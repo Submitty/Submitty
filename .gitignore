@@ -1,2 +1,6 @@
 # Makefiles
 makefile
+
+# Project Files
+.cproject
+.project
