@@ -36,6 +36,9 @@ public:
     void incrTesting(int points, bool hidden, bool extra_credit);
     void setTA(int points);
 
+
+    // TEST CASE CODE
+
     void VerifyTotalAfterTA(int expected_total) const;
     void AddTestCaseResult(const std::string & hidden,
             const std::string & full_message,
@@ -43,7 +46,7 @@ public:
     int NumTestCases() const;
     void GetTestCase(int index, std::string & test_case_hidden,
             std::string & test_case_full_messages,
-            std::string & test_case_hidden_messages);
+            std::string & test_case_hidden_messages) const;
 
 
 private:

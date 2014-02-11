@@ -126,6 +126,9 @@ void GradingRubric::setTA(int points){
     _ta_points += points;
 }
 
+
+// TEST CASE CODE
+
 // Causes error if expected total is different than the
 // calculated total in rubric
 void GradingRubric::VerifyTotalAfterTA(int expected_total) const {
@@ -161,7 +164,7 @@ int GradingRubric::NumTestCases() const {
 // will cause an error
 void GradingRubric::GetTestCase(int index, std::string& test_case_hidden,
         std::string& test_case_full_messages,
-        std::string& test_case_hidden_messages) {
+        std::string& test_case_hidden_messages) const {
     if (index < 0 || index > NumTestCases()){
         std::cerr << "BAD TEST CASE NUMBER " << index << std::endl;
         exit(0);
