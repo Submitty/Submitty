@@ -127,7 +127,7 @@ void GradingRubric::setTA(int points){
 
 // Causes error if expected total is different than the
 // calculated total in rubric
-void GradingRubric::VerifyTotalAfterTA(int expected_total) {
+void GradingRubric::VerifyTotalAfterTA(int expected_total) const {
     if (getTotalAfterTA() != expected_total){
         std::cerr << "ERROR! Expected TotalAfterTA() " << getTotalAfterTA() <<
                 " != " << expected_total << std::endl;
@@ -144,7 +144,7 @@ void GradingRubric::AddTestCaseResult(const std::string& hidden,
 }
 
 // Returns total number of test cases in rubric
-int GradingRubric::NumTestCases() {
+int GradingRubric::NumTestCases() const {
     int arraySizeA = _test_case_hidden.size();
     int arraySizeB = _test_case_full_messages.size();
     int arraySizeC = _test_case_hidden_messages.size();

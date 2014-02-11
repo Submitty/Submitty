@@ -35,11 +35,11 @@ public:
     void incrTesting(int points, bool hidden, bool extra_credit);
     void setTA(int points);
 
-    void VerifyTotalAfterTA(int expected_total);
+    void VerifyTotalAfterTA(int expected_total) const;
     void AddTestCaseResult(const std::string & hidden,
             const std::string & full_message,
             const std::string & hidden_message);
-    int NumTestCases();
+    int NumTestCases() const;
     void GetTestCase(int index, std::string & test_case_hidden,
             std::string & test_case_full_messages,
             std::string & test_case_hidden_messages);
