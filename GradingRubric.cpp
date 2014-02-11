@@ -6,6 +6,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 "LICENSE.md" for the full license
 */
 
+#include "GradingRubric.h"
 #include <algorithm>
 
 // Constructor
@@ -63,18 +64,24 @@ int GradingRubric::getExtraCredit() const {
             _nonhidden_extra_credit;
 }
 
+// Returns total number of hidden and nonhidden points (does
+// not include TA's grade)
 int GradingRubric::getTotal() const {
     return  getNonHiddenTotal() +
             getHiddenTotal();
 }
 
+// Returns total including the TA's grade
 int GradingRubric::getTotalAfterTA() const {
     return  getTotal() +
             _ta_points;
 }
 
+
 // MODIFIERS
 
+// Set submission penalty based on number of submissions and the
+// max number of submissions allowed, (10 submissions = -1 point)
 void GradingRubric::setSubmissionPenalty(
         int number_of_submissions,
         int max_submissions,
@@ -87,4 +94,36 @@ void GradingRubric::setSubmissionPenalty(
 
     _submission_penalty =
             -std::max(0, std::min(max_penalty, penalty));
+}
+
+// Increase README points on rubric
+void GradingRubric::incrREADME(int points, bool hidden) {
+    if (hidden) _nonhidden_readme += points;
+    else _hidden_readme += points;
+}
+
+// Increase compilation points on rubric
+void GradingRubric::incrCompilation(int points, bool hidden) {
+    if (hidden) _nonhidden_compilation += points;
+    else _hidden_compilation += points;
+}
+
+// Increase testing points on rubric
+void GradingRubric::incrTesting(int points, bool hidden,
+		bool extra_credit) {
+	if (!hidden && extra_credit == 0){
+		_nonhidden_testing += points;
+	}else if (!hidden && extra_credit){
+		_nonhidden_extra_credit += points;
+	}else if (hidden && extra_credit == 0){
+		_hidden_testing += points;
+	}else if (hidden && extra_credit){
+		_hidden_extra_credit += points;
+	}
+}
+
+// Set TA points
+// TODO more descriptive name?
+void GradingRubric::setTA(int points){
+	_ta_points += points;
 }

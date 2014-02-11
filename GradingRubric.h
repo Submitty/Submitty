@@ -16,22 +16,23 @@ public:
     int getCompilation() const;
     int getNonHiddenTotal() const;
     int getHiddenTotal() const;
-    int getNonHiddenExtraCredit() const
+    int getNonHiddenExtraCredit() const;
     int getExtraCredit() const;
     int getTotal() const;
     int getTotalAfterTA() const;
 
-    // MODIFIERS
+    // MODIFIERSs
 
     void setSubmissionPenalty(
             int number_of_submissions,
             int max_submissions,
             int max_penalty);
 
-    void incrREADME();                      // UNIMPLEMENTED
-    void incrCompilation();                 // UNIMPLEMENTED
-    void incrTesting();                     // UNIMPLEMENTED
-    void setTA();                           // UNIMPLEMENTED
+    void incrREADME(int points, bool hidden);
+    void incrCompilation(int points, bool hidden);
+    void incrTesting(int points, bool hidden, bool extra_credit);
+    void setTA(int points);
+
     void VerifyTotalAfterTA();              // UNIMPLEMENTED
     void AddTestCaseResult();               // UNIMPLEMENTED
     void NumTestCases();                    // UNIMPLEMENTED
