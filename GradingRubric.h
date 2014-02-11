@@ -6,6 +6,8 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 "LICENSE.md" for the full license
 */
 
+#include <vector>
+
 class GradingRubric{
 public:
 
@@ -33,10 +35,14 @@ public:
     void incrTesting(int points, bool hidden, bool extra_credit);
     void setTA(int points);
 
-    void VerifyTotalAfterTA();              // UNIMPLEMENTED
-    void AddTestCaseResult();               // UNIMPLEMENTED
-    void NumTestCases();                    // UNIMPLEMENTED
-    void GetTestCase();                     // UNIMPLEMENTED
+    void VerifyTotalAfterTA(int expected_total);
+    void AddTestCaseResult(const std::string & hidden,
+    		const std::string & full_message,
+    		const std::string & hidden_message);
+    int NumTestCases();
+    void GetTestCase(int index, std::string & test_case_hidden,
+    		std::string & test_case_full_messages,
+    		std::string & test_case_hidden_messages);
 
 
 private:
@@ -54,8 +60,8 @@ private:
     int _hidden_extra_credit;
     int _nonhidden_extra_credit;
 
-//  UNKNOWN_TYPE _test_case_hidden;
-//  UNKNOWN_TYPE _test_case_full_messages;
-//  UNKNOWN_TYPE _test_case_hidden_messages;
+	std::vector<std::string> _test_case_hidden;
+	std::vector<std::string> _test_case_full_messages;
+	std::vector<std::string> _test_case_hidden_messages;
 
 };

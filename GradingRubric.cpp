@@ -7,7 +7,9 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 */
 
 #include "GradingRubric.h"
+#include <cstdlib>
 #include <algorithm>
+#include <iostream>
 
 // Constructor
 
@@ -26,11 +28,6 @@ GradingRubric::GradingRubric() {
     _hidden_extra_credit = 0;
     _nonhidden_extra_credit = 0;
 
-
-    // TODO initialize these variables
-    //  _test_case_hidden;
-    //  _test_case_full_messages;
-    //  _test_case_hidden_messages;
 }
 
 // ACCESSORS
@@ -126,4 +123,49 @@ void GradingRubric::incrTesting(int points, bool hidden,
 // TODO more descriptive name?
 void GradingRubric::setTA(int points){
 	_ta_points += points;
+}
+
+// Causes error if expected total is different than the
+// calculated total in rubric
+void GradingRubric::VerifyTotalAfterTA(int expected_total) {
+	if (getTotalAfterTA() != expected_total){
+		std::cerr << "ERROR! Expected TotalAfterTA() " << getTotalAfterTA() <<
+				" != " << expected_total << std::endl;
+		exit(0);
+	}
+}
+
+// Adds test case to rubric
+void GradingRubric::AddTestCaseResult(const std::string& hidden,
+		const std::string& full_message, const std::string& hidden_message) {
+	_test_case_hidden.push_back(hidden);
+	_test_case_full_messages.push_back(full_message);
+	_test_case_hidden_messages.push_back(hidden_message);
+}
+
+// Returns total number of test cases in rubric
+int GradingRubric::NumTestCases() {
+	int arraySizeA = _test_case_hidden.size();
+	int arraySizeB = _test_case_full_messages.size();
+	int arraySizeC = _test_case_hidden_messages.size();
+	if (arraySizeA != arraySizeB || arraySizeA != arraySizeC){
+		std::cerr << "ARRAYS NOT EQUAL SIZE" << std::endl;
+		exit(0);
+	}
+	return arraySizeA;
+}
+
+// Sets provided strings to test case number {index}
+// A bad index (under 0 or above total number of test cases)
+// will cause an error
+void GradingRubric::GetTestCase(int index, std::string& test_case_hidden,
+		std::string& test_case_full_messages,
+		std::string& test_case_hidden_messages) {
+	if (index < 0 || index > NumTestCases()){
+		std::cerr << "BAD TEST CASE NUMBER " << index << std::endl;
+		exit(0);
+	}
+	test_case_hidden = _test_case_hidden[index];
+    test_case_full_messages = _test_case_full_messages[index];
+    test_case_hidden_messages = _test_case_hidden_messages[index];
 }
