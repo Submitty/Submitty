@@ -10,6 +10,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <cstdlib>
 #include <algorithm>
 #include <iostream>
+#include <string>
 
 // Constructor
 

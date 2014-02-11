@@ -7,6 +7,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 */
 
 #include <vector>
+#include <string>
 
 class GradingRubric{
 public:
