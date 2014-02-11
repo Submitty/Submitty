@@ -37,12 +37,12 @@ public:
 
     void VerifyTotalAfterTA(int expected_total);
     void AddTestCaseResult(const std::string & hidden,
-    		const std::string & full_message,
-    		const std::string & hidden_message);
+            const std::string & full_message,
+            const std::string & hidden_message);
     int NumTestCases();
     void GetTestCase(int index, std::string & test_case_hidden,
-    		std::string & test_case_full_messages,
-    		std::string & test_case_hidden_messages);
+            std::string & test_case_full_messages,
+            std::string & test_case_hidden_messages);
 
 
 private:
@@ -60,8 +60,8 @@ private:
     int _hidden_extra_credit;
     int _nonhidden_extra_credit;
 
-	std::vector<std::string> _test_case_hidden;
-	std::vector<std::string> _test_case_full_messages;
-	std::vector<std::string> _test_case_hidden_messages;
+    std::vector<std::string> _test_case_hidden;
+    std::vector<std::string> _test_case_full_messages;
+    std::vector<std::string> _test_case_hidden_messages;
 
 };

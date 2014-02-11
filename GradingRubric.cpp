@@ -107,65 +107,65 @@ void GradingRubric::incrCompilation(int points, bool hidden) {
 
 // Increase testing points on rubric
 void GradingRubric::incrTesting(int points, bool hidden,
-		bool extra_credit) {
-	if (!hidden && extra_credit == 0){
-		_nonhidden_testing += points;
-	}else if (!hidden && extra_credit){
-		_nonhidden_extra_credit += points;
-	}else if (hidden && extra_credit == 0){
-		_hidden_testing += points;
-	}else if (hidden && extra_credit){
-		_hidden_extra_credit += points;
-	}
+        bool extra_credit) {
+    if (!hidden && extra_credit == 0){
+        _nonhidden_testing += points;
+    }else if (!hidden && extra_credit){
+        _nonhidden_extra_credit += points;
+    }else if (hidden && extra_credit == 0){
+        _hidden_testing += points;
+    }else if (hidden && extra_credit){
+        _hidden_extra_credit += points;
+    }
 }
 
 // Set TA points
 // TODO more descriptive name?
 void GradingRubric::setTA(int points){
-	_ta_points += points;
+    _ta_points += points;
 }
 
 // Causes error if expected total is different than the
 // calculated total in rubric
 void GradingRubric::VerifyTotalAfterTA(int expected_total) {
-	if (getTotalAfterTA() != expected_total){
-		std::cerr << "ERROR! Expected TotalAfterTA() " << getTotalAfterTA() <<
-				" != " << expected_total << std::endl;
-		exit(0);
-	}
+    if (getTotalAfterTA() != expected_total){
+        std::cerr << "ERROR! Expected TotalAfterTA() " << getTotalAfterTA() <<
+                " != " << expected_total << std::endl;
+        exit(0);
+    }
 }
 
 // Adds test case to rubric
 void GradingRubric::AddTestCaseResult(const std::string& hidden,
-		const std::string& full_message, const std::string& hidden_message) {
-	_test_case_hidden.push_back(hidden);
-	_test_case_full_messages.push_back(full_message);
-	_test_case_hidden_messages.push_back(hidden_message);
+        const std::string& full_message, const std::string& hidden_message) {
+    _test_case_hidden.push_back(hidden);
+    _test_case_full_messages.push_back(full_message);
+    _test_case_hidden_messages.push_back(hidden_message);
 }
 
 // Returns total number of test cases in rubric
 int GradingRubric::NumTestCases() {
-	int arraySizeA = _test_case_hidden.size();
-	int arraySizeB = _test_case_full_messages.size();
-	int arraySizeC = _test_case_hidden_messages.size();
-	if (arraySizeA != arraySizeB || arraySizeA != arraySizeC){
-		std::cerr << "ARRAYS NOT EQUAL SIZE" << std::endl;
-		exit(0);
-	}
-	return arraySizeA;
+    int arraySizeA = _test_case_hidden.size();
+    int arraySizeB = _test_case_full_messages.size();
+    int arraySizeC = _test_case_hidden_messages.size();
+    if (arraySizeA != arraySizeB || arraySizeA != arraySizeC){
+        std::cerr << "ARRAYS NOT EQUAL SIZE" << std::endl;
+        exit(0);
+    }
+    return arraySizeA;
 }
 
 // Sets provided strings to test case number {index}
 // A bad index (under 0 or above total number of test cases)
 // will cause an error
 void GradingRubric::GetTestCase(int index, std::string& test_case_hidden,
-		std::string& test_case_full_messages,
-		std::string& test_case_hidden_messages) {
-	if (index < 0 || index > NumTestCases()){
-		std::cerr << "BAD TEST CASE NUMBER " << index << std::endl;
-		exit(0);
-	}
-	test_case_hidden = _test_case_hidden[index];
+        std::string& test_case_full_messages,
+        std::string& test_case_hidden_messages) {
+    if (index < 0 || index > NumTestCases()){
+        std::cerr << "BAD TEST CASE NUMBER " << index << std::endl;
+        exit(0);
+    }
+    test_case_hidden = _test_case_hidden[index];
     test_case_full_messages = _test_case_full_messages[index];
     test_case_hidden_messages = _test_case_hidden_messages[index];
 }
