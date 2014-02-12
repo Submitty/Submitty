@@ -24,6 +24,15 @@ public:
     int getTotal() const;
     int getTotalAfterTA() const;
 
+    // PRIVATE VARIABLE ACCESSORS
+
+    int getSubmissionPenalty() const;
+    int getNonHiddenReadme() const;
+    int getNonHiddenCompilation() const;
+    int getHiddenCompilation() const;
+    int getHiddenTesting() const;
+    int getTAPoints() const;
+
     // MODIFIERSs
 
     void setSubmissionPenalty(
@@ -40,11 +49,11 @@ public:
     // TEST CASE CODE
 
     void VerifyTotalAfterTA(int expected_total) const;
-    void AddTestCaseResult(const std::string & hidden,
+    void AddTestCaseResult(bool hidden,
             const std::string & full_message,
             const std::string & hidden_message);
     int NumTestCases() const;
-    void GetTestCase(int index, std::string & test_case_hidden,
+    void GetTestCase(int index, bool & test_case_hidden,
             std::string & test_case_full_messages,
             std::string & test_case_hidden_messages) const;
 
@@ -64,7 +73,7 @@ private:
     int _hidden_extra_credit;
     int _nonhidden_extra_credit;
 
-    std::vector<std::string> _test_case_hidden;
+    std::vector<bool> _test_case_hidden;
     std::vector<std::string> _test_case_full_messages;
     std::vector<std::string> _test_case_hidden_messages;
 

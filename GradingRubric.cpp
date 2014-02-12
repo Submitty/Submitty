@@ -76,6 +76,33 @@ int GradingRubric::getTotalAfterTA() const {
 }
 
 
+// PRIVATE VARIABLE ACCESSORS
+
+int GradingRubric::getSubmissionPenalty() const {
+	return _submission_penalty;
+}
+
+int GradingRubric::getNonHiddenReadme() const {
+	return _nonhidden_readme;
+}
+
+int GradingRubric::getNonHiddenCompilation() const {
+	return _nonhidden_compilation;
+}
+
+int GradingRubric::getHiddenCompilation() const {
+	return _hidden_compilation;
+}
+
+int GradingRubric::getHiddenTesting() const {
+	return _hidden_testing;
+}
+
+int GradingRubric::getTAPoints() const {
+	return _ta_points;
+}
+
+
 // MODIFIERS
 
 // Set submission penalty based on number of submissions and the
@@ -140,7 +167,7 @@ void GradingRubric::VerifyTotalAfterTA(int expected_total) const {
 }
 
 // Adds test case to rubric
-void GradingRubric::AddTestCaseResult(const std::string& hidden,
+void GradingRubric::AddTestCaseResult(bool hidden,
         const std::string& full_message, const std::string& hidden_message) {
     _test_case_hidden.push_back(hidden);
     _test_case_full_messages.push_back(full_message);
