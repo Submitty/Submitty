@@ -6,12 +6,15 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 "LICENSE.md" for the full license
 */
 
-#include <string>
 #include "GradingRubric.h"
+#include "Autograder.h"
+
+#include <string>
 #include <fstream>
 #include <cstdlib>
 #include <iomanip>
 #include <sstream>
+#include <iostream>
 
 void prepareGradefile(const GradingRubric& perfect,
 		const GradingRubric& student,
@@ -23,8 +26,8 @@ void prepareGradefile(const GradingRubric& perfect,
 			+ "/.submit.grade_hidden";
 
 	// Open gradefiles
-	std::ofstream gradefile(gradefile_location);
-	std::ofstream hidden_gradefile(hidden_gradefile_location);
+	std::ofstream gradefile(gradefile_location.c_str());
+	std::ofstream hidden_gradefile(hidden_gradefile_location.c_str());
 
 	if (!gradefile){
 		std::cerr << "ERROR: Could not open gradefile!" << std::endl;
@@ -180,16 +183,48 @@ void prepareGradefile(const GradingRubric& perfect,
 
 	gradefile_print(gradefile, hidden_gradefile, 0, text.str());
 
-
+	gradefile.close();
+	hidden_gradefile.close();
 
 }
 
 void displayGradefile(const std::ostream& out,
 		const std::string& main_directory,
 		bool hidden, const std::string color) {
+
+	std::string filename = !hidden?
+			main_directory + "/.submit.grade" :
+			main_directory + "/.submit.grade_hidden";
+
+	std::ifstream gradefile(filename.c_str());
+
+	if (!gradefile){
+		std::cerr << "ERROR: Could not open " << filename << " for display"
+				<< std:: endl;
+		exit(0);
+	}
+
+	std::cout << "<p>&nbsp;<p><hr><p>"
+			<< "<FONT COLOR=\"" << color << "\"><b>"
+			<< "<pre>\n";
+	std::cout << gradefile;
+
+	gradefile.close();
+
+	std::cout << "</pre>\n"
+			<< "</FONT></b><p><hr><p>\n";
+
+
 }
 
-void gradefile_print(const std::ofstream& gradefile,
-		const std::ofstream& hidden_gradefile, int UNKNOWN_NUMBER,
+void gradefile_print(std::ofstream& gradefile,
+		std::ofstream& hidden_gradefile, int UNKNOWN_NUMBER,
 		const std::string& line) {
+	// TODO ignoring UNKNOWN_NUMBER until I know what it does,
+	// may have something to do with the hidden gradefile but
+	// for now I'm going to write to both
+
+	gradefile << line;
+	hidden_gradefile << line;
+
 }
