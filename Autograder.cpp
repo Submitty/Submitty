@@ -63,7 +63,7 @@ void prepareGradefile(const GradingRubric& perfect,
 
 	if (student.getSubmissionPenalty() < 0){
 		text << std::left << std::setw(50) << "  Penalty for excessive submissions:"
-				<< submission_number << " points\n";
+				<< student.getSubmissionPenalty() << " points\n";
 		gradefile_print(gradefile, hidden_gradefile, 0, text.str());
 	}
 
