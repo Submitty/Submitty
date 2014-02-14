@@ -9,8 +9,8 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <vector>
 #include <string>
 
-#ifndef AUTOGRADER_H_
-#define AUTOGRADER_H_
+#ifndef GRADINGRUBRIC_H_
+#define GRADINGRUBRIC_H_
 
 class GradingRubric{
 public:
