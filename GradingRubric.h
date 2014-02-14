@@ -81,3 +81,5 @@ private:
     std::vector<std::string> _test_case_hidden_messages;
 
 };
+
+#endif
