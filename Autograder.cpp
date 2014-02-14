@@ -62,7 +62,7 @@ void prepareGradefile(const GradingRubric& perfect,
 	text.str("");text.clear(); // reset string stream
 
 	if (student.getSubmissionPenalty() < 0){
-		text << std::setw(50) << "  Penalty for excessive submissions:"
+		text << std::left << std::setw(50) << "  Penalty for excessive submissions:"
 				<< submission_number << " points\n";
 		gradefile_print(gradefile, hidden_gradefile, 0, text.str());
 	}
@@ -71,7 +71,7 @@ void prepareGradefile(const GradingRubric& perfect,
 
 	text.str("");text.clear(); // reset string stream
 
-	text << std::setw(50) <<  "  Points for README.txt:"
+	text << std::left << std::setw(50) <<  "  Points for README.txt:"
 			<< student.getNonHiddenReadme() << " / "
 			<< perfect.getNonHiddenReadme() << "\n";
 
@@ -81,7 +81,7 @@ void prepareGradefile(const GradingRubric& perfect,
 
 	text.str("");text.clear(); // reset string stream
 
-	text << std::setw(50) <<  "  Points for Compilation:"
+	text << std::left << std::setw(50) <<  "  Points for Compilation:"
 			<< student.getNonHiddenCompilation() << " / "
 			<< perfect.getNonHiddenCompilation() << "\n";
 
@@ -93,7 +93,7 @@ void prepareGradefile(const GradingRubric& perfect,
 
 		text.str("");text.clear(); // reset string stream
 
-		text << std::setw(50) <<  "  Points for Compilation (hidden):"
+		text << std::left << std::setw(50) <<  "  Points for Compilation (hidden):"
 				<< student.getHiddenCompilation() << " / "
 				<< perfect.getHiddenCompilation() << "\n";
 
@@ -121,7 +121,7 @@ void prepareGradefile(const GradingRubric& perfect,
 
 	text.str("");text.clear(); // reset string stream
 
-	text << std::setw(50) <<  "Automatic Extra Credit (w/o hidden):"
+	text << std::left << std::setw(50) <<  "Automatic Extra Credit (w/o hidden):"
 			<< "+" << student.getNonHiddenExtraCredit() << " points\n";
 
 	gradefile_print(gradefile, hidden_gradefile, 0, text.str());
@@ -130,7 +130,7 @@ void prepareGradefile(const GradingRubric& perfect,
 
 	text.str("");text.clear(); // reset string stream
 
-	text << std::setw(50) <<  "Automatic Grading Total (w/o hidden):"
+	text << std::left << std::setw(50) <<  "Automatic Grading Total (w/o hidden):"
 					<< student.getNonHiddenTotal() << " / "
 					<< perfect.getNonHiddenTotal() << "\n";
 
@@ -140,7 +140,7 @@ void prepareGradefile(const GradingRubric& perfect,
 
 	text.str("");text.clear(); // reset string stream
 
-	text << std::setw(50) <<  "Max possible hidden automatic grading points:"
+	text << std::left << std::setw(50) <<  "Max possible hidden automatic grading points:"
 					<< perfect.getHiddenTesting() << "\n";
 
 	gradefile_print(gradefile, hidden_gradefile, 0, text.str());
@@ -149,8 +149,8 @@ void prepareGradefile(const GradingRubric& perfect,
 
 	text.str("");text.clear(); // reset string stream
 
-	text << std::setw(50) <<  "Automatic extra credit:"
-					<< "+" << student.getExtraCredit() << "points\n";
+	text << std::left << std::setw(50) <<  "Automatic extra credit:"
+					<< "+" << student.getExtraCredit() << " points\n";
 
 	gradefile_print(gradefile, hidden_gradefile, 1, text.str());
 
@@ -158,7 +158,7 @@ void prepareGradefile(const GradingRubric& perfect,
 
 	text.str("");text.clear(); // reset string stream
 
-	text << std::setw(50) <<  "Automatic Grading Total:"
+	text << std::left << std::setw(50) <<  "Automatic Grading Total:"
 						<< student.getTotal() << " / "
 						<< perfect.getTotal() << "\n";
 
@@ -168,7 +168,7 @@ void prepareGradefile(const GradingRubric& perfect,
 
 	text.str("");text.clear(); // reset string stream
 
-	text << std::setw(50) <<  "Remaining points to be graded by TA:"
+	text << std::left << std::setw(50) <<  "Remaining points to be graded by TA:"
 						<< perfect.getTAPoints() << "\n";
 
 	gradefile_print(gradefile, hidden_gradefile, 0, text.str());
@@ -177,8 +177,8 @@ void prepareGradefile(const GradingRubric& perfect,
 
 	text.str("");text.clear(); // reset string stream
 
-	text << std::setw(50)
-		<< "Max points for assignment (excluding extra credit)"
+	text << std::left << std::setw(50)
+		<< "Max points for assignment (excluding extra credit): "
 		<< student.getTotalAfterTA() << "\n";
 
 	gradefile_print(gradefile, hidden_gradefile, 0, text.str());
