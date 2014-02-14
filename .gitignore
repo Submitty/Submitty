@@ -6,7 +6,6 @@ makefile
 .project
 
 # Testing files
-test.cpp
 output
 .submit.grade
 .submit.grade_hidden
