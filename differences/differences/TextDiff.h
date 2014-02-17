@@ -27,8 +27,8 @@ public:
     TextDiff(const TextDiff &);
     TextDiff(vector<string> *, vector<string> *);
     string lineDiff() const;
-    string charDiff() const;
-    string lineCharDiff() const;
+    //string charDiff() const;
+    //string lineCharDiff() const;
     bool isEqual() const;
     void setTimeout(float);
     void setEditCost(int);
