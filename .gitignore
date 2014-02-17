@@ -1,0 +1,9 @@
+# Makefiles
+makefile
+
+# Project files
+.cproject
+.project
+
+# Testing files
+test.cpp
