@@ -189,7 +189,7 @@ int GradingRubric::NumTestCases() const {
 // Sets provided strings to test case number {index}
 // A bad index (under 0 or above total number of test cases)
 // will cause an error
-void GradingRubric::GetTestCase(int index, std::string& test_case_hidden,
+void GradingRubric::GetTestCase(int index, bool& test_case_hidden,
         std::string& test_case_full_messages,
         std::string& test_case_hidden_messages) const {
     if (index < 0 || index > NumTestCases()){

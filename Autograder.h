@@ -22,8 +22,8 @@ void displayGradefile(const std::ostream & out,
 		const std::string & main_directory,
 		bool hidden, const std::string color);
 
-void gradefile_print(const std::ofstream & gradefile,
-		const std::ofstream & hidden_gradefile,
+void gradefile_print(std::ofstream & gradefile,
+		std::ofstream & hidden_gradefile,
 		int UNKNOWN_NUMBER, const std::string & line);
 
 #endif /* AUTOGRADER_H_ */

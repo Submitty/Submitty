@@ -9,6 +9,9 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <vector>
 #include <string>
 
+#ifndef GRADINGRUBRIC_H_
+#define GRADINGRUBRIC_H_
+
 class GradingRubric{
 public:
 
@@ -78,3 +81,5 @@ private:
     std::vector<std::string> _test_case_hidden_messages;
 
 };
+
+#endif
