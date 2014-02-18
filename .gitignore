@@ -7,3 +7,17 @@ makefile
 
 # Testing files
 test.cpp
+
+# Perl Scripts
+*.pl
+*.pm
+
+# Executables
+*.out
+*.exe
+
+# Git Ignore
+.gitignore
+
+# Misc.
+*.*~
