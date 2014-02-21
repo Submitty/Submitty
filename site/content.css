@@ -140,3 +140,9 @@
 .content-score-score{
 	float:right;
 }
+
+#scorecard{
+	text-align: left;
+	color:#888;
+	padding-left: 10px;
+}
