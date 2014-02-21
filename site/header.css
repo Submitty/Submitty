@@ -4,7 +4,7 @@ body{
 	border-spacing: 0px;
 	background-color: #eee;
 	font-family: 'Varela Round', sans-serif;
-	overflow:hidden;
+	overflow-horizontal:hidden;
 }
 
 .navbar{
