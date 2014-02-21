@@ -45,6 +45,9 @@
 
       <div id='content-container'>
         <div id='content'>
+
+        <!-- Homework Name, Browse and Submit -->
+
           <div id='content-submit'>
             <span id='assignment-name'>
             <i class='fa fa-check'></i>
@@ -57,15 +60,80 @@
             Browse
             </span>
           </div>
+
+
+          <!-- Percentage complete graphs and submission # -->
+
+          <div id='assignment-graph-container'>
+
+            <div id='assignment-graph-grade'>
+                <div id='assignment-graph-grade-text'>
+                Best: 18 / 25
+                </div>
+                <div id='assignment-graph-graph'>
+                  <div class='assignment-graph-bar' id='assignment-graph-green'></div>
+                  <div class='assignment-graph-bar' id='assignment-graph-red'></div>
+                  <div class='assignment-graph-bar' id='assignment-graph-yellow'></div>
+                </div>
+            </div>
+
+            <div id='assignment-submission-info'>
+                Submission Count: 17
+            </div>  
+
+
+          </div>
+
+
+          <!-- Table with all tests / scores -->
+
           <table>
             <tbody>
               <tr>
                 <td id='content-scores'>
-                <div class='content-score'>
 
+                <!-- All Scores for User -->
+
+                <div class='content-score'>
+                  <span class='content-score-name'>
+                  <i class='fa fa-bars'></i> Scorecard </span>
+                  <span class='content-score-score'> 18 / 25 </span>
                 </div>
+
+                <div class='content-score'>
+                  <span class='content-score-name'>
+                  <i class='fa fa-check' style='color:#4f4'></i>
+                   Readme </span>
+                  <span class='content-score-score'> 2 / 2 </span>
+                </div>
+
+                <div class='content-score'>
+                  <span class='content-score-name'>
+                  <i class='fa fa-check' style='color:#4f4'></i>
+                   Easy Test </span>
+                  <span class='content-score-score' > 5 / 5 </span>
+                </div>
+
+                <div class='content-score'>
+                  <span class='content-score-name'>
+                  <i class='fa fa-times' style='color:#f44'></i>
+                   Medium Test </span>
+                  <span class='content-score-score'> 8 / 9 </span>
+                </div>
+
+                <div class='content-score'>
+                  <span class='content-score-name'>
+                  <i class='fa fa-times' style='color:#f44'></i>
+                   Difficult Test </span>
+                  <span class='content-score-score'> 3 / 9 </span>
+                </div>
+
+
+
                 </td>
                 <td>
+
+
                 </td>
               </tr>
             </tbody>
@@ -80,6 +148,8 @@
 
 
     <script src='jquery.js'></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src='main.js'></script>
 
   </body>
 </html>
