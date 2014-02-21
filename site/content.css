@@ -1,0 +1,59 @@
+#content-container{
+	text-align:center;
+	padding:50px;
+	padding-top:15px;
+}
+
+#content{
+	min-height:800px;
+	background-color: #fff;
+	padding-left:20px;
+	padding-right:20px;
+}
+
+#content-submit{
+	height:80px;
+	border-bottom:1px #9797BD solid;
+	text-align: left;
+	font-size:18px;
+}
+
+#assignment-name{
+	line-height: 80px;
+	margin-left:40px;
+	color:#333;
+}
+
+#assignment-name i{
+	color:#00790D;
+}
+
+.assignment-button{
+	margin-right:30px;
+	float:right;
+	margin-top:23px;
+	padding:10px;
+	padding-left:20px;
+	padding-right:20px;
+	min-width: 80px;
+	text-align: center;
+	font-size:14px;
+	color:#888;
+}
+.assignment-button:hover{
+	cursor:pointer;
+	color:#555;
+	background-color: #eee;
+}
+
+#assignment-submit{
+	margin-right:40px;
+}
+
+#content table{
+	width:100%;
+	height:800px;
+}
+#content-scores{
+	width:300px;
+}
