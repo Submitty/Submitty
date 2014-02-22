@@ -37,6 +37,10 @@ const int ta_pts = 20;
 
 // Test cases
 const int num_testcases = 1;
+const std::string student_files_dir = "";	// directory containing output files generated
+											//   from student's code
+const std::string expected_output_dir = "";	// directory containing expected output files
+const std::string results_dir = "";			// directory to store results from validation
 
 std::vector<TestCase> testcases;
 
