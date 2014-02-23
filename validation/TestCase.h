@@ -42,6 +42,7 @@ public:
 		{ _expected = new_exp; return this; }
 	Check* const setCompare(int (*cmp)(std::string, std::string)) 
 		{ cmp_output = cmp; return this; }
+	//TODO: Should this be redesigned? Is this too unwieldy?
 	Check* const setSideBySide(bool new_sbys) { side_by_side = new_sbys; return this; }
 	Check* const setPrintCheck(p_check new_print) { print = new_print; return this; }
 private:
@@ -62,6 +63,7 @@ public:
 	std::string details() const { return _details; }
 	std::string command() const { return _command; }
 	int points() const { return _points; }
+	bool hidden() const { return _hidden; }
 	
 	//TODO: Is this neccessary? Is this expensive?
 	std::vector<Check> checks() const { return _checks; }
@@ -77,10 +79,13 @@ public:
 		{ _points = new_points; return this; }
 	TestCase* const addCheck(const Check &new_check)
 		{ _checks.push_back(new_check); return this; }
+	TestCase* const setHidden(const bool new_hidden)
+		{ _hidden = new_hidden; }
 private:
 	std::string _title;
 	std::string _details;
 	std::string _command;
 	int _points;
+	bool _hidden;
 	std::vector<Check> _checks;
 };
