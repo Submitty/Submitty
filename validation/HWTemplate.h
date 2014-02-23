@@ -18,22 +18,22 @@ const int hw_num = 0;
 const std::string hw_name = "TestHW";
 
 // Submission parameters
-const int max_submissions = 0;
-const int submission_penalty = 0;
+const int max_submissions = 20;
+const int submission_penalty = 5;
 const std::string input_file_dir = "";
 const std::string output_file_dir = "";
 
 // Compile-time parameters
-const int max_clocktime = 0;
-const int max_cputime = 0;
-const int max_output_size = 0;
+const int max_clocktime = 2;		// in seconds
+const int max_cputime = 2;			// in seconds
+const int max_output_size = 100;	// in KB
 	// OTHERS?
 
 // Grading parameters
-const int auto_pts = 0;
-const int readme_pts = 0;
-const int compile_pts = 0;
-const int ta_pts = 0;
+const int auto_pts = 30;
+const int readme_pts = 2;
+const int compile_pts = 3;
+const int ta_pts = 20;
 
 // Test cases
 const int num_testcases = 1;
