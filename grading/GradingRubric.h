@@ -1,9 +1,10 @@
-/*
- * GradingRubric.h
- *
- *  Created on: Feb 23, 2014
- *      Author: seve
- */
+/*Copyright (c) 2014, Chris Berger, Jesse Freitas, Severin Ibarluzea,
+Kiana McNellis, Kienan Knight-Boehm
+
+All rights reserved.
+This code is licensed using the BSD "3-Clause" license. Please refer to
+"LICENSE.md" for the full license.
+*/
 
 #ifndef GRADINGRUBRIC_H_
 #define GRADINGRUBRIC_H_
