@@ -1,21 +1,36 @@
+@fst-color: #ccc;
+@light-fst-color: lighten(@fst-color, 20%);
+
+@snd-color: #333;
+@light-snd-color: lighten(@snd-color, 50%);
+
+@thd-color: #ccc;
+@light-thd-color: lighten(@thd-color, 50%);
+
+@bg-color: #eee;
+
+
 body{
 	padding:0px;
 	margin:0px;
 	border-spacing: 0px;
-	background-color: #eee;
+	background-color: @bg-color;
 	font-family: 'Varela Round', sans-serif;
 	overflow-horizontal:hidden;
 }
+#container{
+	min-width: 800px;
+}
 
 .navbar{
-	background-color: #ccc;
+	background-color: @fst-color;
 	height:80px;
-	border-bottom:#888 1px solid;
+	border-bottom:@light-snd-color 2px solid;
 }
 
 #navbar-header{
 	font-size:24px;
-	color : #333;
+	color : @snd-color;
 	margin-left:100px;
 	display:inline-block;
 	line-height: 80px;
