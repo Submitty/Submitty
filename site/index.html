@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Data Structures</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="header.css" rel="stylesheet">
+    <link href="content.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+  </head>
+
+    <div class="container">
+
+
+      <!-- NAVBAR -->
+
+      <div class='navbar'>
+        <span id='navbar-header'>
+          RPI Data Structures
+        </span>
+        <div class='navbar-button' id='navbar-user'>
+        ibarls<i class='fa fa-chevron-down'></i>
+        </div>
+        <div class='navbar-button' id='navbar-assignment'>
+        <span id='homework-assignment'>
+          Homework 2
+        </span>
+          <i class='fa fa-chevron-down'></i>
+        </div>
+      </div>
+
+    
+
+      <!-- CONTENT -->
+
+      <div id='content-container'>
+        <div id='content'>
+
+        <!-- Homework Name, Browse and Submit -->
+
+          <div id='content-submit'>
+            <span id='assignment-name'>
+            <i class='fa fa-check'></i>
+            Homework 2
+            </span>
+            <span class='assignment-button' id='assignment-submit'>
+            Submit
+            </span>
+            <span class='assignment-button'>
+            Browse
+            </span>
+          </div>
+
+
+          <!-- Percentage complete graphs and submission # -->
+
+          <div id='assignment-graph-container'>
+
+            <div id='assignment-graph-grade'>
+                <div id='assignment-graph-grade-text'>
+                Best: 18 / 25
+                </div>
+                <div id='assignment-graph-graph'>
+                  <div class='assignment-graph-bar' id='assignment-graph-green'></div>
+                  <div class='assignment-graph-bar' id='assignment-graph-red'></div>
+                  <div class='assignment-graph-bar' id='assignment-graph-yellow'></div>
+                </div>
+            </div>
+
+            <div id='assignment-submission-info'>
+                Submissions: 17
+            </div>  
+
+
+          </div>
+
+
+          <!-- Table with all tests / scores -->
+
+          <table>
+            <tbody>
+              <tr>
+                <td id='content-scores'>
+
+                <!-- All Scores for User -->
+
+                <div class='content-score'>
+                  <span class='content-score-name'>
+                  <i class='fa fa-bars'></i> Scorecard </span>
+                  <span class='content-score-score'> 18 / 25 </span>
+                </div>
+
+                <div class='content-score'>
+                  <span class='content-score-name'>
+                  <i class='fa fa-check' style='color:#4f4'></i>
+                   Readme </span>
+                  <span class='content-score-score'> 2 / 2 </span>
+                </div>
+
+                <div class='content-score'>
+                  <span class='content-score-name'>
+                  <i class='fa fa-check' style='color:#4f4'></i>
+                   Easy Test </span>
+                  <span class='content-score-score' > 5 / 5 </span>
+                </div>
+
+                <div class='content-score'>
+                  <span class='content-score-name'>
+                  <i class='fa fa-times' style='color:#f44'></i>
+                   Medium Test </span>
+                  <span class='content-score-score'> 8 / 9 </span>
+                </div>
+
+                <div class='content-score'>
+                  <span class='content-score-name'>
+                  <i class='fa fa-times' style='color:#f44'></i>
+                   Doge Test </span>
+                  <span class='content-score-score'> 3 / 9 </span>
+                </div>
+
+                </td>
+
+
+
+                 <!-- Test / Grade Info -->
+
+                <td id='scorecard'>
+
+                  <div style='border-bottom:1px solid #ddd;margin-bottom:10px;'>
+                  Overall
+                  </div>
+                  <div style='font-size:14px;'>
+                  <div style='margin-bottom:10px'>
+                  <div style='display:inline-block;line-height:30px;'>
+                  Automatic Grade <br/> TA Grade </div>
+                  <div style='float:right;text-align:right;line-height:30px;'>
+                  18 / 25 <br/> ? / 25
+                  </div>
+                  </div>
+
+                  <div style='padding-top:10px;border-top:1px solid #ddd;padding-bottom:10px;'>
+                  Submission #17
+                  <div style='float:right'>
+                  18/25
+                  </div>
+                    <div style='margin-left:50px;margin-top:10px;padding-top:10px padding-bottom:10px;'>
+                      <div style='display:inline-block;color:#aaa;'>
+                        Penalty for excessive submissions:<br/>
+                        Points for README.txt:<br/>
+                        Points for East Test:<br/>
+                        Points for Medium Test:<br/>
+                        Points for Doge Test:
+                      </div>
+                      <div style='text-align:right;float:right;color:#aaa'>
+                          -1<br/>
+                          2 / 2<br/>
+                          5 / 5<br/>
+                          8 / 9<br/>
+                          3 / 9
+                      </div>  
+                    </div>
+                  </div>
+
+
+                  <div style='padding-top:10px;border-top:1px solid #ddd;padding-bottom:10px;'>
+                  Submission #16
+                  <div style='float:right'>
+                  18/25
+                  </div>
+                    <div style='margin-left:50px;margin-top:10px;padding-top:10px padding-bottom:10px;'>
+                      <div style='display:inline-block;color:#aaa;'>
+                        Penalty for excessive submissions:<br/>
+                        Points for README.txt:<br/>
+                        Points for East Test:<br/>
+                        Points for Medium Test:<br/>
+                        Points for Doge Test:
+                      </div>
+                      <div style='text-align:right;float:right;color:#aaa'>
+                          -1<br/>
+                          2 / 2<br/>
+                          5 / 5<br/>
+                          8 / 9<br/>
+                          3 / 9
+                      </div>  
+                    </div>
+                  </div>
+
+
+                  <div style='padding-top:10px;border-top:1px solid #ddd;padding-bottom:10px;'>
+                  Submission #15
+                  <div style='float:right'>
+                  18/25
+                  </div>
+                    <div style='margin-left:50px;margin-top:10px;padding-top:10px padding-bottom:10px;'>
+                      <div style='display:inline-block;color:#aaa;'>
+                        Penalty for excessive submissions:<br/>
+                        Points for README.txt:<br/>
+                        Points for East Test:<br/>
+                        Points for Medium Test:<br/>
+                        Points for Doge Test:
+                      </div>
+                      <div style='text-align:right;float:right;color:#aaa'>
+                          -1<br/>
+                          2 / 2<br/>
+                          5 / 5<br/>
+                          8 / 9<br/>
+                          3 / 9
+                      </div>  
+                    </div>
+                  </div>
+
+
+                  <div style='padding-top:10px;border-top:1px solid #ddd;padding-bottom:10px;'>
+                  Submission #14
+                  <div style='float:right'>
+                  18/25
+                  </div>
+                    <div style='margin-left:50px;margin-top:10px;padding-top:10px padding-bottom:10px;'>
+                      <div style='display:inline-block;color:#aaa;'>
+                        Penalty for excessive submissions:<br/>
+                        Points for README.txt:<br/>
+                        Points for East Test:<br/>
+                        Points for Medium Test:<br/>
+                        Points for Doge Test:
+                      </div>
+                      <div style='text-align:right;float:right;color:#aaa'>
+                          -1<br/>
+                          2 / 2<br/>
+                          5 / 5<br/>
+                          8 / 9<br/>
+                          3 / 9
+                      </div>  
+                    </div>
+                  </div>
+
+
+
+
+                  </div>
+
+                </td>
+
+
+
+
+
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+
+
+    </div>
+
+
+    <script src='jquery.js'></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src='main.js'></script>
+
+  </body>
+</html>
