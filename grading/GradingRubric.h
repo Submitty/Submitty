@@ -10,6 +10,7 @@
 
 #include "../validation/TestCase.h"
 #include <vector>
+#include <numeric>
 
 class GradingRubric {
 public:
@@ -29,6 +30,9 @@ public:
 
 	int getTAScore() const { return _ta_score; };
 
+	int getTotalScore() const;
+	int getPerfectScore() const;
+
 	const std::vector<TestCase>& getTestCases() const { return _test_cases; };
 
 	// MODIFIERS
@@ -39,15 +43,17 @@ public:
 	}
 	void setTestScore(const TestCase& test_case, int score);
 
-	// Set the score of a test case
+	// Set the perfect (highest possible) score of a test case
 	void setPerfectTestScore(int test_case, int score){
 		_perfect_scores[test_case] = score;
 	}
 	void setPerfectTestScore(const TestCase& test_case, int score);
 
+	// Set the submission count and penalty
 	void setSubmissionPenalty( int number_of_submissions, int max_submissions,
 	            int max_penalty);
 
+	// Set the TA's score
 	void setTAScore(int score){ _ta_score = score; };
 
 private:
@@ -113,6 +119,14 @@ int GradingRubric::getPerfectTestScore(int test_case) const {
 
 int GradingRubric::getPerfectTestScore(const TestCase& test_case) const {
 	return _perfect_scores[getTestCaseIndex(test_case)];
+}
+
+int GradingRubric::getTotalScore() const {
+	return std::accumulate(_scores.begin(), _scores.end(), 0);
+}
+
+int GradingRubric::getPerfectScore() const {
+	return std::accumulate(_perfect_scores.begin(), _perfect_scores.end(), 0);
 }
 
 int GradingRubric::getTestCaseIndex(const TestCase& test_case) const {
