@@ -23,13 +23,13 @@ public:
 	int getTestScore(int test_case) const;
 	int getTestScore(const TestCase& test_case) const;
 
-	int getPerfectTestScore(int test_case) const;
-	int getPerfectTestScore(const TestCase& test_case) const;
-
 	int getTAScore() const { return _ta_score; };
 
 	int getTotalScore() const;
 	int getPerfectScore() const;
+
+	int getSubmissionCount() const;
+	int getSubmissionPenalty() const;
 
 	const std::vector<TestCase>& getTestCases() const { return _test_cases; };
 
@@ -72,6 +72,9 @@ void GradingRubric::initGradingRubric(
 		const std::vector<TestCase>& test_cases) {
 
 	_test_cases = test_cases;
+	_ta_score = 0;
+	_submission_count = 0;
+	_submission_penalty = 0;
 
 	// Initialize scores to 0
 	_scores =  std::vector<int>(test_cases.size(), 0);
@@ -96,6 +99,14 @@ int GradingRubric::getPerfectScore() const {
 		point_sum += _test_cases[i].points();
 	}
 	return point_sum;
+}
+
+int GradingRubric::getSubmissionCount() const {
+	return _submission_count;
+}
+
+int GradingRubric::getSubmissionPenalty() const {
+	return _submission_penalty;
 }
 
 int GradingRubric::getTestCaseIndex(const TestCase& test_case) const {
