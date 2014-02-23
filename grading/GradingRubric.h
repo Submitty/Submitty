@@ -132,7 +132,7 @@ int GradingRubric::getPerfectScore() const {
 
 int GradingRubric::getTestCaseIndex(const TestCase& test_case) const {
 	for (int i = 0; i < _test_cases.size(); i++){
-		if (_test_cases[i] == test_case){
+		if (_test_cases[i].title() == test_case.title()){
 			return i;
 		}
 	}
