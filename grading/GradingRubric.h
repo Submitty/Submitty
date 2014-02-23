@@ -1,279 +1,159 @@
-/*Copyright (c) 2014, Chris Berger, Jesse Freitas, Severin Ibarluzea,
-Kiana McNellis, Kienan Knight-Boehm
-
-All rights reserved.
-This code is licensed using the BSD "3-Clause" license. Please refer to
-"LICENSE.md" for the full license
-*/
-
-#include <vector>
-#include <string>
+/*
+ * GradingRubric.h
+ *
+ *  Created on: Feb 23, 2014
+ *      Author: seve
+ */
 
 #ifndef GRADINGRUBRIC_H_
 #define GRADINGRUBRIC_H_
 
-class GradingRubric{
+#include "../validation/TestCase.h"
+#include <vector>
+#include <numeric>
+
+class GradingRubric {
 public:
 
-    GradingRubric();
+	GradingRubric(const std::vector<TestCase>& test_cases,
+			const std::vector<int>& perfect_scores);
 
-    // ACCESSORS
+	GradingRubric(const std::vector<TestCase>& test_cases);
 
-    int getCompilation() const;
-    int getNonHiddenTotal() const;
-    int getHiddenTotal() const;
-    int getNonHiddenExtraCredit() const;
-    int getExtraCredit() const;
-    int getTotal() const;
-    int getTotalAfterTA() const;
+	// ACCESSORS
 
-    // PRIVATE VARIABLE ACCESSORS
+	int getTestScore(int test_case) const;
+	int getTestScore(const TestCase& test_case) const;
 
-    int getSubmissionPenalty() const;
-    int getNonHiddenReadme() const;
-    int getNonHiddenCompilation() const;
-    int getHiddenCompilation() const;
-    int getHiddenTesting() const;
-    int getTAPoints() const;
+	int getPerfectTestScore(int test_case) const;
+	int getPerfectTestScore(const TestCase& test_case) const;
 
-    // MODIFIERSs
+	int getTAScore() const { return _ta_score; };
 
-    void setSubmissionPenalty(
-            int number_of_submissions,
-            int max_submissions,
-            int max_penalty);
+	int getTotalScore() const;
+	int getPerfectScore() const;
 
-    void incrREADME(int points, bool hidden);
-    void incrCompilation(int points, bool hidden);
-    void incrTesting(int points, bool hidden, bool extra_credit);
-    void setTA(int points);
+	const std::vector<TestCase>& getTestCases() const { return _test_cases; };
 
+	// MODIFIERS
 
-    // TEST CASE CODE
+	// Set the score of a test case
+	void setTestScore(int test_case, int score){
+		_scores[test_case] = score;
+	}
+	void setTestScore(const TestCase& test_case, int score);
 
-    void VerifyTotalAfterTA(int expected_total) const;
-    void AddTestCaseResult(bool hidden,
-            const std::string & full_message,
-            const std::string & hidden_message);
-    int NumTestCases() const;
-    void GetTestCase(int index, bool & test_case_hidden,
-            std::string & test_case_full_messages,
-            std::string & test_case_hidden_messages) const;
+	// Set the perfect (highest possible) score of a test case
+	void setPerfectTestScore(int test_case, int score){
+		_perfect_scores[test_case] = score;
+	}
+	void setPerfectTestScore(const TestCase& test_case, int score);
 
+	// Set the submission count and penalty
+	void setSubmissionPenalty( int number_of_submissions, int max_submissions,
+	            int max_penalty);
+
+	// Set the TA's score
+	void setTAScore(int score){ _ta_score = score; };
 
 private:
 
-    // HW Points
+	void initGradingRubric(const std::vector<TestCase> & test_cases);
+	int getTestCaseIndex(const TestCase& test_case) const;
 
-    int _nonhidden_readme;
-    int _nonhidden_compilation;
-    int _nonhidden_testing;
-    int _hidden_readme;
-    int _hidden_compilation;
-    int _hidden_testing;
-    int _ta_points;
-    int _submission_penalty;
-    int _hidden_extra_credit;
-    int _nonhidden_extra_credit;
+	int _submission_penalty, _submission_count, _ta_score;
 
-    std::vector<bool> _test_case_hidden;
-    std::vector<std::string> _test_case_full_messages;
-    std::vector<std::string> _test_case_hidden_messages;
+	std::vector<TestCase> _test_cases;
+	std::vector<int> _perfect_scores;
+	std::vector<int> _scores;
 
 };
-#include "GradingRubric.h"
-#include <cstdlib>
-#include <algorithm>
-#include <iostream>
-#include <string>
 
-// Constructor
+GradingRubric::GradingRubric(const std::vector<TestCase> & test_cases,
+		const std::vector<int>& perfect_scores){
+	if (perfect_scores.size() != test_cases.size()){
+		std::cerr << "Test cases are a different size than perfect scores!"
+				<< std::endl;
+		// TODO exit?
+	}
+	_perfect_scores = perfect_scores;
 
-GradingRubric::GradingRubric() {
-
-    // Initialize all scores to 0
-
-    _nonhidden_readme = 0;
-    _nonhidden_compilation = 0;
-    _nonhidden_testing = 0;
-    _hidden_readme = 0;
-    _hidden_compilation = 0;
-    _hidden_testing = 0;
-    _ta_points = 0;
-    _submission_penalty = 0;
-    _hidden_extra_credit = 0;
-    _nonhidden_extra_credit = 0;
+	initGradingRubric(test_cases);
 
 }
 
-// ACCESSORS
-
-int GradingRubric::getCompilation() const {
-    return  _nonhidden_compilation +
-            _hidden_compilation;
+GradingRubric::GradingRubric(const std::vector<TestCase>& test_cases) {
+	initGradingRubric(test_cases);
 }
 
-int GradingRubric::getNonHiddenTotal() const {
-    return  _submission_penalty +
-            _nonhidden_readme +
-            _nonhidden_compilation +
-            _nonhidden_testing +
-            _nonhidden_extra_credit;
+void GradingRubric::setTestScore(const TestCase& test_case, int score) {
+	_scores[getTestCaseIndex(test_case)] = score;
 }
 
-int GradingRubric::getHiddenTotal() const {
-    return  _hidden_readme +
-            _hidden_compilation +
-            _hidden_testing +
-            _hidden_extra_credit;
+void GradingRubric::initGradingRubric(
+		const std::vector<TestCase>& test_cases) {
+
+	_test_cases = test_cases;
+
+	// Initialize perfect scores and scores to 0
+	_perfect_scores = std::vector<int>(test_cases.size(), 0);
+	_scores =  std::vector<int>(test_cases.size(), 0);
 }
 
-int GradingRubric::getNonHiddenExtraCredit() const {
-    return _nonhidden_extra_credit;
+void GradingRubric::setPerfectTestScore(const TestCase& test_case,
+		int score) {
+	_perfect_scores[getTestCaseIndex(test_case)] = score;
 }
 
-int GradingRubric::getExtraCredit() const {
-    return  _hidden_extra_credit +
-            _nonhidden_extra_credit;
+int GradingRubric::getTestScore(int test_case) const {
+	return _scores[test_case];
 }
 
-// Returns total number of hidden and nonhidden points (does
-// not include TA's grade)
-int GradingRubric::getTotal() const {
-    return  getNonHiddenTotal() +
-            getHiddenTotal();
+int GradingRubric::getTestScore(const TestCase& test_case) const {
+	return _scores[getTestCaseIndex(test_case)];
 }
 
-// Returns total including the TA's grade
-int GradingRubric::getTotalAfterTA() const {
-    return  getTotal() +
-            _ta_points;
+int GradingRubric::getPerfectTestScore(int test_case) const {
+	return _perfect_scores[test_case];
 }
 
-
-// PRIVATE VARIABLE ACCESSORS
-
-int GradingRubric::getSubmissionPenalty() const {
-	return _submission_penalty;
+int GradingRubric::getPerfectTestScore(const TestCase& test_case) const {
+	return _perfect_scores[getTestCaseIndex(test_case)];
 }
 
-int GradingRubric::getNonHiddenReadme() const {
-	return _nonhidden_readme;
+int GradingRubric::getTotalScore() const {
+	return std::accumulate(_scores.begin(), _scores.end(), 0);
 }
 
-int GradingRubric::getNonHiddenCompilation() const {
-	return _nonhidden_compilation;
+int GradingRubric::getPerfectScore() const {
+	return std::accumulate(_perfect_scores.begin(), _perfect_scores.end(), 0);
 }
 
-int GradingRubric::getHiddenCompilation() const {
-	return _hidden_compilation;
+int GradingRubric::getTestCaseIndex(const TestCase& test_case) const {
+	for (int i = 0; i < _test_cases.size(); i++){
+		if (_test_cases[i] == test_case){
+			return i;
+		}
+	}
+	std::cerr << "Could not find test case in grading rubric!" << std::endl;
+	// TODO exit?
+	return -1;
 }
 
-int GradingRubric::getHiddenTesting() const {
-	return _hidden_testing;
-}
-
-int GradingRubric::getTAPoints() const {
-	return _ta_points;
-}
-
-
-// MODIFIERS
-
-// Set submission penalty based on number of submissions and the
-// max number of submissions allowed, (10 submissions = -1 point)
 void GradingRubric::setSubmissionPenalty(
         int number_of_submissions,
         int max_submissions,
         int max_penalty) {
 
-        // Number of points to lose (if negative, it has no effect)
-        // TODO 10 is the number of assignments to deduct 1 point,
-        // should this be configurable?
-        int penalty = (number_of_submissions - max_submissions)/10;
+	// Number of points to lose (if negative, it has no effect)
+	// TODO 10 is the number of assignments to deduct 1 point,
+	// should this be configurable?
+	int penalty = (number_of_submissions - max_submissions)/10;
 
+    _submission_count = number_of_submissions;
     _submission_penalty =
             -std::max(0, std::min(max_penalty, penalty));
 }
 
-// Increase README points on rubric
-void GradingRubric::incrREADME(int points, bool hidden) {
-    if (hidden) _nonhidden_readme += points;
-    else _hidden_readme += points;
-}
 
-// Increase compilation points on rubric
-void GradingRubric::incrCompilation(int points, bool hidden) {
-    if (hidden) _nonhidden_compilation += points;
-    else _hidden_compilation += points;
-}
-
-// Increase testing points on rubric
-void GradingRubric::incrTesting(int points, bool hidden,
-        bool extra_credit) {
-    if (!hidden && extra_credit == 0){
-        _nonhidden_testing += points;
-    }else if (!hidden && extra_credit){
-        _nonhidden_extra_credit += points;
-    }else if (hidden && extra_credit == 0){
-        _hidden_testing += points;
-    }else if (hidden && extra_credit){
-        _hidden_extra_credit += points;
-    }
-}
-
-// Set TA points
-// TODO more descriptive name?
-void GradingRubric::setTA(int points){
-    _ta_points += points;
-}
-
-
-// TEST CASE CODE
-
-// Causes error if expected total is different than the
-// calculated total in rubric
-void GradingRubric::VerifyTotalAfterTA(int expected_total) const {
-    if (getTotalAfterTA() != expected_total){
-        std::cerr << "ERROR! Expected TotalAfterTA() " << getTotalAfterTA() <<
-                " != " << expected_total << std::endl;
-        exit(0);
-    }
-}
-
-// Adds test case to rubric
-void GradingRubric::AddTestCaseResult(bool hidden,
-        const std::string& full_message, const std::string& hidden_message) {
-    _test_case_hidden.push_back(hidden);
-    _test_case_full_messages.push_back(full_message);
-    _test_case_hidden_messages.push_back(hidden_message);
-}
-
-// Returns total number of test cases in rubric
-int GradingRubric::NumTestCases() const {
-    int arraySizeA = _test_case_hidden.size();
-    int arraySizeB = _test_case_full_messages.size();
-    int arraySizeC = _test_case_hidden_messages.size();
-    if (arraySizeA != arraySizeB || arraySizeA != arraySizeC){
-        std::cerr << "ARRAYS NOT EQUAL SIZE" << std::endl;
-        exit(0);
-    }
-    return arraySizeA;
-}
-
-// Sets provided strings to test case number {index}
-// A bad index (under 0 or above total number of test cases)
-// will cause an error
-void GradingRubric::GetTestCase(int index, bool& test_case_hidden,
-        std::string& test_case_full_messages,
-        std::string& test_case_hidden_messages) const {
-    if (index < 0 || index > NumTestCases()){
-        std::cerr << "BAD TEST CASE NUMBER " << index << std::endl;
-        exit(0);
-    }
-    test_case_hidden = _test_case_hidden[index];
-    test_case_full_messages = _test_case_full_messages[index];
-    test_case_hidden_messages = _test_case_hidden_messages[index];
-}
-
-#endif
+#endif /* GRADINGRUBRIC_H_ */
