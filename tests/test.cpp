@@ -50,23 +50,26 @@ int testTestCase(){
 		->setDetails("./justify.exe example.txt output.txt 16 flush_left")
 		->setCommand("./a.out /projects/submit2/csci1200/testing_input/hw01/example.txt output.txt 16 flush_left 1> cout.txt 2> cerr.txt")
 		->setPoints(3);
-	
+	std::cout << test1.title() << "\n" << test1.details() << "\n" << test1.command() << std::endl;
 	Check OUTPUT;
 	OUTPUT.setFilename("output.txt")
 		->setDescription("output.txt")
 		->setExpected("/projects/submit2/csci1200/scripts/hw01/example_16_flush_left.txt")
 		->setCompare(&diff)
 		->setPrintCheck(ALWAYS);
+	std::cout << "  " << OUTPUT.filename() << "\n  " << OUTPUT.expected() << std::endl;
 	Check STDOUT;
 	STDOUT.setFilename("cout.txt")
 		->setDescription("Standard OUTPUT (STDOUT)")
 		->setCompare(&warn_if_not_empty)
 		->setPrintCheck(WARNING_OR_FAILURE);
 	Check STDERR;
+	std::cout << "  " << STDOUT.filename() << "\n  " << STDOUT.description() << std::endl;
 	STDERR.setFilename("cerr.txt")
 		->setDescription("Standard ERROR (STDERR)")
 		->setCompare(&warn_if_not_empty)
 		->setPrintCheck(WARNING_OR_FAILURE);
+	std::cout << "  " << STDERR.filename() << "\n  " << STDERR.description() << std::endl;
 	test1.addCheck(OUTPUT)
 		->addCheck(STDOUT)
 		->addCheck(STDERR);
