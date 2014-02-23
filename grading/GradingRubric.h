@@ -16,9 +16,6 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 class GradingRubric {
 public:
 
-	GradingRubric(const std::vector<TestCase>& test_cases,
-			const std::vector<int>& perfect_scores);
-
 	GradingRubric(const std::vector<TestCase>& test_cases);
 
 	// ACCESSORS
@@ -44,12 +41,6 @@ public:
 	}
 	void setTestScore(const TestCase& test_case, int score);
 
-	// Set the perfect (highest possible) score of a test case
-	void setPerfectTestScore(int test_case, int score){
-		_perfect_scores[test_case] = score;
-	}
-	void setPerfectTestScore(const TestCase& test_case, int score);
-
 	// Set the submission count and penalty
 	void setSubmissionPenalty( int number_of_submissions, int max_submissions,
 	            int max_penalty);
@@ -65,23 +56,9 @@ private:
 	int _submission_penalty, _submission_count, _ta_score;
 
 	std::vector<TestCase> _test_cases;
-	std::vector<int> _perfect_scores;
 	std::vector<int> _scores;
 
 };
-
-GradingRubric::GradingRubric(const std::vector<TestCase> & test_cases,
-		const std::vector<int>& perfect_scores){
-	if (perfect_scores.size() != test_cases.size()){
-		std::cerr << "Test cases are a different size than perfect scores!"
-				<< std::endl;
-		// TODO exit?
-	}
-	_perfect_scores = perfect_scores;
-
-	initGradingRubric(test_cases);
-
-}
 
 GradingRubric::GradingRubric(const std::vector<TestCase>& test_cases) {
 	initGradingRubric(test_cases);
@@ -96,15 +73,10 @@ void GradingRubric::initGradingRubric(
 
 	_test_cases = test_cases;
 
-	// Initialize perfect scores and scores to 0
-	_perfect_scores = std::vector<int>(test_cases.size(), 0);
+	// Initialize scores to 0
 	_scores =  std::vector<int>(test_cases.size(), 0);
 }
 
-void GradingRubric::setPerfectTestScore(const TestCase& test_case,
-		int score) {
-	_perfect_scores[getTestCaseIndex(test_case)] = score;
-}
 
 int GradingRubric::getTestScore(int test_case) const {
 	return _scores[test_case];
@@ -114,20 +86,16 @@ int GradingRubric::getTestScore(const TestCase& test_case) const {
 	return _scores[getTestCaseIndex(test_case)];
 }
 
-int GradingRubric::getPerfectTestScore(int test_case) const {
-	return _perfect_scores[test_case];
-}
-
-int GradingRubric::getPerfectTestScore(const TestCase& test_case) const {
-	return _perfect_scores[getTestCaseIndex(test_case)];
-}
-
 int GradingRubric::getTotalScore() const {
 	return std::accumulate(_scores.begin(), _scores.end(), 0);
 }
 
 int GradingRubric::getPerfectScore() const {
-	return std::accumulate(_perfect_scores.begin(), _perfect_scores.end(), 0);
+	int point_sum = 0;
+	for (int i = 0; i < _test_cases.size(); i++){
+		point_sum += _test_cases[i].points();
+	}
+	return point_sum;
 }
 
 int GradingRubric::getTestCaseIndex(const TestCase& test_case) const {
