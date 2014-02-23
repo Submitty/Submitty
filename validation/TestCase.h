@@ -87,7 +87,7 @@ public:
 	TestCase* const setPoints(int new_points)
 		{ _points = new_points; return this; }
 	TestCase* const setHidden(const bool new_hidden)
-		{ _hidden = new_hidden; }
+		{ _hidden = new_hidden; return this; }
 	TestCase* const setFilename(const std::string &new_filename) 
 		{ _filename = new_filename; return this; }
 	TestCase* const setDescription(const std::string &new_desc) 
