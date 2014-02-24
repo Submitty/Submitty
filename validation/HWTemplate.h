@@ -20,8 +20,6 @@ const std::string hw_name = "TestHW";
 // Submission parameters
 const int max_submissions = 20;
 const int submission_penalty = 5;
-const std::string input_file_dir = "";
-const std::string output_file_dir = "";
 
 // Compile-time parameters
 const int max_clocktime = 2;		// in seconds
@@ -35,12 +33,15 @@ const int readme_pts = 2;
 const int compile_pts = 3;
 const int ta_pts = 20;
 
-// Test cases
-const int num_testcases = 1;
+// File directories
+const std::string input_files_dir = "";		// directory containing input files
 const std::string student_files_dir = "";	// directory containing output files generated
 											//   from student's code
 const std::string expected_output_dir = "";	// directory containing expected output files
 const std::string results_dir = "";			// directory to store results from validation
+
+// Test cases
+const int num_testcases = 1;
 
 std::vector<TestCase> testcases;
 
