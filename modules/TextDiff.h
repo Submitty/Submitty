@@ -19,7 +19,7 @@
 #include <fstream>
 #include <algorithm>
 
-using std::cout; using std::endl; using std::cin; using std::string; using std::vector;
+//using std::cout; using std::endl; using std::cin; using std::string; using std::vector;
 //pass chunks of text in strings
 // return int did it work?
 // diff_naive() - character by character
@@ -30,17 +30,49 @@ using std::cout; using std::endl; using std::cin; using std::string; using std::
 // edit_distance_naive()
 // edit distance_line()
 typedef unsigned int size_type;
-size_type SES(const string & A, const string & B){
+size_type SES(const std::string & A, const std::string & B){
     size_type N=(size_type)A.size();
     size_type M=(size_type)B.size();
+    int V[N+M];
     
-    for ( size_type d = 0 ; d <= N + M ; d++ ){
-        for ( int k = -d ; k <= d ; k += 2 ){
-            
-        }
+    for (int a=0; a<(N+M); a++) {
+        V[a]=0;
     }
-    
-    return 0;
+    for ( int d = 0 ; d <= N + M ; d++ ){
+        for ( int k = -d ; k <= d ; k += 2 ){
+            bool down = (k==-d || (k!=d && V[k-1] < V[k+1]));
+            int kPrev, xStart, yStart, xEnd, yEnd;
+            if (down) {
+                kPrev=k+1;
+                xStart = V[kPrev];
+                xEnd=xStart;
+            }
+            else
+            {
+                kPrev=k-1;
+                xStart = V[kPrev];
+                xEnd=xStart + 1;
+            }
+            yStart = xStart - kPrev;
+            yEnd = xEnd - k;
+            // follow diagonal
+            int snake = 0;
+            while ( xEnd < N && yEnd < M && A[xEnd] == B[yEnd] ){
+                xEnd++; yEnd++; snake++;
+            }
+            
+            // save end point
+            V[ k ] = xEnd;
+            
+            // check for solution
+            if ( xEnd >= N && yEnd >= M ){ /* solution has been found */
+                return d;
+            }
+        }
+        
+    }
+
+    return 99;
 }
 
 
