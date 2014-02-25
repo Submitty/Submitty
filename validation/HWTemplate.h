@@ -35,13 +35,15 @@ const int ta_pts = 20;
 // File directories
 
 // directory containing input files
-const std::string input_files_dir = "";
-// directory containing README and output files generated from student's code
-const std::string student_files_dir = "../../testHWsubmit";
+const std::string input_files_dir = "../../hw0/input";
+// directory containing README and student's code
+const std::string student_submit_dir = "../../testHWsubmit";
+// directory containing output files generated from student's code
+const std::string student_output_dir = "../../student_hw0/testCaseOutputs";
 // directory containing expected output files
-const std::string expected_output_dir = "";
+const std::string expected_output_dir = "../../hw0/expectedOutput";
 // directory to store results from validation
-const std::string results_dir = "";
+const std::string results_dir = "../../student_hw0/validationResults";
 
 // Test cases
 const int num_testcases = 1;

@@ -13,11 +13,14 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <cstdlib>
 #include <vector>
 #include <string>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "TestCase.h"
 #include "HWTemplate.h"
 //#include "../modules/modules.h"
 
+bool checkValidDirectory( const std::string &directory );
 int validateReadme();
 int validateCompilation();
 int validateTestCases();
@@ -25,6 +28,15 @@ int validateTestCases();
 int main( int argc, char* argv[] ) {
 	
 	// Check for valid directories
+	if( !checkValidDirectory( input_files_dir ) ||
+	    !checkValidDirectory( student_submit_dir ) ||
+	    !checkValidDirectory( student_output_dir ) ||
+	    !checkValidDirectory( expected_output_dir ) ||
+	    !checkValidDirectory( results_dir ) ) {
+	    
+	    std::cout << "ERROR: one or more directories not found.  Terminating" << std::endl;
+	    return 1;
+	}
 	
 	// Run test cases
 	validateReadme();
@@ -34,10 +46,23 @@ int main( int argc, char* argv[] ) {
 	return 0;
 }
 
-/* Check student files directory for README.txt */
+/* Ensures that the given directory exists */
+bool checkValidDirectory( const std::string &directory ) {
+	
+	struct stat status;
+	stat( directory.c_str(), &status );
+	if( !(status.st_mode & S_IFDIR) ) {
+		std::cout << "ERROR: directory " << directory << " does not exist" << std::endl;
+		return false;
+	}
+	else { std::cout << "Directory " << directory << " found!" << std::endl; }
+	return true;
+}
+
+/* Check student submit directory for README.txt */
 int validateReadme() {
 	
-	const char* readme = (student_files_dir + "/README.txt").c_str();
+	const char* readme = (student_submit_dir + "/README.txt").c_str();
 	std::ifstream instr( readme, std::ifstream::in );
 	
 	if( instr != NULL ) {
