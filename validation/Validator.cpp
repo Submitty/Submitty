@@ -16,7 +16,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 #include "TestCase.h"
 #include "HWTemplate.h"
-//#include "../modules/diffNaive.h"
+//#include "../modules/modules.h"
 
 int validateReadme();
 int validateCompilation();
@@ -28,6 +28,8 @@ int main( int argc, char* argv[] ) {
 	
 	// Run test cases
 	validateReadme();
+	
+	validateTestCases();
 	
 	return 0;
 }
@@ -50,11 +52,14 @@ int validateReadme() {
 	return 0;
 }
 
+/* Runs through each test case, pulls in the correct files, validates,
+   and outputs the results */ 
 int validateTestCases()
 {
-	/* Runs through each test case, pulls in the correct files,
-	   validates, and outputs the results */
-	   
+	for( int i = 0; i < num_testcases; ++i ) {
+		std::cout << testcases[i].title() << " - points: " << testcases[i].points() << std::endl;
+	}
+	
 	return 0;
 }
 

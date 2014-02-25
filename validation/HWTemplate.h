@@ -46,17 +46,19 @@ const std::string results_dir = "";
 // Test cases
 const int num_testcases = 1;
 
-TestCase case1(
-  	"Case 1",
-  	"./case1.exe",
-    "./a.out 1> cout.txt 2> cerr.txt",
-    "test_out.txt",
-    "test_out.txt",
-    "expected_test1.txt",
-    5,
-    false,
-    NULL
-);
+TestCase testcases[1] {
+TestCase(
+  	"Case 1",							// title
+  	"./case1.exe",						// details
+    "./a.out 1> cout.txt 2> cerr.txt",	// command
+    "test_out.txt",						// output file name
+    "test_out.txt",						// output file description
+    "expected_test1.txt",				// expected output file
+    5,									// points
+    false,								// hidden
+    NULL								// compare function
+)
+};
   
   /* TODO: SHOULD COUT AND CERR CHECKS ALWAYS BE INCLUDED?
             IF SO, JUST DO THESE AUTOMATICALLY IN VALIDATOR*/

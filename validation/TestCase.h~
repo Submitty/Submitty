@@ -27,10 +27,10 @@ public:
 			  const std::string &description, const std::string &expected,
 			  const int points, const bool hidden,
 			  int (*cmp)(std::string, std::string) )
-			: _title = title, _details = details, _command = command,
-			  _filename = filename, _description = description,
-			  _expected = expected, _points = points, _hidden = hidden,
-			  cmp_output = cmp {}
+			: _title(title), _details(details), _command(command),
+			  _filename(filename), _description(description),
+			  _expected(expected), _points(points), _hidden(hidden),
+			  cmp_output(cmp) {}
 	
 	//Accessors
 	std::string title() const { return _title; }

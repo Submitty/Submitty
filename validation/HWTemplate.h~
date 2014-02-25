@@ -36,19 +36,18 @@ const int ta_pts = 20;
 
 // directory containing input files
 const std::string input_files_dir = "";
-// directory containing README and
+// directory containing README and output files generated from student's code
 const std::string student_files_dir = "../../testHWsubmit";
-											//   output files generated from
-											//   student's code
-const std::string expected_output_dir = "";	// directory containing expected
-											//   output files
-const std::string results_dir = "";			// directory to store results from
-											//   validation
+// directory containing expected output files
+const std::string expected_output_dir = "";
+// directory to store results from validation
+const std::string results_dir = "";
 
 // Test cases
 const int num_testcases = 1;
 
-TestCase case1(
+TestCase testcases[1] {
+TestCase(
   	"Case 1",
   	"./case1.exe",
     "./a.out 1> cout.txt 2> cerr.txt",
@@ -58,7 +57,8 @@ TestCase case1(
     5,
     false,
     NULL
-);
+)
+};
   
   /* TODO: SHOULD COUT AND CERR CHECKS ALWAYS BE INCLUDED?
             IF SO, JUST DO THESE AUTOMATICALLY IN VALIDATOR*/

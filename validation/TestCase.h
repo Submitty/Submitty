@@ -22,6 +22,7 @@ class TestCase {
 
 public:
 
+	//Constructor
 	TestCase( const std::string &title, const std::string &details,
 			  const std::string &command, const std::string &filename,
 			  const std::string &description, const std::string &expected,
