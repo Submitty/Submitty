@@ -1,5 +1,5 @@
-#include <diffNaive.h>
-#include <partialDiff.h>
-#include <STRutil.h>
-#include <TextDiff.h>
-#include <tokenSearch.h>
+#include <../modules/diffNaive.h>
+#include <../modules/partialDiff.h>
+#include <../modules/STRutil.h>
+#include <../modules/TextDiff.h>
+#include <../modules/tokenSearch.h>
