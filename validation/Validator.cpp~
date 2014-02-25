@@ -27,7 +27,6 @@ int main( int argc, char* argv[] ) {
 	// Check for valid directories
 	
 	// Run test cases
-	validateReadme();
 	
 	return 0;
 }
