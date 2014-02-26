@@ -46,19 +46,51 @@ const std::string expected_output_dir = "../../hw0/expectedOutput";
 const std::string results_dir = "../../student_hw0/validationResults";
 
 // Test cases
-const int num_testcases = 1;
+const int num_testcases = 3;
 
-TestCase testcases[1] {
+TestCase testcases[3] {
+
+/************* README AND COMPILATION *****************/
 TestCase(
-  	"Case 1",							// title
-  	"./case1.exe",						// details
-    "./a.out 1> cout.txt 2> cerr.txt",	// command
-    "test_out.txt",						// output file name
-    "test_out.txt",						// output file description
-    "expected_test1.txt",				// expected output file
-    5,									// points
-    false,								// hidden
-    NULL								// compare function
+  	"Readme",
+  	"",
+    "",
+    "README.txt",
+    "",
+    "",
+    2,				// points for readme
+    false,
+    DONT_CHECK,
+    DONT_CHECK,
+    NULL
+),
+TestCase(
+	"Compilation",
+	"",
+	"",
+	"hw0.exe",		// name of .exe created by student
+	"",
+	"",
+	3,				// points for compilation
+	false,
+	DONT_CHECK,
+	DONT_CHECK,
+	NULL
+),
+
+/******************** TEST CASES **********************/
+TestCase(
+	"Case 1",							// title
+	"./case1.exe",						// details
+	"./a.out 1> cout.txt 2> cerr.txt",	// command
+	"test1_out.txt",					// output file name
+	"test1_out.txt",					// output file description
+	"expected_test1.txt",				// expected output file
+	5,									// points
+	false,								// hidden
+	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
+	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
+	NULL								// compare function
 )
 };
   

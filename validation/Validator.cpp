@@ -34,7 +34,7 @@ int main( int argc, char* argv[] ) {
 	    !checkValidDirectory( expected_output_dir ) ||
 	    !checkValidDirectory( results_dir ) ) {
 	    
-	    std::cout << "ERROR: one or more directories not found.  Terminating" << std::endl;
+	    std::cout << "ERROR: one or more directories not found" << std::endl;
 	    return 1;
 	}
 	
@@ -77,12 +77,37 @@ int validateReadme() {
 	return 0;
 }
 
+/* Makes sure the code was compiled successfully */
+int validateCompilation() {
+
+	return 0;
+}
+
 /* Runs through each test case, pulls in the correct files, validates,
-   and outputs the results */ 
-int validateTestCases()
-{
-	for( int i = 0; i < num_testcases; ++i ) {
+   and outputs the results */
+int validateTestCases() {
+
+	for( int i = 2; i < num_testcases; ++i ) {
+		
 		std::cout << testcases[i].title() << " - points: " << testcases[i].points() << std::endl;
+		
+		// Pull in student output & expected output
+		const char* student_path = (student_output_dir + "/" + testcases[i].filename()).c_str();
+		std::ifstream student_instr( student_path, std::ifstream::in );
+		if( !student_instr ) { std::cout << "ERROR: Student's " << testcases[i].filename() << " does not exist" << std::endl; }
+		
+		const char* expected_path = (expected_output_dir + "/" + testcases[i].expected()).c_str();
+		std::ifstream expected_instr( expected_path, std::ifstream::in );
+		if( !expected_instr ) { std::cout << "ERROR: Expected output file " << testcases[i].expected() << " does not exist" << std::endl; }
+		
+		if( !student_instr || !expected_instr ) continue;
+		
+		// Check cout and cerr
+		
+		// Pass files off to comparison function
+		
+		// Output to result file
+		
 	}
 	
 	return 0;

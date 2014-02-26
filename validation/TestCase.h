@@ -10,30 +10,32 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #define __TESTCASE_H__
 
 
-/*p_check is an enumerated tyoe used in Check to declare if the 
-output from a Check is shown.*/
-enum p_check { NEVER = 0, WARNING_OR_FAILURE = 1, ALWAYS = 2 };
+/* cout_cerr_check is an enumerated type used to specify whether to
+check and what to do with cout.txt and cerr.txt */
+enum cout_cerr_check { DONT_CHECK = 0, WARN_IF_NOT_EMPTY = 1, CHECK = 2 };
 
 
-/*TestCase is used to define individual test cases for homeworks. These are to
+/* TestCase is used to define individual test cases for homeworks. These are to
 be populated using the Mutators prior to use and will be executed by the 
-validator and graded by the grader.*/
+validator and graded by the grader. */
 class TestCase {
 
 public:
 
-	//Constructor
+	// Constructor
 	TestCase( const std::string &title, const std::string &details,
 			  const std::string &command, const std::string &filename,
 			  const std::string &description, const std::string &expected,
 			  const int points, const bool hidden,
+			  const cout_cerr_check cout_check, const cout_cerr_check cerr_check,
 			  int (*cmp)(std::string, std::string) )
 			: _title(title), _details(details), _command(command),
 			  _filename(filename), _description(description),
 			  _expected(expected), _points(points), _hidden(hidden),
+			  _coutcheck(cout_check), _cerrcheck(cerr_check),
 			  cmp_output(cmp) {}
 	
-	//Accessors
+	// Accessors
 	std::string title() const { return _title; }
 	std::string details() const { return _details; }
 	std::string command() const { return _command; }
@@ -42,15 +44,17 @@ public:
 	std::string expected() const { return _expected; }
 	int points() const { return _points; }
 	bool hidden() const { return _hidden; }
+	cout_cerr_check coutCheck() const { return _coutcheck; }
+	cout_cerr_check cerrCheck() const { return _cerrcheck; }
 	
-	/*Calls the function designated by the function pointer and returns the
-	result if successful or -1 otherwise. The arguments of the compare*/
+	/* Calls the function designated by the function pointer and returns the
+	result if successful or -1 otherwise. The arguments of the compare */
 	int compare(std::string &student_out, std::string &expected_out){
 		if(cmp_output != 0) return cmp_output(student_out, expected_out);
 		else return -1;
 	}
 	
-	//Mutators for configuring the test case
+	// Mutators for configuring the test case
 	TestCase* const setTitle(const std::string &new_title) 
 		{ _title = new_title; return this; }
 	TestCase* const setDetails(const std::string &new_details) 
@@ -79,6 +83,8 @@ private:
 	std::string _expected;
 	int _points;
 	bool _hidden;
+	cout_cerr_check _coutcheck;
+	cout_cerr_check _cerrcheck;
 	int (*cmp_output)(std::string, std::string);
 };
 
