@@ -12,7 +12,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <stdlib.h>
 #include <string>
 #include <algorithm>
-#include "STRUtil.h"
+#include "STRutil.h"
 
 int searchToken(const std::string& _student, const std::string& _instructor){
 	return 100;
