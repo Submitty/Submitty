@@ -27,7 +27,8 @@ public:
 			  const std::string &command, const std::string &filename,
 			  const std::string &description, const std::string &expected,
 			  const int points, const bool hidden,
-			  const cout_cerr_check cout_check, const cout_cerr_check cerr_check,
+			  const cout_cerr_check cout_check,
+			  const cout_cerr_check cerr_check,
 			  int (*cmp)(std::string, std::string) )
 			: _title(title), _details(details), _command(command),
 			  _filename(filename), _description(description),
