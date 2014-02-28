@@ -95,7 +95,7 @@ int GradingRubric::getTotalScore() const {
 
 int GradingRubric::getPerfectScore() const {
 	int point_sum = 0;
-	for (int i = 0; i < _test_cases.size(); i++){
+	for (unsigned int i = 0; i < _test_cases.size(); i++){
 		point_sum += _test_cases[i].points();
 	}
 	return point_sum;
@@ -110,7 +110,7 @@ int GradingRubric::getSubmissionPenalty() const {
 }
 
 int GradingRubric::getTestCaseIndex(const TestCase& test_case) const {
-	for (int i = 0; i < _test_cases.size(); i++){
+	for (unsigned int i = 0; i < _test_cases.size(); i++){
 		if (_test_cases[i].title() == test_case.title()){
 			return i;
 		}

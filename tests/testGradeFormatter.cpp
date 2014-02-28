@@ -21,6 +21,19 @@ int main(){
 	std::cout << rubric.getTotalScore() << std::endl;
 	std::cout << rubric.getPerfectScore() << std::endl;
 
+	// Test modifier rubric methods
+
+	rubric.setTestScore(0, 2);
+	rubric.setTestScore(1, 5);
+	rubric.setTestScore(2, 8);
+	rubric.setTestScore(3, 5);
+	rubric.setTestScore(4, 5);
+
+	// Test if values changed
+
+	std::cout << rubric.getTotalScore() << '/' << rubric.getPerfectScore()
+			<< std::endl;
+
 }
 
 void create_test_cases(std::vector<TestCase>& tests){
