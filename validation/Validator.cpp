@@ -103,6 +103,37 @@ int validateTestCases() {
 		if( !student_instr || !expected_instr ) continue;
 		
 		// Check cout and cerr
+		const char* cout_path = (student_output_dir + "/test" + i + "_cout.txt" ).c_str();
+		std::ifstream cout_instr( cout_path, std::ifstream::in );
+		if( testcases[i].coutCheck() != DONT_CHECK ) {
+			if( !cout_instr ) { std::cout << "ERROR: test" << i << "_cout.txt does not exist" << std::endl; }
+			else {
+				if( testcases[i].coutCheck() == WARN_IF_NOT_EMPTY ) {
+					std::string content;
+					cout_instr >> content;
+					if( content.size() > 0 ) { std::cout << "WARNING: test" << i << "_cout.txt is not empty" << std::endl; }
+				}
+				else if( testcases[i].coutCheck() == CHECK ) {
+					std::cout << "Check test" << i << "_cout.txt instead of student's output file" << std::endl;
+				}
+			}
+		}
+		
+		const char* cerr_path = (student_output_dir + "/test" + i + "_cerr.txt" ).c_str();
+		std::ifstream cerr_instr( cerr_path, std::ifstream::in );
+		if( testcases[i].cerrCheck() != DONT_CHECK ) {
+			if( !cerr_instr ) { std::cout << "ERROR: test" << i << "_cerr.txt does not exist" << std::endl; }
+			else {
+				if( testcases[i].cerrCheck() == WARN_IF_NOT_EMPTY ) {
+					std::string content;
+					cerr_instr >> content;
+					if( content.size() > 0 ) { std::cout << "WARNING: test" << i << "_cerr.txt is not empty" << std::endl; }
+				}
+				else if( testcases[i].cerrCheck() == CHECK ) {
+					std::cout << "Check test" << i << "_cerr.txt" << std::endl;
+				}
+			}
+		}
 		
 		// Pass files off to comparison function
 		
