@@ -60,13 +60,19 @@ private:
 
 };
 
+// GradingRubric Constructor
+
 GradingRubric::GradingRubric(const std::vector<TestCase>& test_cases) {
 	initGradingRubric(test_cases);
 }
 
+// Set test score by test case
+
 void GradingRubric::setTestScore(const TestCase& test_case, int score) {
 	_scores[getTestCaseIndex(test_case)] = score;
 }
+
+// Initialize variables in new instance of Grading Rubric
 
 void GradingRubric::initGradingRubric(
 		const std::vector<TestCase>& test_cases) {
@@ -80,18 +86,26 @@ void GradingRubric::initGradingRubric(
 	_scores =  std::vector<int>(test_cases.size(), 0);
 }
 
+// Return user score for test
 
 int GradingRubric::getTestScore(int test_case) const {
 	return _scores[test_case];
 }
 
+// Return user score for test
+
 int GradingRubric::getTestScore(const TestCase& test_case) const {
 	return _scores[getTestCaseIndex(test_case)];
 }
 
+// Return student's total score
+
 int GradingRubric::getTotalScore() const {
-	return std::accumulate(_scores.begin(), _scores.end(), 0);
+	return std::accumulate(_scores.begin(), _scores.end(), 0)
+		- _submission_penalty;
 }
+
+// Return best possible score for student
 
 int GradingRubric::getPerfectScore() const {
 	int point_sum = 0;
@@ -101,13 +115,20 @@ int GradingRubric::getPerfectScore() const {
 	return point_sum;
 }
 
+// Return the total number of submissions this user has submitted
+
 int GradingRubric::getSubmissionCount() const {
 	return _submission_count;
 }
 
+// Get the total points this student has lost due to the submission
+// penalty
+
 int GradingRubric::getSubmissionPenalty() const {
 	return _submission_penalty;
 }
+
+// Returns index of test case in the _test_cases variable
 
 int GradingRubric::getTestCaseIndex(const TestCase& test_case) const {
 	for (unsigned int i = 0; i < _test_cases.size(); i++){
@@ -119,6 +140,10 @@ int GradingRubric::getTestCaseIndex(const TestCase& test_case) const {
 	// TODO exit?
 	return -1;
 }
+
+// Set the submission penalty and total submissions based on the
+// # of submissions, the max submission number and the max
+// penalty
 
 void GradingRubric::setSubmissionPenalty(
         int number_of_submissions,
