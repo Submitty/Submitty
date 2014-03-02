@@ -162,7 +162,6 @@ void GradingRubric::setSubmissionPenalty(
 	// should this be configurable?
 	int penalty = (number_of_submissions - max_submissions
 			+ penalize_every)/penalize_every;
-	std::cout << number_of_submissions << " " << max_submissions << " " << penalty <<
 			" " << (number_of_submissions - max_submissions) << std::endl;
 
     _submission_count = number_of_submissions;
