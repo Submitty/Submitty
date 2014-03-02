@@ -37,7 +37,7 @@ int main(){
 
 	// Test grade formatter
 
-	output_human_rubric(std::cout, rubric);
+	outputHumanRubric(std::cout, rubric);
 
 }
 
