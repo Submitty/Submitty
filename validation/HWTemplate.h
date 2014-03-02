@@ -1,4 +1,4 @@
-/*Copyright (c) 2014, Chris Berger, Jesse Freitas, Severin Ibarluzea,
+/* Copyright (c) 2014, Chris Berger, Jesse Freitas, Severin Ibarluzea,
 Kiana McNellis, Kienan Knight-Boehm
 
 All rights reserved.
@@ -6,13 +6,12 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 "LICENSE.md" for the full license.
 */
 
-#include <string>
-#include <vector>
+#ifndef __HWTEMPLATE_H__
+#define __HWTEMPLATE_H__
 
 #include "TestCase.h"
 //#include "GradingRubric.h"
 
-class TestCase;
 
 const int hw_num = 0;
 const std::string hw_name = "TestHW";
@@ -34,27 +33,66 @@ const int compile_pts = 3;
 const int ta_pts = 20;
 
 // File directories
-const std::string input_files_dir = "";		// directory containing input files
-const std::string student_files_dir = "";	// directory containing output files generated
-											//   from student's code
-const std::string expected_output_dir = "";	// directory containing expected output files
-const std::string results_dir = "";			// directory to store results from validation
+
+// directory containing input files
+const std::string input_files_dir = "../CSCI1200/testingInput";
+// directory containing README and student's code
+const std::string student_submit_dir = "../CSCI1200/HW0/alice/1";
+// directory containing output files generated from student's code
+const std::string student_output_dir = "../CSCI1200/HW0/alice/1/submit_out";
+// directory containing expected output files
+const std::string expected_output_dir = "../CSCI1200/Scripts/expectedOutput/HW0";
+// directory to store results from validation
+const std::string results_dir = "../CSCI1200/HW0/alice/1/submit_grade";
 
 // Test cases
-const int num_testcases = 1;
+const int num_testcases = 3;
 
-std::vector<TestCase> testcases;
+TestCase testcases[3] {
 
-TestCase case1;
-  case1.setTitle("Case 1");
-  case1.setDetails("./case1.exe");
-  case1.setCommand("./a.out 1> cout.txt 2> cerr.txt");
-  case1.setPoints(5);
-  case1.setHidden(false);
-  case1.setFilename("test_out.txt");
-  case1.setDescription("test_out.txt");
-  case1.setExpected("expected_test1.txt");
-  case1.setCompare(&diff);
+/************* README AND COMPILATION *****************/
+TestCase(
+  	"Readme",
+  	"",
+    "",
+    "README.txt",
+    "",
+    "",
+    2,				// points for readme
+    false,
+    DONT_CHECK,
+    DONT_CHECK,
+    NULL
+),
+TestCase(
+	"Compilation",
+	"",
+	"",
+	"hw0.exe",		// name of .exe created by student
+	"",
+	"",
+	3,				// points for compilation
+	false,
+	DONT_CHECK,
+	DONT_CHECK,
+	NULL
+),
+
+/******************** TEST CASES **********************/
+TestCase(
+	"Case 1",							// title
+	"./case1.exe",						// details
+	"./a.out 1> cout.txt 2> cerr.txt",	// command
+	"test1_out.txt",					// output file name
+	"test1_out.txt",					// output file description
+	"expected_test1.txt",				// expected output file
+	5,									// points
+	false,								// hidden
+	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
+	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
+	NULL								// compare function
+)
+};
   
   /* TODO: SHOULD COUT AND CERR CHECKS ALWAYS BE INCLUDED?
             IF SO, JUST DO THESE AUTOMATICALLY IN VALIDATOR*/
@@ -75,9 +113,6 @@ TestCase case1;
   cerr_check.setSideBySide(true);
   cerr_check.setPrintCheck(WARNING_OR_FAILURE);*/
   
-  case1.addCheck(output_check);
-  case1.addCheck(cout_check);
-  case1.addCheck(cerr_check);
-testcases.push_back(case1);
 
+#endif
 
