@@ -93,26 +93,6 @@ TestCase(
 	NULL								// compare function
 )
 };
-  
-  /* TODO: SHOULD COUT AND CERR CHECKS ALWAYS BE INCLUDED?
-            IF SO, JUST DO THESE AUTOMATICALLY IN VALIDATOR*/
-  
-  /*Check cout_check;
-  cout_check.setFilename("cout.txt");
-  cout_check.setDescription("Standard OUTPUT (STDOUT)");
-  cout_check.setExpected(NULL);
-  //cout_check.setCompare();		// warn if not empty?
-  cout_check.setSideBySide(true);
-  cout_check.setPrintCheck(WARNING_OR_FAILURE);
-  
-  Check cerr_check;
-  cerr_check.setFilename("cerr.txt");
-  cerr_check.setDescription("Standard ERROR (STDERR)");
-  cerr_check.setExpected(NULL);
-  //cerr_check.setCompare();		// warn if not empty?
-  cerr_check.setSideBySide(true);
-  cerr_check.setPrintCheck(WARNING_OR_FAILURE);*/
-  
 
 #endif
 
