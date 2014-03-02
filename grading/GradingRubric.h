@@ -49,7 +49,7 @@ public:
 
 	// Set the submission count and penalty
 	void setSubmissionPenalty( int number_of_submissions, int max_submissions,
-	            int max_penalty);
+	            int penalize_every, int max_penalty);
 
 	// Set the TA's score
 	void setTAScore(int score){ _ta_score = score; };
@@ -154,16 +154,20 @@ int GradingRubric::getTestCaseIndex(const TestCase& test_case) const {
 void GradingRubric::setSubmissionPenalty(
         int number_of_submissions,
         int max_submissions,
+        int penalize_every,
         int max_penalty) {
 
 	// Number of points to lose (if negative, it has no effect)
 	// TODO 10 is the number of assignments to deduct 1 point,
 	// should this be configurable?
-	int penalty = (number_of_submissions - max_submissions)/10;
+	int penalty = (number_of_submissions - max_submissions
+			+ penalize_every)/penalize_every;
+	std::cout << number_of_submissions << " " << max_submissions << " " << penalty <<
+			" " << (number_of_submissions - max_submissions) << std::endl;
 
     _submission_count = number_of_submissions;
     _submission_penalty =
-            -std::max(0, std::min(max_penalty, penalty));
+            std::min(max_penalty, penalty);
 }
 
 
