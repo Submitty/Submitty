@@ -5,6 +5,9 @@ All rights reserved.
 This code is licensed using the BSD "3-Clause" license. Please refer to
 "LICENSE.md" for the full license.
 */
+
+#ifndef ___STR_UTIL___
+#define ___STR_UTIL___
 #include <string>
 
 static inline void string_trim_left_inplace(std::string &str)
@@ -56,3 +59,5 @@ static inline void string_trim_inplace(std::string& str)
     else
         str.erase(str.begin(), str.end());
 }
+
+#endif //___STR_UTIL___
