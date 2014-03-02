@@ -1,13 +1,15 @@
-//
-//  TextDiff.h
-//  differences
-//
-//  Created by Kiana on 2/16/14.
-//  Copyright (c) 2014 Kiana. All rights reserved.
-//
+/*Copyright (c) 2014, Chris Berger, Jesse Freitas, Severin Ibarluzea,
+ Kiana McNellis, Kienan Knight-Boehm
+ 
+ All rights reserved.
+ This code is licensed using the BSD "3-Clause" license. Please refer to
+ "LICENSE.md" for the full license
+ */
 
-#ifndef __differences__TextDiff__
-#define __differences__TextDiff__
+
+#ifndef differences_myersDiff_h
+#define differences_myersDiff_h
+
 
 #include <iostream>
 #include <string>
@@ -33,24 +35,25 @@ typedef unsigned int size_type;
 size_type SES(const std::string & A, const std::string & B){
     size_type N=(size_type)A.size();
     size_type M=(size_type)B.size();
-    int V[N+M];
-    
-    for (int a=0; a<(N+M); a++) {
+    std::vector<int> V((N+M)*2,0);
+    std::vector< std::vector<int> > Snakes;
+    for (int a=0; a<(N+M)+(N+M); a++) {
         V[a]=0;
     }
     for ( int d = 0 ; d <= N + M ; d++ ){
         for ( int k = -d ; k <= d ; k += 2 ){
-            bool down = (k==-d || (k!=d && V[k-1] < V[k+1]));
+            bool down = (k==-d || (k!=d && V[(k-1)+(N+M)] < V[(k+1)+(N+M)]));
+            //std::cout<<k<<" "<<V[(k)+(N+M)]<<std::endl;
             int kPrev, xStart, yStart, xEnd, yEnd;
             if (down) {
                 kPrev=k+1;
-                xStart = V[kPrev];
+                xStart = V[kPrev+(N+M)];
                 xEnd=xStart;
             }
             else
             {
                 kPrev=k-1;
-                xStart = V[kPrev];
+                xStart = V[kPrev+(N+M)];
                 xEnd=xStart + 1;
             }
             yStart = xStart - kPrev;
@@ -62,8 +65,8 @@ size_type SES(const std::string & A, const std::string & B){
             }
             
             // save end point
-            V[ k ] = xEnd;
-            
+            V[ k +(N+M)] = xEnd;
+            Snakes.push_back(V);
             // check for solution
             if ( xEnd >= N && yEnd >= M ){ /* solution has been found */
                 return d;
@@ -71,9 +74,10 @@ size_type SES(const std::string & A, const std::string & B){
         }
         
     }
-
-    return 99;
+    
+    return -1;
 }
 
 
-#endif /* defined(__differences__TextDiff__) */
+
+#endif
