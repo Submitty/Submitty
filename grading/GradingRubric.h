@@ -31,6 +31,8 @@ public:
 	int getSubmissionCount() const;
 	int getSubmissionPenalty() const;
 
+	int getTotalExtraCredit() const;
+
 	unsigned int getNumTestCases() const { return _test_cases.size(); };
 
 	const TestCase& getTestCase(unsigned int index) const {
@@ -116,7 +118,10 @@ int GradingRubric::getTotalScore() const {
 int GradingRubric::getPerfectScore() const {
 	int point_sum = 0;
 	for (unsigned int i = 0; i < _test_cases.size(); i++){
-		point_sum += _test_cases[i].points();
+		// TODO make sure test case is not extra credit
+		if (true){
+			point_sum += _test_cases[i].points();
+		}
 	}
 	return point_sum;
 }
@@ -132,6 +137,17 @@ int GradingRubric::getSubmissionCount() const {
 
 int GradingRubric::getSubmissionPenalty() const {
 	return _submission_penalty;
+}
+
+// Get total points from non hidden extra credit
+
+int GradingRubric::getTotalExtraCredit() const {
+	unsigned int points = 0;
+	for (unsigned int i = 0;i < _test_cases.size(); i++){
+		if (false){ // TODO check if test_case is extra credit
+			points += _test_cases[i].points();
+		}
+	}
 }
 
 // Returns index of test case in the _test_cases variable

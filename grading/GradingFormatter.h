@@ -22,21 +22,36 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 void outputHumanRubric(std::ostream& ostr,const GradingRubric& rubric){
 
 	const std::string indent = "    ";
+	const int spacing = 64;
 
 	ostr << "Grade for <NAME>\n"
 			<< "  submission :#" << rubric.getSubmissionCount() << "\n";
 
 	if (rubric.getSubmissionPenalty() > 0){
-		ostr << indent << std::left <<  std::setw(48)
+		ostr << indent << std::left <<  std::setw(spacing)
 			<< "Penalty for excessive submissions:"
 			<< '-' << rubric.getSubmissionPenalty() << " points\n";
 	}
 
 	for (unsigned int i = 0; i < rubric.getNumTestCases(); i++){
 		const TestCase tc = rubric.getTestCase(i);
-		ostr << indent << std::setw(48) << tc.title() << rubric.getTestScore(i)
+		ostr << indent << std::setw(spacing) << tc.title() << rubric.getTestScore(i)
 				<< " / " << tc.points() << "\n";
 	}
+
+	ostr << std::left << std::setw(spacing)
+				<< "Automatic Extra Credit:"
+				<< rubric.getTotalExtraCredit() << " points\n";
+
+	ostr << std::left << std::setw(spacing)
+				<< "Automatic Grading Total:"
+				<< rubric.getTotalScore() << " / " << rubric.getPerfectScore()
+				<< "\n";
+
+	ostr << std::left << std::setw(spacing)
+				<< "Remaining points to be graded by TA:"
+				<< rubric.getTAScore() << " points \n";
+
 }
 
 #endif
