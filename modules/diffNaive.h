@@ -12,7 +12,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <stdlib.h>
 #include <string>
 #include <algorithm>
-#include "STRUtil.h"
+#include "STRutil.h"
 
 //TODO: Change the return type for these functions.
 
@@ -24,7 +24,7 @@ int diffNaive(const std::string& _student, const std::string& _instructor){
 	std::string student = string_trim_right(_student);
 	std::string instructor = string_trim_right(_instructor);
 	int len = (student.size() < instructor.size()) ? student.length() : instructor.length();
-	int extra = std::abs(instructor.size() - student.size()); 
+	int extra = std::abs((int)(instructor.size() - student.size())); 
 	int diff = 0;
 
 	for(int i = 0; i < len; i++){
@@ -39,7 +39,7 @@ including new lines. It returns a number between 0 and 100 (inclusive)
 indicating the number of characters the student string was off by. The strings 
 are not changed in this comparison. Runs in linear time with respect to the 
 longer string.*/
-int diffNoWhiteSpace(const std::string& _student, const std::string& _instuctor){
+int diffNoWhiteSpace(const std::string& _student, const std::string& _instructor){
 	std::string student = string_trim_right(_student);
 	std::string instructor = string_trim_right(_instructor);
 	int diff = 0;
