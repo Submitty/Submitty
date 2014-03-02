@@ -31,6 +31,12 @@ public:
 	int getSubmissionCount() const;
 	int getSubmissionPenalty() const;
 
+	unsigned int getNumTestCases() const { return _test_cases.size(); };
+
+	const TestCase& getTestCase(unsigned int index) const {
+		return _test_cases[index];
+	}
+
 	const std::vector<TestCase>& getTestCases() const { return _test_cases; };
 
 	// MODIFIERS
