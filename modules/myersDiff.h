@@ -20,6 +20,7 @@
 #include <cctype>
 #include <fstream>
 #include <algorithm>
+#include "difference.h"
 
 //using std::cout; using std::endl; using std::cin; using std::string; using std::vector;
 //pass chunks of text in strings
@@ -32,11 +33,20 @@
 // edit_distance_naive()
 // edit distance_line()
 typedef unsigned int size_type;
-size_type SES(const std::string & A, const std::string & B){
+int SES(std::string &A, std::string &B);
+//Difference SESparse(Difference &);
+
+
+int SES(std::string &A, std::string &B){
     size_type N=(size_type)A.size();
     size_type M=(size_type)B.size();
+    // Difference text_Diff;
+    
     std::vector<int> V((N+M)*2,0);
-    std::vector< std::vector<int> > Snakes;
+    std::vector< std::vector<int> > saveV;
+    std::vector< std::vector<int> > snakes;
+    
+    // text_Diff.distance=-1;
     for (int a=0; a<(N+M)+(N+M); a++) {
         V[a]=0;
     }
@@ -66,18 +76,30 @@ size_type SES(const std::string & A, const std::string & B){
             
             // save end point
             V[ k +(N+M)] = xEnd;
-            Snakes.push_back(V);
+            saveV.push_back(V);
             // check for solution
             if ( xEnd >= N && yEnd >= M ){ /* solution has been found */
+                //text_Diff.distance=d;
                 return d;
+                 break;
             }
+            //text_Diff.snapshots=saveV;
         }
         
     }
-    
     return -1;
+    //return text_Diff;
 }
+/*
+Difference SESparse(Difference & text_diff){
+    size_type N=(size_type)text_diff.A->size();
+    size_type M=(size_type)text_diff.B->size();
 
+    size_type point[2]={N,M};
+    
+    return Difference();
+}
+*/
 
 
 #endif
