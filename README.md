@@ -15,6 +15,9 @@ The following technologies will be used in the project:
 *	Improve UX for the Instructor when creating homework assignments.
 *	Improve the UX for students when reviewing past homework submissions and homework submission workflow
 
-## RESEARCH REQUIRED
-When designing the components of the system, we will be attempting to research systems like the ones available by Coursera and EdX to see if they have any insight to what we would like to accomplish. We will also spend a considerable time on analyzing homework from previous students to determine methods for grading that are fair and can be written in an efficient algorithm.
+## Mid-Semester Update
+* Reviewed legacy code and determined system design changes that were neccessary
+* Researched and developed baseline algorithms for preliminary testing
+* Created a preliminary redesign for the student interface
+* Currently developing a test system to analyze the fairness and efficiency of grading algorithms
 
