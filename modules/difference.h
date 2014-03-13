@@ -21,12 +21,11 @@
 
 class Difference{
 public:
-    Difference();
     std::vector< std::vector< int > > snakes;
     std::vector< std::vector< int > > snapshots;
     std::vector<int> shortest_edit_script;
-    std::vector<std::vector<int> > changes;
-    
+    std::vector<std::vector<std::vector<int> > > changes;
+
     int distance;
     std::string const *A;
     std::string const *B;
