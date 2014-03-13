@@ -19,7 +19,7 @@
 #include <fstream>
 #include <algorithm>
 
-class Difference{
+template<class T> class Difference{
 public:
     std::vector< std::vector< int > > snakes;
     std::vector< std::vector< int > > snapshots;
@@ -27,8 +27,10 @@ public:
     std::vector<std::vector<std::vector<int> > > changes;
 
     int distance;
-    std::string const *A;
-    std::string const *B;
+    T const *a;
+    T const *b;
+    int m;
+    int n;
     
 };
 #endif /* defined(__differences__difference__) */
