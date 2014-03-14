@@ -19,12 +19,25 @@
 #include <fstream>
 #include <algorithm>
 
+class Change{
+public:
+    int student_start;
+    int sample_start;
+    std::vector<int> student_changes;
+    std::vector<int> sample_changes;
+    void clear(){
+        student_start=sample_start=-1;
+        student_changes.clear();
+        sample_changes.clear();
+    }
+};
+
 template<class T> class Difference{
 public:
     std::vector< std::vector< int > > snakes;
     std::vector< std::vector< int > > snapshots;
     std::vector<int> shortest_edit_script;
-    std::vector<std::vector<std::vector<int> > > changes;
+    std::vector<Change> changes;
 
     int distance;
     T const *a;
@@ -33,4 +46,6 @@ public:
     int n;
     
 };
+
+
 #endif /* defined(__differences__difference__) */

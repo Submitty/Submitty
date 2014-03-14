@@ -175,10 +175,17 @@ template<class T> Difference<T> sesSnakes(Difference<T> & text_diff){
 }
 
 template<class T> Difference<T> sesChanges(Difference<T> & text_diff){
-    std::vector<int> a_changes;
-    std::vector<int> b_changes;
+    if(text_diff.snakes.size()==0){
+        return text_diff;
+    }
+    Change change_var;
+    change_var.clear();
     std::vector<std::vector<int> > change_groups;
-    for (int a=1; a<text_diff.snakes.size(); a++) {
+    int a=1;
+    if (text_diff.snakes[0][0] != -1 && text_diff.snakes[0][1] != -1) {
+        a=0;
+    }
+    for (; a<text_diff.snakes.size(); a++) {
         int * a_start=&text_diff.snakes[a][0];
         int * b_start=&text_diff.snakes[a][1];
         int * a_mid=&text_diff.snakes[a][2];
@@ -187,28 +194,34 @@ template<class T> Difference<T> sesChanges(Difference<T> & text_diff){
         int * b_end=&text_diff.snakes[a][5];
 
         if (*a_start!=*a_mid) { //if "a" was changed, add the line/char number
-            a_changes.push_back(*a_mid);
+            change_var.student_changes.push_back(*a_mid-1);
+            if (change_var.student_start==-1 || change_var.student_changes.size()==1) {
+                change_var.student_start=*a_mid-1;
+                if (change_var.sample_start==-1 && *b_start==*b_mid-1) {
+                    change_var.sample_start=*b_mid-1;
+                }
+            }
         }
+        
         if (*b_start!=*b_mid) {//if "b" was changed, add the line/char number
-            b_changes.push_back(*b_mid);
+            change_var.sample_changes.push_back(*b_mid-1);
+            if (change_var.sample_start==-1 || change_var.sample_changes.size()==1) {
+                change_var.sample_start=*b_mid-1;
+                if (change_var.student_start==-1 && *a_start==*a_mid-1) {
+                    change_var.student_start=*a_mid-1;
+                }
+            }
         }
         if (*a_mid != *a_end || *b_mid != *b_end) {
             //if a section of identical text is reached, push back the change
-            change_groups.push_back(a_changes);
-            change_groups.push_back(b_changes);
-            text_diff.changes.push_back(change_groups);
+            text_diff.changes.push_back(change_var);
             //start again
-            a_changes.clear();
-            b_changes.clear();
-            change_groups.clear();
+            change_var.clear();
         }
     }
-    if (a_changes.size()!=0 || b_changes.size()!=0) {
-        change_groups.push_back(a_changes);
-        change_groups.push_back(b_changes);
-        text_diff.changes.push_back(change_groups);
+    if (change_var.student_changes.size()!=0 || change_var.sample_changes.size()!=0) {
+        text_diff.changes.push_back(change_var);
     }
-    
     
     return text_diff;
 }
