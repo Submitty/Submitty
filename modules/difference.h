@@ -21,14 +21,14 @@
 
 class Change{
 public:
-    int student_start;
-    int sample_start;
-    std::vector<int> student_changes;
-    std::vector<int> sample_changes;
+    int a_start;
+    int b_start;
+    std::vector<int> a_changes;
+    std::vector<int> b_changes;
     void clear(){
-        student_start=sample_start=-1;
-        student_changes.clear();
-        sample_changes.clear();
+        a_start=b_start=-1;
+        a_changes.clear();
+        b_changes.clear();
     }
 };
 

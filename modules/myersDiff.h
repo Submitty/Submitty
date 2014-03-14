@@ -194,21 +194,21 @@ template<class T> Difference<T> sesChanges(Difference<T> & text_diff){
         int * b_end=&text_diff.snakes[a][5];
 
         if (*a_start!=*a_mid) { //if "a" was changed, add the line/char number
-            change_var.student_changes.push_back(*a_mid-1);
-            if (change_var.student_start==-1 || change_var.student_changes.size()==1) {
-                change_var.student_start=*a_mid-1;
-                if (change_var.sample_start==-1 && *b_start==*b_mid-1) {
-                    change_var.sample_start=*b_mid-1;
+            change_var.a_changes.push_back(*a_mid-1);
+            if (change_var.a_start==-1 || change_var.a_changes.size()==1) {
+                change_var.a_start=*a_mid-1;
+                if (change_var.b_start==-1 && *b_start==*b_mid) {
+                    change_var.b_start=*b_mid-1;
                 }
             }
         }
         
         if (*b_start!=*b_mid) {//if "b" was changed, add the line/char number
-            change_var.sample_changes.push_back(*b_mid-1);
-            if (change_var.sample_start==-1 || change_var.sample_changes.size()==1) {
-                change_var.sample_start=*b_mid-1;
-                if (change_var.student_start==-1 && *a_start==*a_mid-1) {
-                    change_var.student_start=*a_mid-1;
+            change_var.b_changes.push_back(*b_mid-1);
+            if (change_var.b_start==-1 || change_var.b_changes.size()==1) {
+                change_var.b_start=*b_mid-1;
+                if (change_var.a_start==-1 && *a_start==*a_mid) {
+                    change_var.a_start=*a_mid-1;
                 }
             }
         }
@@ -219,7 +219,7 @@ template<class T> Difference<T> sesChanges(Difference<T> & text_diff){
             change_var.clear();
         }
     }
-    if (change_var.student_changes.size()!=0 || change_var.sample_changes.size()!=0) {
+    if (change_var.a_changes.size()!=0 || change_var.b_changes.size()!=0) {
         text_diff.changes.push_back(change_var);
     }
     
