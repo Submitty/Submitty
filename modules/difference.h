@@ -25,6 +25,8 @@ public:
     int b_start;
     std::vector<int> a_changes;
     std::vector<int> b_changes;
+    std::vector< std::vector< int > >  a_characters;
+    std::vector< std::vector< int > >  b_characters;
     void clear(){
         a_start=b_start=-1;
         a_changes.clear();

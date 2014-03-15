@@ -21,6 +21,7 @@
 
 #ifndef differences_myersDiff_h
 #define differences_myersDiff_h
+#define tab "    "
 
 
 #include <iostream>
@@ -40,7 +41,7 @@ template<class T> Difference<T> ses(T & a, T & b);
 template<class T> Difference<T> sesSnakes(Difference<T> & text_diff);
 template<class T> Difference<T> sesChanges(Difference<T> & text_diff);
 template<class T> Difference<T> sesJSON(Difference<T> & text_diff);
-
+template<class T> Difference<T> printJSON(Difference<T> & text_diff, std::ofstream & file_out);
 
 template<class T> Difference<T> ses(T& a, T& b){
     return ses(&a, &b); // changes passing by refrence to pointers
@@ -226,9 +227,35 @@ template<class T> Difference<T> sesChanges(Difference<T> & text_diff){
     return text_diff;
 }
 
-template<class T> Difference<T> sesJSON(Difference<T> & text_diff){
+template<class T> Difference<T> printJSON(Difference<T> & text_diff, std::ofstream & file_out){
+    file_out<<"{"<<std::endl
+    <<"\"differences\":["<<std::endl
+    <<tab<<"{"<<std::endl;
+    
+    file_out<<tab<<tab<<"\"instructor:\""<<std::endl
+    <<tab<<tab<<"{"<<std::endl;
+    for (int a=0; a<text_diff.changes.size(); a++) {
+        file_out<<tab<<tab<<tab<<"start\": "
+                <<text_diff.changes[a].a_start<<std::endl;
+        if (text_diff.changes[a].a_changes.size()>0) {
+            for (int b=1; b<text_diff.changes[a].a_changes.size(); b++) {
+                file_out<<tab<<tab<<tab<<"line\": [";
+                file_out<<tab<<tab<<tab<<tab<<"{"<<std::endl;
+                file_out<<tab<<tab<<tab<<tab<<tab
+                <<"\"line_number\": " <<text_diff.changes[a].a_changes[b]<<","
+                <<std::endl;
+                //insert code to display word changes here
+                file_out<<tab<<tab<<tab<<tab<<"}";
+                if (b<0) {
+                    file_out<<", ";
+                }
+            }
+            file_out<<std::endl<<tab<<tab<<tab<<"],"<<std::endl;
+        }
+    }
     return text_diff;
 }
+#undef tab
 
 
 #endif
