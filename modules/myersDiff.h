@@ -22,7 +22,12 @@
 #ifndef differences_myersDiff_h
 #define differences_myersDiff_h
 #define tab "    "
-
+#define OtherType 0
+#define StringType 1
+#define VectorStringType 2
+#define VectorVectorStringType 3
+#define VectorVectorOtherType 4
+#define VectorOtherType 5
 
 #include <iostream>
 #include <string>
@@ -35,22 +40,58 @@
 #include <algorithm>
 #include "difference.h"
 
-template<class T> Difference<T> ses(T* a, T* b);
-template<class T> Difference<T> ses(T & a, T & b);
-
+template<class T> Difference<T> ses(T* a, T* b, bool secondary=false);
+template<class T> Difference<T> ses(T & a, T & b, bool secondary=false);
+template<class T> Difference<T> ses(Difference<T> text_diff, bool secondary=false);
+template<class T> Difference<T> sesHelper(T& a, T& b);
+template<class T> Difference<T> sesHelper(T* a, T* b);
+template<class T> Difference<T> sesHelper(Difference<T> text_diff);
 template<class T> Difference<T> sesSnakes(Difference<T> & text_diff);
 template<class T> Difference<T> sesChanges(Difference<T> & text_diff);
 template<class T> Difference<T> sesJSON(Difference<T> & text_diff);
-template<class T> Difference<T> printJSON(Difference<T> & text_diff, std::ofstream & file_out);
+template<class T> Difference<T> sesSecondary(Difference<T> & text_diff);
+template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff, std::ofstream & file_out, int type=0);
+template<class T> Difference<std::vector<T> > printJSON
+(Difference<std::vector< std::vector<T> > > & text_diff, std::ofstream & file_out);
 
-template<class T> Difference<T> ses(T& a, T& b){
-    return ses(&a, &b); // changes passing by refrence to pointers
+template<class T> Difference<T> ses(T& a, T& b, bool secondary){
+    return ses(&a, &b, secondary); // changes passing by refrence to pointers
 }
 
-template<class T> Difference<T> ses(T* a, T* b){
+template<class T> Difference<T> ses(T* a, T* b, bool secondary){
+    Difference<T> text_diff= sesHelper((T*)a, (T*)b);
+    sesSnakes(text_diff);
+    sesChanges(text_diff);
+    if (secondary) {
+        sesSecondary(text_diff);
+    }
+    return text_diff;
+}
+
+template<class T> Difference<T> ses(Difference<T> text_diff, bool secondary){
+    text_diff=sesHelper(text_diff);
+    sesSnakes(text_diff);
+    sesChanges(text_diff);
+    if (secondary) {
+        sesSecondary(text_diff);
+    }
+    return text_diff;
+}
+
+template<class T> Difference<T> sesHelper(Difference<T> text_diff){
+    text_diff.changes.clear();
+    text_diff.diff_a.clear();
+    text_diff.diff_b.clear();
+    text_diff.snakes.clear();
+    text_diff.snapshots.clear();
+    text_diff=sesHelper(text_diff.a, text_diff.b);
+}
+template<class T> Difference<T> sesHelper(T& a, T& b){
+    return sesHelper(&a, &b);
+}
+template<class T> Difference<T> sesHelper(T* a, T* b){
     //takes 2 strings or vectors of values and finds the shortest edit script
     //to convert a into b
-    
     int n=(int)a->size();
     int m=(int)b->size();
     Difference<T> text_diff;
@@ -104,8 +145,6 @@ template<class T> Difference<T> ses(T* a, T* b){
             if ( a_end >= n && b_end >= m ){ /* solution has been found */
                 text_diff.distance=d;
                 text_diff.snapshots.push_back(v);
-                sesSnakes(text_diff);
-                sesChanges(text_diff);
                 return text_diff;
             }
         }
@@ -119,11 +158,13 @@ template<class T> Difference<T> ses(T* a, T* b){
 template<class T> Difference<T> sesSnakes(Difference<T> & text_diff){
     int n=text_diff.n;
     int m=text_diff.m;
+    
+    text_diff.snakes.clear();
 
     int point[2]={n,m};
     // loop through the snapshots until all diffrences have been recorded
     for ( int d =int(text_diff.snapshots.size() - 1) ;
-         point[0] > 0 || point[1] > 0 ; d-- ){
+         (point[0] > 0 || point[1] > 0) && d>=0 ; d-- ){
         
         std::vector<int> v(text_diff.snapshots[d]);
         int k = point[0] - point[1]; // find the k value from y = x-k
@@ -176,6 +217,10 @@ template<class T> Difference<T> sesSnakes(Difference<T> & text_diff){
 }
 
 template<class T> Difference<T> sesChanges(Difference<T> & text_diff){
+    text_diff.changes.clear();
+    text_diff.diff_a.clear();
+    text_diff.diff_b.clear();
+    
     if(text_diff.snakes.size()==0){
         return text_diff;
     }
@@ -193,7 +238,7 @@ template<class T> Difference<T> sesChanges(Difference<T> & text_diff){
         int * b_mid=&text_diff.snakes[a][3];
         int * a_end=&text_diff.snakes[a][4];
         int * b_end=&text_diff.snakes[a][5];
-
+        
         if (*a_start!=*a_mid) { //if "a" was changed, add the line/char number
             change_var.a_changes.push_back(*a_mid-1);
             if (change_var.a_start==-1 || change_var.a_changes.size()==1) {
@@ -216,22 +261,100 @@ template<class T> Difference<T> sesChanges(Difference<T> & text_diff){
         if (*a_mid != *a_end || *b_mid != *b_end) {
             //if a section of identical text is reached, push back the change
             text_diff.changes.push_back(change_var);
+            for (int b=0; b<change_var.a_changes.size(); b++) {
+                text_diff.diff_a.push_back(change_var.a_changes[b]);
+            }
+            for (int b=0; b<change_var.b_changes.size(); b++) {
+                text_diff.diff_b.push_back(change_var.b_changes[b]);
+            }
             //start again
             change_var.clear();
         }
     }
     if (change_var.a_changes.size()!=0 || change_var.b_changes.size()!=0) {
         text_diff.changes.push_back(change_var);
+        for (int b=0; b<change_var.a_changes.size(); b++) {
+            text_diff.diff_a.push_back(change_var.a_changes[b]);
+        }
+        for (int b=0; b<change_var.b_changes.size(); b++) {
+            text_diff.diff_b.push_back(change_var.b_changes[b]);
+        }
+        change_var.clear();
     }
 
     return text_diff;
 }
 
-template<class T> Difference<T> printJSON(Difference<T> & text_diff, std::ofstream & file_out){
+template<class T> Difference<T> sesSecondary(Difference<T> & text_diff){
+    for (int a=0; a<text_diff.changes.size(); a++) {
+        Change* current= &text_diff.changes[a];
+        if (current->a_changes.size()==0 || current->b_changes.size()==0)
+        {
+            continue;
+        }
+//        else if (current->a_changes.size()==1 && current->b_changes.size()==1)
+//        {
+//            Difference<typeof*(text_diff.a)[current->a_changes[0]]> second_diff;
+//            second_diff=ses(*(text_diff.a)[current->a_changes[0]],
+//                            *(text_diff.b)[current->b_changes[0]]);
+//            sesSnakes(second_diff);
+//            sesChanges(second_diff);
+//            current->a_characters.push_back(second_diff.diff_a);
+//            current->b_characters.push_back(second_diff.diff_b);
+//            
+//        }
+        else if (current->a_changes.size()==current->b_changes.size())
+        {
+            for (int b=0; b<current->a_changes.size(); b++) {
+                Difference<typeof(*text_diff.a)[current->a_changes[b]]> second_diff;
+                second_diff=sesHelper(
+                                (*text_diff.a)[current->a_changes[b]],
+                                (*text_diff.b)[current->b_changes[b]]);
+                sesSnakes(second_diff);
+                sesChanges(second_diff);
+                current->a_characters.push_back(second_diff.diff_a);
+                current->b_characters.push_back(second_diff.diff_b);
+            }
+        }
+    }
+    return text_diff;
+}
+
+template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff, std::ofstream & file_out, int type){
+    std::string diff1_name;
+    std::string diff2_name;
     file_out<<"{"<<std::endl
     <<"\"differences\":["<<std::endl
     <<tab;
+    switch (type) {
+            // StringType;
+            // VectorStringType;
+            // VectorVectorStringType;
+            // VectorVectorOtherType;
+            // VectorOtherType;
 
+        case StringType:
+            diff1_name="line";
+            diff2_name="char";
+            break;
+            
+        case VectorStringType:
+        case VectorOtherType:
+            diff1_name="word";
+            diff2_name="char";
+            break;
+            
+        case VectorVectorStringType:
+        case VectorVectorOtherType:
+            diff1_name="line";
+            diff2_name="word";
+            break;
+            
+        default:
+            diff1_name="line";
+            diff2_name="char";
+            break;
+    }
     
     for (int a=0; a<text_diff.changes.size(); a++) {
         if (a>0) {
@@ -246,7 +369,7 @@ template<class T> Difference<T> printJSON(Difference<T> & text_diff, std::ofstre
         file_out<<tab<<tab<<tab<<"\"start\": "
                 <<text_diff.changes[a].a_start<<","<<std::endl;
         if (text_diff.changes[a].a_changes.size()>0) {
-            file_out<<tab<<tab<<tab<<"\"line\": ["<<std::endl
+            file_out<<tab<<tab<<tab<<"\""+diff1_name+"\": ["<<std::endl
                     <<tab<<tab<<tab<<tab;
             for (int b=0; b<text_diff.changes[a].a_changes.size(); b++) {
                 if (b>0) {
@@ -254,7 +377,7 @@ template<class T> Difference<T> printJSON(Difference<T> & text_diff, std::ofstre
                 }
                 file_out<<"{"<<std::endl;
                 file_out<<tab<<tab<<tab<<tab<<tab
-                <<"\"line_number\": " <<text_diff.changes[a].a_changes[b]
+                <<"\""+diff1_name+"_number\": " <<text_diff.changes[a].a_changes[b]
                 <<std::endl;
                 //insert code to display word changes here
                 file_out<<tab<<tab<<tab<<tab<<"}";
@@ -269,7 +392,7 @@ template<class T> Difference<T> printJSON(Difference<T> & text_diff, std::ofstre
         file_out<<tab<<tab<<tab<<"\"start\": "
         <<text_diff.changes[a].b_start<<","<<std::endl;
         if (text_diff.changes[a].b_changes.size()>0) {
-            file_out<<tab<<tab<<tab<<"\"line\": ["<<std::endl
+            file_out<<tab<<tab<<tab<<"\""+diff1_name+"\": ["<<std::endl
                     <<tab<<tab<<tab<<tab;
             for (int b=0; b<text_diff.changes[a].b_changes.size(); b++) {
                 if (b>0) {
@@ -277,7 +400,7 @@ template<class T> Difference<T> printJSON(Difference<T> & text_diff, std::ofstre
                 }
                 file_out<<"{"<<std::endl;
                 file_out<<tab<<tab<<tab<<tab<<tab
-                <<"\"line_number\": " <<text_diff.changes[a].b_changes[b]
+                <<"\""+diff1_name+"_number\": " <<text_diff.changes[a].b_changes[b]
                 <<std::endl;
                 //insert code to display word changes here
                 file_out<<tab<<tab<<tab<<tab<<"}";
@@ -293,7 +416,48 @@ template<class T> Difference<T> printJSON(Difference<T> & text_diff, std::ofstre
     
     return text_diff;
 }
+
+template<class T> Difference<T> printJSON
+(Difference<T> & text_diff, std::ofstream & file_out)
+{
+    return printJSONhelper(text_diff, file_out, StringType);
+}
+
+template<class> Difference<std::string> printJSON
+    (Difference<std::string> & text_diff, std::ofstream & file_out)
+{
+    return printJSONhelper(text_diff, file_out, StringType);
+}
+
+template<class> Difference<std::vector<std::string> > printJSON
+    (Difference<std::vector<std::string> > &text_diff, std::ofstream & file_out)
+{
+    return printJSONhelper(text_diff, file_out, VectorStringType);
+}
+
+template<class> Difference<std::vector< std::vector<std::string> > > printJSON
+(Difference<std::vector< std::vector<std::string> > > & text_diff, std::ofstream & file_out)
+{
+    return printJSONhelper(text_diff, file_out, VectorVectorStringType);
+}
+
+template<class T> Difference<std::vector< std::vector<T> > > printJSON
+(Difference<std::vector< std::vector<T> > > & text_diff, std::ofstream & file_out)
+{
+    return printJSONhelper(text_diff, file_out, VectorVectorOtherType);
+}
+
+template<class T> Difference<std::vector<T> > printJSON
+(Difference<std::vector< std::vector<T> > > & text_diff, std::ofstream & file_out)
+{
+    return printJSONhelper(text_diff, file_out, VectorOtherType);
+}
+
 #undef tab
-
-
+#undef StringType
+#undef VectorStringType
+#undef VectorVectorStringType
+#undef VectorVectorOtherType
+#undef VectorOtherType
+#undef OtherType
 #endif
