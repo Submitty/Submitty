@@ -6,13 +6,7 @@
  "LICENSE.md" for the full license
  */
 /*
- Credit to Nicholas Butler and Cope Project for base Shortest Edit Script algorithm code from
- http://www.codeproject.com/Articles/42279/Investigating-Myers-diff-algorithm-Part-1-of-2
- goverened under The Code Project Open License (CPOL) 1.02 found here:
- http://www.codeproject.com/info/cpol10.aspx
- Modifided on 3/13/14 to include specilized functionality and converted to C++
- 
- The algorithm described by Nicholas Butler was in turn derived from 
+ The algorithm for shortest edit script was in derived from
  Eugene W. Myers's paper, "An O(ND) Difference Algorithm and Its Variations", 
  avalible here: http://www.xmailserver.org/diff2.pdf
  
@@ -42,10 +36,10 @@
 
 template<class T> Difference<T> ses(T* a, T* b, bool secondary=false);
 template<class T> Difference<T> ses(T & a, T & b, bool secondary=false);
-template<class T> Difference<T> ses(Difference<T> text_diff, bool secondary=false);
+template<class T> Difference<T> ses(Difference<T> & text_diff, bool secondary=false);
 template<class T> Difference<T> sesHelper(T& a, T& b);
 template<class T> Difference<T> sesHelper(T* a, T* b);
-template<class T> Difference<T> sesHelper(Difference<T> text_diff);
+template<class T> Difference<T> sesHelper(Difference<T> & text_diff);
 template<class T> Difference<T> sesSnakes(Difference<T> & text_diff);
 template<class T> Difference<T> sesChanges(Difference<T> & text_diff);
 template<class T> Difference<T> sesJSON(Difference<T> & text_diff);
@@ -54,10 +48,12 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff, std::
 template<class T> Difference<std::vector<T> > printJSON
 (Difference<std::vector< std::vector<T> > > & text_diff, std::ofstream & file_out);
 
+// changes passing by refrence to pointers
 template<class T> Difference<T> ses(T& a, T& b, bool secondary){
-    return ses(&a, &b, secondary); // changes passing by refrence to pointers
+    return ses(&a, &b, secondary);
 }
 
+// Runs all the ses functions
 template<class T> Difference<T> ses(T* a, T* b, bool secondary){
     Difference<T> text_diff= sesHelper((T*)a, (T*)b);
     sesSnakes(text_diff);
@@ -67,8 +63,8 @@ template<class T> Difference<T> ses(T* a, T* b, bool secondary){
     }
     return text_diff;
 }
-
-template<class T> Difference<T> ses(Difference<T> text_diff, bool secondary){
+// Runs all the ses functions, passed a Diffrence object rather than 2 objects
+template<class T> Difference<T> ses(Difference<T>& text_diff, bool secondary){
     text_diff=sesHelper(text_diff);
     sesSnakes(text_diff);
     sesChanges(text_diff);
@@ -77,18 +73,24 @@ template<class T> Difference<T> ses(Difference<T> text_diff, bool secondary){
     }
     return text_diff;
 }
-
-template<class T> Difference<T> sesHelper(Difference<T> text_diff){
+// Converts a Diffrence object into 2 objects of type T to pass to sesHelper
+template<class T> Difference<T> sesHelper(Difference<T>& text_diff){
     text_diff.changes.clear();
     text_diff.diff_a.clear();
     text_diff.diff_b.clear();
     text_diff.snakes.clear();
     text_diff.snapshots.clear();
     text_diff=sesHelper(text_diff.a, text_diff.b);
+    return text_diff;
 }
+
+// changes passing by refrence to pointers
 template<class T> Difference<T> sesHelper(T& a, T& b){
     return sesHelper(&a, &b);
 }
+
+// runs shortest edit script. Saves traces in snapshots,
+// the edit distance in distance and pointers to objects a and b
 template<class T> Difference<T> sesHelper(T* a, T* b){
     //takes 2 strings or vectors of values and finds the shortest edit script
     //to convert a into b
@@ -155,6 +157,8 @@ template<class T> Difference<T> sesHelper(T* a, T* b){
     //return text_diff;
 }
 
+// takes a Difference object with snapshots and parses to find the "snake"
+// - a path that leads from the start to the end of both of a and b
 template<class T> Difference<T> sesSnakes(Difference<T> & text_diff){
     int n=text_diff.n;
     int m=text_diff.m;
@@ -216,6 +220,10 @@ template<class T> Difference<T> sesSnakes(Difference<T> & text_diff){
     return text_diff;
 }
 
+// Takes a Difference object and parses the snake to constuct a vector of
+// Change objects, which each hold the diffrences between a and b, lumped
+// by if they are neighboring. Also fills diff_a and diff_b with the diffrences
+// All diffrences are stored by element number
 template<class T> Difference<T> sesChanges(Difference<T> & text_diff){
     text_diff.changes.clear();
     text_diff.diff_a.clear();
@@ -285,6 +293,9 @@ template<class T> Difference<T> sesChanges(Difference<T> & text_diff){
     return text_diff;
 }
 
+// Takes a Difference object that has it's changes vector filled and parses to
+// find substitution chunks. It then runs a secondary diff to find diffrences
+// between the elements of each version of the line
 template<class T> Difference<T> sesSecondary(Difference<T> & text_diff){
     for (int a=0; a<text_diff.changes.size(); a++) {
         Change* current= &text_diff.changes[a];
@@ -292,17 +303,6 @@ template<class T> Difference<T> sesSecondary(Difference<T> & text_diff){
         {
             continue;
         }
-//        else if (current->a_changes.size()==1 && current->b_changes.size()==1)
-//        {
-//            Difference<typeof*(text_diff.a)[current->a_changes[0]]> second_diff;
-//            second_diff=ses(*(text_diff.a)[current->a_changes[0]],
-//                            *(text_diff.b)[current->b_changes[0]]);
-//            sesSnakes(second_diff);
-//            sesChanges(second_diff);
-//            current->a_characters.push_back(second_diff.diff_a);
-//            current->b_characters.push_back(second_diff.diff_b);
-//            
-//        }
         else if (current->a_changes.size()==current->b_changes.size())
         {
             for (int b=0; b<current->a_changes.size(); b++) {
@@ -320,6 +320,7 @@ template<class T> Difference<T> sesSecondary(Difference<T> & text_diff){
     return text_diff;
 }
 
+// formats and outputs a Difference object to the ofstream
 template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff, std::ofstream & file_out, int type){
     std::string diff1_name;
     std::string diff2_name;
@@ -417,6 +418,8 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff, std::
     return text_diff;
 }
 
+// Finds out if the Difference object is of a specific type and passes along the
+// information for better printing
 template<class T> Difference<T> printJSON
 (Difference<T> & text_diff, std::ofstream & file_out)
 {
