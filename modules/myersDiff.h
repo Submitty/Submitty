@@ -44,7 +44,8 @@ template<class T> Difference<T> sesSnakes(Difference<T> & text_diff);
 template<class T> Difference<T> sesChanges(Difference<T> & text_diff);
 template<class T> Difference<T> sesJSON(Difference<T> & text_diff);
 template<class T> Difference<T> sesSecondary(Difference<T> & text_diff);
-template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff, std::ofstream & file_out, int type=0);
+template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
+                                        std::ofstream & file_out, int type=0);
 template<class T> Difference<std::vector<T> > printJSON
 (Difference<std::vector< std::vector<T> > > & text_diff, std::ofstream & file_out);
 
@@ -316,12 +317,17 @@ template<class T> Difference<T> sesSecondary(Difference<T> & text_diff){
                 current->b_characters.push_back(second_diff.diff_b);
             }
         }
+//        else{
+//            current->a_characters.push_back(std::vector<int>());
+//            current->b_characters.push_back(std::vector<int>());
+//        }
     }
     return text_diff;
 }
 
 // formats and outputs a Difference object to the ofstream
-template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff, std::ofstream & file_out, int type){
+template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
+                                            std::ofstream & file_out, int type){
     std::string diff1_name;
     std::string diff2_name;
     file_out<<"{"<<std::endl
@@ -378,10 +384,26 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff, std::
                 }
                 file_out<<"{"<<std::endl;
                 file_out<<tab<<tab<<tab<<tab<<tab
-                <<"\""+diff1_name+"_number\": " <<text_diff.changes[a].a_changes[b]
-                <<std::endl;
+                <<"\""+diff1_name+"_number\": "
+                <<text_diff.changes[a].a_changes[b]<<std::endl;
                 //insert code to display word changes here
+                if (text_diff.changes[a].a_characters.size()>=b && text_diff.changes[a].a_characters.size()>0) {
+                    if (text_diff.changes[a].a_characters[b].size()>0){
+                        file_out<<tab<<tab<<tab<<tab<<tab
+                                <<"\""+diff2_name+"_number\":[ ";
+                    }
+                    for (int c=0; c< text_diff.changes[a].a_characters[b].size(); c++) {
+                        if (c>0) {
+                            file_out<<", ";
+                        }
+                        file_out<<text_diff.changes[a].a_characters[b][c];
+                    }
+                    if (text_diff.changes[a].a_characters[b].size()>0){
+                        file_out<<" ]"<<std::endl;
+                    }
+                }
                 file_out<<tab<<tab<<tab<<tab<<"}";
+                
             }
             file_out<<std::endl<<tab<<tab<<tab<<"]"<<std::endl;
         }
@@ -404,7 +426,24 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff, std::
                 <<"\""+diff1_name+"_number\": " <<text_diff.changes[a].b_changes[b]
                 <<std::endl;
                 //insert code to display word changes here
+                if (text_diff.changes[a].b_characters.size()>=b && text_diff.changes[a].b_characters.size()>0) {
+                    if (text_diff.changes[a].b_characters[b].size()>0){
+                        file_out<<tab<<tab<<tab<<tab<<tab
+                                <<"\""+diff2_name+"_number\":[ ";
+                    }
+                    for (int c=0; c< text_diff.changes[a].b_characters[b].size(); c++) {
+                        if (c>0) {
+                            file_out<<", ";
+                        }
+                        file_out<<text_diff.changes[a].b_characters[b][c];
+                    }
+                    if (text_diff.changes[a].b_characters[b].size()>0){
+                        file_out<<" ]"<<std::endl;
+                    }
+                }
+                
                 file_out<<tab<<tab<<tab<<tab<<"}";
+                
             }
             file_out<<std::endl<<tab<<tab<<tab<<"]"<<std::endl;
             file_out<<tab<<tab<<"}"<<std::endl;
@@ -439,7 +478,8 @@ template<class> Difference<std::vector<std::string> > printJSON
 }
 
 template<class> Difference<std::vector< std::vector<std::string> > > printJSON
-(Difference<std::vector< std::vector<std::string> > > & text_diff, std::ofstream & file_out)
+(Difference<std::vector< std::vector<std::string> > > & text_diff,
+                                        std::ofstream & file_out)
 {
     return printJSONhelper(text_diff, file_out, VectorVectorStringType);
 }
