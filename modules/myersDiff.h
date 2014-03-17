@@ -369,7 +369,7 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
         }
         file_out<<"{"<<std::endl;
 
-        file_out<<tab<<tab<<"\"instructor:\""<<std::endl;
+        file_out<<tab<<tab<<"\"instructor\":"<<std::endl;
         
         file_out<<tab<<tab<<"{"<<std::endl;
 
@@ -409,7 +409,7 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
         }
         
         file_out<<tab<<tab<<"},"<<std::endl;
-        file_out<<tab<<tab<<"\"student:\""<<std::endl
+        file_out<<tab<<tab<<"\"student\":"<<std::endl
         <<tab<<tab<<"{"<<std::endl;
         
         file_out<<tab<<tab<<tab<<"\"start\": "
