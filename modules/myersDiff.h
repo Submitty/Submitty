@@ -109,8 +109,8 @@ template<class T> Difference<T> sesHelper(T* a, T* b){
     text_diff.a=a;
     text_diff.b=b;
 
-    for (int a=0; a<(n+m)+(n+m); a++) {
-        v[a]=0;
+    for (int b=0; b<(n+m)+(n+m); b++) {
+        v[b]=0;
     }
     //loop until the correct diff (d) value is reached, or until end is reached
     for ( int d = 0 ; d <= (n+m) ; d++ ){
@@ -409,7 +409,7 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
         }
         
         file_out<<tab<<tab<<"},"<<std::endl;
-        file_out<<tab<<tab<<"\"student\":"<<std::endl
+        file_out<<tab<<tab<<"\"student\":   "<<std::endl
         <<tab<<tab<<"{"<<std::endl;
         
         file_out<<tab<<tab<<tab<<"\"start\": "
