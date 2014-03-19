@@ -46,8 +46,6 @@ template<class T> Difference<T> sesJSON(Difference<T> & text_diff);
 template<class T> Difference<T> sesSecondary(Difference<T> & text_diff);
 template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
                                         std::ofstream & file_out, int type=0);
-template<class T> Difference<std::vector<T> > printJSON
-(Difference<std::vector< std::vector<T> > > & text_diff, std::ofstream & file_out);
 
 // changes passing by refrence to pointers
 template<class T> Difference<T> ses(T& a, T& b, bool secondary){
@@ -459,11 +457,6 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
 
 // Finds out if the Difference object is of a specific type and passes along the
 // information for better printing
-template<class T> Difference<T> printJSON
-(Difference<T> & text_diff, std::ofstream & file_out)
-{
-    return printJSONhelper(text_diff, file_out, StringType);
-}
 
 template<class> Difference<std::string> printJSON
     (Difference<std::string> & text_diff, std::ofstream & file_out)
@@ -478,7 +471,7 @@ template<class> Difference<std::vector<std::string> > printJSON
 }
 
 template<class> Difference<std::vector< std::vector<std::string> > > printJSON
-(Difference<std::vector< std::vector<std::string> > > & text_diff,
+(Difference<std::vector< std::vector<std::string> > >  & text_diff,
                                         std::ofstream & file_out)
 {
     return printJSONhelper(text_diff, file_out, VectorVectorStringType);
@@ -491,9 +484,15 @@ template<class T> Difference<std::vector< std::vector<T> > > printJSON
 }
 
 template<class T> Difference<std::vector<T> > printJSON
-(Difference<std::vector< std::vector<T> > > & text_diff, std::ofstream & file_out)
+(Difference<std::vector<T> > & text_diff, std::ofstream & file_out)
 {
     return printJSONhelper(text_diff, file_out, VectorOtherType);
+}
+
+template<class T> Difference<T> printJSON
+(Difference<T> & text_diff, std::ofstream & file_out)
+{
+    return printJSONhelper(text_diff, file_out, StringType);
 }
 
 #undef tab
