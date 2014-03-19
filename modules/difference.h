@@ -25,19 +25,25 @@ public:
     int b_start;
     std::vector<int> a_changes;
     std::vector<int> b_changes;
-    void clear(){
-        a_start=b_start=-1;
-        a_changes.clear();
-        b_changes.clear();
-    }
+    std::vector< std::vector< int > >  a_characters;
+    std::vector< std::vector< int > >  b_characters;
+    void clear();
 };
+
+void Change::clear(){
+    a_start=b_start=-1;
+    a_changes.clear();
+    b_changes.clear();
+}
 
 template<class T> class Difference{
 public:
     std::vector< std::vector< int > > snakes;
     std::vector< std::vector< int > > snapshots;
-    std::vector<int> shortest_edit_script;
     std::vector<Change> changes;
+    std::vector<int> diff_a;
+    std::vector<int> diff_b;
+
 
     int distance;
     T const *a;
