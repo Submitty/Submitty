@@ -21,18 +21,98 @@ int main(){
 	std::cout << rubric.getTotalScore() << std::endl;
 	std::cout << rubric.getPerfectScore() << std::endl;
 
+	// Test modifier rubric methods
+
+	rubric.setTestScore(0, 2);
+	rubric.setTestScore(1, 5);
+	rubric.setTestScore(2, 8);
+	rubric.setTestScore(3, 5);
+	rubric.setTestScore(4, 5);
+	rubric.setSubmissionPenalty(16,10,5,5);
+
+	// Test if values changed
+
+	std::cout << rubric.getTotalScore() << '/' << rubric.getPerfectScore()
+			<< std::endl;
+
+	// Test grade formatter
+
+	outputHumanRubric(std::cout, rubric);
+
 }
 
 void create_test_cases(std::vector<TestCase>& tests){
-	TestCase t1,t2,t3,t4,t5;
 
-	t1.setTitle("README");
-	t1.setPoints(2);
-	t1.setHidden(false);
+	TestCase t1(
+		"Readme",
+		"",
+		"",
+		"README.txt",
+		"",
+		"",
+		2,				// points for readme
+		false,
+		DONT_CHECK,
+		DONT_CHECK,
+		NULL
+	);
 
-	t2.setTitle("Compilation");
-	t2.setPoints(5);
-	t2.setHidden(false);
+	TestCase t2(
+		"Compilation",
+		"",
+		"",
+		"hw0.exe",
+		"",
+		"",
+		5,				// points for compilation
+		false,
+		DONT_CHECK,
+		DONT_CHECK,
+		NULL
+	);
+
+	TestCase t3(
+		"Case 1",							// title
+		"g++ Jelly.cpp -o output",						// details
+		"./a.out 1> cout.txt 2> cerr.txt",	// command
+		"test1_out.txt",					// output file name
+		"test1_out.txt",					// output file description
+		"expected_test1.txt",				// expected output file
+		5,									// points
+		false,								// hidden
+		WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
+		WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
+		NULL								// compare function
+	);
+
+	TestCase t4(
+		"Case 2",							// title
+		"g++ Jelly.cpp Cat.cpp throw.cpp -o throw",						// details
+		"./a.out 1> cout.txt 2> cerr.txt",	// command
+		"test1_out.txt",					// output file name
+		"test1_out.txt",					// output file description
+		"expected_test1.txt",				// expected output file
+		5,									// points
+		false,								// hidden
+		WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
+		WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
+		NULL								// compare function
+	);
+
+	TestCase t5(
+		"Case 3",							// title
+		"g++ Jelly.cpp Cat.cpp throw.cpp check_levitate.cpp -o lev",
+		"./a.out 1> cout.txt 2> cerr.txt",	// command
+		"test1_out.txt",					// output file name
+		"test1_out.txt",					// output file description
+		"expected_test1.txt",				// expected output file
+		5,									// points
+		false,								// hidden
+		WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
+		WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
+		NULL								// compare function
+	);
+
 
 	t3.setTitle("Test 1");
 	t3.setPoints(8);

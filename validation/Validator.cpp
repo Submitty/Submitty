@@ -13,12 +13,15 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <cstdlib>
 #include <vector>
 #include <string>
+#include <iterator>
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "../modules/modules.h"
 #include "TestCase.h"
 #include "HWTemplate.h"
-#include "../modules/modules.h"
+
+/* TODO: Define debug mode */
 
 bool checkValidDirectory( const std::string &directory );
 int validateReadme();
@@ -108,11 +111,15 @@ int validateTestCases() {
 								<< testcases[i].expected() << " does not exist"
 								<< std::endl; }
 		
-		if( !student_instr || !expected_instr ) continue;
+		//if( !student_instr || !expected_instr ) continue;
+		
+		char cout_temp[student_output_dir.size() + 15];
+		sprintf(cout_temp, "%s/test%d_cout.txt", student_output_dir.c_str(), i-1 );
+		const char* cout_path = cout_temp;
 		
 		// Check cout and cerr
-		const char* cout_path = (student_output_dir + "/test" + (char)(i-1) +
-													  "_cout.txt" ).c_str();
+		/*const char* cout_path = (student_output_dir + "/test" + (char*)(i-1) +
+													  "_cout.txt" ).c_str();*/
 		std::ifstream cout_instr( cout_path, std::ifstream::in );
 		if( testcases[i].coutCheck() != DONT_CHECK ) {
 			if( !cout_instr ) { std::cout << "ERROR: test" << (i-1)
@@ -131,8 +138,12 @@ int validateTestCases() {
 			}
 		}
 		
-		const char* cerr_path = (student_output_dir + "/test" + (char)(i-1) +
-													  "_cerr.txt" ).c_str();
+		char cerr_temp[student_output_dir.size() + 15];
+		sprintf(cerr_temp, "%s/test%d_cout.txt", student_output_dir.c_str(), i-1 );
+		const char* cerr_path = cerr_temp;
+		
+		/*const char* cerr_path = (student_output_dir + "/test" + (char*)(i-1) +
+													  "_cerr.txt" ).c_str();*/
 		std::ifstream cerr_instr( cerr_path, std::ifstream::in );
 		if( testcases[i].cerrCheck() != DONT_CHECK ) {
 			if( !cerr_instr ) { std::cout << "ERROR: test" << (i-1)
@@ -150,9 +161,56 @@ int validateTestCases() {
 			}
 		}
 		
+		//std::cout << cout_path << std::endl;
+		//std::cerr << cerr_path << std::endl;
+		
+		/* TODO: change return type?? */
+		int result = 0;
+		const std::string blank = "";
+		
+		if( !student_instr && !expected_instr )
+			result = testcases[i].compare( blank, blank );
+		else if( !student_instr && expected_instr != NULL ) {
+			const std::string e = std::string( std::istreambuf_iterator<char>(expected_instr),
+										   		std::istreambuf_iterator<char>() );
+			result = testcases[i].compare( blank, e );
+		}
+		else if( student_instr != NULL && !expected_instr ) {
+			const std::string s = std::string( std::istreambuf_iterator<char>(student_instr),
+										   		std::istreambuf_iterator<char>() );
+			result = testcases[i].compare( s, blank );
+		}
+		else {
+			const std::string s = std::string( std::istreambuf_iterator<char>(student_instr),
+										   		std::istreambuf_iterator<char>() );
+			const std::string e = std::string( std::istreambuf_iterator<char>(expected_instr),
+										   		std::istreambuf_iterator<char>() );
+			std::cout << s << "\n" << e << std::endl;
+			result = testcases[i].compare( std::string( std::istreambuf_iterator<char>(student_instr),
+										   		std::istreambuf_iterator<char>() ),
+										   std::string( std::istreambuf_iterator<char>(expected_instr),
+										   		std::istreambuf_iterator<char>() ) );
+		}
+		
+		/*
 		// Pass files off to comparison function
+		const std::string blank = "";
+		const std::string student_file_string;
+		if( !student_instr ) student_file_string = blank;
+		else student_file_string = std::string( std::istreambuf_iterator<char>(student_instr),
+										   std::istreambuf_iterator<char>() );
+		
+		const std::string expected_file_string;
+		if( !expected_instr ) expected_file_string = blank;
+		else expected_file_string = std::string( std::istreambuf_iterator<char>(student_instr),
+										   std::istreambuf_iterator<char>() );
+		
+		// NOTE: This return type will be changed
+		int result = testcases[i].compare( student_file_string, expected_file_string );
+		*/
 		
 		// Output to result file
+		std::cout << result << std::endl;
 		
 	}
 	

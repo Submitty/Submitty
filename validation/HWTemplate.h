@@ -60,6 +60,7 @@ TestCase(
     "",
     2,				// points for readme
     false,
+    false,
     DONT_CHECK,
     DONT_CHECK,
     NULL
@@ -72,6 +73,7 @@ TestCase(
 	"",
 	"",
 	3,				// points for compilation
+	false,
 	false,
 	DONT_CHECK,
 	DONT_CHECK,
@@ -88,9 +90,10 @@ TestCase(
 	"expected_test1.txt",				// expected output file
 	5,									// points
 	false,								// hidden
+	false,								// extra credit
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
-	NULL								// compare function
+	&diffNaive							// compare function
 )
 };
 
