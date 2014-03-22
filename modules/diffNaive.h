@@ -24,7 +24,8 @@ int diffNaive(const std::string& _student, const std::string& _instructor){
 	std::string student = string_trim_right(_student);
 	std::string instructor = string_trim_right(_instructor);
 	int len = (student.size() < instructor.size()) ? student.length() : instructor.length();
-	int extra = std::abs((int)(instructor.size() - student.size())); 
+	int extra = std::abs((int)(instructor.size() - student.size()));
+	int max = std::max(instructor.length(), student.length());
 	int diff = 0;
 
 	for(int i = 0; i < len; i++){
@@ -32,7 +33,7 @@ int diffNaive(const std::string& _student, const std::string& _instructor){
 			diff++;
 	}
 	diff += extra;
-	return double(instructor.length() - diff) / instructor.length() * 100.0;
+	return double(max - diff) / max * 100.0;
 }
 /*diffNoWhiteSpace does a per character comparison not including white space but
 including new lines. It returns a number between 0 and 100 (inclusive) 
@@ -42,6 +43,7 @@ longer string.*/
 int diffNoWhiteSpace(const std::string& _student, const std::string& _instructor){
 	std::string student = string_trim_right(_student);
 	std::string instructor = string_trim_right(_instructor);
+	int max = std::max(instructor.length(), student.length());
 	int diff = 0;
 	int i = 0;
 	int j = 0;
@@ -57,16 +59,14 @@ int diffNoWhiteSpace(const std::string& _student, const std::string& _instructor
 		i++; j++;
 	} 
 	while( i != student.size() ){
-		if(student[i] != ' ')
-			diff++;
+		diff++;
 		i++;
 	}
-	while( j != instructor.size() ){
-		if(instructor[j] != ' ')
-			diff++;
+	while( j != instructor.size()){}
+		diff++;
 		j++;
 	}
-	return double(instructor.length() - diff) / instructor.length() * 100.0;
+	return double(max - diff) / max * 100.0;
 }
 
 #endif //__DIFF__

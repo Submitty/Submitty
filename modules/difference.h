@@ -43,8 +43,7 @@ public:
     std::vector<Change> changes;
     std::vector<int> diff_a;
     std::vector<int> diff_b;
-
-
+    
     int distance;
     T const *a;
     T const *b;
