@@ -75,13 +75,15 @@ void runFiles(std::string input){
     std::vector<std::string> student_files;
     readFileList(input, sample_file, student_files);
     std::vector< std::vector<std::string> >contents, sample_text;
-    
+    getFileInput(sample_file, sample_text);
     for (int a=0; a<student_files.size(); a++) {
         contents.clear();
         getFileInput(student_files[a], contents);
         Difference< std::vector < std::vector <std::string> > > text_diff=ses(&sample_text, &contents, true);
         std::ofstream file_out;
-        file_out.open(student_files[a]+"_out");
+        std::string file_name(student_files[a]);
+        file_name.erase(student_files[a].size()-4, student_files[a].size());
+        file_out.open(file_name+"_out.txt");
         if (!file_out.good()) {
             std::cerr << "Can't open " << student_files[a]+"_out" << " to write.\n";
             file_out.close();
