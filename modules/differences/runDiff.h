@@ -70,27 +70,28 @@ void getFileInput(std::string file, std::vector<std::string>& contents){
     
 }
 
-void runFiles(std::string input){
+void runFiles(std::string input){ //input is a list of file names, the first of which is the instructor file
     std::string sample_file;
     std::vector<std::string> student_files;
-    readFileList(input, sample_file, student_files);
+    readFileList(input, sample_file, student_files); //read all the file names from the input file
     std::vector< std::vector<std::string> >contents, sample_text;
-    getFileInput(sample_file, sample_text);
+    getFileInput(sample_file, sample_text); // get the text from the instructor file
     for (int a=0; a<student_files.size(); a++) {
         contents.clear();
-        getFileInput(student_files[a], contents);
+        getFileInput(student_files[a], contents); //get the text from the student file
+        //get the diffrences
         Difference< std::vector < std::vector <std::string> > > text_diff=ses(&sample_text, &contents, true);
         std::ofstream file_out;
         std::string file_name(student_files[a]);
         file_name.erase(student_files[a].size()-4, student_files[a].size());
-        file_out.open(file_name+"_out.txt");
+        file_out.open(file_name+"_out.txt"); //edit the name to add _out
         if (!file_out.good()) {
             std::cerr << "Can't open " << student_files[a]+"_out" << " to write.\n";
             file_out.close();
             continue;
         }
 
-        printJSON(text_diff, file_out);
+        printJSON(text_diff, file_out); //print the diffrences as JSON files
     }
 }
 
