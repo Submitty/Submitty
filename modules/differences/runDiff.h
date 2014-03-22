@@ -70,5 +70,26 @@ void getFileInput(std::string file, std::vector<std::string>& contents){
     
 }
 
+void runFiles(std::string input){
+    std::string sample_file;
+    std::vector<std::string> student_files;
+    readFileList(input, sample_file, student_files);
+    std::vector< std::vector<std::string> >contents, sample_text;
+    
+    for (int a=0; a<student_files.size(); a++) {
+        contents.clear();
+        getFileInput(student_files[a], contents);
+        Difference< std::vector < std::vector <std::string> > > text_diff=ses(&sample_text, &contents, true);
+        std::ofstream file_out;
+        file_out.open(student_files[a]+"_out");
+        if (!file_out.good()) {
+            std::cerr << "Can't open " << student_files[a]+"_out" << " to write.\n";
+            file_out.close();
+            continue;
+        }
+
+        printJSON(text_diff, file_out);
+    }
+}
 
 #endif
