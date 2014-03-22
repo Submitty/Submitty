@@ -19,24 +19,38 @@
 #include <fstream>
 #include <algorithm>
 
-class Difference{
+class Change{
 public:
-    Difference();
+    int a_start;
+    int b_start;
+    std::vector<int> a_changes;
+    std::vector<int> b_changes;
+    std::vector< std::vector< int > >  a_characters;
+    std::vector< std::vector< int > >  b_characters;
+    void clear();
+};
+
+void Change::clear(){
+    a_start=b_start=-1;
+    a_changes.clear();
+    b_changes.clear();
+}
+
+template<class T> class Difference{
+public:
     std::vector< std::vector< int > > snakes;
     std::vector< std::vector< int > > snapshots;
-    std::vector<int> shortest_edit_script;
-    std::vector<std::vector<int> > changes;
-
-    //For difference algorithms:
-    //	Char = 0
-    //  Word = 1
-    //  Line = 2
-    //Used to determine the type of changes vector
-    int changeType;
+    std::vector<Change> changes;
+    std::vector<int> diff_a;
+    std::vector<int> diff_b;
     
     int distance;
-    std::string const *A;
-    std::string const *B;
+    T const *a;
+    T const *b;
+    int m;
+    int n;
     
 };
+
+
 #endif /* defined(__differences__difference__) */
