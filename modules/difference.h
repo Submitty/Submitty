@@ -8,16 +8,8 @@
 
 #ifndef __differences__difference__
 #define __differences__difference__
-
-#include <iostream>
 #include <string>
-#include <iomanip>
-#include <cmath>
 #include <vector>
-#include <cstdlib>
-#include <cctype>
-#include <fstream>
-#include <algorithm>
 
 class Change{
 public:
@@ -36,20 +28,12 @@ void Change::clear(){
     b_changes.clear();
 }
 
-template<class T> class Difference{
+class Difference{
 public:
-    std::vector< std::vector< int > > snakes;
-    std::vector< std::vector< int > > snapshots;
     std::vector<Change> changes;
     std::vector<int> diff_a;
     std::vector<int> diff_b;
-    
     int distance;
-    T const *a;
-    T const *b;
-    int m;
-    int n;
-    
 };
 
 

@@ -8,6 +8,12 @@
 
 #ifndef differences_runDiff_h
 #define differences_runDiff_h
+#define OtherType 0
+#define StringType 1
+#define VectorStringType 2
+#define VectorVectorStringType 3
+#define VectorVectorOtherType 4
+#define VectorOtherType 5
 
 #include <iostream>
 #include <sstream>
@@ -81,7 +87,7 @@ void runFiles(std::string input){ //input is a list of file names, the first of 
         contents.clear();
         getFileInput(student_files[a], contents); //get the text from the student file
         //get the diffrences
-        Difference< std::vector < std::vector <std::string> > > text_diff=ses(&sample_text, &contents, true);
+        Difference text_diff=ses(&sample_text, &contents, true);
         std::ofstream file_out;
         std::string file_name(student_files[a]);
         file_name.erase(student_files[a].size()-4, student_files[a].size());
@@ -92,7 +98,7 @@ void runFiles(std::string input){ //input is a list of file names, the first of 
             continue;
         }
 
-        printJSON(text_diff, file_out); //print the diffrences as JSON files
+        printJSON(text_diff, file_out, VectorVectorStringType); //print the diffrences as JSON files
     }
 }
 
