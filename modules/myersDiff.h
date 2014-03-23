@@ -325,7 +325,7 @@ template<class T> Difference<T> sesSecondary(Difference<T> & text_diff){
 
 // formats and outputs a Difference object to the ofstream
 template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
-                                            std::ofstream & file_out, int type){
+                                            std::ostream & file_out, int type){
     std::string diff1_name;
     std::string diff2_name;
     file_out<<"{"<<std::endl
