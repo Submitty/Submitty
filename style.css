@@ -1,0 +1,48 @@
+.h {
+  display: inline-block;
+}
+body,
+html {
+  margin: 0px;
+  padding: 0px;
+  min-width: 1000px;
+  text-align: center;
+  font-family: 'Varela Round', sans-serif;
+  color: #333333;
+  overflow-horizontal: hidden;
+  background-color: #eeeeee;
+}
+#container {
+  width: 1000px;
+}
+#header {
+  height: 100px;
+  background-color: #fd9883;
+  text-align: center;
+}
+#title {
+  width: 600px;
+  font-size: 24px;
+  height: 100px;
+  line-height: 90px;
+  text-align: left;
+  margin-left: 100px;
+  float: left;
+}
+.header-button,
+#user {
+  margin-top: 25px;
+  width: 150px;
+  height: 40px;
+  line-height: 40px;
+  float: right;
+  background-color: #e9573f;
+  border-radius: 2px;
+}
+#user {
+  margin-right: 100px;
+}
+#user:hover {
+  opacity: .75;
+  cursor: pointer;
+}

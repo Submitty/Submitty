@@ -1,0 +1,65 @@
+
+// All colors for site!
+@base : #FC6E51;
+@prim : #E9573F;
+@gray : #eee;
+
+// derived colors
+@light-base : lighten(@base, 10%);
+@lighter-base : lighten(@light-base, 10%);
+@bg : @gray;
+@default-text : #333;
+
+// Utility Classes
+.h{
+	display:inline-block;
+}
+
+body,html{
+	margin: 0px;
+	padding:0px;
+	min-width: 1000px;
+	text-align: center;
+	font-family: 'Varela Round', sans-serif;
+	color : @default-text;
+	overflow-horizontal:hidden;
+	background-color:@bg;
+}
+
+#container{
+	width:1000px;
+}
+
+#header{
+	height:100px;
+	background-color: @light-base;
+	text-align: center;
+}
+
+#title{
+	width:600px;
+	font-size:24px;
+	height:100px;
+	line-height: 90px;
+	text-align: left;
+	margin-left:100px;
+	float:left;
+}
+
+.header-button{
+	margin-top: 25px;
+	width:150px;
+	height:40px;
+	line-height:40px;
+	float:right;
+	background-color: @prim;
+	border-radius:2px;
+}
+
+#user:extend(.header-button){
+	margin-right: 100px;
+}
+#user:hover{
+	opacity:.75;
+	cursor : pointer;
+}
