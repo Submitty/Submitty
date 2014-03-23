@@ -84,7 +84,7 @@ void runFiles(std::string input){ //input is a list of file names, the first of 
         std::ofstream file_out;
         std::string file_name(student_files[a]);
         file_name.erase(student_files[a].size()-4, student_files[a].size());
-        file_out.open(file_name+"_out.txt"); //edit the name to add _out
+        file_out.open(file_name+"_out.json"); //edit the name to add _out
         if (!file_out.good()) {
             std::cerr << "Can't open " << student_files[a]+"_out" << " to write.\n";
             file_out.close();
