@@ -100,11 +100,15 @@ void Difference::printJSON(std::ostream & file_out, int type){
                 <<changes[a].a_changes[b];
                 //insert code to display word changes here
                 if (changes[a].a_characters.size()>=b && changes[a].a_characters.size()>0) {
-                    file_out<<", "<<std::endl;
                     if (changes[a].a_characters[b].size()>0){
+                        file_out<<", "<<std::endl;
                         file_out<<tab<<tab<<tab<<tab<<tab
                         <<"\""+diff2_name+"_number\":[ ";
                     }
+                    else{
+                        file_out<<std::endl;
+                    }
+
                     for (int c=0; c< changes[a].a_characters[b].size(); c++) {
                         if (c>0) {
                             file_out<<", ";
@@ -119,9 +123,8 @@ void Difference::printJSON(std::ostream & file_out, int type){
                     file_out<<std::endl;
                 }
                 file_out<<tab<<tab<<tab<<tab<<"}";
-                file_out<<std::endl<<tab<<tab<<tab<<"]"<<std::endl;
-                
             }
+            file_out<<std::endl<<tab<<tab<<tab<<"]"<<std::endl;
         }
         else{
             file_out<<std::endl;
@@ -147,10 +150,13 @@ void Difference::printJSON(std::ostream & file_out, int type){
                 <<"\""+diff1_name+"_number\": " <<changes[a].b_changes[b];
                 //insert code to display word changes here
                 if (changes[a].b_characters.size()>=b && changes[a].b_characters.size()>0) {
-                    file_out<<", "<<std::endl;
                     if (changes[a].b_characters[b].size()>0){
+                        file_out<<", "<<std::endl;
                         file_out<<tab<<tab<<tab<<tab<<tab
                         <<"\""+diff2_name+"_number\":[ ";
+                    }
+                    else{
+                        file_out<<std::endl;
                     }
                     for (int c=0; c< changes[a].b_characters[b].size(); c++) {
                         if (c>0) {

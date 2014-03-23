@@ -20,9 +20,13 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include "myersDiff.h"
+#include "difference.h"
+#include "runDiff.h"
+#include "metaData.h"
 
 void readFileList(std::string input, std::string & sample_file, std::vector<std::string>& student_files){
-    std::ifstream in_file(input);
+    std::ifstream in_file(input.c_str());
     if (!in_file.good()) {
         std::cerr << "Can't open " << input << " to read.\n";
         in_file.close();
@@ -39,7 +43,7 @@ void readFileList(std::string input, std::string & sample_file, std::vector<std:
 }
 
 void getFileInput(std::string file, std::vector< std::vector<std::string> >& contents){
-    std::ifstream in_file(file);
+    std::ifstream in_file(file.c_str());
     if (!in_file.good()) {
         std::cerr << "Can't open " << file << " to read.\n";
         in_file.close();
@@ -61,7 +65,7 @@ void getFileInput(std::string file, std::vector< std::vector<std::string> >& con
     
 }
 void getFileInput(std::string file, std::vector<std::string>& contents){
-    std::ifstream in_file(file);
+    std::ifstream in_file(file.c_str());
     if (!in_file.good()) {
         std::cerr << "Can't open " << file << " to read.\n";
         in_file.close();
@@ -88,17 +92,17 @@ void runFiles(std::string input){ //input is a list of file names, the first of 
         getFileInput(student_files[a], contents); //get the text from the student file
         //get the diffrences
         Difference text_diff=ses(&sample_text, &contents, true);
-        std::ofstream file_out;
         std::string file_name(student_files[a]);
         file_name.erase(student_files[a].size()-4, student_files[a].size());
-        file_out.open(file_name+"_out.json"); //edit the name to add _out
+        std::ofstream file_out;
+        file_out.open((file_name+"_out.json").c_str()); //edit the name to add _out
         if (!file_out.good()) {
             std::cerr << "Can't open " << student_files[a]+"_out" << " to write.\n";
             file_out.close();
             continue;
         }
 
-        printJSON(text_diff, file_out, VectorVectorStringType); //print the diffrences as JSON files
+        text_diff.printJSON(file_out, VectorVectorStringType); //print the diffrences as JSON files
     }
 }
 
