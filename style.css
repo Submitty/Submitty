@@ -8,7 +8,7 @@ html {
   min-width: 1000px;
   text-align: center;
   font-family: 'Varela Round', sans-serif;
-  color: #333333;
+  color: #ffffff;
   overflow-horizontal: hidden;
   background-color: #eeeeee;
 }
@@ -24,7 +24,7 @@ html {
   width: 600px;
   font-size: 24px;
   height: 100px;
-  line-height: 90px;
+  line-height: 100px;
   text-align: left;
   margin-left: 100px;
   float: left;
