@@ -39,16 +39,17 @@ void getFileInput(std::string file, std::vector< std::vector<std::string> >& con
         in_file.close();
         return;
     }
-    std::stringstream line;
     std:: string word;
     while (getline(in_file, word)) {
         std::vector<std::string> text;
-        while (line.width()>0) {
-            line << word;
+        std::stringstream line;
+        line<<word;
+        while (line>>word) {
             text.push_back(word);
         }
         contents.push_back(text);
     }
+    
     in_file.close();
     
     

@@ -372,8 +372,10 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
         file_out<<tab<<tab<<"{"<<std::endl;
 
         file_out<<tab<<tab<<tab<<"\"start\": "
-                <<text_diff.changes[a].a_start<<","<<std::endl;
-        if (text_diff.changes[a].a_changes.size()>0) {
+            <<text_diff.changes[a].a_start;
+        if (text_diff.changes[a].a_changes.size()>0)
+        {
+            file_out<<","<<std::endl;
             file_out<<tab<<tab<<tab<<"\""+diff1_name+"\": ["<<std::endl
                     <<tab<<tab<<tab<<tab;
             for (int b=0; b<text_diff.changes[a].a_changes.size(); b++) {
@@ -383,9 +385,10 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
                 file_out<<"{"<<std::endl;
                 file_out<<tab<<tab<<tab<<tab<<tab
                 <<"\""+diff1_name+"_number\": "
-                <<text_diff.changes[a].a_changes[b]<<std::endl;
+                <<text_diff.changes[a].a_changes[b];
                 //insert code to display word changes here
                 if (text_diff.changes[a].a_characters.size()>=b && text_diff.changes[a].a_characters.size()>0) {
+                    file_out<<", "<<std::endl;
                     if (text_diff.changes[a].a_characters[b].size()>0){
                         file_out<<tab<<tab<<tab<<tab<<tab
                                 <<"\""+diff2_name+"_number\":[ ";
@@ -400,10 +403,16 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
                         file_out<<" ]"<<std::endl;
                     }
                 }
+                else{
+                    file_out<<std::endl;
+                }
                 file_out<<tab<<tab<<tab<<tab<<"}";
-                
+                file_out<<std::endl<<tab<<tab<<tab<<"]"<<std::endl;
+
             }
-            file_out<<std::endl<<tab<<tab<<tab<<"]"<<std::endl;
+        }
+        else{
+            file_out<<std::endl;
         }
         
         file_out<<tab<<tab<<"},"<<std::endl;
@@ -411,8 +420,10 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
         <<tab<<tab<<"{"<<std::endl;
         
         file_out<<tab<<tab<<tab<<"\"start\":"
-        <<text_diff.changes[a].b_start<<","<<std::endl;
-        if (text_diff.changes[a].b_changes.size()>0) {
+        <<text_diff.changes[a].b_start;
+        if (text_diff.changes[a].b_changes.size()>0)
+        {
+            file_out<<","<<std::endl;
             file_out<<tab<<tab<<tab<<"\""+diff1_name+"\": ["<<std::endl
                     <<tab<<tab<<tab<<tab;
             for (int b=0; b<text_diff.changes[a].b_changes.size(); b++) {
@@ -421,10 +432,10 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
                 }
                 file_out<<"{"<<std::endl;
                 file_out<<tab<<tab<<tab<<tab<<tab
-                <<"\""+diff1_name+"_number\": " <<text_diff.changes[a].b_changes[b]
-                <<std::endl;
+                <<"\""+diff1_name+"_number\": " <<text_diff.changes[a].b_changes[b];
                 //insert code to display word changes here
                 if (text_diff.changes[a].b_characters.size()>=b && text_diff.changes[a].b_characters.size()>0) {
+                    file_out<<", "<<std::endl;
                     if (text_diff.changes[a].b_characters[b].size()>0){
                         file_out<<tab<<tab<<tab<<tab<<tab
                                 <<"\""+diff2_name+"_number\":[ ";
@@ -439,13 +450,19 @@ template<class T> Difference<T> printJSONhelper(Difference<T> & text_diff,
                         file_out<<" ]"<<std::endl;
                     }
                 }
-                
+                else{
+                    file_out<<std::endl;
+
+                }
                 file_out<<tab<<tab<<tab<<tab<<"}";
                 
             }
             file_out<<std::endl<<tab<<tab<<tab<<"]"<<std::endl;
-            file_out<<tab<<tab<<"}"<<std::endl;
         }
+        else{
+            file_out<<std::endl;
+        }
+        file_out<<tab<<tab<<"}"<<std::endl;
         file_out<<tab<<"}";
     }
     file_out<<std::endl<<"]"<<std::endl;
