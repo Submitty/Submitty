@@ -1,11 +1,12 @@
-.h {
+.h,
+.diff {
   display: inline-block;
 }
 body,
 html {
   margin: 0px;
   padding: 0px;
-  min-width: 1000px;
+  min-width: 1200px;
   text-align: center;
   font-family: 'Varela Round', sans-serif;
   color: #ffffff;
@@ -13,36 +14,48 @@ html {
   background-color: #eeeeee;
 }
 #container {
-  width: 1000px;
+  width: 1200px;
 }
 #header {
-  height: 100px;
+  height: 80px;
   background-color: #fd9883;
   text-align: center;
+  border-bottom: 2px #ee7f6d solid;
 }
 #title {
   width: 600px;
   font-size: 24px;
-  height: 100px;
-  line-height: 100px;
+  height: 80px;
+  line-height: 80px;
   text-align: left;
   margin-left: 100px;
   float: left;
 }
-.header-button,
-#user {
-  margin-top: 25px;
+.header-button {
+  margin-top: 20px;
+  margin-right: 10px;
   width: 150px;
   height: 40px;
   line-height: 40px;
   float: right;
-  background-color: #e9573f;
+  background-color: #ee7f6d;
   border-radius: 2px;
+}
+.header-button:hover {
+  background-color: #e9573f;
+  cursor: pointer;
+}
+.header-button i {
+  margin-left: 10px;
 }
 #user {
   margin-right: 100px;
 }
-#user:hover {
-  opacity: .75;
-  cursor: pointer;
+.diff {
+  width: 550px;
+  height: 600px;
+  background-color: #fff;
+  margin: 10px;
+  margin-top: 30px;
+  box-shadow: 0px 0px 5px #bbbbbb;
 }
