@@ -15,13 +15,6 @@
 
 #ifndef differences_myersDiff_h
 #define differences_myersDiff_h
-#define tab "    "
-#define OtherType 0
-#define StringType 1
-#define VectorStringType 2
-#define VectorVectorStringType 3
-#define VectorVectorOtherType 4
-#define VectorOtherType 5
 
 #include <iostream>
 #include <string>
@@ -296,14 +289,5 @@ template<class T> Difference sesSecondary(Difference & text_diff, metaData<T> & 
     }
     return text_diff;
 }
-
-
-
-#undef tab
-#undef StringType
-#undef VectorStringType
-#undef VectorVectorStringType
-#undef VectorVectorOtherType
-#undef VectorOtherType
-#undef OtherType
+// formats and outputs a Difference object to the ofstream
 #endif

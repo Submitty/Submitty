@@ -15,7 +15,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include "STRutil.h"
 
 int searchToken(const std::string& _student, const std::string& _instructor){
-	return 100;
+	
 }
 int searchTokenNoWhiteSpace(const std::string& _student,
 				const std::string& _instructor){
