@@ -1,0 +1,61 @@
+{
+"differences":[
+    {
+        "student":
+        {
+            "start": 3,
+            "line": [
+                {
+                    "line_number": 3
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":2
+        }
+    }, {
+        "student":
+        {
+            "start": 7,
+            "line": [
+                {
+                    "line_number": 7
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":5
+        }
+    }, {
+        "student":
+        {
+            "start": 14,
+            "line": [
+                {
+                    "line_number": 14
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":11
+        }
+    }, {
+        "student":
+        {
+            "start": 28,
+            "line": [
+                {
+                    "line_number": 28
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":24
+        }
+    }
+]
+}
