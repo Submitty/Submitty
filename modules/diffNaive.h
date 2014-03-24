@@ -62,7 +62,7 @@ int diffNoWhiteSpace(const std::string& _student, const std::string& _instructor
 		diff++;
 		i++;
 	}
-	while( j != instructor.size()){}
+	while( j != instructor.size()){
 		diff++;
 		j++;
 	}

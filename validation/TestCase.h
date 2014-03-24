@@ -53,7 +53,7 @@ public:
 	result if successful or -1 otherwise. The arguments of the compare */
 	int compare(const std::string &student_out, const std::string &expected_out){
 		if(cmp_output != 0) return cmp_output(student_out, expected_out);
-		else return -1;
+		else return 0;
 	}
 	
 	// Mutators for configuring the test case

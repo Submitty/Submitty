@@ -18,14 +18,13 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <sys/stat.h>
 
 #include "../modules/modules.h"
+//#include "../modules/difference.h"
 #include "TestCase.h"
 #include "HWTemplate.h"
 
-/* TODO: Define debug mode */
-
 bool checkValidDirectory( const std::string &directory );
-int validateReadme();
-int validateCompilation();
+int validateReadme( std::ofstream &gradefile );
+int validateCompilation( std::ofstream &gradefile );
 int validateTestCases();
 
 int main( int argc, char* argv[] ) {
@@ -41,8 +40,11 @@ int main( int argc, char* argv[] ) {
 	    return 1;
 	}
 	
+	const char* gradepath = (student_submit_dir + "/submit_grade/grade.txt").c_str();
+	std::ofstream outstr( gradepath, std::ofstream::out );
+	
 	// Run test cases
-	validateReadme();
+	validateReadme( outstr );
 	
 	validateTestCases();
 	
@@ -64,7 +66,7 @@ bool checkValidDirectory( const std::string &directory ) {
 }
 
 /* Check student submit directory for README.txt */
-int validateReadme() {
+int validateReadme( std::ofstream &gradefile ) {
 	
 	const char* readme = (student_submit_dir + "/README.txt").c_str();
 	std::ifstream instr( readme, std::ifstream::in );
@@ -72,9 +74,11 @@ int validateReadme() {
 	if( instr != NULL ) {
 		// Handle output
 		std::cout << "Readme found!" << std::endl;
+		gradefile << "2" << std::endl;
 	}
 	else {
 		std::cout << "Readme not found" << std::endl;
+		gradefile << "0" << std::endl;
 		return 1;	// README.txt does not exist
 	}
 	
@@ -82,7 +86,10 @@ int validateReadme() {
 }
 
 /* Makes sure the code was compiled successfully */
-int validateCompilation() {
+int validateCompilation( std::ofstream &gradefile ) {
+
+	// at compile time, file will be generated with g++ exit status;
+	//  check this file for successful compilation
 
 	return 0;
 }
@@ -165,7 +172,7 @@ int validateTestCases() {
 		//std::cerr << cerr_path << std::endl;
 		
 		/* TODO: change return type?? */
-		int result = 0;
+		int result = NULL;
 		const std::string blank = "";
 		
 		if( !student_instr && !expected_instr )
@@ -185,11 +192,7 @@ int validateTestCases() {
 										   		std::istreambuf_iterator<char>() );
 			const std::string e = std::string( std::istreambuf_iterator<char>(expected_instr),
 										   		std::istreambuf_iterator<char>() );
-			std::cout << s << "\n" << e << std::endl;
-			result = testcases[i].compare( std::string( std::istreambuf_iterator<char>(student_instr),
-										   		std::istreambuf_iterator<char>() ),
-										   std::string( std::istreambuf_iterator<char>(expected_instr),
-										   		std::istreambuf_iterator<char>() ) );
+			result = testcases[i].compare( s, e );
 		}
 		
 		/*
@@ -209,12 +212,10 @@ int validateTestCases() {
 		int result = testcases[i].compare( student_file_string, expected_file_string );
 		*/
 		
-		// Output to result file
-		std::cout << result << std::endl;
+		/* TODO: Output to result file */
+		//std::cout << result << std::endl;
 		
 	}
-	
 	return 0;
 }
-
 
