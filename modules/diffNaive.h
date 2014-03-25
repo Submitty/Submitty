@@ -72,7 +72,7 @@ longer string.*/
 		diff++;
 		i++;
 	}
-	while( j != instructor.size()){}
+	while( j != instructor.size()){
 		diff++;
 		j++;
 	}
