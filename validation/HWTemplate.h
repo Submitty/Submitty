@@ -93,7 +93,7 @@ TestCase(
 	false,								// extra credit
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
-	&diffNaive							// compare function
+	&diffLine							// compare function
 )
 };
 

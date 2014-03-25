@@ -171,8 +171,7 @@ int validateTestCases() {
 		//std::cout << cout_path << std::endl;
 		//std::cerr << cerr_path << std::endl;
 		
-		/* TODO: change return type?? */
-		int result = NULL;
+		Difference result;
 		const std::string blank = "";
 		
 		if( !student_instr && !expected_instr )
@@ -195,25 +194,9 @@ int validateTestCases() {
 			result = testcases[i].compare( s, e );
 		}
 		
-		/*
-		// Pass files off to comparison function
-		const std::string blank = "";
-		const std::string student_file_string;
-		if( !student_instr ) student_file_string = blank;
-		else student_file_string = std::string( std::istreambuf_iterator<char>(student_instr),
-										   std::istreambuf_iterator<char>() );
+		/* TODO: Pass off to grade interpreter? */
 		
-		const std::string expected_file_string;
-		if( !expected_instr ) expected_file_string = blank;
-		else expected_file_string = std::string( std::istreambuf_iterator<char>(student_instr),
-										   std::istreambuf_iterator<char>() );
-		
-		// NOTE: This return type will be changed
-		int result = testcases[i].compare( student_file_string, expected_file_string );
-		*/
-		
-		/* TODO: Output to result file */
-		//std::cout << result << std::endl;
+		std::cout << "distance: " << (result.distance) << std::endl;
 		
 	}
 	return 0;

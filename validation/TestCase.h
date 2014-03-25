@@ -28,7 +28,7 @@ public:
 			  const int points, const bool hidden, const bool extracredit,
 			  const cout_cerr_check cout_check,
 			  const cout_cerr_check cerr_check,
-			  int (*cmp)(const std::string&, const std::string&) )
+			  Difference (*cmp)(const std::string&, const std::string&) )
 			: _title(title), _details(details), _command(command),
 			  _filename(filename), _description(description),
 			  _expected(expected), _points(points),
@@ -49,11 +49,11 @@ public:
 	cout_cerr_check coutCheck() const { return _coutcheck; }
 	cout_cerr_check cerrCheck() const { return _cerrcheck; }
 	
-	/* Calls the function designated by the function pointer and returns the
-	result if successful or -1 otherwise. The arguments of the compare */
-	int compare(const std::string &student_out, const std::string &expected_out){
-		if(cmp_output != 0) return cmp_output(student_out, expected_out);
-		else return 0;
+	/* Calls the function designated by the function pointer; if the function pointer
+	    is NULL, defaults to returning the result of diffLine(). */
+	Difference compare(const std::string &student_out, const std::string &expected_out){
+		if(cmp_output != NULL) return cmp_output(student_out, expected_out);
+		else return diffLine(student_out, expected_out);
 	}
 	
 	// Mutators for configuring the test case
@@ -88,7 +88,7 @@ private:
 	bool _extracredit;
 	cout_cerr_check _coutcheck;
 	cout_cerr_check _cerrcheck;
-	int (*cmp_output)(const std::string&, const std::string&);
+	Difference (*cmp_output)(const std::string&, const std::string&);
 };
 
 #endif
