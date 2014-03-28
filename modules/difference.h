@@ -11,6 +11,14 @@
 #include <string>
 #include <vector>
 
+#define tab "    "
+#define OtherType 0
+#define StringType 1
+#define VectorStringType 2
+#define VectorVectorStringType 3
+#define VectorVectorOtherType 4
+#define VectorOtherType 5
+
 class Change{
 public:
     int a_start;
@@ -189,7 +197,5 @@ void Difference::printJSON(std::ostream & file_out, int type){
     
     return ;
 }
-
-
 
 #endif /* defined(__differences__difference__) */
