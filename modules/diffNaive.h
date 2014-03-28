@@ -113,8 +113,10 @@ Difference diffLine(const std::string& _student, const std::string& _instructor)
 		}
 		Change changes = diffNaive(s_line, i_line);
 		if(changes.a_changes.size() || changes.b_changes.size()){
-			file.a_changes.push_back(i);
-			file.b_changes.push_back(i);
+			if(!s_eof)
+				file.a_changes.push_back(i);
+			if(!i_eof)
+				file.b_changes.push_back(i);
 			file.a_characters.push_back(changes.a_changes);
 			file.b_characters.push_back(changes.b_changes);
 		}
@@ -151,8 +153,10 @@ Difference diffLineNoSpace(const std::string& _student, const std::string& _inst
 		}
 		Change changes = diffNoSpace(s_line, i_line);
 		if(changes.a_changes.size() || changes.b_changes.size()){
-			file.a_changes.push_back(i);
-			file.b_changes.push_back(i);
+			if(!s_eof)
+				file.a_changes.push_back(i);
+			if(!i_eof)
+				file.b_changes.push_back(i);
 			file.a_characters.push_back(changes.a_changes);
 			file.b_characters.push_back(changes.b_changes);
 		}
