@@ -3,16 +3,30 @@
     {
         "student":
         {
-            "start": 3,
+            "start": 2
+        },
+        "instructor":
+        {
+            "start":3,
             "line": [
                 {
                     "line_number": 3
                 }
             ]
+        }
+    }, {
+        "student":
+        {
+            "start": 5
         },
         "instructor":
         {
-            "start":2
+            "start":7,
+            "line": [
+                {
+                    "line_number": 7
+                }
+            ]
         }
     }, {
         "student":
@@ -20,109 +34,95 @@
             "start": 7,
             "line": [
                 {
-                    "line_number": 7
+                    "line_number": 7, 
+                    "word_number":[ 3, 4, 5 ]
                 }
             ]
         },
         "instructor":
         {
-            "start":5
-        }
-    }, {
-        "student":
-        {
-            "start": 9,
+            "start":9,
             "line": [
                 {
                     "line_number": 9, 
                     "word_number":[ 3, 4, 5, 6, 7 ]
                 }
             ]
-        },
-        "instructor":
-        {
-            "start":7,
-            "line": [
-                {
-                    "line_number": 7, 
-                    "word_number":[ 3, 4, 5 ]
-                }
-            ]
         }
     }, {
         "student":
         {
-            "start": 14,
+            "start": 11
+        },
+        "instructor":
+        {
+            "start":14,
             "line": [
                 {
                     "line_number": 14
                 }
             ]
-        },
-        "instructor":
-        {
-            "start":11
         }
     }, {
         "student":
         {
-            "start": 20,
-            "line": [
-                {
-                    "line_number": 20, 
-                    "word_number":[ 1 ]
-                }
-            ]
-        },
-        "instructor":
-        {
-            "start":17,
+            "start": 17,
             "line": [
                 {
                     "line_number": 17, 
                     "word_number":[ 1 ]
                 }
             ]
+        },
+        "instructor":
+        {
+            "start":20,
+            "line": [
+                {
+                    "line_number": 20, 
+                    "word_number":[ 1 ]
+                }
+            ]
         }
     }, {
         "student":
         {
-            "start": 24,
-            "line": [
-                {
-                    "line_number": 24, 
-                    "word_number":[ 1 ]
-                }
-            ]
-        },
-        "instructor":
-        {
-            "start":21,
+            "start": 21,
             "line": [
                 {
                     "line_number": 21, 
                     "word_number":[ 1 ]
                 }
             ]
+        },
+        "instructor":
+        {
+            "start":24,
+            "line": [
+                {
+                    "line_number": 24, 
+                    "word_number":[ 1 ]
+                }
+            ]
         }
     }, {
         "student":
         {
-            "start": 28,
+            "start": 25,
             "line": [
                 {
-                    "line_number": 28
-                }, {
-                    "line_number": 29
+                    "line_number": 25
                 }
             ]
         },
         "instructor":
         {
-            "start":25,
+            "start":28,
             "line": [
                 {
-                    "line_number": 25
+                    "line_number": 28
+                }, {
+                    "line_number": 29
                 }
             ]
         }

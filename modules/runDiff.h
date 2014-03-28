@@ -91,7 +91,7 @@ void runFiles(std::string input){ //input is a list of file names, the first of 
         contents.clear();
         getFileInput(student_files[a], contents); //get the text from the student file
         //get the diffrences
-        Difference text_diff=ses(&sample_text, &contents, true);
+        Difference text_diff=ses(&contents,&sample_text, true);
         std::string file_name(student_files[a]);
         file_name.erase(student_files[a].size()-4, student_files[a].size());
         std::ofstream file_out;

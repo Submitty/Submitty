@@ -7,9 +7,10 @@
             "line": [
                 {
                     "line_number": 4, 
-                    "word_number":[ 3, 4 ]
+                    "word_number":[ 2, 4 ]
                 }, {
-                    "line_number": 5
+                    "line_number": 5, 
+                    "word_number":[ 3, 4 ]
                 }
             ]
         },
@@ -19,10 +20,9 @@
             "line": [
                 {
                     "line_number": 4, 
-                    "word_number":[ 2, 4 ]
-                }, {
-                    "line_number": 5, 
                     "word_number":[ 3, 4 ]
+                }, {
+                    "line_number": 5
                 }
             ]
         }
@@ -32,8 +32,7 @@
             "start": 20,
             "line": [
                 {
-                    "line_number": 20, 
-                    "word_number":[ 2 ]
+                    "line_number": 20
                 }, {
                     "line_number": 21, 
                     "word_number":[ 3 ]
@@ -45,7 +44,8 @@
             "start":20,
             "line": [
                 {
-                    "line_number": 20
+                    "line_number": 20, 
+                    "word_number":[ 2 ]
                 }, {
                     "line_number": 21, 
                     "word_number":[ 3 ]
