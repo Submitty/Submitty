@@ -1,0 +1,22 @@
+!!! 5
+%html
+    %head
+        %script{src:"main.js"}
+        %link{href:'style.css',rel:'stylesheet'}
+        %link{href:'style.less',rel:'stylesheet/less'}
+        %link{href:'http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css',rel:'stylesheet',type:'text/css'}
+        %link{href:'http://fonts.googleapis.com/css?family=Varela+Round',rel:'stylesheet',type:'text/css'}
+    %body
+        #header
+            #title.h RPI Data Structures
+            #user.h.header-button
+                user
+                %i.fa.fa-caret-down
+            #assignment.h.header-button
+                [0] Diff Test
+                %i.fa.fa-caret-down
+        #container.h
+            #diff0.diff
+            #diff1.diff
+        %script{src:'lib/less-debug.js'}
+        %script{src:'lib/less.min.js'}

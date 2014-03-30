@@ -1,0 +1,89 @@
+
+// All colors for site!
+@base : #FC6E51;
+@prim : #E9573F;
+@gray : #eee;
+
+// derived colors
+@light-base : lighten(@base, 10%);
+@lighter-base : lighten(@light-base, 10%);
+@bg : @gray;
+@default-text : #fff;
+@prim-light : lighten(@prim, 10%);
+
+// Sizes
+@size : 1200px;
+@header-height : 80px;
+
+// Utility Classes
+.h{
+	display:inline-block;
+}
+
+// Regular Classes
+
+body,html{
+	margin: 0px;
+	padding:0px;
+	min-width: @size;
+	text-align: center;
+	font-family: 'Varela Round', sans-serif;
+	color : @default-text;
+	overflow-horizontal:hidden;
+	background-color:@bg;
+}
+
+#container{
+	width:@size;
+}
+
+#header{
+	height:@header-height;
+	background-color: @light-base;
+	text-align: center;
+	border-bottom:2px @prim-light solid;
+}
+
+#title{
+	width:600px;
+	font-size:24px;
+	height:@header-height;
+	line-height: @header-height;
+	text-align: left;
+	margin-left:100px;
+	float:left;
+}
+
+.header-button{
+	margin-top: @header-height/4;
+	margin-right: 10px;
+	width:150px;
+	height:40px;
+	line-height:40px;
+	float:right;
+	background-color: @prim-light;
+	border-radius:2px;
+}
+.header-button:hover{
+	background-color: @prim;
+	cursor : pointer;
+}
+.header-button i{
+	margin-left: 10px;
+}
+
+#user{
+	margin-right: 100px;
+}
+
+#assignment{
+}
+
+.diff:extend(.h){
+	width:@size/2-50;
+	height:600px;
+	background-color: #fff;
+	margin:10px;
+	margin-top:30px;
+	box-shadow: 0px 0px 5px darken(@bg, 20%);
+}
