@@ -81,7 +81,7 @@ void Difference::printJSON(std::ostream & file_out, int type){
             break;
     }
     
-    for (int a=0; a<changes.size(); a++) {
+    for (unsigned int a=0; a<changes.size(); a++) {
         if (a>0) {
             file_out<<", ";
         }
@@ -98,7 +98,7 @@ void Difference::printJSON(std::ostream & file_out, int type){
             file_out<<","<<std::endl;
             file_out<<tab<<tab<<tab<<"\""+diff1_name+"\": ["<<std::endl
             <<tab<<tab<<tab<<tab;
-            for (int b=0; b<changes[a].a_changes.size(); b++) {
+            for (unsigned int b=0; b<changes[a].a_changes.size(); b++) {
                 if (b>0) {
                     file_out<<", ";
                 }
@@ -117,7 +117,7 @@ void Difference::printJSON(std::ostream & file_out, int type){
                         file_out<<std::endl;
                     }
 
-                    for (int c=0; c< changes[a].a_characters[b].size(); c++) {
+                    for (unsigned int c=0; c< changes[a].a_characters[b].size(); c++) {
                         if (c>0) {
                             file_out<<", ";
                         }
@@ -149,7 +149,7 @@ void Difference::printJSON(std::ostream & file_out, int type){
             file_out<<","<<std::endl;
             file_out<<tab<<tab<<tab<<"\""+diff1_name+"\": ["<<std::endl
             <<tab<<tab<<tab<<tab;
-            for (int b=0; b<changes[a].b_changes.size(); b++) {
+            for (unsigned int b=0; b<changes[a].b_changes.size(); b++) {
                 if (b>0) {
                     file_out<<", " ;
                 }
@@ -166,7 +166,7 @@ void Difference::printJSON(std::ostream & file_out, int type){
                     else{
                         file_out<<std::endl;
                     }
-                    for (int c=0; c< changes[a].b_characters[b].size(); c++) {
+                    for (unsigned int c=0; c< changes[a].b_characters[b].size(); c++) {
                         if (c>0) {
                             file_out<<", ";
                         }
