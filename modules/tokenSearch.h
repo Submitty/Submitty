@@ -72,6 +72,7 @@ Difference searchToken(const std::string& student, const std::string& token){
 	tmp.b_changes.push_back(0);
 	tmp.a_start = tmp.b_start = 0;
 	diff.changes.push_back(tmp);
+	return diff;
 }
 /*searchMultipleTokens looks for tokens delimited by newline characters in the 
 student output. The algorithm runs in linear time with respect to the 
