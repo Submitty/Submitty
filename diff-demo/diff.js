@@ -84,7 +84,7 @@ var diff = function(){
 			// difference.start += ins.length;
 			ins.push(difference.start+1);
 			// console.log("#" + id_prepend + "ins" + difference.start);
-			assocs[changeID].push("#" + id_prepend + "ins" + difference.start+1);
+			assocs[changeID].push("#" + id_prepend + "ins" + (difference.start+1));
 		}else{
 			console.log("Couldn't interpret difference : ",difference);
 		}
