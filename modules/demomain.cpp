@@ -8,6 +8,6 @@ int main(int argc, const char * argv[])
 		std::cerr<<"Usage: "<<argv[0]<<" input file name"<<std::endl;
 		return 1;
 	}
-	runFiles(string(argv[1]));
+	runFiles(std::string(argv[1]));
 	return 0;
 }
