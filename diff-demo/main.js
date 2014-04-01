@@ -24,11 +24,11 @@ function initEvents(){
             $.get("tests/test" + num + ".txt",function(data){
                 $.getJSON("tests/test" + num + ".json", function (json){
                     $("#assignment").text(assignment_name);
-                    diff.load(base_test, data);
+                    diff.load(data, base_test);
                     diff.evalDifferences(json.differences);
                     diff.display();
                 });
-            }); 
+            });
         });
     })
 }

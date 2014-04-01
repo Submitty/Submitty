@@ -32,7 +32,7 @@ var diff = function(){
 	// Evaluate differences JSON object
 	function evalDifferences(differences){
 		for (var i = 0;i < differences.length;i++){
-			
+
 			var student = differences[i].student;
 			var instructor = differences[i].instructor;
 
@@ -60,7 +60,7 @@ var diff = function(){
 						// TODO Automate all these steps inside highlight.js
 						var line = change.line_number;
 						// Convert word range to multiple connected word ranges
-						var subranges = enrange(change.word_number); 
+						var subranges = enrange(change.word_number);
 						// will contain all tags
 						var surround = [];
 
@@ -80,11 +80,11 @@ var diff = function(){
 				}
 			}
 		}else if (difference.start !== undefined){
-			console.log(id_prepend,"Insert line at ",difference.start);
+			console.log(id_prepend,"Insert line at ",difference.start+1);
 			// difference.start += ins.length;
-			ins.push(difference.start);
+			ins.push(difference.start+1);
 			// console.log("#" + id_prepend + "ins" + difference.start);
-			assocs[changeID].push("#" + id_prepend + "ins" + difference.start);
+			assocs[changeID].push("#" + id_prepend + "ins" + difference.start+1);
 		}else{
 			console.log("Couldn't interpret difference : ",difference);
 		}
