@@ -2,7 +2,7 @@ r<?php
 $username = $_SERVER['REMOTE_USER'];
 $temp = explode(".", $_FILES["file"]["name"]);
 $extension = end($temp);
-if ($_FILES["file"]["size"] < 2000000 && $extension=="cpp")
+if ($_FILES["file"]["size"] < 2000000 && $extension=="zip")
 	{
 	if ($_FILES["file"]["error"] > 0)
     {
