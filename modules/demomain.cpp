@@ -1,5 +1,5 @@
 #include <string>
-#include <"runDiff.h">
+#include "runDiff.h"
 
 int main(int argc, const char * argv[])
 {
