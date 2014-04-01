@@ -27,9 +27,9 @@ Change diffNaive(const std::string& student, const std::string& instructor){
 	differences.a_start = 0;
 	differences.b_start = 0;
 
-	int len = (student.size() < instructor.size()) ? student.length() : instructor.length();
+	unsigned int len = (student.size() < instructor.size()) ? student.length() : instructor.length();
 
-	int i = 0;
+	unsigned int i = 0;
 	for(i = 0; i < len; i++){
 		if(student[i] != instructor[i]){
 			differences.a_changes.push_back(i);
@@ -59,8 +59,8 @@ Change diffNoSpace(const std::string& _student, const std::string& _instructor){
 	std::string student = string_trim_right(_student);
 	std::string instructor = string_trim_right(_instructor);
 
-	int i = 0;
-	int j = 0;
+	unsigned int i = 0;
+	unsigned int j = 0;
 	while( i != student.size() && j != instructor.size() ){
 		if(student[i] == ' '){
 			i++; continue;
@@ -97,7 +97,7 @@ Difference diffLine(const std::string& _student, const std::string& _instructor)
 	instructor.str(_instructor);
 	std::string s_line;
 	std::string i_line;
-	int i = 0;
+	unsigned int i = 0;
 	bool i_eof = false;
 	bool s_eof = false;
 	while(!i_eof || !s_eof){
