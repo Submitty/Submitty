@@ -80,6 +80,24 @@ body,html{
 #assignment{
 }
 
+#dropdown{
+	width:200px;
+	background-color: @base;
+	position:absolute;
+	display: inline-block;
+	box-shadow: @prim-light 0px 0px 4px;
+	opacity: 0;
+}
+.dropdown-item{
+	height:40px;
+	line-height:40px;
+	padding:5px;
+}
+.dropdown-item:hover{
+	background-color: lighten(@prim-light,2%);
+	cursor : pointer;
+}
+
 .diff:extend(.h){
 	width:@size/2-70;
 	overflow: hidden;
@@ -88,8 +106,12 @@ body,html{
 	// height:800px;
 	margin-top:30px;
 	box-shadow: 0px 0px 5px darken(@bg, 20%);
+	vertical-align: top;
 	// padding:20px;
 	color : #888;
+}
+.missing{
+	background-color:#fedede;
 }
 
 .diff div{
@@ -116,13 +138,13 @@ body,html{
 	background-color: #fedede;
 }
 .bad-seg{
-	background-color: #dedefe;
+	background-color: #fefe8e;
 	border-radius:5px;
 	padding:2px;
 	margin:-2px;
 }
 
 .line-hover{
-	background-color: #dfd;
+	background-color: #ddf;
 	cursor:pointer;
 }

@@ -9,15 +9,17 @@ var diff = function(){
 	var ins0,ins1;
 
 	// List of [line id, css class] to apply line styles
-	var style = [];
+	var style;
 
 	// List of associated ids or classes
-	var assocs = [];
+	var assocs;
 
 	// Initialization
 	function init(){
 		ins0 = [];
 		ins1 = [];
+		style = [];
+		assocs = [];
 	}
 
 	// Load files to diff
@@ -78,6 +80,8 @@ var diff = function(){
 			}
 		}else if (difference.start){
 			ins.push(difference.start);
+			console.log("#" + id_prepend + "ins" + difference.start);
+			assocs[changeID].push("#" + id_prepend + "ins" + difference.start);
 		}else{
 			console.log("Couldn't interpret difference : ",difference);
 		}
@@ -126,14 +130,16 @@ var diff = function(){
 	// Put lines in element on page
 	function displayLines(lines,inserts, element, id_preprend){
 		var html = "";
+		var line_number = 0;
 		for (var i = 0;i < lines.length;i++){
 			if (inserts.indexOf(i) != -1){
 				// html += "Insert<br/>";
-				html += "<div class='line missing'></div>";
+				html += "<div class='line missing' id='"+id_preprend+"ins"+i+"'></div>";
 			}else{
 				html += "<div class='line' id='"+id_preprend+"line"+i+
 					"'><span class='line_number "+(i%2 == 0 ? "" : "odd-line")+
-					"'>"+(i+1)+"</span>" + lines[i] + "</div>";
+					"'>"+(line_number+1)+"</span>" + lines[i] + "</div>";
+				line_number ++;
 			}
 		}
 		element.innerHTML = html;

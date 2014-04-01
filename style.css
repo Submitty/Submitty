@@ -52,6 +52,23 @@ html {
 #user {
   margin-right: 100px;
 }
+#dropdown {
+  width: 200px;
+  background-color: #fc6e51;
+  position: absolute;
+  display: inline-block;
+  box-shadow: #ee7f6d 0px 0px 4px;
+  opacity: 0;
+}
+.dropdown-item {
+  height: 40px;
+  line-height: 40px;
+  padding: 5px;
+}
+.dropdown-item:hover {
+  background-color: #ef8776;
+  cursor: pointer;
+}
 .diff {
   width: 530px;
   overflow: hidden;
@@ -59,7 +76,11 @@ html {
   margin: 10px;
   margin-top: 30px;
   box-shadow: 0px 0px 5px #bbbbbb;
+  vertical-align: top;
   color: #888;
+}
+.missing {
+  background-color: #fedede;
 }
 .diff div {
   text-align: left;
@@ -83,12 +104,12 @@ html {
   background-color: #fedede;
 }
 .bad-seg {
-  background-color: #dedefe;
+  background-color: #fefe8e;
   border-radius: 5px;
   padding: 2px;
   margin: -2px;
 }
 .line-hover {
-  background-color: #dfd;
+  background-color: #ddf;
   cursor: pointer;
 }
