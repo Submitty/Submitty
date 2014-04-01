@@ -15,6 +15,7 @@ html {
 }
 #container {
   width: 1200px;
+  vertical-align: top;
 }
 #header {
   height: 80px;
@@ -52,10 +53,42 @@ html {
   margin-right: 100px;
 }
 .diff {
-  width: 550px;
-  height: 600px;
+  width: 530px;
+  overflow: hidden;
   background-color: #fff;
   margin: 10px;
   margin-top: 30px;
   box-shadow: 0px 0px 5px #bbbbbb;
+  color: #888;
+}
+.diff div {
+  text-align: left;
+}
+.line {
+  height: 30px;
+  line-height: 30px;
+}
+.line_number {
+  display: inline-block;
+  width: 40px;
+  text-align: center;
+  background-color: #f2f2f2;
+  opacity: .75;
+  margin-right: 10px;
+}
+.odd-line {
+  background-color: #f8f8f8;
+}
+.bad-line {
+  background-color: #fedede;
+}
+.bad-seg {
+  background-color: #dedefe;
+  border-radius: 5px;
+  padding: 2px;
+  margin: -2px;
+}
+.line-hover {
+  background-color: #dfd;
+  cursor: pointer;
 }

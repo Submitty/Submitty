@@ -35,6 +35,7 @@ body,html{
 
 #container{
 	width:@size;
+	vertical-align: top;
 }
 
 #header{
@@ -80,10 +81,48 @@ body,html{
 }
 
 .diff:extend(.h){
-	width:@size/2-50;
-	height:600px;
+	width:@size/2-70;
+	overflow: hidden;
 	background-color: #fff;
 	margin:10px;
+	// height:800px;
 	margin-top:30px;
 	box-shadow: 0px 0px 5px darken(@bg, 20%);
+	// padding:20px;
+	color : #888;
+}
+
+.diff div{
+	text-align: left;
+}
+
+.line{
+	height:30px;
+	line-height: 30px;
+}
+
+.line_number{
+	display:inline-block;
+	width:40px;
+	text-align: center;
+	background-color: #f2f2f2;
+	opacity:.75;
+	margin-right: 10px;
+}
+.odd-line{
+	background-color: #f8f8f8;
+}
+.bad-line{
+	background-color: #fedede;
+}
+.bad-seg{
+	background-color: #dedefe;
+	border-radius:5px;
+	padding:2px;
+	margin:-2px;
+}
+
+.line-hover{
+	background-color: #dfd;
+	cursor:pointer;
 }
