@@ -16,8 +16,6 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include "STRutil.h"
 #include "difference.h"
 
-//TODO: Change the return type for these functions.
-
 /*diffNaive does a per character comparison including white space and new lines.
 It returns a number between 0 and 100 (inclusive) indicating the number of
 characters the student string was off by. The strings are not changed in this
@@ -46,11 +44,11 @@ Change diffNaive(const std::string& student, const std::string& instructor){
 	}
 	return differences;
 }
-/*diffNoWhiteSpace does a per character comparison not including white space but
-including new lines. It returns a number between 0 and 100 (inclusive) 
-indicating the number of characters the student string was off by. The strings 
-are not changed in this comparison. Runs in linear time with respect to the 
-longer string.*/
+
+/*diffNoSpace does a per character comparison not including white space but
+including new lines. It returns a Change object that indicates the indicies of
+characters the student string was off by. The strings are not changed in this 
+comparison. Runs in linear time with respect to the longer string. */
 Change diffNoSpace(const std::string& _student, const std::string& _instructor){
 	Change differences;
 	differences.a_start = 0;
@@ -86,7 +84,12 @@ Change diffNoSpace(const std::string& _student, const std::string& _instructor){
 	}
 	return differences;
 }
-/**/
+
+/*diffLine does a per character comparison including white space but
+including new lines. Comparison is done per line and returns a Difference object
+that indicates the indicies of characters the student string was off by. The 
+strings are not changed in this comparison. Runs in linear time with respect to
+the longer string.*/
 Difference diffLine(const std::string& _student, const std::string& _instructor){
 	Difference diffs;
 	Change file;
@@ -126,7 +129,12 @@ Difference diffLine(const std::string& _student, const std::string& _instructor)
 	diffs.changes.push_back(file);
 	return diffs;
 }
-/**/
+
+/*diffLineNoSpace does a per character comparison not including white space but
+including new lines. Comparison is done per line and returns a Difference object
+that indicates the indicies of characters the student string was off by. The 
+strings are not changed in this comparison. Runs in linear time with respect to
+the longer string.*/
 Difference diffLineNoSpace(const std::string& _student, const std::string& _instructor){
 	Difference diffs;
 	Change file;
