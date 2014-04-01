@@ -1,0 +1,28 @@
+3 copies of "Into the Wild" added
+2 copies of "Forrest Drawl" added
+2 copies of "Gone with the Wind" added
+3 copies of "Toy Story" added
+new customer: Carol Adams
+new customer: Kim Smith
+Ship DVDs
+  Carol Adams receives "Raiders of the Lost Ark"
+  Carol Adams receives "Gone with the Wind"
+  Carol Adams receives "Forrest Gump"
+  Kim Smith receives "Gone with the Wind"
+Kim Smith returns "Into the Wild"
+Ship DVDs
+  Carol Adams receives "Into the Wild"
+Carol Adams returns "Into the Wild"
+Throw DVDs
+  Carol Adams receives "Toy Story"
+Carol Adams has 3 movies:
+    "Raiders of the Lost Ark"
+    "Gone with the Wind"
+    "Toy Story"
+Wayne Evans has no movies
+  Kim Smith receives "Gone with the Wind"
+  preference list:
+    "Raiders of the Lost Ark"
+  1 copy checked out and 2 copies available
+"Gone with the Wind":
+  2 copies missing out

@@ -4,6 +4,8 @@ Kiana McNellis, Kienan Knight-Boehm
 All rights reserved.
 This code is licensed using the BSD "3-Clause" license. Please refer to
 "LICENSE.md" for the full license.
+
+Knuth–Morris–Pratt algorithm
 */
 
 #ifndef __TOKEN__
@@ -14,12 +16,74 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <algorithm>
 #include "STRutil.h"
 
-int searchToken(const std::string& _student, const std::string& _instructor){
-	return 100;
+/*A helper function that is used to construct a table for the keyword
+in linear time with respect to the keyword given. This helper function
+is used in the Knuth–Morris–Pratt token searching algorithm for single
+tokens in order to eliminate redundant comparisons in the student string.
+The expected arguments are an integer buffer the same size as the string
+keyword and a keyword that accepts any ASCII character. The behavior
+for the function with a buffer less than the size of the keyword is
+not predictable and should not be used.*/
+void buildTable( int* V, const std::string& keyword){
+	int j = 0;
+
+	//Table initialization
+	V[0] = -1; V[1] = 0;
+	for(unsigned int i = 2; i < keyword.size(); i++){
+		if( keyword[i] == keyword[j] ){
+			j++;
+			V[i] = j;
+		} else if( j > 0 ){
+			j = V[j];
+		} else {
+			V[i] = 0;
+		}
+	}
 }
-int searchTokenNoWhiteSpace(const std::string& _student,
-				const std::string& _instructor){
-	return 100;
+/*searchToken looks for a token specified in the second argument in the
+student output. The algorithm runs in linear time with respect to the 
+length of the student output and preprocessing for the algorithm is
+linear with respect to the token. Overall, the algorithm runs in O(N + M)
+time where N is the length of the student and M is the length of the token.*/
+Difference searchToken(const std::string& student, const std::string& token){
+	
+	//Build a table to use for the search
+	Difference diff;
+	diff.distance = 0;
+	int V[token.size()];
+	buildTable( V, token);
+
+	int m = 0;
+	int i = 0;
+	while( m + i < student.size() ){
+		if( student[i + m] == token[i] ){
+			if( i == token.size() - 1 )
+				return diff;
+			i++;
+		} else {
+			m += i - V[i];
+			if( V[i] == -1 )
+				i = 0;
+			else
+				i = V[i];
+		}
+	}
+
+	Change tmp;
+	tmp.b_changes.push_back(0);
+	tmp.a_start = tmp.b_start = 0;
+	diff.changes.push_back(tmp);
+	diff.distance = 1;
+	return diff;
+}
+/*searchMultipleTokens looks for tokens delimited by newline characters in the 
+student output. The algorithm runs in linear time with respect to the 
+length of the student output and preprocessing for the algorithm is
+linear with respect to the token. Overall, the algorithm runs in O(N + M)
+time where N is the length of the student and M is the length of the token.*/
+Difference searchMultipleTokens(const std::string& student,
+										 		const std::string& tokens){
+	return Difference();
 }
 
 #endif //__TOKEN__
