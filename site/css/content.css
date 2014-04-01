@@ -1,0 +1,124 @@
+#content-container {
+  text-align: center;
+  padding: 15px;
+  /*padding-top:15px;*/
+}
+#content {
+  min-height: 800px;
+  background-color: #fff;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+#content-submit {
+  height: 80px;
+  text-align: left;
+  font-size: 18px;
+}
+#assignment-name {
+  line-height: 80px;
+  margin-left: 40px;
+  color: #333;
+}
+#assignment-name i {
+  color: #00790D;
+}
+.assignment-button {
+  margin-right: 30px;
+  float: right;
+  margin-top: 23px;
+  padding: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  min-width: 80px;
+  text-align: center;
+  font-size: 14px;
+  color: #888;
+}
+.assignment-button:hover {
+  cursor: pointer;
+  color: #555;
+  background-color: #eee;
+}
+#assignment-submit {
+  margin-right: 40px;
+}
+#assignment-graph-container {
+  height: 60px;
+  border-bottom: 1px solid #ccc;
+  font-size: 14px;
+}
+.assignment-graph-bar {
+  display: inline-block;
+  height: 20px;
+}
+.assignment-graph-bar:hover {
+  opacity: .5;
+}
+#assignment-graph-red {
+  background-color: #f88;
+}
+#assignment-graph-green {
+  background-color: #8f8;
+}
+#assignment-graph-yellow {
+  background-color: #ff8;
+}
+#assignment-graph-grade {
+  display: inline-block;
+  float: left;
+  width: 500px;
+  height: 60px;
+  text-align: left;
+  padding: 5px;
+  color: #888;
+  padding-left: 40px;
+}
+#assignment-submission-info {
+  font-size: 14px;
+  float: right;
+  display: inline-block;
+  color: #888;
+  margin-right: 40px;
+  margin-top: 20px;
+}
+#content table {
+  margin-top: 20px;
+  width: 100%;
+  height: 800px;
+  vertical-align: top;
+}
+#content td {
+  vertical-align: top;
+}
+#content-scores {
+  width: 250px;
+  padding-right: 10px;
+  border-right: solid 1px #ccc;
+}
+.content-score {
+  height: 60px;
+  font-size: 14px;
+  color: #888;
+  line-height: 60px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.content-score:hover {
+  background-color: #f8f8f8;
+  cursor: pointer;
+}
+.content-score i {
+  width: 10px;
+  margin-right: 12px;
+}
+.content-score-name {
+  float: left;
+}
+.content-score-score {
+  float: right;
+}
+#scorecard {
+  text-align: left;
+  color: #888;
+  padding-left: 10px;
+}
