@@ -49,6 +49,7 @@ Difference searchToken(const std::string& student, const std::string& token){
 	
 	//Build a table to use for the search
 	Difference diff;
+	diff.distance = 0;
 	int V[token.size()];
 	buildTable( V, token);
 
@@ -72,6 +73,7 @@ Difference searchToken(const std::string& student, const std::string& token){
 	tmp.b_changes.push_back(0);
 	tmp.a_start = tmp.b_start = 0;
 	diff.changes.push_back(tmp);
+	diff.distance = 1;
 	return diff;
 }
 /*searchMultipleTokens looks for tokens delimited by newline characters in the 
