@@ -38,7 +38,7 @@ var diff = function(){
 
 			assocs.push([]);
 			markDifference(f0,ins0,student,i,"stu_");
-			markDifference(f1,ins1,instructor,i,"ins_");
+			markDifference(f1,ins1,instructor,i,"ist_");
 
 		}
 	}
@@ -53,6 +53,7 @@ var diff = function(){
 				var line_id = "#" + id_prepend + "line" + change.line_number;
 				if (change.line_number){
 					if (!change.word_number){
+						console.log(id_prepend,"Bad line at ",change.line_number);
 						style.push([line_id, "bad-line"]);
 						assocs[changeID].push(line_id);
 					}else{
@@ -78,9 +79,11 @@ var diff = function(){
 					console.log("ERROR: NO LINE NUMBER IN DIFFERENCE");
 				}
 			}
-		}else if (difference.start){
+		}else if (difference.start !== undefined){
+			console.log(id_prepend,"Insert line at ",difference.start);
+			// difference.start += ins.length;
 			ins.push(difference.start);
-			console.log("#" + id_prepend + "ins" + difference.start);
+			// console.log("#" + id_prepend + "ins" + difference.start);
 			assocs[changeID].push("#" + id_prepend + "ins" + difference.start);
 		}else{
 			console.log("Couldn't interpret difference : ",difference);
@@ -92,10 +95,11 @@ var diff = function(){
 
 		// Display lines from diff
 		displayLines(f0,ins0,document.getElementById("diff0"),"stu_");
-		displayLines(f1,ins1,document.getElementById("diff1"),"ins_");
+		displayLines(f1,ins1,document.getElementById("diff1"),"ist_");
 
 		// Load generated css
 		for (var i = 0;i < style.length;i++){
+			console.log(style[i]);
 			$(style[i][0]).addClass(style[i][1]);
 		}
 
@@ -135,12 +139,11 @@ var diff = function(){
 			if (inserts.indexOf(i) != -1){
 				// html += "Insert<br/>";
 				html += "<div class='line missing' id='"+id_preprend+"ins"+i+"'></div>";
-			}else{
-				html += "<div class='line' id='"+id_preprend+"line"+i+
-					"'><span class='line_number "+(i%2 == 0 ? "" : "odd-line")+
-					"'>"+(line_number+1)+"</span>" + lines[i] + "</div>";
-				line_number ++;
 			}
+			html += "<div class='line' id='"+id_preprend+"line"+i+
+				"'><span class='line_number "+(i%2 == 0 ? "" : "odd-line")+
+				"'>"+(line_number+1)+"</span>" + lines[i] + "</div>";
+			line_number ++;
 		}
 		element.innerHTML = html;
 	}
