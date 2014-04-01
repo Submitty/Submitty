@@ -15,9 +15,8 @@ check and what to do with cout.txt and cerr.txt */
 enum cout_cerr_check { DONT_CHECK = 0, WARN_IF_NOT_EMPTY = 1, CHECK = 2 };
 
 
-/* TestCase is used to define individual test cases for homeworks. These are to
-be populated using the Mutators prior to use and will be executed by the 
-validator and graded by the grader. */
+/* TestCase is used to define individual test cases for homeworks. These
+will be checked by the validator and graded by the grader. */
 class TestCase {
 
 public:
@@ -26,12 +25,14 @@ public:
 	TestCase( const std::string &title, const std::string &details,
 			  const std::string &command, const std::string &filename,
 			  const std::string &description, const std::string &expected,
-			  const int points, const bool hidden,
-			  const cout_cerr_check cout_check, const cout_cerr_check cerr_check,
-			  int (*cmp)(std::string, std::string) )
+			  const int points, const bool hidden, const bool extracredit,
+			  const cout_cerr_check cout_check,
+			  const cout_cerr_check cerr_check,
+			  Difference (*cmp)(const std::string&, const std::string&) )
 			: _title(title), _details(details), _command(command),
 			  _filename(filename), _description(description),
-			  _expected(expected), _points(points), _hidden(hidden),
+			  _expected(expected), _points(points),
+			  _hidden(hidden), _extracredit(extracredit),
 			  _coutcheck(cout_check), _cerrcheck(cerr_check),
 			  cmp_output(cmp) {}
 	
@@ -44,18 +45,19 @@ public:
 	std::string expected() const { return _expected; }
 	int points() const { return _points; }
 	bool hidden() const { return _hidden; }
+	bool extracredit() const { return _extracredit; }
 	cout_cerr_check coutCheck() const { return _coutcheck; }
 	cout_cerr_check cerrCheck() const { return _cerrcheck; }
 	
-	/* Calls the function designated by the function pointer and returns the
-	result if successful or -1 otherwise. The arguments of the compare */
-	int compare(std::string &student_out, std::string &expected_out){
-		if(cmp_output != 0) return cmp_output(student_out, expected_out);
-		else return -1;
+	/* Calls the function designated by the function pointer; if the function pointer
+	    is NULL, defaults to returning the result of diffLine(). */
+	Difference compare(const std::string &student_out, const std::string &expected_out){
+		if(cmp_output != NULL) return cmp_output(student_out, expected_out);
+		else return diffLine(student_out, expected_out);
 	}
 	
 	// Mutators for configuring the test case
-	TestCase* const setTitle(const std::string &new_title) 
+	/*TestCase* const setTitle(const std::string &new_title) 
 		{ _title = new_title; return this; }
 	TestCase* const setDetails(const std::string &new_details) 
 		{ _details = new_details; return this; }
@@ -72,7 +74,7 @@ public:
 	TestCase* const setExpected(const std::string &new_exp) 
 		{ _expected = new_exp; return this; }
 	TestCase* const setCompare(int (*cmp)(std::string, std::string)) 
-		{ cmp_output = cmp; return this; }
+		{ cmp_output = cmp; return this; }*/
 		
 private:
 	std::string _title;
@@ -83,9 +85,10 @@ private:
 	std::string _expected;
 	int _points;
 	bool _hidden;
+	bool _extracredit;
 	cout_cerr_check _coutcheck;
 	cout_cerr_check _cerrcheck;
-	int (*cmp_output)(std::string, std::string);
+	Difference (*cmp_output)(const std::string&, const std::string&);
 };
 
 #endif
