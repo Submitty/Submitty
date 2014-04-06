@@ -67,6 +67,8 @@ var diff = function(){
 						// Convert subranges to character ranges and add
 						// surround tags
 						for (var k = 0;k < subranges.length;k++){
+							console.log(word_to_character_range(lines[line], subranges[k]).toString() 
+								,lines[line], subranges[k].toString());
 							subranges[k] = word_to_character_range(lines[line], subranges[k]);
 							surround.push(["<span class='bad-seg bad-seg-"+line+"'>","</span>"]);
 						}

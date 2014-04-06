@@ -26,11 +26,19 @@ function characters_to_word(words, word_num){
 // Convert word range to character range
 // "a dog went to the store", [1,3] => [2,13]
 function word_to_character_range(sentence, word_range){
+	var initial_space_count = 0;
+	for (var i = 0; i <sentence.length; i++){
+		if (sentence[i] != " "){
+			initial_space_count = i;
+			sentence = sentence.slice(i,sentence.length);
+			break;
+		}
+	}
 	var words = sentence.split(" ");
 	return [
-		characters_to_word(words, word_range[0]),
-		word_range[1] < words.length ? characters_to_word(words, word_range[1]) + words[word_range[1]].length : 
-			characters_to_word(words, words.length-1) + words[words.length-1].length
+		initial_space_count + characters_to_word(words, word_range[0]),
+		initial_space_count + (word_range[1] < words.length ? characters_to_word(words, word_range[1]) + words[word_range[1]].length : 
+			characters_to_word(words, words.length-1) + words[words.length-1].length)
 	];
 }
 
