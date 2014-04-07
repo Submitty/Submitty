@@ -1,5 +1,5 @@
-<?php $name = "";
-if ($name == "") {
+<?php
+if (!isset($name) || $name=="") {
     $name = "Login";
 }
 ?>

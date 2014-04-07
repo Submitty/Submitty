@@ -8,7 +8,7 @@ if (!isset($_GET["page"])) {
 $page = htmlspecialchars($_GET["page"]);
 
 //This needs to be wrapped around session Ids and logins
-if ($page == "home") {
+if ($page == "home" || $page == "announcements" || $page == "grades" || $page == "homework") {
     require_once("private/controller/home.php");
 } else {
     require_once("private/controller/login.php");

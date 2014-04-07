@@ -1,4 +1,4 @@
 <?php
 require_once("private/controller/helper.php");
-render("home");
+render("home",array("page"=>$page));
 ?>
