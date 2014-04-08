@@ -1,4 +1,4 @@
-<div class="col-sm-3 col-md-2 sidebar">  
+<div class="col-md-3 sidebar">  
   <ul class="nav nav-sidebar">
     <li class="active"><a href="?page=home">Home</a></li>
     <li><a href="?page=announcements">Announcements</a></li>

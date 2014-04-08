@@ -3,7 +3,7 @@ function render($viewpage, $data = array()) {
     $path = './private/view/'.$viewpage.'.php';
     if (file_exists($path)) {
         extract($data);
-        require($path);
+        require_once($path);
     } else {
         echo "Error, render file path does not exist <br>";
         echo "cwd = ";
