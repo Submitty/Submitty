@@ -10,7 +10,7 @@ $a_data = array(
 );
 ?>
     <?php render("navbar",array("name"=>"Sengs"));?>
-    <div class="container">
+<div class="container">
     <div class="container-fluid">
         <div class="row">
             <?php render("leftnavbar");?>
@@ -24,50 +24,52 @@ $a_data = array(
 
                 <div class="col-xs-10 blog-main">
                     <div class="row">
-                    <div class="col-md-4 panel panel-default" style="padding: 0; margin-right: 5px">
-                        <div class="panel-heading"><h3>Announcements</h3>
+                        <div class="col-md-4 panel panel-default" style="padding: 0; margin-right: 5px">
+                            <div class="panel-heading"><h3>Announcements</h3>
+                            </div>
+                            <div class="panel-body">
+                                <p><?php if (isset($a_data)) {?>
+                                    <h4><p class="blog-post-meta"><?php echo $a_data[0]["date"];?></p></h4>
+                                    <p><?php echo $a_data[0]["text"];?></p>
+                                <?php } else {
+                                    echo "No recent announcements.";
+                                }?>
+                                </p>
+                                <p><a class="btn btn-default" href="?page=announcements" role="button">See more</a></p>                        
+                            </div>
                         </div>
-                        <div class="panel-body">
-                        <p><?php if (isset($a_data)) {?>
-                            <h4><p class="blog-post-meta"><?php echo $a_data[0]["date"];?></p></h4>
-                            <p><?php echo $a_data[0]["text"];?></p>
-                        <?php } else {
-                            echo "No recent announcements.";
-                        }?>
-                        </p>
-                        <p><a class="btn btn-default" href="?page=announcements" role="button">See more</a></p>                        </div>
-                    </div>
-                    <div class="panel panel-default col-md-4" style="padding: 0; margin-right: 5px;">
-                        <div class="panel-heading"><h3>Homework</h3></div>
-                        <div class="panel-body">
-                        <p><?php
-                            if (isset($homework)) {
-                                echo $homework["name"]." is due on ".$homework["due_date"]." at 11:59PM.  ";
-                                if (isset($homework["score"])) {
-                                    echo "Your last submission score was ".$homework["score"].".";
-                                }
-                            } else {
-                                echo "No current homework";
-                            }?>
-                        </p>
-                        <p><a class="btn btn-default" href="?page=homework" role="button">Homework</a></p>
+                        <div class="panel panel-default col-md-4" style="padding: 0; margin-right: 5px;">
+                            <div class="panel-heading"><h3>Homework</h3>
+                            </div>
+                            <div class="panel-body">
+                                <p><?php
+                                    if (isset($homework)) {
+                                        echo $homework["name"]." is due on ".$homework["due_date"]." at 11:59PM.  ";
+                                        if (isset($homework["score"])) {
+                                            echo "Your last submission score was ".$homework["score"].".";
+                                        }
+                                    } else {
+                                        echo "No current homework";
+                                    }?>
+                                </p>
+                                <p><a class="btn btn-default" href="?page=homework" role="button">Homework</a></p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="panel panel-default col-md-3" style="padding: 0;">
-                        <div class="panel-heading"><h3>Grades</h3></div>
-                        <div class="panel-body">
-                        <p>Grade overview</p>
-                        <p><a class="btn btn-default" href="?page=grades" role="button">Grades</a></p>
+                        <div class="panel panel-default col-md-3" style="padding: 0;">
+                            <div class="panel-heading"><h3>Grades</h3></div>
+                                <div class="panel-body">
+                                    <p>Grade overview</p>
+                                    <p><a class="btn btn-default" href="?page=grades" role="button">Grades</a></p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    </div>
-                </div>
-                </div>
+                    </div><!--Ends row-->
+                </div><!--Ends col-xs-10-->
             <?php }?>
       <!-- Main component for a primary marketing message or call to action -->
-        </div>
-    </div> <!-- /container -->
-</div>
+        </div> <!-- /row -->
+    </div> <!-- /container-fluid -->
+</div><!-- /continer
 
 <?php
 render("footer");

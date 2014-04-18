@@ -19,10 +19,7 @@ render("header");
                     </div>
                 </div>
             </div>
-            </div>
         </div>
-    </div>
-</div>
 <?php
 render("footer");
 ?>
