@@ -21,11 +21,17 @@
 
 class Change{
 public:
+	// Starting changeblock line for input (student)
     int a_start;
+	// Same for (instructor)
     int b_start;
+	// Vector of lines in changeblock that contain discrepancies (student)
     std::vector<int> a_changes;
+	// Same for (instructor)
     std::vector<int> b_changes;
+	// Structure for changed character/word indices (student)
     std::vector< std::vector< int > >  a_characters;
+	// Same for (instructor)
     std::vector< std::vector< int > >  b_characters;
     void clear();
 };
