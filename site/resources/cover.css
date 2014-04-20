@@ -42,4 +42,37 @@ footer {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
-
+.word-wrap {
+    word-wrap: break-word;
+}
+.container-main {
+    padding-top: 20px;
+}
+.panel-col {
+    padding-right: 5px;
+    padding-left: 5px;
+}
+.sidebar {
+    border-radius: 4px;
+    border-color: #ddd;
+    border-width: 1px;
+    border-style: solid;
+    border-top: 0;
+    border-left: 0;
+    top: -2px;
+    left: -2px;
+    padding-top: 20px;
+    margin-right: 5px;
+}
+.no-margin {
+    margin: 0;
+}
+.navbar {
+    margin-bottom: 0;*/
+}
+.subnav {
+    display: none;
+}
+.subnav-show:hover .subnav {
+    display: block;
+}
