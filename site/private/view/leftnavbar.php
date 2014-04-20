@@ -14,6 +14,8 @@
   <ul class="nav nav-sidebar">
     <li class="active"><a href="?page=home">Home</a></li>
     <li><a href="?page=announcements">Announcements</a></li>
+    <li><a href="?page=grades">Grades</a></li>
+
     <li class="subnav-show"><a href="?page=homework">Homework <b class="caret"></b></a>
         <ul class="subnav subnav-show nav-sidebar" <?php if ($page == "homework") {?> style="display:block" <?php } ?> >
             <?php for ($i = 1; $i <= $num_homeworks; $i++) {?>
@@ -21,7 +23,7 @@
             <?php }?>
         </ul>
     </li>
-    <li><a href="?page=grades">Grades</a></li>
-  </ul>
+     </ul>
+     <br>
 </div>
 
