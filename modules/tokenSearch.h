@@ -83,7 +83,26 @@ linear with respect to the token. Overall, the algorithm runs in O(N + M)
 time where N is the length of the student and M is the length of the token.*/
 Difference searchMultipleTokens(const std::string& student,
 										 		const std::string& tokens){
-	return Difference();
+	std::vector<std::string> tokenlist;
+	std::string tmpstr;													// Create junk token variable
+	for (int i = 1;i<tokens.size(); i++)								// Start at 1 to avoid first double quote
+	{
+		if (tokens[i]=="\"" && tokens[i+1]=="\n" && tokens[i+2]=="\"")	// If we're at a delimiter...
+		{
+			if (tmpstr!="")
+			{
+				tokenlist.push_back(tmpstr);
+			}
+			tmpstr.clear();
+			i=i+2;														// Skip to end of said delimiter
+		}
+		else
+		{
+			tmpstr+=tokens[i];
+		}
+	}
+	tokenlist.push_back(tmpstr);
+	return diff;
 }
 
 #endif //__TOKEN__
