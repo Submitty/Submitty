@@ -20,10 +20,8 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include "myersDiff.h"
-#include "difference.h"
-#include "runDiff.h"
-#include "metaData.h"
+#include "modules.h"
+
 
 void readFileList(std::string input, std::string & sample_file, std::vector<std::string>& student_files){
     std::ifstream in_file(input.c_str());

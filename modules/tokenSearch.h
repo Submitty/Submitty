@@ -15,6 +15,13 @@ Knuth–Morris–Pratt algorithm
 #include <string>
 #include <algorithm>
 #include "STRutil.h"
+#include "difference.h"
+
+void buildTable( int* V, const std::string& keyword);
+Difference searchToken(const std::string& student, const std::string& token);
+Difference searchMultipleTokens(const std::string& student,
+                                const std::string& tokens);
+std::vector<std::string> splitTokens(const std::string& tokens);
 
 /*A helper function that is used to construct a table for the keyword
 in linear time with respect to the keyword given. This helper function
@@ -84,11 +91,12 @@ time where N is the length of the student and M is the length of the token.*/
 Difference searchMultipleTokens(const std::string& student,
 										 		const std::string& tokens){
 	std::vector<std::string> tokenlist;
-	std::string tmpstr;													// Create junk token variable
-	for (int i = 1;i<tokens.size(); i++)								// Start at 1 to avoid first double quote
-	{
-		if (tokens[i]=="\"" && tokens[i+1]=="\n" && tokens[i+2]=="\"")	// If we're at a delimiter...
-		{
+	std::string tmpstr;                 // Create junk token variable
+
+    // Start at 1 to avoid first double quote
+    for (int i = 1;i<tokens.size(); i++){
+        // If we're at a delimiter...
+		if (tokens[i]=='\"' && tokens[i+1]=='\n' && tokens[i+2]=='\"')			{
 			if (tmpstr!="")
 			{
 				tokenlist.push_back(tmpstr);
@@ -102,7 +110,32 @@ Difference searchMultipleTokens(const std::string& student,
 		}
 	}
 	tokenlist.push_back(tmpstr);
-	return diff;
+	return Difference();//change to actual return
 }
+
+std::vector<std::string> splitTokens(const std::string& tokens){
+    std::vector<std::string> tokenlist;
+	std::string tmpstr;                 // Create empty token variable
+
+    // Start at 1 to avoid first double quote
+    for (int i = 1;i<tokens.size(); i++){
+        // If we're at a delimiter...
+		if (tokens[i]=='\"' && tokens[i+1]=='\n' && tokens[i+2]=='\"')			{
+			if (tmpstr!="")
+			{
+				tokenlist.push_back(tmpstr);
+			}
+			tmpstr.clear();
+			i=i+2;														// Skip to end of said delimiter
+		}
+		else
+		{
+			tmpstr+=tokens[i];
+		}
+	}
+	tokenlist.push_back(tmpstr);
+    return tokenlist;
+}
+
 
 #endif //__TOKEN__
