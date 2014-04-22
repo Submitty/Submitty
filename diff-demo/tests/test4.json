@@ -3,9 +3,12 @@
     {
         "student":
         {
-            "start": 1,
+            "start": 0,
             "line": [
                 {
+                    "line_number": 0, 
+                    "word_number":[ 5 ]
+                }, {
                     "line_number": 1, 
                     "word_number":[ 4 ]
                 }
@@ -13,9 +16,11 @@
         },
         "instructor":
         {
-            "start":1,
+            "start":0,
             "line": [
                 {
+                    "line_number": 0
+                }, {
                     "line_number": 1, 
                     "word_number":[ 4 ]
                 }

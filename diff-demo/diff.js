@@ -46,12 +46,12 @@ var diff = function(){
 	// Change a line specified by difference object
 	function markDifference(lines,ins, difference, changeID,id_prepend){
 		assocs[changeID] = (assocs[changeID] || []);
-		if (difference.line){
+		if (difference.line!== undefined){
 			var changes = difference.line;
 			for (var i = 0;i < changes.length;i++){
 				var change = changes[i];
 				var line_id = "#" + id_prepend + "line" + change.line_number;
-				if (change.line_number){
+				if (change.line_number !== undefined){
 					if (!change.word_number){
 						console.log(id_prepend,"Bad line at ",change.line_number);
 						style.push([line_id, "bad-line"]);
@@ -67,7 +67,7 @@ var diff = function(){
 						// Convert subranges to character ranges and add
 						// surround tags
 						for (var k = 0;k < subranges.length;k++){
-							console.log(word_to_character_range(lines[line], subranges[k]).toString() 
+							console.log(word_to_character_range(lines[line], subranges[k]).toString()
 								,lines[line], subranges[k].toString());
 							subranges[k] = word_to_character_range(lines[line], subranges[k]);
 							surround.push(["<span class='bad-seg bad-seg-"+line+"'>","</span>"]);
