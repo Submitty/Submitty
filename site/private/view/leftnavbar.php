@@ -10,7 +10,7 @@
 
 
 
-<div class="col-sm-3 hidden-xs sidebar"> 
+<div class="col-md-2 col-sm-3 hidden-xs sidebar"> 
   <ul class="nav nav-sidebar">
     <li class="active"><a href="?page=home">Home</a></li>
     <li><a href="?page=announcements">Announcements</a></li>

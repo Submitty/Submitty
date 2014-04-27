@@ -6,8 +6,11 @@ $data = array(
     HW6 avg:31/50, std dev:12 approximate grades: 42&up=A, 30&up=B, 20&up=C, 15&up=D.
     Time spent on HW5: average 22.3 hours, median 20 hours.")
 );
+if (!isset($announcements_url)) {
+    $announcements_url = "http://www.cs.rpi.edu/academics/courses/spring14/ds/announcements.php";
+}
 ?>
-<div class="col-sm-8 blog-main">
+<div class="col-sm-8 blog-main" id="blog-main">
     <div class="blog-header">
         <h1 class="blog-title">Announcements</h1>
     </div>

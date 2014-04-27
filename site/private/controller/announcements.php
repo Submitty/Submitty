@@ -1,9 +1,6 @@
 <?php
 
-//Make model function calls for home here
-
-$homework = array("due_date"=>"4/10/14","name"=>"Homework 8","score"=>"25/25");
-
+//Make model function calls for announcements here
 $a_data = array(
     array("date"=>"Apr 4","text"=>"While the webserver is being updated.... please use this URL for homework submission: https://cgi8.cs.rpi.edu/submit/submit.php?course=csci1200", "link"=>"https://cgi8.cs.rpi.edu/submit/submit.php?course=csci1200"),
     array("date"=>"Apr 4","text"=>"HW8 has been posted on the calendar. It is due Thursday Apr 10th at 11:59pm."),
@@ -12,5 +9,5 @@ $a_data = array(
     Time spent on HW5: average 22.3 hours, median 20 hours.")
 );
 
-render("home",array("homework"=>$homework, "a_data"=>$a_data));
+render("announcements", array());
 ?>
