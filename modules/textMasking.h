@@ -55,7 +55,7 @@ std::vector< std::string > includelines(
                 bool match=true;
                 for (int b=0; b<multTokens.size(); b++){
                     //change to use searchMultipleTokens to find token
-                    if (text[a].find(token)==std::string::npos){
+                    if (text[a].find(multTokens[b])==std::string::npos){
                         match=false;
                         break;
                     }
@@ -69,7 +69,7 @@ std::vector< std::string > includelines(
             for (int a=0; a<text.size(); a++) {
                 for (int b=0; b<multTokens.size(); b++){
                     //change to use searchMultipleTokens to find token
-                    if (text[a].find(token)!=std::string::npos){
+                    if (text[a].find(multTokens[b])!=std::string::npos){
                         output.push_back(text[a]);
                         break;
                     }
@@ -111,7 +111,7 @@ std::vector< std::string > excludelines(
                 bool match=true;
                 for (int b=0; b<multTokens.size(); b++){
                     //change to use searchMultipleTokens to find token
-                    if (text[a].find(token)==std::string::npos){
+                    if (text[a].find(multTokens[b])==std::string::npos){
                         match=false;
                         break;
                     }
@@ -126,7 +126,7 @@ std::vector< std::string > excludelines(
                 bool match=true;
                 for (int b=0; b<multTokens.size(); b++){
                     //change to use searchMultipleTokens to find token
-                    if (text[a].find(token)!=std::string::npos){
+                    if (text[a].find(multTokens[b])!=std::string::npos){
                         match=false;
                         break;
                     }
