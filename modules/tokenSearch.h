@@ -110,12 +110,31 @@ std::vector<std::string> splitTokens(const std::string& tokens){
 			tmpstr.clear();
 			i=i+2;														// Skip to end of said delimiter
 		}
+        else if ((tokens.size()-i==2) && tokens[i]=='\"' && tokens[i+1]=='\n'){
+            if (tmpstr!="")
+			{
+				tokenlist.push_back(tmpstr);
+			}
+			tmpstr.clear();
+            i=i+1;
+        }
+        else if ((tokens.size()-i==1) && tokens[i]=='\"'){
+            if (tmpstr!="")
+			{
+				tokenlist.push_back(tmpstr);
+			}
+			tmpstr.clear();
+        }
+
 		else
 		{
 			tmpstr+=tokens[i];
 		}
 	}
-	tokenlist.push_back(tmpstr);
+    if (tmpstr!="")
+    {
+        tokenlist.push_back(tmpstr);
+    }
     return tokenlist;
 }
 
