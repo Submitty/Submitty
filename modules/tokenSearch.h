@@ -91,25 +91,7 @@ time where N is the length of the student and M is the length of the token.*/
 Difference searchMultipleTokens(const std::string& student,
 										 		const std::string& tokens){
 	std::vector<std::string> tokenlist;
-	std::string tmpstr;                 // Create junk token variable
-
-    // Start at 1 to avoid first double quote
-    for (int i = 1;i<tokens.size(); i++){
-        // If we're at a delimiter...
-		if (tokens[i]=='\"' && tokens[i+1]=='\n' && tokens[i+2]=='\"')			{
-			if (tmpstr!="")
-			{
-				tokenlist.push_back(tmpstr);
-			}
-			tmpstr.clear();
-			i=i+2;														// Skip to end of said delimiter
-		}
-		else
-		{
-			tmpstr+=tokens[i];
-		}
-	}
-	tokenlist.push_back(tmpstr);
+	tokenlist=splitTokens(tokens);
 	return Difference();//change to actual return
 }
 
