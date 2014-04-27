@@ -163,17 +163,39 @@ std::vector< std::string > linesBetween(
                                 unsigned int begin,
                                 unsigned int end,
                                 const std::vector< std::string >&text){
+    if (end>text.size()) {
+        end=(unsigned int)(text.size());
+    }
+    if (begin>text.size()) {
+        begin=(unsigned int)(text.size());
+    }
+    std::vector< std::string > output;
 
-    return std::vector< std::string > ();
+    for (int a=begin; a<end; a++) {
+        output.push_back(text[a]);
+    }
+    return output;
 }
 
 std::vector< std::string > linesOutside(
                                 unsigned int begin,
                                 unsigned int end,
                                 const std::vector< std::string >&text){
+    if (end>text.size()) {
+        end=(unsigned int)(text.size());
+    }
+    if (begin>text.size()) {
+        begin=(unsigned int)(text.size());
+    }
+    std::vector< std::string > output;
+    for (int a=0; a<begin; a++) {
+        output.push_back(text[a]);
+    }
+    for (int a=end+1; a<text.size(); a++) {
+        output.push_back(text[a]);
+    }
+    return output;
 
-
-    return std::vector< std::string > ();
 }
 
 
