@@ -18,20 +18,22 @@ std::vector< std::string > includelines(
                                 const std::vector< std::string >& text,
                                 bool allMatch=false);
 std::vector< std::string > includelines(
-                                const std::vector<int> &lines,
+                                const std::vector<unsigned int> &lines,
                                 const std::vector< std::string >&text);
 std::vector< std::string > excludelines(
                                 const std::string &token,
                                 const std::vector< std::string >& text,
                                 bool allMatch=false);
 std::vector< std::string > excludelines(
-                                const std::vector<int> &lines,
+                                const std::vector<unsigned int> &lines,
                                 const std::vector< std::string >&text);
 std::vector< std::string > linesBetween(
-                                const int begin, const int end,
+                                unsigned int begin,
+                                unsigned int end,
                                 const std::vector< std::string >&text);
 std::vector< std::string > linesOutside(
-                                const int begin, const int end,
+                                unsigned int begin,
+                                unsigned int end,
                                 const std::vector< std::string >&text);
 
 
@@ -82,10 +84,13 @@ std::vector< std::string > includelines(
 
 
 std::vector< std::string > includelines(
-                                const std::vector<int> &lines,
+                                const std::vector<unsigned int> &lines,
                                 const std::vector< std::string >&text){
     std::vector< std::string > output;
     for (int a=0; a<lines.size(); a++){
+        if (lines[a]>text.size()) {
+            continue;
+        }
         output.push_back(text[lines[a]]);
     }
     return output;
@@ -141,10 +146,13 @@ std::vector< std::string > excludelines(
 }
 
 std::vector< std::string > excludelines(
-                                const std::vector<int> &lines,
+                                const std::vector<unsigned int> &lines,
                                 const std::vector< std::string >&text){
     std::vector< std::string > output=text;
     for (int a=0; a<lines.size(); a++){
+        if (lines[a]>text.size()) {
+            continue;
+        }
         output.erase(text.begin()+lines[a]);
     }
     return output;
@@ -152,14 +160,16 @@ std::vector< std::string > excludelines(
 
 
 std::vector< std::string > linesBetween(
-                                const int begin, const int end,
+                                unsigned int begin,
+                                unsigned int end,
                                 const std::vector< std::string >&text){
 
     return std::vector< std::string > ();
 }
 
 std::vector< std::string > linesOutside(
-                                const int begin, const int end,
+                                unsigned int begin,
+                                unsigned int end,
                                 const std::vector< std::string >&text){
 
 
