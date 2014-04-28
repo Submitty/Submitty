@@ -3,6 +3,7 @@ render("header");
 ?>
     <?php render("navbar",array("name"=>""));?>
         <div class="container">
+            <div class="jumbotron">
             <div class="row">
                 <div class="panel panel-default col-xs-8 col-xs-offset-2" style="padding: 0">
                     <div class="panel-heading">
@@ -18,6 +19,7 @@ render("header");
 
                     </div>
                 </div>
+            </div>
             </div>
         </div>
 <?php

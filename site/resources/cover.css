@@ -9,6 +9,10 @@ body {
 footer {
   padding: 30px 0;
 }
+.jumbotron {
+    margin-top: 40px;
+    min-height: 400px;
+}
 .form-signin {
   max-width: 330px;
   padding: 15px;
