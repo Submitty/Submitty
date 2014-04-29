@@ -5,7 +5,8 @@ All rights reserved.
 This code is licensed using the BSD "3-Clause" license. Please refer to
 "LICENSE.md" for the full license.
 
-Knuth–Morris–Pratt algorithm
+Knuth–Morris–Pratt algorithm used for single token search
+Rabin-Karp algorithm used for multiple token search
 */
 
 #ifndef __TOKEN__
@@ -16,6 +17,7 @@ Knuth–Morris–Pratt algorithm
 #include <algorithm>
 #include "STRutil.h"
 #include "difference.h"
+#include "clean.h"
 
 void buildTable( int* V, const std::string& keyword);
 Difference searchToken(const std::string& student, const std::string& token);
@@ -37,11 +39,12 @@ void buildTable( int* V, const std::string& keyword){
 	//Table initialization
 	V[0] = -1; V[1] = 0;
 	for(unsigned int i = 2; i < keyword.size(); i++){
-		if( keyword[i] == keyword[j] ){
+		if( keyword[i - 1] == keyword[j] ){
 			j++;
 			V[i] = j;
 		} else if( j > 0 ){
 			j = V[j];
+			i--;
 		} else {
 			V[i] = 0;
 		}
