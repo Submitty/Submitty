@@ -6,7 +6,7 @@ if ($points_possible == 0) {
 }
 
 ?>
-<div class="col-md-10 col-sm-9 blog-main">
+<div class="col-md-10 col-sm-10 blog-main">
     <div class="panel panel-default">
         <div class="panel-body"><!-- Panel Body Summary -->
             <h2>Homework <?php echo $homework_number;?></h2>

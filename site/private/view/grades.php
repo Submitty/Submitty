@@ -1,7 +1,7 @@
 <?php 
 ?>
 
-<div class="col-md-10 col-sm-9 blog-main">
+<div class="col-md-10 col-sm-10 blog-main">
     <div class="blog-header">
             <div class="panel panel-default">
                 <!-- Default panel contents -->
