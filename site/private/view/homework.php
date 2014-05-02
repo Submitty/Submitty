@@ -6,11 +6,7 @@ if ($points_possible == 0) {
 }
 
 ?>
-
 <div class="col-md-10 col-sm-9 blog-main">
-    <!--<div class="blog-header">
-        <h1 class="blog-title">Homework</h1>
-    </div>-->
     <div class="panel panel-default">
         <div class="panel-body"><!-- Panel Body Summary -->
             <h2>Homework <?php echo $homework_number;?></h2>
@@ -115,6 +111,9 @@ if ($points_possible == 0) {
         </div>
     </div><!-- End Homework Output Compare And Diff -->
 </div><!-- End Col Blog-Main -->
+
+
+
 <script>
 load_progress_bar(<?php echo $percent; ?>, "<?php echo $points_received." / ".$points_possible;?>");
 </script>

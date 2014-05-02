@@ -31,12 +31,17 @@ render("header");
 render("navbar", array("name"=>$name));
 render("leftnavbar", array("page"=>$page, "homework_number"=>$homework_number));
 ?>
+<?php 
+
+//if ($page != "homework") {//Uncomment for homework diff comparison to take entire width of screen
+
+?>
 <div class="col-sm-8">
     <div class="container container-main">
         <?php if ($page == "announcements") {
             render_controller("announcements");
         } else if ($page == "homework") {
-            render_controller("homework", array("last_homework"=>$last_homework, "homework_number"=>$homework_number));
+            render_controller("homework", array("homework_number"=>$homework_number, "last_homework"=>$last_homework));
         } else if ($page == "grades") {
             render_controller("grades");
         } else {
@@ -45,6 +50,10 @@ render("leftnavbar", array("page"=>$page, "homework_number"=>$homework_number));
         ?>
     </div>
 </div>
-<?php
+<?php 
+
+/*} else {
+    render_controller("homework", array("homework_number"=>$homework_number, "last_homework"=>$last_homework));//Uncomment for homework diff comparison to take entire width of screen
+}*/
+
 render("footer");
-?>
