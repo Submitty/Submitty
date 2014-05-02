@@ -42,7 +42,7 @@ const char* hw_dir = "HW0/";
 // input files directory
 const char* input_dir = "testingInput/";
 // expected output files directory
-const char* expected_out_dir = "Scripts/expectedOutput/HW0/";
+const char* expected_out_dir = "../CSCI1200/Scripts/expectedOutput/HW0/";
 
 /*
 // directory containing input files

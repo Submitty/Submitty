@@ -17,6 +17,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <iterator>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <math.h>
 
 #include "../modules/modules.h"
 #include "TestCase.h"
@@ -27,9 +28,9 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 bool checkValidDirectory( char* directory );
 bool checkValidDirectory( const char* directory );
-int validateReadme( char* submit_dir, char* grade_dir );
+int validateReadme( char* submit_dir, char* grade_dir, int &total_grade );
 int validateCompilation( std::ofstream &gradefile );
-int validateTestCases( char* submit_dir, char* grade_dir );
+int validateTestCases( char* submit_dir, char* grade_dir, int &total_grade );
 
 int main( int argc, char* argv[] ) {
 	
@@ -50,8 +51,12 @@ int main( int argc, char* argv[] ) {
 	hw_dir[strlen(hw_dir)] = '\0';
 	*/
 	
-	char user_dir[strlen(root_dir)+strlen(hw_dir)+strlen(argv[2])+2];
-	sprintf(user_dir, "%s%s%s/", root_dir, hw_dir, argv[2]);
+	char homework_dir[strlen(root_dir)+strlen(hw_dir)+1];
+	sprintf(homework_dir, "%s%s", root_dir, hw_dir);
+	homework_dir[strlen(homework_dir)] = '\0';
+	
+	char user_dir[strlen(homework_dir)+strlen(argv[2])+2];
+	sprintf(user_dir, "%s%s/", homework_dir, argv[2]);
 	user_dir[strlen(user_dir)] = '\0';
 	
 	char submission_dir[strlen(user_dir)+strlen(argv[3])+2];
@@ -59,7 +64,7 @@ int main( int argc, char* argv[] ) {
 	submission_dir[strlen(submission_dir)] = '\0';
 	
 	/* Check for valid directories */
-	if( !checkValidDirectory( hw_dir ) ||
+	if( !checkValidDirectory( homework_dir ) ||
 	    !checkValidDirectory( user_dir ) ||
 	    !checkValidDirectory( submission_dir )) {
 
@@ -75,10 +80,12 @@ int main( int argc, char* argv[] ) {
 	
 	//std::ofstream outstr( grade_dir, std::ofstream::out );
 	
-	// Run test cases
-	validateReadme( submission_dir, grade_dir );
+	int total_grade = 0;
 	
-	validateTestCases( submission_dir, grade_dir );
+	// Run test cases
+	validateReadme( submission_dir, grade_dir, total_grade );
+	
+	validateTestCases( submission_dir, grade_dir, total_grade );
 	
 	return 0;
 }
@@ -124,13 +131,14 @@ bool checkValidDirectory( const char* directory ) {
 }
 
 /* Check student submit directory for README.txt */
-int validateReadme( char* submit_dir, char* grade_dir ) {
+int validateReadme( char* submit_dir, char* grade_dir, int &total_grade ) {
 	
 	char gradepath[strlen(grade_dir)+strlen("grade.txt")+1];
 	sprintf(gradepath, "%sgrade.txt", grade_dir);
 	gradepath[strlen(gradepath)] = '\0';
 	
 	std::ofstream gradefile( gradepath, std::ofstream::out );
+	/* TODO: check if this is valid */
 	
 	char readme[strlen(submit_dir)+strlen("README.txt")+1];
 	sprintf(readme, "%sREADME.txt", submit_dir);
@@ -144,13 +152,15 @@ int validateReadme( char* submit_dir, char* grade_dir ) {
 		std::cout << "Readme found!" << std::endl;
 #endif		
 		/* TODO: Specify readme points */
-		gradefile << "2" << std::endl;
+		total_grade += 2;
+		
+		//gradefile << "2" << std::endl;
 	}
 	else {
 #ifdef DEBUG		
 		std::cout << "Readme not found" << std::endl;
 #endif		
-		gradefile << "0" << std::endl;
+		//gradefile << "0" << std::endl;
 		return 1;	// README.txt does not exist
 	}
 	
@@ -168,11 +178,13 @@ int validateCompilation( std::ofstream &gradefile ) {
 
 /* Runs through each test case, pulls in the correct files, validates,
    and outputs the results */
-int validateTestCases( char* submit_dir, char* grade_dir ) {
+int validateTestCases( char* submit_dir, char* grade_dir, int &total_grade ) {
 
 	char output_dir[strlen(submit_dir)+strlen(".submit.out/")+1];
 	sprintf(output_dir, "%s.submit.out/", submit_dir);
 	output_dir[strlen(output_dir)] = '\0';
+	
+	//int total_grade = 0;
 	
 	for( int i = 2; i < num_testcases; ++i ) {
 		
@@ -270,13 +282,30 @@ int validateTestCases( char* submit_dir, char* grade_dir ) {
 			result = testcases[i].compare( s, e );
 		}
 		
-		/* TODO: Pass off to grade interpreter? */
-		
 		std::cout << "distance: " << (result.distance) << std::endl;
 		
+		int testcase_grade = (int)floor(result.distance * testcases[i].points());
+		total_grade += testcase_grade;
 		
+		char testcase_gradepath[strlen(grade_dir)+17];
+		sprintf(testcase_gradepath, "%stest%d_grade.txt", grade_dir, i-1);
+		testcase_gradepath[strlen(testcase_gradepath)] = '\0';
 		
+		std::ofstream testcase_gradefile( testcase_gradepath, std::ofstream::out );
+		/* TODO: check if this is valid */
+		
+		testcase_gradefile << testcase_grade << std::endl;
 	}
+	
+	char gradepath[strlen(grade_dir)+strlen("grade.txt")+1];
+	sprintf(gradepath, "%sgrade.txt", grade_dir);
+	gradepath[strlen(gradepath)] = '\0';
+	
+	std::ofstream gradefile( gradepath, std::ofstream::out );
+	/* TODO: check if this is valid */
+	
+	gradefile << total_grade << std::endl;
+	
 	return 0;
 }
 
