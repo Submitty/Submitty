@@ -74,8 +74,8 @@ int main( int argc, char* argv[] ) {
 #endif
 	}
 	
-	char grade_dir[strlen(submission_dir)+strlen(".submit.grade/")+1];
-	sprintf(grade_dir, "%s.submit.grade/", submission_dir);
+	char grade_dir[strlen(submission_dir)+strlen("GRADES/")+1];
+	sprintf(grade_dir, "%sGRADES/", submission_dir);
 	grade_dir[strlen(grade_dir)] = '\0';
 	
 	//std::ofstream outstr( grade_dir, std::ofstream::out );
@@ -140,8 +140,8 @@ int validateReadme( char* submit_dir, char* grade_dir, int &total_grade ) {
 	std::ofstream gradefile( gradepath, std::ofstream::out );
 	/* TODO: check if this is valid */
 	
-	char readme[strlen(submit_dir)+strlen("README.txt")+1];
-	sprintf(readme, "%sREADME.txt", submit_dir);
+	char readme[strlen(submit_dir)+strlen("FILES/README.txt")+1];
+	sprintf(readme, "%sFILES/README.txt", submit_dir);
 	readme[strlen(readme)] = '\0';
 	
 	std::ifstream instr( readme, std::ifstream::in );
