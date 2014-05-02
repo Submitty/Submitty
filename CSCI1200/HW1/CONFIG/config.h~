@@ -15,6 +15,9 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 const int hw_num = 1;
 const std::string hw_name = "Squaring Numbers";
 
+// Compile Command (executed in student FILES directory)
+const std::string compile_command = "g++ -g *.cpp";
+
 // Submission parameters
 const int max_submissions = 20;
 const int submission_penalty = 5;

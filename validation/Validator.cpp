@@ -82,9 +82,9 @@ int main( int argc, char* argv[] ) {
 	
 	int total_grade = 0;
 	
-	// Run test cases
-	validateReadme( submission_dir, grade_dir, total_grade );
+	//validateReadme( submission_dir, grade_dir, total_grade );
 	
+	// Run test cases
 	validateTestCases( submission_dir, grade_dir, total_grade );
 	
 	return 0;
@@ -130,6 +130,7 @@ bool checkValidDirectory( const char* directory ) {
 	return true;
 }
 
+/* TODO: POSSIBLY NOT NEEDED */
 /* Check student submit directory for README.txt */
 int validateReadme( char* submit_dir, char* grade_dir, int &total_grade ) {
 	
@@ -167,6 +168,7 @@ int validateReadme( char* submit_dir, char* grade_dir, int &total_grade ) {
 	return 0;
 }
 
+/* TODO: NOT NEEDED */
 /* Makes sure the code was compiled successfully */
 int validateCompilation( std::ofstream &gradefile ) {
 
@@ -186,7 +188,7 @@ int validateTestCases( char* submit_dir, char* grade_dir, int &total_grade ) {
 	
 	//int total_grade = 0;
 	
-	for( int i = 2; i < num_testcases; ++i ) {
+	for( int i = 0; i < num_testcases; ++i ) {
 		
 		std::cout << testcases[i].title() << " - points: "
 				  << testcases[i].points() << std::endl;
@@ -209,7 +211,7 @@ int validateTestCases( char* submit_dir, char* grade_dir, int &total_grade ) {
 		//if( !student_instr || !expected_instr ) continue;
 		
 		char cout_temp[strlen(output_dir) + 16];
-		sprintf(cout_temp, "%stest%d_cout.txt", output_dir, i-1 );
+		sprintf(cout_temp, "%stest%d_cout.txt", output_dir, i+1 );
 		const char* cout_path = cout_temp;
 		
 		// Check cout and cerr
@@ -217,41 +219,41 @@ int validateTestCases( char* submit_dir, char* grade_dir, int &total_grade ) {
 													  "_cout.txt" ).c_str();*/
 		std::ifstream cout_instr( cout_path, std::ifstream::in );
 		if( testcases[i].coutCheck() != DONT_CHECK ) {			
-			if( !cout_instr ) { std::cerr << "ERROR: test" << (i-1)
+			if( !cout_instr ) { std::cerr << "ERROR: test" << (i+1)
 								<< "_cout.txt does not exist" << std::endl; }			
 			else {
 				if( testcases[i].coutCheck() == WARN_IF_NOT_EMPTY ) {
 					std::string content;
 					cout_instr >> content;
 					if( content.size() > 0 ) { std::cout << "WARNING: test"
-							   << (i-1) << "_cout.txt is not empty" << std::endl; }
+							   << (i+1) << "_cout.txt is not empty" << std::endl; }
 				}
 				else if( testcases[i].coutCheck() == CHECK ) {
-					std::cout << "Check test" << (i-1)
+					std::cout << "Check test" << (i+1)
 							<< "_cout.txt instead of output file" << std::endl;
 				}
 			}
 		}
 		
 		char cerr_temp[strlen(output_dir) + 16];
-		sprintf(cerr_temp, "%stest%d_cerr.txt", output_dir, i-1 );
+		sprintf(cerr_temp, "%stest%d_cerr.txt", output_dir, i+1 );
 		const char* cerr_path = cerr_temp;
 		
 		/*const char* cerr_path = (student_output_dir + "/test" + (char*)(i-1) +
 													  "_cerr.txt" ).c_str();*/
 		std::ifstream cerr_instr( cerr_path, std::ifstream::in );
 		if( testcases[i].cerrCheck() != DONT_CHECK ) {
-			if( !cerr_instr ) { std::cout << "ERROR: test" << (i-1)
+			if( !cerr_instr ) { std::cout << "ERROR: test" << (i+1)
 								<< "_cerr.txt does not exist" << std::endl; }
 			else {
 				if( testcases[i].cerrCheck() == WARN_IF_NOT_EMPTY ) {
 					std::string content;
 					cerr_instr >> content;
 					if( content.size() > 0 ) { std::cout << "WARNING: test"
-							   << (i-1) << "_cerr.txt is not empty" << std::endl; }
+							   << (i+1) << "_cerr.txt is not empty" << std::endl; }
 				}
 				else if( testcases[i].cerrCheck() == CHECK ) {
-					std::cout << "Check test" << (i-1) << "_cerr.txt" << std::endl;
+					std::cout << "Check test" << (i+1) << "_cerr.txt" << std::endl;
 				}
 			}
 		}
@@ -288,23 +290,47 @@ int validateTestCases( char* submit_dir, char* grade_dir, int &total_grade ) {
 		total_grade += testcase_grade;
 		
 		char testcase_gradepath[strlen(grade_dir)+17];
-		sprintf(testcase_gradepath, "%stest%d_grade.txt", grade_dir, i-1);
+		sprintf(testcase_gradepath, "%stest%d_grade.txt", grade_dir, i+1);
 		testcase_gradepath[strlen(testcase_gradepath)] = '\0';
 		
-		std::ofstream testcase_gradefile( testcase_gradepath, std::ofstream::out );
-		/* TODO: check if this is valid */
-		
+		std::ofstream testcase_gradefile;
+		testcase_gradefile.open( testcase_gradepath );
 		testcase_gradefile << testcase_grade << std::endl;
+		testcase_gradefile.close();
 	}
 	
+	/* Fetch readme grade */
+	char readme_gradepath[strlen(grade_dir)+strlen("readme_grade.txt")+1];
+	sprintf(readme_gradepath, "%sreadme_grade.txt", grade_dir);
+	readme_gradepath[strlen(readme_gradepath)] = '\0';
+	
+	std::ifstream readme_gradefile;
+	readme_gradefile.open( readme_gradepath );
+	int grade;
+	readme_gradefile >> grade;
+	readme_gradefile.close();
+	total_grade += grade;
+	
+	/* Fetch compilation grade */
+	char compilation_gradepath[strlen(grade_dir)+strlen("compilation_grade.txt")+1];
+	sprintf(compilation_gradepath, "%scompilation_grade.txt", grade_dir);
+	compilation_gradepath[strlen(compilation_gradepath)] = '\0';
+	
+	std::ifstream readme_gradefile;
+	readme_gradefile.open( readme_gradepath );
+	compilation_gradefile >> grade;
+	compilation_gradefile.close();
+	total_grade += grade;
+	
+	/* Output total grade */
 	char gradepath[strlen(grade_dir)+strlen("grade.txt")+1];
 	sprintf(gradepath, "%sgrade.txt", grade_dir);
 	gradepath[strlen(gradepath)] = '\0';
 	
-	std::ofstream gradefile( gradepath, std::ofstream::out );
-	/* TODO: check if this is valid */
-	
+	std::ofstream gradefile;
+	gradefile.open( gradepath );
 	gradefile << total_grade << std::endl;
+	gradefile.close();
 	
 	return 0;
 }

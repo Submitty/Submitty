@@ -21,7 +21,7 @@ int main( int argc, char* argv[] ) {
 		return 1;
 	}
 	
-	ofstream << "Squaring " << num << " gives you " << squared << std::endl;
+	outstr << "Squaring " << num << " gives you " << squared << std::endl;
 	
 	return 0;
 }
