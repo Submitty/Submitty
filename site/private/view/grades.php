@@ -49,11 +49,10 @@ $test_scales = array($t1,$t2,$t3,$t4);
 
 <div class="col-md-10 col-sm-9 blog-main">
     <div class="blog-header">
-        <h1 class="blog-title">Grades</h1>
             <div class="panel panel-default">
                 <!-- Default panel contents -->
-                <div class="panel-heading">Grade summary</div>
                 <div class="panel-body">
+                    <h2>Grade summary</h2>
                     <p>The cutoffs are not exact and are used for final grade cutoffs or something like that...</p>
                     <h3>Overall</h3>
                 </div>

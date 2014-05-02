@@ -11,23 +11,24 @@ if (!isset($announcements_url)) {
 }
 ?>
 <div class="col-sm-8 blog-main" id="blog-main">
-    <div class="blog-header">
-        <h1 class="blog-title">Announcements</h1>
-    </div>
- 
-    <?php foreach ($data as $post) {
-        ?>
-        <div class="blog-post">
-            <h3><p class="blog-post-meta"><?php echo $post["date"];?></p></h3>
-            
-            <p><?php echo $post["text"];?></p>
-            <?php if (isset($post["code"])) {
-                ?><pre><code><?php echo $post["code"];?></code></pre>
-            <?php } 
-            if (isset($post["link"])) { ?>
-                <pre><code><a href='<?php echo $post["link"];?>'><?php echo $post["link"];?></a></code></pre>
-            <?php }?>
-            
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <h2>Announcements</h2>
+            <?php foreach ($data as $post) {
+                ?>
+                <div class="blog-post">
+                    <h3><p class="blog-post-meta"><?php echo $post["date"];?></p></h3>
+                    
+                    <p><?php echo $post["text"];?></p>
+                    <?php if (isset($post["code"])) {
+                        ?><pre><code><?php echo $post["code"];?></code></pre>
+                    <?php } 
+                    if (isset($post["link"])) { ?>
+                        <pre><code><a href='<?php echo $post["link"];?>'><?php echo $post["link"];?></a></code></pre>
+                    <?php }?>
+                    
+                </div>
+            <?php } ?>
         </div>
-    <?php } ?>
+    </div>
 </div>

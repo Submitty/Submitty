@@ -101,12 +101,12 @@ if ($points_possible == 0) {
                     $class = "badge";
                 }?>
                 <h4 style="margin-left: 10px;"><?php echo $test["title"];?> <span class="<?php echo $class;?>"><?php echo $test["score"]."/".$test["points_possible"];?></span></h4>
-                <div class="col-sm-6">
+                <div class="col-md-6">
                     <div class="panel panel-default">
                         My output
                     </div>
                 </div>
-                <div class="col-sm-6">
+                <div class="col-md-6">
                     <div class="panel panel-default">
                         Teacher output
                     </div>
