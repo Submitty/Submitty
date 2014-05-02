@@ -108,7 +108,7 @@ int GradingRubric::getTestScore(const TestCase& test_case) const {
 
 // Return student's total score
 
-int GradingRubric::getTotalScore() const {
+int GradingRubric::getTotalScore(bool withHidden = false) const {
 	return std::accumulate(_scores.begin(), _scores.end(), 0)
 		- _submission_penalty;
 }

@@ -1,11 +1,12 @@
 /*Copyright (c) 2014, Chris Berger, Jesse Freitas, Severin Ibarluzea,
-Kiana McNellis, Kienan Knight-Boehm
+Kiana McNellis, Kienan Knight-Boehm, Sam Seng
 
 All rights reserved.
 This code is licensed using the BSD "3-Clause" license. Please refer to
 "LICENSE.md" for the full license.
 
-Knuth–Morris–Pratt algorithm
+Knuth–Morris–Pratt algorithm used for single token search
+Rabin-Karp algorithm used for multiple token search
 */
 
 #ifndef __TOKEN__
@@ -15,6 +16,14 @@ Knuth–Morris–Pratt algorithm
 #include <string>
 #include <algorithm>
 #include "STRutil.h"
+#include "difference.h"
+#include "clean.h"
+
+void buildTable( int* V, const std::string& keyword);
+Difference searchToken(const std::string& student, const std::string& token);
+Difference searchMultipleTokens(const std::string& student,
+                                const std::string& tokens);
+std::vector<std::string> splitTokens(const std::string& tokens);
 
 /*A helper function that is used to construct a table for the keyword
 in linear time with respect to the keyword given. This helper function
@@ -30,11 +39,12 @@ void buildTable( int* V, const std::string& keyword){
 	//Table initialization
 	V[0] = -1; V[1] = 0;
 	for(unsigned int i = 2; i < keyword.size(); i++){
-		if( keyword[i] == keyword[j] ){
+		if( keyword[i - 1] == keyword[j] ){
 			j++;
 			V[i] = j;
 		} else if( j > 0 ){
 			j = V[j];
+			i--;
 		} else {
 			V[i] = 0;
 		}
@@ -83,7 +93,85 @@ linear with respect to the token. Overall, the algorithm runs in O(N + M)
 time where N is the length of the student and M is the length of the token.*/
 Difference searchMultipleTokens(const std::string& student,
 										 		const std::string& tokens){
-	return Difference();
+	std::vector<std::string> tokenlist;
+	tokenlist=splitTokens(tokens);
+	return Difference();//change to actual return
 }
+
+/*	Looks for a single token in a string using the Rabin-Karp rolling hash
+	method.  Returns starting index if found, -1 if not.					*/
+int RabinKarpSingle(std::string token, std::string searchstring)
+{
+	long hash = 0;
+	long goalhash = 0;
+	unsigned int tlen = token.size();
+	if (searchstring.size()<token.size())
+	{
+		return -1;
+	}
+	for (int i= 0; i<tlen; i++)		// Set up goal hash
+	{
+		goalhash += token[i];
+	}
+	for (int i = 0; i<tlen; i++)	// Set up first hash
+	{
+		hash+=searchstring[i];
+	}
+	for (int i = 0; i<=searchstring.size()-tlen; i++)
+	{
+		// Check if hashes then strings are equal, and if so return index
+		if (hash==goalhash && searchstring.substr(i,tlen)==token)
+		{
+			return i;
+		}
+		hash+=searchstring[i+tlen];
+		hash-=searchstring[i];
+	}
+	return -1;
+}
+
+std::vector<std::string> splitTokens(const std::string& tokens){
+    std::vector<std::string> tokenlist;
+	std::string tmpstr;                 // Create empty token variable
+
+    // Start at 1 to avoid first double quote
+    for (int i = 1;i<tokens.size(); i++){
+        // If we're at a delimiter...
+		if (tokens[i]=='\"' && tokens[i+1]=='\n' && tokens[i+2]=='\"')			{
+			if (tmpstr!="")
+			{
+				tokenlist.push_back(tmpstr);
+			}
+			tmpstr.clear();
+			i=i+2;						// Skip to end of said delimiter
+		}
+        else if ((tokens.size()-i==2) && tokens[i]=='\"' && tokens[i+1]=='\n'){
+            if (tmpstr!="")
+			{
+				tokenlist.push_back(tmpstr);
+			}
+			tmpstr.clear();
+            i=i+1;
+        }
+        else if ((tokens.size()-i==1) && tokens[i]=='\"'){
+            if (tmpstr!="")
+			{
+				tokenlist.push_back(tmpstr);
+			}
+			tmpstr.clear();
+        }
+
+		else
+		{
+			tmpstr+=tokens[i];
+		}
+	}
+    if (tmpstr!="")
+    {
+        tokenlist.push_back(tmpstr);
+    }
+    return tokenlist;
+}
+
 
 #endif //__TOKEN__

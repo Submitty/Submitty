@@ -17,9 +17,9 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 int diffBegin(const std::string& _student, const std::string& _instructor){
 	std::string student = string_trim_right(_student);
 	std::string instructor = string_trim_right(_instructor);
-	int len = (student.size() < instructor.size()) ? student.length() : instructor.length();
-	int extra = std::abs((int)(instructor.size() - student.size()));
-	int max = std::max(instructor.length(), student.length());
+	int len = (int)(student.size() < (int)instructor.size()) ? (int)student.length() : (int)instructor.length();
+	int extra = std::abs((int)(instructor.size() - (int)student.size()));
+	int max = std::max((int)instructor.length(), (int)student.length());
 	int diff = 0;
 
 	for(int i = 0; i < len; i++){
