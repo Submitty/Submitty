@@ -261,7 +261,7 @@ int validateTestCases( char* submit_dir, char* grade_dir, int &total_grade ) {
 		//std::cout << cout_path << std::endl;
 		//std::cerr << cerr_path << std::endl;
 		
-		Difference result;
+		TestResults result;
 		const std::string blank = "";
 		
 		if( !student_instr && !expected_instr )
@@ -283,6 +283,8 @@ int validateTestCases( char* submit_dir, char* grade_dir, int &total_grade ) {
 										   		std::istreambuf_iterator<char>() );
 			result = testcases[i].compare( s, e );
 		}
+		
+		/* TODO: Different member than .distance ? */
 		
 		std::cout << "distance: " << (result.distance) << std::endl;
 		

@@ -58,13 +58,8 @@ const std::string expected_output_dir = "../CSCI1200/Scripts/expectedOutput/HW0"
 const std::string results_dir = "../CSCI1200/HW0/alice/1/.submit.grade";
 */
 
-// Test cases
-const int num_testcases = 3;
-
-TestCase testcases[3] {
-
 /************* README AND COMPILATION *****************/
-TestCase(
+TestCase readmeTestCase(
   	"Readme",
   	"",
     "",
@@ -77,8 +72,8 @@ TestCase(
     DONT_CHECK,
     DONT_CHECK,
     NULL
-),
-TestCase(
+);
+TestCase compilationTestCase(
 	"Compilation",
 	"",
 	"",
@@ -91,13 +86,18 @@ TestCase(
 	DONT_CHECK,
 	DONT_CHECK,
 	NULL
-),
+);
+
+// Test cases
+const int num_testcases = 5;
+
+TestCase testcases[5] {
 
 /******************** TEST CASES **********************/
 TestCase(
 	"Case 1",							// title
 	"./hw1.exe 1 hw1_out.txt",			// details
-	"./a.out 1 test1_out.txt 1> test1_cout.txt 2> test1_cerr.txt",	// command
+	"./a.out 1 test1_out.txt",			// command
 	"test1_out.txt",					// output file name [V]
 	"test1_out.txt",					// output file description
 	"expected_test1.txt",				// expected output file [V]
@@ -111,7 +111,7 @@ TestCase(
 TestCase(
 	"Case 2",
 	"./hw1.exe 10 hw1_out.txt",
-	"./a.out 10 test2_out.txt 1> test2_cout.txt 2> test2_cerr.txt",
+	"./a.out 10 test2_out.txt",
 	"test2_out.txt",
 	"test2_out.txt",
 	"expected_test2.txt",
@@ -125,7 +125,7 @@ TestCase(
 TestCase(
 	"Case 3",
 	"./hw1.exe 69 hw1_out.txt",
-	"./a.out 69 test3_out.txt 1> test3_cout.txt 2> test3_cerr.txt",
+	"./a.out 69 test3_out.txt",
 	"test3_out.txt",
 	"test3_out.txt",
 	"expected_test3.txt",
@@ -139,7 +139,7 @@ TestCase(
 TestCase(
 	"Case 4",
 	"./hw1.exe 0 hw1_out.txt",
-	"./a.out 0 test4_out.txt 1> test4_cout.txt 2> test4_cerr.txt",
+	"./a.out 0 test4_out.txt",
 	"test4_out.txt",
 	"test4_out.txt",
 	"expected_test4.txt",
@@ -153,7 +153,7 @@ TestCase(
 TestCase(
 	"Case 5",
 	"./hw1.exe -3 hw1_out.txt",
-	"./a.out -3 test5_out.txt 1> test5_cout.txt 2> test5_cerr.txt",
+	"./a.out -3 test5_out.txt",
 	"test5_out.txt",
 	"test5_out.txt",
 	"expected_test5.txt",

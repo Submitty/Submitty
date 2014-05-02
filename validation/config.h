@@ -99,7 +99,7 @@ TestCase testcases[1] {
 TestCase(
 	"Case 1",							// title
 	"./case1.exe",						// details
-	"./a.out 1> cout.txt 2> cerr.txt",	// command
+	"./a.out",	// command
 	"test1_out.txt",					// output file name [V]
 	"test1_out.txt",					// output file description
 	"expected_test1.txt",				// expected output file [V]

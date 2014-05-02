@@ -17,12 +17,13 @@ Rabin-Karp algorithm used for multiple token search
 #include <algorithm>
 #include "STRutil.h"
 #include "difference.h"
-//#include "clean.h"
+#include "clean.h"
 
+int RabinKarpSingle(std::string token, std::string searchstring);
 void buildTable( int* V, const std::string& keyword);
 Difference searchToken(const std::string& student, const std::string& token);
-Difference searchMultipleTokens(const std::string& student,
-                                const std::string& tokens);
+Tokens searchMultipleTokens(const std::string& student,
+                            const std::string& tokens);
 std::vector<std::string> splitTokens(const std::string& tokens);
 
 /*A helper function that is used to construct a table for the keyword
@@ -55,11 +56,11 @@ student output. The algorithm runs in linear time with respect to the
 length of the student output and preprocessing for the algorithm is
 linear with respect to the token. Overall, the algorithm runs in O(N + M)
 time where N is the length of the student and M is the length of the token.*/
-Difference searchToken(const std::string& student, const std::string& token){
+Tokens searchToken(const std::string& student, const std::string& token){
 	
 	//Build a table to use for the search
-	Difference diff;
-	diff.distance = 0;
+	Tokens diff;
+	diff.num_tokens = 1;
 	int V[token.size()];
 	buildTable( V, token);
 
@@ -79,23 +80,56 @@ Difference searchToken(const std::string& student, const std::string& token){
 		}
 	}
 
-	Change tmp;
-	tmp.b_changes.push_back(0);
-	tmp.a_start = tmp.b_start = 0;
-	diff.changes.push_back(tmp);
-	diff.distance = 1;
+	diff.tokens_found.push_back(0);
 	return diff;
 }
-/*searchMultipleTokens looks for tokens delimited by newline characters in the 
+/*searchAllTokens looks for tokens delimited by newline characters in the 
 student output. The algorithm runs in linear time with respect to the 
 length of the student output and preprocessing for the algorithm is
 linear with respect to the token. Overall, the algorithm runs in O(N + M)
 time where N is the length of the student and M is the length of the token.*/
-Difference searchMultipleTokens(const std::string& student,
+Tokens searchAllTokens(const std::string& student,
 										 		const std::string& tokens){
+	Tokens difference;
+	difference.partial = false;
+	difference.harsh = true;
 	std::vector<std::string> tokenlist;
 	tokenlist=splitTokens(tokens);
-	return Difference();//change to actual return
+	difference.num_tokens = tokenlist.size();
+	for (unsigned int i = 0; i<tokenlist.size(); i++)
+	{
+		difference.tokens.push_back(RabinKarpSingle(tokenlist[i], student));
+	}
+	return difference;
+}
+
+Tokens searchAnyTokens(const std::string& student,
+										 		const std::string& tokens){
+	Tokens difference;
+	difference.partial = false;
+	difference.harsh = false;
+	std::vector<std::string> tokenlist;
+	tokenlist=splitTokens(tokens);
+	difference.num_tokens = tokenlist.size();
+	for (unsigned int i = 0; i<tokenlist.size(); i++)
+	{
+		difference.tokens.push_back(RabinKarpSingle(tokenlist[i], student));
+	}
+	return difference;
+}
+
+Tokens searchTokens(const std::string& student,
+										 		const std::string& tokens){
+	Tokens difference;
+	difference.partial = true;
+	std::vector<std::string> tokenlist;
+	tokenlist=splitTokens(tokens);
+	difference.num_tokens = tokenlist.size();
+	for (unsigned int i = 0; i<tokenlist.size(); i++)
+	{
+		difference.tokens.push_back(RabinKarpSingle(tokenlist[i], student));
+	}
+	return difference;
 }
 
 /*	Looks for a single token in a string using the Rabin-Karp rolling hash
@@ -104,7 +138,7 @@ int RabinKarpSingle(std::string token, std::string searchstring)
 {
 	long hash = 0;
 	long goalhash = 0;
-	unsigned int tlen = token.size();
+	unsigned int tlen = (unsigned int)token.size();
 	if (searchstring.size()<token.size())
 	{
 		return -1;

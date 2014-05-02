@@ -19,6 +19,14 @@
 #define VectorVectorOtherType 4
 #define VectorOtherType 5
 
+class TestResults{
+public:
+    TestResults();
+    int distance;
+    virtual void printJSON(std::ostream & file_out, int type)=0;
+    virtual float grade()=0;
+
+};
 class Change{
 public:
 	// Starting changeblock line for input (student)
@@ -42,14 +50,33 @@ void Change::clear(){
     b_changes.clear();
 }
 
-class Difference{
+class Difference: public TestResults{
 public:
+    Difference();
     std::vector<Change> changes;
     std::vector<int> diff_a;
     std::vector<int> diff_b;
-    int distance;
     void printJSON(std::ostream & file_out, int type);
+    void grade();
 };
+
+class Tokens: public TestResults{
+public:
+    Tokens();
+    std::vector<int> tokens_found;
+    int num_tokens;
+    bool partial;
+    bool alltokensfound;
+    bool harsh;
+    void printJSON(std::ostream & file_out, int type);
+    void grade();
+};
+
+TestResults::TestResults():distance(0){}
+
+Difference::Difference():TestResults() {}
+
+Tokens::Tokens():TestResults(), alltokensfound(false){}
 
 void Difference::printJSON(std::ostream & file_out, int type){
     std::string diff1_name;
@@ -202,6 +229,42 @@ void Difference::printJSON(std::ostream & file_out, int type){
     
     
     return ;
+}
+
+void Tokens::printJSON(std::ostream & file_out, int type){
+    std::string partial_str = (this.partial) ? "true" : "false";
+
+    file_out << "{\n\t\"tokens\": " << num_tokens << "," << std::endl;
+    file_out << "\t\"found\": [";
+    for(unsigned int i = 0; i < tokens_found.size(); i++){
+        file_out << tokens_found[i];
+        if(i != tokens_found.size() - 1){
+            file_out << ", ";
+        }
+        else{
+            file_out << " ]," << std::endl;
+        }
+    } 
+    file_out << "\t\"num_found\": " << tokens_found.size() << "," << std::endl;
+    file_out << "\t\"partial\": " << partial_str << "," << std::endl;
+    file_out << "}" << std::endl;
+    return;
+}
+
+float Tokens::grade(){
+    if(partial)
+        return (float)tokens_found.size() / (float)num_tokens;
+    else{
+        if(tokens_found.size() == num_tokens || (tokens_found.size() != 0 && !harsh))
+            return 1;
+        else
+            return 0;
+    }
+        
+
+}
+float Difference::grade(){
+
 }
 
 #endif /* defined(__differences__difference__) */
