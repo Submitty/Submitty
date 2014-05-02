@@ -286,9 +286,9 @@ int validateTestCases( char* submit_dir, char* grade_dir, int &total_grade ) {
 		
 		/* TODO: Different member than .distance ? */
 		
-		std::cout << "distance: " << (result.distance) << std::endl;
+		std::cout << "distance: " << (result.grade()) << std::endl;
 		
-		int testcase_grade = (int)floor(result.distance * testcases[i].points());
+		int testcase_grade = (int)floor(result.grade() * testcases[i].points());
 		total_grade += testcase_grade;
 		
 		char testcase_gradepath[strlen(grade_dir)+17];
@@ -318,8 +318,8 @@ int validateTestCases( char* submit_dir, char* grade_dir, int &total_grade ) {
 	sprintf(compilation_gradepath, "%scompilation_grade.txt", grade_dir);
 	compilation_gradepath[strlen(compilation_gradepath)] = '\0';
 	
-	std::ifstream readme_gradefile;
-	readme_gradefile.open( readme_gradepath );
+	std::ifstream compilation_gradefile;
+	compilation_gradefile.open( compilation_gradepath );
 	compilation_gradefile >> grade;
 	compilation_gradefile.close();
 	total_grade += grade;

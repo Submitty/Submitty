@@ -6,7 +6,7 @@
 #include "../modules/tokenSearch.h"
 #include "../modules/myersDiff.h"
 #include "../modules/textMasking.h"
-#include "../modules/runDiff.h"
+//#include "../modules/runDiff.h"
 #include "../modules/clean.h"
 #include "../modules/difference.h"
 
