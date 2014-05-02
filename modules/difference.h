@@ -23,8 +23,8 @@ class TestResults{
 public:
     TestResults();
     int distance;
-    virtual void printJSON(std::ostream & file_out, int type)=0;
-    virtual float grade()=0;
+    virtual void printJSON(std::ostream & file_out, int type){};
+    virtual float grade(){return 0;};
 
 };
 class Change{
@@ -69,7 +69,7 @@ public:
     std::vector<int> tokens_found;
     int num_tokens;
     bool partial;
-    bool alltokensfound;
+    int tokensfound;
     bool harsh;
     void printJSON(std::ostream & file_out, int type);
     float grade();
@@ -81,7 +81,7 @@ Difference::Difference():TestResults(), output_length_a(0),output_length_b(0),
       edit_distance(0){}
 
 Tokens::Tokens():TestResults(), num_tokens(0),
-    alltokensfound(false), partial(true), harsh(false){}
+    tokensfound(0), partial(true), harsh(false){}
 
 float Difference::grade(){
     int max = (output_length_a>output_length_b)?output_length_a:output_length_b;
@@ -89,15 +89,15 @@ float Difference::grade(){
 }
 
 float Tokens::grade(){
-    if (alltokensfound) {
+    for(unsigned int i = 0; i < tokens_found.size(); i++){
+        if(tokens_found[i] != -1)
+            tokensfound++;
+    }
+    if(partial)
+        return (float)tokensfound / (float)num_tokens;
+    else if (tokensfound == num_tokens || (!harsh && tokensfound != 0)) {
         return 1;
     }
-    else if(partial)
-        return (float)tokens_found.size() / (float)num_tokens;
-    else if (harsh) {
-        return 0;
-    }
-
     return 0;
 }
 
@@ -255,7 +255,7 @@ void Difference::printJSON(std::ostream & file_out, int type){
 }
 
 void Tokens::printJSON(std::ostream & file_out, int type){
-    std::string partial_str = (this->partial) ? "true" : "false";
+    std::string partial_str = (partial) ? "true" : "false";
 
     file_out << "{\n\t\"tokens\": " << num_tokens << "," << std::endl;
     file_out << "\t\"found\": [";
@@ -268,7 +268,7 @@ void Tokens::printJSON(std::ostream & file_out, int type){
             file_out << " ]," << std::endl;
         }
     } 
-    file_out << "\t\"num_found\": " << tokens_found.size() << "," << std::endl;
+    file_out << "\t\"num_found\": " << tokensfound << "," << std::endl;
     file_out << "\t\"partial\": " << partial_str << "," << std::endl;
     file_out << "}" << std::endl;
     return;
