@@ -98,6 +98,38 @@ Difference searchMultipleTokens(const std::string& student,
 	return Difference();//change to actual return
 }
 
+/*	Looks for a single token in a string using the Rabin-Karp rolling hash
+	method.  Returns starting index if found, -1 if not.					*/
+int RabinKarpSingle(std::string token, std::string searchstring)
+{
+	long hash = 0;
+	long goalhash = 0;
+	unsigned int tlen = token.size();
+	if (searchstring.size()<token.size())
+	{
+		return -1;
+	}
+	for (int i= 0; i<tlen; i++)		// Set up goal hash
+	{
+		goalhash += token[i];
+	}
+	for (int i = 0; i<tlen; i++)	// Set up first hash
+	{
+		hash+=searchstring[i];
+	}
+	for (int i = 0; i<=searchstring.size()-tlen; i++)
+	{
+		// Check if hashes then strings are equal, and if so return index
+		if (hash==goalhash && searchstring.substr(i,tlen)==token)
+		{
+			return i;
+		}
+		hash+=searchstring[i+tlen];
+		hash-=searchstring[i];
+	}
+	return -1;
+}
+
 std::vector<std::string> splitTokens(const std::string& tokens){
     std::vector<std::string> tokenlist;
 	std::string tmpstr;                 // Create empty token variable
@@ -111,7 +143,7 @@ std::vector<std::string> splitTokens(const std::string& tokens){
 				tokenlist.push_back(tmpstr);
 			}
 			tmpstr.clear();
-			i=i+2;														// Skip to end of said delimiter
+			i=i+2;						// Skip to end of said delimiter
 		}
         else if ((tokens.size()-i==2) && tokens[i]=='\"' && tokens[i+1]=='\n'){
             if (tmpstr!="")
