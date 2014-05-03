@@ -10,7 +10,7 @@ if (!isset($announcements_url)) {
     $announcements_url = "http://www.cs.rpi.edu/academics/courses/spring14/ds/announcements.php";
 }
 ?>
-<div class="col-sm-10 blog-main" id="blog-main">
+<div class="col-sm-12 blog-main" id="blog-main">
     <div class="panel panel-default">
         <div class="panel-body">
             <h2>Announcements</h2>

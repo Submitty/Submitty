@@ -27,7 +27,8 @@ $l1 = array(3.0,3.0,3.0,3.0,3.0);
 $l2 = array(2.5,2.5,2.5,2.5,2.5);
 $l3 = array(2.0,2.0,2.0,2.0,2.0);
 $l4 = array(1.5,1.5,1.5,1.5,1.5);
-$lab_scales = array($l1,$l2,$l3,$l4);
+$l5 = array(1.0,1.0,1.0,1.0,1.0);
+$lab_scales = array($l1,$l2,$l3,$l4,$l5);
 //User homework data
 $num_homeworks = 10;
 $homeworks = array(40,40,40,40,40);
@@ -36,7 +37,8 @@ $l1 = array(50,50,50,50,50);
 $l2 = array(45,45,45,45,45);
 $l3 = array(40,40,40,40,40);
 $l4 = array(35,35,35,35,35);
-$homework_scales = array($l1,$l2,$l3,$l4);
+$l5 = array(30,30,30,30,30);
+$homework_scales = array($l1,$l2,$l3,$l4,$l5);
 //User Test data
 $num_tests = 3;
 $tests = array(90,90,90);
@@ -45,7 +47,10 @@ $t1 = array(100,100,100);
 $t2 = array(80,80,80);
 $t3 = array(60,60,60);
 $t4 = array(40,40,40);
-$test_scales = array($t1,$t2,$t3,$t4);
+$t5 = array(20,20,20);
+$test_scales = array($t1,$t2,$t3,$t4,$t5);
+//Scales last updated
+$grades_last_updated = "5/2/2014";
 
 
 render("grades", array(
@@ -59,7 +64,8 @@ render("grades", array(
     "homework_scales"=>$homework_scales,
     "num_tests"=>$num_tests,
     "tests"=>$tests,
-    "test_scales"=>$test_scales
+    "test_scales"=>$test_scales,
+    "grades_last_updated"=>$grades_last_updated
     )    
 );
 ?>

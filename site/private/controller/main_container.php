@@ -1,12 +1,11 @@
 <?php
 require_once("private/controller/helper.php");
 
-//Make model function calls for navbar and leftnavbar data here
+//Make model function calls for navbar data here
 
+$name = "Sam";//For navbar
+$num_homeworks = 5;//For navbar
 
-if (!isset($name)) {
-    $name = "Sam";
-}
 if (!isset($page) || ($page != "homework" && $page != "grades" && $page != "announcements")) {
     $page = "home";
 }
@@ -26,17 +25,10 @@ if ($page == "homework") {
 }
 
 
-render("header");
-
-render("navbar", array("name"=>$name));
-render("leftnavbar", array("page"=>$page, "homework_number"=>$homework_number));
+render("header");//This is the html tag, body tag, head tag, scripts tags, etc.
+render("navbar", array("name"=>$name, "num_homeworks"=>$num_homeworks));//This is the top navbar
 ?>
-<?php 
-
-//if ($page != "homework") {//Uncomment for homework diff comparison to take entire width of screen
-
-?>
-<div class="col-sm-8">
+<div class="col-sm-12">
     <div class="container container-main">
         <?php if ($page == "announcements") {
             render_controller("announcements");
@@ -51,9 +43,5 @@ render("leftnavbar", array("page"=>$page, "homework_number"=>$homework_number));
     </div>
 </div>
 <?php 
-
-/*} else {
-    render_controller("homework", array("homework_number"=>$homework_number, "last_homework"=>$last_homework));//Uncomment for homework diff comparison to take entire width of screen
-}*/
 
 render("footer");

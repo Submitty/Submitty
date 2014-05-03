@@ -1,4 +1,4 @@
-<div class="col-sm-10 blog-main">
+<div class="col-sm-12 blog-main">
     <div class="row">
             <div class="col-md-4 panel-col"> 
                 <div class="panel panel-default">

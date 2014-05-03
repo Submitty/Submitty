@@ -81,3 +81,23 @@ footer {
 .subnav-show:hover .subnav {
     display: block;
 }
+.container-navbar {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.perfect {
+    background-color: #33FFFF;
+}
+.green {
+    background-color: 
+}
+.blue {
+    background-color: #66CCFF;
+}
+.yellow {
+    background-color: #FFFF99;
+}
+.red {
+    background-color: #E37575;
+}
+ 
