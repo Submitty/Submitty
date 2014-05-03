@@ -16,8 +16,6 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include "STRutil.h"
 #include "difference.h"
 
-//TODO: Change the return type for these functions.
-
 /*diffNaive does a per character comparison including white space and new lines.
 It returns a number between 0 and 100 (inclusive) indicating the number of
 characters the student string was off by. The strings are not changed in this
@@ -27,9 +25,9 @@ Change diffNaive(const std::string& student, const std::string& instructor){
 	differences.a_start = 0;
 	differences.b_start = 0;
 
-	int len = (student.size() < instructor.size()) ? student.length() : instructor.length();
+	unsigned int len = (student.size() < instructor.size()) ? student.length() : instructor.length();
 
-	int i = 0;
+	unsigned int i = 0;
 	for(i = 0; i < len; i++){
 		if(student[i] != instructor[i]){
 			differences.a_changes.push_back(i);
@@ -46,11 +44,11 @@ Change diffNaive(const std::string& student, const std::string& instructor){
 	}
 	return differences;
 }
-/*diffNoWhiteSpace does a per character comparison not including white space but
-including new lines. It returns a number between 0 and 100 (inclusive) 
-indicating the number of characters the student string was off by. The strings 
-are not changed in this comparison. Runs in linear time with respect to the 
-longer string.*/
+
+/*diffNoSpace does a per character comparison not including white space but
+including new lines. It returns a Change object that indicates the indicies of
+characters the student string was off by. The strings are not changed in this 
+comparison. Runs in linear time with respect to the longer string. */
 Change diffNoSpace(const std::string& _student, const std::string& _instructor){
 	Change differences;
 	differences.a_start = 0;
@@ -59,8 +57,8 @@ Change diffNoSpace(const std::string& _student, const std::string& _instructor){
 	std::string student = string_trim_right(_student);
 	std::string instructor = string_trim_right(_instructor);
 
-	int i = 0;
-	int j = 0;
+	unsigned int i = 0;
+	unsigned int j = 0;
 	while( i != student.size() && j != instructor.size() ){
 		if(student[i] == ' '){
 			i++; continue;
@@ -86,7 +84,12 @@ Change diffNoSpace(const std::string& _student, const std::string& _instructor){
 	}
 	return differences;
 }
-/**/
+
+/*diffLine does a per character comparison including white space but
+including new lines. Comparison is done per line and returns a Difference object
+that indicates the indicies of characters the student string was off by. The 
+strings are not changed in this comparison. Runs in linear time with respect to
+the longer string.*/
 Difference diffLine(const std::string& _student, const std::string& _instructor){
 	Difference diffs;
 	Change file;
@@ -97,7 +100,7 @@ Difference diffLine(const std::string& _student, const std::string& _instructor)
 	instructor.str(_instructor);
 	std::string s_line;
 	std::string i_line;
-	int i = 0;
+	unsigned int i = 0;
 	bool i_eof = false;
 	bool s_eof = false;
 	while(!i_eof || !s_eof){
@@ -126,7 +129,12 @@ Difference diffLine(const std::string& _student, const std::string& _instructor)
 	diffs.changes.push_back(file);
 	return diffs;
 }
-/**/
+
+/*diffLineNoSpace does a per character comparison not including white space but
+including new lines. Comparison is done per line and returns a Difference object
+that indicates the indicies of characters the student string was off by. The 
+strings are not changed in this comparison. Runs in linear time with respect to
+the longer string.*/
 Difference diffLineNoSpace(const std::string& _student, const std::string& _instructor){
 	Difference diffs;
 	Change file;
