@@ -1,10 +1,9 @@
-<div class="col-md-10 blog-main">
+<div class="col-sm-12 blog-main">
     <div class="row">
             <div class="col-md-4 panel-col"> 
                 <div class="panel panel-default">
-                    <div class="panel-heading"><h3>Announcements</h3>
-                    </div>
                     <div class="panel-body word-wrap">
+                        <h4>Announcements</h4>
                         <p><?php if (isset($a_data)) {?>
                             <h4><p class="blog-post-meta"><?php echo $a_data[0]["date"];?></p></h4>
                             <p><?php echo $a_data[0]["text"];?></p>
@@ -18,9 +17,8 @@
             </div>
             <div class="col-md-4 panel-col">
                 <div class="panel panel-default">
-                    <div class="panel-heading"><h3>Homework</h3>
-                    </div>
                     <div class="panel-body">
+                        <h4>Homework</h4>
                         <p><?php
                             if (isset($homework)) {
                                 echo $homework["name"]." is due on ".$homework["due_date"]." at 11:59PM.  ";
@@ -37,11 +35,10 @@
             </div>
             <div class="col-md-4 panel-col">
                 <div class="panel panel-default">
-                    <div class="panel-heading"><h3>Grades</h3></div>
-                        <div class="panel-body">
-                            <p>Grade overview</p>
-                            <p><a class="btn btn-default" href="?page=grades" role="button">Grades</a></p>
-                        </div>
+                    <div class="panel-body">
+                        <h4>Grades</h4>
+                        <p>Grade overview</p>
+                        <p><a class="btn btn-default" href="?page=grades" role="button">Grades</a></p>
                     </div>
                 </div>
             </div>

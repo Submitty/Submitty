@@ -1,60 +1,14 @@
 <?php 
-$section = 1;
-$username = "sengs";
-$last = "Seng";
-$first = "Samuel";
-$overall = 40.0;
-$lab = 10.0;
-$homework = 20.0;
-$tests = 10.0;
-$final = "";
-//User overall data
-$user_data = array("section"=>$section, "username"=>$username, "last"=>$last, "first"=>$first, "overall"=>$overall, "lab"=>$lab, "homework"=>$homework, "tests"=>$tests, "final"=>$final);
-//Overall scales
-$perfect = array("section"=>"", "username"=>"Perfect", "last"=>"", "first"=>"", "overall"=>70.9, "lab"=>20, "homework"=>20, "tests"=>20, "final"=>"");
-$a = array("section"=>"", "username"=>"Lowest A-", "last"=>"approximate", "first"=>"", "overall"=>70.9, "lab"=>20, "homework"=>20, "tests"=>20, "final"=>"");
-$b = array("section"=>"", "username"=>"Lowest B-", "last"=>"approximate", "first"=>"", "overall"=>70.9, "lab"=>20, "homework"=>20, "tests"=>20, "final"=>"");
-$c = array("section"=>"", "username"=>"Lowest C-", "last"=>"approximate", "first"=>"", "overall"=>70.9, "lab"=>20, "homework"=>20, "tests"=>20, "final"=>"");
-$d = array("section"=>"", "username"=>"Lowest D-", "last"=>"approximate", "first"=>"", "overall"=>70.9, "lab"=>20, "homework"=>20, "tests"=>20, "final"=>"");
-$scale = array($perfect, $a, $b, $c, $d);
-//User Lab data
-$num_labs = 12;
-$labs = array(3.0,3.0,3.0,3.0,3.0);
-//Lab scales
-$l1 = array(3.0,3.0,3.0,3.0,3.0);
-$l2 = array(2.5,2.5,2.5,2.5,2.5);
-$l3 = array(2.0,2.0,2.0,2.0,2.0);
-$l4 = array(1.5,1.5,1.5,1.5,1.5);
-$lab_scales = array($l1,$l2,$l3,$l4);
-//User homework data
-$num_homeworks = 10;
-$homeworks = array(40,40,40,40,40);
-//Homework scales
-$l1 = array(50,50,50,50,50);
-$l2 = array(45,45,45,45,45);
-$l3 = array(40,40,40,40,40);
-$l4 = array(35,35,35,35,35);
-$homework_scales = array($l1,$l2,$l3,$l4);
-//User Test data
-$num_tests = 3;
-$tests = array(90,90,90);
-//Test scales
-$t1 = array(100,100,100);
-$t2 = array(80,80,80);
-$t3 = array(60,60,60);
-$t4 = array(40,40,40);
-$test_scales = array($t1,$t2,$t3,$t4);
-
 ?>
 
-<div class="col-md-10 col-sm-9 blog-main">
+<div class="col-md-12 col-sm-12 blog-main">
     <div class="blog-header">
-        <h1 class="blog-title">Grades</h1>
             <div class="panel panel-default">
                 <!-- Default panel contents -->
-                <div class="panel-heading">Grade summary</div>
                 <div class="panel-body">
-                    <p>The cutoffs are not exact and are used for final grade cutoffs or something like that...</p>
+                    <h2>Grade summary</h2>
+                    <p>Please contact your graduate lab TA if there is a missing or incorrect grade.</p>
+                    <p>Last Updated: <?php echo $grades_last_updated;?></p>
                     <h3>Overall</h3>
                 </div>
                 <!-- Table -->
@@ -67,10 +21,10 @@ $test_scales = array($t1,$t2,$t3,$t4);
                             <th>Last</th>
                             <th>First</th>
                             <th>Overall</th>
-                            <th>Lab</th>
-                            <th>Homework</th>
-                            <th>Tests</th>
-                            <th>Final</th>
+                            <th>Lab %</th>
+                            <th>Homework %</th>
+                            <th>Tests %</th>
+                            <th>Final %</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -88,18 +42,31 @@ $test_scales = array($t1,$t2,$t3,$t4);
                     </tbody>
                     <tbody>
                         <?php 
-                        foreach ($scale as $ar) {
+                        for ($i = 0; $i < count($scale); $i++) {
                             ?>
-                        <tr>
-                            <td><?php echo $ar["username"]; ?></td>
-                            <td><?php echo $ar["section"]; ?></td>
-                            <td><?php echo $ar["last"]; ?></td>
-                            <td><?php echo $ar["first"]; ?></td>
-                            <td><?php echo $ar["overall"]; ?></td>
-                            <td><?php echo $ar["lab"]; ?></td>
-                            <td><?php echo $ar["homework"]; ?></td>
-                            <td><?php echo $ar["tests"]; ?></td>
-                            <td><?php echo $ar["final"]; ?></td>
+                        <?php if ($i == 0) {
+                            $class = "success";
+                        } else if ($i == 1) {
+                            $class = "info";
+                        } else if ($i == 2) {
+                            $class = "warning";
+                        } else if ($i == 3) {
+                            $class = "danger";
+                        } else if ($i == 4) {
+                            $class = "red";
+                        } else {
+                            $class = "";
+                        }?>
+                        <tr class="<?php echo $class;?>">
+                            <td><?php echo $scale[$i]["username"]; ?></td>
+                            <td><?php echo $scale[$i]["section"]; ?></td>
+                            <td><?php echo $scale[$i]["last"]; ?></td>
+                            <td><?php echo $scale[$i]["first"]; ?></td>
+                            <td><?php echo $scale[$i]["overall"]; ?></td>
+                            <td><?php echo $scale[$i]["lab"]; ?></td>
+                            <td><?php echo $scale[$i]["homework"]; ?></td>
+                            <td><?php echo $scale[$i]["tests"]; ?></td>
+                            <td><?php echo $scale[$i]["final"]; ?></td>
                         </tr>
                         <?php } ?>
                     </tbody>
@@ -131,21 +98,31 @@ $test_scales = array($t1,$t2,$t3,$t4);
                     </tbody>
                     <tbody>
                         <?php
-                        $count = 0;
-                        foreach ($lab_scales as $lab_scale) {?>
-                            <tr>
-                                <td><?php echo $scale[$count]["username"]; ?></td>
-                                <?php foreach($lab_scale as $score) {?>
+                        for ($i = 0; $i < count($lab_scales); $i++) {?>
+                            <?php if ($i == 0) {
+                            $class = "success";
+                            } else if ($i == 1) {
+                                $class = "info";
+                            } else if ($i == 2) {
+                                $class = "warning";
+                            } else if ($i == 3) {
+                                $class = "danger";
+                            } else if ($i == 4) {
+                                $class = "red";
+                            } else {
+                                $class = "";
+                            }?>
+                            <tr class="<?php echo $class;?>">
+                                <td><?php echo $scale[$i]["username"]; ?></td>
+                                <?php foreach($lab_scales[$i] as $score) {?>
                                     <td><?php echo $score; ?></td>
                                 <?php }
-                                for ($i = 0; $i < $num_labs - count($labs); $i++) {?>
+                                for ($j = 0; $j < $num_labs - count($labs); $j++) {?>
                                     <td></td>
                                 <?php } ?>
 
                             </tr>
-                        <?php 
-                            $count++;
-                        } ?>
+                        <?php } ?>
                     </tbody>
                 </table>
                 </div>
@@ -175,20 +152,31 @@ $test_scales = array($t1,$t2,$t3,$t4);
                     </tbody>
                     <tbody>
                         <?php
-                        $count = 0;
-                        foreach ($homework_scales as $homework_scale) {?>
-                            <tr>
-                                <td><?php echo $scale[$count]["username"]; ?></td>
-                                <?php foreach($homework_scale as $score) {?>
+                        for ($i = 0; $i < count($homework_scales); $i++) {?>
+                            <?php if ($i == 0) {
+                                $class = "success";
+                            } else if ($i == 1) {
+                                $class = "info";
+                            } else if ($i == 2) {
+                                $class = "warning";
+                            } else if ($i == 3) {
+                                $class = "danger";
+                            } else if ($i == 4) {
+                                $class = "red";
+                            } else {
+                                $class = "";
+                            }?>
+                            <tr class="<?php echo $class;?>">
+                                <td><?php echo $scale[$i]["username"]; ?></td>
+                                <?php foreach($homework_scales[$i] as $score) {?>
                                     <td><?php echo $score; ?></td>
                                 <?php }
-                                for ($i = 0; $i < $num_homeworks - count($homework_scale); $i++) {?>
+                                for ($j = 0; $j < $num_homeworks - count($homework_scales[$i]); $j++) {?>
                                     <td></td>
                                 <?php } ?>
 
                             </tr>
                         <?php 
-                            $count++;
                         } ?>
                     </tbody>
                 </table>
@@ -219,20 +207,32 @@ $test_scales = array($t1,$t2,$t3,$t4);
                     </tbody>
                     <tbody>
                         <?php
-                        $count = 0;
-                        foreach ($test_scales as $test_scale) {?>
-                            <tr>
-                                <td><?php echo $scale[$count]["username"]; ?></td>
-                                <?php foreach($test_scale as $score) {?>
+                        for ($i = 0; $i < count($test_scales); $i++) { ?>
+                            <?php if ($i == 0) {
+                                $class = "success";
+                            } else if ($i == 1) {
+                                $class = "info";
+                            } else if ($i == 2) {
+                                $class = "warning";
+                            } else if ($i == 3) {
+                                $class = "danger";
+                            } else if ($i == 4) {
+                                $class = "red";
+                            } else {
+                                $class = "";
+                            }?>
+
+                            <tr class="<?php echo $class;?>">
+                                <td><?php echo $scale[$i]["username"]; ?></td>
+                                <?php foreach($test_scales[$i] as $score) {?>
                                     <td><?php echo $score; ?></td>
                                 <?php }
-                                for ($i = 0; $i < $num_tests - count($test_scale); $i++) {?>
+                                for ($j = 0; $j < $num_tests - count($test_scales[$i]); $j++) {?>
                                     <td></td>
                                 <?php } ?>
 
                             </tr>
                         <?php 
-                            $count++;
                         } ?>
                     </tbody>
                 </table>
