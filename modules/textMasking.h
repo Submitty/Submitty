@@ -153,7 +153,8 @@ std::vector< std::string > excludelines(
         if (lines[a]>text.size()) {
             continue;
         }
-        output.erase(text.begin()+lines[a]);
+        
+        output.erase(output.begin()+lines[a]);
     }
     return output;
 }

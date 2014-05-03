@@ -1,5 +1,5 @@
 /*Copyright (c) 2014, Chris Berger, Jesse Freitas, Severin Ibarluzea,
-Kiana McNellis, Kienan Knight-Boehm
+Kiana McNellis, Kienan Knight-Boehm, Sam Seng
 
 All rights reserved.
 This code is licensed using the BSD "3-Clause" license. Please refer to
