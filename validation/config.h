@@ -1,20 +1,21 @@
 /* Copyright (c) 2014, Chris Berger, Jesse Freitas, Severin Ibarluzea,
-Kiana McNellis, Kienan Knight-Boehm
+Kiana McNellis, Kienan Knight-Boehm, Sam Seng
 
 All rights reserved.
 This code is licensed using the BSD "3-Clause" license. Please refer to
 "LICENSE.md" for the full license.
 */
 
-#ifndef __HWTEMPLATE_H__
-#define __HWTEMPLATE_H__
+#ifndef __CONFIG_H__
+#define __CONFIG_H__
+
+#include <sstream>
 
 #include "TestCase.h"
 //#include "GradingRubric.h"
 
-
 const int hw_num = 0;
-const std::string hw_name = "TestHW";
+const std::string hw_name = "";
 
 // Submission parameters
 const int max_submissions = 20;
@@ -34,16 +35,27 @@ const int ta_pts = 20;
 
 // File directories
 
+// root directory
+const char* root_dir = "../CSCI1200/";
+// homework directory
+const char* hw_dir = "HW0/";
+// input files directory
+const char* input_dir = "testingInput/";
+// expected output files directory
+const char* expected_out_dir = "Scripts/expectedOutput/HW0/";
+
+/*
 // directory containing input files
 const std::string input_files_dir = "../CSCI1200/testingInput";
 // directory containing README and student's code
 const std::string student_submit_dir = "../CSCI1200/HW0/alice/1";
 // directory containing output files generated from student's code
-const std::string student_output_dir = "../CSCI1200/HW0/alice/1/submit_out";
+const std::string student_output_dir = "../CSCI1200/HW0/alice/1/.submit.out";
 // directory containing expected output files
 const std::string expected_output_dir = "../CSCI1200/Scripts/expectedOutput/HW0";
 // directory to store results from validation
-const std::string results_dir = "../CSCI1200/HW0/alice/1/submit_grade";
+const std::string results_dir = "../CSCI1200/HW0/alice/1/.submit.grade";
+*/
 
 // Test cases
 const int num_testcases = 3;
@@ -58,7 +70,7 @@ TestCase(
     "README.txt",
     "",
     "",
-    2,				// points for readme
+    readme_pts,				// points for readme
     false,
     false,
     DONT_CHECK,
@@ -72,7 +84,7 @@ TestCase(
 	"hw0.exe",		// name of .exe created by student
 	"",
 	"",
-	3,				// points for compilation
+	compile_pts,				// points for compilation
 	false,
 	false,
 	DONT_CHECK,
@@ -85,15 +97,15 @@ TestCase(
 	"Case 1",							// title
 	"./case1.exe",						// details
 	"./a.out 1> cout.txt 2> cerr.txt",	// command
-	"test1_out.txt",					// output file name
+	"test1_out.txt",					// output file name [V]
 	"test1_out.txt",					// output file description
-	"expected_test1.txt",				// expected output file
-	5,									// points
-	false,								// hidden
-	false,								// extra credit
-	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
-	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK]
-	&diffLine							// compare function
+	"expected_test1.txt",				// expected output file [V]
+	5,									// points [V]
+	false,								// hidden [V]
+	false,								// extra credit [V]
+	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
+	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
+	&diffLine							// compare function [V]
 )
 };
 
