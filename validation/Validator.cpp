@@ -1,5 +1,5 @@
 /* Copyright (c) 2014, Chris Berger, Jesse Freitas, Severin Ibarluzea,
-Kiana McNellis, Kienan Knight-Boehm
+Kiana McNellis, Kienan Knight-Boehm, Sam Seng
 
 All rights reserved.
 This code is licensed using the BSD "3-Clause" license. Please refer to
@@ -11,6 +11,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <sstream>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <vector>
 #include <string>
 #include <iterator>
@@ -18,66 +19,137 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <sys/stat.h>
 
 #include "../modules/modules.h"
-//#include "../modules/difference.h"
 #include "TestCase.h"
-#include "HWTemplate.h"
 
-bool checkValidDirectory( const std::string &directory );
-int validateReadme( std::ofstream &gradefile );
+/* TODO: how to include this specifically? */
+/*  maybe -D this on the command line */
+#include "config.h"
+
+bool checkValidDirectory( char* directory );
+bool checkValidDirectory( const char* directory );
+int validateReadme( char* submit_dir, char* grade_dir );
 int validateCompilation( std::ofstream &gradefile );
-int validateTestCases();
+int validateTestCases( char* submit_dir, char* grade_dir );
 
 int main( int argc, char* argv[] ) {
 	
-	// Check for valid directories
-	if( !checkValidDirectory( input_files_dir ) ||
-	    !checkValidDirectory( student_submit_dir ) ||
-	    !checkValidDirectory( student_output_dir ) ||
-	    !checkValidDirectory( expected_output_dir ) ||
-	    !checkValidDirectory( results_dir ) ) {
-	    
-	    std::cout << "ERROR: one or more directories not found" << std::endl;
-	    return 1;
+	/* Check argument usage */
+	if( argc != 4 ) {
+#ifdef DEBUG		
+		std::cerr << "VALIDATOR USAGE: validator <homework#> <username> <submission#>" << std::endl;
+#endif		
+		return 1;
 	}
 	
-	const char* gradepath = (student_submit_dir + "/submit_grade/grade.txt").c_str();
-	std::ofstream outstr( gradepath, std::ofstream::out );
+	/* TODO: Will this need to be a CL arg? */
+	//const char* root_dir = "CSCI1200";
+	
+	/*
+	char hw_dir[strlen(root_dir)+strlen(argv[1])+1];
+	sprintf(hw_dir, "%s/HW%s", root_dir, argv[1]);
+	hw_dir[strlen(hw_dir)] = '\0';
+	*/
+	
+	char user_dir[strlen(root_dir)+strlen(hw_dir)+strlen(argv[2])+2];
+	sprintf(user_dir, "%s%s%s/", root_dir, hw_dir, argv[2]);
+	user_dir[strlen(user_dir)] = '\0';
+	
+	char submission_dir[strlen(user_dir)+strlen(argv[3])+2];
+	sprintf(submission_dir, "%s%s/", user_dir, argv[3]);
+	submission_dir[strlen(submission_dir)] = '\0';
+	
+	/* Check for valid directories */
+	if( !checkValidDirectory( hw_dir ) ||
+	    !checkValidDirectory( user_dir ) ||
+	    !checkValidDirectory( submission_dir )) {
+
+#ifdef DEBUG	    
+	    std::cerr << "ERROR: one or more directories not found" << std::endl;
+	    return 1;
+#endif
+	}
+	
+	char grade_dir[strlen(submission_dir)+strlen(".submit.grade/")+1];
+	sprintf(grade_dir, "%s.submit.grade/", submission_dir);
+	grade_dir[strlen(grade_dir)] = '\0';
+	
+	//std::ofstream outstr( grade_dir, std::ofstream::out );
 	
 	// Run test cases
-	validateReadme( outstr );
+	validateReadme( submission_dir, grade_dir );
 	
-	validateTestCases();
+	validateTestCases( submission_dir, grade_dir );
 	
 	return 0;
 }
 
 /* Ensures that the given directory exists */
-bool checkValidDirectory( const std::string &directory ) {
+bool checkValidDirectory( char* directory ) {
 	
 	struct stat status;
-	stat( directory.c_str(), &status );
+	stat( directory, &status );
 	if( !(status.st_mode & S_IFDIR) ) {
-		std::cout << "ERROR: directory " << directory << " does not exist"
+#ifdef DEBUG
+		std::cerr << "ERROR: directory " << directory << " does not exist"
 				  << std::endl;
+#endif		
 		return false;
 	}
-	else { std::cout << "Directory " << directory << " found!" << std::endl; }
+#ifdef DEBUG
+	else {
+		std::cout << "Directory " << directory << " found!" << std::endl;
+	}
+#endif
+	return true;
+}
+
+// checkValidDirectory with const char*
+bool checkValidDirectory( const char* directory ) {
+	
+	struct stat status;
+	stat( directory, &status );
+	if( !(status.st_mode & S_IFDIR) ) {
+#ifdef DEBUG
+		std::cerr << "ERROR: directory " << directory << " does not exist"
+				  << std::endl;
+#endif		
+		return false;
+	}
+#ifdef DEBUG
+	else {
+		std::cout << "Directory " << directory << " found!" << std::endl;
+	}
+#endif
 	return true;
 }
 
 /* Check student submit directory for README.txt */
-int validateReadme( std::ofstream &gradefile ) {
+int validateReadme( char* submit_dir, char* grade_dir ) {
 	
-	const char* readme = (student_submit_dir + "/README.txt").c_str();
+	char gradepath[strlen(grade_dir)+strlen("grade.txt")+1];
+	sprintf(gradepath, "%sgrade.txt", grade_dir);
+	gradepath[strlen(gradepath)] = '\0';
+	
+	std::ofstream gradefile( gradepath, std::ofstream::out );
+	
+	char readme[strlen(submit_dir)+strlen("README.txt")+1];
+	sprintf(readme, "%sREADME.txt", submit_dir);
+	readme[strlen(readme)] = '\0';
+	
 	std::ifstream instr( readme, std::ifstream::in );
 	
 	if( instr != NULL ) {
 		// Handle output
+#ifdef DEBUG
 		std::cout << "Readme found!" << std::endl;
+#endif		
+		/* TODO: Specify readme points */
 		gradefile << "2" << std::endl;
 	}
 	else {
+#ifdef DEBUG		
 		std::cout << "Readme not found" << std::endl;
+#endif		
 		gradefile << "0" << std::endl;
 		return 1;	// README.txt does not exist
 	}
@@ -96,41 +168,45 @@ int validateCompilation( std::ofstream &gradefile ) {
 
 /* Runs through each test case, pulls in the correct files, validates,
    and outputs the results */
-int validateTestCases() {
+int validateTestCases( char* submit_dir, char* grade_dir ) {
 
+	char output_dir[strlen(submit_dir)+strlen(".submit.out/")+1];
+	sprintf(output_dir, "%s.submit.out/", submit_dir);
+	output_dir[strlen(output_dir)] = '\0';
+	
 	for( int i = 2; i < num_testcases; ++i ) {
 		
 		std::cout << testcases[i].title() << " - points: "
 				  << testcases[i].points() << std::endl;
 		
 		// Pull in student output & expected output
-		const char* student_path = (student_output_dir + "/"
-									+ testcases[i].filename()).c_str();
+		const char* student_path = (output_dir + testcases[i].filename()).c_str();
 		std::ifstream student_instr( student_path, std::ifstream::in );
+#ifdef DEBUG		
 		if( !student_instr ) { std::cout << "ERROR: Student's "
 							   << testcases[i].filename() << " does not exist"
 							   << std::endl; }
-		
-		const char* expected_path = (expected_output_dir + "/"
-									 + testcases[i].expected()).c_str();
+#endif		
+		const char* expected_path = (expected_out_dir + testcases[i].expected()).c_str();
 		std::ifstream expected_instr( expected_path, std::ifstream::in );
+#ifdef DEBUG		
 		if( !expected_instr ) { std::cout << "ERROR: Expected output file "
 								<< testcases[i].expected() << " does not exist"
 								<< std::endl; }
-		
+#endif
 		//if( !student_instr || !expected_instr ) continue;
 		
-		char cout_temp[student_output_dir.size() + 15];
-		sprintf(cout_temp, "%s/test%d_cout.txt", student_output_dir.c_str(), i-1 );
+		char cout_temp[strlen(output_dir) + 16];
+		sprintf(cout_temp, "%stest%d_cout.txt", output_dir, i-1 );
 		const char* cout_path = cout_temp;
 		
 		// Check cout and cerr
 		/*const char* cout_path = (student_output_dir + "/test" + (char*)(i-1) +
 													  "_cout.txt" ).c_str();*/
 		std::ifstream cout_instr( cout_path, std::ifstream::in );
-		if( testcases[i].coutCheck() != DONT_CHECK ) {
-			if( !cout_instr ) { std::cout << "ERROR: test" << (i-1)
-								<< "_cout.txt does not exist" << std::endl; }
+		if( testcases[i].coutCheck() != DONT_CHECK ) {			
+			if( !cout_instr ) { std::cerr << "ERROR: test" << (i-1)
+								<< "_cout.txt does not exist" << std::endl; }			
 			else {
 				if( testcases[i].coutCheck() == WARN_IF_NOT_EMPTY ) {
 					std::string content;
@@ -145,8 +221,8 @@ int validateTestCases() {
 			}
 		}
 		
-		char cerr_temp[student_output_dir.size() + 15];
-		sprintf(cerr_temp, "%s/test%d_cout.txt", student_output_dir.c_str(), i-1 );
+		char cerr_temp[strlen(output_dir) + 16];
+		sprintf(cerr_temp, "%stest%d_cerr.txt", output_dir, i-1 );
 		const char* cerr_path = cerr_temp;
 		
 		/*const char* cerr_path = (student_output_dir + "/test" + (char*)(i-1) +
@@ -197,6 +273,8 @@ int validateTestCases() {
 		/* TODO: Pass off to grade interpreter? */
 		
 		std::cout << "distance: " << (result.distance) << std::endl;
+		
+		
 		
 	}
 	return 0;
