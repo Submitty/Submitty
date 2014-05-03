@@ -13,8 +13,14 @@ if (isset($_GET["do"])){
 	echo "Server does not know what to do <br/>";
 }
 
-// Fill with all server operation functions
+// CREATE TREE FOR ALL ASSIGNMENTS
+function create_root(){
+	global $path_root;
 
+	copyDir("./base_CSCI1200","$path_root");
+}
+
+// RESET TREE FOR ALL ASSIGNMENTS
 function reset_root(){
 	global $path_root;
 	try{
@@ -26,13 +32,7 @@ function reset_root(){
 	create_root();
 }
 
-function create_root(){
-	global $path_root;
-
-	copyDir("./base_CSCI1200","$path_root");
-}
-
-
+// CREATE ASSIGNMENT DIRECTORY (INSTRUCTOR)
 function create_assignment($assignment_name){
 	global $path_templates;
 	global $path_assignments;
@@ -40,6 +40,7 @@ function create_assignment($assignment_name){
 	copyDir("$path_templates/assignment_config", "$path_assignments/$assignment_name");
 }
 
+// CREATING STUDENT ASSIGNMENT DIRECTORY
 function create_student_directory($assignment_name, $student_name){
 	global $path_assignments;
 	global $path_templates;
@@ -48,6 +49,8 @@ function create_student_directory($assignment_name, $student_name){
 	copyDir("$path_templates/student_submissions", "$student_dir");
 }
 
+
+// FOR HOMEWORK SUBMISSION
 function submit($assignment_name, $student_name){
 	global $path_assignments;
 
@@ -68,30 +71,34 @@ function submit($assignment_name, $student_name){
 		echo "Incorrect File Type: $file_extension <br/>";
 		exit;
 	}
-	if ($_FILES["file"]["size"] > 20000){
+
+	// 100 kb file cap
+	if ($_FILES["file"]["size"] > 100000){
 		echo "File too large <br/>";
 		exit;
 	}
 
 	if ($_FILES["file"]["error"] > 0) {
 		echo "Error: " . $_FILES["file"]["error"] . "<br/>";
-	} else {
-		echo "FILE STATISTICS :<br/>";
-		echo "Upload: " . $_FILES["file"]["name"] . "<br/>";
-		echo "Type: " . $_FILES["file"]["type"] . "<br/>";
-		echo "Size: " . ($_FILES["file"]["size"] / 1024) . " kB<br/>";
-		echo "Stored in: " . $_FILES["file"]["tmp_name"] . "<br/><br/>";
-
-		$zip = new ZipArchive;
-		$res = $zip->open($_FILES["file"]["tmp_name"]);
-		if ($res === TRUE) {
-		  $zip->extractTo("$student_dir/FILES");
-		  $zip->close();
-		} else {
-		  echo 'Error Reading Zip <br/>';
-		}
-
 	}
+
+	echo "FILE STATISTICS :<br/>";
+	echo "Upload: " . $_FILES["file"]["name"] . "<br/>";
+	echo "Type: " . $_FILES["file"]["type"] . "<br/>";
+	echo "Size: " . ($_FILES["file"]["size"] / 1024) . " kB<br/>";
+	echo "Stored in: " . $_FILES["file"]["tmp_name"] . "<br/><br/>";
+
+	$zip = new ZipArchive;
+	$res = $zip->open($_FILES["file"]["tmp_name"]);
+	if ($res === TRUE) {
+	  $zip->extractTo("$student_dir/FILES");
+	  $zip->close();
+	} else {
+	  echo 'Error Reading Zip <br/>';
+	}
+
+
+
 }
 
 if ($do == "resetroot"){
