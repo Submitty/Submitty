@@ -44,12 +44,22 @@ void Change::clear(){
 
 class Difference{
 public:
+	bool is_tokensearch;	// False means normal diff, true means tokensearch
+	bool alltokensfound;
+	std::vector<int> tokens;
     std::vector<Change> changes;
     std::vector<int> diff_a;
     std::vector<int> diff_b;
     int distance;
     void printJSON(std::ostream & file_out, int type);
 };
+
+Difference::Difference()
+{
+	is_tokensearch = false;
+	alltokensfound = true;
+	distance = 0;
+}
 
 void Difference::printJSON(std::ostream & file_out, int type){
     std::string diff1_name;
