@@ -82,4 +82,34 @@ void runFiles(std::string input){ //input is a list of file names, the first of 
     }
 }
 
+void runFilesDiff(std::string input){ //input is a list of file names, the first of which is the instructor file
+    std::string sample_file;
+    std::vector<std::string> student_files;
+    readFileList(input, sample_file, student_files); //read all the file names from the input file
+
+    std::string contents, sample_text;
+    std::string text;
+    text=getFileInput(sample_file); // get the text from the instructor file
+    sample_text=(text);
+    for (int a=0; a<student_files.size(); a++) {
+        contents.clear();
+        text=getFileInput(student_files[a]); //get the text from the student file
+        contents=(text);
+        //get the diffrences
+        Difference text_diff=diffLine(contents, sample_text);
+        std::string file_name(student_files[a]);
+        file_name.erase(student_files[a].size()-4, student_files[a].size());
+        std::ofstream file_out;
+        file_out.open((file_name+"_out.json").c_str()); //edit the name to add _out
+        if (!file_out.good()) {
+            std::cerr << "Can't open " << student_files[a]+"_out" << " to write.\n";
+            file_out.close();
+            continue;
+        }
+
+        text_diff.printJSON(file_out, VectorVectorStringType); //print the diffrences as JSON files
+    }
+}
+
+
 #endif
