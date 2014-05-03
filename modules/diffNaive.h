@@ -6,8 +6,8 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 "LICENSE.md" for the full license.
 */
 
-#ifndef __DIFF__
-#define __DIFF__
+#ifndef __DIFFNAIVE__
+#define __DIFFNAIVE__
 
 #include <stdlib.h>
 #include <string>
@@ -175,4 +175,4 @@ Difference diffLineNoSpace(const std::string& _student, const std::string& _inst
 	return diffs;
 }
 
-#endif //__DIFF__
+#endif //__DIFFNAIVE__

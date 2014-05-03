@@ -6,8 +6,8 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 "LICENSE.md" for the full license.
 */
 
-#ifndef __PARTIAL__
-#define __PARTIAL__
+#ifndef __PARTIALDIFF__
+#define __PARTIALDIFF__
 
 #include <stdlib.h>
 #include <string>
@@ -38,4 +38,4 @@ int diffBeginNoWhiteSpace(const std::string& _student, const std::string& _instr
 int diffEndNoWhiteSpace(const std::string& _student, const std::string& _instructor){
 	return 100;
 }
-#endif //__PARTIAL__
+#endif //__PARTIALDIFF__
