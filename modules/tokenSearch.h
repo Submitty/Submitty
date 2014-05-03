@@ -91,11 +91,16 @@ student output. The algorithm runs in linear time with respect to the
 length of the student output and preprocessing for the algorithm is
 linear with respect to the token. Overall, the algorithm runs in O(N + M)
 time where N is the length of the student and M is the length of the token.*/
-Difference searchMultipleTokens(const std::string& student,
+std::vector<int> searchMultipleTokens(const std::string& student,
 										 		const std::string& tokens){
 	std::vector<std::string> tokenlist;
+	std::vector<int> retlist;
 	tokenlist=splitTokens(tokens);
-	return Difference();//change to actual return
+	for (unsigned int i = 0; i<tokenlist.size(); i++)
+	{
+		retlist.push_back(RabinKarpSingle(tokenlist[i], student));
+	}
+	return retlist;
 }
 
 /*	Looks for a single token in a string using the Rabin-Karp rolling hash
