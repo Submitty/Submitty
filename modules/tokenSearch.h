@@ -55,11 +55,11 @@ student output. The algorithm runs in linear time with respect to the
 length of the student output and preprocessing for the algorithm is
 linear with respect to the token. Overall, the algorithm runs in O(N + M)
 time where N is the length of the student and M is the length of the token.*/
-Difference searchToken(const std::string& student, const std::string& token){
+Tokens searchToken(const std::string& student, const std::string& token){
 	
 	//Build a table to use for the search
-	Difference diff;
-	diff.distance = 0;
+	Tokens diff;
+	diff.num_tokens = 1;
 	int V[token.size()];
 	buildTable( V, token);
 
@@ -79,11 +79,7 @@ Difference searchToken(const std::string& student, const std::string& token){
 		}
 	}
 
-	Change tmp;
-	tmp.b_changes.push_back(0);
-	tmp.a_start = tmp.b_start = 0;
-	diff.changes.push_back(tmp);
-	diff.distance = 1;
+	diff.tokens_found.push_back(0);
 	return diff;
 }
 /*searchAllTokens looks for tokens delimited by newline characters in the 
