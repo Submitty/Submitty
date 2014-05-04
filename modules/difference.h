@@ -66,6 +66,8 @@ public:
     std::vector<int> tokens_found;
     int num_tokens;
     bool partial;
+    bool alltokensfound;
+    bool harsh;
     void printJSON(std::ostream & file_out, int type);
     void grade();
 };
@@ -249,11 +251,20 @@ void Tokens::printJSON(std::ostream & file_out, int type){
     return;
 }
 
-void Tokens::grade(){
+float Tokens::grade(){
+    if(partial)
+        return (float)tokens_found.size() / (float)num_tokens;
+    else{
+        if(tokens_found.size() == num_tokens || (tokens_found.size() != 0 && !harsh))
+            return 1;
+        else
+            return 0;
+    }
+        
 
 }
-void Difference::grade(){
-    
+float Difference::grade(){
+
 }
 
 #endif /* defined(__differences__difference__) */

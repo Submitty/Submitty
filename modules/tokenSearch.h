@@ -86,14 +86,45 @@ Difference searchToken(const std::string& student, const std::string& token){
 	diff.distance = 1;
 	return diff;
 }
-/*searchMultipleTokens looks for tokens delimited by newline characters in the 
+/*searchAllTokens looks for tokens delimited by newline characters in the 
 student output. The algorithm runs in linear time with respect to the 
 length of the student output and preprocessing for the algorithm is
 linear with respect to the token. Overall, the algorithm runs in O(N + M)
 time where N is the length of the student and M is the length of the token.*/
-Tokens searchMultipleTokens(const std::string& student,
+Tokens searchAllTokens(const std::string& student,
 										 		const std::string& tokens){
 	Tokens difference;
+	difference.partial = false;
+	difference.harsh = true;
+	std::vector<std::string> tokenlist;
+	tokenlist=splitTokens(tokens);
+	difference.num_tokens = tokenlist.size();
+	for (unsigned int i = 0; i<tokenlist.size(); i++)
+	{
+		difference.tokens.push_back(RabinKarpSingle(tokenlist[i], student));
+	}
+	return difference;
+}
+
+Tokens searchAnyTokens(const std::string& student,
+										 		const std::string& tokens){
+	Tokens difference;
+	difference.partial = false;
+	difference.harsh = false;
+	std::vector<std::string> tokenlist;
+	tokenlist=splitTokens(tokens);
+	difference.num_tokens = tokenlist.size();
+	for (unsigned int i = 0; i<tokenlist.size(); i++)
+	{
+		difference.tokens.push_back(RabinKarpSingle(tokenlist[i], student));
+	}
+	return difference;
+}
+
+Tokens searchTokens(const std::string& student,
+										 		const std::string& tokens){
+	Tokens difference;
+	difference.partial = true;
 	std::vector<std::string> tokenlist;
 	tokenlist=splitTokens(tokens);
 	difference.num_tokens = tokenlist.size();
