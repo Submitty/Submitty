@@ -11,11 +11,14 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 #include <sstream>
 
-#include "TestCase.h"
+//#include "TestCase.h"
 //#include "GradingRubric.h"
 
 const int hw_num = 0;
 const std::string hw_name = "";
+
+// Compile Command (executed in student FILES directory)
+const std::string compile_command = "g++ -g *.cpp";
 
 // Submission parameters
 const int max_submissions = 20;
@@ -96,7 +99,7 @@ TestCase(
 TestCase(
 	"Case 1",							// title
 	"./case1.exe",						// details
-	"./a.out 1> cout.txt 2> cerr.txt",	// command
+	"./a.out",	// command
 	"test1_out.txt",					// output file name [V]
 	"test1_out.txt",					// output file description
 	"expected_test1.txt",				// expected output file [V]
