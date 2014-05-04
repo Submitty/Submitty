@@ -24,6 +24,7 @@ public:
     TestResults();
     int distance;
     virtual void printJSON(std::ostream & file_out, int type)=0;
+    virtual float grade()=0;
 
 };
 class Change{
@@ -56,16 +57,17 @@ public:
     std::vector<int> diff_a;
     std::vector<int> diff_b;
     void printJSON(std::ostream & file_out, int type);
+    void grade();
 };
 
 class Tokens: public TestResults{
 public:
-    std::vector<int> tokens_found;
-	bool alltokensfound;
-    std::vector<int> tokens;
     Tokens();
+    std::vector<int> tokens_found;
+    int num_tokens;
+    bool partial;
     void printJSON(std::ostream & file_out, int type);
-
+    void grade();
 };
 
 TestResults::TestResults():distance(0){}
@@ -228,7 +230,30 @@ void Difference::printJSON(std::ostream & file_out, int type){
 }
 
 void Tokens::printJSON(std::ostream & file_out, int type){
+    std::string partial_str = (this.partial) ? "true" : "false";
+
+    file_out << "{\n\t\"tokens\": " << num_tokens << "," << std::endl;
+    file_out << "\t\"found\": [";
+    for(unsigned int i = 0; i < tokens_found.size(); i++){
+        file_out << tokens_found[i];
+        if(i != tokens_found.size() - 1){
+            file_out << ", ";
+        }
+        else{
+            file_out << " ]," << std::endl;
+        }
+    } 
+    file_out << "\t\"num_found\": " << tokens_found.size() << "," << std::endl;
+    file_out << "\t\"partial\": " << partial_str << "," << std::endl;
+    file_out << "}" << std::endl;
     return;
+}
+
+void Tokens::grade(){
+
+}
+void Difference::grade(){
+    
 }
 
 #endif /* defined(__differences__difference__) */

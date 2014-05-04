@@ -96,16 +96,10 @@ Tokens searchMultipleTokens(const std::string& student,
 	Tokens difference;
 	std::vector<std::string> tokenlist;
 	tokenlist=splitTokens(tokens);
+	difference.num_tokens = tokenlist.size();
 	for (unsigned int i = 0; i<tokenlist.size(); i++)
 	{
 		difference.tokens.push_back(RabinKarpSingle(tokenlist[i], student));
-	}
-	for (unsigned int i = 0; i<difference.tokens.size(); i++)
-	{
-		if (difference.tokens[i]==-1)
-		{
-			difference.alltokensfound = false;
-		}
 	}
 	return difference;
 }
