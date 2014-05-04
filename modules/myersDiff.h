@@ -36,7 +36,7 @@ template<class T> Difference sesSecondary(Difference & text_diff, metaData<T> & 
 template<class T> Difference sesSecondary(Difference & text_diff);
 template<class T> Difference printJSON(Difference & text_diff, std::ofstream & file_out, int type=0);
 
-TestResults myersDiffbyLinebyWord(std::string b, std::string a){
+TestResults myersDiffbyLinebyWord(const std::string & b, const std::string & a){
     vectorOfWords text_a=stringToWords(a);
     vectorOfWords text_b=stringToWords(b);
     Difference diff= ses(text_a, text_b, true);
@@ -44,7 +44,7 @@ TestResults myersDiffbyLinebyWord(std::string b, std::string a){
     return diff;
 }
 
-TestResults myersDiffbyLineNoWhite(std::string b, std::string a){
+TestResults myersDiffbyLineNoWhite(const std::string & b, const std::string & a){
     vectorOfWords text_a=stringToWords(a);
     vectorOfWords text_b=stringToWords(b);
     Difference diff= ses(text_a, text_b, false);
@@ -52,7 +52,7 @@ TestResults myersDiffbyLineNoWhite(std::string b, std::string a){
     return diff;
 }
 
-TestResults myersDiffbyLine(std::string b, std::string a){
+TestResults myersDiffbyLine(const std::string & b, const std::string & a){
     vectorOfLines text_a=stringToLines(a);
     vectorOfLines text_b=stringToLines(b);
     Difference diff= ses(text_a, text_b, false);
@@ -61,7 +61,7 @@ TestResults myersDiffbyLine(std::string b, std::string a){
 
 }
 
-TestResults myersDiffbyLinesByChar(std::string b, std::string a){
+TestResults myersDiffbyLinesByChar(const std::string & b, const std::string & a){
     vectorOfLines text_a=stringToLines(a);
     vectorOfLines text_b=stringToLines(b);
     Difference diff= ses(text_a, text_b, true);
