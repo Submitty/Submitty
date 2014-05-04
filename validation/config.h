@@ -17,6 +17,9 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 const int hw_num = 0;
 const std::string hw_name = "";
 
+// Compile Command (executed in student FILES directory)
+const std::string compile_command = "g++ -g *.cpp";
+
 // Submission parameters
 const int max_submissions = 20;
 const int submission_penalty = 5;
@@ -57,13 +60,8 @@ const std::string expected_output_dir = "../CSCI1200/Scripts/expectedOutput/HW0"
 const std::string results_dir = "../CSCI1200/HW0/alice/1/.submit.grade";
 */
 
-// Test cases
-const int num_testcases = 3;
-
-TestCase testcases[3] {
-
 /************* README AND COMPILATION *****************/
-TestCase(
+TestCase readmeTestCase(
   	"Readme",
   	"",
     "",
@@ -76,8 +74,8 @@ TestCase(
     DONT_CHECK,
     DONT_CHECK,
     NULL
-),
-TestCase(
+);
+TestCase compilationTestCase(
 	"Compilation",
 	"",
 	"",
@@ -90,7 +88,12 @@ TestCase(
 	DONT_CHECK,
 	DONT_CHECK,
 	NULL
-),
+);
+
+// Test cases
+const int num_testcases = 1;
+
+TestCase testcases[1] {
 
 /******************** TEST CASES **********************/
 TestCase(

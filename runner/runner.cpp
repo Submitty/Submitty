@@ -12,6 +12,7 @@
 #include "config.h"
 
 using std::ifstream;
+using std::ofstream;
 using std::string;
 using std::cout;
 using std::endl;
@@ -53,29 +54,59 @@ int main(int argc, char* argv[]) {
 		return 2;
 	}
 
-	// Compile files in tmp directory with compile command from config
+	// Try to make GRADES directory
+	if (execute("cd " + user_path + "/" + submission_dir + "; mkdir GRADES")){
+		cerr << "COULD NOT CREATE GRADES DIRECTORY" << endl;
+		return 6;
+	}
 
+	// Get readme grade (does it exist?)
+	ofstream readme_file((user_path + "/" + submission_dir + "/GRADES/readme_grade.txt").c_str());
+	if (execute("cd " + tmp_path + "/" + submission_dir + "/FILES" + "; [ -f README.txt ]")){
+		cerr << "NO README.txt" << endl;
+		readme_file << 0;
+	}else{
+		readme_file << readmeTestCase.points();
+	}
+	readme_file.close();
+
+	// Compile files in tmp directory with compile command from config
+	ofstream compilation_file((user_path + "/" + submission_dir + "/GRADES/compilation_grade.txt").c_str());
 	if (execute(
 			"cd " + tmp_path + "/" + submission_dir + "/FILES && "
-					+ compile_command))
-		return 3;
+					+ compile_command)){
+		cerr << "COMPILATION FAILED" << endl;
+		return 0;
+		compilation_file << 0;
+	}else{
+		compilation_file << compilationTestCase.points();
+	}
+	compilation_file.close();
 
 	// Create the .submit.out directory
-	if (execute("cd " + tmp_path + "/" + submission_dir + "/FILES && mkdir .submit.out")){
+	if (execute(
+			"cd " + tmp_path + "/" + submission_dir
+					+ " && mkdir .submit.out")) {
 		return 4;
 	}
 
 	// Run each test case and create output files
-
 	for (unsigned int i = 0; i < num_testcases; i++) {
 		string cmd = testcases[i].command();
 		if (cmd != "") {
 			if (execute(
 					"cd " + tmp_path + "/" + submission_dir + "/FILES && " + cmd
-							+ " 1>../.submit.out/test"+to_string(i)+"_cout.txt 2>../.submit.out/test"+to_string(i)+"_cerr.txt")){
+							+ " 1>../.submit.out/test" + to_string(i)
+							+ "_cout.txt 2>../.submit.out/test" + to_string(i)
+							+ "_cerr.txt")) {
 				cerr << "ERROR RUNNING TEST CASE " << i << endl;
 			}
 		}
+	}
+
+	// Copy over .submit.out from tmp to user submission directory
+	if (execute("mv " + tmp_path + "/" + submission_dir + "/.submit.out " + user_path + "/" + submission_dir + "/.submit.out")){
+		return 5;
 	}
 
 	//TODO MAKE CALL TO VALIDATOR!!!

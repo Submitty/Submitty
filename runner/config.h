@@ -11,7 +11,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 #include <sstream>
 
-//#include "TestCase.h"
+#include "TestCase.h"
 //#include "GradingRubric.h"
 
 const int hw_num = 0;
@@ -60,13 +60,8 @@ const std::string expected_output_dir = "../CSCI1200/Scripts/expectedOutput/HW0"
 const std::string results_dir = "../CSCI1200/HW0/alice/1/.submit.grade";
 */
 
-// Test cases
-const int num_testcases = 3;
-
-TestCase testcases[3] {
-
 /************* README AND COMPILATION *****************/
-TestCase(
+TestCase readmeTestCase(
   	"Readme",
   	"",
     "",
@@ -79,8 +74,8 @@ TestCase(
     DONT_CHECK,
     DONT_CHECK,
     NULL
-),
-TestCase(
+);
+TestCase compilationTestCase(
 	"Compilation",
 	"",
 	"",
@@ -93,13 +88,18 @@ TestCase(
 	DONT_CHECK,
 	DONT_CHECK,
 	NULL
-),
+);
+
+// Test cases
+const int num_testcases = 1;
+
+TestCase testcases[1] {
 
 /******************** TEST CASES **********************/
 TestCase(
 	"Case 1",							// title
 	"./case1.exe",						// details
-	"./a.out",	// command
+	"./a.out 1> cout.txt 2> cerr.txt",	// command
 	"test1_out.txt",					// output file name [V]
 	"test1_out.txt",					// output file description
 	"expected_test1.txt",				// expected output file [V]
