@@ -18,12 +18,13 @@ Rabin-Karp algorithm used for multiple token search
 #include "STRutil.h"
 #include "difference.h"
 #include "clean.h"
+
 int RabinKarpSingle(std::string token, std::string searchstring);
-void buildTable( int* V, const std::string& keyword);
-Difference searchToken(const std::string& student, const std::string& token);
-Tokens searchMultipleTokens(const std::string& student,
-                            const std::string& tokens);
 std::vector<std::string> splitTokens(const std::string& tokens);
+Tokens searchTokens(const std::string& student, const std::string& tokens);
+Tokens searchAnyTokens(const std::string& student, const std::string& tokens);
+Tokens searchAllTokens(const std::string& student, const std::string& tokens);
+void buildTable( int* V, const std::string& keyword);
 
 /*A helper function that is used to construct a table for the keyword
 in linear time with respect to the keyword given. This helper function
@@ -67,8 +68,11 @@ Tokens searchToken(const std::string& student, const std::string& token){
 	int i = 0;
 	while( m + i < student.size() ){
 		if( student[i + m] == token[i] ){
-			if( i == token.size() - 1 )
+			if( i == token.size() - 1 ){
+				diff.tokens_found.push_back(m);
 				return diff;
+			}
+				
 			i++;
 		} else {
 			m += i - V[i];
@@ -79,7 +83,7 @@ Tokens searchToken(const std::string& student, const std::string& token){
 		}
 	}
 
-	diff.tokens_found.push_back(0);
+	diff.tokens_found.push_back(-1);
 	return diff;
 }
 /*searchAllTokens looks for tokens delimited by newline characters in the 
@@ -97,7 +101,7 @@ Tokens searchAllTokens(const std::string& student,
 	difference.num_tokens = tokenlist.size();
 	for (unsigned int i = 0; i<tokenlist.size(); i++)
 	{
-		difference.tokens.push_back(RabinKarpSingle(tokenlist[i], student));
+		difference.tokens_found.push_back(RabinKarpSingle(tokenlist[i], student));
 	}
 	return difference;
 }
@@ -112,7 +116,7 @@ Tokens searchAnyTokens(const std::string& student,
 	difference.num_tokens = tokenlist.size();
 	for (unsigned int i = 0; i<tokenlist.size(); i++)
 	{
-		difference.tokens.push_back(RabinKarpSingle(tokenlist[i], student));
+		difference.tokens_found.push_back(RabinKarpSingle(tokenlist[i], student));
 	}
 	return difference;
 }
@@ -126,7 +130,7 @@ Tokens searchTokens(const std::string& student,
 	difference.num_tokens = tokenlist.size();
 	for (unsigned int i = 0; i<tokenlist.size(); i++)
 	{
-		difference.tokens.push_back(RabinKarpSingle(tokenlist[i], student));
+		difference.tokens_found.push_back(RabinKarpSingle(tokenlist[i], student));
 	}
 	return difference;
 }

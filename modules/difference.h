@@ -57,7 +57,7 @@ public:
     std::vector<int> diff_a;
     std::vector<int> diff_b;
     void printJSON(std::ostream & file_out, int type);
-    void grade();
+    float grade();
 };
 
 class Tokens: public TestResults{
@@ -69,7 +69,7 @@ public:
     bool alltokensfound;
     bool harsh;
     void printJSON(std::ostream & file_out, int type);
-    void grade();
+    float grade();
 };
 
 TestResults::TestResults():distance(0){}
@@ -232,7 +232,7 @@ void Difference::printJSON(std::ostream & file_out, int type){
 }
 
 void Tokens::printJSON(std::ostream & file_out, int type){
-    std::string partial_str = (this.partial) ? "true" : "false";
+    std::string partial_str = (partial) ? "true" : "false";
 
     file_out << "{\n\t\"tokens\": " << num_tokens << "," << std::endl;
     file_out << "\t\"found\": [";
