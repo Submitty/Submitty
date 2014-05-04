@@ -9,13 +9,11 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#include <sstream>
-
-#include "TestCase.h"
+#include "../../validation/TestCase.h"
 //#include "GradingRubric.h"
 
-const int hw_num = 0;
-const std::string hw_name = "";
+const int hw_num = 1;
+const std::string hw_name = "Squaring Numbers";
 
 // Compile Command (executed in student FILES directory)
 const std::string compile_command = "g++ -g *.cpp";
@@ -41,11 +39,11 @@ const int ta_pts = 20;
 // root directory
 const char* root_dir = "../CSCI1200/";
 // homework directory
-const char* hw_dir = "HW0/";
+const char* hw_dir = "HW1/";
 // input files directory
 const char* input_dir = "testingInput/";
 // expected output files directory
-const char* expected_out_dir = "../CSCI1200/Scripts/expectedOutput/HW0/";
+const char* expected_out_dir = "../CSCI1200/Scripts/expectedOutput/HW1/";
 
 /*
 // directory containing input files
@@ -79,7 +77,7 @@ TestCase compilationTestCase(
 	"Compilation",
 	"",
 	"",
-	"hw0.exe",		// name of .exe created by student
+	"hw1.exe",		// name of .exe created by student
 	"",
 	"",
 	compile_pts,				// points for compilation
@@ -91,15 +89,15 @@ TestCase compilationTestCase(
 );
 
 // Test cases
-const int num_testcases = 1;
+const int num_testcases = 5;
 
-TestCase testcases[1] {
+TestCase testcases[5] {
 
 /******************** TEST CASES **********************/
 TestCase(
 	"Case 1",							// title
-	"./case1.exe",						// details
-	"./a.out",	// command
+	"./hw1.exe 1 hw1_out.txt",			// details
+	"./a.out 1 test1_out.txt 1> test1_cout.txt 2> test1_cerr.txt",	// command
 	"test1_out.txt",					// output file name [V]
 	"test1_out.txt",					// output file description
 	"expected_test1.txt",				// expected output file [V]
@@ -109,6 +107,62 @@ TestCase(
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&diffLine							// compare function [V]
+),
+TestCase(
+	"Case 2",
+	"./hw1.exe 10 hw1_out.txt",
+	"./a.out 10 test2_out.txt 1> test2_cout.txt 2> test2_cerr.txt",
+	"test2_out.txt",
+	"test2_out.txt",
+	"expected_test2.txt",
+	5,
+	false,
+	false,
+	WARN_IF_NOT_EMPTY,
+	WARN_IF_NOT_EMPTY,
+	&diffLine
+),
+TestCase(
+	"Case 3",
+	"./hw1.exe 69 hw1_out.txt",
+	"./a.out 69 test3_out.txt 1> test3_cout.txt 2> test3_cerr.txt",
+	"test3_out.txt",
+	"test3_out.txt",
+	"expected_test3.txt",
+	5,
+	false,
+	false,
+	WARN_IF_NOT_EMPTY,
+	WARN_IF_NOT_EMPTY,
+	&diffLine
+),
+TestCase(
+	"Case 4",
+	"./hw1.exe 0 hw1_out.txt",
+	"./a.out 0 test4_out.txt 1> test4_cout.txt 2> test4_cerr.txt",
+	"test4_out.txt",
+	"test4_out.txt",
+	"expected_test4.txt",
+	5,
+	false,
+	false,
+	WARN_IF_NOT_EMPTY,
+	WARN_IF_NOT_EMPTY,
+	&diffLine
+),
+TestCase(
+	"Case 5",
+	"./hw1.exe -3 hw1_out.txt",
+	"./a.out -3 test5_out.txt 1> test5_cout.txt 2> test5_cerr.txt",
+	"test5_out.txt",
+	"test5_out.txt",
+	"expected_test5.txt",
+	5,
+	true,
+	false,
+	WARN_IF_NOT_EMPTY,
+	WARN_IF_NOT_EMPTY,
+	&diffLine
 )
 };
 

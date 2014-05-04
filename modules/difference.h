@@ -13,17 +13,16 @@
 
 #define tab "    "
 #define OtherType 0
-#define StringType 1
-#define VectorStringType 2
-#define VectorVectorStringType 3
-#define VectorVectorOtherType 4
-#define VectorOtherType 5
+#define ByLineByChar 1
+#define ByWordByChar 2
+#define ByLineByWord 3
 
 class TestResults{
 public:
     TestResults();
     int distance;
-    virtual void printJSON(std::ostream & file_out, int type)=0;
+    virtual void printJSON(std::ostream & file_out){};
+    virtual float grade(){return 0;};
 
 };
 class Change{
@@ -53,53 +52,78 @@ class Difference: public TestResults{
 public:
     Difference();
     std::vector<Change> changes;
-    std::vector<int> diff_a;
-    std::vector<int> diff_b;
-    void printJSON(std::ostream & file_out, int type);
+    std::vector<int> diff_a; //student
+    std::vector<int> diff_b; //instructor
+    void printJSON(std::ostream & file_out);
+    float grade();
+    int output_length_a;
+    int output_length_b;
+    int edit_distance;
+    int type;
 };
 
 class Tokens: public TestResults{
 public:
-    std::vector<int> tokens_found;
-	bool alltokensfound;
-    std::vector<int> tokens;
     Tokens();
-    void printJSON(std::ostream & file_out, int type);
-
+    std::vector<int> tokens_found;
+    int num_tokens;
+    bool partial;
+    int tokensfound;
+    bool harsh;
+    void printJSON(std::ostream & file_out);
+    float grade();
 };
 
 TestResults::TestResults():distance(0){}
 
-Difference::Difference():TestResults() {}
+Difference::Difference():TestResults(), output_length_a(0),output_length_b(0),
+      edit_distance(0){}
 
-Tokens::Tokens():TestResults(), alltokensfound(false){}
+Tokens::Tokens():TestResults(), num_tokens(0),
+    tokensfound(0), partial(true), harsh(false){}
 
-void Difference::printJSON(std::ostream & file_out, int type){
+float Difference::grade(){
+    int max = (output_length_a>output_length_b)?output_length_a:output_length_b;
+    return (float)distance/(float)max;
+}
+
+float Tokens::grade(){
+    for(unsigned int i = 0; i < tokens_found.size(); i++){
+        if(tokens_found[i] != -1)
+            tokensfound++;
+    }
+    if(partial)
+        return (float)tokensfound / (float)num_tokens;
+    else if (tokensfound == num_tokens || (!harsh && tokensfound != 0)) {
+        return 1;
+    }
+    return 0;
+}
+
+void Difference::printJSON(std::ostream & file_out){
     std::string diff1_name;
     std::string diff2_name;
     file_out<<"{"<<std::endl
     <<"\"differences\":["<<std::endl
     <<tab;
     switch (type) {
-            // StringType;
-            // VectorStringType;
+            // ByLineByChar;
+            // ByWordByChar;
             // VectorVectorStringType;
-            // VectorVectorOtherType;
+            // ByLineByWord;
             // VectorOtherType;
             
-        case StringType:
+        case ByLineByChar:
             diff1_name="line";
             diff2_name="char";
             break;
             
-        case VectorStringType:
-        case VectorOtherType:
+        case ByWordByChar:
             diff1_name="word";
             diff2_name="char";
             break;
             
-        case VectorVectorStringType:
-        case VectorVectorOtherType:
+        case ByLineByWord:
             diff1_name="line";
             diff2_name="word";
             break;
@@ -227,8 +251,27 @@ void Difference::printJSON(std::ostream & file_out, int type){
     return ;
 }
 
-void Tokens::printJSON(std::ostream & file_out, int type){
+void Tokens::printJSON(std::ostream & file_out){
+    std::string partial_str = (partial) ? "true" : "false";
+
+    file_out << "{\n\t\"tokens\": " << num_tokens << "," << std::endl;
+    file_out << "\t\"found\": [";
+    for(unsigned int i = 0; i < tokens_found.size(); i++){
+        file_out << tokens_found[i];
+        if(i != tokens_found.size() - 1){
+            file_out << ", ";
+        }
+        else{
+            file_out << " ]," << std::endl;
+        }
+    } 
+    file_out << "\t\"num_found\": " << tokensfound << "," << std::endl;
+    file_out << "\t\"partial\": " << partial_str << "," << std::endl;
+    file_out << "}" << std::endl;
     return;
 }
+
+
+
 
 #endif /* defined(__differences__difference__) */

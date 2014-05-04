@@ -15,9 +15,13 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 config.h for easier parsing.*/
 
 int main(int argc, char* argv[]){
+	if(argc != 2){
+		std::cout << "USAGE: " << argv[0] << " [output_file]" << std::endl;
+	}
+
 
 	std::ofstream init;
-	init.open( "config.json", std::ios::out );
+	init.open( argv[1], std::ios::out );
 
 	if(!init.is_open()){
 		std::cout << "ERROR: unable to open new file for initialization... \
