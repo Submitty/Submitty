@@ -49,7 +49,8 @@ Now Exiting" << std::endl;
 			<< std::endl;
 		init << "\t\t\"points\": " << testcases[i].points() << "," << std::endl;
 		init << "\t\t\"hidden\": " << hidden << "," << std::endl;
-		init << "\t\t\"extracredit\": " << extracredit << std::endl;
+		init << "\t\t\"extracredit\": " << extracredit << "," << std::endl;
+		init << "\t\t\"expected_output_file\": " << testcases[i].expected() << std::endl;
 		init << "\t}";
 		if(i != num_testcases - 1)
 			init << "," << std::endl;
