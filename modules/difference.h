@@ -19,6 +19,13 @@
 #define VectorVectorOtherType 4
 #define VectorOtherType 5
 
+class TestResults{
+public:
+    TestResults();
+    int distance;
+    virtual void printJSON(std::ostream & file_out, int type)=0;
+
+};
 class Change{
 public:
 	// Starting changeblock line for input (student)
@@ -42,24 +49,30 @@ void Change::clear(){
     b_changes.clear();
 }
 
-class Difference{
+class Difference: public TestResults{
 public:
-	bool is_tokensearch;	// False means normal diff, true means tokensearch
-	bool alltokensfound;
-	std::vector<int> tokens;
+    Difference();
     std::vector<Change> changes;
     std::vector<int> diff_a;
     std::vector<int> diff_b;
-    int distance;
     void printJSON(std::ostream & file_out, int type);
 };
 
-Difference::Difference()
-{
-	is_tokensearch = false;
-	alltokensfound = true;
-	distance = 0;
-}
+class Tokens: public TestResults{
+public:
+    std::vector<int> tokens_found;
+	bool alltokensfound;
+    std::vector<int> tokens;
+    Tokens();
+    void printJSON(std::ostream & file_out, int type);
+
+};
+
+TestResults::TestResults():distance(0){}
+
+Difference::Difference():TestResults() {}
+
+Tokens::Tokens():TestResults(), alltokensfound(false){}
 
 void Difference::printJSON(std::ostream & file_out, int type){
     std::string diff1_name;
@@ -212,6 +225,10 @@ void Difference::printJSON(std::ostream & file_out, int type){
     
     
     return ;
+}
+
+void Tokens::printJSON(std::ostream & file_out, int type){
+    return;
 }
 
 #endif /* defined(__differences__difference__) */

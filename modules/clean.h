@@ -15,30 +15,22 @@
 typedef std::vector< std::vector<std::string> > vectorOfWords;
 typedef std::vector<std::string> vectorOfLines;
 
-std::string clean(const std::string & content){
-	std::stringstream message;
-	message.str(content);
-
-	std::string new_message = "";
-
-	std::string line;
-	while(!message){
-		std::getline(message, line);
-		if(line[line.length() - 1] == '\r'){
-			line = line.substr(0, line.length() - 2);
-		}
-        if(line[0] == '\r'){
-			line = line.substr(1, line.length() - 1);
-		}
-		new_message.append(line);
-		if(message){
-			//new_message.append('\n');
-		}
-		else{
-			break;
-		}
-	}
-    return "";
+// Removes all instances of \r and replaces with \n
+void clean(std::string & content){
+	int pos=(int)content.find('\r');
+    while (pos!=std::string::npos) {
+        if (content[pos+1]=='\n') {
+            content.erase(pos, 1);
+        }
+        else if (content[pos-1]=='\n') {
+            content.erase(pos, 1);
+        }
+        else{
+            content[pos]='\n';
+        }
+        pos=(int)content.find('\r');
+    }
+    return;
 }
 
 vectorOfWords stringToWords(std::string text){

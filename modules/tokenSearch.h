@@ -21,8 +21,8 @@ Rabin-Karp algorithm used for multiple token search
 int RabinKarpSingle(std::string token, std::string searchstring);
 void buildTable( int* V, const std::string& keyword);
 Difference searchToken(const std::string& student, const std::string& token);
-std::vector<int> searchMultipleTokens(const std::string& student,
-                                      const std::string& tokens);
+Tokens searchMultipleTokens(const std::string& student,
+                            const std::string& tokens);
 std::vector<std::string> splitTokens(const std::string& tokens);
 
 /*A helper function that is used to construct a table for the keyword
@@ -91,10 +91,9 @@ student output. The algorithm runs in linear time with respect to the
 length of the student output and preprocessing for the algorithm is
 linear with respect to the token. Overall, the algorithm runs in O(N + M)
 time where N is the length of the student and M is the length of the token.*/
-Difference searchMultipleTokens(const std::string& student,
+Tokens searchMultipleTokens(const std::string& student,
 										 		const std::string& tokens){
-	Difference difference();
-	difference.is_tokensearch = true;
+	Tokens difference;
 	std::vector<std::string> tokenlist;
 	tokenlist=splitTokens(tokens);
 	for (unsigned int i = 0; i<tokenlist.size(); i++)
