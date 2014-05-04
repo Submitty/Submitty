@@ -21,9 +21,9 @@ Rabin-Karp algorithm used for multiple token search
 
 int RabinKarpSingle(std::string token, std::string searchstring);
 std::vector<std::string> splitTokens(const std::string& tokens);
-Tokens searchTokens(const std::string& student, const std::string& tokens);
-Tokens searchAnyTokens(const std::string& student, const std::string& tokens);
-Tokens searchAllTokens(const std::string& student, const std::string& tokens);
+TestResults searchTokens(const std::string& student, const std::string& tokens);
+TestResults searchAnyTokens(const std::string& student, const std::string& tokens);
+TestResults searchAllTokens(const std::string& student, const std::string& tokens);
 void buildTable( int* V, const std::string& keyword);
 
 /*A helper function that is used to construct a table for the keyword
@@ -56,7 +56,7 @@ student output. The algorithm runs in linear time with respect to the
 length of the student output and preprocessing for the algorithm is
 linear with respect to the token. Overall, the algorithm runs in O(N + M)
 time where N is the length of the student and M is the length of the token.*/
-Tokens searchToken(const std::string& student, const std::string& token){
+TestResults searchToken(const std::string& student, const std::string& token){
 	
 	//Build a table to use for the search
 	Tokens diff;
@@ -91,7 +91,7 @@ student output. The algorithm runs in linear time with respect to the
 length of the student output and preprocessing for the algorithm is
 linear with respect to the token. Overall, the algorithm runs in O(N + M)
 time where N is the length of the student and M is the length of the token.*/
-Tokens searchAllTokens(const std::string& student,
+TestResults searchAllTokens(const std::string& student,
 										 		const std::string& tokens){
 	Tokens difference;
 	difference.partial = false;
@@ -106,7 +106,7 @@ Tokens searchAllTokens(const std::string& student,
 	return difference;
 }
 
-Tokens searchAnyTokens(const std::string& student,
+TestResults searchAnyTokens(const std::string& student,
 										 		const std::string& tokens){
 	Tokens difference;
 	difference.partial = false;
@@ -121,7 +121,7 @@ Tokens searchAnyTokens(const std::string& student,
 	return difference;
 }
 
-Tokens searchTokens(const std::string& student,
+TestResults searchTokens(const std::string& student,
 										 		const std::string& tokens){
 	Tokens difference;
 	difference.partial = true;
