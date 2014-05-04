@@ -17,13 +17,10 @@ Rabin-Karp algorithm used for multiple token search
 #include <algorithm>
 #include "STRutil.h"
 #include "difference.h"
-<<<<<<< HEAD
+
 #include "clean.h"
 int RabinKarpSingle(std::string token, std::string searchstring);
-=======
-//#include "clean.h"
 
->>>>>>> origin/runner
 void buildTable( int* V, const std::string& keyword);
 Difference searchToken(const std::string& student, const std::string& token);
 Tokens searchMultipleTokens(const std::string& student,
