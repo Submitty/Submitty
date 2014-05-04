@@ -2,6 +2,9 @@
 if (!isset($name) || $name=="") {
     $name = "Login";
 }
+if (!isset($num_homeworks)) {
+    $num_homeworks = 0;
+}
 ?>
 
 <!-- Static navbar -->
@@ -20,6 +23,7 @@ if (!isset($name) || $name=="") {
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="?page=home">Home</a></li>
                 <li><a href="?page=announcements">Announcements</a></li>
+                <?php if ($num_homeworks > 0) {?>
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                         Homework <span class="caret"></span>
@@ -30,7 +34,13 @@ if (!isset($name) || $name=="") {
                         <?php }?>
                     </ul>
                 </li>
+                <?php } else {?>
+                    <li><a href="?page=homework">Homework</a></li>
+                <?php }?>
                 <li><a href="?page=grades">Grades</a></li>
+                <?php if ($name == "Login") {?>
+                    <li><a href="#">Login</a></li>
+                <?php } else {?>
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                         <?php echo $name;?> <span class="caret"></span>
@@ -39,6 +49,7 @@ if (!isset($name) || $name=="") {
                         <li><a href="?page=logout">Logout</a></li>
                     </ul>
                 </li>
+                <?php }?>
             </ul>
           </div><!--/.nav-collapse -->
         </div><!--/.container-fluid -->
