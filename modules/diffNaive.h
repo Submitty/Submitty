@@ -90,7 +90,7 @@ including new lines. Comparison is done per line and returns a Difference object
 that indicates the indicies of characters the student string was off by. The 
 strings are not changed in this comparison. Runs in linear time with respect to
 the longer string.*/
-Difference diffLine(const std::string& _student, const std::string& _instructor){
+TestResults diffLine(const std::string& _student, const std::string& _instructor){
 	Difference diffs;
 	Change file;
 	file.a_start = file.b_start = 0;
@@ -135,7 +135,7 @@ including new lines. Comparison is done per line and returns a Difference object
 that indicates the indicies of characters the student string was off by. The 
 strings are not changed in this comparison. Runs in linear time with respect to
 the longer string.*/
-Difference diffLineNoSpace(const std::string& _student, const std::string& _instructor){
+TestResults diffLineNoSpace(const std::string& _student, const std::string& _instructor){
 	Difference diffs;
 	Change file;
 	file.a_start = file.b_start = 0;
