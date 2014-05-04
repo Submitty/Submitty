@@ -39,7 +39,11 @@ if ($points_possible == 0) {
                     <ul class="list-group">
                         <?php foreach($homework_summary as $item) {?>
                             <?php if (isset($item["score"]) && isset($item["points_possible"]) && $item["points_possible"] != 0) {
-                                $part_percent = $item["score"] / $item["points_possible"];
+                                if (!($item["points_possible"] > 0)) {
+                                    $part_percent = 1;
+                                } else {
+                                    $part_percent = $item["score"] / $item["points_possible"];
+                                }
                                 if ($part_percent == 1) {
                                     $class = "";
                                 } else if ($part_percent >= 0.5) {
@@ -83,7 +87,11 @@ if ($points_possible == 0) {
         <div class="row" style="margin-left: 10px; margin-right: 10px">
             <?php foreach($homework_tests as $test) {?>
                 <?php if (isset($test["score"]) && isset($test["points_possible"]) && $test["points_possible"] != 0) {
-                    $part_percent = $test["score"] / $test["points_possible"];
+                    if (!($test["points_possible"] > 0)) {
+                        $part_percent = 1;
+                    } else {
+                        $part_percent = $test["score"] / $test["points_possible"];
+                    }
                     if ($part_percent == 1) {
                         $class = "badge alert-success";
                     } else if ($part_percent >= 0.5) {
