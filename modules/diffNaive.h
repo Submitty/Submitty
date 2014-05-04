@@ -92,6 +92,7 @@ strings are not changed in this comparison. Runs in linear time with respect to
 the longer string.*/
 TestResults diffLine(const std::string& _student, const std::string& _instructor){
 	Difference diffs;
+	diffs.type = 1;
 
 	diffs.output_length_a = 0;
 	diffs.output_length_b = 0;
@@ -144,6 +145,8 @@ strings are not changed in this comparison. Runs in linear time with respect to
 the longer string.*/
 TestResults diffLineNoSpace(const std::string& _student, const std::string& _instructor){
 	Difference diffs;
+	diffs.type = 1;
+
 	Change file;
 	file.a_start = file.b_start = 0;
 	std::stringstream student;
