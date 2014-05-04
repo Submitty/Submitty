@@ -133,7 +133,6 @@ TestResults diffLine(const std::string& _student, const std::string& _instructor
 		i++;
 	}
 	diffs.distance = (int)std::max(file.a_changes.size(), file.b_changes.size());
-	diffs.editdistance = diffs.distance;
 	diffs.changes.push_back(file);
 	return diffs;
 }
