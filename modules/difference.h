@@ -13,17 +13,15 @@
 
 #define tab "    "
 #define OtherType 0
-#define StringType 1
-#define VectorStringType 2
-#define VectorVectorStringType 3
-#define VectorVectorOtherType 4
-#define VectorOtherType 5
+#define ByLineByChar 1
+#define ByWordByChar 2
+#define ByLineByWord 3
 
 class TestResults{
 public:
     TestResults();
     int distance;
-    virtual void printJSON(std::ostream & file_out, int type){};
+    virtual void printJSON(std::ostream & file_out){};
     virtual float grade(){return 0;};
 
 };
@@ -56,11 +54,12 @@ public:
     std::vector<Change> changes;
     std::vector<int> diff_a; //student
     std::vector<int> diff_b; //instructor
-    void printJSON(std::ostream & file_out, int type);
+    void printJSON(std::ostream & file_out);
     float grade();
     int output_length_a;
     int output_length_b;
     int edit_distance;
+    int type;
 };
 
 class Tokens: public TestResults{
@@ -71,7 +70,7 @@ public:
     bool partial;
     int tokensfound;
     bool harsh;
-    void printJSON(std::ostream & file_out, int type);
+    void printJSON(std::ostream & file_out);
     float grade();
 };
 
@@ -101,32 +100,30 @@ float Tokens::grade(){
     return 0;
 }
 
-void Difference::printJSON(std::ostream & file_out, int type){
+void Difference::printJSON(std::ostream & file_out){
     std::string diff1_name;
     std::string diff2_name;
     file_out<<"{"<<std::endl
     <<"\"differences\":["<<std::endl
     <<tab;
     switch (type) {
-            // StringType;
-            // VectorStringType;
+            // ByLineByChar;
+            // ByWordByChar;
             // VectorVectorStringType;
-            // VectorVectorOtherType;
+            // ByLineByWord;
             // VectorOtherType;
             
-        case StringType:
+        case ByLineByChar:
             diff1_name="line";
             diff2_name="char";
             break;
             
-        case VectorStringType:
-        case VectorOtherType:
+        case ByWordByChar:
             diff1_name="word";
             diff2_name="char";
             break;
             
-        case VectorVectorStringType:
-        case VectorVectorOtherType:
+        case ByLineByWord:
             diff1_name="line";
             diff2_name="word";
             break;
@@ -254,7 +251,7 @@ void Difference::printJSON(std::ostream & file_out, int type){
     return ;
 }
 
-void Tokens::printJSON(std::ostream & file_out, int type){
+void Tokens::printJSON(std::ostream & file_out){
     std::string partial_str = (partial) ? "true" : "false";
 
     file_out << "{\n\t\"tokens\": " << num_tokens << "," << std::endl;

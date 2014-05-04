@@ -10,7 +10,6 @@
 
 #include <string>
 #include <sstream>
-#include "modules.h"
 
 typedef std::vector< std::vector<std::string> > vectorOfWords;
 typedef std::vector<std::string> vectorOfLines;

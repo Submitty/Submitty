@@ -24,6 +24,7 @@
 #include <fstream>
 #include "difference.h"
 #include "metaData.h"
+#include "clean.h"
 
 template<class T> Difference ses(T& a, T& b, bool secondary=false);
 template<class T> Difference ses(T* a, T* b, bool secondary=false);
@@ -34,6 +35,40 @@ template<class T> Difference sesChanges(metaData<T> & meta_diff);
 template<class T> Difference sesSecondary(Difference & text_diff, metaData<T> & meta_diff);
 template<class T> Difference sesSecondary(Difference & text_diff);
 template<class T> Difference printJSON(Difference & text_diff, std::ofstream & file_out, int type=0);
+
+TestResults myersDiffbyLinebyWord(std::string b, std::string a){
+    vectorOfWords text_a=stringToWords(a);
+    vectorOfWords text_b=stringToWords(b);
+    Difference diff= ses(text_a, text_b, true);
+    diff.type=ByLineByWord;
+    return diff;
+}
+
+TestResults myersDiffbyLineNoWhite(std::string b, std::string a){
+    vectorOfWords text_a=stringToWords(a);
+    vectorOfWords text_b=stringToWords(b);
+    Difference diff= ses(text_a, text_b, false);
+    diff.type=ByLineByWord;
+    return diff;
+}
+
+TestResults myersDiffbyLine(std::string b, std::string a){
+    vectorOfLines text_a=stringToLines(a);
+    vectorOfLines text_b=stringToLines(b);
+    Difference diff= ses(text_a, text_b, false);
+    diff.type=ByLineByChar;
+    return diff;
+
+}
+
+TestResults myersDiffbyLinesByChar(std::string b, std::string a){
+    vectorOfLines text_a=stringToLines(a);
+    vectorOfLines text_b=stringToLines(b);
+    Difference diff= ses(text_a, text_b, true);
+    diff.type=ByLineByChar;
+    return diff;
+
+}
 
 // changes passing by refrence to pointers
 template<class T> Difference ses(T& a, T& b, bool secondary){
