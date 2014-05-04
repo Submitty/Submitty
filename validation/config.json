@@ -1,0 +1,34 @@
+{
+	"hw_num": 0,
+	"hw_name": "",
+	"max_submissions": 20,
+	"auto_pts": 30,
+	"ta_pts": 20,
+	"total_pts": 50,
+	"num_testcases": 1,
+	"testcases": [
+	{
+		"title": "Readme",
+		"details": "",
+		"points": 2,
+		"hidden": false,
+		"extracredit": false,
+		"expected_output_file": ""
+	},
+	{
+		"title": "Compilation",
+		"details": "",
+		"points": 3,
+		"hidden": false,
+		"extracredit": false,
+		"expected_output_file": ""
+	},
+	{
+		"title": "Case 1",
+		"details": "./case1.exe",
+		"points": 5,
+		"hidden": false,
+		"extracredit": false,
+		"expected_output_file": "expected_test1.txt"
+	} ]
+}
