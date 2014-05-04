@@ -1,4 +1,6 @@
 function load_progress_bar(progress, text) {
+    console.log(progress);
+
     if (progress == 0) {
         $("#centered-progress").html("");
         $("#bar-progress").html("");
@@ -9,5 +11,5 @@ function load_progress_bar(progress, text) {
         $("#centered-progress").html(text);
         $("#bar-progress").html("");
     }
-}
+    }
 

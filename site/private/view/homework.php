@@ -4,7 +4,6 @@ if ($points_possible == 0) {
 } else {
     $percent = (int)($points_received * 100 / $points_possible);
 }
-
 ?>
 <div class="col-md-12 col-sm-12 blog-main">
     <div class="panel panel-default">
@@ -15,7 +14,6 @@ if ($points_possible == 0) {
                 <span id="centered-progress" style="margin-left: auto; text-align: center;"></span>
               </div>
               <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $percent;?>%;">
-                <?php echo $percent;?>%
                 <span id="bar-progress"></span>
               </div>
             </div><!-- End Progress Bar -->
@@ -41,10 +39,10 @@ if ($points_possible == 0) {
                     <ul class="list-group">
                         <?php foreach($homework_summary as $item) {?>
                             <?php if (isset($item["score"]) && isset($item["points_possible"]) && $item["points_possible"] != 0) {
-                                $percent = $item["score"] / $item["points_possible"];
-                                if ($percent == 1) {
+                                $part_percent = $item["score"] / $item["points_possible"];
+                                if ($part_percent == 1) {
                                     $class = "";
-                                } else if ($percent >= 0.5) {
+                                } else if ($part_percent >= 0.5) {
                                     $class = " list-group-item-warning";
                                 } else {
                                     $class = " list-group-item-danger";
@@ -85,10 +83,10 @@ if ($points_possible == 0) {
         <div class="row" style="margin-left: 10px; margin-right: 10px">
             <?php foreach($homework_tests as $test) {?>
                 <?php if (isset($test["score"]) && isset($test["points_possible"]) && $test["points_possible"] != 0) {
-                    $percent = $test["score"] / $test["points_possible"];
-                    if ($percent == 1) {
+                    $part_percent = $test["score"] / $test["points_possible"];
+                    if ($part_percent == 1) {
                         $class = "badge alert-success";
-                    } else if ($percent >= 0.5) {
+                    } else if ($part_percent >= 0.5) {
                         $class = "badge alert-warning";
                     } else {
                         $class = "badge alert-danger";
@@ -111,7 +109,6 @@ if ($points_possible == 0) {
         </div>
     </div><!-- End Homework Output Compare And Diff -->
 </div><!-- End Col Blog-Main -->
-
 
 
 <script>

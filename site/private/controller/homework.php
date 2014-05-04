@@ -3,8 +3,8 @@ require_once("private/controller/helper.php");
 
 //Make model function calls for homework here
 
-$points_received = 11;//Points_received for entire homework as an int
-$points_possible = 15;//Points_possible for entire homework as an int
+$points_received = 15;//Points_received for entire homework as an int
+$points_possible = 20;//Points_possible for entire homework as an int
 
 //This is the summary for the entire homework
 //Either fill in value as a string or fill in score as an int.
