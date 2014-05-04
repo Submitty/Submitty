@@ -14,9 +14,27 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 /*Generates a file in json format containing all of the information defined in 
 config.h for easier parsing.*/
 
+void printTestCase(std::ostream& out, TestCase test ){
+	std::string hidden = (test.hidden()) ? "true" : "false";
+	std::string extracredit = 
+		(test.extracredit()) ? "true" : "false";
+
+	out << "\t{" << std::endl;
+	out << "\t\t\"title\": \""<< test.title() << "\"," 
+		<< std::endl;
+	out << "\t\t\"details\": \"" <<test.details() << "\"," 
+		<< std::endl;
+	out << "\t\t\"points\": " << test.points() << "," << std::endl;
+	out << "\t\t\"hidden\": " << hidden << "," << std::endl;
+	out << "\t\t\"extracredit\": " << extracredit << "," << std::endl;
+	out << "\t\t\"expected_output_file\": " << "\"" << test.expected() << "\"" << std::endl;
+	out << "\t}";
+}
+
 int main(int argc, char* argv[]){
 	if(argc != 2){
 		std::cout << "USAGE: " << argv[0] << " [output_file]" << std::endl;
+		return 0;
 	}
 
 
@@ -36,26 +54,18 @@ Now Exiting" << std::endl;
 
 	init << "\t\"auto_pts\": " << auto_pts << "," << std::endl;
 	init << "\t\"ta_pts\": " << ta_pts << "," << std::endl;
+	init << "\t\"total_pts\": " << auto_pts + ta_pts << "," << std::endl;
 
 	init << "\t\"num_testcases\": " << num_testcases << "," << std::endl;
 
 	init << "\t\"testcases\": [" << std::endl;
 	
+	printTestCase(init, readmeTestCase);
+	init << "," << std::endl;
+	printTestCase(init, compilationTestCase);
+	init << "," << std::endl;
 	for(unsigned int i = 0; i < num_testcases; i++){
-		std::string hidden = (testcases[i].hidden()) ? "true" : "false";
-		std::string extracredit = 
-			(testcases[i].extracredit()) ? "true" : "false";
-	
-		init << "\t{" << std::endl;
-		init << "\t\t\"title\": \""<< testcases[i].title() << "\"," 
-			<< std::endl;
-		init << "\t\t\"details\": \"" <<testcases[i].details() << "\"," 
-			<< std::endl;
-		init << "\t\t\"points\": " << testcases[i].points() << "," << std::endl;
-		init << "\t\t\"hidden\": " << hidden << "," << std::endl;
-		init << "\t\t\"extracredit\": " << extracredit << "," << std::endl;
-		init << "\t\t\"expected_output_file\": " << testcases[i].expected() << std::endl;
-		init << "\t}";
+		printTestCase(init, testcases[i]);
 		if(i != num_testcases - 1)
 			init << "," << std::endl;
 	}
