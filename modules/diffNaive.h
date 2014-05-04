@@ -92,6 +92,9 @@ strings are not changed in this comparison. Runs in linear time with respect to
 the longer string.*/
 TestResults diffLine(const std::string& _student, const std::string& _instructor){
 	Difference diffs;
+
+	diffs.output_length_a = 0;
+	diffs.output_length_b = 0;
 	Change file;
 	file.a_start = file.b_start = 0;
 	std::stringstream student;
@@ -106,6 +109,10 @@ TestResults diffLine(const std::string& _student, const std::string& _instructor
 	while(!i_eof || !s_eof){
 		std::getline(student, s_line);
 		std::getline(instructor, i_line);
+		if(!i_eof)
+			diffs.output_length_b++;
+		if(!s_eof)
+			diffs.output_length_a++;
 		if(!student){
 			s_eof = true;
 			s_line = "";
@@ -126,6 +133,7 @@ TestResults diffLine(const std::string& _student, const std::string& _instructor
 		i++;
 	}
 	diffs.distance = (int)std::max(file.a_changes.size(), file.b_changes.size());
+	diffs.editdistance = diffs.distance;
 	diffs.changes.push_back(file);
 	return diffs;
 }
