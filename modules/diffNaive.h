@@ -6,8 +6,8 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 "LICENSE.md" for the full license.
 */
 
-#ifndef __DIFF__
-#define __DIFF__
+#ifndef __DIFFNAIVE__
+#define __DIFFNAIVE__
 
 #include <stdlib.h>
 #include <string>
@@ -25,7 +25,7 @@ Change diffNaive(const std::string& student, const std::string& instructor){
 	differences.a_start = 0;
 	differences.b_start = 0;
 
-	unsigned int len = (student.size() < instructor.size()) ? student.length() : instructor.length();
+	unsigned int len = (unsigned int)(student.size() < instructor.size()) ? (unsigned int)student.length() : (unsigned int)instructor.length();
 
 	unsigned int i = 0;
 	for(i = 0; i < len; i++){
@@ -125,7 +125,7 @@ Difference diffLine(const std::string& _student, const std::string& _instructor)
 		}
 		i++;
 	}
-	diffs.distance = std::max(file.a_changes.size(), file.b_changes.size());
+	diffs.distance = (int)std::max(file.a_changes.size(), file.b_changes.size());
 	diffs.changes.push_back(file);
 	return diffs;
 }
@@ -170,9 +170,9 @@ Difference diffLineNoSpace(const std::string& _student, const std::string& _inst
 		}
 		i++;
 	}
-	diffs.distance = std::max(file.a_changes.size(), file.b_changes.size());
+	diffs.distance = (int)std::max(file.a_changes.size(), file.b_changes.size());
 	diffs.changes.push_back(file);
 	return diffs;
 }
 
-#endif //__DIFF__
+#endif //__DIFFNAIVE__

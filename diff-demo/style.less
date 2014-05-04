@@ -1,0 +1,150 @@
+
+// All colors for site!
+@base : #FC6E51;
+@prim : #E9573F;
+@gray : #eee;
+
+// derived colors
+@light-base : lighten(@base, 10%);
+@lighter-base : lighten(@light-base, 10%);
+@bg : @gray;
+@default-text : #fff;
+@prim-light : lighten(@prim, 10%);
+
+// Sizes
+@size : 1200px;
+@header-height : 80px;
+
+// Utility Classes
+.h{
+	display:inline-block;
+}
+
+// Regular Classes
+
+body,html{
+	margin: 0px;
+	padding:0px;
+	min-width: @size;
+	text-align: center;
+	font-family: 'Varela Round', sans-serif;
+	color : @default-text;
+	overflow-horizontal:hidden;
+	background-color:@bg;
+}
+
+#container{
+	width:@size;
+	vertical-align: top;
+}
+
+#header{
+	height:@header-height;
+	background-color: @light-base;
+	text-align: center;
+	border-bottom:2px @prim-light solid;
+}
+
+#title{
+	width:600px;
+	font-size:24px;
+	height:@header-height;
+	line-height: @header-height;
+	text-align: left;
+	margin-left:100px;
+	float:left;
+}
+
+.header-button{
+	margin-top: @header-height/4;
+	margin-right: 10px;
+	width:150px;
+	height:40px;
+	line-height:40px;
+	float:right;
+	background-color: @prim-light;
+	border-radius:2px;
+}
+.header-button:hover{
+	background-color: @prim;
+	cursor : pointer;
+}
+.header-button i{
+	margin-left: 10px;
+}
+
+#user{
+	margin-right: 100px;
+}
+
+#assignment{
+}
+
+#dropdown{
+	width:200px;
+	background-color: @base;
+	position:absolute;
+	display: inline-block;
+	box-shadow: @prim-light 0px 0px 4px;
+	opacity: 0;
+}
+.dropdown-item{
+	height:40px;
+	line-height:40px;
+	padding:5px;
+}
+.dropdown-item:hover{
+	background-color: lighten(@prim-light,2%);
+	cursor : pointer;
+}
+
+.diff:extend(.h){
+	width:@size/2-70;
+	overflow: hidden;
+	background-color: #fff;
+	margin:10px;
+	// height:800px;
+	margin-top:30px;
+	box-shadow: 0px 0px 5px darken(@bg, 20%);
+	vertical-align: top;
+	// padding:20px;
+	color : #888;
+}
+.missing{
+	background-color:#fedede;
+}
+
+.diff div{
+	text-align: left;
+}
+
+.line{
+	height:30px;
+	line-height: 30px;
+}
+
+.line_number{
+	display:inline-block;
+	width:40px;
+	text-align: center;
+	background-color: #f2f2f2;
+	opacity:.75;
+	margin-right: 10px;
+}
+.odd-line{
+	background-color: #f8f8f8;
+}
+.bad-line{
+	background-color: #fedede;
+}
+.bad-seg{
+	background-color: #fefe8e;
+	border-radius:5px;
+	padding:2px;
+	margin:-2px;
+}
+
+.line-hover{
+	background-color: #ddf;
+	cursor:pointer;
+}
