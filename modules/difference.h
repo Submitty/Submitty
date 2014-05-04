@@ -54,10 +54,13 @@ class Difference: public TestResults{
 public:
     Difference();
     std::vector<Change> changes;
-    std::vector<int> diff_a;
-    std::vector<int> diff_b;
+    std::vector<int> diff_a; //student
+    std::vector<int> diff_b; //instructor
     void printJSON(std::ostream & file_out, int type);
     float grade();
+    int output_length_a;
+    int output_length_b;
+    int edit_distance;
 };
 
 class Tokens: public TestResults{
@@ -74,9 +77,29 @@ public:
 
 TestResults::TestResults():distance(0){}
 
-Difference::Difference():TestResults() {}
+Difference::Difference():TestResults(), output_length_a(0),output_length_b(0),
+      edit_distance(0){}
 
-Tokens::Tokens():TestResults(), alltokensfound(false){}
+Tokens::Tokens():TestResults(), num_tokens(0),
+    alltokensfound(false), partial(true), harsh(false){}
+
+float Difference::grade(){
+    int max = (output_length_a>output_length_b)?output_length_a:output_length_b;
+    return (float)distance/(float)max;
+}
+
+float Tokens::grade(){
+    if (alltokensfound) {
+        return 1;
+    }
+    else if(partial)
+        return (float)tokens_found.size() / (float)num_tokens;
+    else if (harsh) {
+        return 0;
+    }
+
+    return 0;
+}
 
 void Difference::printJSON(std::ostream & file_out, int type){
     std::string diff1_name;
@@ -251,20 +274,7 @@ void Tokens::printJSON(std::ostream & file_out, int type){
     return;
 }
 
-float Tokens::grade(){
-    if(partial)
-        return (float)tokens_found.size() / (float)num_tokens;
-    else{
-        if(tokens_found.size() == num_tokens || (tokens_found.size() != 0 && !harsh))
-            return 1;
-        else
-            return 0;
-    }
-        
 
-}
-float Difference::grade(){
 
-}
 
 #endif /* defined(__differences__difference__) */

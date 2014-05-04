@@ -193,7 +193,13 @@ template<class T> metaData<T> sesSnakes(metaData<T> & meta_diff){
 // All diffrences are stored by element number
 template<class T> Difference sesChanges(metaData<T> & meta_diff){
     Difference diff;
-    
+    diff.edit_distance=meta_diff.distance;
+    diff.output_length_a = (int)meta_diff.a->size();
+    diff.output_length_b = (int)meta_diff.b->size();
+    int added=abs(diff.output_length_a-diff.output_length_b);
+    diff.distance = (meta_diff.distance-added)/2;
+    diff.distance += added;
+
     if(meta_diff.snakes.size()==0){
         return diff;
     }
