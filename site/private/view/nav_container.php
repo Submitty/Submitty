@@ -3,12 +3,12 @@
 
 <body height=100% leftmargin=0 rightmargin=0 topmargin=0 bottommargin=0 bgcolor=228833>
 
-<table cellpadding=10 border=0 cellspacing=0 width=100% height=100% background="greenleaf.png"> 
+<table cellpadding=10 border=0 cellspacing=0 width=100% height=100% background="resources/greenleaf.png"> 
 
 <tr>
 <td class=upper_left_corner align=center>
 <a href="http://www.cs.rpi.edu">
-<img border = 0 src="rpi_cs_transparent_black.png" width=200 height=40>
+<img border = 0 src="resources/rpi_cs_transparent_black.png" width=200 height=40>
 </a>
 </td>
 <td class=top_and_left_bars width=100% align=right>
