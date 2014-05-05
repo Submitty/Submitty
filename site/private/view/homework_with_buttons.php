@@ -29,27 +29,33 @@
             </div><!-- End Progress Bar -->
             <div class="panel-body" style="text-align: right;"> <!-- Body homework select -->
                 <span>Select Homework</span>
-                <form action="">
-                    <select name="number">
+                <div class="btn-group" style="text-align: left; margin-left: 20px;">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"> Homework <?php echo $homework_number;?> <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu">
                     <?php for ($i = 1; $i <= $last_homework; $i++) {?>
-                        <option value="<?php echo $i;?>" <?php if ($i == $homework_number) {?> selected <?php }?>>Homework <?php echo $i;?></option>
+                        <li><a href="?page=homework&number=<?php echo $i;?>">Homework <?php echo $i;?></a></li>
                     <?php } ?>
-                    </select>
-                    <input type="submit" value="Go">
-                </form>
+                    <li class="divider"></li>
+                    <li><a href="?page=homework&number=<?php echo $last_homework;?>">Current Homework</a></li>
+                  </ul>
+                </div>
             </div><!-- End Homework Select -->
             <div class="row"><!-- Summary Table -->
                 <div class="col-sm-4">
                     <span>Summary:<br> You currently are submitting <b>Version 1</b> with a score of <b>11/15</b><br><br>
                     <span>Select Version: </span>
-                    <form action="index.php?page=homework">
-                        <select name="version">
+                    <div class="btn-group" style="text-align: left; margin-left: 20px;">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"> Version <?php echo $version_number;?> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
                             <?php for ($i = 1; $i <= $max_version_number; $i++) {?>
-                                <option value="<?php echo $i;?>" <?php if ($i == $version_number) {?> selected <?php }?>>Version <?php echo $i;?></option>
+                                <li><a href="?page=homework&number=<?php echo $homework_number;?>&version=<?php echo $i;?>"> Version <?php echo $i;?></a><li>
                             <?php }?>
-                        </select>
-                        <input type="submit" value="Go">
-                    </form>
+                            <li class="divider"></li>
+                            <li><a href="?page=homework&number=<?php echo $homework_number;?>&version=<?php echo $max_version_number;?>">Last Submitted</a></li>
+                        </ul>
+                    </div>
                     <br>
                     <br>
                     <br>

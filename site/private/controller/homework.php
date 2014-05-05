@@ -3,12 +3,44 @@ require_once("private/controller/helper.php");
 
 //Make model function calls for homework here
 
+if (!isset($last_homework)) {
+    $last_homework = 5;
+}
+if (!isset($homework_number)) {
+    $homework_number = $last_homework;
+}
+if (!isset($max_version_number)) {
+    $max_version_number = 3;
+}
+if (!isset($version_number)) {
+    $version_number = $max_version_number;
+}
+
+
+
+if (isset($_GET["number"])) {
+    $homework_number = htmlspecialchars($_GET["number"]);
+}
+if (!($homework_number > 0 && $homework_number <= $last_homework)) {
+    $homework_number = $last_workwork;
+}
+if (isset($_GET["version"])) {
+    $version_number = htmlspecialchars($_GET["version"]);
+}
+if (!($version_number > 0 && $version_number <= $max_version_number)) {
+    $version_number = $max_version_number;
+}
+
+
 $points_received = 15;//Points_received for entire homework as an int
 $points_possible = 20;//Points_possible for entire homework as an int
 
 //This is the summary for the entire homework
 //Either fill in value as a string or fill in score as an int.
 //Points_possible as an int is optional when score is used
+
+
+
 $homework_summary = array(
     array(
         "title"=>"Points for README.txt",
@@ -48,7 +80,9 @@ render("homework", array(
     "points_possible"=>$points_possible,
     "points_received"=>$points_received,
     "homework_summary"=>$homework_summary,
-    "homework_tests"=>$homework_tests
+    "homework_tests"=>$homework_tests,
+    "max_version_number"=>$max_version_number,
+    "version_number"=>$version_number
     )
 );
 ?>

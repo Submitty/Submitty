@@ -1,22 +1,12 @@
-<!--link href="resources/bootstrap/css/bootstrap.min.css" rel="stylesheet"-->
-<link href="resources/bootmin.css" rel="stylesheet"></link>
-<link href="private/view/main.css" rel="stylesheet"></link>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-<script src="./resources/bootstrap/js/bootstrap.min.js"></script>
-<script src="./resources/script/main.js"></script>
-
-
-<?php if ($points_possible == 0) {
-    $pecent = 0;
+<?php
+if ($points_possible == 0) {
+    $percent = 0;
 } else {
     $percent = (int)($points_received * 100 / $points_possible);
 }
 ?>
-
-
-<?php require_once("private/view/nav_container.php");?>
-<td class=main_panel valign=top height=100%>
-    <div class="panel panel-default" style="max-width:none">
+<div class="col-md-12 col-sm-12 blog-main">
+    <div class="panel panel-default">
         <div class="panel-body"><!-- Panel Body Summary -->
             <h2>Homework <?php echo $homework_number;?></h2>
             <div class="progress" style="margin-top: 20px;"><!-- Progress Bar -->
@@ -29,35 +19,23 @@
             </div><!-- End Progress Bar -->
             <div class="panel-body" style="text-align: right;"> <!-- Body homework select -->
                 <span>Select Homework</span>
-                <form action="">
-                    <select name="number">
+                <div class="btn-group" style="text-align: left; margin-left: 20px;">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"> Homework <?php echo $homework_number;?> <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu">
                     <?php for ($i = 1; $i <= $last_homework; $i++) {?>
-                        <option value="<?php echo $i;?>" <?php if ($i == $homework_number) {?> selected <?php }?>>Homework <?php echo $i;?></option>
+                        <li><a href="?page=homework&number=<?php echo $i;?>">Homework <?php echo $i;?></a></li>
                     <?php } ?>
-                    </select>
-                    <input type="submit" value="Go">
-                </form>
+                    <li class="divider"></li>
+                    <li><a href="?page=homework&number=<?php echo $last_homework;?>">Current Homework</a></li>
+                  </ul>
+                </div>
             </div><!-- End Homework Select -->
             <div class="row"><!-- Summary Table -->
                 <div class="col-sm-4">
-                    <span>Summary:<br> You currently are submitting <b>Version 1</b> with a score of <b>11/15</b><br><br>
-                    <span>Select Version: </span>
-                    <form action="index.php?page=homework">
-                        <select name="version">
-                            <?php for ($i = 1; $i <= $max_version_number; $i++) {?>
-                                <option value="<?php echo $i;?>" <?php if ($i == $version_number) {?> selected <?php }?>>Version <?php echo $i;?></option>
-                            <?php }?>
-                        </select>
-                        <input type="submit" value="Go">
-                    </form>
-                    <br>
-                    <br>
-                    <br>
-                    <form action="" style="text-align:center;">
-                    <input type="submit" class="btn btn-primary" value="Submit using Version <?php echo $version_number;?>"></input>
-                    </form>
+                    Summary:
                 </div>
-                <div class="col-sm-7">
+                <div class="col-sm-8">
                     <ul class="list-group">
                         <?php foreach($homework_summary as $item) {?>
                             <?php if (isset($item["score"]) && isset($item["points_possible"]) && $item["points_possible"] != 0) {
@@ -124,7 +102,7 @@
                 } else {
                     $class = "badge";
                 }?>
-                <h4 style="margin-left: 10px; text-align: left;"><?php echo $test["title"];?> <span class="<?php echo $class;?>"><?php echo $test["score"]."/".$test["points_possible"];?></span></h4>
+                <h4 style="margin-left: 10px;"><?php echo $test["title"];?> <span class="<?php echo $class;?>"><?php echo $test["score"]."/".$test["points_possible"];?></span></h4>
                 <div class="col-md-6">
                     <div class="panel panel-default">
                         My output
@@ -135,18 +113,12 @@
                         Teacher output
                     </div>
                 </div>
-                
             <?php } ?>
         </div>
     </div><!-- End Homework Output Compare And Diff -->
 </div><!-- End Col Blog-Main -->
+
+
 <script>
-load_progress_bar(<?php echo $percent; ?>, "<?php echo $points_received.' / '.$points_possible;?>");
+load_progress_bar(<?php echo $percent; ?>, "<?php echo $points_received." / ".$points_possible;?>");
 </script>
-
-
-
-
-</table>
-</body>
-</html>
