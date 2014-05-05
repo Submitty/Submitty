@@ -11,7 +11,7 @@
 ?>
 
 
-<?php require_once("private/view/nav_container.php");?>
+<?php require_once("../private/view/nav_container.php");?>
 <td class=main_panel valign=top height=100%>
     <div class="panel panel-default" style="max-width:none">
         <div class="panel-body"><!-- Panel Body Summary -->
@@ -92,6 +92,13 @@
                     </span>
                 </form>
             </div><!-- End Upload New Homework -->
+            <?php if (isset($TA_grade) && $TA_grade) {?>
+            <div class="panel-body" style="text-align: right"><!-- TA Grade -->
+                <button type="button">Show TA Grade</button>
+                <div id="TA-grade">
+                </div>
+            </div>
+            <?php }?>
         </div><!-- Ends Panel Body Summary -->
     </div><!-- Ends panel-default -->
     <div class="panel panel-default"><!-- Homework Output Compare And Diff -->

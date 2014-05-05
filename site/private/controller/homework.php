@@ -1,5 +1,5 @@
 <?php
-require_once("private/controller/helper.php");
+require_once("../private/controller/helper.php");
 
 //Make model function calls for homework here
 
@@ -35,6 +35,7 @@ if (!($version_number > 0 && $version_number <= $max_version_number)) {
 $points_received = 15;//Points_received for entire homework as an int
 $points_possible = 20;//Points_possible for entire homework as an int
 
+$TA_grade = false;
 //This is the summary for the entire homework
 //Either fill in value as a string or fill in score as an int.
 //Points_possible as an int is optional when score is used
@@ -82,7 +83,8 @@ render("homework", array(
     "homework_summary"=>$homework_summary,
     "homework_tests"=>$homework_tests,
     "max_version_number"=>$max_version_number,
-    "version_number"=>$version_number
+    "version_number"=>$version_number,
+    "TA_grade"=>$TA_grade
     )
 );
 ?>

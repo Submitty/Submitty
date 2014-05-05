@@ -14,13 +14,13 @@ if (isset($_GET["page"])) {
 
 if ($page == "serverop"){
 
-	require_once("private/controller/serverop.php");
+	require_once("../private/controller/serverop.php");
 
 }else{
 
 	//This needs to be wrapped around session Ids and logins
 
-	    require_once("private/controller/homework.php");
+	    require_once("../private/controller/homework.php");
 
 }
 ?>

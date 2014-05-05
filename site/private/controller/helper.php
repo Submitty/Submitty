@@ -1,6 +1,6 @@
 <?php
 function render($viewpage, $data = array()) {
-    $path = './private/view/'.$viewpage.'.php';
+    $path = '../private/view/'.$viewpage.'.php';
     if (file_exists($path)) {
         extract($data);
         require_once($path);
@@ -14,7 +14,7 @@ function render($viewpage, $data = array()) {
     }
 }
 function render_controller($viewpage, $data = array()) {
-    $path = './private/controller/'.$viewpage.'.php';
+    $path = '../private/controller/'.$viewpage.'.php';
     if (file_exists($path)) {
         extract($data);
         require_once($path);
