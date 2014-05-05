@@ -1,9 +1,6 @@
 <!--link href="resources/bootstrap/css/bootstrap.min.css" rel="stylesheet"-->
 <link href="resources/bootmin.css" rel="stylesheet"></link>
 <link href="resources/main.css" rel="stylesheet"></link>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-<script src="./resources/bootstrap/js/bootstrap.min.js"></script>
-<script src="./resources/script/main.js"></script>
 
 
 <?php if ($points_possible == 0) {
@@ -19,14 +16,6 @@
     <div class="panel panel-default" style="max-width:none">
         <div class="panel-body"><!-- Panel Body Summary -->
             <h2>Homework <?php echo $homework_number;?></h2>
-            <div class="progress" style="margin-top: 20px;"><!-- Progress Bar -->
-              <div style="position: absolute; width: 100%; text-align:center;">
-                <span id="centered-progress" style="margin-left: auto; text-align: center;"></span>
-              </div>
-              <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $percent;?>%;">
-                <span id="bar-progress"></span>
-              </div>
-            </div><!-- End Progress Bar -->
             <div class="panel-body" style="text-align: right;"> <!-- Body homework select -->
                 <span>Select Homework</span>
                 <form action="">
@@ -140,9 +129,6 @@
         </div>
     </div><!-- End Homework Output Compare And Diff -->
 </div><!-- End Col Blog-Main -->
-<script>
-load_progress_bar(<?php echo $percent; ?>, "<?php echo $points_received.' / '.$points_possible;?>");
-</script>
 
 
 
