@@ -1,29 +1,29 @@
 <?php
 function upload_homework($username, $assignment, $homework_number, $homework_file) {
-    if ($username !== $_SESSION["id"]) {
+    if ($username !== $_SESSION["id"]) {//Validate the id
         echo "Something really got screwed up with usernames and session ids"; 
         return array("error"=>"Something really got screwed up with usernames and session ids");
     }
-    if (!can_change_homework($username, $homework_number)) {
+    if (!can_change_homework($username, $homework_number)) {//Made sure the user can upload to this homework
         return array("error"=>"This homework cannot be changed");
     }
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
     //ex: homework number, due date, late days
-    $path_front = "upload_testing";
+    $path_front = "upload_testing";//This is for Prof Cutler to edit
 
     $max_size = 50000;//CHANGE THIS TO GET VALUE FROM APPROPRIATE FILE
     $allowed = array("zip");
     $filename = explode(".", $homework_file["name"]);
     $extension = end($filename);
 
-    $upload_path = $path_front."/".$assignment.$homework_number."/".$username;
+    $upload_path = $path_front."/".$assignment.$homework_number."/".$username;//Upload path
     
     if (!($homework_file["type"] === "application/zip")) {//Make sure the file is a zip file
         echo "Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]);
         return array("error"=>"Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
     }
 
-    if (!file_exists($path_front."/".$assignment.$homework_number)) {
+    if (!file_exists($path_front."/".$assignment.$homework_number)) {//Made sure the assignment exists as a folder
         echo "Error, ".$assignment.$homework_number." does not exist in file structure";
         return array("error"=>$assignment.$homework_number." does not exist in file structure");
     }
@@ -66,13 +66,18 @@ function last_homework_number() {
 }
 
 function max_submissions() {
+    //Returns the maximum number of submissions for an assignment
+    //Demo data
     return 20;
 }
 
 function max_version_number($username, $homework_number) {
+    //Returns the last version number a student has submitted
     return 3;
 }
 function can_change_homework($username, $homework_number) {
+    //NEEDS TO BE CHANGED TO INCLUDE AN ASSIGNMENT ARGUEMENT
+    //Returns if the student can upload or change versions to the given assignment
     return true;
 }
 

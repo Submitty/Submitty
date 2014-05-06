@@ -4,36 +4,36 @@ require_once("../private/model/homework_model_functions.php");
 
 //Make model function calls for homework here
 
-$last_homework = last_homework_number();
+$last_homework = last_homework_number();//Get the last homework to display in dropdown menu
 if (!isset($homework_number)) {
     $homework_number = $last_homework;
 }
-$max_version_number = max_version_number($_SESSION["id"], $homework_number);
-if (!isset($version_number)) {
+$max_version_number = max_version_number($_SESSION["id"], $homework_number);//Get the maximum number of versions for that homework
+if (!isset($version_number)) {//If the version hasn't been specified, display the most recent
     $version_number = $max_version_number;
 }
-if (!($version_number >= 0 && $version_number <= $max_version_number)) {
+if (!($version_number >= 0 && $version_number <= $max_version_number)) {//Validate version number
     $version_number = $max_version_number;
 }
 
 $max_submissions = max_submissions();
 
-if (isset($_GET["number"])) {
+if (isset($_GET["number"])) {//Which homework or which lab
     $homework_number = htmlspecialchars($_GET["number"]);
 }
-if (isset($_GET["assignment"])) {
+if (isset($_GET["assignment"])) {//Homework or lab?
     $assignment = htmlspecialchars($_GET["assignment"]);
 }
-if (!($assignment) || strpos($assignment, " ")) {
+if (!($assignment) || strpos($assignment, " ")) {//Assignment has to be one word
     $assignment = "Homework";
 }
-if (!($homework_number > 0 && $homework_number <= $last_homework)) {
+if (!($homework_number > 0 && $homework_number <= $last_homework)) {//Validate current homework number the user wants to see
     $homework_number = $last_homework;
 }
-if (isset($_GET["version"])) {
+if (isset($_GET["version"])) {//Get the version of the assignment the user wants to see
     $version_number = htmlspecialchars($_GET["version"]);
 }
-if (!($version_number > 0 && $version_number <= $max_version_number)) {
+if (!($version_number > 0 && $version_number <= $max_version_number)) {//Validate version number
     $version_number = $max_version_number;
 }
 
@@ -51,7 +51,7 @@ $TA_grade = false;
 
 
 
-$homework_summary = array(
+$homework_summary = array(//Demo data
     array(
         "title"=>"Points for README.txt",
         "score"=>3,
