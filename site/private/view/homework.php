@@ -15,13 +15,15 @@
 <td class=main_panel valign=top height=100%>
     <div class="panel panel-default" style="max-width:none">
         <div class="panel-body"><!-- Panel Body Summary -->
-            <h2>Homework <?php echo $homework_number;?></h2>
+            <h2><?php echo $assignment.' '.$homework_number;?></h2>
             <div class="panel-body" style="text-align: right;"> <!-- Body homework select -->
                 <span>Select Homework</span>
                 <form action="">
+                    <input type="input" readonly="readonly" name="page" value="homework" style="display: none">
+                    <input type="input" readonly="readonly" name="assignment" value="<?php echo $assignment;?>" style="display: none">
                     <select name="number">
                     <?php for ($i = 1; $i <= $last_homework; $i++) {?>
-                        <option value="<?php echo $i;?>" <?php if ($i == $homework_number) {?> selected <?php }?>>Homework <?php echo $i;?></option>
+                        <option value="<?php echo $i;?>" <?php if ($i == $homework_number) {?> selected <?php }?>><?php echo $assignment.' '.$i;?></option>
                     <?php } ?>
                     </select>
                     <input type="submit" value="Go">
@@ -31,7 +33,11 @@
                 <div class="col-sm-4">
                     <span>Summary:<br> You currently are submitting <b>Version 1</b> with a score of <b>11/15</b><br><br>
                     <span>Select Version: </span>
-                    <form action="index.php?page=homework">
+                    <form action="index.php">
+                        <input type="input" readonly="readonly" name="page" value="homework" style="display: none">
+                        <input type="input" readonly="readonly" name="assignment" value="<?php echo $assignment;?>" style="display: none">
+                        <input type="input" readonly="readonly" name="number" value="<?php echo $homework_number;?>" style="display: none">
+ 
                         <select name="version">
                             <?php for ($i = 1; $i <= $max_version_number; $i++) {?>
                                 <option value="<?php echo $i;?>" <?php if ($i == $version_number) {?> selected <?php }?>>Version <?php echo $i;?></option>
@@ -84,7 +90,7 @@
                 </div>
             </div><!-- End Summary Table -->
             <div class="panel-body" style="text-align: right"><!-- Upload New Homework -->
-                <form action="?page=upload&homework=<?php echo $homework_number;?>" method="post" enctype="multipart/form-data" 
+                <form action="?page=upload&homework=<?php echo $homework_number;?>&assignment=<?php echo$assignment;?>" method="post" enctype="multipart/form-data" 
                 onsubmit=" return check_for_upload('<?php echo $assignment." ".$homework_number?>', '<?php echo $max_version_number;?>', '<?php echo $max_submissions;?>');">
                     <label for="file" style="margin-right: 5%;">Filename:</label>
                     <input type="file" name="file" id="file" style="display: inline" />

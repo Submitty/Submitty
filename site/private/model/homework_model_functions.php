@@ -1,5 +1,5 @@
 <?php
-function upload_homework($username, $homework_number, $homework_file) {
+function upload_homework($username, $assignment, $homework_number, $homework_file) {
     if ($username !== $_SESSION["id"]) {
         echo "Something really got screwed up with usernames and session ids"; 
         return array("error"=>"Something really got screwed up with usernames and session ids");
@@ -16,16 +16,16 @@ function upload_homework($username, $homework_number, $homework_file) {
     $filename = explode(".", $homework_file["name"]);
     $extension = end($filename);
 
-    $upload_path = $path_front."/HW".$homework_number."/".$username;
+    $upload_path = $path_front."/".$assignment.$homework_number."/".$username;
     
     if (!($homework_file["type"] === "application/zip")) {//Make sure the file is a zip file
         echo "Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]);
         return array("error"=>"Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
     }
 
-    if (!file_exists($path_front."/HW".$homework_number)) {
-        echo "Error, HW".$homework_number." does not exist in file structure";
-        return array("error"=>"HW".$homework_number." does not exist in file structure");
+    if (!file_exists($path_front."/".$assignment.$homework_number)) {
+        echo "Error, ".$assignment.$homework_number." does not exist in file structure";
+        return array("error"=>$assignment.$homework_number." does not exist in file structure");
     }
     if (!file_exists($upload_path)) {//Make sure the user has a file already
         echo "Error, Person does not exist in file structure";

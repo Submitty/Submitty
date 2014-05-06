@@ -21,8 +21,14 @@ $max_submissions = max_submissions();
 if (isset($_GET["number"])) {
     $homework_number = htmlspecialchars($_GET["number"]);
 }
+if (isset($_GET["assignment"])) {
+    $assignment = htmlspecialchars($_GET["assignment"]);
+}
+if (!($assignment) || strpos($assignment, " ")) {
+    $assignment = "Homework";
+}
 if (!($homework_number > 0 && $homework_number <= $last_homework)) {
-    $homework_number = $last_workwork;
+    $homework_number = $last_homework;
 }
 if (isset($_GET["version"])) {
     $version_number = htmlspecialchars($_GET["version"]);
@@ -31,8 +37,9 @@ if (!($version_number > 0 && $version_number <= $max_version_number)) {
     $version_number = $max_version_number;
 }
 
-$assignment = "Homework";
-
+//Function call to make sure assignment and homework_number and version number are all valid
+//If not valid do last homework
+//Function call to get data for assignment, homework_number and version number 
 
 $points_received = 15;//Points_received for entire homework as an int
 $points_possible = 20;//Points_possible for entire homework as an int
@@ -76,8 +83,6 @@ $homework_tests = array(
     array("title"=>"Test 2", "score"=>0, "points_possible"=>4)
 );
 
-echo $max_version_number;
-echo $max_submissions;
 
 
 render("homework", array(
