@@ -84,7 +84,8 @@
                 </div>
             </div><!-- End Summary Table -->
             <div class="panel-body" style="text-align: right"><!-- Upload New Homework -->
-                <form action="?page=upload&homework=<?php echo $homework_number;?>" method="post" enctype="multipart/form-data">
+                <form action="?page=upload&homework=<?php echo $homework_number;?>" method="post" enctype="multipart/form-data" 
+                onsubmit=" return check_for_upload('<?php echo $assignment." ".$homework_number?>', '<?php echo $max_version_number;?>', '<?php echo $max_submissions;?>');">
                     <label for="file" style="margin-right: 5%;">Filename:</label>
                     <input type="file" name="file" id="file" style="display: inline" />
                     <span class="group-btn">
@@ -142,4 +143,20 @@
 
 </table>
 </body>
+<script>
+function check_for_upload(assignment, versions_used, versions_allowed) {
+    versions_used = parseInt(versions_used);
+    versions_allowed = parseInt(versions_allowed);
+    if (versions_used < versions_allowed) {
+        var message = confirm("Are you sure you want to upload for " + assignment + " ?  You have used " + versions_used + " / " + versions_allowed);
+    } else {
+        var message = confirm("Are you sure you want to upload for " + assignment + " ?  You have used all free uploads.  Uploading may result in a deduction of points.");
+    }
+    if (message == true) {
+        return true;
+    } else {
+        return false;
+    }
+}
+</script>
 </html>

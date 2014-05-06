@@ -17,7 +17,7 @@ if (isset($_FILES["file"])) {
         exit();
     }
     $uploaded_file = $_FILES["file"];//THIS NEEDS TO BE MADE HACKER PROOF
-    $result = upload_homework("sengs",$homework,$uploaded_file);
+    $result = upload_homework($_SESSION["id"],$homework,$uploaded_file);
     if (isset($result["error"])) {
         //Go to error page?
     }

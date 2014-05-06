@@ -1,6 +1,12 @@
 <?php
-$path_front = "upload_testing";
 function upload_homework($username, $homework_number, $homework_file) {
+    if ($username !== $_SESSION["id"]) {
+        echo "Something really got screwed up with usernames and session ids"; 
+        return array("error"=>"Something really got screwed up with usernames and session ids");
+    }
+    if (!can_change_homework($username, $homework_number)) {
+        return array("error"=>"This homework cannot be changed");
+    }
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
     //ex: homework number, due date, late days
     $path_front = "upload_testing";
@@ -49,8 +55,25 @@ function upload_homework($username, $homework_number, $homework_file) {
     return array("success"=>"File uploaded successfully");
 }
 
+function get_homework_version() {
+}
+
 function change_version_number() {
 }
 
-function get_homework() {
+function last_homework_number() {
+    return 2;
 }
+
+function max_submissions() {
+    return 20;
+}
+
+function max_version_number($username, $homework_number) {
+    return 3;
+}
+function can_change_homework($username, $homework_number) {
+    return true;
+}
+
+
