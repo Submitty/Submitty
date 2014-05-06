@@ -19,8 +19,10 @@ if ($page == "serverop"){
 }else{
 
 	//This needs to be wrapped around session Ids and logins
-
+    if ($page == "upload") {
+        require_once("../private/controller/upload.php");
+    } else {
 	    require_once("../private/controller/homework.php");
-
+    }
 }
 ?>

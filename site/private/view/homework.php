@@ -84,7 +84,7 @@
                 </div>
             </div><!-- End Summary Table -->
             <div class="panel-body" style="text-align: right"><!-- Upload New Homework -->
-                <form action="#" method="post" enctype="multipart/form-data">
+                <form action="?page=upload&homework=<?php echo $homework_number;?>" method="post" enctype="multipart/form-data">
                     <label for="file" style="margin-right: 5%;">Filename:</label>
                     <input type="file" name="file" id="file" style="display: inline" />
                     <span class="group-btn">
