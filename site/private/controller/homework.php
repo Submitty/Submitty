@@ -1,41 +1,51 @@
 <?php
 require_once("../private/controller/helper.php");
 require_once("../private/model/homework_model_functions.php");
-
 //Make model function calls for homework here
 
-$last_homework = last_homework_number();//Get the last homework to display in dropdown menu
-if (!isset($homework_number)) {
-    $homework_number = $last_homework;
-}
-$max_version_number = max_version_number($_SESSION["id"], $homework_number);//Get the maximum number of versions for that homework
-if (!isset($version_number)) {//If the version hasn't been specified, display the most recent
-    $version_number = $max_version_number;
-}
-if (!($version_number >= 0 && $version_number <= $max_version_number)) {//Validate version number
-    $version_number = $max_version_number;
-}
+$most_recent_assignment = most_recent_assignment($_SESSION["id"]);
+$most_recent_assignment_number = most_recent_assignment_number($_SESSION["id"]);
+$most_recent_assignment_version = most_recent_assignment_version($_SESSION["id"]);
 
-$max_submissions = max_submissions();
+$all_assignments = get_assignments($_SESSION["id"]);
 
-if (isset($_GET["number"])) {//Which homework or which lab
-    $homework_number = htmlspecialchars($_GET["number"]);
-}
-if (isset($_GET["assignment"])) {//Homework or lab?
+
+if (isset($_GET["number"]) && isset($_GET["assignment"])) {//Which homework or which lab the user wants to see
+    $assignment_number = htmlspecialchars($_GET["number"]);
     $assignment = htmlspecialchars($_GET["assignment"]);
+    if (!is_valid_assignment_number($_SESSION["id"], $assignment, $assignment_number)) {
+        $assignment = $most_recent_assignment;
+        $assignment_number = $most_recent_assignment_number;
+    }
+    if (isset($_GET["version"])) {
+        $assignment_version = htmlspecialchars($_GET["version"]);
+    }
+    if (!isset($assignment_version) || !is_valid_assignment_version($_SESSION["id"], $assignment, $assignment_number, $assignment_version)) {
+        $assignment_version = last_assignment_version($_SESSION["id"], $assignment, $assignment_number);
+    }
+} else if (isset($_GET["arraynumber"])) {
+    $i = htmlspecialchars($_GET["arraynumber"]);
+    if ($i >= 0 && $i < count($all_assignments)) {
+        $assignment = $all_assignments[$i]["assignment"];
+        $assignment_number = $all_assignments[$i]["number"];
+        $assignment_version = last_assignment_version($_SESSION["id"], $assignment, $assignment_number);
+    } else {
+        $assignment = $most_recent_assignment;
+        $assignment_number = $most_recent_assignment_number;
+        $assignment_version = $most_recent_assignment_version;
+    }
+} else {
+    $assignment = $most_recent_assignment;
+    $assignment_number = $most_recent_assignment_number;
+    $assignment_version = $most_recent_assignment_version;
 }
-if (!($assignment) || strpos($assignment, " ")) {//Assignment has to be one word
-    $assignment = "Homework";
-}
-if (!($homework_number > 0 && $homework_number <= $last_homework)) {//Validate current homework number the user wants to see
-    $homework_number = $last_homework;
-}
-if (isset($_GET["version"])) {//Get the version of the assignment the user wants to see
-    $version_number = htmlspecialchars($_GET["version"]);
-}
-if (!($version_number > 0 && $version_number <= $max_version_number)) {//Validate version number
-    $version_number = $max_version_number;
-}
+
+$max_version_number = max_assignment_version($_SESSION["id"], $assignment, $assignment_number);
+$max_submissions_for_assignment = max_submissions_for_assignment($_SESSION["id"], $assignment, $assignment_number);
+
+
+
+
 
 //Function call to make sure assignment and homework_number and version number are all valid
 //If not valid do last homework
@@ -44,7 +54,7 @@ if (!($version_number > 0 && $version_number <= $max_version_number)) {//Validat
 $points_received = 15;//Points_received for entire homework as an int
 $points_possible = 20;//Points_possible for entire homework as an int
 
-$TA_grade = false;
+$TA_grade = TA_grade($_SESSION["id"], $assignment, $assignment_number);
 //This is the summary for the entire homework
 //Either fill in value as a string or fill in score as an int.
 //Points_possible as an int is optional when score is used
@@ -84,19 +94,18 @@ $homework_tests = array(
 );
 
 
-
 render("homework", array(
-    "homework_number"=>$homework_number,
-    "last_homework"=>$last_homework,
+    "assignment"=>$assignment,
+    "homework_number"=>$assignment_number,
+    "all_assignments"=>$all_assignments,
     "points_possible"=>$points_possible,
     "points_received"=>$points_received,
     "homework_summary"=>$homework_summary,
     "homework_tests"=>$homework_tests,
     "max_version_number"=>$max_version_number,
-    "version_number"=>$version_number,
+    "version_number"=>$assignment_version,
     "TA_grade"=>$TA_grade,
-    "max_submissions"=>$max_submissions,
-    "assignment"=>$assignment
+    "max_submissions"=>$max_submissions_for_assignment,
     )
 );
 ?>

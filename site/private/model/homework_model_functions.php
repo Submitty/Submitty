@@ -4,7 +4,7 @@ function upload_homework($username, $assignment, $homework_number, $homework_fil
         echo "Something really got screwed up with usernames and session ids"; 
         return array("error"=>"Something really got screwed up with usernames and session ids");
     }
-    if (!can_change_homework($username, $homework_number)) {//Made sure the user can upload to this homework
+    if (!can_change_homework($username, $assignment, $homework_number)) {//Made sure the user can upload to this homework
         return array("error"=>"This homework cannot be changed");
     }
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
@@ -55,30 +55,75 @@ function upload_homework($username, $assignment, $homework_number, $homework_fil
     return array("success"=>"File uploaded successfully");
 }
 
-function get_homework_version() {
+function can_change_homework($username, $assignment, $assignment_number) {
+    return true;
+}
+function most_recent_assignment($username) {
+    return "Homework";
 }
 
-function change_version_number() {
-}
-
-function last_homework_number() {
+function most_recent_assignment_number($username) {
     return 2;
 }
 
-function max_submissions() {
-    //Returns the maximum number of submissions for an assignment
-    //Demo data
-    return 20;
-}
-
-function max_version_number($username, $homework_number) {
-    //Returns the last version number a student has submitted
+function most_recent_assignment_version($username) {
     return 3;
 }
-function can_change_homework($username, $homework_number) {
-    //NEEDS TO BE CHANGED TO INCLUDE AN ASSIGNMENT ARGUEMENT
-    //Returns if the student can upload or change versions to the given assignment
-    return true;
+
+function is_valid_assignment_number($username, $assignment, $assignment_number) {
+    $path_front = "upload_testing";
+    $upload_path = $path_front."/".$assignment.$assignment_number."/".$username;//Upload path
+
+    return file_exists($upload_path);
+}
+
+function is_valid_assignment_version($username, $assignment, $assignment_number, $assignment_version) {
+    $path_front = "upload_testing";
+    $upload_path = $path_front."/".$assignment.$assignment_number."/".$username."/".$assignment_version;
+
+    return file_exists($upload_path);
+}
+
+function last_assignment_version($username, $assignment, $assignment_number) {
+    $path_front = "upload_testing";
+    $upload_path = $path_front."/".$assignment.$assignment_number."/".$username;
+    $i = 0;
+    if (!(file_exists($upload_path."/0"))) {
+        return -1;
+    }
+    while (file_exists($upload_path."/".$i)) {
+        $i++;
+    }
+    return $i - 1;
+}
+
+function get_assignments($username) {
+    return array(
+        array("assignment"=>"Homework", "number"=>1),
+        array("assignment"=>"Lab", "number"=>1),
+        array("assignment"=>"Homework", "number"=>2)
+    );
+}
+
+function TA_grade($username, $assignment, $assignment_number) {
+    return false;
+}
+
+function max_assignment_version($username, $assignment, $assignment_number) {
+    $path_front = "upload_testing";
+    $upload_path = $path_front."/".$assignment.$assignment_number."/".$username;
+    $i = 0;
+    if (!(file_exists($upload_path."/0"))) {
+        return -1;
+    }
+    while (file_exists($upload_path."/".$i)) {
+        $i++;
+    }
+    return $i - 1;
+}
+
+function max_submissions_for_assignment($username, $assignment, $assignment_number) {
+    return 20;
 }
 
 
