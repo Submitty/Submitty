@@ -6,7 +6,7 @@ require_once("../private/model/homework_model_functions.php");
 //Upload the stuff
 
 if (isset($_FILES["file"])) {
-    if (!isset($_GET["assigment_id"])) {
+    if (!isset($_GET["assignment_id"])) {
         echo "No assigment id";
         exit();
     }

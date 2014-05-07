@@ -4,8 +4,11 @@ function upload_homework($username, $assignment_id, $homework_file) {
         echo "Something really got screwed up with usernames and session ids"; 
         return array("error"=>"Something really got screwed up with usernames and session ids");
     }
+    if (!is_valid_assignment($username, $assignment_id)) {
+        return array("error"=>"This assignment is not valid");
+    }
     if (!can_edit_homework($username, $assignment_id)) {//Made sure the user can upload to this homework
-        return array("error"=>"This homework cannot be changed");
+        return array("error"=>"This assignment cannot be changed");
     }
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
     //ex: homework number, due date, late days
@@ -22,16 +25,9 @@ function upload_homework($username, $assignment_id, $homework_file) {
         echo "Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]);
         return array("error"=>"Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
     }
-
-    if (!file_exists($path_front."/".$assignment_id)) {//Made sure the assignment exists as a folder
-        echo "Error, ".$assignment_id." does not exist in file structure";
-        return array("error"=>$assignment_id." does not exist in file structure");
+    if (!file_exists($upload_path)) {
+        mkdir($upload_path, 0777, true);
     }
-    if (!file_exists($upload_path)) {//Make sure the user has a file already
-        echo "Error, Person does not exist in file structure";
-        return array("error"=>"Person does not exist in file structure (Could not find them in the homework ".$homework_number." folder)");
-    }
-    
     $i = 1;
     while (file_exists($upload_path."/".$i)) {//Find the next homework version number
         //Replace with symlink?
@@ -59,17 +55,18 @@ function can_edit_homework($username, $assignment_id) {
     return true;
 }
 function most_recent_assignment_id($username) {
-    return "Homework1";
+    $path_front = "../../CSCI1200";
+    $file = $path_front."/results/class.json";
+    //Get json and parse for assignment_name
+    $json = json_decode(file_get_contents($file), true);
+    return $json["default_assignment"];
 }
 
 function most_recent_assignment_version($username, $assignment_id) {
     $path_front = "../../CSCI1200";
     $path = $path_front."/submissions/".$assignment_id."/".$username;
     $i = 1;
-    if (!(file_exists($upload_path."/0"))) {
-        return -1;
-    }
-    while (file_exists($upload_path."/".$i)) {
+    while (file_exists($path."/".$i)) {
         $i++;
     }
     return $i - 1;
@@ -80,7 +77,7 @@ function name_for_assignment_id($username, $assignment_id) {
     $path_front = "../../CSCI1200";
     $file = $path_front."/results/class.json";
     //Get json and parse for assignment_name
-    $json = json_decode(file_get_contents($file),true);
+    $json = json_decode(file_get_contents($file), true);
     $assignments = $json["assignments"];
     foreach ($assignments as $one) {
         if ($one["assignment_id"] == $assignment_id) {
@@ -91,25 +88,33 @@ function name_for_assignment_id($username, $assignment_id) {
 }
 
 function is_valid_assignment($username, $assignment_id) {
-    $path_front = "upload_testing";
-    $upload_path = $path_front."/".$assignment_id."/".$username;//Upload path
-
-    return file_exists($upload_path);
+    $path_front = "../../CSCI1200";
+    $file = $path_front."/results/class.json";
+    //Get json and parse for assignment_name
+    $json = json_decode(file_get_contents($file), true);
+    $assignments = $json["assignments"];
+    foreach ($assignments as $one) {
+        if ($one["assignment_id"] == $assignment_id) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function is_valid_assignment_version($username, $assignment_id, $assignment_version) {
-    $path_front = "upload_testing";
-    $upload_path = $path_front."/".$assignment_id."/".$username."/".$assignment_version;
+    $path_front = "../../CSCI1200";
+    $path = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
     return file_exists($upload_path);
 }
 
 
 function get_assignments($username) {
-    return array(
-        array("assignment_id"=>"Homework1", "assignment_name"=>"Homework 1"),
-        array("assignment_id"=>"Lab1", "assignment_name"=>"Lab 1"),
-        array("assignment_id"=>"Homework2", "assignment_name"=>"Homework 2")
-    );
+    $path_front = "../../CSCI1200";
+    $file = $path_front."/results/class.json";
+    //Get json and parse for assignment_name
+    $json = json_decode(file_get_contents($file), true);
+    $assignments = $json["assignments"];
+    return $assignments;
 }
 
 function TA_grade($username, $assignment_id) {
@@ -117,20 +122,20 @@ function TA_grade($username, $assignment_id) {
 }
 
 function max_assignment_version($username, $assignment_id) {
-    $path_front = "upload_testing";
-    $upload_path = $path_front."/".$assignment_id."/".$username;
+    $path_front = "../../CSCI1200";
+    $path = $path_front."/submissions/".$assignment_id."/".$username;
     $i = 1;
-    if (!(file_exists($upload_path."/0"))) {
-        return -1;
-    }
-    while (file_exists($upload_path."/".$i)) {
+    while (file_exists($path."/".$i)) {
         $i++;
     }
     return $i - 1;
 }
 
 function max_submissions_for_assignment($username, $assignment_id) {
-    return 20;
+    $path_front = "../../CSCI1200";
+    $file = $path_front."/results/".$assignment_id."/assignment_config.json";
+    $json = json_decode(file_get_contents($file), true);
+    return $json["max_submissions"];
 }
 
 

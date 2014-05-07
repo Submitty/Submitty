@@ -31,7 +31,7 @@
             <div class="row"><!-- Summary Table -->
                 <div class="col-sm-4">
                     <span>Summary:</span>
-                    <?php if ($assignment_version >= 0) {?>
+                    <?php if ($assignment_version >= 1) {?>
                     <br><span>You currently are submitting <b>Version <?php echo $submitting_version;?></b> with a score of <b><?php echo $submitting_version_score;?></b><br><br>
                     <span>Select Version: </span>
                     <form action="index.php">
@@ -51,6 +51,8 @@
                     <form action="" style="text-align:center;">
                     <input type="submit" class="btn btn-primary" value="Submit using Version <?php echo $assignment_version;?>"></input>
                     </form>
+                    <?php } else {?>
+                        <br><span>You have not submitted anything for this assignment!</span>
                     <?php }?>
                 </div>
                 <div class="col-sm-7">
