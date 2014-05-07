@@ -9,7 +9,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#include "../../validation/TestCase.h"
+//#include "../../../validation/TestCase.h"
 //#include "GradingRubric.h"
 
 const int hw_num = 1;
@@ -41,7 +41,7 @@ const char* root_dir = "../CSCI1200/";
 // homework directory
 const char* hw_dir = "HW1/";
 // input files directory
-const char* input_dir = "testingInput/";
+const char* input_dir = "../CSCI1200/testingInput/";
 // expected output files directory
 const char* expected_out_dir = "../CSCI1200/Scripts/expectedOutput/HW1/";
 
@@ -106,7 +106,7 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	&diffLine							// compare function [V]
+	&myersDiffbyLinebyWord							// compare function [V]
 ),
 TestCase(
 	"Case 2",
@@ -120,7 +120,7 @@ TestCase(
 	false,
 	WARN_IF_NOT_EMPTY,
 	WARN_IF_NOT_EMPTY,
-	&diffLine
+	&myersDiffbyLinebyWord
 ),
 TestCase(
 	"Case 3",
@@ -134,7 +134,7 @@ TestCase(
 	false,
 	WARN_IF_NOT_EMPTY,
 	WARN_IF_NOT_EMPTY,
-	&diffLine
+	&myersDiffbyLinebyWord
 ),
 TestCase(
 	"Case 4",
@@ -148,7 +148,7 @@ TestCase(
 	false,
 	WARN_IF_NOT_EMPTY,
 	WARN_IF_NOT_EMPTY,
-	&diffLine
+	&myersDiffbyLinebyWord
 ),
 TestCase(
 	"Case 5",
@@ -162,7 +162,7 @@ TestCase(
 	false,
 	WARN_IF_NOT_EMPTY,
 	WARN_IF_NOT_EMPTY,
-	&diffLine
+	&myersDiffbyLinebyWord
 )
 };
 

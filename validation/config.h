@@ -11,7 +11,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 #include <sstream>
 
-#include "TestCase.h"
+//#include "../validation/TestCase.h"
 //#include "GradingRubric.h"
 
 const int hw_num = 0;
@@ -43,7 +43,7 @@ const char* root_dir = "../CSCI1200/";
 // homework directory
 const char* hw_dir = "HW0/";
 // input files directory
-const char* input_dir = "testingInput/";
+const char* input_dir = "../CSCI1200/testingInput/";
 // expected output files directory
 const char* expected_out_dir = "../CSCI1200/Scripts/expectedOutput/HW0/";
 
