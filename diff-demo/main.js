@@ -26,7 +26,7 @@ function initEvents(){
                     $("#assignment").text(assignment_name);
                     diff.load(data, base_test);
                     diff.evalDifferences(json.differences);
-                    diff.display();
+                    diff.display("diff0","diff1");
                 });
             });
         });

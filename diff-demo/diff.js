@@ -1,3 +1,14 @@
+
+// Requires highlight.js
+
+// Used to display the difference between two strings given a json difference
+// object and the div ids to display the diff
+
+// Flow:
+// diff.load(STRING,STRING)
+// diff.evalDifferences(JSON_DIFF)
+// diff.display(DIVID1,DIVID2)
+
 var diff = function(){
 
 	// File lines (modified as program goes on)
@@ -60,7 +71,7 @@ var diff = function(){
 						// TODO Automate all these steps inside highlight.js
 						var line = change.line_number;
 						// Convert word range to multiple connected word ranges
-						var subranges = enrange(change.word_number);
+						var subranges = highlight.enrange(change.word_number);
 						// will contain all tags
 						var surround = [];
 
@@ -93,11 +104,11 @@ var diff = function(){
 	}
 
 	// Display files on page
-	function display(){
+	function display(first_diff_tag, second_diff_tag){
 
 		// Display lines from diff
-		displayLines(f0,ins0,document.getElementById("diff0"),"stu_");
-		displayLines(f1,ins1,document.getElementById("diff1"),"ist_");
+		displayLines(f0,ins0,document.getElementById(first_diff_tag),"stu_");
+		displayLines(f1,ins1,document.getElementById(second_diff_tag),"ist_");
 
 		// Load generated css
 		for (var i = 0;i < style.length;i++){
