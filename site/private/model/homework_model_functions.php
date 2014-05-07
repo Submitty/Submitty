@@ -7,6 +7,9 @@ $path_front = "../../CSCI1200";
 // Upload HW Assignment to server and unzip
 function upload_homework($username, $assignment_id, $homework_file) {
     global $path_front;
+
+    // Check user and assignment authenticity
+
     if ($username !== $_SESSION["id"]) {//Validate the id
         echo "Something really got screwed up with usernames and session ids"; 
         return array("error"=>"Something really got screwed up with usernames and session ids");
@@ -27,25 +30,37 @@ function upload_homework($username, $assignment_id, $homework_file) {
 
     $upload_path = $path_front."/submissions/".$assignment_id."/".$username;//Upload path
     
-    // TODO should support more than zip
+    // TODO should support more than zip (.tar.gz etc.)
     if (!($homework_file["type"] === "application/zip")) {//Make sure the file is a zip file
         echo "Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]);
         return array("error"=>"Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
     }
+
+    // If user path doesn't exist, create new one
+
     if (!file_exists($upload_path)) {
+        // TODO is this permission level correct?
         mkdir($upload_path, 0777, true);
     }
+
+    //Find the next homework version number
+    
     $i = 1;
-    while (file_exists($upload_path."/".$i)) {//Find the next homework version number
+    while (file_exists($upload_path."/".$i)) {
         //Replace with symlink?
         $i++;
     }
+
+    // Attempt to create folder
 
     if (!mkdir($upload_path."/".$i, 0777, false)) {//Create a new directory corresponding to a new version number
         //chmod 0777, recursive false
         echo "Error, failed to make folder ".$upload_path."/".$i;
         return array("error"=>"failed to make folder ".$upload_path."/".$i);
     }
+
+    // Unzip files in folder
+
     $zip = new ZipArchive;
     $res = $zip->open($homework_file["tmp_name"]);
     if ($res === TRUE) {
