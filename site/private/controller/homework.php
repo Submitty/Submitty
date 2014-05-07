@@ -46,12 +46,20 @@ $TA_grade = TA_grade($_SESSION["id"], $assignment_id);
 //Either fill in value as a string or fill in score as an int.
 //Points_possible as an int is optional when score is used
 
+// Grab the assignment and user information regarding test cases
 $testcases_info = get_testcase_config($_SESSION["id"], $assignment_id);
 $testcases_results = get_testcase_results($_SESSION["id"], $assignment_id, $assignment_version);
+
 if (count($testcases_results) != count($testcases_info)) {
     $homework_summary = array();
     for ($i = 0; $i < count($testcases_info); $i++) {
-        array_push($homework_summary, array("title"=>$testcases_info[$i]["title"], "score"=>0, "points_possible"=>$testcases_info[$i]["points"]));
+        for ($u = 0; $u < count($testcases_results); $u++){
+            if ($testcases_info[$i]["title"] == $testcases_results[$u]["test_name"]){
+                array_push($homework_summary, array("title"=>$testcases_info[$i]["title"], "score"=>$testcases_results[$u]["points_awarded"], "points_possible"=>$testcases_info[$i]["points"]));
+                break;
+            }
+        }
+
     }
 } else {
     $homework_summary = array();
