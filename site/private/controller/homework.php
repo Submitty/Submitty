@@ -62,33 +62,6 @@ if (count($testcases_results) != count($testcases_info)) {
 
 }
 
-
-/*$homework_summary = array(//Demo data
-    array(
-        "title"=>"Points for README.txt",
-        "score"=>3,
-        "points_possible"=>"3"),
-    array(
-        "title"=>"Points for compilation",
-        "score"=>4,
-        "points_possible"=>4),
-    array(
-        "title"=>"Test 1",
-        "score"=>4,
-        "points_possible"=>4),
-    array(
-        "title"=>"Test 2",
-        "score"=>0,
-        "points_possible"=>4),
-    array(
-        "title"=>"Automatic extra credit(w/o hidden)",
-        "value"=>"+0 points"),
-    array(
-        "title"=>"Automatic grading total",
-        "score"=>11,
-        "points_possible"=>15)
-);*/
-
 //This is the data with the diff comparisons
 $homework_tests = array(
     array("title"=>"Test 1", "score"=>4, "points_possible"=>4),
