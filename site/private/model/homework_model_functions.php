@@ -105,7 +105,7 @@ function is_valid_assignment($username, $assignment_id) {
 function is_valid_assignment_version($username, $assignment_id, $assignment_version) {
     $path_front = "../../CSCI1200";
     $path = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
-    return file_exists($upload_path);
+    return file_exists($path);
 }
 
 
@@ -137,6 +137,26 @@ function max_submissions_for_assignment($username, $assignment_id) {
     $file = $path_front."/results/".$assignment_id."/assignment_config.json";
     $json = json_decode(file_get_contents($file), true);
     return $json["max_submissions"];
+}
+
+
+//RESULTS DATA
+
+function get_testcase_config($username, $assignment_id) {
+    $path_front = "../../CSCI1200";
+    $file = $path_front."/results/".$assignment_id."/assignment_config.json";
+    $json = json_decode(file_get_contents($file), true);
+    return $json["testcases"];
+}
+
+function get_testcase_results($username, $assignment_id, $assignment_version) {
+    $path_front = "../../CSCI1200";
+    $file = $path_front."/results/".$assignment_id."/".$username."/".$assignment_version."/submission.json";
+    if (!file_exists($file)) {
+        return array();
+    }
+    $json = json_decode(file_get_contents($file), true);
+    return $json["testcases"];
 }
 
 
