@@ -1,0 +1,19 @@
+{
+    "submission_number": 1,
+    "points_awarded": 25,
+    "submission_time": "2012-07-08 11:59:0.0",
+    "testcases": [
+        {
+            "test_name" : "Readme"
+            "points_awarded": 2
+        },
+        {
+            "test_name": "Compilation",
+            "points_awarded": 3
+        },
+        {
+            "test_name": "Case1",
+            "points_awarded": 5
+        }
+    ]
+}

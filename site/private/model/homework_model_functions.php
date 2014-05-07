@@ -32,7 +32,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
         return array("error"=>"Person does not exist in file structure (Could not find them in the homework ".$homework_number." folder)");
     }
     
-    $i = 0;//We're computer scientists, we start from 0
+    $i = 1;
     while (file_exists($upload_path."/".$i)) {//Find the next homework version number
         //Replace with symlink?
         $i++;
@@ -65,7 +65,7 @@ function most_recent_assignment_id($username) {
 function most_recent_assignment_version($username, $assignment_id) {
     $path_front = "upload_testing";
     $upload_path = $path_front."/".$assignment_id."/".$username;
-    $i = 0;
+    $i = 1;
     if (!(file_exists($upload_path."/0"))) {
         return -1;
     }
@@ -112,7 +112,7 @@ function TA_grade($username, $assignment_id) {
 function max_assignment_version($username, $assignment_id) {
     $path_front = "upload_testing";
     $upload_path = $path_front."/".$assignment_id."/".$username;
-    $i = 0;
+    $i = 1;
     if (!(file_exists($upload_path."/0"))) {
         return -1;
     }
