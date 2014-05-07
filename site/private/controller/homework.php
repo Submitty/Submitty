@@ -49,6 +49,7 @@ $TA_grade = TA_grade($_SESSION["id"], $assignment_id);
 // Grab the assignment and user information regarding test cases
 $testcases_info = get_testcase_config($_SESSION["id"], $assignment_id);
 $testcases_results = get_testcase_results($_SESSION["id"], $assignment_id, $assignment_version);
+$homework_tests = array();
 
 if (count($testcases_results) != count($testcases_info)) {
     $homework_summary = array();
@@ -56,6 +57,11 @@ if (count($testcases_results) != count($testcases_info)) {
         for ($u = 0; $u < count($testcases_results); $u++){
             if ($testcases_info[$i]["title"] == $testcases_results[$u]["test_name"]){
                 array_push($homework_summary, array("title"=>$testcases_info[$i]["title"], "score"=>$testcases_results[$u]["points_awarded"], "points_possible"=>$testcases_info[$i]["points"]));
+                array_push($homework_tests, array(
+                    "title"=>$testcases_info[$i]["title"],
+                    "points_possible"=>$testcases_info[$i]["points"],
+                    "points"=>$testcases_results[$u]["points_awarded"]
+                ));
                 break;
             }
         }
@@ -65,16 +71,20 @@ if (count($testcases_results) != count($testcases_info)) {
     $homework_summary = array();
     for ($i = 0; $i < count($testcases_info); $i++) {
          array_push($homework_summary, array("title"=>$testcases_info[$i]["title"], "score"=>$testcases_results[$i]["points_awarded"], "points_possible"=>$testcases_info[$i]["points"]));//THIS NEEDS TO CHANGE TO SEARCH FOR THE CORRECT RESULT BY TITLE
-
+         array_push($homework_tests, array(
+            "title"=>$testcases_info[$i]["title"],
+            "points_possible"=>$testcases_info[$i]["points"],
+            "score"=>$testcases_results[$i]["points_awarded"]
+        ));
     }
 
 }
 
-//This is the data with the diff comparisons
-$homework_tests = array(
-    array("title"=>"Test 1", "score"=>4, "points_possible"=>4),
-    array("title"=>"Test 2", "score"=>0, "points_possible"=>4)
-);
+// //This is the data with the diff comparisons
+// $homework_tests = array(
+//     array("title"=>"Test 1", "score"=>4, "points_possible"=>4),
+//     array("title"=>"Test 2", "score"=>0, "points_possible"=>4)
+// );
 
 $submitting_version = 1;
 $submitting_version_score = "11/15";
