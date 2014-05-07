@@ -14,8 +14,9 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 //#include "../validation/TestCase.h"
 //#include "GradingRubric.h"
 
-const int hw_num = 0;
-const std::string hw_name = "";
+const std::string id = "HW1";
+const std::string name = "Robot Rally";
+const std::string due_date = "2014-05-03 11:59:59.0";
 
 // Compile Command (executed in student FILES directory)
 const std::string compile_command = "g++ -g *.cpp";
@@ -31,6 +32,7 @@ const int max_output_size = 100;	// in KB
 	// OTHERS?
 
 // Grading parameters
+const int total_pts = 50;
 const int auto_pts = 30;
 const int readme_pts = 2;
 const int compile_pts = 3;
@@ -60,27 +62,24 @@ const std::string expected_output_dir = "../CSCI1200/Scripts/expectedOutput/HW0"
 const std::string results_dir = "../CSCI1200/HW0/alice/1/.submit.grade";
 */
 
-// Test cases
-const int num_testcases = 3;
-
-TestCase testcases[3] {
-
 /************* README AND COMPILATION *****************/
-TestCase(
-  	"Readme",
-  	"",
-    "",
-    "README.txt",
-    "",
-    "",
-    readme_pts,				// points for readme
-    false,
-    false,
-    DONT_CHECK,
-    DONT_CHECK,
-    NULL
-),
-TestCase(
+TestCase readmeTestCase(
+	"Readme",
+	"",
+	"",
+	"README.txt",
+	"",
+	"",
+	readme_pts,				// points for readme
+	false,
+	false,
+	DONT_CHECK,
+	DONT_CHECK,
+	false,
+	"",
+	NULL
+);
+TestCase compilationTestCase(
 	"Compilation",
 	"",
 	"",
@@ -92,8 +91,15 @@ TestCase(
 	false,
 	DONT_CHECK,
 	DONT_CHECK,
+	false,
+	"",
 	NULL
-),
+);
+
+// Test cases
+const int num_testcases = 1;
+
+TestCase testcases[1] {
 
 /******************** TEST CASES **********************/
 TestCase(
@@ -103,17 +109,15 @@ TestCase(
 	"test1_out.txt",					// output file name [V]
 	"test1_out.txt",					// output file description
 	"expected_test1.txt",				// expected output file [V]
-	5,									// points [V]
+	25,									// points [V]
 	false,								// hidden [V]
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
+	false, 								// recompilation
+	"",									// recompilation command
 	&diffLine							// compare function [V]
 )
 };
 
-TestCase* readmeTestCase = &testcases[0];
-TestCase* compileTestCase = &testcases[1];
-
 #endif
-

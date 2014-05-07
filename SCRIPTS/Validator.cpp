@@ -25,7 +25,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 /* TODO: how to include this specifically? */
 /*  maybe -include with g++ */
-#include "../validation/config.h"
+#include "../CSCI1200/hwconfig/hw0/config.h"
 
 bool checkValidDirectory( char* directory );
 bool checkValidDirectory( const char* directory );

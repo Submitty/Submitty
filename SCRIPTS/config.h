@@ -11,7 +11,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 #include <sstream>
 
-#include "TestCase.h"
+//#include "../validation/TestCase.h"
 //#include "GradingRubric.h"
 
 const int hw_num = 0;
@@ -43,7 +43,7 @@ const char* root_dir = "../CSCI1200/";
 // homework directory
 const char* hw_dir = "HW0/";
 // input files directory
-const char* input_dir = "testingInput/";
+const char* input_dir = "../CSCI1200/testingInput/";
 // expected output files directory
 const char* expected_out_dir = "../CSCI1200/Scripts/expectedOutput/HW0/";
 
@@ -60,8 +60,13 @@ const std::string expected_output_dir = "../CSCI1200/Scripts/expectedOutput/HW0"
 const std::string results_dir = "../CSCI1200/HW0/alice/1/.submit.grade";
 */
 
+// Test cases
+const int num_testcases = 3;
+
+TestCase testcases[3] {
+
 /************* README AND COMPILATION *****************/
-TestCase readmeTestCase(
+TestCase(
   	"Readme",
   	"",
     "",
@@ -73,9 +78,11 @@ TestCase readmeTestCase(
     false,
     DONT_CHECK,
     DONT_CHECK,
-    NULL
-);
-TestCase compilationTestCase(
+    NULL,
+    false,
+    compile_command
+),
+TestCase(
 	"Compilation",
 	"",
 	"",
@@ -87,19 +94,16 @@ TestCase compilationTestCase(
 	false,
 	DONT_CHECK,
 	DONT_CHECK,
-	NULL
-);
-
-// Test cases
-const int num_testcases = 1;
-
-TestCase testcases[1] {
+	NULL,
+	false,
+	compile_command
+),
 
 /******************** TEST CASES **********************/
 TestCase(
 	"Case 1",							// title
 	"./case1.exe",						// details
-	"./a.out 1> cout.txt 2> cerr.txt",	// command
+	"./a.out",	// command
 	"test1_out.txt",					// output file name [V]
 	"test1_out.txt",					// output file description
 	"expected_test1.txt",				// expected output file [V]
@@ -108,9 +112,14 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	&diffLine							// compare function [V]
+	&diffLine,							// compare function [V]
+	false,
+	compile_command
 )
 };
+
+TestCase* readmeTestCase = &testcases[0];
+TestCase* compileTestCase = &testcases[1];
 
 #endif
 

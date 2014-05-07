@@ -28,13 +28,15 @@ public:
 			  const int points, const bool hidden, const bool extracredit,
 			  const cout_cerr_check cout_check,
 			  const cout_cerr_check cerr_check,
+			  const bool recompile, const std::string compile_cmd,
 			  TestResults* (*cmp)(const std::string&, const std::string&) )
 			: _title(title), _details(details), _command(command),
 			  _filename(filename), _description(description),
 			  _expected(expected), _points(points),
 			  _hidden(hidden), _extracredit(extracredit),
 			  _coutcheck(cout_check), _cerrcheck(cerr_check),
-			  cmp_output(cmp) {}
+			  cmp_output(cmp), _recompile(recompile), 
+			  _compile_cmd(compile_cmd){}
 	
 	// Accessors
 	std::string title() const { return _title; }
@@ -48,6 +50,8 @@ public:
 	bool extracredit() const { return _extracredit; }
 	cout_cerr_check coutCheck() const { return _coutcheck; }
 	cout_cerr_check cerrCheck() const { return _cerrcheck; }
+	bool recompile() const { return _recompile; }
+	std::string const compile_cmd() const { return _compile_cmd; }
 	
 	/* Calls the function designated by the function pointer; if the function pointer
 	    is NULL, defaults to returning the result of diffLine(). */
@@ -86,6 +90,9 @@ private:
 	int _points;
 	bool _hidden;
 	bool _extracredit;
+
+	bool _recompile;
+	std::string _compile_cmd;
 	cout_cerr_check _coutcheck;
 	cout_cerr_check _cerrcheck;
 	TestResults* (*cmp_output)(const std::string&, const std::string&);
