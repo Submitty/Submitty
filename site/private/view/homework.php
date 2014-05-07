@@ -130,17 +130,28 @@
                 } else {
                     $class = "badge";
                 }?>
-                <h4 style="margin-left: 10px; text-align: left;"><?php echo $test["title"];?> <span class="<?php echo $class;?>"><?php echo $test["score"]."/".$test["points_possible"];?></span></h4>
+                <div>
+                    <h4 style="margin-left: 10px; text-align: left;display:inline-block;">
+                        <?php echo $test["title"];?>
+                    </h4>
+                    <?php echo $test["message"]; ?>
+                    <span class="<?php echo $class;?>">
+                        <?php echo $test["score"]."/".$test["points_possible"];?>
+                    </span>
+                </div>
+                
+                <?php if ($test["diff"] != ""){?>
                 <div class="col-md-6">
                     <div class="panel panel-default">
-                        My output
+                        <?php echo $test["diff"]["student"]; ?>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="panel panel-default">
-                        Teacher output
+                        <?php echo $test["diff"]["instructor"]; ?>
                     </div>
                 </div>
+                <?php }?>
                 
             <?php } ?>
         </div>
