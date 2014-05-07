@@ -31,6 +31,14 @@
             "hidden": false,
             "extracredit": false,
             "expected_output": "expected.txt"
+        },
+        {
+            "title": "Hidden Case2",
+            "details": "./case2.exe",
+            "points": 5,
+            "hidden": true,
+            "extracredit": false,
+            "expected_output": "expected.txt"
         }
     ]
 }
