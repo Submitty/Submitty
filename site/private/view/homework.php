@@ -2,6 +2,13 @@
 <link href="resources/bootmin.css" rel="stylesheet"></link>
 <link href="resources/main.css" rel="stylesheet"></link>
 
+<!-- DIFF VIEWER STUFF -->
+<script src='diff-viewer/jquery.js'></script>
+<script src='diff-viewer/underscore.js'></script>
+<script src='diff-viewer/highlight.js'></script>
+<script src='diff-viewer/diff.js'></script>
+<script src='diff-viewer/diff_queue.js'></script>
+<link href="diff-viewer/diff.css" rel="stylesheet"></link>
 
 <?php if ($points_possible == 0) {
     $pecent = 0;
@@ -12,6 +19,8 @@
 
 
 <?php require_once("../private/view/nav_container.php");?>
+
+
 <td class=main_panel valign=top height=100%>
     <div class="panel panel-default" style="max-width:none">
         <div class="panel-body"><!-- Panel Body Summary -->
@@ -142,15 +151,19 @@
                 
                 <?php if ($test["diff"] != ""){?>
                 <div class="col-md-6">
-                    <div class="panel panel-default">
+                    <div class="panel panel-default" id="<?php echo $test["title"]; ?>_student">
                         <?php echo $test["diff"]["student"]; ?>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="panel panel-default">
+                    <div class="panel panel-default" id="<?php echo $test["title"]; ?>_instructor">
                         <?php echo $test["diff"]["instructor"]; ?>
                     </div>
                 </div>
+                <script>
+                diff_queue.push("<?php echo $test["title"]; ?>");
+                diff_objects["<?php echo $test["title"]; ?>"] = <?php echo $test["diff"]["difference"]; ?>;
+                </script>
                 <?php }?>
                 
             <?php } ?>
@@ -178,5 +191,9 @@ function check_for_upload(assignment, versions_used, versions_allowed) {
         return false;
     }
 }
+</script>
+<script>
+// Go through diff queue and run viewer
+loadDiffQueue();
 </script>
 </html>
