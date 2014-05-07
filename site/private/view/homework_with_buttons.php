@@ -1,14 +1,10 @@
 <!--link href="resources/bootstrap/css/bootstrap.min.css" rel="stylesheet"-->
 <link href="resources/bootmin.css" rel="stylesheet"></link>
-<link href="resources/main.css" rel="stylesheet"></link>
+<link href="private/view/main.css" rel="stylesheet"></link>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="./resources/bootstrap/js/bootstrap.min.js"></script>
+<script src="./resources/script/main.js"></script>
 
-<!-- DIFF VIEWER STUFF -->
-<script src='diff-viewer/jquery.js'></script>
-<script src='diff-viewer/underscore.js'></script>
-<script src='diff-viewer/highlight.js'></script>
-<script src='diff-viewer/diff.js'></script>
-<script src='diff-viewer/diff_queue.js'></script>
-<link href="diff-viewer/diff.css" rel="stylesheet"></link>
 
 <?php if ($points_possible == 0) {
     $pecent = 0;
@@ -18,51 +14,54 @@
 ?>
 
 
-<?php require_once("../private/view/nav_container.php");?>
-
-
+<?php require_once("private/view/nav_container.php");?>
 <td class=main_panel valign=top height=100%>
     <div class="panel panel-default" style="max-width:none">
         <div class="panel-body"><!-- Panel Body Summary -->
-            <h2><?php echo $assignment_name;?></h2>
+            <h2>Homework <?php echo $homework_number;?></h2>
+            <div class="progress" style="margin-top: 20px;"><!-- Progress Bar -->
+              <div style="position: absolute; width: 100%; text-align:center;">
+                <span id="centered-progress" style="margin-left: auto; text-align: center;"></span>
+              </div>
+              <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $percent;?>%;">
+                <span id="bar-progress"></span>
+              </div>
+            </div><!-- End Progress Bar -->
             <div class="panel-body" style="text-align: right;"> <!-- Body homework select -->
                 <span>Select Homework</span>
-                <form action="">
-                    <input type="input" readonly="readonly" name="page" value="homework" style="display: none">
-                    <select name="assignment_id">
-                    <?php for ($i = 0; $i < count($all_assignments); $i++) {?>
-                        <option value="<?php echo $all_assignments[$i]["assignment_id"];?>" <?php if ($all_assignments[$i]["assignment_id"] == $assignment_id) {?> selected <?php }?>><?php echo $all_assignments[$i]["assignment_name"];?></option>
+                <div class="btn-group" style="text-align: left; margin-left: 20px;">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"> Homework <?php echo $homework_number;?> <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu">
+                    <?php for ($i = 1; $i <= $last_homework; $i++) {?>
+                        <li><a href="?page=homework&number=<?php echo $i;?>">Homework <?php echo $i;?></a></li>
                     <?php } ?>
-                    </select>
-                    <input type="submit" value="Go">
-                </form>
+                    <li class="divider"></li>
+                    <li><a href="?page=homework&number=<?php echo $last_homework;?>">Current Homework</a></li>
+                  </ul>
+                </div>
             </div><!-- End Homework Select -->
             <div class="row"><!-- Summary Table -->
                 <div class="col-sm-4">
-                    <span>Summary:</span>
-                    <?php if ($assignment_version >= 1) {?>
-                    <br><span>You currently are submitting <b>Version <?php echo $submitting_version;?></b> with a score of <b><?php echo $submitting_version_score;?></b><br><br>
+                    <span>Summary:<br> You currently are submitting <b>Version 1</b> with a score of <b>11/15</b><br><br>
                     <span>Select Version: </span>
-                    <form action="index.php">
-                        <input type="input" readonly="readonly" name="page" value="homework" style="display: none">
-                        <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
- 
-                        <select name="version">
-                            <?php for ($i = 1; $i <= $highest_version; $i++) {?>
-                                <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?>>Version <?php echo $i;?></option>
+                    <div class="btn-group" style="text-align: left; margin-left: 20px;">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"> Version <?php echo $version_number;?> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <?php for ($i = 1; $i <= $max_version_number; $i++) {?>
+                                <li><a href="?page=homework&number=<?php echo $homework_number;?>&version=<?php echo $i;?>"> Version <?php echo $i;?></a><li>
                             <?php }?>
-                        </select>
-                        <input type="submit" value="Go">
-                    </form>
+                            <li class="divider"></li>
+                            <li><a href="?page=homework&number=<?php echo $homework_number;?>&version=<?php echo $max_version_number;?>">Last Submitted</a></li>
+                        </ul>
+                    </div>
                     <br>
                     <br>
                     <br>
                     <form action="" style="text-align:center;">
-                    <input type="submit" class="btn btn-primary" value="Submit using Version <?php echo $assignment_version;?>"></input>
+                    <input type="submit" class="btn btn-primary" value="Submit using Version <?php echo $version_number;?>"></input>
                     </form>
-                    <?php } else {?>
-                        <br><span>You have not submitted anything for this assignment!</span>
-                    <?php }?>
                 </div>
                 <div class="col-sm-7">
                     <ul class="list-group">
@@ -102,8 +101,7 @@
                 </div>
             </div><!-- End Summary Table -->
             <div class="panel-body" style="text-align: right"><!-- Upload New Homework -->
-                <form action="?page=upload&assignment_id=<?php echo $assignment_id?>" method="post" enctype="multipart/form-data" 
-                onsubmit=" return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>');">
+                <form action="#" method="post" enctype="multipart/form-data">
                     <label for="file" style="margin-right: 5%;">Filename:</label>
                     <input type="file" name="file" id="file" style="display: inline" />
                     <span class="group-btn">
@@ -111,13 +109,6 @@
                     </span>
                 </form>
             </div><!-- End Upload New Homework -->
-            <?php if (isset($TA_grade) && $TA_grade) {?>
-            <div class="panel-body" style="text-align: right"><!-- TA Grade -->
-                <button type="button">Show TA Grade</button>
-                <div id="TA-grade">
-                </div>
-            </div>
-            <?php }?>
         </div><!-- Ends Panel Body Summary -->
     </div><!-- Ends panel-default -->
     <div class="panel panel-default"><!-- Homework Output Compare And Diff -->
@@ -139,61 +130,29 @@
                 } else {
                     $class = "badge";
                 }?>
-                <div>
-                    <h4 style="margin-left: 10px; text-align: left;display:inline-block;">
-                        <?php echo $test["title"];?>
-                    </h4>
-                    <?php echo $test["message"]; ?>
-                    <span class="<?php echo $class;?>">
-                        <?php echo $test["score"]."/".$test["points_possible"];?>
-                    </span>
-                </div>
-                
-                <?php if ($test["diff"] != ""){?>
+                <h4 style="margin-left: 10px; text-align: left;"><?php echo $test["title"];?> <span class="<?php echo $class;?>"><?php echo $test["score"]."/".$test["points_possible"];?></span></h4>
                 <div class="col-md-6">
-                    <div class="panel panel-default" id="<?php echo $test["title"]; ?>_student">
-                        <?php echo $test["diff"]["student"]; ?>
+                    <div class="panel panel-default">
+                        My output
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="panel panel-default" id="<?php echo $test["title"]; ?>_instructor">
-                        <?php echo $test["diff"]["instructor"]; ?>
+                    <div class="panel panel-default">
+                        Teacher output
                     </div>
                 </div>
-                <script>
-                diff_queue.push("<?php echo $test["title"]; ?>");
-                diff_objects["<?php echo $test["title"]; ?>"] = <?php echo $test["diff"]["difference"]; ?>;
-                </script>
-                <?php }?>
                 
             <?php } ?>
         </div>
     </div><!-- End Homework Output Compare And Diff -->
 </div><!-- End Col Blog-Main -->
+<script>
+load_progress_bar(<?php echo $percent; ?>, "<?php echo $points_received.' / '.$points_possible;?>");
+</script>
 
 
 
 
 </table>
 </body>
-<script>
-function check_for_upload(assignment, versions_used, versions_allowed) {
-    versions_used = parseInt(versions_used);
-    versions_allowed = parseInt(versions_allowed);
-    if (versions_used < versions_allowed) {
-        var message = confirm("Are you sure you want to upload for " + assignment + " ?  You have used " + versions_used + " / " + versions_allowed);
-    } else {
-        var message = confirm("Are you sure you want to upload for " + assignment + " ?  You have used all free uploads.  Uploading may result in a deduction of points.");
-    }
-    if (message == true) {
-        return true;
-    } else {
-        return false;
-    }
-}
-</script>
-<script>
-// Go through diff queue and run viewer
-loadDiffQueue();
-</script>
 </html>

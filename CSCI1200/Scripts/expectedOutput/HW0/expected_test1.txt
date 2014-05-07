@@ -1,4 +1,0 @@
-This is a test output.
-Here is line 1.
-Here is line 2.
-Here is line 3.

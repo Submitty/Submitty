@@ -1,0 +1,26 @@
+{
+    "submission_number": 1,
+    "points_awarded": 25,
+    "submission_time": "2012-07-08 11:59:0.0",
+    "testcases": [
+        {
+            "test_name" : "Readme",
+            "points_awarded": 2,
+            "message": "You have a README!"
+        },
+        {
+            "test_name": "Compilation",
+            "points_awarded": 3,
+            "message" : "You were able to compile!"
+        },
+        {
+            "test_name": "Case1",
+            "points_awarded": 5,
+            "diff":{
+                "instructor_file":"results/hw1/.perfect/test3.txt",
+                "student_file":"test3_out.txt",
+                "difference":"test3_diff.json"
+            }
+        }
+    ]
+}
