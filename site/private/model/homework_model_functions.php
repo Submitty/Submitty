@@ -9,14 +9,14 @@ function upload_homework($username, $assignment_id, $homework_file) {
     }
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
     //ex: homework number, due date, late days
-    $path_front = "upload_testing";//This is for Prof Cutler to edit
+    $path_front = "../../CSCI1200";//This is for Prof Cutler to edit
 
     $max_size = 50000;//CHANGE THIS TO GET VALUE FROM APPROPRIATE FILE
     $allowed = array("zip");
     $filename = explode(".", $homework_file["name"]);
     $extension = end($filename);
 
-    $upload_path = $path_front."/".$assignment_id."/".$username;//Upload path
+    $upload_path = $path_front."/submissions/".$assignment_id."/".$username;//Upload path
     
     if (!($homework_file["type"] === "application/zip")) {//Make sure the file is a zip file
         echo "Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]);
@@ -63,8 +63,8 @@ function most_recent_assignment_id($username) {
 }
 
 function most_recent_assignment_version($username, $assignment_id) {
-    $path_front = "upload_testing";
-    $upload_path = $path_front."/".$assignment_id."/".$username;
+    $path_front = "../../CSCI1200";
+    $path = $path_front."/submissions/".$assignment_id."/".$username;
     $i = 1;
     if (!(file_exists($upload_path."/0"))) {
         return -1;
@@ -77,10 +77,17 @@ function most_recent_assignment_version($username, $assignment_id) {
 }
 
 function name_for_assignment_id($username, $assignment_id) {
-    $path_front = "";
-    $path = $path_front."/results";
+    $path_front = "../../CSCI1200";
+    $file = $path_front."/results/class.json";
     //Get json and parse for assignment_name
-    return "Assignment_name here";
+    $json = json_decode(file_get_contents($file),true);
+    $assignments = $json["assignments"];
+    foreach ($assignments as $one) {
+        if ($one["assignment_id"] == $assignment_id) {
+            return $one["assignment_name"];
+        }
+    }
+    return "";//FIX THIS
 }
 
 function is_valid_assignment($username, $assignment_id) {
