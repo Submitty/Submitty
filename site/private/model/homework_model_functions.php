@@ -1,4 +1,6 @@
 <?php
+
+// Upload HW Assignment to server and unzip
 function upload_homework($username, $assignment_id, $homework_file) {
     if ($username !== $_SESSION["id"]) {//Validate the id
         echo "Something really got screwed up with usernames and session ids"; 
@@ -52,9 +54,12 @@ function upload_homework($username, $assignment_id, $homework_file) {
     return array("success"=>"File uploaded successfully");
 }
 
+// Check if user has permission to edit homework
 function can_edit_homework($username, $assignment_id) {
-    return true;
+    return true; // TODO permission checking
 }
+
+// Get the default assignment name to be displayed on the page
 function most_recent_assignment_id($username) {
     $path_front = "../../CSCI1200";
     $file = $path_front."/results/class.json";
@@ -63,6 +68,7 @@ function most_recent_assignment_id($username) {
     return $json["default_assignment"];
 }
 
+// Find most recent submission from user
 function most_recent_assignment_version($username, $assignment_id) {
     $path_front = "../../CSCI1200";
     $path = $path_front."/submissions/".$assignment_id."/".$username;
@@ -74,6 +80,7 @@ function most_recent_assignment_version($username, $assignment_id) {
 
 }
 
+// Get name for assignment
 function name_for_assignment_id($username, $assignment_id) {
     $path_front = "../../CSCI1200";
     $file = $path_front."/results/class.json";
@@ -88,6 +95,7 @@ function name_for_assignment_id($username, $assignment_id) {
     return "";//FIX THIS
 }
 
+// Check to make sure instructor has added this assignment
 function is_valid_assignment($username, $assignment_id) {
     $path_front = "../../CSCI1200";
     $file = $path_front."/results/class.json";
@@ -102,13 +110,15 @@ function is_valid_assignment($username, $assignment_id) {
     return false;
 }
 
+// Make sure student has actually submitted this version of an assignment
 function is_valid_assignment_version($username, $assignment_id, $assignment_version) {
     $path_front = "../../CSCI1200";
     $path = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
     return file_exists($path);
 }
 
-
+// Get all assignments for user
+// => [{"assignment_id":"hw1"},{"assignment_name":"Robot Rally"}]
 function get_assignments($username) {
     $path_front = "../../CSCI1200";
     $file = $path_front."/results/class.json";
@@ -118,20 +128,12 @@ function get_assignments($username) {
     return $assignments;
 }
 
+// Get TA grade for assignment
 function TA_grade($username, $assignment_id) {
     return false;
 }
 
-function max_assignment_version($username, $assignment_id) {
-    $path_front = "../../CSCI1200";
-    $path = $path_front."/submissions/".$assignment_id."/".$username;
-    $i = 1;
-    while (file_exists($path."/".$i)) {
-        $i++;
-    }
-    return $i - 1;
-}
-
+// Get the max submissions before penalty for an assignment
 function max_submissions_for_assignment($username, $assignment_id) {
     $path_front = "../../CSCI1200";
     $file = $path_front."/results/".$assignment_id."/assignment_config.json";
@@ -142,6 +144,7 @@ function max_submissions_for_assignment($username, $assignment_id) {
 
 //RESULTS DATA
 
+// Get the test cases from the instructor configuration file
 function get_testcase_config($username, $assignment_id) {
     $path_front = "../../CSCI1200";
     $file = $path_front."/results/".$assignment_id."/assignment_config.json";
@@ -149,6 +152,7 @@ function get_testcase_config($username, $assignment_id) {
     return $json["testcases"];
 }
 
+// Get results from test cases for a student submission
 function get_testcase_results($username, $assignment_id, $assignment_version) {
     $path_front = "../../CSCI1200";
     $file = $path_front."/results/".$assignment_id."/".$username."/".$assignment_version."/submission.json";

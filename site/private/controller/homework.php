@@ -1,6 +1,7 @@
 <?php
 require_once("../private/controller/helper.php");
 require_once("../private/model/homework_model_functions.php");
+
 //Make model function calls for homework here
 
 $most_recent_assignment_id = most_recent_assignment_id($_SESSION["id"]);
@@ -26,7 +27,7 @@ if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants
 }
 $assignment_name = name_for_assignment_id($_SESSION["id"], $assignment_id);
 
-$highest_version = max_assignment_version($_SESSION["id"], $assignment_id);
+$highest_version = most_recent_assignment_version($_SESSION["id"], $assignment_id);
 $max_submissions_for_assignment = max_submissions_for_assignment($_SESSION["id"], $assignment_id);
 
 
