@@ -1,7 +1,12 @@
 <?php
 
+//This is for Prof Cutler to edit
+$path_front = "../../CSCI1200";
+
+
 // Upload HW Assignment to server and unzip
 function upload_homework($username, $assignment_id, $homework_file) {
+    global $path_front;
     if ($username !== $_SESSION["id"]) {//Validate the id
         echo "Something really got screwed up with usernames and session ids"; 
         return array("error"=>"Something really got screwed up with usernames and session ids");
@@ -14,7 +19,6 @@ function upload_homework($username, $assignment_id, $homework_file) {
     }
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
     //ex: homework number, due date, late days
-    $path_front = "../../CSCI1200";//This is for Prof Cutler to edit
 
     $max_size = 50000;//CHANGE THIS TO GET VALUE FROM APPROPRIATE FILE
     $allowed = array("zip");
@@ -23,6 +27,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
 
     $upload_path = $path_front."/submissions/".$assignment_id."/".$username;//Upload path
     
+    // TODO should support more than zip
     if (!($homework_file["type"] === "application/zip")) {//Make sure the file is a zip file
         echo "Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]);
         return array("error"=>"Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
@@ -61,7 +66,7 @@ function can_edit_homework($username, $assignment_id) {
 
 // Get the default assignment name to be displayed on the page
 function most_recent_assignment_id($username) {
-    $path_front = "../../CSCI1200";
+    global $path_front;
     $file = $path_front."/results/class.json";
     //Get json and parse for assignment_name
     $json = json_decode(file_get_contents($file), true);
@@ -70,7 +75,7 @@ function most_recent_assignment_id($username) {
 
 // Find most recent submission from user
 function most_recent_assignment_version($username, $assignment_id) {
-    $path_front = "../../CSCI1200";
+    global $path_front;
     $path = $path_front."/submissions/".$assignment_id."/".$username;
     $i = 1;
     while (file_exists($path."/".$i)) {
@@ -82,7 +87,7 @@ function most_recent_assignment_version($username, $assignment_id) {
 
 // Get name for assignment
 function name_for_assignment_id($username, $assignment_id) {
-    $path_front = "../../CSCI1200";
+    global $path_front;
     $file = $path_front."/results/class.json";
     //Get json and parse for assignment_name
     $json = json_decode(file_get_contents($file), true);
@@ -97,7 +102,7 @@ function name_for_assignment_id($username, $assignment_id) {
 
 // Check to make sure instructor has added this assignment
 function is_valid_assignment($username, $assignment_id) {
-    $path_front = "../../CSCI1200";
+    global $path_front;
     $file = $path_front."/results/class.json";
     //Get json and parse for assignment_name
     $json = json_decode(file_get_contents($file), true);
@@ -112,7 +117,7 @@ function is_valid_assignment($username, $assignment_id) {
 
 // Make sure student has actually submitted this version of an assignment
 function is_valid_assignment_version($username, $assignment_id, $assignment_version) {
-    $path_front = "../../CSCI1200";
+    global $path_front;
     $path = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
     return file_exists($path);
 }
@@ -120,7 +125,7 @@ function is_valid_assignment_version($username, $assignment_id, $assignment_vers
 // Get all assignments for user
 // => [{"assignment_id":"hw1"},{"assignment_name":"Robot Rally"}]
 function get_assignments($username) {
-    $path_front = "../../CSCI1200";
+    global $path_front;
     $file = $path_front."/results/class.json";
     //Get json and parse for assignment_name
     $json = json_decode(file_get_contents($file), true);
@@ -135,7 +140,7 @@ function TA_grade($username, $assignment_id) {
 
 // Get the max submissions before penalty for an assignment
 function max_submissions_for_assignment($username, $assignment_id) {
-    $path_front = "../../CSCI1200";
+    global $path_front;
     $file = $path_front."/results/".$assignment_id."/assignment_config.json";
     $json = json_decode(file_get_contents($file), true);
     return $json["max_submissions"];
@@ -146,7 +151,7 @@ function max_submissions_for_assignment($username, $assignment_id) {
 
 // Get the test cases from the instructor configuration file
 function get_testcase_config($username, $assignment_id) {
-    $path_front = "../../CSCI1200";
+    global $path_front;
     $file = $path_front."/results/".$assignment_id."/assignment_config.json";
     $json = json_decode(file_get_contents($file), true);
     return $json["testcases"];
@@ -154,7 +159,7 @@ function get_testcase_config($username, $assignment_id) {
 
 // Get results from test cases for a student submission
 function get_testcase_results($username, $assignment_id, $assignment_version) {
-    $path_front = "../../CSCI1200";
+    global $path_front;
     $file = $path_front."/results/".$assignment_id."/".$username."/".$assignment_version."/submission.json";
     if (!file_exists($file)) {
         return array();
