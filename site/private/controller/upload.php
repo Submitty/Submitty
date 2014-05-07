@@ -6,25 +6,18 @@ require_once("../private/model/homework_model_functions.php");
 //Upload the stuff
 
 if (isset($_FILES["file"])) {
-    if (!isset($_GET["number"]) || !isset($_GET["assignment"])) {
-        //Go to error page?
-        echo "here1";
+    if (!isset($_GET["assigment_id"])) {
+        echo "No assigment id";
         exit();
     }
-    $assignment = htmlspecialchars($_GET["assignment"]);
-    $number = htmlspecialchars($_GET["number"]);
-    if (!($number >= 0 && $number < 100)) {
-        //Go to error page?
-        echo "here2";
-        exit();
-    }
-    if (strpos($assignment," ")) {
+    $assignment_id = htmlspecialchars($_GET["assignment_id"]);
+    if (strpos($assignment_id," ")) {
         //Go to error page?
         echo "here3";
         exit();
     }
     $uploaded_file = $_FILES["file"];//THIS NEEDS TO BE MADE HACKER PROOF
-    $result = upload_homework($_SESSION["id"],$assignment,$number,$uploaded_file);
+    $result = upload_homework($_SESSION["id"],$assignment_id,$uploaded_file);
     if (isset($result["error"])) {
         //Go to error page?
         ?>
@@ -35,6 +28,6 @@ if (isset($_FILES["file"])) {
     }
 }
 //Go back to homework page
-header("Location: index.php?page=homework&number=".$number."&assignment=".$assignment);
+header("Location: index.php?page=homework&assignment_id=".$assignment_id);
 
 ?>

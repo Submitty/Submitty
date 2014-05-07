@@ -1,10 +1,10 @@
 <?php
-function upload_homework($username, $assignment, $homework_number, $homework_file) {
+function upload_homework($username, $assignment_id, $homework_file) {
     if ($username !== $_SESSION["id"]) {//Validate the id
         echo "Something really got screwed up with usernames and session ids"; 
         return array("error"=>"Something really got screwed up with usernames and session ids");
     }
-    if (!can_change_homework($username, $assignment, $homework_number)) {//Made sure the user can upload to this homework
+    if (!can_edit_homework($username, $assignment_id)) {//Made sure the user can upload to this homework
         return array("error"=>"This homework cannot be changed");
     }
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
@@ -16,16 +16,16 @@ function upload_homework($username, $assignment, $homework_number, $homework_fil
     $filename = explode(".", $homework_file["name"]);
     $extension = end($filename);
 
-    $upload_path = $path_front."/".$assignment.$homework_number."/".$username;//Upload path
+    $upload_path = $path_front."/".$assignment_id."/".$username;//Upload path
     
     if (!($homework_file["type"] === "application/zip")) {//Make sure the file is a zip file
         echo "Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]);
         return array("error"=>"Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
     }
 
-    if (!file_exists($path_front."/".$assignment.$homework_number)) {//Made sure the assignment exists as a folder
-        echo "Error, ".$assignment.$homework_number." does not exist in file structure";
-        return array("error"=>$assignment.$homework_number." does not exist in file structure");
+    if (!file_exists($path_front."/".$assignment_id)) {//Made sure the assignment exists as a folder
+        echo "Error, ".$assignment_id." does not exist in file structure";
+        return array("error"=>$assignment_id." does not exist in file structure");
     }
     if (!file_exists($upload_path)) {//Make sure the user has a file already
         echo "Error, Person does not exist in file structure";
@@ -55,38 +55,16 @@ function upload_homework($username, $assignment, $homework_number, $homework_fil
     return array("success"=>"File uploaded successfully");
 }
 
-function can_change_homework($username, $assignment, $assignment_number) {
+function can_edit_homework($username, $assignment_id) {
     return true;
 }
-function most_recent_assignment($username) {
-    return "Homework";
+function most_recent_assignment_id($username) {
+    return "Homework1";
 }
 
-function most_recent_assignment_number($username) {
-    return 2;
-}
-
-function most_recent_assignment_version($username) {
-    return 3;
-}
-
-function is_valid_assignment_number($username, $assignment, $assignment_number) {
+function most_recent_assignment_version($username, $assignment_id) {
     $path_front = "upload_testing";
-    $upload_path = $path_front."/".$assignment.$assignment_number."/".$username;//Upload path
-
-    return file_exists($upload_path);
-}
-
-function is_valid_assignment_version($username, $assignment, $assignment_number, $assignment_version) {
-    $path_front = "upload_testing";
-    $upload_path = $path_front."/".$assignment.$assignment_number."/".$username."/".$assignment_version;
-
-    return file_exists($upload_path);
-}
-
-function last_assignment_version($username, $assignment, $assignment_number) {
-    $path_front = "upload_testing";
-    $upload_path = $path_front."/".$assignment.$assignment_number."/".$username;
+    $upload_path = $path_front."/".$assignment_id."/".$username;
     $i = 0;
     if (!(file_exists($upload_path."/0"))) {
         return -1;
@@ -95,23 +73,45 @@ function last_assignment_version($username, $assignment, $assignment_number) {
         $i++;
     }
     return $i - 1;
+
 }
+
+function name_for_assignment_id($username, $assignment_id) {
+    $path_front = "";
+    $path = $path_front."/results";
+    //Get json and parse for assignment_name
+    return "Assignment_name here";
+}
+
+function is_valid_assignment($username, $assignment_id) {
+    $path_front = "upload_testing";
+    $upload_path = $path_front."/".$assignment_id."/".$username;//Upload path
+
+    return file_exists($upload_path);
+}
+
+function is_valid_assignment_version($username, $assignment_id, $assignment_version) {
+    $path_front = "upload_testing";
+    $upload_path = $path_front."/".$assignment_id."/".$username."/".$assignment_version;
+    return file_exists($upload_path);
+}
+
 
 function get_assignments($username) {
     return array(
-        array("assignment"=>"Homework", "number"=>1),
-        array("assignment"=>"Lab", "number"=>1),
-        array("assignment"=>"Homework", "number"=>2)
+        array("assignment_id"=>"Homework1", "assignment_name"=>"Homework 1"),
+        array("assignment_id"=>"Lab1", "assignment_name"=>"Lab 1"),
+        array("assignment_id"=>"Homework2", "assignment_name"=>"Homework 2")
     );
 }
 
-function TA_grade($username, $assignment, $assignment_number) {
+function TA_grade($username, $assignment_id) {
     return false;
 }
 
-function max_assignment_version($username, $assignment, $assignment_number) {
+function max_assignment_version($username, $assignment_id) {
     $path_front = "upload_testing";
-    $upload_path = $path_front."/".$assignment.$assignment_number."/".$username;
+    $upload_path = $path_front."/".$assignment_id."/".$username;
     $i = 0;
     if (!(file_exists($upload_path."/0"))) {
         return -1;
@@ -122,7 +122,7 @@ function max_assignment_version($username, $assignment, $assignment_number) {
     return $i - 1;
 }
 
-function max_submissions_for_assignment($username, $assignment, $assignment_number) {
+function max_submissions_for_assignment($username, $assignment_id) {
     return 20;
 }
 
