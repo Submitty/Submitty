@@ -39,14 +39,15 @@ function upload_homework($username, $assignment_id, $homework_file) {
         echo "Error, failed to make folder ".$upload_path."/".$i;
         return array("error"=>"failed to make folder ".$upload_path."/".$i);
     }
-
-    if (!move_uploaded_file($homework_file["tmp_name"], $upload_path."/".$i."/".$homework_file["name"])) {//Move the zip file to the correct directory
-        echo "Error failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $upload_path."/".$i."/".$homework_file["name"];
+    $zip = new ZipArchive;
+    $res = $zip->open($homework_file["tmp_name"]);
+    if ($res === TRUE) {
+      $zip->extractTo($upload_path."/".$i."/");
+      $zip->close();
+    } else {
+        "Error failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $upload_path."/".$i."/".$homework_file["name"];
         return array ("error"=>"failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $upload_path."/".$i."/".$homework_file["name"]);
-    }
-    if (!file_exists($upload_path."/".$i."/".$homework_file["name"])) {//Check to make sure the file got placed correctly
-        echo "Hmm, ".$homework_file["tmp_name"]." didn't move to ".$upload_path."/".$i."/".$homework_file["name"];
-        return array("error"=>"Hmm, ".$homework_file["tmp_name"]." didn't move to ".$upload_path."/".$i."/".$homework_file["name"]);
+
     }
     return array("success"=>"File uploaded successfully");
 }
