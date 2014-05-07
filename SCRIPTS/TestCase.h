@@ -28,7 +28,7 @@ public:
 			  const int points, const bool hidden, const bool extracredit,
 			  const cout_cerr_check cout_check,
 			  const cout_cerr_check cerr_check,
-			  TestResults (*cmp)(const std::string&, const std::string&) )
+			  TestResults* (*cmp)(const std::string&, const std::string&) )
 			: _title(title), _details(details), _command(command),
 			  _filename(filename), _description(description),
 			  _expected(expected), _points(points),
@@ -51,7 +51,7 @@ public:
 	
 	/* Calls the function designated by the function pointer; if the function pointer
 	    is NULL, defaults to returning the result of diffLine(). */
-	TestResults compare(const std::string &student_out, const std::string &expected_out){
+	TestResults* compare(const std::string &student_out, const std::string &expected_out){
 		if(cmp_output != NULL) return cmp_output(student_out, expected_out);
 		else return diffLine(student_out, expected_out);
 	}
@@ -88,7 +88,7 @@ private:
 	bool _extracredit;
 	cout_cerr_check _coutcheck;
 	cout_cerr_check _cerrcheck;
-	TestResults (*cmp_output)(const std::string&, const std::string&);
+	TestResults* (*cmp_output)(const std::string&, const std::string&);
 };
 
 #endif

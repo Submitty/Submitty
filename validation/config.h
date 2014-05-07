@@ -60,8 +60,13 @@ const std::string expected_output_dir = "../CSCI1200/Scripts/expectedOutput/HW0"
 const std::string results_dir = "../CSCI1200/HW0/alice/1/.submit.grade";
 */
 
+// Test cases
+const int num_testcases = 3;
+
+TestCase testcases[3] {
+
 /************* README AND COMPILATION *****************/
-TestCase readmeTestCase(
+TestCase(
   	"Readme",
   	"",
     "",
@@ -74,8 +79,8 @@ TestCase readmeTestCase(
     DONT_CHECK,
     DONT_CHECK,
     NULL
-);
-TestCase compilationTestCase(
+),
+TestCase(
 	"Compilation",
 	"",
 	"",
@@ -88,12 +93,7 @@ TestCase compilationTestCase(
 	DONT_CHECK,
 	DONT_CHECK,
 	NULL
-);
-
-// Test cases
-const int num_testcases = 1;
-
-TestCase testcases[1] {
+),
 
 /******************** TEST CASES **********************/
 TestCase(
@@ -111,6 +111,9 @@ TestCase(
 	&diffLine							// compare function [V]
 )
 };
+
+TestCase* readmeTestCase = &testcases[0];
+TestCase* compileTestCase = &testcases[1];
 
 #endif
 

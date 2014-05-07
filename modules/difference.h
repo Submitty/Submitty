@@ -21,9 +21,9 @@ class TestResults{
 public:
     TestResults();
     int distance;
-    virtual void printJSON(std::ostream & file_out){};
-    virtual float grade(){return 0;};
-
+    virtual void printJSON(std::ostream & file_out) =0;
+    virtual float grade() =0;
+	
 };
 class Change{
 public:
