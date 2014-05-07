@@ -4,16 +4,23 @@
     "submission_time": "2012-07-08 11:59:0.0",
     "testcases": [
         {
-            "test_name" : "Readme"
-            "points_awarded": 2
+            "test_name" : "Readme",
+            "points_awarded": 2,
+            "message": "You have a README!"
         },
         {
             "test_name": "Compilation",
-            "points_awarded": 3
+            "points_awarded": 3,
+            "message" : "You were able to compile!"
         },
         {
             "test_name": "Case1",
-            "points_awarded": 5
+            "points_awarded": 5,
+            "diff":{
+                "instructor_file":"path/to/file",
+                "student_file":"path/to/file",
+                "difference":"path/to/file"
+            }
         }
     ]
 }
