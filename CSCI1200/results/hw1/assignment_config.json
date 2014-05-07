@@ -3,6 +3,7 @@
     "name": "Robot Rally",
     "max_submissions": 20,
     "auto_pts": 30,
+    "points_visible":10,
     "ta_pts": 20,
     "due_date" : "2012-07-08 11:59:0.0",
     "num_testcases": 3,

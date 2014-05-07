@@ -39,7 +39,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
     // If user path doesn't exist, create new one
 
     if (!file_exists($upload_path)) {
-        // TODO is this permission level correct?
+        // TODO permission level is INCORRECT
         mkdir($upload_path, 0777, true);
     }
 
@@ -54,7 +54,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
     // Attempt to create folder
 
     if (!mkdir($upload_path."/".$i, 0777, false)) {//Create a new directory corresponding to a new version number
-        //chmod 0777, recursive false
+        // TODO permission level is INCORRECT
         echo "Error, failed to make folder ".$upload_path."/".$i;
         return array("error"=>"failed to make folder ".$upload_path."/".$i);
     }
@@ -112,7 +112,7 @@ function name_for_assignment_id($username, $assignment_id) {
             return $one["assignment_name"];
         }
     }
-    return "";//FIX THIS
+    return "";//TODO Error handling
 }
 
 // Check to make sure instructor has added this assignment
@@ -150,6 +150,7 @@ function get_assignments($username) {
 
 // Get TA grade for assignment
 function TA_grade($username, $assignment_id) {
+    //TODO
     return false;
 }
 
@@ -165,23 +166,39 @@ function max_submissions_for_assignment($username, $assignment_id) {
 //RESULTS DATA
 
 // Get the test cases from the instructor configuration file
-function get_testcase_config($username, $assignment_id) {
+function get_assignment_config($username, $assignment_id) {
     global $path_front;
     $file = $path_front."/results/".$assignment_id."/assignment_config.json";
-    $json = json_decode(file_get_contents($file), true);
-    return $json["testcases"];
+    if (!file_exists($file)) {
+        return false;//TODO Handle this case
+    }
+    return json_decode(file_get_contents($file), true);
 }
 
 // Get results from test cases for a student submission
-function get_testcase_results($username, $assignment_id, $assignment_version) {
+function get_assignment_results($username, $assignment_id, $assignment_version) {
     global $path_front;
     $file = $path_front."/results/".$assignment_id."/".$username."/".$assignment_version."/submission.json";
     if (!file_exists($file)) {
-        return array();
+        return false;
+    }
+    return json_decode(file_get_contents($file), true);
+}
+
+
+//SUBMITTING VERSION
+
+function get_user_submitting_version($username, $assignment_id) {
+    global $path_front;
+    $file = $path_front."/submissions/".$assignment_id."/".$username."/user_assignment_settings.json";
+    if (!file_exists($file)) {
+        return 0;
     }
     $json = json_decode(file_get_contents($file), true);
-    return $json["testcases"];
+    return $json["selected_assignment"];
 }
+
+//DIFF FUNCTIONS
 
 // Converts the JSON "diff" field from submission.json to an array containing
 // file contents
