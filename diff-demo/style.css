@@ -79,37 +79,3 @@ html {
   vertical-align: top;
   color: #888;
 }
-.missing {
-  background-color: #fedede;
-}
-.diff div {
-  text-align: left;
-}
-.line {
-  height: 30px;
-  line-height: 30px;
-}
-.line_number {
-  display: inline-block;
-  width: 40px;
-  text-align: center;
-  background-color: #f2f2f2;
-  opacity: .75;
-  margin-right: 10px;
-}
-.odd-line {
-  background-color: #f8f8f8;
-}
-.bad-line {
-  background-color: #fedede;
-}
-.bad-seg {
-  background-color: #fefe8e;
-  border-radius: 5px;
-  padding: 2px;
-  margin: -2px;
-}
-.line-hover {
-  background-color: #ddf;
-  cursor: pointer;
-}
