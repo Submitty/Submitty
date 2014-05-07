@@ -1,7 +1,8 @@
 {
-    "id": "hw1",
-    "name": "Robot Rally",
+    "id": "lab1",
+    "name": "Lab 1",
     "max_submissions": 20,
+    "points_visible": 10,
     "auto_pts": 30,
     "ta_pts": 20,
     "due_date" : "2012-07-08 11:59:0.0",
