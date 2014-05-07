@@ -48,8 +48,14 @@ $TA_grade = TA_grade($username, $assignment_id);
 //Points_possible as an int is optional when score is used
 
 // Grab the assignment and user information regarding test cases
-$testcases_info = get_testcase_config($username, $assignment_id);
-$testcases_results = get_testcase_results($username, $assignment_id, $assignment_version);
+$assignment_config = get_assignment_config($username, $assignment_id);
+$testcases_info = $assignment_config["testcases"];
+$version_results = get_assignment_results($username, $assignment_id, $assignment_version);
+if ($version_results) { 
+    $testcases_results = $version_results["testcases"];
+} else {
+    $testcases_results = array();
+}
 $homework_tests = array();
 
 if (count($testcases_results) != count($testcases_info)) {
@@ -90,10 +96,13 @@ if (count($testcases_results) != count($testcases_info)) {
 //     array("title"=>"Test 1", "score"=>4, "points_possible"=>4),
 //     array("title"=>"Test 2", "score"=>0, "points_possible"=>4)
 // );
-
-$submitting_version = 1;
-$submitting_version_score = "11/15";
-
+$submitting_version = get_user_submitting_version($_SESSION["id"], $assignment_id);
+$submitting_results = get_assignment_results($_SESSION["id"], $assignment_id, $submitting_version);
+if ($submitting_results) {
+    $submitting_version_score = $submitting_results["points_awarded"]." / ".$assignment_config["points_visible"];
+} else {
+    $submitting_version_score = NULL;
+}
 render("homework", array(
     "assignment_id"=>$assignment_id,
     "assignment_name"=>$assignment_name,

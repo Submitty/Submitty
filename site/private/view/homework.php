@@ -57,9 +57,9 @@
                     <br>
                     <br>
                     <br>
-                    <form action="" style="text-align:center;">
-                    <input type="submit" class="btn btn-primary" value="Submit using Version <?php echo $assignment_version;?>"></input>
-                    </form>
+                    <a href="?page=update&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" style="text-align:center;">
+                        <input type="submit" class="btn btn-primary" value="Submit using Version <?php echo $assignment_version;?>"></input>
+                    </a>
                     <?php } else {?>
                         <br><span>You have not submitted anything for this assignment!</span>
                     <?php }?>
