@@ -28,9 +28,10 @@ int main(int argc, char* argv[]) {
 	// Make sure arguments are entered correctly
 
 	if (argc != 3) {
+		//Pass in the current working directory to run the programs
 		cout << "Incorrect # of arguments:" << argc << endl;
 		cout << "Usage : " << endl
-				<< "     ./runner path/to/user submission_num" << endl;
+				<< "     ./runner current/working/directory" << endl;
 		return 1;
 	}
 
@@ -39,12 +40,16 @@ int main(int argc, char* argv[]) {
 
 	// Extract Paths
 
-	string user_path = argv[1];
+	/*string user_path = argv[1];
 	string submission_dir = argv[2];
 
-	cout << "User path: " << user_path << endl;
+	cout << "User path: " << user_path << endl;*/
 
-	// Copy files to temporary directory
+
+	//README should be checked in validator
+	//Compile checked here, returns the error code from GCC
+
+	/*// Copy files to temporary directory
 	// TODO this cpp file should not do this, it should be done at a higher
 	// level, then this should be run at a lower permissions level
 	string tmp_path = "/tmp/" + random_hash();
@@ -52,15 +57,15 @@ int main(int argc, char* argv[]) {
 	if (execute("cp -r " + user_path + " " + tmp_path)) {
 		cerr << "FAIL: Copy to tmp directory" << endl;
 		return 2;
-	}
+	}*/
 
-	// Try to make GRADES directory
-	if (execute("cd " + user_path + "/" + submission_dir + "; mkdir GRADES")){
+	/*// Try to make GRADES directory
+	if (execute("cd " + submission_dir + "; mkdir GRADES")){
 		cerr << "COULD NOT CREATE GRADES DIRECTORY" << endl;
 		return 6;
-	}
+	}*/
 
-	// Get readme grade (does it exist?)
+	/*// Get readme grade (does it exist?)
 	ofstream readme_file((user_path + "/" + submission_dir + "/GRADES/readme_grade.txt").c_str());
 	if (execute("cd " + tmp_path + "/" + submission_dir + "/FILES" + "; [ -f README.txt ]")){
 		cerr << "NO README.txt" << endl;
@@ -68,8 +73,8 @@ int main(int argc, char* argv[]) {
 	}else{
 		readme_file << readmeTestCase.points();
 	}
-	readme_file.close();
-
+	readme_file.close();*/
+	/*
 	// Compile files in tmp directory with compile command from config
 	ofstream compilation_file((user_path + "/" + submission_dir + "/GRADES/compilation_grade.txt").c_str());
 	if (execute(
@@ -81,38 +86,50 @@ int main(int argc, char* argv[]) {
 	}else{
 		compilation_file << compilationTestCase.points();
 	}
-	compilation_file.close();
-
+	compilation_file.close();*/
+	int compile = execute(compile_command + " 2>.compile_out");
+	if(compile){
+		cerr << "COMPILATION FAILED" << endl;
+		return compile;
+	}
+	/*
 	// Create the .submit.out directory
 	if (execute(
 			"cd " + tmp_path + "/" + submission_dir
 					+ " && mkdir .submit.out")) {
 		return 4;
-	}
+	}*/
 
 	// Run each test case and create output files
 	for (unsigned int i = 0; i < num_testcases; i++) {
+		if(testcases[i].recompile()){
+			int recomp = execute(testcase[i].compile_cmd() + " 2>.compile_out_" + to_string(i));
+			if(recomp){
+				cerr << "Recompilation in test case " << testcases[i].title() << " failed; No points will be awarded." << std::endl;
+				continue;
+			}
+		}
+
 		string cmd = testcases[i].command();
 		if (cmd != "") {
-			ofstream testcase_file((tmp_path + "/" + submission_dir + "/.submit.out/" + testcases[i].filename()).c_str());
-			if (execute(
-					"cd " + tmp_path + "/" + submission_dir + "/FILES && " + cmd
-							+ " 1>../.submit.out/test" + to_string(i+1)
-							+ "_cout.txt 2>../.submit.out/test" + to_string(i+1)
-							+ "_cerr.txt")) {
+			//ofstream testcase_file((tmp_path + "/" + submission_dir + "/.submit.out/" + testcases[i].filename()).c_str());
+			int exit_no = execute(cmd + " 1>test" + to_string(i+1)
+							+ "_cout.txt 2>test" + to_string(i+1)
+							+ "_cerr.txt")
+			//Is this needed? Do we check this?
+			if (exit_no) {
 				cerr << "ERROR RUNNING TEST CASE " << i << endl;
 			}
-			testcase_file.close();
+			//testcase_file.close();
 		}
 	}
-
+	/*
 	// Copy over .submit.out from tmp to user submission directory
 	if (execute("mv " + tmp_path + "/" + submission_dir + "/.submit.out " + user_path + "/" + submission_dir + "/.submit.out")){
 		return 5;
-	}
+	}*/
 
-	//TODO MAKE CALL TO VALIDATOR!!!
-
+	return 0;
 }
 
 // Executes command (from shell) and returns error code (0 = success)
