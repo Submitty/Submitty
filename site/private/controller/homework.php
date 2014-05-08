@@ -5,7 +5,8 @@ require_once("../private/model/homework_model_functions.php");
 //Make model function calls for homework here
 
 $username = $_SESSION["id"];
-$most_recent_assignment_id = most_recent_assignment_id($username);
+$class_config = get_class_config($_SESSION["id"]);
+$most_recent_assignment_id = $class_config["default_assignment"];
 $most_recent_assignment_version = most_recent_assignment_version($username, $most_recent_assignment_id);
 
 $all_assignments = get_assignments($username);
@@ -13,7 +14,7 @@ $all_assignments = get_assignments($username);
 
 if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants to see
     $assignment_id = htmlspecialchars($_GET["assignment_id"]);
-    if (!is_valid_assignment($username, $assignment_id)) {
+    if (!is_valid_assignment($class_config, $assignment_id)) {
         $assignment_id = $most_recent_assignment_id;
     }
     if (isset($_GET["assignment_version"])) {
@@ -26,10 +27,9 @@ if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants
     $assignment_id = $most_recent_assignment_id;
     $assignment_version = $most_recent_assignment_version;
 }
-$assignment_name = name_for_assignment_id($username, $assignment_id);
+$assignment_name = name_for_assignment_id($class_config, $assignment_id);
 
 $highest_version = most_recent_assignment_version($username, $assignment_id);
-$max_submissions_for_assignment = max_submissions_for_assignment($username, $assignment_id);
 
 
 
@@ -56,6 +56,8 @@ if ($version_results) {
 } else {
     $testcases_results = array();
 }
+
+$max_submissions_for_assignment = $assignment_config["max_submissions"];
 $homework_tests = array();
 
 if (count($testcases_results) != count($testcases_info)) {

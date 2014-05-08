@@ -9,12 +9,12 @@ function upload_homework($username, $assignment_id, $homework_file) {
     global $path_front;
 
     // Check user and assignment authenticity
-
+    $class_config = get_class_config($username);
     if ($username !== $_SESSION["id"]) {//Validate the id
         echo "Something really got screwed up with usernames and session ids"; 
         return array("error"=>"Something really got screwed up with usernames and session ids");
     }
-    if (!is_valid_assignment($username, $assignment_id)) {
+    if (!is_valid_assignment($class_config, $assignment_id)) {
         return array("error"=>"This assignment is not valid");
     }
     if (!can_edit_assignment($username, $assignment_id)) {//Made sure the user can upload to this homework
@@ -52,13 +52,11 @@ function upload_homework($username, $assignment_id, $homework_file) {
     }
 
     // Attempt to create folder
-
     if (!mkdir($upload_path."/".$i, 0777, false)) {//Create a new directory corresponding to a new version number
         // TODO permission level is INCORRECT
         echo "Error, failed to make folder ".$upload_path."/".$i;
         return array("error"=>"failed to make folder ".$upload_path."/".$i);
     }
-
     // Unzip files in folder
 
     $zip = new ZipArchive;
@@ -76,17 +74,21 @@ function upload_homework($username, $assignment_id, $homework_file) {
 
 // Check if user has permission to edit homework
 function can_edit_assignment($username, $assignment_id) {
+    global $path_front;
+    $file = $path_front."/results/".$assignment_id."";//TODO
     return true; // TODO permission checking
 }
 
-// Get the default assignment name to be displayed on the page
-function most_recent_assignment_id($username) {
+
+//Gets the class information for assignments
+
+function get_class_config($username) {
+    //TODO Exit everything is this fails
     global $path_front;
     $file = $path_front."/results/class.json";
-    //Get json and parse for assignment_name
-    $json = json_decode(file_get_contents($file), true);
-    return $json["default_assignment"];
+    return json_decode(file_get_contents($file), true);
 }
+
 
 // Find most recent submission from user
 function most_recent_assignment_version($username, $assignment_id) {
@@ -101,12 +103,8 @@ function most_recent_assignment_version($username, $assignment_id) {
 }
 
 // Get name for assignment
-function name_for_assignment_id($username, $assignment_id) {
-    global $path_front;
-    $file = $path_front."/results/class.json";
-    //Get json and parse for assignment_name
-    $json = json_decode(file_get_contents($file), true);
-    $assignments = $json["assignments"];
+function name_for_assignment_id($class_config, $assignment_id) {
+    $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
         if ($one["assignment_id"] == $assignment_id) {
             return $one["assignment_name"];
@@ -116,12 +114,8 @@ function name_for_assignment_id($username, $assignment_id) {
 }
 
 // Check to make sure instructor has added this assignment
-function is_valid_assignment($username, $assignment_id) {
-    global $path_front;
-    $file = $path_front."/results/class.json";
-    //Get json and parse for assignment_name
-    $json = json_decode(file_get_contents($file), true);
-    $assignments = $json["assignments"];
+function is_valid_assignment($class_config, $assignment_id) {
+    $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
         if ($one["assignment_id"] == $assignment_id) {
             return true;
@@ -152,14 +146,6 @@ function get_assignments($username) {
 function TA_grade($username, $assignment_id) {
     //TODO
     return false;
-}
-
-// Get the max submissions before penalty for an assignment
-function max_submissions_for_assignment($username, $assignment_id) {
-    global $path_front;
-    $file = $path_front."/results/".$assignment_id."/assignment_config.json";
-    $json = json_decode(file_get_contents($file), true);
-    return $json["max_submissions"];
 }
 
 function version_in_grading_queue($username, $assignment_id, $assignment_version) {
