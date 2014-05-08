@@ -1,6 +1,0 @@
-/Users/kiana/GIT/HWserver/modules/differences/test_cases/test.txt
-/Users/kiana/GIT/HWserver/modules/differences/test_cases/test1.txt
-/Users/kiana/GIT/HWserver/modules/differences/test_cases/test2.txt
-/Users/kiana/GIT/HWserver/modules/differences/test_cases/test3.txt
-/Users/kiana/GIT/HWserver/modules/differences/test_cases/test4.txt
-/Users/kiana/GIT/HWserver/modules/differences/test_cases/test5.txt
