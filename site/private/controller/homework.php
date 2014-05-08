@@ -4,20 +4,35 @@ require_once("../private/model/homework_model_functions.php");
 
 //Make model function calls for homework here
 
+$error = "";
+if (isset($_GET["error"])) {
+    $error_code = htmlspecialchars($_GET["error"]);
+    if ($error_code == "upload_failed") {
+        $error = "Upload failed";
+    } else if ($error_code == "assignment_closed") {
+        $error = "This assignment is closed";
+    }
+}
+
 $username = $_SESSION["id"];
-$most_recent_assignment_id = most_recent_assignment_id($username);
+$class_config = get_class_config($_SESSION["id"]);
+if ($class_config == NULL) {
+    ?><script>alert("Configuration for this class (class.JSON) is invalid.  Quitting");</script>
+    <?php exit();
+}
+$most_recent_assignment_id = $class_config["default_assignment"];
 $most_recent_assignment_version = most_recent_assignment_version($username, $most_recent_assignment_id);
 
-$all_assignments = get_assignments($username);
+$all_assignments = $class_config["assignments"];
 
 
 if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants to see
     $assignment_id = htmlspecialchars($_GET["assignment_id"]);
-    if (!is_valid_assignment($username, $assignment_id)) {
+    if (!is_valid_assignment($class_config, $assignment_id)) {
         $assignment_id = $most_recent_assignment_id;
     }
-    if (isset($_GET["version"])) {
-        $assignment_version = htmlspecialchars($_GET["version"]);
+    if (isset($_GET["assignment_version"])) {
+        $assignment_version = htmlspecialchars($_GET["assignment_version"]);
     }
     if (!isset($assignment_version) || !is_valid_assignment_version($username, $assignment_id, $assignment_version)) {
         $assignment_version = most_recent_assignment_version($username, $assignment_id);
@@ -26,10 +41,9 @@ if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants
     $assignment_id = $most_recent_assignment_id;
     $assignment_version = $most_recent_assignment_version;
 }
-$assignment_name = name_for_assignment_id($username, $assignment_id);
+$assignment_name = name_for_assignment_id($class_config, $assignment_id);
 
 $highest_version = most_recent_assignment_version($username, $assignment_id);
-$max_submissions_for_assignment = max_submissions_for_assignment($username, $assignment_id);
 
 
 
@@ -48,8 +62,16 @@ $TA_grade = TA_grade($username, $assignment_id);
 //Points_possible as an int is optional when score is used
 
 // Grab the assignment and user information regarding test cases
-$testcases_info = get_testcase_config($username, $assignment_id);
-$testcases_results = get_testcase_results($username, $assignment_id, $assignment_version);
+$assignment_config = get_assignment_config($username, $assignment_id);
+$testcases_info = $assignment_config["testcases"];
+$version_results = get_assignment_results($username, $assignment_id, $assignment_version);
+if ($version_results) { 
+    $testcases_results = $version_results["testcases"];
+} else {
+    $testcases_results = array();
+}
+
+$max_submissions_for_assignment = $assignment_config["max_submissions"];
 $homework_tests = array();
 
 if (count($testcases_results) != count($testcases_info)) {
@@ -90,10 +112,18 @@ if (count($testcases_results) != count($testcases_info)) {
 //     array("title"=>"Test 1", "score"=>4, "points_possible"=>4),
 //     array("title"=>"Test 2", "score"=>0, "points_possible"=>4)
 // );
+$submitting_version = get_user_submitting_version($_SESSION["id"], $assignment_id);
+$submitting_results = get_assignment_results($_SESSION["id"], $assignment_id, $submitting_version);
+if ($submitting_results) {
+    $submitting_version_score = $submitting_results["points_awarded"]." / ".$assignment_config["points_visible"];
+} else {
+    $submitting_version_score = "0 / ".$assignment_config["points_visible"];
+}
 
-$submitting_version = 1;
-$submitting_version_score = "11/15";
 
+$submitting_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $submitting_version);
+
+$assignment_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $assignment_version);
 render("homework", array(
     "assignment_id"=>$assignment_id,
     "assignment_name"=>$assignment_name,
@@ -108,6 +138,9 @@ render("homework", array(
     "assignment_version"=>$assignment_version,
     "TA_grade"=>$TA_grade,
     "max_submissions"=>$max_submissions_for_assignment,
+    "submitting_version_in_grading_queue"=>$submitting_version_in_grading_queue,
+    "assignment_version_in_grading_queue"=>$assignment_version_in_grading_queue,
+    "error"=>$error
     )
 );
 ?>
