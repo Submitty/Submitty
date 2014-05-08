@@ -11,11 +11,12 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 #include <sstream>
 
-#include "TestCase.h"
+//#include "../validation/TestCase.h"
 //#include "GradingRubric.h"
 
-const int hw_num = 0;
-const std::string hw_name = "";
+const std::string id = "HW1";
+const std::string name = "Robot Rally";
+const std::string due_date = "2014-05-03 11:59:59.0";
 
 // Compile Command (executed in student FILES directory)
 const std::string compile_command = "g++ -g *.cpp";
@@ -31,6 +32,7 @@ const int max_output_size = 100;	// in KB
 	// OTHERS?
 
 // Grading parameters
+const int total_pts = 50;
 const int auto_pts = 30;
 const int readme_pts = 2;
 const int compile_pts = 3;
@@ -43,7 +45,7 @@ const char* root_dir = "../CSCI1200/";
 // homework directory
 const char* hw_dir = "HW0/";
 // input files directory
-const char* input_dir = "testingInput/";
+const char* input_dir = "../CSCI1200/testingInput/";
 // expected output files directory
 const char* expected_out_dir = "../CSCI1200/Scripts/expectedOutput/HW0/";
 
@@ -62,18 +64,20 @@ const std::string results_dir = "../CSCI1200/HW0/alice/1/.submit.grade";
 
 /************* README AND COMPILATION *****************/
 TestCase readmeTestCase(
-  	"Readme",
-  	"",
-    "",
-    "README.txt",
-    "",
-    "",
-    readme_pts,				// points for readme
-    false,
-    false,
-    DONT_CHECK,
-    DONT_CHECK,
-    NULL
+	"Readme",
+	"",
+	"",
+	"README.txt",
+	"",
+	"",
+	readme_pts,				// points for readme
+	false,
+	false,
+	DONT_CHECK,
+	DONT_CHECK,
+	false,
+	"",
+	NULL
 );
 TestCase compilationTestCase(
 	"Compilation",
@@ -87,6 +91,8 @@ TestCase compilationTestCase(
 	false,
 	DONT_CHECK,
 	DONT_CHECK,
+	false,
+	"",
 	NULL
 );
 
@@ -99,18 +105,19 @@ TestCase testcases[1] {
 TestCase(
 	"Case 1",							// title
 	"./case1.exe",						// details
-	"./a.out 1> cout.txt 2> cerr.txt",	// command
+	"./a.out",	// command
 	"test1_out.txt",					// output file name [V]
 	"test1_out.txt",					// output file description
 	"expected_test1.txt",				// expected output file [V]
-	5,									// points [V]
+	25,									// points [V]
 	false,								// hidden [V]
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
+	false, 								// recompilation
+	"",									// recompilation command
 	&diffLine							// compare function [V]
 )
 };
 
 #endif
-
