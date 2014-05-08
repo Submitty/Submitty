@@ -20,11 +20,7 @@ if (isset($_FILES["file"])) {
     $result = upload_homework($_SESSION["id"],$assignment_id,$uploaded_file);
     if (isset($result["error"])) {
         //Go to error page?
-        ?>
-        <script>
-        alert("Error: Assignment could not be uploaded");
-        </script>
-        <?php
+        header("Location: index.php?page=homework&assignment_id=".$assignment_id."&error=upload_failed");
     }
 }
 //Go back to homework page

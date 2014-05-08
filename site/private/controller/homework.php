@@ -4,6 +4,16 @@ require_once("../private/model/homework_model_functions.php");
 
 //Make model function calls for homework here
 
+$error = "";
+if (isset($_GET["error"])) {
+    $error_code = htmlspecialchars($_GET["error"]);
+    if ($error_code == "upload_failed") {
+        $error = "Upload failed";
+    } else if ($error_code == "assignment_closed") {
+        $error = "This assignment is closed";
+    }
+}
+
 $username = $_SESSION["id"];
 $class_config = get_class_config($_SESSION["id"]);
 $most_recent_assignment_id = $class_config["default_assignment"];
@@ -125,7 +135,8 @@ render("homework", array(
     "TA_grade"=>$TA_grade,
     "max_submissions"=>$max_submissions_for_assignment,
     "submitting_version_in_grading_queue"=>$submitting_version_in_grading_queue,
-    "assignment_version_in_grading_queue"=>$assignment_version_in_grading_queue
+    "assignment_version_in_grading_queue"=>$assignment_version_in_grading_queue,
+    "error"=>$error
     )
 );
 ?>

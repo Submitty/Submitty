@@ -185,6 +185,11 @@
 
 </table>
 </body>
+<?php if (strlen($error) > 0) {?>
+    <script>
+        alert("<?php echo $error;?>");
+    </script>
+<?php }?>
 <script>
 function check_for_upload(assignment, versions_used, versions_allowed) {
     versions_used = parseInt(versions_used);
