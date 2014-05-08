@@ -9,7 +9,7 @@ $class_config = get_class_config($_SESSION["id"]);
 $most_recent_assignment_id = $class_config["default_assignment"];
 $most_recent_assignment_version = most_recent_assignment_version($username, $most_recent_assignment_id);
 
-$all_assignments = get_assignments($username);
+$all_assignments = $class_config["assignments"];
 
 
 if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants to see

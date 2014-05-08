@@ -17,7 +17,8 @@ function upload_homework($username, $assignment_id, $homework_file) {
     if (!is_valid_assignment($class_config, $assignment_id)) {
         return array("error"=>"This assignment is not valid");
     }
-    if (!can_edit_assignment($username, $assignment_id)) {//Made sure the user can upload to this homework
+    $assignment_config = get_assignment_config($username, $assignment_id);
+    if (!can_edit_assignment($username, $assignment_id, $assignment_config)) {//Made sure the user can upload to this homework
         return array("error"=>"This assignment cannot be changed");
     }
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
@@ -73,10 +74,22 @@ function upload_homework($username, $assignment_id, $homework_file) {
 }
 
 // Check if user has permission to edit homework
-function can_edit_assignment($username, $assignment_id) {
+function can_edit_assignment($username, $assignment_id, $assignment_config) {
     global $path_front;
-    $file = $path_front."/results/".$assignment_id."";//TODO
-    return true; // TODO permission checking
+    date_default_timezone_set('America/New_York');
+    $file = $path_front."/results/".$assignment_id."/".$username."/user_assignment_config.json";
+    if (file_exists($file)) {
+        $json = json_decode(file_get_contents($file), true);
+        if (isset($json["due_date"]) && $json["due_date"] != "default") {
+            $date = new DateTime($json["due_date"]);
+            $now = new DateTime("NOW");
+            return $now <= $date;
+        }
+        return; //TODO
+    }
+    $date = new DateTime($assignment_config["due_date"]);
+    $now = new DateTime("NOW");
+    return $now <= $date;
 }
 
 
@@ -131,16 +144,6 @@ function is_valid_assignment_version($username, $assignment_id, $assignment_vers
     return file_exists($path);
 }
 
-// Get all assignments for user
-// => [{"assignment_id":"hw1"},{"assignment_name":"Robot Rally"}]
-function get_assignments($username) {
-    global $path_front;
-    $file = $path_front."/results/class.json";
-    //Get json and parse for assignment_name
-    $json = json_decode(file_get_contents($file), true);
-    $assignments = $json["assignments"];
-    return $assignments;
-}
 
 // Get TA grade for assignment
 function TA_grade($username, $assignment_id) {
