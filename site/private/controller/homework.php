@@ -16,8 +16,8 @@ if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants
     if (!is_valid_assignment($username, $assignment_id)) {
         $assignment_id = $most_recent_assignment_id;
     }
-    if (isset($_GET["version"])) {
-        $assignment_version = htmlspecialchars($_GET["version"]);
+    if (isset($_GET["assignment_version"])) {
+        $assignment_version = htmlspecialchars($_GET["assignment_version"]);
     }
     if (!isset($assignment_version) || !is_valid_assignment_version($username, $assignment_id, $assignment_version)) {
         $assignment_version = most_recent_assignment_version($username, $assignment_id);
@@ -101,8 +101,13 @@ $submitting_results = get_assignment_results($_SESSION["id"], $assignment_id, $s
 if ($submitting_results) {
     $submitting_version_score = $submitting_results["points_awarded"]." / ".$assignment_config["points_visible"];
 } else {
-    $submitting_version_score = NULL;
+    $submitting_version_score = "0 / ".$assignment_config["points_visible"];
 }
+
+
+$submitting_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $submitting_version);
+
+$assignment_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $assignment_version);
 render("homework", array(
     "assignment_id"=>$assignment_id,
     "assignment_name"=>$assignment_name,
@@ -117,6 +122,8 @@ render("homework", array(
     "assignment_version"=>$assignment_version,
     "TA_grade"=>$TA_grade,
     "max_submissions"=>$max_submissions_for_assignment,
+    "submitting_version_in_grading_queue"=>$submitting_version_in_grading_queue,
+    "assignment_version_in_grading_queue"=>$assignment_version_in_grading_queue
     )
 );
 ?>

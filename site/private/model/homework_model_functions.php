@@ -17,7 +17,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
     if (!is_valid_assignment($username, $assignment_id)) {
         return array("error"=>"This assignment is not valid");
     }
-    if (!can_edit_homework($username, $assignment_id)) {//Made sure the user can upload to this homework
+    if (!can_edit_assignment($username, $assignment_id)) {//Made sure the user can upload to this homework
         return array("error"=>"This assignment cannot be changed");
     }
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
@@ -75,7 +75,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
 }
 
 // Check if user has permission to edit homework
-function can_edit_homework($username, $assignment_id) {
+function can_edit_assignment($username, $assignment_id) {
     return true; // TODO permission checking
 }
 
@@ -162,6 +162,18 @@ function max_submissions_for_assignment($username, $assignment_id) {
     return $json["max_submissions"];
 }
 
+function version_in_grading_queue($username, $assignment_id, $assignment_version) {
+    global $path_front;
+    if (!is_valid_assignment_version($username, $assignment_id, $assignment_version)) {//If its not in the submissions folder
+        return false;
+    }
+    $file = $path_front."/results/".$assignment_id."/".$username."/".$assignment_version;
+    if (file_exists($file)) {//If the version has already been graded
+        return false;
+    }
+    return true;
+}
+
 
 //RESULTS DATA
 
@@ -186,6 +198,7 @@ function get_assignment_results($username, $assignment_id, $assignment_version) 
 }
 
 
+
 //SUBMITTING VERSION
 
 function get_user_submitting_version($username, $assignment_id) {
@@ -196,6 +209,24 @@ function get_user_submitting_version($username, $assignment_id) {
     }
     $json = json_decode(file_get_contents($file), true);
     return $json["selected_assignment"];
+}
+
+function change_assignment_version($username, $assignment_id, $assignment_version) {
+    if (!can_edit_assignment($username, $assignment_id)) {
+        return array("error"=>"Error: This assignment ".$assignment_id." is not open.  You may not edit this assignment.");
+    }
+    if (!is_valid_assignment_version($username, $assignment_id, $assignment_version)) {
+        return array("error"=>"This assignment version ".$assignment_version." does not exist");
+    }
+    global $path_front;
+    $file = $path_front."/submissions/".$assignment_id."/".$username."/user_assignment_settings.json";
+    if (!file_exists($file)) {
+        return array("error"=>"Unable to find user settings");
+    }
+    $json = json_decode(file_get_contents($file), true);
+    $json["selected_assignment"] = $assignment_version;
+    file_put_contents($file, json_encode($json));
+    return array("success"=>"Success");
 }
 
 //DIFF FUNCTIONS

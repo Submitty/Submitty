@@ -23,15 +23,17 @@ if (isset($_GET["page"])) {
 }
 // Temporary page for testing server operations
 
-if ($page == "serverop"){
+if ($page == "serverop") {
 
 	require_once("../private/controller/serverop.php");
 
-}else{
+} else {
 
 	//This needs to be wrapped around session Ids and logins
     if ($page == "upload") {
         require_once("../private/controller/upload.php");
+    } else if ($page == "update") {
+        require_once("../private/controller/update.php");
     } else {
 	    require_once("../private/controller/homework.php");
     }
