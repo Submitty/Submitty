@@ -16,6 +16,10 @@ if (isset($_GET["error"])) {
 
 $username = $_SESSION["id"];
 $class_config = get_class_config($_SESSION["id"]);
+if ($class_config == NULL) {
+    ?><script>alert("Configuration for this class (class.JSON) is invalid.  Quitting");</script>
+    <?php exit();
+}
 $most_recent_assignment_id = $class_config["default_assignment"];
 $most_recent_assignment_version = most_recent_assignment_version($username, $most_recent_assignment_id);
 

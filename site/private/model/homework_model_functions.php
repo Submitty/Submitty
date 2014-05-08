@@ -96,9 +96,12 @@ function can_edit_assignment($username, $assignment_id, $assignment_config) {
 //Gets the class information for assignments
 
 function get_class_config($username) {
-    //TODO Exit everything is this fails
     global $path_front;
     $file = $path_front."/results/class.json";
+    if (!file_exists($file)) {
+        ?><script>alert("Configuration for this class (class.JSON) does not exist.  Quitting");</script>
+        <?php exit();
+    }
     return json_decode(file_get_contents($file), true);
 }
 
