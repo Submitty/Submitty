@@ -77,10 +77,10 @@ function upload_homework($username, $assignment_id, $homework_file) {
     }
     $to_be_compiled = $path_front."/submissions/to_be_compiled.txt";
     if (!file_exists($to_be_compiled)) {
-        file_put_contents($to_be_compiled, $assignment_id."/".$username."/".$i);
+        file_put_contents($to_be_compiled, $assignment_id."/".$username."/".$i."\n");
     } else {
         $text = file_get_contents($to_be_compiled, false);
-        $text = $text."\n".$assignment_id."/".$username."/".$i;
+        $text = $text.$assignment_id."/".$username."/".$i."\n";
         file_put_contents($to_be_compiled, $text);
     }
     return array("success"=>"File uploaded successfully");
