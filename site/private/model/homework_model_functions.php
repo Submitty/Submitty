@@ -75,6 +75,14 @@ function upload_homework($username, $assignment_id, $homework_file) {
         $json = array("selected_assignment"=>1);
         file_put_contents($settings_file, json_encode($json));
     }
+    $to_be_compiled = $path_front."/submissions/to_be_compiled.txt";
+    if (!file_exists($to_be_compiled)) {
+        file_put_contents($to_be_compiled, $assignment_id."/".$username."/".$i);
+    } else {
+        $text = file_get_contents($to_be_compiled, false);
+        $text = $text."\n".$assignment_id."/".$username."/".$i;
+        file_put_contents($to_be_compiled, $text);
+    }
     return array("success"=>"File uploaded successfully");
 }
 
