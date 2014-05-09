@@ -19,7 +19,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
     }
     $assignment_config = get_assignment_config($username, $assignment_id);
     if (!can_edit_assignment($username, $assignment_id, $assignment_config)) {//Made sure the user can upload to this homework
-        return array("error"=>"This assignment cannot be changed");
+        return array("error"=>"assignment_closed");
     }
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
     //ex: homework number, due date, late days
@@ -69,6 +69,11 @@ function upload_homework($username, $assignment_id, $homework_file) {
         "Error failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $upload_path."/".$i."/".$homework_file["name"];
         return array ("error"=>"failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $upload_path."/".$i."/".$homework_file["name"]);
 
+    }
+    $settings_file = $upload_path."/user_assignment_settings.json";
+    if (!file_exists($settings_file)) {
+        $json = array("selected_assignment"=>1);
+        file_put_contents($settings_file, json_encode($json));
     }
     return array("success"=>"File uploaded successfully");
 }
@@ -203,8 +208,8 @@ function get_user_submitting_version($username, $assignment_id) {
     return $json["selected_assignment"];
 }
 
-function change_assignment_version($username, $assignment_id, $assignment_version) {
-    if (!can_edit_assignment($username, $assignment_id)) {
+function change_assignment_version($username, $assignment_id, $assignment_version, $assignment_config) {
+    if (!can_edit_assignment($username, $assignment_id, $assignment_config)) {
         return array("error"=>"Error: This assignment ".$assignment_id." is not open.  You may not edit this assignment.");
     }
     if (!is_valid_assignment_version($username, $assignment_id, $assignment_version)) {
