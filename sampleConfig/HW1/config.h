@@ -41,13 +41,13 @@ const int ta_pts = 20;
 // File directories
 
 // root directory
-const char* root_dir = "../CSCI1200/";
+const char* root_dir = "../../CSCI1200/";
 // homework directory
 const char* hw_dir = "HW1/";
 // input files directory
-const char* input_dir = "../CSCI1200/testingInput/HW1";
+const char* input_dir = "../../CSCI1200/testingInput/HW1";
 // expected output files directory
-const char* expected_out_dir = "../CSCI1200/Scripts/expectedOutput/HW1/";
+const char* expected_out_dir = "../../CSCI1200/Scripts/expectedOutput/HW1/";
 
 /*
 // directory containing input files
@@ -62,13 +62,12 @@ const std::string expected_output_dir = "../CSCI1200/Scripts/expectedOutput/HW0"
 const std::string results_dir = "../CSCI1200/HW0/alice/1/.submit.grade";
 */
 
-/************* README AND COMPILATION *****************/
-
-
 // Test cases
 const int num_testcases = 11;
 
 TestCase testcases[11] {
+
+/************* README AND COMPILATION *****************/
 
 TestCase(
 	"Readme",
@@ -102,6 +101,7 @@ TestCase(
 	"",
 	NULL
 ),
+
 /******************** TEST CASES **********************/
 TestCase(
 	"left justify example",							// title
@@ -109,7 +109,7 @@ TestCase(
 	"./a.out example.txt test1_out.txt 16 flush_left",	// command
 	"test1_out.txt",					// output file name [V]
 	"Expected output.txt",					// output file description
-	"expected_test1.txt",				// expected output file [V]
+	"example_16_flush_left.txt",				// expected output file [V]
 	3,									// points [V]
 	false,								// hidden [V]
 	false,								// extra credit [V]
@@ -250,6 +250,6 @@ TestCase(
 };
 
 TestCase* readmeTestCase = &testcases[0];
-TestCase* compilationTestCase = &testcases[1];
+TestCase* compileTestCase = &testcases[1];
 
 #endif

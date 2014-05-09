@@ -25,47 +25,28 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 /* TODO: how to include this specifically? */
 /*  maybe -include with g++ */
-#include "../CSCI1200/hwconfig/hw0/config.h"
+#include "../sampleConfig/HW1/config.h"
 
 bool checkValidDirectory( char* directory );
 bool checkValidDirectory( const char* directory );
-int validateTestCases( char* submit_dir, char* grade_dir, int subnum, const char* subtime, int readme, int compiled );
+int validateTestCases( int subnum, const char* subtime, int readme, int compiled );
 
 int main( int argc, char* argv[] ) {
 	
 	/* Check argument usage */
-	if( argc != 6 ) {
+	if( argc != 4 ) {
 #ifdef DEBUG		
-		std::cerr << "VALIDATOR USAGE: validator <user path> <submission#> <submission time> <readme result> <compile result>" << std::endl;
+		std::cerr << "VALIDATOR USAGE: validator <submission#> <time-of-submission> <runner-result>" << std::endl;
 #endif		
 		return 1;
 	}
 	
-	// User path: ".../CSCI1200/results/{hw#}/{user}/"
-	
-	char submission_dir[strlen(argv[1])+strlen(argv[2])+2];
-	sprintf(submission_dir, "%s%s/", argv[1], argv[2]);
-	submission_dir[strlen(submission_dir)] = '\0';
-	
-	char grade_dir[strlen(submission_dir)+strlen("GRADES/")+1];
-	sprintf(grade_dir, "%sGRADES/", submission_dir);
-	grade_dir[strlen(grade_dir)] = '\0';
-	
-	std::cout << grade_dir << std::endl;
-	
-	/* Check for valid directories */
-	if( !checkValidDirectory( argv[1] ) ||
-	    !checkValidDirectory( submission_dir ) ||
-	    !checkValidDirectory( grade_dir ) ) {
-
-#ifdef DEBUG	    
-	    std::cerr << "ERROR: one or more directories not found" << std::endl;
-	    return 1;
-#endif
-	}
+	// Check for readme
+	// for now, assume it was found
+	bool readme_found = 1;
 	
 	// Run test cases
-	int rc = validateTestCases( submission_dir, grade_dir, atoi(argv[2]), argv[3], atoi(argv[4]), atoi(argv[5]) );
+	int rc = validateTestCases( atoi(argv[1]), argv[2], readme_found, atoi(argv[3]) );
 	if(rc > 0) {
 #ifdef DEBUG
 		std::cerr << "Validator terminated" << std::endl;
@@ -118,14 +99,8 @@ bool checkValidDirectory( const char* directory ) {
 
 /* Runs through each test case, pulls in the correct files, validates,
    and outputs the results */
-int validateTestCases( char* submit_dir, char* grade_dir, int subnum, const char* subtime, int readme, int compiled ) {
+int validateTestCases( int subnum, const char* subtime, int readme, int compiled ) {
 
-	char output_dir[strlen(submit_dir)+strlen(".submit.out/")+1];
-	sprintf(output_dir, "%s.submit.out/", submit_dir);
-	output_dir[strlen(output_dir)] = '\0';
-	
-	if(!checkValidDirectory(output_dir)) return 1;
-	
 	int total_grade = 0;
 	
 	std::stringstream testcase_json;
@@ -139,36 +114,28 @@ int validateTestCases( char* submit_dir, char* grade_dir, int subnum, const char
 				  << testcases[i].points() << std::endl;
 		
 		// Pull in student output & expected output
-		std::string student_path = (output_dir + testcases[i].filename());
-		std::ifstream student_instr( student_path.c_str() );
+		std::ifstream student_instr( testcases[i].filename().c_str() );
 		if( !student_instr ) {
 #ifdef DEBUG			
 			std::cerr << "ERROR: Student's " << testcases[i].filename()
 					  << " does not exist" << std::endl;
 #endif			
-			return 1;
+			continue;
 		}
 	
-		std::string expected_path = (expected_out_dir + testcases[i].expected());
-		std::ifstream expected_instr( expected_path.c_str() );
+		std::ifstream expected_instr( testcases[i].expected().c_str() );
 		if( !expected_instr ) {
 #ifdef DEBUG
 			std::cerr << "ERROR: Instructor's " << testcases[i].expected()
 					  << " does not exist" << std::endl;
 #endif
-			return 1;
+			continue;
 		}
-
-		//if( !student_instr || !expected_instr ) continue;
-		
-		char cout_temp[strlen(output_dir) + 16];
-		sprintf(cout_temp, "%stest%d_cout.txt", output_dir, t );
-		const char* cout_path = cout_temp;
 		
 		// Check cout and cerr
-		/*const char* cout_path = (student_output_dir + "/test" + (char*)(i-1) +
-													  "_cout.txt" ).c_str();*/
-		std::ifstream cout_instr( cout_path );
+		std::stringstream cout_path;
+		cout_path << "test" << t << "_cout.txt";
+		std::ifstream cout_instr( cout_path.str().c_str() );
 		if( testcases[i].coutCheck() != DONT_CHECK ) {			
 			if( !cout_instr ) { std::cerr << "ERROR: test" << t
 								<< "_cout.txt does not exist" << std::endl; }			
@@ -186,13 +153,9 @@ int validateTestCases( char* submit_dir, char* grade_dir, int subnum, const char
 			}
 		}
 		
-		char cerr_temp[strlen(output_dir) + 16];
-		sprintf(cerr_temp, "%stest%d_cerr.txt", output_dir, t );
-		const char* cerr_path = cerr_temp;
-		
-		/*const char* cerr_path = (student_output_dir + "/test" + (char*)(i-1) +
-													  "_cerr.txt" ).c_str();*/
-		std::ifstream cerr_instr( cerr_path );
+		std::stringstream cerr_path;
+		cerr_path << "test" << t << "_cerr.txt";
+		std::ifstream cerr_instr( cerr_path.str().c_str() );
 		if( testcases[i].cerrCheck() != DONT_CHECK ) {
 			if( !cerr_instr ) { std::cout << "ERROR: test" << t
 								<< "_cerr.txt does not exist" << std::endl; }
@@ -208,9 +171,6 @@ int validateTestCases( char* submit_dir, char* grade_dir, int subnum, const char
 				}
 			}
 		}
-		
-		//std::cout << cout_path << std::endl;
-		//std::cerr << cerr_path << std::endl;
 		
 		TestResults* result;
 		const std::string blank = "";
@@ -239,43 +199,16 @@ int validateTestCases( char* submit_dir, char* grade_dir, int subnum, const char
 		
 		int testcase_grade = 0;
 		
-		char diff_path[strlen(submit_dir)+17];
-		sprintf(diff_path, "%stest%d_diff.json", submit_dir, t);
-		diff_path[strlen(diff_path)] = '\0';
-		std::ofstream diff_stream(diff_path);
+		std::stringstream diff_path;
+		diff_path << "test" << t << "_diff.json";
+		std::ofstream diff_stream(diff_path.str().c_str());
 		
-		/*if(typeid(result) == typeid(Difference)) {
-			Difference d = (Difference)(result);
-			testcase_grade = (int)floor(d.grade() * testcases[i].points());
-			d.printJSON(diff_stream);
-		}
-		else {
-			Tokens d = (Tokens)(result);
-			testcase_grade = (int)floor(d.grade() * testcases[i].points());
-			d.printJSON(diff_stream);
-		}*/
+		std::cout << result->grade() << std::endl;
 		
 		testcase_grade = (int)floor(result->grade() * testcases[i].points());
 		result->printJSON(diff_stream);
 		
 		std::cout << "Grade: " << testcase_grade << std::endl;
-		
-		//int testcase_grade = (int)floor(result.grade() * testcases[i].points());
-		total_grade += testcase_grade;
-		
-		char testcase_gradepath[strlen(grade_dir)+17];
-		sprintf(testcase_gradepath, "%stest%d_grade.txt", grade_dir, t);
-		testcase_gradepath[strlen(testcase_gradepath)] = '\0';
-		
-		std::ofstream testcase_gradefile;
-		testcase_gradefile.open( testcase_gradepath );
-		testcase_gradefile << testcase_grade << std::endl;
-		testcase_gradefile.close();
-		
-		
-		
-		
-		//result.printJSON(diff_stream);
 		
 		const char* last_line = (i == num_testcases-1) ? "\t\t}\n" : "\t\t},\n";
 		
@@ -284,7 +217,7 @@ int validateTestCases( char* submit_dir, char* grade_dir, int subnum, const char
 					  << "\t\t\t\"test_name\": \"" << testcases[i].title() << "\",\n"
 					  << "\t\t\t\"points_awarded\": " << testcase_grade << ",\n"
 					  << "\t\t\t\"diff\":{\n"
-					  << "\t\t\t\t\"instructor_file\":\"" << expected_path << "\",\n"
+					  << "\t\t\t\t\"instructor_file\":\"" << testcases[i].expected() << "\",\n"
 					  << "\t\t\t\t\"student_file\":\"" << testcases[i].filename() << "\",\n"
 					  << "\t\t\t\t\"difference\":\"test" << t << "_diff.json\"\n"
 					  << "\t\t\t}\n"
@@ -310,14 +243,9 @@ int validateTestCases( char* submit_dir, char* grade_dir, int subnum, const char
 	total_grade += (readme_grade + compile_grade);
 	
 	/* Output total grade */
-	char gradepath[strlen(grade_dir)+strlen("grade.txt")+1];
-	sprintf(gradepath, "%sgrade.txt", grade_dir);
-	gradepath[strlen(gradepath)] = '\0';
-	
-	std::ofstream gradefile;
-	gradefile.open( gradepath );
+	std::string grade_path = "grade.txt";
+	std::ofstream gradefile(grade_path.c_str());
 	gradefile << total_grade << std::endl;
-	gradefile.close();
 	
 	/* Generate submission.json */
 	std::ofstream json_file("submission.json");
