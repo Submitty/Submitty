@@ -2,6 +2,10 @@
 
 # SET PARAMETERS
 
+echo "This script takes 3 parameters"
+echo "./grade_students <assignment_submission_path> <temporary_files_path> <results_directory_path>"
+echo ""
+
 echo "Setting Parameters"
 echo "---------------------"
 
@@ -47,7 +51,8 @@ while read path; do
 	# RUN RUNNER
 
 	cd "$tmp/submission"
-	"$bin_path/${assignment_name}_run"
+	$bin_path/${assignment_name}_run
+	runner_error_code="$?"
 
 	echo ""
 
@@ -56,7 +61,7 @@ while read path; do
 	echo ""
 	echo "Running validator"
 	echo "-----------------"
-	"$bin_path/${assignment_name}_validate"
+	"$bin_path/${assignment_name}_validate" "$submission_no" "$submission_time" "$runner_error_code"
 
 	echo ""
 
@@ -75,6 +80,6 @@ while read path; do
 
 	rm -r "$tmp/submission" || echo "ERROR: Failed to remove temporary directory"
 
-done < "$1/to_be_compiled.txt"
+done < "$assignment_submission_path/to_be_compiled.txt"
 
-rm "$1/to_be_compiled.txt"
+rm "$assignment_submission_path/to_be_compiled.txt"
