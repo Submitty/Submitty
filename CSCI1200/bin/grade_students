@@ -51,7 +51,7 @@ while read path; do
 	# RUN RUNNER
 
 	cd "$tmp/submission"
-	$bin_path/${assignment_name}_run
+	"$bin_path/${assignment_name}run.out"
 	runner_error_code="$?"
 
 	echo ""
@@ -61,7 +61,7 @@ while read path; do
 	echo ""
 	echo "Running validator"
 	echo "-----------------"
-	"$bin_path/${assignment_name}_validate" "$submission_no" "$submission_time" "$runner_error_code"
+	"$bin_path/${assignment_name}validate.out" "$submission_no" "$submission_time" "$runner_error_code"
 
 	echo ""
 
