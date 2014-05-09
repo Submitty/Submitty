@@ -3,19 +3,22 @@
 
 # TEMPORARY LINE, REMOVE THIS
 
-cp test.txt to_be_compiled.txt
+cp test.txt submissions/to_be_compiled.txt
 
 # END TEMPORARY
 
-echo "Temporary directory set to $2"
-echo "Results directory set to $3"
+assignment_submission_path="$1"
+echo "Assignment submissions path set to $assignment_submission_path"
 
 tmp="$2"
+echo "Temporary directory set to $tmp"
+
 results_path="$3"
+echo "Results directory set to $results_path"
 
 echo "Looking for to_be_compiled.txt in $1"
 
-if [[ ! -f  "$1/to_be_compiled.txt" ]]; then
+if [[ ! -f  "$assignment_submission_path/to_be_compiled.txt" ]]; then
 	echo "Nothing to be compiled"
 	exit
 fi
@@ -24,9 +27,12 @@ echo "to_be_compiled.txt found"
 
 while read path; do
 
-	echo "Copying path ($path) to tmp directory ($tmp/submission)"
+	echo "Copying path ($assignment_submission_path/$path) to tmp directory ($tmp/submission)"
 
-	cp -r "$path" "$tmp/submission" || echo "ERROR: Failed to copy to temporary directory"
+	cp -r "$assignment_submission_path/$path" "$tmp/submission" || echo "ERROR: Failed to copy to temporary directory"
+
+	submission_no="$(basename $path)"
+	submission_time="$(date -r $assignment_submission_path/$path "+%F %T")"
 
 	# RUN RUNNER
 
@@ -34,9 +40,9 @@ while read path; do
 
 	# Make directory structure in results if it doesn't exist
 
-	mkdir -p "$results_path/$path" || "ERROR: Could not create results path"
+	mkdir -p "$results_path/$path" || echo "ERROR: Could not create results path"
 
-	echo "Copying temporary directory to results directory"
+	echo "Copying temporary directory ($tmp/submission) to results directory ($results_path/$path)"
 
 	cp -r "$tmp/submission" "$results_path/$path" || echo "ERROR: Could not copy temporary directory to results directory"
 
