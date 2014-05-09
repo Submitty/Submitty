@@ -10,7 +10,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <fstream>
 #include "../modules/modules.h"
 #include "TestCase.h"
-#include "config.h"
+#include "../sampleConfig/HW1/config.h"
 
 /*Generates a file in json format containing all of the information defined in 
 config.h for easier parsing.*/

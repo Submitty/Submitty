@@ -63,11 +63,12 @@ const std::string results_dir = "../CSCI1200/HW0/alice/1/.submit.grade";
 */
 
 // Test cases
-const int num_testcases = 9;
+const int num_testcases = 11;
 
-TestCase testcases[9] {
+TestCase testcases[11] {
 
 /************* README AND COMPILATION *****************/
+
 TestCase(
 	"Readme",
 	"",
@@ -100,7 +101,10 @@ TestCase(
 	"",
 	NULL
 ),
+<<<<<<< HEAD
 
+=======
+>>>>>>> 63e0447269b4728109389ff9b0dd32b957dc5ae7
 /******************** TEST CASES **********************/
 TestCase(
 	"left justify example",							// title
@@ -247,5 +251,8 @@ TestCase(
 	&myersDiffbyLinesByChar							// compare function [V]
 )
 };
+
+TestCase* readmeTestCase = &testcases[0];
+TestCase* compilationTestCase = &testcases[1];
 
 #endif
