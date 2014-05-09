@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
 	int n = 0;
 	if(readmeTestCase != NULL)
 		n++;
-	if(compilationTestCase != NULL)
+	if(compileTestCase != NULL)
 		n++;
 
 	// Run each test case and create output files
