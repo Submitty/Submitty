@@ -8,7 +8,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 #include <iostream>
 #include <fstream>
-#include "../modules/modules.h"
+#include "../../../../modules/modules.h"
 #include "TestCase.h"
 //#include "../sampleConfig/HW1/config.h"
 
@@ -61,7 +61,7 @@ Now Exiting" << std::endl;
 		return 0;
 	}
 
-	init << "{\n\t\"id\": " << id << "," <<  std::endl;
+	init << "{\n\t\"id\": \"" << id << "\"," <<  std::endl;
 	init << "\t\"name\": \"" << name << "\"," << std::endl;
 
 	init << "\t\"max_submissions\": " << max_submissions << "," << std::endl;
@@ -75,7 +75,7 @@ Now Exiting" << std::endl;
 	init << "\t\"points_visible\": " << visible << "," << std::endl;
 	init << "\t\"ta_pts\": " << ta_pts << "," << std::endl;
 	init << "\t\"total_pts\": " << total_pts << "," << std::endl;
-	init << "\t\"due_date\": " << due_date << "\"," << std::endl;
+	init << "\t\"due_date\": \"" << due_date << "\"," << std::endl;
 
 	init << "\t\"num_testcases\": " << num_testcases << "," << std::endl;
 
