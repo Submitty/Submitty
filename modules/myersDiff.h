@@ -26,60 +26,60 @@
 #include "metaData.h"
 #include "clean.h"
 
-template<class T> Difference ses(T& a, T& b, bool secondary=false);
-template<class T> Difference ses(T* a, T* b, bool secondary=false);
+template<class T> Difference* ses(T& a, T& b, bool secondary=false);
+template<class T> Difference* ses(T* a, T* b, bool secondary=false);
 template<class T> metaData<T> sesSnapshots(T& a, T& b);
 template<class T> metaData<T> sesSnapshots(T* a, T* b);
 template<class T> metaData<T> sesSnakes(metaData<T> & meta_diff);
-template<class T> Difference sesChanges(metaData<T> & meta_diff);
-template<class T> Difference sesSecondary(Difference & text_diff, metaData<T> & meta_diff);
-template<class T> Difference sesSecondary(Difference & text_diff);
-template<class T> Difference printJSON(Difference & text_diff, std::ofstream & file_out, int type=0);
+template<class T> Difference* sesChanges(metaData<T> & meta_diff);
+template<class T> Difference* sesSecondary(Difference & text_diff, metaData<T> & meta_diff);
+template<class T> Difference* sesSecondary(Difference & text_diff);
+template<class T> Difference* printJSON(Difference & text_diff, std::ofstream & file_out, int type=0);
 
-TestResults myersDiffbyLinebyWord(const std::string & b, const std::string & a){
+TestResults* myersDiffbyLinebyWord(const std::string & b, const std::string & a){
     vectorOfWords text_a=stringToWords(a);
     vectorOfWords text_b=stringToWords(b);
-    Difference diff= ses(text_a, text_b, true);
-    diff.type=ByLineByWord;
+    Difference* diff= ses(text_a, text_b, true);
+    diff->type=ByLineByWord;
     return diff;
 }
 
-TestResults myersDiffbyLineNoWhite(const std::string & b, const std::string & a){
+TestResults* myersDiffbyLineNoWhite(const std::string & b, const std::string & a){
     vectorOfWords text_a=stringToWords(a);
     vectorOfWords text_b=stringToWords(b);
-    Difference diff= ses(text_a, text_b, false);
-    diff.type=ByLineByWord;
+    Difference* diff= ses(text_a, text_b, false);
+    diff->type=ByLineByWord;
     return diff;
 }
 
-TestResults myersDiffbyLine(const std::string & b, const std::string & a){
+TestResults* myersDiffbyLine(const std::string & b, const std::string & a){
     vectorOfLines text_a=stringToLines(a);
     vectorOfLines text_b=stringToLines(b);
-    Difference diff= ses(text_a, text_b, false);
-    diff.type=ByLineByChar;
+    Difference* diff= ses(text_a, text_b, false);
+    diff->type=ByLineByChar;
     return diff;
 
 }
 
-TestResults myersDiffbyLinesByChar(const std::string & b, const std::string & a){
+TestResults* myersDiffbyLinesByChar(const std::string & b, const std::string & a){
     vectorOfLines text_a=stringToLines(a);
     vectorOfLines text_b=stringToLines(b);
-    Difference diff= ses(text_a, text_b, true);
-    diff.type=ByLineByChar;
+    Difference* diff= ses(text_a, text_b, true);
+    diff->type=ByLineByChar;
     return diff;
 
 }
 
 // changes passing by refrence to pointers
-template<class T> Difference ses(T& a, T& b, bool secondary){
+template<class T> Difference* ses(T& a, T& b, bool secondary){
     return ses(&a, &b, secondary);
 }
 
 // Runs all the ses functions
-template<class T> Difference ses(T* a, T* b, bool secondary){
+template<class T> Difference* ses(T* a, T* b, bool secondary){
     metaData<T> meta_diff= sesSnapshots((T*)a, (T*)b);
     sesSnakes(meta_diff);
-    Difference diff=sesChanges(meta_diff);
+    Difference* diff=sesChanges(meta_diff);
     if (secondary) {
         sesSecondary(diff, meta_diff);
     }
@@ -226,14 +226,14 @@ template<class T> metaData<T> sesSnakes(metaData<T> & meta_diff){
 // Change objects, which each hold the diffrences between a and b, lumped
 // by if they are neighboring. Also fills diff_a and diff_b with the diffrences
 // All diffrences are stored by element number
-template<class T> Difference sesChanges(metaData<T> & meta_diff){
-    Difference diff;
-    diff.edit_distance=meta_diff.distance;
-    diff.output_length_a = (int)meta_diff.a->size();
-    diff.output_length_b = (int)meta_diff.b->size();
-    int added=abs(diff.output_length_a-diff.output_length_b);
-    diff.distance = (meta_diff.distance-added)/2;
-    diff.distance += added;
+template<class T> Difference* sesChanges(metaData<T> & meta_diff){
+    Difference* diff = new Difference();
+    diff->edit_distance=meta_diff.distance;
+    diff->output_length_a = (int)meta_diff.a->size();
+    diff->output_length_b = (int)meta_diff.b->size();
+    int added=abs(diff->output_length_a-diff->output_length_b);
+    diff->distance = (meta_diff.distance-added)/2;
+    diff->distance += added;
 
     if(meta_diff.snakes.size()==0){
         return diff;
@@ -274,24 +274,24 @@ template<class T> Difference sesChanges(metaData<T> & meta_diff){
         }
         if (*a_mid != *a_end || *b_mid != *b_end) {
             //if a section of identical text is reached, push back the change
-            diff.changes.push_back(change_var);
+            diff->changes.push_back(change_var);
             for (int b=0; b<change_var.a_changes.size(); b++) {
-                diff.diff_a.push_back(change_var.a_changes[b]);
+                diff->diff_a.push_back(change_var.a_changes[b]);
             }
             for (int b=0; b<change_var.b_changes.size(); b++) {
-                diff.diff_b.push_back(change_var.b_changes[b]);
+                diff->diff_b.push_back(change_var.b_changes[b]);
             }
             //start again
             change_var.clear();
         }
     }
     if (change_var.a_changes.size()!=0 || change_var.b_changes.size()!=0) {
-        diff.changes.push_back(change_var);
+        diff->changes.push_back(change_var);
         for (int b=0; b<change_var.a_changes.size(); b++) {
-            diff.diff_a.push_back(change_var.a_changes[b]);
+            diff->diff_a.push_back(change_var.a_changes[b]);
         }
         for (int b=0; b<change_var.b_changes.size(); b++) {
-            diff.diff_b.push_back(change_var.b_changes[b]);
+            diff->diff_b.push_back(change_var.b_changes[b]);
         }
         change_var.clear();
     }
@@ -302,9 +302,9 @@ template<class T> Difference sesChanges(metaData<T> & meta_diff){
 // Takes a Difference object that has it's changes vector filled and parses to
 // find substitution chunks. It then runs a secondary diff to find diffrences
 // between the elements of each version of the line
-template<class T> Difference sesSecondary(Difference & text_diff, metaData<T> & meta_diff){
-    for (int a=0; a<text_diff.changes.size(); a++) {
-        Change* current= &text_diff.changes[a];
+template<class T> Difference* sesSecondary(Difference* text_diff, metaData<T> & meta_diff){
+    for (int a=0; a<text_diff->changes.size(); a++) {
+        Change* current= &text_diff->changes[a];
         if (current->a_changes.size()==0 || current->b_changes.size()==0)
         {
             continue;
@@ -313,14 +313,15 @@ template<class T> Difference sesSecondary(Difference & text_diff, metaData<T> & 
         {
             for (int b=0; b<current->a_changes.size(); b++) {
                 metaData<typeof(*meta_diff.a)[current->a_changes[b]]> meta_second_diff;
-                Difference second_diff;
+                Difference* second_diff;
                 meta_second_diff=sesSnapshots(
                                 (*meta_diff.a)[current->a_changes[b]],
                                 (*meta_diff.b)[current->b_changes[b]]);
                 sesSnakes(meta_second_diff);
                 second_diff=sesChanges(meta_second_diff);
-                current->a_characters.push_back(second_diff.diff_a);
-                current->b_characters.push_back(second_diff.diff_b);
+                current->a_characters.push_back(second_diff->diff_a);
+                current->b_characters.push_back(second_diff->diff_b);
+                delete second_diff;
             }
         }
 //        else{
