@@ -41,13 +41,13 @@ const int ta_pts = 20;
 // File directories
 
 // root directory
-const char* root_dir = "../CSCI1200/";
+const char* root_dir = "../../CSCI1200/";
 // homework directory
 const char* hw_dir = "HW1/";
 // input files directory
-const char* input_dir = "../CSCI1200/testingInput/HW1";
+const char* input_dir = "../../CSCI1200/testingInput/HW1";
 // expected output files directory
-const char* expected_out_dir = "../CSCI1200/Scripts/expectedOutput/HW1/";
+const char* expected_out_dir = "../../CSCI1200/Scripts/expectedOutput/HW1/";
 
 /*
 // directory containing input files
@@ -62,8 +62,13 @@ const std::string expected_output_dir = "../CSCI1200/Scripts/expectedOutput/HW0"
 const std::string results_dir = "../CSCI1200/HW0/alice/1/.submit.grade";
 */
 
+// Test cases
+const int num_testcases = 9;
+
+TestCase testcases[9] {
+
 /************* README AND COMPILATION *****************/
-TestCase readmeTestCase(
+TestCase(
 	"Readme",
 	"",
 	"",
@@ -78,8 +83,8 @@ TestCase readmeTestCase(
 	false,
 	"",
 	NULL
-);
-TestCase compilationTestCase(
+),
+TestCase(
 	"Compilation",
 	"",
 	"",
@@ -94,12 +99,7 @@ TestCase compilationTestCase(
 	false,
 	"",
 	NULL
-);
-
-// Test cases
-const int num_testcases = 1;
-
-TestCase testcases[9] {
+),
 
 /******************** TEST CASES **********************/
 TestCase(
