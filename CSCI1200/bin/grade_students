@@ -1,11 +1,9 @@
 #!/bin/bash
 
+# SET PARAMETERS
 
-# TEMPORARY LINE, REMOVE THIS
-
-cp test_to_be_compiled.txt submissions/hw1/to_be_compiled.txt || echo "DEBUG PROBS"
-
-# END TEMPORARY
+echo "Setting Parameters"
+echo "---------------------"
 
 assignment_submission_path="$1"
 echo "Assignment submissions path set to $assignment_submission_path"
@@ -18,8 +16,14 @@ echo "Temporary directory set to $tmp"
 results_path="$3"
 echo "Results directory set to $results_path"
 
-echo "Looking for to_be_compiled.txt in $1"
+bin_path="$(pwd)"
+echo "Path to bin set to $bin_path"
 
+echo ""
+
+# EXECUTION
+
+echo "Looking for to_be_compiled.txt in $1"
 if [[ ! -f  "$assignment_submission_path/to_be_compiled.txt" ]]; then
 	echo "Nothing to be compiled"
 	exit
@@ -36,9 +40,28 @@ while read path; do
 	submission_no="$(basename $path)"
 	submission_time="$(date -r $assignment_submission_path/$path "+%F %T")"
 
+	echo ""
+	echo "Running runner"
+	echo "-----------------"
+
 	# RUN RUNNER
 
+	cd "$tmp/submission"
+	"$bin_path/${assignment_name}_run"
+
+	echo ""
+
 	# RUN VALIDATOR
+
+	echo ""
+	echo "Running validator"
+	echo "-----------------"
+	"$bin_path/${assignment_name}_validate"
+
+	echo ""
+
+	# Get working directory back to bin
+	cd "$bin_path"
 
 	# Make directory structure in results if it doesn't exist
 
