@@ -1,0 +1,33 @@
+{
+    "id": "hw1",
+    "name": "Robot Rally",
+    "max_submissions": 20,
+    "auto_pts": 30,
+    "points_visible":10,
+    "ta_pts": 20,
+    "due_date" : "2014-07-08 11:59:0.0",
+    "num_testcases": 3,
+    "testcases": [
+        {
+            "title": "Readme",
+            "details": "",
+            "points": 2,
+            "hidden": "false",
+            "extracredit": "false"
+        },
+        {
+            "title": "Compilation",
+            "details": "",
+            "points": 3,
+            "hidden": false,
+            "extracredit": false
+        },
+        {
+            "title": "Case1",
+            "details": "./case1.exe",
+            "points": 5,
+            "hidden": false,
+            "extracredit": false
+        }
+    ]
+}

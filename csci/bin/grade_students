@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# SET PARAMETERS
+
+echo "This script takes 3 parameters"
+echo "./grade_students <assignment_submission_path> <temporary_files_path> <results_directory_path>"
+echo ""
+
+echo "Setting Parameters"
+echo "---------------------"
+
+assignment_submission_path="$1"
+echo "Assignment submissions path set to $assignment_submission_path"
+assignment_name="$(basename $assignment_submission_path)"
+echo "Assignment name set to $assignment_name"
+
+tmp="$2"
+echo "Temporary directory set to $tmp"
+
+results_path="$3"
+echo "Results directory set to $results_path"
+
+bin_path="$(pwd)"
+echo "Path to bin set to $bin_path"
+
+echo ""
+
+# EXECUTION
+
+echo "Looking for to_be_compiled.txt in $1"
+if [[ ! -f  "$assignment_submission_path/to_be_compiled.txt" ]]; then
+	echo "Nothing to be compiled"
+	exit
+fi
+
+echo "to_be_compiled.txt found"
+
+while read path; do
+
+	echo "Copying path ($assignment_submission_path/$path) to tmp directory ($tmp/submission)"
+
+	cp -r "$assignment_submission_path/$path" "$tmp/submission" || echo "ERROR: Failed to copy to temporary directory"
+
+	submission_no="$(basename $path)"
+	submission_time="$(date -r $assignment_submission_path/$path "+%F %T")"
+
+	echo ""
+	echo "Running runner"
+	echo "-----------------"
+
+	# RUN RUNNER
+
+	cd "$tmp/submission"
+	$bin_path/${assignment_name}_run
+	runner_error_code="$?"
+
+	echo ""
+
+	# RUN VALIDATOR
+
+	echo ""
+	echo "Running validator"
+	echo "-----------------"
+	"$bin_path/${assignment_name}_validate" "$submission_no" "$submission_time" "$runner_error_code"
+
+	echo ""
+
+	# Get working directory back to bin
+	cd "$bin_path"
+
+	# Make directory structure in results if it doesn't exist
+
+	mkdir -p "$results_path/$assignment_name/$path" || echo "ERROR: Could not create results path"
+
+	echo "Copying temporary directory ($tmp/submission) to results directory ($results_path/$assignment_name/$path)"
+
+	mv "$tmp/submission" "$results_path/$assignment_name/$path" || echo "ERROR: Could not copy temporary directory to results directory"
+
+done < "$assignment_submission_path/to_be_compiled.txt"
+
+rm "$assignment_submission_path/to_be_compiled.txt"
