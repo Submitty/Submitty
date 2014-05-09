@@ -1,0 +1,13 @@
+#!/bin/bash
+HWNUM=hw1
+if [[ ! -f  ./in_progress.txt ]]; then
+	exit
+fi
+echo "YUP" > ./in_progress.txt
+for path in ../submissions/$HWNUM/; do
+	if [[ -f ../submissions/$HWNUM/$path/$path.txt]]; then
+		# Copy instructor files, call runner, copy results back, clean up
+		rm ../submissions/$HWNUM/$path/$path.txt
+	fi
+done
+rm ./in_progress.txt
