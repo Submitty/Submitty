@@ -1,0 +1,71 @@
+{
+	"submission_number": 1,
+	"points_awarded": 5,
+	"submission_time": "2014-05-09 12:16:27",
+	"testcases": [
+		{
+			"test_name": "Readme",
+			"points_awarded": 2,
+			"message": "README found",
+		},
+		{
+			"test_name": "Compilation",
+			"points_awarded": 3,
+			"message": "Compiled successfully",
+		},
+		{
+			"test_name": "left justify example",
+			"points_awarded": 0,
+			"diff":{
+				"instructor_file":"../../CSCI1200/Scripts/expectedOutput/HW1/example_16_flush_left.txt",
+				"student_file":"test1_out.txt",
+				"difference":"test1_diff.json"
+			}
+		},
+		{
+			"test_name": "right justify example",
+			"points_awarded": 0,
+			"diff":{
+				"instructor_file":"../../CSCI1200/Scripts/expectedOutput/HW1/example_16_flush_right.txt",
+				"student_file":"test2_out.txt",
+				"difference":"test2_diff.json"
+			}
+		},
+		{
+			"test_name": "full justify example",
+			"points_awarded": 0,
+			"diff":{
+				"instructor_file":"../../CSCI1200/Scripts/expectedOutput/HW1/example_16_full_justify.txt",
+				"student_file":"test3_out.txt",
+				"difference":"test3_diff.json"
+			}
+		},
+		{
+			"test_name": "left justify gettysburg address",
+			"points_awarded": 2,
+			"diff":{
+				"instructor_file":"../../CSCI1200/Scripts/expectedOutput/HW1/gettysburg_address_70_flush_left.txt",
+				"student_file":"test4_out.txt",
+				"difference":"test4_diff.json"
+			}
+		},
+		{
+			"test_name": "right justify gettysburg address",
+			"points_awarded": 0,
+			"diff":{
+				"instructor_file":"../../CSCI1200/Scripts/expectedOutput/HW1/gettysburg_address_70_flush_right.txt",
+				"student_file":"test5_out.txt",
+				"difference":"test5_diff.json"
+			}
+		},
+		{
+			"test_name": "full justify long word",
+			"points_awarded": 0,
+			"diff":{
+				"instructor_file":"../../CSCI1200/Scripts/expectedOutput/HW1/long_word_15_full_justify.txt",
+				"student_file":"test7_out.txt",
+				"difference":"test6_diff.json"
+			}
+		},
+	]
+}
