@@ -40,8 +40,6 @@ int main(int argc, char* argv[]){
 
 	int total = 0;
 
-	total += readmeTestCase.points() + compilationTestCase.points();
-
 	for(unsigned int i = 0; i < num_testcases; i++){
 		total += testcases[i].points();
 	}
@@ -74,26 +72,14 @@ Now Exiting" << std::endl;
 		if(!testcases[i].hidden())
 			visible += testcases[i].points();
 	}
-	if(!readmeTestCase.hidden())
-		visible += readmeTestCase.points();
-	if(!compilationTestCase.hidden())
-		visible += compilationTestCase.points();
 	init << "\t\"points_visible\": " << visible << "," << std::endl;
 	init << "\t\"ta_pts\": " << ta_pts << "," << std::endl;
 	init << "\t\"total_pts\": " << total_pts << "," << std::endl;
 	init << "\t\"due_date\": " << due_date << "\"," << std::endl;
 
-	int m = num_testcases + 2;
-
-	init << "\t\"num_testcases\": " << m << "," << std::endl;
+	init << "\t\"num_testcases\": " << num_testcases << "," << std::endl;
 
 	init << "\t\"testcases\": [" << std::endl;
-	
-	printTestCase(init, readmeTestCase);
-	init << "," << std::endl;
-
-	printTestCase(init, compilationTestCase);
-	init << "," << std::endl;
 
 	for(unsigned int i = 0; i < num_testcases; i++){
 		printTestCase(init, testcases[i]);
