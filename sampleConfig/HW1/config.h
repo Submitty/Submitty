@@ -9,9 +9,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#include <sstream>
-
-//#include "../validation/TestCase.h"
+#include "../../SCRIPTS/TestCase.h"
 //#include "GradingRubric.h"
 
 const std::string id = "HW1";
@@ -40,27 +38,10 @@ const int ta_pts = 20;
 
 // File directories
 
-// root directory
-const char* root_dir = "../../CSCI1200/";
-// homework directory
-const char* hw_dir = "HW1/";
 // input files directory
 const char* input_dir = "../../CSCI1200/testingInput/HW1";
 // expected output files directory
 const char* expected_out_dir = "../../CSCI1200/Scripts/expectedOutput/HW1/";
-
-/*
-// directory containing input files
-const std::string input_files_dir = "../CSCI1200/testingInput";
-// directory containing README and student's code
-const std::string student_submit_dir = "../CSCI1200/HW0/alice/1";
-// directory containing output files generated from student's code
-const std::string student_output_dir = "../CSCI1200/HW0/alice/1/.submit.out";
-// directory containing expected output files
-const std::string expected_output_dir = "../CSCI1200/Scripts/expectedOutput/HW0";
-// directory to store results from validation
-const std::string results_dir = "../CSCI1200/HW0/alice/1/.submit.grade";
-*/
 
 // Test cases
 const int num_testcases = 11;

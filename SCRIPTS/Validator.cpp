@@ -25,7 +25,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 /* TODO: how to include this specifically? */
 /*  maybe -include with g++ */
-#include "../sampleConfig/HW1/config.h"
+//#include "../sampleConfig/HW1/config.h"
 
 bool checkValidDirectory( char* directory );
 bool checkValidDirectory( const char* directory );
@@ -42,8 +42,25 @@ int main( int argc, char* argv[] ) {
 	}
 	
 	// Check for readme
-	// for now, assume it was found
-	bool readme_found = 1;
+	bool readme_found = false;
+	
+	if(access("README.txt", 0) == 0) {
+		struct stat status;
+		stat( "README.txt", &status );
+		if( status.st_mode & S_IFREG ) {
+#ifdef DEBUG
+			std::cout << "Readme found!" << std::endl;
+#endif
+			readme_found = true;
+		}
+	}
+	if(!readme_found) {
+#ifdef DEBUG		
+		std::cout << "Readme not found!" << std::endl;
+#endif	
+	}
+	
+	// TODO: Apply a diff to readme?
 	
 	// Run test cases
 	int rc = validateTestCases( atoi(argv[1]), argv[2], readme_found, atoi(argv[3]) );
@@ -212,12 +229,15 @@ int validateTestCases( int subnum, const char* subtime, int readme, int compiled
 		
 		const char* last_line = (i == num_testcases-1) ? "\t\t}\n" : "\t\t},\n";
 		
+		std::stringstream expected_path;
+		expected_path << expected_out_dir << testcases[i].expected();
+		
 		// Generate JSON data
 		testcase_json << "\t\t{\n"
 					  << "\t\t\t\"test_name\": \"" << testcases[i].title() << "\",\n"
 					  << "\t\t\t\"points_awarded\": " << testcase_grade << ",\n"
 					  << "\t\t\t\"diff\":{\n"
-					  << "\t\t\t\t\"instructor_file\":\"" << testcases[i].expected() << "\",\n"
+					  << "\t\t\t\t\"instructor_file\":\"" << expected_path.str() << "\",\n"
 					  << "\t\t\t\t\"student_file\":\"" << testcases[i].filename() << "\",\n"
 					  << "\t\t\t\t\"difference\":\"test" << t << "_diff.json\"\n"
 					  << "\t\t\t}\n"
@@ -229,13 +249,13 @@ int validateTestCases( int subnum, const char* subtime, int readme, int compiled
 	
 	/* Get readme and compilation grades */
 	int readme_grade = (readme == 1) ? readme_pts : 0;
-	const char* readme_msg = (readme == 1)? "README not found" : "README found";
+	const char* readme_msg = (readme == 1)? "README found" : "README not found";
 	
 	int compile_grade = 0;
 	const char* compile_msg = "";
 	if(compileTestCase != NULL) {
-		compile_grade = (compiled == 1) ? compile_pts : 0;
-		compile_msg = (compiled == 1)? "Compiled successfully" : "Compilation failed";
+		compile_grade = (compiled == 0) ? compile_pts : 0;
+		compile_msg = (compiled == 0)? "Compiled successfully" : "Compilation failed";
 	}
 
 	bool handle_compilation = (compileTestCase != NULL);
