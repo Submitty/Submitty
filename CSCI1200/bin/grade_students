@@ -1,13 +1,37 @@
 #!/bin/bash
-HWNUM=hw1
-if [[ ! -f  ./in_progress.txt ]]; then
+
+
+# TEMPORARY LINE, REMOVE THIS
+
+cp test.txt to_be_compiled.txt
+
+# END TEMPORARY
+
+echo "Temporary directory set to $2"
+
+echo "Looking for to_be_compiled.txt in $1"
+
+tmp="$2"
+
+if [[ ! -f  "$1/to_be_compiled.txt" ]]; then
+	echo "Nothing to be compiled"
 	exit
 fi
-echo "YUP" > ./in_progress.txt
-for path in ../submissions/$HWNUM/; do
-	if [[ -f ../submissions/$HWNUM/$path/$path.txt]]; then
-		# Copy instructor files, call runner, copy results back, clean up
-		rm ../submissions/$HWNUM/$path/$path.txt
-	fi
-done
-rm ./in_progress.txt
+
+echo "to_be_compiled.txt found"
+
+while read path; do
+
+	echo "Copying path ($path) to tmp directory ($tmp/submission)"
+
+	cp -r "$path" "$tmp/submission" || echo "Failed to copy to temporary directory"
+
+
+
+	echo "Removing temporary directory ($tmp/submission)"
+
+	rm -r "$tmp/submission" || echo "Failed to remove temporary directory"
+
+done < "$1/to_be_compiled.txt"
+
+rm "$1/to_be_compiled.txt"
