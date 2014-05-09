@@ -1,8 +1,6 @@
 HW=HW1
 COURSE=CSCI1200
 assignment:
-	mkdir ../../../../$(COURSE)/submissions/$(HW)
-	mkdir ../../../../$(COURSE)/results/$(HW)
 	g++ -include config.h ../../rcos/SCRIPTS/Validator.cpp -o ../../../../$(COURSE)/bin/$(HW)validate.out
 	g++ -include config.h ../../rcos/SCRIPTS/runner.cpp -o ../../../../$(COURSE)/bin/$(HW)run.out
 	g++ -include config.h ../../rcos/SCRIPTS/config.cpp -o ../../../../$(COURSE)/bin/$(HW)configure.out
