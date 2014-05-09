@@ -74,7 +74,7 @@ while read path; do
 
 	echo "Copying temporary directory ($tmp/submission) to results directory ($results_path/$assignment_name/$path)"
 
-	cp -r "$tmp/submission" "$results_path/$path" || echo "ERROR: Could not copy temporary directory to results directory"
+	cp -r "$tmp/submission" "$results_path/$assignment_name/$path" || echo "ERROR: Could not copy temporary directory to results directory"
 
 	echo "Removing temporary directory ($tmp/submission)"
 
