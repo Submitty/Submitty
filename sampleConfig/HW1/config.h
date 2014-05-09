@@ -101,10 +101,7 @@ TestCase(
 	"",
 	NULL
 ),
-<<<<<<< HEAD
 
-=======
->>>>>>> 63e0447269b4728109389ff9b0dd32b957dc5ae7
 /******************** TEST CASES **********************/
 TestCase(
 	"left justify example",							// title
@@ -112,7 +109,7 @@ TestCase(
 	"./a.out example.txt test1_out.txt 16 flush_left",	// command
 	"test1_out.txt",					// output file name [V]
 	"Expected output.txt",					// output file description
-	"expected_test1.txt",				// expected output file [V]
+	"example_16_flush_left.txt",				// expected output file [V]
 	3,									// points [V]
 	false,								// hidden [V]
 	false,								// extra credit [V]
@@ -253,6 +250,6 @@ TestCase(
 };
 
 TestCase* readmeTestCase = &testcases[0];
-TestCase* compilationTestCase = &testcases[1];
+TestCase* compileTestCase = &testcases[1];
 
 #endif

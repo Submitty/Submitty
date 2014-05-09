@@ -25,7 +25,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 /* TODO: how to include this specifically? */
 /*  maybe -include with g++ */
-#include "../CSCI1200/hwconfig/hw1/config.h"
+#include "../sampleConfig/HW1/config.h"
 
 bool checkValidDirectory( char* directory );
 bool checkValidDirectory( const char* directory );
@@ -202,6 +202,8 @@ int validateTestCases( int subnum, const char* subtime, int readme, int compiled
 		std::stringstream diff_path;
 		diff_path << "test" << t << "_diff.json";
 		std::ofstream diff_stream(diff_path.str().c_str());
+		
+		std::cout << result->grade() << std::endl;
 		
 		testcase_grade = (int)floor(result->grade() * testcases[i].points());
 		result->printJSON(diff_stream);
