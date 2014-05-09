@@ -10,7 +10,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #define __TESTCASE_H__
 
 #include <string>
-#include "../../../../modules/modules.h"
+#include "../modules/modules.h"
 
 /* cout_cerr_check is an enumerated type used to specify whether to
 check and what to do with cout.txt and cerr.txt */
@@ -24,6 +24,7 @@ class TestCase {
 public:
 
 	// Constructor
+    TestCase(){}
 	TestCase( const std::string &title, const std::string &details,
 			  const std::string &command, const std::string &filename,
 			  const std::string &description, const std::string &expected,
