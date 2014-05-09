@@ -3,12 +3,14 @@
 
 # TEMPORARY LINE, REMOVE THIS
 
-cp test.txt submissions/to_be_compiled.txt
+cp test_to_be_compiled.txt submissions/hw1/to_be_compiled.txt || echo "DEBUG PROBS"
 
 # END TEMPORARY
 
 assignment_submission_path="$1"
 echo "Assignment submissions path set to $assignment_submission_path"
+assignment_name="$(basename $assignment_submission_path)"
+echo "Assignment name set to $assignment_name"
 
 tmp="$2"
 echo "Temporary directory set to $tmp"
@@ -40,9 +42,9 @@ while read path; do
 
 	# Make directory structure in results if it doesn't exist
 
-	mkdir -p "$results_path/$path" || echo "ERROR: Could not create results path"
+	mkdir -p "$results_path/$assignment_name/$path" || echo "ERROR: Could not create results path"
 
-	echo "Copying temporary directory ($tmp/submission) to results directory ($results_path/$path)"
+	echo "Copying temporary directory ($tmp/submission) to results directory ($results_path/$assignment_name/$path)"
 
 	cp -r "$tmp/submission" "$results_path/$path" || echo "ERROR: Could not copy temporary directory to results directory"
 
