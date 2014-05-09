@@ -120,7 +120,7 @@ int validateTestCases( int subnum, const char* subtime, int readme, int compiled
 			std::cerr << "ERROR: Student's " << testcases[i].filename()
 					  << " does not exist" << std::endl;
 #endif			
-			return 1;
+			continue;
 		}
 	
 		std::ifstream expected_instr( testcases[i].expected().c_str() );
@@ -129,7 +129,7 @@ int validateTestCases( int subnum, const char* subtime, int readme, int compiled
 			std::cerr << "ERROR: Instructor's " << testcases[i].expected()
 					  << " does not exist" << std::endl;
 #endif
-			return 1;
+			continue;
 		}
 		
 		// Check cout and cerr
