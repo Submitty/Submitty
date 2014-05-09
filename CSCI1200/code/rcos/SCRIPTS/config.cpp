@@ -8,7 +8,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 #include <iostream>
 #include <fstream>
-#include "../../../../modules/modules.h"
+#include "../modules/modules.h"
 #include "TestCase.h"
 //#include "../sampleConfig/HW1/config.h"
 

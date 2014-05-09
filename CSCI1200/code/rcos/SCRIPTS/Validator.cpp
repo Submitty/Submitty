@@ -20,7 +20,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <sys/stat.h>
 #include <math.h>
 
-#include "../../../../modules/modules.h"
+#include "../modules/modules.h"
 #include "TestCase.h"
 
 /* TODO: how to include this specifically? */

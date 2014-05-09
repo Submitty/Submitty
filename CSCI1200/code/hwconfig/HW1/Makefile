@@ -1,5 +1,5 @@
 HW=HW1
-COURSE=CSCI1200
+COURSE=csci1200
 assignment:
 	g++ -include config.h ../../rcos/SCRIPTS/Validator.cpp -o ../../../../$(COURSE)/bin/$(HW)validate.out
 	g++ -include config.h ../../rcos/SCRIPTS/runner.cpp -o ../../../../$(COURSE)/bin/$(HW)run.out
