@@ -76,10 +76,6 @@ while read path; do
 
 	mv "$tmp/submission" "$results_path/$assignment_name/$path" || echo "ERROR: Could not copy temporary directory to results directory"
 
-	echo "Removing temporary directory ($tmp/submission)"
-
-	rm -r "$tmp/submission" || echo "ERROR: Failed to remove temporary directory"
-
 done < "$assignment_submission_path/to_be_compiled.txt"
 
 rm "$assignment_submission_path/to_be_compiled.txt"
