@@ -13,7 +13,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include "../modules/modules.h"
 #include "TestCase.h"
 
-#include "../CSCI1200/HW1/CONFIG/config.h"
+#include "../sampleConfig/HW1/config.h"
 
 using std::ifstream;
 using std::ofstream;
@@ -29,25 +29,32 @@ int main(int argc, char* argv[]) {
 	cout << "Running User Code..." << endl;
 
 	// Make sure arguments are entered correctly
-	if (argc != 2) {
+	if (argc != 1) {
 		//Pass in the current working directory to run the programs
 		cout << "Incorrect # of arguments:" << argc << endl;
 		cout << "Usage : " << endl
-				<< "     ./runner current/working/directory" << endl;
-		return 1;
+				<< "     ./runner" << endl;
+		return 2;
 	}
 	if(compile_command != ""){
 		int compile = execute(compile_command + " 2>.compile_out.txt");
 		if(compile){
 			cerr << "COMPILATION FAILED" << endl;
-			return compile;
+			exit(1);
 		}
 	}
-	
+	int n = 0;
+	if(readmeTestCase != NULL)
+		n++;
+	if(compilationTestCase != NULL)
+		n++;
+
 	// Run each test case and create output files
-	for (unsigned int i = 0; i < num_testcases; i++) {
+	for (unsigned int i = 0 + n; i < num_testcases; i++) {
+		cout << testcases[i].command() << std::endl;
+
 		if(testcases[i].recompile()){
-			int recomp = execute(testcase[i].compile_cmd() + " 2>.compile_out_" + to_string(i) + ".txt");
+			int recomp = execute(testcases[i].compile_cmd() + " 2>.compile_out_" + to_string(i) + ".txt");
 			if(recomp){
 				cerr << "Recompilation in test case " << testcases[i].title() << " failed; No points will be awarded." << std::endl;
 				continue;
@@ -56,8 +63,8 @@ int main(int argc, char* argv[]) {
 
 		string cmd = testcases[i].command();
 		if (cmd != "") {
-			int exit_no = execute(cmd + " 1>test" + to_string(i+1)
-							+ "_cout.txt 2>test" + to_string(i+1)
+			int exit_no = execute(cmd + " 1>test" + to_string(i+1-n)
+							+ "_cout.txt 2>test" + to_string(i+1-n)
 							+ "_cerr.txt");
 		}
 
@@ -67,7 +74,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	return (compile_command != "") ? -1 : 0;
+	return 0;
 }
 
 // Executes command (from shell) and returns error code (0 = success)

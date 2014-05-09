@@ -1,0 +1,100 @@
+{
+	"id": HW1,
+	"name": "Text Justification",
+	"max_submissions": 20,
+	"auto_pts": 30,
+	"points_visible": 21,
+	"ta_pts": 20,
+	"total_pts": 50,
+	"due_date": 2014-05-15 11:59:59.0",
+	"num_testcases": 11,
+	"testcases": [
+	{
+		"title": "Readme",
+		"details": "",
+		"points": 2,
+		"hidden": false,
+		"extracredit": false,
+		"expected_output": ""
+	},
+	{
+		"title": "Compilation",
+		"details": "",
+		"points": 3,
+		"hidden": false,
+		"extracredit": false,
+		"expected_output": ""
+	},
+	{
+		"title": "left justify example",
+		"details": "./justify.exe example.txt output.txt 16 flush_left",
+		"points": 3,
+		"hidden": false,
+		"extracredit": false,
+		"expected_output": "expected_test1.txt"
+	},
+	{
+		"title": "right justify example",
+		"details": "./justify.exe example.txt output.txt 16 flush_right",
+		"points": 3,
+		"hidden": false,
+		"extracredit": false,
+		"expected_output": "expected_test2.txt"
+	},
+	{
+		"title": "full justify example",
+		"details": "./justify.exe example.txt output.txt 16 full_justify",
+		"points": 4,
+		"hidden": false,
+		"extracredit": false,
+		"expected_output": "expected_test3.txt"
+	},
+	{
+		"title": "left justify gettysburg address",
+		"details": "./justify.exe gettysburg_address.txt output.txt 16 flush_left",
+		"points": 2,
+		"hidden": true,
+		"extracredit": false,
+		"expected_output": "expected_test4.txt"
+	},
+	{
+		"title": "right justify gettysburg address",
+		"details": "./justify.exe gettysburg_address.txt output.txt 70 flush_right",
+		"points": 2,
+		"hidden": true,
+		"extracredit": false,
+		"expected_output": "expected_test5.txt"
+	},
+	{
+		"title": "full justify gettysburg address",
+		"details": "./justify.exe gettysburg_address.txt output.txt 70 full_justify",
+		"points": 3,
+		"hidden": false,
+		"extracredit": false,
+		"expected_output": "expected_test6.txt"
+	},
+	{
+		"title": "full justify long word",
+		"details": "./justify.exe long_word.txt output.txt 15 full_justify",
+		"points": 3,
+		"hidden": false,
+		"extracredit": false,
+		"expected_output": "expected_test7.txt"
+	},
+	{
+		"title": "lengthier document",
+		"details": "./justify.exe lengthier.txt output.txt 15 full_justify",
+		"points": 3,
+		"hidden": true,
+		"extracredit": true,
+		"expected_output": "expected_test8.txt"
+	},
+	{
+		"title": " lots of long words",
+		"details": "./justify.exe lots_long.txt output.txt 15 full_justify",
+		"points": 2,
+		"hidden": true,
+		"extracredit": true,
+		"expected_output": "expected_test9.txt"
+	} ]
+}
