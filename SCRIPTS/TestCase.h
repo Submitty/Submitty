@@ -9,6 +9,8 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #ifndef __TESTCASE_H__
 #define __TESTCASE_H__
 
+#include <string>
+#include "../modules/modules.h"
 
 /* cout_cerr_check is an enumerated type used to specify whether to
 check and what to do with cout.txt and cerr.txt */
@@ -59,26 +61,6 @@ public:
 		if(cmp_output != NULL) return cmp_output(student_out, expected_out);
 		else return diffLine(student_out, expected_out);
 	}
-	
-	// Mutators for configuring the test case
-	/*TestCase* const setTitle(const std::string &new_title) 
-		{ _title = new_title; return this; }
-	TestCase* const setDetails(const std::string &new_details) 
-		{ _details = new_details; return this; }
-	TestCase* const setCommand(const std::string &new_command) 
-		{ _command = new_command; return this; }
-	TestCase* const setPoints(int new_points)
-		{ _points = new_points; return this; }
-	TestCase* const setHidden(const bool new_hidden)
-		{ _hidden = new_hidden; return this; }
-	TestCase* const setFilename(const std::string &new_filename) 
-		{ _filename = new_filename; return this; }
-	TestCase* const setDescription(const std::string &new_desc) 
-		{ _description = new_desc; return this; }
-	TestCase* const setExpected(const std::string &new_exp) 
-		{ _expected = new_exp; return this; }
-	TestCase* const setCompare(int (*cmp)(std::string, std::string)) 
-		{ cmp_output = cmp; return this; }*/
 		
 private:
 	std::string _title;
