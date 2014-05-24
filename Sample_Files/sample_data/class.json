@@ -1,0 +1,13 @@
+{
+    "default_assignment":"hw1"
+    "assignments": [
+        {
+            "assignment_id":"hw1",
+            "assignment_name":"Text Justification"
+        },
+        {
+            "assignment_id":"lab1",
+            "assignment_name":"Lab 1"
+        }
+    ]
+}
