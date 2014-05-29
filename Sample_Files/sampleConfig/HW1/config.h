@@ -9,7 +9,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#include "../../SCRIPTS/TestCase.h"
+#include "SCRIPTS/TestCase.h"
 //#include "GradingRubric.h"
 
 const std::string id = "HW1";
