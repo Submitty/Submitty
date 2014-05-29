@@ -1,7 +1,7 @@
 <?php
 
 //This is for Prof Cutler to edit
-$path_front = "../../CSCI1200";
+$path_front = "../../csci1200";
 
 
 // Upload HW Assignment to server and unzip
@@ -11,7 +11,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
     // Check user and assignment authenticity
     $class_config = get_class_config($username);
     if ($username !== $_SESSION["id"]) {//Validate the id
-        echo "Something really got screwed up with usernames and session ids"; 
+        echo "Something really got screwed up with usernames and session ids";
         return array("error"=>"Something really got screwed up with usernames and session ids");
     }
     if (!is_valid_assignment($class_config, $assignment_id)) {
@@ -30,7 +30,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
     $extension = end($filename);
 
     $upload_path = $path_front."/submissions/".$assignment_id."/".$username;//Upload path
-    
+
     // TODO should support more than zip (.tar.gz etc.)
     if (!($homework_file["type"] === "application/zip")) {//Make sure the file is a zip file
         echo "Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]);
@@ -45,7 +45,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
     }
 
     //Find the next homework version number
-    
+
     $i = 1;
     while (file_exists($upload_path."/".$i)) {
         //Replace with symlink?
@@ -240,7 +240,7 @@ function change_assignment_version($username, $assignment_id, $assignment_versio
 // file contents
 function get_testcase_diff($username, $assignment_id, $assignment_version, $diff){
     global $path_front;
-    
+
     if (!isset($diff["instructor_file"]) ||
         !isset($diff["student_file"]) ||
         !isset($diff["difference"])) {
@@ -266,4 +266,3 @@ function get_testcase_diff($username, $assignment_id, $assignment_version, $diff
             "difference" => $difference
         );
 }
-
