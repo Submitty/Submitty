@@ -36,8 +36,14 @@
                     <input type="submit" value="Go">
                 </form>
             </div><!-- End Homework Select -->
+            <div class="panel-body">
+                <p>When you have completed your programming assignment, prepare your assignment 
+                for submission exactly as described on the <a href="<?php echo $link_absolute;?>/homework.php">homework submission</a> webpage.</p>
+                <p>1) Select the homework assignment to edit and click Go.<br>2) Upload by choosing a file and clicking Send File.<br>3) Update the assignment version to use for grading by selecting the version, clicking Go, and then clicking Use Version X.</p>
+            </div>
+
             <div class="panel-body"><!-- Summary Table -->
-                <div class="col-sm-4" style="padding: 0;">
+                <div class="col-sm-6" style="padding: 0;">
                     <div class="box" style="">
                         <span>Summary:</span>
                         <?php if ($assignment_version >= 1) {?>
@@ -66,7 +72,7 @@
                         <?php }?>
                     </div><!-- End Box -->
                 </div>
-                <div class="col-sm-8" style="padding: 0;">
+                <div class="col-sm-6" style="padding: 0;">
                     <div class="box" style="">
                         <?php if ($assignment_version_in_grading_queue) {?>
                             <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
@@ -111,6 +117,8 @@
             </div><!-- End Summary Table -->
             <div class="panel-body" style="text-align: right"><!-- Upload New Homework -->
                 <div class="box">
+                <p style="text-align: left">By clicking "Send File" you are confirming that you have read, understand, and 
+                agree to follow the <a href="<?php echo $link_absolute;?>academic_integrity.php">Homework Collaboration and Academic Integrity Policy</a> for this course.</p>
                 <form action="?page=upload&assignment_id=<?php echo $assignment_id?>" method="post" enctype="multipart/form-data" 
                 onsubmit=" return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>');">
                     <label for="file" style="margin-right: 5%;">Filename:</label>
