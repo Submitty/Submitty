@@ -29,15 +29,17 @@ function upload_homework($username, $assignment_id, $homework_file) {
     // Check user and assignment authenticity
     $class_config = get_class_config($username);
     if ($username !== $_SESSION["id"]) {//Validate the id
-        echo "Something really got screwed up with usernames and session ids";
-        return array("error"=>"Something really got screwed up with usernames and session ids");
+        display_error("User Id invalid.  ".$username." != ".$_SESSION["id"]);
+        return;
     }
     if (!is_valid_assignment($class_config, $assignment_id)) {
-        return array("error"=>"This assignment is not valid");
+        display_error($assignment_id." is not a valid assignment");
+        return;
     }
     $assignment_config = get_assignment_config($username, $assignment_id);
     if (!can_edit_assignment($username, $assignment_id, $assignment_config)) {//Made sure the user can upload to this homework
-        return array("error"=>"assignment_closed");
+        display_error($assignment_id." is closed.  Unable to change");
+        return;
     }
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
     //ex: homework number, due date, late days
@@ -51,15 +53,18 @@ function upload_homework($username, $assignment_id, $homework_file) {
 
     // TODO should support more than zip (.tar.gz etc.)
     if (!($homework_file["type"] === "application/zip")) {//Make sure the file is a zip file
-        echo "Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]);
-        return array("error"=>"Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
+        display_error("Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
+        return;
     }
 
     // If user path doesn't exist, create new one
 
     if (!file_exists($upload_path)) {
-        // TODO permission level is INCORRECT
-        mkdir($upload_path, 0777, true);
+        if (!mkdir($upload_path))
+        {
+            display_error("Failed to make folder ".$upload_path);
+            return;
+        }
     }
 
     //Find the next homework version number
@@ -71,10 +76,9 @@ function upload_homework($username, $assignment_id, $homework_file) {
     }
 
     // Attempt to create folder
-    if (!mkdir($upload_path."/".$i, 0777, false)) {//Create a new directory corresponding to a new version number
-        // TODO permission level is INCORRECT
-        echo "Error, failed to make folder ".$upload_path."/".$i;
-        return array("error"=>"failed to make folder ".$upload_path."/".$i);
+    if (!mkdir($upload_path."/".$i)) {//Create a new directory corresponding to a new version number
+        display_error("Failed to make folder ".$upload_path."/".$i);
+        return;
     }
     // Unzip files in folder
 
@@ -84,9 +88,8 @@ function upload_homework($username, $assignment_id, $homework_file) {
       $zip->extractTo($upload_path."/".$i."/");
       $zip->close();
     } else {
-        "Error failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $upload_path."/".$i."/".$homework_file["name"];
-        return array ("error"=>"failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $upload_path."/".$i."/".$homework_file["name"]);
-
+        display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $upload_path."/".$i."/".$homework_file["name"]);
+        return;
     }
     $settings_file = $upload_path."/user_assignment_settings.json";
     if (!file_exists($settings_file)) {
@@ -236,15 +239,18 @@ function get_user_submitting_version($username, $assignment_id) {
 
 function change_assignment_version($username, $assignment_id, $assignment_version, $assignment_config) {
     if (!can_edit_assignment($username, $assignment_id, $assignment_config)) {
-        return array("error"=>"Error: This assignment ".$assignment_id." is not open.  You may not edit this assignment.");
+        display_error("Error: This assignment ".$assignment_id." is not open.  You may not edit this assignment.");
+        return;
     }
     if (!is_valid_assignment_version($username, $assignment_id, $assignment_version)) {
-        return array("error"=>"This assignment version ".$assignment_version." does not exist");
+        display_error("This assignment version ".$assignment_version." does not exist");
+        return;
     }
     $path_front = get_path_front();
     $file = $path_front."/submissions/".$assignment_id."/".$username."/user_assignment_settings.json";
     if (!file_exists($file)) {
-        return array("error"=>"Unable to find user settings");
+        display_error("Unable to find user settings.  Looking for ".$file);
+        return;
     }
     $json = json_decode(file_get_contents($file), true);
     $json["selected_assignment"] = $assignment_version;
@@ -283,4 +289,14 @@ function get_testcase_diff($username, $assignment_id, $assignment_version, $diff
             "instructor"=> $instructor_content,
             "difference" => $difference
         );
+}
+
+//ERRORS
+
+function display_error($error) {
+    ?>
+    <script>alert("Error: <?php echo $error;?>");</script>
+    <?php
+    echo get_current_user();
+    exit();
 }
