@@ -24,8 +24,9 @@
 <td class=main_panel valign=top height=100%>
     <div class="panel panel-default" style="max-width:none">
         <div class="panel-body"><!-- Panel Body Summary -->
-            <h2><?php echo $assignment_name;?></h2>
             <div class="panel-body" style="text-align: right;"> <!-- Body homework select -->
+                <h2 style="float: left; margin-left: 10px;"><?php echo $assignment_name;?></h2>
+<br>
                 <span>Select Homework</span>
                 <form action="">
                     <select name="assignment_id">
@@ -37,83 +38,86 @@
                 </form>
             </div><!-- End Homework Select -->
             <div class="panel-body">
+                <div class="box">
                 <p>When you have completed your programming assignment, prepare your assignment 
                 for submission exactly as described on the <a href="<?php echo $link_absolute;?>/homework.php">homework submission</a> webpage.</p>
                 <p>1) Select the homework assignment to edit and click Go.<br>2) Upload by choosing a file and clicking Send File.<br>3) Update the assignment version to use for grading by selecting the version, clicking Go, and then clicking Use Version X.</p>
+                </div>
             </div>
 
             <div class="panel-body"><!-- Summary Table -->
-                <div class="col-sm-6" style="padding: 0;">
-                    <div class="box" style="">
-                        <span>Summary:</span>
-                        <?php if ($assignment_version >= 1) {?>
-                            <?php if ($submitting_version_in_grading_queue) {?>
-                                <br><span>You currently are submitting <b>Version <?php echo $submitting_version;?></b>. It is currently being graded.
-                            <?php } else {?>
-                                <br><span>You currently are submitting <b>Version <?php echo $submitting_version;?></b> with a score of <b><?php echo $submitting_version_score;?></b>
-                            <?php } ?>
-                            <br><br>
-                            <span>Select Version: </span>
-                            <form action="index.php">
-                                <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
-         
-                                <select name="assignment_version">
-                                    <?php for ($i = 1; $i <= $highest_version; $i++) {?>
-                                        <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?>>Version <?php echo $i;?></option>
-                                    <?php }?>
-                                </select>
-                                <input type="submit" value="Go">
-                            </form>
-                            <a href="?page=update&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" style="text-align:center;">
-                                <input type="submit" class="btn btn-primary" value="Use Version <?php echo $assignment_version;?>"></input>
-                            </a>
-                        <?php } else {?>
-                            <br><span>You have not submitted anything for this assignment!</span>
-                        <?php }?>
-                    </div><!-- End Box -->
-                </div>
-                <div class="col-sm-6" style="padding: 0;">
-                    <div class="box" style="">
-                        <?php if ($assignment_version_in_grading_queue) {?>
-                            <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
-                        <?php } else {?>
-                            <ul class="list-group">
-                                <?php foreach($homework_summary as $item) {?>
-                                    <?php if (isset($item["score"]) && isset($item["points_possible"]) && $item["points_possible"] != 0) {
-                                        if (!($item["points_possible"] > 0)) {
-                                            $part_percent = 1;
-                                        } else {
-                                            $part_percent = $item["score"] / $item["points_possible"];
-                                        }
-                                        if ($part_percent == 1) {
-                                            $class = "";
-                                        } else if ($part_percent >= 0.5) {
-                                            $class = " list-group-item-warning";
-                                        } else {
-                                            $class = " list-group-item-danger";
-                                        }
-                                    } else {
-                                        $class = "";
-                                    }?>
-                                  <li class="list-group-item <?php echo $class;?>">
-                                      <span class="badge">
-                                        <?php if (isset($item["score"])) {
-                                            echo $item["score"];
-                                            if (isset($item["points_possible"])) {
-                                                echo "/".$item["points_possible"];
-                                            }
-                                        } else if (isset($item["value"])) {
-                                            echo $item["value"];
-                                        }
-                                        ?>
-                                      </span>
-                                      <?php echo $item["title"];?>
-                                  </li>
+                <div class="box">
+                    <div class="row" style="margin: 0;">
+                        <div class="col-sm-5" style="padding: 0;">
+                            <span>Summary:</span>
+                            <?php if ($assignment_version >= 1) {?>
+                                <?php if ($submitting_version_in_grading_queue) {?>
+                                    <br><span>You currently are submitting <b>Version <?php echo $submitting_version;?></b>. It is currently being graded.
+                                <?php } else {?>
+                                    <br><span>You currently are submitting <b>Version <?php echo $submitting_version;?></b> with a score of <b><?php echo $submitting_version_score;?></b>
                                 <?php } ?>
-                            </ul>
-                        <?php }?>
-                    </div><!-- End Box -->
-                </div>
+                                <br><br>
+                                <span>Select Version: </span>
+                                <form action="index.php">
+                                    <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
+             
+                                    <select name="assignment_version">
+                                        <?php for ($i = 1; $i <= $highest_version; $i++) {?>
+                                            <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?>>Version <?php echo $i;?></option>
+                                        <?php }?>
+                                    </select>
+                                    <input type="submit" value="Go">
+                                </form>
+                                <a href="?page=update&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" style="text-align:center;">
+                                    <input type="submit" class="btn btn-primary" value="Use Version <?php echo $assignment_version;?>"></input>
+                                </a>
+                            <?php } else {?>
+                                <br><span>You have not submitted anything for this assignment!</span>
+                            <?php }?>
+                    </div><!-- End Column -->
+                    <div class="col-sm-1" style="padding: 0;"></div>
+                    <div class="col-sm-6" style="padding: 0;">
+                            <?php if ($assignment_version_in_grading_queue) {?>
+                                <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
+                            <?php } else {?>
+                                <ul class="list-group">
+                                    <?php foreach($homework_summary as $item) {?>
+                                        <?php if (isset($item["score"]) && isset($item["points_possible"]) && $item["points_possible"] != 0) {
+                                            if (!($item["points_possible"] > 0)) {
+                                                $part_percent = 1;
+                                            } else {
+                                                $part_percent = $item["score"] / $item["points_possible"];
+                                            }
+                                            if ($part_percent == 1) {
+                                                $class = "";
+                                            } else if ($part_percent >= 0.5) {
+                                                $class = " list-group-item-warning";
+                                            } else {
+                                                $class = " list-group-item-danger";
+                                            }
+                                        } else {
+                                            $class = "";
+                                        }?>
+                                      <li class="list-group-item <?php echo $class;?>">
+                                          <span class="badge">
+                                            <?php if (isset($item["score"])) {
+                                                echo $item["score"];
+                                                if (isset($item["points_possible"])) {
+                                                    echo "/".$item["points_possible"];
+                                                }
+                                            } else if (isset($item["value"])) {
+                                                echo $item["value"];
+                                            }
+                                            ?>
+                                          </span>
+                                          <?php echo $item["title"];?>
+                                      </li>
+                                    <?php } ?>
+                                </ul>
+                            <?php }?>
+                        </div><!-- End Column -->
+                    </div><!-- End Row -->
+                </div><!-- End Box -->
             </div><!-- End Summary Table -->
             <div class="panel-body" style="text-align: right"><!-- Upload New Homework -->
                 <div class="box">

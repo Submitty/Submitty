@@ -38,6 +38,8 @@ td.top_and_left_bars {
 } /*background-color: #88cc88;}*/
 td.main_panel {
     background:rgba(255,255,255,0.8);
+
+
 }
 
   td.calendar_red { background-color: #ffcccc; vertical-align:text-top; }
@@ -60,15 +62,19 @@ td.main_panel {
 .panel {
     margin: 10px 20px 10px 10px;
     border-radius: 0;
+background-color: #F8F8F8;
+
 }
 .col-md-6 {
     padding: 0;
 }
 
 .box {
-    border-radius: 2px;
-    padding: 5px;
+    border-radius: 3px;
+    padding: 15px;
     border: 2px solid #F0F0F0;
     height: 100%;
     margin: 5px;
+    background:rgba(255,255,255,0.8);
+
 }
