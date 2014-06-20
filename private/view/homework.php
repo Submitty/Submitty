@@ -57,20 +57,27 @@
                                     <br><span>You currently are submitting <b>Version <?php echo $submitting_version;?></b> with a score of <b><?php echo $submitting_version_score;?></b>
                                 <?php } ?>
                                 <br><br>
-                                <span>Select Version: </span>
-                                <form action="index.php">
-                                    <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
-             
-                                    <select name="assignment_version">
-                                        <?php for ($i = 1; $i <= $highest_version; $i++) {?>
-                                            <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?>>Version <?php echo $i;?></option>
-                                        <?php }?>
-                                    </select>
-                                    <input type="submit" value="Go">
-                                </form>
-                                <a href="?page=update&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" style="text-align:center;">
-                                    <input type="submit" class="btn btn-primary" value="Use Version <?php echo $assignment_version;?>"></input>
-                                </a>
+                                <div class="row">
+                                    <div style="float: left; margin-left: 15px;">
+                                        <span>Select Version: </span>
+                                        <br>
+                                        <form action="index.php">
+                                            <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
+                     
+                                            <select name="assignment_version">
+                                                <?php for ($i = 1; $i <= $highest_version; $i++) {?>
+                                                    <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?>>Version <?php echo $i;?></option>
+                                                <?php }?>
+                                            </select>
+                                            <input type="submit" value="Go">
+                                        </form>
+                                    </div>
+                                    <div style="float: right; margin-right: 15px;">
+                                        <a href="?page=update&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" style="text-align:center;">
+                                            <input type="submit" class="btn btn-primary" value="Use Version <?php echo $assignment_version;?>"></input>
+                                        </a>
+                                    </div>
+                                </div><!-- End Row -->
                             <?php } else {?>
                                 <br><span>You have not submitted anything for this assignment!</span>
                             <?php }?>
