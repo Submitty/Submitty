@@ -1,11 +1,24 @@
 <?php 
 
+// ============================================
+// GET THE USERNAME OF THE AUTHENTICATED USER
+// ============================================
+if (isset($_SERVER['PHP_AUTH_USER'])) {
+    $user = $_SERVER['PHP_AUTH_USER'];
+} else if (isset($_SERVER['REMOTE_USER'])) {
+    $user = $_SERVER['PHP_AUTH_USER'];
+} else {
+    echo 'Internal Error - Not Authenticated';
+    return -1;
+}
+
+
 //Remove error reporting and ini set for production code
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 session_start();
-$_SESSION["id"] = "sengs";//TEMPORARY
+$_SESSION["id"] = $user;
 
 if (!isset($_SESSION["id"])) {
     require_once("../private/controller/homework.php");//Should direct to login instead
