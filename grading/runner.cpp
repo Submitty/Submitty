@@ -11,7 +11,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <sstream>
 
 #include "modules/modules.h"
-#include "SCRIPTS/TestCase.h"
+#include "grading/TestCase.h"
 
 //#include "../sampleConfig/HW1/config.h"
 

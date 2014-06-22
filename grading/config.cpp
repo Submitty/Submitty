@@ -9,21 +9,21 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <iostream>
 #include <fstream>
 #include "modules/modules.h"
-#include "SCRIPTS/TestCase.h"
+#include "grading/TestCase.h"
 //#include "../sampleConfig/HW1/config.h"
 
-/*Generates a file in json format containing all of the information defined in 
+/*Generates a file in json format containing all of the information defined in
 config.h for easier parsing.*/
 
 void printTestCase(std::ostream& out, TestCase test ){
 	std::string hidden = (test.hidden()) ? "true" : "false";
-	std::string extracredit = 
+	std::string extracredit =
 		(test.extracredit()) ? "true" : "false";
 
 	out << "\t{" << std::endl;
-	out << "\t\t\"title\": \""<< test.title() << "\"," 
+	out << "\t\t\"title\": \""<< test.title() << "\","
 		<< std::endl;
-	out << "\t\t\"details\": \"" <<test.details() << "\"," 
+	out << "\t\t\"details\": \"" <<test.details() << "\","
 		<< std::endl;
 	out << "\t\t\"points\": " << test.points() << "," << std::endl;
 	out << "\t\t\"hidden\": " << hidden << "," << std::endl;
@@ -86,9 +86,9 @@ Now Exiting" << std::endl;
 		if(i != num_testcases - 1)
 			init << "," << std::endl;
 	}
-	
+
 	init << " ]\n}" << std::endl;
-	
+
 
 	init.close();
 

@@ -19,9 +19,10 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <math.h>
+#include <unistd.h>
 
 #include "modules/modules.h"
-#include "SCRIPTS/TestCase.h"
+#include "grading/TestCase.h"
 
 /* TODO: how to include this specifically? */
 /*  maybe -include with g++ */
@@ -32,18 +33,18 @@ bool checkValidDirectory( const char* directory );
 int validateTestCases( int subnum, const char* subtime, int readme, int compiled );
 
 int main( int argc, char* argv[] ) {
-	
+
 	/* Check argument usage */
 	if( argc != 4 ) {
-#ifdef DEBUG		
+#ifdef DEBUG
 		std::cerr << "VALIDATOR USAGE: validator <submission#> <time-of-submission> <runner-result>" << std::endl;
-#endif		
+#endif
 		return 1;
 	}
-	
+
 	// Check for readme
 	bool readme_found = false;
-	
+
 	if(access("README.txt", 0) == 0) {
 		struct stat status;
 		stat( "README.txt", &status );
@@ -55,13 +56,13 @@ int main( int argc, char* argv[] ) {
 		}
 	}
 	if(!readme_found) {
-#ifdef DEBUG		
+#ifdef DEBUG
 		std::cout << "Readme not found!" << std::endl;
-#endif	
+#endif
 	}
-	
+
 	// TODO: Apply a diff to readme?
-	
+
 	// Run test cases
 	int rc = validateTestCases( atoi(argv[1]), argv[2], readme_found, atoi(argv[3]) );
 	if(rc > 0) {
@@ -70,13 +71,13 @@ int main( int argc, char* argv[] ) {
 #endif
 		return 1;
 	}
-	
+
 	return 0;
 }
 
 /* Ensures that the given directory exists */
 bool checkValidDirectory( char* directory ) {
-	
+
 	if(access(directory, 0) == 0) {
 		struct stat status;
 		stat( directory, &status );
@@ -96,7 +97,7 @@ bool checkValidDirectory( char* directory ) {
 
 // checkValidDirectory with const char*
 bool checkValidDirectory( const char* directory ) {
-	
+
 	if(access(directory, 0) == 0) {
 		struct stat status;
 		stat( directory, &status );
@@ -119,27 +120,27 @@ bool checkValidDirectory( const char* directory ) {
 int validateTestCases( int subnum, const char* subtime, int readme, int compiled ) {
 
 	int total_grade = 0;
-	
+
 	std::stringstream testcase_json;
-	
+
 	int index = 2;
 	if(compileTestCase == NULL) index--;
 	int t = 1;
 	for( int i = index; i < num_testcases; ++i ) {
-		
+
 		std::cout << testcases[i].title() << " - points: "
 				  << testcases[i].points() << std::endl;
-		
+
 		// Pull in student output & expected output
 		std::ifstream student_instr( testcases[i].filename().c_str() );
 		if( !student_instr ) {
-#ifdef DEBUG			
+#ifdef DEBUG
 			std::cerr << "ERROR: Student's " << testcases[i].filename()
 					  << " does not exist" << std::endl;
-#endif			
+#endif
 			continue;
 		}
-	
+
 		std::ifstream expected_instr( testcases[i].expected().c_str() );
 		if( !expected_instr ) {
 #ifdef DEBUG
@@ -148,14 +149,14 @@ int validateTestCases( int subnum, const char* subtime, int readme, int compiled
 #endif
 			continue;
 		}
-		
+
 		// Check cout and cerr
 		std::stringstream cout_path;
 		cout_path << "test" << t << "_cout.txt";
 		std::ifstream cout_instr( cout_path.str().c_str() );
-		if( testcases[i].coutCheck() != DONT_CHECK ) {			
+		if( testcases[i].coutCheck() != DONT_CHECK ) {
 			if( !cout_instr ) { std::cerr << "ERROR: test" << t
-								<< "_cout.txt does not exist" << std::endl; }			
+								<< "_cout.txt does not exist" << std::endl; }
 			else {
 				if( testcases[i].coutCheck() == WARN_IF_NOT_EMPTY ) {
 					std::string content;
@@ -169,7 +170,7 @@ int validateTestCases( int subnum, const char* subtime, int readme, int compiled
 				}
 			}
 		}
-		
+
 		std::stringstream cerr_path;
 		cerr_path << "test" << t << "_cerr.txt";
 		std::ifstream cerr_instr( cerr_path.str().c_str() );
@@ -188,10 +189,10 @@ int validateTestCases( int subnum, const char* subtime, int readme, int compiled
 				}
 			}
 		}
-		
+
 		TestResults* result;
 		const std::string blank = "";
-		
+
 		if( !student_instr && !expected_instr )
 			result = testcases[i].compare( blank, blank );
 		else if( !student_instr && expected_instr != NULL ) {
@@ -211,27 +212,27 @@ int validateTestCases( int subnum, const char* subtime, int readme, int compiled
 										   		std::istreambuf_iterator<char>() );
 			result = testcases[i].compare( s, e );
 		}
-		
+
 		/* TODO: Always returns 0 ? */
-		
+
 		int testcase_grade = 0;
-		
+
 		std::stringstream diff_path;
 		diff_path << "test" << t << "_diff.json";
 		std::ofstream diff_stream(diff_path.str().c_str());
-		
+
 		std::cout << result->grade() << std::endl;
-		
+
 		testcase_grade = (int)floor(result->grade() * testcases[i].points());
 		result->printJSON(diff_stream);
-		
+
 		std::cout << "Grade: " << testcase_grade << std::endl;
-		
+
 		const char* last_line = (i == num_testcases-1) ? "\t\t}\n" : "\t\t},\n";
-		
+
 		std::stringstream expected_path;
 		expected_path << expected_out_dir << testcases[i].expected();
-		
+
 		// Generate JSON data
 		testcase_json << "\t\t{\n"
 					  << "\t\t\t\"test_name\": \"" << testcases[i].title() << "\",\n"
@@ -243,14 +244,14 @@ int validateTestCases( int subnum, const char* subtime, int readme, int compiled
 					  << "\t\t\t}\n"
 					  << last_line;
 		++t;
-		
+
 		delete result;
 	}
-	
+
 	/* Get readme and compilation grades */
 	int readme_grade = (readme == 1) ? readme_pts : 0;
 	const char* readme_msg = (readme == 1)? "README found" : "README not found";
-	
+
 	int compile_grade = 0;
 	const char* compile_msg = "";
 	if(compileTestCase != NULL) {
@@ -261,12 +262,12 @@ int validateTestCases( int subnum, const char* subtime, int readme, int compiled
 	bool handle_compilation = (compileTestCase != NULL);
 
 	total_grade += (readme_grade + compile_grade);
-	
+
 	/* Output total grade */
 	std::string grade_path = "grade.txt";
 	std::ofstream gradefile(grade_path.c_str());
 	gradefile << total_grade << std::endl;
-	
+
 	/* Generate submission.json */
 	std::ofstream json_file("submission.json");
 	json_file << "{\n"
@@ -290,7 +291,6 @@ int validateTestCases( int subnum, const char* subtime, int readme, int compiled
 			  << "\t]\n"
 			  << "}";
 	json_file.close();
-	
+
 	return 0;
 }
-
