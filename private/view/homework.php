@@ -126,9 +126,12 @@
                     </div><!-- End Row -->
                 </div><!-- End Box -->
             </div><!-- End Summary Table -->
+
             <div class="panel-body" style="text-align: right"><!-- Upload New Homework -->
                 <div class="box">
-                <p style="text-align: left">By clicking "Send File" you are confirming that you have read, understand, and 
+<h3>Upload New Version</h3>
+                <p style="text-align: left">
+		  By clicking "Send File" you are confirming that you have read, understand, and 
                 agree to follow the <a href="<?php echo $link_absolute;?>academic_integrity.php">Homework Collaboration and Academic Integrity Policy</a> for this course.</p>
                 <form action="?page=upload&assignment_id=<?php echo $assignment_id?>" method="post" enctype="multipart/form-data" 
                 onsubmit=" return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>');">

@@ -1,7 +1,11 @@
 <?php
 
-//This is for Prof Cutler to edit
-static $path_to_path_file = "../../site_path.txt";
+// This file is relative to the public directory of the website.  (It
+// is run from the location of index.php). 
+// static $path_to_path_file = "../../site_path.txt"; 
+static $path_to_path_file = "site_path.txt";
+
+
 //This will be changed to whatever exists in the above file
 static $path_front = "";
 function get_path_front() {
@@ -49,7 +53,6 @@ function upload_homework($username, $assignment_id, $homework_file) {
     $filename = explode(".", $homework_file["name"]);
     $extension = end($filename);
 
-    $upload_path = $path_front."/submissions/".$assignment_id."/".$username;//Upload path
 
     // TODO should support more than zip (.tar.gz etc.)
     if (!($homework_file["type"] === "application/zip")) {//Make sure the file is a zip file
@@ -57,8 +60,19 @@ function upload_homework($username, $assignment_id, $homework_file) {
         return;
     }
 
-    // If user path doesn't exist, create new one
+    // make folder for this homework (if it doesn't exist)
+    $upload_path = $path_front."/submissions/".$assignment_id;
+    if (!file_exists($upload_path)) {
+        if (!mkdir($upload_path))
+        {
+            display_error("Failed to make folder ".$upload_path);
+            return;
+        }
+    }
 
+    // make folder for this user (if it doesn't exist)
+    $upload_path = $path_front."/submissions/".$assignment_id."/".$username;//Upload path
+    // If user path doesn't exist, create new one
     if (!file_exists($upload_path)) {
         if (!mkdir($upload_path))
         {
@@ -109,6 +123,10 @@ function upload_homework($username, $assignment_id, $homework_file) {
 
 // Check if user has permission to edit homework
 function can_edit_assignment($username, $assignment_id, $assignment_config) {
+
+	    // HACK!  To not check due date
+	    return true;
+
     $path_front = get_path_front();
     date_default_timezone_set('America/New_York');
     $file = $path_front."/results/".$assignment_id."/".$username."/user_assignment_config.json";
@@ -131,9 +149,10 @@ function can_edit_assignment($username, $assignment_id, $assignment_config) {
 
 function get_class_config($username) {
     $path_front = get_path_front();
-    $file = $path_front."/results/class.json";
+    $file = $path_front."/config/class.json";
+//    $file = $path_front."/results/class.json";
     if (!file_exists($file)) {
-        ?><script>alert("Configuration for this class (class.JSON) does not exist.  Quitting");</script>
+        ?><script>alert("Configuration for this class (<?php echo $file ?>) does not exist. Quitting.");</script>
         <?php exit();
     }
     return json_decode(file_get_contents($file), true);
@@ -297,6 +316,6 @@ function display_error($error) {
     ?>
     <script>alert("Error: <?php echo $error;?>");</script>
     <?php
-    echo get_current_user();
+//       echo get_current_user();
     exit();
 }
