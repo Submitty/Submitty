@@ -25,6 +25,9 @@
     <div class="panel panel-default" style="max-width:none">
         <div class="panel-body"><!-- Panel Body Summary -->
             <div class="panel-body" style="text-align: right;"> <!-- Body homework select -->
+
+<h3>Select Homework</h3>
+
                 <h2 style="float: left; margin-left: 10px;"><?php echo $assignment_name;?></h2>
 <br>
                 <span>Select Homework</span>
@@ -45,11 +48,37 @@
                 </div>
             </div>
 
+
+
+            <div class="panel-body" style="text-align: right"><!-- Upload New Homework -->
+                <div class="box">
+		  <h3>Upload New Version</h3>
+                <p style="text-align: left">
+		  By clicking "Send File" you are confirming that you have read, understand, and 
+                agree to follow the <a href="<?php echo $link_absolute;?>academic_integrity.php">Homework Collaboration and Academic Integrity Policy</a> for this course.</p>
+                <form action="?page=upload&assignment_id=<?php echo $assignment_id?>" method="post" enctype="multipart/form-data" 
+                onsubmit=" return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>');">
+                    <label for="file" style="margin-right: 5%;">Filename:</label>
+                    <input type="file" name="file" id="file" style="display: inline" />
+                    <span class="group-btn">
+                        <input type="submit" name="submit" value="Send File" class="btn btn-primary" style="margin-top: 10px">
+                    </span>
+                </form>
+                </div>
+            </div><!-- End Upload New Homework -->
+
+
+
+
+
             <div class="panel-body"><!-- Summary Table -->
                 <div class="box">
+
+		  <h3><?php echo $assignment_name." Version ".$submitting_version." ".$user; ?></h3>
+
                     <div class="row" style="margin: 0;">
                         <div class="col-sm-5" style="padding: 0;">
-                            <span>Summary:</span>
+                          <span>Summary:</span>
                             <?php if ($assignment_version >= 1) {?>
                                 <?php if ($submitting_version_in_grading_queue) {?>
                                     <br><span>You currently are submitting <b>Version <?php echo $submitting_version;?></b>. It is currently being graded.
@@ -127,22 +156,9 @@
                 </div><!-- End Box -->
             </div><!-- End Summary Table -->
 
-            <div class="panel-body" style="text-align: right"><!-- Upload New Homework -->
-                <div class="box">
-<h3>Upload New Version</h3>
-                <p style="text-align: left">
-		  By clicking "Send File" you are confirming that you have read, understand, and 
-                agree to follow the <a href="<?php echo $link_absolute;?>academic_integrity.php">Homework Collaboration and Academic Integrity Policy</a> for this course.</p>
-                <form action="?page=upload&assignment_id=<?php echo $assignment_id?>" method="post" enctype="multipart/form-data" 
-                onsubmit=" return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>');">
-                    <label for="file" style="margin-right: 5%;">Filename:</label>
-                    <input type="file" name="file" id="file" style="display: inline" />
-                    <span class="group-btn">
-                        <input type="submit" name="submit" value="Send File" class="btn btn-primary" style="margin-top: 10px">
-                    </span>
-                </form>
-                </div>
-            </div><!-- End Upload New Homework -->
+
+
+
             <?php if (isset($TA_grade) && $TA_grade) {?>
             <div class="panel-body" style="text-align: right"><!-- TA Grade -->
                 <button type="button">Show TA Grade</button>
