@@ -1,7 +1,11 @@
 <?php
 
-//This is for Prof Cutler to edit
-static $path_to_path_file = "../../site_path.txt";
+// This file is relative to the public directory of the website.  (It
+// is run from the location of index.php). 
+// static $path_to_path_file = "../../site_path.txt"; 
+static $path_to_path_file = "site_path.txt";
+
+
 //This will be changed to whatever exists in the above file
 static $path_front = "";
 function get_path_front() {
@@ -20,6 +24,58 @@ function get_path_front() {
     return $path_front;
 }
 
+
+
+function display_file_permissions($perms) {
+  if (($perms & 0xC000) == 0xC000) {
+    // Socket
+    $info = 's';
+  } elseif (($perms & 0xA000) == 0xA000) {
+    // Symbolic Link
+    $info = 'l';
+  } elseif (($perms & 0x8000) == 0x8000) {
+    // Regular
+    $info = '-';
+  } elseif (($perms & 0x6000) == 0x6000) {
+    // Block special
+    $info = 'b';
+  } elseif (($perms & 0x4000) == 0x4000) {
+    // Directory
+    $info = 'd';
+  } elseif (($perms & 0x2000) == 0x2000) {
+    // Character special
+    $info = 'c';
+  } elseif (($perms & 0x1000) == 0x1000) {
+    // FIFO pipe
+    $info = 'p';
+  } else {
+    // Unknown
+    $info = 'u';
+  }
+  
+  // Owner
+  $info .= (($perms & 0x0100) ? 'r' : '-');
+  $info .= (($perms & 0x0080) ? 'w' : '-');
+  $info .= (($perms & 0x0040) ?
+            (($perms & 0x0800) ? 's' : 'x' ) :
+            (($perms & 0x0800) ? 'S' : '-'));
+  
+  // Group
+  $info .= (($perms & 0x0020) ? 'r' : '-');
+  $info .= (($perms & 0x0010) ? 'w' : '-');
+  $info .= (($perms & 0x0008) ?
+            (($perms & 0x0400) ? 's' : 'x' ) :
+            (($perms & 0x0400) ? 'S' : '-'));
+  
+  // World
+  $info .= (($perms & 0x0004) ? 'r' : '-');
+  $info .= (($perms & 0x0002) ? 'w' : '-');
+  $info .= (($perms & 0x0001) ?
+            (($perms & 0x0200) ? 't' : 'x' ) :
+            (($perms & 0x0200) ? 'T' : '-'));
+  
+  echo $info;
+}
 
 
 // Upload HW Assignment to server and unzip
@@ -49,7 +105,6 @@ function upload_homework($username, $assignment_id, $homework_file) {
     $filename = explode(".", $homework_file["name"]);
     $extension = end($filename);
 
-    $upload_path = $path_front."/submissions/".$assignment_id."/".$username;//Upload path
 
     // TODO should support more than zip (.tar.gz etc.)
     if (!($homework_file["type"] === "application/zip")) {//Make sure the file is a zip file
@@ -57,41 +112,73 @@ function upload_homework($username, $assignment_id, $homework_file) {
         return;
     }
 
-    // If user path doesn't exist, create new one
-
-    if (!file_exists($upload_path)) {
-        if (!mkdir($upload_path))
+    // make folder for this homework (if it doesn't exist)
+    $assignment_path = $path_front."/submissions/".$assignment_id;
+    if (!file_exists($assignment_path)) {
+        if (!mkdir($assignment_path))
         {
-            display_error("Failed to make folder ".$upload_path);
+            display_error("Failed to make folder ".$assignment_path);
             return;
         }
     }
+    // which group is sticky, but need to set group read access	  
+		  //chmod($assignment_path,"0750");
+
+    // make folder for this user (if it doesn't exist)
+    $user_path = $assignment_path."/".$username;
+    // If user path doesn't exist, create new one
+    if (!file_exists($user_path)) {
+        if (!mkdir($user_path))
+        {
+            display_error("Failed to make folder ".$user_path);
+            return;
+        }
+    }
+   // which group is sticky, but need to set group read access	  
+//   chmod($user_path,"0750");
 
     //Find the next homework version number
 
     $i = 1;
-    while (file_exists($upload_path."/".$i)) {
+    while (file_exists($user_path."/".$i)) {
+		  // FIXME: should not exist?
         //Replace with symlink?
         $i++;
     }
 
     // Attempt to create folder
-    if (!mkdir($upload_path."/".$i)) {//Create a new directory corresponding to a new version number
-        display_error("Failed to make folder ".$upload_path."/".$i);
+    $version_path = $user_path."/".$i;
+    if (!mkdir($version_path)) {//Create a new directory corresponding to a new version number
+        display_error("Failed to make folder ".$version_path);
         return;
     }
-    // Unzip files in folder
 
+    $perms = fileperms($version_path);
+    display_file_permissions($perms);
+
+    // which group is sticky, but need to set group read access	  
+		  //chmod($version_path,"0750");
+
+    $perms = fileperms($version_path);
+    display_file_permissions($perms);
+
+    // which group is sticky, but need to set group read access	  
+		  //chmod($version_path,"0544");
+
+    $perms = fileperms($version_path);
+    display_file_permissions($perms);
+
+    // Unzip files in folder
     $zip = new ZipArchive;
     $res = $zip->open($homework_file["tmp_name"]);
     if ($res === TRUE) {
-      $zip->extractTo($upload_path."/".$i."/");
+      $zip->extractTo($version_path."/");
       $zip->close();
     } else {
-        display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $upload_path."/".$i."/".$homework_file["name"]);
+        display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $version_path."/".$homework_file["name"]);
         return;
     }
-    $settings_file = $upload_path."/user_assignment_settings.json";
+    $settings_file = $user_path."/user_assignment_settings.json";
     if (!file_exists($settings_file)) {
         $json = array("selected_assignment"=>1);
         file_put_contents($settings_file, json_encode($json));
@@ -104,11 +191,19 @@ function upload_homework($username, $assignment_id, $homework_file) {
         $text = $text.$assignment_id."/".$username."/".$i."\n";
         file_put_contents($to_be_compiled, $text);
     }
+
+    // which group is sticky, but need to set group read access	  
+	    //chmod($version_path."/*".$i,"g+r");
+
     return array("success"=>"File uploaded successfully");
 }
 
 // Check if user has permission to edit homework
 function can_edit_assignment($username, $assignment_id, $assignment_config) {
+
+	    // HACK!  To not check due date
+	    return true;
+
     $path_front = get_path_front();
     date_default_timezone_set('America/New_York');
     $file = $path_front."/results/".$assignment_id."/".$username."/user_assignment_config.json";
@@ -131,9 +226,10 @@ function can_edit_assignment($username, $assignment_id, $assignment_config) {
 
 function get_class_config($username) {
     $path_front = get_path_front();
-    $file = $path_front."/results/class.json";
+    $file = $path_front."/config/class.json";
+//    $file = $path_front."/results/class.json";
     if (!file_exists($file)) {
-        ?><script>alert("Configuration for this class (class.JSON) does not exist.  Quitting");</script>
+        ?><script>alert("Configuration for this class (<?php echo $file ?>) does not exist. Quitting.");</script>
         <?php exit();
     }
     return json_decode(file_get_contents($file), true);
@@ -297,6 +393,6 @@ function display_error($error) {
     ?>
     <script>alert("Error: <?php echo $error;?>");</script>
     <?php
-    echo get_current_user();
+//       echo get_current_user();
     exit();
 }

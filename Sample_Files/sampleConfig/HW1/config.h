@@ -46,7 +46,7 @@ const char* expected_out_dir = "../../CSCI1200/Scripts/expectedOutput/HW1/";
 // Test cases
 const int num_testcases = 11;
 
-TestCase testcases[11] {
+TestCase testcases[11] = {
 
 /************* README AND COMPILATION *****************/
 

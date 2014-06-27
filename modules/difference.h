@@ -20,6 +20,7 @@
 class TestResults {
 public:
 	TestResults();
+        virtual ~TestResults() {}
 	int distance;
 	virtual void printJSON(std::ostream & file_out) =0;
 	virtual float grade() =0;
