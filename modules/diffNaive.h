@@ -126,6 +126,7 @@ Change diffNoSpace ( const std::string& _student,
  * object that indicates the indicies of characters the student string was off
  * by. The strings are not changed in this comparison. Runs in linear time
  * with respect to the longer string.
+ * https://github.com/JFrei86/HWserver/wiki/Naive-Difference#usage
  */
 TestResults* diffLine ( const std::string& _student,
 		const std::string& _instructor ) {
@@ -185,7 +186,9 @@ TestResults* diffLine ( const std::string& _student,
  * strings. Comparison is done per line and returns a Difference object
  * that indicates the indicies of characters the student string was off by. The
  * strings are not changed in this comparison. Runs in linear time with respect to
- * the longer string.*/
+ * the longer string.
+ * https://github.com/JFrei86/HWserver/wiki/Naive-Difference#usage
+ * */
 TestResults* diffLineNoSpace ( const std::string& _student,
 		const std::string& _instructor ) {
 	Difference* diffs = new Difference();
