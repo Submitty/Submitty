@@ -11,7 +11,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 #include <sstream>
 
-//#include "../validation/TestCase.h"
+//#include "grading/TestCase.h"
 //#include "GradingRubric.h"
 
 const std::string id = "HW1";

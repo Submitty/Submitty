@@ -9,7 +9,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#include "../../SCRIPTS/TestCase.h"
+#include "grading/TestCase.h"
 //#include "GradingRubric.h"
 
 const std::string id = "HW1";
@@ -46,7 +46,7 @@ const char* expected_out_dir = "../../CSCI1200/Scripts/expectedOutput/HW1/";
 // Test cases
 const int num_testcases = 11;
 
-TestCase testcases[11] {
+TestCase testcases[11] = {
 
 /************* README AND COMPILATION *****************/
 
