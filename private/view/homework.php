@@ -2,6 +2,7 @@
 <link href="resources/bootmin.css" rel="stylesheet"></link>
 <link href="resources/main.css" rel="stylesheet"></link>
 
+
 <!-- DIFF VIEWER STUFF -->
 <script src='diff-viewer/jquery.js'></script>
 <script src='diff-viewer/underscore.js'></script>
@@ -11,21 +12,33 @@
 <link href="diff-viewer/diff.css" rel="stylesheet"></link>
 
 <?php if ($points_possible == 0) {
-    $pecent = 0;
+    $percent = 0;
 } else {
     $percent = (int)($points_received * 100 / $points_possible);
 }
 ?>
 
 
-<?php require_once("../private/view/nav_container.php");?>
+<?php require_once("../private/view/nav_container2.php");?>
 
 <?php $user = $_SESSION["id"]; ?>
 
+<script type="text/javascript">
+function assignment_changed(){
+<!--  window.location.href="?assignment_id="+document.getElementById('hwlist').value;-->
+  window.location.href="?assignment_id="+document.getElementById('hwlist').value;
+}
+function version_changed(){
+<!--  window.location.href="?assignment_version="+document.getElementById('assignmentlist').value;-->
+  window.location.href="?assignment_id="+document.getElementById('hwlist').value+"&assignment_version="+document.getElementById('versionlist').value;
+}
+</script>
 
-<td class=main_panel valign=top height=100%>
-    <div class="panel panel-default" style="max-width:none">
-        <div class="panel-body"><!-- Panel Body Summary -->
+<!--<td class=main_panel valign=top height=100%>--> 
+
+<!--    <div class="panel panel-default" style="max-width:none">-->
+
+<!--        <div class="panel-body">--><!-- Panel Body Summary -->
 
 
 	  <!--<h2 style="float: left; margin-left: 10px;">Homework Submission for <em> <?php echo $user;?> </em></h2>-->
@@ -37,14 +50,14 @@
 
 <!--<h2>Select Homework</h2>-->
 
-                <span><b>Select Homework & press "Go"</b></span>
+                <span><b>Select Lab or Homework:</b></span>
                 <form action="">
-                    <select name="assignment_id">
+                    <select id="hwlist" name="assignment_id" onchange="assignment_changed();">
                     <?php for ($i = 0; $i < count($all_assignments); $i++) {?>
                         <option value="<?php echo $all_assignments[$i]["assignment_id"];?>" <?php if ($all_assignments[$i]["assignment_id"] == $assignment_id) {?> selected <?php }?>><?php echo $all_assignments[$i]["assignment_name"];?></option>
                     <?php } ?>
                     </select>
-                    <input type="submit" value="Go">
+                    <!-- <input type="submit" value="Go">-->
                 </form>
             </div><!-- End Homework Select -->
 
@@ -56,17 +69,16 @@
             <div class="panel-body">
                 <div class="box">
 <h3>Upload New Version</h3>
-                <p>When you have completed your programming assignment, prepare your assignment 
-                for submission exactly as described on the <a href="<?php echo $link_absolute;?>/homework.php">homework submission</a> webpage.
-		</p>
-		<p>
+                <p>Prepare your assignment for submission exactly as described on the <a href="<?php echo $link_absolute;?>/homework.php">homework submission</a> webpage.
+<!--		</p>
+		<p>-->
 		  By clicking "Send File" you are confirming that you have read, understand, and 
                   agree to follow the <a href="<?php echo $link_absolute;?>academic_integrity.php">Homework Collaboration and Academic Integrity Policy</a> for this course.
 		</p>
 
                 <form action="?page=upload&assignment_id=<?php echo $assignment_id?>" method="post" enctype="multipart/form-data" 
                 onsubmit=" return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>');">
-                    <label for="file" style="margin-right: 5%;">Filename:</label>
+                    <label for="file" style="margin-right: 5%;"><b>Select File:</b></label>
                     <input type="file" name="file" id="file" style="display: inline" />
                     <span class="group-btn">
                         <input type="submit" name="submit" value="Send File" class="btn btn-primary" style="margin-top: 10px">
@@ -89,29 +101,36 @@
 <!--                          <span>Summary:</span>-->
                             <?php if ($assignment_version >= 1) {?>
                                 <?php if ($submitting_version_in_grading_queue) {?>
-                                    <br><span><b>Active Submission Version: <?php echo $submitting_version;?></b>. It is currently being graded.
+                                    <br><span><b>Active Submission Version: <?php echo $submitting_version;?></b>. 
+                                                 It is currently being graded.
                                 <?php } else {?>
-                                    <br><span><b>Active Submission Version: <?php echo $submitting_version;?></b>. Automated grading score: <b><?php echo $submitting_version_score;?></b>
+                                    <br><span><b>Active Submission Version: <?php echo $submitting_version;?></b>. 
+                                                 Automated grading score: <b><?php echo $submitting_version_score;?></b>
                                 <?php } ?>
                                 <br><br>
                                 <div class="row">
                                     <div style="float: left; margin-left: 15px;">
-                                        <span>Select another version & press "Go"</span>
+                                        <span>Select Submission Version:</span>
                                         <br>
                                         <form action="index.php">
                                             <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
                      
-                                            <select name="assignment_version">
+                                            <select id="versionlist" name="assignment_version" onchange="version_changed();">
                                                 <?php for ($i = 1; $i <= $highest_version; $i++) {?>
-                                                    <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?>>Version <?php echo $i;?></option>
+                                                    <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?>>
+                                                                Version <?php echo $i;?></option>
                                                 <?php }?>
                                             </select>
-                                            <input type="submit" value="Go">
+                                    <!--        <input type="submit" value="Go">-->
                                         </form>
                                     </div>
                                     <div style="float: right; margin-right: 15px;">
-                                        <a href="?page=update&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" style="text-align:center;">
-                                            <input type="submit" class="btn btn-primary" value="Set Version <?php echo $assignment_version;?> as Active Submission Version"></input>
+                                        <a href="?page=update&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" 
+                                                             style="text-align:center;">
+					  <?php if ($assignment_version != $submitting_version) { ?>
+                                            <input type="submit" class="btn btn-primary" value="Set Version <?php echo $assignment_version;?> 
+                                                                as Active Submission Version"></input>
+					  <?php } ?>
                                         </a>
                                     </div>
                                 </div><!-- End Row -->
@@ -124,6 +143,30 @@
                             <?php if ($assignment_version_in_grading_queue) {?>
                                 <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
                             <?php } else {?>
+
+			         not in grading queue<br>
+
+                                    <?php echo "highest_version ".$highest_version."<br>";  ?>
+
+<!--                                    <?php echo "version_results ".var_dump($version_results)."<br>";  ?>-->
+                                    <?php echo "username ".$username."<br>";  ?>
+
+
+                                    <?php echo "points_received ".$points_received."<br>";  ?>
+                                    <?php echo "points_possible ".$points_possible."<br>";  ?>
+
+                                    <?php echo "count(homework_tests) ".count($homework_tests)."<br>";  ?>
+
+				    <?php echo "count(testcases_results) ".count($testcases_results)."<br>";  ?>
+				    <?php echo "count(testcases_info) ".count($testcases_info)."<br>";  ?>
+
+
+
+<!--                                    <?php foreach($homework_summary as $item) { echo "hi".$item; } ?>-->
+
+
+			    
+
                                 <ul class="list-group">
                                     <?php foreach($homework_summary as $item) {?>
                                         <?php if (isset($item["score"]) && isset($item["points_possible"]) && $item["points_possible"] != 0) {
@@ -224,8 +267,8 @@
                 
             <?php } ?>
         </div>
-    </div><!-- End Homework Output Compare And Diff -->
-</div><!-- End Col Blog-Main -->
+<!--    </div>--><!-- End Homework Output Compare And Diff -->
+<!--</div>--><!-- End Col Blog-Main -->
 
 
 

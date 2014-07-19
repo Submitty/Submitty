@@ -3,7 +3,7 @@
 # SET PARAMETERS
 
 echo "This script takes 2 parameters (USE FULL PATH)"
-echo "./grade_students <assignment_submission_path> <results_directory_path>"
+echo "./grade_students <assignment_submission_path> <test_input> <test_output> <results_directory_path>"
 echo ""
 
 echo "Setting Parameters"
@@ -11,7 +11,11 @@ echo "---------------------"
 
 assignment_submission_path="$1"
 echo "Assignment submissions path set to $assignment_submission_path"
-results_path="$2"
+test_input_path="$2"
+echo "Test_Input directory set to $test_input_path"
+test_output_path="$3"
+echo "Test_Output directory set to $test_output_path"
+results_path="$4"
 echo "Results directory set to $results_path"
 
 bin_path="$(pwd)"
@@ -41,9 +45,9 @@ while read path; do
     x=`expr index "$rest" /`
     username=${rest:0:$x-1}
     version=${rest:$x:${#rest}}
-    echo "WHICH ASSIGNMENT = $whichassignment"
-    echo "USERNAME = $username"
-    echo "VERSION = $version"
+#    echo "WHICH ASSIGNMENT = $whichassignment"
+#    echo "USERNAME = $username"
+#    echo "VERSION = $version"
 
 
     # make a temporary directory for each student for each submission
@@ -56,29 +60,36 @@ while read path; do
 
     cp 1>/dev/null  2>&1  -r $submittedfiles $tmp || echo "ERROR: Failed to copy to temporary directory"
 
-#	echo "Copying path ($inputs_path) to tmp directory ($tmp/submission)"	
-#	cp -r $inputs_path/*.txt "$tmp/submission" || echo "ERROR: Failed to copy to temporary directory"       
-#	echo "Copying path ($expected_outputs_path) to tmp directory ($tmp/submission)"	
-#	cp -r $expected_outputs_path/*.txt "$tmp/submission" || echo "ERROR: Failed to copy to temporary directory"
+    echo "Copying path ($test_input_path/$whichassignment/*) to tmp directory ($tmp)"	
+    cp -r $test_input_path/$whichassignment/* "$tmp" || echo "ERROR: Failed to copy to temporary directory"       
+
+    echo "Copying path ($test_output_path/$whichassignment/*) to tmp directory ($tmp)"	
+    cp -r $test_output_path/$whichassignment/* "$tmp" || echo "ERROR: Failed to copy to temporary directory"       
 
     submission_no="$(basename $path)"
     submission_time="$(date -r $assignment_submission_path/$path "+%F %T")"
 
 
     cd $tmp
+
+echo "here in tmp"
+ls -lta
     
     echo ""
     echo "Compile code"
     echo "-----------------"
 
-    clang++ -Wall *.cpp -o a.out &> .submit_compilation_output.txt
-    #g++ -Wall *.cpp -o a.out    &> .submit_compilation_output.txt
+    #clang++ -Wall *.cpp -o a.out &> .submit_compilation_output.txt
+    g++ -Wall *.cpp -o a.out    &> .submit_compilation_output.txt
     compile_error_code=$?
 
 
     if [[ "$compile_error_code" -ne 0 ]] ;
     then
 	echo "COMPILE ERROR CODE $compile_error_code"
+
+	more .submit_compilation_output.txt
+
 	rm -rf $tmp
 	continue
     else
@@ -123,7 +134,7 @@ while read path; do
 	echo "VALIDATOR OK"
     fi
 
-
+ls -lta
 
 	echo ""
 
@@ -139,7 +150,8 @@ while read path; do
 	echo "Copying temporary directory ($tmp) to results directory ($results_path/$path)"
 
 	# redirects prevent complaints about no files matching these patterns
-	cp  1>/dev/null  2>&1  $tmp/test*_cout.txt $tmp/test*_cerr.txt $tmp/test*_out.txt $tmp/submission.json "$results_path/$path"
+#	cp  1>/dev/null  2>&1  $tmp/test*_cout.txt $tmp/test*_cerr.txt $tmp/test*_out.txt $tmp/submission.json "$results_path/$path"
+	cp  1>/dev/null  2>&1  $tmp/* "$results_path/$path"
 #|| echo "ERROR: Could not copy temporary directory to results directory"
 
 
@@ -148,11 +160,14 @@ while read path; do
 #remove temporary directory
 	rm -rf $tmp
 
+echo "finished with " $path
 
 
-
-#       break #only do first
+       break #only do first
 
 done < "$assignment_submission_path/to_be_compiled.txt"
 
 #rm "$assignment_submission_path/to_be_compiled.txt"
+
+
+echo "ALL DONE"

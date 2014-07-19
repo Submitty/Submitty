@@ -115,9 +115,9 @@ if (count($testcases_results) != count($testcases_info)) {
 $submitting_version = get_user_submitting_version($_SESSION["id"], $assignment_id);
 $submitting_results = get_assignment_results($_SESSION["id"], $assignment_id, $submitting_version);
 if ($submitting_results) {
-    $submitting_version_score = $submitting_results["points_awarded"]." / ".$assignment_config["points_visible"];
+    $submitting_version_score ="XX".$assignment_id."XX".$submitting_version."XX".$submitting_results["points_awarded"]." / ".$assignment_config["points_visible"];
 } else {
-    $submitting_version_score = "0 / ".$assignment_config["points_visible"];
+    $submitting_version_score = "YY"."0 / ".$assignment_config["points_visible"];
 }
 
 
@@ -131,6 +131,13 @@ render("homework", array(
     "points_possible"=>$points_possible,
     "points_received"=>$points_received,
     "homework_summary"=>$homework_summary,
+    
+      // added for debugging
+    "username"=>$username,
+    "version_results"=>$version_results,
+    "testcases_results"=>$testcases_results,
+    "testcases_info"=>$testcases_info,
+
     "homework_tests"=>$homework_tests,
     "submitting_version"=>$submitting_version,
     "submitting_version_score"=>$submitting_version_score,
