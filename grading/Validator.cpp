@@ -249,6 +249,8 @@ int validateTestCases(int subnum, const char *subtime, int readme,
     std::stringstream expected_path;
     expected_path << expected_out_dir << testcases[i].expected();
 
+    total_grade += testcase_grade;
+
     // Generate JSON data
     testcase_json << "\t\t{\n"
                   << "\t\t\t\"test_name\": \"" << testcases[i].title()
