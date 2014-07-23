@@ -51,7 +51,7 @@ if ($page == "serverop") {
     } else if ($page == "update") {
         require_once("../private/controller/update.php");
     } else {
-	    require_once("../private/controller/homework.php");
+        require_once("../private/controller/homework.php");
     }
 }
 ?>

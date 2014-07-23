@@ -152,10 +152,10 @@ int validateTestCases(int subnum, const char *subtime, int readme,
 
     std::ifstream expected_instr(testcases[i].expected().c_str());
     if (!expected_instr) {
-#ifdef DEBUG
+      //#ifdef DEBUG
       std::cerr << "ERROR: Instructor's " << testcases[i].expected()
                 << " does not exist" << std::endl;
-#endif
+      //#endif
       continue;
     }
 
@@ -232,6 +232,7 @@ int validateTestCases(int subnum, const char *subtime, int readme,
 
     int testcase_grade = 0;
 
+    std::cout << "MAKING A DIFF JSON" << std::endl;
     std::stringstream diff_path;
     diff_path << "test" << t << "_diff.json";
     std::ofstream diff_stream(diff_path.str().c_str());
@@ -247,6 +248,8 @@ int validateTestCases(int subnum, const char *subtime, int readme,
 
     std::stringstream expected_path;
     expected_path << expected_out_dir << testcases[i].expected();
+
+    total_grade += testcase_grade;
 
     // Generate JSON data
     testcase_json << "\t\t{\n"

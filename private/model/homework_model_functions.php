@@ -208,7 +208,7 @@ function can_edit_assignment($username, $assignment_id, $assignment_config) {
     date_default_timezone_set('America/New_York');
     $file = $path_front."/results/".$assignment_id."/".$username."/user_assignment_config.json";
     if (file_exists($file)) {
-        $json = json_decode(file_get_contents($file), true);
+        $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
         if (isset($json["due_date"]) && $json["due_date"] != "default") {
             $date = new DateTime($json["due_date"]);
             $now = new DateTime("NOW");
@@ -232,7 +232,7 @@ function get_class_config($username) {
         ?><script>alert("Configuration for this class (<?php echo $file ?>) does not exist. Quitting.");</script>
         <?php exit();
     }
-    return json_decode(file_get_contents($file), true);
+    return json_decode(removeTrailingCommas(file_get_contents($file)), true);
 }
 
 
@@ -302,11 +302,15 @@ function version_in_grading_queue($username, $assignment_id, $assignment_version
 // Get the test cases from the instructor configuration file
 function get_assignment_config($username, $assignment_id) {
     $path_front = get_path_front();
-    $file = $path_front."/results/".$assignment_id."/assignment_config.json";
+//    $file = $path_front."/results/".$assignment_id."/assignment_config.json";
+    $file = $path_front."/config/".$assignment_id."_assignment_config.json";
+
+//	      echo "GET ASSIGNMENT CONFIG ".$file."<br>";
+
     if (!file_exists($file)) {
         return false;//TODO Handle this case
     }
-    return json_decode(file_get_contents($file), true);
+    return json_decode(removeTrailingCommas(file_get_contents($file)), true);
 }
 
 // Get results from test cases for a student submission
@@ -316,7 +320,34 @@ function get_assignment_results($username, $assignment_id, $assignment_version) 
     if (!file_exists($file)) {
         return false;
     }
-    return json_decode(file_get_contents($file), true);
+
+$contents = file_get_contents($file);
+$contents = removeTrailingCommas($contents);
+
+	      $tmp = json_decode($contents, true);
+
+
+	      
+
+//echo "GET ASSIGN $tmp foo<br>";
+if ($tmp == NULL) {
+echo "DECODE FAILURE<br>";
+echo "GET_ASSIGNMENT_RESULTS FROM FILE: $file<br>";
+echo "contents $contents<br>";
+} else {
+//echo "DECODE OK!<br>";
+}
+
+	      return $tmp;
+}
+
+
+
+// FROM http://www.php.net/manual/en/function.json-decode.php
+function removeTrailingCommas($json)
+{
+    $json=preg_replace('/,\s*([\]}])/m', '$1', $json);
+    return $json;
 }
 
 
@@ -329,7 +360,7 @@ function get_user_submitting_version($username, $assignment_id) {
     if (!file_exists($file)) {
         return 0;
     }
-    $json = json_decode(file_get_contents($file), true);
+    $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
     return $json["selected_assignment"];
 }
 
@@ -348,7 +379,7 @@ function change_assignment_version($username, $assignment_id, $assignment_versio
         display_error("Unable to find user settings.  Looking for ".$file);
         return;
     }
-    $json = json_decode(file_get_contents($file), true);
+    $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
     $json["selected_assignment"] = $assignment_version;
     file_put_contents($file, json_encode($json));
     return array("success"=>"Success");

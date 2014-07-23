@@ -3,7 +3,7 @@
 
 <body height=100% leftmargin=0 rightmargin=0 topmargin=0 bottommargin=0 bgcolor=228833>
 
-<table cellpadding=10 border=0 cellspacing=0 width=100% height=100% background="resources/greenleaf.png"> 
+<table cellpadding=10 border=0 cellspacing=0 width=100% height=100% background="resources/background_image.jpg"> 
 
 <tr>
 <td class=upper_left_corner align=center>
@@ -81,3 +81,6 @@ Academic Integrity</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;Dr. Memory
 </p>
 </td>
+
+
+<td class=main_panel valign=top height=100%>
