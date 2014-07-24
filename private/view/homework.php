@@ -144,11 +144,13 @@ function version_changed(){
                                 <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
                             <?php } else {?>
 
-			         not in grading queue<br>
+<!--			         not in grading queue<br>-->
 
-                                    <?php echo "highest_version ".$highest_version."<br>";  ?>
+<!--                                    <?php echo "highest_version ".$highest_version."<br>";  ?>-->
 
 <!--                                    <?php echo "version_results ".var_dump($version_results)."<br>";  ?>-->
+
+<!--
                                     <?php echo "username ".$username."<br>";  ?>
 
 
@@ -159,7 +161,7 @@ function version_changed(){
 
 				    <?php echo "count(testcases_results) ".count($testcases_results)."<br>";  ?>
 				    <?php echo "count(testcases_info) ".count($testcases_info)."<br>";  ?>
-
+-->
 
 
 <!--                                    <?php foreach($homework_summary as $item) { echo "hi".$item; } ?>-->
@@ -222,6 +224,17 @@ function version_changed(){
     <div class="panel panel-default"><!-- Homework Output Compare And Diff -->
         <div class="row" style="margin-left: 10px; margin-right: 10px">
             <?php foreach($homework_tests as $test) {?>
+
+<!--
+	    A TEST! title '<?php echo $test["title"] ?>' <br>
+	    A TEST! message '<?php echo $test["message"] ?>' <br>
+	    A TEST! diff '<?php echo $test["diff"] ?>' <br>
+-->
+
+<br clear="all">
+<hr>
+<!--<h2>DIFF</h2>-->
+
                 <?php if (isset($test["score"]) && isset($test["points_possible"]) && $test["points_possible"] != 0) {
                     if (!($test["points_possible"] > 0)) {
                         $part_percent = 1;
@@ -249,14 +262,21 @@ function version_changed(){
                 </div>
                 
                 <?php if ($test["diff"] != ""){?>
+
+
+
                 <div class="col-md-6">
                     <div class="panel panel-default" id="<?php echo $test["title"]; ?>_student">
-                        <?php echo $test["diff"]["student"]; ?>
+
+<?php echo $test["diff"]["student"]; ?>
+
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="panel panel-default" id="<?php echo $test["title"]; ?>_instructor">
-                        <?php echo $test["diff"]["instructor"]; ?>
+
+<?php echo $test["diff"]["instructor"]; ?>
+
                     </div>
                 </div>
                 <script>

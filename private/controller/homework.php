@@ -93,6 +93,7 @@ for ($i = 0; $i < count($testcases_info); $i++) {
                 "score"=>$testcases_results[$u]["points_awarded"],
                 "message"=> isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "",
                 "diff"=> isset($testcases_results[$u]["diff"]) ? get_testcase_diff($username, $assignment_id, $assignment_version,$testcases_results[$u]["diff"]) : ""
+    //"diff"=> isset($testcases_results[$u]["diff"]) ? "a" : "b"
             ));
             break;
         }

@@ -39,9 +39,11 @@ const int ta_pts = 20;
 // File directories
 
 // input files directory
-const char* input_dir = "../../CSCI1200/testingInput/HW1";
+const char* input_dir = "test_input/hw1/";
+//../../CSCI1200/testingInput/HW1";
 // expected output files directory
-const char* expected_out_dir = "../../CSCI1200/Scripts/expectedOutput/HW1/";
+const char* expected_out_dir = "test_output/hw1/";
+//../../CSCI1200/Scripts/expectedOutput/HW1/";
 
 // Test cases
 const int num_testcases = 11;
@@ -106,7 +108,7 @@ TestCase(
 	"./a.out example.txt test2_out.txt 16 flush_right",	// command
 	"test2_out.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"example_16_flush_right.txt",				// expected output file [V]
 	3,									// points [V]
 	false,								// hidden [V]
 	false,								// extra credit [V]
@@ -122,7 +124,7 @@ TestCase(
 	"./a.out example.txt test3_out.txt 16 full_justify",	// command
 	"test3_out.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"example_16_full_justify.txt",				// expected output file [V]
 	4,									// points [V]
 	false,								// hidden [V]
 	false,								// extra credit [V]
@@ -134,11 +136,11 @@ TestCase(
 ),
 TestCase(
 	"left justify gettysburg address",							// title
-	"./justify.exe gettysburg_address.txt output.txt 16 flush_left",						// details
-	"./a.out gettysburg_address.txt test4_out.txt 16 flush_left",	// command
+	"./justify.exe gettysburg_address.txt output.txt 70 flush_left",						// details
+	"./a.out gettysburg_address.txt test4_out.txt 70 flush_left",	// command
 	"test4_out.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"gettysburg_address_70_flush_left.txt",				// expected output file [V]
 	2,									// points [V]
 	true,								// hidden [V]
 	false,								// extra credit [V]
@@ -154,7 +156,7 @@ TestCase(
 	"./a.out gettysburg_address.txt test5_out.txt 70 flush_right",	// command
 	"test5_out.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"gettysburg_address_70_flush_right.txt",				// expected output file [V]
 	2,									// points [V]
 	true,								// hidden [V]
 	false,								// extra credit [V]
@@ -170,7 +172,7 @@ TestCase(
 	"./a.out gettysburg_address.txt test6_out.txt 70 full_justify",	// command
 	"test6_out.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"gettysburg_address_70_full_justify.txt",				// expected output file [V]
 	3,									// points [V]
 	false,								// hidden [V]
 	false,								// extra credit [V]
@@ -182,11 +184,11 @@ TestCase(
 ),
 TestCase(
 	"full justify long word",							// title
-	"./justify.exe long_word.txt output.txt 16 full_justify",	// details
-	"./a.out long_word.txt test7_out.txt 16 full_justify",	// command
+	"./justify.exe long_word.txt output.txt 15 full_justify",	// details
+	"./a.out long_word.txt test7_out.txt 15 full_justify",	// command
 	"test7_out.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"long_word_15_full_justify.txt",				// expected output file [V]
 	3,									// points [V]
 	false,								// hidden [V]
 	false,								// extra credit [V]

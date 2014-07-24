@@ -1,4 +1,4 @@
-<?php $link_absolute = "http://www.cs.rpi.edu/academics/courses/spring14/ds/";?>
+<?php $link_absolute = "https://www.cs.rpi.edu/academics/courses/spring14/ds/";?>
 <title>CSCI 1200 Data Structures - Spring 2014</title>
 
 <body height=100% leftmargin=0 rightmargin=0 topmargin=0 bottommargin=0 bgcolor=228833>

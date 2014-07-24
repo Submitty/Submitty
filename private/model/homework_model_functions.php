@@ -390,12 +390,13 @@ function change_assignment_version($username, $assignment_id, $assignment_versio
 // Converts the JSON "diff" field from submission.json to an array containing
 // file contents
 function get_testcase_diff($username, $assignment_id, $assignment_version, $diff){
+	
     $path_front = get_path_front();
 
     if (!isset($diff["instructor_file"]) ||
         !isset($diff["student_file"]) ||
         !isset($diff["difference"])) {
-        return "";
+        return "FAILED A";
     }
 
     $instructor_file_path = "$path_front/".$diff["instructor_file"];
@@ -404,7 +405,7 @@ function get_testcase_diff($username, $assignment_id, $assignment_version, $diff
     if (!file_exists($instructor_file_path) ||
         !file_exists($student_path . $diff["student_file"]) ||
         !file_exists($student_path . $diff["difference"])){
-        return "";
+        return "FAILED B $instructor_file_path";
     }
 
     $student_content = file_get_contents($student_path.$diff["student_file"]);
