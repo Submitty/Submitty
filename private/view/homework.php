@@ -164,13 +164,14 @@ function version_changed(){
 -->
 
 
-<!--                                    <?php foreach($homework_summary as $item) { echo "hi".$item; } ?>-->
+                                    <?php foreach($homework_summary as $item) { echo "hi".$item["title"]."<br>"; } ?> 
 
 
 			    
 
                                 <ul class="list-group">
                                     <?php foreach($homework_summary as $item) {?>
+
                                         <?php if (isset($item["score"]) && isset($item["points_possible"]) && $item["points_possible"] != 0) {
                                             if (!($item["points_possible"] > 0)) {
                                                 $part_percent = 1;
@@ -267,17 +268,13 @@ function version_changed(){
 
                 <div class="col-md-6">
                     <div class="panel panel-default" id="<?php echo $test["title"]; ?>_student">
-
 <?php echo $test["diff"]["student"]; ?>
-
-                    </div>
+</div>
                 </div>
                 <div class="col-md-6">
                     <div class="panel panel-default" id="<?php echo $test["title"]; ?>_instructor">
-
 <?php echo $test["diff"]["instructor"]; ?>
-
-                    </div>
+</div>
                 </div>
                 <script>
                 diff_queue.push("<?php echo $test["title"]; ?>");

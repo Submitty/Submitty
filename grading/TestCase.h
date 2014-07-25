@@ -19,6 +19,7 @@
 #define __TESTCASE_H__
 
 #include <string>
+#include <sstream> 
 #include "modules/modules.h"
 
 /* cout_cerr_check is an enumerated type used to specify whether to
@@ -34,8 +35,8 @@ class TestCase {
 	public:
 
 		// Constructor
-		TestCase () {
-		}
+  //		TestCase () {   /* THIS CONSTRUCTOR SHOULD NOT BE USED */
+  //		}
 		TestCase ( const std::string &title, const std::string &details,
 				const std::string &command, const std::string &filename,
 				const std::string &description, const std::string &expected,
@@ -50,11 +51,16 @@ class TestCase {
 						extracredit ), _coutcheck( cout_check ), _cerrcheck(
 						cerr_check ), cmp_output( cmp ), _recompile(
 						recompile ), _compile_cmd( compile_cmd ) {
+		  test_case_id = next_test_case_id;
+		  next_test_case_id++;
 		}
 
 		// Accessors
 		std::string title () const {
-			return _title;
+		  std::stringstream ss;
+		  ss << "Test " << test_case_id << " " << _title;
+		  return ss.str();
+		  //return _title;
 		}
 		std::string details () const {
 			return _details;
@@ -62,9 +68,19 @@ class TestCase {
 		std::string command () const {
 			return _command;
 		}
-		std::string filename () const {
-			return _filename;
+		std::string raw_filename () const {
+		  return _filename;
 		}
+		std::string filename () const {
+		  //std::stringstream ss;
+		  //ss << "test" << std::setw(2) << std::setfill('0') << test_case_id << "_" << _filename;
+		  return prefix()+"_"+_filename; //ss.str();
+		}
+  std::string prefix() const {
+    std::stringstream ss;
+    ss << "test" << std::setw(2) << std::setfill('0') << test_case_id;
+    return ss.str();
+  }
 		std::string description () const {
 			return _description;
 		}
@@ -114,6 +130,9 @@ class TestCase {
 		bool _hidden;
 		bool _extracredit;
 
+  int test_case_id;
+  static int next_test_case_id; 
+  
 		bool _recompile;
 		std::string _compile_cmd;
 		cout_cerr_check _coutcheck;

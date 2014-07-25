@@ -10,7 +10,8 @@ bindir=$(ROOT)/$(COURSE)/bin/$(HW)
 
 assignment:
 	test -d $(bindir) || mkdir $(bindir)
-	$(gcc) -DDEBUG -I $(RCOS) -include $(CONFIG)/config.h $(RCOS)/grading/Validator.cpp -o $(bindir)/validate.out
+#	$(gcc) -DDEBUG -I $(RCOS) -include $(CONFIG)/config.h $(RCOS)/grading/Validator.cpp  $(RCOS)/grading/TestCase.cpp  -o $(bindir)/validate.out
+	$(gcc) -DDEBUG -I $(RCOS) -include $(CONFIG)/config.h $(RCOS)/grading/Validator.cpp   -o $(bindir)/validate.out
 	$(gcc) -DDEBUG -I $(RCOS) -include $(CONFIG)/config.h $(RCOS)/grading/runner.cpp    -o $(bindir)/run.out
 	$(gcc) -DDEBUG -I $(RCOS) -include $(CONFIG)/config.h $(RCOS)/grading/config.cpp    -o $(bindir)/configure.out
 	$(bindir)/configure.out assignment_config.json

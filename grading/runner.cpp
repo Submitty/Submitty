@@ -18,9 +18,14 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <cassert>
 
 #include "modules/modules.h"
 #include "grading/TestCase.h"
+
+#include "grading/TestCase.cpp"   /* should not #include a .cpp file */
+
+const std::string compile_command = "g++ -g *.cpp";  /* relocated (temporarily?) from  config file */
 
 //#include "../sampleConfig/HW1/config.h"
 
@@ -52,14 +57,17 @@ int main(int argc, char *argv[]) {
     }
   }
   int n = 0;
-  if (readmeTestCase != NULL)
-    n++;
-  if (compileTestCase != NULL)
-    n++;
+  //if (readmeTestCase != NULL)
+  //  n++;
+  //if (compileTestCase != NULL)
+  //  n++;
 
   // Run each test case and create output files
   for (unsigned int i = 0 + n; i < num_testcases; i++) {
     cout << testcases[i].command() << std::endl;
+
+    /*
+      // MULTIPLE COMPILATION IS DONE ELSEHWERE
 
     if (testcases[i].recompile()) {
       int recomp = execute(testcases[i].compile_cmd() + " 2>.compile_out_" +
@@ -70,18 +78,38 @@ int main(int argc, char *argv[]) {
         continue;
       }
     }
+    */
 
     string cmd = testcases[i].command();
-    if (cmd != "") {
+    if (cmd != "" &&
+	cmd != "FILE_EXISTS") {
       int exit_no =
           execute(cmd + " 1>test" + to_string(i + 1 - n) + "_cout.txt 2>test" +
                   to_string(i + 1 - n) + "_cerr.txt");
-    }
 
+
+
+
+
+      cerr << "WANT TO: mv "+testcases[i].raw_filename()+" "+testcases[i].filename() << std::endl;
+      
+      // append the test case # to the front of the output file
+      if (testcases[i].raw_filename() != "" &&
+	  access( testcases[i].raw_filename().c_str(), F_OK|R_OK|W_OK ) != -1 /* file exists */
+	  ) {
+	assert (access( testcases[i].filename().c_str(), F_OK|R_OK|W_OK ) == -1);
+	execute ("mv "+testcases[i].raw_filename()+" "+testcases[i].filename());
+      }
+
+    }
+    
+    /*   SHOULD NOT BE RECOMPILING INSIDE OF RUNNER
     // Recompile the original in case the executable was overwritten
     if (testcases[i].recompile() && compile_command != "") {
       execute(compile_command);
     }
+    */
+
   }
 
   return 0;
@@ -92,6 +120,8 @@ int execute(const string &cmd) { return system(cmd.c_str()); }
 
 string to_string(int i) {
   std::ostringstream tmp;
-  tmp << i;
+  tmp << std::setfill('0') << std::setw(2) << i;
   return tmp.str();
 }
+
+
