@@ -1,9 +1,15 @@
-<?php 
+<?php
 
 
 // ============================================
 // GET THE USERNAME OF THE AUTHENTICATED USER
 // ============================================
+
+
+// if not already authenticated do it
+//
+//here
+//
 if (isset($_SERVER['PHP_AUTH_USER'])) {
     $user = $_SERVER['PHP_AUTH_USER'];
 } else if (isset($_SERVER['REMOTE_USER'])) {
