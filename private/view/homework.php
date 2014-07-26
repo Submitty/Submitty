@@ -3,6 +3,8 @@
 <link href="resources/main.css" rel="stylesheet"></link>
 
 
+
+
 <!-- DIFF VIEWER STUFF -->
 <script src='diff-viewer/jquery.js'></script>
 <script src='diff-viewer/underscore.js'></script>
@@ -10,6 +12,8 @@
 <script src='diff-viewer/diff.js'></script>
 <script src='diff-viewer/diff_queue.js'></script>
 <link href="diff-viewer/diff.css" rel="stylesheet"></link>
+
+<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
 
 <?php if ($points_possible == 0) {
     $percent = 0;
@@ -164,8 +168,8 @@ function version_changed(){
 -->
 
 
-                                    <?php foreach($homework_summary as $item) { echo "hi".$item["title"]."<br>"; } ?> 
-
+<!--                                    <?php foreach($homework_summary as $item) { echo "hi".$item["title"]."<br>"; } ?> 
+-->
 
 			    
 
@@ -268,13 +272,15 @@ function version_changed(){
 
                 <div class="col-md-6">
                     <div class="panel panel-default" id="<?php echo $test["title"]; ?>_student">
-<?php echo $test["diff"]["student"]; ?>
+<?php echo str_replace(" ", "&nbsp;", $test["diff"]["student"]); ?>
 </div>
+<!--<?php echo $test["diff"]["student"]; ?>-->
                 </div>
                 <div class="col-md-6">
                     <div class="panel panel-default" id="<?php echo $test["title"]; ?>_instructor">
-<?php echo $test["diff"]["instructor"]; ?>
+<?php echo str_replace(" ", "&nbsp;", $test["diff"]["instructor"]); ?>
 </div>
+<!--<?php echo $test["diff"]["instructor"]; ?>-->
                 </div>
                 <script>
                 diff_queue.push("<?php echo $test["title"]; ?>");

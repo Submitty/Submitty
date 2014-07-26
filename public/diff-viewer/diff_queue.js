@@ -20,6 +20,8 @@ function loadDiffQueue(){
 		var instructor_element = document.getElementById(instructor_element_id);
 
 		diff.load(student_element.innerHTML,instructor_element.innerHTML);
+//         	diff.load(student_element.innerHTML.replace(/&nbsp;/g, " ") ,instructor_element.innerHTML.replace(/&nbsp;/g, " "));
+
 		student_element.innerHTML = "";
 		instructor_element.innerHTML = "";
 		diff.evalDifferences(diff_objects[title]["differences"]);

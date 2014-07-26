@@ -107,7 +107,8 @@ function upload_homework($username, $assignment_id, $homework_file) {
 
 
     // TODO should support more than zip (.tar.gz etc.)
-    if (!($homework_file["type"] === "application/zip")) {//Make sure the file is a zip file
+    if (!($homework_file["type"] === "application/zip") && 
+	!($homework_file["type"] === "application/x-zip-compressed")) {  //Make sure the file is a zip file
         display_error("Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
         return;
     }
