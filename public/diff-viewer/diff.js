@@ -39,7 +39,7 @@ var diff = function(){
 		f0 = file0.split("\n");
 		f1 = file1.split("\n");
 
-		for (var i = 0;f0.length;i++){
+		for (var i = 0;i < f0.length;i++){
 			if (f0[i] == "" && f1[i] == ""){
 				f0.splice(0,1);
 				f1.splice(0,1);
