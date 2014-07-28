@@ -129,13 +129,18 @@ function version_changed(){
                                         </form>
                                     </div>
                                     <div style="float: right; margin-right: 15px;">
+					  <?php if ($assignment_version != $submitting_version) { ?>
+
                                         <a href="?page=update&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" 
                                                              style="text-align:center;">
-					  <?php if ($assignment_version != $submitting_version) { ?>
+
                                             <input type="submit" class="btn btn-primary" value="Set Version <?php echo $assignment_version;?> 
                                                                 as Active Submission Version"></input>
-					  <?php } ?>
                                         </a>
+
+
+
+					  <?php } ?>
                                     </div>
                                 </div><!-- End Row -->
                             <?php } else {?>
@@ -237,7 +242,7 @@ function version_changed(){
 -->
 
 <br clear="all">
-<hr>
+
 <!--<h2>DIFF</h2>-->
 
                 <?php if (isset($test["score"]) && isset($test["points_possible"]) && $test["points_possible"] != 0) {
@@ -260,16 +265,16 @@ function version_changed(){
                     <h4 style="margin-left: 10px; text-align: left;display:inline-block;">
                         <?php echo $test["title"];?>
                     </h4>
-                    <?php echo $test["message"]; ?>
                     <span class="<?php echo $class;?>">
                         <?php echo $test["score"]."/".$test["points_possible"];?>
                     </span>
+                    <?php if ($test["message"] != ""){?>
+<br>
+		    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
+		    <?php }?>
                 </div>
                 
                 <?php if ($test["diff"] != ""){?>
-
-
-
                 <div class="col-md-6">
                     <div class="panel panel-default" id="<?php echo $test["title"]; ?>_student">
 <?php echo str_replace(" ", "&nbsp;", $test["diff"]["student"]); ?>
@@ -282,10 +287,17 @@ function version_changed(){
 </div>
 <!--<?php echo $test["diff"]["instructor"]; ?>-->
                 </div>
+
+<!--MYDIFF
+<?php  echo $test["diff"]["difference"]; ?>
+-->
+
+
                 <script>
                 diff_queue.push("<?php echo $test["title"]; ?>");
                 diff_objects["<?php echo $test["title"]; ?>"] = <?php echo $test["diff"]["difference"]; ?>;
                 </script>
+
                 <?php }?>
                 
             <?php } ?>

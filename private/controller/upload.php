@@ -24,10 +24,22 @@ if (isset($_FILES["file"])) {
             header("Location: index.php?assignment_id=".$assignment_id."&error=assignment_closed");
             exit();
         }
+
         header("Location: index.php?assignment_id=".$assignment_id."&error=upload_failed");
         exit();
     }
 }
+
+
+$assignment_version = 1;//htmlspecialchars($_GET["assignment_version"]);
+$assignment_config = get_assignment_config($_SESSION["id"], $assignment_id);
+
+
+// automatically set new upload as active version   
+change_assignment_version($_SESSION["id"], $assignment_id, $assignment_version, $assignment_config);
+
+
+
 //Go back to homework page
 header("Location: index.php?assignment_id=".$assignment_id);
 
