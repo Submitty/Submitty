@@ -26,6 +26,16 @@ $most_recent_assignment_version = most_recent_assignment_version($username, $mos
 $all_assignments = $class_config["assignments"];
 
 
+if (isset($_GET["course"])) {
+    $course = htmlspecialchars($_GET["course"]);
+    if (!is_valid_course($course)) {
+          $course = "NONE";
+    } 
+} else {
+    $course = "NONE";
+}
+
+
 if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants to see
     $assignment_id = htmlspecialchars($_GET["assignment_id"]);
     if (!is_valid_assignment($class_config, $assignment_id)) {
@@ -115,6 +125,7 @@ $submitting_version_in_grading_queue = version_in_grading_queue($username, $assi
 
 $assignment_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $assignment_version);
 render("homework", array(
+    "course"=>$course,
     "assignment_id"=>$assignment_id,
     "assignment_name"=>$assignment_name,
     "all_assignments"=>$all_assignments,

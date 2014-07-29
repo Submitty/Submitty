@@ -18,7 +18,7 @@ function get_path_front() {
         }
 
         $file = fopen($path_to_path_file, 'r');
-        $path_front = trim(fgets($file));
+        $path_front = trim(fgets($file))."/csci1200";
         fclose($file);
     }
     return $path_front;
@@ -108,6 +108,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
 
     // TODO should support more than zip (.tar.gz etc.)
     if (!($homework_file["type"] === "application/zip") && 
+	!($homework_file["type"] === "application/octet-stream") && 
 	!($homework_file["type"] === "application/x-zip-compressed")) {  //Make sure the file is a zip file
         display_error("Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
         return;
@@ -258,6 +259,23 @@ function name_for_assignment_id($class_config, $assignment_id) {
         }
     }
     return "";//TODO Error handling
+}
+
+// Check to make sure instructor has added this assignment
+function is_valid_course($course) {
+    if ($course == "csci1200") {
+      return true;
+    }
+    if ($course == "csci1100") {
+      return true;
+    }
+    if ($course == "csci1200test") {
+      return true;
+    }
+    if ($course == "csci1100test") {
+      return true;
+    }
+    return false;
 }
 
 // Check to make sure instructor has added this assignment
