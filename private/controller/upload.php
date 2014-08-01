@@ -5,7 +5,32 @@ require_once("../private/model/homework_model_functions.php");
 
 //Upload the stuff
 
+$course = "UPLOAD_NONE_A";
+
+   if (isset($_GET["course"])) {
+   $tmp = htmlspecialchars($_GET["course"]);
+   if (!is_valid_course($tmp)) {
+       $course = "UPLOAD_NONE_B".$tmp;
+   } else {
+   $course = $tmp;
+   }
+   }
+
 if (isset($_FILES["file"])) {
+
+    if (!isset($_GET["course"])) {
+        echo "No course id";
+        exit();
+    }
+    $course = htmlspecialchars($_GET["course"]);
+    if ($course != "csci1100" &&
+        $course != "csci1200" &&
+        $course != "csci1200test" &&
+        $course != "csci1100test") {
+        echo "BAD COURSE '".$course."'";
+        exit();
+    }
+
     if (!isset($_GET["assignment_id"])) {
         echo "No assignment id";
         exit();
@@ -21,15 +46,15 @@ if (isset($_FILES["file"])) {
     if (isset($result["error"])) {
         //Go to error page?
         if ($result["error"] == "assignment_closed") {
-            header("Location: index.php?assignment_id=".$assignment_id."&error=assignment_closed");
+            header("Location: index.php?course=".$course."&assignment_id=".$assignment_id."&error=assignment_closed");
             exit();
         }
 
-        header("Location: index.php?assignment_id=".$assignment_id."&error=upload_failed");
+        header("Location: index.php?course=".$course."&assignment_id=".$assignment_id."&error=upload_failed");
         exit();
     }
 }
 //Go back to homework page
-header("Location: index.php?assignment_id=".$assignment_id);
+header("Location: index.php?course=".$course."&assignment_id=".$assignment_id);
 
 ?>

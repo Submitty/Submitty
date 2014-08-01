@@ -1,8 +1,8 @@
-<!--link href="resources/bootstrap/css/bootstrap.min.css" rel="stylesheet"-->
+<?php require_once("../private/view/".$course."_container.php");?>
+
 <link href="resources/bootmin.css" rel="stylesheet"></link>
-<link href="resources/main.css" rel="stylesheet"></link>
 
-
+<?php $course =    $course = htmlspecialchars($_GET["course"]); ?>
 
 
 <!-- DIFF VIEWER STUFF -->
@@ -23,18 +23,20 @@
 ?>
 
 
-<?php require_once("../private/view/nav_container2.php");?>
 
 <?php $user = $_SESSION["id"]; ?>
 
+
 <script type="text/javascript">
 function assignment_changed(){
+   var php_course = "<?php echo $course; ?>";
 <!--  window.location.href="?assignment_id="+document.getElementById('hwlist').value;-->
-  window.location.href="?assignment_id="+document.getElementById('hwlist').value;
+  window.location.href="?course="+php_course+"&assignment_id="+document.getElementById('hwlist').value;
 }
 function version_changed(){
 <!--  window.location.href="?assignment_version="+document.getElementById('assignmentlist').value;-->
-  window.location.href="?assignment_id="+document.getElementById('hwlist').value+"&assignment_version="+document.getElementById('versionlist').value;
+   var php_course = "<?php echo $course; ?>";
+  window.location.href="?course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+"&assignment_version="+document.getElementById('versionlist').value;
 }
 </script>
 
@@ -80,8 +82,9 @@ function version_changed(){
                   agree to follow the <a href="<?php echo $link_absolute;?>academic_integrity.php">Homework Collaboration and Academic Integrity Policy</a> for this course.
 		</p>
 
-                <form action="?page=upload&assignment_id=<?php echo $assignment_id?>" method="post" enctype="multipart/form-data" 
-                onsubmit=" return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>');">
+                <form action="?page=upload&course=<?php echo $course?>&assignment_id=<?php echo $assignment_id?>" 
+		      method="post" enctype="multipart/form-data" 
+                      onsubmit=" return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>');">
                     <label for="file" style="margin-right: 5%;"><b>Select File:</b></label>
                     <input type="file" name="file" id="file" style="display: inline" />
                     <span class="group-btn">
@@ -116,7 +119,7 @@ function version_changed(){
                                     <div style="float: left; margin-left: 15px;">
                                         <span>Select Submission Version:</span>
                                         <br>
-                                        <form action="index.php">
+                                        <form action="">
                                             <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
                      
                                             <select id="versionlist" name="assignment_version" onchange="version_changed();">
@@ -131,7 +134,7 @@ function version_changed(){
                                     <div style="float: right; margin-right: 15px;">
 					  <?php if ($assignment_version != $submitting_version) { ?>
 
-                                        <a href="?page=update&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" 
+                                        <a href="?page=update&course=<?php echo $course;?>&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" 
                                                              style="text-align:center;">
 
                                             <input type="submit" class="btn btn-primary" value="Set Version <?php echo $assignment_version;?> 
