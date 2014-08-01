@@ -180,7 +180,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
     }
     $settings_file = $user_path."/user_assignment_settings.json";
     if (!file_exists($settings_file)) {
-        $json = array("selected_assignment"=>1);
+        $json = array("selected_assignment"=>$upload_version);
         file_put_contents($settings_file, json_encode($json));
     } else {
         change_assignment_version($username, $assignment_id, $upload_version, $assignment_config);
