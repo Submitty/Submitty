@@ -9,6 +9,16 @@ static $path_to_path_file = "site_path.txt";
 //This will be changed to whatever exists in the above file
 static $path_front = "";
 function get_path_front() {
+
+   $course = "GPF_NONE_A";
+   if (isset($_GET["course"])) {
+   $course = htmlspecialchars($_GET["course"]);
+   if (!is_valid_course($course)) {
+   $c = $course;
+       $course = "GPF_NONE_B".$c;
+   } 
+   }
+
     global $path_front;
     global $path_to_path_file;
     if ($path_front == "") {
@@ -18,7 +28,7 @@ function get_path_front() {
         }
 
         $file = fopen($path_to_path_file, 'r');
-        $path_front = trim(fgets($file))."/csci1200";
+        $path_front = trim(fgets($file))."/".$course;
         fclose($file);
     }
     return $path_front;

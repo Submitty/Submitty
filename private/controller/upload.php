@@ -5,7 +5,16 @@ require_once("../private/model/homework_model_functions.php");
 
 //Upload the stuff
 
-$course = "NONE";
+$course = "UPLOAD_NONE_A";
+
+   if (isset($_GET["course"])) {
+   $tmp = htmlspecialchars($_GET["course"]);
+   if (!is_valid_course($tmp)) {
+       $course = "UPLOAD_NONE_B".$tmp;
+   } else {
+   $course = $tmp;
+   }
+   }
 
 if (isset($_FILES["file"])) {
 
@@ -14,11 +23,11 @@ if (isset($_FILES["file"])) {
         exit();
     }
     $course = htmlspecialchars($_GET["course"]);
-    if (!strpos($course,"csci1200") &&
-       !strpos($course,"csci1100") &&
-       !strpos($course,"csci1200test") &&
-       !strpos($course,"csci1100test")) {
-        echo "BAD COURSE ".$course;
+    if ($course != "csci1100" &&
+        $course != "csci1200" &&
+        $course != "csci1200test" &&
+        $course != "csci1100test") {
+        echo "BAD COURSE '".$course."'";
         exit();
     }
 

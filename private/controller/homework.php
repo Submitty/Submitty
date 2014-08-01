@@ -29,10 +29,10 @@ $all_assignments = $class_config["assignments"];
 if (isset($_GET["course"])) {
     $course = htmlspecialchars($_GET["course"]);
     if (!is_valid_course($course)) {
-          $course = "NONE";
+          $course = "CONTROLLER_HOMEWORK_NONE_A";
     } 
 } else {
-    $course = "NONE";
+    $course = "CONTROLLER_HOMEWORK_NONE_B";
 }
 
 
