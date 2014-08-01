@@ -140,15 +140,14 @@ function upload_homework($username, $assignment_id, $homework_file) {
 
     //Find the next homework version number
 
-    $i = 1;
-    while (file_exists($user_path."/".$i)) {
-		  // FIXME: should not exist?
-        //Replace with symlink?
-        $i++;
+    $upload_version = 1;
+    while (file_exists($user_path."/".$upload_version)) {
+		// FIXME: Replace with symlink
+        $upload_version++;
     }
 
     // Attempt to create folder
-    $version_path = $user_path."/".$i;
+    $version_path = $user_path."/".$upload_version;
     if (!mkdir($version_path)) {//Create a new directory corresponding to a new version number
         display_error("Failed to make folder ".$version_path);
         return;
@@ -183,13 +182,15 @@ function upload_homework($username, $assignment_id, $homework_file) {
     if (!file_exists($settings_file)) {
         $json = array("selected_assignment"=>1);
         file_put_contents($settings_file, json_encode($json));
+    } else {
+        change_assignment_version($username, $assignment_id, $upload_version, $assignment_config);
     }
     $to_be_compiled = $path_front."/submissions/to_be_compiled.txt";
     if (!file_exists($to_be_compiled)) {
-        file_put_contents($to_be_compiled, $assignment_id."/".$username."/".$i."\n");
+        file_put_contents($to_be_compiled, $assignment_id."/".$username."/".$upload_version."\n");
     } else {
         $text = file_get_contents($to_be_compiled, false);
-        $text = $text.$assignment_id."/".$username."/".$i."\n";
+        $text = $text.$assignment_id."/".$username."/".$upload_version."\n";
         file_put_contents($to_be_compiled, $text);
     }
 
@@ -202,7 +203,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
 // Check if user has permission to edit homework
 function can_edit_assignment($username, $assignment_id, $assignment_config) {
 
-	    // HACK!  To not check due date
+	    // FIXME: HACK!  To not check due date
 	    return true;
 
     $path_front = get_path_front();
