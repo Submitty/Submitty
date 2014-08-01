@@ -152,7 +152,6 @@ function version_changed(){
                             <?php if ($assignment_version_in_grading_queue) {?>
                                 <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
                             <?php } else {?>
-
 <!--			         not in grading queue<br>-->
 
 <!--                                    <?php echo "highest_version ".$highest_version."<br>";  ?>-->
@@ -171,7 +170,6 @@ function version_changed(){
 				    <?php echo "count(testcases_results) ".count($testcases_results)."<br>";  ?>
 				    <?php echo "count(testcases_info) ".count($testcases_info)."<br>";  ?>
 -->
-
 
 <!--                                    <?php foreach($homework_summary as $item) { echo "hi".$item["title"]."<br>"; } ?> 
 -->
@@ -213,7 +211,18 @@ function version_changed(){
                                       </li>
                                     <?php } ?>
                                 </ul>
-                            <?php }?>
+                            <?php } ?>
+                            
+                            <ul class="list-group">
+                                <li class="list-group-item list-group-item-active">
+                                    Submitted Files
+                                </li>
+                                <?php foreach($submitted_files as $file) {?>
+                                    <li class="list-group-item">
+                                        <?php echo $file;?>
+                                    </li>
+                                <?php } ?>
+                            </ul>
                         </div><!-- End Column -->
                     </div><!-- End Row -->
                 </div><!-- End Box -->

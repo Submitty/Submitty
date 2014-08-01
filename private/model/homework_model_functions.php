@@ -237,6 +237,22 @@ function get_class_config($username) {
     return json_decode(removeTrailingCommas(file_get_contents($file)), true);
 }
 
+// Get a list of uploaded files
+function get_submitted_files($username, $assignment_id, $assignment_version) {
+    $path_front = get_path_front();
+    $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
+    $contents = scandir($folder);
+    if (!$contents) {
+        return array();
+    }
+    $filtered_contents = array();
+    foreach ($contents as $item) {
+        if ($item != "." && $item != "..") {
+            array_push($filtered_contents, $item);
+        }
+    }
+    return $filtered_contents;
+}
 
 // Find most recent submission from user
 function most_recent_assignment_version($username, $assignment_id) {
