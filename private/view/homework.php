@@ -1,6 +1,7 @@
 <?php require_once("../private/view/".$course."_container.php");?>
 
 <link href="resources/bootmin.css" rel="stylesheet"></link>
+<link href="resources/main.css" rel="stylesheet"></link>
 
 <?php $course =    $course = htmlspecialchars($_GET["course"]); ?>
 
@@ -104,7 +105,7 @@ function version_changed(){
 <!--		  <h3><?php echo $assignment_name." Version ".$submitting_version." ".$user; ?></h3>-->
 
                     <div class="row" style="margin: 0;">
-                        <div class="col-sm-5" style="padding: 0;">
+                        <div class="col-sm-10" style="padding: 0;">
 <!--                          <span>Summary:</span>-->
                             <?php if ($assignment_version >= 1) {?>
                                 <?php if ($submitting_version_in_grading_queue) {?>
@@ -117,11 +118,9 @@ function version_changed(){
                                 <br><br>
                                 <div class="row">
                                     <div style="float: left; margin-left: 15px;">
-                                        <span>Select Submission Version:</span>
-                                        <br>
                                         <form action="">
+                                            <label>Select Submission Version:</label>
                                             <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
-                     
                                             <select id="versionlist" name="assignment_version" onchange="version_changed();">
                                                 <?php for ($i = 1; $i <= $highest_version; $i++) {?>
                                                     <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?>>
@@ -130,19 +129,14 @@ function version_changed(){
                                             </select>
                                     <!--        <input type="submit" value="Go">-->
                                         </form>
-                                    </div>
-                                    <div style="float: right; margin-right: 15px;">
+                            <?php if ($assignment_version_in_grading_queue) {?>
+                                <span>Version <?php echo $assignment_version;?> is currently being graded.</span><br><br>
+                            <?php } ?>
+
 					  <?php if ($assignment_version != $submitting_version) { ?>
 
                                         <a href="?page=update&course=<?php echo $course;?>&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" 
-                                                             style="text-align:center;">
-
-                                            <input type="submit" class="btn btn-primary" value="Set Version <?php echo $assignment_version;?> 
-                                                                as Active Submission Version"></input>
-                                        </a>
-
-
-
+                                                             style="text-align:center;"><input type="submit" class="btn btn-primary" value="Set Version <?php echo $assignment_version;?> as Active Submission Version"></input></a><br><br>
 					  <?php } ?>
                                     </div>
                                 </div><!-- End Row -->
@@ -151,10 +145,10 @@ function version_changed(){
                             <?php }?>
                     </div><!-- End Column -->
                     <div class="col-sm-1" style="padding: 0;"></div>
-                    <div class="col-sm-6" style="padding: 0;">
-                            <?php if ($assignment_version_in_grading_queue) {?>
-                                <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
-                            <?php } else {?>
+                </div><!-- End Row -->
+                    <div class="row" style="padding: 0;">
+                        <div class="col-sm-6">
+                            <?php if (!$assignment_version_in_grading_queue) {?>
 <!--			         not in grading queue<br>-->
 
 <!--                                    <?php echo "highest_version ".$highest_version."<br>";  ?>-->
@@ -215,9 +209,11 @@ function version_changed(){
                                     <?php } ?>
                                 </ul>
                             <?php } ?>
-                            
+                            </div>
+                            <div class="col-sm-6">
+                            <div class="box">
                             <ul class="list-group">
-                                <li class="list-group-item list-group-item-active">
+                                <li class="list-group-item list-group-item-heading" style="text-decoration:underline">
                                     Submitted Files
                                 </li>
                                 <?php foreach($submitted_files as $file) {?>
@@ -226,6 +222,7 @@ function version_changed(){
                                     </li>
                                 <?php } ?>
                             </ul>
+                            </div>
                         </div><!-- End Column -->
                     </div><!-- End Row -->
                 </div><!-- End Box -->
