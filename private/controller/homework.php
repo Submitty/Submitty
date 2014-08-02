@@ -26,6 +26,16 @@ $most_recent_assignment_version = most_recent_assignment_version($username, $mos
 $all_assignments = $class_config["assignments"];
 
 
+if (isset($_GET["course"])) {
+    $course = htmlspecialchars($_GET["course"]);
+    if (!is_valid_course($course)) {
+          $course = "CONTROLLER_HOMEWORK_NONE_A";
+    } 
+} else {
+    $course = "CONTROLLER_HOMEWORK_NONE_B";
+}
+
+
 if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants to see
     $assignment_id = htmlspecialchars($_GET["assignment_id"]);
     if (!is_valid_assignment($class_config, $assignment_id)) {
@@ -93,6 +103,7 @@ for ($i = 0; $i < count($testcases_info); $i++) {
                 "score"=>$testcases_results[$u]["points_awarded"],
                 "message"=> isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "",
                 "diff"=> isset($testcases_results[$u]["diff"]) ? get_testcase_diff($username, $assignment_id, $assignment_version,$testcases_results[$u]["diff"]) : ""
+    //"diff"=> isset($testcases_results[$u]["diff"]) ? "a" : "b"
             ));
             break;
         }
@@ -109,11 +120,14 @@ if ($submitting_results) {
     $submitting_version_score = "0 / ".$assignment_config["points_visible"];
 }
 
+$submitted_files = get_submitted_files($_SESSION["id"], $assignment_id, $assignment_version);
+
 
 $submitting_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $submitting_version);
 
 $assignment_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $assignment_version);
 render("homework", array(
+    "course"=>$course,
     "assignment_id"=>$assignment_id,
     "assignment_name"=>$assignment_name,
     "all_assignments"=>$all_assignments,
@@ -132,6 +146,7 @@ render("homework", array(
     "submitting_version_score"=>$submitting_version_score,
     "highest_version"=>$highest_version,
     "assignment_version"=>$assignment_version,
+    "submitted_files"=>$submitted_files,
     "TA_grade"=>$TA_grade,
     "max_submissions"=>$max_submissions_for_assignment,
     "submitting_version_in_grading_queue"=>$submitting_version_in_grading_queue,

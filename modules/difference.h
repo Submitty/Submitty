@@ -92,7 +92,11 @@ float Difference::grade() {
 	int max =
 			(output_length_a > output_length_b) ?
 					output_length_a : output_length_b;
-	return (float) distance / (float) max;
+
+	/* CHANGED FROM distance to (1-distance) */
+	/* because distance == 0 when the files are perfect, and that should be worth full credit */
+
+	return (float) (1 - (distance / (float) max ));
 }
 
 float Tokens::grade() {

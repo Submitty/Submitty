@@ -17,7 +17,7 @@ const std::string name = "Text Justification";
 const std::string due_date = "2014-05-15 11:59:59.0";
 
 // Compile Command (executed in student FILES directory)
-const std::string compile_command = "g++ -g *.cpp";
+//const std::string compile_command = "g++ -g *.cpp";  /* should not be in config file */
 
 // Submission parameters
 const int max_submissions = 20;
@@ -32,16 +32,18 @@ const int max_output_size = 100;	// in KB
 // Grading parameters
 const int total_pts = 50;
 const int auto_pts = 30;
-const int readme_pts = 2;
-const int compile_pts = 3;
+//const int readme_pts = 2;
+//const int compile_pts = 3;
 const int ta_pts = 20;
 
 // File directories
 
 // input files directory
-const char* input_dir = "../../CSCI1200/testingInput/HW1";
+const char* input_dir = "test_input/hw1/";
+//../../CSCI1200/testingInput/HW1";
 // expected output files directory
-const char* expected_out_dir = "../../CSCI1200/Scripts/expectedOutput/HW1/";
+const char* expected_out_dir = "test_output/hw1/";
+//../../CSCI1200/Scripts/expectedOutput/HW1/";
 
 // Test cases
 const int num_testcases = 11;
@@ -51,13 +53,13 @@ TestCase testcases[11] = {
 /************* README AND COMPILATION *****************/
 
 TestCase(
-	"Readme",
+	"README",
 	"",
-	"",
+	"FILE_EXISTS",
 	"README.txt",
 	"",
 	"",
-	readme_pts,				// points for readme
+	2, //readme_pts,				// points for readme
 	false,
 	false,
 	DONT_CHECK,
@@ -69,11 +71,11 @@ TestCase(
 TestCase(
 	"Compilation",
 	"",
-	"",
+	"FILE_EXISTS",
 	"a.out",		// name of .exe created by student
 	"",
 	"",
-	compile_pts,				// points for compilation
+	3, //compile_pts,				// points for compilation
 	false,
 	false,
 	DONT_CHECK,
@@ -87,8 +89,8 @@ TestCase(
 TestCase(
 	"left justify example",							// title
 	"./justify.exe example.txt output.txt 16 flush_left",						// details
-	"./a.out example.txt test1_out.txt 16 flush_left",	// command
-	"test1_out.txt",					// output file name [V]
+	"./a.out example.txt output.txt 16 flush_left",	// command
+	"output.txt",					// output file name [V]
 	"Expected output.txt",					// output file description
 	"example_16_flush_left.txt",				// expected output file [V]
 	3,									// points [V]
@@ -103,10 +105,10 @@ TestCase(
 TestCase(
 	"right justify example",							// title
 	"./justify.exe example.txt output.txt 16 flush_right",						// details
-	"./a.out example.txt test2_out.txt 16 flush_right",	// command
-	"test2_out.txt",					// output file name [V]
+	"./a.out example.txt output.txt 16 flush_right",	// command
+	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"example_16_flush_right.txt",				// expected output file [V]
 	3,									// points [V]
 	false,								// hidden [V]
 	false,								// extra credit [V]
@@ -119,10 +121,10 @@ TestCase(
 TestCase(
 	"full justify example",							// title
 	"./justify.exe example.txt output.txt 16 full_justify",						// details
-	"./a.out example.txt test3_out.txt 16 full_justify",	// command
-	"test3_out.txt",					// output file name [V]
+	"./a.out example.txt output.txt 16 full_justify",	// command
+	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"example_16_full_justify.txt",				// expected output file [V]
 	4,									// points [V]
 	false,								// hidden [V]
 	false,								// extra credit [V]
@@ -134,11 +136,11 @@ TestCase(
 ),
 TestCase(
 	"left justify gettysburg address",							// title
-	"./justify.exe gettysburg_address.txt output.txt 16 flush_left",						// details
-	"./a.out gettysburg_address.txt test4_out.txt 16 flush_left",	// command
-	"test4_out.txt",					// output file name [V]
+	"./justify.exe gettysburg_address.txt output.txt 70 flush_left",						// details
+	"./a.out gettysburg_address.txt output.txt 70 flush_left",	// command
+	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"gettysburg_address_70_flush_left.txt",				// expected output file [V]
 	2,									// points [V]
 	true,								// hidden [V]
 	false,								// extra credit [V]
@@ -151,10 +153,10 @@ TestCase(
 TestCase(
 	"right justify gettysburg address",							// title
 	"./justify.exe gettysburg_address.txt output.txt 70 flush_right",						// details
-	"./a.out gettysburg_address.txt test5_out.txt 70 flush_right",	// command
-	"test5_out.txt",					// output file name [V]
+	"./a.out gettysburg_address.txt output.txt 70 flush_right",	// command
+	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"gettysburg_address_70_flush_right.txt",				// expected output file [V]
 	2,									// points [V]
 	true,								// hidden [V]
 	false,								// extra credit [V]
@@ -167,10 +169,10 @@ TestCase(
 TestCase(
 	"full justify gettysburg address",							// title
 	"./justify.exe gettysburg_address.txt output.txt 70 full_justify",	// details
-	"./a.out gettysburg_address.txt test6_out.txt 70 full_justify",	// command
-	"test6_out.txt",					// output file name [V]
+	"./a.out gettysburg_address.txt output.txt 70 full_justify",	// command
+	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"gettysburg_address_70_full_justify.txt",				// expected output file [V]
 	3,									// points [V]
 	false,								// hidden [V]
 	false,								// extra credit [V]
@@ -182,11 +184,11 @@ TestCase(
 ),
 TestCase(
 	"full justify long word",							// title
-	"./justify.exe long_word.txt output.txt 16 full_justify",	// details
-	"./a.out long_word.txt test7_out.txt 16 full_justify",	// command
-	"test7_out.txt",					// output file name [V]
+	"./justify.exe long_word.txt output.txt 15 full_justify",	// details
+	"./a.out long_word.txt output.txt 15 full_justify",	// command
+	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"long_word_15_full_justify.txt",				// expected output file [V]
 	3,									// points [V]
 	false,								// hidden [V]
 	false,								// extra credit [V]
@@ -199,8 +201,8 @@ TestCase(
 TestCase(
 	"lengthier document",							// title
 	"./justify.exe lengthier.txt output.txt 16 full_justify",	// details
-	"./a.out lengthier.txt test8_out.txt 16 full_justify",	// command
-	"test8_out.txt",					// output file name [V]
+	"./a.out lengthier.txt output.txt 16 full_justify",	// command
+	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
 	"example_16_flush_left.txt",				// expected output file [V]
 	3,									// points [V]
@@ -215,8 +217,8 @@ TestCase(
 TestCase(
 	" lots of long words",							// title
 	"./justify.exe lots_long.txt output.txt 16 full_justify",	// details
-	"./a.out lots_long.txt test9_out.txt 16 full_justify",	// command
-	"test9_out.txt",					// output file name [V]
+	"./a.out lots_long.txt output.txt 16 full_justify",	// command
+	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
 	"example_16_flush_left.txt",				// expected output file [V]
 	2,									// points [V]
@@ -230,7 +232,7 @@ TestCase(
 )
 };
 
-TestCase* readmeTestCase = &testcases[0];
+//TestCase* readmeTestCase = &testcases[0];
 TestCase* compileTestCase = &testcases[1];
 
 #endif

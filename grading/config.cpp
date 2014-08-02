@@ -18,6 +18,9 @@
 #include <fstream>
 #include "modules/modules.h"
 #include "grading/TestCase.h"
+
+#include "grading/TestCase.cpp"  /* should not #include a .cpp file */
+
 //#include "../sampleConfig/HW1/config.h"
 
 /*Generates a file in json format containing all of the information defined in

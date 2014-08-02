@@ -9,6 +9,16 @@ static $path_to_path_file = "site_path.txt";
 //This will be changed to whatever exists in the above file
 static $path_front = "";
 function get_path_front() {
+
+   $course = "GPF_NONE_A";
+   if (isset($_GET["course"])) {
+   $course = htmlspecialchars($_GET["course"]);
+   if (!is_valid_course($course)) {
+   $c = $course;
+       $course = "GPF_NONE_B".$c;
+   } 
+   }
+
     global $path_front;
     global $path_to_path_file;
     if ($path_front == "") {
@@ -18,7 +28,7 @@ function get_path_front() {
         }
 
         $file = fopen($path_to_path_file, 'r');
-        $path_front = trim(fgets($file));
+        $path_front = trim(fgets($file))."/".$course;
         fclose($file);
     }
     return $path_front;
@@ -107,7 +117,9 @@ function upload_homework($username, $assignment_id, $homework_file) {
 
 
     // TODO should support more than zip (.tar.gz etc.)
-    if (!($homework_file["type"] === "application/zip")) {//Make sure the file is a zip file
+    if (!($homework_file["type"] === "application/zip") && 
+	!($homework_file["type"] === "application/octet-stream") && 
+	!($homework_file["type"] === "application/x-zip-compressed")) {  //Make sure the file is a zip file
         display_error("Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
         return;
     }
@@ -139,15 +151,14 @@ function upload_homework($username, $assignment_id, $homework_file) {
 
     //Find the next homework version number
 
-    $i = 1;
-    while (file_exists($user_path."/".$i)) {
-		  // FIXME: should not exist?
-        //Replace with symlink?
-        $i++;
+    $upload_version = 1;
+    while (file_exists($user_path."/".$upload_version)) {
+		// FIXME: Replace with symlink
+        $upload_version++;
     }
 
     // Attempt to create folder
-    $version_path = $user_path."/".$i;
+    $version_path = $user_path."/".$upload_version;
     if (!mkdir($version_path)) {//Create a new directory corresponding to a new version number
         display_error("Failed to make folder ".$version_path);
         return;
@@ -180,15 +191,17 @@ function upload_homework($username, $assignment_id, $homework_file) {
     }
     $settings_file = $user_path."/user_assignment_settings.json";
     if (!file_exists($settings_file)) {
-        $json = array("selected_assignment"=>1);
+        $json = array("selected_assignment"=>$upload_version);
         file_put_contents($settings_file, json_encode($json));
+    } else {
+        change_assignment_version($username, $assignment_id, $upload_version, $assignment_config);
     }
     $to_be_compiled = $path_front."/submissions/to_be_compiled.txt";
     if (!file_exists($to_be_compiled)) {
-        file_put_contents($to_be_compiled, $assignment_id."/".$username."/".$i."\n");
+        file_put_contents($to_be_compiled, $assignment_id."/".$username."/".$upload_version."\n");
     } else {
         $text = file_get_contents($to_be_compiled, false);
-        $text = $text.$assignment_id."/".$username."/".$i."\n";
+        $text = $text.$assignment_id."/".$username."/".$upload_version."\n";
         file_put_contents($to_be_compiled, $text);
     }
 
@@ -201,7 +214,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
 // Check if user has permission to edit homework
 function can_edit_assignment($username, $assignment_id, $assignment_config) {
 
-	    // HACK!  To not check due date
+	    // FIXME: HACK!  To not check due date
 	    return true;
 
     $path_front = get_path_front();
@@ -235,6 +248,22 @@ function get_class_config($username) {
     return json_decode(removeTrailingCommas(file_get_contents($file)), true);
 }
 
+// Get a list of uploaded files
+function get_submitted_files($username, $assignment_id, $assignment_version) {
+    $path_front = get_path_front();
+    $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
+    $contents = scandir($folder);
+    if (!$contents) {
+        return array();
+    }
+    $filtered_contents = array();
+    foreach ($contents as $item) {
+        if ($item != "." && $item != "..") {
+            array_push($filtered_contents, $item);
+        }
+    }
+    return $filtered_contents;
+}
 
 // Find most recent submission from user
 function most_recent_assignment_version($username, $assignment_id) {
@@ -257,6 +286,23 @@ function name_for_assignment_id($class_config, $assignment_id) {
         }
     }
     return "";//TODO Error handling
+}
+
+// Check to make sure instructor has added this assignment
+function is_valid_course($course) {
+    if ($course == "csci1200") {
+      return true;
+    }
+    if ($course == "csci1100") {
+      return true;
+    }
+    if ($course == "csci1200test") {
+      return true;
+    }
+    if ($course == "csci1100test") {
+      return true;
+    }
+    return false;
 }
 
 // Check to make sure instructor has added this assignment
@@ -390,12 +436,13 @@ function change_assignment_version($username, $assignment_id, $assignment_versio
 // Converts the JSON "diff" field from submission.json to an array containing
 // file contents
 function get_testcase_diff($username, $assignment_id, $assignment_version, $diff){
+	
     $path_front = get_path_front();
 
     if (!isset($diff["instructor_file"]) ||
         !isset($diff["student_file"]) ||
         !isset($diff["difference"])) {
-        return "";
+        return "FAILED A";
     }
 
     $instructor_file_path = "$path_front/".$diff["instructor_file"];
@@ -404,7 +451,7 @@ function get_testcase_diff($username, $assignment_id, $assignment_version, $diff
     if (!file_exists($instructor_file_path) ||
         !file_exists($student_path . $diff["student_file"]) ||
         !file_exists($student_path . $diff["difference"])){
-        return "";
+        return "FAILED B $instructor_file_path";
     }
 
     $student_content = file_get_contents($student_path.$diff["student_file"]);
