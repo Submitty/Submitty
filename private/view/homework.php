@@ -78,7 +78,7 @@ function version_changed(){
                 <p>Prepare your assignment for submission exactly as described on the <a href="<?php echo $link_absolute;?>/homework.php">homework submission</a> webpage.
 <!--		</p>
 		<p>-->
-		  By clicking "Send File" you are confirming that you have read, understand, and 
+		  By clicking "Submit File" you are confirming that you have read, understand, and 
                   agree to follow the <a href="<?php echo $link_absolute;?>academic_integrity.php">Homework Collaboration and Academic Integrity Policy</a> for this course.
 		</p>
 
@@ -88,24 +88,17 @@ function version_changed(){
                     <label for="file" style="margin-right: 5%;"><b>Select File:</b></label>
                     <input type="file" name="file" id="file" style="display: inline" />
                     <span class="group-btn">
-                        <input type="submit" name="submit" value="Send File" class="btn btn-primary" style="margin-top: 10px">
+                        <input type="submit" name="submit" value="Submit File" class="btn btn-primary" style="margin-top: 10px">
                     </span>
                 </form>
                 </div>
-            </div><!-- End Upload New Homework -->
+<!--            </div>-->
+<!-- End Upload New Homework -->
 
 
-
-
-
-            <div class="panel-body"><!-- Summary Table -->
+<!--            <div class="panel-body">--><!-- Summary Table -->
                 <div class="box">
-<h3>Review Previous Submissions</h3>
-<!--		  <h3><?php echo $assignment_name." Version ".$submitting_version." ".$user; ?></h3>-->
-
-                    <div class="row" style="margin: 0;">
-                        <div class="col-sm-5" style="padding: 0;">
-<!--                          <span>Summary:</span>-->
+<h3>Active  Submission</h3>
                             <?php if ($assignment_version >= 1) {?>
                                 <?php if ($submitting_version_in_grading_queue) {?>
                                     <br><span><b>Active Submission Version: <?php echo $submitting_version;?></b>. 
@@ -114,7 +107,33 @@ function version_changed(){
                                     <br><span><b>Active Submission Version: <?php echo $submitting_version;?></b>. 
                                                  Automated grading score: <b><?php echo $submitting_version_score;?></b>
                                 <?php } ?>
+                            <?php } ?>
+</div>
+<!--
+</div>
+
+
+            <div class="panel-body">
+-->
+<!-- Summary Table -->
+                <div class="box">
+<h3>Review Previous Submissions</h3>
+<!--		  <h3><?php echo $assignment_name." Version ".$submitting_version." ".$user; ?></h3>-->
+
+                    <div class="row" style="margin: 0;">
+                        <div class="col-sm-5" style="padding: 0;">
+<!--                          <span>Summary:</span>-->
+                            <?php if ($assignment_version >= 1) {?>
+<!--
+                                <?php if ($submitting_version_in_grading_queue) {?>
+                                    <br><span><b>Active Submission Version: <?php echo $submitting_version;?></b>. 
+                                                 It is currently being graded.
+                                <?php } else {?>
+                                    <br><span><b>Active Submission Version: <?php echo $submitting_version;?></b>. 
+                                                 Automated grading score: <b><?php echo $submitting_version_score;?></b>
+                                <?php } ?>
                                 <br><br>
+-->
                                 <div class="row">
                                     <div style="float: left; margin-left: 15px;">
                                         <span>Select Submission Version:</span>
@@ -130,6 +149,10 @@ function version_changed(){
                                             </select>
                                     <!--        <input type="submit" value="Go">-->
                                         </form>
+
+
+
+
                                     </div>
                                     <div style="float: right; margin-right: 15px;">
 					  <?php if ($assignment_version != $submitting_version) { ?>
@@ -145,42 +168,47 @@ function version_changed(){
 
 					  <?php } ?>
                                     </div>
+
+
+
                                 </div><!-- End Row -->
                             <?php } else {?>
                                 <br><span>You have not submitted anything for this assignment!</span>
                             <?php }?>
+
+<!-- SUBMITTED FILES -->
+                            <ul class="list-group">
+                                <li class="list-group-item list-group-item-active">
+                                    Submitted Files
+                                </li>
+                                <?php foreach($submitted_files as $file) {?>
+                                    <li class="list-group-item">
+                                        <?php echo $file;?>
+                                    </li>
+                                <?php } ?>
+                            </ul>
+
+
                     </div><!-- End Column -->
                     <div class="col-sm-1" style="padding: 0;"></div>
                     <div class="col-sm-6" style="padding: 0;">
                             <?php if ($assignment_version_in_grading_queue) {?>
                                 <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
                             <?php } else {?>
-<!--			         not in grading queue<br>-->
 
-<!--                                    <?php echo "highest_version ".$highest_version."<br>";  ?>-->
-
-<!--                                    <?php echo "version_results ".var_dump($version_results)."<br>";  ?>-->
-
-<!--
-                                    <?php echo "username ".$username."<br>";  ?>
-
-
-                                    <?php echo "points_received ".$points_received."<br>";  ?>
-                                    <?php echo "points_possible ".$points_possible."<br>";  ?>
-
-                                    <?php echo "count(homework_tests) ".count($homework_tests)."<br>";  ?>
-
-				    <?php echo "count(testcases_results) ".count($testcases_results)."<br>";  ?>
-				    <?php echo "count(testcases_info) ".count($testcases_info)."<br>";  ?>
--->
-
-<!--                                    <?php foreach($homework_summary as $item) { echo "hi".$item["title"]."<br>"; } ?> 
--->
 
 			    
 
+<!-- SCORE BREAKDOWN -->
                                 <ul class="list-group">
-                                    <?php foreach($homework_summary as $item) {?>
+
+
+
+                                    <?php 
+
+				       $total = 0;
+				       $total_possible = 0;
+				       foreach($homework_summary as $item) {?>
 
                                         <?php if (isset($item["score"]) && isset($item["points_possible"]) && $item["points_possible"] != 0) {
                                             if (!($item["points_possible"] > 0)) {
@@ -202,8 +230,10 @@ function version_changed(){
                                           <span class="badge">
                                             <?php if (isset($item["score"])) {
                                                 echo $item["score"];
+						  $total +=  $item["score"];
                                                 if (isset($item["points_possible"])) {
                                                     echo "/".$item["points_possible"];
+						  $total_possible +=  $item["points_possible"];
                                                 }
                                             } else if (isset($item["value"])) {
                                                 echo $item["value"];
@@ -212,20 +242,21 @@ function version_changed(){
                                           </span>
                                           <?php echo $item["title"];?>
                                       </li>
-                                    <?php } ?>
+                                    <?php }
+      $class = "";
+ ?>
+
+                                      <li class="list-group-item <?php echo $class;?>">
+                                          <span class="badge">
+					    <?php echo $total."/".$total_possible; ?>
+                                          </span>
+				       TOTAL
+				       </li>
+
                                 </ul>
                             <?php } ?>
                             
-                            <ul class="list-group">
-                                <li class="list-group-item list-group-item-active">
-                                    Submitted Files
-                                </li>
-                                <?php foreach($submitted_files as $file) {?>
-                                    <li class="list-group-item">
-                                        <?php echo $file;?>
-                                    </li>
-                                <?php } ?>
-                            </ul>
+
                         </div><!-- End Column -->
                     </div><!-- End Row -->
                 </div><!-- End Box -->
