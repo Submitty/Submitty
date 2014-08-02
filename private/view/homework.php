@@ -2,6 +2,7 @@
 
 <link href="resources/bootmin.css" rel="stylesheet"></link>
 <link href="resources/main.css" rel="stylesheet"></link>
+<script src="resources/script/main.js"></script>
 
 <?php $course =    $course = htmlspecialchars($_GET["course"]); ?>
 
@@ -343,5 +344,13 @@ function check_for_upload(assignment, versions_used, versions_allowed) {
 <script>
 // Go through diff queue and run viewer
 loadDiffQueue();
+</script>
+<script>
+//Set time between asking server if the homework has been graded
+//Last argument in ms
+//TODO: Set time between server requests (currently at 1 minute = 60000ms)
+<?php if ($assignment_version_in_grading_queue || $submitting_version_in_grading_queue) {?>
+init_refresh_on_update("<?php echo $course;?>", "<?php echo $assignment_id;?>","<?php echo $assignment_version?>", "<?php echo $submitting_version;?>", "<?php echo !$assignment_version_in_grading_queue;?>", "<?php echo !$submitting_version_in_grading_queue;?>", 60000);
+<?php } ?>
 </script>
 </html>
