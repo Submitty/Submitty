@@ -25,7 +25,6 @@ if (isset($_POST["assignment_id"]) && isset($_POST["assignment_version"]) && iss
             exit();
         }
     }
-    echo $submitting_graded;
     if (!$submitting_graded)
     {
         $results = get_assignment_results($_SESSION["id"], $assignment_id, $submitting_version);
