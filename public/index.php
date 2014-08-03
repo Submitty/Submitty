@@ -1,9 +1,10 @@
-<?php 
+<?php
 
 
 // ============================================
 // GET THE USERNAME OF THE AUTHENTICATED USER
 // ============================================
+
 if (isset($_SERVER['PHP_AUTH_USER'])) {
     $user = $_SERVER['PHP_AUTH_USER'];
 } else if (isset($_SERVER['REMOTE_USER'])) {
@@ -24,8 +25,12 @@ $_SESSION["id"] = $user;
 
 
 if (!isset($_SESSION["id"])) {
-    require_once("../private/controller/homework.php");//Should direct to login instead
-    exit();
+    require_once("../private/controller/homework.php");
+    // if not already authenticated do it
+    //
+    exit();//here
+    //
+
 }
 
 /*if (!isset($_GET["page"])) {

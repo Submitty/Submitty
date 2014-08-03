@@ -127,7 +127,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
     // make folder for this homework (if it doesn't exist)
     $assignment_path = $path_front."/submissions/".$assignment_id;
     if (!file_exists($assignment_path)) {
-        if (!mkdir($assignment_path))
+        if (!mkdir($assignment_path, 0771, true))
         {
             display_error("Failed to make folder ".$assignment_path);
             return;
@@ -165,19 +165,19 @@ function upload_homework($username, $assignment_id, $homework_file) {
     }
 
     $perms = fileperms($version_path);
-    display_file_permissions($perms);
+    //display_file_permissions($perms);
 
     // which group is sticky, but need to set group read access	  
 		  //chmod($version_path,"0750");
 
     $perms = fileperms($version_path);
-    display_file_permissions($perms);
+    //display_file_permissions($perms);
 
     // which group is sticky, but need to set group read access	  
 		  //chmod($version_path,"0544");
 
     $perms = fileperms($version_path);
-    display_file_permissions($perms);
+    //display_file_permissions($perms);
 
     // Unzip files in folder
     $zip = new ZipArchive;
@@ -252,10 +252,15 @@ function get_class_config($username) {
 function get_submitted_files($username, $assignment_id, $assignment_version) {
     $path_front = get_path_front();
     $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
-    $contents = scandir($folder);
+    if ($assignment_version != 0) {
+        $contents = scandir($folder);}
+    else {
+        return array();
+    }
     if (!$contents) {
         return array();
     }
+
     $filtered_contents = array();
     foreach ($contents as $item) {
         if ($item != "." && $item != "..") {
