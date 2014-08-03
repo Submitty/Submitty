@@ -14,6 +14,15 @@ if (isset($_GET["error"])) {//Errors are pushed to the view
     }
 }
 
+$status = "";
+if (isset($_GET["status"])) {//Upload status is pushed to the view
+    $status_code = htmlspecialchars($_GET["status"]);
+    if ($status_code == "uploaded_no_error") {
+        $status = "Upload Successful";
+    }
+}
+
+
 $username = $_SESSION["id"];
 $class_config = get_class_config($_SESSION["id"]);//Gets class.JSON data
 if ($class_config == NULL) {
@@ -151,7 +160,8 @@ render("homework", array(
     "max_submissions"=>$max_submissions_for_assignment,
     "submitting_version_in_grading_queue"=>$submitting_version_in_grading_queue,
     "assignment_version_in_grading_queue"=>$assignment_version_in_grading_queue,
-    "error"=>$error
+    "error"=>$error,
+    "status"=>$status
     )
 );
 ?>

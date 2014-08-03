@@ -55,6 +55,6 @@ if (isset($_FILES["file"])) {
     }
 }
 //Go back to homework page
-header("Location: index.php?course=".$course."&assignment_id=".$assignment_id."error=uploaded_no_error");
+header("Location: index.php?course=".$course."&assignment_id=".$assignment_id."&status=uploaded_no_error");
 
 ?>
