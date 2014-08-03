@@ -336,6 +336,14 @@ function version_changed(){
 
 
 
+<?php if (strlen($status) > 0) {?>
+    <script>
+        alert("<?php echo $status;?>");
+    </script>
+<?php }?>
+
+
+
 <script>
 function check_for_upload(assignment, versions_used, versions_allowed) {
     versions_used = parseInt(versions_used);
