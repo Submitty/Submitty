@@ -33,13 +33,24 @@ var diff = function(){
 		assocs = [];
 	}
 
+	// Utility function for a replaceAll string function
+	// returns string with the "find" regex replaced with "replace"
+	function replaceAll(str, find, replace) {
+		return str.replace(new RegExp(find, 'g'), replace);
+	}
+
 	// Load files to diff
 	function load(file0, file1){
 		init();
+
+		// TODO escape all html characters
+		file0 = replaceAll(file0, "&nbsp;", " ");
+		file1 = replaceAll(file1, "&nbsp;", " ");
+
 		f0 = file0.split("\n");
 		f1 = file1.split("\n");
 
-		for (var i = 0;i<f0.length;i++){
+		for (var i = 0;i < f0.length;i++){
 			if (f0[i] == "" && f1[i] == ""){
 				f0.splice(0,1);
 				f1.splice(0,1);
@@ -159,12 +170,13 @@ var diff = function(){
 				// html += "Insert<br/>";
 				html += "<div class='line missing' id='"+id_preprend+"ins"+i+"'></div>";
 			}
+
 			html += "<div class='line' id='"+id_preprend+"line"+i+
 				"'><span class='line_number "+(i%2 == 0 ? "" : "odd-line")+
 				"'>"+(line_number+1)+"</span>" + lines[i] + "</div>";
 			line_number ++;
 		}
-		element.innerHTML = html;
+		element.innerHTML = "<pre>" + html + "</pre>";
 	}
 
 	return {
