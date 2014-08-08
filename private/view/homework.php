@@ -251,7 +251,8 @@ function version_changed(){
 <!-- DETAILS ON INDIVIDUAL TESTS --> 
 
   <div class="row" style="margin-left: 10px; margin-right: 10px">
-    <?php foreach($homework_tests as $test) {?>
+    <?php $counter = 0;
+    foreach($homework_tests as $test) { ?>
     <br clear="all">
 
     <div class="box2" style="border-radius: 3px;    padding: 0px;    border: 1px solid #cccccc;    height: 100%;  width: 100%;   margin: 5px; position: relative; float: left;    background:rgba(255,255,255,0.8);">
@@ -279,27 +280,28 @@ function version_changed(){
       <span class="<?php echo $class;?>">
         <?php echo $test["score"]."/".$test["points_possible"];?>
       </span>
+      <span>
+        <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Show / Hide</a>
+      </span>
       <?php if ($test["message"] != ""){?>
       <br>
       <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
       <?php }?>
     </div>
-
+    <div id="sidebysidediff<?php echo $counter;?>">
       <!-- SIDE BY SIDE DIFF -->
-
-
       <?php if ($test["diff"] != ""){?>
            <!-- STUDENT INSTRUCTOR OUTPUT -->
 	   <div class="col-md-6">
              <div class="panel panel-default" id="<?php echo $test["title"]; ?>_student">
 	       <?php echo str_replace(" ", "&nbsp;", $test["diff"]["student"]); ?>
-	     </div>
+	        </div>
 	   </div>
 	   <!-- INSTRUCTOR OUTPUT -->
 	   <div class="col-md-6">
              <div class="panel panel-default" id="<?php echo $test["title"]; ?>_instructor">
 	       <?php echo str_replace(" ", "&nbsp;", $test["diff"]["instructor"]); ?>
-	     </div>
+	        </div>
 	   </div>
 	   <script>
              diff_queue.push("<?php echo $test["title"]; ?>");
@@ -308,9 +310,10 @@ function version_changed(){
       <!-- end if -->
       <?php }?>  
 
-      </div>
-
+    </div><!-- end sidebysidediff# -->
+      <?php $counter++;?>
    <!-- end foreach -->
+   </div><!-- end box2 -->
    <?php }?>
 
    <!-- END OF "IS GRADED?" -->    

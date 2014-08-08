@@ -36,4 +36,17 @@ function init_refresh_on_update(course, assignment_id, assignment_version, submi
 {
     setTimeout(function() { check_server(course, assignment_id, assignment_version, submitting_version, assignment_graded, submitting_graded, interval) }, interval);
 }
+
+function toggleDiv(id) {
+    var e = document.getElementById(id);
+    if (!e) {
+        return false;
+    }
+    if (e.style.display == "none") {
+        e.style.display = "block"
+    } else {
+        e.style.display="none"
+    }
+    return false;
+}
         
