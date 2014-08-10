@@ -108,6 +108,7 @@ for ($i = 0; $i < count($testcases_info); $i++) {
             //Data to display in the detail view / Diff Viewer (bottom)
             array_push($homework_tests, array(
                 "title"=>$testcases_info[$i]["title"],
+                "is_hidden"=>$testcases_info[$i]["hidden"],
                 "points_possible"=>$testcases_info[$i]["points"],
                 "score"=>$testcases_results[$u]["points_awarded"],
                 "message"=> isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "",

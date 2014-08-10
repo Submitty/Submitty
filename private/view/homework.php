@@ -167,7 +167,7 @@ function version_changed(){
 
   <div class="row" style="margin-left: 10px; margin-right: 10px">
     <?php $counter = 0;
-    foreach($homework_tests as $test) { ?>
+    foreach($homework_tests as $test) {?>
     <br clear="all">
 
     <div class="box2" style="border-radius: 3px;    padding: 0px;    border: 1px solid #cccccc;    height: 100%;  width: 100%;   margin: 5px; position: relative; float: left;    background:rgba(255,255,255,0.8);">
@@ -193,7 +193,16 @@ function version_changed(){
         <?php echo $test["title"];?>
       </h4>
       <span class="<?php echo $class;?>">
-        <?php echo $test["score"]."/".$test["points_possible"];?>
+        <?php 
+            if ($test["is_hidden"] === true || $test["is_hidden"] == "true" || $test["is_hidden"] == "True") {
+                echo "Hidden";?>
+                </span>
+                </div><!-- End div -->
+                </div><!-- End Box2 -->
+                <?php continue;
+            }
+            echo $test["score"]."/".$test["points_possible"];
+        ?>
       </span>
       <span>
         <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Show / Hide</a>
