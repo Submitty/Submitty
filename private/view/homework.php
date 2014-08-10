@@ -17,13 +17,6 @@
 
 <link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
 
-<?php if ($points_possible == 0) {
-    $percent = 0;
-} else {
-    $percent = (int)($points_received * 100 / $points_possible);
-}
-?>
-
 <?php $user = $_SESSION["id"]; ?>
 
 
@@ -152,7 +145,6 @@ function version_changed(){
                </li>
           <?php } ?>
         </ul>
-
 <!--	     
       </div><!-- End Column ~>
 <!--  FIXME
@@ -166,86 +158,9 @@ function version_changed(){
 
         <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
 
-   <?php } else { ?>
+   <?php } else {?>
 
 
-<!--
-                 </div><!-- End Row ~>
-           <div class="row" style="padding: 0;">
-             <div class="col-sm-6">
--->
-
-
-
-<!-- SCORE BREAKDOWN -->
-<ul class="list-group">
-  <?php 
-     $total = 0;
-     $total_possible = 0;
-     foreach($homework_summary as $item) {
-       if (isset($item["score"]) && isset($item["points_possible"]) && $item["points_possible"] != 0) {
-         if (!($item["points_possible"] > 0)) {
-            $part_percent = 1;
-         } else {
-            $part_percent = $item["score"] / $item["points_possible"];
-         }
-         if ($part_percent == 1) {
-            $class = "";
-         } else if ($part_percent >= 0.5) {
-            $class = " list-group-item-warning";
-         } else {
-            $class = " list-group-item-danger";
-         }
-       } else {
-         $class = "";
-       }  ?>
-  <li class="list-group-item <?php echo $class;?>">
-    <span class="badge">
-      <?php if (isset($item["score"])) {
-               echo $item["score"];
-   	       $total +=  $item["score"];
-               if (isset($item["points_possible"])) {
-                  echo "/".$item["points_possible"];
-	          $total_possible +=  $item["points_possible"];
-               }
-            } else if (isset($item["value"])) {
-               echo $item["value"];
-            }
-            ?>
-    </span>
-    <?php echo $item["title"];?>
-  </li>
-  <?php }
-	$class = "";
-	?>
-  
-  <li class="list-group-item <?php echo $class;?>">
-    <span class="badge">
-      <?php echo $total."/".$total_possible; ?>
-    </span>
-    TOTAL
-  </li>
-</ul>
-
-
-<!--
-                        </div><!-- End Column ~>
-                    </div><!-- End Row ~>
-                </div><!-- End Box ~>
-            </div><!-- End Summary Table ~>
-
-
-<!-- TA Grade ~>
-<!-- FIXME
-  <?~php if (isset($TA_grade) && $TA_grade) {?>
-  <div class="panel-body" style="text-align: right">
-    <button type="button">Show TA Grade</button>
-    <div id="TA-grade">
-    </div>
-  </div>
-  <?~php }?>
-~>
--->
 
 
 <!-- DETAILS ON INDIVIDUAL TESTS --> 
@@ -257,20 +172,20 @@ function version_changed(){
 
     <div class="box2" style="border-radius: 3px;    padding: 0px;    border: 1px solid #cccccc;    height: 100%;  width: 100%;   margin: 5px; position: relative; float: left;    background:rgba(255,255,255,0.8);">
       <?php if (isset($test["score"]) && isset($test["points_possible"]) && $test["points_possible"] != 0) {
-            if (!($test["points_possible"] > 0)) {
-               $part_percent = 1;
-            } else {
-               $part_percent = $test["score"] / $test["points_possible"];
-            }
-            if ($part_percent == 1) {
-               $class = "badge alert-success";
-            } else if ($part_percent >= 0.5) {
-               $class = "badge alert-warning";
-            } else {
-               $class = "badge alert-danger";
-            }
+                if (!($test["points_possible"] > 0)) {
+                   $part_percent = 1;
+                } else {
+                   $part_percent = $test["score"] / $test["points_possible"];
+                }
+                if ($part_percent == 1) {
+                   $class = "badge alert-success";
+                } else if ($part_percent >= 0.5) {
+                   $class = "badge alert-warning";
+                } else {
+                   $class = "badge alert-danger";
+                }
           } else {
-            $class = "badge";
+                $class = "badge";
           } ?>
             
     <div>
@@ -283,12 +198,13 @@ function version_changed(){
       <span>
         <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Show / Hide</a>
       </span>
+          </div>
+    <div id="sidebysidediff<?php echo $counter;?>" style="display:none">
       <?php if ($test["message"] != ""){?>
-      <br>
-      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
+          <br>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
       <?php }?>
-    </div>
-    <div id="sidebysidediff<?php echo $counter;?>">
+
       <!-- SIDE BY SIDE DIFF -->
       <?php if ($test["diff"] != ""){?>
            <!-- STUDENT INSTRUCTOR OUTPUT -->
@@ -312,9 +228,19 @@ function version_changed(){
 
     </div><!-- end sidebysidediff# -->
       <?php $counter++;?>
-   <!-- end foreach -->
    </div><!-- end box2 -->
-   <?php }?>
+   <?php }?><!-- end foreach homework_tests as test-->
+   <div class="box2" style="border-radius: 3px;    padding: 0px;    border: 1px solid #cccccc;    height: 100%;  width: 100%;   margin: 5px; position: relative; float: left;    background:rgba(255,255,255,0.8);">
+        <div>
+              <h4 style="margin-left: 10px; text-align: left;display:inline-block;">
+                    Total
+              </h4>
+              <span class="<?php echo $class;?>">
+                    <?php echo $viewing_version_score."/".$points_visible;?>
+              </span>
+        </div>
+    </div>
+
 
    <!-- END OF "IS GRADED?" -->    
    <?php } ?>

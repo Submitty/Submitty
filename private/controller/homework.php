@@ -129,19 +129,27 @@ if ($submitting_results) {
     $submitting_version_score = "0 / ".$assignment_config["points_visible"];
 }
 
+$viewing_version_results = get_assignment_results($_SESSION["id"], $assignment_id, $assignment_version);
+if ($viewing_version_results) {
+    $viewing_version_score = $viewing_version_results["points_awarded"];
+} else {
+    $viewing_version_score = 0;
+}
+
 $submitted_files = get_submitted_files($_SESSION["id"], $assignment_id, $assignment_version);
 
 
 $submitting_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $submitting_version);
 
 $assignment_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $assignment_version);
+
 render("homework", array(
     "course"=>$course,
     "assignment_id"=>$assignment_id,
     "assignment_name"=>$assignment_name,
     "all_assignments"=>$all_assignments,
     "points_possible"=>$points_possible,
-    "points_received"=>$points_received,
+    "points_visible"=>$assignment_config["points_visible"],
     "homework_summary"=>$homework_summary,
     
       // added for debugging
@@ -153,6 +161,7 @@ render("homework", array(
     "homework_tests"=>$homework_tests,
     "submitting_version"=>$submitting_version,
     "submitting_version_score"=>$submitting_version_score,
+    "viewing_version_score"=>$viewing_version_score,
     "highest_version"=>$highest_version,
     "assignment_version"=>$assignment_version,
     "submitted_files"=>$submitted_files,
