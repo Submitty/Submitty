@@ -1,173 +1,281 @@
 #!/bin/bash
  
-# SET PARAMETERS
+# ======================================================================
+# this script takes in a single parameter, the base path of the all of
+# the submission server files
 
-echo "This script takes 2 parameters (USE FULL PATH)"
-echo "./grade_students <assignment_submission_path> <test_input> <test_output> <results_directory_path>"
-echo ""
+#     ./grade_students <base_path>
 
-echo "Setting Parameters"
-echo "---------------------"
+base_path="$1"
 
-assignment_submission_path="$1"
-echo "Assignment submissions path set to $assignment_submission_path"
-test_input_path="$2"
-echo "Test_Input directory set to $test_input_path"
-test_output_path="$3"
-echo "Test_Output directory set to $test_output_path"
-results_path="$4"
-echo "Results directory set to $results_path"
+# from that directory, we expect:
 
-bin_path="$(pwd)"
-echo "Path to bin set to $bin_path"
+# a subdirectory for each course
+# BASE_PATH/course_apple/
+# BASE_PATH/course_banana/
 
-echo ""
+# a directory within each course for the submissions, further
+# subdirectories for each assignment, then subdirectories for each
+# user, and finally subdirectories for multiple submissions (version)
+# BASE_PATH/course_apple/submissions/
+# BASE_PATH/course_apple/submissions/hw1/
+# BASE_PATH/course_apple/submissions/hw1/smithj
+# BASE_PATH/course_apple/submissions/hw1/smithj/1
+# BASE_PATH/course_apple/submissions/hw1/smithj/2
 
-# EXECUTION
+# input & output files are stored in a similar structure
+# BASE_PATH/course_apple/test_input/hw1/first.txt
+# BASE_PATH/course_apple/test_input/hw1/second.txt
+# BASE_PATH/course_apple/test_output/hw1/solution1.txt
+# BASE_PATH/course_apple/test_output/hw1/solution2.txt
 
-echo "Looking for to_be_compiled.txt in $1"
-if [[ ! -f  "$assignment_submission_path/to_be_compiled.txt" ]]; then
-	echo "Nothing to be compiled"
-	exit
-fi
-
-echo "to_be_compiled.txt found"
-
-while read path; do
-
-    echo "========================================================================"
-    echo "========================================================================"
-
-    echo "PATH " $path
-    x=`expr index "$path" /`
-    whichassignment=${path:0:$x-1}
-    rest=${path:$x:${#path}}
-    x=`expr index "$rest" /`
-    username=${rest:0:$x-1}
-    version=${rest:$x:${#rest}}
-#    echo "WHICH ASSIGNMENT = $whichassignment"
-#    echo "USERNAME = $username"
-#    echo "VERSION = $version"
+# each assignment has executables to be run during grading
+# BASE_PATH/course_apple/bin/hw1/run.out
+# BASE_PATH/course_apple/bin/hw1/validate.out
 
 
-    # make a temporary directory for each student for each submission
-    tmp=`mktemp -d`
-    echo "Temporary directory set to $tmp"
+# =====================================================================
+# The newest (ungraded) submissions have a dummy file in this
+# directory:
+
+# BASE_PATH/to_be_graded/course_apple__hw1__smithj__1
+# BASE_PATH/to_be_graded/course_banana__hw2__doej__5
+
+echo "Grade all submissions in $base_path/to_be_graded/"
 
 
-    submittedfiles="$assignment_submission_path/$path/*"
-    echo "Copying path ($submittedfiles) to tmp directory ($tmp)"
+# OUTER LOOP 
+# will eventually process all submissions 
 
-    cp 1>/dev/null  2>&1  -r $submittedfiles $tmp || echo "ERROR: Failed to copy to temporary directory"
+all_graded=false
 
-    echo "Copying path ($test_input_path/$whichassignment/*) to tmp directory ($tmp)"	
-    cp -r $test_input_path/$whichassignment/* "$tmp" || echo "ERROR: Failed to copy to temporary directory"       
+while [ "$all_graded" != "true" ]; do
+    all_graded=true
 
-    echo "Copying path ($test_output_path/$whichassignment/*) to tmp directory ($tmp)"	
-    cp -r $test_output_path/$whichassignment/* "$tmp" || echo "ERROR: Failed to copy to temporary directory"       
+    # =====================================================================
+    # FIND NEXT ASSIGNMENT TO GRADE (in reverse chronological order)
+    # =====================================================================
 
-    submission_no="$(basename $path)"
-    submission_time="$(date -r $assignment_submission_path/$path "+%F %T")"
+    for NEXT_TO_GRADE in `cd $base_path/to_be_graded && ls -tr`; do
+	echo "========================================================================"
+	echo "WANT TO GRADE $NEXT_TO_GRADE"
+	
+	STARTTIME=$(date +%s)
 
 
-    cd $tmp
+	# FIXME start of idea to make robust... use flock (needs more work)
 
-echo "here in tmp"
-ls -lta
+
+	# --------------------------------------------------------------------
+        # extract the course, assignment, user, and version from the filename
+	with_spaces=${NEXT_TO_GRADE//__/ }
+	t=0
+	course="NOCOURSE"
+	assignment="NOASSIGNMENT"
+	user="NOUSER"
+	version="NOVERSION"
+	for thing in $with_spaces; do	
+	    ((t++))
+	    if [ $t -eq 1 ]
+	    then
+		course=$thing
+	    elif [ $t -eq 2 ]
+	    then
+		assignment=$thing
+	    elif [ $t -eq 3 ]
+	    then
+	    user=$thing
+	    elif [ $t -eq 4 ]
+	    then
+		version=$thing
+	    else
+		echo "FORMAT ERROR: $NEXT_TO_GRADE"
+		continue
+	    fi
+	done
+        # error checking
+        # FIXME: error checking could be more significant
+	if [ $course == "NOCOURSE" ] 
+	then 
+	    echo "ERROR IN COURSE: $course"
+	    continue 
+	fi
+	if [ $assignment == "NOASSIGNMENT" ] 
+	then 
+	    echo "ERROR IN ASSIGNMENT: $assignment"
+	    continue 
+	fi
+	if [ $user == "NOUSER" ] 
+	then 
+	    echo "ERROR IN USER: $user"
+	    continue
+	fi
+	if [ $version == "NOVERSION" ] 
+	then 
+	    echo "ERROR IN VERSION: $version"
+	    continue 
+	fi
+
     
-    echo ""
-    echo "Compile code"
-    echo "-----------------"
+	# --------------------------------------------------------------------
+        # check to see if directory exists
+	submission_path=$base_path/$course/submissions/$assignment/$user/$version 
+	if [ ! -d $submission_path ]
+	then
+	    echo "ERROR, directory does not exist '$submission_path'"
+	    continue
+	fi
+	
+	
 
-    #clang++ -Wall *.cpp -o a.out &> .submit_compilation_output.txt
-    g++ -Wall *.cpp -o a.out    &> .submit_compilation_output.txt
-    compile_error_code=$?
+	test_input_path="$base_path/$course/test_input/$assignment"
+	test_output_path="$base_path/$course/test_output/$assignment"
+	results_path="$base_path/$course/results/$assignment/$user/$version"
+	bin_path="$base_path/$course/bin"
+	
+
+	# --------------------------------------------------------------------
+        # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
+	tmp=`mktemp -d`
 
 
-    if [[ "$compile_error_code" -ne 0 ]] ;
-    then
-	echo "COMPILE ERROR CODE $compile_error_code"
-
-	more .submit_compilation_output.txt
-
-	rm -rf $tmp
-	continue
-    else
-	echo "COMPILE OK"
-    fi
-
-    echo ""
-    echo "Running runner"
-    echo "-----------------"
-
-	# RUN RUNNER
-
-    "$bin_path/$whichassignment/run.out"
-    runner_error_code="$?"
-    if [[ "$runner_error_code" -ne 0 ]] ;
-    then
-	echo "RUNNER ERROR CODE $runner_error_code"
-	rm -rf $tmp
-	continue
-    else
-	echo "RUNNER OK"
-    fi
-    
-
-    echo ""
-    
-	# RUN VALIDATOR
+        # copy submitted files to tmp directory
+	cp 1>/dev/null  2>&1  -r $submission_path/* $tmp || echo "ERROR: Failed to copy to temporary directory"
 
 
 
-    echo ""
-    echo "Running validator"
-    echo "-----------------"
-    "$bin_path/$whichassignment/validate.out" "$submission_no" "$submission_time" "$runner_error_code"
-    validator_error_code="$?"
-    if [[ "$validator_error_code" -ne 0 ]] ;
-    then
-	echo "VALIDATOR ERROR CODE $validator_error_code"
-	rm -rf $tmp
-	continue
-    else
-	echo "VALIDATOR OK"
-    fi
 
-ls -lta
 
-	echo ""
 
-	# Get working directory back to bin
+
+
+
+        # copy input files to tmp directory
+	if [ -d $test_input_path ]
+	then
+	    cp -rf $test_input_path/* "$tmp" || echo "ERROR: Failed to copy to temporary directory"       
+	fi
+	
+
+
+
+
+
+
+
+
+        # copy output files to tmp directory  (SHOULD CHANGE THIS)
+	if [ -d $test_output_path ]
+	then
+	    cp -rf $test_output_path/* "$tmp" || echo "ERROR: Failed to copy to temporary directory"       
+	fi
+	
+	submission_time="$(date -r $submission_path "+%F %T")"
+
+
+
+        # switch to tmp directory
+	cd $tmp
+	
+	
+	# --------------------------------------------------------------------
+        # COMPILE THE SUBMITTED CODE
+        #clang++ -Wall *.cpp -o a.out &> .submit_compilation_output.txt
+	g++ -Wall *.cpp -o a.out    &> .submit_compilation_output.txt
+	compile_error_code=$?
+	
+
+	if [[ "$compile_error_code" -ne 0 ]] ;
+	then
+	    echo "COMPILE ERROR CODE $compile_error_code"
+	else
+	    echo "COMPILE OK"
+	fi
+	
+	
+	# --------------------------------------------------------------------
+        # RUN RUNNER
+	# copy run.out to the tmp directory
+	cp "$bin_path/$assignment/run.out" $tmp/my_run.out
+
+	chmod o+rwx $tmp
+	chmod g+rwx $tmp
+
+
+	chmod o+rwx $tmp/*
+	chmod g+rwx $tmp/*
+
+
+
+#	echo "DEBUG"
+#	pwd
+#	echo " "
+#	ls -lta $tmp
+#	chmod o+r $tmp/my_run.out
+#	ls -lta $tmp/my_run.out
+#	chmod o+r $tmp/my_run.out
+#	echo "DEBUG END"
+
+	# run the run.out as the untrusted user
+	$base_path/bin/untrusted_runscript $tmp/my_run.out &> .submit_runner_output.txt
+	#	"$bin_path/$assignment/run.out" &> .submit_runner_output.txt
+
+	runner_error_code="$?"
+	if [[ "$runner_error_code" -ne 0 ]] ;
+	then
+	    echo "RUNNER ERROR CODE $runner_error_code"
+	else
+	    echo "RUNNER OK"
+	fi
+	
+	
+	# --------------------------------------------------------------------
+        # RUN VALIDATOR
+        "$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" &> .submit_validator_output.txt
+	validator_error_code="$?"
+	if [[ "$validator_error_code" -ne 0 ]] ;
+	then
+	    echo "VALIDATOR ERROR CODE $validator_error_code"
+	else
+	    echo "VALIDATOR OK"
+	fi
+	
+
+	# --------------------------------------------------------------------
+        # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
+
+        # Get working directory back to bin
 	cd "$bin_path"
 
-	# Make directory structure in results if it doesn't exist
+        # clean out all of the old files if this is a re-run
+        rm -rf "$results_path/$path"
+
+        # Make directory structure in results if it doesn't exist
+        mkdir -p "$results_path/$path" || echo "ERROR: Could not create results path $results_path/$path"
+
+        cp  1>/dev/null  2>&1  $tmp/* $tmp/.* "$results_path/$path"
+        # cp  1>/dev/null  2>&1  $tmp/test*_cout.txt $tmp/test*_cerr.txt $tmp/test*_out.txt $tmp/submission.json "$results_path/$path"
+
+
+	# --------------------------------------------------------------------
+        # REMOVE TEMP DIRECTORY
+        rm -rf $tmp
+
+
+	# remove submission from the todo list
+	# start of idea to make robust... use flock (needs more work)
+	#flock ($base_path/to_be_graded/my_lock,LOCK_EX)
+	rm -rf $base_path/to_be_graded/$NEXT_TO_GRADE
+	#flock ($base_path/to_be_graded/my_lock,LOCK_UN)
 
 	
-	mkdir -p "$results_path/$path" || echo "ERROR: Could not create results path $results_path/$path"
+	ENDTIME=$(date +%s)
+	echo "finished with $NEXT_TO_GRADE in ~$(($ENDTIME - $STARTTIME)) seconds"
 
-	echo "made directory $results_path/$path" 
-	echo "Copying temporary directory ($tmp) to results directory ($results_path/$path)"
+	all_graded=false
+	break
+    done
+done
 
-	# redirects prevent complaints about no files matching these patterns
-#	cp  1>/dev/null  2>&1  $tmp/test*_cout.txt $tmp/test*_cerr.txt $tmp/test*_out.txt $tmp/submission.json "$results_path/$path"
-	cp  1>/dev/null  2>&1  $tmp/* "$results_path/$path"
-#|| echo "ERROR: Could not copy temporary directory to results directory"
-
-
-
-
-#remove temporary directory
-	rm -rf $tmp
-
-echo "finished with " $path
-
-
-       break #only do first
-
-done < "$assignment_submission_path/to_be_compiled.txt"
-
-#rm "$assignment_submission_path/to_be_compiled.txt"
-
-
+echo "========================================================================"
 echo "ALL DONE"
