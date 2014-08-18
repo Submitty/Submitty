@@ -48,17 +48,38 @@ echo "Grade all submissions in $base_path/to_be_graded/"
 # will eventually process all submissions 
 
 all_graded=false
+repeat=0
 
 while [ "$all_graded" != "true" ]; do
     all_graded=true
+
+
+    # check for runaway processes (this should never be more that a few, the user limit is 50)
+    numprocesses=$(ps -u untrusted | wc -l)
+    if [[ $numprocesses -gt 20 ]] ; then
+	echo "untrusted is running too many processes" $numprocesses
+	all_graded=false
+	((repeat++))
+	if [[ $repeat -gt 10 ]]; 
+	then 
+	    exit
+	fi
+	sleep 1
+	continue
+    fi
+    repeat=0
+
+
 
     # =====================================================================
     # FIND NEXT ASSIGNMENT TO GRADE (in reverse chronological order)
     # =====================================================================
 
     for NEXT_TO_GRADE in `cd $base_path/to_be_graded && ls -tr`; do
+
+
 	echo "========================================================================"
-	echo "WANT TO GRADE $NEXT_TO_GRADE"
+	echo "GRADE $NEXT_TO_GRADE"
 	
 	STARTTIME=$(date +%s)
 
@@ -118,15 +139,76 @@ while [ "$all_graded" != "true" ]; do
 
     
 	# --------------------------------------------------------------------
-        # check to see if directory exists
+        # check to see if directory exists & is readable
 	submission_path=$base_path/$course/submissions/$assignment/$user/$version 
-	if [ ! -d $submission_path ]
+	#echo "check directory '$submission_path'"
+
+	if [ ! -d "$base_path" ]
 	then
-	    echo "ERROR, directory does not exist '$submission_path'"
+	    echo "ERROR: directory does not exist '$base_path'"
 	    continue
 	fi
-	
-	
+        # note we do not expect $base_path to be readable
+
+	if [ ! -d "$base_path/$course" ]
+	then
+	    echo "ERROR: directory does not exist '$base_path/$course'"
+	    continue
+	fi
+	if [ ! -r "$base_path/$course" ]
+	then
+	    echo "ERROR: directory is not readable '$base_path/$course'"
+	    continue
+	fi
+
+	if [ ! -d "$base_path/$course/submissions" ]
+	then
+	    echo "ERROR: directory does not exist '$base_path/$course/submissions'"
+	    continue
+	fi
+	if [ ! -r "$base_path/$course/submissions" ]
+	then
+	    echo "ERROR: directory is not readable '$base_path/$course/submissions'"
+	    continue
+	fi
+
+	if [ ! -d "$base_path/$course/submissions/$assignment" ]
+	then
+	    echo "ERROR: directory does not exist '$base_path/$course/submissions/$assignment'"
+	    continue
+	fi
+	if [ ! -r "$base_path/$course/submissions/$assignment" ]
+	then
+	    echo "ERROR: directory is not readable '$base_path/$course/submissions/$assignment'"
+	    continue
+	fi
+
+	if [ ! -d "$base_path/$course/submissions/$assignment/$user" ]
+	then
+	    echo "ERROR: directory does not exist '$base_path/$course/submissions/$assignment/$user'"
+	    continue
+	fi
+	if [ ! -r "$base_path/$course/submissions/$assignment/$user" ]
+	then
+	    echo "ERROR: directory is not readable '$base_path/$course/submissions/$assignment/$user'"
+	    continue
+	fi
+
+	if [ ! -d "$submission_path" ]
+	then
+	    echo "ERROR: directory does not exist '$submission_path'"
+	    # this submission does not exist, remove it from the queue
+	    rm -rf $base_path/to_be_graded/$NEXT_TO_GRADE
+	    continue
+	fi
+	if [ ! -r "$submission_path" ]
+	then
+	    echo "ERROR: directory is not readable '$submission_path'"
+	    # leave this submission file for next time (hopefully
+	    # permissions will be corrected then)
+	    continue
+	fi
+
 
 	test_input_path="$base_path/$course/test_input/$assignment"
 	test_output_path="$base_path/$course/test_output/$assignment"
@@ -151,7 +233,7 @@ while [ "$all_graded" != "true" ]; do
 
 
         # copy input files to tmp directory
-	if [ -d $test_input_path ]
+	if [ -d "$test_input_path" ]
 	then
 	    cp -rf $test_input_path/* "$tmp" || echo "ERROR: Failed to copy to temporary directory"       
 	fi
@@ -165,7 +247,7 @@ while [ "$all_graded" != "true" ]; do
 
 
         # copy output files to tmp directory  (SHOULD CHANGE THIS)
-	if [ -d $test_output_path ]
+	if [ -d "$test_output_path" ]
 	then
 	    cp -rf $test_output_path/* "$tmp" || echo "ERROR: Failed to copy to temporary directory"       
 	fi
@@ -196,29 +278,21 @@ while [ "$all_graded" != "true" ]; do
 	# --------------------------------------------------------------------
         # RUN RUNNER
 	# copy run.out to the tmp directory
+	if [ ! -r "$bin_path/$assignment/run.out" ]
+	then
+	    echo "ERROR:  $bin_path/$assignment/run.out  does not exist/is not readable"
+	    continue
+	fi
 	cp "$bin_path/$assignment/run.out" $tmp/my_run.out
 
+	# give the untrusted user read/write/execute permissions on the tmp directory & files
 	chmod o+rwx $tmp
 	chmod g+rwx $tmp
-
-
 	chmod o+rwx $tmp/*
 	chmod g+rwx $tmp/*
 
-
-
-#	echo "DEBUG"
-#	pwd
-#	echo " "
-#	ls -lta $tmp
-#	chmod o+r $tmp/my_run.out
-#	ls -lta $tmp/my_run.out
-#	chmod o+r $tmp/my_run.out
-#	echo "DEBUG END"
-
 	# run the run.out as the untrusted user
 	$base_path/bin/untrusted_runscript $tmp/my_run.out &> .submit_runner_output.txt
-	#	"$bin_path/$assignment/run.out" &> .submit_runner_output.txt
 
 	runner_error_code="$?"
 	if [[ "$runner_error_code" -ne 0 ]] ;
@@ -231,6 +305,12 @@ while [ "$all_graded" != "true" ]; do
 	
 	# --------------------------------------------------------------------
         # RUN VALIDATOR
+	if [ ! -r "$bin_path/$assignment/validate.out" ]
+	then
+	    echo "ERROR:  $bin_path/$assignment/validate.out  does not exist/is not readable"
+	    continue
+	fi
+
         "$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" &> .submit_validator_output.txt
 	validator_error_code="$?"
 	if [[ "$validator_error_code" -ne 0 ]] ;
