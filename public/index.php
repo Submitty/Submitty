@@ -55,6 +55,8 @@ if ($page == "serverop") {
         require_once("../private/controller/upload.php");
     } else if ($page == "update") {
         require_once("../private/controller/update.php");
+    } else if ($page == "checkrefresh") {
+        require_once("../private/controller/check_refresh.php");
     } else {
         require_once("../private/controller/homework.php");
     }
