@@ -6,6 +6,7 @@
 static $path_to_path_file = "site_path.txt";
 
 
+
 //This will be changed to whatever exists in the above file
 static $path_front = "";
 function get_path_front() {
@@ -33,6 +34,7 @@ function get_path_front() {
     }
     return $path_front;
 }
+
 
 
 
@@ -204,6 +206,12 @@ function upload_homework($username, $assignment_id, $homework_file) {
         $text = $text.$assignment_id."/".$username."/".$upload_version."\n";
         file_put_contents($to_be_compiled, $text);
     }
+
+   $course = htmlspecialchars($_GET["course"]);
+   // FIXME: RESTRUCTURE CODE/ HANDLE THIS ERROR PROPERLY
+   // if (!is_valid_course($course)) {
+
+    touch($path_front."/../to_be_graded/".$course."__".$assignment_id."__".$username."__".$upload_version);
 
     // which group is sticky, but need to set group read access	  
 	    //chmod($version_path."/*".$i,"g+r");
