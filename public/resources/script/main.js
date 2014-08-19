@@ -23,7 +23,7 @@ function check_server(course, assignment_id, assignment_version, submitting_vers
             submitting_graded: submitting_graded
         },
         function(data) {
-            if (data === true || data === "true") {
+            if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
             } else {
                 init_refresh_on_update(course, assignment_id, assignment_version, submitting_version, assignment_graded, submitting_graded, interval);
