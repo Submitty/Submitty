@@ -113,15 +113,13 @@ function upload_homework($username, $assignment_id, $homework_file) {
     //ex: homework number, due date, late days
 
     $max_size = 50000;//CHANGE THIS TO GET VALUE FROM APPROPRIATE FILE
-    $allowed = array("zip");
+    $zip_types = array("application.zip", "application/x-zip-compressed");
+    $allowed = array("application/zip","applcation/x-zip-compressed","application/octet-stream","text/x-python-script", "text/plain");
     $filename = explode(".", $homework_file["name"]);
     $extension = end($filename);
 
-
     // TODO should support more than zip (.tar.gz etc.)
-    if (!($homework_file["type"] === "application/zip") && 
-	!($homework_file["type"] === "application/octet-stream") && 
-	!($homework_file["type"] === "application/x-zip-compressed")) {  //Make sure the file is a zip file
+    if (!(in_array($homework_file["type"], $allowed))) {
         display_error("Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
         return;
     }
@@ -182,14 +180,20 @@ function upload_homework($username, $assignment_id, $homework_file) {
     //display_file_permissions($perms);
 
     // Unzip files in folder
-    $zip = new ZipArchive;
-    $res = $zip->open($homework_file["tmp_name"]);
-    if ($res === TRUE) {
-      $zip->extractTo($version_path."/");
-      $zip->close();
+    if (in_array($homework_file["type"], $zip_types)) {
+        $zip = new ZipArchive;
+        $res = $zip->open($homework_file["tmp_name"]);
+        if ($res === TRUE) {
+          $zip->extractTo($version_path."/");
+          $zip->close();
+        } else {
+            display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $version_path."/".$homework_file["name"]);
+            return;
+        }
     } else {
-        display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $version_path."/".$homework_file["name"]);
-        return;
+        if (!move_uploaded_file($homework_file["tmp_name"], $version_path."/".$homework_file["name"])) {
+            display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
+        }
     }
     $settings_file = $user_path."/user_assignment_settings.json";
     if (!file_exists($settings_file)) {
