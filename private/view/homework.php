@@ -195,7 +195,7 @@ function version_changed(){
       <span class="<?php echo $class;?>">
         <?php 
             if ($test["is_hidden"] === true || $test["is_hidden"] == "true" || $test["is_hidden"] == "True") {
-                echo "Hidden";?>
+                echo "Hidden Test Case";?>
                 </span>
                 </div><!-- End div -->
                 </div><!-- End Box2 -->

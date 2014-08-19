@@ -358,6 +358,54 @@ function version_in_grading_queue($username, $assignment_id, $assignment_version
 
 //RESULTS DATA
 
+function get_awarded_points_visible($username, $assignment_id, $assignment_version) {
+    $assignment_config = get_assignment_config($username, $assignment_id);//Gets data from assignment_config.json
+    $testcases_info = $assignment_config["testcases"];//These are the tests run on a homework (for grading etc.)
+    $version_results = get_assignment_results($username, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
+    if ($version_results) { 
+        $testcases_results = $version_results["testcases"];
+    } else {
+        $testcases_results = array();
+    }
+
+    $homework_tests = array();
+    $homework_summary = array();
+    for ($i = 0; $i < count($testcases_info); $i++) {
+        for ($u = 0; $u < count($testcases_results); $u++){
+            //Match the assignment results (user specific) with the configuration (class specific)
+            if ($testcases_info[$i]["title"] == $testcases_results[$u]["test_name"]){
+                //Data to display in summary table
+                array_push($homework_summary, array(
+                    "title"=>$testcases_info[$i]["title"], 
+                    "score"=>$testcases_results[$u]["points_awarded"], 
+                    "points_possible"=>$testcases_info[$i]["points"]
+                ));
+                //Data to display in the detail view / Diff Viewer (bottom)
+                array_push($homework_tests, array(
+                    "title"=>$testcases_info[$i]["title"],
+                    "is_hidden"=>$testcases_info[$i]["hidden"],
+                    "points_possible"=>$testcases_info[$i]["points"],
+                    "score"=>$testcases_results[$u]["points_awarded"],
+                    "message"=> isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "",
+                    "diff"=> isset($testcases_results[$u]["diff"]) ? get_testcase_diff($username, $assignment_id, $assignment_version,$testcases_results[$u]["diff"]) : ""
+        //"diff"=> isset($testcases_results[$u]["diff"]) ? "a" : "b"
+                ));
+                break;
+            }
+        }
+
+    }
+    $version_score = 0;
+    foreach ($homework_tests as $testcase) {
+        if ($testcase["is_hidden"] === false || $testcase["is_hidden"] === "false" || $testcase["is_hidden"] === "False") {
+            $version_score += $testcase["score"];
+        }
+    }
+    return $version_score;
+}
+
+
+
 // Get the test cases from the instructor configuration file
 function get_assignment_config($username, $assignment_id) {
     $path_front = get_path_front();
