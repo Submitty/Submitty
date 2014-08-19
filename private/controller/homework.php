@@ -118,27 +118,17 @@ for ($i = 0; $i < count($testcases_info); $i++) {
             break;
         }
     }
-
 }
 
 $submitting_version = get_user_submitting_version($_SESSION["id"], $assignment_id);//What version they are using as their final submission
-$submitting_results = get_assignment_results($_SESSION["id"], $assignment_id, $submitting_version);//Display the results of this version
-if ($submitting_results) {
-//    $submitting_version_score ="XX".$assignment_id."XX".$submitting_version."XX".$submitting_results["points_awarded"]." / ".$assignment_config["points_visible"];
-    $submitting_version_score = $submitting_results["points_awarded"]." / ".$assignment_config["points_visible"];
-} else {
-    $submitting_version_score = "0 / ".$assignment_config["points_visible"];
-}
+$submitting_version_score = 0;
+$submitting_version_score = get_awarded_points_visible($_SESSION["id"], $assignment_id, $submitting_version)." / ".$assignment_config["points_visible"];
+;
+$viewing_version_score = 0;
+$viewing_version_score = get_awarded_points_visible($_SESSION["id"], $assignment_id, $assignment_version);
 
-$viewing_version_results = get_assignment_results($_SESSION["id"], $assignment_id, $assignment_version);
-if ($viewing_version_results) {
-    $viewing_version_score = $viewing_version_results["points_awarded"];
-} else {
-    $viewing_version_score = 0;
-}
 
 $submitted_files = get_submitted_files($_SESSION["id"], $assignment_id, $assignment_version);
-
 
 $submitting_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $submitting_version);
 
