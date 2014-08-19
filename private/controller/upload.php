@@ -46,15 +46,17 @@ if (isset($_FILES["file"])) {
     if (isset($result["error"])) {
         //Go to error page?
         if ($result["error"] == "assignment_closed") {
-            header("Location: index.php?course=".$course."&assignment_id=".$assignment_id."&error=assignment_closed");
+            $_SESSION["status"] = "assignment_closed";
+            header("Location: index.php?page=displaymessage&course=".$course."&assignment_id=".$assignment_id);
             exit();
         }
-
-        header("Location: index.php?course=".$course."&assignment_id=".$assignment_id."&error=upload_failed");
+        $_SESSION["status"] = "upload_failed";
+        header("Location: index.php?page=displaymessage&course=".$course."&assignment_id=".$assignment_id);
         exit();
     }
 }
 //Go back to homework page
-header("Location: index.php?course=".$course."&assignment_id=".$assignment_id."&status=uploaded_no_error");
+$_SESSION["status"] = "uploaded_no_error";
+header("Location: index.php?page=displaymessage&course=".$course."&assignment_id=".$assignment_id);
 
 ?>
