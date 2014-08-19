@@ -56,7 +56,7 @@ while [ "$all_graded" != "true" ]; do
 
     # check for runaway processes (this should never be more that a few, the user limit is 50)
     numprocesses=$(ps -u untrusted | wc -l)
-    if [[ $numprocesses -gt 20 ]] ; then
+    if [[ $numprocesses -gt 5 ]] ; then
 	echo "untrusted is running too many processes" $numprocesses
 	all_graded=false
 	((repeat++))
@@ -64,7 +64,7 @@ while [ "$all_graded" != "true" ]; do
 	then 
 	    exit
 	fi
-	sleep 1
+	sleep 5
 	continue
     fi
     repeat=0
