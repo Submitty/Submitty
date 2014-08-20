@@ -215,6 +215,15 @@ function version_changed(){
           <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
       <?php }?>
 
+
+
+<!--
+      <?php echo $test["diff"]["student"]; ?>
+      <?php echo $test["diff"]["instructor"]; ?>
+      <?php echo $test["diff"]["difference"]; ?>
+-->
+
+
       <!-- SIDE BY SIDE DIFF -->
       <?php if ($test["diff"] != ""){?>
            <!-- STUDENT INSTRUCTOR OUTPUT -->

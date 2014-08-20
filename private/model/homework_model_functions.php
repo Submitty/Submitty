@@ -508,6 +508,14 @@ function get_testcase_diff($username, $assignment_id, $assignment_version, $diff
 	
     $path_front = get_path_front();
 
+//    return array(
+//            "student" => $diff["instructor_file"],
+//            "instructor"=> $diff["instructor_file"],
+//            "difference" =>  $diff["difference"]
+//        );
+
+
+
     if (!isset($diff["instructor_file"]) ||
         !isset($diff["student_file"]) ||
         !isset($diff["difference"])) {
