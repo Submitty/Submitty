@@ -126,7 +126,7 @@ function version_changed(){
 	<!-- SELECT A PREVIOUS SUBMISSION -->
 	<form action="">
           <label>Select Submission Version:</label>
-          <input type="input" readonly="readonly" name="assignment_id" value="<?~php echo $assignment_id;?>" style="display: none">
+          <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
           <select id="versionlist" name="assignment_version" onchange="version_changed();">
             <?php for ($i = 1; $i <= $highest_version; $i++) {?>
                   <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?> >
