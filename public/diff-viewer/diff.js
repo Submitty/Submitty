@@ -130,7 +130,8 @@ var diff = function(){
 		// Load generated css
 		for (var i = 0;i < style.length;i++){
 			console.log(style[i]);
-			$(style[i][0]).addClass(style[i][1]);
+			$('#' + first_diff_tag + ' > ' + style[i][0]).addClass(style[i][1]);
+			$('#' + second_diff_tag + ' > ' + style[i][0]).addClass(style[i][1]);
 		}
 
 		// Create association events
