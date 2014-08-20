@@ -4,22 +4,19 @@ require_once("../private/model/homework_model_functions.php");
 
 //Make model function calls for homework here
 
-$error = "";
-if (isset($_GET["error"])) {//Errors are pushed to the view
-    $error_code = htmlspecialchars($_GET["error"]);
-    if ($error_code == "upload_failed") {
-        $error = "Upload failed";
-    } else if ($error_code == "assignment_closed") {
-        $error = "This assignment is closed";
-    }
-}
-
 $status = "";
-if (isset($_GET["status"])) {//Upload status is pushed to the view
-    $status_code = htmlspecialchars($_GET["status"]);
+if (isset($_SESSION["status"])) {
+    $status_code = htmlspecialchars($_SESSION["status"]);
     if ($status_code == "uploaded_no_error") {
-        $status = "Upload Successful";
+        $status = "Upload Successful!";
+    } else if ($status_code == "upload_failed") {
+        $status = "Unknown error.  Upload failed.";
+    } else if ($status_code == "assignment_closed") {
+        $status = "Unable to upload, this assignment is closed";
+    } else if ($status_code != "") {
+        $status = $status_code;
     }
+    $_SESSION["status"] = "";
 }
 
 
@@ -53,7 +50,7 @@ if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants
     if (isset($_GET["assignment_version"])) {
         $assignment_version = htmlspecialchars($_GET["assignment_version"]);
     }
-    if (!isset($assignment_version) || !is_valid_assignment_version($username, $assignment_id, $assignment_version)) {
+    if (!isset($assignment_version) || !is_valid_assignment_version($username, $assignment_id, $assignment_version) || $assignment_version == "") {
         $assignment_version = most_recent_assignment_version($username, $assignment_id);
     }
 } else {//Otherwise use the most recent assignment and version
@@ -160,7 +157,6 @@ render("homework", array(
     "max_submissions"=>$max_submissions_for_assignment,
     "submitting_version_in_grading_queue"=>$submitting_version_in_grading_queue,
     "assignment_version_in_grading_queue"=>$assignment_version_in_grading_queue,
-    "error"=>$error,
     "status"=>$status
     )
 );

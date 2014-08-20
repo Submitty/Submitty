@@ -37,6 +37,15 @@ function version_changed(){
 
 
 <!--- IDENTIFY USER & SELECT WHICH HOMEWORK NUMBER -->
+<?php if ($status && $status != "") {?>
+    <div class="panel-body">
+        <div class="box">
+            <h3 style="margin-top:0; margin-bottom:0">
+                <?php echo $status; ?>
+            </h3>
+        </div>
+    </div>
+<?php } ?>
 <h2>Homework Submission for <em> <?php echo $user;?> </em></h2>
 
 <div class="panel-body" style="text-align: left;">
@@ -69,8 +78,7 @@ function version_changed(){
       Collaboration and Academic Integrity Policy</a> for this course.
     </p>
     <form action="?page=upload&course=<?php echo $course?>&assignment_id=<?php echo $assignment_id?>" 
-	  method="post" enctype="multipart/form-data" 
-          onsubmit=" return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>');">
+	  method="post" enctype="multipart/form-data" onsubmit="return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>')">
       <label for="file" style="margin-right: 5%;"><b>Select File:</b></label>
       <input type="file" name="file" id="file" style="display: inline" />
       <span class="group-btn">
@@ -102,6 +110,8 @@ function version_changed(){
        }
     ?>
     </h3>
+    <p><?php echo $highest_version;?> submissions used out of <?php echo $max_submissions;?>.</p>
+
   </div>
 
 
@@ -117,7 +127,7 @@ function version_changed(){
 	<!-- SELECT A PREVIOUS SUBMISSION -->
 	<form action="">
           <label>Select Submission Version:</label>
-          <input type="input" readonly="readonly" name="assignment_id" value="<?~php echo $assignment_id;?>" style="display: none">
+          <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
           <select id="versionlist" name="assignment_version" onchange="version_changed();">
             <?php for ($i = 1; $i <= $highest_version; $i++) {?>
                   <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?> >
@@ -275,41 +285,17 @@ function version_changed(){
 </table>
 </body>
 
-
-<?php if (strlen($error) > 0) {?>
-    <script>
-        alert("<?php echo $error;?>");
-    </script>
-<?php }?>
-
-
-
-<?php if (strlen($status) > 0) {?>
-    <script>
-        alert("<?php echo $status;?>");
-    </script>
-<?php }?>
-
-
-
 <script>
 function check_for_upload(assignment, versions_used, versions_allowed) {
     versions_used = parseInt(versions_used);
     versions_allowed = parseInt(versions_allowed);
-    if (versions_used < versions_allowed) {
-        var message = confirm("Are you sure you want to upload for " + assignment + " ?  You have used " + versions_used + " / " + versions_allowed);
-    } else {
-        var message = confirm("Are you sure you want to upload for " + assignment + " ?  You have used all free uploads.  Uploading may result in a deduction of points.");
+    if (versions_used >= versions_allowed) {
+        var message = confirm("Are you sure you want to upload for " + assignment + " ?  You have already used up all of your free submissions (" + versions_used + " / " + versions_allowed + ").  Uploading may result in loss of points.");
+        return message;
     }
-    if (message == true) {
-        return true;
-    } else {
-        return false;
-    }
+    return true;
 }
 </script>
-
-
 <script>
 // Go through diff queue and run viewer
 loadDiffQueue();
