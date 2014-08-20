@@ -6,6 +6,7 @@
 static $path_to_path_file = "site_path.txt";
 
 
+
 //This will be changed to whatever exists in the above file
 static $path_front = "";
 function get_path_front() {
@@ -33,6 +34,7 @@ function get_path_front() {
     }
     return $path_front;
 }
+
 
 
 
@@ -111,15 +113,13 @@ function upload_homework($username, $assignment_id, $homework_file) {
     //ex: homework number, due date, late days
 
     $max_size = 50000;//CHANGE THIS TO GET VALUE FROM APPROPRIATE FILE
-    $allowed = array("zip");
+    $zip_types = array("application.zip", "application/x-zip-compressed");
+    $allowed = array("application/zip","applcation/x-zip-compressed","application/octet-stream","text/x-python-script", "text/plain");
     $filename = explode(".", $homework_file["name"]);
     $extension = end($filename);
 
-
     // TODO should support more than zip (.tar.gz etc.)
-    if (!($homework_file["type"] === "application/zip") && 
-	!($homework_file["type"] === "application/octet-stream") && 
-	!($homework_file["type"] === "application/x-zip-compressed")) {  //Make sure the file is a zip file
+    if (!(in_array($homework_file["type"], $allowed))) {
         display_error("Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
         return;
     }
@@ -180,14 +180,20 @@ function upload_homework($username, $assignment_id, $homework_file) {
     //display_file_permissions($perms);
 
     // Unzip files in folder
-    $zip = new ZipArchive;
-    $res = $zip->open($homework_file["tmp_name"]);
-    if ($res === TRUE) {
-      $zip->extractTo($version_path."/");
-      $zip->close();
+    if (in_array($homework_file["type"], $zip_types)) {
+        $zip = new ZipArchive;
+        $res = $zip->open($homework_file["tmp_name"]);
+        if ($res === TRUE) {
+          $zip->extractTo($version_path."/");
+          $zip->close();
+        } else {
+            display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $version_path."/".$homework_file["name"]);
+            return;
+        }
     } else {
-        display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $version_path."/".$homework_file["name"]);
-        return;
+        if (!move_uploaded_file($homework_file["tmp_name"], $version_path."/".$homework_file["name"])) {
+            display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
+        }
     }
     $settings_file = $user_path."/user_assignment_settings.json";
     if (!file_exists($settings_file)) {
@@ -204,6 +210,12 @@ function upload_homework($username, $assignment_id, $homework_file) {
         $text = $text.$assignment_id."/".$username."/".$upload_version."\n";
         file_put_contents($to_be_compiled, $text);
     }
+
+   $course = htmlspecialchars($_GET["course"]);
+   // FIXME: RESTRUCTURE CODE/ HANDLE THIS ERROR PROPERLY
+   // if (!is_valid_course($course)) {
+
+    touch($path_front."/../to_be_graded/".$course."__".$assignment_id."__".$username."__".$upload_version);
 
     // which group is sticky, but need to set group read access	  
 	    //chmod($version_path."/*".$i,"g+r");
@@ -349,6 +361,54 @@ function version_in_grading_queue($username, $assignment_id, $assignment_version
 
 
 //RESULTS DATA
+
+function get_awarded_points_visible($username, $assignment_id, $assignment_version) {
+    $assignment_config = get_assignment_config($username, $assignment_id);//Gets data from assignment_config.json
+    $testcases_info = $assignment_config["testcases"];//These are the tests run on a homework (for grading etc.)
+    $version_results = get_assignment_results($username, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
+    if ($version_results) { 
+        $testcases_results = $version_results["testcases"];
+    } else {
+        $testcases_results = array();
+    }
+
+    $homework_tests = array();
+    $homework_summary = array();
+    for ($i = 0; $i < count($testcases_info); $i++) {
+        for ($u = 0; $u < count($testcases_results); $u++){
+            //Match the assignment results (user specific) with the configuration (class specific)
+            if ($testcases_info[$i]["title"] == $testcases_results[$u]["test_name"]){
+                //Data to display in summary table
+                array_push($homework_summary, array(
+                    "title"=>$testcases_info[$i]["title"], 
+                    "score"=>$testcases_results[$u]["points_awarded"], 
+                    "points_possible"=>$testcases_info[$i]["points"]
+                ));
+                //Data to display in the detail view / Diff Viewer (bottom)
+                array_push($homework_tests, array(
+                    "title"=>$testcases_info[$i]["title"],
+                    "is_hidden"=>$testcases_info[$i]["hidden"],
+                    "points_possible"=>$testcases_info[$i]["points"],
+                    "score"=>$testcases_results[$u]["points_awarded"],
+                    "message"=> isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "",
+                    "diff"=> isset($testcases_results[$u]["diff"]) ? get_testcase_diff($username, $assignment_id, $assignment_version,$testcases_results[$u]["diff"]) : ""
+        //"diff"=> isset($testcases_results[$u]["diff"]) ? "a" : "b"
+                ));
+                break;
+            }
+        }
+
+    }
+    $version_score = 0;
+    foreach ($homework_tests as $testcase) {
+        if ($testcase["is_hidden"] === false || $testcase["is_hidden"] === "false" || $testcase["is_hidden"] === "False") {
+            $version_score += $testcase["score"];
+        }
+    }
+    return $version_score;
+}
+
+
 
 // Get the test cases from the instructor configuration file
 function get_assignment_config($username, $assignment_id) {

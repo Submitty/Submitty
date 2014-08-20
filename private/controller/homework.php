@@ -4,22 +4,19 @@ require_once("../private/model/homework_model_functions.php");
 
 //Make model function calls for homework here
 
-$error = "";
-if (isset($_GET["error"])) {//Errors are pushed to the view
-    $error_code = htmlspecialchars($_GET["error"]);
-    if ($error_code == "upload_failed") {
-        $error = "Upload failed";
-    } else if ($error_code == "assignment_closed") {
-        $error = "This assignment is closed";
-    }
-}
-
 $status = "";
-if (isset($_GET["status"])) {//Upload status is pushed to the view
-    $status_code = htmlspecialchars($_GET["status"]);
+if (isset($_SESSION["status"])) {
+    $status_code = htmlspecialchars($_SESSION["status"]);
     if ($status_code == "uploaded_no_error") {
-        $status = "Upload Successful";
+        $status = "Upload Successful!";
+    } else if ($status_code == "upload_failed") {
+        $status = "Unknown error.  Upload failed.";
+    } else if ($status_code == "assignment_closed") {
+        $status = "Unable to upload, this assignment is closed";
+    } else if ($status_code != "") {
+        $status = $status_code;
     }
+    $_SESSION["status"] = "";
 }
 
 
@@ -53,7 +50,7 @@ if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants
     if (isset($_GET["assignment_version"])) {
         $assignment_version = htmlspecialchars($_GET["assignment_version"]);
     }
-    if (!isset($assignment_version) || !is_valid_assignment_version($username, $assignment_id, $assignment_version)) {
+    if (!isset($assignment_version) || !is_valid_assignment_version($username, $assignment_id, $assignment_version) || $assignment_version == "") {
         $assignment_version = most_recent_assignment_version($username, $assignment_id);
     }
 } else {//Otherwise use the most recent assignment and version
@@ -108,6 +105,7 @@ for ($i = 0; $i < count($testcases_info); $i++) {
             //Data to display in the detail view / Diff Viewer (bottom)
             array_push($homework_tests, array(
                 "title"=>$testcases_info[$i]["title"],
+                "is_hidden"=>$testcases_info[$i]["hidden"],
                 "points_possible"=>$testcases_info[$i]["points"],
                 "score"=>$testcases_results[$u]["points_awarded"],
                 "message"=> isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "",
@@ -117,31 +115,29 @@ for ($i = 0; $i < count($testcases_info); $i++) {
             break;
         }
     }
-
 }
 
 $submitting_version = get_user_submitting_version($_SESSION["id"], $assignment_id);//What version they are using as their final submission
-$submitting_results = get_assignment_results($_SESSION["id"], $assignment_id, $submitting_version);//Display the results of this version
-if ($submitting_results) {
-//    $submitting_version_score ="XX".$assignment_id."XX".$submitting_version."XX".$submitting_results["points_awarded"]." / ".$assignment_config["points_visible"];
-    $submitting_version_score = $submitting_results["points_awarded"]." / ".$assignment_config["points_visible"];
-} else {
-    $submitting_version_score = "0 / ".$assignment_config["points_visible"];
-}
+$submitting_version_score = 0;
+$submitting_version_score = get_awarded_points_visible($_SESSION["id"], $assignment_id, $submitting_version)." / ".$assignment_config["points_visible"];
+;
+$viewing_version_score = 0;
+$viewing_version_score = get_awarded_points_visible($_SESSION["id"], $assignment_id, $assignment_version);
+
 
 $submitted_files = get_submitted_files($_SESSION["id"], $assignment_id, $assignment_version);
-
 
 $submitting_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $submitting_version);
 
 $assignment_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $assignment_version);
+
 render("homework", array(
     "course"=>$course,
     "assignment_id"=>$assignment_id,
     "assignment_name"=>$assignment_name,
     "all_assignments"=>$all_assignments,
     "points_possible"=>$points_possible,
-    "points_received"=>$points_received,
+    "points_visible"=>$assignment_config["points_visible"],
     "homework_summary"=>$homework_summary,
     
       // added for debugging
@@ -153,6 +149,7 @@ render("homework", array(
     "homework_tests"=>$homework_tests,
     "submitting_version"=>$submitting_version,
     "submitting_version_score"=>$submitting_version_score,
+    "viewing_version_score"=>$viewing_version_score,
     "highest_version"=>$highest_version,
     "assignment_version"=>$assignment_version,
     "submitted_files"=>$submitted_files,
@@ -160,7 +157,6 @@ render("homework", array(
     "max_submissions"=>$max_submissions_for_assignment,
     "submitting_version_in_grading_queue"=>$submitting_version_in_grading_queue,
     "assignment_version_in_grading_queue"=>$assignment_version_in_grading_queue,
-    "error"=>$error,
     "status"=>$status
     )
 );

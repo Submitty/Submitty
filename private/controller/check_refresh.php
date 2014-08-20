@@ -21,7 +21,7 @@ if (isset($_POST["assignment_id"]) && isset($_POST["assignment_version"]) && iss
     if (!$assignment_graded) {
         $results = get_assignment_results($_SESSION["id"], $assignment_id, $assignment_version);
         if ($results != NULL && $results != false) {
-            echo "true";
+            echo "REFRESH_ME";
             exit();
         }
     }
@@ -29,7 +29,7 @@ if (isset($_POST["assignment_id"]) && isset($_POST["assignment_version"]) && iss
     {
         $results = get_assignment_results($_SESSION["id"], $assignment_id, $submitting_version);
         if ($results != NULL && $results != false) {
-            echo "true";
+            echo "REFRESH_ME";
             exit();
         }
     }

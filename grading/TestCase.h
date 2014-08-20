@@ -119,6 +119,8 @@ class TestCase {
 				return diffLine( student_out, expected_out );
 		}
 
+  int seconds_to_run() { return 5; }
+
 	private:
 		std::string _title;
 		std::string _details;

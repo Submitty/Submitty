@@ -200,11 +200,11 @@ TestCase(
 ),
 TestCase(
 	"lengthier document",							// title
-	"./justify.exe lengthier.txt output.txt 16 full_justify",	// details
-	"./a.out lengthier.txt output.txt 16 full_justify",	// command
+	"./justify.exe hidden_input.txt output.txt 100 full_justify",	// details
+	"./a.out hansel_and_gretel.txt output.txt 100 full_justify",	// command
 	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"hansel_and_gretel_100_full_justify.txt",				// expected output file [V]
 	3,									// points [V]
 	true,								// hidden [V]
 	true,								// extra credit [V]
@@ -216,11 +216,11 @@ TestCase(
 ),
 TestCase(
 	" lots of long words",							// title
-	"./justify.exe lots_long.txt output.txt 16 full_justify",	// details
-	"./a.out lots_long.txt output.txt 16 full_justify",	// command
+	"./justify.exe hidden_input.txt output.txt 20 flush_right",	// details
+	"./a.out longestwords.txt output.txt 20 flush_right",	// command
 	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
-	"example_16_flush_left.txt",				// expected output file [V]
+	"longestwords_20_flush_right.txt",				// expected output file [V]
 	2,									// points [V]
 	true,								// hidden [V]
 	true,								// extra credit [V]
