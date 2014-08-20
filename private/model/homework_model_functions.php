@@ -215,6 +215,24 @@ function upload_homework($username, $assignment_id, $homework_file) {
    // FIXME: RESTRUCTURE CODE/ HANDLE THIS ERROR PROPERLY
    // if (!is_valid_course($course)) {
 
+    // If to be graded path doesn't exist, create new one
+    //TODO, set correct permissions 
+    if (!file_exists($path_front."/../to_be_graded")) {
+
+        if (!mkdir($path_front."/../to_be_graded", 0771, true))
+        {
+
+            display_error("Failed to make folder ".$path_front."/../to_be_graded");
+            return;
+        }
+    }
+    if (!file_exists($path_front."/../to_be_graded/".$course."__".$assignment_id."__".$username."__")) {
+        if (!mkdir($path_front."/../to_be_graded/".$course."__".$assignment_id."__".$username."__", 0771, true))
+        {
+            display_error("Failed to make folder ".$path_front."/../to_be_graded/".$course."__".$assignment_id."__".$username."__");
+            return;
+        }
+    }
     touch($path_front."/../to_be_graded/".$course."__".$assignment_id."__".$username."__".$upload_version);
 
     // which group is sticky, but need to set group read access	  
