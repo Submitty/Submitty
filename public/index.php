@@ -11,7 +11,10 @@ if (isset($_SERVER['PHP_AUTH_USER'])) {
     $user = $_SERVER['PHP_AUTH_USER'];
 } else {
     echo 'Internal Error - Not Authenticated';
-    return -1;
+    // if not already authenticated do it
+    //
+    exit();//here
+    //
 }
 
 
@@ -26,10 +29,8 @@ $_SESSION["id"] = $user;
 
 if (!isset($_SESSION["id"])) {
     require_once("../private/controller/homework.php");
-    // if not already authenticated do it
-    //
-    exit();//here
-    //
+    exit();
+
 
 }
 
