@@ -387,6 +387,10 @@ function get_awarded_points_visible($username, $assignment_id, $assignment_versi
         $testcases_results = array();
     }
 
+
+// FIXME: VERY BAD STYLE: THIS CODE IS DUPLICATED IN HOMEWORK_MODEL_FUNCTIONS :(
+
+
     $homework_tests = array();
     $homework_summary = array();
     for ($i = 0; $i < count($testcases_info); $i++) {
@@ -406,6 +410,7 @@ function get_awarded_points_visible($username, $assignment_id, $assignment_versi
                     "points_possible"=>$testcases_info[$i]["points"],
                     "score"=>$testcases_results[$u]["points_awarded"],
                     "message"=> isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "",
+                    "compilation_output"=> isset($testcases_results[$u]["compilation_output"]) ? $testcases_results[$u]["compilation_output"] : "",
                     "diff"=> isset($testcases_results[$u]["diff"]) ? get_testcase_diff($username, $assignment_id, $assignment_version,$testcases_results[$u]["diff"]) : ""
         //"diff"=> isset($testcases_results[$u]["diff"]) ? "a" : "b"
                 ));

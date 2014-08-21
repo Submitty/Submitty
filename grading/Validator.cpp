@@ -146,21 +146,21 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
   //  int t = 1;
   //for (int i = index; i < num_testcases; ++i) {
   for (int i = 0; i < num_testcases; ++i) {
-
+    
     std::cout << testcases[i].title() << " - points: " << testcases[i].points()
               << std::endl;
 
-
-     /* TODO: Always returns 0 ? */
-      int testcase_grade = 0;
-
-      bool has_diff = false;
-
-      std::string message = "";
-
+    
+    /* TODO: Always returns 0 ? */
+    int testcase_grade = 0;
+    
+    bool has_diff = false;
+    
+    std::string message = "";
+    
     if (testcases[i].command() == std::string("FILE_EXISTS")) {
       std::cerr << "THIS IS A FILE EXISTS TEST! " << std::endl;
-
+      
       if ( access( testcases[i].raw_filename().c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
 	std::cerr << "file does exist: " << testcases[i].raw_filename() << std::endl;
 	testcase_grade = testcases[i].points();
@@ -169,9 +169,9 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 	std::cerr << "ERROR file DOES NOT exist: " << testcases[i].raw_filename() << std::endl;
 	message = "ERROR: " + testcases[i].raw_filename() + " was NOT FOUND!";
       }
-
+      
     }
-
+    
     else {
 
       // Pull in student output & expected output
@@ -307,10 +307,13 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 		    << "\t\t\t\t\"student_file\":\"" << testcases[i].filename()
 		    << "\",\n"
 		    << "\t\t\t\t\"difference\":\"" << testcases[i].prefix() << "_diff.json\"\n"
-		    << "\t\t\t}\n";
+		    << "\t\t\t},\n";
     }
     if (message != "") {
       testcase_json << "\t\t\t\"message\": \"" << message << "\",\n";
+    }
+    if (1) {//message != "") {
+      testcase_json << "\t\t\t\"compilation_output\": \".submit_compilation_output.txt\",\n";
     }
     
     testcase_json << last_line;
