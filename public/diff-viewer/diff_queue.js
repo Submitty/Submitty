@@ -12,7 +12,7 @@ function loadDiffQueue(){
 	for (var i = 0; i < diff_queue.length; i++){
 
 		var title = diff_queue[i];
-		title = title.split(' ').join('\ ');
+		title = title.split(' ').join('\\ ');
 
 		var student_element_id = title+"_student";
 		var instructor_element_id = title+"_instructor";
