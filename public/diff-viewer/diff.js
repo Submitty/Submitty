@@ -137,12 +137,12 @@ var diff = function(){
 		// Create association events
 		for (var i = 0;i < assocs.length;i++){
 			var selectors = assocs[i];
-			setup_line_hover(selectors);
+			setup_line_hover(selectors, first_diff_tag, second_diff_tag);
 		}
 	}
 
 	// Setup line selectors for hover event
-	function setup_line_hover(selectors){
+	function setup_line_hover(selectors, first_diff_tag, second_diff_tag){
 		// Function called when group is hovered over
 		var event_function_hover_on = function(e){
 			for (var u = 0;u<selectors.length;u++){
