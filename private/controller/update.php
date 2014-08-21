@@ -15,7 +15,7 @@ if (isset($_GET["course"])) {
        $assignment_config = get_assignment_config($_SESSION["id"], $assignment_id);
        if (!can_edit_assignment($_SESSION["id"], $assignment_id, $assignment_config)) {
            $_SESSION["status"] = "assignment_closed";
-           header ("Location: index.php?course=".$course."&assignment_id=".$assignment_id."&assignment_version=".$assignment_version.);
+           header ("Location: index.php?course=".$course."&assignment_id=".$assignment_id."&assignment_version=".$assignment_version);
            exit();
        }
        change_assignment_version($_SESSION["id"], $assignment_id, $assignment_version, $assignment_config);
