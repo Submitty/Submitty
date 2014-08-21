@@ -1,3 +1,9 @@
+<!-- The user's umask is ignored for the user running php, so we need
+to set it from inside of php to make sure the group read & execute
+permissions aren't lost for newly created files & directories.  -->
+<?php umask (0027); ?>
+
+
 <?php
 
 // This file is relative to the public directory of the website.  (It
@@ -118,6 +124,11 @@ function upload_homework($username, $assignment_id, $homework_file) {
     $filename = explode(".", $homework_file["name"]);
     $extension = end($filename);
 
+//    // FIXME TODO should support more than zip (.tar.gz etc.)
+//    if (!($homework_file["type"] === "application/zip") && 
+//	!($homework_file["type"] === "application/octet-stream") && 
+//	!($homework_file["type"] === "application/x-zip-compressed")) {  //Make sure the file is a zip file
+
     // TODO should support more than zip (.tar.gz etc.)
     if (!(in_array($homework_file["type"], $allowed))) {
         display_error("Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
@@ -127,7 +138,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
     // make folder for this homework (if it doesn't exist)
     $assignment_path = $path_front."/submissions/".$assignment_id;
     if (!file_exists($assignment_path)) {
-        if (!mkdir($assignment_path, 0771, true))
+        if (!mkdir($assignment_path)) //, 0771, true))
         {
             display_error("Failed to make folder ".$assignment_path);
             return;
@@ -202,6 +213,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
     } else {
         change_assignment_version($username, $assignment_id, $upload_version, $assignment_config);
     }
+/*
     $to_be_compiled = $path_front."/submissions/to_be_compiled.txt";
     if (!file_exists($to_be_compiled)) {
         file_put_contents($to_be_compiled, $assignment_id."/".$username."/".$upload_version."\n");
@@ -210,6 +222,7 @@ function upload_homework($username, $assignment_id, $homework_file) {
         $text = $text.$assignment_id."/".$username."/".$upload_version."\n";
         file_put_contents($to_be_compiled, $text);
     }
+*/
 
    $course = htmlspecialchars($_GET["course"]);
    // FIXME: RESTRUCTURE CODE/ HANDLE THIS ERROR PROPERLY
@@ -505,6 +518,14 @@ function change_assignment_version($username, $assignment_id, $assignment_versio
 function get_testcase_diff($username, $assignment_id, $assignment_version, $diff){
 	
     $path_front = get_path_front();
+
+//    return array(
+//            "student" => $diff["instructor_file"],
+//            "instructor"=> $diff["instructor_file"],
+//            "difference" =>  $diff["difference"]
+//        );
+
+
 
     if (!isset($diff["instructor_file"]) ||
         !isset($diff["student_file"]) ||

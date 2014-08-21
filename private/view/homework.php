@@ -1,5 +1,6 @@
 <?php require_once("../private/view/".$course."_container.php");?>
 
+
 <link href="resources/bootmin.css" rel="stylesheet"></link>
 <link href="resources/main.css" rel="stylesheet"></link>
 <script src="resources/script/main.js"></script>
@@ -223,6 +224,15 @@ function version_changed(){
           <br>
           <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
       <?php }?>
+
+
+
+<!--
+      <?php echo $test["diff"]["student"]; ?>
+      <?php echo $test["diff"]["instructor"]; ?>
+      <?php echo $test["diff"]["difference"]; ?>
+-->
+
 
       <!-- SIDE BY SIDE DIFF -->
       <?php if ($test["diff"] != ""){?>
