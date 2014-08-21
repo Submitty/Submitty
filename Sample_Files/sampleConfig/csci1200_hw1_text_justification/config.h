@@ -64,8 +64,8 @@ TestCase(
 	false,
 	DONT_CHECK,
 	DONT_CHECK,
-	false,
-	"",
+	//	false,
+	//"",
 	NULL
 ),
 TestCase(
@@ -80,8 +80,8 @@ TestCase(
 	false,
 	DONT_CHECK,
 	DONT_CHECK,
-	false,
-	"",
+	//false,
+	//"",
 	NULL
 ),
 
@@ -98,8 +98,8 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	false, 								// recompilation
-	"",									// recompilation command
+	//	false, 								// recompilation
+	//"",									// recompilation command
 	&myersDiffbyLinesByChar				// compare function [V]
 ),
 TestCase(
@@ -114,8 +114,8 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	false, 								// recompilation
-	"",									// recompilation command
+	//false, 								// recompilation
+	//"",									// recompilation command
 	&myersDiffbyLinesByChar				// compare function [V]
 ),
 TestCase(
@@ -130,8 +130,8 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	false, 								// recompilation
-	"",									// recompilation command
+	//false, 								// recompilation
+	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 ),
 TestCase(
@@ -146,8 +146,8 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	false, 								// recompilation
-	"",									// recompilation command
+	//false, 								// recompilation
+	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 ),
 TestCase(
@@ -162,8 +162,8 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	false, 								// recompilation
-	"",									// recompilation command
+	//false, 								// recompilation
+	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 ),
 TestCase(
@@ -178,8 +178,8 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	false, 								// recompilation
-	"",									// recompilation command
+	//false, 								// recompilation
+	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 ),
 TestCase(
@@ -194,8 +194,8 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	false, 								// recompilation
-	"",									// recompilation command
+	//false, 								// recompilation
+	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 ),
 TestCase(
@@ -210,8 +210,8 @@ TestCase(
 	true,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	false, 								// recompilation
-	"",									// recompilation command
+	//false, 								// recompilation
+	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 ),
 TestCase(
@@ -226,8 +226,8 @@ TestCase(
 	true,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	false, 								// recompilation
-	"",									// recompilation command
+	//false, 								// recompilation
+	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 )
 };
