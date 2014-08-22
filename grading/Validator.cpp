@@ -156,42 +156,55 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 	testcases[i].isCompilationTest()) {
       std::cerr << "THIS IS A FILE EXISTS TEST! " << std::endl;
       
-      if ( access( testcases[i].raw_filename().c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
-	std::cerr << "file does exist: " << testcases[i].raw_filename() << std::endl;
+      if ( access( testcases[i].details().c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
+	std::cerr << "file does exist: " << testcases[i].details() << std::endl;
 	testcase_grade = testcases[i].points();
-	message = testcases[i].raw_filename() + " was found";
+	message = testcases[i].details() + " was found";
       } else {
-	std::cerr << "ERROR file DOES NOT exist: " << testcases[i].raw_filename() << std::endl;
-	message = "ERROR: " + testcases[i].raw_filename() + " was NOT FOUND!";
+	std::cerr << "ERROR file DOES NOT exist: " << testcases[i].details() << std::endl;
+	message = "ERROR: " + testcases[i].details() + " was NOT FOUND!";
       }
       
     }
     
     else {
 
+      std::cout << "num comparisons " << testcases[i].numFileComparisons() << std::endl;
+      assert (testcases[i].numFileComparisons() > 0);
       // Pull in student output & expected output
-      std::ifstream student_instr(testcases[i].filename().c_str());
+      std::ifstream student_instr(testcases[i].filename(0).c_str());
       if (!student_instr) {
 	//#ifdef DEBUG
-	std::cerr << "ERROR: Student's " << testcases[i].filename()
+	std::cerr << "ERROR: Student's " << testcases[i].filename(0)
 		  << " does not exist" << std::endl;
 	//#endif
 	//continue;
-	message = "ERROR: Student's expected output " + testcases[i].raw_filename() + " was not created!";
+	//
+	//assert (testcases[i].numFileComparisons() > 0);
+	//if  (testcases[i].numFileComparisons() > 0) {
+	  message = "ERROR: Student's expected output " + testcases[i].raw_filename(0) + " was not created!";
+	  //}
       } else  {
 	
-	std::ifstream expected_instr(testcases[i].expected().c_str());
+
+
+      std::cout << "num comparisons " << testcases[i].numFileComparisons() << std::endl;
+      assert (testcases[i].numFileComparisons() > 0);
+
+	std::ifstream expected_instr(testcases[i].expected(0).c_str());
 	if (!expected_instr) {
 	  //#ifdef DEBUG
-	  std::cerr << "HOMEWORK CONFIGURATION ERROR: Instructor's " << testcases[i].expected()
+	  std::cerr << "HOMEWORK CONFIGURATION ERROR: Instructor's " << testcases[i].expected(0)
 		    << " does not exist" << std::endl;
-	  message = "HOMEWORK CONFIGURATION ERROR: Instructor's " + testcases[i].expected()
+	  message = "HOMEWORK CONFIGURATION ERROR: Instructor's " + testcases[i].expected(0)
 								  + " does not exist!";
 	  //#endif
 	  //continue;
 	} else {
 	  
 	  // Check cout and cerr
+	  /*
+
 	  std::stringstream cout_path;
 	  cout_path << testcases[i].prefix() << "_cout.txt";
 	  std::ifstream cout_instr(cout_path.str().c_str());
@@ -200,6 +213,7 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 	      std::cerr << "ERROR: " << testcases[i].prefix() << "_cout.txt does not exist"
 			<< std::endl;
 	    } else {
+
 	      if (testcases[i].coutCheck() == WARN_IF_NOT_EMPTY) {
 		std::string content;
 		cout_instr >> content;
@@ -234,11 +248,13 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 	      }
 	    }
 	  }
+	  */
       
 	  TestResults *result;
 	  
-	  const std::string blank = "";
+	  //const std::string blank = "";
 	  
+	  /*
 	  if (!student_instr && !expected_instr)
 	    result = testcases[i].compare(blank, blank);
 	  else if (!student_instr && expected_instr != NULL) {
@@ -260,6 +276,10 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 			  std::istreambuf_iterator<char>());
 	    result = testcases[i].compare(s, e);
 	  }
+	  */
+
+
+	  result = testcases[i].compare(0); //s, e);
 
 	  has_diff = true;
 	  
@@ -284,8 +304,6 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
     const char *last_line = (i == num_testcases - 1) ? "\t\t}\n" : "\t\t},\n";
 
 
-    std::stringstream expected_path;
-    expected_path << expected_out_dir << testcases[i].expected();
 
     total_grade += testcase_grade;
 
@@ -296,10 +314,18 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
                   << "\t\t\t\"points_awarded\": " << testcase_grade << ",\n";
 
     if (has_diff) {
+
+      assert (testcases[i].numFileComparisons() > 0);
+      std::stringstream expected_path;
+      expected_path << expected_out_dir << testcases[i].expected(0);
+      
       testcase_json << "\t\t\t\"diff\":{\n"
+
+		    << "\t\t\t\t\"diff_id\":\"diff_test" << i << "_" << 0
+		    << "\",\n"
 		    << "\t\t\t\t\"instructor_file\":\"" << expected_path.str()
 		    << "\",\n"
-		    << "\t\t\t\t\"student_file\":\"" << testcases[i].filename()
+		    << "\t\t\t\t\"student_file\":\"" << testcases[i].filename(0)
 		    << "\",\n"
 		    << "\t\t\t\t\"difference\":\"" << testcases[i].prefix() << "_diff.json\"\n"
 		    << "\t\t\t},\n";

@@ -61,91 +61,79 @@ TestCase::MakeTestCase(
 	 "non leap year test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <nonleapyear.txt", // 1> cout.txt 2> cerr.txt",                  // command
-	 "cout.txt",		     // output (STDOUT)
-	 "STDOUT",                   // output description
-	 "test1_output.txt",  // expected output
 	 TestCasePoints(5),
-	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	&myersDiffbyLinesByChar		// compare function [V]
-	 ),
+	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
+			    "cout.txt",					// output file name [V]
+			    "STDOUT",					// output file description
+			    "test1_output.txt"),  // expected output
+	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+		       ),
 TestCase::MakeTestCase(
 	 "leap year test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <leapyear.txt", // 1> cout.txt 2> cerr.txt",                  // command
-	 "cout.txt",		     // output (STDOUT)
-	 "STDOUT",                   // output description
-	 "test2_output.txt",  // expected output
 	 TestCasePoints(5),
-	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	&myersDiffbyLinesByChar		// compare function [V]
-	 ),
+	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
+			    "cout.txt",					// output file name [V]
+			    "STDOUT",					// output file description
+			    "test2_output.txt"),  // expected output
+	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+		       ),
 TestCase::MakeTestCase(
 	 "corner case A test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <corner_case_A.txt", // 1> cout.txt 2> cerr.txt",                  // command
-	 "cout.txt",		     // output (STDOUT)
-	 "STDOUT",                   // output description
-	 "test3_output.txt",  // expected output
 	 TestCasePoints(2),
-	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	&myersDiffbyLinesByChar		// compare function [V]
-	 ),
+	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
+			    "cout.txt",					// output file name [V]
+			    "STDOUT",					// output file description
+			    "test3_output.txt"),  // expected output
+	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+		       ),
 TestCase::MakeTestCase(
 	 "corner case B test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <corner_case_B.txt", // 1> cout.txt 2> cerr.txt",                  // command
-	 "cout.txt",		     // output (STDOUT)
-	 "STDOUT",                   // output description
-	 "test4_output.txt",  // expected output
 	 TestCasePoints(2),
-	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	&myersDiffbyLinesByChar		// compare function [V]
-	 ),
+	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
+			    "cout.txt",					// output file name [V]
+			    "STDOUT",					// output file description
+			    "test4_output.txt"),  // expected output
+	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+		       ),
 TestCase::MakeTestCase(
 	 "corner case C test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <corner_case_C.txt", // 1> cout.txt 2> cerr.txt",                  // command
-	 "cout.txt",		     // output (STDOUT)
-	 "STDOUT",                   // output description
-	 "test5_output.txt",  // expected output
 	 TestCasePoints(1),
-	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	&myersDiffbyLinesByChar		// compare function [V]
-	 ),
-
-
-
+	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
+			    "cout.txt",					// output file name [V]
+			    "STDOUT",					// output file description
+			    "test5_output.txt"),  // expected output
+	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+		       ),
 TestCase::MakeTestCase(
 	 "error case A test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <error_case_A.txt", // 1> cout.txt 2> cerr.txt",                  // command
-	 "cout.txt",		     // output (STDOUT)
-	 "STDOUT",                   // output description
-	 "test6_output.txt",  // expected output
 	 TestCasePoints(1,false,true),	  // non hidden, extra credit
-	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	&myersDiffbyLinesByChar		// compare function [V]
-	 ),
-
+	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
+			    "cout.txt",					// output file name [V]
+			    "STDOUT",					// output file description
+			    "test6_output.txt"),  // expected output
+	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+		       ),
 TestCase::MakeTestCase(
 	 "error case B test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <error_case_B.txt", // 1> cout.txt 2> cerr.txt",                  // command
-	 "cout.txt",		     // output (STDOUT)
-	 "STDOUT",                   // output description
-	 "test7_output.txt",  // expected output
 	 TestCasePoints(1,false,true),	// non hidden, extra credit
-	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	&myersDiffbyLinesByChar		// compare function [V]
-)
-
+	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
+			    "cout.txt",					// output file name [V]
+			    "STDOUT",					// output file description
+			    "test7_output.txt"),  // expected output
+	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+		       )
 };
 
 
