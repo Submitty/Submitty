@@ -29,6 +29,7 @@ const int max_output_size = 100;	// in KB
 const int total_pts = 20;
 const int auto_pts = 20;
 const int ta_pts = 0;
+const int extra_credit = 0;
 
 // File directories
 
@@ -44,7 +45,7 @@ TestCase testcases[num_testcases] = {
 
 /************* README AND COMPILATION *****************/
 
-TestCase(
+TestCase::MakeTestCase(
 	"README",
 	"",
 	"FILE_EXISTS",
@@ -56,11 +57,9 @@ TestCase(
 	false,
 	DONT_CHECK,
 	DONT_CHECK,
-	//false,
-	//"",
 	NULL
 ),
-TestCase(
+TestCase::MakeTestCase(
 	"Compilation",
 	"",
 	"FILE_EXISTS",
@@ -72,13 +71,11 @@ TestCase(
 	false,
 	DONT_CHECK,
 	DONT_CHECK,
-	//false,
-	//"",
 	NULL
 ),
 
 /******************** TEST CASES **********************/
-TestCase(
+TestCase::MakeTestCase(
 	 "non leap year test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <nonleapyear.txt", // 1> cout.txt 2> cerr.txt",                  // command
@@ -90,11 +87,9 @@ TestCase(
 	 false,				// extra credit [V]
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	 //	false, 				// recompilation
-	 //"",				// recompilation command
 	&myersDiffbyLinesByChar		// compare function [V]
 	 ),
-TestCase(
+TestCase::MakeTestCase(
 	 "leap year test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <leapyear.txt", // 1> cout.txt 2> cerr.txt",                  // command
@@ -106,11 +101,9 @@ TestCase(
 	 false,				// extra credit [V]
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	 //false, 				// recompilation
-	 //"",				// recompilation command
 	&myersDiffbyLinesByChar		// compare function [V]
 	 ),
-TestCase(
+TestCase::MakeTestCase(
 	 "corner case A test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <corner_case_A.txt", // 1> cout.txt 2> cerr.txt",                  // command
@@ -122,11 +115,9 @@ TestCase(
 	 false,				// extra credit [V]
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	 //false, 				// recompilation
-	 //"",				// recompilation command
 	&myersDiffbyLinesByChar		// compare function [V]
 	 ),
-TestCase(
+TestCase::MakeTestCase(
 	 "corner case B test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <corner_case_B.txt", // 1> cout.txt 2> cerr.txt",                  // command
@@ -138,11 +129,9 @@ TestCase(
 	 false,				// extra credit [V]
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	 //false, 				// recompilation
-	 //"",				// recompilation command
 	&myersDiffbyLinesByChar		// compare function [V]
 	 ),
-TestCase(
+TestCase::MakeTestCase(
 	 "corner case C test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <corner_case_C.txt", // 1> cout.txt 2> cerr.txt",                  // command
@@ -154,14 +143,12 @@ TestCase(
 	 false,				// extra credit [V]
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	 //false, 				// recompilation
-	 //"",				// recompilation command
 	&myersDiffbyLinesByChar		// compare function [V]
 	 ),
 
 
 
-TestCase(
+TestCase::MakeTestCase(
 	 "error case A test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <error_case_A.txt", // 1> cout.txt 2> cerr.txt",                  // command
@@ -173,12 +160,10 @@ TestCase(
 	 true,				// extra credit [V]
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	 //false, 				// recompilation
-	 //"",				// recompilation command
 	&myersDiffbyLinesByChar		// compare function [V]
 	 ),
 
-TestCase(
+TestCase::MakeTestCase(
 	 "error case B test case",  // title
 	 "./a.out",                  // details
 	 "./a.out <error_case_B.txt", // 1> cout.txt 2> cerr.txt",                  // command
@@ -190,14 +175,10 @@ TestCase(
 	 true,				// extra credit [V]
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	 //false, 				// recompilation
-	 //"",				// recompilation command
 	&myersDiffbyLinesByChar		// compare function [V]
 )
 
 };
 
-//TestCase* readmeTestCase = &testcases[0];
-TestCase* compileTestCase = &testcases[1];
 
 #endif

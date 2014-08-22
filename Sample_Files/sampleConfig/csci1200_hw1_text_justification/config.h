@@ -10,14 +10,10 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #define __CONFIG_H__
 
 #include "grading/TestCase.h"
-//#include "GradingRubric.h"
 
 const std::string id = "HW1";
 const std::string name = "Text Justification";
 const std::string due_date = "2014-05-15 11:59:59.0";
-
-// Compile Command (executed in student FILES directory)
-//const std::string compile_command = "g++ -g *.cpp";  /* should not be in config file */
 
 // Submission parameters
 const int max_submissions = 20;
@@ -32,27 +28,24 @@ const int max_output_size = 100;	// in KB
 // Grading parameters
 const int total_pts = 50;
 const int auto_pts = 30;
-//const int readme_pts = 2;
-//const int compile_pts = 3;
 const int ta_pts = 20;
+const int extra_credit = 0;
 
 // File directories
 
 // input files directory
 const char* input_dir = "test_input/hw1/";
-//../../CSCI1200/testingInput/HW1";
 // expected output files directory
 const char* expected_out_dir = "test_output/hw1/";
-//../../CSCI1200/Scripts/expectedOutput/HW1/";
 
 // Test cases
 const int num_testcases = 11;
 
-TestCase testcases[11] = {
+TestCase testcases[num_testcases] = {
 
 /************* README AND COMPILATION *****************/
 
-TestCase(
+TestCase::MakeTestCase(
 	"README",
 	"",
 	"FILE_EXISTS",
@@ -64,11 +57,9 @@ TestCase(
 	false,
 	DONT_CHECK,
 	DONT_CHECK,
-	//	false,
-	//"",
 	NULL
 ),
-TestCase(
+TestCase::MakeTestCase(
 	"Compilation",
 	"",
 	"FILE_EXISTS",
@@ -80,13 +71,11 @@ TestCase(
 	false,
 	DONT_CHECK,
 	DONT_CHECK,
-	//false,
-	//"",
 	NULL
 ),
 
 /******************** TEST CASES **********************/
-TestCase(
+TestCase::MakeTestCase(
 	"left justify example",							// title
 	"./justify.exe example.txt output.txt 16 flush_left",						// details
 	"./a.out example.txt output.txt 16 flush_left",	// command
@@ -98,11 +87,9 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	//	false, 								// recompilation
-	//"",									// recompilation command
 	&myersDiffbyLinesByChar				// compare function [V]
 ),
-TestCase(
+TestCase::MakeTestCase(
 	"right justify example",							// title
 	"./justify.exe example.txt output.txt 16 flush_right",						// details
 	"./a.out example.txt output.txt 16 flush_right",	// command
@@ -114,11 +101,9 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	//false, 								// recompilation
-	//"",									// recompilation command
 	&myersDiffbyLinesByChar				// compare function [V]
 ),
-TestCase(
+TestCase::MakeTestCase(
 	"full justify example",							// title
 	"./justify.exe example.txt output.txt 16 full_justify",						// details
 	"./a.out example.txt output.txt 16 full_justify",	// command
@@ -130,11 +115,9 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	//false, 								// recompilation
-	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 ),
-TestCase(
+TestCase::MakeTestCase(
 	"left justify gettysburg address",							// title
 	"./justify.exe gettysburg_address.txt output.txt 70 flush_left",						// details
 	"./a.out gettysburg_address.txt output.txt 70 flush_left",	// command
@@ -146,11 +129,9 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	//false, 								// recompilation
-	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 ),
-TestCase(
+TestCase::MakeTestCase(
 	"right justify gettysburg address",							// title
 	"./justify.exe gettysburg_address.txt output.txt 70 flush_right",						// details
 	"./a.out gettysburg_address.txt output.txt 70 flush_right",	// command
@@ -162,11 +143,9 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	//false, 								// recompilation
-	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 ),
-TestCase(
+TestCase::MakeTestCase(
 	"full justify gettysburg address",							// title
 	"./justify.exe gettysburg_address.txt output.txt 70 full_justify",	// details
 	"./a.out gettysburg_address.txt output.txt 70 full_justify",	// command
@@ -178,11 +157,9 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	//false, 								// recompilation
-	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 ),
-TestCase(
+TestCase::MakeTestCase(
 	"full justify long word",							// title
 	"./justify.exe long_word.txt output.txt 15 full_justify",	// details
 	"./a.out long_word.txt output.txt 15 full_justify",	// command
@@ -194,11 +171,9 @@ TestCase(
 	false,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	//false, 								// recompilation
-	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 ),
-TestCase(
+TestCase::MakeTestCase(
 	"lengthier document",							// title
 	"./justify.exe hidden_input.txt output.txt 100 full_justify",	// details
 	"./a.out hansel_and_gretel.txt output.txt 100 full_justify",	// command
@@ -210,11 +185,9 @@ TestCase(
 	true,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	//false, 								// recompilation
-	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 ),
-TestCase(
+TestCase::MakeTestCase(
 	" lots of long words",							// title
 	"./justify.exe hidden_input.txt output.txt 20 flush_right",	// details
 	"./a.out longestwords.txt output.txt 20 flush_right",	// command
@@ -226,13 +199,9 @@ TestCase(
 	true,								// extra credit [V]
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
-	//false, 								// recompilation
-	//"",									// recompilation command
 	&myersDiffbyLinesByChar							// compare function [V]
 )
 };
 
-//TestCase* readmeTestCase = &testcases[0];
-TestCase* compileTestCase = &testcases[1];
 
 #endif

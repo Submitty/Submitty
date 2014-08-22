@@ -1,11 +1,12 @@
 #!/bin/bash
  
 # ======================================================================
-# this script takes in a single parameter, the base path of the all of
+# this script takes in a single parameter, the base path of all of
 # the submission server files
 
 #     ./grade_students <base_path>
 
+#FIXME: check to make sure exactly one argument
 base_path="$1"
 
 # from that directory, we expect:
@@ -35,12 +36,13 @@ base_path="$1"
 
 
 # =====================================================================
-# The newest (ungraded) submissions have a dummy file in this
-# directory:
+# The todo list of the most recent (ungraded) submissions have a dummy
+# file in this directory:
 
 # BASE_PATH/to_be_graded/course_apple__hw1__smithj__1
 # BASE_PATH/to_be_graded/course_banana__hw2__doej__5
 
+#FIXME cron job stdout/stderr gets emailed
 echo "Grade all submissions in $base_path/to_be_graded/"
 
 
@@ -81,7 +83,7 @@ while true; do
     # check for runaway processes by untrusted (this should never be more that a few, the user limit is 50)
     numprocesses=$(ps -u untrusted | wc -l)
     if [[ $numprocesses -gt 25 ]] ; then
-	echo "untrusted is running too many processes" $numprocesses
+	echo "untrusted is running too many processes: " $numprocesses
 	((too_many_processes_count++))
 	if [[ $too_many_processes_count -gt 10 ]]; 
 	then 
@@ -94,9 +96,10 @@ while true; do
 
 
     # check for parallel grade_students scripts
+#FIXME, look into pgreg (process grep)
     numparallel=$(ps -f -u hwcron | grep grade_students.sh | wc -l)
     if [[ "$numparallel" -gt 5 ]] ; then
-	echo "hwcron is running too many parallel scripts" $numparallel
+	echo "hwcron is running too many parallel scripts: " $numparallel
 	exit
     fi
 
@@ -123,7 +126,7 @@ while true; do
 
 	
         # check to see if this assignment is already being graded
-	# wait until the lock is available (up to 10 seconds)
+	# wait until the lock is available (up to 5 seconds)
 	flock -w 5 200 || { echo "ERROR: flock() failed." >&2; exit 1; }
 	if [ -e "$base_path/to_be_graded/GRADING_$NEXT_TO_GRADE" ]
 	then
@@ -145,6 +148,7 @@ while true; do
 
 	# --------------------------------------------------------------------
         # extract the course, assignment, user, and version from the filename
+	# replace the '__' with spaces to allow for looping over list
 	with_spaces=${NEXT_TO_GRADE//__/ }
 	t=0
 	course="NOCOURSE"
@@ -153,6 +157,7 @@ while true; do
 	version="NOVERSION"
 	for thing in $with_spaces; do	
 	    ((t++))
+	    #FIXME replace with switch statement
 	    if [ $t -eq 1 ]
 	    then
 		course=$thing
@@ -161,11 +166,12 @@ while true; do
 		assignment=$thing
 	    elif [ $t -eq 3 ]
 	    then
-	    user=$thing
+		user=$thing
 	    elif [ $t -eq 4 ]
 	    then
 		version=$thing
 	    else
+#FIXME document error handling approach: leave GRADING_ file in to_be_graded directory, assume email sent, move to next
 		echo "FORMAT ERROR: $NEXT_TO_GRADE"
 		continue
 	    fi
@@ -254,7 +260,7 @@ while true; do
 	then
 	    echo "ERROR: directory does not exist '$submission_path'"
 	    # this submission does not exist, remove it from the queue
-	    rm -rf $base_path/to_be_graded/$NEXT_TO_GRADE
+	    rm -f $base_path/to_be_graded/$NEXT_TO_GRADE
 	    continue
 	fi
 	if [ ! -r "$submission_path" ]
@@ -262,6 +268,7 @@ while true; do
 	    echo "ERROR: directory is not readable '$submission_path'"
 	    # leave this submission file for next time (hopefully
 	    # permissions will be corrected then)
+	    #FIXME remove GRADING_ file
 	    continue
 	fi
 
@@ -280,7 +287,7 @@ while true; do
 
 
         # copy submitted files to tmp directory
-	cp 1>/dev/null  2>&1  -r $submission_path/* $tmp || echo "ERROR: Failed to copy to temporary directory"
+	cp 1>/dev/null  2>&1  -r $submission_path/* "$tmp" || echo "ERROR: Failed to copy to temporary directory"
 
 
 
@@ -315,13 +322,14 @@ while true; do
 
 
         # switch to tmp directory
+# FIXME pushd?
 	cd $tmp
 	
 	
 	# --------------------------------------------------------------------
         # COMPILE THE SUBMITTED CODE
         #clang++ -Wall *.cpp -o a.out &> .submit_compilation_output.txt
-	g++ -Wall *.cpp -o a.out    1> .submit_compilation_output.txt 2> .submit_compilation_errors.txt
+	g++ -Wall *.cpp -o a.out    &> .submit_compilation_output.txt
 	compile_error_code=$?
 	
 
@@ -341,13 +349,11 @@ while true; do
 	    echo "ERROR:  $bin_path/$assignment/run.out  does not exist/is not readable"
 	    continue
 	fi
-	cp "$bin_path/$assignment/run.out" $tmp/my_run.out
+	cp -f "$bin_path/$assignment/run.out" $tmp/my_run.out
 
 	# give the untrusted user read/write/execute permissions on the tmp directory & files
-	chmod o+rwx $tmp
-	chmod g+rwx $tmp
-	chmod o+rwx $tmp/*
-	chmod g+rwx $tmp/*
+	#FIXME: copying in subdirs but not making readable here
+	chmod -R go+rwx $tmp
 
 	# run the run.out as the untrusted user
 	$base_path/bin/untrusted_runscript $tmp/my_run.out 1> .submit_runner_output.txt 2> .submit_runner_errors.txt
@@ -387,12 +393,12 @@ while true; do
 	cd "$bin_path"
 
         # clean out all of the old files if this is a re-run
-        rm -rf "$results_path/$path"
+        rm -rf "$results_path"
 
         # Make directory structure in results if it doesn't exist
-        mkdir -p "$results_path/$path" || echo "ERROR: Could not create results path $results_path/$path"
+        mkdir -p "$results_path" || echo "ERROR: Could not create results path $results_path"
 
-        cp  1>/dev/null  2>&1  $tmp/* $tmp/.* "$results_path/$path"
+        cp  1>/dev/null  2>&1  $tmp/* $tmp/.* "$results_path"
         # cp  1>/dev/null  2>&1  $tmp/test*_cout.txt $tmp/test*_cerr.txt $tmp/test*_out.txt $tmp/submission.json "$results_path/$path"
 
 
@@ -403,8 +409,8 @@ while true; do
 
 	# remove submission & the active grading tag from the todo list
 	flock -w 5 200 || { echo "ERROR: flock() failed." >&2; exit 1; }
-	rm -rf $base_path/to_be_graded/$NEXT_TO_GRADE
-	rm -rf $base_path/to_be_graded/GRADING_$NEXT_TO_GRADE
+	rm -f $base_path/to_be_graded/$NEXT_TO_GRADE
+	rm -f $base_path/to_be_graded/GRADING_$NEXT_TO_GRADE
 	flock -u 200
 
 	

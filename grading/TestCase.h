@@ -34,31 +34,39 @@ class TestCase {
 
 	public:
 
-		// Constructor
-  //		TestCase () {   /* THIS CONSTRUCTOR SHOULD NOT BE USED */
-  //		}
-		TestCase ( const std::string &title, const std::string &details,
+
+  static TestCase MakeTestCase( const std::string &title, const std::string &details,
 				const std::string &command, const std::string &filename,
 				const std::string &description, const std::string &expected,
 				const int points, const bool hidden, const bool extracredit,
-				const cout_cerr_check cout_check,
-				const cout_cerr_check cerr_check, 
-			   /*const bool recompile,
-				const std::string compile_cmd,
-			   */
-				TestResults* (*cmp) ( const std::string&, const std::string& ) ) :
-				_title( title ), _details( details ), _command( command ), _filename(
+				const cout_cerr_check coutcheck,
+				const cout_cerr_check cerrcheck, 
+				TestResults* (*cmp) ( const std::string&, const std::string& ) ) {
+    TestCase answer;
+    answer._title = title;
+    answer._details = details;
+    answer._command = command;
+    answer._filename = filename;
+    answer._description = description;
+    answer._expected = expected;
+    answer._points = points;
+    answer._hidden = hidden;
+    answer._extracredit = extracredit;
+    answer._coutcheck = coutcheck;
+    answer._cerrcheck = cerrcheck;
+    answer.cmp_output = cmp;
+    
+    
+    /*				_title( title ), _details( details ), _command( command ), _filename(
 						filename ), _description( description ), _expected(
 						expected ), _points( points ), _hidden( hidden ), _extracredit(
 						extracredit ), _coutcheck( cout_check ), _cerrcheck(
-						cerr_check ), cmp_output( cmp )
-				/*, 
-				  _recompile(
-				  recompile ), _compile_cmd( compile_cmd ) */ 
-  {
-		  test_case_id = next_test_case_id;
-		  next_test_case_id++;
-		}
+						cerr_check ), cmp_output( cmp )  { */
+
+    answer.test_case_id = next_test_case_id;
+    next_test_case_id++;
+    return answer;
+  }
 
 		// Accessors
 		std::string title () const {
@@ -107,14 +115,7 @@ class TestCase {
 		cout_cerr_check cerrCheck () const {
 			return _cerrcheck;
 		}
-  /*
-		bool recompile () const {
-			return _recompile;
-		}
-		std::string const compile_cmd () const {
-			return _compile_cmd;
-		}
-  */
+
 		/* Calls the function designated by the function pointer; if the function pointer
 		 is NULL, defaults to returning the result of diffLine(). */
 		TestResults* compare ( const std::string &student_out,
@@ -127,7 +128,11 @@ class TestCase {
 
   int seconds_to_run() { return 5; }
 
-	private:
+private:
+
+  // This constructor only used by the static Make functions
+  		TestCase () { /* THIS CONSTRUCTOR SHOULD NOT BE USED */ }
+
 		std::string _title;
 		std::string _details;
 		std::string _command;
@@ -142,13 +147,13 @@ class TestCase {
   static int next_test_case_id; 
   
 
-  /*
-		bool _recompile;
-		std::string _compile_cmd;
-  */
 		cout_cerr_check _coutcheck;
 		cout_cerr_check _cerrcheck;
 		TestResults* (*cmp_output) ( const std::string&, const std::string& );
 };
+
+
+
+
 
 #endif

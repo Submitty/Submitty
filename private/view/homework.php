@@ -226,13 +226,10 @@ function version_changed(){
       <?php }?>
 
 
-      <?php if (1) { ?> 
-<!--isset($test["compilation_output"]) && $test["compilation_output"] != ""){?>-->
-          <br>
-          <pre><?php echo $test["compilation_output"]; ?></pre>
+      <?php if (isset($test["compilation_output"]) && $test["compilation_output"] != ""){?>
+      <b>Compilation output:</b>
+      <pre><?php echo $test["compilation_output"]; ?></pre>
       <?php }?>
-
-
 
 <!--
       <?php echo $test["diff"]["student"]; ?>

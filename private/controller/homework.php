@@ -104,6 +104,10 @@ for ($i = 0; $i < count($testcases_info); $i++) {
                 "score"=>$testcases_results[$u]["points_awarded"], 
                 "points_possible"=>$testcases_info[$i]["points"]
             ));
+
+    $path_front = get_path_front();
+	$student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
+
             //Data to display in the detail view / Diff Viewer (bottom)
             array_push($homework_tests, array(
                 "title"=>$testcases_info[$i]["title"],
@@ -111,7 +115,7 @@ for ($i = 0; $i < count($testcases_info); $i++) {
                 "points_possible"=>$testcases_info[$i]["points"],
                 "score"=>$testcases_results[$u]["points_awarded"],
                 "message"=> isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "",
-                    "compilation_output"=> isset($testcases_results[$u]["compilation_output"]) ? $testcases_results[$u]["compilation_output"] : "EMPTY",
+                    "compilation_output"=> isset($testcases_results[$u]["compilation_output"]) ? get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]) : "",
                 "diff"=> isset($testcases_results[$u]["diff"]) ? get_testcase_diff($username, $assignment_id, $assignment_version,$testcases_results[$u]["diff"]) : ""
     //"diff"=> isset($testcases_results[$u]["diff"]) ? "a" : "b"
             ));
