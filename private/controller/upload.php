@@ -42,7 +42,7 @@ if (isset($_FILES["file"])) {
         exit();
     }
     $uploaded_file = $_FILES["file"];//THIS NEEDS TO BE MADE HACKER PROOF
-    $result = upload_homework($_SESSION["id"],$assignment_id,$uploaded_file);
+    $result = upload_homework($_SESSION["id"], $course, $assignment_id,$uploaded_file);
     if (isset($result["error"])) {
         //Go to error page?
         if ($result["error"] == "assignment_closed") {

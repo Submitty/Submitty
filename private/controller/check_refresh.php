@@ -19,7 +19,7 @@ if (isset($_POST["assignment_id"]) && isset($_POST["assignment_version"]) && iss
     $assignment_graded = htmlspecialchars($_POST["assignment_graded"]);
     $submitting_graded = htmlspecialchars($_POST["submitting_graded"]);
     if (!$assignment_graded) {
-        $results = get_assignment_results($_SESSION["id"], $assignment_id, $assignment_version);
+        $results = get_assignment_results($_SESSION["id"], $course, $assignment_id, $assignment_version);
         if ($results != NULL && $results != false) {
             echo "REFRESH_ME";
             exit();
@@ -27,7 +27,7 @@ if (isset($_POST["assignment_id"]) && isset($_POST["assignment_version"]) && iss
     }
     if (!$submitting_graded)
     {
-        $results = get_assignment_results($_SESSION["id"], $assignment_id, $submitting_version);
+        $results = get_assignment_results($_SESSION["id"], $course, $assignment_id, $submitting_version);
         if ($results != NULL && $results != false) {
             echo "REFRESH_ME";
             exit();
