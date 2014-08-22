@@ -29,7 +29,7 @@ const int max_output_size = 100;	// in KB
 const int total_pts = 20;
 const int auto_pts = 20;
 const int ta_pts = 0;
-const int extra_credit = 0;
+const int extra_credit_pts = 2;
 
 // File directories
 
@@ -48,16 +48,12 @@ TestCase testcases[num_testcases] = {
   TestCase::MakeFileExists(
 	"README",
 	"README.txt",
-	2, //readme_pts,				// points for readme
-	false,
-	false
+	TestCasePoints(2)
 ),
   TestCase::MakeCompilation(
 	"Compilation",
 	"a.out",		// name of .exe created by student
-	3, //compile_pts,				// points for compilation
-	false,
-	false
+	TestCasePoints(3)
 ),
 
 /******************** TEST CASES **********************/
@@ -68,9 +64,7 @@ TestCase::MakeTestCase(
 	 "cout.txt",		     // output (STDOUT)
 	 "STDOUT",                   // output description
 	 "test1_output.txt",  // expected output
-	 5,				// points [V]
-	 false,				// hidden [V]
-	 false,				// extra credit [V]
+	 TestCasePoints(5),
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar		// compare function [V]
@@ -82,9 +76,7 @@ TestCase::MakeTestCase(
 	 "cout.txt",		     // output (STDOUT)
 	 "STDOUT",                   // output description
 	 "test2_output.txt",  // expected output
-	 5,				// points [V]
-	 false,				// hidden [V]
-	 false,				// extra credit [V]
+	 TestCasePoints(5),
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar		// compare function [V]
@@ -96,9 +88,7 @@ TestCase::MakeTestCase(
 	 "cout.txt",		     // output (STDOUT)
 	 "STDOUT",                   // output description
 	 "test3_output.txt",  // expected output
-	 2,				// points [V]
-	 false,				// hidden [V]
-	 false,				// extra credit [V]
+	 TestCasePoints(2),
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar		// compare function [V]
@@ -110,9 +100,7 @@ TestCase::MakeTestCase(
 	 "cout.txt",		     // output (STDOUT)
 	 "STDOUT",                   // output description
 	 "test4_output.txt",  // expected output
-	 2,				// points [V]
-	 false,				// hidden [V]
-	 false,				// extra credit [V]
+	 TestCasePoints(2),
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar		// compare function [V]
@@ -124,9 +112,7 @@ TestCase::MakeTestCase(
 	 "cout.txt",		     // output (STDOUT)
 	 "STDOUT",                   // output description
 	 "test5_output.txt",  // expected output
-	 1,				// points [V]
-	 false,				// hidden [V]
-	 false,				// extra credit [V]
+	 TestCasePoints(1),
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar		// compare function [V]
@@ -141,9 +127,7 @@ TestCase::MakeTestCase(
 	 "cout.txt",		     // output (STDOUT)
 	 "STDOUT",                   // output description
 	 "test6_output.txt",  // expected output
-	 0,				// points [V]
-	 false,				// hidden [V]
-	 true,				// extra credit [V]
+	 TestCasePoints(1,false,true),	  // non hidden, extra credit
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar		// compare function [V]
@@ -156,9 +140,7 @@ TestCase::MakeTestCase(
 	 "cout.txt",		     // output (STDOUT)
 	 "STDOUT",                   // output description
 	 "test7_output.txt",  // expected output
-	 0,				// points [V]
-	 false,				// hidden [V]
-	 true,				// extra credit [V]
+	 TestCasePoints(1,false,true),	// non hidden, extra credit
 	WARN_IF_NOT_EMPTY,		// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,		// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar		// compare function [V]

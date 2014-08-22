@@ -27,9 +27,9 @@ const int max_output_size = 100;	// in KB
 
 // Grading parameters
 const int total_pts = 50;
-const int auto_pts = 30;
-const int ta_pts = 20;
-const int extra_credit = 0;
+const int auto_pts = 25;
+const int ta_pts = 25;
+const int extra_credit_pts = 5;
 
 // File directories
 
@@ -48,17 +48,13 @@ TestCase testcases[num_testcases] = {
   TestCase::MakeFileExists(
 	"README",
 	"README.txt",
-	2,           // readme_pts,
-	false,       // not hidden
-	false       // not extra credit
+	TestCasePoints(2)
   ),			   
 
   TestCase::MakeCompilation(
 			 "Compilation",
 			 "a.out",		// name of .exe created by student
-	3, //compile_pts,				// points for compilation
-	false,
-	false
+			 TestCasePoints(3)
 ),
 
 /******************** TEST CASES **********************/
@@ -69,9 +65,7 @@ TestCase::MakeTestCase(
 	"output.txt",					// output file name [V]
 	"Expected output.txt",					// output file description
 	"example_16_flush_left.txt",				// expected output file [V]
-	3,									// points [V]
-	false,								// hidden [V]
-	false,								// extra credit [V]
+	TestCasePoints(3),
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar				// compare function [V]
@@ -83,9 +77,7 @@ TestCase::MakeTestCase(
 	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
 	"example_16_flush_right.txt",				// expected output file [V]
-	3,									// points [V]
-	false,								// hidden [V]
-	false,								// extra credit [V]
+	TestCasePoints(3),
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar				// compare function [V]
@@ -97,9 +89,7 @@ TestCase::MakeTestCase(
 	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
 	"example_16_full_justify.txt",				// expected output file [V]
-	4,									// points [V]
-	false,								// hidden [V]
-	false,								// extra credit [V]
+	TestCasePoints(4),
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar							// compare function [V]
@@ -111,9 +101,7 @@ TestCase::MakeTestCase(
 	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
 	"gettysburg_address_70_flush_left.txt",				// expected output file [V]
-	2,									// points [V]
-	true,								// hidden [V]
-	false,								// extra credit [V]
+	TestCasePoints(2,true,false),     // hidden, not extra credit
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar							// compare function [V]
@@ -125,9 +113,7 @@ TestCase::MakeTestCase(
 	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
 	"gettysburg_address_70_flush_right.txt",				// expected output file [V]
-	2,									// points [V]
-	true,								// hidden [V]
-	false,								// extra credit [V]
+	TestCasePoints(2,true,false),     // hidden, not extra credit
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar							// compare function [V]
@@ -139,9 +125,7 @@ TestCase::MakeTestCase(
 	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
 	"gettysburg_address_70_full_justify.txt",				// expected output file [V]
-	3,									// points [V]
-	false,								// hidden [V]
-	false,								// extra credit [V]
+	TestCasePoints(3),
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar							// compare function [V]
@@ -153,9 +137,7 @@ TestCase::MakeTestCase(
 	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
 	"long_word_15_full_justify.txt",				// expected output file [V]
-	3,									// points [V]
-	false,								// hidden [V]
-	false,								// extra credit [V]
+	TestCasePoints(3),
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar							// compare function [V]
@@ -167,9 +149,7 @@ TestCase::MakeTestCase(
 	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
 	"hansel_and_gretel_100_full_justify.txt",				// expected output file [V]
-	3,									// points [V]
-	true,								// hidden [V]
-	true,								// extra credit [V]
+	TestCasePoints(3,true,true),   // hidden, extra credit!
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar							// compare function [V]
@@ -181,9 +161,7 @@ TestCase::MakeTestCase(
 	"output.txt",					// output file name [V]
 	"Expected output.txt",				// output file description
 	"longestwords_20_flush_right.txt",				// expected output file [V]
-	2,									// points [V]
-	true,								// hidden [V]
-	true,								// extra credit [V]
+	TestCasePoints(2,true,true),   // hidden,extra credit
 	WARN_IF_NOT_EMPTY,					// check cout? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	WARN_IF_NOT_EMPTY,					// check cerr? [DONT_CHECK, WARN_IF_NOT_EMPTY, CHECK] [V]
 	&myersDiffbyLinesByChar							// compare function [V]
