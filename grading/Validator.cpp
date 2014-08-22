@@ -152,7 +152,8 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
     
     std::string message = "";
     
-    if (testcases[i].command() == std::string("FILE_EXISTS")) {
+    if (testcases[i].isFileExistsTest() ||
+	testcases[i].isCompilationTest()) {
       std::cerr << "THIS IS A FILE EXISTS TEST! " << std::endl;
       
       if ( access( testcases[i].raw_filename().c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
@@ -306,7 +307,7 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
     if (message != "") {
       testcase_json << "\t\t\t\"message\": \"" << message << "\",\n";
     }
-    if (!has_diff) {
+    if (testcases[i].isCompilationTest()) {
       testcase_json << "\t\t\t\"compilation_output\": \".submit_compilation_output.txt\",\n";
     }
     

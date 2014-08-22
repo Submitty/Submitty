@@ -45,33 +45,19 @@ TestCase testcases[num_testcases] = {
 
 /************* README AND COMPILATION *****************/
 
-TestCase::MakeTestCase(
+  TestCase::MakeFileExists(
 	"README",
-	"",
-	"FILE_EXISTS",
 	"README.txt",
-	"",
-	"",
 	2, //readme_pts,				// points for readme
 	false,
-	false,
-	DONT_CHECK,
-	DONT_CHECK,
-	NULL
+	false
 ),
-TestCase::MakeTestCase(
+  TestCase::MakeCompilation(
 	"Compilation",
-	"",
-	"FILE_EXISTS",
 	"a.out",		// name of .exe created by student
-	"",
-	"",
 	3, //compile_pts,				// points for compilation
 	false,
-	false,
-	DONT_CHECK,
-	DONT_CHECK,
-	NULL
+	false
 ),
 
 /******************** TEST CASES **********************/

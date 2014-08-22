@@ -216,12 +216,12 @@ function version_changed(){
         ?>
       </span>
       <span>
-        <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Show / Hide</a>
+        <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
       </span>
           </div>
     <div id="sidebysidediff<?php echo $counter;?>" style="display:none">
       <?php if ($test["message"] != ""){?>
-          <br>
+      <!--<br>-->
           <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
       <?php }?>
 
