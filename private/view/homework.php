@@ -216,16 +216,20 @@ function version_changed(){
         ?>
       </span>
       <span>
-        <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Show / Hide</a>
+        <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
       </span>
           </div>
     <div id="sidebysidediff<?php echo $counter;?>" style="display:none">
       <?php if ($test["message"] != ""){?>
-          <br>
+      <!--<br>-->
           <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
       <?php }?>
 
 
+      <?php if (isset($test["compilation_output"]) && $test["compilation_output"] != ""){?>
+      <b>Compilation output:</b>
+      <pre><?php echo $test["compilation_output"]; ?></pre>
+      <?php }?>
 
 <!--
       <?php echo $test["diff"]["student"]; ?>
@@ -303,9 +307,10 @@ loadDiffQueue();
 <script>
 //Set time between asking server if the homework has been graded
 //Last argument in ms
-//TODO: Set time between server requests (currently at 1 minute = 60000ms)
+//TODO: Set time between server requests (currently at 5 seconds = 5000ms)
+//                                       (previously at 1 minute = 60000ms)
 <?php if ($assignment_version_in_grading_queue || $submitting_version_in_grading_queue) {?>
-init_refresh_on_update("<?php echo $course;?>", "<?php echo $assignment_id;?>","<?php echo $assignment_version?>", "<?php echo $submitting_version;?>", "<?php echo !$assignment_version_in_grading_queue;?>", "<?php echo !$submitting_version_in_grading_queue;?>", 60000);
+init_refresh_on_update("<?php echo $course;?>", "<?php echo $assignment_id;?>","<?php echo $assignment_version?>", "<?php echo $submitting_version;?>", "<?php echo !$assignment_version_in_grading_queue;?>", "<?php echo !$submitting_version_in_grading_queue;?>", 5000);
 <?php } ?>
 </script>
 

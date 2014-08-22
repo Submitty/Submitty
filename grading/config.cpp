@@ -47,16 +47,23 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  int total = 0;
-
+  int total_nonec = 0;
+  int total_ec = 0;
   for (unsigned int i = 0; i < num_testcases; i++) {
-    total += testcases[i].points();
+    if (testcases[i].extracredit())
+      total_ec += testcases[i].points();
+    else
+      total_nonec += testcases[i].points();
   }
-  if (total != auto_pts) {
-    std::cout << "ERROR: Automated Points do not match testcases." << std::endl;
+  if (total_nonec != auto_pts) {
+    std::cout << "ERROR: Automated Points do not match testcases." << total_nonec << "!=" << auto_pts << std::endl;
     return 1;
   }
-  if (total + ta_pts != total_pts) {
+  if (total_ec != extra_credit_pts) {
+    std::cout << "ERROR: Extra Credit Points do not match testcases." << total_ec << "!=" << extra_credit_pts << std::endl;
+    return 1;
+  }
+  if (total_nonec + ta_pts != total_pts) {
     std::cout << "ERROR: Automated Points and TA Points do not match total."
               << std::endl;
     return 1;

@@ -12,7 +12,6 @@ function loadDiffQueue(){
 	for (var i = 0; i < diff_queue.length; i++){
 
 		var title = diff_queue[i];
-		title = title.split(' ').join('\ ');
 
 		var student_element_id = title+"_student";
 		var instructor_element_id = title+"_instructor";
@@ -25,6 +24,6 @@ function loadDiffQueue(){
 		student_element.innerHTML = "";
 		instructor_element.innerHTML = "";
 		diff.evalDifferences(diff_objects[title]["differences"]);
-		diff.display(student_element_id,instructor_element_id);
+		diff.display(student_element_id.split(' ').join('\\ '),instructor_element_id.split(' ').join('\\ '));
 	}
 }

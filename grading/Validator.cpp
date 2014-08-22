@@ -137,30 +137,25 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
   std::stringstream testcase_json;
 
 
-  /* WHOOPS!  This seems to be a hack to handle the readme & compilation test cases and must go away */
-  /*  int index = 2;*/
-  /*  if (compileTestCase == NULL)
-    index--;
-  */
-
   //  int t = 1;
   //for (int i = index; i < num_testcases; ++i) {
   for (int i = 0; i < num_testcases; ++i) {
-
+    
     std::cout << testcases[i].title() << " - points: " << testcases[i].points()
               << std::endl;
 
-
-     /* TODO: Always returns 0 ? */
-      int testcase_grade = 0;
-
-      bool has_diff = false;
-
-      std::string message = "";
-
-    if (testcases[i].command() == std::string("FILE_EXISTS")) {
+    
+    /* TODO: Always returns 0 ? */
+    int testcase_grade = 0;
+    
+    bool has_diff = false;
+    
+    std::string message = "";
+    
+    if (testcases[i].isFileExistsTest() ||
+	testcases[i].isCompilationTest()) {
       std::cerr << "THIS IS A FILE EXISTS TEST! " << std::endl;
-
+      
       if ( access( testcases[i].raw_filename().c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
 	std::cerr << "file does exist: " << testcases[i].raw_filename() << std::endl;
 	testcase_grade = testcases[i].points();
@@ -169,9 +164,9 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 	std::cerr << "ERROR file DOES NOT exist: " << testcases[i].raw_filename() << std::endl;
 	message = "ERROR: " + testcases[i].raw_filename() + " was NOT FOUND!";
       }
-
+      
     }
-
+    
     else {
 
       // Pull in student output & expected output
@@ -307,10 +302,13 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 		    << "\t\t\t\t\"student_file\":\"" << testcases[i].filename()
 		    << "\",\n"
 		    << "\t\t\t\t\"difference\":\"" << testcases[i].prefix() << "_diff.json\"\n"
-		    << "\t\t\t}\n";
+		    << "\t\t\t},\n";
     }
     if (message != "") {
       testcase_json << "\t\t\t\"message\": \"" << message << "\",\n";
+    }
+    if (testcases[i].isCompilationTest()) {
+      testcase_json << "\t\t\t\"compilation_output\": \".submit_compilation_output.txt\",\n";
     }
     
     testcase_json << last_line;
@@ -318,26 +316,6 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 
 
   }
-
-  /* Get readme and compilation grades */
-  //int readme_grade = (readme == 1) ? readme_pts : 0;
-  //const char *readme_msg = (readme == 1) ? "README found" : "README not found";
-
-#if 0
-  /*
- int compile_grade = 0;
-  const char *compile_msg = "";
-  if (compileTestCase != NULL) {
-    compile_grade = (compiled == 0) ? 100 /*compile_pts*/ : 0;
-    compile_msg =
-        (compiled == 0) ? "Compiled successfully" : "Compilation failed";
-  }
-*/
-#endif
-
-  bool handle_compilation = (compileTestCase != NULL);
-
-  //total_grade += (readme_grade + compile_grade);
 
   /* Output total grade */
   std::string grade_path = "grade.txt";
@@ -350,22 +328,8 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
             << "\t\"submission_number\": " << subnum << ",\n"
             << "\t\"points_awarded\": " << total_grade << ",\n"
             << "\t\"submission_time\": \"" << subtime << "\",\n"
-            << "\t\"testcases\": [\n"
-    ;
-#if 0
-            << "\t\t{\n"
-            << "\t\t\t\"test_name\": \"README\",\n"
-            << "\t\t\t\"points_awarded\": " << 100/*readme_grade*/ << ",\n"
-            << "\t\t\t\"message\": \"" << "DUNNO" /*readme_msg*/ << "\",\n"
-            << "\t\t},\n";
-  if (handle_compilation) {
-    json_file << "\t\t{\n"
-              << "\t\t\t\"test_name\": \"Compilation\",\n"
-              << "\t\t\t\"points_awarded\": " << 100/*compile_grade*/ << ",\n"
-              << "\t\t\t\"message\": \"" << compile_msg << "\",\n"
-              << "\t\t},\n";
-  }
-#endif
+            << "\t\"testcases\": [\n";
+
 
   json_file << testcase_json.str() << "\t]\n"
             << "}";

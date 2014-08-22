@@ -1,11 +1,12 @@
 #!/bin/bash
  
 # ======================================================================
-# this script takes in a single parameter, the base path of the all of
+# this script takes in a single parameter, the base path of all of
 # the submission server files
 
 #     ./grade_students <base_path>
 
+#FIXME: check to make sure exactly one argument
 base_path="$1"
 
 # from that directory, we expect:
@@ -35,39 +36,72 @@ base_path="$1"
 
 
 # =====================================================================
-# The newest (ungraded) submissions have a dummy file in this
-# directory:
+# The todo list of the most recent (ungraded) submissions have a dummy
+# file in this directory:
 
 # BASE_PATH/to_be_graded/course_apple__hw1__smithj__1
 # BASE_PATH/to_be_graded/course_banana__hw2__doej__5
 
+#FIXME cron job stdout/stderr gets emailed
 echo "Grade all submissions in $base_path/to_be_graded/"
 
 
 # OUTER LOOP 
 # will eventually process all submissions 
 
-all_graded=false
-repeat=0
+all_grading_done=false
 
-while [ "$all_graded" != "true" ]; do
-    all_graded=true
+too_many_processes_count=0
+
+sleep_count=0
 
 
-    # check for runaway processes (this should never be more that a few, the user limit is 50)
+# SETUP THE DIRECTORY LOCK FILE 
+# arbitrarily using file descriptor 200
+exec 200>/var/lock/homework_submissions_server_lockfile || exit 1
+
+
+while true; do
+
+    # if no work was done on the last loop...
+    if [ "$all_grading_done" = "true" ] ; then
+	((sleep_count++))
+	echo "sleep iter $sleep_count: no work"
+	if [[ $sleep_count -gt 100 ]] ; then
+	    # if you've been running for several minutes, quit (will be restarted by a cron once per minute)
+	    break;
+	else
+	    # sleep for 5 seconds
+	    sleep 5
+	    # make sure to reset the all_grading_done flag so we check again
+	    all_grading_done=false
+	    continue;
+	fi
+    fi
+
+
+    # check for runaway processes by untrusted (this should never be more that a few, the user limit is 50)
     numprocesses=$(ps -u untrusted | wc -l)
-    if [[ $numprocesses -gt 5 ]] ; then
-	echo "untrusted is running too many processes" $numprocesses
-	all_graded=false
-	((repeat++))
-	if [[ $repeat -gt 10 ]]; 
+    if [[ $numprocesses -gt 25 ]] ; then
+	echo "untrusted is running too many processes: " $numprocesses
+	((too_many_processes_count++))
+	if [[ $too_many_processes_count -gt 10 ]]; 
 	then 
 	    exit
 	fi
-	sleep 5
+	sleep 10
 	continue
     fi
-    repeat=0
+    too_many_processes_count=0
+
+
+    # check for parallel grade_students scripts
+#FIXME, look into pgreg (process grep)
+    numparallel=$(ps -f -u hwcron | grep grade_students.sh | wc -l)
+    if [[ "$numparallel" -gt 5 ]] ; then
+	echo "hwcron is running too many parallel scripts: " $numparallel
+	exit
+    fi
 
 
 
@@ -75,7 +109,35 @@ while [ "$all_graded" != "true" ]; do
     # FIND NEXT ASSIGNMENT TO GRADE (in reverse chronological order)
     # =====================================================================
 
+
+    # reset this variable
+    all_grading_done=true
+
+
+
     for NEXT_TO_GRADE in `cd $base_path/to_be_graded && ls -tr`; do
+
+
+	# skip the active grading tags
+	if [ "${NEXT_TO_GRADE:0:8}" == "GRADING_" ]
+	then
+	    continue
+	fi
+
+	
+        # check to see if this assignment is already being graded
+	# wait until the lock is available (up to 5 seconds)
+	flock -w 5 200 || { echo "ERROR: flock() failed." >&2; exit 1; }
+	if [ -e "$base_path/to_be_graded/GRADING_$NEXT_TO_GRADE" ]
+	then
+    	    echo "skip $NEXT_TO_GRADE, being graded by another grade_students.sh process"
+	    flock -u 200
+	    continue
+	else
+	    # mark this file as being graded
+	    touch $base_path/to_be_graded/GRADING_$NEXT_TO_GRADE
+	    flock -u 200
+	fi
 
 
 	echo "========================================================================"
@@ -84,11 +146,9 @@ while [ "$all_graded" != "true" ]; do
 	STARTTIME=$(date +%s)
 
 
-	# FIXME start of idea to make robust... use flock (needs more work)
-
-
 	# --------------------------------------------------------------------
         # extract the course, assignment, user, and version from the filename
+	# replace the '__' with spaces to allow for looping over list
 	with_spaces=${NEXT_TO_GRADE//__/ }
 	t=0
 	course="NOCOURSE"
@@ -97,6 +157,7 @@ while [ "$all_graded" != "true" ]; do
 	version="NOVERSION"
 	for thing in $with_spaces; do	
 	    ((t++))
+	    #FIXME replace with switch statement
 	    if [ $t -eq 1 ]
 	    then
 		course=$thing
@@ -105,11 +166,12 @@ while [ "$all_graded" != "true" ]; do
 		assignment=$thing
 	    elif [ $t -eq 3 ]
 	    then
-	    user=$thing
+		user=$thing
 	    elif [ $t -eq 4 ]
 	    then
 		version=$thing
 	    else
+#FIXME document error handling approach: leave GRADING_ file in to_be_graded directory, assume email sent, move to next
 		echo "FORMAT ERROR: $NEXT_TO_GRADE"
 		continue
 	    fi
@@ -198,7 +260,7 @@ while [ "$all_graded" != "true" ]; do
 	then
 	    echo "ERROR: directory does not exist '$submission_path'"
 	    # this submission does not exist, remove it from the queue
-	    rm -rf $base_path/to_be_graded/$NEXT_TO_GRADE
+	    rm -f $base_path/to_be_graded/$NEXT_TO_GRADE
 	    continue
 	fi
 	if [ ! -r "$submission_path" ]
@@ -206,8 +268,11 @@ while [ "$all_graded" != "true" ]; do
 	    echo "ERROR: directory is not readable '$submission_path'"
 	    # leave this submission file for next time (hopefully
 	    # permissions will be corrected then)
+	    #FIXME remove GRADING_ file
 	    continue
 	fi
+
+
 
 
 	test_input_path="$base_path/$course/test_input/$assignment"
@@ -222,7 +287,7 @@ while [ "$all_graded" != "true" ]; do
 
 
         # copy submitted files to tmp directory
-	cp 1>/dev/null  2>&1  -r $submission_path/* $tmp || echo "ERROR: Failed to copy to temporary directory"
+	cp 1>/dev/null  2>&1  -r $submission_path/* "$tmp" || echo "ERROR: Failed to copy to temporary directory"
 
 
 
@@ -257,6 +322,7 @@ while [ "$all_graded" != "true" ]; do
 
 
         # switch to tmp directory
+# FIXME pushd?
 	cd $tmp
 	
 	
@@ -283,16 +349,14 @@ while [ "$all_graded" != "true" ]; do
 	    echo "ERROR:  $bin_path/$assignment/run.out  does not exist/is not readable"
 	    continue
 	fi
-	cp "$bin_path/$assignment/run.out" $tmp/my_run.out
+	cp -f "$bin_path/$assignment/run.out" $tmp/my_run.out
 
 	# give the untrusted user read/write/execute permissions on the tmp directory & files
-	chmod o+rwx $tmp
-	chmod g+rwx $tmp
-	chmod o+rwx $tmp/*
-	chmod g+rwx $tmp/*
+	#FIXME: copying in subdirs but not making readable here
+	chmod -R go+rwx $tmp
 
 	# run the run.out as the untrusted user
-	$base_path/bin/untrusted_runscript $tmp/my_run.out &> .submit_runner_output.txt
+	$base_path/bin/untrusted_runscript $tmp/my_run.out 1> .submit_runner_output.txt 2> .submit_runner_errors.txt
 
 	runner_error_code="$?"
 	if [[ "$runner_error_code" -ne 0 ]] ;
@@ -311,7 +375,8 @@ while [ "$all_graded" != "true" ]; do
 	    continue
 	fi
 
-        "$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" &> .submit_validator_output.txt
+        echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
+        valgrind "$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" >& .submit_validator_output.txt 
 	validator_error_code="$?"
 	if [[ "$validator_error_code" -ne 0 ]] ;
 	then
@@ -328,12 +393,12 @@ while [ "$all_graded" != "true" ]; do
 	cd "$bin_path"
 
         # clean out all of the old files if this is a re-run
-        rm -rf "$results_path/$path"
+        rm -rf "$results_path"
 
         # Make directory structure in results if it doesn't exist
-        mkdir -p "$results_path/$path" || echo "ERROR: Could not create results path $results_path/$path"
+        mkdir -p "$results_path" || echo "ERROR: Could not create results path $results_path"
 
-        cp  1>/dev/null  2>&1  $tmp/* $tmp/.* "$results_path/$path"
+        cp  1>/dev/null  2>&1  $tmp/* $tmp/.* "$results_path"
         # cp  1>/dev/null  2>&1  $tmp/test*_cout.txt $tmp/test*_cerr.txt $tmp/test*_out.txt $tmp/submission.json "$results_path/$path"
 
 
@@ -342,17 +407,17 @@ while [ "$all_graded" != "true" ]; do
         rm -rf $tmp
 
 
-	# remove submission from the todo list
-	# start of idea to make robust... use flock (needs more work)
-	#flock ($base_path/to_be_graded/my_lock,LOCK_EX)
-	rm -rf $base_path/to_be_graded/$NEXT_TO_GRADE
-	#flock ($base_path/to_be_graded/my_lock,LOCK_UN)
+	# remove submission & the active grading tag from the todo list
+	flock -w 5 200 || { echo "ERROR: flock() failed." >&2; exit 1; }
+	rm -f $base_path/to_be_graded/$NEXT_TO_GRADE
+	rm -f $base_path/to_be_graded/GRADING_$NEXT_TO_GRADE
+	flock -u 200
 
 	
 	ENDTIME=$(date +%s)
 	echo "finished with $NEXT_TO_GRADE in ~$(($ENDTIME - $STARTTIME)) seconds"
 
-	all_graded=false
+	all_grading_done=false
 	break
     done
 done

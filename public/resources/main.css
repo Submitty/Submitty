@@ -12,6 +12,7 @@ h1, h2, h3 {
 } 
 pre { 
   max-width:900px;
+  display: inline-block;
 }
 center { 
     width:fit-content; max-width:700px; word-wrap:break-word;
@@ -62,8 +63,8 @@ td.main_panel {
 .panel {
     margin: 10px 20px 10px 10px;
     border-radius: 0;
-background-color: #F8F8F8;
-
+    background-color: #F8F8F8;
+    overflow-x: auto;	
 }
 .col-md-6 {
     padding: 0;

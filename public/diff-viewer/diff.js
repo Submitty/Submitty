@@ -130,34 +130,38 @@ var diff = function(){
 		// Load generated css
 		for (var i = 0;i < style.length;i++){
 			console.log(style[i]);
-			$('#' + first_diff_tag + ' > ' + style[i][0]).addClass(style[i][1]);
-			$('#' + second_diff_tag + ' > ' + style[i][0]).addClass(style[i][1]);
+			$('#' + first_diff_tag + ' > > ' + style[i][0]).addClass(style[i][1]);
+			$('#' + second_diff_tag + ' > > ' + style[i][0]).addClass(style[i][1]);
 		}
 
 		// Create association events
 		for (var i = 0;i < assocs.length;i++){
 			var selectors = assocs[i];
-			setup_line_hover(selectors);
+			setup_line_hover(selectors, first_diff_tag, second_diff_tag);
 		}
 	}
 
 	// Setup line selectors for hover event
-	function setup_line_hover(selectors){
+	function setup_line_hover(selectors, first_diff_tag, second_diff_tag){
 		// Function called when group is hovered over
 		var event_function_hover_on = function(e){
 			for (var u = 0;u<selectors.length;u++){
-				$(selectors[u]).addClass("line-hover");
+				$('#' + first_diff_tag + ' > > ' + selectors[u]).addClass("line-hover");
+				$('#' + second_diff_tag + ' > > ' + selectors[u]).addClass("line-hover");
 			}
 		};
 		// Function called when group is no longer hovered over
 		var event_function_hover_off = function(e){
 			for (var u = 0;u<selectors.length;u++){
-				$(selectors[u]).removeClass("line-hover");
+				$('#' + first_diff_tag + ' > > ' + selectors[u]).removeClass("line-hover");
+				$('#' + second_diff_tag + ' > > ' + selectors[u]).removeClass("line-hover");
 			}
 		};
 		// Set each elements event
 		for (var u = 0;u < selectors.length;u++){
-			$(selectors[u]).hover(event_function_hover_on,
+			$('#' + first_diff_tag + ' > > ' + selectors[u]).hover(event_function_hover_on,
+				event_function_hover_off);
+			$('#' + second_diff_tag + ' > > ' + selectors[u]).hover(event_function_hover_on,
 				event_function_hover_off);
 		}
 	}
