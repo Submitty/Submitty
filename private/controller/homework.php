@@ -107,13 +107,13 @@ $submitted_files = get_submitted_files($username, $course, $assignment_id, $assi
 $submitting_version_in_grading_queue = version_in_grading_queue($username, $course, $assignment_id, $submitting_version);
 
 $assignment_version_in_grading_queue = version_in_grading_queue($username, $course, $assignment_id, $assignment_version);
+$points_visible = get_points_visible($homework_tests);
 render("homework", array(
     "course"=>$course,
     "assignment_id"=>$assignment_id,
     "assignment_name"=>$assignment_name,
     "all_assignments"=>$all_assignments,
-    "points_possible"=>$points_possible,
-    "points_visible"=>$assignment_config["points_visible"],
+    "points_visible"=>$points_visible,
     
       // added for debugging
     "username"=>$username,

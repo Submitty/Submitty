@@ -79,3 +79,16 @@ td.main_panel {
     background:rgba(255,255,255,0.8);
 
 }
+
+.green-background {
+    background-color: #006600;
+}
+
+.yellow-background {
+    background-color: #CFCF00;
+}
+
+.red-background {
+    background-color: #E60000;
+}
+

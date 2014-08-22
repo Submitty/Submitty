@@ -387,6 +387,7 @@ function get_homework_tests($username, $course, $assignment_id, $assignment_vers
                  array_push($homework_tests, array(
                     "title"=>$testcases_info[$i]["title"],
                     "is_hidden"=>$testcases_info[$i]["hidden"],
+                    "is_extra_credit"=>$testcases_info[$i]["extracredit"],
                     "points_possible"=>$testcases_info[$i]["points"],
                     "score"=>$testcases_results[$u]["points_awarded"],
                     "message"=> isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "",
@@ -413,6 +414,20 @@ function get_awarded_points_visible($homework_tests)
     }
     return $version_score;
 }
+
+function get_points_visible($homework_tests)
+{
+    $points_visible = 0;
+    foreach ($homework_tests as $testcase) {
+        if ($testcase["is_hidden"] === false || $testcase["is_hidden"] === "false" || $testcase["is_hidden"] === "False") {
+            if ($testcase["is_extra_credit"] === false || $testcase["is_extra_credit"] === "false" || $testcase["is_extra_credit"] === "False") {
+                $points_visible += $testcase["points_possible"];
+            }
+        }
+    }
+    return $points_visible;
+}
+
 
 // Get the test cases from the instructor configuration file
 function get_assignment_config($username, $course, $assignment_id) {
