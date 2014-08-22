@@ -1,10 +1,7 @@
-<!-- The user's umask is ignored for the user running php, so we need
+<?php umask (0027);
+/*The user's umask is ignored for the user running php, so we need
 to set it from inside of php to make sure the group read & execute
-permissions aren't lost for newly created files & directories.  -->
-<?php umask (0027); ?>
-
-
-<?php
+permissions aren't lost for newly created files & directories.*/
 
 // This file is relative to the public directory of the website.  (It
 // is run from the location of index.php). 
