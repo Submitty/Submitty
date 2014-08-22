@@ -216,23 +216,20 @@ function version_changed(){
         ?>
       </span>
       <span>
-        <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Show / Hide</a>
+        <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
       </span>
           </div>
     <div id="sidebysidediff<?php echo $counter;?>" style="display:none">
       <?php if ($test["message"] != ""){?>
-          <br>
+      <!--<br>-->
           <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
       <?php }?>
 
 
-      <?php if (1) { ?> 
-<!--isset($test["compilation_output"]) && $test["compilation_output"] != ""){?>-->
-          <br>
-          <pre><?php echo $test["compilation_output"]; ?></pre>
+      <?php if (isset($test["compilation_output"]) && $test["compilation_output"] != ""){?>
+      <b>Compilation output:</b>
+      <pre><?php echo $test["compilation_output"]; ?></pre>
       <?php }?>
-
-
 
 <!--
       <?php echo $test["diff"]["student"]; ?>
