@@ -17,8 +17,8 @@ function loadDiffQueue(){
 		var student_element_id = title+"_student";
 		var instructor_element_id = title+"_instructor";
 
-		var student_element = document.getElementById(student_element_id);
-		var instructor_element = document.getElementById(instructor_element_id);
+		var student_element = document.getElementById(student_element_id.split('\\ ').join(' '));
+		var instructor_element = document.getElementById(instructor_element_id.split('\\ ').join(' '));
 
 		diff.load(student_element.innerHTML,instructor_element.innerHTML);
 
