@@ -18,20 +18,6 @@ if (isset($_SESSION["status"])) {
     }
     $_SESSION["status"] = "";
 }
-
-
-$username = $_SESSION["id"];
-$class_config = get_class_config($_SESSION["id"]);//Gets class.JSON data
-if ($class_config == NULL) {
-    ?><script>alert("Configuration for this class (class.JSON) is invalid.  Quitting");</script>
-    <?php exit();
-}
-$most_recent_assignment_id = $class_config["default_assignment"];
-$most_recent_assignment_version = most_recent_assignment_version($username, $most_recent_assignment_id);
-
-$all_assignments = $class_config["assignments"];
-
-
 if (isset($_GET["course"])) {
     $course = htmlspecialchars($_GET["course"]);
     if (!is_valid_course($course)) {
@@ -42,6 +28,22 @@ if (isset($_GET["course"])) {
 }
 
 
+$username = $_SESSION["id"];
+$class_config = get_class_config($course);//Gets class.JSON data
+if ($class_config == NULL) {
+    ?><script>alert("Configuration for this class (class.JSON) is invalid.  Quitting");</script>
+    <?php exit();
+}
+
+
+
+$most_recent_assignment_id = $class_config["default_assignment"];
+$most_recent_assignment_version = most_recent_assignment_version($username, $course, $most_recent_assignment_id);
+
+$all_assignments = $class_config["assignments"];
+
+
+
 if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants to see
     $assignment_id = htmlspecialchars($_GET["assignment_id"]);
     if (!is_valid_assignment($class_config, $assignment_id)) {
@@ -50,8 +52,8 @@ if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants
     if (isset($_GET["assignment_version"])) {
         $assignment_version = htmlspecialchars($_GET["assignment_version"]);
     }
-    if (!isset($assignment_version) || !is_valid_assignment_version($username, $assignment_id, $assignment_version) || $assignment_version == "") {
-        $assignment_version = most_recent_assignment_version($username, $assignment_id);
+    if (!isset($assignment_version) || !is_valid_assignment_version($username, $course, $assignment_id, $assignment_version) || $assignment_version == "") {
+        $assignment_version = most_recent_assignment_version($username, $course, $assignment_id);
     }
 } else {//Otherwise use the most recent assignment and version
     $assignment_id = $most_recent_assignment_id;
@@ -59,7 +61,7 @@ if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants
 }
 $assignment_name = name_for_assignment_id($class_config, $assignment_id);
 
-$highest_version = most_recent_assignment_version($username, $assignment_id);
+$highest_version = most_recent_assignment_version($username, $course, $assignment_id);
 
 
 
@@ -76,9 +78,9 @@ $TA_grade = TA_grade($username, $assignment_id);
 //Points_possible as an int is optional when score is used
 
 // Grab the assignment and user information regarding test cases
-$assignment_config = get_assignment_config($username, $assignment_id);//Gets data from assignment_config.json
+$assignment_config = get_assignment_config($username, $course, $assignment_id);//Gets data from assignment_config.json
 $testcases_info = $assignment_config["testcases"];//These are the tests run on a homework (for grading etc.)
-$version_results = get_assignment_results($username, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
+$version_results = get_assignment_results($username, $course, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
 if ($version_results) { 
     $testcases_results = $version_results["testcases"];
 } else {
@@ -90,62 +92,28 @@ $max_submissions_for_assignment = $assignment_config["max_submissions"];
 $points_received = 0;
 $points_possible = 0;
 
-// FIXME: VERY BAD STYLE: THIS CODE IS DUPLICATED IN HOMEWORK_MODEL_FUNCTIONS :(
+$homework_tests = get_homework_tests($username, $course, $assignment_id, $assignment_version, $assignment_config);
 
-$homework_tests = array();
-$homework_summary = array();
-for ($i = 0; $i < count($testcases_info); $i++) {
-    for ($u = 0; $u < count($testcases_results); $u++){
-        //Match the assignment results (user specific) with the configuration (class specific)
-        if ($testcases_info[$i]["title"] == $testcases_results[$u]["test_name"]){
-            //Data to display in summary table
-            array_push($homework_summary, array(
-                "title"=>$testcases_info[$i]["title"], 
-                "score"=>$testcases_results[$u]["points_awarded"], 
-                "points_possible"=>$testcases_info[$i]["points"]
-            ));
 
-    $path_front = get_path_front();
-	$student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
 
-            //Data to display in the detail view / Diff Viewer (bottom)
-            array_push($homework_tests, array(
-                "title"=>$testcases_info[$i]["title"],
-                "is_hidden"=>$testcases_info[$i]["hidden"],
-                "points_possible"=>$testcases_info[$i]["points"],
-                "score"=>$testcases_results[$u]["points_awarded"],
-                "message"=> isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "",
-                    "compilation_output"=> isset($testcases_results[$u]["compilation_output"]) ? get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]) : "",
-                "diff"=> isset($testcases_results[$u]["diff"]) ? get_testcase_diff($username, $assignment_id, $assignment_version,$testcases_results[$u]["diff"]) : ""
-    //"diff"=> isset($testcases_results[$u]["diff"]) ? "a" : "b"
-            ));
-            break;
-        }
-    }
-}
 
-$submitting_version = get_user_submitting_version($_SESSION["id"], $assignment_id);//What version they are using as their final submission
+$submitting_version = get_user_submitting_version($username, $course, $assignment_id);//What version they are using as their final submission
+$submitting_homework_tests = get_homework_tests($username, $course, $assignment_id, $submitting_version, $assignment_config);
 $submitting_version_score = 0;
-$submitting_version_score = get_awarded_points_visible($_SESSION["id"], $assignment_id, $submitting_version)." / ".$assignment_config["points_visible"];
-;
-$viewing_version_score = 0;
-$viewing_version_score = get_awarded_points_visible($_SESSION["id"], $assignment_id, $assignment_version);
+$submitting_version_score = get_awarded_points_visible($submitting_homework_tests)." / ".$assignment_config["points_visible"];
+$viewing_version_score = get_awarded_points_visible($homework_tests);
+$submitted_files = get_submitted_files($username, $course, $assignment_id, $assignment_version);
 
+$submitting_version_in_grading_queue = version_in_grading_queue($username, $course, $assignment_id, $submitting_version);
 
-$submitted_files = get_submitted_files($_SESSION["id"], $assignment_id, $assignment_version);
-
-$submitting_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $submitting_version);
-
-$assignment_version_in_grading_queue = version_in_grading_queue($username, $assignment_id, $assignment_version);
-
+$assignment_version_in_grading_queue = version_in_grading_queue($username, $course, $assignment_id, $assignment_version);
+$points_visible = get_points_visible($homework_tests);
 render("homework", array(
     "course"=>$course,
     "assignment_id"=>$assignment_id,
     "assignment_name"=>$assignment_name,
     "all_assignments"=>$all_assignments,
-    "points_possible"=>$points_possible,
-    "points_visible"=>$assignment_config["points_visible"],
-    "homework_summary"=>$homework_summary,
+    "points_visible"=>$points_visible,
     
       // added for debugging
     "username"=>$username,

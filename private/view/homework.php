@@ -177,6 +177,17 @@ function version_changed(){
 <!-- DETAILS ON INDIVIDUAL TESTS --> 
 
   <div class="row" style="margin-left: 10px; margin-right: 10px">
+    <div class="box2" style="border-radius: 3px;    padding: 0px;    border: 1px solid #cccccc;    height: 100%;  width: 100%;   margin: 5px; position: relative; float: left;    background:rgba(255,255,255,0.8);">
+        <div>
+              <h4 style="margin-left: 10px; text-align: left;display:inline-block;">
+                    Total
+              </h4>
+              <span class="badge">
+                    <?php echo $viewing_version_score." / ".$points_visible;?>
+              </span>
+        </div>
+    </div>
+
     <?php $counter = 0;
     foreach($homework_tests as $test) {?>
     <br clear="all">
@@ -189,11 +200,11 @@ function version_changed(){
                    $part_percent = $test["score"] / $test["points_possible"];
                 }
                 if ($part_percent == 1) {
-                   $class = "badge alert-success";
+                   $class = "badge green-background";
                 } else if ($part_percent >= 0.5) {
-                   $class = "badge alert-warning";
+                   $class = "badge yellow-background";
                 } else {
-                   $class = "badge alert-danger";
+                   $class = "badge red-background";
                 }
           } else {
                 $class = "badge";
@@ -212,7 +223,10 @@ function version_changed(){
                 </div><!-- End Box2 -->
                 <?php continue;
             }
-            echo $test["score"]."/".$test["points_possible"];
+            echo $test["score"]." / ".$test["points_possible"];
+            if ($test["is_extra_credit"] === true || $test["is_extra_credit"] === "true" || $test["is_extra_credit"] === "True") {
+                echo " Extra Credit";
+            }
         ?>
       </span>
       <span>
@@ -263,17 +277,7 @@ function version_changed(){
       <?php $counter++;?>
    </div><!-- end box2 -->
    <?php }?><!-- end foreach homework_tests as test-->
-   <div class="box2" style="border-radius: 3px;    padding: 0px;    border: 1px solid #cccccc;    height: 100%;  width: 100%;   margin: 5px; position: relative; float: left;    background:rgba(255,255,255,0.8);">
-        <div>
-              <h4 style="margin-left: 10px; text-align: left;display:inline-block;">
-                    Total
-              </h4>
-              <span class="<?php echo $class;?>">
-                    <?php echo $viewing_version_score."/".$points_visible;?>
-              </span>
-        </div>
-    </div>
-
+   
 
    <!-- END OF "IS GRADED?" -->    
    <?php } ?>
