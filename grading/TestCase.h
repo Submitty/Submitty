@@ -231,13 +231,19 @@ public:
     std::string e = "";
 
     if (student_instr) {
+      std::cout << "STUDENT FILE EXISTS" << std::endl;
       s = std::string(std::istreambuf_iterator<char>(student_instr),
 		      std::istreambuf_iterator<char>());
+      std::cout << s << std::endl;
     }
     if (expected_instr) {
+      std::cout << "INSTRUCTOR FILE EXISTS" << std::endl;
       e = std::string(std::istreambuf_iterator<char>(expected_instr),
 		      std::istreambuf_iterator<char>());
+      std::cout << e << std::endl;
     }
+
+    std::cout << "MIDDLE OF COMPARE" << std::endl;
 
     /*
       && !expected_instr)
@@ -248,7 +254,6 @@ public:
 	} else if (student_instr != NULL && !expected_instr) {
 
 	  result = testcases[i].compare(s, blank);
-
     */
 
     return test_case_comparison[j].cmp_output (s,e);

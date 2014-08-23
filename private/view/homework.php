@@ -99,7 +99,7 @@ function version_changed(){
 
 
   <!-- ACTIVE SUBMISION INFO -->
-  <div class="box">
+<!--  <div class="box">
     <h3>Active  Submission Version 
     <?php 
        echo $submitting_version."</b>"; 
@@ -113,11 +113,11 @@ function version_changed(){
     <p><?php echo $highest_version;?> submissions used out of <?php echo $max_submissions;?>.</p>
 
   </div>
-
+-->
 
   <!-- INFO ON ALL VERSIONS -->
   <div class="box">
-    <h3>Review Previous Submissions</h3>
+    <h3>Review Submissions</h3>
       
 <!--
     <div class="row" style="margin: 0;">
@@ -131,7 +131,20 @@ function version_changed(){
           <select id="versionlist" name="assignment_version" onchange="version_changed();">
             <?php for ($i = 1; $i <= $highest_version; $i++) {?>
                   <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?> >
-                    Version <?php echo $i;?>
+                    Version #<?php echo $i;?>
+		    &nbsp;&nbsp 
+		    Score:
+		    <!-- FIX ME: INSERT SCORE FOR THIS VERSION... -->
+		    <?php echo $submitting_version_score; ?>
+		    &nbsp;&nbsp
+		    Days Late:
+		    <!-- FIX ME: INSERT LATE DAYS FOR THIS VERSION... -->
+		    <?php echo 0; ?>
+
+		    <?php if ($i == $submitting_version) { ?>
+		    &nbsp;&nbsp
+		    ACTIVE
+		    <?php } ?>
                   </option>
             <?php }?>
           </select>

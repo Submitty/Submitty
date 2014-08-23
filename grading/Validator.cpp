@@ -127,13 +127,9 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
     std::cout << testcases[i].title() << " - points: " << testcases[i].points()
               << std::endl;
 
-    /* TODO: Always returns 0 ? */
     int testcase_grade = 0;
     
-    bool has_diff = false;
-    
     std::string message = "";
-
     // --------------------------------------------
     if (testcases[i].isFileExistsTest()  ||  testcases[i].isCompilationTest()) {
       std::cerr << "THIS IS A FILE EXISTS TEST! " << std::endl;
@@ -146,76 +142,48 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 	message += "ERROR: " + testcases[i].details() + " was NOT FOUND!";
       }
     }
-
     // --------------------------------------------    
     else {
 
-      std::cout << "num comparisons " << testcases[i].numFileComparisons() << std::endl;
+      float grade_helper = 1.0;
+      
       for (int j = 0; j < testcases[i].numFileComparisons(); j++) {
 
-	//assert (testcases[i].numFileComparisons() > 0);
+	//std::cout << "-------------------" << std::endl;
+	//std::cout << "comparison #" << j << std::endl;
+
 	// Pull in student output & expected output
 	std::ifstream student_instr(testcases[i].filename(j).c_str());
 	if (!student_instr) {
-	  std::cerr << "ERROR: Student's '" << testcases[i].filename(j) << "' does not exist" << std::endl;
-	  message += "ERROR: Student's expected output '" + testcases[i].raw_filename(j) + "' was not created!";
+	  std::stringstream tmp;
+	  tmp << "ERROR: comparison #" << j << ": Student's " << testcases[i].filename(j) << " does not exist";
+	  std::cerr << tmp.str() << std::endl;
+	  //message += tmp.str();
 	} 
-	
 	std::ifstream expected_instr(testcases[i].expected(j).c_str());
 	if (!expected_instr) {
-	  std::cerr << "HOMEWORK CONFIGURATION ERROR: Instructor's '" << testcases[i].expected(j) << "' does not exist" << std::endl;
-	  message += "HOMEWORK CONFIGURATION ERROR: Instructor's '" + testcases[i].expected(j) + "' does not exist!";
+	  std::stringstream tmp;
+	  tmp << "ERROR: comparison #" << j << ": Instructor's " + testcases[i].expected(j) + " does not exist!";
+	  std::cerr << tmp.str() << std::endl;
+	  //message += tmp.str();
 	}
-	
-	TestResults *result;
-	  
-	/*
-	const std::string blank = "";
-	  
-	if (!student_instr && !expected_instr)
-	  result = testcases[i].compare(blank, blank);
-	else if (!student_instr && expected_instr != NULL) {
-	  const std::string e =
-	    std::string(std::istreambuf_iterator<char>(expected_instr),
-			std::istreambuf_iterator<char>());
-	  result = testcases[i].compare(blank, e);
-	} else if (student_instr != NULL && !expected_instr) {
-	  const std::string s =
-	    std::string(std::istreambuf_iterator<char>(student_instr),
-			std::istreambuf_iterator<char>());
-	  result = testcases[i].compare(s, blank);
-	} else {
-	  const std::string s =
-	    std::string(std::istreambuf_iterator<char>(student_instr),
-			std::istreambuf_iterator<char>());
-	  const std::string e =
-	    std::string(std::istreambuf_iterator<char>(expected_instr),
-			std::istreambuf_iterator<char>());
-	  result = testcases[i].compare(j); s, e);
-	}
-	*/	
-	
-	std::cout << "BEFORE" << std::endl;
-	result = testcases[i].compare(j); //s, e);
-	std::cout << "AFTER" << std::endl;
+	TestResults *result = testcases[i].compare(j);
 
-	has_diff = true;
-	  
-	std::cout << "MAKING A DIFF JSON" << std::endl;
 	std::stringstream diff_path;
 	diff_path << testcases[i].prefix() << "_" << j << "_diff.json";
 	std::ofstream diff_stream(diff_path.str().c_str());
 	  
 	std::cout << "result->grade() " << result->grade() << std::endl;
-	  
-	// had to edit to invert the grade??
-	testcase_grade = (int)floor(result->grade() * testcases[i].points());
+
+	grade_helper *= result->grade();
 	result->printJSON(diff_stream);
 	  
 	std::cout << "Grade: " << testcase_grade << std::endl;
 	  
 	delete result;
       }
+      
+      testcase_grade = (int)floor(grade_helper * testcases[i].points());
     }      
     
     const char *last_line = (i == num_testcases - 1) ? "\t\t}\n" : "\t\t},\n";
@@ -228,10 +196,8 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
                   << "\",\n"
                   << "\t\t\t\"points_awarded\": " << testcase_grade << ",\n";
 
-    if (has_diff) {
 
-      assert (testcases[i].numFileComparisons() > 0);
-      
+    if (testcases[i].numFileComparisons() > 0)  {
       testcase_json << "\t\t\t\"diffs\": [\n";
 
       for (int j = 0; j < testcases[i].numFileComparisons(); j++) {
@@ -241,16 +207,16 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 	
 	testcase_json
 	  << "\t\t\t\t{\n"
-	  << "\t\t\t\t\t\"diff_id\":\"" << testcases[i].prefix() << "_" << j << "_diff\""
-	  << "\",\n"
-	  << "\t\t\t\t\t\"instructor_file\":\"" << expected_path.str()
-	  << "\",\n"
-	  << "\t\t\t\t\t\"student_file\":\"" << testcases[i].filename(j)
-	  << "\",\n"
-	  << "\t\t\t\t\t\"difference\":\"" << testcases[i].prefix() << "_" << j << "_diff.json\",\n";
+	  << "\t\t\t\t\t\"diff_id\":\"" << testcases[i].prefix() << "_" << j << "_diff\",\n"
+	  << "\t\t\t\t\t\"student_file\":\"" << testcases[i].filename(j) << "\",\n";
 
-	if (message != "") {
-	  testcase_json << "\t\t\t\t\t\"message\": \"" << message << "\",\n";
+	if (1) { //testcases[i].expected(j) != "") {
+	  testcase_json << "\t\t\t\t\t\"instructor_file\":\"" << expected_path.str() << "\",\n"
+			<< "\t\t\t\t\t\"difference\":\"" << testcases[i].prefix() << "_" << j << "_diff.json\",\n";
+	}
+
+	if (1) { //message != "") {
+	  testcase_json << "\t\t\t\t\t\"message\": \"this is comparison #" << j << " " << message << "\",\n";
 	  message = "";
 	}
 	
@@ -260,17 +226,14 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
       
       testcase_json << "\t\t\t],\n";
     }
-    if (message != "") {
-      testcase_json << "\t\t\t\"message\": \"" << message << "\",\n";
+    if (1) { //message != "") {
+      testcase_json << "\t\t\t\"message\": \"message for this testcase... " << message << "\",\n";
     }
     if (testcases[i].isCompilationTest()) {
       testcase_json << "\t\t\t\"compilation_output\": \".submit_compilation_output.txt\",\n";
     }
     
     testcase_json << last_line;
-    //++t;
-
-
   }
 
   /* Output total grade */

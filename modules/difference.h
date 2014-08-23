@@ -80,7 +80,8 @@ TestResults::TestResults() :
 }
 
 Difference::Difference() :
-		TestResults(), output_length_a(0), output_length_b(0), edit_distance(0) {
+  TestResults(), output_length_a(0), output_length_b(0), edit_distance(0), 
+  type(OtherType) /* WAS UNINITIALIZED */ {
 }
 
 Tokens::Tokens() :
@@ -95,6 +96,8 @@ float Difference::grade() {
 
 	/* CHANGED FROM distance to (1-distance) */
 	/* because distance == 0 when the files are perfect, and that should be worth full credit */
+
+	if (max == 0) return 1;
 
 	return (float) (1 - (distance / (float) max ));
 }
