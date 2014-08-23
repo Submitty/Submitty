@@ -252,7 +252,7 @@ function version_changed(){
 -->
 
 
-      <!-- SIDE BY SIDE DIFF -->
+      <!-- SIDE BY SIDE INDIVIDUAL DIFF -->
       <?php if ($test["diff"] != ""){?>
            <!-- STUDENT INSTRUCTOR OUTPUT -->
 	   <div class="col-md-6">
@@ -271,7 +271,27 @@ function version_changed(){
              diff_objects["<?php echo $test["title"]; ?>"] = <?php echo $test["diff"]["difference"]; ?>;
 	   </script>
       <!-- end if -->
-      <?php }?>  
+      <?php }?>
+      <!-- END SIDE BY SIDE INDIVIDUAL DIFF -->
+      <!-- MULTIPLE DIFFS -->
+      <?php foreach ($test["diffs"] as $diff) {?>
+            <div class="col-md-6">
+                <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
+                    <?php echo str_replace(" ", "&nbsp;", $diff["student"]); ?>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_instructor">
+                    <?php echo str_replace(" ", "&nbsp;", $diff["instructor"]); ?>
+                </div>
+            </div>
+            <script>
+                diff_queue.push("<?php echo $diff["diff_id"]; ?>");
+                diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
+            </script>
+        <?php } ?>
+        <!-- END MULTIPLE DIFFS -->
+
 
     </div><!-- end sidebysidediff# -->
       <?php $counter++;?>
