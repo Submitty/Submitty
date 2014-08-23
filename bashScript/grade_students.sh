@@ -66,7 +66,7 @@ while true; do
     # if no work was done on the last loop...
     if [ "$all_grading_done" = "true" ] ; then
 	((sleep_count++))
-	echo "sleep iter $sleep_count: no work"
+	 echo "sleep iter $sleep_count: no work"
 	if [[ $sleep_count -gt 100 ]] ; then
 	    # if you've been running for several minutes, quit (will be restarted by a cron once per minute)
 	    break;
@@ -83,7 +83,7 @@ while true; do
     # check for runaway processes by untrusted (this should never be more that a few, the user limit is 50)
     numprocesses=$(ps -u untrusted | wc -l)
     if [[ $numprocesses -gt 25 ]] ; then
-	echo "untrusted is running too many processes: " $numprocesses
+	 echo "untrusted is running too many processes: " $numprocesses
 	((too_many_processes_count++))
 	if [[ $too_many_processes_count -gt 10 ]]; 
 	then 
@@ -99,7 +99,7 @@ while true; do
 #FIXME, look into pgreg (process grep)
     numparallel=$(ps -f -u hwcron | grep grade_students.sh | wc -l)
     if [[ "$numparallel" -gt 5 ]] ; then
-	echo "hwcron is running too many parallel scripts: " $numparallel
+	 echo "hwcron is running too many parallel scripts: " $numparallel
 	exit
     fi
 
@@ -130,7 +130,7 @@ while true; do
 	flock -w 5 200 || { echo "ERROR: flock() failed." >&2; exit 1; }
 	if [ -e "$base_path/to_be_graded/GRADING_$NEXT_TO_GRADE" ]
 	then
-    	    echo "skip $NEXT_TO_GRADE, being graded by another grade_students.sh process"
+    	     echo "skip $NEXT_TO_GRADE, being graded by another grade_students.sh process"
 	    flock -u 200
 	    continue
 	else
@@ -140,8 +140,8 @@ while true; do
 	fi
 
 
-	echo "========================================================================"
-	echo "GRADE $NEXT_TO_GRADE"
+	 echo "========================================================================"
+	 echo "GRADE $NEXT_TO_GRADE"
 	
 	STARTTIME=$(date +%s)
 
@@ -287,7 +287,7 @@ while true; do
 
 
         # copy submitted files to tmp directory
-	cp 1>/dev/null  2>&1  -r $submission_path/* "$tmp" || echo "ERROR: Failed to copy to temporary directory"
+	cp 1>/dev/null  2>&1  -r $submission_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory"
 
 
 
@@ -300,7 +300,7 @@ while true; do
         # copy input files to tmp directory
 	if [ -d "$test_input_path" ]
 	then
-	    cp -rf $test_input_path/* "$tmp" || echo "ERROR: Failed to copy to temporary directory"       
+	    cp -rf $test_input_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory"       
 	fi
 	
 
@@ -314,7 +314,7 @@ while true; do
         # copy output files to tmp directory  (SHOULD CHANGE THIS)
 	if [ -d "$test_output_path" ]
 	then
-	    cp -rf $test_output_path/* "$tmp" || echo "ERROR: Failed to copy to temporary directory"       
+	    cp -rf $test_output_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory"       
 	fi
 	
 	submission_time="$(date -r $submission_path "+%F %T")"
@@ -335,9 +335,9 @@ while true; do
 
 	if [[ "$compile_error_code" -ne 0 ]] ;
 	then
-	    echo "COMPILE ERROR CODE $compile_error_code"
+	     echo "COMPILE ERROR CODE $compile_error_code"
 	else
-	    echo "COMPILE OK"
+	     echo "COMPILE OK"
 	fi
 	
 	
@@ -356,14 +356,14 @@ while true; do
 	chmod -R go+rwx $tmp
 
 	# run the run.out as the untrusted user
-	$base_path/bin/untrusted_runscript $tmp/my_run.out 1> .submit_runner_output.txt 2> .submit_runner_errors.txt
+	$base_path/bin/untrusted_runscript $tmp/my_run.out >& .submit_runner_output.txt
 
 	runner_error_code="$?"
 	if [[ "$runner_error_code" -ne 0 ]] ;
 	then
-	    echo "RUNNER ERROR CODE $runner_error_code"
+	     echo "RUNNER ERROR CODE $runner_error_code"
 	else
-	    echo "RUNNER OK"
+	     echo "RUNNER OK"
 	fi
 	
 	
@@ -375,14 +375,14 @@ while true; do
 	    continue
 	fi
 
-        echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
+         echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
         valgrind "$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" >& .submit_validator_output.txt 
 	validator_error_code="$?"
 	if [[ "$validator_error_code" -ne 0 ]] ;
 	then
-	    echo "VALIDATOR ERROR CODE $validator_error_code"
+	     echo "VALIDATOR ERROR CODE $validator_error_code"
 	else
-	    echo "VALIDATOR OK"
+	     echo "VALIDATOR OK"
 	fi
 	
 
@@ -396,7 +396,7 @@ while true; do
         rm -rf "$results_path"
 
         # Make directory structure in results if it doesn't exist
-        mkdir -p "$results_path" || echo "ERROR: Could not create results path $results_path"
+        mkdir -p "$results_path" ||  echo "ERROR: Could not create results path $results_path"
 
         cp  1>/dev/null  2>&1  $tmp/* $tmp/.* "$results_path"
         # cp  1>/dev/null  2>&1  $tmp/test*_cout.txt $tmp/test*_cerr.txt $tmp/test*_out.txt $tmp/submission.json "$results_path/$path"
@@ -415,12 +415,12 @@ while true; do
 
 	
 	ENDTIME=$(date +%s)
-	echo "finished with $NEXT_TO_GRADE in ~$(($ENDTIME - $STARTTIME)) seconds"
+	 echo "finished with $NEXT_TO_GRADE in ~$(($ENDTIME - $STARTTIME)) seconds"
 
 	all_grading_done=false
 	break
     done
 done
 
-echo "========================================================================"
-echo "ALL DONE"
+ echo "========================================================================"
+ echo "ALL DONE"

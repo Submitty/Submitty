@@ -62,9 +62,11 @@ int main(int argc, char *argv[]) {
 			    " 2>test" + to_string(i + 1) + "_cerr.txt",
 			    testcases[i].seconds_to_run());
       // append the test case # to the front of the output file (if it exists)
-      if (testcases[i].raw_filename() != "" &&
-	  access( testcases[i].raw_filename().c_str(), F_OK|R_OK|W_OK ) != -1) { /* file exists */
-	execute ("/bin/mv "+testcases[i].raw_filename()+" "+testcases[i].filename());
+      //      assert (testcases[i].numFileComparisons() >= 1);
+      if (testcases[i].numFileComparisons() > 0 && 
+	  testcases[i].raw_filename(0) != "" &&
+	  access( testcases[i].raw_filename(0).c_str(), F_OK|R_OK|W_OK ) != -1) { /* file exists */
+	execute ("/bin/mv "+testcases[i].raw_filename(0)+" "+testcases[i].filename(0));
       }
     }
   }

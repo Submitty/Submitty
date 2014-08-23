@@ -47,6 +47,15 @@ template<class T> Difference* sesSecondary ( Difference & text_diff );
 template<class T> Difference* printJSON ( Difference & text_diff,
 		std::ofstream & file_out, int type = 0 );
 
+
+
+TestResults* warnIfNotEmpty ( const std::string & b,
+		const std::string & a ) {
+  exit(0);
+}
+
+
+
 TestResults* myersDiffbyLinebyWord ( const std::string & b,
 		const std::string & a ) {
 	vectorOfWords text_a = stringToWords( a );

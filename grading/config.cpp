@@ -36,8 +36,8 @@ void printTestCase(std::ostream &out, TestCase test) {
   out << "\t\t\"points\": " << test.points() << "," << std::endl;
   out << "\t\t\"hidden\": " << hidden << "," << std::endl;
   out << "\t\t\"extracredit\": " << extracredit << "," << std::endl;
-  out << "\t\t\"expected_output\": "
-      << "\"" << test.expected() << "\"" << std::endl;
+  //  out << "\t\t\"expected_output\": "
+  //   << "\"" << test.expected(0) << "\"" << std::endl;
   out << "\t}";
 }
 

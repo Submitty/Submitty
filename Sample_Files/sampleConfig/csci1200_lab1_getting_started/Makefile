@@ -14,6 +14,7 @@ assignment:
 	$(gcc) -g -DDEBUG -I $(RCOS) -include $(CONFIG)/config.h $(RCOS)/grading/Validator.cpp   -o $(bindir)/validate.out
 	$(gcc) -g -DDEBUG -I $(RCOS) -include $(CONFIG)/config.h $(RCOS)/grading/runner.cpp    -o $(bindir)/run.out
 	$(gcc) -g -DDEBUG -I $(RCOS) -include $(CONFIG)/config.h $(RCOS)/grading/config.cpp    -o $(bindir)/configure.out
+	#valgrind 
 	$(bindir)/configure.out assignment_config.json
 
 clean:
