@@ -289,15 +289,20 @@ function version_changed(){
       <!-- MULTIPLE DIFFS -->
       <?php foreach ($test["diffs"] as $diff) {?>
             <div class="col-md-6">
+
+
+	      <!-- WARNING spaces/newlines in the inner divs are critical -->
+	      <!-- FIXME, should get rid of the newline after the div
+	           open and get rid of the "+1" on the line index in
+	           the diff.js file -->
                 <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
-                    <?php echo str_replace(" ", "&nbsp;", $diff["student"]); ?>
-                </div>
+<?php echo str_replace(" ", "&nbsp;", $diff["student"]); ?></div>
             </div>
             <div class="col-md-6">
                 <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_instructor">
-                    <?php echo str_replace(" ", "&nbsp;", $diff["instructor"]); ?>
-                </div>
+<?php echo str_replace(" ", "&nbsp;", $diff["instructor"]); ?></div>
             </div>
+
             <script>
                 diff_queue.push("<?php echo $diff["diff_id"]; ?>");
                 diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;

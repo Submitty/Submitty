@@ -110,6 +110,11 @@ var diff = function(){
 				}
 			}
 		}else if (difference.start !== undefined){
+
+// FIXME: We should be able to get rid of a bunch of the line index
+//        "+1"s in this file when the newline is removed from
+//        view/homework.php
+
 			console.log(id_prepend,"Insert line at ",difference.start+1);
 			// difference.start += ins.length;
 			ins.push(difference.start+1);
@@ -175,6 +180,12 @@ var diff = function(){
 				// html += "Insert<br/>";
 				html += "<div class='line missing' id='"+id_preprend+"ins"+i+"'></div>";
 			}
+
+
+// FIXME: We should be able to get rid of a bunch of the line index
+//        "+1"s in this file when the newline is removed from
+//        view/homework.php
+
 
 			html += "<div class='line' id='"+id_preprend+"line"+i+
 				"'><span class='line_number "+(i%2 == 0 ? "" : "odd-line")+
