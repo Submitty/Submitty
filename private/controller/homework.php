@@ -108,6 +108,7 @@ $submitting_version_in_grading_queue = version_in_grading_queue($username, $cour
 
 $assignment_version_in_grading_queue = version_in_grading_queue($username, $course, $assignment_id, $assignment_version);
 $points_visible = get_points_visible($homework_tests);
+$select_submission_data = get_select_submission_data($username, $course, $assignment_id, $assignment_config, $highest_version);
 render("homework", array(
     "course"=>$course,
     "assignment_id"=>$assignment_id,
@@ -122,6 +123,7 @@ render("homework", array(
     "testcases_info"=>$testcases_info,
 
     "homework_tests"=>$homework_tests,
+    "select_submission_data"=>$select_submission_data,
     "submitting_version"=>$submitting_version,
     "submitting_version_score"=>$submitting_version_score,
     "viewing_version_score"=>$viewing_version_score,

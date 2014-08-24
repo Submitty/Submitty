@@ -13,7 +13,7 @@ h1, h2, h3 {
 } 
 pre { 
   max-width:900px;
-  display: inline-block;
+  display: inline-block !important;
 }
 center { 
     width:fit-content; max-width:700px; word-wrap:break-word;
