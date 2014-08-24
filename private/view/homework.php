@@ -99,7 +99,7 @@ function version_changed(){
 
 
   <!-- ACTIVE SUBMISION INFO -->
-  <div class="box">
+<!--  <div class="box">
     <h3>Active  Submission Version 
     <?php 
        echo $submitting_version."</b>"; 
@@ -113,11 +113,11 @@ function version_changed(){
     <p><?php echo $highest_version;?> submissions used out of <?php echo $max_submissions;?>.</p>
 
   </div>
-
+-->
 
   <!-- INFO ON ALL VERSIONS -->
   <div class="box">
-    <h3>Review Previous Submissions</h3>
+    <h3>Review Submissions</h3>
       
 <!--
     <div class="row" style="margin: 0;">
@@ -131,7 +131,20 @@ function version_changed(){
           <select id="versionlist" name="assignment_version" onchange="version_changed();">
             <?php for ($i = 1; $i <= $highest_version; $i++) {?>
                   <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?> >
-                    Version <?php echo $i;?>
+                    Version #<?php echo $i;?>
+		    &nbsp;&nbsp 
+		    Score:
+		    <!-- FIX ME: INSERT SCORE FOR THIS VERSION... -->
+		    <?php echo $submitting_version_score; ?>
+		    &nbsp;&nbsp
+		    Days Late:
+		    <!-- FIX ME: INSERT LATE DAYS FOR THIS VERSION... -->
+		    <?php echo 0; ?>
+
+		    <?php if ($i == $submitting_version) { ?>
+		    &nbsp;&nbsp
+		    ACTIVE
+		    <?php } ?>
                   </option>
             <?php }?>
           </select>
@@ -214,31 +227,35 @@ function version_changed(){
       <h4 style="margin-left: 10px; text-align: left;display:inline-block;">
         <?php echo $test["title"];?>
       </h4>
-      <span class="<?php echo $class;?>">
+      <!-- BADGE TEST SCORE -->
         <?php 
-            if ($test["is_hidden"] === true || $test["is_hidden"] == "true" || $test["is_hidden"] == "True") {
-                echo "Hidden Test Case";?>
+            if ($test["is_hidden"] === true || $test["is_hidden"] == "true" || $test["is_hidden"] == "True") {?>
+                <span class="badge">
+                Hidden Test Case
                 </span>
                 </div><!-- End div -->
                 </div><!-- End Box2 -->
                 <?php continue;
-            }
-            echo $test["score"]." / ".$test["points_possible"];
+            }?>
+            <span class="<?php echo $class;?>">
+            <?php echo $test["score"]." / ".$test["points_possible"];
             if ($test["is_extra_credit"] === true || $test["is_extra_credit"] === "true" || $test["is_extra_credit"] === "True") {
                 echo " Extra Credit";
             }
         ?>
       </span>
-      <span>
-        <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
-      </span>
-          </div>
-    <div id="sidebysidediff<?php echo $counter;?>" style="display:none">
-      <?php if ($test["message"] != ""){?>
-      <!--<br>-->
-          <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
+      <?php if ((isset($test["diff"]) && $test["diff"] != "") || (isset($test["diffs"]) && count($test["diffs"]) > 0)) {?>
+          <span>
+            <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
+          </span>
       <?php }?>
-
+      <?php if ($test["message"] != "") {?>
+        <div>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
+          </div>
+        <?php } ?>
+    </div>
+    <div id="sidebysidediff<?php echo $counter;?>" style="display:none">
 
       <?php if (isset($test["compilation_output"]) && $test["compilation_output"] != ""){?>
       <b>Compilation output:</b>
@@ -252,8 +269,13 @@ function version_changed(){
 -->
 
 
-      <!-- SIDE BY SIDE DIFF -->
+      <!-- SIDE BY SIDE INDIVIDUAL DIFF -->
       <?php if ($test["diff"] != ""){?>
+        <?php if (isset($test["message"]) && $test["message"] != "") {?>
+            <div>
+                <?php echo $test["message"];?>
+            </div>
+        <?php }?>
            <!-- STUDENT INSTRUCTOR OUTPUT -->
 	   <div class="col-md-6">
              <div class="panel panel-default" id="<?php echo $test["title"]; ?>_student">
@@ -271,7 +293,37 @@ function version_changed(){
              diff_objects["<?php echo $test["title"]; ?>"] = <?php echo $test["diff"]["difference"]; ?>;
 	   </script>
       <!-- end if -->
-      <?php }?>  
+      <?php }?>
+      <!-- END SIDE BY SIDE INDIVIDUAL DIFF -->
+      <!-- MULTIPLE DIFFS -->
+      <?php foreach ($test["diffs"] as $diff) {?>
+        <?php if (isset($diff["message"]) && $diff["message"] != "") {?>
+            <br>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $diff["message"]; ?></em></span>
+        <?php }?>
+        <div class="row">
+            <div class="col-md-6">
+
+
+	      <!-- WARNING spaces/newlines in the inner divs are critical -->
+	      <!-- FIXME, should get rid of the newline after the div
+	           open and get rid of the "+1" on the line index in
+	           the diff.js file -->
+                <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
+<?php echo str_replace(" ", "&nbsp;", $diff["student"]); ?></div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_instructor">
+<?php echo str_replace(" ", "&nbsp;", $diff["instructor"]); ?></div>
+            </div>
+            <script>
+                diff_queue.push("<?php echo $diff["diff_id"]; ?>");
+                diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
+            </script>
+        </div>
+        <?php } ?>
+        <!-- END MULTIPLE DIFFS -->
+
 
     </div><!-- end sidebysidediff# -->
       <?php $counter++;?>

@@ -201,7 +201,7 @@ public:
     return test_case_comparison[i].description;
   }	
   std::string expected (int i) const {
-    std::cout << "EXPECTED " << i << numFileComparisons() << std::endl;
+    //std::cout << "EXPECTED " << i << numFileComparisons() << std::endl;
     assert (i >= 0 && i < numFileComparisons());
     return test_case_comparison[i].instructor_file;
   }		
@@ -217,14 +217,49 @@ public:
   
   /* Calls the function designated by the function pointer; if the function pointer
      is NULL, defaults to returning the result of diffLine(). */
-  TestResults* compare ( int i) {
-    assert (i >= 0 && i < numFileComparisons());
+  TestResults* compare (int j) {
+    assert (j >= 0 && j < numFileComparisons());
     //const std::string &student_out,
     //				const std::string &expected_out ) {
     //if ( test_case_comparison[i].cmp_output != NULL )
-    return test_case_comparison[i].cmp_output
-      (test_case_comparison[i].filename,
-       test_case_comparison[i].instructor_file);
+
+
+    std::ifstream student_instr(filename(j).c_str());
+    std::ifstream expected_instr(expected(j).c_str());
+
+    std::string s = "";
+    std::string e = "";
+
+    if (student_instr) {
+      std::cout << "STUDENT FILE EXISTS" << std::endl;
+      s = std::string(std::istreambuf_iterator<char>(student_instr),
+		      std::istreambuf_iterator<char>());
+      std::cout << s << std::endl;
+    }
+    if (expected_instr) {
+      std::cout << "INSTRUCTOR FILE EXISTS" << std::endl;
+      e = std::string(std::istreambuf_iterator<char>(expected_instr),
+		      std::istreambuf_iterator<char>());
+      std::cout << e << std::endl;
+    }
+
+    std::cout << "MIDDLE OF COMPARE" << std::endl;
+
+    /*
+      && !expected_instr)
+	  result = testcases[i].compare(blank, blank);
+	else if (!student_instr && expected_instr != NULL) {
+
+	  result = testcases[i].compare(blank, e);
+	} else if (student_instr != NULL && !expected_instr) {
+
+	  result = testcases[i].compare(s, blank);
+    */
+
+    return test_case_comparison[j].cmp_output (s,e);
+    //test_case_comparison[i].filename,
+    // test_case_comparison[i].instructor_file);
+
     //    else
     // return diffLine( student_out, expected_out );
   }

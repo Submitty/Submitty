@@ -51,7 +51,9 @@ template<class T> Difference* printJSON ( Difference & text_diff,
 
 TestResults* warnIfNotEmpty ( const std::string & b,
 		const std::string & a ) {
-  exit(0);
+  std::cout << "in warn if not empty -- need to edit" << std::endl;
+  // FIXME: not what we want...
+  return new Difference();
 }
 
 

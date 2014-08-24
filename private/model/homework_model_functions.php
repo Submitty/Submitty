@@ -378,7 +378,6 @@ function get_homework_tests($username, $course, $assignment_id, $assignment_vers
     }
     $path_front = get_path_front($course);
 	$student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
- 
     $homework_tests = array();
     for ($i = 0; $i < count($testcases_info); $i++) {
         for ($u = 0; $u < count($testcases_results); $u++){
@@ -392,8 +391,8 @@ function get_homework_tests($username, $course, $assignment_id, $assignment_vers
                     "score"=>$testcases_results[$u]["points_awarded"],
                     "message"=> isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "",
                     "compilation_output"=> isset($testcases_results[$u]["compilation_output"]) ? get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]) : "",
-                    "diff"=> isset($testcases_results[$u]["diff"]) ? get_testcase_diff($username,$course, $assignment_id, $assignment_version,$testcases_results[$u]["diff"]) : ""
-        //"diff"=> isset($testcases_results[$u]["diff"]) ? "a" : "b"
+                    "diff"=> isset($testcases_results[$u]["diff"]) ? get_testcase_diff($username,$course, $assignment_id, $assignment_version,$testcases_results[$u]["diff"]) : "",
+                    "diffs"=>isset($testcases_results[$u]["diffs"]) ? get_all_testcase_diffs($username, $course, $assignment_id, $assignment_version, $testcases_results[$u]["diffs"]) : array()
                 ));
 
                 break;
@@ -536,39 +535,47 @@ function get_compilation_output($file) {
 // file contents
 function get_testcase_diff($username, $course, $assignment_id, $assignment_version, $diff){
     $path_front = get_path_front($course);
-
-//    return array(
-//            "student" => $diff["instructor_file"],
-//            "instructor"=> $diff["instructor_file"],
-//            "difference" =>  $diff["difference"]
-//        );
-
-
-
-    if (!isset($diff["instructor_file"]) ||
-        !isset($diff["student_file"]) ||
-        !isset($diff["difference"])) {
-        return "FAILED A";
-    }
-
-    $instructor_file_path = "$path_front/".$diff["instructor_file"];
     $student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
+    
+    $student_content = "";
+    $instructor_content = "";
+    $difference = "{differences:[]}";
 
-    if (!file_exists($instructor_file_path) ||
-        !file_exists($student_path . $diff["student_file"]) ||
-        !file_exists($student_path . $diff["difference"])){
-        return "FAILED B $instructor_file_path";
+    if (isset($diff["instructor_file"])) {
+        $instructor_file_path = "$path_front/".$diff["instructor_file"];
+        if (file_exists($instructor_file_path)) {
+            $instructor_content = file_get_contents($instructor_file_path);
+        }
     }
-
-    $student_content = file_get_contents($student_path.$diff["student_file"]);
-    $difference = file_get_contents($student_path.$diff["difference"]);
-    $instructor_content = file_get_contents($instructor_file_path);
+    if (isset($diff["student_file"]) && file_exists($student_path . $diff["student_file"])) {
+        $student_content = file_get_contents($student_path.$diff["student_file"]);
+    }
+    if (isset($diff["difference"]) && file_exists($student_path . $diff["difference"])) {
+        $difference = file_get_contents($student_path.$diff["difference"]);
+    }
 
     return array(
             "student" => $student_content,
             "instructor"=> $instructor_content,
             "difference" => $difference
         );
+}
+
+function get_all_testcase_diffs($username, $course, $assignment_id, $assignment_version, $diffs) {
+    $results = array();
+    foreach ($diffs as $diff) {
+        $diff_result = get_testcase_diff($username, $course, $assignment_id, $assignment_version, $diff);
+        if (is_string($diff_result) || count(array_keys($diff_result)) == 0) {
+            echo ("Unable to load testcase differences.  Reason: ".$diff_result);
+            return array();
+        }
+        $diff_result["diff_id"] = $diff["diff_id"];
+        if (isset($diff["message"])) {
+            $diff_result["message"] = $diff["message"];
+        }
+        array_push($results, $diff_result);
+    }
+    return $results;
 }
 
 //ERRORS

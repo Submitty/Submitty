@@ -6,8 +6,13 @@
 
 #     ./grade_students <base_path>
 
-#FIXME: check to make sure exactly one argument
+if [ "$#" -ne 1 ]; then
+    echo "ERROR: Illegal number of parameters" >&2
+    exit 1
+fi
+
 base_path="$1"
+
 
 # from that directory, we expect:
 
@@ -42,12 +47,13 @@ base_path="$1"
 # BASE_PATH/to_be_graded/course_apple__hw1__smithj__1
 # BASE_PATH/to_be_graded/course_banana__hw2__doej__5
 
-#FIXME cron job stdout/stderr gets emailed
+
+
+# NOTE ON OUTPUT: cron job stdout/stderr gets emailed
+# debugging type output can be sent to stdout, which we'll redirect to /dev/null in the cron job
+# all problematic errors should get set to stderr  (>&2)  so that an email will be sent
 echo "Grade all submissions in $base_path/to_be_graded/"
 
-
-# OUTER LOOP 
-# will eventually process all submissions 
 
 all_grading_done=false
 
@@ -61,14 +67,20 @@ sleep_count=0
 exec 200>/var/lock/homework_submissions_server_lockfile || exit 1
 
 
+# OUTER LOOP 
+# will eventually process all submissions 
 while true; do
 
     # if no work was done on the last loop...
     if [ "$all_grading_done" = "true" ] ; then
 	((sleep_count++))
 	 echo "sleep iter $sleep_count: no work"
-	if [[ $sleep_count -gt 100 ]] ; then
-	    # if you've been running for several minutes, quit (will be restarted by a cron once per minute)
+	if [[ $sleep_count -gt 200 ]] ; then
+	    # 5 seconds (sleep) * 12 = 1 minute
+	    # 5 seconds (sleep) * 120 = 10 minutes
+	    # 5 seconds (sleep) * 200 = 16 minutes
+	    # *** plus more time if you actually did any work! ***
+	    # if you've been running for at least 16 minutes, quit (will be restarted by a cron once per 15 minutes)
 	    break;
 	else
 	    # sleep for 5 seconds
@@ -83,7 +95,7 @@ while true; do
     # check for runaway processes by untrusted (this should never be more that a few, the user limit is 50)
     numprocesses=$(ps -u untrusted | wc -l)
     if [[ $numprocesses -gt 25 ]] ; then
-	 echo "untrusted is running too many processes: " $numprocesses
+	echo "ERROR: untrusted is running too many processes: " $numprocesses >&2
 	((too_many_processes_count++))
 	if [[ $too_many_processes_count -gt 10 ]]; 
 	then 
@@ -96,8 +108,12 @@ while true; do
 
 
     # check for parallel grade_students scripts
-#FIXME, look into pgreg (process grep)
-    numparallel=$(ps -f -u hwcron | grep grade_students.sh | wc -l)
+    #ps -f -u hwcron | grep grade_students.sh
+    #pgrep -u hwcron grade_students
+    pgrep_results=$(pgrep -u hwcron grade_students)
+    pgrep_results=( $pgrep_results ) # recast as array
+    numparallel=${#pgrep_results[@]} # count elements in array
+    echo "hwcron is running $numparallel parallel scripts"
     if [[ "$numparallel" -gt 5 ]] ; then
 	 echo "hwcron is running too many parallel scripts: " $numparallel
 	exit
@@ -172,7 +188,7 @@ while true; do
 		version=$thing
 	    else
 #FIXME document error handling approach: leave GRADING_ file in to_be_graded directory, assume email sent, move to next
-		echo "FORMAT ERROR: $NEXT_TO_GRADE"
+		echo "ERROR BAD FORMAT: $NEXT_TO_GRADE" >&2
 		continue
 	    fi
 	done
@@ -180,22 +196,22 @@ while true; do
         # FIXME: error checking could be more significant
 	if [ $course == "NOCOURSE" ] 
 	then 
-	    echo "ERROR IN COURSE: $course"
+	    echo "ERROR IN COURSE: $NEXT_TO_GRADE" >&2
 	    continue 
 	fi
 	if [ $assignment == "NOASSIGNMENT" ] 
 	then 
-	    echo "ERROR IN ASSIGNMENT: $assignment"
+	    echo "ERROR IN ASSIGNMENT: $NEXT_TO_GRADE" >&2
 	    continue 
 	fi
 	if [ $user == "NOUSER" ] 
 	then 
-	    echo "ERROR IN USER: $user"
+	    echo "ERROR IN USER: $NEXT_TO_GRADE" >&2
 	    continue
 	fi
 	if [ $version == "NOVERSION" ] 
 	then 
-	    echo "ERROR IN VERSION: $version"
+	    echo "ERROR IN VERSION: $NEXT_TO_GRADE" >&2
 	    continue 
 	fi
 
@@ -207,65 +223,65 @@ while true; do
 
 	if [ ! -d "$base_path" ]
 	then
-	    echo "ERROR: directory does not exist '$base_path'"
+	    echo "ERROR: directory does not exist '$base_path'" >&2
 	    continue
 	fi
         # note we do not expect $base_path to be readable
 
 	if [ ! -d "$base_path/$course" ]
 	then
-	    echo "ERROR: directory does not exist '$base_path/$course'"
+	    echo "ERROR: directory does not exist '$base_path/$course'" >&2
 	    continue
 	fi
 	if [ ! -r "$base_path/$course" ]
 	then
-	    echo "ERROR: directory is not readable '$base_path/$course'"
+	    echo "ERROR: directory is not readable '$base_path/$course'" >&2
 	    continue
 	fi
 
 	if [ ! -d "$base_path/$course/submissions" ]
 	then
-	    echo "ERROR: directory does not exist '$base_path/$course/submissions'"
+	    echo "ERROR: directory does not exist '$base_path/$course/submissions'" >&2
 	    continue
 	fi
 	if [ ! -r "$base_path/$course/submissions" ]
 	then
-	    echo "ERROR: directory is not readable '$base_path/$course/submissions'"
+	    echo "ERROR: directory is not readable '$base_path/$course/submissions'" >&2
 	    continue
 	fi
 
 	if [ ! -d "$base_path/$course/submissions/$assignment" ]
 	then
-	    echo "ERROR: directory does not exist '$base_path/$course/submissions/$assignment'"
+	    echo "ERROR: directory does not exist '$base_path/$course/submissions/$assignment'" >&2
 	    continue
 	fi
 	if [ ! -r "$base_path/$course/submissions/$assignment" ]
 	then
-	    echo "ERROR: directory is not readable '$base_path/$course/submissions/$assignment'"
+	    echo "ERROR: directory is not readable '$base_path/$course/submissions/$assignment'" >&2
 	    continue
 	fi
 
 	if [ ! -d "$base_path/$course/submissions/$assignment/$user" ]
 	then
-	    echo "ERROR: directory does not exist '$base_path/$course/submissions/$assignment/$user'"
+	    echo "ERROR: directory does not exist '$base_path/$course/submissions/$assignment/$user'" >&2
 	    continue
 	fi
 	if [ ! -r "$base_path/$course/submissions/$assignment/$user" ]
 	then
-	    echo "ERROR: directory is not readable '$base_path/$course/submissions/$assignment/$user'"
+	    echo "ERROR: directory is not readable '$base_path/$course/submissions/$assignment/$user'" >&2
 	    continue
 	fi
 
 	if [ ! -d "$submission_path" ]
 	then
-	    echo "ERROR: directory does not exist '$submission_path'"
+	    echo "ERROR: directory does not exist '$submission_path'" >&2
 	    # this submission does not exist, remove it from the queue
 	    rm -f $base_path/to_be_graded/$NEXT_TO_GRADE
 	    continue
 	fi
 	if [ ! -r "$submission_path" ]
 	then
-	    echo "ERROR: directory is not readable '$submission_path'"
+	    echo "ERROR: directory is not readable '$submission_path'" >&2
 	    # leave this submission file for next time (hopefully
 	    # permissions will be corrected then)
 	    #FIXME remove GRADING_ file
@@ -287,7 +303,7 @@ while true; do
 
 
         # copy submitted files to tmp directory
-	cp 1>/dev/null  2>&1  -r $submission_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory"
+	cp 1>/dev/null  2>&1  -r $submission_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory" >&2
 
 
 
@@ -300,7 +316,7 @@ while true; do
         # copy input files to tmp directory
 	if [ -d "$test_input_path" ]
 	then
-	    cp -rf $test_input_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory"       
+	    cp -rf $test_input_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory" >&2
 	fi
 	
 
@@ -314,7 +330,7 @@ while true; do
         # copy output files to tmp directory  (SHOULD CHANGE THIS)
 	if [ -d "$test_output_path" ]
 	then
-	    cp -rf $test_output_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory"       
+	    cp -rf $test_output_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory" >&2
 	fi
 	
 	submission_time="$(date -r $submission_path "+%F %T")"
@@ -335,7 +351,7 @@ while true; do
 
 	if [[ "$compile_error_code" -ne 0 ]] ;
 	then
-	     echo "COMPILE ERROR CODE $compile_error_code"
+	     echo "COMPILE FAILURE CODE $compile_error_code"
 	else
 	     echo "COMPILE OK"
 	fi
@@ -346,45 +362,45 @@ while true; do
 	# copy run.out to the tmp directory
 	if [ ! -r "$bin_path/$assignment/run.out" ]
 	then
-	    echo "ERROR:  $bin_path/$assignment/run.out  does not exist/is not readable"
-	    continue
-	fi
-	cp -f "$bin_path/$assignment/run.out" $tmp/my_run.out
-
-	# give the untrusted user read/write/execute permissions on the tmp directory & files
-	#FIXME: copying in subdirs but not making readable here
-	chmod -R go+rwx $tmp
-
-	# run the run.out as the untrusted user
-	$base_path/bin/untrusted_runscript $tmp/my_run.out >& .submit_runner_output.txt
-
-	runner_error_code="$?"
-	if [[ "$runner_error_code" -ne 0 ]] ;
-	then
-	     echo "RUNNER ERROR CODE $runner_error_code"
+	    echo "ERROR:  $bin_path/$assignment/run.out  does not exist/is not readable" >&2
+	    #continue
 	else
-	     echo "RUNNER OK"
-	fi
-	
+
+	    cp -f "$bin_path/$assignment/run.out" $tmp/my_run.out
+
+  	    # give the untrusted user read/write/execute permissions on the tmp directory & files
+  	    #FIXME: copying in subdirs but not making readable here
+	    chmod -R go+rwx $tmp
+	    
+	    # run the run.out as the untrusted user
+	    $base_path/bin/untrusted_runscript $tmp/my_run.out >& .submit_runner_output.txt
+
+	    runner_error_code="$?"
+	    if [[ "$runner_error_code" -ne 0 ]] ;
+	    then
+		echo "RUNNER FAILURE CODE $runner_error_code"
+	    else
+		echo "RUNNER OK"
+	    fi
+	fi	
 	
 	# --------------------------------------------------------------------
         # RUN VALIDATOR
 	if [ ! -r "$bin_path/$assignment/validate.out" ]
 	then
-	    echo "ERROR:  $bin_path/$assignment/validate.out  does not exist/is not readable"
-	    continue
-	fi
-
-         echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
-        valgrind "$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" >& .submit_validator_output.txt 
-	validator_error_code="$?"
-	if [[ "$validator_error_code" -ne 0 ]] ;
-	then
-	     echo "VALIDATOR ERROR CODE $validator_error_code"
+	    echo "ERROR:  $bin_path/$assignment/validate.out  does not exist/is not readable" >&2
+	    # continue
 	else
-	     echo "VALIDATOR OK"
-	fi
-	
+            # echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
+            valgrind "$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" >& .submit_validator_output.txt 
+	    validator_error_code="$?"
+	    if [[ "$validator_error_code" -ne 0 ]] ;
+	    then
+	     echo "VALIDATOR FAILURE CODE $validator_error_code"
+	    else
+		echo "VALIDATOR OK"
+	    fi
+	fi	
 
 	# --------------------------------------------------------------------
         # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
@@ -396,7 +412,7 @@ while true; do
         rm -rf "$results_path"
 
         # Make directory structure in results if it doesn't exist
-        mkdir -p "$results_path" ||  echo "ERROR: Could not create results path $results_path"
+        mkdir -p "$results_path" ||  echo "ERROR: Could not create results path $results_path" >&2
 
         cp  1>/dev/null  2>&1  $tmp/* $tmp/.* "$results_path"
         # cp  1>/dev/null  2>&1  $tmp/test*_cout.txt $tmp/test*_cerr.txt $tmp/test*_out.txt $tmp/submission.json "$results_path/$path"
@@ -422,5 +438,5 @@ while true; do
     done
 done
 
- echo "========================================================================"
- echo "ALL DONE"
+echo "========================================================================"
+echo "ALL DONE"
