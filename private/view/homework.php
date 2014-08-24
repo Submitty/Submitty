@@ -227,16 +227,18 @@ function version_changed(){
       <h4 style="margin-left: 10px; text-align: left;display:inline-block;">
         <?php echo $test["title"];?>
       </h4>
-      <span class="<?php echo $class;?>">
+      <!-- BADGE TEST SCORE -->
         <?php 
-            if ($test["is_hidden"] === true || $test["is_hidden"] == "true" || $test["is_hidden"] == "True") {
-                echo "Hidden Test Case";?>
+            if ($test["is_hidden"] === true || $test["is_hidden"] == "true" || $test["is_hidden"] == "True") {?>
+                <span class="badge">
+                Hidden Test Case
                 </span>
                 </div><!-- End div -->
                 </div><!-- End Box2 -->
                 <?php continue;
-            }
-            echo $test["score"]." / ".$test["points_possible"];
+            }?>
+            <span class="<?php echo $class;?>">
+            <?php echo $test["score"]." / ".$test["points_possible"];
             if ($test["is_extra_credit"] === true || $test["is_extra_credit"] === "true" || $test["is_extra_credit"] === "True") {
                 echo " Extra Credit";
             }
