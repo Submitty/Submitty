@@ -210,7 +210,7 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 	  << "\t\t\t\t\t\"diff_id\":\"" << testcases[i].prefix() << "_" << j << "_diff\",\n"
 	  << "\t\t\t\t\t\"student_file\":\"" << testcases[i].filename(j) << "\",\n";
 
-	if (1) { //testcases[i].expected(j) != "") {
+	if (testcases[i].expected(j) != "") {
 	  testcase_json << "\t\t\t\t\t\"instructor_file\":\"" << expected_path.str() << "\",\n"
 			<< "\t\t\t\t\t\"difference\":\"" << testcases[i].prefix() << "_" << j << "_diff.json\",\n";
 	}

@@ -1,8 +1,9 @@
+/*
 body, td {
     color: #000000; font-family: Arial, Helvetica, sans-serif;
 }
 p,div {
-    color: #000000; font-family: Arial, Helvetica, sans-serif; width:fit-content; /*max-width:700px;*/ word-wrap:break-word; 
+    color: #000000; font-family: Arial, Helvetica, sans-serif; width:fit-content; / *max-width:700px;* / word-wrap:break-word; 
 } 
 li {
     color: #000000; font-family: Arial, Helvetica, sans-serif; width:fit-content; max-width:1000px; word-wrap:break-word;
@@ -23,7 +24,7 @@ b {
 em, .italics {
     color: #448844; font-family: Arial, Helvetica, sans-serif; font-style:italic;
 }
-
+*/
   a:link {color:#0033cc;}      /* unvisited link */
   a:visited {color:#330cc;}  /* visited link */
   a:hover {color:#990000;}  /* mouse over link */
