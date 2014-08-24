@@ -51,9 +51,20 @@ template<class T> Difference* printJSON ( Difference & text_diff,
 
 TestResults* warnIfNotEmpty ( const std::string & b,
 		const std::string & a ) {
-  std::cout << "in warn if not empty -- need to edit" << std::endl;
-  // FIXME: not what we want...
-  return new Difference();
+  //std::cout << "in warn if not empty -- need to edit" << std::endl;
+
+
+  // the instructor file should be empty
+  assert (a == "");
+
+  TestResults* answer = new Difference();
+
+  if (b != "") {
+    answer->message = "WARNING: This should be empty";
+    std::cout << "in warn if not empty -- student file not empty" << std::endl;
+  }
+
+  return answer;
 }
 
 

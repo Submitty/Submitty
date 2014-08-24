@@ -250,10 +250,10 @@ function version_changed(){
           </span>
       <?php }?>
       <?php if ($test["message"] != "") {?>
-        <div>
-            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
-          </div>
-        <?php } ?>
+      <!--<div>-->
+      <!--<span>&nbsp;&nbsp;-->&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em><!--</span>-->
+      <!--</div>-->
+      <?php } ?>
     </div>
     <div id="sidebysidediff<?php echo $counter;?>" style="display:none">
 
@@ -271,9 +271,9 @@ function version_changed(){
 
       <!-- SIDE BY SIDE INDIVIDUAL DIFF -->
       <?php if ($test["diff"] != ""){?>
-        <?php if (isset($test["message"]) && $test["message"] != "") {?>
+      <?php if (isset($test["message"]) && $test["message"] != "") {?>
             <div>
-                <?php echo $test["message"];?>
+              <em><?php echo $test["message"];?></em>
             </div>
         <?php }?>
            <!-- STUDENT INSTRUCTOR OUTPUT -->
@@ -297,10 +297,17 @@ function version_changed(){
       <!-- END SIDE BY SIDE INDIVIDUAL DIFF -->
       <!-- MULTIPLE DIFFS -->
       <?php foreach ($test["diffs"] as $diff) {?>
+
+      <span>
+      <?php if (isset($diff["description"]) && $diff["description"] != "") {?>
+      <b><?php echo $diff["description"];?></b>
+      <?php } ?>
+
         <?php if (isset($diff["message"]) && $diff["message"] != "") {?>
-            <br>
-            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $diff["message"]; ?></em></span>
+      <!--  <br> 
+            <span>&nbsp;&nbsp;-->&nbsp;&nbsp;&nbsp;<em><?php echo $diff["message"]; ?></em><!--</span>-->
         <?php }?>
+      </span>
         <div class="row">
             <div class="col-md-6">
 

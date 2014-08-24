@@ -601,6 +601,10 @@ function get_all_testcase_diffs($username, $course, $assignment_id, $assignment_
         if (isset($diff["message"])) {
             $diff_result["message"] = $diff["message"];
         }
+        if (isset($diff["description"])) {
+            $diff_result["description"] = $diff["description"];
+        }
+
         array_push($results, $diff_result);
     }
     return $results;
