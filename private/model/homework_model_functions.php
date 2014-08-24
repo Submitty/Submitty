@@ -535,34 +535,22 @@ function get_compilation_output($file) {
 // file contents
 function get_testcase_diff($username, $course, $assignment_id, $assignment_version, $diff){
     $path_front = get_path_front($course);
-
-//    return array(
-//            "student" => $diff["instructor_file"],
-//            "instructor"=> $diff["instructor_file"],
-//            "difference" =>  $diff["difference"]
-//        );
-
-
-
-    if (!isset($diff["instructor_file"]) ||
-        !isset($diff["student_file"]) ||
-        !isset($diff["difference"])) {
-        return "FAILED. Invalid json or diff indexes are incorrect.";
-    }
-
-    $instructor_file_path = "$path_front/".$diff["instructor_file"];
     $student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
     
     $student_content = "";
     $instructor_content = "";
-    $difference = "";
-    if (file_exists($instructor_file_path)) {
-        $instructor_content = file_get_contents($instructor_file_path);
+    $difference = "{differences:[]}";
+
+    if (isset($diff["instructor_file"])) {
+        $instructor_file_path = "$path_front/".$diff["instructor_file"];
+        if (file_exists($instructor_file_path)) {
+            $instructor_content = file_get_contents($instructor_file_path);
+        }
     }
-    if (file_exists($student_path . $diff["student_file"])) {
+    if (isset($diff["student_file"]) && file_exists($student_path . $diff["student_file"])) {
         $student_content = file_get_contents($student_path.$diff["student_file"]);
     }
-    if (file_exists($student_path . $diff["difference"])) {
+    if (isset($diff["difference"]) && file_exists($student_path . $diff["difference"])) {
         $difference = file_get_contents($student_path.$diff["difference"]);
     }
 
@@ -581,7 +569,10 @@ function get_all_testcase_diffs($username, $course, $assignment_id, $assignment_
             echo ("Unable to load testcase differences.  Reason: ".$diff_result);
             return array();
         }
-        $diff_result['diff_id'] = $diff["diff_id"];
+        $diff_result["diff_id"] = $diff["diff_id"];
+        if (isset($diff["message"])) {
+            $diff_result["message"] = $diff["message"];
+        }
         array_push($results, $diff_result);
     }
     return $results;

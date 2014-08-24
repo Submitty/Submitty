@@ -242,16 +242,18 @@ function version_changed(){
             }
         ?>
       </span>
-      <span>
-        <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
-      </span>
-          </div>
-    <div id="sidebysidediff<?php echo $counter;?>" style="display:none">
-      <?php if ($test["message"] != ""){?>
-      <!--<br>-->
-          <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
+      <?php if ((isset($test["diff"]) && $test["diff"] != "") || (isset($test["diffs"]) && count($test["diffs"]) > 0)) {?>
+          <span>
+            <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
+          </span>
       <?php }?>
-
+      <?php if ($test["message"] != "") {?>
+        <div>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em></span>
+          </div>
+        <?php } ?>
+    </div>
+    <div id="sidebysidediff<?php echo $counter;?>" style="display:none">
 
       <?php if (isset($test["compilation_output"]) && $test["compilation_output"] != ""){?>
       <b>Compilation output:</b>
@@ -267,6 +269,11 @@ function version_changed(){
 
       <!-- SIDE BY SIDE INDIVIDUAL DIFF -->
       <?php if ($test["diff"] != ""){?>
+        <?php if (isset($test["message"]) && $test["message"] != "") {?>
+            <div>
+                <?php echo $test["message"];?>
+            </div>
+        <?php }?>
            <!-- STUDENT INSTRUCTOR OUTPUT -->
 	   <div class="col-md-6">
              <div class="panel panel-default" id="<?php echo $test["title"]; ?>_student">
@@ -288,6 +295,11 @@ function version_changed(){
       <!-- END SIDE BY SIDE INDIVIDUAL DIFF -->
       <!-- MULTIPLE DIFFS -->
       <?php foreach ($test["diffs"] as $diff) {?>
+        <?php if (isset($diff["message"]) && $diff["message"] != "") {?>
+            <br>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em><?php echo $diff["message"]; ?></em></span>
+        <?php }?>
+        <div class="row">
             <div class="col-md-6">
 
 
@@ -302,11 +314,11 @@ function version_changed(){
                 <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_instructor">
 <?php echo str_replace(" ", "&nbsp;", $diff["instructor"]); ?></div>
             </div>
-
             <script>
                 diff_queue.push("<?php echo $diff["diff_id"]; ?>");
                 diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
             </script>
+        </div>
         <?php } ?>
         <!-- END MULTIPLE DIFFS -->
 
