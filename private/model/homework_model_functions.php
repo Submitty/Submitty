@@ -234,7 +234,13 @@ function can_edit_assignment($username, $course, $assignment_id, $assignment_con
 
 	    // FIXME: HACK!  To not check due date
 	    return true;
+    
+    $due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
+    $now = new DateTime("NOW");
+    return $now <= $due_date;
+}
 
+function get_due_date($username, $course, $assignment_id, $assignment_config) {
     $path_front = get_path_front($course);
     date_default_timezone_set('America/New_York');
     $file = $path_front."/results/".$assignment_id."/".$username."/user_assignment_config.json";
@@ -242,14 +248,11 @@ function can_edit_assignment($username, $course, $assignment_id, $assignment_con
         $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
         if (isset($json["due_date"]) && $json["due_date"] != "default") {
             $date = new DateTime($json["due_date"]);
-            $now = new DateTime("NOW");
-            return $now <= $date;
+            return $date;
         }
-        return; //TODO
     }
     $date = new DateTime($assignment_config["due_date"]);
-    $now = new DateTime("NOW");
-    return $now <= $date;
+    return $date;
 }
 
 
@@ -427,10 +430,9 @@ function get_points_visible($homework_tests)
     return $points_visible;
 }
 
-function get_select_submission_data($username, $course, $assignment_id, $highest_version) {
+function get_select_submission_data($username, $course, $assignment_id, $assignment_config, $highest_version) {
     $select_data = array();
     for ($i = 1; $i <= $highest_version; $i++) {
-        $assignment_config = get_assignment_config($username, $course, $assignment_id);
         $homework_tests = get_homework_tests($username, $course, $assignment_id, $i, $assignment_config);
         $points_awarded_visible = get_awarded_points_visible($homework_tests);
         $points_visible = get_points_visible($homework_tests);
@@ -438,7 +440,16 @@ function get_select_submission_data($username, $course, $assignment_id, $highest
         if (version_in_grading_queue($username, $course, $assignment_id, $i)) {
             $score = "Grading in progress";
         }
-        $entry = array("score"=> $score, "days_late"=>0);
+
+        $due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
+        $now = new DateTime("NOW");
+        $days_late = "";
+        if ($now > $due_date) {
+            $now->add(new DateInterval("P1D"));
+            $interval = $now->diff($due_date);
+            $days_late = $interval->format("%d");
+        }
+        $entry = array("score"=> $score, "days_late"=>$days_late);
         array_push($select_data, $entry);
     }
     return $select_data;

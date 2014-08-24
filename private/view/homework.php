@@ -136,9 +136,10 @@ function version_changed(){
 		    <!-- FIX ME: INSERT SCORE FOR THIS VERSION... -->
 		    <?php echo $select_submission_data[$i-1]["score"]; ?>
 		    &nbsp;&nbsp
-		    Days Late:
-		    <!-- FIX ME: INSERT LATE DAYS FOR THIS VERSION... -->
-		    <?php echo $select_submission_data[$i-1]["days_late"]; ?>
+            <?php if ($select_submission_data[$i-1]["days_late"] != "") {?>
+                Days Late:
+                <?php echo $select_submission_data[$i-1]["days_late"]; ?>
+            <?php } ?>
 
 		    <?php if ($i == $submitting_version) { ?>
 		    &nbsp;&nbsp
