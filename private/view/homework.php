@@ -1,6 +1,5 @@
 <?php require_once("../private/view/".$course."_container.php");?>
 
-
 <link href="resources/bootmin.css" rel="stylesheet"></link>
 <link href="resources/main.css" rel="stylesheet"></link>
 <script src="resources/script/main.js"></script>
@@ -135,11 +134,11 @@ function version_changed(){
 		    &nbsp;&nbsp 
 		    Score:
 		    <!-- FIX ME: INSERT SCORE FOR THIS VERSION... -->
-		    <?php echo $submitting_version_score; ?>
+		    <?php echo $select_submission_data[$i-1]["score"]; ?>
 		    &nbsp;&nbsp
 		    Days Late:
 		    <!-- FIX ME: INSERT LATE DAYS FOR THIS VERSION... -->
-		    <?php echo 0; ?>
+		    <?php echo $select_submission_data[$i-1]["days_late"]; ?>
 
 		    <?php if ($i == $submitting_version) { ?>
 		    &nbsp;&nbsp

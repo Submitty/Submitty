@@ -427,6 +427,23 @@ function get_points_visible($homework_tests)
     return $points_visible;
 }
 
+function get_select_submission_data($username, $course, $assignment_id, $highest_version) {
+    $select_data = array();
+    for ($i = 1; $i <= $highest_version; $i++) {
+        $assignment_config = get_assignment_config($username, $course, $assignment_id);
+        $homework_tests = get_homework_tests($username, $course, $assignment_id, $i, $assignment_config);
+        $points_awarded_visible = get_awarded_points_visible($homework_tests);
+        $points_visible = get_points_visible($homework_tests);
+        $score = $points_awarded_visible." / ".$points_visible;
+        if (version_in_grading_queue($username, $course, $assignment_id, $i)) {
+            $score = "Grading in progress";
+        }
+        $entry = array("score"=> $score, "days_late"=>0);
+        array_push($select_data, $entry);
+    }
+    return $select_data;
+}
+
 
 // Get the test cases from the instructor configuration file
 function get_assignment_config($username, $course, $assignment_id) {
