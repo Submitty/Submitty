@@ -552,17 +552,19 @@ function get_testcase_diff($username, $course, $assignment_id, $assignment_versi
 
     $instructor_file_path = "$path_front/".$diff["instructor_file"];
     $student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
-
-    if (!file_exists($instructor_file_path)) {
-        return "Failed to find $instructor_file_path";
-    } else if (!file_exists($student_path . $diff["student_file"])) {
-        return "failed to find ". $student_path . $diff['student_file'];
-    } else if (!file_exists($student_path . $diff["difference"])) {
-        return "Failed to find " . $student_path . $diff['difference'];
+    
+    $student_content = "";
+    $instructor_content = "";
+    $difference = "";
+    if (file_exists($instructor_file_path)) {
+        $instructor_content = file_get_contents($instructor_file_path);
     }
-    $student_content = file_get_contents($student_path.$diff["student_file"]);
-    $difference = file_get_contents($student_path.$diff["difference"]);
-    $instructor_content = file_get_contents($instructor_file_path);
+    if (file_exists($student_path . $diff["student_file"])) {
+        $student_content = file_get_contents($student_path.$diff["student_file"]);
+    }
+    if (file_exists($student_path . $diff["difference"])) {
+        $difference = file_get_contents($student_path.$diff["difference"]);
+    }
 
     return array(
             "student" => $student_content,
