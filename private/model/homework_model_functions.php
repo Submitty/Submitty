@@ -593,10 +593,6 @@ function get_all_testcase_diffs($username, $course, $assignment_id, $assignment_
     $results = array();
     foreach ($diffs as $diff) {
         $diff_result = get_testcase_diff($username, $course, $assignment_id, $assignment_version, $diff);
-        if (is_string($diff_result) || count(array_keys($diff_result)) == 0) {
-            echo ("Unable to load testcase differences.  Reason: ".$diff_result);
-            return array();
-        }
         $diff_result["diff_id"] = $diff["diff_id"];
         if (isset($diff["message"])) {
             $diff_result["message"] = $diff["message"];

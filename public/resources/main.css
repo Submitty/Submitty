@@ -80,6 +80,9 @@ td.main_panel {
     background:rgba(255,255,255,0.8);
 
 }
+.display-none {
+    display: none;
+}
 
 .green-background {
     background-color: #006600;

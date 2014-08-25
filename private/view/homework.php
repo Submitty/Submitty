@@ -312,9 +312,14 @@ function version_changed(){
         <?php }?>
       </span>
         <div class="row">
-            <div class="col-md-6">
-
-
+            <?php 
+            $column_class_student = "col-md-6";
+            $column_class_teacher = "col-md-6";
+            if ($diff["student"] != "" && $diff["instructor"] == "") {
+                $column_class_student = "col-md-12";
+                $column_class_teacher = "display-none";
+            }?>
+            <div class="<?php echo $column_class_student;?>">
 	      <!-- WARNING spaces/newlines in the inner divs are critical -->
 	      <!-- FIXME, should get rid of the newline after the div
 	           open and get rid of the "+1" on the line index in
@@ -322,7 +327,7 @@ function version_changed(){
                 <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
 <?php echo str_replace(" ", "&nbsp;", $diff["student"]); ?></div>
             </div>
-            <div class="col-md-6">
+            <div class="<?php echo $column_class_teacher;?>">
                 <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_instructor">
 <?php echo str_replace(" ", "&nbsp;", $diff["instructor"]); ?></div>
             </div>
