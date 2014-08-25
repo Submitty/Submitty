@@ -206,7 +206,11 @@ function version_changed(){
     <br clear="all">
 
     <div class="box2" style="border-radius: 3px;    padding: 0px;    border: 1px solid #cccccc;    height: 100%;  width: 100%;   margin: 5px; position: relative; float: left;    background:rgba(255,255,255,0.8);">
-      <?php if (isset($test["score"]) && isset($test["points_possible"]) && $test["points_possible"] != 0) {
+      <?php //score, points, and points possible are set.  Is not hidden and is not extra credit
+        if (isset($test["score"]) && isset($test["points_possible"]) && $test["points_possible"] != 0 && 
+            ($test["is_hidden"] === false || $test["is_hidden"] == "false" || $test["is_hidden"] == "False") && 
+            ($test["is_extra_credit"] === false || $test["is_extra_credit"] === "false" || $test["is_extra_credit"] === "False")   
+        ) {
                 if (!($test["points_possible"] > 0)) {
                    $part_percent = 1;
                 } else {
@@ -228,16 +232,15 @@ function version_changed(){
         <?php echo $test["title"];?>
       </h4>
       <!-- BADGE TEST SCORE -->
+      <span class="<?php echo $class;?>">
         <?php 
             if ($test["is_hidden"] === true || $test["is_hidden"] == "true" || $test["is_hidden"] == "True") {?>
-                <span class="badge">
                 Hidden Test Case
                 </span>
                 </div><!-- End div -->
                 </div><!-- End Box2 -->
                 <?php continue;
             }?>
-            <span class="<?php echo $class;?>">
             <?php echo $test["score"]." / ".$test["points_possible"];
             if ($test["is_extra_credit"] === true || $test["is_extra_credit"] === "true" || $test["is_extra_credit"] === "True") {
                 echo " Extra Credit";
@@ -347,7 +350,6 @@ function version_changed(){
 <?php } ?>
 
 <!------------------------------------------------------------------------>
-
 
 </table>
 </body>
