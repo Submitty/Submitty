@@ -2,9 +2,9 @@
 
 require_once("../private/model/homework_model_functions.php");
 
-$cource = "REFRESH_CHECK_NO_COURSE";
-if (isset($_POST["course"])) {
-    $new_course = htmlspecialchars($_POST["course"]);
+$course = "REFRESH_CHECK_NO_COURSE";
+if (isset($_GET["course"])) {
+    $new_course = htmlspecialchars($_GET["course"]);
     if (!is_valid_course($new_course)) {
         $course = "REFRESH_CHECK_BAD_COURSE";
     } else {
