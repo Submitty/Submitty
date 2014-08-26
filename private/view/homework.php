@@ -280,13 +280,6 @@ function version_changed(){
       <pre><?php echo $test["compilation_output"]; ?></pre>
       <?php }?>
 
-<!--
-      <?php echo $test["diff"]["student"]; ?>
-      <?php echo $test["diff"]["instructor"]; ?>
-      <?php echo $test["diff"]["difference"]; ?>
--->
-
-
       <!-- SIDE BY SIDE INDIVIDUAL DIFF -->
       <?php if ($test["diff"] != ""){?>
       <?php if (isset($test["message"]) && $test["message"] != "") {?>
