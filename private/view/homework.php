@@ -207,10 +207,19 @@ function version_changed(){
 
     <div class="box2" style="border-radius: 3px;    padding: 0px;    border: 1px solid #cccccc;    height: 100%;  width: 100%;   margin: 5px; position: relative; float: left;    background:rgba(255,255,255,0.8);">
       <?php //score, points, and points possible are set.  Is not hidden and is not extra credit
-        if (isset($test["score"]) && isset($test["points_possible"]) && $test["points_possible"] != 0 && 
-            ($test["is_hidden"] === false || $test["is_hidden"] == "false" || $test["is_hidden"] == "False") && 
-            ($test["is_extra_credit"] === false || $test["is_extra_credit"] === "false" || $test["is_extra_credit"] === "False")   
-        ) {
+        if (  isset($test["score"]) && 
+              isset($test["points_possible"]) && 
+              $test["points_possible"] != 0 && 
+
+	    // FIXME:  Let's agree on using true & false, none of this silly booleans as strings.
+	    //         I had to switch the false to !true though, something is fishy here.
+
+              (! ( $test["is_hidden"] === true || 
+	           $test["is_hidden"] == "true" || 
+                   $test["is_hidden"] == "True" ) )&& 
+              (! ( $test["is_extra_credit"] === true || 
+                   $test["is_extra_credit"] === "true" || 
+                   $test["is_extra_credit"] === "True" ) )  ) {
                 if (!($test["points_possible"] > 0)) {
                    $part_percent = 1;
                 } else {
@@ -247,7 +256,13 @@ function version_changed(){
             }
         ?>
       </span>
-      <?php if ((isset($test["diff"]) && $test["diff"] != "") || (isset($test["diffs"]) && count($test["diffs"]) > 0)) {?>
+      
+
+      <?php if ( (isset($test["diff"]) && $test["diff"] != "") || 
+	         (isset($test["diffs"]) && count($test["diffs"]) > 0) ||
+                 (isset($test["compilation_output"]) && $test["compilation_output"] != "UNDEFINED")
+               ) {?>
+      
           <span>
             <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
           </span>
@@ -260,7 +275,7 @@ function version_changed(){
     </div>
     <div id="sidebysidediff<?php echo $counter;?>" style="display:none">
 
-      <?php if (isset($test["compilation_output"]) && $test["compilation_output"] != ""){?>
+      <?php if (isset($test["compilation_output"]) && $test["compilation_output"] != "UNDEFINED"){?>
       <b>Compilation output:</b>
       <pre><?php echo $test["compilation_output"]; ?></pre>
       <?php }?>

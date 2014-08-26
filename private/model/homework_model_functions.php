@@ -388,12 +388,16 @@ function get_homework_tests($username, $course, $assignment_id, $assignment_vers
             if ($testcases_info[$i]["title"] == $testcases_results[$u]["test_name"]){
                  array_push($homework_tests, array(
                     "title"=>$testcases_info[$i]["title"],
-                    "is_hidden"=>$testcases_info[$i]["hidden"],
-                    "is_extra_credit"=>$testcases_info[$i]["extracredit"],
                     "points_possible"=>$testcases_info[$i]["points"],
                     "score"=>$testcases_results[$u]["points_awarded"],
                     "message"=> isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "",
-                    "compilation_output"=> isset($testcases_results[$u]["compilation_output"]) ? get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]) : "",
+
+//));
+
+//	        array_push($homework_tests,array(
+                    "is_hidden"=>$testcases_info[$i]["hidden"],
+                    "is_extra_credit"=>$testcases_info[$i]["extracredit"],
+                    "compilation_output"=> isset($testcases_results[$u]["compilation_output"]) ? get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]) : "UNDEFINED",
                     "diff"=> isset($testcases_results[$u]["diff"]) ? get_testcase_diff($username,$course, $assignment_id, $assignment_version,$testcases_results[$u]["diff"]) : "",
                     "diffs"=>isset($testcases_results[$u]["diffs"]) ? get_all_testcase_diffs($username, $course, $assignment_id, $assignment_version, $testcases_results[$u]["diffs"]) : array()
                 ));
