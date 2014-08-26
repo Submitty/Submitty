@@ -64,9 +64,9 @@ TestCase::MakeTestCase(
 	 TestCasePoints(5),
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
 			    "cout.txt",					// output file name [V]
-			    "STDOUT",					// output file description
+			    "Standard OUTPUT (STDOUT)",					// output file description
 			    "test1_output.txt"),  // expected output
-	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
 	 "leap year test case",  // title
@@ -75,9 +75,9 @@ TestCase::MakeTestCase(
 	 TestCasePoints(5),
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
 			    "cout.txt",					// output file name [V]
-			    "STDOUT",					// output file description
+			    "Standard OUTPUT (STDOUT)",					// output file description
 			    "test2_output.txt"),  // expected output
-	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
 	 "corner case A test case",  // title
@@ -86,9 +86,9 @@ TestCase::MakeTestCase(
 	 TestCasePoints(2),
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
 			    "cout.txt",					// output file name [V]
-			    "STDOUT",					// output file description
+			    "Standard OUTPUT (STDOUT)",					// output file description
 			    "test3_output.txt"),  // expected output
-	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
 	 "corner case B test case",  // title
@@ -97,9 +97,9 @@ TestCase::MakeTestCase(
 	 TestCasePoints(2),
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
 			    "cout.txt",					// output file name [V]
-			    "STDOUT",					// output file description
+			    "Standard OUTPUT (STDOUT)",					// output file description
 			    "test4_output.txt"),  // expected output
-	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
 	 "corner case C test case",  // title
@@ -108,9 +108,9 @@ TestCase::MakeTestCase(
 	 TestCasePoints(1),
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
 			    "cout.txt",					// output file name [V]
-			    "STDOUT",					// output file description
+			    "Standard OUTPUT (STDOUT)",					// output file description
 			    "test5_output.txt"),  // expected output
-	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
 	 "error case A test case",  // title
@@ -119,9 +119,12 @@ TestCase::MakeTestCase(
 	 TestCasePoints(1,false,true),	  // non hidden, extra credit
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
 			    "cout.txt",					// output file name [V]
-			    "STDOUT",					// output file description
+			    "Standard OUTPUT (STDOUT)",					// output file description
 			    "test6_output.txt"),  // expected output
-	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
+			    "cerr.txt",					// output file name [V]
+			    "Standard ERROR (STDERR)",					// output file description
+			    "test6_outputB.txt")  // expected output
 		       ),
 TestCase::MakeTestCase(
 	 "error case B test case",  // title
@@ -130,9 +133,12 @@ TestCase::MakeTestCase(
 	 TestCasePoints(1,false,true),	// non hidden, extra credit
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
 			    "cout.txt",					// output file name [V]
-			    "STDOUT",					// output file description
+			    "Standard OUTPUT (STDOUT)",					// output file description
 			    "test7_output.txt"),  // expected output
-	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR")
+	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
+			    "cerr.txt",					// output file name [V]
+			    "Standard ERROR (STDERR)",					// output file description
+			    "test7_outputB.txt")  // expected output
 		       )
 };
 
