@@ -122,7 +122,7 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
 
     // TODO should support more than zip (.tar.gz etc.)
     if (!(in_array($homework_file["type"], $allowed))) {
-        display_error("Incorrect file upload type.  Not a zip, got ".htmlspecialchars($homework_file["type"]));
+        display_error("Incorrect file upload type.  Got ".htmlspecialchars($homework_file["type"]));
         return;
     }
 
@@ -182,19 +182,15 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     //display_file_permissions($perms);
 
     // Unzip files in folder
-    if (in_array($homework_file["type"], $zip_types)) {
-        $zip = new ZipArchive;
-        $res = $zip->open($homework_file["tmp_name"]);
-        if ($res === TRUE) {
-          $zip->extractTo($version_path."/");
-          $zip->close();
-        } else {
-            display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ". $version_path."/".$homework_file["name"]);
-            return;
-        }
+    $zip = new ZipArchive;
+    $res = $zip->open($homework_file["tmp_name"]);
+    if ($res === TRUE) {
+      $zip->extractTo($version_path."/");
+      $zip->close();
     } else {
         if (!move_uploaded_file($homework_file["tmp_name"], $version_path."/".$homework_file["name"])) {
-            display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
+        display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
+        return;
         }
     }
     $settings_file = $user_path."/user_assignment_settings.json";
@@ -204,20 +200,6 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     } else {
         change_assignment_version($username, $course, $assignment_id, $upload_version, $assignment_config);
     }
-/*
-    $to_be_compiled = $path_front."/submissions/to_be_compiled.txt";
-    if (!file_exists($to_be_compiled)) {
-        file_put_contents($to_be_compiled, $assignment_id."/".$username."/".$upload_version."\n");
-    } else {
-        $text = file_get_contents($to_be_compiled, false);
-        $text = $text.$assignment_id."/".$username."/".$upload_version."\n";
-        file_put_contents($to_be_compiled, $text);
-    }
-*/
-
-   $course = htmlspecialchars($_GET["course"]);
-   // FIXME: RESTRUCTURE CODE/ HANDLE THIS ERROR PROPERLY
-   // if (!is_valid_course($course)) {
 
     // If to be graded path doesn't exist, create new one
 
