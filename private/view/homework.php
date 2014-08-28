@@ -286,15 +286,20 @@ function version_changed(){
             <div>
               <em><?php echo $test["message"];?></em>
             </div>
+            <br />
         <?php }?>
            <!-- STUDENT INSTRUCTOR OUTPUT -->
 	   <div class="col-md-6">
+            <br />
+             <div style="margin-left: 20px;">Student: <?php echo $test["title"];?></div>
              <div class="panel panel-default" id="<?php echo $test["title"]; ?>_student">
 	       <?php echo str_replace(" ", "&nbsp;", $test["diff"]["student"]); ?>
 	        </div>
 	   </div>
 	   <!-- INSTRUCTOR OUTPUT -->
 	   <div class="col-md-6">
+            <br />
+            <div style="margin-left: 20px;">Instructor: <?php echo $test["title"];?></div>
              <div class="panel panel-default" id="<?php echo $test["title"]; ?>_instructor">
 	       <?php echo str_replace(" ", "&nbsp;", $test["diff"]["instructor"]); ?>
 	        </div>
@@ -311,7 +316,8 @@ function version_changed(){
 
       <span>
       <?php if (isset($diff["description"]) && $diff["description"] != "") {?>
-      <b><?php echo $diff["description"];?></b>
+          <b><?php echo $diff["description"];?></b>
+          <br />
       <?php } ?>
 
         <?php if (isset($diff["message"]) && $diff["message"] != "") {?>
@@ -332,10 +338,14 @@ function version_changed(){
 	      <!-- FIXME, should get rid of the newline after the div
 	           open and get rid of the "+1" on the line index in
 	           the diff.js file -->
+               <br />
+                <div style="margin-left: 20px;">Student: <?php echo $test["title"];?></div>
                 <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
 <?php echo str_replace(" ", "&nbsp;", $diff["student"]); ?></div>
             </div>
             <div class="<?php echo $column_class_teacher;?>">
+                <br />
+                <div style="margin-left: 20px;">Instructor: <?php echo $test["title"];?></div>
                 <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_instructor">
 <?php echo str_replace(" ", "&nbsp;", $diff["instructor"]); ?></div>
             </div>
