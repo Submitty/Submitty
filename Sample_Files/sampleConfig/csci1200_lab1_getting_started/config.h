@@ -58,7 +58,7 @@ TestCase testcases[num_testcases] = {
 
 /******************** TEST CASES **********************/
 TestCase::MakeTestCase(
-	 "non leap year test case",  // title
+	 "non leap year: '3 1 2012'",  // title
 	 "./a.out",                  // details
 	 "./a.out <nonleapyear.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(5),
@@ -69,7 +69,7 @@ TestCase::MakeTestCase(
 	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
-	 "leap year test case",  // title
+	 "leap year: ' 3 1 2013",  // title
 	 "./a.out",                  // details
 	 "./a.out <leapyear.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(5),
@@ -80,7 +80,7 @@ TestCase::MakeTestCase(
 	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
-	 "corner case A test case",  // title
+	 "corner case A: '1 1 2012'",  // title
 	 "./a.out",                  // details
 	 "./a.out <corner_case_A.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(2),
@@ -91,7 +91,7 @@ TestCase::MakeTestCase(
 	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
-	 "corner case B test case",  // title
+	 "corner case B: '12 31 2012'",  // title
 	 "./a.out",                  // details
 	 "./a.out <corner_case_B.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(2),
@@ -102,7 +102,7 @@ TestCase::MakeTestCase(
 	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
-	 "corner case C test case",  // title
+	 "corner case C: '12 31 2011'",  // title
 	 "./a.out",                  // details
 	 "./a.out <corner_case_C.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(1),
@@ -113,7 +113,7 @@ TestCase::MakeTestCase(
 	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
-	 "error case A test case",  // title
+	 "error case A: '13 1 2012'",  // title
 	 "./a.out",                  // details
 	 "./a.out <error_case_A.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(1,false,true),	  // non hidden, extra credit
@@ -127,7 +127,7 @@ TestCase::MakeTestCase(
 			    "test6_outputB.txt")  // expected output
 		       ),
 TestCase::MakeTestCase(
-	 "error case B test case",  // title
+	 "error case B: '2 30 2008'",  // title
 	 "./a.out",                  // details
 	 "./a.out <error_case_B.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(1,false,true),	// non hidden, extra credit

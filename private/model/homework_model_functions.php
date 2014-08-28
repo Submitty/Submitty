@@ -110,7 +110,7 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     //ex: homework number, due date, late days
 
     $max_size = 50000;//CHANGE THIS TO GET VALUE FROM APPROPRIATE FILE
-    $zip_types = array("application/zip", "application/x-zip-compressed");
+    $zip_types = array("application/zip", "application/x-zip-compressed","application/octet-stream");  // FIXME: trying adding octet stream
     $allowed   = array("application/zip", "application/x-zip-compressed","application/octet-stream","text/x-python-script", "text/plain", "text/x-c++src");
     $filename = explode(".", $homework_file["name"]);
     $extension = end($filename);
