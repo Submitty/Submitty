@@ -156,6 +156,8 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
       for (int j = 0; j < testcases[i].numFileComparisons(); j++) {
 	std::string helper_message = "";
 
+	bool ok_to_compare = true;
+
 	// GET THE FILES READY
 	std::ifstream student_instr(testcases[i].filename(j).c_str());
 	if (!student_instr) {
@@ -163,6 +165,7 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 	  tmp << "ERROR: comparison #" << j << ": Student's " << testcases[i].filename(j) << " does not exist";
 	  std::cerr << tmp.str() << std::endl;
 	  helper_message += tmp.str();
+	  ok_to_compare = false;
 	} 
 	std::ifstream expected_instr(testcases[i].expected(j).c_str());
 	if (!expected_instr && testcases[i].expected(j) != "") {
@@ -171,25 +174,33 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 	  std::cerr << tmp.str() << std::endl;
 	  if (helper_message != "") helper_message += "<br>";
 	  helper_message += tmp.str();
+	  ok_to_compare = false;
 	}
 
 	// DO THE COMPARISON
-	TestResults *result = testcases[i].compare(j);
+	TestResults *result = NULL;
+	if (ok_to_compare) {
+	  result = testcases[i].compare(j);
+	}
 
 	// PREPARE THE JSON DIFF FILE
 	std::stringstream diff_path;
 	diff_path << testcases[i].prefix() << "_" << j << "_diff.json";
 	std::ofstream diff_stream(diff_path.str().c_str());
 
-	// THE GRADE (will be compiled across all comparisons)
-	std::cout << "result->grade() " << result->grade() << std::endl;
-	grade_helper *= result->grade();
-	result->printJSON(diff_stream);
-
-	helper_message += " " + result->get_message();
-
-	// CLEANUP THIS COMPARISON
-	delete result;
+	if (result != NULL) {
+	  // THE GRADE (will be compiled across all comparisons)
+	  std::cout << "result->grade() " << result->grade() << std::endl;
+	  grade_helper *= result->grade();
+	  result->printJSON(diff_stream);
+	  
+	  helper_message += " " + result->get_message();
+	
+	  // CLEANUP THIS COMPARISON
+	  delete result;
+	} else {
+	  grade_helper = 0;
+	}
 
 	// JSON FOR THIS COMPARISON
 	std::stringstream expected_path;

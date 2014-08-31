@@ -13,7 +13,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 const std::string id = "lab1";
 const std::string name = "Getting Started";
-const std::string due_date = "2014-08-27 11:59:59.0";
+const std::string due_date = "2014-08-27 23:59:59.0";
 
 // Submission parameters
 const int max_submissions = 20;

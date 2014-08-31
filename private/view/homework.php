@@ -47,14 +47,40 @@ function version_changed(){
 <?php } ?>
 <h2>Homework Submission for <em> <?php echo $user;?> </em></h2>
 
+<?php 
+// FIXME: New variable in class.json 
+if (on_dev_team($user)) { 
+  echo "<font color=\"ff0000\" size=+5>on dev team</font>"; 
+  echo "<br>Dev Team = ";
+  for ($i=0; $i<count($dev_team); $i++) {
+    echo " ".$dev_team[$i];
+  }
+} else { 
+//echo "test message"; 
+} 
+?>
+
 <div class="panel-body" style="text-align: left;">
   <span><b>Select Lab or Homework:</b></span>
   <form action="">
     <select id="hwlist" name="assignment_id" onchange="assignment_changed();">
-      <?php for ($i = 0; $i < count($all_assignments); $i++) {?>
+       <?php for ($i = 0; $i < count($all_assignments); $i++) {
+            $FLAG = "";
+
+                if ($all_assignments[$i]["released"] != true) {
+	           if (on_dev_team($user)) {
+		      $FLAG = " NOT RELEASED";
+		   } else {
+	              continue;
+	           }
+	        }
+       ?>
             <option value="<?php echo $all_assignments[$i]["assignment_id"];?>" 
-		    <?php if ($all_assignments[$i]["assignment_id"] == $assignment_id) {?> selected <?php }?>><?php echo $all_assignments[$i]["assignment_name"];?></option>
-            <?php } ?>
+ 	    <?php 
+               if ($all_assignments[$i]["assignment_id"] == $assignment_id) {?> selected <?php }?>><?php echo $all_assignments[$i]["assignment_name"].$FLAG;
+            ?>
+            </option>
+      <?php } ?>
     </select>
   </form>
 </div>

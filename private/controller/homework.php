@@ -40,8 +40,19 @@ if ($class_config == NULL) {
 $most_recent_assignment_id = $class_config["default_assignment"];
 $most_recent_assignment_version = most_recent_assignment_version($username, $course, $most_recent_assignment_id);
 
+
 $all_assignments = $class_config["assignments"];
 
+// FIXME: New variable in class.json 
+$dev_team = $class_config["dev_team"];
+
+function on_dev_team($test_user) {
+  global $dev_team;
+  for ($u = 0; $u < count($dev_team); $u++) {
+    if ($test_user == $dev_team[$u]) return true;
+  }  
+  return false;
+}
 
 
 if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants to see
@@ -114,6 +125,7 @@ render("homework", array(
     "assignment_id"=>$assignment_id,
     "assignment_name"=>$assignment_name,
     "all_assignments"=>$all_assignments,
+    "dev_team"=>$dev_team,
     "points_visible"=>$points_visible,
     
       // added for debugging
