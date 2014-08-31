@@ -60,6 +60,14 @@ td.main_panel {
 
   td.schedule_ltgrey { background-color: #eeeeee; vertical-align:middle; text-align:center; }
 
+.diff-row {
+    vertical-align: top;
+}
+
+.diff-row-none {
+    vertical-align: top;
+    display: none;
+}
 
 .panel {
     margin: 10px 20px 10px 10px;

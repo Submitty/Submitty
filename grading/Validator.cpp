@@ -181,7 +181,7 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 	TestResults *result = NULL;
 	if (ok_to_compare) {
 	  result = testcases[i].compare(j);
-	}
+	} 
 
 	// PREPARE THE JSON DIFF FILE
 	std::stringstream diff_path;
@@ -210,8 +210,10 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 	  << "\t\t\t\t\t\"diff_id\":\"" << testcases[i].prefix() << "_" << j << "_diff\",\n"
 	  << "\t\t\t\t\t\"student_file\":\"" << testcases[i].filename(j) << "\",\n";
 	if (testcases[i].expected(j) != "") {
-	  testcase_json << "\t\t\t\t\t\"instructor_file\":\"" << expected_path.str() << "\",\n"
-			<< "\t\t\t\t\t\"difference\":\"" << testcases[i].prefix() << "_" << j << "_diff.json\",\n";
+	  testcase_json << "\t\t\t\t\t\"instructor_file\":\"" << expected_path.str() << "\",\n";
+	  if (ok_to_compare) {
+	    testcase_json << "\t\t\t\t\t\"difference\":\"" << testcases[i].prefix() << "_" << j << "_diff.json\",\n";
+	  }
 	}
 	testcase_json << "\t\t\t\t\t\"description\": \"" << testcases[i].description(j) << "\",\n";
 	if (helper_message != "") {

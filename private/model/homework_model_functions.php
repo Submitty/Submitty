@@ -109,8 +109,28 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
     //ex: homework number, due date, late days
 
-    $max_size = 50000;//CHANGE THIS TO GET VALUE FROM APPROPRIATE FILE
+
+// NOT SURE WHY THIS IS GONE NOW
+//    $max_size = 50000;//CHANGE THIS TO GET VALUE FROM APPROPRIATE FILE
+
+
+
+// HACK PLACED IN FOR LAB 1, TO WORK WITH CYGWIN ZIPS & CHROME ON WINDOWS 8
     $zip_types = array("application/zip", "application/x-zip-compressed","application/octet-stream");  // FIXME: trying adding octet stream
+//    $zip_types = array("application/zip", "application/x-zip-compressed");
+
+
+    /*$max_size = 50;//CHANGE THIS TO GET VALUE FROM APPROPRIATE FILE
+    if (isset($assignment_config["max_upload_size"])) {
+        $max_size = $assignment_config["max_upload_size"];
+    }
+    if ($homework_file["size"] / 1024 > $max_size) {
+        display_error("File uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file was ".$homework_file["size"] / 1024 ." kb.");
+        return;
+    }*/
+
+
+
     $allowed   = array("application/zip", "application/x-zip-compressed","application/octet-stream","text/x-python-script", "text/plain", "text/x-c++src");
     $filename = explode(".", $homework_file["name"]);
     $extension = end($filename);
@@ -368,22 +388,22 @@ function get_homework_tests($username, $course, $assignment_id, $assignment_vers
         for ($u = 0; $u < count($testcases_results); $u++){
             //Match the assignment results (user specific) with the configuration (class specific)
             if ($testcases_info[$i]["title"] == $testcases_results[$u]["test_name"]){
-                 array_push($homework_tests, array(
-                    "title"=>$testcases_info[$i]["title"],
-                    "points_possible"=>$testcases_info[$i]["points"],
-                    "score"=>$testcases_results[$u]["points_awarded"],
-                    "message"=> isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "",
+                $data = array();
+                $data["title"] = $testcases_info[$i]["title"];
+                $data["points_possible"] = $testcases_info[$i]["points"];
+                $data["score"] = $testcases_results[$u]["points_awarded"];
+                $data["message"] = isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "";
+                $data["is_hidden"] = $testcases_info[$i]["hidden"];
+                $data["is_extra_credit"] = $testcases_info[$i]["extracredit"];
+                
+                if (isset($testcases_results[$u]["compilation_output"])) {
+                    $data["compilation_output"] = get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]);
+                }
+                if (isset($testcases_results[$u]["diffs"])) {
+                    $data["diffs"] = get_all_testcase_diffs($username, $course, $assignment_id, $assignment_version, $testcases_results[$u]["diffs"]);
+                }
 
-//));
-
-//	        array_push($homework_tests,array(
-                    "is_hidden"=>$testcases_info[$i]["hidden"],
-                    "is_extra_credit"=>$testcases_info[$i]["extracredit"],
-                    "compilation_output"=> isset($testcases_results[$u]["compilation_output"]) ? get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]) : "UNDEFINED",
-                    "diff"=> isset($testcases_results[$u]["diff"]) ? get_testcase_diff($username,$course, $assignment_id, $assignment_version,$testcases_results[$u]["diff"]) : "",
-                    "diffs"=>isset($testcases_results[$u]["diffs"]) ? get_all_testcase_diffs($username, $course, $assignment_id, $assignment_version, $testcases_results[$u]["diffs"]) : array()
-                ));
-
+                array_push($homework_tests, $data);
                 break;
             }
         }
@@ -394,9 +414,8 @@ function get_homework_tests($username, $course, $assignment_id, $assignment_vers
 function get_awarded_points_visible($homework_tests)
 {
     $version_score = 0;
-    //TODO Add extra credit
     foreach ($homework_tests as $testcase) {
-        if ($testcase["is_hidden"] === false || $testcase["is_hidden"] === "false" || $testcase["is_hidden"] === "False") {
+        if ($testcase["is_hidden"] === false) {
             $version_score += $testcase["score"];
         }
     }
@@ -407,8 +426,8 @@ function get_points_visible($homework_tests)
 {
     $points_visible = 0;
     foreach ($homework_tests as $testcase) {
-        if ($testcase["is_hidden"] === false || $testcase["is_hidden"] === "false" || $testcase["is_hidden"] === "False") {
-            if ($testcase["is_extra_credit"] === false || $testcase["is_extra_credit"] === "false" || $testcase["is_extra_credit"] === "False") {
+        if ($testcase["is_hidden"] === false) {
+            if ($testcase["is_extra_credit"] === false) {
                 $points_visible += $testcase["points_possible"];
             }
         }
@@ -551,28 +570,22 @@ function get_testcase_diff($username, $course, $assignment_id, $assignment_versi
     $path_front = get_path_front($course);
     $student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
     
-    $student_content = "";
-    $instructor_content = "";
-    $difference = "{differences:[]}";
+    $data = array();
+    $data["difference"] = "{differences:[]}";//This needs to be here to render the diff viewer without a teacher file
 
     if (isset($diff["instructor_file"])) {
         $instructor_file_path = "$path_front/".$diff["instructor_file"];
         if (file_exists($instructor_file_path)) {
-            $instructor_content = file_get_contents($instructor_file_path);
+            $data["instructor"] = file_get_contents($instructor_file_path);
         }
     }
     if (isset($diff["student_file"]) && file_exists($student_path . $diff["student_file"])) {
-        $student_content = file_get_contents($student_path.$diff["student_file"]);
+        $data["student"] = file_get_contents($student_path.$diff["student_file"]);
     }
     if (isset($diff["difference"]) && file_exists($student_path . $diff["difference"])) {
-        $difference = file_get_contents($student_path.$diff["difference"]);
+        $data["difference"] = file_get_contents($student_path.$diff["difference"]);
     }
-
-    return array(
-            "student" => $student_content,
-            "instructor"=> $instructor_content,
-            "difference" => $difference
-        );
+    return $data;
 }
 
 function get_all_testcase_diffs($username, $course, $assignment_id, $assignment_version, $diffs) {
@@ -580,10 +593,10 @@ function get_all_testcase_diffs($username, $course, $assignment_id, $assignment_
     foreach ($diffs as $diff) {
         $diff_result = get_testcase_diff($username, $course, $assignment_id, $assignment_version, $diff);
         $diff_result["diff_id"] = $diff["diff_id"];
-        if (isset($diff["message"])) {
+        if (isset($diff["message"]) && $diff["message"] != "") {
             $diff_result["message"] = $diff["message"];
         }
-        if (isset($diff["description"])) {
+        if (isset($diff["description"]) && $diff["description"] != "") {
             $diff_result["description"] = $diff["description"];
         }
 
