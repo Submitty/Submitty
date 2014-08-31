@@ -401,7 +401,6 @@ function get_homework_tests($username, $course, $assignment_id, $assignment_vers
 function get_awarded_points_visible($homework_tests)
 {
     $version_score = 0;
-    //TODO Add extra credit
     foreach ($homework_tests as $testcase) {
         if ($testcase["is_hidden"] === false) {
             $version_score += $testcase["score"];

@@ -273,6 +273,7 @@ function version_changed(){
       <?php }?>
 
       <!-- MULTIPLE DIFFS -->
+
       <?php foreach ($test["diffs"] as $diff) {
           if (isset($diff["student"]) && !isset($diff["instructor"]) && !isset($diff["description"]) && !isset($diff["message"])) {
               continue;
@@ -289,37 +290,44 @@ function version_changed(){
           </span>
           <?php if (!isset($diff["student"]) && !isset($diff["instructor"])) {
                 continue;
-            }?>
+            }
+            if (isset($diff["instructor"])) {
+                $instructor_row_class = "diff-row";
+            } else {
+                $instructor_row_class = "diff-row-none";
+            }
+          ?>
           <div class="row">
-                <?php 
-                $column_class_student = "col-md-6";
-                $column_class_teacher = "col-md-6";
-                if (!isset($diff["instructor"])) {
-                    $column_class_student = "col-md-12";
-                    $column_class_teacher = "display-none";
-                }?>
-                <div class="<?php echo $column_class_student;?>">
-                   <br />
-                    <div style="margin-left: 20px;">Student: <?php echo $test["title"];?></div>
-                    <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
-                        <?php if (isset($diff["student"])) {
-                            echo str_replace(" ", "&nbsp;", $diff["student"]);
-                        } else {
-                            echo "";
-                        }?>
-                    </div>
-                </div>
-                <div class="<?php echo $column_class_teacher;?>">
-                    <br />
-                    <div style="margin-left: 20px;">Instructor: <?php echo $test["title"];?></div>
-                    <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_instructor">
-                        <?php if (isset($diff["instructor"])) {
-                            echo str_replace(" ", "&nbsp;", $diff["instructor"]); 
-                        } else {
-                            echo "";
-                        }?>
-                    </div>
-                </div>
+                <table border="0">
+                    <tr>
+                        <td class="diff-row">
+                            <span style="margin-left: 20px;">Student: <?php echo $test["title"];?></span>
+                        </td>
+                        <td class="<?php echo $instructor_row_class;?>">
+                            <span style="margin-left: 20px;">Instructor: <?php echo $test["title"];?></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="diff-row">
+                            <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
+                                <?php if (isset($diff["student"])) {
+                                    echo str_replace(" ", "&nbsp;", $diff["student"]);
+                                } else {
+                                    echo "";
+                                }?>
+                            </div>
+                        </td>
+                        <td class="<?php echo $instructor_row_class;?>">
+                             <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_instructor">
+                                <?php if (isset($diff["instructor"])) {
+                                    echo str_replace(" ", "&nbsp;", $diff["instructor"]); 
+                                } else {
+                                    echo "";
+                                }?>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
                 <script>
                     diff_queue.push("<?php echo $diff["diff_id"]; ?>");
                     diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
