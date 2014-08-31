@@ -210,16 +210,8 @@ function version_changed(){
         if (  isset($test["score"]) && 
               isset($test["points_possible"]) && 
               $test["points_possible"] != 0 && 
-
-	    // FIXME:  Let's agree on using true & false, none of this silly booleans as strings.
-	    //         I had to switch the false to !true though, something is fishy here.
-
-              (! ( $test["is_hidden"] === true || 
-	           $test["is_hidden"] == "true" || 
-                   $test["is_hidden"] == "True" ) )&& 
-              (! ( $test["is_extra_credit"] === true || 
-                   $test["is_extra_credit"] === "true" || 
-                   $test["is_extra_credit"] === "True" ) )  ) {
+              $test["is_hidden"] === false && 
+              $test["is_extra_credit"] === false ) {
                 if (!($test["points_possible"] > 0)) {
                    $part_percent = 1;
                 } else {
@@ -243,7 +235,7 @@ function version_changed(){
       <!-- BADGE TEST SCORE -->
       <span class="<?php echo $class;?>">
         <?php 
-            if ($test["is_hidden"] === true || $test["is_hidden"] == "true" || $test["is_hidden"] == "True") {?>
+            if ($test["is_hidden"] === true) {?>
                 Hidden Test Case
                 </span>
                 </div><!-- End div -->
@@ -251,7 +243,7 @@ function version_changed(){
                 <?php continue;
             }?>
             <?php echo $test["score"]." / ".$test["points_possible"];
-            if ($test["is_extra_credit"] === true || $test["is_extra_credit"] === "true" || $test["is_extra_credit"] === "True") {
+            if ($test["is_extra_credit"] === true) {
                 echo " Extra Credit";
             }
         ?>

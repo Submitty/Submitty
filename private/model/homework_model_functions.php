@@ -403,7 +403,7 @@ function get_awarded_points_visible($homework_tests)
     $version_score = 0;
     //TODO Add extra credit
     foreach ($homework_tests as $testcase) {
-        if ($testcase["is_hidden"] === false || $testcase["is_hidden"] === "false" || $testcase["is_hidden"] === "False") {
+        if ($testcase["is_hidden"] === false) {
             $version_score += $testcase["score"];
         }
     }
@@ -414,8 +414,8 @@ function get_points_visible($homework_tests)
 {
     $points_visible = 0;
     foreach ($homework_tests as $testcase) {
-        if ($testcase["is_hidden"] === false || $testcase["is_hidden"] === "false" || $testcase["is_hidden"] === "False") {
-            if ($testcase["is_extra_credit"] === false || $testcase["is_extra_credit"] === "false" || $testcase["is_extra_credit"] === "False") {
+        if ($testcase["is_hidden"] === false) {
+            if ($testcase["is_extra_credit"] === false) {
                 $points_visible += $testcase["points_possible"];
             }
         }
