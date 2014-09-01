@@ -151,7 +151,7 @@ if (on_dev_team($user)) {
 
 	<!-- SELECT A PREVIOUS SUBMISSION -->
 <div class="row">
-<div class="col-xs-5">
+<div style="margin-left: 20px">
 	<form action="">
           <label>Select Submission Version:</label>
           <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
@@ -179,7 +179,7 @@ if (on_dev_team($user)) {
         </form>
 </div>
 
-<div class="col-xs-5">
+<div style="margin-left: 20px">
         <!-- CHANGE ACTIVE VERSION -->
         <?php if ($assignment_version != $submitting_version) { ?>
 	<a href="?page=update&course=<?php echo $course;?>&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" 
@@ -194,25 +194,20 @@ if (on_dev_team($user)) {
 	   //echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
         ?>
 	<!-- SUBMITTED FILES -->
-        <ul class="list-group">
-          <li class="list-group-item list-group-item-active">
-            Submitted Files
-          </li>
-          <?php foreach($submitted_files as $file) {?>
-          <li class="list-group-item">
-            <?php echo $file;?>
-               </li>
-          <?php } ?>
-        </ul>
-<!--	     
-      </div><!-- End Column ~>
-<!--  FIXME
-      <div class="col-sm-1" style="padding: 0;"></div>
-      <!--<<<<<<< HEAD~>
-<!--  FIXME
-      <div class="col-sm-6" style="padding: 0;">
--->
-
+    <div class="row">
+        <div style="margin-left: 20px; margin-right: 20px; ">
+            <ul class="list-group">
+              <li class="list-group-item list-group-item-active">
+                Submitted Files
+              </li>
+              <?php foreach($submitted_files as $file) {?>
+              <li class="list-group-item">
+                <?php echo $file;?>
+                   </li>
+              <?php } ?>
+            </ul>
+        </div>
+    </div>
    <?php if ($assignment_version_in_grading_queue) {?>
 
         <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
