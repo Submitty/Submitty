@@ -150,6 +150,8 @@ if (on_dev_team($user)) {
 -->
 
 	<!-- SELECT A PREVIOUS SUBMISSION -->
+<div class="row">
+<div class="col-xs-5">
 	<form action="">
           <label>Select Submission Version:</label>
           <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
@@ -175,18 +177,21 @@ if (on_dev_team($user)) {
             <?php }?>
           </select>
         </form>
+</div>
 
-
+<div class="col-xs-5">
         <!-- CHANGE ACTIVE VERSION -->
         <?php if ($assignment_version != $submitting_version) { ?>
 	<a href="?page=update&course=<?php echo $course;?>&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" 
 	   style="text-align:center;"><input type="submit" class="btn btn-primary" value="Set Version <?php echo $assignment_version;?> as Active Submission Version"></input></a><br><br>
 	<?php } ?>
+</div>
+</div>
 
 
 	<?php 
-	   $date_submitted = get_submission_time($user,$course,$assignment_id,$assignment_version);
-	   echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
+	   //$date_submitted = get_submission_time($user,$course,$assignment_id,$assignment_version);
+	   //echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
         ?>
 	<!-- SUBMITTED FILES -->
         <ul class="list-group">

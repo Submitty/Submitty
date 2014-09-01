@@ -471,9 +471,10 @@ function get_select_submission_data($username, $course, $assignment_id, $assignm
 		       //echo "due_date = $due_date";
 		       //echo "date_submitted = $date_submitted <br>";
 
-       if ($date_submitted == "") $date_submitted = $due_date;
+       $date_submitted2 = new DateTime($date_submitted);
+       if ($date_submitted == "") $date_submitted2 = $due_date;
 
-		       $date_submitted2 = new DateTime($date_submitted);
+
 
         //$now = new DateTime("NOW");
         $days_late = "";
