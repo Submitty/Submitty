@@ -316,7 +316,7 @@ if (on_dev_team($user)) {
              ) {
               continue;
           } ?>
-          <span>
+          <div style="margin-left:20px;">
               <?php if (0) /*isset($diff["description"]))*/ {?>
                   <b><?php echo $diff["description"];?></b>
                   <br />
@@ -326,7 +326,7 @@ if (on_dev_team($user)) {
               <?php if (isset($diff["message"])) {?>
                   <em><?php echo $diff["message"]; ?></em>
               <?php }?>
-          </span>
+          </div>
           <?php if (!isset($diff["student"]) && !isset($diff["instructor"])) {
                 continue;
             }
@@ -349,7 +349,7 @@ if (on_dev_team($user)) {
                     <tr>
 <?php /* EXTRA NEWLINES & SPACES HERE CAUSE MISFORMATTING  in the diffviewer  */ ?>
                         <td class="diff-row">
-                            <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
+                            <div style="margin-left: 20px;" class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
 <?php if (isset($diff["student"])) { echo str_replace(" ", "&nbsp;", $diff["student"]); } else { echo ""; }?></div>
                         </td>
                         <td class="<?php echo $instructor_row_class;?>">
