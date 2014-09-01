@@ -245,14 +245,6 @@ function can_edit_assignment($username, $course, $assignment_id, $assignment_con
 function get_due_date($username, $course, $assignment_id, $assignment_config) {
     $path_front = get_path_front($course);
     date_default_timezone_set('America/New_York');
-    $file = $path_front."/results/".$assignment_id."/".$username."/user_assignment_config.json";
-    if (file_exists($file)) {
-        $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
-        if (isset($json["due_date"]) && $json["due_date"] != "default") {
-            $date = new DateTime($json["due_date"]);
-            return $date;
-        }
-    }
     $date = new DateTime($assignment_config["due_date"]);
 
 

@@ -345,10 +345,10 @@ if (on_dev_team($user)) {
                 <table border="0">
                     <tr>
                         <td class="diff-row">
-                            <span style="margin-left: 20px;"><b>Student <?php echo $diff["description"];?></b></span>
+                            <div style="margin-left: 20px;"><b>Student <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b></div>
                         </td>
                         <td class="<?php echo $instructor_row_class;?>">
-                            <span style="margin-left: 20px;"><b>Expected <?php echo $diff["description"];?></b></span>
+                            <div style="margin-left: 20px;"><b>Expected <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b></div>
                         </td>
                     </tr>
                     <tr>
