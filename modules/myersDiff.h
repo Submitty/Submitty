@@ -56,12 +56,47 @@ TestResults* warnIfNotEmpty ( const std::string & b,
 
   // the instructor file should be empty
   assert (a == "");
-
-  TestResults* answer = new Difference();
+  
+  Tokens* answer = new Tokens();
 
   if (b != "") {
     answer->message = "WARNING: This should be empty";
     std::cout << "in warn if not empty -- student file not empty" << std::endl;
+  }
+
+  return answer;
+}
+
+
+TestResults* errorIfNotEmpty ( const std::string & b,
+		const std::string & a ) {
+
+  // the instructor file should be empty
+  assert (a == "");
+
+  Tokens* answer = new Tokens();
+
+  if (b != "") {
+    answer->message = "ERROR: This should be empty";
+    std::cout << "in error if not empty -- student file not empty" << std::endl;
+    answer->setGrade(0);
+  }
+
+  return answer;
+}
+
+
+TestResults* errorIfEmpty ( const std::string & b,
+		const std::string & a ) {
+  // the instructor file should be empty
+  assert (a == "");
+
+  Tokens* answer = new Tokens();
+
+  if (b == "") {
+    answer->message = "ERROR: This should be non empty";
+    std::cout << "in error if empty -- student file empty" << std::endl;
+    answer->setGrade(0);
   }
 
   return answer;

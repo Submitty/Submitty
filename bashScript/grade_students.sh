@@ -143,7 +143,7 @@ while true; do
 	
         # check to see if this assignment is already being graded
 	# wait until the lock is available (up to 5 seconds)
-	flock -w 5 200 || { echo "ERROR: flock() failed." >&2; exit 1; }
+	flock -w 5 200 || { echo "ERROR: flock() failed. $NEXT_TO_GRADE" >&2; exit 1; }
 	if [ -e "$base_path/to_be_graded/GRADING_$NEXT_TO_GRADE" ]
 	then
     	     echo "skip $NEXT_TO_GRADE, being graded by another grade_students.sh process"
@@ -303,7 +303,7 @@ while true; do
 
 
         # copy submitted files to tmp directory
-	cp 1>/dev/null  2>&1  -r $submission_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory" >&2
+	cp 1>/dev/null  2>&1  -r $submission_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory $submission_path" >&2
 
 
 
@@ -316,7 +316,7 @@ while true; do
         # copy input files to tmp directory
 	if [ -d "$test_input_path" ]
 	then
-	    cp -rf $test_input_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory" >&2
+	    cp -rf $test_input_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory $test_input_path" >&2
 	fi
 	
 
@@ -330,7 +330,7 @@ while true; do
         # copy output files to tmp directory  (SHOULD CHANGE THIS)
 	if [ -d "$test_output_path" ]
 	then
-	    cp -rf $test_output_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory" >&2
+	    cp -rf $test_output_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory $test_output_path" >&2
 	fi
 	
 	submission_time="$(date -r $submission_path "+%F %T")"
@@ -424,7 +424,7 @@ while true; do
 
 
 	# remove submission & the active grading tag from the todo list
-	flock -w 5 200 || { echo "ERROR: flock() failed." >&2; exit 1; }
+	flock -w 5 200 || { echo "ERROR: flock() failed. $NEXT_TO_GRADE" >&2; exit 1; }
 	rm -f $base_path/to_be_graded/$NEXT_TO_GRADE
 	rm -f $base_path/to_be_graded/GRADING_$NEXT_TO_GRADE
 	flock -u 200

@@ -82,6 +82,7 @@ Now Exiting" << std::endl;
   init << "\t\"name\": \"" << name << "\"," << std::endl;
 
   init << "\t\"max_submissions\": " << max_submissions << "," << std::endl;
+  init << "\t\"max_submission_size\": " << max_submission_size << "," << std::endl;
 
   init << "\t\"auto_pts\": " << auto_pts << "," << std::endl;
   int visible = 0;

@@ -22,6 +22,7 @@ const int submission_penalty = 5;
 // Compile-time parameters
 const int max_clocktime = 2;		// in seconds
 const int max_cputime = 2;			// in seconds
+const int max_submission_size = 1000;	// in KB
 const int max_output_size = 100;	// in KB
 	// OTHERS?
 
@@ -58,8 +59,8 @@ TestCase testcases[num_testcases] = {
 
 /******************** TEST CASES **********************/
 TestCase::MakeTestCase(
-	 "non leap year: '3 1 2012'",  // title
-	 "./a.out",                  // details
+	 "non leap year",  // title
+	 "3 1 2012",                  // details
 	 "./a.out <nonleapyear.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(5),
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
@@ -69,8 +70,8 @@ TestCase::MakeTestCase(
 	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
-	 "leap year: ' 3 1 2013",  // title
-	 "./a.out",                  // details
+	 "leap year",  // title
+	 "3 1 2013",                  // details
 	 "./a.out <leapyear.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(5),
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
@@ -80,8 +81,8 @@ TestCase::MakeTestCase(
 	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
-	 "corner case A: '1 1 2012'",  // title
-	 "./a.out",                  // details
+	 "corner case A",  // title
+	 "1 1 2012",                  // details
 	 "./a.out <corner_case_A.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(2),
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
@@ -91,8 +92,8 @@ TestCase::MakeTestCase(
 	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
-	 "corner case B: '12 31 2012'",  // title
-	 "./a.out",                  // details
+	 "corner case B",  // title
+	 "12 31 2012",                  // details
 	 "./a.out <corner_case_B.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(2),
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
@@ -102,8 +103,8 @@ TestCase::MakeTestCase(
 	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
-	 "corner case C: '12 31 2011'",  // title
-	 "./a.out",                  // details
+	 "corner case C",  // title
+	 "12 31 2011",                  // details
 	 "./a.out <corner_case_C.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(1),
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
@@ -113,8 +114,8 @@ TestCase::MakeTestCase(
 	 TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)")
 		       ),
 TestCase::MakeTestCase(
-	 "error case A: '13 1 2012'",  // title
-	 "./a.out",                  // details
+	 "error case A",  // title
+	 "13 1 2012",                  // details
 	 "./a.out <error_case_A.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(1,false,true),	  // non hidden, extra credit
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),
@@ -127,8 +128,8 @@ TestCase::MakeTestCase(
 			    "test6_outputB.txt")  // expected output
 		       ),
 TestCase::MakeTestCase(
-	 "error case B: '2 30 2008'",  // title
-	 "./a.out",                  // details
+	 "error case B",  // title
+	 "2 30 2008",                  // details
 	 "./a.out <error_case_B.txt", // 1> cout.txt 2> cerr.txt",                  // command
 	 TestCasePoints(1,false,true),	// non hidden, extra credit
 	 TestCaseComparison(&myersDiffbyLinesByChar,				// compare function [V]			   ),

@@ -13,7 +13,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 const std::string id = "HW1";
 const std::string name = "Text Justification";
-const std::string due_date = "2014-05-15 11:59:59.0";
+const std::string due_date = "2014-09-04 23:59:59.0";
 
 // Submission parameters
 const int max_submissions = 20;
@@ -22,6 +22,7 @@ const int submission_penalty = 5;
 // Compile-time parameters
 const int max_clocktime = 2;		// in seconds
 const int max_cputime = 2;			// in seconds
+const int max_submission_size = 1000;	// in KB
 const int max_output_size = 100;	// in KB
 	// OTHERS?
 

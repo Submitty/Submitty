@@ -254,6 +254,9 @@ function get_due_date($username, $course, $assignment_id, $assignment_config) {
         }
     }
     $date = new DateTime($assignment_config["due_date"]);
+
+
+//		   echo "the due date = ".$assignment_config["due_date"];
     return $date;
 }
 
@@ -373,6 +376,16 @@ function version_in_grading_queue($username, $course, $assignment_id, $assignmen
 
 //RESULTS DATA
 
+function get_submission_time($username, $course, $assignment_id, $assignment_version) {
+    $version_results = get_assignment_results($username, $course, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
+    if ($version_results &&
+	      isset($version_results["submission_time"])) { 
+	      return $version_results["submission_time"]; 
+    } else {
+	      return "";
+    }
+}
+
 function get_homework_tests($username, $course, $assignment_id, $assignment_version, $assignment_config) {
     $testcases_info = $assignment_config["testcases"];//These are the tests run on a homework (for grading etc.)
     $version_results = get_assignment_results($username, $course, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
@@ -390,6 +403,7 @@ function get_homework_tests($username, $course, $assignment_id, $assignment_vers
             if ($testcases_info[$i]["title"] == $testcases_results[$u]["test_name"]){
                 $data = array();
                 $data["title"] = $testcases_info[$i]["title"];
+                $data["details"] = $testcases_info[$i]["details"];
                 $data["points_possible"] = $testcases_info[$i]["points"];
                 $data["score"] = $testcases_results[$u]["points_awarded"];
                 $data["message"] = isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "";
@@ -447,12 +461,28 @@ function get_select_submission_data($username, $course, $assignment_id, $assignm
         }
 
         $due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
-        $now = new DateTime("NOW");
+//	if (!isset($due_date) || !defined("due_date")) {
+//		       $due_date = "";
+//		       }
+
+        $date_submitted = get_submission_time($username,$course,$assignment_id,$i);
+
+
+		       //echo "due_date = $due_date";
+		       //echo "date_submitted = $date_submitted <br>";
+
+       if ($date_submitted == "") $date_submitted = $due_date;
+
+		       $date_submitted2 = new DateTime($date_submitted);
+
+        //$now = new DateTime("NOW");
         $days_late = "";
-        if ($now > $due_date) {
-            $now->add(new DateInterval("P1D"));
-            $interval = $now->diff($due_date);
+        if ($date_submitted2 > $due_date) {
+            $date_submitted2->add(new DateInterval("P1D"));
+            $interval = $date_submitted2->diff($due_date);
             $days_late = $interval->format("%d");
+
+	//echo "days_late = $days_late<br>";
         }
         $entry = array("score"=> $score, "days_late"=>$days_late);
         array_push($select_data, $entry);

@@ -184,6 +184,10 @@ if (on_dev_team($user)) {
 	<?php } ?>
 
 
+	<?php 
+	   $date_submitted = get_submission_time($user,$course,$assignment_id,$assignment_version);
+	   echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
+        ?>
 	<!-- SUBMITTED FILES -->
         <ul class="list-group">
           <li class="list-group-item list-group-item-active">
@@ -257,6 +261,7 @@ if (on_dev_team($user)) {
     <div>
       <h4 style="margin-left: 10px; text-align: left;display:inline-block;">
         <?php echo $test["title"];?>
+        <?php if (isset ($test["details"])) { if ($test["details"] != "") { echo " <tt>".$test["details"]."</tt>"; } } ?>
       </h4>
       <!-- BADGE TEST SCORE -->
       <span class="<?php echo $class;?>">
@@ -276,7 +281,7 @@ if (on_dev_team($user)) {
       </span>
       
 
-      <?php if ( (isset($test["diff"]) && $test["diff"] != "") || 
+      <?php if (/* (isset($test["diff"]) && $test["diff"] != "") || */
 	         (isset($test["diffs"]) && count($test["diffs"]) > 0) ||
                  (isset($test["compilation_output"]))
                ) {?>
@@ -287,7 +292,7 @@ if (on_dev_team($user)) {
       <?php }?>
       <?php if ($test["message"] != "") {?>
       <!--<div>-->
-      <!--<span>&nbsp;&nbsp;-->&nbsp;&nbsp;&nbsp;<em><?php echo $test["message"]; ?></em><!--</span>-->
+      <!--<span>&nbsp;&nbsp;--><em><?php echo $test["message"]; ?></em><!--</span>-->
       <!--</div>-->
       <?php } ?>
     </div>
@@ -304,7 +309,11 @@ if (on_dev_team($user)) {
 	 if (isset($test["diffs"])) {
 
 	 foreach ($test["diffs"] as $diff) {
-          if (isset($diff["student"]) && !isset($diff["instructor"]) && !isset($diff["description"]) && !isset($diff["message"])) {
+          if (   isset($diff["student"])      && 
+	         !isset($diff["instructor"])  && 
+                 !isset($diff["description"]) && 
+                 !isset($diff["message"])
+             ) {
               continue;
           } ?>
           <span>
@@ -315,7 +324,7 @@ if (on_dev_team($user)) {
               ?>
 
               <?php if (isset($diff["message"])) {?>
-                  &nbsp;&nbsp;&nbsp;<em><?php echo $diff["message"]; ?></em>
+                  <em><?php echo $diff["message"]; ?></em>
               <?php }?>
           </span>
           <?php if (!isset($diff["student"]) && !isset($diff["instructor"])) {

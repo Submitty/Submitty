@@ -27,6 +27,9 @@ public:
   std::string message;
   std::string get_message() { return message; }
 };
+
+
+
 class Change {
 public:
 	// Starting changeblock line for input (student)
@@ -72,6 +75,9 @@ public:
 	bool partial;
 	int tokensfound;
 	bool harsh;
+  // FIXME: redesign necessary
+  float tokens_grade;
+  void setGrade(float g) { tokens_grade = g; }
 	void printJSON(std::ostream & file_out);
 	float grade();
 };
@@ -87,7 +93,7 @@ Difference::Difference() :
 
 Tokens::Tokens() :
 		TestResults(), num_tokens(0), tokensfound(0), partial(true), harsh(
-				false) {
+										   false), tokens_grade(1) {
 }
 
 float Difference::grade() {
@@ -104,6 +110,9 @@ float Difference::grade() {
 }
 
 float Tokens::grade() {
+  return tokens_grade;
+  // FIXME
+  /*
 	for (unsigned int i = 0; i < tokens_found.size(); i++) {
 		if (tokens_found[i] != -1)
 			tokensfound++;
@@ -114,6 +123,7 @@ float Tokens::grade() {
 		return 1;
 	}
 	return 0;
+  */
 }
 
 void Difference::printJSON(std::ostream & file_out) {

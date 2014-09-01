@@ -125,7 +125,7 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 
   // LOOP OVER ALL TEST CASES
   for (int i = 0; i < num_testcases; ++i) {
-    std::cout << testcases[i].title() << " - points: " << testcases[i].points() << std::endl;
+    std::cout << "------------------------------------------\n" << testcases[i].title() << " - points: " << testcases[i].points() << std::endl;
     
     // START JSON FOR TEST CASE
     testcase_json << "\t\t{\n"
@@ -153,7 +153,9 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
       // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
       testcase_json << "\t\t\t\"diffs\": [\n";
       float grade_helper = 1.0;
+      //      std::cerr << "-----------------------\ntest case " << i+1 << std::endl;
       for (int j = 0; j < testcases[i].numFileComparisons(); j++) {
+	std::cerr << "comparison #" << j << std::endl;
 	std::string helper_message = "";
 
 	bool ok_to_compare = true;
