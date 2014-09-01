@@ -107,24 +107,18 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     //ex: homework number, due date, late days
 
 
-// NOT SURE WHY THIS IS GONE NOW
-//    $max_size = 50000;//CHANGE THIS TO GET VALUE FROM APPROPRIATE FILE
-
-
-
 // HACK PLACED IN FOR LAB 1, TO WORK WITH CYGWIN ZIPS & CHROME ON WINDOWS 8
     $zip_types = array("application/zip", "application/x-zip-compressed","application/octet-stream");  // FIXME: trying adding octet stream
 //    $zip_types = array("application/zip", "application/x-zip-compressed");
 
 
-    /*$max_size = 50;//CHANGE THIS TO GET VALUE FROM APPROPRIATE FILE
-    if (isset($assignment_config["max_upload_size"])) {
-        $max_size = $assignment_config["max_upload_size"];
+    $max_size = 50;
+    if (isset($assignment_config["max_submission_size"])) {
+        $max_size = $assignment_config["max_submission_size"];
     }
     if ($homework_file["size"] / 1024 > $max_size) {
-        display_error("File uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file was ".$homework_file["size"] / 1024 ." kb.");
-        return;
-    }*/
+        return array("error"=>"", "message"=>"File uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file was ".$homework_file["size"] / 1024 ." kb.");
+    }
 
 
 
