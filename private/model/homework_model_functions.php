@@ -94,17 +94,14 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     // Check user and assignment authenticity
     $class_config = get_class_config($course);
     if ($username !== $_SESSION["id"]) {//Validate the id
-        display_error("User Id invalid.  ".$username." != ".$_SESSION["id"]);
-        return;
+        return array("error"=>"", "message"=>"User Id invalid.  ".$username." != ".$_SESSION["id"]);
     }
     if (!is_valid_assignment($class_config, $assignment_id)) {
-        display_error($assignment_id." is not a valid assignment");
-        return;
+        return array("error"=>"", "message"=>$assignment_id." is not a valid assignment");
     }
     $assignment_config = get_assignment_config($username, $course, $assignment_id);
     if (!can_edit_assignment($username, $course, $assignment_id, $assignment_config)) {//Made sure the user can upload to this homework
-        display_error($assignment_id." is closed.  Unable to change");
-        return;
+        return array("error"=>"assignment_closed", "message"=>$assignment_id." is closed.");
     }
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
     //ex: homework number, due date, late days
@@ -142,8 +139,7 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
 
     // TODO should support more than zip (.tar.gz etc.)
     if (!(in_array($homework_file["type"], $allowed))) {
-        display_error("Incorrect file upload type.  Got ".htmlspecialchars($homework_file["type"]));
-        return;
+        return array("error"=>"", "message"=>"Incorrect file upload type.  Got ".htmlspecialchars($homework_file["type"]));
     }
 
     // make folder for this homework (if it doesn't exist)
@@ -235,11 +231,13 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
 function can_edit_assignment($username, $course, $assignment_id, $assignment_config) {
 
 	    // FIXME: HACK!  To not check due date
-	    return true;
+	    //return true;
     
     $due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
+    $last_edit_date = $due_date->add(new DateInterval("P2D"));
     $now = new DateTime("NOW");
-    return $now <= $due_date;
+
+    return $now <= $last_edit_date;
 }
 
 function get_due_date($username, $course, $assignment_id, $assignment_config) {

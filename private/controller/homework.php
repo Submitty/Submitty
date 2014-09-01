@@ -12,7 +12,7 @@ if (isset($_SESSION["status"])) {
     } else if ($status_code == "upload_failed") {
         $status = "Unknown error.  Upload failed.";
     } else if ($status_code == "assignment_closed") {
-        $status = "Unable to upload, this assignment is closed";
+        $status = "Unable to edit assignment, this assignment is closed";
     } else if ($status_code != "") {
         $status = $status_code;
     }

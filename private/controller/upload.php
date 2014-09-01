@@ -50,7 +50,7 @@ if (isset($_FILES["file"])) {
             header("Location: index.php?page=displaymessage&course=".$course."&assignment_id=".$assignment_id);
             exit();
         }
-        $_SESSION["status"] = "upload_failed";
+        $_SESSION["status"] = isset($result["message"]) ? $result["message"] : "upload_failed";
         header("Location: index.php?page=displaymessage&course=".$course."&assignment_id=".$assignment_id);
         exit();
     }
