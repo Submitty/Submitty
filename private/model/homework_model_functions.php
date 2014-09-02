@@ -595,7 +595,20 @@ function get_testcase_diff($username, $course, $assignment_id, $assignment_versi
         }
     }
     if (isset($diff["student_file"]) && file_exists($student_path . $diff["student_file"])) {
-        $data["student"] = file_get_contents($student_path.$diff["student_file"]);
+        $file_size = filesize($student_path. $diff["student_file"]);
+        if ($file_size / 1024 < 10000) {
+            $data["student"] = file_get_contents($student_path.$diff["student_file"]);
+        } else {
+            $file=$student_path.$diff["student_file"];
+            $line_count = 0;
+            $file_handle = fopen($file, "r");
+            while (!feof($file_handle)) {
+                $line = fgets($file_handle);
+                $line_count++;
+            }
+            fclose($file_handle);
+            $data["student"] = "ERROR: Unable to read student output file.  Student output file contains greater than or equal to ". $line_count. " lines.  File could be corrupted or is too large.";
+        }
     }
     if (isset($diff["difference"]) && file_exists($student_path . $diff["difference"])) {
         $data["difference"] = file_get_contents($student_path.$diff["difference"]);
