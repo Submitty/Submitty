@@ -370,7 +370,7 @@ function get_submission_time($username, $course, $assignment_id, $assignment_ver
     }
 }
 
-function get_homework_tests($username, $course, $assignment_id, $assignment_version, $assignment_config) {
+function get_homework_tests($username, $course, $assignment_id, $assignment_version, $assignment_config, $include_diffs = true) {
     $testcases_info = $assignment_config["testcases"];//These are the tests run on a homework (for grading etc.)
     $version_results = get_assignment_results($username, $course, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
     if ($version_results) { 
@@ -397,7 +397,7 @@ function get_homework_tests($username, $course, $assignment_id, $assignment_vers
                 if (isset($testcases_results[$u]["compilation_output"])) {
                     $data["compilation_output"] = get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]);
                 }
-                if (isset($testcases_results[$u]["diffs"])) {
+                if ($include_diffs && isset($testcases_results[$u]["diffs"])) {
                     $data["diffs"] = get_all_testcase_diffs($username, $course, $assignment_id, $assignment_version, $testcases_results[$u]["diffs"]);
                 }
 
@@ -436,7 +436,7 @@ function get_points_visible($homework_tests)
 function get_select_submission_data($username, $course, $assignment_id, $assignment_config, $highest_version) {
     $select_data = array();
     for ($i = 1; $i <= $highest_version; $i++) {
-        $homework_tests = get_homework_tests($username, $course, $assignment_id, $i, $assignment_config);
+        $homework_tests = get_homework_tests($username, $course, $assignment_id, $i, $assignment_config, false);
         $points_awarded_visible = get_awarded_points_visible($homework_tests);
         $points_visible = get_points_visible($homework_tests);
         $score = $points_awarded_visible." / ".$points_visible;
