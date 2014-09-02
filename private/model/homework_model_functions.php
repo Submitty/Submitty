@@ -122,7 +122,7 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
 
 
 
-    $allowed   = array("application/zip", "application/x-zip-compressed","application/octet-stream","text/x-python-script", "text/plain", "text/x-c++src");
+    $allowed   = array("application/zip", "application/x-zip-compressed","application/octet-stream","text/x-python-script", "text/plain", "text/x-c++src", "application/download");
     $filename = explode(".", $homework_file["name"]);
     $extension = end($filename);
 
