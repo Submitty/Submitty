@@ -20,6 +20,14 @@
  avalible here: http://www.xmailserver.org/diff2.pdf
 
  It was published in the journal "Algorithmica" in November 1986.
+
+
+
+ code similar to:
+ http://simplygenius.net/Article/DiffTutorial1
+ FIXME: if this was the source, should be formally credited
+        (or are both just coming from the paper's pseudocode)
+
  */
 
 #ifndef differences_myersDiff_h
@@ -60,7 +68,7 @@ TestResults* warnIfNotEmpty ( const std::string & b,
   Tokens* answer = new Tokens();
 
   if (b != "") {
-    answer->message = "WARNING: This should be empty";
+    answer->setMessage("WARNING: This should be empty");
     std::cout << "in warn if not empty -- student file not empty" << std::endl;
   }
 
@@ -77,7 +85,7 @@ TestResults* errorIfNotEmpty ( const std::string & b,
   Tokens* answer = new Tokens();
 
   if (b != "") {
-    answer->message = "ERROR: This should be empty";
+    answer->setMessage("ERROR: This should be empty");
     std::cout << "in error if not empty -- student file not empty" << std::endl;
     answer->setGrade(0);
   }
@@ -94,7 +102,7 @@ TestResults* errorIfEmpty ( const std::string & b,
   Tokens* answer = new Tokens();
 
   if (b == "") {
-    answer->message = "ERROR: This should be non empty";
+    answer->setMessage("ERROR: This should be non empty");
     std::cout << "in error if empty -- student file empty" << std::endl;
     answer->setGrade(0);
   }
@@ -167,43 +175,53 @@ template<class T> metaData< T > sesSnapshots ( T& a, T& b ) {
 template<class T> metaData< T > sesSnapshots ( T* a, T* b ) {
 	//takes 2 strings or vectors of values and finds the shortest edit script
 	//to convert a into b
-	int n = ( int ) a->size();
-	int m = ( int ) b->size();
+	int a_size = ( int ) a->size();
+	int b_size = ( int ) b->size();
 	metaData< T > text_diff;
-	if ( n == 0 && m == 0 ) {
+	if ( a_size == 0 && b_size == 0 ) {
 		return text_diff;
 	}
-	text_diff.m = m;
-	text_diff.n = n;
-	std::vector< int > v( ( n + m ) * 2, 0 );
+	text_diff.m = b_size;
+	text_diff.n = a_size;
 
+
+	// WHAT IS V?
+	//std::vector< int > v( ( a_size + b_size ) * 2, 0 );
+	// TODO: BOUNDS ERROR, is this the appropriate fix?
+	std::vector< int > v( ( a_size + b_size ) * 2 + 1, 0 );
+
+	// DISTANCE -1 MEANS WHAT?
 	text_diff.distance = -1;
 	text_diff.a = a;
 	text_diff.b = b;
 
-	for ( int i = 0; i < ( n + m ) + ( n + m ); i++ ) {
+	// INITIALIZATION REDUNDANT, ALREADY DONE BY CONSTRUCTOR ABOVE
+	/*
+	for ( int i = 0; i < ( a_size + b_size ) + ( a_size + b_size ); i++ ) {
 		v[i] = 0;
 	}
+	*/
+
 	//loop until the correct diff (d) value is reached, or until end is reached
-	for ( int d = 0; d <= ( n + m ); d++ ) {
+	for ( int d = 0; d <= ( a_size + b_size ); d++ ) {
 		// find all the possibile k lines represented by  y = x-k from the max
 		// negative diff value to the max positive diff value
 		// represents the possibilities for additions and deletions at diffrent
 		// points in the file
 		for ( int k = -d; k <= d; k += 2 ) {
 			//which is the farthest path reached in the previous iteration?
-			bool down = ( k == -d
-					|| ( k != d
-							&& v[ ( k - 1 ) + ( n + m )]
-									< v[ ( k + 1 ) + ( n + m )] ) );
+		  bool down = ( k == -d
+				|| ( k != d
+				     && v[ ( k - 1 ) + ( a_size + b_size )]
+				     < v[ ( k + 1 ) + ( a_size + b_size )] ) );
 			int k_prev, a_start, b_start, a_end, b_end;
 			if ( down ) {
 				k_prev = k + 1;
-				a_start = v[k_prev + ( n + m )];
+				a_start = v[k_prev + ( a_size + b_size )];
 				a_end = a_start;
 			} else {
 				k_prev = k - 1;
-				a_start = v[k_prev + ( n + m )];
+				a_start = v[k_prev + ( a_size + b_size )];
 				a_end = a_start + 1;
 			}
 
@@ -211,16 +229,19 @@ template<class T> metaData< T > sesSnapshots ( T* a, T* b ) {
 			b_end = a_end - k;
 			// follow diagonal
 			int snake = 0;
-			while ( a_end < n && b_end < m && ( *a )[a_end] == ( *b )[b_end] ) {
+			while ( a_end < a_size && b_end < b_size && ( *a )[a_end] == ( *b )[b_end] ) {
 				a_end++;
 				b_end++;
 				snake++;
 			}
 
 			// save end point
-			v[k + ( n + m )] = a_end;
+			if (k+(a_size+b_size) < 0 || k+(a_size+b_size) >= v.size()) {
+			  std::cerr << "ERROR VALUE " << k+(a_size+b_size) << " OUT OF RANGE " << v.size() << " k=" << k << " a_size=" << a_size << " b_size=" << b_size << std::endl;
+			}
+			v[k + ( a_size + b_size )] = a_end;
 			// check for solution
-			if ( a_end >= n && b_end >= m ) { /* solution has been found */
+			if ( a_end >= a_size && b_end >= b_size ) { /* solution has been found */
 				text_diff.distance = d;
 				text_diff.snapshots.push_back( v );
 				return text_diff;

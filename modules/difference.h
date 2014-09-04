@@ -19,13 +19,16 @@
 
 class TestResults {
 public:
-	TestResults();
+  TestResults(int g=0, const std::string &m="") { my_grade = g; message = m; }
         virtual ~TestResults() {}
 	int distance;
-	virtual void printJSON(std::ostream & file_out) =0;
-	virtual float grade() =0;
-  std::string message;
+  virtual void printJSON(std::ostream & file_out); // =0;
+  virtual float grade() { return my_grade; } //=0;
   std::string get_message() { return message; }
+  void setMessage(const std::string &m) { message=m; }
+protected:
+  std::string message;
+  float my_grade;
 };
 
 
@@ -76,15 +79,17 @@ public:
 	int tokensfound;
 	bool harsh;
   // FIXME: redesign necessary
-  float tokens_grade;
-  void setGrade(float g) { tokens_grade = g; }
+  //  float tokens_grade;
+  void setGrade(float g) { my_grade = g; }
 	void printJSON(std::ostream & file_out);
 	float grade();
 };
 
+/*
 TestResults::TestResults() :
 		distance(0) {
 }
+*/
 
 Difference::Difference() :
   TestResults(), output_length_a(0), output_length_b(0), edit_distance(0), 
@@ -92,8 +97,7 @@ Difference::Difference() :
 }
 
 Tokens::Tokens() :
-		TestResults(), num_tokens(0), tokensfound(0), partial(true), harsh(
-										   false), tokens_grade(1) {
+  TestResults(1,""), num_tokens(0), tokensfound(0), partial(true), harsh(false) {
 }
 
 float Difference::grade() {
@@ -110,7 +114,7 @@ float Difference::grade() {
 }
 
 float Tokens::grade() {
-  return tokens_grade;
+  return my_grade;
   // FIXME
   /*
 	for (unsigned int i = 0; i < tokens_found.size(); i++) {
@@ -292,5 +296,14 @@ void Tokens::printJSON(std::ostream & file_out) {
 	file_out << "}" << std::endl;
 	return;
 }
+
+
+void TestResults::printJSON(std::ostream & file_out) {
+
+	file_out << "{" << std::endl;
+	file_out << "}" << std::endl;
+	return;
+}
+
 
 #endif /* defined(__differences__difference__) */

@@ -157,12 +157,17 @@ public:
 
 
 		// Accessors
-		std::string title () const {
+		std::string title() const {
 		  std::stringstream ss;
 		  ss << "Test " << test_case_id << " " << _title;
 		  return ss.str();
 		  //return _title;
 		}
+
+		std::string just_title() const {
+		  return _title;
+		}
+
 		std::string details () const {
 			return _details;
 		}
@@ -234,34 +239,30 @@ public:
       std::cout << "STUDENT FILE EXISTS" << std::endl;
       s = std::string(std::istreambuf_iterator<char>(student_instr),
 		      std::istreambuf_iterator<char>());
-      //std::cout << s << std::endl;
+      std::cout << "student file size = " << s.size() << std::endl;
     }
     if (expected_instr) {
       std::cout << "INSTRUCTOR FILE EXISTS" << std::endl;
       e = std::string(std::istreambuf_iterator<char>(expected_instr),
 		      std::istreambuf_iterator<char>());
-      //std::cout << e << std::endl;
+      std::cout << "instructor file size = " << e.size() << std::endl;
     }
 
-    //std::cout << "MIDDLE OF COMPARE" << std::endl;
 
-    /*
-      && !expected_instr)
-	  result = testcases[i].compare(blank, blank);
-	else if (!student_instr && expected_instr != NULL) {
+    // FIXME should be configurable within the homework, but should not exceed what is reasonable to myers diff
+    //#define MAX_FILE_SIZE 400 // in characters  (approx 50 lines with 50 characters per line)
+    #define MAX_FILE_SIZE 50 * 50 // in characters  (approx 50 lines with 50 characters per line)
 
-	  result = testcases[i].compare(blank, e);
-	} else if (student_instr != NULL && !expected_instr) {
-
-	  result = testcases[i].compare(s, blank);
-    */
+    if (s.size() > MAX_FILE_SIZE) {
+      std::cout << "ERROR: student file size too big " << s.size() << " > " << MAX_FILE_SIZE << std::endl;
+      return new TestResults(0,"ERROR: student file too large for comparison");
+    }
+    if (e.size() > MAX_FILE_SIZE) {
+      std::cout << "ERROR: instructor file size too big " << e.size() << " > " << MAX_FILE_SIZE << std::endl;
+      return new TestResults(0,"ERROR: instructor file too large for comparison");
+    }
 
     return test_case_comparison[j].cmp_output (s,e);
-    //test_case_comparison[i].filename,
-    // test_case_comparison[i].instructor_file);
-
-    //    else
-    // return diffLine( student_out, expected_out );
   }
 
   int seconds_to_run() { return 5; }

@@ -6,13 +6,14 @@
 
 #     ./grade_students <base_path>
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 2 ]; then
     echo "ERROR: Illegal number of parameters" >&2
+    echo "   ./grade_students  absolute_path_to_base_directory  relative_path_of_to_be_graded_directory" >&2
     exit 1
 fi
 
-base_path="$1"
-
+base_path="$1"  
+TO_BE_GRADED="$2"  
 
 # from that directory, we expect:
 
@@ -52,7 +53,7 @@ base_path="$1"
 # NOTE ON OUTPUT: cron job stdout/stderr gets emailed
 # debugging type output can be sent to stdout, which we'll redirect to /dev/null in the cron job
 # all problematic errors should get set to stderr  (>&2)  so that an email will be sent
-echo "Grade all submissions in $base_path/to_be_graded/"
+echo "Grade all submissions in $base_path/$TO_BE_GRADED/"
 
 
 all_grading_done=false
@@ -131,7 +132,7 @@ while true; do
 
 
 
-    for NEXT_TO_GRADE in `cd $base_path/to_be_graded && ls -tr`; do
+    for NEXT_TO_GRADE in `cd $base_path/$TO_BE_GRADED && ls -tr`; do
 
 
 	# skip the active grading tags
@@ -144,14 +145,14 @@ while true; do
         # check to see if this assignment is already being graded
 	# wait until the lock is available (up to 5 seconds)
 	flock -w 5 200 || { echo "ERROR: flock() failed. $NEXT_TO_GRADE" >&2; exit 1; }
-	if [ -e "$base_path/to_be_graded/GRADING_$NEXT_TO_GRADE" ]
+	if [ -e "$base_path/$TO_BE_GRADED/GRADING_$NEXT_TO_GRADE" ]
 	then
     	     echo "skip $NEXT_TO_GRADE, being graded by another grade_students.sh process"
 	    flock -u 200
 	    continue
 	else
 	    # mark this file as being graded
-	    touch $base_path/to_be_graded/GRADING_$NEXT_TO_GRADE
+	    touch $base_path/$TO_BE_GRADED/GRADING_$NEXT_TO_GRADE
 	    flock -u 200
 	fi
 
@@ -187,7 +188,7 @@ while true; do
 	    then
 		version=$thing
 	    else
-#FIXME document error handling approach: leave GRADING_ file in to_be_graded directory, assume email sent, move to next
+#FIXME document error handling approach: leave GRADING_ file in $TO_BE_GRADED directory, assume email sent, move to next
 		echo "ERROR BAD FORMAT: $NEXT_TO_GRADE" >&2
 		continue
 	    fi
@@ -276,7 +277,7 @@ while true; do
 	then
 	    echo "ERROR: directory does not exist '$submission_path'" >&2
 	    # this submission does not exist, remove it from the queue
-	    rm -f $base_path/to_be_graded/$NEXT_TO_GRADE
+	    rm -f $base_path/$TO_BE_GRADED/$NEXT_TO_GRADE
 	    continue
 	fi
 	if [ ! -r "$submission_path" ]
@@ -369,7 +370,6 @@ while true; do
 	    cp -f "$bin_path/$assignment/run.out" $tmp/my_run.out
 
   	    # give the untrusted user read/write/execute permissions on the tmp directory & files
-  	    #FIXME: copying in subdirs but not making readable here
 	    chmod -R go+rwx $tmp
 	    
 	    # run the run.out as the untrusted user
@@ -392,7 +392,11 @@ while true; do
 	    # continue
 	else
             # echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
+	    
             valgrind "$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" >& .submit_validator_output.txt 
+            #"$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" >& .submit_validator_output.txt 
+
+
 	    validator_error_code="$?"
 	    if [[ "$validator_error_code" -ne 0 ]] ;
 	    then
@@ -425,8 +429,8 @@ while true; do
 
 	# remove submission & the active grading tag from the todo list
 	flock -w 5 200 || { echo "ERROR: flock() failed. $NEXT_TO_GRADE" >&2; exit 1; }
-	rm -f $base_path/to_be_graded/$NEXT_TO_GRADE
-	rm -f $base_path/to_be_graded/GRADING_$NEXT_TO_GRADE
+	rm -f $base_path/$TO_BE_GRADED/$NEXT_TO_GRADE
+	rm -f $base_path/$TO_BE_GRADED/GRADING_$NEXT_TO_GRADE
 	flock -u 200
 
 	

@@ -198,6 +198,14 @@ int execute(const std::string &cmd, int seconds_to_run) {
     assert (set_success == 0);
 
 
+    // FIXME read in the file size from the configuration
+    // limit size of files created by the process
+    rlimit fsize_limit;
+    fsize_limit.rlim_cur = fsize_limit.rlim_max = 10000;  // 10 kilobytes
+    set_success = setrlimit(RLIMIT_FSIZE, &fsize_limit);
+    assert (set_success == 0);
+
+
     // Student's shouldn't be forking & making threads/processes...
     // but if they do, let's set them in the same process group
     int pgrp = setpgid(getpid(), 0);

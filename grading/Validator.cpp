@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
   // Run test cases
   int rc =
-    validateTestCases(atoi(argv[1]), argv[2] /*, readme_found, atoi(argv[3])*/);
+    validateTestCases(atoi(argv[1]), argv[2]);
   if (rc > 0) {
 #ifdef DEBUG
     std::cerr << "Validator terminated" << std::endl;
@@ -118,9 +118,16 @@ bool checkValidDirectory(const char *directory) {
 int validateTestCases(int subnum, const char *subtime /*, int readme,
 							 int compiled*/) {
 
-  int total_grade = 0;
-  std::stringstream testcase_json;
+  std::string grade_path = ".submit.grade";
+  std::ofstream gradefile(grade_path.c_str());
 
+  gradefile << "Grade for: XXX" << std::endl;
+  gradefile << "  submission#: " << subnum << std::endl;
+
+
+  int total_grade = 0;
+  int nonhidden_total_grade = 0;
+  std::stringstream testcase_json;
 
 
   // LOOP OVER ALL TEST CASES
@@ -233,6 +240,7 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 
     std::cout << "Grade: " << testcase_grade << std::endl;
     total_grade += testcase_grade;
+    if (!testcases[i].hidden()) nonhidden_total_grade += testcase_grade;
     testcase_json << "\t\t\t\"points_awarded\": " << testcase_grade << ",\n";
 
     if (message != "") {
@@ -241,26 +249,43 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 
     const char *last_line = (i == num_testcases - 1) ? "\t\t}\n" : "\t\t},\n";
     testcase_json << last_line;
+
+
+    gradefile << "  Test " << std::setw(2) << std::right << i+1 << ":" 
+	      << std::setw(30) << std::left << testcases[i].just_title() << " " 
+	      << std::setw(2) << std::right << testcase_grade << " / " 
+	      << std::setw(2) << std::right << testcases[i].points() << std::endl;
+
   } // end test case loop
 
 
-  /* Output total grade */
-  std::string grade_path = "grade.txt";
-  std::ofstream gradefile(grade_path.c_str());
-  gradefile << total_grade << std::endl;
 
   /* Generate submission.json */
   std::ofstream json_file("submission.json");
   json_file << "{\n"
             << "\t\"submission_number\": " << subnum << ",\n"
             << "\t\"points_awarded\": " << total_grade << ",\n"
+            << "\t\"nonhidden_points_awarded\": " << nonhidden_total_grade << ",\n"
             << "\t\"submission_time\": \"" << subtime << "\",\n"
             << "\t\"testcases\": [\n";
-
-
   json_file << testcase_json.str() << "\t]\n"
-            << "}";
+	    << "}";
   json_file.close();
+
+
+
+  gradefile << "Automatic extra credit (w/o hidden):"                << "+ " << 0 << " points" << std::endl;
+  gradefile << "Automatic grading total (w/o hidden):"               << total_grade << " / " << 0 << std::endl;
+  gradefile << "Max possible hidden automatic grading points:"       << 0 << std::endl;
+  gradefile << "Automatic extra credit:"                             << "+ " << 0 << " points" << std::endl;
+  gradefile << "Automatic grading total:"                            << nonhidden_total_grade << " / " << 0 << std::endl;
+  gradefile << "Remaining points to be graded by TA:"                << 0 << std::endl;
+  gradefile << "Max points for assignment (excluding extra credit):" << 0 << std::endl;
+
+
+
+
+
 
   return 0;
 }
