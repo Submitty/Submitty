@@ -274,12 +274,12 @@ int validateTestCases(int subnum, const char *subtime /*, int readme,
 
 
 
-  gradefile << "Automatic extra credit (w/o hidden):"                << "+ " << 0 << " points" << std::endl;
-  gradefile << "Automatic grading total (w/o hidden):"               << total_grade << " / " << 0 << std::endl;
-  gradefile << "Max possible hidden automatic grading points:"       << 0 << std::endl;
-  gradefile << "Automatic extra credit:"                             << "+ " << 0 << " points" << std::endl;
-  gradefile << "Automatic grading total:"                            << nonhidden_total_grade << " / " << 0 << std::endl;
-  gradefile << "Remaining points to be graded by TA:"                << 0 << std::endl;
+  gradefile << "Automatic extra credit (w/o hidden):               " << "+ " << 0 << " points" << std::endl;
+  gradefile << "Automatic grading total (w/o hidden):              " << total_grade << " / " << 0 << std::endl;
+  gradefile << "Max possible hidden automatic grading points:      " << 0 << std::endl;
+  gradefile << "Automatic extra credit:                            " << "+ " << 0 << " points" << std::endl;
+  gradefile << "Automatic grading total:                           " << nonhidden_total_grade << " / " << 0 << std::endl;
+  gradefile << "Remaining points to be graded by TA:               " << 0 << std::endl;
   gradefile << "Max points for assignment (excluding extra credit):" << 0 << std::endl;
 
 

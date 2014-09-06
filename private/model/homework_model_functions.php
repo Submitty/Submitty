@@ -89,6 +89,12 @@ function display_file_permissions($perms) {
 
 // Upload HW Assignment to server and unzip
 function upload_homework($username, $course, $assignment_id, $homework_file) {
+
+    // Store the time, right now!  
+    // 2001-03-10 17:16:18 (the MySQL DATETIME format)
+    $TIMESTAMP = date("Y-m-d H:i:s");  
+      
+
     $path_front = get_path_front($course);
 
     // Check user and assignment authenticity
@@ -139,14 +145,14 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     // make folder for this homework (if it doesn't exist)
     $assignment_path = $path_front."/submissions/".$assignment_id;
     if (!file_exists($assignment_path)) {
-        if (!mkdir($assignment_path)) //, 0771, true))
+        if (!mkdir($assignment_path))
         {
             display_error("Failed to make folder ".$assignment_path);
             return;
         }
     }
-    // which group is sticky, but need to set group read access	  
-		  //chmod($assignment_path,"0750");
+
+    // NOTE: which group is sticky, umask will set the permissions correctly (0750)
 
     // make folder for this user (if it doesn't exist)
     $user_path = $assignment_path."/".$username;
@@ -158,14 +164,12 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
             return;
         }
     }
-   // which group is sticky, but need to set group read access	  
-//   chmod($user_path,"0750");
 
     //Find the next homework version number
 
     $upload_version = 1;
     while (file_exists($user_path."/".$upload_version)) {
-		// FIXME: Replace with symlink
+        // FIXME: Replace with symlink
         $upload_version++;
     }
 
@@ -176,20 +180,6 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
         return;
     }
 
-    $perms = fileperms($version_path);
-    //display_file_permissions($perms);
-
-    // which group is sticky, but need to set group read access	  
-		  //chmod($version_path,"0750");
-
-    $perms = fileperms($version_path);
-    //display_file_permissions($perms);
-
-    // which group is sticky, but need to set group read access	  
-		  //chmod($version_path,"0544");
-
-    $perms = fileperms($version_path);
-    //display_file_permissions($perms);
 
     // Unzip files in folder
     $zip = new ZipArchive;
@@ -211,12 +201,16 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
         change_assignment_version($username, $course, $assignment_id, $upload_version, $assignment_config);
     }
 
-    // If to be graded path doesn't exist, create new one
-
+    // add this assignment to the grading queue
+    // FIX ME: If to_be_graded path doesn't exist, create new one
     touch($path_front."/../to_be_graded/".$course."__".$assignment_id."__".$username."__".$upload_version);
-
-    // which group is sticky, but need to set group read access	  
-	    //chmod($version_path."/*".$i,"g+r");
+   
+    // CREATE THE TIMESTAMP FILE
+    //touch($version_path."/.submit.timestamp");
+    if (!file_put_contents($version_path."/.submit.timestamp",$TIMESTAMP."\n")) {
+        display_error("Failed to save timestamp file ".$version_path."/.submit.timestamp",$TIMESTAMP);
+        return;
+    } 
 
     return array("success"=>"File uploaded successfully");
 }
