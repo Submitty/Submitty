@@ -122,7 +122,7 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     if (isset($assignment_config["max_submission_size"])) {
         $max_size = $assignment_config["max_submission_size"];
     }
-    if ($homework_file["size"] / 1024 > $max_size) {
+    if ($homework_file["size"] / 1024 > $max_size || !is_valid_zip_size($homework_file["tmp_name"], $max_size)) {
         return array("error"=>"", "message"=>"File uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file was ".$homework_file["size"] / 1024 ." kb.");
     }
 
@@ -219,6 +219,20 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     symlink ($version_path,$user_path."/ACTIVE");
 
     return array("success"=>"File uploaded successfully");
+}
+
+function is_valid_zip_size($filename, $max_size) {
+    $size = 0;
+    $zip = zip_open($filename);
+    if ($zip) {
+        while ($inner_file = zip_read($zip)) {
+            $size += zip_entry_filesize($inner_file);
+            if ($size > $max_size) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 // Check if user has permission to edit homework
