@@ -1,6 +1,6 @@
 <?php
 
-require_once("controller/helper_functions.php");
+require_once("controller/data_functions.php");
 
 $course = "REFRESH_CHECK_NO_COURSE";
 if (isset($_GET["course"])) {

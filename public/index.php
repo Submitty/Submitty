@@ -1,11 +1,14 @@
-<?php
-
+<?php umask (0027);
+/*The user's umask is ignored for the user running php, so we need
+to set it from inside of php to make sure the group read & execute
+permissions aren't lost for newly created files & directories.*/
 
 
 // ============================================
 // GET THE USERNAME OF THE AUTHENTICATED USER
 // ============================================
 
+/*
 if (isset($_SERVER['PHP_AUTH_USER'])) {
     $user = $_SERVER['PHP_AUTH_USER'];
 } else if (isset($_SERVER['REMOTE_USER'])) {
@@ -16,50 +19,30 @@ if (isset($_SERVER['PHP_AUTH_USER'])) {
     echo 'Internal Error - Not Authenticated'; exit();//here
     //
 }
-
+*/
+$user = "sengs";
 
 //Remove error reporting and ini set for production code
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-
 session_start();
 $_SESSION["id"] = $user;
 
-
-if (!isset($_SESSION["id"])) {
-    require_once("../private/controller/homework.php");
-    exit();
-
-
-}
-
-/*if (!isset($_GET["page"])) {
-    require_once("private/controller/login.php");
-    exit;
-}*/
 if (isset($_GET["page"])) {
     $page = htmlspecialchars($_GET["page"]);
 } else {
     $page = "homework";
 }
-// Temporary page for testing server operations
 
-if ($page == "serverop") {
-
-	require_once("../private/controller/serverop.php");
-
+//This needs to be wrapped around session Ids and logins
+if ($page == "upload") {
+    require_once("controller/upload.php");
+} else if ($page == "update") {
+    require_once("controller/update.php");
+} else if ($page == "checkrefresh") {
+    require_once("controller/check_refresh.php");
 } else {
-
-	//This needs to be wrapped around session Ids and logins
-    if ($page == "upload") {
-        require_once("../private/controller/upload.php");
-    } else if ($page == "update") {
-        require_once("../private/controller/update.php");
-    } else if ($page == "checkrefresh") {
-        require_once("../private/controller/check_refresh.php");
-    } else {
-        require_once("../private/controller/homework.php");
-    }
+    require_once("controller/homework.php");
 }
 ?>

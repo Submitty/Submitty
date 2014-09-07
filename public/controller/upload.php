@@ -1,6 +1,6 @@
 <?php
 
-require_once("controller/helper_functions.php");
+require_once("controller/data_functions.php");
 
 
 //Upload the stuff
