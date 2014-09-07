@@ -195,7 +195,7 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     }
     $settings_file = $user_path."/user_assignment_settings.json";
     if (!file_exists($settings_file)) {
-        $json = array("selected_assignment"=>$upload_version);
+        $json = array("active_assignment"=>$upload_version);
         file_put_contents($settings_file, json_encode($json));
     } else {
         change_assignment_version($username, $course, $assignment_id, $upload_version, $assignment_config);
@@ -212,6 +212,12 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
         return;
     } 
 
+    // set LAST symlink
+    symlink ($version_path,$user_path."/LAST");
+
+    // set ACTIVE symlink
+    symlink ($version_path,$user_path."/ACTIVE");
+
     return array("success"=>"File uploaded successfully");
 }
 
@@ -219,7 +225,9 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
 function can_edit_assignment($username, $course, $assignment_id, $assignment_config) {
 
 	    // FIXME: HACK!  To not check due date
-	    //return true;
+// TODO: FIXME: late submissions should be allowed (there are excused absenses)
+// TODOL FIXME: but the ACTIVE should not be updated ( we can manually adjust active for excused absenses)
+return true;
     
     $due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
     $last_edit_date = $due_date->add(new DateInterval("P2D"));
@@ -254,6 +262,14 @@ function get_class_config($course) {
 
 // Get a list of uploaded files
 function get_submitted_files($username, $course, $assignment_id, $assignment_version) {
+
+// FIXME: Would like this to search into directories (to clearly
+//   display when students have accidentally included a directory structure
+//   in their zip instead of just files
+
+// FIXME: Would like this to not display the dotfiles in this
+//   directory (e.g., .submit.timestamp)
+
     $path_front = get_path_front($course);
     $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
     if ($assignment_version != 0) {
@@ -532,7 +548,7 @@ function get_user_submitting_version($username, $course, $assignment_id) {
         return 0;
     }
     $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
-    return $json["selected_assignment"];
+    return $json["active_assignment"];
 }
 
 function change_assignment_version($username, $course, $assignment_id, $assignment_version, $assignment_config) {
@@ -545,13 +561,22 @@ function change_assignment_version($username, $course, $assignment_id, $assignme
         return;
     }
     $path_front = get_path_front($course);
-    $file = $path_front."/submissions/".$assignment_id."/".$username."/user_assignment_settings.json";
+	
+    $user_path = $path_front."/submissions/".$assignment_id."/".$username;
+    //    $file = $path_front."/submissions/".$assignment_id."/".$username."/user_assignment_settings.json";
+    $file = $user_path."/user_assignment_settings.json";
+
     if (!file_exists($file)) {
         display_error("Unable to find user settings.  Looking for ".$file);
         return;
     }
     $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
-    $json["selected_assignment"] = $assignment_version;
+    $json["active_assignment"] = $assignment_version;
+
+    //symlink (version_path,$user_path."/ACTIVE");
+    $success = unlink ($user_path."/ACTIVE");
+    $success = symlink ($user_path."/".$assignment_version,$user_path."/ACTIVE");
+
     file_put_contents($file, json_encode($json));
     return array("success"=>"Success");
 }

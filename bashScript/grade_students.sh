@@ -334,9 +334,14 @@ while true; do
 	    cp -rf $test_output_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory $test_output_path" >&2
 	fi
 	
-	submission_time="$(date -r $submission_path "+%F %T")"
-
-
+	submission_time=""
+	if [ -e "$submission_path/.submit.timestamp" ]
+	then
+	    submission_time=`cat $submission_path/.submit.timestamp`
+	else
+	    echo "ERROR:  $submission_path/.submit.timestamp   does not exist!" >&2
+	fi
+	
 
         # switch to tmp directory
 # FIXME pushd?
@@ -345,10 +350,14 @@ while true; do
 	
 	# --------------------------------------------------------------------
         # COMPILE THE SUBMITTED CODE
+
+	# first delete any submitted .out or .exe executable files
+	rm -f *.out *.exe 
+
         #clang++ -Wall *.cpp -o a.out &> .submit_compilation_output.txt
 	g++ -Wall *.cpp -o a.out    &> .submit_compilation_output.txt
 	compile_error_code=$?
-	
+
 
 	if [[ "$compile_error_code" -ne 0 ]] ;
 	then
@@ -393,14 +402,14 @@ while true; do
 	else
             # echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
 	    
-            valgrind "$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" >& .submit_validator_output.txt 
-            #"$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" >& .submit_validator_output.txt 
-
+            #valgrind "$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" >& .submit_validator_output.txt 
+            valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt 
 
 	    validator_error_code="$?"
 	    if [[ "$validator_error_code" -ne 0 ]] ;
 	    then
-	     echo "VALIDATOR FAILURE CODE $validator_error_code"
+	     echo "VALIDATOR FAILURE CODE $validator_error_code  course=$course  hw=$assignment  user=$user  version=$version" 1>&2
+	     
 	    else
 		echo "VALIDATOR OK"
 	    fi
