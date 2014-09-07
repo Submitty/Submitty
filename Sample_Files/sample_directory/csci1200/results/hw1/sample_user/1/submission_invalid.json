@@ -1,0 +1,234 @@
+{
+	"submission_number": 1,
+	"points_awarded": 30,
+	"submission_time": "2014-06-25 15:40:18",
+	"testcases": [
+		{
+			"test_name": "Test 1 README",
+			"points_awarded": 2,
+			"message": "message for this testcase... README.txt was found"
+		},
+		{
+			"test_name": "Test 2 Compilation",
+			"points_awarded": 3,
+			"message": "message for this testcase... a.out was found",
+			"compilation_output": ".submit_compilation_output.txt"
+		},
+		{
+			"test_name": "Test 3 left justify example",
+			"points_awarded": 3,
+			"diffs": [
+				{
+					"diff_id":"test03_0_diff",
+					"student_file":"test03_output.txt",
+					"instructor_file":"test_output/hw1/example_16_flush_left.txt",
+					"difference":"test03_0_diff.json",
+					"message": "this is comparison #0 "
+				},
+				{
+					"diff_id":"test03_1_diff",
+					"student_file":"test03_cout.txt",
+					"message": "this is comparison #1 "
+				},
+				{
+					"diff_id":"test03_2_diff",
+					"student_file":"test03_cerr.txt",
+					"message": "this is comparison #2 "
+				}
+			],
+			"message": "message for this testcase... "
+		},
+		{
+			"test_name": "Test 4 right justify example",
+			"points_awarded": 3,
+			"diffs": [
+				{
+					"diff_id":"test04_0_diff",
+					"student_file":"test04_output.txt",
+					"instructor_file":"test_output/hw1/example_16_flush_right.txt",
+					"difference":"test04_0_diff.json",
+					"message": "this is comparison #0 ",
+				},
+				{
+					"diff_id":"test04_1_diff",
+					"student_file":"test04_cout.txt",
+					"message": "this is comparison #1 ",
+				},
+				{
+					"diff_id":"test04_2_diff",
+					"student_file":"test04_cerr.txt",
+					"message": "this is comparison #2 ",
+				},
+			],
+			"message": "message for this testcase... ",
+		},
+		{
+			"test_name": "Test 5 full justify example",
+			"points_awarded": 4,
+			"diffs": [
+				{
+					"diff_id":"test05_0_diff",
+					"student_file":"test05_output.txt",
+					"instructor_file":"test_output/hw1/example_16_full_justify.txt",
+					"difference":"test05_0_diff.json",
+					"message": "this is comparison #0 ",
+				},
+				{
+					"diff_id":"test05_1_diff",
+					"student_file":"test05_cout.txt",
+					"message": "this is comparison #1 ",
+				},
+				{
+					"diff_id":"test05_2_diff",
+					"student_file":"test05_cerr.txt",
+					"message": "this is comparison #2 ",
+				},
+			],
+			"message": "message for this testcase... ",
+		},
+		{
+			"test_name": "Test 6 left justify gettysburg address",
+			"points_awarded": 2,
+			"diffs": [
+				{
+					"diff_id":"test06_0_diff",
+					"student_file":"test06_output.txt",
+					"instructor_file":"test_output/hw1/gettysburg_address_70_flush_left.txt",
+					"difference":"test06_0_diff.json",
+					"message": "this is comparison #0 ",
+				},
+				{
+					"diff_id":"test06_1_diff",
+					"student_file":"test06_cout.txt",
+					"message": "this is comparison #1 ",
+				},
+				{
+					"diff_id":"test06_2_diff",
+					"student_file":"test06_cerr.txt",
+					"message": "this is comparison #2 ",
+				},
+			],
+			"message": "message for this testcase... ",
+		},
+		{
+			"test_name": "Test 7 right justify gettysburg address",
+			"points_awarded": 2,
+			"diffs": [
+				{
+					"diff_id":"test07_0_diff",
+					"student_file":"test07_output.txt",
+					"instructor_file":"test_output/hw1/gettysburg_address_70_flush_right.txt",
+					"difference":"test07_0_diff.json",
+					"message": "this is comparison #0 ",
+				},
+				{
+					"diff_id":"test07_1_diff",
+					"student_file":"test07_cout.txt",
+					"message": "this is comparison #1 ",
+				},
+				{
+					"diff_id":"test07_2_diff",
+					"student_file":"test07_cerr.txt",
+					"message": "this is comparison #2 ",
+				},
+			],
+			"message": "message for this testcase... ",
+		},
+		{
+			"test_name": "Test 8 full justify gettysburg address",
+			"points_awarded": 3,
+			"diffs": [
+				{
+					"diff_id":"test08_0_diff",
+					"student_file":"test08_output.txt",
+					"instructor_file":"test_output/hw1/gettysburg_address_70_full_justify.txt",
+					"difference":"test08_0_diff.json",
+					"message": "this is comparison #0 ",
+				},
+				{
+					"diff_id":"test08_1_diff",
+					"student_file":"test08_cout.txt",
+					"message": "this is comparison #1 ",
+				},
+				{
+					"diff_id":"test08_2_diff",
+					"student_file":"test08_cerr.txt",
+					"message": "this is comparison #2 ",
+				},
+			],
+			"message": "message for this testcase... ",
+		},
+		{
+			"test_name": "Test 9 full justify long word",
+			"points_awarded": 3,
+			"diffs": [
+				{
+					"diff_id":"test09_0_diff",
+					"student_file":"test09_output.txt",
+					"instructor_file":"test_output/hw1/long_word_15_full_justify.txt",
+					"difference":"test09_0_diff.json",
+					"message": "this is comparison #0 ",
+				},
+				{
+					"diff_id":"test09_1_diff",
+					"student_file":"test09_cout.txt",
+					"message": "this is comparison #1 ",
+				},
+				{
+					"diff_id":"test09_2_diff",
+					"student_file":"test09_cerr.txt",
+					"message": "this is comparison #2 ",
+				},
+			],
+			"message": "message for this testcase... ",
+		},
+		{
+			"test_name": "Test 10 lengthier document",
+			"points_awarded": 3,
+			"diffs": [
+				{
+					"diff_id":"test10_0_diff",
+					"student_file":"test10_output.txt",
+					"instructor_file":"test_output/hw1/hansel_and_gretel_100_full_justify.txt",
+					"difference":"test10_0_diff.json",
+					"message": "this is comparison #0 ",
+				},
+				{
+					"diff_id":"test10_1_diff",
+					"student_file":"test10_cout.txt",
+					"message": "this is comparison #1 ",
+				},
+				{
+					"diff_id":"test10_2_diff",
+					"student_file":"test10_cerr.txt",
+					"message": "this is comparison #2 ",
+				},
+			],
+			"message": "message for this testcase... ",
+		},
+		{
+			"test_name": "Test 11  lots of long words",
+			"points_awarded": 2,
+			"diffs": [
+				{
+					"diff_id":"test11_0_diff",
+					"student_file":"test11_output.txt",
+					"instructor_file":"test_output/hw1/longestwords_20_flush_right.txt",
+					"difference":"test11_0_diff.json",
+					"message": "this is comparison #0 ",
+				},
+				{
+					"diff_id":"test11_1_diff",
+					"student_file":"test11_cout.txt",
+					"message": "this is comparison #1 ",
+				},
+				{
+					"diff_id":"test11_2_diff",
+					"student_file":"test11_cerr.txt",
+					"message": "this is comparison #2 "
+				}
+			],
+			"message": "message for this testcase... "
+		}
+	]
+}

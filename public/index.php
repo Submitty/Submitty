@@ -20,7 +20,7 @@ if (isset($_SERVER['PHP_AUTH_USER'])) {
     //
 }
 */
-$user = "sengs";
+$user = "sample_user";
 
 //Remove error reporting and ini set for production code
 error_reporting(E_ALL);

@@ -1,0 +1,42 @@
+{
+	"submission_number": 1,
+	"points_awarded": 30,
+	"submission_time": "2014-06-25 15:40:18",
+	"testcases": [
+		{
+			"test_name": "Test 1 README",
+			"points_awarded": 2,
+			"message": "message for this testcase... README.txt was found"
+		},
+		{
+			"test_name": "Test 2 Compilation",
+			"points_awarded": 3,
+			"message": "message for this testcase... a.out was found",
+			"compilation_output": ".submit_compilation_output.txt"
+		},
+		{
+			"test_name": "Test 3 left justify example",
+			"points_awarded": 3,
+			"diffs": [
+				{
+					"diff_id":"test03_0_diff",
+					"student_file":"test03_output.txt",
+					"instructor_file":"test_output/hw1/example_16_flush_left.txt",
+					"difference":"test03_0_diff.json",
+					"message": "this is comparison #0 "
+				},
+				{
+					"diff_id":"test03_1_diff",
+					"student_file":"test03_cout.txt",
+					"message": "this is comparison #1 "
+				},
+				{
+					"diff_id":"test03_2_diff",
+					"student_file":"test03_cerr.txt",
+					"message": "this is comparison #2 "
+				}
+			],
+			"message": "message for this testcase... "
+		}
+	]
+}

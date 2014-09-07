@@ -1,0 +1,33 @@
+{
+    "id": "lab1",
+    "name": "Lab 1",
+    "max_submissions": 20,
+    "points_visible": 10,
+    "auto_pts": 30,
+    "ta_pts": 20,
+    "due_date" : "2013-07-08 11:59:0.0",
+    "num_testcases": 3,
+    "testcases": [
+        {
+            "title": "Readme",
+            "details": "",
+            "points": 2,
+            "hidden": "false",
+            "extracredit": "false"
+        },
+        {
+            "title": "Compilation",
+            "details": "",
+            "points": 3,
+            "hidden": false,
+            "extracredit": false
+        },
+        {
+            "title": "Case1",
+            "details": "./case1.exe",
+            "points": 5,
+            "hidden": false,
+            "extracredit": false
+        }
+    ]
+}
