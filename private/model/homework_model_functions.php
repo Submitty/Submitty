@@ -231,6 +231,7 @@ function is_valid_zip_size($filename, $max_size) {
                 return false;
             }
         }
+        zip_close($zip);
     }
     return true;
 }
