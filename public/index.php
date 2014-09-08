@@ -20,7 +20,6 @@ if (isset($_SERVER['PHP_AUTH_USER'])) {
     //
 }
 
-
 //Remove error reporting and ini set for production code
 error_reporting(E_ALL);
 ini_set('display_errors', 1);

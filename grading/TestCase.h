@@ -45,14 +45,14 @@ public:
 class TestCaseComparison {
 public:
   TestCaseComparison(TestResults* (*cmp) ( const std::string&, const std::string& ) = NULL,
-		     const std::string f = "",
-		     const std::string d = "",
-		     const std::string i = "")
-    : cmp_output(cmp), filename(f),description(d),instructor_file(i) {}
+		     const std::string file = "",
+		     const std::string desc = "",
+		     const std::string expect = "")
+    : cmp_output(cmp), filename(file),description(desc),expected_file(expect) {}
   TestResults* (*cmp_output) ( const std::string&, const std::string& );  
   std::string filename;
   std::string description;
-  std::string instructor_file;
+  std::string expected_file;
 };
 
 
@@ -208,7 +208,7 @@ public:
   std::string expected (int i) const {
     //std::cout << "EXPECTED " << i << numFileComparisons() << std::endl;
     assert (i >= 0 && i < numFileComparisons());
-    return test_case_comparison[i].instructor_file;
+    return test_case_comparison[i].expected_file;
   }		
   int points () const {
     return _test_case_points.points;
@@ -242,25 +242,28 @@ public:
       std::cout << "student file size = " << s.size() << std::endl;
     }
     if (expected_instr) {
-      std::cout << "INSTRUCTOR FILE EXISTS" << std::endl;
+      std::cout << "EXPECTED FILE EXISTS" << std::endl;
       e = std::string(std::istreambuf_iterator<char>(expected_instr),
 		      std::istreambuf_iterator<char>());
-      std::cout << "instructor file size = " << e.size() << std::endl;
+      std::cout << "expected file size = " << e.size() << std::endl;
     }
 
 
     // FIXME should be configurable within the homework, but should not exceed what is reasonable to myers diff
-    //#define MAX_FILE_SIZE 400 // in characters  (approx 50 lines with 50 characters per line)
-    #define MAX_FILE_SIZE 50 * 50 // in characters  (approx 50 lines with 50 characters per line)
+    #define MAX_FILE_SIZE 200 * 50 // in characters  (approx 200 lines with 50 characters per line)
+
 
     if (s.size() > MAX_FILE_SIZE) {
       std::cout << "ERROR: student file size too big " << s.size() << " > " << MAX_FILE_SIZE << std::endl;
       return new TestResults(0,"ERROR: student file too large for comparison");
     }
     if (e.size() > MAX_FILE_SIZE) {
-      std::cout << "ERROR: instructor file size too big " << e.size() << " > " << MAX_FILE_SIZE << std::endl;
-      return new TestResults(0,"ERROR: instructor file too large for comparison");
+      std::cout << "ERROR: expected file size too big " << e.size() << " > " << MAX_FILE_SIZE << std::endl;
+      return new TestResults(0,"ERROR: expected file too large for comparison");
     }
+
+
+    std::cout << "GOING TO COMPARE studentsize=" << s.size() << "  expectedsize="<< e.size() << std::endl;
 
     return test_case_comparison[j].cmp_output (s,e);
   }
