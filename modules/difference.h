@@ -37,15 +37,15 @@ class Change {
 public:
 	// Starting changeblock line for input (student)
 	int a_start;
-	// Same for (instructor)
+	// Same for (expected)
 	int b_start;
 	// Vector of lines in changeblock that contain discrepancies (student)
 	std::vector<int> a_changes;
-	// Same for (instructor)
+	// Same for (expected)
 	std::vector<int> b_changes;
 	// Structure for changed character/word indices (student)
 	std::vector<std::vector<int> > a_characters;
-	// Same for (instructor)
+	// Same for (expected)
 	std::vector<std::vector<int> > b_characters;
 	void clear();
 };
@@ -61,7 +61,7 @@ public:
 	Difference();
 	std::vector<Change> changes;
 	std::vector<int> diff_a; //student
-	std::vector<int> diff_b; //instructor
+	std::vector<int> diff_b; //expected
 	void printJSON(std::ostream & file_out);
 	float grade();
 	int output_length_a;
@@ -220,7 +220,7 @@ void Difference::printJSON(std::ostream & file_out) {
 		}
 
 		file_out << tab<<tab<<"},"<<std::endl;
-		file_out << tab<<tab<<"\"instructor\":"<<std::endl
+		file_out << tab<<tab<<"\"instructor\":"<<std::endl   // want to replace instructor with expected
 		<<tab<<tab<<"{"<<std::endl;
 
 		file_out << tab<<tab<<tab<<"\"start\":"

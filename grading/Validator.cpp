@@ -103,9 +103,18 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     int testcase_pts = 0;
     std::string message = "";
 
-    if (testcases[i].isFileExistsTest()  ||  testcases[i].isCompilationTest()) {
-      // FILE EXISTS & COMPILATION TESTS DON'T HAVE FILE COMPARISONS
+    // FILE EXISTS & COMPILATION TESTS DON'T HAVE FILE COMPARISONS
+    if (testcases[i].isFileExistsTest()) {
       std::cerr << "THIS IS A FILE EXISTS TEST! " << std::endl;
+      if ( access( (std::string("STUDENT_FILES/")+testcases[i].details()).c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
+	std::cerr << "file does exist: " << testcases[i].details() << std::endl;
+	testcase_pts = testcases[i].points();
+      } else {
+	std::cerr << "ERROR file DOES NOT exist: " << testcases[i].details() << std::endl;
+	message += "ERROR: " + testcases[i].details() + " was NOT FOUND!";
+      }
+    } else if (testcases[i].isCompilationTest()) {
+      std::cerr << "THIS IS A COMPILATION! " << std::endl;
       if ( access( testcases[i].details().c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
 	std::cerr << "file does exist: " << testcases[i].details() << std::endl;
 	testcase_pts = testcases[i].points();
@@ -113,13 +122,10 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 	std::cerr << "ERROR file DOES NOT exist: " << testcases[i].details() << std::endl;
 	message += "ERROR: " + testcases[i].details() + " was NOT FOUND!";
       }
-
       if (testcases[i].isCompilationTest()) {
 	testcase_json << "\t\t\t\"compilation_output\": \".submit_compilation_output.txt\",\n";
       }
-      
-    }
-    else {
+    } else {
       // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
       testcase_json << "\t\t\t\"diffs\": [\n";
       float pts_helper = 1.0;

@@ -8,7 +8,7 @@ permissions aren't lost for newly created files & directories.*/
 // GET THE USERNAME OF THE AUTHENTICATED USER
 // ============================================
 
-/*
+
 if (isset($_SERVER['PHP_AUTH_USER'])) {
     $user = $_SERVER['PHP_AUTH_USER'];
 } else if (isset($_SERVER['REMOTE_USER'])) {
@@ -19,8 +19,6 @@ if (isset($_SERVER['PHP_AUTH_USER'])) {
     echo 'Internal Error - Not Authenticated'; exit();//here
     //
 }
-*/
-$user = "sample_user";
 
 //Remove error reporting and ini set for production code
 error_reporting(E_ALL);

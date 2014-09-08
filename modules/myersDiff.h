@@ -57,92 +57,72 @@ template<class T> Difference* printJSON ( Difference & text_diff,
 
 
 
-TestResults* warnIfNotEmpty ( const std::string & b,
-		const std::string & a ) {
-  //std::cout << "in warn if not empty -- need to edit" << std::endl;
-
-
+TestResults* warnIfNotEmpty (const std::string & student_file, const std::string & expected_file) {
   // the instructor file should be empty
-  assert (a == "");
-  
+  assert (expected_file == "");
   Tokens* answer = new Tokens();
-
-  if (b != "") {
+  if (student_file != "") {
     answer->setMessage("WARNING: This should be empty");
     std::cout << "in warn if not empty -- student file not empty" << std::endl;
   }
-
   return answer;
 }
 
 
-TestResults* errorIfNotEmpty ( const std::string & b,
-		const std::string & a ) {
-
+TestResults* errorIfNotEmpty ( const std::string & student_file, const std::string & expected_file) {
   // the instructor file should be empty
-  assert (a == "");
-
+  assert (expected_file == "");
   Tokens* answer = new Tokens();
-
-  if (b != "") {
+  if (expected_file != "") {
     answer->setMessage("ERROR: This should be empty");
     std::cout << "in error if not empty -- student file not empty" << std::endl;
     answer->setGrade(0);
   }
-
   return answer;
 }
 
 
-TestResults* errorIfEmpty ( const std::string & b,
-		const std::string & a ) {
+TestResults* errorIfEmpty ( const std::string & student_file, const std::string & expected_file) {
   // the instructor file should be empty
-  assert (a == "");
-
+  assert (expected_file == "");
   Tokens* answer = new Tokens();
-
-  if (b == "") {
+  if (student_file == "") {
     answer->setMessage("ERROR: This should be non empty");
     std::cout << "in error if empty -- student file empty" << std::endl;
     answer->setGrade(0);
   }
-
   return answer;
 }
 
 
-
-TestResults* myersDiffbyLinebyWord ( const std::string & b,
-		const std::string & a ) {
-	vectorOfWords text_a = stringToWords( a );
-	vectorOfWords text_b = stringToWords( b );
+TestResults* myersDiffbyLinebyWord ( const std::string & student_file, const std::string & expected_file) {
+	vectorOfWords text_a = stringToWords( student_file );
+	vectorOfWords text_b = stringToWords( expected_file );
 	Difference* diff = ses( text_a, text_b, true );
 	diff->type = ByLineByWord;
 	return diff;
 }
 
-TestResults* myersDiffbyLineNoWhite ( const std::string & b,
-		const std::string & a ) {
-	vectorOfWords text_a = stringToWords( a );
-	vectorOfWords text_b = stringToWords( b );
+TestResults* myersDiffbyLineNoWhite ( const std::string & student_file, const std::string & expected_file) {
+	vectorOfWords text_a = stringToWords( student_file );
+	vectorOfWords text_b = stringToWords( expected_file );
 	Difference* diff = ses( text_a, text_b, false );
 	diff->type = ByLineByWord;
 	return diff;
 }
 
-TestResults* myersDiffbyLine ( const std::string & b, const std::string & a ) {
-	vectorOfLines text_a = stringToLines( a );
-	vectorOfLines text_b = stringToLines( b );
+TestResults* myersDiffbyLine ( const std::string & student_file, const std::string & expected_file) {
+	vectorOfLines text_a = stringToLines( student_file );
+	vectorOfLines text_b = stringToLines( expected_file );
 	Difference* diff = ses( text_a, text_b, false );
 	diff->type = ByLineByChar;
 	return diff;
 
 }
 
-TestResults* myersDiffbyLinesByChar ( const std::string & b,
-		const std::string & a ) {
-	vectorOfLines text_a = stringToLines( a );
-	vectorOfLines text_b = stringToLines( b );
+TestResults* myersDiffbyLinesByChar ( const std::string & student_file, const std::string & expected_file) {
+	vectorOfLines text_a = stringToLines( student_file );
+	vectorOfLines text_b = stringToLines( expected_file );
 	Difference* diff = ses( text_a, text_b, true );
 	diff->type = ByLineByChar;
 	return diff;
