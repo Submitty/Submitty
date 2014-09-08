@@ -22,7 +22,7 @@ const int submission_penalty = 5;
 // Compile-time parameters
 const int max_clocktime = 2;		// in seconds
 const int max_cputime = 2;			// in seconds
-const int max_submission_size = 1000;	// in KB
+const int max_submission_size = 10000;	// in KB
 const int max_output_size = 100;	// in KB
 	// OTHERS?
 

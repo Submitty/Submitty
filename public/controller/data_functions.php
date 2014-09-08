@@ -224,6 +224,10 @@ function is_valid_zip_size($filename, $max_size) {
         while ($inner_file = zip_read($zip)) {
             $size += zip_entry_filesize($inner_file);
             if ($size > $max_size) {
+
+                // FIXME: Added this, but it is a popup message, would be better to be like the other error messages
+                display_error("When unzipped, too big: ".$size." > ".$max_size);
+
                 return false;
             }
         }
