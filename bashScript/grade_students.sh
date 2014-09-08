@@ -304,7 +304,9 @@ while true; do
 
 
         # copy submitted files to tmp directory
-	cp 1>/dev/null  2>&1  -r $submission_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory $submission_path" >&2
+	# cp 1>/dev/null  2>&1  -r $submission_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory $submission_path" >&2
+	mkdir "$tmp/STUDENT_FILES"
+	cp 1>/dev/null  2>&1  -r $submission_path/* "$tmp/STUDENT_FILES" ||  echo "ERROR: Failed to copy to temporary directory $submission_path" >&2
 
 
 
@@ -355,7 +357,9 @@ while true; do
 	rm -f *.out *.exe 
 
         #clang++ -Wall *.cpp -o a.out &> .submit_compilation_output.txt
-	g++ -Wall *.cpp -o a.out    &> .submit_compilation_output.txt
+	cd STUDENT_FILES
+	g++ -Wall *.cpp -o ../a.out    &> ../.submit_compilation_output.txt
+	cd ..
 	compile_error_code=$?
 
 
@@ -426,9 +430,15 @@ while true; do
 
         # Make directory structure in results if it doesn't exist
         mkdir -p "$results_path" ||  echo "ERROR: Could not create results path $results_path" >&2
+        cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/.submit* $tmp/submission.json $tmp/test*.json "$results_path"
 
-        cp  1>/dev/null  2>&1  $tmp/* $tmp/.* "$results_path"
-        # cp  1>/dev/null  2>&1  $tmp/test*_cout.txt $tmp/test*_cerr.txt $tmp/test*_out.txt $tmp/submission.json "$results_path/$path"
+	
+
+	# TEMPORARY FOR TA GRADING SERVER, WILL GO AWAY SOON
+        mkdir -p "$results_path/HACK" ||  echo "ERROR: Could not create results path $results_path/HACK" >&2
+	cp  1>/dev/null  2>&1  -r $submission_path/* "$results_path/HACK" ||  echo "ERROR: Failed to copy to hack output directory $results_path/HACK" >&2
+        cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/.submit* "$results_path/HACK"
+
 
 
 	# --------------------------------------------------------------------
