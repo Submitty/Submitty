@@ -19,11 +19,17 @@
 
 class TestResults {
 public:
-  TestResults(int g=0, const std::string &m="") { my_grade = g; message = m; }
+
+  TestResults(int g=-1, const std::string &m="") { my_grade = g; message = m; }
         virtual ~TestResults() {}
 	int distance;
+
   virtual void printJSON(std::ostream & file_out); // =0;
-  virtual float grade() { return my_grade; } //=0;
+  //  virtual float grade() { return my_grade; } //=0;
+  float getGrade() { assert (my_grade >= 0); return my_grade; } //=0;
+
+  void setGrade(float g) { assert (g >= 0); my_grade = g; }
+
   std::string get_message() { return message; }
   void setMessage(const std::string &m) { message=m; }
 protected:
@@ -50,6 +56,23 @@ public:
 	void clear();
 };
 
+inline std::ostream& operator<< (std::ostream& ostr, const Change &c) {
+  ostr << "CHANGE\n";
+  ostr << "a_start " << c.a_start << std::endl;
+  ostr << "b_start " << c.b_start << std::endl;
+  ostr << "a_changes: ";
+  for (int i = 0; i < c.a_changes.size(); i++) {
+    ostr << c.a_changes[i] << " ";
+  }
+  ostr << std::endl;
+  ostr << "b_changes: ";
+  for (int i = 0; i < c.b_changes.size(); i++) {
+    ostr << c.b_changes[i] << " ";
+  }
+  ostr << std::endl;
+  return ostr;
+}
+
 void Change::clear() {
 	a_start = b_start = -1;
 	a_changes.clear();
@@ -63,11 +86,12 @@ public:
 	std::vector<int> diff_a; //student
 	std::vector<int> diff_b; //expected
 	void printJSON(std::ostream & file_out);
-	float grade();
+  //float grade();
 	int output_length_a;
 	int output_length_b;
 	int edit_distance;
 	int type;
+  bool extraStudentOutputOk;
 };
 
 class Tokens: public TestResults {
@@ -80,9 +104,9 @@ public:
 	bool harsh;
   // FIXME: redesign necessary
   //  float tokens_grade;
-  void setGrade(float g) { my_grade = g; }
+  //void setGrade(float g) { my_grade = g; }
 	void printJSON(std::ostream & file_out);
-	float grade();
+  //float grade();
 };
 
 /*
@@ -93,30 +117,35 @@ TestResults::TestResults() :
 
 Difference::Difference() :
   TestResults(), output_length_a(0), output_length_b(0), edit_distance(0), 
-  type(OtherType) /* WAS UNINITIALIZED */ {
+  type(OtherType), extraStudentOutputOk(false) {
 }
 
 Tokens::Tokens() :
   TestResults(1,""), num_tokens(0), tokensfound(0), partial(true), harsh(false) {
 }
 
+/*
 float Difference::grade() {
-	int max =
-			(output_length_a > output_length_b) ?
-					output_length_a : output_length_b;
+  //	int max =
+  //			(output_length_a > output_length_b) ?
+  //					output_length_a : output_length_b;
 
-	/* CHANGED FROM distance to (1-distance) */
-	/* because distance == 0 when the files are perfect, and that should be worth full credit */
+  int max = std::max(output_length_a, output_length_b);
+
+	/ * CHANGED FROM distance to (1-distance) * /
+	/ * because distance == 0 when the files are perfect, and that should be worth full credit * /
 
 	if (max == 0) return 1;
 
 	return (float) (1 - (distance / (float) max ));
 }
+*/
 
+/*
 float Tokens::grade() {
   return my_grade;
   // FIXME
-  /*
+  / *
 	for (unsigned int i = 0; i < tokens_found.size(); i++) {
 		if (tokens_found[i] != -1)
 			tokensfound++;
@@ -127,8 +156,9 @@ float Tokens::grade() {
 		return 1;
 	}
 	return 0;
-  */
+  * /
 }
+*/
 
 void Difference::printJSON(std::ostream & file_out) {
 	std::string diff1_name;

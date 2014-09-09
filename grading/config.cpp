@@ -81,6 +81,8 @@ Now Exiting" << std::endl;
   init << "{\n\t\"id\": \"" << id << "\"," << std::endl;
   init << "\t\"name\": \"" << name << "\"," << std::endl;
 
+  init << "\t\"assignment_message\": \"" << assignment_message << "\"," << std::endl;
+
   init << "\t\"max_submissions\": " << max_submissions << "," << std::endl;
   init << "\t\"max_submission_size\": " << max_submission_size << "," << std::endl;
 

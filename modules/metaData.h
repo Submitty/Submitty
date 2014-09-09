@@ -18,6 +18,8 @@
 #ifndef differences_metaData_h
 #define differences_metaData_h
 
+#include <ostream>
+
 #include <string>
 #include <vector>
 template<class T> class metaData {
@@ -30,9 +32,34 @@ template<class T> class metaData {
 		int m;
 		int n;
 		int distance;
+
+
 };
 template<class T> metaData< T >::metaData () :
 		a( NULL ), b( NULL ), m( 0 ), n( 0 ), distance( 0 ) {
 }
+
+
+
+
+
+// for printing snakes & snapshots
+inline std::ostream& operator<<(std::ostream &ostr, const std::vector< std::vector< int > > &data) {
+  for (int i = 0; i < data.size(); i++) {
+    ostr << i << "  :  ";
+    for (int j = 0; j < data[i].size(); j++) {
+      ostr << " " << data[i][j];
+    }
+    ostr << std::endl;
+  }
+  return ostr;
+}
+
+
+
+//inline std::ostream& operator<<(std::ostream &ostr, const metaData<char> md) {
+//return ostr;
+//}
+
 
 #endif

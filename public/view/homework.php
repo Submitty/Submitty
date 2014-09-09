@@ -215,6 +215,7 @@ if (on_dev_team($user)) {
    <?php } else {?>
 
 
+   <?php if ($assignment_message != "") { echo "<p><b><em><font size=+1 color=green>".$assignment_message."</font></b></p>"; } ?>
 
 
 <!-- DETAILS ON INDIVIDUAL TESTS --> 

@@ -168,8 +168,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
 	if (result != NULL) {
 	  // THE GRADE (will be compiled across all comparisons)
-	  std::cout << "result->grade() " << result->grade() << std::endl;
-	  pts_helper *= result->grade();
+	  std::cout << "result->getGrade() " << result->getGrade() << std::endl;
+	  pts_helper *= result->getGrade();
 	  result->printJSON(diff_stream);
 	  
 	  helper_message += " " + result->get_message();
