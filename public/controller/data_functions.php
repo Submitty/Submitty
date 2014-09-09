@@ -88,6 +88,7 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
 
     // Store the time, right now!  
     // 2001-03-10 17:16:18 (the MySQL DATETIME format)
+    date_default_timezone_set('America/New_York');
     $TIMESTAMP = date("Y-m-d H:i:s");  
       
 
