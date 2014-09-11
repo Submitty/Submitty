@@ -329,6 +329,24 @@ function name_for_assignment_id($class_config, $assignment_id) {
     return "";//TODO Error handling
 }
 
+
+// Get name for assignment
+function is_ta_grade_released($class_config, $assignment_id) {
+    $assignments = $class_config["assignments"];
+    foreach ($assignments as $one) {
+        if ($one["assignment_id"] == $assignment_id) {
+ 	      if (isset($one["ta_grade_released"]) &&
+            	  $one["ta_grade_released"] == true) {
+	        return true;
+	      } else {
+	        return false;
+              }
+        }
+    }
+    return "";//TODO Error handling
+}
+
+
 // Check to make sure instructor has added this assignment
 function is_valid_course($course) {
     if ($course == "csci1200") {

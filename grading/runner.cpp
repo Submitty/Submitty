@@ -201,7 +201,7 @@ int execute(const std::string &cmd, int seconds_to_run) {
     // FIXME read in the file size from the configuration
     // limit size of files created by the process
     rlimit fsize_limit;
-    fsize_limit.rlim_cur = fsize_limit.rlim_max = 10000;  // 10 kilobytes
+    fsize_limit.rlim_cur = fsize_limit.rlim_max = 100000;  // 100 kilobytes
     set_success = setrlimit(RLIMIT_FSIZE, &fsize_limit);
     assert (set_success == 0);
 

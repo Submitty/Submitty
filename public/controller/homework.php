@@ -30,6 +30,7 @@ $assignment_id = parse_assignment_id($class_config, $most_recent_assignment_id);
 $assignment_version = parse_assignment_version($username, $course, $assignment_id);
 
 $assignment_name = name_for_assignment_id($class_config, $assignment_id);
+$ta_grade_released = is_ta_grade_released($class_config, $assignment_id);
 
 $highest_version = most_recent_assignment_version($username, $course, $assignment_id);
 
@@ -71,6 +72,7 @@ render("homework", array(
     "course"=>$course,
     "assignment_id"=>$assignment_id,
     "assignment_name"=>$assignment_name,
+    "ta_grade_released"=>$ta_grade_released,
     "all_assignments"=>$all_assignments,
     "dev_team"=>$dev_team,
     "points_visible"=>$points_visible,
