@@ -300,7 +300,7 @@ while true; do
 
 	# --------------------------------------------------------------------
         # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
-	tmp=`mktemp -d`
+	tmp=`mktemp -d /tmp/temp.XXXXXXXX`
 
 
         # copy submitted files to tmp directory
