@@ -8,6 +8,8 @@ gcc=clang++
 
 bindir=$(ROOT)/$(COURSE)/bin/$(HW)
 
+all: assignment run
+	
 assignment:
 	test -d $(bindir) || mkdir $(bindir)
 #	$(gcc) -DDEBUG -I $(RCOS) -include $(CONFIG)/config.h $(RCOS)/grading/Validator.cpp  $(RCOS)/grading/TestCase.cpp  -o $(bindir)/validate.out
