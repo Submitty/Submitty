@@ -1,8 +1,8 @@
 {
-    "default_assignment":"hw01",
+    "default_assignment":"hw1",
     "assignments": [
         {
-            "assignment_id":"hw01",
+            "assignment_id":"hw1",
             "assignment_name":"Homework 1 Text Justification",
             "released":true,
             "ta_grade_released":false
