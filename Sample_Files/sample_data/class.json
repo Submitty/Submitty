@@ -9,5 +9,9 @@
             "assignment_id":"lab1",
             "assignment_name":"Lab 1"
         }
-    ]
+    ],
+    "dev_team": [
+        "dev"
+        ]
+
 }
