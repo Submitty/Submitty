@@ -3,13 +3,7 @@
     "assignments": [
         {
             "assignment_id":"hw01",
-            "assignment_name":"Homework 1 Moire Strings",
-            "released":true,
-            "ta_grade_released":false
-        },
-        {
-            "assignment_id":"hw02",
-            "assignment_name":"Homework 2 Bowling Classes",
+            "assignment_name":"Homework 1 Text Justification",
             "released":true,
             "ta_grade_released":false
         },
