@@ -1,8 +1,8 @@
 CONFIG=.
 ROOT=/projects/submit3
 COURSE=csci1200
-RCOS=/projects/submit3/csci1200/code/rcos
-HW=lab1
+RCOS=$(ROOT)/$(COURSE)/code/rcos
+HW=default
 #gcc=g++ -std=c++0x
 gcc=clang++
 
@@ -23,6 +23,8 @@ run:
 
 move:
 	cp $(HW)_assignment_config.json $(ROOT)/$(COURSE)/config/$(HW)_assignment_config.json
+	cp -r test_input $(ROOT)/$(COURSE)/test_input/$(HW)
+	
 clean:
 	rm $(ROOT)/$(COURSE)/bin/*
 	rm assignment_config.json
