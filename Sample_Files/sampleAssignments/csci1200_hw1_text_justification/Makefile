@@ -24,6 +24,8 @@ run:
 move:
 	cp $(HW)_assignment_config.json $(ROOT)/$(COURSE)/config/$(HW)_assignment_config.json
 	cp -r test_input $(ROOT)/$(COURSE)/test_input/$(HW)
+	cp -r test_output $(ROOT)/$(COURSE)/test_output/$(HW)
+
 	
 clean:
 	rm $(ROOT)/$(COURSE)/bin/*
