@@ -2,7 +2,7 @@ CONFIG=.
 ROOT=/projects/submit3
 COURSE=csci1200
 RCOS=$(ROOT)/$(COURSE)/code/rcos
-HW=default
+HW=hw01
 #gcc=g++ -std=c++0x
 gcc=clang++
 

@@ -1,11 +1,10 @@
 CONFIG=.
 ROOT=/projects/submit3
 COURSE=csci1200
-RCOS=/projects/submit3/csci1200/code/rcos
+RCOS=$(ROOT)/$(COURSE)/code/rcos
 HW=lab1
 #gcc=g++ -std=c++0x
 gcc=clang++
-
 
 bindir=$(ROOT)/$(COURSE)/bin/$(HW)
 
