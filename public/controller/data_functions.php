@@ -352,6 +352,9 @@ function is_valid_course($course) {
     if ($course == "csci1100test") {
       return true;
     }
+    if ($course == "default") {
+      return true;
+    }
     return false;
 }
 
