@@ -28,6 +28,9 @@
 #include "modules/myersDiff.h"
 #include "modules/textMasking.h"
 #include "modules/clean.h"
+ 
 #include "modules/difference.h"
+#include "modules/testResults.h"
+#include "modules/tokens.h"
 
 #endif //__MODULES__

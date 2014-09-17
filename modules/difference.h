@@ -10,34 +10,13 @@
 #define __differences__difference__
 #include <string>
 #include <vector>
+#include "testResults.h"
 
 #define tab "    "
 #define OtherType 0
 #define ByLineByChar 1
 #define ByWordByChar 2
 #define ByLineByWord 3
-
-class TestResults {
-public:
-
-  TestResults(int g=-1, const std::string &m="") { my_grade = g; message = m; }
-        virtual ~TestResults() {}
-	int distance;
-
-  virtual void printJSON(std::ostream & file_out); // =0;
-  //  virtual float grade() { return my_grade; } //=0;
-  float getGrade() { assert (my_grade >= 0); return my_grade; } //=0;
-
-  void setGrade(float g) { assert (g >= 0); my_grade = g; }
-
-  std::string get_message() { return message; }
-  void setMessage(const std::string &m) { message=m; }
-protected:
-  std::string message;
-  float my_grade;
-};
-
-
 
 class Change {
 public:
@@ -109,19 +88,9 @@ public:
   //float grade();
 };
 
-/*
-TestResults::TestResults() :
-		distance(0) {
-}
-*/
-
 Difference::Difference() :
   TestResults(), output_length_a(0), output_length_b(0), edit_distance(0), 
   type(OtherType), extraStudentOutputOk(false) {
-}
-
-Tokens::Tokens() :
-  TestResults(1,""), num_tokens(0), tokensfound(0), partial(true), harsh(false) {
 }
 
 /*
@@ -138,25 +107,6 @@ float Difference::grade() {
 	if (max == 0) return 1;
 
 	return (float) (1 - (distance / (float) max ));
-}
-*/
-
-/*
-float Tokens::grade() {
-  return my_grade;
-  // FIXME
-  / *
-	for (unsigned int i = 0; i < tokens_found.size(); i++) {
-		if (tokens_found[i] != -1)
-			tokensfound++;
-	}
-	if (partial)
-		return (float) tokensfound / (float) num_tokens;
-	else if (tokensfound == num_tokens || (!harsh && tokensfound != 0)) {
-		return 1;
-	}
-	return 0;
-  * /
 }
 */
 
@@ -307,33 +257,5 @@ void Difference::printJSON(std::ostream & file_out) {
 
 	return;
 }
-
-void Tokens::printJSON(std::ostream & file_out) {
-	std::string partial_str = (partial) ? "true" : "false";
-
-	file_out << "{\n\t\"tokens\": " << num_tokens << "," << std::endl;
-	file_out << "\t\"found\": [";
-	for (unsigned int i = 0; i < tokens_found.size(); i++) {
-		file_out << tokens_found[i];
-		if (i != tokens_found.size() - 1) {
-			file_out << ", ";
-		} else {
-			file_out << " ]," << std::endl;
-		}
-	}
-	file_out << "\t\"num_found\": " << tokensfound << "," << std::endl;
-	file_out << "\t\"partial\": " << partial_str << "," << std::endl;
-	file_out << "}" << std::endl;
-	return;
-}
-
-
-void TestResults::printJSON(std::ostream & file_out) {
-
-	file_out << "{" << std::endl;
-	file_out << "}" << std::endl;
-	return;
-}
-
 
 #endif /* defined(__differences__difference__) */
