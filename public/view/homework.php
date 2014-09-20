@@ -383,49 +383,38 @@ if (on_dev_team($user)) {
 
 
 <?php 
-// FIXME: New variable in class.json 
-//if (on_dev_team($user)) { 
 
+//if (on_dev_team($user)) { 
 //echo "<font color=\"ff0000\" size=+5>on dev team</font><br><br>"; 
 
-
-
+if ($ta_grade_released == true) {
   
-//<!--- TA GRADE -->
-echo "<div class=\"panel-body\">";
-echo "<div class=\"box\">";
+   //<!--- TA GRADE -->
+   echo "<div class=\"panel-body\">";
+   echo "<div class=\"box\">";
+   
+   $path_front = get_path_front($course);
+   
+   $gradefile_path = "$path_front/reports/$assignment_id/".$username.".txt";
 
-   if ($ta_grade_released == true) {
-   
-     $path_front = get_path_front($course);
-   
-     $gradefile_path = "$path_front/reports/$assignment_id/".$username.".txt";
-     if (!file_exists($gradefile_path)) {
-        echo "<h3>TA grade not available</h3>";
-     } else {
-        $grade_file = file_get_contents($gradefile_path);
-        echo "<h3>TA grade</h3>";
-        echo "<em><p>Please see the <a href=\"https://www.cs.rpi.edu/academics/courses/fall14/csci1200/announcements.php\">Announcements</a> page for the curve for this homework.</p></em>";
-        echo "<pre>".$grade_file."</pre>";
-     }
+   if (!file_exists($gradefile_path)) {
+      echo "<h3>TA grade not available</h3>";
    } else {
-     //echo "<h3>TA grades for this homework not released yet</h3>";
+      $grade_file = file_get_contents($gradefile_path);
+      echo "<h3>TA grade</h3>";
+      echo "<em><p>Please see the <a href=\"https://www.cs.rpi.edu/academics/courses/fall14/csci1200/announcements.php\">Announcements</a> 
+                page for the curve for this homework.</p></em>";
+      echo "<pre>".$grade_file."</pre>";
    }
 
-  echo "</div>";
-  echo "</div>";
+   echo "</div>";
+   echo "</div>";
 
-//} else { 
-  //echo "test message";
-//} 
+} else {
+  //echo "<h3>TA grades for this homework not released yet</h3>";
+}
+   
 ?>
-
-
-
-
-
-
-
 
 <!-- END OF "IF AT LEAST ONE SUBMISSION... " -->
 <?php } ?>

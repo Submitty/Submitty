@@ -250,7 +250,7 @@ public:
 
 
     // FIXME should be configurable within the homework, but should not exceed what is reasonable to myers diff
-    #define MAX_FILE_SIZE 200 * 50 // in characters  (approx 200 lines with 50 characters per line)
+    #define MAX_FILE_SIZE 1000 * 50 // in characters  (approx 200 lines with 50 characters per line)
 
 
     if (s.size() > MAX_FILE_SIZE) {

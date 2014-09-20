@@ -14,6 +14,8 @@
  *
 */
 
+
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -33,7 +35,11 @@
 #include "modules/modules.h"
 #include "grading/TestCase.h"
 
-#include "grading/TestCase.cpp"  /* Should not #include a .cpp file */
+//#include "grading/TestCase.cpp"  /* Should not #include a .cpp file */
+
+
+#include <config.h>
+
 
 int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime);
 

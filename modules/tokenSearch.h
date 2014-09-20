@@ -24,6 +24,7 @@
 #include "modules/STRutil.h"
 #include "modules/difference.h"
 #include "modules/clean.h"
+#include "modules/tokens.h"
 
 int RabinKarpSingle ( std::string token, std::string searchstring );
 std::vector< std::string > splitTokens ( const std::string& tokens );

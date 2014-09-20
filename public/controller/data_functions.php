@@ -111,7 +111,7 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
 
 
 // HACK PLACED IN FOR LAB 1, TO WORK WITH CYGWIN ZIPS & CHROME ON WINDOWS 8
-    $zip_types = array("application/zip", "application/x-zip-compressed","application/octet-stream");  // FIXME: trying adding octet stream
+//    $zip_types = array("application/zip", "application/x-zip-compressed","application/octet-stream");  // FIXME: trying adding octet stream
 //    $zip_types = array("application/zip", "application/x-zip-compressed");
 
 
@@ -125,7 +125,14 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
 
 
 
-    $allowed   = array("application/zip", "application/x-zip-compressed","application/octet-stream","text/x-python-script", "text/plain", "text/x-c++src", "application/download");
+    $allowed   = array("application/zip", 
+                       "application/x-zip",
+                       "application/x-zip-compressed",
+                       "application/octet-stream",
+                       "text/x-python-script", 
+                       "text/plain", 
+                       "text/x-c++src", 
+                       "application/download");
     $filename = explode(".", $homework_file["name"]);
     $extension = end($filename);
 

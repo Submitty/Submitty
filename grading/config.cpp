@@ -19,7 +19,9 @@
 #include "modules/modules.h"
 #include "grading/TestCase.h"
 
-#include "grading/TestCase.cpp"  /* should not #include a .cpp file */
+//#include "grading/TestCase.cpp"  /* should not #include a .cpp file */
+
+#include <config.h>
 
 //#include "../sampleConfig/HW1/config.h"
 

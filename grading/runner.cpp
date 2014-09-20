@@ -31,8 +31,10 @@
 #include "grading/TestCase.h"
 
 
-#include "grading/TestCase.cpp"   /* should not #include a .cpp file */
+//#include "grading/TestCase.cpp"   /* should not #include a .cpp file */
 
+
+#include <config.h>
 
 int execute(const std::string &cmd, int seconds_to_run=5);
 std::string to_string(int i);

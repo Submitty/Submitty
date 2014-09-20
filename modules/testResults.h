@@ -5,14 +5,21 @@
  This code is licensed using the BSD "3-Clause" license. Please refer to
  "LICENSE.md" for the full license
  */
+
 #ifndef __differences__testResults__
 #define __differences__testResults__
+
+#include <cassert>
+#include <iostream>
+#include <fstream>
 
 class TestResults {
 public:
 
-  TestResults(int g=-1, const std::string &m="") { my_grade = g; message = m; }
-        virtual ~TestResults() {}
+  TestResults(int g=-1, const std::string &m="") { my_grade = g; message = m; distance=0; }
+
+  virtual ~TestResults() {}
+  
   int distance;
 
   virtual void printJSON(std::ostream & file_out); // =0;
@@ -28,9 +35,9 @@ protected:
   float my_grade;
 };
 
-TestResults::TestResults():distance(0){}
+//TestResults::TestResults():distance(0){}
 
-void TestResults::printJSON(std::ostream & file_out) {
+inline void TestResults::printJSON(std::ostream & file_out) {
 
   file_out << "{" << std::endl;
   file_out << "}" << std::endl;
