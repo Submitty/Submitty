@@ -111,61 +111,39 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
     // FILE EXISTS & COMPILATION TESTS DON'T HAVE FILE COMPARISONS
     if (testcases[i].isFileExistsTest()) {
-      std::cerr << "THIS IS A FILE EXISTS TEST! " << std::endl;
-      if ( access( (std::string("STUDENT_FILES/")+testcases[i].details()).c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
-	std::cerr << "file does exist: " << testcases[i].details() << std::endl;
+      std::cerr << "THIS IS A FILE EXISTS TEST! " << testcases[i].getFilename() << std::endl;
+      assert (testcases[i].getFilename() != "");
+
+      if ( access( (std::string("")+testcases[i].getFilename()).c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
+	std::cerr << "file does exist: " << testcases[i].getFilename() << std::endl;
 	testcase_pts = testcases[i].points();
       } else {
-	std::cerr << "ERROR file DOES NOT exist: " << testcases[i].details() << std::endl;
-	message += "ERROR: " + testcases[i].details() + " was NOT FOUND!";
+	std::cerr << "ERROR file DOES NOT exist: " << testcases[i].getFilename() << std::endl;
+	message += "ERROR: " + testcases[i].getFilename() + " was NOT FOUND!";
       }
     } else if (testcases[i].isCompilationTest()) {
       std::cerr << "THIS IS A COMPILATION! " << std::endl;
-      if ( access( testcases[i].details().c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
-	std::cerr << "file does exist: " << testcases[i].details() << std::endl;
+      if ( access( testcases[i].getFilename().c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
+	std::cerr << "file does exist: " << testcases[i].getFilename() << std::endl;
 	testcase_pts = testcases[i].points();
       } else {
-	std::cerr << "ERROR file DOES NOT exist: " << testcases[i].details() << std::endl;
-	message += "ERROR: " + testcases[i].details() + " was NOT FOUND!";
+	std::cerr << "ERROR file DOES NOT exist: " << testcases[i].getFilename() << std::endl;
+	message += "ERROR: " + testcases[i].getFilename() + " was NOT FOUND!";
       }
       if (testcases[i].isCompilationTest()) {
-	testcase_json << "\t\t\t\"compilation_output\": \".submit_compilation_output.txt\",\n";
+	testcase_json << "\t\t\t\"compilation_output\": \"" << testcases[i].prefix() << "_cerr.txt\",\n";
+	//.submit_compilation_output.txt\",\n";
       }
     } else {
       // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
       testcase_json << "\t\t\t\"diffs\": [\n";
       float pts_helper = 1.0;
       //      std::cerr << "-----------------------\ntest case " << i+1 << std::endl;
-      for (int j = 0; j < testcases[i].numFileComparisons(); j++) {
+      for (int j = 0; j < testcases[i].numFileGraders(); j++) {
 	std::cerr << "comparison #" << j << std::endl;
 	std::string helper_message = "";
 
-	bool ok_to_compare = true;
-
-	// GET THE FILES READY
-	std::ifstream student_instr(testcases[i].filename(j).c_str());
-	if (!student_instr) {
-	  std::stringstream tmp;
-	  tmp << "ERROR: comparison #" << j << ": Student's " << testcases[i].filename(j) << " does not exist";
-	  std::cerr << tmp.str() << std::endl;
-	  helper_message += tmp.str();
-	  ok_to_compare = false;
-	} 
-	std::ifstream expected_instr(testcases[i].expected(j).c_str());
-	if (!expected_instr && testcases[i].expected(j) != "") {
-	  std::stringstream tmp;
-	  tmp << "ERROR: comparison #" << j << ": Instructor's " + testcases[i].expected(j) + " does not exist!";
-	  std::cerr << tmp.str() << std::endl;
-	  if (helper_message != "") helper_message += "<br>";
-	  helper_message += tmp.str();
-	  ok_to_compare = false;
-	}
-
-	// DO THE COMPARISON
-	TestResults *result = NULL;
-	if (ok_to_compare) {
-	  result = testcases[i].compare(j);
-	} 
+	TestResults *result = testcases[i].do_the_grading(j,helper_message);
 
 	// PREPARE THE JSON DIFF FILE
 	std::stringstream diff_path;
@@ -187,17 +165,25 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 	}
 
 	// JSON FOR THIS COMPARISON
-	std::stringstream expected_path;
-	expected_path << expected_out_dir << testcases[i].expected(j);
 	testcase_json
 	  << "\t\t\t\t{\n"
 	  << "\t\t\t\t\t\"diff_id\":\"" << testcases[i].prefix() << "_" << j << "_diff\",\n"
 	  << "\t\t\t\t\t\"student_file\":\"" << testcases[i].filename(j) << "\",\n";
-	if (testcases[i].expected(j) != "") {
+
+	std::string expected = "";
+	if (testcases[i].test_case_grader[j] != NULL) {
+	  expected = testcases[i].test_case_grader[j]->getExpected();
+	}
+
+	if (expected != "") {
+
+	  std::stringstream expected_path;
+	  expected_path << expected_out_dir << expected;
+	  
 	  testcase_json << "\t\t\t\t\t\"instructor_file\":\"" << expected_path.str() << "\",\n";
-	  if (ok_to_compare) {
+	  //if (ok_to_compare) {
 	    testcase_json << "\t\t\t\t\t\"difference\":\"" << testcases[i].prefix() << "_" << j << "_diff.json\",\n";
-	  }
+	    //}
 	}
 	testcase_json << "\t\t\t\t\t\"description\": \"" << testcases[i].description(j) << "\",\n";
 	if (helper_message != "") {

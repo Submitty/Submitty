@@ -28,14 +28,16 @@
 
 int RabinKarpSingle ( std::string token, std::string searchstring );
 std::vector< std::string > splitTokens ( const std::string& tokens );
+
 TestResults* searchToken ( const std::string& student,
-		const std::string& tokens );
+			   const std::vector<std::string>& tokens );
 TestResults* searchTokens ( const std::string& student,
-		const std::string& tokens );
+			    const std::vector<std::string>& tokens );
 TestResults* searchAnyTokens ( const std::string& student,
-		const std::string& tokens );
+			       const std::vector<std::string>& tokens );
 TestResults* searchAllTokens ( const std::string& student,
-		const std::string& tokens );
+			       const std::vector<std::string>& tokens );
+
 void buildTable ( int* V, const std::string& keyword );
 
 #endif //__TOKEN__

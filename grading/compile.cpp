@@ -1,4 +1,4 @@
-/* FILENAME: runner.cpp
+/* FILENAME: compile.cpp
  * YEAR: 2014
  * AUTHORS:
  *   Members of Rensselaer Center for Open Source (rcos.rpi.edu):
@@ -27,8 +27,8 @@
 #include <sstream>
 #include <cassert>
 
-//#include "modules/modules.h"
-//#include "grading/TestCase.h"
+#include "modules/modules.h"
+#include "grading/TestCase.h"
 
 
 #include <config.h>
@@ -38,50 +38,53 @@ int execute(const std::string &cmd, int seconds_to_run=5, int file_size_limit=10
 std::string to_string(int i);
 
 int main(int argc, char *argv[]) {
-  std::cout << "Running User Code..." << std::endl;
 
   // Make sure arguments are entered correctly
   if (argc != 1) {
     // Pass in the current working directory to run the programs
     std::cout << "Incorrect # of arguments:" << argc << std::endl;
-    std::cout << "Usage : " << std::endl << "     ./runner" << std::endl;
+    std::cout << "Usage : " << std::endl << "     ./compile" << std::endl;
     return 2;
   }
 
-  setenv("DYNAMORIO_CONFIGDIR", ".", 1);
 
-  // Run each test case and create output files
+  std::cout << "Compiling User Code..." << std::endl;
+
+
+  // Run each COMPILATION TEST
   for (unsigned int i = 0; i < num_testcases; i++) {
-    if (testcases[i].isFileExistsTest()) continue;
-    if (testcases[i].isCompilationTest()) continue;
+    if (!testcases[i].isCompilationTest()) continue;
+    assert (testcases[i].numFileGraders() == 0);
 
     std::cout << "========================================================" << std::endl;
-    std::cout << "TEST " << i+1 << " " << testcases[i].command() << std::endl;
+    std::cout << "TEST " << i+1 << " " << testcases[i].command() << " IS COMPILATION!" << std::endl;
 
-    
-    //stsicmd != "" && cmd != "FILE_EXISTS") {
     std::string cmd = testcases[i].command();
     assert (cmd != "");
 
-      // run the command, capturing STDOUT & STDERR
+    //std::cout << "LS:\n";
+    //execute("/bin/pwd",5);
+    //execute("/bin/ls -lta *cpp",4);
+    //system("/bin/ls -lta *cpp");
+    //std::cout << "LS DONE!\n";
+
+    // run the command, capturing STDOUT & STDERR
     int exit_no = execute(cmd + 
 			  " 1>test" + to_string(i + 1) + "_cout.txt" +
 			  " 2>test" + to_string(i + 1) + "_cerr.txt",
-			  testcases[i].seconds_to_run());
-    // append the test case # to the front of the output file (if it exists)
-    //      assert (testcases[i].numFileComparisons() >= 1);
-    if (testcases[i].numFileGraders() > 0 && 
-	testcases[i].raw_filename(0) != "" &&
-	access( testcases[i].raw_filename(0).c_str(), F_OK|R_OK|W_OK ) != -1) { /* file exists */
-      execute ("/bin/mv "+testcases[i].raw_filename(0)+" "+testcases[i].filename(0));
-    }
-    //}
+			  testcases[i].seconds_to_run(),
+			  10000000); // 10 mb
+
+    //std::cout << "AFTER LS:\n";
+    //execute("/bin/ls -a *",4);
+    //std::cout << "AFTER LS DONE!\n";
+
   }
 
   std::cout << "========================================================" << std::endl;
   std::cout << "FINISHED ALL TESTS" << std::endl;
   // allow hwcron read access so the files can be copied back
-  execute ("/usr/bin/find . -user untrusted -exec chmod o+r {} ;");
+  //  execute ("/usr/bin/find . -user untrusted -exec chmod o+r {} ;");
   
   return 0;
 }

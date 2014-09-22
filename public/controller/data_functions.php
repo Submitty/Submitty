@@ -17,7 +17,7 @@ function get_path_front($course) {
     global $path_to_path_file;
     if ($path_front == "") {
         if (!file_exists($path_to_path_file)) {
-            display_error($path_to_path_file." does not exist.  Please make this file or edit the path in private/model/homework_model_functions.  The file should contain a single line of the path to the directory folder (ex: csci1200).  No whitespaces or return characters.");
+            display_error($path_to_path_file." does not exist.  Please make this file or edit the path in private/model/homework_model_functions.  The file should contain a single line of the path to the directory folder (ex: csciXXXX).  No whitespaces or return characters.");
             exit();
         }
 
@@ -366,6 +366,9 @@ function is_valid_course($course) {
       return true;
     }
     if ($course == "csci1100test") {
+      return true;
+    }
+    if ($course == "csci4960") {
       return true;
     }
     return false;
