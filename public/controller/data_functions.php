@@ -109,12 +109,6 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
     //ex: homework number, due date, late days
 
-
-// HACK PLACED IN FOR LAB 1, TO WORK WITH CYGWIN ZIPS & CHROME ON WINDOWS 8
-//    $zip_types = array("application/zip", "application/x-zip-compressed","application/octet-stream");  // FIXME: trying adding octet stream
-//    $zip_types = array("application/zip", "application/x-zip-compressed");
-
-
     $max_size = 50;
     if (isset($assignment_config["max_submission_size"])) {
         $max_size = $assignment_config["max_submission_size"];
@@ -123,30 +117,24 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
         return array("error"=>"", "message"=>"File uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file was ".$homework_file["size"] / 1024 ." kb.");
     }
 
+    $filename = explode(".", $homework_file["name"]);
+    $extension = end($filename);
 
 
-    $allowed   = array("application/zip", 
+    /*$allowed   = array("application/zip", 
                        "application/x-zip",
                        "application/x-zip-compressed",
                        "application/octet-stream",
                        "text/x-python-script", 
                        "text/plain", 
                        "text/x-c++src", 
-                       "application/download");
-    $filename = explode(".", $homework_file["name"]);
-    $extension = end($filename);
-
-//    // FIXME TODO should support more than zip (.tar.gz etc.)
-//    if (!($homework_file["type"] === "application/zip") && 
-//	!($homework_file["type"] === "application/octet-stream") && 
-//	!($homework_file["type"] === "application/x-zip-compressed")) {  //Make sure the file is a zip file
-
-    // TODO should support more than zip (.tar.gz etc.)
+                       "application/download");*/
+    /*
     if (!(in_array($homework_file["type"], $allowed))) {
-//display_error("Incorrect file upload type.  Got ".htmlspecialchars($homework_file["type"]));
+        //display_error("Incorrect file upload type.  Got ".htmlspecialchars($homework_file["type"]));
         return array("error"=>"", "message"=>"Incorrect file upload type.  Got ".htmlspecialchars($homework_file["type"]));
     }
-
+    */
     // make folder for this homework (if it doesn't exist)
     $assignment_path = $path_front."/submissions/".$assignment_id;
     if (!file_exists($assignment_path)) {
@@ -193,9 +181,10 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
       $zip->extractTo($version_path."/");
       $zip->close();
     } else {
-        if (!move_uploaded_file($homework_file["tmp_name"], $version_path."/".$homework_file["name"])) {
-        display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
-        return;
+        $result = move_uploaded_file($homework_file["tmp_name"], $version_path."/".$homework_file["name"]);
+        if (!$result) {
+            display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
+            return;
         }
     }
     $settings_file = $user_path."/user_assignment_settings.json";
@@ -232,7 +221,7 @@ function is_valid_zip_size($filename, $max_size) {
     if ($zip) {
         while ($inner_file = zip_read($zip)) {
             $size += zip_entry_filesize($inner_file);
-            if ($size > $max_size) {
+            if ($size / 1024 > $max_size) {
 
                 // FIXME: Added this, but it is a popup message, would be better to be like the other error messages
                 display_error("When unzipped, too big: ".$size." > ".$max_size);
