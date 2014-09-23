@@ -143,6 +143,7 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
 
     // TODO should support more than zip (.tar.gz etc.)
     if (!(in_array($homework_file["type"], $allowed))) {
+//display_error("Incorrect file upload type.  Got ".htmlspecialchars($homework_file["type"]));
         return array("error"=>"", "message"=>"Incorrect file upload type.  Got ".htmlspecialchars($homework_file["type"]));
     }
 
