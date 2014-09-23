@@ -2,6 +2,8 @@
 #include "tokens.h"
 
 TestResults* warnIfNotEmpty (const std::string & student_file, const std::string & expected_file) {
+  std::cout << "in warn if not empty" << std::endl;
+  std::cout << "the file '" << student_file << "'" << std::endl;
   // the instructor file should be empty
   assert (expected_file == "");
   Tokens* answer = new Tokens();
@@ -13,6 +15,8 @@ TestResults* warnIfNotEmpty (const std::string & student_file, const std::string
 }
 
 TestResults* errorIfNotEmpty ( const std::string & student_file, const std::string & expected_file) {
+  std::cout << "in error if not empty" << std::endl;
+  std::cout << "the file '" << student_file << "'" << std::endl;
   // the instructor file should be empty
   assert (expected_file == "");
   Tokens* answer = new Tokens();
@@ -26,6 +30,8 @@ TestResults* errorIfNotEmpty ( const std::string & student_file, const std::stri
 
 
 TestResults* errorIfEmpty ( const std::string & student_file, const std::string & expected_file) {
+  std::cout << "in error if empty" << std::endl;
+  std::cout << "the file '" << student_file << "'" << std::endl;
   // the instructor file should be empty
   assert (expected_file == "");
   Tokens* answer = new Tokens();

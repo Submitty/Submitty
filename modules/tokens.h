@@ -23,7 +23,7 @@ public:
     int tokensfound;
     bool harsh;
     void printJSON(std::ostream & file_out);
-    float grade();
+  //    float grade();
 };
 
 #endif

@@ -312,7 +312,7 @@ while true; do
 	fi
 
         # switch to tmp directory
-	pushd $tmp
+	pushd $tmp > /dev/null
 	
 	# --------------------------------------------------------------------
         # COMPILE THE SUBMITTED CODE
@@ -330,7 +330,7 @@ while true; do
 	fi
 
 
-	pushd $tmp_compilation
+	pushd $tmp_compilation > /dev/null
 
 	# first delete any submitted .out or .exe executable files
 	rm -f *.out *.exe test*.txt
@@ -360,7 +360,7 @@ while true; do
 	fi	
 
 	# return to the main tmp directory
-	popd
+	popd > /dev/null
 	
 	# move all executable files from the to the main tmp directory
 	# FIXME: not really what we want for the "FILE_EXISTS" command....
@@ -449,7 +449,7 @@ while true; do
         # REMOVE TEMP DIRECTORY
 
 	# step out of this directory
-	popd
+	popd > /dev/null
 	# and remove the directory
         rm -rf $tmp
 

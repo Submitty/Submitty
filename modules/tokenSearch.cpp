@@ -43,6 +43,8 @@ TestResults* searchToken ( const std::string& student,
 	//int V[token.size()];
 	buildTable( V, token_vec[0] );
 
+	std::cout << "searching for " << token_vec[0] << std::endl;
+
 	int m = 0;
 	int i = 0;
 	while ( m + i < student.size() ) {
@@ -51,6 +53,8 @@ TestResults* searchToken ( const std::string& student,
 		  //if ( i == token.size() - 1 ) {
 			if ( i == token_vec[0].size() - 1 ) {
 				diff->tokens_found.push_back( m );
+				std::cout << "found! " << std::endl;
+				diff->setGrade(1);	
 				return diff;
 			}
 
@@ -65,6 +69,10 @@ TestResults* searchToken ( const std::string& student,
 	}
 
 	diff->tokens_found.push_back( -1 );
+
+	std::cout << "not found!" << std::endl;
+	diff->setGrade(0);
+
 	return diff;
 }
 /*searchAllTokens looks for tokens delimited by newline characters in the
@@ -77,6 +85,9 @@ TestResults* searchAllTokens ( const std::string& student,
 	Tokens* difference = new Tokens();
 	difference->partial = false;
 	difference->harsh = true;
+
+
+	difference->setGrade(0);
 
 	//std::vector< std::string > tokenlist;
 	std::vector< std::string > tokenlist = token_vec;
@@ -103,6 +114,7 @@ TestResults* searchAnyTokens ( const std::string& student,
 		difference->tokens_found.push_back(
 				RabinKarpSingle( tokenlist[i], student ) );
 	}
+	difference->setGrade(0);
 	return difference;
 }
 
@@ -118,6 +130,7 @@ TestResults* searchTokens ( const std::string& student,
 		difference->tokens_found.push_back(
 				RabinKarpSingle( tokenlist[i], student ) );
 	}
+	difference->setGrade(0);
 	return difference;
 }
 

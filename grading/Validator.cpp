@@ -137,8 +137,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     } else {
       // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
       testcase_json << "\t\t\t\"diffs\": [\n";
-      float pts_helper = 1.0;
-      //      std::cerr << "-----------------------\ntest case " << i+1 << std::endl;
+      double pts_helper = 0.0;
       for (int j = 0; j < testcases[i].numFileGraders(); j++) {
 	std::cerr << "comparison #" << j << std::endl;
 	std::string helper_message = "";
@@ -153,15 +152,11 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 	if (result != NULL) {
 	  // THE GRADE (will be compiled across all comparisons)
 	  std::cout << "result->getGrade() " << result->getGrade() << std::endl;
-	  pts_helper *= result->getGrade();
+	  pts_helper += result->getGrade();
 	  result->printJSON(diff_stream);
-	  
 	  helper_message += " " + result->get_message();
-	
 	  // CLEANUP THIS COMPARISON
 	  delete result;
-	} else {
-	  pts_helper = 0;
 	}
 
 	// JSON FOR THIS COMPARISON
@@ -176,14 +171,10 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 	}
 
 	if (expected != "") {
-
 	  std::stringstream expected_path;
 	  expected_path << expected_out_dir << expected;
-	  
 	  testcase_json << "\t\t\t\t\t\"instructor_file\":\"" << expected_path.str() << "\",\n";
-	  //if (ok_to_compare) {
-	    testcase_json << "\t\t\t\t\t\"difference\":\"" << testcases[i].prefix() << "_" << j << "_diff.json\",\n";
-	    //}
+	  testcase_json << "\t\t\t\t\t\"difference\":\"" << testcases[i].prefix() << "_" << j << "_diff.json\",\n";
 	}
 	testcase_json << "\t\t\t\t\t\"description\": \"" << testcases[i].description(j) << "\",\n";
 	if (helper_message != "") {
@@ -191,10 +182,12 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 	}
 	testcase_json << "\t\t\t\t},\n";
       } // END COMPARISON LOOP
-
+      //assert (pts_helper >= 0.0 && pts_helper <= testcases[i].numFileGraders()+0.00001);
+      pts_helper /= double(testcases[i].numFileGraders());
+      assert (pts_helper >= -0.00001 && pts_helper <= 1.000001);
+      pts_helper = std::max(0.0,std::min(1.0,pts_helper));
       testcase_json << "\t\t\t],\n";
       testcase_pts = (int)floor(pts_helper * testcases[i].points());
-
     } // end if/else of test case type
 
 

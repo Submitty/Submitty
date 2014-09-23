@@ -73,23 +73,6 @@ public:
   bool extraStudentOutputOk;
 };
 
-/*
-class Tokens: public TestResults {
-public:
-	Tokens();
-	std::vector<int> tokens_found;
-	int num_tokens;
-	bool partial;
-	int tokensfound;
-	bool harsh;
-  // FIXME: redesign necessary
-  //  float tokens_grade;
-  //void setGrade(float g) { my_grade = g; }
-	void printJSON(std::ostream & file_out);
-  //float grade();
-};
-*/
-
 inline Difference::Difference() :
   TestResults(), output_length_a(0), output_length_b(0), edit_distance(0), 
   type(OtherType), extraStudentOutputOk(false) {

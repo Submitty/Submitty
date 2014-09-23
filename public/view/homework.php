@@ -1,7 +1,9 @@
 <?php require_once("view/".$course."_container.php");?>
+<!--<?php require_once("view/csciXXXX_container.php");?>-->
 
 <link href="resources/bootmin.css" rel="stylesheet"></link>
-<!--<link href="resources/main.css" rel="stylesheet"></link>-->
+<link href="resources/badge.css" rel="stylesheet"></link>
+
 <script src="resources/script/main.js"></script>
 
 <?php $course =    $course = htmlspecialchars($_GET["course"]); ?>
@@ -241,8 +243,10 @@ if (on_dev_team($user)) {
         if (  isset($test["score"]) && 
               isset($test["points_possible"]) && 
               $test["points_possible"] != 0 && 
-              $test["is_hidden"] === false && 
-              $test["is_extra_credit"] === false ) {
+              $test["is_hidden"] == false && 
+              $test["is_extra_credit"] == false ) {
+
+	
                 if (!($test["points_possible"] > 0)) {
                    $part_percent = 1;
                 } else {
