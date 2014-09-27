@@ -32,20 +32,29 @@ void buildTable ( int* V, const std::string& keyword ) {
  linear with respect to the token. Overall, the algorithm runs in O(N + M)
  time where N is the length of the student and M is the length of the token.*/
 TestResults* searchToken ( const std::string& student,
-		const std::string& token ) {
+			   const std::vector<std::string>& token_vec ) {
 
 	//Build a table to use for the search
 	Tokens* diff = new Tokens();
 	diff->num_tokens = 1;
-	int V[token.size()];
-	buildTable( V, token );
+	//buildTable( V, token );
+	assert (token_vec.size() == 1);
+	int V[token_vec[0].size()];
+	//int V[token.size()];
+	buildTable( V, token_vec[0] );
+
+	std::cout << "searching for " << token_vec[0] << std::endl;
 
 	int m = 0;
 	int i = 0;
 	while ( m + i < student.size() ) {
-		if ( student[i + m] == token[i] ) {
-			if ( i == token.size() - 1 ) {
+	  //if ( student[i + m] == token[i] ) {
+		if ( student[i + m] == token_vec[0][i] ) {
+		  //if ( i == token.size() - 1 ) {
+			if ( i == token_vec[0].size() - 1 ) {
 				diff->tokens_found.push_back( m );
+				std::cout << "found! " << std::endl;
+				diff->setGrade(1);	
 				return diff;
 			}
 
@@ -60,6 +69,10 @@ TestResults* searchToken ( const std::string& student,
 	}
 
 	diff->tokens_found.push_back( -1 );
+
+	std::cout << "not found!" << std::endl;
+	diff->setGrade(0);
+
 	return diff;
 }
 /*searchAllTokens looks for tokens delimited by newline characters in the
@@ -68,12 +81,18 @@ TestResults* searchToken ( const std::string& student,
  linear with respect to the token. Overall, the algorithm runs in O(N + M)
  time where N is the length of the student and M is the length of the token.*/
 TestResults* searchAllTokens ( const std::string& student,
-		const std::string& tokens ) {
+			       const std::vector<std::string>& token_vec ) {
 	Tokens* difference = new Tokens();
 	difference->partial = false;
 	difference->harsh = true;
-	std::vector< std::string > tokenlist;
-	tokenlist = splitTokens( tokens );
+
+
+	difference->setGrade(0);
+
+	//std::vector< std::string > tokenlist;
+	std::vector< std::string > tokenlist = token_vec;
+	//tokenlist = splitTokens( tokens );
+
 	difference->num_tokens = tokenlist.size();
 	for ( unsigned int i = 0; i < tokenlist.size(); i++ ) {
 		difference->tokens_found.push_back(
@@ -83,31 +102,35 @@ TestResults* searchAllTokens ( const std::string& student,
 }
 
 TestResults* searchAnyTokens ( const std::string& student,
-		const std::string& tokens ) {
+			       const std::vector<std::string>& token_vec ) {
 	Tokens* difference = new Tokens();
 	difference->partial = false;
 	difference->harsh = false;
-	std::vector< std::string > tokenlist;
-	tokenlist = splitTokens( tokens );
+	//std::vector< std::string > tokenlist;
+	std::vector< std::string > tokenlist = token_vec;
+	  //tokenlist = splitTokens( tokens );
 	difference->num_tokens = tokenlist.size();
 	for ( unsigned int i = 0; i < tokenlist.size(); i++ ) {
 		difference->tokens_found.push_back(
 				RabinKarpSingle( tokenlist[i], student ) );
 	}
+	difference->setGrade(0);
 	return difference;
 }
 
 TestResults* searchTokens ( const std::string& student,
-		const std::string& tokens ) {
+			    const std::vector<std::string>& token_vec ) {
 	Tokens* difference = new Tokens();
 	difference->partial = true;
-	std::vector< std::string > tokenlist;
-	tokenlist = splitTokens( tokens );
+	//std::vector< std::string > tokenlist;
+	std::vector< std::string > tokenlist = token_vec;
+	//tokenlist = splitTokens( tokens );
 	difference->num_tokens = tokenlist.size();
 	for ( unsigned int i = 0; i < tokenlist.size(); i++ ) {
 		difference->tokens_found.push_back(
 				RabinKarpSingle( tokenlist[i], student ) );
 	}
+	difference->setGrade(0);
 	return difference;
 }
 
@@ -138,6 +161,7 @@ int RabinKarpSingle ( std::string token, std::string searchstring ) {
 	}
 	return -1;
 }
+
 
 std::vector< std::string > splitTokens ( const std::string& tokens ) {
 	std::vector< std::string > tokenlist;
@@ -176,3 +200,4 @@ std::vector< std::string > splitTokens ( const std::string& tokens ) {
 	}
 	return tokenlist;
 }
+

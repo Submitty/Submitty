@@ -292,6 +292,7 @@ while true; do
 
 
 
+	test_code_path="$base_path/$course/test_code/$assignment"
 	test_input_path="$base_path/$course/test_input/$assignment"
 	test_output_path="$base_path/$course/test_output/$assignment"
 	results_path="$base_path/$course/results/$assignment/$user/$version"
@@ -302,40 +303,6 @@ while true; do
         # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
 	tmp=`mktemp -d /tmp/temp.XXXXXXXX`
 
-
-        # copy submitted files to tmp directory
-	# cp 1>/dev/null  2>&1  -r $submission_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory $submission_path" >&2
-	mkdir "$tmp/STUDENT_FILES"
-	cp 1>/dev/null  2>&1  -r $submission_path/* "$tmp/STUDENT_FILES" ||  echo "ERROR: Failed to copy to temporary directory $submission_path" >&2
-
-
-
-
-
-
-
-
-
-        # copy input files to tmp directory
-	if [ -d "$test_input_path" ]
-	then
-	    cp -rf $test_input_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory $test_input_path" >&2
-	fi
-	
-
-
-
-
-
-
-
-
-        # copy output files to tmp directory  (SHOULD CHANGE THIS)
-	if [ -d "$test_output_path" ]
-	then
-	    cp -rf $test_output_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory $test_output_path" >&2
-	fi
-	
 	submission_time=""
 	if [ -e "$submission_path/.submit.timestamp" ]
 	then
@@ -343,48 +310,86 @@ while true; do
 	else
 	    echo "ERROR:  $submission_path/.submit.timestamp   does not exist!" >&2
 	fi
-	
 
         # switch to tmp directory
-# FIXME pushd?
-	cd $tmp
-	
+	pushd $tmp > /dev/null
 	
 	# --------------------------------------------------------------------
         # COMPILE THE SUBMITTED CODE
 
-	# first delete any submitted .out or .exe executable files
-	rm -f *.out *.exe 
-
-        #clang++ -Wall *.cpp -o a.out &> .submit_compilation_output.txt
-	cd STUDENT_FILES
-	g++ -Wall *.cpp -o ../a.out    &> ../.submit_compilation_output.txt
-	cd ..
-	compile_error_code=$?
+        # copy submitted files to a tmp compilation directory
+	tmp_compilation=$tmp/TMP_COMPILATION
+	mkdir $tmp_compilation
+	cp 1>/dev/null  2>&1  -r $submission_path/* $tmp_compilation ||  echo "ERROR: Failed to copy to temporary directory $submission_path" >&2
 
 
-	if [[ "$compile_error_code" -ne 0 ]] ;
+        # copy any instructor code files to tmp directory
+	if [ -d "$test_code_path" ]
 	then
-	     echo "COMPILE FAILURE CODE $compile_error_code"
-	else
-	     echo "COMPILE OK"
+	    cp -rf $test_code_path/* "$tmp_compilation" ||  echo "ERROR: Failed to copy to temporary directory $test_code_path" >&2
 	fi
+
+
+	pushd $tmp_compilation > /dev/null
+
+	# first delete any submitted .out or .exe executable files
+	rm -f *.out *.exe test*.txt
+
+	if [ ! -r "$bin_path/$assignment/compile.out" ]
+	then
+	    echo "ERROR:  $bin_path/$assignment/compile.out  does not exist/is not readable" >&2
+	else
+
+   	    # copy compile.out to the current directory
+	    cp -f "$bin_path/$assignment/compile.out" $tmp_compilation/my_compile.out
+
+  	    # give the untrusted user read/write/execute permissions on the tmp directory & files
+#	    chmod -R go+rwx $tmp
+	    # run the compile.out as the untrusted user
+#	    $base_path/bin/untrusted_runscript $tmp/my_compile.out >& .submit_compile_output.txt
+
+	    $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
+
+	    compile_error_code="$?"
+	    if [[ "$compile_error_code" -ne 0 ]] ;
+	    then
+		echo "COMPILE FAILURE CODE $compile_error_code"
+	    else
+		echo "COMPILE OK"
+	    fi
+	fi	
+
+	# return to the main tmp directory
+	popd > /dev/null
 	
-	
+	# move all executable files from the to the main tmp directory
+	# FIXME: not really what we want for the "FILE_EXISTS" command....
+	cp -f $tmp_compilation/README*.txt $tmp
+	cp -f $tmp_compilation/*.out $tmp
+	cp -f $tmp_compilation/test*.txt $tmp
+
+	# remove the directory
+	rm -rf $tmp_compilation
+
 	# --------------------------------------------------------------------
         # RUN RUNNER
+
+        # copy input files to tmp directory
+	if [ -d "$test_input_path" ]
+	then
+	    cp -rf $test_input_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory $test_input_path" >&2
+	fi
+
 	# copy run.out to the tmp directory
 	if [ ! -r "$bin_path/$assignment/run.out" ]
 	then
 	    echo "ERROR:  $bin_path/$assignment/run.out  does not exist/is not readable" >&2
-	    #continue
 	else
 
 	    cp -f "$bin_path/$assignment/run.out" $tmp/my_run.out
 
   	    # give the untrusted user read/write/execute permissions on the tmp directory & files
 	    chmod -R go+rwx $tmp
-	    
 	    # run the run.out as the untrusted user
 	    $base_path/bin/untrusted_runscript $tmp/my_run.out >& .submit_runner_output.txt
 
@@ -399,6 +404,13 @@ while true; do
 	
 	# --------------------------------------------------------------------
         # RUN VALIDATOR
+
+        # copy output files to tmp directory  (SHOULD CHANGE THIS)
+	if [ -d "$test_output_path" ]
+	then
+	    cp -rf $test_output_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory $test_output_path" >&2
+	fi
+
 	if [ ! -r "$bin_path/$assignment/validate.out" ]
 	then
 	    echo "ERROR:  $bin_path/$assignment/validate.out  does not exist/is not readable" >&2
@@ -432,17 +444,13 @@ while true; do
         mkdir -p "$results_path" ||  echo "ERROR: Could not create results path $results_path" >&2
         cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/.submit* $tmp/submission.json $tmp/test*.json "$results_path"
 
-	
-
-	# TEMPORARY FOR TA GRADING SERVER, WILL GO AWAY SOON
-        mkdir -p "$results_path/HACK" ||  echo "ERROR: Could not create results path $results_path/HACK" >&2
-	cp  1>/dev/null  2>&1  -r $submission_path/* "$results_path/HACK" ||  echo "ERROR: Failed to copy to hack output directory $results_path/HACK" >&2
-        cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/.submit* "$results_path/HACK"
-
-
 
 	# --------------------------------------------------------------------
         # REMOVE TEMP DIRECTORY
+
+	# step out of this directory
+	popd > /dev/null
+	# and remove the directory
         rm -rf $tmp
 
 

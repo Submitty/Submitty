@@ -1,0 +1,47 @@
+
+
+.diff-row {
+    vertical-align: top;
+}
+
+.diff-row-none {
+    vertical-align: top;
+    display: none;
+}
+
+.panel {
+    margin: 10px 20px 10px 10px;
+    border-radius: 0;
+    background-color: #F8F8F8;
+    overflow-x: auto;	
+}
+.col-md-6 {
+    padding: 0;
+}
+
+.box {
+    border-radius: 3px;
+    padding: 15px;
+    border: 2px solid #F0F0F0;
+    height: 100%;
+    margin: 5px;
+    background:rgba(255,255,255,0.8);
+
+}
+.display-none {
+    display: none;
+}
+
+.green-background {
+    background-color: #006600;
+}
+
+.yellow-background {
+    background-color: #CFCF00;
+    color: #000000;
+}
+
+.red-background {
+    background-color: #E60000;
+}
+

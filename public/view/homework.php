@@ -1,7 +1,9 @@
 <?php require_once("view/".$course."_container.php");?>
+<!--<?php require_once("view/csciXXXX_container.php");?>-->
 
 <link href="resources/bootmin.css" rel="stylesheet"></link>
-<link href="resources/main.css" rel="stylesheet"></link>
+<link href="resources/badge.css" rel="stylesheet"></link>
+
 <script src="resources/script/main.js"></script>
 
 <?php $course =    $course = htmlspecialchars($_GET["course"]); ?>
@@ -51,7 +53,7 @@ function version_changed(){
 // FIXME: New variable in class.json 
 if (on_dev_team($user)) { 
   echo "<font color=\"ff0000\" size=+5>on dev team</font>"; 
-  echo "<br>Dev Team = ";
+  echo "<br>the Dev Team = ";
   for ($i=0; $i<count($dev_team); $i++) {
     echo " ".$dev_team[$i];
   }
@@ -215,6 +217,7 @@ if (on_dev_team($user)) {
    <?php } else {?>
 
 
+   <?php if ($assignment_message != "") { echo "<p><b><em><font size=+1 color=green>".$assignment_message."</font></b></p>"; } ?>
 
 
 <!-- DETAILS ON INDIVIDUAL TESTS --> 
@@ -240,8 +243,10 @@ if (on_dev_team($user)) {
         if (  isset($test["score"]) && 
               isset($test["points_possible"]) && 
               $test["points_possible"] != 0 && 
-              $test["is_hidden"] === false && 
-              $test["is_extra_credit"] === false ) {
+              $test["is_hidden"] == false && 
+              $test["is_extra_credit"] == false ) {
+
+	
                 if (!($test["points_possible"] > 0)) {
                    $part_percent = 1;
                 } else {
@@ -373,6 +378,47 @@ if (on_dev_team($user)) {
    <?php } ?>
 
   </div>
+  </div>
+
+
+
+
+
+
+
+<?php 
+
+//if (on_dev_team($user)) { 
+//echo "<font color=\"ff0000\" size=+5>on dev team</font><br><br>"; 
+
+if ($ta_grade_released == true) {
+  
+   //<!--- TA GRADE -->
+   echo "<div class=\"panel-body\">";
+   echo "<div class=\"box\">";
+   
+   $path_front = get_path_front($course);
+   
+   $gradefile_path = "$path_front/reports/$assignment_id/".$username.".txt";
+
+   if (!file_exists($gradefile_path)) {
+      echo "<h3>TA grade not available</h3>";
+   } else {
+      $grade_file = file_get_contents($gradefile_path);
+      echo "<h3>TA grade</h3>";
+      echo "<em><p>Please see the <a href=\"https://www.cs.rpi.edu/academics/courses/fall14/csci1200/announcements.php\">Announcements</a> 
+                page for the curve for this homework.</p></em>";
+      echo "<pre>".$grade_file."</pre>";
+   }
+
+   echo "</div>";
+   echo "</div>";
+
+} else {
+  //echo "<h3>TA grades for this homework not released yet</h3>";
+}
+   
+?>
 
 <!-- END OF "IF AT LEAST ONE SUBMISSION... " -->
 <?php } ?>

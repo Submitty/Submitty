@@ -19,9 +19,9 @@
 #include "modules/modules.h"
 #include "grading/TestCase.h"
 
-#include "grading/TestCase.cpp"  /* should not #include a .cpp file */
 
-//#include "../sampleConfig/HW1/config.h"
+#include <config.h>
+
 
 /*Generates a file in json format containing all of the information defined in
  config.h for easier parsing.*/
@@ -80,6 +80,8 @@ Now Exiting" << std::endl;
 
   init << "{\n\t\"id\": \"" << id << "\"," << std::endl;
   init << "\t\"name\": \"" << name << "\"," << std::endl;
+
+  init << "\t\"assignment_message\": \"" << assignment_message << "\"," << std::endl;
 
   init << "\t\"max_submissions\": " << max_submissions << "," << std::endl;
   init << "\t\"max_submission_size\": " << max_submission_size << "," << std::endl;

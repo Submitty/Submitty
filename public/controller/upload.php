@@ -27,8 +27,8 @@ if (isset($_FILES["file"])) {
         $course != "csci1200" &&
         $course != "csci1200test" &&
         $course != "csci1100test" &&
-        $course != "default"
-        ) {
+        $course != "csci4960" &&
+        $course != "default") {
         echo "BAD COURSE '".$course."'";
         exit();
     }
