@@ -406,7 +406,7 @@ if ($ta_grade_released == true) {
    } else {
       $grade_file = file_get_contents($gradefile_path);
       echo "<h3>TA grade</h3>";
-      echo "<em><p>Please see the <a href=\"https://www.cs.rpi.edu/academics/courses/fall14/csci1200/announcements.php\">Announcements</a> 
+      echo "<em><p>Please see the <a href=\"http://www.cs.rpi.edu/academics/courses/fall14/csci1200/announcements.php\">Announcements</a> 
                 page for the curve for this homework.</p></em>";
       echo "<pre>".$grade_file."</pre>";
    }

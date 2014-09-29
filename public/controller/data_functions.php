@@ -242,21 +242,32 @@ function can_edit_assignment($username, $course, $assignment_id, $assignment_con
 // TODOL FIXME: but the ACTIVE should not be updated ( we can manually adjust active for excused absenses)
 return true;
     
-    $due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
+//$due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
+    $class_config = get_class_config($course);
+    $due_date = get_due_date($class_config,$assignment_id);
     $last_edit_date = $due_date->add(new DateInterval("P2D"));
     $now = new DateTime("NOW");
 
     return $now <= $last_edit_date;
 }
 
-function get_due_date($username, $course, $assignment_id, $assignment_config) {
-    $path_front = get_path_front($course);
-    date_default_timezone_set('America/New_York');
-    $date = new DateTime($assignment_config["due_date"]);
+//function get_due_date($username, $course, $assignment_id) {
+function get_due_date($class_config, $assignment_id) {
+    $assignments = $class_config["assignments"];
+    foreach ($assignments as $one) {
+      if ($one["assignment_id"] == $assignment_id) {
+	if (isset($one["due_date"])) {
+          date_default_timezone_set('America/New_York');
+          $date = new DateTime($one["due_date"]);
+       	  return $date;
+        } else {
+          date_default_timezone_set('America/New_York');
+          $date = new DateTime("2014-12-01 23:59:59.0");
+       	  return $date;
+        }
 
-
-//		   echo "the due date = ".$assignment_config["due_date"];
-    return $date;
+      }
+    }
 }
 
 
@@ -481,7 +492,9 @@ function get_select_submission_data($username, $course, $assignment_id, $assignm
             $score = "Grading in progress";
         }
 
-        $due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
+    $class_config = get_class_config($course);
+    $due_date = get_due_date($class_config,$assignment_id);
+//        $due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
 //	if (!isset($due_date) || !defined("due_date")) {
 //		       $due_date = "";
 //		       }

@@ -236,40 +236,40 @@ while true; do
 	fi
 	if [ ! -r "$base_path/$course" ]
 	then
-	    echo "ERROR: directory is not readable '$base_path/$course'" >&2
+	    echo "ERROR: A directory is not readable '$base_path/$course'" >&2
 	    continue
 	fi
 
 	if [ ! -d "$base_path/$course/submissions" ]
 	then
-	    echo "ERROR: directory does not exist '$base_path/$course/submissions'" >&2
+	    echo "ERROR: B directory does not exist '$base_path/$course/submissions'" >&2
 	    continue
 	fi
 	if [ ! -r "$base_path/$course/submissions" ]
 	then
-	    echo "ERROR: directory is not readable '$base_path/$course/submissions'" >&2
+	    echo "ERROR: C directory is not readable '$base_path/$course/submissions'" >&2
 	    continue
 	fi
 
 	if [ ! -d "$base_path/$course/submissions/$assignment" ]
 	then
-	    echo "ERROR: directory does not exist '$base_path/$course/submissions/$assignment'" >&2
+	    echo "ERROR: D directory does not exist '$base_path/$course/submissions/$assignment'" >&2
 	    continue
 	fi
 	if [ ! -r "$base_path/$course/submissions/$assignment" ]
 	then
-	    echo "ERROR: directory is not readable '$base_path/$course/submissions/$assignment'" >&2
+	    echo "ERROR: E directory is not readable '$base_path/$course/submissions/$assignment'" >&2
 	    continue
 	fi
 
 	if [ ! -d "$base_path/$course/submissions/$assignment/$user" ]
 	then
-	    echo "ERROR: directory does not exist '$base_path/$course/submissions/$assignment/$user'" >&2
+	    echo "ERROR: F directory does not exist '$base_path/$course/submissions/$assignment/$user'" >&2
 	    continue
 	fi
 	if [ ! -r "$base_path/$course/submissions/$assignment/$user" ]
 	then
-	    echo "ERROR: directory is not readable '$base_path/$course/submissions/$assignment/$user'" >&2
+	    echo "ERROR: G directory is not readable '$base_path/$course/submissions/$assignment/$user'" >&2
 	    continue
 	fi
 
@@ -282,7 +282,7 @@ while true; do
 	fi
 	if [ ! -r "$submission_path" ]
 	then
-	    echo "ERROR: directory is not readable '$submission_path'" >&2
+	    echo "ERROR: H directory is not readable '$submission_path'" >&2
 	    # leave this submission file for next time (hopefully
 	    # permissions will be corrected then)
 	    #FIXME remove GRADING_ file
@@ -364,9 +364,9 @@ while true; do
 	
 	# move all executable files from the to the main tmp directory
 	# FIXME: not really what we want for the "FILE_EXISTS" command....
-	cp -f $tmp_compilation/README*.txt $tmp
-	cp -f $tmp_compilation/*.out $tmp
-	cp -f $tmp_compilation/test*.txt $tmp
+        cp  1>/dev/null  2>&1  $tmp_compilation/README*.txt  $tmp_compilation/*.out $tmp_compilation/test*.txt $tmp 
+
+
 
 	# remove the directory
 	rm -rf $tmp_compilation

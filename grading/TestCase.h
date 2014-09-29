@@ -255,6 +255,7 @@ private:
 };
 
 
+std::string getAssignmentIdFromCurrentDirectory();
 
 
 

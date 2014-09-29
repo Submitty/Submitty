@@ -6,7 +6,7 @@ HW=$(notdir $(CURDIR))
 bindir=$(CURDIR)/../../../bin/$(HW)
 
 gcc=clang++
-#gcc=g++ -std=c++11
+#gcc=g++ -std=c++11 
 
 config_files=$(RCOS)/grading/config.cpp \
 	       $(RCOS)/grading/TestCase.cpp \

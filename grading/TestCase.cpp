@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "TestCase.h"
 
 int TestCase::next_test_case_id = 1;
@@ -111,4 +112,32 @@ TestResults* TestCaseTokens::doit(const std::string &prefix) {
 
 
   return token_grader(s,tokens);
+}
+
+
+
+
+std::string getAssignmentIdFromCurrentDirectory() {
+  char cCurrentPath[1000];
+  if (!getcwd(cCurrentPath, 1000)) {
+    std::cerr << "ERROR: couldn't get current directory" << std::endl;
+    exit(0);
+  }
+  //printf ("The current working directory is '%s'\n", cCurrentPath);
+  std::string tmp = cCurrentPath;
+
+  assert (tmp.size() >= 1);
+  assert (tmp[tmp.size()-1] != '/');
+
+  while (1) {
+
+    int loc = tmp.find('/');
+    if (loc == std::string::npos) break;
+    tmp = tmp.substr(loc+1,tmp.size()-loc-1);
+
+    //std::cout << "tmp is now '" << tmp << "'\n";
+
+  }
+  assert (tmp.size() >= 1);
+  return tmp;
 }

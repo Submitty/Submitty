@@ -172,6 +172,16 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
 	if (expected != "") {
 	  std::stringstream expected_path;
+
+//const char* input_dir = "test_input/lab1/";
+// expected output files directory
+
+	  std::string id = getAssignmentIdFromCurrentDirectory();
+
+	  std::string expected_out_dir = "test_output/" + id + "/";
+
+
+
 	  expected_path << expected_out_dir << expected;
 	  testcase_json << "\t\t\t\t\t\"instructor_file\":\"" << expected_path.str() << "\",\n";
 	  testcase_json << "\t\t\t\t\t\"difference\":\"" << testcases[i].prefix() << "_" << j << "_diff.json\",\n";
