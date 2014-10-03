@@ -62,6 +62,31 @@ if (on_dev_team($user)) {
 } 
 ?>
 
+<?php 
+//if (on_dev_team($user)) { 
+
+   //<!--- PRIORITY HELP QUEUE SUMMARY HTML RAINBOW CHART -->
+//   echo "<div class=\"panel-body\">";
+//   echo "<div class=\"box\">";
+   
+   $path_front = get_path_front($course);
+   $priority_path = "$path_front/reports/summary_html/".$username."_priority.html";
+
+   if (!file_exists($priority_path)) {
+  //    echo "<h3>GRADE SUMMARY not available</h3>";
+   } else {
+      $priority_file = file_get_contents($priority_path);
+      echo $priority_file;
+   }
+
+//   echo "</div>";
+//   echo "</div>";
+
+//}
+?>
+
+
+
 <div class="panel-body" style="text-align: left;">
   <span><b>Select Lab or Homework:</b></span>
   <form action="">
@@ -417,11 +442,35 @@ if ($ta_grade_released == true) {
 } else {
   //echo "<h3>TA grades for this homework not released yet</h3>";
 }
+
+//<!-- END OF "IF AT LEAST ONE SUBMISSION... " -->
+}
+ //<?php } ? >
+
+
+//if (on_dev_team($user)) { 
+
+   //<!--- SUMMARY HTML RAINBOW CHART -->
+   echo "<div class=\"panel-body\">";
+   echo "<div class=\"box\">";
+   
+   $path_front = get_path_front($course);
+   $gradefile_path = "$path_front/reports/summary_html/".$username."_summary.html";
+
+   if (!file_exists($gradefile_path)) {
+      echo "<h3>GRADE SUMMARY not available</h3>";
+   } else {
+      $grade_file = file_get_contents($gradefile_path);
+      echo $grade_file;
+   }
+
+   echo "</div>";
+   echo "</div>";
+
+//}
    
 ?>
 
-<!-- END OF "IF AT LEAST ONE SUBMISSION... " -->
-<?php } ?>
 
 <!------------------------------------------------------------------------>
 

@@ -138,6 +138,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
       testcase_json << "\t\t\t\"diffs\": [\n";
       double pts_helper = 0.0;
+      double fraction_sum = 0.0;
+      
       for (int j = 0; j < testcases[i].numFileGraders(); j++) {
 	std::cerr << "comparison #" << j << std::endl;
 	std::string helper_message = "";
@@ -152,7 +154,16 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 	if (result != NULL) {
 	  // THE GRADE (will be compiled across all comparisons)
 	  std::cout << "result->getGrade() " << result->getGrade() << std::endl;
-	  pts_helper += result->getGrade();
+
+	  double pts_fraction = testcases[i].test_case_grader[j]->points_fraction;
+	  if (pts_fraction < -0.5) {
+	    pts_fraction = 1 / double(testcases[i].numFileGraders());
+	  }
+	  fraction_sum += pts_fraction;
+	  //pts_helper *=pts_fraction;
+
+
+	  pts_helper += pts_fraction*result->getGrade();
 	  result->printJSON(diff_stream);
 	  helper_message += " " + result->get_message();
 	  // CLEANUP THIS COMPARISON
@@ -172,16 +183,11 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
 	if (expected != "") {
 	  std::stringstream expected_path;
-
-//const char* input_dir = "test_input/lab1/";
-// expected output files directory
-
-	  std::string id = getAssignmentIdFromCurrentDirectory();
+	  //	  std::string id = getAssignmentIdFromCurrentDirectory();
+	  
+	  std::string id = hw_id;
 
 	  std::string expected_out_dir = "test_output/" + id + "/";
-
-
-
 	  expected_path << expected_out_dir << expected;
 	  testcase_json << "\t\t\t\t\t\"instructor_file\":\"" << expected_path.str() << "\",\n";
 	  testcase_json << "\t\t\t\t\t\"difference\":\"" << testcases[i].prefix() << "_" << j << "_diff.json\",\n";
@@ -192,8 +198,9 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 	}
 	testcase_json << "\t\t\t\t},\n";
       } // END COMPARISON LOOP
-      //assert (pts_helper >= 0.0 && pts_helper <= testcases[i].numFileGraders()+0.00001);
-      pts_helper /= double(testcases[i].numFileGraders());
+
+    assert (fraction_sum > 0.99 && fraction_sum < 1.01);
+
       assert (pts_helper >= -0.00001 && pts_helper <= 1.000001);
       pts_helper = std::max(0.0,std::min(1.0,pts_helper));
       testcase_json << "\t\t\t],\n";
