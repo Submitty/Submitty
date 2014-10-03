@@ -297,7 +297,7 @@ function get_submitted_files($username, $course, $assignment_id, $assignment_ver
         $contents = get_contents($folder, 5);
     }
     for ($i = 0; $i < count($contents); $i++) {
-        $contents[$i] = substr($contents[$i], strlen($folder) + 1);
+        $contents[$i]["name"] = substr($contents[$i]["name"], strlen($folder) + 1);
     }
     return $contents;
 }
@@ -317,7 +317,7 @@ function get_contents($dir, $max_depth) {
                             array_push($contents, $child);
                         }
                     } else {
-                        array_push($contents, $dir."/".$file);
+                        array_push($contents, array("name"=>$dir."/".$file, "size"=>floor(filesize($dir."/".$file) / 1024)));
                     }
                 }
             }
