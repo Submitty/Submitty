@@ -86,6 +86,9 @@ function display_file_permissions($perms) {
 // Upload HW Assignment to server and unzip
 function upload_homework($username, $course, $assignment_id, $homework_file) {
 
+    if (!isset($homework_file["tmp_name"]) || $homework_file["tmp_name"] == "") {
+        display_error("The file did not upload to POST[tmp_name].  This issue is currently being worked on.  A smaller file or fast connection might help.");
+    }
     // Store the time, right now!  
     // 2001-03-10 17:16:18 (the MySQL DATETIME format)
     date_default_timezone_set('America/New_York');
@@ -287,31 +290,40 @@ function get_class_config($course) {
 // Get a list of uploaded files
 function get_submitted_files($username, $course, $assignment_id, $assignment_version) {
 
-// FIXME: Would like this to search into directories (to clearly
-//   display when students have accidentally included a directory structure
-//   in their zip instead of just files
-
-// FIXME: Would like this to not display the dotfiles in this
-//   directory (e.g., .submit.timestamp)
-
     $path_front = get_path_front($course);
     $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
+    $contents = array();
     if ($assignment_version != 0) {
-        $contents = scandir($folder);}
-    else {
-        return array();
+        $contents = get_contents($folder, 5);
     }
-    if (!$contents) {
-        return array();
+    for ($i = 0; $i < count($contents); $i++) {
+        $contents[$i]["name"] = substr($contents[$i]["name"], strlen($folder) + 1);
     }
+    return $contents;
+}
 
-    $filtered_contents = array();
-    foreach ($contents as $item) {
-        if ($item != "." && $item != "..") {
-            array_push($filtered_contents, $item);
+function get_contents($dir, $max_depth) {
+    if ($max_depth == 0) {
+        return array();
+    }
+    $contents = array();
+    if (is_dir($dir)) {
+        if ($handle = opendir($dir)) {
+            while (($file = readdir($handle)) !== false) {
+                if ($file[0] && $file[0] != ".") {
+                    if (is_dir($dir."/".$file)) {
+                        $children = get_contents($dir."/".$file, $max_depth - 1);
+                        foreach ($children as $child) {
+                            array_push($contents, $child);
+                        }
+                    } else {
+                        array_push($contents, array("name"=>$dir."/".$file, "size"=>floor(filesize($dir."/".$file) / 1024)));
+                    }
+                }
+            }
         }
     }
-    return $filtered_contents;
+    return $contents;
 }
 
 // Find most recent submission from user

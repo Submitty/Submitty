@@ -229,7 +229,7 @@ if (on_dev_team($user)) {
               </li>
               <?php foreach($submitted_files as $file) {?>
               <li class="list-group-item">
-                <?php echo $file;?>
+                <?php echo $file["name"];?> (<?php echo $file["size"];?>kb)
                    </li>
               <?php } ?>
             </ul>
