@@ -55,9 +55,11 @@ if (isset($_FILES["file"])) {
         header("Location: index.php?page=displaymessage&course=".$course."&assignment_id=".$assignment_id);
         exit();
     }
+    $_SESSION["status"] = "uploaded_no_error";
+} else {
+    $_SESSION["status"] = "upload_failed";
 }
 //Go back to homework page
-$_SESSION["status"] = "uploaded_no_error";
 header("Location: index.php?page=displaymessage&course=".$course."&assignment_id=".$assignment_id);
 
 ?>
