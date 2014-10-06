@@ -1,7 +1,7 @@
 <?php $course = htmlspecialchars($_GET["course"]);
 require_once("view/".$course."_container.php");
 // require_once("view/csciXXXX_container.php");
-print('<link href="resources/'.$course.'_main.css" rel="stylesheet"></link>"');
+print('<link href="resources/'.$course.'_main.css" rel="stylesheet"></link>');
 ?>
 
 <link href="resources/bootmin.css" rel="stylesheet"></link>
