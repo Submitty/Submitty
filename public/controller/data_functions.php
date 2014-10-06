@@ -87,7 +87,11 @@ function display_file_permissions($perms) {
 function upload_homework($username, $course, $assignment_id, $homework_file) {
 
     if (!isset($homework_file["tmp_name"]) || $homework_file["tmp_name"] == "") {
-        display_error("The file did not upload to POST[tmp_name].  This issue is currently being worked on.  A smaller file or fast connection might help.");
+        $error_text = "The file did not upload to POST[tmp_name].  This issue is currently being worked on.  A smaller file or fast connection might help.";
+        if (isset($homework_file["error"])) {
+            $error_text = $error_text. " Error code given for upload is ". $homework_file["error"]. " . This is defined at http://php.net/manual/en/features.file-upload.errors.php";
+        }
+        display_error($error_text);
     }
     // Store the time, right now!  
     // 2001-03-10 17:16:18 (the MySQL DATETIME format)
