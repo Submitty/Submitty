@@ -37,9 +37,11 @@ const int extra_credit_pts = 5;
 // File directories
 
 // input files directory
-const char* input_dir = "test_input/hw1/";
+const std::string input_dir_S = "test_input/"+id+"/";
+const char* input_dir = input_dir_S.c_str();
 // expected output files directory
-const char* expected_out_dir = "test_output/hw1/";
+const std::string output_dir_S = "test_output/"+id+"/";
+const char* expected_out_dir = output_dir_S.c_str();
 
 // Test cases
 const int num_testcases = 11;
@@ -52,7 +54,7 @@ TestCase testcases[num_testcases] = {
 	"README",
 	"README.txt",
 	TestCasePoints(2)
-  ),			   
+  ),
 
   TestCase::MakeCompilation(
 			 "Compilation",

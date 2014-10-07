@@ -37,9 +37,9 @@ const int extra_credit_pts = 2;
 // File directories
 
 // input files directory
-const char* input_dir = "test_input/lab1/";
+const char* input_dir = "test_input/"+id.c_str()+"/";
 // expected output files directory
-const char* expected_out_dir = "test_output/lab1/";
+const char* expected_out_dir = "test_output/"+id.c_str()+"/";
 
 // Test cases
 const int num_testcases = 9;

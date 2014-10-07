@@ -1,10 +1,20 @@
 CONFIG=$(dirname $0)
 CURDIR=$(CONFIG)
+
+#Source of repository
 RCOS=$(CURDIR)/../../rcos
+
 # just the last part of the current directory
 HW=$(notdir $(CURDIR))
-bindir=$(CURDIR)/../../../bin/$(HW)
-coursedir=$(CURDIR)/../../../
+
+# HW id
+ID=$(HW)
+
+# The class directory
+coursedir=$(CURDIR)/../../..
+
+# Where the compiled binaries are stored, under the class directory
+bindir=$(coursedir)/bin/$(ID)
 
 gcc=clang++
 #gcc=g++ -std=c++11
@@ -72,8 +82,8 @@ run:
 
 move:
 	cp $(bindir)/assignment_config.json $(coursedir)/config/$(HW)_assignment_config.json
-	cp -r $(CURDIR)/test_input $(coursedir)/test_input/$(HW)
-	cp -r $(CURDIR)/test_output $(coursedir)/test_output/$(HW)
+	cp -r $(CURDIR)/test_input $(coursedir)/test_input/$(ID)
+	cp -r $(CURDIR)/test_output $(coursedir)/test_output/$(ID)
 
 clean:
 #	rm $(ROOT)/$(COURSE)/bin/*
