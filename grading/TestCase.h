@@ -67,8 +67,8 @@ public:
   TestCaseTokens(TestResults* (*cmp) ( const std::string&, const std::vector<std::string> &tokens ),
 		 const std::string file,
 		 const std::string desc,
-		 const std::vector<std::string> &_tokens)
-    : TestCaseGrader(file,desc), token_grader(cmp), tokens(_tokens) {}
+		 const std::vector<std::string> &_tokens,float points_frac=-1.0)
+    : TestCaseGrader(file,desc), token_grader(cmp), tokens(_tokens) {points_fraction=points_frac;}
   TestResults* (*token_grader) ( const std::string&, const std::vector<std::string>& );  
   std::vector<std::string> tokens;
 
