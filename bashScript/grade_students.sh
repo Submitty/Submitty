@@ -1,5 +1,5 @@
 #!/bin/bash
- 
+
 # ======================================================================
 # this script takes in a single parameter, the base path of all of
 # the submission server files
@@ -12,8 +12,8 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
-base_path="$1"  
-TO_BE_GRADED="$2"  
+base_path="$1"
+TO_BE_GRADED="$2"
 
 # from that directory, we expect:
 
@@ -63,13 +63,13 @@ too_many_processes_count=0
 sleep_count=0
 
 
-# SETUP THE DIRECTORY LOCK FILE 
+# SETUP THE DIRECTORY LOCK FILE
 # arbitrarily using file descriptor 200
 exec 200>/var/lock/homework_submissions_server_lockfile || exit 1
 
 
-# OUTER LOOP 
-# will eventually process all submissions 
+# OUTER LOOP
+# will eventually process all submissions
 while true; do
 
     # if no work was done on the last loop...
@@ -98,8 +98,8 @@ while true; do
     if [[ $numprocesses -gt 25 ]] ; then
 	echo "ERROR: untrusted is running too many processes: " $numprocesses >&2
 	((too_many_processes_count++))
-	if [[ $too_many_processes_count -gt 10 ]]; 
-	then 
+	if [[ $too_many_processes_count -gt 10 ]];
+	then
 	    exit
 	fi
 	sleep 10
@@ -172,7 +172,7 @@ while true; do
 	assignment="NOASSIGNMENT"
 	user="NOUSER"
 	version="NOVERSION"
-	for thing in $with_spaces; do	
+	for thing in $with_spaces; do
 	    ((t++))
 	    #FIXME replace with switch statement
 	    if [ $t -eq 1 ]
@@ -195,31 +195,31 @@ while true; do
 	done
         # error checking
         # FIXME: error checking could be more significant
-	if [ $course == "NOCOURSE" ] 
-	then 
+	if [ $course == "NOCOURSE" ]
+	then
 	    echo "ERROR IN COURSE: $NEXT_TO_GRADE" >&2
-	    continue 
+	    continue
 	fi
-	if [ $assignment == "NOASSIGNMENT" ] 
-	then 
+	if [ $assignment == "NOASSIGNMENT" ]
+	then
 	    echo "ERROR IN ASSIGNMENT: $NEXT_TO_GRADE" >&2
-	    continue 
+	    continue
 	fi
-	if [ $user == "NOUSER" ] 
-	then 
+	if [ $user == "NOUSER" ]
+	then
 	    echo "ERROR IN USER: $NEXT_TO_GRADE" >&2
 	    continue
 	fi
-	if [ $version == "NOVERSION" ] 
-	then 
+	if [ $version == "NOVERSION" ]
+	then
 	    echo "ERROR IN VERSION: $NEXT_TO_GRADE" >&2
-	    continue 
+	    continue
 	fi
 
-    
+
 	# --------------------------------------------------------------------
         # check to see if directory exists & is readable
-	submission_path=$base_path/$course/submissions/$assignment/$user/$version 
+	submission_path=$base_path/$course/submissions/$assignment/$user/$version
 	#echo "check directory '$submission_path'"
 
 	if [ ! -d "$base_path" ]
@@ -297,7 +297,7 @@ while true; do
 	test_output_path="$base_path/$course/test_output/$assignment"
 	results_path="$base_path/$course/results/$assignment/$user/$version"
 	bin_path="$base_path/$course/bin"
-	
+
 
 	# --------------------------------------------------------------------
         # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
@@ -313,7 +313,7 @@ while true; do
 
         # switch to tmp directory
 	pushd $tmp > /dev/null
-	
+
 	# --------------------------------------------------------------------
         # COMPILE THE SUBMITTED CODE
 
@@ -348,6 +348,7 @@ while true; do
 	    # run the compile.out as the untrusted user
 #	    $base_path/bin/untrusted_runscript $tmp/my_compile.out >& .submit_compile_output.txt
 
+        echo "$tmp_compilation/my_compile.out"
 	    $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
 
 	    compile_error_code="$?"
@@ -357,11 +358,11 @@ while true; do
 	    else
 		echo "COMPILE OK"
 	    fi
-	fi	
+	fi
 
 	# return to the main tmp directory
 	popd > /dev/null
-	
+
 	# move all executable files from the to the main tmp directory
 	# FIXME: not really what we want for the "FILE_EXISTS" command....
 	cp -f $tmp_compilation/README*.txt $tmp
@@ -391,6 +392,7 @@ while true; do
   	    # give the untrusted user read/write/execute permissions on the tmp directory & files
 	    chmod -R go+rwx $tmp
 	    # run the run.out as the untrusted user
+        echo "$base_path/bin/untrusted_runscript $tmp/my_run.out >& .submit_runner_output.txt"
 	    $base_path/bin/untrusted_runscript $tmp/my_run.out >& .submit_runner_output.txt
 
 	    runner_error_code="$?"
@@ -400,8 +402,8 @@ while true; do
 	    else
 		echo "RUNNER OK"
 	    fi
-	fi	
-	
+	fi
+
 	# --------------------------------------------------------------------
         # RUN VALIDATOR
 
@@ -417,19 +419,20 @@ while true; do
 	    # continue
 	else
             # echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
-	    
-            #valgrind "$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" >& .submit_validator_output.txt 
-            valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt 
+
+            #"$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" >& .submit_validator_output.txt
+            echo ""$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt"
+            "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
 
 	    validator_error_code="$?"
 	    if [[ "$validator_error_code" -ne 0 ]] ;
 	    then
 	     echo "VALIDATOR FAILURE CODE $validator_error_code  course=$course  hw=$assignment  user=$user  version=$version" 1>&2
-	     
+
 	    else
 		echo "VALIDATOR OK"
 	    fi
-	fi	
+	fi
 
 	# --------------------------------------------------------------------
         # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
