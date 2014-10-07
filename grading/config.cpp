@@ -78,8 +78,10 @@ Now Exiting" << std::endl;
     return 0;
   }
 
+  std::string id = getAssignmentIdFromCurrentDirectory();
+
   init << "{\n\t\"id\": \"" << id << "\"," << std::endl;
-  init << "\t\"name\": \"" << name << "\"," << std::endl;
+  //  init << "\t\"name\": \"" << name << "\"," << std::endl;
 
   init << "\t\"assignment_message\": \"" << assignment_message << "\"," << std::endl;
 
@@ -95,7 +97,7 @@ Now Exiting" << std::endl;
   init << "\t\"points_visible\": " << visible << "," << std::endl;
   init << "\t\"ta_pts\": " << ta_pts << "," << std::endl;
   init << "\t\"total_pts\": " << total_pts << "," << std::endl;
-  init << "\t\"due_date\": \"" << due_date << "\"," << std::endl;
+  //  init << "\t\"due_date\": \"" << due_date << "\"," << std::endl;
 
   init << "\t\"num_testcases\": " << num_testcases << "," << std::endl;
 

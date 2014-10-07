@@ -362,26 +362,26 @@ template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extra
 	  // go through the changes,
 	  int count_of_missing_lines = 0;
 	  for (int x = 0; x < diff->changes.size(); x++) {
-	    std::cout << "CHANGE " << x << "\n" << diff->changes[x] << std::endl;
+	    // std::cout << "CHANGE " << x << "\n" << diff->changes[x] << std::endl;
 	    int num_b_lines = diff->changes[x].b_changes.size();
 	    if (num_b_lines > 0) {
-	      std::cout << "*************************\n";
+	      //std::cout << "*************************\n";
 	      count_of_missing_lines += num_b_lines;
 	    }
 	  }
 	  int output_length = diff->output_length_b;
 
-	  std::cout << "COMPARE " << output_length << " " << count_of_missing_lines << std::endl;
-
+	  //std::cout << "COMPARE " << output_length << " " << count_of_missing_lines << std::endl;
+	  
 
 	  assert (count_of_missing_lines <= output_length);
 	  float grade = 1.0;
 	  assert (output_length > 0);
 	  if (output_length > 0) {
-	    std::cout << "SES [ESOO] calculating grade " << diff->distance << "/" << output_length << std::endl;
+	    //std::cout << "SES [ESOO] calculating grade " << diff->distance << "/" << output_length << std::endl;
 	    //grade -= (diff->distance / (float) output_length );
 	    grade -= count_of_missing_lines / float(output_length);
-	    std::cout << "SES [ESOO] calculated grade = " << std::setprecision(1) << std::fixed << std::setw(5) << grade << " " << std::setw(5) << (int)floor(5*grade) << std::endl;
+	    //std::cout << "SES [ESOO] calculated grade = " << std::setprecision(1) << std::fixed << std::setw(5) << grade << " " << std::setw(5) << (int)floor(5*grade) << std::endl;
 	  }
 	  diff->setGrade(grade);
 	} else {
@@ -391,9 +391,9 @@ template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extra
 	  if (max_output_length == 0) {
 	    grade = 0;
 	  } else {
-	    std::cout << "SES  calculating grade " << diff->distance << "/" << max_output_length << std::endl;
+	    //std::cout << "SES  calculating grade " << diff->distance << "/" << max_output_length << std::endl;
 	    grade -= (diff->distance / (float) max_output_length );
-	    std::cout << "SES calculated grade = " << grade << std::endl;
+	    //std::cout << "SES calculated grade = " << grade << std::endl;
 	  }
 	  diff->setGrade(grade);
 	}

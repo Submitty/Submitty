@@ -11,10 +11,6 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 #include "grading/TestCase.h"
 
-const std::string id = "HW1";
-const std::string name = "Text Justification";
-const std::string due_date = "2014-09-04 23:59:59.0";
-
 const std::string assignment_message = "";
 
 // Submission parameters

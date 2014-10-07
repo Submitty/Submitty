@@ -1,7 +1,7 @@
 <?php
 // This file is relative to the public directory of the website.  (It
-// is run from the location of index.php).
-// static $path_to_path_file = "../../site_path.txt";
+// is run from the location of index.php). 
+// static $path_to_path_file = "../../site_path.txt"; 
 static $path_to_path_file = "site_path.txt";
 
 
@@ -57,28 +57,28 @@ function display_file_permissions($perms) {
     // Unknown
     $info = 'u';
   }
-
+  
   // Owner
   $info .= (($perms & 0x0100) ? 'r' : '-');
   $info .= (($perms & 0x0080) ? 'w' : '-');
   $info .= (($perms & 0x0040) ?
             (($perms & 0x0800) ? 's' : 'x' ) :
             (($perms & 0x0800) ? 'S' : '-'));
-
+  
   // Group
   $info .= (($perms & 0x0020) ? 'r' : '-');
   $info .= (($perms & 0x0010) ? 'w' : '-');
   $info .= (($perms & 0x0008) ?
             (($perms & 0x0400) ? 's' : 'x' ) :
             (($perms & 0x0400) ? 'S' : '-'));
-
+  
   // World
   $info .= (($perms & 0x0004) ? 'r' : '-');
   $info .= (($perms & 0x0002) ? 'w' : '-');
   $info .= (($perms & 0x0001) ?
             (($perms & 0x0200) ? 't' : 'x' ) :
             (($perms & 0x0200) ? 'T' : '-'));
-
+  
   echo $info;
 }
 
@@ -86,11 +86,18 @@ function display_file_permissions($perms) {
 // Upload HW Assignment to server and unzip
 function upload_homework($username, $course, $assignment_id, $homework_file) {
 
-    // Store the time, right now!
+    if (!isset($homework_file["tmp_name"]) || $homework_file["tmp_name"] == "") {
+        $error_text = "The file did not upload to POST[tmp_name].  This issue is currently being worked on.  A smaller file or fast connection might help.";
+        if (isset($homework_file["error"])) {
+            $error_text = $error_text. " Error code given for upload is ". $homework_file["error"]. " . This is defined at http://php.net/manual/en/features.file-upload.errors.php";
+        }
+        display_error($error_text);
+    }
+    // Store the time, right now!  
     // 2001-03-10 17:16:18 (the MySQL DATETIME format)
     date_default_timezone_set('America/New_York');
-    $TIMESTAMP = date("Y-m-d H:i:s");
-
+    $TIMESTAMP = date("Y-m-d H:i:s");  
+      
 
     $path_front = get_path_front($course);
 
@@ -121,13 +128,13 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     $extension = end($filename);
 
 
-    /*$allowed   = array("application/zip",
+    /*$allowed   = array("application/zip", 
                        "application/x-zip",
                        "application/x-zip-compressed",
                        "application/octet-stream",
-                       "text/x-python-script",
-                       "text/plain",
-                       "text/x-c++src",
+                       "text/x-python-script", 
+                       "text/plain", 
+                       "text/x-c++src", 
                        "application/download");*/
     /*
     if (!(in_array($homework_file["type"], $allowed))) {
@@ -198,25 +205,16 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     // add this assignment to the grading queue
     // FIX ME: If to_be_graded path doesn't exist, create new one
     touch($path_front."/../to_be_graded/".$course."__".$assignment_id."__".$username."__".$upload_version);
-
+   
     // CREATE THE TIMESTAMP FILE
     //touch($version_path."/.submit.timestamp");
     if (!file_put_contents($version_path."/.submit.timestamp",$TIMESTAMP."\n")) {
         display_error("Failed to save timestamp file ".$version_path."/.submit.timestamp",$TIMESTAMP);
         return;
-    }
-// set LAST symlink
+    } 
 
-    if (file_exists("$user_path/LAST")){
-        unlink("$user_path/LAST");
-
-    }
+    // set LAST symlink
     symlink ($version_path,$user_path."/LAST");
-
-    if (file_exists("$user_path/ACTIVE")){
-        unlink("$user_path/ACTIVE");
-
-    }
 
     // set ACTIVE symlink
     symlink ($version_path,$user_path."/ACTIVE");
@@ -250,22 +248,33 @@ function can_edit_assignment($username, $course, $assignment_id, $assignment_con
 // TODO: FIXME: late submissions should be allowed (there are excused absenses)
 // TODOL FIXME: but the ACTIVE should not be updated ( we can manually adjust active for excused absenses)
 return true;
-
-    $due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
+    
+//$due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
+    $class_config = get_class_config($course);
+    $due_date = get_due_date($class_config,$assignment_id);
     $last_edit_date = $due_date->add(new DateInterval("P2D"));
     $now = new DateTime("NOW");
 
     return $now <= $last_edit_date;
 }
 
-function get_due_date($username, $course, $assignment_id, $assignment_config) {
-    $path_front = get_path_front($course);
-    date_default_timezone_set('America/New_York');
-    $date = new DateTime($assignment_config["due_date"]);
+//function get_due_date($username, $course, $assignment_id) {
+function get_due_date($class_config, $assignment_id) {
+    $assignments = $class_config["assignments"];
+    foreach ($assignments as $one) {
+      if ($one["assignment_id"] == $assignment_id) {
+	if (isset($one["due_date"])) {
+          date_default_timezone_set('America/New_York');
+          $date = new DateTime($one["due_date"]);
+       	  return $date;
+        } else {
+          date_default_timezone_set('America/New_York');
+          $date = new DateTime("2014-12-01 23:59:59.0");
+       	  return $date;
+        }
 
-
-//		   echo "the due date = ".$assignment_config["due_date"];
-    return $date;
+      }
+    }
 }
 
 
@@ -285,31 +294,40 @@ function get_class_config($course) {
 // Get a list of uploaded files
 function get_submitted_files($username, $course, $assignment_id, $assignment_version) {
 
-// FIXME: Would like this to search into directories (to clearly
-//   display when students have accidentally included a directory structure
-//   in their zip instead of just files
-
-// FIXME: Would like this to not display the dotfiles in this
-//   directory (e.g., .submit.timestamp)
-
     $path_front = get_path_front($course);
     $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
+    $contents = array();
     if ($assignment_version != 0) {
-        $contents = scandir($folder);}
-    else {
-        return array();
+        $contents = get_contents($folder, 5);
     }
-    if (!$contents) {
-        return array();
+    for ($i = 0; $i < count($contents); $i++) {
+        $contents[$i]["name"] = substr($contents[$i]["name"], strlen($folder) + 1);
     }
+    return $contents;
+}
 
-    $filtered_contents = array();
-    foreach ($contents as $item) {
-        if ($item != "." && $item != "..") {
-            array_push($filtered_contents, $item);
+function get_contents($dir, $max_depth) {
+    if ($max_depth == 0) {
+        return array();
+    }
+    $contents = array();
+    if (is_dir($dir)) {
+        if ($handle = opendir($dir)) {
+            while (($file = readdir($handle)) !== false) {
+                if ($file[0] && $file[0] != ".") {
+                    if (is_dir($dir."/".$file)) {
+                        $children = get_contents($dir."/".$file, $max_depth - 1);
+                        foreach ($children as $child) {
+                            array_push($contents, $child);
+                        }
+                    } else {
+                        array_push($contents, array("name"=>$dir."/".$file, "size"=>floor(filesize($dir."/".$file) / 1024)));
+                    }
+                }
+            }
         }
     }
-    return $filtered_contents;
+    return $contents;
 }
 
 // Find most recent submission from user
@@ -370,9 +388,6 @@ function is_valid_course($course) {
     if ($course == "csci4960") {
       return true;
     }
-    if ($course == "default") {
-        return true;
-    }
     return false;
 }
 
@@ -412,8 +427,8 @@ function version_in_grading_queue($username, $course, $assignment_id, $assignmen
 function get_submission_time($username, $course, $assignment_id, $assignment_version) {
     $version_results = get_assignment_results($username, $course, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
     if ($version_results &&
-	      isset($version_results["submission_time"])) {
-	      return $version_results["submission_time"];
+	      isset($version_results["submission_time"])) { 
+	      return $version_results["submission_time"]; 
     } else {
 	      return "";
     }
@@ -422,7 +437,7 @@ function get_submission_time($username, $course, $assignment_id, $assignment_ver
 function get_homework_tests($username, $course, $assignment_id, $assignment_version, $assignment_config, $include_diffs = true) {
     $testcases_info = $assignment_config["testcases"];//These are the tests run on a homework (for grading etc.)
     $version_results = get_assignment_results($username, $course, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
-    if ($version_results) {
+    if ($version_results) { 
         $testcases_results = $version_results["testcases"];
     } else {
         $testcases_results = array();
@@ -442,7 +457,7 @@ function get_homework_tests($username, $course, $assignment_id, $assignment_vers
                 $data["message"] = isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "";
                 $data["is_hidden"] = $testcases_info[$i]["hidden"];
                 $data["is_extra_credit"] = $testcases_info[$i]["extracredit"];
-
+                
                 if (isset($testcases_results[$u]["compilation_output"])) {
                     $data["compilation_output"] = get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]);
                 }
@@ -493,7 +508,9 @@ function get_select_submission_data($username, $course, $assignment_id, $assignm
             $score = "Grading in progress";
         }
 
-        $due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
+    $class_config = get_class_config($course);
+    $due_date = get_due_date($class_config,$assignment_id);
+//        $due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
 //	if (!isset($due_date) || !defined("due_date")) {
 //		       $due_date = "";
 //		       }
@@ -593,7 +610,7 @@ function change_assignment_version($username, $course, $assignment_id, $assignme
         return;
     }
     $path_front = get_path_front($course);
-
+	
     $user_path = $path_front."/submissions/".$assignment_id."/".$username;
     //    $file = $path_front."/submissions/".$assignment_id."/".$username."/user_assignment_settings.json";
     $file = $user_path."/user_assignment_settings.json";
@@ -606,9 +623,7 @@ function change_assignment_version($username, $course, $assignment_id, $assignme
     $json["active_assignment"] = $assignment_version;
 
     //symlink (version_path,$user_path."/ACTIVE");
-    if (file_exists("$user_path/ACTIVE")){
-        $success=unlink("$user_path/ACTIVE");
-    }
+    $success = unlink ($user_path."/ACTIVE");
     $success = symlink ($user_path."/".$assignment_version,$user_path."/ACTIVE");
 
     file_put_contents($file, json_encode($json));
@@ -626,7 +641,7 @@ function get_compilation_output($file) {
     $contents = str_replace("<","&lt;",$contents);
 
     return $contents;
-
+	
 }
 
 
@@ -637,7 +652,7 @@ function get_compilation_output($file) {
 function get_testcase_diff($username, $course, $assignment_id, $assignment_version, $diff){
     $path_front = get_path_front($course);
     $student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
-
+    
     $data = array();
     $data["difference"] = "{differences:[]}";//This needs to be here to render the diff viewer without a teacher file
 
