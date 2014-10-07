@@ -80,7 +80,7 @@ TestResults* myersDiffbyLinesByChar ( const std::string & student_file, const st
 TestResults* myersDiffbyLinesByCharExtraStudentOutputOk ( const std::string & student_file, const std::string & expected_file) {
 	vectorOfLines text_a = stringToLines( student_file );
 	vectorOfLines text_b = stringToLines( expected_file );
-	
+
 	bool extraStudentOutputOk = true;
 	Difference* diff = ses( &text_a, &text_b, true, extraStudentOutputOk );
 	diff->type = ByLineByChar;
@@ -99,11 +99,6 @@ template<class T> Difference* ses ( T* a, T* b, bool secondary, bool extraStuden
 	return diff;
 }
 
-// changes passing by refrence to pointers
-//template<class T> metaData< T > sesSnapshots ( T& a, T& b, bool extraStudentOutputOk  ) {
-//return sesSnapshots( &a, &b, extraStudentOutputOk  );
-//}
-
 // runs shortest edit script. Saves traces in snapshots,
 // the edit distance in distance and pointers to objects a and b
 template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutputOk ) {
@@ -117,17 +112,16 @@ template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutp
 	}
 	text_diff.m = b_size;
 	text_diff.n = a_size;
-
+    // DISTANCE -1 MEANS WHAT?
+    text_diff.distance = -1;
+    text_diff.a = a;
+    text_diff.b = b;
 
 	// WHAT IS V?
 	//std::vector< int > v( ( a_size + b_size ) * 2, 0 );
 	// TODO: BOUNDS ERROR, is this the appropriate fix?
 	std::vector< int > v( ( a_size + b_size ) * 2 + 1, 0 );
 
-	// DISTANCE -1 MEANS WHAT?
-	text_diff.distance = -1;
-	text_diff.a = a;
-	text_diff.b = b;
 
 	// INITIALIZATION REDUNDANT, ALREADY DONE BY CONSTRUCTOR ABOVE
 	/*
@@ -145,8 +139,7 @@ template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutp
 		for ( int k = -d; k <= d; k += 2 ) {
 			//which is the farthest path reached in the previous iteration?
 		  bool down = ( k == -d
-				|| ( k != d
-				     && v[ ( k - 1 ) + ( a_size + b_size )]
+				|| ( k != d && v[ ( k - 1 ) + ( a_size + b_size )]
 				     < v[ ( k + 1 ) + ( a_size + b_size )] ) );
 			int k_prev, a_start, b_start, a_end, b_end;
 			if ( down ) {
@@ -185,7 +178,7 @@ template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutp
 
 
 		//std::cout << "TEXTDIFF " << std::endl;
-	
+
 		//std::cout << "SNAPSHOTS\n" << text_diff.snapshots << std::endl;
 
 	}
@@ -259,7 +252,7 @@ template<class T> metaData< T > sesSnakes ( metaData< T > & meta_diff, bool extr
 	}
 
 	//std::cout << "META DIFF LENGTH " << meta_diff.snakes.size() << std::endl;
-	
+
 	//std::cout << "SNAKES\n" << meta_diff.snakes << std::endl;
 
 
@@ -278,8 +271,18 @@ template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extra
 	Difference* diff = new Difference();
 	diff->extraStudentOutputOk = extraStudentOutputOk;
 	diff->edit_distance = meta_diff.distance;
-	diff->output_length_a = ( int ) meta_diff.a->size();
-	diff->output_length_b = ( int ) meta_diff.b->size();
+    if (meta_diff.a != NULL){
+        diff->output_length_a = ( int ) meta_diff.a->size();
+    }
+    else{
+        diff->output_length_a = 0;
+    }
+    if (meta_diff.b != NULL){
+        diff->output_length_b = ( int ) meta_diff.b->size();
+    }
+    else{
+        diff->output_length_b = 0;
+    }
 	int added = abs( diff->output_length_a - diff->output_length_b );
 	diff->distance = ( meta_diff.distance - added ) / 2;
 	diff->distance += added;
@@ -431,4 +434,3 @@ template<class T> Difference* sesSecondary ( Difference* text_diff,
 	return text_diff;
 }
 // formats and outputs a Difference object to the ofstream
-
