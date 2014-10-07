@@ -81,7 +81,7 @@ run:
 	$(bindir)/configure.out $(bindir)/assignment_config.json
 
 move:
-	cp $(bindir)/assignment_config.json $(coursedir)/config/$(HW)_assignment_config.json
+	cp $(bindir)/assignment_config.json $(coursedir)/config/$(ID)_assignment_config.json
 	cp -r $(CURDIR)/test_input $(coursedir)/test_input/$(ID)
 	cp -r $(CURDIR)/test_output $(coursedir)/test_output/$(ID)
 
