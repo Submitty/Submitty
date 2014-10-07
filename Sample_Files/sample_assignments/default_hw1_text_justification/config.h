@@ -10,7 +10,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #define __CONFIG_H__
 
 #include "grading/TestCase.h"
-const std::string id = "HW1";
+
 const std::string assignment_message = "";
 
 // Submission parameters
@@ -22,22 +22,12 @@ const int max_clocktime = 2;		// in seconds
 const int max_cputime = 2;			// in seconds
 const int max_submission_size = 100000;	// in KB
 const int max_output_size = 100;	// in KB
-	// OTHERS?
 
 // Grading parameters
 const int total_pts = 50;
 const int auto_pts = 25;
 const int ta_pts = 25;
 const int extra_credit_pts = 5;
-
-// File directories
-
-// input files directory
-const std::string input_dir_S = "test_input/"+id+"/";
-const char* input_dir = input_dir_S.c_str();
-// expected output files directory
-const std::string output_dir_S = "test_output/"+id+"/";
-const char* expected_out_dir = output_dir_S.c_str();
 
 // Test cases
 const int num_testcases = 11;

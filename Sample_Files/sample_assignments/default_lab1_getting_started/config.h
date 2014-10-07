@@ -12,7 +12,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include "grading/TestCase.h"
 
 const std::string assignment_message = "";
-const std::string id = "lab1";
+
 // Submission parameters
 const int max_submissions = 20;
 const int submission_penalty = 5;
@@ -29,13 +29,6 @@ const int total_pts = 20;
 const int auto_pts = 20;
 const int ta_pts = 0;
 const int extra_credit_pts = 2;
-
-// File directories
-
-// input files directory
-const char* input_dir = "test_input/"+id.c_str()+"/";
-// expected output files directory
-const char* expected_out_dir = "test_output/"+id.c_str()+"/";
 
 // Test cases
 const int num_testcases = 9;
