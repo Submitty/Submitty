@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
     std::cout << "USAGE: " << argv[0] << " [output_file]" << std::endl;
     return 0;
   }
-  std::cout << argv[0] << std::endl;
+  std::cout <<"FILENAME" << argv[0] << std::endl;
   int total_nonec = 0;
   int total_ec = 0;
   for (unsigned int i = 0; i < num_testcases; i++) {
