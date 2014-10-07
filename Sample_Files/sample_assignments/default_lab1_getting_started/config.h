@@ -12,7 +12,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #include "grading/TestCase.h"
 
 const std::string assignment_message = "";
-
+const std::string id = "lab1";
 // Submission parameters
 const int max_submissions = 20;
 const int submission_penalty = 5;

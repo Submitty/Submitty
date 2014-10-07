@@ -10,7 +10,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 #define __CONFIG_H__
 
 #include "grading/TestCase.h"
-
+const std::string id = "HW1";
 const std::string assignment_message = "";
 
 // Submission parameters
