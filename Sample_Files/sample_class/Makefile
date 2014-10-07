@@ -68,12 +68,12 @@ assignment:
 
 run:
 #	valgrind
-	$(bindir)/configure.out assignment_config.json
+	$(bindir)/configure.out $(bindir)/assignment_config.json
 
 move:
-	cp assignment_config.json $(coursedir)/config/$(HW)_assignment_config.json
-	cp -r test_input $(coursedir)/test_input/$(HW)
-	cp -r test_output $(coursedir)/test_output/$(HW)
+	cp $(bindir)/assignment_config.json $(coursedir)/config/$(HW)_assignment_config.json
+	cp -r $(CURDIR)/test_input $(coursedir)/test_input/$(HW)
+	cp -r $(CURDIR)/test_output $(coursedir)/test_output/$(HW)
 
 clean:
 #	rm $(ROOT)/$(COURSE)/bin/*
