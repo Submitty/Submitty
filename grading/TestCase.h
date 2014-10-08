@@ -19,7 +19,7 @@
 #define __TESTCASE_H__
 
 #include <string>
-#include <sstream> 
+#include <sstream>
 #include <cassert>
 #include "modules/modules.h"
 
@@ -56,7 +56,7 @@ public:
 		     const std::string desc,
 		     const std::string expect = "",float points_frac=-1.0)
     : TestCaseGrader(file,desc), cmp_output(cmp), expected_file(expect)  {points_fraction=points_frac;}
-  TestResults* (*cmp_output) ( const std::string&, const std::string& );  
+  TestResults* (*cmp_output) ( const std::string&, const std::string& );
   std::string expected_file;
   virtual std::string getExpected() { return expected_file; }
   virtual TestResults* doit(const std::string &prefix);
@@ -69,7 +69,7 @@ public:
 		 const std::string desc,
 		 const std::vector<std::string> &_tokens,float points_frac=-1.0)
     : TestCaseGrader(file,desc), token_grader(cmp), tokens(_tokens) {points_fraction=points_frac;}
-  TestResults* (*token_grader) ( const std::string&, const std::vector<std::string>& );  
+  TestResults* (*token_grader) ( const std::string&, const std::vector<std::string>& );
   std::vector<std::string> tokens;
 
   virtual TestResults* doit(const std::string &prefix);
@@ -85,7 +85,7 @@ class TestCase {
 
 private:
   // This constructor only used by the static Make functions
-  TestCase () { 
+  TestCase () {
     test_case_id = next_test_case_id;
     next_test_case_id++;
     FILE_EXISTS = false;
@@ -107,7 +107,7 @@ public:
     answer.FILE_EXISTS = true;
     return answer;
   }
-  
+
   static TestCase MakeCompilation( const std::string &title,
 				   const std::string &compilation_command,
 				   const std::string &executable_filename,
@@ -207,13 +207,13 @@ public:
   std::string description (int i) const {
     assert (i >= 0 && i < numFileGraders());
     return test_case_grader[i]->description;
-  }	
+  }
   /*
   std::string getexpected (int i) const {
     //std::cout << "EXPECTED " << i << numFileGraders() << std::endl;
     assert (i >= 0 && i < numFileGraders());
     return test_case_grader[i]->getExpected();
-  }		
+  }
   */
 
   int points () const {
@@ -225,7 +225,7 @@ public:
   bool extracredit () const {
     return _test_case_points.extra_credit;
   }
-  
+
   /* Calls the function designated by the function pointer; if the function pointer
      is NULL, defaults to returning the result of diffLine(). */
   TestResults* do_the_grading (int j, std::string &message);
@@ -252,11 +252,11 @@ private:
   bool COMPILATION;
 
   int test_case_id;
-  static int next_test_case_id; 
+  static int next_test_case_id;
 };
 
 
-std::string getAssignmentIdFromCurrentDirectory();
+std::string getAssignmentIdFromCurrentDirectory(std::string);
 
 
 
