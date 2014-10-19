@@ -137,6 +137,8 @@ std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
     if (loc != std::string::npos){
         tmp = tmp.substr(loc);
     }
+    std::cout << "tmp is now '" << tmp << "'\n";
+
     loc = tmp.find('_');
     if (loc != std::string::npos){
         tmp = tmp.substr(0,loc);
