@@ -1,6 +1,9 @@
 <?php
+print('<!-- Course Container -->');
 require_once("view/".$course."_container.php");
 // require_once("view/default_container.php");
+print('<!-- Course CSS -->');
+print('<link href="resources/'.$course.'_main.css" rel="stylesheet"></link>');
 ?>
 <link href="resources/bootmin.css" rel="stylesheet"></link>
 <link href="resources/badge.css" rel="stylesheet"></link>
