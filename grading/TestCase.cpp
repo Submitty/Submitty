@@ -133,11 +133,11 @@ std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
     }
 
     std::cout << "tmp is now '" << tmp << "'\n";
-    int loc = tmp.find('_');
+    loc = tmp.find('_');
     if (loc != std::string::npos){
         tmp = tmp.substr(loc);
     }
-    int loc = tmp.find('_');
+    loc = tmp.find('_');
     if (loc != std::string::npos){
         tmp = tmp.substr(0,loc);
     }
