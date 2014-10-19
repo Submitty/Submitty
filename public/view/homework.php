@@ -1,6 +1,7 @@
-<?php require_once("view/".$course."_container.php");?>
-<!--<?php require_once("view/csciXXXX_container.php");?>-->
-
+<?php
+require_once("view/".$course."_container.php");
+// require_once("view/default_container.php");
+?>
 <link href="resources/bootmin.css" rel="stylesheet"></link>
 <link href="resources/badge.css" rel="stylesheet"></link>
 
@@ -49,26 +50,26 @@ function version_changed(){
 <?php } ?>
 <h2>Homework Submission for <em> <?php echo $user;?> </em></h2>
 
-<?php 
-// FIXME: New variable in class.json 
-if (on_dev_team($user)) { 
-  echo "<font color=\"ff0000\" size=+5>on dev team</font>"; 
+<?php
+// FIXME: New variable in class.json
+if (on_dev_team($user)) {
+  echo "<font color=\"ff0000\" size=+5>on dev team</font>";
   echo "<br>the Dev Team = ";
   for ($i=0; $i<count($dev_team); $i++) {
     echo " ".$dev_team[$i];
   }
-} else { 
-//echo "test message"; 
-} 
+} else {
+//echo "test message";
+}
 ?>
 
-<?php 
-//if (on_dev_team($user)) { 
+<?php
+//if (on_dev_team($user)) {
 
    //<!--- PRIORITY HELP QUEUE SUMMARY HTML RAINBOW CHART -->
 //   echo "<div class=\"panel-body\">";
 //   echo "<div class=\"box\">";
-   
+
    $path_front = get_path_front($course);
    $priority_path = "$path_front/reports/summary_html/".$username."_priority.html";
 
@@ -102,8 +103,8 @@ if (on_dev_team($user)) {
 	           }
 	        }
        ?>
-            <option value="<?php echo $all_assignments[$i]["assignment_id"];?>" 
- 	    <?php 
+            <option value="<?php echo $all_assignments[$i]["assignment_id"];?>"
+ 	    <?php
                if ($all_assignments[$i]["assignment_id"] == $assignment_id) {?> selected <?php }?>><?php echo $all_assignments[$i]["assignment_name"].$FLAG;
             ?>
             </option>
@@ -118,7 +119,7 @@ if (on_dev_team($user)) {
 
 <div class="panel-body">
 
-  
+
   <!--- UPLOAD NEW VERSION -->
   <div class="box">
     <h3>Upload New Version</h3>
@@ -129,7 +130,7 @@ if (on_dev_team($user)) {
       the <a href="<?php echo $link_absolute;?>academic_integrity.php">Homework
       Collaboration and Academic Integrity Policy</a> for this course.
     </p>
-    <form action="?page=upload&course=<?php echo $course?>&assignment_id=<?php echo $assignment_id?>" 
+    <form action="?page=upload&course=<?php echo $course?>&assignment_id=<?php echo $assignment_id?>"
 	  method="post" enctype="multipart/form-data" onsubmit="return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>')">
       <label for="file" style="margin-right: 5%;"><b>Select File:</b></label>
       <input type="file" name="file" id="file" style="display: inline" />
@@ -138,7 +139,7 @@ if (on_dev_team($user)) {
       </span>
     </form>
   </div>
-       
+
 
 
 
@@ -152,9 +153,9 @@ if (on_dev_team($user)) {
 
   <!-- ACTIVE SUBMISION INFO -->
 <!--  <div class="box">
-    <h3>Active  Submission Version 
-    <?php 
-       echo $submitting_version."</b>"; 
+    <h3>Active  Submission Version
+    <?php
+       echo $submitting_version."</b>";
        if ($submitting_version_in_grading_queue) {
            echo " is currently being graded.";
        } else {
@@ -170,7 +171,7 @@ if (on_dev_team($user)) {
   <!-- INFO ON ALL VERSIONS -->
   <div class="box">
     <h3>Review Submissions</h3>
-      
+
 <!--
     <div class="row" style="margin: 0;">
       <div class="col-sm-10" style="padding: 0;">
@@ -186,7 +187,7 @@ if (on_dev_team($user)) {
             <?php for ($i = 1; $i <= $highest_version; $i++) {?>
                   <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?> >
                     Version #<?php echo $i;?>
-		    &nbsp;&nbsp 
+		    &nbsp;&nbsp
 		    Score:
 		    <!-- FIX ME: INSERT SCORE FOR THIS VERSION... -->
 		    <?php echo $select_submission_data[$i-1]["score"]; ?>
@@ -209,14 +210,14 @@ if (on_dev_team($user)) {
 <div style="margin-left: 20px">
         <!-- CHANGE ACTIVE VERSION -->
         <?php if ($assignment_version != $submitting_version) { ?>
-	<a href="?page=update&course=<?php echo $course;?>&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" 
+	<a href="?page=update&course=<?php echo $course;?>&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>"
 	   style="text-align:center;"><input type="submit" class="btn btn-primary" value="Set Version <?php echo $assignment_version;?> as Active Submission Version"></input></a><br><br>
 	<?php } ?>
 </div>
 </div>
 
 
-	<?php 
+	<?php
 	   //$date_submitted = get_submission_time($user,$course,$assignment_id,$assignment_version);
 	   //echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
         ?>
@@ -245,7 +246,7 @@ if (on_dev_team($user)) {
    <?php if ($assignment_message != "") { echo "<p><b><em><font size=+1 color=green>".$assignment_message."</font></b></p>"; } ?>
 
 
-<!-- DETAILS ON INDIVIDUAL TESTS --> 
+<!-- DETAILS ON INDIVIDUAL TESTS -->
 
   <div class="row" style="margin-left: 10px; margin-right: 10px">
     <div class="box2" style="border-radius: 3px;    padding: 0px;    border: 1px solid #cccccc;    height: 100%;  width: 100%;   margin: 5px; position: relative; float: left;    background:rgba(255,255,255,0.8);">
@@ -265,13 +266,13 @@ if (on_dev_team($user)) {
 
     <div class="box2" style="border-radius: 3px;    padding: 0px;    border: 1px solid #cccccc;    height: 100%;  width: 100%;   margin: 5px; position: relative; float: left;    background:rgba(255,255,255,0.8);">
       <?php //score, points, and points possible are set.  Is not hidden and is not extra credit
-        if (  isset($test["score"]) && 
-              isset($test["points_possible"]) && 
-              $test["points_possible"] != 0 && 
-              $test["is_hidden"] == false && 
+        if (  isset($test["score"]) &&
+              isset($test["points_possible"]) &&
+              $test["points_possible"] != 0 &&
+              $test["is_hidden"] == false &&
               $test["is_extra_credit"] == false ) {
 
-	
+
                 if (!($test["points_possible"] > 0)) {
                    $part_percent = 1;
                 } else {
@@ -287,7 +288,7 @@ if (on_dev_team($user)) {
           } else {
                 $class = "badge";
           } ?>
-            
+
     <div>
       <h4 style="margin-left: 10px; text-align: left;display:inline-block;">
         <?php echo $test["title"];?>
@@ -295,7 +296,7 @@ if (on_dev_team($user)) {
       </h4>
       <!-- BADGE TEST SCORE -->
       <span class="<?php echo $class;?>">
-        <?php 
+        <?php
             if ($test["is_hidden"] === true) {?>
                 Hidden Test Case
                 </span>
@@ -309,13 +310,13 @@ if (on_dev_team($user)) {
             }
         ?>
       </span>
-      
+
 
       <?php if (/* (isset($test["diff"]) && $test["diff"] != "") || */
 	         (isset($test["diffs"]) && count($test["diffs"]) > 0) ||
                  (isset($test["compilation_output"]))
                ) {?>
-      
+
           <span>
             <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
           </span>
@@ -335,13 +336,13 @@ if (on_dev_team($user)) {
 
       <!-- MULTIPLE DIFFS -->
       <table border="0">
-      <?php 
+      <?php
 	 if (isset($test["diffs"])) {
 
 	 foreach ($test["diffs"] as $diff) {
-          if (   isset($diff["student"])      && 
-	         !isset($diff["instructor"])  && 
-                 !isset($diff["description"]) && 
+          if (   isset($diff["student"])      &&
+	         !isset($diff["instructor"])  &&
+                 !isset($diff["description"]) &&
                  !isset($diff["message"])
              ) {
               continue;
@@ -397,9 +398,9 @@ if (on_dev_team($user)) {
       <?php $counter++;?>
    </div><!-- end box2 -->
    <?php }?><!-- end foreach homework_tests as test-->
-   
 
-   <!-- END OF "IS GRADED?" -->    
+
+   <!-- END OF "IS GRADED?" -->
    <?php } ?>
 
   </div>
@@ -411,19 +412,19 @@ if (on_dev_team($user)) {
 
 
 
-<?php 
+<?php
 
-//if (on_dev_team($user)) { 
-//echo "<font color=\"ff0000\" size=+5>on dev team</font><br><br>"; 
+//if (on_dev_team($user)) {
+//echo "<font color=\"ff0000\" size=+5>on dev team</font><br><br>";
 
 if ($ta_grade_released == true) {
-  
+
    //<!--- TA GRADE -->
    echo "<div class=\"panel-body\">";
    echo "<div class=\"box\">";
-   
+
    $path_front = get_path_front($course);
-   
+
    $gradefile_path = "$path_front/reports/$assignment_id/".$username.".txt";
 
    if (!file_exists($gradefile_path)) {
@@ -431,7 +432,7 @@ if ($ta_grade_released == true) {
    } else {
       $grade_file = file_get_contents($gradefile_path);
       echo "<h3>TA grade</h3>";
-      echo "<em><p>Please see the <a href=\"http://www.cs.rpi.edu/academics/courses/fall14/csci1200/announcements.php\">Announcements</a> 
+      echo "<em><p>Please see the <a href=\"http://www.cs.rpi.edu/academics/courses/fall14/csci1200/announcements.php\">Announcements</a>
                 page for the curve for this homework.</p></em>";
       echo "<pre>".$grade_file."</pre>";
    }
@@ -448,12 +449,12 @@ if ($ta_grade_released == true) {
  //<?php } ? >
 
 
-//if (on_dev_team($user)) { 
+//if (on_dev_team($user)) {
 
    //<!--- SUMMARY HTML RAINBOW CHART -->
    echo "<div class=\"panel-body\">";
    echo "<div class=\"box\">";
-   
+
    $path_front = get_path_front($course);
    $gradefile_path = "$path_front/reports/summary_html/".$username."_summary.html";
 
@@ -468,7 +469,7 @@ if ($ta_grade_released == true) {
    echo "</div>";
 
 //}
-   
+
 ?>
 
 
