@@ -1,7 +1,7 @@
 CONFIG=$(dirname $0)
 
 #Source of repository
-RCOS=$(CONFIG)/../../rcos
+RCOS=$(CONFIG)/../../../../rcos
 
 # just the last part of the current directory
 HW=$(notdir $(CONFIG))
@@ -68,7 +68,13 @@ validate_files=$(RCOS)/grading/Validator.cpp \
 
 
 assignment:
-	echo 'making hw' $(HW)
+	@ echo "coursedir: " $(coursedir)
+	@ echo "class_bin: " $(class_bin)
+	@ echo "ID: " $(ID)
+	@ echo "HW: " $(HW)
+	@ echo "RCOS: " $(RCOS)
+	@ echo "CONFIG: " $(CONFIG)
+	echo 'making hw'  $(HW)
 	test -d $(class_bin) || mkdir $(class_bin)
 	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(config_files)   -o $(class_bin)/configure.out
 	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(compile_files)  -o $(class_bin)/compile.out
