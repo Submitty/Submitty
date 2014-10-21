@@ -1,20 +1,19 @@
 CONFIG=$(dirname $0)
-CURDIR=$(CONFIG)
 
 #Source of repository
-RCOS=$(CURDIR)/../../rcos
+RCOS=$(CONFIG)/../../rcos
 
 # just the last part of the current directory
-HW=$(notdir $(CURDIR))
+HW=$(notdir $(CONFIG))
 
 # HW id
 ID=$(HW)
 
 # The class directory
-coursedir=$(CURDIR)/../../..
+coursedir=$(CONFIG)/../../..
 
 # Where the compiled binaries are stored, under the class directory
-bindir=$(coursedir)/bin/$(ID)
+class_bin=$(coursedir)/bin/$(ID)
 
 gcc=clang++
 #gcc=g++ -std=c++11
@@ -70,22 +69,22 @@ validate_files=$(RCOS)/grading/Validator.cpp \
 
 assignment:
 	echo 'making hw' $(HW)
-	test -d $(bindir) || mkdir $(bindir)
-	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CURDIR) $(config_files)   -o $(bindir)/configure.out
-	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CURDIR) $(compile_files)  -o $(bindir)/compile.out
-	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CURDIR) $(runner_files)   -o $(bindir)/run.out
-	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CURDIR) $(validate_files) -o $(bindir)/validate.out
+	test -d $(class_bin) || mkdir $(class_bin)
+	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(config_files)   -o $(class_bin)/configure.out
+	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(compile_files)  -o $(class_bin)/compile.out
+	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(runner_files)   -o $(class_bin)/run.out
+	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(validate_files) -o $(class_bin)/validate.out
 
 run:
 #	valgrind
-	$(bindir)/configure.out $(bindir)/assignment_config.json
+	$(class_bin)/configure.out $(class_bin)/assignment_config.json
 
 move:
-	cp $(bindir)/assignment_config.json $(coursedir)/config/$(ID)_assignment_config.json
-	cp -r $(CURDIR)/test_input $(coursedir)/test_input/$(ID)
-	cp -r $(CURDIR)/test_output $(coursedir)/test_output/$(ID)
+	cp $(class_bin)/assignment_config.json $(coursedir)/config/$(ID)_assignment_config.json
+	cp -r $(CONFIG)/test_input $(coursedir)/test_input/$(ID)
+	cp -r $(CONFIG)/test_output $(coursedir)/test_output/$(ID)
 
 clean:
 #	rm $(ROOT)/$(COURSE)/bin/*
-	rm $(bindir)
+	rm $(class_bin)
 	rm assignment_config.json
