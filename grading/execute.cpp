@@ -34,7 +34,7 @@
 
 #define MAX_STRING_LENGTH 100
 #define MAX_NUM_STRINGS 20
-#define PATH_MAX 1000
+#define DIR_PATH_MAX 1000
 
 #include <dirent.h>
 
@@ -69,8 +69,8 @@ bool wildcard_match(const std::string &pattern, const std::string &thing) {
 void wildcard_expansion(std::vector<std::string> &my_args, const std::string &pattern) {
   if (pattern.find("*") != std::string::npos) {
     std::cout << "WILDCARD DETECTED:" << pattern << std::endl;
-    char buf[PATH_MAX]; 
-    getcwd( buf, PATH_MAX ); 
+    char buf[DIR_PATH_MAX]; 
+    getcwd( buf, DIR_PATH_MAX ); 
     DIR* dir = opendir(buf);
     assert (dir != NULL);
     struct dirent *ent;
@@ -194,7 +194,7 @@ int exec_this_command(const std::string &cmd) {
 
   int child_result =  execv ( my_program.c_str(), my_char_args );
   // if exec does not fail, we'll never get here
-  
+
   return child_result;
 }
 
@@ -236,7 +236,7 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) {
 
     int child_result;
     child_result = exec_this_command(cmd);
-    
+
     // send the system status code back to the parent process
     //std::cout << "    child_result = " << child_result << std::endl;
     exit(child_result);
@@ -257,19 +257,19 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) {
       if (wpid == 0) {
 	if (elapsed < seconds_to_run) {
 	  // sleep 1/10 of a second
-	  usleep(100000); 
+	  usleep(100000);
 	  elapsed+= 0.1;
 	}
 	else {
 	  std::cout << "Killing child process" << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
 	  // the '-' here means to kill the group
-	  kill(childPID, SIGKILL); 
-	  kill(-childPID, SIGKILL); 
+	  kill(childPID, SIGKILL);
+	  kill(-childPID, SIGKILL);
 	  usleep(1000); /* wait 1/1000th of a second for the process to die */
 	}
       }
     } while (wpid == 0);
-    
+
     if (WIFEXITED(status)) {
       printf("Child exited, status=%d\n", WEXITSTATUS(status));
       result = WEXITSTATUS(status);
@@ -286,4 +286,3 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) {
 
   return result;
 }
-
