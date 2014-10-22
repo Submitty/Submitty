@@ -214,9 +214,10 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     }
 
     // set LAST symlink
+    unlink ($user_path."/LAST");
     symlink ($version_path,$user_path."/LAST");
-
     // set ACTIVE symlink
+    unlink ($user_path."/ACTIVE");
     symlink ($version_path,$user_path."/ACTIVE");
 
     return array("success"=>"File uploaded successfully");

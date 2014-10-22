@@ -11,12 +11,12 @@ $course = "UPLOAD_NONE_A";
    $tmp = htmlspecialchars($_GET["course"]);
    if (!is_valid_course($tmp)) {
        $course = "UPLOAD_NONE_B".$tmp;
+       header("Location: index.php?page=displaymessage&course=".$course);
+
    } else {
    $course = $tmp;
    }
    }
-
-if (isset($_FILES["file"])) {
 
     if (!isset($_GET["course"])) {
         echo "No course id";
@@ -43,6 +43,8 @@ if (isset($_FILES["file"])) {
         echo "Invalid assignment id";
         exit();
     }
+if (isset($_FILES["file"])) {
+
     $uploaded_file = $_FILES["file"];//THIS NEEDS TO BE MADE HACKER PROOF
     $result = upload_homework($_SESSION["id"], $course, $assignment_id,$uploaded_file);
     if (isset($result["error"])) {
