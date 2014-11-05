@@ -214,10 +214,14 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     }
 
     // set LAST symlink
-    unlink ($user_path."/LAST");
+    if (file_exists($user_path."/LAST")){
+        unlink ($user_path."/LAST");
+    }
     symlink ($version_path,$user_path."/LAST");
     // set ACTIVE symlink
-    unlink ($user_path."/ACTIVE");
+    if (file_exists($user_path."/ACTIVE")){
+        unlink ($user_path."/ACTIVE");
+    }
     symlink ($version_path,$user_path."/ACTIVE");
 
     return array("success"=>"File uploaded successfully");
@@ -625,7 +629,9 @@ function change_assignment_version($username, $course, $assignment_id, $assignme
     $json["active_assignment"] = $assignment_version;
 
     //symlink (version_path,$user_path."/ACTIVE");
-    $success = unlink ($user_path."/ACTIVE");
+    if (file_exists($user_path."/ACTIVE")){
+        unlink ($user_path."/ACTIVE");
+    }
     $success = symlink ($user_path."/".$assignment_version,$user_path."/ACTIVE");
 
     file_put_contents($file, json_encode($json));
