@@ -70,6 +70,7 @@ $select_submission_data = get_select_submission_data($username, $course, $assign
 
 render("homework", array(
     "course"=>$course,
+    "user"=>$user,
     "assignment_id"=>$assignment_id,
     "assignment_name"=>$assignment_name,
     "ta_grade_released"=>$ta_grade_released,
