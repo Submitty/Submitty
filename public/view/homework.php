@@ -1,7 +1,6 @@
 <?php
 print('<!-- Course Container -->');
 require_once("view/".$course."_container.php");
-// require_once("view/default_container.php");
 print('<!-- Course CSS -->');
 print('<link href="resources/'.$course.'_main.css" rel="stylesheet"></link>');
 ?>
@@ -10,7 +9,7 @@ print('<link href="resources/'.$course.'_main.css" rel="stylesheet"></link>');
 
 <script src="resources/script/main.js"></script>
 
-<?php $course =    $course = htmlspecialchars($_GET["course"]); ?>
+<?php $course = htmlspecialchars($_GET["course"]);?>
 
 
 <!-- DIFF VIEWER STUFF -->
@@ -22,9 +21,6 @@ print('<link href="resources/'.$course.'_main.css" rel="stylesheet"></link>');
 <link href="diff-viewer/diff.css" rel="stylesheet"></link>
 
 <link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
-
-<?php $user = $_SESSION["id"]; ?>
-
 
 
 <!-- FUNCTIONS USED BY THE PULL-DOWN MENUS -->
@@ -54,15 +50,12 @@ function version_changed(){
 <h2>Homework Submission for <em> <?php echo $user;?> </em></h2>
 
 <?php
-// FIXME: New variable in class.json
 if (on_dev_team($user)) {
   echo "<font color=\"ff0000\" size=+5>on dev team</font>";
   echo "<br>the Dev Team = ";
   for ($i=0; $i<count($dev_team); $i++) {
     echo " ".$dev_team[$i];
   }
-} else {
-//echo "test message";
 }
 ?>
 
@@ -92,7 +85,7 @@ if (on_dev_team($user)) {
 
 
 <div class="panel-body" style="text-align: left;">
-  <span><b>Select Lab or Homework:</b></span>
+  <span style="new-text"><b>Select Lab or Homework:</b></span>
   <form action="">
     <select id="hwlist" name="assignment_id" onchange="assignment_changed();">
        <?php for ($i = 0; $i < count($all_assignments); $i++) {
@@ -152,78 +145,48 @@ if (on_dev_team($user)) {
 
 <!-- "IF AT LEAST ONE SUBMISSION... " -->
 <?php if ($assignment_version >= 1) {?>
-
-
-  <!-- ACTIVE SUBMISION INFO -->
-<!--  <div class="box">
-    <h3>Active  Submission Version
-    <?php
-       echo $submitting_version."</b>";
-       if ($submitting_version_in_grading_queue) {
-           echo " is currently being graded.";
-       } else {
-          echo " score: ".$submitting_version_score;
-       }
-    ?>
-    </h3>
-    <p><?php echo $highest_version;?> submissions used out of <?php echo $max_submissions;?>.</p>
-
-  </div>
--->
-
   <!-- INFO ON ALL VERSIONS -->
   <div class="box">
     <h3>Review Submissions</h3>
-
-<!--
-    <div class="row" style="margin: 0;">
-      <div class="col-sm-10" style="padding: 0;">
--->
-
 	<!-- SELECT A PREVIOUS SUBMISSION -->
-<div class="row">
-<div style="margin-left: 20px">
-	<form action="">
-          <label>Select Submission Version:</label>
-          <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
-          <select id="versionlist" name="assignment_version" onchange="version_changed();">
-            <?php for ($i = 1; $i <= $highest_version; $i++) {?>
+    <div class="row">
+        <div style="margin-left: 20px">
+            <form action="">
+              <label>Select Submission Version:</label>
+              <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
+              <select id="versionlist" name="assignment_version" onchange="version_changed();">
+                <?php for ($i = 1; $i <= $highest_version; $i++) {?>
                   <option value="<?php echo $i;?>" <?php if ($i == $assignment_version) {?> selected <?php }?> >
                     Version #<?php echo $i;?>
-		    &nbsp;&nbsp
-		    Score:
-		    <!-- FIX ME: INSERT SCORE FOR THIS VERSION... -->
-		    <?php echo $select_submission_data[$i-1]["score"]; ?>
-		    &nbsp;&nbsp
-            <?php if ($select_submission_data[$i-1]["days_late"] != "") {?>
-                Days Late:
-                <?php echo $select_submission_data[$i-1]["days_late"]; ?>
-            <?php } ?>
-
-		    <?php if ($i == $submitting_version) { ?>
-		    &nbsp;&nbsp
-		    ACTIVE
-		    <?php } ?>
+                    &nbsp;&nbsp
+                    Score:
+                    <?php echo $select_submission_data[$i-1]["score"]; ?>
+                    &nbsp;&nbsp
+                    <?php if ($select_submission_data[$i-1]["days_late"] != "") {?>
+                        Days Late:
+                        <?php echo $select_submission_data[$i-1]["days_late"]; ?>
+                    <?php } ?>
+                    <?php if ($i == $submitting_version) { ?>
+                        &nbsp;&nbsp
+                        ACTIVE
+                    <?php } ?>
                   </option>
-            <?php }?>
-          </select>
-        </form>
-</div>
+                <?php }?>
+              </select>
+            </form>
+        </div>
 
-<div style="margin-left: 20px">
-        <!-- CHANGE ACTIVE VERSION -->
-        <?php if ($assignment_version != $submitting_version) { ?>
-	<a href="?page=update&course=<?php echo $course;?>&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>"
-	   style="text-align:center;"><input type="submit" class="btn btn-primary" value="Set Version <?php echo $assignment_version;?> as Active Submission Version"></input></a><br><br>
-	<?php } ?>
-</div>
-</div>
+        <div style="margin-left: 20px">
+            <!-- CHANGE ACTIVE VERSION -->
+            <?php if ($assignment_version != $submitting_version) { ?>
+                <a href="?page=update&course=<?php echo $course;?>&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>"style="text-align:center;">
+                    <input type="submit" class="btn btn-primary" value="Set Version <?php echo $assignment_version;?> as Active Submission Version"></input>
+                </a>
+                <br><br>
+            <?php } ?>
+        </div>
+    </div><!-- End of row -->
 
-
-	<?php
-	   //$date_submitted = get_submission_time($user,$course,$assignment_id,$assignment_version);
-	   //echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
-        ?>
 	<!-- SUBMITTED FILES -->
     <div class="row">
         <div style="margin-left: 20px; margin-right: 20px; ">
@@ -232,193 +195,28 @@ if (on_dev_team($user)) {
                 Submitted Files
               </li>
               <?php foreach($submitted_files as $file) {?>
-              <li class="list-group-item">
-                <?php echo $file["name"];?> (<?php echo $file["size"];?>kb)
-                   </li>
+                  <li class="list-group-item">
+                    <?php echo $file["name"];?> (<?php echo $file["size"];?>kb)
+                  </li>
               <?php } ?>
             </ul>
         </div>
     </div>
-   <?php if ($assignment_version_in_grading_queue) {?>
-
+    <?php if ($assignment_version_in_grading_queue) {?>
         <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
-
-   <?php } else {?>
-
-
-   <?php if ($assignment_message != "") { echo "<p><b><em><font size=+1 color=green>".$assignment_message."</font></b></p>"; } ?>
-
-
-<!-- DETAILS ON INDIVIDUAL TESTS -->
-
-  <div class="row" style="margin-left: 10px; margin-right: 10px">
-    <div class="box2" style="border-radius: 3px;    padding: 0px;    border: 1px solid #cccccc;    height: 100%;  width: 100%;   margin: 5px; position: relative; float: left;    background:rgba(255,255,255,0.8);">
-        <div>
-              <h4 style="margin-left: 10px; text-align: left;display:inline-block;">
-                    Total
-              </h4>
-              <span class="badge">
-                    <?php echo $viewing_version_score." / ".$points_visible;?>
-              </span>
-        </div>
-    </div>
-
-    <?php $counter = 0;
-    foreach($homework_tests as $test) {?>
-    <br clear="all">
-
-    <div class="box2" style="border-radius: 3px;    padding: 0px;    border: 1px solid #cccccc;    height: 100%;  width: 100%;   margin: 5px; position: relative; float: left;    background:rgba(255,255,255,0.8);">
-      <?php //score, points, and points possible are set.  Is not hidden and is not extra credit
-        if (  isset($test["score"]) &&
-              isset($test["points_possible"]) &&
-              $test["points_possible"] != 0 &&
-              $test["is_hidden"] == false &&
-              $test["is_extra_credit"] == false ) {
-
-
-                if (!($test["points_possible"] > 0)) {
-                   $part_percent = 1;
-                } else {
-                   $part_percent = $test["score"] / $test["points_possible"];
-                }
-                if ($part_percent == 1) {
-                   $class = "badge green-background";
-                } else if ($part_percent >= 0.5) {
-                   $class = "badge yellow-background";
-                } else {
-                   $class = "badge red-background";
-                }
-          } else {
-                $class = "badge";
-          } ?>
-
-    <div>
-      <h4 style="margin-left: 10px; text-align: left;display:inline-block;">
-        <?php echo $test["title"];?>
-        <?php if (isset ($test["details"])) { if ($test["details"] != "") { echo " <tt>".$test["details"]."</tt>"; } } ?>
-      </h4>
-      <!-- BADGE TEST SCORE -->
-      <span class="<?php echo $class;?>">
-        <?php
-            if ($test["is_hidden"] === true) {?>
-                Hidden Test Case
-                </span>
-                </div><!-- End div -->
-                </div><!-- End Box2 -->
-                <?php continue;
-            }?>
-            <?php echo $test["score"]." / ".$test["points_possible"];
-            if ($test["is_extra_credit"] === true) {
-                echo " Extra Credit";
-            }
-        ?>
-      </span>
-
-
-      <?php if (/* (isset($test["diff"]) && $test["diff"] != "") || */
-	         (isset($test["diffs"]) && count($test["diffs"]) > 0) ||
-                 (isset($test["compilation_output"]))
-               ) {?>
-
-          <span>
-            <a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
-          </span>
-      <?php }?>
-      <?php if ($test["message"] != "") {?>
-      <!--<div>-->
-      <!--<span>&nbsp;&nbsp;--><em><?php echo $test["message"]; ?></em><!--</span>-->
-      <!--</div>-->
-      <?php } ?>
-    </div>
-    <div id="sidebysidediff<?php echo $counter;?>" style="display:none">
-
-      <?php if (isset($test["compilation_output"])){?>
-          <b>Compilation output:</b>
-          <pre><?php echo $test["compilation_output"]; ?></pre>
-      <?php }?>
-
-      <!-- MULTIPLE DIFFS -->
-      <table border="0">
-      <?php
-	 if (isset($test["diffs"])) {
-
-	 foreach ($test["diffs"] as $diff) {
-          if (   isset($diff["student"])      &&
-	         !isset($diff["instructor"])  &&
-                 !isset($diff["description"]) &&
-                 !isset($diff["message"])
-             ) {
-              continue;
-          } ?>
-          <div style="margin-left:20px;">
-              <?php if (0) /*isset($diff["description"]))*/ {?>
-                  <b><?php echo $diff["description"];?></b>
-                  <br />
-                   <?php }
-              ?>
-
-              <?php if (isset($diff["message"])) {?>
-                  <tr><td><em><?php echo $diff["message"]; ?></em></td></tr>
-              <?php }?>
-          </div>
-          <?php if (!isset($diff["student"]) && !isset($diff["instructor"])) {
-                continue;
-            }
-            if (isset($diff["instructor"])) {
-                $instructor_row_class = "diff-row";
-            } else {
-                $instructor_row_class = "diff-row-none";
-            }
-          ?>
-                <tr>
-                    <td class="diff-row">
-                        <div style="margin-left: 20px;"><b>Student <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b></div>
-                    </td>
-                    <td class="<?php echo $instructor_row_class;?>">
-                        <div style="margin-left: 20px;"><b>Expected <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b></div>
-                    </td>
-                </tr>
-                <tr>
-<?php /* EXTRA NEWLINES & SPACES HERE CAUSE MISFORMATTING  in the diffviewer  */ ?>
-                    <td class="diff-row">
-                        <div style="margin-left: 20px;" class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
-<?php if (isset($diff["student"])) { echo str_replace(" ", "&nbsp;", $diff["student"]); } else { echo ""; }?></div>
-                    </td>
-                    <td class="<?php echo $instructor_row_class;?>">
-                         <div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_instructor">
-<?php if (isset($diff["instructor"])) { echo str_replace(" ", "&nbsp;", $diff["instructor"]); } else { echo ""; }?></div>
-                    </td>
-                </tr>
-            <script>
-                diff_queue.push("<?php echo $diff["diff_id"]; ?>");
-                diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
-            </script>
-        <?php } } ?><!-- first one ends foreach diff in diffs. Second ends if is set of diff -->
-        <!-- END MULTIPLE DIFFS -->
-
-    </table>
-    </div><!-- end sidebysidediff# -->
-      <?php $counter++;?>
-   </div><!-- end box2 -->
-   <?php }?><!-- end foreach homework_tests as test-->
-
-
-   <!-- END OF "IS GRADED?" -->
-   <?php } ?>
-
-  </div>
-  </div>
-
-
-
-
-
-
+    <?php } else {
+        //Box with grades, outputs and diffs
+        render("homework_graded_display",array(
+            "assignment_message"=>$assignment_message,
+            "homework_tests"=>$homework_tests,
+            "viewing_version_score"=>$viewing_version_score,
+            "points_visible"=>$points_visible
+            ));
+    } ?>
+  </div><!-- End of box -->
+</div><!-- End of panel-body -->
 
 <?php
-
-//if (on_dev_team($user)) {
-//echo "<font color=\"ff0000\" size=+5>on dev team</font><br><br>";
 
 if ($ta_grade_released == true) {
 
