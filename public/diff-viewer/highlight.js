@@ -17,31 +17,84 @@ var highlight = function(){
 
 	// Count characters up to word
 	// ['a', 'mom', 'was'], 2 => 5
-	function characters_to_word(words, word_num){
-		var u = 0;
-		for (var i = 0;i < word_num;i++){
-			u += words[i].length;
-		}
-		return u + word_num;
-	}
+	// function characters_to_word(words, word_num){
+	// 	var u = 0;
+	// 	var spaces= 0;
+	// 	for (var i = 0;i < word_num;i++){
+	// 		if(!words[i] || words[i]==" "){
+	// 			//u += 1;
+	// 			spaces+=1;
+	// 			word_num++;
+	// 			console.log("SPACE HERE");
+	// 		}
+	// 		else{
+	// 			u += words[i].length;
+	// 		}
+	// 		if(spaces==1){
+	// 			word_num--;
+	// 		}
+	// 		console.log(" word "+i +" of "+word_num+" : "+words[i]+" count "+u);
+	//
+	// 	}
+	// 	console.log("count: "+(u + word_num) );
+	// 	return u + word_num ;
+	// }
+	function characters_to_word_begin(sentence, word_num){
+		console.log("find start");
+		var prev = " ";
+		var w = -1;
+		if(word_num == 0){
+			for (var i = 0; i <sentence.length; i++){
+				console.log("char "+i+ " is: "+sentence[i]);
 
+				if (sentence[i] != " "){
+					//console.log("spaces until: "+i );
+
+					return i;
+				}
+			}
+			return sentence.length-1;
+		}
+		for (var i = 0; i <sentence.length; i++){
+			console.log("count: "+w + " char: "+i );
+
+			if (sentence[i] != " " && prev == " "){
+				w++;
+				if (w == word_num){
+					return i;
+				}
+			}
+			prev = sentence[i];
+		}
+		return sentence.length;
+	}
+	function characters_to_word_end(sentence, word_num){
+		console.log("find end");
+		var prev = " ";
+		var w = -1;
+
+		for (var i = 0; i <sentence.length; i++){
+			console.log("count: "+w + " char: "+i );
+
+			if (sentence[i] == " " && prev != " "){
+				w++;
+				if (w == word_num){
+					return i;
+				}
+			}
+			prev = sentence[i];
+		}
+		return sentence.length;
+	}
 	// Convert word range to character range
 	// "a dog went to the store", [1,3] => [2,13]
 	function word_to_character_range(sentence, word_range){
-		var initial_space_count = 0;
-		for (var i = 0; i <sentence.length; i++){
-			if (sentence[i] != " "){
-				initial_space_count = i;
-				sentence = sentence.slice(i,sentence.length);
-				break;
-			}
-		}
-		var words = sentence.split(" ");
-		return [
-			initial_space_count + characters_to_word(words, word_range[0]),
-			initial_space_count + (word_range[1] < words.length ? characters_to_word(words, word_range[1]) + words[word_range[1]].length : 
-				characters_to_word(words, words.length-1) + words[words.length-1].length)
-		];
+		var s = characters_to_word_begin(sentence, word_range[0]);
+		var e = characters_to_word_end(sentence, word_range[1]);
+
+		console.log("start: "+s + " end: "+e);
+
+		return [s,e];
 	}
 
 	// return sorted ranges (by first number)
@@ -126,7 +179,8 @@ var highlight = function(){
 
 	return {
 		enrange:enrange,
-		characters_to_word:characters_to_word,
+		characters_to_word_begin:characters_to_word_begin,
+		characters_to_word_end:characters_to_word_end,
 		word_to_character_range:word_to_character_range,
 		sort_ranges:sort_ranges,
 		range_overlap:range_overlap,
