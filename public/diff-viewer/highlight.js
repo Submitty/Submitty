@@ -11,7 +11,27 @@ var highlight = function(){
 				start = ar[i];
 			}
 		}
+		console.log("ar: "+ar);
+
 		nar.push([start,ar[ar.length-1]]);
+		console.log("nar: "+nar);
+
+		return nar;
+	}
+	function enrange_char(ar){
+		var nar = [];
+		var start = ar[0];
+		for (var i = 1;i < ar.length;i++){
+			if (ar[i] > ar[i-1] + 1){
+				nar.push([start,ar[i-1]]);
+				start = ar[i];
+			}
+		}
+		console.log("ar: "+ar);
+
+		nar.push([start, ar[ar.length-1]+1]);
+		console.log("nar: "+nar);
+
 		return nar;
 	}
 
@@ -179,6 +199,7 @@ var highlight = function(){
 
 	return {
 		enrange:enrange,
+		enrange_char:enrange_char,
 		characters_to_word_begin:characters_to_word_begin,
 		characters_to_word_end:characters_to_word_end,
 		word_to_character_range:word_to_character_range,

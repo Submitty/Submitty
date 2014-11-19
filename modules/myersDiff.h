@@ -63,7 +63,7 @@ TestResults* errorIfEmpty ( const std::string & student_file, const std::string 
 TestResults* myersDiffbyLinebyWord ( const std::string & student_file, const std::string & expected_file);
 TestResults* myersDiffbyLineNoWhite ( const std::string & student_file, const std::string & expected_file);
 TestResults* myersDiffbyLine ( const std::string & student_file, const std::string & expected_file);
-TestResults* myersDiffbyLinesByChar ( const std::string & student_file, const std::string & expected_file);
-TestResults* myersDiffbyLinesByCharExtraStudentOutputOk ( const std::string & student_file, const std::string & expected_file);
+TestResults* myersDiffbyLinebyChar ( const std::string & student_file, const std::string & expected_file);
+TestResults* myersDiffbyLinebyCharExtraStudentOutputOk ( const std::string & student_file, const std::string & expected_file);
 
 #endif

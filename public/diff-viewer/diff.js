@@ -111,7 +111,7 @@ var diff = function(){
 							// TODO Automate all these steps inside highlight.js
 							var line = change.line_number;
 							// Convert word range to multiple connected word ranges
-							var subranges = highlight.enrange(change.char_number);
+							var subranges = highlight.enrange_char(change.char_number);
 							// will contain all tags
 							var surround = [];
 
