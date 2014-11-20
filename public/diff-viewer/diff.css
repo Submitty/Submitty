@@ -9,7 +9,8 @@
 .line {
   height: 30px;
   line-height: 30px;
-  font-family: 'Inconsolata' ; 
+  font-family: 'Inconsolata' ;
+  margin-right: 10px;
 /*  font-family: "Courier New", Courier, monospace; */
 }
 .line_number {
@@ -17,7 +18,7 @@
   width: 40px;
   text-align: center;
   background-color: #f2f2f2;
-  opacity: .75;
+  opacity: .55;
   margin-right: 10px;
 }
 .odd-line {
@@ -27,10 +28,10 @@
   background-color: #fedede;
 }
 .bad-seg {
-  background-color: #fefe8e;
+  background-color: #fffdbe;
   border-radius: 5px;
-  padding: 2px;
-  margin: -2px;
+  padding-top:2px;
+  padding-bottom: :2px;
 }
 .line-hover {
   background-color: #ddf;
