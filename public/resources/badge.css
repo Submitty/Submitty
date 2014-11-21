@@ -13,7 +13,7 @@
     margin: 10px 20px 10px 10px;
     border-radius: 0;
     background-color: #F8F8F8;
-    overflow-x: auto;	
+    overflow-x: auto;
 }
 .col-md-6 {
     padding: 0;
@@ -37,11 +37,10 @@
 }
 
 .yellow-background {
-    background-color: #CFCF00;
+    background-color: #eac73d;
     color: #000000;
 }
 
 .red-background {
-    background-color: #E60000;
+    background-color: #c00000;
 }
-
