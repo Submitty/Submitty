@@ -1,4 +1,6 @@
-
+#HWsubmission{
+    font-family: 'Source Sans Pro', sans-serif;
+}
 
 .diff-row {
     vertical-align: top;
@@ -15,8 +17,85 @@
     background-color: #F8F8F8;
     overflow-x: auto;
 }
+
+.panel-body{
+    text-align: left;
+    padding: 0;
+    margin: 15px;
+}
+
 .col-md-6 {
     padding: 0;
+}
+
+.view_diff{
+    float: left;
+}
+
+.label{
+    font-family: 'PT Sans', sans-serif;
+    font-weight: 700;
+    margin-top: .5em;
+    margin-bottom: .5em;
+    margin-right: 0;
+    margin-left: 0;
+}
+
+a.label{
+    display: inline;
+}
+
+#HWsubmission a:link {
+    color: #3276b1;
+    text-decoration: none;
+
+}
+
+/* visited link */
+#HWsubmission a:visited {
+    color: #3276b1;
+    text-decoration: none;
+
+}
+
+/* mouse over link */
+#HWsubmission a:hover {
+    color: #234b66;
+    text-decoration: underline;
+
+}
+
+/* selected link */
+#HWsubmission a:active {
+    color: #234b66;
+    text-decoration: underline;
+
+}
+
+
+
+.sub{
+    margin-left: 3%;
+    margin-top: 1%;
+    margin-bottom: 1%;
+}
+
+.form_submit{
+    display: inline;
+    margin: 0;
+}
+
+h2{
+    margin: 0;
+
+}
+h3{
+    margin: 0;
+
+}
+p{
+    margin: 0;
+
 }
 
 .box {
@@ -28,12 +107,33 @@
     background:rgba(255,255,255,0.8);
 
 }
+
+.box2 {
+    border-radius: 3px;
+    padding: 0px;
+    border: 1px solid #cccccc;
+    height: 100%;
+    width: 100%;
+    margin: 5px;
+    position: relative;
+    float: left;
+    background:rgba(255,255,255,0.8);"
+}
+
+.error_mess{
+    font-style: italic;
+    margin-right: .5em;
+    margin-left: .5em;
+}
+
 .display-none {
-    display: none;
+
+display: none;
 }
 
 .green-background {
-    background-color: #006600;
+
+background-color: #006600;
 }
 
 .yellow-background {
@@ -44,3 +144,7 @@
 .red-background {
     background-color: #c00000;
 }
+
+/*.badge{
+    margin-right: .5em;
+}*/
