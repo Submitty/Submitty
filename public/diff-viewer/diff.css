@@ -1,39 +1,40 @@
 /*@import url(http://fonts.googleapis.com/css?family=Inconsolata);*/
-
 .missing {
-  background-color: #fedede;
+    background-color: #fedede;
 }
 .diff div {
-  text-align: left;
+    text-align: left;
 }
 .line {
-  height: 30px;
-  line-height: 30px;
-  font-family: 'Inconsolata' ;
-  margin-right: 10px;
-/*  font-family: "Courier New", Courier, monospace; */
+    height: 30px;
+    line-height: 30px;
+    font-family: 'Inconsolata', monospace;
+    white-space: pre;
+
+    margin-right: 10px;
+    /*  font-family: "Courier New", Courier, monospace; */
 }
 .line_number {
-  display: inline-block;
-  width: 40px;
-  text-align: center;
-  background-color: #f2f2f2;
-  opacity: .55;
-  margin-right: 10px;
+    display: inline-block;
+    width: 40px;
+    text-align: center;
+    background-color: #f2f2f2;
+    opacity: .55;
+    margin-right: 10px;
 }
 .odd-line {
-  background-color: #f8f8f8;
+    background-color: #f8f8f8;
 }
 .bad-line {
-  background-color: #fedede;
+    background-color: #fedede;
 }
 .bad-seg {
-  background-color: #fffdbe;
-  border-radius: 5px;
-  padding-top:2px;
-  padding-bottom: :2px;
+    background-color: #fffdbe;
+    border-radius: 5px;
+    padding-top:2px;
+    padding-bottom: :2px;
 }
 .line-hover {
-  background-color: #ddf;
-  cursor: pointer;
+    background-color: #ddf;
+    cursor: pointer;
 }

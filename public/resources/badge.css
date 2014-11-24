@@ -1,6 +1,21 @@
 #HWsubmission{
     font-family: 'Source Sans Pro', sans-serif;
 }
+.diff{
+    display:block;
+    float: left;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.diff-block{
+    float: none;
+    width: 100%;
+    display: inline;
+    vertical-align: top;
+    margin-left: 20px;
+    margin-right: 20px;
+}
 
 .diff-row {
     vertical-align: top;
@@ -9,6 +24,13 @@
 .diff-row-none {
     vertical-align: top;
     display: none;
+}
+
+.spacer{
+    padding-top: 10px;
+    width: 100%;
+    display: block;
+    vertical-align: top;
 }
 
 .panel {
@@ -21,7 +43,11 @@
 .panel-body{
     text-align: left;
     padding: 0;
-    margin: 15px;
+    margin: 20px;
+}
+
+.row{
+    margin: 0;
 }
 
 .col-md-6 {
@@ -79,6 +105,9 @@ a.label{
     margin-top: 1%;
     margin-bottom: 1%;
 }
+.sub2{
+    margin-left: 20px;
+}
 
 .form_submit{
     display: inline;
@@ -100,7 +129,7 @@ p{
 
 .box {
     border-radius: 3px;
-    padding: 15px;
+    padding: 20px;
     border: 2px solid #F0F0F0;
     height: 100%;
     margin: 5px;
@@ -114,10 +143,21 @@ p{
     border: 1px solid #cccccc;
     height: 100%;
     width: 100%;
-    margin: 5px;
+    margin-left: 0;
+    margin-top:  5px;
+    margin-bottom:  5px;
     position: relative;
     float: left;
     background:rgba(255,255,255,0.8);"
+}
+
+.diff-header {
+    margin-left: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+
+    text-align: left;
+    display:inline-block;
 }
 
 .error_mess{
@@ -125,6 +165,16 @@ p{
     margin-right: .5em;
     margin-left: .5em;
 }
+
+.error_mess2{
+    font-style: italic;
+    margin-left: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+
+
+}
+
 
 .display-none {
 

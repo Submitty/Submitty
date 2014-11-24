@@ -214,7 +214,9 @@ var diff = function(){
 				"'>"+(line_number+1)+"</span>" + lines[i] + "</div>";
 			line_number ++;
 		}
-		element.innerHTML = "<pre style='display: inline-block;'>" + html + "</pre>";
+		//element.innerHTML = "<pre>" + html + "</pre>";
+		element.innerHTML = "<span>"+ html + "</span>";
+
 	}
 
 	return {
