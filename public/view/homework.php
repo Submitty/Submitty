@@ -116,14 +116,15 @@ if ($status && $status != "") {
 
 		<!------------------------------------------------------------------------>
 		<!-- "IF AT LEAST ONE SUBMISSION... " -->
-		<div class="box">
 			<!-- INFO ON ALL VERSIONS -->
-			<h3 class="label">Review Submissions</h3>
-
 			<?php
 			if ($assignment_version >= 1)
 			{
 				?>
+				<div class="box">
+
+				<h3 class="label">Review Submissions</h3>
+
 				<!-- ACTIVE SUBMISION INFO -->
 
 				<div class="sub-text"><b>Active  Submission Version #
@@ -246,8 +247,9 @@ if ($status && $status != "") {
 					echo '<h3 class="label">TA grades for this homework not released yet</h3>';
 				}
 				//<!-- END OF "IF AT LEAST ONE SUBMISSION... " -->
+				echo "</div> <!-- end box -->";
+				
 			}
-		echo "</div> <!-- end box -->";
 
 		echo '<div class="box"> <!-- box -->';
 			$path_front = get_path_front($course);
