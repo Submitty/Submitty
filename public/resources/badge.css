@@ -2,19 +2,31 @@
     font-family: 'Source Sans Pro', sans-serif;
 }
 .diff{
-    display:block;
-    float: left;
     padding-left: 20px;
     padding-right: 20px;
 }
 
 .diff-block{
-    float: none;
-    width: 100%;
-    display: inline;
     vertical-align: top;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow:hidden;
+}
+
+.diff-block div{
+    float: left;
+}
+
+.diff-element{
     margin-left: 20px;
     margin-right: 20px;
+
+}
+
+.diff-element div{
+    display: block;
+    float: none;
 }
 
 .diff-row {
@@ -168,11 +180,7 @@ p{
 
 .error_mess2{
     font-style: italic;
-    margin-left: 20px;
-    margin-top: 20px;
-    margin-bottom: 20px;
-
-
+    margin-left: 40px;
 }
 
 

@@ -9,7 +9,7 @@
     height: 30px;
     line-height: 30px;
     font-family: 'Inconsolata', monospace;
-    white-space: pre;
+    /*white-space: pre;*/
 
     margin-right: 10px;
     /*  font-family: "Courier New", Courier, monospace; */
@@ -21,7 +21,16 @@
     background-color: #f2f2f2;
     opacity: .55;
     margin-right: 10px;
+    float: left;
 }
+
+.mono{
+    white-space: pre;
+    float: left;
+    font-family: 'Inconsolata', monospace;
+
+}
+
 .odd-line {
     background-color: #f8f8f8;
 }

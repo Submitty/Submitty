@@ -89,7 +89,7 @@
 					}
 					?>
 					<!-- MULTIPLE DIFFS -->
-					<div> <!--table -->
+					<!--<div>--> <!--table -->
 						<?php
 						if (isset($test["diffs"])) {
 							foreach ($test["diffs"] as $diff) {
@@ -108,6 +108,7 @@
 								}
 								if (isset($diff["message"]) && $diff["message"]!=" ") {
 									echo '<div class="diff-block"><a class="error_mess2">'.$diff["message"].'</a></div>'; //TODO: remove table here
+									echo '<div class="spacer"></div>';
 								}
 								if (!isset($diff["student"]) && !isset($diff["instructor"]))
 								{
@@ -121,27 +122,24 @@
 									$instructor_row_class = "diff-row-none";
 								}
 								?>
-								<div class="diff-block"> <!-- div block -->
-									<?php	/* EXTRA NEWLINES & SPACES HERE CAUSE MISFORMATTING  in the diffviewer  */ ?>
-									<div class="diff"> <!-- student diff -->
-										<div class="diff-row">
-											<div>
-												<b>Student <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b>
-											</div>
-											<div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
-												<?php
-												if (isset($diff["student"]))
-												{
-													echo str_replace(" ", "&nbsp;", $diff["student"]);
-												}
-												else
-												{
-													echo "";
-												}?>
-											</div>
+								<div class="diff-block"> <!-- diff block -->
+									<div class="diff-element"><!-- student diff element -->
+										<div>
+											<b>Student <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b>
 										</div>
-									</div><!-- end student diff -->
-									<div class="diff"><!-- instructor diff -->
+										<div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
+											<?php
+											if (isset($diff["student"]))
+											{
+												echo str_replace(" ", "&nbsp;", $diff["student"]);
+											}
+											else
+											{
+												echo "";
+											}?>
+										</div>
+									</div><!-- end student diff element -->
+									<div class="diff-element"><!-- instructor diff element -->
 										<div class="<?php echo $instructor_row_class;?>">
 											<div>
 												<b>Expected <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b>
@@ -151,31 +149,31 @@
 											<?php
 											if (isset($diff["instructor"]))
 											{
-												echo str_replace(" ", "&nbsp;", $diff["instructor"]);
+												// echo str_replace(" ", "&nbsp;", $diff["instructor"]);
+												// echo "~~~~~~~~~~~~~~~~~~~~~~\n";
+												echo '<tt class="mono">'.$diff["instructor"].'</tt>';
 											}
 											else
 											{
 												echo "";
 											}?>
 										</div>
-									</div><!-- end instructor diff -->
-									<div><!-- script -->
-										<script>
-										diff_queue.push("<?php echo $diff["diff_id"]; ?>");
-										diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
-										</script>
-									</div><!-- end script -->
-
+									</div><!-- end instructor diff element -->
+									<!-- <div style="clear:both;"></div> -->
+									<script><!-- script -->
+									diff_queue.push("<?php echo $diff["diff_id"]; ?>");
+									diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
+									</script><!-- end script -->
 								</div><!-- end div block -->
 								<div class="spacer"></div>
 							<!-- first one ends foreach diff in diffs. Second ends if is set of diff -->
 							<!-- </div> end sidebysidediff -->
 							<?php
 						}
-						}
-						?>
-						<!-- END MULTIPLE DIFFS -->
-					</div>  <!-- end table -->
+					}
+					?>
+					<!-- END MULTIPLE DIFFS -->
+					<!-- </div>-->  <!-- end table -->
 				</div><!-- end sidebysidediff# -->
 				<?php $counter++;?>
 			</div><!-- end box2 -->
