@@ -138,12 +138,10 @@ if ($status && $status != "") {
 						echo "  Score: ".$submitting_version_score;
 					}
 					?>
-				</div>
 
 
 				<!-- SELECT A PREVIOUS SUBMISSION -->
-				<div class="row">
-					<div class="sub-text">
+					<div class="row">
 						<form class="form_submit" action="">
 							<label><em>Select Submission Version:</em></label>
 							<input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
@@ -191,21 +189,17 @@ if ($status && $status != "") {
 				//echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
 				?> -->
 				<!-- SUBMITTED FILES -->
-				<div class="row">
-					<div class="sub2">
-						<ul class="list-group">
-							<li class="list-group-item list-group-item-active">
-								Submitted Files
-							</li>
-							<?php
-							foreach($submitted_files as $file) {
-								echo '<li class="list-group-item">';
-									echo $file["name"].'('.$file["size"].'kb)';
-									echo '</li>';
-								}
-								?>
-							</ul>
-					</div>
+				<div class="row sub-text">
+					<h4>Submitted Files:</h4>
+					<ul class="list-group">
+						<?php
+						foreach($submitted_files as $file) {
+							echo '<li class="list-group-item">';
+								echo $file["name"].' ('.$file["size"].'kb)';
+								echo '</li>';
+							}
+							?>
+						</ul>
 				</div>
 				<?php if ($assignment_version_in_grading_queue) {?>
 					<span>Version <?php echo $assignment_version;?> is currently being graded.</span>
@@ -248,7 +242,7 @@ if ($status && $status != "") {
 				}
 				//<!-- END OF "IF AT LEAST ONE SUBMISSION... " -->
 				echo "</div> <!-- end box -->";
-				
+
 			}
 
 		echo '<div class="box"> <!-- box -->';

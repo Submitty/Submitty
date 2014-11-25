@@ -2,7 +2,9 @@
 	echo "<p class='error_mess'>".$assignment_message."</p>"; }
 	?>
 	<!-- DETAILS ON INDIVIDUAL TESTS -->
-	<div class="row sub2">
+	<div class="row sub-text">
+		<h4>Results:</h4>
+
 		<div class="box2" >
 			<div>
 				<h4 class="diff-header">

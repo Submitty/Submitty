@@ -122,7 +122,7 @@ a.label{
 }
 .sub-text{
     margin-left: 20px;
-    margin-top: 5px;
+    margin-top: 20px;
 
 }
 
@@ -131,11 +131,16 @@ a.label{
     margin: 0;
 }
 
+
 h2{
     margin: 0;
 
 }
 h3{
+    margin: 0;
+
+}
+h4{
     margin: 0;
 
 }
@@ -166,6 +171,24 @@ p{
     position: relative;
     float: left;
     background:rgba(255,255,255,0.8);"
+}
+
+.list-group{
+    padding: 0px;
+    margin-left: 0;
+    margin-top:  5px;
+    margin-bottom:  5px;
+}
+.list-group li{
+    border: 1px solid #cccccc;
+    background:rgba(255,255,255,0.8);"
+    padding-left: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-left: 0;
+    margin-top:  5px;
+    margin-bottom:  5px;
+
 }
 
 .diff-header {
