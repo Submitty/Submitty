@@ -120,6 +120,11 @@ a.label{
 .sub2{
     margin-left: 20px;
 }
+.sub-text{
+    margin-left: 20px;
+    margin-top: 5px;
+
+}
 
 .form_submit{
     display: inline;
