@@ -1096,7 +1096,7 @@ fieldset[disabled] .btn-link:focus {
     width: 58.33333333%;
   }
   .col-md-6 {
-    width: 50%; 
+    width: 50%;
   }
   .col-md-5 {
     width: 41.66666667%;
@@ -1944,4 +1944,3 @@ table th[class*="col-"] {
   display: table-cell;
   float: none;
 }
-

@@ -68,7 +68,7 @@ TestResults* myersDiffbyLine ( const std::string & student_file, const std::stri
 
 }
 
-TestResults* myersDiffbyLinesByChar ( const std::string & student_file, const std::string & expected_file) {
+TestResults* myersDiffbyLinebyChar ( const std::string & student_file, const std::string & expected_file) {
 	vectorOfLines text_a = stringToLines( student_file );
 	vectorOfLines text_b = stringToLines( expected_file );
 	Difference* diff = ses( &text_a, &text_b, true );
@@ -77,7 +77,7 @@ TestResults* myersDiffbyLinesByChar ( const std::string & student_file, const st
 
 }
 
-TestResults* myersDiffbyLinesByCharExtraStudentOutputOk ( const std::string & student_file, const std::string & expected_file) {
+TestResults* myersDiffbyLinebyCharExtraStudentOutputOk ( const std::string & student_file, const std::string & expected_file) {
 	vectorOfLines text_a = stringToLines( student_file );
 	vectorOfLines text_b = stringToLines( expected_file );
 
