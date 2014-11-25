@@ -82,28 +82,50 @@ var diff = function(){
 				var change = changes[i];
 				var line_id = "#" + id_prepend + "line" + change.line_number;
 				if (change.line_number !== undefined){
-					if (!change.word_number){
+
 						console.log(id_prepend,"Bad line at ",change.line_number);
 						style.push([line_id, "bad-line"]);
 						assocs[changeID].push(line_id);
-					}else{
-						// TODO Automate all these steps inside highlight.js
-						var line = change.line_number;
-						// Convert word range to multiple connected word ranges
-						var subranges = highlight.enrange(change.word_number);
-						// will contain all tags
-						var surround = [];
+					if (change.word_number || change.char_number){
+						if (change.word_number){
+							// TODO Automate all these steps inside highlight.js
+							var line = change.line_number;
+							// Convert word range to multiple connected word ranges
+							var subranges = highlight.enrange(change.word_number);
+							// will contain all tags
+							var surround = [];
 
-						// Convert subranges to character ranges and add
-						// surround tags
-						for (var k = 0;k < subranges.length;k++){
-							subranges[k] = highlight.word_to_character_range(lines[line], subranges[k]);
-							surround.push(["<span class='bad-seg bad-seg-"+line+"'>","</span>"]);
+							// Convert subranges to character ranges and add
+							// surround tags
+							for (var k = 0;k < subranges.length;k++){
+								subranges[k] = highlight.word_to_character_range(lines[line], subranges[k]);
+								surround.push(["<span class='bad-seg bad-seg-"+line+"'>","</span>"]);
+							}
+
+							// tag all strings in string with desired elements
+							lines[line] = highlight.tagString(lines[line], subranges, surround);
+
+							assocs[changeID].push(".bad-seg-" + line);
 						}
+						else{
+							// TODO Automate all these steps inside highlight.js
+							var line = change.line_number;
+							// Convert word range to multiple connected word ranges
+							var subranges = highlight.enrange_char(change.char_number);
+							// will contain all tags
+							var surround = [];
 
-						// tag all strings in string with desired elements
-						lines[line] = highlight.tagString(lines[line], subranges, surround);
-						assocs[changeID].push(".bad-seg-" + line);
+							// Convert subranges to character ranges and add
+							// surround tags
+							for (var k = 0;k < subranges.length;k++){
+								surround.push(["<span class='bad-seg bad-seg-"+line+"'>","</span>"]);
+							}
+
+							// tag all strings in string with desired elements
+							lines[line] = highlight.tagString(lines[line], subranges, surround);
+
+							assocs[changeID].push(".bad-seg-" + line);
+						}
 					}
 				}else{
 					console.log("ERROR: NO LINE NUMBER IN DIFFERENCE");
@@ -192,7 +214,9 @@ var diff = function(){
 				"'>"+(line_number+1)+"</span>" + lines[i] + "</div>";
 			line_number ++;
 		}
-		element.innerHTML = "<pre style='display: inline-block;'>" + html + "</pre>";
+		//element.innerHTML = "<pre>" + html + "</pre>";
+		element.innerHTML = "<span>"+ html + "</span>";
+
 	}
 
 	return {
