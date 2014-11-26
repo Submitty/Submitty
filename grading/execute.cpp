@@ -17,6 +17,8 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -151,10 +153,7 @@ int exec_this_command(const std::string &cmd) {
   std::cout << std::endl << std::endl;
 
 
-  // FIXME: if we want to assert or print stuff afterward, we should save
-  // the originals and restore after the exec fails.
-
-
+  // print out the command line to be executed
   std::cout << "going to exec: ";
   for (int i = 0; i < my_args.size()+1; i++) {
     std::cout << my_char_args[i] << " ";
@@ -162,17 +161,26 @@ int exec_this_command(const std::string &cmd) {
   std::cout << std::endl;
 
 
-  /*
-  char* path = getenv("PATH");
-  std::string stringpath = (path==NULL) ? "" : std::string(path);
-  std::cout << "my path = " << stringpath << std::endl;
-  setenv("PATH","/usr/bin/",1);
 
-  path = getenv("PATH");
-  stringpath = (path==NULL) ? "" : std::string(path);
-  std::cout << "my path edited = " << stringpath << std::endl;
-  */
+  // the default umask is 220, so we need edit so that we can make
+  // these files 'other read', so that we can read them when we switch
+  // users
+  mode_t everyone_read = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+  mode_t prior_umask = umask(S_IWGRP | S_IWOTH);
 
+  // The path is probably empty, we need to add /usr/bin to the path
+  // since we get a "collect2 ld not found" error from g++ otherwise
+  char* my_path = getenv("PATH");
+  std::cout << "PATH pre= " << (my_path ? my_path : "<empty>") << std::endl;
+  if (my_path == NULL) {
+    setenv("PATH", "/usr/bin", 1);
+  }
+  my_path = getenv("PATH");
+  std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
+
+
+  // FIXME: if we want to assert or print stuff afterward, we should save
+  // the originals and restore after the exec fails.
   if (my_stdin != "") {
     int new_stdinfd  = open(my_stdin.c_str()  , O_RDONLY );
     int stdinfd = fileno(stdin);
@@ -180,20 +188,22 @@ int exec_this_command(const std::string &cmd) {
     dup2(new_stdinfd, stdinfd);
   }
   if (my_stdout != "") {
-    int new_stdoutfd = creat(my_stdout.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH );
+    int new_stdoutfd = creat(my_stdout.c_str(), everyone_read );
     int stdoutfd = fileno(stdout);
     close(stdoutfd);
     dup2(new_stdoutfd, stdoutfd);
   }
   if (my_stderr != "") {
-    int new_stderrfd = creat(my_stderr.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH );
+    int new_stderrfd = creat(my_stderr.c_str(), everyone_read );
     int stderrfd = fileno(stderr);
     close(stderrfd);
     dup2(new_stderrfd, stderrfd);
   }
 
+
   int child_result =  execv ( my_program.c_str(), my_char_args );
   // if exec does not fail, we'll never get here
+  umask(prior_umask);
   
   return child_result;
 }

@@ -16,7 +16,7 @@
 class TestResults {
 public:
 
-  TestResults(int g=-1, const std::string &m="") { my_grade = g; message = m; distance=0; }
+  TestResults(float g=-1, const std::string &m="") { my_grade = g; message = m; distance=0; }
 
   virtual ~TestResults() {}
   

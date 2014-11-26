@@ -344,11 +344,9 @@ while true; do
 	    cp -f "$bin_path/$assignment/compile.out" $tmp_compilation/my_compile.out
 
   	    # give the untrusted user read/write/execute permissions on the tmp directory & files
-#	    chmod -R go+rwx $tmp
+	    chmod -R go+rwx $tmp
 	    # run the compile.out as the untrusted user
-#	    $base_path/bin/untrusted_runscript $tmp/my_compile.out >& .submit_compile_output.txt
-
-	    $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
+	    $base_path/bin/untrusted_runscript $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
 
 	    compile_error_code="$?"
 	    if [[ "$compile_error_code" -ne 0 ]] ;
@@ -361,6 +359,8 @@ while true; do
 
 	# return to the main tmp directory
 	popd > /dev/null
+
+
 	
 	# move all executable files from the to the main tmp directory
 	# FIXME: not really what we want for the "FILE_EXISTS" command....
