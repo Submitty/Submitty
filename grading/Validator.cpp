@@ -230,14 +230,14 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     if (!testcases[i].hidden()) {
       nonhidden_auto_pts += testcase_pts;
       if (testcases[i].extracredit()) {
-	nonhidden_extra_credit += testcases[i].points();
+	nonhidden_extra_credit += testcase_pts; //testcases[i].points();
       } else {
 	nonhidden_possible_pts += testcases[i].points();
       }
     } 
     hidden_auto_pts += testcase_pts;
     if (testcases[i].extracredit()) {
-      hidden_extra_credit += testcases[i].points();
+      hidden_extra_credit += testcase_pts; //testcases[i].points();
     } else {
       hidden_possible_pts += testcases[i].points();
     }
