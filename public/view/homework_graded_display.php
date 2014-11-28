@@ -133,7 +133,9 @@
 											<?php
 											if (isset($diff["student"]))
 											{
-												echo str_replace(" ", "&nbsp;", $diff["student"]);
+												//echo str_replace(" ", "&nbsp;", $diff["student"]);
+												echo '<tt class="mono">'.$diff["student"].'</tt>';
+
 											}
 											else
 											{
