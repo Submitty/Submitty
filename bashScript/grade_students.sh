@@ -141,7 +141,7 @@ while true; do
 	    continue
 	fi
 
-	
+
         # check to see if this assignment is already being graded
 	# wait until the lock is available (up to 5 seconds)
 	flock -w 5 200 || { echo "ERROR: flock() failed. $NEXT_TO_GRADE" >&2; exit 1; }
@@ -159,7 +159,7 @@ while true; do
 
 	 echo "========================================================================"
 	 echo "GRADE $NEXT_TO_GRADE"
-	
+
 	STARTTIME=$(date +%s)
 
 
@@ -344,12 +344,15 @@ while true; do
 	    cp -f "$bin_path/$assignment/compile.out" $tmp_compilation/my_compile.out
 
   	    # give the untrusted user read/write/execute permissions on the tmp directory & files
-#	    chmod -R go+rwx $tmp
+	    chmod -R go+rwx $tmp
 	    # run the compile.out as the untrusted user
+
 #	    $base_path/bin/untrusted_runscript $tmp/my_compile.out >& .submit_compile_output.txt
 
-        echo "$tmp_compilation/my_compile.out"
-	    $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
+        # echo "$tmp_compilation/my_compile.out"
+	    # $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
+
+	    $base_path/bin/untrusted_runscript $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
 
 	    compile_error_code="$?"
 	    if [[ "$compile_error_code" -ne 0 ]] ;
@@ -363,9 +366,10 @@ while true; do
 	# return to the main tmp directory
 	popd > /dev/null
 
+
 	# move all executable files from the to the main tmp directory
 	# FIXME: not really what we want for the "FILE_EXISTS" command....
-        cp  1>/dev/null  2>&1  $tmp_compilation/README*.txt  $tmp_compilation/*.out $tmp_compilation/test*.txt $tmp 
+        cp  1>/dev/null  2>&1  $tmp_compilation/README*.txt  $tmp_compilation/*.out $tmp_compilation/test*.txt $tmp
 
 
 
@@ -463,7 +467,7 @@ while true; do
 	rm -f $base_path/$TO_BE_GRADED/GRADING_$NEXT_TO_GRADE
 	flock -u 200
 
-	
+
 	ENDTIME=$(date +%s)
 	 echo "finished with $NEXT_TO_GRADE in ~$(($ENDTIME - $STARTTIME)) seconds"
 
