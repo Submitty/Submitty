@@ -1,12 +1,27 @@
-#HWsubmission{
+#HWsubmission {
     font-family: 'Source Sans Pro', sans-serif;
 }
-.diff{
+
+
+#HWsubmission h1, #HWsubmission h2, #HWsubmission h3, #HWsubmission h4, #HWsubmission b, #HWsubmission em, #HWsubmission p{
+    margin: 0;
+    color: black;
+    font-family: 'Source Sans Pro', sans-serif;
+
+}
+
+#HWsubmission div{
+    color: black;
+    font-family: 'Source Sans Pro', sans-serif;
+
+}
+
+#HWsubmission .diff{
     padding-left: 20px;
     padding-right: 20px;
 }
 
-.diff-block{
+#HWsubmission .diff-block{
     vertical-align: top;
     display: block;
     width: 100%;
@@ -14,72 +29,70 @@
     overflow:hidden;
 }
 
-.diff-block div{
+#HWsubmission .diff-block div{
     float: left;
 }
 
-.diff-element{
+#HWsubmission .diff-element{
     margin-left: 20px;
     margin-right: 20px;
 
 }
 
-.diff-element div{
+#HWsubmission .diff-element div{
     display: block;
     float: none;
 }
 
-.diff-row {
+#HWsubmission .diff-row {
     vertical-align: top;
 }
 
-.diff-row-none {
+#HWsubmission .diff-row-none {
     vertical-align: top;
     display: none;
 }
 
-.spacer{
+#HWsubmission .spacer{
     padding-top: 10px;
     width: 100%;
     display: block;
     vertical-align: top;
 }
 
-.panel {
+#HWsubmission .panel {
     margin: 10px 20px 10px 10px;
     border-radius: 0;
     background-color: #F8F8F8;
     overflow-x: auto;
 }
 
-.panel-body{
+#HWsubmission .panel-body{
     text-align: left;
     padding: 0;
-    margin: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
-.row{
+#HWsubmission .row{
     margin: 0;
 }
 
-.col-md-6 {
-    padding: 0;
-}
-
-.view_diff{
+#HWsubmission .view_diff{
     float: left;
 }
 
-.label{
+#HWsubmission .label{
     font-family: 'PT Sans', sans-serif;
     font-weight: 700;
     margin-top: .5em;
-    margin-bottom: .5em;
     margin-right: 0;
     margin-left: 0;
 }
 
-a.label{
+#HWsubmission a.label{
     display: inline;
 }
 
@@ -110,47 +123,37 @@ a.label{
 
 }
 
-
-
-.sub{
+#HWsubmission .sub{
     margin-left: 3%;
     margin-top: 1%;
     margin-bottom: 1%;
 }
-.sub2{
+#HWsubmission .sub2{
     margin-left: 20px;
 }
-.sub-text{
+#HWsubmission .sub-text{
     margin-left: 20px;
-    margin-top: 20px;
+    margin-top: 10px;
 
 }
 
-.form_submit{
+#HWsubmission .form_submit{
     display: inline;
     margin: 0;
 }
 
-
-
-h1, h2, h3, b, em, p, div{
-    margin: 0;
-    color: black;
-    font-family: 'Source Sans Pro', sans-serif;
-
-}
-
-.box {
+#HWsubmission .box {
     border-radius: 3px;
     padding: 20px;
     border: 2px solid #F0F0F0;
     height: 100%;
-    margin: 5px;
+    margin: 0;
+    margin-bottom: 5px;
     background:rgba(255,255,255,0.8);
 
 }
 
-.box2 {
+#HWsubmission .box2 {
     border-radius: 3px;
     padding: 0px;
     border: 1px solid #cccccc;
@@ -164,64 +167,39 @@ h1, h2, h3, b, em, p, div{
     background:rgba(255,255,255,0.8);"
 }
 
-.list-group{
-    padding: 0px;
-    margin-left: 0;
-    margin-top:  5px;
-    margin-bottom:  5px;
-}
-.list-group li{
-    border: 1px solid #cccccc;
-    background:rgba(255,255,255,0.8);"
-    padding-left: 10px;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    margin-left: 0;
-    margin-top:  5px;
-    margin-bottom:  5px;
-
-}
-
-.diff-header {
+#HWsubmission .diff-header {
     margin-left: 10px;
     margin-top: 20px;
     margin-bottom: 20px;
-
     text-align: left;
     display:inline-block;
 }
 
-.error_mess{
+#HWsubmission .error_mess{
     font-style: italic;
     margin-right: .5em;
     margin-left: .5em;
 }
 
-.error_mess2{
+#HWsubmission .error_mess2{
     font-style: italic;
     margin-left: 40px;
 }
 
 
-.display-none {
-
-display: none;
+#HWsubmission .display-none {
+    display: none;
 }
 
-.green-background {
-
-background-color: #006600;
+#HWsubmission .green-background {
+    background-color: #006600;
 }
 
-.yellow-background {
+#HWsubmission .yellow-background {
     background-color: #eac73d;
     color: #000000;
 }
 
-.red-background {
+#HWsubmission .red-background {
     background-color: #c00000;
 }
-
-/*.badge{
-    margin-right: .5em;
-}*/

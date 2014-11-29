@@ -191,15 +191,13 @@ if ($status && $status != "") {
 				<!-- SUBMITTED FILES -->
 				<div class="row sub-text">
 					<h4>Submitted Files:</h4>
-					<ul class="list-group">
 						<?php
 						foreach($submitted_files as $file) {
-							echo '<li class="list-group-item">';
-								echo $file["name"].' ('.$file["size"].'kb)';
-								echo '</li>';
+							echo '<div class="box2">';
+								echo '<a class="diff-header">'.$file["name"].' ('.$file["size"].'kb)'.'</a>';
+								echo '</div>';
 							}
 							?>
-						</ul>
 				</div>
 				<?php if ($assignment_version_in_grading_queue) {?>
 					<span>Version <?php echo $assignment_version;?> is currently being graded.</span>
