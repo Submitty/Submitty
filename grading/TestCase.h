@@ -23,6 +23,8 @@
 #include <cassert>
 #include "modules/modules.h"
 
+extern const int max_clocktime;
+
 // =================================================================================
 
 class TestCasePoints {
@@ -74,6 +76,29 @@ public:
 
   virtual TestResults* doit(const std::string &prefix);
 };
+
+
+class TestCaseCustom : public TestCaseGrader {
+public:
+  TestCaseCustom(float (*custom_grader_)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv),
+		 const std::string file,
+		 const std::string desc,
+		 const std::string arg_string,
+		 float points_frac=-1.0)
+    : TestCaseGrader(file,desc), custom_grader(custom_grader_) {my_arg_string = arg_string; points_fraction=points_frac;}
+
+  float (*custom_grader)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv);
+
+  //TestResults* (*token_grader) ( const std::string&, const std::vector<std::string>& );  
+  //std::vector<std::string> tokens;
+
+  virtual TestResults* doit(const std::string &prefix);
+private:
+  std::string my_arg_string;
+};
+
+
+
 
 // =================================================================================
 // =================================================================================
@@ -230,7 +255,8 @@ public:
      is NULL, defaults to returning the result of diffLine(). */
   TestResults* do_the_grading (int j, std::string &message);
 
-  int seconds_to_run() { return 5; }
+  //int seconds_to_run() { return 5; }
+  int seconds_to_run() { return max_clocktime; }
 
   bool isFileExistsTest() { return FILE_EXISTS; }
   bool isCompilationTest() { return COMPILATION; }

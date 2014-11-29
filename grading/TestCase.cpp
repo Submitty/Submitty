@@ -1,5 +1,16 @@
 #include <unistd.h>
 #include "TestCase.h"
+//#include "config.h"
+
+/*
+
+float custom_grade(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv);
+
+
+// this isn't needed by all homeworks...  needs a rethink
+float custom_grade(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv) { return 0.0; }
+
+*/
 
 int TestCase::next_test_case_id = 1;
 
@@ -111,15 +122,65 @@ TestResults* TestCaseTokens::doit(const std::string &prefix) {
 }
 
 
+TestResults* TestCaseCustom::doit(const std::string &prefix) {
+
+
+  std::ifstream student_instr((prefix+"_"+filename).c_str());
+
+  std::string s = "";
+
+  if (!student_instr) {
+    std::cout << "STUDENT FILE DOES NOT EXIST" << std::endl;
+    return new TestResults(0,"ERROR: student file does not exist");
+  }
+
+
+  std::vector<std::string> argv;
+
+  argv.push_back("MY_EXECUTABLE.out");
+
+  std::stringstream ss(my_arg_string);
+  std::string token;
+  while (ss >> token) {
+    argv.push_back(token);
+  }
+
+
+  std::stringstream output;
+  float answer = custom_grader(student_instr,output,argv);
+
+
+  std::cout << "GRADE: " << answer << "\nOUTPUT:\n" << output.str() << std::endl;
+
+
+  std::string tmp = output.str();
+  std::string replaced;
+  for (int i = 0; i < tmp.size(); i++) {
+    if (tmp[i] != '\n') {
+      replaced.push_back(tmp[i]);
+    }
+    else {
+      replaced += "<br>\n";
+    }
+  }
+
+
+
+
+  return new TestResults(answer,replaced);
+
+}
+
+
 
 
 std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
-  // char cCurrentPath[1000];
-  // if (!getcwd(cCurrentPath, 1000)) {
-  //   std::cerr << "ERROR: couldn't get current directory" << std::endl;
-  //   exit(0);
-  // }
-  // //printf ("The current working directory is '%s'\n", cCurrentPath);
+    // char cCurrentPath[1000];
+    // if (!getcwd(cCurrentPath, 1000)) {
+    //   std::cerr << "ERROR: couldn't get current directory" << std::endl;
+    //   exit(0);
+    // }
+    // //printf ("The current working directory is '%s'\n", cCurrentPath);
     std::string tmp = dir;
 
     assert (tmp.size() >= 1);

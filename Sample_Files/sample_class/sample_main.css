@@ -1,112 +1,44 @@
-/*
-body, td {
-    color: #000000; font-family: Arial, Helvetica, sans-serif;
-}
-p,div {
-    color: #000000; font-family: Arial, Helvetica, sans-serif; width:fit-content; / *max-width:700px;* / word-wrap:break-word;
-}
-li {
-    color: #000000; font-family: Arial, Helvetica, sans-serif; width:fit-content; max-width:1000px; word-wrap:break-word;
-}
-h1, h2, h3 {
-    color: #448844; font-family: Arial, Helvetica, sans-serif; width:fit-content; max-width:700px; word-wrap:break-word;
-}
-pre {
-  max-width:900px;
-  display: inline-block !important;
-}
-center {
-    width:fit-content; max-width:700px; word-wrap:break-word;
-}
-b {
-    color: #448844; font-family: Arial, Helvetica, sans-serif;
-}
-em, .italics {
-    color: #448844; font-family: Arial, Helvetica, sans-serif; font-style:italic;
-}
-*/
-  a:link {color:#0033cc;}      /* unvisited link */
-  a:visited {color:#330cc;}  /* visited link */
-  a:hover {color:#990000;}  /* mouse over link */
-  a:active {color:#009900;}  /* selected link */
-
-table { }
-
-td.upper_left_corner {
-    background:rgba(255,255,255,0.0);
-} /*background-color: #448844; }*/
-td.top_and_left_bars {
-    background:rgba(255,255,255,0.4);
-} /*background-color: #88cc88;}*/
-td.main_panel {
-    background:rgba(255,255,255,0.8);
-
-
-}
-
-  td.calendar_red { background-color: #ffcccc; vertical-align:text-top; }
-  td.calendar_green { background-color: #ccffcc; vertical-align:text-top; }
-  td.calendar_yellow { background-color: #ffffcc; vertical-align:text-top; }
-  td.calendar_white { background-color: #ffffff; vertical-align:text-top; }
-  td.calendar_blue { background-color: #ccccff; vertical-align:text-top; }
-  td.calendar_grey { background-color: #dddddd; vertical-align:text-top; }
-
-  td.schedule_red { background-color: #ffcccc; vertical-align:middle; text-align:center; }
-  td.schedule_green { background-color: #ccffcc; vertical-align:middle; text-align:center; }
-  td.schedule_yellow { background-color: #ffffcc; vertical-align:middle; text-align:center; }
-  td.schedule_white { background-color: #ffffff; vertical-align:middle; text-align:center; }
-  td.schedule_blue { background-color: #ccccff; vertical-align:middle; text-align:center; }
-  td.schedule_grey { background-color: #dddddd; vertical-align:middle; text-align:center; }
-
-  td.schedule_ltgrey { background-color: #eeeeee; vertical-align:middle; text-align:center; }
-
-/*
-
-.diff-row {
-    vertical-align: top;
-}
-
-.diff-row-none {
-    vertical-align: top;
-    display: none;
-}
-
-.panel {
-    margin: 10px 20px 10px 10px;
-    border-radius: 0;
-    background-color: #F8F8F8;
-    overflow-x: auto;
-}
-.col-md-6 {
-    padding: 0;
-}
-
-.box {
-    border-radius: 3px;
-    padding: 15px;
-    border: 2px solid #F0F0F0;
+body{
     height: 100%;
-    margin: 5px;
-    background:rgba(255,255,255,0.8);
-
-}
-.display-none {
-    display: none;
+    background-color: #B6CECE;
+    padding: 0;
+    margin: 0;
+    font-family: 'Open Sans Condensed', sans-serif;
 }
 
+.title-box{
+    background-color: #EDF6F6;
+    padding:2%;
+    margin: 0;
+    box-shadow: 0px 2px 15px -5px #888888;
+    display: block;
 
-
-.green-background {
-    background-color: #006600;
 }
 
-.yellow-background {
-    background-color: #fae13f;
-    color: #000000;
+.title{
+    font-weight: 300;
+    text-align: center;
+    margin: 0;
+
 }
 
-.red-background {
-    background-color: #E60000;
+.subtext{
+    font-style: italic;
+    text-align: center;
+    font-weight: 300;
+    margin: 0;
+
 }
 
-*/
+.submissions{
+    background-color: #E9EFEF;
+    margin: 2%;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    padding:3%;
+    margin-right: 2%;
+    margin-left: 2%;
+    margin-top: 2%;
+    margin-bottom: 2%;
+    box-shadow: 0px 2px 15px -5px #888888;
+}

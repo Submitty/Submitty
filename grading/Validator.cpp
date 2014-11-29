@@ -114,6 +114,9 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       std::cerr << "THIS IS A FILE EXISTS TEST! " << testcases[i].getFilename() << std::endl;
       assert (testcases[i].getFilename() != "");
 
+      system ("ls -lta");
+      system ("pwd");
+
       if ( access( (std::string("")+testcases[i].getFilename()).c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
 	std::cerr << "file does exist: " << testcases[i].getFilename() << std::endl;
 	testcase_pts = testcases[i].points();
@@ -123,6 +126,10 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       }
     } else if (testcases[i].isCompilationTest()) {
       std::cerr << "THIS IS A COMPILATION! " << std::endl;
+
+      system ("ls -lta");
+      system ("pwd");
+
       if ( access( testcases[i].getFilename().c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
 	std::cerr << "file does exist: " << testcases[i].getFilename() << std::endl;
 	testcase_pts = testcases[i].points();
@@ -199,6 +206,9 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 	testcase_json << "\t\t\t\t},\n";
       } // END COMPARISON LOOP
 
+      if (fraction_sum < 0.99 || fraction_sum > 1.01) {
+	std::cout << "Fraction sum " << fraction_sum << std::endl;
+      }
     assert (fraction_sum > 0.99 && fraction_sum < 1.01);
 
       assert (pts_helper >= -0.00001 && pts_helper <= 1.000001);
@@ -220,14 +230,14 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     if (!testcases[i].hidden()) {
       nonhidden_auto_pts += testcase_pts;
       if (testcases[i].extracredit()) {
-	nonhidden_extra_credit += testcases[i].points();
+	nonhidden_extra_credit += testcase_pts; //testcases[i].points();
       } else {
 	nonhidden_possible_pts += testcases[i].points();
       }
     } 
     hidden_auto_pts += testcase_pts;
     if (testcases[i].extracredit()) {
-      hidden_extra_credit += testcases[i].points();
+      hidden_extra_credit += testcase_pts; //testcases[i].points();
     } else {
       hidden_possible_pts += testcases[i].points();
     }
