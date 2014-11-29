@@ -34,17 +34,6 @@ function version_changed(){
 </script>
 
 <!--- IDENTIFY USER & SELECT WHICH HOMEWORK NUMBER -->
-<?php
-if ($status && $status != "") {
-	echo '<div class="panel-body">';
-	echo '  <div class="box">';
-	echo '  <h3 class="label">';
-	echo $status;
-	echo '  </h3>';
-	echo '</div>';
-	echo '</div>';
-}
-?>
 <div id="HWsubmission">
 	<h2 class="label">Homework Submission for <em> <?php echo $user;?> </em></h2>
 	<?php
@@ -65,6 +54,7 @@ if ($status && $status != "") {
 		echo $priority_file;
 	}
 	?>
+
 	<div class="sub"> <!-- sub -->
 		<form class="form_submit" action="">
 			<label>Select Lab or Homework:</label>
@@ -93,8 +83,19 @@ if ($status && $status != "") {
 			</select>
 		</form>
 	</div> <!-- end sub -->
+
 	<h2 class="label">Assignment: <?php echo $assignment_name;?></h2>
+
 	<div class="panel-body"> <!-- panel-body -->
+		<?php
+		if ($status && $status != "") {
+			echo '  <div class="box">';
+			echo '  <h3 class="label2">';
+			echo $status;
+			echo '  </h3>';
+			echo '</div>';
+		}
+		?>
 		<!--- UPLOAD NEW VERSION -->
 		<div class="box"> <!-- box -->
 			<h3 class="label">Upload New Version</h3>
@@ -223,7 +224,7 @@ if ($status && $status != "") {
 						$path_front = get_path_front($course);
 						$gradefile_path = "$path_front/reports/$assignment_id/".$username.".txt";
 						if (!file_exists($gradefile_path)) {
-							echo '<h3 class="label">TA grade not available</h3>';
+							echo '<h3 class="label2">TA grade not available</h3>';
 						}
 						else
 						{
@@ -236,7 +237,7 @@ if ($status && $status != "") {
 				}
 				else
 				{
-					echo '<h3 class="label">TA grades for this homework not released yet</h3>';
+					echo '<h3 class="label2">TA grades for this homework not released yet</h3>';
 				}
 				//<!-- END OF "IF AT LEAST ONE SUBMISSION... " -->
 				echo "</div> <!-- end box -->";
@@ -248,7 +249,7 @@ if ($status && $status != "") {
 			$gradefile_path = "$path_front/reports/summary_html/".$username."_summary.html";
 			if (!file_exists($gradefile_path))
 			{
-				echo '<h3 class="label">Grade Summary not available</h3>';
+				echo '<h3 class="label2">Grade Summary not available</h3>';
 			}
 			else
 			{

@@ -1,5 +1,6 @@
 #HWsubmission {
     font-family: 'Source Sans Pro', sans-serif;
+    padding-left: 10px;
 }
 
 
@@ -88,6 +89,15 @@
     font-family: 'PT Sans', sans-serif;
     font-weight: 700;
     margin-top: .5em;
+    margin-right: 0;
+    margin-left: 0;
+}
+#HWsubmission .label2{
+    font-family: 'PT Sans', sans-serif;
+    font-weight: 700;
+    margin-top: .5em;
+    margin-bottom: .5em;
+
     margin-right: 0;
     margin-left: 0;
 }
