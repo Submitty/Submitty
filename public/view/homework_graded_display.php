@@ -9,10 +9,11 @@
 			<div>
 				<h4 class="diff-header">
 					Total
+					<span class="badge">
+						<?php echo $viewing_version_score." / ".$points_visible;?>
+					</span>
 				</h4>
-				<span class="badge">
-					<?php echo $viewing_version_score." / ".$points_visible;?>
-				</span>
+
 			</div><!-- End div -->
 		</div><!-- End Box2 -->
 		<?php
@@ -46,38 +47,40 @@
 					<h4 class="diff-header">
 						<?php echo $test["title"];?>
 						<?php if (isset ($test["details"])) { if ($test["details"] != "") { echo " <tt>".$test["details"]."</tt>"; } } ?>
-					</h4>
-					<!-- BADGE TEST SCORE -->
-					<span class="<?php echo $class;?>">
+						<!-- BADGE TEST SCORE -->
+						<span class="<?php echo $class;?>">
+							<?php
+							if ($test["is_hidden"] === true) {
+								echo 'Hidden Test Case';
+								echo '</span>';
+								echo '</div><!-- End div -->';
+								echo '</div><!-- End Box2 -->';
+								continue;
+							}
+							echo $test["score"]." / ".$test["points_possible"]; ?>
+						</span>
+
 						<?php
-						if ($test["is_hidden"] === true) {
-							echo 'Hidden Test Case';
-							echo '</span>';
-							echo '</div><!-- End div -->';
-							echo '</div><!-- End Box2 -->';
-							continue;
+						if ($test["is_extra_credit"] === true) {
+							echo " Extra Credit";
 						}
-						echo $test["score"]." / ".$test["points_possible"]; ?>
-					</span>
-					<?php
-					if ($test["is_extra_credit"] === true) {
-						echo " Extra Credit";
-					}
-					if (/* (isset($test["diff"]) && $test["diff"] != "") || */
+						if (/* (isset($test["diff"]) && $test["diff"] != "") || */
 						(isset($test["diffs"]) && count($test["diffs"]) > 0) ||
 						(isset($test["compilation_output"]))
 						)
-					{
-						if ($test["message"] != "") {
-							echo '<span class="error_mess">'.$test["message"].'</span>';
+						{
+							if ($test["message"] != "") {
+								echo '<span class="error_mess">'.$test["message"].'</span>';
+							}
+							?>
+							<span>
+								<a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
+							</span>
+							<?php
 						}
 						?>
-						<span>
-							<a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
-						</span>
-						<?php
-					}
-					?>
+					</h4>
+
 				</div>
 				<div id="sidebysidediff<?php echo $counter;?>"  class="view_diffs" style="display:none">
 					<!-- DIFF (FIX FROM HERE) -->

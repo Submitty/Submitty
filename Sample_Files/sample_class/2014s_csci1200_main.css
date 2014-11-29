@@ -1,0 +1,34 @@
+  a:link {color:#0033cc;}      /* unvisited link */
+  a:visited {color:#330cc;}  /* visited link */
+  a:hover {color:#990000;}  /* mouse over link */
+  a:active {color:#009900;}  /* selected link */
+
+table { }
+
+td.upper_left_corner {
+    background:rgba(255,255,255,0.0);
+} /*background-color: #448844; }*/
+td.top_and_left_bars {
+    background:rgba(255,255,255,0.4);
+} /*background-color: #88cc88;}*/
+td.main_panel {
+    background:rgba(255,255,255,0.8);
+
+
+}
+
+  td.calendar_red { background-color: #ffcccc; vertical-align:text-top; }
+  td.calendar_green { background-color: #ccffcc; vertical-align:text-top; }
+  td.calendar_yellow { background-color: #ffffcc; vertical-align:text-top; }
+  td.calendar_white { background-color: #ffffff; vertical-align:text-top; }
+  td.calendar_blue { background-color: #ccccff; vertical-align:text-top; }
+  td.calendar_grey { background-color: #dddddd; vertical-align:text-top; }
+
+  td.schedule_red { background-color: #ffcccc; vertical-align:middle; text-align:center; }
+  td.schedule_green { background-color: #ccffcc; vertical-align:middle; text-align:center; }
+  td.schedule_yellow { background-color: #ffffcc; vertical-align:middle; text-align:center; }
+  td.schedule_white { background-color: #ffffff; vertical-align:middle; text-align:center; }
+  td.schedule_blue { background-color: #ccccff; vertical-align:middle; text-align:center; }
+  td.schedule_grey { background-color: #dddddd; vertical-align:middle; text-align:center; }
+
+  td.schedule_ltgrey { background-color: #eeeeee; vertical-align:middle; text-align:center; }
