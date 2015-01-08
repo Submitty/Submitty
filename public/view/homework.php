@@ -37,7 +37,6 @@ function version_changed(){
 <div id="HWsubmission">
 	<h2 class="label">Homework Submission for <em> <?php echo $user;?> </em></h2>
 	<?php
-	// FIXME: New variable in class.json
 	if (on_dev_team($user)) {
 		echo "<font color=\"ff0000\" size=+5>on dev team</font>";
 		echo "<br>the Dev Team = ";
