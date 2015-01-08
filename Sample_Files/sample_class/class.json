@@ -16,6 +16,13 @@
     ],
     "dev_team": [
         "dev"
-        ]
+    ],
+    "ta_grades":true,
+    "grade_summary":true,
+    "view_files":true,
+    "download_files":true,
+    "view_points":true,
+    "view_hidden_points":true,
+    "view_hidden_cases":true
 
 }
