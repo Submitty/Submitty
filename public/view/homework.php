@@ -99,12 +99,9 @@ function version_changed(){
 		<!--- UPLOAD NEW VERSION -->
 		<div class="box"> <!-- box -->
 			<h3 class="label">Upload New Version</h3>
-			<p class="sub">Prepare your assignment for submission exactly as
-				described on the <a href="<?php echo $link_absolute;?>/homework.php">homework submission</a>
-				webpage.  By clicking "Submit File" you are confirming that
-				you have read, understand, and agree to follow
-				the <a href="<?php echo $link_absolute;?>academic_integrity.php">Homework
-					Collaboration and Academic Integrity Policy</a> for this course.
+			<p class="sub">
+				<?php require_once("view/".$course."_upload.php"); ?>
+
 				</p>
 				<form class="form_submit" action="?page=upload&course=<?php echo $course?>&assignment_id=<?php echo $assignment_id?>"
 					method="post" enctype="multipart/form-data"
