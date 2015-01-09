@@ -1,0 +1,227 @@
+#HWsubmission {
+    font-family: 'Source Sans Pro', sans-serif;
+    padding-left: 10px;
+}
+
+
+#HWsubmission h1, #HWsubmission h2, #HWsubmission h3, #HWsubmission h4, #HWsubmission b, #HWsubmission em, #HWsubmission p{
+    margin: 0;
+    color: black;
+    font-family: 'Source Sans Pro', sans-serif;
+
+}
+
+#HWsubmission div{
+    color: black;
+    font-family: 'Source Sans Pro', sans-serif;
+
+}
+
+#HWsubmission .diff{
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+#HWsubmission .diff-block{
+    vertical-align: top;
+    display: block;
+    width: 100%;
+    overflow:hidden;
+}
+
+#HWsubmission .diff-block div{
+    float: left;
+}
+
+#HWsubmission .diff-element{
+    margin-left: 20px;
+    margin-right: 20px;
+
+}
+
+#HWsubmission .diff-element div{
+    display: block;
+    float: none;
+}
+
+#HWsubmission .diff-row {
+    vertical-align: top;
+}
+
+#HWsubmission .diff-row-none {
+    vertical-align: top;
+    display: none;
+}
+
+#HWsubmission .spacer{
+    padding-top: 10px;
+    width: 100%;
+    display: block;
+    vertical-align: top;
+}
+
+#HWsubmission .panel {
+    margin: 10px 20px 10px 10px;
+    border-radius: 0;
+    background-color: #F8F8F8;
+    overflow-x: auto;
+}
+
+#HWsubmission .panel-body{
+    text-align: left;
+    padding: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+#HWsubmission .row{
+    margin: 0;
+}
+
+#HWsubmission .view_diff{
+    float: left;
+}
+
+#HWsubmission .label{
+    font-family: 'PT Sans', sans-serif;
+    font-weight: 700;
+    margin-top: .5em;
+    margin-right: 0;
+    margin-left: 0;
+}
+#HWsubmission .label2{
+    font-family: 'PT Sans', sans-serif;
+    font-weight: 700;
+    margin-top: .5em;
+    margin-bottom: .5em;
+
+    margin-right: 0;
+    margin-left: 0;
+}
+
+#HWsubmission a.label{
+    display: inline;
+}
+
+#HWsubmission a:link {
+    color: #3276b1;
+    text-decoration: none;
+
+}
+
+/* visited link */
+#HWsubmission a:visited {
+    color: #3276b1;
+    text-decoration: none;
+
+}
+
+/* mouse over link */
+#HWsubmission a:hover {
+    color: #234b66;
+    text-decoration: underline;
+
+}
+
+/* selected link */
+#HWsubmission a:active {
+    color: #234b66;
+    text-decoration: underline;
+
+}
+
+#HWsubmission .sub{
+    margin-left: 3%;
+    margin-top: 1%;
+    margin-bottom: 1%;
+}
+#HWsubmission .sub2{
+    margin-left: 20px;
+}
+#HWsubmission .sub-text{
+    margin-left: 20px;
+    margin-top: 10px;
+
+}
+
+#HWsubmission .form_submit{
+    display: inline;
+    margin: 0;
+}
+
+#HWsubmission .box {
+    border-radius: 3px;
+    padding: 20px;
+    border: 2px solid #F0F0F0;
+    margin: 0;
+    margin-bottom: 5px;
+    background:rgba(255,255,255,0.8);
+
+}
+
+#HWsubmission .box2 {
+    border-radius: 3px;
+    padding: 0px;
+    border: 1px solid #cccccc;
+    width: 100%;
+    margin-left: 0;
+    margin-top:  5px;
+    margin-bottom:  5px;
+    position: relative;
+    float: left;
+    background:rgba(255,255,255,0.8);"
+}
+
+#HWsubmission .diff-header {
+    margin-left: 10px;
+    margin-right: 10px;
+
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: left;
+    display:inline-block;
+}
+
+#HWsubmission .diff-header a{
+    font-weight: 400;
+}
+
+#HWsubmission .diff-header span{
+    margin-left: .5em;
+
+}
+
+#HWsubmission .error_mess{
+    font-style: italic;
+    margin-right: .5em;
+    margin-left: .5em;
+}
+
+#HWsubmission .error_mess_diff{
+    font-style: italic;
+    margin-left: 40px;
+}
+
+#HWsubmission .complation_mess{
+    font-style: pre;
+    margin-left: 40px;
+}
+
+#HWsubmission .display-none {
+    display: none;
+}
+
+#HWsubmission .green-background {
+    background-color: #006600;
+}
+
+#HWsubmission .yellow-background {
+    background-color: #eac73d;
+    color: #000000;
+}
+
+#HWsubmission .red-background {
+    background-color: #c00000;
+}

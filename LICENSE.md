@@ -1,6 +1,6 @@
 ##BSD License
 
-Copyright (c) 2014, Chris Berger, Jesse Freitas, Severin Ibarluzea, Kiana McNellis, Kienan Knight-Boehm
+Copyright (c) 2014, Chris Berger, Jesse Freitas, Severin Ibarluzea, Kiana McNellis, Kienan Knight-Boehm, Samuel Seng
 
 All rights reserved.
 
