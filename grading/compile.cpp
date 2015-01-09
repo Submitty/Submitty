@@ -35,7 +35,7 @@
 
 #define MAX_STRING_LENGTH 100
 #define MAX_NUM_STRINGS 20
-#define PATH_MAX 1000
+#define DIR_PATH_MAX 1000
 
 #include <dirent.h>
 
@@ -46,8 +46,8 @@
 std::string to_string(int i);
 
 
-void LoadDisallowedWords(const std::string &filename, 
-			 std::set<std::string> &disallowed_words, 
+void LoadDisallowedWords(const std::string &filename,
+			 std::set<std::string> &disallowed_words,
 			 std::set<std::string> &warning_words) {
   std::ifstream istr(filename.c_str());
   if (!istr) {
@@ -72,21 +72,21 @@ void LoadDisallowedWords(const std::string &filename,
   }
 }
 
-void SearchForDisallowedWords(std::set<std::string> &disallowed_words, 
+void SearchForDisallowedWords(std::set<std::string> &disallowed_words,
 			      std::set<std::string> &warning_words) {
 
   system ("ls -lta");
   system ("whoami");
 
-  char buf[PATH_MAX]; 
-  getcwd( buf, PATH_MAX ); 
+  char buf[DIR_PATH_MAX];
+  getcwd( buf, DIR_PATH_MAX );
   DIR* dir = opendir(buf);
   assert (dir != NULL);
   struct dirent *ent;
 
   bool disallowed = false;
   bool warning = false;
-  
+
   while (1) {
     ent = readdir(dir);
     if (ent == NULL) break;
@@ -94,7 +94,7 @@ void SearchForDisallowedWords(std::set<std::string> &disallowed_words,
     std::string filename = ent->d_name;
     if (filename == "disallowed_words.txt") continue;
     if (filename == "my_compile.out") continue;
-    
+
     for (std::set<std::string>::iterator itr = disallowed_words.begin(); itr != disallowed_words.end(); itr++) {
       int success = system ( (std::string("grep ")+(*itr)+" "+filename+" 1> /dev/null 2> /dev/null").c_str());
       if (success == 0) {
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
     assert (cmd != "");
 
     // run the command, capturing STDOUT & STDERR
-    int exit_no = execute(cmd + 
+    int exit_no = execute(cmd +
 			  " 1>test" + to_string(i + 1) + "_cout.txt" +
 			  " 2>test" + to_string(i + 1) + "_cerr.txt",
 			  testcases[i].seconds_to_run(),
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
   std::cout << "FINISHED ALL TESTS" << std::endl;
   // allow hwcron read access so the files can be copied back
   //  execute ("/usr/bin/find . -user untrusted -exec chmod o+r {} ;");
-  
+
   return 0;
 }
 
@@ -178,5 +178,3 @@ std::string to_string(int i) {
   tmp << std::setfill('0') << std::setw(2) << i;
   return tmp.str();
 }
-
-
