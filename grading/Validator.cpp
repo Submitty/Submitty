@@ -114,9 +114,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       std::cerr << "THIS IS A FILE EXISTS TEST! " << testcases[i].getFilename() << std::endl;
       assert (testcases[i].getFilename() != "");
 
-      system ("ls -lta");
-      system ("pwd");
-
       if ( access( (std::string("")+testcases[i].getFilename()).c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
 	std::cerr << "file does exist: " << testcases[i].getFilename() << std::endl;
 	testcase_pts = testcases[i].points();
@@ -127,9 +124,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     } else if (testcases[i].isCompilationTest()) {
       std::cerr << "THIS IS A COMPILATION! " << std::endl;
 
-      system ("ls -lta");
-      system ("pwd");
-
       if ( access( testcases[i].getFilename().c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
 	std::cerr << "file does exist: " << testcases[i].getFilename() << std::endl;
 	testcase_pts = testcases[i].points();
@@ -139,7 +133,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       }
       if (testcases[i].isCompilationTest()) {
 	testcase_json << "\t\t\t\"compilation_output\": \"" << testcases[i].prefix() << "_cerr.txt\",\n";
-	//.submit_compilation_output.txt\",\n";
       }
     } else {
       // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS

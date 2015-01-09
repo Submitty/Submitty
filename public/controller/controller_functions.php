@@ -45,6 +45,19 @@ function parse_status() {
     }
     return $status;
 }
+
+function parse_semester() {
+    if (isset($_GET["semester"])) {
+        $semester = htmlspecialchars($_GET["semester"]);
+        if (!is_valid_semester($semester)) {
+            $semester = "CONTROLLER_HOMEWORK_NONE_A";
+        } 
+    } else {
+        $semester = "CONTROLLER_HOMEWORK_NONE_B";
+    }
+    return $semester;
+}
+
 function parse_course() {
     if (isset($_GET["course"])) {
         $course = htmlspecialchars($_GET["course"]);
@@ -57,6 +70,8 @@ function parse_course() {
     return $course;
 }
 
+
+
 function parse_assignment_id($class_config, $most_recent_assignment_id) {
     if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants to see
         $assignment_id = htmlspecialchars($_GET["assignment_id"]);
@@ -68,12 +83,12 @@ function parse_assignment_id($class_config, $most_recent_assignment_id) {
     return $most_recent_assignment_id;
 }
 
-function parse_assignment_version($username, $course, $assignment_id) {
+function parse_assignment_version($username, $semester, $course, $assignment_id) {
     if (isset($_GET["assignment_version"])) {
         $assignment_version = htmlspecialchars($_GET["assignment_version"]);
     }
-    if (!isset($assignment_version) || !is_valid_assignment_version($username, $course, $assignment_id, $assignment_version) || $assignment_version == "") {
-        $assignment_version = most_recent_assignment_version($username, $course, $assignment_id);
+    if (!isset($assignment_version) || !is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version) || $assignment_version == "") {
+        $assignment_version = most_recent_assignment_version($username, $semester, $course, $assignment_id);
     }
     return $assignment_version;
 }

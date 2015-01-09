@@ -7,6 +7,7 @@
 <script src="resources/script/main.js"></script>
 
 <?php $course =    $course = htmlspecialchars($_GET["course"]); ?>
+<?php $semester =    $semester = htmlspecialchars($_GET["semester"]); ?>
 
 
 <!-- DIFF VIEWER STUFF -->
@@ -27,11 +28,13 @@
 <script type="text/javascript">
 function assignment_changed(){
    var php_course = "<?php echo $course; ?>";
-  window.location.href="?course="+php_course+"&assignment_id="+document.getElementById('hwlist').value;
+   var php_semester = "<?php echo $semester; ?>";
+  window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value;
 }
 function version_changed(){
    var php_course = "<?php echo $course; ?>";
-  window.location.href="?course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+"&assignment_version="+document.getElementById('versionlist').value;
+   var php_semester = "<?php echo $semester; ?>";
+  window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+"&assignment_version="+document.getElementById('versionlist').value;
 }
 </script>
 
@@ -69,7 +72,7 @@ if (on_dev_team($user)) {
 //   echo "<div class=\"panel-body\">";
 //   echo "<div class=\"box\">";
    
-   $path_front = get_path_front($course);
+   $path_front = get_path_front_course($semester,$course);
    $priority_path = "$path_front/reports/summary_html/".$username."_priority.html";
 
    if (!file_exists($priority_path)) {
@@ -129,7 +132,7 @@ if (on_dev_team($user)) {
       the <a href="<?php echo $link_absolute;?>academic_integrity.php">Homework
       Collaboration and Academic Integrity Policy</a> for this course.
     </p>
-    <form action="?page=upload&course=<?php echo $course?>&assignment_id=<?php echo $assignment_id?>" 
+    <form action="?page=upload&semester=<?php echo $semester?>&course=<?php echo $course?>&assignment_id=<?php echo $assignment_id?>" 
 	  method="post" enctype="multipart/form-data" onsubmit="return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>')">
       <label for="file" style="margin-right: 5%;"><b>Select File:</b></label>
       <input type="file" name="file" id="file" style="display: inline" />
@@ -209,7 +212,7 @@ if (on_dev_team($user)) {
 <div style="margin-left: 20px">
         <!-- CHANGE ACTIVE VERSION -->
         <?php if ($assignment_version != $submitting_version) { ?>
-	<a href="?page=update&course=<?php echo $course;?>&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" 
+	<a href="?page=update&semester=<?php echo $semester;?>&course=<?php echo $course;?>&assignment_id=<?php echo $assignment_id;?>&assignment_version=<?php echo $assignment_version?>" 
 	   style="text-align:center;"><input type="submit" class="btn btn-primary" value="Set Version <?php echo $assignment_version;?> as Active Submission Version"></input></a><br><br>
 	<?php } ?>
 </div>
@@ -217,7 +220,7 @@ if (on_dev_team($user)) {
 
 
 	<?php 
-	   //$date_submitted = get_submission_time($user,$course,$assignment_id,$assignment_version);
+	   //$date_submitted = get_submission_time($user,$semester,$course,$assignment_id,$assignment_version);
 	   //echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
         ?>
 	<!-- SUBMITTED FILES -->
@@ -422,7 +425,7 @@ if ($ta_grade_released == true) {
    echo "<div class=\"panel-body\">";
    echo "<div class=\"box\">";
    
-   $path_front = get_path_front($course);
+   $path_front = get_path_front_course($semester,$course);
    
    $gradefile_path = "$path_front/reports/$assignment_id/".$username.".txt";
 
@@ -454,7 +457,7 @@ if ($ta_grade_released == true) {
    echo "<div class=\"panel-body\">";
    echo "<div class=\"box\">";
    
-   $path_front = get_path_front($course);
+   $path_front = get_path_front_course($semester,$course);
    $gradefile_path = "$path_front/reports/summary_html/".$username."_summary.html";
 
    if (!file_exists($gradefile_path)) {
@@ -498,7 +501,7 @@ loadDiffQueue();
 //TODO: Set time between server requests (currently at 5 seconds = 5000ms)
 //                                       (previously at 1 minute = 60000ms)
 <?php if ($assignment_version_in_grading_queue || $submitting_version_in_grading_queue) {?>
-init_refresh_on_update("<?php echo $course;?>", "<?php echo $assignment_id;?>","<?php echo $assignment_version?>", "<?php echo $submitting_version;?>", "<?php echo !$assignment_version_in_grading_queue;?>", "<?php echo !$submitting_version_in_grading_queue;?>", 5000);
+init_refresh_on_update("<?php echo $semester;?>", "<?php echo $course;?>", "<?php echo $assignment_id;?>","<?php echo $assignment_version?>", "<?php echo $submitting_version;?>", "<?php echo !$assignment_version_in_grading_queue;?>", "<?php echo !$submitting_version_in_grading_queue;?>", 5000);
 <?php } ?>
 </script>
 
