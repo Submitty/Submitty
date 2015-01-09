@@ -216,6 +216,7 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) {
 
   // Forking to allow the setting of limits of RLIMITS on the command
   int result = -1;
+  int time_kill=0;
   pid_t childPID = fork();
   // ensure fork was successful
   assert (childPID >= 0);
@@ -277,6 +278,7 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) {
 	  kill(childPID, SIGKILL);
 	  kill(-childPID, SIGKILL);
 	  usleep(1000); /* wait 1/1000th of a second for the process to die */
+      time_kill=1;
 	}
       }
     } while (wpid == 0);
@@ -298,6 +300,9 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) {
       else{
           result=2;
       }
+    }
+    if (time_kill){
+        result=3;
     }
 
     std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
