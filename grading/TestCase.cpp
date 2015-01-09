@@ -24,7 +24,7 @@ TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {
   std::ifstream student_file(filename(j).c_str());
   if (!student_file) {
     std::stringstream tmp;
-    tmp << "ERROR: comparison " << j << ": Student's " << filename(j) << " does not exist";
+    tmp << "Error: comparison " << j << ": Student's " << filename(j) << " does not exist";
     std::cerr << tmp.str() << std::endl;
     helper_message += tmp.str();
     ok_to_compare = false;
@@ -38,7 +38,7 @@ TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {
   std::ifstream expected_file(expected.c_str());
   if (!expected_file && expected != "") {
     std::stringstream tmp;
-    tmp << "ERROR: comparison #" << j << ": Instructor's " + expected + " does not exist!";
+    tmp << "Error: comparison" << j << ": Instructor's " + expected + " does not exist!";
     std::cerr << tmp.str() << std::endl;
     if (helper_message != "") helper_message += "<br>";
     helper_message += tmp.str();
@@ -82,11 +82,11 @@ TestResults* TestCaseComparison::doit(const std::string &prefix) {
 
   if (s.size() > MAX_FILE_SIZE) {
     std::cout << "ERROR: student file size too big " << s.size() << " > " << MAX_FILE_SIZE << std::endl;
-    return new TestResults(0,"ERROR: student file too large for grader");
+    return new TestResults(0,"Error: student file too large for grader");
   }
   if (e.size() > MAX_FILE_SIZE) {
     std::cout << "ERROR: expected file size too big " << e.size() << " > " << MAX_FILE_SIZE << std::endl;
-    return new TestResults(0,"ERROR: expected file too large for grader");
+    return new TestResults(0,"Error: expected file too large for grader");
   }
 
 
@@ -114,7 +114,7 @@ TestResults* TestCaseTokens::doit(const std::string &prefix) {
 
   if (s.size() > MAX_FILE_SIZE) {
     std::cout << "ERROR: student file size too big " << s.size() << " > " << MAX_FILE_SIZE << std::endl;
-    return new TestResults(0,"ERROR: student file too large for grader");
+    return new TestResults(0,"Error: student file too large for grader");
   }
 
   //return test_case_grader[j]->cmp_output (s,e);
@@ -130,8 +130,8 @@ TestResults* TestCaseCustom::doit(const std::string &prefix) {
   std::string s = "";
 
   if (!student_instr) {
-    std::cout << "STUDENT FILE DOES NOT EXIST" << std::endl;
-    return new TestResults(0,"ERROR: student file does not exist");
+    std::cout << "ERROR: STUDENT FILE DOES NOT EXIST" << std::endl;
+    return new TestResults(0,"Error: student file does not exist");
   }
 
 

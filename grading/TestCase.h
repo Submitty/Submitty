@@ -56,7 +56,8 @@ public:
   TestCaseComparison(TestResults* (*cmp) ( const std::string&, const std::string& ),
 		     const std::string file,
 		     const std::string desc,
-		     const std::string expect = "",float points_frac=-1.0)
+		     const std::string expect = "",
+             float points_frac=-1.0)
     : TestCaseGrader(file,desc), cmp_output(cmp), expected_file(expect)  {points_fraction=points_frac;}
   TestResults* (*cmp_output) ( const std::string&, const std::string& );
   std::string expected_file;
@@ -69,7 +70,8 @@ public:
   TestCaseTokens(TestResults* (*cmp) ( const std::string&, const std::vector<std::string> &tokens ),
 		 const std::string file,
 		 const std::string desc,
-		 const std::vector<std::string> &_tokens,float points_frac=-1.0)
+		 const std::vector<std::string> &_tokens,
+         float points_frac=-1.0)
     : TestCaseGrader(file,desc), token_grader(cmp), tokens(_tokens) {points_fraction=points_frac;}
   TestResults* (*token_grader) ( const std::string&, const std::vector<std::string>& );
   std::vector<std::string> tokens;
@@ -89,7 +91,7 @@ public:
 
   float (*custom_grader)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv);
 
-  //TestResults* (*token_grader) ( const std::string&, const std::vector<std::string>& );  
+  //TestResults* (*token_grader) ( const std::string&, const std::vector<std::string>& );
   //std::vector<std::string> tokens;
 
   virtual TestResults* doit(const std::string &prefix);

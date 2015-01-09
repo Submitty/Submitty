@@ -69,23 +69,43 @@ int main(int argc, char *argv[]) {
     //std::cout << "LS DONE!\n";
 
     // run the command, capturing STDOUT & STDERR
-    int exit_no = execute(cmd + 
+    int exit_no = execute(cmd +
 			  " 1>test" + to_string(i + 1) + "_cout.txt" +
 			  " 2>test" + to_string(i + 1) + "_cerr.txt",
 			  testcases[i].seconds_to_run(),
 			  10000000); // 10 mb
+    if (exit_no == 1){
+        std::ofstream cerr_out ("test" + to_string(i + 1) + "_cerr.txt", std::ofstream::out | std::ofstream::app);
+        cerr_out << "Compile failed\n";
+        std::cout << "Compile failed, code 1" << std::endl;
 
+        cerr_out.close();
+    }
+    else if (exit_no == 2){
+        std::ofstream cerr_out ("test" + to_string(i + 1) + "_cerr.txt", std::ofstream::out | std::ofstream::app);
+        cerr_out << "Compile terminated, exceeded max limits\n";
+        std::cout << "Compile terminated, exceeded max limits, code 2" << std::endl;
+
+        cerr_out.close();
+    }
+    else if (exit_no == 3){
+        std::ofstream cerr_out ("test" + to_string(i + 1) + "_cerr.txt", std::ofstream::out | std::ofstream::app);
+        cerr_out << "Compile terminated, time elapsed was longer that allocated time\n";
+        std::cout << "Compile terminated, time elapsed was longer that allocated time code 3" << std::endl;
+
+        cerr_out.close();
+    }
     //std::cout << "AFTER LS:\n";
     //execute("/bin/ls -a *",4);
     //std::cout << "AFTER LS DONE!\n";
+    std::cout<< "Exited with exit_no: "<<exit_no<<std::endl;
 
   }
-
   std::cout << "========================================================" << std::endl;
   std::cout << "FINISHED ALL TESTS" << std::endl;
   // allow hwcron read access so the files can be copied back
   //  execute ("/usr/bin/find . -user untrusted -exec chmod o+r {} ;");
-  
+
   return 0;
 }
 
@@ -96,5 +116,3 @@ std::string to_string(int i) {
   tmp << std::setfill('0') << std::setw(2) << i;
   return tmp.str();
 }
-
-
