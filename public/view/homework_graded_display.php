@@ -85,13 +85,10 @@
 				<div id="sidebysidediff<?php echo $counter;?>"  class="view_diffs" style="display:none">
 					<!-- DIFF (FIX FROM HERE) -->
 					<?php
-					if (isset($test["compilation_output"]))
-					{
-						?>
-						<b class="sub2">Compilation output:</b>
-						<pre><?php echo $test["compilation_output"]; ?></pre>
-						<?php
+					if (isset($test["compilation_output"]) && $test["compilation_output"]!=" ") {
+						echo '<div class="diff-block"><b class="sub2">Compilation output:</b><pre class="complation_mess">'.$test["compilation_output"].'</pre></div>'; //TODO: remove table here
 					}
+
 					?>
 					<!-- MULTIPLE DIFFS -->
 					<!--<div>--> <!--table -->
@@ -112,7 +109,7 @@
 									echo '<br />';
 								}
 								if (isset($diff["message"]) && $diff["message"]!=" ") {
-									echo '<div class="diff-block"><a class="error_mess2">'.$diff["message"].'</a></div>'; //TODO: remove table here
+									echo '<div class="diff-block"><a class="error_mess_diff">'.$diff["message"].'</a></div>'; //TODO: remove table here
 									echo '<div class="spacer"></div>';
 								}
 								if (!isset($diff["student"]) && !isset($diff["instructor"]))

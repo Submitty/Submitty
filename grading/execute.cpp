@@ -283,17 +283,27 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) {
 
     if (WIFEXITED(status)) {
       printf("Child exited, status=%d\n", WEXITSTATUS(status));
-      result = WEXITSTATUS(status);
+      if (WEXITSTATUS(status) == 0){
+          result=0;
+      }
+      else{
+          result=1;
+      }
     }
     else if (WIFSIGNALED(status)) {
       printf("Child %d was terminated with a status of: %d \n", childPID, WTERMSIG(status));
-      result = WTERMSIG(status);
+      if (WTERMSIG(status) == 0){
+          result=0;
+      }
+      else{
+          result=2;
+      }
     }
 
     std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
     parent_result = system("date");
     assert (parent_result == 0);
   }
-
+  std::cout <<"Result: "<<result<<std::endl;
   return result;
 }
