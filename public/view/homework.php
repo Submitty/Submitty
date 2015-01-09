@@ -55,7 +55,7 @@ function version_changed(){
 	}
 	?>
 	<?php
-	$path_front = get_path_front($semester,$course);
+	$path_front = get_path_front_course($semester,$course);
 	$priority_path = "$path_front/reports/summary_html/".$username."_priority.html";
 	if (file_exists($priority_path)){
 		$priority_file = file_get_contents($priority_path);
@@ -229,7 +229,7 @@ function version_changed(){
 				echo '<div class="box"> <!-- box -->';
 				if ($ta_grade_released == true) {
 					//<!--- TA GRADE -->
-						$path_front = get_path_front($semester,$course);
+						$path_front = get_path_front_course($semester,$course);
 						$gradefile_path = "$path_front/reports/$assignment_id/".$username.".txt";
 						if (!file_exists($gradefile_path)) {
 							echo '<h3 class="label2">TA grade not available</h3>';
@@ -253,7 +253,7 @@ function version_changed(){
 			}
 
 		echo '<div class="box"> <!-- box -->';
-			$path_front = get_path_front($semester,$course);
+			$path_front = get_path_front_course($semester,$course);
 			$gradefile_path = "$path_front/reports/summary_html/".$username."_summary.html";
 			if (!file_exists($gradefile_path))
 			{
