@@ -9,6 +9,8 @@ HW=$(notdir $(CONFIG))
 # HW id
 ID=$(HW)
 
+# FIXME: Add semester directory
+
 # The class directory
 coursedir=$(CONFIG)/../../..
 
@@ -40,6 +42,7 @@ compile_files=$(RCOS)/grading/compile.cpp \
 		$(RCOS)/modules/textMasking.cpp \
 		$(RCOS)/modules/clean.cpp \
 		$(RCOS)/modules/difference.cpp \
+		$(RCOS)/grading/seccomp_functions.cpp \
 		$(RCOS)/grading/execute.cpp \
 		$(RCOS)/grading/TestCase.cpp
 
@@ -52,6 +55,7 @@ runner_files=$(RCOS)/grading/runner.cpp \
 		$(RCOS)/modules/textMasking.cpp \
 		$(RCOS)/modules/clean.cpp \
 		$(RCOS)/modules/difference.cpp \
+		$(RCOS)/grading/seccomp_functions.cpp \
 		$(RCOS)/grading/execute.cpp
 
 
@@ -63,6 +67,7 @@ validate_files=$(RCOS)/grading/Validator.cpp \
 		$(RCOS)/modules/textMasking.cpp \
 		$(RCOS)/modules/clean.cpp \
 		$(RCOS)/modules/difference.cpp \
+		$(RCOS)/grading/seccomp_functions.cpp \
 		$(RCOS)/grading/execute.cpp \
 		$(RCOS)/grading/TestCase.cpp
 
@@ -76,10 +81,10 @@ assignment:
 	@ echo "CONFIG: " $(CONFIG)
 	echo 'making hw'  $(HW)
 	test -d $(class_bin) || mkdir $(class_bin)
-	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(config_files)   -o $(class_bin)/configure.out
-	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(compile_files)  -o $(class_bin)/compile.out
-	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(runner_files)   -o $(class_bin)/run.out
-	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(validate_files) -o $(class_bin)/validate.out
+	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(config_files)             -o $(class_bin)/configure.out
+	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(compile_files)  -lseccomp -o $(class_bin)/compile.out
+	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(runner_files)   -lseccomp -o $(class_bin)/run.out
+	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(validate_files) -lseccomp -o $(class_bin)/validate.out
 
 run:
 #	valgrind

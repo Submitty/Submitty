@@ -2,92 +2,110 @@
 // This file is relative to the public directory of the website.  (It
 // is run from the location of index.php).
 // static $path_to_path_file = "../../site_path.txt";
+
 static $path_to_path_file = "site_path.txt";
 
 
-
 //This will be changed to whatever exists in the above file
-static $path_front = "";
-function get_path_front($course) {
+static $path_front_root = "";
 
-   if (!is_valid_course($course)) {
-        display_error("INVALID COURSE");
-    }
-    global $path_front;
-    global $path_to_path_file;
-    if ($path_front == "") {
-        if (!file_exists($path_to_path_file)) {
-            display_error($path_to_path_file." does not exist.  Please make this file or edit the path in private/model/homework_model_functions.  The file should contain a single line of the path to the directory folder (ex: csciXXXX).  No whitespaces or return characters.");
-            exit();
-        }
 
-        $file = fopen($path_to_path_file, 'r');
-        $path_front = trim(fgets($file))."/".$course;
-        fclose($file);
+function get_path_front_root() {
+   global $path_front_root;
+   global $path_to_path_file;
+   if ($path_front_root == "") {
+      if (!file_exists($path_to_path_file)) {
+          display_error($path_to_path_file." does not exist.  Please make this file or edit the path in private/model/homework_model_functions.  The file should contain a single line of the path to courses directory containing the semesters and courses.  No whitespaces or return characters.");
+          exit();
+      }
+      $file = fopen($path_to_path_file, 'r');
+      $path_front_root = trim(fgets($file));
+
+     // FIXME: do some error checking on this path (make sure it does not have a trailing slash, has no spaces, etc.)
+
+      fclose($file);
+   }
+   return $path_front_root;
+}
+
+
+function get_path_front_course($semester,$course) {
+    //display_note("get path front: ".$semester." ".$course);
+    if (!is_valid_semester($semester)) {
+        display_error("INVALID SEMESTER: ".$semester);
     }
-    return $path_front;
+    if (!is_valid_course($course)) {
+        display_error("INVALID COURSE: ".$course);
+    }
+    $path_front_root = get_path_front_root();
+    return $path_front_root."/courses/".$semester."/".$course;
 }
 
 
 
 
 function display_file_permissions($perms) {
-  if (($perms & 0xC000) == 0xC000) {
-    // Socket
-    $info = 's';
-  } elseif (($perms & 0xA000) == 0xA000) {
-    // Symbolic Link
-    $info = 'l';
-  } elseif (($perms & 0x8000) == 0x8000) {
-    // Regular
-    $info = '-';
-  } elseif (($perms & 0x6000) == 0x6000) {
-    // Block special
-    $info = 'b';
-  } elseif (($perms & 0x4000) == 0x4000) {
-    // Directory
-    $info = 'd';
-  } elseif (($perms & 0x2000) == 0x2000) {
-    // Character special
-    $info = 'c';
-  } elseif (($perms & 0x1000) == 0x1000) {
-    // FIFO pipe
-    $info = 'p';
-  } else {
-    // Unknown
-    $info = 'u';
-  }
+    if (($perms & 0xC000) == 0xC000) {
+        // Socket
+        $info = 's';
+    } elseif (($perms & 0xA000) == 0xA000) {
+        // Symbolic Link
+        $info = 'l';
+    } elseif (($perms & 0x8000) == 0x8000) {
+        // Regular
+        $info = '-';
+    } elseif (($perms & 0x6000) == 0x6000) {
+        // Block special
+        $info = 'b';
+    } elseif (($perms & 0x4000) == 0x4000) {
+        // Directory
+        $info = 'd';
+    } elseif (($perms & 0x2000) == 0x2000) {
+        // Character special
+        $info = 'c';
+    } elseif (($perms & 0x1000) == 0x1000) {
+        // FIFO pipe
+        $info = 'p';
+    } else {
+        // Unknown
+        $info = 'u';
+    }
 
-  // Owner
-  $info .= (($perms & 0x0100) ? 'r' : '-');
-  $info .= (($perms & 0x0080) ? 'w' : '-');
-  $info .= (($perms & 0x0040) ?
+    // Owner
+    $info .= (($perms & 0x0100) ? 'r' : '-');
+    $info .= (($perms & 0x0080) ? 'w' : '-');
+    $info .= (($perms & 0x0040) ?
             (($perms & 0x0800) ? 's' : 'x' ) :
             (($perms & 0x0800) ? 'S' : '-'));
 
-  // Group
-  $info .= (($perms & 0x0020) ? 'r' : '-');
-  $info .= (($perms & 0x0010) ? 'w' : '-');
-  $info .= (($perms & 0x0008) ?
+    // Group
+    $info .= (($perms & 0x0020) ? 'r' : '-');
+    $info .= (($perms & 0x0010) ? 'w' : '-');
+    $info .= (($perms & 0x0008) ?
             (($perms & 0x0400) ? 's' : 'x' ) :
             (($perms & 0x0400) ? 'S' : '-'));
 
-  // World
-  $info .= (($perms & 0x0004) ? 'r' : '-');
-  $info .= (($perms & 0x0002) ? 'w' : '-');
-  $info .= (($perms & 0x0001) ?
+    // World
+    $info .= (($perms & 0x0004) ? 'r' : '-');
+    $info .= (($perms & 0x0002) ? 'w' : '-');
+    $info .= (($perms & 0x0001) ?
             (($perms & 0x0200) ? 't' : 'x' ) :
             (($perms & 0x0200) ? 'T' : '-'));
 
-  echo $info;
+    echo $info;
 }
 
 
 // Upload HW Assignment to server and unzip
-function upload_homework($username, $course, $assignment_id, $homework_file) {
+function upload_homework($username, $semester, $course, $assignment_id, $homework_file) {
+
+    if (!is_valid_semester($semester)) { display_error("upload_homework, INVALID SEMESTER: ".$semester); }
+    if (!is_valid_course($course))     { display_error("upload_homework, INVALID COURSE: ".$course); }
+
+    display_note ("trying to upload homework ".$semester." ".$course." ");
 
     if (!isset($homework_file["tmp_name"]) || $homework_file["tmp_name"] == "") {
-        $error_text = "The file did not upload to POST[tmp_name].  This issue is currently being worked on.  A smaller file or fast connection might help.";
+        $error_text = "The file did not upload to POST[tmp_name].";
         if (isset($homework_file["error"])) {
             $error_text = $error_text. " Error code given for upload is ". $homework_file["error"]. " . This is defined at http://php.net/manual/en/features.file-upload.errors.php";
         }
@@ -99,18 +117,19 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     $TIMESTAMP = date("Y-m-d H:i:s");
 
 
-    $path_front = get_path_front($course);
+    $path_front_root = get_path_front_root();
+    $path_front_course = get_path_front_course($semester,$course);
 
     // Check user and assignment authenticity
-    $class_config = get_class_config($course);
+    $class_config = get_class_config($semester,$course);
     if ($username !== $_SESSION["id"]) {//Validate the id
         return array("error"=>"", "message"=>"User Id invalid.  ".$username." != ".$_SESSION["id"]);
     }
     if (!is_valid_assignment($class_config, $assignment_id)) {
         return array("error"=>"", "message"=>$assignment_id." is not a valid assignment");
     }
-    $assignment_config = get_assignment_config($username, $course, $assignment_id);
-    if (!can_edit_assignment($username, $course, $assignment_id, $assignment_config)) {//Made sure the user can upload to this homework
+    $assignment_config = get_assignment_config($username, $semester, $course, $assignment_id);
+    if (!can_edit_assignment($username, $semester, $course, $assignment_id, $assignment_config)) {//Made sure the user can upload to this homework
         return array("error"=>"assignment_closed", "message"=>$assignment_id." is closed.");
     }
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
@@ -143,7 +162,7 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     }
     */
     // make folder for this homework (if it doesn't exist)
-    $assignment_path = $path_front."/submissions/".$assignment_id;
+    $assignment_path = $path_front_course."/submissions/".$assignment_id;
     if (!file_exists($assignment_path)) {
         if (!mkdir($assignment_path))
         {
@@ -185,9 +204,10 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     $zip = new ZipArchive;
     $res = $zip->open($homework_file["tmp_name"]);
     if ($res === TRUE) {
-      $zip->extractTo($version_path."/");
-      $zip->close();
-    } else {
+        $zip->extractTo($version_path."/");
+        $zip->close();
+    }
+    else {
         $result = move_uploaded_file($homework_file["tmp_name"], $version_path."/".$homework_file["name"]);
         if (!$result) {
             display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
@@ -198,13 +218,16 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
     if (!file_exists($settings_file)) {
         $json = array("active_assignment"=>$upload_version);
         file_put_contents($settings_file, json_encode($json));
-    } else {
-        change_assignment_version($username, $course, $assignment_id, $upload_version, $assignment_config);
+    }
+    else {
+        change_assignment_version($username, $semester, $course, $assignment_id, $upload_version, $assignment_config);
     }
 
     // add this assignment to the grading queue
     // FIX ME: If to_be_graded path doesn't exist, create new one
-    touch($path_front."/../to_be_graded/".$course."__".$assignment_id."__".$username."__".$upload_version);
+
+    $touchfile = $path_front_root."/to_be_graded/".$semester."__".$course."__".$assignment_id."__".$username."__".$upload_version;
+    touch($touchfile);
 
     // CREATE THE TIMESTAMP FILE
     //touch($version_path."/.submit.timestamp");
@@ -213,26 +236,34 @@ function upload_homework($username, $course, $assignment_id, $homework_file) {
         return;
     }
 
-// set LAST symlink
-
-    if (is_link("$user_path/LAST")){
-        unlink("$user_path/LAST");
-    }
-    symlink ($version_path,$user_path."/LAST");
-
-    if (is_link("$user_path/ACTIVE")){
-        unlink("$user_path/ACTIVE");
-    }
-
-    // set ACTIVE symlink
-    symlink ($version_path,$user_path."/ACTIVE");
-
+    /* // php symlinks disabled on server for security reasons
+    ////// set LAST symlink
+    //
+    //     if (is_link("$user_path/LAST")){
+    //         unlink("$user_path/LAST");
+    //     }
+    //     symlink ($version_path,$user_path."/LAST");
+    //
+    //     if (is_link("$user_path/ACTIVE")){
+    //         unlink("$user_path/ACTIVE");
+    //     }
+    //
+    //     // set ACTIVE symlink
+    //     symlink ($version_path,$user_path."/ACTIVE");
+    */
     return array("success"=>"File uploaded successfully");
 }
 
 function is_valid_zip_size($filename, $max_size) {
     $size = 0;
     $zip = zip_open($filename);
+    //
+    // FIXME: bug with this check?  Getting this warning when a non zip is uploaded
+    //
+    // Warning: zip_read() expects parameter 1 to be resource, integer given
+    // Warning: zip_close() expects parameter 1 to be resource, integer given
+    //
+
     if ($zip) {
         while ($inner_file = zip_read($zip)) {
             $size += zip_entry_filesize($inner_file);
@@ -250,15 +281,18 @@ function is_valid_zip_size($filename, $max_size) {
 }
 
 // Check if user has permission to edit homework
-function can_edit_assignment($username, $course, $assignment_id, $assignment_config) {
+function can_edit_assignment($username, $semester, $course, $assignment_id, $assignment_config) {
 
-	    // FIXME: HACK!  To not check due date
-// TODO: FIXME: late submissions should be allowed (there are excused absenses)
-// TODOL FIXME: but the ACTIVE should not be updated ( we can manually adjust active for excused absenses)
-return true;
+	// FIXME: HACK!  To not check due date
+    // TODO: FIXME: late submissions should be allowed (there are excused absenses)
+    // TODOL FIXME: but the ACTIVE should not be updated ( we can manually adjust active for excused absenses)
 
-//$due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
-    $class_config = get_class_config($course);
+    return true;
+
+
+    //$due_date = get_due_date($username, $semester, $course, $assignment_id, $assignment_config);
+    $class_config = get_class_config($semester,$course);
+
     $due_date = get_due_date($class_config,$assignment_id);
     $last_edit_date = $due_date->add(new DateInterval("P2D"));
     $now = new DateTime("NOW");
@@ -266,32 +300,35 @@ return true;
     return $now <= $last_edit_date;
 }
 
-//function get_due_date($username, $course, $assignment_id) {
+//function get_due_date($username, $semester, $course, $assignment_id) {
 function get_due_date($class_config, $assignment_id) {
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
-      if ($one["assignment_id"] == $assignment_id) {
-	if (isset($one["due_date"])) {
-          date_default_timezone_set('America/New_York');
-          $date = new DateTime($one["due_date"]);
-       	  return $date;
-        } else {
-          date_default_timezone_set('America/New_York');
-          $date = new DateTime("2014-12-01 23:59:59.0");
-       	  return $date;
+        if ($one["assignment_id"] == $assignment_id) {
+            if (isset($one["due_date"])) {
+                date_default_timezone_set('America/New_York');
+                $date = new DateTime($one["due_date"]);
+                return $date;
+            }
+            else {
+                date_default_timezone_set('America/New_York');
+                $date = new DateTime("2014-12-01 23:59:59.0");
+                return $date;
+            }
         }
-
-      }
     }
 }
 
 
 //Gets the class information for assignments
 
-function get_class_config($course) {
-    $path_front = get_path_front($course);
+function get_class_config($semester,$course) {
+   if (!is_valid_semester($semester)) { display_error("get_class_config, INVALID SEMESTER: ".$semester); }
+   if (!is_valid_course($course))     { display_error("get_class_config, INVALID COURSE: ".$course); }
+
+    $path_front = get_path_front_course($semester,$course);
     $file = $path_front."/config/class.json";
-//    $file = $path_front."/results/class.json";
+    //    $file = $path_front."/results/class.json";
     if (!file_exists($file)) {
         ?><script>alert("Configuration for this class (<?php echo $file ?>) does not exist. Quitting.");</script>
         <?php exit();
@@ -300,9 +337,12 @@ function get_class_config($course) {
 }
 
 // Get a list of uploaded files
-function get_submitted_files($username, $course, $assignment_id, $assignment_version) {
+function get_submitted_files($username, $semester, $course, $assignment_id, $assignment_version) {
 
-    $path_front = get_path_front($course);
+    if (!is_valid_semester($semester)) { display_error("get_submitted_files, INVALID SEMESTER: ".$semester); }
+    if (!is_valid_course($course))     { display_error("get_submitted_files, INVALID COURSE: ".$course); }
+
+    $path_front = get_path_front_course($semester,$course);
     $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
     $contents = array();
     if ($assignment_version != 0) {
@@ -339,8 +379,8 @@ function get_contents($dir, $max_depth) {
 }
 
 // Find most recent submission from user
-function most_recent_assignment_version($username, $course, $assignment_id) {
-    $path_front = get_path_front($course);
+function most_recent_assignment_version($username, $semester, $course, $assignment_id) {
+    $path_front = get_path_front_course($semester,$course);
     $path = $path_front."/submissions/".$assignment_id."/".$username;
     $i = 1;
     while (file_exists($path."/".$i)) {
@@ -367,38 +407,55 @@ function is_ta_grade_released($class_config, $assignment_id) {
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
         if ($one["assignment_id"] == $assignment_id) {
- 	      if (isset($one["ta_grade_released"]) &&
-            	  $one["ta_grade_released"] == true) {
-	        return true;
-	      } else {
-	        return false;
-              }
+            if (isset($one["ta_grade_released"]) && $one["ta_grade_released"] == true) {
+                return true;
+            }
+            else {
+                return false;
+            }
         }
     }
-    return "";//TODO Error handling
+    return ""; //TODO Error handling
+}
+
+
+// Check to make sure instructor has added this assignment
+function is_valid_semester($semester) {
+    if ($semester == "f14") {
+        return true;
+    }
+    if ($semester == "s15") {
+        return true;
+    }
+    return false;
 }
 
 
 // Check to make sure instructor has added this assignment
 function is_valid_course($course) {
     if ($course == "csci1200") {
-      return true;
+        return true;
     }
     if ($course == "csci1100") {
-      return true;
+        return true;
     }
     if ($course == "csci1200test") {
-      return true;
+        return true;
     }
     if ($course == "csci1100test") {
-      return true;
+        return true;
     }
     if ($course == "csci4960") {
-      return true;
+        return true;
     }
+    if ($course == "csci4530") {
+        return true;
+    }
+    //For auto-setup script:
     //if ($course == "default") {return true;}
     return false;
 }
+
 
 // Check to make sure instructor has added this assignment
 function is_valid_assignment($class_config, $assignment_id) {
@@ -412,15 +469,15 @@ function is_valid_assignment($class_config, $assignment_id) {
 }
 
 // Make sure student has actually submitted this version of an assignment
-function is_valid_assignment_version($username, $course, $assignment_id, $assignment_version) {
-    $path_front = get_path_front($course);
+function is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version) {
+    $path_front = get_path_front_course($semester,$course);
     $path = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
     return file_exists($path);
 }
 
-function version_in_grading_queue($username, $course, $assignment_id, $assignment_version) {
-    $path_front = get_path_front($course);
-    if (!is_valid_assignment_version($username, $course, $assignment_id, $assignment_version)) {//If its not in the submissions folder
+function version_in_grading_queue($username, $semester, $course, $assignment_id, $assignment_version) {
+    $path_front = get_path_front_course($semester,$course);
+    if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {//If its not in the submissions folder
         return false;
     }
     $file = $path_front."/results/".$assignment_id."/".$username."/".$assignment_version;
@@ -433,8 +490,8 @@ function version_in_grading_queue($username, $course, $assignment_id, $assignmen
 
 //RESULTS DATA
 
-function get_submission_time($username, $course, $assignment_id, $assignment_version) {
-    $version_results = get_assignment_results($username, $course, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
+function get_submission_time($username, $semester,$course, $assignment_id, $assignment_version) {
+    $version_results = get_assignment_results($username, $semester,$course, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
     if ($version_results &&
 	      isset($version_results["submission_time"])) {
 	      return $version_results["submission_time"];
@@ -443,15 +500,15 @@ function get_submission_time($username, $course, $assignment_id, $assignment_ver
     }
 }
 
-function get_homework_tests($username, $course, $assignment_id, $assignment_version, $assignment_config, $include_diffs = true) {
+function get_homework_tests($username, $semester,$course, $assignment_id, $assignment_version, $assignment_config, $include_diffs = true) {
     $testcases_info = $assignment_config["testcases"];//These are the tests run on a homework (for grading etc.)
-    $version_results = get_assignment_results($username, $course, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
+    $version_results = get_assignment_results($username, $semester,$course, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
     if ($version_results) {
         $testcases_results = $version_results["testcases"];
     } else {
         $testcases_results = array();
     }
-    $path_front = get_path_front($course);
+    $path_front = get_path_front_course($semester,$course);
 	$student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
     $homework_tests = array();
     for ($i = 0; $i < count($testcases_info); $i++) {
@@ -471,7 +528,7 @@ function get_homework_tests($username, $course, $assignment_id, $assignment_vers
                     $data["compilation_output"] = get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]);
                 }
                 if ($include_diffs && isset($testcases_results[$u]["diffs"])) {
-                    $data["diffs"] = get_all_testcase_diffs($username, $course, $assignment_id, $assignment_version, $testcases_results[$u]["diffs"]);
+                    $data["diffs"] = get_all_testcase_diffs($username, $semester,$course, $assignment_id, $assignment_version, $testcases_results[$u]["diffs"]);
                 }
 
                 array_push($homework_tests, $data);
@@ -506,25 +563,25 @@ function get_points_visible($homework_tests)
     return $points_visible;
 }
 
-function get_select_submission_data($username, $course, $assignment_id, $assignment_config, $highest_version) {
+function get_select_submission_data($username, $semester,$course, $assignment_id, $assignment_config, $highest_version) {
     $select_data = array();
     for ($i = 1; $i <= $highest_version; $i++) {
-        $homework_tests = get_homework_tests($username, $course, $assignment_id, $i, $assignment_config, false);
+        $homework_tests = get_homework_tests($username, $semester,$course, $assignment_id, $i, $assignment_config, false);
         $points_awarded_visible = get_awarded_points_visible($homework_tests);
         $points_visible = get_points_visible($homework_tests);
         $score = $points_awarded_visible." / ".$points_visible;
-        if (version_in_grading_queue($username, $course, $assignment_id, $i)) {
+        if (version_in_grading_queue($username, $semester,$course, $assignment_id, $i)) {
             $score = "Grading in progress";
         }
 
-    $class_config = get_class_config($course);
+    $class_config = get_class_config($semester,$course);
     $due_date = get_due_date($class_config,$assignment_id);
-//        $due_date = get_due_date($username, $course, $assignment_id, $assignment_config);
+//        $due_date = get_due_date($username, $semester,$course, $assignment_id, $assignment_config);
 //	if (!isset($due_date) || !defined("due_date")) {
 //		       $due_date = "";
 //		       }
 
-        $date_submitted = get_submission_time($username,$course,$assignment_id,$i);
+        $date_submitted = get_submission_time($username,$semester,$course,$assignment_id,$i);
 
 
 		       //echo "due_date = $due_date";
@@ -552,8 +609,8 @@ function get_select_submission_data($username, $course, $assignment_id, $assignm
 
 
 // Get the test cases from the instructor configuration file
-function get_assignment_config($username, $course, $assignment_id) {
-    $path_front = get_path_front($course);
+function get_assignment_config($username, $semester,$course, $assignment_id) {
+    $path_front = get_path_front_course($semester,$course);
 //    $file = $path_front."/results/".$assignment_id."/assignment_config.json";
     $file = $path_front."/config/".$assignment_id."_assignment_config.json";
 
@@ -566,8 +623,8 @@ function get_assignment_config($username, $course, $assignment_id) {
 }
 
 // Get results from test cases for a student submission
-function get_assignment_results($username, $course, $assignment_id, $assignment_version) {
-    $path_front = get_path_front($course);
+function get_assignment_results($username, $semester,$course, $assignment_id, $assignment_version) {
+    $path_front = get_path_front_course($semester,$course);
     $file = $path_front."/results/".$assignment_id."/".$username."/".$assignment_version."/submission.json";
     if (!file_exists($file)) {
         return array();
@@ -599,8 +656,8 @@ function removeTrailingCommas($json)
 
 //SUBMITTING VERSION
 
-function get_user_submitting_version($username, $course, $assignment_id) {
-    $path_front = get_path_front($course);
+function get_user_submitting_version($username, $semester,$course, $assignment_id) {
+    $path_front = get_path_front_course($semester,$course);
     $file = $path_front."/submissions/".$assignment_id."/".$username."/user_assignment_settings.json";
     if (!file_exists($file)) {
         return 0;
@@ -609,16 +666,17 @@ function get_user_submitting_version($username, $course, $assignment_id) {
     return $json["active_assignment"];
 }
 
-function change_assignment_version($username, $course, $assignment_id, $assignment_version, $assignment_config) {
-    if (!can_edit_assignment($username, $course, $assignment_id, $assignment_config)) {
+function change_assignment_version($username, $semester,$course, $assignment_id, $assignment_version, $assignment_config) {
+    if (!can_edit_assignment($username, $semester, $course, $assignment_id, $assignment_config)) {
         display_error("Error: This assignment ".$assignment_id." is not open.  You may not edit this assignment.");
         return;
     }
-    if (!is_valid_assignment_version($username, $course, $assignment_id, $assignment_version)) {
+    if (!is_valid_assignment_version($username, $semester,$course, $assignment_id, $assignment_version)) {
         display_error("This assignment version ".$assignment_version." does not exist");
         return;
     }
-    $path_front = get_path_front($course);
+
+    $path_front = get_path_front_course($semester,$course);
 
     $user_path = $path_front."/submissions/".$assignment_id."/".$username;
     //    $file = $path_front."/submissions/".$assignment_id."/".$username."/user_assignment_settings.json";
@@ -631,12 +689,15 @@ function change_assignment_version($username, $course, $assignment_id, $assignme
     $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
     $json["active_assignment"] = $assignment_version;
 
+/* // php symlinks disabled on server for security reasons
+
     //symlink (version_path,$user_path."/ACTIVE");
     if (is_link("$user_path/ACTIVE")){
         $success=unlink("$user_path/ACTIVE");
     }
 
     $success = symlink ($user_path."/".$assignment_version,$user_path."/ACTIVE");
+*/
 
     file_put_contents($file, json_encode($json));
     return array("success"=>"Success");
@@ -661,8 +722,8 @@ function get_compilation_output($file) {
 
 // Converts the JSON "diff" field from submission.json to an array containing
 // file contents
-function get_testcase_diff($username, $course, $assignment_id, $assignment_version, $diff){
-    $path_front = get_path_front($course);
+function get_testcase_diff($username, $semester,$course, $assignment_id, $assignment_version, $diff){
+    $path_front = get_path_front_course($semester,$course);
     $student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
 
     $data = array();
@@ -688,10 +749,10 @@ function get_testcase_diff($username, $course, $assignment_id, $assignment_versi
     return $data;
 }
 
-function get_all_testcase_diffs($username, $course, $assignment_id, $assignment_version, $diffs) {
+function get_all_testcase_diffs($username, $semester,$course, $assignment_id, $assignment_version, $diffs) {
     $results = array();
     foreach ($diffs as $diff) {
-        $diff_result = get_testcase_diff($username, $course, $assignment_id, $assignment_version, $diff);
+        $diff_result = get_testcase_diff($username, $semester,$course, $assignment_id, $assignment_version, $diff);
         $diff_result["diff_id"] = $diff["diff_id"];
         if (isset($diff["message"]) && $diff["message"] != "") {
             $diff_result["message"] = $diff["message"];
@@ -714,6 +775,14 @@ function display_error($error) {
 //       echo get_current_user();
     exit();
 }
+
+
+function display_note($note) {
+    ?>
+    <script>alert("Note: <?php echo $note;?>");</script>
+    <?php
+}
+
 
 
 ?>

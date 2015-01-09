@@ -30,11 +30,10 @@
 //#include "modules/modules.h"
 //#include "grading/TestCase.h"
 
-
 #include <config.h>
 
-//                                              5 seconds,                 100 kb
-int execute(const std::string &cmd, int seconds_to_run=5, int file_size_limit=100000);
+#include "execute.h"
+
 std::string to_string(int i);
 
 int main(int argc, char *argv[]) {
@@ -67,13 +66,15 @@ int main(int argc, char *argv[]) {
     int exit_no = execute(cmd + 
 			  " 1>test" + to_string(i + 1) + "_cout.txt" +
 			  " 2>test" + to_string(i + 1) + "_cerr.txt",
-			  testcases[i].seconds_to_run());
+			  testcases[i].seconds_to_run(),
+			  max_output_size);
     // append the test case # to the front of the output file (if it exists)
     //      assert (testcases[i].numFileComparisons() >= 1);
     if (testcases[i].numFileGraders() > 0 && 
 	testcases[i].raw_filename(0) != "" &&
 	access( testcases[i].raw_filename(0).c_str(), F_OK|R_OK|W_OK ) != -1) { /* file exists */
-      execute ("/bin/mv "+testcases[i].raw_filename(0)+" "+testcases[i].filename(0));
+      execute ("/bin/mv "+testcases[i].raw_filename(0)+" "+testcases[i].filename(0),
+	       max_cputime,max_output_size);
     }
     //}
   }
@@ -81,7 +82,7 @@ int main(int argc, char *argv[]) {
   std::cout << "========================================================" << std::endl;
   std::cout << "FINISHED ALL TESTS" << std::endl;
   // allow hwcron read access so the files can be copied back
-  execute ("/usr/bin/find . -user untrusted -exec chmod o+r {} ;");
+  execute ("/usr/bin/find . -user untrusted -exec chmod o+r {} ;",max_cputime,max_output_size);
   
   return 0;
 }
