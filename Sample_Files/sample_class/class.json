@@ -1,0 +1,21 @@
+{
+    "default_assignment":"hw1",
+    "assignments": [
+        {
+            "assignment_id":"hw1",
+            "assignment_name":"Homework 1 Text Justification",
+            "released":true,
+            "ta_grade_released":false
+        },
+        {
+            "assignment_id":"lab1",
+            "assignment_name":"Lab 1 Getting Started",
+            "released":true,
+            "ta_grade_released":false
+        }
+    ],
+    "dev_team": [
+        "dev"
+        ]
+
+}
