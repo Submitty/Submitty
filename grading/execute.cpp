@@ -390,9 +390,9 @@ int exec_this_command(const std::string &cmd) {
   // SECCOMP: install the filter (system calls restrictions)
   // No seccomp on Mac
   // remove seccomp /*
-  if (install_syscall_filter(prog_is_32bit, true/*blacklist*/)) {
-    std::cout << "seccomp filter install failed" << std::endl;
-    return 1;
+  if (install_syscall_filter(prog_is_32bit, true)) { //blacklist
+      std::cout << "seccomp filter install failed" << std::endl;
+      return 1;
   }
   // remove seccomp */
   // END SECCOMP
