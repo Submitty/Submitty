@@ -39,7 +39,6 @@ function version_changed(){
 </script>
 
 <!--- IDENTIFY USER & SELECT WHICH HOMEWORK NUMBER -->
-<<<<<<< HEAD
 <div id="HWsubmission">
 	<h2 class="label">Homework Submission for <em> <?php echo $user;?> </em></h2>
 	<?php
