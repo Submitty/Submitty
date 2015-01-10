@@ -161,22 +161,22 @@ int main(int argc, char *argv[]) {
 			  std::max(max_output_size, 10000000)); // 10 mb
     if (exit_no == 1){
         std::ofstream cerr_out ("test" + to_string(i + 1) + "_cerr.txt", std::ofstream::out | std::ofstream::app);
-        cerr_out << "Compile failed\n";
-        std::cout << "Compile failed, code 1" << std::endl;
+        cerr_out << "Compilation failed\n";
+        std::cout << "Compilation failed, code 1" << std::endl;
 
         cerr_out.close();
     }
     else if (exit_no == 2){
         std::ofstream cerr_out ("test" + to_string(i + 1) + "_cerr.txt", std::ofstream::out | std::ofstream::app);
-        cerr_out << "Compile terminated, exceeded max limits\n";
-        std::cout << "Compile terminated, exceeded max limits, code 2" << std::endl;
+        cerr_out << "Compilation terminated, exceeded max limits\n";
+        std::cout << "Compilation terminated, exceeded max limits, code 2" << std::endl;
 
         cerr_out.close();
     }
     else if (exit_no == 3){
         std::ofstream cerr_out ("test" + to_string(i + 1) + "_cerr.txt", std::ofstream::out | std::ofstream::app);
-        cerr_out << "Compile terminated, time elapsed was longer that allocated time\n";
-        std::cout << "Compile terminated, time elapsed was longer that allocated time code 3" << std::endl;
+        cerr_out << "Compilation terminated, time elapsed was longer that allocated time\n";
+        std::cout << "Compilation terminated, time elapsed was longer that allocated time code 3" << std::endl;
 
         cerr_out.close();
     }
