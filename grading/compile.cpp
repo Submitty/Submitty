@@ -1,3 +1,4 @@
+
 /* FILENAME: compile.cpp
  * YEAR: 2014
  * AUTHORS:
@@ -26,16 +27,98 @@
 #include <iostream>
 #include <sstream>
 #include <cassert>
+#include <set>
+#include <fstream>
 
 #include "modules/modules.h"
 #include "grading/TestCase.h"
 
+#define MAX_STRING_LENGTH 100
+#define MAX_NUM_STRINGS 20
+#define DIR_PATH_MAX 1000
+
+#include <dirent.h>
 
 #include <config.h>
 
-//                                              5 seconds,                 100 kb
-int execute(const std::string &cmd, int seconds_to_run=5, int file_size_limit=100000);
+#include "execute.h"
+
 std::string to_string(int i);
+
+
+void LoadDisallowedWords(const std::string &filename,
+			 std::set<std::string> &disallowed_words,
+			 std::set<std::string> &warning_words) {
+  std::ifstream istr(filename.c_str());
+  if (!istr) {
+    system("pwd");
+    system("whoami");
+    system("ls -lta");
+    std::cout << "file is " << filename << std::endl;
+  }
+  assert (istr);
+  std::string token1, token2;
+  while (istr >> token1 >> token2) {
+    if (token1 == "disallow") {
+      assert (warning_words.find(token2) == warning_words.end());
+      disallowed_words.insert(token2);
+    } else if (token1 == "warning") {
+      assert (disallowed_words.find(token2) == disallowed_words.end());
+      warning_words.insert(token2);
+    } else {
+      std::cout << "UNKNOWN TOKEN " << token1 << std::endl;
+      exit(1);
+    }
+  }
+}
+
+void SearchForDisallowedWords(std::set<std::string> &disallowed_words,
+			      std::set<std::string> &warning_words) {
+
+  system ("ls -lta");
+  system ("whoami");
+
+  char buf[DIR_PATH_MAX];
+  getcwd( buf, DIR_PATH_MAX );
+  DIR* dir = opendir(buf);
+  assert (dir != NULL);
+  struct dirent *ent;
+
+  bool disallowed = false;
+  bool warning = false;
+
+  while (1) {
+    ent = readdir(dir);
+    if (ent == NULL) break;
+    if (ent->d_type != DT_REG) continue;
+    std::string filename = ent->d_name;
+    if (filename == "disallowed_words.txt") continue;
+    if (filename == "my_compile.out") continue;
+
+    for (std::set<std::string>::iterator itr = disallowed_words.begin(); itr != disallowed_words.end(); itr++) {
+      int success = system ( (std::string("grep ")+(*itr)+" "+filename+" 1> /dev/null 2> /dev/null").c_str());
+      if (success == 0) {
+	std::cout << "DISALLOWED: " << filename << " contains '" << (*itr) << "'" << std::endl;
+	disallowed = true;
+      }
+    }
+
+    for (std::set<std::string>::iterator itr = warning_words.begin(); itr != warning_words.end(); itr++) {
+      int success = system ( (std::string("grep ")+(*itr)+" "+filename+" 1> /dev/null 2> /dev/null").c_str());
+      if (success == 0) {
+	std::cout << "WARNING: " << filename << " contains '" << (*itr) << "'" << std::endl;
+	warning = true;
+      }
+    }
+
+  }
+  closedir(dir);
+
+  if (disallowed) {
+    exit(1);
+  }
+}
+
 
 int main(int argc, char *argv[]) {
 
@@ -47,6 +130,14 @@ int main(int argc, char *argv[]) {
     return 2;
   }
 
+  /*
+  std::cout << "Scanning User Code..." << std::endl;
+
+  std::set<std::string> disallowed_words;
+  std::set<std::string> warning_words;
+  LoadDisallowedWords("disallowed_words.txt",disallowed_words,warning_words);
+  SearchForDisallowedWords(disallowed_words,warning_words);
+  */
 
   std::cout << "Compiling User Code..." << std::endl;
 
@@ -62,18 +153,12 @@ int main(int argc, char *argv[]) {
     std::string cmd = testcases[i].command();
     assert (cmd != "");
 
-    //std::cout << "LS:\n";
-    //execute("/bin/pwd",5);
-    //execute("/bin/ls -lta *cpp",4);
-    //system("/bin/ls -lta *cpp");
-    //std::cout << "LS DONE!\n";
-
     // run the command, capturing STDOUT & STDERR
     int exit_no = execute(cmd +
 			  " 1>test" + to_string(i + 1) + "_cout.txt" +
 			  " 2>test" + to_string(i + 1) + "_cerr.txt",
 			  testcases[i].seconds_to_run(),
-			  10000000); // 10 mb
+			  std::max(max_output_size, 10000000)); // 10 mb
     if (exit_no == 1){
         std::ofstream cerr_out ("test" + to_string(i + 1) + "_cerr.txt", std::ofstream::out | std::ofstream::app);
         cerr_out << "Compile failed\n";

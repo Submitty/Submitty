@@ -13,8 +13,8 @@ function load_progress_bar(progress, text) {
     }
 }
 
-function check_server(course, assignment_id, assignment_version, submitting_version, assignment_graded, submitting_graded, interval) {
-    $.post("index.php?course="+course+"&page=checkrefresh", 
+function check_server(semester, course, assignment_id, assignment_version, submitting_version, assignment_graded, submitting_graded, interval) {
+    $.post("index.php?semester="+semester+"&course="+course+"&page=checkrefresh", 
         {
             assignment_id: assignment_id,
             assignment_version: assignment_version,
@@ -26,15 +26,15 @@ function check_server(course, assignment_id, assignment_version, submitting_vers
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
             } else {
-                init_refresh_on_update(course, assignment_id, assignment_version, submitting_version, assignment_graded, submitting_graded, interval);
+                init_refresh_on_update(semester, course, assignment_id, assignment_version, submitting_version, assignment_graded, submitting_graded, interval);
             }
         }
     );
 }
 
-function init_refresh_on_update(course, assignment_id, assignment_version, submitting_version, assignment_graded, submitting_graded, interval)
+function init_refresh_on_update(semester, course, assignment_id, assignment_version, submitting_version, assignment_graded, submitting_graded, interval)
 {
-    setTimeout(function() { check_server(course, assignment_id, assignment_version, submitting_version, assignment_graded, submitting_graded, interval) }, interval);
+    setTimeout(function() { check_server(semester, course, assignment_id, assignment_version, submitting_version, assignment_graded, submitting_graded, interval) }, interval);
 }
 
 function toggleDiv(id) {

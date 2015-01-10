@@ -23,7 +23,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -39,6 +39,86 @@
 #define DIR_PATH_MAX 1000
 
 #include <dirent.h>
+
+// for system call white list
+#include "execute.h"
+
+// defined in seccomp_functions.cpp
+#include <elf.h>
+int install_syscall_filter(bool is_32, bool blacklist);
+
+// =====================================================================================
+// =====================================================================================
+
+bool system_program(const std::string &program) {
+  assert (program.size() >= 1);
+  if (program == "/usr/bin/ls" ||
+      program == "/usr/bin/time" ||
+      program == "/usr/bin/clang++" ||
+      program == "/usr/bin/g++" ||
+      program == "/usr/bin/strace" ||
+      program == "/usr/bin/valgrind" ||
+      program == "/projects/submit3/drmemory/bin/drmemory" ||
+      program == "/bin/mv") {
+    return true;
+  }
+  return false;
+}
+
+
+bool local_executable (const std::string &program) {
+  assert (program.size() >= 1);
+  if (program.size() > 4 &&
+      program.substr(0,2) == "./" &&
+      program.substr(program.size()-4,4) == ".out" &&
+      program.substr(2,program.size()-2).find("/") == std::string::npos) {
+    return true;
+  }
+  return false;
+}
+
+
+void validate_program(const std::string &program) {
+  assert (program.size() >= 1);
+  if (!system_program(program) &&
+      !local_executable(program)) {
+    std::cout << "ERROR: program looks suspicious '" << program << "'" << std::endl;
+    std::cerr << "ERROR: program looks suspicious '" << program << "'" << std::endl;
+    exit(1);
+  }
+}
+
+
+void validate_filename(const std::string &filename) {
+  assert (filename.size() >= 1);
+  if (filename[0] == '-') {
+    std::cout << "ERROR: command line filename looks suspicious '" << filename << "'" << std::endl;
+    std::cerr << "ERROR: command line filename looks suspicious '" << filename << "'" << std::endl;
+    exit(1);
+  }
+}
+
+
+void validate_option(const std::string &program, const std::string &option) {
+  static std::string last_option = "";
+  assert (option.size() >= 1);
+  if (option[0] == '-') {
+    // probably a normal option
+  } else if (last_option == "-o" &&
+	     option.size() > 4 &&
+	     option.substr(option.size()-4,4) == ".out") {
+    // ok, it's an executable name
+  } else if (local_executable(program)) {
+    // custom
+  } else {
+    std::cout << "ERROR: command line option looks suspicious '" << option << "'" << std::endl;
+    std::cerr << "ERROR: command line option looks suspicious '" << option << "'" << std::endl;
+    //exit(1);
+  }
+  last_option = option;
+}
+
+// =====================================================================================
 
 bool wildcard_match(const std::string &pattern, const std::string &thing) {
   int wildcard_loc = pattern.find("*");
@@ -69,69 +149,119 @@ bool wildcard_match(const std::string &pattern, const std::string &thing) {
 
 
 void wildcard_expansion(std::vector<std::string> &my_args, const std::string &pattern) {
-  if (pattern.find("*") != std::string::npos) {
-    std::cout << "WILDCARD DETECTED:" << pattern << std::endl;
-    char buf[DIR_PATH_MAX];
-    getcwd( buf, DIR_PATH_MAX );
-    DIR* dir = opendir(buf);
-    assert (dir != NULL);
-    struct dirent *ent;
-    while (1) {
-      ent = readdir(dir);
-      if (ent == NULL) break;
-      std::string thing = ent->d_name;
-      if (wildcard_match(pattern,thing)) {
-	my_args.push_back(thing);
-	std::cout << "   MATCHED! " << thing << std::endl;
-      }
+    if (pattern.find("*") != std::string::npos) {
+        std::cout << "WILDCARD DETECTED:" << pattern << std::endl;
+        char buf[DIR_PATH_MAX];
+        getcwd( buf, DIR_PATH_MAX );
+        DIR* dir = opendir(buf);
+        assert (dir != NULL);
+        struct dirent *ent;
+        while (1) {
+            ent = readdir(dir);
+            if (ent == NULL) break;
+            std::string thing = ent->d_name;
+            if (wildcard_match(pattern,thing)) {
+                std::cout << "   MATCHED! " << thing << std::endl;
+                validate_filename(thing);
+                my_args.push_back(thing);
+            }
+        }
+        closedir(dir);
+    } else {
+        my_args.push_back(pattern);
     }
-    closedir(dir);
-  } else {
-    my_args.push_back(pattern);
-  }
 }
 
 
 // This function only returns on failure to exec
 int exec_this_command(const std::string &cmd) {
 
-  // to avoid creating extra layers of processes, use exec and not
-  // system or the shell
+void parse_command_line(const std::string &cmd,
+			std::string &my_program,
+			std::vector<std::string> &my_args,
+			std::string &my_stdin,
+			std::string &my_stdout,
+			std::string &my_stderr) {
 
-  // first we need to parse the command line
-  std::string my_program;
-  std::vector<std::string> my_args;
-  std::string my_stdin;
-  std::string my_stdout;
-  std::string my_stderr;
+    std::stringstream ss(cmd);
+    std::string tmp;
+    bool bare_double_dash = false;
 
-  // FIXME: command line parsing is a bit fragile.  Could be made more robust
-  std::stringstream ss(cmd);
-  std::string tmp;
-  while (ss >> tmp) {
-    assert (tmp.size() >= 1);
-    if (my_program == "") {
-      // program name
-      my_program = tmp;
+    while (ss >> tmp) {
+        assert (tmp.size() >= 1);
+
+        // grab the program name
+        if (my_program == "") {
+            assert (my_args.size() == 0);
+            // program name
+            my_program = tmp;
+            validate_program(my_program);
+        }
+
+        // grab the arguments
+        else {
+            assert (my_program != "");
+
+            // look for the bare double dash
+            if (tmp == "--") {
+                assert (bare_double_dash == false);
+                bare_double_dash = true;
+                my_args.push_back(tmp);
+            }
+
+            // look for stdin/stdout/stderr
+            else if (tmp.size() >= 1 && tmp.substr(0,1) == "<") {
+                assert (my_stdin == "");
+                if (tmp.size() == 1) {
+                    bool success = ss >> tmp;
+                    assert (success);
+                    my_stdin = tmp;
+                } else {
+                    my_stdin = tmp.substr(1,tmp.size()-1);
+                }
+                validate_filename(my_stdin);
+            }
+            else if (tmp.size() >= 2 && tmp.substr(0,2) == "1>") {
+                assert (my_stdout == "");
+                if (tmp.size() == 2) {
+                    bool success = ss >> tmp;
+                    assert (success);
+                    my_stdout = tmp;
+                } else {
+                    my_stdout = tmp.substr(2,tmp.size()-2);
+                }
+                validate_filename(my_stdout);
+            }
+            else if (tmp.size() >= 2 && tmp.substr(0,2) == "2>") {
+                assert (my_stderr == "");
+                if (tmp.size() == 2) {
+                    bool success = ss >> tmp;
+                    assert (success);
+                    my_stderr = tmp;
+                } else {
+                    my_stderr = tmp.substr(2,tmp.size()-2);
+                }
+                validate_filename(my_stderr);
+            }
+
+            // remainder of the arguments
+            else if (tmp.find("*") != std::string::npos) {
+                if (bare_double_dash != true) {
+                    std::cout << "ERROR: Not allowed to use the wildcard before the bare double dash" << std::endl;
+                    std::cerr << "ERROR: Not allowed to use the wildcard before the bare double dash" << std::endl;
+                    exit(1);
+                }
+                wildcard_expansion(my_args,tmp);
+            } else {
+                if (bare_double_dash == true) {
+                    validate_filename(tmp);
+                } else {
+                    validate_option(my_program,tmp);
+                }
+                my_args.push_back(tmp);
+            }
+        }
     }
-    else if (tmp.size() >= 1 && tmp.substr(0,1) == "<") {
-      // stdin
-      assert (tmp.size() > 1);
-      my_stdin = tmp.substr(1,tmp.size()-1);
-    }
-    else if (tmp.size() >= 2 && tmp.substr(0,2) == "1>") {
-      // stdout
-      assert (tmp.size() > 2);
-      my_stdout = tmp.substr(2,tmp.size()-2);
-    }
-    else if (tmp.size() >= 2 && tmp.substr(0,2) == "2>") {
-      // stderr
-      my_stderr = tmp.substr(2,tmp.size()-2);
-    }
-    else {
-      wildcard_expansion(my_args,tmp);
-    }
-  }
 
   /*
   // FOR DEBUGGING
@@ -142,6 +272,28 @@ int exec_this_command(const std::string &cmd) {
   std::cout << "MY STDERR:  '" << my_stderr  << "'" << std::endl;
   std::cout << "MY ARGS (" << my_args.size() << ") :";
   */
+}
+
+// =====================================================================================
+// =====================================================================================
+// =====================================================================================
+
+
+// This function only returns on failure to exec
+int exec_this_command(const std::string &cmd) {
+
+
+  // to avoid creating extra layers of processes, use exec and not
+  // system or the shell
+
+  // first we need to parse the command line
+  std::string my_program;
+  std::vector<std::string> my_args;
+  std::string my_stdin;
+  std::string my_stdout;
+  std::string my_stderr;
+  parse_command_line(cmd, my_program, my_args, my_stdin, my_stdout, my_stderr);
+
 
   char** const my_char_args = new char * [my_args.size()+2];  // yes, there is a memory leak here
   my_char_args[0] = (char*) my_program.c_str();
@@ -162,21 +314,58 @@ int exec_this_command(const std::string &cmd) {
 
 
 
-  // the default umask is 220, so we need edit so that we can make
+
+
+  // SECCOMP:  Used to restrict allowable system calls.
+  // First we determine if the program we will run is a 64 or 32 bit
+  // executable (the system calls are different on 64 vs. 32 bit)
+  Elf64_Ehdr elf_hdr;
+  std::cout << "reading " <<  my_program << std::endl;
+  int fd = open(my_program.c_str(), O_RDONLY);
+  if (fd == -1) {
+    perror("can't open");
+    std::cerr << "ERROR: cannot open program" << std::endl;
+    exit(1);
+  }
+  int res = read(fd, &elf_hdr, sizeof(elf_hdr));
+  if (res < sizeof(elf_hdr)) {
+    perror("can't read ");
+    std::cerr << "ERROR: cannot read program" << std::endl;
+    exit(1);
+  }
+  int prog_is_32bit;
+  if (elf_hdr.e_machine == EM_386) {
+    std::cout << "this is a 32 bit program" << std::endl;
+    prog_is_32bit = 1;
+  }
+  else {
+    std::cout << "this is a 64 bit program" << std::endl;
+    prog_is_32bit = 0;
+  }
+  // END SECCOMP
+
+
+
+  // the default umask is 0027, so we need edit so that we can make
   // these files 'other read', so that we can read them when we switch
   // users
   mode_t everyone_read = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-  mode_t prior_umask = umask(S_IWGRP | S_IWOTH);
+  mode_t prior_umask = umask(S_IWGRP | S_IWOTH);  // save the prior umask
 
   // The path is probably empty, we need to add /usr/bin to the path
   // since we get a "collect2 ld not found" error from g++ otherwise
   char* my_path = getenv("PATH");
-  std::cout << "PATH pre= " << (my_path ? my_path : "<empty>") << std::endl;
   if (my_path == NULL) {
     setenv("PATH", "/usr/bin", 1);
   }
+  else {
+    std::cout << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
+  }
   my_path = getenv("PATH");
-  std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
+  //std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
+
+
+
 
 
   // FIXME: if we want to assert or print stuff afterward, we should save
@@ -201,17 +390,39 @@ int exec_this_command(const std::string &cmd) {
   }
 
 
+
+  // SECCOMP: install the filter (system calls restrictions)
+  // No seccomp on Mac
+  // remove seccomp /*
+  if (install_syscall_filter(prog_is_32bit, true)) { //blacklist
+      std::cout << "seccomp filter install failed" << std::endl;
+      return 1;
+  }
+  // remove seccomp */
+  // END SECCOMP
+
+
   int child_result =  execv ( my_program.c_str(), my_char_args );
   // if exec does not fail, we'll never get here
 
-  umask(prior_umask);
+  umask(prior_umask);  // reset to the prior umask
 
   return child_result;
 }
 
 
 // Executes command (from shell) and returns error code (0 = success)
-int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) {
+int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) { //, bool add_strace) {
+
+  //  add_strace = true;
+
+  /*  std::string cmd = cmd_a;
+  if (add_strace) {
+    assert (cmd.substr(0,18) != std::string("/usr/bin/strace -f "));
+    cmd = std::string("/usr/bin/strace -f ") + cmd;
+  }
+  */
+
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
 
   // Forking to allow the setting of limits of RLIMITS on the command
@@ -253,62 +464,75 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) {
     //std::cout << "    child_result = " << child_result << std::endl;
     exit(child_result);
 
-  } else {
-    // PARENT PROCESS
-    std::cout << "childPID = " << childPID << std::endl;
-    std::cout << "PARENT PROCESS START: " << std::endl;
-    int parent_result = system("date");
-    assert (parent_result == 0);
-    //std::cout << "  parent_result = " << parent_result << std::endl;
-
-    float elapsed = 0;
-    int status;
-    pid_t wpid = 0;
-    do {
-      wpid = waitpid(childPID, &status, WNOHANG);
-      if (wpid == 0) {
-	if (elapsed < seconds_to_run) {
-	  // sleep 1/10 of a second
-	  usleep(100000);
-	  elapsed+= 0.1;
-	}
-	else {
-	  std::cout << "Killing child process" << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
-	  // the '-' here means to kill the group
-	  kill(childPID, SIGKILL);
-	  kill(-childPID, SIGKILL);
-	  usleep(1000); /* wait 1/1000th of a second for the process to die */
-      time_kill=1;
-	}
-      }
-    } while (wpid == 0);
-
-    if (WIFEXITED(status)) {
-      printf("Child exited, status=%d\n", WEXITSTATUS(status));
-      if (WEXITSTATUS(status) == 0){
-          result=0;
-      }
-      else{
-          result=1;
-      }
     }
-    else if (WIFSIGNALED(status)) {
-      printf("Child %d was terminated with a status of: %d \n", childPID, WTERMSIG(status));
-      if (WTERMSIG(status) == 0){
-          result=0;
-      }
-      else{
-          result=2;
-      }
-    }
-    if (time_kill){
-        result=3;
-    }
+    else {
+        // PARENT PROCESS
+        std::cout << "childPID = " << childPID << std::endl;
+        std::cout << "PARENT PROCESS START: " << std::endl;
+        int parent_result = system("date");
+        assert (parent_result == 0);
+        //std::cout << "  parent_result = " << parent_result << std::endl;
 
-    std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
-    parent_result = system("date");
-    assert (parent_result == 0);
-  }
+        float elapsed = 0;
+        int status;
+        pid_t wpid = 0;
+        do {
+            wpid = waitpid(childPID, &status, WNOHANG);
+            if (wpid == 0) {
+                if (elapsed < seconds_to_run) {
+                    // sleep 1/10 of a second
+                    usleep(100000);
+                    elapsed+= 0.1;
+                }
+                else {
+                    std::cout << "Killing child process" << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
+                    // the '-' here means to kill the group
+                    kill(childPID, SIGKILL);
+                    kill(-childPID, SIGKILL);
+                    usleep(1000); /* wait 1/1000th of a second for the process to die */
+                    time_kill=1;
+                }
+            }
+        } while (wpid == 0);
+
+        if (WIFEXITED(status)) {
+            std::cout << "Child exited, status=" << WEXITSTATUS(status) << std::endl;
+            if (WEXITSTATUS(status) == 0){
+                result=0;
+            }
+            else{
+                result=1;
+            }
+        }
+        else if (WIFSIGNALED(status)) {
+            int what_signal =  WTERMSIG(status);
+
+            if (what_signal == SIGSYS /* 31 */) { // && !add_strace)
+                std::cout << "DETECTED BAD SYSTEM CALL" << std::endl;
+                //	execute(cmd,seconds_to_run,file_size_limit,true);
+                //std::cout << "FINISHED RERUN WITH STRACE" << std::endl;
+            }
+
+            std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
+
+            if (what_signal == 25) {
+                std::cout << "signal 25 = file size exceeded" << std::endl;
+            }
+
+            if (WTERMSIG(status) == 0){
+                result=0;
+            }
+            else{
+                result=2;
+            }
+        }
+        if (time_kill){
+            result=3;
+        }
+        std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
+        parent_result = system("date");
+        assert (parent_result == 0);
+    }
   std::cout <<"Result: "<<result<<std::endl;
-  return result;
+    return result;
 }

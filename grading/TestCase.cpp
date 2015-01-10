@@ -175,40 +175,85 @@ TestResults* TestCaseCustom::doit(const std::string &prefix) {
 
 
 std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
-    // char cCurrentPath[1000];
-    // if (!getcwd(cCurrentPath, 1000)) {
-    //   std::cerr << "ERROR: couldn't get current directory" << std::endl;
-    //   exit(0);
-    // }
-    // //printf ("The current working directory is '%s'\n", cCurrentPath);
-    std::string tmp = dir;
+  //std::cout << "getassignmentidfromcurrentdirectory '" << dir << "'\n";
+  assert (dir.size() >= 1);
+  assert (dir[dir.size()-1] != '/');
 
-    assert (tmp.size() >= 1);
-  // assert (tmp[tmp.size()-1] != '/');
+  std::string tmp2 = dir;
 
-   // while (1) {
+  assert (tmp2.size() >= 1);
+  // assert (tmp2[tmp2.size()-1] != '/');
 
-    int loc = tmp.find('/');
-    if (loc != std::string::npos){
-        tmp = tmp.substr(0,loc);
+
+  int loc = tmp2.find('/');
+  if (loc != std::string::npos){
+      tmp2 = tmp2.substr(0,loc);
+  }
+
+  std::cout << "tmp2 is now '" << tmp2 << "'\n";
+  loc = tmp2.find('_');
+  if (loc != std::string::npos){
+      tmp2 = tmp2.substr(loc+1);
+  }
+  std::cout << "tmp2 is now '" << tmp2 << "'\n";
+
+  loc = tmp2.find('_');
+  if (loc != std::string::npos){
+      tmp2 = tmp2.substr(0,loc);
+  }
+
+  std::cout << "tmp2 is now '" << tmp2 << "'\n";
+
+  int last_slash = -1;
+  int second_to_last_slash = -1;
+  std::string tmp;
+  while (1) {
+    int loc = dir.find('/',last_slash+1);
+    if (loc == std::string::npos) break;
+    second_to_last_slash = last_slash;
+    last_slash = loc;
+    if (second_to_last_slash != -1) {
+      tmp = dir.substr(second_to_last_slash+1,last_slash-second_to_last_slash-1);
     }
+    std::cout << "tmp is now '" << tmp << "'\n";  
 
-    // std::cout << "tmp is now '" << tmp << "'\n";
-    loc = tmp.find('_');
-    if (loc != std::string::npos){
-        tmp = tmp.substr(loc+1);
-    }
-    // std::cout << "tmp is now '" << tmp << "'\n";
-
-    loc = tmp.find('_');
-    if (loc != std::string::npos){
-        tmp = tmp.substr(0,loc);
-    }
-
-    // std::cout << "tmp is now '" << tmp << "'\n";
-
-
-   // }
-   assert (tmp.size() >= 1);
-   return tmp;
+  }
+  assert (tmp.size() > 1);
+  return tmp;
 }
+/*
+
+
+std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
+
+std::string tmp2 = dir;
+
+assert (tmp2.size() >= 1);
+// assert (tmp2[tmp2.size()-1] != '/');
+
+
+int loc = tmp2.find('/');
+if (loc != std::string::npos){
+tmp2 = tmp2.substr(0,loc);
+}
+
+std::cout << "tmp2 is now '" << tmp2 << "'\n";
+loc = tmp2.find('_');
+if (loc != std::string::npos){
+tmp2 = tmp2.substr(loc+1);
+}
+std::cout << "tmp2 is now '" << tmp2 << "'\n";
+
+loc = tmp2.find('_');
+if (loc != std::string::npos){
+tmp2 = tmp2.substr(0,loc);
+}
+
+std::cout << "tmp2 is now '" << tmp2 << "'\n";
+
+
+// }
+assert (tmp2.size() >= 1);
+return tmp2;
+}
+*/
