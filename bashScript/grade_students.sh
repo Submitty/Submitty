@@ -199,13 +199,13 @@ while true; do
 	done
         # error checking
         # FIXME: error checking could be more significant
-	if [ $semester == "NOSEMESTER" ] 
-	then 
+	if [ $semester == "NOSEMESTER" ]
+	then
 	    echo "ERROR IN SEMESTER: $NEXT_TO_GRADE" >&2
-	    continue 
+	    continue
 	fi
-	if [ $course == "NOCOURSE" ] 
-	then 
+	if [ $course == "NOCOURSE" ]
+	then
 	    echo "ERROR IN COURSE: $NEXT_TO_GRADE" >&2
 	    continue
 	fi
@@ -228,8 +228,11 @@ while true; do
 
 	# --------------------------------------------------------------------
         # check to see if directory exists & is readable
-	submission_path=$base_path/courses/$semester/$course/submissions/$assignment/$user/$version 
-
+# <<<<<<< HEAD
+# 	submission_path=$base_path/$course/submissions/$assignment/$user/$version
+# =======
+	submission_path=$base_path/courses/$semester/$course/submissions/$assignment/$user/$version
+# >>>>>>> server
 	#echo "check directory '$submission_path'"
 
 	if [ ! -d "$base_path" ]
@@ -311,14 +314,22 @@ while true; do
 
 
 
-
+#
+# <<<<<<< HEAD
+# 	test_code_path="$base_path/$course/test_code/$assignment"
+# 	test_input_path="$base_path/$course/test_input/$assignment"
+# 	test_output_path="$base_path/$course/test_output/$assignment"
+# 	results_path="$base_path/$course/results/$assignment/$user/$version"
+# 	bin_path="$base_path/$course/bin"
+#
+# =======
 	test_code_path="$base_path/courses/$semester/$course/test_code/$assignment"
 	test_input_path="$base_path/courses/$semester/$course/test_input/$assignment"
 	test_output_path="$base_path/courses/$semester/$course/test_output/$assignment"
 	results_path="$base_path/courses/$semester/$course/results/$assignment/$user/$version"
 	bin_path="$base_path/courses/$semester/$course/bin"
-	
 
+# >>>>>>> server
 
 	# --------------------------------------------------------------------
         # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
@@ -444,15 +455,19 @@ while true; do
 	    echo "ERROR:  $bin_path/$assignment/validate.out  does not exist/is not readable" >&2
 	    # continue
 	else
-            # echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
+        # echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
 
-            #valgrind "$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" >& .submit_validator_output.txt 
-if [[ 0 -eq 0 ]] ;
-then
-            valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt 
-else
-	    $base_path/bin/untrusted_runscript /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt 
-fi
+        if [[ 0 -eq 0 ]] ; then
+            echo '"$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'
+            valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+        else
+            echo '$base_path/bin/untrusted_runscript /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'
+            "$base_path/bin/untrusted_runscript" "/usr/bin/valgrind" "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+        fi
+        # Non-valgrind commands
+        # echo ""$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt"
+        # "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+
 
 	    validator_error_code="$?"
 	    if [[ "$validator_error_code" -ne 0 ]] ;

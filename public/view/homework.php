@@ -13,7 +13,6 @@ print('<link href="resources/'.$course.'_main.css" rel="stylesheet"></link>');
 <?php $course =    $course = htmlspecialchars($_GET["course"]); ?>
 <?php $semester =    $semester = htmlspecialchars($_GET["semester"]); ?>
 
-
 <!-- DIFF VIEWER STUFF -->
 <script src='diff-viewer/jquery.js'></script>
 <script src='diff-viewer/underscore.js'></script>
@@ -36,12 +35,10 @@ function version_changed(){
    var php_course = "<?php echo $course; ?>";
    var php_semester = "<?php echo $semester; ?>";
   window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+"&assignment_version="+document.getElementById('versionlist').value;
-
 }
 </script>
 
 <!--- IDENTIFY USER & SELECT WHICH HOMEWORK NUMBER -->
-
 <div id="HWsubmission">
 	<h2 class="label">Homework Submission for <em> <?php echo $user;?> </em></h2>
 	<?php
@@ -55,7 +52,7 @@ function version_changed(){
 	}
 	?>
 	<?php
-	$path_front = get_path_front_course($semester,$course);
+	$path_front = get_path_front_course($semester,$course);;
 	$priority_path = "$path_front/reports/summary_html/".$username."_priority.html";
 	if (file_exists($priority_path)){
 		$priority_file = file_get_contents($priority_path);
@@ -114,7 +111,7 @@ function version_changed(){
 				the <a href="<?php echo $link_absolute;?>academic_integrity.php">Homework
 					Collaboration and Academic Integrity Policy</a> for this course.
 				</p>
-                                <form class="form_submit" action="?page=upload&semester=<?php echo $semester?>&course=<?php echo $course?>&assignment_id=<?php echo $assignment_id?>" 
+				<form class="form_submit" action="?page=upload&semester=<?php echo $semester?>&course=<?php echo $course?>&assignment_id=<?php echo $assignment_id?>"
 					method="post" enctype="multipart/form-data"
 					onsubmit="return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>')">
 					<label for="file" class="label">Select File:</label>
@@ -229,7 +226,7 @@ function version_changed(){
 				echo '<div class="box"> <!-- box -->';
 				if ($ta_grade_released == true) {
 					//<!--- TA GRADE -->
-						$path_front = get_path_front_course($semester,$course);
+						$path_front = get_path_front_course($semester,$course);;
 						$gradefile_path = "$path_front/reports/$assignment_id/".$username.".txt";
 						if (!file_exists($gradefile_path)) {
 							echo '<h3 class="label2">TA grade not available</h3>';
@@ -253,7 +250,7 @@ function version_changed(){
 			}
 
 		echo '<div class="box"> <!-- box -->';
-			$path_front = get_path_front_course($semester,$course);
+			$path_front = get_path_front_course($semester,$course);;
 			$gradefile_path = "$path_front/reports/summary_html/".$username."_summary.html";
 			if (!file_exists($gradefile_path))
 			{
@@ -269,9 +266,6 @@ function version_changed(){
 	?>
 	<!------------------------------------------------------------------------>
 </div> <!-- end HWsubmission -->
-
-
-
 
 </body>
 <script>
@@ -290,20 +284,14 @@ function version_changed(){
 	loadDiffQueue();
 </script>
 <script>
-
-
-
 	//Set time between asking server if the homework has been graded
 	//Last argument in ms
 	//TODO: Set time between server requests (currently at 5 seconds = 5000ms)
 	//                                                     (previously at 1 minute = 60000ms)
 	<?php if ($assignment_version_in_grading_queue || $submitting_version_in_grading_queue) {?>
-                init_refresh_on_update("<?php echo $semester;?>", "<?php echo $course;?>", "<?php echo $assignment_id;?>","<?php echo $assignment_version?>", "<?php echo $submitting_version;?>", "<?php echo !$assignment_version_in_grading_queue;?>", "<?php echo !$submitting_version_in_grading_queue;?>", 5000);
-
+		init_refresh_on_update("<?php echo $semester;?>", "<?php echo $course;?>", "<?php echo $assignment_id;?>","<?php echo $assignment_version?>", "<?php echo $submitting_version;?>", "<?php echo !$assignment_version_in_grading_queue;?>", "<?php echo !$submitting_version_in_grading_queue;?>", 5000);
 		<?php } ?>
 	</script>
 </div>
-
-
 
 </html>

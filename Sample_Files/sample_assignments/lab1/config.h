@@ -113,7 +113,6 @@ TestCase::MakeTestCase(
 	 new TestCaseComparison(&myersDiffbyLinebyChar,				// compare function [V]			   ),
 			    "cout.txt",					// output file name [V]
 			    "Standard OUTPUT (STDOUT)",					// output file description
-
 				"test6_output.txt",0.5),  // expected output
 	 new TestCaseComparison(&myersDiffbyLinebyChar,				// compare function [V]			   ),
 			    "cerr.txt",					// output file name [V]
