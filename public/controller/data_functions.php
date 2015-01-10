@@ -102,7 +102,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     if (!is_valid_semester($semester)) { display_error("upload_homework, INVALID SEMESTER: ".$semester); }
     if (!is_valid_course($course))     { display_error("upload_homework, INVALID COURSE: ".$course); }
 
-    display_note ("trying to upload homework ".$semester." ".$course." ");
+    // display_note ("trying to upload homework ".$semester." ".$course." ");
 
     if (!isset($homework_file["tmp_name"]) || $homework_file["tmp_name"] == "") {
         $error_text = "The file did not upload to POST[tmp_name].";
