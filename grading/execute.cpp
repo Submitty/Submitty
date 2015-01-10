@@ -173,9 +173,6 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &pa
 }
 
 
-// This function only returns on failure to exec
-int exec_this_command(const std::string &cmd) {
-
 void parse_command_line(const std::string &cmd,
 			std::string &my_program,
 			std::vector<std::string> &my_args,
@@ -281,7 +278,6 @@ void parse_command_line(const std::string &cmd,
 
 // This function only returns on failure to exec
 int exec_this_command(const std::string &cmd) {
-
 
   // to avoid creating extra layers of processes, use exec and not
   // system or the shell
