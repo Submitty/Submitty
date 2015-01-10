@@ -2,76 +2,60 @@
 
 require_once("controller/data_functions.php");
 
-
 //Upload the stuff
-
-$course = "UPLOAD_NONE_A";
-$semester = "f14";
 
 if (isset($_GET["course"])) {
     $tmp = htmlspecialchars($_GET["course"]);
     if (!is_valid_course($tmp)) {
         $course = "UPLOAD_NONE_B".$tmp;
+        // FIXME, displaymesssage does not exist
         header("Location: index.php?page=displaymessage&course=".$course);
-
-    } else {
+    }
+    else {
         $course = $tmp;
     }
 }
+else {
+    // FIXME: need a better default
+    $course = "default_course";
+    // maybe should exit?
+    //exit(1);
+}
 
 if (isset($_GET["semester"])) {
-   $tmp = htmlspecialchars($_GET["semester"]);
-   if (!is_valid_semester($tmp)) {
-       //$semester = "UPLOAD_NONE_B".$tmp;
-   } else {
-       $semester = $tmp;
-   }
+    $tmp = htmlspecialchars($_GET["semester"]);
+    if (!is_valid_semester($tmp)) {
+        //$semester = "UPLOAD_NONE_B".$tmp;
+        // FIXME, displaymesssage does not exist
+        header("Location: index.php?page=displaymessage&semester=".$semester);
+    } else {
+        $semester = $tmp;
+    }
 }
+else {
+    // FIXME: need a better default
+    $semester = "default_semester";
+    // maybe should exit?
+    //exit(1);
+}
+
+if (isset($_GET["assignment_id"])) {
+    $assignment_id = htmlspecialchars($_GET["assignment_id"]);
+
+    // FIXME: add a validity check for assignment id
+
+}
+else {
+    // FIXME: maybe do something better
+    exit(1);
+}
+
 
 if (isset($_FILES["file"])) {
 
-    if (!isset($_GET["course"])) {
-        echo "No course id";
-        exit();
-    }
-
-    if (!isset($_GET["semester"])) {
-        echo "No semester id";
-        exit();
-    }
-
-    $semester = htmlspecialchars($_GET["semester"]);
-    if ($semester != "f14" &&
-        $semester != "s15") {
-        echo "BAD SEMESTER '".$semester."'";
-        exit();
-    }
-
-
-    $course = htmlspecialchars($_GET["course"]);
-    if ($course != "csci1100" &&
-        $course != "csci1200" &&
-        $course != "csci1200test" &&
-        $course != "csci1100test" &&
-        $course != "csci4960" &&
-        $course != "default") {
-        echo "BAD COURSE '".$course."'";
-        exit();
-    }
-
-    if (!isset($_GET["assignment_id"])) {
-        echo "No assignment id";
-        exit();
-    }
-    $assignment_id = htmlspecialchars($_GET["assignment_id"]);
-    if (strpos($assignment_id," ")) {
-        //Go to error page?
-        echo "Invalid assignment id";
-        exit();
-    }
-
-    $uploaded_file = $_FILES["file"];//THIS NEEDS TO BE MADE HACKER PROOF
+    $uploaded_file = $_FILES["file"];
     $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id,$uploaded_file);
+
     if (isset($result["error"])) {
         //Go to error page?
         if ($result["error"] == "assignment_closed") {
