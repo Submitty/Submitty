@@ -427,6 +427,8 @@ function is_valid_semester($semester) {
     if ($semester == "s15") {
         return true;
     }
+    //For auto-setup script:
+    //if ($semester == "default") {return true;}
     return false;
 }
 
