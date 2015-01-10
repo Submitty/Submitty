@@ -44,7 +44,7 @@ TestCase testcases[num_testcases] = {
 
     TestCase::MakeCompilation(
     "Compilation",
-    "/usr/bin/g++ -Wall *.cpp -o a.out",
+    "/usr/bin/g++ -Wall -o a.out -- *.cpp",
     "a.out",		// name of .exe created by student
     TestCasePoints(3)
     ),
