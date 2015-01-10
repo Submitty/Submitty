@@ -42,9 +42,10 @@ compile_files=$(RCOS)/grading/compile.cpp \
 		$(RCOS)/modules/textMasking.cpp \
 		$(RCOS)/modules/clean.cpp \
 		$(RCOS)/modules/difference.cpp \
-		$(RCOS)/grading/seccomp_functions.cpp \
 		$(RCOS)/grading/execute.cpp \
-		$(RCOS)/grading/TestCase.cpp
+		$(RCOS)/grading/TestCase.cpp \
+		$(RCOS)/grading/seccomp_functions.cpp
+
 
 runner_files=$(RCOS)/grading/runner.cpp \
 		$(RCOS)/grading/TestCase.cpp \
@@ -55,8 +56,8 @@ runner_files=$(RCOS)/grading/runner.cpp \
 		$(RCOS)/modules/textMasking.cpp \
 		$(RCOS)/modules/clean.cpp \
 		$(RCOS)/modules/difference.cpp \
-		$(RCOS)/grading/seccomp_functions.cpp \
-		$(RCOS)/grading/execute.cpp
+		$(RCOS)/grading/execute.cpp \
+		$(RCOS)/grading/seccomp_functions.cpp
 
 
 validate_files=$(RCOS)/grading/Validator.cpp \
@@ -67,9 +68,9 @@ validate_files=$(RCOS)/grading/Validator.cpp \
 		$(RCOS)/modules/textMasking.cpp \
 		$(RCOS)/modules/clean.cpp \
 		$(RCOS)/modules/difference.cpp \
-		$(RCOS)/grading/seccomp_functions.cpp \
 		$(RCOS)/grading/execute.cpp \
-		$(RCOS)/grading/TestCase.cpp
+		$(RCOS)/grading/TestCase.cpp \
+		$(RCOS)/grading/seccomp_functions.cpp
 
 
 assignment:
