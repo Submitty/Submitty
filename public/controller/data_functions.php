@@ -107,9 +107,11 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     if (!isset($homework_file["tmp_name"]) || $homework_file["tmp_name"] == "") {
         $error_text = "The file did not upload to POST[tmp_name].";
         if (isset($homework_file["error"])) {
-            $error_text = $error_text. " Error code given for upload is ". $homework_file["error"]. " . This is defined at http://php.net/manual/en/features.file-upload.errors.php";
+            $error_text = $error_text." Error code given for upload is ". $homework_file["error"]. " . This is defined at http://php.net/manual/en/features.file-upload.errors.php";
         }
-        display_error($error_text);
+        // display_error($error_text);
+        return array("error"=>"Upload Failed", "message"=>"Upload Failed: ".$error_text);
+
     }
     // Store the time, right now!
     // 2001-03-10 17:16:18 (the MySQL DATETIME format)
@@ -769,15 +771,11 @@ function get_all_testcase_diffs($username, $semester,$course, $assignment_id, $a
 //ERRORS
 
 function display_error($error) {
-    ?>
-    <script>alert("Error: <?php echo $error;?>");</script>
-    <?php
+    ?><script>alert("Error: <?php echo $error;?>");</script><?php
     //       echo get_current_user();
     exit();
 }
 function display_note($note) {
-    ?>
-    <script>alert("Note: <?php echo $note;?>");</script>
-    <?php
+    ?><script>alert("Note: <?php echo $note;?>");</script><?php
 }
 ?>
