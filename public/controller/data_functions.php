@@ -533,6 +533,8 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
                 $data["message"] = isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "";
                 $data["is_hidden"] = $testcases_info[$i]["hidden"];
                 $data["is_extra_credit"] = $testcases_info[$i]["extracredit"];
+                $data["visible"] = $testcases_info[$i]["visible"];
+                $data["points_visible"] = $testcases_info[$i]["points_visible"];
 
                 if (isset($testcases_results[$u]["compilation_output"])) {
                     $data["compilation_output"] = get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]);

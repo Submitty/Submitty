@@ -33,6 +33,11 @@ const int extra_credit_pts = 2;
 // Test cases
 const int num_testcases = 9;
 
+// UI Interface
+const bool view_points = true;
+const bool view_hidden_points = false;
+
+
 TestCase testcases[num_testcases] = {
 
 /************* README AND COMPILATION *****************/

@@ -14,7 +14,6 @@
 #HWsubmission div{
     color: black;
     font-family: 'Source Sans Pro', sans-serif;
-
 }
 
 #HWsubmission .diff{
@@ -82,6 +81,23 @@
 
 #HWsubmission .view_diff{
     float: left;
+}
+
+#HWsubmission .hidden{
+    color: #999999;
+    text-decoration: none;
+}
+#HWsubmission .hidden:hover{
+    color: #999999;
+    text-decoration: none;
+}
+#HWsubmission .hidden:active{
+    color: #999999;
+    text-decoration: none;
+}
+#HWsubmission .hidden:visited{
+    color: #999999;
+    text-decoration: none;
 }
 
 #HWsubmission .label{

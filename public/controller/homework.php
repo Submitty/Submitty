@@ -22,7 +22,7 @@ $most_recent_assignment_version = most_recent_assignment_version($username, $sem
 
 $all_assignments = $class_config["assignments"];
 
-// FIXME: New variable in class.json 
+// FIXME: New variable in class.json
 $dev_team = $class_config["dev_team"];
 
 //Get and validate assignment_id and assignment_version
@@ -66,6 +66,13 @@ $assignment_version_in_grading_queue = version_in_grading_queue($username, $seme
 
 $points_visible = get_points_visible($homework_tests);
 
+$view_points = $assignment_config["view_points"];
+$view_hidden_points = $assignment_config["view_hidden_points"];
+$download_files = $class_config["download_files"];
+$grade_summary = $class_config["grade_summary"];
+$ta_grades = $class_config["ta_grades"];
+
+
 //Data for assignment verion quick select dropdown
 $select_submission_data = get_select_submission_data($username, $semester,$course, $assignment_id, $assignment_config, $highest_version);
 
@@ -78,10 +85,14 @@ render("homework", array(
     "all_assignments"=>$all_assignments,
     "dev_team"=>$dev_team,
     "points_visible"=>$points_visible,
-    
+    "view_points"=>$view_points,
+    "view_hidden_points"=>$view_hidden_points,
+    "download_files"=>$download_files,
+    "grade_summary"=>$grade_summary,
+    "ta_grades"=>$ta_grades,
       // added for debugging
     "username"=>$username,
-    
+
     "homework_tests"=>$homework_tests,
     "select_submission_data"=>$select_submission_data,
     "submitting_version"=>$submitting_version,

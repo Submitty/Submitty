@@ -29,6 +29,8 @@
 void printTestCase(std::ostream &out, TestCase test) {
   std::string hidden = (test.hidden()) ? "true" : "false";
   std::string extracredit = (test.extracredit()) ? "true" : "false";
+  std::string visible = (test.visible()) ? "true" : "false";
+  std::string points_visible = (test.points_visible()) ? "true" : "false";
 
   out << "\t{" << std::endl;
   out << "\t\t\"title\": \"" << test.title() << "\"," << std::endl;
@@ -36,6 +38,9 @@ void printTestCase(std::ostream &out, TestCase test) {
   out << "\t\t\"points\": " << test.points() << "," << std::endl;
   out << "\t\t\"hidden\": " << hidden << "," << std::endl;
   out << "\t\t\"extracredit\": " << extracredit << "," << std::endl;
+  out << "\t\t\"visible\": " << visible << "," << std::endl;
+  out << "\t\t\"points_visible\": " << points_visible << "," << std::endl;
+
   //  out << "\t\t\"expected_output\": "
   //   << "\"" << test.expected(0) << "\"" << std::endl;
   out << "\t}";
@@ -100,6 +105,12 @@ Now Exiting" << std::endl;
   //  init << "\t\"due_date\": \"" << due_date << "\"," << std::endl;
 
   init << "\t\"num_testcases\": " << num_testcases << "," << std::endl;
+
+  std::string view_points_s = (view_points) ? "true" : "false";
+  init << "\t\"view_points\": " << view_points_s << "," << std::endl;
+
+  std::string view_hidden_points_s = (view_hidden_points) ? "true" : "false";
+  init << "\t\"view_hidden_points\": " << view_hidden_points_s << "," << std::endl;
 
   init << "\t\"testcases\": [" << std::endl;
 

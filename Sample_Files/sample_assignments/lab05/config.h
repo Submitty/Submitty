@@ -11,7 +11,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 #include "grading/TestCase.h"
 
-const std::string assignment_message = "";
+const std::string assignment_message = "memory_debugging";
 
 // Submission parameters
 const int max_submissions = 20;
@@ -34,6 +34,12 @@ const int extra_credit_pts = 0;
 // Test cases
 const int num_testcases = 4;
 
+
+// UI Interface
+const bool view_points = true;
+const bool view_hidden_points = false;
+
+
 TestCase testcases[num_testcases] = {
 
 /************* README AND COMPILATION *****************/
@@ -42,15 +48,15 @@ TestCase testcases[num_testcases] = {
   (
    "Compilation of Submitted Files (for Dr. Memory): g++ -m32 -g -Wall *cpp -o submitted_32.out",
    "/usr/bin/clang++ -m32 -g -Wall -o submitted_32.out -- *.cpp",
-   "submitted_32.out",	
+   "submitted_32.out",
    TestCasePoints(2)
    ),
 
   TestCase::MakeCompilation
   (
    "Compilation of Submitted Files (for Valgrind): g++ -g -Wall *cpp -o submitted.out",
-   "/usr/bin/clang++ -g -Wall -o submitted.out -- *.cpp", 
-   "submitted.out",	
+   "/usr/bin/clang++ -g -Wall -o submitted.out -- *.cpp",
+   "submitted.out",
    TestCasePoints(2)
    ),
 
@@ -60,7 +66,7 @@ TestCase testcases[num_testcases] = {
 TestCase::MakeTestCase
   (
    "Under Dr Memory",
-   "drmemory -brief -- ./submitted_32.out",	
+   "drmemory -brief -- ./submitted_32.out",
    "/projects/submit3/drmemory/bin/drmemory  -brief -- ./submitted_32.out",
    TestCasePoints(5),
    new TestCaseComparison(&errorIfEmpty,"cout.txt","STDOUT"),
@@ -70,7 +76,7 @@ TestCase::MakeTestCase
 TestCase::MakeTestCase
   (
    "Under Valgrind",
-   "valgrind --leak-check=full ./submitted.out",	
+   "valgrind --leak-check=full ./submitted.out",
    "/usr/bin/valgrind --leak-check=full ./submitted.out",
    TestCasePoints(5),
    new TestCaseComparison(&errorIfEmpty,"cout.txt","STDOUT"),
