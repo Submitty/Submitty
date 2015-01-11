@@ -58,7 +58,7 @@ TestCase testcases[num_testcases] = {
         "left justify example",                                 // title
         "./justify.exe example.txt output.txt 16 flush_left",   // details
         "./a.out example.txt output.txt 16 flush_left",	        // command
-        TestCasePoints(3),
+        TestCasePoints(3),                                      // points=0, hidden=false, extra_credit=false, view_test_case=true,  view_points=false
         new TestCaseComparison(&myersDiffbyLinebyChar,		    // compare function [V]
             "output.txt",					                    // output file name [V]
             "output.txt",					                    // output file description
@@ -72,7 +72,7 @@ TestCase testcases[num_testcases] = {
         "right justify example",                                // title
         "./justify.exe example.txt output.txt 16 flush_right",  // details
         "./a.out example.txt output.txt 16 flush_right",        // command
-        TestCasePoints(3),
+        TestCasePoints(3),                                      // points=0, hidden=false, extra_credit=false, view_test_case=true,  view_points=false
         new TestCaseComparison(&myersDiffbyLinebyChar,          // compare function [V]
             "output.txt",                                       // output file name [V]
             "output.txt",                                       // output file description
@@ -86,7 +86,7 @@ TestCase testcases[num_testcases] = {
         "full justify example",                                 // title
         "./justify.exe example.txt output.txt 16 full_justify", // details
         "./a.out example.txt output.txt 16 full_justify",       // command
-        TestCasePoints(4),
+        TestCasePoints(4),                                      // points=0, hidden=false, extra_credit=false, view_test_case=true,  view_points=false 
         new TestCaseComparison(&myersDiffbyLinebyChar,          // compare function [V]
             "output.txt",                                       // output file name [V]
             "output.txt",                                       // output file description

@@ -50,20 +50,20 @@ TestCase testcases[num_testcases] = {
   TestCase::MakeCompilation(
 	"Compilation",
 	"/usr/bin/clang++ -Wall -o a.out -- *.cpp",
-	"a.out",		// name of .exe created by student
+	"a.out",                                               // name of .exe created by student
 	TestCasePoints(3)
 ),
 
 /******************** TEST CASES **********************/
 TestCase::MakeTestCase(
-	 "non leap year",  // title
-	 "3 1 2012",                  // details
-	 "./a.out <nonleapyear.txt", // 1> cout.txt 2> cerr.txt",                  // command
-	 TestCasePoints(5),
-	 new TestCaseComparison(&myersDiffbyLinebyChar,				// compare function [V]			   ),
-				"cout.txt",					// output file name [V]
-				"Standard OUTPUT (STDOUT)",					// output file description
-				"test1_output.txt",1.0),  // expected output
+	 "non leap year",                                      // title
+	 "3 1 2012",                                           // details
+	 "./a.out <nonleapyear.txt",                           // command
+	 TestCasePoints(5),                                    // points=0, hidden=false, extra_credit=false, view_test_case=true,  view_points=false 
+	 new TestCaseComparison(&myersDiffbyLinebyChar,        // compare function [V]
+				"cout.txt",                                // output file name [V]
+				"Standard OUTPUT (STDOUT)",                // output file description
+				"test1_output.txt",1.0),                   // expected output
 	 new TestCaseComparison(&warnIfNotEmpty,"cerr.txt","Standard ERROR (STDERR)","",0.0)
 		       ),
 TestCase::MakeTestCase(
