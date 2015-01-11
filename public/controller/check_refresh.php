@@ -2,6 +2,17 @@
 
 require_once("controller/data_functions.php");
 
+$semester = "REFRESH_CHECK_NO_SEMESTER";
+if (isset($_GET["semester"])) {
+    $new_semester = htmlspecialchars($_GET["semester"]);
+    if (!is_valid_semester($new_semester)) {
+        $semester = "REFRESH_CHECK_BAD_SEMESTER";
+    } else {
+        $semester = $new_semester;
+    }
+}
+
+
 $course = "REFRESH_CHECK_NO_COURSE";
 if (isset($_GET["course"])) {
     $new_course = htmlspecialchars($_GET["course"]);
@@ -19,7 +30,7 @@ if (isset($_POST["assignment_id"]) && isset($_POST["assignment_version"]) && iss
     $assignment_graded = htmlspecialchars($_POST["assignment_graded"]);
     $submitting_graded = htmlspecialchars($_POST["submitting_graded"]);
     if (!$assignment_graded) {
-        $results = get_assignment_results($_SESSION["id"], $course, $assignment_id, $assignment_version);
+        $results = get_assignment_results($_SESSION["id"], $semester, $course, $assignment_id, $assignment_version);
         if ($results != NULL && $results != false) {
             echo "REFRESH_ME";
             exit();
@@ -27,7 +38,7 @@ if (isset($_POST["assignment_id"]) && isset($_POST["assignment_version"]) && iss
     }
     if (!$submitting_graded)
     {
-        $results = get_assignment_results($_SESSION["id"], $course, $assignment_id, $submitting_version);
+        $results = get_assignment_results($_SESSION["id"], $semester, $course, $assignment_id, $submitting_version);
         if ($results != NULL && $results != false) {
             echo "REFRESH_ME";
             exit();

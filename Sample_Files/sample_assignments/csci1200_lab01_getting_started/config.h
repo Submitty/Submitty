@@ -18,8 +18,8 @@ const int max_submissions = 20;
 const int submission_penalty = 5;
 
 // Compile-time parameters
-const int max_clocktime = 10;		// in seconds
-const int max_cputime = 10;			// in seconds
+const int max_clocktime = 2;		// in seconds
+const int max_cputime = 2;			// in seconds
 const int max_submission_size = 10000;	// in KB
 const int max_output_size = 10000;	// in KB
 	// OTHERS?
@@ -113,6 +113,7 @@ TestCase::MakeTestCase(
 	 new TestCaseComparison(&myersDiffbyLinebyChar,				// compare function [V]			   ),
 			    "cout.txt",					// output file name [V]
 			    "Standard OUTPUT (STDOUT)",					// output file description
+
 				"test6_output.txt",0.5),  // expected output
 	 new TestCaseComparison(&myersDiffbyLinebyChar,				// compare function [V]			   ),
 			    "cerr.txt",					// output file name [V]

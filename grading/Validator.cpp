@@ -111,37 +111,35 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
     // FILE EXISTS & COMPILATION TESTS DON'T HAVE FILE COMPARISONS
     if (testcases[i].isFileExistsTest()) {
+
       std::cerr << "THIS IS A FILE EXISTS TEST! " << testcases[i].getFilename() << std::endl;
       assert (testcases[i].getFilename() != "");
-
-      system ("ls -lta");
-      system ("pwd");
 
       if ( access( (std::string("")+testcases[i].getFilename()).c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
 	std::cerr << "file does exist: " << testcases[i].getFilename() << std::endl;
 	testcase_pts = testcases[i].points();
-      } else {
+            }
+            else {
 	std::cerr << "ERROR file DOES NOT exist: " << testcases[i].getFilename() << std::endl;
 	message += "ERROR: " + testcases[i].getFilename() + " was NOT FOUND!";
       }
-    } else if (testcases[i].isCompilationTest()) {
+        }
+        else if (testcases[i].isCompilationTest()) {
       std::cerr << "THIS IS A COMPILATION! " << std::endl;
-
-      system ("ls -lta");
-      system ("pwd");
 
       if ( access( testcases[i].getFilename().c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
 	std::cerr << "file does exist: " << testcases[i].getFilename() << std::endl;
 	testcase_pts = testcases[i].points();
-      } else {
+            }
+            else {
 	std::cerr << "ERROR file DOES NOT exist: " << testcases[i].getFilename() << std::endl;
-	message += "ERROR: " + testcases[i].getFilename() + " was NOT FOUND!";
+                message += "Error: compilation was not successful!";
       }
       if (testcases[i].isCompilationTest()) {
 	testcase_json << "\t\t\t\"compilation_output\": \"" << testcases[i].prefix() << "_cerr.txt\",\n";
-	//.submit_compilation_output.txt\",\n";
       }
-    } else {
+        }
+        else {
       // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
       testcase_json << "\t\t\t\"diffs\": [\n";
       double pts_helper = 0.0;
@@ -163,6 +161,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 	  std::cout << "result->getGrade() " << result->getGrade() << std::endl;
 
 	  double pts_fraction = testcases[i].test_case_grader[j]->points_fraction;
+                    std::cout << "pts_fraction " << pts_fraction << std::endl;
+
 	  if (pts_fraction < -0.5) {
 	    pts_fraction = 1 / double(testcases[i].numFileGraders());
 	  }
@@ -217,8 +217,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       testcase_pts = (int)floor(pts_helper * testcases[i].points());
     } // end if/else of test case type
 
-
-
     // output grade & message
 
     std::cout << "Grade: " << testcase_pts << std::endl;
@@ -231,14 +229,16 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       nonhidden_auto_pts += testcase_pts;
       if (testcases[i].extracredit()) {
 	nonhidden_extra_credit += testcase_pts; //testcases[i].points();
-      } else {
+            }
+            else {
 	nonhidden_possible_pts += testcases[i].points();
       }
     } 
     hidden_auto_pts += testcase_pts;
     if (testcases[i].extracredit()) {
       hidden_extra_credit += testcase_pts; //testcases[i].points();
-    } else {
+        }
+        else {
       hidden_possible_pts += testcases[i].points();
     }
  

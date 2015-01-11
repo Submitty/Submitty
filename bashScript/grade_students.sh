@@ -18,35 +18,35 @@ TO_BE_GRADED="$2"
 # from that directory, we expect:
 
 # a subdirectory for each course
-# BASE_PATH/course_apple/
-# BASE_PATH/course_banana/
+# BASE_PATH/courses/which_semester/course_apple/
+# BASE_PATH/courses/which_semester/course_banana/
 
 # a directory within each course for the submissions, further
 # subdirectories for each assignment, then subdirectories for each
 # user, and finally subdirectories for multiple submissions (version)
-# BASE_PATH/course_apple/submissions/
-# BASE_PATH/course_apple/submissions/hw1/
-# BASE_PATH/course_apple/submissions/hw1/smithj
-# BASE_PATH/course_apple/submissions/hw1/smithj/1
-# BASE_PATH/course_apple/submissions/hw1/smithj/2
+# BASE_PATH/courses/which_semester/course_apple/submissions/
+# BASE_PATH/courses/which_semester/course_apple/submissions/hw1/
+# BASE_PATH/courses/which_semester/course_apple/submissions/hw1/smithj
+# BASE_PATH/courses/which_semester/course_apple/submissions/hw1/smithj/1
+# BASE_PATH/courses/which_semester/course_apple/submissions/hw1/smithj/2
 
 # input & output files are stored in a similar structure
-# BASE_PATH/course_apple/test_input/hw1/first.txt
-# BASE_PATH/course_apple/test_input/hw1/second.txt
-# BASE_PATH/course_apple/test_output/hw1/solution1.txt
-# BASE_PATH/course_apple/test_output/hw1/solution2.txt
+# BASE_PATH/courses/which_semester/course_apple/test_input/hw1/first.txt
+# BASE_PATH/courses/which_semester/course_apple/test_input/hw1/second.txt
+# BASE_PATH/courses/which_semester/course_apple/test_output/hw1/solution1.txt
+# BASE_PATH/courses/which_semester/course_apple/test_output/hw1/solution2.txt
 
 # each assignment has executables to be run during grading
-# BASE_PATH/course_apple/bin/hw1/run.out
-# BASE_PATH/course_apple/bin/hw1/validate.out
+# BASE_PATH/courses/which_semester/course_apple/bin/hw1/run.out
+# BASE_PATH/courses/which_semester/course_apple/bin/hw1/validate.out
 
 
 # =====================================================================
 # The todo list of the most recent (ungraded) submissions have a dummy
 # file in this directory:
 
-# BASE_PATH/to_be_graded/course_apple__hw1__smithj__1
-# BASE_PATH/to_be_graded/course_banana__hw2__doej__5
+# BASE_PATH/to_be_graded/which_semester__course_apple__hw1__smithj__1
+# BASE_PATH/to_be_graded/which_semester__course_banana__hw2__doej__5
 
 
 
@@ -168,6 +168,7 @@ while true; do
 	# replace the '__' with spaces to allow for looping over list
 	with_spaces=${NEXT_TO_GRADE//__/ }
 	t=0
+	semester="NOSEMESTER"
 	course="NOCOURSE"
 	assignment="NOASSIGNMENT"
 	user="NOUSER"
@@ -177,14 +178,17 @@ while true; do
 	    #FIXME replace with switch statement
 	    if [ $t -eq 1 ]
 	    then
-		course=$thing
+		semester=$thing
 	    elif [ $t -eq 2 ]
 	    then
-		assignment=$thing
+		course=$thing
 	    elif [ $t -eq 3 ]
 	    then
-		user=$thing
+		assignment=$thing
 	    elif [ $t -eq 4 ]
+	    then
+		user=$thing
+	    elif [ $t -eq 5 ]
 	    then
 		version=$thing
 	    else
@@ -195,6 +199,11 @@ while true; do
 	done
         # error checking
         # FIXME: error checking could be more significant
+	if [ $semester == "NOSEMESTER" ]
+	then
+	    echo "ERROR IN SEMESTER: $NEXT_TO_GRADE" >&2
+	    continue
+	fi
 	if [ $course == "NOCOURSE" ]
 	then
 	    echo "ERROR IN COURSE: $NEXT_TO_GRADE" >&2
@@ -219,7 +228,11 @@ while true; do
 
 	# --------------------------------------------------------------------
         # check to see if directory exists & is readable
-	submission_path=$base_path/$course/submissions/$assignment/$user/$version
+# <<<<<<< HEAD
+# 	submission_path=$base_path/$course/submissions/$assignment/$user/$version
+# =======
+	submission_path=$base_path/courses/$semester/$course/submissions/$assignment/$user/$version
+# >>>>>>> server
 	#echo "check directory '$submission_path'"
 
 	if [ ! -d "$base_path" ]
@@ -227,49 +240,59 @@ while true; do
 	    echo "ERROR: directory does not exist '$base_path'" >&2
 	    continue
 	fi
-        # note we do not expect $base_path to be readable
+	if [ ! -d "$base_path/courses" ]
+	then
+	    echo "ERROR: directory does not exist '$base_path'" >&2
+	    continue
+	fi
+	if [ ! -d "$base_path/courses/$semester" ]
+	then
+	    echo "ERROR: directory does not exist '$base_path'" >&2
+	    continue
+	fi
+        # note we do not expect these directories to be readable
 
-	if [ ! -d "$base_path/$course" ]
+	if [ ! -d "$base_path/courses/$semester/$course" ]
 	then
-	    echo "ERROR: directory does not exist '$base_path/$course'" >&2
+	    echo "ERROR: directory does not exist '$base_path/courses/$semester/$course'" >&2
 	    continue
 	fi
-	if [ ! -r "$base_path/$course" ]
+	if [ ! -r "$base_path/courses/$semester/$course" ]
 	then
-	    echo "ERROR: A directory is not readable '$base_path/$course'" >&2
-	    continue
-	fi
-
-	if [ ! -d "$base_path/$course/submissions" ]
-	then
-	    echo "ERROR: B directory does not exist '$base_path/$course/submissions'" >&2
-	    continue
-	fi
-	if [ ! -r "$base_path/$course/submissions" ]
-	then
-	    echo "ERROR: C directory is not readable '$base_path/$course/submissions'" >&2
-	    continue
-	fi
-
-	if [ ! -d "$base_path/$course/submissions/$assignment" ]
-	then
-	    echo "ERROR: D directory does not exist '$base_path/$course/submissions/$assignment'" >&2
-	    continue
-	fi
-	if [ ! -r "$base_path/$course/submissions/$assignment" ]
-	then
-	    echo "ERROR: E directory is not readable '$base_path/$course/submissions/$assignment'" >&2
+	    echo "ERROR: A directory is not readable '$base_path/courses/$semester/$course'" >&2
 	    continue
 	fi
 
-	if [ ! -d "$base_path/$course/submissions/$assignment/$user" ]
+	if [ ! -d "$base_path/courses/$semester/$course/submissions" ]
 	then
-	    echo "ERROR: F directory does not exist '$base_path/$course/submissions/$assignment/$user'" >&2
+	    echo "ERROR: B directory does not exist '$base_path/courses/$semester/$course/submissions'" >&2
 	    continue
 	fi
-	if [ ! -r "$base_path/$course/submissions/$assignment/$user" ]
+	if [ ! -r "$base_path/courses/$semester/$course/submissions" ]
 	then
-	    echo "ERROR: G directory is not readable '$base_path/$course/submissions/$assignment/$user'" >&2
+	    echo "ERROR: C directory is not readable '$base_path/courses/$semester/$course/submissions'" >&2
+	    continue
+	fi
+
+	if [ ! -d "$base_path/courses/$semester/$course/submissions/$assignment" ]
+	then
+	    echo "ERROR: D directory does not exist '$base_path/courses/$semester/$course/submissions/$assignment'" >&2
+	    continue
+	fi
+	if [ ! -r "$base_path/courses/$semester/$course/submissions/$assignment" ]
+	then
+	    echo "ERROR: E directory is not readable '$base_path/courses/$semester/$course/submissions/$assignment'" >&2
+	    continue
+	fi
+
+	if [ ! -d "$base_path/courses/$semester/$course/submissions/$assignment/$user" ]
+	then
+	    echo "ERROR: F directory does not exist '$base_path/courses/$semester/$course/submissions/$assignment/$user'" >&2
+	    continue
+	fi
+	if [ ! -r "$base_path/courses/$semester/$course/submissions/$assignment/$user" ]
+	then
+	    echo "ERROR: G directory is not readable '$base_path/courses/$semester/$course/submissions/$assignment/$user'" >&2
 	    continue
 	fi
 
@@ -291,13 +314,22 @@ while true; do
 
 
 
+#
+# <<<<<<< HEAD
+# 	test_code_path="$base_path/$course/test_code/$assignment"
+# 	test_input_path="$base_path/$course/test_input/$assignment"
+# 	test_output_path="$base_path/$course/test_output/$assignment"
+# 	results_path="$base_path/$course/results/$assignment/$user/$version"
+# 	bin_path="$base_path/$course/bin"
+#
+# =======
+	test_code_path="$base_path/courses/$semester/$course/test_code/$assignment"
+	test_input_path="$base_path/courses/$semester/$course/test_input/$assignment"
+	test_output_path="$base_path/courses/$semester/$course/test_output/$assignment"
+	results_path="$base_path/courses/$semester/$course/results/$assignment/$user/$version"
+	bin_path="$base_path/courses/$semester/$course/bin"
 
-	test_code_path="$base_path/$course/test_code/$assignment"
-	test_input_path="$base_path/$course/test_input/$assignment"
-	test_output_path="$base_path/$course/test_output/$assignment"
-	results_path="$base_path/$course/results/$assignment/$user/$version"
-	bin_path="$base_path/$course/bin"
-
+# >>>>>>> server
 
 	# --------------------------------------------------------------------
         # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
@@ -326,7 +358,8 @@ while true; do
         # copy any instructor code files to tmp directory
 	if [ -d "$test_code_path" ]
 	then
-	    cp -rf $test_code_path/* "$tmp_compilation" ||  echo "ERROR: Failed to copy to temporary directory $test_code_path" >&2
+	    cp -rf $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy to temporary directory $test_code_path" >&2
+	    cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path" >&2
 	fi
 
 
@@ -422,11 +455,19 @@ while true; do
 	    echo "ERROR:  $bin_path/$assignment/validate.out  does not exist/is not readable" >&2
 	    # continue
 	else
-            # echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
+        # echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
 
-            #"$bin_path/$assignment/validate.out" "$version" "$submission_time" "$runner_error_code" >& .submit_validator_output.txt
-            echo ""$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt"
-            "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+        if [[ 0 -eq 0 ]] ; then
+            echo "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+            valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+        else
+            echo '$base_path/bin/untrusted_runscript /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'
+            "$base_path/bin/untrusted_runscript" "/usr/bin/valgrind" "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+        fi
+        # Non-valgrind commands
+        # echo ""$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt"
+        # "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+
 
 	    validator_error_code="$?"
 	    if [[ "$validator_error_code" -ne 0 ]] ;
