@@ -1,17 +1,17 @@
 <?php
+$course = htmlspecialchars($_GET["course"]);
+$semester = htmlspecialchars($_GET["semester"]);
+
 print('<!-- Course Container -->');
-require_once("view/".$course."_container.php");
+require_once("view/".$semester."_".$course."_container.php");
 print('<!-- Course CSS -->');
-print('<link href="resources/'.$course.'_main.css" rel="stylesheet"></link>');
+print('<link href="resources/'.$semester."_".$course.'_main.css" rel="stylesheet"></link>');
 ?>
 <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic' rel='stylesheet' type='text/css'>
 <link href='http://fonts.googleapis.com/css?family=PT+Sans:700,700italic' rel='stylesheet' type='text/css'>
 <link href="resources/bootmin.css" rel="stylesheet"></link>
 <link href="resources/badge.css" rel="stylesheet"></link>
 <script src="resources/script/main.js"></script>
-
-<?php $course =    $course = htmlspecialchars($_GET["course"]); ?>
-<?php $semester =    $semester = htmlspecialchars($_GET["semester"]); ?>
 
 <!-- DIFF VIEWER STUFF -->
 <script src='diff-viewer/jquery.js'></script>
@@ -90,21 +90,21 @@ function version_changed(){
 
 	<h2 class="label">Assignment: <?php echo $assignment_name;?></h2>
 
-	<div class="panel-body"> <!-- panel-body -->
-		<?php
-		if ($status && $status != "") {
-			echo '  <div class="box">';
-			echo '  <h3 class="label2">';
-			echo $status;
-			echo '  </h3>';
-			echo '</div>';
-		}
-		?>
-		<!--- UPLOAD NEW VERSION -->
-		<div class="box"> <!-- box -->
-			<h3 class="label">Upload New Version</h3>
-			<p class="sub">
-				<?php require_once("view/".$course."_upload.php"); ?>
+    <div class="panel-body"> <!-- panel-body -->
+        <?php
+        if ($status && $status != "") {
+            echo '  <div class="box">';
+                echo '  <h3 class="label2">';
+                    echo $status;
+                    echo '  </h3>';
+                    echo '</div>';
+                }
+                ?>
+                <!--- UPLOAD NEW VERSION -->
+                <div class="box"> <!-- box -->
+                    <h3 class="label">Upload New Version</h3>
+                    <p class="sub">
+                        <?php require_once("view/".$semester."_".$course."_upload_message.php"); ?>
 
 				</p>
 				<form class="form_submit" action="?page=upload&semester=<?php echo $semester?>&course=<?php echo $course?>&assignment_id=<?php echo $assignment_id?>"
