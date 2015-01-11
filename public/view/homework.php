@@ -93,7 +93,7 @@ function version_changed(){
 	<div class="panel-body"> <!-- panel-body -->
 		<?php
 		if ($status && $status != "") {
-			echo '  <div class="box">';
+			echo '  <div class="outer_box">';
 			echo '  <h3 class="label2">';
 			echo $status;
 			echo '  </h3>';
@@ -101,7 +101,7 @@ function version_changed(){
 		}
 		?>
 		<!--- UPLOAD NEW VERSION -->
-		<div class="box"> <!-- box -->
+		<div class="outer_box"> <!-- outer_box -->
 			<h3 class="label">Upload New Version</h3>
 			<p class="sub">
 				<?php require_once("view/".$course."_upload.php"); ?>
@@ -114,7 +114,7 @@ function version_changed(){
 					<input type="file" name="file" id="file" />
 					<input type="submit" name="submit" value="Submit File" class="btn btn-primary">
 				</form>
-		</div> <!-- end box -->
+		</div> <!-- end outer_box -->
 
 		<!------------------------------------------------------------------------>
 		<!-- "IF AT LEAST ONE SUBMISSION... " -->
@@ -123,7 +123,7 @@ function version_changed(){
 			if ($assignment_version >= 1)
 			{
 				?>
-				<div class="box">
+				<div class="outer_box">
 
 				<h3 class="label">Review Submissions</h3>
 
@@ -192,11 +192,20 @@ function version_changed(){
 				?> -->
 				<!-- SUBMITTED FILES -->
 				<div class="row sub-text">
-					<h4>Submitted Files:</h4>
-						<?php
+					<h4>Submitted Files:
+                    <?php
+                        echo '<span>';
+                        echo '<a style="font-weight: 400; margin-left: 8px;" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name=all">Download All (as zip)</a>';
+                        echo '</span>';
+                    ?>
+                </h4>
+                    <?php
 						foreach($submitted_files as $file) {
-							echo '<div class="box2">';
-								echo '<a class="diff-header">'.$file["name"].' ('.$file["size"].'kb)'.'</a>';
+							echo '<div class="box">';
+								echo '<a class="file-header">'.$file["name"].' ('.$file["size"].'kb)'.'</a>';
+                                echo '<span>';
+                                echo '<a href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
+                                echo '</span>';
 								echo '</div>';
 							}
 							?>
@@ -216,10 +225,10 @@ function version_changed(){
 				} ?>
 
 				<!-- END OF "IS GRADED?" -->
-				</div>  <!-- end box -->
+				</div>  <!-- end outer_box -->
 
 				<?php
-				echo '<div class="box"> <!-- box -->';
+				echo '<div class="outer_box"> <!-- outer_box -->';
 				if ($ta_grade_released == true) {
 					//<!--- TA GRADE -->
 						$path_front = get_path_front_course($semester,$course);;
@@ -241,11 +250,11 @@ function version_changed(){
 					echo '<h3 class="label2">TA grades for this homework not released yet</h3>';
 				}
 				//<!-- END OF "IF AT LEAST ONE SUBMISSION... " -->
-				echo "</div> <!-- end box -->";
+				echo "</div> <!-- end outer_box -->";
 
 			}
 
-		echo '<div class="box"> <!-- box -->';
+		echo '<div class="outer_box"> <!-- outer_box -->';
 			$path_front = get_path_front_course($semester,$course);;
 			$gradefile_path = "$path_front/reports/summary_html/".$username."_summary.html";
 			if (!file_exists($gradefile_path))
@@ -257,7 +266,7 @@ function version_changed(){
 				$grade_file = file_get_contents($gradefile_path);
 				echo $grade_file;
 			}
-		echo "</div> <!-- end box -->";
+		echo "</div> <!-- end outer_box -->";
 	echo "</div> <!-- end panel-body -->";
 	?>
 	<!------------------------------------------------------------------------>

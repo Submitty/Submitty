@@ -151,7 +151,7 @@
     margin: 0;
 }
 
-#HWsubmission .box {
+#HWsubmission .outer_box {
     border-radius: 3px;
     padding: 20px;
     border: 2px solid #F0F0F0;
@@ -161,25 +161,27 @@
 
 }
 
-#HWsubmission .box2 {
+#HWsubmission .box {
     border-radius: 3px;
     padding: 0px;
-    border: 1px solid #cccccc;
+    border: 1px solid #dddddd;
     width: 100%;
     margin-left: 0;
-    margin-top:  5px;
-    margin-bottom:  5px;
+    margin-top:  3px;
+    margin-bottom:  3px;
     position: relative;
     float: left;
-    background:rgba(255,255,255,0.8);"
+    background:rgba(255,255,255,0.8);
+    box-shadow: 2px 2px 4px -3px #dddddd;
+
 }
 
 #HWsubmission .diff-header {
     margin-left: 10px;
     margin-right: 10px;
 
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 15px;
+    margin-bottom: 15px;
     text-align: left;
     display:inline-block;
 }
@@ -190,7 +192,24 @@
 
 #HWsubmission .diff-header span{
     margin-left: .5em;
+}
 
+#HWsubmission .file-header {
+    margin-left: 10px;
+    margin-right: 10px;
+
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: left;
+    display:inline-block;
+}
+
+#HWsubmission .file-header a{
+    font-weight: 400;
+}
+
+#HWsubmission .file-header span{
+    margin-left: .5em;
 }
 
 #HWsubmission .error_mess{
