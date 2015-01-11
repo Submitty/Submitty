@@ -9,7 +9,9 @@ print('<link href="resources/'.$course.'_main.css" rel="stylesheet"></link>');
 <link href="resources/bootmin.css" rel="stylesheet"></link>
 <link href="resources/badge.css" rel="stylesheet"></link>
 <script src="resources/script/main.js"></script>
-<?php $course =     $course = htmlspecialchars($_GET["course"]); ?>
+
+<?php $course =    $course = htmlspecialchars($_GET["course"]); ?>
+<?php $semester =    $semester = htmlspecialchars($_GET["semester"]); ?>
 
 <!-- DIFF VIEWER STUFF -->
 <script src='diff-viewer/jquery.js'></script>
@@ -24,12 +26,15 @@ print('<link href="resources/'.$course.'_main.css" rel="stylesheet"></link>');
 <!-- FUNCTIONS USED BY THE PULL-DOWN MENUS -->
 <script type="text/javascript">
 function assignment_changed(){
-	var php_course = "<?php echo $course; ?>";
-	window.location.href="?course="+php_course+"&assignment_id="+document.getElementById('hwlist').value;
+
+   var php_course = "<?php echo $course; ?>";
+   var php_semester = "<?php echo $semester; ?>";
+  window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value;
 }
 function version_changed(){
-	var php_course = "<?php echo $course; ?>";
-	window.location.href="?course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+"&assignment_version="+document.getElementById('versionlist').value;
+   var php_course = "<?php echo $course; ?>";
+   var php_semester = "<?php echo $semester; ?>";
+  window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+"&assignment_version="+document.getElementById('versionlist').value;
 }
 </script>
 
@@ -37,7 +42,6 @@ function version_changed(){
 <div id="HWsubmission">
 	<h2 class="label">Homework Submission for <em> <?php echo $user;?> </em></h2>
 	<?php
-	// FIXME: New variable in class.json
 	if (on_dev_team($user)) {
 		echo "<font color=\"ff0000\" size=+5>on dev team</font>";
 		echo "<br>the Dev Team = ";
@@ -47,7 +51,7 @@ function version_changed(){
 	}
 	?>
 	<?php
-	$path_front = get_path_front($course);
+	$path_front = get_path_front_course($semester,$course);;
 	$priority_path = "$path_front/reports/summary_html/".$username."_priority.html";
 	if (file_exists($priority_path)){
 		$priority_file = file_get_contents($priority_path);
@@ -103,7 +107,7 @@ function version_changed(){
 				<?php require_once("view/".$course."_upload.php"); ?>
 
 				</p>
-				<form class="form_submit" action="?page=upload&course=<?php echo $course?>&assignment_id=<?php echo $assignment_id?>"
+				<form class="form_submit" action="?page=upload&semester=<?php echo $semester?>&course=<?php echo $course?>&assignment_id=<?php echo $assignment_id?>"
 					method="post" enctype="multipart/form-data"
 					onsubmit="return check_for_upload('<?php echo $assignment_name;?>', '<?php echo $highest_version;?>', '<?php echo $max_submissions;?>')">
 					<label for="file" class="label">Select File:</label>
@@ -176,14 +180,14 @@ function version_changed(){
 						<!-- CHANGE ACTIVE VERSION -->
 						<?php
 						if ($assignment_version != $submitting_version) {
-							echo '<a href="?page=update&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version;
+							echo '<a href="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version;
 							echo 'style="text-align:center;"><input type="submit" class="btn btn-primary" value="Set Version '.$assignment_version.' as Active  Submission Version"></input></a><br><br>';
 						}
 						?>
 					</div>
 				</div>
 				<!-- <?php
-				//$date_submitted = get_submission_time($user,$course,$assignment_id,$assignment_version);
+				//$date_submitted = get_submission_time($user,$semester,$course,$assignment_id,$assignment_version);
 				//echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
 				?> -->
 				<!-- SUBMITTED FILES -->
@@ -218,7 +222,7 @@ function version_changed(){
 				echo '<div class="box"> <!-- box -->';
 				if ($ta_grade_released == true) {
 					//<!--- TA GRADE -->
-						$path_front = get_path_front($course);
+						$path_front = get_path_front_course($semester,$course);;
 						$gradefile_path = "$path_front/reports/$assignment_id/".$username.".txt";
 						if (!file_exists($gradefile_path)) {
 							echo '<h3 class="label2">TA grade not available</h3>';
@@ -242,7 +246,7 @@ function version_changed(){
 			}
 
 		echo '<div class="box"> <!-- box -->';
-			$path_front = get_path_front($course);
+			$path_front = get_path_front_course($semester,$course);;
 			$gradefile_path = "$path_front/reports/summary_html/".$username."_summary.html";
 			if (!file_exists($gradefile_path))
 			{
@@ -258,6 +262,7 @@ function version_changed(){
 	?>
 	<!------------------------------------------------------------------------>
 </div> <!-- end HWsubmission -->
+
 </body>
 <script>
 	function check_for_upload(assignment, versions_used, versions_allowed) {
@@ -280,8 +285,9 @@ function version_changed(){
 	//TODO: Set time between server requests (currently at 5 seconds = 5000ms)
 	//                                                     (previously at 1 minute = 60000ms)
 	<?php if ($assignment_version_in_grading_queue || $submitting_version_in_grading_queue) {?>
-		init_refresh_on_update("<?php echo $course;?>", "<?php echo $assignment_id;?>","<?php echo $assignment_version?>", "<?php echo $submitting_version;?>", "<?php echo !$assignment_version_in_grading_queue;?>", "<?php echo !$submitting_version_in_grading_queue;?>", 5000);
+		init_refresh_on_update("<?php echo $semester;?>", "<?php echo $course;?>", "<?php echo $assignment_id;?>","<?php echo $assignment_version?>", "<?php echo $submitting_version;?>", "<?php echo !$assignment_version_in_grading_queue;?>", "<?php echo !$submitting_version_in_grading_queue;?>", 5000);
 		<?php } ?>
 	</script>
 </div>
+
 </html>
