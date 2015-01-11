@@ -4,5 +4,5 @@
 public/resources/*_main.css
 public/site_path.txt
 public/view/*_container.php
-public/view/*_upload.php
+public/view/*_upload_message.php
 *~
