@@ -82,6 +82,13 @@
 #HWsubmission .view_diff{
     float: left;
 }
+#HWsubmission .badge{
+    float: right;
+}
+#HWsubmission .view_file{
+    float: right;
+    font-family: 'Source Sans Pro', sans-serif;
+}
 
 #HWsubmission .hidden{
     color: #999999;
@@ -214,13 +221,16 @@
 }
 
 #HWsubmission .file-header {
-    margin-left: 10px;
-    margin-right: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
 
-    margin-top: 10px;
-    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     text-align: left;
     display:inline-block;
+    box-sizing: border-box;
+
+    min-width: 100%
 }
 
 #HWsubmission .file-header a{
@@ -262,10 +272,4 @@
 
 #HWsubmission .red-background {
     background-color: #c00000;
-}
-#HWsubmission .badge{
-    float: right;
-}
-#HWsubmission .view_file{
-    float: right;
 }
