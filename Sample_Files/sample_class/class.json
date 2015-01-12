@@ -19,6 +19,7 @@
     ],
     "ta_grades":true,
     "grade_summary":true,
-    "download_files":true
+    "download_readme":true,
+    "download_files":false
 
 }

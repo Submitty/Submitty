@@ -207,6 +207,9 @@ function version_changed(){
                                 if ($download_files === true){
                                     echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
                                 }
+                                else if (strtolower($file) == "readme.txt"){
+                                    echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
+                                }
                                 echo '</p>';
 								echo '</div>';
 							}

@@ -69,6 +69,7 @@ $points_visible = get_points_visible($homework_tests);
 $view_points = $assignment_config["view_points"];
 $view_hidden_points = $assignment_config["view_hidden_points"];
 $download_files = $class_config["download_files"];
+$download_readme = $class_config["download_readme"];
 $grade_summary = $class_config["grade_summary"];
 $ta_grades = $class_config["ta_grades"];
 
@@ -88,6 +89,7 @@ render("homework", array(
     "view_points"=>$view_points,
     "view_hidden_points"=>$view_hidden_points,
     "download_files"=>$download_files,
+    "download_readme"=>$download_readme,
     "grade_summary"=>$grade_summary,
     "ta_grades"=>$ta_grades,
       // added for debugging
