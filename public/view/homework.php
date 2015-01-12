@@ -195,18 +195,18 @@ function version_changed(){
 				<div class="row sub-text">
 					<h4>Submitted Files:
                     <?php
-                        echo '<span>';
-                        echo '<a class = "view_file" style="font-weight: 400; margin-left: 8px;" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name=all">Download All (as zip)</a>';
-                        echo '</span>';
+                        if ($download_files === true){
+                            echo '<a class = "view_file" style="font-weight: 400; margin-left: 8px;" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name=all">Download All (as zip)</a>';
+                        }
                     ?>
                 </h4>
                     <?php
 						foreach($submitted_files as $file) {
 							echo '<div class="box">';
 								echo '<p class="file-header">'.$file["name"].' ('.$file["size"].'kb)';
-                                echo '<span>';
-                                echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
-                                echo '</span>';
+                                if ($download_files === true){
+                                    echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
+                                }
                                 echo '</p>';
 								echo '</div>';
 							}
