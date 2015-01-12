@@ -193,13 +193,16 @@
 }
 
 #HWsubmission .diff-header {
-    margin-left: 10px;
-    margin-right: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
 
-    margin-top: 15px;
-    margin-bottom: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
     text-align: left;
     display:inline-block;
+    box-sizing: border-box;
+
+    min-width: 100%
 }
 
 #HWsubmission .diff-header a{
@@ -259,4 +262,10 @@
 
 #HWsubmission .red-background {
     background-color: #c00000;
+}
+#HWsubmission .badge{
+    float: right;
+}
+#HWsubmission .view_file{
+    float: right;
 }

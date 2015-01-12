@@ -72,7 +72,7 @@
 								echo '</span>';
 							}
 							if ($test["is_hidden"]) {
-								echo '<span><a class="hidden">Hidden</a></span>';
+								echo '<span><a class="hidden view_file">Hidden</a></span>';
 							echo '</div><!-- End div -->';
 							echo '</div><!-- End box -->';
 							continue;
@@ -87,7 +87,7 @@
 						}
 						?>
 						<span>
-							<a href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
+							<a class = "view_file" href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
 						</span>
 						<?php
 					}
