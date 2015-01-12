@@ -1,0 +1,6 @@
+Total distance run 17.1 miles
+Total time run 137 minutes and 34 seconds
+Average speed on Monday is 8 minutes and 23 seconds per mile
+Average speed on Tuesday is 8 minutes and 10 seconds per mile
+Average speed on Thusday is 6 minutes and 49 seconds per mile
+Average overall speed is 8 minutes and 2 seconds per mile
