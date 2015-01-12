@@ -458,7 +458,7 @@ while true; do
         # echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
 
         if [[ 0 -eq 0 ]] ; then
-            echo '"$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'
+            echo "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
             valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
         else
             echo '$base_path/bin/untrusted_runscript /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'

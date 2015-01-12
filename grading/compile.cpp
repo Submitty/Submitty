@@ -158,11 +158,34 @@ int main(int argc, char *argv[]) {
 			  " 1>test" + to_string(i + 1) + "_cout.txt" +
 			  " 2>test" + to_string(i + 1) + "_cerr.txt",
 			  testcases[i].seconds_to_run(),
-			  std::max(max_output_size,
-				   10000000)); // 10 mb
+			  std::max(max_output_size, 10000000)); // 10 mb
+    if (exit_no == 1){
+        std::ofstream cerr_out ("test" + to_string(i + 1) + "_cerr.txt", std::ofstream::out | std::ofstream::app);
+        cerr_out << "Compilation failed\n";
+        std::cout << "Compilation failed, code 1" << std::endl;
+
+        cerr_out.close();
+    }
+    else if (exit_no == 2){
+        std::ofstream cerr_out ("test" + to_string(i + 1) + "_cerr.txt", std::ofstream::out | std::ofstream::app);
+        cerr_out << "Compilation terminated, exceeded max limits\n";
+        std::cout << "Compilation terminated, exceeded max limits, code 2" << std::endl;
+
+        cerr_out.close();
+    }
+    else if (exit_no == 3){
+        std::ofstream cerr_out ("test" + to_string(i + 1) + "_cerr.txt", std::ofstream::out | std::ofstream::app);
+        cerr_out << "Compilation terminated, time elapsed was longer that allocated time\n";
+        std::cout << "Compilation terminated, time elapsed was longer that allocated time code 3" << std::endl;
+
+        cerr_out.close();
+    }
+    //std::cout << "AFTER LS:\n";
+    //execute("/bin/ls -a *",4);
+    //std::cout << "AFTER LS DONE!\n";
+    std::cout<< "Exited with exit_no: "<<exit_no<<std::endl;
 
   }
-
   std::cout << "========================================================" << std::endl;
   std::cout << "FINISHED ALL TESTS" << std::endl;
   // allow hwcron read access so the files can be copied back

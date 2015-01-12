@@ -176,6 +176,8 @@
 
 #HWsubmission .diff-header {
     margin-left: 10px;
+    margin-right: 10px;
+
     margin-top: 20px;
     margin-bottom: 20px;
     text-align: left;
@@ -197,11 +199,15 @@
     margin-left: .5em;
 }
 
-#HWsubmission .error_mess2{
+#HWsubmission .error_mess_diff{
     font-style: italic;
     margin-left: 40px;
 }
 
+#HWsubmission .complation_mess{
+    font-style: pre;
+    margin-left: 40px;
+}
 
 #HWsubmission .display-none {
     display: none;

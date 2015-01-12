@@ -32,6 +32,8 @@
 #include "modules/modules.h"
 #include "grading/TestCase.h"
 
+// ----------------------------------------------------------------
+
 #define MAX_STRING_LENGTH 100
 #define MAX_NUM_STRINGS 20
 #define DIR_PATH_MAX 1000
@@ -168,11 +170,8 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &pa
     } else {
         my_args.push_back(pattern);
     }
-
 }
 
-
-// =====================================================================================
 
 void parse_command_line(const std::string &cmd,
 			std::string &my_program,
@@ -280,7 +279,6 @@ void parse_command_line(const std::string &cmd,
 // This function only returns on failure to exec
 int exec_this_command(const std::string &cmd) {
 
-
   // to avoid creating extra layers of processes, use exec and not
   // system or the shell
 
@@ -296,9 +294,12 @@ int exec_this_command(const std::string &cmd) {
   char** const my_char_args = new char * [my_args.size()+2];  // yes, there is a memory leak here
   my_char_args[0] = (char*) my_program.c_str();
   for (int i = 0; i < my_args.size(); i++) {
+    std::cout << "'" << my_args[i] << "' ";
     my_char_args[i+1] = (char*) my_args[i].c_str();
   }
   my_char_args[my_args.size()+1] = (char *)NULL;  // FIXME: casting away the const :(
+  std::cout << std::endl << std::endl;
+
 
   // print out the command line to be executed
   std::cout << "going to exec: ";
@@ -346,7 +347,6 @@ int exec_this_command(const std::string &cmd) {
   // users
   mode_t everyone_read = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
   mode_t prior_umask = umask(S_IWGRP | S_IWOTH);  // save the prior umask
-
 
   // The path is probably empty, we need to add /usr/bin to the path
   // since we get a "collect2 ld not found" error from g++ otherwise
@@ -423,12 +423,10 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) { /
 
   // Forking to allow the setting of limits of RLIMITS on the command
   int result = -1;
+  int time_kill=0;
   pid_t childPID = fork();
   // ensure fork was successful
   assert (childPID >= 0);
-
-  //std::cout << "BEFORE EXEC" << std::endl;
-  //system( "ls -lta");
 
   if (childPID == 0) {
     // CHILD PROCESS
@@ -456,8 +454,6 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) { /
     assert(pgrp == 0);
 
     int child_result;
-
-
     child_result = exec_this_command(cmd);
 
     // send the system status code back to the parent process
@@ -490,13 +486,19 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) { /
                     kill(childPID, SIGKILL);
                     kill(-childPID, SIGKILL);
                     usleep(1000); /* wait 1/1000th of a second for the process to die */
+                    time_kill=1;
                 }
             }
         } while (wpid == 0);
 
         if (WIFEXITED(status)) {
             std::cout << "Child exited, status=" << WEXITSTATUS(status) << std::endl;
-            result = WEXITSTATUS(status);
+            if (WEXITSTATUS(status) == 0){
+                result=0;
+            }
+            else{
+                result=1;
+            }
         }
         else if (WIFSIGNALED(status)) {
             int what_signal =  WTERMSIG(status);
@@ -513,17 +515,20 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) { /
                 std::cout << "signal 25 = file size exceeded" << std::endl;
             }
 
-            result = WTERMSIG(status);
+            if (WTERMSIG(status) == 0){
+                result=0;
+            }
+            else{
+                result=2;
+            }
         }
-
+        if (time_kill){
+            result=3;
+        }
         std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
         parent_result = system("date");
         assert (parent_result == 0);
     }
-
-    //std::cout << "AFTER EXEC" << std::endl;
-    //system( "ls -lta");
-
-
+  std::cout <<"Result: "<<result<<std::endl;
     return result;
 }

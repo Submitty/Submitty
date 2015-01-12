@@ -107,9 +107,11 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     if (!isset($homework_file["tmp_name"]) || $homework_file["tmp_name"] == "") {
         $error_text = "The file did not upload to POST[tmp_name].";
         if (isset($homework_file["error"])) {
-            $error_text = $error_text. " Error code given for upload is ". $homework_file["error"]. " . This is defined at http://php.net/manual/en/features.file-upload.errors.php";
+            $error_text = $error_text." Error code given for upload is ". $homework_file["error"]. " . This is defined at http://php.net/manual/en/features.file-upload.errors.php";
         }
-        display_error($error_text);
+        // display_error($error_text);
+        return array("error"=>"Upload Failed", "message"=>"Upload Failed: ".$error_text);
+
     }
     // Store the time, right now!
     // 2001-03-10 17:16:18 (the MySQL DATETIME format)
@@ -236,6 +238,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
         return;
     }
 
+
     /* // php symlinks disabled on server for security reasons
     ////// set LAST symlink
     //
@@ -283,6 +286,7 @@ function is_valid_zip_size($filename, $max_size) {
 // Check if user has permission to edit homework
 function can_edit_assignment($username, $semester, $course, $assignment_id, $assignment_config) {
 
+
 	// FIXME: HACK!  To not check due date
     // TODO: FIXME: late submissions should be allowed (there are excused absenses)
     // TODOL FIXME: but the ACTIVE should not be updated ( we can manually adjust active for excused absenses)
@@ -305,7 +309,10 @@ function get_due_date($class_config, $assignment_id) {
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
         if ($one["assignment_id"] == $assignment_id) {
+
             if (isset($one["due_date"])) {
+
+                // TODO: Put this in cofig file
                 date_default_timezone_set('America/New_York');
                 $date = new DateTime($one["due_date"]);
                 return $date;
@@ -337,6 +344,7 @@ function get_class_config($semester,$course) {
 }
 
 // Get a list of uploaded files
+
 function get_submitted_files($username, $semester, $course, $assignment_id, $assignment_version) {
 
     if (!is_valid_semester($semester)) { display_error("get_submitted_files, INVALID SEMESTER: ".$semester); }
@@ -541,8 +549,7 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
     return $homework_tests;
 }
 
-function get_awarded_points_visible($homework_tests)
-{
+function get_awarded_points_visible($homework_tests){
     $version_score = 0;
     foreach ($homework_tests as $testcase) {
         if ($testcase["is_hidden"] === false) {
@@ -552,8 +559,7 @@ function get_awarded_points_visible($homework_tests)
     return $version_score;
 }
 
-function get_points_visible($homework_tests)
-{
+function get_points_visible($homework_tests){
     $points_visible = 0;
     foreach ($homework_tests as $testcase) {
         if ($testcase["is_hidden"] === false) {
@@ -576,23 +582,22 @@ function get_select_submission_data($username, $semester,$course, $assignment_id
             $score = "Grading in progress";
         }
 
-    $class_config = get_class_config($semester,$course);
-    $due_date = get_due_date($class_config,$assignment_id);
-//        $due_date = get_due_date($username, $semester,$course, $assignment_id, $assignment_config);
-//	if (!isset($due_date) || !defined("due_date")) {
-//		       $due_date = "";
-//		       }
+
+        $class_config = get_class_config($semester,$course);
+        $due_date = get_due_date($class_config,$assignment_id);
+        //        $due_date = get_due_date($username, $semester,$course, $assignment_id, $assignment_config);
+        //	if (!isset($due_date) || !defined("due_date")) {
+        //		       $due_date = "";
+        //		       }
 
         $date_submitted = get_submission_time($username,$semester,$course,$assignment_id,$i);
 
 
-		       //echo "due_date = $due_date";
-		       //echo "date_submitted = $date_submitted <br>";
+       //echo "due_date = $due_date";
+       //echo "date_submitted = $date_submitted <br>";
 
        $date_submitted2 = new DateTime($date_submitted);
        if ($date_submitted == "") $date_submitted2 = $due_date;
-
-
 
         //$now = new DateTime("NOW");
         $days_late = "";
@@ -601,7 +606,7 @@ function get_select_submission_data($username, $semester,$course, $assignment_id
             $interval = $date_submitted2->diff($due_date);
             $days_late = $interval->format("%d");
 
-	//echo "days_late = $days_late<br>";
+	           //echo "days_late = $days_late<br>";
         }
         $entry = array("score"=> $score, "days_late"=>$days_late);
         array_push($select_data, $entry);
@@ -616,7 +621,7 @@ function get_assignment_config($username, $semester,$course, $assignment_id) {
 //    $file = $path_front."/results/".$assignment_id."/assignment_config.json";
     $file = $path_front."/config/".$assignment_id."_assignment_config.json";
 
-//	      echo "GET ASSIGNMENT CONFIG ".$file."<br>";
+    //	      echo "GET ASSIGNMENT CONFIG ".$file."<br>";
 
     if (!file_exists($file)) {
         return false;//TODO Handle this case
@@ -646,14 +651,11 @@ function get_assignment_results($username, $semester,$course, $assignment_id, $a
 }
 
 
-
 // FROM http://www.php.net/manual/en/function.json-decode.php
-function removeTrailingCommas($json)
-{
+function removeTrailingCommas($json){
     $json=preg_replace('/,\s*([\]}])/m', '$1', $json);
     return $json;
 }
-
 
 
 //SUBMITTING VERSION
@@ -705,7 +707,6 @@ function change_assignment_version($username, $semester,$course, $assignment_id,
     return array("success"=>"Success");
 }
 
-
 function get_compilation_output($file) {
     if (!file_exists($file)) {
       return "FILE DOES NOT EXIST $file";
@@ -718,7 +719,6 @@ function get_compilation_output($file) {
     return $contents;
 
 }
-
 
 //DIFF FUNCTIONS
 
@@ -771,20 +771,11 @@ function get_all_testcase_diffs($username, $semester,$course, $assignment_id, $a
 //ERRORS
 
 function display_error($error) {
-    ?>
-    <script>alert("Error: <?php echo $error;?>");</script>
-    <?php
-//       echo get_current_user();
+    ?><script>alert("Error: <?php echo $error;?>");</script><?php
+    //       echo get_current_user();
     exit();
 }
-
-
 function display_note($note) {
-    ?>
-    <script>alert("Note: <?php echo $note;?>");</script>
-    <?php
+    ?><script>alert("Note: <?php echo $note;?>");</script><?php
 }
-
-
-
 ?>
