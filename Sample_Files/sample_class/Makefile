@@ -1,7 +1,7 @@
 CONFIG=$(dirname $0)
 
 #Source of repository
-RCOS=$(CONFIG)/../../../../../../rcos
+RCOS=$(CONFIG)/../../../../../../gradingcode
 
 # just the last part of the current directory
 HW=$(notdir $(CONFIG))
