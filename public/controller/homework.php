@@ -68,10 +68,30 @@ $points_visible = get_points_visible($homework_tests);
 
 $view_points = $assignment_config["view_points"];
 $view_hidden_points = $assignment_config["view_hidden_points"];
-$download_files = $class_config["download_files"];
-$download_readme = $class_config["download_readme"];
-$grade_summary = $class_config["grade_summary"];
-$ta_grades = $class_config["ta_grades"];
+if (isset($class_config["download_files"])){
+    $download_files = $class_config["download_files"];
+}
+else{
+    $download_files = false;
+}
+if (isset($class_config["download_readme"])){
+    $download_readme = $class_config["download_readme"];
+}
+else{
+    $download_readme = false;
+}
+if (isset($class_config["grade_summary"])){
+    $grade_summary = $class_config["grade_summary"];
+}
+else{
+    $grade_summary = true;
+}
+if (isset($class_config["ta_grades"])){
+    $ta_grades = $class_config["ta_grades"];
+}
+else{
+    $ta_grades = true;
+}
 
 
 //Data for assignment verion quick select dropdown

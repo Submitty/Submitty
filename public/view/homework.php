@@ -195,7 +195,7 @@ function version_changed(){
 				<div class="row sub-text">
 					<h4>Submitted Files:
                     <?php
-                        if ($download_files === true){
+                        if (isset($download_files) && $download_files == true){
                             echo '<a class = "view_file" style="font-weight: 400; margin-left: 8px;" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name=all">Download All (as zip)</a>';
                         }
                     ?>
@@ -204,10 +204,10 @@ function version_changed(){
 						foreach($submitted_files as $file) {
 							echo '<div class="box">';
 								echo '<p class="file-header">'.$file["name"].' ('.$file["size"].'kb)';
-                                if ($download_files === true){
+                                if (isset($download_files) && $download_files == true){
                                     echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
                                 }
-                                else if (strtolower($file["name"]) == "readme.txt"){
+                                else if (isset($download_readme) && $download_readme == true && strtolower($file["name"]) == "readme.txt"){
                                     echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
                                 }
                                 echo '</p>';
@@ -235,7 +235,7 @@ function version_changed(){
 				</div>  <!-- end outer_box -->
 
 				<?php
-                if ($ta_grades === true){
+                if (!isset($ta_grades) || (isset($ta_grades) && $ta_grades == true)){
     				echo '<div class="outer_box"> <!-- outer_box -->';
     				if ($ta_grade_released == true) {
     					//<!--- TA GRADE -->
@@ -263,7 +263,7 @@ function version_changed(){
 
 			}
 
-            if ($grade_summary === true){
+            if (!isset($grade_summary) || (isset($grade_summary) && $grade_summary == true)){
     		echo '<div class="outer_box"> <!-- outer_box -->';
     			$path_front = get_path_front_course($semester,$course);;
     			$gradefile_path = "$path_front/reports/summary_html/".$username."_summary.html";
