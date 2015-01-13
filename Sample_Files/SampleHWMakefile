@@ -1,101 +1,140 @@
-CONFIG=$(dirname $0)
+.PHONY: default print_stuff make_directory depend 
 
-#Source of repository
-RCOS=$(CONFIG)/../../../../../../rcos
+
+###################################################################################
+
+# assuming we are in a directory of this structure
+#   BASEDIR/courses/which_semester/which_course/hwconfig/which_assignment
+
+MY_DIR = $(CURDIR)
+
+# assuming the core files for config, compilation, running & grading are here:
+#   BASEDIR/gradingcode/grading
+#   BASEDIR/gradingcode/modules
+
+GRADINGCODE=$(MY_DIR)/../../../../../gradingcode
+
+###################################################################################
+
+
+# base directory for course
+course_dir=$(MY_DIR)/../..
+
 
 # just the last part of the current directory
-HW=$(notdir $(CONFIG))
+assignment=$(notdir $(MY_DIR))
 
-# HW id
-ID=$(HW)
-
-# FIXME: Add semester directory
-
-# The class directory
-coursedir=$(CONFIG)/../../..
 
 # Where the compiled binaries are stored, under the class directory
-class_bin=$(coursedir)/bin/$(ID)
+my_bin=$(course_dir)/bin/$(assignment)
+
+
+###################################################################################
+# source files
+
+common_files=$(GRADINGCODE)/grading/TestCase.cpp \
+		$(GRADINGCODE)/modules/myersDiff.cpp \
+		$(GRADINGCODE)/modules/tokens.cpp \
+		$(GRADINGCODE)/modules/tokenSearch.cpp \
+		$(GRADINGCODE)/modules/diffNaive.cpp \
+		$(GRADINGCODE)/modules/textMasking.cpp \
+		$(GRADINGCODE)/modules/clean.cpp \
+		$(GRADINGCODE)/modules/difference.cpp
+
+config_files=$(GRADINGCODE)/grading/config.cpp 
+
+compile_files=$(GRADINGCODE)/grading/compile.cpp \
+		$(GRADINGCODE)/grading/seccomp_functions.cpp \
+		$(GRADINGCODE)/grading/execute.cpp 
+
+runner_files=$(GRADINGCODE)/grading/runner.cpp \
+		$(GRADINGCODE)/grading/seccomp_functions.cpp \
+		$(GRADINGCODE)/grading/execute.cpp
+
+
+validate_files=	$(GRADINGCODE)/grading/Validator.cpp \
+		$(GRADINGCODE)/grading/seccomp_functions.cpp \
+		$(GRADINGCODE)/grading/execute.cpp 
+
+common_files_obj   :=  $(patsubst %.cpp,%.o,$(common_files))
+config_files_obj   :=  $(patsubst %.cpp,%.o,$(config_files))
+compile_files_obj  :=  $(patsubst %.cpp,%.o,$(compile_files))
+runner_files_obj   :=  $(patsubst %.cpp,%.o,$(runner_files))
+validate_files_obj :=  $(patsubst %.cpp,%.o,$(validate_files))
+
+
+###################################################################################
+# build rules
+
+
+default: print_stuff make_directory depend \
+	$(my_bin)/configure.out \
+	$(my_bin)/assignment_config.json \
+	$(my_bin)/compile.out \
+	$(my_bin)/run.out \
+	$(my_bin)/validate.out
+
+
+print_stuff:
+	@ echo 'making assignment'  $(assignment)
+#	@ echo "course_dir: " $(course_dir)
+#	@ echo "my_bin: " $(my_bin)
+#	@ echo "assignment: " $(assignment)
+#	@ echo "GRADINGCODE: " $(GRADINGCODE)
+#	@ echo "MY_DIR: " $(MY_DIR)
+
+
+make_directory:
+	@test -d $(my_bin) || mkdir $(my_bin)
+
+
+
+DEPFILE = my_makedepend_file
+DEPTOKEN = '\# MAKEDEPENDS'
+DEPFLAGS = -Y -f $(DEPFILE) -s $(DEPTOKEN) 
+
 
 gcc=clang++
-#gcc=g++ -std=c++11
-
-default: assignment run
-
-all: assignment run
-
-config_files=$(RCOS)/grading/config.cpp \
-		$(RCOS)/grading/TestCase.cpp \
-		$(RCOS)/modules/myersDiff.cpp \
-		$(RCOS)/modules/tokens.cpp \
-		$(RCOS)/modules/tokenSearch.cpp \
-		$(RCOS)/modules/diffNaive.cpp \
-		$(RCOS)/modules/textMasking.cpp \
-		$(RCOS)/modules/clean.cpp \
-		$(RCOS)/modules/difference.cpp
-
-compile_files=$(RCOS)/grading/compile.cpp \
-		$(RCOS)/modules/tokens.cpp \
-		$(RCOS)/modules/tokenSearch.cpp \
-		$(RCOS)/modules/diffNaive.cpp \
-		$(RCOS)/modules/myersDiff.cpp \
-		$(RCOS)/modules/textMasking.cpp \
-		$(RCOS)/modules/clean.cpp \
-		$(RCOS)/modules/difference.cpp \
-		$(RCOS)/grading/seccomp_functions.cpp \
-		$(RCOS)/grading/execute.cpp \
-		$(RCOS)/grading/TestCase.cpp
-
-runner_files=$(RCOS)/grading/runner.cpp \
-		$(RCOS)/grading/TestCase.cpp \
-		$(RCOS)/modules/tokens.cpp \
-		$(RCOS)/modules/tokenSearch.cpp \
-		$(RCOS)/modules/diffNaive.cpp \
-		$(RCOS)/modules/myersDiff.cpp \
-		$(RCOS)/modules/textMasking.cpp \
-		$(RCOS)/modules/clean.cpp \
-		$(RCOS)/modules/difference.cpp \
-		$(RCOS)/grading/seccomp_functions.cpp \
-		$(RCOS)/grading/execute.cpp
+#gcc=g++ -std=c++11 
+CFLAGS = -g
 
 
-validate_files=$(RCOS)/grading/Validator.cpp \
-		$(RCOS)/modules/tokens.cpp \
-		$(RCOS)/modules/tokenSearch.cpp \
-		$(RCOS)/modules/diffNaive.cpp \
-		$(RCOS)/modules/myersDiff.cpp \
-		$(RCOS)/modules/textMasking.cpp \
-		$(RCOS)/modules/clean.cpp \
-		$(RCOS)/modules/difference.cpp \
-		$(RCOS)/grading/seccomp_functions.cpp \
-		$(RCOS)/grading/execute.cpp \
-		$(RCOS)/grading/TestCase.cpp
+$(DEPFILE):
+	@echo $(DEPTOKEN) > $(DEPFILE)
+	@makedepend $(DEPFLAGS) -- $(CFLAGS) -- $(common_files) $(config_files) $(compile_files) $(runner_files) $(validate_files) 1> /dev/null 2> /dev/null
 
 
-assignment:
-	@ echo "coursedir: " $(coursedir)
-	@ echo "class_bin: " $(class_bin)
-	@ echo "ID: " $(ID)
-	@ echo "HW: " $(HW)
-	@ echo "RCOS: " $(RCOS)
-	@ echo "CONFIG: " $(CONFIG)
-	echo 'making hw'  $(HW)
-	test -d $(class_bin) || mkdir $(class_bin)
-	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(config_files)             -o $(class_bin)/configure.out
-	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(compile_files)  -lseccomp -o $(class_bin)/compile.out
-	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(runner_files)   -lseccomp -o $(class_bin)/run.out
-	$(gcc)  -g -DDEBUG -I $(RCOS) -I $(CONFIG) $(validate_files) -lseccomp -o $(class_bin)/validate.out
+depend:
+	rm -f $(DEPFILE)
+	$(MAKE) $(DEPFILE)
 
-run:
-#	valgrind
-	$(class_bin)/configure.out $(class_bin)/assignment_config.json
 
-move:
-	cp $(class_bin)/assignment_config.json $(coursedir)/config/$(ID)_assignment_config.json
-	cp -r $(CONFIG)/test_input $(coursedir)/test_input/$(ID)
-	cp -r $(CONFIG)/test_output $(coursedir)/test_output/$(ID)
+%.o: %.cpp
+	$(gcc)  -g -DDEBUG -I $(GRADINGCODE) -I $(MY_DIR) -c $< -o $@
+
+
+
+$(my_bin)/configure.out: $(common_files_obj) $(config_files_obj)
+	$(gcc) -g $(common_files_obj) $(config_files_obj) -o $(my_bin)/configure.out
+
+$(my_bin)/assignment_config.json: $(my_bin)/configure.out
+	$(my_bin)/configure.out $(my_bin)/assignment_config.json
+
+$(my_bin)/compile.out: $(common_files_obj) $(compile_files_obj)
+	$(gcc) -g $(common_files_obj) $(compile_files_obj) -lseccomp -o $(my_bin)/compile.out
+
+$(my_bin)/run.out: $(common_files_obj) $(runner_files_obj)
+	$(gcc) -g $(common_files_obj) $(runner_files_obj) -lseccomp -o $(my_bin)/run.out
+
+$(my_bin)/validate.out: $(common_files_obj) $(validate_files_obj)
+	$(gcc) -g $(common_files_obj) $(validate_files_obj) -lseccomp -o $(my_bin)/validate.out
+
 
 clean:
-#	rm $(ROOT)/$(COURSE)/bin/*
-	rm $(class_bin)
-	rm assignment_config.json
+	rm -r $(my_bin)
+	rm -f $(GRADINGCODE)/*/*.o
+
+
+###################################################################################
+# put this file in the last line of your Makefile
+sinclude $(DEPFILE)

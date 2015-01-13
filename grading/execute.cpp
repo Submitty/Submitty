@@ -32,6 +32,13 @@
 #include "modules/modules.h"
 #include "grading/TestCase.h"
 
+
+#include <seccomp.h>
+
+//#define SECCOMP_ENABLED 0
+#define SECCOMP_ENABLED 1
+
+
 // ----------------------------------------------------------------
 
 #define MAX_STRING_LENGTH 100
@@ -50,16 +57,18 @@ int install_syscall_filter(bool is_32, bool blacklist);
 // =====================================================================================
 // =====================================================================================
 
+
 bool system_program(const std::string &program) {
   assert (program.size() >= 1);
   if (program == "/usr/bin/ls" ||
       program == "/usr/bin/time" ||
       program == "/usr/bin/clang++" ||
       program == "/usr/bin/g++" ||
-      program == "/usr/bin/strace" ||
       program == "/usr/bin/valgrind" ||
       program == "/projects/submit3/drmemory/bin/drmemory" ||
-      program == "/bin/mv") {
+      program == "/bin/mv" || 
+      program == "/usr/bin/find" || 
+      program == "/usr/bin/python") {
     return true;
   }
   return false;
@@ -121,12 +130,15 @@ void validate_option(const std::string &program, const std::string &option) {
 // =====================================================================================
 
 bool wildcard_match(const std::string &pattern, const std::string &thing) {
+
+  //std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
+
   int wildcard_loc = pattern.find("*");
   assert (wildcard_loc != std::string::npos);
 
   std::string before = pattern.substr(0,wildcard_loc);
   std::string after = pattern.substr(wildcard_loc+1,pattern.size()-wildcard_loc-1);
-
+  
   //  std::cout << "BEFORE " << before << " AFTER" << after << std::endl;
 
   // FIXME: we only handle a single wildcard!
@@ -243,11 +255,14 @@ void parse_command_line(const std::string &cmd,
 
             // remainder of the arguments
             else if (tmp.find("*") != std::string::npos) {
+	      // unfortunately not all programs used the double dash convention 
+	      /*
                 if (bare_double_dash != true) {
                     std::cout << "ERROR: Not allowed to use the wildcard before the bare double dash" << std::endl;
                     std::cerr << "ERROR: Not allowed to use the wildcard before the bare double dash" << std::endl;
                     exit(1);
                 }
+	      */
                 wildcard_expansion(my_args,tmp);
             } else {
                 if (bare_double_dash == true) {
@@ -342,6 +357,13 @@ int exec_this_command(const std::string &cmd) {
 
 
 
+  if (SECCOMP_ENABLED) {
+    std::cout << "seccomp filter enabled" << std::endl;
+  } else {
+    std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
+  }
+
+
   // the default umask is 0027, so we need edit so that we can make
   // these files 'other read', so that we can read them when we switch
   // users
@@ -388,13 +410,13 @@ int exec_this_command(const std::string &cmd) {
 
 
   // SECCOMP: install the filter (system calls restrictions)
-  // No seccomp on Mac
-  // remove seccomp /*
-  if (install_syscall_filter(prog_is_32bit, true)) { //blacklist
+  if (SECCOMP_ENABLED) {
+    if (install_syscall_filter(prog_is_32bit, true /*blacklist*/)) { 
       std::cout << "seccomp filter install failed" << std::endl;
       return 1;
+    }
+  } else {
   }
-  // remove seccomp */
   // END SECCOMP
 
 
@@ -408,16 +430,7 @@ int exec_this_command(const std::string &cmd) {
 
 
 // Executes command (from shell) and returns error code (0 = success)
-int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) { //, bool add_strace) {
-
-  //  add_strace = true;
-
-  /*  std::string cmd = cmd_a;
-  if (add_strace) {
-    assert (cmd.substr(0,18) != std::string("/usr/bin/strace -f "));
-    cmd = std::string("/usr/bin/strace -f ") + cmd;
-  }
-  */
+int execute(const std::string &cmd, const std::string &execute_logfile, int seconds_to_run, int file_size_limit) { 
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
 
@@ -469,6 +482,16 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) { /
         assert (parent_result == 0);
         //std::cout << "  parent_result = " << parent_result << std::endl;
 
+
+	std::ofstream logfile(execute_logfile.c_str(), std::ofstream::out | std::ofstream::app);
+
+	std::cout << "my logfile is " << execute_logfile << std::endl;
+
+	logfile << "RESULTS OF TEST RUN for TEST CASE " << std::endl;
+	
+	logfile.close();
+
+
         float elapsed = 0;
         int status;
         pid_t wpid = 0;
@@ -503,10 +526,8 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) { /
         else if (WIFSIGNALED(status)) {
             int what_signal =  WTERMSIG(status);
 
-            if (what_signal == SIGSYS /* 31 */) { // && !add_strace)
-                std::cout << "DETECTED BAD SYSTEM CALL" << std::endl;
-                //	execute(cmd,seconds_to_run,file_size_limit,true);
-                //std::cout << "FINISHED RERUN WITH STRACE" << std::endl;
+            if (what_signal == SIGSYS /* 31 */) { 
+                std::cout << "********************************\nDETECTED BAD SYSTEM CALL\n***********************************" << std::endl;
             }
 
             std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
@@ -515,10 +536,12 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) { /
                 std::cout << "signal 25 = file size exceeded" << std::endl;
             }
 
+
             if (WTERMSIG(status) == 0){
                 result=0;
             }
             else{
+
                 result=2;
             }
         }

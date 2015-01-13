@@ -42,24 +42,15 @@ TestCase testcases[num_testcases] = {
   (
    "Compilation of Submitted Files (for Dr. Memory): g++ -m32 -g -Wall *cpp -o submitted_32.out",
    "/usr/bin/clang++ -m32 -g -Wall -o submitted_32.out -- *.cpp",
-<<<<<<< HEAD
    "submitted_32.out",	
-=======
-   "submitted_32.out",
->>>>>>> master
    TestCasePoints(2)
    ),
 
   TestCase::MakeCompilation
   (
    "Compilation of Submitted Files (for Valgrind): g++ -g -Wall *cpp -o submitted.out",
-<<<<<<< HEAD
-   "/usr/bin/clang++ -g -Wall -o submitted.out -- *.cpp", 
-   "submitted.out",	
-=======
    "/usr/bin/clang++ -g -Wall -o submitted.out -- *.cpp",
    "submitted.out",
->>>>>>> master
    TestCasePoints(2)
    ),
 
@@ -69,11 +60,7 @@ TestCase testcases[num_testcases] = {
 TestCase::MakeTestCase
   (
    "Under Dr Memory",
-<<<<<<< HEAD
-   "drmemory -brief -- ./submitted_32.out",	
-=======
    "drmemory -brief -- ./submitted_32.out",
->>>>>>> master
    "/projects/submit3/drmemory/bin/drmemory  -brief -- ./submitted_32.out",
    TestCasePoints(5),
    new TestCaseComparison(&errorIfEmpty,"cout.txt","STDOUT"),
@@ -83,11 +70,7 @@ TestCase::MakeTestCase
 TestCase::MakeTestCase
   (
    "Under Valgrind",
-<<<<<<< HEAD
-   "valgrind --leak-check=full ./submitted.out",	
-=======
    "valgrind --leak-check=full ./submitted.out",
->>>>>>> master
    "/usr/bin/valgrind --leak-check=full ./submitted.out",
    TestCasePoints(5),
    new TestCaseComparison(&errorIfEmpty,"cout.txt","STDOUT"),
