@@ -81,49 +81,86 @@ else {
     $_SESSION["status"] = "Invalid file name";
     header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
 }
+$class_config = get_class_config($semester,$course);//Gets class.JSON data
+if ($class_config == NULL) {
+    ?><script>alert("Configuration for this class (class.JSON) is invalid.  Quitting");</script>
+    <?php exit();
+}
 
-
-if ($file_name == "all"){
-    header("Content-Type: archive/zip");
-
-    header('Content-Disposition: attachment; filename="assignment_' .  $assignment_id."_submission_". $assignment_version . ".zip".'"');
-    $submitted_files = get_submitted_files($username, $semester, $course, $assignment_id, $assignment_version);
-
-    // $tmp_zip = tempnam ("tmp", "tempname") . ".zip";
-    // $zip = new ZipArchive;
-    // $zip->open($tmp_zip, ZipArchive::CREATE);
-
-    $filespec = "";
-    chdir( get_all_files($username, $semester, $course, $assignment_id, $assignment_version) );
-    foreach($submitted_files as $file){
-        $filespec .= " '".$file["name"]."' ";
-        //     $zip->addFile($file["name"]);
-
-    }
-    // $zip->close();
-
-    // echo "<body><p>".$filespec."</p></body>";
-    $stream = popen( "/usr/bin/zip -q - ".$filespec, "r" );
-
-    if( $stream )
-    {
-        fpassthru( $stream );
-        fclose( $stream );
-    }
-
-    // $filesize = filesize($tmp_zip);
-    // header('Content-Length: ' . filesize($zipfilename));
-    // readfile($tmp_zip);
-
+if (isset($class_config["download_files"])){
+    $download_files = $class_config["download_files"];
 }
 else{
-    header("Pragma: public");
-    header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-    header("Content-Type: application/octet-stream");
-    header('Content-Disposition: attachment; filename="' .  $file_name . '"');
-
-    readfile(get_file($username, $semester, $course, $assignment_id, $assignment_version, $file_name));
+    $download_files = false;
 }
+if (isset($class_config["download_readme"])){
+    $download_readme = $class_config["download_readme"];
+}
+
+if ($download_files == true){
+    if ($file_name == "all"){
+        header("Content-Type: archive/zip");
+
+        header('Content-Disposition: attachment; filename="assignment_' .  $assignment_id."_submission_". $assignment_version . ".zip".'"');
+        $submitted_files = get_submitted_files($username, $semester, $course, $assignment_id, $assignment_version);
+
+        // $tmp_zip = tempnam ("tmp", "tempname") . ".zip";
+        // $zip = new ZipArchive;
+        // $zip->open($tmp_zip, ZipArchive::CREATE);
+
+        $filespec = "";
+        chdir( get_all_files($username, $semester, $course, $assignment_id, $assignment_version) );
+        foreach($submitted_files as $file){
+            $filespec .= " '".$file["name"]."' ";
+            //     $zip->addFile($file["name"]);
+
+        }
+        // $zip->close();
+
+        // echo "<body><p>".$filespec."</p></body>";
+        $stream = popen( "/usr/bin/zip -q - ".$filespec, "r" );
+
+        if( $stream )
+        {
+            fpassthru( $stream );
+            fclose( $stream );
+        }
+
+        // $filesize = filesize($tmp_zip);
+        // header('Content-Length: ' . filesize($zipfilename));
+        // readfile($tmp_zip);
+
+    }
+    else{
+        header("Pragma: public");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Content-Type: application/octet-stream");
+        header('Content-Disposition: attachment; filename="' .  $file_name . '"');
+
+        readfile(get_file($username, $semester, $course, $assignment_id, $assignment_version, $file_name));
+    }
+}
+
+else if ($download_readme == true){
+    if (strtolower($file_name) == "readme.txt"){
+        header("Pragma: public");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Content-Type: application/octet-stream");
+        header('Content-Disposition: attachment; filename="' .  $file_name . '"');
+
+        readfile(get_file($username, $semester, $course, $assignment_id, $assignment_version, $file_name));
+    }
+    else{
+        $_SESSION["status"] = "Invalid filename download";
+        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
+    }
+}
+
+else{
+    $_SESSION["status"] = "Downloads disabled";
+    header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
+}
+
 // echo "<body><p>".get_file($username, $semester, $course, $assignment_id, $assignment_version, $tmp)."</p></body>";
 //Go back to homework page
 // header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
