@@ -63,8 +63,8 @@ TestCase::MakeTestCase
    "drmemory -brief -- ./submitted_32.out",
    "/projects/submit3/drmemory/bin/drmemory  -brief -- ./submitted_32.out",
    TestCasePoints(5),
-   new TestCaseComparison(&errorIfEmpty,"cout.txt","STDOUT"),
-   new TestCaseTokens(&searchToken,"cerr.txt","STDERR", std::vector<std::string>(1,std::string("NO ERRORS FOUND:")))
+   new TestCaseComparison(&errorIfEmpty,"STDOUT.txt","STDOUT"),
+   new TestCaseTokens(&searchToken,"STDERR.txt","STDERR", std::vector<std::string>(1,std::string("NO ERRORS FOUND:")))
    ),
 
 TestCase::MakeTestCase
@@ -73,8 +73,8 @@ TestCase::MakeTestCase
    "valgrind --leak-check=full ./submitted.out",
    "/usr/bin/valgrind --leak-check=full ./submitted.out",
    TestCasePoints(5),
-   new TestCaseComparison(&errorIfEmpty,"cout.txt","STDOUT"),
-   new TestCaseTokens(&searchToken,"cerr.txt","STDERR", std::vector<std::string>(1,std::string("ERROR SUMMARY: 0 errors from 0 contexts")))
+   new TestCaseComparison(&errorIfEmpty,"STDOUT.txt","STDOUT"),
+   new TestCaseTokens(&searchToken,"STDERR.txt","STDERR", std::vector<std::string>(1,std::string("ERROR SUMMARY: 0 errors from 0 contexts")))
    )
 
 };

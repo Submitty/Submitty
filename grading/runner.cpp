@@ -27,10 +27,7 @@
 #include <sstream>
 #include <cassert>
 
-//#include "modules/modules.h"
-//#include "grading/TestCase.h"
-
-#include <config.h>
+#include "config.h"
 
 #include "execute.h"
 
@@ -57,36 +54,20 @@ int main(int argc, char *argv[]) {
     std::cout << "========================================================" << std::endl;
     std::cout << "TEST " << i+1 << " " << testcases[i].command() << std::endl;
 
-/*
-int exit_no = execute(cmd +
-" 1>test" + to_string(i + 1) + "_cout.txt" +
-" 2>test" + to_string(i + 1) + "_cerr.txt",
-testcases[i].seconds_to_run(),
-10000000); // 10 mb
-if (exit_no == 2){
-std::ofstream cerr_out ("test" + to_string(i + 1) + "_cerr.txt", std::ofstream::out | std::ofstream::app);
-cerr_out << "Complilation terminated, time elapsed was longer that allocated time\n";
-cerr_out.close();
-}
-//std::cout << "AFTER LS:\n";
-//execute("/bin/ls -a *",4);
-//std::cout << "AFTER LS DONE!\n";
-std::cout<< "Exited with exit_no: "<<exit_no<<std::endl;
-*/
-
-    //stsicmd != "" && cmd != "FILE_EXISTS") {
     std::string cmd = testcases[i].command();
     assert (cmd != "");
 
     std::string logfile = std::string("test") + to_string(i + 1) + "_execute_logfile.txt";
-
       // run the command, capturing STDOUT & STDERR
     int exit_no = execute(cmd +
-			  " 1>test" + to_string(i + 1) + "_cout.txt" +
-			  " 2>test" + to_string(i + 1) + "_cerr.txt",
+			  " 1>test" + to_string(i + 1) + "_STDOUT.txt" +
+			  " 2>test" + to_string(i + 1) + "_STDERR.txt",
 			  logfile,
 			  testcases[i].seconds_to_run(),
 			  max_output_size);
+
+
+    /*
     // append the test case # to the front of the output file (if it exists)
     //      assert (testcases[i].numFileComparisons() >= 1);
     if (exit_no == 1){
@@ -110,9 +91,11 @@ std::cout<< "Exited with exit_no: "<<exit_no<<std::endl;
 
         cerr_out.close();
     }
+    */
+
     if (testcases[i].numFileGraders() > 0 &&
 	testcases[i].raw_filename(0) != "" &&
-	access( testcases[i].raw_filename(0).c_str(), F_OK|R_OK|W_OK ) != -1) { /* file exists */
+	access( testcases[i].raw_filename(0).c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists 
       execute ("/bin/mv "+testcases[i].raw_filename(0)+" "+testcases[i].filename(0),
 	       "/dev/null",
 	       max_cputime,max_output_size);
@@ -128,7 +111,12 @@ std::cout<< "Exited with exit_no: "<<exit_no<<std::endl;
   std::cout << "FINISHED ALL TESTS" << std::endl;
   // allow hwcron read access so the files can be copied back
 
-  //execute ("/usr/bin/find . -user untrusted -exec chmod o+r {} ;","/dev/null", max_cputime,max_output_size);
+
+  execute ("/usr/bin/find . -user untrusted -exec /bin/chmod o+r {} ;",
+	   "/dev/null", 
+	   10*max_cputime,
+	   10*max_output_size,
+	   0);
 
   return 0;
 }

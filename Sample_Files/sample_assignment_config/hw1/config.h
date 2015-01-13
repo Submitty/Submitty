@@ -61,8 +61,8 @@ TestCase testcases[num_testcases] = {
             "example_16_flush_left.txt",                        // expected output file [V]
             1
             ),
-        new TestCaseComparison(&warnIfNotEmpty,"cout.txt","STDOUT","", 0),
-        new TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR","", 0)
+        new TestCaseComparison(&warnIfNotEmpty,"STDOUT.txt","STDOUT","", 0),
+        new TestCaseComparison(&warnIfNotEmpty,"STDERR.txt","STDERR","", 0)
         ),
     TestCase::MakeTestCase(
         "right justify example",                                // title
@@ -75,8 +75,8 @@ TestCase testcases[num_testcases] = {
             "example_16_flush_right.txt",                       // expected output file [V]
             1
             ),
-        new TestCaseComparison(&warnIfNotEmpty,"cout.txt","STDOUT","", 0),
-        new TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR","", 0)
+        new TestCaseComparison(&warnIfNotEmpty,"STDOUT.txt","STDOUT","", 0),
+        new TestCaseComparison(&warnIfNotEmpty,"STDERR.txt","STDERR","", 0)
         ),
     TestCase::MakeTestCase(
         "full justify example",                                 // title
@@ -89,8 +89,8 @@ TestCase testcases[num_testcases] = {
             "example_16_full_justify.txt",                      // expected output file [V]
             1
             ),
-        new TestCaseComparison(&warnIfNotEmpty,"cout.txt","STDOUT","", 0),
-        new TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR","", 0)
+        new TestCaseComparison(&warnIfNotEmpty,"STDOUT.txt","STDOUT","", 0),
+        new TestCaseComparison(&warnIfNotEmpty,"STDERR.txt","STDERR","", 0)
         ),
     TestCase::MakeTestCase(
         "left justify gettysburg address",                                  // title
@@ -103,8 +103,8 @@ TestCase testcases[num_testcases] = {
             "gettysburg_address_70_flush_left.txt",                         // expected output file [V]
             1
             ),
-        new TestCaseComparison(&warnIfNotEmpty,"cout.txt","STDOUT","", 0),
-        new TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR","", 0)
+        new TestCaseComparison(&warnIfNotEmpty,"STDOUT.txt","STDOUT","", 0),
+        new TestCaseComparison(&warnIfNotEmpty,"STDERR.txt","STDERR","", 0)
         ),
     TestCase::MakeTestCase(
         "right justify gettysburg address",                                 // title
@@ -117,8 +117,8 @@ TestCase testcases[num_testcases] = {
             "gettysburg_address_70_flush_right.txt",                        // expected output file [V]
             1
             ),
-        new TestCaseComparison(&warnIfNotEmpty,"cout.txt","STDOUT","", 0),
-        new TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR","", 0)
+        new TestCaseComparison(&warnIfNotEmpty,"STDOUT.txt","STDOUT","", 0),
+        new TestCaseComparison(&warnIfNotEmpty,"STDERR.txt","STDERR","", 0)
         ),
     TestCase::MakeTestCase(
         "full justify gettysburg address",                                  // title
@@ -131,8 +131,8 @@ TestCase testcases[num_testcases] = {
             "gettysburg_address_70_full_justify.txt",                       // expected output file [V]
             1
             ),
-        new TestCaseComparison(&warnIfNotEmpty,"cout.txt","STDOUT","", 0),
-        new TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR","", 0)
+        new TestCaseComparison(&warnIfNotEmpty,"STDOUT.txt","STDOUT","", 0),
+        new TestCaseComparison(&warnIfNotEmpty,"STDERR.txt","STDERR","", 0)
         ),
     TestCase::MakeTestCase(
         "full justify long word",                                       // title
@@ -145,8 +145,8 @@ TestCase testcases[num_testcases] = {
             "long_word_15_full_justify.txt",                            // expected output file [V]
             1
             ),
-        new TestCaseComparison(&warnIfNotEmpty,"cout.txt","STDOUT","", 0),
-        new TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR","", 0)
+        new TestCaseComparison(&warnIfNotEmpty,"STDOUT.txt","STDOUT","", 0),
+        new TestCaseComparison(&warnIfNotEmpty,"STDERR.txt","STDERR","", 0)
         ),
     TestCase::MakeTestCase(
         "lengthier document",                                           // title
@@ -159,8 +159,8 @@ TestCase testcases[num_testcases] = {
             "hansel_and_gretel_100_full_justify.txt",                   // expected output file [V]
             1
             ),
-        new TestCaseComparison(&warnIfNotEmpty,"cout.txt","STDOUT","", 0),
-        new TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR","", 0)
+        new TestCaseComparison(&warnIfNotEmpty,"STDOUT.txt","STDOUT","", 0),
+        new TestCaseComparison(&warnIfNotEmpty,"STDERR.txt","STDERR","", 0)
         ),
     TestCase::MakeTestCase(
         " lots of long words",                                          // title
@@ -173,8 +173,8 @@ TestCase testcases[num_testcases] = {
             "longestwords_20_flush_right.txt",                          // expected output file [V]
             1
             ),
-        new TestCaseComparison(&warnIfNotEmpty,"cout.txt","STDOUT","", 0),
-        new TestCaseComparison(&warnIfNotEmpty,"cerr.txt","STDERR","", 0)
+        new TestCaseComparison(&warnIfNotEmpty,"STDOUT.txt","STDOUT","", 0),
+        new TestCaseComparison(&warnIfNotEmpty,"STDERR.txt","STDERR","", 0)
         )
 };
 

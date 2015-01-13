@@ -15,6 +15,7 @@
  *
 */
 
+
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/wait.h>
@@ -39,7 +40,7 @@
 
 #include <dirent.h>
 
-#include <config.h>
+#include "config.h"
 
 #include "execute.h"
 
@@ -155,8 +156,8 @@ int main(int argc, char *argv[]) {
 
     // run the command, capturing STDOUT & STDERR
     int exit_no = execute(cmd +
-			  " 1>test" + to_string(i + 1) + "_cout.txt" +
-			  " 2>test" + to_string(i + 1) + "_cerr.txt",
+			  " 1>test" + to_string(i + 1) + "_STDOUT.txt" +
+			  " 2>test" + to_string(i + 1) + "_STDERR.txt",
 			  "test" + to_string(i + 1) + "_execute_logfile.txt",
 			  testcases[i].seconds_to_run(),
 			  std::max(max_output_size, 10000000)); // 10 mb

@@ -8,7 +8,7 @@
 
 MY_DIR = $(CURDIR)
 
-# assuming the core files for config, compilation, running & grading are here:
+# assuming the core files for config, compilation, running, & grading are here:
 #   BASEDIR/gradingcode/grading
 #   BASEDIR/gradingcode/modules
 
@@ -52,22 +52,26 @@ runner_files=$(GRADINGCODE)/grading/runner.cpp \
 		$(GRADINGCODE)/grading/execute.cpp
 
 
-validate_files=	$(GRADINGCODE)/grading/Validator.cpp \
+validate_files=	$(GRADINGCODE)/grading/validator.cpp \
 		$(GRADINGCODE)/grading/seccomp_functions.cpp \
 		$(GRADINGCODE)/grading/execute.cpp 
 
-common_files_obj   :=  $(patsubst %.cpp,%.o,$(common_files))
-config_files_obj   :=  $(patsubst %.cpp,%.o,$(config_files))
-compile_files_obj  :=  $(patsubst %.cpp,%.o,$(compile_files))
-runner_files_obj   :=  $(patsubst %.cpp,%.o,$(runner_files))
-validate_files_obj :=  $(patsubst %.cpp,%.o,$(validate_files))
+
+# put the obj files in the current directory
+# note we are assuming there are no file name conflicts between grading/ & modules/
+common_files_obj   := $(notdir $(patsubst %.cpp,%.o,$(common_files)))
+config_files_obj   := $(notdir $(patsubst %.cpp,%.o,$(config_files)))
+compile_files_obj  := $(notdir $(patsubst %.cpp,%.o,$(compile_files)))
+runner_files_obj   := $(notdir $(patsubst %.cpp,%.o,$(runner_files)))
+validate_files_obj := $(notdir $(patsubst %.cpp,%.o,$(validate_files)))
 
 
 ###################################################################################
 # build rules
 
+#default: print_stuff  make_directory depend \
 
-default: print_stuff make_directory depend \
+default: print_stuff clean make_directory depend \
 	$(my_bin)/configure.out \
 	$(my_bin)/assignment_config.json \
 	$(my_bin)/compile.out \
@@ -91,17 +95,22 @@ make_directory:
 
 DEPFILE = my_makedepend_file
 DEPTOKEN = '\# MAKEDEPENDS'
-DEPFLAGS = -Y -f $(DEPFILE) -s $(DEPTOKEN) 
+
+# -Y does not include system file dependencies (change rarely)
+#DEPFLAGS = -Y -f $(DEPFILE) -s $(DEPTOKEN) 
+DEPFLAGS = -f $(DEPFILE) -s $(DEPTOKEN) 
 
 
-gcc=clang++
+gcc=clang++ 
+#gcc=clang++  -std=c++11 
 #gcc=g++ -std=c++11 
 CFLAGS = -g
 
 
+# note cannot use &>/dev/null in dash
 $(DEPFILE):
 	@echo $(DEPTOKEN) > $(DEPFILE)
-	@makedepend $(DEPFLAGS) -- $(CFLAGS) -- $(common_files) $(config_files) $(compile_files) $(runner_files) $(validate_files) 1> /dev/null 2> /dev/null
+	@makedepend $(DEPFLAGS) -- $(CFLAGS) -- $(common_files) $(config_files) $(compile_files) $(runner_files) $(validate_files) >/dev/null 2>&1
 
 
 depend:
@@ -110,6 +119,11 @@ depend:
 
 
 %.o: %.cpp
+	$(gcc)  -g -DDEBUG -I $(GRADINGCODE) -I $(MY_DIR) -c $< -o $@
+
+%.o: $(GRADINGCODE)/grading/%.cpp
+	$(gcc)  -g -DDEBUG -I $(GRADINGCODE) -I $(MY_DIR) -c $< -o $@
+%.o: $(GRADINGCODE)/modules/%.cpp
 	$(gcc)  -g -DDEBUG -I $(GRADINGCODE) -I $(MY_DIR) -c $< -o $@
 
 
@@ -131,8 +145,8 @@ $(my_bin)/validate.out: $(common_files_obj) $(validate_files_obj)
 
 
 clean:
+	rm -f *.o
 	rm -r $(my_bin)
-	rm -f $(GRADINGCODE)/*/*.o
 
 
 ###################################################################################
