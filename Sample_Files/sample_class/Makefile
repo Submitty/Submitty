@@ -1,7 +1,7 @@
 CONFIG=$(dirname $0)
 
 #Source of repository
-RCOS=$(CONFIG)/../../../../../../gradingcode
+RCOS=$(CONFIG)/../../../../../gradingcode
 
 # just the last part of the current directory
 HW=$(notdir $(CONFIG))
@@ -12,7 +12,7 @@ ID=$(HW)
 # FIXME: Add semester directory
 
 # The class directory
-coursedir=$(CONFIG)/../../..
+coursedir=$(CONFIG)/../..
 
 # Where the compiled binaries are stored, under the class directory
 class_bin=$(coursedir)/bin/$(ID)
