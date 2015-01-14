@@ -414,11 +414,21 @@ template<class T> Difference* sesSecondary ( Difference* text_diff,
 			continue;
 		} else if ( current->a_changes.size() == current->b_changes.size() ) {
 			for ( int b = 0; b < current->a_changes.size(); b++ ) {
-				metaData< typeof(*meta_diff.a)[current->a_changes[b]] > meta_second_diff;
+
+// FIXME: This code is not sufficiently commented to allow reader
+// understanding and long term  maintenance
+
+			        // FIXME: does not compile with clang -std=c++11
+			        //metaData< typeof(*meta_diff.a)[current->a_changes[b]] > meta_second_diff;
+			  
 				Difference* second_diff;
-				meta_second_diff = sesSnapshots(
+
+				// FIXME: so added auto instead
+				// code is fragile to change in compiler options
+				auto meta_second_diff = sesSnapshots(
 						&( *meta_diff.a )[current->a_changes[b]],
 						&( *meta_diff.b )[current->b_changes[b]], extraStudentOutputOk );
+
 				sesSnakes( meta_second_diff,  extraStudentOutputOk  );
 				second_diff = sesChanges( meta_second_diff, extraStudentOutputOk );
 				current->a_characters.push_back( second_diff->diff_a );
