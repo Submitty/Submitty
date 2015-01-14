@@ -137,7 +137,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
                 message += "Error: compilation was not successful!";
       }
       if (testcases[i].isCompilationTest()) {
-	testcase_json << "\t\t\t\"compilation_output\": \"" << testcases[i].prefix() << "_cerr.txt\",\n";
+	testcase_json << "\t\t\t\"compilation_output\": \"" << testcases[i].prefix() << "_STDERR.txt\",\n";
       }
         }
         else {

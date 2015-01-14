@@ -143,6 +143,7 @@ int main(int argc, char *argv[]) {
 
   // Run each COMPILATION TEST
   for (unsigned int i = 0; i < testcases.size(); i++) {
+
     if (!testcases[i].isCompilationTest()) continue;
     assert (testcases[i].numFileGraders() == 0);
 
@@ -159,6 +160,9 @@ int main(int argc, char *argv[]) {
 			  "test" + to_string(i + 1) + "_execute_logfile.txt",
 			  testcases[i].seconds_to_run(),
 			  std::max(max_output_size, 10000000)); // 10 mb
+
+
+    /*
     if (exit_no == 1){
       std::ofstream cerr_out (std::string("test" + to_string(i + 1) + "_cerr.txt").c_str(), std::ofstream::out | std::ofstream::app);
         cerr_out << "Compilation failed\n";
@@ -180,6 +184,8 @@ int main(int argc, char *argv[]) {
 
         cerr_out.close();
     }
+    */
+
     //std::cout << "AFTER LS:\n";
     //execute("/bin/ls -a *",4);
     //std::cout << "AFTER LS DONE!\n";
