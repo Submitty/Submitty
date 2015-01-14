@@ -43,12 +43,23 @@ int install_syscall_filter(bool is_32, bool blacklist)
     // per assignment
 
 
+
     // RESTRICT SOCKETS
     if (is_32) {
         DISALLOW_SYSCALL_32(socketcall);
     } else {
-        DISALLOW_SYSCALL_64(socket);
-        DISALLOW_SYSCALL_64(connect);
+
+
+      //std::cout << "SYSTEM CALL NUMBER FOR SOCKET  " << seccomp_syscall_resolve_name("socket") << std::endl;
+      //std::cout << "SYSTEM CALL NUMBER FOR CONNECT " << seccomp_syscall_resolve_name("connect") << std::endl;
+
+
+
+        // these 2 system calls are used by even very basic python programs (???)
+        //DISALLOW_SYSCALL_64(socket);
+        //DISALLOW_SYSCALL_64(connect);
+
+
         DISALLOW_SYSCALL_64(accept);
         DISALLOW_SYSCALL_64(sendto);
         DISALLOW_SYSCALL_64(recvfrom);
@@ -65,6 +76,7 @@ int install_syscall_filter(bool is_32, bool blacklist)
     }
 
 
+
     // RESTRICK CLONE & FORK
     if (is_32) {
         DISALLOW_SYSCALL_32(clone);
@@ -73,6 +85,7 @@ int install_syscall_filter(bool is_32, bool blacklist)
         DISALLOW_SYSCALL_64(clone);
         DISALLOW_SYSCALL_64(fork);
     }
+
 
 
     if (seccomp_load(sc) < 0) {

@@ -192,7 +192,7 @@ while true; do
 	    then
 		version=$thing
 	    else
-#FIXME document error handling approach: leave GRADING_ file in $TO_BE_GRADED directory, assume email sent, move to next
+                #FIXME document error handling approach: leave GRADING_ file in $TO_BE_GRADED directory, assume email sent, move to next
 		echo "ERROR BAD FORMAT: $NEXT_TO_GRADE" >&2
 		continue
 	    fi
@@ -228,11 +228,7 @@ while true; do
 
 	# --------------------------------------------------------------------
         # check to see if directory exists & is readable
-# <<<<<<< HEAD
-# 	submission_path=$base_path/$course/submissions/$assignment/$user/$version
-# =======
 	submission_path=$base_path/courses/$semester/$course/submissions/$assignment/$user/$version
-# >>>>>>> server
 	#echo "check directory '$submission_path'"
 
 	if [ ! -d "$base_path" ]
@@ -314,22 +310,11 @@ while true; do
 
 
 
-#
-# <<<<<<< HEAD
-# 	test_code_path="$base_path/$course/test_code/$assignment"
-# 	test_input_path="$base_path/$course/test_input/$assignment"
-# 	test_output_path="$base_path/$course/test_output/$assignment"
-# 	results_path="$base_path/$course/results/$assignment/$user/$version"
-# 	bin_path="$base_path/$course/bin"
-#
-# =======
 	test_code_path="$base_path/courses/$semester/$course/test_code/$assignment"
 	test_input_path="$base_path/courses/$semester/$course/test_input/$assignment"
 	test_output_path="$base_path/courses/$semester/$course/test_output/$assignment"
 	results_path="$base_path/courses/$semester/$course/results/$assignment/$user/$version"
 	bin_path="$base_path/courses/$semester/$course/bin"
-
-# >>>>>>> server
 
 	# --------------------------------------------------------------------
         # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
@@ -354,14 +339,12 @@ while true; do
 	mkdir $tmp_compilation
 	cp 1>/dev/null  2>&1  -r $submission_path/* $tmp_compilation ||  echo "ERROR: Failed to copy to temporary directory $submission_path" >&2
 
-
         # copy any instructor code files to tmp directory
 	if [ -d "$test_code_path" ]
 	then
 	    cp -rf $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy to temporary directory $test_code_path" >&2
 	    cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path" >&2
 	fi
-
 
 	pushd $tmp_compilation > /dev/null
 
@@ -380,11 +363,6 @@ while true; do
 	    chmod -R go+rwx $tmp
 	    # run the compile.out as the untrusted user
 
-#	    $base_path/bin/untrusted_runscript $tmp/my_compile.out >& .submit_compile_output.txt
-
-        # echo "$tmp_compilation/my_compile.out"
-	    # $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
-
 	    $base_path/bin/untrusted_runscript $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
 
 	    compile_error_code="$?"
@@ -402,8 +380,8 @@ while true; do
 
 	# move all executable files from the to the main tmp directory
 	# FIXME: not really what we want for the "FILE_EXISTS" command....
-        cp  1>/dev/null  2>&1  $tmp_compilation/README*.txt  $tmp_compilation/*.out $tmp_compilation/test*.txt $tmp
-
+	# FIXME: make more general, requires thinking, need to get python files into the running directory too (a hack for now)
+        cp  1>/dev/null  2>&1  $tmp_compilation/README*.txt  $tmp_compilation/*.out $tmp_compilation/test*.txt $tmp_compilation/*.py $tmp
 
 
 	# remove the directory
@@ -429,7 +407,6 @@ while true; do
   	    # give the untrusted user read/write/execute permissions on the tmp directory & files
 	    chmod -R go+rwx $tmp
 	    # run the run.out as the untrusted user
-        echo "$base_path/bin/untrusted_runscript $tmp/my_run.out >& .submit_runner_output.txt"
 	    $base_path/bin/untrusted_runscript $tmp/my_run.out >& .submit_runner_output.txt
 
 	    runner_error_code="$?"
@@ -490,6 +467,8 @@ while true; do
 
         # Make directory structure in results if it doesn't exist
         mkdir -p "$results_path" ||  echo "ERROR: Could not create results path $results_path" >&2
+echo 'copying files back?'
+ls -lta $tmp
         cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/.submit* $tmp/submission.json $tmp/test*.json "$results_path"
 
 

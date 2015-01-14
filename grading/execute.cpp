@@ -32,6 +32,10 @@
 #include "modules/modules.h"
 #include "grading/TestCase.h"
 
+
+#include <seccomp.h>
+
+
 // ----------------------------------------------------------------
 
 #define MAX_STRING_LENGTH 100
@@ -50,16 +54,19 @@ int install_syscall_filter(bool is_32, bool blacklist);
 // =====================================================================================
 // =====================================================================================
 
+
 bool system_program(const std::string &program) {
   assert (program.size() >= 1);
-  if (program == "/usr/bin/ls" ||
+  if (program == "/bin/ls" ||
       program == "/usr/bin/time" ||
       program == "/usr/bin/clang++" ||
       program == "/usr/bin/g++" ||
-      program == "/usr/bin/strace" ||
       program == "/usr/bin/valgrind" ||
       program == "/projects/submit3/drmemory/bin/drmemory" ||
-      program == "/bin/mv") {
+      program == "/bin/mv" || 
+      program == "/bin/chmod" || 
+      program == "/usr/bin/find" || 
+      program == "/usr/bin/python") {
     return true;
   }
   return false;
@@ -111,8 +118,8 @@ void validate_option(const std::string &program, const std::string &option) {
   } else if (local_executable(program)) {
     // custom
   } else {
-    std::cout << "ERROR: command line option looks suspicious '" << option << "'" << std::endl;
-    std::cerr << "ERROR: command line option looks suspicious '" << option << "'" << std::endl;
+    std::cout << "WARNING: command line option looks suspicious '" << option << "'" << std::endl;
+    std::cerr << "WARNING: command line option looks suspicious '" << option << "'" << std::endl;
     //exit(1);
   }
   last_option = option;
@@ -120,13 +127,16 @@ void validate_option(const std::string &program, const std::string &option) {
 
 // =====================================================================================
 
-bool wildcard_match(const std::string &pattern, const std::string &thing) {
+bool wildcard_match(const std::string &pattern, const std::string &thing, std::ofstream &logfile) {
+
+  //std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
+
   int wildcard_loc = pattern.find("*");
   assert (wildcard_loc != std::string::npos);
 
   std::string before = pattern.substr(0,wildcard_loc);
   std::string after = pattern.substr(wildcard_loc+1,pattern.size()-wildcard_loc-1);
-
+  
   //  std::cout << "BEFORE " << before << " AFTER" << after << std::endl;
 
   // FIXME: we only handle a single wildcard!
@@ -148,28 +158,33 @@ bool wildcard_match(const std::string &pattern, const std::string &thing) {
 
 
 
-void wildcard_expansion(std::vector<std::string> &my_args, const std::string &pattern) {
-    if (pattern.find("*") != std::string::npos) {
-        std::cout << "WILDCARD DETECTED:" << pattern << std::endl;
-        char buf[DIR_PATH_MAX];
-        getcwd( buf, DIR_PATH_MAX );
-        DIR* dir = opendir(buf);
-        assert (dir != NULL);
-        struct dirent *ent;
-        while (1) {
-            ent = readdir(dir);
-            if (ent == NULL) break;
-            std::string thing = ent->d_name;
-            if (wildcard_match(pattern,thing)) {
-                std::cout << "   MATCHED! " << thing << std::endl;
-                validate_filename(thing);
-                my_args.push_back(thing);
-            }
-        }
-        closedir(dir);
-    } else {
-        my_args.push_back(pattern);
+void wildcard_expansion(std::vector<std::string> &my_args, const std::string &pattern, std::ofstream &logfile) {
+  int count_matches = 0;
+  if (pattern.find("*") != std::string::npos) {
+    std::cout << "WILDCARD DETECTED:" << pattern << std::endl;
+    char buf[DIR_PATH_MAX];
+    getcwd( buf, DIR_PATH_MAX );
+    DIR* dir = opendir(buf);
+    assert (dir != NULL);
+    struct dirent *ent;
+    while (1) {
+      ent = readdir(dir);
+      if (ent == NULL) break;
+      std::string thing = ent->d_name;
+      if (wildcard_match(pattern,thing,logfile)) {
+	std::cout << "   MATCHED! " << thing << std::endl;
+	validate_filename(thing);
+	my_args.push_back(thing);
+	count_matches++;
+     }
     }
+    closedir(dir);
+  } else {
+    my_args.push_back(pattern);
+  }
+  if (count_matches == 0) {
+    logfile << "WARNING: No matches to wildcard pattern: " << pattern << std::endl;
+  }
 }
 
 
@@ -178,7 +193,8 @@ void parse_command_line(const std::string &cmd,
 			std::vector<std::string> &my_args,
 			std::string &my_stdin,
 			std::string &my_stdout,
-			std::string &my_stderr) {
+			std::string &my_stderr,
+			std::ofstream &logfile) {
 
     std::stringstream ss(cmd);
     std::string tmp;
@@ -243,12 +259,15 @@ void parse_command_line(const std::string &cmd,
 
             // remainder of the arguments
             else if (tmp.find("*") != std::string::npos) {
+	      // unfortunately not all programs used the double dash convention 
+	      /*
                 if (bare_double_dash != true) {
                     std::cout << "ERROR: Not allowed to use the wildcard before the bare double dash" << std::endl;
                     std::cerr << "ERROR: Not allowed to use the wildcard before the bare double dash" << std::endl;
                     exit(1);
                 }
-                wildcard_expansion(my_args,tmp);
+	      */
+	      wildcard_expansion(my_args,tmp,logfile);
             } else {
                 if (bare_double_dash == true) {
                     validate_filename(tmp);
@@ -277,7 +296,7 @@ void parse_command_line(const std::string &cmd,
 
 
 // This function only returns on failure to exec
-int exec_this_command(const std::string &cmd) {
+int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream &logfile) {
 
   // to avoid creating extra layers of processes, use exec and not
   // system or the shell
@@ -288,7 +307,7 @@ int exec_this_command(const std::string &cmd) {
   std::string my_stdin;
   std::string my_stdout;
   std::string my_stderr;
-  parse_command_line(cmd, my_program, my_args, my_stdin, my_stdout, my_stderr);
+  parse_command_line(cmd, my_program, my_args, my_stdin, my_stdout, my_stderr, logfile);
 
 
   char** const my_char_args = new char * [my_args.size()+2];  // yes, there is a memory leak here
@@ -342,6 +361,13 @@ int exec_this_command(const std::string &cmd) {
 
 
 
+  if (SECCOMP_ENABLED != 0) {
+    std::cout << "seccomp filter enabled" << std::endl;
+  } else {
+    std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
+  }
+
+
   // the default umask is 0027, so we need edit so that we can make
   // these files 'other read', so that we can read them when we switch
   // users
@@ -388,13 +414,13 @@ int exec_this_command(const std::string &cmd) {
 
 
   // SECCOMP: install the filter (system calls restrictions)
-  // No seccomp on Mac
-  // remove seccomp /*
-  if (install_syscall_filter(prog_is_32bit, true)) { //blacklist
+  if (SECCOMP_ENABLED != 0) {
+    if (install_syscall_filter(prog_is_32bit, true /*blacklist*/)) { 
       std::cout << "seccomp filter install failed" << std::endl;
       return 1;
+    }
+  } else {
   }
-  // remove seccomp */
   // END SECCOMP
 
 
@@ -408,18 +434,11 @@ int exec_this_command(const std::string &cmd) {
 
 
 // Executes command (from shell) and returns error code (0 = success)
-int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) { //, bool add_strace) {
-
-  //  add_strace = true;
-
-  /*  std::string cmd = cmd_a;
-  if (add_strace) {
-    assert (cmd.substr(0,18) != std::string("/usr/bin/strace -f "));
-    cmd = std::string("/usr/bin/strace -f ") + cmd;
-  }
-  */
+int execute(const std::string &cmd, const std::string &execute_logfile, int seconds_to_run, int file_size_limit, int SECCOMP_ENABLED) { 
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
+
+  std::ofstream logfile(execute_logfile.c_str(), std::ofstream::out | std::ofstream::app);
 
   // Forking to allow the setting of limits of RLIMITS on the command
   int result = -1;
@@ -454,7 +473,7 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) { /
     assert(pgrp == 0);
 
     int child_result;
-    child_result = exec_this_command(cmd);
+    child_result = exec_this_command(cmd,SECCOMP_ENABLED,logfile);
 
     // send the system status code back to the parent process
     //std::cout << "    child_result = " << child_result << std::endl;
@@ -469,6 +488,10 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) { /
         assert (parent_result == 0);
         //std::cout << "  parent_result = " << parent_result << std::endl;
 
+
+
+
+	
         float elapsed = 0;
         int status;
         pid_t wpid = 0;
@@ -503,27 +526,36 @@ int execute(const std::string &cmd, int seconds_to_run, int file_size_limit) { /
         else if (WIFSIGNALED(status)) {
             int what_signal =  WTERMSIG(status);
 
-            if (what_signal == SIGSYS /* 31 */) { // && !add_strace)
-                std::cout << "DETECTED BAD SYSTEM CALL" << std::endl;
-                //	execute(cmd,seconds_to_run,file_size_limit,true);
-                //std::cout << "FINISHED RERUN WITH STRACE" << std::endl;
+            if (what_signal == SIGSYS /* 31 */) { 
+                std::cout << "********************************\nDETECTED BAD SYSTEM CALL\n***********************************" << std::endl;
+		
+		logfile << "ERROR: DETECTED BAD SYSTEM CALL" << std::endl;
+		logfile << "Program Terminated" << std::endl;
+
             }
 
             std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
 
             if (what_signal == 25) {
                 std::cout << "signal 25 = file size exceeded" << std::endl;
+
+		logfile << "ERROR: Maximum file size exceeded" << std::endl;
+		logfile << "Program Terminated" << std::endl;
             }
+
 
             if (WTERMSIG(status) == 0){
                 result=0;
             }
             else{
+
                 result=2;
             }
         }
         if (time_kill){
-            result=3;
+	  logfile << "ERROR: Maximum run time exceeded" << std::endl;
+	  logfile << "Program Terminated" << std::endl;
+	  result=3;
         }
         std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
         parent_result = system("date");

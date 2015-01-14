@@ -1,6 +1,5 @@
 #include <unistd.h>
 #include "TestCase.h"
-//#include "config.h"
 
 /*
 
@@ -179,31 +178,6 @@ std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
   assert (dir.size() >= 1);
   assert (dir[dir.size()-1] != '/');
 
-  std::string tmp2 = dir;
-
-  assert (tmp2.size() >= 1);
-  // assert (tmp2[tmp2.size()-1] != '/');
-
-
-  int loc = tmp2.find('/');
-  if (loc != std::string::npos){
-      tmp2 = tmp2.substr(0,loc);
-  }
-
-  std::cout << "tmp2 is now '" << tmp2 << "'\n";
-  loc = tmp2.find('_');
-  if (loc != std::string::npos){
-      tmp2 = tmp2.substr(loc+1);
-  }
-  std::cout << "tmp2 is now '" << tmp2 << "'\n";
-
-  loc = tmp2.find('_');
-  if (loc != std::string::npos){
-      tmp2 = tmp2.substr(0,loc);
-  }
-
-  std::cout << "tmp2 is now '" << tmp2 << "'\n";
-
   int last_slash = -1;
   int second_to_last_slash = -1;
   std::string tmp;
@@ -215,45 +189,9 @@ std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
     if (second_to_last_slash != -1) {
       tmp = dir.substr(second_to_last_slash+1,last_slash-second_to_last_slash-1);
     }
-    std::cout << "tmp is now '" << tmp << "'\n";  
-
+    //std::cout << "tmp is now '" << tmp << "'\n";  
   }
-  assert (tmp.size() > 1);
+  assert (tmp.size() >= 1);
   return tmp;
 }
-/*
 
-
-std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
-
-std::string tmp2 = dir;
-
-assert (tmp2.size() >= 1);
-// assert (tmp2[tmp2.size()-1] != '/');
-
-
-int loc = tmp2.find('/');
-if (loc != std::string::npos){
-tmp2 = tmp2.substr(0,loc);
-}
-
-std::cout << "tmp2 is now '" << tmp2 << "'\n";
-loc = tmp2.find('_');
-if (loc != std::string::npos){
-tmp2 = tmp2.substr(loc+1);
-}
-std::cout << "tmp2 is now '" << tmp2 << "'\n";
-
-loc = tmp2.find('_');
-if (loc != std::string::npos){
-tmp2 = tmp2.substr(0,loc);
-}
-
-std::cout << "tmp2 is now '" << tmp2 << "'\n";
-
-
-// }
-assert (tmp2.size() >= 1);
-return tmp2;
-}
-*/

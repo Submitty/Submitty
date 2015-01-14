@@ -38,7 +38,7 @@
 //#include "grading/TestCase.cpp"  /* Should not #include a .cpp file */
 
 
-#include <config.h>
+#include "config.h"
 
 
 int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime);
@@ -105,7 +105,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     
     // START JSON FOR TEST CASE
     testcase_json << "\t\t{\n"
-                  << "\t\t\t\"test_name\": \"" << testcases[i].title() << "\",\n";
+                  << "\t\t\t\"test_name\": \"" << testcases[i].title() << "\",\n"
+                  << "\t\t\t\"execute_logfile\": \"" << testcases[i].prefix() << "_execute_logfile.txt\",\n";
     int testcase_pts = 0;
     std::string message = "";
 

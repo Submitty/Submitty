@@ -1,0 +1,7 @@
+#icebucketchallenge vs #alsicebucketchallenge, percentage change
+150 vs 200
+300 vs 400
+500 vs 766
+100 vs 92
+170 vs 320
+7 vs -19

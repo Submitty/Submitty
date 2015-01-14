@@ -20,7 +20,7 @@
 #include "grading/TestCase.h"
 
 
-#include <config.h>
+#include "config.h"
 
 
 /*Generates a file in json format containing all of the information defined in

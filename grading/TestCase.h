@@ -23,7 +23,7 @@
 #include <cassert>
 #include "modules/modules.h"
 
-extern const int max_clocktime;
+extern const int max_cputime;
 
 // =================================================================================
 
@@ -265,7 +265,7 @@ public:
   TestResults* do_the_grading (int j, std::string &message);
 
   //int seconds_to_run() { return 5; }
-  int seconds_to_run() { return max_clocktime; }
+  int seconds_to_run() { return max_cputime; }
 
   bool isFileExistsTest() { return FILE_EXISTS; }
   bool isCompilationTest() { return COMPILATION; }
