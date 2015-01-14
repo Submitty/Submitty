@@ -33,6 +33,24 @@ set(my_hw_config_file ${course_dir}/config/${assignment}_assignment_config.json)
 
 
 ###################################################################################
+# OPTIONAL INSTRUCTOR CUSTOMIZATION 
+#
+# If extra .cpp files are needed for grading/validation, add a file
+#  named "instructor_CMakeLists.txt" and in that file list the .cpp
+#  files in the variable "custom_files".  For example:
+#
+#  set (custom_files   test_code/custom.cpp  test_code/helper.cpp)
+#
+
+include(instructor_CMakeLists.txt OPTIONAL RESULT_VARIABLE instructor_cmakelists)
+
+if (instructor_cmakelists)
+message("DETECTED INSTRUCTOR CUSTOMIZATIONS in ${instructor_cmakelists}")
+message("  custom_files: ${custom_files}")
+endif(instructor_cmakelists)
+
+
+###################################################################################
 # source files
 
 set (common_files
@@ -48,11 +66,15 @@ set (common_files
 
 add_executable(configure.out
   ${common_files}
+  # FIXME: I don't think custom files needs to/should be here
+  ${custom_files}
   ${GRADINGCODE}/grading/config.cpp 
 )
 
 add_executable(compile.out
   ${common_files}
+  # FIXME: I don't think custom files needs to/should be here
+  ${custom_files}
   ${GRADINGCODE}/grading/compile.cpp 
   ${GRADINGCODE}/grading/seccomp_functions.cpp 
   ${GRADINGCODE}/grading/execute.cpp 
@@ -60,6 +82,8 @@ add_executable(compile.out
 
 add_executable(run.out
   ${common_files}
+  # FIXME: I don't think custom files needs to/should be here
+  ${custom_files}
   ${GRADINGCODE}/grading/runner.cpp 
   ${GRADINGCODE}/grading/seccomp_functions.cpp 
   ${GRADINGCODE}/grading/execute.cpp
@@ -67,6 +91,7 @@ add_executable(run.out
 
 add_executable(validate.out
   ${common_files}
+  ${custom_files}
   ${GRADINGCODE}/grading/validator.cpp 
   ${GRADINGCODE}/grading/seccomp_functions.cpp 
   ${GRADINGCODE}/grading/execute.cpp 

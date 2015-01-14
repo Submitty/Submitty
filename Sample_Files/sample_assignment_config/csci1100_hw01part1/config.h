@@ -24,13 +24,7 @@ const int auto_pts = 0;
 const int ta_pts = 0;
 const int extra_credit_pts = 0;
 
-
-//std::vector<std::string> testhere{"hi","bye"};
-
-//std::vector<TestCase> testcases 
-
-const int num_testcases=1;
-TestCase testcases[num_testcases] =
+std::vector<TestCase> testcases 
   {
     
     /******************** TEST CASES **********************/

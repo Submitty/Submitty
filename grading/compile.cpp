@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
 
 
   // Run each COMPILATION TEST
-  for (unsigned int i = 0; i < num_testcases; i++) {
+  for (unsigned int i = 0; i < testcases.size(); i++) {
     if (!testcases[i].isCompilationTest()) continue;
     assert (testcases[i].numFileGraders() == 0);
 

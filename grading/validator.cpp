@@ -100,7 +100,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
 
   // LOOP OVER ALL TEST CASES
-  for (int i = 0; i < num_testcases; ++i) {
+  for (int i = 0; i < testcases.size(); ++i) {
     std::cout << "------------------------------------------\n" << testcases[i].title() << " - points: " << testcases[i].points() << std::endl;
     
     // START JSON FOR TEST CASE
@@ -249,7 +249,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       testcase_json << "\t\t\t\"message\": \"" << message << "\",\n";
     }
 
-    const char *last_line = (i == num_testcases - 1) ? "\t\t}\n" : "\t\t},\n";
+    const char *last_line = (i == testcases.size() - 1) ? "\t\t}\n" : "\t\t},\n";
     testcase_json << last_line;
 
 
