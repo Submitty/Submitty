@@ -14,7 +14,7 @@ const int submission_penalty = 5;
 // Compile-time parameters
 const int max_cputime = 2;		// in seconds, per test case
 const int max_submission_size = 10000;	// in KB, entire submission (could be zip file)
-const int max_output_size =     100;	// in KB, per created output file
+const int max_output_size =     1000;	// in KB, per created output file
 
 
 

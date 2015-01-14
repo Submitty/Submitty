@@ -1,0 +1,96 @@
+cmake_minimum_required (VERSION 2.8)
+project (sample_assignment)
+
+###################################################################################
+
+# assuming we are in a directory of this structure
+#   BASEDIR/courses/which_semester/which_course/hwconfig/which_assignment
+
+set (MY_DIR ${CMAKE_SOURCE_DIR})
+
+# assuming the core files for config, compilation, running, & grading are here:
+#   BASEDIR/gradingcode/grading
+#   BASEDIR/gradingcode/modules
+
+set (GRADINGCODE ${MY_DIR}/../../../../../gradingcode)
+
+###################################################################################
+
+
+# base directory for course
+set (course_dir ${MY_DIR}/../..)
+
+
+# just the last part of the current directory
+get_filename_component(assignment ${MY_DIR} NAME)
+message("ASSIGNMENT IS ${assignment}")
+
+# Where the compiled binaries are stored, under the class directory
+set(my_bin ${course_dir}/bin/${assignment})
+
+# Assignment configuration json file location
+set(my_hw_config_file ${course_dir}/config/${assignment}_assignment_config.json)
+
+
+###################################################################################
+# source files
+
+set (common_files
+  ${GRADINGCODE}/grading/TestCase.cpp 
+  ${GRADINGCODE}/modules/myersDiff.cpp 
+  ${GRADINGCODE}/modules/tokens.cpp 
+  ${GRADINGCODE}/modules/tokenSearch.cpp 
+  ${GRADINGCODE}/modules/diffNaive.cpp 
+  ${GRADINGCODE}/modules/textMasking.cpp 
+  ${GRADINGCODE}/modules/clean.cpp 
+  ${GRADINGCODE}/modules/difference.cpp
+)
+
+add_executable(configure.out
+  ${common_files}
+  ${GRADINGCODE}/grading/config.cpp 
+)
+
+add_executable(compile.out
+  ${common_files}
+  ${GRADINGCODE}/grading/compile.cpp 
+  ${GRADINGCODE}/grading/seccomp_functions.cpp 
+  ${GRADINGCODE}/grading/execute.cpp 
+)
+
+add_executable(run.out
+  ${common_files}
+  ${GRADINGCODE}/grading/runner.cpp 
+  ${GRADINGCODE}/grading/seccomp_functions.cpp 
+  ${GRADINGCODE}/grading/execute.cpp
+)
+
+add_executable(validate.out
+  ${common_files}
+  ${GRADINGCODE}/grading/validator.cpp 
+  ${GRADINGCODE}/grading/seccomp_functions.cpp 
+  ${GRADINGCODE}/grading/execute.cpp 
+)
+
+###################################################################################
+
+target_link_libraries(compile.out seccomp)
+target_link_libraries(run.out seccomp)
+target_link_libraries(validate.out seccomp)
+
+set_property(TARGET configure.out APPEND_STRING PROPERTY COMPILE_FLAGS "-g")
+set_property(TARGET compile.out APPEND_STRING PROPERTY COMPILE_FLAGS "-g")
+set_property(TARGET run.out APPEND_STRING PROPERTY COMPILE_FLAGS "-g")
+set_property(TARGET validate.out APPEND_STRING PROPERTY COMPILE_FLAGS "-g")
+#set_property(TARGET validate.out APPEND_STRING PROPERTY COMPILE_FLAGS "-g  -std=c++11")
+
+include_directories(${MY_DIR})
+include_directories(${GRADINGCODE})
+
+SET(EXECUTABLE_OUTPUT_PATH ${my_bin})
+
+add_custom_command(TARGET configure.out POST_BUILD COMMAND ${my_bin}/configure.out ${my_hw_config_file})
+
+###################################################################################
+
+

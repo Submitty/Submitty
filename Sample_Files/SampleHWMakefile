@@ -71,7 +71,7 @@ validate_files_obj := $(notdir $(patsubst %.cpp,%.o,$(validate_files)))
 
 #default: print_stuff  make_directory depend \
 
-default: print_stuff clean make_directory depend \
+default: print_stuff  make_directory depend \
 	$(my_bin)/configure.out \
 	$(my_bin)/assignment_config.json \
 	$(my_bin)/compile.out \
@@ -98,7 +98,7 @@ DEPTOKEN = '\# MAKEDEPENDS'
 
 # -Y does not include system file dependencies (change rarely)
 #DEPFLAGS = -Y -f $(DEPFILE) -s $(DEPTOKEN) 
-DEPFLAGS = -f $(DEPFILE) -s $(DEPTOKEN) 
+DEPFLAGS = -f $(DEPFILE) -s $(DEPTOKEN) -p $(MY_DIR)
 
 
 gcc=clang++ 
@@ -118,8 +118,8 @@ depend:
 	$(MAKE) $(DEPFILE)
 
 
-%.o: %.cpp
-	$(gcc)  -g -DDEBUG -I $(GRADINGCODE) -I $(MY_DIR) -c $< -o $@
+#%.o: %.cpp
+#	$(gcc)  -g -DDEBUG -I $(GRADINGCODE) -I $(MY_DIR) -c $< -o $@
 
 %.o: $(GRADINGCODE)/grading/%.cpp
 	$(gcc)  -g -DDEBUG -I $(GRADINGCODE) -I $(MY_DIR) -c $< -o $@
@@ -145,7 +145,7 @@ $(my_bin)/validate.out: $(common_files_obj) $(validate_files_obj)
 
 
 clean:
-	rm -f *.o
+	rm -f *.o $(DEPFILE)
 	rm -r $(my_bin)
 
 

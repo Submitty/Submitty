@@ -1,4 +1,3 @@
-
 /* FILENAME: compile.cpp
  * YEAR: 2014
  * AUTHORS:
@@ -14,7 +13,6 @@
  * RELEVANT DOCUMENTATION:
  *
 */
-
 
 #include <sys/time.h>
 #include <sys/resource.h>
