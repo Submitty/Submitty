@@ -66,8 +66,19 @@ $assignment_version_in_grading_queue = version_in_grading_queue($username, $seme
 
 $points_visible = get_points_visible($homework_tests);
 
-$view_points = $assignment_config["view_points"];
-$view_hidden_points = $assignment_config["view_hidden_points"];
+if (isset($assignment_config["view_points"])){
+  $view_points = $assignment_config["view_points"];
+}
+else{
+  $view_points = true;
+}
+
+if (isset($assignment_config["view_hidden_points"])){
+  $view_hidden_points = $assignment_config["view_hidden_points"];
+}
+else{
+  $view_hidden_points = false;
+}
 if (isset($class_config["download_files"])){
     $download_files = $class_config["download_files"];
 }

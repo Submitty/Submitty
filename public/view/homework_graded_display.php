@@ -4,18 +4,18 @@
 <!-- DETAILS ON INDIVIDUAL TESTS -->
 <div class="row sub-text">
 	<h4>Results:</h4>
-
-	<div class="box" >
-		<div>
-			<h4 class="diff-header">
-				Total
-				<span class="badge">
-					<?php echo $viewing_version_score." / ".$points_visible;?>
-				</span>
-			</h4>
-
-		</div><!-- End div -->
-	</div><!-- End box -->
+	if ($view_points == true && $points_visible != 0){
+		<div class="box" >
+			<div>
+				<h4 class="diff-header">
+					Total
+					<span class="badge">
+						<?php echo $viewing_version_score." / ".$points_visible;?>
+					</span>
+				</h4>
+			</div><!-- End div -->
+		</div><!-- End box -->
+	}
 	<?php
 	$counter = 0;
 	foreach($homework_tests as $test)
@@ -57,12 +57,12 @@
 					}
 				}
 				echo '<!-- BADGE TEST SCORE -->';
-				if ($test["is_extra_credit"] === true) {
+				if ($test["is_extra_credit"] == true) {
 					echo '<span class="test_type">Extra Credit</span>';
 				}
-				if ($view_points === true && $test["points_visible"] === false){
+				if ($view_points == true && $test["points_visible"] == false && $test["points_possible"] != 0){
 					echo '<span class="'.$class.'">';
-					if ($test["is_hidden"] === true && $view_hidden_points === false) {
+					if ($test["is_hidden"] == true && $view_hidden_points == false) {
 						echo 'Hidden';
 					}
 					else{
