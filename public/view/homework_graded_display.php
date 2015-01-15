@@ -4,7 +4,9 @@
 <!-- DETAILS ON INDIVIDUAL TESTS -->
 <div class="row sub-text">
 	<h4>Results:</h4>
+	<?php
 	if ($view_points == true && $points_visible != 0){
+		?>
 		<div class="box" >
 			<div>
 				<h4 class="diff-header">
@@ -15,8 +17,8 @@
 				</h4>
 			</div><!-- End div -->
 		</div><!-- End box -->
-	}
 	<?php
+	}
 	$counter = 0;
 	foreach($homework_tests as $test)
 		{
