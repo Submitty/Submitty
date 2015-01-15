@@ -426,6 +426,35 @@ function is_ta_grade_released($class_config, $assignment_id) {
     return ""; //TODO Error handling
 }
 
+function is_points_visible($class_config, $assignment_id) {
+  $assignments = $class_config["assignments"];
+  foreach ($assignments as $one) {
+    if ($one["assignment_id"] == $assignment_id) {
+      if (isset($one["view_points"]) && $one["view_points"] == false) {
+        return false;
+      }
+      else {
+        return true;
+      }
+    }
+  }
+  return ""; //TODO Error handling
+}
+
+function is_hidden_points_visible($class_config, $assignment_id) {
+  $assignments = $class_config["assignments"];
+  foreach ($assignments as $one) {
+    if ($one["assignment_id"] == $assignment_id) {
+      if (isset($one["view_hidden_points"]) && $one["view_hidden_points"] == true) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+  }
+  return ""; //TODO Error handling
+}
 
 // Check to make sure instructor has added this assignment
 function is_valid_semester($semester) {

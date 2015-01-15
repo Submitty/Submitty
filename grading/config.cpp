@@ -106,17 +106,6 @@ Now Exiting" << std::endl;
 
   init << "\t\"num_testcases\": " << num_testcases << "," << std::endl;
 
-  if (isset(view_points)){
-      std::string view_points_s = (view_points) ? "true" : "false";
-      init << "\t\"view_points\": " << view_points_s << "," << std::endl;
-
-  }
-
-  if (isset(view_hidden_points)){
-    std::string view_hidden_points_s = (view_hidden_points) ? "true" : "false";
-    init << "\t\"view_hidden_points\": " << view_hidden_points_s << "," << std::endl;
-  }
-  
   init << "\t\"testcases\": [" << std::endl;
 
   for (unsigned int i = 0; i < num_testcases; i++) {

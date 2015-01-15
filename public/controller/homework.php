@@ -32,7 +32,8 @@ $assignment_version = parse_assignment_version($username, $semester,$course, $as
 
 $assignment_name = name_for_assignment_id($class_config, $assignment_id);
 $ta_grade_released = is_ta_grade_released($class_config, $assignment_id);
-
+$view_points = is_points_visible($class_config, $assignment_id);
+$view_hidden_points = is_hidden_points_visible($class_config, $assignment_id);
 $highest_version = most_recent_assignment_version($username, $semester,$course, $assignment_id);
 
 //Assignment configuration data from assignmnet_config.json
@@ -66,19 +67,6 @@ $assignment_version_in_grading_queue = version_in_grading_queue($username, $seme
 
 $points_visible = get_points_visible($homework_tests);
 
-if (isset($assignment_config["view_points"])){
-  $view_points = $assignment_config["view_points"];
-}
-else{
-  $view_points = true;
-}
-
-if (isset($assignment_config["view_hidden_points"])){
-  $view_hidden_points = $assignment_config["view_hidden_points"];
-}
-else{
-  $view_hidden_points = false;
-}
 if (isset($class_config["download_files"])){
     $download_files = $class_config["download_files"];
 }
