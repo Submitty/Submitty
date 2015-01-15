@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
   std::cout <<"FILENAME " << argv[0] << std::endl;
   int total_nonec = 0;
   int total_ec = 0;
-  for (unsigned int i = 0; i < num_testcases; i++) {
+  for (unsigned int i = 0; i < testcases.size(); i++) {
     if (testcases[i].extracredit())
       total_ec += testcases[i].points();
     else
@@ -95,7 +95,7 @@ Now Exiting" << std::endl;
 
   init << "\t\"auto_pts\": " << auto_pts << "," << std::endl;
   int visible = 0;
-  for (unsigned int i = 0; i < num_testcases; i++) {
+  for (unsigned int i = 0; i < testcases.size(); i++) {
     if (!testcases[i].hidden())
       visible += testcases[i].points();
   }
@@ -104,13 +104,13 @@ Now Exiting" << std::endl;
   init << "\t\"total_pts\": " << total_pts << "," << std::endl;
   //  init << "\t\"due_date\": \"" << due_date << "\"," << std::endl;
 
-  init << "\t\"num_testcases\": " << num_testcases << "," << std::endl;
+  init << "\t\"num_testcases\": " << testcases.size() << "," << std::endl;
 
   init << "\t\"testcases\": [" << std::endl;
 
-  for (unsigned int i = 0; i < num_testcases; i++) {
+  for (unsigned int i = 0; i < testcases.size(); i++) {
     printTestCase(init, testcases[i]);
-    if (i != num_testcases - 1)
+    if (i != testcases.size() - 1)
       init << "," << std::endl;
   }
 

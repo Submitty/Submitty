@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
   setenv("DYNAMORIO_CONFIGDIR", ".", 1);
 
   // Run each test case and create output files
-  for (unsigned int i = 0; i < num_testcases; i++) {
+  for (unsigned int i = 0; i < testcases.size(); i++) {
     if (testcases[i].isFileExistsTest()) continue;
     if (testcases[i].isCompilationTest()) continue;
 

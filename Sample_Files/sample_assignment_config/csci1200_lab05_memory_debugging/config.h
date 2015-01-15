@@ -32,9 +32,8 @@ const int extra_credit_pts = 0;
 
 
 // Test cases
-const int num_testcases = 4;
-
-TestCase testcases[num_testcases] = {
+std::vector<TestCase> testcases
+{
 
 /************* README AND COMPILATION *****************/
 

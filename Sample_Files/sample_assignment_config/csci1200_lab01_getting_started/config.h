@@ -31,15 +31,8 @@ const int ta_pts = 0;
 const int extra_credit_pts = 2;
 
 // Test cases
-const int num_testcases = 9;
-
-// UI Interface
-const bool view_points = true;
-const bool view_hidden_points = false;
-
-
-TestCase testcases[num_testcases] = {
-
+std::vector<TestCase> testcases
+{
 /************* README AND COMPILATION *****************/
 
   TestCase::MakeFileExists(
@@ -50,7 +43,7 @@ TestCase testcases[num_testcases] = {
   TestCase::MakeCompilation(
 	"Compilation",
 	"/usr/bin/clang++ -Wall -o a.out -- *.cpp",
-	"a.out",                                               // name of .exe created by student
+	"a.out",		// name of .exe created by student
 	TestCasePoints(3)
 ),
 
@@ -59,8 +52,8 @@ TestCase::MakeTestCase(
 	 "non leap year",  // title
 	 "3 1 2012",                  // details
 	 "./a.out <nonleapyear.txt", // 1> STDOUT.txt 2> STDERR.txt",                  // command
-     TestCasePoints(5),                                    // points=0, hidden=false, extra_credit=false, view_test_case=true,  view_points=false
-     new TestCaseComparison(&myersDiffbyLinebyChar,				// compare function [V]			   ),
+	 TestCasePoints(5),
+	 new TestCaseComparison(&myersDiffbyLinebyChar,				// compare function [V]			   ),
 				"STDOUT.txt",					// output file name [V]
 				"Standard OUTPUT (STDOUT)",					// output file description
 				"test1_output.txt",1.0),  // expected output

@@ -96,17 +96,17 @@ function install_homework {
     
     # copy the files
     rsync -rvuz   $hw_source/   $hw_code_path
-    # grab the universal makefile
-    cp $RCOS_REPO/Sample_Files/SampleHWMakefile   $hw_code_path/Makefile
+    # grab the universal cmake file
+    cp $RCOS_REPO/Sample_Files/Sample_CMakeLists.txt   $hw_code_path/CMakeLists.txt
     # go to the code directory
     pushd $hw_code_path
     # build the configuration, compilation, runner, and validation executables
-    make 
-    # if it doesn't exist, create bin directory for these executables
-    if [ ! -e $hw_bin_path ] 
-    then 
-	mkdir $hw_bin_path 
-    fi
+    # configure cmake, specifying the clang compiler
+    CXX=/usr/bin/clang++ cmake . 
+    # build in parallel
+    # FIXME: using -j 8 causes fork errors on the server
+    make -j 2
+
     # copy the json config file
     cp $hw_bin_path/assignment_config.json $hw_config
     # set the permissions

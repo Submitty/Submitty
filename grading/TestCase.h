@@ -119,6 +119,9 @@ private:
     next_test_case_id++;
     FILE_EXISTS = false;
     COMPILATION = false;
+    test_case_grader[0] = NULL;
+    test_case_grader[1] = NULL;
+    test_case_grader[2] = NULL;
   }
 
 public:
@@ -127,7 +130,6 @@ public:
   static TestCase MakeFileExists ( const std::string &title,
 				   const std::string &filename,
 				   const TestCasePoints &tcp) {
-
     TestCase answer;
     answer._title = title;
     answer._filename = filename;
@@ -141,7 +143,6 @@ public:
 				   const std::string &compilation_command,
 				   const std::string &executable_filename,
 				   const TestCasePoints &tcp) {
-
     TestCase answer;
     answer._title = title;
     answer._filename = executable_filename;
@@ -150,7 +151,6 @@ public:
     assert (answer._command != "");
     answer._test_case_points = tcp;
     answer.COMPILATION = true;
-
     return answer;
   }
 

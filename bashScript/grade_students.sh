@@ -467,8 +467,6 @@ while true; do
 
         # Make directory structure in results if it doesn't exist
         mkdir -p "$results_path" ||  echo "ERROR: Could not create results path $results_path" >&2
-echo 'copying files back?'
-ls -lta $tmp
         cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/.submit* $tmp/submission.json $tmp/test*.json "$results_path"
 
 
