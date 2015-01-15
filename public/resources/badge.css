@@ -94,6 +94,7 @@
     float: right;
     font-family: 'Source Sans Pro', sans-serif;
     font-weight: 400;
+    margin-left: .5em;
 }
 
 #HWsubmission .hidden{

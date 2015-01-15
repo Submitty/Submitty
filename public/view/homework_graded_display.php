@@ -58,9 +58,21 @@
 						echo " <tt>".$test["details"]."</tt>";
 					}
 				}
-				echo '<!-- BADGE TEST SCORE -->';
-				if ($test["is_extra_credit"] == true) {
-					echo '<span class="test_type">Extra Credit</span>';
+				if ($test["is_hidden"]) {
+					echo '<span class="hidden view_file">Hidden</span>';
+				}
+				else if ( (isset($test["diffs"]) && count($test["diffs"]) > 0) || (isset($test["compilation_output"]) ) )
+					{
+						if ($test["message"] != "") {
+							echo '<span class="error_mess">'.$test["message"].'</span>';
+						}
+						?>
+						<a class = "view_file" href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
+						<?php
+					}
+					echo '<!-- BADGE TEST SCORE -->';
+					if ($test["is_extra_credit"] == true) {
+						echo '<span class="test_type">Extra Credit</span>';
 				}
 				if ($view_points == true && $test["points_visible"] == false && $test["points_possible"] != 0){
 					echo '<span class="'.$class.'">';
@@ -72,24 +84,14 @@
 					}
 					echo '</span>';
 				}
-				if ($test["is_hidden"]) {
-					echo '<span class="hidden view_file">Hidden</span>';
-					echo '</div><!-- End box -->';
-					continue;
-				}
-				if (/* (isset($test["diff"]) && $test["diff"] != "") || */
-					(isset($test["diffs"]) && count($test["diffs"]) > 0) ||
-					(isset($test["compilation_output"])) )
-				{
-					if ($test["message"] != "") {
-						echo '<span class="error_mess">'.$test["message"].'</span>';
-					}
-					?>
-					<a class = "view_file" href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
-					<?php
-				}
 				?>
 			</h4>
+			<?php
+			if ($test["is_hidden"]) {
+				echo '</div><!-- End box -->';
+				continue;
+			}
+			?>
 			<div id="sidebysidediff<?php echo $counter;?>"  class="view_diffs" style="display:none">
 				<!-- DIFF (FIX FROM HERE) -->
 				<?php
