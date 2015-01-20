@@ -34,7 +34,6 @@
 
 #HWsubmission .diff-element{
     margin-left: 20px;
-    margin-right: 20px;
 
 }
 
@@ -60,7 +59,7 @@
 }
 
 #HWsubmission .panel {
-    margin: 10px 20px 10px 10px;
+    margin: 10px 0 10px 10px;
     border-radius: 0;
     background-color: #F8F8F8;
     overflow-x: auto;
@@ -257,6 +256,7 @@
 #HWsubmission .error_mess_diff{
     font-style: italic;
     margin-left: 40px;
+    color: #af0000;
 }
 
 #HWsubmission .complation_mess{
