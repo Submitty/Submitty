@@ -66,9 +66,17 @@
 						if ($test["message"] != "") {
 							echo '<span class="error_mess">'.$test["message"].'</span>';
 						}
-						?>
-						<a class = "view_file" href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
-						<?php
+						if (isset($test["diffs"])){
+							?>
+							<a class = "view_file" href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
+							<?php
+						}
+						else{
+							?>
+							<a class = "view_file" >No Details</a>
+							<?php
+
+						}
 					}
 					echo '<!-- BADGE TEST SCORE -->';
 					if ($test["is_extra_credit"] == true) {
@@ -91,10 +99,17 @@
 				echo '</div><!-- End box -->';
 				continue;
 			}
-			?>
-			<div id="sidebysidediff<?php echo $counter;?>"  class="view_diffs" style="display:none">
-				<!-- DIFF (FIX FROM HERE) -->
+			if (count($homework_tests) == 1){
+				?>
+				<div id="sidebysidediff<?php echo $counter;?>"  class="view_diffs" style="display:block">
 				<?php
+			}
+			else{
+				?>
+				<div id="sidebysidediff<?php echo $counter;?>"  class="view_diffs" style="display:none">
+				<?php
+			}
+
 				if (isset($test["compilation_output"]) && $test["compilation_output"]!=" ") {
 					echo '<div class="diff-block"><b class="sub2">Compilation output:</b><pre class="complation_mess">'.$test["compilation_output"].'</pre></div>'; //TODO: remove table here
 				}
@@ -105,32 +120,26 @@
 					<?php
 					if (isset($test["diffs"])) {
 						foreach ($test["diffs"] as $diff) {
-							if (	isset($diff["student"]) &&
-							!isset($diff["instructor"])  &&
-							!isset($diff["description"]) &&
-							!isset($diff["message"])
+							if (	(isset($diff["student"]) && trim($diff["student"]) != "") &&
+							(!isset($diff["instructor"]) || trim($diff["instructor"]) == "")  &&
+							(!isset($diff["description"]) || trim($diff["description"]) == "") &&
+							(!isset($diff["message"]) || trim($diff["message"]) == "")
 							)
 							{
 								continue;
 							}
-							if (0) /*isset($diff["description"]))*/
-							{
-								echo '<b>'.$diff["description"].'</b>';
-								echo '<br />';
-							}
-							if (isset($diff["message"]) && $diff["message"]!=" ") {
+							if (isset($diff["message"]) && trim($diff["message"])!="") {
 								echo '<div class="diff-block"><a class="error_mess_diff">'.$diff["message"].'</a></div>';
 								echo '<div class="spacer"></div>';
 							}
-							if (!isset($diff["student"]) && !isset($diff["instructor"]))
+							if ((!isset($diff["student"]) || trim($diff["student"]) == "") && (!isset($diff["instructor"]) || trim($diff["instructor"]) == ""))
 							{
 								continue;
 							}
 							if (isset($diff["instructor"])) {
 								$instructor_row_class = "diff-row";
 							}
-							else
-							{
+							else{
 								$instructor_row_class = "diff-row-none";
 							}
 							?>
@@ -141,7 +150,7 @@
 
 									<div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
 										<?php
-										if (isset($diff["student"]))
+										if (isset($diff["student"]) && trim($diff["student"]) != "")
 										{
 											//echo str_replace(" ", "&nbsp;", $diff["student"]);
 											echo '<tt class="mono">'.$diff["student"].'</tt>';
@@ -153,24 +162,30 @@
 										}?>
 									</div>
 								</div><!-- end student diff element -->
-								<div class="diff-element"><!-- instructor diff element -->
+								<?php
+								if 	(isset($diff["instructor"]) && trim($diff["instructor"]) != ""){
+									?>
+									<div class="diff-element"><!-- instructor diff element -->
 
-										<b>Expected <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b>
+											<b>Expected <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b>
 
-									<div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_instructor">
-										<?php
-										if (isset($diff["instructor"]))
-										{
-											// echo str_replace(" ", "&nbsp;", $diff["instructor"]);
-											// echo "~~~~~~~~~~~~~~~~~~~~~~\n";
-											echo '<tt class="mono">'.$diff["instructor"].'</tt>';
-										}
-										else
-										{
-											echo "";
-										}?>
-									</div>
-								</div><!-- end instructor diff element -->
+										<div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_instructor">
+											<?php
+											if (isset($diff["instructor"]) && trim($diff["instructor"]) != "")
+											{
+												// echo str_replace(" ", "&nbsp;", $diff["instructor"]);
+												// echo "~~~~~~~~~~~~~~~~~~~~~~\n";
+												echo '<tt class="mono">'.$diff["instructor"].'</tt>';
+											}
+											else
+											{
+												echo "";
+											}?>
+										</div>
+									</div><!-- end instructor diff element -->
+									<?php
+								}
+								?>
 								<!-- <div style="clear:both;"></div> -->
 								<script><!-- script -->
 									diff_queue.push("<?php echo $diff["diff_id"]; ?>");
