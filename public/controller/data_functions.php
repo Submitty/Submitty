@@ -426,6 +426,35 @@ function is_ta_grade_released($class_config, $assignment_id) {
     return ""; //TODO Error handling
 }
 
+function is_points_visible($class_config, $assignment_id) {
+  $assignments = $class_config["assignments"];
+  foreach ($assignments as $one) {
+    if ($one["assignment_id"] == $assignment_id) {
+      if (isset($one["view_points"]) && $one["view_points"] == false) {
+        return false;
+      }
+      else {
+        return true;
+      }
+    }
+  }
+  return ""; //TODO Error handling
+}
+
+function is_hidden_points_visible($class_config, $assignment_id) {
+  $assignments = $class_config["assignments"];
+  foreach ($assignments as $one) {
+    if ($one["assignment_id"] == $assignment_id) {
+      if (isset($one["view_hidden_points"]) && $one["view_hidden_points"] == true) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+  }
+  return ""; //TODO Error handling
+}
 
 // Check to make sure instructor has added this assignment
 function is_valid_semester($semester) {
@@ -485,6 +514,53 @@ function is_valid_assignment_version($username, $semester, $course, $assignment_
     return file_exists($path);
 }
 
+function is_valid_file_name($username, $semester, $course, $assignment_id, $assignment_version, $file_name){
+        if (!is_valid_semester($semester)) { display_error("get_submitted_files, INVALID SEMESTER: ".$semester); }
+        if (!is_valid_course($course))     { display_error("get_submitted_files, INVALID COURSE: ".$course); }
+        if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) { display_error("get_submitted_files, INVALID Assignment Version: ".$course); }
+
+        $path_front = get_path_front_course($semester,$course);
+        $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
+        $contents = array();
+        if ($assignment_version != 0) {
+            $contents = get_contents($folder, 5);
+        }
+        for ($i = 0; $i < count($contents); $i++) {
+            if ($file_name == substr($contents[$i]["name"], strlen($folder) + 1)){
+                return true;
+            }
+        }
+        return false;
+}
+
+function get_file($username, $semester, $course, $assignment_id, $assignment_version, $file_name){
+    if (!is_valid_semester($semester)) { display_error("get_submitted_files, INVALID SEMESTER: ".$semester); }
+    if (!is_valid_course($course))     { display_error("get_submitted_files, INVALID COURSE: ".$course); }
+    if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) { display_error("get_submitted_files, INVALID Assignment Version: ".$course); }
+
+    $path_front = get_path_front_course($semester,$course);
+    $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
+    $contents = array();
+    if ($assignment_version != 0) {
+        $contents = get_contents($folder, 5);
+    }
+    for ($i = 0; $i < count($contents); $i++) {
+        if ($file_name == substr($contents[$i]["name"], strlen($folder) + 1)){
+            return $contents[$i]["name"];
+        }
+    }
+    return "";
+}
+function get_all_files($username, $semester, $course, $assignment_id, $assignment_version){
+    if (!is_valid_semester($semester)) { display_error("get_submitted_files, INVALID SEMESTER: ".$semester); }
+    if (!is_valid_course($course))     { display_error("get_submitted_files, INVALID COURSE: ".$course); }
+    if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) { display_error("get_submitted_files, INVALID Assignment Version: ".$course); }
+
+    $path_front = get_path_front_course($semester,$course);
+    $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
+    return $folder;
+}
+
 function version_in_grading_queue($username, $semester, $course, $assignment_id, $assignment_version) {
     $path_front = get_path_front_course($semester,$course);
     if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {//If its not in the submissions folder
@@ -533,6 +609,8 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
                 $data["message"] = isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "";
                 $data["is_hidden"] = $testcases_info[$i]["hidden"];
                 $data["is_extra_credit"] = $testcases_info[$i]["extracredit"];
+                $data["visible"] = $testcases_info[$i]["visible"];
+                $data["points_visible"] = $testcases_info[$i]["points_visible"];
 
                 if (isset($testcases_results[$u]["compilation_output"])) {
                     $data["compilation_output"] = get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]);

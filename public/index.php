@@ -40,6 +40,8 @@ if ($page == "upload") {
     require_once("controller/update.php");
 } else if ($page == "checkrefresh") {
     require_once("controller/check_refresh.php");
+} else if ($page == "viewfile") {
+    require_once("controller/viewfile.php");
 } else {
     require_once("controller/homework.php");
 }

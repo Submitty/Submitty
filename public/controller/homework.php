@@ -22,7 +22,7 @@ $most_recent_assignment_version = most_recent_assignment_version($username, $sem
 
 $all_assignments = $class_config["assignments"];
 
-// FIXME: New variable in class.json 
+// FIXME: New variable in class.json
 $dev_team = $class_config["dev_team"];
 
 //Get and validate assignment_id and assignment_version
@@ -32,7 +32,8 @@ $assignment_version = parse_assignment_version($username, $semester,$course, $as
 
 $assignment_name = name_for_assignment_id($class_config, $assignment_id);
 $ta_grade_released = is_ta_grade_released($class_config, $assignment_id);
-
+$view_points = is_points_visible($class_config, $assignment_id);
+$view_hidden_points = is_hidden_points_visible($class_config, $assignment_id);
 $highest_version = most_recent_assignment_version($username, $semester,$course, $assignment_id);
 
 //Assignment configuration data from assignmnet_config.json
@@ -66,6 +67,32 @@ $assignment_version_in_grading_queue = version_in_grading_queue($username, $seme
 
 $points_visible = get_points_visible($homework_tests);
 
+if (isset($class_config["download_files"])){
+    $download_files = $class_config["download_files"];
+}
+else{
+    $download_files = false;
+}
+if (isset($class_config["download_readme"])){
+    $download_readme = $class_config["download_readme"];
+}
+else{
+    $download_readme = false;
+}
+if (isset($class_config["grade_summary"])){
+    $grade_summary = $class_config["grade_summary"];
+}
+else{
+    $grade_summary = true;
+}
+if (isset($class_config["ta_grades"])){
+    $ta_grades = $class_config["ta_grades"];
+}
+else{
+    $ta_grades = true;
+}
+
+
 //Data for assignment verion quick select dropdown
 $select_submission_data = get_select_submission_data($username, $semester,$course, $assignment_id, $assignment_config, $highest_version);
 
@@ -78,10 +105,15 @@ render("homework", array(
     "all_assignments"=>$all_assignments,
     "dev_team"=>$dev_team,
     "points_visible"=>$points_visible,
-    
+    "view_points"=>$view_points,
+    "view_hidden_points"=>$view_hidden_points,
+    "download_files"=>$download_files,
+    "download_readme"=>$download_readme,
+    "grade_summary"=>$grade_summary,
+    "ta_grades"=>$ta_grades,
       // added for debugging
     "username"=>$username,
-    
+
     "homework_tests"=>$homework_tests,
     "select_submission_data"=>$select_submission_data,
     "submitting_version"=>$submitting_version,

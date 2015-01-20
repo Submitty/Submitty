@@ -29,10 +29,12 @@ extern const int max_cputime;
 
 class TestCasePoints {
 public:
-  TestCasePoints(int p=0, bool h=false, bool ec=false) : points(p),hidden(h),extra_credit(ec) {}
+  TestCasePoints(int p=0, bool h=false, bool ec=false, bool view_test_case=true, bool view_points=false ) : points(p),hidden(h),extra_credit(ec),visible(view_test_case),points_visible(view_points) {}
   int points;
   bool hidden;
   bool extra_credit;
+  bool visible;
+  bool points_visible;
 };
 
 
@@ -242,7 +244,6 @@ public:
     return test_case_grader[i]->getExpected();
   }
   */
-
   int points () const {
     return _test_case_points.points;
   }
@@ -251,6 +252,12 @@ public:
   }
   bool extracredit () const {
     return _test_case_points.extra_credit;
+  }
+  bool points_visible () const {
+      return _test_case_points.points_visible;
+  }
+  bool visible () const {
+      return _test_case_points.visible;
   }
 
   /* Calls the function designated by the function pointer; if the function pointer

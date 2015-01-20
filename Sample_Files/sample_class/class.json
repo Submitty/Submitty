@@ -16,6 +16,10 @@
     ],
     "dev_team": [
         "dev"
-        ]
+    ],
+    "ta_grades":true,
+    "grade_summary":true,
+    "download_readme":true,
+    "download_files":false
 
 }

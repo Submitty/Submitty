@@ -29,11 +29,8 @@ const int auto_pts = 1;
 const int ta_pts = 0;
 const int extra_credit_pts = 0;
 
-// Test cases
-const int num_testcases = 1;
-
-TestCase testcases[num_testcases] = {
-
+std::vector<TestCase> testcases
+{
 /************* README AND COMPILATION *****************/
 
   TestCase::MakeFileExists
