@@ -29,13 +29,21 @@ function assignment_changed(){
 
    var php_course = "<?php echo $course; ?>";
    var php_semester = "<?php echo $semester; ?>";
-  window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value;
+  window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+'#scroll=' + window.scrollY;
 }
 function version_changed(){
    var php_course = "<?php echo $course; ?>";
    var php_semester = "<?php echo $semester; ?>";
-  window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+"&assignment_version="+document.getElementById('versionlist').value;
+  window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+"&assignment_version="+document.getElementById('versionlist').value+'#scroll=' + window.scrollY;
 }
+
+window.addEventListener('load', function() {
+    // Do we have a #scroll in the URL hash?
+    if(window.location.hash && /#scroll/.test(window.location.hash)) {
+        // Scroll to the #scroll value
+        window.scrollTo(0, window.location.hash.replace('#scroll=', ''));
+    }
+});
 </script>
 
 <!--- IDENTIFY USER & SELECT WHICH HOMEWORK NUMBER -->
@@ -153,7 +161,7 @@ function version_changed(){
                             <select id="versionlist" name="assignment_version" onchange="version_changed();">
                                 <?php
                                 for ($i = 1; $i <= $highest_version; $i++) {
-                                    echo '<option value="'.$i.' " ';
+                                    echo '<option value="'.$i.'"';
                                     if ($i == $assignment_version)
                                     {
                                         echo 'selected';
