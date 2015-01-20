@@ -30,14 +30,8 @@ const int ta_pts = 25;
 const int extra_credit_pts = 5;
 
 // Test cases
-const int num_testcases = 11;
-
-// UI Interface
-const bool view_points = true;
-const bool view_hidden_points = false;
-
-TestCase testcases[num_testcases] = {
-
+std::vector<TestCase> testcases
+{
     /************* README AND COMPILATION *****************/
 
     TestCase::MakeFileExists(
