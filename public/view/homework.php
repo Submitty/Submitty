@@ -139,7 +139,7 @@ function version_changed(){
                                 {
                                     echo " is currently being graded.";
                                 }
-                                else
+                                else if ($points_visible != 0)
                                 {
                                     echo "  Score: ".$submitting_version_score;
                                 }
@@ -161,10 +161,12 @@ function version_changed(){
                                     echo ' > ';
                                     echo 'Version #'.$i;
                                     echo '&nbsp;&nbsp';
-                                    echo 'Score: ';
-                                    // <!-- FIX ME: INSERT SCORE FOR THIS VERSION... -->
-                                    echo $select_submission_data[$i-1]["score"];
-                                    echo '&nbsp;&nbsp';
+                                    if ($points_visible != 0){
+                                        echo 'Score: ';
+                                        // <!-- FIX ME: INSERT SCORE FOR THIS VERSION... -->
+                                        echo $select_submission_data[$i-1]["score"];
+                                        echo '&nbsp;&nbsp';
+                                    }
                                     if ($select_submission_data[$i-1]["days_late"] != "")
                                     {
                                         echo 'Days Late: ';
