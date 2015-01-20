@@ -24,9 +24,12 @@
 		{
 			if ( $test["visible"]==true)
 			{
-
+				if ($counter != 0){
+					?>
+					<br clear="all">
+						<?php 
+				}
 				?>
-		<br clear="all">
 		<div class="box">
 			<?php //score, points, and points possible are set.Is not hidden and is not extra credit
 			if (  isset($test["score"]) &&
