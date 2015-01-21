@@ -130,7 +130,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     if (!is_valid_assignment($class_config, $assignment_id)) {
         return array("error"=>"", "message"=>$assignment_id." is not a valid assignment");
     }
-    $assignment_config = get_assignment_config($username, $semester, $course, $assignment_id);
+    $assignment_config = get_assignment_config($semester, $course, $assignment_id);
     if (!can_edit_assignment($username, $semester, $course, $assignment_id, $assignment_config)) {//Made sure the user can upload to this homework
         return array("error"=>"assignment_closed", "message"=>$assignment_id." is closed.");
     }
@@ -627,7 +627,7 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
                 $data["is_hidden"] = $testcases_info[$i]["hidden"];
                 $data["is_extra_credit"] = $testcases_info[$i]["extracredit"];
                 $data["visible"] = $testcases_info[$i]["visible"];
-                $data["points_visible"] = $testcases_info[$i]["points_visible"];
+                $data["view_test_points"] = $testcases_info[$i]["view_test_points"];
 
                 if (isset($testcases_results[$u]["compilation_output"])) {
                     $data["compilation_output"] = get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]);
@@ -711,13 +711,9 @@ function get_select_submission_data($username, $semester,$course, $assignment_id
 
 
 // Get the test cases from the instructor configuration file
-function get_assignment_config($username, $semester,$course, $assignment_id) {
+function get_assignment_config($semester,$course, $assignment_id) {
     $path_front = get_path_front_course($semester,$course);
-//    $file = $path_front."/results/".$assignment_id."/assignment_config.json";
     $file = $path_front."/config/".$assignment_id."_assignment_config.json";
-
-    //	      echo "GET ASSIGNMENT CONFIG ".$file."<br>";
-
     if (!file_exists($file)) {
         return false;//TODO Handle this case
     }
