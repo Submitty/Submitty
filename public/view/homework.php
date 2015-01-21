@@ -203,10 +203,11 @@ window.addEventListener('load', function() {
                         <!-- CHANGE ACTIVE VERSION -->
                         <?php
                         if ($assignment_version != $submitting_version) {
+			   echo '&nbsp;&nbsp;&nbsp;&nbsp;';
                             echo '<a href="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'" ';
-                            echo 'style="text-align:center;"><input type="submit" class="btn btn-primary" value="Set Version '.$assignment_version.' as Active Submission Version"></input></a>';
+                            echo 'style="text-align:center;"><input type="submit" class="btn btn-primary" value="Set Version '.$assignment_version.' as ACTIVE Submission Version"></input></a>';
                         } else {
-			   echo '<b>This is the "ACTIVE" version</b>';
+			   echo '<em>Note: This is your "ACTIVE" submission version, which will be graded by the TAs and the score recorded in the gradebook.</em>';
 			   }
                         ?>
                     </div> <!-- class="split-row" -->
