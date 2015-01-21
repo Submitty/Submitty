@@ -17,7 +17,7 @@ if ($class_config == NULL) {
     <?php exit();
 }
 
-$most_recent_assignment_id = $class_config["default_assignment"];
+$most_recent_assignment_id =      most_recent_released_assignment_id($class_config);
 $most_recent_assignment_version = most_recent_assignment_version($username, $semester,$course, $most_recent_assignment_id);
 
 $all_assignments = $class_config["assignments"];
