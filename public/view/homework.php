@@ -49,22 +49,23 @@ window.addEventListener('load', function() {
 <!--- IDENTIFY USER & SELECT WHICH HOMEWORK NUMBER -->
 <div id="HWsubmission">
     <h2 class="label">Homework Submission for <em> <?php echo $user;?> </em>
-    <?php
-    if (on_dev_team($user)) {
-       echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ]";
-       
-       //echo "(dev team =";
-       //for ($i=0; $i<count($dev_team); $i++) {
-					 //    echo " ".$dev_team[$i];
-					 //}
-					 //echo ")";
-					 
-       echo "</font>";
-      }
+          <?php
+          if (on_dev_team($user)) {
+             echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ]";
+             /*
+                 echo "(dev team =";
+                 for ($i=0; $i<count($dev_team); $i++) {
+      	      echo " ".$dev_team[$i];
+      	   }
+        	   echo ")";
+             */				 
+             echo "</font>";
+            }
+      
+          ?>
+    </h2>
 
-    ?>
-</h2>
-
+    <!-- PRIORITY HELP QUEUE-->
     <?php
     $path_front = get_path_front_course($semester,$course);;
     $priority_path = "$path_front/reports/summary_html/".$username."_priority.html";

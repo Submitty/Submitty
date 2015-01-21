@@ -329,6 +329,8 @@ function get_due_date($class_config, $assignment_id) {
 
 //Gets the class information for assignments
 
+
+
 function get_class_config($semester,$course) {
    if (!is_valid_semester($semester)) { display_error("get_class_config, INVALID SEMESTER: ".$semester); }
    if (!is_valid_course($course))     { display_error("get_class_config, INVALID COURSE: ".$course); }
@@ -342,6 +344,21 @@ function get_class_config($semester,$course) {
     }
     return json_decode(removeTrailingCommas(file_get_contents($file)), true);
 }
+
+
+function most_recent_released_assignment_id($class_config) {
+    // eliminating "default_assignment" in class.json, always used last "released" homework!
+    // return $class_config["default_assignment"];
+    $assignments = $class_config["assignments"];
+    $last="";
+    foreach ($assignments as $one) {
+        if ($one["released"] == true) {
+             $last=$one["assignment_id"];
+        }
+    }
+    return $last;
+}
+
 
 // Get a list of uploaded files
 
