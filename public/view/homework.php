@@ -48,16 +48,23 @@ window.addEventListener('load', function() {
 
 <!--- IDENTIFY USER & SELECT WHICH HOMEWORK NUMBER -->
 <div id="HWsubmission">
-    <h2 class="label">Homework Submission for <em> <?php echo $user;?> </em></h2>
+    <h2 class="label">Homework Submission for <em> <?php echo $user;?> </em>
     <?php
     if (on_dev_team($user)) {
-        echo "<font color=\"ff0000\" size=+5>on dev team</font>";
-        echo "<br>the Dev Team = ";
-        for ($i=0; $i<count($dev_team); $i++) {
-            echo " ".$dev_team[$i];
-        }
-    }
+       echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ]";
+       
+       //echo "(dev team =";
+       //for ($i=0; $i<count($dev_team); $i++) {
+					 //    echo " ".$dev_team[$i];
+					 //}
+					 //echo ")";
+					 
+       echo "</font>";
+      }
+
     ?>
+</h2>
+
     <?php
     $path_front = get_path_front_course($semester,$course);;
     $priority_path = "$path_front/reports/summary_html/".$username."_priority.html";
@@ -69,7 +76,7 @@ window.addEventListener('load', function() {
 
     <div class="sub"> <!-- sub -->
         <form class="form_submit" action="">
-            <label>Select Lab or Homework:</label>
+            <label class="label">Select Assignment:</label>
             <select id="hwlist" name="assignment_id" onchange="assignment_changed();">
                 <?php
                 for ($i = 0; $i < count($all_assignments); $i++)
@@ -140,9 +147,11 @@ window.addEventListener('load', function() {
 
                 <div class="sub-text">
                     <div class="split-row">
-                        <div>
-                            <b>Active  Submission Version #
-                                <?php echo $submitting_version." of ".$highest_version.": </b> ";
+<!--                        <div>
+                            < !---<b>Active  Submission Version #-- >
+                                <?php 
+//echo $submitting_version." of ".$highest_version.": </b> ";
+
                                 if ($submitting_version_in_grading_queue)
                                 {
                                     echo " is currently being graded.";
@@ -153,10 +162,10 @@ window.addEventListener('load', function() {
                                 }
                                 ?>
                         </div>
-
+-->
                         <!-- SELECT A PREVIOUS SUBMISSION -->
                         <form class="form_submit" action="">
-                            <label><em>Select Submission Version:</em></label>
+                            <label class="label"><em>Select Submission Version:</em></label>
                             <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
                             <select id="versionlist" name="assignment_version" onchange="version_changed();">
                                 <?php
@@ -193,9 +202,11 @@ window.addEventListener('load', function() {
                         <!-- CHANGE ACTIVE VERSION -->
                         <?php
                         if ($assignment_version != $submitting_version) {
-                            echo '<a href="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version;
-                            echo 'style="text-align:center;"><input type="submit" class="btn btn-primary" value="Set Version '.$assignment_version.' as Active  Submission Version"></input></a>';
-                        }
+                            echo '<a href="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'" ';
+                            echo 'style="text-align:center;"><input type="submit" class="btn btn-primary" value="Set Version '.$assignment_version.' as Active Submission Version"></input></a>';
+                        } else {
+			   echo '<b>This is the "ACTIVE" version</b>';
+			   }
                         ?>
                     </div> <!-- class="split-row" -->
                 </div>
@@ -213,8 +224,9 @@ window.addEventListener('load', function() {
                     ?>
                 </h4>
                     <?php
-                        foreach($submitted_files as $file) {
-                            echo '<div class="box">';
+                       echo '<div class="box">';
+                          foreach($submitted_files as $file) {
+
                                 echo '<p class="file-header">'.$file["name"].' ('.$file["size"].'kb)';
                                 if (isset($download_files) && $download_files == true){
                                     echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
@@ -223,9 +235,10 @@ window.addEventListener('load', function() {
                                     echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
                                 }
                                 echo '</p>';
-                                echo '</div>';
+                         
                             }
-                            ?>
+		       echo '</div>';
+                     ?>
                 </div>
                 <?php if ($assignment_version_in_grading_queue) {?>
                     <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
@@ -267,7 +280,7 @@ window.addEventListener('load', function() {
                     }
                     else
                     {
-                        echo '<h3 class="label2">TA grades for this homework not released yet</h3>';
+                   //echo '<h3 class="label2">TA grades for this homework not released yet</h3>';
                     }
                     //<!-- END OF "IF AT LEAST ONE SUBMISSION... " -->
                     echo "</div> <!-- end outer_box -->";
@@ -281,7 +294,7 @@ window.addEventListener('load', function() {
                 $gradefile_path = "$path_front/reports/summary_html/".$username."_summary.html";
                 if (!file_exists($gradefile_path))
                 {
-                    echo '<h3 class="label2">Grade Summary not available</h3>';
+                   //echo '<h3 class="label2">Grade Summary not available</h3>';
                 }
                 else
                 {
