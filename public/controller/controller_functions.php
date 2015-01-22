@@ -1,5 +1,6 @@
 <?php
 //CONTROLLER FUNCTIONS
+
 function render($viewpage, $data = array()) {
     $path = 'view/'.$viewpage.'.php';
     if (file_exists($path)) {
@@ -89,26 +90,9 @@ function on_dev_team($test_user) {
 }
 
 
-function check_course(){
-    if (isset($_GET["course"])) {
-        $course = htmlspecialchars($_GET["course"]);
-        if (is_valid_course($course)) {
-            return $course;
-        }
-        $_SESSION["status"] = "Invalid course specified";
-    }
-    else{
-        $_SESSION["status"] = "No course specified";
-    }
-    // FIXME: need a better default
-    $course = "default_course";
-    // FIXME, displaymesssage does not exist
-    header("Location: index.php?page=displaymessage&course=".$course);
-    exit();
-}
-
-
 function check_semester(){
+    include 'controller/defaults.php';
+
     if (isset($_GET["semester"])) {
         $semester = htmlspecialchars($_GET["semester"]);
         if (is_valid_semester($semester)) {
@@ -119,10 +103,35 @@ function check_semester(){
     else{
         $_SESSION["status"] = "No semester specified";
     }
-    $semester = "default_semester";
+    $semester = $default_semester;
+    if (is_valid_semester($semester)){
+        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".check_course());
+        exit();
+    }
+    return $semester;
+}
+
+function check_course(){
+    include 'controller/defaults.php';
+
+    if (isset($_GET["course"])) {
+        $course = htmlspecialchars($_GET["course"]);
+        if (is_valid_course($course)) {
+            return $course;
+        }
+        $_SESSION["status"] = "Invalid course specified";
+    }
+    else{
+        $_SESSION["status"] = "No course specified";
+    }
+    // FIXME: need selection page
+    $course = $default_course;
     // FIXME, displaymesssage does not exist
-    header("Location: index.php?page=displaymessage&semester=".$semester."&course=".check_course());
-    exit();
+    if (is_valid_course($course)){
+        header("Location: index.php?page=displaymessage&semester=".check_semester()."&course=".$course);
+        exit();
+    }
+    return $course;
 }
 
 
