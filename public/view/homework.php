@@ -1,11 +1,9 @@
 <?php
 require_once("controller/controller_functions.php");
 
-$semester = check_semester();
-$course = check_course();
-
 print('<!-- Course Container -->');
 require_once("view/".$semester."_".$course."_container.php");
+
 print('<!-- Course CSS -->');
 print('<link href="resources/'.$semester."_".$course.'_main.css" rel="stylesheet"></link>');
 ?>

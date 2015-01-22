@@ -48,7 +48,7 @@ function parse_status() {
     return $status;
 }
 
-function parse_assignment_id($class_config, $most_recent_assignment_id) {
+function parse_assignment_id_with_recent($class_config, $most_recent_assignment_id) {
     if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants to see
         $assignment_id = htmlspecialchars($_GET["assignment_id"]);
         if (is_open_assignment($class_config, $assignment_id)) {
@@ -61,7 +61,7 @@ function parse_assignment_id($class_config, $most_recent_assignment_id) {
     return $most_recent_assignment_id;
 }
 
-function parse_assignment_version($username, $semester, $course, $assignment_id) {
+function parse_assignment_version_with_recent($username, $semester, $course, $assignment_id) {
     if (isset($_GET["assignment_version"])) {
         $assignment_version = htmlspecialchars($_GET["assignment_version"]);
         if (is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {

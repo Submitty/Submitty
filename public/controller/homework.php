@@ -28,8 +28,8 @@ $dev_team =                         $class_config["dev_team"];
 
 //Get and validate assignment_id and assignment_version
 //If not valid do last homework, last version
-$assignment_id =                    parse_assignment_id($class_config, $most_recent_assignment_id);
-$assignment_version =               parse_assignment_version($username, $semester,$course, $assignment_id);
+$assignment_id =                    parse_assignment_id_with_recent($class_config, $most_recent_assignment_id);
+$assignment_version =               parse_assignment_version_with_recent($username, $semester,$course, $assignment_id);
 
 $assignment_name =                  name_for_assignment_id($class_config, $assignment_id);
 $ta_grade_released =                is_ta_grade_released($class_config, $assignment_id);
