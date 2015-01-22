@@ -1,6 +1,8 @@
 <?php
-$course = htmlspecialchars($_GET["course"]);
-$semester = htmlspecialchars($_GET["semester"]);
+require_once("controller/controller_functions.php");
+
+$semester = check_semester();
+$course = check_course();
 
 print('<!-- Course Container -->');
 require_once("view/".$semester."_".$course."_container.php");

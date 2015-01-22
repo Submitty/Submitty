@@ -1,27 +1,9 @@
 <?php
-
 require_once("controller/data_functions.php");
+require_once("controller/controller_functions.php");
 
-$semester = "REFRESH_CHECK_NO_SEMESTER";
-if (isset($_GET["semester"])) {
-    $new_semester = htmlspecialchars($_GET["semester"]);
-    if (!is_valid_semester($new_semester)) {
-        $semester = "REFRESH_CHECK_BAD_SEMESTER";
-    } else {
-        $semester = $new_semester;
-    }
-}
-
-
-$course = "REFRESH_CHECK_NO_COURSE";
-if (isset($_GET["course"])) {
-    $new_course = htmlspecialchars($_GET["course"]);
-    if (!is_valid_course($new_course)) {
-        $course = "REFRESH_CHECK_BAD_COURSE";
-    } else {
-        $course = $new_course;
-    }
-}
+$course=check_course();
+$semester=check_semester();
 
 if (isset($_POST["assignment_id"]) && isset($_POST["assignment_version"]) && isset($_POST["submitting_version"]) && isset($_POST["assignment_graded"]) && isset($_POST["submitting_graded"])) {
     $assignment_id = htmlspecialchars($_POST["assignment_id"]);

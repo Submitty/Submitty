@@ -127,7 +127,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     if ($username !== $_SESSION["id"]) {//Validate the id
         return array("error"=>"", "message"=>"User Id invalid.  ".$username." != ".$_SESSION["id"]);
     }
-    if (!is_valid_assignment($class_config, $assignment_id)) {
+    if (!is_open_assignment($class_config, $assignment_id)) {
         return array("error"=>"", "message"=>$assignment_id." is not a valid assignment");
     }
     $assignment_config = get_assignment_config($semester, $course, $assignment_id);
@@ -367,6 +367,7 @@ function get_submitted_files($username, $semester, $course, $assignment_id, $ass
     if (!is_valid_semester($semester)) { display_error("get_submitted_files, INVALID SEMESTER: ".$semester); }
     if (!is_valid_course($course))     { display_error("get_submitted_files, INVALID COURSE: ".$course); }
 
+
     $path_front = get_path_front_course($semester,$course);
     $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
     $contents = array();
@@ -518,7 +519,28 @@ function is_valid_assignment($class_config, $assignment_id) {
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
         if ($one["assignment_id"] == $assignment_id) {
+
             return true;
+        }
+    }
+    return false;
+}
+
+function is_open_assignment($class_config, $assignment_id){
+    $assignments = $class_config["assignments"];
+    foreach ($assignments as $one) {
+        if ($one["assignment_id"] == $assignment_id) {
+            if ($one["released"] == true)
+            {
+                return true;
+            }
+            else{
+                $user = $_SESSION["id"];
+
+                if (on_dev_team($user)) {
+                    return true;
+                }
+            }
         }
     }
     return false;
@@ -816,14 +838,14 @@ function get_compilation_output($file) {
 
 function get_student_file($file) {
     if (!file_exists($file)) {
-        return "FILE DOES NOT EXIST $file";
+        return "";
     }
 
     $contents = file_get_contents($file);
     $contents = str_replace(">","&gt;",$contents);
     $contents = str_replace("<","&lt;",$contents);
 
-    return $contents;
+    return "$contents";
 
 }
 

@@ -1,12 +1,13 @@
 <?php
 require_once("controller/controller_functions.php");
 require_once("controller/data_functions.php");
+
 //Make model function calls for homework here
 
 //URL PARSING
 $status = parse_status();
-$semester = parse_semester();
-$course = parse_course();
+$semester = check_semester();
+$course = check_course();
 
 $username = $_SESSION["id"];
 //END URL PARSING

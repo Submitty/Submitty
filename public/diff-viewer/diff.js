@@ -157,8 +157,13 @@ var diff = function(){
 		// Load generated css
 		for (var i = 0;i < style.length;i++){
 			console.log(style[i]);
+
+			$('#' + first_diff_tag + ' > ' + style[i][0]).addClass(style[i][1]);
+			$('#' + second_diff_tag + ' > ' + style[i][0]).addClass(style[i][1]);
+
 			$('#' + first_diff_tag + ' > > ' + style[i][0]).addClass(style[i][1]);
 			$('#' + second_diff_tag + ' > > ' + style[i][0]).addClass(style[i][1]);
+
 		}
 
 		// Create association events
@@ -214,8 +219,9 @@ var diff = function(){
 				"'>"+(line_number+1)+"</span>" + lines[i] + "</div>";
 			line_number ++;
 		}
-		//element.innerHTML = "<pre>" + html + "</pre>";
-		element.innerHTML = "<span>"+ html + "</span>";
+		// element.innerHTML = "<div>" + html + "</div>";
+		// element.innerHTML = "<span>"+ html + "</span>";
+		element.innerHTML =  html;
 
 	}
 
