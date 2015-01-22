@@ -121,16 +121,9 @@
 				echo '</div><!-- End box -->';
 				continue;
 			}
-			if (count($homework_tests) == 1){
-				?>
-				<div id="sidebysidediff<?php echo $counter;?>"  class="view_diffs" style="display:block">
-				<?php
-			}
-			else{
-				?>
-				<div id="sidebysidediff<?php echo $counter;?>"  class="view_diffs" style="display:none">
-				<?php
-			}
+			?>
+			<div id="sidebysidediff<?php echo $counter;?>"  class="view_diffs" style="display:block">
+			<?php
 
 				if (isset($test["compilation_output"]) && trim($test["compilation_output"])!="") {
 					echo '<div class="diff-block"><b class="sub2">Compilation output:</b><pre class="complation_mess">'.$test["compilation_output"].'</pre></div>';
@@ -163,7 +156,9 @@
 										<?php
 										if (isset($diff["student"]) && trim($diff["student"]) != "")
 										{
-											echo '<tt class="mono">'.$diff["student"].'</tt>';
+											echo '<tt class="mono">';
+											echo $diff["student"];
+											echo '</tt>';
 										}
 										?>
 									</div>
@@ -216,6 +211,14 @@
 		<?php
 		// end foreach homework_tests as test
 		}
+	}
+
+	if (count($homework_tests) > 1){
+		?>
+		<script>
+		hideAllDiv(<?php echo $counter; ?>, 'sidebysidediff');
+		</script>
+		<?php
 	}
 	?>
 </div> <!-- end row sub-text -->

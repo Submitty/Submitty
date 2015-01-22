@@ -49,14 +49,18 @@ var diff = function(){
 
 		f0 = file0.split("\n");
 		f1 = file1.split("\n");
+		console.log("STU_",f0);
+		console.log("INST_",f1);
 
-		for (var i = 0;i < f0.length;i++){
-			if (f0[i] == "" && f1[i] == ""){
-				f0.splice(0,1);
-				f1.splice(0,1);
-				break;
-			}
-		}
+		// for (var i = f0.length-1;i >= 0;i--){
+		// 	if (f0[i] == "" && f1[i] == ""){
+		// 		f0.splice(i,1);
+		// 		f1.splice(i,1);
+		// 	}
+		// 	else{
+		// 		break;
+		// 	}
+		// }
 	}
 
 	// Evaluate differences JSON object
@@ -175,25 +179,27 @@ var diff = function(){
 
 	// Setup line selectors for hover event
 	function setup_line_hover(selectors, first_diff_tag, second_diff_tag){
+		// console.log("HOVER-setup",selectors, first_diff_tag, second_diff_tag)
 		// Function called when group is hovered over
 		var event_function_hover_on = function(e){
+			console.log("HOVER",selectors, first_diff_tag, second_diff_tag)
 			for (var u = 0;u<selectors.length;u++){
-				$('#' + first_diff_tag + ' > > ' + selectors[u]).addClass("line-hover");
-				$('#' + second_diff_tag + ' > > ' + selectors[u]).addClass("line-hover");
+				$('#' + first_diff_tag + ' > > > ' + selectors[u]).addClass("line-hover");
+				$('#' + second_diff_tag + ' > > > ' + selectors[u]).addClass("line-hover");
 			}
 		};
 		// Function called when group is no longer hovered over
 		var event_function_hover_off = function(e){
 			for (var u = 0;u<selectors.length;u++){
-				$('#' + first_diff_tag + ' > > ' + selectors[u]).removeClass("line-hover");
-				$('#' + second_diff_tag + ' > > ' + selectors[u]).removeClass("line-hover");
+				$('#' + first_diff_tag + ' > > > ' + selectors[u]).removeClass("line-hover");
+				$('#' + second_diff_tag + ' > > > ' + selectors[u]).removeClass("line-hover");
 			}
 		};
 		// Set each elements event
 		for (var u = 0;u < selectors.length;u++){
-			$('#' + first_diff_tag + ' > > ' + selectors[u]).hover(event_function_hover_on,
+			$('#' + first_diff_tag + ' > > > ' + selectors[u]).hover(event_function_hover_on,
 				event_function_hover_off);
-			$('#' + second_diff_tag + ' > > ' + selectors[u]).hover(event_function_hover_on,
+			$('#' + second_diff_tag + ' > > > ' + selectors[u]).hover(event_function_hover_on,
 				event_function_hover_off);
 		}
 	}
@@ -205,7 +211,7 @@ var diff = function(){
 		for (var i = 0;i < lines.length;i++){
 			if (inserts.indexOf(i) != -1){
 				// html += "Insert<br/>";
-				html += "<div class='line missing' id='"+id_preprend+"ins"+i+"'></div>";
+				html += "<div class='line missing' id='"+id_preprend+"ins"+i+"'>"+'<tt class="mono"></tt>'+"</div>";
 			}
 
 
@@ -216,7 +222,7 @@ var diff = function(){
 
 			html += "<div class='line' id='"+id_preprend+"line"+i+
 				"'><span class='line_number "+(i%2 == 0 ? "" : "odd-line")+
-				"'>"+(line_number+1)+"</span>" + lines[i] + "</div>";
+				"'>"+(line_number+1)+"</span>" + '<tt class="mono">' + lines[i] + '</tt>' + "</div>";
 			line_number ++;
 		}
 		// element.innerHTML = "<div>" + html + "</div>";

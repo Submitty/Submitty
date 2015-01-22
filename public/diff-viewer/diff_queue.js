@@ -16,10 +16,15 @@ function loadDiffQueue(){
 		var student_element_id = title+"_student";
 		var instructor_element_id = title+"_instructor";
 
-		var student_element = document.getElementById(student_element_id);
-		var instructor_element = document.getElementById(instructor_element_id);
+		var student_element = document.getElementById(student_element_id).getElementsByTagName( 'tt' )[0];
+		var instructor_element = document.getElementById(instructor_element_id).getElementsByTagName( 'tt' )[0];
+
 
 		diff.load(student_element.innerHTML,instructor_element.innerHTML);
+		console.log("STUDENT_ELEMENT");
+		console.log(student_element.innerHTML);
+		console.log("INSTRUCTOR_ELEMENT");
+		console.log(instructor_element.innerHTML);
 
 		student_element.innerHTML = "";
 		instructor_element.innerHTML = "";
@@ -27,3 +32,4 @@ function loadDiffQueue(){
 		diff.display(student_element_id.split(' ').join('\\ '),instructor_element_id.split(' ').join('\\ '));
 	}
 }
+// .getElementsByTagName( 'tt' )[0];
