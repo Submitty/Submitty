@@ -211,7 +211,7 @@ public:
   }
 
   std::string getView_file() const {
-      if(view_file_results){
+      if(view_file_results && view_file !=""){
           return prefix()+"_"+view_file;
       }
       else{

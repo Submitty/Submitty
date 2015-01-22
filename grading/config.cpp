@@ -31,7 +31,7 @@ void printTestCase(std::ostream &out, TestCase test) {
   std::string extracredit = (test.extracredit()) ? "true" : "false";
   std::string visible = (test.visible()) ? "true" : "false";
   std::string view_test_points = (test.view_test_points()) ? "true" : "false";
-  std::string view_file = (test.getView_file());
+  std::string view_file = '"'+(test.getView_file())+'"';
   std::string view_file_results = (test.getView_file_results())? "true" : "false";
   out << "\t{" << std::endl;
   out << "\t\t\"title\": \"" << test.title() << "\"," << std::endl;
