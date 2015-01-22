@@ -136,6 +136,8 @@ public:
     assert (answer._filename != "");
     answer._test_case_points = tcp;
     answer.FILE_EXISTS = true;
+    answer.view_file = filename;
+    answer.view_file_results = false;
     return answer;
   }
 
@@ -159,7 +161,8 @@ public:
 				   const TestCasePoints &tcp,
 				   TestCaseGrader *tcc0,
 				   TestCaseGrader *tcc1=NULL,
-				   TestCaseGrader *tcc2=NULL ) {
+				   TestCaseGrader *tcc2=NULL,
+                   const std::string &filename = "") {
 
     TestCase answer;
     answer._title = title;
@@ -170,7 +173,8 @@ public:
     answer.test_case_grader[0] = tcc0;
     answer.test_case_grader[1] = tcc1;
     answer.test_case_grader[2] = tcc2;
-
+    answer.view_file = filename;
+    answer.view_file_results = true;
     return answer;
   }
 
@@ -205,6 +209,20 @@ public:
   std::string getFilename() const {
     return _filename;
   }
+
+  std::string getView_file() const {
+      if(view_file_results){
+          return prefix()+"_"+view_file;
+      }
+      else{
+          return view_file;
+      }
+  }
+
+  bool getView_file_results() const {
+      return view_file_results;
+  }
+
 
   std::string getFilename2() const {
     return prefix()+"_"+_filename;
@@ -278,6 +296,8 @@ private:
   std::string _filename;
   std::string _command;
 
+  bool view_file_results;
+  std::string view_file;
 
   TestCasePoints _test_case_points;
 public:

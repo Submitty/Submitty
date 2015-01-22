@@ -31,7 +31,8 @@ void printTestCase(std::ostream &out, TestCase test) {
   std::string extracredit = (test.extracredit()) ? "true" : "false";
   std::string visible = (test.visible()) ? "true" : "false";
   std::string view_test_points = (test.view_test_points()) ? "true" : "false";
-
+  std::string view_file = (test.getView_file());
+  std::string view_file_results = (test.getView_file_results())? "true" : "false";
   out << "\t{" << std::endl;
   out << "\t\t\"title\": \"" << test.title() << "\"," << std::endl;
   out << "\t\t\"details\": \"" << test.details() << "\"," << std::endl;
@@ -40,6 +41,8 @@ void printTestCase(std::ostream &out, TestCase test) {
   out << "\t\t\"extracredit\": " << extracredit << "," << std::endl;
   out << "\t\t\"visible\": " << visible << "," << std::endl;
   out << "\t\t\"view_test_points\": " << view_test_points << "," << std::endl;
+  out << "\t\t\"view_file\": " << view_file << "," << std::endl;
+  out << "\t\t\"view_file_results\": " << view_file_results << "," << std::endl;
 
   //  out << "\t\t\"expected_output\": "
   //   << "\"" << test.expected(0) << "\"" << std::endl;
