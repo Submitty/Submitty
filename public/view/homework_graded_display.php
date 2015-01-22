@@ -79,6 +79,10 @@
 					}
 					echo '</span>';
 				}
+				if ($test["is_extra_credit"] == true) {
+					echo '<span class="test_type">Extra Credit</span>';
+				}
+				
 				echo $test["title"];
 				if (isset ($test["details"])) {
 					if ($test["details"] != "") {
@@ -93,7 +97,7 @@
 					if ($test["message"] != "") {
 						echo '<span class="error_mess">'.$test["message"].'</span>';
 					}
-					if ($show_details){
+					if ($show_details && count($homework_tests) != 1){
 						?>
 						<a class = "view_file" href="#" >Details</a>
 						<?php
@@ -104,9 +108,6 @@
 						<?php
 
 					}
-				}
-				if ($test["is_extra_credit"] == true) {
-					echo '<span class="test_type">Extra Credit</span>';
 				}
 
 				?>

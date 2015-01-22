@@ -629,6 +629,9 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
                 $data["visible"] = $testcases_info[$i]["visible"];
                 $data["view_test_points"] = $testcases_info[$i]["view_test_points"];
 
+                if (isset($testcases_results[$u]["execute_logfile"])) {
+                    $data["execute_logfile"] = get_student_file($student_path . $testcases_results[$u]["execute_logfile"]);
+                }
                 if (isset($testcases_results[$u]["compilation_output"])) {
                     $data["compilation_output"] = get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]);
                 }
@@ -801,6 +804,19 @@ function change_assignment_version($username, $semester,$course, $assignment_id,
 function get_compilation_output($file) {
     if (!file_exists($file)) {
       return "FILE DOES NOT EXIST $file";
+    }
+
+    $contents = file_get_contents($file);
+    $contents = str_replace(">","&gt;",$contents);
+    $contents = str_replace("<","&lt;",$contents);
+
+    return $contents;
+
+}
+
+function get_student_file($file) {
+    if (!file_exists($file)) {
+        return "FILE DOES NOT EXIST $file";
     }
 
     $contents = file_get_contents($file);

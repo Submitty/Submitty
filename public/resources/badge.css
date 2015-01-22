@@ -106,10 +106,17 @@
     margin-left: .5em;
 }
 
+#HWsubmission .test_type{
+    text-decoration: none;
+    margin-right: 5px;
+    font-style: italic;
+}
+
 #HWsubmission .hidden{
     color: #999999;
     text-decoration: none;
 }
+
 #HWsubmission .hidden:hover{
     color: #999999;
     text-decoration: none;
