@@ -184,23 +184,34 @@ var diff = function(){
 		var event_function_hover_on = function(e){
 			console.log("HOVER",selectors, first_diff_tag, second_diff_tag)
 			for (var u = 0;u<selectors.length;u++){
-				$('#' + first_diff_tag + ' > > > ' + selectors[u]).addClass("line-hover");
-				$('#' + second_diff_tag + ' > > > ' + selectors[u]).addClass("line-hover");
+				// $('#' + first_diff_tag + ' > > > ' + selectors[u]).addClass("line-hover");
+				// $('#' + second_diff_tag + ' > > > ' + selectors[u]).addClass("line-hover");
+				// $('#' + first_diff_tag + ' > > ' + selectors[u]).addClass("line-hover");
+				// $('#' + second_diff_tag + ' > > ' + selectors[u]).addClass("line-hover");
+				$('#' + first_diff_tag + ' > ' + selectors[u]).addClass("line-hover");
+				$('#' + second_diff_tag + ' > ' + selectors[u]).addClass("line-hover");
 			}
 		};
 		// Function called when group is no longer hovered over
 		var event_function_hover_off = function(e){
 			for (var u = 0;u<selectors.length;u++){
-				$('#' + first_diff_tag + ' > > > ' + selectors[u]).removeClass("line-hover");
-				$('#' + second_diff_tag + ' > > > ' + selectors[u]).removeClass("line-hover");
+				// $('#' + first_diff_tag + ' > > > ' + selectors[u]).removeClass("line-hover");
+				// $('#' + second_diff_tag + ' > > > ' + selectors[u]).removeClass("line-hover");
+				// $('#' + first_diff_tag + ' > > ' + selectors[u]).removeClass("line-hover");
+				// $('#' + second_diff_tag + ' > > ' + selectors[u]).removeClass("line-hover");
+				$('#' + first_diff_tag + ' > ' + selectors[u]).removeClass("line-hover");
+				$('#' + second_diff_tag + ' > ' + selectors[u]).removeClass("line-hover");
+
 			}
 		};
 		// Set each elements event
 		for (var u = 0;u < selectors.length;u++){
-			$('#' + first_diff_tag + ' > > > ' + selectors[u]).hover(event_function_hover_on,
-				event_function_hover_off);
-			$('#' + second_diff_tag + ' > > > ' + selectors[u]).hover(event_function_hover_on,
-				event_function_hover_off);
+			// $('#' + first_diff_tag + ' > > > ' + selectors[u]).hover(event_function_hover_on, event_function_hover_off);
+			// $('#' + second_diff_tag + ' > > > ' + selectors[u]).hover(event_function_hover_on, event_function_hover_off);
+			// $('#' + first_diff_tag + ' > > ' + selectors[u]).hover(event_function_hover_on, event_function_hover_off);
+			// $('#' + second_diff_tag + ' > > ' + selectors[u]).hover(event_function_hover_on, event_function_hover_off);
+			$('#' + first_diff_tag + ' > ' + selectors[u]).hover(event_function_hover_on, event_function_hover_off);
+			$('#' + second_diff_tag + ' > ' + selectors[u]).hover(event_function_hover_on, event_function_hover_off);
 		}
 	}
 
