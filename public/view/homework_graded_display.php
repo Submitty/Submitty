@@ -6,18 +6,16 @@
 	<h4>Results:</h4>
 	<?php
 	if ($view_points == true && $points_visible != 0){
-		?>
-		<div class="box" >
-			<div>
-				<h4 class="diff-header">
-					Total
-					<span class="badge">
-						<?php echo $viewing_version_score." / ".$points_visible;?>
-					</span>
-				</h4>
-			</div><!-- End div -->
-		</div><!-- End box -->
-	<?php
+		echo '<div class="box" >';
+			echo '<div>';
+				echo '<h4 class="diff-header">';
+					echo '<span class="badge-cont">';
+						echo '<span class="badge">'.$viewing_version_score." / ".$points_visible.'</span>';
+					echo '</span>';
+					echo 'Total';
+				echo '</h4>';
+			echo '</div><!-- End div -->';
+		echo '</div><!-- End box -->';
 	}
 	$counter = 0;
 	foreach($homework_tests as $test)
@@ -27,7 +25,7 @@
 				if ($counter != 0){
 					?>
 					<br clear="all">
-						<?php 
+						<?php
 				}
 				?>
 		<div class="box">
@@ -52,9 +50,43 @@
 					}
 					else {
 				$class = "badge";
-			} ?>
-			<h4 class="diff-header">
+			}
+			if($test["is_hidden"] == false && (
+				(isset($test["diffs"])
+				|| (isset($test["compilation_output"]) && trim($test["compilation_output"])!="")
+				|| (isset($test["execute_logfile"]) && trim($test["execute_logfile"])!="")
+				))) {
+				$show_details=true;
+				$click_event='href="#" onclick="return toggleDiv('."'".'sidebysidediff'.$counter."'".');" style="cursor:pointer;"';
+			}
+			else{
+				$show_details=false;
+				$click_event='';
+			}
+			 ?>
+
+			<h4 class="diff-header" <?php echo $click_event ?> >
 				<?php
+				echo '<!-- BADGE TEST SCORE -->';
+
+				if ($view_points == true && $points_visible != 0){
+					echo '<span class="badge-cont">';
+					if ($test["view_test_points"] == true && $test["points_possible"] != 0){
+						echo '<span class="'.$class.'">';
+						if ($test["is_hidden"] == true && $view_hidden_points == false) {
+							echo 'Hidden';
+						}
+						else{
+							echo $test["score"]." / ".$test["points_possible"];
+						}
+						echo '</span>';
+					}
+					echo '</span>';
+				}
+				if ($test["is_extra_credit"] == true) {
+					echo '<span class="test_type">Extra Credit</span>';
+				}
+
 				echo $test["title"];
 				if (isset ($test["details"])) {
 					if ($test["details"] != "") {
@@ -64,37 +96,24 @@
 				if ($test["is_hidden"]) {
 					echo '<span class="hidden view_file">Hidden</span>';
 				}
-				else if ( (isset($test["diffs"]) && count($test["diffs"]) > 0) || (isset($test["compilation_output"]) ) )
-					{
-						if ($test["message"] != "") {
-							echo '<span class="error_mess">'.$test["message"].'</span>';
-						}
-						if (isset($test["diffs"])){
-							?>
-							<a class = "view_file" href="#" onclick="return toggleDiv('sidebysidediff<?php echo $counter;?>');">Details</a>
-							<?php
-						}
-						else{
-							?>
-							<a class = "view_file" >No Details</a>
-							<?php
-
-						}
+				else
+				{
+					if ($test["message"] != "") {
+						echo '<span class="error_mess">'.$test["message"].'</span>';
 					}
-					echo '<!-- BADGE TEST SCORE -->';
-					if ($test["is_extra_credit"] == true) {
-						echo '<span class="test_type">Extra Credit</span>';
-				}
-				if ($view_points == true && $test["points_visible"] == false && $test["points_possible"] != 0){
-					echo '<span class="'.$class.'">';
-					if ($test["is_hidden"] == true && $view_hidden_points == false) {
-						echo 'Hidden';
+					if ($show_details && count($homework_tests) != 1){
+						?>
+						<a class = "view_file" href="#" >Details</a>
+						<?php
 					}
 					else{
-						echo $test["score"]." / ".$test["points_possible"];
+						?>
+						<!-- <p class = "view_file" >No Details</p> -->
+						<?php
+
 					}
-					echo '</span>';
 				}
+
 				?>
 			</h4>
 			<?php
@@ -102,82 +121,62 @@
 				echo '</div><!-- End box -->';
 				continue;
 			}
-			if (count($homework_tests) == 1){
-				?>
-				<div id="sidebysidediff<?php echo $counter;?>"  class="view_diffs" style="display:block">
-				<?php
-			}
-			else{
-				?>
-				<div id="sidebysidediff<?php echo $counter;?>"  class="view_diffs" style="display:none">
-				<?php
-			}
+			?>
+			<div id="sidebysidediff<?php echo $counter;?>"  class="view_diffs" style="display:block">
+			<?php
 
-				if (isset($test["compilation_output"]) && $test["compilation_output"]!=" ") {
-					echo '<div class="diff-block"><b class="sub2">Compilation output:</b><pre class="complation_mess">'.$test["compilation_output"].'</pre></div>'; //TODO: remove table here
+				if (isset($test["compilation_output"]) && trim($test["compilation_output"])!="") {
+					echo '<div class="diff-block"><b class="sub2">Compilation output:</b><pre class="complation_mess">'.$test["compilation_output"].'</pre></div>';
+				}
+				if (isset($test["execute_logfile"]) && trim($test["execute_logfile"])!="") {
+					echo '<div class="diff-block"><b class="sub2">Execution output:</b><pre class="complation_mess">'.$test["execute_logfile"].'</pre></div>';
 				}
 
 				?>
 				<!-- MULTIPLE DIFFS -->
-				<!--<div>--> <!--table -->
 					<?php
 					if (isset($test["diffs"])) {
 						foreach ($test["diffs"] as $diff) {
-							if (	(isset($diff["student"]) && trim($diff["student"]) != "") &&
-							(!isset($diff["instructor"]) || trim($diff["instructor"]) == "")  &&
-							(!isset($diff["description"]) || trim($diff["description"]) == "") &&
-							(!isset($diff["message"]) || trim($diff["message"]) == "")
-							)
-							{
-								continue;
-							}
 							if (isset($diff["message"]) && trim($diff["message"])!="") {
 								echo '<div class="diff-block"><a class="error_mess_diff">'.$diff["message"].'</a></div>';
 								echo '<div class="spacer"></div>';
 							}
-							if ((!isset($diff["student"]) || trim($diff["student"]) == "") && (!isset($diff["instructor"]) || trim($diff["instructor"]) == ""))
+							if ((!isset($diff["student"]) || trim($diff["student"]) == "") &&
+								(!isset($diff["instructor"]) || trim($diff["instructor"]) == ""))
 							{
 								continue;
 							}
-							if (isset($diff["instructor"])) {
-								$instructor_row_class = "diff-row";
-							}
-							else{
-								$instructor_row_class = "diff-row-none";
-							}
+							$instructor_row_class = "diff-row";
 							?>
 							<div class="diff-block"> <!-- diff block -->
 								<div class="diff-element"><!-- student diff element -->
-
 									<b>Student <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b>
 
 									<div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
 										<?php
 										if (isset($diff["student"]) && trim($diff["student"]) != "")
 										{
-											//echo str_replace(" ", "&nbsp;", $diff["student"]);
-											echo '<tt class="mono">'.$diff["student"].'</tt>';
-
+											echo '<tt class="mono">';
+											echo $diff["student"];
+											echo '</tt>';
 										}
-										else
-										{
-											echo "";
-										}?>
+										?>
 									</div>
 								</div><!-- end student diff element -->
+
+
+
 								<?php
 								if 	(isset($diff["instructor"]) && trim($diff["instructor"]) != ""){
 									?>
 									<div class="diff-element"><!-- instructor diff element -->
 
-											<b>Expected <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b>
+										<b>Expected <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b>
 
 										<div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_instructor">
 											<?php
 											if (isset($diff["instructor"]) && trim($diff["instructor"]) != "")
 											{
-												// echo str_replace(" ", "&nbsp;", $diff["instructor"]);
-												// echo "~~~~~~~~~~~~~~~~~~~~~~\n";
 												echo '<tt class="mono">'.$diff["instructor"].'</tt>';
 											}
 											else
@@ -190,25 +189,36 @@
 								}
 								?>
 								<!-- <div style="clear:both;"></div> -->
+
 								<script><!-- script -->
 									diff_queue.push("<?php echo $diff["diff_id"]; ?>");
 									diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
 								</script><!-- end script -->
+
 							</div><!-- end div block -->
 							<div class="spacer"></div>
-						<!-- first one ends foreach diff in diffs. Second ends if is set of diff -->
 						<!-- </div> end sidebysidediff -->
 						<?php
+						// first one ends foreach diff in diffs. Second ends if is set of diff
 					}
 				}
 				?>
 				<!-- END MULTIPLE DIFFS -->
-				<!-- </div>-->  <!-- end table -->
+
 			</div><!-- end sidebysidediff# -->
 			<?php $counter++;?>
 		</div><!-- end box -->
-	<?php
-			}
-	}?><!-- end foreach homework_tests as test-->
-</div> <!-- end row sub2 -->
-<?php
+		<?php
+		// end foreach homework_tests as test
+		}
+	}
+
+	if (count($homework_tests) > 1){
+		?>
+		<script>
+		hideAllDiv(<?php echo $counter; ?>, 'sidebysidediff');
+		</script>
+		<?php
+	}
+	?>
+</div> <!-- end row sub-text -->

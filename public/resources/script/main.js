@@ -14,7 +14,7 @@ function load_progress_bar(progress, text) {
 }
 
 function check_server(semester, course, assignment_id, assignment_version, submitting_version, assignment_graded, submitting_graded, interval) {
-    $.post("index.php?semester="+semester+"&course="+course+"&page=checkrefresh", 
+    $.post("index.php?semester="+semester+"&course="+course+"&page=checkrefresh",
         {
             assignment_id: assignment_id,
             assignment_version: assignment_version,
@@ -49,4 +49,9 @@ function toggleDiv(id) {
     }
     return false;
 }
-        
+
+function hideAllDiv(max_id, id_name) {
+    for (var i = 0; i < max_id; i++){
+        toggleDiv(id_name+i);
+    }
+}

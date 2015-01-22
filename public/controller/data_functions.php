@@ -127,10 +127,10 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     if ($username !== $_SESSION["id"]) {//Validate the id
         return array("error"=>"", "message"=>"User Id invalid.  ".$username." != ".$_SESSION["id"]);
     }
-    if (!is_valid_assignment($class_config, $assignment_id)) {
+    if (!is_open_assignment($class_config, $assignment_id)) {
         return array("error"=>"", "message"=>$assignment_id." is not a valid assignment");
     }
-    $assignment_config = get_assignment_config($username, $semester, $course, $assignment_id);
+    $assignment_config = get_assignment_config($semester, $course, $assignment_id);
     if (!can_edit_assignment($username, $semester, $course, $assignment_id, $assignment_config)) {//Made sure the user can upload to this homework
         return array("error"=>"assignment_closed", "message"=>$assignment_id." is closed.");
     }
@@ -367,6 +367,7 @@ function get_submitted_files($username, $semester, $course, $assignment_id, $ass
     if (!is_valid_semester($semester)) { display_error("get_submitted_files, INVALID SEMESTER: ".$semester); }
     if (!is_valid_course($course))     { display_error("get_submitted_files, INVALID COURSE: ".$course); }
 
+
     $path_front = get_path_front_course($semester,$course);
     $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
     $contents = array();
@@ -518,7 +519,28 @@ function is_valid_assignment($class_config, $assignment_id) {
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
         if ($one["assignment_id"] == $assignment_id) {
+
             return true;
+        }
+    }
+    return false;
+}
+
+function is_open_assignment($class_config, $assignment_id){
+    $assignments = $class_config["assignments"];
+    foreach ($assignments as $one) {
+        if ($one["assignment_id"] == $assignment_id) {
+            if ($one["released"] == true)
+            {
+                return true;
+            }
+            else{
+                $user = $_SESSION["id"];
+
+                if (on_dev_team($user)) {
+                    return true;
+                }
+            }
         }
     }
     return false;
@@ -627,8 +649,11 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
                 $data["is_hidden"] = $testcases_info[$i]["hidden"];
                 $data["is_extra_credit"] = $testcases_info[$i]["extracredit"];
                 $data["visible"] = $testcases_info[$i]["visible"];
-                $data["points_visible"] = $testcases_info[$i]["points_visible"];
+                $data["view_test_points"] = $testcases_info[$i]["view_test_points"];
 
+                if (isset($testcases_results[$u]["execute_logfile"])) {
+                    $data["execute_logfile"] = get_student_file($student_path . $testcases_results[$u]["execute_logfile"]);
+                }
                 if (isset($testcases_results[$u]["compilation_output"])) {
                     $data["compilation_output"] = get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]);
                 }
@@ -711,13 +736,9 @@ function get_select_submission_data($username, $semester,$course, $assignment_id
 
 
 // Get the test cases from the instructor configuration file
-function get_assignment_config($username, $semester,$course, $assignment_id) {
+function get_assignment_config($semester,$course, $assignment_id) {
     $path_front = get_path_front_course($semester,$course);
-//    $file = $path_front."/results/".$assignment_id."/assignment_config.json";
     $file = $path_front."/config/".$assignment_id."_assignment_config.json";
-
-    //	      echo "GET ASSIGNMENT CONFIG ".$file."<br>";
-
     if (!file_exists($file)) {
         return false;//TODO Handle this case
     }
@@ -812,6 +833,19 @@ function get_compilation_output($file) {
     $contents = str_replace("<","&lt;",$contents);
 
     return $contents;
+
+}
+
+function get_student_file($file) {
+    if (!file_exists($file)) {
+        return "";
+    }
+
+    $contents = file_get_contents($file);
+    $contents = str_replace(">","&gt;",$contents);
+    $contents = str_replace("<","&lt;",$contents);
+
+    return "$contents";
 
 }
 
