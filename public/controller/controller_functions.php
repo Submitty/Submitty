@@ -56,10 +56,12 @@ function parse_assignment_id_with_recent($class_config, $most_recent_assignment_
             return $assignment_id;
         }
     }
+    if (trim($most_recent_assignment_id) == "" || !is_open_assignment($class_config, $most_recent_assignment_id)){
+        return $most_recent_assignment_id;
+    }
     header("Location: index.php?page=displaymessage&semester=".check_semester()."&course=".check_course()."&assignment_id=".$most_recent_assignment_id);
     exit();
 
-    return $most_recent_assignment_id;
 }
 
 function parse_assignment_version_with_recent($username, $semester, $course, $assignment_id) {

@@ -352,7 +352,7 @@ function most_recent_released_assignment_id($class_config) {
     $assignments = $class_config["assignments"];
     $last="";
     foreach ($assignments as $one) {
-        if ($one["released"] == true) {
+        if (isset($one["released"]) && $one["released"] == true) {
              $last=$one["assignment_id"];
         }
     }
@@ -420,8 +420,8 @@ function most_recent_assignment_version($username, $semester, $course, $assignme
 function name_for_assignment_id($class_config, $assignment_id) {
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
-        if ($one["assignment_id"] == $assignment_id) {
-            return $one["assignment_name"];
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
+            return isset($one["assignment_name"]) ? $one["assignment_name"] : "";
         }
     }
     return "";//TODO Error handling
@@ -432,7 +432,7 @@ function name_for_assignment_id($class_config, $assignment_id) {
 function is_ta_grade_released($class_config, $assignment_id) {
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
-        if ($one["assignment_id"] == $assignment_id) {
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
             if (isset($one["ta_grade_released"]) && $one["ta_grade_released"] == true) {
                 return true;
             }
@@ -447,7 +447,7 @@ function is_ta_grade_released($class_config, $assignment_id) {
 function is_points_visible($class_config, $assignment_id) {
   $assignments = $class_config["assignments"];
   foreach ($assignments as $one) {
-    if ($one["assignment_id"] == $assignment_id) {
+    if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
       if (isset($one["view_points"]) && $one["view_points"] == false) {
         return false;
       }
@@ -462,7 +462,7 @@ function is_points_visible($class_config, $assignment_id) {
 function is_hidden_points_visible($class_config, $assignment_id) {
   $assignments = $class_config["assignments"];
   foreach ($assignments as $one) {
-    if ($one["assignment_id"] == $assignment_id) {
+    if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
       if (isset($one["view_hidden_points"]) && $one["view_hidden_points"] == true) {
         return true;
       }
@@ -518,7 +518,7 @@ function is_valid_course($course) {
 function is_valid_assignment($class_config, $assignment_id) {
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
-        if ($one["assignment_id"] == $assignment_id) {
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
 
             return true;
         }
@@ -529,8 +529,8 @@ function is_valid_assignment($class_config, $assignment_id) {
 function is_open_assignment($class_config, $assignment_id){
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
-        if ($one["assignment_id"] == $assignment_id) {
-            if ($one["released"] == true)
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
+            if (isset($one["released"]) && $one["released"] == true)
             {
                 return true;
             }
@@ -639,17 +639,17 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
     for ($i = 0; $i < count($testcases_info); $i++) {
         for ($u = 0; $u < count($testcases_results); $u++){
             //Match the assignment results (user specific) with the configuration (class specific)
-            if ($testcases_info[$i]["title"] == $testcases_results[$u]["test_name"]){
+            if (isset($testcases_info[$i]["title"]) && isset( $testcases_results[$u]["test_name"]) && $testcases_info[$i]["title"] == $testcases_results[$u]["test_name"]){
                 $data = array();
-                $data["title"] = $testcases_info[$i]["title"];
-                $data["details"] = $testcases_info[$i]["details"];
-                $data["points_possible"] = $testcases_info[$i]["points"];
-                $data["score"] = $testcases_results[$u]["points_awarded"];
+                $data["title"] = isset($testcases_info[$i]["title"]) ? $testcases_info[$i]["title"] : "";
+                $data["details"] = isset($testcases_info[$i]["details"]) ? $testcases_info[$i]["details"] : "";
+                $data["points_possible"] = isset($testcases_info[$i]["points"]) ? $testcases_info[$i]["points"] : 0;
+                $data["score"] = isset($testcases_results[$u]["points_awarded"]) ? $testcases_results[$u]["points_awarded"] : 0;
+                $data["is_hidden"] = isset($testcases_info[$i]["hidden"]) ? $testcases_info[$i]["hidden"] : false;
+                $data["is_extra_credit"] = isset($testcases_info[$i]["extracredit"]) ? $testcases_info[$i]["extracredit"] : false;
+                $data["visible"] = isset($testcases_info[$i]["visible"]) ? $testcases_info[$i]["visible"] : true;
+                $data["view_test_points"] = isset($testcases_info[$i]["view_test_points"]) ? $testcases_info[$i]["view_test_points"] : true;
                 $data["message"] = isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "";
-                $data["is_hidden"] = $testcases_info[$i]["hidden"];
-                $data["is_extra_credit"] = $testcases_info[$i]["extracredit"];
-                $data["visible"] = $testcases_info[$i]["visible"];
-                $data["view_test_points"] = $testcases_info[$i]["view_test_points"];
 
                 if (isset($testcases_results[$u]["execute_logfile"])) {
                     $data["execute_logfile"] = get_student_file($student_path . $testcases_results[$u]["execute_logfile"]);
