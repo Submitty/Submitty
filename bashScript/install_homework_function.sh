@@ -5,7 +5,7 @@
 
 function install_homework {
 
-    base_dir=$1
+    BASEDIR=$1
 
     # location of the homework files, including:
     # $hw_source/config.h
