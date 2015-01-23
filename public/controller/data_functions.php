@@ -127,10 +127,10 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     if ($username !== $_SESSION["id"]) {//Validate the id
         return array("error"=>"", "message"=>"User Id invalid.  ".$username." != ".$_SESSION["id"]);
     }
-    if (!is_valid_assignment($class_config, $assignment_id)) {
+    if (!is_open_assignment($class_config, $assignment_id)) {
         return array("error"=>"", "message"=>$assignment_id." is not a valid assignment");
     }
-    $assignment_config = get_assignment_config($username, $semester, $course, $assignment_id);
+    $assignment_config = get_assignment_config($semester, $course, $assignment_id);
     if (!can_edit_assignment($username, $semester, $course, $assignment_id, $assignment_config)) {//Made sure the user can upload to this homework
         return array("error"=>"assignment_closed", "message"=>$assignment_id." is closed.");
     }
@@ -329,6 +329,8 @@ function get_due_date($class_config, $assignment_id) {
 
 //Gets the class information for assignments
 
+
+
 function get_class_config($semester,$course) {
    if (!is_valid_semester($semester)) { display_error("get_class_config, INVALID SEMESTER: ".$semester); }
    if (!is_valid_course($course))     { display_error("get_class_config, INVALID COURSE: ".$course); }
@@ -343,12 +345,28 @@ function get_class_config($semester,$course) {
     return json_decode(removeTrailingCommas(file_get_contents($file)), true);
 }
 
+
+function most_recent_released_assignment_id($class_config) {
+    // eliminating "default_assignment" in class.json, always used last "released" homework!
+    // return $class_config["default_assignment"];
+    $assignments = $class_config["assignments"];
+    $last="";
+    foreach ($assignments as $one) {
+        if (isset($one["released"]) && $one["released"] == true) {
+             $last=$one["assignment_id"];
+        }
+    }
+    return $last;
+}
+
+
 // Get a list of uploaded files
 
 function get_submitted_files($username, $semester, $course, $assignment_id, $assignment_version) {
 
     if (!is_valid_semester($semester)) { display_error("get_submitted_files, INVALID SEMESTER: ".$semester); }
     if (!is_valid_course($course))     { display_error("get_submitted_files, INVALID COURSE: ".$course); }
+
 
     $path_front = get_path_front_course($semester,$course);
     $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
@@ -402,8 +420,8 @@ function most_recent_assignment_version($username, $semester, $course, $assignme
 function name_for_assignment_id($class_config, $assignment_id) {
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
-        if ($one["assignment_id"] == $assignment_id) {
-            return $one["assignment_name"];
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
+            return isset($one["assignment_name"]) ? $one["assignment_name"] : "";
         }
     }
     return "";//TODO Error handling
@@ -414,7 +432,7 @@ function name_for_assignment_id($class_config, $assignment_id) {
 function is_ta_grade_released($class_config, $assignment_id) {
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
-        if ($one["assignment_id"] == $assignment_id) {
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
             if (isset($one["ta_grade_released"]) && $one["ta_grade_released"] == true) {
                 return true;
             }
@@ -429,7 +447,7 @@ function is_ta_grade_released($class_config, $assignment_id) {
 function is_points_visible($class_config, $assignment_id) {
   $assignments = $class_config["assignments"];
   foreach ($assignments as $one) {
-    if ($one["assignment_id"] == $assignment_id) {
+    if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
       if (isset($one["view_points"]) && $one["view_points"] == false) {
         return false;
       }
@@ -444,7 +462,7 @@ function is_points_visible($class_config, $assignment_id) {
 function is_hidden_points_visible($class_config, $assignment_id) {
   $assignments = $class_config["assignments"];
   foreach ($assignments as $one) {
-    if ($one["assignment_id"] == $assignment_id) {
+    if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
       if (isset($one["view_hidden_points"]) && $one["view_hidden_points"] == true) {
         return true;
       }
@@ -500,8 +518,29 @@ function is_valid_course($course) {
 function is_valid_assignment($class_config, $assignment_id) {
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
-        if ($one["assignment_id"] == $assignment_id) {
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
+
             return true;
+        }
+    }
+    return false;
+}
+
+function is_open_assignment($class_config, $assignment_id){
+    $assignments = $class_config["assignments"];
+    foreach ($assignments as $one) {
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
+            if (isset($one["released"]) && $one["released"] == true)
+            {
+                return true;
+            }
+            else{
+                $user = $_SESSION["id"];
+
+                if (on_dev_team($user)) {
+                    return true;
+                }
+            }
         }
     }
     return false;
@@ -600,18 +639,21 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
     for ($i = 0; $i < count($testcases_info); $i++) {
         for ($u = 0; $u < count($testcases_results); $u++){
             //Match the assignment results (user specific) with the configuration (class specific)
-            if ($testcases_info[$i]["title"] == $testcases_results[$u]["test_name"]){
+            if (isset($testcases_info[$i]["title"]) && isset( $testcases_results[$u]["test_name"]) && $testcases_info[$i]["title"] == $testcases_results[$u]["test_name"]){
                 $data = array();
-                $data["title"] = $testcases_info[$i]["title"];
-                $data["details"] = $testcases_info[$i]["details"];
-                $data["points_possible"] = $testcases_info[$i]["points"];
-                $data["score"] = $testcases_results[$u]["points_awarded"];
+                $data["title"] = isset($testcases_info[$i]["title"]) ? $testcases_info[$i]["title"] : "";
+                $data["details"] = isset($testcases_info[$i]["details"]) ? $testcases_info[$i]["details"] : "";
+                $data["points_possible"] = isset($testcases_info[$i]["points"]) ? $testcases_info[$i]["points"] : 0;
+                $data["score"] = isset($testcases_results[$u]["points_awarded"]) ? $testcases_results[$u]["points_awarded"] : 0;
+                $data["is_hidden"] = isset($testcases_info[$i]["hidden"]) ? $testcases_info[$i]["hidden"] : false;
+                $data["is_extra_credit"] = isset($testcases_info[$i]["extracredit"]) ? $testcases_info[$i]["extracredit"] : false;
+                $data["visible"] = isset($testcases_info[$i]["visible"]) ? $testcases_info[$i]["visible"] : true;
+                $data["view_test_points"] = isset($testcases_info[$i]["view_test_points"]) ? $testcases_info[$i]["view_test_points"] : true;
                 $data["message"] = isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "";
-                $data["is_hidden"] = $testcases_info[$i]["hidden"];
-                $data["is_extra_credit"] = $testcases_info[$i]["extracredit"];
-                $data["visible"] = $testcases_info[$i]["visible"];
-                $data["points_visible"] = $testcases_info[$i]["points_visible"];
 
+                if (isset($testcases_results[$u]["execute_logfile"])) {
+                    $data["execute_logfile"] = get_student_file($student_path . $testcases_results[$u]["execute_logfile"]);
+                }
                 if (isset($testcases_results[$u]["compilation_output"])) {
                     $data["compilation_output"] = get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]);
                 }
@@ -694,13 +736,9 @@ function get_select_submission_data($username, $semester,$course, $assignment_id
 
 
 // Get the test cases from the instructor configuration file
-function get_assignment_config($username, $semester,$course, $assignment_id) {
+function get_assignment_config($semester,$course, $assignment_id) {
     $path_front = get_path_front_course($semester,$course);
-//    $file = $path_front."/results/".$assignment_id."/assignment_config.json";
     $file = $path_front."/config/".$assignment_id."_assignment_config.json";
-
-    //	      echo "GET ASSIGNMENT CONFIG ".$file."<br>";
-
     if (!file_exists($file)) {
         return false;//TODO Handle this case
     }
@@ -795,6 +833,19 @@ function get_compilation_output($file) {
     $contents = str_replace("<","&lt;",$contents);
 
     return $contents;
+
+}
+
+function get_student_file($file) {
+    if (!file_exists($file)) {
+        return "";
+    }
+
+    $contents = file_get_contents($file);
+    $contents = str_replace(">","&gt;",$contents);
+    $contents = str_replace("<","&lt;",$contents);
+
+    return "$contents";
 
 }
 

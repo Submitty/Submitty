@@ -3,6 +3,8 @@ var highlight = function(){
 	// Change unranged ints to ranged ints
 	// [1,2,3,6,7] => [[1,3],[6,7]]
 	function enrange(ar){
+		console.log("enrange: ");
+
 		var nar = [];
 		var start = ar[0];
 		for (var i = 1;i < ar.length;i++){
@@ -19,11 +21,13 @@ var highlight = function(){
 		return nar;
 	}
 	function enrange_char(ar){
+		console.log("enrange_char: ");
+
 		var nar = [];
 		var start = ar[0];
 		for (var i = 1;i < ar.length;i++){
 			if (ar[i] > ar[i-1] + 1){
-				nar.push([start,ar[i-1]]);
+				nar.push([start,ar[i-1]+1]);
 				start = ar[i];
 			}
 		}
