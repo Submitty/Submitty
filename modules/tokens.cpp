@@ -32,12 +32,10 @@ void Tokens::printJSON(std::ostream & file_out){
         if(i != tokens_found.size() - 1){
             file_out << ", ";
         }
-        else{
-            file_out << " ]," << std::endl;
-        }
     } 
+    file_out << " \t]," << std::endl;
     file_out << "\t\"num_found\": " << tokensfound << "," << std::endl;
-    file_out << "\t\"partial\": " << partial_str << "," << std::endl;
+    file_out << "\t\"partial\": " << partial_str << std::endl;
     file_out << "}" << std::endl;
     return;
 }
