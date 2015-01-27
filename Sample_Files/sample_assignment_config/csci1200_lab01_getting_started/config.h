@@ -12,7 +12,7 @@ This code is licensed using the BSD "3-Clause" license. Please refer to
 
 #include "grading/TestCase.h"
 
-const std::string assignment_message = "";
+const std::string assignment_message = "The homework submission area & autograding points for Lab 1 are just practice.<br>The only grades for Lab 1 are the 3 checkpoints recorded by your TA & mentors.";
 
 // Submission parameters
 const int max_submissions = 20;
@@ -51,7 +51,7 @@ std::vector<TestCase> testcases
 /******************** TEST CASES **********************/
 TestCase::MakeTestCase(
 	 "non leap year",  // title
-	 "3 1 2012",                  // details
+	 "3 1 2013",                  // details
 	 "./a.out <nonleapyear.txt", // 1> STDOUT.txt 2> STDERR.txt",                  // command
 	 TestCasePoints(5),
 	 new TestCaseComparison(&myersDiffbyLinebyChar,				// compare function [V]			   ),
@@ -62,7 +62,7 @@ TestCase::MakeTestCase(
 		       ),
 TestCase::MakeTestCase(
 	 "leap year",  // title
-	 "3 1 2013",                  // details
+	 "3 1 2012",                  // details
 	 "./a.out <leapyear.txt", // 1> STDOUT.txt 2> STDERR.txt",                  // command
 	 TestCasePoints(5),
 	 new TestCaseComparison(&myersDiffbyLinebyChar,				// compare function [V]			   ),

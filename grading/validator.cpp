@@ -124,7 +124,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       }
       else {
         std::cerr << "ERROR file DOES NOT exist: " << testcases[i].getFilename() << std::endl;
-        message += "ERROR: " + testcases[i].getFilename() + " was NOT FOUND!";
+        message += "Error: " + testcases[i].getFilename() + " was not found!";
       }
     }
     else if (testcases[i].isCompilationTest()) {

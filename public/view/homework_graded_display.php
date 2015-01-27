@@ -1,9 +1,13 @@
-<?php if ($assignment_message != "") {
-	echo "<p class='error_mess'>".$assignment_message."</p>"; }
-?>
 <!-- DETAILS ON INDIVIDUAL TESTS -->
 <div class="row sub-text">
 	<h4>Results:</h4>
+
+<?php if ($assignment_message != "") {
+	echo '<span class="message">Note: '.$assignment_message."</span>"; 
+}
+?>
+
+
 	<?php
 	if ($view_points == true && $points_visible != 0){
 		echo '<div class="box" >';
@@ -99,7 +103,7 @@
 				else
 				{
 					if ($test["message"] != "") {
-						echo '<span class="error_mess">'.$test["message"].'</span>';
+						echo '<span class="error_mess">&nbsp;&nbsp;'.$test["message"].'</span>';
 					}
 					if ($show_details && count($homework_tests) != 1){
 						?>
