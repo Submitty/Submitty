@@ -267,7 +267,7 @@ function is_valid_zip_size($filename, $max_size) {
     // Warning: zip_close() expects parameter 1 to be resource, integer given
     //
 
-    if ($zip) {
+    if (is_resource($zip)) {
         while ($inner_file = zip_read($zip)) {
             $size += zip_entry_filesize($inner_file);
             if ($size / 1024 > $max_size) {
