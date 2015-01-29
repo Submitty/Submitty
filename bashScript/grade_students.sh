@@ -381,9 +381,11 @@ while true; do
 	# move all executable files from the to the main tmp directory
 	# FIXME: not really what we want for the "FILE_EXISTS" command....
 	# FIXME: make more general, requires thinking, need to get python files into the running directory too (a hack for now)
-        cp  1>/dev/null  2>&1  $tmp_compilation/README*.txt  $tmp_compilation/*.out $tmp_compilation/test*.txt $tmp_compilation/*.py $tmp
+        cp  1>/dev/null  2>&1  $tmp_compilation/README*.txt $tmp_compilation/README*.TXT $tmp_compilation/readme*.txt $tmp_compilation/readme*.TXT $tmp_compilation/*.out $tmp_compilation/test*.txt $tmp_compilation/*.py $tmp
 
-
+    ls $tmp_compilation
+    echo "------------------------------------------"
+    ls $tmp
 	# remove the directory
 	rm -rf $tmp_compilation
 
