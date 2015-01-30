@@ -724,7 +724,7 @@ function get_select_submission_data($username, $semester,$course, $assignment_id
         if ($date_submitted2 > $due_date) {
             $date_submitted2->add(new DateInterval("P1D"));
             $interval = $date_submitted2->diff($due_date);
-            $days_late = $interval->format("%d");
+            $days_late = $interval->format("%a");
 
 	           //echo "days_late = $days_late<br>";
         }
