@@ -7,8 +7,8 @@ require_once("view/".$semester."_".$course."_container.php");
 print('<!-- Course CSS -->');
 print('<link href="resources/'.$semester."_".$course.'_main.css" rel="stylesheet"></link>');
 ?>
-<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic' rel='stylesheet' type='text/css'>
-<link href='http://fonts.googleapis.com/css?family=PT+Sans:700,700italic' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=PT+Sans:700,700italic' rel='stylesheet' type='text/css'>
 <link href="resources/bootmin.css" rel="stylesheet"></link>
 <link href="resources/badge.css" rel="stylesheet"></link>
 <script src="resources/script/main.js"></script>
@@ -279,8 +279,7 @@ window.addEventListener('load', function() {
                             {
                                 $grade_file = file_get_contents($gradefile_path);
                                 echo '<h3 class="label">TA grade</h3>';
-                                echo "<em><p>Please see the <a href=\"http://www.cs.rpi.edu/academics/courses/fall14/csci1200/announcements.php\">Announcements</a>
-                                    page for the curve for this homework.</p></em>";
+                               // echo "<em><p>Please see the <a href=\"https://www.cs.rpi.edu/academics/courses/fall14/csci1200/announcements.php\">Announcements</a> page for the curve for this homework.</p></em>";
                                     echo "<pre>".$grade_file."</pre>";
                             }
                         echo "</div> <!-- end outer_box -->";

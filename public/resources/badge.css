@@ -260,10 +260,15 @@
     margin-left: .5em;
 }
 
+#HWsubmission .message{
+    font-style: italic;
+    font-weight: bold;
+    color: #008800;
+}
+
 #HWsubmission .error_mess{
     font-style: italic;
-    margin-right: .5em;
-    margin-left: .5em;
+    color: #af0000;
 }
 
 #HWsubmission .error_mess_diff{
