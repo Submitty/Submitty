@@ -476,6 +476,9 @@ function is_hidden_points_visible($class_config, $assignment_id) {
 
 // Check to make sure instructor has added this assignment
 function is_valid_semester($semester) {
+
+//FIXME: SHOULD NOT BE USING THIS
+
     if ($semester == "f14") {
         return true;
     }
@@ -490,19 +493,19 @@ function is_valid_semester($semester) {
 
 // Check to make sure instructor has added this assignment
 function is_valid_course($course) {
+
+//FIXME: SHOULD NOT BE USING THIS
+
     if ($course == "csci1200") {
         return true;
     }
     if ($course == "csci1100") {
         return true;
     }
-    if ($course == "csci1200test") {
-        return true;
-    }
-    if ($course == "csci1100test") {
-        return true;
-    }
     if ($course == "csci4960") {
+        return true;
+    }
+    if ($course == "csci4962") {
         return true;
     }
     if ($course == "csci4530") {
