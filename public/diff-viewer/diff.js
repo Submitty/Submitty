@@ -1,3 +1,5 @@
+//REMOVE DEBUG CONSOLE LOGGING
+console.log = function() {}
 
 // Requires highlight.js
 
@@ -71,22 +73,23 @@ var diff = function(){
 			var instructor = differences[i].instructor;
 
 			assocs.push([]);
-			markDifference(f0,ins0,student,i,"stu_");
-			markDifference(f1,ins1,instructor,i,"ist_");
+			markDifference(f0,ins0,student, instructor,i,"stu_");
+			markDifference(f1,ins1,instructor, student,i,"ist_");
 
 		}
 	}
 
 	// Change a line specified by difference object
-	function markDifference(lines,ins, difference, changeID,id_prepend){
+	function markDifference(lines,ins, difference, other_diff, changeID,id_prepend){
 		assocs[changeID] = (assocs[changeID] || []);
 		if (difference.line!== undefined){
 			var changes = difference.line;
-			for (var i = 0;i < changes.length;i++){
+			var last_line = difference.start;
+			for (var i=0;i < changes.length;i++){
 				var change = changes[i];
 				var line_id = "#" + id_prepend + "line" + change.line_number;
+				last_line=change.line_number;
 				if (change.line_number !== undefined){
-
 						console.log(id_prepend,"Bad line at ",change.line_number);
 						style.push([line_id, "bad-line"]);
 						assocs[changeID].push(line_id);
@@ -131,22 +134,39 @@ var diff = function(){
 							assocs[changeID].push(".bad-seg-" + line);
 						}
 					}
-				}else{
+				}
+				else{
 					console.log("ERROR: NO LINE NUMBER IN DIFFERENCE");
 				}
 			}
-		}else if (difference.start !== undefined){
+			if (difference.start !== undefined && other_diff.line !== undefined){
+				var lines_inserted =  other_diff.line.length-difference.line.length;
+				console.log("Insert lines: ",lines_inserted );
+				for (var a = 0; a<lines_inserted; a++){
+					console.log(id_prepend,"Insert line at ",last_line+1);
+					console.log(lines,ins, difference,  other_diff, changeID,id_prepend);
+					// difference.start += ins.length;
+					ins.push(last_line+1);
+					// console.log("#" + id_prepend + "ins" + difference.start);
+					assocs[changeID].push("#" + id_prepend + "ins" + (last_line+1));
+				}
+			}
+		}
+		else if (difference.start !== undefined && other_diff.line !== undefined){
 
-// FIXME: We should be able to get rid of a bunch of the line index
-//        "+1"s in this file when the newline is removed from
-//        view/homework.php
-
-			console.log(id_prepend,"Insert line at ",difference.start+1);
-			// difference.start += ins.length;
-			ins.push(difference.start+1);
-			// console.log("#" + id_prepend + "ins" + difference.start);
-			assocs[changeID].push("#" + id_prepend + "ins" + (difference.start+1));
-		}else{
+			// FIXME: We should be able to get rid of a bunch of the line index
+			//        "+1"s in this file when the newline is removed from
+			//        view/homework.php
+			for (var a = 0; a< other_diff.line.length; a++){
+				console.log(id_prepend,"Insert line at ",difference.start+1);
+				console.log(lines,ins, difference,  other_diff, changeID,id_prepend);
+				// difference.start += ins.length;
+				ins.push(difference.start+1);
+				// console.log("#" + id_prepend + "ins" + difference.start);
+				assocs[changeID].push("#" + id_prepend + "ins" + (difference.start+1));
+			}
+		}
+		else{
 			console.log("Couldn't interpret difference : ",difference);
 		}
 	}
@@ -220,15 +240,19 @@ var diff = function(){
 		var html = "";
 		var line_number = 0;
 		for (var i = 0;i < lines.length;i++){
+			console.log(inserts, i, inserts.indexOf(i));
 			if (inserts.indexOf(i) != -1){
-				// html += "Insert<br/>";
-				html += "<div class='line missing' id='"+id_preprend+"ins"+i+"'>"+'<tt class="mono"></tt>'+"</div>";
+				for (var a = inserts.indexOf(i); inserts[a] == i ; a++){
+					// html += "Insert<br/>";
+					html += "<div class='line missing' id='"+id_preprend+"ins"+i+"'>"+'<tt class="mono"></tt>'+"</div>";
+				}
+
 			}
 
 
-// FIXME: We should be able to get rid of a bunch of the line index
-//        "+1"s in this file when the newline is removed from
-//        view/homework.php
+			// FIXME: We should be able to get rid of a bunch of the line index
+			//        "+1"s in this file when the newline is removed from
+			//        view/homework.php
 
 
 			html += "<div class='line' id='"+id_preprend+"line"+i+
