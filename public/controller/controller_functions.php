@@ -1,6 +1,16 @@
 <?php
 //CONTROLLER FUNCTIONS
 
+function on_dev_team($test_user) {
+    global $dev_team;
+    for ($u = 0; $u < count($dev_team); $u++) {
+        if ($test_user == $dev_team[$u]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function render($viewpage, $data = array()) {
     $path = 'view/'.$viewpage.'.php';
     if (file_exists($path)) {
@@ -52,11 +62,12 @@ function parse_status() {
 function parse_assignment_id_with_recent($class_config, $most_recent_assignment_id) {
     if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants to see
         $assignment_id = htmlspecialchars($_GET["assignment_id"]);
-        if (is_open_assignment($class_config, $assignment_id)) {
+        $username = $_SESSION["id"];
+        if (is_open_assignment($class_config, $assignment_id) || on_dev_team($username)) {
             return $assignment_id;
         }
     }
-    if (trim($most_recent_assignment_id) == "" || !is_open_assignment($class_config, $most_recent_assignment_id)){
+    if (trim($most_recent_assignment_id) == "" || !(is_open_assignment($class_config, $most_recent_assignment_id) || on_dev_team($username) ) ) {
         return $most_recent_assignment_id;
     }
     header("Location: index.php?page=displaymessage&semester=".check_semester()."&course=".check_course()."&assignment_id=".$most_recent_assignment_id);
@@ -72,8 +83,13 @@ function parse_assignment_version_with_recent($username, $semester, $course, $as
         }
     }
     $assignment_version = most_recent_assignment_version($username, $semester, $course, $assignment_id);
-    if (trim($assignment_version) == "" || !is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)){
+    if (trim($assignment_version) == "" ||  trim($assignment_version) == 0){
         return $assignment_version;
+    }
+    else if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)){
+        $_SESSION["status"] = "Invalid assignment_version specified";
+        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
+        exit();
     }
     else{
         header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id."&assignment_version=".$assignment_version);
@@ -81,16 +97,6 @@ function parse_assignment_version_with_recent($username, $semester, $course, $as
     }
 
 }
-
-
-function on_dev_team($test_user) {
-  global $dev_team;
-  for ($u = 0; $u < count($dev_team); $u++) {
-    if ($test_user == $dev_team[$u]) return true;
-  }
-  return false;
-}
-
 
 function check_semester(){
     include 'controller/defaults.php';
@@ -139,8 +145,9 @@ function check_course(){
 
 function check_assignment_id($class_config){
     if (isset($_GET["assignment_id"])) {
+        $username = $_SESSION["id"];
         $assignment_id = htmlspecialchars($_GET["assignment_id"]);
-        if (is_open_assignment($class_config, $assignment_id)) {
+        if (is_open_assignment($class_config, $assignment_id) || on_dev_team($username) || trim($assignment_id)=="") {
             return $assignment_id;
         }
         $_SESSION["status"] = "Invalid assignment_id specified";
@@ -148,14 +155,14 @@ function check_assignment_id($class_config){
     else{
         $_SESSION["status"] = "No assignment_id specified";
     }
-    $assignment_id = "default_assignment_id";
     // FIXME, displaymesssage does not exist
-    header("Location: index.php?page=displaymessage&semester=".check_semester()."&course=".check_course()."&assignment_id=".$assignment_id);
+    header("Location: index.php?page=displaymessage&semester=".check_semester()."&course=".check_course());
     exit();
 }
 
+
 function check_assignment_version($semester, $course, $assignment_id){
-    if (isset($_GET["assignment_version"])) {
+    if (isset($_GET["assignment_version"]) || trim(htmlspecialchars($_GET["assignment_version"])) == "") {
         $assignment_version = htmlspecialchars($_GET["assignment_version"]);
         $username = $_SESSION["id"];
 
@@ -167,9 +174,8 @@ function check_assignment_version($semester, $course, $assignment_id){
     else{
         $_SESSION["status"] = "No assignment_version specified";
     }
-    $assignment_version = "default_assignment_version";
     // FIXME, displaymesssage does not exist
-    header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id."&assignment_id=".$assignment_version);
+    header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
     exit();
 }
 

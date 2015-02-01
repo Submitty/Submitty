@@ -51,7 +51,7 @@ window.addEventListener('load', function() {
     <h2 class="label">Homework Submission for <em> <?php echo $user;?> </em>
           <?php
           if (on_dev_team($user)) {
-             echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ].</font>";
+             echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ]</font>";
             }
           ?>
     </h2>
