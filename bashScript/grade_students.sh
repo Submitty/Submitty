@@ -336,14 +336,14 @@ while true; do
 
         # copy submitted files to a tmp compilation directory
 	tmp_compilation=$tmp/TMP_COMPILATION
-	mkdir $tmp_compilation
-	cp 1>/dev/null  2>&1  -r $submission_path/* $tmp_compilation ||  echo "ERROR: Failed to copy to temporary directory $submission_path" >&2
+	mkdir -p $tmp_compilation
+	cp 1>/dev/null  2>&1  -r $submission_path/* $tmp_compilation ||  echo "ERROR: Failed to submitted files copy to temporary compilation directory $submission_path to $tmp_compilation : cp -r $submission_path/* $tmp_compilation" >&2
 
         # copy any instructor code files to tmp directory
 	if [ -d "$test_code_path" ]
 	then
-	    cp -rf $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy to temporary directory $test_code_path" >&2
-	    cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path" >&2
+	    cp -rf $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy instructor files to temporary compilation directory $test_code_path to $tmp_compilation :  cp -rf $test_code_path/ $tmp_compilation" >&2
+	    cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
 	fi
 
 	pushd $tmp_compilation > /dev/null
@@ -395,7 +395,7 @@ while true; do
         # copy input files to tmp directory
 	if [ -d "$test_input_path" ]
 	then
-	    cp -rf $test_input_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory $test_input_path" >&2
+	    cp -rf $test_input_path/* "$tmp" ||  echo "ERROR: Failed to copy input files to temporary directory $test_input_path to $tmp : cp -rf $test_input_path/* $tmp"  >&2
 	fi
 
 	# copy run.out to the tmp directory
@@ -426,7 +426,7 @@ while true; do
         # copy output files to tmp directory  (SHOULD CHANGE THIS)
 	if [ -d "$test_output_path" ]
 	then
-	    cp -rf $test_output_path/* "$tmp" ||  echo "ERROR: Failed to copy to temporary directory $test_output_path" >&2
+	    cp -rf $test_output_path/* "$tmp" ||  echo "ERROR: Failed to copy output files to temporary directory $test_output_path to $tmp :  cp -rf $test_output_path/* $tmp" >&2
 	fi
 
 	if [ ! -r "$bin_path/$assignment/validate.out" ]
