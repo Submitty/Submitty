@@ -3,7 +3,7 @@
 	<h4>Results:</h4>
 
 <?php if ($assignment_message != "") {
-	echo '<span class="message">Note: '.$assignment_message."</span>"; 
+	echo '<span class="message">Note: '.$assignment_message."</span>";
 }
 ?>
 

@@ -226,7 +226,7 @@ void parse_command_line(const std::string &cmd,
             else if (tmp.size() >= 1 && tmp.substr(0,1) == "<") {
                 assert (my_stdin == "");
                 if (tmp.size() == 1) {
-                    bool success = ss >> tmp;
+                    ss >> tmp; bool success = ss.good();
                     assert (success);
                     my_stdin = tmp;
                 } else {
@@ -237,7 +237,7 @@ void parse_command_line(const std::string &cmd,
             else if (tmp.size() >= 2 && tmp.substr(0,2) == "1>") {
                 assert (my_stdout == "");
                 if (tmp.size() == 2) {
-                    bool success = ss >> tmp;
+                    ss >> tmp; bool success = ss.good();
                     assert (success);
                     my_stdout = tmp;
                 } else {
@@ -248,7 +248,7 @@ void parse_command_line(const std::string &cmd,
             else if (tmp.size() >= 2 && tmp.substr(0,2) == "2>") {
                 assert (my_stderr == "");
                 if (tmp.size() == 2) {
-                    bool success = ss >> tmp;
+                    ss >> tmp; bool success = ss.good();
                     assert (success);
                     my_stderr = tmp;
                 } else {

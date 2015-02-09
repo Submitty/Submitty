@@ -4,9 +4,12 @@ require_once("controller/controller_functions.php");
 
 $course=check_course();
 $semester=check_semester();
-$assignment_id=check_assignment_id();
+$class_config=check_class_config($semester,$course);
+
+$assignment_id=check_assignment_id($class_config);
 $assignment_version=check_assignment_version($semester, $course, $assignment_id);
 $assignment_config = get_assignment_config($semester, $course, $assignment_id);
+
 
 if (!can_edit_assignment($_SESSION["id"], $semester, $course, $assignment_id, $assignment_config)) {
    $_SESSION["status"] = "assignment_closed";
