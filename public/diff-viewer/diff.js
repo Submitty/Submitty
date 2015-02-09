@@ -38,16 +38,13 @@ var diff = function(){
 	// Utility function for a replaceAll string function
 	// returns string with the "find" regex replaced with "replace"
 	function replaceAll(str, find, replace) {
+		console.log(str.replace(new RegExp(find, 'g'), replace), ":",new RegExp(find, 'g') , ":",find, ":",replace, new RegExp(find, 'g'));
 		return str.replace(new RegExp(find, 'g'), replace);
 	}
 
 	// Load files to diff
 	function load(file0, file1){
 		init();
-
-		// TODO escape all html characters
-		file0 = replaceAll(file0, "&nbsp;", " ");
-		file1 = replaceAll(file1, "&nbsp;", " ");
 
 		f0 = file0.split("\n");
 		f1 = file1.split("\n");
@@ -90,7 +87,7 @@ var diff = function(){
 				var line_id = "#" + id_prepend + "line" + change.line_number;
 				last_line=change.line_number;
 				if (change.line_number !== undefined){
-						console.log(id_prepend,"Bad line at ",change.line_number);
+						// console.log(id_prepend,"Bad line at ",change.line_number);
 						style.push([line_id, "bad-line"]);
 						assocs[changeID].push(line_id);
 					if (change.word_number || change.char_number){
@@ -144,7 +141,7 @@ var diff = function(){
 				console.log("Insert lines: ",lines_inserted );
 				for (var a = 0; a<lines_inserted; a++){
 					console.log(id_prepend,"Insert line at ",last_line+1);
-					console.log(lines,ins, difference,  other_diff, changeID,id_prepend);
+					// console.log(lines,ins, difference,  other_diff, changeID,id_prepend);
 					// difference.start += ins.length;
 					ins.push(last_line+1);
 					// console.log("#" + id_prepend + "ins" + difference.start);
@@ -159,7 +156,7 @@ var diff = function(){
 			//        view/homework.php
 			for (var a = 0; a< other_diff.line.length; a++){
 				console.log(id_prepend,"Insert line at ",difference.start+1);
-				console.log(lines,ins, difference,  other_diff, changeID,id_prepend);
+				// console.log(lines,ins, difference,  other_diff, changeID,id_prepend);
 				// difference.start += ins.length;
 				ins.push(difference.start+1);
 				// console.log("#" + id_prepend + "ins" + difference.start);
@@ -180,7 +177,7 @@ var diff = function(){
 
 		// Load generated css
 		for (var i = 0;i < style.length;i++){
-			console.log(style[i]);
+			// console.log(style[i]);
 
 			$('#' + first_diff_tag + ' > ' + style[i][0]).addClass(style[i][1]);
 			$('#' + second_diff_tag + ' > ' + style[i][0]).addClass(style[i][1]);
@@ -240,7 +237,7 @@ var diff = function(){
 		var html = "";
 		var line_number = 0;
 		for (var i = 0;i < lines.length;i++){
-			console.log(inserts, i, inserts.indexOf(i));
+			// console.log(inserts, i, inserts.indexOf(i));
 			if (inserts.indexOf(i) != -1){
 				for (var a = inserts.indexOf(i); inserts[a] == i ; a++){
 					// html += "Insert<br/>";
