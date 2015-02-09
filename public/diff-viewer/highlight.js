@@ -152,11 +152,18 @@ var highlight = function(){
 		var i = 0;
 		var cr = 0;
 		while (i < sentence.length && cr < ranges.length){
-			console.log(i, ranges[cr][0]);
+			// console.log(i, ranges[cr][0]);
 			var next = sentence.slice(i,ranges[cr][0]);
 			new_string += next;
 			i = ranges[cr][1];
-			next = sentence.slice(ranges[cr][0],i);
+			if (sentence.slice(i-1,i+1)==="\\r" || sentence.slice(i-1,i+1)==="^M"){
+				console.log("TAB ERROR"+":"+sentence.slice(i-1,i+1)+":"+sentence.slice(ranges[cr][0],i+1)+";");
+				next = sentence.slice(ranges[cr][0],i+1);
+				i++;
+			}
+			else{
+				next = sentence.slice(ranges[cr][0],i);
+			}
 			new_string += surrounds[cr][0] + next + surrounds[cr][1];
 			cr++;
 		}

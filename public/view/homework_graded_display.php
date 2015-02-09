@@ -161,7 +161,9 @@
 										if (isset($diff["student"]) && trim($diff["student"]) != "")
 										{
 											echo '<tt class="mono">';
-											echo htmlentities($diff["student"]);
+											$str=$diff["student"];
+											$str=str_replace("\r","\\r",$str);
+											echo htmlentities($str);
 											echo '</tt>';
 										}
 										?>
@@ -181,7 +183,11 @@
 											<?php
 											if (isset($diff["instructor"]) && trim($diff["instructor"]) != "")
 											{
-												echo '<tt class="mono">'.htmlentities($diff["instructor"]).'</tt>';
+												echo '<tt class="mono">';
+												$str=$diff["instructor"];
+												$str=str_replace("\r","\\r",$str);
+												echo htmlentities($str);
+												echo '</tt>';
 											}
 											else
 											{
