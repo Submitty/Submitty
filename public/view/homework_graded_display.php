@@ -161,7 +161,7 @@
 										if (isset($diff["student"]) && trim($diff["student"]) != "")
 										{
 											echo '<tt class="mono">';
-											echo $diff["student"];
+											echo htmlentities($diff["student"]);
 											echo '</tt>';
 										}
 										?>
