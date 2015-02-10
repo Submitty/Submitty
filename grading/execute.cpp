@@ -341,7 +341,7 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
   } else if (what_signal == SIGVTALRM /* 26,26,28  Term  Virtual alarm clock (4.2BSD)  */) {
   } else if (what_signal == SIGXCPU   /* 24,24,30  Core  CPU time limit exceeded (4.2BSD)  */) {
     message = "ERROR: CPU TIME LIMIT EXCEEDED";
-  } else if (what_sig.nal == SIGXFSZ   /* 25,25,31  Core  File size limit exceeded (4.2BSD  */) {
+  } else if (what_signal == SIGXFSZ   /* 25,25,31  Core  File size limit exceeded (4.2BSD  */) {
     message = "ERROR: FILE SIZE LIMIT EXCEEDED";
   } else {
   }
