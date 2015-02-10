@@ -2,14 +2,15 @@
 require_once("controller/data_functions.php");
 require_once("controller/controller_functions.php");
 
-$username = $_SESSION["id"];
-
 $course=check_course();
 $semester=check_semester();
 $class_config=check_class_config($semester,$course);
+$dev_team=$class_config["dev_team"];
 $assignment_id=check_assignment_id($class_config);
 $assignment_version=check_assignment_version($semester, $course, $assignment_id);
 $file_name=check_file_name($semester, $course, $assignment_id, $assignment_version);
+
+$username = $_SESSION["id"];
 
 if (isset($class_config["download_files"])){
     $download_files = $class_config["download_files"];
