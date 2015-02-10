@@ -2,14 +2,14 @@
 #include "tokens.h"
 
 TestResults* warnIfNotEmpty (const std::string & student_file, const std::string & expected_file) {
-  std::cout << "in warn if not empty" << std::endl;
-  std::cout << "the file '" << student_file << "'" << std::endl;
+  //std::cout << "in warn if not empty" << std::endl;
+  //  std::cout << "the file '" << student_file << "'" << std::endl;
   // the instructor file should be empty
   assert (expected_file == "");
   Tokens* answer = new Tokens();
   if (student_file != "") {
     answer->setMessage("WARNING: This should be empty");
-    std::cout << "in warn if not empty -- student file not empty" << std::endl;
+    //std::cout << "in warn if not empty -- student file not empty" << std::endl;
   }
   return answer;
 }
@@ -381,8 +381,14 @@ template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extra
 	    //std::cout << "SES [ESOO] calculating grade " << diff->distance << "/" << output_length << std::endl;
 	    //grade -= (diff->distance / (float) output_length );
 	    grade -= count_of_missing_lines / float(output_length);
+
+	    std::cout << 
+	      "grade:  missing_lines [ " << count_of_missing_lines << 
+	      "] / output_length " << output_length << "]\n";
+	    
 	    //std::cout << "SES [ESOO] calculated grade = " << std::setprecision(1) << std::fixed << std::setw(5) << grade << " " << std::setw(5) << (int)floor(5*grade) << std::endl;
 	  }
+
 	  diff->setGrade(grade);
 	} else {
 	  // both missing lines (deletions) and extra lines are a deduction
@@ -393,8 +399,15 @@ template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extra
 	  } else {
 	    //std::cout << "SES  calculating grade " << diff->distance << "/" << max_output_length << std::endl;
 	    grade -= (diff->distance / (float) max_output_length );
+
+	  std::cout << 
+	    "grade:  diff->distance [ " << diff->distance << 
+	    "] / max_output_length " << max_output_length << "]\n";
+
 	    //std::cout << "SES calculated grade = " << grade << std::endl;
 	  }
+
+
 	  diff->setGrade(grade);
 	}
 	// ===================================================

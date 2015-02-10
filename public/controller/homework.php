@@ -6,10 +6,7 @@ require_once("controller/data_functions.php");
 //URL PARSING
 $semester = check_semester();
 $course = check_course();
-
 $username = $_SESSION["id"];
-//END URL PARSING
-
 $class_config = get_class_config($semester,$course);//Gets class.JSON data
 if ($class_config == NULL) {
     ?><script>alert("Configuration for this class (class.JSON) is invalid.  Quitting");</script>
@@ -17,12 +14,8 @@ if ($class_config == NULL) {
 }
 $most_recent_assignment_id =        most_recent_released_assignment_id($class_config);
 $most_recent_assignment_version =   most_recent_assignment_version($username, $semester,$course, $most_recent_assignment_id);
-
 $all_assignments =                  $class_config["assignments"];
-
-// FIXME: New variable in class.json
 $dev_team =                         $class_config["dev_team"];
-
 //Get and validate assignment_id and assignment_version
 //If not valid do last homework, last version
 $assignment_id =                    parse_assignment_id_with_recent($class_config, $most_recent_assignment_id);
