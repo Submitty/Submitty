@@ -3,7 +3,7 @@ var highlight = function(){
 	// Change unranged ints to ranged ints
 	// [1,2,3,6,7] => [[1,3],[6,7]]
 	function enrange(ar){
-		console.log("enrange: ");
+		// console.log("enrange: ");
 
 		var nar = [];
 		var start = ar[0];
@@ -13,15 +13,15 @@ var highlight = function(){
 				start = ar[i];
 			}
 		}
-		console.log("ar: "+ar);
+		// console.log("ar: "+ar);
 
 		nar.push([start,ar[ar.length-1]]);
-		console.log("nar: "+nar);
+		// console.log("nar: "+nar);
 
 		return nar;
 	}
 	function enrange_char(ar){
-		console.log("enrange_char: ");
+		// console.log("enrange_char: ");
 
 		var nar = [];
 		var start = ar[0];
@@ -31,10 +31,10 @@ var highlight = function(){
 				start = ar[i];
 			}
 		}
-		console.log("ar: "+ar);
+		// console.log("ar: "+ar);
 
 		nar.push([start, ar[ar.length-1]+1]);
-		console.log("nar: "+nar);
+		// console.log("nar: "+nar);
 
 		return nar;
 	}
@@ -72,7 +72,7 @@ var highlight = function(){
 				console.log("char "+i+ " is: "+sentence[i]);
 
 				if (sentence[i] != " "){
-					//console.log("spaces until: "+i );
+					console.log("spaces until: "+i );
 
 					return i;
 				}
@@ -152,11 +152,18 @@ var highlight = function(){
 		var i = 0;
 		var cr = 0;
 		while (i < sentence.length && cr < ranges.length){
-			console.log(i, ranges[cr][0]);
+			// console.log(i, ranges[cr][0]);
 			var next = sentence.slice(i,ranges[cr][0]);
 			new_string += next;
 			i = ranges[cr][1];
-			next = sentence.slice(ranges[cr][0],i);
+			if (sentence.slice(i-1,i+1)==="\\r" || sentence.slice(i-1,i+1)==="^M"){
+				console.log("TAB ERROR"+":"+sentence.slice(i-1,i+1)+":"+sentence.slice(ranges[cr][0],i+1)+";");
+				next = sentence.slice(ranges[cr][0],i+1);
+				i++;
+			}
+			else{
+				next = sentence.slice(ranges[cr][0],i);
+			}
 			new_string += surrounds[cr][0] + next + surrounds[cr][1];
 			cr++;
 		}

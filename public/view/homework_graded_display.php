@@ -3,7 +3,7 @@
 	<h4>Results:</h4>
 
 <?php if ($assignment_message != "") {
-	echo '<span class="message">Note: '.$assignment_message."</span>"; 
+	echo '<span class="message">Note: '.htmlentities($assignment_message)."</span>";
 }
 ?>
 
@@ -76,7 +76,7 @@
 				if ($view_points == true && $points_visible != 0){
 					echo '<span class="badge-cont">';
 					if ($test["view_test_points"] == true && $test["points_possible"] != 0){
-						echo '<span class="'.$class.'">';
+						echo '<span class="'.htmlentities($class).'">';
 						if ($test["is_hidden"] == true && $view_hidden_points == false) {
 							echo 'Hidden';
 						}
@@ -91,10 +91,10 @@
 					echo '<span class="test_type">Extra Credit</span>';
 				}
 
-				echo $test["title"];
+				echo htmlentities($test["title"]);
 				if (isset ($test["details"])) {
 					if ($test["details"] != "") {
-						echo " <tt>".$test["details"]."</tt>";
+						echo " <tt>".htmlentities($test["details"])."</tt>";
 					}
 				}
 				if ($test["is_hidden"]) {
@@ -103,7 +103,7 @@
 				else
 				{
 					if ($test["message"] != "") {
-						echo '<span class="error_mess">&nbsp;&nbsp;'.$test["message"].'</span>';
+						echo '<span class="error_mess">&nbsp;&nbsp;'.htmlentities($test["message"]).'</span>';
 					}
 					if ($show_details && count($homework_tests) != 1){
 						?>
@@ -130,10 +130,10 @@
 			<?php
 
 				if (isset($test["compilation_output"]) && trim($test["compilation_output"])!="") {
-					echo '<div class="diff-block"><b class="sub2">Compilation output:</b><pre class="complation_mess">'.$test["compilation_output"].'</pre></div>';
+					echo '<div class="diff-block"><b class="sub2">Compilation output:</b><pre class="complation_mess">'.htmlentities($test["compilation_output"]).'</pre></div>';
 				}
 				if (isset($test["execute_logfile"]) && trim($test["execute_logfile"])!="") {
-					echo '<div class="diff-block"><b class="sub2">Execution output:</b><pre class="complation_mess">'.$test["execute_logfile"].'</pre></div>';
+					echo '<div class="diff-block"><b class="sub2">Execution output:</b><pre class="complation_mess">'.htmlentities($test["execute_logfile"]).'</pre></div>';
 				}
 
 				?>
@@ -142,7 +142,7 @@
 					if (isset($test["diffs"])) {
 						foreach ($test["diffs"] as $diff) {
 							if (isset($diff["message"]) && trim($diff["message"])!="") {
-								echo '<div class="diff-block"><a class="error_mess_diff">'.$diff["message"].'</a></div>';
+								echo '<div class="diff-block"><a class="error_mess_diff">'.htmlentities($diff["message"]).'</a></div>';
 								echo '<div class="spacer"></div>';
 							}
 							if ((!isset($diff["student"]) || trim($diff["student"]) == "") &&
@@ -154,14 +154,16 @@
 							?>
 							<div class="diff-block"> <!-- diff block -->
 								<div class="diff-element"><!-- student diff element -->
-									<b>Student <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b>
+									<b>Student <?php if (isset($diff["description"])) { echo htmlentities($diff["description"]); } ?></b>
 
-									<div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_student">
+									<div class="panel panel-default" id="<?php echo htmlentities($diff["diff_id"]); ?>_student">
 										<?php
 										if (isset($diff["student"]) && trim($diff["student"]) != "")
 										{
 											echo '<tt class="mono">';
-											echo $diff["student"];
+											$str=$diff["student"];
+											$str=str_replace("\r","\\r",$str);
+											echo htmlentities($str);
 											echo '</tt>';
 										}
 										?>
@@ -175,13 +177,17 @@
 									?>
 									<div class="diff-element"><!-- instructor diff element -->
 
-										<b>Expected <?php if (isset($diff["description"])) { echo $diff["description"]; } ?></b>
+										<b>Expected <?php if (isset($diff["description"])) { echo htmlentities($diff["description"]); } ?></b>
 
-										<div class="panel panel-default" id="<?php echo $diff["diff_id"]; ?>_instructor">
+										<div class="panel panel-default" id="<?php echo htmlentities($diff["diff_id"]); ?>_instructor">
 											<?php
 											if (isset($diff["instructor"]) && trim($diff["instructor"]) != "")
 											{
-												echo '<tt class="mono">'.$diff["instructor"].'</tt>';
+												echo '<tt class="mono">';
+												$str=$diff["instructor"];
+												$str=str_replace("\r","\\r",$str);
+												echo htmlentities($str);
+												echo '</tt>';
 											}
 											else
 											{
