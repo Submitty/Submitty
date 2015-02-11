@@ -297,6 +297,9 @@ void parse_command_line(const std::string &cmd,
 
 
 
+#ifndef SIGPOLL
+  #define SIGPOLL SIGIO // SIGPOLL is obsolescent in POSIX, SIGIO is a synonym
+#endif
 
 void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &logfile) {
 

@@ -1,16 +1,14 @@
 <?php
-
 require_once("controller/data_functions.php");
 require_once("controller/controller_functions.php");
 
-//Upload the stuff
 $course=check_course();
 $semester=check_semester();
 $class_config=check_class_config($semester,$course);
 $dev_team=$class_config["dev_team"];
-
 $assignment_id=check_assignment_id($class_config);
 
+//Upload the files
 if (isset($_FILES["file"])) {
 
     $uploaded_file = $_FILES["file"];
