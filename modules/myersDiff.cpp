@@ -78,14 +78,21 @@ TestResults* myersDiffbyLinebyChar ( const std::string & student_file, const std
 }
 
 TestResults* myersDiffbyLinebyCharExtraStudentOutputOk ( const std::string & student_file, const std::string & expected_file) {
+#if 0
+  //from nowhite
+	vectorOfWords text_a = stringToWords( student_file );
+	vectorOfWords text_b = stringToWords( expected_file );
+	Difference* diff = ses( &text_a, &text_b, true, extraStudentOutputOk );
+	diff->type = ByLineByWord;
+	return diff;
+#else
 	vectorOfLines text_a = stringToLines( student_file );
 	vectorOfLines text_b = stringToLines( expected_file );
-
 	bool extraStudentOutputOk = true;
 	Difference* diff = ses( &text_a, &text_b, true, extraStudentOutputOk );
 	diff->type = ByLineByChar;
 	return diff;
-
+#endif
 }
 
 // Runs all the ses functions
