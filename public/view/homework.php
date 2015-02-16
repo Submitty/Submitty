@@ -286,9 +286,9 @@ window.addEventListener('load', function() {
                     }
                     else
                     {
-                        // echo '<div class="outer_box"> <!-- outer_box -->';
-                        // echo '<h3 class="label2">TA grades for this homework not released yet</h3>';
-                        // echo "</div> <!-- end outer_box -->";
+                    //echo '<div class="outer_box"> <!-- outer_box -->';
+                    //echo '<h3 class="label2">TA grades for this homework not released yet</h3>';
+                    //echo "</div> <!-- end outer_box -->";
 
                     }
                     //<!-- END OF "IF AT LEAST ONE SUBMISSION... " -->

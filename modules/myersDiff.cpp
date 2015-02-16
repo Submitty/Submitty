@@ -378,23 +378,29 @@ template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extra
 	  }
 	  int output_length = diff->output_length_b;
 
-	  //std::cout << "COMPARE " << output_length << " " << count_of_missing_lines << std::endl;
+	  std::cout << "COMPARE outputlength=" << output_length << " missinglines=" << count_of_missing_lines << std::endl;
 	  
 
 	  assert (count_of_missing_lines <= output_length);
 	  float grade = 1.0;
-	  assert (output_length > 0);
 	  if (output_length > 0) {
 	    //std::cout << "SES [ESOO] calculating grade " << diff->distance << "/" << output_length << std::endl;
 	    //grade -= (diff->distance / (float) output_length );
 	    grade -= count_of_missing_lines / float(output_length);
-
 	    std::cout << 
 	      "grade:  missing_lines [ " << count_of_missing_lines << 
 	      "] / output_length " << output_length << "]\n";
 	    
 	    //std::cout << "SES [ESOO] calculated grade = " << std::setprecision(1) << std::fixed << std::setw(5) << grade << " " << std::setw(5) << (int)floor(5*grade) << std::endl;
 	  }
+	  else {
+	    //	  assert (output_length > 0);
+	    // FIXME: I do not understand this code anymore :(
+	    assert (output_length == 0);
+	    std::cout << "******************************is it an error that output_length == 0?" << std::endl;
+	    grade = 0;
+	  }
+
 
 	  diff->setGrade(grade);
 	} else {

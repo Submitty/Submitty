@@ -49,7 +49,7 @@
 
 // defined in seccomp_functions.cpp
 #include <elf.h>
-int install_syscall_filter(bool is_32, bool blacklist);
+int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_program);
 
 // =====================================================================================
 // =====================================================================================
@@ -453,8 +453,10 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
   //std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
 
 
-
-
+  // print this out here (before losing our output)
+  if (SECCOMP_ENABLED != 0) {
+    std::cout << "going to install syscall filter for " << my_program << std::endl;
+  }
 
   // FIXME: if we want to assert or print stuff afterward, we should save
   // the originals and restore after the exec fails.
@@ -481,7 +483,7 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
 
   // SECCOMP: install the filter (system calls restrictions)
   if (SECCOMP_ENABLED != 0) {
-    if (install_syscall_filter(prog_is_32bit, true /*blacklist*/)) { 
+    if (install_syscall_filter(prog_is_32bit, true /*blacklist*/, my_program)) { 
       std::cout << "seccomp filter install failed" << std::endl;
       return 1;
     }
@@ -586,7 +588,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
                 result=0;
             }
             else{
-	      logfile << "Child existed with status = " << WEXITSTATUS(status) << std::endl;
+	      logfile << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
 	      result=1;
             }
         }
