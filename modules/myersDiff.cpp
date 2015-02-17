@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "myersDiff.h"
 #include "tokens.h"
 
@@ -86,24 +88,40 @@ TestResults* myersDiffbyLinebyCharExtraStudentOutputOk ( const std::string & stu
 	diff->type = ByLineByWord;
 	return diff;
 #else
+	std::cout << "MYERS DIFF EXTRA STUDENT OUTPUT" << std::endl;
 	vectorOfLines text_a = stringToLines( student_file );
 	vectorOfLines text_b = stringToLines( expected_file );
 	bool extraStudentOutputOk = true;
 	Difference* diff = ses( &text_a, &text_b, true, extraStudentOutputOk );
 	diff->type = ByLineByChar;
+	std::cout << "end of MYERS DIFF EXTRA STUDENT OUTPUT" << std::endl;
 	return diff;
 #endif
 }
 
 // Runs all the ses functions
 template<class T> Difference* ses ( T* a, T* b, bool secondary, bool extraStudentOutputOk  ) {
+
   metaData< T > meta_diff = sesSnapshots( ( T* ) a, ( T* ) b, extraStudentOutputOk );
   sesSnakes( meta_diff,  extraStudentOutputOk  );
-	Difference* diff = sesChanges( meta_diff, extraStudentOutputOk );
-	if ( secondary ) {
-	  sesSecondary( diff, meta_diff, extraStudentOutputOk );
-	}
-	return diff;
+
+  Difference* diff = sesChanges( meta_diff, extraStudentOutputOk );
+  if ( secondary ) {
+    std::cout << "do a secondary" << std::endl;
+    sesSecondary( diff, meta_diff, extraStudentOutputOk );
+  } else {
+    std::cout << "no secondary" << std::endl;
+  }
+
+  diff->only_whitespace_changes = true;
+
+  for (int x = 0; x < diff->changes.size(); x++) {
+    INSPECT_CHANGES(std::cout,diff->changes[x],*a,*b,diff->only_whitespace_changes,extraStudentOutputOk);
+  }
+
+  diff->PrepareGrade();
+
+  return diff;
 }
 
 // runs shortest edit script. Saves traces in snapshots,
@@ -359,74 +377,85 @@ template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extra
 		change_var.clear();
 	}
 
-
-
-	// ===================================================
-	// PREPARE GRADE
-	if (diff->extraStudentOutputOk) {
-	  // only missing lines (deletions) are a problem
-
-	  // go through the changes,
-	  int count_of_missing_lines = 0;
-	  for (int x = 0; x < diff->changes.size(); x++) {
-	    // std::cout << "CHANGE " << x << "\n" << diff->changes[x] << std::endl;
-	    int num_b_lines = diff->changes[x].b_changes.size();
-	    if (num_b_lines > 0) {
-	      //std::cout << "*************************\n";
-	      count_of_missing_lines += num_b_lines;
-	    }
-	  }
-	  int output_length = diff->output_length_b;
-
-	  std::cout << "COMPARE outputlength=" << output_length << " missinglines=" << count_of_missing_lines << std::endl;
-	  
-
-	  assert (count_of_missing_lines <= output_length);
-	  float grade = 1.0;
-	  if (output_length > 0) {
-	    //std::cout << "SES [ESOO] calculating grade " << diff->distance << "/" << output_length << std::endl;
-	    //grade -= (diff->distance / (float) output_length );
-	    grade -= count_of_missing_lines / float(output_length);
-	    std::cout << 
-	      "grade:  missing_lines [ " << count_of_missing_lines << 
-	      "] / output_length " << output_length << "]\n";
-	    
-	    //std::cout << "SES [ESOO] calculated grade = " << std::setprecision(1) << std::fixed << std::setw(5) << grade << " " << std::setw(5) << (int)floor(5*grade) << std::endl;
-	  }
-	  else {
-	    //	  assert (output_length > 0);
-	    // FIXME: I do not understand this code anymore :(
-	    assert (output_length == 0);
-	    std::cout << "******************************is it an error that output_length == 0?" << std::endl;
-	    grade = 0;
-	  }
-
-
-	  diff->setGrade(grade);
-	} else {
-	  // both missing lines (deletions) and extra lines are a deduction
-	  int max_output_length = std::max(diff->output_length_a, diff->output_length_b);
-	  float grade = 1.0;
-	  if (max_output_length == 0) {
-	    grade = 0;
-	  } else {
-	    //std::cout << "SES  calculating grade " << diff->distance << "/" << max_output_length << std::endl;
-	    grade -= (diff->distance / (float) max_output_length );
-
-	  std::cout << 
-	    "grade:  diff->distance [ " << diff->distance << 
-	    "] / max_output_length " << max_output_length << "]\n";
-
-	    //std::cout << "SES calculated grade = " << grade << std::endl;
-	  }
-
-
-	  diff->setGrade(grade);
-	}
-	// ===================================================
-
 	return diff;
+
 }
+
+
+// =================================================================
+// =================================================================
+
+void Difference::PrepareGrade() {
+  std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
+  std::cout << "PREPARE GRADE" << std::endl;
+
+  // --------------------------------------------------------
+  if (this->extraStudentOutputOk) {
+    // only missing lines (deletions) are a problem
+    int count_of_missing_lines = 0;
+    for (int x = 0; x < this->changes.size(); x++) {
+      //std::cout << "CHANGE " << x << "\n";
+      //PRINT_CHANGES (std::cout, this->changes[x]);
+      int num_b_lines = this->changes[x].b_changes.size();
+      if (num_b_lines > 0) {
+	count_of_missing_lines += num_b_lines;
+      }
+    }
+    int output_length = this->output_length_b;
+    std::cout << "COMPARE outputlength=" << output_length << " missinglines=" << count_of_missing_lines << std::endl;
+    assert (count_of_missing_lines <= output_length);
+    float grade = 1.0;
+    if (output_length > 0) {
+      //std::cout << "SES [ESOO] calculating grade " << this->distance << "/" << output_length << std::endl;
+      //grade -= (this->distance / (float) output_length );
+      grade -= count_of_missing_lines / float(output_length);
+      std::cout << 
+	"grade:  missing_lines [ " << count_of_missing_lines << 
+	"] / output_length " << output_length << "]\n";
+      //std::cout << "SES [ESOO] calculated grade = " << std::setprecision(1) << std::fixed << std::setw(5) << grade << " " << std::setw(5) << (int)floor(5*grade) << std::endl;
+      if (grade < 1.0 && this->only_whitespace_changes) {
+	std::cout << "ONLY WHITESPACE DIFFERENCES! adjusting grade: " << grade << " -> ";
+	// FIXME:  Ugly, but with rounding, this will be only a -1 point grade for this test case
+	grade = std::max(grade,0.99f);
+	std::cout << grade << std::endl;
+      } else {
+	std::cout << "MORE THAN JUST WHITESPACE DIFFERENCES! " << std::endl;
+      }
+    } else {
+      assert (output_length == 0);
+      std::cout << "NO OUTPUT, GRADE IS ZERO" << std::endl;
+      grade = 0;
+    }
+    
+    std::cout << "this test grade = " << grade << std::endl;
+    this->setGrade(grade);
+  }
+
+  // --------------------------------------------------------
+  else {
+    // both missing lines (deletions) and extra lines are a deduction
+    int max_output_length = std::max(this->output_length_a, this->output_length_b);
+    float grade = 1.0;
+    if (max_output_length == 0) {
+      grade = 0;
+    } else {
+      //std::cout << "SES  calculating grade " << this->distance << "/" << max_output_length << std::endl;
+      grade -= (this->distance / (float) max_output_length );
+      std::cout << 
+	"grade:  this->distance [ " << this->distance << 
+	"] / max_output_length " << max_output_length << "]\n";
+      //std::cout << "SES calculated grade = " << grade << std::endl;
+    }
+    this->setGrade(grade);
+  }
+  // ===================================================
+  std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
+}
+
+
+// =================================================================
+// =================================================================
+
 
 // Takes a Difference object that has it's changes vector filled and parses to
 // find substitution chunks. It then runs a secondary diff to find diffrences

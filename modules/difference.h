@@ -35,8 +35,49 @@ public:
 	void clear();
 };
 
-inline std::ostream& operator<< (std::ostream& ostr, const Change &c) {
-  ostr << "CHANGE\n";
+
+
+inline void PRINT_CHANGES(std::ostream& ostr, const Change &c) {
+
+  ostr << "MY CHANGE\n";
+  ostr << "a_start " << c.a_start << std::endl;
+  ostr << "b_start " << c.b_start << std::endl;
+
+  ostr << "a_changes: ";
+  for (int i = 0; i < c.a_changes.size(); i++) {
+    ostr << c.a_changes[i] << " ";
+  }
+  ostr << std::endl;
+  ostr << "b_changes: ";
+  for (int i = 0; i < c.b_changes.size(); i++) {
+    ostr << c.b_changes[i] << " ";
+  }
+  ostr << std::endl;
+}
+
+
+
+inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
+			    const std::vector<std::vector<std::string> > &a, 
+			    const std::vector<std::vector<std::string> >  &b,
+			    bool &only_whitespace,
+			    bool extra_student_output_ok) { 
+  std::cout << "NOT HANDLING THINGS IN THIS CASE... " << std::endl;
+  only_whitespace = false;
+}
+
+
+#define VERBOSE_INSPECT_CHANGES 0
+//#define VERBOSE_INSPECT_CHANGES 1
+
+inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
+			    const std::vector<std::string> &adata, 
+			    const std::vector<std::string>  &bdata,
+			    bool &only_whitespace,
+			    bool extra_student_output_ok) { 
+
+#if VERBOSE_INSPECT_CHANGES
+  ostr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nINSPECT CHANGES\n";
   ostr << "a_start " << c.a_start << std::endl;
   ostr << "b_start " << c.b_start << std::endl;
   ostr << "a_changes: ";
@@ -49,7 +90,66 @@ inline std::ostream& operator<< (std::ostream& ostr, const Change &c) {
     ostr << c.b_changes[i] << " ";
   }
   ostr << std::endl;
-  return ostr;
+#endif
+
+  
+  // if there are more lines in b (instructor) 
+  if (c.a_changes.size() < c.b_changes.size()) only_whitespace = false;
+
+  // if there are more lines in a (student), that might be ok...
+  if (c.a_changes.size() != c.b_changes.size()) {
+    // but if extra student output is not ok
+    if (!extra_student_output_ok
+	||
+	c.b_changes.size() != 0)
+      only_whitespace = false;
+  }
+
+  for (int i = 0; i < c.a_characters.size(); i++) {
+#if VERBOSE_INSPECT_CHANGES
+    ostr << "a_characters["<<i<<"]: ";
+#endif
+    for (int j = 0; j < c.a_characters[i].size(); j++) {
+      int row = c.a_changes[i];
+      int col = c.a_characters[i][j];
+#if VERBOSE_INSPECT_CHANGES
+      ostr << "" << c.a_characters[i][j] << "='" << adata[row][col] << "' " ;
+#endif
+      if (adata[row][col] != ' ') only_whitespace = false;
+    }
+#if VERBOSE_INSPECT_CHANGES
+    std::cout << std::endl;
+#endif
+  }
+#if VERBOSE_INSPECT_CHANGES
+  ostr << std::endl;
+#endif
+
+  for (int i = 0; i < c.b_characters.size(); i++) {
+#if VERBOSE_INSPECT_CHANGES
+    ostr << "b_characters["<<i<<"]: ";
+#endif
+    for (int j = 0; j < c.b_characters[i].size(); j++) {
+      int row = c.b_changes[i];
+      int col = c.b_characters[i][j];
+#if VERBOSE_INSPECT_CHANGES
+      ostr << "" << c.b_characters[i][j] << "='" << bdata[row][col] << "' " ;
+#endif
+      if (bdata[row][col] != ' ') only_whitespace = false;
+    }
+#if VERBOSE_INSPECT_CHANGES
+    std::cout << std::endl;
+#endif
+  }
+#if VERBOSE_INSPECT_CHANGES
+  ostr << std::endl;
+#endif
+
+  if (only_whitespace) {
+    std::cout << "ONLY WHITESPACE CHANGES!!!!!!!!!!!!!" << std::endl;
+  } else {
+    std::cout << "FILE HAS NON WHITESPACE CHANGES!!!!!!!!!!!!!" << std::endl;
+  }
 }
 
 inline void Change::clear() {
@@ -71,11 +171,15 @@ public:
 	int edit_distance;
 	int type;
   bool extraStudentOutputOk;
+  bool only_whitespace_changes;
+
+
+  void PrepareGrade();
 };
 
 inline Difference::Difference() :
   TestResults(), output_length_a(0), output_length_b(0), edit_distance(0), 
-  type(OtherType), extraStudentOutputOk(false) {
+  type(OtherType), extraStudentOutputOk(false), only_whitespace_changes(false) {
 }
 
 /*
