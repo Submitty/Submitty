@@ -342,8 +342,8 @@ while true; do
         # copy any instructor code files to tmp directory
 	if [ -d "$test_code_path" ]
 	then
-	    cp -rf $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy instructor files to temporary compilation directory $test_code_path to $tmp_compilation :  cp -rf $test_code_path/ $tmp_compilation" >&2
-	    cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
+	    rsync -a $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy instructor files to temporary compilation directory $test_code_path to $tmp_compilation :  cp -rf $test_code_path/ $tmp_compilation" >&2
+	    #cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
 	fi
 
 	pushd $tmp_compilation > /dev/null
