@@ -458,6 +458,7 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
     std::cout << "going to install syscall filter for " << my_program << std::endl;
   }
 
+
   // FIXME: if we want to assert or print stuff afterward, we should save
   // the originals and restore after the exec fails.
   if (my_stdin != "") {
@@ -490,6 +491,7 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
   } else {
   }
   // END SECCOMP
+
 
 
   int child_result =  execv ( my_program.c_str(), my_char_args );
