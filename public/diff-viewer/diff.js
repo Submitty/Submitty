@@ -1,5 +1,5 @@
-//REMOVE DEBUG CONSOLE LOGGING
-console.log = function() {}
+// Show console.log lines
+var DEBUG = false;
 
 // Requires highlight.js
 
@@ -31,14 +31,14 @@ var diff = function(){
 	function init(){
 		ins0 = [];
 		ins1 = [];
-		style = [];
+		style = {};
 		assocs = [];
 	}
 
 	// Utility function for a replaceAll string function
 	// returns string with the "find" regex replaced with "replace"
 	function replaceAll(str, find, replace) {
-		console.log(str.replace(new RegExp(find, 'g'), replace), ":",new RegExp(find, 'g') , ":",find, ":",replace, new RegExp(find, 'g'));
+		consoleLog(str.replace(new RegExp(find, 'g'), replace), ":",new RegExp(find, 'g') , ":",find, ":",replace, new RegExp(find, 'g'));
 		return str.replace(new RegExp(find, 'g'), replace);
 	}
 
@@ -48,8 +48,8 @@ var diff = function(){
 
 		f0 = file0.split("\n");
 		f1 = file1.split("\n");
-		console.log("STU_",f0);
-		console.log("INST_",f1);
+		consoleLog("STU_",f0);
+		consoleLog("INST_",f1);
 
 		// for (var i = f0.length-1;i >= 0;i--){
 		// 	if (f0[i] == "" && f1[i] == ""){
@@ -87,8 +87,8 @@ var diff = function(){
 				var line_id = "#" + id_prepend + "line" + change.line_number;
 				last_line=change.line_number;
 				if (change.line_number !== undefined){
-						// console.log(id_prepend,"Bad line at ",change.line_number);
-						style.push([line_id, "bad-line"]);
+						// consoleLog(id_prepend,"Bad line at ",change.line_number);
+						style[line_id] = "bad-line";
 						assocs[changeID].push(line_id);
 					if (change.word_number || change.char_number){
 						if (change.word_number){
@@ -133,18 +133,18 @@ var diff = function(){
 					}
 				}
 				else{
-					console.log("ERROR: NO LINE NUMBER IN DIFFERENCE");
+					consoleLog("ERROR: NO LINE NUMBER IN DIFFERENCE");
 				}
 			}
 			if (difference.start !== undefined && other_diff.line !== undefined){
 				var lines_inserted =  other_diff.line.length-difference.line.length;
-				console.log("Insert lines: ",lines_inserted );
+				consoleLog("Insert lines: ",lines_inserted );
 				for (var a = 0; a<lines_inserted; a++){
-					console.log(id_prepend,"Insert line at ",last_line+1);
-					// console.log(lines,ins, difference,  other_diff, changeID,id_prepend);
+					consoleLog(id_prepend,"Insert line at ",last_line+1);
+					// consoleLog(lines,ins, difference,  other_diff, changeID,id_prepend);
 					// difference.start += ins.length;
 					ins.push(last_line+1);
-					// console.log("#" + id_prepend + "ins" + difference.start);
+					// consoleLog("#" + id_prepend + "ins" + difference.start);
 					assocs[changeID].push("#" + id_prepend + "ins" + (last_line+1));
 				}
 			}
@@ -155,16 +155,16 @@ var diff = function(){
 			//        "+1"s in this file when the newline is removed from
 			//        view/homework.php
 			for (var a = 0; a< other_diff.line.length; a++){
-				console.log(id_prepend,"Insert line at ",difference.start+1);
-				// console.log(lines,ins, difference,  other_diff, changeID,id_prepend);
+				consoleLog(id_prepend,"Insert line at ",difference.start+1);
+				// consoleLog(lines,ins, difference,  other_diff, changeID,id_prepend);
 				// difference.start += ins.length;
 				ins.push(difference.start+1);
-				// console.log("#" + id_prepend + "ins" + difference.start);
+				// consoleLog("#" + id_prepend + "ins" + difference.start);
 				assocs[changeID].push("#" + id_prepend + "ins" + (difference.start+1));
 			}
 		}
 		else{
-			console.log("Couldn't interpret difference : ",difference);
+			consoleLog("Couldn't interpret difference : ",difference);
 		}
 	}
 
@@ -175,18 +175,6 @@ var diff = function(){
 		displayLines(f0,ins0,document.getElementById(first_diff_tag),"stu_");
 		displayLines(f1,ins1,document.getElementById(second_diff_tag),"ist_");
 
-		// Load generated css
-		for (var i = 0;i < style.length;i++){
-			// console.log(style[i]);
-
-			$('#' + first_diff_tag + ' > ' + style[i][0]).addClass(style[i][1]);
-			$('#' + second_diff_tag + ' > ' + style[i][0]).addClass(style[i][1]);
-
-			$('#' + first_diff_tag + ' > > ' + style[i][0]).addClass(style[i][1]);
-			$('#' + second_diff_tag + ' > > ' + style[i][0]).addClass(style[i][1]);
-
-		}
-
 		// Create association events
 		for (var i = 0;i < assocs.length;i++){
 			var selectors = assocs[i];
@@ -196,10 +184,10 @@ var diff = function(){
 
 	// Setup line selectors for hover event
 	function setup_line_hover(selectors, first_diff_tag, second_diff_tag){
-		// console.log("HOVER-setup",selectors, first_diff_tag, second_diff_tag)
+		// consoleLog("HOVER-setup",selectors, first_diff_tag, second_diff_tag)
 		// Function called when group is hovered over
 		var event_function_hover_on = function(e){
-			console.log("HOVER",selectors, first_diff_tag, second_diff_tag)
+			consoleLog("HOVER",selectors, first_diff_tag, second_diff_tag)
 			for (var u = 0;u<selectors.length;u++){
 				// $('#' + first_diff_tag + ' > > > ' + selectors[u]).addClass("line-hover");
 				// $('#' + second_diff_tag + ' > > > ' + selectors[u]).addClass("line-hover");
@@ -237,7 +225,7 @@ var diff = function(){
 		var html = "";
 		var line_number = 0;
 		for (var i = 0;i < lines.length;i++){
-			// console.log(inserts, i, inserts.indexOf(i));
+			// consoleLog(inserts, i, inserts.indexOf(i));
 			if (inserts.indexOf(i) != -1){
 				for (var a = inserts.indexOf(i); inserts[a] == i ; a++){
 					// html += "Insert<br/>";
@@ -251,16 +239,28 @@ var diff = function(){
 			//        "+1"s in this file when the newline is removed from
 			//        view/homework.php
 
-
-			html += "<div class='line' id='"+id_preprend+"line"+i+
+			var style_id = "#"+id_preprend+"line"+i;
+			html += "<div class='line "+(style[style_id] != undefined ? style[style_id] : "")+"' id='"+id_preprend+"line"+i+
 				"'><span class='line_number "+(i%2 == 0 ? "" : "odd-line")+
-				"'>"+(line_number+1)+"</span>" + '<tt class="mono">' + lines[i] + '</tt>' + "</div>";
+				"'>"+(line_number+1)+"</span>" + '<tt class="mono">';
+			if (style[style_id] != undefined) {
+				html += lines[i];
+			}
+			else {
+				html += highlight.htmlEntities(lines[i]);
+			}
+			html += '</tt>' + "</div>";
 			line_number ++;
 		}
 		// element.innerHTML = "<div>" + html + "</div>";
 		// element.innerHTML = "<span>"+ html + "</span>";
 		element.innerHTML =  html;
+	}
 
+	function consoleLog(log) {
+		if (DEBUG == true) {
+			consoleLog(log);
+		}
 	}
 
 	return {
