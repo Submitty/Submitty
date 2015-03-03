@@ -7,6 +7,10 @@
 }
 ?>
 
+	<?php
+	   //echo "debug: $points_visible";
+	?>
+
 
 	<?php
 	if ($view_points == true && $points_visible != 0){
