@@ -140,6 +140,8 @@ if ! $(test -d $repodir) ; then
 fi
 ls
 git status
+
+
 echo "********************************************************************************"
 
 # Replace default with class name
@@ -157,6 +159,9 @@ replace='/*,"default" => [default]*/'
 replace_with=', "'.$semester.'" => ['.$class.']'
 sed -i.orig  s~"$replace"~"$replace_with"~ public/controller/defaults.php
 
+replace='pgrep_results=$(pgrep -u hwcron grade_students)'
+replace_with='pgrep_results=$(pgrep grade_students)'
+sed -i.orig  s~"$replace"~"$replace_with"~ bashScript/grade_students.sh
 
 # replace='$course != "default"'
 # replace_with='$course != "'$class'"'
