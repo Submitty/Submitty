@@ -163,6 +163,10 @@ replace='pgrep_results=$(pgrep -u hwcron grade_students)'
 replace_with='pgrep_results=$(pgrep grade_students)'
 sed -i.orig  s~"$replace"~"$replace_with"~ bashScript/grade_students.sh
 
+
+replace='numprocesses=$(ps -u untrusted | wc -l)'
+replace_with='#numprocesses=$(ps -u untrusted | wc -l)'
+sed -i.orig  s~"$replace"~"$replace_with"~ bashScript/grade_students.sh
 # replace='$course != "default"'
 # replace_with='$course != "'$class'"'
 # sed -i.orig  s~"$replace"~"$replace_with"~ public/controller/upload.php
