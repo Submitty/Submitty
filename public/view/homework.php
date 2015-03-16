@@ -249,6 +249,11 @@ window.addEventListener('load', function() {
                     <?php
                     }
                     else {
+
+
+//	   echo "debuga: $points_visible";
+
+
                         //Box with grades, outputs and diffs
                         render("homework_graded_display",array(
                             "assignment_message"=>$assignment_message,
