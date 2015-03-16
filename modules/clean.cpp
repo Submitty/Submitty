@@ -25,7 +25,7 @@
  * RETURN: void
  * PURPOSE: Removes all instances of \r\n and replaces with \n
  */
- oid clean(std::string & content) {
+ void clean(std::string & content) {
 	int pos = (int) content.find('\r');
 	while (pos != std::string::npos) {
 		if (content[pos + 1] == '\n') {
@@ -129,7 +129,7 @@ std::string wordsToString(vectorOfWords text) {
 	std::string contents;
 	for (int a = 0; a < text.size(); a++) {
 		std::string line;
-		if (a > 0) {
+		if (a > 0) 
 			contents += "\n";
 	}
 		for (int b = 0; b < text[a].size(); b++) {
