@@ -77,7 +77,7 @@ Change diffNaive ( const std::string& student, const std::string& instructor ) {
  * in linear time with respect to the longer string.
  */
 Change diffNoSpace ( const std::string& _student,
-					 const std::string& _instructor ) {
+		     const std::string& _instructor ) {
 	Change differences;
 	differences.a_start = 0;
 	differences.b_start = 0;
@@ -128,7 +128,7 @@ Change diffNoSpace ( const std::string& _student,
  * https://github.com/JFrei86/HWserver/wiki/Naive-Difference#usage
  */
 TestResults* diffLine ( const std::string& _student,
-						const std::string& _instructor ) {
+			const std::string& _instructor ) {
 	Difference* diffs = new Difference();
 	diffs->type = 1;
 	
@@ -172,7 +172,7 @@ TestResults* diffLine ( const std::string& _student,
 		i++;
 	}
 	diffs->distance = ( int ) std::max( file.a_changes.size(),
-										file.b_changes.size() );
+					    file.b_changes.size() );
 
 	diffs->changes.push_back( file );
 	return diffs;
@@ -190,7 +190,7 @@ TestResults* diffLine ( const std::string& _student,
  * https://github.com/JFrei86/HWserver/wiki/Naive-Difference#usage
  */
 TestResults* diffLineNoSpace ( const std::string& _student,
-							   const std::string& _instructor ) {
+			       const std::string& _instructor ) {
 	Difference* diffs = new Difference();
 	diffs->type = 1;
 
@@ -228,7 +228,7 @@ TestResults* diffLineNoSpace ( const std::string& _student,
 		i++;
 	}
 	diffs->distance = ( int ) std::max( file.a_changes.size(),
-										file.b_changes.size() );
+					    file.b_changes.size() );
 	diffs->changes.push_back( file );
 	return diffs;
 }
