@@ -50,6 +50,7 @@
 vectorOfWords stringToWords(std::string text) {
 	vectorOfWords contents;
 	std::stringstream input(text);
+	
 	std::string word;
 	while (getline(input, word)) {
 		std::vector<std::string> text;
@@ -71,6 +72,7 @@ vectorOfWords stringToWords(std::string text) {
 vectorOfLines stringToLines(std::string text) {
 	vectorOfLines contents;
 	std::stringstream input(text);
+	
 	std::string line;
 	while (getline(input, line)) {
 		contents.push_back(line);
@@ -87,6 +89,7 @@ vectorOfLines stringToLines(std::string text) {
  */
 std::string linesToString(vectorOfLines text) {
 	std::string contents;
+	
 	for (int a = 0; a < text.size(); a++) {
 		contents += text[a] + '\n';
 	}
@@ -129,9 +132,9 @@ std::string wordsToString(vectorOfWords text) {
 	std::string contents;
 	for (int a = 0; a < text.size(); a++) {
 		std::string line;
-		if (a > 0) 
+		if (a > 0) {
 			contents += "\n";
-	}
+		}
 		for (int b = 0; b < text[a].size(); b++) {
 			if (b > 0) {
 				line += " ";
