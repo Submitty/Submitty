@@ -165,7 +165,7 @@ sed -i.orig  s~"$replace"~"$replace_with"~ bashScript/grade_students.sh
 
 
 replace='numprocesses=$(ps -u untrusted | wc -l)'
-replace_with='#numprocesses=$(ps -u untrusted | wc -l)'
+replace_with='numprocesses=1 #$(ps -u untrusted | wc -l)'
 sed -i.orig  s~"$replace"~"$replace_with"~ bashScript/grade_students.sh
 # replace='$course != "default"'
 # replace_with='$course != "'$class'"'
@@ -289,14 +289,14 @@ echo "CXX=/usr/bin/clang++ cmake . "
 echo "make -j 2"
 echo "********************************************************************************"
 
-if [[ ($dev = "y" || $dev = "yes"  || $dev = "Y"  || $dev = "Yes" || $dev = "o" || $dev = "other"  || $dev = "O"  || $dev = "Other") && $comp = "0" ]]; then
-    read -p "Add symlink to /var/www? (for apache) " yn
-    if [ $yn = "y" ]; then
-        sudo rm -f "/var/www/html/hws"
-        sudo ln "$(pwd)/site/public" "/var/www/html/hws"
-        echo "You can now access the site at 127.0.0.1/hws"
-    fi
-fi
+# if [[ ($dev = "y" || $dev = "yes"  || $dev = "Y"  || $dev = "Yes" || $dev = "o" || $dev = "other"  || $dev = "O"  || $dev = "Other") && $comp = "0" ]]; then
+#     # read -p "Add symlink to /var/www? (for apache) " yn
+#     # if [ $yn = "y" ]; then
+#     #     sudo rm -f "/var/www/html/hws"
+#     #     sudo ln "$(pwd)/site/public" "/var/www/html/hws"
+#     #     echo "You can now access the site at 127.0.0.1/hws"
+#     # fi
+# fi
 
 echo "********************************************************************************"
 
