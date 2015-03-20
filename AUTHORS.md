@@ -1,32 +1,33 @@
 ##Members
 
 Barbara Cutler
+
 Matthew Peveler
 
 **Members of Rensselaer Center for Open Source (rcos.rpi.edu)**
 
-	Chris Berger
+Chris Berger
 	
-	Jesse Freitas
+Jesse Freitas
+	
+Severin Ibarluzea
+	
+Kiana McNellis
  	
- 	Severin Ibarluzea
+Kienan Knight-Boehm
  	
- 	Kiana McNellis
+Sam Seng
  	
- 	Kienan Knight-Boehm
+Victor Zhu
  	
- 	Sam Seng
+Melissa Lindquist
  	
- 	Victor Zhu
+Beverly Sihsobhon
+
+Stanley Cheung
+	
+Tyler Shepard
  	
- 	Melissa Lindquist
+Seema Bhaskar
  	
- 	Beverly Sihsobhon
- 	
- 	Stanley Cheung
- 	
- 	Tyler Shepard
- 	
- 	Seema Bhaskar
- 	
- 	Andrea Wong
+Andrea Wong
