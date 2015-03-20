@@ -4,8 +4,7 @@
  * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
  *
  * RELEVANT DOCUMENTATION:
- * This file is used to make including grading modules easier.
-*/
+ */
 
 #ifndef __MODULES__
 #define __MODULES__

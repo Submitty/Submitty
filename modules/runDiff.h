@@ -5,7 +5,6 @@
  *
  * RELEVANT DOCUMENTATION:
  */
-
 #ifndef differences_runDiff_h
 #define differences_runDiff_h
 
