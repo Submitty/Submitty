@@ -1,3 +1,11 @@
+/* FILENAME: difference.cpp
+ * YEAR: 2014
+ * AUTHORS: Please refer to 'AUTHORS.md' for a list of contributors
+ * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
+ *
+ * RELEVANT DOCUMENTATION:
+ */
+
 #include "difference.h"
 
 void Difference::printJSON(std::ostream & file_out) {
