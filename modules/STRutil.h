@@ -6,7 +6,7 @@
  * RELEVANT DOCUMENTATION:
  * This is a series of utility functions for removing trailing and
  * heading white space
-*/
+ */
 
 
 #ifndef ___STR_UTIL___
