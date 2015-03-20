@@ -1,13 +1,21 @@
 /* FILENAME: diffNaive.cpp
  * YEAR: 2014
  * AUTHORS:
- * 	Members of Rensselaer Center for Open Source (rcos.rpi.edu):
- * 		Chris Berger
- * 		Jesse Freitas
- * 		Severin Ibarluzea
- * 		Kiana McNellis
- * 		Kienan Knight-Boehm
- * 		Sam Seng
+ *   Members of Rensselaer Center for Open Source (rcos.rpi.edu):
+ *   	Chris Berger
+ *   	Jesse Freitas
+ *   	Severin Ibarluzea
+ *   	Kiana McNellis
+ *   	Kienan Knight-Boehm
+ *   	Sam Seng
+ *   	Robert Berman
+ *   	Victor Zhu
+ *   	Melissa Lindquist
+ *   	Beverly Sihsobhon
+ *   	Stanley Cheung
+ *   	Tyler Shepard
+ *   	Seema Bhaskar
+ *   	Andrea Wong
  * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
  *
  * RELEVANT DOCUMENTATION:
