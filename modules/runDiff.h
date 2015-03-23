@@ -1,11 +1,11 @@
-/*Copyright (c) 2014, Chris Berger, Jesse Freitas, Severin Ibarluzea,
- Kiana McNellis, Kienan Knight-Boehm
-
- All rights reserved.
- This code is licensed using the BSD "3-Clause" license. Please refer to
- "LICENSE.md" for the full license.
+/* FILENAME: runDiff.h
+ * YEAR: 2014
+ * AUTHORS: Please refer to 'AUTHORS.md' for a list of contributors
+ * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
+ *
+ * RELEVANT DOCUMENTATION:
  */
-
+ 
 #ifndef differences_runDiff_h
 #define differences_runDiff_h
 
