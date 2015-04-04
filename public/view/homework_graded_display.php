@@ -146,7 +146,11 @@
 					if (isset($test["diffs"])) {
 						foreach ($test["diffs"] as $diff) {
 							if (isset($diff["message"]) && trim($diff["message"])!="") {
-								echo '<div class="diff-block"><a class="error_mess_diff">'.htmlentities($diff["message"]).'</a></div>';
+
+							
+								echo '<div class="diff-block"><div class="error_mess_diff">'.html_entity_decode($diff["message"]).'</div></div>';
+								//echo '<div class="diff-block"><a class="error_mess_diff">'."MESSAGE ".htmlentities($diff["message"]).'</a></div>';
+
 								echo '<div class="spacer"></div>';
 							}
 							if ((!isset($diff["student"]) || trim($diff["student"]) == "") &&
