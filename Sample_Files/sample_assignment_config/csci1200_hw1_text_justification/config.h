@@ -18,8 +18,8 @@ const int max_submissions = 20;
 const int submission_penalty = 5;
 
 // Compile-time parameters
-const int max_clocktime = 10;		// in seconds
-const int max_cputime = 10;			// in seconds
+const int max_clocktime = 200; // = 10;		// in seconds
+const int max_cputime = 200; // = 10;			// in seconds
 const int max_submission_size = 100000;	// in KB
 const int max_output_size = 100000;	// in KB
 
