@@ -168,24 +168,23 @@ window.addEventListener('load', function() {
                                             echo 'selected';
                                         }
                                         echo ' > ';
-                                        echo 'Version #'.$i;
-                                        echo '&nbsp;&nbsp';
-                                        if ($points_visible != 0){
-                                            echo 'Score: ';
-                                            echo $select_submission_data[$i-1]["score"];
-                                            echo '&nbsp;&nbsp';
-                                        }
-                                        else{
-                                            echo $points_visible;
+                                        $field_text = array();
+                                        $field_text[] = 'Version #'.$i;
+                                        if ($points_visible > 0){
+                                            $score_text = 'Score: ';
+                                            $score_text .= $select_submission_data[$i-1]["score"];
+                                            $field_text[] = $score_text;
                                         }
                                         if ($select_submission_data[$i-1]["days_late"] != "")
                                         {
-                                            echo 'Days Late: ';
-                                            echo $select_submission_data[$i-1]["days_late"];
+                                            $days_late = 'Days Late: ';
+                                            $days_late .= $select_submission_data[$i-1]["days_late"];
+                                            $field_text[] = $days_late;
                                         }
                                         if ($i == $submitting_version) {
-                                            echo '&nbsp;&nbsp ACTIVE';
+                                            $field_text[] = 'ACTIVE';
                                         }
+                                        echo implode("&nbsp;&nbsp;",$field_text);
                                         echo ' </option>';
                                     }
                                     ?>
