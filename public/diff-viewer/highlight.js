@@ -137,6 +137,9 @@ var highlight = function(){
 		return false;
 	}
 
+	function htmlEntities(str) {
+    	return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+	}
 
 	// Insert tags in character ranges in string
 	function tagString(sentence, ranges, surrounds){
@@ -154,7 +157,7 @@ var highlight = function(){
 		while (i < sentence.length && cr < ranges.length){
 			// console.log(i, ranges[cr][0]);
 			var next = sentence.slice(i,ranges[cr][0]);
-			new_string += next;
+			new_string += htmlEntities(next);
 			i = ranges[cr][1];
 			if (sentence.slice(i-1,i+1)==="\\r" || sentence.slice(i-1,i+1)==="^M"){
 				console.log("TAB ERROR"+":"+sentence.slice(i-1,i+1)+":"+sentence.slice(ranges[cr][0],i+1)+";");
@@ -164,10 +167,10 @@ var highlight = function(){
 			else{
 				next = sentence.slice(ranges[cr][0],i);
 			}
-			new_string += surrounds[cr][0] + next + surrounds[cr][1];
+			new_string += surrounds[cr][0] + htmlEntities(next) + surrounds[cr][1];
 			cr++;
 		}
-		new_string += sentence.slice(i,sentence.length);
+		new_string += htmlEntities(sentence.slice(i,sentence.length));
 		return new_string;
 	}
 
@@ -218,6 +221,7 @@ var highlight = function(){
 		range_overlap:range_overlap,
 		tagString:tagString,
 		surround:surround,
-		tagger:tagger
+		tagger:tagger,
+		htmlEntities:htmlEntities
 	};
 }();

@@ -7,6 +7,8 @@
 var diff_queue = [];
 var diff_objects = {};
 
+var DEBUG = false;
+
 // Go through diff queue and load elements
 function loadDiffQueue(){
 	for (var i = 0; i < diff_queue.length; i++){
@@ -20,16 +22,23 @@ function loadDiffQueue(){
 		var instructor_element = document.getElementById(instructor_element_id).getElementsByTagName( 'tt' )[0];
 
 
-		diff.load(student_element.innerHTML,instructor_element.innerHTML);
-		console.log("STUDENT_ELEMENT");
-		console.log(student_element.innerHTML);
-		console.log("INSTRUCTOR_ELEMENT");
-		console.log(instructor_element.innerHTML);
+		diff.load($(student_element).text(),$(instructor_element).text());
+		consoleLog("STUDENT_ELEMENT");
+		consoleLog(student_element.innerHTML);
+		consoleLog("INSTRUCTOR_ELEMENT");
+		consoleLog(instructor_element.innerHTML);
 
 		student_element.innerHTML = "";
 		instructor_element.innerHTML = "";
+
 		diff.evalDifferences(diff_objects[title]["differences"]);
 		diff.display(student_element_id.split(' ').join('\\ '),instructor_element_id.split(' ').join('\\ '));
+	}
+}
+
+function consoleLog(log) {
+	if (DEBUG == true) {
+		consoleLog(log);
 	}
 }
 // .getElementsByTagName( 'tt' )[0];
