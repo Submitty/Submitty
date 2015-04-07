@@ -234,7 +234,7 @@ window.addEventListener('load', function() {
                                         }
                                         else if (isset($download_readme) && $download_readme == true && strtolower($file["name"]) == "readme.txt"){
                                             echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
-                                            echo '<a class = "view_file" href="#" onclick="">View</a>';
+                                             echo '<a class = "view_file" href="#" onclick="">View</a>';
                                         }
                                     echo '</p>';
                                     echo '</div>';
