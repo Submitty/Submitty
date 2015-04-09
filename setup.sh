@@ -98,7 +98,7 @@ if ! $(test -d $repodir) ; then
     if [[ $dev = "y" || $dev = "yes"  || $dev = "Y"  || $dev = "Yes" ]] ; then
         echo "cloning develop"
         if ! git clone git@github.com:RCOS-Grading-Server/HWserver.git $repodir ; then
-            echo "Repository or branch is invalid.  Check at https://github.com/JFrei86/HWserver"
+            echo "Repository or branch is invalid.  Check at https://github.com/RCOS-Grading-Server/HWserver"
             exit
         fi
         cd $setup_dir/$repodir
@@ -114,7 +114,7 @@ if ! $(test -d $repodir) ; then
 
         echo "cloning $branch"
         if ! git clone git@github.com:RCOS-Grading-Server/HWserver.git $repodir ; then
-            echo "Repository or branch is invalid.  Check at https://github.com/JFrei86/HWserver"
+            echo "Repository or branch is invalid.  Check at https://github.com/RCOS-Grading-Server/HWserver"
             exit
         fi
         cd $repodir
@@ -129,7 +129,7 @@ if ! $(test -d $repodir) ; then
     else
         echo "cloning master"
         if ! git clone https://github.com/RCOS-Grading-Server/HWserver.git $repodir ; then
-            echo "Repository or branch is invalid.  Check at https://github.com/JFrei86/HWserver"
+            echo "Repository or branch is invalid.  Check at https://github.com/RCOS-Grading-Server/HWserver"
             exit
         fi
         cd $repodir
