@@ -3,11 +3,17 @@
  * AUTHORS: Please refer to 'AUTHORS.md' for a list of contributors
  * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
  *
- * RELEVANT DOCUMENTATION:
+ * RELEVANT DOCUMENTATION: 
+ * Extends the printJSON method to format results into JSON format
  */
 
 #include "difference.h"
 
+/* METHOD: printJSON
+ * ARGS: ostream
+ * RETURN: void
+ * PURPOSE: print out the data in JSON format for student's result and expected result
+ */
 void Difference::printJSON(std::ostream & file_out) {
 	std::string diff1_name;
 	std::string diff2_name;
