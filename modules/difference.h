@@ -72,7 +72,7 @@ inline void PRINT_CHANGES(std::ostream& ostr, const Change &c) {
 
 /* METHOD: INSPECT_CHANGES
  * ARGS: ostream, c - contains a block of text with discrepancies, 
- * a - strings by line for student output???, b - strings by line for expected output???,
+ * a - strings by line for student output, b - strings by line for expected outpu,
  * only_whitespace - check for if only whitespace, extra_Student_output_ok - check for if
  * student output is good
  * RETURN: void
@@ -93,7 +93,7 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
 
 /* METHOD: INSPECT_CHANGES
  * ARGS: ostream, c - contains a block of text with discrepancies, 
- * adata - strings by line for student output???, bdata - strings by line for expected output???,
+ * adata - strings by line for student output, bdata - strings by line for expected output,
  * only_whitespace - check for if only whitespace, extra_Student_output_ok - check for if
  * student output is good
  * RETURN: void
