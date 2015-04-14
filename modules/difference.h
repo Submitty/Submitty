@@ -3,7 +3,10 @@
  * AUTHORS: Please refer to 'AUTHORS.md' for a list of contributors
  * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
  *
- * RELEVANT DOCUMENTATION:
+ * RELEVANT DOCUMENTATION: 
+ * Contains the Change class that keeps track of differences between the expected output
+ * and the resulting output.  Differences contains a vector of changes.  Used to hold 
+ * all the data regarding the differences in output of a test.
  */
 
 #ifndef __differences__difference__
@@ -18,25 +21,37 @@
 #define ByWordByChar 2
 #define ByLineByWord 3
 
+/* DESCRIPTION: Contains the differences in a block for a student's ouput
+ * and the expected output */
 class Change {
 public:
+
 	// Starting changeblock line for input (student)
 	int a_start;
+
 	// Same for (expected)
 	int b_start;
+
 	// Vector of lines in changeblock that contain discrepancies (student)
 	std::vector<int> a_changes;
+
 	// Same for (expected)
 	std::vector<int> b_changes;
+
 	// Structure for changed character/word indices (student)
 	std::vector<std::vector<int> > a_characters;
+
 	// Same for (expected)
 	std::vector<std::vector<int> > b_characters;
+
 	void clear();
 };
 
-
-
+/* METHOD: PRINT_CHANGES
+ * ARGS: ostream, c - contains a block of text with discrepancies
+ * RETURN: void
+ * PURPOSE: Print out the changes for the block for both student and expected
+ */
 inline void PRINT_CHANGES(std::ostream& ostr, const Change &c) {
 
   ostr << "MY CHANGE\n";
@@ -55,8 +70,14 @@ inline void PRINT_CHANGES(std::ostream& ostr, const Change &c) {
   ostr << std::endl;
 }
 
-
-
+/* METHOD: INSPECT_CHANGES
+ * ARGS: ostream, c - contains a block of text with discrepancies, 
+ * a - strings by line for student output, b - strings by line for expected outpu,
+ * only_whitespace - check for if only whitespace, extra_Student_output_ok - check for if
+ * student output is good
+ * RETURN: void
+ * PURPOSE: Inspect the changes for student output and expected output
+ */
 inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
 			    const std::vector<std::vector<std::string> > &a, 
 			    const std::vector<std::vector<std::string> >  &b,
@@ -70,6 +91,14 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
 #define VERBOSE_INSPECT_CHANGES 0
 //#define VERBOSE_INSPECT_CHANGES 1
 
+/* METHOD: INSPECT_CHANGES
+ * ARGS: ostream, c - contains a block of text with discrepancies, 
+ * adata - strings by line for student output, bdata - strings by line for expected output,
+ * only_whitespace - check for if only whitespace, extra_Student_output_ok - check for if
+ * student output is good
+ * RETURN: void
+ * PURPOSE: Used for logging
+ */
 inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
 			    const std::vector<std::string> &adata, 
 			    const std::vector<std::string>  &bdata,
@@ -152,6 +181,11 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
   }
 }
 
+/* METHOD: clear
+ * ARGS: none
+ * RETURN: void
+ * PUROSE: Clear and reset data for next block to check
+ */
 inline void Change::clear() {
 	a_start = b_start = -1;
 	a_changes.clear();
