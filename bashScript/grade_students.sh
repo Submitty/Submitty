@@ -337,12 +337,13 @@ while true; do
         # copy submitted files to a tmp compilation directory
 	tmp_compilation=$tmp/TMP_COMPILATION
 	mkdir -p $tmp_compilation
-	cp 1>/dev/null  2>&1  -r $submission_path/* $tmp_compilation ||  echo "ERROR: Failed to submitted files copy to temporary compilation directory $submission_path to $tmp_compilation : cp -r $submission_path/* $tmp_compilation" >&2
+
+	cp 1>/dev/null  2>&1  -r $submission_path/* $tmp_compilation ||  echo "ERROR: Failed to copy submitted files to temporary compilation directory: cp -r $submission_path/* $tmp_compilation" >&2
 
         # copy any instructor code files to tmp directory
 	if [ -d "$test_code_path" ]
 	then
-	    rsync -a $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy instructor files to temporary compilation directory $test_code_path to $tmp_compilation :  cp -rf $test_code_path/ $tmp_compilation" >&2
+	    rsync -a $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy instructor files to temporary compilation directory:  cp -rf $test_code_path/ $tmp_compilation" >&2
 	    #cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
 	fi
 
