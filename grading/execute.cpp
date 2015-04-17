@@ -376,7 +376,7 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
   parse_command_line(cmd, my_program, my_args, my_stdin, my_stdout, my_stderr, logfile);
 
 
-  char** temp_args = new char* [my_args.size()+2];
+  char** temp_args = new char* [my_args.size()+2];   //memory leak here
   temp_args[0] = (char*) my_program.c_str();
   for (int i = 0; i < my_args.size(); i++) {
     std::cout << "'" << my_args[i] << "' ";
