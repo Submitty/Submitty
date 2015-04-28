@@ -16,8 +16,13 @@ if (isset($_SERVER['PHP_AUTH_USER'])) {
 } else {
     // if not already authenticated do it
     //
-    if (!isset($_SERVER['PHP_AUTH_USER'])) {header('WWW-Authenticate: Basic realm=HWServer'); header('HTTP/1.0 401 Unauthorized'); exit;} else { $user = $_SERVER['PHP_AUTH_USER'];}
-    //
+    if (!isset($_SERVER['PHP_AUTH_USER'])) {
+		header('WWW-Authenticate: Basic realm=HWServer'); 
+		header('HTTP/1.0 401 Unauthorized'); 
+		exit;
+	}else { 
+		$user = $_SERVER['PHP_AUTH_USER'];
+	}
 }
 
 //Remove error reporting and ini set for production code
@@ -32,6 +37,9 @@ if (isset($_GET["page"])) {
 } else {
     $page = "homework";
 }
+
+//Logout button to reminds users to close the browser to logout.(Only way for HTTP BSAIC AUTHENTICATION)
+echo "<button onclick='myFunction()'>logout</button><script>function myFunction() {alert('Please close the browser to log out');}</script>";
 
 //This needs to be wrapped around session Ids and logins
 if ($page == "upload") {
