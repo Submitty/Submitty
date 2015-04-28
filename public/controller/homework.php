@@ -57,7 +57,14 @@ $submitting_version_in_grading_queue = version_in_grading_queue($username, $seme
 //Is the viewing version being graded
 $assignment_version_in_grading_queue = version_in_grading_queue($username, $semester,$course, $assignment_id, $assignment_version);
 
-$points_visible =            $assignment_config["points_visible"];
+
+
+// FIXME:  This incorrectly includes extra credit
+//$points_visible =            $assignment_config["points_visible"];
+// FIXME:  This looks correct.  Why are they different?  Why are there two?
+$points_visible =            get_points_visible($submitting_homework_tests);
+
+
 
 if (isset($class_config["download_files"])){
     $download_files = $class_config["download_files"];

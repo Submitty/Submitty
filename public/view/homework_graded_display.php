@@ -7,6 +7,10 @@
 }
 ?>
 
+	<?php
+	   //echo "debug: $points_visible";
+	?>
+
 
 	<?php
 	if ($view_points == true && $points_visible != 0){
@@ -197,14 +201,21 @@
 									</div><!-- end instructor diff element -->
 									<?php
 								}
+
+
+								if ((isset($diff["student"]) && trim($diff["student"]) != "") &&
+									(isset($diff["instructor"]) && trim($diff["instructor"]) != ""))
+								{
+									?>
+									<!-- <div style="clear:both;"></div> -->
+
+									<script><!-- script -->
+										diff_queue.push("<?php echo $diff["diff_id"]; ?>");
+										diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
+									</script><!-- end script -->
+									<?php
+								}
 								?>
-								<!-- <div style="clear:both;"></div> -->
-
-								<script><!-- script -->
-									diff_queue.push("<?php echo $diff["diff_id"]; ?>");
-									diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
-								</script><!-- end script -->
-
 							</div><!-- end div block -->
 							<div class="spacer"></div>
 						<!-- </div> end sidebysidediff -->

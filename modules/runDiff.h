@@ -1,11 +1,14 @@
-/*Copyright (c) 2014, Chris Berger, Jesse Freitas, Severin Ibarluzea,
- Kiana McNellis, Kienan Knight-Boehm
-
- All rights reserved.
- This code is licensed using the BSD "3-Clause" license. Please refer to
- "LICENSE.md" for the full license.
+/* FILENAME: runDiff.h
+ * YEAR: 2014
+ * AUTHORS: Please refer to 'AUTHORS.md' for a list of contributors
+ * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
+ *
+ * RELEVANT DOCUMENTATION:
+ * Provides the functionality of opening and running the input files (student files) 
+ * and the instructor files to get the differences between them.  Relies on the
+ * method implemented in differences.h and differences.cpp
  */
-
+ 
 #ifndef differences_runDiff_h
 #define differences_runDiff_h
 
@@ -23,8 +26,14 @@
 #include <fstream>
 #include "modules/modules.h"
 
+/* METHOD: readFileList
+ * ARGS: input: list of file names, sample_file: instructor file,
+ * student_files: vector of strings that contain names of student_files
+ * RETURN: void
+ * PURPOSE: Compile a list of student files from the sample file
+ */
 void readFileList ( std::string input, std::string & sample_file,
-		std::vector< std::string >& student_files ) {
+					std::vector< std::string >& student_files ) {
 	std::ifstream in_file( input.c_str() );
 	if ( !in_file.good() ) {
 		std::cerr << "Can't open " << input << " to read.\n";
@@ -41,6 +50,11 @@ void readFileList ( std::string input, std::string & sample_file,
 	in_file.close();
 }
 
+/* METHOD: getFileInput
+ * ARGS: file: string containing file name of file to be opened
+ * RETURN: output: string containing output of file
+ * PURPOSE: Get all output of a file
+ */
 std::string getFileInput ( std::string file ) {
 	std::ifstream input( file.c_str(), std::ifstream::in );
 	if ( !input ) {
@@ -53,7 +67,13 @@ std::string getFileInput ( std::string file ) {
 	return output;
 }
 
-void runFiles ( std::string input ) { //input is a list of file names, the first of which is the instructor file
+/* METHOD: runFiles
+ * ARGS: input: list of files names, where the first is the instructor file
+ * RETURN: void
+ * PURPOSE: Run both the instructor and student file to get the differences
+ * between them and make the resulting JSON
+ */
+void runFiles ( std::string input ) {
 	std::string sample_file;
 	std::vector< std::string > student_files;
 	readFileList( input, sample_file, student_files ); //read all the file names from the input file
@@ -66,7 +86,7 @@ void runFiles ( std::string input ) { //input is a list of file names, the first
 		contents.clear();
 		text = getFileInput( student_files[a] ); //get the text from the student file
 		contents = stringToWords( text );
-		//get the diffrences
+		//get the differences
 		Difference text_diff = ses( &contents, &sample_text, true );
 		std::string file_name( student_files[a] );
 		file_name.erase( student_files[a].size() - 4, student_files[a].size() );
@@ -83,7 +103,12 @@ void runFiles ( std::string input ) { //input is a list of file names, the first
 	}
 }
 
-void runFilesDiff ( std::string input ) { //input is a list of file names, the first of which is the instructor file
+/* METHOD: runFilesDiff
+ * ARGS: input: list of files names, where first is the instructor file
+ * RETURN: void
+ * PURPOSE: Another implementation of runFiles (look above for implementation)
+ */
+void runFilesDiff ( std::string input ) { 
 	std::string sample_file;
 	std::vector< std::string > student_files;
 	readFileList( input, sample_file, student_files ); //read all the file names from the input file

@@ -168,24 +168,23 @@ window.addEventListener('load', function() {
                                             echo 'selected';
                                         }
                                         echo ' > ';
-                                        echo 'Version #'.$i;
-                                        echo '&nbsp;&nbsp';
-                                        if ($points_visible != 0){
-                                            echo 'Score: ';
-                                            echo $select_submission_data[$i-1]["score"];
-                                            echo '&nbsp;&nbsp';
-                                        }
-                                        else{
-                                            echo $points_visible;
+                                        $field_text = array();
+                                        $field_text[] = 'Version #'.$i;
+                                        if ($points_visible > 0){
+                                            $score_text = 'Score: ';
+                                            $score_text .= $select_submission_data[$i-1]["score"];
+                                            $field_text[] = $score_text;
                                         }
                                         if ($select_submission_data[$i-1]["days_late"] != "")
                                         {
-                                            echo 'Days Late: ';
-                                            echo $select_submission_data[$i-1]["days_late"];
+                                            $days_late = 'Days Late: ';
+                                            $days_late .= $select_submission_data[$i-1]["days_late"];
+                                            $field_text[] = $days_late;
                                         }
                                         if ($i == $submitting_version) {
-                                            echo '&nbsp;&nbsp ACTIVE';
+                                            $field_text[] = 'ACTIVE';
                                         }
+                                        echo implode("&nbsp;&nbsp;",$field_text);
                                         echo ' </option>';
                                     }
                                     ?>
@@ -231,9 +230,11 @@ window.addEventListener('load', function() {
                                     echo '<p class="file-header">'.$file["name"].' ('.$file["size"].'kb)';
                                         if (isset($download_files) && $download_files == true){
                                             echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
+                                            
                                         }
                                         else if (isset($download_readme) && $download_readme == true && strtolower($file["name"]) == "readme.txt"){
                                             echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
+                            
                                         }
                                     echo '</p>';
                                     echo '</div>';
@@ -249,6 +250,11 @@ window.addEventListener('load', function() {
                     <?php
                     }
                     else {
+
+
+//	   echo "debuga: $points_visible";
+
+
                         //Box with grades, outputs and diffs
                         render("homework_graded_display",array(
                             "assignment_message"=>$assignment_message,
@@ -286,9 +292,9 @@ window.addEventListener('load', function() {
                     }
                     else
                     {
-                        // echo '<div class="outer_box"> <!-- outer_box -->';
-                        // echo '<h3 class="label2">TA grades for this homework not released yet</h3>';
-                        // echo "</div> <!-- end outer_box -->";
+                    //echo '<div class="outer_box"> <!-- outer_box -->';
+                    //echo '<h3 class="label2">TA grades for this homework not released yet</h3>';
+                    //echo "</div> <!-- end outer_box -->";
 
                     }
                     //<!-- END OF "IF AT LEAST ONE SUBMISSION... " -->

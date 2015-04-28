@@ -94,7 +94,7 @@ while true; do
 
 
     # check for runaway processes by untrusted (this should never be more that a few, the user limit is 50)
-    numprocesses=$(ps -u untrusted | wc -l)
+    numprocesses=1 #$(ps -u untrusted | wc -l)
     if [[ $numprocesses -gt 25 ]] ; then
 	echo "ERROR: untrusted is running too many processes: " $numprocesses >&2
 	((too_many_processes_count++))
@@ -111,7 +111,7 @@ while true; do
     # check for parallel grade_students scripts
     #ps -f -u hwcron | grep grade_students.sh
     #pgrep -u hwcron grade_students
-    pgrep_results=$(pgrep -u hwcron grade_students)
+    pgrep_results=$(pgrep grade_students)
     pgrep_results=( $pgrep_results ) # recast as array
     numparallel=${#pgrep_results[@]} # count elements in array
     echo "hwcron is running $numparallel parallel scripts"
@@ -342,8 +342,8 @@ while true; do
         # copy any instructor code files to tmp directory
 	if [ -d "$test_code_path" ]
 	then
-	    cp -rf $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy instructor files to temporary compilation directory $test_code_path to $tmp_compilation :  cp -rf $test_code_path/ $tmp_compilation" >&2
-	    cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
+	    rsync -a $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy instructor files to temporary compilation directory $test_code_path to $tmp_compilation :  cp -rf $test_code_path/ $tmp_compilation" >&2
+	    #cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
 	fi
 
 	pushd $tmp_compilation > /dev/null
