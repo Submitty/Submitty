@@ -67,6 +67,7 @@ bool system_program(const std::string &program) {
       program == "/bin/mv" || 
       program == "/bin/chmod" || 
       program == "/usr/bin/find" || 
+      program == "/usr/bin/compare" ||  // image magick! 
       program == "/usr/bin/python") {
     return true;
   }
