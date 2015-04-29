@@ -60,7 +60,7 @@ int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_pro
   DISALLOW_SYSCALL(getsockopt);
   if (my_program != "/usr/bin/g++" &&
       my_program != "/usr/bin/clang++" &&
-      my_program != "/usr/bin/compare") {
+      my_program != "/usr/bin/time") {
     DISALLOW_SYSCALL(clone);
     DISALLOW_SYSCALL(fork);
     DISALLOW_SYSCALL(vfork);
