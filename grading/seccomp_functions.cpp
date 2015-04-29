@@ -40,6 +40,10 @@ int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_pro
    * no choice in the matter as we cannot pass them the number for the target: only for                      
    * the source.  We could use raw seccomp-bpf instead.                                                      
    */
+  
+  if (my_program != "/usr/bin/compare") {
+    
+
   if (my_program != "/usr/bin/python") {
     // these 2 system calls are used by even very basic python programs (???)
     DISALLOW_SYSCALL(socket);
@@ -64,6 +68,8 @@ int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_pro
     DISALLOW_SYSCALL(clone);
     DISALLOW_SYSCALL(fork);
     DISALLOW_SYSCALL(vfork);
+  }
+
   }
 
   if (seccomp_load(sc) < 0)
