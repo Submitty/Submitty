@@ -587,6 +587,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
         } while (wpid == 0);
 
         if (WIFEXITED(status)) {
+
             std::cout << "Child exited, status=" << WEXITSTATUS(status) << std::endl;
             if (WEXITSTATUS(status) == 0){
                 result=0;
@@ -594,6 +595,15 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
             else{
 	      logfile << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
 	      result=1;
+
+              // 
+              // NOTE: If wrapping /usr/bin/time around a program that exits with signal = 25
+              //       time exits with status = 153 (128 + 25)
+              //
+              if (WEXITSTATUS(status) > 128 && WEXITSTATUS(status) <= 256) {
+                OutputSignalErrorMessageToExecuteLogfile(  WEXITSTATUS(status)-128,logfile );
+              }
+
             }
         }
         else if (WIFSIGNALED(status)) {
