@@ -1,70 +1,32 @@
 <?php umask (0027);
-/*The user's umask is ignored for the user running php, so we need
-to set it from inside of php to make sure the group read & execute
-permissions aren't lost for newly created files & directories.*/
+session_start(); //You must start session or declare this variable at the very top and first line of your website page
+ob_start();
 
+$QUERY_STRINg = $_SERVER[REQUEST_URI];
 
-// ============================================
-// GET THE USERNAME OF THE AUTHENTICATED USER
-// ============================================
-
-/* This is the old simple HTTP basic auth which doesn't support logout*/
-/*
-if (isset($_SERVER['PHP_AUTH_USER'])) {
-    $user = $_SERVER['PHP_AUTH_USER'];
-} else if (isset($_SERVER['REMOTE_USER'])) {
-    $user = $_SERVER['PHP_AUTH_USER'];
-} else {
-    // if not already authenticated do it
-    //
-    if (!isset($_SERVER['PHP_AUTH_USER'])) {
-	header('WWW-Authenticate: Basic realm=HWServer'); 
-	header('HTTP/1.0 401 Unauthorized'); 
-	exit;
-    } else { 
-	$user = $_SERVER['PHP_AUTH_USER'];}
+//if a user logs into the system and leave his or her account for 30 minutes of inactive, his or her session will expire and require new login
+$inactive = 1800; // 30 minutes
+if(isset($_SESSION['timeout'])) 
+{
+	$session_life = time() - $_SESSION['timeout'];
+	if($session_life > $inactive)
+	{
+		session_unset();
+		session_destroy(); 
+	}
 }
-*/
-
-// ==============================================
-// HTTP BASIC AUTHENTICATION WITH "PSEUDO" LOGOUT
-// ==============================================
-session_start();
-
-if (isset($_GET['logout'])) {
-    session_destroy();
-    echo "Logged out";
-    exit();
-}
-if (!isset($_SESSION['logged_in'])) {
-    $_SESSION['logged_in'] = false;
-}
-else {
-    if (isset($_SERVER['PHP_AUTH_USER'])) {
-        $user = $_SERVER['PHP_AUTH_USER'];
-        $_SESSION['logged_in'] = true;
-    } 
-    else if (isset($_SERVER['REMOTE_USER'])) {
-        $user = $_SERVER['PHP_AUTH_USER'];
-        $_SESSION['logged_in'] = true;
-    }
-}
-
-if (!$_SESSION['logged_in']) {
-    header('WWW-Authenticate: Basic realm=HWServer'); 
-    header('HTTP/1.0 401 Unauthorized'); 
-    exit;
-}
+$_SESSION['timeout'] = time();
 
 
+if(isset($_SESSION['validfullname']) && isset($_SESSION['validusername']) && isset($_SESSION['validemail']) && isset($_SESSION['validpassword']) && !empty($_SESSION['validfullname']) && !empty($_SESSION['validusername']) && !empty($_SESSION['validemail']) && !empty($_SESSION['validpassword'])) {
+
+
+//===============================================================
 //Remove error reporting and ini set for production code
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-/*session starts here if using the old HTTP Auth without 
-                                        "pseudo" logout*/
-//session_start();
-
+$user = $_SESSION['validusername'];
 $_SESSION["id"] = $user;
 
 if (isset($_GET["page"])) {
@@ -73,11 +35,6 @@ if (isset($_GET["page"])) {
     $page = "homework";
 }
 
-/*logout button for pseudo logout, comment out this block 
-                              if old HTTP auth is in use*/
-echo "<div align='right'>";
-echo "<a class='btn btn-primary' href='?logout'>logout</a>";
-echo "</div>";
 
 //This needs to be wrapped around session Ids and logins
 if ($page == "upload") {
@@ -91,4 +48,63 @@ if ($page == "upload") {
 } else {
     require_once("controller/homework.php");
 }
+//===============================================================
+?>
+
+
+<head>
+
+<!-- Required header files -->
+<script type="text/javascript" src="login/js/jquery_1.5.2.js"></script>
+<script type="text/javascript" src="login/js/vpb_save_details.js"></script>
+<link href="login/css/style.css" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+
+
+<!-- Profile Page Code Begins -->
+
+<div style=" width:800px; padding:10px;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px; font-size:13px;" id="vasplus_programming_blog_wrapper">
+
+<div class="" align="left" style="width:730px; float:left;font-family:Verdana, Geneva, sans-serif; font-size:16px; font-weight:bold;">Welcome <?php echo $_SESSION['validfullname']; ?>
+</div>
+
+<div style="width:70px;float:left;" align="right"><span class="ccc"><a href="login/logout.php"><font color="#3300FF">Logout</font></a></span>
+</div>
+
+<br clear="all"><br clear="all"><br clear="all">
+
+<div align="left"><b>Below are all your information</b></div>
+<br clear="all">
+
+<div class="vpb_lebels" style="padding:0px;" align="left">Your Fullname:</div>
+<div class="vpb_lebels_fields" align="left"><?php echo $_SESSION['validfullname']; ?></div>
+<br clear="all"><br clear="all">
+
+<div class="vpb_lebels" style="padding:0px;" align="left">Your Username:</div>
+<div class="vpb_lebels_fields" align="left"><?php echo $_SESSION['validusername']; ?></div>
+<br clear="all"><br clear="all">
+
+<div class="vpb_lebels" style="padding:0px;" align="left">Email Address:</div>
+<div class="vpb_lebels_fields" align="left"><?php echo $_SESSION['validemail']; ?></div>
+<br clear="all"><br clear="all">
+
+</div>
+
+<!-- Profile Page Code Ends -->
+
+
+<p style="margin-bottom:200px;">&nbsp;</p>
+</center>
+</body>
+</html>
+
+<?php
+}
+else
+{
+	header("location: login/login.php"."?".$QUERY_STRINg);
+}
+
 ?>
