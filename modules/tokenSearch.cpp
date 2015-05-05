@@ -3,19 +3,24 @@
  * AUTHORS: Please refer to 'AUTHORS.md' for a list of contributors
  * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
  *
- * RELEVANT DOCUMENTATION:
+ * RELEVANT DOCUMENTATION: 
+ * Based on the student output, search for tokens within
+ * the output. Use for figuring out the final resutls based on the output.
  */
 
 #include "tokenSearch.h"
 
-/*A helper function that is used to construct a table for the keyword
- in linear time with respect to the keyword given. This helper function
- is used in the Knuth–Morris–Pratt token searching algorithm for single
- tokens in order to eliminate redundant comparisons in the student string.
- The expected arguments are an integer buffer the same size as the string
- keyword and a keyword that accepts any ASCII character. The behavior
- for the function with a buffer less than the size of the keyword is
- not predictable and should not be used.*/
+/* METHOD: buildTable
+ * ARGS: buffer: integer the same size as the string keyword, keyword: string
+ * that accepts any ASCII character
+ * RETURN: void
+ * PURPOSE: A helper function that is used to construct a table for the keyword
+ * in linear time with respect to the keyword given. This helper function
+ * is used in the Knuth–Morris–Pratt token searching algorithm for single
+ * tokens in order to eliminate redundant comparisons in the student string.
+ * The behavior for the function with a buffer less than the size of the keyword is
+ * not predictable and should not be used.
+ */
 void buildTable ( int* V, const std::string& keyword ) {
 	int j = 0;
 
@@ -34,13 +39,19 @@ void buildTable ( int* V, const std::string& keyword ) {
 		}
 	}
 }
-/*searchToken looks for a token specified in the second argument in the
- student output. The algorithm runs in linear time with respect to the
- length of the student output and preprocessing for the algorithm is
- linear with respect to the token. Overall, the algorithm runs in O(N + M)
- time where N is the length of the student and M is the length of the token.*/
+
+/* METHOD: searchToken
+ * ARGS: student: string containing student output, token: vector of strings that
+ * is based of off the student output
+ * RETURN: TestResults*
+ * PURPOSE: Looks for a token specified in the second argument in the
+ * student output. The algorithm runs in linear time with respect to the
+ * length of the student output and preprocessing for the algorithm is
+ * linear with respect to the token. Overall, the algorithm runs in O(N + M)
+ * time where N is the length of the student and M is the length of the token.
+ */
 TestResults* searchToken ( const std::string& student,
-			   const std::vector<std::string>& token_vec ) {
+			   			   const std::vector<std::string>& token_vec ) {
 
 	//Build a table to use for the search
 	Tokens* diff = new Tokens();
@@ -83,13 +94,19 @@ TestResults* searchToken ( const std::string& student,
 
 	return diff;
 }
-/*searchAllTokens looks for tokens delimited by newline characters in the
- student output. The algorithm runs in linear time with respect to the
- length of the student output and preprocessing for the algorithm is
- linear with respect to the token. Overall, the algorithm runs in O(N + M)
- time where N is the length of the student and M is the length of the token.*/
+
+/* METHOD: searchAllTokens
+ * ARGS: student: string of student output, token_vec: vector of strings based
+ * off of the student output
+ * RETURN: TestResults*
+ * PURPOSE: Looks for all the tokens delimited by newline characters in the
+ * student output. The algorithm runs in linear time with respect to the
+ * length of the student output and preprocessing for the algorithm is
+ * linear with respect to the token. Overall, the algorithm runs in O(N + M)
+ * time where N is the length of the student and M is the length of the token.
+ */
 TestResults* searchAllTokens ( const std::string& student,
-			       const std::vector<std::string>& token_vec ) {
+			       			   const std::vector<std::string>& token_vec ) {
 	Tokens* difference = new Tokens();
 	difference->partial = false;
 	difference->harsh = true;
@@ -109,8 +126,14 @@ TestResults* searchAllTokens ( const std::string& student,
 	return difference;
 }
 
+/* METHOD: searchAnyTokens
+ * ARGS: student: string of student output, token_vec: vector of strings based
+ * off of the student output
+ * RETURN: TestResults*
+ * PURPOSE: Another way of searching for tokens in the student output
+ */
 TestResults* searchAnyTokens ( const std::string& student,
-			       const std::vector<std::string>& token_vec ) {
+			       			   const std::vector<std::string>& token_vec ) {
 	Tokens* difference = new Tokens();
 	difference->partial = false;
 	difference->harsh = false;
@@ -126,8 +149,14 @@ TestResults* searchAnyTokens ( const std::string& student,
 	return difference;
 }
 
+/* METHOD: searchTokens
+ * ARGS: student: string of student output, token_vec: vector of strings based
+ * off of the student output
+ * RETURN: TestResults*
+ * PURPOSE: Another way of searching for tokens in the student output
+ */
 TestResults* searchTokens ( const std::string& student,
-			    const std::vector<std::string>& token_vec ) {
+			    		    const std::vector<std::string>& token_vec ) {
 	Tokens* difference = new Tokens();
 	difference->partial = true;
 	//std::vector< std::string > tokenlist;
@@ -142,8 +171,12 @@ TestResults* searchTokens ( const std::string& student,
 	return difference;
 }
 
-/*	Looks for a single token in a string using the Rabin-Karp rolling hash
- method.  Returns starting index if found, -1 if not.					*/
+/* METHOD: RabinKarpSingle
+ * ARGS: token: string with token to search for, searchstring: string of where to search for token
+ * RETURN: int
+ * PURPOSE: Looks for a single token in a string using the Rabin-Karp rolling hash
+ * method.  Returns starting index if found, -1 if not.	
+ */
 int RabinKarpSingle ( std::string token, std::string searchstring ) {
 	long hash = 0;
 	long goalhash = 0;
@@ -170,7 +203,11 @@ int RabinKarpSingle ( std::string token, std::string searchstring ) {
 	return -1;
 }
 
-
+/* METHOD: splitTokens
+ * ARGS: tokens: string of tokens
+ * RETURN: vector of strings
+ * PURPOSE: split up the tokens within the string into individual tokens stored in the vector
+ */
 std::vector< std::string > splitTokens ( const std::string& tokens ) {
 	std::vector< std::string > tokenlist;
 	std::string tmpstr; // Create empty token variable
