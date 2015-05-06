@@ -282,6 +282,11 @@ void parse_command_line(const std::string &cmd,
               ss >> tmp;
               std::cout << "EXCLUDE THIS FILE " << tmp << std::endl;
 
+              for (std::vector<std::string>::iterator itr = my_args.begin();
+                   itr != my_args.end(); itr++) {
+                if (*itr == tmp) {  std::cout << "FOUND IT!" << std::endl; }
+              }
+
             }
 
             else {
