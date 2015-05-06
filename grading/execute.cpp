@@ -129,12 +129,21 @@ void validate_option(const std::string &program, const std::string &option) {
 
 // =====================================================================================
 
+#include <regex>
+
 bool wildcard_match(const std::string &pattern, const std::string &thing, std::ofstream &logfile) {
 
-  //std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
+
+  std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
 
   int wildcard_loc = pattern.find("*");
   assert (wildcard_loc != std::string::npos);
+
+
+  if (std::regex_match (thing.c_str,std::regex(pattern.c_str()))) {
+    std::cout << "regex_match!" << std::endl;
+  }
+
 
   std::string before = pattern.substr(0,wildcard_loc);
   std::string after = pattern.substr(wildcard_loc+1,pattern.size()-wildcard_loc-1);
@@ -152,9 +161,12 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
 
   //  std::cout << "THINGBEFORE " << thing_before << " THINGAFTER" << thing_after << std::endl;
 
-  if (before == thing_before && after == thing_after)
+  if (before == thing_before && after == thing_after) {
+    std::cout << "RETURN TRUE" << std::endl;
     return true;
+  }
 
+  std::cout << "return false" << std::endl;
   return false;
 }
 
