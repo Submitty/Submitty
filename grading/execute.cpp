@@ -129,8 +129,6 @@ void validate_option(const std::string &program, const std::string &option) {
 
 // =====================================================================================
 
-#include <regex>
-
 bool wildcard_match(const std::string &pattern, const std::string &thing, std::ofstream &logfile) {
 
 
@@ -138,12 +136,6 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
 
   int wildcard_loc = pattern.find("*");
   assert (wildcard_loc != std::string::npos);
-
-
-  if (std::regex_match (thing.c_str(),std::regex(pattern.c_str()))) {
-    std::cout << "regex_match!" << std::endl;
-  }
-
 
   std::string before = pattern.substr(0,wildcard_loc);
   std::string after = pattern.substr(wildcard_loc+1,pattern.size()-wildcard_loc-1);
@@ -282,7 +274,17 @@ void parse_command_line(const std::string &cmd,
                 }
 	      */
 	      wildcard_expansion(my_args,tmp,logfile);
-            } else {
+            }
+
+            // special exclude file option
+            // FIXME: this is ugly, don't know how I want it to be done though
+            else if (tmp == "-EXCLUDE_FILE") {
+              ss >> tmp;
+              std::cout << "EXCLUDE THIS FILE " << tmp << std::endl;
+
+            }
+
+            else {
                 if (bare_double_dash == true) {
                     validate_filename(tmp);
                 } else {
