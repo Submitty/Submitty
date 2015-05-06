@@ -140,7 +140,7 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
   assert (wildcard_loc != std::string::npos);
 
 
-  if (std::regex_match (thing.c_str,std::regex(pattern.c_str()))) {
+  if (std::regex_match (thing.c_str(),std::regex(pattern.c_str()))) {
     std::cout << "regex_match!" << std::endl;
   }
 
