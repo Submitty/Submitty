@@ -132,7 +132,7 @@ void validate_option(const std::string &program, const std::string &option) {
 bool wildcard_match(const std::string &pattern, const std::string &thing, std::ofstream &logfile) {
 
 
-  std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
+  //  std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
 
   int wildcard_loc = pattern.find("*");
   assert (wildcard_loc != std::string::npos);
@@ -154,11 +154,11 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
   //  std::cout << "THINGBEFORE " << thing_before << " THINGAFTER" << thing_after << std::endl;
 
   if (before == thing_before && after == thing_after) {
-    std::cout << "RETURN TRUE" << std::endl;
+    //std::cout << "RETURN TRUE" << std::endl;
     return true;
   }
 
-  std::cout << "return false" << std::endl;
+  //std::cout << "return false" << std::endl;
   return false;
 }
 
