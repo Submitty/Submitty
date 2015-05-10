@@ -49,7 +49,7 @@
 
 // defined in seccomp_functions.cpp
 #include <elf.h>
-int install_syscall_filter(bool is_32, bool blacklist);
+int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_program);
 
 // =====================================================================================
 // =====================================================================================
@@ -376,13 +376,16 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
   parse_command_line(cmd, my_program, my_args, my_stdin, my_stdout, my_stderr, logfile);
 
 
-  char** const my_char_args = new char * [my_args.size()+2];  // yes, there is a memory leak here
-  my_char_args[0] = (char*) my_program.c_str();
+  char** temp_args = new char* [my_args.size()+2];   //memory leak here
+  temp_args[0] = (char*) my_program.c_str();
   for (int i = 0; i < my_args.size(); i++) {
     std::cout << "'" << my_args[i] << "' ";
-    my_char_args[i+1] = (char*) my_args[i].c_str();
+    temp_args[i+1] = (char*) my_args[i].c_str();
   }
-  my_char_args[my_args.size()+1] = (char *)NULL;  // FIXME: casting away the const :(
+  my_char_args[my_args.size()+1] = (char *)NULL;
+
+  char** const my_char_args = temp_args;
+
   std::cout << std::endl << std::endl;
 
 
@@ -453,7 +456,10 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
   //std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
 
 
-
+  // print this out here (before losing our output)
+  if (SECCOMP_ENABLED != 0) {
+    std::cout << "going to install syscall filter for " << my_program << std::endl;
+  }
 
 
   // FIXME: if we want to assert or print stuff afterward, we should save
@@ -481,13 +487,14 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
 
   // SECCOMP: install the filter (system calls restrictions)
   if (SECCOMP_ENABLED != 0) {
-    if (install_syscall_filter(prog_is_32bit, true /*blacklist*/)) { 
+    if (install_syscall_filter(prog_is_32bit, true /*blacklist*/, my_program)) { 
       std::cout << "seccomp filter install failed" << std::endl;
       return 1;
     }
   } else {
   }
   // END SECCOMP
+
 
 
   int child_result =  execv ( my_program.c_str(), my_char_args );
@@ -586,7 +593,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
                 result=0;
             }
             else{
-	      logfile << "Child existed with status = " << WEXITSTATUS(status) << std::endl;
+	      logfile << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
 	      result=1;
             }
         }

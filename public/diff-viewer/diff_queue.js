@@ -7,7 +7,6 @@
 var diff_queue = [];
 var diff_objects = {};
 
-var DEBUG = false;
 
 // Go through diff queue and load elements
 function loadDiffQueue(){
