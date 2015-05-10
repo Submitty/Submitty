@@ -95,8 +95,15 @@ window.addEventListener('load', function() {
         </form>
     </div> <!-- end sub -->
 
-    <h2 class="label">Assignment: <?php echo $assignment_name;?></h2>
-
+<?php
+    $assignment_link = '#';  
+    //assignment name links to the assignment instructions
+    echo '<h2 class="label">Assignment: ';
+    echo' <a href="'.$assignment_link.'">';
+    echo $assignment_name;
+    echo '</a>';
+    echo '</h2>';
+?>
     <div class="panel-body"> <!-- panel-body -->
         <?php
         if ($status && $status != "") {
