@@ -525,6 +525,52 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
 }
 
 
+
+
+
+void enable_all_setrlimit(int seconds_to_run,
+                          int file_size_limit) {
+
+  // documentation on setrlimit
+  // http://linux.die.net/man/2/setrlimit
+
+  int set_success;
+  
+  // limit CPU time (unfortunately this is *not* wall clock time)
+  rlimit time_limit;
+  time_limit.rlim_cur = time_limit.rlim_max = seconds_to_run*2;
+  set_success = setrlimit(RLIMIT_CPU, &time_limit);
+  assert (set_success == 0);
+  
+  
+  // FIXME read in the file size from the configuration
+  // limit size of files created by the process
+  rlimit fsize_limit;
+  fsize_limit.rlim_cur = fsize_limit.rlim_max = file_size_limit; //100000;  // 100 kilobytes
+  set_success = setrlimit(RLIMIT_FSIZE, &fsize_limit);
+  assert (set_success == 0);
+
+  // address space in bytes
+  int address_space_limit = 100000000 ;  // 100 MB
+
+  // limit the address space used by the process
+  rlimit address_space_limit;
+  address_space_limit.rlim_cur = address_space_limit.rlim_max = address_space_limit; 
+  set_success = setrlimit(RLIMIT_ADDRESS_SPACE, &address_space_limit);
+  assert (set_success == 0);
+
+  // limit the address space used by the process
+  rlimit address_space_limit;
+  address_space_limit.rlim_cur = address_space_limit.rlim_max = address_space_limit; 
+  set_success = setrlimit(RLIMIT_ADDRESS_SPACE, &address_space_limit);
+  assert (set_success == 0);
+
+
+}
+
+
+
+
 // Executes command (from shell) and returns error code (0 = success)
 int execute(const std::string &cmd, const std::string &execute_logfile, int seconds_to_run, int file_size_limit, int SECCOMP_ENABLED) { 
 
@@ -542,21 +588,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
   if (childPID == 0) {
     // CHILD PROCESS
 
-    int set_success;
-
-    // limit CPU time (unfortunately this is *not* wall clock time)
-    rlimit time_limit;
-    time_limit.rlim_cur = time_limit.rlim_max = seconds_to_run*2;
-    set_success = setrlimit(RLIMIT_CPU, &time_limit);
-    assert (set_success == 0);
-
-
-    // FIXME read in the file size from the configuration
-    // limit size of files created by the process
-    rlimit fsize_limit;
-    fsize_limit.rlim_cur = fsize_limit.rlim_max = file_size_limit; //100000;  // 100 kilobytes
-    set_success = setrlimit(RLIMIT_FSIZE, &fsize_limit);
-    assert (set_success == 0);
+    enable_all_setrlimit(seconds_to_run,file_size_limit);
 
 
     // Student's shouldn't be forking & making threads/processes...
