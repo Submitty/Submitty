@@ -553,16 +553,12 @@ void enable_all_setrlimit(int seconds_to_run,
   // address space in bytes
   int my_address_space_limit = 100000000 ;  // 100 MB
 
-  // limit the address space used by the process
+  // limit the address space & data segment used by the process
   rlimit address_space_limit;
   address_space_limit.rlim_cur = address_space_limit.rlim_max = my_address_space_limit; 
-  set_success = setrlimit(RLIMIT_ADDRESS_SPACE, &address_space_limit);
+  set_success = setrlimit(RLIMIT_AS, &address_space_limit);
   assert (set_success == 0);
-
-  // limit the address space used by the process
-  rlimit address_space_limit;
-  address_space_limit.rlim_cur = address_space_limit.rlim_max = address_space_limit; 
-  set_success = setrlimit(RLIMIT_ADDRESS_SPACE, &address_space_limit);
+  set_success = setrlimit(RLIMIT_DATA, &address_space_limit);
   assert (set_success == 0);
 
 
