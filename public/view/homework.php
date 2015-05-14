@@ -135,6 +135,19 @@ window.addEventListener('load', function() {
                 </form>
         </div> <!-- end outer_box -->
 
+        <!--Description-->
+        <?php
+        if($assignment_description != '#'){
+            echo '  <div class="outer_box">';
+            echo '  <h3 class="label">Description</h3>';
+            echo '<p class="sub">';
+            echo $assignment_description;
+            echo '</p>';
+            echo '  </div>';
+        }
+        ?>
+        
+
         <!------------------------------------------------------------------------>
         <!-- "IF AT LEAST ONE SUBMISSION... " -->
             <!-- INFO ON ALL VERSIONS -->
