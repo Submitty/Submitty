@@ -22,6 +22,7 @@ $assignment_id =                    parse_assignment_id_with_recent($class_confi
 $assignment_version =               parse_assignment_version_with_recent($username, $semester,$course, $assignment_id);
 
 $assignment_name =                  name_for_assignment_id($class_config, $assignment_id);
+$assignment_link =                  link_for_assignment_id($class_config, $assignment_id);
 $ta_grade_released =                is_ta_grade_released($class_config, $assignment_id);
 $view_points =                      is_points_visible($class_config, $assignment_id);
 $view_hidden_points =               is_hidden_points_visible($class_config, $assignment_id);
@@ -101,6 +102,7 @@ render("homework", array(
     "course"=>                  $course,
     "assignment_id"=>           $assignment_id,
     "assignment_name"=>         $assignment_name,
+    "assignment_link"=>         $assignment_link,
     "ta_grade_released"=>       $ta_grade_released,
     "all_assignments"=>         $all_assignments,
     "dev_team"=>                $dev_team,
