@@ -100,7 +100,7 @@ window.addEventListener('load', function() {
     //assignment name links to the assignment instructions
     echo '<h2 class="label">Assignment: ';
     if($assignment_link != '#'){
-        echo' <a href="'.$assignment_link.'">';
+        echo' <a href="'.$assignment_link.'" target = "_blank">';
         echo $assignment_name;
         echo '</a>';
     }
