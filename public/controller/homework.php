@@ -102,6 +102,7 @@ render("homework", array(
     "course"=>                  $course,
     "assignment_id"=>           $assignment_id,
     "assignment_name"=>         $assignment_name,
+    "assignment_link"=>         $assignment_link,
     "ta_grade_released"=>       $ta_grade_released,
     "all_assignments"=>         $all_assignments,
     "dev_team"=>                $dev_team,

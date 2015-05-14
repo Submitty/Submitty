@@ -99,9 +99,15 @@ window.addEventListener('load', function() {
       
     //assignment name links to the assignment instructions
     echo '<h2 class="label">Assignment: ';
-    echo' <a href="'.$assignment_link.'">';
-    echo $assignment_name;
-    echo '</a>';
+    if($assignment_link != '#'){
+        echo' <a href="'.$assignment_link.'">';
+        echo $assignment_name;
+        echo '</a>';
+    }
+    else{
+        echo $assignment_name;
+
+    }
     echo '</h2>';
 ?>
     <div class="panel-body"> <!-- panel-body -->
