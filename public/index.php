@@ -38,9 +38,6 @@ if (isset($_GET["page"])) {
     $page = "homework";
 }
 
-//Logout button to reminds users to close the browser to logout.(Only way for HTTP BSAIC AUTHENTICATION)
-echo "<button onclick='myFunction()'>logout</button><script>function myFunction() {alert('Please close the browser to log out');}</script>";
-
 //This needs to be wrapped around session Ids and logins
 if ($page == "upload") {
     require_once("controller/upload.php");
