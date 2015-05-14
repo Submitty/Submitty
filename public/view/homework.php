@@ -96,7 +96,7 @@ window.addEventListener('load', function() {
     </div> <!-- end sub -->
 
 <?php
-    $assignment_link = '#';  
+      
     //assignment name links to the assignment instructions
     echo '<h2 class="label">Assignment: ';
     echo' <a href="'.$assignment_link.'">';
