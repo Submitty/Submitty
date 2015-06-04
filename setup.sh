@@ -306,6 +306,8 @@ echo "Done setting up $class"
 echo $setup_dir
 read -p "Would you like to start the bash grader script? " bash
 echo "for bash grader, run:  sudo $setup_dir/$repodir/bashScript/grade_students.sh $setup_dir to_be_graded"
+echo "sudo $setup_dir/bin/grade_students.sh $setup_dir to_be_graded
+" > "run_grading.sh"
 if [[ $bash = "y" ]]; then
 
     sudo $setup_dir/bin/grade_students.sh $setup_dir to_be_graded
