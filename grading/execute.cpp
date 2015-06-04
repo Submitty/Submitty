@@ -382,7 +382,7 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
     std::cout << "'" << my_args[i] << "' ";
     temp_args[i+1] = (char*) my_args[i].c_str();
   }
-  my_char_args[my_args.size()+1] = (char *)NULL;
+  temp_args[my_args.size()+1] = (char *)NULL;
 
   char** const my_char_args = temp_args;
 

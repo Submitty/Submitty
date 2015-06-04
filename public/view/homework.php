@@ -53,6 +53,10 @@ window.addEventListener('load', function() {
           if (on_dev_team($user)) {
              echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ]</font>";
             }
+
+            // //Logout button to reminds users to close the browser to logout.(Only way for HTTP BSAIC AUTHENTICATION)
+            // echo "<button onclick='myFunction()'>logout</button><script>function myFunction() {alert('Please close the browser to log out');}</script>";
+
           ?>
     </h2>
 
@@ -256,11 +260,11 @@ window.addEventListener('load', function() {
                                     echo '<p class="file-header">'.$file["name"].' ('.$file["size"].'kb)';
                                         if (isset($download_files) && $download_files == true){
                                             echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
-                                            
+
                                         }
                                         else if (isset($download_readme) && $download_readme == true && strtolower($file["name"]) == "readme.txt"){
                                             echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
-                            
+
                                         }
                                     echo '</p>';
                                     echo '</div>';
