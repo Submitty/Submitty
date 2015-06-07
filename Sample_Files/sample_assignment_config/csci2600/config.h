@@ -38,14 +38,14 @@ std::vector<TestCase> testcases
 	//.jar is in a directory I called junitStuff in gradingcode
 	TestCase::MakeCompilation(
 		"Compilation".
-		"javac -cp ~/hwserver/server/gradingcode/junitStuff/junit-4.12.jar *.java"
+		"javac -cp /home/hwserver/server/gradingcode/junitStuff/junit-4.12.jar *.java"
 	),
 
 	/******** TEST CASES ******************************/
 	//using the TestClassTester provided in .zip file from GitHub
 	TestCase::MakeTestCase(
 		"example",
-		"java -cp ~/hwserver/server/gradingcode/junitStuff/junit-4.12.jar:~/hwserver/server/gradingcode/junitStuff/hamcrest-core-1.3.jar:. org.junit.runner.JUnitCore TestClassTester",
+		"java -cp /home/hwserver/server/gradingcode/junitStuff/junit-4.12.jar:/home/hwserver/server/gradingcode/junitStuff/hamcrest-core-1.3.jar:. org.junit.runner.JUnitCore TestClassTester",
 		TestCasePoints(0),
 
 		new TestCaseComparison(
