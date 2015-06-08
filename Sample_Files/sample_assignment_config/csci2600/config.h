@@ -34,18 +34,17 @@ std::vector<TestCase> testcases
 		TestCasePoints(2)
 	),
 
-	//path to .jar will change - currently set to the path where it is on my local server
-	//.jar is in a directory I called junitStuff in gradingcode
+	//path to .jar will change
 	TestCase::MakeCompilation(
 		"Compilation".
-		"javac -cp /home/hwserver/server/gradingcode/junitStuff/junit-4.12.jar *.java"
+		"javac -cp /HWserver/Sample_Files/sample_assignment_config/csci2600/junit-4.12.jar *.java"
 	),
 
 	/******** TEST CASES ******************************/
 	//using the TestClassTester provided in .zip file from GitHub
 	TestCase::MakeTestCase(
 		"example",
-		"java -cp /home/hwserver/server/gradingcode/junitStuff/junit-4.12.jar:/home/hwserver/server/gradingcode/junitStuff/hamcrest-core-1.3.jar:. org.junit.runner.JUnitCore TestClassTester",
+		"java -cp /HWserver/Sample_Files/sample_assignment_config/csci2600/junit-4.12.jar:/HWserver/Sample_Files/sample_assignment_config/csci2600/hamcrest-core-1.3.jar:. org.junit.runner.JUnitCore TestClassTester",
 		TestCasePoints(0),
 
 		new TestCaseComparison(
