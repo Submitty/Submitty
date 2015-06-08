@@ -51,7 +51,6 @@ std::vector<TestCase> testcases
 			       "could put details for user here",
 		//		"/usr/bin/java -cp /HWserver/Sample_Files/sample_assignment_config/csci2600/junit-4.12.jar:/HWserver/Sample_Files/sample_assignment_config/csci2600/hamcrest-core-1.3.jar:. org.junit.runner.JUnitCore TestClassTester",
 		"/usr/bin/java -cp "+junit_jar_path+":/HWserver/Sample_Files/sample_assignment_config/csci2600/hamcrest-core-1.3.jar:. org.junit.runner.JUnitCore TestClassTester",
-
 		TestCasePoints(2),
 
 		new TestCaseComparison(
