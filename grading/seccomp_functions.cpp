@@ -41,8 +41,13 @@ int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_pro
    * the source.  We could use raw seccomp-bpf instead.                                                      
    */
   
+  if (my_program != "/usr/bin/javac") {
+    // FIXME:  CURRENTLY DISABLING ALL SYSTEM CALL FILTERING FOR JAVA
+
+
   if (my_program != "/usr/bin/compare") {
-    
+    // FIXME: SHOULD FIGURE OUT WHAT COMPARE NEEDS...
+
 
   if (my_program != "/usr/bin/python") {
     // these 2 system calls are used by even very basic python programs (???)
@@ -70,6 +75,7 @@ int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_pro
     DISALLOW_SYSCALL(vfork);
   }
 
+  }
   }
 
   if (seccomp_load(sc) < 0)

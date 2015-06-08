@@ -68,7 +68,8 @@ bool system_program(const std::string &program) {
       program == "/bin/chmod" || 
       program == "/usr/bin/find" || 
       program == "/usr/bin/compare" ||  // image magick! 
-      program == "/usr/bin/python") {
+      program == "/usr/bin/python" ||
+      program == "/usr/bin/javac") {
     return true;
   }
   return false;
