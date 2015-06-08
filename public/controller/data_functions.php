@@ -496,10 +496,13 @@ function is_valid_course($course) {
 
 //FIXME: SHOULD NOT BE USING THIS
 
+    if ($course == "csci1100") {
+        return true;
+    }
     if ($course == "csci1200") {
         return true;
     }
-    if ($course == "csci1100") {
+    if ($course == "csci2600") {
         return true;
     }
     if ($course == "csci4960") {
