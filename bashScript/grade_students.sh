@@ -364,6 +364,13 @@ while true; do
 	    chmod -R go+rwx $tmp
 	    # run the compile.out as the untrusted user
 
+
+# FIXME: still need to explain why/fix there are 2 copies of test...
+	    echo "______before compilation__________"
+	    pwd
+	    ls -lta 
+	    echo "________________"
+
 	    $base_path/bin/untrusted_runscript $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
 
 	    compile_error_code="$?"
@@ -382,7 +389,27 @@ while true; do
 	# move all executable files from the to the main tmp directory
 	# FIXME: not really what we want for the "FILE_EXISTS" command....
 	# FIXME: make more general, requires thinking, need to get python files into the running directory too (a hack for now)
-        cp  1>/dev/null  2>&1  $tmp_compilation/README*.txt $tmp_compilation/README*.TXT $tmp_compilation/readme*.txt $tmp_compilation/readme*.TXT $tmp_compilation/*.out $tmp_compilation/*.class $tmp_compilation/*/*.class $tmp_compilation/*/*/*.class $tmp_compilation/test*.txt $tmp_compilation/*.py $tmp
+        cp  1>/dev/null  2>&1  $tmp_compilation/README*.txt $tmp_compilation/README*.TXT $tmp_compilation/readme*.txt $tmp_compilation/readme*.TXT $tmp_compilation/*.out $tmp_compilation/test*.txt $tmp_compilation/*.py $tmp
+
+	
+	# FIXME: NEED TO PRESERVE DIRECTORY STRUCTURE OF EXECUTABLES
+	#cp  1>/dev/null  2>&1  $tmp_compilation/*.class $tmp_compilation/*/*.class $tmp_compilation/*/*/*.class 
+
+	# hack for now
+	mkdir hw0
+	mkdir hw0/test
+	cp  1>/dev/null  2>&1  $tmp_compilation/hw0/*.class      ./hw0/
+	cp  1>/dev/null  2>&1  $tmp_compilation/hw0/test/*.class ./hw0/test/
+
+    echo "----AFTER COMPILATION---------------------"
+    pwd
+    ls -lta 
+    echo "---a"
+ls -lta hw0/
+    echo "---b"
+    ls -lta hw0/test
+    echo "------------------------------------------"
+
 
     ls $tmp_compilation
     echo "------------------------------------------"
