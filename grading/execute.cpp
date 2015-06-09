@@ -69,6 +69,7 @@ bool system_program(const std::string &program) {
       program == "/usr/bin/find" || 
       program == "/usr/bin/compare" ||  // image magick! 
       program == "/usr/bin/python" ||
+      program == "/usr/bin/java" ||
       program == "/usr/bin/javac") {
     return true;
   }
@@ -165,7 +166,47 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
 
 
 
-void wildcard_expansion(std::vector<std::string> &my_args, const std::string &pattern, std::ofstream &logfile) {
+
+/*
+int wildcard_expansion(std::vector<std::string> &my_args, const std::string &directory, const std::string &file_pattern, std::ofstream &logfile) {
+  
+  // if our pattern contains a directory, remove that and recurse
+  assert (pattern.find("/") == std::string::npos);  
+  
+  // confirm that the pattern does not contain a directory
+
+  // confirm that the pattern does contain a wildcard
+  assert (pattern.find("*") != std::string::npos);
+
+  int count_matches = 0;
+  
+  std::cout << "WILDCARD DETECTED:" << pattern << std::endl;
+
+  char buf[DIR_PATH_MAX];
+  getcwd( buf, DIR_PATH_MAX );
+  DIR* dir = opendir(buf);
+  assert (dir != NULL);
+  struct dirent *ent;
+  while (1) {
+    ent = readdir(dir);
+    if (ent == NULL) break;
+    std::string thing = ent->d_name;
+    if (wildcard_match(pattern,thing,logfile)) {
+      std::cout << "   MATCHED! " << thing << std::endl;
+      validate_filename(thing);
+      my_args.push_back(thing);
+      count_matches++;
+    }
+  }
+  closedir(dir);
+
+  return count_matches;
+}
+*/
+
+
+
+void wildcard_expansion(std::vector<std::string> &my_args, const std::string &directory, const std::string &pattern, std::ofstream &logfile) {
   int count_matches = 0;
   if (pattern.find("*") != std::string::npos) {
     std::cout << "WILDCARD DETECTED:" << pattern << std::endl;
@@ -191,8 +232,12 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &pa
   }
   if (count_matches == 0) {
     logfile << "WARNING: No matches to wildcard pattern: " << pattern << std::endl;
+    std::cout << "WARNING: No matches to wildcard pattern: " << pattern << std::endl;
   }
 }
+
+
+
 
 
 void parse_command_line(const std::string &cmd,
@@ -274,7 +319,7 @@ void parse_command_line(const std::string &cmd,
                     exit(1);
                 }
 	      */
-	      wildcard_expansion(my_args,tmp,logfile);
+	      wildcard_expansion(my_args,"",tmp,logfile);
             }
 
             // special exclude file option
@@ -544,6 +589,10 @@ void enable_all_setrlimit(int seconds_to_run,
   assert (set_success == 0);
   
   
+  /*
+
+  // THIS IS TOO SMALL A LIMIT FOR JAVA
+
   // FIXME read in the file size from the configuration
   // limit size of files created by the process
   rlimit fsize_limit;
@@ -551,8 +600,14 @@ void enable_all_setrlimit(int seconds_to_run,
   set_success = setrlimit(RLIMIT_FSIZE, &fsize_limit);
   assert (set_success == 0);
 
+  */
+
+  /*
+
+  // THIS IS TOO SMALL A LIMIT FOR JAVAC
+
   // address space in bytes
-  int my_address_space_limit = 1000000000 ;  // 1 GB
+  int my_address_space_limit = 1000000000 ;  // 1 GB 
 
   // limit the address space & data segment used by the process
   rlimit address_space_limit;
@@ -561,7 +616,7 @@ void enable_all_setrlimit(int seconds_to_run,
   assert (set_success == 0);
   set_success = setrlimit(RLIMIT_DATA, &address_space_limit);
   assert (set_success == 0);
-
+  */
 
 }
 

@@ -23,34 +23,34 @@ const int auto_pts = 6;
 const int ta_pts = 0;
 const int extra_credit_pts = 0;
 
-const std::string junit_jar_path = "/local/scratch0/submit3/bin/junit-4.12.jar";
+//path to .jar will change
+const std::string junit_jar_path =         "/local/scratch0/submit3/JUnit/junit-4.12.jar";
+const std::string hamcrest_core_jar_path = "/local/scratch0/submit3/JUnit/hamcrest-core-1.3.jar";
 
 //Test cases
 std::vector<TestCase> testcases
 {
 	/******* README AND COMPILATION **********************/
 
-	TestCase::MakeFileExists(
-		"README",
-		"README.txt",
-		TestCasePoints(2)
+	TestCase::MakeCompilation(
+				  "Compilation of student code",
+				  "/usr/bin/javac -cp "+junit_jar_path+" TestClass.java",
+				  "TestClass.class",
+				  TestCasePoints(2)
 	),
 
-	//path to .jar will change
 	TestCase::MakeCompilation(
-				  "Compilation",
-				  "/usr/bin/javac -cp "+junit_jar_path+" *.java",
-				  "foo.class",
+				  "Compilation of test cases",
+				  "/usr/bin/javac -cp "+junit_jar_path+":. TestClassTester.java",
+				  "TestClassTester.class",
 				  TestCasePoints(2)
 	),
 
 	/******** TEST CASES ******************************/
-	//using the TestClassTester provided in .zip file from GitHub
 	TestCase::MakeTestCase(
 			       "Run junit tests",
 			       "could put details for user here",
-		//		"/usr/bin/java -cp /HWserver/Sample_Files/sample_assignment_config/csci2600/junit-4.12.jar:/HWserver/Sample_Files/sample_assignment_config/csci2600/hamcrest-core-1.3.jar:. org.junit.runner.JUnitCore TestClassTester",
-		"/usr/bin/java -cp "+junit_jar_path+":/HWserver/Sample_Files/sample_assignment_config/csci2600/hamcrest-core-1.3.jar:. org.junit.runner.JUnitCore TestClassTester",
+		"/usr/bin/java -cp "+junit_jar_path+":"+hamcrest_core_jar_path+":. org.junit.runner.JUnitCore TestClassTester",
 		TestCasePoints(2),
 
 		new TestCaseComparison(

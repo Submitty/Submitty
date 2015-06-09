@@ -22,6 +22,7 @@
   }\
 } while (0)
 
+
 int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_program)
 {
   int res;
@@ -41,7 +42,8 @@ int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_pro
    * the source.  We could use raw seccomp-bpf instead.                                                      
    */
   
-  if (my_program != "/usr/bin/javac") {
+  if (my_program != "/usr/bin/javac" &&
+      my_program != "/usr/bin/java") {
     // FIXME:  CURRENTLY DISABLING ALL SYSTEM CALL FILTERING FOR JAVA
 
 
