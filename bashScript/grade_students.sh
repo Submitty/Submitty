@@ -398,6 +398,7 @@ while true; do
 	# hack for now
 	mkdir hw0
 	mkdir hw0/test
+	cp  1>/dev/null  2>&1  $tmp_compilation/*.class          .
 	cp  1>/dev/null  2>&1  $tmp_compilation/hw0/*.class      ./hw0/
 	cp  1>/dev/null  2>&1  $tmp_compilation/hw0/test/*.class ./hw0/test/
 

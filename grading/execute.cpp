@@ -132,8 +132,6 @@ void validate_option(const std::string &program, const std::string &option) {
 // =====================================================================================
 
 bool wildcard_match(const std::string &pattern, const std::string &thing, std::ofstream &logfile) {
-
-
   //  std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
 
   int wildcard_loc = pattern.find("*");
@@ -165,78 +163,66 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
 }
 
 
-
-
-/*
-int wildcard_expansion(std::vector<std::string> &my_args, const std::string &directory, const std::string &file_pattern, std::ofstream &logfile) {
+void wildcard_expansion(std::vector<std::string> &my_args, const std::string &full_pattern, std::ofstream &logfile) {
   
-  // if our pattern contains a directory, remove that and recurse
-  assert (pattern.find("/") == std::string::npos);  
-  
-  // confirm that the pattern does not contain a directory
+  // if the pattern does not contain a wildcard, just return that
+  if (full_pattern.find("*") == std::string::npos) {
+    my_args.push_back(full_pattern);
+    return;
+  }
 
-  // confirm that the pattern does contain a wildcard
-  assert (pattern.find("*") != std::string::npos);
+  std::cout << "WILDCARD DETECTED:" << full_pattern << std::endl;
+
+  // otherwise, if our pattern contains directory structure, first remove that 
+  std::string directory = "";
+  std::string file_pattern = full_pattern;
+  while (1) {
+    size_t location = file_pattern.find("/");
+    if (location == std::string::npos) { break; }
+    directory += file_pattern.substr(0,location+1);
+    file_pattern = file_pattern.substr(location+1,file_pattern.size()-location-1);
+  }
+  std::cout << "  directory: " << directory << std::endl;
+  std::cout << "  file_pattern " << file_pattern << std::endl;
+
+  // FIXME: could extend this to allow a wildcard in the directory name 
+  // confirm that the directory does not contain a wildcard
+  assert (directory.find("*") == std::string::npos);
+  // confirm that the file pattern does contain a wildcard
+  assert (file_pattern.find("*") != std::string::npos);
 
   int count_matches = 0;
-  
-  std::cout << "WILDCARD DETECTED:" << pattern << std::endl;
 
+  // combine the current directory plus the directory portion of the pattern
   char buf[DIR_PATH_MAX];
   getcwd( buf, DIR_PATH_MAX );
-  DIR* dir = opendir(buf);
+  std::string d = std::string(buf)+"/"+directory;
+  // note: we don't want the trailing "/"
+  if (d.size() > 0 && d[d.size()-1] == '/') {
+    d = d.substr(0,d.size()-1);
+  }
+  DIR* dir = opendir(d.c_str());
   assert (dir != NULL);
+
+  // loop over all files in the directory, see which ones match the pattern
   struct dirent *ent;
   while (1) {
     ent = readdir(dir);
     if (ent == NULL) break;
     std::string thing = ent->d_name;
-    if (wildcard_match(pattern,thing,logfile)) {
+    if (wildcard_match(file_pattern,thing,logfile)) {
       std::cout << "   MATCHED! " << thing << std::endl;
-      validate_filename(thing);
-      my_args.push_back(thing);
+      validate_filename(directory+thing);
+      my_args.push_back(directory+thing);
       count_matches++;
     }
   }
   closedir(dir);
 
-  return count_matches;
-}
-*/
-
-
-
-void wildcard_expansion(std::vector<std::string> &my_args, const std::string &directory, const std::string &pattern, std::ofstream &logfile) {
-  int count_matches = 0;
-  if (pattern.find("*") != std::string::npos) {
-    std::cout << "WILDCARD DETECTED:" << pattern << std::endl;
-    char buf[DIR_PATH_MAX];
-    getcwd( buf, DIR_PATH_MAX );
-    DIR* dir = opendir(buf);
-    assert (dir != NULL);
-    struct dirent *ent;
-    while (1) {
-      ent = readdir(dir);
-      if (ent == NULL) break;
-      std::string thing = ent->d_name;
-      if (wildcard_match(pattern,thing,logfile)) {
-	std::cout << "   MATCHED! " << thing << std::endl;
-	validate_filename(thing);
-	my_args.push_back(thing);
-	count_matches++;
-     }
-    }
-    closedir(dir);
-  } else {
-    my_args.push_back(pattern);
-  }
   if (count_matches == 0) {
-    logfile << "WARNING: No matches to wildcard pattern: " << pattern << std::endl;
-    std::cout << "WARNING: No matches to wildcard pattern: " << pattern << std::endl;
+    std::cout << "ERROR: FOUND NO MATCHES" << std::endl;
   }
 }
-
-
 
 
 
@@ -319,7 +305,7 @@ void parse_command_line(const std::string &cmd,
                     exit(1);
                 }
 	      */
-	      wildcard_expansion(my_args,"",tmp,logfile);
+	      wildcard_expansion(my_args,tmp,logfile);
             }
 
             // special exclude file option
