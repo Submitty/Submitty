@@ -366,10 +366,10 @@ while true; do
 
 
 # FIXME: still need to explain why/fix there are 2 copies of test...
-	    echo "______before compilation__________"
-	    pwd
-	    ls -lta 
-	    echo "________________"
+#	    echo "______before compilation__________"
+#	    pwd
+#	    ls -lta 
+#	    echo "________________"
 
 	    $base_path/bin/untrusted_runscript $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
 
@@ -386,36 +386,21 @@ while true; do
 	popd > /dev/null
 
 
-	# move all executable files from the to the main tmp directory
-	# FIXME: not really what we want for the "FILE_EXISTS" command....
-	# FIXME: make more general, requires thinking, need to get python files into the running directory too (a hack for now)
-        cp  1>/dev/null  2>&1  $tmp_compilation/README*.txt $tmp_compilation/README*.TXT $tmp_compilation/readme*.txt $tmp_compilation/readme*.TXT $tmp_compilation/*.out $tmp_compilation/test*.txt $tmp_compilation/*.py $tmp
+	# move all executable files from the compilation directory to the main tmp directory
+	# Note: Must preserve the directory structure of compiled files (esp for Java)
 
-	
-	# FIXME: NEED TO PRESERVE DIRECTORY STRUCTURE OF EXECUTABLES
-	#cp  1>/dev/null  2>&1  $tmp_compilation/*.class $tmp_compilation/*/*.class $tmp_compilation/*/*/*.class 
+	# at the same time grab the README files and the testXX_ STDOUT, STDERR, & execute_logfiles
+	# FIXME: This might need to be revised depending on future needs...
 
-	# hack for now
-	mkdir hw0
-	mkdir hw0/test
-	cp  1>/dev/null  2>&1  $tmp_compilation/*.class          .
-	cp  1>/dev/null  2>&1  $tmp_compilation/hw0/*.class      ./hw0/
-	cp  1>/dev/null  2>&1  $tmp_compilation/hw0/test/*.class ./hw0/test/
+	#  -r  recursive
+	#  -m  prune empty directories
+	#  --include="*/"  match all subdirectories
+	#  --include="*.XXX"  grab all .XXX files
+	#  --exclude="*"  exclude everything else
 
-    echo "----AFTER COMPILATION---------------------"
-    pwd
-    ls -lta 
-    echo "---a"
-ls -lta hw0/
-    echo "---b"
-    ls -lta hw0/test
-    echo "------------------------------------------"
+	rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"   --include="*.class"  --include="*.py"  --include="*README*"  --include="test*.txt"  --exclude="*"  $tmp_compilation/  $tmp  
 
-
-    ls $tmp_compilation
-    echo "------------------------------------------"
-    ls $tmp
-	# remove the directory
+	# remove the compilation directory
 	rm -rf $tmp_compilation
 
 	# --------------------------------------------------------------------
