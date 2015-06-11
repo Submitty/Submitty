@@ -364,13 +364,6 @@ while true; do
 	    chmod -R go+rwx $tmp
 	    # run the compile.out as the untrusted user
 
-
-# FIXME: still need to explain why/fix there are 2 copies of test...
-#	    echo "______before compilation__________"
-#	    pwd
-#	    ls -lta 
-#	    echo "________________"
-
 	    $base_path/bin/untrusted_runscript $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
 
 	    compile_error_code="$?"
