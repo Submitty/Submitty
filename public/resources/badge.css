@@ -298,3 +298,21 @@
 #HWsubmission .red-background {
     background-color: #c00000;
 }
+
+#HWsubmission .file-display{
+    padding-left: 10px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-right: 10px
+
+    vertical-align: top;
+    display: block;
+    width: 100%;
+    overflow:hidden;
+
+    /* Unselectable text */
+    -moz-user-select: none; 
+    -khtml-user-select: none; 
+    -webkit-user-select: none; 
+    -o-user-select: none;
+}
