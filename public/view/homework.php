@@ -228,12 +228,49 @@ window.addEventListener('load', function() {
                                   else{
                                       echo '<div style="border-bottom: 1px solid #dddddd;">';
                                   }
-                                    echo '<p class="file-header">'.$file["name"].' ('.$file["size"].'kb)';
+                                    //implementation of README display
+                                    //ex. "code1.cpp (3kb)"
+                                    $file_desc = $file["name"].' ('.$file["size"].'kb)';
+
+                                    echo '<p class="file-header"'; 
+
                                         if (isset($download_files) && $download_files == true){
-                                            echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
+                                            echo '>'.$file_desc.'<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
                                         }
+
                                         else if (isset($download_readme) && $download_readme == true && strtolower($file["name"]) == "readme.txt"){
-                                            echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
+                                            //extend the file-header class to listen to user clicks so that it expands
+                                            echo 'href="#" onclick="return toggleDiv('."'".'filedisplay'."'".');" style="cursor:pointer;" >'.$file_desc.'<a class = "view_file" href="#">View</a>';
+                                            ?>
+
+                                            <!-- create the outermost div that will appear if display is set to "block" -->
+                                            <div id="filedisplay" class="diff-block" style="display:block">
+
+                                                <div class="file-display">
+                                                    <?php //read the readme file and print out on rm-block div, line-by-line
+                                                    $frontpath = get_path_front_course($semester,$course);;
+                                                    $readme_fp = $frontpath.'/submissions/'.$assignment_id.'/'.$username.'/'.$assignment_version.'/'.$file["name"];
+                                                    $readmfile = fopen($readme_fp,"r") or die("Unable to open file!");
+                                                    while (!feof($readmfile)){
+                                                        echo htmlentities(fgets($readmfile))."<br>";
+                                                    }
+                                                    fclose($readmfile);
+                                                    ?> 
+
+                                                </div>
+
+                                            </div>
+
+                                            <script> 
+                                                //set readme block to display=none 
+                                                toggleDiv('filedisplay');
+                                            </script>
+
+                                            <?php
+
+                                        }
+                                        else{
+                                            echo '>'.$file_desc; //close off beginning tag if its a normal, non-readme and non-downloadable, file.
                                         }
                                     echo '</p>';
                                     echo '</div>';
