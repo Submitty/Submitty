@@ -1,13 +1,6 @@
-/* FILENAME: diffNaive.h
+/* FILENAME: diffNaive.cpp
  * YEAR: 2014
- * AUTHORS:
- *   Members of Rensselaer Center for Open Source (rcos.rpi.edu):
- *   Chris Berger
- *   Jesse Freitas
- *   Severin Ibarluzea
- *   Kiana McNellis
- *   Kienan Knight-Boehm
- *   Sam Seng
+ * AUTHORS: Please refer to 'AUTHORS.md' for a list of contributors
  * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
  *
  * RELEVANT DOCUMENTATION:
@@ -31,11 +24,10 @@
 #include "modules/difference.h"
 
 /* METHOD: diffNaive
- * ARGS:   student: the student generated output file contents as a string
- *         instructor: the instructor expected output file contents as a string
+ * ARGS: student: the student generated output file contents as a string
+ * instructor: the instructor expected output file contents as a string
  * RETURN: Change: The difference of the two strings
- * PURPOSE:
- * diffNaive is used as a helper to the diffLine function.
+ * PURPOSE: diffNaive is used as a helper to the diffLine function.
  * It does a per character comparison including white space and new lines. The
  * strings are not changed in this comparison. Runs in linear time with respect
  * to the longer string.
@@ -46,9 +38,9 @@ Change diffNaive ( const std::string& student, const std::string& instructor ) {
 	differences.b_start = 0;
 
 	unsigned int len =
-			( unsigned int ) ( student.size() < instructor.size() ) ?
-					( unsigned int ) student.length() :
-					( unsigned int ) instructor.length();
+		( unsigned int ) ( student.size() < instructor.size() ) ?
+		( unsigned int ) student.length() :
+		( unsigned int ) instructor.length();
 
 	unsigned int i = 0;
 	for ( i = 0; i < len; i++ ) {
@@ -69,24 +61,23 @@ Change diffNaive ( const std::string& student, const std::string& instructor ) {
 }
 
 /* METHOD: diffNoSpace
- * ARGS:   student: the student generated output file contents as a string
- *         instructor: the instructor expected output file contents as a string
+ * ARGS: student: the student generated output file contents as a string
+ * instructor: the instructor expected output file contents as a string
  * RETURN: Change: The difference of the two strings
- * PURPOSE:
- * diffNoSpace is a helper function to the diffLineNoSpace function.
+ * PURPOSE: diffNoSpace is a helper function to the diffLineNoSpace function.
  * diffNoSpace does a per character comparison not including white space but
  * including new lines. The strings are not changed in this comparison. Runs
  * in linear time with respect to the longer string.
  */
 Change diffNoSpace ( const std::string& _student,
-		const std::string& _instructor ) {
+		     const std::string& _instructor ) {
 	Change differences;
 	differences.a_start = 0;
 	differences.b_start = 0;
-
+	
 	std::string student = string_trim_right( _student );
 	std::string instructor = string_trim_right( _instructor );
-
+	
 	unsigned int i = 0;
 	unsigned int j = 0;
 	while ( i != student.size() && j != instructor.size() ) {
@@ -109,7 +100,7 @@ Change diffNoSpace ( const std::string& _student,
 		if ( student[i] != ' ' )
 			differences.a_changes.push_back( i );
 		i++;
-	}
+	}	
 	while ( j != instructor.size() ) {
 		if ( instructor[j] != ' ' )
 			differences.b_changes.push_back( j );
@@ -117,9 +108,10 @@ Change diffNoSpace ( const std::string& _student,
 	}
 	return differences;
 }
+
 /* METHOD: diffLine
- * ARGS:   student: the student generated output file contents as a string
- *         instructor: the instructor expected output file contents as a string
+ * ARGS: student: the student generated output file contents as a string
+ * instructor: the instructor expected output file contents as a string
  * RETURN: Difference: The difference of the two files
  * PURPOSE: diffLine does a per character comparison including white space and
  * including new lines. Comparison is done per line and returns a Difference
@@ -129,10 +121,10 @@ Change diffNoSpace ( const std::string& _student,
  * https://github.com/JFrei86/HWserver/wiki/Naive-Difference#usage
  */
 TestResults* diffLine ( const std::string& _student,
-		const std::string& _instructor ) {
+			const std::string& _instructor ) {
 	Difference* diffs = new Difference();
 	diffs->type = 1;
-
+	
 	diffs->output_length_a = 0;
 	diffs->output_length_b = 0;
 	Change file;
@@ -173,24 +165,25 @@ TestResults* diffLine ( const std::string& _student,
 		i++;
 	}
 	diffs->distance = ( int ) std::max( file.a_changes.size(),
-			file.b_changes.size() );
+					    file.b_changes.size() );
+
 	diffs->changes.push_back( file );
 	return diffs;
 }
+
 /* METHOD: diffLineNoSpace
- * ARGS:   student: the student generated output file contents as a string
- *         instructor: the instructor expected output file contents as a string
+ * ARGS: student: the student generated output file contents as a string
+ * instructor: the instructor expected output file contents as a string
  * RETURN: Difference: The difference of the two strings
- * PURPOSE:
- * diffLineNoSpace does a per character comparison for each line in the respective
+ * PURPOSE: diffLineNoSpace does a per character comparison for each line in the respective
  * strings. Comparison is done per line and returns a Difference object
  * that indicates the indicies of characters the student string was off by. The
  * strings are not changed in this comparison. Runs in linear time with respect to
  * the longer string.
  * https://github.com/JFrei86/HWserver/wiki/Naive-Difference#usage
- * */
+ */
 TestResults* diffLineNoSpace ( const std::string& _student,
-		const std::string& _instructor ) {
+			       const std::string& _instructor ) {
 	Difference* diffs = new Difference();
 	diffs->type = 1;
 
@@ -228,7 +221,7 @@ TestResults* diffLineNoSpace ( const std::string& _student,
 		i++;
 	}
 	diffs->distance = ( int ) std::max( file.a_changes.size(),
-			file.b_changes.size() );
+					    file.b_changes.size() );
 	diffs->changes.push_back( file );
 	return diffs;
 }

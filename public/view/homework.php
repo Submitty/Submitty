@@ -53,6 +53,10 @@ window.addEventListener('load', function() {
           if (on_dev_team($user)) {
              echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ]</font>";
             }
+
+            // //Logout button to reminds users to close the browser to logout.(Only way for HTTP BSAIC AUTHENTICATION)
+            // echo "<button onclick='myFunction()'>logout</button><script>function myFunction() {alert('Please close the browser to log out');}</script>";
+
           ?>
     </h2>
 
@@ -95,8 +99,21 @@ window.addEventListener('load', function() {
         </form>
     </div> <!-- end sub -->
 
-    <h2 class="label">Assignment: <?php echo $assignment_name;?></h2>
+<?php
+      
+    //assignment name links to the assignment instructions
+    echo '<h2 class="label">Assignment: ';
+    if($assignment_link != '#'){
+        echo' <a href="'.$assignment_link.'" target = "_blank">';
+        echo $assignment_name;
+        echo '</a>';
+    }
+    else{
+        echo $assignment_name;
 
+    }
+    echo '</h2>';
+?>
     <div class="panel-body"> <!-- panel-body -->
         <?php
         if ($status && $status != "") {
@@ -121,6 +138,19 @@ window.addEventListener('load', function() {
                     <input type="submit" name="submit" value="Submit File" class="btn btn-primary">
                 </form>
         </div> <!-- end outer_box -->
+
+        <!--Description-->
+        <?php
+        if($assignment_description != '#'){
+            echo '  <div class="outer_box">';
+            echo '  <h3 class="label">Description</h3>';
+            echo '<p class="sub">';
+            echo $assignment_description;
+            echo '</p>';
+            echo '  </div>';
+        }
+        ?>
+        
 
         <!------------------------------------------------------------------------>
         <!-- "IF AT LEAST ONE SUBMISSION... " -->
@@ -168,24 +198,23 @@ window.addEventListener('load', function() {
                                             echo 'selected';
                                         }
                                         echo ' > ';
-                                        echo 'Version #'.$i;
-                                        echo '&nbsp;&nbsp';
-                                        if ($points_visible != 0){
-                                            echo 'Score: ';
-                                            echo $select_submission_data[$i-1]["score"];
-                                            echo '&nbsp;&nbsp';
-                                        }
-                                        else{
-                                            echo $points_visible;
+                                        $field_text = array();
+                                        $field_text[] = 'Version #'.$i;
+                                        if ($points_visible > 0){
+                                            $score_text = 'Score: ';
+                                            $score_text .= $select_submission_data[$i-1]["score"];
+                                            $field_text[] = $score_text;
                                         }
                                         if ($select_submission_data[$i-1]["days_late"] != "")
                                         {
-                                            echo 'Days Late: ';
-                                            echo $select_submission_data[$i-1]["days_late"];
+                                            $days_late = 'Days Late: ';
+                                            $days_late .= $select_submission_data[$i-1]["days_late"];
+                                            $field_text[] = $days_late;
                                         }
                                         if ($i == $submitting_version) {
-                                            echo '&nbsp;&nbsp ACTIVE';
+                                            $field_text[] = 'ACTIVE';
                                         }
+                                        echo implode("&nbsp;&nbsp;",$field_text);
                                         echo ' </option>';
                                     }
                                     ?>
@@ -236,6 +265,7 @@ window.addEventListener('load', function() {
 
                                         if (isset($download_files) && $download_files == true){
                                             echo '>'.$file_desc.'<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
+                                            echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
                                         }
 
                                         else if (isset($download_readme) && $download_readme == true && strtolower($file["name"]) == "readme.txt"){

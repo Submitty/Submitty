@@ -427,6 +427,28 @@ function name_for_assignment_id($class_config, $assignment_id) {
     return "";//TODO Error handling
 }
 
+//get link for assignment page
+function link_for_assignment_id($class_config, $assignment_id) {
+    $assignments = $class_config["assignments"];
+    foreach ($assignments as $one) {
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
+            return isset($one["assignment_link"]) ? $one["assignment_link"] : '#';
+        }
+    }
+    return "";//TODO Error handling
+}
+
+//get description
+function description_for_assignment_id($class_config, $assignment_id) {
+    $assignments = $class_config["assignments"];
+    foreach ($assignments as $one) {
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
+            return isset($one["assignment_description"]) ? $one["assignment_description"] : '#';
+        }
+    }
+    return "";//TODO Error handling
+}
+
 
 // Get name for assignment
 function is_ta_grade_released($class_config, $assignment_id) {
@@ -486,7 +508,7 @@ function is_valid_semester($semester) {
         return true;
     }
     //For auto-setup script:
-    //if ($semester == "default") {return true;}
+    if ($semester == "s15") {return true;}
     return false;
 }
 
@@ -515,7 +537,7 @@ function is_valid_course($course) {
         return true;
     }
     //For auto-setup script:
-    //if ($course == "default") {return true;}
+    if ($course == "csci1200") {return true;}
     return false;
 }
 
