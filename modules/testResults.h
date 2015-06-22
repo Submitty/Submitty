@@ -22,9 +22,8 @@ public:
   
   int distance;
 
-  virtual void printJSON(std::ostream & file_out); // =0;
-  //  virtual float grade() { return my_grade; } //=0;
-  float getGrade() { assert (my_grade >= 0); return my_grade; } //=0;
+  virtual void printJSON(std::ostream & file_out); 
+  float getGrade() { assert (my_grade >= 0); return my_grade; } 
 
   void setGrade(float g) { assert (g >= 0); my_grade = g; }
 
@@ -35,7 +34,6 @@ protected:
   float my_grade;
 };
 
-//TestResults::TestResults():distance(0){}
 
 inline void TestResults::printJSON(std::ostream & file_out) {
 

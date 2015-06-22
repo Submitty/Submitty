@@ -55,6 +55,7 @@ endif(instructor_cmakelists)
 
 set (common_files
   ${GRADINGCODE}/grading/TestCase.cpp 
+  ${GRADINGCODE}/grading/JUnitGrader.cpp
   ${GRADINGCODE}/modules/myersDiff.cpp 
   ${GRADINGCODE}/modules/tokens.cpp 
   ${GRADINGCODE}/modules/tokenSearch.cpp 
