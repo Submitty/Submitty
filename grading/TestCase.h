@@ -75,11 +75,15 @@ public:
 		 const std::vector<std::string> &_tokens,
          float points_frac=-1.0)
     : TestCaseGrader(file,desc), token_grader(cmp), tokens(_tokens) {points_fraction=points_frac;}
+
+
   TestResults* (*token_grader) ( const std::string&, const std::vector<std::string>& );
   std::vector<std::string> tokens;
 
   virtual TestResults* doit(const std::string &prefix);
 };
+
+
 
 
 class TestCaseCustom : public TestCaseGrader {
@@ -92,10 +96,6 @@ public:
     : TestCaseGrader(file,desc), custom_grader(custom_grader_) {my_arg_string = arg_string; points_fraction=points_frac;}
 
   float (*custom_grader)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv);
-
-  //TestResults* (*token_grader) ( const std::string&, const std::vector<std::string>& );
-  //std::vector<std::string> tokens;
-
   virtual TestResults* doit(const std::string &prefix);
 private:
   std::string my_arg_string;
@@ -313,6 +313,9 @@ private:
 
 std::string getAssignmentIdFromCurrentDirectory(std::string);
 
+
+// FIXME: file organization should be re-structured
+#include "JUnitGrader.h"
 
 
 #endif

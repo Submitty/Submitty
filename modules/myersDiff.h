@@ -1,33 +1,22 @@
 /* FILENAME: myersDiff.h
  * YEAR: 2014
- * AUTHORS:
- *   Members of Rensselaer Center for Open Source (rcos.rpi.edu):
- *   Chris Berger
- *   Jesse Freitas
- *   Severin Ibarluzea
- *   Kiana McNellis
- *   Kienan Knight-Boehm
- *   Sam Seng
+ * AUTHORS: Please refer to 'AUTHORS.md' for a list of contributors
  * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
  *
  * RELEVANT DOCUMENTATION:
- *
-*/
+ */
 
 /*
- The algorithm for shortest edit script was in derived from
- Eugene W. Myers's paper, "An O(ND) Difference Algorithm and Its Variations",
- avalible here: http://www.xmailserver.org/diff2.pdf
+   The algorithm for shortest edit script was in derived from
+   Eugene W. Myers's paper, "An O(ND) Difference Algorithm and Its Variations",
+   avalible here: http://www.xmailserver.org/diff2.pdf
 
- It was published in the journal "Algorithmica" in November 1986.
+   It was published in the journal "Algorithmica" in November 1986.
 
-
-
- code similar to:
- http://simplygenius.net/Article/DiffTutorial1
- FIXME: if this was the source, should be formally credited
+   Code similar to:
+   		http://simplygenius.net/Article/DiffTutorial1
+ 		FIXME: if this was the source, should be formally credited
         (or are both just coming from the paper's pseudocode)
-
  */
 
 #ifndef differences_myersDiff_h

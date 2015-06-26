@@ -47,19 +47,14 @@ std::vector<TestCase> testcases
 	),
 
 	/******** TEST CASES ******************************/
-	TestCase::MakeTestCase(
-			       "Run junit tests",
-			       "could put details for user here",
-		"/usr/bin/java -cp "+junit_jar_path+":"+hamcrest_core_jar_path+":. org.junit.runner.JUnitCore TestClassTester",
-		TestCasePoints(2),
-
-		new TestCaseComparison(
-								&myersDiffbyLinebyChar,
-								"STDOUT.txt"
-								"Program Output",
-								"output_1.txt"),
-		new TestCaseComparison(&warnIfNotEmpty, "STDERR.txt", "syntax error output from running junit")
-	)
+	TestCase::MakeTestCase
+	  ("Run junit tests",
+	   "", /* could put more details for the user here */
+	   "/usr/bin/java -cp "+junit_jar_path+":"+hamcrest_core_jar_path+":. org.junit.runner.JUnitCore TestClassTester",
+	   TestCasePoints(2),
+	   TestCaseJUnit::JUnitTestGrader("STDOUT.txt",1),
+	   new TestCaseComparison(&warnIfNotEmpty, "STDERR.txt", "syntax error output from running junit")
+	   )
 };
 
 #endif
