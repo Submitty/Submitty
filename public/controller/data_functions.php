@@ -486,7 +486,7 @@ function is_valid_semester($semester) {
         return true;
     }
     //For auto-setup script:
-    //if ($semester == "default") {return true;}
+    //if ($semester == "s15") {return true;}
     return false;
 }
 
@@ -512,7 +512,7 @@ function is_valid_course($course) {
         return true;
     }
     //For auto-setup script:
-    //if ($course == "default") {return true;}
+    //if ($course == "csci1200") {return true;}
     return false;
 }
 
@@ -768,7 +768,6 @@ function get_assignment_results($username, $semester,$course, $assignment_id, $a
     }
     return $tmp;
 }
-
 
 //Get list of student-submitted files that students are allowed to view
 function get_files_to_view($class_config,$semester,$course,$assignment_id, $username,$assignment_version){
