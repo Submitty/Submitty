@@ -58,12 +58,14 @@ $submitting_version_in_grading_queue = version_in_grading_queue($username, $seme
 $assignment_version_in_grading_queue = version_in_grading_queue($username, $semester,$course, $assignment_id, $assignment_version);
 
 
-
 // FIXME:  This incorrectly includes extra credit
 //$points_visible =            $assignment_config["points_visible"];
 // FIXME:  This looks correct.  Why are they different?  Why are there two?
 $points_visible =            get_points_visible($submitting_homework_tests);
 
+
+//List of submitted files that server is allowed to display
+$files_to_view =            get_files_to_view($class_config,$semester,$course,$assignment_id, $username,$assignment_version);
 
 
 if (isset($class_config["download_files"])){
@@ -71,12 +73,6 @@ if (isset($class_config["download_files"])){
 }
 else{
     $download_files = false;
-}
-if (isset($class_config["download_readme"])){
-    $download_readme = $class_config["download_readme"];
-}
-else{
-    $download_readme = false;
 }
 if (isset($class_config["grade_summary"])){
     $grade_summary = $class_config["grade_summary"];
@@ -108,7 +104,6 @@ render("homework", array(
     "view_points"=>             $view_points,
     "view_hidden_points"=>      $view_hidden_points,
     "download_files"=>          $download_files,
-    "download_readme"=>         $download_readme,
     "grade_summary"=>           $grade_summary,
     "ta_grades"=>               $ta_grades,
       // added for debugging
@@ -126,7 +121,9 @@ render("homework", array(
     "assignment_message"=>      $assignment_message,
     "submitting_version_in_grading_queue"=>$submitting_version_in_grading_queue,
     "assignment_version_in_grading_queue"=>$assignment_version_in_grading_queue,
-    "status"=>                  $status
+    "status"=>                  $status,
+
+    "files_to_view"=>           $files_to_view
     )
 );
 ?>

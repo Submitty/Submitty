@@ -301,18 +301,24 @@
 
 #HWsubmission .file-display{
     padding-left: 10px;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    padding-right: 10px
+    padding-right: 10px;
+    padding-top: 7.5px;
+    padding-bottom: 7.5px;
+
+    box-sizing: border-box;
 
     vertical-align: top;
-    display: block;
     width: 100%;
     overflow:hidden;
+
+    word-wrap: break-word;
+
+    font-family: "Lucida Console", Monaco, monospace;
 
     /* Unselectable text */
     -moz-user-select: none; 
     -khtml-user-select: none; 
     -webkit-user-select: none; 
     -o-user-select: none;
+
 }
