@@ -821,7 +821,7 @@ function get_files_to_view($class_config,$semester,$course,$assignment_id, $user
     foreach ($list_with_wildcards as $pattern){
         foreach (glob($folder.$pattern) as $file){
             if (!in_array($file, $result)){
-                array_push($result, substr($file, strrpos($file, '/') +1) );
+                array_push($result, substr($file, strlen($folder)) );
             }
         }
     }
