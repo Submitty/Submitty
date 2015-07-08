@@ -156,7 +156,7 @@ window.addEventListener('load', function() {
       echo '<label for="file" class="label">Select File:</label>';
       echo '<input type="file" name="file" id="file" />';
       echo '<input type="submit" name="submit" value="Submit File" class="btn btn-primary">';
-      echo '<input type="hidden" name="svn_checkout" value="true">';
+      echo '<input type="hidden" name="svn_checkout" value="false">';
       echo '</form>';
       
 
