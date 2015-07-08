@@ -113,13 +113,63 @@ window.addEventListener('load', function() {
             <p class="sub">
                 <?php require_once("view/".$semester."_".$course."_upload_message.php"); ?>
             </p>
-            <form class="form_submit" action="<?php echo '?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id; ?>"
+
+
+
+<!--            <form class="form_submit" action="<?php echo '?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id; ?>"
                     method="post" enctype="multipart/form-data"
                     onsubmit="return check_for_upload('<?php echo $assignment_name.', '.$highest_version.', '.$max_submissions;?>')">
                     <label for="file" class="label">Select File:</label>
                     <input type="file" name="file" id="file" />
                     <input type="submit" name="submit" value="Submit File" class="btn btn-primary">
                 </form>
+-->
+
+
+
+<?php if ($svn_checkout == true) {  
+
+	// NO FILE SUBMISSION, PULL FILES FROM SVN
+
+      echo '<form ';
+      echo ' class="form_submit"';
+      echo ' action="?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'"';
+      echo ' method="post"';
+      echo ' enctype="multipart/form-data"';
+      echo ' onsubmit="return check_for_upload('.$assignment_name.', '.$highest_version.', '.$max_submissions.' )"';
+      echo '>';
+      echo '<input type="submit" name="submit" value="GRADE SVN" class="btn btn-primary">';
+      echo '<input type="hidden" name="svn_checkout" value="true">';
+      echo '</form>';
+
+} else {
+
+	// SINGLE FILE OR ZIP FILE SUBMISSION
+      
+      echo '<form ';
+      echo ' class="form_submit"';
+      echo ' action="?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'"';
+      echo ' method="post"';
+      echo ' enctype="multipart/form-data"';
+      echo ' onsubmit="return check_for_upload('.$assignment_name.', '.$highest_version.', '.$max_submissions.' )"';
+      echo '>';
+      echo '<label for="file" class="label">Select File:</label>';
+      echo '<input type="file" name="file" id="file" />';
+      echo '<input type="submit" name="submit" value="Submit File" class="btn btn-primary">';
+      echo '<input type="hidden" name="svn_checkout" value="true">';
+      echo '</form>';
+      
+
+}
+?>
+
+
+
+
+
+
+
+
         </div> <!-- end outer_box -->
 
         <!------------------------------------------------------------------------>

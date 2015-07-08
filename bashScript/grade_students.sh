@@ -15,6 +15,11 @@ fi
 base_path="$1"
 TO_BE_GRADED="$2"
 
+
+# global variable
+svn_path=svn+ssh://csci2600svn.cs.rpi.edu/local/svn/csci2600
+
+
 # from that directory, we expect:
 
 # a subdirectory for each course
@@ -338,7 +343,27 @@ while true; do
 	tmp_compilation=$tmp/TMP_COMPILATION
 	mkdir -p $tmp_compilation
 
+
+	# copy files from submission zip
 	cp 1>/dev/null  2>&1  -r $submission_path/* $tmp_compilation ||  echo "ERROR: Failed to copy submitted files to temporary compilation directory: cp -r $submission_path/* $tmp_compilation" >&2
+
+
+#	if submission is empty...
+#	# svn checkout into the tmp compilation directory
+#	svn co https://128.213.17.15/$user $tmp_compilation --username hwcron > .submit_svn_checkout_output.txt 
+
+
+	echo "\n\ngoing to checkout svn"  >&2
+#	svn co svn+ssh://csci2600svn.cs.rpi.edu/local/svn/csci2600/$user  > .submit_svn_checkout_output.txt 
+#	svn co $svn_path/$user > .submit_svn_checkout_output.txt 
+
+	
+#	ls -lta
+#	cat .submit_svn_checkout_output.txt >&2
+	
+
+	echo "finished checkout svn\n\n"  >&2
+
 
         # copy any instructor code files to tmp directory
 	if [ -d "$test_code_path" ]

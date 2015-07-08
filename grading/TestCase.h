@@ -132,29 +132,42 @@ public:
 				   const TestCasePoints &tcp) {
     TestCase answer;
     answer._title = title;
-    answer._filename = filename;
-    assert (answer._filename != "");
+    assert (filename != "");
+    answer._filenames.push_back(filename); // = std::vector<std::string>(0,filename);
     answer._test_case_points = tcp;
     answer.FILE_EXISTS = true;
-    answer.view_file = filename;
+    //answer.view_file = filename;
     answer.view_file_results = false;
     return answer;
   }
+
 
   static TestCase MakeCompilation( const std::string &title,
 				   const std::string &compilation_command,
 				   const std::string &executable_filename,
 				   const TestCasePoints &tcp) {
+    return MakeCompilation(title,
+			   compilation_command,
+			   std::vector<std::string>(1,executable_filename),
+			   tcp);
+  }
+
+  static TestCase MakeCompilation( const std::string &title,
+				   const std::string &compilation_command,
+				   const std::vector<std::string> &executable_filenames,
+				   const TestCasePoints &tcp) {
     TestCase answer;
     answer._title = title;
-    answer._filename = executable_filename;
-    assert (answer._filename != "");
+    assert (executable_filenames.size() > 0 && 
+	    executable_filenames[0] != "");
+    answer._filenames = executable_filenames;
     answer._command = compilation_command;
     assert (answer._command != "");
     answer._test_case_points = tcp;
     answer.COMPILATION = true;
     return answer;
   }
+
 
   static TestCase MakeTestCase   ( const std::string &title, const std::string &details,
 				   const std::string &command,
@@ -173,7 +186,8 @@ public:
     answer.test_case_grader[0] = tcc0;
     answer.test_case_grader[1] = tcc1;
     answer.test_case_grader[2] = tcc2;
-    answer.view_file = filename;
+    //answer.view_file = filename;
+    answer._filenames.push_back(filename); // = std::vector<std::string>
     answer.view_file_results = true;
     return answer;
   }
@@ -207,16 +221,18 @@ public:
 
 
   std::string getFilename() const {
-    return _filename;
+    return _filenames[0];
   }
 
   std::string getView_file() const {
-      if(view_file_results && view_file !=""){
-          return prefix()+"_"+view_file;
-      }
-      else{
-          return view_file;
-      }
+    //      if(view_file_results && view_file !=""){
+    //return prefix()+"_"+view_file;
+    if(view_file_results && _filenames[0] !=""){
+      return prefix()+"_"+_filenames[0];
+    }
+    else{
+      return _filenames[0];
+    }
   }
 
   bool getView_file_results() const {
@@ -225,7 +241,7 @@ public:
 
 
   std::string getFilename2() const {
-    return prefix()+"_"+_filename;
+    return prefix()+"_"+_filenames[0];
   }
 
   int numFileGraders() const {
@@ -293,11 +309,11 @@ private:
   std::string _title;
   std::string _details;
 
-  std::string _filename;
+  std::vector<std::string> _filenames;
   std::string _command;
 
   bool view_file_results;
-  std::string view_file;
+  //std::string view_file;
 
   TestCasePoints _test_case_points;
 public:

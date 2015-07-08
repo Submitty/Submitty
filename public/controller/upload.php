@@ -8,11 +8,22 @@ $class_config=check_class_config($semester,$course);
 $dev_team=$class_config["dev_team"];
 $assignment_id=check_assignment_id($class_config);
 
+if (isset($_POST["svn_checkout"])) {
+
+    $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id,$uploaded_file, true);
+
+    $_SESSION["status"] = "uploaded_no_error";
+//    $_SESSION["status"] = "upload_failed";
+
+
+
+}  else {
+
 //Upload the files
 if (isset($_FILES["file"])) {
 
     $uploaded_file = $_FILES["file"];
-    $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id,$uploaded_file);
+    $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id,$uploaded_file, false);
 
     if (isset($result["error"])) {
         //Go to error page?
@@ -30,6 +41,10 @@ if (isset($_FILES["file"])) {
 else {
     $_SESSION["status"] = "upload_failed";
 }
+
+}
+
+
 //Go back to homework page
 header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
 

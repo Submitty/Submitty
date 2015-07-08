@@ -35,8 +35,6 @@
 #include "modules/modules.h"
 #include "grading/TestCase.h"
 
-//#include "grading/TestCase.cpp"  /* Should not #include a .cpp file */
-
 
 #include "config.h"
 
