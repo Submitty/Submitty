@@ -16,8 +16,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "modules.h"
-#include "grading/TestCase.h"
+#include "TestCase.h"
 
 
 #include "config.h"

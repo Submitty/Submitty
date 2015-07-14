@@ -29,8 +29,7 @@
 #include <set>
 #include <fstream>
 
-#include "modules.h"
-#include "grading/TestCase.h"
+#include "TestCase.h"
 
 #define MAX_STRING_LENGTH 100
 #define MAX_NUM_STRINGS 20

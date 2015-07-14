@@ -24,7 +24,6 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include "modules.h"
 
 /* METHOD: readFileList
  * ARGS: input: list of file names, sample_file: instructor file,
