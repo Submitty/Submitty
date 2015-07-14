@@ -215,6 +215,8 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
       validate_filename(directory+thing);
       my_args.push_back(directory+thing);
       count_matches++;
+    } else {
+      //std::cout << "   no match  " << thing << std::endl;
     }
   }
   closedir(dir);

@@ -10,6 +10,7 @@ $assignment_id=check_assignment_id($class_config);
 
 if (isset($_POST["svn_checkout"])) {
 
+    $uploaded_file = "";
     $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id,$uploaded_file, true);
 
     $_SESSION["status"] = "uploaded_no_error";

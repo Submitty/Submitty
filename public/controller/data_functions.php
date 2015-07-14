@@ -251,8 +251,8 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
 
 
     if ($svn_checkout == true) {
-      if (!file_put_contents($version_path."/.submit.SVN_CHECKOUT",$TIMESTAMP."\n")) {
-	display_error("Failed to save file ".$version_path."/.submit.SVN_CHECKOUT");
+      if (!touch($version_path."/.submit.SVN_CHECKOUT")) {
+	display_error("Failed to touch file ".$version_path."/.submit.SVN_CHECKOUT");
 	return;
       }
     }

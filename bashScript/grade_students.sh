@@ -344,28 +344,52 @@ while true; do
 	mkdir -p $tmp_compilation
 
 
-	# copy files from submission zip
-	cp 1>/dev/null  2>&1  -r $submission_path/* $tmp_compilation ||  echo "ERROR: Failed to copy submitted files to temporary compilation directory: cp -r $submission_path/* $tmp_compilation" >&2
+	# copy the .submit.timestamp file and any files from submission zip 
+	#cp 1>/dev/null  2>&1  -r $submission_path/* $tmp_compilation ||  echo "ERROR: Failed to copy submitted files to temporary compilation directory: cp -r $submission_path/* $tmp_compilation" >&2
+	# switched to rsync to copy dot files (just in case they're needed)
+	rsync 1>/dev/null  2>&1  -r $submission_path/ $tmp_compilation ||  echo "ERROR: Failed to copy submitted files to temporary compilation directory: rsync -r $submission_path/ $tmp_compilation" >&2
 
+	# use the jq json parsing command line utility to grab the svn_checkout flag from the class.json config file
+	class_json_config="$base_path/courses/$semester/$course/config/class.json"
+	svn_checkout=`cat $class_json_config | jq '.assignments[] | if .assignment_id == "'${assignment}'" then .svn_checkout else empty end'`
 
-#	if submission is empty...
-#	# svn checkout into the tmp compilation directory
-#	svn co https://128.213.17.15/$user $tmp_compilation --username hwcron > .submit_svn_checkout_output.txt 
+	# if this homework is submitted by svn, use the date/time from
+	# the .submit.timestamp file and checkout the version matching
+	# that date/time from the svn server
+	if [ $svn_checkout == true ]
+	then
 
+	    # grab the svn subdirectory (if any) from the class.json config file
+	    svn_subdirectory=`cat $class_json_config | jq '.assignments[] | if .assignment_id == "'${assignment}'" then .svn_subdirectory else empty end'`
+	    if [ $svn_subdirectory == "null" ]
+	    then
+		svn_subdirectory=""
+	    else
+		# remove double quotes from the value
+		svn_subdirectory=${svn_subdirectory//\"/}
+	    fi
 
-	echo "\n\ngoing to checkout svn"  >&2
-#	svn co svn+ssh://csci2600svn.cs.rpi.edu/local/svn/csci2600/$user  > .submit_svn_checkout_output.txt 
-#	svn co $svn_path/$user > .submit_svn_checkout_output.txt 
+	    # svn checkout into the tmp compilation directory
+	    
+	    # students can access SVN only their own top SVN repo directory with this command:
+	    # svn co https://csci2600svn.cs.rpi.edu/USERNAME --username USERNAME
 
-	
-#	ls -lta
-#	cat .submit_svn_checkout_output.txt >&2
-	
+	    # the hwcron user can access all students SVN repo directories with this command:
+	    # svn co svn+ssh://csci2600svn.cs.rpi.edu/local/svn/csci2600/USERNAME
 
-	echo "finished checkout svn\n\n"  >&2
+	    # -r specifies which version to checkout (by timestamp)
+	    svn co -r {"$submission_time"} $svn_path/$user/$svn_subdirectory $tmp_compilation > .submit_svn_checkout.txt 2>&1
 
+	    svn_checkout_error_code="$?"
+	    if [[ "$svn_checkout_error_code" -ne 0 ]] ;
+	    then
+		echo "SVN CHECKOUT FAILURE $svn_checkout_error_code"
+	    else
+		echo "SVN CHECKOUT OK" 
+	    fi
+	fi
 
-        # copy any instructor code files to tmp directory
+        # copy any instructor provided code files to tmp compilation directory
 	if [ -d "$test_code_path" ]
 	then
 	    rsync -a $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy instructor files to temporary compilation directory:  cp -rf $test_code_path/ $tmp_compilation" >&2
@@ -387,8 +411,8 @@ while true; do
 
   	    # give the untrusted user read/write/execute permissions on the tmp directory & files
 	    chmod -R go+rwx $tmp
-	    # run the compile.out as the untrusted user
 
+	    # run the compile.out as the untrusted user
 	    $base_path/bin/untrusted_runscript $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
 
 	    compile_error_code="$?"
