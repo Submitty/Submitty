@@ -59,7 +59,6 @@ set (common_files
   ${GRADINGCODE}/grading/tokens.cpp 
   ${GRADINGCODE}/grading/tokenSearch.cpp 
   ${GRADINGCODE}/grading/diffNaive.cpp 
-  ${GRADINGCODE}/grading/textMasking.cpp 
   ${GRADINGCODE}/grading/clean.cpp 
   ${GRADINGCODE}/grading/difference.cpp
 )
