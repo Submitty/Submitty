@@ -13,10 +13,10 @@
 #include <stdlib.h>
 #include <string>
 #include <algorithm>
-#include "modules/STRutil.h"
-#include "modules/difference.h"
-#include "modules/clean.h"
-#include "modules/tokens.h"
+#include "STRutil.h"
+#include "difference.h"
+#include "clean.h"
+#include "tokens.h"
 
 /* METHOD: RabinKarpSingle
  * ARGS: token: string with token to search for, searchstring: string of where to search for token

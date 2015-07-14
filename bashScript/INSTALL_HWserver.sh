@@ -53,7 +53,6 @@ rsync -vuz XXXXXXXXXXXXXXX/visualization/F14/f14_csci4960_main.css              
 # COPY THE CORE GRADING CODE
 
 rsync -rvuz $RCOS_REPO/grading $BASEDIR/gradingcode
-rsync -rvuz $RCOS_REPO/modules $BASEDIR/gradingcode
 
 
 ####

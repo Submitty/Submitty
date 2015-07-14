@@ -29,7 +29,7 @@
 #include <set>
 #include <fstream>
 
-#include "modules/modules.h"
+#include "modules.h"
 #include "grading/TestCase.h"
 
 #define MAX_STRING_LENGTH 100

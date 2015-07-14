@@ -10,7 +10,6 @@ set (MY_DIR ${CMAKE_SOURCE_DIR})
 
 # assuming the core files for config, compilation, running, & grading are here:
 #   BASEDIR/gradingcode/grading
-#   BASEDIR/gradingcode/modules
 
 set (GRADINGCODE ${MY_DIR}/../../../../../gradingcode)
 
@@ -56,13 +55,13 @@ endif(instructor_cmakelists)
 set (common_files
   ${GRADINGCODE}/grading/TestCase.cpp 
   ${GRADINGCODE}/grading/JUnitGrader.cpp
-  ${GRADINGCODE}/modules/myersDiff.cpp 
-  ${GRADINGCODE}/modules/tokens.cpp 
-  ${GRADINGCODE}/modules/tokenSearch.cpp 
-  ${GRADINGCODE}/modules/diffNaive.cpp 
-  ${GRADINGCODE}/modules/textMasking.cpp 
-  ${GRADINGCODE}/modules/clean.cpp 
-  ${GRADINGCODE}/modules/difference.cpp
+  ${GRADINGCODE}/grading/myersDiff.cpp 
+  ${GRADINGCODE}/grading/tokens.cpp 
+  ${GRADINGCODE}/grading/tokenSearch.cpp 
+  ${GRADINGCODE}/grading/diffNaive.cpp 
+  ${GRADINGCODE}/grading/textMasking.cpp 
+  ${GRADINGCODE}/grading/clean.cpp 
+  ${GRADINGCODE}/grading/difference.cpp
 )
 
 add_executable(configure.out

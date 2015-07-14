@@ -21,7 +21,7 @@
 #include <string>
 #include <sstream>
 #include <cassert>
-#include "modules/modules.h"
+#include "modules.h"
 
 extern const int max_cputime;
 

@@ -16,7 +16,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "modules/modules.h"
+#include "modules.h"
 #include "grading/TestCase.h"
 
 

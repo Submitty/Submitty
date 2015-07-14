@@ -20,8 +20,8 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
-#include "modules/STRutil.h"
-#include "modules/difference.h"
+#include "STRutil.h"
+#include "difference.h"
 
 /* METHOD: diffNaive
  * ARGS: student: the student generated output file contents as a string

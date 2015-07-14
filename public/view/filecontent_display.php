@@ -7,7 +7,7 @@
 ?>
 
 <?php if ($svn_checkout != true) { echo "<!--"; } ?>
-<!--      <div class="diff-block">-->
+
          <b class="sub2">Files from SVN checkout:</b>
          <pre class="complation_mess"><?php 
 	      $path_front = get_path_front_course($semester,$course);
@@ -20,7 +20,7 @@
     	        echo htmlentities($svn_file_contents);
               }
             ?></pre>
-<!--      </div>-->
+
 <?php if ($svn_checkout != true) { echo "-->"; } ?>
 
 

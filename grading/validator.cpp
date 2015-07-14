@@ -32,8 +32,8 @@
 #include <unistd.h>
 #include <algorithm>
 
-#include "modules/modules.h"
-#include "grading/TestCase.h"
+#include "modules.h"
+#include "TestCase.h"
 
 
 #include "config.h"

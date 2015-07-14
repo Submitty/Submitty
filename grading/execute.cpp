@@ -29,7 +29,7 @@
 #include <sstream>
 #include <cassert>
 
-#include "modules/modules.h"
+#include "modules.h"
 #include "grading/TestCase.h"
 
 

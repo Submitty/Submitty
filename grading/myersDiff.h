@@ -29,9 +29,9 @@
 #include <cstdlib>
 #include <fstream>
 #include <cmath>
-#include "modules/difference.h"
-#include "modules/metaData.h"
-#include "modules/clean.h"
+#include "difference.h"
+#include "metaData.h"
+#include "clean.h"
 
 //template<class T> Difference* ses ( T& a, T& b, bool secondary = false, bool extraStudentOutputOk =false );
 template<class T> Difference* ses ( T* a, T* b, bool secondary = false, bool extraStudentOutputOk =false );
