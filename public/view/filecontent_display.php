@@ -58,9 +58,12 @@
                                 }
                                 else {
                                     //read the file line-by-line
+				    //use <pre> tag to support multi-space and tabbed sentences
+                                    echo "<pre>";
                                     while (!feof($file_open)){
-                                        echo htmlentities(fgets($file_open))."<br>";
+                                        echo htmlentities(fgets($file_open));
                                     }
+                                    echo "</pre>";
                                 }
 
                                 fclose($file_open);
