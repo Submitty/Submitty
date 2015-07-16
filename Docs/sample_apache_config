@@ -1,12 +1,12 @@
 IfModule mod_ssl.c>
 SSLUseStapling On
 SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
-<VirtualHost hss.cs.rpi.edu:443>
+<VirtualHost _default_:443>
 	suPHP_ConfigPath /local/scratch0/submit3/
 	AddDefaultCharset utf-8
 	AddExternalAuth pwauth /usr/sbin/pwauth
 	SetExternalAuthMethod pwauth pipe
-	ServerAdmin labstaff@cs.rpi.edu
+	ServerAdmin admin@domain.here
 	ServerName hss.cs.rpi.edu
 
 	DocumentRoot /local/scratch0/submit3/website/public
@@ -45,7 +45,7 @@ SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 	<Directory /local/scratch0/submit3/website/public>
 		Options ExecCGI FollowSymLinks Includes
 		AuthType Basic
-		AuthName "Please log in with your RCS credentials"
+		AuthName "Please log in"
 		AllowOverride None
 		AuthBasicProvider external
 		AuthExternal pwauth
