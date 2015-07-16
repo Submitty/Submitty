@@ -318,6 +318,7 @@ while true; do
 	test_code_path="$base_path/courses/$semester/$course/test_code/$assignment"
 	test_input_path="$base_path/courses/$semester/$course/test_input/$assignment"
 	test_output_path="$base_path/courses/$semester/$course/test_output/$assignment"
+	checkout_path="$base_path/courses/$semester/$course/checkout/$assignment/$user/$version"
 	results_path="$base_path/courses/$semester/$course/results/$assignment/$user/$version"
 	bin_path="$base_path/courses/$semester/$course/bin"
 
@@ -369,16 +370,29 @@ while true; do
 		svn_subdirectory=${svn_subdirectory//\"/}
 	    fi
 
-	    # svn checkout into the tmp compilation directory
-	    
+	    ##############
+	    # SVN documentation
+	    #
 	    # students can access SVN only their own top SVN repo directory with this command:
 	    # svn co https://csci2600svn.cs.rpi.edu/USERNAME --username USERNAME
-
+	    #
 	    # the hwcron user can access all students SVN repo directories with this command:
 	    # svn co svn+ssh://csci2600svn.cs.rpi.edu/local/svn/csci2600/USERNAME
-
+	    #
 	    # -r specifies which version to checkout (by timestamp)
-	    svn co -r {"$submission_time"} $svn_path/$user/$svn_subdirectory $tmp_compilation > .submit_svn_checkout.txt 2>&1
+	    ##############
+
+            # first, clean out all of the old files if this is a re-run
+            rm -rf "$checkout_path"
+
+	    # svn checkout into the archival directory 
+	    mkdir -p $checkout_path
+	    pushd $checkout_path > /dev/null
+	    svn co -r {"$submission_time"} $svn_path/$user/$svn_subdirectory . > $tmp/.submit_svn_checkout.txt 2>&1
+	    popd > /dev/null
+
+	    # copy checkout into tmp compilation directory
+	    rsync 1>/dev/null  2>&1  -r $checkout_path/ $tmp_compilation ||  echo "ERROR: Failed to copy checkout files into compilation directory: rsync -r $checkout_path/ $tmp_compilation" >&2
 
 	    svn_checkout_error_code="$?"
 	    if [[ "$svn_checkout_error_code" -ne 0 ]] ;
