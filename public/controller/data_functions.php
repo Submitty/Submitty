@@ -486,7 +486,7 @@ function is_valid_semester($semester) {
         return true;
     }
     //For auto-setup script:
-    //if ($semester == "default") {return true;}
+    //if ($semester == "s15") {return true;}
     return false;
 }
 
@@ -512,7 +512,7 @@ function is_valid_course($course) {
         return true;
     }
     //For auto-setup script:
-    //if ($course == "default") {return true;}
+    //if ($course == "csci1200") {return true;}
     return false;
 }
 
@@ -768,6 +768,43 @@ function get_assignment_results($username, $semester,$course, $assignment_id, $a
     }
     return $tmp;
 }
+
+//Get list of student-submitted files that students are allowed to view
+function get_files_to_view($class_config,$semester,$course,$assignment_id, $username,$assignment_version){
+    $assignments            = $class_config["assignments"];
+    $list_with_wildcards    = array();
+    $result                 = array();
+
+    //Grab files_to_view from current assignment id
+    foreach ($assignments as $one) {
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id){
+            if (isset($one["files_to_view"]) ){
+                $list_with_wildcards =  $one["files_to_view"];
+                break;
+            }
+            else 
+                return $result;
+        }
+    }
+
+
+    //Get absolute path to the directory that contains student's submitted files
+    $path_front = get_path_front_course($semester,$course);
+    $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version."/";
+
+    //Store all the files that match with each pattern in list_with_wildcards
+    foreach ($list_with_wildcards as $pattern){
+        foreach (glob($folder.$pattern) as $file){
+            if (!in_array($file, $result)){
+                array_push($result, substr($file, strlen($folder)) );
+            }
+        }
+    }
+
+    return $result;
+
+}
+
 
 
 // FROM http://www.php.net/manual/en/function.json-decode.php

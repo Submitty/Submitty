@@ -210,39 +210,23 @@ window.addEventListener('load', function() {
                     //$date_submitted = get_submission_time($user,$semester,$course,$assignment_id,$assignment_version);
                     //echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
                     ?> -->
-                    <!-- SUBMITTED FILES -->
-                    <div class="row sub-text">
-                        <h4>Submitted Files:
-                            <?php
-                                if (isset($download_files) && $download_files == true){
-                                    echo '<a class = "view_file"  href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name=all">Download All (as zip)</a>';
-                                }
-                            ?>
-                        </h4>
-                        <?php
-                        echo '<div class="box">';
-                              foreach($submitted_files as $file) {
-                                  if ($file === end($submitted_files)){
-                                      echo '<div>';
-                                  }
-                                  else{
-                                      echo '<div style="border-bottom: 1px solid #dddddd;">';
-                                  }
-                                    echo '<p class="file-header">'.$file["name"].' ('.$file["size"].'kb)';
-                                        if (isset($download_files) && $download_files == true){
-                                            echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
-                                        }
-                                        else if (isset($download_readme) && $download_readme == true && strtolower($file["name"]) == "readme.txt"){
-                                            echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
-                                        }
-                                    echo '</p>';
-                                    echo '</div>';
-                                }
-                            echo '</div>';
+                   <?php
 
-                        ?>
-                    </div>
-                    <?php
+                    //Box with name, size, and content of submitted files
+                    render("filecontent_display",array(
+                        "download_files"=>$download_files,
+                        "submitted_files"=>$submitted_files,
+                        "semester"=>$semester,
+                        "course"=>$course,
+                        "username"=>$username,
+                        "assignment_id"=>$assignment_id,
+                        "assignment_version"=>$assignment_version,
+                        "files_to_view"=>$files_to_view
+                        ));
+
+                    
+
+
                     if ($assignment_version_in_grading_queue) {
                     ?>
                         <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
