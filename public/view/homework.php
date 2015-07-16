@@ -113,13 +113,63 @@ window.addEventListener('load', function() {
             <p class="sub">
                 <?php require_once("view/".$semester."_".$course."_upload_message.php"); ?>
             </p>
-            <form class="form_submit" action="<?php echo '?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id; ?>"
+
+
+
+<!--            <form class="form_submit" action="<?php echo '?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id; ?>"
                     method="post" enctype="multipart/form-data"
                     onsubmit="return check_for_upload('<?php echo $assignment_name.', '.$highest_version.', '.$max_submissions;?>')">
                     <label for="file" class="label">Select File:</label>
                     <input type="file" name="file" id="file" />
                     <input type="submit" name="submit" value="Submit File" class="btn btn-primary">
                 </form>
+-->
+
+
+
+<?php if ($svn_checkout == true) {  
+
+	// NO FILE SUBMISSION, PULL FILES FROM SVN
+
+      echo '<form ';
+      echo ' class="form_submit"';
+      echo ' action="?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'"';
+      echo ' method="post"';
+      echo ' enctype="multipart/form-data"';
+      echo ' onsubmit="return check_for_upload('.$assignment_name.', '.$highest_version.', '.$max_submissions.' )"';
+      echo '>';
+      echo '<input type="submit" name="submit" value="GRADE SVN" class="btn btn-primary">';
+      echo '<input type="hidden" name="svn_checkout" value="true">';
+      echo '</form>';
+
+} else {
+
+	// SINGLE FILE OR ZIP FILE SUBMISSION
+      
+      echo '<form ';
+      echo ' class="form_submit"';
+      echo ' action="?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'"';
+      echo ' method="post"';
+      echo ' enctype="multipart/form-data"';
+      echo ' onsubmit="return check_for_upload('.$assignment_name.', '.$highest_version.', '.$max_submissions.' )"';
+      echo '>';
+      echo '<label for="file" class="label">Select File:</label>';
+      echo '<input type="file" name="file" id="file" />';
+      echo '<input type="submit" name="submit" value="Submit File" class="btn btn-primary">';
+      echo '<input type="hidden" name="svn_checkout" value="false">';
+      echo '</form>';
+      
+
+}
+?>
+
+
+
+
+
+
+
+
         </div> <!-- end outer_box -->
 
         <!------------------------------------------------------------------------>
@@ -210,45 +260,34 @@ window.addEventListener('load', function() {
                     //$date_submitted = get_submission_time($user,$semester,$course,$assignment_id,$assignment_version);
                     //echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
                     ?> -->
-                    <!-- SUBMITTED FILES -->
-                    <div class="row sub-text">
-                        <h4>Submitted Files:
-                            <?php
-                                if (isset($download_files) && $download_files == true){
-                                    echo '<a class = "view_file"  href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name=all">Download All (as zip)</a>';
-                                }
-                            ?>
-                        </h4>
-                        <?php
-                        echo '<div class="box">';
-                              foreach($submitted_files as $file) {
-                                  if ($file === end($submitted_files)){
-                                      echo '<div>';
-                                  }
-                                  else{
-                                      echo '<div style="border-bottom: 1px solid #dddddd;">';
-                                  }
-                                    echo '<p class="file-header">'.$file["name"].' ('.$file["size"].'kb)';
-                                        if (isset($download_files) && $download_files == true){
-                                            echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
-                                        }
-                                        else if (isset($download_readme) && $download_readme == true && strtolower($file["name"]) == "readme.txt"){
-                                            echo '<a class = "view_file" href="?page=viewfile&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'&file_name='.$file["name"].'">Download</a>';
-                                        }
-                                    echo '</p>';
-                                    echo '</div>';
-                                }
-                            echo '</div>';
-
-                        ?>
-                    </div>
                     <?php
+
+                    //Box with name, size, and content of submitted files
+                    render("filecontent_display",array(
+                        "download_files"=>$download_files,
+                        "submitted_files"=>$submitted_files,
+                        "semester"=>$semester,
+                        "course"=>$course,
+                        "username"=>$username,
+                        "assignment_id"=>$assignment_id,
+                        "assignment_version"=>$assignment_version,
+                        "files_to_view"=>$files_to_view
+                        ));
+
+                    
+
+
                     if ($assignment_version_in_grading_queue) {
                     ?>
                         <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
                     <?php
                     }
                     else {
+
+
+//	   echo "debuga: $points_visible";
+
+
                         //Box with grades, outputs and diffs
                         render("homework_graded_display",array(
                             "assignment_message"=>$assignment_message,
@@ -286,9 +325,9 @@ window.addEventListener('load', function() {
                     }
                     else
                     {
-                        // echo '<div class="outer_box"> <!-- outer_box -->';
-                        // echo '<h3 class="label2">TA grades for this homework not released yet</h3>';
-                        // echo "</div> <!-- end outer_box -->";
+                    //echo '<div class="outer_box"> <!-- outer_box -->';
+                    //echo '<h3 class="label2">TA grades for this homework not released yet</h3>';
+                    //echo "</div> <!-- end outer_box -->";
 
                     }
                     //<!-- END OF "IF AT LEAST ONE SUBMISSION... " -->

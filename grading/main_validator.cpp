@@ -31,11 +31,7 @@
 #include <cmath>
 #include <unistd.h>
 #include <algorithm>
-
-#include "modules/modules.h"
-#include "grading/TestCase.h"
-
-//#include "grading/TestCase.cpp"  /* Should not #include a .cpp file */
+#include "TestCase.h"
 
 
 #include "config.h"
@@ -145,7 +141,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     else {
       // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
       std::vector<std::string> diff_vectors;
-      double pts_helper = 0.0;
+      double my_score = 1.0;
       double fraction_sum = 0.0;
       
       for (int j = 0; j < testcases[i].numFileGraders(); j++) {
@@ -163,17 +159,21 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
         if (result != NULL) {
           // THE GRADE (will be compiled across all comparisons)
-          std::cout << "result->getGrade() " << result->getGrade() << std::endl;
+          std::cout << "result->getGrade() = " << result->getGrade() << std::endl;
+	  assert (result->getGrade() >= 0.0 && result->getGrade() <= 1.0);
 
           double pts_fraction = testcases[i].test_case_grader[j]->points_fraction;
-          std::cout << "pts_fraction " << pts_fraction << std::endl;
+          std::cout << "pts_fraction = " << pts_fraction << std::endl;
 
           if (pts_fraction < -0.5) {
             pts_fraction = 1 / double(testcases[i].numFileGraders());
           }
           fraction_sum += pts_fraction;
+	  
+          my_score -= pts_fraction*(1-result->getGrade());
 
-          pts_helper += pts_fraction*result->getGrade();
+          std::cout << "my_score = " << my_score << std::endl;
+
           result->printJSON(diff_stream);
           helper_message += " " + result->get_message();
           // CLEANUP THIS COMPARISON
@@ -195,7 +195,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
           std::string expected_out_dir = "test_output/" + id + "/";
           expected_path << expected_out_dir << expected;
           diff_vector.push_back("\t\t\t\t\t\"instructor_file\":\"" + expected_path.str() + "\"");
-          //diff_vector.push_back("\t\t\t\t\t\"difference\":\"" + testcases[i].prefix() + "_" + std::to_string(j) + "_diff.json\",\n");
           diff_vector.push_back("\t\t\t\t\t\"difference\":\"" + testcases[i].prefix() + "_" + std::to_string(j) + "_diff.json\"");
         }
 
@@ -209,13 +208,13 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       testcase_vector.push_back("\t\t\t\"diffs\": [\n" + join(diff_vectors) + "\t\t\t]");
 
       if (fraction_sum < 0.99 || fraction_sum > 1.01) {
-        std::cout << "Fraction sum " << fraction_sum << std::endl;
+        std::cout << "WARNING: Fraction sum " << fraction_sum << std::endl;
       }
-      assert (fraction_sum > 0.99 && fraction_sum < 1.01);
-
-      assert (pts_helper >= -0.00001 && pts_helper <= 1.000001);
-      pts_helper = std::max(0.0,std::min(1.0,pts_helper));
-      testcase_pts = (int)floor(pts_helper * testcases[i].points());
+      assert (fraction_sum > 0.99); 
+      assert (my_score <= 1.00001);
+      my_score = std::max(0.0,std::min(1.0,my_score));
+      std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
+      testcase_pts = (int)floor(my_score * testcases[i].points());
     } // end if/else of test case type
 
     // output grade & message

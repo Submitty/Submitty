@@ -97,22 +97,25 @@ function display_file_permissions($perms) {
 
 
 // Upload HW Assignment to server and unzip
-function upload_homework($username, $semester, $course, $assignment_id, $homework_file) {
+function upload_homework($username, $semester, $course, $assignment_id, $homework_file, $svn_checkout) {
 
     if (!is_valid_semester($semester)) { display_error("upload_homework, INVALID SEMESTER: ".$semester); }
     if (!is_valid_course($course))     { display_error("upload_homework, INVALID COURSE: ".$course); }
 
     // display_note ("trying to upload homework ".$semester." ".$course." ");
 
-    if (!isset($homework_file["tmp_name"]) || $homework_file["tmp_name"] == "") {
+    if ($svn_checkout == false) {
+      if (!isset($homework_file["tmp_name"]) || $homework_file["tmp_name"] == "") {
         $error_text = "The file did not upload to POST[tmp_name].";
         if (isset($homework_file["error"])) {
-            $error_text = $error_text." Error code given for upload is ". $homework_file["error"]. " . This is defined at http://php.net/manual/en/features.file-upload.errors.php";
+	  $error_text = $error_text." Error code given for upload is ". $homework_file["error"]. " . This is defined at http://php.net/manual/en/features.file-upload.errors.php";
         }
         // display_error($error_text);
         return array("error"=>"Upload Failed", "message"=>"Upload Failed: ".$error_text);
-
+      }
     }
+
+
     // Store the time, right now!
     // 2001-03-10 17:16:18 (the MySQL DATETIME format)
     date_default_timezone_set('America/New_York');
@@ -141,12 +144,35 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     if (isset($assignment_config["max_submission_size"])) {
         $max_size = $assignment_config["max_submission_size"];
     }
-    if ($homework_file["size"] / 1024 > $max_size || !is_valid_zip_size($homework_file["tmp_name"], $max_size)) {
-        return array("error"=>"", "message"=>"File uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file was ".$homework_file["size"] / 1024 ." kb.");
-    }
 
-    $filename = explode(".", $homework_file["name"]);
-    $extension = end($filename);
+
+
+    $filename="";
+    $extension="";
+
+    if ($svn_checkout==false) {
+      if ($homework_file["size"] / 1024 > $max_size || !is_valid_zip_size($homework_file["tmp_name"], $max_size)) {
+        return array("error"=>"", "message"=>"File uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file was ".$homework_file["size"] / 1024 ." kb.");
+      }
+
+      $filename = explode(".", $homework_file["name"]);
+      $extension = end($filename);
+    }
+    
+
+
+    // make folder for this homework (if it doesn't exist)
+    $assignment_path = $path_front_course."/submissions/".$assignment_id;
+
+
+    if (!file_exists($assignment_path)) {
+      if (!mkdir($assignment_path))
+	{
+	  display_error("Failed to make folder ".$assignment_path);
+	  return;
+	}
+    }
+    
 
 
     /*$allowed   = array("application/zip",
@@ -163,59 +189,57 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
         return array("error"=>"", "message"=>"Incorrect file upload type.  Got ".htmlspecialchars($homework_file["type"]));
     }
     */
-    // make folder for this homework (if it doesn't exist)
-    $assignment_path = $path_front_course."/submissions/".$assignment_id;
-    if (!file_exists($assignment_path)) {
-        if (!mkdir($assignment_path))
-        {
-            display_error("Failed to make folder ".$assignment_path);
-            return;
-        }
-    }
 
+
+
+      
     // NOTE: which group is sticky, umask will set the permissions correctly (0750)
 
     // make folder for this user (if it doesn't exist)
     $user_path = $assignment_path."/".$username;
     // If user path doesn't exist, create new one
     if (!file_exists($user_path)) {
-        if (!mkdir($user_path))
-        {
-            display_error("Failed to make folder ".$user_path);
-            return;
-        }
+      if (!mkdir($user_path))
+	{
+	  display_error("Failed to make folder ".$user_path);
+	  return;
+	}
     }
-
+    
     //Find the next homework version number
 
     $upload_version = 1;
     while (file_exists($user_path."/".$upload_version)) {
-        // FIXME: Replace with symlink
-        $upload_version++;
+      // FIXME: Replace with symlink
+      $upload_version++;
     }
 
     // Attempt to create folder
     $version_path = $user_path."/".$upload_version;
     if (!mkdir($version_path)) {//Create a new directory corresponding to a new version number
-        display_error("Failed to make folder ".$version_path);
-        return;
+      display_error("Failed to make folder ".$version_path);
+      return;
     }
 
 
-    // Unzip files in folder
-    $zip = new ZipArchive;
-    $res = $zip->open($homework_file["tmp_name"]);
-    if ($res === TRUE) {
+    if ($svn_checkout == false) {
+      // Unzip files in folder
+      $zip = new ZipArchive;
+      $res = $zip->open($homework_file["tmp_name"]);
+      if ($res === TRUE) {
         $zip->extractTo($version_path."/");
         $zip->close();
-    }
-    else {
+      }
+      else {
         $result = move_uploaded_file($homework_file["tmp_name"], $version_path."/".$homework_file["name"]);
         if (!$result) {
-            display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
-            return;
+	  display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
+	  return;
         }
+      }
     }
+
+
     $settings_file = $user_path."/user_assignment_settings.json";
     if (!file_exists($settings_file)) {
         $json = array("active_assignment"=>$upload_version);
@@ -225,18 +249,28 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
         change_assignment_version($username, $semester, $course, $assignment_id, $upload_version, $assignment_config);
     }
 
-    // add this assignment to the grading queue
-    // FIX ME: If to_be_graded path doesn't exist, create new one
 
-    $touchfile = $path_front_root."/to_be_graded/".$semester."__".$course."__".$assignment_id."__".$username."__".$upload_version;
-    touch($touchfile);
+    if ($svn_checkout == true) {
+      if (!touch($version_path."/.submit.SVN_CHECKOUT")) {
+	display_error("Failed to touch file ".$version_path."/.submit.SVN_CHECKOUT");
+	return;
+      }
+    }
+
 
     // CREATE THE TIMESTAMP FILE
     //touch($version_path."/.submit.timestamp");
     if (!file_put_contents($version_path."/.submit.timestamp",$TIMESTAMP."\n")) {
-        display_error("Failed to save timestamp file ".$version_path."/.submit.timestamp",$TIMESTAMP);
-        return;
+      display_error("Failed to save timestamp file ".$version_path."/.submit.timestamp",$TIMESTAMP);
+      return;
     }
+    
+
+    // add this assignment to the grading queue
+    // FIX ME: If to_be_graded path doesn't exist, create new one
+    $touchfile = $path_front_root."/to_be_graded/".$semester."__".$course."__".$assignment_id."__".$username."__".$upload_version;
+    touch($touchfile);
+
 
 
     /* // php symlinks disabled on server for security reasons
@@ -427,6 +461,28 @@ function name_for_assignment_id($class_config, $assignment_id) {
     return "";//TODO Error handling
 }
 
+//get link for assignment page
+function link_for_assignment_id($class_config, $assignment_id) {
+    $assignments = $class_config["assignments"];
+    foreach ($assignments as $one) {
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
+            return isset($one["assignment_link"]) ? $one["assignment_link"] : '#';
+        }
+    }
+    return "";//TODO Error handling
+}
+
+//get description
+function description_for_assignment_id($class_config, $assignment_id) {
+    $assignments = $class_config["assignments"];
+    foreach ($assignments as $one) {
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
+            return isset($one["assignment_description"]) ? $one["assignment_description"] : '#';
+        }
+    }
+    return "";//TODO Error handling
+}
+
 
 // Get name for assignment
 function is_ta_grade_released($class_config, $assignment_id) {
@@ -443,6 +499,24 @@ function is_ta_grade_released($class_config, $assignment_id) {
     }
     return ""; //TODO Error handling
 }
+
+
+// Get name for assignment
+function is_svn_checkout($class_config, $assignment_id) {
+    $assignments = $class_config["assignments"];
+    foreach ($assignments as $one) {
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
+            if (isset($one["svn_checkout"]) && $one["svn_checkout"] == true) {
+                return true;		    
+            }
+            else {
+                return false;
+            }
+        }
+    }
+    return ""; //TODO Error handling
+}
+
 
 function is_points_visible($class_config, $assignment_id) {
   $assignments = $class_config["assignments"];
@@ -486,7 +560,7 @@ function is_valid_semester($semester) {
         return true;
     }
     //For auto-setup script:
-    //if ($semester == "default") {return true;}
+    if ($semester == "s15") {return true;}
     return false;
 }
 
@@ -496,10 +570,13 @@ function is_valid_course($course) {
 
 //FIXME: SHOULD NOT BE USING THIS
 
+    if ($course == "csci1100") {
+        return true;
+    }
     if ($course == "csci1200") {
         return true;
     }
-    if ($course == "csci1100") {
+    if ($course == "csci2600") {
         return true;
     }
     if ($course == "csci4960") {
@@ -512,7 +589,7 @@ function is_valid_course($course) {
         return true;
     }
     //For auto-setup script:
-    //if ($course == "default") {return true;}
+    if ($course == "csci1200") {return true;}
     return false;
 }
 
@@ -767,6 +844,42 @@ function get_assignment_results($username, $semester,$course, $assignment_id, $a
         echo "contents $contents<br>";
     }
     return $tmp;
+}
+
+//Get list of student-submitted files that students are allowed to view
+function get_files_to_view($class_config,$semester,$course,$assignment_id, $username,$assignment_version){
+    $assignments            = $class_config["assignments"];
+    $list_with_wildcards    = array();
+    $result                 = array();
+
+    //Grab files_to_view from current assignment id
+    foreach ($assignments as $one) {
+        if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id){
+            if (isset($one["files_to_view"]) ){
+                $list_with_wildcards =  $one["files_to_view"];
+                break;
+            }
+            else 
+                return $result;
+        }
+    }
+
+
+    //Get absolute path to the directory that contains student's submitted files
+    $path_front = get_path_front_course($semester,$course);
+    $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version."/";
+
+    //Store all the files that match with each pattern in list_with_wildcards
+    foreach ($list_with_wildcards as $pattern){
+        foreach (glob($folder.$pattern) as $file){
+            if (!in_array($file, $result)){
+                array_push($result, substr($file, strlen($folder)) );
+            }
+        }
+    }
+
+    return $result;
+
 }
 
 

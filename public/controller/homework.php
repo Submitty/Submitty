@@ -22,7 +22,10 @@ $assignment_id =                    parse_assignment_id_with_recent($class_confi
 $assignment_version =               parse_assignment_version_with_recent($username, $semester,$course, $assignment_id);
 
 $assignment_name =                  name_for_assignment_id($class_config, $assignment_id);
+$assignment_link =                  link_for_assignment_id($class_config, $assignment_id);
+$assignment_description =            description_for_assignment_id($class_config, $assignment_id);
 $ta_grade_released =                is_ta_grade_released($class_config, $assignment_id);
+$svn_checkout =                     is_svn_checkout($class_config, $assignment_id);
 $view_points =                      is_points_visible($class_config, $assignment_id);
 $view_hidden_points =               is_hidden_points_visible($class_config, $assignment_id);
 $highest_version =                  most_recent_assignment_version($username, $semester,$course, $assignment_id);
@@ -57,19 +60,22 @@ $submitting_version_in_grading_queue = version_in_grading_queue($username, $seme
 //Is the viewing version being graded
 $assignment_version_in_grading_queue = version_in_grading_queue($username, $semester,$course, $assignment_id, $assignment_version);
 
-$points_visible =            $assignment_config["points_visible"];
+
+// FIXME:  This incorrectly includes extra credit
+//$points_visible =            $assignment_config["points_visible"];
+// FIXME:  This looks correct.  Why are they different?  Why are there two?
+$points_visible =            get_points_visible($submitting_homework_tests);
+
+
+//List of submitted files that server is allowed to display
+$files_to_view =            get_files_to_view($class_config,$semester,$course,$assignment_id, $username,$assignment_version);
+
 
 if (isset($class_config["download_files"])){
     $download_files = $class_config["download_files"];
 }
 else{
     $download_files = false;
-}
-if (isset($class_config["download_readme"])){
-    $download_readme = $class_config["download_readme"];
-}
-else{
-    $download_readme = false;
 }
 if (isset($class_config["grade_summary"])){
     $grade_summary = $class_config["grade_summary"];
@@ -94,14 +100,16 @@ render("homework", array(
     "course"=>                  $course,
     "assignment_id"=>           $assignment_id,
     "assignment_name"=>         $assignment_name,
+    "assignment_link"=>         $assignment_link,
+    "assignment_description"=>  $assignment_description,
     "ta_grade_released"=>       $ta_grade_released,
+    "svn_checkout"=>            $svn_checkout,
     "all_assignments"=>         $all_assignments,
     "dev_team"=>                $dev_team,
     "points_visible"=>          $points_visible,
     "view_points"=>             $view_points,
     "view_hidden_points"=>      $view_hidden_points,
     "download_files"=>          $download_files,
-    "download_readme"=>         $download_readme,
     "grade_summary"=>           $grade_summary,
     "ta_grades"=>               $ta_grades,
       // added for debugging
@@ -119,7 +127,9 @@ render("homework", array(
     "assignment_message"=>      $assignment_message,
     "submitting_version_in_grading_queue"=>$submitting_version_in_grading_queue,
     "assignment_version_in_grading_queue"=>$assignment_version_in_grading_queue,
-    "status"=>                  $status
+    "status"=>                  $status,
+
+    "files_to_view"=>           $files_to_view
     )
 );
 ?>

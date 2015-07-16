@@ -298,3 +298,27 @@
 #HWsubmission .red-background {
     background-color: #c00000;
 }
+
+#HWsubmission .file-display{
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 7.5px;
+    padding-bottom: 7.5px;
+
+    box-sizing: border-box;
+
+    vertical-align: top;
+    width: 100%;
+    overflow:hidden;
+
+    word-wrap: break-word;
+
+    font-family: "Lucida Console", Monaco, monospace;
+
+    /* Unselectable text */
+    -moz-user-select: none; 
+    -khtml-user-select: none; 
+    -webkit-user-select: none; 
+    -o-user-select: none;
+
+}

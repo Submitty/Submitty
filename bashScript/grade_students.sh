@@ -15,6 +15,11 @@ fi
 base_path="$1"
 TO_BE_GRADED="$2"
 
+
+# global variable
+svn_path=svn+ssh://csci2600svn.cs.rpi.edu/local/svn/csci2600
+
+
 # from that directory, we expect:
 
 # a subdirectory for each course
@@ -94,7 +99,7 @@ while true; do
 
 
     # check for runaway processes by untrusted (this should never be more that a few, the user limit is 50)
-    numprocesses=$(ps -u untrusted | wc -l)
+    numprocesses=1 #$(ps -u untrusted | wc -l)
     if [[ $numprocesses -gt 25 ]] ; then
 	echo "ERROR: untrusted is running too many processes: " $numprocesses >&2
 	((too_many_processes_count++))
@@ -111,7 +116,7 @@ while true; do
     # check for parallel grade_students scripts
     #ps -f -u hwcron | grep grade_students.sh
     #pgrep -u hwcron grade_students
-    pgrep_results=$(pgrep -u hwcron grade_students)
+    pgrep_results=$(pgrep grade_students)
     pgrep_results=( $pgrep_results ) # recast as array
     numparallel=${#pgrep_results[@]} # count elements in array
     echo "hwcron is running $numparallel parallel scripts"
@@ -313,6 +318,7 @@ while true; do
 	test_code_path="$base_path/courses/$semester/$course/test_code/$assignment"
 	test_input_path="$base_path/courses/$semester/$course/test_input/$assignment"
 	test_output_path="$base_path/courses/$semester/$course/test_output/$assignment"
+	checkout_path="$base_path/courses/$semester/$course/checkout/$assignment/$user/$version"
 	results_path="$base_path/courses/$semester/$course/results/$assignment/$user/$version"
 	bin_path="$base_path/courses/$semester/$course/bin"
 
@@ -337,13 +343,71 @@ while true; do
         # copy submitted files to a tmp compilation directory
 	tmp_compilation=$tmp/TMP_COMPILATION
 	mkdir -p $tmp_compilation
-	cp 1>/dev/null  2>&1  -r $submission_path/* $tmp_compilation ||  echo "ERROR: Failed to submitted files copy to temporary compilation directory $submission_path to $tmp_compilation : cp -r $submission_path/* $tmp_compilation" >&2
 
-        # copy any instructor code files to tmp directory
+
+	# copy the .submit.timestamp file and any files from submission zip 
+	#cp 1>/dev/null  2>&1  -r $submission_path/* $tmp_compilation ||  echo "ERROR: Failed to copy submitted files to temporary compilation directory: cp -r $submission_path/* $tmp_compilation" >&2
+	# switched to rsync to copy dot files (just in case they're needed)
+	rsync 1>/dev/null  2>&1  -r $submission_path/ $tmp_compilation ||  echo "ERROR: Failed to copy submitted files to temporary compilation directory: rsync -r $submission_path/ $tmp_compilation" >&2
+
+	# use the jq json parsing command line utility to grab the svn_checkout flag from the class.json config file
+	class_json_config="$base_path/courses/$semester/$course/config/class.json"
+	svn_checkout=`cat $class_json_config | jq '.assignments[] | if .assignment_id == "'${assignment}'" then .svn_checkout else empty end'`
+
+	# if this homework is submitted by svn, use the date/time from
+	# the .submit.timestamp file and checkout the version matching
+	# that date/time from the svn server
+	if [ $svn_checkout == true ]
+	then
+
+	    # grab the svn subdirectory (if any) from the class.json config file
+	    svn_subdirectory=`cat $class_json_config | jq '.assignments[] | if .assignment_id == "'${assignment}'" then .svn_subdirectory else empty end'`
+	    if [ $svn_subdirectory == "null" ]
+	    then
+		svn_subdirectory=""
+	    else
+		# remove double quotes from the value
+		svn_subdirectory=${svn_subdirectory//\"/}
+	    fi
+
+	    ##############
+	    # SVN documentation
+	    #
+	    # students can access SVN only their own top SVN repo directory with this command:
+	    # svn co https://csci2600svn.cs.rpi.edu/USERNAME --username USERNAME
+	    #
+	    # the hwcron user can access all students SVN repo directories with this command:
+	    # svn co svn+ssh://csci2600svn.cs.rpi.edu/local/svn/csci2600/USERNAME
+	    #
+	    # -r specifies which version to checkout (by timestamp)
+	    ##############
+
+            # first, clean out all of the old files if this is a re-run
+            rm -rf "$checkout_path"
+
+	    # svn checkout into the archival directory 
+	    mkdir -p $checkout_path
+	    pushd $checkout_path > /dev/null
+	    svn co -r {"$submission_time"} $svn_path/$user/$svn_subdirectory . > $tmp/.submit_svn_checkout.txt 2>&1
+	    popd > /dev/null
+
+	    # copy checkout into tmp compilation directory
+	    rsync 1>/dev/null  2>&1  -r $checkout_path/ $tmp_compilation ||  echo "ERROR: Failed to copy checkout files into compilation directory: rsync -r $checkout_path/ $tmp_compilation" >&2
+
+	    svn_checkout_error_code="$?"
+	    if [[ "$svn_checkout_error_code" -ne 0 ]] ;
+	    then
+		echo "SVN CHECKOUT FAILURE $svn_checkout_error_code"
+	    else
+		echo "SVN CHECKOUT OK" 
+	    fi
+	fi
+
+        # copy any instructor provided code files to tmp compilation directory
 	if [ -d "$test_code_path" ]
 	then
-	    cp -rf $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy instructor files to temporary compilation directory $test_code_path to $tmp_compilation :  cp -rf $test_code_path/ $tmp_compilation" >&2
-	    cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
+	    rsync -a $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy instructor files to temporary compilation directory:  cp -rf $test_code_path/ $tmp_compilation" >&2
+	    #cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $base_path/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
 	fi
 
 	pushd $tmp_compilation > /dev/null
@@ -361,8 +425,8 @@ while true; do
 
   	    # give the untrusted user read/write/execute permissions on the tmp directory & files
 	    chmod -R go+rwx $tmp
-	    # run the compile.out as the untrusted user
 
+	    # run the compile.out as the untrusted user
 	    $base_path/bin/untrusted_runscript $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
 
 	    compile_error_code="$?"
@@ -378,15 +442,21 @@ while true; do
 	popd > /dev/null
 
 
-	# move all executable files from the to the main tmp directory
-	# FIXME: not really what we want for the "FILE_EXISTS" command....
-	# FIXME: make more general, requires thinking, need to get python files into the running directory too (a hack for now)
-        cp  1>/dev/null  2>&1  $tmp_compilation/README*.txt $tmp_compilation/README*.TXT $tmp_compilation/readme*.txt $tmp_compilation/readme*.TXT $tmp_compilation/*.out $tmp_compilation/test*.txt $tmp_compilation/*.py $tmp
+	# move all executable files from the compilation directory to the main tmp directory
+	# Note: Must preserve the directory structure of compiled files (esp for Java)
 
-    ls $tmp_compilation
-    echo "------------------------------------------"
-    ls $tmp
-	# remove the directory
+	# at the same time grab the README files and the testXX_ STDOUT, STDERR, & execute_logfiles
+	# FIXME: This might need to be revised depending on future needs...
+
+	#  -r  recursive
+	#  -m  prune empty directories
+	#  --include="*/"  match all subdirectories
+	#  --include="*.XXX"  grab all .XXX files
+	#  --exclude="*"  exclude everything else
+
+	rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"   --include="*.class"  --include="*.py"  --include="*README*"  --include="test*.txt"  --exclude="*"  $tmp_compilation/  $tmp  
+
+	# remove the compilation directory
 	rm -rf $tmp_compilation
 
 	# --------------------------------------------------------------------
@@ -438,7 +508,8 @@ while true; do
 
         if [[ 0 -eq 0 ]] ; then
             echo "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
-            valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+            #valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+            "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
         else
             echo '$base_path/bin/untrusted_runscript /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'
             "$base_path/bin/untrusted_runscript" "/usr/bin/valgrind" "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt

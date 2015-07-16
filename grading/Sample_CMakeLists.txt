@@ -10,7 +10,6 @@ set (MY_DIR ${CMAKE_SOURCE_DIR})
 
 # assuming the core files for config, compilation, running, & grading are here:
 #   BASEDIR/gradingcode/grading
-#   BASEDIR/gradingcode/modules
 
 set (GRADINGCODE ${MY_DIR}/../../../../../gradingcode)
 
@@ -55,27 +54,27 @@ endif(instructor_cmakelists)
 
 set (common_files
   ${GRADINGCODE}/grading/TestCase.cpp 
-  ${GRADINGCODE}/modules/myersDiff.cpp 
-  ${GRADINGCODE}/modules/tokens.cpp 
-  ${GRADINGCODE}/modules/tokenSearch.cpp 
-  ${GRADINGCODE}/modules/diffNaive.cpp 
-  ${GRADINGCODE}/modules/textMasking.cpp 
-  ${GRADINGCODE}/modules/clean.cpp 
-  ${GRADINGCODE}/modules/difference.cpp
+  ${GRADINGCODE}/grading/JUnitGrader.cpp
+  ${GRADINGCODE}/grading/myersDiff.cpp 
+  ${GRADINGCODE}/grading/tokens.cpp 
+  ${GRADINGCODE}/grading/tokenSearch.cpp 
+  ${GRADINGCODE}/grading/diffNaive.cpp 
+  ${GRADINGCODE}/grading/clean.cpp 
+  ${GRADINGCODE}/grading/difference.cpp
 )
 
 add_executable(configure.out
   ${common_files}
   # FIXME: I don't think custom files needs to/should be here
   ${custom_files}
-  ${GRADINGCODE}/grading/config.cpp 
+  ${GRADINGCODE}/grading/main_configure.cpp 
 )
 
 add_executable(compile.out
   ${common_files}
   # FIXME: I don't think custom files needs to/should be here
   ${custom_files}
-  ${GRADINGCODE}/grading/compile.cpp 
+  ${GRADINGCODE}/grading/main_compile.cpp 
   ${GRADINGCODE}/grading/seccomp_functions.cpp 
   ${GRADINGCODE}/grading/execute.cpp 
 )
@@ -84,7 +83,7 @@ add_executable(run.out
   ${common_files}
   # FIXME: I don't think custom files needs to/should be here
   ${custom_files}
-  ${GRADINGCODE}/grading/runner.cpp 
+  ${GRADINGCODE}/grading/main_runner.cpp 
   ${GRADINGCODE}/grading/seccomp_functions.cpp 
   ${GRADINGCODE}/grading/execute.cpp
 )
@@ -92,7 +91,7 @@ add_executable(run.out
 add_executable(validate.out
   ${common_files}
   ${custom_files}
-  ${GRADINGCODE}/grading/validator.cpp 
+  ${GRADINGCODE}/grading/main_validator.cpp 
   ${GRADINGCODE}/grading/seccomp_functions.cpp 
   ${GRADINGCODE}/grading/execute.cpp 
 )

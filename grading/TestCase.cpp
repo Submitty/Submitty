@@ -48,7 +48,9 @@ TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {
 
 
 // FIXME should be configurable within the homework, but should not exceed what is reasonable to myers diff
-#define MAX_FILE_SIZE 1000 * 50 // in characters  (approx 200 lines with 50 characters per line)
+
+#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 50   // in characters  (approx 1000 lines with 50 characters per line)
+#define OTHER_MAX_FILE_SIZE      1000 * 100  // in characters  (approx 1000 lines with 100 characters per line)
 
 
 
@@ -79,12 +81,12 @@ TestResults* TestCaseComparison::doit(const std::string &prefix) {
 
 
 
-  if (s.size() > MAX_FILE_SIZE) {
-    std::cout << "ERROR: student file size too big " << s.size() << " > " << MAX_FILE_SIZE << std::endl;
+  if (s.size() > MYERS_DIFF_MAX_FILE_SIZE) {
+    std::cout << "ERROR: student file size too big " << s.size() << " > " << MYERS_DIFF_MAX_FILE_SIZE << std::endl;
     return new TestResults(0,"Error: student file too large for grader");
   }
-  if (e.size() > MAX_FILE_SIZE) {
-    std::cout << "ERROR: expected file size too big " << e.size() << " > " << MAX_FILE_SIZE << std::endl;
+  if (e.size() > MYERS_DIFF_MAX_FILE_SIZE) {
+    std::cout << "ERROR: expected file size too big " << e.size() << " > " << MYERS_DIFF_MAX_FILE_SIZE << std::endl;
     return new TestResults(0,"Error: expected file too large for grader");
   }
 
@@ -111,14 +113,16 @@ TestResults* TestCaseTokens::doit(const std::string &prefix) {
     std::cout << "student file size = " << s.size() << std::endl;
   }
 
-  if (s.size() > MAX_FILE_SIZE) {
-    std::cout << "ERROR: student file size too big " << s.size() << " > " << MAX_FILE_SIZE << std::endl;
+  if (s.size() > OTHER_MAX_FILE_SIZE) {
+    std::cout << "ERROR: student file size too big " << s.size() << " > " << OTHER_MAX_FILE_SIZE << std::endl;
     return new TestResults(0,"Error: student file too large for grader");
   }
 
   //return test_case_grader[j]->cmp_output (s,e);
   return token_grader(s,tokens);
 }
+
+
 
 
 TestResults* TestCaseCustom::doit(const std::string &prefix) {
