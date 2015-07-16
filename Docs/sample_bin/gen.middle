@@ -1,0 +1,25 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+## Intent: create apache configs for csci2600 student repositories
+
+my $dir = '/local/svn/csci2600';
+opendir(DIR, $dir) or die $!;
+while (my $file = readdir(DIR)) 
+{
+	chomp $file;
+	next if ($file =~ m/^\./);	#skip hidden files and directories
+	print "	\<Location \/$file\>
+		AuthType Basic
+		AuthName \"Please log in with your RCS credentials\"
+		AuthBasicProvider external
+		AuthExternal pwauth
+		<RequireAny>
+			require user $file
+			require group course_csci2600_tas_www
+		</RequireAny>
+	</Location>
+";
+}
+closedir(DIR);

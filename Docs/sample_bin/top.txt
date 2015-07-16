@@ -1,0 +1,17 @@
+<IfModule mod_ssl.c>
+SSLUseStapling on
+SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
+<VirtualHost csci2600svn.cs.rpi.edu:443>
+AddExternalAuth pwauth /usr/sbin/pwauth
+SetExternalAuthMethod pwauth pipe
+	ServerName csci2600svn.cs.rpi.edu
+	ServerAdmin labstaff@cs.rpi.edu
+
+	<Location />
+		DAV svn
+		AuthGroupFile /local/svngroups
+		SVNParentPath /local/svn/csci2600
+		SVNListParentPath Off
+		SVNAutoVersioning On
+	</Location>
+
