@@ -1,0 +1,40 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# test-hss
+auto eth0
+iface eth0 inet static
+	address 128.213.17.21
+	netmask 255.255.255.0
+	network 128.213.17.0
+	broadcast 128.213.17.255
+	gateway 128.213.17.1
+	dns-nameservers 128.113.26.77 128.113.28.67
+	dns-search cs.rpi.edu
+
+# test-hwgrading
+auto eth0:1
+iface eth0:1 inet static
+	address 128.213.17.26
+        netmask 255.255.255.0
+        network 128.213.17.0
+        broadcast 128.213.17.255
+        gateway 128.213.17.1
+        dns-nameservers 128.113.26.77 128.113.28.67
+        dns-search cs.rpi.edu
+
+# test-csci2600svn 
+auto eth0:2
+iface eth0:2 inet static
+        address 128.213.17.15
+        netmask 255.255.255.0
+        network 128.213.17.0
+        broadcast 128.213.17.255
+        gateway 128.213.17.1
+        dns-nameservers 128.113.26.77 128.113.28.67
+        dns-search cs.rpi.edu
+
