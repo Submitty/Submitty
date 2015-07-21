@@ -1,37 +1,17 @@
-/* FILENAME: runner.cpp
- * YEAR: 2014
- * AUTHORS:
- *   Members of Rensselaer Center for Open Source (rcos.rpi.edu):
- *   Chris Berger
- *   Jesse Freitas
- *   Severin Ibarluzea
- *   Kiana McNellis
- *   Kienan Knight-Boehm
- *   Sam Seng
- * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
- *
- * RELEVANT DOCUMENTATION:
- *
-*/
-
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <sys/wait.h>
-#include <signal.h>
 #include <unistd.h>
-#include <fcntl.h>
-
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
 #include <iostream>
-#include <sstream>
 #include <cassert>
 
 #include "config.h"
-
 #include "execute.h"
 
-std::string to_string(int i);
+
+
+// =====================================================================
+// =====================================================================
+
 
 int main(int argc, char *argv[]) {
   std::cout << "Running User Code..." << std::endl;
@@ -44,6 +24,7 @@ int main(int argc, char *argv[]) {
     return 2;
   }
 
+  // necessary since the untrusted user does not have a home directory
   setenv("DYNAMORIO_CONFIGDIR", ".", 1);
 
   // Run each test case and create output files
@@ -53,78 +34,44 @@ int main(int argc, char *argv[]) {
 
     std::cout << "========================================================" << std::endl;
     std::cout << "TEST " << i+1 << " " << testcases[i].command() << std::endl;
-
+    
     std::string cmd = testcases[i].command();
     assert (cmd != "");
 
-    std::string logfile = std::string("test") + to_string(i + 1) + "_execute_logfile.txt";
-      // run the command, capturing STDOUT & STDERR
+    std::string logfile = testcases[i].prefix() + "_execute_logfile.txt";
+    // run the command, capturing STDOUT & STDERR
     int exit_no = execute(cmd +
-			  " 1>test" + to_string(i + 1) + "_STDOUT.txt" +
-			  " 2>test" + to_string(i + 1) + "_STDERR.txt",
+			  " 1>" + testcases[i].prefix() + "_STDOUT.txt" +
+			  " 2>" + testcases[i].prefix() + "_STDERR.txt",
 			  logfile,
 			  testcases[i].seconds_to_run(),
 			  max_output_size);
 
-
-    /*
-    // append the test case # to the front of the output file (if it exists)
-    //      assert (testcases[i].numFileComparisons() >= 1);
-    if (exit_no == 1){
-      std::ofstream cerr_out (std::string("test" + to_string(i + 1) + "_cerr.txt").c_str(), std::ofstream::out | std::ofstream::app);
-        cerr_out << "Program exited with errors (exit code was not 0)\n";
-        std::cout << "Running terminated, code 1" << std::endl;
-
-        cerr_out.close();
-    }
-    else if (exit_no == 2){
-      std::ofstream cerr_out (std::string("test" + to_string(i + 1) + "_cerr.txt").c_str(), std::ofstream::out | std::ofstream::app);
-        cerr_out << "Running terminated, exceeded max limits\n";
-        std::cout << "Running terminated, exceeded max limits, code 2" << std::endl;
-
-        cerr_out.close();
-    }
-    else if (exit_no == 3){
-      std::ofstream cerr_out (std::string("test" + to_string(i + 1) + "_cerr.txt").c_str(), std::ofstream::out | std::ofstream::app);
-        cerr_out << "Running terminated, time elapsed was longer that allocated time\n";
-        std::cout << "Running terminated, time elapsed was longer that allocated time code 3" << std::endl;
-
-        cerr_out.close();
-    }
-    */
-
-    if (testcases[i].numFileGraders() > 0 &&
-	testcases[i].raw_filename(0) != "" &&
-	access( testcases[i].raw_filename(0).c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists 
-      execute ("/bin/mv "+testcases[i].raw_filename(0)+" "+testcases[i].filename(0),
-	       "/dev/null",
-	       max_cputime,max_output_size);
+    // rename any key files created by this test case to prepend the test number
+    for (int f = 0; f < testcases[i].numFileGraders(); f++) {
+      std::string raw_filename = testcases[i].raw_filename(f);
+      std::string filename     = testcases[i].filename(f);
+      if (raw_filename != "" &&
+	  
+	  access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists 
+	
+	std::cout << "runner mv " << raw_filename << " " << filename << std::endl;
+	std::cerr << "runner mv " << raw_filename << " " << filename << std::endl;
+	
+	execute ("/bin/mv "+raw_filename+" "+filename,
+		 "/dev/null",
+		 max_cputime,max_output_size);
+	
+      }
     }
 
-    //execute ("ls","/dev/null", max_cputime,max_output_size);
-
-
-    //}
   }
-
+  
   std::cout << "========================================================" << std::endl;
   std::cout << "FINISHED ALL TESTS" << std::endl;
-  // allow hwcron read access so the files can be copied back
-
-
-  execute ("/usr/bin/find . -user untrusted -exec /bin/chmod o+r {} ;",
-	   "/dev/null", 
-	   10*max_cputime,
-	   10*max_output_size,
-	   0);
-
+  
   return 0;
 }
 
-// ----------------------------------------------------------------
-
-std::string to_string(int i) {
-  std::ostringstream tmp;
-  tmp << std::setfill('0') << std::setw(2) << i;
-  return tmp.str();
-}
+// =====================================================================
+// =====================================================================

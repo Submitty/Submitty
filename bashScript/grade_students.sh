@@ -478,8 +478,12 @@ while true; do
 
   	    # give the untrusted user read/write/execute permissions on the tmp directory & files
 	    chmod -R go+rwx $tmp
+
 	    # run the run.out as the untrusted user
 	    $base_path/bin/untrusted_runscript $tmp/my_run.out >& .submit_runner_output.txt
+
+	    # change permissions of all files created by untrusted in this directory (so hwcron can archive/grade them)
+	    $base_path/bin/untrusted_runscript /usr/bin/find . -user untrusted -exec /bin/chmod o+r {} \;   >>  .submit_runner_output.txt 2&>1
 
 	    runner_error_code="$?"
 	    if [[ "$runner_error_code" -ne 0 ]] ;

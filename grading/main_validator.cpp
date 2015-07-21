@@ -1,41 +1,28 @@
-/* FILENAME: Validator.cpp
- * YEAR: 2014
- * AUTHORS:
- *   Members of Rensselaer Center for Open Source (rcos.rpi.edu):
- *   Chris Berger
- *   Jesse Freitas
- *   Severin Ibarluzea
- *   Kiana McNellis
- *   Kienan Knight-Boehm
- *   Sam Seng
- * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
- *
- * RELEVANT DOCUMENTATION:
- *
-*/
+#include <sys/types.h>
+#include <sys/stat.h>
 
+#include <typeinfo>
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <unistd.h>
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+
 #include <vector>
 #include <string>
-#include <iterator>
-#include <typeinfo>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <cmath>
-#include <unistd.h>
 #include <algorithm>
+
 #include "TestCase.h"
-
-
 #include "config.h"
 
+
+// =====================================================================
+// =====================================================================
 
 int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime);
 std::string join(std::vector<std::string> strings);
@@ -307,3 +294,6 @@ std::string join(std::vector<std::string> strings) {
   }
   return ss.str();
 }
+
+// =====================================================================
+// =====================================================================
