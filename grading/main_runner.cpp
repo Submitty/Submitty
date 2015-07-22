@@ -52,16 +52,10 @@ int main(int argc, char *argv[]) {
       std::string raw_filename = testcases[i].raw_filename(f);
       std::string filename     = testcases[i].filename(f);
       if (raw_filename != "" &&
-	  
 	  access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists 
-	
-	std::cout << "runner mv " << raw_filename << " " << filename << std::endl;
-	std::cerr << "runner mv " << raw_filename << " " << filename << std::endl;
-	
 	execute ("/bin/mv "+raw_filename+" "+filename,
 		 "/dev/null",
 		 max_cputime,max_output_size);
-	
       }
     }
 

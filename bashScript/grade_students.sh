@@ -481,11 +481,11 @@ while true; do
 
 	    # run the run.out as the untrusted user
 	    $base_path/bin/untrusted_runscript $tmp/my_run.out >& .submit_runner_output.txt
+	    runner_error_code="$?"
 
 	    # change permissions of all files created by untrusted in this directory (so hwcron can archive/grade them)
 	    $base_path/bin/untrusted_runscript /usr/bin/find . -user untrusted -exec /bin/chmod o+r {} \;   >>  .submit_runner_output.txt 2&>1
 
-	    runner_error_code="$?"
 	    if [[ "$runner_error_code" -ne 0 ]] ;
 	    then
 		echo "RUNNER FAILURE CODE $runner_error_code"
