@@ -260,7 +260,7 @@ window.addEventListener('load', function() {
                     //$date_submitted = get_submission_time($user,$semester,$course,$assignment_id,$assignment_version);
                     //echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
                     ?> -->
-                    <?php
+                   <?php
 
                     //Box with name, size, and content of submitted files
                     render("filecontent_display",array(

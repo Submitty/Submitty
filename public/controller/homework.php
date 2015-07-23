@@ -71,6 +71,11 @@ $points_visible =            get_points_visible($submitting_homework_tests);
 $files_to_view =            get_files_to_view($class_config,$semester,$course,$assignment_id, $username,$assignment_version);
 
 
+
+//List of submitted files that server is allowed to display
+$files_to_view =            get_files_to_view($class_config,$semester,$course,$assignment_id, $username,$assignment_version);
+
+
 if (isset($class_config["download_files"])){
     $download_files = $class_config["download_files"];
 }

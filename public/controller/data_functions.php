@@ -559,8 +559,6 @@ function is_valid_semester($semester) {
     if ($semester == "s15") {
         return true;
     }
-    //For auto-setup script:
-    if ($semester == "s15") {return true;}
     return false;
 }
 
@@ -588,8 +586,6 @@ function is_valid_course($course) {
     if ($course == "csci4530") {
         return true;
     }
-    //For auto-setup script:
-    if ($course == "csci1200") {return true;}
     return false;
 }
 
