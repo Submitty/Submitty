@@ -18,6 +18,12 @@ class TestCaseJUnit : public TestCaseGrader {
     return answer;
   }
 
+  static TestCaseJUnit* MultipleJUnitTestGrader(const std::string &f, float points_frac = -1.0) {
+    TestCaseJUnit* answer = new TestCaseJUnit(f,"TestRunner output",points_frac);
+    answer->junit_grader_type = "MULTIPLE_JUNIT_TESTS";
+    return answer;
+  }
+
   static TestCaseJUnit* EmmaInstrumentationGrader(const std::string &f, float points_frac = -1.0) {
     TestCaseJUnit* answer = new TestCaseJUnit(f,"JUnit EMMA instrumentation output",points_frac);
     answer->junit_grader_type = "EMMA_INSTRUMENTATION";
@@ -50,7 +56,9 @@ class TestCaseJUnit : public TestCaseGrader {
   TestResults* doit_junit_test(std::ifstream &junit_output);
   TestResults* doit_emma_instrumentation(std::ifstream &junit_output);
   TestResults* doit_emma_coverage_report(std::ifstream &junit_output);
-  
+  TestResults* doit_multiple_junit_tests(std::ifstream &junit_output);
+
+
   // junit_grader_type should be:  JUNIT_TEST or EMMA_INSTRUMENTATION or EMMA_COVERAGE_REPORT
   std::string junit_grader_type;
 
