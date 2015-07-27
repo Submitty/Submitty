@@ -2,14 +2,14 @@ IfModule mod_ssl.c>
 SSLUseStapling On
 SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 <VirtualHost _default_:443>
-	suPHP_ConfigPath /local/scratch0/submit3/
+	suPHP_ConfigPath /INSTALLATION_DIRECTORY
 	AddDefaultCharset utf-8
 	AddExternalAuth pwauth /usr/sbin/pwauth
 	SetExternalAuthMethod pwauth pipe
 	ServerAdmin admin@domain.here
 	ServerName hss.cs.rpi.edu
 
-	DocumentRoot /local/scratch0/submit3/website/public
+	DocumentRoot /INSTALLATION_DIRECTORY/website/public
 
 	DirectoryIndex index.html index.php index.htm index.cgi
 
@@ -42,7 +42,7 @@ SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 
 	CustomLog ${APACHE_LOG_DIR}/submit.log combined
 
-	<Directory /local/scratch0/submit3/website/public>
+	<Directory /INSTALLATION_DIRECTORY/website/public>
 		Options ExecCGI FollowSymLinks Includes
 		AuthType Basic
 		AuthName "Please log in"
