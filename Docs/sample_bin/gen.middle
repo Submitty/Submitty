@@ -2,9 +2,9 @@
 use strict;
 use warnings;
 
-## Intent: create apache configs for csci2600 student repositories
+## Intent: create apache configs for student repositories
 
-my $dir = '/local/svn/csci2600';
+my $dir = '/var/lib/svn/class01';
 opendir(DIR, $dir) or die $!;
 while (my $file = readdir(DIR)) 
 {
@@ -12,12 +12,12 @@ while (my $file = readdir(DIR))
 	next if ($file =~ m/^\./);	#skip hidden files and directories
 	print "	\<Location \/$file\>
 		AuthType Basic
-		AuthName \"Please log in with your RCS credentials\"
+		AuthName \"Please log in\"
 		AuthBasicProvider external
 		AuthExternal pwauth
 		<RequireAny>
 			require user $file
-			require group course_csci2600_tas_www
+			require group class01_tas_www
 		</RequireAny>
 	</Location>
 ";

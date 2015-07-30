@@ -1,7 +1,7 @@
 IfModule mod_ssl.c>
 SSLUseStapling On
 SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
-<VirtualHost _default_:443>
+<VirtualHost test-submit:443>
 	suPHP_ConfigPath /INSTALLATION_DIRECTORY
 	AddDefaultCharset utf-8
 	AddExternalAuth pwauth /usr/sbin/pwauth

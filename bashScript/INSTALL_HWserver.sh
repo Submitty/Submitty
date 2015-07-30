@@ -25,8 +25,8 @@ BASEDIR=/fill/this/in
 RCOS_REPO=/fill/this/in
 PRIVATE_REPO=/fill/this/in
 
-PHPUSER=fillthisin
-CRONGROUP=fillthisin
+PHPUSER=hwphp
+CRONGROUP=hwcronphp
 
 
 ########################################

@@ -1,5 +1,5 @@
-cat /root/bin/top.txt > /etc/apache2/sites-available/csci2600-ssl.conf
-/root/bin/gen.middle >> /etc/apache2/sites-available/csci2600-ssl.conf
-cat /root/bin/bottom.txt >> /etc/apache2/sites-available/csci2600-ssl.conf
+cat /root/bin/top.txt > /etc/apache2/sites-available/test-svn-ssl.conf
+/root/bin/gen.middle >> /etc/apache2/sites-available/test-svn-ssl.conf
+cat /root/bin/bottom.txt >> /etc/apache2/sites-available/test-svn-ssl.conf
 apache2ctl -t
 echo "Type '/usr/hss/reload.apache' to reload with the new config."
