@@ -44,18 +44,18 @@ int main(int argc, char *argv[]) {
 			  " 1>" + testcases[i].prefix() + "_STDOUT.txt" +
 			  " 2>" + testcases[i].prefix() + "_STDERR.txt",
 			  logfile,
-			  testcases[i].seconds_to_run(),
-			  max_output_size);
-
+			  testcases[i].get_test_case_limits());
+    
     // rename any key files created by this test case to prepend the test number
     for (int f = 0; f < testcases[i].numFileGraders(); f++) {
       std::string raw_filename = testcases[i].raw_filename(f);
       std::string filename     = testcases[i].filename(f);
       if (raw_filename != "" &&
-	  access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists 
+	access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists 
 	execute ("/bin/mv "+raw_filename+" "+filename,
 		 "/dev/null",
-		 max_cputime,max_output_size);
+		 testcases[i].get_test_case_limits()); 
+
       }
     }
 

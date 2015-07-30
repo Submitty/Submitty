@@ -134,8 +134,7 @@ int main(int argc, char *argv[]) {
 			    " 1>" + testcases[i].prefix() + "_STDOUT.txt" +
 			    " 2>" + testcases[i].prefix() + "_STDERR.txt",
 			    testcases[i].prefix() + "_execute_logfile.txt",
-			    testcases[i].seconds_to_run(),
-			    std::max(max_output_size, 10000000)); // 10 mb
+			    testcases[i].get_test_case_limits());
       
       std::cout<< "Exited with exit_no: "<<exit_no<<std::endl;
     }

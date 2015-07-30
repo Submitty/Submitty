@@ -20,6 +20,12 @@ fi
 
 # find all submissions in these subdirectories
 pattern="$1"
+pattern_length=${#pattern}
+if [ "${pattern:$[$pattern_length-1]:1}" == "/" ]; then
+    # truncate last character if it is a trailing slash
+    pattern=${pattern:0:$[$pattern_length-1]}
+    pattern_length=${#pattern}
+fi
 
 #optional argument...
 if [ "$#" -gt 1 ]; then
@@ -28,7 +34,6 @@ else
     TO_BE_GRADED="to_be_graded2"
 fi
 
-pattern_length=${#pattern}
 base_path=${pattern%/courses*}
 base_path_length=${#base_path}
 
@@ -190,7 +195,7 @@ done
 
 # if there are alot of matching submissions, first confirm that we want to regrade all of them
 queue_size=${#my_queue[@]}
-if [ "$queue_size" -gt 20 ]
+if [ "$queue_size" -gt 50 ]
 then
     echo "Found $queue_size matching submissions.  Add to queue? [y/n]"
     read value

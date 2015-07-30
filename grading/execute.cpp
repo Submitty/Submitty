@@ -206,6 +206,19 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
 // =====================================================================================
 // =====================================================================================
 
+std::string get_executable_name(const std::string &cmd) {
+  std::string my_program;
+  
+  std::stringstream ss(cmd);
+  
+  ss >> my_program;
+  assert (my_program.size() >= 1);
+
+  validate_program(my_program);
+  return my_program;
+}
+
+
 void parse_command_line(const std::string &cmd,
 			std::string &my_program,
 			std::vector<std::string> &my_args,
@@ -547,59 +560,9 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 // =====================================================================================
 
 
-void enable_all_setrlimit(int seconds_to_run,
-                          int file_size_limit) {
-
-  // documentation on setrlimit
-  // http://linux.die.net/man/2/setrlimit
-
-  int set_success;
-  
-  // limit CPU time (unfortunately this is *not* wall clock time)
-  rlimit time_limit;
-  time_limit.rlim_cur = time_limit.rlim_max = seconds_to_run*2;
-  set_success = setrlimit(RLIMIT_CPU, &time_limit);
-  assert (set_success == 0);
-  
-  
-  /*
-
-  // THIS IS TOO SMALL A LIMIT FOR JAVA
-
-  // FIXME read in the file size from the configuration
-  // limit size of files created by the process
-  rlimit fsize_limit;
-  fsize_limit.rlim_cur = fsize_limit.rlim_max = file_size_limit; //100000;  // 100 kilobytes
-  set_success = setrlimit(RLIMIT_FSIZE, &fsize_limit);
-  assert (set_success == 0);
-
-  */
-
-  /*
-
-  // THIS IS TOO SMALL A LIMIT FOR JAVAC
-
-  // address space in bytes
-  int my_address_space_limit = 1000000000 ;  // 1 GB 
-
-  // limit the address space & data segment used by the process
-  rlimit address_space_limit;
-  address_space_limit.rlim_cur = address_space_limit.rlim_max = my_address_space_limit; 
-  set_success = setrlimit(RLIMIT_AS, &address_space_limit);
-  assert (set_success == 0);
-  set_success = setrlimit(RLIMIT_DATA, &address_space_limit);
-  assert (set_success == 0);
-  */
-
-}
-
-
-// =====================================================================================
-// =====================================================================================
-
-
 // Executes command (from shell) and returns error code (0 = success)
-int execute(const std::string &cmd, const std::string &execute_logfile, int seconds_to_run, int file_size_limit) {
+int execute(const std::string &cmd, const std::string &execute_logfile, 
+	    const std::map<int,rlim_t> &test_case_limits) {
 
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
@@ -616,7 +579,9 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
   if (childPID == 0) {
     // CHILD PROCESS
 
-    enable_all_setrlimit(seconds_to_run,file_size_limit);
+
+    std::string executable_name = get_executable_name(cmd);
+    enable_all_setrlimit(executable_name,test_case_limits);
 
 
     // Student's shouldn't be forking & making threads/processes...
@@ -642,6 +607,8 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
 
 
 
+	// FIXME
+	int seconds_to_run = 10;
 
 	
         float elapsed = 0;
