@@ -11,11 +11,11 @@ while (<LIST>)
 	next if (!$_);  # Skip blank lines to avoid making a new repository at the base directory
 # create svn repository and set permissions, made clear rather than efficient
 	system ("adduser $_ --quiet --home /tmp --gecos \'RCS auth account\' --no-create-home --disabled-password --shell /usr/sbin/nologin");
-	system ("svnadmin create /local/svn/csci2600/$_");
-	system ("touch /local/svn/csci2600/$_/db/rep-cache.db");
-	system ("chmod g+w /local/svn/csci2600/$_/db/rep-cache.db");
-	system ("chmod 2770 /local/svn/csci2600/$_");
-	system ("chown -R www-data:svn-csci2600 /local/svn/csci2600/$_");
+	system ("svnadmin create /var/lib/svn/course01/$_");
+	system ("touch /var/lib/svn/course01/$_/db/rep-cache.db");
+	system ("chmod g+w /var/lib/svn/course01/$_/db/rep-cache.db");
+	system ("chmod 2770 /var/lib/svn/course01/$_");
+	system ("chown -R www-data:svn-course01 /var/lib/svn/course01/$_");
 	print "Done creating $_\n";
 }
 system ("/root/bin/regen.apache");
