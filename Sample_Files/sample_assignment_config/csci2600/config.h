@@ -24,8 +24,8 @@ const int ta_pts = 0;
 const int extra_credit_pts = 0;
 
 //path to .jar will change
-const std::string junit_jar_path =         "/local/scratch0/submit3/JUnit/junit-4.12.jar";
-const std::string hamcrest_core_jar_path = "/local/scratch0/submit3/JUnit/hamcrest-core-1.3.jar";
+const std::string junit_jar_path =         "/usr/local/hss/JUnit/junit-4.12.jar";
+const std::string hamcrest_core_jar_path = "/usr/local/hss/JUnit/hamcrest-core-1.3.jar";
 
 //Test cases
 std::vector<TestCase> testcases

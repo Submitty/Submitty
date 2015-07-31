@@ -40,7 +40,7 @@ bool system_program(const std::string &program) {
       program == "/usr/bin/clang++" ||
       program == "/usr/bin/g++" ||
       program == "/usr/bin/valgrind" ||
-      program == "/local/scratch0/submit3/drmemory/bin/drmemory" ||
+      program == "/usr/local/hss/drmemory/bin/drmemory" ||
       program == "/bin/mv" || 
       program == "/bin/chmod" || 
       program == "/usr/bin/find" || 

@@ -17,7 +17,7 @@ TO_BE_GRADED="$2"
 
 
 # global variable
-svn_path=svn+ssh://csci2600svn.cs.rpi.edu/local/svn/csci2600
+svn_path=svn+ssh://csci2600svn.cs.rpi.edu/var/lib/svn/csci2600
 
 
 # from that directory, we expect:
