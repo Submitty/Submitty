@@ -1,39 +1,17 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#include "grading/TestCase.h"
-
 // ===================================================================================
 
-const std::string assignment_message = "The homework submission area & autograding points for Lab 1 are just practice.<br>The only grades for Lab 1 are the 3 checkpoints recorded by your TA & mentors.";
-
-// Submission parameters
-const int max_submissions = 20;
-const int submission_penalty = 5;
-const int max_submission_size = 10000;	// in KB
+#define ASSIGNMENT_MESSAGE "The homework submission area & autograding points for Lab 1 are just practice.<br>The only grades for Lab 1 are the 3 checkpoints recorded by your TA & mentors."
 
 // Grading parameters
-const int total_pts = 20;
-const int auto_pts = 20;
-const int ta_pts = 0;
-const int extra_credit_pts = 2;
+#define TOTAL_POINTS 20
+#define AUTO_POINTS 20
+#define TA_POINTS 0
+#define EXTRA_CREDIT_POINTS 2
 
 // ===================================================================================
-
-const std::map<int,rlim_t> assignment_limits = 
-  { 
-    //{ RLIMIT_AS,         RLIM_INFINITY },  // unlimited address space
-    //{ RLIMIT_NPROC,      100           }   // 10 additional process
-  };
-
-// Compile-time parameters
-//const int max_clocktime = 200; // = 200; // = 2;		// in seconds
-//const int max_cputime = 200; // = 200; // = 2;			// in seconds
-
-//const int max_output_size = 10000;	// in KB
-	// OTHERS?
-
-
 
 // Test cases
 std::vector<TestCase> testcases

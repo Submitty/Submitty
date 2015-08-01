@@ -29,7 +29,9 @@
 #include "testResults.h"
 #include "tokens.h"
 
-extern const std::map<int,rlim_t> assignment_limits;  // must be defined in config.h
+extern const std::map<int,rlim_t> assignment_limits;  // defined in default_config.h 
+
+const std::string drmemory_path = "/usr/local/hss/drmemory/bin/drmemory";
 
 // =================================================================================
 
@@ -108,7 +110,24 @@ private:
 };
 
 
+// =================================================================================
 
+static void adjust_test_case_limits(std::map<int,rlim_t> &modified_test_case_limits,
+			       int rlimit_name, rlim_t value) {
+
+  // first, see if this quantity already has a value
+  std::map<int,rlim_t>::iterator itr = modified_test_case_limits.find(rlimit_name);
+
+  if (itr == modified_test_case_limits.end()) {
+    // if it does not, add it
+    modified_test_case_limits.insert(std::make_pair(rlimit_name,value));
+  } else {
+    // if it does, and the new limit is higher, change it
+    if (value > itr->second)
+      itr->second = value;
+  }
+  
+}
 
 // =================================================================================
 // =================================================================================
@@ -150,7 +169,7 @@ public:
 
   static TestCase MakeCompilation( const std::string &title,
 				   const std::string &compilation_command,
-				   const std::string &executable_filename,
+				   const std::string &executable_filename, // single executable file converted into vector
 				   const TestCasePoints &tcp,
 				   const std::map<int,rlim_t> &test_case_limits = {} ) {
     return MakeCompilation(title,
@@ -159,11 +178,13 @@ public:
 			   tcp,test_case_limits);
   }
 
+
   static TestCase MakeCompilation( const std::string &title,
 				   const std::string &compilation_command,
 				   const std::vector<std::string> &executable_filenames,
 				   const TestCasePoints &tcp,
-				   const std::map<int,rlim_t> &test_case_limits = {} ) {
+				   const std::map<int,rlim_t> &test_case_limits={}) {
+
     TestCase answer;
     answer._title = title;
     assert (executable_filenames.size() > 0 && 
@@ -171,9 +192,24 @@ public:
     answer._filenames = executable_filenames;
     answer._command = compilation_command;
     assert (answer._command != "");
-    answer._test_case_points = tcp;
+
+
     answer.COMPILATION = true;
-answer._test_case_limits = test_case_limits;
+    answer._test_case_limits = test_case_limits;
+
+    // compilation (g++, clang++, javac) usually requires multiple
+    // threads && produces a large executable
+    adjust_test_case_limits(answer._test_case_limits,RLIMIT_CPU,60);             // 60 seconds 
+    adjust_test_case_limits(answer._test_case_limits,RLIMIT_NPROC,10);           // 10 threads 
+    adjust_test_case_limits(answer._test_case_limits,RLIMIT_FSIZE,1*1000*1000);  // 1 MB executable
+
+
+    answer._test_case_points = tcp;
+    //std::cout << "COMPILATION TEST CASE POINTS " << tcp.points << std::endl;
+    //std::cout << "ANSWER POINTS " << answer.points() << std::endl;
+
+    //if (answer.points() == 0) { std::cout << "NO POINTS????" << std::endl; }
+    //std::cout << "ANSWER POINTS " << answer.points() << std::endl;
     return answer;
   }
 

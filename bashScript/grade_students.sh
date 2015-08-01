@@ -357,7 +357,7 @@ while true; do
 	# if this homework is submitted by svn, use the date/time from
 	# the .submit.timestamp file and checkout the version matching
 	# that date/time from the svn server
-	if [ $svn_checkout == true ]
+	if [ "$svn_checkout" == true ]
 	then
 
 	    # grab the svn subdirectory (if any) from the class.json config file

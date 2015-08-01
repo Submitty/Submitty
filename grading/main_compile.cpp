@@ -10,7 +10,7 @@
 
 #include "TestCase.h"
 
-#include "config.h"
+#include "default_config.h"
 #include "execute.h"
 
 #define DIR_PATH_MAX 1000

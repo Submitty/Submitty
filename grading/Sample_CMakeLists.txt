@@ -4,7 +4,7 @@ project (sample_assignment)
 ###################################################################################
 
 # assuming we are in a directory of this structure
-#   BASEDIR/courses/which_semester/which_course/hwconfig/which_assignment
+#   BASEDIR/courses/which_semester/which_course/build/which_assignment
 
 set (MY_DIR ${CMAKE_SOURCE_DIR})
 

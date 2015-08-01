@@ -576,11 +576,13 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
   // ensure fork was successful
   assert (childPID >= 0);
 
+  std::string executable_name = get_executable_name(cmd);
+  int seconds_to_run = get_the_limit(executable_name,RLIMIT_CPU,test_case_limits);
+  
   if (childPID == 0) {
     // CHILD PROCESS
 
 
-    std::string executable_name = get_executable_name(cmd);
     enable_all_setrlimit(executable_name,test_case_limits);
 
 
@@ -605,19 +607,15 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
         assert (parent_result == 0);
         //std::cout << "  parent_result = " << parent_result << std::endl;
 
-
-
-	// FIXME
-	int seconds_to_run = 10;
-
-	
         float elapsed = 0;
         int status;
         pid_t wpid = 0;
         do {
             wpid = waitpid(childPID, &status, WNOHANG);
             if (wpid == 0) {
-                if (elapsed < seconds_to_run) {
+	      // allow 10 extra seconds for differences in wall clock
+	      // vs CPU time (imperfect solution)
+	      if (elapsed < seconds_to_run + 10) {  
                     // sleep 1/10 of a second
                     usleep(100000);
                     elapsed+= 0.1;

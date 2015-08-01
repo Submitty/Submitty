@@ -8,8 +8,7 @@
 #include <map>
 
 #include "execute.h"
-
-extern const std::map<int,rlim_t> assignment_limits;  // must be defined in config.h
+//#include "default_config.h"
 
 // =====================================================================================
 
@@ -19,17 +18,17 @@ extern const std::map<int,rlim_t> assignment_limits;  // must be defined in conf
 // =====================================================================================
 
 const std::vector<int> limit_names = { 
-  RLIMIT_CPU,        //  0  CPU time in seconds
+  RLIMIT_CPU,        //  0  CPU time (not wall clock) in seconds
   RLIMIT_FSIZE,      //  1  created file size in bytes (includes total file size after appending)
-  RLIMIT_DATA,       //  2  heap size in bytes (initialized & uninitialized data) 
+  RLIMIT_DATA,       //  2  heap size in bytes (includes initialized & uninitialized data segment) 
   RLIMIT_STACK,      //  3  stack size in bytes (also includes command line arguments and environment variables)
   RLIMIT_CORE,       //  4  allow core files?  core file size in bytes
   RLIMIT_RSS,        //  5  limit in pages of resident set (deprecated?)
-  RLIMIT_NPROC,      //  6  number of processes that can be created
+  RLIMIT_NPROC,      //  6  number of processes (threads) that can be created
   RLIMIT_NOFILE,     //  7  1 + maximum number of file descriptors
   RLIMIT_MEMLOCK,    //  8  bytes of memory that may be locked into RAM
   RLIMIT_AS,         //  9  virtual memory (address space) in bytes (2GB max or unlimited)
-  RLIMIT_LOCKS,      // 10  number of open files or file locks
+  RLIMIT_LOCKS,      // 10  number of file locks 
   RLIMIT_SIGPENDING, // 11  number of signals that may be queued
   RLIMIT_MSGQUEUE,   // 12  bytes of memory allocated to POSIX message queues
   RLIMIT_NICE,       // 13  ceiling of nice value 
@@ -41,49 +40,37 @@ const std::vector<int> limit_names = {
 
 // NOTE:   RLIM_INFINITY = 18446744073709551615
 
-// If neither the assignment_limits nor the per test test_case_limits
-// provides a limit value, these values will be used
+extern const std::map<int,rlim_t> assignment_limits;  // defined in default_config.h 
 
-const std::map<int,rlim_t> default_limits = 
-  { 
-    { RLIMIT_CPU,        10               }, // 10 seconds per test
-    { RLIMIT_FSIZE,      100*1000         }, // 100 KB created file size
-    { RLIMIT_DATA,       500*1000*1000    }, // 500 MB heap
-    { RLIMIT_STACK,      500*1000*1000    }, // 500 MB stack
-    { RLIMIT_CORE,       0                }, // don't allow core files
-    { RLIMIT_RSS,        RLIM_INFINITY    }, // 
-    { RLIMIT_NPROC,      0,               }, // no additional processes 
-    { RLIMIT_NOFILE,     100,             }, // 100 file descriptors
-    { RLIMIT_MEMLOCK,    500*1000*1000    }, // 500 MB RAM 
-    { RLIMIT_AS,         1*1000*1000*1000 }, // 1 GB virtual memory address space
-    { RLIMIT_LOCKS,      100              }, // 100 files open 
-    { RLIMIT_SIGPENDING, 0                }, // 
-    { RLIMIT_MSGQUEUE,   0                }, // 
-    { RLIMIT_NICE,       RLIM_INFINITY    }, // 
-    { RLIMIT_RTPRIO,     0                }, // 
-    { RLIMIT_RTTIME,     0                }  // 
-  };
+// NOTE: See also TestCase.h for default settings for compilation test
+//       cases that have somewhat higher values.
+
 
 // Instructor configurations (assignment_limits and test_case_limits)
 // cannot exceed these values
 const std::map<int,rlim_t> system_limits = 
   { 
-    { RLIMIT_CPU,        600           }, // CPU limited to 10 minutes per test
-    { RLIMIT_FSIZE,      RLIM_INFINITY }, // created (or appended) file size in bytes
-    { RLIMIT_DATA,       RLIM_INFINITY }, // heap
-    { RLIMIT_STACK,      RLIM_INFINITY }, // stack size
-    { RLIMIT_CORE,       RLIM_INFINITY }, // allow core files?
-    { RLIMIT_RSS,        RLIM_INFINITY }, // 
-    { RLIMIT_NPROC,      RLIM_INFINITY }, // 
-    { RLIMIT_NOFILE,     RLIM_INFINITY }, // 
-    { RLIMIT_MEMLOCK,    RLIM_INFINITY }, // 
-    { RLIMIT_AS,         RLIM_INFINITY }, // 
-    { RLIMIT_LOCKS,      RLIM_INFINITY }, // 
-    { RLIMIT_SIGPENDING, RLIM_INFINITY }, // 
-    { RLIMIT_MSGQUEUE,   RLIM_INFINITY }, // 
-    { RLIMIT_NICE,       RLIM_INFINITY }, // 
-    { RLIMIT_RTPRIO,     RLIM_INFINITY }, // 
-    { RLIMIT_RTTIME,     RLIM_INFINITY }  // 
+    { RLIMIT_CPU,        600              }, // 10 minutes per test
+    { RLIMIT_FSIZE,      100*1000*1000    }, // 100 MB created file size
+    { RLIMIT_DATA,       RLIM_INFINITY    }, // heap                // 1 GB
+    { RLIMIT_STACK,      RLIM_INFINITY    }, // stack size          // 50 MB
+    { RLIMIT_CORE,       RLIM_INFINITY    }, // allow core files?   // FIXME: 0
+    { RLIMIT_RSS,        RLIM_INFINITY    }, //      (deprecated, use AS instead?)
+    { RLIMIT_NPROC,      RLIM_INFINITY    }, // 100 additional processes
+    { RLIMIT_NOFILE,     RLIM_INFINITY    }, // 1000 file descriptors 
+    { RLIMIT_MEMLOCK,    RLIM_INFINITY    }, // 2GB RAM 
+
+    //{ RLIMIT_NPROC,      100              }, // 100 additional processes
+    //{ RLIMIT_NOFILE,     1000             }, // 1000 file descriptors 
+    //{ RLIMIT_MEMLOCK,    2*1000*1000*1000 }, // 2GB RAM 
+
+    { RLIMIT_AS,         RLIM_INFINITY    }, //    2 GB
+    { RLIMIT_LOCKS,      RLIM_INFINITY    }, //   100
+    { RLIMIT_SIGPENDING, RLIM_INFINITY    }, // 0
+    { RLIMIT_MSGQUEUE,   RLIM_INFINITY    }, // 0
+    { RLIMIT_NICE,       RLIM_INFINITY    }, // 
+    { RLIMIT_RTPRIO,     RLIM_INFINITY    }, // 0
+    { RLIMIT_RTTIME,     RLIM_INFINITY    }  // 0
   };
 
 
@@ -137,33 +124,18 @@ rlim_t get_the_limit(const std::string &program_name,
     }
   }
 
-  // then, look for an assignment specific value
+  // otherwise, look for an assignment specific value
   std::map<int,rlim_t>::const_iterator a_iter = assignment_limits.find(which_limit);
-  if (a_iter != assignment_limits.end()) {
-    // check to see if it exceeds the system limit
-    if (a_iter->second <= s_iter->second) {
-      return a_iter->second;
-    } else {
-      std::cout << "ERROR: Assignment limit value " << a_iter->second 
-		<< " for " << rlimit_name_decoder(which_limit) 
-		<< " exceeds system limit " << s_iter->second << std::endl;
-      return s_iter->second;
-    }
-  }
-
-  // otherwise, use the default value (which must exist)
-  std::map<int,rlim_t>::const_iterator d_iter = default_limits.find(which_limit);
-  assert (d_iter != default_limits.end());
-  // confirm that it does not exceed the system limit
-  if (d_iter->second <= s_iter->second) {
-    return d_iter->second;
+  assert (a_iter != assignment_limits.end());
+  // check to see if it exceeds the system limit
+  if (a_iter->second <= s_iter->second) {
+    return a_iter->second;
   } else {
-    std::cout << "ERROR: Default limit value " << d_iter->second 
+    std::cout << "ERROR: Assignment limit value " << a_iter->second 
 	      << " for " << rlimit_name_decoder(which_limit) 
 	      << " exceeds system limit " << s_iter->second << std::endl;
     return s_iter->second;
   }
-  
 }
 
 
@@ -211,59 +183,3 @@ void enable_all_setrlimit(const std::string &program_name,
 
 // =====================================================================================
 // =====================================================================================
-
-
-  /*
-
-
-#if 1
-
-
-  if (which_limit == RLIMIT_AS) { 
-    if (program_name == "/usr/bin/javac" ||
-	program_name == "/usr/bin/java" ) {
-      return RLIM_INFINITY;
-    }
-    return 2 * 1000 * 1000 * 1000 ;  // 2 GB 
-  }
-
-  // limit the address space & data segment used by the process  
-  if (which_limit == RLIMIT_DATA) {
-    if (program_name == "/usr/bin/javac" ||
-	program_name == "/usr/bin/java" ) {
-      return RLIM_INFINITY;
-    }
-    return 1000 * 1000 * 1000;  // 1 GB
-  }
-
-
-  // ---------------------------------------------------------------
-  // limit CPU time (unfortunately this is *not* wall clock time)
-  if (which_limit == RLIMIT_DATA) {
-    return seconds_to_run*2;
-  }
-
-  // ---------------------------------------------------------------
-  // no core dumps
-  rl.rlim_cur = rl.rlim_max = 0;
-  success = setrlimit(RLIMIT_CORE, &rl);
-  assert (success == 0);
-
-
-  // ---------------------------------------------------------------
-  // limit the address space & data segment used by the process  
-  if (which_limit == RLIMIT_DATA) {
-    if (program_name == "/usr/bin/javac" ||
-	program_name == "/usr/bin/java" ) {
-      return RLIM_INFINITY;
-    }
-    return file_size_limit;
-  }
-
-  // otherwise, there is specified limit on this resource
-  return RLIM_INFINITY;
-
-
-#else
-*/
-

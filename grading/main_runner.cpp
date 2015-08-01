@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cassert>
 
-#include "config.h"
+#include "default_config.h"
 #include "execute.h"
 
 

@@ -2,7 +2,7 @@
 #include <fstream>
 
 #include "TestCase.h"
-#include "config.h"
+#include "default_config.h"
 
 
 /*
@@ -48,20 +48,22 @@ int main(int argc, char *argv[]) {
   int total_nonec = 0;
   int total_ec = 0;
   for (unsigned int i = 0; i < testcases.size(); i++) {
+    //if (testcases[i].points() == 0) { std::cout << "NO POINTS????" << std::endl; }
+    //std::cout << "test case #" << i << " ec?:" << testcases[i].extracredit() << " pts:" << testcases[i].points() << " total: " << total_ec << "+" << total_nonec<< std::endl;
     if (testcases[i].extracredit())
       total_ec += testcases[i].points();
     else
       total_nonec += testcases[i].points();
   }
-  if (total_nonec != auto_pts) {
-    std::cout << "ERROR: Automated Points do not match testcases." << total_nonec << "!=" << auto_pts << std::endl;
+  if (total_nonec != AUTO_POINTS) {
+    std::cout << "ERROR: Automated Points do not match testcases." << total_nonec << "!=" << AUTO_POINTS << std::endl;
     return 1;
   }
-  if (total_ec != extra_credit_pts) {
-    std::cout << "ERROR: Extra Credit Points do not match testcases." << total_ec << "!=" << extra_credit_pts << std::endl;
+  if (total_ec != EXTRA_CREDIT_POINTS) {
+    std::cout << "ERROR: Extra Credit Points do not match testcases." << total_ec << "!=" << EXTRA_CREDIT_POINTS << std::endl;
     return 1;
   }
-  if (total_nonec + ta_pts != total_pts) {
+  if (total_nonec + TA_POINTS != TOTAL_POINTS) {
     std::cout << "ERROR: Automated Points and TA Points do not match total."
               << std::endl;
     return 1;
@@ -81,20 +83,20 @@ Now Exiting" << std::endl;
   init << "{\n\t\"id\": \"" << id << "\"," << std::endl;
   //  init << "\t\"name\": \"" << name << "\"," << std::endl;
 
-  init << "\t\"assignment_message\": \"" << assignment_message << "\"," << std::endl;
+  init << "\t\"assignment_message\": \"" << ASSIGNMENT_MESSAGE << "\"," << std::endl;
 
-  init << "\t\"max_submissions\": " << max_submissions << "," << std::endl;
-  init << "\t\"max_submission_size\": " << max_submission_size << "," << std::endl;
+  init << "\t\"max_submissions\": " << MAX_NUM_SUBMISSIONS << "," << std::endl;
+  init << "\t\"max_submission_size\": " << MAX_SUBMISSION_SIZE << "," << std::endl;
 
-  init << "\t\"auto_pts\": " << auto_pts << "," << std::endl;
+  init << "\t\"auto_pts\": " << AUTO_POINTS << "," << std::endl;
   int visible = 0;
   for (unsigned int i = 0; i < testcases.size(); i++) {
     if (!testcases[i].hidden())
       visible += testcases[i].points();
   }
   init << "\t\"points_visible\": " << visible << "," << std::endl;
-  init << "\t\"ta_pts\": " << ta_pts << "," << std::endl;
-  init << "\t\"total_pts\": " << total_pts << "," << std::endl;
+  init << "\t\"ta_pts\": " << TA_POINTS << "," << std::endl;
+  init << "\t\"total_pts\": " << TOTAL_POINTS << "," << std::endl;
   //  init << "\t\"due_date\": \"" << due_date << "\"," << std::endl;
 
   init << "\t\"num_testcases\": " << testcases.size() << "," << std::endl;

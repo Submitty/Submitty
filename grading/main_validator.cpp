@@ -18,7 +18,7 @@
 #include <algorithm>
 
 #include "TestCase.h"
-#include "config.h"
+#include "default_config.h"
 
 
 // =====================================================================
@@ -63,8 +63,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
   gradefile << "Grade for: " << rcsid << std::endl;
   gradefile << "  submission#: " << subnum << std::endl;
-  int penalty = -std::min(submission_penalty,int(std::ceil(std::max(0,subnum-max_submissions)/10.0)));
-  assert (penalty >= -submission_penalty && penalty <= 0);
+  int penalty = -std::min(SUBMISSION_PENALTY,int(std::ceil(std::max(0,subnum-MAX_NUM_SUBMISSIONS)/10.0)));
+  assert (penalty >= -SUBMISSION_PENALTY && penalty <= 0);
   if (penalty != 0) {
     gradefile << "  penalty for excessive submissions: " << penalty << " points" << std::endl;
   }
@@ -78,7 +78,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   int nonhidden_possible_pts = 0;
   int hidden_possible_pts = 0;
 
-  int possible_ta_pts = ta_pts;
+  int possible_ta_pts = TA_POINTS;
 
   std::stringstream testcase_json;
   std::vector<std::string> all_testcases;
@@ -254,7 +254,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   std::cout << "possible ta pts         " <<  possible_ta_pts << std::endl;
   std::cout << "total possible pts      " <<  total_possible_pts << std::endl;
 
-  assert (total_possible_pts == total_pts);
+  assert (total_possible_pts == TOTAL_POINTS);
 
   /* Generate submission.json */
   std::ofstream json_file("submission.json");

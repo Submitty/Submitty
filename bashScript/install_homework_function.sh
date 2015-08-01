@@ -18,7 +18,7 @@ function install_homework {
     semester=$3
     course=$4
     assignment=$5
-    hw_code_path=$BASEDIR/courses/$semester/$course/hwconfig/$assignment
+    hw_code_path=$BASEDIR/courses/$semester/$course/build/$assignment
     hw_bin_path=$BASEDIR/courses/$semester/$course/bin/$assignment
     hw_config=$BASEDIR/courses/$semester/$course/config/${assignment}_assignment_config.json
 
