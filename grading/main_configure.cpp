@@ -40,32 +40,40 @@ void printTestCase(std::ostream &out, TestCase test) {
 }
 
 int main(int argc, char *argv[]) {
+
+
   if (argc != 2) {
     std::cout << "USAGE: " << argv[0] << " [output_file]" << std::endl;
     return 0;
   }
-  std::cout <<"FILENAME " << argv[0] << std::endl;
+  std::cout << "FILENAME " << argv[0] << std::endl;
   int total_nonec = 0;
   int total_ec = 0;
   for (unsigned int i = 0; i < testcases.size(); i++) {
-    //if (testcases[i].points() == 0) { std::cout << "NO POINTS????" << std::endl; }
-    //std::cout << "test case #" << i << " ec?:" << testcases[i].extracredit() << " pts:" << testcases[i].points() << " total: " << total_ec << "+" << total_nonec<< std::endl;
+
     if (testcases[i].extracredit())
       total_ec += testcases[i].points();
     else
       total_nonec += testcases[i].points();
   }
+
+  std::string start_red_text = "\033[1;31m";
+  std::string end_red_text   = "\033[0m";
+
   if (total_nonec != AUTO_POINTS) {
-    std::cout << "ERROR: Automated Points do not match testcases." << total_nonec << "!=" << AUTO_POINTS << std::endl;
+    
+    std::cout << "\n" << start_red_text << "ERROR: Automated Points do not match testcases." << total_nonec 
+	      << "!=" << AUTO_POINTS << end_red_text << "\n" << std::endl;
     return 1;
   }
   if (total_ec != EXTRA_CREDIT_POINTS) {
-    std::cout << "ERROR: Extra Credit Points do not match testcases." << total_ec << "!=" << EXTRA_CREDIT_POINTS << std::endl;
+    std::cout << "\n" << start_red_text << "ERROR: Extra Credit Points do not match testcases." << total_ec 
+	      << "!=" << EXTRA_CREDIT_POINTS << end_red_text << "\n" << std::endl;
     return 1;
   }
   if (total_nonec + TA_POINTS != TOTAL_POINTS) {
-    std::cout << "ERROR: Automated Points and TA Points do not match total."
-              << std::endl;
+    std::cout << "\n" << start_red_text << "ERROR: Automated Points and TA Points do not match total." 
+	      << end_red_text << "\n" << std::endl;
     return 1;
   }
 
@@ -73,16 +81,14 @@ int main(int argc, char *argv[]) {
   init.open(argv[1], std::ios::out);
 
   if (!init.is_open()) {
-    std::cout << "ERROR: unable to open new file for initialization... \
-Now Exiting" << std::endl;
+    std::cout << "\n" << start_red_text << "ERROR: unable to open new file for initialization... Now Exiting" 
+	      << end_red_text << "\n" << std::endl;
     return 0;
   }
 
   std::string id = getAssignmentIdFromCurrentDirectory(std::string(argv[0]));
 
   init << "{\n\t\"id\": \"" << id << "\"," << std::endl;
-  //  init << "\t\"name\": \"" << name << "\"," << std::endl;
-
   init << "\t\"assignment_message\": \"" << ASSIGNMENT_MESSAGE << "\"," << std::endl;
 
   init << "\t\"max_submissions\": " << MAX_NUM_SUBMISSIONS << "," << std::endl;
@@ -97,7 +103,6 @@ Now Exiting" << std::endl;
   init << "\t\"points_visible\": " << visible << "," << std::endl;
   init << "\t\"ta_pts\": " << TA_POINTS << "," << std::endl;
   init << "\t\"total_pts\": " << TOTAL_POINTS << "," << std::endl;
-  //  init << "\t\"due_date\": \"" << due_date << "\"," << std::endl;
 
   init << "\t\"num_testcases\": " << testcases.size() << "," << std::endl;
 
