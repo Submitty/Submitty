@@ -7,7 +7,7 @@ SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 	AddExternalAuth pwauth /usr/sbin/pwauth
 	SetExternalAuthMethod pwauth pipe
 	ServerAdmin ADMIN@DOMAIN.HERE
-	ServerName hss.cs.rpi.edu
+	ServerName test-submit
 
 	DocumentRoot /usr/local/hss/website/public
 
@@ -17,7 +17,7 @@ SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 		Order allow,deny
 		Deny from all
 	</Files>
-	
+
 	<Files *~>
 		Order allow,deny
 		Deny from all
