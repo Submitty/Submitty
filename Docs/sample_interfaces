@@ -5,36 +5,25 @@
 auto lo
 iface lo inet loopback
 
-# test-hss
+# primary interface
 auto eth0
-iface eth0 inet static
-	address 128.213.17.21
-	netmask 255.255.255.0
-	network 128.213.17.0
-	broadcast 128.213.17.255
-	gateway 128.213.17.1
-	dns-nameservers 128.113.26.77 128.113.28.67
-	dns-search cs.rpi.edu
+iface eth0 inet dhcp
 
-# test-hwgrading
+# test-hss
 auto eth0:1
 iface eth0:1 inet static
-	address 128.213.17.26
-        netmask 255.255.255.0
-        network 128.213.17.0
-        broadcast 128.213.17.255
-        gateway 128.213.17.1
-        dns-nameservers 128.113.26.77 128.113.28.67
-        dns-search cs.rpi.edu
+	address 192.168.56.1
+	netmask 255.255.255.0
 
-# test-csci2600svn 
+# test-svn
 auto eth0:2
 iface eth0:2 inet static
-        address 128.213.17.15
+	address 192.168.56.2
+	netmask 255.255.255.0
+
+# test-hwgrading
+auto eth0:3
+iface eth0:3 inet static
+        address 192.168.56.3
         netmask 255.255.255.0
-        network 128.213.17.0
-        broadcast 128.213.17.255
-        gateway 128.213.17.1
-        dns-nameservers 128.113.26.77 128.113.28.67
-        dns-search cs.rpi.edu
 
