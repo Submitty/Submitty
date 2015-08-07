@@ -10,12 +10,16 @@ if [[ "$UID" -ne "0" ]] ; then
 fi
 
 
+# defaults 
+# FIXME: allow these to be configured by a configure script
 HSS_INSTALL_DIR=/usr/local/hss
 HSS_DATA_DIR=/var/local/hss
 
 HWSUBMISSION_REPO=$HSS_INSTALL_DIR/GIT_CHECKOUT_HWserver
 TAGRADING_REPO=$HSS_INSTALL_DIR/GIT_CHECKOUT_TAgrading
 
+PHPUSER=hwphp
+CRONGROUP=hwcronphp
 
 
 ########################################################################################################################
@@ -32,8 +36,8 @@ fi
 
 
 # set the permissions of the top level directory
-chown  root:cutler  $HSS_INSTALL_DIR
-chmod  771          $HSS_INSTALL_DIR
+chown  root:instructors $HSS_INSTALL_DIR
+chmod  771              $HSS_INSTALL_DIR
 
 
 ########################################################################################################################
@@ -53,8 +57,11 @@ chmod  771          $HSS_INSTALL_DIR
 ########################################################################################################################
 # COPY THE SUBMISSION SERVER WEBSITE (php & javascript)
 
+
 # copy the website from the repo
 rsync -rvuz   $HWSUBMISSION_REPO/public   $HSS_INSTALL_DIR/website
+
+
 
 # automatically create the site path file, storing the data directory in the file
 echo $HSS_DATA_DIR > $HSS_INSTALL_DIR/website/public/site_path.txt 
@@ -63,20 +70,20 @@ echo $HSS_DATA_DIR > $HSS_INSTALL_DIR/website/public/site_path.txt
 find $HSS_INSTALL_DIR/website -exec chown hwphp:hwphp {} \;
 
 # set the permissions of all files
-# hwphp can read & execute all directories & files
-chmod -R 500 $HSS_INSTALL_DIR/website
+# hwphp can read & execute all directories and read all files
 # "other" can cd into all subdirectories
-find $HSS_INSTALL_DIR/website -type d -exec chmod o+x {} \;
+chmod -R 400 $HSS_INSTALL_DIR/website
+find $HSS_INSTALL_DIR/website -type d -exec chmod uo+x {} \;
 # "other" can read all .txt & .css files
 find $HSS_INSTALL_DIR/website -type f -name \*.css -exec chmod o+r {} \;
 find $HSS_INSTALL_DIR/website -type f -name \*.txt -exec chmod o+r {} \;
-# "other" can read & execute all .txt & .css files
+# "other" can read & execute all .js files
 find $HSS_INSTALL_DIR/website -type f -name \*.js -exec chmod o+rx {} \;
 
 
 # create the custom_resources directory
 mkdir -p $HSS_INSTALL_DIR/website/public/custom_resources
-# instructors will be able to add their own .css file and other limited customizations to this directory
+# instructors will be able to add their own .css file customizations to this directory
 find $HSS_INSTALL_DIR/website/public/custom_resources -exec chown root:instructors {} \;
 find $HSS_INSTALL_DIR/website/public/custom_resources -exec chmod 775 {} \;
 
@@ -108,7 +115,7 @@ mkdir -p $HSS_INSTALL_DIR/bin
 rsync -rvuz  $HWSUBMISSION_REPO/bashScript/*   $HSS_INSTALL_DIR/bin/
 
 
-# most of the scripts should are root only
+# most of the scripts should be root only
 find $HSS_INSTALL_DIR/bin -type d -exec chown root:instructors {} \;
 find $HSS_INSTALL_DIR/bin -type d -exec chmod 551 {} \;
 find $HSS_INSTALL_DIR/bin -type f -exec chmod 540 {} \;
