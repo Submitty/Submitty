@@ -11,7 +11,8 @@ fi
 
 
 # defaults 
-# FIXME: allow these to be configured by a configure script
+# FIXME: allow these to be configured by the CONFIGURE.sh script
+# (E.g., CONFIGURE.sh will overwrite these variables in a copy of this installation script)
 HSS_INSTALL_DIR=/usr/local/hss
 HSS_DATA_DIR=/var/local/hss
 
@@ -107,12 +108,12 @@ find $HSS_INSTALL_DIR/src -type f -exec chmod 444 {} \;
 
 ########################################################################################################################
 ########################################################################################################################
-# COPY THE SCRIPTS TO GRADE UPLOADED CODE (bash scripts)
+# COPY THE SCRIPTS TO GRADE UPLOADED CODE (bash scripts & untrusted_execute)
 
 # make the directory (has a different name)
 mkdir -p $HSS_INSTALL_DIR/bin
 # copy all of the files
-rsync -rvuz  $HWSUBMISSION_REPO/bashScript/*   $HSS_INSTALL_DIR/bin/
+rsync -rvuz  $HWSUBMISSION_REPO/bin/*   $HSS_INSTALL_DIR/bin/
 
 
 # most of the scripts should be root only
@@ -125,21 +126,30 @@ find $HSS_INSTALL_DIR/bin -type f -exec chmod 540 {} \;
 chmod o+rx $HSS_INSTALL_DIR/bin/install_homework_function.sh 
 
 
-# the cron grading job user needs read/execute access to this script
-chmod 550 $HSS_INSTALL_DIR/bin/untrusted_runscript
-chown root:hwcron $HSS_INSTALL_DIR/bin/untrusted_runscript
-# the suid bit must be set on this script
-chmod u+s $HSS_INSTALL_DIR/bin/untrusted_runscript
-
-
 # fix the permissions specifically of the grade_students.sh script
 chown root:hwcron $HSS_INSTALL_DIR/bin/grade_students.sh
 chmod 750 $HSS_INSTALL_DIR/bin/grade_students.sh
 
 
+# prepare the untrusted_execute executable with suid
 
+# SUID (Set owner User ID up on execution), allows the hwcron user 
+# to run this executable as sudo/root, which is necessary for the 
+# "switch user" to untrusted as part of the sandbox.
 
+pushd $HSS_INSTALL_DIR/bin/
+# set ownership/permissions on the source code
+chown root:root untrusted_execute.c
+chmod 500 untrusted_execute.c
+# compile the code
+g++ -static untrusted_execute.c -o untrusted_execute
+# change permissions & set suid: (must be root)
+chown root untrusted_execute
+chgrp hwcron untrusted_execute
+chmod 4550 untrusted_execute
+popd
 exit
+
 
 ########################################
 # COPY THE TA GRADING WEBSITE

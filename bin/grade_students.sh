@@ -437,7 +437,7 @@ while true; do
 	    chmod -R go+rwx $tmp
 
 	    # run the compile.out as the untrusted user
-	    $HSS_INSTALL_DIR/bin/untrusted_runscript $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
+	    $HSS_INSTALL_DIR/bin/untrusted_execute $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
 
 	    compile_error_code="$?"
 	    if [[ "$compile_error_code" -ne 0 ]] ;
@@ -490,11 +490,11 @@ while true; do
 	    chmod -R go+rwx $tmp
 
 	    # run the run.out as the untrusted user
-	    $HSS_INSTALL_DIR/bin/untrusted_runscript $tmp/my_run.out >& .submit_runner_output.txt
+	    $HSS_INSTALL_DIR/bin/untrusted_execute $tmp/my_run.out >& .submit_runner_output.txt
 	    runner_error_code="$?"
 
 	    # change permissions of all files created by untrusted in this directory (so hwcron can archive/grade them)
-	    $HSS_INSTALL_DIR/bin/untrusted_runscript /usr/bin/find . -user untrusted -exec /bin/chmod o+r {} \;   >>  .submit_runner_output.txt 2&>1
+	    $HSS_INSTALL_DIR/bin/untrusted_execute /usr/bin/find . -user untrusted -exec /bin/chmod o+r {} \;   >>  .submit_runner_output.txt 2&>1
 
 	    if [[ "$runner_error_code" -ne 0 ]] ;
 	    then
@@ -525,8 +525,8 @@ while true; do
             #valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
             "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
         else
-            echo '$HSS_INSTALL_DIR/bin/untrusted_runscript /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'
-            "$HSS_INSTALL_DIR/bin/untrusted_runscript" "/usr/bin/valgrind" "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+            echo '$HSS_INSTALL_DIR/bin/untrusted_execute /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'
+            "$HSS_INSTALL_DIR/bin/untrusted_execute" "/usr/bin/valgrind" "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
         fi
         # Non-valgrind commands
         # echo ""$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt"
