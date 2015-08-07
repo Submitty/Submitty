@@ -88,6 +88,10 @@
 #define RLIMIT_RTTIME_VALUE     0                 // 
 #endif
 
+// ========================================================================================
+// ========================================================================================
+
+extern const std::map<int,rlim_t> assignment_limits;
 const std::map<int,rlim_t> assignment_limits = 
   { 
     { RLIMIT_CPU,        RLIMIT_CPU_VALUE        },
@@ -107,6 +111,7 @@ const std::map<int,rlim_t> assignment_limits =
     { RLIMIT_RTPRIO,     RLIMIT_RTPRIO_VALUE     },
     { RLIMIT_RTTIME,     RLIMIT_RTTIME_VALUE     }
   };
+
 
 // ========================================================================================
 // ========================================================================================

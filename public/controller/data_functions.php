@@ -502,6 +502,15 @@ function is_ta_grade_released($class_config, $assignment_id) {
 
 
 // Get name for assignment
+function get_upload_message($class_config) {
+   if (isset($class_config["upload_message"])) {
+      return $class_config["upload_message"];
+   }  
+   return "ERROR: no \"upload_message\" specified in the class.json file";
+}
+
+
+// Get name for assignment
 function is_svn_checkout($class_config, $assignment_id) {
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {

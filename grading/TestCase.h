@@ -29,8 +29,6 @@
 #include "testResults.h"
 #include "tokens.h"
 
-extern const std::map<int,rlim_t> assignment_limits;  // defined in default_config.h 
-
 const std::string drmemory_path = "/usr/local/hss/drmemory/bin/drmemory";
 
 // =================================================================================
@@ -113,20 +111,18 @@ private:
 // =================================================================================
 
 static void adjust_test_case_limits(std::map<int,rlim_t> &modified_test_case_limits,
-			       int rlimit_name, rlim_t value) {
-
+				    int rlimit_name, rlim_t value) {
+  
   // first, see if this quantity already has a value
-  std::map<int,rlim_t>::iterator itr = modified_test_case_limits.find(rlimit_name);
-
-  if (itr == modified_test_case_limits.end()) {
+  std::map<int,rlim_t>::iterator t_itr = modified_test_case_limits.find(rlimit_name);
+  
+  if (t_itr == modified_test_case_limits.end()) {
     // if it does not, add it
     modified_test_case_limits.insert(std::make_pair(rlimit_name,value));
   } else {
-    // if it does, and the new limit is higher, change it
-    if (value > itr->second)
-      itr->second = value;
+    // otherwise set it to the max
+    t_itr->second = std::max(value,t_itr->second);
   }
-  
 }
 
 // =================================================================================
@@ -197,12 +193,12 @@ public:
     answer.COMPILATION = true;
     answer._test_case_limits = test_case_limits;
 
+
     // compilation (g++, clang++, javac) usually requires multiple
     // threads && produces a large executable
     adjust_test_case_limits(answer._test_case_limits,RLIMIT_CPU,60);             // 60 seconds 
     adjust_test_case_limits(answer._test_case_limits,RLIMIT_NPROC,10);           // 10 threads 
     adjust_test_case_limits(answer._test_case_limits,RLIMIT_FSIZE,1*1000*1000);  // 1 MB executable
-
 
     answer._test_case_points = tcp;
     //std::cout << "COMPILATION TEST CASE POINTS " << tcp.points << std::endl;
@@ -348,9 +344,6 @@ public:
 
   const std::map<int,rlim_t> get_test_case_limits() const { return _test_case_limits; }
   
-  //int seconds_to_run() { return 5; }
-  //int seconds_to_run() { return max_cputime; }
-
   bool isFileExistsTest() { return FILE_EXISTS; }
   bool isCompilationTest() { return COMPILATION; }
 

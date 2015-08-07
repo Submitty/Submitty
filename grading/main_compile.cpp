@@ -10,8 +10,10 @@
 
 #include "TestCase.h"
 
-#include "default_config.h"
+
 #include "execute.h"
+
+#include "default_config.h"
 
 #define DIR_PATH_MAX 1000
 
@@ -95,6 +97,9 @@ void SearchForDisallowedWords(std::set<std::string> &disallowed_words,
 // =====================================================================
 
 int main(int argc, char *argv[]) {
+
+
+  assert (assignment_limits.size() == 16);
 
   // Make sure arguments are entered correctly
   if (argc != 1) {

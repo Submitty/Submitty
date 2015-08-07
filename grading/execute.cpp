@@ -179,24 +179,25 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
     d = d.substr(0,d.size()-1);
   }
   DIR* dir = opendir(d.c_str());
-  assert (dir != NULL);
+  if (dir != NULL) {
 
-  // loop over all files in the directory, see which ones match the pattern
-  struct dirent *ent;
-  while (1) {
-    ent = readdir(dir);
-    if (ent == NULL) break;
-    std::string thing = ent->d_name;
-    if (wildcard_match(file_pattern,thing,logfile)) {
-      std::cout << "   MATCHED! " << thing << std::endl;
-      validate_filename(directory+thing);
-      my_args.push_back(directory+thing);
-      count_matches++;
-    } else {
-      //std::cout << "   no match  " << thing << std::endl;
+    // loop over all files in the directory, see which ones match the pattern
+    struct dirent *ent;
+    while (1) {
+      ent = readdir(dir);
+      if (ent == NULL) break;
+      std::string thing = ent->d_name;
+      if (wildcard_match(file_pattern,thing,logfile)) {
+	std::cout << "   MATCHED! " << thing << std::endl;
+	validate_filename(directory+thing);
+	my_args.push_back(directory+thing);
+	count_matches++;
+      } else {
+	//std::cout << "   no match  " << thing << std::endl;
+      }
     }
+    closedir(dir);
   }
-  closedir(dir);
 
   if (count_matches == 0) {
     std::cout << "ERROR: FOUND NO MATCHES" << std::endl;

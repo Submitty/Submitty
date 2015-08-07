@@ -52,6 +52,7 @@ function install_homework {
     # build (in parallel, 8 threads)
     # quit (don't continue on to build other homeworks) if there is a compile error
     make -j 8 || exit
+    #make -j 1 || exit
     
     # set the permissions 
     chmod  o+r   $hw_config

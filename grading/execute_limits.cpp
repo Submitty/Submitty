@@ -8,7 +8,6 @@
 #include <map>
 
 #include "execute.h"
-//#include "default_config.h"
 
 // =====================================================================================
 
@@ -39,12 +38,6 @@ const std::vector<int> limit_names = {
 // =====================================================================================
 
 // NOTE:   RLIM_INFINITY = 18446744073709551615
-
-extern const std::map<int,rlim_t> assignment_limits;  // defined in default_config.h 
-
-// NOTE: See also TestCase.h for default settings for compilation test
-//       cases that have somewhat higher values.
-
 
 // Instructor configurations (assignment_limits and test_case_limits)
 // cannot exceed these values
@@ -95,6 +88,8 @@ std::string rlimit_name_decoder(int i) {
 };
 
 
+extern const std::map<int,rlim_t> assignment_limits;  // defined in default_config.h
+
 // =====================================================================================
 // 
 // Set limits on the executing process for running time, size of
@@ -103,39 +98,52 @@ std::string rlimit_name_decoder(int i) {
 // =====================================================================================
 
 rlim_t get_the_limit(const std::string &program_name,
-		   int which_limit,
-		   const std::map<int,rlim_t> &test_case_limits) {
+		     int which_limit,
+		     const std::map<int,rlim_t> &test_case_limits) {
+  
+
+  assert (assignment_limits.size() == 16);
+
 
   // first, grab the system limit (this value must exist)
-  std::map<int,rlim_t>::const_iterator s_iter = system_limits.find(which_limit);
-  assert (s_iter != system_limits.end());
+  std::map<int,rlim_t>::const_iterator s_itr = system_limits.find(which_limit);
+  assert (s_itr != system_limits.end());
 
-  // next, look for a test case specific value
-  std::map<int,rlim_t>::const_iterator t_iter = test_case_limits.find(which_limit);
-  if (t_iter != test_case_limits.end()) {
-    // check to see if it exceeds the system limit
-    if (t_iter->second <= s_iter->second) {
-      return t_iter->second;
-    } else {
-      std::cout << "ERROR: Test case limit value " << t_iter->second 
-		<< " for " << rlimit_name_decoder(which_limit) 
-		<< " exceeds system limit " << s_iter->second << std::endl;
-      return s_iter->second;
-    }
-  }
-
-  // otherwise, look for an assignment specific value
-  std::map<int,rlim_t>::const_iterator a_iter = assignment_limits.find(which_limit);
-  assert (a_iter != assignment_limits.end());
-  // check to see if it exceeds the system limit
-  if (a_iter->second <= s_iter->second) {
-    return a_iter->second;
-  } else {
-    std::cout << "ERROR: Assignment limit value " << a_iter->second 
+  
+  // then, grab the assignment value (this value must also exist)
+  // (it might be the default defined in default_config.h)
+  std::map<int,rlim_t>::const_iterator a_itr = assignment_limits.find(which_limit);
+  assert (a_itr != assignment_limits.end());
+  rlim_t answer = a_itr->second;
+  
+  
+  // check to see if the assignment value exceeds the system limit
+  if (answer > s_itr->second) {
+    std::cout << "ERROR: Assignment limit value " << a_itr->second 
 	      << " for " << rlimit_name_decoder(which_limit) 
-	      << " exceeds system limit " << s_iter->second << std::endl;
-    return s_iter->second;
+	      << " exceeds system limit " << s_itr->second << std::endl;
+    return s_itr->second;
   }
+
+
+  // then, look for a test case specific value
+  std::map<int,rlim_t>::const_iterator t_itr = test_case_limits.find(which_limit);
+  if (t_itr != test_case_limits.end()) {
+    answer = std::max(answer,t_itr->second);
+    
+    // check to see if the test case specific value exceeds the system limit
+    if (answer > t_itr->second) {
+      std::cout << "ERROR: Test case limit value " << t_itr->second 
+		<< " for " << rlimit_name_decoder(which_limit) 
+		<< " exceeds system limit " << s_itr->second << std::endl;
+      return s_itr->second;
+    }      
+  }
+
+
+  // return the max test case & assignment values
+  assert (answer <= s_itr->second);
+  return answer;
 }
 
 
@@ -160,7 +168,7 @@ void enable_all_setrlimit(const std::string &program_name,
     success = getrlimit(limit_names[i], &current_rl);
     assert (success == 0);
 
-    // decide on the new limit
+    // decide on the new limits
     rlim_t new_limit = get_the_limit(program_name,limit_names[i],test_case_limits);
     assert (new_limit >= (rlim_t)0 && new_limit <= RLIM_INFINITY);
 

@@ -42,6 +42,10 @@ void printTestCase(std::ostream &out, TestCase test) {
 int main(int argc, char *argv[]) {
 
 
+  std::cout << "@configure main : assignment_limits size " << assignment_limits.size() << std::endl;
+  assert (assignment_limits.size() == 16);
+
+
   if (argc != 2) {
     std::cout << "USAGE: " << argv[0] << " [output_file]" << std::endl;
     return 0;
