@@ -1,9 +1,15 @@
-//                                              5 seconds,                 100 kb
-//int execute(const std::string &cmd, int seconds_to_run=5, int file_size_limit=100000);
+#include <string>
+
+
+// implemented in execute.cpp
 int execute(const std::string &cmd, 
 	    const std::string &execute_logfile, 
-	    int seconds_to_run, 
-	    int file_size_limit, 
-	    int SECCOMP_ENABLED=1);
+	    const std::map<int,rlim_t> &test_case_limits);
 
 
+// implemented in execute_limits.cpp
+void enable_all_setrlimit(const std::string &program_name,
+			  const std::map<int,rlim_t> &test_case_limits);
+
+rlim_t get_the_limit(const std::string &program_name, int which_limit,
+		     const std::map<int,rlim_t> &test_case_limits);

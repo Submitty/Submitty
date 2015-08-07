@@ -7,6 +7,10 @@
 }
 ?>
 
+	<?php
+	   //echo "debug: $points_visible";
+	?>
+
 
 	<?php
 	if ($view_points == true && $points_visible != 0){
@@ -142,7 +146,11 @@
 					if (isset($test["diffs"])) {
 						foreach ($test["diffs"] as $diff) {
 							if (isset($diff["message"]) && trim($diff["message"])!="") {
-								echo '<div class="diff-block"><a class="error_mess_diff">'.htmlentities($diff["message"]).'</a></div>';
+
+							
+								echo '<div class="diff-block"><div class="error_mess_diff">'.html_entity_decode($diff["message"]).'</div></div>';
+								//echo '<div class="diff-block"><a class="error_mess_diff">'."MESSAGE ".htmlentities($diff["message"]).'</a></div>';
+
 								echo '<div class="spacer"></div>';
 							}
 							if ((!isset($diff["student"]) || trim($diff["student"]) == "") &&
@@ -197,14 +205,21 @@
 									</div><!-- end instructor diff element -->
 									<?php
 								}
+
+
+								if ((isset($diff["student"]) && trim($diff["student"]) != "") &&
+									(isset($diff["instructor"]) && trim($diff["instructor"]) != ""))
+								{
+									?>
+									<!-- <div style="clear:both;"></div> -->
+
+									<script><!-- script -->
+										diff_queue.push("<?php echo $diff["diff_id"]; ?>");
+										diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
+									</script><!-- end script -->
+									<?php
+								}
 								?>
-								<!-- <div style="clear:both;"></div> -->
-
-								<script><!-- script -->
-									diff_queue.push("<?php echo $diff["diff_id"]; ?>");
-									diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
-								</script><!-- end script -->
-
 							</div><!-- end div block -->
 							<div class="spacer"></div>
 						<!-- </div> end sidebysidediff -->

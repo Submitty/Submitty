@@ -3,22 +3,27 @@ project (sample_assignment)
 
 ###################################################################################
 
-# assuming we are in a directory of this structure
-#   BASEDIR/courses/which_semester/which_course/hwconfig/which_assignment
 
-set (MY_DIR ${CMAKE_SOURCE_DIR})
+# DEFAULT INSTALLATION & DATA/CONFIGURATION LOCATIONS
+# (must be changed if you put the files elsewhere)
+set (HSS_INSTALL_DIR /usr/local/hss)
+set (HSS_DATA_DIR /var/local/hss)
+
 
 # assuming the core files for config, compilation, running, & grading are here:
-#   BASEDIR/gradingcode/grading
-#   BASEDIR/gradingcode/modules
-
-set (GRADINGCODE ${MY_DIR}/../../../../../gradingcode)
+set (GRADINGCODE ${HSS_INSTALL_DIR}/src)
 
 ###################################################################################
 
+# assuming we are in a directory of this structure
+#   HSS_DATA_DIR/courses/which_semester/which_course/build/which_assignment
+
+set (MY_DIR ${CMAKE_SOURCE_DIR})
 
 # base directory for course
 set (course_dir ${MY_DIR}/../..)
+#alternately/equivalently
+#set (course_dir ${HSS_DATA_DIR}/courses)
 
 
 # just the last part of the current directory
@@ -55,46 +60,49 @@ endif(instructor_cmakelists)
 
 set (common_files
   ${GRADINGCODE}/grading/TestCase.cpp 
-  ${GRADINGCODE}/modules/myersDiff.cpp 
-  ${GRADINGCODE}/modules/tokens.cpp 
-  ${GRADINGCODE}/modules/tokenSearch.cpp 
-  ${GRADINGCODE}/modules/diffNaive.cpp 
-  ${GRADINGCODE}/modules/textMasking.cpp 
-  ${GRADINGCODE}/modules/clean.cpp 
-  ${GRADINGCODE}/modules/difference.cpp
+  ${GRADINGCODE}/grading/JUnitGrader.cpp
+  ${GRADINGCODE}/grading/myersDiff.cpp 
+  ${GRADINGCODE}/grading/tokens.cpp 
+  ${GRADINGCODE}/grading/tokenSearch.cpp 
+  ${GRADINGCODE}/grading/diffNaive.cpp 
+  ${GRADINGCODE}/grading/clean.cpp 
+  ${GRADINGCODE}/grading/difference.cpp
 )
 
 add_executable(configure.out
   ${common_files}
   # FIXME: I don't think custom files needs to/should be here
   ${custom_files}
-  ${GRADINGCODE}/grading/config.cpp 
+  ${GRADINGCODE}/grading/main_configure.cpp 
 )
 
 add_executable(compile.out
   ${common_files}
   # FIXME: I don't think custom files needs to/should be here
   ${custom_files}
-  ${GRADINGCODE}/grading/compile.cpp 
+  ${GRADINGCODE}/grading/main_compile.cpp 
   ${GRADINGCODE}/grading/seccomp_functions.cpp 
   ${GRADINGCODE}/grading/execute.cpp 
+  ${GRADINGCODE}/grading/execute_limits.cpp 
 )
 
 add_executable(run.out
   ${common_files}
   # FIXME: I don't think custom files needs to/should be here
   ${custom_files}
-  ${GRADINGCODE}/grading/runner.cpp 
+  ${GRADINGCODE}/grading/main_runner.cpp 
   ${GRADINGCODE}/grading/seccomp_functions.cpp 
   ${GRADINGCODE}/grading/execute.cpp
+  ${GRADINGCODE}/grading/execute_limits.cpp 
 )
 
 add_executable(validate.out
   ${common_files}
   ${custom_files}
-  ${GRADINGCODE}/grading/validator.cpp 
+  ${GRADINGCODE}/grading/main_validator.cpp 
   ${GRADINGCODE}/grading/seccomp_functions.cpp 
   ${GRADINGCODE}/grading/execute.cpp 
+  ${GRADINGCODE}/grading/execute_limits.cpp 
 )
 
 ###################################################################################
@@ -113,7 +121,8 @@ include_directories(${GRADINGCODE})
 
 SET(EXECUTABLE_OUTPUT_PATH ${my_bin})
 
-add_custom_command(TARGET configure.out POST_BUILD COMMAND ${my_bin}/configure.out ${my_hw_config_file})
+add_custom_target(config_tgt ALL DEPENDS ${my_hw_config_file})
+add_custom_command(OUTPUT ${my_hw_config_file} DEPENDS configure.out COMMAND ${my_bin}/configure.out ${my_hw_config_file})
 
 ###################################################################################
 

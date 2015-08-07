@@ -1,5 +1,32 @@
 <!-- DETAILS ON SUBMITTED FILES -->
 <div class="row sub-text">
+
+
+ <?php 
+    $class_config = get_class_config($semester,$course);
+    $svn_checkout = is_svn_checkout($class_config, $assignment_id); 
+?>
+
+<?php if ($svn_checkout != true) { echo "<!--"; } ?>
+
+         <b class="sub2">Files from SVN checkout:</b>
+         <pre class="complation_mess"><?php 
+	      $path_front = get_path_front_course($semester,$course);
+	      $student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
+              $svn_file = $student_path.".submit_svn_checkout.txt";
+              $svn_file_contents = get_student_file($svn_file);
+	      if ($svn_file_contents == "") {
+	        echo "<b> ERROR WITH SVN CHECKOUT </b>";
+	      } else {	  
+    	        echo htmlentities($svn_file_contents);
+              }
+            ?></pre>
+
+<?php if ($svn_checkout != true) { echo "-->"; } ?>
+
+
+<?php if ($svn_checkout == true) { echo "<!--"; } ?>
+
     <h4>Submitted Files:
         <?php
             if (isset($download_files) && $download_files == true){
@@ -102,4 +129,7 @@
         echo '</div>';
 
     ?>
+
+<?php if ($svn_checkout == true) { echo "-->"; } ?>
 </div>
+

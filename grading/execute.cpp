@@ -1,19 +1,3 @@
-/* FILENAME: runner.cpp
- * YEAR: 2014
- * AUTHORS:
- *   Members of Rensselaer Center for Open Source (rcos.rpi.edu):
- *   Chris Berger
- *   Jesse Freitas
- *   Severin Ibarluzea
- *   Kiana McNellis
- *   Kienan Knight-Boehm
- *   Sam Seng
- * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
- *
- * RELEVANT DOCUMENTATION:
- *
-*/
-
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/wait.h>
@@ -22,6 +6,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <dirent.h>
 
 #include <cstdlib>
 #include <string>
@@ -29,27 +14,20 @@
 #include <sstream>
 #include <cassert>
 
-#include "modules/modules.h"
-#include "grading/TestCase.h"
-
-
+// for system call filtering
 #include <seccomp.h>
+#include <elf.h>
 
-
-// ----------------------------------------------------------------
-
-#define MAX_STRING_LENGTH 100
-#define MAX_NUM_STRINGS 20
-#define DIR_PATH_MAX 1000
-
-#include <dirent.h>
-
-// for system call white list
+#include "TestCase.h"
 #include "execute.h"
 
+
+#define DIR_PATH_MAX 1000
+
+
 // defined in seccomp_functions.cpp
-#include <elf.h>
-int install_syscall_filter(bool is_32, bool blacklist);
+
+int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_program);
 
 // =====================================================================================
 // =====================================================================================
@@ -62,11 +40,14 @@ bool system_program(const std::string &program) {
       program == "/usr/bin/clang++" ||
       program == "/usr/bin/g++" ||
       program == "/usr/bin/valgrind" ||
-      program == "/projects/submit3/drmemory/bin/drmemory" ||
+      program == "/usr/local/hss/drmemory/bin/drmemory" ||
       program == "/bin/mv" || 
       program == "/bin/chmod" || 
       program == "/usr/bin/find" || 
-      program == "/usr/bin/python") {
+      program == "/usr/bin/compare" ||  // image magick! 
+      program == "/usr/bin/python" ||
+      program == "/usr/bin/java" ||
+      program == "/usr/bin/javac") {
     return true;
   }
   return false;
@@ -128,8 +109,7 @@ void validate_option(const std::string &program, const std::string &option) {
 // =====================================================================================
 
 bool wildcard_match(const std::string &pattern, const std::string &thing, std::ofstream &logfile) {
-
-  //std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
+  //  std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
 
   int wildcard_loc = pattern.find("*");
   assert (wildcard_loc != std::string::npos);
@@ -150,41 +130,93 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
 
   //  std::cout << "THINGBEFORE " << thing_before << " THINGAFTER" << thing_after << std::endl;
 
-  if (before == thing_before && after == thing_after)
+  if (before == thing_before && after == thing_after) {
+    //std::cout << "RETURN TRUE" << std::endl;
     return true;
+  }
 
+  //std::cout << "return false" << std::endl;
   return false;
 }
 
 
+void wildcard_expansion(std::vector<std::string> &my_args, const std::string &full_pattern, std::ofstream &logfile) {
+  
+  // if the pattern does not contain a wildcard, just return that
+  if (full_pattern.find("*") == std::string::npos) {
+    my_args.push_back(full_pattern);
+    return;
+  }
 
-void wildcard_expansion(std::vector<std::string> &my_args, const std::string &pattern, std::ofstream &logfile) {
+  std::cout << "WILDCARD DETECTED:" << full_pattern << std::endl;
+
+  // otherwise, if our pattern contains directory structure, first remove that 
+  std::string directory = "";
+  std::string file_pattern = full_pattern;
+  while (1) {
+    size_t location = file_pattern.find("/");
+    if (location == std::string::npos) { break; }
+    directory += file_pattern.substr(0,location+1);
+    file_pattern = file_pattern.substr(location+1,file_pattern.size()-location-1);
+  }
+  std::cout << "  directory: " << directory << std::endl;
+  std::cout << "  file_pattern " << file_pattern << std::endl;
+
+  // FIXME: could extend this to allow a wildcard in the directory name 
+  // confirm that the directory does not contain a wildcard
+  assert (directory.find("*") == std::string::npos);
+  // confirm that the file pattern does contain a wildcard
+  assert (file_pattern.find("*") != std::string::npos);
+
   int count_matches = 0;
-  if (pattern.find("*") != std::string::npos) {
-    std::cout << "WILDCARD DETECTED:" << pattern << std::endl;
-    char buf[DIR_PATH_MAX];
-    getcwd( buf, DIR_PATH_MAX );
-    DIR* dir = opendir(buf);
-    assert (dir != NULL);
+
+  // combine the current directory plus the directory portion of the pattern
+  char buf[DIR_PATH_MAX];
+  getcwd( buf, DIR_PATH_MAX );
+  std::string d = std::string(buf)+"/"+directory;
+  // note: we don't want the trailing "/"
+  if (d.size() > 0 && d[d.size()-1] == '/') {
+    d = d.substr(0,d.size()-1);
+  }
+  DIR* dir = opendir(d.c_str());
+  if (dir != NULL) {
+
+    // loop over all files in the directory, see which ones match the pattern
     struct dirent *ent;
     while (1) {
       ent = readdir(dir);
       if (ent == NULL) break;
       std::string thing = ent->d_name;
-      if (wildcard_match(pattern,thing,logfile)) {
+      if (wildcard_match(file_pattern,thing,logfile)) {
 	std::cout << "   MATCHED! " << thing << std::endl;
-	validate_filename(thing);
-	my_args.push_back(thing);
+	validate_filename(directory+thing);
+	my_args.push_back(directory+thing);
 	count_matches++;
-     }
+      } else {
+	//std::cout << "   no match  " << thing << std::endl;
+      }
     }
     closedir(dir);
-  } else {
-    my_args.push_back(pattern);
   }
+
   if (count_matches == 0) {
-    logfile << "WARNING: No matches to wildcard pattern: " << pattern << std::endl;
+    std::cout << "ERROR: FOUND NO MATCHES" << std::endl;
   }
+}
+
+// =====================================================================================
+// =====================================================================================
+
+std::string get_executable_name(const std::string &cmd) {
+  std::string my_program;
+  
+  std::stringstream ss(cmd);
+  
+  ss >> my_program;
+  assert (my_program.size() >= 1);
+
+  validate_program(my_program);
+  return my_program;
 }
 
 
@@ -268,7 +300,23 @@ void parse_command_line(const std::string &cmd,
                 }
 	      */
 	      wildcard_expansion(my_args,tmp,logfile);
-            } else {
+            }
+
+            // special exclude file option
+            // FIXME: this is ugly, don't know how I want it to be done though
+            else if (tmp == "-EXCLUDE_FILE") {
+              ss >> tmp;
+              std::cout << "EXCLUDE THIS FILE " << tmp << std::endl;
+
+              for (std::vector<std::string>::iterator itr = my_args.begin();
+                   itr != my_args.end(); ) {
+                if (*itr == tmp) {  std::cout << "FOUND IT!" << std::endl; itr = my_args.erase(itr);  }
+                else { itr++; }
+              }
+
+            }
+
+            else {
                 if (bare_double_dash == true) {
                     validate_filename(tmp);
                 } else {
@@ -358,11 +406,12 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
 
 
 
-
+// =====================================================================================
+// =====================================================================================
 
 
 // This function only returns on failure to exec
-int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream &logfile) {
+int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 
   // to avoid creating extra layers of processes, use exec and not
   // system or the shell
@@ -376,13 +425,16 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
   parse_command_line(cmd, my_program, my_args, my_stdin, my_stdout, my_stderr, logfile);
 
 
-  char** const my_char_args = new char * [my_args.size()+2];  // yes, there is a memory leak here
-  my_char_args[0] = (char*) my_program.c_str();
+  char** temp_args = new char* [my_args.size()+2];   //memory leak here
+  temp_args[0] = (char*) my_program.c_str();
   for (int i = 0; i < my_args.size(); i++) {
     std::cout << "'" << my_args[i] << "' ";
-    my_char_args[i+1] = (char*) my_args[i].c_str();
+    temp_args[i+1] = (char*) my_args[i].c_str();
   }
-  my_char_args[my_args.size()+1] = (char *)NULL;  // FIXME: casting away the const :(
+  temp_args[my_args.size()+1] = (char *)NULL;
+
+  char** const my_char_args = temp_args;
+
   std::cout << std::endl << std::endl;
 
 
@@ -427,12 +479,14 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
 
 
 
-  if (SECCOMP_ENABLED != 0) {
-    std::cout << "seccomp filter enabled" << std::endl;
-  } else {
-    std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
-  }
+  
 
+  //if (SECCOMP_ENABLED != 0) {
+  std::cout << "seccomp filter enabled" << std::endl;
+  //} else {
+  //std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
+  // }
+  
 
   // the default umask is 0027, so we need edit so that we can make
   // these files 'other read', so that we can read them when we switch
@@ -453,9 +507,12 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
   //std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
 
 
-
-
-
+  // print this out here (before losing our output)
+  //  if (SECCOMP_ENABLED != 0) {
+  std::cout << "going to install syscall filter for " << my_program << std::endl;
+  //}
+  
+  
   // FIXME: if we want to assert or print stuff afterward, we should save
   // the originals and restore after the exec fails.
   if (my_stdin != "") {
@@ -480,27 +537,34 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
 
 
   // SECCOMP: install the filter (system calls restrictions)
-  if (SECCOMP_ENABLED != 0) {
-    if (install_syscall_filter(prog_is_32bit, true /*blacklist*/)) { 
-      std::cout << "seccomp filter install failed" << std::endl;
-      return 1;
-    }
-  } else {
+  //  if (SECCOMP_ENABLED != 0) {
+  if (install_syscall_filter(prog_is_32bit, true /*blacklist*/, my_program)) { 
+    std::cout << "seccomp filter install failed" << std::endl;
+    return 1;
   }
+  // } else {
+  // }
   // END SECCOMP
-
-
+  
+  
+  
   int child_result =  execv ( my_program.c_str(), my_char_args );
   // if exec does not fail, we'll never get here
-
+  
   umask(prior_umask);  // reset to the prior umask
-
+  
   return child_result;
 }
 
 
+// =====================================================================================
+// =====================================================================================
+
+
 // Executes command (from shell) and returns error code (0 = success)
-int execute(const std::string &cmd, const std::string &execute_logfile, int seconds_to_run, int file_size_limit, int SECCOMP_ENABLED) { 
+int execute(const std::string &cmd, const std::string &execute_logfile, 
+	    const std::map<int,rlim_t> &test_case_limits) {
+
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
 
@@ -513,24 +577,14 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
   // ensure fork was successful
   assert (childPID >= 0);
 
+  std::string executable_name = get_executable_name(cmd);
+  int seconds_to_run = get_the_limit(executable_name,RLIMIT_CPU,test_case_limits);
+  
   if (childPID == 0) {
     // CHILD PROCESS
 
-    int set_success;
 
-    // limit CPU time (unfortunately this is *not* wall clock time)
-    rlimit time_limit;
-    time_limit.rlim_cur = time_limit.rlim_max = seconds_to_run*2;
-    set_success = setrlimit(RLIMIT_CPU, &time_limit);
-    assert (set_success == 0);
-
-
-    // FIXME read in the file size from the configuration
-    // limit size of files created by the process
-    rlimit fsize_limit;
-    fsize_limit.rlim_cur = fsize_limit.rlim_max = file_size_limit; //100000;  // 100 kilobytes
-    set_success = setrlimit(RLIMIT_FSIZE, &fsize_limit);
-    assert (set_success == 0);
+    enable_all_setrlimit(executable_name,test_case_limits);
 
 
     // Student's shouldn't be forking & making threads/processes...
@@ -539,7 +593,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
     assert(pgrp == 0);
 
     int child_result;
-    child_result = exec_this_command(cmd,SECCOMP_ENABLED,logfile);
+    child_result = exec_this_command(cmd,logfile);
 
     // send the system status code back to the parent process
     //std::cout << "    child_result = " << child_result << std::endl;
@@ -554,17 +608,15 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
         assert (parent_result == 0);
         //std::cout << "  parent_result = " << parent_result << std::endl;
 
-
-
-
-	
         float elapsed = 0;
         int status;
         pid_t wpid = 0;
         do {
             wpid = waitpid(childPID, &status, WNOHANG);
             if (wpid == 0) {
-                if (elapsed < seconds_to_run) {
+	      // allow 10 extra seconds for differences in wall clock
+	      // vs CPU time (imperfect solution)
+	      if (elapsed < seconds_to_run + 10) {  
                     // sleep 1/10 of a second
                     usleep(100000);
                     elapsed+= 0.1;
@@ -581,13 +633,23 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
         } while (wpid == 0);
 
         if (WIFEXITED(status)) {
+
             std::cout << "Child exited, status=" << WEXITSTATUS(status) << std::endl;
             if (WEXITSTATUS(status) == 0){
                 result=0;
             }
             else{
-	      logfile << "Child existed with status = " << WEXITSTATUS(status) << std::endl;
+	      logfile << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
 	      result=1;
+
+              // 
+              // NOTE: If wrapping /usr/bin/time around a program that exits with signal = 25
+              //       time exits with status = 153 (128 + 25)
+              //
+              if (WEXITSTATUS(status) > 128 && WEXITSTATUS(status) <= 256) {
+                OutputSignalErrorMessageToExecuteLogfile(  WEXITSTATUS(status)-128,logfile );
+              }
+
             }
         }
         else if (WIFSIGNALED(status)) {
@@ -617,3 +679,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
   std::cout <<"Result: "<<result<<std::endl;
     return result;
 }
+
+
+// =====================================================================================
+// =====================================================================================

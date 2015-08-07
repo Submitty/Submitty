@@ -1,45 +1,28 @@
-/* FILENAME: Validator.cpp
- * YEAR: 2014
- * AUTHORS:
- *   Members of Rensselaer Center for Open Source (rcos.rpi.edu):
- *   Chris Berger
- *   Jesse Freitas
- *   Severin Ibarluzea
- *   Kiana McNellis
- *   Kienan Knight-Boehm
- *   Sam Seng
- * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
- *
- * RELEVANT DOCUMENTATION:
- *
-*/
+#include <sys/types.h>
+#include <sys/stat.h>
 
+#include <typeinfo>
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <unistd.h>
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+
 #include <vector>
 #include <string>
-#include <iterator>
-#include <typeinfo>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <cmath>
-#include <unistd.h>
 #include <algorithm>
 
-#include "modules/modules.h"
-#include "grading/TestCase.h"
-
-//#include "grading/TestCase.cpp"  /* Should not #include a .cpp file */
+#include "TestCase.h"
+#include "default_config.h"
 
 
-#include "config.h"
-
+// =====================================================================
+// =====================================================================
 
 int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime);
 std::string join(std::vector<std::string> strings);
@@ -80,8 +63,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
   gradefile << "Grade for: " << rcsid << std::endl;
   gradefile << "  submission#: " << subnum << std::endl;
-  int penalty = -std::min(submission_penalty,int(std::ceil(std::max(0,subnum-max_submissions)/10.0)));
-  assert (penalty >= -submission_penalty && penalty <= 0);
+  int penalty = -std::min(SUBMISSION_PENALTY,int(std::ceil(std::max(0,subnum-MAX_NUM_SUBMISSIONS)/10.0)));
+  assert (penalty >= -SUBMISSION_PENALTY && penalty <= 0);
   if (penalty != 0) {
     gradefile << "  penalty for excessive submissions: " << penalty << " points" << std::endl;
   }
@@ -95,7 +78,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   int nonhidden_possible_pts = 0;
   int hidden_possible_pts = 0;
 
-  int possible_ta_pts = ta_pts;
+  int possible_ta_pts = TA_POINTS;
 
   std::stringstream testcase_json;
   std::vector<std::string> all_testcases;
@@ -145,7 +128,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     else {
       // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
       std::vector<std::string> diff_vectors;
-      double pts_helper = 0.0;
+      double my_score = 1.0;
       double fraction_sum = 0.0;
       
       for (int j = 0; j < testcases[i].numFileGraders(); j++) {
@@ -163,17 +146,21 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
         if (result != NULL) {
           // THE GRADE (will be compiled across all comparisons)
-          std::cout << "result->getGrade() " << result->getGrade() << std::endl;
+          std::cout << "result->getGrade() = " << result->getGrade() << std::endl;
+	  assert (result->getGrade() >= 0.0 && result->getGrade() <= 1.0);
 
           double pts_fraction = testcases[i].test_case_grader[j]->points_fraction;
-          std::cout << "pts_fraction " << pts_fraction << std::endl;
+          std::cout << "pts_fraction = " << pts_fraction << std::endl;
 
           if (pts_fraction < -0.5) {
             pts_fraction = 1 / double(testcases[i].numFileGraders());
           }
           fraction_sum += pts_fraction;
+	  
+          my_score -= pts_fraction*(1-result->getGrade());
 
-          pts_helper += pts_fraction*result->getGrade();
+          std::cout << "my_score = " << my_score << std::endl;
+
           result->printJSON(diff_stream);
           helper_message += " " + result->get_message();
           // CLEANUP THIS COMPARISON
@@ -195,7 +182,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
           std::string expected_out_dir = "test_output/" + id + "/";
           expected_path << expected_out_dir << expected;
           diff_vector.push_back("\t\t\t\t\t\"instructor_file\":\"" + expected_path.str() + "\"");
-          //diff_vector.push_back("\t\t\t\t\t\"difference\":\"" + testcases[i].prefix() + "_" + std::to_string(j) + "_diff.json\",\n");
           diff_vector.push_back("\t\t\t\t\t\"difference\":\"" + testcases[i].prefix() + "_" + std::to_string(j) + "_diff.json\"");
         }
 
@@ -209,13 +195,13 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       testcase_vector.push_back("\t\t\t\"diffs\": [\n" + join(diff_vectors) + "\t\t\t]");
 
       if (fraction_sum < 0.99 || fraction_sum > 1.01) {
-        std::cout << "Fraction sum " << fraction_sum << std::endl;
+        std::cout << "WARNING: Fraction sum " << fraction_sum << std::endl;
       }
-      assert (fraction_sum > 0.99 && fraction_sum < 1.01);
-
-      assert (pts_helper >= -0.00001 && pts_helper <= 1.000001);
-      pts_helper = std::max(0.0,std::min(1.0,pts_helper));
-      testcase_pts = (int)floor(pts_helper * testcases[i].points());
+      assert (fraction_sum > 0.99); 
+      assert (my_score <= 1.00001);
+      my_score = std::max(0.0,std::min(1.0,my_score));
+      std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
+      testcase_pts = (int)floor(my_score * testcases[i].points());
     } // end if/else of test case type
 
     // output grade & message
@@ -268,7 +254,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   std::cout << "possible ta pts         " <<  possible_ta_pts << std::endl;
   std::cout << "total possible pts      " <<  total_possible_pts << std::endl;
 
-  assert (total_possible_pts == total_pts);
+  assert (total_possible_pts == TOTAL_POINTS);
 
   /* Generate submission.json */
   std::ofstream json_file("submission.json");
@@ -308,3 +294,6 @@ std::string join(std::vector<std::string> strings) {
   }
   return ss.str();
 }
+
+// =====================================================================
+// =====================================================================
