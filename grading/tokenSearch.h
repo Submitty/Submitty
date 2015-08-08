@@ -15,7 +15,6 @@
 #include <algorithm>
 #include "STRutil.h"
 #include "difference.h"
-#include "clean.h"
 #include "tokens.h"
 
 /* METHOD: RabinKarpSingle

@@ -36,6 +36,7 @@ class TestCaseJUnit : public TestCaseGrader {
     answer->junit_grader_type = "EMMA_COVERAGE_REPORT";
     assert (coverage_thresh >= 10.0 && coverage_thresh <= 100.0);
     answer->coverage_threshhold = coverage_thresh;
+    answer->filename = f;
     return answer;
   }
   

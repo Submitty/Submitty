@@ -1,48 +1,19 @@
-/* FILENAME: compile.cpp
- * YEAR: 2014
- * AUTHORS:
- *   Members of Rensselaer Center for Open Source (rcos.rpi.edu):
- *   Chris Berger
- *   Jesse Freitas
- *   Severin Ibarluzea
- *   Kiana McNellis
- *   Kienan Knight-Boehm
- *   Sam Seng
- * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
- *
- * RELEVANT DOCUMENTATION:
- *
-*/
-
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <sys/wait.h>
-#include <signal.h>
 #include <unistd.h>
-#include <fcntl.h>
-
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <cassert>
 #include <set>
 #include <fstream>
-
-#include "modules.h"
-#include "grading/TestCase.h"
-
-#define MAX_STRING_LENGTH 100
-#define MAX_NUM_STRINGS 20
-#define DIR_PATH_MAX 1000
-
 #include <dirent.h>
 
-#include "config.h"
+#include "TestCase.h"
 
+#include "config.h"
 #include "execute.h"
 
-std::string to_string(int i);
+#define DIR_PATH_MAX 1000
 
 
 // =====================================================================
@@ -160,9 +131,9 @@ int main(int argc, char *argv[]) {
       
       // run the command, capturing STDOUT & STDERR
       int exit_no = execute(cmd +
-			    " 1>test" + to_string(i + 1) + "_STDOUT.txt" +
-			    " 2>test" + to_string(i + 1) + "_STDERR.txt",
-			    "test" + to_string(i + 1) + "_execute_logfile.txt",
+			    " 1>" + testcases[i].prefix() + "_STDOUT.txt" +
+			    " 2>" + testcases[i].prefix() + "_STDERR.txt",
+			    testcases[i].prefix() + "_execute_logfile.txt",
 			    testcases[i].seconds_to_run(),
 			    std::max(max_output_size, 10000000)); // 10 mb
       
@@ -177,8 +148,3 @@ int main(int argc, char *argv[]) {
 
 // ----------------------------------------------------------------
 
-std::string to_string(int i) {
-  std::ostringstream tmp;
-  tmp << std::setfill('0') << std::setw(2) << i;
-  return tmp.str();
-}

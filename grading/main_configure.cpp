@@ -1,30 +1,20 @@
-/* FILENAME: config.cpp
- * YEAR: 2014
- * AUTHORS:
- *   Members of Rensselaer Center for Open Source (rcos.rpi.edu):
- *   Chris Berger
- *   Jesse Freitas
- *   Severin Ibarluzea
- *   Kiana McNellis
- *   Kienan Knight-Boehm
- *   Sam Seng
- * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
- *
- * RELEVANT DOCUMENTATION:
- *
-*/
-
 #include <iostream>
 #include <fstream>
-#include "modules.h"
-#include "grading/TestCase.h"
 
-
+#include "TestCase.h"
 #include "config.h"
 
 
-/*Generates a file in json format containing all of the information defined in
- config.h for easier parsing.*/
+/*
+
+  Generates a file in json format containing all of the information defined in
+  config.h for easier parsing.
+
+*/
+
+
+// =====================================================================
+// =====================================================================
 
 void printTestCase(std::ostream &out, TestCase test) {
   std::string hidden = (test.hidden()) ? "true" : "false";

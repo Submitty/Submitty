@@ -21,7 +21,12 @@
 #include <string>
 #include <sstream>
 #include <cassert>
-#include "modules.h"
+#include <iomanip>
+
+#include "tokenSearch.h"
+#include "myersDiff.h"
+#include "testResults.h"
+#include "tokens.h"
 
 extern const int max_cputime;
 

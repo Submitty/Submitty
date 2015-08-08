@@ -1,19 +1,3 @@
-/* FILENAME: runner.cpp
- * YEAR: 2014
- * AUTHORS:
- *   Members of Rensselaer Center for Open Source (rcos.rpi.edu):
- *   Chris Berger
- *   Jesse Freitas
- *   Severin Ibarluzea
- *   Kiana McNellis
- *   Kienan Knight-Boehm
- *   Sam Seng
- * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
- *
- * RELEVANT DOCUMENTATION:
- *
-*/
-
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/wait.h>
@@ -22,6 +6,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <dirent.h>
 
 #include <cstdlib>
 #include <string>
@@ -29,26 +14,19 @@
 #include <sstream>
 #include <cassert>
 
-#include "modules.h"
-#include "grading/TestCase.h"
-
-
+// for system call filtering
 #include <seccomp.h>
+#include <elf.h>
 
-
-// ----------------------------------------------------------------
-
-#define MAX_STRING_LENGTH 100
-#define MAX_NUM_STRINGS 20
-#define DIR_PATH_MAX 1000
-
-#include <dirent.h>
-
-// for system call white list
+#include "TestCase.h"
 #include "execute.h"
 
+
+#define DIR_PATH_MAX 1000
+
+
 // defined in seccomp_functions.cpp
-#include <elf.h>
+
 int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_program);
 
 // =====================================================================================
@@ -62,7 +40,6 @@ bool system_program(const std::string &program) {
       program == "/usr/bin/clang++" ||
       program == "/usr/bin/g++" ||
       program == "/usr/bin/valgrind" ||
-      //      program == "/projects/submit3/drmemory/bin/drmemory" ||
       program == "/local/scratch0/submit3/drmemory/bin/drmemory" ||
       program == "/bin/mv" || 
       program == "/bin/chmod" || 
@@ -226,7 +203,8 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
   }
 }
 
-
+// =====================================================================================
+// =====================================================================================
 
 void parse_command_line(const std::string &cmd,
 			std::string &my_program,
@@ -414,11 +392,12 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
 
 
 
-
+// =====================================================================================
+// =====================================================================================
 
 
 // This function only returns on failure to exec
-int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream &logfile) {
+int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 
   // to avoid creating extra layers of processes, use exec and not
   // system or the shell
@@ -486,12 +465,14 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
 
 
 
-  if (SECCOMP_ENABLED != 0) {
-    std::cout << "seccomp filter enabled" << std::endl;
-  } else {
-    std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
-  }
+  
 
+  //if (SECCOMP_ENABLED != 0) {
+  std::cout << "seccomp filter enabled" << std::endl;
+  //} else {
+  //std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
+  // }
+  
 
   // the default umask is 0027, so we need edit so that we can make
   // these files 'other read', so that we can read them when we switch
@@ -513,11 +494,11 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
 
 
   // print this out here (before losing our output)
-  if (SECCOMP_ENABLED != 0) {
-    std::cout << "going to install syscall filter for " << my_program << std::endl;
-  }
-
-
+  //  if (SECCOMP_ENABLED != 0) {
+  std::cout << "going to install syscall filter for " << my_program << std::endl;
+  //}
+  
+  
   // FIXME: if we want to assert or print stuff afterward, we should save
   // the originals and restore after the exec fails.
   if (my_stdin != "") {
@@ -542,27 +523,28 @@ int exec_this_command(const std::string &cmd, int SECCOMP_ENABLED, std::ofstream
 
 
   // SECCOMP: install the filter (system calls restrictions)
-  if (SECCOMP_ENABLED != 0) {
-    if (install_syscall_filter(prog_is_32bit, true /*blacklist*/, my_program)) { 
-      std::cout << "seccomp filter install failed" << std::endl;
-      return 1;
-    }
-  } else {
+  //  if (SECCOMP_ENABLED != 0) {
+  if (install_syscall_filter(prog_is_32bit, true /*blacklist*/, my_program)) { 
+    std::cout << "seccomp filter install failed" << std::endl;
+    return 1;
   }
+  // } else {
+  // }
   // END SECCOMP
-
-
-
+  
+  
+  
   int child_result =  execv ( my_program.c_str(), my_char_args );
   // if exec does not fail, we'll never get here
-
+  
   umask(prior_umask);  // reset to the prior umask
-
+  
   return child_result;
 }
 
 
-
+// =====================================================================================
+// =====================================================================================
 
 
 void enable_all_setrlimit(int seconds_to_run,
@@ -612,10 +594,13 @@ void enable_all_setrlimit(int seconds_to_run,
 }
 
 
+// =====================================================================================
+// =====================================================================================
 
 
 // Executes command (from shell) and returns error code (0 = success)
-int execute(const std::string &cmd, const std::string &execute_logfile, int seconds_to_run, int file_size_limit, int SECCOMP_ENABLED) { 
+int execute(const std::string &cmd, const std::string &execute_logfile, int seconds_to_run, int file_size_limit) {
+
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
 
@@ -640,7 +625,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
     assert(pgrp == 0);
 
     int child_result;
-    child_result = exec_this_command(cmd,SECCOMP_ENABLED,logfile);
+    child_result = exec_this_command(cmd,logfile);
 
     // send the system status code back to the parent process
     //std::cout << "    child_result = " << child_result << std::endl;
@@ -728,3 +713,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
   std::cout <<"Result: "<<result<<std::endl;
     return result;
 }
+
+
+// =====================================================================================
+// =====================================================================================

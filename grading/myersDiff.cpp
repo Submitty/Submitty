@@ -10,6 +10,7 @@
 
 #include "myersDiff.h"
 #include "tokens.h"
+#include "clean.h"
 
 TestResults* warnIfNotEmpty (const std::string & student_file, const std::string & expected_file) {
   //std::cout << "in warn if not empty" << std::endl;
