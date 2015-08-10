@@ -110,28 +110,24 @@ find $HSS_INSTALL_DIR/src -type f -exec chmod 444 {} \;
 
 ########################################################################################################################
 ########################################################################################################################
-# JUNIT TEST RUNNER (.java file)
+# BUILD JUNIT TEST RUNNER (.java file)
 
-# copy the files from the repo
-rsync -rvuz $HSS_REPOSITORY/junit_testrunner/TestRunner.java $HSS_INSTALL_DIR/JUnit/TestRunner.java
+# copy the file from the repo
+rsync -rvuz $HSS_REPOSITORY/junit_test_runner/TestRunner.java $HSS_INSTALL_DIR/JUnit/TestRunner.java
 
 pushd $HSS_INSTALL_DIR/JUnit
-
-# root will be owner & group of the soruce file
+# root will be owner & group of the source file
 chown  root:root  TestRunner.java
 # everyone can read this file
 chmod  444 TestRunner.java
 
 # compile the executable
-java -cp ./junit-4.12.jar TestRunner.java
+javac -cp ./junit-4.12.jar TestRunner.java
 
+# everyone can read the compiled file
 chown root:root TestRunner.class
 chmod 444 TestRunner.class
-
 popd
-
-
-
 
 
 ########################################################################################################################
