@@ -356,7 +356,6 @@ while true; do
 
 
 	# copy the .submit.timestamp file and any files from submission zip 
-	#cp 1>/dev/null  2>&1  -r $submission_path/* $tmp_compilation ||  echo "ERROR: Failed to copy submitted files to temporary compilation directory: cp -r $submission_path/* $tmp_compilation" >&2
 	# switched to rsync to copy dot files (just in case they're needed)
 	rsync 1>/dev/null  2>&1  -r $submission_path/ $tmp_compilation ||  echo "ERROR: Failed to copy submitted files to temporary compilation directory: rsync -r $submission_path/ $tmp_compilation" >&2
 
@@ -464,10 +463,13 @@ while true; do
 	#  --include="*.XXX"  grab all .XXX files
 	#  --exclude="*"  exclude everything else
 
-	rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"   --include="*.class"  --include="*.py"  --include="*README*"  --include="test*.txt"  --exclude="*"  $tmp_compilation/  $tmp  
+	rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"   --include="*.class"  --include="*.py"  --include="*README*"  --include="test*.txt"  --include="data/*" --exclude="*"  $tmp_compilation/  $tmp  
 
+	# NOTE: Also grabbing all student data files (files with 'data/' directory in path)
 	# remove the compilation directory
 	rm -rf $tmp_compilation
+
+	find . > $tmp/.submit___TEMPORARY_FILE___directory_contents_before_runner.txt
 
 	# --------------------------------------------------------------------
         # RUN RUNNER
