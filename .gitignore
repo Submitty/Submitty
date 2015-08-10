@@ -7,3 +7,4 @@ public/view/*_container.php
 public/view/*_upload_message.php
 *~
 *.o
+INSTALL.sh
