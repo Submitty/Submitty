@@ -110,6 +110,32 @@ find $HSS_INSTALL_DIR/src -type f -exec chmod 444 {} \;
 
 ########################################################################################################################
 ########################################################################################################################
+# JUNIT TEST RUNNER (.java file)
+
+# copy the files from the repo
+rsync -rvuz $HSS_REPOSITORY/junit_testrunner/TestRunner.java $HSS_INSTALL_DIR/JUnit/TestRunner.java
+
+pushd $HSS_INSTALL_DIR/JUnit
+
+# root will be owner & group of the soruce file
+chown  root:root  TestRunner.java
+# everyone can read this file
+chmod  444 TestRunner.java
+
+# compile the executable
+java -cp ./junit-4.12.jar TestRunner.java
+
+chown root:root TestRunner.class
+chmod 444 TestRunner.class
+
+popd
+
+
+
+
+
+########################################################################################################################
+########################################################################################################################
 # COPY THE SCRIPTS TO GRADE UPLOADED CODE (bash scripts & untrusted_execute)
 
 # make the directory (has a different name)
