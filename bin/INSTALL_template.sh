@@ -10,6 +10,11 @@ if [[ "$UID" -ne "0" ]] ; then
 fi
 
 
+##########################################################################
+# VARIABLES CONFIGURED BY CONFIGURE.SH
+# these variables are used by the INSTALL.sh
+##########################################################################
+
 # These variables are specified by running the CONFIGURE.sh script
 # (the CONFIGURE.sh script makes a copy of this file and replaces these values)
 HSS_INSTALL_DIR=__CONFIGURE__FILLIN__HSS_INSTALL_DIR__
@@ -22,7 +27,6 @@ HWPHP_USER=__CONFIGURE__FILLIN__HWPHP_USER__
 HWCRON_USER=__CONFIGURE__FILLIN__HWCRON_USER__
 HWCRONPHP_GROUP=__CONFIGURE__FILLIN__HWCRONPHP_GROUP__
 INSTRUCTORS_GROUP=__CONFIGURE__FILLIN__INSTRUCTORS_GROUP__
-
 
 # FIXME: Add some error checking to make sure these values were filled in correctly
 
