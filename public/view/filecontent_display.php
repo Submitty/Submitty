@@ -1,6 +1,7 @@
 <!-- DETAILS ON SUBMITTED FILES -->
 <div class="row sub-text">
 
+
  <?php 
     $class_config = get_class_config($semester,$course);
     $svn_checkout = is_svn_checkout($class_config, $assignment_id); 
@@ -25,6 +26,7 @@
 
 
 <?php if ($svn_checkout == true) { echo "<!--"; } ?>
+
     <h4>Submitted Files:
         <?php
             if (isset($download_files) && $download_files == true){
@@ -83,9 +85,12 @@
                                 }
                                 else {
                                     //read the file line-by-line
+				    //use <pre> tag to support multi-space and tabbed sentences
+                                    echo "<pre>";
                                     while (!feof($file_open)){
-                                        echo htmlentities(fgets($file_open))."<br>";
+                                        echo htmlentities(fgets($file_open));
                                     }
+                                    echo "</pre>";
                                 }
 
                                 fclose($file_open);
@@ -127,3 +132,4 @@
 
 <?php if ($svn_checkout == true) { echo "-->"; } ?>
 </div>
+

@@ -1,46 +1,65 @@
 #!/bin/bash
 
+#################################################################################
+#
+# Expected directory structure:
+# <BASE_PATH>/courses/<SEMESTER>/<COURSES>/submissions/<HW>/<USERNAME>/<VERSION#>
+#
+# This script will find all submissions that match the provided
+# pattern and add them to the grading queue.
+#
+#################################################################################
 
-# base_path
-base_path="$1"
+# check the number of arguments
+if [ "$#" -ne 1 ] && [ "$#" -ne 2 ]; then 
+    echo "USAGE:"
+    echo "  regrade.sh  <(absolute) PATTERN PATH>"
+    echo "  regrade.sh  <(absolute) PATTERN PATH>  <TO_BE_GRADED_DIRECTORY (relative)>"
+    exit
+fi
 
 # find all submissions in these subdirectories
-pattern="$2"
+pattern="$1"
+pattern_length=${#pattern}
+if [ "${pattern:$[$pattern_length-1]:1}" == "/" ]; then
+    # truncate last character if it is a trailing slash
+    pattern=${pattern:0:$[$pattern_length-1]}
+    pattern_length=${#pattern}
+fi
 
 #optional argument...
 if [ "$#" -gt 1 ]; then
-    TO_BE_GRADED="$3"
+    TO_BE_GRADED="$2"
 else
     TO_BE_GRADED="to_be_graded2"
 fi
 
+base_path=${pattern%/courses*}
+base_path_length=${#base_path}
 
-pattern_length=${#pattern}
-
+# ensure we extracted the base path
+if [ "$pattern_length" -eq "$base_path_length" ]; then 
+    echo "ERROR:  PATTERN PATH " $pattern " should include 'courses' subdirectory "
+    exit
+fi
 
 #################################################################################
 #################################################################################
+
 function check_match {
 
     # single argument, to be compared to the input pattern 
     candidate=$1
     candidate_length=${#candidate}
 
-    #echo "CHECK MATCH '$pattern' '$candidate'"
-    #echo "lengths '$pattern_length' '$candidate_length'"
-
     if [ "$candidate_length" -lt "$pattern_length" ]
     then
-	#echo "candidate not long enough yet" 
 	# not long enough yet
 	short_pattern=${pattern:0:$candidate_length}
 
-#	echo "truncated check '$short_pattern' '$candidate'"
-    
 	if [ "$short_pattern" != "$candidate" ]
 	then
 	    # does not match!
-#	    echo "does not match"  "$short_pattern" != "$candidate" 
 	    return 2  
 	else
 	    # matches so far...
@@ -50,25 +69,18 @@ function check_match {
 
     short_candidate=${candidate:0:$pattern_length}
 
-#    echo "TEST '$pattern' '$short_candidate'"
-
     if [ "$pattern" != "$short_candidate" ]
     then
-	#echo "returning 2"
-	#echo "NO MATCH                          $submission_path"
         # equal or longer, does not match
 	return 2  
     fi
 
-
-
     # equal or longer, matches!
-    #echo "returning 0"
     return 0  
 }
+
 #################################################################################
-
-
+#################################################################################
 
 echo "looking in '$base_path' for submissions that match '$pattern'"
 
@@ -167,10 +179,36 @@ for semester in `cd $base_path/courses && ls -d [fs]* 2> /dev/null`; do
 			
 			next_to_grade=$semester"__"$course"__"$assignment"__"$user"__"$version
 			echo "GRADE THIS: $next_to_grade"
-			touch $base_path/$TO_BE_GRADED/$next_to_grade
+
+			# collect the submissions (don't add them just yet...)
+			my_queue=("${my_queue[@]}" "$next_to_grade")
 		    fi
 		done
 	    done
 	done
     done
 done
+
+
+#################################################################################
+#################################################################################
+
+# if there are alot of matching submissions, first confirm that we want to regrade all of them
+queue_size=${#my_queue[@]}
+if [ "$queue_size" -gt 50 ]
+then
+    echo "Found $queue_size matching submissions.  Add to queue? [y/n]"
+    read value
+    if [ "$value" != "y" ] 
+    then
+	echo "quitting"
+	exit
+    fi
+fi
+
+# add the matching submissions to the grading queue
+for i in "${my_queue[@]}"
+do
+touch $base_path/$TO_BE_GRADED/$i
+done
+echo "Added $queue_size submissions to $TO_BE_GRADED queue for regrading."

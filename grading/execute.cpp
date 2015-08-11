@@ -40,7 +40,7 @@ bool system_program(const std::string &program) {
       program == "/usr/bin/clang++" ||
       program == "/usr/bin/g++" ||
       program == "/usr/bin/valgrind" ||
-      program == "/local/scratch0/submit3/drmemory/bin/drmemory" ||
+      program == "/usr/local/hss/drmemory/bin/drmemory" ||
       program == "/bin/mv" || 
       program == "/bin/chmod" || 
       program == "/usr/bin/find" || 
@@ -179,24 +179,25 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
     d = d.substr(0,d.size()-1);
   }
   DIR* dir = opendir(d.c_str());
-  assert (dir != NULL);
+  if (dir != NULL) {
 
-  // loop over all files in the directory, see which ones match the pattern
-  struct dirent *ent;
-  while (1) {
-    ent = readdir(dir);
-    if (ent == NULL) break;
-    std::string thing = ent->d_name;
-    if (wildcard_match(file_pattern,thing,logfile)) {
-      std::cout << "   MATCHED! " << thing << std::endl;
-      validate_filename(directory+thing);
-      my_args.push_back(directory+thing);
-      count_matches++;
-    } else {
-      //std::cout << "   no match  " << thing << std::endl;
+    // loop over all files in the directory, see which ones match the pattern
+    struct dirent *ent;
+    while (1) {
+      ent = readdir(dir);
+      if (ent == NULL) break;
+      std::string thing = ent->d_name;
+      if (wildcard_match(file_pattern,thing,logfile)) {
+	std::cout << "   MATCHED! " << thing << std::endl;
+	validate_filename(directory+thing);
+	my_args.push_back(directory+thing);
+	count_matches++;
+      } else {
+	//std::cout << "   no match  " << thing << std::endl;
+      }
     }
+    closedir(dir);
   }
-  closedir(dir);
 
   if (count_matches == 0) {
     std::cout << "ERROR: FOUND NO MATCHES" << std::endl;
@@ -205,6 +206,19 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
 
 // =====================================================================================
 // =====================================================================================
+
+std::string get_executable_name(const std::string &cmd) {
+  std::string my_program;
+  
+  std::stringstream ss(cmd);
+  
+  ss >> my_program;
+  assert (my_program.size() >= 1);
+
+  validate_program(my_program);
+  return my_program;
+}
+
 
 void parse_command_line(const std::string &cmd,
 			std::string &my_program,
@@ -547,59 +561,9 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 // =====================================================================================
 
 
-void enable_all_setrlimit(int seconds_to_run,
-                          int file_size_limit) {
-
-  // documentation on setrlimit
-  // http://linux.die.net/man/2/setrlimit
-
-  int set_success;
-  
-  // limit CPU time (unfortunately this is *not* wall clock time)
-  rlimit time_limit;
-  time_limit.rlim_cur = time_limit.rlim_max = seconds_to_run*2;
-  set_success = setrlimit(RLIMIT_CPU, &time_limit);
-  assert (set_success == 0);
-  
-  
-  /*
-
-  // THIS IS TOO SMALL A LIMIT FOR JAVA
-
-  // FIXME read in the file size from the configuration
-  // limit size of files created by the process
-  rlimit fsize_limit;
-  fsize_limit.rlim_cur = fsize_limit.rlim_max = file_size_limit; //100000;  // 100 kilobytes
-  set_success = setrlimit(RLIMIT_FSIZE, &fsize_limit);
-  assert (set_success == 0);
-
-  */
-
-  /*
-
-  // THIS IS TOO SMALL A LIMIT FOR JAVAC
-
-  // address space in bytes
-  int my_address_space_limit = 1000000000 ;  // 1 GB 
-
-  // limit the address space & data segment used by the process
-  rlimit address_space_limit;
-  address_space_limit.rlim_cur = address_space_limit.rlim_max = my_address_space_limit; 
-  set_success = setrlimit(RLIMIT_AS, &address_space_limit);
-  assert (set_success == 0);
-  set_success = setrlimit(RLIMIT_DATA, &address_space_limit);
-  assert (set_success == 0);
-  */
-
-}
-
-
-// =====================================================================================
-// =====================================================================================
-
-
 // Executes command (from shell) and returns error code (0 = success)
-int execute(const std::string &cmd, const std::string &execute_logfile, int seconds_to_run, int file_size_limit) {
+int execute(const std::string &cmd, const std::string &execute_logfile, 
+	    const std::map<int,rlim_t> &test_case_limits) {
 
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
@@ -613,10 +577,14 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
   // ensure fork was successful
   assert (childPID >= 0);
 
+  std::string executable_name = get_executable_name(cmd);
+  int seconds_to_run = get_the_limit(executable_name,RLIMIT_CPU,test_case_limits);
+  
   if (childPID == 0) {
     // CHILD PROCESS
 
-    enable_all_setrlimit(seconds_to_run,file_size_limit);
+
+    enable_all_setrlimit(executable_name,test_case_limits);
 
 
     // Student's shouldn't be forking & making threads/processes...
@@ -640,17 +608,15 @@ int execute(const std::string &cmd, const std::string &execute_logfile, int seco
         assert (parent_result == 0);
         //std::cout << "  parent_result = " << parent_result << std::endl;
 
-
-
-
-	
         float elapsed = 0;
         int status;
         pid_t wpid = 0;
         do {
             wpid = waitpid(childPID, &status, WNOHANG);
             if (wpid == 0) {
-                if (elapsed < seconds_to_run) {
+	      // allow 10 extra seconds for differences in wall clock
+	      // vs CPU time (imperfect solution)
+	      if (elapsed < seconds_to_run + 10) {  
                     // sleep 1/10 of a second
                     usleep(100000);
                     elapsed+= 0.1;

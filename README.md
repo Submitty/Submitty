@@ -25,7 +25,7 @@ The following technologies will be used in the project:
 To setup a new server, take a look at [the setup page](https://github.com/JFrei86/HWserver/wiki/Setup), or set up according to [the manual setup page](https://github.com/JFrei86/HWserver/wiki/Manual-Setup)
 
 ### Adding new assignment
-To add a new assignment, put it in _"$YourClass/code/hwconfig/$hwID"_, the test inputs into _"$YourClass/code/hwconfig/$hwID/test_input"_, and the test outputs into _"$YourClass/code/hwconfig/$hwID/test_output"_ and then run ```make all move CONFIG=$hwID```
+To add a new assignment, put it in _"$YourClass/code/build/$hwID"_, the test inputs into _"$YourClass/code/build/$hwID/test_input"_, and the test outputs into _"$YourClass/code/build/$hwID/test_output"_ and then run ```make all move CONFIG=$hwID```
 
 Make sure to also add an entry to _"csci1200/config/class.json"_
 

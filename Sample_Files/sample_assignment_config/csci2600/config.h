@@ -3,29 +3,34 @@
 
 #include "grading/TestCase.h"
 
-const std::string assignment_message = "";
-
-// Submission parameters
-const int max_submissions = 20;
-const int submission_penalty = 5;
-
-
-// Compile-time parameters
-const int max_cputime = 2;		// in seconds, per test case
-const int max_submission_size = 10000;	// in KB, entire submission (could be zip file)
-const int max_output_size =     1000;	// in KB, per created output file
-
-
+// ===================================================================================
 
 // Grading parameters
-const int total_pts = 6;
-const int auto_pts = 6;
-const int ta_pts = 0;
-const int extra_credit_pts = 0;
+#define TOTAL_POINTS 6
+#define AUTO_POINTS 6
+
+// ===================================================================================
 
 //path to .jar will change
-const std::string junit_jar_path =         "/local/scratch0/submit3/JUnit/junit-4.12.jar";
-const std::string hamcrest_core_jar_path = "/local/scratch0/submit3/JUnit/hamcrest-core-1.3.jar";
+const std::string junit_jar_path =         "/usr/local/hss/JUnit/junit-4.12.jar";
+const std::string hamcrest_core_jar_path = "/usr/local/hss/JUnit/hamcrest-core-1.3.jar";
+const std::string emma_jar_path =          "/usr/local/hss/JUnit/emma.jar";
+
+// ===================================================================================
+
+
+#define RLIMIT_AS_VALUE RLIM_INFINITY
+#define RLIMIT_NPROC_VALUE 100
+
+
+// java & javac need unlimited heap & address space
+const std::map<int,rlim_t> java_test_case_limits = 
+  { 
+    { RLIMIT_AS,         RLIM_INFINITY },  // unlimited address space
+    { RLIMIT_NPROC,      100           }   // 10 additional process
+  };
+
+// ===================================================================================
 
 //Test cases
 std::vector<TestCase> testcases
@@ -52,9 +57,11 @@ std::vector<TestCase> testcases
 	   "", /* could put more details for the user here */
 	   "/usr/bin/java -cp "+junit_jar_path+":"+hamcrest_core_jar_path+":. org.junit.runner.JUnitCore TestClassTester",
 	   TestCasePoints(2),
-	   TestCaseJUnit::JUnitTestGrader("STDOUT.txt",1),
-	   new TestCaseComparison(&warnIfNotEmpty, "STDERR.txt", "syntax error output from running junit")
+	   {TestCaseJUnit::JUnitTestGrader("STDOUT.txt",1),
+	       new TestCaseComparison(&warnIfNotEmpty, "STDERR.txt", "syntax error output from running junit")}
 	   )
 };
+
+// ===================================================================================
 
 #endif

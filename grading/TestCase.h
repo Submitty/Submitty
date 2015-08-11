@@ -22,13 +22,14 @@
 #include <sstream>
 #include <cassert>
 #include <iomanip>
-
+#include <map>
+#include <sys/resource.h>
 #include "tokenSearch.h"
 #include "myersDiff.h"
 #include "testResults.h"
 #include "tokens.h"
 
-extern const int max_cputime;
+const std::string drmemory_path = "/usr/local/hss/drmemory/bin/drmemory";
 
 // =================================================================================
 
@@ -107,7 +108,22 @@ private:
 };
 
 
+// =================================================================================
 
+static void adjust_test_case_limits(std::map<int,rlim_t> &modified_test_case_limits,
+				    int rlimit_name, rlim_t value) {
+  
+  // first, see if this quantity already has a value
+  std::map<int,rlim_t>::iterator t_itr = modified_test_case_limits.find(rlimit_name);
+  
+  if (t_itr == modified_test_case_limits.end()) {
+    // if it does not, add it
+    modified_test_case_limits.insert(std::make_pair(rlimit_name,value));
+  } else {
+    // otherwise set it to the max
+    t_itr->second = std::max(value,t_itr->second);
+  }
+}
 
 // =================================================================================
 // =================================================================================
@@ -149,18 +165,22 @@ public:
 
   static TestCase MakeCompilation( const std::string &title,
 				   const std::string &compilation_command,
-				   const std::string &executable_filename,
-				   const TestCasePoints &tcp) {
+				   const std::string &executable_filename, // single executable file converted into vector
+				   const TestCasePoints &tcp,
+				   const std::map<int,rlim_t> &test_case_limits = {} ) {
     return MakeCompilation(title,
 			   compilation_command,
 			   std::vector<std::string>(1,executable_filename),
-			   tcp);
+			   tcp,test_case_limits);
   }
+
 
   static TestCase MakeCompilation( const std::string &title,
 				   const std::string &compilation_command,
 				   const std::vector<std::string> &executable_filenames,
-				   const TestCasePoints &tcp) {
+				   const TestCasePoints &tcp,
+				   const std::map<int,rlim_t> &test_case_limits={}) {
+
     TestCase answer;
     answer._title = title;
     assert (executable_filenames.size() > 0 && 
@@ -168,8 +188,24 @@ public:
     answer._filenames = executable_filenames;
     answer._command = compilation_command;
     assert (answer._command != "");
-    answer._test_case_points = tcp;
+
+
     answer.COMPILATION = true;
+    answer._test_case_limits = test_case_limits;
+
+
+    // compilation (g++, clang++, javac) usually requires multiple
+    // threads && produces a large executable
+    adjust_test_case_limits(answer._test_case_limits,RLIMIT_CPU,60);             // 60 seconds 
+    adjust_test_case_limits(answer._test_case_limits,RLIMIT_NPROC,10);           // 10 threads 
+    adjust_test_case_limits(answer._test_case_limits,RLIMIT_FSIZE,1*1000*1000);  // 1 MB executable
+
+    answer._test_case_points = tcp;
+    //std::cout << "COMPILATION TEST CASE POINTS " << tcp.points << std::endl;
+    //std::cout << "ANSWER POINTS " << answer.points() << std::endl;
+
+    //if (answer.points() == 0) { std::cout << "NO POINTS????" << std::endl; }
+    //std::cout << "ANSWER POINTS " << answer.points() << std::endl;
     return answer;
   }
 
@@ -177,20 +213,23 @@ public:
   static TestCase MakeTestCase   ( const std::string &title, const std::string &details,
 				   const std::string &command,
 				   const TestCasePoints &tcp,
-				   TestCaseGrader *tcc0,
-				   TestCaseGrader *tcc1=NULL,
-				   TestCaseGrader *tcc2=NULL,
-                   const std::string &filename = "") {
-
+				   std::vector<TestCaseGrader*> tcc,
+				   //*tcc0,
+				   //TestCaseGrader *tcc1=NULL,
+				   //TestCaseGrader *tcc2=NULL,
+				   const std::string &filename = "",
+				   const std::map<int,rlim_t> &test_case_limits = {} ) {
     TestCase answer;
     answer._title = title;
     answer._details = details;
     answer._command = command;
     assert (answer._command != "");
     answer._test_case_points = tcp;
-    answer.test_case_grader[0] = tcc0;
-    answer.test_case_grader[1] = tcc1;
-    answer.test_case_grader[2] = tcc2;
+    assert (tcc.size() >= 1 && tcc.size() <= 3);
+    answer.test_case_grader[0] = tcc[0];
+    (tcc.size() >= 2) ? answer.test_case_grader[1] = tcc[1] : answer.test_case_grader[1] = NULL;
+    (tcc.size() == 3) ? answer.test_case_grader[2] = tcc[2] : answer.test_case_grader[2] = NULL;
+    //answer.test_case_grader[2] = tcc2;
     //answer.view_file = filename;
     answer._filenames.push_back(filename); // = std::vector<std::string>
     answer.view_file_results = true;
@@ -303,9 +342,8 @@ public:
      is NULL, defaults to returning the result of diffLine(). */
   TestResults* do_the_grading (int j, std::string &message);
 
-  //int seconds_to_run() { return 5; }
-  int seconds_to_run() { return max_cputime; }
-
+  const std::map<int,rlim_t> get_test_case_limits() const { return _test_case_limits; }
+  
   bool isFileExistsTest() { return FILE_EXISTS; }
   bool isCompilationTest() { return COMPILATION; }
 
@@ -316,6 +354,8 @@ private:
 
   std::vector<std::string> _filenames;
   std::string _command;
+
+  std::map<int,rlim_t> _test_case_limits;
 
   bool view_file_results;
   //std::string view_file;

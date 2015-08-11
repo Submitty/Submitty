@@ -25,6 +25,7 @@ $assignment_name =                  name_for_assignment_id($class_config, $assig
 $assignment_link =                  link_for_assignment_id($class_config, $assignment_id);
 $assignment_description =            description_for_assignment_id($class_config, $assignment_id);
 $ta_grade_released =                is_ta_grade_released($class_config, $assignment_id);
+$upload_message =                   get_upload_message($class_config);
 $svn_checkout =                     is_svn_checkout($class_config, $assignment_id);
 $view_points =                      is_points_visible($class_config, $assignment_id);
 $view_hidden_points =               is_hidden_points_visible($class_config, $assignment_id);
@@ -71,6 +72,11 @@ $points_visible =            get_points_visible($submitting_homework_tests);
 $files_to_view =            get_files_to_view($class_config,$semester,$course,$assignment_id, $username,$assignment_version);
 
 
+
+//List of submitted files that server is allowed to display
+$files_to_view =            get_files_to_view($class_config,$semester,$course,$assignment_id, $username,$assignment_version);
+
+
 if (isset($class_config["download_files"])){
     $download_files = $class_config["download_files"];
 }
@@ -103,6 +109,7 @@ render("homework", array(
     "assignment_link"=>         $assignment_link,
     "assignment_description"=>  $assignment_description,
     "ta_grade_released"=>       $ta_grade_released,
+    "upload_message"=>          $upload_message,
     "svn_checkout"=>            $svn_checkout,
     "all_assignments"=>         $all_assignments,
     "dev_team"=>                $dev_team,

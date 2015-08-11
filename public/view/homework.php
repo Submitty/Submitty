@@ -1,11 +1,39 @@
 <?php
 require_once("controller/controller_functions.php");
+?>
 
-print('<!-- Course Container -->');
-require_once("view/".$semester."_".$course."_container.php");
+<html>
 
-print('<!-- Course CSS -->');
-print('<link href="resources/'.$semester."_".$course.'_main.css" rel="stylesheet"></link>');
+<title><?php echo $course;?></title>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700' rel='stylesheet' type='text/css'>
+
+<body>
+	<div>
+		<div class="title-box">
+			<h1 class="title">Homework Submissions for <?php echo $course; ?></h1>
+			<h3 class="subtext">Submit Homeworks Here!</h3>
+		</div>
+		<div>
+			<div></div>
+			<div class="submissions">
+				
+
+
+<?php
+
+
+
+if (file_exists("custom_resources/".$semester."_".$course."_main.css")) {
+   print('<link href="custom_resources/'.$semester."_".$course.'_main.css" rel="stylesheet"></link>');
+} else {
+   print('<link href="resources/default_main.css" rel="stylesheet"></link>');
+}
+
+
+print('<link href="resources/override.css" rel="stylesheet"></link>');
+
+
+
 ?>
 <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic' rel='stylesheet' type='text/css'>
 <link href='https://fonts.googleapis.com/css?family=PT+Sans:700,700italic' rel='stylesheet' type='text/css'>
@@ -45,6 +73,7 @@ window.addEventListener('load', function() {
     }
 });
 </script>
+
 
 <!--- IDENTIFY USER & SELECT WHICH HOMEWORK NUMBER -->
 <div id="HWsubmission">
@@ -97,6 +126,7 @@ window.addEventListener('load', function() {
 
     <h2 class="label">Assignment: <?php echo $assignment_name;?></h2>
 
+
     <div class="panel-body"> <!-- panel-body -->
         <?php
         if ($status && $status != "") {
@@ -107,23 +137,16 @@ window.addEventListener('load', function() {
             echo '</div>';
         }
         ?>
+
         <!--- UPLOAD NEW VERSION -->
         <div class="outer_box"> <!-- outer_box -->
             <h3 class="label">Upload New Version</h3>
             <p class="sub">
-                <?php require_once("view/".$semester."_".$course."_upload_message.php"); ?>
+                <?php 
+		echo $upload_message;
+		?>
+                
             </p>
-
-
-
-<!--            <form class="form_submit" action="<?php echo '?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id; ?>"
-                    method="post" enctype="multipart/form-data"
-                    onsubmit="return check_for_upload('<?php echo $assignment_name.', '.$highest_version.', '.$max_submissions;?>')">
-                    <label for="file" class="label">Select File:</label>
-                    <input type="file" name="file" id="file" />
-                    <input type="submit" name="submit" value="Submit File" class="btn btn-primary">
-                </form>
--->
 
 
 
@@ -158,15 +181,9 @@ window.addEventListener('load', function() {
       echo '<input type="submit" name="submit" value="Submit File" class="btn btn-primary">';
       echo '<input type="hidden" name="svn_checkout" value="false">';
       echo '</form>';
-      
 
 }
 ?>
-
-
-
-
-
 
 
 
@@ -260,7 +277,7 @@ window.addEventListener('load', function() {
                     //$date_submitted = get_submission_time($user,$semester,$course,$assignment_id,$assignment_version);
                     //echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
                     ?> -->
-                    <?php
+                   <?php
 
                     //Box with name, size, and content of submitted files
                     render("filecontent_display",array(

@@ -10,8 +10,10 @@
 
 #include "TestCase.h"
 
-#include "config.h"
+
 #include "execute.h"
+
+#include "default_config.h"
 
 #define DIR_PATH_MAX 1000
 
@@ -96,6 +98,9 @@ void SearchForDisallowedWords(std::set<std::string> &disallowed_words,
 
 int main(int argc, char *argv[]) {
 
+
+  assert (assignment_limits.size() == 16);
+
   // Make sure arguments are entered correctly
   if (argc != 1) {
     // Pass in the current working directory to run the programs
@@ -134,8 +139,7 @@ int main(int argc, char *argv[]) {
 			    " 1>" + testcases[i].prefix() + "_STDOUT.txt" +
 			    " 2>" + testcases[i].prefix() + "_STDERR.txt",
 			    testcases[i].prefix() + "_execute_logfile.txt",
-			    testcases[i].seconds_to_run(),
-			    std::max(max_output_size, 10000000)); // 10 mb
+			    testcases[i].get_test_case_limits());
       
       std::cout<< "Exited with exit_no: "<<exit_no<<std::endl;
     }

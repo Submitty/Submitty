@@ -74,7 +74,7 @@ test -d courses/$semester/$class || mkdir courses/$semester/$class
 
 test -d $course_dir/bin || mkdir $course_dir/bin
 test -d $course_dir/config || mkdir $course_dir/config
-test -d $course_dir/hwconfig || mkdir $course_dir/hwconfig
+test -d $course_dir/build || mkdir $course_dir/build
 test -d $course_dir/test_input || mkdir $course_dir/test_input
 test -d $course_dir/test_output || mkdir $course_dir/test_output
 test -d $course_dir/submissions || mkdir $course_dir/submissions
@@ -263,7 +263,7 @@ install_homework $BASEDIR $repodir/Sample_Files/sample_assignment_config/$hwName
 echo "source $repodir/bashScript/install_homework_function.sh"
 echo "install_homework $BASEDIR $repodir/Sample_Files/sample_assignment_config/$hwName/   $semester   $class   $hwID"
 echo "*****OR*******"
-echo "cd $setup_dir/$course_dir/hwconfig/$hwID"
+echo "cd $setup_dir/$course_dir/build/$hwID"
 echo "CXX=/usr/bin/clang++ cmake . "
 echo "make -j 2"
 echo "********************************************************************************"
@@ -284,7 +284,7 @@ install_homework $BASEDIR $repodir/Sample_Files/sample_assignment_config/$hwName
 echo "source $repodir/bashScript/install_homework_function.sh"
 echo "install_homework $BASEDIR $repodir/Sample_Files/sample_assignment_config/$hwName/   $semester   $class   $hwID"
 echo "*****OR*******"
-echo "cd $setup_dir/$course_dir/hwconfig/$hwID"
+echo "cd $setup_dir/$course_dir/build/$hwID"
 echo "CXX=/usr/bin/clang++ cmake . "
 echo "make -j 2"
 echo "********************************************************************************"

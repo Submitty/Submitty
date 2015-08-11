@@ -502,6 +502,15 @@ function is_ta_grade_released($class_config, $assignment_id) {
 
 
 // Get name for assignment
+function get_upload_message($class_config) {
+   if (isset($class_config["upload_message"])) {
+      return $class_config["upload_message"];
+   }  
+   return "ERROR: no \"upload_message\" specified in the class.json file";
+}
+
+
+// Get name for assignment
 function is_svn_checkout($class_config, $assignment_id) {
     $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
@@ -559,8 +568,6 @@ function is_valid_semester($semester) {
     if ($semester == "s15") {
         return true;
     }
-    //For auto-setup script:
-    if ($semester == "s15") {return true;}
     return false;
 }
 
@@ -588,8 +595,6 @@ function is_valid_course($course) {
     if ($course == "csci4530") {
         return true;
     }
-    //For auto-setup script:
-    if ($course == "csci1200") {return true;}
     return false;
 }
 
