@@ -10,19 +10,27 @@
 #
 #################################################################################
 
+HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
+
+echo $PWD
+
 # check the number of arguments
 if [ "$#" -ne 1 ] && [ "$#" -ne 2 ]; then 
     echo "USAGE:"
-    echo "  regrade.sh  <(absolute) PATTERN PATH>"
-    echo "  regrade.sh  <(absolute) PATTERN PATH>  <TO_BE_GRADED_DIRECTORY (relative)>"
+    echo "  regrade.sh  <(absolute or relative) PATTERN PATH>"
+    echo "  regrade.sh  <(absolute or relative) PATTERN PATH>  <TO_BE_GRADED_DIRECTORY (relative)>"
     exit
 fi
 
 # find all submissions in these subdirectories
 pattern="$1"
+# look for non relative path
+if [ "${pattern:$[0]:1}" != "/" ]; then
+    pattern=$PWD/$pattern
+fi
+# truncate last character if it is a trailing slash
 pattern_length=${#pattern}
 if [ "${pattern:$[$pattern_length-1]:1}" == "/" ]; then
-    # truncate last character if it is a trailing slash
     pattern=${pattern:0:$[$pattern_length-1]}
     pattern_length=${#pattern}
 fi
@@ -31,7 +39,8 @@ fi
 if [ "$#" -gt 1 ]; then
     TO_BE_GRADED="$2"
 else
-    TO_BE_GRADED="to_be_graded2"
+    TO_BE_GRADED="to_be_graded"
+#    TO_BE_GRADED="batch_regrade"
 fi
 
 base_path=${pattern%/courses*}
@@ -40,6 +49,13 @@ base_path_length=${#base_path}
 # ensure we extracted the base path
 if [ "$pattern_length" -eq "$base_path_length" ]; then 
     echo "ERROR:  PATTERN PATH " $pattern " should include 'courses' subdirectory "
+    exit
+fi
+
+
+# ensure we extracted the base path
+if [ "$base_path" -ne "$HSS_DATA_DIR" ]; then
+    echo "ERROR:  $base_path != $HSS_DATA_DIR"
     exit
 fi
 
