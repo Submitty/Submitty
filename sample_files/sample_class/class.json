@@ -1,4 +1,6 @@
 {
+    "dev_team": [],
+    "upload_message": "Prepare your assignment for submission exactly as described on the course webpage.  By clicking \"Submit File\" you are confirming that you have read, understand, and agree to follow the Academic Integrity Policy.",
     "assignments": [
         {
             "assignment_id":"hw1",
@@ -12,13 +14,5 @@
             "released":true,
             "ta_grade_released":false
         }
-    ],
-    "dev_team": [
-        "dev"
-    ],
-    "ta_grades":true,
-    "grade_summary":true,
-    "download_readme":true,
-    "download_files":false
-
+    ]
 }

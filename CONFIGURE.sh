@@ -5,7 +5,7 @@
 
 # determine location of HSS GIT repository
 # this script (CONFIGURE.sh) is in the top level directory of the repository
-# (this command works even if we run configure from a different directory
+# (this command works even if we run configure from a different directory)
 HSS_REPOSITORY=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 # assume the TA grading repo is in the same location
