@@ -10,6 +10,11 @@ if [[ "$UID" -ne "0" ]] ; then
 fi
 
 
+##########################################################################
+# VARIABLES CONFIGURED BY CONFIGURE.SH
+# these variables are used by the INSTALL.sh
+##########################################################################
+
 # These variables are specified by running the CONFIGURE.sh script
 # (the CONFIGURE.sh script makes a copy of this file and replaces these values)
 HSS_INSTALL_DIR=__CONFIGURE__FILLIN__HSS_INSTALL_DIR__
@@ -22,7 +27,6 @@ HWPHP_USER=__CONFIGURE__FILLIN__HWPHP_USER__
 HWCRON_USER=__CONFIGURE__FILLIN__HWCRON_USER__
 HWCRONPHP_GROUP=__CONFIGURE__FILLIN__HWCRONPHP_GROUP__
 INSTRUCTORS_GROUP=__CONFIGURE__FILLIN__INSTRUCTORS_GROUP__
-
 
 # FIXME: Add some error checking to make sure these values were filled in correctly
 
@@ -102,6 +106,28 @@ chown -R  root:root $HSS_INSTALL_DIR/src
 find $HSS_INSTALL_DIR/src -type d -exec chmod 555 {} \;
 # "other" can read all files
 find $HSS_INSTALL_DIR/src -type f -exec chmod 444 {} \;
+
+
+########################################################################################################################
+########################################################################################################################
+# BUILD JUNIT TEST RUNNER (.java file)
+
+# copy the file from the repo
+rsync -rvuz $HSS_REPOSITORY/junit_test_runner/TestRunner.java $HSS_INSTALL_DIR/JUnit/TestRunner.java
+
+pushd $HSS_INSTALL_DIR/JUnit
+# root will be owner & group of the source file
+chown  root:root  TestRunner.java
+# everyone can read this file
+chmod  444 TestRunner.java
+
+# compile the executable
+javac -cp ./junit-4.12.jar TestRunner.java
+
+# everyone can read the compiled file
+chown root:root TestRunner.class
+chmod 444 TestRunner.class
+popd
 
 
 ########################################################################################################################
