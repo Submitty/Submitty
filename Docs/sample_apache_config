@@ -1,4 +1,4 @@
-IfModule mod_ssl.c>
+<IfModule mod_ssl.c>
 SSLUseStapling On
 SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 <VirtualHost test-submit:443>
