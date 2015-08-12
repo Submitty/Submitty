@@ -4,10 +4,9 @@ project (sample_assignment)
 ###################################################################################
 
 
-# DEFAULT INSTALLATION & DATA/CONFIGURATION LOCATIONS
-# (must be changed if you put the files elsewhere)
-set (HSS_INSTALL_DIR /usr/local/hss)
-set (HSS_DATA_DIR /var/local/hss)
+# these variables will be replaced by INSTALL.sh
+set (HSS_INSTALL_DIR __INSTALL__FILLIN__HSS_INSTALL_DIR__)
+set (HSS_DATA_DIR __INSTALL__FILLIN__HSS_DATA_DIR__)
 
 
 # assuming the core files for config, compilation, running, & grading are here:
