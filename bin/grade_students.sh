@@ -2,32 +2,31 @@
 
 
 # ======================================================================
-# this script takes in a single parameter, the base path of all of
-# the submission server files
+# this script takes in a single parameter, the relative path of the
+# to_be_graded directory (the todo list)
 
-#     ./grade_students <base_path>
+#     ./grade_students <relative_path_of_to_be_graded_directory>
 
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 1 ]; then
     echo "ERROR: Illegal number of parameters" >&2
-    echo "   ./grade_students  absolute_path_to_intall_directory  absolute_path_to_data_directory  relative_path_of_to_be_graded_directory" >&2
+    echo "   ./grade_students  relative_path_of_to_be_graded_directory" >&2
     exit 1
 fi
 
 # ======================================================================
-#HSS_INSTALL_DIR=/usr/local/hss
-#HSS_DATA_DIR=/var/local/hss
+# these variables will be replaced by INSTALL.sh
 
-HSS_INSTALL_DIR=$1
-HSS_DATA_DIR=$2
-TO_BE_GRADED=$3
+HSS_INSTALL_DIR=__INSTALL__FILLIN__HSS_INSTALL_DIR__
+HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
+
+SVN_PATH=__INSTALL__FILLIN__SVN_PATH__
 
 
-#base_path="$1"
-#TO_BE_GRADED="$2"
+TO_BE_GRADED=$1
 
 
 # global variable
-svn_path=svn+ssh://csci2600svn.cs.rpi.edu/var/lib/svn/csci2600
+
 
 
 # from that directory, we expect:
@@ -397,7 +396,7 @@ while true; do
 	    # svn checkout into the archival directory 
 	    mkdir -p $checkout_path
 	    pushd $checkout_path > /dev/null
-	    svn co -r {"$submission_time"} $svn_path/$user/$svn_subdirectory . > $tmp/.submit_svn_checkout.txt 2>&1
+	    svn co -r {"$submission_time"} $SVN_PATH/$user/$svn_subdirectory . > $tmp/.submit_svn_checkout.txt 2>&1
 	    popd > /dev/null
 
 	    # copy checkout into tmp compilation directory
