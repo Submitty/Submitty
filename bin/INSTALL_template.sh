@@ -111,6 +111,10 @@ find $HSS_INSTALL_DIR/website/public/custom_resources -exec chown root:instructo
 find $HSS_INSTALL_DIR/website/public/custom_resources -exec chmod 775 {} \;
 
 
+#replace necessary variables 
+replace_fillin_variables $HSS_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
+
+
 ########################################################################################################################
 ########################################################################################################################
 # COPY THE CORE GRADING CODE (C++ files)
@@ -123,6 +127,10 @@ chown -R  root:root $HSS_INSTALL_DIR/src
 find $HSS_INSTALL_DIR/src -type d -exec chmod 555 {} \;
 # "other" can read all files
 find $HSS_INSTALL_DIR/src -type f -exec chmod 444 {} \;
+
+
+#replace necessary variables
+replace_fillin_variables $HSS_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
 
 
 ########################################################################################################################
@@ -224,6 +232,7 @@ popd
 #replace necessary variables in the copied scripts
 replace_fillin_variables $HSS_INSTALL_DIR/bin/create_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/grade_students.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/grading_done.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/regrade.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/build_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/build_homework_function.sh
@@ -233,36 +242,44 @@ replace_fillin_variables $HSS_INSTALL_DIR/bin/build_homework_function.sh
 ################################################################################################################
 # COPY THE TA GRADING WEBSITE
 
-rsync  -rvuz $TAGRADING_REPOSITORY/*php         $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rvuz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rvuz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rvuz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rvuz $TAGRADING_REPOSITORY/robots.txt   $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rvuz $TAGRADING_REPOSITORY/favicon.ico  $HSS_INSTALL_DIR/hwgrading_website
+# if the tagrading repository is available....
+if [ -d "$TAGRADING_REPOSITORY" ]; then
 
-# set special user $HWPHP_USER as owner & group of all hwgrading_website files
-find $HSS_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
+    rsync  -rvuz $TAGRADING_REPOSITORY/*php         $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -rvuz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -rvuz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -rvuz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -rvuz $TAGRADING_REPOSITORY/robots.txt   $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -rvuz $TAGRADING_REPOSITORY/favicon.ico  $HSS_INSTALL_DIR/hwgrading_website
+    
+    # set special user $HWPHP_USER as owner & group of all hwgrading_website files
+    find $HSS_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
+    
+    # set the permissions of all files
+    # $HWPHP_USER can read & execute all directories and read all files
+    # "other" can cd into all subdirectories
+    chmod -R 400 $HSS_INSTALL_DIR/hwgrading_website
+    find $HSS_INSTALL_DIR/hwgrading_website -type d -exec chmod uo+x {} \;
+    # "other" can read all .txt & .css files
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.txt -exec chmod o+r {} \;
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.ico -exec chmod o+r {} \;
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.png -exec chmod o+r {} \;
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.jpg -exec chmod o+r {} \;
+    
+    # "other" can read & execute all .js files
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
+    
+    
+    replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/csci1200.php
+    replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/csci1100.php
 
-# set the permissions of all files
-# $HWPHP_USER can read & execute all directories and read all files
-# "other" can cd into all subdirectories
-chmod -R 400 $HSS_INSTALL_DIR/hwgrading_website
-find $HSS_INSTALL_DIR/hwgrading_website -type d -exec chmod uo+x {} \;
-# "other" can read all .txt & .css files
-find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
-find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.txt -exec chmod o+r {} \;
-find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.ico -exec chmod o+r {} \;
-find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
-find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.png -exec chmod o+r {} \;
-find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.jpg -exec chmod o+r {} \;
+else 
 
-# "other" can read & execute all .js files
-find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
+    echo -e "\n\nTA GRADING REPOSITORY IS NOT AVAILABLE, TA GRADING WEBSITE WAS NOT INSTALLED!\n\n"
 
-
-replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/csci1200.php
-replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/csci1100.php
-
+fi
 
 ################################################################################################################
 ################################################################################################################
