@@ -18,6 +18,7 @@ fi
 # (the CONFIGURE.sh script makes a copy of this file and replaces these values)
 HSS_INSTALL_DIR=__CONFIGURE__FILLIN__HSS_INSTALL_DIR__
 HSS_DATA_DIR=__CONFIGURE__FILLIN__HSS_DATA_DIR__
+SVN_PATH=__CONFIGURE__FILLIN__SVN_PATH__
 
 HSS_REPOSITORY=__CONFIGURE__FILLIN__HSS_REPOSITORY__
 TAGRADING_REPOSITORY=__CONFIGURE__FILLIN__TAGRADING_REPOSITORY__
@@ -36,6 +37,7 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__TAGRADING_REPOSITORY__|$TAGRADING_REPOSITORY|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|$HSS_INSTALL_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HSS_DATA_DIR__|$HSS_DATA_DIR|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SVN_PATH__|$SVN_PATH|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $1
@@ -220,8 +222,9 @@ popd
 
 
 #replace necessary variables in the copied scripts
-replace_fillin_variables $HSS_INSTALL_DIR/bin/regrade.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/create_course.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/grade_students.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/regrade.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/build_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/build_homework_function.sh
 
