@@ -128,17 +128,13 @@ find $HSS_INSTALL_DIR/src -type f -exec chmod 444 {} \;
 # COPY THE SAMPLE FILES FOR COURSE MANAGEMENT
 
 # copy the files from the repo
-rsync -rvuz $HSS_REPOSITORY/sample_files $HSS_INSTALL_DIR/sample_files
+rsync -rvuz $HSS_REPOSITORY/sample_files $HSS_INSTALL_DIR
 
 # root will be owner & group of these files
-chown -R  root:root $HSS_INSTALL_DIR/src
+chown -R  root:root $HSS_INSTALL_DIR/sample_files
 # but everyone can read all that files & directories, and cd into all the directories
-find $HSS_INSTALL_DIR/src -type d -exec chmod 555 {} \;
-find $HSS_INSTALL_DIR/src -type f -exec chmod 444 {} \;
-
-
-#replace necessary variables in the copied scripts
-replace_fillin_variables $HSS_INSTALL_DIR/sample_files/sample_class/build_course.sh
+find $HSS_INSTALL_DIR/sample_files -type d -exec chmod 555 {} \;
+find $HSS_INSTALL_DIR/sample_files -type f -exec chmod 444 {} \;
 
 
 ########################################################################################################################
@@ -160,6 +156,18 @@ javac -cp ./junit-4.12.jar TestRunner.java
 # everyone can read the compiled file
 chown root:root TestRunner.class
 chmod 444 TestRunner.class
+
+#
+#
+# FIXME: TEMPORARY, allow all members of the instructors group to
+# write the TestRunner.class.  Remove this once debugging of
+# TestRunner.class is finished.
+chgrp instructors TestRunner.class
+chmod g+w TestRunner.class
+#
+#
+#
+
 popd
 
 
@@ -180,7 +188,7 @@ find $HSS_INSTALL_DIR/bin -type f -exec chmod 540 {} \;
 
 
 # all course builders (instructors & head TAs) need read/execute access to this script
-chmod o+rx $HSS_INSTALL_DIR/bin/install_homework_function.sh 
+chmod o+rx $HSS_INSTALL_DIR/bin/build_homework_function.sh 
 
 chmod o+rx $HSS_INSTALL_DIR/bin/regrade.sh
 chmod o+rx $HSS_INSTALL_DIR/bin/grading_done.sh
@@ -214,6 +222,8 @@ popd
 #replace necessary variables in the copied scripts
 replace_fillin_variables $HSS_INSTALL_DIR/bin/regrade.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/create_course.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/build_course.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/build_homework_function.sh
 
 
 ################################################################################################################

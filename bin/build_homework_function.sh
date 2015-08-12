@@ -3,13 +3,11 @@
 ##########################################################################
 
 
-function install_homework {
+function build_homework {
 
-
-    # DEFAULT INSTALLATION & DATA/CONFIGURATION LOCATIONS
-    # (must be changed if you put the files elsewhere)
-    HSS_INSTALL_DIR=/usr/local/hss
-    HSS_DATA_DIR=/var/local/hss
+    # these variables will be replaced by INSTALL.sh
+    HSS_INSTALL_DIR=__INSTALL__FILLIN__HSS_INSTALL_DIR__
+    HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
 
 
     # location of the homework source files, including:
@@ -37,13 +35,16 @@ function install_homework {
     
     # copy the files to the build directory 
     rsync -rvuz   $hw_source/   $hw_build_path
+    find $hw_build_path -type d -exec chmod 770 {} \;
+    find $hw_build_path -type d -exec chmod g+s {} \;
+    find $hw_build_path -type f -exec chmod 660 {} \;
 
     # grab the universal cmake file
     cp $HSS_INSTALL_DIR/src/grading/Sample_CMakeLists.txt   $hw_build_path/CMakeLists.txt
+    chmod 660 $hw_build_path/CMakeLists.txt
 
     # go to the build directory
     pushd $hw_build_path
-
 
     # build the configuration, compilation, runner, and validation executables
     # configure cmake, specifying the clang compiler
@@ -52,7 +53,6 @@ function install_homework {
     # build (in parallel, 8 threads)
     # quit (don't continue on to build other homeworks) if there is a compile error
     make -j 8 || exit
-    #make -j 1 || exit
     
     # set the permissions 
     chmod  o+r   $hw_config
