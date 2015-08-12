@@ -34,9 +34,9 @@ TestResults* TestCaseJUnit::doit(const std::string &prefix) {
 // =============================================================================                                                                                           
 // =============================================================================                                                                                           
 /*
-This method parses the output of TestRunner. Output file format is one of the following two:
+This method parses the output of TestRunner. Output file format is one of the following:
 
-With failure:
+FAILURE:
 
 JUnit version 4.12
 EMMA: collecting runtime coverage data ...
@@ -44,12 +44,27 @@ FAILURES!!!
 Tests run: 13, Failures: 13
 EMMA: runtime coverage data merged into [/Users/ana/Downloads/java/coverage.ec] {in 2 ms}
 
-Success:
+or, if code is not instrumented
+
+JUnit version 4.12                                                                                                                      
+FAILURES!!!                                                                                                                                         
+Tests run: 13, Failures: 13 
+
+SUCCESS:
 
 JUnit version 4.12
 EMMA: collecting runtime coverage data ...
 OK (65 tests)
 EMMA: runtime coverage data merged into [/Users/ana/Downloads/java/coverage.ec] {in 46 ms}
+
+or, if code is not instrumented 
+
+JUnit version 4.12
+OK (65 tests)
+
+-------------------------------------
+
+All other output is exceptional, will be garded 0
 
 */
 
@@ -61,59 +76,68 @@ TestResults* TestCaseJUnit::doit_multiple_junit_tests(std::ifstream &junit_outpu
     return new TestResults(0.0,"ERROR: TestRunner output format and/or version number incompatible with grader");
   } 
 
+  /*
   junit_output >> token1 >> token2 >> token3 >> token4 >> token5 >> token6;
   // EMMA: collecting runtime coverage data ...
   if (token1 != "EMMA:" || token2 != "collecting" || token3 != "runtime" || token4 != "coverage" || token5 != "data" || token6 != "...") {
     return new TestResults(0.0,"ERROR: TestRunner output format incompatible with grader");
   }
+  */
 
-  junit_output >> token1;
+  while (junit_output >> token1) {
 
-  // If OK, then all student tests pass, award full credit
+    // If OK, then all student tests pass, award full credit
 
-  if (token1 == "OK") {
-    char c;
-    junit_output >> c;
-    if (c != '(') {
-      return new TestResults(0.0,"ERROR: FORMATTING!");
-    } // ANA: I think this should be an assertion
-    int num;
-    junit_output >> num;
-    junit_output >> token2;
-    if (token2 != "tests)") {
-      return new TestResults(0.0,"ERROR: FORMATTING!");
-    } // ANA: Same here, should be an assertion?
-    return new TestResults(1.0,""); // Awarding full credit    
-  }
-
-  // If Failures, award partial credit
-
-  if (token1 == "FAILURES!!!") {
-    // Parses the following: Tests run: 13, Failures: 13                                                                                                      
-    junit_output >> token2 >> token3; 
-    if (token2 != "Tests" || token3 != "run:") {
-      return new TestResults(0.0,"ERROR: FORMATTING!");
-    }
-    int tests_run;
-    junit_output >> tests_run;
-    assert (tests_run >= 0);
-    char comma;
-    junit_output >> comma;
-    assert (comma == ',');
-    junit_output >> token4;
-    assert (token4 == "Failures:");
-    int tests_failed;
-    junit_output >> tests_failed;
-    assert (tests_failed > 0);
-    if (tests_run == 0) { // Fixture creation failure (likely), award 0 credit
-      return new TestResults(0.0,"ERROR: No tests ran. Could not create fixture.");
+    if (token1 == "OK") {
+      char c;
+      junit_output >> c;
+      if (c != '(') {
+	return new TestResults(0.0,"ERROR: FORMATTING!");
+      } 
+      int num;
+      junit_output >> num;
+      if (num == 0) // No tests ran, awarding 0 
+	return new TestResults(0.0,"ERROR: No tests ran!");
+      junit_output >> token2;
+      if (token2 != "tests)") {
+	return new TestResults(0.0,"ERROR: FORMATTING!");
+      } 
+      return new TestResults(1.0,""); // Awarding full credit    
     }
 
-    int successful_tests = std::max(0,tests_run-tests_failed);
-    float partial = float(successful_tests) / float(num_junit_tests);
-    std::stringstream ss;
-    ss << "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = " << successful_tests << "/" << num_junit_tests;
-    return new TestResults(partial,ss.str());
+    // If Failures, award partial credit
+
+    else if (token1 == "FAILURES!!!") {
+      // Parses the following: Tests run: 13, Failures: 13                                                                                                      
+      junit_output >> token2 >> token3; 
+      if (token2 != "Tests" || token3 != "run:") {
+	return new TestResults(0.0,"ERROR: FORMATTING!");
+      }
+      int tests_run;
+      junit_output >> tests_run;
+      assert (tests_run >= 0);
+      char comma;
+      junit_output >> comma;
+      if (comma != ',') {
+	return new TestResults(0.0,"ERROR: FORMATTING!");
+      }
+      junit_output >> token4;      
+      if (token4 != "Failures:") {
+	return new TestResults(0.0,"ERROR: FORMATTING!");
+      }
+      int tests_failed;
+      junit_output >> tests_failed;
+      assert (tests_failed > 0);
+      if (tests_run == 0) { // Fixture creation failure (likely), award 0 credit
+	return new TestResults(0.0,"ERROR: No tests ran. Could not create fixture.");
+      }
+
+      int successful_tests = std::max(0,tests_run-tests_failed);
+      float partial = float(successful_tests) / float(tests_run);
+      std::stringstream ss;
+      ss << "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = " << successful_tests << "/" << tests_run;
+      return new TestResults(partial,ss.str());
+    }
   }
 
   std::cout << "ERROR: TestRunner output did not say 'OK' or 'FAILURES!!!'.  This should not happen!" << std::endl;
