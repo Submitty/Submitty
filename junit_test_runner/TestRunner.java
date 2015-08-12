@@ -6,6 +6,8 @@ import java.io.*;
 
 public class TestRunner {
 
+    private static String HIDDEN_TESTS_PREFIX = "ALMHidden";
+
     /*
     @param: relative name of the folder where the tests are
     @effects: runs all tests in folder ./$homework/test/ with JUnit
@@ -33,7 +35,10 @@ public class TestRunner {
 	    if (listOfFiles[i].isFile()) {
 		String filename = listOfFiles[i].getName();
 		if (filename.indexOf(".class") > -1) {
-		    // Found XyzTest.class in test directory
+		    // if class file is a hidden test, skip
+		    if (filename.startsWith(HIDDEN_TESTS_PREFIX))
+			continue;
+		    // Found XyzTest.class in test directory, and this is not a hidden test
 		    // Strip the .class off the name, then append to "hw.test."
 		    filename = folderName.replace('/','.')+filename.substring(0,filename.indexOf(".class"));
 		    try {
