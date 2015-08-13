@@ -48,7 +48,7 @@ function replace_fillin_variables {
 
 ########################################################################################################################
 ########################################################################################################################
-# if the top level directory does not exist, then make it
+# if the top level INSTALL directory does not exist, then make it
 mkdir -p $HSS_INSTALL_DIR
 
 
@@ -64,6 +64,19 @@ fi
 # set the permissions of the top level directory
 chown  root:instructors $HSS_INSTALL_DIR
 chmod  751              $HSS_INSTALL_DIR
+
+
+########################################################################################################################
+########################################################################################################################
+# if the top level DATA directory & CLASSES subdirectory do not exist, then make them
+mkdir -p $HSS_DATA_DIR
+mkdir -p $HSS_DATA_DIR/courses
+
+# set the permissions of these directories
+chown  root:instructors $HSS_DATA_DIR
+chmod  751              $HSS_DATA_DIR
+chown  root:instructors $HSS_DATA_DIR/courses
+chmod  751              $HSS_DATA_DIR/courses
 
 
 ########################################################################################################################
