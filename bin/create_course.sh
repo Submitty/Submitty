@@ -117,8 +117,10 @@ fi
 
 if [ ! -d "$HSS_DATA_DIR/courses/$semester" ]; then
     mkdir                            $HSS_DATA_DIR/courses/$semester
-    chown $HWPHP_USER:$HWPHP_USER    $HSS_DATA_DIR/courses/$semester
-    chmod u=rwx,g=rwx,o=rx           $HSS_DATA_DIR/courses/$semester
+#    chown $HWPHP_USER:$HWPHP_USER   $HSS_DATA_DIR/courses/$semester
+    chown $root:$instructors         $HSS_DATA_DIR/courses/$semester
+#    chmod u=rwx,g=rwx,o=rx          $HSS_DATA_DIR/courses/$semester
+    chmod 751                        $HSS_DATA_DIR/courses/$semester
 fi
 
 ########################################################################################################################

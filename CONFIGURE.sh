@@ -25,6 +25,10 @@ HWCRON_USER=hwcron
 HWCRONPHP_GROUP=hwcronphp
 INSTRUCTORS_GROUP=instructors
 
+UNTRUSTED_UID=`id -u untrusted` # untrusted's user id 
+UNTRUSTED_GID=`id -g untrusted` # untrusted's group id
+HWCRON_UID=`id -u hwcron`       # hwcron's user id 
+HWCRON_GID=`id -g hwcron`       # hwcron's group id
 
 ########################################################################################################################
 ########################################################################################################################
@@ -64,6 +68,10 @@ sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $HSS_REPOSITORY/
 sed -i -e "s|__CONFIGURE__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $HSS_REPOSITORY/INSTALL.sh
 sed -i -e "s|__CONFIGURE__FILLIN__INSTRUCTORS_GROUP__|$INSTRUCTORS_GROUP|g" $HSS_REPOSITORY/INSTALL.sh
 
+sed -i -e "s|__CONFIGURE__FILLIN__UNTRUSTED_UID__|$UNTRUSTED_UID|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__UNTRUSTED_GID__|$UNTRUSTED_GID|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_UID__|$HWCRON_UID|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $HSS_REPOSITORY/INSTALL.sh
 
 # FIXME: Add some error checking to make sure those values were filled in correctly
 

@@ -28,6 +28,11 @@ HWCRON_USER=__CONFIGURE__FILLIN__HWCRON_USER__
 HWCRONPHP_GROUP=__CONFIGURE__FILLIN__HWCRONPHP_GROUP__
 INSTRUCTORS_GROUP=__CONFIGURE__FILLIN__INSTRUCTORS_GROUP__
 
+UNTRUSTED_UID=__CONFIGURE__FILLIN__UNTRUSTED_UID__
+UNTRUSTED_GID=__CONFIGURE__FILLIN__UNTRUSTED_GID__
+HWCRON_UID=__CONFIGURE__FILLIN__HWCRON_UID__
+HWCRON_GID=__CONFIGURE__FILLIN__HWCRON_GID__
+
 # FIXME: Add some error checking to make sure these values were filled in correctly
 
 
@@ -42,6 +47,12 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $1
     sed -i -e "s|__INSTALL__FILLIN__INSTRUCTORS_GROUP__|$INSTRUCTORS_GROUP|g" $1
+
+    sed -i -e "s|__INSTALL__FILLIN__UNTRUSTED_UID__|$UNTRUSTED_UID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__UNTRUSTED_GID__|$UNTRUSTED_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWCRON_UID__|$HWCRON_UID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $1
+
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
 
@@ -221,6 +232,14 @@ chmod o+rx $HSS_INSTALL_DIR/bin/grading_done.sh
 chown root:$HWCRON_USER $HSS_INSTALL_DIR/bin/grade_students.sh
 chmod 750 $HSS_INSTALL_DIR/bin/grade_students.sh
 
+#replace necessary variables in the copied scripts
+replace_fillin_variables $HSS_INSTALL_DIR/bin/create_course.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/grade_students.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/grading_done.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/regrade.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/build_course.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/build_homework_function.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/untrusted_execute.c
 
 # prepare the untrusted_execute executable with suid
 
@@ -239,16 +258,6 @@ chown root untrusted_execute
 chgrp $HWCRON_USER untrusted_execute
 chmod 4550 untrusted_execute
 popd
-
-
-
-#replace necessary variables in the copied scripts
-replace_fillin_variables $HSS_INSTALL_DIR/bin/create_course.sh
-replace_fillin_variables $HSS_INSTALL_DIR/bin/grade_students.sh
-replace_fillin_variables $HSS_INSTALL_DIR/bin/grading_done.sh
-replace_fillin_variables $HSS_INSTALL_DIR/bin/regrade.sh
-replace_fillin_variables $HSS_INSTALL_DIR/bin/build_course.sh
-replace_fillin_variables $HSS_INSTALL_DIR/bin/build_homework_function.sh
 
 
 ################################################################################################################
