@@ -34,10 +34,10 @@ int main(int argc, char* argv[]) {
      THE SUID BIT & PERMISSIONS MUST BE SET CORRECTLY ON THE EXECUTABLE
   */
   static const uid_t ROOT_UID = 0;         /* root's user id & group id */
-  static const uid_t UNTRUSTED_UID = 1500; /* untrusted's user id */
-  static const uid_t UNTRUSTED_GID = 1506; /* untrusted's group id */
-  static const uid_t HWCRON_UID = 1625;    /* hwcron's user id */
-  static const uid_t HWCRON_GID = 1655;    /* hwcron's group id */
+  static const uid_t UNTRUSTED_UID = __INSTALL__FILLIN__UNTRUSTED_UID__; /* untrusted's user id */
+  static const uid_t UNTRUSTED_GID = __INSTALL__FILLIN__UNTRUSTED_GID__; /* untrusted's group id */
+  static const uid_t HWCRON_UID    = __INSTALL__FILLIN__HWCRON_UID__;    /* hwcron's user id */
+  static const uid_t HWCRON_GID    = __INSTALL__FILLIN__HWCRON_GID__;    /* hwcron's group id */
   /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
   /* Sanity check, this program must be run by hwcron, with

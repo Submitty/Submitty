@@ -34,7 +34,7 @@ function build_homework {
     echo "install $hw_source $hw_build_path"
     
     # copy the files to the build directory 
-    rsync -rvuz   $hw_source/   $hw_build_path
+    rsync -rvuz --delete  $hw_source/   $hw_build_path
     find $hw_build_path -type d -exec chmod 770 {} \;
     find $hw_build_path -type d -exec chmod g+s {} \;
     find $hw_build_path -type f -exec chmod 660 {} \;
@@ -61,13 +61,13 @@ function build_homework {
 
     # copy the test input, test output, test solution code files to the appropriate directories
     if [ -d $hw_build_path/test_input/ ]; then
-	rsync -rvuz $hw_build_path/test_input/   $course_dir/test_input/$assignment/
+	rsync -rvuz --delete $hw_build_path/test_input/   $course_dir/test_input/$assignment/
     fi
     if [ -d $hw_build_path/test_output/ ]; then
-	rsync -rvuz $hw_build_path/test_output/  $course_dir/test_output/$assignment/
+	rsync -rvuz --delete $hw_build_path/test_output/  $course_dir/test_output/$assignment/
     fi
     if [ -d $hw_build_path/test_code/ ]; then
-	rsync -rvuz $hw_build_path/test_code/    $course_dir/test_code/$assignment/
+	rsync -rvuz --delete $hw_build_path/test_code/    $course_dir/test_code/$assignment/
     fi
 
     popd
