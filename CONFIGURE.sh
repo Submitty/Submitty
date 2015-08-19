@@ -77,15 +77,16 @@ sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $HSS_REPOSITORY/IN
 
 # Copy account maintenance scripts unless they exist
 mkdir -p $HSS_INSTALL_DIR/bin
-[ -f $HSS_INSTALL_DIR/bin/rcsonly.pl ] || cp $HSS_REPOSITORY/Docs/Sample_bin/rcsonly.pl $HSS_INSTALL_DIR/bin/rcsonly.pl
-[ -f $HSS_INSTALL_DIR/bin/new.svnuser.pl ] || cp $HSS_REPOSITORY/Docs/Sample_bin/rcsonly.pl $HSS_INSTALL_DIR/bin/new.svnuser.pl
+[ -f $HSS_INSTALL_DIR/bin/rcsonly.pl ] || cp $HSS_REPOSITORY/Docs/sample_bin/rcsonly.pl $HSS_INSTALL_DIR/bin/rcsonly.pl
+[ -f $HSS_INSTALL_DIR/bin/new.svnuser.pl ] || cp $HSS_REPOSITORY/Docs/sample_bin/rcsonly.pl $HSS_INSTALL_DIR/bin/new.svnuser.pl
 mkdir -p /root/bin
+mkdir -p /var/local/hss/instructors
 touch /var/local/hss/instructors/rcslist
 touch /var/local/hss/instructors/svnlist
-[ -f /root/bin/top.txt ] || cp $HSS_REPOSITORY/Docs/Sample_bin/top.txt /root/bin/top.txt
-[ -f /root/bin/bottom.txt ] || cp $HSS_REPOSITORY/Docs/Sample_bin/bottom.txt /root/bin/bottom.txt
-[ -f /root/bin/gen.middle ] || cp $HSS_REPOSITORY/Docs/Sample_bin/gen.middle /root/bin/gen.middle
-[ -f /root/bin/regen.apache ] || cp $HSS_REPOSITORY/Docs/Sample_bin/regen.apache /root/bin/regen.apache
+[ -f /root/bin/top.txt ] || cp $HSS_REPOSITORY/Docs/sample_bin/top.txt /root/bin/top.txt
+[ -f /root/bin/bottom.txt ] || cp $HSS_REPOSITORY/Docs/sample_bin/bottom.txt /root/bin/bottom.txt
+[ -f /root/bin/gen.middle ] || cp $HSS_REPOSITORY/Docs/sample_bin/gen.middle /root/bin/gen.middle
+[ -f /root/bin/regen.apache ] || cp $HSS_REPOSITORY/Docs/sample_bin/regen.apache /root/bin/regen.apache
 chgrp instructors /root/bin/top.txt /root/bin/bottom.txt /root/bin/gen.middle /root/bin/regen.apache /var/local/hss/instructors/rcslist /var/local/hss/instructors/svnlist
 chmod 750 /root/bin/gen.middle /root/bin/regen.apache
 chmod 660 /var/local/hss/instructors/rcslist /var/local/hss/instructors/svnlist

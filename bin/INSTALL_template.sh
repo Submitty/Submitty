@@ -135,10 +135,6 @@ find $HSS_INSTALL_DIR/website/public/custom_resources -exec chown root:instructo
 find $HSS_INSTALL_DIR/website/public/custom_resources -exec chmod 775 {} \;
 
 
-#replace necessary variables 
-replace_fillin_variables $HSS_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
-
-
 ########################################################################################################################
 ########################################################################################################################
 # COPY THE CORE GRADING CODE (C++ files)
