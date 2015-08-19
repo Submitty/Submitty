@@ -80,6 +80,7 @@ mkdir -p $HSS_INSTALL_DIR/bin
 [ -f $HSS_INSTALL_DIR/bin/rcsonly.pl ] || cp $HSS_REPOSITORY/Docs/sample_bin/rcsonly.pl $HSS_INSTALL_DIR/bin/rcsonly.pl
 [ -f $HSS_INSTALL_DIR/bin/new.svnuser.pl ] || cp $HSS_REPOSITORY/Docs/sample_bin/rcsonly.pl $HSS_INSTALL_DIR/bin/new.svnuser.pl
 mkdir -p /root/bin
+mkdir -p /var/local/hss/instructors
 touch /var/local/hss/instructors/rcslist
 touch /var/local/hss/instructors/svnlist
 [ -f /root/bin/top.txt ] || cp $HSS_REPOSITORY/Docs/sample_bin/top.txt /root/bin/top.txt
