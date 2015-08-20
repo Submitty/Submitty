@@ -32,6 +32,8 @@ UNTRUSTED_UID=__CONFIGURE__FILLIN__UNTRUSTED_UID__
 UNTRUSTED_GID=__CONFIGURE__FILLIN__UNTRUSTED_GID__
 HWCRON_UID=__CONFIGURE__FILLIN__HWCRON_UID__
 HWCRON_GID=__CONFIGURE__FILLIN__HWCRON_GID__
+HWPHP_UID=__CONFIGURE__FILLIN__HWPHP_UID__
+HWPHP_GID=__CONFIGURE__FILLIN__HWPHP_GID__
 
 # FIXME: Add some error checking to make sure these values were filled in correctly
 
@@ -52,6 +54,8 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__UNTRUSTED_GID__|$UNTRUSTED_GID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_UID__|$HWCRON_UID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWPHP_GID__|$HWPHP_GID|g" $1
 
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
@@ -219,7 +223,7 @@ find $HSS_INSTALL_DIR/bin -type f -exec chmod 540 {} \;
 
 # all course builders (instructors & head TAs) need read/execute access to this script
 chmod o+rx $HSS_INSTALL_DIR/bin/build_homework_function.sh 
-
+chmod o+rx $HSS_INSTALL_DIR/bin/fake_submit_button_press.sh
 chmod o+rx $HSS_INSTALL_DIR/bin/regrade.sh
 chmod o+rx $HSS_INSTALL_DIR/bin/grading_done.sh
 
@@ -235,6 +239,7 @@ replace_fillin_variables $HSS_INSTALL_DIR/bin/grading_done.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/regrade.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/build_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/build_homework_function.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/fake_submit_button_press.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/untrusted_execute.c
 
 # prepare the untrusted_execute executable with suid
