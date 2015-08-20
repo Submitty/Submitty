@@ -29,6 +29,8 @@ UNTRUSTED_UID=`id -u untrusted` # untrusted's user id
 UNTRUSTED_GID=`id -g untrusted` # untrusted's group id
 HWCRON_UID=`id -u hwcron`       # hwcron's user id 
 HWCRON_GID=`id -g hwcron`       # hwcron's group id
+HWPHP_UID=`id -u hwphp`         # hwphp's user id 
+HWPHP_GID=`id -g hwphp`         # hwphp's group id
 
 ########################################################################################################################
 ########################################################################################################################
@@ -72,6 +74,8 @@ sed -i -e "s|__CONFIGURE__FILLIN__UNTRUSTED_UID__|$UNTRUSTED_UID|g" $HSS_REPOSIT
 sed -i -e "s|__CONFIGURE__FILLIN__UNTRUSTED_GID__|$UNTRUSTED_GID|g" $HSS_REPOSITORY/INSTALL.sh
 sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_UID__|$HWCRON_UID|g" $HSS_REPOSITORY/INSTALL.sh
 sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_GID__|$HWPHP_GID|g" $HSS_REPOSITORY/INSTALL.sh
 
 # FIXME: Add some error checking to make sure those values were filled in correctly
 
