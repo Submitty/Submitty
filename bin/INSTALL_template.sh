@@ -175,6 +175,8 @@ find $HSS_INSTALL_DIR/sample_files -type f -exec chmod 444 {} \;
 ########################################################################################################################
 # BUILD JUNIT TEST RUNNER (.java file)
 
+echo 'going to build junit test runner'
+
 # copy the file from the repo
 rsync -rvuz $HSS_REPOSITORY/junit_test_runner/TestRunner.java $HSS_INSTALL_DIR/JUnit/TestRunner.java
 
@@ -204,6 +206,7 @@ chmod g+w TestRunner.class
 
 popd
 
+echo 'finished building junit test runner'
 
 ########################################################################################################################
 ########################################################################################################################

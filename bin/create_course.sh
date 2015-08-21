@@ -20,6 +20,8 @@ HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
 HWPHP_USER=__INSTALL__FILLIN__HWPHP_USER__
 HWCRON_USER=__INSTALL__FILLIN__HWCRON_USER__
 
+INSTRUCTORS_GROUP=instructors
+
 ########################################################################################################################
 ########################################################################################################################
 
@@ -56,6 +58,12 @@ if ! getent group "$ta_www_group" >/dev/null 2>&1 ; then
     exit
 fi
 
+
+# confirm that the instructor is a member of the instructors group
+if ! groups "$instructor" | grep -q "\b${INSTRUCTORS_GROUP}\b" ; then
+    echo -e "ERROR: $instructor is not in group $INSTRUCTORS_GROUP\n"
+    exit
+fi
 
 # confirm that the instructor, hwcron, and hwphp are members of the
 # ta_www_group 
@@ -118,7 +126,7 @@ fi
 if [ ! -d "$HSS_DATA_DIR/courses/$semester" ]; then
     mkdir                            $HSS_DATA_DIR/courses/$semester
 #    chown $HWPHP_USER:$HWPHP_USER   $HSS_DATA_DIR/courses/$semester
-    chown $root:$instructors         $HSS_DATA_DIR/courses/$semester
+    chown root:$INSTRUCTORS_GROUP    $HSS_DATA_DIR/courses/$semester
 #    chmod u=rwx,g=rwx,o=rx          $HSS_DATA_DIR/courses/$semester
     chmod 751                        $HSS_DATA_DIR/courses/$semester
 fi
