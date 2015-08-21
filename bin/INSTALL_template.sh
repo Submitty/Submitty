@@ -10,15 +10,15 @@ if [[ "$UID" -ne "0" ]] ; then
 fi
 
 
-##########################################################################
+########################################################################################################################
 # VARIABLES CONFIGURED BY CONFIGURE.SH
-# these variables are used by the INSTALL.sh
-##########################################################################
+########################################################################################################################
 
 # These variables are specified by running the CONFIGURE.sh script
 # (the CONFIGURE.sh script makes a copy of this file and replaces these values)
 HSS_INSTALL_DIR=__CONFIGURE__FILLIN__HSS_INSTALL_DIR__
 HSS_DATA_DIR=__CONFIGURE__FILLIN__HSS_DATA_DIR__
+SVN_PATH=__CONFIGURE__FILLIN__SVN_PATH__
 
 HSS_REPOSITORY=__CONFIGURE__FILLIN__HSS_REPOSITORY__
 TAGRADING_REPOSITORY=__CONFIGURE__FILLIN__TAGRADING_REPOSITORY__
@@ -31,6 +31,21 @@ INSTRUCTORS_GROUP=__CONFIGURE__FILLIN__INSTRUCTORS_GROUP__
 # FIXME: Add some error checking to make sure these values were filled in correctly
 
 
+#this function takes a single argument, the name of the file to be edited
+function replace_fillin_variables {
+    sed -i -e "s|__INSTALL__FILLIN__HSS_REPOSITORY__|$HSS_REPOSITORY|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__TAGRADING_REPOSITORY__|$TAGRADING_REPOSITORY|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|$HSS_INSTALL_DIR|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HSS_DATA_DIR__|$HSS_DATA_DIR|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SVN_PATH__|$SVN_PATH|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__INSTRUCTORS_GROUP__|$INSTRUCTORS_GROUP|g" $1
+    # FIXME: Add some error checking to make sure these values were filled in correctly
+}
+
+
 ########################################################################################################################
 ########################################################################################################################
 # if the top level directory does not exist, then make it
@@ -40,7 +55,9 @@ mkdir -p $HSS_INSTALL_DIR
 # option for clean install (delete all existing directories/files
 if [[ "$#" -eq 1 && $1 == "clean" ]] ; then
     rm -r $HSS_INSTALL_DIR/website
+    rm -r $HSS_INSTALL_DIR/hwgrading_website
     rm -r $HSS_INSTALL_DIR/src
+    rm -r $HSS_INSTALL_DIR/bin
 fi
 
 
@@ -94,6 +111,10 @@ find $HSS_INSTALL_DIR/website/public/custom_resources -exec chown root:instructo
 find $HSS_INSTALL_DIR/website/public/custom_resources -exec chmod 775 {} \;
 
 
+#replace necessary variables 
+replace_fillin_variables $HSS_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
+
+
 ########################################################################################################################
 ########################################################################################################################
 # COPY THE CORE GRADING CODE (C++ files)
@@ -106,6 +127,24 @@ chown -R  root:root $HSS_INSTALL_DIR/src
 find $HSS_INSTALL_DIR/src -type d -exec chmod 555 {} \;
 # "other" can read all files
 find $HSS_INSTALL_DIR/src -type f -exec chmod 444 {} \;
+
+
+#replace necessary variables
+replace_fillin_variables $HSS_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
+
+
+########################################################################################################################
+########################################################################################################################
+# COPY THE SAMPLE FILES FOR COURSE MANAGEMENT
+
+# copy the files from the repo
+rsync -rvuz $HSS_REPOSITORY/sample_files $HSS_INSTALL_DIR
+
+# root will be owner & group of these files
+chown -R  root:root $HSS_INSTALL_DIR/sample_files
+# but everyone can read all that files & directories, and cd into all the directories
+find $HSS_INSTALL_DIR/sample_files -type d -exec chmod 555 {} \;
+find $HSS_INSTALL_DIR/sample_files -type f -exec chmod 444 {} \;
 
 
 ########################################################################################################################
@@ -127,6 +166,18 @@ javac -cp ./junit-4.12.jar TestRunner.java
 # everyone can read the compiled file
 chown root:root TestRunner.class
 chmod 444 TestRunner.class
+
+#
+#
+# FIXME: TEMPORARY, allow all members of the instructors group to
+# write the TestRunner.class.  Remove this once debugging of
+# TestRunner.class is finished.
+chgrp instructors TestRunner.class
+chmod g+w TestRunner.class
+#
+#
+#
+
 popd
 
 
@@ -147,7 +198,7 @@ find $HSS_INSTALL_DIR/bin -type f -exec chmod 540 {} \;
 
 
 # all course builders (instructors & head TAs) need read/execute access to this script
-chmod o+rx $HSS_INSTALL_DIR/bin/install_homework_function.sh 
+chmod o+rx $HSS_INSTALL_DIR/bin/build_homework_function.sh 
 
 chmod o+rx $HSS_INSTALL_DIR/bin/regrade.sh
 chmod o+rx $HSS_INSTALL_DIR/bin/grading_done.sh
@@ -175,21 +226,60 @@ chown root untrusted_execute
 chgrp $HWCRON_USER untrusted_execute
 chmod 4550 untrusted_execute
 popd
-exit
 
 
-########################################
+
+#replace necessary variables in the copied scripts
+replace_fillin_variables $HSS_INSTALL_DIR/bin/create_course.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/grade_students.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/grading_done.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/regrade.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/build_course.sh
+replace_fillin_variables $HSS_INSTALL_DIR/bin/build_homework_function.sh
+
+
+################################################################################################################
+################################################################################################################
 # COPY THE TA GRADING WEBSITE
-# all at once?
-#rsync -rvuz $TAGRADING_REPOSITORY/ $HWPHP_USER@localhost:$HSS_INSTALL_DIR/hwgrading_website
-# separately?  (is this necessary?)
-rsync -rvuz $TAGRADING_REPOSITORY/*php $HWPHP_USER@localhost:$HSS_INSTALL_DIR/hwgrading_website
-rsync -rvuz $TAGRADING_REPOSITORY/toolbox $HWPHP_USER@localhost:$HSS_INSTALL_DIR/hwgrading_website
-rsync -rvuz $TAGRADING_REPOSITORY/lib $HWPHP_USER@localhost:$HSS_INSTALL_DIR/hwgrading_website
-rsync -rvuz $TAGRADING_REPOSITORY/account $HWPHP_USER@localhost:$HSS_INSTALL_DIR/hwgrading_website
-rsync -rvuz $TAGRADING_REPOSITORY/robots.txt $HWPHP_USER@localhost:$HSS_INSTALL_DIR/hwgrading_website
-rsync -rvuz $TAGRADING_REPOSITORY/favicon.ico $HWPHP_USER@localhost:$HSS_INSTALL_DIR/hwgrading_website
 
+# if the tagrading repository is available....
+if [ -d "$TAGRADING_REPOSITORY" ]; then
+
+    rsync  -rvuz $TAGRADING_REPOSITORY/*php         $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -rvuz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -rvuz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -rvuz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -rvuz $TAGRADING_REPOSITORY/robots.txt   $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -rvuz $TAGRADING_REPOSITORY/favicon.ico  $HSS_INSTALL_DIR/hwgrading_website
+    
+    # set special user $HWPHP_USER as owner & group of all hwgrading_website files
+    find $HSS_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
+    
+    # set the permissions of all files
+    # $HWPHP_USER can read & execute all directories and read all files
+    # "other" can cd into all subdirectories
+    chmod -R 400 $HSS_INSTALL_DIR/hwgrading_website
+    find $HSS_INSTALL_DIR/hwgrading_website -type d -exec chmod uo+x {} \;
+    # "other" can read all .txt & .css files
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.txt -exec chmod o+r {} \;
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.ico -exec chmod o+r {} \;
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.png -exec chmod o+r {} \;
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.jpg -exec chmod o+r {} \;
+    
+    # "other" can read & execute all .js files
+    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
+    
+    
+    replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/csci1200.php
+    replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/csci1100.php
+
+else 
+
+    echo -e "\n\nTA GRADING REPOSITORY IS NOT AVAILABLE, TA GRADING WEBSITE WAS NOT INSTALLED!\n\n"
+
+fi
 
 ################################################################################################################
 ################################################################################################################

@@ -1,7 +1,12 @@
 #!/bin/bash
 
-HSS_INSTALL_DIR=/usr/local/hss
-HSS_DATA_DIR=/var/local/hss
+# ======================================================================
+# these variables will be replaced by INSTALL.sh
+
+HSS_INSTALL_DIR=__INSTALL__FILLIN__HSS_INSTALL_DIR__
+HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
+
+# ======================================================================
 
 while true; do
     total_count=`ls -1 2>/dev/null $HSS_DATA_DIR/to_be_graded/* | wc -l`
@@ -17,3 +22,5 @@ while true; do
     fi    
 
 done
+
+# ======================================================================

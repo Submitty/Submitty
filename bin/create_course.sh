@@ -9,61 +9,120 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
+########################################################################################################################
+########################################################################################################################
 
+# these variables will be replaced by INSTALL.sh
 
+HSS_INSTALL_DIR=__INSTALL__FILLIN__HSS_INSTALL_DIR__
+HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
+
+HWPHP_USER=__INSTALL__FILLIN__HWPHP_USER__
+HWCRON_USER=__INSTALL__FILLIN__HWCRON_USER__
 
 ########################################################################################################################
 ########################################################################################################################
 
-#!/bin/bash
-
-
-#  new_course.sh  <semester>  <course>  <instructor username>  <ta group>
+if [[ $# -ne "4" ]] ; then
+    echo "ERROR: Usage, wrong number of arguments"
+    echo "   create_course.sh  <semester>  <course>  <instructor username>  <ta group>"
+    exit
+fi
 
 semester=$1
 course=$2
 instructor=$3
 ta_www_group=$4
 
-#base_directory=/projects/submit3
-base_directory=/local/scratch0/submit3
+echo -e "\nCREATE COURSE:"
+echo -e "  semester:     $semester"
+echo -e "  course:       $course"
+echo -e "  instructor:   $instructor"
+echo -e "  ta_www_group: $ta_www_group\n"
 
-echo "semester:     $semester"
-echo "course:       $course"
-echo "instructor:   $instructor"
-echo "ta_www_group: $ta_www_group"
+########################################################################################################################
+########################################################################################################################
+# ERROR CHECKING ON THE ARGUMENTS
 
-# ta_www_group should contain:  hwphp hwcron instructor ta1 ta2 ta3 ...
-
-
-#############################################################
-
-if [ ! -d "$base_directory" ]; then
-    echo "ERROR: base directory " $base_directory " does not exist"
+# confirm that the instructor user exists
+if ! id -u "$instructor" >/dev/null 2>&1 ; then
+    echo -e "ERROR: $instructor user does not exist\n"
     exit
 fi
 
-if [ ! -d "$base_directory/courses" ]; then
-    echo "ERROR: courses directory " $base_directory/courses " does not exist"
+# confirm that the ta_www_group exists
+if ! getent group "$ta_www_group" >/dev/null 2>&1 ; then
+    echo -e "ERROR: $ta_www_group group does not exist\n"
     exit
 fi
 
-if [ ! -d "$base_directory/courses/$semester" ]; then
-    mkdir                   $base_directory/courses/$semester
-    chown hwphp:hwphp       $base_directory/courses/$semester
-    chmod u=rwx,g=rwx,o=rx  $base_directory/courses/$semester
+
+# confirm that the instructor, hwcron, and hwphp are members of the
+# ta_www_group 
+if ! groups "$instructor" | grep -q "\b${ta_www_group}\b" ; then
+    echo -e "ERROR: $instructor is not in group $ta_www_group\n"
+    exit
+fi
+if ! groups "$HWPHP_USER" | grep -q "\b${ta_www_group}\b" ; then
+    echo -e "ERROR: $HWPHP_USER is not in group $ta_www_group\n"
+    exit
+fi
+if ! groups "$HWCRON_USER" | grep -q "\b${ta_www_group}\b" ; then
+    echo -e "ERROR: $HWCRON_USER is not in group $ta_www_group\n"
+    exit
 fi
 
-#############################################################
+# NOTE: the ta_www_group should also contain the usernames of any
+#       additional instructors and/or head TAs who need read/write
+#       access to these files
 
-course_dir=$base_directory/courses/$semester/$course
+########################################################################################################################
+########################################################################################################################
+
+#this function takes a single argument, the name of the file to be edited
+function replace_fillin_variables {
+    sed -i -e "s|__CREATE_COURSE__FILLIN__HSS_INSTALL_DIR__|$HSS_INSTALL_DIR|g" $1
+    sed -i -e "s|__CREATE_COURSE__FILLIN__HSS_DATA_DIR__|$HSS_DATA_DIR|g" $1
+    sed -i -e "s|__CREATE_COURSE__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $1
+    sed -i -e "s|__CREATE_COURSE__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $1
+
+    sed -i -e "s|__CREATE_COURSE__FILLIN__SEMESTER__|$semester|g" $1
+    sed -i -e "s|__CREATE_COURSE__FILLIN__COURSE__|$course|g" $1
+
+    # FIXME: Add some error checking to make sure these values were filled in correctly
+}
+
+########################################################################################################################
+########################################################################################################################
+
+course_dir=$HSS_DATA_DIR/courses/$semester/$course
 
 if [ -d "$course_dir" ]; then
-    echo "ERROR: specific course directory " $course_dir " already exists"
+    echo -e "ERROR: specific course directory " $course_dir " already exists"
     exit
 fi
 
+########################################################################################################################
+########################################################################################################################
 
+if [ ! -d "$HSS_DATA_DIR" ]; then
+    echo -e "ERROR: base directory " $HSS_DATA_DIR " does not exist\n"
+    exit
+fi
+
+if [ ! -d "$HSS_DATA_DIR/courses" ]; then
+    echo -e "ERROR: courses directory " $HSS_DATA_DIR/courses " does not exist\n"
+    exit
+fi
+
+if [ ! -d "$HSS_DATA_DIR/courses/$semester" ]; then
+    mkdir                            $HSS_DATA_DIR/courses/$semester
+    chown $HWPHP_USER:$HWPHP_USER    $HSS_DATA_DIR/courses/$semester
+    chmod u=rwx,g=rwx,o=rx           $HSS_DATA_DIR/courses/$semester
+fi
+
+########################################################################################################################
+########################################################################################################################
 
 function create_and_set {
     permissions="$1"
@@ -76,36 +135,67 @@ function create_and_set {
 }
 
 
-#               drwxrws---      instructor   ta_www_group    ./
-create_and_set  u=rwx,g=rxs,o=  $instructor  $ta_www_group   $course_dir
+# top level course directory
+#               drwxrws---       instructor   ta_www_group    ./
+create_and_set  u=rwx,g=rxs,o=   $instructor  $ta_www_group   $course_dir
 
 
-# NOTE: these are the only directories that should be manually edited
-#               drwxrws---      instructor   ta_www_group	hwconfig/
-#               drwxr-s---      instructor   ta_www_group    config/
-create_and_set  u=rwx,g=rxs,o=  $instructor  $ta_www_group	$course_dir/hwconfig
-create_and_set  u=rwx,g=rxs,o=  $instructor  $ta_www_group   $course_dir/config
+#               drwxrws---       instructor   ta_www_group    build/
+#               drwxrws---       instructor   ta_www_group    config/
+create_and_set  u=rwx,g=rwxs,o=  $instructor  $ta_www_group   $course_dir/build
+create_and_set  u=rwx,g=rwxs,o=  $instructor  $ta_www_group   $course_dir/config
 
 
 # NOTE: when homework is    installed, grading executables, code, & datafiles are placed here
-#               drwxr-s---      instructor   ta_www_group    bin/
-#               drwxr-s---      instructor   ta_www_group    test_code/
-#               drwxr-s---      instructor   ta_www_group    test_input/
-#               drwxr-s---      instructor   ta_www_group    test_output/
-create_and_set  u=rwx,g=rxs,o=  $instructor  $ta_www_group   $course_dir/bin
-create_and_set  u=rwx,g=rxs,o=  $instructor  $ta_www_group   $course_dir/test_code
-create_and_set  u=rwx,g=rxs,o=  $instructor  $ta_www_group   $course_dir/test_input
-create_and_set  u=rwx,g=rxs,o=  $instructor  $ta_www_group   $course_dir/test_output
+#               drwxr-s---       instructor   ta_www_group    bin/
+#               drwxr-s---       instructor   ta_www_group    test_code/
+#               drwxr-s---       instructor   ta_www_group    test_input/
+#               drwxr-s---       instructor   ta_www_group    test_output/
+create_and_set  u=rwx,g=rxs,o=   $instructor  $ta_www_group   $course_dir/bin
+create_and_set  u=rwx,g=rxs,o=   $instructor  $ta_www_group   $course_dir/test_code
+create_and_set  u=rwx,g=rxs,o=   $instructor  $ta_www_group   $course_dir/test_input
+create_and_set  u=rwx,g=rxs,o=   $instructor  $ta_www_group   $course_dir/test_output
 
 
 # NOTE: on each student submission, files are written to these directories
-#               drwxr-s---      hwphp        ta_www_group    submissions/
-#               drwxr-s---      hwcron       ta_www_group    results/
-create_and_set  u=rwx,g=rxs,o=  hwphp        $ta_www_group   $course_dir/submissions
-create_and_set  u=rwx,g=rxs,o=  hwcron       $ta_www_group   $course_dir/results
+#               drwxr-s---       $HWPHP_USER        ta_www_group    submissions/
+#               drwxr-s---       $HWCRON_USER       ta_www_group    results/
+#               drwxr-s---       $HWCRON_USER       ta_www_group    checkout/
+create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/submissions
+create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/results
+create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/checkout
 
 
 # NOTE:    instructor uploads TA HW grade reports & overall grade scores here
-#               drwxr-s---      instructor   ta_www_group    reports/
-create_and_set  u=rwx,g=rxs,o=  $instructor   $ta_www_group   $course_dir/reports
+#               drwxr-s---       instructor   ta_www_group    reports/
+create_and_set  u=rwx,g=rxs,o=   $instructor   $ta_www_group   $course_dir/reports
 
+
+########################################################################################################################
+########################################################################################################################
+
+# copy the build_course.sh script
+cp $HSS_INSTALL_DIR/bin/build_course.sh $course_dir/BUILD_${course}.sh
+chown $instructor:$ta_www_group $course_dir/BUILD_${course}.sh
+chmod 770 $course_dir/BUILD_${course}.sh
+replace_fillin_variables $course_dir/BUILD_${course}.sh
+
+# copy the sample_main.css file for webpage customizations
+cp $HSS_INSTALL_DIR/sample_files/sample_class/sample_main.css $course_dir/${semester}_${course}_main.css
+chown $instructor:$ta_www_group $course_dir/${semester}_${course}_main.css
+chmod 660 $course_dir/${semester}_${course}_main.css
+replace_fillin_variables $course_dir/${semester}_${course}_main.css
+
+# copy the sample_main.css file for webpage customizations
+cp $HSS_INSTALL_DIR/sample_files/sample_class/class.json $course_dir/config/class.json
+chown $instructor:$ta_www_group $course_dir/config/class.json
+chmod 660 $course_dir/config/class.json
+#replace_fillin_variables $course_dir/config/class.json
+
+########################################################################################################################
+########################################################################################################################
+
+echo -e "SUCCESS!  new course   $course $semester   CREATED HERE:   $course_dir"
+
+########################################################################################################################
+########################################################################################################################

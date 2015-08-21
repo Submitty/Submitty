@@ -568,6 +568,9 @@ function is_valid_semester($semester) {
     if ($semester == "s15") {
         return true;
     }
+    if ($semester == "f15") {
+        return true;
+    }
     return false;
 }
 

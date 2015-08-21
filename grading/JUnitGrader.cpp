@@ -133,9 +133,13 @@ TestResults* TestCaseJUnit::doit_multiple_junit_tests(std::ifstream &junit_outpu
       }
 
       int successful_tests = std::max(0,tests_run-tests_failed);
+      std::cout << "SUCCESSFUL_TESTS = " << successful_tests << "  tests_run = " << tests_run << std::endl;
       float partial = float(successful_tests) / float(tests_run);
       std::stringstream ss;
       ss << "ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = " << successful_tests << "/" << tests_run;
+
+      std::cout << "JUNIT Multiple junit tests, partial = " << partial << std::endl;
+      assert (partial >= 0.0 && partial <= 1.0);
       return new TestResults(partial,ss.str());
     }
   }
