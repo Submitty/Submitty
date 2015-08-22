@@ -18,7 +18,7 @@ echo $PWD
 if [ "$#" -ne 1 ] && [ "$#" -ne 2 ]; then 
     echo "USAGE:"
     echo "  regrade.sh  <(absolute or relative) PATTERN PATH>"
-    echo "  regrade.sh  <(absolute or relative) PATTERN PATH>  <TO_BE_GRADED_DIRECTORY (relative)>"
+    echo "  regrade.sh  <(absolute or relative) PATTERN PATH>  interactive"
     exit
 fi
 
@@ -35,13 +35,19 @@ if [ "${pattern:$[$pattern_length-1]:1}" == "/" ]; then
     pattern_length=${#pattern}
 fi
 
-#optional argument...
-if [ "$#" -gt 1 ]; then
-    TO_BE_GRADED="$2"
+
+if [ "$#" -eq 2 ]; then 
+    if [ ! "$2" = "interactive" ]; then
+	echo "USAGE:"
+	echo "  regrade.sh  <(absolute or relative) PATTERN PATH>"
+	echo "  regrade.sh  <(absolute or relative) PATTERN PATH>  interactive"
+	exit
+    fi
+    TO_BE_GRADED="to_be_graded_interactive"
 else
-    TO_BE_GRADED="to_be_graded"
-#    TO_BE_GRADED="batch_regrade"
+    TO_BE_GRADED="to_be_graded_batch"
 fi
+
 
 base_path=${pattern%/courses*}
 base_path_length=${#base_path}

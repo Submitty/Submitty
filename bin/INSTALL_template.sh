@@ -9,6 +9,8 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
+echo -e "\nBeginning installation of the homework submission server\n"
+
 
 ########################################################################################################################
 # VARIABLES CONFIGURED BY CONFIGURE.SH
@@ -69,6 +71,9 @@ mkdir -p $HSS_INSTALL_DIR
 
 # option for clean install (delete all existing directories/files
 if [[ "$#" -eq 1 && $1 == "clean" ]] ; then
+
+    echo -e "\nDeleting directories for a clean installation\n"
+
     rm -r $HSS_INSTALL_DIR/website
     rm -r $HSS_INSTALL_DIR/hwgrading_website
     rm -r $HSS_INSTALL_DIR/src
@@ -77,21 +82,41 @@ fi
 
 
 # set the permissions of the top level directory
-chown  root:instructors $HSS_INSTALL_DIR
-chmod  751              $HSS_INSTALL_DIR
+chown  root:$INSTRUCTORS_GROUP  $HSS_INSTALL_DIR
+chmod  751                      $HSS_INSTALL_DIR
 
 
 ########################################################################################################################
 ########################################################################################################################
 # if the top level DATA directory & CLASSES subdirectory do not exist, then make them
+
+echo -e "Make top level directores & set permissions"
+
 mkdir -p $HSS_DATA_DIR
 mkdir -p $HSS_DATA_DIR/courses
 
 # set the permissions of these directories
-chown  root:instructors $HSS_DATA_DIR
-chmod  751              $HSS_DATA_DIR
-chown  root:instructors $HSS_DATA_DIR/courses
-chmod  751              $HSS_DATA_DIR/courses
+chown  root:$INSTRUCTORS_GROUP $HSS_DATA_DIR
+chmod  751                     $HSS_DATA_DIR
+chown  root:$INSTRUCTORS_GROUP $HSS_DATA_DIR/courses
+chmod  751                     $HSS_DATA_DIR/courses
+
+
+
+# if the to_be_graded directories do not exist, then make them
+mkdir -p $HSS_DATA_DIR/to_be_graded_interactive
+mkdir -p $HSS_DATA_DIR/to_be_graded_batch
+
+# set the permissions of these directories
+
+#hwphp will write items to this list, hwcron will remove them
+chown  $HWCRON_USER:$HWCRONPHP_GROUP   $HSS_DATA_DIR/to_be_graded_interactive
+chmod  770                             $HSS_DATA_DIR/to_be_graded_interactive
+#instructors will write items to this todo list, hwcron will remove them
+chown  $HWCRON_USER:$INSTRUCTORS_GROUP $HSS_DATA_DIR/to_be_graded_batch
+chmod  770                             $HSS_DATA_DIR/to_be_graded_batch
+
+
 
 
 ########################################################################################################################
@@ -111,9 +136,10 @@ chmod  751              $HSS_DATA_DIR/courses
 ########################################################################################################################
 # COPY THE SUBMISSION SERVER WEBSITE (php & javascript)
 
+echo -e "Copy the submission website"
 
 # copy the website from the repo
-rsync -rvuz   $HSS_REPOSITORY/public   $HSS_INSTALL_DIR/website
+rsync -ruz   $HSS_REPOSITORY/public   $HSS_INSTALL_DIR/website
 
 # automatically create the site path file, storing the data directory in the file
 echo $HSS_DATA_DIR > $HSS_INSTALL_DIR/website/public/site_path.txt 
@@ -135,7 +161,7 @@ find $HSS_INSTALL_DIR/website -type f -name \*.js -exec chmod o+rx {} \;
 # create the custom_resources directory
 mkdir -p $HSS_INSTALL_DIR/website/public/custom_resources
 # instructors will be able to add their own .css file customizations to this directory
-find $HSS_INSTALL_DIR/website/public/custom_resources -exec chown root:instructors {} \;
+find $HSS_INSTALL_DIR/website/public/custom_resources -exec chown root:$INSTRUCTORS_GROUP {} \;
 find $HSS_INSTALL_DIR/website/public/custom_resources -exec chmod 775 {} \;
 
 
@@ -143,8 +169,10 @@ find $HSS_INSTALL_DIR/website/public/custom_resources -exec chmod 775 {} \;
 ########################################################################################################################
 # COPY THE CORE GRADING CODE (C++ files)
 
+echo -e "Copy the grading code"
+
 # copy the files from the repo
-rsync -rvuz $HSS_REPOSITORY/grading $HSS_INSTALL_DIR/src
+rsync -ruz $HSS_REPOSITORY/grading $HSS_INSTALL_DIR/src
 # root will be owner & group of these files
 chown -R  root:root $HSS_INSTALL_DIR/src
 # "other" can cd into & ls all subdirectories
@@ -161,8 +189,10 @@ replace_fillin_variables $HSS_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
 ########################################################################################################################
 # COPY THE SAMPLE FILES FOR COURSE MANAGEMENT
 
+echo -e "Copy the sample files"
+
 # copy the files from the repo
-rsync -rvuz $HSS_REPOSITORY/sample_files $HSS_INSTALL_DIR
+rsync -ruz $HSS_REPOSITORY/sample_files $HSS_INSTALL_DIR
 
 # root will be owner & group of these files
 chown -R  root:root $HSS_INSTALL_DIR/sample_files
@@ -175,12 +205,12 @@ find $HSS_INSTALL_DIR/sample_files -type f -exec chmod 444 {} \;
 ########################################################################################################################
 # BUILD JUNIT TEST RUNNER (.java file)
 
-echo 'going to build junit test runner'
+echo -e "Build the junit test runner"
 
 # copy the file from the repo
-rsync -rvuz $HSS_REPOSITORY/junit_test_runner/TestRunner.java $HSS_INSTALL_DIR/JUnit/TestRunner.java
+rsync -ruz $HSS_REPOSITORY/junit_test_runner/TestRunner.java $HSS_INSTALL_DIR/JUnit/TestRunner.java
 
-pushd $HSS_INSTALL_DIR/JUnit
+pushd $HSS_INSTALL_DIR/JUnit > /dev/null
 # root will be owner & group of the source file
 chown  root:root  TestRunner.java
 # everyone can read this file
@@ -198,28 +228,28 @@ chmod 444 TestRunner.class
 # FIXME: TEMPORARY, allow all members of the instructors group to
 # write the TestRunner.class.  Remove this once debugging of
 # TestRunner.class is finished.
-chgrp instructors TestRunner.class
+chgrp $INSTRUCTORS_GROUP TestRunner.class
 chmod g+w TestRunner.class
 #
 #
 #
 
-popd
-
-echo 'finished building junit test runner'
+popd > /dev/null
 
 ########################################################################################################################
 ########################################################################################################################
 # COPY THE SCRIPTS TO GRADE UPLOADED CODE (bash scripts & untrusted_execute)
 
+echo -e "Copy the scripts"
+
 # make the directory (has a different name)
 mkdir -p $HSS_INSTALL_DIR/bin
 # copy all of the files
-rsync -rvuz  $HSS_REPOSITORY/bin/*   $HSS_INSTALL_DIR/bin/
+rsync -ruz  $HSS_REPOSITORY/bin/*   $HSS_INSTALL_DIR/bin/
 
 
 # most of the scripts should be root only
-find $HSS_INSTALL_DIR/bin -type d -exec chown root:instructors {} \;
+find $HSS_INSTALL_DIR/bin -type d -exec chown root:$INSTRUCTORS_GROUP {} \;
 find $HSS_INSTALL_DIR/bin -type d -exec chmod 551 {} \;
 find $HSS_INSTALL_DIR/bin -type f -exec chmod 540 {} \;
 
@@ -251,7 +281,7 @@ replace_fillin_variables $HSS_INSTALL_DIR/bin/untrusted_execute.c
 # to run this executable as sudo/root, which is necessary for the 
 # "switch user" to untrusted as part of the sandbox.
 
-pushd $HSS_INSTALL_DIR/bin/
+pushd $HSS_INSTALL_DIR/bin/ > /dev/null
 # set ownership/permissions on the source code
 chown root:root untrusted_execute.c
 chmod 500 untrusted_execute.c
@@ -261,22 +291,24 @@ g++ -static untrusted_execute.c -o untrusted_execute
 chown root untrusted_execute
 chgrp $HWCRON_USER untrusted_execute
 chmod 4550 untrusted_execute
-popd
+popd > /dev/null
 
 
 ################################################################################################################
 ################################################################################################################
 # COPY THE TA GRADING WEBSITE
 
+echo -e "Copy the ta grading website"
+
 # if the tagrading repository is available....
 if [ -d "$TAGRADING_REPOSITORY" ]; then
 
-    rsync  -rvuz $TAGRADING_REPOSITORY/*php         $HSS_INSTALL_DIR/hwgrading_website
-    rsync  -rvuz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
-    rsync  -rvuz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
-    rsync  -rvuz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
-    rsync  -rvuz $TAGRADING_REPOSITORY/robots.txt   $HSS_INSTALL_DIR/hwgrading_website
-    rsync  -rvuz $TAGRADING_REPOSITORY/favicon.ico  $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -ruz $TAGRADING_REPOSITORY/*php         $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -ruz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -ruz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -ruz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -ruz $TAGRADING_REPOSITORY/robots.txt   $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -ruz $TAGRADING_REPOSITORY/favicon.ico  $HSS_INSTALL_DIR/hwgrading_website
     
     # set special user $HWPHP_USER as owner & group of all hwgrading_website files
     find $HSS_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
@@ -311,3 +343,4 @@ fi
 ################################################################################################################
 
 
+echo -e "\nCompleted installation of the homework submission server\n"

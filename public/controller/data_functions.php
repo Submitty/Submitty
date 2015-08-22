@@ -264,8 +264,8 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     
 
     // add this assignment to the grading queue
-    // FIX ME: If to_be_graded path doesn't exist, create new one
-    $touchfile = $path_front_root."/to_be_graded/".$semester."__".$course."__".$assignment_id."__".$username."__".$upload_version;
+    // FIX ME: If to_be_graded_interactive path doesn't exist, throw an error
+    $touchfile = $path_front_root."/to_be_graded_interactive/".$semester."__".$course."__".$assignment_id."__".$username."__".$upload_version;
     touch($touchfile);
 
 
