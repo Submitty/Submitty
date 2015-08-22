@@ -323,7 +323,7 @@ function grade_this_item {
 	# svn checkout into the archival directory 
 	mkdir -p $checkout_path
 	pushd $checkout_path > /dev/null
-	svn co -r {"$submission_time"} $SVN_PATH/$user/$svn_subdirectory . > $tmp/.submit_svn_checkout.txt 2>&1
+	svn co $SVN_PATH/$user/$svn_subdirectory@{"$submission_time"} . > $tmp/.submit_svn_checkout.txt 2>&1
 	popd > /dev/null
 	
 	# copy checkout into tmp compilation directory
@@ -394,8 +394,6 @@ function grade_this_item {
     # NOTE: Also grabbing all student data files (files with 'data/' directory in path)
     # remove the compilation directory
     rm -rf $tmp_compilation
-    
-    find . > $tmp/.submit___TEMPORARY_FILE___directory_contents_before_runner.txt
     
     # --------------------------------------------------------------------
     # RUN RUNNER
@@ -559,7 +557,6 @@ while true; do
     # the to_do list.  Prioritize grading "interative" items before all
     # "batch" items.
 
-    echo "MAKE THE LISTS"
     interactive_list=$(ls -1rt ${TO_BE_GRADED_INTERACTIVE} | awk '{print "'${TO_BE_GRADED_INTERACTIVE}'/"$1}')
     batch_list=$(ls -1rt ${TO_BE_GRADED_BATCH} | awk '{print "'${TO_BE_GRADED_BATCH}'/"$1}')
 
