@@ -244,27 +244,11 @@ echo -e "Copy the scripts"
 
 # make the directory (has a different name)
 mkdir -p $HSS_INSTALL_DIR/bin
+chown root:$INSTRUCTORS_GROUP $HSS_INSTALL_DIR/bin
+chmod 751 $HSS_INSTALL_DIR/bin
+
 # copy all of the files
 rsync -ruz  $HSS_REPOSITORY/bin/*   $HSS_INSTALL_DIR/bin/
-
-
-# most of the scripts should be root only
-find $HSS_INSTALL_DIR/bin -type d -exec chown root:$INSTRUCTORS_GROUP {} \;
-find $HSS_INSTALL_DIR/bin -type d -exec chmod 551 {} \;
-find $HSS_INSTALL_DIR/bin -type f -exec chmod 540 {} \;
-
-
-# all course builders (instructors & head TAs) need read/execute access to this script
-chmod o+rx $HSS_INSTALL_DIR/bin/build_homework_function.sh 
-chmod o+rx $HSS_INSTALL_DIR/bin/fake_submit_button_press.sh
-chmod o+rx $HSS_INSTALL_DIR/bin/regrade.sh
-chmod o+rx $HSS_INSTALL_DIR/bin/grading_done.sh
-
-
-# fix the permissions specifically of the grade_students.sh script
-chown root:$HWCRON_USER $HSS_INSTALL_DIR/bin/grade_students.sh
-chmod 750 $HSS_INSTALL_DIR/bin/grade_students.sh
-
 #replace necessary variables in the copied scripts
 replace_fillin_variables $HSS_INSTALL_DIR/bin/create_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/grade_students.sh
@@ -274,6 +258,23 @@ replace_fillin_variables $HSS_INSTALL_DIR/bin/build_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/build_homework_function.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/fake_submit_button_press.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/untrusted_execute.c
+
+# most of the scripts should be root only
+find $HSS_INSTALL_DIR/bin -type f -exec chown root:root {} \;
+find $HSS_INSTALL_DIR/bin -type f -exec chmod 500 {} \;
+
+# all course builders (instructors & head TAs) need read/execute access to these scripts
+chown root:$INSTRUCTORS_GROUP $HSS_INSTALL_DIR/bin/build_homework_function.sh 
+chown root:$INSTRUCTORS_GROUP $HSS_INSTALL_DIR/bin/regrade.sh
+chown root:$INSTRUCTORS_GROUP $HSS_INSTALL_DIR/bin/grading_done.sh
+chmod 550 $HSS_INSTALL_DIR/bin/build_homework_function.sh 
+chmod 550 $HSS_INSTALL_DIR/bin/regrade.sh
+chmod 550 $HSS_INSTALL_DIR/bin/grading_done.sh
+
+# fix the permissions specifically of the grade_students.sh script
+chown root:$HWCRON_USER $HSS_INSTALL_DIR/bin/grade_students.sh
+chmod 550 $HSS_INSTALL_DIR/bin/grade_students.sh
+
 
 # prepare the untrusted_execute executable with suid
 
