@@ -103,7 +103,7 @@ function check_match {
 
 echo "looking in '$base_path' for submissions that match '$pattern'"
 
-for semester in `cd $base_path/courses && ls -d [fs]* 2> /dev/null`; do
+for semester in `cd $base_path/courses && ls -d * 2> /dev/null`; do
 
     if [ ! -d $base_path/courses/$semester/ ]
     then
@@ -120,7 +120,7 @@ for semester in `cd $base_path/courses && ls -d [fs]* 2> /dev/null`; do
     echo matching semester: $semester
 
 
-    for course in `cd $base_path/courses/$semester && ls -d csci* 2> /dev/null`; do
+    for course in `cd $base_path/courses/$semester && ls -d * 2> /dev/null`; do
 
 
 	if [ ! -d $base_path/courses/$semester/$course/ ]
