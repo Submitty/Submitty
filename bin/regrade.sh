@@ -12,8 +12,6 @@
 
 HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
 
-echo $PWD
-
 # check the number of arguments
 if [ "$#" -ne 1 ] && [ "$#" -ne 2 ]; then 
     echo "USAGE:"
@@ -58,9 +56,8 @@ if [ "$pattern_length" -eq "$base_path_length" ]; then
     exit
 fi
 
-
 # ensure we extracted the base path
-if [ "$base_path" -ne "$HSS_DATA_DIR" ]; then
+if [ "$base_path" != "$HSS_DATA_DIR" ]; then
     echo "ERROR:  $base_path != $HSS_DATA_DIR"
     exit
 fi
