@@ -1,4 +1,6 @@
-<?php umask (0027);
+<?php 
+
+umask (0027);
 /*The user's umask is ignored for the user running php, so we need
 to set it from inside of php to make sure the group read & execute
 permissions aren't lost for newly created files & directories.*/
@@ -15,9 +17,9 @@ if (isset($_SERVER['PHP_AUTH_USER'])) {
     $user = $_SERVER['PHP_AUTH_USER'];
 } else {
     // if not already authenticated do it
-    //
-    if (!isset($_SERVER['PHP_AUTH_USER'])) {header('WWW-Authenticate: Basic realm=HWServer'); header('HTTP/1.0 401 Unauthorized'); exit;} else { $user = $_SERVER['PHP_AUTH_USER'];}
-    //
+    header('WWW-Authenticate: Basic realm=HWServer'); 
+    header('HTTP/1.0 401 Unauthorized'); 
+    exit;
 }
 
 //Remove error reporting and ini set for production code
