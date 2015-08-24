@@ -8,3 +8,7 @@ public/view/*_upload_message.php
 *~
 *.o
 INSTALL.sh
+
+# ENVIRONMENT IGNORES
+.idea
+*.zip

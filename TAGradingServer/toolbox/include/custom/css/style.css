@@ -1,0 +1,535 @@
+html,body
+{
+	margin:0;
+	padding:0;
+	height:100%;
+	width:100%; 
+	overflow: hidden;
+}
+
+header
+{
+	width:100%;    
+	height: 41px;
+	border-bottom: #AAA solid 2px;
+}
+
+#container
+{
+    display : inline-block;
+}
+
+#inner-container
+{
+	width: 95%;
+	margin: auto auto auto auto;
+	height: 100%;
+}
+
+div.span3.left
+{
+	float:left; 
+	border-right:#DDD solid 1px;
+}
+
+div.span3.right
+{
+	float:right; 
+	border-left:#DDD solid 1px; 
+	color: white;
+}
+
+span#left.resbox
+{
+	border-right:#AAA solid 1px;
+}
+
+span#right.resbox
+{
+	border-left:#AAA solid 1px;
+}
+
+#inner-container-spacer
+{
+	height: 25px;
+	width: 100%;
+}
+
+#inner-container-seperator
+{
+	height: 1px;
+	width: 100%;
+	background-color: #DDD;
+	margin-bottom: 20px;
+	margin: 75px 0px;
+/*
+	-webkit-mask: -webkit-linear-gradient(
+          left,
+         rgba(255,255,255,0),
+         rgba(255,255,255,1) 15%,
+         rgba(255,255,255,1) 85%,
+         rgba(255,255,255,0)
+     );
+*/
+}
+
+#content
+{
+	background: #FFF;
+	width: 100%;
+	height: 100%;
+	float: left;
+	overflow:scroll;
+	overflow-x: hidden;
+}
+
+#rubric
+{
+	background: #E1E1E1;
+	width: 100%;
+	height: 100%;
+	float: right;
+	overflow:hidden;
+}
+
+.progress
+{
+	display: inline-block;
+	width: 100%;
+	margin: auto;
+	position:absolute;
+	bottom: 0;
+	left: 0;
+	-webkit-border-radius: 0px;
+    	-moz-border-radius: 0px;
+        	border-radius: 0px;
+}
+
+#progress-icon
+{
+	margin-top:-0.5px;
+}
+
+.navigation
+{
+	line-height: 0px;
+	position:absolute;
+	bottom: 0;
+	right: 0;
+	padding-left: 30px;
+}
+
+.btn-group .btn
+{
+	padding: 0px 12px;
+	line-height: 18px;
+}
+
+.container-fluid
+{
+	padding-right: 0px;
+}
+
+ul.dropdown-menu li#logout a:hover
+{
+	background-image: -webkit-linear-gradient(top, #DA4F49, #CC4A44);
+}
+
+#pane {
+	cursor: col-resize;
+    display : inline-block;
+    margin-left: -5px;
+	padding-right: 2px;
+    height : 100%;
+    width: 5px;
+    vertical-align : top;
+    background-image: url("../../images/handle-v2.png");
+	background-repeat:no-repeat;
+	background-position:150% 50%;
+}
+        
+#panemover {
+	cursor: col-resize;
+    position:absolute;
+    margin-left: -2px;
+    width : 10px;
+    height : 80%;
+    vertical-align : top;
+}
+
+.resbox {
+    display : inline-block;
+    height : 100%;
+    overflow:hidden;
+}
+
+.CodeMirror
+{
+	border: #DDD solid 1px;
+}
+
+select
+{
+	margin-bottom: 0px;
+	width: 20%;
+	min-width: 150px;
+	/*height:20px;*/
+}
+
+#settings
+{
+	overflow: hidden;
+	border: none;
+	height: 100%;
+	width: 100%;
+}
+
+#myModal
+{
+	height: 450px;
+}
+
+.modal-body 
+{
+	max-height:none;
+}
+
+.source-info
+{
+	height: 20px;
+	width: 99%;
+	border: #DDD solid 1px;
+	border-bottom: none;
+	text-align: center;
+	font-weight: bold;
+	color: #444;
+	-webkit-border-top-left-radius: 4px;
+	-moz-border-radius-topleft: 4px;
+	border-top-left-radius: 4px;
+	-webkit-border-top-right-radius: 4px;
+	-moz-border-radius-topright: 4px;
+	border-top-right-radius: 4px;
+}
+
+[class*="span"] 
+{
+	margin-left: 0px;
+}
+
+#rubric #inner-container a.btn.btn-large, input.btn.btn-large
+{
+	width: 100%;
+	padding: 15px 0px 15px 0px;
+}
+
+.accordion-group 
+{
+	margin-right: -2px;
+	margin-bottom: 2px;
+	border:#DDD solid 1px; 
+	border-top: none;
+	-webkit-border-radius: 0px;
+	-moz-border-radius: 0px;
+	border-radius: 0px;
+	-webkit-border-bottom-left-radius: 4px;
+	-moz-border-radius-bottomleft: 4px;
+	border-bottom-left-radius: 4px;
+	-webkit-border-bottom-right-radius: 4px;
+	-moz-border-radius-bottomright: 4px;
+	border-bottom-right-radius: 4px;
+}
+
+.accordion 
+{
+	text-align: center;
+	margin-bottom: 0px;
+}
+
+.accordion-heading:hover
+{
+	background-color: #F1F1F1;
+}
+
+.accordion-heading .accordion-toggle
+{
+	color: #444;
+	text-decoration: none;
+	padding: 1px 15px;
+}
+
+.nav-tabs
+{
+	color: #444;
+	border-bottom: 1px solid #DDD;
+}
+
+.nav-tabs > li 
+{
+	margin-bottom: -2px;
+    width: 200px;
+}
+
+.nav-tabs > li > a
+{
+	color: #444;
+}
+
+.nav-tabs > .active > a, .nav-tabs > .active > a:hover
+{
+	border: 1px solid #DDD;
+	border-bottom: 1px solid #FFF;
+}
+
+.tabbable
+{
+	margin-right: -4px;
+	position: relative;
+}
+
+.tabbable .CodeMirror
+{
+	-webkit-border-bottom-left-radius: 4px;
+	-moz-border-radius-bottomleft: 4px;
+	border-bottom-left-radius: 4px;
+	-webkit-border-bottom-right-radius: 4px;
+	-moz-border-radius-bottomright: 4px;
+	border-bottom-right-radius: 4px;
+}
+
+form {
+	margin: 0px;
+}
+
+.table-bordered
+{
+	border: 1px solid #AAA;
+	border-left: 0px;
+}
+
+.table-bordered th, .table-bordered td 
+{
+	border-left: 1px solid #AAA;
+}
+
+#rubric-title
+{
+	height: 30px;
+	margin-top: 80px;
+	width: 100%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#left .popover-title
+{
+	background-color: #DA4F49;
+	color: white;
+}
+
+#left .popover
+{
+	width:75%;
+}
+
+table {
+  max-width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.table {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.table th,
+.table td {
+  padding: 8px;
+  line-height: 20px;
+  text-align: left;
+  vertical-align: top;
+  border-top: 1px solid #dddddd;
+}
+
+.table th {
+  font-weight: bold;
+}
+
+.table thead th {
+  vertical-align: bottom;
+}
+
+.table caption + thead tr:first-child th,
+.table caption + thead tr:first-child td,
+.table colgroup + thead tr:first-child th,
+.table colgroup + thead tr:first-child td,
+.table thead:first-child tr:first-child th,
+.table thead:first-child tr:first-child td {
+  border-top: 0;
+}
+
+.table-bordered {
+  border: 1px solid #dddddd;
+  border-collapse: separate;
+  *border-collapse: collapse;
+  border-left: 0;
+  -webkit-border-radius: 4px;
+     -moz-border-radius: 4px;
+          border-radius: 4px;
+}
+
+.table-bordered th,
+.table-bordered td {
+  border-left: 1px solid #dddddd;
+}
+
+.table-striped tbody > tr:nth-child(odd) > td,
+.table-striped tbody > tr:nth-child(odd) > th {
+  background-color: #f9f9f9;
+}
+
+.icon-ok
+{
+	background-image: url('../../bootstrap/img/glyphicons-halflings-white.png');
+	background-position: -288px 0px;
+	background-repeat: no-repeat;
+	color: rgb(51, 51, 51);
+	display: inline-block;
+	height: 14px;
+	width: 14px;
+}
+
+.icon-time
+{
+	background-image: url('../../bootstrap/img/glyphicons-halflings.png');
+	background-position: -48px -24px;
+	background-repeat: no-repeat;
+	color: rgb(51, 51, 51);
+	display: inline-block;
+	height: 14px;
+	width: 14px;
+}
+
+.icon-print
+{
+    background-image: url('../../bootstrap/img/glyphicons-halflings.png');
+    background-position: -96px -48px;
+    background-repeat: no-repeat;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+#page-info
+{
+    visibility: hidden;
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    z-index:1000;
+    background: #fff;
+    border: 1px solid #000;
+    height: 500px;
+    width: 80%;
+    overflow-y: scroll;
+}
+
+/**
+ * FINEDIFF STUFF
+ */
+ins {
+    color: green;
+    background: #dfd;
+    text-decoration: none;
+}
+del {
+    color: red;
+    background: #fdd;
+    text-decoration: none;
+}
+code {
+    font-size: smaller;
+}
+#params {
+    margin: 1em 0;
+    font: 14px sans-serif;
+}
+.code {
+    margin-left: 2em;
+    font: 12px monospace;
+}
+.ins {
+    background:#dfd;
+}
+.del {
+    background:#fdd;
+}
+.rep {
+    color: #008;
+    background: #eef;
+}
+.finephp-panecontainer {
+    display: inline-block;
+    width: 49.5%;
+    vertical-align: top;
+}
+.finephp-panecontainer > p {
+    margin: 0;
+    border: 1px solid #bcd;
+    border-bottom: none;
+    padding: 1px 3px;
+    background: #def;
+    font: 14px sans-serif
+}
+.finephp-panecontainer > p + div {
+    margin: 0;
+    padding: 2px 0 2px 2px;
+    border: 1px solid #bcd;
+    border-top: none;
+}
+.finephp-pane {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    width: 100%;
+    min-height: 3em;
+    overflow:auto;
+    font: 12px monospace;
+}
+#htmldiff.onlyDeletions ins {display:none}
+#htmldiff.onlyInsertions del {display:none}
+
+.diff {
+    width: 13px;
+    height: 12px;
+    display: inline;
+    /* Hide the text. */
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    float: right;
+    margin-right: 40px;
+    margin-top: 10px;
+}
+
+.check-partial {
+    background: url('../img/buttons.png') 26px 0;
+}
+
+.check-full {
+    background: url('../img/buttons.png') 0 0;
+}
+
+.cross {
+    background: url('../img/buttons.png') 13px 0;
+}
+
+.loading-gif {
+    /*position: absolute;
+    top: 50%;
+    left: 50%;*/
+    float: right;
+    margin: -10px 60px 0px 0px;
+    width: 40px;
+}
