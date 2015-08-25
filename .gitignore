@@ -5,3 +5,7 @@ public/site_path.txt
 *~
 *.o
 INSTALL.sh
+
+# ENVIRONMENT IGNORES
+.idea
+*.zip
