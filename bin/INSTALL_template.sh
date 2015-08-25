@@ -37,6 +37,10 @@ HWCRON_GID=__CONFIGURE__FILLIN__HWCRON_GID__
 HWPHP_UID=__CONFIGURE__FILLIN__HWPHP_UID__
 HWPHP_GID=__CONFIGURE__FILLIN__HWPHP_GID__
 
+
+DB_PASSWORD=__CONFIGURE__FILLIN__DB_PASSWORD__
+
+
 # FIXME: Add some error checking to make sure these values were filled in correctly
 
 
@@ -58,6 +62,12 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_GID__|$HWPHP_GID|g" $1
+
+
+
+    sed -i -e "s|__INSTALL__FILLIN__DB_PASSWORD__|$DB_PASSWORD|g" $1
+
+
 
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
@@ -308,8 +318,9 @@ if [ -d "$TAGRADING_REPOSITORY" ]; then
     rsync  -ruz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
     rsync  -ruz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
     rsync  -ruz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
-    rsync  -ruz $TAGRADING_REPOSITORY/robots.txt   $HSS_INSTALL_DIR/hwgrading_website
-    rsync  -ruz $TAGRADING_REPOSITORY/favicon.ico  $HSS_INSTALL_DIR/hwgrading_website
+#    rsync  -ruz $TAGRADING_REPOSITORY/robots.txt   $HSS_INSTALL_DIR/hwgrading_website
+    rsync  -ruz $TAGRADING_REPOSITORY/app          $HSS_INSTALL_DIR/hwgrading_website
+#    rsync  -ruz $TAGRADING_REPOSITORY/favicon.ico  $HSS_INSTALL_DIR/hwgrading_website
     
     # set special user $HWPHP_USER as owner & group of all hwgrading_website files
     find $HSS_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;

@@ -2,6 +2,15 @@
 
 ########################################################################################################################
 ########################################################################################################################
+# this script must be run by root or sudo 
+if [[ "$UID" -ne "0" ]] ; then
+    echo "ERROR: This script must be run by root or sudo"
+    exit
+fi
+
+
+########################################################################################################################
+########################################################################################################################
 
 # determine location of HSS GIT repository
 # this script (CONFIGURE.sh) is in the top level directory of the repository
@@ -49,6 +58,11 @@ else
     echo -e "Sorry, the interactive script is not written yet....  you are stuck with the defaults.\n"
 fi
 
+
+echo "What is the database password?"
+read DB_PASSWORD
+
+
 ########################################################################################################################
 ########################################################################################################################
 
@@ -58,6 +72,12 @@ fi
 
 # copy the installation script
 cp $HSS_REPOSITORY/bin/INSTALL_template.sh $HSS_REPOSITORY/INSTALL.sh
+
+
+# set the permissions of this file 
+chown root:root $HSS_REPOSITORY/INSTALL.sh
+chmod 500 $HSS_REPOSITORY/INSTALL.sh
+
 
 # fillin the necessary variables 
 sed -i -e "s|__CONFIGURE__FILLIN__HSS_REPOSITORY__|$HSS_REPOSITORY|g" $HSS_REPOSITORY/INSTALL.sh
@@ -76,6 +96,8 @@ sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_UID__|$HWCRON_UID|g" $HSS_REPOSITORY/IN
 sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $HSS_REPOSITORY/INSTALL.sh
 sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $HSS_REPOSITORY/INSTALL.sh
 sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_GID__|$HWPHP_GID|g" $HSS_REPOSITORY/INSTALL.sh
+
+sed -i -e "s|__CONFIGURE__FILLIN__DB_PASSWORD__|$DB_PASSWORD|g" $HSS_REPOSITORY/INSTALL.sh
 
 # FIXME: Add some error checking to make sure those values were filled in correctly
 
