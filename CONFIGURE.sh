@@ -19,7 +19,8 @@ HSS_REPOSITORY=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 # assume the TA grading repo is in the same location
 # NOTE: eventually the TA grading repo will be merged into the main repo
-TAGRADING_REPOSITORY=$HSS_REPOSITORY/../GIT_CHECKOUT_TAgrading
+#TAGRADING_REPOSITORY=$HSS_REPOSITORY/../GIT_CHECKOUT_TAgrading
+TAGRADING_REPOSITORY=$HSS_REPOSITORY/TAGradingServer
 
 # recommended (default) directory locations
 HSS_INSTALL_DIR=/usr/local/hss
@@ -33,6 +34,7 @@ HWPHP_USER=hwphp
 HWCRON_USER=hwcron
 HWCRONPHP_GROUP=hwcronphp
 INSTRUCTORS_GROUP=instructors
+DATABASE_USER=hsdbu
 
 UNTRUSTED_UID=`id -u untrusted` # untrusted's user id 
 UNTRUSTED_GID=`id -g untrusted` # untrusted's group id
@@ -59,8 +61,19 @@ else
 fi
 
 
-echo "What is the database password?"
-read DB_PASSWORD
+########################################################################################################################
+########################################################################################################################
+
+
+echo "What is the database password for the database user $DATABASE_USER?"
+read DATABASE_PASSWORD
+
+
+# assumptions
+
+DATABASE_HOST=csdb3
+TAGRADING_URL=https://hwgrading.cs.rpi.edu/
+TAGRADING_LOG_PATH=$HSS_DATA_DIR/tagrading_logs/
 
 
 ########################################################################################################################
@@ -97,7 +110,14 @@ sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $HSS_REPOSITORY/IN
 sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $HSS_REPOSITORY/INSTALL.sh
 sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_GID__|$HWPHP_GID|g" $HSS_REPOSITORY/INSTALL.sh
 
-sed -i -e "s|__CONFIGURE__FILLIN__DB_PASSWORD__|$DB_PASSWORD|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_HOST__|$DATABASE_HOST|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_USER__|$DATABASE_USER|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_PASSWORD__|$DATABASE_PASSWORD|g" $HSS_REPOSITORY/INSTALL.sh
+
+sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $HSS_REPOSITORY/INSTALL.sh
+
+
 
 # FIXME: Add some error checking to make sure those values were filled in correctly
 
@@ -105,6 +125,6 @@ sed -i -e "s|__CONFIGURE__FILLIN__DB_PASSWORD__|$DB_PASSWORD|g" $HSS_REPOSITORY/
 ########################################################################################################################
 
 echo -e "Configuration completed.  Now you may run the installation script"
-echo -e "   $HSS_REPOSITORY/INSTALL.sh"
+echo -e "   sudo $HSS_REPOSITORY/INSTALL.sh"
 echo -e "          or"
-echo -e "   $HSS_REPOSITORY/INSTALL.sh clean\n\n"
+echo -e "   sudo $HSS_REPOSITORY/INSTALL.sh clean\n\n"

@@ -37,8 +37,12 @@ HWCRON_GID=__CONFIGURE__FILLIN__HWCRON_GID__
 HWPHP_UID=__CONFIGURE__FILLIN__HWPHP_UID__
 HWPHP_GID=__CONFIGURE__FILLIN__HWPHP_GID__
 
+DATABASE_HOST=__CONFIGURE__FILLIN__DATABASE_HOST__
+DATABASE_USER=__CONFIGURE__FILLIN__DATABASE_USER__
+DATABASE_PASSWORD=__CONFIGURE__FILLIN__DATABASE_PASSWORD__
 
-DB_PASSWORD=__CONFIGURE__FILLIN__DB_PASSWORD__
+TAGRADING_URL=__CONFIGURE__FILLIN__TAGRADING_URL__
+TAGRADING_LOG_PATH=__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__
 
 
 # FIXME: Add some error checking to make sure these values were filled in correctly
@@ -65,8 +69,12 @@ function replace_fillin_variables {
 
 
 
-    sed -i -e "s|__INSTALL__FILLIN__DB_PASSWORD__|$DB_PASSWORD|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__DATABASE_HOST__|$DATABASE_HOST|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__DATABASE_USER__|$DATABASE_USER|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__DATABASE_PASSWORD__|$DATABASE_PASSWORD|g" $1
 
+    sed -i -e "s|__INSTALL__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $1
 
 
     # FIXME: Add some error checking to make sure these values were filled in correctly
@@ -98,20 +106,21 @@ chmod  751                      $HSS_INSTALL_DIR
 
 ########################################################################################################################
 ########################################################################################################################
-# if the top level DATA directory & CLASSES subdirectory do not exist, then make them
+# if the top level DATA, COURSES, & LOGS directores do not exist, then make them
 
 echo -e "Make top level directores & set permissions"
 
 mkdir -p $HSS_DATA_DIR
 mkdir -p $HSS_DATA_DIR/courses
+mkdir -p $HSS_DATA_DIR/tagrading_logs
 
 # set the permissions of these directories
-chown  root:$INSTRUCTORS_GROUP $HSS_DATA_DIR
-chmod  751                     $HSS_DATA_DIR
-chown  root:$INSTRUCTORS_GROUP $HSS_DATA_DIR/courses
-chmod  751                     $HSS_DATA_DIR/courses
-
-
+chown  root:$INSTRUCTORS_GROUP  $HSS_DATA_DIR
+chmod  751                      $HSS_DATA_DIR
+chown  root:$INSTRUCTORS_GROUP  $HSS_DATA_DIR/courses
+chmod  751                      $HSS_DATA_DIR/courses
+chown  hwphp:$INSTRUCTORS_GROUP $HSS_DATA_DIR/tagrading_logs
+chmod  750                      $HSS_DATA_DIR/tagrading_logs
 
 # if the to_be_graded directories do not exist, then make them
 mkdir -p $HSS_DATA_DIR/to_be_graded_interactive
@@ -311,45 +320,34 @@ popd > /dev/null
 
 echo -e "Copy the ta grading website"
 
-# if the tagrading repository is available....
-if [ -d "$TAGRADING_REPOSITORY" ]; then
+rsync  -ruz $TAGRADING_REPOSITORY/*php         $HSS_INSTALL_DIR/hwgrading_website
+rsync  -ruz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
+rsync  -ruz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
+rsync  -ruz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
+rsync  -ruz $TAGRADING_REPOSITORY/app          $HSS_INSTALL_DIR/hwgrading_website
+    
+# set special user $HWPHP_USER as owner & group of all hwgrading_website files
+find $HSS_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
 
-    rsync  -ruz $TAGRADING_REPOSITORY/*php         $HSS_INSTALL_DIR/hwgrading_website
-    rsync  -ruz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
-    rsync  -ruz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
-    rsync  -ruz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
-#    rsync  -ruz $TAGRADING_REPOSITORY/robots.txt   $HSS_INSTALL_DIR/hwgrading_website
-    rsync  -ruz $TAGRADING_REPOSITORY/app          $HSS_INSTALL_DIR/hwgrading_website
-#    rsync  -ruz $TAGRADING_REPOSITORY/favicon.ico  $HSS_INSTALL_DIR/hwgrading_website
-    
-    # set special user $HWPHP_USER as owner & group of all hwgrading_website files
-    find $HSS_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
-    
-    # set the permissions of all files
-    # $HWPHP_USER can read & execute all directories and read all files
-    # "other" can cd into all subdirectories
-    chmod -R 400 $HSS_INSTALL_DIR/hwgrading_website
-    find $HSS_INSTALL_DIR/hwgrading_website -type d -exec chmod uo+x {} \;
-    # "other" can read all .txt & .css files
-    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
-    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.txt -exec chmod o+r {} \;
-    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.ico -exec chmod o+r {} \;
-    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
-    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.png -exec chmod o+r {} \;
-    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.jpg -exec chmod o+r {} \;
-    
-    # "other" can read & execute all .js files
-    find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
-    
-    
-    replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/csci1200.php
-    replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/csci1100.php
+# set the permissions of all files
+# $HWPHP_USER can read & execute all directories and read all files
+# "other" can cd into all subdirectories
+chmod -R 400 $HSS_INSTALL_DIR/hwgrading_website
+find $HSS_INSTALL_DIR/hwgrading_website -type d -exec chmod uo+x {} \;
+# "other" can read all .txt & .css files
+find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
+find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.txt -exec chmod o+r {} \;
+find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.ico -exec chmod o+r {} \;
+find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
+find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.png -exec chmod o+r {} \;
+find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.jpg -exec chmod o+r {} \;
 
-else 
+# "other" can read & execute all .js files
+find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
 
-    echo -e "\n\nTA GRADING REPOSITORY IS NOT AVAILABLE, TA GRADING WEBSITE WAS NOT INSTALLED!\n\n"
 
-fi
+replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
+
 
 ################################################################################################################
 ################################################################################################################

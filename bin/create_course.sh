@@ -84,6 +84,29 @@ fi
 #       additional instructors and/or head TAs who need read/write
 #       access to these files
 
+
+# FIXME: add some error checking on the $semester and $course
+#        variables 
+#
+#   (not clear how to do this since these variables could have quite
+#   different structure at different schools)
+
+########################################################################################################################
+########################################################################################################################
+
+course_dir=$HSS_DATA_DIR/courses/$semester/$course
+
+if [ -d "$course_dir" ]; then
+    echo -e "ERROR: specific course directory " $course_dir " already exists"
+    exit
+fi
+
+
+########################################################################################################################
+########################################################################################################################
+
+DATABASE_NAME=${course}_hwgrading
+
 ########################################################################################################################
 ########################################################################################################################
 
@@ -97,18 +120,12 @@ function replace_fillin_variables {
     sed -i -e "s|__CREATE_COURSE__FILLIN__SEMESTER__|$semester|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__COURSE__|$course|g" $1
 
+    sed -i -e "s|__CREATE_COURSE__FILLIN__TAGRADING_DATABASE_NAME__|$DATBASE_NAME|g" $1
+    sed -i -e "s|__CREATE_COURSE__FILLIN__TAGRADING_COURSE_FILES_LOCATION__|$course_dir|g" $1
+
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
 
-########################################################################################################################
-########################################################################################################################
-
-course_dir=$HSS_DATA_DIR/courses/$semester/$course
-
-if [ -d "$course_dir" ]; then
-    echo -e "ERROR: specific course directory " $course_dir " already exists"
-    exit
-fi
 
 ########################################################################################################################
 ########################################################################################################################
@@ -125,9 +142,7 @@ fi
 
 if [ ! -d "$HSS_DATA_DIR/courses/$semester" ]; then
     mkdir                            $HSS_DATA_DIR/courses/$semester
-#    chown $HWPHP_USER:$HWPHP_USER   $HSS_DATA_DIR/courses/$semester
     chown root:$INSTRUCTORS_GROUP    $HSS_DATA_DIR/courses/$semester
-#    chmod u=rwx,g=rwx,o=rx          $HSS_DATA_DIR/courses/$semester
     chmod 751                        $HSS_DATA_DIR/courses/$semester
 fi
 
@@ -201,6 +216,14 @@ cp $HSS_INSTALL_DIR/sample_files/sample_class/class.json $course_dir/config/clas
 chown $instructor:$ta_www_group $course_dir/config/class.json
 chmod 660 $course_dir/config/class.json
 #replace_fillin_variables $course_dir/config/class.json
+
+
+# copy the config file for TA grading & replace the variables
+cp $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/sample_course.php $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+
+echo -e 'Make sure to create a database: ' $DATABASE_NAME
+
 
 ########################################################################################################################
 ########################################################################################################################
