@@ -105,7 +105,7 @@ fi
 ########################################################################################################################
 ########################################################################################################################
 
-DATABASE_NAME=${course}_hwgrading
+DATABASE_NAME=hss_${course}
 
 ########################################################################################################################
 ########################################################################################################################
@@ -120,7 +120,7 @@ function replace_fillin_variables {
     sed -i -e "s|__CREATE_COURSE__FILLIN__SEMESTER__|$semester|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__COURSE__|$course|g" $1
 
-    sed -i -e "s|__CREATE_COURSE__FILLIN__TAGRADING_DATABASE_NAME__|$DATBASE_NAME|g" $1
+    sed -i -e "s|__CREATE_COURSE__FILLIN__TAGRADING_DATABASE_NAME__|$DATABASE_NAME|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__TAGRADING_COURSE_FILES_LOCATION__|$course_dir|g" $1
 
     # FIXME: Add some error checking to make sure these values were filled in correctly
@@ -220,9 +220,14 @@ chmod 660 $course_dir/config/class.json
 
 # copy the config file for TA grading & replace the variables
 cp $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/sample_course.php $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+chown hwphp:hwphp $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+chmod 400 $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+
+
+
 replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
 
-echo -e 'Make sure to create a database: ' $DATABASE_NAME
+echo -e "\nMake sure to create the database: $DATABASE_NAME\n\n"
 
 
 ########################################################################################################################
