@@ -316,7 +316,8 @@ TestResults* TestCaseJUnit::doit_emma_coverage_report(std::ifstream &junit_outpu
       
       else {
 	// simple formula for partial credit based on coverage.
-	float partial = float(std::min(block_p,line_p)) / coverage_threshhold;
+	// float partial = float(std::min(block_p,line_p)) / coverage_threshhold;
+	float partial = float(block_p) / coverage_threshhold;
 	ss2 << "ERROR: Insuffficient block and/or line coverage below threshhold for " << name 
 	    << " (" << std::min(block_p,line_p) << "/" << coverage_threshhold << " = " << partial << ")";
 	return new TestResults(partial,ss2.str()); 
