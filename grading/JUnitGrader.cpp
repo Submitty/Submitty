@@ -309,8 +309,8 @@ TestResults* TestCaseJUnit::doit_emma_coverage_report(std::ifstream &junit_outpu
 
       assert (coverage_threshhold >= 0.0 && coverage_threshhold <= 100.0);
 
-      if (block_p >= coverage_threshhold &&
-	  line_p >= coverage_threshhold) {
+      if (block_p >= coverage_threshhold) {
+	// && line_p >= coverage_threshhold) {
 	return new TestResults(1.0,""); // Awarding full credit, no message
       }
       
@@ -319,7 +319,7 @@ TestResults* TestCaseJUnit::doit_emma_coverage_report(std::ifstream &junit_outpu
 	// float partial = float(std::min(block_p,line_p)) / coverage_threshhold;
 	float partial = float(block_p) / coverage_threshhold;
 	ss2 << "ERROR: Insuffficient block and/or line coverage below threshhold for " << name 
-	    << " (" << std::min(block_p,line_p) << "/" << coverage_threshhold << " = " << partial << ")";
+	    << " (" << block_p << "/" << coverage_threshhold << " = " << partial << ")";
 	return new TestResults(partial,ss2.str()); 
       }
     }
