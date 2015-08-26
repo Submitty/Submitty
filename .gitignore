@@ -12,3 +12,5 @@ INSTALL.sh
 # ENVIRONMENT IGNORES
 .idea
 *.zip
+
+tests/TAGradingServer/report
