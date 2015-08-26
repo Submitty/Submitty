@@ -12,7 +12,7 @@ use \lib\Database;
             'rubric_due_date' => "",
             'rubric_code' => "",
             'rubric_parts_sep' => false,
-            'rubric_late_days' => __DEFAULT_LATE_DAY__
+            'rubric_late_days' => __DEFAULT_LATE_DAYS__
         );
         $old_questions = array();
         if (isset($_GET['action']) && $_GET['action'] == 'edit') {
