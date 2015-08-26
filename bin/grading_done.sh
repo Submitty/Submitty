@@ -96,7 +96,7 @@ while true; do
 
 
     # pause before checking again
-    sleep 1
+    sleep 5
 
 done
 

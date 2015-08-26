@@ -28,7 +28,7 @@ TAGRADING_REPOSITORY=__CONFIGURE__FILLIN__TAGRADING_REPOSITORY__
 HWPHP_USER=__CONFIGURE__FILLIN__HWPHP_USER__
 HWCRON_USER=__CONFIGURE__FILLIN__HWCRON_USER__
 HWCRONPHP_GROUP=__CONFIGURE__FILLIN__HWCRONPHP_GROUP__
-INSTRUCTORS_GROUP=__CONFIGURE__FILLIN__INSTRUCTORS_GROUP__
+COURSE_BUILDERS_GROUP=__CONFIGURE__FILLIN__COURSE_BUILDERS__
 
 UNTRUSTED_UID=__CONFIGURE__FILLIN__UNTRUSTED_UID__
 UNTRUSTED_GID=__CONFIGURE__FILLIN__UNTRUSTED_GID__
@@ -58,7 +58,7 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__INSTRUCTORS_GROUP__|$INSTRUCTORS_GROUP|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__|$COURSE_BUILDERS_GROUP|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__UNTRUSTED_UID__|$UNTRUSTED_UID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__UNTRUSTED_GID__|$UNTRUSTED_GID|g" $1
@@ -100,8 +100,8 @@ fi
 
 
 # set the permissions of the top level directory
-chown  root:$INSTRUCTORS_GROUP  $HSS_INSTALL_DIR
-chmod  751                      $HSS_INSTALL_DIR
+chown  root:$COURSE_BUILDERS_GROUP  $HSS_INSTALL_DIR
+chmod  751                          $HSS_INSTALL_DIR
 
 
 ########################################################################################################################
@@ -115,12 +115,12 @@ mkdir -p $HSS_DATA_DIR/courses
 mkdir -p $HSS_DATA_DIR/tagrading_logs
 
 # set the permissions of these directories
-chown  root:$INSTRUCTORS_GROUP  $HSS_DATA_DIR
-chmod  751                      $HSS_DATA_DIR
-chown  root:$INSTRUCTORS_GROUP  $HSS_DATA_DIR/courses
-chmod  751                      $HSS_DATA_DIR/courses
-chown  hwphp:$INSTRUCTORS_GROUP $HSS_DATA_DIR/tagrading_logs
-chmod  750                      $HSS_DATA_DIR/tagrading_logs
+chown  root:$COURSE_BUILDERS_GROUP  $HSS_DATA_DIR
+chmod  751                          $HSS_DATA_DIR
+chown  root:$COURSE_BUILDERS_GROUP  $HSS_DATA_DIR/courses
+chmod  751                          $HSS_DATA_DIR/courses
+chown  hwphp:$COURSE_BUILDERS_GROUP $HSS_DATA_DIR/tagrading_logs
+chmod  750                          $HSS_DATA_DIR/tagrading_logs
 
 # if the to_be_graded directories do not exist, then make them
 mkdir -p $HSS_DATA_DIR/to_be_graded_interactive
@@ -129,11 +129,11 @@ mkdir -p $HSS_DATA_DIR/to_be_graded_batch
 # set the permissions of these directories
 
 #hwphp will write items to this list, hwcron will remove them
-chown  $HWCRON_USER:$HWCRONPHP_GROUP   $HSS_DATA_DIR/to_be_graded_interactive
-chmod  770                             $HSS_DATA_DIR/to_be_graded_interactive
-#instructors will write items to this todo list, hwcron will remove them
-chown  $HWCRON_USER:$INSTRUCTORS_GROUP $HSS_DATA_DIR/to_be_graded_batch
-chmod  770                             $HSS_DATA_DIR/to_be_graded_batch
+chown  $HWCRON_USER:$HWCRONPHP_GROUP        $HSS_DATA_DIR/to_be_graded_interactive
+chmod  770                                  $HSS_DATA_DIR/to_be_graded_interactive
+#course builders (instructors & head TAs) will write items to this todo list, hwcron will remove them
+chown  $HWCRON_USER:$COURSE_BUILDERS_GROUP  $HSS_DATA_DIR/to_be_graded_batch
+chmod  770                                  $HSS_DATA_DIR/to_be_graded_batch
 
 
 
@@ -179,8 +179,8 @@ find $HSS_INSTALL_DIR/website -type f -name \*.js -exec chmod o+rx {} \;
 
 # create the custom_resources directory
 mkdir -p $HSS_INSTALL_DIR/website/public/custom_resources
-# instructors will be able to add their own .css file customizations to this directory
-find $HSS_INSTALL_DIR/website/public/custom_resources -exec chown root:$INSTRUCTORS_GROUP {} \;
+# course builders will be able to add their own .css file customizations to this directory
+find $HSS_INSTALL_DIR/website/public/custom_resources -exec chown root:$COURSE_BUILDERS_GROUP {} \;
 find $HSS_INSTALL_DIR/website/public/custom_resources -exec chmod 775 {} \;
 
 
@@ -242,17 +242,6 @@ javac -cp ./junit-4.12.jar TestRunner.java
 chown root:root TestRunner.class
 chmod 444 TestRunner.class
 
-#
-#
-# FIXME: TEMPORARY, allow all members of the instructors group to
-# write the TestRunner.class.  Remove this once debugging of
-# TestRunner.class is finished.
-chgrp $INSTRUCTORS_GROUP TestRunner.class
-chmod g+w TestRunner.class
-#
-#
-#
-
 popd > /dev/null
 
 ########################################################################################################################
@@ -263,7 +252,7 @@ echo -e "Copy the scripts"
 
 # make the directory (has a different name)
 mkdir -p $HSS_INSTALL_DIR/bin
-chown root:$INSTRUCTORS_GROUP $HSS_INSTALL_DIR/bin
+chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin
 chmod 751 $HSS_INSTALL_DIR/bin
 
 # copy all of the files
@@ -283,9 +272,9 @@ find $HSS_INSTALL_DIR/bin -type f -exec chown root:root {} \;
 find $HSS_INSTALL_DIR/bin -type f -exec chmod 500 {} \;
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-chown root:$INSTRUCTORS_GROUP $HSS_INSTALL_DIR/bin/build_homework_function.sh 
-chown root:$INSTRUCTORS_GROUP $HSS_INSTALL_DIR/bin/regrade.sh
-chown root:$INSTRUCTORS_GROUP $HSS_INSTALL_DIR/bin/grading_done.sh
+chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/build_homework_function.sh 
+chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/regrade.sh
+chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/grading_done.sh
 chmod 550 $HSS_INSTALL_DIR/bin/build_homework_function.sh 
 chmod 550 $HSS_INSTALL_DIR/bin/regrade.sh
 chmod 550 $HSS_INSTALL_DIR/bin/grading_done.sh
