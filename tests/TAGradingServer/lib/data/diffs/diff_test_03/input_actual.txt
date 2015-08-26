@@ -1,0 +1,10 @@
+Please enter a country ==> Germany
+All games:
+                   Ghana   1-2   USA                     Winner: USA
+                     USA   2-2   Portugal                Winner: Draw
+                     USA   0-1   Germany                 Winner: Germany
+                 Belgium   2-1   USA                     Winner: Belgium
+Scores:
+Games Wins  Lose  Draw  GF    GA
+4     1     2     1     5     6     
+The highest achievement in 2014 World cup was round of 16

@@ -1,0 +1,41 @@
+{
+"differences":[
+    {
+        "student":
+        {
+            "start": 2,
+            "line": [
+                {
+                    "line_number": 2
+                }, {
+                    "line_number": 3
+                }, {
+                    "line_number": 4
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":1
+        }
+    }, {
+        "student":
+        {
+            "start": 5
+        },
+        "instructor":
+        {
+            "start":3,
+            "line": [
+                {
+                    "line_number": 3
+                }, {
+                    "line_number": 4
+                }, {
+                    "line_number": 5
+                }
+            ]
+        }
+    }
+]
+}

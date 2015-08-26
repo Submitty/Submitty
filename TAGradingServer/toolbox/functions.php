@@ -37,7 +37,7 @@ require_once($config);
 
 $DEBUG = (defined('__DEBUG__')) ? (__DEBUG__): false;
 ExceptionHandler::$debug = $DEBUG;
-ExceptionHandler::$logExceptions = true;
+ExceptionHandler::$logExceptions = __LOG_EXCEPTIONS__;
 Logger::$log_path = __LOG_PATH__;
 
 if($DEBUG) {
