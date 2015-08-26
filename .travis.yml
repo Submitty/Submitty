@@ -8,7 +8,7 @@ addons:
   postgresql: "9.3"
   
 before_script:
-  - psql -c 'create database test hwgrading;' -U postgres
+  - psql -c 'create database test_hwgrading;' -U postgres
   - psql --host=localhost --username=postgres --command="CREATE GROUP test_hwgrading ROLE postgres"
   - psql -f tests/TAGradingServer/travis.sql -U postgres -d test_hwgrading
   
