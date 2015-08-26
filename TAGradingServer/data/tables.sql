@@ -2,11 +2,39 @@
 -- PostgreSQL database dump
 --
 
+-- Dumped from database version 9.3.5
+-- Dumped by pg_dump version 9.4.0
+-- Started on 2015-08-25 13:59:21 EDT
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- TOC entry 206 (class 3079 OID 12018)
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- TOC entry 2408 (class 0 OID 0)
+-- Dependencies: 206
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
 SET search_path = public, pg_catalog;
 
 --
--- TOC entry 170 (class 1259 OID 18156)
--- Name: grade_lab_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 170 (class 1259 OID 44515)
+-- Name: grade_lab_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE grade_lab_sequence
@@ -17,10 +45,9 @@ CREATE SEQUENCE grade_lab_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 171 (class 1259 OID 18158)
--- Name: grade_question_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 171 (class 1259 OID 44517)
+-- Name: grade_question_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE grade_question_sequence
@@ -31,10 +58,9 @@ CREATE SEQUENCE grade_question_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 172 (class 1259 OID 18160)
--- Name: grade_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 172 (class 1259 OID 44519)
+-- Name: grade_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE grade_sequence
@@ -45,10 +71,9 @@ CREATE SEQUENCE grade_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 173 (class 1259 OID 18162)
--- Name: grade_test_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 173 (class 1259 OID 44521)
+-- Name: grade_test_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE grade_test_sequence
@@ -59,14 +84,11 @@ CREATE SEQUENCE grade_test_sequence
     CACHE 1;
 
 
-
-SET default_tablespace = '';
-
 SET default_with_oids = false;
 
 --
--- TOC entry 174 (class 1259 OID 18164)
--- Name: grades; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 174 (class 1259 OID 44523)
+-- Name: grades; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE grades (
@@ -79,13 +101,15 @@ CREATE TABLE grades (
     grade_days_late integer,
     grade_is_regraded integer,
     grade_email_timestamp timestamp(6) without time zone,
-    student_rcs character varying
+    student_rcs character varying,
+    submitted integer DEFAULT 0 NOT NULL,
+    status integer DEFAULT 0 NOT NULL
 );
 
 
 --
--- TOC entry 175 (class 1259 OID 18171)
--- Name: grades_academic_integrity_seq; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 175 (class 1259 OID 44532)
+-- Name: grades_academic_integrity_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE grades_academic_integrity_seq
@@ -96,10 +120,9 @@ CREATE SEQUENCE grades_academic_integrity_seq
     CACHE 1;
 
 
-
 --
--- TOC entry 176 (class 1259 OID 18173)
--- Name: grades_academic_integrity; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 176 (class 1259 OID 44534)
+-- Name: grades_academic_integrity; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE grades_academic_integrity (
@@ -111,10 +134,9 @@ CREATE TABLE grades_academic_integrity (
 );
 
 
-
 --
--- TOC entry 177 (class 1259 OID 18181)
--- Name: grades_labs; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 177 (class 1259 OID 44542)
+-- Name: grades_labs; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE grades_labs (
@@ -129,10 +151,9 @@ CREATE TABLE grades_labs (
 );
 
 
-
 --
--- TOC entry 178 (class 1259 OID 18188)
--- Name: grades_questions; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 178 (class 1259 OID 44549)
+-- Name: grades_questions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE grades_questions (
@@ -144,10 +165,9 @@ CREATE TABLE grades_questions (
 );
 
 
-
 --
--- TOC entry 179 (class 1259 OID 18195)
--- Name: grades_tests; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 179 (class 1259 OID 44556)
+-- Name: grades_tests; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE grades_tests (
@@ -155,13 +175,42 @@ CREATE TABLE grades_tests (
     test_id integer,
     student_id integer,
     grade_test_user_id integer,
-    grade_test_value character varying(16),
-    student_rcs character varying
+    student_rcs character varying,
+    grade_test_questions numeric[],
+    grade_test_value numeric DEFAULT 0 NOT NULL,
+    grade_test_text character varying[]
 );
 
+
 --
--- TOC entry 180 (class 1259 OID 18202)
--- Name: lab_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 180 (class 1259 OID 44564)
+-- Name: hw_grading_sec_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE hw_grading_sec_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 181 (class 1259 OID 44566)
+-- Name: homework_grading_sections; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE homework_grading_sections (
+    hgs_id integer DEFAULT nextval('hw_grading_sec_seq'::regclass) NOT NULL,
+    user_id integer,
+    rubric_id integer,
+    grading_section_id integer
+);
+
+
+--
+-- TOC entry 182 (class 1259 OID 44570)
+-- Name: lab_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE lab_sequence
@@ -172,10 +221,9 @@ CREATE SEQUENCE lab_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 181 (class 1259 OID 18204)
--- Name: labs; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 183 (class 1259 OID 44572)
+-- Name: labs; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE labs (
@@ -187,24 +235,47 @@ CREATE TABLE labs (
 );
 
 
+--
+-- TOC entry 184 (class 1259 OID 44579)
+-- Name: late_day_exceptions_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
 CREATE SEQUENCE late_day_exceptions_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 185 (class 1259 OID 44581)
+-- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -
+--
 
 CREATE TABLE late_day_exceptions (
-  ex_id integer DEFAULT nextval('late_day_exceptions_seq'::regclass) NOT NULL,
-  ex_student_rcs character varying NOT NULL,
-  ex_rubric_id integer NOT NULL,
-  ex_late_days integer NOT NULL default 0
+    ex_id integer DEFAULT nextval('late_day_exceptions_seq'::regclass) NOT NULL,
+    ex_student_rcs character varying NOT NULL,
+    ex_rubric_id integer NOT NULL,
+    ex_late_days integer DEFAULT 0 NOT NULL
 );
 
 
 --
--- TOC entry 182 (class 1259 OID 18211)
--- Name: question_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 186 (class 1259 OID 44589)
+-- Name: late_days; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE late_days (
+    student_rcs character varying NOT NULL,
+    allowed_lates integer DEFAULT 0 NOT NULL,
+    since_rubric integer NOT NULL
+);
+
+
+--
+-- TOC entry 187 (class 1259 OID 44596)
+-- Name: question_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE question_sequence
@@ -215,10 +286,9 @@ CREATE SEQUENCE question_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 183 (class 1259 OID 18213)
--- Name: questions; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 188 (class 1259 OID 44598)
+-- Name: questions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE questions (
@@ -234,10 +304,9 @@ CREATE TABLE questions (
 );
 
 
-
 --
--- TOC entry 184 (class 1259 OID 18221)
--- Name: relationship_student_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 189 (class 1259 OID 44606)
+-- Name: relationship_student_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE relationship_student_sequence
@@ -248,10 +317,9 @@ CREATE SEQUENCE relationship_student_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 185 (class 1259 OID 18223)
--- Name: relationship_user_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 190 (class 1259 OID 44608)
+-- Name: relationship_user_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE relationship_user_sequence
@@ -262,10 +330,9 @@ CREATE SEQUENCE relationship_user_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 186 (class 1259 OID 18225)
--- Name: relationships_students; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 191 (class 1259 OID 44610)
+-- Name: relationships_students; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE relationships_students (
@@ -276,10 +343,9 @@ CREATE TABLE relationships_students (
 );
 
 
-
 --
--- TOC entry 187 (class 1259 OID 18232)
--- Name: relationships_users; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 192 (class 1259 OID 44617)
+-- Name: relationships_users; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE relationships_users (
@@ -289,10 +355,9 @@ CREATE TABLE relationships_users (
 );
 
 
-
 --
--- TOC entry 188 (class 1259 OID 18236)
--- Name: reset_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 193 (class 1259 OID 44621)
+-- Name: reset_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE reset_sequence
@@ -303,24 +368,9 @@ CREATE SEQUENCE reset_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 189 (class 1259 OID 18238)
--- Name: resets; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
---
-
-CREATE TABLE resets (
-    reset_id integer DEFAULT nextval('reset_sequence'::regclass) NOT NULL,
-    user_id integer,
-    reset_secret character varying(255),
-    reset_issue_timestamp timestamp(6) without time zone
-);
-
-
-
---
--- TOC entry 190 (class 1259 OID 18242)
--- Name: rubric_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 194 (class 1259 OID 44627)
+-- Name: rubric_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE rubric_sequence
@@ -331,10 +381,9 @@ CREATE SEQUENCE rubric_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 191 (class 1259 OID 18244)
--- Name: rubrics; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 195 (class 1259 OID 44629)
+-- Name: rubrics; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE rubrics (
@@ -342,14 +391,15 @@ CREATE TABLE rubrics (
     rubric_number integer,
     rubric_due_date timestamp(6) without time zone,
     rubric_code character varying(8),
-    rubric_parts_sep boolean DEFAULT false NOT NULL
+    rubric_parts_sep boolean DEFAULT false NOT NULL,
+    rubric_late_days integer DEFAULT (-1) NOT NULL,
+    rubric_name character varying(20)
 );
 
 
-
 --
--- TOC entry 192 (class 1259 OID 18249)
--- Name: section_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 196 (class 1259 OID 44635)
+-- Name: section_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE section_sequence
@@ -360,10 +410,9 @@ CREATE SEQUENCE section_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 193 (class 1259 OID 18251)
--- Name: sections; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 197 (class 1259 OID 44637)
+-- Name: sections; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE sections (
@@ -373,10 +422,9 @@ CREATE TABLE sections (
 );
 
 
-
 --
--- TOC entry 194 (class 1259 OID 18255)
--- Name: session_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 198 (class 1259 OID 44641)
+-- Name: session_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE session_sequence
@@ -387,28 +435,9 @@ CREATE SEQUENCE session_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 195 (class 1259 OID 18257)
--- Name: sessions; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
---
-
-CREATE TABLE sessions (
-    session_id integer DEFAULT nextval('session_sequence'::regclass) NOT NULL,
-    user_id integer,
-    session_secret character varying(255),
-    session_login_timestamp timestamp(6) without time zone,
-    session_activity_timestamp timestamp(6) without time zone,
-    session_logout_timestamp timestamp(6) without time zone,
-    session_ip_address character varying(255),
-    session_is_valid integer
-);
-
-
-
---
--- TOC entry 196 (class 1259 OID 18264)
--- Name: student_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 199 (class 1259 OID 44650)
+-- Name: student_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE student_sequence
@@ -419,10 +448,9 @@ CREATE SEQUENCE student_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 197 (class 1259 OID 18266)
--- Name: students; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 200 (class 1259 OID 44652)
+-- Name: students; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE students (
@@ -438,10 +466,9 @@ CREATE TABLE students (
 );
 
 
-
 --
--- TOC entry 198 (class 1259 OID 18270)
--- Name: test_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 201 (class 1259 OID 44656)
+-- Name: test_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE test_sequence
@@ -452,10 +479,9 @@ CREATE SEQUENCE test_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 199 (class 1259 OID 18272)
--- Name: tests; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 202 (class 1259 OID 44658)
+-- Name: tests; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE tests (
@@ -463,14 +489,16 @@ CREATE TABLE tests (
     test_number integer,
     test_code character varying(8),
     test_max_grade numeric DEFAULT 100 NOT NULL,
-    test_curve numeric DEFAULT 0 NOT NULL
+    test_curve numeric DEFAULT 0 NOT NULL,
+    test_questions integer DEFAULT 0 NOT NULL,
+    test_locked boolean DEFAULT false NOT NULL,
+    test_text_fields integer DEFAULT 0 NOT NULL
 );
 
 
-
 --
--- TOC entry 200 (class 1259 OID 18281)
--- Name: user_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 203 (class 1259 OID 44670)
+-- Name: user_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE user_sequence
@@ -481,10 +509,9 @@ CREATE SEQUENCE user_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 201 (class 1259 OID 18283)
--- Name: users; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 204 (class 1259 OID 44672)
+-- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE users (
@@ -493,20 +520,14 @@ CREATE TABLE users (
     user_lastname character varying(255),
     user_rcs character varying(255),
     user_email character varying(255),
-    user_password_salt character varying(255),
-    user_password_salted_hash character varying(255),
-    user_creation_timestamp timestamp(6) without time zone,
-    user_login_attempts integer,
     user_is_administrator integer,
-    user_is_verified integer,
-    user_is_locked integer
+    user_is_developer integer DEFAULT 0 NOT NULL
 );
 
 
-
 --
--- TOC entry 202 (class 1259 OID 18290)
--- Name: verify_sequence; Type: SEQUENCE; Schema: public; Owner: hsdbu
+-- TOC entry 205 (class 1259 OID 44679)
+-- Name: verify_sequence; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE verify_sequence
@@ -517,24 +538,9 @@ CREATE SEQUENCE verify_sequence
     CACHE 1;
 
 
-
 --
--- TOC entry 203 (class 1259 OID 18292)
--- Name: verifies; Type: TABLE; Schema: public; Owner: hsdbu; Tablespace: 
---
-
-CREATE TABLE verifies (
-    verify_id integer DEFAULT nextval('verify_sequence'::regclass) NOT NULL,
-    user_id integer,
-    verify_secret character varying(255),
-    verify_issue_timestamp timestamp(6) without time zone
-);
-
-
-
---
--- TOC entry 2224 (class 2606 OID 18297)
--- Name: grades_academic_integrity_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2238 (class 2606 OID 44686)
+-- Name: grades_academic_integrity_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades_academic_integrity
@@ -542,8 +548,8 @@ ALTER TABLE ONLY grades_academic_integrity
 
 
 --
--- TOC entry 2234 (class 2606 OID 18299)
--- Name: grades_labs_copy_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2248 (class 2606 OID 44688)
+-- Name: grades_labs_copy_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades_tests
@@ -551,8 +557,8 @@ ALTER TABLE ONLY grades_tests
 
 
 --
--- TOC entry 2227 (class 2606 OID 18301)
--- Name: grades_labs_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2241 (class 2606 OID 44690)
+-- Name: grades_labs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades_labs
@@ -560,8 +566,8 @@ ALTER TABLE ONLY grades_labs
 
 
 --
--- TOC entry 2222 (class 2606 OID 18303)
--- Name: grades_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2236 (class 2606 OID 44692)
+-- Name: grades_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades
@@ -569,8 +575,8 @@ ALTER TABLE ONLY grades
 
 
 --
--- TOC entry 2230 (class 2606 OID 18305)
--- Name: grades_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2244 (class 2606 OID 44694)
+-- Name: grades_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades_questions
@@ -578,8 +584,17 @@ ALTER TABLE ONLY grades_questions
 
 
 --
--- TOC entry 2236 (class 2606 OID 18307)
--- Name: labs_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2250 (class 2606 OID 44696)
+-- Name: homework_grading_sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY homework_grading_sections
+    ADD CONSTRAINT homework_grading_sections_pkey PRIMARY KEY (hgs_id);
+
+
+--
+-- TOC entry 2252 (class 2606 OID 44698)
+-- Name: labs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY labs
@@ -587,8 +602,26 @@ ALTER TABLE ONLY labs
 
 
 --
--- TOC entry 2239 (class 2606 OID 18309)
--- Name: questions_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2256 (class 2606 OID 44700)
+-- Name: lates_primary; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY late_days
+    ADD CONSTRAINT lates_primary PRIMARY KEY (student_rcs, since_rubric);
+
+
+--
+-- TOC entry 2254 (class 2606 OID 44702)
+-- Name: pkey_ex_id; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY late_day_exceptions
+    ADD CONSTRAINT pkey_ex_id PRIMARY KEY (ex_id);
+
+
+--
+-- TOC entry 2259 (class 2606 OID 44704)
+-- Name: questions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY questions
@@ -596,8 +629,8 @@ ALTER TABLE ONLY questions
 
 
 --
--- TOC entry 2241 (class 2606 OID 18311)
--- Name: relationships_students_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2261 (class 2606 OID 44706)
+-- Name: relationships_students_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY relationships_students
@@ -605,8 +638,8 @@ ALTER TABLE ONLY relationships_students
 
 
 --
--- TOC entry 2245 (class 2606 OID 18313)
--- Name: relationships_users_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2265 (class 2606 OID 44708)
+-- Name: relationships_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY relationships_users
@@ -614,17 +647,8 @@ ALTER TABLE ONLY relationships_users
 
 
 --
--- TOC entry 2247 (class 2606 OID 18315)
--- Name: resets_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
---
-
-ALTER TABLE ONLY resets
-    ADD CONSTRAINT resets_pkey PRIMARY KEY (reset_id);
-
-
---
--- TOC entry 2249 (class 2606 OID 18317)
--- Name: rubrics_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2267 (class 2606 OID 44712)
+-- Name: rubrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY rubrics
@@ -632,8 +656,8 @@ ALTER TABLE ONLY rubrics
 
 
 --
--- TOC entry 2251 (class 2606 OID 18319)
--- Name: sections_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2269 (class 2606 OID 44714)
+-- Name: sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY sections
@@ -641,17 +665,8 @@ ALTER TABLE ONLY sections
 
 
 --
--- TOC entry 2253 (class 2606 OID 18321)
--- Name: sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
---
-
-ALTER TABLE ONLY sessions
-    ADD CONSTRAINT sessions_pkey PRIMARY KEY (session_id);
-
-
---
--- TOC entry 2255 (class 2606 OID 18323)
--- Name: students_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2271 (class 2606 OID 44718)
+-- Name: students_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY students
@@ -659,8 +674,8 @@ ALTER TABLE ONLY students
 
 
 --
--- TOC entry 2257 (class 2606 OID 18325)
--- Name: tests_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2273 (class 2606 OID 44720)
+-- Name: tests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY tests
@@ -668,8 +683,8 @@ ALTER TABLE ONLY tests
 
 
 --
--- TOC entry 2259 (class 2606 OID 18327)
--- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2275 (class 2606 OID 44722)
+-- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY users
@@ -677,97 +692,106 @@ ALTER TABLE ONLY users
 
 
 --
--- TOC entry 2261 (class 2606 OID 18329)
--- Name: verifies_pkey; Type: CONSTRAINT; Schema: public; Owner: hsdbu; Tablespace: 
---
-
-ALTER TABLE ONLY verifies
-    ADD CONSTRAINT verifies_pkey PRIMARY KEY (verify_id);
-
-
---
--- TOC entry 2225 (class 1259 OID 18330)
--- Name: fki_grades_labs_fkey; Type: INDEX; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2239 (class 1259 OID 44725)
+-- Name: fki_grades_labs_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX fki_grades_labs_fkey ON grades_labs USING btree (lab_id);
 
 
 --
--- TOC entry 2228 (class 1259 OID 18331)
--- Name: fki_grades_questions_fkey; Type: INDEX; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2242 (class 1259 OID 44726)
+-- Name: fki_grades_questions_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX fki_grades_questions_fkey ON grades_questions USING btree (grade_id);
 
 
 --
--- TOC entry 2218 (class 1259 OID 18332)
--- Name: fki_grades_rubric_fkey; Type: INDEX; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2232 (class 1259 OID 44727)
+-- Name: fki_grades_rubric_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX fki_grades_rubric_fkey ON grades USING btree (rubric_id);
 
 
 --
--- TOC entry 2219 (class 1259 OID 18333)
--- Name: fki_grades_student_fkey; Type: INDEX; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2233 (class 1259 OID 44728)
+-- Name: fki_grades_student_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX fki_grades_student_fkey ON grades USING btree (student_rcs);
 
 
 --
--- TOC entry 2231 (class 1259 OID 18334)
--- Name: fki_grades_tests_fkey; Type: INDEX; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2245 (class 1259 OID 44729)
+-- Name: fki_grades_tests_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX fki_grades_tests_fkey ON grades_tests USING btree (test_id);
 
 
 --
--- TOC entry 2232 (class 1259 OID 18335)
--- Name: fki_grades_tests_student_fkey; Type: INDEX; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2246 (class 1259 OID 44730)
+-- Name: fki_grades_tests_student_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX fki_grades_tests_student_fkey ON grades_tests USING btree (student_rcs);
 
 
 --
--- TOC entry 2220 (class 1259 OID 18336)
--- Name: fki_grades_user_fkey; Type: INDEX; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2234 (class 1259 OID 44731)
+-- Name: fki_grades_user_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX fki_grades_user_fkey ON grades USING btree (grade_user_id);
 
 
 --
--- TOC entry 2237 (class 1259 OID 18337)
--- Name: fki_questions_fkey; Type: INDEX; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2257 (class 1259 OID 44732)
+-- Name: fki_questions_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX fki_questions_fkey ON questions USING btree (rubric_id);
 
 
 --
--- TOC entry 2242 (class 1259 OID 18338)
--- Name: fki_relationships_users_section_fkey; Type: INDEX; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2262 (class 1259 OID 44733)
+-- Name: fki_relationships_users_section_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX fki_relationships_users_section_fkey ON relationships_users USING btree (section_id);
 
 
 --
--- TOC entry 2243 (class 1259 OID 18339)
--- Name: fki_relationships_users_user_fkey; Type: INDEX; Schema: public; Owner: hsdbu; Tablespace: 
+-- TOC entry 2263 (class 1259 OID 44734)
+-- Name: fki_relationships_users_user_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX fki_relationships_users_user_fkey ON relationships_users USING btree (user_id);
 
 
 --
--- TOC entry 2265 (class 2606 OID 18340)
--- Name: grades_academic_integrity_rubric_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2289 (class 2606 OID 44735)
+-- Name: fkey_rubric_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY late_day_exceptions
+    ADD CONSTRAINT fkey_rubric_id FOREIGN KEY (ex_rubric_id) REFERENCES rubrics(rubric_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 2290 (class 2606 OID 44740)
+-- Name: fkey_student_rcs; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY late_day_exceptions
+    ADD CONSTRAINT fkey_student_rcs FOREIGN KEY (ex_student_rcs) REFERENCES students(student_rcs) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 2279 (class 2606 OID 44745)
+-- Name: grades_academic_integrity_rubric_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades_academic_integrity
@@ -775,8 +799,8 @@ ALTER TABLE ONLY grades_academic_integrity
 
 
 --
--- TOC entry 2266 (class 2606 OID 18345)
--- Name: grades_academic_integrity_student; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2280 (class 2606 OID 44750)
+-- Name: grades_academic_integrity_student; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades_academic_integrity
@@ -784,8 +808,8 @@ ALTER TABLE ONLY grades_academic_integrity
 
 
 --
--- TOC entry 2267 (class 2606 OID 18350)
--- Name: grades_labs_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2281 (class 2606 OID 44755)
+-- Name: grades_labs_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades_labs
@@ -793,8 +817,8 @@ ALTER TABLE ONLY grades_labs
 
 
 --
--- TOC entry 2268 (class 2606 OID 18355)
--- Name: grades_labs_student_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2282 (class 2606 OID 44760)
+-- Name: grades_labs_student_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades_labs
@@ -802,8 +826,8 @@ ALTER TABLE ONLY grades_labs
 
 
 --
--- TOC entry 2269 (class 2606 OID 18360)
--- Name: grades_questions_grade_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2283 (class 2606 OID 44765)
+-- Name: grades_questions_grade_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades_questions
@@ -811,8 +835,8 @@ ALTER TABLE ONLY grades_questions
 
 
 --
--- TOC entry 2270 (class 2606 OID 18365)
--- Name: grades_questions_question_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2284 (class 2606 OID 44770)
+-- Name: grades_questions_question_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades_questions
@@ -820,8 +844,8 @@ ALTER TABLE ONLY grades_questions
 
 
 --
--- TOC entry 2262 (class 2606 OID 18370)
--- Name: grades_rubric_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2276 (class 2606 OID 44775)
+-- Name: grades_rubric_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades
@@ -829,8 +853,8 @@ ALTER TABLE ONLY grades
 
 
 --
--- TOC entry 2263 (class 2606 OID 18375)
--- Name: grades_student_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2277 (class 2606 OID 44780)
+-- Name: grades_student_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades
@@ -838,8 +862,8 @@ ALTER TABLE ONLY grades
 
 
 --
--- TOC entry 2271 (class 2606 OID 18380)
--- Name: grades_tests_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2285 (class 2606 OID 44785)
+-- Name: grades_tests_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades_tests
@@ -847,8 +871,8 @@ ALTER TABLE ONLY grades_tests
 
 
 --
--- TOC entry 2272 (class 2606 OID 18385)
--- Name: grades_tests_students_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2286 (class 2606 OID 44790)
+-- Name: grades_tests_students_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades_tests
@@ -856,8 +880,8 @@ ALTER TABLE ONLY grades_tests
 
 
 --
--- TOC entry 2264 (class 2606 OID 18390)
--- Name: grades_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2278 (class 2606 OID 44795)
+-- Name: grades_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grades
@@ -865,8 +889,26 @@ ALTER TABLE ONLY grades
 
 
 --
--- TOC entry 2273 (class 2606 OID 18395)
--- Name: questions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2287 (class 2606 OID 44800)
+-- Name: homework_grading_sections_rubric_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY homework_grading_sections
+    ADD CONSTRAINT homework_grading_sections_rubric_id_fkey FOREIGN KEY (rubric_id) REFERENCES rubrics(rubric_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 2288 (class 2606 OID 44805)
+-- Name: homework_grading_sections_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY homework_grading_sections
+    ADD CONSTRAINT homework_grading_sections_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- TOC entry 2291 (class 2606 OID 44810)
+-- Name: questions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY questions
@@ -874,8 +916,8 @@ ALTER TABLE ONLY questions
 
 
 --
--- TOC entry 2274 (class 2606 OID 18400)
--- Name: relationships_users_section_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2292 (class 2606 OID 44815)
+-- Name: relationships_users_section_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY relationships_users
@@ -883,8 +925,8 @@ ALTER TABLE ONLY relationships_users
 
 
 --
--- TOC entry 2275 (class 2606 OID 18405)
--- Name: relationships_users_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2293 (class 2606 OID 44820)
+-- Name: relationships_users_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY relationships_users
@@ -892,10 +934,17 @@ ALTER TABLE ONLY relationships_users
 
 
 --
--- TOC entry 2276 (class 2606 OID 18410)
--- Name: student_section_fkey; Type: FK CONSTRAINT; Schema: public; Owner: hsdbu
+-- TOC entry 2294 (class 2606 OID 44825)
+-- Name: student_section_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY students
     ADD CONSTRAINT student_section_fkey FOREIGN KEY (student_section_id) REFERENCES sections(section_id);
+
+
+-- Completed on 2015-08-25 13:59:21 EDT
+
+--
+-- PostgreSQL database dump complete
+--
 
