@@ -98,48 +98,60 @@ function parse_assignment_version_with_recent($username, $semester, $course, $as
 
 }
 
+
+
 function check_semester(){
     include 'controller/defaults.php';
 
+    $semester = $default_semester;
+
     if (isset($_GET["semester"])) {
         $semester = htmlspecialchars($_GET["semester"]);
-        if (is_valid_semester($semester)) {
-            return $semester;
-        }
-        $_SESSION["status"] = "Invalid semester specified";
-    }
-    else{
+    } else {
         $_SESSION["status"] = "No semester specified";
     }
-    $semester = $default_semester;
-    if (is_valid_semester($semester)){
-        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".check_course());
+    if (is_valid_semester($semester)) {
+        return $semester;
+    } else {
+        $_SESSION["status"] = "Invalid semester specified";
+        $course = $default_course;
+        if (isset($_GET["course"])) {
+            $course = htmlspecialchars($_GET["course"]);
+        }
+//FIXME: 
+//        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
+        header("Location: ERROR_bad_semester_error.html");
         exit();
     }
-    return $semester;
-}
+}	
 
-function check_course(){
+
+
+
+function check_course() {
+
+    $semester = check_semester();
+
     include 'controller/defaults.php';
+
+    $course = $default_course;
 
     if (isset($_GET["course"])) {
         $course = htmlspecialchars($_GET["course"]);
-        if (is_valid_course($course)) {
-            return $course;
-        }
-        $_SESSION["status"] = "Invalid course specified";
     }
     else{
         $_SESSION["status"] = "No course specified";
     }
-    // FIXME: need selection page
-    $course = $default_course;
-    // FIXME, displaymesssage does not exist
-    if (is_valid_course($course)){
-        header("Location: index.php?page=displaymessage&semester=".check_semester()."&course=".$course);
+
+    if (is_valid_course($semester,$course)) {
+        return $course;
+    } else {
+        $_SESSION["status"] = "Invalid course specified";
+//FIXME: 
+//        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
+        header("Location: ERROR_bad_course_error.html");
         exit();
     }
-    return $course;
 }
 
 

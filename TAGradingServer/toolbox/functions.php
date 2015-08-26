@@ -1,5 +1,11 @@
 <?php
 
+
+// FOR DEBUGGING
+//ini_set('display_errors', 1);
+//error_reporting(E_ALL);
+
+
 use \lib\AutoLoader;
 use \lib\Database;
 use \lib\ExceptionHandler;

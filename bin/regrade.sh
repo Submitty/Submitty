@@ -12,13 +12,11 @@
 
 HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
 
-echo $PWD
-
 # check the number of arguments
 if [ "$#" -ne 1 ] && [ "$#" -ne 2 ]; then 
     echo "USAGE:"
     echo "  regrade.sh  <(absolute or relative) PATTERN PATH>"
-    echo "  regrade.sh  <(absolute or relative) PATTERN PATH>  <TO_BE_GRADED_DIRECTORY (relative)>"
+    echo "  regrade.sh  <(absolute or relative) PATTERN PATH>  interactive"
     exit
 fi
 
@@ -35,13 +33,19 @@ if [ "${pattern:$[$pattern_length-1]:1}" == "/" ]; then
     pattern_length=${#pattern}
 fi
 
-#optional argument...
-if [ "$#" -gt 1 ]; then
-    TO_BE_GRADED="$2"
+
+if [ "$#" -eq 2 ]; then 
+    if [ ! "$2" = "interactive" ]; then
+	echo "USAGE:"
+	echo "  regrade.sh  <(absolute or relative) PATTERN PATH>"
+	echo "  regrade.sh  <(absolute or relative) PATTERN PATH>  interactive"
+	exit
+    fi
+    TO_BE_GRADED="to_be_graded_interactive"
 else
-    TO_BE_GRADED="to_be_graded"
-#    TO_BE_GRADED="batch_regrade"
+    TO_BE_GRADED="to_be_graded_batch"
 fi
+
 
 base_path=${pattern%/courses*}
 base_path_length=${#base_path}
@@ -52,9 +56,8 @@ if [ "$pattern_length" -eq "$base_path_length" ]; then
     exit
 fi
 
-
 # ensure we extracted the base path
-if [ "$base_path" -ne "$HSS_DATA_DIR" ]; then
+if [ "$base_path" != "$HSS_DATA_DIR" ]; then
     echo "ERROR:  $base_path != $HSS_DATA_DIR"
     exit
 fi
@@ -100,7 +103,7 @@ function check_match {
 
 echo "looking in '$base_path' for submissions that match '$pattern'"
 
-for semester in `cd $base_path/courses && ls -d [fs]* 2> /dev/null`; do
+for semester in `cd $base_path/courses && ls -d * 2> /dev/null`; do
 
     if [ ! -d $base_path/courses/$semester/ ]
     then
@@ -117,7 +120,7 @@ for semester in `cd $base_path/courses && ls -d [fs]* 2> /dev/null`; do
     echo matching semester: $semester
 
 
-    for course in `cd $base_path/courses/$semester && ls -d csci* 2> /dev/null`; do
+    for course in `cd $base_path/courses/$semester && ls -d * 2> /dev/null`; do
 
 
 	if [ ! -d $base_path/courses/$semester/$course/ ]

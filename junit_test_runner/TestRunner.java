@@ -69,19 +69,19 @@ public class TestRunner {
     }
     private static void footer(int tests, int failures) {
 	if (failures != 0) {
-            System.out.println("FAILURES!!!");
+            System.out.println("TEST-RUNNER-FAILURES!!!");
             System.out.println("Tests run: "+tests+", Failures: "+failures);
         }
         else {
-            System.out.println("OK ("+tests+" tests)");
+            System.out.println("TEST-RUNNER-OK ("+tests+" tests)");
         }
     }
 
     private static Result runTestsInFile(String filename) throws ClassNotFoundException {
 	Class clazz = Class.forName(filename);
-	// System.out.println("Running Junit tests in "+clazz);
+	System.out.println("Running Junit tests in "+clazz);
 	JUnitCore junit = new JUnitCore();
-	// junit.addListener(new TextListener(System.out));
+	junit.addListener(new TextListener(System.out));
 	Result result = junit.run(clazz);
 	return result;
     }

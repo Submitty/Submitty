@@ -12,3 +12,4 @@ define("__ALLOWED_FILE_EXTENSIONS__", "py,times,txt,cpp,h,java");
 define("__ZERO_RUBRIC_GRADES__", false);
 define("__DEFAULT_LATE_DAY__", 4);
 ?>
+

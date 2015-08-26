@@ -31,13 +31,16 @@ function get_path_front_root() {
 
 function get_path_front_course($semester,$course) {
     //display_note("get path front: ".$semester." ".$course);
-    if (!is_valid_semester($semester)) {
-        display_error("INVALID SEMESTER: ".$semester);
-    }
-    if (!is_valid_course($course)) {
-        display_error("INVALID COURSE: ".$course);
-    }
+
     $path_front_root = get_path_front_root();
+
+    if (!is_valid_semester($semester)) {
+       display_error("INVALID SEMESTER: ".$semester);
+    }
+    if (!is_valid_course($semester,$course)) {
+       display_error("INVALID COURSE: ".$course);
+    }
+
     return $path_front_root."/courses/".$semester."/".$course;
 }
 
@@ -98,12 +101,6 @@ function display_file_permissions($perms) {
 
 // Upload HW Assignment to server and unzip
 function upload_homework($username, $semester, $course, $assignment_id, $homework_file, $svn_checkout) {
-
-    if (!is_valid_semester($semester)) { display_error("upload_homework, INVALID SEMESTER: ".$semester); }
-    if (!is_valid_course($course))     { display_error("upload_homework, INVALID COURSE: ".$course); }
-
-    // display_note ("trying to upload homework ".$semester." ".$course." ");
-
     if ($svn_checkout == false) {
       if (!isset($homework_file["tmp_name"]) || $homework_file["tmp_name"] == "") {
         $error_text = "The file did not upload to POST[tmp_name].";
@@ -267,8 +264,8 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     
 
     // add this assignment to the grading queue
-    // FIX ME: If to_be_graded path doesn't exist, create new one
-    $touchfile = $path_front_root."/to_be_graded/".$semester."__".$course."__".$assignment_id."__".$username."__".$upload_version;
+    // FIX ME: If to_be_graded_interactive path doesn't exist, throw an error
+    $touchfile = $path_front_root."/to_be_graded_interactive/".$semester."__".$course."__".$assignment_id."__".$username."__".$upload_version;
     touch($touchfile);
 
 
@@ -366,9 +363,6 @@ function get_due_date($class_config, $assignment_id) {
 
 
 function get_class_config($semester,$course) {
-   if (!is_valid_semester($semester)) { display_error("get_class_config, INVALID SEMESTER: ".$semester); }
-   if (!is_valid_course($course))     { display_error("get_class_config, INVALID COURSE: ".$course); }
-
     $path_front = get_path_front_course($semester,$course);
     $file = $path_front."/config/class.json";
     //    $file = $path_front."/results/class.json";
@@ -397,11 +391,7 @@ function most_recent_released_assignment_id($class_config) {
 // Get a list of uploaded files
 
 function get_submitted_files($username, $semester, $course, $assignment_id, $assignment_version) {
-
-    if (!is_valid_semester($semester)) { display_error("get_submitted_files, INVALID SEMESTER: ".$semester); }
-    if (!is_valid_course($course))     { display_error("get_submitted_files, INVALID COURSE: ".$course); }
-
-
+	 
     $path_front = get_path_front_course($semester,$course);
     $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
     $contents = array();
@@ -557,48 +547,24 @@ function is_hidden_points_visible($class_config, $assignment_id) {
   return ""; //TODO Error handling
 }
 
-// Check to make sure instructor has added this assignment
+
 function is_valid_semester($semester) {
 
-//FIXME: SHOULD NOT BE USING THIS
+   $path_front_root = get_path_front_root();
+   $semester_directory = $path_front_root."/courses/".$semester;
 
-    if ($semester == "f14") {
-        return true;
-    }
-    if ($semester == "s15") {
-        return true;
-    }
-    if ($semester == "f15") {
-        return true;
-    }
-    return false;
+   return is_dir($semester_directory);
+
 }
 
 
-// Check to make sure instructor has added this assignment
-function is_valid_course($course) {
+function is_valid_course($semester,$course) {
 
-//FIXME: SHOULD NOT BE USING THIS
+   $path_front_root = get_path_front_root();
+   $course_directory = $path_front_root."/courses/".$semester."/".$course;
+    
+   return is_dir($course_directory);
 
-    if ($course == "csci1100") {
-        return true;
-    }
-    if ($course == "csci1200") {
-        return true;
-    }
-    if ($course == "csci2600") {
-        return true;
-    }
-    if ($course == "csci4960") {
-        return true;
-    }
-    if ($course == "csci4962") {
-        return true;
-    }
-    if ($course == "csci4530") {
-        return true;
-    }
-    return false;
 }
 
 
@@ -642,11 +608,11 @@ function is_valid_assignment_version($username, $semester, $course, $assignment_
 }
 
 function is_valid_file_name($username, $semester, $course, $assignment_id, $assignment_version, $file_name){
-        if (!is_valid_semester($semester)) { display_error("get_submitted_files, INVALID SEMESTER: ".$semester); }
-        if (!is_valid_course($course))     { display_error("get_submitted_files, INVALID COURSE: ".$course); }
+        $path_front = get_path_front_course($semester,$course);
+
         if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) { display_error("get_submitted_files, INVALID Assignment Version: ".$course); }
 
-        $path_front = get_path_front_course($semester,$course);
+
         $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
         $contents = array();
         if ($assignment_version != 0) {
@@ -661,11 +627,12 @@ function is_valid_file_name($username, $semester, $course, $assignment_id, $assi
 }
 
 function get_file($username, $semester, $course, $assignment_id, $assignment_version, $file_name){
-    if (!is_valid_semester($semester)) { display_error("get_submitted_files, INVALID SEMESTER: ".$semester); }
-    if (!is_valid_course($course))     { display_error("get_submitted_files, INVALID COURSE: ".$course); }
-    if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) { display_error("get_submitted_files, INVALID Assignment Version: ".$course); }
 
     $path_front = get_path_front_course($semester,$course);
+
+    if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) { display_error("get_submitted_files, INVALID Assignment Version: ".$course); }
+
+
     $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
     $contents = array();
     if ($assignment_version != 0) {
@@ -679,11 +646,12 @@ function get_file($username, $semester, $course, $assignment_id, $assignment_ver
     return "";
 }
 function get_all_files($username, $semester, $course, $assignment_id, $assignment_version){
-    if (!is_valid_semester($semester)) { display_error("get_submitted_files, INVALID SEMESTER: ".$semester); }
-    if (!is_valid_course($course))     { display_error("get_submitted_files, INVALID COURSE: ".$course); }
-    if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) { display_error("get_submitted_files, INVALID Assignment Version: ".$course); }
 
     $path_front = get_path_front_course($semester,$course);
+
+    if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) { display_error("get_submitted_files, INVALID Assignment Version: ".$course); }
+
+
     $folder = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
     return $folder;
 }

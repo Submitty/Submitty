@@ -20,6 +20,8 @@ HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
 HWPHP_USER=__INSTALL__FILLIN__HWPHP_USER__
 HWCRON_USER=__INSTALL__FILLIN__HWCRON_USER__
 
+COURSE_BUILDERS_GROUP=__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__
+
 ########################################################################################################################
 ########################################################################################################################
 
@@ -57,6 +59,12 @@ if ! getent group "$ta_www_group" >/dev/null 2>&1 ; then
 fi
 
 
+# confirm that the instructor is a member of the $COURSE_BUILDERS_GROUP
+if ! groups "$instructor" | grep -q "\b${COURSE_BUILDERS_GROUP}\b" ; then
+    echo -e "ERROR: $instructor is not in group $COURSE_BUILDERS_GROUP\n"
+    exit
+fi
+
 # confirm that the instructor, hwcron, and hwphp are members of the
 # ta_www_group 
 if ! groups "$instructor" | grep -q "\b${ta_www_group}\b" ; then
@@ -76,6 +84,29 @@ fi
 #       additional instructors and/or head TAs who need read/write
 #       access to these files
 
+
+# FIXME: add some error checking on the $semester and $course
+#        variables 
+#
+#   (not clear how to do this since these variables could have quite
+#   different structure at different schools)
+
+########################################################################################################################
+########################################################################################################################
+
+course_dir=$HSS_DATA_DIR/courses/$semester/$course
+
+if [ -d "$course_dir" ]; then
+    echo -e "ERROR: specific course directory " $course_dir " already exists"
+    exit
+fi
+
+
+########################################################################################################################
+########################################################################################################################
+
+DATABASE_NAME=hss_${course}
+
 ########################################################################################################################
 ########################################################################################################################
 
@@ -89,18 +120,12 @@ function replace_fillin_variables {
     sed -i -e "s|__CREATE_COURSE__FILLIN__SEMESTER__|$semester|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__COURSE__|$course|g" $1
 
+    sed -i -e "s|__CREATE_COURSE__FILLIN__TAGRADING_DATABASE_NAME__|$DATABASE_NAME|g" $1
+    sed -i -e "s|__CREATE_COURSE__FILLIN__TAGRADING_COURSE_FILES_LOCATION__|$course_dir|g" $1
+
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
 
-########################################################################################################################
-########################################################################################################################
-
-course_dir=$HSS_DATA_DIR/courses/$semester/$course
-
-if [ -d "$course_dir" ]; then
-    echo -e "ERROR: specific course directory " $course_dir " already exists"
-    exit
-fi
 
 ########################################################################################################################
 ########################################################################################################################
@@ -116,11 +141,9 @@ if [ ! -d "$HSS_DATA_DIR/courses" ]; then
 fi
 
 if [ ! -d "$HSS_DATA_DIR/courses/$semester" ]; then
-    mkdir                            $HSS_DATA_DIR/courses/$semester
-#    chown $HWPHP_USER:$HWPHP_USER   $HSS_DATA_DIR/courses/$semester
-    chown $root:$instructors         $HSS_DATA_DIR/courses/$semester
-#    chmod u=rwx,g=rwx,o=rx          $HSS_DATA_DIR/courses/$semester
-    chmod 751                        $HSS_DATA_DIR/courses/$semester
+    mkdir                               $HSS_DATA_DIR/courses/$semester
+    chown root:$COURSE_BUILDERS_GROUP   $HSS_DATA_DIR/courses/$semester
+    chmod 751                           $HSS_DATA_DIR/courses/$semester
 fi
 
 ########################################################################################################################
@@ -193,6 +216,19 @@ cp $HSS_INSTALL_DIR/sample_files/sample_class/class.json $course_dir/config/clas
 chown $instructor:$ta_www_group $course_dir/config/class.json
 chmod 660 $course_dir/config/class.json
 #replace_fillin_variables $course_dir/config/class.json
+
+
+# copy the config file for TA grading & replace the variables
+cp $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/sample_course.php $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+chown hwphp:hwphp $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+chmod 400 $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+
+
+
+replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+
+echo -e "\nMake sure to create the database: $DATABASE_NAME\n\n"
+
 
 ########################################################################################################################
 ########################################################################################################################

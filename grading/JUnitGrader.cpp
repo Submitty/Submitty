@@ -40,27 +40,28 @@ FAILURE:
 
 JUnit version 4.12
 EMMA: collecting runtime coverage data ...
-FAILURES!!!
+fkjdkfjd
+TEST-RUNNER-FAILURES!!!
 Tests run: 13, Failures: 13
 EMMA: runtime coverage data merged into [/Users/ana/Downloads/java/coverage.ec] {in 2 ms}
 
 or, if code is not instrumented
 
-JUnit version 4.12                                                                                                                      
-FAILURES!!!                                                                                                                                         
-Tests run: 13, Failures: 13 
+JUnit version 4.12
+kfjdkfdj                                                                                                                      
+TEST-RUNNER-FAILURES!!!                                                                                                                         Tests run: 13, Failures: 13 
 
 SUCCESS:
 
 JUnit version 4.12
 EMMA: collecting runtime coverage data ...
-OK (65 tests)
+TEST-RUNNER-OK (65 tests)
 EMMA: runtime coverage data merged into [/Users/ana/Downloads/java/coverage.ec] {in 46 ms}
 
 or, if code is not instrumented 
 
 JUnit version 4.12
-OK (65 tests)
+TEST-RUNNER-OK (65 tests)
 
 -------------------------------------
 
@@ -88,7 +89,7 @@ TestResults* TestCaseJUnit::doit_multiple_junit_tests(std::ifstream &junit_outpu
 
     // If OK, then all student tests pass, award full credit
 
-    if (token1 == "OK") {
+    if (token1 == "TEST-RUNNER-OK") {
       char c;
       junit_output >> c;
       if (c != '(') {
@@ -107,7 +108,7 @@ TestResults* TestCaseJUnit::doit_multiple_junit_tests(std::ifstream &junit_outpu
 
     // If Failures, award partial credit
 
-    else if (token1 == "FAILURES!!!") {
+    else if (token1 == "TEST-RUNNER-FAILURES!!!") {
       // Parses the following: Tests run: 13, Failures: 13                                                                                                      
       junit_output >> token2 >> token3; 
       if (token2 != "Tests" || token3 != "run:") {
@@ -144,8 +145,8 @@ TestResults* TestCaseJUnit::doit_multiple_junit_tests(std::ifstream &junit_outpu
     }
   }
 
-  std::cout << "ERROR: TestRunner output did not say 'OK' or 'FAILURES!!!'.  This should not happen!" << std::endl;
-  return new TestResults(0.0,"ERROR: TestRunner output did not say 'OK' or 'FAILURES!!!'.  This should not happen!");
+  std::cout << "ERROR: TestRunner output did not say 'TEST-RUNNER-OK' or 'TEST-RUNNER-FAILURES!!!'.  This should not happen!" << std::endl;
+  return new TestResults(0.0,"ERROR: TestRunner output did not say 'TEST-RUNNER-OK' or 'TEST-RUNNER-FAILURES!!!'.  This should not happen!");
 }
 
 // =============================================================================
@@ -308,16 +309,17 @@ TestResults* TestCaseJUnit::doit_emma_coverage_report(std::ifstream &junit_outpu
 
       assert (coverage_threshhold >= 0.0 && coverage_threshhold <= 100.0);
 
-      if (block_p >= coverage_threshhold &&
-	  line_p >= coverage_threshhold) {
+      if (block_p >= coverage_threshhold) {
+	// && line_p >= coverage_threshhold) {
 	return new TestResults(1.0,""); // Awarding full credit, no message
       }
       
       else {
 	// simple formula for partial credit based on coverage.
-	float partial = float(std::min(block_p,line_p)) / coverage_threshhold;
+	// float partial = float(std::min(block_p,line_p)) / coverage_threshhold;
+	float partial = float(block_p) / coverage_threshhold;
 	ss2 << "ERROR: Insuffficient block and/or line coverage below threshhold for " << name 
-	    << " (" << std::min(block_p,line_p) << "/" << coverage_threshhold << " = " << partial << ")";
+	    << " (" << block_p << "/" << coverage_threshhold << " = " << partial << ")";
 	return new TestResults(partial,ss2.str()); 
       }
     }
