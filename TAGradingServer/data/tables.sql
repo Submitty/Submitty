@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.3.5
 -- Dumped by pg_dump version 9.4.0
--- Started on 2015-08-25 13:59:21 EDT
+-- Started on 2015-08-26 13:17:50 EDT
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -14,7 +14,7 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 --
--- TOC entry 206 (class 3079 OID 12018)
+-- TOC entry 207 (class 3079 OID 12018)
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -22,8 +22,8 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- TOC entry 2408 (class 0 OID 0)
--- Dependencies: 206
+-- TOC entry 2415 (class 0 OID 0)
+-- Dependencies: 207
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
 --
 
@@ -31,6 +31,20 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
 SET search_path = public, pg_catalog;
+
+SET default_with_oids = false;
+
+--
+-- TOC entry 206 (class 1259 OID 53036)
+-- Name: config; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE config (
+    config_name character varying(255) NOT NULL,
+    config_type integer NOT NULL,
+    config_value character varying(255) NOT NULL
+);
+
 
 --
 -- TOC entry 170 (class 1259 OID 44515)
@@ -83,8 +97,6 @@ CREATE SEQUENCE grade_test_sequence
     NO MAXVALUE
     CACHE 1;
 
-
-SET default_with_oids = false;
 
 --
 -- TOC entry 174 (class 1259 OID 44523)
@@ -539,7 +551,7 @@ CREATE SEQUENCE verify_sequence
 
 
 --
--- TOC entry 2238 (class 2606 OID 44686)
+-- TOC entry 2243 (class 2606 OID 44686)
 -- Name: grades_academic_integrity_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -548,7 +560,7 @@ ALTER TABLE ONLY grades_academic_integrity
 
 
 --
--- TOC entry 2248 (class 2606 OID 44688)
+-- TOC entry 2253 (class 2606 OID 44688)
 -- Name: grades_labs_copy_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -557,7 +569,7 @@ ALTER TABLE ONLY grades_tests
 
 
 --
--- TOC entry 2241 (class 2606 OID 44690)
+-- TOC entry 2246 (class 2606 OID 44690)
 -- Name: grades_labs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -566,7 +578,7 @@ ALTER TABLE ONLY grades_labs
 
 
 --
--- TOC entry 2236 (class 2606 OID 44692)
+-- TOC entry 2241 (class 2606 OID 44692)
 -- Name: grades_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -575,7 +587,7 @@ ALTER TABLE ONLY grades
 
 
 --
--- TOC entry 2244 (class 2606 OID 44694)
+-- TOC entry 2249 (class 2606 OID 44694)
 -- Name: grades_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -584,7 +596,7 @@ ALTER TABLE ONLY grades_questions
 
 
 --
--- TOC entry 2250 (class 2606 OID 44696)
+-- TOC entry 2255 (class 2606 OID 44696)
 -- Name: homework_grading_sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -593,7 +605,7 @@ ALTER TABLE ONLY homework_grading_sections
 
 
 --
--- TOC entry 2252 (class 2606 OID 44698)
+-- TOC entry 2257 (class 2606 OID 44698)
 -- Name: labs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -602,7 +614,7 @@ ALTER TABLE ONLY labs
 
 
 --
--- TOC entry 2256 (class 2606 OID 44700)
+-- TOC entry 2261 (class 2606 OID 44700)
 -- Name: lates_primary; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -611,7 +623,16 @@ ALTER TABLE ONLY late_days
 
 
 --
--- TOC entry 2254 (class 2606 OID 44702)
+-- TOC entry 2282 (class 2606 OID 53043)
+-- Name: pk_config; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY config
+    ADD CONSTRAINT pk_config PRIMARY KEY (config_name);
+
+
+--
+-- TOC entry 2259 (class 2606 OID 44702)
 -- Name: pkey_ex_id; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -620,7 +641,7 @@ ALTER TABLE ONLY late_day_exceptions
 
 
 --
--- TOC entry 2259 (class 2606 OID 44704)
+-- TOC entry 2264 (class 2606 OID 44704)
 -- Name: questions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -629,7 +650,7 @@ ALTER TABLE ONLY questions
 
 
 --
--- TOC entry 2261 (class 2606 OID 44706)
+-- TOC entry 2266 (class 2606 OID 44706)
 -- Name: relationships_students_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -638,7 +659,7 @@ ALTER TABLE ONLY relationships_students
 
 
 --
--- TOC entry 2265 (class 2606 OID 44708)
+-- TOC entry 2270 (class 2606 OID 44708)
 -- Name: relationships_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -647,7 +668,7 @@ ALTER TABLE ONLY relationships_users
 
 
 --
--- TOC entry 2267 (class 2606 OID 44712)
+-- TOC entry 2272 (class 2606 OID 44712)
 -- Name: rubrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -656,7 +677,7 @@ ALTER TABLE ONLY rubrics
 
 
 --
--- TOC entry 2269 (class 2606 OID 44714)
+-- TOC entry 2274 (class 2606 OID 44714)
 -- Name: sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -665,7 +686,7 @@ ALTER TABLE ONLY sections
 
 
 --
--- TOC entry 2271 (class 2606 OID 44718)
+-- TOC entry 2276 (class 2606 OID 44718)
 -- Name: students_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -674,7 +695,7 @@ ALTER TABLE ONLY students
 
 
 --
--- TOC entry 2273 (class 2606 OID 44720)
+-- TOC entry 2278 (class 2606 OID 44720)
 -- Name: tests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -683,7 +704,7 @@ ALTER TABLE ONLY tests
 
 
 --
--- TOC entry 2275 (class 2606 OID 44722)
+-- TOC entry 2280 (class 2606 OID 44722)
 -- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -692,7 +713,7 @@ ALTER TABLE ONLY users
 
 
 --
--- TOC entry 2239 (class 1259 OID 44725)
+-- TOC entry 2244 (class 1259 OID 44725)
 -- Name: fki_grades_labs_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -700,7 +721,7 @@ CREATE INDEX fki_grades_labs_fkey ON grades_labs USING btree (lab_id);
 
 
 --
--- TOC entry 2242 (class 1259 OID 44726)
+-- TOC entry 2247 (class 1259 OID 44726)
 -- Name: fki_grades_questions_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -708,7 +729,7 @@ CREATE INDEX fki_grades_questions_fkey ON grades_questions USING btree (grade_id
 
 
 --
--- TOC entry 2232 (class 1259 OID 44727)
+-- TOC entry 2237 (class 1259 OID 44727)
 -- Name: fki_grades_rubric_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -716,7 +737,7 @@ CREATE INDEX fki_grades_rubric_fkey ON grades USING btree (rubric_id);
 
 
 --
--- TOC entry 2233 (class 1259 OID 44728)
+-- TOC entry 2238 (class 1259 OID 44728)
 -- Name: fki_grades_student_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -724,7 +745,7 @@ CREATE INDEX fki_grades_student_fkey ON grades USING btree (student_rcs);
 
 
 --
--- TOC entry 2245 (class 1259 OID 44729)
+-- TOC entry 2250 (class 1259 OID 44729)
 -- Name: fki_grades_tests_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -732,7 +753,7 @@ CREATE INDEX fki_grades_tests_fkey ON grades_tests USING btree (test_id);
 
 
 --
--- TOC entry 2246 (class 1259 OID 44730)
+-- TOC entry 2251 (class 1259 OID 44730)
 -- Name: fki_grades_tests_student_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -740,7 +761,7 @@ CREATE INDEX fki_grades_tests_student_fkey ON grades_tests USING btree (student_
 
 
 --
--- TOC entry 2234 (class 1259 OID 44731)
+-- TOC entry 2239 (class 1259 OID 44731)
 -- Name: fki_grades_user_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -748,7 +769,7 @@ CREATE INDEX fki_grades_user_fkey ON grades USING btree (grade_user_id);
 
 
 --
--- TOC entry 2257 (class 1259 OID 44732)
+-- TOC entry 2262 (class 1259 OID 44732)
 -- Name: fki_questions_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -756,7 +777,7 @@ CREATE INDEX fki_questions_fkey ON questions USING btree (rubric_id);
 
 
 --
--- TOC entry 2262 (class 1259 OID 44733)
+-- TOC entry 2267 (class 1259 OID 44733)
 -- Name: fki_relationships_users_section_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -764,7 +785,7 @@ CREATE INDEX fki_relationships_users_section_fkey ON relationships_users USING b
 
 
 --
--- TOC entry 2263 (class 1259 OID 44734)
+-- TOC entry 2268 (class 1259 OID 44734)
 -- Name: fki_relationships_users_user_fkey; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -772,7 +793,7 @@ CREATE INDEX fki_relationships_users_user_fkey ON relationships_users USING btre
 
 
 --
--- TOC entry 2289 (class 2606 OID 44735)
+-- TOC entry 2296 (class 2606 OID 44735)
 -- Name: fkey_rubric_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -781,7 +802,7 @@ ALTER TABLE ONLY late_day_exceptions
 
 
 --
--- TOC entry 2290 (class 2606 OID 44740)
+-- TOC entry 2297 (class 2606 OID 44740)
 -- Name: fkey_student_rcs; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -790,7 +811,7 @@ ALTER TABLE ONLY late_day_exceptions
 
 
 --
--- TOC entry 2279 (class 2606 OID 44745)
+-- TOC entry 2286 (class 2606 OID 44745)
 -- Name: grades_academic_integrity_rubric_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -799,7 +820,7 @@ ALTER TABLE ONLY grades_academic_integrity
 
 
 --
--- TOC entry 2280 (class 2606 OID 44750)
+-- TOC entry 2287 (class 2606 OID 44750)
 -- Name: grades_academic_integrity_student; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -808,7 +829,7 @@ ALTER TABLE ONLY grades_academic_integrity
 
 
 --
--- TOC entry 2281 (class 2606 OID 44755)
+-- TOC entry 2288 (class 2606 OID 44755)
 -- Name: grades_labs_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -817,7 +838,7 @@ ALTER TABLE ONLY grades_labs
 
 
 --
--- TOC entry 2282 (class 2606 OID 44760)
+-- TOC entry 2289 (class 2606 OID 44760)
 -- Name: grades_labs_student_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -826,7 +847,7 @@ ALTER TABLE ONLY grades_labs
 
 
 --
--- TOC entry 2283 (class 2606 OID 44765)
+-- TOC entry 2290 (class 2606 OID 44765)
 -- Name: grades_questions_grade_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -835,7 +856,7 @@ ALTER TABLE ONLY grades_questions
 
 
 --
--- TOC entry 2284 (class 2606 OID 44770)
+-- TOC entry 2291 (class 2606 OID 44770)
 -- Name: grades_questions_question_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -844,7 +865,7 @@ ALTER TABLE ONLY grades_questions
 
 
 --
--- TOC entry 2276 (class 2606 OID 44775)
+-- TOC entry 2283 (class 2606 OID 44775)
 -- Name: grades_rubric_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -853,7 +874,7 @@ ALTER TABLE ONLY grades
 
 
 --
--- TOC entry 2277 (class 2606 OID 44780)
+-- TOC entry 2284 (class 2606 OID 44780)
 -- Name: grades_student_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -862,7 +883,7 @@ ALTER TABLE ONLY grades
 
 
 --
--- TOC entry 2285 (class 2606 OID 44785)
+-- TOC entry 2292 (class 2606 OID 44785)
 -- Name: grades_tests_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -871,7 +892,7 @@ ALTER TABLE ONLY grades_tests
 
 
 --
--- TOC entry 2286 (class 2606 OID 44790)
+-- TOC entry 2293 (class 2606 OID 44790)
 -- Name: grades_tests_students_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -880,7 +901,7 @@ ALTER TABLE ONLY grades_tests
 
 
 --
--- TOC entry 2278 (class 2606 OID 44795)
+-- TOC entry 2285 (class 2606 OID 44795)
 -- Name: grades_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -889,7 +910,7 @@ ALTER TABLE ONLY grades
 
 
 --
--- TOC entry 2287 (class 2606 OID 44800)
+-- TOC entry 2294 (class 2606 OID 44800)
 -- Name: homework_grading_sections_rubric_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -898,7 +919,7 @@ ALTER TABLE ONLY homework_grading_sections
 
 
 --
--- TOC entry 2288 (class 2606 OID 44805)
+-- TOC entry 2295 (class 2606 OID 44805)
 -- Name: homework_grading_sections_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -907,7 +928,7 @@ ALTER TABLE ONLY homework_grading_sections
 
 
 --
--- TOC entry 2291 (class 2606 OID 44810)
+-- TOC entry 2298 (class 2606 OID 44810)
 -- Name: questions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -916,7 +937,7 @@ ALTER TABLE ONLY questions
 
 
 --
--- TOC entry 2292 (class 2606 OID 44815)
+-- TOC entry 2299 (class 2606 OID 44815)
 -- Name: relationships_users_section_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -925,7 +946,7 @@ ALTER TABLE ONLY relationships_users
 
 
 --
--- TOC entry 2293 (class 2606 OID 44820)
+-- TOC entry 2300 (class 2606 OID 44820)
 -- Name: relationships_users_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -934,15 +955,14 @@ ALTER TABLE ONLY relationships_users
 
 
 --
--- TOC entry 2294 (class 2606 OID 44825)
+-- TOC entry 2301 (class 2606 OID 44825)
 -- Name: student_section_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY students
     ADD CONSTRAINT student_section_fkey FOREIGN KEY (student_section_id) REFERENCES sections(section_id);
 
-
--- Completed on 2015-08-25 13:59:21 EDT
+-- Completed on 2015-08-26 13:17:50 EDT
 
 --
 -- PostgreSQL database dump complete

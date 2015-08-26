@@ -82,7 +82,7 @@ class Functions {
      * @return mixed
      */
     public static function removeTrailingCommas($json){
-    $json=preg_replace('/,\s*([\]}])/m', '$1', $json);
-    return $json;
-}
+        $json=preg_replace('/,\s*([\]}])/m', '$1', $json);
+        return $json;
+    }
 }

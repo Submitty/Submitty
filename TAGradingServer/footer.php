@@ -12,7 +12,7 @@
         }
     </script>
 <?php
-    if ($user_is_administrator == true) {
+    if ($DEVELOPER == true) {
         $total_time = microtime_float()-$start_time;
         echo <<<HTML
         <div id='page-info'>
