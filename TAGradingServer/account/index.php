@@ -159,9 +159,7 @@ ORDER BY
 		}
 	
 		if($student_rcs != NULL) {
-
-			
-			if (!$DEBUG) {
+			if (!$DEVELOPER) {
 				print <<<HTML
 	<span id="left" class="resbox">
 HTML;

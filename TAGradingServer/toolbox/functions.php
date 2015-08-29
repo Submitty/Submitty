@@ -49,17 +49,15 @@ else {
     error_reporting(E_ERROR);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-// CORE FUNCTIONALITY CODE - Site-wide includes, database, email, and user account information.
-////////////////////////////////////////////////////////////////////////////////////////////////////////
+$db = Database::getInstance();
+$db->connect(__DATABASE_HOST__, __DATABASE_USER__, __DATABASE_PASSWORD__, __DATABASE_NAME__);
+
+load_config();
 
 $COURSE_NAME = __COURSE_NAME__;
 $BASE_URL = __BASE_URL__;
 
 header("Content-Type: text/html; charset=UTF-8");
-
-$db = Database::getInstance();
-$db->connect(__DATABASE_HOST__, __DATABASE_USER__, __DATABASE_PASSWORD__, __DATABASE_NAME__);
 
 $user_id = 0;
 if ($DEBUG) {
@@ -78,61 +76,43 @@ $user_logged_in = isset($user_info['user_id']);
 $user_is_administrator = isset($user_info['user_is_administrator']) && $user_info['user_is_administrator'] == 1;
 $user_id = $user_info['user_id'];
 
-if (isset($user_info['use_debug']) && $user_info['use_debug'] == 1) {
-    $DEBUG = true;
-}
+$DEVELOPER = (isset($user_info['user_is_developer']) && $user_info['user_is_developer'] == 1);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // GENERAL
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-function echo_error($error)
-{
+function echo_error($error) {
     echo $error, "<br/>";
     echo "<br/>";
 }
 
-function generateNumbers($max = 64) 
-{
+function generateNumbers($max = 64) {
     return generateRandomString("0123456789", $max);
 }
 
-function generateSalt($max = 64) 
-{
+function generateSalt($max = 64) {
     return generateRandomString("abcdef0123456789", $max);
 }
 
-function generatePassword($max = __PASSWORD_AUTO_LENGTH__) 
-{
-    return generateRandomString("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()", $max);
-}
-
-function generateRandomString($alphabet, $max = 64)
-{
+function generateRandomString($alphabet, $max = 64) {
     $retVal = "";
-    
+
     for($i = 0; $i < $max; $i++)
     {
         $retVal .= $alphabet{mt_rand(0, (strlen($alphabet) - 1))};
     }
-    
+
     return $retVal;
 }
 
-function is_valid_email($email)
-{
-    return filter_var($email, FILTER_VALIDATE_EMAIL);
-}
-
-function strip_url_get_variables($url)
-{
+function strip_url_get_variables($url) {
     $retVal = explode("?", $url);
     return $retVal[0];
 }
 
-function url_location()
-{
+function url_location() {
     $location = $_SERVER["PHP_SELF"];
     if (!strstr($location,'.php')) {
         $location .= 'index.php';
@@ -149,64 +129,52 @@ function url_location()
 
 }
 
-function url_sans_get()
-{
+function url_sans_get() {
     $retVal = explode("?", $_SERVER["REQUEST_URI"]);
     return $retVal[0];
 }
 
-function url_add_get($new_get_value)
-{
+function url_add_get($new_get_value) {
     $retVal = $_SERVER["REQUEST_URI"];
-    
-    if(strstr($retVal, "?"))
-    {
-        $retVal .= "&" . $new_get_value;    
+
+    if(strstr($retVal, "?")) {
+        $retVal .= "&" . $new_get_value;
     }
-    else
-    {
-        $retVal .= "?" . $new_get_value;    
+    else {
+        $retVal .= "?" . $new_get_value;
     }
-    
+
     return $retVal;
 }
-    
-function format_money($number, $fractional=true) 
-{ 
-    if($fractional) 
-    { 
-        $number = sprintf('%.2f', $number); 
-    } 
-    while(true) 
-    { 
-        $replaced = preg_replace('/(-?\d+)(\d\d\d)/', '$1,$2', $number); 
-        if($replaced != $number) 
-        { 
-            $number = $replaced; 
-        } 
-        else 
-        { 
-            break; 
-        } 
-    } 
-    
-    return $number; 
-} 
 
-function digit_to_ordinal($number)
-{
+function format_money($number, $fractional=true) {
+    if($fractional) {
+        $number = sprintf('%.2f', $number);
+    }
+    while(true) {
+        $replaced = preg_replace('/(-?\d+)(\d\d\d)/', '$1,$2', $number);
+        if($replaced != $number) {
+            $number = $replaced;
+        }
+        else {
+            break;
+        }
+    }
+
+    return $number;
+}
+
+function digit_to_ordinal($number) {
     $number = intval($number);
     $ends = array('th','st','nd','rd','th','th','th','th','th','th');
-    
-    if(($number %100) >= 11 && ($number%100) <= 13)
-    {
-       $abbreviation = $number. 'th';    
+
+    if(($number %100) >= 11 && ($number%100) <= 13) {
+        $abbreviation = $number. 'th';
     }
-    else
-    {
-       $abbreviation = $number. $ends[$number % 10];    
+    else {
+        $abbreviation = $number. $ends[$number % 10];
     }
-    
+
     return $abbreviation;
 }
 
@@ -222,8 +190,7 @@ function digit_to_ordinal($number)
  *
  * @return string
  */
-function sourceSettingsJS($filename, $number)
-{
+function sourceSettingsJS($filename, $number) {
     switch(pathinfo($filename, PATHINFO_EXTENSION)) {
         case 'java':
         case 'c':
@@ -238,7 +205,7 @@ function sourceSettingsJS($filename, $number)
             $type = 'shell';
             break;
     }
-    
+
     $number = intval($number);
     return '<script>
     var editor'.$number.' = CodeMirror.fromTextArea(document.getElementById("code'.$number.'"), {
@@ -261,8 +228,7 @@ function sourceSettingsJS($filename, $number)
     </script>';
 }
 
-function clean_string($str)
-{
+function clean_string($str) {
     // update grades_questions set grade_question_comment = regexp_replace(grade_question_comment, E'\r\n', '\n');
     // select * from grades_questions where 0 < position( E'\r\n' in grade_question_comment ) ORDER BY grade_question_comment ASC;
 
@@ -273,18 +239,17 @@ function clean_string($str)
     $str = str_replace(PHP_EOL, '\n', $str);
     $str = str_replace("\x20\x0b", '\n', $str); # replace unicode character to prevent javascript errors.
     $str = str_replace("\x0d\x0a", '\n', $str); # replace unicode character to prevent javascript errors.
-    
-    return $str;    
+
+    return $str;
 }
 
-function clean_string_javascript($str)
-{
+function clean_string_javascript($str) {
     $str = str_replace('"', '\"', $str);
     $str = str_replace('\\\"', '\"', $str);
     $str = str_replace("\r","",$str);
     $str = str_replace("\n","\"+\n\"",$str);
 
-    return $str;            
+    return $str;
 }
 
 /**
@@ -335,5 +300,38 @@ function phpToPgArray($array) {
 function removeTrailingCommas($json){
     $json=preg_replace('/,\s*([\]}])/m', '$1', $json);
     return $json;
+}
+
+/**
+ * Load config settings from the database. Any configs in the database are then
+ * defined as constants using __CONFIG_NAME__ paradigm.
+ */
+function load_config() {
+    Database::query("SELECT * FROM config");
+    foreach (Database::rows() as $config) {
+        $config['config_value'] = process_config_value($config['config_value'], $config['config_type']);
+        $name = "__".strtoupper($config['config_name'])."__";
+        define($name, $config['config_value']);
+    }
+}
+
+function process_config_value($value, $type) {
+    switch ($type) {
+        case 1:
+            $value = intval($value);
+            break;
+        case 2:
+            $value = floatval($value);
+            break;
+        case 3:
+            $value = (strtolower($value) == "true" || intval($value) == 1);
+            break;
+        case 4:
+            // no action needed, already a string
+            break;
+        default:
+            throw new UnexpectedValueException("{$type} is not a valid config type.");
+    }
+    return $value;
 }
 ?>

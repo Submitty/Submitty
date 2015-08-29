@@ -1,4 +1,9 @@
-<?php include "header.php"; ?>
+<?php 
+require_once("toolbox/functions.php");
+header('Location: '.__BASE_URL__.'/account/index.php?course='.$_GET['course']);
+
+/*
+include "header.php"; ?>
 	
 	<div id="home-container" style="margin: 0px auto; width:227px;">
 		<div class="row-fluid">	
@@ -15,5 +20,4 @@
 	</div>
 	
 <?php include "footer.php"; ?> 
-        
-        
+*/

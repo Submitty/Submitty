@@ -126,9 +126,12 @@ HTML;
                         </li>
                         <li class="dropdown">
                             <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
-                                Utility Functions
+                                System Management
                             </a>
                             <ul class="dropdown-menu" role="menu" aria-labelledby="drop-utility">
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-config.php" role="button" data-toggle="modal">
+                                    System Configuration
+                                </a></li>
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-classlist.php" role="button" data-toggle="modal">
                                     Upload Classlist
                                 </a></li>
@@ -152,7 +155,7 @@ HTML;
                             <ul class="dropdown-menu" role="menu" aria-labelledby="drop1">
 HTML;
 
-    if ($user_is_administrator == true) {
+    if ($DEVELOPER) {
         print <<<HTML
                                 <li><a tabindex="-1" href="#" role="button" data-toggle="modal" onClick="toggle()">
                                     Toggle Page Details

@@ -225,13 +225,13 @@ HTML;
 
                 </div>
             </div>
+        </div>
+    </div>
 HTML;
     $active = false;
 }
 
 $output .= <<<HTML
-        </div>
-    </div>
 </span>
 
 <span id="pane"></span>

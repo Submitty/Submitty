@@ -225,8 +225,8 @@ ORDER BY question_part_number, question_number", $params);
             $this->submitted = true;
 
             // TODO: Finish this and hook up the database to have a 'rubric_active_assignment' column
-            // #
-            if (!$this->has_grade || 1 == 1) {
+            
+            if (!$this->has_grade) {
                 if (file_exists(implode("/", array($submission_directory, "user_assignment_settings.json")))) {
                     $settings = json_decode(file_get_contents(implode("/", array($submission_directory, "user_assignment_settings.json"))), true);
                     $active_assignment = $settings['active_assignment'];
