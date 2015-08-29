@@ -33,7 +33,7 @@ SVN_PATH=svn+ssh://csci2600svn.cs.rpi.edu/var/lib/svn/csci2600
 HWPHP_USER=hwphp
 HWCRON_USER=hwcron
 HWCRONPHP_GROUP=hwcronphp
-COURSE_BUILDERS_GROUP=instructors
+COURSE_BUILDERS_GROUP=course_builders
 DATABASE_USER=hsdbu
 
 UNTRUSTED_UID=`id -u untrusted` # untrusted's user id 
