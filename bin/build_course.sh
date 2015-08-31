@@ -12,7 +12,7 @@ course=__CREATE_COURSE__FILLIN__COURSE__
 
 ##########################################################################
 
-# the install_homework function is defined here
+# the build_homework function is defined here
 . $HSS_INSTALL_DIR/bin/build_homework_function.sh
 
 # helper variable
