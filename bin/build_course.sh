@@ -42,7 +42,7 @@ MY_COURSE_DIR=$HSS_DATA_DIR/courses/$semester/$course
 
 ##########################################################################
 # SPECIFIC HOMEWORKS
-# NOTE: also need to edit the HSS_DATA_DIR/courses/s15/config/class.json file
+# NOTE: also need to edit the HSS_DATA_DIR/courses/$semester/$course/config/class.json file
 
 echo "BUILDING course=$course semester=$semester... "
 
