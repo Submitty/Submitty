@@ -2,6 +2,8 @@
 
 include "../../toolbox/functions.php";
 
+check_administrator();
+
 $action = $_GET['action'];
 
 switch($action) {

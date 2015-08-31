@@ -37,6 +37,11 @@ class Database
     private static $all_queries = array();
 
     /**
+     * @var bool
+     */
+    private static $transaction = false;
+    
+    /**
      * Don't allow other classes to instantiate/copy Database (Singleton)
      */
     private function __construct() { }
@@ -108,6 +113,33 @@ class Database
         }
         
         return true;
+    }
+
+    /**
+     * Start a DB transaction, turning off autocommit mode. Queries won't be
+     * actually commited to the database till Database::commit() is called.
+     */
+    static function beginTransaction() {
+        if (!Database::$transaction) {
+            Database::$transaction = Database::$link->beginTransaction();
+        }
+    }
+
+    /**
+     * Actually commit/execute all queries to the database since we began the transaction.
+     * 
+     * @throws ServerException
+     * @throws \Exception
+     */
+    static function commit() {
+        if (Database::$transaction) {
+            try {
+                Database::$link->commit();
+            } catch (PDOException $pdoException) {
+                ExceptionHandler::throwException("Database",
+                                                 $pdoException);
+            }
+        }
     }
 
     /**

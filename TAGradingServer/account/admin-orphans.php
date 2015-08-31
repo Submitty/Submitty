@@ -1,5 +1,7 @@
 <?php 
 	include "../header.php";
+
+	check_administrator();
 	
 	if($user_is_administrator)
 	{

@@ -4,12 +4,7 @@ require_once "../header.php";
 
 $output = "";
 
-if($user_is_administrator) {
-    $account_subpages_unlock = true;
-}
-else {
-    die("Not allowed on this part of the site");
-}
+check_administrator();
 
 $db->query("SELECT * FROM labs ORDER BY lab_number ASC",array());
 

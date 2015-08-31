@@ -13,13 +13,15 @@ namespace lib;
 class ExceptionHandler {
 
     /**
-     * Should we log exceptions
+     * Should we log exceptions?
+     * 
      * @var bool
      */
     public static $logExceptions = false;
 
     /**
-     * Are we in debug mode?
+     * Are we in debug mode and should show actual exceptions instead of the generic one?
+     * 
      * @var bool
      */
     public static $debug = false;

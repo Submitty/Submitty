@@ -1,7 +1,9 @@
 <?php 
 
-	include "../../toolbox/functions.php";
-	
+include "../../toolbox/functions.php";
+
+check_administrator();
+
     $rubric_parts_sep = (isset($_POST['rubric_parts_sep']) && $_POST['rubric_parts_sep'] == 1) ? "true" : "false";
     $rubric_late_days = intval($_POST['rubric_late_days']);
 	$params = array($_POST['rubric'], $_POST['date_submit'], $rubric_parts_sep, $rubric_late_days);

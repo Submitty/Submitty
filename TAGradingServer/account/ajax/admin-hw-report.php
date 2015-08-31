@@ -1,6 +1,9 @@
 <?php
 
 include "../../toolbox/functions.php";
+
+check_administrator();
+
 $start = microtime_float();
 
 // Make sure we actually have a created output directory

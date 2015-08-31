@@ -1,9 +1,6 @@
 <?php 
 
-umask (0027);
-/*The user's umask is ignored for the user running php, so we need
-to set it from inside of php to make sure the group read & execute
-permissions aren't lost for newly created files & directories.*/
+
 
 
 // Prevent back button from showing sensitive cached content after logout.

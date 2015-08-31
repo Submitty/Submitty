@@ -1,7 +1,7 @@
 <?php
 include "../header.php";
 
-
+check_administrator();
 
 if($user_is_administrator)
 {
@@ -30,6 +30,5 @@ if($user_is_administrator)
 HTML;
 	include "../footer.php";
 }
-?> 
         
         

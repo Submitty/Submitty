@@ -2,6 +2,8 @@
 
 require "../../toolbox/functions.php";
 
+check_administrator();
+
 if (!is_dir(implode("/",array(__SUBMISSION_SERVER__, "reports","all_grades")))) {
     mkdir(implode("/",array(__SUBMISSION_SERVER__, "reports","all_grades")));
 }
