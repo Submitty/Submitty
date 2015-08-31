@@ -24,4 +24,5 @@ while (<LIST>)
 	print "Done creating $_\n";
 }
 system ("/root/bin/regen.apache");
+system ("/usr/sbin/apache2ctl -t");
 close (LIST);
