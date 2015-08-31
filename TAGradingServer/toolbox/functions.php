@@ -1,15 +1,19 @@
 <?php
 
-
-// FOR DEBUGGING
-//ini_set('display_errors', 1);
-//error_reporting(E_ALL);
+/*
+The user's umask is ignored for the user running php, so we need
+to set it from inside of php to make sure the group read & execute
+permissions aren't lost for newly created files & directories. We do this
+here as every working file must include functions.php to actuall work.
+*/
+umask (0027);
 
 
 use \lib\AutoLoader;
 use \lib\Database;
 use \lib\ExceptionHandler;
 use \lib\Logger;
+use \app\models\User;
 
 // get our sweet autoloader!
 include __DIR__ . "/../lib/AutoLoader.php";
@@ -67,16 +71,16 @@ else {
     $suggested_username = $_SERVER["PHP_AUTH_USER"];
 }
 $params = array($suggested_username);
-Database::query("SELECT * FROM users WHERE user_rcs=?", $params);
-$user_info = $db->row();
+User::loadUser($suggested_username);
+$user_info = User::$user_details;
 if (!isset($user_info['user_id'])) {
     die("Unrecognized user: {$suggested_username}. Please contact an administrator to get an account.");
 }
 $user_logged_in = isset($user_info['user_id']);
-$user_is_administrator = isset($user_info['user_is_administrator']) && $user_info['user_is_administrator'] == 1;
+$user_is_administrator = User::$is_administrator;
 $user_id = $user_info['user_id'];
 
-$DEVELOPER = (isset($user_info['user_is_developer']) && $user_info['user_is_developer'] == 1);
+$DEVELOPER = User::$is_developer;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // GENERAL
@@ -298,7 +302,7 @@ function phpToPgArray($array) {
  * @return mixed
  */
 function removeTrailingCommas($json){
-    $json=preg_replace('/,\s*([\]}])/m', '$1', $json);
+    $json = preg_replace('/,\s*([\]}])/m', '$1', $json);
     return $json;
 }
 
@@ -334,4 +338,9 @@ function process_config_value($value, $type) {
     }
     return $value;
 }
-?>
+
+function check_administrator() {
+    if (!User::$is_administrator) {
+        die("<br /><br /><br /><br />&nbsp;&nbsp;You must be an administrator to access this page.");
+    }
+}

@@ -2,14 +2,9 @@
 
 require_once "../header.php";
 
-$output = "";
+check_administrator();
 
-if($user_is_administrator) {
-    $account_subpages_unlock = true;
-}
-else {
-    die("Not allowed on this part of the site");
-}
+$output = "";
 
 $db->query("
 SELECT

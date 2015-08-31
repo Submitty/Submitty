@@ -1,6 +1,8 @@
 <?php
 include "../header.php";
 
+check_administrator();
+
 if($user_is_administrator)
 {
     $account_subpages_unlock = true;
@@ -29,6 +31,5 @@ HTML;
 
     include "../footer.php";
 }
-?> 
         
         

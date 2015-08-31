@@ -2,6 +2,8 @@
 
 require_once "../../toolbox/functions.php";
 
+check_administrator();
+
 use \lib\Database;
 
 Database::query("SELECT * FROM config");

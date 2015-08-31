@@ -1,8 +1,10 @@
 <?php 
 use \lib\Database;
 
-	include "../header.php";
-	
+include "../header.php";
+
+check_administrator();
+
 	if($user_is_administrator)
 	{
         $have_old = false;

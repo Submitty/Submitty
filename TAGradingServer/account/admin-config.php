@@ -3,9 +3,8 @@
 use \lib\Database;
 
 require_once "../header.php";
-if (!$user_is_administrator) {
-    die("You are now allowed on this page");
-}
+
+check_administrator();
 
 $settings = array();
 $checked = array();
