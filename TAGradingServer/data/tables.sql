@@ -532,7 +532,7 @@ CREATE TABLE users (
     user_lastname character varying(255),
     user_rcs character varying(255),
     user_email character varying(255),
-    user_is_administrator integer,
+    user_is_administrator integer DEFAULT 0 NOT NULL,
     user_is_developer integer DEFAULT 0 NOT NULL
 );
 

@@ -74,17 +74,19 @@ class Database
     static function connect($host, $user, $password, $name) {
         Database::getInstance();
         
-        Database::$query_count = 0;
-        Database::$all_queries = array();
-        
-        try {
-            Database::$link = new PDO('pgsql:dbname=' . $name . ';host=' . $host, $user, $password);
-            
-            Database::$link->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-            Database::$link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        }
-        catch (PDOException $ex) {
-            ExceptionHandler::throwException("Database", $ex);
+        // Only start a new connection if we're not already connected to a DB
+        if (Database::$link == null) {
+            Database::$query_count = 0;
+            Database::$all_queries = array();
+
+            try {
+                Database::$link = new PDO('pgsql:dbname=' . $name . ';host=' . $host, $user, $password);
+
+                Database::$link->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+                Database::$link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            } catch (PDOException $ex) {
+                ExceptionHandler::throwException("Database", $ex);
+            }
         }
     }
 

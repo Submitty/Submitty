@@ -6,10 +6,19 @@ use \lib\Database;
 
 class DatabaseTester extends \PHPUnit_Framework_TestCase {
 
-    public function connect() {
+    /*
+     * We leave a database connection available for later tests (outside the lib folder) that require it. Not best
+     * test design, but Database does not need to be anything but a static class with only one connection.
+     */
+    public static function tearDownAfterClass() {
+        DatabaseTester::connect();
+    }
+    
+    public static function connect() {
         Database::connect(__DATABASE_HOST__, __DATABASE_USER__, __DATABASE_PASSWORD__, __DATABASE_NAME__);
     }
-    public function disconnect() {
+    
+    public static function disconnect() {
         Database::disconnect();
     }
     
@@ -42,45 +51,45 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
     }
     
     public function testQuery() {
-        $this->connect();
+        DatabaseTester::connect();
         Database::query("SELECT student_rcs FROM students");
         $this->assertEquals(1, count(Database::rows()));
         $this->assertEquals(array('student_rcs' => 'pevelm', '0' => 'pevelm'), Database::row());
-        $this->disconnect();
+        DatabaseTester::disconnect();
     }
 
     /**
      * @expectedException \lib\ServerException
      */
     public function testQueryBad() {
-        $this->connect();
+        DatabaseTester::connect();
         Database::query("SELECT student_rcs FROM bad_table");
-        $this->disconnect();
+        DatabaseTester::disconnect();
     }
     
     public function testEmptyResult() {
-        $this->connect();
+        DatabaseTester::connect();
         Database::query("SELECT * FROM students WHERE student_rcs='nonstudent'");
         $this->assertEquals(0, count(Database::rows()));
         $this->assertEquals(array(), Database::row());
-        $this->disconnect();
+        DatabaseTester::disconnect();
     }
     
     public function testQueryCount() {
-        $this->connect();
+        DatabaseTester::connect();
         for ($i = 0; $i < 10; $i++) {
             Database::query("SELECT * FROM students LIMIT 1");
         }
         $this->assertEquals(10, Database::totalQueries());
-        $this->disconnect();
+        DatabaseTester::disconnect();
     }
     
     public function testPrintQueries() {
-        $this->connect();
+        DatabaseTester::connect();
         Database::query("SELECT * FROM students");
         Database::query("SELECT * FROM students WHERE student_rcs=?", array('pevelm'));
         $this->assertEquals("1) SELECT * FROM students<br />2) SELECT * FROM students WHERE student_rcs=? --- ?pevelm <br />", 
                             Database::getQueries());
-        $this->disconnect();
+        DatabaseTester::disconnect();
     }
 }

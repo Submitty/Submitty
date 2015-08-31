@@ -58,5 +58,6 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
 
         $this->assertEquals(1, preg_match('/[0-9]{2}\/[0-9]{2}\/[0-9]{4}\ [0-9]{2}\:[0-9]{2}\:[0-9]{2} \- FATAL ERROR\nExceptionHandlerTester threw Exception\nMessage\:\ntest\nStrack Trace\:\n.+/', $actual));
         $this->assertEquals(1, preg_match('/Extra Details:\n\ttest: b\n\ttest2:\n\t\ta\n\t\tc/', $actual));
+        ExceptionHandler::$logExceptions = false;
     }
 }

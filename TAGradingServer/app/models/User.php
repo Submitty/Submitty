@@ -35,7 +35,7 @@ class User {
     private function __clone() { }
 
     /**
-     * @param $user_rcs
+     * @param string $user_rcs: This is a user's RCS/username on the database
      *
      * @throws \InvalidArgumentException|\lib\ServerException
      */
@@ -45,9 +45,9 @@ class User {
         if (User::$user_details == array()) {
             ExceptionHandler::$debug = true;
             ExceptionHandler::throwException("User", new \InvalidArgumentException("Cannot load user '{$user_rcs}'"));
-        }
-        
-        User::$is_administrator = User::$user_details['user_is_administrator'] == 1;
+        } // @codeCoverageIgnore
+
         User::$is_developer = User::$user_details['user_is_developer'] == 1;
+        User::$is_administrator = User::$user_details['user_is_administrator'] == 1 || User::$is_developer;
     }
 }
