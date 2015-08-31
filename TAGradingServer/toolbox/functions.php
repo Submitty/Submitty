@@ -71,11 +71,13 @@ else {
     $suggested_username = $_SERVER["PHP_AUTH_USER"];
 }
 $params = array($suggested_username);
-User::loadUser($suggested_username);
-$user_info = User::$user_details;
-if (!isset($user_info['user_id'])) {
+try {
+    User::loadUser($suggested_username);
+}
+catch (InvalidArgumentException $e) {
     die("Unrecognized user: {$suggested_username}. Please contact an administrator to get an account.");
 }
+$user_info = User::$user_details;
 $user_logged_in = isset($user_info['user_id']);
 $user_is_administrator = User::$is_administrator;
 $user_id = $user_info['user_id'];
