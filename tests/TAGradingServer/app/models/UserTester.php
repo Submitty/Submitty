@@ -1,6 +1,6 @@
 <?php
 
-namespace TAGradingServer\app\models;
+namespace tests\app\models;
 
 use app\models\User;
 

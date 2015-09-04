@@ -1,5 +1,7 @@
 <?php
 
+namespace tests\lib;
+
 use \lib\ServerException;
 
 class ServerExceptionTester extends \PHPUnit_Framework_TestCase {

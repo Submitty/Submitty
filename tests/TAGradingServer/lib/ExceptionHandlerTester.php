@@ -1,8 +1,9 @@
 <?php
 
-namespace tests;
+namespace tests\lib;
 
 use lib\ExceptionHandler;
+use lib\FileUtils;
 use lib\Logger;
 use lib\ServerException;
 use lib\Functions;
@@ -11,17 +12,17 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
     
     public static function setUpBeforeClass() {
         if (is_dir(__DIR__."/logs/EHLogs")) {
-            Functions::emptyDir(__DIR__."/logs/EHLogs");
+            FileUtils::emptyDir(__DIR__."/logs/EHLogs");
         }
         else {
-            Functions::createDir(__DIR__."/logs/EHLogs");
+            FileUtils::createDir(__DIR__."/logs/EHLogs");
         }
         
         Logger::$log_path = __DIR__."/logs/EHLogs/";
     }
     
     public static function tearDownAfterClass() {
-        Functions::recursiveRmdir(__DIR__."/logs/EHLogs");
+        FileUtils::recursiveRmdir(__DIR__."/logs/EHLogs");
     }
     
     /**

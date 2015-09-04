@@ -1,6 +1,9 @@
 <?php
 
+namespace tests\lib;
+
 use \lib\Functions;
+use \lib\FileUtils;
 
 class FunctionsTester extends \PHPUnit_Framework_TestCase {
     public function testRecurseiveRmDir() {
@@ -13,8 +16,8 @@ class FunctionsTester extends \PHPUnit_Framework_TestCase {
         file_put_contents($root."/.hidden", "b");
         file_put_contents($root."/test1/file", "c");
         file_put_contents($root."/test1/test2/file", "d");
-        
-        Functions::recursiveRmdir($root);
+    
+        FileUtils::recursiveRmdir($root);
         
         $this->assertFalse(file_exists($root));
     }
