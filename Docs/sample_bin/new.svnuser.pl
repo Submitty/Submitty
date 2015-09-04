@@ -7,6 +7,11 @@ use warnings;
 $ENV{ 'PATH' } = '/bin:/usr/bin';
 delete @ENV{'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
 
+        print "Validating user list...\n";
+        system ("/usr/local/hss/bin/validate.svn.pl");
+        print "Hit Ctrl-C to cancel or Enter to continue.\n";
+        getc();
+
 open LIST, "/var/local/hss/instructors/svnlist";	# Should have a list of RCS userids (not email), one per line 
 
 while (<LIST>)
