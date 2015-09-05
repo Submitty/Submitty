@@ -59,7 +59,7 @@ $db->connect(__DATABASE_HOST__, __DATABASE_USER__, __DATABASE_PASSWORD__, __DATA
 load_config();
 
 $COURSE_NAME = __COURSE_NAME__;
-$BASE_URL = __BASE_URL__;
+$BASE_URL = rtrim(__BASE_URL__, "/");
 
 header("Content-Type: text/html; charset=UTF-8");
 
