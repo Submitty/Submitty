@@ -20,7 +20,8 @@ HTML;
         echo "<div style='color:red'>Classlist Updated</div><br />";
     }
     echo <<<HTML
-                    <input type="file" name="classlist" id="classlist"><br />
+                    Upload Classlist: <input type="file" name="classlist" id="classlist"><br />
+                    Ignore students marked manual in the classlist? <input type="checkbox" name="ignore_manual_1" checked="checked" /><br />
                     What to do with students in DB, but not classlist?
                     <select name="missing_students">
                         <option value="-2">Nothing</option>
@@ -32,7 +33,7 @@ HTML;
     }
     echo <<<HTML
                     </select><br />
-                    Ignore students marked manual from above option? <input type="checkbox" name="ignore_manual" checked="checked" />
+                    Ignore students marked manual from above option? <input type="checkbox" name="ignore_manual_2" checked="checked" />
                 </div>
 
                 <div class="modal-footer">

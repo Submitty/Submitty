@@ -13,9 +13,9 @@ $students = array();
 foreach(\lib\Database::rows() as $student) {
     $students[$student['student_rcs']] = $student;    
 }
-\lib\Database::beginTransaction();
 
 if (($handle = fopen($_FILES['classlist']['tmp_name'], "r")) !== FALSE) {
+    \lib\Database::beginTransaction();
     $contents = explode("\r",fread($handle,filesize($_FILES['classlist']['tmp_name'])));
     unset($contents[0]);
     
@@ -34,6 +34,9 @@ if (($handle = fopen($_FILES['classlist']['tmp_name'], "r")) !== FALSE) {
         $columns = array("student_rcs", "student_first_name", "student_last_name", "student_section_id", "student_grading_id");
         $values = array($rcs, $details[12],  $details[11], intval($details[6]), 1);
         if (array_key_exists($rcs, $students)) {
+            if (isset($_POST['ignore_manual_1']) && $_POST['ignore_manual_1'] == true && $students[$rcs]['student_manual'] == 1) {
+                continue;
+            }
             \lib\Database::query("UPDATE students SET student_section_id=? WHERE student_rcs=?", array(intval($details[6]), $rcs));
             unset($students[$rcs]);
         }
@@ -45,7 +48,7 @@ if (($handle = fopen($_FILES['classlist']['tmp_name'], "r")) !== FALSE) {
     fclose($handle);
     
     foreach ($students as $rcs => $student) {
-        if (isset($_POST['ignore_manual']) && $_POST['ignore_manual'] == true && $student['student_manual'] == 1) {
+        if (isset($_POST['ignore_manual_2']) && $_POST['ignore_manual_2'] == true && $student['student_manual'] == 1) {
             continue;
         }
         $_POST['missing_students'] = intval($_POST['missing_students']);
@@ -67,4 +70,3 @@ else {
 }
 
 header("Location: {$BASE_URL}/account/admin-classlist.php?course={$_GET['course']}&update=1");
-?>
