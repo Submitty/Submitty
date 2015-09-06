@@ -12,6 +12,9 @@ INSTALL.sh
 
 tests/TAGradingServer/report
 
+logs/
+*.csv
+
 TAGradingServer/toolbox/configs/*
 !TAGradingServer/toolbox/configs/master.php
 !TAGradingServer/toolbox/configs/sample_course.php

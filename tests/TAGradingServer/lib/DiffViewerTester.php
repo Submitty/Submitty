@@ -1,6 +1,6 @@
 <?php
 
-namespace tests;
+namespace tests\lib;
 
 use lib\DiffViewer;
 
