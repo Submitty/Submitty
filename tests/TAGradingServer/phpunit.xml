@@ -1,12 +1,15 @@
 <phpunit
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.5/phpunit.xsd"
+        xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.8/phpunit.xsd"
         bootstrap="bootstrap.php"
         colors="true"
         verbose="true">
     <testsuites>
-        <testsuite name="Application Tests">
+        <testsuite name="Library Tests">
             <directory suffix="Tester.php">lib</directory>
+        </testsuite>
+        <testsuite name="Model Tests">
+            <directory suffix="Tester.php">app/models</directory>
         </testsuite>
     </testsuites>
 

@@ -18,8 +18,6 @@ CREATE TABLE sections
   section_is_enabled integer DEFAULT 0,
   CONSTRAINT sections_pkey PRIMARY KEY (section_id)
 );
-ALTER TABLE sections OWNER TO test_hwgrading;
-GRANT ALL ON TABLE sections TO test_hwgrading;
 
 --------------------------
 -- STUDENTS
@@ -51,12 +49,36 @@ CREATE TABLE students
   ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 
-ALTER TABLE students OWNER TO test_hwgrading;
-GRANT ALL ON TABLE students TO test_hwgrading;
-
---------------------------
 -- TEST DATA
---------------------------
 INSERT INTO sections (section_title, section_is_enabled) VALUES ('Section 1', 1);
 INSERT INTO students (student_rcs, student_last_name, student_first_name, student_section_id, student_grading_user_id)
     VALUES ('pevelm', 'Peveler', 'Matthew', 1, 1);
+
+--------------------------
+-- Users
+--------------------------
+CREATE SEQUENCE user_sequence
+START WITH 1
+INCREMENT BY 1
+NO MINVALUE
+NO MAXVALUE
+CACHE 1;
+
+CREATE TABLE users (
+  user_id integer DEFAULT nextval('user_sequence'::regclass) NOT NULL,
+  user_firstname character varying(255),
+  user_lastname character varying(255),
+  user_rcs character varying(255),
+  user_email character varying(255),
+  user_is_administrator integer DEFAULT 0 NOT NULL,
+  user_is_developer integer DEFAULT 0 NOT NULL
+);
+
+ALTER TABLE ONLY users ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
+
+INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email) 
+    VALUES ('user', 'user', 'user', 'user@users.com');
+INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email, user_is_administrator)
+    VALUES ('admin', 'admin', 'admin', 'admin@users.com',1);
+INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email, user_is_developer)
+    VALUES ('developer', 'developer', 'developer', 'developer@users.com', 1);

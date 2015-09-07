@@ -1,6 +1,7 @@
 <?php
 
-namespace tests;
+namespace tests\lib;
+
 use \lib\DatabaseUtils;
 
 class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {

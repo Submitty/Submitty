@@ -1,15 +1,18 @@
 <?php
 
+namespace tests\lib;
+
 use \lib\Logger;
 use \lib\Functions;
+use \lib\FileUtils;
 
 class LoggerTester extends \PHPUnit_Framework_TestCase {
     private static $file_name;
     
     public static function setUpBeforeClass() {
         Logger::$log_path = __DIR__."/logs/log_test/";
-        Functions::createDir(__DIR__."/logs/log_test");
-        Functions::emptyDir(__DIR__."/logs/log_test");
+        FileUtils::createDir(__DIR__."/logs/log_test");
+        FileUtils::emptyDir(__DIR__."/logs/log_test");
         $date = getdate(time());
         LoggerTester::$file_name = __DIR__."/logs/log_test/".
             $date['year'].Functions::pad($date['mon']).Functions::pad($date['mday']).".txt";
@@ -20,7 +23,7 @@ class LoggerTester extends \PHPUnit_Framework_TestCase {
     }
     
     public static function tearDownAfterClass() {
-        Functions::recursiveRmdir(__DIR__."/logs/log_test");
+        FileUtils::recursiveRmdir(__DIR__."/logs/log_test");
         unset($_SERVER['HTTP_HOST']);
         unset($_SERVER['HTTPS']);
         unset($_SERVER['REQUEST_URI']);
