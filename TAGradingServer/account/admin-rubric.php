@@ -100,7 +100,7 @@ check_administrator();
 			background-clip: padding-box;
 		}
 	</style>
-	
+
 	<div id="container-rubric">
 		<form class="form-signin" action="{$BASE_URL}/account/submit/admin-rubric.php?action={$action}&id={$old_rubric['rubric_id']}" method="post" enctype="multipart/form-data">
 HTML;
@@ -114,7 +114,7 @@ HTML;
 				<select name="rubric" style="width: 420px; display:none;">	
 					<option>
 						$rubricNumberQuery
-					</option>						
+					</option>		
 				</select>
 				
 				<br/>
@@ -321,10 +321,7 @@ HTML;
         }
         print <<<HTML
     <script type="text/javascript">
-		$('.datepicker').pickadate({
-			format: 'dddd, mmm d, yyyy at 23:59:59',
-			formatSubmit: 'yyyy-mm-dd 23:59:59'
-		}, {$date});
+		$('.datepicker').datetimepicker();
 		
 		function toggleTA(part, question)
 		{	

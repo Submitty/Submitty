@@ -38,23 +38,26 @@ HTML;
 }
 print <<<HTML
 		
-		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/bootstrap/css/bootstrap.min.css"/>
-		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/pickadate/themes/pickadate.02.classic.css">
-		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/custom/css/style.css"/>
+		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/bootstrap/css/bootstrap.min.css" />
+		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/custom/css/style.css" />
+		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/custom/css/jquery-ui.min.css" />
+		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/custom/css/jquery-ui-timepicker-addon.css" />
 		
-		<link href="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.css" rel="stylesheet" >
-		<link rel="stylesheet" href="{$BASE_URL}/toolbox/include/codemirror/theme/eclipse.css">
+		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.css" />
+		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/codemirror/theme/eclipse.css" />
 
 		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/custom/js/jquery-2.0.3.min.map.js"></script>
+		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/custom/js/jquery-ui.min.js"></script>
+		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/custom/js/jquery-ui-timepicker-addon.js"></script>
 		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/custom/js/jquery.color-2.1.2.min.js"></script>
 		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/bootstrap/js/bootstrap.min.js"></script>
-		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/pickadate/source/pickadate.js"></script>
-		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/custom/js/script.js"></script>
+		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/custom/js/script.js"></script>	
+        
 		
-		<script src="{$BASE_URL}/toolbox/include/codemirror/codemirror-compressed.js"></script>
-		<script src="{$BASE_URL}/toolbox/include/codemirror/mode/clike/clike.js"></script>
-		<script src="{$BASE_URL}/toolbox/include/codemirror/mode/python/python.js"></script>
-		<script src="{$BASE_URL}/toolbox/include/codemirror/mode/shell/shell.js"></script>
+		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/codemirror-compressed.js"></script>
+		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/clike/clike.js"></script>
+		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/python/python.js"></script>
+		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/shell/shell.js"></script>
 		
 	</head>
 	
