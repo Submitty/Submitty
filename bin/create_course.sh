@@ -162,7 +162,7 @@ function create_and_set {
 
 # top level course directory
 #               drwxrws---       instructor   ta_www_group    ./
-create_and_set  u=rwx,g=rxs,o=   $instructor  $ta_www_group   $course_dir
+create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir
 
 
 #               drwxrws---       instructor   ta_www_group    build/
@@ -176,10 +176,10 @@ create_and_set  u=rwx,g=rwxs,o=  $instructor  $ta_www_group   $course_dir/config
 #               drwxr-s---       instructor   ta_www_group    test_code/
 #               drwxr-s---       instructor   ta_www_group    test_input/
 #               drwxr-s---       instructor   ta_www_group    test_output/
-create_and_set  u=rwx,g=rxs,o=   $instructor  $ta_www_group   $course_dir/bin
-create_and_set  u=rwx,g=rxs,o=   $instructor  $ta_www_group   $course_dir/test_code
-create_and_set  u=rwx,g=rxs,o=   $instructor  $ta_www_group   $course_dir/test_input
-create_and_set  u=rwx,g=rxs,o=   $instructor  $ta_www_group   $course_dir/test_output
+create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/bin
+create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_code
+create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_input
+create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_output
 
 
 # NOTE: on each student submission, files are written to these directories
@@ -193,7 +193,7 @@ create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/
 
 # NOTE:    instructor uploads TA HW grade reports & overall grade scores here
 #               drwxr-s---       instructor   ta_www_group    reports/
-create_and_set  u=rwx,g=rxs,o=   $instructor   $ta_www_group   $course_dir/reports
+create_and_set  u=rwx,g=rwxs,o=   $instructor   $ta_www_group   $course_dir/reports
 
 
 ########################################################################################################################

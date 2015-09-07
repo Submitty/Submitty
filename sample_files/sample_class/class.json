@@ -6,13 +6,15 @@
             "assignment_id":"lab01",
             "assignment_name":"Lab 1 Getting Started",
             "released":true,
-            "ta_grade_released":false
+            "ta_grade_released":false,
+	    "due_date":"2015-09-02 23:59:59.0"
         },
         {
             "assignment_id":"pythontest",
             "assignment_name":"CS1 Homework 1 Part 1",
             "released":true,
-            "ta_grade_released":false
+            "ta_grade_released":false,
+	    "due_date":"2015-09-02 23:59:59.0"
         }
     ]
 }
