@@ -121,7 +121,7 @@ HTML;
 				
 				Due Date:
 				<!--<fieldset>-->
-					<input name="date" class="datepicker" type="text" 
+					<input name="date_submit" class="datepicker" type="text" 
 					style="cursor: auto; background-color: #FFF; width: 250px;">
 				<!--</fieldset>-->
 				&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
