@@ -12,4 +12,4 @@ define("__OUTPUT_MAX_LENGTH__", 100000);
 define("__DEBUG__", false);
 
 define("__LOG_EXCEPTIONS__", true);
-define("__LOG_PATH__", "__INSTALL_FILLIN__TAGRADING_LOG_PATH__");
+define("__LOG_PATH__", "__INSTALL__FILLIN__TAGRADING_LOG_PATH__");

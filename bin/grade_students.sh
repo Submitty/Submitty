@@ -388,7 +388,7 @@ function grade_this_item {
     #  --include="*/"  match all subdirectories
     #  --include="*.XXX"  grab all .XXX files
     #  --exclude="*"  exclude everything else
-    
+
     rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"   --include="*.class"  --include="*.py"  --include="*README*"  --include="test*.txt"  --include="data/*" --exclude="*"  $tmp_compilation/  $tmp  
     
     # NOTE: Also grabbing all student data files (files with 'data/' directory in path)
@@ -418,10 +418,10 @@ function grade_this_item {
 	# run the run.out as the untrusted user
 	$HSS_INSTALL_DIR/bin/untrusted_execute $tmp/my_run.out >& .submit_runner_output.txt
 	runner_error_code="$?"
-	
+
 	# change permissions of all files created by untrusted in this directory (so hwcron can archive/grade them)
-	$HSS_INSTALL_DIR/bin/untrusted_execute /usr/bin/find . -user untrusted -exec /bin/chmod o+r {} \;   >>  .submit_runner_output.txt 2&>1
-	
+	$HSS_INSTALL_DIR/bin/untrusted_execute /usr/bin/find $tmp -user untrusted -exec /bin/chmod o+r {} \;   >>  .submit_runner_output.txt 2>&1
+
 	if [[ "$runner_error_code" -ne 0 ]] ;
 	then
 	    echo "RUNNER FAILURE CODE $runner_error_code"
@@ -481,7 +481,7 @@ function grade_this_item {
     # Make directory structure in results if it doesn't exist
     mkdir -p "$results_path" ||  echo "ERROR: Could not create results path $results_path" >&2
     cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/.submit* $tmp/submission.json $tmp/test*.json "$results_path"
-    
+
     
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY

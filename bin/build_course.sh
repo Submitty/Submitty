@@ -12,7 +12,7 @@ course=__CREATE_COURSE__FILLIN__COURSE__
 
 ##########################################################################
 
-# the install_homework function is defined here
+# the build_homework function is defined here
 . $HSS_INSTALL_DIR/bin/build_homework_function.sh
 
 # helper variable
@@ -42,7 +42,7 @@ MY_COURSE_DIR=$HSS_DATA_DIR/courses/$semester/$course
 
 ##########################################################################
 # SPECIFIC HOMEWORKS
-# NOTE: also need to edit the HSS_DATA_DIR/courses/s15/config/class.json file
+# NOTE: also need to edit the HSS_DATA_DIR/courses/$semester/$course/config/class.json file
 
 echo "BUILDING course=$course semester=$semester... "
 
