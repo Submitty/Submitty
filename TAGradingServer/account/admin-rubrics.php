@@ -23,7 +23,7 @@ LEFT JOIN(
     GROUP BY
         rubric_id
 ) as q ON r.rubric_id = q.rid
-ORDER BY rubric_number ASC",array());
+ORDER BY rubric_id ASC",array());
 
 $output .= <<<HTML
 <style type="text/css">
@@ -73,8 +73,12 @@ $output .= <<<HTML
         border-bottom: 1px solid darkgray;
         margin-top: 5px;
     }
-
-    #table-rubrics td.rubrics-number {
+    
+    #table-rubrics td.rubrics-id {
+        width: 50px;
+    }
+    
+    #table-rubrics td.rubrics-name {
         width: 200px;
     }
 
@@ -132,19 +136,18 @@ $output .= <<<HTML
 
 </style>
 <script type="text/javascript">
-    function deleteRubric(rubric_id) {
-        var rubric_number = $('#rubric-'+rubric_id).attr('rubric-number');
-        var c = window.confirm("Are you sure you want to delete Rubric " + rubric_number + "?");
+    function deleteRubric(rubric_id, rubric_name) {
+        var c = window.confirm("Are you sure you want to delete '" + rubric_name + "'?");
         if (c == true) {
             $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=delete&id='+rubric_id)
                 .done(function(response) {
                     var res_array = response.split("|");
                     if (res_array[0] == "success") {
-                        window.alert("Rubric " + rubric_number + " deleted");
+                        window.alert("'" + rubric_name + "' deleted");
                         $('tr#rubric-'+rubric_id).remove();
                     }
                     else {
-                        window.alert("Rubric " + rubric_number + " could not be deleted");
+                        window.alert("'" + rubric_name + "' could not be deleted");
                     }
                 })
                 .fail(function() {
@@ -162,11 +165,11 @@ $output .= <<<HTML
                 }
                 else {
                     console.log(response);
-                    window.alert("[DB ERROR] Refresh page and tell Matt");
+                    window.alert("[DB ERROR] Refresh page");
                 }
             })
             .fail(function() {
-                window.alert("[AJAX ERROR] Refresh Page and tell Matt");
+                window.alert("[AJAX ERROR] Refresh page");
             });
     }
 </script>
@@ -181,7 +184,8 @@ $output .= <<<HTML
     </div>
     <table id="table-rubrics">
         <tr>
-            <td class="rubrics-number">Number</td>
+            <td class="rubrics-id">ID</td>
+            <td class="rubrics-name">Name</td>
             <td class="rubrics-parts">Parts</td>
             <td class="rubrics-questions">Questions</td>
             <td class="rubrics-score">Score</td>
@@ -196,14 +200,15 @@ foreach ($db->rows() as $rubric) {
     else 0 end) FROM questions WHERE rubric_id=?", array($rubric['rubric_id']));
     $rubric = 
     $output .= <<<HTML
-        <tr id='rubric-{$rubric['rubric_id']}' rubric-number="{$rubric['rubric_number']}">
-            <td class="rubrics-number" id="rubric-{$rubric['rubric_id']}-number">Rubric {$rubric['rubric_number']}</td>
+        <tr id='rubric-{$rubric['rubric_id']}'">
+            <td class="rubrics-id" id="$rubric-{$rubric['rubric_id']}-id">{$rubric['rubric_id']}</td>
+            <td class="rubrics-name" id="rubric-{$rubric['rubric_id']}-title">{$rubric['rubric_name']}</td>
             <td class="rubrics-parts" id="rubric-{$rubric['rubric_id']}-parts">{$rubric['rubric_parts']}</td>
             <td class="rubrics-questions" id="rubric-{$rubric['rubric_id']}-questions">{$rubric['rubric_questions']}</td>
             <td class="rubrics-score" id="rubric-{$rubric['rubric_id']}-score">{$rubric['rubric_score']} ({$rubric['rubric_ec']})</td>
             <td class="rubrics-due" id="rubric-{$rubric['rubric_id']}-due">{$rubric['rubric_due_date']}</td>
             <td id="rubric-{$rubric['rubric_id']}-options"><a href="{$BASE_URL}/account/admin-rubric.php?course={$_GET['course']}&action=edit&id={$rubric['rubric_id']}">Edit</a> |
-            <a onclick="deleteRubric({$rubric['rubric_id']});">Delete</a></td>
+            <a onclick="deleteRubric({$rubric['rubric_id']}, {$rubric['rubric_name']});">Delete</a></td>
         </tr>
 HTML;
 }

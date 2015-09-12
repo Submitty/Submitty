@@ -227,4 +227,13 @@ class Database
     static function inTransaction() {
         return Database::$transaction;
     }
+    
+    static function getLastInsertId($name = "") {
+        if (!empty($name)) {
+            return Database::$link->lastInsertId($name);
+        }
+        else {
+            return Database::$link->lastInsertId();
+        }
+    }
 }

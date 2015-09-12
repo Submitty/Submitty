@@ -12,6 +12,11 @@ use lib\ExceptionHandler;
 class User {
     
     /**
+     * @var int
+     */
+    public static $user_id = -1;
+    
+    /**
      * @var array
      */
     public static $user_details = array();
