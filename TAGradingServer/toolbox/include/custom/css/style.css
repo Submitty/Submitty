@@ -533,3 +533,7 @@ code {
     margin: -10px 60px 0px 0px;
     width: 40px;
 }
+
+.part_submission_id {
+	display: none;
+}

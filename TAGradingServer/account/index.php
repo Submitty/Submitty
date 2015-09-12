@@ -1,75 +1,72 @@
 <?php 
-	include "../header.php";
+include "../header.php";
 
-	$account_subpages_unlock = true;
-	
-	$split = floatval($_COOKIE["split"]);
-    $rubric_late_days = 0;
+$account_subpages_unlock = true;
 
-	print <<<HTML
+$split = floatval($_COOKIE["split"]);
+$rubric_late_days = 0;
+
+print <<<HTML
 <div id="container" style="width:100%; margin-top:40px;">
 HTML;
-	if(isset($_GET["hw"]))
-	{
-		$homework_number = $_GET["hw"];
-		$params = array($homework_number);
-		$db->query("SELECT rubric_id, rubric_parts_sep, rubric_late_days, rubric_due_date FROM rubrics WHERE rubric_number=?", $params);
-		$row = $db->row();
-	}
-		
-	if(isset($_GET["hw"]) && isset($row["rubric_id"]))
-	{
-		$rubric_id = $row["rubric_id"];
-		$rubric_sep = $row["rubric_parts_sep"];
-        $rubric_late_days = $row['rubric_late_days'];
-		//$student_id = NULL;
-		$student_rcs = NULL;
-		$student_first_name = NULL;
-		$student_last_name = NULL;
-		$student_allowed_lates = 0;
-		$position_completed = 0;
-		$position_total = 0;
-		$position_other = 0;
-		$student_individual_graded = False;
-        $previous_rcs = "";
-        $next_rcs = "";
+if(isset($_GET["hw"])) {
+    $homework_id = $_GET["hw"];
+    $params = array($homework_id);
+    $db->query("SELECT rubric_id, rubric_name, rubric_parts_sep, rubric_late_days, rubric_due_date FROM rubrics WHERE rubric_id=?", $params);
+    $row = $db->row();
+}
+    
+if(isset($_GET["hw"]) && isset($row["rubric_id"])) {
+    $rubric_id = $row["rubric_id"];
+    $rubric_name = $row['rubric_name'];
+    $rubric_sep = $row["rubric_parts_sep"];
+    $rubric_late_days = $row['rubric_late_days'];
+    //$student_id = NULL;
+    $student_rcs = NULL;
+    $student_first_name = NULL;
+    $student_last_name = NULL;
+    $student_allowed_lates = 0;
+    $position_completed = 0;
+    $position_total = 0;
+    $position_other = 0;
+    $student_individual_graded = False;
+    $previous_rcs = "";
+    $next_rcs = "";
 
-		if(isset($_GET["individual"]) || isset($_GET['prev']) || isset($_GET['next']))
-		{
-            if (isset($_GET['individual'])) {
-                $student_rcs = $_GET["individual"];
-            }
-            else if (isset($_GET['prev'])) {
-                $student_rcs = $_GET['prev'];
-            }
-            else {
-                $student_rcs = $_GET['next'];
-            }
+    if(isset($_GET["individual"]) || isset($_GET['prev']) || isset($_GET['next'])) {
+        if (isset($_GET['individual'])) {
+            $student_rcs = $_GET["individual"];
+        }
+        else if (isset($_GET['prev'])) {
+            $student_rcs = $_GET['prev'];
+        }
+        else {
+            $student_rcs = $_GET['next'];
+        }
 
-			$params = array($student_rcs);
-			$db->query("SELECT * FROM students WHERE student_rcs=?", $params);
-			$temp_row = $db->row();
-			//$student_id = intval($temp_row["student_id"]);
-			$student_first_name = $temp_row["student_first_name"];
-			$student_last_name = $temp_row["student_last_name"];
-            $params = array($temp_row['student_rcs'], $rubric_id);
-            $db->query("SELECT * FROM late_days WHERE student_rcs=? AND since_rubric <= ? ORDER BY since_rubric DESC LIMIT 1", $params);
-            $lates = $db->row();
-            $student_allowed_lates = isset($lates['allowed_lates']) ? intval($lates['allowed_lates']) : 0;
+        $params = array($student_rcs);
+        $db->query("SELECT * FROM students WHERE student_rcs=?", $params);
+        $temp_row = $db->row();
+        //$student_id = intval($temp_row["student_id"]);
+        $student_first_name = $temp_row["student_first_name"];
+        $student_last_name = $temp_row["student_last_name"];
+        $params = array($temp_row['student_rcs'], $rubric_id);
+        $db->query("SELECT * FROM late_days WHERE student_rcs=? AND since_rubric <= ? ORDER BY since_rubric DESC LIMIT 1", $params);
+        $lates = $db->row();
+        $student_allowed_lates = isset($lates['allowed_lates']) ? intval($lates['allowed_lates']) : 0;
 
-			$params = array($student_rcs, $rubric_id);
-			$db->query("SELECT grade_id FROM grades WHERE student_rcs=? and rubric_id=?", $params);
-			$temp_row = $db->row();
-			$student_individual_graded = isset($temp_row["grade_id"]);
-		}
+        $params = array($student_rcs, $rubric_id);
+        $db->query("SELECT grade_id FROM grades WHERE student_rcs=? and rubric_id=?", $params);
+        $temp_row = $db->row();
+        $student_individual_graded = isset($temp_row["grade_id"]);
+    }
 
-		$params = array($user_id, $rubric_id);
-		$db->query("SELECT * FROM homework_grading_sections WHERE user_id=? AND rubric_id=? ORDER BY grading_section_id", $params);
-		//$db->query("SELECT section_id FROM relationships_users WHERE user_id=? ORDER BY section_id", $params);
-		foreach($db->rows() as $section)
-		{
-			$params = array($rubric_id,intval($section["grading_section_id"]));
-			$db->query("
+    $params = array(\app\models\User::$user_id, $rubric_id);
+    $db->query("SELECT * FROM homework_grading_sections WHERE user_id=? AND rubric_id=? ORDER BY grading_section_id", $params);
+    //$db->query("SELECT section_id FROM relationships_users WHERE user_id=? ORDER BY section_id", $params);
+    foreach($db->rows() as $section) {
+        $params = array($rubric_id,intval($section["grading_section_id"]));
+        $db->query("
 SELECT
     s.student_rcs
     , s.student_first_name
@@ -78,15 +75,15 @@ SELECT
 FROM
     students AS s
     LEFT JOIN (
-	SELECT
-		student_rcs
-		, count(grade_id) as number_graded
-	FROM
-		grades
-	WHERE
-		rubric_id=?
-	GROUP BY
-		student_rcs
+    SELECT
+        student_rcs
+        , count(grade_id) as number_graded
+    FROM
+        grades
+    WHERE
+        rubric_id=?
+    GROUP BY
+        student_rcs
     ) AS g
     ON s.student_rcs=g.student_rcs
 WHERE
@@ -95,274 +92,238 @@ ORDER BY
     s.student_rcs ASC
                 ", $params);
             
-            $prev_row = array('student_rcs' => "");
-            $set_next = false;
+        $prev_row = array('student_rcs' => "");
+        $set_next = false;
             
-			foreach($db->rows() as $row)
-			{
-				$temp_row = $row;
+        foreach($db->rows() as $row) {
+            $temp_row = $row;
 
-                if ($set_next) {
-                    $next_rcs = $temp_row['student_rcs'];
-                    $set_next = false;
+            if ($set_next) {
+                $next_rcs = $temp_row['student_rcs'];
+                $set_next = false;
+            }
+            
+            if ($student_rcs != NULL) {
+                if ($student_rcs == $temp_row['student_rcs']) {
+                    $previous_rcs = $prev_row['student_rcs'];
+                    $set_next = true;
                 }
-                
-                if ($student_rcs != NULL) {
-                    if ($student_rcs == $temp_row['student_rcs']) {
-                        $previous_rcs = $prev_row['student_rcs'];
-                        $set_next = true;
-                    }
+            }
+            
+            if(intval($temp_row["number_graded"]) == 0) {
+                if($student_rcs == NULL) {
+                    $params = array($row["student_rcs"]);
+                    $db->query("SELECT * FROM students WHERE student_rcs=?", $params);
+                    $row = $db->row();
+
+                    $student_first_name = $row["student_first_name"];
+                    $student_last_name = $row["student_last_name"];
+                    $student_rcs = $row["student_rcs"];
+                    $previous_rcs = $prev_row['student_rcs'];
+                    
+                    $params = array($row['student_rcs'], $rubric_id);
+                    $db->query("SELECT * FROM late_days WHERE student_rcs=? AND since_rubric <= ?", $params);
+                    $lates = $db->row();
+                    $student_allowed_lates = intval($lates['allowed_lates']);
+
+                    $set_next = true;
                 }
-                
-				if(intval($temp_row["number_graded"]) == 0)
-				{
-					if(/* $student_id == NULL && */ $student_rcs == NULL)
-					{
-						$params = array($row["student_rcs"]);
-						$db->query("SELECT * FROM students WHERE student_rcs=?", $params);
-						$row = $db->row();
+            }
+            else {
+                $params = array($row['student_rcs'], $rubric_id);
+                $db->query("SELECT grade_user_id FROM grades WHERE student_rcs=? AND rubric_id=?", $params);
+                $temp_row = $db->row();
 
-						//$student_id = intval($row["student_id"]);
-						$student_first_name = $row["student_first_name"];
-						$student_last_name = $row["student_last_name"];
-                        $student_rcs = $row["student_rcs"];
-                        $previous_rcs = $prev_row['student_rcs'];
-                        
-                        $params = array($row['student_rcs'], $rubric_id);
-                        $db->query("SELECT * FROM late_days WHERE student_rcs=? AND since_rubric <= ?", $params);
-                        $lates = $db->row();
-						$student_allowed_lates = intval($lates['allowed_lates']);
+                if(intval($temp_row["grade_user_id"]) == \app\models\User::$user_id) {
+                    $position_completed++;
+                }
+                else {
+                    $position_other++;
+                }
+            }
 
-                        $set_next = true;
-					}
-				}
-				else
-				{
-					$params = array($row['student_rcs'], $rubric_id);
-					$db->query("SELECT grade_user_id FROM grades WHERE student_rcs=? AND rubric_id=?", $params);
-					$temp_row = $db->row();
-
-					if(intval($temp_row["grade_user_id"]) == $user_id)
-					{
-						$position_completed++;
-					}
-					else
-					{
-						$position_other++;
-					}
-				}
-
-				$position_total++;
-                
-                $prev_row = $row;
-			}
-		}
-	
-		if($student_rcs != NULL) {
-			if (!$DEVELOPER) {
-				print <<<HTML
-	<span id="left" class="resbox">
-HTML;
-				include "account-homework.php";
-				print <<<HTML
-	</span>
-
-	<span id="pane"></span>
-
-	<span id="panemover" onmousedown="dragStart(event, 'left', 'right'); return false;" onmousemove="drag(event, 'left', 'right');" onmouseout="dragRelease();" onmouseup="dragRelease();"></span>
-
-	<span id="right" class="resbox">
-HTML;
-				include("account-rubric.php");
-				print <<<HTML
-	</span>
-HTML;
-			}
-			else {
-				include "account-new-rubric.php";
-			}
-		}
-		else {
-			print <<<HTML
-	<div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
-		<div class="modal-header">
-			<h3 id="myModalLabel">Grading Finished</h3>
-		</div>
-
-		<div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-			Congratulations, you have finished grading Homework {$_GET["hw"]}.
-			<br/>
-			<br/>
-			<i style="color:#777;">You can review the grades you have saved by using the navigation buttons at the bottom-right of the page or by going to the homework overview page.</i>
-		</div>
-						
-		<div class="modal-footer">
-			<a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
-			<a class="btn" href="{$BASE_URL}/account/account-summary.php?hw={$_GET["hw"]}">Homework {$_GET["hw"]} Overview</a>
-			<!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
-		</div>
-	</div>
-</div>
-HTML;
-       	}
+            $position_total++;
+            
+            $prev_row = $row;
+        }
     }
-	else if(!isset($_GET["hw"])) {
 
-		$params = array();
-		$db->query("SELECT rubric_number FROM rubrics WHERE rubric_due_date < (NOW() - INTERVAL '56' HOUR) ORDER BY rubric_due_date ASC, rubric_number ASC", $params);
-		$results = $db->rows();
+    if($student_rcs != NULL) {
+        include "account-new-rubric.php";
+    }
+    else {
+        print <<<HTML
+    <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
+        <div class="modal-header">
+            <h3 id="myModalLabel">Grading Finished</h3>
+        </div>
 
-		if(count($results) > 0)
-		{
-			print <<<HTML
-	<div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
-		<form action="{$BASE_URL}/account/index.php" method="get">
-			<div class="modal-header">
-				<h3 id="myModalLabel">Select Homework</h3>
-			</div>
+        <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
+            Congratulations, you have finished grading Homework {$rubric_name}.
+            <br/>
+            <br/>
+            <i style="color:#777;">You can review the grades you have saved by using the navigation buttons at the bottom-right of the page or by going to the homework overview page.</i>
+        </div>
+                        
+        <div class="modal-footer">
+            <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
+            <a class="btn" href="{$BASE_URL}/account/account-summary.php?hw={$_GET["hw"]}">Homework {$_GET["hw"]} Overview</a>
+            <!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
+        </div>
+    </div>
+</div>
+HTML;
+       }
+}
+else if(!isset($_GET["hw"])) {
 
-			<div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-				<select name="hw">
+    $params = array();
+    $db->query("SELECT rubric_name, rubric_id, rubric_due_date, rubric_late_days FROM rubrics ORDER BY rubric_due_date ASC, rubric_id ASC", $params);
+    $results = $db->rows();
+
+    if(count($results) > 0) {
+        print <<<HTML
+    <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
+        <form action="{$BASE_URL}/account/index.php" method="get">
+            <div class="modal-header">
+                <h3 id="myModalLabel">Select Homework</h3>
+            </div>
+
+            <div class="modal-body" style="vertical-align: middle; padding-top:20px; padding-bottom:20px;">
+                <select style="width:400px" name="hw">
 HTML;
 
-				// $db->query("SELECT rubric_number FROM rubrics WHERE rubric_due_date < (NOW() - INTERVAL 56 HOUR) ORDER BY rubric_due_date ASC", $params);
-				// $db->query("SELECT rubric_number FROM rubrics WHERE rubric_due_date < (NOW() - INTERVAL '56' HOUR) ORDER BY rubric_due_date ASC", $params);
+        $last = end($results);
+        reset($results);
+        $c = 0;
+        $now = new DateTime('now');
+        foreach($results as $row) {
+            $homeworkDate = new DateTime($row['rubric_due_date']);
+            if ($row['rubric_late_days'] > 0) {
+                $homeworkDate->add(new DateInterval("PT{$row['rubric_late_days']}H"));
+            }
+            $extra = ($now < $homeworkDate) ? "(Gradable: {$homeworkDate->format("Y-m-d H:i:s")})" : "";
+            echo "<option value='{$row['rubric_id']}' ".($last["rubric_id"] == $row["rubric_id"] ? "selected" : "").">{$row['rubric_name']} {$extra}</option>";
+            $c++;
+        }
+        print <<<HTML
 
+                </select>
+            </div>
 
-			$last = end($results);
-			reset($results);
-			$c = 0;
-			foreach($results as $row)
-			{
-				echo '<option '.($last["rubric_number"] == $row["rubric_number"] ? "selected" : "").'>' . $row["rubric_number"] . '</option>';
-				$c++;
-			}
-			print <<<HTML
-
-				</select>
-			</div>
-
-			<div class="modal-footer">
-				<input class="btn btn-primary" type="submit" value="Grade" onclick="createCookie('backup',0,1000);"/>
-			</div>
-		</form>
-	</div>
+            <div class="modal-footer">
+                <input class="btn btn-primary" type="submit" value="Grade" onclick="createCookie('backup',0,1000);"/>
+            </div>
+        </form>
+    </div>
 HTML;
-		}
-		else {
-			print <<<HTML
-	<div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
-		<div class="modal-header">
-			<h3 id="myModalLabel">Homework Not Available Yet</h3>
-		</div>
+    }
+    else {
+        print <<<HTML
+    <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
+        <div class="modal-header">
+            <h3 id="myModalLabel">Homeworks Not Available Yet</h3>
+        </div>
 
-		<div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-			No homeworks are available to grade at this time.  Please come back on Sunday after 8AM to grade HW 1.
-		</div>
-	</div>
+        <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
+            No homeworks have been added to the system yet.
+        </div>
+    </div>
 HTML;
-		}
-	}
-	else {
-		print <<<HTML
-	<div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
-		<div class="modal-header">
-			<h3 id="myModalLabel">Rubric Error</h3>
-		</div>
+    }
+}
+else {
+    print <<<HTML
+    <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
+        <div class="modal-header">
+            <h3 id="myModalLabel">Rubric Error</h3>
+        </div>
 
-		<div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-			The rubric you are looking for cannot be found
-		</div>
+        <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
+            The rubric you are looking for cannot be found
+        </div>
 
-		<div class="modal-footer">
-			<a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
-		</div>
-	</div>
+        <div class="modal-footer">
+            <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
+        </div>
+    </div>
 HTML;
-	}
-	print <<<HTML
+}
+print <<<HTML
 </div>
 HTML;
 
-    // TODO: Rewrite this (Issue #43)
-	if(isset($_GET["hw"]) && isset($rubric_id))
-	{
-		if($position_total == 0)
-		{
-			$position_total = 0.001;
-		}
-	
-		?>
-	<div style="border-top:#AAA solid 2px; width:100%; height: 20px; position:absolute; bottom:0; background-color:#fff; z-index:999;">
-		<?php if($position_other == 0) { ?>
-			<div class="progress" id="prog">
-				<div class="bar bar-primary" style="width: <?php echo (($position_completed - $position_backup) / $position_total) * 97; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
-				<div class="bar bar-warning" style="width: <?php echo ($position_backup / $position_total) * 97; ?>%;"><i class="icon-refresh icon-white" id="progress-icon"></i></div>
-				<div class="bar" style="width: 3%; background-image: none; background-color: #777;"><?php echo round(($position_completed / $position_total) * 100, 1); ?>%</div>
-			</div>
-		<?php } elseif($position_other < $position_total) { ?>
-			<div class="progress" id="prog">
-				<div class="bar bar-info" style="width: <?php echo ($position_other / $position_total) * 96; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
-				<div class="bar" style="width: 1%; background-image: none; background-color: #777;"></div>
-				<div class="bar bar-primary" style="width: <?php echo (($position_completed - $position_backup) / $position_total) * 96; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
-				<div class="bar bar-warning" style="width: <?php echo ($position_backup / $position_total) * 96; ?>%;"><i class="icon-refresh icon-white" id="progress-icon"></i></div>
-				<div class="bar" style="width: 3%; background-image: none; background-color: #777;"><?php echo round((($position_completed + $position_other) / $position_total) * 100, 1); ?>%</div>
-			</div>
-		<?php } else { ?>
-			<div class="progress" id="prog">
-				<div class="bar bar-info" style="width: <?php echo ($position_other / $position_total) * 97; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
-				<div class="bar" style="width: 3%; background-image: none; background-color: #777;"><?php echo round(($position_other / $position_total) * 100, 1); ?>%</div>
-			</div>	
-		<?php } ?>
-		
-		<div class="navigation">
-		  <div class="btn-group" id="nav-group">
+// TODO: Rewrite this (Issue #43)
+if(isset($_GET["hw"]) && isset($rubric_id)) {
+    if($position_total == 0) {
+        $position_total = 0.001;
+    }
+
+    ?>
+    <div style="border-top:#AAA solid 2px; width:100%; height: 20px; position:absolute; bottom:0; background-color:#fff; z-index:999;">
+    <?php if($position_other == 0) { ?>
+            <div class="progress" id="prog">
+                <div class="bar bar-primary" style="width: <?php echo (($position_completed - $position_backup) / $position_total) * 97; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
+                <div class="bar bar-warning" style="width: <?php echo ($position_backup / $position_total) * 97; ?>%;"><i class="icon-refresh icon-white" id="progress-icon"></i></div>
+                <div class="bar" style="width: 3%; background-image: none; background-color: #777;"><?php echo round(($position_completed / $position_total) * 100, 1); ?>%</div>
+            </div>
+    <?php } elseif($position_other < $position_total) { ?>
+            <div class="progress" id="prog">
+                <div class="bar bar-info" style="width: <?php echo ($position_other / $position_total) * 96; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
+                <div class="bar" style="width: 1%; background-image: none; background-color: #777;"></div>
+                <div class="bar bar-primary" style="width: <?php echo (($position_completed - $position_backup) / $position_total) * 96; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
+                <div class="bar bar-warning" style="width: <?php echo ($position_backup / $position_total) * 96; ?>%;"><i class="icon-refresh icon-white" id="progress-icon"></i></div>
+                <div class="bar" style="width: 3%; background-image: none; background-color: #777;"><?php echo round((($position_completed + $position_other) / $position_total) * 100, 1); ?>%</div>
+            </div>
+    <?php } else { ?>
+            <div class="progress" id="prog">
+                <div class="bar bar-info" style="width: <?php echo ($position_other / $position_total) * 97; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
+                <div class="bar" style="width: 3%; background-image: none; background-color: #777;"><?php echo round(($position_other / $position_total) * 100, 1); ?>%</div>
+            </div>    
+    <?php } ?>
+        
+        <div class="navigation">
+          <div class="btn-group" id="nav-group">
               <a class="btn" style="border-radius: 0px;" <?php echo ($previous_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&prev={$previous_rcs}\""); ?> <?php echo ($previous_rcs == "" ? "disabled" : ""); ?>><i class="icon-chevron-left"></i></a>
               <a class="btn" style="border-radius: 0px;" href="<?php echo $BASE_URL; ?>/account/account-summary.php?hw=<?php echo $_GET["hw"]; ?>"><i class="icon-align-justify"></i></a>
               <a class="btn" style="border-radius: 0px;" <?php echo ($next_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&next={$next_rcs}\""); ?> <?php echo ($next_rcs == "" ? "disabled" : ""); ?>><i class="icon-chevron-right"></i></a>
-		  </div>
-		</div>
-	</div>
+          </div>
+        </div>
+    </div>
 <?php } ?>
 <script type="text/javascript">
     var mousedown = false;
 
-	$("#rubric-autoscroll-checkbox").change(function() {
-        if($("#rubric-autoscroll-checkbox").is(':checked'))
-		{
-			createCookie('auto',1,1000);
-			$('#rubric').css("overflow-y", "hidden");
-		}
-		else
-		{	
-			eraseCookie('auto');
-			$('#rubric').css("overflow-y", "scroll");
-		}       
+    $("#rubric-autoscroll-checkbox").change(function() {
+        if($("#rubric-autoscroll-checkbox").is(':checked')) {
+            createCookie('auto',1,1000);
+            $('#rubric').css("overflow-y", "hidden");
+        }
+        else {    
+            eraseCookie('auto');
+            $('#rubric').css("overflow-y", "scroll");
+        }       
     });
-    		
-	$('#content').scroll(function() {
-			
-		if($("#rubric-autoscroll-checkbox").is(':checked'))
-		{
-			var scrollPercentage = this.scrollTop / (this.scrollHeight-this.clientHeight);
-	        document.getElementById('rubric').scrollTop = scrollPercentage * (document.getElementById('rubric').scrollHeight-document.getElementById('rubric').clientHeight);	
-		}
-		else
-		{
-		}
-	});
+            
+    $('#content').scroll(function() {
+            
+        if($("#rubric-autoscroll-checkbox").is(':checked')) {
+            var scrollPercentage = this.scrollTop / (this.scrollHeight-this.clientHeight);
+            document.getElementById('rubric').scrollTop = scrollPercentage * (document.getElementById('rubric').scrollHeight-document.getElementById('rubric').clientHeight);    
+        }
+    });
 
     var progressBar = document.getElementById('pro');
     if (progressBar != null) {
         progressBar.style.width = (document.documentElement.clientWidth - 157) + 'px';
     }
-	
-	document.getElementById('container').style.width = window.innerWidth + 'px';
-	document.getElementById('container').style.height = (window.innerHeight - 20 - 40) + 'px';
+    
+    document.getElementById('container').style.width = window.innerWidth + 'px';
+    document.getElementById('container').style.height = (window.innerHeight - 20 - 40) + 'px';
 
     var split = 0;
-	var width = window.innerWidth - 8 - 2 - 2;
-	split = <?php echo ($split == "" || $split < 50 || 75 < $split ? 65 : $split); ?> / 100.0;
+    var width = window.innerWidth - 8 - 2 - 2;
+    split = <?php echo ($split == "" || $split < 50 || 75 < $split ? 65 : $split); ?> / 100.0;
     if (document.getElementById('left') != null) {
         document.getElementById('left').style.width = (width * (split)) + 'px';
     }
@@ -373,68 +334,66 @@ HTML;
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
         document.getElementById('panemover').style.width = '10px';
     }
-	
-	    
-	window.onresize = function(event) 
-	{
-		width = (window.innerWidth - 8 - 2 - 2);
-	    split = (parseInt(document.getElementById('left').style.width) / (parseInt(document.getElementById('left').style.width) + parseInt(document.getElementById('right').style.width))).toFixed(2);
-	    
-		document.getElementById('left').style.width = (width * (split)) + 'px';
-		document.getElementById('right').style.width = ((width * (1 - split)) - 10) + 'px';
-		
-		document.getElementById('prog').style.width = (document.documentElement.clientWidth - 157) + 'px';
-		document.getElementById('container').style.width = window.innerWidth + 'px';
-		document.getElementById('container').style.height = (window.innerHeight - 20 - 40) + 'px';
-	    document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
-	}
-	
-	function dragStart(e, left, right) {
 
-	    document.getElementById('panemover').style.width = '100%';
-	    document.getElementById('panemover').style.left = '0px';
-	
-	    mousedown = true;
-	    x = e.clientX
-	    dragOffsetLeft = document.getElementById(left).offsetWidth - x;
-	    dragOffsetRight = document.getElementById(right).offsetWidth + x;
-	};
-	
-	function dragRelease() {
-	    
-	    document.getElementById('panemover').style.width = '10px';
-	    document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
-	    
-	    var date = new Date();
-	    date.setTime(date.getTime()+(180*24*60*60*1000));
-	    var expires = "; expires="+date.toGMTString();
-	    
-	    var splitVar = parseFloat(100 * (parseFloat(document.getElementById('left').style.width) / (parseFloat(document.getElementById('left').style.width) + parseFloat(document.getElementById('right').style.width)))).toFixed(2);
-	    
-	    document.cookie ='split='+splitVar+'; expires='+expires+'; path=/';
-	
-	    mousedown = false;
-	};
+    window.onresize = function(event) {
+        width = (window.innerWidth - 8 - 2 - 2);
+        split = (parseInt(document.getElementById('left').style.width) / (parseInt(document.getElementById('left').style.width) + parseInt(document.getElementById('right').style.width))).toFixed(2);
+        
+        document.getElementById('left').style.width = (width * (split)) + 'px';
+        document.getElementById('right').style.width = ((width * (1 - split)) - 10) + 'px';
+        
+        document.getElementById('prog').style.width = (document.documentElement.clientWidth - 157) + 'px';
+        document.getElementById('container').style.width = window.innerWidth + 'px';
+        document.getElementById('container').style.height = (window.innerHeight - 20 - 40) + 'px';
+        document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
+    };
+    
+    function dragStart(e, left, right) {
 
-	function drag(e, left, right) {
-	
-	    if (!mousedown) {
-	        return
-	    }
-	    x = e.clientX
-	    tmpLeft = dragOffsetLeft + x
-	    tmpRight = dragOffsetRight - x
-	    minWidthLeft = window.innerWidth * 0.50;
-	    minWidthRight = window.innerWidth * 0.25;
-	    if (tmpLeft < minWidthLeft || tmpRight < minWidthRight) {
-	        return
-	    }
-	    document.getElementById('left').style.width = (tmpLeft - 1) + 'px';
-	    document.getElementById('right').style.width = (tmpRight - 10) + 'px';
-	};
-	
-	eraseCookie("reset");
-	
+        document.getElementById('panemover').style.width = '100%';
+        document.getElementById('panemover').style.left = '0px';
+    
+        mousedown = true;
+        x = e.clientX;
+        dragOffsetLeft = document.getElementById(left).offsetWidth - x;
+        dragOffsetRight = document.getElementById(right).offsetWidth + x;
+    }
+    
+    function dragRelease() {
+        
+        document.getElementById('panemover').style.width = '10px';
+        document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
+        
+        var date = new Date();
+        date.setTime(date.getTime()+(180*24*60*60*1000));
+        var expires = "; expires="+date.toGMTString();
+        
+        var splitVar = parseFloat(100 * (parseFloat(document.getElementById('left').style.width) / (parseFloat(document.getElementById('left').style.width) + parseFloat(document.getElementById('right').style.width)))).toFixed(2);
+        
+        document.cookie ='split='+splitVar+'; expires='+expires+'; path=/';
+    
+        mousedown = false;
+    }
+
+    function drag(e, left, right) {
+    
+        if (!mousedown) {
+            return
+        }
+        x = e.clientX
+        tmpLeft = dragOffsetLeft + x
+        tmpRight = dragOffsetRight - x
+        minWidthLeft = window.innerWidth * 0.50;
+        minWidthRight = window.innerWidth * 0.25;
+        if (tmpLeft < minWidthLeft || tmpRight < minWidthRight) {
+            return
+        }
+        document.getElementById('left').style.width = (tmpLeft - 1) + 'px';
+        document.getElementById('right').style.width = (tmpRight - 10) + 'px';
+    }
+    
+    eraseCookie("reset");
+    
 </script>
-	
+    
 <?php include "../footer.php"; ?>
