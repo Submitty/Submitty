@@ -53,7 +53,7 @@ if (count($testcase['diffs']) > 0) {
         }
         else {
             if ($actual != "") {
-                $out = file_get_contents($actual);
+                $out = htmlentities(file_get_contents($actual));
                 $iframe .= <<<HTML
     Student File<br />
     <textarea id="code{$i}">{$out}</textarea>
@@ -61,7 +61,7 @@ HTML;
                 $iframe .= sourceSettingsJS($diff['student_file'], $i++);
             }
             if ($expected != "") {
-                $out = file_get_contents($expected);
+                $out = htmlentities(file_get_contents($expected));
                 $iframe .= <<<HTML
     Instructor File<br />
     <textarea id="code{$i}">{$out}</textarea>
@@ -73,7 +73,7 @@ HTML;
     }
 }
 if (isset($testcase['compilation_output']) && $testcase['compilation_output'] != "") {
-    $out = file_get_contents($_GET['directory'].'/'.$testcase['compilation_output']);
+    $out = htmlentities(file_get_contents($_GET['directory'].'/'.$testcase['compilation_output']));
     $iframe .= <<<HTML
     <textarea id="code{$i}">{$out}</textarea>
 HTML;

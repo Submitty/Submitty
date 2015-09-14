@@ -179,7 +179,7 @@ HTML;
                             Logfile
                             <textarea id="code{$source_number}">
 HTML;
-        $output .= file_get_contents($results_details['directory']."/".$testcase['execute_logfile']);
+        $output .= htmlentities(file_get_contents($results_details['directory']."/".$testcase['execute_logfile']));
         $output .= <<<HTML
                             </textarea>
 HTML;
