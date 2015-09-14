@@ -361,7 +361,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 }
                 $this->active_assignment[$part] = $_GET["active_assignment_{$part}"];
             }
-            else if (!$this->has_grade) {
+            else if (!$this->has_grade || !isset($this->active_assignment[$part]) || $this->active_assignment[$part] == 0) {
                 if (file_exists(implode("/", array($submission_directory, "user_assignment_settings.json")))) {
                     $settings = json_decode(file_get_contents(implode("/", array($submission_directory, "user_assignment_settings.json"))), true);
                     $this->active_assignment[$part] = $settings['active_assignment'];
