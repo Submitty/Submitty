@@ -177,7 +177,7 @@ class Rubric {
             $this->setRubricResults();
             $this->calculateStatus();
             $this->setQuestionTotals();
-            for ($i = 1; $i < $this->rubric_parts; $i++) {
+            for ($i = 1; $i <= $this->rubric_parts; $i++) {
                 sort($this->rubric_files[$i]);
             }
         }
