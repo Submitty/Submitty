@@ -40,8 +40,6 @@ class DiffViewer {
         $this->expected = array();
         $this->diff = array();
         $this->add = array();
-        $this->expected_name = null;
-        $this->actual_name = null;
         $this->link = array();
         $this->id = "id";
     }
@@ -59,6 +57,7 @@ class DiffViewer {
      * @throws \Exception
      */
     function load($actual_file, $expected_file, $diff_file, $id_prepend="id") {
+        $this->reset();
         $this->id = rtrim($id_prepend,"_")."_";
         if (!file_exists($actual_file) && $actual_file != "") {
             throw new \Exception("'{$actual_file}' could not be found.");

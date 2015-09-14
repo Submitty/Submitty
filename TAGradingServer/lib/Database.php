@@ -108,6 +108,10 @@ class Database
             Database::$all_queries[] = array($query, $parameters);
         }
         catch (PDOException $pdoException) {
+            if (Database::$transaction) {
+                Database::$link->rollBack();
+                Database::$transaction = false;
+            }
             ExceptionHandler::throwException("Database",
                                              $pdoException,
                                              array("Query" => $query,
@@ -135,12 +139,8 @@ class Database
      */
     static function commit() {
         if (Database::$transaction) {
-            try {
-                Database::$link->commit();
-            } catch (PDOException $pdoException) {
-                ExceptionHandler::throwException("Database",
-                                                 $pdoException);
-            }
+            Database::$link->commit();
+            Database::$transaction = false;
         }
     }
 
@@ -222,5 +222,18 @@ class Database
      */
     static function hasConnection() {
         return Database::$link !== null;
+    }
+    
+    static function inTransaction() {
+        return Database::$transaction;
+    }
+    
+    static function getLastInsertId($name = "") {
+        if (!empty($name)) {
+            return Database::$link->lastInsertId($name);
+        }
+        else {
+            return Database::$link->lastInsertId();
+        }
     }
 }

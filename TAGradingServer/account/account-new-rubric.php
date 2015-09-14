@@ -8,16 +8,18 @@ $rubric_id
 
 use \app\models\Rubric;
 
+$rubric = new Rubric($student_rcs, $rubric_id);
+
 $calculate_diff = __CALCULATE_DIFF__;
 if ($calculate_diff) {
     $output = <<<HTML
 
 <script>
-    function autoResize(id){
+    function autoResize(id) {
         var newheight;
         var newwidth;
     
-        if(document.getElementById){
+        if(document.getElementById) {
             newheight=document.getElementById(id).contentWindow.document .body.scrollHeight;
             newwidth=document.getElementById(id).contentWindow.document .body.scrollWidth;
         }
@@ -25,50 +27,41 @@ if ($calculate_diff) {
         document.getElementById(id).height= (newheight) + "px";
         document.getElementById(id).width= (newwidth) + "px";
     }
-    
-    calculatePercentageTotal();
-		
-    function calculatePercentageTotal() 
-    {
+        
+    function calculatePercentageTotal() {
         var total=0;
         
-        $('#rubric-table select.grades').each(function()
-        {
+        $('#rubric-table').find('select.grades').each(function() {
             total += parseFloat($(this).val());
-/* 		    $(this).next('.accordian-body').collapse('show'); */
+/*             $(this).next('.accordian-body').collapse('show'); */
         });
     
         $("#score_total").html(total);
     }
-		
-    function updateLates()
-    {
-        var late_number = parseInt($("select#late-select").val());
         
-        $('.lates').each(function()
-        {
-            if(late_number == 0)
-            {
-                var late_color = "green";
-                var late_icon = '<i class="icon-ok icon-white">';
+    function updateLates() {
+        var late_number = parseInt($("select#late-select").val());
+        var late_color;
+        var late_icon;
+        
+        $('.lates').each(function() {
+            if(late_number == 0) {
+                late_color = "green";
+                late_icon = '<i class="icon-ok icon-white">';
             }
-            else if(late_number == 1)
-            {														
-                var late_color = "#FAA732";
-                var late_icon = '<i class="icon-exclamation-sign icon-white"><br/>';
+            else if(late_number == 1) {                                                        
+                late_color = "#FAA732";
+                late_icon = '<i class="icon-exclamation-sign icon-white"><br/>';
             }
-            else if(late_number == 2)
-            {
-                var late_color = "#FAA732";
-                var late_icon = '<i class="icon-exclamation-sign icon-white"><br/><i class="icon-exclamation-sign icon-white">';
+            else if(late_number == 2) {
+                late_color = "#FAA732";
+                late_icon = '<i class="icon-exclamation-sign icon-white"><br/><i class="icon-exclamation-sign icon-white">';
             }
-            else
-            {
-                var late_color = "#DA4F49";
-                var late_icon = '<i class="icon-remove icon-white">';
+            else {
+                late_color = "#DA4F49";
+                late_icon = '<i class="icon-remove icon-white">';
                 
-                $('#rubric-table select.grades').each(function()
-                {
+                $('#rubric-table').find('select.grades').each(function() {
                     $(this).val(0);
                 });
             }
@@ -84,27 +77,58 @@ if ($calculate_diff) {
 HTML;
 
 }
-$code_number = 0;
 
-$rubric = new Rubric($student_rcs, $rubric_id);
+$code_number = 0;
 
 $output .= <<<HTML
 
 <span id="left" class="resbox">
+    <div id="content">
 HTML;
 
 $source_number = 0;
-foreach ($rubric->results_details as $part => $results_details) {
-    $submitted_details = $rubric->submitted_details[$part];
+for($part = 1; $part <= $rubric->rubric_parts; $part++) {
+    
+    if ($rubric->rubric_details['rubric_parts_sep']) {
+        $show_part = "Part: {$part}<br />";
+    }
+    else {
+        $show_part = "";
+    }
+    
+    //$output .= $rubric->submission_details[$part];
+    if (!isset($rubric->submission_details[$part])) {
+        $output .= <<<HTML
+        <div id="inner-container">
+            <div id="inner-container-spacer"></div>
+            {$show_part}
+            <div id="inner-container-spacer"></div>
+            <div class="tabbable">
+                <ul id="myTab" class="nav nav-tabs">
+                    <li style="margin-right:2px; height:34px; width:20px; text-align:center; line-height:16px; padding-top:3px; -webkit-border-radius: 4px 4px 0 0; -moz-border-radius: 4px 4px 0 0; border-radius: 4px 4px 0 0; background-color: #DA4F49;">
+                        <i class="icon-remove icon-white"></i>
+                    </li>
+                    <li class='active'><a href="#output-{$part}-1" data-toggle="tab">
+                        <b style="color:#DA4F49;">No Submission</b>
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+HTML;
+        continue;
+    }
+    
+    $results_details = $rubric->results_details[$part];
+
+    $submitted_details = $rubric->submission_details[$part];
     
     $output .= <<<HTML
-
-    <div id="content">
         <div id="inner-container">
-	        <div id="inner-container-spacer"></div>
-            Part: {$part}<br />
+            <div id="inner-container-spacer"></div>
+            <br />
             Submitted: {$results_details['submission_time']}<br />
-            Submission Number: {$results_details['submission_number']}
+            {$show_part}
+            Submission Number: {$rubric->active_assignment[$part]} / {$rubric->max_assignment[$part]}
             <div id="inner-container-spacer"></div>
             <div class="tabbable">
                 <ul id="myTab" class="nav nav-tabs">
@@ -133,17 +157,6 @@ HTML;
         $active = false;
     }
     
-    $c = 0;
-    foreach (array_merge($rubric->submitted_files[$part], $rubric->results_files[$part]) as $file) {
-        $output .= <<<HTML
-
-                    <li>
-                        <a href="#source-{$part}-{$c}" data-toggle="tab" style="background-color:#F6F6F6;">{$file}</a>
-                    </li>
-HTML;
-        $c++;
-    }
-    
     $output .= <<<HTML
 
                 </ul>
@@ -154,7 +167,8 @@ HTML;
     $active = true;
     foreach ($results_details['testcases'] as $testcase) {
         $active_text = ($active) ? 'active' : '';
-        $url = $BASE_URL."/account/ajax/account-new-rubric.php?course={$_GET['course']}&testcases=".urlencode(json_encode($testcase))."&directory=".urlencode($results_details['directory']);
+        $url = $BASE_URL."/account/iframe/account-new-rubric.php?course={$_GET['course']}&testcases=".urlencode(json_encode($testcase))."&directory=".urlencode($results_details['directory']);
+        
         $output .= <<<HTML
 
                     <div class="tab-pane {$active_text}" id="output-{$part}-{$i}">
@@ -174,64 +188,30 @@ HTML;
                         </div>
                     </div>
 HTML;
+        
         $i++;
         $active = false;
         $source_number++;
     }
     
-    $c = 0;
-    foreach ($rubric->submitted_files[$part] as $file) {
-        $output .= <<<HTML
-
-                    <div class="tab-pane" id="source-{$part}-{$c}">
-                        <div style="width:95%; margin: auto auto auto auto; overflow-y:auto; overflow-x:hidden; padding-top:20px;">
-                            <textarea id="code{$source_number}">
-HTML;
-        $output .= file_get_contents($submitted_details['directory']."/".$file);
-        $output .= <<<HTML
-                            </textarea>
-HTML;
-        $output .= sourceSettingsJS($file, $source_number);
-        $output .= <<<HTML
-                        </div>
-                    </div>
-HTML;
-        $c++;
-        $source_number++;
-    }
-    
-    foreach ($rubric->results_files[$part] as $file) {
-        $output .= <<<HTML
-
-                    <div class="tab-pane" id="source-{$part}-{$c}">
-                        <div style="width:95%; margin: auto auto auto auto; overflow-y:auto; overflow-x:hidden; padding-top:20px;">
-                             <textarea id="code{$source_number}">
-HTML;
-        $output .= file_get_contents($results_details['directory']."/".$file);
-        $output .= <<<HTML
-                            </textarea>
-HTML;
-        
-        $output .= sourceSettingsJS($file, $source_number);
-        $output .= <<<HTML
-                        </div>
-                    </div>
-HTML;
-        $source_number++;
-        $c++;
-    }
     
     $output .= <<<HTML
 
                 </div>
             </div>
+            <div class="tabbable">
+HTML;
+    foreach ($rubric->rubric_files[$part] as $file) {
+        $output .= "<a href='{$BASE_URL}/account/iframe/file_display.php?filename=".htmlentities($file)."' target='_blank'>{$file}</a><br />";
+    }
+    $output .= <<<HTML
+            </div>
         </div>
-    </div>
 HTML;
     $active = false;
 }
-
 $output .= <<<HTML
+    </div>
 </span>
 
 <span id="pane"></span>
@@ -240,11 +220,11 @@ $output .= <<<HTML
 
 <span id="right" class="resbox">
     <div id="rubric" style="overflow-y:scroll;">
-		<div id="inner-container">
+        <div id="inner-container">
             <div id="rubric-title">
-				<div class="span2" style="float:left; text-align: left;"><b>Homework {$rubric->rubric_details['rubric_number']}</b></div>
-				<div class="span2" style="float:right; text-align: right; margin-top: -20px;"><b>{$rubric->student['student_last_name']}, {$rubric->student['student_first_name']}<br/>RCS: {$rubric->student['student_rcs']}</b></div>
-			</div>
+                <div class="span2" style="float:left; text-align: left;"><b>{$rubric->rubric_details['rubric_name']}</b></div>
+                <div class="span2" style="float:right; text-align: right; margin-top: -20px;"><b>{$rubric->student['student_last_name']}, {$rubric->student['student_first_name']}<br/>RCS: {$rubric->student['student_rcs']}</b></div>
+            </div>
 HTML;
 
 $submitted = ($rubric->submitted) ? "1" : "0";
@@ -256,21 +236,23 @@ else {
     $cookie_auto = "";
 }
 
+$active_assignments = implode(",",$rubric->active_assignment);
 $output .= <<<HTML
-			<form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&hw={$rubric->rubric_details['rubric_number']}&student={$rubric->student['student_rcs']}&individual={$individual}" method="post">
-			    <input type="hidden" name="submitted" value="{$submitted}" />
-			    <input type="hidden" name="status" value="{$rubric->status}" />
-			    <input type="hidden" name="late" value="{$rubric->late_days}" />
-				<div id="inner-container-seperator" style="background-color:#AAA; margin-top: 0; margin-bottom:0;"></div>
-				
-				<div style="margin-top: 0; margin-bottom:35px;">
-					<input type="checkbox" style="margin-top:0; margin-right:5px;" id="rubric-autoscroll-checkbox" {$cookie_auto} /><span style="font-size:11px;">Rubric Auto Scroll</span>
-				</div>
+            <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&hw={$rubric->rubric_details['rubric_id']}&student={$rubric->student['student_rcs']}&individual={$individual}" method="post">
+                <input type="hidden" name="submitted" value="{$submitted}" />
+                <input type="hidden" name="status" value="{$rubric->status}" />
+                <input type="hidden" name="late" value="{$rubric->days_late}" />
+                <input type="hidden" name="active_assignment" value="{$active_assignments}" />
+                <div id="inner-container-seperator" style="background-color:#AAA; margin-top: 0; margin-bottom:0;"></div>
+                
+                <div style="margin-top: 0; margin-bottom:35px;">
+                    <input type="checkbox" style="margin-top:0; margin-right:5px;" id="rubric-autoscroll-checkbox" {$cookie_auto} /><span style="font-size:11px;">Rubric Auto Scroll</span>
+                </div>
 HTML;
 
 if ($rubric->rubric_details['rubric_late_days'] >= 0) {
     $output .= <<<HTML
-				<span style="color: black">Homework allows {$rubric->rubric_details['rubric_late_days']} late day(s).</span><br />
+                <span style="color: black">Homework allows {$rubric->rubric_details['rubric_late_days']} late day(s).</span><br />
 HTML;
 }
 
@@ -281,22 +263,20 @@ HTML;
 }
 
 $output .= <<<HTML
-				Late Days Used on Assignment:&nbsp;{$rubric->late_days}<br />
+                Late Days Used on Assignment:&nbsp;{$rubric->days_late}<br />
 HTML;
 
 if ($rubric->late_days_exception > 0) {
     $output .= <<<HTML
                 <span style="color: green">Student has an exception of {$rubric->late_days_exception} late day(s).</span><br />                  
 HTML;
+    $output .= <<<HTML
+                <b>Late Days Used:</b>&nbsp;{$rubric->days_late_used}<br />
+HTML;
 }
 
-$output .= <<<HTML
-				<b>Late Days Used:</b>&nbsp;{$rubric->used_late_days}<br />
-HTML;
-
-
-if($rubric->late_days_max_surpassed) {
-    print <<<HTML
+if($rubric->status == 0 && $rubric->submitted == 1) {
+    $output .= <<<HTML
                 <b style="color:#DA4F49;">Too many total late days used for this assignment</b><br />
 HTML;
 }
@@ -446,9 +426,9 @@ HTML;
     
 if(isset($_GET["individual"])) {
     $output .= <<<HTML
-                        <tr>	  
-                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;"></td>	  
-                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;"></td>	  
+                        <tr>      
+                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;"></td>      
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;"></td>      
                             <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;"><strong>CURRENT GRADE</strong></td>
                             <td style="background-color: #EEE; border-top:5px #FAA732 solid;"><strong id="score_total">0</strong></td>
                             <td style="background-color: #EEE; border-top:5px #FAA732 solid;"><strong>{$rubric->rubric_details['rubric_total']}</strong></td>
@@ -457,9 +437,9 @@ HTML;
 } 
 else {
     $output .= <<<HTML
-                        <tr>	  
-                            <td style="background-color: #EEE; border-top: 1px solid #CCC;"></td>	  
-                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"></td>	  
+                        <tr>      
+                            <td style="background-color: #EEE; border-top: 1px solid #CCC;"></td>      
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"></td>      
                             <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"><strong>CURRENT GRADE</strong></td>
                             <td style="background-color: #EEE; border-top: 1px solid #CCC;"><strong id="score_total">0</strong></td>
                             <td style="background-color: #EEE; border-top: 1px solid #CCC;"><strong>{$rubric->rubric_details['rubric_total']}</strong></td>
@@ -471,8 +451,8 @@ $output .= <<<HTML
                     </tbody>
                 </table>
                 <div style="width:100%;"><b>General Comment:</b></div>
-				<textarea name="comment-general" rows="5" style="width:98%; padding:5px; resize:none;" placeholder="Overall message for student about the homework...">{$rubric->rubric_details['grade_comment']}</textarea>
-				<div style="width:100%; height:40px;"></div>
+                <textarea name="comment-general" rows="5" style="width:98%; padding:5px; resize:none;" placeholder="Overall message for student about the homework...">{$rubric->rubric_details['grade_comment']}</textarea>
+                <div style="width:100%; height:40px;"></div>
 HTML;
 if (isset($rubric->rubric_details['user_email'])) {
     $output .= "Graded By: {$rubric->rubric_details['user_email']}<br />Overwrite Grader: <input type='checkbox' name='overwrite' /><br /><br />";
@@ -499,5 +479,10 @@ $output .= <<<HTML
 </span>
 HTML;
 
+$output .= <<<HTML
+<script>
+calculatePercentageTotal();
+</script>
+HTML;
+
 print $output;
-?>

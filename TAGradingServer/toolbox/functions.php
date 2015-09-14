@@ -7,7 +7,7 @@ permissions aren't lost for newly created files & directories. We do this
 here as every working file must include functions.php to actuall work.
 */
 umask (0027);
-
+date_default_timezone_set('America/New_York');
 
 use \lib\AutoLoader;
 use \lib\Database;
@@ -215,25 +215,31 @@ function sourceSettingsJS($filename, $number) {
     }
 
     $number = intval($number);
-    return '<script>
-    var editor'.$number.' = CodeMirror.fromTextArea(document.getElementById("code'.$number.'"), {
+    return <<<HTML
+<script>
+    var editor{$number} = CodeMirror.fromTextArea(document.getElementById('code{$number}'), {
         lineNumbers: true,
         readOnly: true,
         cursorHeight: 0.0,
         lineWrapping: true
     });
 
-    editor'.$number.'.setSize("100%", "100%");
-    editor'.$number.'.setOption("theme", "eclipse");
-    editor'.$number.'.setOption("mode", "'.$type.'");
+    var lineCount = editor{$number}.lineCount();
+    if (lineCount == 0) {
+        //lineCount += 1;
+    }
+    editor{$number}.setSize("100%", (editor{$number}.defaultTextHeight() * (lineCount+1)) + "px");
+    editor{$number}.setOption("theme", "eclipse");
+    editor{$number}.setOption("mode", "'.$type.'");
 
     $("#myTab a").click(function (e) {
         e.preventDefault();
         $(this).tab("show");
-        setTimeout(function() { editor'.$number.'.refresh(); }, 1);
+        setTimeout(function() { editor{$number}.refresh(); }, 1);
     });
 
-    </script>';
+</script>
+HTML;
 }
 
 function clean_string($str) {
