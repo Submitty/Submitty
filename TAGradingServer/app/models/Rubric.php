@@ -177,6 +177,9 @@ class Rubric {
             $this->setRubricResults();
             $this->calculateStatus();
             $this->setQuestionTotals();
+            array_walk_recursive($this->rubric_files, function(&$value, $key) {
+                $value = str_replace(__SUBMISSION_SERVER__, "", $value);
+            });
             for ($i = 1; $i <= $this->rubric_parts; $i++) {
                 sort($this->rubric_files[$i]);
             }
@@ -508,7 +511,6 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
             }
         }
         $this->rubric_details['rubric_total'] = $total;
-        //var_dump($this->questions);
     }
     
     public function dumpStuff() {

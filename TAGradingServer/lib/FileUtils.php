@@ -14,6 +14,10 @@ class FileUtils {
      * @return array
      */
     public static function getAllFiles($dir, $allowed_file_extensions=array()) {
+        // we never want to include these files/folders as they do not contain any useful
+        // information for us and would just end up making the file viewer have way too many files
+        $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
+        $disallowed_files = array('.ds_store');
         $return = array();
         if (file_exists($dir)) {
             // If it's not an array, assume it's a comma separated string, and use that
@@ -26,7 +30,7 @@ class FileUtils {
             if(is_dir($dir)) {
                 if($handle = opendir($dir)) {
                     while (false !== ($entry = readdir($handle))) {
-                        if(in_array(strtolower($entry), array(".", "..", ".svn", ".git", ".idea", "__macosx"))) {
+                        if(in_array(strtolower($entry), $disallowed_folders)) {
                             continue;
                         }
                         $file = "{$dir}/{$entry}";
@@ -40,7 +44,7 @@ class FileUtils {
                                     $return[] = $file;
                                 }
                             } else {
-                                if(!in_array(strtolower($entry), array(".ds_store"))) {
+                                if(!in_array(strtolower($entry), $disallowed_files)) {
                                     $return[] = $file;
                                 }
                             }
@@ -54,12 +58,13 @@ class FileUtils {
                         $return[] = $dir;
                     }
                 } else {
-                    if(!in_array(strtolower($dir), array(".ds_store"))) {
+                    if(!in_array(strtolower($dir), $disallowed_files)) {
                         $return[] = $dir;
                     }
                 }
             }
         }
+        sort($return);
         return $return;
     }
     
