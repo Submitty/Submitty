@@ -139,13 +139,13 @@ HTML;
     
     $i = 0;
     $active = true;
-    foreach ($results_details['testcases'] as $testcase) {
+    foreach ($results_details['testcases'] as $k => $testcase) {
         $active_text  = ($active == true) ? 'active' : '';
         $css = 'check-full'; // cross
         $text = 'Y'; // 'N'
         $j = $i + 1;
-        $pa = $results_details['points_awarded'];
-        $pt = 0;
+        $pa = $testcase['points_awarded'];
+        $pt = $rubric->config_details[$part]['testcases'][$k]['points'];
         $output .= <<<HTML
 
                     <li class="{$active_text}" >
