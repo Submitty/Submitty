@@ -177,6 +177,7 @@ class Rubric {
             $this->setRubricResults();
             $this->calculateStatus();
             $this->setQuestionTotals();
+            sort($this->rubric_files);
         }
         catch (\Exception $ex) {
             ExceptionHandler::throwException("Homework", $ex);
