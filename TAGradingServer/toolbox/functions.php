@@ -27,9 +27,11 @@ $start_time = microtime_float();
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 if (isset($_GET['course'])) {
+    // don't allow the user entered course to potentially point to a different directory via use of ../
+    $_GET['course'] = str_replace("/","_",$_GET['course']);
     $config = __DIR__."/configs/".$_GET['course'].".php";
     if (!file_exists($config)) {
-        die("Fatal Error: The config for course=#### does not exist");
+        die("Fatal Error: The config for the specified course '{$_GET['course']}' does not exist");
     }
 }
 else {
