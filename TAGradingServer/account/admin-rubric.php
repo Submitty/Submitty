@@ -12,7 +12,7 @@ if($user_is_administrator)
     $old_rubric = array(
         'rubric_id' => -1, 
         'rubric_number' => "",
-        'rubric_due_date' => "",
+        'rubric_due_date' => date('Y/m/d 23:59:59'),
         'rubric_code' => "",
         'rubric_parts_sep' => false,
         'rubric_late_days' => __DEFAULT_LATE_DAYS__
@@ -56,19 +56,21 @@ if($user_is_administrator)
 
     if (!$have_old) {
         $rubricNumberQuery = (count($rubrics) > 0) ? end($rubrics) + 1 : 1;
-        $rubric_name = "Rubric {$rubricNumberQuery}";
+        $rubric_name = "Homework {$rubricNumberQuery}";
         $rubric_submission_id = "hw".Functions::pad($rubricNumberQuery);
         $rubric_parts_submission_id[1] = "_part1";
+        $part_count = 1;
         $string = "Add";
         $action = strtolower($string);
     }
     else {
-        $rubricNumberQuery = $old_rubric['rubric_number'];
+        $rubricNumberQuery = $old_rubric['rubric_id'];
         $rubric_name = $old_rubric['rubric_name'];
         $rubric_submission_id = $old_rubric['rubric_submission_id'];
         $rubric_parts_submission_id = array();
-        
+        $part_count = 0;
         foreach(explode(",", $old_rubric['rubric_parts_submission_id']) as $k => $v) {
+            $part_count++;
             $rubric_parts_submission_id[$k + 1] = $v;
         }
         
@@ -78,7 +80,6 @@ if($user_is_administrator)
 
     $rubric_sep_checked = ($old_rubric['rubric_parts_sep'] == 1) ? "checked" : "";
     
-    $rubric_submission_id = "hw" . Functions::pad($rubricNumberQuery);
     print <<<HTML
     
 <style type="text/css">
@@ -113,7 +114,7 @@ if($user_is_administrator)
 
 <div id="container-rubric">
     <form class="form-signin" action="{$BASE_URL}/account/submit/admin-rubric.php?action={$action}&id={$old_rubric['rubric_id']}" method="post" enctype="multipart/form-data">
-    <input type='hidden' name="part_count" value="1" />
+    <input type='hidden' name="part_count" value="{$part_count}" />
 HTML;
         
     print <<<HTML
@@ -347,7 +348,13 @@ HTML;
     
     print <<<HTML
 <script type="text/javascript">
-    $('.datepicker').datetimepicker();
+    var datepicker = $('.datepicker');
+    datepicker.datetimepicker({
+        timeFormat: "HH:mm:ss",
+	    showTimezone: false
+    });
+
+    datepicker.datetimepicker('setDate', (new Date("{$old_rubric['rubric_due_date']}")));
     
     function toggleTA(part, question) {    
         if(document.getElementById("individual-" + part + "-" + question ).style.display == "block") {
@@ -390,10 +397,10 @@ HTML;
         var cell3 = row.insertCell(2);
         cell3.style.backgroundColor = "#EEE";
         cell1.innerHTML = partNameString + "<br /><div class='part_submission_id'><input style='width: 47px;' type='text' name='rubric_part_"+partNameString+"_id' value='_part"+partNameString+"' /></div>";
-        cell2.innerHTML='<textarea name="comment-' + partName + '-1" rows="1" style="width: 896px; padding: 0px; resize: none; margin-top: 5px; margin-right: 5px;"></textarea></span>'+
+        cell2.innerHTML='<textarea name="comment-' + partName + '-1" rows="1" style="width: 896px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea></span>'+
                           '<div class="btn btn-mini btn-default" onclick="toggleTA(' + partName + ',1)" style="margin-top:-5px;">TA Note</div>'+
                           '<textarea name="ta-' + partName + '-1" id="individual-' + partName + '-1" rows="1" placeholder=" Message to TA" style="width: 954px; padding: 0px; resize: none; margin-top: 5px; margin-bottom: -80px; display: none;"></textarea>';
-        cell3.innerHTML=selectBox(partName, "1") + ' <input name="ec-' + partName + '-1" type="checkbox" />';
+        cell3.innerHTML=selectBox(partName, "1") + ' <input onclick="calculatePercentageTotal();" name="ec-' + partName + '-1" type="checkbox" />';
         
         row = table.insertRow(table.rows.length - 2);
         cell1 = row.insertCell(0);
@@ -402,6 +409,7 @@ HTML;
         cell1.innerHTML='<div class="btn btn-small btn-success"  onclick="addQuestion('+partName+')"><i class="icon-plus icon-white"></i> Question</div>';
         var elem = $("input[name='part_count']");
         elem.val(parseInt(elem.val())+1);
+        togglePartSubmissionId();
     }
     
     function addQuestion(partName)
@@ -418,13 +426,12 @@ HTML;
         cell1.style.overflow = "hidden";
         var cell2 = row.insertCell(1);
         cell2.style.backgroundColor = "#EEE";
-        cell1.innerHTML = '<textarea name="comment-' + partName + "-" + parts[Number(partName)] + '" rows="1" style="width:896px; padding: 0px; resize: none; margin-top: 5px; margin-right: 5px;"></textarea></span>'+
+        cell1.innerHTML = '<textarea name="comment-' + partName + "-" + parts[Number(partName)] + '" rows="1" style="width:896px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea></span>'+
                           '<div class="btn btn-mini btn-default" onclick="toggleTA(' + partName + "," + parts[Number(partName)] + ')" style="margin-top:-5px;">TA Note</div>'+
                           '<textarea name="ta-' + partName + "-" + parts[Number(partName)] + '" id="individual-' + partName + "-" + parts[Number(partName)] + '" rows="1" placeholder=" Message to TA" style="width: 954px; padding: 0px; resize: none; margin-top: 5px; margin-bottom: -80px; display: none;"></textarea>';
-        cell2.innerHTML = selectBox(partName, parts[Number(partName)]) + ' <input name="ec-'+partName+'-'+parts[Number(partName)]+'" type="checkbox" />';
+        cell2.innerHTML = selectBox(partName, parts[Number(partName)]) + ' <input onclick="calculatePercentageTotal();" name="ec-'+partName+'-'+parts[Number(partName)]+'" type="checkbox" />';
         
         parts[Number(partName)] += 1;
-        
     }
     
     function selectBox(part, question)
@@ -452,7 +459,7 @@ HTML;
         var ec = 0;
         $('select.points').each(function(){
             var elem = $(this).attr('name').replace('point','ec');
-            if (!$('[name="'+elem+'"]').is(':checked')) {
+            if (!$('[name="'+elem+'"]').prop('checked') == true) {
                 total += +($(this).val());
             }
             else {
@@ -462,6 +469,7 @@ HTML;
         document.getElementById("totalCalculation").innerHTML = total + " (" + ec + ")";
     }
     
+    togglePartSubmissionId();
     calculatePercentageTotal();
 JS;
     print <<<HTML

@@ -198,10 +198,10 @@ foreach ($db->rows() as $rubric) {
     $db->query("SELECT count(distinct(case when question_part_number > 0 then question_part_number 
     else null end)), count(question_id), sum(case when question_extra_credit = 0 then question_total 
     else 0 end) FROM questions WHERE rubric_id=?", array($rubric['rubric_id']));
-    $rubric = 
+
     $output .= <<<HTML
         <tr id='rubric-{$rubric['rubric_id']}'">
-            <td class="rubrics-id" id="$rubric-{$rubric['rubric_id']}-id">{$rubric['rubric_id']}</td>
+            <td class="rubrics-id" id="rubric-{$rubric['rubric_id']}-id">{$rubric['rubric_id']}</td>
             <td class="rubrics-name" id="rubric-{$rubric['rubric_id']}-title">{$rubric['rubric_name']}</td>
             <td class="rubrics-parts" id="rubric-{$rubric['rubric_id']}-parts">{$rubric['rubric_parts']}</td>
             <td class="rubrics-questions" id="rubric-{$rubric['rubric_id']}-questions">{$rubric['rubric_questions']}</td>

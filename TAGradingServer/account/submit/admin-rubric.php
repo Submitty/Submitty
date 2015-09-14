@@ -13,8 +13,8 @@ if (empty($_POST['rubric_name']) || empty($_POST['rubric_submission_id'])) {
     die("You must fill out a rubric name and submission id");
 }
 
-if ($rubric_parts_sep) {
-    for ($i = 1; $i <= $rubric_parts; $i++) {
+for ($i = 1; $i <= $rubric_parts; $i++) {
+    if ($rubric_parts_sep) {
         if(!isset($_POST["rubric_part_{$i}_id"]) || empty($_POST["rubric_part_{$i}_id"])) {
             die("Missing submissiond id for part {$i}.");
         }
@@ -23,7 +23,11 @@ if ($rubric_parts_sep) {
         }
         $part_submission_ids[] = $_POST["rubric_part_{$i}_id"];
     }
+    else {
+        $part_submission_ids[] = "_part{$i}";
+    }
 }
+
 $params = array($_POST['date_submit'], $rubric_parts_sep, $rubric_late_days, $_POST['rubric_name'], $_POST['rubric_submission_id'], implode(",", $part_submission_ids));
 $action = $_GET['action'];
 

@@ -50,8 +50,8 @@ if(isset($_GET["hw"]) && isset($row["rubric_id"])) {
         //$student_id = intval($temp_row["student_id"]);
         $student_first_name = $temp_row["student_first_name"];
         $student_last_name = $temp_row["student_last_name"];
-        $params = array($temp_row['student_rcs'], $rubric_id);
-        $db->query("SELECT * FROM late_days WHERE student_rcs=? AND since_rubric <= ? ORDER BY since_rubric DESC LIMIT 1", $params);
+        $params = array($temp_row['student_rcs'], $row['rubric_due_date']);
+        $db->query("SELECT * FROM late_days WHERE student_rcs=? AND since_timestamp <= ? ORDER BY since_timestamp DESC LIMIT 1", $params);
         $lates = $db->row();
         $student_allowed_lates = isset($lates['allowed_lates']) ? intval($lates['allowed_lates']) : 0;
 
@@ -159,7 +159,7 @@ ORDER BY
         </div>
 
         <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-            Congratulations, you have finished grading Homework {$rubric_name}.
+            Congratulations, you have finished grading {$rubric_name}.
             <br/>
             <br/>
             <i style="color:#777;">You can review the grades you have saved by using the navigation buttons at the bottom-right of the page or by going to the homework overview page.</i>
@@ -167,7 +167,7 @@ ORDER BY
                         
         <div class="modal-footer">
             <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
-            <a class="btn" href="{$BASE_URL}/account/account-summary.php?hw={$_GET["hw"]}">Homework {$_GET["hw"]} Overview</a>
+            <a class="btn" href="{$BASE_URL}/account/account-summary.php?hw={$_GET["hw"]}">{$rubric_name} Overview</a>
             <!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
         </div>
     </div>

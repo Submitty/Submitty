@@ -51,7 +51,8 @@ class User {
             ExceptionHandler::$debug = true;
             ExceptionHandler::throwException("User", new \InvalidArgumentException("Cannot load user '{$user_rcs}'"));
         } // @codeCoverageIgnore
-
+        
+        User::$user_id = User::$user_details['user_id'];
         User::$is_developer = User::$user_details['user_is_developer'] == 1;
         User::$is_administrator = User::$user_details['user_is_administrator'] == 1 || User::$is_developer;
     }

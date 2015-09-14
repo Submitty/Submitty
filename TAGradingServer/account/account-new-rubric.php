@@ -8,6 +8,8 @@ $rubric_id
 
 use \app\models\Rubric;
 
+$rubric = new Rubric($student_rcs, $rubric_id);
+
 $calculate_diff = __CALCULATE_DIFF__;
 if ($calculate_diff) {
     $output = <<<HTML
@@ -25,8 +27,6 @@ if ($calculate_diff) {
         document.getElementById(id).height= (newheight) + "px";
         document.getElementById(id).width= (newwidth) + "px";
     }
-    
-    calculatePercentageTotal();
         
     function calculatePercentageTotal() {
         var total=0;
@@ -80,15 +80,15 @@ HTML;
 
 $code_number = 0;
 
-$rubric = new Rubric($student_rcs, $rubric_id);
-
 $output .= <<<HTML
 
 <span id="left" class="resbox">
+    <div id="content">
 HTML;
 
 $source_number = 0;
 for($part = 1; $part <= $rubric->rubric_parts; $part++) {
+    
     if ($rubric->rubric_details['rubric_parts_sep']) {
         $show_part = "Part: {$part}<br />";
     }
@@ -96,9 +96,9 @@ for($part = 1; $part <= $rubric->rubric_parts; $part++) {
         $show_part = "";
     }
     
+    //$output .= $rubric->submission_details[$part];
     if (!isset($rubric->submission_details[$part])) {
         $output .= <<<HTML
-    <div id="content">
         <div id="inner-container">
             <div id="inner-container-spacer"></div>
             {$show_part}
@@ -114,7 +114,6 @@ for($part = 1; $part <= $rubric->rubric_parts; $part++) {
                 </ul>
             </div>
         </div>
-    </div>
 HTML;
         continue;
     }
@@ -124,8 +123,6 @@ HTML;
     $submitted_details = $rubric->submission_details[$part];
     
     $output .= <<<HTML
-
-    <div id="content">
         <div id="inner-container">
             <div id="inner-container-spacer"></div>
             <br />
@@ -170,7 +167,8 @@ HTML;
     $active = true;
     foreach ($results_details['testcases'] as $testcase) {
         $active_text = ($active) ? 'active' : '';
-        $url = $BASE_URL."/account/ajax/account-new-rubric.php?course={$_GET['course']}&testcases=".urlencode(json_encode($testcase))."&directory=".urlencode($results_details['directory']);
+        $url = $BASE_URL."/account/iframe/account-new-rubric.php?course={$_GET['course']}&testcases=".urlencode(json_encode($testcase))."&directory=".urlencode($results_details['directory']);
+        
         $output .= <<<HTML
 
                     <div class="tab-pane {$active_text}" id="output-{$part}-{$i}">
@@ -190,22 +188,30 @@ HTML;
                         </div>
                     </div>
 HTML;
+        
         $i++;
         $active = false;
         $source_number++;
     }
     
+    
     $output .= <<<HTML
 
                 </div>
             </div>
+            <div class="tabbable">
+HTML;
+    foreach ($rubric->rubric_files[$part] as $file) {
+        $output .= "<a href='{$BASE_URL}/account/iframe/file_display.php?filename=".htmlentities($file)."' target='_blank'>{$file}</a><br />";
+    }
+    $output .= <<<HTML
+            </div>
         </div>
-    </div>
 HTML;
     $active = false;
 }
-
 $output .= <<<HTML
+    </div>
 </span>
 
 <span id="pane"></span>
@@ -216,7 +222,7 @@ $output .= <<<HTML
     <div id="rubric" style="overflow-y:scroll;">
         <div id="inner-container">
             <div id="rubric-title">
-                <div class="span2" style="float:left; text-align: left;"><b>Homework {$rubric->rubric_details['rubric_number']}</b></div>
+                <div class="span2" style="float:left; text-align: left;"><b>{$rubric->rubric_details['rubric_name']}</b></div>
                 <div class="span2" style="float:right; text-align: right; margin-top: -20px;"><b>{$rubric->student['student_last_name']}, {$rubric->student['student_first_name']}<br/>RCS: {$rubric->student['student_rcs']}</b></div>
             </div>
 HTML;
@@ -230,11 +236,13 @@ else {
     $cookie_auto = "";
 }
 
+$active_assignments = implode(",",$rubric->active_assignment);
 $output .= <<<HTML
-            <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&hw={$rubric->rubric_details['rubric_number']}&student={$rubric->student['student_rcs']}&individual={$individual}" method="post">
+            <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&hw={$rubric->rubric_details['rubric_id']}&student={$rubric->student['student_rcs']}&individual={$individual}" method="post">
                 <input type="hidden" name="submitted" value="{$submitted}" />
-                <input type="hidden" name="status" value="{$rubric->status[$part]}" />
+                <input type="hidden" name="status" value="{$rubric->status}" />
                 <input type="hidden" name="late" value="{$rubric->days_late}" />
+                <input type="hidden" name="active_assignment" value="{$active_assignments}" />
                 <div id="inner-container-seperator" style="background-color:#AAA; margin-top: 0; margin-bottom:0;"></div>
                 
                 <div style="margin-top: 0; margin-bottom:35px;">
@@ -265,10 +273,9 @@ HTML;
     $output .= <<<HTML
                 <b>Late Days Used:</b>&nbsp;{$rubric->days_late_used}<br />
 HTML;
-    
 }
 
-if($rubric->parts_status[$part] == 0 && $rubric->parts_submitted[$part] == 1) {
+if($rubric->status == 0 && $rubric->submitted == 1) {
     $output .= <<<HTML
                 <b style="color:#DA4F49;">Too many total late days used for this assignment</b><br />
 HTML;
@@ -470,6 +477,12 @@ $output .= <<<HTML
         </div>
     </div>
 </span>
+HTML;
+
+$output .= <<<HTML
+<script>
+calculatePercentageTotal();
+</script>
 HTML;
 
 print $output;

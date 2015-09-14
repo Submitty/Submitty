@@ -40,8 +40,6 @@ class DiffViewer {
         $this->expected = array();
         $this->diff = array();
         $this->add = array();
-        $this->expected_name = null;
-        $this->actual_name = null;
         $this->link = array();
         $this->id = "id";
     }

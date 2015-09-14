@@ -99,7 +99,6 @@ CREATE TABLE grades (
     grade_comment character varying(10240),
     grade_days_late integer,
     grade_is_regraded integer,
-    grade_email_timestamp timestamp(6) without time zone,
     student_rcs character varying,
     grade_submitted integer DEFAULT 0 NOT NULL,
     grade_status integer DEFAULT 0 NOT NULL,

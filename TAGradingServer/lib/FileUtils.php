@@ -26,7 +26,7 @@ class FileUtils {
             if(is_dir($dir)) {
                 if($handle = opendir($dir)) {
                     while (false !== ($entry = readdir($handle))) {
-                        if(in_array(strtolower($entry), array(".", "..", ".svn", ".git", ".idea"))) {
+                        if(in_array(strtolower($entry), array(".", "..", ".svn", ".git", ".idea", "__macosx"))) {
                             continue;
                         }
                         $file = "{$dir}/{$entry}";
