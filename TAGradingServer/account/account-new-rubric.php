@@ -15,6 +15,30 @@ if ($calculate_diff) {
     $output = <<<HTML
 
 <script>
+    function openFile(file) {
+        window.open("{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "&add_submission_path=1","_blank","toolbar=no,scrollbars=yes, resizable=yes, width=700, height=600");
+        return false;
+    }
+    function openFrame(file, num) {
+        var iframe = $('.file_viewer_' + num);
+        if (!iframe.hasClass('open')) {
+            iframe.html("<iframe src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "' height='500px' width='750px' style='border: 0'></iframe>");
+            iframe.addClass('open');
+        }
+        
+        if (!iframe.hasClass('shown')) {
+            iframe.show();
+            iframe.addClass('shown');
+            $(iframe.parent().children()[0]).removeClass('icon-plus').addClass('icon-minus');
+        }
+        else {
+            iframe.hide();
+            iframe.removeClass('shown');
+            $(iframe.parent().children()[0]).addClass('icon-minus').removeClass('icon-plus');
+        }
+        return false;
+    }
+    
     function autoResize(id) {
         var newheight;
         var newwidth;
@@ -201,8 +225,16 @@ HTML;
             </div>
             <div style='margin-top: 20px' class="tabbable">
 HTML;
+    $j = 0;
     foreach ($rubric->rubric_files[$part] as $file) {
-        $output .= "<a href='{$BASE_URL}/account/iframe/file_display.php?filename=".htmlentities($file)."' target='_blank'>{$file}</a><br />";
+        $file = htmlentities($file);
+        $output .= <<<HTML
+                <div>
+                    <span class='icon-plus'></span><span class='file-viewer'><a onclick='openFrame("{$file}", {$j})'>{$file}</a></span> <a onclick='openFile("{$file}")'>(Popout)</a><br />
+                    <div class="file_viewer_{$j}"></div>
+                </div>
+HTML;
+        $j++;
     }
     $output .= <<<HTML
             </div>

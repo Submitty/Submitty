@@ -180,9 +180,6 @@ class Rubric {
             array_walk_recursive($this->rubric_files, function(&$value, $key) {
                 $value = str_replace(__SUBMISSION_SERVER__, "", $value);
             });
-            for ($i = 1; $i <= $this->rubric_parts; $i++) {
-                sort($this->rubric_files[$i]);
-            }
         }
         catch (\Exception $ex) {
             ExceptionHandler::throwException("Homework", $ex);
