@@ -25,16 +25,16 @@ if ($calculate_diff) {
             iframe.html("<iframe src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "' height='500px' width='750px' style='border: 0'></iframe>");
             iframe.addClass('open');
         }
-        
+
         if (!iframe.hasClass('shown')) {
             iframe.show();
             iframe.addClass('shown');
-            $(iframe.parent().children()[0]).removeClass('icon-plus').addClass('icon-minus');
+            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-plus').addClass('icon-minus');
         }
         else {
             iframe.hide();
             iframe.removeClass('shown');
-            $(iframe.parent().children()[0]).addClass('icon-minus').removeClass('icon-plus');
+            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-minus').addClass('icon-plus');
         }
         return false;
     }
@@ -230,7 +230,7 @@ HTML;
         $file = htmlentities($file);
         $output .= <<<HTML
                 <div>
-                    <span class='icon-plus'></span><span class='file-viewer'><a onclick='openFrame("{$file}", {$j})'>{$file}</a></span> <a onclick='openFile("{$file}")'>(Popout)</a><br />
+                    <div class="file-viewer"><a onclick='openFrame("{$file}", {$j})'><span class='icon-plus'></span>{$file}</a></div> <a onclick='openFile("{$file}")'>(Popout)</a><br />
                     <div class="file_viewer_{$j}"></div>
                 </div>
 HTML;

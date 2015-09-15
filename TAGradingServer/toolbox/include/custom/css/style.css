@@ -445,19 +445,21 @@ table {
 }
 
 .file-viewer{
-	
+	float: left;
+	margin-right: 10px;
+	cursor: pointer;
 }
 
 .file-viewer a,
 .file-viewer a:link,
 .file-viewer a:visited,
 .file-viewer a:active {
-	color: #000; !important;
+	color: #005c83;
 }
 
 .file-viewer a:hover {
 	/*color: #6db7ff;*/
-	color: #000;
+	color: #6db7ff;
 	text-decoration: none;
 }
 

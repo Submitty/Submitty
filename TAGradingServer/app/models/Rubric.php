@@ -434,8 +434,24 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
 
             // We can lazy load the actual results till we need them (such as the diffs, etc.)
             $this->results_details[$part] = $details;
+            $skip_files = array();
+            foreach ($this->results_details[$part]['testcases'] as $testcase) {
+                if (isset($testcase['execute_logfile'])) {
+                    $skip_files[] = $testcase['execute_logfile'];
+                }
+                if (isset($testcase['compilation_output'])) {
+                    $skip_files[] = $testcase['compilation_output'];
+                }
+                foreach($testcase['diffs'] as $diff) {
+                    foreach(array('instructor_file', 'student_file', 'diff_id') as $file) {
+                        if(isset($diff[$file])) {
+                            $skip_files[] = $diff[$file] . ($file == 'diff_id' ? '.json' : '');
+                        }
+                    }
+                }
+            }
             
-            $this->rubric_files[$part] = array_merge($this->rubric_files[$part], FileUtils::getAllFiles($result_directory));
+            $this->rubric_files[$part] = array_merge($this->rubric_files[$part], FileUtils::getAllFiles($result_directory, array(), $skip_files));
             
             $part++;
         }
