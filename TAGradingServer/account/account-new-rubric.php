@@ -15,6 +15,30 @@ if ($calculate_diff) {
     $output = <<<HTML
 
 <script>
+    function openFile(file) {
+        window.open("{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "&add_submission_path=1","_blank","toolbar=no,scrollbars=yes, resizable=yes, width=700, height=600");
+        return false;
+    }
+    function openFrame(file, num) {
+        var iframe = $('.file_viewer_' + num);
+        if (!iframe.hasClass('open')) {
+            iframe.html("<iframe src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "' height='500px' width='750px' style='border: 0'></iframe>");
+            iframe.addClass('open');
+        }
+
+        if (!iframe.hasClass('shown')) {
+            iframe.show();
+            iframe.addClass('shown');
+            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-plus').addClass('icon-minus');
+        }
+        else {
+            iframe.hide();
+            iframe.removeClass('shown');
+            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-minus').addClass('icon-plus');
+        }
+        return false;
+    }
+    
     function autoResize(id) {
         var newheight;
         var newwidth;
@@ -199,10 +223,18 @@ HTML;
 
                 </div>
             </div>
-            <div class="tabbable">
+            <div style='margin-top: 20px' class="tabbable">
 HTML;
+    $j = 0;
     foreach ($rubric->rubric_files[$part] as $file) {
-        $output .= "<a href='{$BASE_URL}/account/iframe/file_display.php?filename=".htmlentities($file)."' target='_blank'>{$file}</a><br />";
+        $file = htmlentities($file);
+        $output .= <<<HTML
+                <div>
+                    <div class="file-viewer"><a onclick='openFrame("{$file}", {$j})'><span class='icon-plus'></span>{$file}</a></div> <a onclick='openFile("{$file}")'>(Popout)</a><br />
+                    <div class="file_viewer_{$j}"></div>
+                </div>
+HTML;
+        $j++;
     }
     $output .= <<<HTML
             </div>
@@ -353,7 +385,7 @@ HTML;
                             <td><strong>{$question['question_total']}</strong></td>
                         </tr>
                         <tr>
-                            <td colspan="3" style="padding:0px; border-top:none;">
+                            <td colspan="3" style="padding:0; border-top:none;">
                                 <div class="accordian-body collapse {$comment}" id="rubric-{$c}">
                                     <textarea name="comment-{$question["question_part_number"]}-{$question["question_number"]}" rows="2" style="width:100%; padding:0px; resize:none; margin:0px 0px; border-radius:0px; border:none; padding:5px; border-left:3px #DDD solid; float:left; margin-right:-28px;" placeholder="Message for the student..." comment-position="0">{$question['grade_question_comment']}</textarea>
 HTML;
@@ -407,8 +439,9 @@ HTML;
                                                 $('a[name=comment-{$question["question_part_number"]}-{$question["question_number"]}-up]').removeAttr("disabled");
                                             }
 
-                                            $('textarea[name=comment-{$question["question_part_number"]}-{$question["question_number"]}]').attr("comment-position", new_position);
-                                            $('textarea[name=comment-{$question["question_part_number"]}-{$question["question_number"]}]').html(pastComments[new_position]);
+                                            var textarea = $('textarea[name=comment-{$question["question_part_number"]}-{$question["question_number"]}]');
+                                            textarea.attr("comment-position", new_position);
+                                            textarea.html(pastComments[new_position]);
                                         }
 
 JS;

@@ -10,10 +10,16 @@ class FileUtils {
      * 
      * @param       $dir
      * @param array $allowed_file_extensions
-     * 
+     * @param array $skip_files
      * @return array
      */
-    public static function getAllFiles($dir, $allowed_file_extensions=array()) {
+    public static function getAllFiles($dir, $allowed_file_extensions=array(), $skip_files=array()) {
+        // we never want to include these files/folders as they do not contain any useful
+        // information for us and would just end up making the file viewer have way too many files
+        $skip_files = array_map(function($str) { return strtolower($str); }, $skip_files);
+        
+        $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
+        $disallowed_files = array('.ds_store');
         $return = array();
         if (file_exists($dir)) {
             // If it's not an array, assume it's a comma separated string, and use that
@@ -26,7 +32,10 @@ class FileUtils {
             if(is_dir($dir)) {
                 if($handle = opendir($dir)) {
                     while (false !== ($entry = readdir($handle))) {
-                        if(in_array(strtolower($entry), array(".", "..", ".svn", ".git", ".idea", "__macosx"))) {
+                        if(in_array(strtolower($entry), $disallowed_folders)) {
+                            continue;
+                        }
+                        if (in_array(strtolower($entry), $skip_files)) {
                             continue;
                         }
                         $file = "{$dir}/{$entry}";
@@ -40,7 +49,7 @@ class FileUtils {
                                     $return[] = $file;
                                 }
                             } else {
-                                if(!in_array(strtolower($entry), array(".ds_store"))) {
+                                if(!in_array(strtolower($entry), $disallowed_files)) {
                                     $return[] = $file;
                                 }
                             }
@@ -48,18 +57,22 @@ class FileUtils {
                     }
                 }
             } else if(is_file($dir)) {
-                $info = pathinfo($dir);
-                if($check_extension) {
-                    if(in_array($info['extension'], $allowed_file_extensions)) {
-                        $return[] = $dir;
-                    }
-                } else {
-                    if(!in_array(strtolower($dir), array(".ds_store"))) {
-                        $return[] = $dir;
+                $check = explode("/", $dir);
+                if (!in_array($check[count($check)-1], $skip_files)) {
+                    $info = pathinfo($dir);
+                    if($check_extension) {
+                        if(in_array($info['extension'], $allowed_file_extensions)) {
+                            $return[] = $dir;
+                        }
+                    } else {
+                        if(!in_array(strtolower($dir), $disallowed_files)) {
+                            $return[] = $dir;
+                        }
                     }
                 }
             }
         }
+        sort($return);
         return $return;
     }
     
