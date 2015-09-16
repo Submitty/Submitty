@@ -45,6 +45,10 @@ TAGRADING_URL=__CONFIGURE__FILLIN__TAGRADING_URL__
 TAGRADING_LOG_PATH=__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__
 
 
+AUTOGRADING_LOG_PATH=__CONFIGURE__FILLIN__AUTOGRADING_LOG_PATH__
+
+
+
 # FIXME: Add some error checking to make sure these values were filled in correctly
 
 
@@ -75,6 +79,8 @@ function replace_fillin_variables {
 
     sed -i -e "s|__INSTALL__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $1
     sed -i -e "s|__INSTALL__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $1
+
+    sed -i -e "s|__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $1
 
 
     # FIXME: Add some error checking to make sure these values were filled in correctly
@@ -113,14 +119,17 @@ echo -e "Make top level directores & set permissions"
 mkdir -p $HSS_DATA_DIR
 mkdir -p $HSS_DATA_DIR/courses
 mkdir -p $HSS_DATA_DIR/tagrading_logs
+mkdir -p $HSS_DATA_DIR/autograding_logs
 
 # set the permissions of these directories
-chown  root:$COURSE_BUILDERS_GROUP  $HSS_DATA_DIR
-chmod  751                          $HSS_DATA_DIR
-chown  root:$COURSE_BUILDERS_GROUP  $HSS_DATA_DIR/courses
-chmod  751                          $HSS_DATA_DIR/courses
-chown  hwphp:$COURSE_BUILDERS_GROUP $HSS_DATA_DIR/tagrading_logs
-chmod  750                          $HSS_DATA_DIR/tagrading_logs
+chown  root:$COURSE_BUILDERS_GROUP   $HSS_DATA_DIR
+chmod  751                           $HSS_DATA_DIR
+chown  root:$COURSE_BUILDERS_GROUP   $HSS_DATA_DIR/courses
+chmod  751                           $HSS_DATA_DIR/courses
+chown  hwphp:$COURSE_BUILDERS_GROUP  $HSS_DATA_DIR/tagrading_logs
+chmod  u+rwx,g+rxs                   $HSS_DATA_DIR/tagrading_logs
+chown  hwcron:$COURSE_BUILDERS_GROUP $HSS_DATA_DIR/autograding_logs
+chmod  u+rwx,g+rxs                   $HSS_DATA_DIR/autograding_logs
 
 # if the to_be_graded directories do not exist, then make them
 mkdir -p $HSS_DATA_DIR/to_be_graded_interactive
