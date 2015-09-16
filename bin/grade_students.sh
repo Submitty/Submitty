@@ -20,6 +20,7 @@ HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
 
 SVN_PATH=__INSTALL__FILLIN__SVN_PATH__
 
+AUTOGRADING_LOG_PATH=__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__
 
 
 # from the data directory, we expect:
@@ -482,6 +483,10 @@ function grade_this_item {
     mkdir -p "$results_path" ||  echo "ERROR: Could not create results path $results_path" >&2
     cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/.submit* $tmp/submission.json $tmp/test*.json "$results_path"
 
+
+    # FIXME: a global variable
+    global_grade_result=`grep "total:" $results_path/.submit.grade`
+
     
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY
@@ -593,11 +598,25 @@ while true; do
 	# -------------------------------------------------------------
 	# GRADE THIS ITEM!
 
+
+	# logfile location
+	DATE=`date +%Y%m%d`
+	autograding_logfile=$AUTOGRADING_LOG_PATH/$DATE.txt
+
+
 	STARTTIME=$(date +%s)
+
+	# log the start
+	# FIXME: should also lock this to make sure we don't collide w/ other processes
+	printf "%-30s | %-50s | %-30s\n" "`date --date="@$STARTTIME"`" "$NEXT_ITEM" >> $autograding_logfile
+
+	global_grade_result="ERROR: NO GRADE"
 
 	grade_this_item $NEXT_ITEM
 
+
 	ENDTIME=$(date +%s)
+
 	echo "finished with $NEXT_ITEM in ~$(($ENDTIME - $STARTTIME)) seconds"
 
 	# -------------------------------------------------------------
@@ -606,6 +625,13 @@ while true; do
 	rm -f $NEXT_DIRECTORY/$NEXT_ITEM
 	rm -f $NEXT_DIRECTORY/GRADING_$NEXT_ITEM
 	flock -u 200
+
+
+
+	# log the start
+	# FIXME: should also lock this to make sure we don't collide w/ other processes
+	printf "%-30s | %-50s | %-30s\n" "`date --date="@$ENDTIME"`" "$NEXT_ITEM" "$global_grade_result" >> $autograding_logfile
+
 
 	# break out of the loop (need to check for new interactive items)
 	graded_something=true

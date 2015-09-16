@@ -75,6 +75,8 @@ DATABASE_HOST=csdb3
 TAGRADING_URL=https://hwgrading.cs.rpi.edu/
 TAGRADING_LOG_PATH=$HSS_DATA_DIR/tagrading_logs/
 
+AUTOGRADING_LOG_PATH=$HSS_DATA_DIR/autograding_logs/
+
 
 ########################################################################################################################
 ########################################################################################################################
@@ -116,6 +118,8 @@ sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_PASSWORD__|$DATABASE_PASSWORD|g" $HSS
 
 sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $HSS_REPOSITORY/INSTALL.sh
 sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $HSS_REPOSITORY/INSTALL.sh
+
+sed -i -e "s|__CONFIGURE__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $HSS_REPOSITORY/INSTALL.sh
 
 
 
