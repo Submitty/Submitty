@@ -21,12 +21,12 @@ if($user_is_administrator)
 
                         <?php
                         $params = array();
-                        $db->query("SELECT rubric_number FROM rubrics ORDER BY rubric_due_date ASC", $params);
+                        $db->query("SELECT * FROM rubrics ORDER BY rubric_due_date ASC", $params);
                         $temp = $db->rows();
                         for($i = 0; $i < count($temp); $i++)
                         {
                             $row = $temp[$i];
-                            echo '<option' . ($i == count($temp) -1 ? " selected " : "") . '>' . $row["rubric_number"] . '</option>';
+                            echo '<option' . ($i == count($temp) -1 ? " selected " : "") . ' value='.$row['rubric_id'].'>' . $row["rubric_name"] . '</option>';
                         }
                         ?>
                     </select>
