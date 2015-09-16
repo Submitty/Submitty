@@ -2,6 +2,8 @@
 
 include "../../toolbox/functions.php";
 
+use lib\Database;
+
 check_administrator();
 
 $start = microtime_float();
@@ -41,21 +43,18 @@ foreach ($db->rows() as $row) {
 $nl = "\n";
 $write_output = True;
 
-$hw_number = intval($_GET["hw"]);
-if ($hw_number < 0) {
-    echo "failed";
+$get_rubric_id = intval($_GET["hw"]);
+Database::query("SELECT * FROM rubrics WHERE rubric_id=?", array($get_rubric_id));
+$get_rubric = Database::row();
+if (!isset($rubric['rubric_id'])) {
+    echo "failed|Invalid ID";
     exit(1);
 }
 
 $rubrics = array();
-
-$params = array($hw_number);
-$db->query("SELECT rubric_id, rubric_number, rubric_parts_sep FROM rubrics WHERE rubric_number<=? ORDER BY rubric_number ASC", $params);
+$db->query("SELECT * FROM rubrics WHERE rubric_due_date<=? ORDER BY rubric_due_date ASC", array($rubric['rubric_due_date']));
 foreach($db->rows() as $row) {
-    $rubric_id = $row["rubric_id"];
-    $rubric_number = $row["rubric_number"];
-    $rubric_parts_sep = $row["rubric_parts_sep"];
-    array_push($rubrics, array($rubric_id,$rubric_number,$rubric_parts_sep));
+    array_push($rubrics, array($row));
 }
 
 // Query the database for all students registered in the class
@@ -78,11 +77,10 @@ foreach($db->rows() as $student_record)
 
         foreach ($rubrics as $rubric)
         {
-            $rubric_id = $rubric[0];
-            $rubric_number = $rubric[1];
-            $rubric_sep = $rubric[2];
+            $rubric_id = $rubric['rubric_id'];
+            $rubric_sep = $rubric['rubric_parts_sep'];
             $rubric_total = 0;
-            $regraded_only = !($rubric_number == $hw_number);
+            $regraded_only = !($rubric_id == $get_rubric_id);
 
             // Gather student info, set output filename, reset output
             $student_output_text_main = "";
@@ -106,12 +104,12 @@ foreach($db->rows() as $student_record)
                 $late_days_used_overall = 0;
                 $late_days_used_remaining = $student_allowed_lates;
 
-                $params = array($student_rcs, $rubric_number);
+                $params = array($student_rcs, $rubric['rubric_due_date']);
                 $db->query("SELECT SUM(g.grade_days_late) as late
                             FROM grades AS g, rubrics AS r
-                            WHERE g.student_rcs=? AND g.rubric_id=r.rubric_id AND r.rubric_number<=? AND g.status=1", $params);
+                            WHERE g.student_rcs=? AND g.rubric_id=r.rubric_id AND r.rubric_due_date<=? AND g.grade_status=1", $params);
                 $row = $db->row();
-                
+
                 $db->query("SELECT * FROM late_day_exceptions WHERE ex_student_rcs=?", array($student_rcs));
                 $ex = $db->row();
                 $grade_days_late = $row['late'] - $ex['ex_late_days'];
@@ -154,7 +152,7 @@ foreach($db->rows() as $student_record)
                     ////////////////////////////////////////////////////////////////////////////
 
                     // Generate output (period is string concatenation in PHP)
-                    $student_output_text_main .= "HOMEWORK " . $rubric_number . " GRADE" . $nl;
+                    $student_output_text_main .= strtoupper($rubric['rubric_name']) . " GRADE" . $nl;
                     $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
                     $student_output_text_main .= "Graded by: " . $grade_user_first_name . " " . $grade_user_last_name . " &lt;" . $grade_user_email . "&gt;" . $nl;
                     $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: " . $grade_user_email . $nl;
@@ -254,7 +252,7 @@ foreach($db->rows() as $student_record)
                         	$student_output_text[$question_part_number] .= "AUTO-GRADING TOTAL [ " . $student_grade[$question_part_number] . " / " . $part_grade[$question_part_number] . " ]";
 
 			 	            // get the active assignment to grade
-			                $json_path = __SUBMISSION_SERVER__."/submissions/hw".str_pad($hw_number,2,"0",STR_PAD_LEFT)."/".$student_rcs."/user_assignment_settings.json";
+			                $json_path = __SUBMISSION_SERVER__."/submissions/".$rubric['rubric_rubric_submission_id']."/".$student_rcs."/user_assignment_settings.json";
 
                             $json = file_get_contents($json_path);
 
@@ -264,9 +262,9 @@ foreach($db->rows() as $student_record)
                             else {
    	                            $json = json_decode($json, true);
 	                            $submission_number = intval($json['active_assignment']);
-                                $submit_file = __SUBMISSION_SERVER__."/results/hw".str_pad($hw_number,2,"0",STR_PAD_LEFT)."/".$student_rcs."/".$submission_number."/.submit.grade";																	
+                                $submit_file = __SUBMISSION_SERVER__."/results/".$rubric['rubric_submission_id']."/".$student_rcs."/".$submission_number."/.submit.grade";
 
-                                $gradefilecontents=file_get_contents($submit_file);
+                                $gradefilecontents = file_get_contents($submit_file);
                                 if ($gradefilecontents === false) {
                                     $student_output_text[$question_part_number] .= $nl.$nl."NO GRADE FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
                                 }
@@ -284,7 +282,7 @@ foreach($db->rows() as $student_record)
                                 $student_output_text[$question_part_number] .= "TA GRADING TOTAL [ " . $student_grade[$question_part_number] . " / " . $part_grade[$question_part_number] . " ]". $nl;
                             }
                         }
-                        
+
                         $student_output_text[$question_part_number] .= "----------------------------------------------------------------------" . $nl;
                     }
 
@@ -304,22 +302,24 @@ foreach($db->rows() as $student_record)
                     $student_penalty_grade = $student_final_grade * floatval($student_resolution[$student_rcs]);
                     $student_output_academic .= "[ YOUR HOMEWORK IS BEING PENALIZED DUE TO AN ACADEMIC INTEGRITY VIOLATION ]" . $nl;
                     $student_output_academic .= "[ PENALTY: -" . intval(100.0 - (100.0 * floatval($student_resolution[$student_rcs]))) . "% OFF OF THE ORIGINAL GRADE ]" . $nl;
-                    $student_output_academic .= "PENALIZED HOMEWORK " . $rubric_number . " GRADE [ " . $student_penalty_grade . " / " . $rubric_total . " ]". $nl;
+                    $student_output_academic .= "PENALIZED " . strtoupper($rubric['rubric_name']) . " GRADE [ " . $student_penalty_grade . " / " . $rubric_total . " ]". $nl;
                     $student_output_academic .= "----------------------------------------------------------------------" . $nl;
                 }
 
-                $student_output_last = "HOMEWORK " . $rubric_number . " GRADE [ " . $student_final_grade . " / " . $rubric_total . " ]" . $nl;
+                $student_output_last = strtoupper($rubric['rubric_name']) . " GRADE [ " . $student_final_grade . " / " . $rubric_total . " ]" . $nl;
                 $student_output_last .= $nl;
                 $student_output_last .= "OVERALL NOTE FROM TA: " . ($grade_comment != "" ? $grade_comment . $nl : "No Note") . $nl;
                 $student_output_last .= "----------------------------------------------------------------------" . $nl;
 
+                $rubric_submission_parts = explode(",", $rubric['rubric_parts_submission_id']);
                 foreach($student_output_text as $k => $output) {
                     if ($output == "") { continue; }
+
                     if($rubric_sep == true) {
-                        $dir = implode("/",array(__SUBMISSION_SERVER__, "reports", "hw".str_pad($rubric_number,2,"0",STR_PAD_LEFT)."_part".$k));
+                        $dir = implode("/",array(__SUBMISSION_SERVER__, "reports", $rubric['rubric_submission_id'].$rubric_submission_parts[$k-1]));
                     }
                     else {
-                        $dir = implode("/", array(__SUBMISSION_SERVER__, "reports", "hw" . str_pad($rubric_number, 2, "0", STR_PAD_LEFT)));
+                        $dir = implode("/", array(__SUBMISSION_SERVER__, "reports", $rubric['rubric_submission_id']));
                     }
                     create_dir($dir);
                     $save_filename = implode("/", array($dir, $student_output_filename));
@@ -346,5 +346,3 @@ foreach($db->rows() as $student_record)
 $db->query("UPDATE grades SET grade_is_regraded=0",array());
 
 echo "updated";
-
-?>
