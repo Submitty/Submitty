@@ -1,4 +1,4 @@
-<?php 
+<?php
 include "../header.php";
 
 $account_subpages_unlock = true;
@@ -13,14 +13,15 @@ if(isset($_GET["hw"])) {
     $homework_id = $_GET["hw"];
     $params = array($homework_id);
     $db->query("SELECT rubric_id, rubric_name, rubric_parts_sep, rubric_late_days, rubric_due_date FROM rubrics WHERE rubric_id=?", $params);
-    $row = $db->row();
+    $rubric = $db->row();
 }
-    
-if(isset($_GET["hw"]) && isset($row["rubric_id"])) {
-    $rubric_id = $row["rubric_id"];
-    $rubric_name = $row['rubric_name'];
-    $rubric_sep = $row["rubric_parts_sep"];
-    $rubric_late_days = $row['rubric_late_days'];
+
+if(isset($_GET["hw"]) && isset($rubric["rubric_id"])) {
+    $rubric_id = $rubric["rubric_id"];
+    $rubric_name = $rubric['rubric_name'];
+    $rubric_sep = $rubric["rubric_parts_sep"];
+    $rubric_late_days = $rubric['rubric_late_days'];
+    $rubric_due_date = $rubric['rubric_due_date'];
     //$student_id = NULL;
     $student_rcs = NULL;
     $student_first_name = NULL;
@@ -91,10 +92,10 @@ WHERE
 ORDER BY
     s.student_rcs ASC
                 ", $params);
-            
+
         $prev_row = array('student_rcs' => "");
         $set_next = false;
-            
+
         foreach($db->rows() as $row) {
             $temp_row = $row;
 
@@ -102,14 +103,14 @@ ORDER BY
                 $next_rcs = $temp_row['student_rcs'];
                 $set_next = false;
             }
-            
+
             if ($student_rcs != NULL) {
                 if ($student_rcs == $temp_row['student_rcs']) {
                     $previous_rcs = $prev_row['student_rcs'];
                     $set_next = true;
                 }
             }
-            
+
             if(intval($temp_row["number_graded"]) == 0) {
                 if($student_rcs == NULL) {
                     $params = array($row["student_rcs"]);
@@ -120,9 +121,9 @@ ORDER BY
                     $student_last_name = $row["student_last_name"];
                     $student_rcs = $row["student_rcs"];
                     $previous_rcs = $prev_row['student_rcs'];
-                    
-                    $params = array($row['student_rcs'], $rubric_id);
-                    $db->query("SELECT * FROM late_days WHERE student_rcs=? AND since_rubric <= ?", $params);
+
+                    $params = array($row['student_rcs'], $rubric_due_date);
+                    $db->query("SELECT * FROM late_days WHERE student_rcs=? AND since_timestamp <= ?", $params);
                     $lates = $db->row();
                     $student_allowed_lates = intval($lates['allowed_lates']);
 
@@ -143,7 +144,6 @@ ORDER BY
             }
 
             $position_total++;
-            
             $prev_row = $row;
         }
     }
@@ -164,7 +164,7 @@ ORDER BY
             <br/>
             <i style="color:#777;">You can review the grades you have saved by using the navigation buttons at the bottom-right of the page or by going to the homework overview page.</i>
         </div>
-                        
+
         <div class="modal-footer">
             <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
             <a class="btn" href="{$BASE_URL}/account/account-summary.php?hw={$_GET["hw"]}">{$rubric_name} Overview</a>
@@ -173,7 +173,7 @@ ORDER BY
     </div>
 </div>
 HTML;
-       }
+    }
 }
 else if(!isset($_GET["hw"])) {
 
@@ -261,13 +261,13 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
 
     ?>
     <div style="border-top:#AAA solid 2px; width:100%; height: 20px; position:absolute; bottom:0; background-color:#fff; z-index:999;">
-    <?php if($position_other == 0) { ?>
+        <?php if($position_other == 0) { ?>
             <div class="progress" id="prog">
                 <div class="bar bar-primary" style="width: <?php echo (($position_completed - $position_backup) / $position_total) * 97; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
                 <div class="bar bar-warning" style="width: <?php echo ($position_backup / $position_total) * 97; ?>%;"><i class="icon-refresh icon-white" id="progress-icon"></i></div>
                 <div class="bar" style="width: 3%; background-image: none; background-color: #777;"><?php echo round(($position_completed / $position_total) * 100, 1); ?>%</div>
             </div>
-    <?php } elseif($position_other < $position_total) { ?>
+        <?php } elseif($position_other < $position_total) { ?>
             <div class="progress" id="prog">
                 <div class="bar bar-info" style="width: <?php echo ($position_other / $position_total) * 96; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
                 <div class="bar" style="width: 1%; background-image: none; background-color: #777;"></div>
@@ -275,19 +275,19 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
                 <div class="bar bar-warning" style="width: <?php echo ($position_backup / $position_total) * 96; ?>%;"><i class="icon-refresh icon-white" id="progress-icon"></i></div>
                 <div class="bar" style="width: 3%; background-image: none; background-color: #777;"><?php echo round((($position_completed + $position_other) / $position_total) * 100, 1); ?>%</div>
             </div>
-    <?php } else { ?>
+        <?php } else { ?>
             <div class="progress" id="prog">
                 <div class="bar bar-info" style="width: <?php echo ($position_other / $position_total) * 97; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
                 <div class="bar" style="width: 3%; background-image: none; background-color: #777;"><?php echo round(($position_other / $position_total) * 100, 1); ?>%</div>
-            </div>    
-    <?php } ?>
-        
+            </div>
+        <?php } ?>
+
         <div class="navigation">
-          <div class="btn-group" id="nav-group">
-              <a class="btn" style="border-radius: 0px;" <?php echo ($previous_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&prev={$previous_rcs}\""); ?> <?php echo ($previous_rcs == "" ? "disabled" : ""); ?>><i class="icon-chevron-left"></i></a>
-              <a class="btn" style="border-radius: 0px;" href="<?php echo $BASE_URL; ?>/account/account-summary.php?hw=<?php echo $_GET["hw"]; ?>"><i class="icon-align-justify"></i></a>
-              <a class="btn" style="border-radius: 0px;" <?php echo ($next_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&next={$next_rcs}\""); ?> <?php echo ($next_rcs == "" ? "disabled" : ""); ?>><i class="icon-chevron-right"></i></a>
-          </div>
+            <div class="btn-group" id="nav-group">
+                <a class="btn" style="border-radius: 0px;" <?php echo ($previous_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&prev={$previous_rcs}\""); ?> <?php echo ($previous_rcs == "" ? "disabled" : ""); ?>><i class="icon-chevron-left"></i></a>
+                <a class="btn" style="border-radius: 0px;" href="<?php echo $BASE_URL; ?>/account/account-summary.php?hw=<?php echo $_GET["hw"]; ?>"><i class="icon-align-justify"></i></a>
+                <a class="btn" style="border-radius: 0px;" <?php echo ($next_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&next={$next_rcs}\""); ?> <?php echo ($next_rcs == "" ? "disabled" : ""); ?>><i class="icon-chevron-right"></i></a>
+            </div>
         </div>
     </div>
 <?php } ?>
@@ -299,17 +299,16 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
             createCookie('auto',1,1000);
             $('#rubric').css("overflow-y", "hidden");
         }
-        else {    
+        else {
             eraseCookie('auto');
             $('#rubric').css("overflow-y", "scroll");
-        }       
+        }
     });
-            
+
     $('#content').scroll(function() {
-            
         if($("#rubric-autoscroll-checkbox").is(':checked')) {
             var scrollPercentage = this.scrollTop / (this.scrollHeight-this.clientHeight);
-            document.getElementById('rubric').scrollTop = scrollPercentage * (document.getElementById('rubric').scrollHeight-document.getElementById('rubric').clientHeight);    
+            document.getElementById('rubric').scrollTop = scrollPercentage * (document.getElementById('rubric').scrollHeight-document.getElementById('rubric').clientHeight);
         }
     });
 
@@ -317,7 +316,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     if (progressBar != null) {
         progressBar.style.width = (document.documentElement.clientWidth - 157) + 'px';
     }
-    
+
     document.getElementById('container').style.width = window.innerWidth + 'px';
     document.getElementById('container').style.height = (window.innerHeight - 20 - 40) + 'px';
 
@@ -338,45 +337,45 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     window.onresize = function(event) {
         width = (window.innerWidth - 8 - 2 - 2);
         split = (parseInt(document.getElementById('left').style.width) / (parseInt(document.getElementById('left').style.width) + parseInt(document.getElementById('right').style.width))).toFixed(2);
-        
+
         document.getElementById('left').style.width = (width * (split)) + 'px';
         document.getElementById('right').style.width = ((width * (1 - split)) - 10) + 'px';
-        
+
         document.getElementById('prog').style.width = (document.documentElement.clientWidth - 157) + 'px';
         document.getElementById('container').style.width = window.innerWidth + 'px';
         document.getElementById('container').style.height = (window.innerHeight - 20 - 40) + 'px';
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
     };
-    
+
     function dragStart(e, left, right) {
 
         document.getElementById('panemover').style.width = '100%';
         document.getElementById('panemover').style.left = '0px';
-    
+
         mousedown = true;
         x = e.clientX;
         dragOffsetLeft = document.getElementById(left).offsetWidth - x;
         dragOffsetRight = document.getElementById(right).offsetWidth + x;
     }
-    
+
     function dragRelease() {
-        
+
         document.getElementById('panemover').style.width = '10px';
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
-        
+
         var date = new Date();
         date.setTime(date.getTime()+(180*24*60*60*1000));
         var expires = "; expires="+date.toGMTString();
-        
+
         var splitVar = parseFloat(100 * (parseFloat(document.getElementById('left').style.width) / (parseFloat(document.getElementById('left').style.width) + parseFloat(document.getElementById('right').style.width)))).toFixed(2);
-        
+
         document.cookie ='split='+splitVar+'; expires='+expires+'; path=/';
-    
+
         mousedown = false;
     }
 
     function drag(e, left, right) {
-    
+
         if (!mousedown) {
             return
         }
@@ -391,9 +390,9 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         document.getElementById('left').style.width = (tmpLeft - 1) + 'px';
         document.getElementById('right').style.width = (tmpRight - 10) + 'px';
     }
-    
+
     eraseCookie("reset");
-    
+
 </script>
-    
+
 <?php include "../footer.php"; ?>
