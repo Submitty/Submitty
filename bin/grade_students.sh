@@ -6,11 +6,21 @@
 
 #     ./grade_students
 
-if [ "$#" -ne 0 ]; then
+if [ "$#" -gt 1 ]; then
     echo "ERROR: Illegal number of parameters" >&2
     echo "   ./grade_students  " >&2
+    echo "   ./grade_students  continuous" >&2
     exit 1
 fi
+
+
+if [[ "$#" -eq 1 && $1 != "continuous" ]]; then
+    echo "ERROR: Illegal parameter" >&2
+    echo "   ./grade_students  " >&2
+    echo "   ./grade_students  continuous" >&2
+    exit 1
+fi
+
 
 # ======================================================================
 # these variables will be replaced by INSTALL.sh
@@ -95,28 +105,37 @@ exec 201>/var/lock/homework_submissions_server_log_lockfile || exit 1
 
 # =====================================================================
 # =====================================================================
-# LOG_MESSAGE HELPER FUNCTION
+# HELPER FUNCTIONS FOR LOGGING
 # =====================================================================
 # =====================================================================
 
 function log_message {
 
+    if [[ $# != 5 ]] ; 
+    then
+	echo "ERROR: log_message called with the wrong number of arguments"
+	echo "  num arguments = $#"
+	echo "  arguments = '$@'"
+	exit 1
+    fi
+
     # function arguments
-    timestamp=$1
-    is_batch=$2
-    jobname=$3
-    timelabel=$4
-    elapsed_time=$5
-    message=$6
+    is_batch=$1
+    jobname=$2
+    timelabel=$3
+    elapsed_time=$4
+    message=$5
 
     # log file name
     DATE=`date +%Y%m%d`
     AUTOGRADING_LOG_FILE=$AUTOGRADING_LOG_PATH/$DATE.txt
 
+    EASY_TO_READ_DATE=`date`
+
     # first lock the file to avoid conflict with other grading processes!
     flock -w 5 $LOG_LOCK_FILE || { echo "ERROR: flock() failed. $NEXT_ITEM" >&2; exit 1; }
     printf "%-28s | %-6s | %5s | %-50s | %-6s %5s sec | %-60s | \n" \
-	"$timestamp" \
+	"$EASY_TO_READ_DATE" \
 	"$BASHPID" \
 	"$is_batch" \
 	"$jobname" \
@@ -125,7 +144,46 @@ function log_message {
 	"$message" \
 	>> $AUTOGRADING_LOG_FILE
     flock -u $LOG_LOCK_FILE
+}
 
+
+function log_error {
+
+    if [[ $# != 2 ]] ; 
+    then
+	echo "ERROR: log_error called with the wrong number of arguments"
+	echo "  num arguments = $#"
+	echo "  arguments = '$@'"
+	exit 1
+    fi
+
+    # function arguments
+    jobname=$1
+    message=$2
+
+    log_message "" "$jobname" "" "" "$message"
+
+    # Also print the message to stderr (so it will be emailed from the cron job)
+    echo "ERROR : $jobname : $message " >&2
+}
+
+function log_exit {
+
+    if [[ $# != 2 ]] ; 
+    then
+	echo "ERROR: log_exit called with the wrong number of arguments"
+	echo "  num arguments = $#"
+	echo "  arguments = '$@'"
+	exit 1
+    fi
+
+    # function arguments
+    jobname=$1
+    message=$2
+
+    log_error "$jobname" "$message"
+
+    exit 1
 }
 
 
@@ -282,7 +340,8 @@ function grade_this_item {
 	echo "ERROR: H directory is not readable '$submission_path'  FIXME!  STUDENT WASN'T GRADED!!" >&2
 	# leave this submission file for next time (hopefully
 	# permissions will be corrected then)
-	#FIXME remove GRADING_ file
+        #FIXME remove GRADING_ file ???
+	log_error "$NEXT_TO_GRADE" "Directory is unreadable, student wasn't graded"
 	return
     fi
     
@@ -304,7 +363,7 @@ function grade_this_item {
     then
 	submission_time=`cat $submission_path/.submit.timestamp`
     else
-	echo "ERROR:  $submission_path/.submit.timestamp   does not exist!" >&2
+	log_error "$NEXT_TO_GRADE" "$submission_path/.submit.timestamp   does not exist!"
     fi
     
     # switch to tmp directory
@@ -319,9 +378,9 @@ function grade_this_item {
     
     
     # copy the .submit.timestamp file and any files from submission zip 
-    # switched to rsync to copy dot files (just in case they're needed)
-    rsync 1>/dev/null  2>&1  -r $submission_path/ $tmp_compilation ||  echo "ERROR: Failed to copy submitted files to temporary compilation directory: rsync -r $submission_path/ $tmp_compilation" >&2
+    rsync 1>/dev/null  2>&1  -r $submission_path/ $tmp_compilation || log_error "$NEXT_TO_GRADE" "Failed to copy submitted files to temporary compilation directory: rsync -r $submission_path/ $tmp_compilation"
     
+
     # use the jq json parsing command line utility to grab the svn_checkout flag from the class.json config file
     class_json_config="$HSS_DATA_DIR/courses/$semester/$course/config/class.json"
     svn_checkout=`cat $class_json_config | jq '.assignments[] | if .assignment_id == "'${assignment}'" then .svn_checkout else empty end'`
@@ -364,14 +423,12 @@ function grade_this_item {
 	popd > /dev/null
 	
 	# copy checkout into tmp compilation directory
-	rsync 1>/dev/null  2>&1  -r $checkout_path/ $tmp_compilation ||  echo "ERROR: Failed to copy checkout files into compilation directory: rsync -r $checkout_path/ $tmp_compilation" >&2
-	
+	rsync 1>/dev/null  2>&1  -r $checkout_path/ $tmp_compilation || log_error "$NEXT_TO_GRADE" "Failed to copy checkout files into compilation directory: rsync -r $checkout_path/ $tmp_compilation"
+
 	svn_checkout_error_code="$?"
 	if [[ "$svn_checkout_error_code" -ne 0 ]] ;
 	then
-	    echo "SVN CHECKOUT FAILURE $svn_checkout_error_code"
-#FIXME add log_message here
-#	    log_message "" 
+	    log_error "$NEXT_TO_GRADE" "SVN CHECKOUT FAILURE $svn_checkout_error_code"
 	else
 	    echo "SVN CHECKOUT OK" 
 	fi
@@ -380,7 +437,8 @@ function grade_this_item {
     # copy any instructor provided code files to tmp compilation directory
     if [ -d "$test_code_path" ]
     then
-	rsync -a $test_code_path/ "$tmp_compilation" ||  echo "ERROR: Failed to copy instructor files to temporary compilation directory:  cp -rf $test_code_path/ $tmp_compilation" >&2
+	rsync -a $test_code_path/ "$tmp_compilation" || log_error "$NEXT_TO_GRADE" "Failed to copy instructor files to temporary compilation directory:  cp -rf $test_code_path/ $tmp_compilation"
+
 	#cp -rf $HSS_DATA_DIR/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $HSS_DATA_DIR/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
     fi
     
@@ -391,7 +449,7 @@ function grade_this_item {
     
     if [ ! -r "$bin_path/$assignment/compile.out" ]
     then
-	echo "ERROR:  $bin_path/$assignment/compile.out  does not exist/is not readable" >&2
+	log_error "$NEXT_TO_GRADE" "$bin_path/$assignment/compile.out does not exist/is not readable"
     else
 	
    	# copy compile.out to the current directory
@@ -406,9 +464,7 @@ function grade_this_item {
 	compile_error_code="$?"
 	if [[ "$compile_error_code" -ne 0 ]] ;
 	then
-	    echo "COMPILE FAILURE CODE $compile_error_code"
-#FIXME add log_message here
-#	    log_message "" 
+	    log_error "$NEXT_TO_GRADE" "COMPILE FAILURE CODE $compile_error_code"
 	else
 	    echo "COMPILE OK"
 	fi
@@ -442,13 +498,13 @@ function grade_this_item {
     # copy input files to tmp directory
     if [ -d "$test_input_path" ]
     then
-	cp -rf $test_input_path/* "$tmp" ||  echo "ERROR: Failed to copy input files to temporary directory $test_input_path to $tmp : cp -rf $test_input_path/* $tmp"  >&2
+	cp -rf $test_input_path/* "$tmp" || log_error "$NEXT_TO_GRADE" "Failed to copy input files to temporary directory $test_input_path to $tmp : cp -rf $test_input_path/* $tmp"
     fi
     
     # copy run.out to the tmp directory
     if [ ! -r "$bin_path/$assignment/run.out" ]
     then
-	echo "ERROR:  $bin_path/$assignment/run.out  does not exist/is not readable" >&2
+	log_error "$NEXT_TO_GRADE" "$bin_path/$assignment/run.out does not exist/is not readable"
     else
 	
 	cp -f "$bin_path/$assignment/run.out" $tmp/my_run.out
@@ -465,9 +521,7 @@ function grade_this_item {
 
 	if [[ "$runner_error_code" -ne 0 ]] ;
 	then
-	    echo "RUNNER FAILURE CODE $runner_error_code"
-#FIXME add log_message here
-#	    log_message "" 
+	    log_error "$NEXT_TO_GRADE" "RUNNER FAILURE CODE $runner_error_code"
 	else
 	    echo "RUNNER OK"
 	fi
@@ -479,35 +533,27 @@ function grade_this_item {
     # copy output files to tmp directory  (SHOULD CHANGE THIS)
     if [ -d "$test_output_path" ]
     then
-	cp -rf $test_output_path/* "$tmp" ||  echo "ERROR: Failed to copy output files to temporary directory $test_output_path to $tmp :  cp -rf $test_output_path/* $tmp" >&2
+	cp -rf $test_output_path/* "$tmp" || log_error "$NEXT_TO_GRADE" "Failed to copy output files to temporary directory $test_output_path to $tmp :  cp -rf $test_output_path/* $tmp"
     fi
     
     if [ ! -r "$bin_path/$assignment/validate.out" ]
     then
-	echo "ERROR:  $bin_path/$assignment/validate.out  does not exist/is not readable" >&2
-	# continue
+	log_error "$NEXT_TO_GRADE" "$bin_path/$assignment/validate.out does not exist/is not readable"
     else
-        # echo "GOING TO RUN valgrind $bin_path/$assignment/validate.out $version $submission_time $runner_error_code"
 	
+	#FIXME: do we still need valgrind here?
         if [[ 0 -eq 0 ]] ; then
             echo "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
-            #valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
             "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
         else
             echo '$HSS_INSTALL_DIR/bin/untrusted_execute /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'
             "$HSS_INSTALL_DIR/bin/untrusted_execute" "/usr/bin/valgrind" "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
         fi
-        # Non-valgrind commands
-        # echo ""$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt"
-        # "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
-
 
 	validator_error_code="$?"
 	if [[ "$validator_error_code" -ne 0 ]] ;
 	then
-	    echo "VALIDATOR FAILURE CODE $validator_error_code  course=$course  hw=$assignment  user=$user  version=$version" 1>&2
-#FIXME add log_message here
-#	    log_message "" 	    
+	    log_error "$NEXT_TO_GRADE" "VALIDATOR FAILURE CODE $validator_error_code  course=$course  hw=$assignment  user=$user  version=$version"
 	else
 	    echo "VALIDATOR OK"
 	fi
@@ -523,7 +569,8 @@ function grade_this_item {
     rm -rf "$results_path"
     
     # Make directory structure in results if it doesn't exist
-    mkdir -p "$results_path" ||  echo "ERROR: Could not create results path $results_path" >&2
+    mkdir -p "$results_path" || log_error "$NEXT_TO_GRADE" "Could not create results path $results_path"
+
     cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/.submit* $tmp/submission.json $tmp/test*.json "$results_path"
 
 
@@ -567,7 +614,7 @@ while true; do
     # more that a few, the user limit is 50)
     numprocesses=1 #$(ps -u untrusted | wc -l)
     if [[ $numprocesses -gt 25 ]] ; then
-	echo "ERROR: untrusted is running too many processes: " $numprocesses >&2
+	log_error "" "untrusted is running too many processes: $numprocesses"
 	((too_many_processes_count++))
 	if [[ $too_many_processes_count -gt 10 ]];
 	then
@@ -588,7 +635,7 @@ while true; do
     numparallel=${#pgrep_results[@]} # count elements in array
     echo "hwcron is running $numparallel parallel scripts"
     if [[ "$numparallel" -gt 5 ]] ; then
-	 echo "hwcron is running too many parallel scripts: " $numparallel
+	log_error "" "hwcron is running too many parallel scripts: $numparallel"
 	exit
     fi
 
@@ -635,7 +682,7 @@ while true; do
         # check to see if this assignment is already being graded
 	# wait until the lock is available (up to 5 seconds)
 
-	flock -w 5 $TODO_LOCK_FILE || { echo "ERROR: flock() failed. $NEXT_TO_GRADE" >&2; exit 1; }
+	flock -w 5 $TODO_LOCK_FILE || log_exit "$NEXT_TO_GRADE" "flock() failed"
 	if [ -e "$NEXT_DIRECTORY/GRADING_$NEXT_ITEM" ]
 	then
     	    echo "skip $NEXT_ITEM, being graded by another grade_students.sh process"
@@ -659,7 +706,7 @@ while true; do
 	WAITTIME=$(($STARTTIME - $FILE_TIMESTAMP))
 	
 	# log the start
-	log_message "`date --date="@$STARTTIME"`"   "$IS_BATCH_JOB"    "$NEXT_ITEM"  "wait:"  "$WAITTIME"  ""
+	log_message "$IS_BATCH_JOB"  "$NEXT_ITEM"  "wait:"  "$WAITTIME"  ""
 
 	# FIXME: using a global variable to pass back the grade
 	global_grade_result="ERROR: NO GRADE"
@@ -676,13 +723,13 @@ while true; do
 
 	# -------------------------------------------------------------
 	# remove submission & the active grading tag from the todo list
-	flock -w 5 $TODO_LOCK_FILE || { echo "ERROR: flock() failed. $NEXT_ITEM" >&2; exit 1; }
+	flock -w 5 $TODO_LOCK_FILE || log_exit "$NEXT_ITEM" "flock() failed"
 	rm -f $NEXT_DIRECTORY/$NEXT_ITEM
 	rm -f $NEXT_DIRECTORY/GRADING_$NEXT_ITEM
 	flock -u $TODO_LOCK_FILE
 
 	# log the end
-	log_message "`date --date="@$ENDTIME"`"   "$IS_BATCH_JOB"    "$NEXT_ITEM"  "grade:"  "$ELAPSED" "$global_grade_result"
+	log_message "$IS_BATCH_JOB"  "$NEXT_ITEM"  "grade:"  "$ELAPSED" "$global_grade_result"
 
 	# break out of the loop (need to check for new interactive items)
 	graded_something=true
@@ -693,8 +740,16 @@ while true; do
     # -------------------------------------------------------------
     # if no work was done in this iteration...
     if [ "$graded_something" = "false" ] ; then
-	((sleep_count++))
-	echo "sleep iter $sleep_count: no work"
+
+	if [[ "$#" -eq 1 && $1 == "continuous" ]];
+	then
+	    echo "grade_students.sh continuous mode"
+	else
+	    ((sleep_count++))
+	    echo "sleep iter $sleep_count: no work"
+	fi
+	
+	# either quit the loop or sleep
 	if [[ $sleep_count -gt 200 ]] ; then
 	    # 5 seconds (sleep) * 12 = 1 minute
 	    # 5 seconds (sleep) * 120 = 10 minutes
