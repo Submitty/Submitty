@@ -422,6 +422,47 @@ table {
     width: 14px;
 }
 
+.icon-plus
+{
+	background-image: url('../../bootstrap/img/glyphicons-halflings.png');
+	background-position: 0px -96px;
+	background-repeat: no-repeat;
+	color: rgb(51, 51, 51);
+	display: inline-block;
+	height: 14px;
+	width: 14px;
+}
+
+.icon-minus
+{
+	background-image: url('../../bootstrap/img/glyphicons-halflings.png');
+	background-position: -24px -96px;
+	background-repeat: no-repeat;
+	color: rgb(51, 51, 51);
+	display: inline-block;
+	height: 14px;
+	width: 14px;
+}
+
+.file-viewer{
+	float: left;
+	margin-right: 10px;
+	cursor: pointer;
+}
+
+.file-viewer a,
+.file-viewer a:link,
+.file-viewer a:visited,
+.file-viewer a:active {
+	color: #005c83;
+}
+
+.file-viewer a:hover {
+	/*color: #6db7ff;*/
+	color: #6db7ff;
+	text-decoration: none;
+}
+
 #page-info
 {
     visibility: hidden;

@@ -39,7 +39,6 @@ HTML;
 print <<<HTML
 		
 		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/bootstrap/css/bootstrap.min.css" />
-		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/custom/css/style.css" />
 		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/custom/css/jquery-ui.min.css" />
 		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/custom/css/jquery-ui-timepicker-addon.css" />
 		
@@ -58,6 +57,8 @@ print <<<HTML
 		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/clike/clike.js"></script>
 		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/python/python.js"></script>
 		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/shell/shell.js"></script>
+		
+		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/custom/css/style.css" />
 		
 	</head>
 	
