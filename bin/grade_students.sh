@@ -22,7 +22,6 @@ SVN_PATH=__INSTALL__FILLIN__SVN_PATH__
 
 AUTOGRADING_LOG_PATH=__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__
 
-
 # from the data directory, we expect:
 
 # a subdirectory for each course
@@ -81,16 +80,53 @@ echo "                    then (batch)       $TO_BE_GRADED_BATCH"
 
 
 
-# SETUP THE DIRECTORY LOCK FILE
-# arbitrarily using file descriptor 200
-exec 200>/var/lock/homework_submissions_server_lockfile || exit 1
+# =====================================================================
+# SETUP THE DIRECTORY LOCK FILES (TWO OF THEM!)
+
+# arbitrarily using file descriptor 200 for the todolist
+TODO_LOCK_FILE=200
+exec 200>/var/lock/homework_submissions_server_todo_lockfile || exit 1
+
+# arbitrarily using file descriptor 201 for the log file
+LOG_LOCK_FILE=201
+exec 201>/var/lock/homework_submissions_server_log_lockfile || exit 1
 
 
 
+# =====================================================================
+# =====================================================================
+# LOG_MESSAGE HELPER FUNCTION
+# =====================================================================
+# =====================================================================
 
+function log_message {
 
+    # function arguments
+    timestamp=$1
+    is_batch=$2
+    jobname=$3
+    timelabel=$4
+    elapsed_time=$5
+    message=$6
 
+    # log file name
+    DATE=`date +%Y%m%d`
+    AUTOGRADING_LOG_FILE=$AUTOGRADING_LOG_PATH/$DATE.txt
 
+    # first lock the file to avoid conflict with other grading processes!
+    flock -w 5 $LOG_LOCK_FILE || { echo "ERROR: flock() failed. $NEXT_ITEM" >&2; exit 1; }
+    printf "%-28s | %-6s | %5s | %-50s | %-6s %5s sec | %-60s | \n" \
+	"$timestamp" \
+	"$BASHPID" \
+	"$is_batch" \
+	"$jobname" \
+	"$timelabel" \
+	"$elapsed_time" \
+	"$message" \
+	>> $AUTOGRADING_LOG_FILE
+    flock -u $LOG_LOCK_FILE
+
+}
 
 
 
@@ -334,6 +370,8 @@ function grade_this_item {
 	if [[ "$svn_checkout_error_code" -ne 0 ]] ;
 	then
 	    echo "SVN CHECKOUT FAILURE $svn_checkout_error_code"
+#FIXME add log_message here
+#	    log_message "" 
 	else
 	    echo "SVN CHECKOUT OK" 
 	fi
@@ -369,6 +407,8 @@ function grade_this_item {
 	if [[ "$compile_error_code" -ne 0 ]] ;
 	then
 	    echo "COMPILE FAILURE CODE $compile_error_code"
+#FIXME add log_message here
+#	    log_message "" 
 	else
 	    echo "COMPILE OK"
 	fi
@@ -426,6 +466,8 @@ function grade_this_item {
 	if [[ "$runner_error_code" -ne 0 ]] ;
 	then
 	    echo "RUNNER FAILURE CODE $runner_error_code"
+#FIXME add log_message here
+#	    log_message "" 
 	else
 	    echo "RUNNER OK"
 	fi
@@ -464,7 +506,8 @@ function grade_this_item {
 	if [[ "$validator_error_code" -ne 0 ]] ;
 	then
 	    echo "VALIDATOR FAILURE CODE $validator_error_code  course=$course  hw=$assignment  user=$user  version=$version" 1>&2
-	    
+#FIXME add log_message here
+#	    log_message "" 	    
 	else
 	    echo "VALIDATOR OK"
 	fi
@@ -567,8 +610,17 @@ while true; do
 
     for NEXT_TO_GRADE in ${interactive_list} ${batch_list}; do
 
+	FILE_TIMESTAMP=`stat -c %Y $NEXT_TO_GRADE`
 	NEXT_DIRECTORY=`dirname $NEXT_TO_GRADE`
 	NEXT_ITEM=`basename $NEXT_TO_GRADE`
+
+
+	IS_BATCH_JOB=""
+	if [ "$NEXT_DIRECTORY" = "$TO_BE_GRADED_BATCH" ]
+	then
+	    IS_BATCH_JOB="BATCH"
+	fi
+
 
 	echo "please grade  "  $NEXT_DIRECTORY " : "  $NEXT_ITEM
 
@@ -582,16 +634,17 @@ while true; do
 	# -------------------------------------------------------------
         # check to see if this assignment is already being graded
 	# wait until the lock is available (up to 5 seconds)
-	flock -w 5 200 || { echo "ERROR: flock() failed. $NEXT_TO_GRADE" >&2; exit 1; }
+
+	flock -w 5 $TODO_LOCK_FILE || { echo "ERROR: flock() failed. $NEXT_TO_GRADE" >&2; exit 1; }
 	if [ -e "$NEXT_DIRECTORY/GRADING_$NEXT_ITEM" ]
 	then
     	    echo "skip $NEXT_ITEM, being graded by another grade_students.sh process"
-	    flock -u 200
+	    flock -u $TODO_LOCK_FILE
 	    continue
 	else
 	    # mark this file as being graded
 	    touch $NEXT_DIRECTORY/GRADING_$NEXT_ITEM
-	    flock -u 200
+	    flock -u $TODO_LOCK_FILE
 	fi
 
 
@@ -599,39 +652,37 @@ while true; do
 	# GRADE THIS ITEM!
 
 
-	# logfile location
-	DATE=`date +%Y%m%d`
-	autograding_logfile=$AUTOGRADING_LOG_PATH/$DATE.txt
-
-
+	# mark the start time
 	STARTTIME=$(date +%s)
 
+	# calculate how long this job was waiting in the queue
+	WAITTIME=$(($STARTTIME - $FILE_TIMESTAMP))
+	
 	# log the start
-	# FIXME: should also lock this to make sure we don't collide w/ other processes
-	printf "%-30s | %-50s | %-30s\n" "`date --date="@$STARTTIME"`" "$NEXT_ITEM" >> $autograding_logfile
+	log_message "`date --date="@$STARTTIME"`"   "$IS_BATCH_JOB"    "$NEXT_ITEM"  "wait:"  "$WAITTIME"  ""
 
+	# FIXME: using a global variable to pass back the grade
 	global_grade_result="ERROR: NO GRADE"
-
+	# call the helper function
 	grade_this_item $NEXT_ITEM
 
-
+	# mark the end time
 	ENDTIME=$(date +%s)
 
-	echo "finished with $NEXT_ITEM in ~$(($ENDTIME - $STARTTIME)) seconds"
+	# calculate how long this job was running
+	ELAPSED=$(($ENDTIME - $STARTTIME))
+
+	echo "finished with $NEXT_ITEM in ~$ELAPSED seconds"
 
 	# -------------------------------------------------------------
 	# remove submission & the active grading tag from the todo list
-	flock -w 5 200 || { echo "ERROR: flock() failed. $NEXT_ITEM" >&2; exit 1; }
+	flock -w 5 $TODO_LOCK_FILE || { echo "ERROR: flock() failed. $NEXT_ITEM" >&2; exit 1; }
 	rm -f $NEXT_DIRECTORY/$NEXT_ITEM
 	rm -f $NEXT_DIRECTORY/GRADING_$NEXT_ITEM
-	flock -u 200
+	flock -u $TODO_LOCK_FILE
 
-
-
-	# log the start
-	# FIXME: should also lock this to make sure we don't collide w/ other processes
-	printf "%-30s | %-50s | %-30s\n" "`date --date="@$ENDTIME"`" "$NEXT_ITEM" "$global_grade_result" >> $autograding_logfile
-
+	# log the end
+	log_message "`date --date="@$ENDTIME"`"   "$IS_BATCH_JOB"    "$NEXT_ITEM"  "grade:"  "$ELAPSED" "$global_grade_result"
 
 	# break out of the loop (need to check for new interactive items)
 	graded_something=true
