@@ -724,7 +724,14 @@ while true; do
 	STARTTIME=$(date +%s)
 	
 	# when was this job put in the queue?
-	FILE_TIMESTAMP=`stat -c %Y $NEXT_TO_GRADE`
+	FILE_TIMESTAMP=`stat -c %Y $NEXT_TO_GRADE > /dev/null`
+
+	if [[ "$FILE_TIMESTAMP" == "" ]] ;
+	then
+	    FILE_TIMESTAMP=STARTTIME
+	    log_error $NEXT_TO_GRADE "stat -c %Y $NEXT_TO_GRADE FAILED, no such file or directory"
+	fi
+
 
 	# calculate how long this job was waiting in the queue
 	#FIXME NOTE: if the file does not exist (shouldn't happen, but
