@@ -724,20 +724,18 @@ while true; do
 	STARTTIME=$(date +%s)
 	
 	# when was this job put in the queue?
-	FILE_TIMESTAMP=`stat -c %Y $NEXT_TO_GRADE > /dev/null`
-
-	if [[ "$FILE_TIMESTAMP" == "" ]] ;
-	then
-	    FILE_TIMESTAMP=STARTTIME
-	    log_error $NEXT_TO_GRADE "stat -c %Y $NEXT_TO_GRADE FAILED, no such file or directory"
-	fi
-
+	FILE_TIMESTAMP=`stat -c %Y $NEXT_TO_GRADE 2>&1`
 
 	# calculate how long this job was waiting in the queue
-	#FIXME NOTE: if the file does not exist (shouldn't happen, but
-	#we might be seeing it, needs debugging), this will be a crazy
-	#big number
+	integer_reg_expression='^[0-9]+$'
+	if ! [[ $FILE_TIMESTAMP =~ $integer_reg_expression ]] ; then
+	    # FIXME NOTE: if the file does not exist (shouldn't
+	    # happen, but we are seeing it, needs debugging)
+	    log_error "$NEXT_ITEM" "$FILE_TIMESTAMP"
+	    FILE_TIMESTAMP=STARTTIME+1
+	fi
 	WAITTIME=$(($STARTTIME - ${FILE_TIMESTAMP:-0}))
+
 	
 	# log the start
 	log_message "$IS_BATCH_JOB"  "$NEXT_ITEM"  "wait:"  "$WAITTIME"  ""
