@@ -198,7 +198,7 @@ public:
     // threads && produces a large executable
     adjust_test_case_limits(answer._test_case_limits,RLIMIT_CPU,60);             // 60 seconds 
     adjust_test_case_limits(answer._test_case_limits,RLIMIT_NPROC,10);           // 10 threads 
-    adjust_test_case_limits(answer._test_case_limits,RLIMIT_FSIZE,1*1000*1000);  // 1 MB executable
+    adjust_test_case_limits(answer._test_case_limits,RLIMIT_FSIZE,10*1000*1000);  // 10 MB executable
 
     answer._test_case_points = tcp;
     //std::cout << "COMPILATION TEST CASE POINTS " << tcp.points << std::endl;
