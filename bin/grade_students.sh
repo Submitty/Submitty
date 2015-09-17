@@ -134,13 +134,21 @@ function log_message {
 
     # first lock the file to avoid conflict with other grading processes!
     flock -w 5 $LOG_LOCK_FILE || { echo "ERROR: flock() failed. $NEXT_ITEM" >&2; exit 1; }
-    printf "%-28s | %-6s | %5s | %-50s | %-6s %5s sec | %-60s | \n" \
+
+    time_unit="sec"
+    if [[ $timelabel == "" && $elapsed_time == "" ]] ; 
+    then 
+	time_unit="" 
+    fi
+
+    printf "%-28s | %-6s | %5s | %-50s | %-6s %5s %3s | %s\n" \
 	"$EASY_TO_READ_DATE" \
 	"$BASHPID" \
 	"$is_batch" \
 	"$jobname" \
 	"$timelabel" \
 	"$elapsed_time" \
+	"$time_unit" \
 	"$message" \
 	>> $AUTOGRADING_LOG_FILE
     flock -u $LOG_LOCK_FILE
@@ -161,7 +169,7 @@ function log_error {
     jobname=$1
     message=$2
 
-    log_message "" "$jobname" "" "" "$message"
+    log_message "" "$jobname" "" "" "ERROR: $message"
 
     # Also print the message to stderr (so it will be emailed from the cron job)
     echo "ERROR : $jobname : $message " >&2
@@ -182,6 +190,7 @@ function log_exit {
     message=$2
 
     log_error "$jobname" "$message"
+    log_error "$jobname" "EXIT grade_students.sh"
 
     exit 1
 }
@@ -575,7 +584,20 @@ function grade_this_item {
 
 
     # FIXME: a global variable
-    global_grade_result=`grep "total:" $results_path/.submit.grade`
+
+    if [ -e $results_path/.submit.grade ] ;
+    then
+	global_grade_result=`grep "total:" $results_path/.submit.grade`
+    else
+	global_grade_result="ERROR: $results_path/.submit.grade does not exist"
+    fi
+
+
+    if [[ $global_grade_result == "" ]] ;
+    then
+	global_grade_result="WARNING: $results_path/.submit.grade does not have a total score"
+    fi
+
 
     
     # --------------------------------------------------------------------
@@ -657,7 +679,6 @@ while true; do
 
     for NEXT_TO_GRADE in ${interactive_list} ${batch_list}; do
 
-	FILE_TIMESTAMP=`stat -c %Y $NEXT_TO_GRADE`
 	NEXT_DIRECTORY=`dirname $NEXT_TO_GRADE`
 	NEXT_ITEM=`basename $NEXT_TO_GRADE`
 
@@ -701,9 +722,20 @@ while true; do
 
 	# mark the start time
 	STARTTIME=$(date +%s)
+	
+	# when was this job put in the queue?
+	FILE_TIMESTAMP=`stat -c %Y $NEXT_TO_GRADE 2>&1`
 
 	# calculate how long this job was waiting in the queue
-	WAITTIME=$(($STARTTIME - $FILE_TIMESTAMP))
+	integer_reg_expression='^[0-9]+$'
+	if ! [[ $FILE_TIMESTAMP =~ $integer_reg_expression ]] ; then
+	    # FIXME NOTE: if the file does not exist (shouldn't
+	    # happen, but we are seeing it, needs debugging)
+	    log_error "$NEXT_ITEM" "$FILE_TIMESTAMP"
+	    FILE_TIMESTAMP=STARTTIME+1
+	fi
+	WAITTIME=$(($STARTTIME - ${FILE_TIMESTAMP:-0}))
+
 	
 	# log the start
 	log_message "$IS_BATCH_JOB"  "$NEXT_ITEM"  "wait:"  "$WAITTIME"  ""

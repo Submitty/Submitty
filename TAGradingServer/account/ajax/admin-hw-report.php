@@ -218,7 +218,8 @@ foreach($db->rows() as $student_record)
                         else
                         {
                             $grade_question_score = intval($grade_question_record["grade_question_score"]);
-                            $grade_question_comment = $grade_question_record["grade_question_comment"];
+                            //$grade_question_comment = $grade_question_record["grade_question_comment"];
+                            $grade_question_comment = clean_string_javascript($grade_question_record["grade_question_comment"]);
                         }
 
                         // we only need to do that for homeworks without separate parts
