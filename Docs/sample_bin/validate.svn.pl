@@ -6,6 +6,8 @@ use warnings;
 $ENV{ 'PATH' } = '/bin:/usr/bin:/usr/sbin:/usr/local/bin';
 delete @ENV{'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
 
+print "Validating user list...\n";
+
 open LIST, "/var/local/hss/instructors/svnlist" or die "file svnlist not found";	# Should have a list of RCS userids to be enabled, one per line
 
 my $GOOD = "/var/local/hss/instructors/valid";
@@ -23,3 +25,5 @@ while (<LIST>)
 	}
 }
 close (LIST);
+print "Validation complete.  Hit Ctrl-C to cancel or Enter to continue.\n";
+getc();
