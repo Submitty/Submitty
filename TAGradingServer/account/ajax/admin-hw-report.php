@@ -52,21 +52,28 @@ if (!isset($get_rubric['rubric_id'])) {
 }
 
 $rubrics = array();
-$db->query("SELECT * FROM rubrics WHERE rubric_due_date<=? ORDER BY rubric_due_date ASC", array($rubric['rubric_due_date']));
+$db->query("SELECT * FROM rubrics WHERE rubric_due_date<=? ORDER BY rubric_due_date ASC", array($get_rubric['rubric_due_date']));
 foreach($db->rows() as $row) {
-    array_push($rubrics, array($row));
+    array_push($rubrics, $row);
 }
 
 // Query the database for all students registered in the class
-$params = array();
-$db->query("SELECT * FROM students ORDER BY student_rcs ASC", $params);
+$params = array($get_rubric['rubric_due_date']);
+$db->query("
+SELECT s.*, ld.allowed_lates as student_allowed_lates
+FROM students s
+LEFT JOIN (
+    SELECT student_rcs, allowed_lates
+    FROM late_days
+    WHERE since_timestamp <= ?
+) as ld ON ld.student_rcs = s.student_rcs
+ORDER BY student_rcs ASC", $params);
 foreach($db->rows() as $student_record)
 {
     $student_id = intval($student_record["student_id"]);
     $student_rcs = $student_record["student_rcs"];
     $student_last_name = $student_record["student_last_name"];
     $student_first_name = $student_record["student_first_name"];
-    $student_experience = intval($student_record["student_experience"]);
     $student_allowed_lates = intval($student_record["student_allowed_lates"]);
     $student_output_filename = $student_rcs . ".txt";
 
@@ -75,7 +82,7 @@ foreach($db->rows() as $student_record)
     if(intval($student_section_id) != 0)
     {
 
-        foreach ($rubrics as $rubric)
+        foreach ($rubrics as $k => $rubric)
         {
             $rubric_id = $rubric['rubric_id'];
             $rubric_sep = $rubric['rubric_parts_sep'];
@@ -110,9 +117,15 @@ foreach($db->rows() as $student_record)
                             WHERE g.student_rcs=? AND g.rubric_id=r.rubric_id AND r.rubric_due_date<=? AND g.grade_status=1", $params);
                 $row = $db->row();
 
-                $db->query("SELECT * FROM late_day_exceptions WHERE ex_student_rcs=?", array($student_rcs));
+
+                $db->query("SELECT * FROM late_day_exceptions WHERE ex_student_rcs=? and ex_rubric_id=?", array($student_rcs, $rubric_id));
                 $ex = $db->row();
-                $grade_days_late = $row['late'] - $ex['ex_late_days'];
+                if (isset($ex['ex_late_days'])) {
+                    $grade_days_late = $row['late'] - $ex['ex_late_days'];
+                }
+                else {
+                    $grade_days_late = $row['late'];
+                }
                 $late_days_used_overall += $grade_days_late;
                 $late_days_used_remaining -= $grade_days_late;
 
@@ -252,7 +265,7 @@ foreach($db->rows() as $student_record)
                         	$student_output_text[$question_part_number] .= "AUTO-GRADING TOTAL [ " . $student_grade[$question_part_number] . " / " . $part_grade[$question_part_number] . " ]";
 
 			 	            // get the active assignment to grade
-			                $json_path = __SUBMISSION_SERVER__."/submissions/".$rubric['rubric_rubric_submission_id']."/".$student_rcs."/user_assignment_settings.json";
+			                $json_path = __SUBMISSION_SERVER__."/submissions/".$rubric['rubric_submission_id']."/".$student_rcs."/user_assignment_settings.json";
 
                             $json = file_get_contents($json_path);
 
@@ -321,7 +334,10 @@ foreach($db->rows() as $student_record)
                     else {
                         $dir = implode("/", array(__SUBMISSION_SERVER__, "reports", $rubric['rubric_submission_id']));
                     }
-                    create_dir($dir);
+                    if (!create_dir($dir)) {
+                        print "failed to create directory {$dir}";
+                        exit();
+                    }
                     $save_filename = implode("/", array($dir, $student_output_filename));
 
                     $student_final_output = $student_output_text_main . $output . $student_output_last;
@@ -336,7 +352,9 @@ foreach($db->rows() as $student_record)
                         $student_final_output .= $student_output_academic;
                     }
                     //print $student_final_output." ".$save_filename."<br />";
-                    file_put_contents($save_filename, $student_final_output);
+                    if (file_put_contents($save_filename, $student_final_output) === false) {
+                        print "failed to write {$save_filename}\n";
+                    }
                 }
             }
         }
