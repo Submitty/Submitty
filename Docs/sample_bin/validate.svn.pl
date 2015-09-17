@@ -17,10 +17,10 @@ while (<LIST>)
 	chomp $_;
 	next if (!$_);  # Skip blank lines
 	if (system ("grep $_ $GOOD > /dev/null")) {
-		print "*ERROR*: $_ is not a valid userid.\n";
+		print "*ERROR* Userid is not valid: $_\n";
 	} else {
 	if (!(system ("id $_ > /dev/null 2>&1"))) {
-		print "$_ already exists.\n";
+		print "Userid already exists: $_\n";
 		}
 	}
 }
