@@ -46,7 +46,7 @@ $write_output = True;
 $get_rubric_id = intval($_GET["hw"]);
 Database::query("SELECT * FROM rubrics WHERE rubric_id=?", array($get_rubric_id));
 $get_rubric = Database::row();
-if (!isset($get_rubric_id['rubric_id'])) {
+if (!isset($get_rubric['rubric_id'])) {
     echo "failed|Invalid ID";
     exit(1);
 }
