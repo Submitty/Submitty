@@ -6,10 +6,7 @@ use warnings;
 $ENV{ 'PATH' } = '/bin:/usr/bin:/usr/sbin:/usr/local/bin';
 delete @ENV{'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
 
-	print "Validating user list...\n";
-	system ("/usr/local/hss/bin/validate.rcs.pl");
-	print "Hit Ctrl-C to cancel or Enter to continue.\n";
-	getc();
+system ("/usr/local/hss/bin/validate.rcs.pl");
 
 open LIST, "/var/local/hss/instructors/rcslist";	# Should have a list of RCS userids, one per line
 
