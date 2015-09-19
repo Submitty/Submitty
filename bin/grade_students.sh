@@ -702,9 +702,13 @@ while true; do
 	# -------------------------------------------------------------
         # check to see if this assignment is already being graded
 	# wait until the lock is available (up to 5 seconds)
-
 	flock -w 5 $TODO_LOCK_FILE || log_exit "$NEXT_TO_GRADE" "flock() failed"
-	if [ -e "$NEXT_DIRECTORY/GRADING_$NEXT_ITEM" ]
+	if [ ! -e "$NEXT_DIRECTORY/$NEXT_ITEM" ]
+	then
+    	    echo "another grade_students.sh process already finished grading $NEXT_ITEM"
+	    flock -u $TODO_LOCK_FILE
+	    continue
+	elif [ -e "$NEXT_DIRECTORY/GRADING_$NEXT_ITEM" ]
 	then
     	    echo "skip $NEXT_ITEM, being graded by another grade_students.sh process"
 	    flock -u $TODO_LOCK_FILE
@@ -756,8 +760,8 @@ while true; do
 	# -------------------------------------------------------------
 	# remove submission & the active grading tag from the todo list
 	flock -w 5 $TODO_LOCK_FILE || log_exit "$NEXT_ITEM" "flock() failed"
-	rm -f $NEXT_DIRECTORY/$NEXT_ITEM
-	rm -f $NEXT_DIRECTORY/GRADING_$NEXT_ITEM
+	rm -f $NEXT_DIRECTORY/$NEXT_ITEM          || log_error "$NEXT_ITEM" "Could not delete item from todo list"
+	rm -f $NEXT_DIRECTORY/GRADING_$NEXT_ITEM  || log_error "$NEXT_ITEM" "Could not delete item (w/ 'GRADING_' tag) from todo list"
 	flock -u $TODO_LOCK_FILE
 
 	# log the end
