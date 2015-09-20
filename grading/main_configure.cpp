@@ -1,9 +1,13 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
+
+#include "json.hpp"
 
 #include "TestCase.h"
 #include "default_config.h"
 
+using json = nlohmann::json;
 
 /*
 
@@ -17,7 +21,7 @@
 // =====================================================================
 
 void printTestCase(std::ostream &out, TestCase test) {
-  std::string hidden = (test.hidden()) ? "true" : "false";
+  /*std::string hidden = (test.hidden()) ? "true" : "false";
   std::string extracredit = (test.extracredit()) ? "true" : "false";
   std::string visible = (test.visible()) ? "true" : "false";
   std::string view_test_points = (test.view_test_points()) ? "true" : "false";
@@ -36,7 +40,21 @@ void printTestCase(std::ostream &out, TestCase test) {
 
   //  out << "\t\t\"expected_output\": "
   //   << "\"" << test.expected(0) << "\"" << std::endl;
-  out << "\t}";
+  out << "\t}";*/
+
+  json j = {
+	  {"title", test.title()},
+	  {"details", test.details()},
+	  {"points", test.points()},
+	  {"hidden", test.hidden()},
+	  {"extracredit", test.extracredit()},
+	  {"visible", test.visible()},
+	  {"view_test_points", test.view_test_points()},
+	  {"view_file", test.getView_file()},
+	  {"view_file_results", test.getView_file_results()},
+  };
+
+  out << std::setw(4) << j;
 }
 
 int main(int argc, char *argv[]) {
