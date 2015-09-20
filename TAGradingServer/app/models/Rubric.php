@@ -12,26 +12,26 @@ use \lib\ServerException;
  * @package app\models
  */
 class Rubric {
-    
+
     /**
      * Array containing information about student from students table
      * @var array
      */
     public $student;
-    
+
     /**
-     * Array containing information about rubric details joined with number of parts as well as 
+     * Array containing information about rubric details joined with number of parts as well as
      * grade details
      * @var array
      */
     public $rubric_details;
-    
+
     /**
      * Array containing information about all questions and grades for each question
      * @var array
      */
     public $questions;
-    
+
     /**
      * @var string
      */
@@ -55,7 +55,7 @@ class Rubric {
      * @var int
      */
     public $days_late = 0;
-    
+
     /**
      * @var int
      */
@@ -67,7 +67,7 @@ class Rubric {
      * @var int
      */
     public $late_days_exception = 0;
-    
+
     /**
      * This is a status for the assignment as a whole (potentially excluding some parts that are 0). We just leave it
      * at 0/1 (and not 2) as we only care whether or not graders can completely skip this homework or not (as well
@@ -77,22 +77,22 @@ class Rubric {
      * @var int
      */
     public $status = 0;
-    
+
     /**
      * @var int
      */
     public $submitted = 0;
-    
+
     /**
      * @var array
      */
     public $active_assignment = array();
-    
+
     /**
      * @var array
      */
     public $max_assignment = array();
-    
+
     /**
      * This is status for each individual part of the assignment, could potentially be 0 for a part, while
      * status for assignment as a whole could be '1' (meaning some parts were accepted)
@@ -102,22 +102,22 @@ class Rubric {
      * @var array
      */
     public $parts_status = array();
-    
+
     /**
      * @var array
      */
     public $parts_submitted = array();
-    
+
     /**
      * @var array
      */
     public $parts_days_late = array();
-    
+
     /**
      * @var array
      */
     public $parts_days_late_used = array();
-    
+
     /**
      * @var array
      */
@@ -132,7 +132,7 @@ class Rubric {
      * @var array
      */
     public $results_details = array();
-    
+
     /**
      * @var array
      */
@@ -144,14 +144,14 @@ class Rubric {
      * @var array
      */
     public $rubric_files = array();
-    
+
     /**
      * @var int
      */
     public $rubric_parts = 0;
-    
+
     public $questions_count = array();
-    
+
     private $submission_ids = array();
 
     /**
@@ -163,14 +163,14 @@ class Rubric {
     function __construct($student_rcs=null, $rubric_id=null) {
         try {
             if ($student_rcs === null || $rubric_id == null) {
-                throw new \InvalidArgumentException("Invalid instation of Homework 
-                class using student_rcs: {$student_rcs} and rubric_id: 
+                throw new \InvalidArgumentException("Invalid instation of Homework
+                class using student_rcs: {$student_rcs} and rubric_id:
                 {$rubric_id}");
             }
 
             $this->student_rcs = $student_rcs;
             $this->rubric_details_id = $rubric_id;
-    
+
             $this->setRubricDetails();
             $this->setStudentDetails();
             $this->setRubricSubmissionDetails();
@@ -188,7 +188,7 @@ class Rubric {
 
     /**
      * Get the student details from the database using given student_rcs
-     * 
+     *
      * @throws \InvalidArgumentException
      */
     private function setStudentDetails() {
@@ -206,17 +206,17 @@ WHERE s.student_rcs=?", array($this->rubric_details['rubric_due_date'], $this->s
             if ($this->student == array()) {
                 throw new \InvalidArgumentException("Could not find student '{$this->student_rcs}'");
             }
-    
+
             $params = array($this->student_rcs, $this->rubric_details['rubric_id']);
             Database::query("SELECT * FROM late_day_exceptions WHERE ex_student_rcs=? AND ex_rubric_id=?", $params);
             $row = Database::row();
             $this->late_days_exception = (isset($row['ex_late_days'])) ? $row['ex_late_days'] : 0;
-    
+
             $params = array($this->student_rcs, $this->rubric_details['rubric_due_date']);
             Database::query("
 SELECT (SUM(g.grade_days_late) - SUM(s.ex_late_days)) as used_late_days
-FROM grades as g 
-    LEFT JOIN 
+FROM grades as g
+    LEFT JOIN
     (
         SELECT * FROM late_day_exceptions
     ) as s on s.ex_rubric_id = g.rubric_id and s.ex_student_rcs=g.student_rcs
@@ -232,32 +232,32 @@ WHERE g.student_rcs=? AND g.grade_status=1 AND r.rubric_due_date<?", $params);
 
     /**
      * Get the rubric and previous grade (if available) for the given rubric_number
-     * 
+     *
      * @throws \InvalidArgumentException
      */
     private function setRubricDetails() {
-        // Must have rubric after grade in select list else g.rubric_id will 
+        // Must have rubric after grade in select list else g.rubric_id will
         // override r.rubric_id which is bad if g.rubric_id is null (grade doesn't exist)
         Database::query("
 SELECT g.*, r.*,b.rubric_parts
-FROM rubrics as r 
+FROM rubrics as r
     LEFT JOIN (
-        SELECT g.*, u.* 
-        FROM grades as g 
-            LEFT JOIN (SELECT * FROM users) as u ON g.grade_user_id=u.user_id 
+        SELECT g.*, u.*
+        FROM grades as g
+            LEFT JOIN (SELECT * FROM users) as u ON g.grade_user_id=u.user_id
         WHERE student_rcs=?) as g ON r.rubric_id=g.rubric_id
     LEFT JOIN (
-        SELECT count(DISTINCT question_part_number) as rubric_parts, rubric_id 
-        FROM questions 
-        WHERE question_part_number > 0 
+        SELECT count(DISTINCT question_part_number) as rubric_parts, rubric_id
+        FROM questions
+        WHERE question_part_number > 0
         GROUP BY rubric_id) as b ON b.rubric_id=r.rubric_id
 WHERE r.rubric_id=?", array($this->student_rcs, $this->rubric_details_id));
-        
+
         if (count(Database::rows()) == 0) {
             throw new \InvalidArgumentException("Could not find rubric '{$this->rubric_details_id}'");
         }
         $this->rubric_details = Database::row();
-    
+
         if ($this->rubric_details['rubric_parts_sep']) {
             $this->rubric_parts = $this->rubric_details['rubric_parts'];
             $submission_ids = explode(",", $this->rubric_details['rubric_parts_submission_id']);
@@ -272,7 +272,7 @@ WHERE r.rubric_id=?", array($this->student_rcs, $this->rubric_details_id));
             $this->rubric_parts = 1;
             $this->submission_ids[1] = $this->rubric_details['rubric_submission_id'];
         }
-        
+
         $fields = array('parts_submitted', 'parts_status');
         if (!isset($this->rubric_details['grade_id']) || intval($this->rubric_details['grade_id']) == 0) {
             $this->rubric_details['grade_id'] = -1;
@@ -304,28 +304,28 @@ WHERE r.rubric_id=?", array($this->student_rcs, $this->rubric_details_id));
                 $this->rubric_files[$i] = array();
             }
         }
-        
+
         $params = array($this->rubric_details['grade_id'], $this->rubric_details['rubric_id']);
         Database::query("
-SELECT q.*, gq.*, q.question_id as question_id 
-FROM questions as q 
-    LEFT JOIN ( 
-        SELECT a.*, b.comments 
-        FROM grades_questions as a 
+SELECT q.*, gq.*, q.question_id as question_id
+FROM questions as q
+    LEFT JOIN (
+        SELECT a.*, b.comments
+        FROM grades_questions as a
             LEFT JOIN (
-                SELECT question_id, count(*) as count, array_agg(grade_question_comment) as comments 
-                FROM grades_questions GROUP BY question_id ORDER BY count) as b 
-            ON a.question_id = b.question_id WHERE grade_id=?) as gq 
-    ON q.question_id = gq.question_id 
-WHERE rubric_id=? 
+                SELECT question_id, count(*) as count, array_agg(grade_question_comment) as comments
+                FROM grades_questions GROUP BY question_id ORDER BY count) as b
+            ON a.question_id = b.question_id WHERE grade_id=?) as gq
+    ON q.question_id = gq.question_id
+WHERE rubric_id=?
 ORDER BY question_part_number, question_number", $params);
         $this->questions = Database::rows();
 
         Database::query("
-SELECT question_part_number, COUNT(*) as count 
-FROM questions 
-WHERE rubric_id=? 
-GROUP BY question_part_number 
+SELECT question_part_number, COUNT(*) as count
+FROM questions
+WHERE rubric_id=?
+GROUP BY question_part_number
 ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
         foreach (Database::rows() as $row) {
             $this->questions_count[$row['question_part_number']] = $row['count'];
@@ -343,15 +343,15 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 print "<div style='z-index: 999999;'>".$submission_directory."</div>";
                 continue;
             }
-            
+
             $details = array();
             $this->submitted = 1;
             $this->parts_submitted[$part] = 1;
-    
+
             $objects = scandir($submission_directory);
             sort($objects);
             $this->max_assignment[$part] = $objects[count($objects) - 2];
-            
+
             if (isset($_GET["active_assignment_{$part}"]) && 1 == 2) {
                 $_GET["active_assignment_{$part}"] = intval($_GET["active_assignment_{$part}"]);
                 if ($_GET["active_assignment_{$part}"] <= 0) {
@@ -384,15 +384,15 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                     throw new \InvalidArgumentException("Couldn't find directory for active assignment {$this->active_assignment[$part]} for part {$part}");
                 }
             }
-            
+
             $details['submission_directory'] = $submission_directory;
             $details['svn_directory'] = implode("/", array(__SUBMISSION_SERVER__, "checkout", $submission_id, $this->student_rcs, $this->active_assignment[$part]));
             $this->submission_details[$part] = $details;
             $allowed_file_extensions = explode(",", __ALLOWED_FILE_EXTENSIONS__);
-            
+
             $this->rubric_files[$part] = array_merge($this->rubric_files[$part], FileUtils::getAllFiles($details['submission_directory'], $allowed_file_extensions));
             $this->rubric_files[$part] = array_merge($this->rubric_files[$part], FileUtils::getAllFiles($details['svn_directory']));
-    
+
             $this->config_details[$part] = json_decode(
                 removeTrailingCommas(file_get_contents(implode("/",array(__SUBMISSION_SERVER__,"config",
                     $submission_id."_assignment_config.json")))), true);
@@ -405,16 +405,16 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
      */
     private function setRubricResults() {
         $part = 1;
-    
+
         foreach($this->submission_ids as $submission_id) {
-            
+
             $result_directory = implode("/", array(__SUBMISSION_SERVER__, "results",
                 $submission_id, $this->student_rcs, $this->active_assignment[$part]));
 
             if (!file_exists($result_directory) || !is_dir($result_directory)) {
                 continue;
             }
-            
+
             $submission_details = $result_directory."/submission.json";
             if (!file_exists($submission_details)) {
                 $details = array();
@@ -429,7 +429,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 $this->parts_days_late[$part] = $late_days;
                 $this->parts_days_late_used[$part] = $this->parts_days_late[$part] - $this->late_days_exception;
             }
-            
+
             $details['directory'] = $result_directory;
 
             // We can lazy load the actual results till we need them (such as the diffs, etc.)
@@ -450,15 +450,15 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                     }
                 }
             }
-            
+
             $this->rubric_files[$part] = array_merge($this->rubric_files[$part], FileUtils::getAllFiles($result_directory, array(), $skip_files));
-            
+
             $part++;
         }
     }
 
     /**
-     * 
+     *
      */
     private function calculateStatus() {
         if (!$this->submitted) {
@@ -468,12 +468,12 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
             if (!$this->parts_submitted[$i]) {
                 continue;
             }
-            
+
             if ($this->rubric_details['rubric_late_days'] >= 0 &&
                 $this->parts_days_late_used[$i] > $this->rubric_details['rubric_late_days']) {
                 $this->parts_status[$i] = 0;
             }
-            else if ($this->student['student_allowed_lates'] >= 0 && 
+            else if ($this->student['student_allowed_lates'] >= 0 &&
                 $this->student['used_late_days'] + $this->parts_days_late_used[$i] > $this->student['student_allowed_lates']) {
                 $this->parts_status[$i] = 0;
             }
@@ -483,25 +483,28 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
             else {
                 $this->parts_status[$i] = 1;
             }
-            
+
             if ($this->parts_status[$i] > 0) {
                 $this->status = 1;
-                $this->days_late = max($this->days_late, $this->parts_days_late[$i]);
             }
+            $this->days_late = max($this->days_late, $this->parts_days_late[$i]);
+            $this->days_late_used = max($this->days_late_used, $this->parts_days_late_used[$i]);
         }
-        
+
     }
 
     /**
-     * 
+     *
      */
     private function setQuestionTotals() {
         $total = 0;
-        
-        foreach ($this->questions as $i => $question) {
+
+        for ($i = 0; $i < count($this->questions); $i++) {
             if (!isset($this->questions[$i]['grade_question_score'])) {
-                if (__USE_AUTOGRADER__ && $this->questions[$i]['question_part_number'] == 0) {
-    
+                if ($this->status == 0) {
+                    $this->questions[$i]['grade_question_score'] = 0;
+                }
+                else if (__USE_AUTOGRADER__ && $this->questions[$i]['question_part_number'] == 0) {
                     foreach ($this->results_details as $part => $details) {
                         if ($this->questions[$i]['question_number'] == 1) {
                             $this->questions[$i]['grade_question_score'] = $this->results_details[$part]['non_extra_credit_points_awarded'];
@@ -518,14 +521,14 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                     $this->questions[$i]['grade_question_score'] = $this->questions[$i]['question_total'];
                 }
             }
-            
+
             if (!$this->questions[$i]['question_extra_credit']) {
                 $total += $this->questions[$i]['question_total'];
             }
         }
         $this->rubric_details['rubric_total'] = $total;
     }
-    
+
     public function dumpStuff() {
         var_dump($this);
     }

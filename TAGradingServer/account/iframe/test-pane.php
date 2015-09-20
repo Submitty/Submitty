@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * Used to display the results of a test when viewing a rubric. Will show either a full diff viewer if there's a difference
+ * file available, else it'll just show the individual files in a simple shell colored code window.
+ */
 include "../../toolbox/functions.php";
 
 use \lib\DiffViewer;
@@ -6,17 +11,19 @@ use \lib\DiffViewer;
 $diffViewer = new DiffViewer();
 
 $iframe = <<<HTML
-		<link rel="stylesheet" href="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.css" />
-		<link rel="stylesheet" href="{$BASE_URL}/toolbox/include/codemirror/theme/eclipse.css" />
-        <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/custom/js/jquery-2.0.3.min.map.js"></script>
-        <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.js"></script>
-		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/clike/clike.js"></script>
-		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/python/python.js"></script>
-		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/shell/shell.js"></script>
+<link rel="stylesheet" href="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.css" />
+<link rel="stylesheet" href="{$BASE_URL}/toolbox/include/codemirror/theme/eclipse.css" />
+<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/custom/js/jquery-2.0.3.min.map.js"></script>
+<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.js"></script>
+<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/clike/clike.js"></script>
+<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/python/python.js"></script>
+<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/shell/shell.js"></script>
 HTML;
 
 $iframe .= $diffViewer->getCSS();
 $iframe .= $diffViewer->getJavascript();
+
+$has_diff = false;
 
 $testcase = json_decode(urldecode($_GET['testcases']), true);
 $i = 0;
@@ -43,13 +50,12 @@ if (count($testcase['diffs']) > 0) {
             if ($actual != "") {
                 $iframe .= "Actual<br />{$actual}<br />";
             }
-            
+
             if ($expected != "") {
-                
                 $iframe .= "Expected<br />{$expected}";
             }
             $iframe .= "<br /><br />";
-            $diffViewer->reset();
+            $has_diff = $diffViewer->exists_difference();
         }
         else {
             if ($actual != "") {
@@ -69,7 +75,7 @@ HTML;
                 $iframe .= sourceSettingsJS($diff['instructor_file'], $i++);
             }
         }
-        //$iframe .= "</div>";
+        $iframe .= "\n</div>";
     }
 }
 if (isset($testcase['compilation_output']) && $testcase['compilation_output'] != "") {
@@ -79,5 +85,8 @@ if (isset($testcase['compilation_output']) && $testcase['compilation_output'] !=
 HTML;
     $iframe .= sourceSettingsJS($testcase['compilation_output'], $i++);
 }
+
+$diff_difference = ($has_diff) ? "1" : "0";
+$iframe .= "\n\n<input type='hidden' name='exists_difference' value='{$diff_difference}' />";
 
 echo $iframe;
