@@ -32,7 +32,7 @@ if(isset($row["grade_id"]))
 else
 {
 	$params = array($rubric_id, $student_id, clean_string($_POST["comment-general"]), \app\models\User::$user_id, $_POST["late"], $student_rcs, $submitted, $status, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status']);
-	$db->query("INSERT INTO grades (rubric_id, student_id, grade_comment, grade_finish_timestamp, grade_user_id, grade_days_late, student_rcs, grade_submitted, grade_status, grade_active_assignment) VALUES (?,?,?,NOW(),?,?,?,?,?,?,?,?,?)", $params);
+	$db->query("INSERT INTO grades (rubric_id, student_id, grade_comment, grade_finish_timestamp, grade_user_id, grade_days_late, student_rcs, grade_submitted, grade_status, grade_active_assignment, grade_parts_days_late, grade_parts_submitted, grade_parts_status) VALUES (?,?,?,NOW(),?,?,?,?,?,?,?,?,?)", $params);
 
 	$params = array($rubric_id, $student_rcs);
 	$db->query("SELECT grade_id FROM grades WHERE rubric_id=? AND student_rcs=?", $params);
