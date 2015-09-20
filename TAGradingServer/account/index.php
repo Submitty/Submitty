@@ -51,7 +51,7 @@ if(isset($_GET["hw"]) && isset($rubric["rubric_id"])) {
         //$student_id = intval($temp_row["student_id"]);
         $student_first_name = $temp_row["student_first_name"];
         $student_last_name = $temp_row["student_last_name"];
-        $params = array($temp_row['student_rcs'], $row['rubric_due_date']);
+        $params = array($temp_row['student_rcs'], $rubric['rubric_due_date']);
         $db->query("SELECT * FROM late_days WHERE student_rcs=? AND since_timestamp <= ? ORDER BY since_timestamp DESC LIMIT 1", $params);
         $lates = $db->row();
         $student_allowed_lates = isset($lates['allowed_lates']) ? intval($lates['allowed_lates']) : 0;

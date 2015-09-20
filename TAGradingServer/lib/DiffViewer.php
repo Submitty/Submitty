@@ -4,36 +4,75 @@ namespace lib;
 
 /**
  * Class DiffViewer
- * 
+ *
  * Given an expected, actual, and differences file,
- * will generate the display for them (in either 
+ * will generate the display for them (in either
  * HTML or plain-text)
  */
 class DiffViewer {
+    /**
+     * @var bool
+     */
     private $display_actual = false;
+
+    /**
+     * @var array
+     */
     private $actual = array();
+
+    /**
+     * @var bool
+     */
     private $display_expected = false;
+
+    /**
+     * @var array
+     */
     private $expected = array();
+
+    /**
+     * @var array
+     */
     private $diff = array();
+
+    /**
+     * @var array
+     */
     private $add = array();
+
+    /**
+     * @var string
+     */
     private $expected_name;
+
+    /**
+     * @var string
+     */
     private $actual_name;
+
+    /**
+     * @var array
+     */
     private $link = array();
+
+    /**
+     * @var string
+     */
     private $id = "id";
 
     /**
      * @param string $expected name of expected in difference file
      * @param string $actual name of actual in difference file
      */
-    function __construct($expected="instructor", $actual="student") {
+    public function __construct($expected="instructor", $actual="student") {
         $this->expected_name = $expected;
         $this->actual_name = $actual;
     }
 
     /**
-     * 
+     * Reset the DiffViewer to its starting values.
      */
-    function reset() {
+    public function reset() {
         $this->display_actual = false;
         $this->actual = array();
         $this->display_expected = false;
@@ -46,9 +85,9 @@ class DiffViewer {
 
     /**
      * Load the actual file, expected file, and diff json,
-     * using them to populate the necessary arrays for 
+     * using them to populate the necessary arrays for
      * display them later back to the user
-     * 
+     *
      * @param $actual_file
      * @param $expected_file
      * @param $diff_file
@@ -56,7 +95,7 @@ class DiffViewer {
      *
      * @throws \Exception
      */
-    function load($actual_file, $expected_file, $diff_file, $id_prepend="id") {
+    public function load($actual_file, $expected_file, $diff_file, $id_prepend="id") {
         $this->reset();
         $this->id = rtrim($id_prepend,"_")."_";
         if (!file_exists($actual_file) && $actual_file != "") {
@@ -79,13 +118,13 @@ class DiffViewer {
         else if ($diff_file != "") {
             $diff = json_decode(file_get_contents($diff_file), true);
         }
-        
+
         /*
         $this->actual = ($actual_file != "") ? explode("\n", file_get_contents($actual_file)) : "";
         $this->expected = ($expected_file != "") ? explode("\n", file_get_contents($expected_file)) : "";
         $diff = ($diff_file != "") ? json_decode(file_get_contents($diff_file), true) : array();
         */
-        
+
         $this->diff = array('expected' => array(), 'actual' => array());
         $this->add = array('expected' => array(), 'actual' => array());
 
@@ -132,7 +171,7 @@ class DiffViewer {
 
                 $this->link['actual'][($act_start)] = (isset($this->link['actual'])) ? count($this->link['actual']) : 0;
                 $this->link['expected'][($exp_start)] = (isset($this->link['expected'])) ? count($this->link['expected']) : 0;
-                
+
                 // Do we need to insert blank lines into actual?
                 if ($act_ins < $exp_ins) {
                     $this->add['actual'][($act_final)] = $exp_ins - $act_ins;
@@ -146,10 +185,10 @@ class DiffViewer {
 
     /**
      * Return the output HTML for the actual display
-     * 
+     *
      * @return string actual html
      */
-    function getDisplayActual() {
+    public function getDisplayActual() {
         if ($this->display_actual) {
             return $this->getDisplay($this->actual, 'actual');
         }
@@ -161,10 +200,10 @@ class DiffViewer {
 
     /**
      * Return the HTML for the expected display
-     * 
+     *
      * @return string expected html
      */
-    function getDisplayExpected() {
+    public function getDisplayExpected() {
         if ($this->display_expected) {
             return $this->getDisplay($this->expected, 'expected');
         }
@@ -177,7 +216,7 @@ class DiffViewer {
      * Prints out the $lines parameter
      *
      * Prints out the actual codebox with diff view applied
-     * based off the $this->diff global based off which
+     * using the $this->diff global based off which
      * type we're interested in
      *
      * @param array $lines array of strings (each line)
@@ -188,7 +227,7 @@ class DiffViewer {
     private function getDisplay($lines, $type='expected') {
         $start = null;
         $html = "<div class='diff-container'><table cellpadding='0' cellspacing='0' class='diff-code'>\n";
-        
+
         if (isset($this->add[$type]) && count($this->add[$type]) > 0) {
             if (array_key_exists(-1, $this->add[$type])) {
                 $html .= "\t<tbody class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][-1]}\">\n";
@@ -198,7 +237,11 @@ class DiffViewer {
                 $html .= "\t</tbody>\n";
             }
         }
-        
+
+        /*
+         * Run through every line, starting a highlight around any group of mismatched lines that exist (whether
+         * there's a difference on that line or that the line doesn't exist.
+         */
         for ($i = 0; $i < count($lines); $i++) {
             $j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
@@ -242,9 +285,8 @@ class DiffViewer {
                     $html .= "\t</tbody>\n";
                 }
             }
-            
-            if ($start !== null && !isset($this->diff[$type][($i+1)])) {
 
+            if ($start !== null && !isset($this->diff[$type][($i+1)])) {
                 $start = null;
                 $html .= "\t</tbody>\n";
             }
@@ -256,7 +298,7 @@ class DiffViewer {
 
     /**
      * Return JS required for DiffViewer to function
-     * 
+     *
      * @return string
      */
     public function getJavascript() {
@@ -267,23 +309,23 @@ class DiffViewer {
         var hoverOn = function(e) {
             var args = $(e.currentTarget).attr('id').split("_");
             var id = args.length-1;
-            types.forEach(function(type) { 
+            types.forEach(function(type) {
                 $('#'+args[0]+'_'+type+'_' + args[id]).children().each(function(index) {
                     $(this).addClass('highlight-hover');
                 });
             });
         };
-        
+
         var hoverOff = function(e) {
             var args = $(e.currentTarget).attr('id').split("_");
             var id = args.length-1;
-            types.forEach(function(type) { 
+            types.forEach(function(type) {
                 $('#'+args[0]+'_'+type+'_' + args[id]).children().each(function(index) {
                     $(this).removeClass('highlight-hover');
                 });
             });
         };
-    
+
         $('.highlight').hover(hoverOn, hoverOff);
     });
 </script>
@@ -292,7 +334,7 @@ HTML;
 
     /**
      * Return CSS required for DiffViewer
-     * 
+     *
      * @return string
      */
     public static function getCSS() {
@@ -305,34 +347,34 @@ HTML;
                 margin-right: 100px;
                 /*float: left;*/
             }
-            
+
             .diff-code {
                 padding: 5px;
-                font-family: monospace; 
+                font-family: monospace;
                 width: 700px
             }
-            
+
             .diff-code tr, td {
                 padding-top: 2px;
                 height: 20px;
             }
-            
+
             .bad {
                 background-color: #fedede;
 
             }
-            
+
             .highlight {
-                
+
             }
-   
+
             .highlight-hover {
                 background-color: yellow !important;
             }
             .highlight-char {
                 background-color: #fffdbe;
             }
-            
+
             .line_number {
                 display: inline-block;
                 min-width: 40px;
@@ -342,20 +384,20 @@ HTML;
                 margin-right: 10px;
                 float: left;
             }
-            
+
             .line_code {
                 min-width: 610px;
                 white-space: nowrap;
                 overflow-x: auto;
             }
-            
+
             .line-code pre {
                 display: block;
                 font-family: monospace;
                 white-space: pre;
                 margin: 1em 0;
             }
-            
+
             .empty_line {
                 width: 700px;
             }
@@ -391,6 +433,22 @@ HTML;
             }
             $temp[] = $number;
             $last = $number;
+        }
+        return $return;
+    }
+
+    /**
+     * Returns true if there's an actual difference between actual and expected, else will
+     * return false
+     *
+     * @return bool
+     */
+    public function exists_difference() {
+        $return = false;
+        foreach(array('expected', 'actual') as $key) {
+            if(count($this->diff[$key]) > 0 || count($this->add[$key]) > 0) {
+                $return = true;
+            }
         }
         return $return;
     }

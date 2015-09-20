@@ -96,7 +96,8 @@ foreach($db->rows() as $student_record)
             $student_grade = array();
             $grade_comment = "";
 
-            if(isset($academic_integrity[$rubric_id]) && in_array($student_rcs, $academic_integrity[$rubric_id]) && !(isset($academic_resolutions[$rubric_id]) && array_key_exists($student_rcs, $academic_resolutions[$rubric_id])))
+            if(isset($academic_integrity[$rubric_id]) && in_array($student_rcs, $academic_integrity[$rubric_id])
+                && !(isset($academic_resolutions[$rubric_id]) && array_key_exists($student_rcs, $academic_resolutions[$rubric_id])))
             {
 
                 $db->query("SELECT question_part_number FROM questions WHERE rubric_id=? GROUP BY question_part_number",array($rubric_id));
@@ -146,7 +147,8 @@ foreach($db->rows() as $student_record)
                     $grade_comment = $grade_record["grade_comment"];
                     $grade_days_late = intval($grade_record["grade_days_late"]);
 
-                    // We don't want to deduct late days for no submissions or for submissions that are so late that the student receives an automatic zero
+                    // We don't want to deduct late days for no submissions or for submissions that are so late that
+                    // the student receives an automatic zero
                     if($grade_days_late == 3) { $grade_days_late = 0; }
 
                     // Query database to gather TA info
