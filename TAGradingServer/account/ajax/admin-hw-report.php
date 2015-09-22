@@ -62,11 +62,6 @@ $params = array($get_rubric['rubric_due_date']);
 $db->query("
 SELECT s.*, ld.allowed_lates as student_allowed_lates
 FROM students s
-LEFT JOIN (
-    SELECT student_rcs, allowed_lates
-    FROM late_days
-    WHERE since_timestamp <= ?
-) as ld ON ld.student_rcs = s.student_rcs
 ORDER BY student_rcs ASC", $params);
 foreach($db->rows() as $student_record)
 {
@@ -74,16 +69,16 @@ foreach($db->rows() as $student_record)
     $student_rcs = $student_record["student_rcs"];
     $student_last_name = $student_record["student_last_name"];
     $student_first_name = $student_record["student_first_name"];
-    $student_allowed_lates = intval($student_record["student_allowed_lates"]);
     $student_output_filename = $student_rcs . ".txt";
 
     $student_section_id = $student_record["student_section_id"];
 
-    if(intval($student_section_id) != 0)
-    {
-
-        foreach ($rubrics as $k => $rubric)
-        {
+    if(intval($student_section_id) != 0) {
+        foreach ($rubrics as $k => $rubric) {
+            $params = array($student_rcs, $rubric['rubric_due_date']);
+            $db->query("SELECT allowed_lates FROM late_days WHERE student_rcs=? AND since_timestamp <= ? ORDER BY since_timestamp DESC LIMIT 1", $params);
+            $late_day = $db->row();
+            $student_allowed_lated = $late_day['allowed_lates'];
             $rubric_id = $rubric['rubric_id'];
             $rubric_sep = $rubric['rubric_parts_sep'];
             $rubric_total = 0;
@@ -97,8 +92,7 @@ foreach($db->rows() as $student_record)
             $grade_comment = "";
 
             if(isset($academic_integrity[$rubric_id]) && in_array($student_rcs, $academic_integrity[$rubric_id])
-                && !(isset($academic_resolutions[$rubric_id]) && array_key_exists($student_rcs, $academic_resolutions[$rubric_id])))
-            {
+                && !(isset($academic_resolutions[$rubric_id]) && array_key_exists($student_rcs, $academic_resolutions[$rubric_id]))) {
 
                 $db->query("SELECT question_part_number FROM questions WHERE rubric_id=? GROUP BY question_part_number",array($rubric_id));
                 for($i = 1; $i <= count($db->rows()); $i++) {
@@ -106,8 +100,7 @@ foreach($db->rows() as $student_record)
                 }
                 $student_output_text_main .= "[ YOUR HOMEWORK IS BEING FURTHER REVIEWED FOR EVIDENCE OF ACADEMIC INTEGRITY VIOLATION ]";
             }
-            else
-            {
+            else {
                 // Query database to gather overall late days statistics
                 $late_days_used_overall = 0;
                 $late_days_used_remaining = $student_allowed_lates;
@@ -140,8 +133,7 @@ foreach($db->rows() as $student_record)
                 }
                 $grade_record = $db->row();
                 // Check to see if student has been graded yet
-                if(isset($grade_record["grade_id"]))
-                {
+                if(isset($grade_record["grade_id"])) {
                     $grade_id = intval($grade_record["grade_id"]);
                     $grade_user_id = intval($grade_record["grade_user_id"]);
                     $grade_comment = $grade_record["grade_comment"];
@@ -149,7 +141,9 @@ foreach($db->rows() as $student_record)
 
                     // We don't want to deduct late days for no submissions or for submissions that are so late that
                     // the student receives an automatic zero
-                    if($grade_days_late == 3) { $grade_days_late = 0; }
+                    if($grade_record['grade_status'] == 0) {
+                        $grade_days_late = 0;
+                    }
 
                     // Query database to gather TA info
                     $params = array($grade_user_id);
