@@ -3,7 +3,19 @@
 include "../../toolbox/functions.php";
 
 $rubric_id = intval($_GET['hw']);
-
+$db->query("SELECT * FROM rubrics WHERE rubric_id=?", array($rubric_id));
+$rubric = $db->row();
+if (!isset($rubric['rubric_id'])) {
+    die("Invalid rubric specified.");
+}
+$now = new DateTime('now');
+$homeworkDate = new DateTime($rubric->rubric_details['rubric_due_date']);
+if ($rubric->rubric_details['rubric_late_days'] > 0) {
+    $homeworkDate->add(new DateInterval("PT{$rubric->rubric_details['rubric_late_days']}H"));
+}
+if ($now < $homeworkDate) {
+    die("Homework is not open for grading yet.");
+}
 $student_rcs = $_GET["student"];
 $db->query("SELECT student_id FROM students WHERE student_rcs=?", array($student_rcs));
 $row = $db->row();
