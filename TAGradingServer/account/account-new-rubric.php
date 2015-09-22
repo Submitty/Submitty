@@ -10,11 +10,17 @@ use \app\models\Rubric;
 
 $rubric = new Rubric($student_rcs, $rubric_id);
 
+$now = new DateTime('now');
+$homeworkDate = new DateTime($rubric->rubric_details['rubric_due_date']);
+if ($rubric->rubric_details['rubric_late_days'] > 0) {
+    $homeworkDate->add(new DateInterval("PT{$rubric->rubric_details['rubric_late_days']}H"));
+}
+$grade_select_extra = $now < $homeworkDate ? 'disabled="true"' : "";
+
 $part_status = array();
 $icon = array();
 $icon_color = array();
 $color = array();
-
 
 if ($rubric->status == 1) {
     $icon[0] = '<i class="icon-ok icon-white"></i>';
@@ -52,8 +58,8 @@ if ($calculate_diff) {
         window.open("{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "&add_submission_path=1","_blank","toolbar=no,scrollbars=yes, resizable=yes, width=700, height=600");
         return false;
     }
-    function openFrame(file, num) {
-        var iframe = $('.file_viewer_' + num);
+    function openFrame(file, part, num) {
+        var iframe = $('.file_viewer_' + part + '_' + num);
         if (!iframe.hasClass('open')) {
             iframe.html("<iframe src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "' height='500px' width='750px' style='border: 0'></iframe>");
             iframe.addClass('open');
@@ -254,8 +260,8 @@ HTML;
         $file = htmlentities($file);
         $output .= <<<HTML
                 <div>
-                    <div class="file-viewer"><a onclick='openFrame("{$file}", {$j})'><span class='icon-plus'></span>{$file}</a></div> <a onclick='openFile("{$file}")'>(Popout)</a><br />
-                    <div class="file_viewer_{$j}"></div>
+                    <div class="file-viewer"><a onclick='openFrame("{$file}", {$part}, {$j})'><span class='icon-plus'></span>{$file}</a></div> <a onclick='openFile("{$file}")'>(Popout)</a><br />
+                    <div class="file_viewer_{$part}_{$j}"></div>
                 </div>
 HTML;
         $j++;
@@ -418,7 +424,7 @@ HTML;
                                 {$message} {$note}
                             </td>
                             <td>
-                                <select name="grade-{$question['question_part_number']}-{$question['question_number']}" id="changer" class="grades" style="width: 65px; height: 25px; min-width:0px;" onchange="calculatePercentageTotal();">
+                                <select name="grade-{$question['question_part_number']}-{$question['question_number']}" id="changer" class="grades" style="width: 65px; height: 25px; min-width:0px;" onchange="calculatePercentageTotal();" {$grade_select_extra}>
 HTML;
 
     for ($i = 0; $i <= $question['question_total'] * 2; $i++) {
@@ -538,17 +544,25 @@ if (isset($rubric->rubric_details['user_email'])) {
     $output .= "Graded By: {$rubric->rubric_details['user_email']}<br />Overwrite Grader: <input type='checkbox' name='overwrite' /><br /><br />";
 }
 
-if((!isset($_GET["individual"])) || (isset($_GET["individual"]) && !$student_individual_graded))  {
-    $output .= <<<HTML
-    <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade"/>
-    <div id="inner-container-spacer" style="height:75px;"></div>
+if (!($now < $homeworkDate)) {
+    if((!isset($_GET["individual"])) || (isset($_GET["individual"]) && !$student_individual_graded)) {
+        $output .= <<<HTML
+        <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade"/>
+        <div id="inner-container-spacer" style="height:75px;"></div>
 HTML;
+    } else {
+        $output .= <<<HTML
+        <input class="btn btn-large btn-warning" type="submit" value="Submit Homework Re-Grade" onclick="createCookie('backup',1,1000);"/>
+        <div style="width:100%; text-align:right; color:#777;">{$rubric->rubric_details['grade_finish_timestamp']}</div>
+        <div id="inner-container-spacer" style="height:55px;"></div>
+HTML;
+    }
 }
 else {
     $output .= <<<HTML
-    <input class="btn btn-large btn-warning" type="submit" value="Submit Homework Re-Grade" onclick="createCookie('backup',1,1000);"/>
-    <div style="width:100%; text-align:right; color:#777;">{$rubric->rubric_details['grade_finish_timestamp']}</div>
-    <div id="inner-container-spacer" style="height:55px;"></div>
+        <input class="btn btn-large btn-primary" type="button" value="Cannot Submit Homework Grade" />
+        <div style="width:100%; text-align:right; color:#777;">This homework has yet been opened for grading.</div>
+        <div id="inner-container-spacer" style="height:55px;"></div>
 HTML;
 }
 
