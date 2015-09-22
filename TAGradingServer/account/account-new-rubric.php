@@ -58,8 +58,8 @@ if ($calculate_diff) {
         window.open("{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "&add_submission_path=1","_blank","toolbar=no,scrollbars=yes, resizable=yes, width=700, height=600");
         return false;
     }
-    function openFrame(file, num) {
-        var iframe = $('.file_viewer_' + num);
+    function openFrame(file, part, num) {
+        var iframe = $('.file_viewer_' + part + '_' + num);
         if (!iframe.hasClass('open')) {
             iframe.html("<iframe src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "' height='500px' width='750px' style='border: 0'></iframe>");
             iframe.addClass('open');
@@ -260,8 +260,8 @@ HTML;
         $file = htmlentities($file);
         $output .= <<<HTML
                 <div>
-                    <div class="file-viewer"><a onclick='openFrame("{$file}", {$j})'><span class='icon-plus'></span>{$file}</a></div> <a onclick='openFile("{$file}")'>(Popout)</a><br />
-                    <div class="file_viewer_{$j}"></div>
+                    <div class="file-viewer"><a onclick='openFrame("{$file}", {$part}, {$j})'><span class='icon-plus'></span>{$file}</a></div> <a onclick='openFile("{$file}")'>(Popout)</a><br />
+                    <div class="file_viewer_{$part}_{$j}"></div>
                 </div>
 HTML;
         $j++;
