@@ -309,9 +309,9 @@ $output .= <<<HTML
                 <input type="hidden" name="status" value="{$rubric->status}" />
                 <input type="hidden" name="late" value="{$rubric->days_late}" />
                 <input type="hidden" name="active_assignment" value="{$active_assignments}" />
-                <input type="hidden" name="grade_parts_days_late" />
-                <input type="hidden" name="grade_parts_submitted" />
-                <input type="hidden" name="grade_parts_status" />
+                <input type="hidden" name="grade_parts_days_late" value="{$grade_parts_days_late}" />
+                <input type="hidden" name="grade_parts_submitted" value="{$grade_parts_submitted}" />
+                <input type="hidden" name="grade_parts_status" value="{$grade_parts_status}" />
                 <div id="inner-container-seperator" style="background-color:#AAA; margin-top: 0; margin-bottom:0;"></div>
 
                 <div style="margin-top: 0; margin-bottom:35px;">

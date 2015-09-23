@@ -9,9 +9,9 @@ if (!isset($rubric['rubric_id'])) {
     die("Invalid rubric specified.");
 }
 $now = new DateTime('now');
-$homeworkDate = new DateTime($rubric->rubric_details['rubric_due_date']);
-if ($rubric->rubric_details['rubric_late_days'] > 0) {
-    $homeworkDate->add(new DateInterval("PT{$rubric->rubric_details['rubric_late_days']}H"));
+$homeworkDate = new DateTime($rubric['rubric_due_date']);
+if ($rubric['rubric_late_days'] > 0) {
+    $homeworkDate->add(new DateInterval("PT{$rubric['rubric_late_days']}H"));
 }
 if ($now < $homeworkDate) {
     die("Homework is not open for grading yet.");
