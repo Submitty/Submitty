@@ -32,6 +32,7 @@ std::map<std::string, std::string> GLOBAL_CLICKER_MAP;
 
 
 void MatchClickerRemotes(std::vector<Student*> &students, const std::string &remotes_filename) {
+  if (remotes_filename == "") return;
   std::cout << "READING CLICKER REMOTES FILE: " << remotes_filename << std::endl;
 
   std::ifstream istr(remotes_filename.c_str());

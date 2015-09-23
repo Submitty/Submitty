@@ -17,6 +17,11 @@
 #include "gradeable.h"
 #include "grade.h"
 
+
+
+#define MAX_LECTURES 28
+
+
 //====================================================================
 // DIRECTORIES & FILES
 
@@ -59,9 +64,32 @@ Student* PERFECT_STUDENT_POINTER;
 //====================================================================
 // INFO ABOUT NUMBER OF SECTIONS
 
-int MAX_SECTION = 11;
+int MAX_SECTION = 20;
 std::map<int,std::string> sectionNames;
 std::map<std::string,std::string> sectionColors;
+
+bool validSection(int section) {
+  std::cout << "valid section " << section << " " <<   (sectionNames.find(section) != sectionNames.end()) << std::endl;
+  return (sectionNames.find(section) != sectionNames.end());
+}
+
+
+std::string sectionName(int section) {
+  std::map<int,std::string>::const_iterator itr = sectionNames.find(section);
+  if (itr == sectionNames.end()) 
+    return "NONE";
+  return itr->second;
+}
+
+
+
+
+//====================================================================
+
+char GLOBAL_EXAM_TITLE[MAX_STRING_LENGTH] = "exam title uninitialized";
+char GLOBAL_EXAM_DATE[MAX_STRING_LENGTH] = "exam date uninitialized";
+char GLOBAL_EXAM_TIME[MAX_STRING_LENGTH] = "exam time uninitialized";
+char GLOBAL_EXAM_DEFAULT_ROOM[MAX_STRING_LENGTH] = "exam default room uninitialized";
 
 //====================================================================
 // INFO ABOUT OUTPUT FORMATTING
@@ -73,9 +101,6 @@ bool DISPLAY_EXAM_SEATING = false;
 
 std::vector<std::string> MESSAGES;
 
-#define MAX_STRING_LENGTH 10000
-
-#define MAX_LECTURES 28
 
 //====================================================================
 
@@ -476,17 +501,11 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
 
     Student* &s = students[i];
 
-    if (s->getSection() < 1 || s->getSection() > 8) {
-      not_reg++;
-      continue;
-    }
-
     if (s->getExamRoom() != "") {
       already_zoned++;
-      continue;
-    }
-    
-    if (s->overall() < 1.0) {
+    } else if (!validSection(s->getSection())) {
+      not_reg++;
+    } else if (s->overall() < 1.0) {
       no_grades++;
     } else {
       assert (next_za < zone_assignments.size());
@@ -519,15 +538,13 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
       Student* &s = students[i];
       
       if (s->getLastName() == "") continue;
-      if (s->getSection() < 1 ||
-          s->getSection() > 8) continue;
 
-      ostr_zone_assignments << std::setw(20) << std::left << s->getLastName();
-      ostr_zone_assignments << std::setw(15) << std::left << s->getFirstName();
-      ostr_zone_assignments << std::setw(12) << std::left << s->getUserName();
+      ostr_zone_assignments << std::setw(20) << std::left << s->getLastName()  << " ";
+      ostr_zone_assignments << std::setw(15) << std::left << s->getFirstName() << " ";
+      ostr_zone_assignments << std::setw(12) << std::left << s->getUserName()  << " ";
 
-      ostr_zone_assignments << std::setw(10) << std::left << s->getExamRoom();
-      ostr_zone_assignments << std::setw(10) << std::left << s->getExamZone();
+      ostr_zone_assignments << std::setw(10) << std::left << s->getExamRoom()  << " ";
+      ostr_zone_assignments << std::setw(10) << std::left << s->getExamZone()  << " ";
       ostr_zone_assignments << std::setw(10) << std::left << s->getExamTime();
       
       ostr_zone_assignments << std::endl;
@@ -589,7 +606,7 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
       istr >> section >> section_name;
       if (students_loaded == false) {
         std::cout << "MAKE ASSOCIATION " << section << " " << section_name << std::endl;
-        assert (sectionNames.find(section) == sectionNames.end());
+        assert (!validSection(section)); //sectionNames.find(section) == sectionNames.end());
         sectionNames[section] = section_name;
         
         static int counter = 0;
@@ -763,6 +780,22 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
       istr.getline(line,MAX_STRING_LENGTH);
       continue;
 
+
+    } else if (token == "exam_title") {
+      istr.getline(GLOBAL_EXAM_TITLE,MAX_STRING_LENGTH);
+      continue;
+    } else if (token == "exam_date") {
+      istr.getline(GLOBAL_EXAM_DATE,MAX_STRING_LENGTH);
+      continue;
+    } else if (token == "exam_time") {
+      istr.getline(GLOBAL_EXAM_TIME,MAX_STRING_LENGTH);
+      continue;
+    } else if (token == "exam_default_room") {
+      istr.getline(GLOBAL_EXAM_DEFAULT_ROOM,MAX_STRING_LENGTH);
+      continue;
+
+
+
     } else if (token == "exam_seating") {
 
       DISPLAY_EXAM_SEATING = true;
@@ -840,17 +873,6 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
 
 
 
-
-
-
-std::string sectionName(int section) {
-  if (sectionNames.find(section) != sectionNames.end())
-    return "NONE";
-  return sectionNames[section];
-}
-
-
-
 void load_student_grades(std::vector<Student*> &students) {
 
   Student *perfect = GetStudent(students,"PERFECT");
@@ -901,7 +923,10 @@ void load_student_grades(std::vector<Student*> &students) {
       } else if (token == "section") {
         istr >> a;
         assert (a >= 0 && a <= MAX_SECTION);
-        if (sectionNames[a] == "FAKE") {  a = 0;  }
+        if (!validSection(a)) {
+          std::cout << "WARNING: invalid section " << a << std::endl;
+        }
+          //sectionNames[a] == "FAKE") {  a = 0;  }
         s->setSection(a);
       } else if (token == "exam_seating") {
         std::cout << "TOKEN IS EXAM SEATING" << std::endl;
@@ -935,6 +960,10 @@ void load_student_grades(std::vector<Student*> &students) {
         float value;
         std::string label;
         ss >> which >> value >> label;
+
+        if (which < GRADEABLES_FIRST[g]) {
+          std::cerr << gradeable_to_string(g) << " " << which << " " << GRADEABLES_FIRST[g] << std::endl;
+        }
         
         assert (which >= GRADEABLES_FIRST[g]);
         assert (value >= 0.0);
@@ -985,6 +1014,9 @@ void load_student_grades(std::vector<Student*> &students) {
       
       else if (token == "days_late") {
         istr >> token; 
+        if (token.size() < 4) {
+          std::cout << "problem with days late format for " << s->getUserName() << std::endl;
+        }
         assert(token.size() >= 4);
         assert (token.substr(0,3) == "hw_");
         int which = atoi(token.substr(3,token.size()-3).c_str())-1;
@@ -1133,7 +1165,7 @@ void output_helper(  std::vector<Student*> &students,
 
 
 
-    std::string file2 = INDIVIDUAL_FILES_OUTPUT_DIRECTORY + students[S]->getUserName() + "_priority.html";
+    std::string file2 = INDIVIDUAL_FILES_OUTPUT_DIRECTORY + students[S]->getUserName() + "_message.html";
     std::ofstream ostr2(file2.c_str());
     if (students[S]->hasPriorityHelpStatus()) {
       ostr2 << "<h3>PRIORITY HELP QUEUE</h3>" << std::endl;

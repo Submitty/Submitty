@@ -12,6 +12,10 @@
 #include "iclicker.h"
 #include "gradeable.h"
 
+
+#define MAX_STRING_LENGTH 10000
+
+
 #define ICLICKER_RECENT 12
 #define ICLICKER_PRIORITY 0.666
 

@@ -16,6 +16,7 @@
 #include "iclicker.h"
 #include "grade.h"
 
+
 extern bool DISPLAY_MOSS_DETAILS;
 extern bool DISPLAY_FINAL_GRADE;
 extern bool DISPLAY_GRADE_DETAILS;
@@ -36,6 +37,13 @@ extern int auditors;
 
 
 extern float LATE_DAY_PERCENTAGE_PENALTY;
+
+extern char GLOBAL_EXAM_TITLE[MAX_STRING_LENGTH];
+extern char GLOBAL_EXAM_DATE[MAX_STRING_LENGTH];
+extern char GLOBAL_EXAM_TIME[MAX_STRING_LENGTH];
+extern char GLOBAL_EXAM_DEFAULT_ROOM[MAX_STRING_LENGTH];
+
+
 
 // ==========================================================
 
@@ -242,10 +250,9 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
 
   if ( DISPLAY_EXAM_SEATING == false) return;
 
-  std::string room = "DCC 308";
+  std::string room = GLOBAL_EXAM_DEFAULT_ROOM;
   std::string zone = "SEE INSTRUCTOR";
-  //std::string time = "3-6pm";
-  std::string time = "6-7:50pm";
+  std::string time = GLOBAL_EXAM_TIME;
   if (s->getExamRoom() == "") {
     //std::cout << "NO ROOM FOR " << s->getUserName() << std::endl;
   } else {
@@ -263,8 +270,8 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
   ostr << "<tr><td>\n";
   ostr << "<table border=0 cellpadding=5 cellspacing=0>\n";
   //  ostr << "  <tr><td colspan=2>Data Structures Final Exam</td></tr>\n";
-  ostr << "  <tr><td colspan=2>Data Structures Test 1</td></tr>\n";
-  ostr << "  <tr><td>Monday September 21st</td><td align=center>" << time << "</td></tr>\n";
+  ostr << "  <tr><td colspan=2>" << GLOBAL_EXAM_TITLE << "</td></tr>\n";
+  ostr << "  <tr><td>" << GLOBAL_EXAM_DATE << "</td><td align=center>" << time << "</td></tr>\n";
   ostr << "  <tr><td>Your room assignment: </td><td align=center>" << room << "</td></tr>\n";
   ostr << "  <tr><td>Your zone assignment: </td><td align=center>" << zone << "</td></tr>\n";
   ostr << "</table>\n";
@@ -345,7 +352,9 @@ void start_table(std::ofstream &ostr, std::string &filename, bool full_details,
     if (S == -1 && DISPLAY_GRADE_DETAILS) {
       ostr << "<td align=center>part.</td>" 
            << "<td align=center>under.</td>";
-      ostr << "<td align=center width=400>notes</td>";
+      //  ostr << "<td align=center width=400>notes</td>";
+      ostr << "<td align=center>notes</td>";
+      ostr << "<td align=center>zone</td>";
     }
     ostr << "<td align=center>USERNAME</td>";
 
@@ -505,6 +514,7 @@ void output_line(std::ofstream &ostr,
       ostr << ews[i] << "<br>";
     }
     ostr << "</font></td>";
+    ostr << "<td align=center>" << this_student->getExamZone() << "</td>";   
   }
 
   if (this_student->getSection() == 0) {
