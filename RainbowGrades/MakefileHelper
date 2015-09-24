@@ -41,6 +41,7 @@ compile:
 		${RAINBOW_GRADES_DIRECTORY}/output.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/student.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/iclicker.cpp \
+		${RAINBOW_GRADES_DIRECTORY}/zone.cpp \
 		-g -o process_grades.out
 	mkdir -p individual_summary_html/
 	mkdir -p all_students_summary_html/
@@ -58,8 +59,11 @@ all: pull overall push
 overall: compile
 	./process_grades.out by_overall
 
+memory_debug: compile
+	drmemory -- ./process_grades.out by_overall
+
 iclicker: compile
-	./process_grades.out by_iclickertotal
+	./process_grades.out by_iclicker
 
 name: compile
 	./process_grades.out by_name
@@ -67,17 +71,26 @@ name: compile
 section: compile
 	./process_grades.out by_section
 
+
+year: compile
+	./process_grades.out by_year
+
+major: compile
+	./process_grades.out by_major
+
+
+
 lab: compile
-	./process_grades.out by_lab_pct
+	./process_grades.out by_lab
 
 hw: compile
-	./process_grades.out by_hw_pct
+	./process_grades.out by_hw
 
 test: compile
-	./process_grades.out by_test_pct
+	./process_grades.out by_test
 
 final: compile
-	./process_grades.out by_final_pct
+	./process_grades.out by_final
 
 zone: compile
 	./process_grades.out by_zone

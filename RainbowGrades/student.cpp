@@ -44,6 +44,20 @@ Student::Student() {
 }
 
 
+
+
+// lookup a student by username
+Student* GetStudent(const std::vector<Student*> &students, const std::string& username) {
+  for (int i = 0; i < students.size(); i++) {
+    if (students[i]->getUserName() == username) return students[i];
+  }
+  return NULL;
+}
+
+
+
+
+
 // =============================================================================================
 // =============================================================================================
 // accessor & modifier for grade data

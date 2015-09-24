@@ -64,12 +64,10 @@ Student* PERFECT_STUDENT_POINTER;
 //====================================================================
 // INFO ABOUT NUMBER OF SECTIONS
 
-int MAX_SECTION = 20;
 std::map<int,std::string> sectionNames;
 std::map<std::string,std::string> sectionColors;
 
 bool validSection(int section) {
-  std::cout << "valid section " << section << " " <<   (sectionNames.find(section) != sectionNames.end()) << std::endl;
   return (sectionNames.find(section) != sectionNames.end());
 }
 
@@ -94,10 +92,13 @@ char GLOBAL_EXAM_DEFAULT_ROOM[MAX_STRING_LENGTH] = "exam default room uninitiali
 //====================================================================
 // INFO ABOUT OUTPUT FORMATTING
 
-bool DISPLAY_FINAL_GRADE = false;
-bool DISPLAY_MOSS_DETAILS = false;
-bool DISPLAY_GRADE_DETAILS = false;
+bool DISPLAY_INSTRUCTOR_NOTES = false;
 bool DISPLAY_EXAM_SEATING = false;
+bool DISPLAY_MOSS_DETAILS = false;
+bool DISPLAY_FINAL_GRADE = false;
+bool DISPLAY_GRADE_SUMMARY = false;
+bool DISPLAY_GRADE_DETAILS = false;
+bool DISPLAY_ICLICKER = false;
 
 std::vector<std::string> MESSAGES;
 
@@ -112,13 +113,6 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s);
 //====================================================================
 
 
-// lookup a student by username
-Student* GetStudent(const std::vector<Student*> &students, const std::string& username) {
-  for (int i = 0; i < students.size(); i++) {
-    if (students[i]->getUserName() == username) return students[i];
-  }
-  return NULL;
-}
 
 
 
@@ -127,7 +121,16 @@ Student* GetStudent(const std::vector<Student*> &students, const std::string& us
 
 
 bool by_overall(const Student* s1, const Student* s2) {
-  return (s1->overall() > s2->overall());
+  float s1_overall = s1->overall();
+  float s2_overall = s2->overall();
+  
+  if (s1_overall > s2_overall+0.0001) return true;
+  if (fabs (s1_overall - s2_overall) < 0.0001 &&
+      s1->getSection() == 0 &&
+      s2->getSection() != 0)
+    return true;
+
+  return false;
 }
 
 
@@ -169,7 +172,7 @@ bool by_section(const Student *s1, const Student *s2) {
     return by_name(s1,s2);
 }
 
-bool by_iclickertotal(const Student* s1, const Student* s2) {
+bool by_iclicker(const Student* s1, const Student* s2) {
   return (s1->getIClickerTotalFromStart() > s2->getIClickerTotalFromStart());
 }
 
@@ -287,14 +290,22 @@ void preprocesscustomizationfile() {
 
     } else if (token == "display") {
       istr >> token;
-      if (token == "exam_seating") {
+
+      if (token == "instructor_notes") {
+        DISPLAY_INSTRUCTOR_NOTES = true;
+      } else if (token == "exam_seating") {
         DISPLAY_EXAM_SEATING = true;
       } else if (token == "moss_details") {
         DISPLAY_MOSS_DETAILS = true;
-      } else if (token == "grade_details") {
-        DISPLAY_GRADE_DETAILS = true;
       } else if (token == "final_grade") {
         DISPLAY_FINAL_GRADE = true;
+      } else if (token == "grade_summary") {
+        DISPLAY_GRADE_SUMMARY = true;
+      } else if (token == "grade_details") {
+        DISPLAY_GRADE_DETAILS = true;
+      } else if (token == "iclicker") {
+        DISPLAY_ICLICKER = true;
+
       } else {
         std::cout << "OOPS " << token << std::endl;
         exit(0);
@@ -384,178 +395,8 @@ void MakeRosterFile(std::vector<Student*> &students) {
 }
 
 
-class ZoneAssignment {
-
-public:
-
-  std::string building;
-  std::string room;
-  std::string zone;
-  
-};
-
-
-// random generator function:
-int myrandomzone (int i) { return std::rand()%i;}
-
-
-void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::string &zone_assignments_filename, std::vector<Student*> &students) {
-  std::cout << "zone counts filename " << zone_counts_filename << std::endl;
-  std::cout << "zone assignments filename " << zone_assignments_filename << std::endl;
-
-  // ============================================================
-  // read in any existing assignments...
-
-  std::map<std::string,int> zones;
-  
-  {
-    std::ifstream istr_zone_assignments(zone_assignments_filename.c_str());
-    if (istr_zone_assignments.good()) {
-      std::string line;
-      while (getline(istr_zone_assignments,line)) {
-        std::stringstream ss(line.c_str());
-        std::string token,last,first,rcs,building,room,zone,time;
-        ss >> last >> first >> rcs >> building >> room >> zone >> time;
-        if (last == "") break;
-        Student *s = GetStudent(students,rcs);
-        if (s == NULL) {
-          std::cout << "**************************NOT HERE" << rcs << std::endl;
-          continue;
-        }
-        assert (s != NULL);
-        if (zone != "") {
-          s->setExamRoom(building+std::string(" ")+room);
-          s->setExamZone(zone);
-          if (time != "") {
-            s->setExamTime(time);
-          }
-          zones[zone]++;
-        }
-      }
-    }
-  }
-
-
-  // ============================================================
-  // read in the desired zone counts
-
-  // create a vector of zones to assign
-  std::vector<ZoneAssignment> zone_assignments;
-  std::map<std::string,int> max_per_zone;
-  std::map<std::string,std::string> zone_room_assignment;
-
-  {
-    std::ifstream istr_zone_counts(zone_counts_filename.c_str());
-    assert (istr_zone_counts.good());
-    
-    int count;
-    ZoneAssignment za; 
-    while (istr_zone_counts >> za.zone >> za.building >> za.room >> count) {
-
-      max_per_zone[za.zone] = count;
-      zone_room_assignment[za.zone] = za.building + " " + za.room;
-
-      int sofar = 0;
-      if (zones.find(za.zone) != zones.end()) {
-        sofar = zones.find(za.zone)->second;
-      }
-
-      assert (sofar <= count);
-
-      for (int i = sofar; i < count; i++) {
-        zone_assignments.push_back(za);
-      }
-    }
-
-    // FIXME: this belongs once, at start of program
-    std::srand ( unsigned ( std::time(0) ) );
-    
-    std::random_shuffle ( zone_assignments.begin(), zone_assignments.end(), myrandomzone );
-  }
-
-
-
-  int total_assignments = 0;
-  for (std::map<std::string,int>::iterator itr = zones.begin();
-       itr != zones.end(); itr++) {
-
-    assert (zone_room_assignment.find(itr->first) != zone_room_assignment.end());
-    std::cout << "ZONE " << itr->first << " " << itr->second << "  " 
-              << zone_room_assignment.find(itr->first)->second << std::endl;
-    total_assignments += itr->second;
-  }
-  std::cout << "TOTAL " << total_assignments << std::endl;
-
-
-
-  // ============================================================
-  // do the assignments!
-
-  int not_reg = 0;
-  int no_grades = 0;
-  int new_zone_assign = 0;
-  int already_zoned = 0;
-  int next_za = 0;
-
-  for (int i = 0; i < students.size(); i++) {
-
-    Student* &s = students[i];
-
-    if (s->getExamRoom() != "") {
-      already_zoned++;
-    } else if (!validSection(s->getSection())) {
-      not_reg++;
-    } else if (s->overall() < 1.0) {
-      no_grades++;
-    } else {
-      assert (next_za < zone_assignments.size());
-      const ZoneAssignment &za = zone_assignments[next_za];
-      s->setExamRoom(za.building+std::string(" ")+za.room);
-      s->setExamZone(za.zone);
-      next_za++;
-      new_zone_assign++;
-    }
-  }
-  
-  std::cout << "new zone assign " << new_zone_assign << std::endl;
-  std::cout << "no grades       " << no_grades << std::endl;
-  std::cout << "not reg         " << not_reg << std::endl;
-
-  std::cout << "za.size()       " << zone_assignments.size() << std::endl;
-
-  assert (new_zone_assign <= zone_assignments.size());
-
-  // ============================================================
-  // write out the assignments!
-
-
-  {
-    std::ofstream ostr_zone_assignments(zone_assignments_filename.c_str());
-    assert (ostr_zone_assignments.good());
-  
-    for (int i = 0; i < students.size(); i++) {
-      
-      Student* &s = students[i];
-      
-      if (s->getLastName() == "") continue;
-
-      ostr_zone_assignments << std::setw(20) << std::left << s->getLastName()  << " ";
-      ostr_zone_assignments << std::setw(15) << std::left << s->getFirstName() << " ";
-      ostr_zone_assignments << std::setw(12) << std::left << s->getUserName()  << " ";
-
-      ostr_zone_assignments << std::setw(10) << std::left << s->getExamRoom()  << " ";
-      ostr_zone_assignments << std::setw(10) << std::left << s->getExamZone()  << " ";
-      ostr_zone_assignments << std::setw(10) << std::left << s->getExamTime();
-      
-      ostr_zone_assignments << std::endl;
-
-    }
-  }
-
-
-
-}
-
+// defined in zone.cpp
+void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::string &zone_assignments_filename, std::vector<Student*> &students);
 
 
 
@@ -612,21 +453,43 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
         static int counter = 0;
         if (sectionColors.find(section_name) == sectionColors.end()) {
           if (counter == 0) {
-            sectionColors[section_name] = "ffff88"; //yellow
+            sectionColors[section_name] = "ccffcc"; // lt green
           } else if (counter == 1) {
-            sectionColors[section_name] = "ff88aa"; //pink
+            sectionColors[section_name] = "ffcccc"; // lt salmon
           } else if (counter == 2) {
-            sectionColors[section_name] = "ffcc88"; //orange 
+            sectionColors[section_name] = "ffffaa"; // lt yellow
           } else if (counter == 3) {
-            sectionColors[section_name] = "aaaaaa"; // grey 
+            sectionColors[section_name] = "ccccff"; // lt blue-purple
           } else if (counter == 4) {
-            sectionColors[section_name] = "aaeeff"; //lt blue
+            sectionColors[section_name] = "aaffff"; // lt cyan
           } else if (counter == 5) {
-            sectionColors[section_name] = "8888ff"; // purple 
+            sectionColors[section_name] = "ffaaff"; // lt magenta
           } else if (counter == 6) {
-            sectionColors[section_name] = "aaff88"; //green
+            sectionColors[section_name] = "88ccff"; // blue 
+          } else if (counter == 7) {
+            sectionColors[section_name] = "cc88ff"; // purple 
+          } else if (counter == 8) {
+            sectionColors[section_name] = "88ffcc"; // mint 
+          } else if (counter == 9) {
+            sectionColors[section_name] = "ccff88"; // yellow green
+          } else if (counter == 10) {
+            sectionColors[section_name] = "ff88cc"; // pink
+          } else if (counter == 11) {
+            sectionColors[section_name] = "ffcc88"; // orange
+          } else if (counter == 12) {
+            sectionColors[section_name] = "ffff33"; // yellow
+          } else if (counter == 13) {
+            sectionColors[section_name] = "ff33ff"; // magenta
+          } else if (counter == 14) {
+            sectionColors[section_name] = "33ffff"; // cyan
+          } else if (counter == 15) {
+            sectionColors[section_name] = "6666ff"; // blue-purple
+          } else if (counter == 16) {
+            sectionColors[section_name] = "66ff66"; // green
+          } else if (counter == 17) {
+            sectionColors[section_name] = "ff6666"; // red
           } else {
-            sectionColors[section_name] = "ffffff"; // white
+            sectionColors[section_name] = "aaaaaa"; // grey 
           }
           counter++;
         }
@@ -798,7 +661,7 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
 
     } else if (token == "exam_seating") {
 
-      DISPLAY_EXAM_SEATING = true;
+      //      DISPLAY_EXAM_SEATING = true;
 
       if (students_loaded == false) {
         char line[MAX_STRING_LENGTH];
@@ -922,7 +785,6 @@ void load_student_grades(std::vector<Student*> &students) {
         s->setLastName(token);
       } else if (token == "section") {
         istr >> a;
-        assert (a >= 0 && a <= MAX_SECTION);
         if (!validSection(a)) {
           std::cout << "WARNING: invalid section " << a << std::endl;
         }
@@ -1070,9 +932,7 @@ void end_table(std::ofstream &ostr,  bool full_details, const std::vector<Studen
 
 
 
-void output_helper(  std::vector<Student*> &students,
-                     std::string &sort_order ) {
-
+void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
 
   Student *blank = GetStudent(students,"");
   Student *sp = GetStudent(students,"PERFECT");
@@ -1111,56 +971,54 @@ void output_helper(  std::vector<Student*> &students,
   int next_rank = 1;
   int last_section = -1;
 
-  //  for (int part = 0; part < 1; part++) {
-
-    for (int S = 0; S < (int)students.size(); S++) {
-      if (students[S] == blank) continue;
-      int rank = next_rank;
-      if (students[S] == sp ||
-          students[S] == sa ||
-          students[S] == sb ||
-          students[S] == sc ||
-          students[S] == sd ||
-          students[S]->getUserName() == "" ||
-          sectionNames[students[S]->getSection()] == "") {
-        rank = -1;
-      } else {
-        if (sort_order == std::string("by_section") &&
-            last_section != students[S]->getSection()) {
-          last_section = students[S]->getSection();
-          next_rank = rank = 1;
-        }
-        next_rank++;
+  for (int S = 0; S < (int)students.size(); S++) {
+    if (students[S] == blank) continue;
+    int rank = next_rank;
+    if (students[S] == sp ||
+        students[S] == sa ||
+        students[S] == sb ||
+        students[S] == sc ||
+        students[S] == sd ||
+        students[S]->getUserName() == "" ||
+        sectionNames[students[S]->getSection()] == "") {
+      rank = -1;
+    } else {
+      if (sort_order == std::string("by_section") &&
+          last_section != students[S]->getSection()) {
+        last_section = students[S]->getSection();
+        next_rank = rank = 1;
       }
-      Student *this_student = students[S];
-      assert (this_student != NULL);
-      output_line(ostr,0,true,this_student,rank,sp,sa,sb,sc,sd);
+      next_rank++;
     }
-    
-    ostr << "</table>\n";
-    end_table(ostr,true,students,-1);
-    
-    command = "ln -s " + summary_file + " " + OUTPUT_FILE;
-    system(command.c_str());
-    
-    for (int S = 0; S < (int)students.size(); S++) {
-      if (students[S]->getSection() == 0) continue;
-      std::string file = INDIVIDUAL_FILES_OUTPUT_DIRECTORY + students[S]->getUserName() + "_summary.html";
-      start_table(ostr,file,false,students,S,month,day,year);
-      output_line(ostr,0,false,students[S],-1,sp,sa,sb,sc,sd);
-      output_line(ostr,0,false,blank,-1,sp,sa,sb,sc,sd);
-      output_line(ostr,0,false,sp,-1,sp,sa,sb,sc,sd);
-      output_line(ostr,0,false,sa,-1,sp,sa,sb,sc,sd);
-      output_line(ostr,0,false,sb,-1,sp,sa,sb,sc,sd);
-      output_line(ostr,0,false,sc,-1,sp,sa,sb,sc,sd);
-      output_line(ostr,0,false,sd,-1,sp,sa,sb,sc,sd);
+    Student *this_student = students[S];
+    assert (this_student != NULL);
+    output_line(ostr,0,true,this_student,rank,sp,sa,sb,sc,sd);
+  }
+  
+  ostr << "</table>\n";
+  end_table(ostr,true,students,-1);
+  
+  command = "ln -s " + summary_file + " " + OUTPUT_FILE;
+  system(command.c_str());
+  
+  for (int S = 0; S < (int)students.size(); S++) {
+    if (students[S]->getSection() == 0) continue;
+    std::string file = INDIVIDUAL_FILES_OUTPUT_DIRECTORY + students[S]->getUserName() + "_summary.html";
+    start_table(ostr,file,false,students,S,month,day,year);
+    output_line(ostr,0,false,students[S],-1,sp,sa,sb,sc,sd);
+    output_line(ostr,0,false,blank,-1,sp,sa,sb,sc,sd);
+    output_line(ostr,0,false,sp,-1,sp,sa,sb,sc,sd);
+    output_line(ostr,0,false,sa,-1,sp,sa,sb,sc,sd);
+    output_line(ostr,0,false,sb,-1,sp,sa,sb,sc,sd);
+    output_line(ostr,0,false,sc,-1,sp,sa,sb,sc,sd);
+    output_line(ostr,0,false,sd,-1,sp,sa,sb,sc,sd);
       
-      ostr << "</table><br><br>\n";
-
-
+    ostr << "</table><br><br>\n";
+    
+    
     bool any_notes = false;
-
-
+    
+    
     end_table(ostr,true,students,S);
 
 
@@ -1173,10 +1031,10 @@ void output_helper(  std::vector<Student*> &students,
                       << std::left << std::setw(15) << students[S]->getUserName() 
                       << std::left << std::setw(15) << students[S]->getFirstName() 
                       << std::left << std::setw(15) << students[S]->getLastName() << std::endl;
-
-
+      
+      
     }
-
+    
     if (MAX_ICLICKER_TOTAL > 0) {
       ostr2 << "<em>recent iclicker = " << students[S]->getIClickerRecent() << " / 12.0</em>" << std::endl;
     }
@@ -1191,7 +1049,7 @@ void output_helper(  std::vector<Student*> &students,
         prev = tmp;
       }
     }
-    }
+  }
     
 }
 
@@ -1231,28 +1089,43 @@ int main(int argc, char* argv[]) {
 
   if (sort_order == std::string("by_overall")) {
     std::sort(students.begin(),students.end(),by_overall);
-  } else if (sort_order == std::string("by_iclickertotal")) {
-    std::sort(students.begin(),students.end(),by_iclickertotal);
   } else if (sort_order == std::string("by_name")) {
     std::sort(students.begin(),students.end(),by_name);
+  } else if (sort_order == std::string("by_section")) {
+    std::sort(students.begin(),students.end(),by_section);
+  } else if (sort_order == std::string("by_zone")) {
+
+    DISPLAY_FINAL_GRADE = false;
+    DISPLAY_MOSS_DETAILS = false;
+    DISPLAY_GRADE_DETAILS = false;
+    DISPLAY_INSTRUCTOR_NOTES = false;
+    
+    DISPLAY_EXAM_SEATING = true;
+ 
+
+    std::sort(students.begin(),students.end(),by_name);
+  } else if (sort_order == std::string("by_iclicker")) {
+    std::sort(students.begin(),students.end(),by_iclicker);
+
+    DISPLAY_ICLICKER = true;
+
   } else if (sort_order == std::string("by_year")) {
     std::sort(students.begin(),students.end(),by_year);
   } else if (sort_order == std::string("by_major")) {
     std::sort(students.begin(),students.end(),by_major);
-  } else if (sort_order == std::string("by_section")) {
-    std::sort(students.begin(),students.end(),by_section);
+
   } else {
-    assert (sort_order.size() > 7);
+    assert (sort_order.size() > 3);
     GRADEABLE_ENUM g;
-    // take off "by_" and "_pct"
-    std::string tmp = sort_order.substr(3,sort_order.size()-7);
+    // take off "by_"
+    std::string tmp = sort_order.substr(3,sort_order.size()-3);
     bool success = string_to_gradeable_enum(tmp,g);
     if (success) {
       std::sort(students.begin(),students.end(), GradeableSorter(g) );
     }
     else {
       std::cerr << "UNKNOWN SORT OPTION " << sort_order << std::endl;
-      std::cerr << "  Usage: " << argv[0] << " [ by_overall | by_section | by_lab_pct | by_exercise | by_reading_pct | by_hw_pct | by_test_pct | by_exam_pct ]" << std::endl;
+      std::cerr << "  Usage: " << argv[0] << " [ by_overall | by_name | by_section | by_zone | by_iclicker | by_year | by_major | | by_lab | by_exercise | by_reading | by_hw | by_test | by_exam ]" << std::endl;
       exit(1);
     }
   }

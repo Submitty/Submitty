@@ -1,5 +1,11 @@
-display exam_seating
+#display instructor_notes
+#display exam_seating
+#display moss_details
+#display final_grade
+#display grade_summary
 display grade_details
+#display iclicker
+
 
 num_labs  14  1  0.15  42
 lab  1  3.0  
@@ -41,10 +47,22 @@ num_exams   1 1 0.20  150
 
 #use test_improvement_averaging_adjustment
 
+
+exam_title My Favorite CS Class, Test 1
+exam_date  Monday April 1st
+exam_time  6-7:50pm
+
+# Where should students go if they do not have a room assignment?
+exam_default_room  DCC 308
+
+
+
+
 exam_seating exam1_zone_counts.txt seating_exam_1.txt
-#exam_seating seating_exam2.txt
-#exam_seating seating_exam3.txt
-#exam_seating seating_exam4.txt
+#exam_seating exam2_zone_counts.txt seating_exam_2.txt
+#exam_seating exam3_zone_counts.txt seating_exam_3.txt
+#exam_seating exam4_zone_counts.txt seating_exam_4.txt
+
 
 
 #final_cutoff A   93.0
@@ -69,7 +87,7 @@ section 7 TA_name_3
 section 8 TA_name_4
 
 
-message <b>CSCI 1200 Data Structures Fall 2015</b>
+message <b>My Favorite CS Class</b>
 message Note: Please be patient with data entry/grade corrections for the most recent lab, homework, and test.
 message Please contact your graduate lab TA if a grade remains missing or incorrect for more than a week.
 #message <em>Note: All grades for lab & hw are uploaded.</em>

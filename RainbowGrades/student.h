@@ -221,4 +221,11 @@ private:
 //====================================================================
 //====================================================================
 
+
+
+
+
+Student* GetStudent(const std::vector<Student*> &students, const std::string& username);
+
+
 #endif
