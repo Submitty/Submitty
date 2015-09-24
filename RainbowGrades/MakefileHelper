@@ -1,0 +1,99 @@
+# =============================================================================
+# This is the helper Makefile 
+
+# Don't directly use this Makefile, it should be included from the
+# per-course Makefile with these variables set:
+
+ifndef USERNAME
+$(error Variable USERNAME not set)
+endif
+
+ifndef RAINBOW_GRADES_DIRECTORY
+$(error Variable RAINBOW_GRADES_DIRECTORY not set)
+endif
+
+ifndef HWSERVER
+$(error Variable HWSERVER not set)
+endif
+
+ifndef REPORTS_DIRECTORY
+$(error Variable REPORTS_DIRECTORY not set)
+endif
+
+# =============================================================================
+
+.PHONY: default pull push all compile overall section lab hw test final iclicker zone clean 
+
+default: overall
+
+pull:
+	mkdir -p raw_data/
+	scp ${USERNAME}@${HWSERVER}:${REPORTS_DIRECTORY}/all_grades/\* raw_data/
+
+
+push:
+	scp individual_summary_html/* ${USERNAME}@${HWSERVER}:${REPORTS_DIRECTORY}/summary_html
+
+
+compile:
+	g++ -std=c++11 -m32 -g \
+		${RAINBOW_GRADES_DIRECTORY}/main.cpp \
+		${RAINBOW_GRADES_DIRECTORY}/output.cpp \
+		${RAINBOW_GRADES_DIRECTORY}/student.cpp \
+		${RAINBOW_GRADES_DIRECTORY}/iclicker.cpp \
+		${RAINBOW_GRADES_DIRECTORY}/zone.cpp \
+		-g -o process_grades.out
+	mkdir -p individual_summary_html/
+	mkdir -p all_students_summary_html/
+
+
+clean:
+	rm process_grades.out
+
+all: pull overall push
+
+
+# =============================================================================
+# the different sorting orders & details of tables
+
+overall: compile
+	./process_grades.out by_overall
+
+memory_debug: compile
+	drmemory -- ./process_grades.out by_overall
+
+iclicker: compile
+	./process_grades.out by_iclicker
+
+name: compile
+	./process_grades.out by_name
+
+section: compile
+	./process_grades.out by_section
+
+
+year: compile
+	./process_grades.out by_year
+
+major: compile
+	./process_grades.out by_major
+
+
+
+lab: compile
+	./process_grades.out by_lab
+
+hw: compile
+	./process_grades.out by_hw
+
+test: compile
+	./process_grades.out by_test
+
+final: compile
+	./process_grades.out by_final
+
+zone: compile
+	./process_grades.out by_zone
+
+
+# =============================================================================
