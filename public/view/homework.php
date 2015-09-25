@@ -243,7 +243,9 @@ window.addEventListener('load', function() {
                                             echo '&nbsp;&nbsp';
                                         }
                                         else{
+					    echo 'Score: ';
                                             echo $points_visible;
+					    echo '&nbsp;&nbsp';
                                         }
                                         if ($select_submission_data[$i-1]["days_late"] != "")
                                         {
