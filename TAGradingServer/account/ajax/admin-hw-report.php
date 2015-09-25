@@ -58,10 +58,10 @@ foreach($db->rows() as $row) {
 }
 
 // Query the database for all students registered in the class
-$params = array($get_rubric['rubric_due_date']);
+$params = array();
 $db->query("
-SELECT s.*, ld.allowed_lates as student_allowed_lates
-FROM students s
+SELECT *
+FROM students
 ORDER BY student_rcs ASC", $params);
 foreach($db->rows() as $student_record)
 {
@@ -78,7 +78,7 @@ foreach($db->rows() as $student_record)
             $params = array($student_rcs, $rubric['rubric_due_date']);
             $db->query("SELECT allowed_lates FROM late_days WHERE student_rcs=? AND since_timestamp <= ? ORDER BY since_timestamp DESC LIMIT 1", $params);
             $late_day = $db->row();
-            $student_allowed_lated = $late_day['allowed_lates'];
+            $student_allowed_lates = isset($late_day['allowed_lates']) ? $late_day['allowed_lates'] : 0;
             $rubric_id = $rubric['rubric_id'];
             $rubric_sep = $rubric['rubric_parts_sep'];
             $rubric_total = 0;

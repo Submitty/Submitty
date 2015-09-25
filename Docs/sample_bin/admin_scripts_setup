@@ -6,6 +6,8 @@ HSS_REPOSITORY=/usr/local/hss/GIT_CHECKOUT_HWSERVER
 mkdir -p $HSS_INSTALL_DIR/bin
 [ ! -f $HSS_INSTALL_DIR/bin/rcsonly.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/rcsonly.pl $HSS_INSTALL_DIR/bin/rcsonly.pl
 [ ! -f $HSS_INSTALL_DIR/bin/new.svnuser.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/rcsonly.pl $HSS_INSTALL_DIR/bin/new.svnuser.pl
+[ ! -f $HSS_INSTALL_DIR/bin/validate.rcs.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/validate.rcs.pl $HSS_INSTALL_DIR/bin/validate.rcs.pl
+[ ! -f $HSS_INSTALL_DIR/bin/validate.svn.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/validate.svn.pl $HSS_INSTALL_DIR/bin/validate.svn.pl
 mkdir -p /root/bin
 mkdir -p /var/local/hss/instructors
 touch /var/local/hss/instructors/rcslist
