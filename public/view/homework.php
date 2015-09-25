@@ -85,13 +85,13 @@ window.addEventListener('load', function() {
           ?>
     </h2>
 
-    <!-- PRIORITY HELP QUEUE-->
+    <!-- TOP MESSAGE (TEST ZONE ASSIGNMENT & PRIORITY HELP QUEUE)-->
     <?php
     $path_front = get_path_front_course($semester,$course);;
-    $priority_path = "$path_front/reports/summary_html/".$username."_priority.html";
-    if (file_exists($priority_path)){
-        $priority_file = file_get_contents($priority_path);
-        echo $priority_file;
+    $message_path = "$path_front/reports/summary_html/".$username."_message.html";
+    if (file_exists($message_path)){
+        $message_file = file_get_contents($message_path);
+        echo $message_file;
     }
     ?>
 
