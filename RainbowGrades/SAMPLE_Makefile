@@ -1,0 +1,11 @@
+# =============================================================================
+# EDIT THESE VARIABLES
+
+USERNAME=username
+RAINBOW_GRADES_DIRECTORY=/<PATH_TO_HWSERVER_REPO>/RainbowGrades
+HWSERVER=hss.cs.rpi.edu
+REPORTSDIRECTORY=/var/local/hss/courses/<SEMESTER>/<COURSE>/reports
+
+# =============================================================================
+
+include ${RAINBOW_GRADES_DIRECTORY}/MakefileHelper
