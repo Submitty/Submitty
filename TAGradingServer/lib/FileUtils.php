@@ -7,7 +7,7 @@ class FileUtils {
     /**
      * Recursively return all files in a directory and subdirectories, assuming the files
      * are part of the $allowed_file_extensions array (if it's non-empty).
-     * 
+     *
      * @param       $dir
      * @param array $allowed_file_extensions
      * @param array $skip_files
@@ -17,7 +17,7 @@ class FileUtils {
         // we never want to include these files/folders as they do not contain any useful
         // information for us and would just end up making the file viewer have way too many files
         $skip_files = array_map(function($str) { return strtolower($str); }, $skip_files);
-        
+
         $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
         $disallowed_files = array('.ds_store');
         $return = array();
@@ -26,9 +26,9 @@ class FileUtils {
             if(!is_array($allowed_file_extensions)) {
                 $allowed_file_extensions = explode(",", $allowed_file_extensions);
             }
-    
+
             $check_extension = count($allowed_file_extensions) > 0;
-    
+
             if(is_dir($dir)) {
                 if($handle = opendir($dir)) {
                     while (false !== ($entry = readdir($handle))) {
@@ -40,7 +40,7 @@ class FileUtils {
                         }
                         $file = "{$dir}/{$entry}";
                         if(is_dir($file)) {
-                    
+
                             $return = array_merge($return, FileUtils::getAllFiles($file, $allowed_file_extensions));
                         } else {
                             $info = pathinfo($file);
@@ -75,7 +75,7 @@ class FileUtils {
         sort($return);
         return $return;
     }
-    
+
     /**
      * Recursively goes through a directory deleting everything in it
      * before deleting the folder itself
@@ -99,7 +99,7 @@ class FileUtils {
             rmdir($dir);
         }
     }
-    
+
     /**
      * Remove all files inside of a dir, but leave the directory
      *
@@ -119,13 +119,13 @@ class FileUtils {
             }
         }
     }
-    
+
     /**
      * Create a directory if it doesn't already exist. If it's a file,
-     * delete the file, and then try to create directory. 
+     * delete the file, and then try to create directory.
      *
      * @param $dir
-     * 
+     *
      * @return bool
      */
     public static function createDir($dir) {
@@ -133,7 +133,7 @@ class FileUtils {
             if (file_exists($dir)) {
                 unlink($dir);
             }
-            return mkdir($dir);
+            return @mkdir($dir);
         }
         return true;
     }

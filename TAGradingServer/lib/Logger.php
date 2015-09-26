@@ -12,7 +12,7 @@ class Logger {
     const WARN = 2;
     const ERROR = 3;
     const FATAL = 4;
-    
+
     /**
      * @var string: where should the log files be created
      */
@@ -26,7 +26,7 @@ class Logger {
 
     /**
      * Log a debug message to the logger
-     * 
+     *
      * @param string $message
      */
     public static function debug($message="") {
@@ -35,7 +35,7 @@ class Logger {
 
     /**
      * Log an info message to the logger
-     * 
+     *
      * @param string $message
      */
     public static function info($message="") {
@@ -44,7 +44,7 @@ class Logger {
 
     /**
      * Log a warning message to the logger
-     * 
+     *
      * @param string $message
      */
     public static function warn($message="") {
@@ -53,7 +53,7 @@ class Logger {
 
     /**
      * Log an error message to the logger
-     * 
+     *
      * @param string $message
      */
     public static function error($message="") {
@@ -62,21 +62,21 @@ class Logger {
 
     /**
      * Log a fatal error message to the logger
-     * 
+     *
      * @param string $message
      */
     public static function fatal($message="") {
         Logger::log(Logger::FATAL, $message);
     }
-    
+
     /**
      * Writes a message to a logfile (named for current date)
      * assuming that we've defined the $log_path variable
-     * 
+     *
      * We log a message as well as the calling URI if available.
      * It's saved to $log_path/yyyymmdd.txt (yyyy is year, mm is month
      * dd is day) with each log seperated by bunch of "=-".
-     * 
+     *
      * @param int $level: message level
      *     0. Debug
      *     1. Info
@@ -91,9 +91,12 @@ class Logger {
             // don't log anything if we don't have a log path set
             return;
         }
+
+        \lib\FileUtils::createDir(Logger::$log_path);
+
         $date = getdate(time());
         $filename = $date['year'].Functions::pad($date['mon']).Functions::pad($date['mday']);
-        
+
         $log_message = Functions::pad($date['mday'])."/".Functions::pad($date['mon'])."/".$date['year'];
         $log_message .= " ";
         $log_message .= Functions::pad($date['hours']).":".Functions::pad($date['minutes']).":";
@@ -116,15 +119,15 @@ class Logger {
                 $log_message .= "FATAL ERROR";
                 break;
         }
-        
+
         $log_message .= "\n".$message."\n";
         if (isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])) {
             $log_message .= 'URL: http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://';
             $log_message .= "{$_SERVER['HTTP_HOST']}/{$_SERVER['REQUEST_URI']}\n";
         }
         $log_message .= str_repeat("=-", 30)."="."\n";
-        
-        // Appends to the file using a locking mechanism 
+
+        // Appends to the file using a locking mechanism
         file_put_contents(Logger::$log_path."/".$filename.".txt", $log_message, FILE_APPEND | LOCK_EX);
     }
 }

@@ -5,11 +5,17 @@
         colors="true"
         verbose="true">
     <testsuites>
+        <testsuite name="controller Tests">
+            <directory suffix="Tester.php">controller</directory>
+        </testsuite>
         <testsuite name="Library Tests">
-            <directory suffix="Tester.php">lib</directory>
+            <directory suffix="Tester.php">TAGradingServer/lib</directory>
         </testsuite>
         <testsuite name="Model Tests">
-            <directory suffix="Tester.php">app/models</directory>
+            <directory suffix="Tester.php">TAGradingServer/app/models</directory>
+        </testsuite>
+        <testsuite name="e2e Tests">
+            <directory suffix="Tester.php">e2e</directory>
         </testsuite>
     </testsuites>
 

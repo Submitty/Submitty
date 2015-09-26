@@ -8,7 +8,7 @@ namespace lib;
 /**
  * Class AutoLoader
  * @package lib
- *          
+ *
  * Autoloads files for classes assuming that class name and file name are
  * are the same
  */
@@ -20,10 +20,10 @@ class AutoLoader {
 
     private function __construct() { }
     private function __clone() { }
-    
+
     /**
      * Store the filename (sans extension) & full path of all ".php" files found
-     * 
+     *
      * @param string $dirName: dirName to iterate through adding in php files
      * @param boolean $use_namespace: class requires namespace
      * @param string $namespace: namespace to append to class name
@@ -79,9 +79,9 @@ class AutoLoader {
     /**
      * Generates the relative path to the root of the repo
      * such that if you ran "cd $append" you would get there
-     * 
+     *
      * @param string $path: path we want to examine
-     * 
+     *
      * @return string: relative path to root of repo
      */
     public static function getPathToRoot($path) {
@@ -102,7 +102,7 @@ class AutoLoader {
      * Useful if someone has renamed it from "TAGradingServer"
      * to "hwgrading" or something, which might break
      * autoloading without this
-     * 
+     *
      * @return mixed: Root name of the git repo
      */
     public static function getRootName() {
@@ -118,7 +118,7 @@ class AutoLoader {
     }
 
     /**
-     * 
+     *
      * @param $classes
      */
     public static function setClasses($classes) {
