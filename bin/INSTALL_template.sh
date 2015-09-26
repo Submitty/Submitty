@@ -339,6 +339,7 @@ find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.ico -exec chmod o+r {} 
 find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
 find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.png -exec chmod o+r {} \;
 find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.jpg -exec chmod o+r {} \;
+find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.gif -exec chmod o+r {} \;
 
 # "other" can read & execute all .js files
 find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;

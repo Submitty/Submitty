@@ -45,9 +45,6 @@ echo <<<HTML
     function successAJAX() {
         window.alert("Homeworks successfully updated!");
     }
-    function printAJAX(x) {
-        window.alert("printing $x");
-    }
 
     function failureAJAX() {
         window.alert("Homeworks update failed!");
@@ -74,7 +71,6 @@ echo <<<HTML
                 $('.loading-gif').css("display","none");
                 if(response == "updated")
                 {
-		    printAJAX("test");
                     successAJAX();
                 }
                 else
