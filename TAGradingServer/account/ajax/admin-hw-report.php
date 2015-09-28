@@ -187,7 +187,7 @@ foreach($db->rows() as $student_record)
                         $question_part_number = intval($question_record["question_part_number"]);
                         $question_message = $question_record["question_message"];
                         $question_grading_note = $question_record["question_grading_note"];
-                        $question_total = intval($question_record["question_total"]);
+                        $question_total = floatval($question_record["question_total"]);
                         $question_default = $question_record["question_default"];
                         $question_extra_credit = intval($question_record["question_extra_credit"]) == 1;
 
@@ -213,7 +213,7 @@ foreach($db->rows() as $student_record)
                         }
                         else
                         {
-                            $grade_question_score = intval($grade_question_record["grade_question_score"]);
+                            $grade_question_score = floatval($grade_question_record["grade_question_score"]);
                             //$grade_question_comment = $grade_question_record["grade_question_comment"];
                             $grade_question_comment = clean_string_javascript($grade_question_record["grade_question_comment"]);
                         }
@@ -245,12 +245,6 @@ foreach($db->rows() as $student_record)
                         // Keep track of students grade and rubric total
                         $student_grade[$question_part_number] += $grade_question_score;
 
-                        if($question_id != 101 && $question_id != 139 && $question_id != 140)
-                        {
-                            $rubric_total += ($question_extra_credit ? 0 : $question_total);
-                            $part_grade[$question_part_number] += ($question_extra_credit ? 0 : $question_total);
-                        }
-
                         $question_part_number_last = $question_part_number;
                     }
 
@@ -261,6 +255,7 @@ foreach($db->rows() as $student_record)
 			            if ($question_part_number == 0) {
                         	$student_output_text[$question_part_number] .= "AUTO-GRADING TOTAL [ " . $student_grade[$question_part_number] . " / " . $part_grade[$question_part_number] . " ]";
 
+                            // TODO: Replace this with using the stored value in the database for each grade
 			 	            // get the active assignment to grade
 			                $json_path = __SUBMISSION_SERVER__."/submissions/".$rubric['rubric_submission_id']."/".$student_rcs."/user_assignment_settings.json";
 
