@@ -10,7 +10,8 @@ INSTALL.sh
 .idea
 *.zip
 
-tests/TAGradingServer/report
+tests/report
+tests/setup/selenium-server-standalone.jar
 
 logs/
 *.csv

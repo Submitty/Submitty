@@ -40,17 +40,17 @@ class Database
      * @var bool
      */
     private static $transaction = false;
-    
+
     /**
      * Don't allow other classes to instantiate/copy Database (Singleton)
      */
     private function __construct() { }
     private function __clone() { }
-    
+
     /**
      * Return the same Database instance after creating it the first
      * time the function is called
-     * 
+     *
      * @return Database
      */
     public static function getInstance() {
@@ -60,20 +60,20 @@ class Database
         }
         return $instance;
     }
-    
+
     /**
      * Connect to a database via PDO
-     * 
+     *
      * @param string $host
      * @param string $user
      * @param string $password
      * @param string $name
-     * 
+     *
      * @throws \PDOException
      */
     static function connect($host, $user, $password, $name) {
         Database::getInstance();
-        
+
         // Only start a new connection if we're not already connected to a DB
         if (Database::$link == null) {
             Database::$query_count = 0;
@@ -92,16 +92,16 @@ class Database
 
     /**
      * Run a query against connected PDO link
-     * 
+     *
      * @param string $query
      * @param array $parameters
-     * 
+     *
      * @return boolean
      */
     static function query($query, $parameters=array()) {
         try {
             $statement = Database::$link->prepare($query);
-            $statement->execute($parameters);
+            $bool = $statement->execute($parameters);
             Database::$results = $statement->fetchAll();
             Database::$lastid = Database::$link->lastInsertId();
             Database::$query_count++;
@@ -117,7 +117,7 @@ class Database
                                              array("Query" => $query,
                                                    "Parameters" => $parameters));
         }
-        
+
         return true;
     }
 
@@ -133,7 +133,7 @@ class Database
 
     /**
      * Actually commit/execute all queries to the database since we began the transaction.
-     * 
+     *
      * @throws ServerException
      * @throws \Exception
      */
@@ -147,7 +147,7 @@ class Database
     /**
      * Returns a single row from the result set from running a query. Removes the row
      * from the result set before returning it
-     * 
+     *
      * @return array|mixed
      */
     static function row() {
@@ -162,7 +162,7 @@ class Database
     /**
      * Get all the rows (minus any gotten via Database::row() before calling
      * this function) from the last query
-     * 
+     *
      * @return array
      */
     static function rows() {
@@ -176,7 +176,7 @@ class Database
 
     /**
      * Return count of total queries run against current PDO connection
-     * 
+     *
      * @return int
      */
     static function totalQueries() {
@@ -185,7 +185,7 @@ class Database
 
     /**
      * Get all queries run against the current PDO connection
-     * 
+     *
      * @return string
      */
     static function getQueries() {
@@ -217,17 +217,17 @@ class Database
     /**
      * Returns true if we're connected to a database,
      * else return false
-     * 
+     *
      * @return bool
      */
     static function hasConnection() {
         return Database::$link !== null;
     }
-    
+
     static function inTransaction() {
         return Database::$transaction;
     }
-    
+
     static function getLastInsertId($name = "") {
         if (!empty($name)) {
             return Database::$link->lastInsertId($name);
