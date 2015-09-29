@@ -28,16 +28,16 @@ $queries = array(
     FROM grades_labs AS gl
     LEFT JOIN (select lab_id,lab_number,lab_title FROM labs) as l ON gl.lab_id=l.lab_id WHERE student_rcs=?
     GROUP BY gl.lab_id,l.lab_number,l.lab_title ORDER BY l.lab_number",
-    
-    "HW"   => "SELECT r.rubric_number, g.grade_days_late, g.rubric_id as id,sum(gq.grade_question_score) as score
-    FROM grades_questions AS gq, grades AS g LEFT JOIN (select rubric_number,rubric_id FROM rubrics) as r ON g.rubric_id=r.rubric_id
+
+    "HW"   => "SELECT r.rubric_due_date, r.rubric_submission_id, r.rubric_name, g.grade_days_late, g.rubric_id as id,sum(gq.grade_question_score) as score
+    FROM grades_questions AS gq, grades AS g LEFT JOIN (select rubric_id, rubric_submission_id, rubric_name, rubric_due_date FROM rubrics) as r ON g.rubric_id=r.rubric_id
     WHERE gq.grade_id=g.grade_id AND g.student_rcs=?
-    GROUP BY g.rubric_id,r.rubric_number,g.grade_days_late
-    ORDER BY r.rubric_number",
-    
+    GROUP BY g.rubric_id,r.rubric_submission_id,g.grade_days_late
+    ORDER BY r.rubric_due_date",
+
     "TEST" => "SELECT t.test_number, t.test_id as id, gt.test_text,
     case when gt.value::numeric=0 or gt.value is null then 0
-    else case when gt.value::numeric+t.test_curve > (t.test_max_grade + t.test_curve) 
+    else case when gt.value::numeric+t.test_curve > (t.test_max_grade + t.test_curve)
             then t.test_max_grade + t.test_curve
         else gt.value::numeric+t.test_curve end end as score
     FROM
@@ -75,42 +75,42 @@ foreach($db->rows() as $student_record) {
     $student_output_text .= "last_name " . $student_last_name . $nl;
     $student_output_text .= "section " . $student_section . $nl;
 
-    
+
     $params = array($student_rcs);
     $db->query($queries['LAB'], $params);
-    
+
     $lab_grades = $lab_base;
     foreach($db->rows() as $row) {
         $lab_grades[$row['id']] = $row['score'];
         //$student_output_text .= $row['lab_title'] . " " . $row['score'] . $nl;
     }
-    
+
     foreach($lab_grades as $id => $score) {
         $student_output_text .= $lab_titles[$id] . " " . floatval($score) . $nl;
     }
-    
+
     $exceptions = array();
     $db->query("SELECT * FROM late_day_exceptions WHERE ex_student_rcs=?", $params);
     foreach($db->rows() as $row) {
         $exceptions[$row['ex_rubric_id']] = $row['ex_late_days'];
     }
-    
+
     $db->query($queries['HW'], $params);
     foreach($db->rows() as $row) {
         if (!isset($row['score'])) {
             $row['score'] = -7000000;
         }
-        $student_output_text .= "hw " . $row['rubric_number'] . " " . $row['score'] . $nl;
+        $student_output_text .= $row['rubric_submission_id'] . " \"" . $row['rubric_name'] . "\"" . $row['score'] . $nl;
         $late_days = $row['grade_days_late'];
         if (isset($exceptions[$row['id']])) {
             $late_days -= $exceptions[$row['id']];
         }
         $late_days = ($late_days < 0) ? 0 : $late_days;
         if ($late_days > 0) {
-            $student_output_text .= "days_late hw_" . $row['rubric_number'] . " " . $late_days . $nl;
+            $student_output_text .= "days_late " . $row['rubric_submission_id'] . " " . $late_days . $nl;
         }
     }
-    
+
     $db->query($queries['TEST'], $params);
     foreach($db->rows() as $row) {
         if ($row['score'] <= 0) {
