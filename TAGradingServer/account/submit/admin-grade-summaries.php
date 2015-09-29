@@ -32,7 +32,7 @@ $queries = array(
     "HW"   => "SELECT r.rubric_due_date, r.rubric_submission_id, r.rubric_name, g.grade_days_late, g.rubric_id as id,sum(gq.grade_question_score) as score
     FROM grades_questions AS gq, grades AS g LEFT JOIN (select rubric_id, rubric_submission_id, rubric_name, rubric_due_date FROM rubrics) as r ON g.rubric_id=r.rubric_id
     WHERE gq.grade_id=g.grade_id AND g.student_rcs=?
-    GROUP BY g.rubric_id,r.rubric_submission_id,g.grade_days_late
+    GROUP BY g.rubric_id,r.rubric_submission_id,g.grade_days_late,rubric_due_date,rubric_name
     ORDER BY r.rubric_due_date",
 
     "TEST" => "SELECT t.test_number, t.test_id as id, gt.test_text,
