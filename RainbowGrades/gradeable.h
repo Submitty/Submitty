@@ -2,6 +2,8 @@
 #define _GRADEABLE_H_
 
 #include <string>
+#include <vector>
+#include <map>
 
 
 enum class GRADEABLE_ENUM { READING, EXERCISE, LAB, PARTICIPATION, HOMEWORK, PROJECT, QUIZ, TEST, EXAM };
@@ -20,6 +22,15 @@ inline std::string gradeable_to_string(const GRADEABLE_ENUM &g) {
   std::cerr << "ERROR!  UNKNOWN GRADEABLE" << std::endl;
   exit(0);
 }
+
+
+extern std::vector<GRADEABLE_ENUM>    ALL_GRADEABLES;
+
+extern std::map<GRADEABLE_ENUM,int>   GRADEABLES_COUNT;
+extern std::map<GRADEABLE_ENUM,float> GRADEABLES_FIRST;
+extern std::map<GRADEABLE_ENUM,float> GRADEABLES_PERCENT;
+extern std::map<GRADEABLE_ENUM,float> GRADEABLES_MAXIMUM;
+extern std::map<GRADEABLE_ENUM,int>   GRADEABLES_REMOVE_LOWEST;
 
 
 #endif

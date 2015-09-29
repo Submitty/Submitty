@@ -21,6 +21,12 @@
 
 #define MAX_LECTURES 28
 
+// defined in iclicker.cpp
+std::string ReadQuoted(std::istream &istr);
+
+
+std::map<std::string,std::pair<int,std::string> > HW_CORRESPONDENCES;
+
 
 //====================================================================
 // DIRECTORIES & FILES
@@ -88,6 +94,8 @@ char GLOBAL_EXAM_TITLE[MAX_STRING_LENGTH] = "exam title uninitialized";
 char GLOBAL_EXAM_DATE[MAX_STRING_LENGTH] = "exam date uninitialized";
 char GLOBAL_EXAM_TIME[MAX_STRING_LENGTH] = "exam time uninitialized";
 char GLOBAL_EXAM_DEFAULT_ROOM[MAX_STRING_LENGTH] = "exam default room uninitialized";
+
+float GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = 0.1;
 
 //====================================================================
 // INFO ABOUT OUTPUT FORMATTING
@@ -426,8 +434,9 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
   assert (istr);
 
   std::string token,token2;
-  int num;
+  //int num;
   int which;
+  std::string which_token;
   float p_score,a_score,b_score,c_score,d_score;
 
   std::string iclicker_remotes_filename;
@@ -656,7 +665,9 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
     } else if (token == "exam_default_room") {
       istr.getline(GLOBAL_EXAM_DEFAULT_ROOM,MAX_STRING_LENGTH);
       continue;
-
+    } else if (token == "min_overall_for_zone_assignment") {
+      istr >> GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT;
+      continue;
 
 
     } else if (token == "exam_seating") {
@@ -680,34 +691,52 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
     } else {
       if (students_loaded == true) continue;
 
-      char gradesline[1000];
-      istr.getline(gradesline,1000);
-
-      std::stringstream ss(gradesline);
-      
-      if (!(ss >> which >> p_score)) {
-        std::cout << "ERROR READING" << std::endl;
-        std::cout << which << " " << p_score << std::endl;
-        
-        assert (0);
-        exit(1);
-      }
-      a_score = 0.9*p_score;
-      b_score = 0.8*p_score;
-      c_score = 0.7*p_score;
-      d_score = 0.6*p_score;
-      ss >> a_score >> b_score >> c_score >> d_score;
-
-      //std::cout << "HERE " << which << " " << p_score << " " << a_score << " " << b_score << " " << c_score << " " << d_score << std::endl;
-      assert (p_score >= a_score &&
-              a_score >= b_score &&
-              b_score >= c_score &&
-              c_score >= d_score);
-
       GRADEABLE_ENUM g;
       bool success = string_to_gradeable_enum(token,g);
       
       if (success) {
+        
+        char gradesline[1000];
+        istr.getline(gradesline,1000);
+        
+        std::stringstream ss(gradesline);
+
+
+        if (g == GRADEABLE_ENUM::HOMEWORK) {
+          // special case reading in a homework curve
+          //std::cout << "reading a hw curve " << which_token << std::endl;
+          ss >> which_token;
+          int next = HW_CORRESPONDENCES.size()+GRADEABLES_FIRST[g];
+          assert (HW_CORRESPONDENCES.find(which_token) == HW_CORRESPONDENCES.end());
+          HW_CORRESPONDENCES[which_token] = std::make_pair(next, ""); 
+          which = HW_CORRESPONDENCES[which_token].first;
+        } else {
+          ss >> which;
+        }
+
+        if (!(ss >> p_score)) {
+          std::cout << "ERROR READING" << std::endl;
+          std::cout << which_token << " " << p_score << std::endl;
+          exit(1);
+        }
+
+        a_score = 0.9*p_score;
+        b_score = 0.8*p_score;
+        c_score = 0.7*p_score;
+        d_score = 0.6*p_score;
+        
+        //        std::cout << "HERE " << which_token << " " << GRADEABLES_FIRST[g] << " " << GRADEABLES_COUNT[g] << std::endl;
+
+        ss >> a_score >> b_score >> c_score >> d_score;
+        
+        //std::cout << "HERE " << which_token << " " << p_score << " " << a_score << " " << b_score << " " << c_score << " " << d_score << std::endl;
+        assert (p_score >= a_score &&
+                a_score >= b_score &&
+                b_score >= c_score &&
+                c_score >= d_score);
+
+        std::cout << "which hw??? " << which << " " << GRADEABLES_FIRST[g] << " " << GRADEABLES_COUNT[g]+GRADEABLES_FIRST[g] << std::endl;
+        
         assert (which >= GRADEABLES_FIRST[g] && which < GRADEABLES_COUNT[g]+GRADEABLES_FIRST[g]);
         perfect->setGradeableValue(g,which-GRADEABLES_FIRST[g], p_score);
         lowest_a->setGradeableValue(g,which-GRADEABLES_FIRST[g], a_score);
@@ -759,7 +788,7 @@ void load_student_grades(std::vector<Student*> &students) {
 
     std::string token;
     int a;
-    float b;
+    //float b;
 
     while (istr >> token) {
 
@@ -767,7 +796,7 @@ void load_student_grades(std::vector<Student*> &students) {
       bool gradeable_enum_success = string_to_gradeable_enum(token,g);
 
       //std::cout << "my TOKEN " << " " << token << std::endl;
-
+      
       if (token == "rcs_id") {
         istr >> token;
         s->setUserName(token);
@@ -821,16 +850,42 @@ void load_student_grades(std::vector<Student*> &students) {
         int which;
         float value;
         std::string label;
-        ss >> which >> value >> label;
 
+
+
+        if (g == GRADEABLE_ENUM::HOMEWORK) {
+          // special case reading in a homework grade for a student
+          std::string hw_id;
+          ss >> hw_id;
+          std::string hw_name = ReadQuoted(ss); // not currently using this
+          ss >> value;
+          std::map<std::string,std::pair<int,std::string> >::iterator itr = HW_CORRESPONDENCES.find(hw_id);
+          assert (itr != HW_CORRESPONDENCES.end());
+          which = itr->second.first;
+          if (itr->second.second == "") {
+            itr->second.second = hw_name;
+          } else {
+            assert (itr->second.second == hw_name);
+          }
+        } else {
+          ss >> which >> value >> label;
+        }
+  
         if (which < GRADEABLES_FIRST[g]) {
+          std::cerr << s->getUserName() << " has a formatting problem " << std::endl;
           std::cerr << gradeable_to_string(g) << " " << which << " " << GRADEABLES_FIRST[g] << std::endl;
         }
         
         assert (which >= GRADEABLES_FIRST[g]);
         assert (value >= 0.0);
         
-        
+
+        if (g == GRADEABLE_ENUM::HOMEWORK &&
+            which >= 4) {
+          value = 0;
+        }
+
+
         // FIXME: this renaming should go away!!!
         if (which >= GRADEABLES_COUNT[g]+GRADEABLES_FIRST[g]) {
           if (g == GRADEABLE_ENUM::LAB) {
@@ -875,15 +930,30 @@ void load_student_grades(std::vector<Student*> &students) {
       
       
       else if (token == "days_late") {
-        istr >> token; 
-        if (token.size() < 4) {
+
+        std::string which_token;
+        istr >> which_token; 
+
+        /*
+          if (token.size() < 4) {
           std::cout << "problem with days late format for " << s->getUserName() << std::endl;
         }
-        assert(token.size() >= 4);
-        assert (token.substr(0,3) == "hw_");
-        int which = atoi(token.substr(3,token.size()-3).c_str())-1;
-        assert(which >= 0 && which < GRADEABLES_COUNT[GRADEABLE_ENUM::HOMEWORK]);
+        */
+        
+        std::map<std::string,std::pair<int,std::string> >::iterator itr = HW_CORRESPONDENCES.find(which_token);
+        assert (itr != HW_CORRESPONDENCES.end());
+        int which = itr->second.first;
+                
+        //std::cout << "WARNING! SKIPPING DAYS LATE! " << std::endl;
+
+        /*
+          assert(token.size() >= 4);
+          assert (token.substr(0,3) == "hw_");
+          int which = atoi(token.substr(3,token.size()-3).c_str())-1;
+          assert(which >= 0 && which < GRADEABLES_COUNT[GRADEABLE_ENUM::HOMEWORK]);
+        */
         istr >> a;
+
         if (a < 1 || a > 3) {
           std::cout << "suspicious late days (" << a << ") for student " << s->getUserName() << " on hw " << which << std::endl;
         }
@@ -894,6 +964,8 @@ void load_student_grades(std::vector<Student*> &students) {
           std::cout << "LATE DAYS " << a << " " << s->getUserName() << " " << token << std::endl;
         }
         s->incrLateDaysUsed(which,a);
+
+
 
       } 
 
@@ -1016,7 +1088,7 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
     ostr << "</table><br><br>\n";
     
     
-    bool any_notes = false;
+    //bool any_notes = false;
     
     
     end_table(ostr,true,students,S);
@@ -1095,13 +1167,13 @@ int main(int argc, char* argv[]) {
     std::sort(students.begin(),students.end(),by_section);
   } else if (sort_order == std::string("by_zone")) {
 
-    DISPLAY_FINAL_GRADE = false;
-    DISPLAY_MOSS_DETAILS = false;
-    DISPLAY_GRADE_DETAILS = false;
     DISPLAY_INSTRUCTOR_NOTES = false;
-    
     DISPLAY_EXAM_SEATING = true;
- 
+    DISPLAY_MOSS_DETAILS = false;
+    DISPLAY_FINAL_GRADE = false;
+    DISPLAY_GRADE_SUMMARY = false;
+    DISPLAY_GRADE_DETAILS = false;
+    DISPLAY_ICLICKER = false;
 
     std::sort(students.begin(),students.end(),by_name);
   } else if (sort_order == std::string("by_iclicker")) {

@@ -17,26 +17,7 @@
 #include "grade.h"
 
 
-#include "constants.h"
-
-
-
-extern std::vector<GRADEABLE_ENUM> ALL_GRADEABLES;
-
-extern std::vector<std::string> MESSAGES;
-
-extern std::map<int,std::string> sectionNames;
-extern std::map<std::string,std::string> sectionColors;
-
-extern std::map<Grade,int> grade_counts;
-extern std::map<Grade,float> grade_avg;
-
-extern int took_final;
-extern int auditors;
-
-
-extern float LATE_DAY_PERCENTAGE_PENALTY;
-
+#include "constants_and_globals.h"
 
 
 // ==========================================================
@@ -691,30 +672,30 @@ void output_line(std::ofstream &ostr,
       //*/
       ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
     }
-  }
-  for (int i = 0; i < ICLICKER_QUESTION_NAMES.size(); i++) {
-    
-    std::pair<std::string,float> answer = this_student->getIClickerAnswer(ICLICKER_QUESTION_NAMES[i]);
-    
-    if (for_instructor && this_student->getUserName() == "PERFECT") {
-      ostr << "<td align=center bgcolor=ffffff>" << ICLICKER_QUESTION_NAMES[i] << "</td>\n"; 
-
-    } else {
+    for (int i = 0; i < ICLICKER_QUESTION_NAMES.size(); i++) {
       
-      std::string thing = answer.first;
-      if (!for_instructor) {
-        thing = "&nbsp;";
-      }
-
-      if (answer.second == ICLICKER_CORRECT) {
-        ostr << "<td align=center bgcolor=aaffaa>" << thing << "</td>\n"; 
-      } else if (answer.second == ICLICKER_PARTICIPATED) {
-        ostr << "<td align=center bgcolor=ffffaa>" << thing << "</td>\n"; 
-      } else if (answer.second == ICLICKER_INCORRECT) {
-        ostr << "<td align=center bgcolor=ffaaaa>" << thing << "</td>\n"; 
+      std::pair<std::string,float> answer = this_student->getIClickerAnswer(ICLICKER_QUESTION_NAMES[i]);
+      
+      if (for_instructor && this_student->getUserName() == "PERFECT") {
+        ostr << "<td align=center bgcolor=ffffff>" << ICLICKER_QUESTION_NAMES[i] << "</td>\n"; 
+        
       } else {
-        assert (answer.second == ICLICKER_NOANSWER);
-        ostr << "<td align=center bgcolor=ffffff>&nbsp;</td>\n"; 
+        
+        std::string thing = answer.first;
+        if (!for_instructor) {
+          thing = "&nbsp;";
+        }
+        
+        if (answer.second == ICLICKER_CORRECT) {
+          ostr << "<td align=center bgcolor=aaffaa>" << thing << "</td>\n"; 
+        } else if (answer.second == ICLICKER_PARTICIPATED) {
+          ostr << "<td align=center bgcolor=ffffaa>" << thing << "</td>\n"; 
+        } else if (answer.second == ICLICKER_INCORRECT) {
+          ostr << "<td align=center bgcolor=ffaaaa>" << thing << "</td>\n"; 
+        } else {
+          assert (answer.second == ICLICKER_NOANSWER);
+          ostr << "<td align=center bgcolor=ffffff>&nbsp;</td>\n"; 
+        }
       }
     }
   }

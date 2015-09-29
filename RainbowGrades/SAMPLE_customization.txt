@@ -52,16 +52,19 @@ exam_title My Favorite CS Class, Test 1
 exam_date  Monday April 1st
 exam_time  6-7:50pm
 
+# Don't assign a zone if the student doesn't have at least this many points overall (probably dropped)
+min_overall_for_zone_assignment 1.0
+
 # Where should students go if they do not have a room assignment?
 exam_default_room  DCC 308
 
 
 
 
-exam_seating exam1_zone_counts.txt seating_exam_1.txt
-#exam_seating exam2_zone_counts.txt seating_exam_2.txt
-#exam_seating exam3_zone_counts.txt seating_exam_3.txt
-#exam_seating exam4_zone_counts.txt seating_exam_4.txt
+exam_seating exam1_zone_counts.txt exam1_seating.txt
+#exam_seating exam2_zone_counts.txt exam2_seating.txt
+#exam_seating exam3_zone_counts.txt exam3_seating.txt
+#exam_seating exam4_zone_counts.txt exam4_seating.txt
 
 
 

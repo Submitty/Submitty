@@ -4,7 +4,7 @@
 
 
 #include "student.h"
-#include "constants.h"
+#include "constants_and_globals.h"
 
 //==========================================================================
 
@@ -129,7 +129,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
       already_zoned++;
     } else if (!validSection(s->getSection())) {
       not_reg++;
-    } else if (s->overall() < 0.1) {
+    } else if (s->overall() < GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT) {
       no_grades++;
     } else {
       assert (next_za < randomized_available.size());

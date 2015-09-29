@@ -1,5 +1,7 @@
 #include "student.h"
 
+const std::string GradeColor(const std::string &grade);
+
 // =============================================================================================
 // =============================================================================================
 // CONSTRUCTOR
@@ -331,6 +333,18 @@ void Student::ManualGrade(const std::string &grade, const std::string &message) 
           grade == "F");
   manual_grade = grade;
   other_note += "awarding a " + grade + " because " + message;
+}
+
+
+void Student::outputgrade(std::ostream &ostr,bool flag_b4_moss,Student *lowest_d) const {
+  std::string g = grade(flag_b4_moss,lowest_d);
+  
+  std::string color = GradeColor(g);
+  if (moss_penalty < -0.01) {
+    ostr << "<td align=center bgcolor=" << color << ">" << g << " *</td>";
+  } else {
+    ostr << "<td align=center bgcolor=" << color << ">" << g << "</td>";
+  }
 }
 
 

@@ -13,6 +13,8 @@ enum iclicker_answer_enum { ICLICKER_NOANSWER, ICLICKER_INCORRECT, ICLICKER_PART
 
 extern std::vector<std::string> ICLICKER_QUESTION_NAMES;
 
+// ==========================================================
+
 class iClickerQuestion {
 public:
   iClickerQuestion(const std::string& f, int c, const std::string& ca) {
@@ -31,6 +33,8 @@ private:
   int column;
   std::string correct_answer;
 };
+
+// ==========================================================
 
 void MatchClickerRemotes(std::vector<Student*> &students, const std::string &remotes_filename);
 void AddClickerScores(std::vector<Student*> &students, std::vector<std::vector<iClickerQuestion> > iclicker_questions);
