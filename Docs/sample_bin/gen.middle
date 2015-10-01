@@ -4,7 +4,7 @@ use warnings;
 
 ## Intent: create apache configs for student repositories
 
-my $dir = '/var/lib/svn/class01';
+my $dir = '/var/lib/svn/course01';
 opendir(DIR, $dir) or die $!;
 while (my $file = readdir(DIR)) 
 {
@@ -17,7 +17,7 @@ while (my $file = readdir(DIR))
 		AuthExternal pwauth
 		<RequireAny>
 			require user $file
-			require group class01_tas_www
+			require group course01_tas_www
 		</RequireAny>
 	</Location>
 ";
