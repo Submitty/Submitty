@@ -26,6 +26,10 @@ float Tokens::grade() {
 }
 */
 
+#include "json.hpp"
+
+using json = nlohmann::json;
+
 Tokens::Tokens() :
   TestResults(1,""), num_tokens(0), tokensfound(0), partial(true), harsh(false) {
 }
@@ -33,17 +37,16 @@ Tokens::Tokens() :
 void Tokens::printJSON(std::ostream & file_out){
     std::string partial_str = (partial) ? "true" : "false";
 
-    file_out << "{\n\t\"tokens\": " << num_tokens << "," << std::endl;
-    file_out << "\t\"found\": [";
+	json j;
+	j["tokens"] = num_tokens;
+
     for(unsigned int i = 0; i < tokens_found.size(); i++){
-        file_out << tokens_found[i];
-        if(i != tokens_found.size() - 1){
-            file_out << ", ";
-        }
+		j["found"].push_back(tokens_found[i]);
     } 
-    file_out << " \t]," << std::endl;
-    file_out << "\t\"num_found\": " << tokensfound << "," << std::endl;
-    file_out << "\t\"partial\": " << partial_str << std::endl;
-    file_out << "}" << std::endl;
+
+	j["num_found"] = tokensfound;
+	j["partial"] = partial_str;
+
+	file_out << j;
     return;
 }
