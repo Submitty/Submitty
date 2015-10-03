@@ -100,7 +100,7 @@ foreach($db->rows() as $student_record) {
         if (!isset($row['score'])) {
             $row['score'] = -7000000;
         }
-        $student_output_text .= $row['rubric_submission_id'] . " \"" . $row['rubric_name'] . "\"" . $row['score'] . $nl;
+        $student_output_text .= "hw " . $row['rubric_submission_id'] . " \"" . $row['rubric_name'] . "\" " . $row['score'] . $nl;
         $late_days = $row['grade_days_late'];
         if (isset($exceptions[$row['id']])) {
             $late_days -= $exceptions[$row['id']];

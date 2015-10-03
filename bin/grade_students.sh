@@ -528,6 +528,19 @@ function grade_this_item {
 	# change permissions of all files created by untrusted in this directory (so hwcron can archive/grade them)
 	$HSS_INSTALL_DIR/bin/untrusted_execute /usr/bin/find $tmp -user untrusted -exec /bin/chmod o+r {} \;   >>  .submit_runner_output.txt 2>&1
 
+
+	# FIXME
+	# ugly cleanup dr memory stuff (not sure why this needs to be added now... was working last semester)
+	$HSS_INSTALL_DIR/bin/untrusted_execute /bin/rm -rf $tmp/symcache
+	$HSS_INSTALL_DIR/bin/untrusted_execute /bin/rm -rf $tmp/DrMemory-*
+	# need to revisit directory & file permissions, and decide who will be responsible for deleting this
+
+	# this didn't fix it (didn't give hwcron ability to delete these files
+	# also need to add execute on the directories...
+	#$HSS_INSTALL_DIR/bin/untrusted_execute /usr/bin/find $tmp -user untrusted -type d -exec /bin/chmod o+x {} \;   >>  .submit_runner_output.txt 2>&1
+
+
+
 	if [[ "$runner_error_code" -ne 0 ]] ;
 	then
 	    log_error "$NEXT_TO_GRADE" "RUNNER FAILURE CODE $runner_error_code"
