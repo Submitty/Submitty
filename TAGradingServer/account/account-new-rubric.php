@@ -219,7 +219,7 @@ HTML;
 
     $i = 0;
     $active = true;
-    foreach ($results_details['testcases'] as $testcase) {
+    foreach ($results_details['testcases'] as $k => $testcase) {
         $active_text = ($active) ? 'active' : '';
         $url = $BASE_URL."/account/iframe/test-pane.php?course={$_GET['course']}&testcases=".urlencode(json_encode($testcase))."&directory=".urlencode($results_details['directory']);
 
