@@ -82,11 +82,11 @@ foreach($db->rows() as $student_record) {
     $lab_grades = $lab_base;
     foreach($db->rows() as $row) {
         $lab_grades[$row['id']] = $row['score'];
-        //$student_output_text .= $row['lab_title'] . " " . $row['score'] . $nl;
     }
 
     foreach($lab_grades as $id => $score) {
-        $student_output_text .= $lab_titles[$id] . " " . floatval($score) . $nl;
+	$labid = "lab" . sprintf("%02d", $id);
+        $student_output_text .= 'lab ' . $labid . ' "' . $lab_titles[$id] . '" ' . floatval($score) . $nl;	
     }
 
     $exceptions = array();
@@ -116,7 +116,9 @@ foreach($db->rows() as $student_record) {
         if ($row['score'] <= 0) {
             continue;
         }
-        $student_output_text .= "test " . $row['test_number'] . " " . $row['score'] . " " . implode(" ", pgArrayToPhp($row['test_text'])) . $nl;
+	$testid = "test" . sprintf("%02d",$row['test_number']);
+	$testname = "Test " . $row['test_number'];
+        $student_output_text .= 'test ' . $testid . ' "' . $testname . '" ' . $row['score'] . " " . implode(" ", pgArrayToPhp($row['test_text'])) . $nl;
     }
 
     // ======================================================
