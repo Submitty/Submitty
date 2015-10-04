@@ -219,7 +219,7 @@ HTML;
 
     $i = 0;
     $active = true;
-    foreach ($results_details['testcases'] as $testcase) {
+    foreach ($results_details['testcases'] as $k => $testcase) {
         $active_text = ($active) ? 'active' : '';
         $url = $BASE_URL."/account/iframe/test-pane.php?course={$_GET['course']}&testcases=".urlencode(json_encode($testcase))."&directory=".urlencode($results_details['directory']);
 
@@ -227,7 +227,7 @@ HTML;
 
                     <div class="tab-pane {$active_text}" id="output-{$part}-{$i}">
                         <div style="width:95%; margin: auto auto auto auto; overflow-y:auto; overflow-x:hidden; padding-top:20px;">
-                            <iframe src="{$url}" id='iframe-{$part}-{$i}' width='750px' style='border: 0' onLoad="autoResize('iframe-{$part}-{$i}'); load_tab_icon('tab-{$part}-{$i}', 'iframe-{$part}-{$i}', '{$testcase['points_awarded']}', '{$rubric->config_details[$part]['testcases'][$k]['points']}'); ">
+                            <iframe src="{$url}" id='iframe-{$part}-{$i}' width='750px' style='border: 0' onLoad="autoResize('iframe-{$part}-{$i}'); load_tab_icon('tab-{$part}-{$i}', 'iframe-{$part}-{$i}', {$testcase['points_awarded']}, {$rubric->config_details[$part]['testcases'][$k]['points']}); ">
                             </iframe>
                             <br />
                             Logfile
