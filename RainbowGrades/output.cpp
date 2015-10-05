@@ -183,7 +183,10 @@ void colorit_major(std::ostream &ostr, const std::string& s) {
 void colorit_section(std::ostream &ostr,
                      int section, bool for_instructor, const std::string &color) {
 
-  std::string section_name = sectionNames[section];
+  std::string section_name;
+
+  if (validSection(section)) 
+    section_name = sectionNames[section];
   std::string section_color = sectionColors[section_name];
 
   if (section == 0) {
@@ -297,6 +300,12 @@ void start_table(std::ofstream &ostr, std::string &filename, bool for_instructor
     exit(0);
   }
 
+  Student* s = NULL;
+  if (rank != -1) {
+    s = students[rank];
+    assert (s != NULL);
+  }
+
 
   // -------------------------------------------------------------------------------
   // PRINT INSTRUCTOR SUPPLIED MESSAGES
@@ -304,19 +313,13 @@ void start_table(std::ofstream &ostr, std::string &filename, bool for_instructor
     ostr << "" << MESSAGES[i] << "<br>\n";
   }
   // get todays date
-  time_t now = time(0);  
-  struct tm * now2 = localtime( & now );
-  ostr << "<em>Information last updated: " 
-       << month << "/" 
-       << day << "/" 
-       << year << "</em><br>\n";
+  //time_t now = time(0);  
+  //struct tm * now2 = localtime( & now );
+  if (s != NULL) {
+    ostr << "<em>Information last updated: " << s->getLastUpdate() << "</em><br>\n";
+  }
   ostr << "<p>&nbsp;</p>\n";
 
-
-  if (rank != -1) {
-    Student *s = students[rank];
-    assert (s != NULL);
-  }
 
   ostr << "<p>&nbsp;</p>\n";
 
@@ -390,7 +393,7 @@ void start_table(std::ofstream &ostr, std::string &filename, bool for_instructor
     for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
       GRADEABLE_ENUM g = ALL_GRADEABLES[i];
       ostr << "<td align=center bgcolor=888888>&nbsp;</td>"          
-           << "<td align=center colspan=" << GRADEABLES_COUNT[g] << ">" <<  gradeable_to_string(g)<< "S";
+           << "<td align=center colspan=" << GRADEABLES[g].getCount() << ">" <<  gradeable_to_string(g)<< "S";
       if (g == GRADEABLE_ENUM::HOMEWORK) {
         ostr << "<br>* = 1 late day used";
       }
@@ -398,7 +401,7 @@ void start_table(std::ofstream &ostr, std::string &filename, bool for_instructor
       if (g == GRADEABLE_ENUM::TEST) {
         if (TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
           ostr << "<td align=center bgcolor=888888>&nbsp;</td>" 
-               << "<td align=center colspan=" << GRADEABLES_COUNT[g] << ">ADJUSTED TESTS</td>";
+               << "<td align=center colspan=" << GRADEABLES[g].getCount() << ">ADJUSTED TESTS</td>";
         }
       }
     }
@@ -429,7 +432,7 @@ void start_table(std::ofstream &ostr, std::string &filename, bool for_instructor
 void output_line_helper(std::ofstream &ostr, GRADEABLE_ENUM g,
                         Student *this_student,
                         Student *sp, Student *sa, Student *sb, Student *sc, Student *sd) {
-  for (int i = 0; i < GRADEABLES_COUNT[g]; i++) {
+  for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
     if (i == 0) ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
     ostr << std::setprecision(2) << std::fixed;
     colorit(ostr,
@@ -456,6 +459,13 @@ void output_line(std::ofstream &ostr,
   if (this_student->getParticipation() + this_student->getUnderstanding() >= 9) {
     //std::cout << "recommend " << this_student->getUserName() << " " << myTA(this_student->getSection()) << std::endl;
   }
+
+  /*
+  if (this_student->overall() < 11 && validSection(this_student->getSection()) && this_student->getUserName() != "" &&
+      for_instructor) {
+    std::cout << "warning " << this_student->getUserName() << " failing(1)" << std::endl;
+  }
+  */
 
 
   // open the row
@@ -587,7 +597,7 @@ void output_line(std::ofstream &ostr,
     output_line_helper(ostr,GRADEABLE_ENUM::READING,this_student,sp,sa,sb,sc,sd);
     output_line_helper(ostr,GRADEABLE_ENUM::EXERCISE,this_student,sp,sa,sb,sc,sd);
     output_line_helper(ostr,GRADEABLE_ENUM::LAB,this_student,sp,sa,sb,sc,sd);
-    for (int i = 0; i < GRADEABLES_COUNT[GRADEABLE_ENUM::HOMEWORK]; i++) {
+    for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(); i++) {
       if (i == 0) ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
       ostr << std::setprecision(2) << std::fixed;
 
@@ -609,9 +619,9 @@ void output_line(std::ofstream &ostr,
 
     output_line_helper(ostr,GRADEABLE_ENUM::PROJECT,this_student,sp,sa,sb,sc,sd);
 
-    if (GRADEABLES_COUNT[GRADEABLE_ENUM::TEST] > 0) {
+    if (GRADEABLES[GRADEABLE_ENUM::TEST].getCount() > 0) {
       ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
-      for (int i = 0; i < GRADEABLES_COUNT[GRADEABLE_ENUM::TEST]; i++) {
+      for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::TEST].getCount(); i++) {
         colorit(ostr,
                 this_student->getGradeableValue(GRADEABLE_ENUM::TEST,i),
                 sp->getGradeableValue(GRADEABLE_ENUM::TEST,i),
@@ -622,15 +632,15 @@ void output_line(std::ofstream &ostr,
       }
       if (TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
         ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
-        for (int i = 0; i < GRADEABLES_COUNT[GRADEABLE_ENUM::TEST]; i++) {
+        for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::TEST].getCount(); i++) {
           colorit(ostr,this_student->adjusted_test(i),sp->adjusted_test(i),sa->adjusted_test(i),sb->adjusted_test(i),sc->adjusted_test(i),sd->adjusted_test(i));
         }
       }
     }
 
-    if (GRADEABLES_COUNT[GRADEABLE_ENUM::EXAM] > 0) {
+    if (GRADEABLES[GRADEABLE_ENUM::EXAM].getCount() > 0) {
       ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
-      for (int i = 0; i < GRADEABLES_COUNT[GRADEABLE_ENUM::EXAM]; i++) {
+      for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::EXAM].getCount(); i++) {
         colorit(ostr,
                 this_student->getGradeableValue(GRADEABLE_ENUM::EXAM,i),
                 sp->getGradeableValue(GRADEABLE_ENUM::EXAM,i),

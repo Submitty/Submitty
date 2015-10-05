@@ -2,35 +2,61 @@
 #define _ICLICKER_H_
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
+#include <iomanip>
+
+
+#define MAX_LECTURES 28
 
 
 class Student;
+
+class Date {
+public:
+  int year;
+  int month;
+  int day;
+
+  std::string getStringRep() {
+    std::stringstream ss;
+    ss << std::setw(4)  << year 
+       << "-" 
+       << std::setw(2)  << std::setfill('0') << month 
+       << "-"
+       << std::setw(2)  << std::setfill('0') << day;
+
+    return ss.str();
+  }
+};
 
 
 enum iclicker_answer_enum { ICLICKER_NOANSWER, ICLICKER_INCORRECT, ICLICKER_PARTICIPATED, ICLICKER_CORRECT };
 
 extern std::vector<std::string> ICLICKER_QUESTION_NAMES;
 
+extern std::map<int,Date> LECTURE_DATE_CORRESPONDENCES;
+
 // ==========================================================
 
 class iClickerQuestion {
 public:
-  iClickerQuestion(const std::string& f, int c, const std::string& ca) {
+  iClickerQuestion(const std::string& f, int q, const std::string& ca) {
     filename = f;
-    column = c;
+    which_question = q;
+    assert (which_question >= 0 && which_question < 8);
     correct_answer = ca;
   }
 
   const std::string& getFilename() const { return filename; }
-  int getColumn() const { return column; }
+  int getColumn() const { return 4 + which_question*6; }
   bool participationQuestion() const { return correct_answer == "ABCDE"; }
   bool isCorrectAnswer(char c) { return correct_answer.find(c) != std::string::npos; }
 
 private:
   std::string filename;
-  int column;
+  int which_question;
   std::string correct_answer;
 };
 

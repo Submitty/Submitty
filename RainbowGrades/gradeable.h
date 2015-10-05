@@ -24,13 +24,63 @@ inline std::string gradeable_to_string(const GRADEABLE_ENUM &g) {
 }
 
 
+// ===============================================================================
+
+class Gradeable {
+
+public:
+
+  // CONSTRUTORS
+  Gradeable() { count=0;percent=0;maximum=0; remove_lowest=0; }
+  Gradeable(int c, float p, float m) : count(c),percent(p),maximum(m) { remove_lowest=0; }
+
+  // ACCESSORS
+  int getCount() const { return count; }
+  float getPercent() const { return percent; }
+  float getMaximum() const { return maximum; }
+  int getRemoveLowest() const { return remove_lowest; }
+
+  bool hasCorrespondence(const std::string &id) {
+    return (correspondences.find(id) != correspondences.end());
+  }
+
+  const std::pair<int,std::string>& getCorrespondence(const std::string& id) {
+    assert (hasCorrespondence(id));
+    return correspondences.find(id)->second;
+  }
+
+  // MODIFIERS
+  void setRemoveLowest(int r) { remove_lowest=r; }
+
+  int setCorrespondence(const std::string& id) {
+    assert (!hasCorrespondence(id));
+    int index = correspondences.size();
+    correspondences[id] = std::make_pair(index,"");
+    return index;
+  }
+
+  void setCorrespondenceName(const std::string& id, const std::string& name) {
+    assert (hasCorrespondence(id));
+    assert (correspondences[id].second == "");
+    correspondences[id].second = name;
+  }
+
+
+private:
+
+  // REPRESENTATION
+  int count;
+  float percent;
+  float maximum;
+  int remove_lowest;
+  std::map<std::string,std::pair<int,std::string> > correspondences;
+};
+
+// ===============================================================================
+
 extern std::vector<GRADEABLE_ENUM>    ALL_GRADEABLES;
 
-extern std::map<GRADEABLE_ENUM,int>   GRADEABLES_COUNT;
-extern std::map<GRADEABLE_ENUM,float> GRADEABLES_FIRST;
-extern std::map<GRADEABLE_ENUM,float> GRADEABLES_PERCENT;
-extern std::map<GRADEABLE_ENUM,float> GRADEABLES_MAXIMUM;
-extern std::map<GRADEABLE_ENUM,int>   GRADEABLES_REMOVE_LOWEST;
+extern std::map<GRADEABLE_ENUM,Gradeable>  GRADEABLES;
 
 
 #endif

@@ -18,17 +18,17 @@ Student::Student() {
   independentstudy = false;
 
   // grade data
-  all_values[GRADEABLE_ENUM::READING]       = std::vector<float>(GRADEABLES_COUNT[GRADEABLE_ENUM::READING],0);
-  all_values[GRADEABLE_ENUM::EXERCISE]      = std::vector<float>(GRADEABLES_COUNT[GRADEABLE_ENUM::EXERCISE],0);
-  all_values[GRADEABLE_ENUM::LAB]           = std::vector<float>(GRADEABLES_COUNT[GRADEABLE_ENUM::LAB],0);
-  all_values[GRADEABLE_ENUM::HOMEWORK]      = std::vector<float>(GRADEABLES_COUNT[GRADEABLE_ENUM::HOMEWORK],0);
-  all_values[GRADEABLE_ENUM::PROJECT]       = std::vector<float>(GRADEABLES_COUNT[GRADEABLE_ENUM::PROJECT],0);
-  all_values[GRADEABLE_ENUM::PARTICIPATION] = std::vector<float>(GRADEABLES_COUNT[GRADEABLE_ENUM::PARTICIPATION],0);
-  all_values[GRADEABLE_ENUM::TEST]          = std::vector<float>(GRADEABLES_COUNT[GRADEABLE_ENUM::TEST],0);
-  all_values[GRADEABLE_ENUM::EXAM]          = std::vector<float>(GRADEABLES_COUNT[GRADEABLE_ENUM::EXAM],0);
+  all_values[GRADEABLE_ENUM::READING]       = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::READING].getCount(),0);
+  all_values[GRADEABLE_ENUM::EXERCISE]      = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::EXERCISE].getCount(),0);
+  all_values[GRADEABLE_ENUM::LAB]           = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::LAB].getCount(),0);
+  all_values[GRADEABLE_ENUM::HOMEWORK]      = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(),0);
+  all_values[GRADEABLE_ENUM::PROJECT]       = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::PROJECT].getCount(),0);
+  all_values[GRADEABLE_ENUM::PARTICIPATION] = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::PARTICIPATION].getCount(),0);
+  all_values[GRADEABLE_ENUM::TEST]          = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),0);
+  all_values[GRADEABLE_ENUM::EXAM]          = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::EXAM].getCount(),0);
   // (iclicker defaults to empty map)
-  hws_late_days                             = std::vector<float>(GRADEABLES_COUNT[GRADEABLE_ENUM::HOMEWORK],0);
-  zones = std::vector<std::string>(GRADEABLES_COUNT[GRADEABLE_ENUM::TEST],"");
+  hws_late_days                             = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(),0);
+  zones = std::vector<std::string>(GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),"");
   moss_penalty = 0;
   cached_hw = -1;
 
@@ -65,7 +65,7 @@ Student* GetStudent(const std::vector<Student*> &students, const std::string& us
 // accessor & modifier for grade data
 
 float Student::getGradeableValue(GRADEABLE_ENUM g, int i) const {
-  assert (i >= 0 && i < GRADEABLES_COUNT[g]);
+  assert (i >= 0 && i < GRADEABLES[g].getCount());
   std::map<GRADEABLE_ENUM,std::vector<float> >::const_iterator itr = all_values.find(g);
   assert (itr != all_values.end());
   assert (itr->second.size() > i);
@@ -89,7 +89,7 @@ float Student::getGradeableValue(GRADEABLE_ENUM g, int i) const {
 
 
 void Student::setGradeableValue(GRADEABLE_ENUM g, int i, float value) {
-  assert (i >= 0 && i < GRADEABLES_COUNT[g]);
+  assert (i >= 0 && i < GRADEABLES[g].getCount());
   std::map<GRADEABLE_ENUM,std::vector<float> >::iterator itr = all_values.find(g);
   assert (itr != all_values.end());
   assert (itr->second.size() > i);
@@ -100,9 +100,9 @@ void Student::setGradeableValue(GRADEABLE_ENUM g, int i, float value) {
 // GRADER CALCULATION HELPER FUNCTIONS
 
 float Student::GradeablePercent(GRADEABLE_ENUM g) const {
-  if (GRADEABLES_COUNT[g] == 0) return 0;
-  assert (GRADEABLES_MAXIMUM[g] > 0);
-  assert (GRADEABLES_PERCENT[g] > 0);
+  if (GRADEABLES[g].getCount() == 0) return 0;
+  assert (GRADEABLES[g].getMaximum() > 0);
+  assert (GRADEABLES[g].getPercent() > 0);
 
   // special rules for tests
   if (g == GRADEABLE_ENUM::TEST && TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
@@ -114,34 +114,34 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
 
   // collect the scores in a vector
   std::vector<float> scores;
-  for (int i = 0; i < GRADEABLES_COUNT[g]; i++) {
+  for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
     scores.push_back(getGradeableValue(g,i));
   }
 
   // sort the scores (smallest first)
   std::sort(scores.begin(),scores.end());
 
-  assert (GRADEABLES_REMOVE_LOWEST[g] >= 0 &&
-          GRADEABLES_REMOVE_LOWEST[g] < GRADEABLES_COUNT[g]);
+  assert (GRADEABLES[g].getRemoveLowest() >= 0 &&
+          GRADEABLES[g].getRemoveLowest() < GRADEABLES[g].getCount());
 
   // sum the remaining (higher) scores
   float sum = 0;
-  for (int i = GRADEABLES_REMOVE_LOWEST[g]; i < GRADEABLES_COUNT[g]; i++) {
+  for (int i = GRADEABLES[g].getRemoveLowest(); i < GRADEABLES[g].getCount(); i++) {
     sum += scores[i];
   }
 
-  return 100*GRADEABLES_PERCENT[g]*sum/GRADEABLES_MAXIMUM[g];
+  return 100*GRADEABLES[g].getPercent()*sum/GRADEABLES[g].getMaximum();
 }
 
 
 float Student::adjusted_test(int i) const {
-  assert (i >= 0 && i <  GRADEABLES_COUNT[GRADEABLE_ENUM::TEST]);
+  assert (i >= 0 && i <  GRADEABLES[GRADEABLE_ENUM::TEST].getCount());
   float a = getGradeableValue(GRADEABLE_ENUM::TEST,i);
   float b;
-  if (i+1 < GRADEABLES_COUNT[GRADEABLE_ENUM::TEST]) {
+  if (i+1 < GRADEABLES[GRADEABLE_ENUM::TEST].getCount()) {
     b = getGradeableValue(GRADEABLE_ENUM::TEST,i+1);
   } else {
-    assert (GRADEABLES_COUNT[GRADEABLE_ENUM::EXAM] == 1);
+    assert (GRADEABLES[GRADEABLE_ENUM::EXAM].getCount() == 1);
     b = getGradeableValue(GRADEABLE_ENUM::EXAM,0);
     // HACK  need to scale the final exam!
     b *= 0.6667;
@@ -154,17 +154,17 @@ float Student::adjusted_test(int i) const {
 
 float Student::adjusted_test_pct() const {
   float sum = 0;
-  for (int i = 0; i < GRADEABLES_COUNT[GRADEABLE_ENUM::TEST]; i++) {
+  for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::TEST].getCount(); i++) {
     sum += adjusted_test(i);
   }
-  float answer =  100 * GRADEABLES_PERCENT[GRADEABLE_ENUM::TEST] * sum / float (GRADEABLES_MAXIMUM[GRADEABLE_ENUM::TEST]);
+  float answer =  100 * GRADEABLES[GRADEABLE_ENUM::TEST].getPercent() * sum / float (GRADEABLES[GRADEABLE_ENUM::TEST].getMaximum());
   return answer;
 }
 
 
 float Student::lowest_test_counts_half_pct() const {
 
-  int num_tests = GRADEABLES_COUNT[GRADEABLE_ENUM::TEST];
+  int num_tests = GRADEABLES[GRADEABLE_ENUM::TEST].getCount();
   assert (num_tests > 0);
 
   // first, collect & sort the scores
@@ -186,41 +186,27 @@ float Student::lowest_test_counts_half_pct() const {
   sum *= float(num_tests) / weight_total;
   
   // scale to percent;
-  return 100 * GRADEABLES_PERCENT[GRADEABLE_ENUM::TEST] * sum / float (GRADEABLES_MAXIMUM[GRADEABLE_ENUM::TEST]);
+  return 100 * GRADEABLES[GRADEABLE_ENUM::TEST].getPercent() * sum / float (GRADEABLES[GRADEABLE_ENUM::TEST].getMaximum());
 }
 
 
 // =============================================================================================
 // =============================================================================================
 
-int Student::getAllowedLateDays(int rubric_id) const {
+int Student::getAllowedLateDays(int which_lecture) const {
   if (getSection() == 0) return 0;
   
   int answer = 2;
   
-  int which_lecture=0;
-  switch (rubric_id) {
-  case  1: which_lecture=3;  break;
-  case  2: which_lecture=5;  break;
-  case  3: which_lecture=6;  break;
-  case  4: which_lecture=10; break;
-  case  5: which_lecture=12; break;
-  case  6: which_lecture=16; break;
-  case  7: which_lecture=18; break;
-  case  8: which_lecture=20; break;
-  case  9: which_lecture=24; break;
-  case 10: which_lecture=26; break;
-  default: which_lecture=100; break;
-  }
-  
-  // average 3.5 questions per lecture 2-25 ~= 84 clicker questions
-  //   25 questions => 3 late days
-  //   50 questions => 4 late days
-  //   75 qustions  => 5 late days
+  // average 4 questions per lecture 2-28 ~= 112 clicker questions
+  //   30 questions => 3 late days
+  //   60 questions => 4 late days
+  //   90 qustions  => 5 late days
   
   float total = getIClickerTotal(which_lecture,0);
   
-  return answer += int(total / 25);
+  //return answer += int(total / 25);
+  return answer += int(total / 30); //25);
   
 }
 
@@ -228,14 +214,14 @@ int Student::getAllowedLateDays(int rubric_id) const {
 // get the used late days for a particular homework
 int Student::getUsedLateDays(int which) const {
   if (getSection() == 0) return 0;
-  assert (which >= 0 && which < GRADEABLES_COUNT[GRADEABLE_ENUM::HOMEWORK]);
+  assert (which >= 0 && which < GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount());
   return hws_late_days[which];
 }
 
 // get the total used late days
 int Student::getUsedLateDays() const {
   int answer = 0;
-  for (int i = 0; i < GRADEABLES_COUNT[GRADEABLE_ENUM::HOMEWORK]; i++) {
+  for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(); i++) {
     answer += getUsedLateDays(i);
   }
   return answer;
@@ -352,7 +338,7 @@ void Student::outputgrade(std::ostream &ostr,bool flag_b4_moss,Student *lowest_d
 
 // zones for exams...
 const std::string& Student::getZone(int i) const {
-  assert (i >= 0 && i < GRADEABLES_COUNT[GRADEABLE_ENUM::TEST]); return zones[i]; 
+  assert (i >= 0 && i < GRADEABLES[GRADEABLE_ENUM::TEST].getCount()); return zones[i]; 
 }
 
 

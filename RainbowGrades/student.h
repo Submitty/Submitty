@@ -36,6 +36,8 @@ public:
   const std::string& getMajor1()        const { return major1; }
   const std::string& getMajor2()        const { return major2; }
 
+  const std::string& getLastUpdate()    const { return lastUpdate; }
+
   // registration status
   int getSection()           const { return section; }
   bool getAudit()            const { return audit; }
@@ -45,7 +47,7 @@ public:
   // grade data
   float getGradeableValue(GRADEABLE_ENUM g, int i) const;
   const std::string& getZone(int i) const;
-  int getAllowedLateDays(int rubric_id) const;
+  int getAllowedLateDays(int which_lecture) const;
   int getUsedLateDays() const;
   int getUsedLateDays(int which) const;
   float getMossPenalty() const { return moss_penalty; }
@@ -75,6 +77,8 @@ public:
   void setPreferredName(const std::string &s) { preferred=s; }
   void setLastName(const std::string &s)      { last=s; }
 
+  void setLastUpdate(const std::string &s)    { lastUpdate = s; }
+
   // registration status
   void setSection(int x) { section = x; }
   void setAudit() { audit = true; }
@@ -84,7 +88,7 @@ public:
   // grade data
   void setTestZone(int which_test, const std::string &zone)  { zones[which_test] = zone; }
   void setGradeableValue(GRADEABLE_ENUM g, int i, float value);
-  void incrLateDaysUsed(int hw, int x) { hws_late_days[hw] += x; }
+  void incrLateDaysUsed(int i, int x) { hws_late_days[i] += x; }
   void mossify(int hw, float penalty);
 
   // other grade-like data
@@ -141,6 +145,8 @@ private:
   std::string year;
   std::string major1;
   std::string major2;
+
+  std::string lastUpdate;
 
   // registration status
   int section;

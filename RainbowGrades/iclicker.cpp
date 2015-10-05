@@ -9,14 +9,40 @@
 extern std::vector<std::string> ICLICKER_QUESTION_NAMES;
 extern float MAX_ICLICKER_TOTAL;
 
+std::map<int,Date> LECTURE_DATE_CORRESPONDENCES;
+
 Student* GetStudent(const std::vector<Student*> &students, const std::string& name);
+
+
+Date dateFromFilename(const std::string& filename_with_directory) {
+  
+  std::string filename = filename_with_directory;
+  while (true) {
+    int pos = filename.find('/');
+    if (pos == std::string::npos) break;
+    filename = filename.substr(pos+1,filename.size()-pos-1);
+  }
+
+  assert (filename.size() == 14);
+  assert (filename[4] == '_');
+  assert (filename[7] == '_');
+  assert (filename.substr(10,4) == ".csv");
+
+  Date answer;
+
+  answer.year  = atoi(filename.substr(0,4).c_str());
+  answer.month = atoi(filename.substr(5,2).c_str());
+  answer.day   = atoi(filename.substr(8,2).c_str());
+
+  return answer;
+}
+
 
 std::string ReadQuoted(std::istream &istr) {
   char c;
   std::string answer;
-  bool success = true;
-  istr >> c;
-  if (!success || c != '"') {
+  //bool success = true;
+  if (  !(istr >> c) || c != '"') {
     //std::cout << success << " OOPS not quote '" << c << "'" << std::endl;
   }
 
@@ -58,6 +84,11 @@ void MatchClickerRemotes(std::vector<Student*> &students, const std::string &rem
     assert (s != NULL);
     s->setRemoteID(remote);
 
+    if (GLOBAL_CLICKER_MAP.find(remote) != GLOBAL_CLICKER_MAP.end()) {
+      std::cout << "ERROR!  already have this clicker assigned " << remote << " " << s->getUserName() << std::endl;
+    }
+
+
     assert (GLOBAL_CLICKER_MAP.find(remote) == GLOBAL_CLICKER_MAP.end());
     GLOBAL_CLICKER_MAP[remote] = username;
   }
@@ -89,7 +120,12 @@ void AddClickerScores(std::vector<Student*> &students, std::vector<std::vector<i
 MAX_ICLICKER_TOTAL += 1.0;
 
       std::ifstream istr(question.getFilename());
-      std::cout << question.getFilename();// << std::endl;
+
+      if (LECTURE_DATE_CORRESPONDENCES.find(which_lecture) ==
+          LECTURE_DATE_CORRESPONDENCES.end()) {
+        Date date = dateFromFilename(question.getFilename());
+        LECTURE_DATE_CORRESPONDENCES[which_lecture] = date;
+      }
 
       assert (istr);
       char line_helper[5000];
@@ -108,7 +144,8 @@ MAX_ICLICKER_TOTAL += 1.0;
         //std::cout << "ITEM " << item << " " << item.size() << std::endl;
         assert (item.size() == 1);
 
-        bool correct = question.participationQuestion() || question.isCorrectAnswer(item[0]);
+        //bool correct = question.participationQuestion() || question.isCorrectAnswer(item[0]);
+
         //std::cout << "ITEM " << remoteid << " " << item << "  " << participate << " " << correct << std::endl;
         std::map<std::string,std::string>::iterator itr = GLOBAL_CLICKER_MAP.find(remoteid);
         if (itr == GLOBAL_CLICKER_MAP.end()) {
