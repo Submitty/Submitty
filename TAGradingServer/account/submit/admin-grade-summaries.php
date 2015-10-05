@@ -69,11 +69,18 @@ foreach($db->rows() as $student_record) {
 
     $params = array($student_id);
 
+
     // WRITE STUDENTS NAME AT TOP OF REPORT FILE
     $student_output_text .= "rcs_id " . $student_rcs . $nl;
     $student_output_text .= "first_name " . $student_first_name . $nl;
     $student_output_text .= "last_name " . $student_last_name . $nl;
     $student_output_text .= "section " . $student_section . $nl;
+
+    // late update date (choice of format)
+    //                                             Sunday, October 4, 2015 
+    $student_output_text .= "last_update " . date("l, F j, Y") .$nl;
+    //                                             2015 09 29
+    // $student_output_text .= "last_update " . date("Y m d") . $nl;
 
 
     $params = array($student_rcs);
