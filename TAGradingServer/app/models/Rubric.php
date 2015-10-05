@@ -214,7 +214,7 @@ WHERE s.student_rcs=?", array($this->rubric_details['rubric_due_date'], $this->s
 
             $params = array($this->student_rcs, $this->rubric_details['rubric_due_date']);
             Database::query("
-SELECT (SUM(g.grade_days_late) - SUM(s.ex_late_days)) as used_late_days
+SELECT (SUM(g.grade_days_late) - COALESCE(SUM(s.ex_late_days),0)) as used_late_days
 FROM grades as g
     LEFT JOIN
     (

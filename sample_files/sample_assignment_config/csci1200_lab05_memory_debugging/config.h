@@ -6,6 +6,11 @@
 #define TOTAL_POINTS 14
 #define AUTO_POINTS 14
 
+// drmemory_path is defined in TestCase.h
+std::string drmemory_flags = " -m32 -g ";
+
+#define ASSIGNMENT_MESSAGE "The homework submission area & autograding points for Lab 5 are just practice.<br>The only grades for Lab 5 are the 3 checkpoints recorded by your TA & mentors."
+
 // ===================================================================================
 
 std::vector<TestCase> testcases
@@ -16,7 +21,7 @@ std::vector<TestCase> testcases
   TestCase::MakeCompilation
   (
    "Compilation of Submitted Files (for Dr. Memory): g++ -m32 -g -Wall *cpp -o submitted_32.out",
-   "/usr/bin/clang++ -m32 -g -Wall -o submitted_32.out -- *.cpp",
+   "/usr/bin/clang++ " + drmemory_flags + " -Wall -o submitted_32.out -- *.cpp",
    "submitted_32.out",	
    TestCasePoints(2)
    ),
@@ -36,7 +41,7 @@ TestCase::MakeTestCase
   (
    "Under Dr Memory",
    "drmemory -brief -- ./submitted_32.out",
-   "/projects/submit3/drmemory/bin/drmemory  -brief -- ./submitted_32.out",
+   drmemory_path + " -brief -- ./submitted_32.out",
    TestCasePoints(5),
    {new TestCaseComparison(&errorIfEmpty,"STDOUT.txt","STDOUT"),
        new TestCaseTokens(&searchToken,"STDERR.txt","STDERR", std::vector<std::string>(1,std::string("NO ERRORS FOUND:")))}
