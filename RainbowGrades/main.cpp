@@ -1187,89 +1187,63 @@ int main(int argc, char* argv[]) {
   // ======================================================================
   // SUGGEST CURVES
 
-  for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(); i++) {
-    std::cout << "HOMEWORK " << i+1 << " statistics & suggested curve" << std::endl;
-    std::vector<float> scores;
-    for (int S = 0; S < students.size(); S++) {
-      if (students[S]->getSection() > 0 && students[S]->getGradeableValue(GRADEABLE_ENUM::HOMEWORK,i) > 0) {
-        scores.push_back(students[S]->getGradeableValue(GRADEABLE_ENUM::HOMEWORK,i));
+  for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
+    GRADEABLE_ENUM g = ALL_GRADEABLES[i];
+
+    for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
+      
+      std::string gradeable_id = GRADEABLES[g].getID(i);
+      if (gradeable_id == "") continue;
+      
+      const std::string& gradeable_name = GRADEABLES[g].getCorrespondence(gradeable_id).second;
+      
+      std::cout << gradeable_to_string(g) << " " << gradeable_id << " " << gradeable_name/* << " statistics & suggested curve"*/ << std::endl;
+      std::vector<float> scores;
+      
+      std::map<int, int> section_counts;
+      
+      for (int S = 0; S < students.size(); S++) {
+        if (students[S]->getSection() > 0 && students[S]->getGradeableValue(g,i) > 0) {
+          scores.push_back(students[S]->getGradeableValue(g,i));
+          section_counts[students[S]->getSection()]++;
+        }
       }
+      if (scores.size() > 0) {
+        //std::cout << "   " << scores.size() << " submitted" << std::endl;
+        std::sort(scores.begin(),scores.end());
+        float sum = 0;
+        for (int i = 0; i < scores.size(); i++) {
+          sum+=scores[i];
+        }
+        float average = sum / float(scores.size());
+        std::cout << "    average=" << std::setprecision(2) << std::fixed << average;
+        sum = 0;
+        for (int i = 0; i < scores.size(); i++) {
+          sum+=(average-scores[i])*(average-scores[i]);
+        }
+        float stddev = sqrt(sum/float(scores.size()));
+        std::cout << "    stddev=" << std::setprecision(2) << std::fixed << stddev;
+
+        std::cout << "    suggested curve:";
+        
+        std::cout << "    A- cutoff=" << scores[int(0.70*scores.size())];
+        std::cout << "    B- cutoff=" << scores[int(0.45*scores.size())];
+        std::cout << "    C- cutoff=" << scores[int(0.20*scores.size())];
+        std::cout << "    D  cutoff=" << scores[int(0.10*scores.size())];
+        std::cout << std::endl;
+      }
+      
+      
+      int total = 0;
+      std::cout << "   ";
+      for (std::map<int,int>::iterator itr = section_counts.begin(); itr != section_counts.end(); itr++) {
+        std::cout << " sec#" << itr->first << "=" << itr->second << "  ";
+        total += itr->second;
+      }
+      std::cout << "  TOTAL = " << total << std::endl;
+      
+      
     }
-    if (scores.size() > 0) {
-      std::cout << "   " << scores.size() << " submitted" << std::endl;
-      std::sort(scores.begin(),scores.end());
-      float sum = 0;
-      for (int i = 0; i < scores.size(); i++) {
-        sum+=scores[i];
-      }
-      float average = sum / float(scores.size());
-      std::cout << "    average " << average << std::endl;
-      sum = 0;
-      for (int i = 0; i < scores.size(); i++) {
-        sum+=(average-scores[i])*(average-scores[i]);
-      }
-      float stddev = sqrt(sum/float(scores.size()));
-      std::cout << "    stddev " << stddev << std::endl;
-
-      std::cout << "    A- cutoff " << scores[int(0.7*scores.size())] << std::endl;
-      std::cout << "    B- cutoff " << scores[int(0.45*scores.size())] << std::endl;
-      std::cout << "    C- cutoff " << scores[int(0.2*scores.size())] << std::endl;
-      std::cout << "    D  cutoff " << scores[int(0.1*scores.size())] << std::endl;
-
-
-    }
-  }
-
-
-
-
-
-
-
-  for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::TEST].getCount(); i++) {
-    std::cout << "TEST " << i+1 << std::endl;
-    std::vector<float> scores;
-
-    std::map<int, int> section_counts;
-
-    for (int S = 0; S < students.size(); S++) {
-      if (students[S]->getSection() > 0 && students[S]->getGradeableValue(GRADEABLE_ENUM::TEST,i) > 0) {
-        scores.push_back(students[S]->getGradeableValue(GRADEABLE_ENUM::TEST,i));
-        section_counts[students[S]->getSection()]++;
-      }
-    }
-    if (scores.size() > 0) {
-      std::cout << "   " << scores.size() << " tests" << std::endl;
-      std::sort(scores.begin(),scores.end());
-      float sum = 0;
-      for (int i = 0; i < scores.size(); i++) {
-        sum+=scores[i];
-      }
-      float average = sum / float(scores.size());
-      std::cout << "    average " << average << std::endl;
-      sum = 0;
-      for (int i = 0; i < scores.size(); i++) {
-        sum+=(average-scores[i])*(average-scores[i]);
-      }
-      float stddev = sqrt(sum/float(scores.size()));
-      std::cout << "    stddev " << stddev << std::endl;
-
-      std::cout << "    A- cutoff " << scores[int(0.7*scores.size())] << std::endl;
-      std::cout << "    B- cutoff " << scores[int(0.45*scores.size())] << std::endl;
-      std::cout << "    C- cutoff " << scores[int(0.2*scores.size())] << std::endl;
-      std::cout << "    D  cutoff " << scores[int(0.1*scores.size())] << std::endl;
-
-      std::cout << "    max " << scores.back() << std::endl;
-      std::cout << "    min " << scores.front() << std::endl;
-    }
-
-    int total = 0;
-    for (std::map<int,int>::iterator itr = section_counts.begin(); itr != section_counts.end(); itr++) {
-      std::cout << "SECTION " << std::setw(2) << itr->first << "  has this # of tests:  " << std::setw(2) << itr->second << std::endl;
-      total += itr->second;
-    }
-    std::cout << "TOTAL = " << total << std::endl;
-
   }
 }
 
