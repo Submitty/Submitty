@@ -92,7 +92,14 @@ foreach($db->rows() as $student_record) {
     }
 
     foreach($lab_grades as $id => $score) {
-	$labid = "lab" . sprintf("%02d", $id);
+    
+	// there is probbaly a better way...
+        $labnum = $id;
+	if (substr($lab_titles[$id], 0,4) == "Lab ") {
+	  $labnum = (int)substr($lab_titles[$id], 4);  
+        }
+	$labid = "lab" . sprintf("%02d", $labnum);
+	// eventually, the instructor could/should(?) have control both of the lab id & the lab title
         $student_output_text .= 'lab ' . $labid . ' "' . $lab_titles[$id] . '" ' . floatval($score) . $nl;	
     }
 
@@ -123,6 +130,7 @@ foreach($db->rows() as $student_record) {
         if ($row['score'] <= 0) {
             continue;
         }
+	// eventually, the instructor could/should(?) have control both of the test id & the test title
 	$testid = "test" . sprintf("%02d",$row['test_number']);
 	$testname = "Test " . $row['test_number'];
         $student_output_text .= 'test ' . $testid . ' "' . $testname . '" ' . $row['score'] . " " . implode(" ", pgArrayToPhp($row['test_text'])) . $nl;
