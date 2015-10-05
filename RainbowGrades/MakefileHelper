@@ -36,7 +36,7 @@ push:
 
 
 compile:
-	g++ -std=c++11 -m32 -g \
+	g++ -Wall -std=c++11 -m32 -g \
 		${RAINBOW_GRADES_DIRECTORY}/main.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/output.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/student.cpp \

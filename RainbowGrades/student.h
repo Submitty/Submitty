@@ -11,28 +11,7 @@
 
 #include "iclicker.h"
 #include "gradeable.h"
-
-
-#define MAX_STRING_LENGTH 10000
-
-
-#define ICLICKER_RECENT 12
-#define ICLICKER_PRIORITY 0.666
-
-extern std::map<GRADEABLE_ENUM,int>   GRADEABLES_COUNT;
-extern std::map<GRADEABLE_ENUM,float> GRADEABLES_FIRST;
-extern std::map<GRADEABLE_ENUM,float> GRADEABLES_PERCENT;
-extern std::map<GRADEABLE_ENUM,float> GRADEABLES_MAXIMUM;
-extern std::map<GRADEABLE_ENUM,int>   GRADEABLES_REMOVE_LOWEST;
-extern std::map<std::string,float> CUTOFFS;
-extern float MAX_ICLICKER_TOTAL;
-extern Student* PERFECT_STUDENT_POINTER;
-
-extern bool  TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT;
-extern float LATE_DAY_PERCENTAGE_PENALTY;
-extern bool  LOWEST_TEST_COUNTS_HALF;
-
-const std::string GradeColor(const std::string &grade);
+#include "constants_and_globals.h"
 
 //====================================================================
 //====================================================================
@@ -44,11 +23,6 @@ public:
   // ---------------
   // CONSTRUCTOR
   Student();
-
-  friend std::ostream& operator<<(std::ostream &ostr, const Student &s) {
-    ostr << "STUDENT: " << s.getUserName();
-    return ostr;
-  }
 
   // ---------------
   // ACCESSORS
@@ -62,6 +36,8 @@ public:
   const std::string& getMajor1()        const { return major1; }
   const std::string& getMajor2()        const { return major2; }
 
+  const std::string& getLastUpdate()    const { return lastUpdate; }
+
   // registration status
   int getSection()           const { return section; }
   bool getAudit()            const { return audit; }
@@ -71,7 +47,7 @@ public:
   // grade data
   float getGradeableValue(GRADEABLE_ENUM g, int i) const;
   const std::string& getZone(int i) const;
-  int getAllowedLateDays(int rubric_id) const;
+  int getAllowedLateDays(int which_lecture) const;
   int getUsedLateDays() const;
   int getUsedLateDays(int which) const;
   float getMossPenalty() const { return moss_penalty; }
@@ -92,7 +68,6 @@ public:
   const std::string& getOtherNote()                  const { return other_note; }
   const std::vector<std::string>& getEarlyWarnings() const { return early_warnings; }
 
-
   // ---------------
   // MODIFIERS
 
@@ -101,6 +76,8 @@ public:
   void setFirstName(const std::string &s)     { first=s; }
   void setPreferredName(const std::string &s) { preferred=s; }
   void setLastName(const std::string &s)      { last=s; }
+
+  void setLastUpdate(const std::string &s)    { lastUpdate = s; }
 
   // registration status
   void setSection(int x) { section = x; }
@@ -111,7 +88,7 @@ public:
   // grade data
   void setTestZone(int which_test, const std::string &zone)  { zones[which_test] = zone; }
   void setGradeableValue(GRADEABLE_ENUM g, int i, float value);
-  void incrLateDaysUsed(int hw, int x) { hws_late_days[hw] += x; }
+  void incrLateDaysUsed(int i, int x) { hws_late_days[i] += x; }
   void mossify(int hw, float penalty);
 
   // other grade-like data
@@ -146,31 +123,14 @@ public:
 
 
   // HELPER FUNCTIONS
-
   float GradeablePercent(GRADEABLE_ENUM g) const;
   float overall() const { return overall_b4_moss() + moss_penalty; }
-
-
   float adjusted_test(int i) const;
   float adjusted_test_pct() const;
-
   float lowest_test_counts_half_pct() const;
-
   float overall_b4_moss() const;
   std::string grade(bool flag_b4_moss, Student *lowest_d) const;
-
-  void outputgrade(std::ostream &ostr,bool flag_b4_moss,Student *lowest_d) const {
-    std::string g = grade(flag_b4_moss,lowest_d);
-
-    std::string color = GradeColor(g);
-    if (moss_penalty < -0.01) {
-      ostr << "<td align=center bgcolor=" << color << ">" << g << " *</td>";
-    } else {
-      ostr << "<td align=center bgcolor=" << color << ">" << g << "</td>";
-    }
-  }
-
-
+  void outputgrade(std::ostream &ostr,bool flag_b4_moss,Student *lowest_d) const;
   
 private:
 
@@ -185,6 +145,8 @@ private:
   std::string year;
   std::string major1;
   std::string major2;
+
+  std::string lastUpdate;
 
   // registration status
   int section;
@@ -221,11 +183,6 @@ private:
 //====================================================================
 //====================================================================
 
-
-
-
-
 Student* GetStudent(const std::vector<Student*> &students, const std::string& username);
-
 
 #endif
