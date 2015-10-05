@@ -40,6 +40,15 @@ public:
   float getMaximum() const { return maximum; }
   int getRemoveLowest() const { return remove_lowest; }
 
+  std::string getID(int index) const {
+    std::map<std::string,std::pair<int,std::string> >::const_iterator itr = correspondences.begin();
+    while (itr != correspondences.end()) {
+      if (itr->second.first == index) return itr->first;
+      itr++;
+    }
+    return "";
+  }
+
   bool hasCorrespondence(const std::string &id) {
     return (correspondences.find(id) != correspondences.end());
   }
@@ -54,6 +63,7 @@ public:
 
   int setCorrespondence(const std::string& id) {
     assert (!hasCorrespondence(id));
+    assert (correspondences.size() < count);
     int index = correspondences.size();
     correspondences[id] = std::make_pair(index,"");
     return index;
