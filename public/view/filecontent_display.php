@@ -15,11 +15,17 @@
 	      $student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
               $svn_file = $student_path.".submit_svn_checkout.txt";
               $svn_file_contents = get_student_file($svn_file);
-	      if ($svn_file_contents == "") {
-	        echo "<b> ERROR WITH SVN CHECKOUT </b>";
-	      } else {	  
-    	        echo htmlentities($svn_file_contents);
-              }
+
+
+	      if (file_exists($student_path) == false) {
+		echo "<b> GRADING IN PROGRESS</b>";
+	      }	else {
+		if ($svn_file_contents == "") {
+		  echo "<b> ERROR WITH SVN CHECKOUT </b>";
+		} else {	  
+		  echo htmlentities($svn_file_contents);
+		}
+	      }
             ?></pre>
 
 <?php if ($svn_checkout != true) { echo "-->"; } ?>
