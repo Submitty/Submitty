@@ -3,7 +3,19 @@
 include "../../toolbox/functions.php";
 
 $rubric_id = intval($_GET['hw']);
-
+$db->query("SELECT * FROM rubrics WHERE rubric_id=?", array($rubric_id));
+$rubric = $db->row();
+if (!isset($rubric['rubric_id'])) {
+    die("Invalid rubric specified.");
+}
+$now = new DateTime('now');
+$homeworkDate = new DateTime($rubric['rubric_due_date']);
+if ($rubric['rubric_late_days'] > 0) {
+    $homeworkDate->add(new DateInterval("PT{$rubric['rubric_late_days']}H"));
+}
+if ($now < $homeworkDate) {
+    die("Homework is not open for grading yet.");
+}
 $student_rcs = $_GET["student"];
 $db->query("SELECT student_id FROM students WHERE student_rcs=?", array($student_rcs));
 $row = $db->row();
@@ -21,11 +33,11 @@ if(isset($row["grade_id"]))
 {
 	$grade_id = intval($row["grade_id"]);
     if (isset($_POST['overwrite']) && intval($_POST['overwrite']) == 1) {
-        $params = array(clean_string($_POST["comment-general"]), \app\models\User::$user_id, $_POST["late"], $submitted, $status, $grade_id, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status']);
+        $params = array(clean_string($_POST["comment-general"]), \app\models\User::$user_id, $_POST["late"], $submitted, $status, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status'], $grade_id);
         $db->query("UPDATE grades SET grade_comment=?, grade_finish_timestamp=NOW(), grade_user_id=?, grade_days_late=?, grade_is_regraded=1, grade_submitted=?, grade_status=?, grade_active_assignment=?, grade_parts_days_late=?, grade_parts_submitted=?, grade_parts_status=? WHERE grade_id=?", $params);
     }
     else {
-        $params = array(clean_string($_POST["comment-general"]), $_POST["late"], $submitted, $status, $grade_id, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status']);
+        $params = array(clean_string($_POST["comment-general"]), $_POST["late"], $submitted, $status, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status'], $grade_id);
         $db->query("UPDATE grades SET grade_comment=?, grade_finish_timestamp=NOW(), grade_days_late=?, grade_is_regraded=1, grade_submitted=?, grade_status=?, grade_active_assignment=?, grade_parts_days_late=?, grade_parts_submitted=?, grade_parts_status=? WHERE grade_id=?", $params);
     }
 }

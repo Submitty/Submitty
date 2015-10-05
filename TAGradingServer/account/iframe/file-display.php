@@ -3,7 +3,7 @@
 include __DIR__."/../../toolbox/functions.php";
 
 if (strstr($_GET['filename'], "/../") !== false) {
-    die("You cannot have /../ in the filename.");    
+    die("You cannot have /../ in the filename.");
 }
 $paths = explode("/", $_GET['filename']);
 if (!empty($paths[0]) || !in_array($paths[1], array('checkout', 'submissions', 'results'))) {
@@ -30,7 +30,7 @@ HTML;
 $output .= <<<HTML
 <textarea id="code0">
 HTML;
-$output .= htmlentities(file_get_contents($filename));
+$output .= htmlentities(file_get_contents($filename), ENT_SUBSTITUTE);
 $output .= <<<HTML
 </textarea>
 HTML;

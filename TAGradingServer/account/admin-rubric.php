@@ -49,7 +49,7 @@ if($user_is_administrator)
     }
 
     $rubrics = array();
-    $db->query("SELECT rubric_id from rubrics", array());
+    $db->query("SELECT rubric_id from rubrics ORDER BY rubric_id", array());
     foreach ($db->rows() as $row) {
         $rubrics[$row['rubric_id']] = intval($row['rubric_id']);
     }
