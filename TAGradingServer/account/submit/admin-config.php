@@ -14,7 +14,7 @@ foreach(Database::rows() as $config) {
     else {
         $value = null;
     }
-    
+
     if ($config['config_type'] == 1) {
         $value = intval($value);
     }
@@ -24,11 +24,14 @@ foreach(Database::rows() as $config) {
     else if ($config['config_type'] == 3) {
         $value = ($value == "true") ? "true" : "false";
     }
-    
+    else if ($config['config_type'] == 4) {
+        $value = ($value == null) ? "" : $value;
+    }
+
     if ($value == $config['config_value']) {
         continue;
     }
-    
+
     Database::query("UPDATE config SET config_value=? WHERE config_name=?", array($value, $config['config_name']));
 }
 
