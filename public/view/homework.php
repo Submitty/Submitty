@@ -270,7 +270,7 @@ window.addEventListener('load', function() {
                                     echo 'style="text-align:center;"><input type="submit" class="btn btn-primary" value="Set Version '.$assignment_version.' as ACTIVE Submission Version"></input></a>';
                                 }
                                 else {
-                                    echo '<em>Note: This is your "ACTIVE" submission version, which will be graded by the TAs and the score recorded in the gradebook.</em>';
+                                    echo '<em>Note: This is your "ACTIVE" submission version, which will be graded and the score recorded in the gradebook.</em>';
                                 }
                             ?>
                         </div> <!-- class="split-row" -->
