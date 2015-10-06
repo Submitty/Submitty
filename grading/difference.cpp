@@ -103,6 +103,7 @@ void Difference::printJSON(std::ostream & file_out) {
 		j["differences"].push_back(instructor_json);
 	}
 	file_out << j;
+	std::cerr << j << std::endl;
 
 	return;
 }
