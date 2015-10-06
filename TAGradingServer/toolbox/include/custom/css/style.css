@@ -3,13 +3,13 @@ html,body
 	margin:0;
 	padding:0;
 	height:100%;
-	width:100%; 
+	width:100%;
 	overflow: hidden;
 }
 
 header
 {
-	width:100%;    
+	width:100%;
 	height: 41px;
 	border-bottom: #AAA solid 2px;
 }
@@ -29,14 +29,14 @@ header
 
 div.span3.left
 {
-	float:left; 
+	float:left;
 	border-right:#DDD solid 1px;
 }
 
 div.span3.right
 {
-	float:right; 
-	border-left:#DDD solid 1px; 
+	float:right;
+	border-left:#DDD solid 1px;
 	color: white;
 }
 
@@ -148,7 +148,7 @@ ul.dropdown-menu li#logout a:hover
 	background-repeat:no-repeat;
 	background-position:150% 50%;
 }
-        
+
 #panemover {
 	cursor: col-resize;
     position:absolute;
@@ -190,7 +190,7 @@ select
 	height: 450px;
 }
 
-.modal-body 
+.modal-body
 {
 	max-height:none;
 }
@@ -212,7 +212,7 @@ select
 	border-top-right-radius: 4px;
 }
 
-[class*="span"] 
+[class*="span"]
 {
 	margin-left: 0px;
 }
@@ -223,11 +223,11 @@ select
 	padding: 15px 0px 15px 0px;
 }
 
-.accordion-group 
+.accordion-group
 {
 	margin-right: -2px;
 	margin-bottom: 2px;
-	border:#DDD solid 1px; 
+	border:#DDD solid 1px;
 	border-top: none;
 	-webkit-border-radius: 0px;
 	-moz-border-radius: 0px;
@@ -240,7 +240,7 @@ select
 	border-bottom-right-radius: 4px;
 }
 
-.accordion 
+.accordion
 {
 	text-align: center;
 	margin-bottom: 0px;
@@ -264,7 +264,7 @@ select
 	border-bottom: 1px solid #DDD;
 }
 
-.nav-tabs > li 
+.nav-tabs > li
 {
 	margin-bottom: -2px;
     width: 200px;
@@ -307,7 +307,7 @@ form {
 	border-left: 0px;
 }
 
-.table-bordered th, .table-bordered td 
+.table-bordered th, .table-bordered td
 {
 	border-left: 1px solid #AAA;
 }
@@ -438,6 +438,22 @@ table {
 	background-image: url('../../bootstrap/img/glyphicons-halflings.png');
 	background-position: -24px -96px;
 	background-repeat: no-repeat;
+	color: rgb(51, 51, 51);
+	display: inline-block;
+	height: 14px;
+	width: 14px;
+}
+
+.icon-folder-closed {
+	background: url('../../bootstrap/img/glyphicons-halflings.png') no-repeat -384px -120px;
+	color: rgb(51, 51, 51);
+	display: inline-block;
+	height: 14px;
+	width: 14px;
+}
+
+.icon-folder-open {
+	background: url('../../bootstrap/img/glyphicons-halflings.png') no-repeat -410px -120px;
 	color: rgb(51, 51, 51);
 	display: inline-block;
 	height: 14px;
