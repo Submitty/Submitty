@@ -10,14 +10,14 @@ class Functions {
      * Defines a new default str_pad that's useful for things like parts of a datetime
      *
      * @param        $string
-     * @param int    $width [optional]
+     * @param int    $pad_width  [optional]
      * @param string $pad_string [optional]
-     * @param int    $pad_type [optional]
+     * @param int    $pad_type   [optional]
      *
      * @return string
      */
     public static function pad($string, $pad_width=2, $pad_string='0', $pad_type = STR_PAD_LEFT) {
-        return str_pad($string, $pad_width, $pad_type, $pad_type);
+        return str_pad($string, $pad_width, $pad_string, $pad_type);
     }
 
     /**
