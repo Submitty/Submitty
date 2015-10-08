@@ -1,4 +1,4 @@
-<div class='diff-container'><table cellpadding='0' cellspacing='0' style='diff-code'>
+<div class='diff-container'><table cellpadding='0' cellspacing='0' class='diff-code'>
 	<tbody class='highlight' id="id_expected_0">
 	<tr class='bad'><td class='line_number'>1</td><td class='line_code'><pre><b>1. Daleks</b></pre></td></td></tr>
 	<tr class='bad'><td class='line_number'>2</td><td class='line_code'><pre><b>2. Cybermen</b></pre></td></td></tr>
