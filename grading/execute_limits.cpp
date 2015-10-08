@@ -109,39 +109,38 @@ rlim_t get_the_limit(const std::string &program_name,
   std::map<int,rlim_t>::const_iterator s_itr = system_limits.find(which_limit);
   assert (s_itr != system_limits.end());
 
-  
   // then, grab the assignment value (this value must also exist)
-  // (it might be the default defined in default_config.h)
+  // (it might be the default defined in default_config.h
+  //  or it might be instructor defined in config.h)
   std::map<int,rlim_t>::const_iterator a_itr = assignment_limits.find(which_limit);
   assert (a_itr != assignment_limits.end());
-  rlim_t answer = a_itr->second;
-  
-  
+
+  rlim_t answer;
   // check to see if the assignment value exceeds the system limit
-  if (answer > s_itr->second) {
+  if (a_itr->second > s_itr->second) {
     std::cout << "ERROR: Assignment limit value " << a_itr->second 
 	      << " for " << rlimit_name_decoder(which_limit) 
 	      << " exceeds system limit " << s_itr->second << std::endl;
-    return s_itr->second;
+    answer = s_itr->second;
+  } else {
+    answer = a_itr->second;
   }
-
 
   // then, look for a test case specific value
   std::map<int,rlim_t>::const_iterator t_itr = test_case_limits.find(which_limit);
   if (t_itr != test_case_limits.end()) {
-    answer = std::max(answer,t_itr->second);
-    
     // check to see if the test case specific value exceeds the system limit
-    if (answer > t_itr->second) {
+    if (t_itr->second > s_itr->second) {
       std::cout << "ERROR: Test case limit value " << t_itr->second 
 		<< " for " << rlimit_name_decoder(which_limit) 
 		<< " exceeds system limit " << s_itr->second << std::endl;
-      return s_itr->second;
-    }      
+      answer = s_itr->second;
+    } else {
+      answer = std::max(answer,t_itr->second);
+    }
   }
 
-
-  // return the max test case & assignment values
+  // return the max of the test case & assignment values
   assert (answer <= s_itr->second);
   return answer;
 }
