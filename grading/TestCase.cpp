@@ -30,9 +30,10 @@ TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {
   }
 
   std::string expected = "";
-  if (test_case_grader[j] != NULL) {
-    expected = test_case_grader[j]->getExpected();
-  }
+  assert (test_case_grader_vec[j] != NULL);
+  //  if (test_case_grader[j] != NULL) {
+    expected = test_case_grader_vec[j]->getExpected();
+    //}
 
   std::ifstream expected_file(expected.c_str());
   if (!expected_file && expected != "") {
@@ -43,7 +44,7 @@ TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {
     helper_message += tmp.str();
     ok_to_compare = false;
   }
-  return test_case_grader[j]->doit(prefix());
+  return test_case_grader_vec[j]->doit(prefix());
 }
 
 
