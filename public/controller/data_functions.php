@@ -950,9 +950,10 @@ function get_testcase_diff($username, $semester,$course, $assignment_id, $assign
     $student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
 
     $data = array();
-    $data["difference"] = "{differences:[]}";//This needs to be here to render the diff viewer without a teacher file
+    //$data["difference"] = "{differences:[]}";//This needs to be here to render the diff viewer without a teacher file
+    $data["difference"] = "";
 
-    if (isset($diff["instructor_file"])) {
+    /*if (isset($diff["instructor_file"])) {
         $instructor_file_path = "$path_front/".$diff["instructor_file"];
         if (file_exists($instructor_file_path)) {
             $data["instructor"] = file_get_contents($instructor_file_path);
@@ -968,6 +969,24 @@ function get_testcase_diff($username, $semester,$course, $assignment_id, $assign
     }
     if (isset($diff["difference"]) && file_exists($student_path . $diff["difference"])) {
         $data["difference"] = file_get_contents($student_path.$diff["difference"]);
+    }*/
+
+    if (isset($diff["instructor_file"])) {
+        $instructor_file_path = "$path_front/".$diff["instructor_file"];
+        if (file_exists($instructor_file_path)) {
+            $data["instructor"] = $instructor_file_path;
+        }
+    }
+    if (isset($diff["student_file"]) && file_exists($student_path . $diff["student_file"])) {
+        $file_size = filesize($student_path. $diff["student_file"]);
+        if ($file_size / 1024 < 10000) {
+            $data["student"] = $student_path.$diff["student_file"];
+        } else {
+            $data["student"] = "ERROR: Unable to read student output file.  Student output file is greater than or equal to ". ($file_size / 1024). " kb.  File could be corrupted or is too large.";
+        }
+    }
+    if (isset($diff["difference"]) && file_exists($student_path . $diff["difference"])) {
+        $data["difference"] = $student_path.$diff["difference"];
     }
     return $data;
 }

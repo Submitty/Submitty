@@ -1,6 +1,13 @@
 <!-- DETAILS ON INDIVIDUAL TESTS -->
 <div class="row sub-text">
 	<h4>Results:</h4>
+<?php
+include "diffviewer_temp/DiffViewer.php";
+use \lib\DiffViewer;
+$dv = new DiffViewer();
+echo $dv->getJavascript();
+echo $dv->getCSS();
+?>
 
 <?php if ($assignment_message != "") {
 	echo '<span class="message">Note: '.htmlentities($assignment_message)."</span>";
@@ -145,6 +152,12 @@
 					<?php
 					if (isset($test["diffs"])) {
 						foreach ($test["diffs"] as $diff) {
+                            if (isset($diff["instructor"])) {
+                                $dv->load($diff["student"], $diff["instructor"], $diff["difference"]);
+                            } else {
+                                $dv->load($diff["student"], "", $diff["difference"]);
+                            }
+                            /*
 							if (isset($diff["message"]) && trim($diff["message"])!="") {
 
 							
@@ -158,7 +171,7 @@
 							{
 								continue;
 							}
-							$instructor_row_class = "diff-row";
+                            $instructor_row_class = "diff-row";*/
 							?>
 							<div class="diff-block"> <!-- diff block -->
 								<div class="diff-element"><!-- student diff element -->
@@ -169,9 +182,11 @@
 										if (isset($diff["student"]) && trim($diff["student"]) != "")
 										{
 											echo '<tt class="mono">';
-											$str=$diff["student"];
+											//$str=$diff["student"];
+                                            $str=$dv->getDisplayActual();
 											$str=str_replace("\r","\\r",$str);
-											echo htmlentities($str);
+                                            echo $str;
+											//echo htmlentities($str);
 											echo '</tt>';
 										}
 										?>
@@ -192,9 +207,11 @@
 											if (isset($diff["instructor"]) && trim($diff["instructor"]) != "")
 											{
 												echo '<tt class="mono">';
-												$str=$diff["instructor"];
+												//$str=$diff["instructor"];
+                                                $str=$dv->getDisplayExpected();
 												$str=str_replace("\r","\\r",$str);
-												echo htmlentities($str);
+                                                echo $str;
+												//echo htmlentities($str);
 												echo '</tt>';
 											}
 											else
@@ -218,7 +235,7 @@
 										diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
 									</script><!-- end script -->
 									<?php
-								}
+                                }
 								?>
 							</div><!-- end div block -->
 							<div class="spacer"></div>
