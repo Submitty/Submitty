@@ -1,11 +1,11 @@
-<div class='diff-container'><table cellpadding='0' cellspacing='0' style='diff-code'>
+<div class='diff-container'><table cellpadding='0' cellspacing='0' class='diff-code'>
 	<tr><td class='line_number'>1</td><td class='line_code'><pre>proper name ==&gt; Brad</pre></td></td></tr>
 	<tr><td class='line_number'>2</td><td class='line_code'><pre>emotion ==&gt; happy</pre></td></td></tr>
 	<tr><td class='line_number'>3</td><td class='line_code'><pre>verb ==&gt; eat</pre></td></td></tr>
 	<tr><td class='line_number'>4</td><td class='line_code'><pre>adjective ==&gt; silly</pre></td></td></tr>
 	<tr><td class='line_number'>5</td><td class='line_code'><pre>noun ==&gt; mouse</pre></td></td></tr>
-	<tbody class='highlight' id="id_actual_0">
-	<tr class='bad'><td class='line_number'>6</td><td class='line_code'><pre>adjective ==&gt; <span class='highlight-char'>sill</span><b>y</b></pre></td></td></tr>
+	<tbody class='highlight' id="id_expected_0">
+	<tr class='bad'><td class='line_number'>6</td><td class='line_code'><pre>adjective ==&gt; <span class='highlight-char'>hungr</span><b>y</b></pre></td></td></tr>
 	</tbody>
 	<tr><td class='line_number'>7</td><td class='line_code'><pre>noun ==&gt; computer</pre></td></td></tr>
 	<tr><td class='line_number'>8</td><td class='line_code'><pre>adjective ==&gt; cute</pre></td></td></tr>

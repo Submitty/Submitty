@@ -27,7 +27,6 @@ $output = <<<HTML
         <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
             Change settings below to manage the system.<br /><br />
             Course Name: <input type="text" name="course_name" value="{$settings['course_name']['config_value']}" /><br />
-            Allowed File Extensions: <input type="text" name="allowed_file_extensions" value="{$settings['allowed_file_extensions']['config_value']}" /><br />
             Default Late Days Per HW: <input type="text" name="default_late_days" value="{$settings['default_late_days']['config_value']}" /><br />
             Default Late Days Per Student: <input type="text" name="default_late_days_student" value="{$settings['default_late_days_student']['config_value']}" /><br />
             Use Autograder: <input type="checkbox" name="use_autograder" value="true" {$checked['use_autograder']} /><br />

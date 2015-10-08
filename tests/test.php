@@ -13,7 +13,7 @@ define("__DATABASE_NAME__", "test_hwgrading");
 define("__DATABASE_USER__", "postgres");
 define("__DATABASE_PASSWORD__", '');
 
-define("__SUBMISSION_SERVER__", str_replace("/toolbox/configs", "", __DIR__)."/tests/data");
+define("__SUBMISSION_SERVER__", __DIR__."/testData/submission_server");
 
 // Zero out the scores on the rubric when TAs grades
 
