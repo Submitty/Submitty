@@ -1,5 +1,7 @@
 <?php
 
+define("__TEST_DIRECTORY__", __DIR__."/testData");
+
 require_once(__DIR__ . '/../TAGradingServer/lib/AutoLoader.php');
 require_once(__DIR__ . '/test.php');
 use lib\AutoLoader;

@@ -6,6 +6,7 @@ use \lib\Database;
 use \lib\ExceptionHandler;
 use \lib\FileUtils;
 use \lib\ServerException;
+use \lib\Utils;
 
 /**
  * Class Rubric
@@ -177,9 +178,8 @@ class Rubric {
             $this->setRubricResults();
             $this->calculateStatus();
             $this->setQuestionTotals();
-            array_walk_recursive($this->rubric_files, function(&$value, $key) {
-                $value = str_replace(__SUBMISSION_SERVER__, "", $value);
-            });
+
+            Utils::stripStringFromArray(__SUBMISSION_SERVER__, $this->rubric_files);
         }
         catch (\Exception $ex) {
             ExceptionHandler::throwException("Homework", $ex);
@@ -194,7 +194,7 @@ class Rubric {
     private function setStudentDetails() {
         if (!isset($this->student)) {
             Database::query("
-SELECT s.*, ld.allowed_lates as student_allowed_lates
+SELECT s.*, COALESCE(ld.allowed_lates,0) as student_allowed_lates
 FROM students as s
 LEFT JOIN (
     SELECT *
@@ -340,7 +340,6 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
         foreach($this->submission_ids as $submission_id) {
             $submission_directory = implode("/", array(__SUBMISSION_SERVER__, "submissions", $submission_id, $this->student_rcs));
             if (!file_exists($submission_directory)) {
-                print "<div style='z-index: 999999;'>".$submission_directory."</div>";
                 continue;
             }
 
@@ -388,9 +387,8 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
             $details['submission_directory'] = $submission_directory;
             $details['svn_directory'] = implode("/", array(__SUBMISSION_SERVER__, "checkout", $submission_id, $this->student_rcs, $this->active_assignment[$part]));
             $this->submission_details[$part] = $details;
-            $allowed_file_extensions = explode(",", __ALLOWED_FILE_EXTENSIONS__);
 
-            $this->rubric_files[$part] = array_merge($this->rubric_files[$part], FileUtils::getAllFiles($details['submission_directory'], $allowed_file_extensions));
+            $this->rubric_files[$part] = array_merge($this->rubric_files[$part], FileUtils::getAllFiles($details['submission_directory']));
             $this->rubric_files[$part] = array_merge($this->rubric_files[$part], FileUtils::getAllFiles($details['svn_directory']));
 
             $this->config_details[$part] = json_decode(
@@ -487,8 +485,11 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
             if ($this->parts_status[$i] > 0) {
                 $this->status = 1;
             }
-            $this->days_late = max($this->days_late, $this->parts_days_late[$i]);
-            $this->days_late_used = max($this->days_late_used, $this->parts_days_late_used[$i]);
+
+            if ($this->parts_status[$i] > 0) {
+                $this->days_late = max($this->days_late, $this->parts_days_late[$i]);
+                $this->days_late_used = max($this->days_late_used, $this->parts_days_late_used[$i]);
+            }
         }
 
     }

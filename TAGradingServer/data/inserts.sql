@@ -6,7 +6,6 @@
 --
 -- Config Inserts
 -- 
-INSERT INTO config (config_name, config_type, config_value) VALUES ('allowed_file_extensions',4,'py,times,txt,cpp,h,java');
 INSERT INTO config (config_name, config_type, config_value) VALUES ('calculate_diff',3,'true');
 INSERT INTO config (config_name, config_type, config_value) VALUES ('course_name',4,'My Course Name');
 INSERT INTO config (config_name, config_type, config_value) VALUES ('default_late_days',1,'2');

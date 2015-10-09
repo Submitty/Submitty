@@ -13,17 +13,13 @@ if (!is_dir(implode("/",array(__SUBMISSION_SERVER__,"reports")))) {
     mkdir(implode("/",array(__SUBMISSION_SERVER__,"reports")));
 }
 
-$send_email = (isset($_GET['email'])) ? intval($_GET['email']) == 1 : false;
 $only_regrade = isset($_GET['regrade']) ? intval($_GET['regrade']) == 1 : false;
 $all = isset($_GET['all']) ? intval($_GET['all']) == 1 : false;
 
-/************************************/
-/* Output Individual Student Files  */
-/************************************/
-
+// Get and setup all of the cases of cheating (academic integrity) we've found to be applied when
+// generating the reports
 $academic_integrity = array();
 $academic_resolutions = array();
-
 $db->query("SELECT * FROM grades_academic_integrity ORDER BY rubric_id",array());
 foreach ($db->rows() as $row) {
     if (!isset($academic_integrity[$row['rubric_id']])) {
@@ -35,10 +31,6 @@ foreach ($db->rows() as $row) {
         $academic_resolutions[$row['rubric_id']][$row['student_rcs']] = floatval($row['penalty']);
     }
 }
-
-/***********/
-/* OUTPUT  */
-/***********/
 
 $nl = "\n";
 $write_output = True;
@@ -154,16 +146,9 @@ foreach($db->rows() as $student_record)
                     $grade_user_last_name = $user_record["user_lastname"];
                     $grade_user_email = $user_record["user_email"];
 
-                    ////////////////////////////////////////////////////////////////////////////
-                    //
-                    // Most of the information you will need for the output is defined above
-                    //
-                    ////////////////////////////////////////////////////////////////////////////
-
                     // Generate output (period is string concatenation in PHP)
                     $student_output_text_main .= strtoupper($rubric['rubric_name']) . " GRADE" . $nl;
                     $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
-
 
 		    if ($grade_user_first_name == "Mentor" || $grade_user_first_name == "TA" || $grade_user_first_name == "") {
 		    } else {
@@ -252,15 +237,17 @@ foreach($db->rows() as $student_record)
                         // Keep track of students grade and rubric total
                         $student_grade[$question_part_number] += $grade_question_score;
 
+                        $rubric_total += ($question_extra_credit ? 0 : $question_total);
+                        $part_grade[$question_part_number] += ($question_extra_credit ? 0 : $question_total);
+
                         $question_part_number_last = $question_part_number;
                     }
 
-                    // TODO: Put together all outputs if not separate parts
-                    foreach($student_output_text as $question_part_number => $v) {
-                        // Generate output for overall comment from TA and overall grade
-
-			            if ($question_part_number == 0) {
-                        	$student_output_text[$question_part_number] .= "AUTO-GRADING TOTAL [ " . $student_grade[$question_part_number] . " / " . $part_grade[$question_part_number] . " ]";
+                    // Run through all parts now and put the footer text as approprtiate
+                    foreach($student_output_text as $part => $v) {
+			            if ($part == 0) {
+                            // If it's part 0, then we append auto-grading total as well as auto-grader log
+                        	$student_output_text[$part] .= "AUTO-GRADING TOTAL [ " . $student_grade[$part] . " / " . $part_grade[$part] . " ]";
 
                             // TODO: Replace this with using the stored value in the database for each grade
 			 	            // get the active assignment to grade
@@ -269,7 +256,7 @@ foreach($db->rows() as $student_record)
                             $json = file_get_contents($json_path);
 
 	                        if ($json === false) {
-                                $student_output_text[$question_part_number] .= $nl.$nl."NO GRADE FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
+                                $student_output_text[$part] .= $nl.$nl."NO GRADE FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
                             }
                             else {
    	                            $json = json_decode($json, true);
@@ -278,24 +265,24 @@ foreach($db->rows() as $student_record)
 
                                 $gradefilecontents = file_get_contents($submit_file);
                                 if ($gradefilecontents === false) {
-                                    $student_output_text[$question_part_number] .= $nl.$nl."NO GRADE FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
+                                    $student_output_text[$part] .= $nl.$nl."NO GRADE FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
                                 }
                                 else {
-                                    $student_output_text[$question_part_number] .= $nl.$nl.$gradefilecontents.$nl;
+                                    $student_output_text[$part] .= $nl.$nl.$gradefilecontents.$nl;
                                 }
                             }
 
                         }
                         else {
                             if ($rubric_sep) {
-                                $student_output_text[$question_part_number] .= "PART " . $question_part_number . " GRADE [ " . $student_grade[$question_part_number] . " / " . $part_grade[$question_part_number] . " ]". $nl;
+                                $student_output_text[$part] .= "PART " . $part . " GRADE [ " . $student_grade[$part] . " / " . $part_grade[$part] . " ]". $nl;
                             }
                             else {
-                                $student_output_text[$question_part_number] .= "TA GRADING TOTAL [ " . $student_grade[$question_part_number] . " / " . $part_grade[$question_part_number] . " ]". $nl;
+                                $student_output_text[$part] .= "TA GRADING TOTAL [ " . $student_grade[$part] . " / " . $part_grade[$part] . " ]". $nl;
                             }
                         }
 
-                        $student_output_text[$question_part_number] .= "----------------------------------------------------------------------" . $nl;
+                        $student_output_text[$part] .= "----------------------------------------------------------------------" . $nl;
                     }
 
                     // If output is all one file, condense to one element array
