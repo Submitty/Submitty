@@ -49,11 +49,10 @@ const std::map<int,rlim_t> system_limits =
     { RLIMIT_STACK,      RLIM_INFINITY    }, // stack size          // 50 MB
     { RLIMIT_CORE,       RLIM_INFINITY    }, // allow core files?   // FIXME: 0
     { RLIMIT_RSS,        RLIM_INFINITY    }, //      (deprecated, use AS instead?)
-    { RLIMIT_NPROC,      RLIM_INFINITY    }, // 100 additional processes
+    { RLIMIT_NPROC,      10000            }, // 10000 additional processes
     { RLIMIT_NOFILE,     RLIM_INFINITY    }, // 1000 file descriptors 
     { RLIMIT_MEMLOCK,    RLIM_INFINITY    }, // 2GB RAM 
 
-    //{ RLIMIT_NPROC,      100              }, // 100 additional processes
     //{ RLIMIT_NOFILE,     1000             }, // 1000 file descriptors 
     //{ RLIMIT_MEMLOCK,    2*1000*1000*1000 }, // 2GB RAM 
 

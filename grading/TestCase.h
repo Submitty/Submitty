@@ -193,8 +193,22 @@ public:
 
     // compilation (g++, clang++, javac) usually requires multiple
     // threads && produces a large executable
-    adjust_test_case_limits(answer._test_case_limits,RLIMIT_CPU,60);             // 60 seconds 
-    adjust_test_case_limits(answer._test_case_limits,RLIMIT_NPROC,10);           // 10 threads 
+
+    // Over multiple semesters of Data Structures C++ assignments, the
+    // maximum number of vfork (or fork or clone) system calls needed
+    // to compile a student submissions was 28.
+    //
+    // It seems that g++     uses approximately 2 * (# of .cpp files + 1) processes
+    // It seems that clang++ uses approximately 2 +  # of .cpp files      processes
+
+    adjust_test_case_limits(answer._test_case_limits,RLIMIT_NPROC,100*40);           // 100 threads * 40 parallel grading
+
+
+    // 10 seconds was sufficient time to compile most Data Structures
+    // homeworks, but some submissions required slightly more time
+    adjust_test_case_limits(answer._test_case_limits,RLIMIT_CPU,60);              // 60 seconds 
+
+
     adjust_test_case_limits(answer._test_case_limits,RLIMIT_FSIZE,10*1000*1000);  // 10 MB executable
 
     answer._test_case_points = tcp;
