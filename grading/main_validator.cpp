@@ -149,7 +149,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
           std::cout << "result->getGrade() = " << result->getGrade() << std::endl;
 	  assert (result->getGrade() >= 0.0 && result->getGrade() <= 1.0);
 
-          double pts_fraction = testcases[i].test_case_grader[j]->points_fraction;
+          double pts_fraction = testcases[i].test_case_grader_vec[j]->points_fraction;
           std::cout << "pts_fraction = " << pts_fraction << std::endl;
 
           if (pts_fraction < -0.5) {
@@ -172,8 +172,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         diff_vector.push_back("\t\t\t\t\t\"student_file\":\"" + testcases[i].filename(j) + "\"");
 
         std::string expected = "";
-        if (testcases[i].test_case_grader[j] != NULL) {
-          expected = testcases[i].test_case_grader[j]->getExpected();
+        if (testcases[i].test_case_grader_vec[j] != NULL) {
+          expected = testcases[i].test_case_grader_vec[j]->getExpected();
         }
 
         if (expected != "") {

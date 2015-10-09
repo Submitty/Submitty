@@ -669,7 +669,7 @@ while true; do
     pgrep_results=( $pgrep_results ) # recast as array
     numparallel=${#pgrep_results[@]} # count elements in array
     echo "hwcron is running $numparallel parallel scripts"
-    if [[ "$numparallel" -gt 5 ]] ; then
+    if [[ "$numparallel" -gt 8 ]] ; then
 	log_error "" "hwcron is running too many parallel scripts: $numparallel"
 	exit
     fi

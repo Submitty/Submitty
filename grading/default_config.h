@@ -58,10 +58,10 @@
 #define RLIMIT_RSS_VALUE        RLIM_INFINITY     //                   // FIXME: deprecated, set to 0? 
 #endif
 #ifndef RLIMIT_NPROC_VALUE
-#define RLIMIT_NPROC_VALUE      0,                // no additional processes  
+#define RLIMIT_NPROC_VALUE      0                 // no additional processes  
 #endif
 #ifndef RLIMIT_NOFILE_VALUE
-#define RLIMIT_NOFILE_VALUE     100,              // 100 file descriptors 
+#define RLIMIT_NOFILE_VALUE     100               // 100 file descriptors 
 #endif
 #ifndef RLIMIT_MEMLOCK_VALUE
 #define RLIMIT_MEMLOCK_VALUE    500*1000*1000     // 500 MB RAM             // FIXME: set to 0

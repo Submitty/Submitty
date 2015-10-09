@@ -149,8 +149,14 @@ foreach($db->rows() as $student_record)
                     // Generate output (period is string concatenation in PHP)
                     $student_output_text_main .= strtoupper($rubric['rubric_name']) . " GRADE" . $nl;
                     $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
-                    $student_output_text_main .= "Graded by: " . $grade_user_first_name . " " . $grade_user_last_name . " <" . $grade_user_email . ">" . $nl;
+
+		    if ($grade_user_first_name == "Mentor" || $grade_user_first_name == "TA" || $grade_user_first_name == "") {
+		    } else {
+		      $student_output_text_main .= "Graded by: " . $grade_user_first_name . " " . $grade_user_last_name . " &lt;" . $grade_user_email . "&gt;" . $nl;
+                    }
                     $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: " . $grade_user_email . $nl;
+
+
                     $student_output_text_main .= "Late days used on this homework: " . $grade_days_late . $nl;
                     if ($student_allowed_lates > 0) {
                         $student_output_text_main .= "Late days used overall: " . $late_days_used_overall . $nl;
