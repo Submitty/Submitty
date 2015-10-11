@@ -256,23 +256,23 @@ HTML;
             </table>
 HTML;
 
-    $db->query("SELECT s.user_id, u.user_email, s.rubric_id, s.grading_section_id
+    $db->query("SELECT s.user_id, u.user_rcs, u.user_email, s.rubric_id, s.grading_section_id
     FROM homework_grading_sections as s, users as u WHERE u.user_id = s.user_id
     ORDER BY rubric_id, grading_section_id", array());
     $sections = array();
     foreach ($db->rows() as $row) {
-        if (!isset($sections[$row['rubric_id']][$row['user_email']])) {
-            $sections[$row['rubric_id']][$row['user_email']] = array();
+        if (!isset($sections[$row['rubric_id']][$row['user_rcs']])) {
+            $sections[$row['rubric_id']][$row['user_rcs']] = array();
         }
-        $sections[$row['rubric_id']][$row['user_email']][] = $row['grading_section_id'];
+        $sections[$row['rubric_id']][$row['user_rcs']][] = $row['grading_section_id'];
     }
     asort($sections);
 
     $i = 0;
-    $db->query("SELECT * FROM users ORDER BY user_email ASC", array());
+    $db->query("SELECT * FROM users ORDER BY user_rcs ASC", array());
     $users = $db->rows();
     foreach($users as $user) {
-        $value =  isset($sections[$old_rubric['rubric_id']][$user['user_email']]) ? implode(",", $sections[$old_rubric['rubric_id']][$user['user_email']]) : -1;
+        $value =  isset($sections[$old_rubric['rubric_id']][$user['user_rcs']]) ? implode(",", $sections[$old_rubric['rubric_id']][$user['user_rcs']]) : -1;
         print <<<HTML
             <span style='display:inline-block; width:300px; padding-right: 5px'>{$user['user_lastname']},
                     {$user['user_firstname']}:</span>
@@ -306,11 +306,11 @@ HTML;
     foreach ($users as $user) {
         print <<<HTML
             <tr>
-                <td>{$user['user_email']}</td>
+                <td>{$user['user_rcs']}</td>
 HTML;
 
         foreach ($rubrics as $id => $rubric) {
-            $number = (isset($sections[$id][$user['user_email']])) ? implode(",",$sections[$id][$user['user_email']]) : "";
+            $number = (isset($sections[$id][$user['user_rcs']])) ? implode(",",$sections[$id][$user['user_rcs']]) : "";
             print <<<HTML
                 <td style="text-align: center">
                     {$number}
