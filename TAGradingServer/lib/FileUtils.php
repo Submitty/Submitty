@@ -131,12 +131,39 @@ class FileUtils {
      * @return bool
      */
     public static function createDir($dir) {
+        $return = true;
         if (!is_dir($dir)) {
             if (file_exists($dir)) {
                 unlink($dir);
             }
-            return @mkdir($dir);
+            $return = @mkdir($dir);
         }
-        return true;
+        return $return;
+    }
+
+    /**
+     * Given a path, it then attempts to create each folder in the path. For example, if we are given
+     * /a/b/c, we then attempt to create directory /a, /a/b, and then /a/b/c (skipping any that exist).
+     * If any folder creation fails, then we return false, otherwise return true.
+     *
+     * @param $path
+     *
+     * @return bool
+     */
+    public static function recursiveCreateDir($path) {
+        $return = true;
+        $total = ($path[0] == "/") ? "/" : "";
+        $dirs = explode("/", $path);
+        foreach($dirs as $dir) {
+            $total .= $dir;
+            if (!is_dir($total)) {
+                if (!FileUtils::createDir($total)) {
+                    $return = false;
+                    break;
+                }
+            }
+            $total .= "/";
+        }
+        return $return;
     }
 }

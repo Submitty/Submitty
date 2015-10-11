@@ -91,6 +91,7 @@ class Logger {
             // don't log anything if we don't have a log path set
             return;
         }
+        Logger::$log_path = rtrim(Logger::$log_path);
 
         \lib\FileUtils::createDir(Logger::$log_path);
 
@@ -127,7 +128,7 @@ class Logger {
         }
         $log_message .= str_repeat("=-", 30)."="."\n";
 
-        // Appends to the file using a locking mechanism
-        file_put_contents(Logger::$log_path."/".$filename.".txt", $log_message, FILE_APPEND | LOCK_EX);
+        // Appends to the file using a locking mechanism, and supressing any potential error from this
+        @file_put_contents(Logger::$log_path."/".$filename.".txt", $log_message, FILE_APPEND | LOCK_EX);
     }
 }

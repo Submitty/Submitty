@@ -6,12 +6,25 @@ use lib\DiffViewer;
 
 class DiffViewerTester extends \PHPUnit_Framework_TestCase {
 
+    /**
+     * Get all of the various diff test cases we have, ensuring that we only take in a folder that has
+     * necessary four files to have the test fixture be properly run
+     *
+     * @return array
+     */
     public function diffDir() {
+        $needed_files = array('input_actual.txt', 'input_expected.txt',
+            'input_differences.json', 'output_actual.txt', 'output_expected.txt');
         $dir = __TEST_DIRECTORY__.'/diffs';
         $files = scandir($dir);
         $diffs = array();
         foreach ($files as $file) {
             if (is_dir($dir."/".$file) && strpos($file, '.') === false) {
+                foreach($needed_files as $needed_file) {
+                    if (!file_exists($dir."/".$file."/".$needed_file)) {
+                        continue 2;
+                    }
+                }
                 $diffs[] = array($dir."/".$file);
             }
         }
@@ -19,7 +32,7 @@ class DiffViewerTester extends \PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @param $diffDir:
+     * @param $diffDir
      *
      * @dataProvider diffDir
      */
@@ -43,7 +56,7 @@ class DiffViewerTester extends \PHPUnit_Framework_TestCase {
      */
     public function testExpectedException() {
         $diff = new DiffViewer();
-        $diff->load(__DIR__."/data/diff_test_01/input_actual.txt",
+        $diff->load(__TEST_DIRECTORY__."/diffs/diff_test_01/input_actual.txt",
                     "file_that_doesnt_exist", "");
     }
 
@@ -52,8 +65,8 @@ class DiffViewerTester extends \PHPUnit_Framework_TestCase {
      */
     public function testDifferencesException() {
         $diff = new DiffViewer();
-        $diff->load(__DIR__."/data/diff_test_01/input_actual.txt",
-                    __DIR__."/data/diff_test_01/input_expected.txt",
+        $diff->load(__TEST_DIRECTORY__."/diffs/diff_test_01/input_actual.txt",
+                    __TEST_DIRECTORY__."/diffs/diff_test_01/input_expected.txt",
                     "file_that_doesnt_exist");
     }
 }
