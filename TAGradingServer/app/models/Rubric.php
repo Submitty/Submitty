@@ -485,13 +485,17 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
             if ($this->parts_status[$i] > 0) {
                 $this->status = 1;
             }
+        }
 
-            if ($this->parts_status[$i] > 0) {
+        // Get the days late for the assignment either only using parts that were good or all parts if assignment
+        // as a whole was bad (as at a minimum, the least late part is still late even if it was submitted at a different
+        // time as everything else).
+        for ($i = 1; $i <= $this->rubric_parts; $i++) {
+            if ($this->status == 0 || ($this->status == 1 && $this->parts_status[$i] > 0)) {
                 $this->days_late = max($this->days_late, $this->parts_days_late[$i]);
                 $this->days_late_used = max($this->days_late_used, $this->parts_days_late_used[$i]);
             }
         }
-
     }
 
     /**
