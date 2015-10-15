@@ -35,13 +35,16 @@ echo -e '############################################################
 ' > /etc/motd
 chmod +rx /etc/motd
 
-echo "192.168.56.101    test-submit" >> /etc/hosts
-echo "192.168.56.102    test-svn" >> /etc/hosts
-echo "192.168.56.103    test-hwgrading" >> /etc/hosts
+echo "192.168.56.101    test-submit test-submit.cs.rpi.edu" >> /etc/hosts
+echo "192.168.56.102    test-svn test-svn.cs.rpi.edu" >> /etc/hosts
+echo "192.168.56.103    test-hwgrading test-hwgrading.cs.rpi.edu hwgrading" >> /etc/hosts
 
 #################################################################
 # PACKAGE SETUP
 #################
+echo "\n" | add-apt-repository ppa:webupd8team/java
+apt-get update
+
 apt-get install -y ntp
 service ntp restart
 
@@ -52,8 +55,6 @@ apt-get install -y apache2 postgresql postgresql-contrib php5 php5-xdebug libapa
 
 apachectl -V | grep MPM
 
-echo "\n" | add-apt-repository ppa:webupd8team/java
-apt-get update
 apt-get install -y clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
 hardening-includes python p7zip-full patchutils postgresql-client postgresql-client-9.3 postgresql-client-common \
 unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
@@ -120,11 +121,17 @@ sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so ob
 
 sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 
+# remove default sites which would cause server to mess up
+rm /etc/apache2/sites*/000-default.conf
+rm /etc/apache2/sites*/default-ssl.conf
+
+service apache2 reload
+
 #################################################################
 # PHP SETUP
 #################
 sed -i -e 's/^docroot=/docroot=\/usr\/local\/hss:/g' /etc/suphp/suphp.conf
-sed -i -e 's/^allow_file_group_writeable=false/allow_file_group_writable=true/g' /etc/suphp/suphp.conf
+sed -i -e 's/^allow_file_group_writeable=false/allow_file_group_writeable=true/g' /etc/suphp/suphp.conf
 sed -i -e 's/^allow_directory_group_writeable=false/allow_directory_group_writeable=true/g' /etc/suphp/suphp.conf
 sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php5/cgi/php.ini
 sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php5/cgi/php.ini
@@ -258,7 +265,7 @@ source ${HWSERVER_DIR}/INSTALL.sh
 
 source ${HWSERVER_DIR}/Docs/sample_bin/admin_scripts_setup
 sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /root/bin/bottom.txt
-sed -i 's/course01/csci1100/g' /root/bin/gen.middle
+sed -i 's/course01/csci2600/g' /root/bin/gen.middle
 
 cp ${HWSERVER_DIR}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
 sed -i 's/hss.crt/submit.crt/g' /etc/apache2/sites-available/submit.conf
@@ -302,16 +309,14 @@ cd /var/local/hss/courses/f15/csci1200
 # CREATE DATABASE
 #################
 
-su postgres << EOF
-psql -c "
-  CREATE DATABASE hss_csci1100_f15;
-  CREATE DATABASE hss_csci1200_f15;
-  CREATE DATABASE hss_csci2600_f15;
-EOF
+psql -d postgres -h localhost -c "CREATE DATABASE hss_csci1100_f15;"
+psql -d postgres -h localhost -c "CREATE DATABASE hss_csci1200_f15;"
+psql -d postgres -h localhost -c "CREATE DATABASE hss_csci2600_f15;"
 
+export PGPASSWORD='hsdbu';
 psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/insert.sql
+psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
 psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/insert.sql
+psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
 psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/insert.sql
+psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
