@@ -3,7 +3,7 @@
 
 ########################################################################################################################
 ########################################################################################################################
-# this script must be run by root or sudo 
+# this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
     exit
@@ -170,7 +170,7 @@ echo -e "Copy the submission website"
 rsync -ruz   $HSS_REPOSITORY/public   $HSS_INSTALL_DIR/website
 
 # automatically create the site path file, storing the data directory in the file
-echo $HSS_DATA_DIR > $HSS_INSTALL_DIR/website/public/site_path.txt 
+echo $HSS_DATA_DIR > $HSS_INSTALL_DIR/website/public/site_path.txt
 
 # set special user $HWPHP_USER as owner & group of all website files
 find $HSS_INSTALL_DIR/website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
@@ -281,10 +281,10 @@ find $HSS_INSTALL_DIR/bin -type f -exec chown root:root {} \;
 find $HSS_INSTALL_DIR/bin -type f -exec chmod 500 {} \;
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/build_homework_function.sh 
+chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/build_homework_function.sh
 chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/regrade.sh
 chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/grading_done.sh
-chmod 550 $HSS_INSTALL_DIR/bin/build_homework_function.sh 
+chmod 550 $HSS_INSTALL_DIR/bin/build_homework_function.sh
 chmod 550 $HSS_INSTALL_DIR/bin/regrade.sh
 chmod 550 $HSS_INSTALL_DIR/bin/grading_done.sh
 
@@ -295,8 +295,8 @@ chmod 550 $HSS_INSTALL_DIR/bin/grade_students.sh
 
 # prepare the untrusted_execute executable with suid
 
-# SUID (Set owner User ID up on execution), allows the $HWCRON_USER 
-# to run this executable as sudo/root, which is necessary for the 
+# SUID (Set owner User ID up on execution), allows the $HWCRON_USER
+# to run this executable as sudo/root, which is necessary for the
 # "switch user" to untrusted as part of the sandbox.
 
 pushd $HSS_INSTALL_DIR/bin/ > /dev/null
@@ -323,7 +323,7 @@ rsync  -ruz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_websit
 rsync  -ruz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
 rsync  -ruz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
 rsync  -ruz $TAGRADING_REPOSITORY/app          $HSS_INSTALL_DIR/hwgrading_website
-    
+
 # set special user $HWPHP_USER as owner & group of all hwgrading_website files
 find $HSS_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
 
@@ -345,7 +345,8 @@ find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.gif -exec chmod o+r {} 
 find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
 
 
-replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
+replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php
+mv $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
 
 
 ################################################################################################################

@@ -1,5 +1,9 @@
 <?php
 
+// Display all errors on initial startup in case we have an early failure in autoloader, or DB setup, etc.
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 /*
 The user's umask is ignored for the user running php, so we need
 to set it from inside of php to make sure the group read & execute
@@ -67,6 +71,7 @@ header("Content-Type: text/html; charset=UTF-8");
 
 $user_id = 0;
 if ($DEBUG) {
+    // TODO: we need to have a pseudo http login box just to always set $_SERVER["PHP_AUTH_USER"] to not default to me
     $suggested_username = "pevelm";
 }
 else {
