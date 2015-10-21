@@ -8,13 +8,8 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
-if [[ "$#" -eq 0 ]] ; then
-    echo -e "\n\nWelcome to the Homework Submission Server (HSS) Configuration\n\n"
-    # defaults above are fine
-else
-	echo -e "\n\nERROR: This script should be run with zero arguments\n\n"
-	exit
-fi
+echo -e "\n\nWelcome to the Homework Submission Server (HSS) Configuration\n\n"
+echo "$1"
 
 echo "What is the database host?"
 read DATABASE_HOST

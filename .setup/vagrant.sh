@@ -196,7 +196,7 @@ adduser instructor csci1200_tas_www
 adduser developer csci1200_tas_www
 
 addgroup csci2600
-adduser ta csci1200
+adduser ta csci2600
 adduser instructor csci2600
 adduser developer csci2600
 addgroup csci2600_tas_www
@@ -219,8 +219,9 @@ ls /home | sort > /var/local/hss/instructors/valid
 #################################################################
 # SVN SETUP
 #################
-apt-get install subversion subversion-tools
-apt-get install libapache2-svn
+service apache2 restart
+apt-get install -y subversion subversion-tools
+apt-get install -y libapache2-svn
 a2enmod dav
 a2enmod dav_fs
 a2enmod authz_svn
@@ -260,7 +261,7 @@ EOF
 # HWSERVER SETUP
 #################
 
-if [[ VAGRANT == 1 ]]; then
+if [[ ${VAGRANT} == 1 ]]; then
   ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
 else
   cd /usr/local/hss
@@ -331,11 +332,12 @@ cd /var/local/hss/courses/f15/csci1200
 # CREATE DATABASE
 #################
 
-psql -d postgres -h localhost -c "CREATE DATABASE hss_csci1100_f15;"
-psql -d postgres -h localhost -c "CREATE DATABASE hss_csci1200_f15;"
-psql -d postgres -h localhost -c "CREATE DATABASE hss_csci2600_f15;"
-
 export PGPASSWORD='hsdbu';
+
+psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1100_f15;"
+psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1200_f15;"
+psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
+
 psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
 psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
 psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
