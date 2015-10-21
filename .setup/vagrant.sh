@@ -5,6 +5,14 @@
 #################
 export DEBIAN_FRONTEND=noninteractive
 
+if [[ $1 == vagrant ]]; then
+  echo "Non-interactive vagrant script..."
+  VAGRANT=1
+else
+  #TODO: We should get options for ./CONFIGURE script
+  VAGRANT=0
+fi
+
 #################################################################
 # UBUNTU SETUP
 #################
@@ -142,6 +150,7 @@ sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php5
 
 #################################################################
 # USERS SETUP
+# TODO: we should probably move this section up and run first?
 #################
 addgroup hwcronphp
 addgroup course_builders
@@ -235,7 +244,7 @@ service apache2 restart
 #################################################################
 # POSTGRES SETUP
 #################
-echo -e "postgres\npostgres" | passwd postgres
+echo "postgres:postgres" | chpasswd postgres
 adduser postgres shadow
 service postgresql restart
 sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
@@ -251,7 +260,14 @@ EOF
 # HWSERVER SETUP
 #################
 
-ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
+if [[ VAGRANT == 1 ]]; then
+  ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
+else
+  cd /usr/local/hss
+  git clone https://github.com/RCOS-Grading-Server/HWserver.git
+  mv HWserver GIT_CHECKOUT_HWserver
+fi
+
 HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
 cd ${HWSERVER_DIR}
 
@@ -283,10 +299,16 @@ service apache2 restart
 #################################################################
 # CRON SETUP
 #################
-# TODO: I have no idea the command to do this non-interactively for this
-# su hwcron << EOF
-# 0,15,30,45 * * * * /usr/local/hss/bin/grade_students.sh > /dev/null
-# EOF
+cd /home/hwcron
+echo "" > /home/hwcron/x
+sudo cp /home/hwcron/x /var/spool/cron/crontabs/hwcron
+sudo chown hwcron:crontab /var/spool/cron/crontabs/hwcron
+echo "0,15,30,45 * * * * /usr/local/hss/bin/grade_students.sh" > /home/hwcron/c
+su hwcron << EOF
+  cat /home/hwcron/c | crontab -
+EOF
+rm /home/hwcron/x
+rm /home/hwcron/c
 
 #################################################################
 # COURSE SETUP
