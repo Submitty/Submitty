@@ -226,15 +226,15 @@ class DiffViewer {
      */
     private function getDisplay($lines, $type='expected') {
         $start = null;
-        $html = "<div class='diff-container'><table cellpadding='0' cellspacing='0' class='diff-code'>\n";
+        $html = "<div class='diff-container'><div class='diff-code'>\n";
 
         if (isset($this->add[$type]) && count($this->add[$type]) > 0) {
             if (array_key_exists(-1, $this->add[$type])) {
-                $html .= "\t<tbody class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][-1]}\">\n";
+                $html .= "\t<div class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][-1]}\">\n";
                 for ($k = 0; $k < $this->add[$type][-1]; $k++) {
-                    $html .= "\t<tr class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></tr>\n";
+                    $html .= "\t<div class='row bad'><div class='empty_line' colspan='2'>&nbsp;</div></div>\n";
                 }
-                $html .= "\t</tbody>\n";
+                $html .= "\t</div>\n";
             }
         }
 
@@ -246,16 +246,16 @@ class DiffViewer {
             $j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
                 $start = $i;
-                $html .= "\t<tbody class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][$start]}\">\n";
+                $html .= "\t<div class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][$start]}\">\n";
             }
             if (isset($this->diff[$type][$i])) {
-                $html .= "\t<tr class='bad'>";
+                $html .= "\t<div class='bad'>";
             }
             else {
-                $html .= "\t<tr>";
+                $html .= "\t<div>";
             }
-            $html .= "<td class='line_number'>{$j}</td>";
-            $html .= "<td class='line_code'><pre>";
+            $html .= "<span class='line_number'>{$j}</span>";
+            $html .= "<span class='line_code'>";
             if (isset($this->diff[$type][$i])) {
                 // highlight the line
                 $current = 0;
@@ -265,34 +265,34 @@ class DiffViewer {
                     $html .= "<span class='highlight-char'>".htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)))."</span>";
                     $current = $diff[1]+1;
                 }
-                $html .= "<b>".htmlentities(substr($lines[$i], $current))."</b>";
+                $html .= htmlentities(substr($lines[$i], $current));
             }
             else {
                 if (isset($lines[$i])) {
                     $html .= htmlentities($lines[$i]);
                 }
             }
-            $html .= "</pre></td></td></tr>\n";
+            $html .= "</span></div>\n";
 
             if (isset($this->add[$type][$i])) {
                 if ($start === null) {
-                    $html .= "\t<tbody class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][$i]}\">\n";
+                    $html .= "\t<div class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][$i]}\">\n";
                 }
                 for ($k = 0; $k < $this->add[$type][$i]; $k++) {
-                    $html .= "\t<tr class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></tr>\n";
+                    $html .= "\t<div class='bad'><div class='empty_line' colspan='2'>&nbsp;</div></div>\n";
                 }
                 if ($start === null) {
-                    $html .= "\t</tbody>\n";
+                    $html .= "\t</div>\n";
                 }
             }
 
             if ($start !== null && !isset($this->diff[$type][($i+1)])) {
                 $start = null;
-                $html .= "\t</tbody>\n";
+                $html .= "\t</div>\n";
             }
         }
 
-        $html .= "</table></div>\n";
+        $html .= "</div></div>\n";
         return $html;
     }
 
@@ -340,67 +340,56 @@ HTML;
     public static function getCSS() {
         return <<<HTML
         <style type="text/css" scoped>
-            .diff-container {
-                width: 700px;
-                overflow-x: auto;
-                background-color: #F8F8F8;
-                margin-right: 100px;
-                /*float: left;*/
-            }
+.diff-container {
+    background-color: #F8F8F8;
+}
 
-            .diff-code {
-                padding: 5px;
-                font-family: monospace;
-                width: 700px
-            }
+.diff-row {
+    width: 100%;
+}
 
-            .diff-code tr, td {
-                padding-top: 2px;
-                height: 20px;
-            }
+.diff-code div {
+    white-space: nowrap;
+    height: 20px;
+}
 
-            .bad {
-                background-color: #fedede;
+.line_number, .line_code > b {
+    vertical-align: top;
+    max-height: 20px !important;
+    height: 20px !important;
+    font-family: 'Inconsolata' !important;
+    font-size: 16px;
+    line-height: 20px !important;
+    padding: 0px !important;
+}
 
-            }
+.line_number {
+    color: gray;
+    display: inline-block;
+    width: 32px;
+}
 
-            .highlight {
+.line_code_inner {
+    max-height: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
+    padding: 0px !important;
+    white-space: pre !important;
+    overflow-x: scroll !important;
+}
 
-            }
+.highlight-hover {
+    background-color: yellow !important;
+}
 
-            .highlight-hover {
-                background-color: yellow !important;
-            }
-            .highlight-char {
-                background-color: #fffdbe;
-            }
+.highlight-char {
+    background-color: lightblue !important;
+}
 
-            .line_number {
-                display: inline-block;
-                min-width: 40px;
-                text-align: center;
-                background-color: #f2f2f2;
-                opacity: .55;
-                margin-right: 10px;
-                float: left;
-            }
+.bad {
+    background-color: #fedede;
 
-            .line_code {
-                min-width: 610px;
-                white-space: nowrap;
-                overflow-x: auto;
-            }
-
-            .line-code pre {
-                display: block;
-                font-family: monospace;
-                white-space: pre;
-                margin: 1em 0;
-            }
-
-            .empty_line {
-                width: 700px;
-            }
+}
         </style>
 HTML;
 

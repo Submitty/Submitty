@@ -41,14 +41,19 @@ print('<link href="resources/override.css" rel="stylesheet"></link>');
 <link href="resources/badge.css" rel="stylesheet"></link>
 <script src="resources/script/main.js"></script>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<link href="resources/diffviewer.css" rel="stylesheet"></link>
+<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
 <!-- DIFF VIEWER STUFF -->
+<!--
 <script src='diff-viewer/jquery.js'></script>
 <script src='diff-viewer/underscore.js'></script>
 <script src='diff-viewer/highlight.js'></script>
 <script src='diff-viewer/diff.js'></script>
 <script src='diff-viewer/diff_queue.js'></script>
 <link href="diff-viewer/diff.css" rel="stylesheet"></link>
-<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>*/
+-->
 <?php $user = $_SESSION["id"]; ?>
 
 <!-- FUNCTIONS USED BY THE PULL-DOWN MENUS -->
