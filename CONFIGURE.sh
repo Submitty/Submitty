@@ -36,12 +36,34 @@ HWCRONPHP_GROUP=hwcronphp
 COURSE_BUILDERS_GROUP=course_builders
 DATABASE_USER=hsdbu
 
-UNTRUSTED_UID=`id -u untrusted` # untrusted's user id 
-UNTRUSTED_GID=`id -g untrusted` # untrusted's group id
+# This value must be at least 60: assumed in INSTALL.sh generation of crontab
+NUM_UNTRUSTED=60
+# FIXME: should check for existence of these users
+FIRST_UNTRUSTED_UID=`id -u untrusted00` # untrusted's user id 
+FIRST_UNTRUSTED_GID=`id -g untrusted00` # untrusted's group id
+
 HWCRON_UID=`id -u hwcron`       # hwcron's user id 
 HWCRON_GID=`id -g hwcron`       # hwcron's group id
 HWPHP_UID=`id -u hwphp`         # hwphp's user id 
 HWPHP_GID=`id -g hwphp`         # hwphp's group id
+
+
+# adjust this number depending on the # of processors
+# available on your hardware
+MAX_INSTANCES_OF_GRADE_STUDENTS=8
+
+# if queue is empty, wait this long before checking the queue again
+GRADE_STUDENTS_IDLE_SECONDS=5
+# each grade_students.sh process should idle for this long total
+# before terminating the process
+GRADE_STUDENTS_IDLE_TOTAL_MINUTES=16
+
+# how often should the cron job launch a new grade_students.sh script?
+# 4 starts per hour  = every 15 minutes
+# 12 starts per hour = every 5 minutes
+# 15 starts per hour = every 4 minutes
+GRADE_STUDENTS_STARTS_PER_HOUR=12
+
 
 ########################################################################################################################
 ########################################################################################################################
@@ -64,6 +86,24 @@ fi
 ########################################################################################################################
 ########################################################################################################################
 
+# confirm that the uid/gid of the untrusted users are sequential
+which_untrusted=0
+while [ $which_untrusted -lt $NUM_UNTRUSTED ]; do
+    an_untrusted_user=`printf "untrusted%.2d" $which_untrusted`
+    if [ `id -u $an_untrusted_user` -ne $(($FIRST_UNTRUSTED_UID+$which_untrusted)) ] ; then
+	echo "CONFIGURATION ERROR: untrusted UID not sequential: $an_untrusted_user"
+	exit
+    fi
+    if [ `id -g $an_untrusted_user` -ne $(($FIRST_UNTRUSTED_GID+$which_untrusted)) ] ; then
+	echo "CONFIGURATION ERROR: untrusted GID not sequential: $an_untrusted_user"
+    echo "AN UNTRUSTED $an_untrusted_user"
+	exit
+    fi
+    let which_untrusted=which_untrusted+1
+done
+
+########################################################################################################################
+########################################################################################################################
 
 echo "What is the database password for the database user $DATABASE_USER?"
 read DATABASE_PASSWORD
@@ -105,8 +145,10 @@ sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $HSS_REPOSITORY/
 sed -i -e "s|__CONFIGURE__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $HSS_REPOSITORY/INSTALL.sh
 sed -i -e "s|__CONFIGURE__FILLIN__COURSE_BUILDERS_GROUP__|$COURSE_BUILDERS_GROUP|g" $HSS_REPOSITORY/INSTALL.sh
 
-sed -i -e "s|__CONFIGURE__FILLIN__UNTRUSTED_UID__|$UNTRUSTED_UID|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__UNTRUSTED_GID__|$UNTRUSTED_GID|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__FIRST_UNTRUSTED_GID__|$FIRST_UNTRUSTED_GID|g" $HSS_REPOSITORY/INSTALL.sh
+
 sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_UID__|$HWCRON_UID|g" $HSS_REPOSITORY/INSTALL.sh
 sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $HSS_REPOSITORY/INSTALL.sh
 sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $HSS_REPOSITORY/INSTALL.sh
@@ -121,6 +163,11 @@ sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $H
 
 sed -i -e "s|__CONFIGURE__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $HSS_REPOSITORY/INSTALL.sh
 
+
+sed -i -e "s|__CONFIGURE__FILLIN__MAX_INSTANCES_OF_GRADE_STUDENTS__|$MAX_INSTANCES_OF_GRADE_STUDENTS|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__GRADE_STUDENTS_IDLE_SECONDS__|$GRADE_STUDENTS_IDLE_SECONDS|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__GRADE_STUDENTS_IDLE_TOTAL_MINUTES__|$GRADE_STUDENTS_IDLE_TOTAL_MINUTES|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__GRADE_STUDENTS_STARTS_PER_HOUR__|$GRADE_STUDENTS_STARTS_PER_HOUR|g" $HSS_REPOSITORY/INSTALL.sh
 
 
 # FIXME: Add some error checking to make sure those values were filled in correctly

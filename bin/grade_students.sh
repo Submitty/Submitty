@@ -2,23 +2,36 @@
 
 
 # ======================================================================
-# this script takes no parameters 
+# this script takes 1 required parameter (which 'untrusted' user to use)
+# and one optional parameter (must be "continuous")
 
-#     ./grade_students
-
-if [ "$#" -gt 1 ]; then
+if [[ "$#" -lt 1 || "$#" -gt 2 ]]; then
     echo "ERROR: Illegal number of parameters" >&2
-    echo "   ./grade_students  " >&2
-    echo "   ./grade_students  continuous" >&2
+    echo "   ./grade_students  untrusted00" >&2
+    echo "   ./grade_students  untrusted00  continuous" >&2
     exit 1
 fi
 
+ARGUMENT_UNTRUSTED_USER=$1
+ARGUMENT_CONTINUOUS=false
 
-if [[ "$#" -eq 1 && $1 != "continuous" ]]; then
-    echo "ERROR: Illegal parameter" >&2
-    echo "   ./grade_students  " >&2
-    echo "   ./grade_students  continuous" >&2
+untrusted_user_length=${#ARGUMENT_UNTRUSTED_USER}
+if [[ "$untrusted_user_length" -ne 11 || "${ARGUMENT_UNTRUSTED_USER:0:9}" != "untrusted" ]]; then
+    echo "ERROR: Invalid untrusted user $ARGUMENT_UNTRUSTED_USER" >&2
+    echo "   ./grade_students  untrusted00" >&2
+    echo "   ./grade_students  untrusted00  continuous" >&2
     exit 1
+fi
+
+if [[ "$#" -eq 2 ]]; then
+    if [[ $2 != "continuous" ]]; then
+	echo "ERROR:  Illegal parameter  $ARGUMENT_CONTINUOUS" >&2
+	echo "   ./grade_students  untrusted00" >&2
+	echo "   ./grade_students  untrusted00  continuous" >&2
+	exit 1
+    else
+	ARGUMENT_CONTINUOUS=true
+    fi
 fi
 
 
@@ -31,6 +44,13 @@ HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
 SVN_PATH=__INSTALL__FILLIN__SVN_PATH__
 
 AUTOGRADING_LOG_PATH=__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__
+
+MAX_INSTANCES_OF_GRADE_STUDENTS=__INSTALL__FILLIN__MAX_INSTANCES_OF_GRADE_STUDENTS__
+GRADE_STUDENTS_IDLE_SECONDS=__INSTALL__FILLIN__GRADE_STUDENTS_IDLE_SECONDS__
+GRADE_STUDENTS_IDLE_TOTAL_MINUTES=__INSTALL__FILLIN__GRADE_STUDENTS_IDLE_TOTAL_MINUTES__
+
+
+
 
 # from the data directory, we expect:
 
@@ -468,7 +488,7 @@ function grade_this_item {
 	chmod -R go+rwx $tmp
 	
 	# run the compile.out as the untrusted user
-	$HSS_INSTALL_DIR/bin/untrusted_execute $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
+	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
 	
 	compile_error_code="$?"
 	if [[ "$compile_error_code" -ne 0 ]] ;
@@ -522,22 +542,22 @@ function grade_this_item {
 	chmod -R go+rwx $tmp
 	
 	# run the run.out as the untrusted user
-	$HSS_INSTALL_DIR/bin/untrusted_execute $tmp/my_run.out >& .submit_runner_output.txt
+	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp/my_run.out >& .submit_runner_output.txt
 	runner_error_code="$?"
 
 	# change permissions of all files created by untrusted in this directory (so hwcron can archive/grade them)
-	$HSS_INSTALL_DIR/bin/untrusted_execute /usr/bin/find $tmp -user untrusted -exec /bin/chmod o+r {} \;   >>  .submit_runner_output.txt 2>&1
+	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp -user "${ARGUMENT_UNTRUSTED_USER}" -exec /bin/chmod o+r {} \;   >>  .submit_runner_output.txt 2>&1
 
 
 	# FIXME
 	# ugly cleanup dr memory stuff (not sure why this needs to be added now... was working last semester)
-	$HSS_INSTALL_DIR/bin/untrusted_execute /bin/rm -rf $tmp/symcache
-	$HSS_INSTALL_DIR/bin/untrusted_execute /bin/rm -rf $tmp/DrMemory-*
+	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /bin/rm -rf $tmp/symcache
+	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /bin/rm -rf $tmp/DrMemory-*
 	# need to revisit directory & file permissions, and decide who will be responsible for deleting this
 
 	# this didn't fix it (didn't give hwcron ability to delete these files
 	# also need to add execute on the directories...
-	#$HSS_INSTALL_DIR/bin/untrusted_execute /usr/bin/find $tmp -user untrusted -type d -exec /bin/chmod o+x {} \;   >>  .submit_runner_output.txt 2>&1
+	#$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp -user "${ARGUMENT_UNTRUSTED_USER}" -type d -exec /bin/chmod o+x {} \;   >>  .submit_runner_output.txt 2>&1
 
 
 
@@ -568,8 +588,8 @@ function grade_this_item {
             echo "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
             "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
         else
-            echo '$HSS_INSTALL_DIR/bin/untrusted_execute /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'
-            "$HSS_INSTALL_DIR/bin/untrusted_execute" "/usr/bin/valgrind" "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+            echo '$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'
+            "$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" " "/usr/bin/valgrind" "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
         fi
 
 	validator_error_code="$?"
@@ -638,6 +658,26 @@ sleep_count=0
 
 # =====================================================================
 # =====================================================================
+# Do some error checking
+
+if [[ "$MAX_INSTANCES_OF_GRADE_STUDENTS" -lt 1 ||
+      "$MAX_INSTANCES_OF_GRADE_STUDENTS" -ge 60 ]] ; then
+    log_exit "" "Bad value for MAX_INSTANCES_OF_GRADE_STUDENTS = $MAX_INSTANCES_OF_GRADE_STUDENTS"
+fi
+
+if [[ "$GRADE_STUDENTS_IDLE_SECONDS" -lt 1 ||
+      "$GRADE_STUDENTS_IDLE_SECONDS" -ge 10 ]] ; then
+    log_exit "" "Bad value for GRADE_STUDENTS_IDLE_SECONDS = $GRADE_STUDENTS_IDLE_SECONDS"
+fi
+
+if [[ "$GRADE_STUDENTS_IDLE_TOTAL_MINUTES" -lt 10 ||
+      "$GRADE_STUDENTS_IDLE_TOTAL_MINUTES" -gt 60 ]] ; then
+    log_exit "" "Bad value for GRADE_STUDENTS_IDLE_TOTAL_MINUTES = $GRADE_STUDENTS_IDLE_TOTAL_MINUTES"
+fi
+
+
+# =====================================================================
+# =====================================================================
 # OUTER LOOP (will eventually process all submissions)
 # =====================================================================
 # =====================================================================
@@ -645,33 +685,25 @@ sleep_count=0
 while true; do
 
     # -------------------------------------------------------------
-    # check for runaway processes by untrusted (this should never be
-    # more that a few, the user limit is 50)
-    numprocesses=1 #$(ps -u untrusted | wc -l)
-    if [[ $numprocesses -gt 25 ]] ; then
-	log_error "" "untrusted is running too many processes: $numprocesses"
-	((too_many_processes_count++))
-	if [[ $too_many_processes_count -gt 10 ]];
-	then
-	    exit
-	fi
-	sleep 10
-	continue
+    # check to see if there are any other grade_student.sh instances
+    # using the same untrusted user
+    specific_instances=`pgrep -f "grade_students.sh ${ARGUMENT_UNTRUSTED_USER}" -d " "`
+    specific_instances_count=`echo $specific_instances | wc -w`
+    echo "Running $specific_instances_count instances of grade_students.sh with argument ${ARGUMENT_UNTRUSTED_USER}"
+    if [[ "$specific_instances_count" -ne 1 ]] ; then
+	# This "error" may occur if the system is very busy for a long
+	# period of time and the specific untrusted user is reused
+	# before its previous instance completed.
+	log_exit "" "Running $specific_instances_count instance(s) of grade_students.sh with argument ${ARGUMENT_UNTRUSTED_USER}, should be exactly 1"
     fi
-    too_many_processes_count=0
-
 
     # -------------------------------------------------------------
-    # check for parallel grade_students scripts
-    #ps -f -u hwcron | grep grade_students.sh
-    #pgrep -u hwcron grade_students
-    pgrep_results=$(pgrep grade_students)
-    pgrep_results=( $pgrep_results ) # recast as array
-    numparallel=${#pgrep_results[@]} # count elements in array
-    echo "hwcron is running $numparallel parallel scripts"
-    if [[ "$numparallel" -gt 8 ]] ; then
-	log_error "" "hwcron is running too many parallel scripts: $numparallel"
-	exit
+    # check total number of instances of grade_students.sh
+    total_instances=`pgrep -f "grade_students.sh untrusted" -d " "`
+    total_instances_count=`echo $total_instances | wc -w`
+    echo "Running a total of $total_instances_count instance(s) of grade_students.sh"
+    if [[ "$total_instances_count" -gt ${MAX_INSTANCES_OF_GRADE_STUDENTS} ]] ; then
+	log_exit "" "Running a total of $total_instances_count instances of grade_students.sh, > max allowed ${MAX_INSTANCES_OF_GRADE_STUDENTS}"
     fi
 
 
@@ -790,7 +822,7 @@ while true; do
     # if no work was done in this iteration...
     if [ "$graded_something" = "false" ] ; then
 
-	if [[ "$#" -eq 1 && $1 == "continuous" ]];
+	if "$ARGUMENT_CONTINUOUS";
 	then
 	    echo "grade_students.sh continuous mode"
 	else
@@ -799,16 +831,11 @@ while true; do
 	fi
 	
 	# either quit the loop or sleep
-	if [[ $sleep_count -gt 200 ]] ; then
-	    # 5 seconds (sleep) * 12 = 1 minute
-	    # 5 seconds (sleep) * 120 = 10 minutes
-	    # 5 seconds (sleep) * 200 = 16 minutes
-	    # *** plus more time if you actually did any work! ***
-	    # if you've been running for at least 16 minutes, quit (will be restarted by a cron once per 15 minutes)
+	if [[ $(($sleep_count * ${GRADE_STUDENTS_IDLE_SECONDS})) -gt $((${GRADE_STUDENTS_IDLE_TOTAL_MINUTES} * 60)) ]] ; then
 	    break;
 	else
-	    # sleep for 5 seconds
-	    sleep 5
+	    # sleep for the specified number of seconds
+	    sleep ${GRADE_STUDENTS_IDLE_SECONDS}
 	    # make sure to reset the all_grading_done flag so we check again
 	    all_grading_done=false
 	    continue;

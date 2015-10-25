@@ -30,8 +30,10 @@ HWCRON_USER=__CONFIGURE__FILLIN__HWCRON_USER__
 HWCRONPHP_GROUP=__CONFIGURE__FILLIN__HWCRONPHP_GROUP__
 COURSE_BUILDERS_GROUP=__CONFIGURE__FILLIN__COURSE_BUILDERS_GROUP__
 
-UNTRUSTED_UID=__CONFIGURE__FILLIN__UNTRUSTED_UID__
-UNTRUSTED_GID=__CONFIGURE__FILLIN__UNTRUSTED_GID__
+NUM_UNTRUSTED=__CONFIGURE__FILLIN__NUM_UNTRUSTED__
+FIRST_UNTRUSTED_UID=__CONFIGURE__FILLIN__FIRST_UNTRUSTED_UID__
+FIRST_UNTRUSTED_GID=__CONFIGURE__FILLIN__FIRST_UNTRUSTED_GID__
+
 HWCRON_UID=__CONFIGURE__FILLIN__HWCRON_UID__
 HWCRON_GID=__CONFIGURE__FILLIN__HWCRON_GID__
 HWPHP_UID=__CONFIGURE__FILLIN__HWPHP_UID__
@@ -46,6 +48,12 @@ TAGRADING_LOG_PATH=__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__
 
 
 AUTOGRADING_LOG_PATH=__CONFIGURE__FILLIN__AUTOGRADING_LOG_PATH__
+
+
+MAX_INSTANCES_OF_GRADE_STUDENTS=__CONFIGURE__FILLIN__MAX_INSTANCES_OF_GRADE_STUDENTS__
+GRADE_STUDENTS_IDLE_SECONDS=__CONFIGURE__FILLIN__GRADE_STUDENTS_IDLE_SECONDS__
+GRADE_STUDENTS_IDLE_TOTAL_MINUTES=__CONFIGURE__FILLIN__GRADE_STUDENTS_IDLE_TOTAL_MINUTES__
+GRADE_STUDENTS_STARTS_PER_HOUR=__CONFIGURE__FILLIN__GRADE_STUDENTS_STARTS_PER_HOUR__
 
 
 
@@ -64,13 +72,14 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $1
     sed -i -e "s|__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__|$COURSE_BUILDERS_GROUP|g" $1
 
-    sed -i -e "s|__INSTALL__FILLIN__UNTRUSTED_UID__|$UNTRUSTED_UID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__UNTRUSTED_GID__|$UNTRUSTED_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_GID__|$FIRST_UNTRUSTED_GID|g" $1
+
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_UID__|$HWCRON_UID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_GID__|$HWPHP_GID|g" $1
-
 
 
     sed -i -e "s|__INSTALL__FILLIN__DATABASE_HOST__|$DATABASE_HOST|g" $1
@@ -82,7 +91,11 @@ function replace_fillin_variables {
 
     sed -i -e "s|__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $1
 
-
+    sed -i -e "s|__INSTALL__FILLIN__MAX_INSTANCES_OF_GRADE_STUDENTS__|$MAX_INSTANCES_OF_GRADE_STUDENTS|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__GRADE_STUDENTS_IDLE_SECONDS__|$GRADE_STUDENTS_IDLE_SECONDS|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__GRADE_STUDENTS_IDLE_TOTAL_MINUTES__|$GRADE_STUDENTS_IDLE_TOTAL_MINUTES|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__GRADE_STUDENTS_STARTS_PER_HOUR__|$GRADE_STUDENTS_STARTS_PER_HOUR|g" $1
+    
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
 
@@ -346,6 +359,41 @@ find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} 
 
 
 replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
+
+
+################################################################################################################
+################################################################################################################
+# GENERATE & INSTALL THE CRONTAB FILE FOR THE hwcron USER
+
+echo -e "Generate & install the crontab file for hwcron user"
+
+# name of temporary file
+HWCRON_CRONTAB_FILE=my_hwcron_crontab_file.txt
+
+# calculate the frequency -- once every how many minutes?
+GRADE_STUDENTS_FREQUENCY=$(( 60 / ${GRADE_STUDENTS_STARTS_PER_HOUR} ))
+
+# sanity check
+if [[ "$GRADE_STUDENTS_FREQUENCY" -lt 1 ||
+      "$GRADE_STUDENTS_FREQUENCY" -ge 60 ]] ; then
+    echo "ERROR: Bad value for GRADE_STUDENTS_FREQUENCY = $GRADE_STUDENTS_FREQUENCY"
+    exit 1
+fi
+
+# generate the file
+echo -e "\n\n"                                                                                >  ${HWCRON_CRONTAB_FILE}
+echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL.sh"                         >> ${HWCRON_CRONTAB_FILE}
+minutes=0
+while [ $minutes -lt 60 ]; do
+    printf "%02d  * * * *   ${HSS_INSTALL_DIR}/bin/grade_students.sh  untrusted%02d  >  /dev/null\n"  $minutes $minutes  >> ${HWCRON_CRONTAB_FILE}
+    minutes=$(($minutes + $GRADE_STUDENTS_FREQUENCY))
+done
+echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL.sh"                         >> ${HWCRON_CRONTAB_FILE}
+echo -e "\n\n"                                                                                >> ${HWCRON_CRONTAB_FILE}
+
+# install the crontab file for the hwcron user
+crontab  -u hwcron  ${HWCRON_CRONTAB_FILE}
+rm ${HWCRON_CRONTAB_FILE}
 
 
 ################################################################################################################
