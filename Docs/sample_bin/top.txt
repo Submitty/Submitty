@@ -5,7 +5,7 @@ SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 AddExternalAuth pwauth /usr/sbin/pwauth
 SetExternalAuthMethod pwauth pipe
 	ServerName test-svn
-	ServerAdmin root
+	ServerAdmin ADMIN@DOMAIN.HERE
 
 	<Location />
 		DAV svn
