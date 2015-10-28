@@ -394,7 +394,9 @@ function grade_this_item {
     else
 	log_error "$NEXT_TO_GRADE" "$submission_path/.submit.timestamp   does not exist!"
     fi
-    
+    # chop of first & last characters
+    global_submission_time=`date -d "${submission_time}"`
+
     # switch to tmp directory
     pushd $tmp > /dev/null
     
@@ -414,6 +416,11 @@ function grade_this_item {
     class_json_config="$HSS_DATA_DIR/courses/$semester/$course/config/class.json"
     svn_checkout=`cat $class_json_config | jq '.assignments[] | if .assignment_id == "'${assignment}'" then .svn_checkout else empty end'`
     
+    # also save the due date
+    global_assignment_deadline=`cat $class_json_config | jq '.assignments[] | if .assignment_id == "'${assignment}'" then .due_date else empty end'`
+    # need to chop off first & last characters (double quotes)
+    global_assignment_deadline=`date -d "${global_assignment_deadline:1:-1}"`
+
     # if this homework is submitted by svn, use the date/time from
     # the .submit.timestamp file and checkout the version matching
     # that date/time from the svn server
@@ -631,6 +638,8 @@ function grade_this_item {
 	global_grade_result="WARNING: $results_path/.submit.grade does not have a total score"
     fi
 
+    global_grade_timestamp_file_location=${results_path}/.grade.timestamp
+    printf "temporary data" > $global_grade_timestamp_file_location
 
     
     # --------------------------------------------------------------------
@@ -791,6 +800,9 @@ while true; do
 
 	# FIXME: using a global variable to pass back the grade
 	global_grade_result="ERROR: NO GRADE"
+	global_grade_timestamp_file_location="/dev/null"
+	global_submission_time=""
+	global_assignment_deadline=""
 	# call the helper function
 	grade_this_item $NEXT_ITEM
 
@@ -811,6 +823,35 @@ while true; do
 
 	# log the end
 	log_message "$IS_BATCH_JOB"  "$NEXT_ITEM"  "grade:"  "$ELAPSED" "$global_grade_result"
+
+
+	# -------------------------------------------------------------
+	# PREPARE THE .grade.timestamp json file 
+	# FIXME: could use a json library to create this file
+	printf "{\n"                                                                                     >  $global_grade_timestamp_file_location
+	printf "  \"assignment_deadline\"            : \"%s\",\n"          "$global_assignment_deadline" >> $global_grade_timestamp_file_location
+	printf "  \"submission_time\"                : \"%s\",\n"          "$global_submission_time"     >> $global_grade_timestamp_file_location
+	sec_deadline=`date -d "${global_assignment_deadline}" +%s`
+	sec_submission=`date -d "${global_submission_time}" +%s`
+	seconds_late=$((sec_submission-sec_deadline))
+	echo "seconds_late " $seconds_late
+	if (( $seconds_late > 0 )) ; then
+	    minutes_late=$((($seconds_late+60-1)/60))
+	    hours_late=$((($seconds_late+60*60-1)/(60*60)))
+	    days_late=$((($seconds_late+60*60*24-1)/(60*60*24)))
+	    echo "days late " $days_late
+	printf "  \"days_late_(before_extensions)\"  : \"%s\",\n"          "$days_late"                  >> $global_grade_timestamp_file_location
+	fi
+	printf "  \"queue_time\"                     : \"%s\",\n"          "`date -d @$FILE_TIMESTAMP`"  >> $global_grade_timestamp_file_location
+	if [ "$IS_BATCH_JOB" != "" ]; then
+        printf "  \"batch_regrade\"                  : true,\n"                                          >> $global_grade_timestamp_file_location
+	fi
+	printf "  \"grading_began\"                  : \"%s\",\n"          "`date -d @$STARTTIME`"       >> $global_grade_timestamp_file_location
+	printf "  \"wait_time\"                      : \"%s seconds\",\n"  $WAITTIME                     >> $global_grade_timestamp_file_location
+	printf "  \"grading_finished\"               : \"%s\",\n"          "`date -d @$ENDTIME`"         >> $global_grade_timestamp_file_location
+	printf "  \"grade_time\"                     : \"%s seconds\"\n"   $ELAPSED                      >> $global_grade_timestamp_file_location
+	printf "}\n"                                                                                     >> $global_grade_timestamp_file_location
+
 
 	# break out of the loop (need to check for new interactive items)
 	graded_something=true
