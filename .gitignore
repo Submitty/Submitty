@@ -13,6 +13,8 @@ INSTALL.sh
 tests/report
 tests/setup/selenium-server-standalone.jar
 
+autograde_tests/build_dir
+
 logs/
 *.csv
 
