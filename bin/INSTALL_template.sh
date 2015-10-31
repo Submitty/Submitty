@@ -180,7 +180,7 @@ chmod  770                                  $HSS_DATA_DIR/to_be_graded_batch
 echo -e "Copy the submission website"
 
 # copy the website from the repo
-rsync -ruz   $HSS_REPOSITORY/public   $HSS_INSTALL_DIR/website
+rsync -rz   $HSS_REPOSITORY/public   $HSS_INSTALL_DIR/website
 
 # automatically create the site path file, storing the data directory in the file
 echo $HSS_DATA_DIR > $HSS_INSTALL_DIR/website/public/site_path.txt 
@@ -213,7 +213,7 @@ find $HSS_INSTALL_DIR/website/public/custom_resources -exec chmod 775 {} \;
 echo -e "Copy the grading code"
 
 # copy the files from the repo
-rsync -ruz $HSS_REPOSITORY/grading $HSS_INSTALL_DIR/src
+rsync -rz $HSS_REPOSITORY/grading $HSS_INSTALL_DIR/src
 # root will be owner & group of these files
 chown -R  root:root $HSS_INSTALL_DIR/src
 # "other" can cd into & ls all subdirectories
@@ -233,7 +233,7 @@ replace_fillin_variables $HSS_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
 echo -e "Copy the sample files"
 
 # copy the files from the repo
-rsync -ruz $HSS_REPOSITORY/sample_files $HSS_INSTALL_DIR
+rsync -rz $HSS_REPOSITORY/sample_files $HSS_INSTALL_DIR
 
 # root will be owner & group of these files
 chown -R  root:root $HSS_INSTALL_DIR/sample_files
@@ -249,7 +249,7 @@ find $HSS_INSTALL_DIR/sample_files -type f -exec chmod 444 {} \;
 echo -e "Build the junit test runner"
 
 # copy the file from the repo
-rsync -ruz $HSS_REPOSITORY/junit_test_runner/TestRunner.java $HSS_INSTALL_DIR/JUnit/TestRunner.java
+rsync -rz $HSS_REPOSITORY/junit_test_runner/TestRunner.java $HSS_INSTALL_DIR/JUnit/TestRunner.java
 
 pushd $HSS_INSTALL_DIR/JUnit > /dev/null
 # root will be owner & group of the source file
@@ -278,7 +278,7 @@ chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin
 chmod 751 $HSS_INSTALL_DIR/bin
 
 # copy all of the files
-rsync -ruz  $HSS_REPOSITORY/bin/*   $HSS_INSTALL_DIR/bin/
+rsync -rz  $HSS_REPOSITORY/bin/*   $HSS_INSTALL_DIR/bin/
 #replace necessary variables in the copied scripts
 replace_fillin_variables $HSS_INSTALL_DIR/bin/create_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/grade_students.sh
@@ -331,11 +331,11 @@ popd > /dev/null
 
 echo -e "Copy the ta grading website"
 
-rsync  -ruz $TAGRADING_REPOSITORY/*php         $HSS_INSTALL_DIR/hwgrading_website
-rsync  -ruz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
-rsync  -ruz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
-rsync  -ruz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
-rsync  -ruz $TAGRADING_REPOSITORY/app          $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $TAGRADING_REPOSITORY/*php         $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $TAGRADING_REPOSITORY/app          $HSS_INSTALL_DIR/hwgrading_website
     
 # set special user $HWPHP_USER as owner & group of all hwgrading_website files
 find $HSS_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;

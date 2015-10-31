@@ -50,7 +50,7 @@ HWPHP_GID=`id -g hwphp`         # hwphp's group id
 
 # adjust this number depending on the # of processors
 # available on your hardware
-MAX_INSTANCES_OF_GRADE_STUDENTS=8
+MAX_INSTANCES_OF_GRADE_STUDENTS=15
 
 # if queue is empty, wait this long before checking the queue again
 GRADE_STUDENTS_IDLE_SECONDS=5
@@ -62,7 +62,8 @@ GRADE_STUDENTS_IDLE_TOTAL_MINUTES=16
 # 4 starts per hour  = every 15 minutes
 # 12 starts per hour = every 5 minutes
 # 15 starts per hour = every 4 minutes
-GRADE_STUDENTS_STARTS_PER_HOUR=12
+#GRADE_STUDENTS_STARTS_PER_HOUR=12
+GRADE_STUDENTS_STARTS_PER_HOUR=20
 
 
 ########################################################################################################################
