@@ -151,6 +151,11 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
       if ($homework_file["size"] / 1024 > $max_size || !is_valid_zip_size($homework_file["tmp_name"], $max_size)) {
         return array("error"=>"", "message"=>"File uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file was ".$homework_file["size"] / 1024 ." kb.");
       }
+	foreach ($homework_file as $file) {
+	   if (filetype($file) == "zip") {
+	      return array("error"=>"", "message"=> "Please remove zip file from within your zip folder submission");
+	   }
+	}
 
       $filename = explode(".", $homework_file["name"]);
       $extension = end($filename);
