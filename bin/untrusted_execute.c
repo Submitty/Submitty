@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <grp.h>
+#include <string.h>
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 /* 
@@ -25,6 +26,28 @@ change permissions & set suid: (must be root)
 
 
 int main(int argc, char* argv[]) {
+
+  /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */  
+  /* Verify that we have at least two arguments, which untrusted user
+     to run as, and the name of the program to run... */
+  
+  if (argc < 3) {
+    fprintf(stderr,"untrusted_execute: ERROR! WRONG NUMBER OF ARGUMENTS\n");
+    exit(1);
+  }
+  int length = strnlen(argv[1], 16);
+
+  /* verify the untrusted username which must be of the form "untrustedNN" */
+  if (length != 11 || strstr(argv[1],"untrusted") != argv[1]) {
+    fprintf(stderr,"untrusted_execute: ERROR! Invalid untrusted user %s\n", argv[1]);
+    exit(1);
+  }
+
+  char which_untrusted_string[3];
+  strncpy(which_untrusted_string,argv[1]+9,2);
+  which_untrusted_string[2]='\0';
+  int which_untrusted = atoi(which_untrusted_string);
+
   int res;
   uid_t euid;
 
@@ -34,10 +57,22 @@ int main(int argc, char* argv[]) {
      THE SUID BIT & PERMISSIONS MUST BE SET CORRECTLY ON THE EXECUTABLE
   */
   static const uid_t ROOT_UID = 0;         /* root's user id & group id */
-  static const uid_t UNTRUSTED_UID = __INSTALL__FILLIN__UNTRUSTED_UID__; /* untrusted's user id */
-  static const uid_t UNTRUSTED_GID = __INSTALL__FILLIN__UNTRUSTED_GID__; /* untrusted's group id */
+
+  static const uid_t NUM_UNTRUSTED       = __INSTALL__FILLIN__NUM_UNTRUSTED__;       /* num untrusted users */
+  static const uid_t FIRST_UNTRUSTED_UID = __INSTALL__FILLIN__FIRST_UNTRUSTED_UID__; /* untrusted's user id */
+  static const uid_t FIRST_UNTRUSTED_GID = __INSTALL__FILLIN__FIRST_UNTRUSTED_GID__; /* untrusted's group id */
+
   static const uid_t HWCRON_UID    = __INSTALL__FILLIN__HWCRON_UID__;    /* hwcron's user id */
   static const uid_t HWCRON_GID    = __INSTALL__FILLIN__HWCRON_GID__;    /* hwcron's group id */
+
+  if (which_untrusted < 0 || which_untrusted >= NUM_UNTRUSTED) {
+    fprintf(stderr,"untrusted_execute: INVALID UNTRUSTED ID %d\n", which_untrusted);
+    exit(1);
+  }
+
+  uid_t MY_UNTRUSTED_UID = FIRST_UNTRUSTED_UID + which_untrusted;
+  uid_t MY_UNTRUSTED_GID = FIRST_UNTRUSTED_GID + which_untrusted;
+
   /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
   /* Sanity check, this program must be run by hwcron, with
@@ -81,7 +116,7 @@ int main(int argc, char* argv[]) {
   /* Drop privileges (groups, gid, uid) */
   
   /* make sure to clear out the secondary groups first */
-  gid_t my_gid = UNTRUSTED_GID;
+  gid_t my_gid = MY_UNTRUSTED_GID;
   res = setgroups (1,&my_gid);
   if (res != 0) {
     fprintf(stderr,"INTERNAL ERROR: FAILED TO DROP GROUPS (setgroups)\n");
@@ -90,7 +125,7 @@ int main(int argc, char* argv[]) {
   }
 
   /* switch the group id to the untrusted group id */
-  res = setresgid(UNTRUSTED_GID, UNTRUSTED_GID, UNTRUSTED_GID); 
+  res = setresgid(MY_UNTRUSTED_GID, MY_UNTRUSTED_GID, MY_UNTRUSTED_GID); 
   if (res != 0) {
     fprintf(stderr,"INTERNAL ERROR: FAILED TO DROP GROUP PRIVS\n");
     perror("setresgid error: ");
@@ -98,7 +133,7 @@ int main(int argc, char* argv[]) {
   }
 
   /* switch the user id to the untrusted user id */
-  res = setresuid(UNTRUSTED_UID, UNTRUSTED_UID, UNTRUSTED_UID); 
+  res = setresuid(MY_UNTRUSTED_UID, MY_UNTRUSTED_UID, MY_UNTRUSTED_UID); 
   if (res != 0) {
     fprintf(stderr,"INTERNAL ERROR: FAILED TO DROP USER PRIVS\n");
     perror("setresuid error: ");
@@ -106,17 +141,11 @@ int main(int argc, char* argv[]) {
   }
 
   /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */  
-  /* Verify that we have a at least one argument, the name of the program to run... */
-  
-  if (argc < 2) {
-    fprintf(stderr,"INTERNAL ERROR: ARGC < 2\n");
-    exit(1);
-  }
 
   /* chop off this executable, and run the the program specified by the rest of the args */
   char *envp[1] = {NULL};
   /* clears the environment variables, etc. */
-  execve(argv[1], argv+1, envp);
+  execve(argv[2], argv+2, envp);
   perror("exec");
   fprintf(stderr,"INTERNAL ERROR: exec failed\n");
   fprintf(stderr,"%s\n",argv[1]);
