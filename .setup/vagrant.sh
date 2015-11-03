@@ -3,11 +3,10 @@
 #################################################################
 # PROVISION SETUP
 #################
-export DEBIAN_FRONTEND=noninteractive
-
 if [[ $1 == vagrant ]]; then
   echo "Non-interactive vagrant script..."
   VAGRANT=1
+  export DEBIAN_FRONTEND=noninteractive
 else
   #TODO: We should get options for ./CONFIGURE script
   VAGRANT=0
@@ -16,27 +15,24 @@ fi
 #################################################################
 # UBUNTU SETUP
 #################
-echo -e '############################################################
-##  Welcome to the Vagrant VM                             ##
+echo -e '
+ __   __  _     _  _______  _______  ______    __   __  _______  ______
+|  | |  || | _ | ||       ||       ||    _ |  |  | |  ||       ||    _ |
+|  |_|  || || || ||  _____||    ___||   | ||  |  |_|  ||    ___||   | ||
+|       ||       || |_____ |   |___ |   |_||_ |       ||   |___ |   |_||_
+|       ||       ||_____  ||    ___||    __  ||       ||    ___||    __  |
+|   _   ||   _   | _____| ||   |___ |   |  | | |     | |   |___ |   |  | |
+|__| |__||__| |__||_______||_______||___|  |_|  |___|  |_______||___|  |_|
+
+############################################################
 ##  All user accounts have same password unless otherwise ##
 ##  noted below. The following user accounts exist:       ##
-##          vagrant/vagrant                               ##
-##          root/vagrant                                  ##
-##          hsdbu                                         ##
-##          hwphp                                         ##
-##          hwcron                                        ##
-##          untrusted                                     ##
-##          ta                                            ##
-##          instructor                                    ##
-##          developer                                     ##
-##          postgres                                      ##
+##    vagrant/vagrant, root/vagrant, hsdbu, hwphp         ##
+##    hwcron, ta, instructor, developer, postgres         ##
 ##                                                        ##
 ##  The following accounts have database accounts         ##
 ##  with same password as above:                          ##
-##          hsdbu                                         ##
-##          postgres                                      ##
-##          root                                          ##
-##          vagrant                                       ##
+##    hsdbu, postgres, root, vagrant                      ##
 ##                                                        ##
 ##  Happy developing!                                     ##
 ############################################################
@@ -79,7 +75,7 @@ apt-get install -y oracle-java8-installer > /dev/null 2>&1
 #################################################################
 # JAR SETUP
 #################
-echo "get jars..."
+echo "Getting JUnit..."
 mkdir -p /usr/local/hss/JUnit
 cd /usr/local/hss/JUnit
 
@@ -87,6 +83,8 @@ wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.
 mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
 wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F1.3%2Fhamcrest-core-1.3.jar hamcrest-core-1.3.jar
+
+echo "Getting emma..."
 wget http://downloads.sourceforge.net/project/emma/emma-release/2.0.5312/emma-2.0.5312.zip -o /dev/null > /dev/null 2>&1
 unzip emma-2.0.5312.zip > /dev/null
 mv emma-2.0.5312/lib/emma.jar emma.jar
@@ -99,7 +97,7 @@ chmod o+r . *.jar
 #################################################################
 # DRMEMORY SETUP
 #################
-echo "DrMemory..."
+echo "Getting DrMemory..."
 mkdir -p /usr/local/hss/DrMemory
 wget http://dl.bintray.com/bruening/DrMemory/DrMemory-Linux-1.8.0-8.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-1.8.0-8.tar.gz
@@ -133,6 +131,8 @@ sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 rm /etc/apache2/sites*/000-default.conf
 rm /etc/apache2/sites*/default-ssl.conf
 
+echo -e "\nServerName 10.0.2.15\n" >> /etc/apache2/apache2.conf
+
 service apache2 reload
 
 #################################################################
@@ -152,21 +152,23 @@ sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php5
 # USERS SETUP
 # TODO: we should probably move this section up and run first?
 #################
+adduser vagrant sudo
+
 addgroup hwcronphp
 addgroup course_builders
-
 adduser ta --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 echo "ta:ta" | sudo chpasswd
 adduser instructor --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 echo "instructor:instructor" | sudo chpasswd
+adduser instructor sudo
 adduser developer --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 echo "developer:developer" | sudo chpasswd
+adduser developer sudo
 adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 echo "hwphp:hwphp" | sudo chpasswd
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 echo "hwcron:hwcron" | sudo chpasswd
-adduser untrusted --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-echo "untrusted:untrusted" | sudo chpasswd
+adduser untrusted --home /tmp --no-create-home --disabled-password --gecos "Untrusted"
 adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 echo "hsdbu:hsdbu" | sudo chpasswd
 adduser hwphp hwcronphp
@@ -296,6 +298,15 @@ a2ensite hwgrading
 
 apache2ctl -t
 service apache2 restart
+
+if [[ ${VAGRANT} == 1 ]]; then
+  rm /var/local/hss/autograding_logs
+  rm /var/local/hss/tagrading_logs
+  rm /vagrant/.vagrant/autograding_logs
+  rm /vagrant/.vagrant/tagrading_logs
+  ln -s /vagrant/.vagrant/autograding_logs /var/local/hss/autograding_logs
+  ln -s /vagrant/.vagrant/tagrading_logs /var/local/hss/tagrading_logs
+fi
 
 #################################################################
 # CRON SETUP
