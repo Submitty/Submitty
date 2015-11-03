@@ -411,6 +411,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 $submission_id, $this->student_rcs, $this->active_assignment[$part]));
 
             if (!file_exists($result_directory) || !is_dir($result_directory)) {
+                $part++;
                 continue;
             }
 
