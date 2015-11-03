@@ -340,6 +340,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
         foreach($this->submission_ids as $submission_id) {
             $submission_directory = implode("/", array(__SUBMISSION_SERVER__, "submissions", $submission_id, $this->student_rcs));
             if (!file_exists($submission_directory)) {
+                $part++;
                 continue;
             }
 
