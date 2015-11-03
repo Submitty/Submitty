@@ -8,8 +8,7 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
-echo -e "\n\nWelcome to the Homework Submission Server (HSS) Configuration\n\n"
-echo "$1"
+echo -e "\nWelcome to the Homework Submission Server (HSS) Configuration\n"
 
 echo "What is the database host?"
 read DATABASE_HOST
@@ -37,7 +36,6 @@ HSS_REPOSITORY=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 # assume the TA grading repo is in the same location
 # NOTE: eventually the TA grading repo will be merged into the main repo
-#TAGRADING_REPOSITORY=$HSS_REPOSITORY/../GIT_CHECKOUT_TAgrading
 TAGRADING_REPOSITORY=$HSS_REPOSITORY/TAGradingServer
 
 # recommended (default) directory locations
@@ -82,25 +80,6 @@ GRADE_STUDENTS_IDLE_TOTAL_MINUTES=16
 #GRADE_STUDENTS_STARTS_PER_HOUR=12
 GRADE_STUDENTS_STARTS_PER_HOUR=20
 
-
-########################################################################################################################
-########################################################################################################################
-
-if [[ "$#" -eq 0 ]] ; then
-    echo -e "\n\nWelcome to the Homework Submission Server (HSS) Default Configuration"
-    echo -e "(rerun this script with a single argument "custom" to customize the installation\n"
-    # defaults above are fine
-else
-    if [[ "$#" -ne 1 || $1 != "custom" ]] ; then
-	echo -e "\n\nERROR: This script should be run with zero arguments or a single argument "custom"\n\n"
-	exit
-    fi
-    echo -e "\n\nWelcome to the Homework Submission Server (HSS) Interactive Custom Configuration"
-    # FIXME: query user to ask if they would like to change the defaults above
-    echo -e "Sorry, the interactive script is not written yet....  you are stuck with the defaults.\n"
-fi
-
-
 ########################################################################################################################
 ########################################################################################################################
 
@@ -119,22 +98,6 @@ while [ $which_untrusted -lt $NUM_UNTRUSTED ]; do
     fi
     let which_untrusted=which_untrusted+1
 done
-
-########################################################################################################################
-########################################################################################################################
-
-echo "What is the database password for the database user $DATABASE_USER?"
-read DATABASE_PASSWORD
-
-
-# assumptions
-
-DATABASE_HOST=csdb3
-TAGRADING_URL=https://hwgrading.cs.rpi.edu/
-TAGRADING_LOG_PATH=$HSS_DATA_DIR/tagrading_logs/
-
-AUTOGRADING_LOG_PATH=$HSS_DATA_DIR/autograding_logs/
-
 
 ########################################################################################################################
 ########################################################################################################################

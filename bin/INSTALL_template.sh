@@ -357,7 +357,6 @@ find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.gif -exec chmod o+r {} 
 # "other" can read & execute all .js files
 find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
 
-
 replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php
 mv $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
 

@@ -150,7 +150,6 @@ sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php5
 
 #################################################################
 # USERS SETUP
-# TODO: we should probably move this section up and run first?
 #################
 adduser vagrant sudo
 
@@ -168,11 +167,11 @@ adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-pas
 echo "hwphp:hwphp" | sudo chpasswd
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 echo "hwcron:hwcron" | sudo chpasswd
-adduser untrusted --home /tmp --no-create-home --disabled-password --gecos "Untrusted"
 adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 echo "hsdbu:hsdbu" | sudo chpasswd
 adduser hwphp hwcronphp
 adduser hwcron hwcronphp
+./vagrant/create.untrusted.users.pl
 
 # TODO: we can automate this with a loop probably
 addgroup csci1100
@@ -311,16 +310,16 @@ fi
 #################################################################
 # CRON SETUP
 #################
-cd /home/hwcron
-echo "" > /home/hwcron/x
-sudo cp /home/hwcron/x /var/spool/cron/crontabs/hwcron
-sudo chown hwcron:crontab /var/spool/cron/crontabs/hwcron
-echo "0,15,30,45 * * * * /usr/local/hss/bin/grade_students.sh" > /home/hwcron/c
-su hwcron << EOF
-  cat /home/hwcron/c | crontab -
-EOF
-rm /home/hwcron/x
-rm /home/hwcron/c
+#cd /home/hwcron
+#echo "" > /home/hwcron/x
+#sudo cp /home/hwcron/x /var/spool/cron/crontabs/hwcron
+#sudo chown hwcron:crontab /var/spool/cron/crontabs/hwcron
+#echo "0,15,30,45 * * * * /usr/local/hss/bin/grade_students.sh" > /home/hwcron/c
+#su hwcron << EOF
+#  cat /home/hwcron/c | crontab -
+#EOF
+#rm /home/hwcron/x
+#rm /home/hwcron/c
 
 #################################################################
 # COURSE SETUP
