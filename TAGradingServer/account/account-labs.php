@@ -100,8 +100,8 @@ Red - [SAVE ERROR] Refresh Page"></i>
 
                     ?>
                     <div class="tab-pane fade<?php echo ($first ? ' active in' : ''); ?>" id="lab<?php echo $lab_row["lab_id"]; ?>">
-                        <table class="table table-bordered" id="labsTable" style=" border: 1px solid #AAA;">
-                            <thead style="background: #E1E1E1;">
+                        <table class="table table-bordered table-striped" id="labsTable" style=" border: 1px solid #AAA;">
+                            <thead>
                             <tr>
                                 <th>RCS ID</th>
 
@@ -212,19 +212,19 @@ ORDER BY
 
                                             if($mode == 0)
                                             {
-                                                $background_color = "transparent";
+                                                $background_color = "";
                                             }
                                             elseif($mode == 1)
                                             {
-                                                $background_color = "#149bdf";
+                                                $background_color = "background-color:#149bdf";
                                             }
                                             elseif($mode == 2)
                                             {
-                                                $background_color = "#88d0f4";
+                                                $background_color = "background-color:#88d0f4";
                                             }
 
                                             ?>
-                                            <td id="cell-<?php echo $lab_row["lab_id"]; ?>-check<?php echo $count; $count++; ?>-<?php echo $row["student_rcs"]; ?>" cell-status="<?php echo $mode; ?>" style="background-color:<?php echo $background_color; ?>"></td>
+                                            <td id="cell-<?php echo $lab_row["lab_id"]; ?>-check<?php echo $count; $count++; ?>-<?php echo $row["student_rcs"]; ?>" cell-status="<?php echo $mode; ?>" style="<?php echo $background_color; ?>"></td>
                                         <?php
                                         }
                                         ?>
@@ -280,7 +280,7 @@ print <<<HTML
 
         if(mode == 0)
         {
-            $(item).css("background-color", "transparent");
+            $(item).css("background-color", "");
             $(item).css("border-right", "15px solid #ddd");
         }
         else if(mode == 1)
