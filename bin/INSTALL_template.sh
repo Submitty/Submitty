@@ -3,7 +3,7 @@
 
 ########################################################################################################################
 ########################################################################################################################
-# this script must be run by root or sudo 
+# this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
     exit
@@ -95,7 +95,7 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__GRADE_STUDENTS_IDLE_SECONDS__|$GRADE_STUDENTS_IDLE_SECONDS|g" $1
     sed -i -e "s|__INSTALL__FILLIN__GRADE_STUDENTS_IDLE_TOTAL_MINUTES__|$GRADE_STUDENTS_IDLE_TOTAL_MINUTES|g" $1
     sed -i -e "s|__INSTALL__FILLIN__GRADE_STUDENTS_STARTS_PER_HOUR__|$GRADE_STUDENTS_STARTS_PER_HOUR|g" $1
-    
+
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
 
@@ -183,7 +183,7 @@ echo -e "Copy the submission website"
 rsync -rz   $HSS_REPOSITORY/public   $HSS_INSTALL_DIR/website
 
 # automatically create the site path file, storing the data directory in the file
-echo $HSS_DATA_DIR > $HSS_INSTALL_DIR/website/public/site_path.txt 
+echo $HSS_DATA_DIR > $HSS_INSTALL_DIR/website/public/site_path.txt
 
 # set special user $HWPHP_USER as owner & group of all website files
 find $HSS_INSTALL_DIR/website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
@@ -294,10 +294,10 @@ find $HSS_INSTALL_DIR/bin -type f -exec chown root:root {} \;
 find $HSS_INSTALL_DIR/bin -type f -exec chmod 500 {} \;
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/build_homework_function.sh 
+chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/build_homework_function.sh
 chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/regrade.sh
 chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/grading_done.sh
-chmod 550 $HSS_INSTALL_DIR/bin/build_homework_function.sh 
+chmod 550 $HSS_INSTALL_DIR/bin/build_homework_function.sh
 chmod 550 $HSS_INSTALL_DIR/bin/regrade.sh
 chmod 550 $HSS_INSTALL_DIR/bin/grading_done.sh
 
@@ -308,8 +308,8 @@ chmod 550 $HSS_INSTALL_DIR/bin/grade_students.sh
 
 # prepare the untrusted_execute executable with suid
 
-# SUID (Set owner User ID up on execution), allows the $HWCRON_USER 
-# to run this executable as sudo/root, which is necessary for the 
+# SUID (Set owner User ID up on execution), allows the $HWCRON_USER
+# to run this executable as sudo/root, which is necessary for the
 # "switch user" to untrusted as part of the sandbox.
 
 pushd $HSS_INSTALL_DIR/bin/ > /dev/null
@@ -336,7 +336,7 @@ rsync  -rz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
 rsync  -rz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
 rsync  -rz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
 rsync  -rz $TAGRADING_REPOSITORY/app          $HSS_INSTALL_DIR/hwgrading_website
-    
+
 # set special user $HWPHP_USER as owner & group of all hwgrading_website files
 find $HSS_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
 
@@ -357,8 +357,8 @@ find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.gif -exec chmod o+r {} 
 # "other" can read & execute all .js files
 find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
 
-
-replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
+replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php
+mv $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
 
 
 ################################################################################################################

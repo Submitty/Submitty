@@ -2,12 +2,28 @@
 
 ########################################################################################################################
 ########################################################################################################################
-# this script must be run by root or sudo 
+# this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
     exit
 fi
 
+echo -e "\nWelcome to the Homework Submission Server (HSS) Configuration\n"
+
+echo "What is the database host? (ex: localhost or csdb3)"
+read DATABASE_HOST
+
+echo "What is the database user? (ex: hsdbu)"
+read DATABASE_USER
+
+echo "What is the database password for the database user $DATABASE_USER?"
+read DATABASE_PASSWORD
+
+echo "What is the url for the Grading Server? (ex: https://192.168.56.103/ or https://hwgrading.cs.rpi.edu/)"
+read TAGRADING_URL
+
+echo "What is the SVN path to be used? (ex: svn+ssh://192.168.56.102 or svn+ssh://csci2600svn.cs.rpi.edu/var/lib/svn/csci2600)"
+read SVN_PATH
 
 ########################################################################################################################
 ########################################################################################################################
@@ -17,36 +33,30 @@ fi
 # (this command works even if we run configure from a different directory)
 HSS_REPOSITORY=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-# assume the TA grading repo is in the same location
-# NOTE: eventually the TA grading repo will be merged into the main repo
-#TAGRADING_REPOSITORY=$HSS_REPOSITORY/../GIT_CHECKOUT_TAgrading
-TAGRADING_REPOSITORY=$HSS_REPOSITORY/TAGradingServer
-
 # recommended (default) directory locations
 HSS_INSTALL_DIR=/usr/local/hss
 HSS_DATA_DIR=/var/local/hss
 
-#FIXME: When multiple courses use SVN, this will need to be updated...
-SVN_PATH=svn+ssh://csci2600svn.cs.rpi.edu/var/lib/svn/csci2600
+# Log locations
+TAGRADING_LOG_PATH=$HSS_DATA_DIR/tagrading_logs/
+AUTOGRADING_LOG_PATH=$HSS_DATA_DIR/autograding_logs/
 
 # recommended names for special users & groups related to the HSS system
 HWPHP_USER=hwphp
 HWCRON_USER=hwcron
 HWCRONPHP_GROUP=hwcronphp
 COURSE_BUILDERS_GROUP=course_builders
-DATABASE_USER=hsdbu
 
 # This value must be at least 60: assumed in INSTALL.sh generation of crontab
 NUM_UNTRUSTED=60
 # FIXME: should check for existence of these users
-FIRST_UNTRUSTED_UID=`id -u untrusted00` # untrusted's user id 
+FIRST_UNTRUSTED_UID=`id -u untrusted00` # untrusted's user id
 FIRST_UNTRUSTED_GID=`id -g untrusted00` # untrusted's group id
 
-HWCRON_UID=`id -u hwcron`       # hwcron's user id 
+HWCRON_UID=`id -u hwcron`       # hwcron's user id
 HWCRON_GID=`id -g hwcron`       # hwcron's group id
-HWPHP_UID=`id -u hwphp`         # hwphp's user id 
+HWPHP_UID=`id -u hwphp`         # hwphp's user id
 HWPHP_GID=`id -g hwphp`         # hwphp's group id
-
 
 # adjust this number depending on the # of processors
 # available on your hardware
@@ -64,25 +74,6 @@ GRADE_STUDENTS_IDLE_TOTAL_MINUTES=16
 # 15 starts per hour = every 4 minutes
 #GRADE_STUDENTS_STARTS_PER_HOUR=12
 GRADE_STUDENTS_STARTS_PER_HOUR=20
-
-
-########################################################################################################################
-########################################################################################################################
-
-if [[ "$#" -eq 0 ]] ; then
-    echo -e "\n\nWelcome to the Homework Submission Server (HSS) Default Configuration"
-    echo -e "(rerun this script with a single argument "custom" to customize the installation\n"
-    # defaults above are fine
-else
-    if [[ "$#" -ne 1 || $1 != "custom" ]] ; then
-	echo -e "\n\nERROR: This script should be run with zero arguments or a single argument "custom"\n\n"
-	exit
-    fi
-    echo -e "\n\nWelcome to the Homework Submission Server (HSS) Interactive Custom Configuration"
-    # FIXME: query user to ask if they would like to change the defaults above
-    echo -e "Sorry, the interactive script is not written yet....  you are stuck with the defaults.\n"
-fi
-
 
 ########################################################################################################################
 ########################################################################################################################
@@ -106,38 +97,20 @@ done
 ########################################################################################################################
 ########################################################################################################################
 
-echo "What is the database password for the database user $DATABASE_USER?"
-read DATABASE_PASSWORD
-
-
-# assumptions
-
-DATABASE_HOST=csdb3
-TAGRADING_URL=https://hwgrading.cs.rpi.edu/
-TAGRADING_LOG_PATH=$HSS_DATA_DIR/tagrading_logs/
-
-AUTOGRADING_LOG_PATH=$HSS_DATA_DIR/autograding_logs/
-
-
-########################################################################################################################
-########################################################################################################################
-
 # FIXME: DO SOME ERROR CHECKING ON THE VARIABLE SETTINGS
 #        (variables are different from each other, directories valid/exist/writeable, etc)
 
-
 # copy the installation script
+rm $HSS_REPOSITORY/INSTALL.sh > /dev/null 2>&1
 cp $HSS_REPOSITORY/bin/INSTALL_template.sh $HSS_REPOSITORY/INSTALL.sh
 
-
-# set the permissions of this file 
+# set the permissions of this file
 chown root:root $HSS_REPOSITORY/INSTALL.sh
 chmod 500 $HSS_REPOSITORY/INSTALL.sh
 
-
-# fillin the necessary variables 
+# fillin the necessary variables
 sed -i -e "s|__CONFIGURE__FILLIN__HSS_REPOSITORY__|$HSS_REPOSITORY|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_REPOSITORY__|$TAGRADING_REPOSITORY|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_REPOSITORY__|$HSS_REPOSITORY/TAGradingServer|g" $HSS_REPOSITORY/INSTALL.sh
 sed -i -e "s|__CONFIGURE__FILLIN__HSS_INSTALL_DIR__|$HSS_INSTALL_DIR|g" $HSS_REPOSITORY/INSTALL.sh
 sed -i -e "s|__CONFIGURE__FILLIN__HSS_DATA_DIR__|$HSS_DATA_DIR|g" $HSS_REPOSITORY/INSTALL.sh
 sed -i -e "s|__CONFIGURE__FILLIN__SVN_PATH__|$SVN_PATH|g" $HSS_REPOSITORY/INSTALL.sh
