@@ -1,12 +1,12 @@
 <?php
 
-namespace tests\lib;
+namespace tests\integrationTests\lib;
 
 use \lib\FileUtils;
 
 class FileUtilsTester extends \PHPUnit_Framework_TestCase {
     public static function setUpBeforeClass() {
-        $class = new \ReflectionClass("\\tests\\lib\\FileUtilsTester");
+        $class = new \ReflectionClass(FileUtilsTester::class);
         for ($i = 0; $i < count($class->getMethods())-1; $i++) {
             FileUtils::recursiveRmdir(__TEST_DIRECTORY__."/FileUtilsTest".$i);
         }

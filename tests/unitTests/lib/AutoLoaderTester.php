@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\lib;
+namespace tests\integrationTests\lib;
 
 use lib\AutoLoader;
 
@@ -16,7 +16,7 @@ class AutoLoaderTester extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetPathToRoot() {
-        $this->assertEquals("../", AutoLoader::getPathToRoot(__DIR__));
+        $this->assertEquals("../../../", AutoLoader::getPathToRoot(__DIR__));
     }
 
     public function testRegisterDirectory() {

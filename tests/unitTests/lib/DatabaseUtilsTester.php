@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\lib;
+namespace tests\integrationTests\lib;
 
 use \lib\DatabaseUtils;
 
@@ -11,9 +11,9 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
             array("{{}, {}}", array(array(),array())),
             array("{1, 2, 3, 4}", array(1,2,3,4)),
             array("{1.5, 2, 4, 5.5}", array(1.5,2,4,5.5)),
-            array('{{"breakfast", "consulting"}, {"meeting", "lunch"}}', 
+            array('{{"breakfast", "consulting"}, {"meeting", "lunch"}}',
                 array(array('breakfast','consulting'), array('meeting', 'lunch'))),
-            array('{{"breakfast", "test"}, {{"another", "array"}, {"test", "me"}}}', 
+            array('{{"breakfast", "test"}, {{"another", "array"}, {"test", "me"}}}',
                 array(array('breakfast','test'),array(array('another','array'),array('test','me'))))
         );
     }
@@ -24,18 +24,18 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
     public function testSingletonPattern() {
         $d = DatabaseUtils::getInstance();
         $this->assertEquals($d, DatabaseUtils::getInstance());
-        
+
         $d = new \ReflectionClass("\\lib\\DatabaseUtils");
         $this->assertTrue($d->getMethod("__clone")->isPrivate());
         $this->assertTrue($d->getMethod("__construct")->isPrivate());
     }
-   
+
     /**
      * Test various valid PHP -> PG Array conversions
-     * 
+     *
      * @param string $pgArray
      * @param array $phpArray
-     * 
+     *
      * @dataProvider arrayData
      */
     public function testFromPHPToPostgres($pgArray, $phpArray) {
@@ -44,10 +44,10 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
 
     /**
      * Test various valid PG -> PHP array conversions
-     * 
+     *
      * @param string $pgArray
      * @param array $phpArray
-     * 
+     *
      * @dataProvider arrayData
      */
     public function testFromPostgresToPHP($pgArray, $phpArray) {

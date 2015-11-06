@@ -12,7 +12,7 @@ INSTALL.sh
 *.zip
 
 tests/report
-tests/setup/selenium-server-standalone.jar
+/.setup/selenium-server-standalone.jar
 
 logs/
 *.csv
