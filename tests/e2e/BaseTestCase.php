@@ -1,13 +1,13 @@
 <?php
 
-namespace tests\functionalTests;
+namespace tests\e2e;
 
 /**
  * Gives us a common setup to use for all e2e tests. This specifies an PHP_AUTH_USER to use,
  * what browsers to use and their session strategy.
  *
  * Class BaseTestCase
- * @package tests\functionalTests
+ * @package tests\e2e
  */
 class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
     // For every browser, always specify sessionStrategy to be shared
