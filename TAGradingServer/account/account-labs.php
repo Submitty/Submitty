@@ -3,8 +3,7 @@ include "../header.php";
 
 $account_subpages_unlock = true;
 
-?>
-
+print <<<HTML
 <style type="text/css">
     body {
         overflow: scroll;
@@ -58,92 +57,82 @@ Red - [SAVE ERROR] Refresh Page"></i>
     <div class="modal-body" style="padding-bottom:10px; padding-top:25px;">
         <div class="bs-docs-example">
             <ul id="myTab" class="nav nav-tabs">
-                <?php
+HTML;
 
-                $params = array();
-                $db->query("SELECT * FROM labs ORDER BY lab_number ASC", $params);
+$params = array();
+$db->query("SELECT * FROM labs ORDER BY lab_number ASC", $params);
 
-                $first = true;
+$first = true;
 
-                foreach($db->rows() as $lab_row)
-                {
-                    if($first)
-                    {
-                        ?>
-                        <li class="active"><a href="#lab<?php echo $lab_row["lab_id"]; ?>" data-toggle="tab"><?php echo $lab_row["lab_title"]; ?></a></li>
-                    <?php
-                    }
-                    else
-                    {
-                        ?>
-                        <li><a href="#lab<?php echo $lab_row["lab_id"]; ?>" data-toggle="tab"><?php echo $lab_row["lab_title"]; ?></a></li>
-                    <?php
-                    }
+foreach($db->rows() as $lab_row) {
+    if($first) {
+        print <<<HTML
+                <li class="active"><a href="#lab<{$lab_row["lab_id"]}" data-toggle="tab">{$lab_row["lab_title"]}</a></li>
+HTML;
+    }
+    else {
+        print <<<HTML
+                <li><a href="#lab{$lab_row["lab_id"]}" data-toggle="tab">{$lab_row["lab_title"]}</a></li>
+HTML;
+    }
 
-                    $first = false;
+    $first = false;
 
-                }
-                ?>
+}
 
-
+print <<<HTML
             </ul>
 
             <div id="myTabContent" class="tab-content">
+HTML;
 
-                <?php
-
-                $first = true;
-
-                foreach($db->rows() as $lab_row)
-                {
-                    $lab_row_checkpoints = explode(",", $lab_row["lab_checkpoints"]);
-
-                    ?>
-                    <div class="tab-pane fade<?php echo ($first ? ' active in' : ''); ?>" id="lab<?php echo $lab_row["lab_id"]; ?>">
-                        <table class="table table-bordered" id="labsTable" style=" border: 1px solid #AAA;">
-                            <thead style="background: #E1E1E1;">
+$first = true;
+foreach($db->rows() as $lab_row) {
+    $lab_row_checkpoints = explode(",", $lab_row["lab_checkpoints"]);
+    $active = ($first) ? 'active in' : '';
+    print <<<HTML
+                <div class="tab-pane fade {$active}" id="lab{$lab_row["lab_id"]}">
+                    <table class="table table-bordered striped-table" id="labsTable" style=" border: 1px solid #AAA;">
+                        <thead style="background: #E1E1E1;">
                             <tr>
                                 <th>RCS ID</th>
-
-                                <?php
-                                foreach($lab_row_checkpoints as $checkpoint)
-                                {
-                                    ?>
-                                    <th><?php echo $checkpoint; ?></th>
-                                <?php
-                                }
-                                ?>
+HTML;
+    foreach($lab_row_checkpoints as $checkpoint) {
+        print <<<HTML
+                                <th>{$checkpoint}</th>
+HTML;
+    }
+    print <<<HTML
                             </tr>
-                            </thead>
+                        </thead>
+HTML;
 
-                            <tbody style="background: #f9f9f9;">
-                            <?php
 
-                            $params = array($user_id);
-                            if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true)
-                            {
-                                $params = array();
-                                $db->query("SELECT * FROM sections ORDER BY section_id ASC", $params);
-                            }
-                            else
-                            {
-                                $params = array($user_id);
-                                $db->query("SELECT * FROM relationships_users WHERE user_id=? ORDER BY section_id ASC", $params);
-                            }
+    $params = array($user_id);
+    if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true) {
+        $params = array();
+        $db->query("SELECT * FROM sections ORDER BY section_id ASC", $params);
+    }
+    else {
+        $params = array($user_id);
+        $db->query("SELECT * FROM relationships_users WHERE user_id=? ORDER BY section_id ASC", $params);
+    }
 
-                            foreach($db->rows() as $section)
-                            {
-                                ?>
-
-                                <tr class="info">
-                                    <td colspan="<?php echo count($lab_row_checkpoints) + 1; ?>" style="text-align:center;">
-                                        Enrolled Students in Section <?php echo intval($section["section_id"]); ?>
-                                        <a href="<?php echo $BASE_URL; ?>/account/print/print_lab.php?course=<?php echo $_GET['course']; ?>&lab_id=<?php echo $lab_row['lab_id']; ?>&section_id=<?php echo $section['section_id']; ?>"><div class="icon-print"></div></a>
-                                    </td>
-                                </tr>
-                                <?php
-                                $params = array(intval($lab_row["lab_id"]),intval($section["section_id"]));
-                                $db->query("
+    foreach($db->rows() as $section) {
+        $count = count($lab_row_checkpoints) + 1;
+        print <<<HTML
+                        <tr class="info">
+                            <td colspan="{$count}" style="text-align:center;">
+                                    Enrolled Students in Section {$section["section_id"]}
+                                    <a href="{$BASE_URL}/account/print/print_lab.php?course=<{$_GET['course']}&lab_id={$lab_row['lab_id']}&section_id={$section['section_id']}">
+                                        <div class="icon-print"></div>
+                                    </a>
+                            </td>
+                        </tr>
+                        <tbody>
+HTML;
+        $params = array(intval($lab_row["lab_id"]),intval($section["section_id"]));
+        $db->query("
 SELECT
     s.student_rcs
     , s.student_id
@@ -171,88 +160,77 @@ FROM
 WHERE
     s.student_section_id=?
 ORDER BY
-    s.student_rcs
-                                ", $params);
+    s.student_rcs", $params);
 
-                                foreach($db->rows() as $row)
-                                {
-                                    $grade_value_array = pgArrayToPhp($row['grade_value_array']);
-                                    $grade_checkpoint_array = pgArrayToPhp($row['grade_checkpoint_array']);
-                                    if (count($grade_checkpoint_array) > 0 && count($grade_value_array) == count($grade_checkpoint_array)) {
-                                        $grades = array_combine($grade_checkpoint_array,$grade_value_array);
-                                    }
-                                    else {
-                                        $grades = array();
-                                    }
+        foreach($db->rows() as $row) {
+            $grade_value_array = pgArrayToPhp($row['grade_value_array']);
+            $grade_checkpoint_array = pgArrayToPhp($row['grade_checkpoint_array']);
+            if (count($grade_checkpoint_array) > 0 && count($grade_value_array) == count($grade_checkpoint_array)) {
+                $grades = array_combine($grade_checkpoint_array,$grade_value_array);
+            }
+            else {
+                $grades = array();
+            }
 
+            $student_info = $row;
+            print <<<HTML
+                            <tr>
+                                <td class="cell-all" id="cell-{$lab_row["lab_id"]}-all-{$row["student_rcs"]}" cell-status="0">
+                                    {$student_info["student_rcs"]} ({$student_info["student_last_name"]}, {$student_info["student_first_name"]})
+                                </td>
+HTML;
+            $count = 1;
 
-                                    //$params = array(intval($row["student_id"]));
-                                    //$db->query("SELECT * FROM students WHERE student_id=?", $params);
-                                    $student_info = $row;
-                                    ?>
-                                    <tr>
-                                        <td class="cell-all" id="cell-<?php echo $lab_row["lab_id"]; ?>-all-<?php echo $row["student_rcs"]; ?>" cell-status="0">
-                                            <?php echo $student_info["student_rcs"]; ?> (<?php echo $student_info["student_last_name"]; ?>, <?php echo $student_info["student_first_name"]; ?>)
-                                        </td>
-
-                                        <?php
-                                        $count = 1;
-
-                                        foreach($lab_row_checkpoints as $checkpoint)
-                                        {
-                                            if(isset($grades[$count])) {
-                                                $grade_value = $grades[$count];
-                                            }
-                                            else {
-                                                $grade_value = 0;
-                                            }
-                                            //$params = array(intval($lab_row["lab_id"]), intval($row["student_rcs"]), $count);
-                                            //$db->query("SELECT grade_lab_value FROM grades_labs WHERE lab_id=? AND student_id=? AND grade_lab_checkpoint=?", $params);
-                                            $mode = $grade_value;
-
-                                            if($mode == 0)
-                                            {
-                                                $background_color = "transparent";
-                                            }
-                                            elseif($mode == 1)
-                                            {
-                                                $background_color = "#149bdf";
-                                            }
-                                            elseif($mode == 2)
-                                            {
-                                                $background_color = "#88d0f4";
-                                            }
-
-                                            ?>
-                                            <td id="cell-<?php echo $lab_row["lab_id"]; ?>-check<?php echo $count; $count++; ?>-<?php echo $row["student_rcs"]; ?>" cell-status="<?php echo $mode; ?>" style="background-color:<?php echo $background_color; ?>"></td>
-                                        <?php
-                                        }
-                                        ?>
-                                    </tr>
-                                <?php
-                                }
-                            }
-                            ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <?php
-
-                    $first = false;
+            foreach($lab_row_checkpoints as $checkpoint) {
+                if(isset($grades[$count])) {
+                    $grade_value = $grades[$count];
                 }
-                ?>
+                else {
+                    $grade_value = 0;
+                }
+                $mode = $grade_value;
+
+                if($mode == 0) {
+                    $background_color = "transparent";
+                    $background_color = "";
+                }
+                elseif($mode == 1) {
+                    $background_color = "#149bdf";
+                    $background_color = "background-color:#149bdf";
+                }
+                elseif($mode == 2) {
+                    $background_color = "#88d0f4";
+                    $background_color = "background-color:#88d0f4";
+                }
+
+                print <<<HTML
+                                <td id="cell-{$lab_row["lab_id"]}-check<{$count}-{$row["student_rcs"]}" cell-status="{$mode}" style="{$background_color}"></td>
+HTML;
+            }
+            print <<<HTML
+                            </tr>
+HTML;
+        }
+        print <<<HTML
+                        </tbody>
+HTML;
+    }
+    print <<<HTML
+                    </table>
+                </div>
+HTML;
+
+    $first = false;
+}
+print <<<HTML
             </div>
         </div>
     </div>
 </div>
 
-<?php
-
-print <<<HTML
 <script type="text/javascript">
 
     $("td[id^=cell-]").click(function() {
-
         var cell_status = (parseInt($(this).attr('cell-status')) + 1) % 3;
         var name = $(this).attr("id");
         name = name.split("-");
@@ -261,64 +239,52 @@ print <<<HTML
         var rcs = name[3];
         var url = "{$BASE_URL}/account/ajax/account-labs.php?course={$_GET['course']}&lab=" + lab + "&check=" + check + "&rcs=" + rcs + "&mode=" + cell_status;
 
-        if($(this).hasClass("cell-all"))
-        {
+        if($(this).hasClass("cell-all")) {
             // Named cell
             $(this).attr('cell-status', cell_status);
             updateColor("td[id^=cell-" + lab + "-check][id$=-" + rcs + "]", cell_status, url);
         }
-        else
-        {
+        else {
             // Non-named cell
             updateColor(this, cell_status, url);
         }
     });
 
-    function updateColor(item, mode, url)
-    {
+    function updateColor(item, mode, url) {
         $(item).attr('cell-status', mode);
 
-        if(mode == 0)
-        {
-            $(item).css("background-color", "transparent");
+        if(mode == 0) {
+            $(item).css("background-color", "");
             $(item).css("border-right", "15px solid #ddd");
         }
-        else if(mode == 1)
-        {
+        else if(mode == 1) {
             $(item).css("background-color", "#149bdf");
             $(item).css("border-right", "15px solid #f9f9f9");
         }
-        else if(mode == 2)
-        {
+        else if(mode == 2) {
             $(item).css("background-color", "#88d0f4");
             $(item).css("border-right", "15px solid #f9f9f9");
         }
 
-        // alert(url);
         submitAJAX(url, updateSuccess, updateFail, item);
     }
 
-    function updateSuccess(item)
-    {
+    function updateSuccess(item) {
         $(item).stop(true, true).animate({"border-right-width":"0px"}, 400);
     }
 
-    function updateFail(item)
-    {
+    function updateFail(item) {
         $(item).css("border-right-width", "15px");
         $(item).stop(true, true).animate({"border-right-color":"#DA4F49"}, 400);
     }
 
-    function submitAJAX(url, callBackSucess, callBackFail, item)
-    {
+    function submitAJAX(url, callBackSucess, callBackFail, item) {
         $.ajax(url)
             .done(function(response) {
-                if(response == "updated")
-                {
+                if(response == "updated") {
                     callBackSucess(item);
                 }
-                else
-                {
+                else {
                     callBackFail(item);
                     console.log(response);
                 }
@@ -333,6 +299,3 @@ print <<<HTML
 HTML;
 
 include "../footer.php";
-?> 
-        
-        
