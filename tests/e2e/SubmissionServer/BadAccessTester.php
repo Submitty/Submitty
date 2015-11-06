@@ -1,8 +1,8 @@
 <?php
 
-namespace tests\functional\lib;
+namespace tests\e2e\SubmissionServer;
 
-use tests\functionalTests\BaseTestCase;
+use tests\e2e\BaseTestCase;
 
 /**
  * Test error screens when accessing the TAGradingServer
