@@ -84,7 +84,8 @@ class Database
 
                 Database::$link->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
                 Database::$link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            } catch (PDOException $ex) {
+            }
+            catch (PDOException $ex) {
                 ExceptionHandler::throwException("Database", $ex);
             }
         }

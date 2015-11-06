@@ -21,8 +21,8 @@ use \app\models\User;
 
 // get our sweet autoloader!
 include __DIR__ . "/../lib/AutoLoader.php";
-AutoLoader::registerDirectory(AutoLoader::getPathToRoot(getcwd())."lib", true, "lib");
-AutoLoader::registerDirectory(AutoLoader::getPathToRoot(getcwd())."app", true, "app");
+AutoLoader::registerDirectory(__DIR__."/../lib", true, "lib");
+AutoLoader::registerDirectory(__DIR__."/../app", true, "app");
 
 $start_time = microtime_float();
 

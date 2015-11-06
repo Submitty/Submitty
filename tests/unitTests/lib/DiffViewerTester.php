@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\lib;
+namespace tests\integrationTests\lib;
 
 use lib\DiffViewer;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\lib;
+namespace tests\integrationTests\lib;
 
 use \lib\Database;
 use lib\ServerException;
@@ -8,7 +8,6 @@ use lib\ServerException;
 class DatabaseTester extends \PHPUnit_Framework_TestCase {
 
     private static $tables = array();
-    
     /*
      * We leave a database connection available for later tests (outside the lib folder) that require it. Not best
      * test design, but Database does not need to be anything but a static class with only one connection.
@@ -19,15 +18,15 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
             Database::query("DROP TABLE {$table}");
         }
     }
-    
+
     public static function connect() {
         Database::connect(__DATABASE_HOST__, __DATABASE_USER__, __DATABASE_PASSWORD__, __DATABASE_NAME__);
     }
-    
+
     public static function disconnect() {
         Database::disconnect();
     }
-    
+
     public function testSingleton() {
         $db = Database::getInstance();
         $this->assertTrue($db === Database::getInstance());
@@ -36,7 +35,7 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
         $this->assertTrue($d->getMethod("__clone")->isPrivate());
         $this->assertTrue($d->getMethod("__construct")->isPrivate());
     }
-    
+
     public function testConnect() {
         Database::connect(__DATABASE_HOST__, __DATABASE_USER__, __DATABASE_PASSWORD__, __DATABASE_NAME__);
         $this->assertTrue(Database::hasConnection());
@@ -50,7 +49,7 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
     public function testBadConnect() {
         Database::connect("","","","");
     }
-    
+
     public function testQuery() {
         DatabaseTester::connect();
         Database::query("SELECT student_rcs FROM students");
@@ -67,7 +66,7 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
         Database::query("SELECT student_rcs FROM bad_table");
         DatabaseTester::disconnect();
     }
-    
+
     public function testEmptyResult() {
         DatabaseTester::connect();
         Database::query("SELECT * FROM students WHERE student_rcs='nonstudent'");
@@ -75,7 +74,7 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(array(), Database::row());
         DatabaseTester::disconnect();
     }
-    
+
     public function testQueryCount() {
         DatabaseTester::connect();
         for ($i = 0; $i < 10; $i++) {
@@ -84,16 +83,16 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(10, Database::totalQueries());
         DatabaseTester::disconnect();
     }
-    
+
     public function testPrintQueries() {
         DatabaseTester::connect();
         Database::query("SELECT * FROM students");
         Database::query("SELECT * FROM students WHERE student_rcs=?", array('pevelm'));
-        $this->assertEquals("1) SELECT * FROM students<br />2) SELECT * FROM students WHERE student_rcs=? --- ?pevelm <br />", 
+        $this->assertEquals("1) SELECT * FROM students<br />2) SELECT * FROM students WHERE student_rcs=? --- ?pevelm <br />",
                             Database::getQueries());
         DatabaseTester::disconnect();
     }
-    
+
     public function testGoodTransaction() {
         DatabaseTester::connect();
         $table_name = uniqid("dbtrans_");
@@ -112,7 +111,7 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(2, $rows[1]['field_1']);
         DatabaseTester::disconnect();
     }
-    
+
     public function testBadTransaction() {
         DatabaseTester::connect();
         $table_name = uniqid("dbtrans_");
