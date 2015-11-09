@@ -206,19 +206,23 @@ function digit_to_ordinal($number) {
 function sourceSettingsJS($filename, $number) {
     switch(strtolower(pathinfo($filename, PATHINFO_EXTENSION))) {
         case 'c':
+            $type = 'text/x-csrc';
+            break;
         case 'cpp':
         case 'cxx':
         case 'h':
         case 'hpp':
         case 'hxx':
+            $type = 'text/x-c++src';
+            break;
         case 'java':
-            $type = 'clike';
+            $type = 'text/x-java';
             break;
         case 'py':
-            $type = 'python';
+            $type = 'text/x-python';
             break;
         default:
-            $type = 'shell';
+            $type = 'text/x-sh';
             break;
     }
 
@@ -238,7 +242,7 @@ function sourceSettingsJS($filename, $number) {
     }
     editor{$number}.setSize("100%", (editor{$number}.defaultTextHeight() * (lineCount+1)) + "px");
     editor{$number}.setOption("theme", "eclipse");
-    editor{$number}.setOption("mode", "'.$type.'");
+    editor{$number}.setOption("mode", "{$type}");
 
     $("#myTab").find("a").click(function (e) {
         e.preventDefault();
