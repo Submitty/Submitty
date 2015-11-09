@@ -35,7 +35,7 @@ $queries = array(
     GROUP BY g.rubric_id,r.rubric_submission_id,g.grade_days_late,rubric_due_date,rubric_name
     ORDER BY r.rubric_due_date",
 
-    "TEST" => "SELECT t.test_number, t.test_id as id, gt.test_text,
+    "TEST" => "SELECT t.test_type, t.test_number, t.test_id as id, gt.test_text,
     case when gt.value::numeric=0 or gt.value is null then 0
     else case when gt.value::numeric+t.test_curve > (t.test_max_grade + t.test_curve)
             then t.test_max_grade + t.test_curve
@@ -77,9 +77,9 @@ foreach($db->rows() as $student_record) {
     $student_output_text .= "section " . $student_section . $nl;
 
     // late update date (choice of format)
-    //                                             Sunday, October 4, 2015 
+    //                                       Sunday, October 4, 2015
     $student_output_text .= "last_update " . date("l, F j, Y") .$nl;
-    //                                             2015 09 29
+    //                                          2015 09 29
     // $student_output_text .= "last_update " . date("Y m d") . $nl;
 
 
@@ -92,15 +92,14 @@ foreach($db->rows() as $student_record) {
     }
 
     foreach($lab_grades as $id => $score) {
-    
-	// there is probbaly a better way...
+	    // there is probbaly a better way...
         $labnum = $id;
-	if (substr($lab_titles[$id], 0,4) == "Lab ") {
-	  $labnum = (int)substr($lab_titles[$id], 4);  
+	    if (substr($lab_titles[$id], 0,4) == "Lab ") {
+            $labnum = (int)substr($lab_titles[$id], 4);
         }
-	$labid = "lab" . sprintf("%02d", $labnum);
-	// eventually, the instructor could/should(?) have control both of the lab id & the lab title
-        $student_output_text .= 'lab ' . $labid . ' "' . $lab_titles[$id] . '" ' . floatval($score) . $nl;	
+        $labid = "lab" . sprintf("%02d", $labnum);
+        // eventually, the instructor could/should(?) have control both of the lab id & the lab title
+        $student_output_text .= 'lab ' . $labid . ' "' . $lab_titles[$id] . '" ' . floatval($score) . $nl;
     }
 
     $exceptions = array();
@@ -130,10 +129,9 @@ foreach($db->rows() as $student_record) {
         if ($row['score'] <= 0) {
             continue;
         }
-	// eventually, the instructor could/should(?) have control both of the test id & the test title
-	$testid = "test" . sprintf("%02d",$row['test_number']);
-	$testname = "Test " . $row['test_number'];
-        $student_output_text .= 'test ' . $testid . ' "' . $testname . '" ' . $row['score'] . " " . implode(" ", pgArrayToPhp($row['test_text'])) . $nl;
+
+	    $testname = $row['test_type']." " . $row['test_number'];
+        $student_output_text .= strtolower($row['test_type']) . ' ' .$row['test_number'] . ' "' . $testname . '" ' . $row['score'] . " " . implode(" ", pgArrayToPhp($row['test_text'])) . $nl;
     }
 
     // ======================================================
