@@ -196,16 +196,16 @@ adduser ta csci1200_tas_www
 adduser instructor csci1200_tas_www
 adduser developer csci1200_tas_www
 
-addgroup csci2600
-adduser ta csci2600
-adduser instructor csci2600
-adduser developer csci2600
-addgroup csci2600_tas_www
-adduser hwphp csci2600_tas_www
-adduser hwcron csci2600_tas_www
-adduser ta csci2600_tas_www
-adduser instructor csci2600_tas_www
-adduser developer csci2600_tas_www
+#addgroup csci2600
+#adduser ta csci2600
+#adduser instructor csci2600
+#adduser developer csci2600
+#addgroup csci2600_tas_www
+#adduser hwphp csci2600_tas_www
+#adduser hwcron csci2600_tas_www
+#adduser ta csci2600_tas_www
+#adduser instructor csci2600_tas_www
+#adduser developer csci2600_tas_www
 
 adduser instructor course_builders
 
@@ -327,7 +327,7 @@ fi
 cd ${HWSERVER_DIR}/../bin
 ./create_course.sh f15 csci1100 instructor csci1100_tas_www
 ./create_course.sh f15 csci1200 instructor csci1200_tas_www
-./create_course.sh f15 csci2600 instructor csci2600_tas_www
+#./create_course.sh f15 csci2600 instructor csci2600_tas_www
 
 cd /var/local/hss/courses/f15/csci1100
 ./BUILD_csci1100.sh
@@ -346,11 +346,11 @@ export PGPASSWORD='hsdbu';
 
 psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1100_f15;"
 psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1200_f15;"
-psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
+#psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
 
 psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
 psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
 psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
 psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
-psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+#psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
+#psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql

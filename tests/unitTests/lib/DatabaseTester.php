@@ -3,11 +3,18 @@
 namespace tests\integrationTests\lib;
 
 use \lib\Database;
+use lib\ExceptionHandler;
 use lib\ServerException;
 
 class DatabaseTester extends \PHPUnit_Framework_TestCase {
 
     private static $tables = array();
+
+    public static function setUpBeforeClass() {
+        Database::disconnect();
+        ExceptionHandler::$debug = false;
+    }
+
     /*
      * We leave a database connection available for later tests (outside the lib folder) that require it. Not best
      * test design, but Database does not need to be anything but a static class with only one connection.

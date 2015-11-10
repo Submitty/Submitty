@@ -3,18 +3,17 @@
 namespace tests\app\models;
 
 use app\models\User;
+use lib\Database;
 
 class UserTester extends \PHPUnit_Framework_TestCase {
-    public function testFunct() {
-        $this->assertTrue(true);
-    }
-    /*
+
     /**
      * @expectedException \InvalidArgumentException
-     *
+     */
     public function testInvalidUser() {
         User::loadUser('fake user');
     }
+
 
     public function testBasicUser() {
         User::loadUser('user');
@@ -36,5 +35,4 @@ class UserTester extends \PHPUnit_Framework_TestCase {
         $this->assertTrue(User::$is_developer);
         $this->assertTrue(User::$is_administrator);
     }
-    */
 }

@@ -102,7 +102,7 @@ class Database
     static function query($query, $parameters=array()) {
         try {
             $statement = Database::$link->prepare($query);
-            $bool = $statement->execute($parameters);
+            $statement->execute($parameters);
             Database::$results = $statement->fetchAll();
             Database::$lastid = Database::$link->lastInsertId();
             Database::$query_count++;
