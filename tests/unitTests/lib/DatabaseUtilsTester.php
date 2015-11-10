@@ -14,7 +14,8 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
             array('{{"breakfast", "consulting"}, {"meeting", "lunch"}}',
                 array(array('breakfast','consulting'), array('meeting', 'lunch'))),
             array('{{"breakfast", "test"}, {{"another", "array"}, {"test", "me"}}}',
-                array(array('breakfast','test'),array(array('another','array'),array('test','me'))))
+                array(array('breakfast','test'),array(array('another','array'),array('test','me')))),
+            array('{true, false}', array(true, false))
         );
     }
 

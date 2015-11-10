@@ -16,7 +16,6 @@
     <logging>
         <log type="coverage-html" target="report" />
     </logging>
-
     <php>
         <env name="TEST_URL" value="http://localhost/"/>
     </php>
