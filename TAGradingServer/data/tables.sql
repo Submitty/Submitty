@@ -435,6 +435,7 @@ CREATE SEQUENCE test_sequence
 CREATE TABLE tests (
     test_id integer DEFAULT nextval('test_sequence'::regclass) NOT NULL,
     test_number integer,
+    test_type character varying NOT NULL,
     test_code character varying(8),
     test_max_grade numeric DEFAULT 100 NOT NULL,
     test_curve numeric DEFAULT 0 NOT NULL,
