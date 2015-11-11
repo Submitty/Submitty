@@ -10,50 +10,8 @@ print <<<HTML
                 <h3 id="myModalLabel">Generate CSV Report</h3>
             </div>
             <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-                Homework: <select name="hw" style="margin-left:5px;">
-                    <option value="-1">No Homework</option>
-HTML;
-
-$params = array();
-$db->query("SELECT rubric_number FROM rubrics ORDER BY rubric_number ASC", $params);
-$temp = $db->rows();
-for($i = 0; $i < count($temp); $i++) {
-    $row = $temp[$i];
-    echo '<option' . ($i == count($temp) -1 ? " selected " : "") . '>' . $row["rubric_number"] . '</option>';
-}
-print <<<HTML
-                </select>
-                <br/>
-                <br/>
-                Lab: <select name="lab" style="margin-left:50px;">
-                    <option value="-1">No Lab</option>
-HTML;
-
-$params = array();
-$db->query("SELECT lab_number FROM labs ORDER BY lab_number ASC", $params);
-$temp = $db->rows();
-for($i = 0; $i < count($temp); $i++) {
-    $row = $temp[$i];
-    echo '<option' . ($i == count($temp) -1 ? " selected " : "") . '>' . $row["lab_number"] . '</option>';
-}
-print <<<HTML
-                </select>
-                <br/>
-                <br/>
-                Test: <select name="test" style="margin-left:47px;">
-                    <option value="-1">No Test</option>
-HTML;
-
-$params = array();
-$db->query("SELECT test_number FROM tests ORDER BY test_number ASC", $params);
-$temp = $db->rows();
-for($i = 0; $i < count($temp); $i++) {
-    $row = $temp[$i];
-    echo '<option' . ($i == count($temp) -1 ? " selected " : "") . '>' . $row["test_number"] . '</option>';
-}
-
-print <<<HTML
-                </select>
+                Generate a CSV report for all homeworks, labs, and tests. Students without a grade for a lab or
+                test will just get a 0 for it, while for homeworks without grades will be blank.
             </div>
             <div class="modal-footer">
                 <div style="width:50%; float:right; margin-top:5px;">

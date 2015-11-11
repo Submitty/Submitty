@@ -22,18 +22,14 @@ foreach ($db->rows() as $row) {
     }
 }
 
-$hw   = (isset($_GET['hw'])) ? intval($_GET['hw']) : 100000;
-$lab  = (isset($_GET['lab'])) ? intval($_GET['lab']) : 100000;
-$test = (isset($_GET['test'])) ? intval($_GET['test']) : 100000;
-
 // Create column headers and the IDs/Codes of all assignments
 $header = array();
 
 $header[] = "Username";
 $queries = array(
-    "LAB"  => "SELECT 'LAB' as key, lab_id AS id,lab_number as number, lab_code AS code FROM labs WHERE lab_number <= {$lab} ORDER BY lab_number",
-    "HW"   => "SELECT 'HW' as key, rubric_id AS id,rubric_number as number, rubric_code AS code FROM rubrics WHERE rubric_number <= {$hw} ORDER BY rubric_number",
-    "TEST" => "SELECT upper(test_type) as key, test_id AS id,test_number as number, test_code AS code FROM tests WHERE test_number <= {$test} ORDER BY test_number"
+    "LAB"  => "SELECT 'LAB' as key, lab_id AS id,lab_number as number, lab_code AS code, ('Lab ' || lab_number) as name FROM labs ORDER BY lab_number",
+    "HW"   => "SELECT 'HW' as key, rubric_id AS id,rubric_number as number, rubric_code AS code, rubric_name as name FROM rubrics ORDER BY rubric_due_date ASC",
+    "TEST" => "SELECT upper(test_type) as key, test_id AS id,test_number as number, test_code AS code, (test_type || ' ' || test_number) as name FROM tests ORDER BY test_number"
 );
 
 $totals = array("LAB"=>array(),"HW"=>array(),"TEST"=>array());
@@ -41,7 +37,7 @@ $totals = array("LAB"=>array(),"HW"=>array(),"TEST"=>array());
 foreach ($queries as $key => $query) {
     $db->query($query, array());
     foreach ($db->rows() as $row) {
-        $header[] = $row['key'] . $row['number'];
+        $header[] = $row['name'] . (isset($row['code']) && !empty($row['code']) ? "|{$row['code']}" : "");
         $totals[$key][] = $row['id'];
     }
 }
