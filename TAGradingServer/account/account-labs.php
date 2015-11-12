@@ -67,7 +67,7 @@ $first = true;
 foreach($db->rows() as $lab_row) {
     if($first) {
         print <<<HTML
-                <li class="active"><a href="#lab<{$lab_row["lab_id"]}" data-toggle="tab">{$lab_row["lab_title"]}</a></li>
+                <li class="active"><a href="#lab{$lab_row["lab_id"]}" data-toggle="tab">{$lab_row["lab_title"]}</a></li>
 HTML;
     }
     else {
@@ -124,7 +124,7 @@ HTML;
                         <tr class="info">
                             <td colspan="{$count}" style="text-align:center;">
                                     Enrolled Students in Section {$section["section_id"]}
-                                    <a href="{$BASE_URL}/account/print/print_lab.php?course=<{$_GET['course']}&lab_id={$lab_row['lab_id']}&section_id={$section['section_id']}">
+                                    <a href="{$BASE_URL}/account/print/print_lab.php?course={$_GET['course']}&lab_id={$lab_row['lab_id']}&section_id={$section['section_id']}">
                                         <div class="icon-print"></div>
                                     </a>
                             </td>
@@ -204,8 +204,9 @@ HTML;
                 }
 
                 print <<<HTML
-                                <td id="cell-{$lab_row["lab_id"]}-check<{$count}-{$row["student_rcs"]}" cell-status="{$mode}" style="{$background_color}"></td>
+                                <td id="cell-{$lab_row["lab_id"]}-check{$count}-{$row["student_rcs"]}" cell-status="{$mode}" style="{$background_color}"></td>
 HTML;
+                $count++;
             }
             print <<<HTML
                             </tr>
