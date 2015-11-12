@@ -225,6 +225,13 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
       $res = $zip->open($homework_file["tmp_name"]);
       if ($res === TRUE) {
         $zip->extractTo($version_path."/");
+	$dir = new DirectoryIterator($version_path."/");
+	foreach ($dir as $fileinfo) {
+	    $path_parts = pathinfo($fileinfo);
+	    if($path_parts['extension'] == 'zip'){
+	    	return array("error"=>"", "message"=>" Your submission contains a zip folder within the submission. Please remove it.");
+	    }
+	}
         $zip->close();
       }
       else {
