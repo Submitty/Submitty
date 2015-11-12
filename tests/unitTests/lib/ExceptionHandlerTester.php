@@ -1,12 +1,11 @@
 <?php
 
-namespace tests\lib;
+namespace tests\integrationTests\lib;
 
 use lib\ExceptionHandler;
 use lib\FileUtils;
 use lib\Logger;
 use lib\ServerException;
-use lib\Functions;
 
 class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
 

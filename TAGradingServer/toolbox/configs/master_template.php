@@ -1,5 +1,4 @@
 <?php
-// General Information
 define("__BASE_URL__", "__INSTALL__FILLIN__TAGRADING_URL__");
 define("__DATABASE_HOST__", "__INSTALL__FILLIN__DATABASE_HOST__");
 define("__DATABASE_USER__", "__INSTALL__FILLIN__DATABASE_USER__");

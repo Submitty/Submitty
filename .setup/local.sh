@@ -16,7 +16,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-source ${DIR}/common_env.sh
+source ${DIR}/common/common_env.sh
 
 SELENIUM_JAR=selenium-server-standalone.jar
 

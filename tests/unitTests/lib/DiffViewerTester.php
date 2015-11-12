@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\lib;
+namespace tests\integrationTests\lib;
 
 use lib\DiffViewer;
 
@@ -41,6 +41,7 @@ class DiffViewerTester extends \PHPUnit_Framework_TestCase {
         $diff->load("{$diffDir}/input_actual.txt", "{$diffDir}/input_expected.txt", "{$diffDir}/input_differences.json");
         $this->assertStringEqualsFile($diffDir."/output_actual.txt", $diff->getDisplayActual());
         $this->assertStringEqualsFile($diffDir."/output_expected.txt", $diff->getDisplayExpected());
+        $this->assertTrue($diff->exists_difference());
     }
 
     /**
@@ -68,5 +69,21 @@ class DiffViewerTester extends \PHPUnit_Framework_TestCase {
         $diff->load(__TEST_DIRECTORY__."/diffs/diff_test_01/input_actual.txt",
                     __TEST_DIRECTORY__."/diffs/diff_test_01/input_expected.txt",
                     "file_that_doesnt_exist");
+    }
+
+    public function testHasCSS() {
+        $diff = new DiffViewer();
+        $this->assertNotEmpty($diff->getCSS());
+    }
+
+    public function testHasJavascript() {
+        $diff = new DiffViewer();
+        $this->assertNotEmpty($diff->getJavascript());
+    }
+
+    public function testEmptyDisplay() {
+        $diff = new DiffViewer();
+        $this->assertEmpty($diff->getDisplayActual());
+        $this->assertEmpty($diff->getDisplayExpected());
     }
 }
