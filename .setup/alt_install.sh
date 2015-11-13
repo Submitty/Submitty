@@ -171,7 +171,7 @@ adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-pas
 echo "hsdbu:hsdbu" | sudo chpasswd
 adduser hwphp hwcronphp
 adduser hwcron hwcronphp
-./vagrant/create.untrusted.users.pl
+./bin/create.untrusted.users.pl
 
 # TODO: we can automate this with a loop probably
 addgroup csci1100
@@ -262,13 +262,13 @@ EOF
 # HWSERVER SETUP
 #################
 
-if [[ ${VAGRANT} == 1 ]]; then
-  ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
-else
+#if [[ ${VAGRANT} == 1 ]]; then
+#  ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
+#else
   cd /usr/local/hss
   git clone https://github.com/RCOS-Grading-Server/HWserver.git
   mv HWserver GIT_CHECKOUT_HWserver
-fi
+#fi
 
 HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
 cd ${HWSERVER_DIR}
