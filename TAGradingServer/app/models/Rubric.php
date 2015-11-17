@@ -197,11 +197,12 @@ class Rubric {
 SELECT s.*, COALESCE(ld.allowed_lates,0) as student_allowed_lates
 FROM students as s
 LEFT JOIN (
-    SELECT *
+    SELECT allowed_lates
     FROM late_days
-    WHERE since_timestamp <= ?
-) as ld on ld.student_rcs = s.student_rcs
-WHERE s.student_rcs=?", array($this->rubric_details['rubric_due_date'], $this->student_rcs));
+    WHERE since_timestamp <= ? and student_rcs=?
+    ORDER BY since_timestamp DESC
+) as ld on 1=1
+WHERE s.student_rcs=? LIMIT 1", array($this->rubric_details['rubric_due_date'], $this->student_rcs, $this->student_rcs));
             $this->student = Database::row();
             if ($this->student == array()) {
                 throw new \InvalidArgumentException("Could not find student '{$this->student_rcs}'");
