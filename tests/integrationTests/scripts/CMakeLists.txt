@@ -1,0 +1,128 @@
+cmake_minimum_required (VERSION 2.8)
+project (sample_assignment)
+
+###################################################################################
+
+
+# these variables will be replaced by INSTALL.sh
+set (HSS_INSTALL_DIR /var/local/hss/autograde_tests/)
+set (HSS_DATA_DIR /var/local/hss/autograde_tests/)
+
+
+# assuming the core files for config, compilation, running, & grading are here:
+set (GRADINGCODE ${HSS_INSTALL_DIR}/src)
+
+###################################################################################
+
+# assuming we are in a directory of this structure
+#   HSS_DATA_DIR/courses/which_semester/which_course/build/which_assignment
+
+set (MY_DIR ${CMAKE_SOURCE_DIR})
+
+# base directory for course
+set (course_dir ${MY_DIR}/../..)
+#alternately/equivalently
+#set (course_dir ${HSS_DATA_DIR}/courses)
+
+
+# just the last part of the current directory
+get_filename_component(assignment ${MY_DIR} NAME)
+message("ASSIGNMENT IS ${assignment}")
+
+# Where the compiled binaries are stored, under the class directory
+set(my_bin ${course_dir}/bin/${assignment})
+
+# Assignment configuration json file location
+set(my_hw_config_file ${course_dir}/config/${assignment}_assignment_config.json)
+
+
+###################################################################################
+# OPTIONAL INSTRUCTOR CUSTOMIZATION 
+#
+# If extra .cpp files are needed for grading/validation, add a file
+#  named "instructor_CMakeLists.txt" and in that file list the .cpp
+#  files in the variable "custom_files".  For example:
+#
+#  set (custom_files   test_code/custom.cpp  test_code/helper.cpp)
+#
+
+include(instructor_CMakeLists.txt OPTIONAL RESULT_VARIABLE instructor_cmakelists)
+
+if (instructor_cmakelists)
+message("DETECTED INSTRUCTOR CUSTOMIZATIONS in ${instructor_cmakelists}")
+message("  custom_files: ${custom_files}")
+endif(instructor_cmakelists)
+
+
+###################################################################################
+# source files
+
+set (common_files
+  ${GRADINGCODE}/grading/TestCase.cpp 
+  ${GRADINGCODE}/grading/JUnitGrader.cpp
+  ${GRADINGCODE}/grading/myersDiff.cpp 
+  ${GRADINGCODE}/grading/tokens.cpp 
+  ${GRADINGCODE}/grading/tokenSearch.cpp 
+  ${GRADINGCODE}/grading/diffNaive.cpp 
+  ${GRADINGCODE}/grading/clean.cpp 
+  ${GRADINGCODE}/grading/difference.cpp
+)
+
+add_executable(configure.out
+  ${common_files}
+  # FIXME: I don't think custom files needs to/should be here
+  ${custom_files}
+  ${GRADINGCODE}/grading/main_configure.cpp 
+)
+
+add_executable(compile.out
+  ${common_files}
+  # FIXME: I don't think custom files needs to/should be here
+  ${custom_files}
+  ${GRADINGCODE}/grading/main_compile.cpp 
+  ${GRADINGCODE}/grading/seccomp_functions.cpp 
+  ${GRADINGCODE}/grading/execute.cpp 
+  ${GRADINGCODE}/grading/execute_limits.cpp 
+)
+
+add_executable(run.out
+  ${common_files}
+  # FIXME: I don't think custom files needs to/should be here
+  ${custom_files}
+  ${GRADINGCODE}/grading/main_runner.cpp 
+  ${GRADINGCODE}/grading/seccomp_functions.cpp 
+  ${GRADINGCODE}/grading/execute.cpp
+  ${GRADINGCODE}/grading/execute_limits.cpp 
+)
+
+add_executable(validate.out
+  ${common_files}
+  ${custom_files}
+  ${GRADINGCODE}/grading/main_validator.cpp 
+  ${GRADINGCODE}/grading/seccomp_functions.cpp 
+  ${GRADINGCODE}/grading/execute.cpp 
+  ${GRADINGCODE}/grading/execute_limits.cpp 
+)
+
+###################################################################################
+
+target_link_libraries(compile.out seccomp)
+target_link_libraries(run.out seccomp)
+target_link_libraries(validate.out seccomp)
+
+set_property(TARGET configure.out APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+set_property(TARGET compile.out   APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+set_property(TARGET run.out       APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+set_property(TARGET validate.out  APPEND_STRING PROPERTY COMPILE_FLAGS "-g  -std=c++11")
+
+include_directories(${MY_DIR})
+include_directories(${GRADINGCODE})
+
+SET(EXECUTABLE_OUTPUT_PATH ${my_bin})
+
+add_custom_target(config_tgt ALL DEPENDS ${my_hw_config_file})
+add_custom_command(OUTPUT ${my_hw_config_file} DEPENDS configure.out COMMAND ${my_bin}/configure.out ${my_hw_config_file})
+
+###################################################################################
+
+
