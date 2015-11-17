@@ -237,6 +237,7 @@ public:
     answer.test_case_grader_vec = tcc; 
     answer._filenames.push_back(filename);
     answer.view_file_results = true;
+    answer._test_case_limits = test_case_limits;
     return answer;
   }
 

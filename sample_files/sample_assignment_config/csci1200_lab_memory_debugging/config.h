@@ -9,7 +9,7 @@
 // drmemory_path is defined in TestCase.h
 std::string drmemory_flags = " -m32 -g ";
 
-#define ASSIGNMENT_MESSAGE "The homework submission area & autograding points for Lab 5 are just practice.<br>The only grades for Lab 5 are the 3 checkpoints recorded by your TA & mentors."
+#define ASSIGNMENT_MESSAGE "The homework submission area & autograding points for Lab are just practice.<br>The only grades for Lab are the 3 checkpoints recorded by your TA & mentors."
 
 // ===================================================================================
 

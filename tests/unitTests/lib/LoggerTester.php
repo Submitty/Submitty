@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\lib;
+namespace tests\integrationTests\lib;
 
 use \lib\Logger;
 use \lib\Functions;
@@ -10,11 +10,11 @@ class LoggerTester extends \PHPUnit_Framework_TestCase {
     private static $file_name;
 
     public static function setUpBeforeClass() {
-        Logger::$log_path = __DIR__."/logs/log_test/";
-        FileUtils::createDir(__DIR__."/logs/log_test");
-        FileUtils::emptyDir(__DIR__."/logs/log_test");
+        Logger::$log_path = __TEST_DIRECTORY__."/LoggerTesterLogs";
+        FileUtils::recursiveCreateDir(__TEST_DIRECTORY__."/LoggerTesterLogs");
+        FileUtils::emptyDir(__TEST_DIRECTORY__."/LoggerTesterLogs");
         $date = getdate(time());
-        LoggerTester::$file_name = __DIR__."/logs/log_test/".
+        LoggerTester::$file_name = __TEST_DIRECTORY__."/LoggerTesterLogs/".
             $date['year'].Functions::pad($date['mon']).Functions::pad($date['mday']).".txt";
 
         $_SERVER['HTTP_HOST'] = "localhost";
@@ -23,7 +23,7 @@ class LoggerTester extends \PHPUnit_Framework_TestCase {
     }
 
     public static function tearDownAfterClass() {
-        FileUtils::recursiveRmdir(__DIR__."/logs/log_test");
+        FileUtils::recursiveRmdir(__TEST_DIRECTORY__."/LoggerTesterLogs");
         unset($_SERVER['HTTP_HOST']);
         unset($_SERVER['HTTPS']);
         unset($_SERVER['REQUEST_URI']);

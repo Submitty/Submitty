@@ -298,19 +298,37 @@ window.addEventListener('load', function() {
                         "files_to_view"=>$files_to_view
                         ));
 
-                    
+
+		    if        ($assignment_version_in_grading_queue2 == "batch_queue" ||
+			       $assignment_version_in_grading_queue2 == "interactive_queue") {
+		      echo "<span>Version ".$assignment_version." is in the queue to be graded</span>";
+		    } else if ($assignment_version_in_grading_queue2 == "currently_grading") {
+		      echo "<span>Version ".$assignment_version." is now currently being graded</span>";
+		    } else if ($assignment_version_in_grading_queue2 == "error_does_not_exist") {
+		      echo "<span> ERROR! Version ".$assignment_version." does not exist!  Please report this issue to your instructor/TA.</span>";
+		    } else if ($assignment_version_in_grading_queue2 == "error_not_graded_and_not_in_queue") {
+		      echo "<span> ERROR! Version ".$assignment_version." has not been graded!  Please report this issue to your instructor/TA.</span>";
+		    } else if ($assignment_version_in_grading_queue2 == "graded") {
+		      //echo "<span>".$assignment_version." has been graded</span>";
+		    } else {
+		      echo "<span> ERROR! Version ".$assignment_version." has an unknown state ".$assignment_version_in_grading_queue."</span>";
+		    }
 
 
+
+		    /*
                     if ($assignment_version_in_grading_queue) {
                     ?>
                         <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
+
                     <?php
                     }
                     else {
+		    */
 
+	            if ($assignment_version_in_grading_queue2 == "graded") {
 
 //	   echo "debuga: $points_visible";
-
 
                         //Box with grades, outputs and diffs
                         render("homework_graded_display",array(

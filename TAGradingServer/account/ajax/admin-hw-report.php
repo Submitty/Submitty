@@ -107,7 +107,7 @@ foreach($db->rows() as $student_record)
                 $db->query("SELECT * FROM late_day_exceptions WHERE ex_student_rcs=? and ex_rubric_id=?", array($student_rcs, $rubric_id));
                 $ex = $db->row();
                 if (isset($ex['ex_late_days'])) {
-                    $grade_days_late = $row['late'] - $ex['ex_late_days'];
+                    $grade_days_late = max($row['late'] - $ex['ex_late_days'], 0);
                 }
                 else {
                     $grade_days_late = $row['late'];
@@ -150,10 +150,10 @@ foreach($db->rows() as $student_record)
                     $student_output_text_main .= strtoupper($rubric['rubric_name']) . " GRADE" . $nl;
                     $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
 
-		    if ($grade_user_first_name == "Mentor" || $grade_user_first_name == "TA" || $grade_user_first_name == "") {
-		    } else {
-		      $student_output_text_main .= "Graded by: " . $grade_user_first_name . " " . $grade_user_last_name . " &lt;" . $grade_user_email . "&gt;" . $nl;
+                    if (!($grade_user_first_name == "Mentor" || $grade_user_first_name == "TA" || $grade_user_first_name == "")) {
+                        $student_output_text_main .= "Graded by: " . $grade_user_first_name . " " . $grade_user_last_name . " <" . $grade_user_email . ">" . $nl;
                     }
+
                     $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: " . $grade_user_email . $nl;
 
 

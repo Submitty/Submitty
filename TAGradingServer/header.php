@@ -100,10 +100,13 @@ HTML;
                             </a>
                             <ul class="dropdown-menu" role="menu" aria-labelledby="drop-grade">
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-hw-report.php" role="button" data-toggle="modal">
-                                    Homework Report
+                                    Generate Homework Report
                                 </a></li>
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-grade-summaries.php" role="button" data-toggle="modal">
                                     Generate Grade Summaries
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-csv-report.php" role="button" data-toggle="modal">
+                                    Generate CSV Report
                                 </a></li>
                             </ul>
                         </li>

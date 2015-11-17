@@ -3,7 +3,7 @@
 
 ########################################################################################################################
 ########################################################################################################################
-# this script must be run by root or sudo 
+# this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
     exit
@@ -66,7 +66,7 @@ if ! groups "$instructor" | grep -q "\b${COURSE_BUILDERS_GROUP}\b" ; then
 fi
 
 # confirm that the instructor, hwcron, and hwphp are members of the
-# ta_www_group 
+# ta_www_group
 if ! groups "$instructor" | grep -q "\b${ta_www_group}\b" ; then
     echo -e "ERROR: $instructor is not in group $ta_www_group\n"
     exit
@@ -86,7 +86,7 @@ fi
 
 
 # FIXME: add some error checking on the $semester and $course
-#        variables 
+#        variables
 #
 #   (not clear how to do this since these variables could have quite
 #   different structure at different schools)
@@ -222,9 +222,6 @@ chmod 660 $course_dir/config/class.json
 cp $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/sample_course.php $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
 chown hwphp:hwphp $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
 chmod 400 $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
-
-
-
 replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
 
 echo -e "\nMake sure to create the database: $DATABASE_NAME\n\n"

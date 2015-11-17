@@ -5,16 +5,10 @@
         colors="true"
         verbose="true">
     <testsuites>
-        <testsuite name="controller Tests">
-            <directory suffix="Tester.php">controller</directory>
+        <testsuite name="Unit Tests">
+            <directory suffix="Tester.php">unitTests</directory>
         </testsuite>
-        <testsuite name="Library Tests">
-            <directory suffix="Tester.php">TAGradingServer/lib</directory>
-        </testsuite>
-        <testsuite name="Model Tests">
-            <directory suffix="Tester.php">TAGradingServer/app/models</directory>
-        </testsuite>
-        <testsuite name="e2e Tests">
+        <testsuite name="Functional Tests">
             <directory suffix="Tester.php">e2e</directory>
         </testsuite>
     </testsuites>
@@ -22,4 +16,7 @@
     <logging>
         <log type="coverage-html" target="report" />
     </logging>
+    <php>
+        <env name="TEST_URL" value="http://localhost/"/>
+    </php>
 </phpunit>

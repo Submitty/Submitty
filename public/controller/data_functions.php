@@ -99,6 +99,12 @@ function display_file_permissions($perms) {
 }
 
 
+
+
+
+
+
+
 // Upload HW Assignment to server and unzip
 function upload_homework($username, $semester, $course, $assignment_id, $homework_file, $svn_checkout) {
     if ($svn_checkout == false) {
@@ -664,6 +670,7 @@ function get_all_files($username, $semester, $course, $assignment_id, $assignmen
     return $folder;
 }
 
+
 function version_in_grading_queue($username, $semester, $course, $assignment_id, $assignment_version) {
     $path_front = get_path_front_course($semester,$course);
     if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {//If its not in the submissions folder
@@ -674,6 +681,48 @@ function version_in_grading_queue($username, $semester, $course, $assignment_id,
         return false;
     }
     return true;
+}
+
+
+function version_in_grading_queue2($username, $semester, $course, $assignment_id, $assignment_version) {
+
+    $path_front_root = get_path_front_root();
+
+    $queue_file = $semester."__".$course."__".$assignment_id."__".$username."__".$assignment_version;
+
+    $interactive_queue_file = $path_front_root."/to_be_graded_interactive/".$queue_file;
+    $batch_queue_file = $path_front_root."/to_be_graded_batch/".$queue_file;
+
+    $GRADING_interactive_queue_file = $path_front_root."/to_be_graded_interactive/GRADING_".$queue_file;
+    $GRADING_batch_queue_file = $path_front_root."/to_be_graded_batch/GRADING_".$queue_file;
+
+    if (file_exists($interactive_queue_file)) {
+      if (file_exists($GRADING_interactive_queue_file)) {
+	return "interactive_queue";
+      } else {
+	return "currently_grading";
+      }
+    } 
+
+    if (file_exists($batch_queue_file)) {
+      if (file_exists($GRADING_batch_queue_file)) {
+	return "batch_queue";
+      } else {
+	return "currently_grading";
+      }
+    }
+
+    // otherwise, should be graded!
+    $path_front = get_path_front_course($semester,$course);
+    if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {//If its not in the submissions folder
+      return "error_does_not_exist";
+    }
+    $file = $path_front."/results/".$assignment_id."/".$username."/".$assignment_version;
+    if (file_exists($file)) {//If the version has already been graded
+      return "graded";
+    }
+
+    return "error_not_graded_and_not_in_queue";
 }
 
 
@@ -765,7 +814,6 @@ function get_select_submission_data($username, $semester,$course, $assignment_id
         if (version_in_grading_queue($username, $semester,$course, $assignment_id, $i)) {
             $score = "Grading in progress";
         }
-
 
         $class_config = get_class_config($semester,$course);
         $due_date = get_due_date($class_config,$assignment_id);
