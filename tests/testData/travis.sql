@@ -1,5 +1,6 @@
 -- TEST DATA
 INSERT INTO sections (section_title, section_is_enabled) VALUES ('Section 1', 1);
+INSERT INTO sections (section_title, section_is_enabled) VALUES ('Section 2', 1);
 
 INSERT INTO students (student_rcs, student_last_name, student_first_name, student_section_id, student_grading_id)
     VALUES ('pevelm', 'Peveler', 'Matthew', 1, 1);
@@ -19,3 +20,5 @@ INSERT INTO labs (lab_number, lab_title, lab_checkpoints, lab_code)
     VALUES (1, 'Lab 1', 'Checkpoint 1,Checkpoint 2,Checkpoint 3', '');
 INSERT INTO labs (lab_number, lab_title, lab_checkpoints, lab_code)
     VALUES (2, 'Lab 2', 'Checkpoint 1,Checkpoint 2,Checkpoint 3', '');
+
+INSERT INTO relationships_users (user_id, section_id) VALUES (1, 1);

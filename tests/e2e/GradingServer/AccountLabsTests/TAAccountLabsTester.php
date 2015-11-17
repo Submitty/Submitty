@@ -5,27 +5,35 @@ namespace tests\e2e\GradingServer;
 use lib\Database;
 use tests\e2e\BaseTestCase;
 
-class AccountLabTester extends BaseTestCase {
-    private static $student_rcs;
+class TAAccountLabTester extends BaseTestCase {
+    private static $student1_rcs;
+    private static $student2_rcs;
 
     public static function setUpBeforeClass() {
         $_SERVER['PHP_AUTH_USER'] = 'ta';
-        $guid = uniqid();
-        Database::query("INSERT INTO
+        for ($i = 1; $i < 3; $i++) {
+            $guid = uniqid();
+            Database::query("INSERT INTO
     students (student_rcs, student_last_name, student_first_name, student_section_id, student_grading_id)
-    VALUES ('student{$guid}', '{$guid}', 'Student', 1, 1);");
-        AccountLabTester::$student_rcs = "student{$guid}";
+    VALUES ('student{$guid}', '{$guid}', 'Student', {$i}, 1);");
+            $var = "student{$i}_rcs";
+            TAAccountLabTester::$$var = "student{$guid}";
+        }
     }
 
     public static function tearDownAfterClass() {
-        Database::query("DELETE FROM students WHERE student_rcs='".AccountLabTester::$student_rcs."'");
+        Database::query("DELETE FROM students WHERE student_rcs='".TAAccountLabTester::$student1_rcs."'");
+        Database::query("DELETE FROM students WHERE student_rcs='".TAAccountLabTester::$student2_rcs."'");
+    }
+
+    public function setUpPage() {
+        $this->url('TAGradingServer/account/account-labs.php?course=test_course');
     }
 
     /**
      * Test changing tabs on lab page
      */
     public function testLabTabs() {
-        $this->url('TAGradingServer/account/account-labs.php?course=test_course');
         $tabs = $this->elements($this->using('css selector')->value('.lab_tab'));
         /** @var \PHPUnit_Extensions_Selenium2TestCase_Element[] $tabs */
         $this->assertEquals(2, count($tabs));
@@ -49,8 +57,7 @@ class AccountLabTester extends BaseTestCase {
     }
 
     public function testInputLabGrades() {
-        $student_rcs = AccountLabTester::$student_rcs;
-        $this->url('TAGradingServer/account/account-labs.php?course=test_course');
+        $student_rcs = TAAccountLabTester::$student1_rcs;
         $tabs = $this->elements($this->using('css selector')->value('.lab_tab'));
         /** @var \PHPUnit_Extensions_Selenium2TestCase_Element[] $tabs */
         for ($i = 1; $i <= 3; $i++) {
@@ -61,32 +68,32 @@ class AccountLabTester extends BaseTestCase {
         }
         $this->assertEquals("0", $this->byId("cell-1-check1-{$student_rcs}")->attribute('cell-status'));
         $this->byId("cell-1-check1-{$student_rcs}")->click();
-        $this->waitUntil(function() {
-            if ($this->byId("cell-1-check1-".AccountLabTester::$student_rcs)->attribute('cell-status') == "1") {
+        $this->waitUntil(function($student_rcs) use ($student_rcs) {
+            if ($this->byId("cell-1-check1-{$student_rcs}")->attribute('cell-status') == "1") {
                 return true;
             }
         }, 5000);
         $this->byId("cell-1-check3-{$student_rcs}")->click();
-        $this->waitUntil(function() {
-            if ($this->byId("cell-1-check3-".AccountLabTester::$student_rcs)->attribute('cell-status') == "1") {
+        $this->waitUntil(function($student_rcs) use ($student_rcs) {
+            if ($this->byId("cell-1-check3-{$student_rcs}")->attribute('cell-status') == "1") {
                 return true;
             }
         }, 5000);
         $this->byId("cell-1-check3-{$student_rcs}")->click();
-        $this->waitUntil(function() {
-            if ($this->byId("cell-1-check3-".AccountLabTester::$student_rcs)->attribute('cell-status') == "2") {
+        $this->waitUntil(function($student_rcs) use ($student_rcs) {
+            if ($this->byId("cell-1-check3-{$student_rcs}")->attribute('cell-status') == "2") {
                 return true;
             }
         }, 5000);
         $tabs[1]->click();
-        $this->waitUntil(function() {
-            if ($this->byId("cell-2-check1-".AccountLabTester::$student_rcs)->displayed()) {
+        $this->waitUntil(function($student_rcs) use ($student_rcs) {
+            if ($this->byId("cell-2-check1-{$student_rcs}")->displayed()) {
                 return true;
             }
         }, 5000);
         $this->byId("cell-2-check2-{$student_rcs}")->click();
-        $this->waitUntil(function() {
-            if ($this->byId("cell-2-check2-".AccountLabTester::$student_rcs)->attribute('cell-status') == "1") {
+        $this->waitUntil(function($student_rcs) use ($student_rcs) {
+            if ($this->byId("cell-2-check2-{$student_rcs}")->attribute('cell-status') == "1") {
                 return true;
             }
         }, 5000);
@@ -97,6 +104,18 @@ class AccountLabTester extends BaseTestCase {
             $this->assertEquals($cell_values[0][$i-1], $this->byId("cell-1-check{$i}-{$student_rcs}")->attribute('cell-status'));
             $this->assertFalse($this->byId("cell-2-check1-{$student_rcs}")->displayed());
             $this->assertEquals($cell_values[1][$i-1], $this->byId("cell-2-check{$i}-{$student_rcs}")->attribute('cell-status'));
+        }
+    }
+
+    public function testCannotSeeStudentsOutsideSection() {
+        $student_rcs = TAAccountLabTester::$student2_rcs;
+        for ($i = 1; $i < 3; $i++) {
+            try {
+                $this->byId("cell-{$i}-all-{$student_rcs}");
+                $this->fail("This element should not exist");
+            } catch (\PHPUnit_Extensions_Selenium2TestCase_WebDriverException $e) {
+                $this->assertEquals(\PHPUnit_Extensions_Selenium2TestCase_WebDriverException::NoSuchElement, $e->getCode());
+            }
         }
     }
 }

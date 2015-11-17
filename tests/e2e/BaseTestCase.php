@@ -29,4 +29,9 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
     public static function setUpBeforeClass() {
         $_SERVER['PHP_AUTH_USER'] = 'pevelm';
     }
+
+    public function url($url) {
+        $url .= (strstr($url, "?") === false ? "?" : "&")."useUser=".$_SERVER['PHP_AUTH_USER'];
+        parent::url(__TEST_URL__.$url);
+    }
 }
