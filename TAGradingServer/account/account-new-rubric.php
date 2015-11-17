@@ -611,7 +611,7 @@ $output .= <<<HTML
                 <div style="width:100%; height:40px;"></div>
 HTML;
 if (isset($rubric->rubric_details['user_email'])) {
-    $output .= "Graded By: {$rubric->rubric_details['user_email']}<br />Overwrite Grader: <input type='checkbox' name='overwrite' /><br /><br />";
+    $output .= "Graded By: {$rubric->rubric_details['user_email']}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br /><br />";
 }
 
 if (!($now < $homeworkDate)) {

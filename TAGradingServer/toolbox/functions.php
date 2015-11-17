@@ -1,5 +1,9 @@
 <?php
 
+// Display all errors on initial startup in case we have an early failure in autoloader, or DB setup, etc.
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 /*
 The user's umask is ignored for the user running php, so we need
 to set it from inside of php to make sure the group read & execute
@@ -17,8 +21,8 @@ use \app\models\User;
 
 // get our sweet autoloader!
 include __DIR__ . "/../lib/AutoLoader.php";
-AutoLoader::registerDirectory(AutoLoader::getPathToRoot(getcwd())."lib", true, "lib");
-AutoLoader::registerDirectory(AutoLoader::getPathToRoot(getcwd())."app", true, "app");
+AutoLoader::registerDirectory(__DIR__."/../lib", true, "lib");
+AutoLoader::registerDirectory(__DIR__."/../app", true, "app");
 
 $start_time = microtime_float();
 
@@ -67,6 +71,7 @@ header("Content-Type: text/html; charset=UTF-8");
 
 $user_id = 0;
 if ($DEBUG) {
+    // TODO: we need to have a pseudo http login box just to always set $_SERVER["PHP_AUTH_USER"] to not default to me
     $suggested_username = "pevelm";
 }
 else {
@@ -201,19 +206,23 @@ function digit_to_ordinal($number) {
 function sourceSettingsJS($filename, $number) {
     switch(strtolower(pathinfo($filename, PATHINFO_EXTENSION))) {
         case 'c':
+            $type = 'text/x-csrc';
+            break;
         case 'cpp':
         case 'cxx':
         case 'h':
         case 'hpp':
         case 'hxx':
+            $type = 'text/x-c++src';
+            break;
         case 'java':
-            $type = 'clike';
+            $type = 'text/x-java';
             break;
         case 'py':
-            $type = 'python';
+            $type = 'text/x-python';
             break;
         default:
-            $type = 'shell';
+            $type = 'text/x-sh';
             break;
     }
 
@@ -233,7 +242,7 @@ function sourceSettingsJS($filename, $number) {
     }
     editor{$number}.setSize("100%", (editor{$number}.defaultTextHeight() * (lineCount+1)) + "px");
     editor{$number}.setOption("theme", "eclipse");
-    editor{$number}.setOption("mode", "'.$type.'");
+    editor{$number}.setOption("mode", "{$type}");
 
     $("#myTab").find("a").click(function (e) {
         e.preventDefault();
