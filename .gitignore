@@ -17,6 +17,8 @@ tests/report
 logs/
 *.csv
 
+*.pyc
+
 TAGradingServer/toolbox/configs/*
 !TAGradingServer/toolbox/configs/master_template.php
 !TAGradingServer/toolbox/configs/sample_course.php
