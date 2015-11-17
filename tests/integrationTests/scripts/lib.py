@@ -53,11 +53,11 @@ class TestcaseWrapper:
     def run_validator(self):
         print "  - Running \"validator.out\"..."
         with open("/dev/null") as devnull:
-            subprocess.call([os.path.join(self.testcase_path, "build", "validate.out"), "testassignment", "testuser", "1", "0"],
+            subprocess.call([os.path.join(self.testcase_path, "build", "validator.out"), "testassignment", "testuser", "1", "0"], \
                     cwd=os.path.join(self.testcase_path, "data"), stdout=devnull, stderr=devnull)
 
     def diff(self, filename):
-        print "  - Running \"validator.out\"..."
+        print "  - Checking differences..."
         return_code = subprocess.call(["diff", "-b", os.path.join(self.testcase_path, "data", filename), os.path.join(self.testcase_path, "validation", filename)])
         if return_code == 1:
             print "  !!! File \"" + filename + "\" differs from expected value. !!!"
