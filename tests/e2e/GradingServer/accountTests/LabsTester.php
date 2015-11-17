@@ -5,7 +5,7 @@ namespace tests\e2e\GradingServer;
 use lib\Database;
 use tests\e2e\BaseTestCase;
 
-class TAAccountLabTester extends BaseTestCase {
+class LabsTester extends BaseTestCase {
     private static $student1_rcs;
     private static $student2_rcs;
 
@@ -17,13 +17,13 @@ class TAAccountLabTester extends BaseTestCase {
     students (student_rcs, student_last_name, student_first_name, student_section_id, student_grading_id)
     VALUES ('student{$guid}', '{$guid}', 'Student', {$i}, 1);");
             $var = "student{$i}_rcs";
-            TAAccountLabTester::$$var = "student{$guid}";
+            LabsTester::$$var = "student{$guid}";
         }
     }
 
     public static function tearDownAfterClass() {
-        Database::query("DELETE FROM students WHERE student_rcs='".TAAccountLabTester::$student1_rcs."'");
-        Database::query("DELETE FROM students WHERE student_rcs='".TAAccountLabTester::$student2_rcs."'");
+        Database::query("DELETE FROM students WHERE student_rcs='".LabsTester::$student1_rcs."'");
+        Database::query("DELETE FROM students WHERE student_rcs='".LabsTester::$student2_rcs."'");
     }
 
     public function setUpPage() {
@@ -57,7 +57,7 @@ class TAAccountLabTester extends BaseTestCase {
     }
 
     public function testInputLabGrades() {
-        $student_rcs = TAAccountLabTester::$student1_rcs;
+        $student_rcs = LabsTester::$student1_rcs;
         $tabs = $this->elements($this->using('css selector')->value('.lab_tab'));
         /** @var \PHPUnit_Extensions_Selenium2TestCase_Element[] $tabs */
         for ($i = 1; $i <= 3; $i++) {
@@ -108,13 +108,40 @@ class TAAccountLabTester extends BaseTestCase {
     }
 
     public function testCannotSeeStudentsOutsideSection() {
-        $student_rcs = TAAccountLabTester::$student2_rcs;
+        $this->assertNotNull($this->byId("section-1"));
+        try {
+            $this->byId("section-2");
+            $this->fail("This element should not exist");
+        }
+        catch (\PHPUnit_Extensions_Selenium2TestCase_WebDriverException $e) {
+            $this->assertEquals(\PHPUnit_Extensions_Selenium2TestCase_WebDriverException::NoSuchElement, $e->getCode());
+        }
+        $student_rcs = LabsTester::$student2_rcs;
         for ($i = 1; $i < 3; $i++) {
             try {
                 $this->byId("cell-{$i}-all-{$student_rcs}");
                 $this->fail("This element should not exist");
             } catch (\PHPUnit_Extensions_Selenium2TestCase_WebDriverException $e) {
                 $this->assertEquals(\PHPUnit_Extensions_Selenium2TestCase_WebDriverException::NoSuchElement, $e->getCode());
+            }
+        }
+    }
+
+    public function testInstructorSeesAllSections() {
+        $this->url('TAGradingServer/account/account-labs.php?course=test_course&useUser=instructor');
+
+        $this->assertNotNull($this->byId("section-1"));
+        $this->assertNotNull($this->byId("section-2"));
+
+        for ($j = 1; $j < 3; $j++) {
+            $var = "student{$j}_rcs";
+            $student_rcs = LabsTester::$$var;
+            for ($i = 1; $i < 3; $i++) {
+                try {
+                    $this->byId("cell-{$i}-all-{$student_rcs}");
+                } catch (\PHPUnit_Extensions_Selenium2TestCase_WebDriverException $e) {
+                    $this->fail("This element should exist");
+                }
             }
         }
     }
