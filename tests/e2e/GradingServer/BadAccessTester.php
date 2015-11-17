@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\e2e\SubmissionServer;
+namespace tests\e2e\GradingServer;
 
 use tests\e2e\BaseTestCase;
 

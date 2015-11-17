@@ -67,12 +67,12 @@ $first = true;
 foreach($db->rows() as $lab_row) {
     if($first) {
         print <<<HTML
-                <li class="active"><a href="#lab{$lab_row["lab_id"]}" data-toggle="tab">{$lab_row["lab_title"]}</a></li>
+                <li class="lab_tab active"><a href="#lab{$lab_row["lab_id"]}" data-toggle="tab">{$lab_row["lab_title"]}</a></li>
 HTML;
     }
     else {
         print <<<HTML
-                <li><a href="#lab{$lab_row["lab_id"]}" data-toggle="tab">{$lab_row["lab_title"]}</a></li>
+                <li class="lab_tab"><a href="#lab{$lab_row["lab_id"]}" data-toggle="tab">{$lab_row["lab_title"]}</a></li>
 HTML;
     }
 
