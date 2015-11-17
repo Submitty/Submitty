@@ -340,7 +340,6 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
         foreach($this->submission_ids as $submission_id) {
             $submission_directory = implode("/", array(__SUBMISSION_SERVER__, "submissions", $submission_id, $this->student_rcs));
             if (!file_exists($submission_directory)) {
-                $part++;
                 continue;
             }
 
@@ -364,7 +363,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 }
                 $this->active_assignment[$part] = $_GET["active_assignment_{$part}"];
             }
-            else if (!$this->has_grade || !isset($this->active_assignment[$part]) || $this->active_assignment[$part] <= 0) {
+            else if (!$this->has_grade || !isset($this->active_assignment[$part]) || $this->active_assignment[$part] == 0) {
                 if (file_exists(implode("/", array($submission_directory, "user_assignment_settings.json")))) {
                     $settings = json_decode(file_get_contents(implode("/", array($submission_directory, "user_assignment_settings.json"))), true);
                     $this->active_assignment[$part] = $settings['active_assignment'];
@@ -411,7 +410,6 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 $submission_id, $this->student_rcs, $this->active_assignment[$part]));
 
             if (!file_exists($result_directory) || !is_dir($result_directory)) {
-                $part++;
                 continue;
             }
 

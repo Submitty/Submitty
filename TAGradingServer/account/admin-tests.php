@@ -6,7 +6,7 @@ check_administrator();
 
 $output = "";
 
-$db->query("SELECT * FROM tests ORDER BY test_type DESC, test_number ASC",array());
+$db->query("SELECT * FROM tests ORDER BY test_number ASC",array());
 
 $output .= <<<HTML
 <style type="text/css">
@@ -23,9 +23,11 @@ $output .= <<<HTML
     #container-tests
     {
         width:1200px;
-        margin: 100px auto;
+        margin:100px auto;
+        margin-top: 100px;
         background-color: #fff;
         border: 1px solid #999;
+        border: 1px solid rgba(0,0,0,0.3);
         -webkit-border-radius: 6px;
         -moz-border-radius: 6px;
         border-radius: 6px;outline: 0;
@@ -130,7 +132,6 @@ $output .= <<<HTML
     }
 
     function createTest() {
-        var type      = $('select#new-test-type').val();
         var number    = $('input#new-test-number').val();
         var questions = $('input#new-test-questions').val();
         var text      = $('input#new-test-text').val();
@@ -142,7 +143,6 @@ $output .= <<<HTML
             {
                 type:'GET',
                 data: {
-                    type: type,
                     number: number,
                     questions: questions,
                     text: text,
@@ -155,7 +155,7 @@ $output .= <<<HTML
                 var res_array = response.split("|");
                 if (res_array[0] == "success") {
                     var html_response = "<tr id='test-"+res_array[1]+"' test-number='"+number+"'>" +
-                     "<td class='tests-number' id='test-"+res_array[1]+"-number'>"+type+" "+number+"</td>" +
+                     "<td class='tests-number' id='test-"+res_array[1]+"-number'>Test "+number+"</td>" +
                      "<td class='tests-score' id='test-"+res_array[1]+"-score'>"+score+"</td>" +
                      "<td class='tests-curve' id='test-"+res_array[1]+"-curve'>"+curve+"</td>" +
                      "<td class='tests-questions' id='test-"+res_array[1]+"-questions'>"+questions+"</td>" +
@@ -165,10 +165,10 @@ $output .= <<<HTML
                      "<a onclick=\"deleteTest("+res_array[1]+");\">Delete</a></td>" +
                      "</tr>";
                     $('table#table-tests').append(html_response);
-                    window.alert(type+" "+number+" created");
+                    window.alert("Test "+number+" created");
                 }
                 else {
-                    window.alert(type+" " + number + " not created");
+                    window.alert("Test " + number + " not created");
                     console.log(response);
                 }
             })
@@ -177,7 +177,6 @@ $output .= <<<HTML
                 console.log(response);
             });
 
-        $('select#new-test-type').val("Test");
         $('input#new-test-number').val("");
         $('input#new-test-questions').val("");
         $('input#new-test-text').val("");
@@ -187,7 +186,6 @@ $output .= <<<HTML
     }
 
     function editTest(test_id) {
-        var type = $('tr#test-'+test_id).attr('test-type');
         var number = $('tr#test-'+test_id).attr('test-number');
         var questions   = $('td#test-'+test_id+'-questions').text();
         var text = $('td#test-'+test_id+'-text').text();
@@ -195,7 +193,7 @@ $output .= <<<HTML
         var curve  = $('td#test-'+test_id+'-curve').text();
         var locked = $('td#test-'+test_id+'-locked').text();
 
-        $('#test-'+test_id+'-number').html(type + " <input type='text' id='edit-test-"+test_id+"-number' old_value='"+number+"' value='"+number+"' />");
+        $('#test-'+test_id+'-number').html("<input type='text' id='edit-test-"+test_id+"-number' old_value='"+number+"' value='"+number+"' />");
         $('#test-'+test_id+'-score').html("<input type='text' id='edit-test-"+test_id+"-score' old_value='"+score+"' value='"+score+"' />");
         $('#test-'+test_id+'-curve').html("<input type='text' id='edit-test-"+test_id+"-curve' old_value='"+curve+"' value='"+curve+"' />");
         $('#test-'+test_id+'-questions').html("<input type='text' id='edit-test-"+test_id+"-questions' old_value='"+questions+"' value='"+questions+"' />");
@@ -207,7 +205,6 @@ $output .= <<<HTML
     }
 
     function submitEdit(test_id) {
-        var type = $('tr#test-'+test_id).attr('test-type');
         var old_number = $('tr#test-'+test_id).attr('test-number');
         var new_number = $('input#edit-test-'+test_id+'-number').val();
         var questions_sel   = $('input#edit-test-'+test_id+'-questions');
@@ -255,7 +252,7 @@ $output .= <<<HTML
                 questions = new_questions;
                 text = new_text;
                 locked = new_locked;
-                window.alert(type+" edited");
+                window.alert("Test edited");
             }
             else {
                 number = old_number;
@@ -264,11 +261,11 @@ $output .= <<<HTML
                 questions = old_questions;
                 text = old_text;
                 locked = old_locked;
-                window.alert(type+" edit failure");
+                window.alert("Test edit failure");
                 console.log(response);
             }
             html_response = "" +
-                     "<td class='tests-number' id='test-"+res_array[1]+"-number'>"+type+" "+number+"</td>" +
+                     "<td class='tests-number' id='test-"+res_array[1]+"-number'>Test "+number+"</td>" +
                      "<td class='tests-score' id='test-"+res_array[1]+"-score'>"+score+"</td>" +
                      "<td class='tests-curve' id='test-"+res_array[1]+"-curve'>"+curve+"</td>" +
                      "<td class='tests-questions' id='test-"+res_array[1]+"-questions'>"+questions+"</td>" +
@@ -284,7 +281,7 @@ $output .= <<<HTML
         })
         .fail(function() {
             html_response = "" +
-                     "<td class='tests-number' id='test-"+test_id+"-number'>"+type+" "+old_number+"</td>" +
+                     "<td class='tests-number' id='test-"+test_id+"-number'>Test "+old_number+"</td>" +
                      "<td class='tests-score' id='test-"+test_id+"-score'>"+old_score+"</td>" +
                      "<td class='tests-curve' id='test-"+test_id+"-curve'>"+old_curve+"</td>" +
                      "<td class='tests-questions' id='test-"+test_id+"-questions'>"+old_questions+"</td>" +
@@ -302,7 +299,6 @@ $output .= <<<HTML
     }
 
     function cancelEdit(test_id) {
-        var type = $('tr#test-'+test_id).attr('test-type');
         var old_number = $('tr#test-'+test_id).attr('test-number');
         var old_score  = $('input#edit-test-'+test_id+'-score').attr('old_value');
         var old_curve   = $('input#edit-test-'+test_id+'-curve').attr('old_value');
@@ -311,7 +307,7 @@ $output .= <<<HTML
         var old_locked = $('input#edit-test-'+test_id+'-locked').attr('old_value');
 
         var html_response = "" +
-             "<td class='tests-number' id='test-"+test_id+"-number'>"+type+" "+old_number+"</td>" +
+             "<td class='tests-number' id='test-"+test_id+"-number'>Test "+old_number+"</td>" +
              "<td class='tests-score' id='test-"+test_id+"-score'>"+old_score+"</td>" +
              "<td class='tests-curve' id='test-"+test_id+"-curve'>"+old_curve+"</td>" +
              "<td class='tests-questions' id='test-"+test_id+"-questions'>"+old_questions+"</td>" +
@@ -345,8 +341,8 @@ foreach ($db->rows() as $test) {
     $last_test = intval($test['test_number']);
     $test['test_locked'] = ($test['test_locked']) ? 1 : 0;
     $output .= <<<HTML
-        <tr id='test-{$test['test_id']}' test-number="{$test['test_number']}" test-type="{$test['test_type']}">
-            <td class="tests-number" id="test-{$test['test_id']}-number">{$test['test_type']} {$test['test_number']}</td>
+        <tr id='test-{$test['test_id']}' test-number="{$test['test_number']}">
+            <td class="tests-number" id="test-{$test['test_id']}-number">Test {$test['test_number']}</td>
             <td class="tests-score" id="test-{$test['test_id']}-score">{$test['test_max_grade']}</td>
             <td class="tests-curve" id="test-{$test['test_id']}-curve">{$test['test_curve']}</td>
             <td class="tests-questions" id="test-{$test['test_id']}-questions">{$test['test_questions']}</td>
@@ -361,20 +357,15 @@ $last_test++;
 
 $output .= <<<HTML
     </table><br />
-    <span style="float:left;margin-left:10px;margin-top:5px;margin-right:5px;">New:</span>
-    <select style="margin-top: -10px; width: 70px;" id='new-test-type'>
-        <option>Test</option>
-        <option>Quiz</option>
-        <option>Exam</option>
-    </select>
+    <span style="float:left;margin-left:10px;margin-top:5px;margin-right:5px;">New Test:</span>
     <input style="width: 70px" type="text" size="10" id='new-test-number' placeholder="Number" />&nbsp;
     <input style="width: 70px" type="text" size="70" id='new-test-score' placeholder="Max Score" /> &nbsp;
     <input style="width: 70px" type="text" size="70" id="new-test-curve" placeholder="Curve" /> &nbsp;
     <input style="width: 70px" type="text" size="10" id='new-test-questions' placeholder="Questions" />&nbsp;
     <input style="width: 70px" type="text" size="10" id='new-test-text' placeholder="Text Fields" />&nbsp;
     <input style="width: 70px" type="text" size="10" id='new-test-locked' placeholder="Locked" />&nbsp;
-    <span style="float:right;margin-right: 300px">
-        <input class="btn btn-primary" onclick="createTest();" type="submit" value="Create New"/>
+    <span style="float:right;margin-right: 400px">
+        <input class="btn btn-primary" onclick="createTest();" type="submit" value="Create New Test"/>
     </span>
 </div>
 HTML;
@@ -382,3 +373,4 @@ HTML;
 print $output;
 
 include "../footer.php";
+?>

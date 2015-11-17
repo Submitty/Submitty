@@ -5,23 +5,17 @@ public/site_path.txt
 *~
 *.o
 INSTALL.sh
-.vagrant
 
 # ENVIRONMENT IGNORES
 .idea
 *.zip
 
 tests/report
-/.setup/selenium-server-standalone.jar
-
-autograde_tests/build_dir
+tests/setup/selenium-server-standalone.jar
 
 logs/
 *.csv
 
 TAGradingServer/toolbox/configs/*
-TAGradingServer/toolbox/configs/master.php
-TAGradingServer/toolbox/configs/sample_course.php
-TAGradingServer/toolbox/configs/master_template.php
-TAGradingServer/toolbox/configs/sample_course.php
-TAGradingServer/toolbox/configs/course_template.php
+!TAGradingServer/toolbox/configs/master.php
+!TAGradingServer/toolbox/configs/sample_course.php

@@ -84,8 +84,7 @@ class Database
 
                 Database::$link->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
                 Database::$link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            }
-            catch (PDOException $ex) {
+            } catch (PDOException $ex) {
                 ExceptionHandler::throwException("Database", $ex);
             }
         }
@@ -102,7 +101,7 @@ class Database
     static function query($query, $parameters=array()) {
         try {
             $statement = Database::$link->prepare($query);
-            $statement->execute($parameters);
+            $bool = $statement->execute($parameters);
             Database::$results = $statement->fetchAll();
             Database::$lastid = Database::$link->lastInsertId();
             Database::$query_count++;

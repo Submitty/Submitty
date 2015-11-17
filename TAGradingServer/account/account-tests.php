@@ -1,10 +1,10 @@
-<?php
+<?php 
 include "../header.php";
 
 $account_subpages_unlock = true;
 
 print <<<HTML
-
+	
 <style type="text/css">
     body {
         overflow: scroll;
@@ -68,7 +68,7 @@ print <<<HTML
 HTML;
 
 $params = array();
-$db->query("SELECT * FROM tests ORDER BY test_type DESC, test_id ASC", $params);
+$db->query("SELECT * FROM tests ORDER BY test_id ASC", $params);
 
 $first = true;
 $tests = $db->rows();
@@ -77,12 +77,12 @@ foreach($tests as $test_row)
     $locked = ($test_row['test_locked']) ? "(Locked)" : "";
     if($first) {
         print <<<HTML
-                <li class="active"><a href="#test{$test_row["test_id"]}" data-toggle="tab">{$test_row['test_type']} {$test_row["test_number"]} {$locked}</a></li>
+                <li class="active"><a href="#test{$test_row["test_id"]}" data-toggle="tab">Test {$test_row["test_number"]} {$locked}</a></li>
 HTML;
     }
     else {
         print <<<HTML
-                <li><a href="#test{$test_row["test_id"]}" data-toggle="tab">{$test_row['test_type']} {$test_row["test_number"]} {$locked}</a></li>
+                <li><a href="#test{$test_row["test_id"]}" data-toggle="tab">Test {$test_row["test_number"]} {$locked}</a></li>
 HTML;
     }
 
@@ -93,7 +93,7 @@ print <<<HTML
 
 
             </ul>
-
+				
             <div id="myTabContent" class="tab-content">
 HTML;
 $first = true;
@@ -118,10 +118,10 @@ HTML;
 HTML;
     }
     print <<<HTML
-
+                                
                             </tr>
                         </thead>
-
+										
                         <tbody style="background: #f9f9f9;">
 HTML;
 
@@ -176,7 +176,7 @@ HTML;
                     $question_grades[] = 0;
                 }
             }
-
+            
             if (isset($temp['grade_test_text'])) {
                 $text_fields = pgArrayToPhp($temp['grade_test_text']);
             }
@@ -248,7 +248,7 @@ echo <<<HTML
 			var rcs = name[2];
 
             if ($(this).attr('elem') == 'text') {
-
+            
             }
             else {
                 if(isNaN(grade) && grade != "-")
@@ -326,5 +326,6 @@ echo <<<HTML
 HTML;
 
 include "../footer.php";
-?>
-
+?> 
+        
+        

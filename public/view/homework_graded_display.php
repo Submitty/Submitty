@@ -1,13 +1,6 @@
 <!-- DETAILS ON INDIVIDUAL TESTS -->
 <div class="row sub-text">
 	<h4>Results:</h4>
-<?php
-include "/usr/local/hss/hwgrading_website/lib/DiffViewer.php";
-use \lib\DiffViewer;
-$dv = new DiffViewer();
-echo $dv->getJavascript();
-echo $dv->getCSS();
-?>
 
 <?php if ($assignment_message != "") {
 	echo '<span class="message">Note: '.htmlentities($assignment_message)."</span>";
@@ -152,24 +145,34 @@ echo $dv->getCSS();
 					<?php
 					if (isset($test["diffs"])) {
 						foreach ($test["diffs"] as $diff) {
-                            if (isset($diff["student"]) && isset($diff["instructor"])) {
-                                $dv->load($diff["student"], $diff["instructor"], $diff["difference"]);
-                            } else if (isset($diff["student"])) {
-                                $dv->load($diff["student"], "", $diff["difference"]);
-                            }
+							if (isset($diff["message"]) && trim($diff["message"])!="") {
+
+							
+								echo '<div class="diff-block"><div class="error_mess_diff">'.html_entity_decode($diff["message"]).'</div></div>';
+								//echo '<div class="diff-block"><a class="error_mess_diff">'."MESSAGE ".htmlentities($diff["message"]).'</a></div>';
+
+								echo '<div class="spacer"></div>';
+							}
+							if ((!isset($diff["student"]) || trim($diff["student"]) == "") &&
+								(!isset($diff["instructor"]) || trim($diff["instructor"]) == ""))
+							{
+								continue;
+							}
+							$instructor_row_class = "diff-row";
 							?>
-							<div class="diff-block container"> <!-- diff block -->
-                                <div class="row diff-row">
-								<div class="diff-element col-md-5"><!-- student diff element -->
+							<div class="diff-block"> <!-- diff block -->
+								<div class="diff-element"><!-- student diff element -->
 									<b>Student <?php if (isset($diff["description"])) { echo htmlentities($diff["description"]); } ?></b>
 
 									<div class="panel panel-default" id="<?php echo htmlentities($diff["diff_id"]); ?>_student">
 										<?php
 										if (isset($diff["student"]) && trim($diff["student"]) != "")
 										{
-                                            $str=$dv->getDisplayActual();
+											echo '<tt class="mono">';
+											$str=$diff["student"];
 											$str=str_replace("\r","\\r",$str);
-                                            echo $str;
+											echo htmlentities($str);
+											echo '</tt>';
 										}
 										?>
 									</div>
@@ -180,7 +183,7 @@ echo $dv->getCSS();
 								<?php
 								if 	(isset($diff["instructor"]) && trim($diff["instructor"]) != ""){
 									?>
-									<div class="diff-element col-md-5"><!-- instructor diff element -->
+									<div class="diff-element"><!-- instructor diff element -->
 
 										<b>Expected <?php if (isset($diff["description"])) { echo htmlentities($diff["description"]); } ?></b>
 
@@ -188,14 +191,18 @@ echo $dv->getCSS();
 											<?php
 											if (isset($diff["instructor"]) && trim($diff["instructor"]) != "")
 											{
-                                                $str=$dv->getDisplayExpected();
+												echo '<tt class="mono">';
+												$str=$diff["instructor"];
 												$str=str_replace("\r","\\r",$str);
-                                                echo $str;
+												echo htmlentities($str);
+												echo '</tt>';
 											}
-											?>
+											else
+											{
+												echo "";
+											}?>
 										</div>
 									</div><!-- end instructor diff element -->
-                                </div>
 									<?php
 								}
 
@@ -211,7 +218,7 @@ echo $dv->getCSS();
 										diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
 									</script><!-- end script -->
 									<?php
-                                }
+								}
 								?>
 							</div><!-- end div block -->
 							<div class="spacer"></div>

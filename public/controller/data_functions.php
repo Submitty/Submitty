@@ -99,12 +99,6 @@ function display_file_permissions($perms) {
 }
 
 
-
-
-
-
-
-
 // Upload HW Assignment to server and unzip
 function upload_homework($username, $semester, $course, $assignment_id, $homework_file, $svn_checkout) {
     if ($svn_checkout == false) {
@@ -230,14 +224,6 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
       $zip = new ZipArchive;
       $res = $zip->open($homework_file["tmp_name"]);
       if ($res === TRUE) {
-	for ($i = 0; $i < $zip->numFiles; $i++) {
-    		$stat = $zip->statIndex($i);
-    		$info = pathinfo($stat['name']);
-   	 	if (isset($info['extension']) && $info['extension'] == "zip") {
-        		rmdir($version_path);
-        		return array("error"=>"", "message"=> "Your submission contains a zip folder within the submission. Please remove it. Detected Zip Folder: ".$info['basename']);
-    		}
-	}
         $zip->extractTo($version_path."/");
         $zip->close();
       }
@@ -670,7 +656,6 @@ function get_all_files($username, $semester, $course, $assignment_id, $assignmen
     return $folder;
 }
 
-
 function version_in_grading_queue($username, $semester, $course, $assignment_id, $assignment_version) {
     $path_front = get_path_front_course($semester,$course);
     if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {//If its not in the submissions folder
@@ -681,48 +666,6 @@ function version_in_grading_queue($username, $semester, $course, $assignment_id,
         return false;
     }
     return true;
-}
-
-
-function version_in_grading_queue2($username, $semester, $course, $assignment_id, $assignment_version) {
-
-    $path_front_root = get_path_front_root();
-
-    $queue_file = $semester."__".$course."__".$assignment_id."__".$username."__".$assignment_version;
-
-    $interactive_queue_file = $path_front_root."/to_be_graded_interactive/".$queue_file;
-    $batch_queue_file = $path_front_root."/to_be_graded_batch/".$queue_file;
-
-    $GRADING_interactive_queue_file = $path_front_root."/to_be_graded_interactive/GRADING_".$queue_file;
-    $GRADING_batch_queue_file = $path_front_root."/to_be_graded_batch/GRADING_".$queue_file;
-
-    if (file_exists($interactive_queue_file)) {
-      if (file_exists($GRADING_interactive_queue_file)) {
-	return "interactive_queue";
-      } else {
-	return "currently_grading";
-      }
-    } 
-
-    if (file_exists($batch_queue_file)) {
-      if (file_exists($GRADING_batch_queue_file)) {
-	return "batch_queue";
-      } else {
-	return "currently_grading";
-      }
-    }
-
-    // otherwise, should be graded!
-    $path_front = get_path_front_course($semester,$course);
-    if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {//If its not in the submissions folder
-      return "error_does_not_exist";
-    }
-    $file = $path_front."/results/".$assignment_id."/".$username."/".$assignment_version;
-    if (file_exists($file)) {//If the version has already been graded
-      return "graded";
-    }
-
-    return "error_not_graded_and_not_in_queue";
 }
 
 
@@ -814,6 +757,7 @@ function get_select_submission_data($username, $semester,$course, $assignment_id
         if (version_in_grading_queue($username, $semester,$course, $assignment_id, $i)) {
             $score = "Grading in progress";
         }
+
 
         $class_config = get_class_config($semester,$course);
         $due_date = get_due_date($class_config,$assignment_id);
@@ -1006,10 +950,9 @@ function get_testcase_diff($username, $semester,$course, $assignment_id, $assign
     $student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
 
     $data = array();
-    //$data["difference"] = "{differences:[]}";//This needs to be here to render the diff viewer without a teacher file
-    $data["difference"] = "";
+    $data["difference"] = "{differences:[]}";//This needs to be here to render the diff viewer without a teacher file
 
-    /*if (isset($diff["instructor_file"])) {
+    if (isset($diff["instructor_file"])) {
         $instructor_file_path = "$path_front/".$diff["instructor_file"];
         if (file_exists($instructor_file_path)) {
             $data["instructor"] = file_get_contents($instructor_file_path);
@@ -1025,24 +968,6 @@ function get_testcase_diff($username, $semester,$course, $assignment_id, $assign
     }
     if (isset($diff["difference"]) && file_exists($student_path . $diff["difference"])) {
         $data["difference"] = file_get_contents($student_path.$diff["difference"]);
-    }*/
-
-    if (isset($diff["instructor_file"])) {
-        $instructor_file_path = "$path_front/".$diff["instructor_file"];
-        if (file_exists($instructor_file_path)) {
-            $data["instructor"] = $instructor_file_path;
-        }
-    }
-    if (isset($diff["student_file"]) && file_exists($student_path . $diff["student_file"])) {
-        $file_size = filesize($student_path. $diff["student_file"]);
-        if ($file_size / 1024 < 10000) {
-            $data["student"] = $student_path.$diff["student_file"];
-        } else {
-            $data["student"] = "ERROR: Unable to read student output file.  Student output file is greater than or equal to ". ($file_size / 1024). " kb.  File could be corrupted or is too large.";
-        }
-    }
-    if (isset($diff["difference"]) && file_exists($student_path . $diff["difference"])) {
-        $data["difference"] = $student_path.$diff["difference"];
     }
     return $data;
 }

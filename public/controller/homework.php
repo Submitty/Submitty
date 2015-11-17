@@ -57,11 +57,9 @@ $submitted_files =           get_submitted_files($username, $semester, $course, 
 
 //Is the submitting version being graded
 $submitting_version_in_grading_queue = version_in_grading_queue($username, $semester,$course, $assignment_id, $submitting_version);
-$submitting_version_in_grading_queue2 = version_in_grading_queue2($username, $semester,$course, $assignment_id, $submitting_version);
 
 //Is the viewing version being graded
 $assignment_version_in_grading_queue = version_in_grading_queue($username, $semester,$course, $assignment_id, $assignment_version);
-$assignment_version_in_grading_queue2 = version_in_grading_queue2($username, $semester,$course, $assignment_id, $assignment_version);
 
 
 // FIXME:  This incorrectly includes extra credit
@@ -135,9 +133,7 @@ render("homework", array(
     "max_submissions"=>         $max_submissions_for_assignment,
     "assignment_message"=>      $assignment_message,
     "submitting_version_in_grading_queue"=>$submitting_version_in_grading_queue,
-    "submitting_version_in_grading_queue2"=>$submitting_version_in_grading_queue2,
     "assignment_version_in_grading_queue"=>$assignment_version_in_grading_queue,
-    "assignment_version_in_grading_queue2"=>$assignment_version_in_grading_queue2,
     "status"=>                  $status,
 
     "files_to_view"=>           $files_to_view

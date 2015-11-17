@@ -105,8 +105,8 @@ class AutoLoader {
      *
      * @return mixed: Root name of the git repo
      */
-    private static function getRootName() {
-        $dir = explode("/",str_replace("/TAGradingServer/lib", "", __DIR__));
+    public static function getRootName() {
+        $dir = explode("/",str_replace("/lib", "", __DIR__));
         return end($dir);
     }
 
