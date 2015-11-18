@@ -59,7 +59,7 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
 
     public function testQuery() {
         DatabaseTester::connect();
-        Database::query("SELECT student_rcs FROM students");
+        Database::query("SELECT student_rcs FROM students WHERE student_rcs='pevelm'");
         $this->assertEquals(1, count(Database::rows()));
         $this->assertEquals(array('student_rcs' => 'pevelm', '0' => 'pevelm'), Database::row());
         DatabaseTester::disconnect();

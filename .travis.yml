@@ -1,19 +1,22 @@
 language: php
 sudo: true
+#dist: trusty
+#we should switch to this after figuring out how to use newer version of PHPUnit
 php:
   - 5.5
   - 5.6
-  - 7
-  - hhvm
+  - 7.0
+#  - hhvm
 matrix:
   allow_failures:
     - php: 7.0
-    - php: hhvm
+#    - php: hhvm
 
 addons:
   postgresql: "9.3"
 
 before_script:
+#  - if [[ "$TRAVIS_PHP_VERSION" = "hhvm" ]]; then source ./.setup/travis/hhvm.sh; fi
   - ./.setup/travis.sh
   - psql -c 'create database test_hwgrading;' -U postgres
   - psql --host=localhost --username=postgres --command="CREATE GROUP test_hwgrading ROLE postgres"
@@ -22,8 +25,10 @@ before_script:
   - psql -f tests/testData/travis.sql -U postgres -d test_hwgrading
 
 script:
-  - phpunit --configuration tests/phpunit.xml
+  - phpunit --version
   - find -L . -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+  - phpunit --configuration tests/phpunit.xml
+  - if [[ "$TRAVIS_PHP_VERSION" != "7.0" ]] && [[ "$TRAVIS_BRANCH" = "master" ]]; then phpunit --configuration tests/phpunit_e2e.xml; fi
 
 notifications:
   email: false

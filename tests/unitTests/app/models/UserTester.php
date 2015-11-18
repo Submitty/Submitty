@@ -16,14 +16,14 @@ class UserTester extends \PHPUnit_Framework_TestCase {
 
 
     public function testBasicUser() {
-        User::loadUser('user');
+        User::loadUser('ta');
         $this->assertNotEmpty(User::$user_details);
         $this->assertFalse(User::$is_developer);
         $this->assertFalse(User::$is_administrator);
     }
 
     public function testAdministratorUser() {
-        User::loadUser('admin');
+        User::loadUser('instructor');
         $this->assertNotEmpty(User::$user_details);
         $this->assertFalse(User::$is_developer);
         $this->assertTrue(User::$is_administrator);

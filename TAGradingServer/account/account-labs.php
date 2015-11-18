@@ -67,12 +67,12 @@ $first = true;
 foreach($db->rows() as $lab_row) {
     if($first) {
         print <<<HTML
-                <li class="active"><a href="#lab{$lab_row["lab_id"]}" data-toggle="tab">{$lab_row["lab_title"]}</a></li>
+                <li class="lab_tab active"><a href="#lab{$lab_row["lab_id"]}" data-toggle="tab">{$lab_row["lab_title"]}</a></li>
 HTML;
     }
     else {
         print <<<HTML
-                <li><a href="#lab{$lab_row["lab_id"]}" data-toggle="tab">{$lab_row["lab_title"]}</a></li>
+                <li class="lab_tab"><a href="#lab{$lab_row["lab_id"]}" data-toggle="tab">{$lab_row["lab_title"]}</a></li>
 HTML;
     }
 
@@ -122,7 +122,7 @@ HTML;
         $count = count($lab_row_checkpoints) + 1;
         print <<<HTML
                         <tr class="info">
-                            <td colspan="{$count}" style="text-align:center;">
+                            <td colspan="{$count}" style="text-align:center;" id="section-{$section['section_id']}">
                                     Enrolled Students in Section {$section["section_id"]}
                                     <a href="{$BASE_URL}/account/print/print_lab.php?course={$_GET['course']}&lab_id={$lab_row['lab_id']}&section_id={$section['section_id']}">
                                         <div class="icon-print"></div>

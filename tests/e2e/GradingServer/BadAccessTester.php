@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\e2e\SubmissionServer;
+namespace tests\e2e\GradingServer;
 
 use tests\e2e\BaseTestCase;
 
@@ -33,8 +33,7 @@ class BadAccessTester extends BaseTestCase {
     public function testInvalidUser() {
         $this->url('TAGradingServer/account/index.php?course=test_course');
         $this->assertEquals("Error", $this->title());
-        $this->assertEquals("Unrecognized user: pevelm. Please contact an administrator to get an account.",
+        $this->assertEquals("Unrecognized user: invalid_user. Please contact an administrator to get an account.",
                             $this->byId('message')->text());
     }
-
 }
