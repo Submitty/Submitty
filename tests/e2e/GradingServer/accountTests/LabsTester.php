@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\e2e\GradingServer;
+namespace tests\e2e\accountTests\GradingServer;
 
 use lib\Database;
 use tests\e2e\BaseTestCase;
@@ -144,5 +144,21 @@ class LabsTester extends BaseTestCase {
                 }
             }
         }
+    }
+
+    public function testAllGetFilter() {
+        $this->assertNotNull($this->byId("section-1"));
+        try {
+            $this->assertNotNull($this->byId("section-2"));
+            $this->fail("This element should not exist.");
+        }
+        catch (\PHPUnit_Extensions_Selenium2TestCase_WebDriverException $e) {
+            $this->assertEquals(\PHPUnit_Extensions_Selenium2TestCase_WebDriverException::NoSuchElement, $e->getCode());
+        }
+
+        $this->url('TAGradingServer/account/account-labs.php?course=test_course&all=true');
+
+        $this->assertNotNull($this->byId("section-1"));
+        $this->assertNotNull($this->byId("section-2"));
     }
 }
