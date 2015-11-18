@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 include "../../toolbox/functions.php";
 
@@ -16,7 +16,7 @@ if (empty($_POST['rubric_name']) || empty($_POST['rubric_submission_id'])) {
 for ($i = 1; $i <= $rubric_parts; $i++) {
     if ($rubric_parts_sep) {
         if(!isset($_POST["rubric_part_{$i}_id"]) || empty($_POST["rubric_part_{$i}_id"])) {
-            die("Missing submissiond id for part {$i}.");
+            die("Missing submission id for part {$i}.");
         }
         if(in_array($_POST["rubric_part_{$i}_id"], $part_submission_ids)) {
             die("The submission id '" . $_POST["rubric_part_{$i}_id"] . "' was already used for a different part.");
@@ -33,8 +33,8 @@ $action = $_GET['action'];
 
 if ($action == 'edit') {
     $rubric_id = intval($_GET['id']);
-    $db->query("UPDATE rubrics SET rubric_due_date=?, rubric_parts_sep=?, rubric_late_days=?, rubric_name=?, rubric_submission_id=?, rubric_parts_submission_id=? WHERE rubric_id=?", 
-               array($_POST['date_submit'], $rubric_parts_sep, $rubric_late_days, $_POST['rubric_name'], $_POST['rubric_submission_id'], implode(",", $part_submission_ids), $rubric_id));        
+    $db->query("UPDATE rubrics SET rubric_due_date=?, rubric_parts_sep=?, rubric_late_days=?, rubric_name=?, rubric_submission_id=?, rubric_parts_submission_id=? WHERE rubric_id=?",
+               array($_POST['date_submit'], $rubric_parts_sep, $rubric_late_days, $_POST['rubric_name'], $_POST['rubric_submission_id'], implode(",", $part_submission_ids), $rubric_id));
 }
 else {
     $db->query("INSERT INTO rubrics (rubric_due_date, rubric_parts_sep, rubric_late_days, rubric_name, rubric_submission_id, rubric_parts_submission_id) VALUES (?,?,?,?,?,?)", $params);
@@ -50,35 +50,35 @@ if ($action == 'edit') {
         $questions[$row['question_part_number']][$row['question_number']] = $row;
     }
 }
-    
+
 while(true) {
     $question = 1;
-    
+
     if(!isset($_POST["comment-" . $part . "-" . $question])) {
         break;
     }
-    
+
     while(true) {
         if(!isset($_POST["comment-" . $part . "-" . $question])) {
             break;
         }
 
-        if(!isset($_POST["ec-" . $part . "-" . $question])) {
+        if(!isset($_POST["ec-" . $part . "-" . $question]) || $_POST["ec-{$part}-{$question}"] != "on") {
             $extra_credit = 0;
         }
         else {
             $extra_credit = 1;
         }
-        
+
         if (isset($questions[$part][$question])) {
             $params = array($_POST["comment-" . $part . "-" . $question], $_POST["ta-" . $part . "-" . $question], $_POST["point-" . $part . "-" . $question], $extra_credit, $questions[$part][$question]['question_id']);
             $db->query("UPDATE questions SET question_message=?, question_grading_note=?, question_total=?, question_extra_credit=? WHERE question_id=?", $params);
             if (intval($_POST['point-'.$part.'-'.$question]) < $questions[$part][$question]['question_total']) {
                 $db->query("
-UPDATE grades_questions 
-SET 
-grade_question_score=case when grade_question_score > ? then ? else grade_question_score end 
-WHERE 
+UPDATE grades_questions
+SET
+grade_question_score=case when grade_question_score > ? then ? else grade_question_score end
+WHERE
 question_id=?", array(intval($_POST['point-'.$part.'-'.$question]), intval($_POST['point-'.$part.'-'.$question]), $questions[$part][$question]['question_id']));
             }
         }

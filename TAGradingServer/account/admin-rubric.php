@@ -217,7 +217,9 @@ HTML;
             $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
             print selectBox($k, $num, $old_grade);
             $checked = ($question['question_extra_credit'] == 1) ? "checked" : "";
+            print (($question['question_extra_credit'] == 1) ? "<input type='hidden' name='ec-{$k}-{$num}'' value='on' />" : "");
             print <<<HTML
+
                         <input onclick='calculatePercentageTotal();' name="ec-{$k}-{$num}" type="checkbox" {$checked} {$disabled} />
                     </td>
 HTML;
@@ -332,21 +334,7 @@ HTML;
         </div>
     </form>
 </div>
-HTML;
 
-    if ($old_rubric['rubric_due_date'] != "") {
-        $date = explode(" ", $old_rubric['rubric_due_date']);
-        $date = explode("-", $date[0]);
-        $year = $date[0];
-        $month = intval($date[1]);
-        $day = intval($date[2]);
-        $date = "{year: {$year}, month: {$month}, day: {$day}}";
-    }
-    else {
-        $date = "null";
-    }
-
-    print <<<HTML
 <script type="text/javascript">
     var datepicker = $('.datepicker');
     datepicker.datetimepicker({
