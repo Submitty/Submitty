@@ -47,7 +47,7 @@ echo "192.168.56.103    test-hwgrading test-hwgrading.cs.rpi.edu hwgrading" >> /
 # PACKAGE SETUP
 #################
 echo "\n" | add-apt-repository ppa:webupd8team/java
-apt-get update
+apt-get -qq update
 
 apt-get install -qqy ntp
 service ntp restart
