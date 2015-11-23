@@ -265,13 +265,13 @@ EOF
 # HWSERVER SETUP
 #################
 
-#if [[ ${VAGRANT} == 1 ]]; then
-#  ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
-#else
+if [[ ${VAGRANT} == 1 ]]; then
+  ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
+else
   cd /usr/local/hss
   git clone https://github.com/RCOS-Grading-Server/HWserver.git
   mv HWserver GIT_CHECKOUT_HWserver
-#fi
+fi
 
 HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
 cd ${HWSERVER_DIR}
