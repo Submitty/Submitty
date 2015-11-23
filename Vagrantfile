@@ -16,7 +16,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provision "shell" do |s|
-    s.path = ".setup/alt_install.sh"
+    s.path = ".setup/install_system.sh"
     s.args = ["vagrant"]
   end
 end
