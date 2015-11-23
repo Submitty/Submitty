@@ -52,7 +52,7 @@ apt-get -qq update
 apt-get install -qqy ntp
 service ntp restart
 
-./bin/create.untrusted.users.pl
+bin/create.untrusted.users.pl
 echo "check results"
 sleep 30
 
