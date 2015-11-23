@@ -52,9 +52,8 @@ apt-get -qq update
 apt-get install -qqy ntp
 service ntp restart
 
+# path for untrusted user creation script will be different if not using Vagrant
 /vagrant/bin/create.untrusted.users.pl
-echo "check results"
-sleep 30
 
 apt-get install -qqy libpam-passwdqc
 
