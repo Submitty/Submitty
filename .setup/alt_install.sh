@@ -52,6 +52,10 @@ apt-get -qq update
 apt-get install -qqy ntp
 service ntp restart
 
+./bin/create.untrusted.users.pl
+echo "check results"
+sleep 30
+
 apt-get install -qqy libpam-passwdqc
 
 apt-get install -qqy ssh sshpass unzip
@@ -59,6 +63,7 @@ apt-get install -qqy apache2 postgresql postgresql-contrib php5 php5-xdebug liba
 
 apachectl -V | grep MPM
 
+echo "Preparing to install packages.  This may take a while."
 apt-get install -qqy clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
 hardening-includes python p7zip-full patchutils postgresql-client postgresql-client-9.3 postgresql-client-common \
 unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
@@ -171,7 +176,6 @@ adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-pas
 echo "hsdbu:hsdbu" | sudo chpasswd
 adduser hwphp hwcronphp
 adduser hwcron hwcronphp
-./bin/create.untrusted.users.pl
 
 # TODO: we can automate this with a loop probably
 addgroup csci1100
