@@ -47,19 +47,23 @@ echo "192.168.56.103    test-hwgrading test-hwgrading.cs.rpi.edu hwgrading" >> /
 # PACKAGE SETUP
 #################
 echo "\n" | add-apt-repository ppa:webupd8team/java
-apt-get update
+apt-get -qq update
 
-apt-get install -y ntp
+apt-get install -qqy ntp
 service ntp restart
 
-apt-get install -y libpam-passwdqc
+# path for untrusted user creation script will be different if not using Vagrant
+/vagrant/bin/create.untrusted.users.pl
 
-apt-get install -y ssh sshpass unzip
-apt-get install -y apache2 postgresql postgresql-contrib php5 php5-xdebug libapache2-mod-suphp
+apt-get install -qqy libpam-passwdqc
+
+apt-get install -qqy ssh sshpass unzip
+apt-get install -qqy apache2 postgresql postgresql-contrib php5 php5-xdebug libapache2-mod-suphp
 
 apachectl -V | grep MPM
 
-apt-get install -y clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
+echo "Preparing to install packages.  This may take a while."
+apt-get install -qqy clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
 hardening-includes python p7zip-full patchutils postgresql-client postgresql-client-9.3 postgresql-client-common \
 unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libfile-mmagic-perl \
@@ -69,8 +73,8 @@ libseccomp2 seccomp junit cmake
 # Install Oracle 8 Non-Interactively
 echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
-echo "apt-get install -y oracle-java8-installer..."
-apt-get install -y oracle-java8-installer > /dev/null 2>&1
+echo "apt-get install -qqy oracle-java8-installer..."
+apt-get install -qqy oracle-java8-installer > /dev/null 2>&1
 
 #################################################################
 # JAR SETUP
@@ -171,7 +175,6 @@ adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-pas
 echo "hsdbu:hsdbu" | sudo chpasswd
 adduser hwphp hwcronphp
 adduser hwcron hwcronphp
-./vagrant/create.untrusted.users.pl
 
 # TODO: we can automate this with a loop probably
 addgroup csci1100
@@ -196,16 +199,16 @@ adduser ta csci1200_tas_www
 adduser instructor csci1200_tas_www
 adduser developer csci1200_tas_www
 
-#addgroup csci2600
-#adduser ta csci2600
-#adduser instructor csci2600
-#adduser developer csci2600
-#addgroup csci2600_tas_www
-#adduser hwphp csci2600_tas_www
-#adduser hwcron csci2600_tas_www
-#adduser ta csci2600_tas_www
-#adduser instructor csci2600_tas_www
-#adduser developer csci2600_tas_www
+addgroup csci2600
+adduser ta csci2600
+adduser instructor csci2600
+adduser developer csci2600
+addgroup csci2600_tas_www
+adduser hwphp csci2600_tas_www
+adduser hwcron csci2600_tas_www
+adduser ta csci2600_tas_www
+adduser instructor csci2600_tas_www
+adduser developer csci2600_tas_www
 
 adduser instructor course_builders
 
@@ -221,8 +224,8 @@ ls /home | sort > /var/local/hss/instructors/valid
 # SVN SETUP
 #################
 service apache2 restart
-apt-get install -y subversion subversion-tools
-apt-get install -y libapache2-svn
+apt-get install -qqy subversion subversion-tools
+apt-get install -qqy libapache2-svn
 a2enmod dav
 a2enmod dav_fs
 a2enmod authz_svn
@@ -327,7 +330,7 @@ fi
 cd ${HWSERVER_DIR}/../bin
 ./create_course.sh f15 csci1100 instructor csci1100_tas_www
 ./create_course.sh f15 csci1200 instructor csci1200_tas_www
-#./create_course.sh f15 csci2600 instructor csci2600_tas_www
+./create_course.sh f15 csci2600 instructor csci2600_tas_www
 
 cd /var/local/hss/courses/f15/csci1100
 ./BUILD_csci1100.sh
@@ -335,8 +338,8 @@ cd /var/local/hss/courses/f15/csci1100
 cd /var/local/hss/courses/f15/csci1200
 ./BUILD_csci1200.sh
 
-#cd /var/local/hss/courses/f15/csci2600
-#./BUILD_csci2600.sh
+cd /var/local/hss/courses/f15/csci2600
+./BUILD_csci2600.sh
 
 #################################################################
 # CREATE DATABASE
@@ -346,11 +349,11 @@ export PGPASSWORD='hsdbu';
 
 psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1100_f15;"
 psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1200_f15;"
-#psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
+psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
 
 psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
 psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
 psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
 psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
-#psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-#psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
+psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
