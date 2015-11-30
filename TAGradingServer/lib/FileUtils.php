@@ -16,6 +16,7 @@ class FileUtils {
     public static function getAllFiles($dir, $allowed_file_extensions=array(), $skip_files=array()) {
         // we never want to include these files/folders as they do not contain any useful
         // information for us and would just end up making the file viewer have way too many files
+        // case them to lowercase for easier string comparisons
         $skip_files = array_map(function($str) { return strtolower($str); }, $skip_files);
 
         $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
@@ -40,8 +41,7 @@ class FileUtils {
                         }
                         $file = "{$dir}/{$entry}";
                         if(is_dir($file)) {
-
-                            $return = array_merge($return, FileUtils::getAllFiles($file, $allowed_file_extensions));
+                            $return = array_merge($return, array($entry => FileUtils::getAllFiles($file, $allowed_file_extensions)));
                         } else {
                             $info = pathinfo($file);
                             if($check_extension) {
@@ -71,8 +71,10 @@ class FileUtils {
                     }
                 }
             }
+            sort($return);
+            $return = array($dir => $return);
         }
-        sort($return);
+
         return $return;
     }
 
@@ -129,12 +131,39 @@ class FileUtils {
      * @return bool
      */
     public static function createDir($dir) {
+        $return = true;
         if (!is_dir($dir)) {
             if (file_exists($dir)) {
                 unlink($dir);
             }
-            return @mkdir($dir);
+            $return = @mkdir($dir);
         }
-        return true;
+        return $return;
+    }
+
+    /**
+     * Given a path, it then attempts to create each folder in the path. For example, if we are given
+     * /a/b/c, we then attempt to create directory /a, /a/b, and then /a/b/c (skipping any that exist).
+     * If any folder creation fails, then we return false, otherwise return true.
+     *
+     * @param $path
+     *
+     * @return bool
+     */
+    public static function recursiveCreateDir($path) {
+        $return = true;
+        $total = ($path[0] == "/") ? "/" : "";
+        $dirs = explode("/", $path);
+        foreach($dirs as $dir) {
+            $total .= $dir;
+            if (!is_dir($total)) {
+                if (!FileUtils::createDir($total)) {
+                    $return = false;
+                    break;
+                }
+            }
+            $total .= "/";
+        }
+        return $return;
     }
 }

@@ -29,12 +29,12 @@ echo <<<HTML
             </div>
 
             <div class="modal-footer">
-                <div style="width:50%; float:left; text-align:left;">
-                    <label style="display: inline;"><input type="checkbox" style="margin-top:0" name="regrade" id="regrade" /> Only Regrades (ignore new grades)</label><br />
-                    <label style="display: inline;"><input type="checkbox" style="margin-top:0" name="all" id="all" /> Grade All Homeworks</label><br />
-                    <label style="display: inline;"><input type="checkbox" style="margin-top:0" name="email" id="email" /> Email Homework Results</label>
+                <div style="float:left; text-align:left;">
+                    <label style="display: inline;"><input type="radio" style="margin-top:0" name="type" value='all' checked="checked" /> Grade all submissions for selected and past homeworks</label><br />
+                    <label style="display: inline;"><input type="radio" style="margin-top:0" name="type" value='default' /> Fully grade selected homework and regrade past homeworks)</label><br />
+                    <label style="display: inline;"><input type="radio" style="margin-top:0" name="type" value='regrade' /> Only regrade selected and past homeworks (ignore new grades)</label><br />
                 </div>
-                <div style="width:50%; float:right; margin-top:15px;">
+                <div style="width:50%; margin-left: 50%; margin-top: 20px; float: left;">
                     <input class="btn btn-primary" type="submit" value="Generate HW Reports"/>
                 </div>
             </div>
@@ -56,14 +56,14 @@ echo <<<HTML
 
         var homework = $('select#hw').val();
         url = url+homework;
-        if ($('input#regrade').prop('checked') == true) {
-            url = url + "&regrade=1";
-        }
-        if ($('input#all').prop('checked') == true) {
+
+        var inp = $('input[name=type]:checked');
+        console.log(inp.val());
+        if (inp.val() == 'all') {
             url = url + "&all=1";
         }
-        if ($('input#email').prop('checked') == true) {
-            url = url + "&email=1";
+        else if (inp.val() == 'regrade') {
+            url = url + "&regrade=1";
         }
 
         $.ajax(url)

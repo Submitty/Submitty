@@ -18,23 +18,36 @@ if (!file_exists($filename)) {
 }
 
 $output = <<<HTML
-<link rel="stylesheet" href="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.css" />
-<link rel="stylesheet" href="{$BASE_URL}/toolbox/include/codemirror/theme/eclipse.css" />
-<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/custom/js/jquery-2.0.3.min.map.js"></script>
-<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.js"></script>
-<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/clike/clike.js"></script>
-<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/python/python.js"></script>
-<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/shell/shell.js"></script>
+<!doctype html>
+<html>
+<head>
+    <title>{$filename}</title>
+    <link rel="stylesheet" href="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.css" />
+    <link rel="stylesheet" href="{$BASE_URL}/toolbox/include/codemirror/theme/eclipse.css" />
+    <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/custom/js/jquery-2.0.3.min.map.js"></script>
+    <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.js"></script>
+    <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/clike/clike.js"></script>
+    <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/python/python.js"></script>
+    <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/shell/shell.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('body').css("height", ($('.CodeMirror').height()) + "px");
+        });
+    </script>
+</head>
+<body>
+    <textarea id="code0">
 HTML;
-
-$output .= <<<HTML
-<textarea id="code0">
-HTML;
-$output .= htmlentities(file_get_contents($filename), ENT_SUBSTITUTE);
-$output .= <<<HTML
-</textarea>
+    $output .= htmlentities(file_get_contents($filename), ENT_SUBSTITUTE);
+    $output .= <<<HTML
+    </textarea>
 HTML;
 
 $output .= sourceSettingsJS($filename, 0);
+
+$output .= <<<HTML
+</body>
+</html>
+HTML;
 
 print $output;

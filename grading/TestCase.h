@@ -140,9 +140,6 @@ private:
     next_test_case_id++;
     FILE_EXISTS = false;
     COMPILATION = false;
-    test_case_grader[0] = NULL;
-    test_case_grader[1] = NULL;
-    test_case_grader[2] = NULL;
   }
 
 public:
@@ -196,8 +193,22 @@ public:
 
     // compilation (g++, clang++, javac) usually requires multiple
     // threads && produces a large executable
-    adjust_test_case_limits(answer._test_case_limits,RLIMIT_CPU,60);             // 60 seconds 
-    adjust_test_case_limits(answer._test_case_limits,RLIMIT_NPROC,10);           // 10 threads 
+
+    // Over multiple semesters of Data Structures C++ assignments, the
+    // maximum number of vfork (or fork or clone) system calls needed
+    // to compile a student submissions was 28.
+    //
+    // It seems that g++     uses approximately 2 * (# of .cpp files + 1) processes
+    // It seems that clang++ uses approximately 2 +  # of .cpp files      processes
+
+    adjust_test_case_limits(answer._test_case_limits,RLIMIT_NPROC,100*40);           // 100 threads * 40 parallel grading
+
+
+    // 10 seconds was sufficient time to compile most Data Structures
+    // homeworks, but some submissions required slightly more time
+    adjust_test_case_limits(answer._test_case_limits,RLIMIT_CPU,60);              // 60 seconds 
+
+
     adjust_test_case_limits(answer._test_case_limits,RLIMIT_FSIZE,10*1000*1000);  // 10 MB executable
 
     answer._test_case_points = tcp;
@@ -214,9 +225,6 @@ public:
 				   const std::string &command,
 				   const TestCasePoints &tcp,
 				   std::vector<TestCaseGrader*> tcc,
-				   //*tcc0,
-				   //TestCaseGrader *tcc1=NULL,
-				   //TestCaseGrader *tcc2=NULL,
 				   const std::string &filename = "",
 				   const std::map<int,rlim_t> &test_case_limits = {} ) {
     TestCase answer;
@@ -225,14 +233,11 @@ public:
     answer._command = command;
     assert (answer._command != "");
     answer._test_case_points = tcp;
-    assert (tcc.size() >= 1 && tcc.size() <= 3);
-    answer.test_case_grader[0] = tcc[0];
-    (tcc.size() >= 2) ? answer.test_case_grader[1] = tcc[1] : answer.test_case_grader[1] = NULL;
-    (tcc.size() == 3) ? answer.test_case_grader[2] = tcc[2] : answer.test_case_grader[2] = NULL;
-    //answer.test_case_grader[2] = tcc2;
-    //answer.view_file = filename;
-    answer._filenames.push_back(filename); // = std::vector<std::string>
+    assert (tcc.size() >= 1 && tcc.size() <= 4);
+    answer.test_case_grader_vec = tcc; 
+    answer._filenames.push_back(filename);
     answer.view_file_results = true;
+    answer._test_case_limits = test_case_limits;
     return answer;
   }
 
@@ -289,20 +294,13 @@ public:
   }
 
   int numFileGraders() const {
-    int answer = 0;
-    if (test_case_grader[0] == NULL) return answer;
-    answer++;
-    if (test_case_grader[1] == NULL) return answer;
-    answer++;
-    if (test_case_grader[2] == NULL) return answer;
-    answer++;
-    return answer;
+    return test_case_grader_vec.size();
   }
 
 
   std::string raw_filename (int i) const {
     assert (i >= 0 && i < numFileGraders());
-    return test_case_grader[i]->filename;
+    return test_case_grader_vec[i]->filename;
   }
 
   std::string prefix() const {
@@ -313,15 +311,8 @@ public:
 
   std::string description (int i) const {
     assert (i >= 0 && i < numFileGraders());
-    return test_case_grader[i]->description;
+    return test_case_grader_vec[i]->description;
   }
-  /*
-  std::string getexpected (int i) const {
-    //std::cout << "EXPECTED " << i << numFileGraders() << std::endl;
-    assert (i >= 0 && i < numFileGraders());
-    return test_case_grader[i]->getExpected();
-  }
-  */
   int points () const {
     return _test_case_points.points;
   }
@@ -362,7 +353,7 @@ private:
 
   TestCasePoints _test_case_points;
 public:
-  TestCaseGrader* test_case_grader[3];
+  std::vector<TestCaseGrader*> test_case_grader_vec;
 private:
   bool FILE_EXISTS;
   bool COMPILATION;

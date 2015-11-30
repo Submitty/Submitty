@@ -15,11 +15,17 @@
 	      $student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
               $svn_file = $student_path.".submit_svn_checkout.txt";
               $svn_file_contents = get_student_file($svn_file);
-	      if ($svn_file_contents == "") {
-	        echo "<b> ERROR WITH SVN CHECKOUT </b>";
-	      } else {	  
-    	        echo htmlentities($svn_file_contents);
-              }
+
+
+	      if (file_exists($student_path) == false) {
+		echo "<b> GRADING IN PROGRESS</b>";
+	      }	else {
+		if ($svn_file_contents == "") {
+		  echo "<b> ERROR WITH SVN CHECKOUT </b>";
+		} else {	  
+		  echo htmlentities($svn_file_contents);
+		}
+	      }
             ?></pre>
 
 <?php if ($svn_checkout != true) { echo "-->"; } ?>
@@ -35,7 +41,7 @@
         ?>
     </h4>
     <?php
-    echo '<div class="box">';
+    echo '<div class="box" style="width:48%;">';
 
           //keep track of number of file-display blocks 
           $counter = 0;
@@ -74,7 +80,7 @@
                             <div class="file-display">
 
                                 <?php 
-                                $frontpath = get_path_front_course($semester,$course);;
+                                $frontpath = get_path_front_course($semester,$course);
                                 $file_path = $frontpath.'/submissions/'.$assignment_id.'/'.$username.'/'.$assignment_version.'/'.$file["name"];
                                 $file_open = fopen($file_path,"r") or die("Unable to open file!");
 
@@ -125,8 +131,50 @@
 
                 echo '</p>';
                 echo '</div>';
+
+
             }
         echo '</div>';
+
+    echo '<div class="box" style="width:48%" >';
+
+
+    $frontpath = get_path_front_course($semester,$course);
+    $grade_timestamp_file = $frontpath.'/results/'.$assignment_id.'/'.$username.'/'.$assignment_version.'/.grade.timestamp';
+ 
+
+    if (file_exists($grade_timestamp_file)) {
+      //echo 'timestamp exists';
+      $timestampdata = json_decode(removeTrailingCommas(file_get_contents($grade_timestamp_file)), true);
+
+      echo "<p>";
+      if (isset($timestampdata["submission_time"])) {
+	echo "<b>submission timestamp:</b> ". $timestampdata["submission_time"]."<br>";
+      }
+
+      if (isset($timestampdata["days_late_(before_extensions)"])) {
+	echo "<b>days late (before extensions):</b> ". $timestampdata["days_late_(before_extensions)"]."<br>";
+      }
+
+      echo "&nbsp;<br>";
+
+      if (isset($timestampdata["wait_time"])) {
+	echo "<b>wait time:</b> ". $timestampdata["wait_time"]."<br>";
+      }
+      if (isset($timestampdata["grade_time"])) {
+	echo "<b>grade time:</b> ". $timestampdata["grade_time"]."<br>";
+      }
+
+
+      echo "</p>";
+
+
+    } else {
+
+    }
+
+    echo '</div>';
+
 
     ?>
 

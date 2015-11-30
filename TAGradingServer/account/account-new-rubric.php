@@ -58,10 +58,12 @@ if ($calculate_diff) {
         window.open("{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "&add_submission_path=1","_blank","toolbar=no,scrollbars=yes, resizable=yes, width=700, height=600");
         return false;
     }
+
     function openFrame(file, part, num) {
-        var iframe = $('.file_viewer_' + part + '_' + num);
+        var iframe = $('#file_viewer_' + part + '_' + num);
         if (!iframe.hasClass('open')) {
-            iframe.html("<iframe src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "' height='500px' width='750px' style='border: 0'></iframe>");
+            var iframeId = "file_viewer_" + part + "_" + num + "_iframe";
+            iframe.html("<iframe id='" + iframeId + "' onLoad='resizeFrame(\"" + iframeId + "\");' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "' width='750px' style='border: 0'></iframe>");
             iframe.addClass('open');
         }
 
@@ -78,17 +80,42 @@ if ($calculate_diff) {
         return false;
     }
 
+    function resizeFrame(id) {
+        var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
+        if (height > 500) {
+            document.getElementById(id).height= "500px";
+        }
+        else {
+            document.getElementById(id).height = (height+18) + "px";
+        }
+    }
+
+    function openDiv(id) {
+        var elem = $('#' + id);
+        if (elem.hasClass('open')) {
+            elem.hide();
+            elem.removeClass('open');
+            $('#' + id + '-span').removeClass('icon-folder-open').addClass('icon-folder-closed');
+        }
+        else {
+            elem.show();
+            elem.addClass('open');
+            $('#' + id + '-span').removeClass('icon-folder-closed').addClass('icon-folder-open');
+        }
+        return false;
+    }
+
     function autoResize(id) {
         var newheight;
-        var newwidth;
 
         if(document.getElementById) {
-            newheight=document.getElementById(id).contentWindow.document .body.scrollHeight;
-            newwidth=document.getElementById(id).contentWindow.document .body.scrollWidth;
+            newheight=document.getElementById(id).contentWindow.document.body.scrollHeight;
         }
 
+        if (newheight < 10) {
+            newheight = document.getElementById(id).contentWindow.document.body.offsetHeight;
+        }
         document.getElementById(id).height= (newheight) + "px";
-        document.getElementById(id).width= (newwidth) + "px";
     }
 
     function calculatePercentageTotal() {
@@ -96,7 +123,6 @@ if ($calculate_diff) {
 
         $('#rubric-table').find('select.grades').each(function() {
             total += parseFloat($(this).val());
-/*             $(this).next('.accordian-body').collapse('show'); */
         });
 
         $("#score_total").html(total);
@@ -143,6 +169,53 @@ $output .= <<<HTML
 HTML;
 
 $source_number = 0;
+
+$j = 0;
+function display_files($file, &$output, $part, $indent = 1) {
+    global $j;
+    $margin_left = 15;
+    $neg_margin_left = -15 * ($indent);
+    if (is_array($file)) {
+        foreach($file as $k => $v) {
+            if (!is_integer($k)) {
+                $id = str_replace("/", "_", $k);
+                $indent += 1;
+                $output .= <<<HTML
+<div>
+    <span id='{$id}-span' class='icon-folder-closed'></span><a onclick='openDiv("{$id}");'>{$k}</a>
+    <div id='{$id}' style='margin-left: {$margin_left}px; display: none'>
+
+HTML;
+            }
+
+            display_files($v, $output, $part, $indent);
+
+            if (!is_integer($k)) {
+                $indent -= 1;
+                $output .= <<<HTML
+
+    </div>\n
+</div>
+
+HTML;
+            }
+        }
+    }
+    else {
+        $file = htmlentities($file);
+        $output .= <<<HTML
+    <div>
+        <div class="file-viewer"><a onclick='openFrame("{$file}", {$part}, {$j})'>
+            <span class='icon-plus'></span>{$file}</a>
+        </div> <a onclick='openFile("{$file}")'>(Popout)</a><br />
+        <div id="file_viewer_{$part}_{$j}" style='margin-left: {$neg_margin_left}px'></div>
+    </div>
+
+HTML;
+        $j++;
+    }
+}
+
 for($part = 1; $part <= $rubric->rubric_parts; $part++) {
 
     if ($rubric->rubric_details['rubric_parts_sep']) {
@@ -256,20 +329,17 @@ HTML;
             <div style='margin-top: 20px' class="tabbable">
 HTML;
     $j = 0;
-    foreach ($rubric->rubric_files[$part] as $file) {
-        $file = htmlentities($file);
-        $output .= <<<HTML
-                <div>
-                    <div class="file-viewer"><a onclick='openFrame("{$file}", {$part}, {$j})'><span class='icon-plus'></span>{$file}</a></div> <a onclick='openFile("{$file}")'>(Popout)</a><br />
-                    <div class="file_viewer_{$part}_{$j}"></div>
-                </div>
-HTML;
-        $j++;
-    }
+
+    $output .= "\n";
+
+    display_files($rubric->rubric_files[$part], $output, $part);
+
     $output .= <<<HTML
-            </div>
         </div>
+    </div>
+    <hr style="background-color: #000; height: 1px; margin-left: 25px; margin-right: 25px;"/>
 HTML;
+
     $active = false;
 }
 $output .= <<<HTML
@@ -363,7 +433,7 @@ HTML;
 if ($rubric->rubric_details['rubric_parts_sep']) {
     for ($i = 1; $i <= $rubric->rubric_parts; $i++) {
         $output .= <<<HTML
-                <span style="margin-left: 50px;">Part {$i} Status: <span style="color: {$color[$i]};">{$part_status[$i]}</span></span>
+                <span style="margin-left: 50px;">Part {$i} Status: <span style="color: {$color[$i]};">{$part_status[$i]}</span></span><br />
 HTML;
     }
 }
@@ -541,7 +611,7 @@ $output .= <<<HTML
                 <div style="width:100%; height:40px;"></div>
 HTML;
 if (isset($rubric->rubric_details['user_email'])) {
-    $output .= "Graded By: {$rubric->rubric_details['user_email']}<br />Overwrite Grader: <input type='checkbox' name='overwrite' /><br /><br />";
+    $output .= "Graded By: {$rubric->rubric_details['user_email']}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br /><br />";
 }
 
 if (!($now < $homeworkDate)) {

@@ -3,7 +3,7 @@
 
 ########################################################################################################################
 ########################################################################################################################
-# this script must be run by root or sudo 
+# this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
     exit
@@ -30,8 +30,10 @@ HWCRON_USER=__CONFIGURE__FILLIN__HWCRON_USER__
 HWCRONPHP_GROUP=__CONFIGURE__FILLIN__HWCRONPHP_GROUP__
 COURSE_BUILDERS_GROUP=__CONFIGURE__FILLIN__COURSE_BUILDERS_GROUP__
 
-UNTRUSTED_UID=__CONFIGURE__FILLIN__UNTRUSTED_UID__
-UNTRUSTED_GID=__CONFIGURE__FILLIN__UNTRUSTED_GID__
+NUM_UNTRUSTED=__CONFIGURE__FILLIN__NUM_UNTRUSTED__
+FIRST_UNTRUSTED_UID=__CONFIGURE__FILLIN__FIRST_UNTRUSTED_UID__
+FIRST_UNTRUSTED_GID=__CONFIGURE__FILLIN__FIRST_UNTRUSTED_GID__
+
 HWCRON_UID=__CONFIGURE__FILLIN__HWCRON_UID__
 HWCRON_GID=__CONFIGURE__FILLIN__HWCRON_GID__
 HWPHP_UID=__CONFIGURE__FILLIN__HWPHP_UID__
@@ -46,6 +48,12 @@ TAGRADING_LOG_PATH=__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__
 
 
 AUTOGRADING_LOG_PATH=__CONFIGURE__FILLIN__AUTOGRADING_LOG_PATH__
+
+
+MAX_INSTANCES_OF_GRADE_STUDENTS=__CONFIGURE__FILLIN__MAX_INSTANCES_OF_GRADE_STUDENTS__
+GRADE_STUDENTS_IDLE_SECONDS=__CONFIGURE__FILLIN__GRADE_STUDENTS_IDLE_SECONDS__
+GRADE_STUDENTS_IDLE_TOTAL_MINUTES=__CONFIGURE__FILLIN__GRADE_STUDENTS_IDLE_TOTAL_MINUTES__
+GRADE_STUDENTS_STARTS_PER_HOUR=__CONFIGURE__FILLIN__GRADE_STUDENTS_STARTS_PER_HOUR__
 
 
 
@@ -64,13 +72,14 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $1
     sed -i -e "s|__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__|$COURSE_BUILDERS_GROUP|g" $1
 
-    sed -i -e "s|__INSTALL__FILLIN__UNTRUSTED_UID__|$UNTRUSTED_UID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__UNTRUSTED_GID__|$UNTRUSTED_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_GID__|$FIRST_UNTRUSTED_GID|g" $1
+
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_UID__|$HWCRON_UID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_GID__|$HWPHP_GID|g" $1
-
 
 
     sed -i -e "s|__INSTALL__FILLIN__DATABASE_HOST__|$DATABASE_HOST|g" $1
@@ -82,6 +91,10 @@ function replace_fillin_variables {
 
     sed -i -e "s|__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $1
 
+    sed -i -e "s|__INSTALL__FILLIN__MAX_INSTANCES_OF_GRADE_STUDENTS__|$MAX_INSTANCES_OF_GRADE_STUDENTS|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__GRADE_STUDENTS_IDLE_SECONDS__|$GRADE_STUDENTS_IDLE_SECONDS|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__GRADE_STUDENTS_IDLE_TOTAL_MINUTES__|$GRADE_STUDENTS_IDLE_TOTAL_MINUTES|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__GRADE_STUDENTS_STARTS_PER_HOUR__|$GRADE_STUDENTS_STARTS_PER_HOUR|g" $1
 
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
@@ -167,10 +180,10 @@ chmod  770                                  $HSS_DATA_DIR/to_be_graded_batch
 echo -e "Copy the submission website"
 
 # copy the website from the repo
-rsync -ruz   $HSS_REPOSITORY/public   $HSS_INSTALL_DIR/website
+rsync -rz   $HSS_REPOSITORY/public   $HSS_INSTALL_DIR/website
 
 # automatically create the site path file, storing the data directory in the file
-echo $HSS_DATA_DIR > $HSS_INSTALL_DIR/website/public/site_path.txt 
+echo $HSS_DATA_DIR > $HSS_INSTALL_DIR/website/public/site_path.txt
 
 # set special user $HWPHP_USER as owner & group of all website files
 find $HSS_INSTALL_DIR/website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
@@ -200,7 +213,7 @@ find $HSS_INSTALL_DIR/website/public/custom_resources -exec chmod 775 {} \;
 echo -e "Copy the grading code"
 
 # copy the files from the repo
-rsync -ruz $HSS_REPOSITORY/grading $HSS_INSTALL_DIR/src
+rsync -rz $HSS_REPOSITORY/grading $HSS_INSTALL_DIR/src
 # root will be owner & group of these files
 chown -R  root:root $HSS_INSTALL_DIR/src
 # "other" can cd into & ls all subdirectories
@@ -220,7 +233,7 @@ replace_fillin_variables $HSS_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
 echo -e "Copy the sample files"
 
 # copy the files from the repo
-rsync -ruz $HSS_REPOSITORY/sample_files $HSS_INSTALL_DIR
+rsync -rz $HSS_REPOSITORY/sample_files $HSS_INSTALL_DIR
 
 # root will be owner & group of these files
 chown -R  root:root $HSS_INSTALL_DIR/sample_files
@@ -236,7 +249,7 @@ find $HSS_INSTALL_DIR/sample_files -type f -exec chmod 444 {} \;
 echo -e "Build the junit test runner"
 
 # copy the file from the repo
-rsync -ruz $HSS_REPOSITORY/junit_test_runner/TestRunner.java $HSS_INSTALL_DIR/JUnit/TestRunner.java
+rsync -rz $HSS_REPOSITORY/junit_test_runner/TestRunner.java $HSS_INSTALL_DIR/JUnit/TestRunner.java
 
 pushd $HSS_INSTALL_DIR/JUnit > /dev/null
 # root will be owner & group of the source file
@@ -265,7 +278,7 @@ chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin
 chmod 751 $HSS_INSTALL_DIR/bin
 
 # copy all of the files
-rsync -ruz  $HSS_REPOSITORY/bin/*   $HSS_INSTALL_DIR/bin/
+rsync -rz  $HSS_REPOSITORY/bin/*   $HSS_INSTALL_DIR/bin/
 #replace necessary variables in the copied scripts
 replace_fillin_variables $HSS_INSTALL_DIR/bin/create_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/grade_students.sh
@@ -281,10 +294,10 @@ find $HSS_INSTALL_DIR/bin -type f -exec chown root:root {} \;
 find $HSS_INSTALL_DIR/bin -type f -exec chmod 500 {} \;
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/build_homework_function.sh 
+chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/build_homework_function.sh
 chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/regrade.sh
 chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/grading_done.sh
-chmod 550 $HSS_INSTALL_DIR/bin/build_homework_function.sh 
+chmod 550 $HSS_INSTALL_DIR/bin/build_homework_function.sh
 chmod 550 $HSS_INSTALL_DIR/bin/regrade.sh
 chmod 550 $HSS_INSTALL_DIR/bin/grading_done.sh
 
@@ -295,8 +308,8 @@ chmod 550 $HSS_INSTALL_DIR/bin/grade_students.sh
 
 # prepare the untrusted_execute executable with suid
 
-# SUID (Set owner User ID up on execution), allows the $HWCRON_USER 
-# to run this executable as sudo/root, which is necessary for the 
+# SUID (Set owner User ID up on execution), allows the $HWCRON_USER
+# to run this executable as sudo/root, which is necessary for the
 # "switch user" to untrusted as part of the sandbox.
 
 pushd $HSS_INSTALL_DIR/bin/ > /dev/null
@@ -318,12 +331,12 @@ popd > /dev/null
 
 echo -e "Copy the ta grading website"
 
-rsync  -ruz $TAGRADING_REPOSITORY/*php         $HSS_INSTALL_DIR/hwgrading_website
-rsync  -ruz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
-rsync  -ruz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
-rsync  -ruz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
-rsync  -ruz $TAGRADING_REPOSITORY/app          $HSS_INSTALL_DIR/hwgrading_website
-    
+rsync  -rz $TAGRADING_REPOSITORY/*php         $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $TAGRADING_REPOSITORY/app          $HSS_INSTALL_DIR/hwgrading_website
+
 # set special user $HWPHP_USER as owner & group of all hwgrading_website files
 find $HSS_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
 
@@ -344,8 +357,43 @@ find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.gif -exec chmod o+r {} 
 # "other" can read & execute all .js files
 find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
 
+replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php
+mv $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
 
-replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
+
+################################################################################################################
+################################################################################################################
+# GENERATE & INSTALL THE CRONTAB FILE FOR THE hwcron USER
+
+echo -e "Generate & install the crontab file for hwcron user"
+
+# name of temporary file
+HWCRON_CRONTAB_FILE=my_hwcron_crontab_file.txt
+
+# calculate the frequency -- once every how many minutes?
+GRADE_STUDENTS_FREQUENCY=$(( 60 / ${GRADE_STUDENTS_STARTS_PER_HOUR} ))
+
+# sanity check
+if [[ "$GRADE_STUDENTS_FREQUENCY" -lt 1 ||
+      "$GRADE_STUDENTS_FREQUENCY" -ge 60 ]] ; then
+    echo "ERROR: Bad value for GRADE_STUDENTS_FREQUENCY = $GRADE_STUDENTS_FREQUENCY"
+    exit 1
+fi
+
+# generate the file
+echo -e "\n\n"                                                                                >  ${HWCRON_CRONTAB_FILE}
+echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL.sh"                         >> ${HWCRON_CRONTAB_FILE}
+minutes=0
+while [ $minutes -lt 60 ]; do
+    printf "%02d  * * * *   ${HSS_INSTALL_DIR}/bin/grade_students.sh  untrusted%02d  >  /dev/null\n"  $minutes $minutes  >> ${HWCRON_CRONTAB_FILE}
+    minutes=$(($minutes + $GRADE_STUDENTS_FREQUENCY))
+done
+echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL.sh"                         >> ${HWCRON_CRONTAB_FILE}
+echo -e "\n\n"                                                                                >> ${HWCRON_CRONTAB_FILE}
+
+# install the crontab file for the hwcron user
+crontab  -u hwcron  ${HWCRON_CRONTAB_FILE}
+rm ${HWCRON_CRONTAB_FILE}
 
 
 ################################################################################################################

@@ -10,10 +10,14 @@
 	SSLProtocol +ALL -SSLv2 -SSLv3
 	SSLCipherSuite ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-DES-CBC3-SHA
 
-	SSLCertificateFile    /etc/apache2/ssl/test-svn.cer
-	SSLCertificateKeyFile /etc/apache2/ssl/test-svn.key
+	# snakeoil certificates
+	SSLCertificateFile    /etc/apache2/ssl/svn.crt
+	SSLCertificateKeyFile /etc/apache2/ssl/svn.key
 
-	SSLCertificateChainFile /etc/apache2/ssl/chain.cer
+	# sample for real certificates
+#	SSLCertificateFile    /etc/apache2/ssl/svn.cer
+#	SSLCertificateKeyFile /etc/apache2/ssl/svn.key
+#	SSLCertificateChainFile /etc/apache2/ssl/chain.cer
 
 	<FilesMatch "\.(cgi|shtml|phtml|php)$">
 		SSLOptions +StdEnvVars

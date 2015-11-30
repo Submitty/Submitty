@@ -6,6 +6,7 @@ use \lib\Database;
 use \lib\ExceptionHandler;
 use \lib\FileUtils;
 use \lib\ServerException;
+use \lib\Utils;
 
 /**
  * Class Rubric
@@ -177,9 +178,8 @@ class Rubric {
             $this->setRubricResults();
             $this->calculateStatus();
             $this->setQuestionTotals();
-            array_walk_recursive($this->rubric_files, function(&$value, $key) {
-                $value = str_replace(__SUBMISSION_SERVER__, "", $value);
-            });
+
+            Utils::stripStringFromArray(__SUBMISSION_SERVER__, $this->rubric_files);
         }
         catch (\Exception $ex) {
             ExceptionHandler::throwException("Homework", $ex);
@@ -194,14 +194,15 @@ class Rubric {
     private function setStudentDetails() {
         if (!isset($this->student)) {
             Database::query("
-SELECT s.*, ld.allowed_lates as student_allowed_lates
+SELECT s.*, COALESCE(ld.allowed_lates,0) as student_allowed_lates
 FROM students as s
 LEFT JOIN (
-    SELECT *
+    SELECT allowed_lates
     FROM late_days
-    WHERE since_timestamp <= ?
-) as ld on ld.student_rcs = s.student_rcs
-WHERE s.student_rcs=?", array($this->rubric_details['rubric_due_date'], $this->student_rcs));
+    WHERE since_timestamp <= ? and student_rcs=?
+    ORDER BY since_timestamp DESC
+) as ld on 1=1
+WHERE s.student_rcs=? LIMIT 1", array($this->rubric_details['rubric_due_date'], $this->student_rcs, $this->student_rcs));
             $this->student = Database::row();
             if ($this->student == array()) {
                 throw new \InvalidArgumentException("Could not find student '{$this->student_rcs}'");
@@ -214,7 +215,7 @@ WHERE s.student_rcs=?", array($this->rubric_details['rubric_due_date'], $this->s
 
             $params = array($this->student_rcs, $this->rubric_details['rubric_due_date']);
             Database::query("
-SELECT (SUM(g.grade_days_late) - SUM(s.ex_late_days)) as used_late_days
+SELECT GREATEST(SUM(g.grade_days_late) - COALESCE(SUM(s.ex_late_days),0),0) as used_late_days
 FROM grades as g
     LEFT JOIN
     (
@@ -340,7 +341,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
         foreach($this->submission_ids as $submission_id) {
             $submission_directory = implode("/", array(__SUBMISSION_SERVER__, "submissions", $submission_id, $this->student_rcs));
             if (!file_exists($submission_directory)) {
-                print "<div style='z-index: 999999;'>".$submission_directory."</div>";
+                $part++;
                 continue;
             }
 
@@ -364,7 +365,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 }
                 $this->active_assignment[$part] = $_GET["active_assignment_{$part}"];
             }
-            else if (!$this->has_grade || !isset($this->active_assignment[$part]) || $this->active_assignment[$part] == 0) {
+            else if (!$this->has_grade || !isset($this->active_assignment[$part]) || $this->active_assignment[$part] <= 0) {
                 if (file_exists(implode("/", array($submission_directory, "user_assignment_settings.json")))) {
                     $settings = json_decode(file_get_contents(implode("/", array($submission_directory, "user_assignment_settings.json"))), true);
                     $this->active_assignment[$part] = $settings['active_assignment'];
@@ -388,9 +389,8 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
             $details['submission_directory'] = $submission_directory;
             $details['svn_directory'] = implode("/", array(__SUBMISSION_SERVER__, "checkout", $submission_id, $this->student_rcs, $this->active_assignment[$part]));
             $this->submission_details[$part] = $details;
-            $allowed_file_extensions = explode(",", __ALLOWED_FILE_EXTENSIONS__);
 
-            $this->rubric_files[$part] = array_merge($this->rubric_files[$part], FileUtils::getAllFiles($details['submission_directory'], $allowed_file_extensions));
+            $this->rubric_files[$part] = array_merge($this->rubric_files[$part], FileUtils::getAllFiles($details['submission_directory']));
             $this->rubric_files[$part] = array_merge($this->rubric_files[$part], FileUtils::getAllFiles($details['svn_directory']));
 
             $this->config_details[$part] = json_decode(
@@ -412,6 +412,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 $submission_id, $this->student_rcs, $this->active_assignment[$part]));
 
             if (!file_exists($result_directory) || !is_dir($result_directory)) {
+                $part++;
                 continue;
             }
 
@@ -427,7 +428,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 $late_days = round((($date_submission - $date_due) / (60 * 60 * 24)) + .5, 0);
                 $late_days = ($late_days < 0) ? 0 : $late_days;
                 $this->parts_days_late[$part] = $late_days;
-                $this->parts_days_late_used[$part] = $this->parts_days_late[$part] - $this->late_days_exception;
+                $this->parts_days_late_used[$part] = max($this->parts_days_late[$part] - $this->late_days_exception, 0);
             }
 
             $details['directory'] = $result_directory;
@@ -487,10 +488,17 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
             if ($this->parts_status[$i] > 0) {
                 $this->status = 1;
             }
-            $this->days_late = max($this->days_late, $this->parts_days_late[$i]);
-            $this->days_late_used = max($this->days_late_used, $this->parts_days_late_used[$i]);
         }
 
+        // Get the days late for the assignment either only using parts that were good or all parts if assignment
+        // as a whole was bad (as at a minimum, the least late part is still late even if it was submitted at a different
+        // time as everything else).
+        for ($i = 1; $i <= $this->rubric_parts; $i++) {
+            if ($this->status == 0 || ($this->status == 1 && $this->parts_status[$i] > 0)) {
+                $this->days_late = max($this->days_late, $this->parts_days_late[$i]);
+                $this->days_late_used = max($this->days_late_used, $this->parts_days_late_used[$i]);
+            }
+        }
     }
 
     /**

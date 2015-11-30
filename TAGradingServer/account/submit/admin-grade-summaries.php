@@ -35,7 +35,7 @@ $queries = array(
     GROUP BY g.rubric_id,r.rubric_submission_id,g.grade_days_late,rubric_due_date,rubric_name
     ORDER BY r.rubric_due_date",
 
-    "TEST" => "SELECT t.test_number, t.test_id as id, gt.test_text,
+    "TEST" => "SELECT t.test_type, t.test_number, t.test_id as id, gt.test_text,
     case when gt.value::numeric=0 or gt.value is null then 0
     else case when gt.value::numeric+t.test_curve > (t.test_max_grade + t.test_curve)
             then t.test_max_grade + t.test_curve
@@ -69,11 +69,18 @@ foreach($db->rows() as $student_record) {
 
     $params = array($student_id);
 
+
     // WRITE STUDENTS NAME AT TOP OF REPORT FILE
     $student_output_text .= "rcs_id " . $student_rcs . $nl;
     $student_output_text .= "first_name " . $student_first_name . $nl;
     $student_output_text .= "last_name " . $student_last_name . $nl;
     $student_output_text .= "section " . $student_section . $nl;
+
+    // late update date (choice of format)
+    //                                       Sunday, October 4, 2015
+    $student_output_text .= "last_update " . date("l, F j, Y") .$nl;
+    //                                          2015 09 29
+    // $student_output_text .= "last_update " . date("Y m d") . $nl;
 
 
     $params = array($student_rcs);
@@ -82,11 +89,17 @@ foreach($db->rows() as $student_record) {
     $lab_grades = $lab_base;
     foreach($db->rows() as $row) {
         $lab_grades[$row['id']] = $row['score'];
-        //$student_output_text .= $row['lab_title'] . " " . $row['score'] . $nl;
     }
 
     foreach($lab_grades as $id => $score) {
-        $student_output_text .= $lab_titles[$id] . " " . floatval($score) . $nl;
+	    // there is probbaly a better way...
+        $labnum = $id;
+	    if (substr($lab_titles[$id], 0,4) == "Lab ") {
+            $labnum = (int)substr($lab_titles[$id], 4);
+        }
+        $labid = "lab" . sprintf("%02d", $labnum);
+        // eventually, the instructor could/should(?) have control both of the lab id & the lab title
+        $student_output_text .= 'lab ' . $labid . ' "' . $lab_titles[$id] . '" ' . floatval($score) . $nl;
     }
 
     $exceptions = array();
@@ -100,7 +113,7 @@ foreach($db->rows() as $student_record) {
         if (!isset($row['score'])) {
             $row['score'] = -7000000;
         }
-        $student_output_text .= $row['rubric_submission_id'] . " \"" . $row['rubric_name'] . "\"" . $row['score'] . $nl;
+        $student_output_text .= "hw " . $row['rubric_submission_id'] . " \"" . $row['rubric_name'] . "\" " . $row['score'] . $nl;
         $late_days = $row['grade_days_late'];
         if (isset($exceptions[$row['id']])) {
             $late_days -= $exceptions[$row['id']];
@@ -116,7 +129,9 @@ foreach($db->rows() as $student_record) {
         if ($row['score'] <= 0) {
             continue;
         }
-        $student_output_text .= "test " . $row['test_number'] . " " . $row['score'] . " " . implode(" ", pgArrayToPhp($row['test_text'])) . $nl;
+
+	    $testname = $row['test_type']." " . $row['test_number'];
+        $student_output_text .= strtolower($row['test_type']) . ' ' .$row['test_number'] . ' "' . $testname . '" ' . $row['score'] . " " . implode(" ", pgArrayToPhp($row['test_text'])) . $nl;
     }
 
     // ======================================================

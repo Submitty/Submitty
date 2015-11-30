@@ -73,11 +73,11 @@ $output .= <<<HTML
         border-bottom: 1px solid darkgray;
         margin-top: 5px;
     }
-    
+
     #table-rubrics td.rubrics-id {
         width: 50px;
     }
-    
+
     #table-rubrics td.rubrics-name {
         width: 200px;
     }
@@ -85,7 +85,7 @@ $output .= <<<HTML
     #table-rubrics td.rubrics-parts {
         width: 160px;
     }
-    
+
     #table-rubrics td.rubrics-questions {
         width: 160px;
     }
@@ -97,7 +97,7 @@ $output .= <<<HTML
     #table-rubrics td.rubrics-due {
         width: 260px;
     }
-    
+
     #table-rubrics td.rubrics-options {
         width: 100px;
     }
@@ -127,7 +127,7 @@ $output .= <<<HTML
         top:0;
         left:-310px;
     }
-    
+
     .submit-button {
         float: right;
         margin-top: -28px;
@@ -155,7 +155,7 @@ $output .= <<<HTML
                 });
         }
     }
-    
+
     function fixSequences() {
         $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=sequence')
             .done(function(response) {
@@ -195,10 +195,6 @@ $output .= <<<HTML
 HTML;
 
 foreach ($db->rows() as $rubric) {
-    $db->query("SELECT count(distinct(case when question_part_number > 0 then question_part_number 
-    else null end)), count(question_id), sum(case when question_extra_credit = 0 then question_total 
-    else 0 end) FROM questions WHERE rubric_id=?", array($rubric['rubric_id']));
-
     $output .= <<<HTML
         <tr id='rubric-{$rubric['rubric_id']}'">
             <td class="rubrics-id" id="rubric-{$rubric['rubric_id']}-id">{$rubric['rubric_id']}</td>

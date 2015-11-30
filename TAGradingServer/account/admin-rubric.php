@@ -1,4 +1,4 @@
-<?php 
+<?php
 use \lib\Database;
 use \lib\Functions;
 
@@ -10,7 +10,7 @@ if($user_is_administrator)
 {
     $have_old = false;
     $old_rubric = array(
-        'rubric_id' => -1, 
+        'rubric_id' => -1,
         'rubric_number' => "",
         'rubric_due_date' => date('Y/m/d 23:59:59'),
         'rubric_code' => "",
@@ -33,18 +33,18 @@ if($user_is_administrator)
         }
         $have_old = true;
     }
-    
+
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
     $account_subpages_unlock = true;
-    
+
     function selectBox($part, $question, $grade = 0) {
         $retVal = "<select name='point-{$part}-{$question}' class='points' onchange='calculatePercentageTotal();'>";
         for($i = 0; $i <= 50; $i += 0.5) {
-            $selected = ($grade == $i) ? "selected" : ""; 
+            $selected = ($grade == $i) ? "selected" : "";
             $retVal .= "<option {$selected}>{$i}</option>";
         }
         $retVal .= "</select>";
-        
+
         return $retVal;
     }
 
@@ -73,35 +73,35 @@ if($user_is_administrator)
             $part_count++;
             $rubric_parts_submission_id[$k + 1] = $v;
         }
-        
+
         $string = "Edit";
         $action = strtolower($string);
     }
 
     $rubric_sep_checked = ($old_rubric['rubric_parts_sep'] == 1) ? "checked" : "";
-    
+
     print <<<HTML
-    
+
 <style type="text/css">
     body {
         overflow: scroll;
     }
-    
+
     select {
         margin-top:7px;
         width: 60px;
         min-width: 60px;
     }
-    
+
     #container-rubric {
-        width:1200px; 
-        margin:100px auto; 
-        margin-top: 130px; 
-        background-color: #fff; 
-        border: 1px solid #999; 
-        border: 1px solid rgba(0,0,0,0.3); 
-        -webkit-border-radius: 6px; 
-        -moz-border-radius: 6px; 
+        width:1200px;
+        margin:100px auto;
+        margin-top: 130px;
+        background-color: #fff;
+        border: 1px solid #999;
+        border: 1px solid rgba(0,0,0,0.3);
+        -webkit-border-radius: 6px;
+        -moz-border-radius: 6px;
         border-radius: 6px;outline: 0;
         -webkit-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
         -moz-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
@@ -116,24 +116,24 @@ if($user_is_administrator)
     <form class="form-signin" action="{$BASE_URL}/account/submit/admin-rubric.php?action={$action}&id={$old_rubric['rubric_id']}" method="post" enctype="multipart/form-data">
     <input type='hidden' name="part_count" value="{$part_count}" />
 HTML;
-        
+
     print <<<HTML
         <div class="modal-header">
             <h3 id="myModalLabel">{$string} Rubric</h3>
         </div>
-    
+
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:hidden;">
             Rubric Name: <input style='width: 227px' type='text' name='rubric_name' value="{$rubric_name}" />
-            
+
             <span style="padding-left:143px">
                 Submission Server ID: <input style='width: 50px' type='text' name='rubric_submission_id' value="{$rubric_submission_id}" />
             </span>
-            
+
             <br/>
-            
+
             Due Date:
             <!--<fieldset>-->
-                <input name="date_submit" class="datepicker" type="text" 
+                <input name="date_submit" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
             <!--</fieldset>-->
             &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
@@ -143,7 +143,7 @@ HTML;
             Late Days:
             <input name="rubric_late_days" type="text" value="{$old_rubric['rubric_late_days']}"/>
             <br/>
-            
+
             <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
                 <thead style="background: #E1E1E1;">
                     <tr>
@@ -152,7 +152,7 @@ HTML;
                         <th style="width:100px;">Points</th>
                     </tr>
                 </thead>
-                
+
                 <tbody style="background: #f9f9f9;">
 HTML;
 
@@ -175,10 +175,10 @@ HTML;
 
     foreach ($old_questions as $k => $v) {
         $count = count($old_questions[$k]) + (($k > 0) ? 1 : 0);
-        
+
         $disabled = ($k == 0) ? "disabled" : "";
         $readonly = ($k == 0) ? "readonly" : "";
-        
+
         $first = true;
         foreach ($v as $num => $question) {
             print <<<HTML
@@ -196,28 +196,30 @@ HTML;
                         </div>
 HTML;
                 }
-                
+
                 print <<<HTML
                     </td>
 HTML;
                 $first = false;
             }
-            
+
             $display_ta = ($question['question_grading_note'] != "") ? 'block' : 'none';
-            
+
             print <<<HTML
                     <td style="overflow: hidden;">
                         <textarea name="comment-{$k}-{$num}" rows="1" style="width: 885px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" {$readonly}>{$question['question_message']}</textarea>
                         <div class="btn btn-mini btn-default" onclick="toggleTA({$k}, {$num})" style="margin-top:-5px;">TA Note</div>
                         <textarea name="ta-{$k}-{$num}" id="individual-{$k}-{$num}" rows="1" placeholder=" Message to TA" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; display: {$display_ta};">{$question['question_grading_note']}</textarea>
                     </td>
-                    
+
                     <td style="background-color:#EEE;">
 HTML;
             $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
             print selectBox($k, $num, $old_grade);
             $checked = ($question['question_extra_credit'] == 1) ? "checked" : "";
+            print (($question['question_extra_credit'] == 1 && $disabled == "disabled") ? "<input type='hidden' name='ec-{$k}-{$num}'' value='on' />" : "");
             print <<<HTML
+
                         <input onclick='calculatePercentageTotal();' name="ec-{$k}-{$num}" type="checkbox" {$checked} {$disabled} />
                     </td>
 HTML;
@@ -227,11 +229,11 @@ HTML;
         }
         if ($k > 0) {
             print <<<HTML
-                <tr>     
+                <tr>
                     <td style="overflow: hidden;">
                         <div class="btn btn-small btn-success"  onclick="addQuestion({$k})"><i class="icon-plus icon-white"></i> Question</div>
                     </td>
-                    
+
                     <td style="border-left: 1px solid #F9F9F9;"></td>
                 </tr>
 HTML;
@@ -247,42 +249,42 @@ HTML;
                 </tr>
 HTML;
     print <<<HTML
-                    <tr>      
+                    <tr>
                         <td style="background-color: #EEE; border-top: 2px solid #CCC;"></td>
-                        <td style="background-color: #EEE; border-top: 2px solid #CCC; border-left: 1px solid #EEE;"><strong>TOTAL POINTS</strong></td>        
+                        <td style="background-color: #EEE; border-top: 2px solid #CCC; border-left: 1px solid #EEE;"><strong>TOTAL POINTS</strong></td>
                         <td style="background-color: #EEE; border-top: 2px solid #CCC;"><strong id="totalCalculation"></strong></td>
                     </tr>
                 </tbody>
             </table>
 HTML;
 
-    $db->query("SELECT s.user_id, u.user_email, s.rubric_id, s.grading_section_id 
-    FROM homework_grading_sections as s, users as u WHERE u.user_id = s.user_id 
+    $db->query("SELECT s.user_id, u.user_rcs, u.user_email, s.rubric_id, s.grading_section_id
+    FROM homework_grading_sections as s, users as u WHERE u.user_id = s.user_id
     ORDER BY rubric_id, grading_section_id", array());
     $sections = array();
     foreach ($db->rows() as $row) {
-        if (!isset($sections[$row['rubric_id']][$row['user_email']])) {
-            $sections[$row['rubric_id']][$row['user_email']] = array();
+        if (!isset($sections[$row['rubric_id']][$row['user_rcs']])) {
+            $sections[$row['rubric_id']][$row['user_rcs']] = array();
         }
-        $sections[$row['rubric_id']][$row['user_email']][] = $row['grading_section_id'];
+        $sections[$row['rubric_id']][$row['user_rcs']][] = $row['grading_section_id'];
     }
     asort($sections);
-    
+
     $i = 0;
-    $db->query("SELECT * FROM users ORDER BY user_email ASC", array());
+    $db->query("SELECT * FROM users ORDER BY user_rcs ASC", array());
     $users = $db->rows();
     foreach($users as $user) {
-        $value =  isset($sections[$old_rubric['rubric_id']][$user['user_email']]) ? implode(",", $sections[$old_rubric['rubric_id']][$user['user_email']]) : -1;
+        $value =  isset($sections[$old_rubric['rubric_id']][$user['user_rcs']]) ? implode(",", $sections[$old_rubric['rubric_id']][$user['user_rcs']]) : -1;
         print <<<HTML
-            <span style='display:inline-block; width:300px; padding-right: 5px'>{$user['user_lastname']}, 
-                    {$user['user_firstname']}:</span> 
-            <input style='width: 30px; text-align: center' type='text' name='{$user['user_id']}-section' 
+            <span style='display:inline-block; width:300px; padding-right: 5px'>{$user['user_lastname']},
+                    {$user['user_firstname']}:</span>
+            <input style='width: 30px; text-align: center' type='text' name='{$user['user_id']}-section'
                     value='{$value}' />
-            <br />    
+            <br />
 HTML;
         $i++;
     }
-    
+
     // TODO: Style this less dumb
     $margintop = ($i*-40) . "px";
     $marginright =  650-(count($rubrics)*25) . "px";
@@ -303,50 +305,36 @@ HTML;
             </tr>
 HTML;
 
-    foreach ($users as $user) {      
+    foreach ($users as $user) {
         print <<<HTML
             <tr>
-                <td>{$user['user_email']}</td>
+                <td>{$user['user_rcs']}</td>
 HTML;
 
         foreach ($rubrics as $id => $rubric) {
-            $number = (isset($sections[$id][$user['user_email']])) ? implode(",",$sections[$id][$user['user_email']]) : "";
+            $number = (isset($sections[$id][$user['user_rcs']])) ? implode(",",$sections[$id][$user['user_rcs']]) : "";
             print <<<HTML
                 <td style="text-align: center">
                     {$number}
                 </td>
 HTML;
-        } 
+        }
         print <<<HTML
             </tr>
 HTML;
     }
 
-    
+
     print <<<HTML
         </table>
         </div>
 
         <div class="modal-footer">
                 <button class="btn btn-primary" type="submit" style="margin-top: 10px;">{$string} Rubric</button>
-        </div>                     
+        </div>
     </form>
-</div>    
-HTML;
-    
-    if ($old_rubric['rubric_due_date'] != "") {
-        $date = explode(" ", $old_rubric['rubric_due_date']);
-        $date = explode("-", $date[0]);
-        $year = $date[0];
-        $month = intval($date[1]);
-        $day = intval($date[2]);
-        $date = "{year: {$year}, month: {$month}, day: {$day}}";
-    }
-    else {
-        $date = "null";
-    }
-    
-    print <<<HTML
+</div>
+
 <script type="text/javascript">
     var datepicker = $('.datepicker');
     datepicker.datetimepicker({
@@ -355,35 +343,35 @@ HTML;
     });
 
     datepicker.datetimepicker('setDate', (new Date("{$old_rubric['rubric_due_date']}")));
-    
-    function toggleTA(part, question) {    
+
+    function toggleTA(part, question) {
         if(document.getElementById("individual-" + part + "-" + question ).style.display == "block") {
             $("#individual-" + part + "-" + question ).animate({marginBottom:"-80px"});
             //document.getElementById("individual-" + part + "-" + question ).innerHTML = "";
             setTimeout(function(){document.getElementById("individual-" + part + "-" + question ).style.display = "none";}, 175);
-            
+
         }
         else {
             $("#individual-" + part + "-" + question ).animate({marginBottom:"5px"});
             setTimeout(function(){document.getElementById("individual-" + part + "-" + question ).style.display = "block";}, 175);
         }
-          
+
         calculatePercentageTotal();
     }
 HTML;
-    
+
     $parts = "[";
     for($i = 0; $i <= max(array_keys($old_questions)); $i++) {
         $parts .= (isset($old_questions[$i]) ? (count($old_questions[$i]) + (($i > 0) ? 1 : 0)) : 0).",";
     }
     $parts = rtrim($parts, ",");
     $parts .= "]";
-    
+
     print <<<JS
-    
+
     var parts = {$parts};
-    
-    function addPart() {           
+
+    function addPart() {
         parts.push(2);
         var partName = parts.length - 1;
         var partNameString = "" + partName;
@@ -401,7 +389,7 @@ HTML;
                           '<div class="btn btn-mini btn-default" onclick="toggleTA(' + partName + ',1)" style="margin-top:-5px;">TA Note</div>'+
                           '<textarea name="ta-' + partName + '-1" id="individual-' + partName + '-1" rows="1" placeholder=" Message to TA" style="width: 954px; padding: 0px; resize: none; margin-top: 5px; margin-bottom: -80px; display: none;"></textarea>';
         cell3.innerHTML=selectBox(partName, "1") + ' <input onclick="calculatePercentageTotal();" name="ec-' + partName + '-1" type="checkbox" />';
-        
+
         row = table.insertRow(table.rows.length - 2);
         cell1 = row.insertCell(0);
         cell2 = row.insertCell(1);
@@ -411,14 +399,14 @@ HTML;
         elem.val(parseInt(elem.val())+1);
         togglePartSubmissionId();
     }
-    
+
     function addQuestion(partName)
-    {     
+    {
         var number = 0;
         for (var i = 0; i < parts.length && i <= Number(partName); i++) {
             number += parts[i];
         }
-            
+
         document.getElementById("spanPart"+partName).rowSpan = '' + (Number(document.getElementById("spanPart"+partName).rowSpan) + 1);
         var table = document.getElementById("rubricTable");
         var row = table.insertRow(number);
@@ -430,10 +418,10 @@ HTML;
                           '<div class="btn btn-mini btn-default" onclick="toggleTA(' + partName + "," + parts[Number(partName)] + ')" style="margin-top:-5px;">TA Note</div>'+
                           '<textarea name="ta-' + partName + "-" + parts[Number(partName)] + '" id="individual-' + partName + "-" + parts[Number(partName)] + '" rows="1" placeholder=" Message to TA" style="width: 954px; padding: 0px; resize: none; margin-top: 5px; margin-bottom: -80px; display: none;"></textarea>';
         cell2.innerHTML = selectBox(partName, parts[Number(partName)]) + ' <input onclick="calculatePercentageTotal();" name="ec-'+partName+'-'+parts[Number(partName)]+'" type="checkbox" />';
-        
+
         parts[Number(partName)] += 1;
     }
-    
+
     function selectBox(part, question)
     {
         var retVal = '<select name="point-' + part + "-" + question + '" class="points" onchange="calculatePercentageTotal()">';
@@ -441,19 +429,19 @@ HTML;
             retVal = retVal + '<option>' + (i * 0.5) + '</option>';
         }
         retVal = retVal + '</select>';
-        
+
         return retVal;
     }
-    
+
     function togglePartSubmissionId() {
         if ($("input[name='rubric_parts_sep']").prop('checked') == true) {
             $('.part_submission_id').show();
         }
         else {
-            $('.part_submission_id').hide();       
+            $('.part_submission_id').hide();
         }
     }
-    
+
     function calculatePercentageTotal() {
         var total=0;
         var ec = 0;
@@ -468,7 +456,7 @@ HTML;
         });
         document.getElementById("totalCalculation").innerHTML = total + " (" + ec + ")";
     }
-    
+
     togglePartSubmissionId();
     calculatePercentageTotal();
 JS;
