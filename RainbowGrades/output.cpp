@@ -434,15 +434,35 @@ void output_line_helper(std::ofstream &ostr, GRADEABLE_ENUM g,
                         Student *sp, Student *sa, Student *sb, Student *sc, Student *sd) {
   for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
     if (i == 0) ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
+ 
+    std::string bonus_text = "";
+    // special case for homework
+    if (g == GRADEABLE_ENUM::HOMEWORK) {
+      int count = this_student->getUsedLateDays(i);
+      if (count > 3) { bonus_text += "(" + std::to_string(count) + "*)"; }
+      else { bonus_text += std::string(count,'*'); }
+    }
+    float grade = this_student->getGradeableValue(g,i);
     ostr << std::setprecision(2) << std::fixed;
     colorit(ostr,
-            this_student->getGradeableValue(g,i),
+            grade, 
             sp->getGradeableValue(g,i),
             sa->getGradeableValue(g,i),
             sb->getGradeableValue(g,i),
             sc->getGradeableValue(g,i),
-            sd->getGradeableValue(g,i));
+            sd->getGradeableValue(g,i),1,false,bonus_text);
   }
+
+  // special case for test
+  if (g == GRADEABLE_ENUM::TEST) {
+    if (TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
+      ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
+      for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
+        colorit(ostr,this_student->adjusted_test(i),sp->adjusted_test(i),sa->adjusted_test(i),sb->adjusted_test(i),sc->adjusted_test(i),sd->adjusted_test(i));
+      }
+    }
+  }
+
 }
 
 
@@ -595,61 +615,9 @@ void output_line(std::ofstream &ostr,
   // -------------------------------------------------------------------------------  
   // GRADE DETAILS
   if (DISPLAY_GRADE_DETAILS) {
-    output_line_helper(ostr,GRADEABLE_ENUM::READING,this_student,sp,sa,sb,sc,sd);
-    output_line_helper(ostr,GRADEABLE_ENUM::EXERCISE,this_student,sp,sa,sb,sc,sd);
-    output_line_helper(ostr,GRADEABLE_ENUM::LAB,this_student,sp,sa,sb,sc,sd);
-    for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(); i++) {
-      if (i == 0) ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
-      ostr << std::setprecision(2) << std::fixed;
-
-
-      std::string bonus_text = "";
-      int count = this_student->getUsedLateDays(i);
-      if (count > 3) { bonus_text += "(" + std::to_string(count) + "*)"; }
-      else { bonus_text += std::string(count,'*'); }
-
-      float grade = this_student->getGradeableValue(GRADEABLE_ENUM::HOMEWORK,i);
-
-      colorit(ostr,grade,sp->getGradeableValue(GRADEABLE_ENUM::HOMEWORK,i),
-              sa->getGradeableValue(GRADEABLE_ENUM::HOMEWORK,i),
-              sb->getGradeableValue(GRADEABLE_ENUM::HOMEWORK,i),
-              sc->getGradeableValue(GRADEABLE_ENUM::HOMEWORK,i),
-              sd->getGradeableValue(GRADEABLE_ENUM::HOMEWORK,i),1,false,bonus_text);
-    }
-
-
-    output_line_helper(ostr,GRADEABLE_ENUM::PROJECT,this_student,sp,sa,sb,sc,sd);
-
-    if (GRADEABLES[GRADEABLE_ENUM::TEST].getCount() > 0) {
-      ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
-      for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::TEST].getCount(); i++) {
-        colorit(ostr,
-                this_student->getGradeableValue(GRADEABLE_ENUM::TEST,i),
-                sp->getGradeableValue(GRADEABLE_ENUM::TEST,i),
-                sa->getGradeableValue(GRADEABLE_ENUM::TEST,i),
-                sb->getGradeableValue(GRADEABLE_ENUM::TEST,i),
-                sc->getGradeableValue(GRADEABLE_ENUM::TEST,i),
-                sd->getGradeableValue(GRADEABLE_ENUM::TEST,i));
-      }
-      if (TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
-        ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
-        for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::TEST].getCount(); i++) {
-          colorit(ostr,this_student->adjusted_test(i),sp->adjusted_test(i),sa->adjusted_test(i),sb->adjusted_test(i),sc->adjusted_test(i),sd->adjusted_test(i));
-        }
-      }
-    }
-
-    if (GRADEABLES[GRADEABLE_ENUM::EXAM].getCount() > 0) {
-      ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
-      for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::EXAM].getCount(); i++) {
-        colorit(ostr,
-                this_student->getGradeableValue(GRADEABLE_ENUM::EXAM,i),
-                sp->getGradeableValue(GRADEABLE_ENUM::EXAM,i),
-                sa->getGradeableValue(GRADEABLE_ENUM::EXAM,i),
-                sb->getGradeableValue(GRADEABLE_ENUM::EXAM,i),
-                sc->getGradeableValue(GRADEABLE_ENUM::EXAM,i),
-                sd->getGradeableValue(GRADEABLE_ENUM::EXAM,i));
-      }
+    for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
+      GRADEABLE_ENUM g = ALL_GRADEABLES[i];
+      output_line_helper(ostr,g,this_student,sp,sa,sb,sc,sd);
     }
   }
 

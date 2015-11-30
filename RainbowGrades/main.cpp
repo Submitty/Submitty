@@ -258,7 +258,7 @@ bool string_to_gradeable_enum(const std::string &s, GRADEABLE_ENUM &return_value
   if (s == "participation")         { return_value = GRADEABLE_ENUM::PARTICIPATION;  return true;  }
   if (s == "hw" || s == "homework") { return_value = GRADEABLE_ENUM::HOMEWORK;       return true;  }
   if (s == "project")               { return_value = GRADEABLE_ENUM::PROJECT;        return true;  }
-  if (s == "quiz")                  { return_value = GRADEABLE_ENUM::QUIZ;           return true;  }
+  if (s == "quiz" || s == "quizze") { return_value = GRADEABLE_ENUM::QUIZ;           return true;  }
   if (s == "test")                  { return_value = GRADEABLE_ENUM::TEST;           return true;  }
   if (s == "exam")                  { return_value = GRADEABLE_ENUM::EXAM;           return true;  }
   return false;
@@ -703,6 +703,8 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
 
         if (g == GRADEABLE_ENUM::HOMEWORK ||
             g == GRADEABLE_ENUM::LAB ||
+            g == GRADEABLE_ENUM::QUIZ ||
+            g == GRADEABLE_ENUM::EXAM ||
             g == GRADEABLE_ENUM::TEST) {
           ss >> which_token;
           
@@ -862,6 +864,9 @@ void load_student_grades(std::vector<Student*> &students) {
         if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
           invalid=true;
           which = -1;
+
+          std::cerr << "WARNING: INVALID gradeable item" << std::endl;
+
         } else {
           const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
           which = c.first;

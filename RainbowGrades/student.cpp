@@ -18,14 +18,10 @@ Student::Student() {
   independentstudy = false;
 
   // grade data
-  all_values[GRADEABLE_ENUM::READING]       = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::READING].getCount(),0);
-  all_values[GRADEABLE_ENUM::EXERCISE]      = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::EXERCISE].getCount(),0);
-  all_values[GRADEABLE_ENUM::LAB]           = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::LAB].getCount(),0);
-  all_values[GRADEABLE_ENUM::HOMEWORK]      = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(),0);
-  all_values[GRADEABLE_ENUM::PROJECT]       = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::PROJECT].getCount(),0);
-  all_values[GRADEABLE_ENUM::PARTICIPATION] = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::PARTICIPATION].getCount(),0);
-  all_values[GRADEABLE_ENUM::TEST]          = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),0);
-  all_values[GRADEABLE_ENUM::EXAM]          = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::EXAM].getCount(),0);
+  for (int i = 0; i < ALL_GRADEABLES.size(); i++) { 
+    GRADEABLE_ENUM g = ALL_GRADEABLES[i];
+    all_values[g]       = std::vector<float>(GRADEABLES[g].getCount(),0);
+  }
   // (iclicker defaults to empty map)
   hws_late_days                             = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(),0);
   zones = std::vector<std::string>(GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),"");
@@ -236,15 +232,12 @@ int Student::getUsedLateDays() const {
 // =============================================================================================
 
 float Student::overall_b4_moss() const {
-  return 
-    GradeablePercent(GRADEABLE_ENUM::READING) +
-    GradeablePercent(GRADEABLE_ENUM::EXERCISE) +
-    GradeablePercent(GRADEABLE_ENUM::PROJECT) + 
-    GradeablePercent(GRADEABLE_ENUM::PARTICIPATION) +
-    GradeablePercent(GRADEABLE_ENUM::LAB) + 
-    GradeablePercent(GRADEABLE_ENUM::HOMEWORK) + 
-    GradeablePercent(GRADEABLE_ENUM::TEST) + 
-    GradeablePercent(GRADEABLE_ENUM::EXAM);
+  float answer = 0;
+  for (int i = 0; i < ALL_GRADEABLES.size(); i++) { 
+    GRADEABLE_ENUM g = ALL_GRADEABLES[i];
+    answer += GradeablePercent(g);
+  }
+  return answer;
 }
 
 std::string Student::grade(bool flag_b4_moss, Student *lowest_d) const {
