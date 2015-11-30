@@ -6,23 +6,88 @@ import inspect
 
 from collections import defaultdict
 
-to_run = defaultdict(lambda: [], {})
+class TestcaseFile:
+    def __init__(self):
+        self.setup = lambda: False
+        self.testcases = []
+
+to_run = defaultdict(lambda: TestcaseFile(), {})
+
+# Helpers for color
+
+class ASCIIEscapeManager:
+    def __init__(self, codes):
+        self.codes = map(str, codes)
+    def __enter__(self):
+        sys.stdout.write("\033[" + ";".join(self.codes) + "m")
+    def __exit__(self, exc_type, exc_value, traceback):
+        sys.stdout.write("\033[0m")
+    def __add__(self, other):
+        return ASCIIEscapeManager(self.codes + other.codes)
+
+bold = ASCIIEscapeManager([1])
+underscore = ASCIIEscapeManager([4])
+blink = ASCIIEscapeManager([5])
+
+black = ASCIIEscapeManager([30])
+red = ASCIIEscapeManager([31])
+green = ASCIIEscapeManager([32])
+yellow = ASCIIEscapeManager([33])
+blue = ASCIIEscapeManager([34])
+magenta = ASCIIEscapeManager([35])
+cyan = ASCIIEscapeManager([36])
+white = ASCIIEscapeManager([37])
+
 
 # Run a single test case
 def run_test(name):
-    print "--- BEGIN TEST MODULE " + name.upper() + " ---"
-    for f in to_run[name]:
-        f()
-    print "--- END TEST MODULE " + name.upper() + " ---"
+    with bold:
+        print "--- BEGIN TEST MODULE " + name.upper() + " ---"
+    cont = True
+    try:
+        to_run[name].setup()
+    except:
+        cont = False
+    if cont:
+        total = 0
+        for index, f in zip(xrange(1, len(to_run[name].testcases) + 1), to_run[name].testcases):
+            try:
+                f()
+            except Exception as e:
+                with bold + red:
+                    print "Test #" + str(index) + " failed with exception:", e
+    with bold:
+        print "--- END TEST MODULE " + name.upper() + " ---"
     print
 
 # Run every test currently loaded
 def run_all():
     for key, val in to_run.iteritems():
-        print "--- BEGIN TEST MODULE " + key.upper() + " ---"
-        for f in val:
-            f()
-        print "--- END TEST MODULE " + key.upper() + " ---"
+        with bold:
+            print "--- BEGIN TEST MODULE " + key.upper() + " ---"
+        cont = True
+        try:
+            val.setup()
+        except e:
+            print "Setup failed with exception: " + e
+            cont = False
+        if cont:
+            total = len(val.testcases)
+            for index, f in zip(xrange(1, total + 1), val.testcases):
+                try:
+                    f()
+                except Exception as e:
+                    with bold + red:
+                        print "Test #" + str(index) + " failed with exception:", e
+                        total -= 1
+            if total == len(val.testcases):
+                with bold + green:
+                    print "All tests passed"
+            else:
+                with bold + red:
+                    print str(total) + "/" + str(len(val.testcases)) + " tests passed"
+        with bold:
+            print "--- END TEST MODULE " + key.upper() + " ---"
         print
 
 # Helper class used to remove the burden of paths from the testcase author.
@@ -45,40 +110,35 @@ class TestcaseWrapper:
     # is likely to run the compiler with a different working directory alongside
     # using relative paths.
     def compile_grading(self):
-        print "  - Compiling grading code..."
         subprocess.call(["clang++",
             "-c", "-std=c++11",
-            "-I" + os.path.join(self.testcase_path, "assignment_config")]
-            + glob.glob(os.path.join(self.testcase_path, "..", "..", "src", "*.cpp")))
-        subprocess.call(["mv"]
-                + glob.glob(os.path.join(os.getcwd(), "*.o"))
-                + [os.path.join(self.testcase_path, "build")])
+            "-I" + os.path.join(self.testcase_path, "assignment_config")] +
+            glob.glob(os.path.join(self.testcase_path, "..", "..", "src", "*.cpp")))
+        subprocess.call(["mv"] +
+                glob.glob(os.path.join(os.getcwd(), "*.o")) +
+                [os.path.join(self.testcase_path, "build")])
 
     # Link a given executable provided a list of libraries to link against and
     # a file containing the main function. It is assumed that all source files
     # prefixed with "main_" define a main function.
     def link(self, target, libraries=[], objects=[]):
-        subprocess.call(["clang++", "-std=c++11"]
-                + ["-l" + lib for lib in libraries]
-                + ["-o", os.path.join(self.testcase_path, "build", target)]
-                + [os.path.join(self.testcase_path, "build", o) for o in objects]
-                + [o for o in glob.glob(os.path.join(self.testcase_path, "build", "*.o")) if not "main" in o])
+        subprocess.call(["clang++", "-std=c++11"] +
+                ["-l" + lib for lib in libraries] +
+                ["-o", os.path.join(self.testcase_path, "build", target)] +
+                [os.path.join(self.testcase_path, "build", o) for o in objects] +
+                [o for o in glob.glob(os.path.join(self.testcase_path, "build", "*.o")) if not "main" in o])
 
     # Helper functions to link the four current executables.
     def link_compile(self):
-        print "  - Linking compile.out..."
         self.link("compile.out", libraries=["seccomp"], objects=["main_compile.o"])
 
     def link_configure(self):
-        print "  - Linking configure.out..."
         self.link("configure.out", libraries=["seccomp"], objects=["main_configure.o"])
 
     def link_runner(self):
-        print "  - Linking runner.out..."
         self.link("runner.out", libraries=["seccomp"], objects=["main_runner.o"])
 
     def link_validator(self):
-        print "  - Linking validator.out..."
         self.link("validator.out", libraries=["seccomp"], objects=["main_validator.o"])
 
     # Run the validator using some sane arguments. Likely wants to be made much more
@@ -87,10 +147,11 @@ class TestcaseWrapper:
     # the locations in which they expect them given different inputs. Define functions
     # for compiler, configure, and runner.
     def run_validator(self):
-        print "  - Running validator.out..."
         with open("/dev/null") as devnull:
-            subprocess.call([os.path.join(self.testcase_path, "build", "validator.out"), "testassignment", "testuser", "1", "0"], \
+            return_code = subprocess.call([os.path.join(self.testcase_path, "build", "validator.out"), "testassignment", "testuser", "1", "0"], \
                     cwd=os.path.join(self.testcase_path, "data"), stdout=devnull, stderr=devnull)
+            if return_code != 0:
+                raise RuntimeError("Validator exited with exit code " + str(return_code))
 
     # Run the UNIX diff command given a filename. The files are compared between the
     # data folder and the validation folder within the test package. For example,
@@ -98,10 +159,21 @@ class TestcaseWrapper:
     # /var/local/autograde_tests/tests/test_foo/data/foo.txt and
     # /var/local/autograde_tests/tests/test_foo/validation/foo.txt will be compared.
     def diff(self, filename):
-        print "  - Checking differences in file \"" + filename + "\"..."
         return_code = subprocess.call(["diff", "-b", os.path.join(self.testcase_path, "data", filename), os.path.join(self.testcase_path, "validation", filename)])
         if return_code == 1:
-            print "  !!! File \"" + filename + "\" differs from expected value. !!!"
+            raise RuntimeError("Difference on file \"" + filename + "\" exited with exit code " + str(return_code))
+
+def setup(func):
+    mod = inspect.getmodule(inspect.stack()[1][0])
+    path = os.path.dirname(mod.__file__)
+    modname = mod.__name__
+    def wrapper():
+        print "* Starting setup..."
+        func(TestcaseWrapper(path))
+        print "* Finished setup"
+    global to_run
+    to_run[modname].setup = wrapper
+    return wrapper
 
 # Decorator function using some inspection trickery to determine paths
 def testcase(func):
@@ -120,5 +192,5 @@ def testcase(func):
         func(TestcaseWrapper(path))
         print "* Finished test " + modname + "." + func.__name__
     global to_run
-    to_run[modname].append(wrapper)
+    to_run[modname].testcases.append(wrapper)
     return wrapper

@@ -13,7 +13,6 @@ subprocess.call(["rsync",
     "-r", "--delete"]) # Copy recursively, delete extraneous files
 
 # Fetch source relative to scripts directory, and install it to /var/local
-subprocess.call(["rsync"]
-        + glob.glob(os.path.join(base_path, "..", "..", "..", "grading", "*.cpp"))
-        + ["/var/local/hss/autograde_tests/src",
-            "-r", "--delete"])
+subprocess.call(["rsync"] +
+        glob.glob(os.path.join(base_path, "..", "..", "..", "grading", "*.cpp")) +
+        ["/var/local/hss/autograde_tests/src", "-r", "--delete"])
