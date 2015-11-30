@@ -460,12 +460,13 @@ void output_line(std::ofstream &ostr,
     //std::cout << "recommend " << this_student->getUserName() << " " << myTA(this_student->getSection()) << std::endl;
   }
 
-  /*
-  if (this_student->overall() < 11 && validSection(this_student->getSection()) && this_student->getUserName() != "" &&
+
+#if 0
+  if (this_student->overall() < 20 && validSection(this_student->getSection()) && this_student->getUserName() != "" &&
       for_instructor) {
-    std::cout << "warning " << this_student->getUserName() << " failing(1)" << std::endl;
+    std::cout << "warning " << this_student->getUserName() << " failing(2)" << std::endl;
   }
-  */
+#endif
 
 
   // open the row
@@ -558,7 +559,7 @@ void output_line(std::ofstream &ostr,
       ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
     }
     ostr << std::setprecision(2) << std::fixed;
-    if (for_instructor) {
+    if (this_student->getUserName() != "LOWEST D") {//for_instructor) {
       colorit(ostr,this_student->overall(),sp->overall(),sa->overall(),sb->overall(),sc->overall(),sd->overall());
     }
     else { 

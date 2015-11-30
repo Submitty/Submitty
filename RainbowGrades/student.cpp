@@ -205,7 +205,13 @@ int Student::getAllowedLateDays(int which_lecture) const {
   
   float total = getIClickerTotal(which_lecture,0);
   
-  //return answer += int(total / 25);
+  for (int i = 0; i < bonus_late_days_which_lecture.size(); i++) {
+    if (bonus_late_days_which_lecture[i] <= which_lecture) {
+      answer ++;
+    }
+  }
+
+
   return answer += int(total / 30); //25);
   
 }

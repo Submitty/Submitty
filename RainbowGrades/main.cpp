@@ -87,6 +87,9 @@ char GLOBAL_EXAM_DEFAULT_ROOM[MAX_STRING_LENGTH] = "exam default room uninitiali
 
 float GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = 0.1;
 
+int BONUS_WHICH_LECTURE = -1;
+std::string BONUS_FILE;
+
 //====================================================================
 // INFO ABOUT OUTPUT FORMATTING
 
@@ -663,8 +666,9 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
     } else if (token == "min_overall_for_zone_assignment") {
       istr >> GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT;
       continue;
-
-
+    } else if (token == "bonus_latedays") {
+      istr >> BONUS_WHICH_LECTURE >> BONUS_FILE;
+      continue;
     } else if (token == "exam_seating") {
 
       //      DISPLAY_EXAM_SEATING = true;
@@ -890,7 +894,15 @@ void load_student_grades(std::vector<Student*> &students) {
         if (GRADEABLES[GRADEABLE_ENUM::HOMEWORK].hasCorrespondence(which_token)) {
           const std::pair<int,std::string>& c = GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCorrespondence(which_token);
           int which = c.first;
-          s->incrLateDaysUsed(which,a);
+   
+          assert (a > 0);
+       
+          float hw_value = s->getGradeableValue(GRADEABLE_ENUM::HOMEWORK,which);
+          if (hw_value <= 0) {
+            std::cout << "OOPS!  should not be charged late days for a homework with grade 0   student:" << s->getUserName() << " hw:" << which_token << " latedays:" << a << std::endl;
+          } else {
+            s->incrLateDaysUsed(which,a);
+          }
         }
       } 
 
@@ -1076,8 +1088,28 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
 // =============================================================================================
 // =============================================================================================
 
+void load_bonus_late_day(std::vector<Student*> &students, 
+                         int which_lecture,
+                         std::string bonus_late_day_file) {
 
+  std::ifstream istr(bonus_late_day_file.c_str());
+  if (!istr.good()) {
+    std::cerr << "ERROR!  could not open " << bonus_late_day_file << std::endl;
+    exit(1);
+  }
 
+  std::string username;
+  while (istr >> username) {
+    Student *s = GetStudent(students,username);
+    if (s == NULL) {
+      std::cerr << "ERROR!  bad username " << username << std::endl;
+      exit(1);
+    } else {
+      s->add_bonus_late_day(which_lecture);
+    }
+  } 
+
+}
 
 
 int main(int argc, char* argv[]) {
@@ -1095,6 +1127,10 @@ int main(int argc, char* argv[]) {
   // ======================================================================
   // LOAD ALL THE STUDENT DATA
   load_student_grades(students);
+
+  if (BONUS_FILE != "") {
+    load_bonus_late_day(students,BONUS_WHICH_LECTURE,BONUS_FILE);
+  }
 
   // ======================================================================
   // MAKE FAKE STUDENTS FOR THE CURVES
