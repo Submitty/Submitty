@@ -14,7 +14,6 @@ class TestcaseFile:
 to_run = defaultdict(lambda: TestcaseFile(), {})
 
 # Helpers for color
-
 class ASCIIEscapeManager:
     def __init__(self, codes):
         self.codes = map(str, codes)
@@ -49,19 +48,31 @@ def run_test(name):
     except:
         cont = False
     if cont:
-        total = 0
+        total = len(to_run[name].testcases)
         for index, f in zip(xrange(1, len(to_run[name].testcases) + 1), to_run[name].testcases):
             try:
                 f()
             except Exception as e:
                 with bold + red:
                     print "Test #" + str(index) + " failed with exception:", e
+                    total -= 1
+                    cont = False
+        if total == len(to_run[name].testcases):
+            with bold + green:
+                print "All tests passed"
+        else:
+            with bold + red:
+                print str(total) + "/" + str(len(to_run[name].testcases)) + " tests passed"
+                success = False
     with bold:
         print "--- END TEST MODULE " + name.upper() + " ---"
     print
+    if not cont:
+        sys.exit(1)
 
 # Run every test currently loaded
 def run_all():
+    success = True
     for key, val in to_run.iteritems():
         with bold:
             print "--- BEGIN TEST MODULE " + key.upper() + " ---"
@@ -86,9 +97,12 @@ def run_all():
             else:
                 with bold + red:
                     print str(total) + "/" + str(len(val.testcases)) + " tests passed"
+                    success = False
         with bold:
             print "--- END TEST MODULE " + key.upper() + " ---"
         print
+    if not success:
+        sys.exit(1)
 
 # Helper class used to remove the burden of paths from the testcase author.
 # The path (in /var/local) of the testcase is provided to the constructor,
