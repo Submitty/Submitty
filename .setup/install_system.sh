@@ -217,7 +217,6 @@ ls /home | sort > /var/local/hss/instructors/valid
 #################################################################
 # SVN SETUP
 #################
-service apache2 restart
 apt-get install -qqy subversion subversion-tools
 apt-get install -qqy libapache2-svn
 a2enmod dav
@@ -240,8 +239,6 @@ if [ ${VAGRANT} == 1 ]; then
 	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
 fi
 
-service apache2 restart
-
 #################################################################
 # POSTGRES SETUP
 #################
@@ -251,12 +248,12 @@ if [ ${VAGRANT} == 1 ]; then
 	service postgresql restart
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
-	su postgres << EOF
+	su postgres
 	psql -c "
 	  CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu';
 	  CREATE ROLE root WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'vagrant';
 	  CREATE ROLE vagrant WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'vagrant';"
-	EOF
+	exit
 fi
 
 #################################################################
