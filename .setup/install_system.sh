@@ -15,7 +15,7 @@ fi
 #################################################################
 # UBUNTU SETUP
 #################
-if VAGRANT; then 
+if [ ${VAGRANT} == 1 ]; then 
 echo -e '
  __   __  _     _  _______  _______  ______    __   __  _______  ______
 |  | |  || | _ | ||       ||       ||    _ |  |  | |  ||       ||    _ |
@@ -126,7 +126,7 @@ echo -e "#%PAM-1.0
 auth required pam_unix.so
 account required pam_unix.so" > /etc/pam.d/httpd
 
-if VAGRANT; then
+if [ ${VAGRANT} == 1 ]; then
 # Loosen password requirements
 	sed -i '25s/^/\#/' /etc/pam.d/common-password
 	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
@@ -162,7 +162,7 @@ sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php5
 addgroup hwcronphp
 addgroup course_builders
 
-if VAGRANT; then
+if [ ${VAGRANT} == 1 ]; then
 	adduser vagrant sudo
 	adduser ta --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 	echo "ta:ta" | sudo chpasswd
@@ -175,15 +175,15 @@ if VAGRANT; then
 fi
 
 adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-if VAGRANT; then
+if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
 fi
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-if VAGRANT; then
+if [ ${VAGRANT} == 1 ]; then
 	echo "hwcron:hwcron" | sudo chpasswd
 fi
 adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-if VAGRANT; then
+if [ ${VAGRANT} == 1 ]; then
 	echo "hsdbu:hsdbu" | sudo chpasswd
 fi
 adduser hwphp hwcronphp
@@ -195,14 +195,14 @@ do
 	addgroup $COURSE_tas_www
 	adduser hwphp $COURSE_tas_www
 	adduser hwcron $COURSE_tas_www
-	if VAGRANT; then
+	if [ ${VAGRANT} == 1 ]; then
 		adduser ta $COURSE
 		adduser instructor $COURSE
 		adduser developer $COURSE
 	fi
 done
 
-if VAGRANT; then
+if [ ${VAGRANT} == 1 ]; then
 	adduser instructor course_builders
 fi
 
@@ -231,7 +231,7 @@ chmod g+s /var/lib/svn
 mkdir -p /var/lib/svn/csci2600
 touch /var/lib/svn/svngroups
 chown www-data:csci2600_tas_www /var/lib/svn/csci2600 /var/lib/svn/svngroups
-if VAGRANT; then
+if [ ${VAGRANT} == 1 ]; then
 	su hwcron
 	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N ""
 	echo "hwcron" > password.txt
@@ -245,7 +245,7 @@ service apache2 restart
 #################################################################
 # POSTGRES SETUP
 #################
-if VAGRANT; then
+if [ ${VAGRANT} == 1 ]; then
 	echo "postgres:postgres" | chpasswd postgres
 	adduser postgres shadow
 	service postgresql restart
@@ -274,7 +274,7 @@ fi
 HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
 cd ${HWSERVER_DIR}
 
-if VAGRANT; then
+if [ ${VAGRANT} == 1 ]; then
 	echo -e "localhost
 hsdbu
 hsdbu
@@ -290,7 +290,7 @@ source ${HWSERVER_DIR}/Docs/sample_bin/admin_scripts_setup
 cp ${HWSERVER_DIR}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
 cp ${HWSERVER_DIR}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
 
-if VAGRANT; then
+if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /root/bin/bottom.txt
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
 	sed -i 's/hss.crt/submit.crt/g' /etc/apache2/sites-available/submit.conf
