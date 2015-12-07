@@ -131,7 +131,7 @@ Troy
 RPI
 CSCI
 .
-." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout hwgrading.key -out hwgrading.crt > /dev/null 2>&"1
+." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout hwgrading.key -out hwgrading.crt > /dev/null 2>&1
 
 echo -e "US
 New York
