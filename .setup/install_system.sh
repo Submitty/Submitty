@@ -75,7 +75,8 @@ libseccomp2 seccomp junit cmake
 # Install Oracle 8 Non-Interactively
 echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
-apt-get install -qqy oracle-java8-installer > /dev/null
+echo "instlling java8"
+apt-get install -qqy oracle-java8-installer > /dev/null 2>&1
 
 #################################################################
 # JAR SETUP
@@ -115,9 +116,10 @@ a2enmod include actions suexec authnz_external headers ssl
 
 mkdir /etc/apache2/ssl
 cd /etc/apache2/ssl
-echo -e "US\nNew York\nTroy\nRPI\nCSCI\n.\n." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout submit.key -out submit.crt
-echo -e "US\nNew York\nTroy\nRPI\nCSCI\n.\n." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout hwgrading.key -out hwgrading.crt
-echo -e "US\nNew York\nTroy\nRPI\nCSCI\n.\n." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout svn.key -out svn.crt
+echo "creating ssl certificates"
+echo -e "US\nNew York\nTroy\nRPI\nCSCI\n.\n." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout submit.key -out submit.crt > /dev/null 2>&1
+echo -e "US\nNew York\nTroy\nRPI\nCSCI\n.\n." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout hwgrading.key -out hwgrading.crt > /dev/null 2>&"1
+echo -e "US\nNew York\nTroy\nRPI\nCSCI\n.\n." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout svn.key -out svn.crt > /dev/null 2>&1
 chmod o+r hwgrading.crt
 chmod o+r submit.crt
 chmod o+r svn.crt
@@ -232,7 +234,7 @@ touch /var/lib/svn/svngroups
 chown www-data:csci2600_tas_www /var/lib/svn/csci2600 /var/lib/svn/svngroups
 if [ ${VAGRANT} == 1 ]; then
 	su hwcron
-	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N "" > /dev/null
+	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N "" > /dev/null 2>&1
 	echo "hwcron" > password.txt
 	sshpass -f password.txt ssh-copy-id hwcron@test-svn
 	rm password.txt
