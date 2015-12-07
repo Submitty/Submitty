@@ -75,7 +75,7 @@ libseccomp2 seccomp junit cmake
 # Install Oracle 8 Non-Interactively
 echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
-apt-get install -qqy oracle-java8-installer
+apt-get install -qqy oracle-java8-installer > /dev/null
 
 #################################################################
 # JAR SETUP
@@ -232,7 +232,7 @@ touch /var/lib/svn/svngroups
 chown www-data:csci2600_tas_www /var/lib/svn/csci2600 /var/lib/svn/svngroups
 if [ ${VAGRANT} == 1 ]; then
 	su hwcron
-	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N ""
+	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N "" > /dev/null
 	echo "hwcron" > password.txt
 	sshpass -f password.txt ssh-copy-id hwcron@test-svn
 	rm password.txt
@@ -248,10 +248,8 @@ if [ ${VAGRANT} == 1 ]; then
 	service postgresql restart
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
-	su postgres
-	psql -c "
-	  CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu';
-	  CREATE ROLE vagrant WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'vagrant';"
+	su postgres -c "/vagrant/.setup/db_users.sh DATABASE";
+	psql -d DATABASE -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu';CREATE ROLE vagrant WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'vagrant';"
 	exit
 fi
 
