@@ -230,9 +230,6 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 mkdir -p /var/local/hss
-mkdir -p /usr/local/hss
-chown hwphp:hwphp /usr/local/hss
-chmod 2771 /usr/local/hss
 
 mkdir -p /var/local/hss/instructors
 ls /home | sort > /var/local/hss/instructors/valid
@@ -272,7 +269,6 @@ if [ ${VAGRANT} == 1 ]; then
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
 	su postgres -c "/vagrant/.setup/db_users.sh DATABASE";
-	exit
 	echo "Finished creating PostgreSQL users"
 fi
 
@@ -378,5 +374,9 @@ psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServe
 psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
 psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
 fi
+
+# Deferred ownership change
+chown hwphp:hwphp /usr/local/hss
+chmod 2771 /usr/local/hss
 
 echo "Done."
