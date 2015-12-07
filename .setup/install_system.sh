@@ -189,12 +189,12 @@ fi
 adduser hwphp hwcronphp
 adduser hwcron hwcronphp
 
-for COURSE in csci1100 csci1200  csci2600
+for COURSE in csci1100 csci1200 csci2600
 do
 	addgroup $COURSE
-	addgroup $COURSE_tas_www
-	adduser hwphp $COURSE_tas_www
-	adduser hwcron $COURSE_tas_www
+	addgroup $COURSE\_tas_www
+	adduser hwphp $COURSE\_tas_www
+	adduser hwcron $COURSE\_tas_www
 	if [ ${VAGRANT} == 1 ]; then
 		adduser ta $COURSE
 		adduser instructor $COURSE
@@ -249,8 +249,8 @@ if [ ${VAGRANT} == 1 ]; then
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
 	su postgres -c "/vagrant/.setup/db_users.sh DATABASE";
-#	psql -d DATABASE -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu';CREATE ROLE vagrant WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'vagrant';"
 	exit
+	echo "Finished creating PostgreSQL users"
 fi
 
 #################################################################
@@ -355,3 +355,5 @@ psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServe
 psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
 psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
 fi
+
+echo "Done."
