@@ -117,9 +117,30 @@ a2enmod include actions suexec authnz_external headers ssl
 mkdir /etc/apache2/ssl
 cd /etc/apache2/ssl
 echo "creating ssl certificates"
-echo -e "US\nNew York\nTroy\nRPI\nCSCI\n.\n." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout submit.key -out submit.crt > /dev/null 2>&1
-echo -e "US\nNew York\nTroy\nRPI\nCSCI\n.\n." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout hwgrading.key -out hwgrading.crt > /dev/null 2>&"1
-echo -e "US\nNew York\nTroy\nRPI\nCSCI\n.\n." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout svn.key -out svn.crt > /dev/null 2>&1
+echo -e "US
+New York
+Troy
+RPI
+CSCI
+.
+." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout submit.key -out submit.crt > /dev/null 2>&1
+
+echo -e "US
+New York
+Troy
+RPI
+CSCI
+.
+." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout hwgrading.key -out hwgrading.crt > /dev/null 2>&"1
+
+echo -e "US
+New York
+Troy
+RPI
+CSCI
+.
+." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout svn.key -out svn.crt > /dev/null 2>&1
+
 chmod o+r hwgrading.crt
 chmod o+r submit.crt
 chmod o+r svn.crt
