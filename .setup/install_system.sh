@@ -249,7 +249,7 @@ if [ ${VAGRANT} == 1 ]; then
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
 	su postgres -c "/vagrant/.setup/db_users.sh DATABASE";
-	psql -d DATABASE -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu';CREATE ROLE vagrant WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'vagrant';"
+#	psql -d DATABASE -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu';CREATE ROLE vagrant WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'vagrant';"
 	exit
 fi
 
