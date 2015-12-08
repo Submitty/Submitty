@@ -221,7 +221,9 @@ do
 	if [ ${VAGRANT} == 1 ]; then
 		adduser ta $COURSE
 		adduser instructor $COURSE
+		adduser	instructor $COURSE\_tas_www
 		adduser developer $COURSE
+		adduser developer $COURSE\_tas_www
 	fi
 done
 
@@ -276,13 +278,15 @@ fi
 # HWSERVER SETUP
 #################
 
-if [[ ${VAGRANT} == 1 ]]; then
-  ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
-else
-  cd /usr/local/hss
-  git clone https://github.com/RCOS-Grading-Server/HWserver.git
-  mv HWserver GIT_CHECKOUT_HWserver
-fi
+# link currently creates file permission issues, commented out
+#if [[ ${VAGRANT} == 1 ]]; then
+#	echo "creating link"
+#	ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
+#else
+	echo "cloning repository"
+	cd /usr/local/hss
+	git clone https://github.com/RCOS-Grading-Server/HWserver.git GIT_CHECKOUT_HWserver
+#fi
 
 HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
 cd ${HWSERVER_DIR}
