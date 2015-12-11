@@ -10,8 +10,9 @@
 //------------------------------------------------------------------------------
 
 //Constants
-define ("_INI_PATH", "__INSTALL__FILLIN__HSS_INSTALL_DIR__/hwgrading_website/toolbox/configs/");
-define ("_INI_FILE", "student_csv_fields.ini");
+define ("_INI_PATH",  "__INSTALL__FILLIN__HSS_INSTALL_DIR__/hwgrading_website/toolbox/configs/");
+define ("_INI_FILE",  "student_csv_fields.ini");
+define ("_INI_OWNER", "hwphp");
 
 //------------------------------------------------------------------------------
 
@@ -61,7 +62,8 @@ function Create_ini(array $param_arr) {
 	//END command line params validation
 
 	//Process
-	$fh = fopen(_INI_PATH . _INI_FILE, "w");
+	$file = _INI_PATH . _INI_FILE;
+	$fh = fopen($file, "w");
 	if ($fh === false) {
 		die("Fatal: Cannot open " . _INI_FILE . " for writing." . PHP_EOL);
 	}
@@ -78,7 +80,7 @@ ini_header;
 student_first_name = %s
 student_last_name  = %s
 student_email      = %s
-student_section_id = %s
+student_section    = %s
 ini_body;
 
 	$ini_body = sprintf($ini_body, $param_arr[0], $param_arr[1], $param_arr[2], $param_arr[3]);
@@ -90,6 +92,9 @@ ini_body;
 	}
 
 	fclose($fh);
+	chown($file, _INI_OWNER);
+	chgrp($file, _INI_OWNER);
+	chmod($file, 0400);
 	//END Process
 }
 
