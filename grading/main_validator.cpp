@@ -21,6 +21,10 @@
 #include "default_config.h"
 
 
+extern std::string GLOBAL_replace_string_before;
+extern std::string GLOBAL_replace_string_after;
+
+
 // =====================================================================
 // =====================================================================
 
@@ -29,17 +33,22 @@ std::string join(std::vector<std::string> strings);
 
 int main(int argc, char *argv[]) {
 
+  std::string hw_id = "";
+  std::string rcsid = "";
+  int subnum = -1;
+  std::string time_of_submission = "";
+
   /* Check argument usage */
-  if (argc != 5) {
+  if (argc == 5) {
+    hw_id = argv[1];
+    rcsid = argv[2];
+    subnum = atoi(argv[3]);
+    time_of_submission = argv[4];
+  }
+  else {
     std::cerr << "VALIDATOR USAGE: validator <hw_id> <rcsid> <submission#> <time-of-submission>" << std::endl;
     return 1;
-  }
-
-  std::string hw_id = argv[1];
-  std::string rcsid = argv[2];
-  int subnum = atoi(argv[3]);
-  std::string time_of_submission = argv[4];
-
+  } 
 
   // TODO: add more error checking of arguments
 
@@ -53,6 +62,9 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+
+
+
 
 
 /* Runs through each test case, pulls in the correct files, validates, and outputs the results */
@@ -83,6 +95,16 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   std::stringstream testcase_json;
   std::vector<std::string> all_testcases;
 
+
+#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
+  GLOBAL_replace_string_before = __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__;
+  GLOBAL_replace_string_after  = CustomizeAutoGrading(rcsid);
+  std::cout << "CUSTOMIZE AUTO GRADING for user '" << rcsid << "'" << std::endl;
+  std::cout << "CUSTOMIZE AUTO GRADING replace " <<  GLOBAL_replace_string_before << " with " << GLOBAL_replace_string_after << std::endl;
+#endif
+
+
+
   // LOOP OVER ALL TEST CASES
   for (int i = 0; i < testcases.size(); ++i) {
     std::cout << "------------------------------------------\n" << testcases[i].title() << " - points: " << testcases[i].points() << std::endl;
@@ -94,6 +116,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
     int testcase_pts = 0;
     std::string message = "";
+
+    //    system ("ls -lta");
 
     // FILE EXISTS & COMPILATION TESTS DON'T HAVE FILE COMPARISONS
     if (testcases[i].isFileExistsTest()) {
@@ -169,12 +193,36 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
         // JSON FOR THIS COMPARISON
         diff_vector.push_back("\t\t\t\t\t\"diff_id\":\"" + testcases[i].prefix() + "_" + std::to_string(j) + "_diff\"");
+
+	std::string dm = testcases[i].test_case_grader_vec[j]->display_mode();
+	if (dm != "") {
+	  diff_vector.push_back("\t\t\t\t\t\"display_mode\":\""+dm+"\"");
+	}
+
         diff_vector.push_back("\t\t\t\t\t\"student_file\":\"" + testcases[i].filename(j) + "\"");
 
         std::string expected = "";
         if (testcases[i].test_case_grader_vec[j] != NULL) {
           expected = testcases[i].test_case_grader_vec[j]->getExpected();
         }
+
+
+
+	//#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
+	if (GLOBAL_replace_string_before != "") {
+	  std::cout << "BEFORE " << expected << std::endl;
+	  while (1) {
+	    int location = expected.find(GLOBAL_replace_string_before);
+	    if (location == std::string::npos) 
+	      break;
+	    expected.replace(location,GLOBAL_replace_string_before.size(),GLOBAL_replace_string_after);
+	  }
+	  std::cout << "AFTER  " << expected << std::endl;
+	}
+	//#endif
+	
+
+
 
         if (expected != "") {
           std::stringstream expected_path;

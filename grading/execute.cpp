@@ -80,9 +80,10 @@ void validate_program(const std::string &program) {
 void validate_filename(const std::string &filename) {
   assert (filename.size() >= 1);
   if (filename[0] == '-') {
-    std::cout << "ERROR: command line filename looks suspicious '" << filename << "'" << std::endl;
-    std::cerr << "ERROR: command line filename looks suspicious '" << filename << "'" << std::endl;
-    exit(1);
+    std::cout << "WARNING: command line filename looks suspicious '" << filename << "'" << std::endl;
+    std::cerr << "WARNING: command line filename looks suspicious '" << filename << "'" << std::endl;
+    // note: cannot enforce this when running drmemory on a program with options :(
+    //exit(1);
   }
 }
 
