@@ -2,7 +2,7 @@
 
 include  "../../toolbox/functions.php";
 
-$start = microtime_float();
+check_administrator();
 
 $csv_output = "";
 $nl = "\n";
