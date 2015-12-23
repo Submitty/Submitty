@@ -259,6 +259,9 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
     zone = "SEE INSTRUCTOR";
   }
 
+
+#if 1
+
   ostr << "<table border=1 cellpadding=5 cellspacing=0 style=\"background-color:#ddffdd\">\n";
   ostr << "<tr><td>\n";
   ostr << "<table border=0 cellpadding=5 cellspacing=0>\n";
@@ -269,6 +272,38 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
   ostr << "</table>\n";
   ostr << "</tr></td>\n";
   ostr << "</table>\n";
+
+#else
+
+
+  ostr << "<table border=1 cellpadding=5 cellspacing=0 style=\"background-color:#ddffdd\">\n";
+  ostr << "<tr><td>\n";
+  ostr << "<table border=0 cellpadding=5 cellspacing=0>\n";
+  ostr << "  <tr><td colspan=2>" << GLOBAL_EXAM_TITLE << "</td></tr>\n";
+  //  ostr << "  <tr><td>" << GLOBAL_EXAM_DATE << "</td><td align=center>" << time << "</td></tr>\n";
+  //ostr << "  <tr><td>Your room assignment: </td><td align=center>" << room << "</td></tr>\n";
+
+
+  if (zone == "SEE INSTRUCTOR") {
+    zone = "10";
+  }
+
+  std::string foo = "http://www.cs.rpi.edu/academics/courses/fall15/csci1200/hw/10_pokemon/";
+
+  ostr << "  <tr><td>Your list assignment:                </td><td align=left><a target=_top href=\"" << foo << "List"                         << zone << ".txt\">List"                         << zone << ".txt</a></td></tr>\n";
+  ostr << "  <tr><td>Small Input:                         </td><td align=left><a target=_top href=\"" << foo << "PokedexSmall"                 << zone << ".txt\">PokedexSmall"                 << zone << ".txt</a></td></tr>\n";
+  ostr << "  <tr><td>Small Input Obfuscate:               </td><td align=left><a target=_top href=\"" << foo << "PokedexSmallObfuscate"        << zone << ".txt\">PokedexSmallObfuscate"        << zone << ".txt</a></td></tr>\n";
+  ostr << "  <tr><td>Small Output Obfuscate:              </td><td align=left><a target=_top href=\"" << foo << "OutputSmallObfuscate"         << zone << ".txt\">OutputSmallObfuscate"         << zone << ".txt</a></td></tr>\n";
+  ostr << "  <tr><td>Small Output Obfuscate w/ Breeding:  </td><td align=left><a target=_top href=\"" << foo << "OutputSmallObfuscateBreeding" << zone << ".txt\">OutputSmallObfuscateBreeding" << zone << ".txt</a></td></tr>\n";
+
+  ostr << "</table>\n";
+  ostr << "</tr></td>\n";
+  ostr << "</table>\n";
+
+
+
+#endif
+
 
   std::string x1 = s->getExamZone();
   std::string x2 = s->getZone(1);
@@ -374,13 +409,17 @@ void start_table(std::ofstream &ostr, std::string &filename, bool for_instructor
     if (DISPLAY_FINAL_GRADE) {
       ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
       ostr << "<td align=center>GRADE</td>";
+
+      if (for_instructor && DISPLAY_MOSS_DETAILS) {
+        ostr << "<td align=center>GRADE BEFORE MOSS</td>";
+      }
+
     }
     ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
-    ostr << "<td align=center>OVERALL</td>";
     if (for_instructor && DISPLAY_MOSS_DETAILS) {
-      ostr << "<td align=center>OVERALL W/ MOSS PENALTY</td>";
-      ostr << "<td align=center>GRADE BEFORE MOSS</td>";
+      ostr << "<td align=center>OVERALL AFTER PENALTY</td>";
     }
+    ostr << "<td align=center>OVERALL</td>";
     ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
     for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
       ostr << "<td align=center>" << gradeable_to_string(ALL_GRADEABLES[i]) << " %</td>";
@@ -568,7 +607,8 @@ void output_line(std::ofstream &ostr,
     if (DISPLAY_FINAL_GRADE) {
       ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
       if (!this_student->getAudit() &&
-          !this_student->getWithdraw()) {
+          !this_student->getWithdraw() &&
+          validSection(this_student->getSection())) {
         //this_student->outputgrade(ostr,true,sd);
         this_student->outputgrade(ostr,false,sd);
       } else {
@@ -576,27 +616,34 @@ void output_line(std::ofstream &ostr,
       }
     }
     if (DISPLAY_GRADE_DETAILS) {
+      if (for_instructor && DISPLAY_MOSS_DETAILS) {
+        if (this_student->getSection() != 0 && !this_student->getAudit() && this_student->getMossPenalty() < 0) {
+          this_student->outputgrade(ostr,true,sd);
+        } else { 
+          ostr << "<td align=center bgcolor=ffffff>&nbsp;</td>";
+        }
+      }
+
       ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
     }
     ostr << std::setprecision(2) << std::fixed;
-    if (this_student->getUserName() != "LOWEST D") {//for_instructor) {
-      colorit(ostr,this_student->overall(),sp->overall(),sa->overall(),sb->overall(),sc->overall(),sd->overall());
+
+    if (for_instructor && DISPLAY_MOSS_DETAILS) {
+      if (this_student->getUserName() != "LOWEST D" && this_student->getMossPenalty() < 0) {
+        colorit(ostr,this_student->overall(),sp->overall(),sa->overall(),sb->overall(),sc->overall(),sd->overall());
+      } else { 
+        ostr << "<td align=center bgcolor=ffffff>&nbsp;</td>";
+      }
+    }
+
+    if (this_student->getUserName() != "LOWEST D") {
+      colorit(ostr,this_student->overall_b4_moss(),sp->overall(),sa->overall(),sb->overall(),sc->overall(),sd->overall());
     }
     else { 
       ostr << "<td align=center bgcolor=ffffff>&nbsp;</td>";
     }
-    if (for_instructor && DISPLAY_MOSS_DETAILS) {
-      if (this_student->getUserName() != "LOWEST D") {
-        colorit(ostr,this_student->overall_b4_moss(),sp->overall(),sa->overall(),sb->overall(),sc->overall(),sd->overall());
-      } else { 
-        ostr << "<td align=center bgcolor=ffffff>&nbsp;</td>";
-      }
-      if (this_student->getSection() != 0 && !this_student->getAudit()) {
-        this_student->outputgrade(ostr,true,sd);
-      } else { 
-        ostr << "<td align=center bgcolor=ffffff>&nbsp;</td>";
-      }
-    }
+
+
     ostr << std::setprecision(2) << std::fixed;
     if (DISPLAY_GRADE_DETAILS) {
       ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
@@ -691,7 +738,7 @@ void end_table(std::ofstream &ostr,  bool for_instructor, const std::vector<Stud
   }
 
   if (print_moss_message) {
-    ostr << "* = final grade with Academic Integrity Violation penalty<p>&nbsp;<p>\n";
+    ostr << "@ = final grade with Academic Integrity Violation penalty<p>&nbsp;<p>\n";
   }
 
   if (DISPLAY_FINAL_GRADE && students.size() > 50) {

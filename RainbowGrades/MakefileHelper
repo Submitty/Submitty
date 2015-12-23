@@ -89,8 +89,11 @@ hw: compile
 test: compile
 	./process_grades.out by_test
 
-final: compile
-	./process_grades.out by_final
+exam: compile
+	./process_grades.out by_exam
+
+test_exam: compile
+	./process_grades.out by_test_and_exam
 
 zone: compile
 	./process_grades.out by_zone
