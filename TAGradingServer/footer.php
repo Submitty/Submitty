@@ -45,19 +45,14 @@ HTML;
             });
             
             $('form').each(function() {
-            
-                console.log($(this).attr('method'));
-            
                 if ($(this).attr('method') == 'get') {
                     $(this).append("<input type='hidden' name='course' value='{$_GET['course']}' />");
                 }
                 else if ($(this).attr('method') == 'post') {
                     $(this).attr('action', $(this).attr('action') + '?course={$_GET['course']}');
                 }
-                
-            console.log($(this).attr('action'));
             });
-        
+
         });
     </script>
 	</body>
