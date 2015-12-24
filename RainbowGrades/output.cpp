@@ -750,7 +750,8 @@ void end_table(std::ofstream &ostr,  bool for_instructor, const std::vector<Stud
   int total_passed = total_A + total_B + total_C + total_D;
   int total_F = grade_counts[Grade("F")];
   int total_blank = grade_counts[Grade("")];
-  int total = total_passed + total_F + auditors + total_blank;
+  assert (total_blank == 0);
+  int total = total_passed + total_F + auditors + total_blank + dropped;
 
   ostr << "<p>\n";
 
@@ -764,10 +765,12 @@ void end_table(std::ofstream &ostr,  bool for_instructor, const std::vector<Stud
   ostr << "<td align=center bgcolor="<<GradeColor("C+")<<" width=40>C+</td><td align=center bgcolor="<<GradeColor("C")<<" width=40>C</td><td align=center bgcolor="<<GradeColor("C-")<<" width=40>C-</td>";
   ostr << "<td align=center bgcolor="<<GradeColor("D+")<<" width=40>D+</td><td align=center bgcolor="<<GradeColor("D")<<" width=40>D</td>\n";
   if (for_instructor) {
-    ostr << "<td align=center bgcolor="<<GradeColor("F")<<"width=40>F</td><td align=center width=40>dropped</td>\n";
+    ostr << "<td align=center bgcolor="<<GradeColor("F")<<"width=40>F</td>\n";
+    //    ostr << "<td align=center width=40>dropped</td>\n";
     ostr << "<td align=center width=40>audit</td>\n";
     ostr << "<td align=center align=center width=40>took final</td>\n";
     ostr << "<td align=center align=center width=40>total passed</td>\n";
+    ostr << "<td align=center align=center width=40>dropped</td>\n";
     ostr << "<td align=center align=center width=40>total</td>\n";
   }
   ostr << "</tr>\n";
@@ -780,10 +783,12 @@ void end_table(std::ofstream &ostr,  bool for_instructor, const std::vector<Stud
   ostr << "<td align=center width=40>"<<grade_counts[Grade("D+")]<<"</td><td align=center width=40>"<<grade_counts[Grade("D")]<<"</td>\n";
   
   if (for_instructor) {
-    ostr << "<td align=center width=40>"<<grade_counts[Grade("F")]<<"</td><td align=center width=40>"<<grade_counts[Grade("")]<<"</td>\n";
+    ostr << "<td align=center width=40>"<<grade_counts[Grade("F")]<<"</td>\n";
+    //ostr << "<td align=center width=40>" << grade_counts[Grade("")]<<"</td>\n";
     ostr << "<td align=center width=40>"<<auditors<<"</td>\n";
     ostr << "<td align=center width=40>"<<took_final<<"</td>\n";
     ostr << "<td align=center width=40>"<<total_passed<<"</td>\n";
+    ostr << "<td align=center width=40>"<<dropped<<"</td>\n";
     ostr << "<td align=center width=40>"<<total<<"</td>\n";
   }
   ostr << "</tr>\n";
@@ -803,7 +808,9 @@ void end_table(std::ofstream &ostr,  bool for_instructor, const std::vector<Stud
   }
 
   if (for_instructor) {
-    ostr << "<td align=center width=40>"<<grade_avg[Grade("F")]<<"</td><td align=center width=40>"<<grade_avg[Grade("")]<<"</td>\n";
+    ostr << "<td align=center width=40>"<<grade_avg[Grade("F")]<<"</td>\n";
+    //ostr << "<td align=center width=40>"<<grade_avg[Grade("")]<<"</td>\n";
+    ostr << "<td align=center width=40>&nbsp;</td>\n";
     ostr << "<td align=center width=40>&nbsp;</td>\n";
     ostr << "<td align=center width=40>&nbsp;</td>\n";
     ostr << "<td align=center width=40>&nbsp;</td>\n";

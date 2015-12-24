@@ -54,6 +54,7 @@ std::map<Grade,int> grade_counts;
 std::map<Grade,float> grade_avg;
 int took_final = 0;
 int auditors = 0;
+int dropped = 0;
 
 Student* PERFECT_STUDENT_POINTER;
 
@@ -1229,25 +1230,32 @@ int main(int argc, char* argv[]) {
   // COUNT
 
   for (unsigned int s = 0; s < students.size(); s++) {
-    if (students[s]->getLastName() == "" || students[s]->getFirstName() == "") continue;
-    if (students[s]->getAudit()) {
+
+    Student *this_student = students[s];
+
+    if (this_student->getLastName() == "" || this_student->getFirstName() == "") {
+      continue;
+    }
+    if (this_student->getAudit()) {
       auditors++;
       continue;
     }
 
     Student *sd = GetStudent(students,"LOWEST D");
 
-
-    grade_counts[students[s]->grade(false,sd)]++;
-    grade_avg[students[s]->grade(false,sd)]+=students[s]->overall();
-
+    if (validSection(this_student->getSection())) {
+      std::string student_grade = this_student->grade(false,sd);
+      grade_counts[student_grade]++;
+      grade_avg[student_grade]+=this_student->overall();
+    } else {
+      dropped++;
+    }
     if (GRADEABLES[GRADEABLE_ENUM::EXAM].getCount() != 0) {
-      if (students[s]->getGradeableValue(GRADEABLE_ENUM::EXAM,GRADEABLES[GRADEABLE_ENUM::EXAM].getCount()-1) > 0) {
-
+      if (this_student->getGradeableValue(GRADEABLE_ENUM::EXAM,GRADEABLES[GRADEABLE_ENUM::EXAM].getCount()-1) > 0) {
         took_final++;
       }
-
     }
+
   }
 
   int runningtotal = 0;
