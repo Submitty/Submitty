@@ -18,14 +18,10 @@ Student::Student() {
   independentstudy = false;
 
   // grade data
-  all_values[GRADEABLE_ENUM::READING]       = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::READING].getCount(),0);
-  all_values[GRADEABLE_ENUM::EXERCISE]      = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::EXERCISE].getCount(),0);
-  all_values[GRADEABLE_ENUM::LAB]           = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::LAB].getCount(),0);
-  all_values[GRADEABLE_ENUM::HOMEWORK]      = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(),0);
-  all_values[GRADEABLE_ENUM::PROJECT]       = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::PROJECT].getCount(),0);
-  all_values[GRADEABLE_ENUM::PARTICIPATION] = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::PARTICIPATION].getCount(),0);
-  all_values[GRADEABLE_ENUM::TEST]          = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),0);
-  all_values[GRADEABLE_ENUM::EXAM]          = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::EXAM].getCount(),0);
+  for (int i = 0; i < ALL_GRADEABLES.size(); i++) { 
+    GRADEABLE_ENUM g = ALL_GRADEABLES[i];
+    all_values[g]       = std::vector<float>(GRADEABLES[g].getCount(),0);
+  }
   // (iclicker defaults to empty map)
   hws_late_days                             = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(),0);
   zones = std::vector<std::string>(GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),"");
@@ -205,7 +201,13 @@ int Student::getAllowedLateDays(int which_lecture) const {
   
   float total = getIClickerTotal(which_lecture,0);
   
-  //return answer += int(total / 25);
+  for (int i = 0; i < bonus_late_days_which_lecture.size(); i++) {
+    if (bonus_late_days_which_lecture[i] <= which_lecture) {
+      answer ++;
+    }
+  }
+
+
   return answer += int(total / 30); //25);
   
 }
@@ -230,15 +232,12 @@ int Student::getUsedLateDays() const {
 // =============================================================================================
 
 float Student::overall_b4_moss() const {
-  return 
-    GradeablePercent(GRADEABLE_ENUM::READING) +
-    GradeablePercent(GRADEABLE_ENUM::EXERCISE) +
-    GradeablePercent(GRADEABLE_ENUM::PROJECT) + 
-    GradeablePercent(GRADEABLE_ENUM::PARTICIPATION) +
-    GradeablePercent(GRADEABLE_ENUM::LAB) + 
-    GradeablePercent(GRADEABLE_ENUM::HOMEWORK) + 
-    GradeablePercent(GRADEABLE_ENUM::TEST) + 
-    GradeablePercent(GRADEABLE_ENUM::EXAM);
+  float answer = 0;
+  for (int i = 0; i < ALL_GRADEABLES.size(); i++) { 
+    GRADEABLE_ENUM g = ALL_GRADEABLES[i];
+    answer += GradeablePercent(g);
+  }
+  return answer;
 }
 
 std::string Student::grade(bool flag_b4_moss, Student *lowest_d) const {
@@ -247,7 +246,7 @@ std::string Student::grade(bool flag_b4_moss, Student *lowest_d) const {
   if (section == 11) return "";  // fake section
   if (section == 12) return "";  // fake section
 
-  if (manual_grade != "") return manual_grade;
+  if (!flag_b4_moss && manual_grade != "") return manual_grade;
   
   float over = overall();
   if (flag_b4_moss) {
@@ -296,8 +295,16 @@ void Student::mossify(int hw, float penalty) {
                                  CUTOFFS["B"]-CUTOFFS["C"] +
                                  CUTOFFS["C"]-CUTOFFS["D"]) / 3.0;
 
-  assert (getGradeableValue(GRADEABLE_ENUM::HOMEWORK,hw-1) > 0);
+  if (!(getGradeableValue(GRADEABLE_ENUM::HOMEWORK,hw-1) > 0)) {
+    std::cerr << "WARNING:  the grade for this homework is already 0, moss penalty error?" << std::endl;
+  }
   setGradeableValue(GRADEABLE_ENUM::HOMEWORK,hw-1,0);
+
+  // the penalty is positive
+  // but it will be multiplied by a negative and added to the total;
+  assert (penalty >= 0);
+
+  moss_penalty += -0.0000001;
   moss_penalty += -average_letter_grade * penalty;
 
   other_note += "[MOSS PENALTY " + std::to_string(penalty) + "]";
@@ -327,7 +334,7 @@ void Student::outputgrade(std::ostream &ostr,bool flag_b4_moss,Student *lowest_d
   
   std::string color = GradeColor(g);
   if (moss_penalty < -0.01) {
-    ostr << "<td align=center bgcolor=" << color << ">" << g << " *</td>";
+    ostr << "<td align=center bgcolor=" << color << ">" << g << " @</td>";
   } else {
     ostr << "<td align=center bgcolor=" << color << ">" << g << "</td>";
   }
