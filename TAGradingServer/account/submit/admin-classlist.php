@@ -3,14 +3,81 @@ require "../../toolbox/functions.php";
 
 check_administrator();
 
-// Verify that upload is a true CSV (check file extension and MIME type)
-$fileType = pathinfo($_FILES['classlist']['name'], PATHINFO_EXTENSION);
-$fh = finfo_open(FILEINFO_MIME_TYPE);
-$mimeType = finfo_file($fh, $_FILES['classlist']['tmp_name']);
-finfo_close($fh); //No longer needed once mime type is determined.
+define('TMP_XLSX_PATH', '/tmp/_HSS_xlsx');
+define('TMP_CSV_PATH',  '/tmp/_HSS_csv');
 
-if ($fileType != 'csv' || $mimeType != 'text/plain') {
-    die("Only csv files are allowed!");
+/**
+ * Due to security policy enacted by SuPHP, use of xslx2csv is disallowed in
+ * this script, but is permitted in a separate CGI script.
+ *
+ * This script will work with cgi-bin/xlsx_to_csv.cgi to convert an uploaded
+ * XLSX file to CSV.  Since HWGrading doesn't use session() / $_SESSION, all
+ * pertinent info must be passed via URL parameters, which cannot be considered
+ * secure information.
+ *
+ * IMPORTANT: Expected data uploads contain data regulated by
+ * FERPA (20 U.S.C. ¤ 1232g)
+ * 
+ * As this information must be made secure, existence of this data
+ * (e.g. filenames) should not be shared by URL paramaters.  Therefore,
+ * filenames will be hardcoded.
+ *
+ * Path for detected XLSX files            /tmp/_HSS_xlsx
+ * Path for xlsx to CSV converted files    /tmp/_HSS_csv
+ *
+ * THESE FILES MUST BE IMMEDIATELY PURGED
+ * (1) after the information is inserted into DB.  --OR--
+ * (2) when the script is abruptly halted due to error condition.  e.g. die()
+ *
+ * Both conditions can be met as a closure registered with
+ * register_shutdown_function()
+ */
+ 
+//Verify:  Is this a new upload or a CSV converted from XLSX?
+if (isset($_GET['xlsx2csv']) && $_GET['xlsx2csv'] == 1) {
+
+	//CSV converted from XLSX
+	$csvFile = TMP_CSV_PATH;
+	
+	//Callback to purge temporary files that contain data restricted by FERPA.
+	//The temp files will be purged when this script ends, FOR ANY REASON.
+	register_shutdown_function(
+		function() {
+			if (file_exists(TMP_XLSX_PATH)) {
+				unlink(TMP_XLSX_PATH);
+			}
+
+			if (file_exists(TMP_CSV_PATH)) {
+				unlink(TMP_CSV_PATH);
+			}
+		}
+	);
+} else {
+
+	//New upload. 
+	//Verify that upload is a true CSV or XLSX file (check file extension and MIME type)
+	$fileType = pathinfo($_FILES['classlist']['name'], PATHINFO_EXTENSION);
+	$fh = finfo_open(FILEINFO_MIME_TYPE);
+	$mimeType = finfo_file($fh, $_FILES['classlist']['tmp_name']);
+	finfo_close($fh); //No longer needed once mime type is determined.
+	
+	if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+
+		//XLSX detected, need to do conversion.  Call up CGI script.
+		if (copy($_FILES['classlist']['tmp_name'], TMP_XLSX_PATH)) {
+			header("Location: {$BASE_URL}/cgi-bin/xlsx_to_csv.cgi?course={$_GET['course']}");
+		} else {
+			die("Error isolating uploaded XLSX.");
+		}
+	} else if (($fileType == 'csv' && $mimeType == 'text/plain')) {
+
+		//CSV detected.  No conversion needed.
+		$csvFile = $_FILES['classlist']['tmp_name'];
+	} else {
+
+		//Neither XLSX or CSV detected.  Good bye...
+		die("Only xlsx or csv files are allowed!\n");
+	}
 }
 
 // Get CSV ini config
@@ -20,7 +87,7 @@ if ($csvFieldsINI === false) {
 }
 
 // Read file into row-by-row array.  Returns false on failure.
-$contents = file($_FILES['classlist']['tmp_name'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+$contents = file($csvFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 if ($contents === false) {
 	die("File was not properly uploaded.  Please contact tech support.");
 }
@@ -101,6 +168,5 @@ foreach ($students as $rcs => $student) {
 }
 
 \lib\Database::commit();
-
 
 header("Location: {$BASE_URL}/account/admin-classlist.php?course={$_GET['course']}&update=1");

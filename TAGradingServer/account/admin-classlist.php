@@ -9,7 +9,7 @@ if($user_is_administrator)
     echo <<<HTML
     <div id="container" style="width:100%; margin-top:40px;">
         <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="classlist" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
-            <form action="{$BASE_URL}/cgi-bin/xlsx_to_csv.cgi" method="post" enctype="multipart/form-data">
+            <form action="{$BASE_URL}/account/submit/admin-classlist.php" method="post" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h3 id="myModalLabel">Upload Classlist</h3>
                 </div>

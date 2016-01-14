@@ -69,14 +69,23 @@ apt-get install -qqy clang autoconf automake autotools-dev clisp diffstat emacs 
 hardening-includes python p7zip-full patchutils postgresql-client postgresql-client-9.3 postgresql-client-common \
 unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libfile-mmagic-perl \
-libgnupg-interface-perl php5-pgsql libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
-libseccomp2 seccomp junit cmake
+libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
+libseccomp2 seccomp junit cmake xlsx2csv
+
+# Enable PHP5-mcrypt
+php5enmod mcrypt
 
 # Install Oracle 8 Non-Interactively
 echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
 echo "instlling java8"
 apt-get install -qqy oracle-java8-installer > /dev/null 2>&1
+
+# Install Racket and Swi-prolog for Programming Languages
+echo "installing Racket and Swi-prolog"
+apt-add-repository -y ppa:plt/racket  > /dev/null 2>&1
+apt-get install -qqy racket > /dev/null 2>&1
+apt-get install -qqy swi-prolog > /dev/null 2>&1
 
 #################################################################
 # JAR SETUP
