@@ -120,7 +120,8 @@ function check_semester(){
         }
 //FIXME: 
 //        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
-        header("Location: ERROR_bad_semester_error.html");
+        header("Location: ERROR_Xbad_semester_error.html");
+	return "f00";
         exit();
     }
 }	
@@ -144,12 +145,15 @@ function check_course() {
     }
 
     if (is_valid_course($semester,$course)) {
+        $_SESSION["status"] = "";
+
         return $course;
     } else {
         $_SESSION["status"] = "Invalid course specified";
 //FIXME: 
 //        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
-        header("Location: ERROR_bad_course_error.html");
+//        header("Location: ERROR_X_bad_course_error.html");
+	  return "csci0000";
         exit();
     }
 }
