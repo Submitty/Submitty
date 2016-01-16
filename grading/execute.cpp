@@ -37,17 +37,23 @@ bool system_program(const std::string &program) {
   assert (program.size() >= 1);
   if (program == "/bin/ls" ||
       program == "/usr/bin/time" ||
+      program == "/bin/mv" || 
+      program == "/bin/chmod" || 
+      program == "/usr/bin/find" || 
+      // for Computer Science I
+      program == "/usr/bin/python" ||
+      // for Data Structures
       program == "/usr/bin/clang++" ||
       program == "/usr/bin/g++" ||
       program == "/usr/bin/valgrind" ||
       program == "/usr/local/hss/drmemory/bin/drmemory" ||
-      program == "/bin/mv" || 
-      program == "/bin/chmod" || 
-      program == "/usr/bin/find" || 
       program == "/usr/bin/compare" ||  // image magick! 
-      program == "/usr/bin/python" ||
+      // for Principles of Software
       program == "/usr/bin/java" ||
-      program == "/usr/bin/javac") {
+      program == "/usr/bin/javac" ||
+      // for Programming Languages
+      program == "/usr/bin/swipl" ||
+      program == "/usr/bin/plt-r5rs") {
     return true;
   }
   return false;
