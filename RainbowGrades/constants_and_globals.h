@@ -45,6 +45,7 @@ extern std::map<std::string,float> CUTOFFS;
 extern std::map<Grade,int> grade_counts;
 extern std::map<Grade,float> grade_avg;
 extern int took_final;
+extern int dropped;
 extern int auditors;
 extern float LATE_DAY_PERCENTAGE_PENALTY;
 

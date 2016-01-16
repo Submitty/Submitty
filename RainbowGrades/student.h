@@ -52,6 +52,8 @@ public:
   int getUsedLateDays(int which) const;
   float getMossPenalty() const { return moss_penalty; }
 
+  void add_bonus_late_day(int which_lecture) { bonus_late_days_which_lecture.push_back(which_lecture); }
+
   // other grade-like data
   const std::string& getRemoteID() const { return remote_id; }
   bool getAcademicIntegrityForm()  const { return academic_integrity_form; }
@@ -148,7 +150,7 @@ private:
 
   std::string lastUpdate;
 
-  // registration status
+    // registration status
   int section;
   bool audit;
   bool withdraw;
@@ -167,6 +169,8 @@ private:
   bool academic_integrity_form;
   int participation;
   int understanding;
+
+  std::vector<int> bonus_late_days_which_lecture;
 
   // info about exam assignments
   std::string exam_zone;
