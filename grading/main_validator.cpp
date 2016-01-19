@@ -104,6 +104,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 #endif
 
 
+  system ("ls -lta");
+
 
   // LOOP OVER ALL TEST CASES
   for (int i = 0; i < testcases.size(); ++i) {
@@ -116,8 +118,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
     int testcase_pts = 0;
     std::string message = "";
-
-    //    system ("ls -lta");
 
     // FILE EXISTS & COMPILATION TESTS DON'T HAVE FILE COMPARISONS
     if (testcases[i].isFileExistsTest()) {

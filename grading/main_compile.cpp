@@ -130,12 +130,13 @@ int main(int argc, char *argv[]) {
 
 
 #ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-      std::string replace_string_before = __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__;
-      std::string replace_string_after  = CustomizeAutoGrading(rcsid);
-      std::cout << "CUSTOMIZE AUTO GRADING for user '" << rcsid << "'" << std::endl;
-      std::cout << "CUSTOMIZE AUTO GRADING replace " <<  replace_string_before << " with " << replace_string_after << std::endl;
+  std::string replace_string_before = __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__;
+  std::string replace_string_after  = CustomizeAutoGrading(rcsid);
+  std::cout << "CUSTOMIZE AUTO GRADING for user '" << rcsid << "'" << std::endl;
+  std::cout << "CUSTOMIZE AUTO GRADING replace " <<  replace_string_before << " with " << replace_string_after << std::endl;
 #endif
 
+  system ("ls -lta");
 
   // Run each COMPILATION TEST
   for (unsigned int i = 0; i < testcases.size(); i++) {

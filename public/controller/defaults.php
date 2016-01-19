@@ -1,4 +1,4 @@
 <?php
-    $default_semester="f15";
+    $default_semester="s16";
     $default_course="default_class";
 ?>

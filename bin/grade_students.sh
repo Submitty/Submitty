@@ -523,7 +523,7 @@ function grade_this_item {
     #  --include="*.XXX"  grab all .XXX files
     #  --exclude="*"  exclude everything else
 
-    rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"   --include="*.class"  --include="*.py"  --include="*README*"  --include="test*.txt" --include="data/*" --exclude="*"  $tmp_compilation/  $tmp  
+    rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"  --include="*.class"  --include="*.py" --include="*.pl"  --include="*.rkt"  --include="*README*"  --include="test*.txt" --include="data/*" 	--exclude="*"  $tmp_compilation/  $tmp  
     
     # NOTE: Also grabbing all student data files (files with 'data/' directory in path)
     # remove the compilation directory
