@@ -38,7 +38,7 @@ if (isset($_GET['xlsx2csv']) && $_GET['xlsx2csv'] == 1) {
 
 	//CSV converted from XLSX
 	$csvFile = TMP_CSV_PATH;
-	die("did it!");
+
 	//Callback to purge temporary files that contain data restricted by FERPA.
 	//The temp files will be purged when this script ends, FOR ANY REASON.
 	register_shutdown_function(
