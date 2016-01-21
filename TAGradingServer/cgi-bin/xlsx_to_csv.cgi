@@ -58,7 +58,7 @@ $err_code |= (file_exists(TMP_XLSX_PATH)) ? 0 : 0x00000010;
 die_on_error($err_code);
 
 //XLSX to CSV conversion
-$proc_handle = popen("xlsx2csv -d , -i -s 0 " . TMP_XLSX_PATH . " " . TMP_CSV_PATH, "r");
+$proc_handle = popen("xlsx2csv -d , -i -s 0 " . TMP_XLSX_PATH . " " . TMP_CSV_PATH . " 2>&1", "r");
 
 //Validate result after process.  Error codes are bitwise set.
 $err_code = 0;
