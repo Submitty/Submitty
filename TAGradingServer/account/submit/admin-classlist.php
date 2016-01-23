@@ -41,17 +41,17 @@ if (isset($_GET['xlsx2csv']) && $_GET['xlsx2csv'] == 1) {
 
 	//Callback to purge temporary files that contain data restricted by FERPA.
 	//The temp files will be purged when this script ends, FOR ANY REASON.
-	register_shutdown_function(
-		function() {
-			if (file_exists(TMP_XLSX_PATH)) {
-				unlink(TMP_XLSX_PATH);
-			}
-
-			if (file_exists(TMP_CSV_PATH)) {
-				unlink(TMP_CSV_PATH);
-			}
-		}
-	);
+//	register_shutdown_function(
+//		function() {
+//			if (file_exists(TMP_XLSX_PATH)) {
+//				unlink(TMP_XLSX_PATH);
+//			}
+//
+//			if (file_exists(TMP_CSV_PATH)) {
+//				unlink(TMP_CSV_PATH);
+//			}
+//		}
+//	);
 } else {
 
 	//New upload. 
@@ -67,7 +67,7 @@ if (isset($_GET['xlsx2csv']) && $_GET['xlsx2csv'] == 1) {
 		if (copy($_FILES['classlist']['tmp_name'], TMP_XLSX_PATH)) {
 			header("Location: {$BASE_URL}/cgi-bin/xlsx_to_csv.cgi?course={$_GET['course']}");
 		} else {
-			die("Error isolating uploaded XLSX.");
+			die("Error isolating uploaded XLSX.  Please contact tech support.");
 		}
 	} else if (($fileType == 'csv' && $mimeType == 'text/plain')) {
 
@@ -107,10 +107,9 @@ foreach($contents as $content) {
 	$err = "";
 
 	//First name must be alpha characters or certain punctuation.
-	$err .= (preg_match("~^[a-zA-Z'`\-]+$~", $val['student_first_name'])) ? "" : "Error in student first name column.<br>";
-	
+	$err .= (preg_match("~^[a-zA-Z'`\- ]+$~", $val['student_first_name'])) ? "" : "Error in student first name column.<br>";
 	//Last name must be alpha characters or certain punctuation.
-	$err .= (preg_match("~^[a-zA-Z'`\-]+$~", $val['student_last_name'])) ? "" : "Error in student first name column.<br>";
+	$err .= (preg_match("~^[a-zA-Z'`\- ]+$~", $val['student_last_name'])) ? "" : "Error in student last name column.<br>";
 
 	//Student section must be greater than zero (intval($str) returns zero when $str is not integer)
 	$err .= ($val['student_section'] > 0) ? "" : "Error in student section column.<br>";
@@ -118,7 +117,7 @@ foreach($contents as $content) {
 	//No check on rcs (computing login ID) -- different Univeristies have different formats.
 
 	if (empty($err) === false) {
-		die($err);
+		die($err . "Contact your sysadmin.");
 	}
 }
 
@@ -150,6 +149,11 @@ foreach ($rows as $row) {
 		\lib\Database::query("INSERT INTO late_days (student_rcs, allowed_lates, since_timestamp) VALUES(?, ?, TIMESTAMP '1970-01-01 00:00:01')", array($rcs, __DEFAULT_LATE_DAYS_STUDENT__));
 	}
 }
+
+//
+//Server exception in the above for-each block when xlsx to csv conversion done.
+//Likely due to $_POST data lost when cgi script is called.
+//
 
 foreach ($students as $rcs => $student) {
 	if (isset($_POST['ignore_manual_2']) && $_POST['ignore_manual_2'] == true && $student['student_manual'] == 1) {
