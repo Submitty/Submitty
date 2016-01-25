@@ -1,15 +1,10 @@
 #include <unistd.h>
 #include "TestCase.h"
 
-/*
 
-float custom_grade(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv);
+std::string GLOBAL_replace_string_before = "";
+std::string GLOBAL_replace_string_after = "";
 
-
-// this isn't needed by all homeworks...  needs a rethink
-float custom_grade(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv) { return 0.0; }
-
-*/
 
 int TestCase::next_test_case_id = 1;
 
@@ -23,7 +18,8 @@ TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {
   std::ifstream student_file(filename(j).c_str());
   if (!student_file) {
     std::stringstream tmp;
-    tmp << "Error: comparison " << j << ": Student's " << filename(j) << " does not exist";
+    //tmp << "Error: comparison " << j << ": Student's " << filename(j) << " does not exist";
+    tmp << "ERROR! Student's " << filename(j) << " does not exist";
     std::cerr << tmp.str() << std::endl;
     helper_message += tmp.str();
     ok_to_compare = false;
@@ -32,13 +28,30 @@ TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {
   std::string expected = "";
   assert (test_case_grader_vec[j] != NULL);
   //  if (test_case_grader[j] != NULL) {
-    expected = test_case_grader_vec[j]->getExpected();
+  expected = test_case_grader_vec[j]->getExpected();
     //}
+
+  std::cout << "IN TEST CASE " << std::endl;
+
+  //#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
+  if (GLOBAL_replace_string_before != "") {
+    std::cout << "BEFORE " << expected << std::endl;
+    while (1) {
+      int location = expected.find(GLOBAL_replace_string_before);
+      if (location == std::string::npos) 
+	break;
+      expected.replace(location,GLOBAL_replace_string_before.size(),GLOBAL_replace_string_after);
+    }
+    std::cout << "AFTER  " << expected << std::endl;
+  }
+  //#endif
+
 
   std::ifstream expected_file(expected.c_str());
   if (!expected_file && expected != "") {
     std::stringstream tmp;
-    tmp << "Error: comparison" << j << ": Instructor's " + expected + " does not exist!";
+    //tmp << "Error: comparison" << j << ": Instructor's " + expected + " does not exist!";
+    tmp << "ERROR! Instructor's " + expected + " does not exist!";
     std::cerr << tmp.str() << std::endl;
     if (helper_message != "") helper_message += "<br>";
     helper_message += tmp.str();
@@ -61,7 +74,29 @@ TestResults* TestCaseComparison::doit(const std::string &prefix) {
   std::cout << "IN DOIT FOR COMPARISON '" << prefix+"_"+filename << "' '" << expected_file << "'" << std::endl;
 
   std::ifstream student_instr((prefix+"_"+filename).c_str());
-  std::ifstream expected_instr(expected_file.c_str());
+
+
+
+
+  //#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
+  std::string expected = expected_file;
+  if (GLOBAL_replace_string_before != "") {
+    std::cout << "BEFORE " << expected << std::endl;
+    while (1) {
+      int location = expected.find(GLOBAL_replace_string_before);
+      if (location == std::string::npos) 
+	break;
+      expected.replace(location,GLOBAL_replace_string_before.size(),GLOBAL_replace_string_after);
+    }
+    std::cout << "AFTER  " << expected << std::endl;
+  }
+  //#endif
+
+
+
+
+  //std::ifstream expected_instr(expected_file.c_str());
+  std::ifstream expected_instr(expected.c_str());
 
   std::string s = "";
   std::string e = "";
@@ -84,11 +119,11 @@ TestResults* TestCaseComparison::doit(const std::string &prefix) {
 
   if (s.size() > MYERS_DIFF_MAX_FILE_SIZE) {
     std::cout << "ERROR: student file size too big " << s.size() << " > " << MYERS_DIFF_MAX_FILE_SIZE << std::endl;
-    return new TestResults(0,"Error: student file too large for grader");
+    return new TestResults(0,"ERROR!  Student file too large for grader<br>\n");
   }
   if (e.size() > MYERS_DIFF_MAX_FILE_SIZE) {
     std::cout << "ERROR: expected file size too big " << e.size() << " > " << MYERS_DIFF_MAX_FILE_SIZE << std::endl;
-    return new TestResults(0,"Error: expected file too large for grader");
+    return new TestResults(0,"ERROR!  Instructor expected file too large for grader<br>\n");
   }
 
 
@@ -116,7 +151,7 @@ TestResults* TestCaseTokens::doit(const std::string &prefix) {
 
   if (s.size() > OTHER_MAX_FILE_SIZE) {
     std::cout << "ERROR: student file size too big " << s.size() << " > " << OTHER_MAX_FILE_SIZE << std::endl;
-    return new TestResults(0,"Error: student file too large for grader");
+    return new TestResults(0,"ERROR! Student file too large for grader<br>\n");
   }
 
   //return test_case_grader[j]->cmp_output (s,e);
@@ -135,7 +170,7 @@ TestResults* TestCaseCustom::doit(const std::string &prefix) {
 
   if (!student_instr) {
     std::cout << "ERROR: STUDENT FILE DOES NOT EXIST" << std::endl;
-    return new TestResults(0,"Error: student file does not exist");
+    return new TestResults(0,"ERROR! Student file does not exist<br>\n");
   }
 
 
@@ -151,7 +186,7 @@ TestResults* TestCaseCustom::doit(const std::string &prefix) {
 
 
   std::stringstream output;
-  float answer = custom_grader(student_instr,output,argv);
+  float answer = custom_grader(student_instr,output,argv,*this); //my_display_mode);
 
 
   std::cout << "GRADE: " << answer << "\nOUTPUT:\n" << output.str() << std::endl;

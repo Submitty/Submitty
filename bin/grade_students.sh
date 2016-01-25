@@ -495,7 +495,8 @@ function grade_this_item {
 	chmod -R go+rwx $tmp
 	
 	# run the compile.out as the untrusted user
-	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out >& $tmp/.submit_compile_output.txt
+	echo '$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$assignment" "$user" "$version" "$submission_time" >& $tmp/.submit_compile_output.txt'
+	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$assignment" "$user" "$version" "$submission_time" >& $tmp/.submit_compile_output.txt
 	
 	compile_error_code="$?"
 	if [[ "$compile_error_code" -ne 0 ]] ;
@@ -522,7 +523,7 @@ function grade_this_item {
     #  --include="*.XXX"  grab all .XXX files
     #  --exclude="*"  exclude everything else
 
-    rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"   --include="*.class"  --include="*.py"  --include="*README*"  --include="test*.txt"  --include="data/*" --exclude="*"  $tmp_compilation/  $tmp  
+    rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"  --include="*.class"  --include="*.py" --include="*.pl"  --include="*.rkt"  --include="*README*"  --include="test*.txt" --include="data/*" 	--exclude="*"  $tmp_compilation/  $tmp  
     
     # NOTE: Also grabbing all student data files (files with 'data/' directory in path)
     # remove the compilation directory
@@ -549,7 +550,8 @@ function grade_this_item {
 	chmod -R go+rwx $tmp
 	
 	# run the run.out as the untrusted user
-	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp/my_run.out >& .submit_runner_output.txt
+	echo '$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$assignment" "$user" "$version" "$submission_time" >& .submit_runner_output.txt'
+	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$assignment" "$user" "$version" "$submission_time" >& .submit_runner_output.txt
 	runner_error_code="$?"
 
 	# change permissions of all files created by untrusted in this directory (so hwcron can archive/grade them)
@@ -620,7 +622,7 @@ function grade_this_item {
     # Make directory structure in results if it doesn't exist
     mkdir -p "$results_path" || log_error "$NEXT_TO_GRADE" "Could not create results path $results_path"
 
-    cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/.submit* $tmp/submission.json $tmp/test*.json "$results_path"
+    cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/test*.html $tmp/.submit* $tmp/submission.json $tmp/test*.json "$results_path"
 
 
     # FIXME: a global variable

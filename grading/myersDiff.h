@@ -47,6 +47,7 @@ template<class T> Difference* printJSON ( Difference & text_diff, std::ofstream 
 
 TestResults* warnIfNotEmpty (const std::string & student_file, const std::string & expected_file);
 TestResults* errorIfNotEmpty ( const std::string & student_file, const std::string & expected_file);
+TestResults* warnIfEmpty ( const std::string & student_file, const std::string & expected_file);
 TestResults* errorIfEmpty ( const std::string & student_file, const std::string & expected_file);
 
 TestResults* myersDiffbyLinebyWord ( const std::string & student_file, const std::string & expected_file);
@@ -54,5 +55,9 @@ TestResults* myersDiffbyLineNoWhite ( const std::string & student_file, const st
 TestResults* myersDiffbyLine ( const std::string & student_file, const std::string & expected_file);
 TestResults* myersDiffbyLinebyChar ( const std::string & student_file, const std::string & expected_file);
 TestResults* myersDiffbyLinebyCharExtraStudentOutputOk ( const std::string & student_file, const std::string & expected_file);
+
+
+TestResults* diffLineSwapOk ( const std::string & student_file, const std::string & expected_file);
+
 
 #endif
