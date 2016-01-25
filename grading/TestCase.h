@@ -56,7 +56,8 @@ public:
 
   virtual TestResults* doit(const std::string &prefix) = 0;
 
-  virtual std::string getExpected() { return ""; }
+  virtual std::string getExpected() const { return ""; }
+  virtual std::string display_mode() const { return ""; }
 };
 
 class TestCaseComparison : public TestCaseGrader {
@@ -69,7 +70,7 @@ public:
     : TestCaseGrader(file,desc), cmp_output(cmp), expected_file(expect)  {points_fraction=points_frac;}
   TestResults* (*cmp_output) ( const std::string&, const std::string& );
   std::string expected_file;
-  virtual std::string getExpected() { return expected_file; }
+  virtual std::string getExpected() const { return expected_file; }
   virtual TestResults* doit(const std::string &prefix);
 };
 
@@ -94,17 +95,22 @@ public:
 
 class TestCaseCustom : public TestCaseGrader {
 public:
-  TestCaseCustom(float (*custom_grader_)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv),
+  TestCaseCustom(float (*custom_grader_)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv, TestCaseCustom& custom_testcase),
 		 const std::string file,
 		 const std::string desc,
 		 const std::string arg_string,
 		 float points_frac=-1.0)
-    : TestCaseGrader(file,desc), custom_grader(custom_grader_) {my_arg_string = arg_string; points_fraction=points_frac;}
+    : TestCaseGrader(file,desc), custom_grader(custom_grader_) { my_arg_string = arg_string; points_fraction=points_frac; my_display_mode = ""; }
 
-  float (*custom_grader)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv);
+  float (*custom_grader)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv,  TestCaseCustom& custom_testcase);
   virtual TestResults* doit(const std::string &prefix);
+  virtual std::string display_mode() const { return my_display_mode; }
+
+  void set_display_mode(const std::string& dm) { my_display_mode = dm; }
+
 private:
   std::string my_arg_string;
+  std::string my_display_mode;
 };
 
 
@@ -233,7 +239,7 @@ public:
     answer._command = command;
     assert (answer._command != "");
     answer._test_case_points = tcp;
-    assert (tcc.size() >= 1 && tcc.size() <= 4);
+    assert (tcc.size() >= 1); // && tcc.size() <= 4);
     answer.test_case_grader_vec = tcc; 
     answer._filenames.push_back(filename);
     answer.view_file_results = true;

@@ -13,46 +13,50 @@
 #include "clean.h"
 
 TestResults* warnIfNotEmpty (const std::string & student_file, const std::string & expected_file) {
-  //std::cout << "in warn if not empty" << std::endl;
-  //  std::cout << "the file '" << student_file << "'" << std::endl;
   // the instructor file should be empty
   assert (expected_file == "");
-  Tokens* answer = new Tokens();
-  if (student_file != "") {
-    answer->setMessage("WARNING: This should be empty");
-    //std::cout << "in warn if not empty -- student file not empty" << std::endl;
+  // simply check the student file
+  if (student_file == "") {
+    return new TestResults(1.0);
+  } else {
+    return new TestResults(1.0,"WARNING: This file should be empty");
   }
-  return answer;
 }
 
 TestResults* errorIfNotEmpty ( const std::string & student_file, const std::string & expected_file) {
-  std::cout << "in error if not empty" << std::endl;
-  std::cout << "the file '" << student_file << "'" << std::endl;
   // the instructor file should be empty
   assert (expected_file == "");
-  Tokens* answer = new Tokens();
-  if (expected_file != "") {
-    answer->setMessage("ERROR: This should be empty");
-    std::cout << "in error if not empty -- student file not empty" << std::endl;
-    answer->setGrade(0);
+  // simply check the student file
+  if (student_file == "") {
+    return new TestResults(1.0);
+  } else {
+    return new TestResults(0.0,"ERROR: This file should be empty!");
   }
-  return answer;
 }
 
+
+TestResults* warnIfEmpty (const std::string & student_file, const std::string & expected_file) {
+  // the instructor file should be empty
+  assert (expected_file == "");
+  // simply check the student file
+  if (student_file == "") {
+    return new TestResults(1.0,"WARNING: This file should not be empty");
+  } else {
+    return new TestResults(1.0);
+  }
+}
 
 TestResults* errorIfEmpty ( const std::string & student_file, const std::string & expected_file) {
-  std::cout << "in error if empty" << std::endl;
-  std::cout << "the file '" << student_file << "'" << std::endl;
   // the instructor file should be empty
   assert (expected_file == "");
-  Tokens* answer = new Tokens();
+  // simply check the student file
   if (student_file == "") {
-    answer->setMessage("ERROR: This should be non empty");
-    std::cout << "in error if empty -- student file empty" << std::endl;
-    answer->setGrade(0);
+    return new TestResults(0.0,"ERROR: This file should not be empty!");
+  } else {
+    return new TestResults(1.0);
   }
-  return answer;
 }
+
 
 TestResults* myersDiffbyLinebyWord ( const std::string & student_file, const std::string & expected_file) {
 	vectorOfWords text_a = stringToWords( student_file );
@@ -107,6 +111,140 @@ TestResults* myersDiffbyLinebyCharExtraStudentOutputOk ( const std::string & stu
 	return diff;
 #endif
 }
+
+
+// ===============================================================================
+// ===============================================================================
+
+// Helper function used by diffLineSwapOk to highlight incorrect,
+// missing, and duplicate lines in the file
+//
+// FIXME: this should be rewritten to use the json library!
+void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int student_line, int expected_line, bool only_student, bool only_expected) {
+  if (!first_diff) {
+    swap_difference << "  ,\n";
+  }
+  swap_difference << "  {\n";
+  swap_difference << "    \"student\":\n";
+  swap_difference << "      {\n";
+  swap_difference << "        \"start\": " << student_line;
+  if (!only_expected) { 
+    swap_difference << ",\n";
+    swap_difference << "        \"line\": [ { \"line_number\": " << student_line << " } ]\n";
+  }
+  swap_difference << "\n";
+  swap_difference << "      },\n";
+  swap_difference << "    \"instructor\":\n";
+  swap_difference << "      {\n";
+  swap_difference << "        \"start\": " << expected_line;
+  if (!only_student) { 
+    swap_difference << ",\n";
+    swap_difference << "        \"line\": [ { \"line_number\": " << expected_line << " } ]\n";
+  }
+  swap_difference << "\n";
+  swap_difference << "      }\n";
+  swap_difference << "  }\n";
+  first_diff = false;
+}
+
+
+// Grader that requires every line to match, but the lines may be in a
+// different order than the expected file.
+//
+// FIXME: might be nice to highlight small errors on a line
+//
+TestResults* diffLineSwapOk (const std::string & student_file, const std::string & expected_file) {
+
+  // break each file (at the newlines) into vectors of strings
+  vectorOfLines student = stringToLines( student_file );
+  vectorOfLines expected = stringToLines( expected_file );
+
+  // check for an empty solution file
+  if (expected.size() < 1) {
+    return new TestResults(0.0,"ERROR!  expected file is empty");
+  }
+  assert (expected.size() > 0);
+
+  // where we will temporarily write the line highlighting json file.
+  // FIXME: currently coloring all problems the same color... could
+  // extend to specify a difference color for incorrect vs. missing
+  // vs. duplicate
+  std::stringstream swap_difference;
+  swap_difference << "{\n";
+  swap_difference << "\"differences\":[\n";
+  bool first_diff = true;
+  ;
+  // counts of problems between the student & expected file
+  int incorrect = 0;
+  int duplicates = 0;
+  int missing = 0;
+
+  // for each line of the expected file, count the number of lines in
+  // the student file that match it.
+  std::vector<int> matches(expected.size(),0);
+
+  // walk through the student file, trying to find a unique match in
+  // the expected file.
+  // FIXME: Currently assuming all lines in the expected file are
+  // unique...  could make this more sophisticated.
+  for (unsigned int i = 0; i < student.size(); i++) {
+    bool match = false;
+    bool duplicate = false;
+    for (unsigned int j = 0; j < expected.size(); j++) {
+      if (student[i] == expected[j]) {
+	if (matches[j] > 0) duplicate = true;
+	matches[j]++;
+	match = true;
+	break;
+      }
+    }
+    if (!match) {
+      incorrect++;
+    }
+    if (!match || duplicate) {
+      LineHighlight(swap_difference,first_diff,i,expected.size()+10,true,false);
+    }
+  }
+
+  // count the number of missing lines
+  for (unsigned int j = 0; j < expected.size(); j++) {
+    if (matches[j] == 0) {
+      missing++;
+      LineHighlight(swap_difference,first_diff,student.size()+10,j,false,true);
+    }
+    if (matches[j] > 1) duplicates+= (matches[j]-1);
+  }
+  swap_difference << "]\n";
+  swap_difference << "}\n";
+
+  // calculate the score
+  int wrong = std::max(missing,duplicates+incorrect);
+  double score = double(expected.size()-wrong)/double(expected.size());
+  score = std::max(0.0,score);
+
+  // prepare the graded message for the student
+  std::stringstream ss;
+  if (incorrect > 0) { 
+    ss << "ERROR: " << incorrect << " incorrect line(s)";
+  }
+  if (duplicates > 0) { 
+    if (ss.str().size() > 0) {
+      ss << ", ";
+    }
+    ss << "ERROR: " << duplicates << " duplicate line(s)";
+  }
+  if (missing > 0) {
+    if (ss.str().size() > 0) {
+      ss << ", ";
+    }
+    ss << "ERROR: " << missing << " missing line(s)";
+  }
+  
+  return new TestResults(score,ss.str(),swap_difference.str());
+}
+
+// ===============================================================================
+// ===============================================================================
 
 // Runs all the ses functions
 template<class T> Difference* ses ( T* a, T* b, bool secondary, bool extraStudentOutputOk  ) {

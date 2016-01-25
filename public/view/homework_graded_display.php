@@ -132,111 +132,107 @@
 			?>
 			<div id="sidebysidediff<?php echo $counter;?>"  class="view_diffs" style="display:block">
 			<?php
+			 
+			 if (isset($test["compilation_output"]) && trim($test["compilation_output"])!="") {
+			   echo '<div class="diff-block"><b class="sub2">Compilation output:</b><pre class="complation_mess">'.htmlentities($test["compilation_output"]).'</pre></div>';
+			 }
+ 			 if (isset($test["execute_logfile"]) && trim($test["execute_logfile"])!="") {
+			   echo '<div class="diff-block"><b class="sub2">Execution output:</b><pre class="complation_mess">'.htmlentities($test["execute_logfile"]).'</pre></div>';
+			 }
 
-				if (isset($test["compilation_output"]) && trim($test["compilation_output"])!="") {
-					echo '<div class="diff-block"><b class="sub2">Compilation output:</b><pre class="complation_mess">'.htmlentities($test["compilation_output"]).'</pre></div>';
-				}
-				if (isset($test["execute_logfile"]) && trim($test["execute_logfile"])!="") {
-					echo '<div class="diff-block"><b class="sub2">Execution output:</b><pre class="complation_mess">'.htmlentities($test["execute_logfile"]).'</pre></div>';
-				}
+			?>
+			
+			<!-- MULTIPLE DIFFS -->
 
-				?>
-				<!-- MULTIPLE DIFFS -->
-					<?php
-					if (isset($test["diffs"])) {
-						foreach ($test["diffs"] as $diff) {
-							if (isset($diff["message"]) && trim($diff["message"])!="") {
+			<?php
 
-							
-								echo '<div class="diff-block"><div class="error_mess_diff">'.html_entity_decode($diff["message"]).'</div></div>';
-								//echo '<div class="diff-block"><a class="error_mess_diff">'."MESSAGE ".htmlentities($diff["message"]).'</a></div>';
+			 if (isset($test["diffs"])) {
+		
+			   foreach ($test["diffs"] as $diff) {
 
-								echo '<div class="spacer"></div>';
-							}
-							if ((!isset($diff["student"]) || trim($diff["student"]) == "") &&
-								(!isset($diff["instructor"]) || trim($diff["instructor"]) == ""))
-							{
-								continue;
-							}
-							$instructor_row_class = "diff-row";
-							?>
-							<div class="diff-block"> <!-- diff block -->
-								<div class="diff-element"><!-- student diff element -->
-									<b>Student <?php if (isset($diff["description"])) { echo htmlentities($diff["description"]); } ?></b>
+			     if (isset($diff["message"]) && trim($diff["message"])!="") {
+			       echo '<div class="error_mess_diff">'.html_entity_decode($diff["message"]).'</div>';
+			       
+			       //echo '<div class="diff-block"><div class="error_mess_diff">'.html_entity_decode($diff["message"]).'</div></div>';
 
-									<div class="panel panel-default" id="<?php echo htmlentities($diff["diff_id"]); ?>_student">
-										<?php
-										if (isset($diff["student"]) && trim($diff["student"]) != "")
-										{
-											echo '<tt class="mono">';
-											$str=$diff["student"];
-											$str=str_replace("\r","\\r",$str);
-											echo htmlentities($str);
-											echo '</tt>';
-										}
-										?>
-									</div>
-								</div><!-- end student diff element -->
+			       //echo '<div class="spacer"></div>';
+			     }
+			     if ((!isset($diff["student"]) || trim($diff["student"]) == "") &&
+				 (!isset($diff["instructor"]) || trim($diff["instructor"]) == "")) {
+			       continue;
+			     }
+			     $instructor_row_class = "diff-row";
+			     echo '<div class="diff-block">'; // <!-- diff block -->
+			     echo '<div class="diff-element">'; //<!-- student diff element -->
+			     
+			     echo '<b>Student ';
+			     if (isset($diff["description"])) { echo htmlentities($diff["description"]); }
+			     echo '</b>';
+			     if (isset($diff["student"]) && trim($diff["student"]) != "" && !isset($diff["display_mode"])) {
+			       echo '<div class="panel panel-default" id="';
+			       echo htmlentities($diff["diff_id"]);
+			       echo '_student">';
+			       echo '<tt class="mono">';
+			       $str=$diff["student"];
+			       $str=str_replace("\r","\\r",$str);
+			       echo htmlentities($str);
+			       echo '</tt>';
+			       echo '</div>';
+			     }
 
+			     if (isset($diff["student"]) && trim($diff["student"]) != "" && isset($diff["display_mode"]) && $diff["display_mode"] == "svg_validated") {
+			       $str=$diff["student"];
+			       echo $str;
+			     }
 
-
-								<?php
-								if 	(isset($diff["instructor"]) && trim($diff["instructor"]) != ""){
-									?>
-									<div class="diff-element"><!-- instructor diff element -->
-
-										<b>Expected <?php if (isset($diff["description"])) { echo htmlentities($diff["description"]); } ?></b>
-
-										<div class="panel panel-default" id="<?php echo htmlentities($diff["diff_id"]); ?>_instructor">
-											<?php
-											if (isset($diff["instructor"]) && trim($diff["instructor"]) != "")
-											{
-												echo '<tt class="mono">';
-												$str=$diff["instructor"];
-												$str=str_replace("\r","\\r",$str);
-												echo htmlentities($str);
-												echo '</tt>';
-											}
-											else
-											{
-												echo "";
-											}?>
-										</div>
-									</div><!-- end instructor diff element -->
-									<?php
-								}
-
-
-								if ((isset($diff["student"]) && trim($diff["student"]) != "") &&
-									(isset($diff["instructor"]) && trim($diff["instructor"]) != ""))
-								{
-									?>
-									<!-- <div style="clear:both;"></div> -->
-
-									<script><!-- script -->
-										diff_queue.push("<?php echo $diff["diff_id"]; ?>");
-										diff_objects["<?php echo $diff["diff_id"]; ?>"] = <?php echo $diff["difference"]; ?>;
-									</script><!-- end script -->
-									<?php
-								}
-								?>
-							</div><!-- end div block -->
-							<div class="spacer"></div>
-						<!-- </div> end sidebysidediff -->
-						<?php
-						// first one ends foreach diff in diffs. Second ends if is set of diff
-					}
-				}
-				?>
-				<!-- END MULTIPLE DIFFS -->
-
-			</div><!-- end sidebysidediff# -->
-			<?php $counter++;?>
-		</div><!-- end box -->
-		<?php
-		// end foreach homework_tests as test
+			     echo '</div>'; //<!-- end student diff element -->
+			     if (isset($diff["instructor"]) && trim($diff["instructor"]) != ""){
+			       echo '<div class="diff-element">'; //<!-- instructor diff element -->
+			       echo '<b>Expected';
+			       if (isset($diff["description"])) { echo htmlentities($diff["description"]); }
+			       echo '</b>';
+			       echo '<div class="panel panel-default" id="';
+			       echo htmlentities($diff["diff_id"]);
+			       echo '_instructor">';
+			       if (isset($diff["instructor"]) && trim($diff["instructor"]) != "") {
+				 echo '<tt class="mono">';
+				 $str=$diff["instructor"];
+				 $str=str_replace("\r","\\r",$str);
+				 echo htmlentities($str);
+				 echo '</tt>';
+			       } else {
+				 echo "";
+			       }
+			       echo '</div>';
+			       echo '</div>'; //<!-- end instructor diff element -->
+			     }
+			     if ((isset($diff["student"]) && trim($diff["student"]) != "") &&
+				 (isset($diff["instructor"]) && trim($diff["instructor"]) != "")) {
+			       //					 <!-- <div style="clear:both;"></div> -->
+			       echo '<script>'; //<!-- script -->
+			       echo 'diff_queue.push("';
+			       echo $diff["diff_id"];
+			       echo '");';
+			       echo 'diff_objects["';
+			       echo $diff["diff_id"];
+			       echo '"] = ';
+			       echo $diff["difference"];
+			       echo ';';
+			       echo '</script>'; //<!-- end script -->
+			     }
+			     echo '</div>'; //<!-- end div block -->
+			     echo '<div class="spacer"></div>';
+			     //<!-- </div> end sidebysidediff -->
+			     // first one ends foreach diff in diffs. Second ends if is set of diff
+			   }
+			 }
+			 //				<!-- END MULTIPLE DIFFS -->
+			 echo '</div>'; //<!-- end sidebysidediff# -->
+			 $counter++;
+			 echo '</div>'; //<!-- end box -->
+			 // end foreach homework_tests as test
+			}
 		}
-	}
 
 	if (count($homework_tests) > 1){
 		?>

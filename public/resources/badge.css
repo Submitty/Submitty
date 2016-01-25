@@ -273,7 +273,8 @@
 
 #HWsubmission .error_mess_diff{
     font-style: italic;
-    margin-left: 40px;
+    font-weight: bold;
+    margin-left: 20px;
     color: #af0000;
 }
 

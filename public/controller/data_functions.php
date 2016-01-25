@@ -1028,6 +1028,10 @@ function get_all_testcase_diffs($username, $semester,$course, $assignment_id, $a
     foreach ($diffs as $diff) {
         $diff_result = get_testcase_diff($username, $semester,$course, $assignment_id, $assignment_version, $diff);
         $diff_result["diff_id"] = $diff["diff_id"];
+
+        if (isset($diff["display_mode"]) && $diff["display_mode"] != "") {
+             $diff_result["display_mode"] = $diff["display_mode"];  
+        }
         if (isset($diff["message"]) && $diff["message"] != "") {
             $diff_result["message"] = $diff["message"];
         }

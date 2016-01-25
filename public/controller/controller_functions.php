@@ -11,13 +11,16 @@ function on_dev_team($test_user) {
     return false;
 }
 
+
 function render($viewpage, $data = array()) {
     $path = 'view/'.$viewpage.'.php';
     if (file_exists($path)) {
         extract($data);
         require_once($path);
     } else {
-        echo "Error, render file path does not exist <br>";
+    	//FIXME: In production, debug information should never be sent to client browser.
+    	//       Send debug information to error log, instead.
+    	echo "Error, render file path does not exist <br>";
         echo "cwd = ";
         echo getcwd();
         echo "<br>path = ";
@@ -25,6 +28,7 @@ function render($viewpage, $data = array()) {
         //header('Location: index.php');
     }
 }
+
 
 function render_controller($viewpage, $data = array()) {
     $path = 'controller/'.$viewpage.'.php';
@@ -40,6 +44,7 @@ function render_controller($viewpage, $data = array()) {
         //header('Location: index.php');
     }
 }
+
 
 function parse_status() {
     $status = "";
@@ -59,6 +64,7 @@ function parse_status() {
     return $status;
 }
 
+
 function parse_assignment_id_with_recent($class_config, $most_recent_assignment_id) {
     if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants to see
         $assignment_id = htmlspecialchars($_GET["assignment_id"]);
@@ -74,6 +80,7 @@ function parse_assignment_id_with_recent($class_config, $most_recent_assignment_
     exit();
 
 }
+
 
 function parse_assignment_version_with_recent($username, $semester, $course, $assignment_id) {
     if (isset($_GET["assignment_version"])) {
@@ -99,7 +106,6 @@ function parse_assignment_version_with_recent($username, $semester, $course, $as
 }
 
 
-
 function check_semester(){
     include 'controller/defaults.php';
 
@@ -118,14 +124,12 @@ function check_semester(){
         if (isset($_GET["course"])) {
             $course = htmlspecialchars($_GET["course"]);
         }
-//FIXME: 
-//        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
-        header("Location: ERROR_bad_semester_error.html");
-        exit();
+//FIXME:  Please include error HTML file in repo to avoid triggering 404 errors in apache.
+//		header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
+//      header("Location: ERROR_Xbad_semester_error.html");
+		return "f00";
     }
-}	
-
-
+}
 
 
 function check_course() {
@@ -144,13 +148,15 @@ function check_course() {
     }
 
     if (is_valid_course($semester,$course)) {
+        $_SESSION["status"] = "";
+
         return $course;
     } else {
         $_SESSION["status"] = "Invalid course specified";
-//FIXME: 
-//        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
-        header("Location: ERROR_bad_course_error.html");
-        exit();
+//FIXME:  Please include error HTML file in repo to avoid triggering 404 errors in apache.
+//      header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
+//      header("Location: ERROR_X_bad_course_error.html");
+	    return "csci0000";
     }
 }
 
@@ -190,6 +196,7 @@ function check_assignment_version($semester, $course, $assignment_id){
     header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
     exit();
 }
+
 
 function check_file_name($semester, $course, $assignment_id, $assignment_version){
     if (isset($_GET["file_name"])) {
