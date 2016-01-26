@@ -30,9 +30,8 @@
  * Both conditions can be met as a closure registered with
  * register_shutdown_function()
  */
-
-define('TMP_XLSX_PATH', '/tmp/_HSS_xlsx');
-define('TMP_CSV_PATH',  '/tmp/_HSS_csv');
+ 
+require "../toolbox/configs/master.php";
 
 /* ERROR codes are bitwise set, and multiple can be set at the same time.
  *
@@ -54,7 +53,7 @@ $err_code = 0;
 //Check if popen() is allowed
 if (function_exists('popen')) {
 
-	//Check is xlsx2csv exists
+	//Check if xlsx2csv file exists
 	$proc_handle = popen("command -v xlsx2csv", "r");
 	$err_code |= (!empty(fread($proc_handle, 1))) ? 0 : 0x00000002;
 	pclose($proc_handle);
@@ -76,13 +75,13 @@ if (isset($_SERVER['QUERY_STRING'])) {
 }
  
 //Check that XLSX file was uploaded.
-$err_code |= (file_exists(TMP_XLSX_PATH)) ? 0 : 0x00000010;
+$err_code |= (file_exists(__TMP_XLSX_PATH__)) ? 0 : 0x00000010;
 
 //Print error and die if any checks failed.
 die_on_error($err_code);
 
 //XLSX to CSV conversion
-$proc_handle = popen("xlsx2csv -d , -i -s 0 -p '' " . TMP_XLSX_PATH . " " . TMP_CSV_PATH . " 2>&1", "r");
+$proc_handle = popen("xlsx2csv -d , -i -s 0 -p '' " . __TMP_XLSX_PATH__ . " " . __TMP_CSV_PATH__ . " 2>&1", "r");
 
 //Validate result after process.  Error codes are bitwise set.
 $err_code = 0;
@@ -91,15 +90,14 @@ $err_code = 0;
 $err_code |= (empty(fread($proc_handle, 1))) ? 0 : 0x00010000;
 pclose($proc_handle);
 
-//Check to make sure _HSS_csv was written
-$err_code |= (file_exists(TMP_CSV_PATH)) ? 0 : 0x00020000;
+//Check to make sure _HSS_csv was written.
+$err_code |= (file_exists(__TMP_CSV_PATH__)) ? 0 : 0x00020000;
 
 //Print error and die if any checks failed.
 die_on_error($err_code);
 
 //CSV conversion all done.  Return to HWgrading.
-print '<HTML><META HTTP-EQUIV="refresh" CONTENT="0;URL=https://192.168.56.103/account/submit/admin-classlist.php?' . $query_string . '&xlsx2csv=1"></HTML>';
-//fprintf(STDOUT, "Location: https://192.168.56.103/account/submit/admin-classlist.php?%s&xlsx2csv=1\n\n", $query_string);
+print '<HTML><META HTTP-EQUIV="refresh" CONTENT="0;URL=' . __BASE_URL__ . '/account/submit/admin-classlist.php?' . $query_string . '&xlsx2csv=1"></HTML>';
 
 function die_on_error($err_code) {
 	if (!empty($err_code)) {

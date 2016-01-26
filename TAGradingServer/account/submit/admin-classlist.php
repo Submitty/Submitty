@@ -4,9 +4,6 @@ require "../../toolbox/functions.php";
 check_administrator();
 session_start();
 
-define('TMP_XLSX_PATH', '/tmp/_HSS_xlsx');
-define('TMP_CSV_PATH',  '/tmp/_HSS_csv');
-
 /**
  * FILE: account/submit/admin-classlist.php
  *
@@ -40,18 +37,18 @@ define('TMP_CSV_PATH',  '/tmp/_HSS_csv');
 if (isset($_GET['xlsx2csv']) && $_GET['xlsx2csv'] == 1) {
 
 	//CSV converted from XLSX
-	$csvFile = TMP_CSV_PATH;
+	$csvFile = __TMP_CSV_PATH__;
 
 	//Callback to purge temporary files that contain data restricted by FERPA.
 	//The temp files will be purged when this script ends, FOR ANY REASON.
 	register_shutdown_function(
 		function() {
-			if (file_exists(TMP_XLSX_PATH)) {
-				unlink(TMP_XLSX_PATH);
+			if (file_exists(__TMP_XLSX_PATH__)) {
+				unlink(__TMP_XLSX_PATH__);
 			}
 
-			if (file_exists(TMP_CSV_PATH)) {
-				unlink(TMP_CSV_PATH);
+			if (file_exists(__TMP_CSV_PATH__)) {
+				unlink(__TMP_CSV_PATH__);
 			}
 		}
 	);
@@ -70,7 +67,7 @@ if (isset($_GET['xlsx2csv']) && $_GET['xlsx2csv'] == 1) {
 	if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
 
 		//XLSX detected, need to do conversion.  Call up CGI script.
-		if (copy($_FILES['classlist']['tmp_name'], TMP_XLSX_PATH)) {
+		if (copy($_FILES['classlist']['tmp_name'], __TMP_XLSX_PATH__)) {
 			header("Location: {$BASE_URL}/cgi-bin/xlsx_to_csv.cgi?course={$_GET['course']}");
 		} else {
 			die("Error isolating uploaded XLSX.  Please contact tech support.");
@@ -111,7 +108,7 @@ foreach($contents as $content) {
 	                 'student_rcs'        => explode("@", $details[$csvFieldsINI['student_email']])[0],
 	                 'student_section'    => intval($details[$csvFieldsINI['student_section']]) );
 	
-	//Validate massaged data
+	//Validate massaged data.  First, make sure we're working on the most recent entry (should be the "end" element).
 	$val = end($rows);
 
 	//First name must be alpha characters, white-space, or certain punctuation.
@@ -126,7 +123,7 @@ foreach($contents as $content) {
 	//No check on rcs (computing login ID) -- different Univeristies have different formats.
 }
 
-//Display any accumulated errors.  Quit on errors, else continue.
+//Display any accumulated errors.  Quit on errors, otherwise continue.
 if (empty($error_message) === false) {
 	die($error_message . "Contact your sysadmin.");
 }
