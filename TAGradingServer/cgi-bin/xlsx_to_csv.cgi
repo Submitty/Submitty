@@ -2,9 +2,33 @@
 
 <?php
 
-/* SuPHP security policy prohibits calling/executing an external processes, but
- * this is permitted in PHP processed as CGI.  An external process is necessary
- * to conduct an XLSX to CSV data conversion. 
+/**
+ * FILE: cgi-bin/xlsx_to_csv.cgi
+ *
+ * Due to security policy enacted by SuPHP, use of xslx2csv is disallowed in
+ * this script, but is permitted in a separate CGI script.
+ *
+ * This script will work with account/submit/admin-classlist.php to convert an
+ * uploaded XLSX file to CSV.  Pertininent info must be passed to this script
+ * via URL parameters, which cannot be considered secure information.
+ *
+ * IMPORTANT: Expected data uploads contain data regulated by
+ * FERPA (20 U.S.C. ¤ 1232g)
+ * 
+ * As this information must be made secure, existence of this data
+ * (e.g. filenames) should not be shared by URL paramaters.  Therefore,
+ * filenames will be hardcoded.
+ *
+ * Path for detected XLSX files            /tmp/_HSS_xlsx
+ * Path for xlsx to CSV converted files    /tmp/_HSS_csv
+ * These should be defined constants in this script and in CGI script.
+ *
+ * THESE FILES MUST BE IMMEDIATELY PURGED
+ * (1) after the information is inserted into DB.  --OR--
+ * (2) when the script is abruptly halted due to error condition.  e.g. die()
+ *
+ * Both conditions can be met as a closure registered with
+ * register_shutdown_function()
  */
 
 define('TMP_XLSX_PATH', '/tmp/_HSS_xlsx');
@@ -74,7 +98,7 @@ $err_code |= (file_exists(TMP_CSV_PATH)) ? 0 : 0x00020000;
 die_on_error($err_code);
 
 //CSV conversion all done.  Return to HWgrading.
-print '<HTML><META HTTP-EQUIV="refresh" CONTENT="1;URL=https://192.168.56.103/account/submit/admin-classlist.php?' . $query_string . '&xlsx2csv=1"></HTML>';
+print '<HTML><META HTTP-EQUIV="refresh" CONTENT="0;URL=https://192.168.56.103/account/submit/admin-classlist.php?' . $query_string . '&xlsx2csv=1"></HTML>';
 //fprintf(STDOUT, "Location: https://192.168.56.103/account/submit/admin-classlist.php?%s&xlsx2csv=1\n\n", $query_string);
 
 function die_on_error($err_code) {

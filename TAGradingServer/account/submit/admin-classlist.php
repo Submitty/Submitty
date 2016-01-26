@@ -2,18 +2,20 @@
 require "../../toolbox/functions.php";
 
 check_administrator();
+session_start();
 
 define('TMP_XLSX_PATH', '/tmp/_HSS_xlsx');
 define('TMP_CSV_PATH',  '/tmp/_HSS_csv');
 
 /**
+ * FILE: account/submit/admin-classlist.php
+ *
  * Due to security policy enacted by SuPHP, use of xslx2csv is disallowed in
  * this script, but is permitted in a separate CGI script.
  *
  * This script will work with cgi-bin/xlsx_to_csv.cgi to convert an uploaded
- * XLSX file to CSV.  Since HWGrading doesn't use session() / $_SESSION, all
- * pertinent info must be passed via URL parameters, which cannot be considered
- * secure information.
+ * XLSX file to CSV.  Pertininent info must be passed to CGI via URL parameters,
+ * which cannot be considered secure information.
  *
  * IMPORTANT: Expected data uploads contain data regulated by
  * FERPA (20 U.S.C. ¤ 1232g)
@@ -24,6 +26,7 @@ define('TMP_CSV_PATH',  '/tmp/_HSS_csv');
  *
  * Path for detected XLSX files            /tmp/_HSS_xlsx
  * Path for xlsx to CSV converted files    /tmp/_HSS_csv
+ * These should be defined constants in this script and in CGI script.
  *
  * THESE FILES MUST BE IMMEDIATELY PURGED
  * (1) after the information is inserted into DB.  --OR--
@@ -41,20 +44,23 @@ if (isset($_GET['xlsx2csv']) && $_GET['xlsx2csv'] == 1) {
 
 	//Callback to purge temporary files that contain data restricted by FERPA.
 	//The temp files will be purged when this script ends, FOR ANY REASON.
-//	register_shutdown_function(
-//		function() {
-//			if (file_exists(TMP_XLSX_PATH)) {
-//				unlink(TMP_XLSX_PATH);
-//			}
-//
-//			if (file_exists(TMP_CSV_PATH)) {
-//				unlink(TMP_CSV_PATH);
-//			}
-//		}
-//	);
+	register_shutdown_function(
+		function() {
+			if (file_exists(TMP_XLSX_PATH)) {
+				unlink(TMP_XLSX_PATH);
+			}
+
+			if (file_exists(TMP_CSV_PATH)) {
+				unlink(TMP_CSV_PATH);
+			}
+		}
+	);
 } else {
 
 	//New upload. 
+	//Preserve POST data so it isn't lost should CGI script be called.
+	$_SESSION['post'] = $_POST;
+	
 	//Verify that upload is a true CSV or XLSX file (check file extension and MIME type)
 	$fileType = pathinfo($_FILES['classlist']['name'], PATHINFO_EXTENSION);
 	$fh = finfo_open(FILEINFO_MIME_TYPE);
@@ -93,9 +99,12 @@ if ($contents === false) {
 }
 
 // Massage student CSV file into generalized data array
+$error_message = ""; //Used to show accumulated errors during data validation
+$row_being_processed = 1; //Offset to account for header (user will cross-reference with his data sheet)
 $rows = array();
-unset($contents[0]); //header should be thrown away
+unset($contents[0]); //header should be thrown away (does not affect cross-reference)
 foreach($contents as $content) {
+	$row_being_processed++;
 	$details = explode(",", trim($content));
 	$rows[] = array( 'student_first_name' => $details[$csvFieldsINI['student_first_name']],
 	                 'student_last_name'  => $details[$csvFieldsINI['student_last_name']],
@@ -104,21 +113,22 @@ foreach($contents as $content) {
 	
 	//Validate massaged data
 	$val = end($rows);
-	$err = "";
 
-	//First name must be alpha characters or certain punctuation.
-	$err .= (preg_match("~^[a-zA-Z'`\- ]+$~", $val['student_first_name'])) ? "" : "Error in student first name column.<br>";
-	//Last name must be alpha characters or certain punctuation.
-	$err .= (preg_match("~^[a-zA-Z'`\- ]+$~", $val['student_last_name'])) ? "" : "Error in student last name column.<br>";
+	//First name must be alpha characters, white-space, or certain punctuation.
+	$error_message .= (preg_match("~^[a-zA-Z.'`\- ]+$~", $val['student_first_name'])) ? "" : "Error in student first name column, row #{$row_being_processed}: {$val['student_first_name']}<br>";
+
+	//Last name must be alpha characters white-space, or certain punctuation.
+	$error_message .= (preg_match("~^[a-zA-Z.'`\- ]+$~", $val['student_last_name'])) ? "" : "Error in student last name column, row #{$row_being_processed}: {$val['student_last_name']}<br>";
 
 	//Student section must be greater than zero (intval($str) returns zero when $str is not integer)
-	$err .= ($val['student_section'] > 0) ? "" : "Error in student section column.<br>";
+	$error_message .= ($val['student_section'] > 0) ? "" : "Error in student section column, row #{$row_being_processed}: {$val['student_section']}<br>";
 	
 	//No check on rcs (computing login ID) -- different Univeristies have different formats.
+}
 
-	if (empty($err) === false) {
-		die($err . "Contact your sysadmin.");
-	}
+//Display any accumulated errors.  Quit on errors, else continue.
+if (empty($error_message) === false) {
+	die($error_message . "Contact your sysadmin.");
 }
 
 //Collect existing student list, group data by rcs
@@ -138,7 +148,7 @@ foreach ($rows as $row) {
 	$values = array($row['student_rcs'], $row['student_first_name'], $row['student_last_name'], $row['student_section'], 1);
 	$rcs = $row['student_rcs'];
 	if (array_key_exists($rcs, $students)) {
-		if (isset($_POST['ignore_manual_1']) && $_POST['ignore_manual_1'] == true && $students[$rcs]['student_manual'] == 1) {
+		if (isset($_SESSION['post']['ignore_manual_1']) && $_SESSION['post']['ignore_manual_1'] == true && $students[$rcs]['student_manual'] == 1) {
 			continue;
 		}
 		\lib\Database::query("UPDATE students SET student_section_id=? WHERE student_rcs=?", array(intval($details[6]), $rcs));
@@ -156,14 +166,14 @@ foreach ($rows as $row) {
 //
 
 foreach ($students as $rcs => $student) {
-	if (isset($_POST['ignore_manual_2']) && $_POST['ignore_manual_2'] == true && $student['student_manual'] == 1) {
+	if (isset($_SESSION['post']['ignore_manual_2']) && $_SESSION['post']['ignore_manual_2'] == true && $student['student_manual'] == 1) {
 		continue;
 	}
-	$_POST['missing_students'] = intval($_POST['missing_students']);
-	if ($_POST['missing_students'] == -2) {
+	$_SESSION['post']['missing_students'] = intval($_SESSION['post']['missing_students']);
+	if ($_SESSION['post']['missing_students'] == -2) {
 		continue;
 	}
-	else if ($_POST['missing_students'] == -1) {
+	else if ($_SESSION['post']['missing_students'] == -1) {
 		\lib\Database::query("DELETE FROM students WHERE student_rcs=?", array($rcs));
 	}
 	else {
@@ -172,5 +182,5 @@ foreach ($students as $rcs => $student) {
 }
 
 \lib\Database::commit();
-
+session_destroy();
 header("Location: {$BASE_URL}/account/admin-classlist.php?course={$_GET['course']}&update=1");
