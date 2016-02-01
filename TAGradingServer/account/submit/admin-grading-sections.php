@@ -14,11 +14,12 @@ if ($type == 'section') {
     }
     $complete_update = 1;
 }
-else if ($type == 'random') {
-    $grading_sections = intval($_POST['random_number']);
+else if ($type == 'arrange') {
+    $_POST['arrange_type'] = in_array($_POST['arrange_type'], array('random', 'alphabetically')) ? $_POST['arrange_type'] : 'random';
+    $grading_sections = intval($_POST['sections']);
     if ($grading_sections > 0) {
         $complete_update = 1;
-        if (isset($_POST['random_skip_disabled']) && $_POST['random_skip_disabled'] == 1) {
+        if (isset($_POST['skip_disabled']) && $_POST['skip_disabled'] == 1) {
             \lib\Database::query("
 SELECT s.student_rcs, r.section_is_enabled
 FROM students AS s
@@ -26,26 +27,8 @@ LEFT JOIN (
     SELECT section_id, section_is_enabled
     FROM sections
 ) as r ON s.student_section_id=r.section_id
+ORDER BY student_rcs
 ");
-            /*
-            $good_users = array();
-            $disabled_users = array();
-            foreach (\lib\Database::rows() as $user) {
-                if ($user['section_is_enabled'] == 0) {
-                    $disabled_users[] = $user['student_rcs'];
-                }
-                else {
-                    $good_users[] = $user['student_rcs'];
-                }
-            }
-            shuffle($good_users);
-            $per_section = ceil(count($good_users) / $grading_sections);
-            for ($i = 1; $i <= $grading_sections; $i++) {
-                $update = array_slice($good_users, ($i-1) * $per_section, $per_section * $i);
-                $update_string = array_pad(array(), count($update), "?");
-                \lib\Database::query("UPDATE students SET student_grading_id=? WHERE student_rcs IN (".implode(",",$update_string).")", array_merge(array($i), $update));
-            }
-            */
         }
         else {
             \lib\Database::query("SELECT student_rcs, 1 as section_is_enabled FROM students");
@@ -60,7 +43,10 @@ LEFT JOIN (
                 $good_users[] = $user['student_rcs'];
             }
         }
-        shuffle($good_users);
+
+        if ($_POST['arrange_type'] == 'random') {
+            shuffle($good_users);
+        }
         $per_section = ceil(count($good_users) / $grading_sections);
         for ($i = 1; $i <= $grading_sections; $i++) {
             $update = array_slice($good_users, ($i-1) * $per_section, $per_section * $i);
