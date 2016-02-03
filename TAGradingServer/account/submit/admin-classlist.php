@@ -148,7 +148,7 @@ foreach ($rows as $row) {
 		if (isset($_SESSION['post']['ignore_manual_1']) && $_SESSION['post']['ignore_manual_1'] == true && $students[$rcs]['student_manual'] == 1) {
 			continue;
 		}
-		\lib\Database::query("UPDATE students SET student_section_id=? WHERE student_rcs=?", array(intval($details[6]), $rcs));
+		\lib\Database::query("UPDATE students SET student_section_id=? WHERE student_rcs=?", array($row['student_section'], $rcs));
 		unset($students[$rcs]);
 	}
 	else {
@@ -156,11 +156,6 @@ foreach ($rows as $row) {
 		\lib\Database::query("INSERT INTO late_days (student_rcs, allowed_lates, since_timestamp) VALUES(?, ?, TIMESTAMP '1970-01-01 00:00:01')", array($rcs, __DEFAULT_LATE_DAYS_STUDENT__));
 	}
 }
-
-//
-//Server exception in the above for-each block when xlsx to csv conversion done.
-//Likely due to $_POST data lost when cgi script is called.
-//
 
 foreach ($students as $rcs => $student) {
 	if (isset($_SESSION['post']['ignore_manual_2']) && $_SESSION['post']['ignore_manual_2'] == true && $student['student_manual'] == 1) {
