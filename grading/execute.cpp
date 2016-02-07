@@ -51,6 +51,8 @@ bool system_program(const std::string &program) {
       // for Principles of Software
       program == "/usr/bin/java" ||
       program == "/usr/bin/javac" ||
+      // for Operating Systems
+      program == "/usr/bin/gcc" ||
       // for Programming Languages
       program == "/usr/bin/swipl" ||
       program == "/usr/bin/plt-r5rs") {
