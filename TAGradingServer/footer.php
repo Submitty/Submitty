@@ -1,5 +1,5 @@
 	<footer>
-		
+
 	</footer>
     <script>
         function toggle() {
@@ -43,13 +43,18 @@ HTML;
                     }
                 }
             });
-            
+
             $('form').each(function() {
                 if ($(this).attr('method') == 'get') {
                     $(this).append("<input type='hidden' name='course' value='{$_GET['course']}' />");
                 }
                 else if ($(this).attr('method') == 'post') {
-                    $(this).attr('action', $(this).attr('action') + '?course={$_GET['course']}');
+                    if ($(this).attr('action').substr(-4) == '.php') {
+                        $(this).attr('action', $(this).attr('action') + '?course={$_GET['course']}');
+                    }
+                    else {
+                        $(this).attr('action', $(this).attr('action') + '&course={$_GET['course']}');
+                    }
                 }
             });
 

@@ -88,6 +88,10 @@ if ($user_logged_in) {
                         <li class="dropdown">
                             <a href="{$BASE_URL}/account/account-tests.php">Tests</a>
                         </li>
+
+                        <li class="dropdown">
+                            <a href="{$BASE_URL}/account/account-other.php">Other</a>
+                        </li>
 HTML;
     if ($user_is_administrator) {
         print <<<HTML
@@ -123,6 +127,9 @@ HTML;
                                 </a></li>
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-tests.php" role="button" data-toggle="modal">
                                         Manage Tests
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-other.php" role="button" data-toggle="modal">
+                                        Manage Other
                                 </a></li>
                             </ul>
                         </li>
