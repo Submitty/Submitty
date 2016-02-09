@@ -84,4 +84,8 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals("{}", DatabaseUtils::fromPHPToPGArray("abcd"));
         $this->assertEquals("{}", DatabaseUtils::fromPHPToPGArray(1));
     }
+
+    public function testBooleanPGToPHP() {
+        $this->assertEquals(array(true, false), DatabaseUtils::fromPGToPHPArray("{true, false}", true));
+    }
 }
