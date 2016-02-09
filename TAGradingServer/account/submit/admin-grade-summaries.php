@@ -50,7 +50,15 @@ $queries = array(
             student_rcs=?
         ) AS gt ON t.test_id=gt.test_id
     ORDER BY
-        t.test_id");
+        t.test_id",
+
+    "OTHER" => "SELECT g.*, o.*
+    FROM
+        grades_others as g
+        LEFT JOIN (SELECT * FROM other_grades) as o on o.oid = g.oid
+    WHERE
+        student_rcs='bergle'"
+);
 
 // Query the database for all students registered in the class
 $params = array();
@@ -134,6 +142,14 @@ foreach($db->rows() as $student_record) {
         $student_output_text .= strtolower($row['test_type']) . ' ' .$row['test_number'] . ' "' . $testname . '" ' . $row['score'] . " " . implode(" ", pgArrayToPhp($row['test_text'])) . $nl;
     }
 
+    $db->query($queries['OTHER'], $params);
+    foreach($db->rows() as $row) {
+        if ($row['grades_other_score'] <= 0) {
+            continue;
+        }
+        $student_output_text .= $row['other_id'].' '.$row['grades_other_score'].' "'.$row['other_name'].'" '.$row['grades_other_text'];
+    }
+    
     // ======================================================
 
     // WRITE REPORT FILE
