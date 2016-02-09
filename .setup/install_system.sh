@@ -15,8 +15,8 @@ fi
 #################################################################
 # UBUNTU SETUP
 #################
-if [ ${VAGRANT} == 1 ]; then 
-echo -e '
+if [ ${VAGRANT} == 1 ]; then
+    echo -e '
  __   __  _     _  _______  _______  ______    __   __  _______  ______
 |  | |  || | _ | ||       ||       ||    _ |  |  | |  ||       ||    _ |
 |  |_|  || || || ||  _____||    ___||   | ||  |  |_|  ||    ___||   | ||
@@ -38,11 +38,11 @@ echo -e '
 ##  Happy developing!                                     ##
 ############################################################
 ' > /etc/motd
-chmod +rx /etc/motd
+    chmod +rx /etc/motd
 
-echo "192.168.56.101    test-submit test-submit.cs.rpi.edu" >> /etc/hosts
-echo "192.168.56.102    test-svn test-svn.cs.rpi.edu" >> /etc/hosts
-echo "192.168.56.103    test-hwgrading test-hwgrading.cs.rpi.edu hwgrading" >> /etc/hosts
+    echo "192.168.56.101    test-submit test-submit.cs.rpi.edu" >> /etc/hosts
+    echo "192.168.56.102    test-svn test-svn.cs.rpi.edu" >> /etc/hosts
+    echo "192.168.56.103    test-hwgrading test-hwgrading.cs.rpi.edu hwgrading" >> /etc/hosts
 fi
 
 #################################################################
@@ -339,53 +339,53 @@ if [[ ${VAGRANT} == 1 ]]; then
   ln -s /vagrant/.vagrant/autograding_logs /var/local/hss/autograding_logs
   ln -s /vagrant/.vagrant/tagrading_logs /var/local/hss/tagrading_logs
 
-#################################################################
-# CRON SETUP
-#################
-#cd /home/hwcron
-#echo "" > /home/hwcron/x
-#sudo cp /home/hwcron/x /var/spool/cron/crontabs/hwcron
-#sudo chown hwcron:crontab /var/spool/cron/crontabs/hwcron
-#echo "0,15,30,45 * * * * /usr/local/hss/bin/grade_students.sh" > /home/hwcron/c
-#su hwcron << EOF
-#  cat /home/hwcron/c | crontab -
-#EOF
-#rm /home/hwcron/x
-#rm /home/hwcron/c
+    #################################################################
+    # CRON SETUP
+    #################
+    #cd /home/hwcron
+    #echo "" > /home/hwcron/x
+    #sudo cp /home/hwcron/x /var/spool/cron/crontabs/hwcron
+    #sudo chown hwcron:crontab /var/spool/cron/crontabs/hwcron
+    #echo "0,15,30,45 * * * * /usr/local/hss/bin/grade_students.sh" > /home/hwcron/c
+    #su hwcron << EOF
+    #  cat /home/hwcron/c | crontab -
+    #EOF
+    #rm /home/hwcron/x
+    #rm /home/hwcron/c
 
-#################################################################
-# COURSE SETUP
-#################
-cd ${HWSERVER_DIR}/../bin
-./create_course.sh f15 csci1100 instructor csci1100_tas_www
-./create_course.sh f15 csci1200 instructor csci1200_tas_www
-./create_course.sh f15 csci2600 instructor csci2600_tas_www
+    #################################################################
+    # COURSE SETUP
+    #################
+    cd ${HWSERVER_DIR}/../bin
+    ./create_course.sh f15 csci1100 instructor csci1100_tas_www
+    ./create_course.sh f15 csci1200 instructor csci1200_tas_www
+    ./create_course.sh f15 csci2600 instructor csci2600_tas_www
 
-cd /var/local/hss/courses/f15/csci1100
-./BUILD_csci1100.sh
+    cd /var/local/hss/courses/f15/csci1100
+    ./BUILD_csci1100.sh
 
-cd /var/local/hss/courses/f15/csci1200
-./BUILD_csci1200.sh
+    cd /var/local/hss/courses/f15/csci1200
+    ./BUILD_csci1200.sh
 
-cd /var/local/hss/courses/f15/csci2600
-./BUILD_csci2600.sh
+    cd /var/local/hss/courses/f15/csci2600
+    ./BUILD_csci2600.sh
 
-#################################################################
-# CREATE DATABASE
-#################
+    #################################################################
+    # CREATE DATABASE
+    #################
 
-export PGPASSWORD='hsdbu';
+    export PGPASSWORD='hsdbu';
 
-psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1100_f15;"
-psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1200_f15;"
-psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
+    psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1100_f15;"
+    psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1200_f15;"
+    psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
 
-psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
-psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
-psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+    psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
+    psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+    psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
+    psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+    psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
+    psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
 fi
 
 # Deferred ownership change

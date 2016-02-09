@@ -53,7 +53,7 @@ class DatabaseUtils {
      *
      * @return array PHP array representation
      */
-    public static function fromPGToPHPArray($text, $start=0, &$end=null, $parseBools=false) {
+    public static function fromPGToPHPArray($text, $parseBools=false, $start=0, &$end=null) {
         $text = trim($text);
 
         if(empty($text) || $text[0] != "{") {
@@ -71,7 +71,7 @@ class DatabaseUtils {
                     $in_array = true;
                 }
                 else if (!$in_string && $ch == "{") {
-                    $return[] = DatabaseUtils::fromPGToPHPArray($text,$i,$i);
+                    $return[] = DatabaseUtils::fromPGToPHPArray($text, $parseBools, $i, $i);
                 }
                 else if (!$in_string && $ch == "}") {
                     if ($have_string) {
