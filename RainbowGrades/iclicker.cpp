@@ -118,9 +118,12 @@ void AddClickerScores(std::vector<Student*> &students, std::vector<std::vector<i
       ss << which_lecture << "." << which_question+1;
 
       ICLICKER_QUESTION_NAMES.push_back(ss.str());
-MAX_ICLICKER_TOTAL += 1.0;
+      MAX_ICLICKER_TOTAL += 1.0;
 
       std::ifstream istr(question.getFilename());
+      if (!istr.good()) {
+        std::cerr << "ERROR: cannot open file: " << question.getFilename() << std::endl;
+      }
 
       if (LECTURE_DATE_CORRESPONDENCES.find(which_lecture) ==
           LECTURE_DATE_CORRESPONDENCES.end()) {
@@ -128,21 +131,22 @@ MAX_ICLICKER_TOTAL += 1.0;
         LECTURE_DATE_CORRESPONDENCES[which_lecture] = date;
       }
 
-      assert (istr);
-      char line_helper[5000];
-      // ignore first 5 lines
-      for (int i = 0; i < 5; i++) {
-        istr.getline(line_helper,5000);
-      }
 
+      char line_helper[5000];
       while (istr.getline(line_helper,5000)) {
+
         std::string line = line_helper;
+
+        // ignore lines that don't begin with a clicker id
+        // all clicker id's start with '#'
+        if (line[0] != '#') continue;
+
         std::string remoteid = getItem(line,0);
         std::string item = getItem(line,question.getColumn()-1);
         bool participate = (item != "");
         
         if (!participate) continue;
-        
+
         //std::cout << "ITEM " << item << " " << item.size() << std::endl;
         
         assert (item.size() == 1);
