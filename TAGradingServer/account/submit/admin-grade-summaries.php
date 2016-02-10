@@ -57,7 +57,7 @@ $queries = array(
         grades_others as g
         LEFT JOIN (SELECT * FROM other_grades) as o on o.oid = g.oid
     WHERE
-        student_rcs='bergle'"
+        student_rcs=?"
 );
 
 // Query the database for all students registered in the class
@@ -147,7 +147,7 @@ foreach($db->rows() as $student_record) {
         if ($row['grades_other_score'] <= 0) {
             continue;
         }
-        $student_output_text .= $row['other_id'].' '.$row['grades_other_score'].' "'.$row['other_name'].'" '.$row['grades_other_text'];
+        $student_output_text .= 'other ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
     }
     
     // ======================================================
