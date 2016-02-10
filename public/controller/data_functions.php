@@ -556,27 +556,75 @@ function is_hidden_points_visible($class_config, $assignment_id) {
 
 function is_valid_semester($semester) {
 
-   $path_front_root = get_path_front_root();
-   $semester_directory = $path_front_root."/courses/".$semester;
+  // the semester name should not contain '/' or '..'
+  // this would allow directory traversal
+  if (strpos($semester, '/') !== FALSE)
+    return false;
+  if (strpos($semester, '..') !== FALSE)
+    return false;
 
-   return is_dir($semester_directory);
+
+  // RPI SPECIFIC CHECKS e.g., f15 s16
+  // must be 3 characters long
+  if(strlen($semester) != 3) return false;	 
+  // first character must be alphabetic
+  if(!ctype_alpha(substr($semester,0,1))) return false;	 
+  // last 2 characters must be a number
+  if(!is_numeric(substr($semester,1,2))) return false;	 
+
+
+  $path_front_root = get_path_front_root();
+  $semester_directory = $path_front_root."/courses/".$semester;
+  
+  return is_dir($semester_directory);
 
 }
 
 
 function is_valid_course($semester,$course) {
 
-   $path_front_root = get_path_front_root();
-   $course_directory = $path_front_root."/courses/".$semester."/".$course;
+  // the course name should not contain '/' or '..'
+  // this would allow directory traversal
+  if (strpos($course, '/') !== FALSE)
+    return false;
+  if (strpos($course, '..') !== FALSE)
+    return false;
+  
 
-   return is_dir($course_directory);
+  // RPI SPECIFIC CHECKS e.g., csci1100 biol1010
+  // must be 8 characters long
+  if(strlen($course) != 8) return false;	 
+  // first 4 characters must be alphabetic
+  if(!ctype_alpha(substr($course,0,4))) return false;	 
+  // last 4 characters must be a number
+  if(!is_numeric(substr($course,4,4))) return false;	 
+
+
+  // CSCI SPECIFIC CHECKS
+  // prefix must be csci
+  if(strtolower(substr($course,0,4)) != "csci") return false;	 
+
+  $path_front_root = get_path_front_root();
+  $course_directory = $path_front_root."/courses/".$semester."/".$course;
+  
+  return is_dir($course_directory);
 
 }
 
 
 // Check to make sure instructor has added this assignment
 function is_valid_assignment($class_config, $assignment_id) {
-    $assignments = $class_config["assignments"];
+  
+
+  // the assignment_id name should not contain '/' or '..'
+  // this would allow directory traversal
+  if (strpos($assignment_id, '/') !== FALSE)
+    return false;
+  if (strpos($assignment_id, '..') !== FALSE)
+    return false;
+
+
+   $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
         if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
 
@@ -608,6 +656,16 @@ function is_open_assignment($class_config, $assignment_id){
 
 // Make sure student has actually submitted this version of an assignment
 function is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version) {
+
+
+  // the assignment_version name should not contain '/' or '..'
+  // this would allow directory traversal
+  if (strpos($assignment_version, '/') !== FALSE)
+    return false;
+  if (strpos($assignment_version, '..') !== FALSE)
+    return false;
+
+
     $path_front = get_path_front_course($semester,$course);
     $path = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
     return file_exists($path);

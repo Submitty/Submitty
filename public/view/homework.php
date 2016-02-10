@@ -11,7 +11,7 @@ require_once("controller/controller_functions.php");
 	<div>
 		<div class="title-box">
 			<h1 class="title">Homework Submissions for <?php echo $course; ?></h1>
-			<h3 class="subtext">Submit Homeworks Here!</h3>
+<!--			<h3 class="subtext">Submit Homeworks Here!</h3> -->
 		</div>
 		<div>
 			<div></div>
