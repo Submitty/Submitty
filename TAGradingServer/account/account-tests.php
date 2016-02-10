@@ -147,7 +147,7 @@ HTML;
 
                             <tr class="info">
                                 <td colspan="{$colspan}" style="text-align:center;">
-                                    Enroled Students in Section {$section_id}
+                                    Students Enrolled in Section {$section_id}
                                 </td>
                             </tr>
 HTML;
