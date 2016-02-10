@@ -54,6 +54,7 @@ std::map<Grade,int> grade_counts;
 std::map<Grade,float> grade_avg;
 int took_final = 0;
 int auditors = 0;
+int dropped = 0;
 
 Student* PERFECT_STUDENT_POINTER;
 
@@ -122,8 +123,8 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s);
 
 
 bool by_overall(const Student* s1, const Student* s2) {
-  float s1_overall = s1->overall();
-  float s2_overall = s2->overall();
+  float s1_overall = s1->overall_b4_moss();
+  float s2_overall = s2->overall_b4_moss();
   
   if (s1_overall > s2_overall+0.0001) return true;
   if (fabs (s1_overall - s2_overall) < 0.0001 &&
@@ -133,6 +134,21 @@ bool by_overall(const Student* s1, const Student* s2) {
 
   return false;
 }
+
+
+bool by_test_and_exam(const Student* s1, const Student* s2) {
+  float val1 = s1->GradeablePercent(GRADEABLE_ENUM::TEST) + s1->GradeablePercent(GRADEABLE_ENUM::EXAM);
+  float val2 = s2->GradeablePercent(GRADEABLE_ENUM::TEST) + s2->GradeablePercent(GRADEABLE_ENUM::EXAM);
+  
+  if (val1 > val2) return true;
+  if (fabs (val1-val2) < 0.0001 &&
+      s1->getSection() == 0 &&
+      s2->getSection() != 0)
+    return true;
+  
+  return false;
+}
+
 
 
 
@@ -865,8 +881,23 @@ void load_student_grades(std::vector<Student*> &students) {
           invalid=true;
           which = -1;
 
-          std::cerr << "WARNING: INVALID gradeable item" << std::endl;
+          if (gradeable_name == "Lab15") {
+            //istr >> a; 
+            std::cout << "value " << s->getUserName() << " " << value << std::endl;
+            assert (value >= 0 && value <= 5);
+            s->setParticipation(value);
+          } else if (gradeable_name == "Lab16") {
+            assert (value >= 0 && value <= 5);
+            s->setUnderstanding(value);            
 
+          } else if (gradeable_name == "Test4") {
+            assert (value >= 0 && value <= 150);
+            s->setGradeableValue(GRADEABLE_ENUM::EXAM,0,value);
+
+          } else {
+            std::cerr << "WARNING: INVALID gradeable item" << gradeable_name << " " << value << std::endl;
+            
+          }
         } else {
           const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
           which = c.first;
@@ -1033,7 +1064,7 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
     //bool any_notes = false;
     
     
-    end_table(ostr,true,students,S);
+    end_table(ostr,false,students,S);
 
 
 
@@ -1163,6 +1194,7 @@ int main(int argc, char* argv[]) {
     DISPLAY_ICLICKER = false;
 
     std::sort(students.begin(),students.end(),by_name);
+
   } else if (sort_order == std::string("by_iclicker")) {
     std::sort(students.begin(),students.end(),by_iclicker);
 
@@ -1172,6 +1204,9 @@ int main(int argc, char* argv[]) {
     std::sort(students.begin(),students.end(),by_year);
   } else if (sort_order == std::string("by_major")) {
     std::sort(students.begin(),students.end(),by_major);
+
+  } else if (sort_order == std::string("by_test_and_exam")) {
+    std::sort(students.begin(),students.end(),by_test_and_exam);
 
   } else {
     assert (sort_order.size() > 3);
@@ -1184,7 +1219,7 @@ int main(int argc, char* argv[]) {
     }
     else {
       std::cerr << "UNKNOWN SORT OPTION " << sort_order << std::endl;
-      std::cerr << "  Usage: " << argv[0] << " [ by_overall | by_name | by_section | by_zone | by_iclicker | by_year | by_major | | by_lab | by_exercise | by_reading | by_hw | by_test | by_exam ]" << std::endl;
+      std::cerr << "  Usage: " << argv[0] << " [ by_overall | by_name | by_section | by_zone | by_iclicker | by_year | by_major | | by_lab | by_exercise | by_reading | by_hw | by_test | by_exam | by_test_and_exam ]" << std::endl;
       exit(1);
     }
   }
@@ -1195,21 +1230,32 @@ int main(int argc, char* argv[]) {
   // COUNT
 
   for (unsigned int s = 0; s < students.size(); s++) {
-    if (students[s]->getLastName() == "" || students[s]->getFirstName() == "") continue;
-    if (students[s]->getAudit()) {
+
+    Student *this_student = students[s];
+
+    if (this_student->getLastName() == "" || this_student->getFirstName() == "") {
+      continue;
+    }
+    if (this_student->getAudit()) {
       auditors++;
       continue;
     }
 
     Student *sd = GetStudent(students,"LOWEST D");
 
-
-    grade_counts[students[s]->grade(false,sd)]++;
-    grade_avg[students[s]->grade(false,sd)]+=students[s]->overall();
-
-    if (GRADEABLES[GRADEABLE_ENUM::TEST].getCount() != 0) {
-      if (students[s]->getGradeableValue(GRADEABLE_ENUM::TEST,GRADEABLES[GRADEABLE_ENUM::TEST].getCount()-1) > 0) took_final++;
+    if (validSection(this_student->getSection())) {
+      std::string student_grade = this_student->grade(false,sd);
+      grade_counts[student_grade]++;
+      grade_avg[student_grade]+=this_student->overall();
+    } else {
+      dropped++;
     }
+    if (GRADEABLES[GRADEABLE_ENUM::EXAM].getCount() != 0) {
+      if (this_student->getGradeableValue(GRADEABLE_ENUM::EXAM,GRADEABLES[GRADEABLE_ENUM::EXAM].getCount()-1) > 0) {
+        took_final++;
+      }
+    }
+
   }
 
   int runningtotal = 0;
