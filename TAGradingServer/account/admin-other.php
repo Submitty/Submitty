@@ -113,11 +113,11 @@ $output .= <<<HTML
                 .done(function(response) {
                     var res_array = response.split("|");
                     if (res_array[0] == "success") {
-                        window.alert("Other " + other_number + " deleted");
+                        window.alert(other_name + " deleted");
                         $('tr#other-'+other_id).remove();
                     }
                     else {
-                        window.alert("Other " + other_number + " could not be deleted");
+                        window.alert(other_name + " could not be deleted");
                         console.log(response);
                     }
                 })
@@ -173,7 +173,14 @@ $output .= <<<HTML
         $('input#new-other-id').val("");
         $('input#new-other-name').val("");
         $('input#new-other-score').val("");
-        $('input#new-other-due').val(new Date());
+        var d = new Date();
+        $('input#new-other-due').val(pad(d.getMonth()+1, 2)+"/"+pad(d.getDate(), 2)+"/"+d.getFullYear()+" "+pad(d.getHours(), 2)+":"+pad(d.getMinutes(), 2)+":"+pad(d.getSeconds(), 2));
+    }
+
+    function pad(n, width, z) {
+        z = z || '0';
+        n = n + '';
+        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
     }
 
     function editOther(other_id) {

@@ -68,7 +68,7 @@ print <<<HTML
 HTML;
 
 $params = array();
-$db->query("SELECT * FROM other_grades ORDER BY other_due_date DESC, other_id ASC", $params);
+$db->query("SELECT * FROM other_grades ORDER BY other_due_date, other_id", $params);
 
 $first = true;
 $others = $db->rows();
@@ -76,12 +76,12 @@ foreach($others as $other)
 {
     if($first) {
         print <<<HTML
-                <li class="active"><a href="#other-{$other["other_id"]}" data-toggle="tab">{$other["other_name"]}</a></li>
+                <li class="active"><a href="#other-{$other["oid"]}" data-toggle="tab">{$other["other_name"]}</a></li>
 HTML;
     }
     else {
         print <<<HTML
-                <li><a href="#test{$other["other_id"]}" data-toggle="tab">{$other["other_name"]}</a></li>
+                <li><a href="#other-{$other["oid"]}" data-toggle="tab">{$other["other_name"]}</a></li>
 HTML;
     }
 
@@ -89,17 +89,14 @@ HTML;
 }
 
 print <<<HTML
-
-
             </ul>
-
             <div id="myTabContent" class="tab-content">
 HTML;
 $first = true;
 foreach($others as $other) {
     $extra = ($first) ? ' active in' : '';
     print <<<HTML
-                <div class="tab-pane fade{$extra}" id="test-{$other["other_id"]}">
+                <div class="tab-pane fade{$extra}" id="other-{$other["oid"]}">
                     <table class="table table-bordered" id="othersTable" style=" border: 1px solid #AAA;">
                         <thead style="background: #E1E1E1;">
                             <tr>
@@ -139,7 +136,7 @@ HTML;
                             </tr>
 HTML;
         $params = array($other['oid'],intval($section["section_id"]));
-        $db->query("SELECT s.*, gt.grades_other_id, gt.oid, gt.grades_other_score, gt.grades_other_text FROM students AS s LEFT JOIN (SELECT * FROM grades_others WHERE grades_other_id=?) AS gt ON s.student_rcs=gt.student_rcs WHERE s.student_section_id=? ORDER BY student_rcs ASC", $params);
+        $db->query("SELECT s.*, gt.grades_other_id, gt.oid, gt.grades_other_score, gt.grades_other_text FROM students AS s LEFT JOIN (SELECT * FROM grades_others WHERE oid=?) AS gt ON s.student_rcs=gt.student_rcs WHERE s.student_section_id=? ORDER BY student_rcs ASC", $params);
         foreach($db->rows() as $row)
         {
             print <<<HTML
@@ -182,7 +179,6 @@ echo <<<HTML
 
 			var score = parseFloat($("input#cell-" + oid + "-" + rcs + "-score").val());
 			var text = $("input#cell-" + oid + "-" + rcs + "-text").val();
-
 
             if(isNaN(score) || score < 0) {
                 score = 0;

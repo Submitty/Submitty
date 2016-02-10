@@ -22,7 +22,7 @@ switch($action) {
 
         $params = array($id, $name, $score, $due_date);
         $db->query("INSERT INTO other_grades(other_id, other_name, other_score, other_due_date) VALUES (?, ?, ?, ?)",$params);
-        $db->query("SELECT oid from other grades WHERE other_id=? AND other_name=?", array($id, $name));
+        $db->query("SELECT oid from other_grades WHERE other_id=? AND other_name=?", array($id, $name));
         $row = $db->row();
         print "success|".$row['oid'];
         break;
