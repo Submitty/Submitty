@@ -345,13 +345,24 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 continue;
             }
 
+
+
+            $objects = scandir($submission_directory);
+            $objects = array_filter($objects, function($element) {
+                return is_dir($element) && !in_array($element, array('.', '..'));
+            });
+            sort($objects);
+            if (count($objects) > 0) {
+                $this->max_assignment[$part] = end($objects);
+            }
+            else {
+                $part++;
+                continue;
+            }
+
             $details = array();
             $this->submitted = 1;
             $this->parts_submitted[$part] = 1;
-
-            $objects = scandir($submission_directory);
-            sort($objects);
-            $this->max_assignment[$part] = $objects[count($objects) - 2];
 
             if (isset($_GET["active_assignment_{$part}"]) && 1 == 2) {
                 $_GET["active_assignment_{$part}"] = intval($_GET["active_assignment_{$part}"]);
