@@ -147,7 +147,13 @@ foreach($db->rows() as $student_record) {
         if ($row['grades_other_score'] <= 0) {
             continue;
         }
-        $student_output_text .= 'other ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
+	if (strpos($row['other_id'], 'reading') !== FALSE) {
+          $student_output_text .= 'reading ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
+	} else if (strpos($row['other_id'], 'participation') !== FALSE) {
+          $student_output_text .= 'participation ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
+	} else {
+          $student_output_text .= 'other ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
+	}
     }
     
     // ======================================================
