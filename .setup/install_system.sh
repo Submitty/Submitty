@@ -159,10 +159,10 @@ auth required pam_unix.so
 account required pam_unix.so" > /etc/pam.d/httpd
 
 if [ ${VAGRANT} == 1 ]; then
-# Loosen password requirements
+    # Loosen password requirements on vagrant box
 	sed -i '25s/^/\#/' /etc/pam.d/common-password
 	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
-# Set the ServerName
+    # Set the ServerName
 	echo -e "\nServerName 10.0.2.15\n" >> /etc/apache2/apache2.conf
 fi
 
@@ -287,15 +287,14 @@ fi
 # HWSERVER SETUP
 #################
 
-# link currently creates file permission issues, commented out
-#if [[ ${VAGRANT} == 1 ]]; then
-#	echo "creating link"
-#	ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
-#else
+if [[ ${VAGRANT} == 1 ]]; then
+	echo "creating link"
+	ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
+else
 	echo "cloning repository"
 	cd /usr/local/hss
 	git clone https://github.com/RCOS-Grading-Server/HWserver.git GIT_CHECKOUT_HWserver
-#fi
+fi
 
 HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
 cd ${HWSERVER_DIR}

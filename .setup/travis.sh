@@ -3,7 +3,7 @@
 # Bash Script responsible for setting up Travis Environment. Keep definitions to common_env.sh,
 # installation to setup.sh and then spinning up services to start.sh
 
-if [[ "$TRAVIS_PHP_VERSION" != "7.0" ]] && [[ "$TRAVIS_BRANCH" = "master" ]]; then
+if [[ "$TRAVIS_BRANCH" = "master" ]]; then
     RUN_E2E=true
 fi
 
