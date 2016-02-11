@@ -16,6 +16,10 @@ fi
 # UBUNTU SETUP
 #################
 if [ ${VAGRANT} == 1 ]; then
+    chmod -x /etc/update-motd.d/*
+    chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
+    chmod +x /etc/update-motd.d/00-header
+    
     echo -e '
  __   __  _     _  _______  _______  ______    __   __  _______  ______
 |  | |  || | _ | ||       ||       ||    _ |  |  | |  ||       ||    _ |
@@ -34,6 +38,11 @@ if [ ${VAGRANT} == 1 ]; then
 ##  The following accounts have database accounts         ##
 ##  with same password as above:                          ##
 ##    hsdbu, postgres, root, vagrant                      ##
+##                                                        ##
+##  The VM can be accessed with the following urls:       ##
+##    https://192.168.56.101 (submission)                 ##
+##    https://192.168.56.102 (svn)                        ##
+##    https://192.168.56.103 (grading)                    ##
 ##                                                        ##
 ##  Happy developing!                                     ##
 ############################################################
@@ -279,7 +288,7 @@ if [ ${VAGRANT} == 1 ]; then
 	service postgresql restart
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
-	su postgres -c "/vagrant/.setup/db_users.sh DATABASE";
+	su postgres -c "source /vagrant/.setup/db_users.sh";
 	echo "Finished creating PostgreSQL users"
 fi
 
