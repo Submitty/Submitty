@@ -265,7 +265,15 @@ for($part = 1; $part <= $rubric->rubric_parts; $part++) {
                         <i class="icon-remove icon-white"></i>
                     </li>
                     <li class='active'><a href="#output-{$part}-1" data-toggle="tab">
-                        <b style="color:#DA4F49;">No Submission</b>
+HTML;
+        if ($rubric->active_assignment[$part] == 0) {
+            print '<b style="color:#DA4F49;">Cancelled</b>';
+        }
+        else {
+            print '<b style="color:#DA4F49;">No Submission</b>';
+        }
+
+        print <<<HTML
                     </a></li>
                 </ul>
             </div>

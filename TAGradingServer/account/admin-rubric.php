@@ -84,7 +84,7 @@ if($user_is_administrator)
 
     $rubric_sep_checked = ($old_rubric['rubric_parts_sep'] == 1) ? "checked" : "";
 
-    $extra = ($has_grades) ? "<span style='color: red;'>(Has Previous Grades! Careful With Questions!)</span>" : "";
+    $extra = ($has_grades) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
     print <<<HTML
 
 <style type="text/css">
