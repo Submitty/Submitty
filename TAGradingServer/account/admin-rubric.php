@@ -9,6 +9,7 @@ check_administrator();
 if($user_is_administrator)
 {
     $have_old = false;
+    $has_grades = false;
     $old_rubric = array(
         'rubric_id' => -1,
         'rubric_number' => "",
@@ -32,6 +33,9 @@ if($user_is_administrator)
             $old_questions[$question['question_part_number']][$question['question_number']] = $question;
         }
         $have_old = true;
+
+        Database::query("SELECT COUNT(*) as cnt FROM grades WHERE rubric_id=?", array($rubric_id));
+        $has_grades = Database::row()['cnt'] > 0;
     }
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
@@ -80,6 +84,7 @@ if($user_is_administrator)
 
     $rubric_sep_checked = ($old_rubric['rubric_parts_sep'] == 1) ? "checked" : "";
 
+    $extra = ($has_grades) ? "<span style='color: red;'>(Has Previous Grades! Careful With Questions!)</span>" : "";
     print <<<HTML
 
 <style type="text/css">
@@ -147,18 +152,15 @@ if($user_is_administrator)
 <div id="container-rubric">
     <form class="form-signin" action="{$BASE_URL}/account/submit/admin-rubric.php?action={$action}&id={$old_rubric['rubric_id']}" method="post" enctype="multipart/form-data">
     <input type='hidden' name="part_count" value="{$part_count}" />
-HTML;
-
-    print <<<HTML
         <div class="modal-header">
-            <h3 id="myModalLabel">{$string} Rubric</h3>
+            <h3 id="myModalLabel">{$string} Rubric {$extra}</h3>
         </div>
 
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:hidden;">
             Rubric Name: <input style='width: 227px' type='text' name='rubric_name' value="{$rubric_name}" />
 
             <span style="padding-left:143px">
-                Submission Server ID: <input style='width: 50px' type='text' name='rubric_submission_id' value="{$rubric_submission_id}" />
+                Submission Server ID: <input style='width: 200px' type='text' name='rubric_submission_id' value="{$rubric_submission_id}" />
             </span>
 
             <br/>
@@ -171,9 +173,9 @@ HTML;
             &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
             Separate Parts:
             <input type="checkbox" name="rubric_parts_sep" value="1" {$rubric_sep_checked} onchange='togglePartSubmissionId()'/>
-            &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+            &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
             Late Days:
-            <input name="rubric_late_days" type="text" value="{$old_rubric['rubric_late_days']}"/>
+            <input style="width: 50px" name="rubric_late_days" type="text" value="{$old_rubric['rubric_late_days']}"/>
             <br/>
 
             <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
@@ -314,6 +316,15 @@ HTML;
     }
     asort($sections);
 
+    $db->query("SELECT student_grading_id, count(student_id) as cnt FROM students GROUP BY student_grading_id", array());
+    $a = array();
+    foreach ($db->rows() as $row) {
+        $a[] = "{$row['student_grading_id']} ({$row['cnt']} students)";
+    }
+    $a = implode(", ", $a);
+
+    print "Available Grading Sections: {$a}<br /><br />";
+
     $i = 0;
     $db->query("SELECT * FROM users ORDER BY user_rcs ASC", array());
     $users = $db->rows();
@@ -333,44 +344,47 @@ HTML;
     $margintop = ($i*-40) . "px";
     $marginright =  650-(count($rubrics)*25) . "px";
     print <<<HTML
-        <table border="1" style="float:right; margin-top:{$margintop}; margin-right: {$marginright}">
-            <tr>
-                <td>User</td>
+            <div>
+
+                <table border="1" style="float: right; margin-top:{$margintop}; margin-right: {$marginright}">
+                    <tr>
+                        <td>User</td>
 HTML;
     foreach ($rubrics as $id => $number) {
         print <<<HTML
-                <td style="width: 20px; text-align: center">
-                    {$number}
-                </td>
+                        <td style="width: 20px; text-align: center">
+                            {$number}
+                        </td>
 HTML;
     }
 
     print <<<HTML
-            </tr>
+                </tr>
 HTML;
 
     foreach ($users as $user) {
         print <<<HTML
-            <tr>
-                <td>{$user['user_rcs']}</td>
+                    <tr>
+                        <td>{$user['user_rcs']}</td>
 HTML;
 
         foreach ($rubrics as $id => $rubric) {
             $number = (isset($sections[$id][$user['user_rcs']])) ? implode(",",$sections[$id][$user['user_rcs']]) : "";
             print <<<HTML
-                <td style="text-align: center">
-                    {$number}
-                </td>
+                        <td style="text-align: center">
+                            {$number}
+                        </td>
 HTML;
         }
         print <<<HTML
-            </tr>
+                    </tr>
 HTML;
     }
 
 
     print <<<HTML
-        </table>
+                </table>
+            </div>
         </div>
 
         <div class="modal-footer">
@@ -556,7 +570,11 @@ HTML;
         }
         else {
             if (question == 1) {
-                $('tr#row-' + part + '-1').prepend('<td rowspan="' + parts[part] + '" id="part-' + part + '"><span id="spanPart' + part + '">' + part + '</span><br><div class="part_submission_id" style="display: none;"><input style="width: 47px;" type="text" name="rubric_part_' + part + '_id" value="' + part_id + '"></div></td>');
+                $('tr#row-' + part + '-1').prepend('' +
+                '<td rowspan="' + parts[part] + '" id="part-' + part + '"><span id="spanPart' + part + '">' + part + '</span><br />' +
+                '<a id="delete-' + part + '" class="question-icon" onclick="deletePart(' + part + ');"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>' +
+                '<br />' +
+                '<div class="part_submission_id" style="display: none;"><input style="width: 47px;" type="text" name="rubric_part_' + part + '_id" value="' + part_id + '"></div></td>');
             }
             else {
                 $('tr#row-' + part + '-1').children('#part-' + part).attr('rowspan', parts[part]);
