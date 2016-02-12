@@ -1,0 +1,7 @@
+{
+    "name": "rcos-grading-server/hwserver",
+    "require": {
+        "phpunit/phpunit": "5.*",
+        "phpunit/phpunit-selenium": "2.*"
+    }
+}
