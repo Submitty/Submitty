@@ -631,11 +631,22 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
                     elapsed+= 0.1;
                 }
                 else {
+  		    static int kill_counter = 0;
                     std::cout << "Killing child process" << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
                     // the '-' here means to kill the group
-                    kill(childPID, SIGKILL);
-                    kill(-childPID, SIGKILL);
-                    usleep(1000); /* wait 1/1000th of a second for the process to die */
+		    int success_kill_a = kill(childPID, SIGKILL);
+                    int success_kill_b = kill(-childPID, SIGKILL);
+		    kill_counter++;
+		    if (success_kill_a != 0 || success_kill_b != 0) {
+		      std::cout << "ERROR! kill pid " << childPID << " was not successful" << std::endl;
+		    }
+		    if (kill_counter >= 5) {
+		      std::cout << "ERROR! kill counter for pid " << childPID << " is " << kill_counter << std::endl;
+		      std::cout << "  Check /var/log/syslog (or other logs) for possible kernel bug \n" 
+				<< "  or hardware bug that is preventing killing this job. " << std::endl;
+		    }
+                    usleep(10000); /* wait 1/100th of a second for the process to die */
+		    elapsed+=0.001;
                     time_kill=1;
                 }
             }
