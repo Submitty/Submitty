@@ -92,6 +92,12 @@ test: compile
 exam: compile
 	./process_grades.out by_exam
 
+reading: compile
+	./process_grades.out by_reading
+
+participation: compile
+	./process_grades.out by_participation
+
 test_exam: compile
 	./process_grades.out by_test_and_exam
 
