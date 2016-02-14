@@ -409,8 +409,7 @@ function grade_this_item {
     
     
     # copy the .submit.timestamp file and any files from submission zip 
-    rsync 1>/dev/null  2>&1  -r $submission_path/ $tmp_compilation || log_error "$NEXT_TO_GRADE" "Failed to copy submitted files to temporary compilation directory: rsync -r $submission_path/ $tmp_compilation"
-    
+    rsync 1>/dev/null  2>&1  -r $submission_path/ $tmp_compilation || log_error "$NEXT_TO_GRADE" "Failed to copy submitted files to temporary compilation directory: rsync -r $submission_path/ $tmp_compilation [ exitcode=$? ]"
 
     # use the jq json parsing command line utility to grab the svn_checkout flag from the class.json config file
     class_json_config="$HSS_DATA_DIR/courses/$semester/$course/config/class.json"
