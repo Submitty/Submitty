@@ -262,7 +262,7 @@ if ($highest_version == -1) {
     if ($points_visible != 0){
       echo 'Score: '.$select_submission_data[$i-1]["score"].'&nbsp;&nbsp';
     } else {
-      echo 'Score: '.$points_visible.'&nbsp;&nbsp';
+      // don't display the score when there are no points
     }
     if ($select_submission_data[$i-1]["days_late"] != "") {
       echo 'Days Late: '.$select_submission_data[$i-1]["days_late"];
@@ -298,6 +298,7 @@ if ($highest_version == -1) {
   // -----------------------------------------------------
   // ACTIVE ASSIGNMENT & CANCELLED ASSIGNMENT MESSAGES
   
+  echo '<div class="sub-text">';
   if ($active_version == 0) {
     echo '<span class="error_mess">Note: You have </span>';
     echo '<b><span class="error_mess">CANCELLED</span></b>';
@@ -306,7 +307,7 @@ if ($highest_version == -1) {
   } else if ($assignment_version == $active_version) {
     echo '<span class="message">Note: This is your "ACTIVE" submission version, which will be graded by the instructor/TAs and the score recorded in the gradebook.</span>';
   }
-
+  echo '</div>'; // sub-text
 
   // -----------------------------------------------------
   // DETAILS OF SELECTED ASSIGNMENT
