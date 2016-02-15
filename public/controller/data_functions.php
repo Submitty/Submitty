@@ -435,15 +435,16 @@ function get_contents($dir, $max_depth) {
 }
 
 // Find most recent submission from user
-function most_recent_assignment_version($username, $semester, $course, $assignment_id) {
+function get_highest_assignment_version($username, $semester, $course, $assignment_id) {
     $path_front = get_path_front_course($semester,$course);
     $path = $path_front."/submissions/".$assignment_id."/".$username;
-    $i = 1;
-    while (file_exists($path."/".$i)) {
-        $i++;
+    $recent = -1;
+    $x = 1;
+    while (file_exists($path."/".$x)) {
+      $recent = $x;
+      $x++;
     }
-    return $i - 1;
-
+    return $recent;
 }
 
 // Get name for assignment
@@ -554,15 +555,27 @@ function is_hidden_points_visible($class_config, $assignment_id) {
 }
 
 
+// This function returns true if the input string looks like it's
+// trying to traverse directories (a possible malicious attack).
+function contains_directory_traversal($string) {
+
+  // the string should not contain '/' or '..'
+  if (strpos($string, '/') !== FALSE)
+    return true;
+  if (strpos($string, '..') !== FALSE)
+    return true;
+
+  // otherwise, things are probably ok
+  return false;
+}
+
+
+
 function is_valid_semester($semester) {
 
-  // the semester name should not contain '/' or '..'
-  // this would allow directory traversal
-  if (strpos($semester, '/') !== FALSE)
+  if (contains_directory_traversal($semester)) {
     return false;
-  if (strpos($semester, '..') !== FALSE)
-    return false;
-
+  }
 
   // RPI SPECIFIC CHECKS e.g., f15 s16
   // must be 3 characters long
@@ -583,13 +596,12 @@ function is_valid_semester($semester) {
 
 function is_valid_course($semester,$course) {
 
-  // the course name should not contain '/' or '..'
-  // this would allow directory traversal
-  if (strpos($course, '/') !== FALSE)
+  if (!is_valid_semester($semester)) {
     return false;
-  if (strpos($course, '..') !== FALSE)
+  }
+  if (contains_directory_traversal($course)) {
     return false;
-  
+  }
 
   // RPI SPECIFIC CHECKS e.g., csci1100 biol1010
   // must be 8 characters long
@@ -611,18 +623,13 @@ function is_valid_course($semester,$course) {
 
 }
 
-
+/*
 // Check to make sure instructor has added this assignment
 function is_valid_assignment($class_config, $assignment_id) {
   
-
-  // the assignment_id name should not contain '/' or '..'
-  // this would allow directory traversal
-  if (strpos($assignment_id, '/') !== FALSE)
+  if (contains_directory_traversal($assignment_id)) {
     return false;
-  if (strpos($assignment_id, '..') !== FALSE)
-    return false;
-
+  }
 
    $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
@@ -633,6 +640,8 @@ function is_valid_assignment($class_config, $assignment_id) {
     }
     return false;
 }
+*/
+
 
 function is_open_assignment($class_config, $assignment_id){
     $assignments = $class_config["assignments"];
@@ -657,18 +666,25 @@ function is_open_assignment($class_config, $assignment_id){
 // Make sure student has actually submitted this version of an assignment
 function is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version) {
 
-
-  // the assignment_version name should not contain '/' or '..'
-  // this would allow directory traversal
-  if (strpos($assignment_version, '/') !== FALSE)
+  if (!is_valid_course($semester,$course)) {
     return false;
-  if (strpos($assignment_version, '..') !== FALSE)
+  }
+  if (contains_directory_traversal($assignment_id)) {
     return false;
+  }
+  if (contains_directory_traversal($assignment_version)) {
+    return false;
+  }
 
+  // "no submission" = -1 = a valid assignment version
+  if ($assignment_version == -1) return true;
 
-    $path_front = get_path_front_course($semester,$course);
-    $path = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
-    return file_exists($path);
+  // "cancel" = 0 = a valid assignment version
+  if ($assignment_version == 0) return true;
+
+  $path_front = get_path_front_course($semester,$course);
+  $path = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
+  return file_exists($path);
 }
 
 function is_valid_file_name($username, $semester, $course, $assignment_id, $assignment_version, $file_name){
@@ -722,6 +738,7 @@ function get_all_files($username, $semester, $course, $assignment_id, $assignmen
 
 
 function version_in_grading_queue($username, $semester, $course, $assignment_id, $assignment_version) {
+
     $path_front = get_path_front_course($semester,$course);
     if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {//If its not in the submissions folder
         return false;
@@ -977,11 +994,11 @@ function removeTrailingCommas($json){
 
 //SUBMITTING VERSION
 
-function get_user_submitting_version($username, $semester,$course, $assignment_id) {
+function get_active_version($username, $semester,$course, $assignment_id) {
     $path_front = get_path_front_course($semester,$course);
     $file = $path_front."/submissions/".$assignment_id."/".$username."/user_assignment_settings.json";
     if (!file_exists($file)) {
-        return 0;
+      return -1; // no submissions
     }
     $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
     return $json["active_assignment"];
