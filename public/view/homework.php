@@ -65,7 +65,7 @@ $user = $_SESSION["id"];
 
 <script type="text/javascript">;
 
-function version_changed(){
+function assignment_changed(){
    var php_course = "<?php echo $course; ?>";
    var php_semester = "<?php echo $semester; ?>";
    window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+'#scroll=' + window.scrollY;
