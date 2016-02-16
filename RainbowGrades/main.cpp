@@ -721,6 +721,8 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
             g == GRADEABLE_ENUM::LAB ||
             g == GRADEABLE_ENUM::QUIZ ||
             g == GRADEABLE_ENUM::EXAM ||
+            g == GRADEABLE_ENUM::READING ||
+            g == GRADEABLE_ENUM::PARTICIPATION ||
             g == GRADEABLE_ENUM::TEST) {
           ss >> which_token;
           
@@ -792,9 +794,8 @@ void load_student_grades(std::vector<Student*> &students) {
   std::string filename;
   int count = 0;
   while (files_istr >> filename) {
-    //std::ifstream istr((RAW_DATA_DIRECTORY+filename).c_str());
     std::ifstream istr(filename.c_str());
-    assert (istr);
+    assert (istr.good());
     Student *s = new Student();
 
     count++;
@@ -908,7 +909,7 @@ void load_student_grades(std::vector<Student*> &students) {
           }
         }
         
-        if (!invalid) {
+         if (!invalid) {
           assert (which >= 0);
           assert (value >= 0.0);
           s->setGradeableValue(g,which,value);
