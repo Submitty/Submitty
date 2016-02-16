@@ -398,12 +398,12 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
             else if (!$this->has_grade || !isset($this->active_assignment[$part]) || $this->active_assignment[$part] <= 0) {
                 if (file_exists(implode("/", array($submission_directory, "user_assignment_settings.json")))) {
                     $settings = json_decode(file_get_contents(implode("/", array($submission_directory, "user_assignment_settings.json"))), true);
+                    $this->active_assignment[$part] = $settings['active_assignment'];
                     // If the active_assignment is -1 in the file, then the submission was "cancelled"
                     if ($settings['active_assignment'] == 0) {
                         $part++;
                         continue;
                     }
-                    $this->active_assignment[$part] = $settings['active_assignment'];
                 }
                 else {
                     $this->active_assignment[$part] = $this->max_assignment[$part];
