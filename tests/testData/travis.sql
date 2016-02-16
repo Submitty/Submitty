@@ -1,12 +1,24 @@
 -- TEST DATA
 INSERT INTO sections (section_title, section_is_enabled) VALUES ('Section 1', 1);
+INSERT INTO sections (section_title, section_is_enabled) VALUES ('Section 2', 1);
 
 INSERT INTO students (student_rcs, student_last_name, student_first_name, student_section_id, student_grading_id)
     VALUES ('pevelm', 'Peveler', 'Matthew', 1, 1);
+INSERT INTO students (student_rcs, student_last_name, student_first_name, student_section_id, student_grading_id)
+    VALUES ('cutler', 'Cutler', 'Barb', 1, 1);
 
 INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email)
-    VALUES ('user', 'user', 'user', 'user@users.com');
+    VALUES ('Teaching', 'Assistant', 'ta', 'ta@rpi.edu');
 INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email, user_is_administrator)
-    VALUES ('admin', 'admin', 'admin', 'admin@users.com',1);
+    VALUES ('Instructor', 'Bob', 'instructor', 'instructor@rpi.edu',1);
 INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email, user_is_developer)
-    VALUES ('developer', 'developer', 'developer', 'developer@users.com', 1);
+    VALUES ('Developer', 'Sid', 'developer', 'developer@rpi.edu', 1);
+INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email, user_is_developer)
+    VALUES ('Matthew', 'Peveler', 'pevelm', 'pevelm@rpi.edu', 1);
+
+INSERT INTO labs (lab_number, lab_title, lab_checkpoints, lab_code)
+    VALUES (1, 'Lab 1', 'Checkpoint 1,Checkpoint 2,Checkpoint 3', '');
+INSERT INTO labs (lab_number, lab_title, lab_checkpoints, lab_code)
+    VALUES (2, 'Lab 2', 'Checkpoint 1,Checkpoint 2,Checkpoint 3', '');
+
+INSERT INTO relationships_users (user_id, section_id) VALUES (1, 1);

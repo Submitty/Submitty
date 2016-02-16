@@ -109,6 +109,7 @@ std::string getItem(const std::string &line, int which) {
 void AddClickerScores(std::vector<Student*> &students, std::vector<std::vector<iClickerQuestion> > iclicker_questions) {
 
   for (int which_lecture = 0; which_lecture < iclicker_questions.size(); which_lecture++) {
+    //std::cout << "which lecture = " << which_lecture << std::endl;
     std::vector<iClickerQuestion>& lecture = iclicker_questions[which_lecture];
     for (int which_question = 0; which_question < lecture.size(); which_question++) {
       iClickerQuestion& question = lecture[which_question];
@@ -141,7 +142,9 @@ MAX_ICLICKER_TOTAL += 1.0;
         bool participate = (item != "");
         
         if (!participate) continue;
+        
         //std::cout << "ITEM " << item << " " << item.size() << std::endl;
+        
         assert (item.size() == 1);
 
         //bool correct = question.participationQuestion() || question.isCorrectAnswer(item[0]);

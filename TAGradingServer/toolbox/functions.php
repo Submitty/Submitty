@@ -72,7 +72,7 @@ header("Content-Type: text/html; charset=UTF-8");
 $user_id = 0;
 if ($DEBUG) {
     // TODO: we need to have a pseudo http login box just to always set $_SERVER["PHP_AUTH_USER"] to not default to me
-    $suggested_username = "pevelm";
+    $suggested_username = (isset($_GET['useUser'])) ? $_GET['useUser'] : "pevelm";
 }
 else {
     $suggested_username = $_SERVER["PHP_AUTH_USER"];

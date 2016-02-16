@@ -54,6 +54,7 @@ std::map<Grade,int> grade_counts;
 std::map<Grade,float> grade_avg;
 int took_final = 0;
 int auditors = 0;
+int dropped = 0;
 
 Student* PERFECT_STUDENT_POINTER;
 
@@ -87,6 +88,9 @@ char GLOBAL_EXAM_DEFAULT_ROOM[MAX_STRING_LENGTH] = "exam default room uninitiali
 
 float GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = 0.1;
 
+int BONUS_WHICH_LECTURE = -1;
+std::string BONUS_FILE;
+
 //====================================================================
 // INFO ABOUT OUTPUT FORMATTING
 
@@ -119,8 +123,8 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s);
 
 
 bool by_overall(const Student* s1, const Student* s2) {
-  float s1_overall = s1->overall();
-  float s2_overall = s2->overall();
+  float s1_overall = s1->overall_b4_moss();
+  float s2_overall = s2->overall_b4_moss();
   
   if (s1_overall > s2_overall+0.0001) return true;
   if (fabs (s1_overall - s2_overall) < 0.0001 &&
@@ -130,6 +134,21 @@ bool by_overall(const Student* s1, const Student* s2) {
 
   return false;
 }
+
+
+bool by_test_and_exam(const Student* s1, const Student* s2) {
+  float val1 = s1->GradeablePercent(GRADEABLE_ENUM::TEST) + s1->GradeablePercent(GRADEABLE_ENUM::EXAM);
+  float val2 = s2->GradeablePercent(GRADEABLE_ENUM::TEST) + s2->GradeablePercent(GRADEABLE_ENUM::EXAM);
+  
+  if (val1 > val2) return true;
+  if (fabs (val1-val2) < 0.0001 &&
+      s1->getSection() == 0 &&
+      s2->getSection() != 0)
+    return true;
+  
+  return false;
+}
+
 
 
 
@@ -255,7 +274,7 @@ bool string_to_gradeable_enum(const std::string &s, GRADEABLE_ENUM &return_value
   if (s == "participation")         { return_value = GRADEABLE_ENUM::PARTICIPATION;  return true;  }
   if (s == "hw" || s == "homework") { return_value = GRADEABLE_ENUM::HOMEWORK;       return true;  }
   if (s == "project")               { return_value = GRADEABLE_ENUM::PROJECT;        return true;  }
-  if (s == "quiz")                  { return_value = GRADEABLE_ENUM::QUIZ;           return true;  }
+  if (s == "quiz" || s == "quizze") { return_value = GRADEABLE_ENUM::QUIZ;           return true;  }
   if (s == "test")                  { return_value = GRADEABLE_ENUM::TEST;           return true;  }
   if (s == "exam")                  { return_value = GRADEABLE_ENUM::EXAM;           return true;  }
   return false;
@@ -663,8 +682,9 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
     } else if (token == "min_overall_for_zone_assignment") {
       istr >> GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT;
       continue;
-
-
+    } else if (token == "bonus_latedays") {
+      istr >> BONUS_WHICH_LECTURE >> BONUS_FILE;
+      continue;
     } else if (token == "exam_seating") {
 
       //      DISPLAY_EXAM_SEATING = true;
@@ -699,6 +719,8 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
 
         if (g == GRADEABLE_ENUM::HOMEWORK ||
             g == GRADEABLE_ENUM::LAB ||
+            g == GRADEABLE_ENUM::QUIZ ||
+            g == GRADEABLE_ENUM::EXAM ||
             g == GRADEABLE_ENUM::TEST) {
           ss >> which_token;
           
@@ -858,6 +880,24 @@ void load_student_grades(std::vector<Student*> &students) {
         if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
           invalid=true;
           which = -1;
+
+          if (gradeable_name == "Lab15") {
+            //istr >> a; 
+            std::cout << "value " << s->getUserName() << " " << value << std::endl;
+            assert (value >= 0 && value <= 5);
+            s->setParticipation(value);
+          } else if (gradeable_name == "Lab16") {
+            assert (value >= 0 && value <= 5);
+            s->setUnderstanding(value);            
+
+          } else if (gradeable_name == "Test4") {
+            assert (value >= 0 && value <= 150);
+            s->setGradeableValue(GRADEABLE_ENUM::EXAM,0,value);
+
+          } else {
+            std::cerr << "WARNING: INVALID gradeable item" << gradeable_name << " " << value << std::endl;
+            
+          }
         } else {
           const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
           which = c.first;
@@ -890,7 +930,15 @@ void load_student_grades(std::vector<Student*> &students) {
         if (GRADEABLES[GRADEABLE_ENUM::HOMEWORK].hasCorrespondence(which_token)) {
           const std::pair<int,std::string>& c = GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCorrespondence(which_token);
           int which = c.first;
-          s->incrLateDaysUsed(which,a);
+   
+          assert (a > 0);
+       
+          float hw_value = s->getGradeableValue(GRADEABLE_ENUM::HOMEWORK,which);
+          if (hw_value <= 0) {
+            std::cout << "OOPS!  should not be charged late days for a homework with grade 0   student:" << s->getUserName() << " hw:" << which_token << " latedays:" << a << std::endl;
+          } else {
+            s->incrLateDaysUsed(which,a);
+          }
         }
       } 
 
@@ -1016,7 +1064,7 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
     //bool any_notes = false;
     
     
-    end_table(ostr,true,students,S);
+    end_table(ostr,false,students,S);
 
 
 
@@ -1076,8 +1124,28 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
 // =============================================================================================
 // =============================================================================================
 
+void load_bonus_late_day(std::vector<Student*> &students, 
+                         int which_lecture,
+                         std::string bonus_late_day_file) {
 
+  std::ifstream istr(bonus_late_day_file.c_str());
+  if (!istr.good()) {
+    std::cerr << "ERROR!  could not open " << bonus_late_day_file << std::endl;
+    exit(1);
+  }
 
+  std::string username;
+  while (istr >> username) {
+    Student *s = GetStudent(students,username);
+    if (s == NULL) {
+      std::cerr << "ERROR!  bad username " << username << std::endl;
+      exit(1);
+    } else {
+      s->add_bonus_late_day(which_lecture);
+    }
+  } 
+
+}
 
 
 int main(int argc, char* argv[]) {
@@ -1095,6 +1163,10 @@ int main(int argc, char* argv[]) {
   // ======================================================================
   // LOAD ALL THE STUDENT DATA
   load_student_grades(students);
+
+  if (BONUS_FILE != "") {
+    load_bonus_late_day(students,BONUS_WHICH_LECTURE,BONUS_FILE);
+  }
 
   // ======================================================================
   // MAKE FAKE STUDENTS FOR THE CURVES
@@ -1122,6 +1194,7 @@ int main(int argc, char* argv[]) {
     DISPLAY_ICLICKER = false;
 
     std::sort(students.begin(),students.end(),by_name);
+
   } else if (sort_order == std::string("by_iclicker")) {
     std::sort(students.begin(),students.end(),by_iclicker);
 
@@ -1131,6 +1204,9 @@ int main(int argc, char* argv[]) {
     std::sort(students.begin(),students.end(),by_year);
   } else if (sort_order == std::string("by_major")) {
     std::sort(students.begin(),students.end(),by_major);
+
+  } else if (sort_order == std::string("by_test_and_exam")) {
+    std::sort(students.begin(),students.end(),by_test_and_exam);
 
   } else {
     assert (sort_order.size() > 3);
@@ -1143,7 +1219,7 @@ int main(int argc, char* argv[]) {
     }
     else {
       std::cerr << "UNKNOWN SORT OPTION " << sort_order << std::endl;
-      std::cerr << "  Usage: " << argv[0] << " [ by_overall | by_name | by_section | by_zone | by_iclicker | by_year | by_major | | by_lab | by_exercise | by_reading | by_hw | by_test | by_exam ]" << std::endl;
+      std::cerr << "  Usage: " << argv[0] << " [ by_overall | by_name | by_section | by_zone | by_iclicker | by_year | by_major | | by_lab | by_exercise | by_reading | by_hw | by_test | by_exam | by_test_and_exam ]" << std::endl;
       exit(1);
     }
   }
@@ -1154,21 +1230,32 @@ int main(int argc, char* argv[]) {
   // COUNT
 
   for (unsigned int s = 0; s < students.size(); s++) {
-    if (students[s]->getLastName() == "" || students[s]->getFirstName() == "") continue;
-    if (students[s]->getAudit()) {
+
+    Student *this_student = students[s];
+
+    if (this_student->getLastName() == "" || this_student->getFirstName() == "") {
+      continue;
+    }
+    if (this_student->getAudit()) {
       auditors++;
       continue;
     }
 
     Student *sd = GetStudent(students,"LOWEST D");
 
-
-    grade_counts[students[s]->grade(false,sd)]++;
-    grade_avg[students[s]->grade(false,sd)]+=students[s]->overall();
-
-    if (GRADEABLES[GRADEABLE_ENUM::TEST].getCount() != 0) {
-      if (students[s]->getGradeableValue(GRADEABLE_ENUM::TEST,GRADEABLES[GRADEABLE_ENUM::TEST].getCount()-1) > 0) took_final++;
+    if (validSection(this_student->getSection())) {
+      std::string student_grade = this_student->grade(false,sd);
+      grade_counts[student_grade]++;
+      grade_avg[student_grade]+=this_student->overall();
+    } else {
+      dropped++;
     }
+    if (GRADEABLES[GRADEABLE_ENUM::EXAM].getCount() != 0) {
+      if (this_student->getGradeableValue(GRADEABLE_ENUM::EXAM,GRADEABLES[GRADEABLE_ENUM::EXAM].getCount()-1) > 0) {
+        took_final++;
+      }
+    }
+
   }
 
   int runningtotal = 0;

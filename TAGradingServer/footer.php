@@ -1,5 +1,5 @@
 	<footer>
-		
+
 	</footer>
     <script>
         function toggle() {
@@ -24,15 +24,17 @@ HTML;
 
     }
     echo <<<HTML
+    <!-- JQuery -->
     <script>
         $(document).ready(function() {
+
             $('a').each(function() {
                 if ($(this).attr('href') != undefined) {
                     if ($(this).attr('href') == "{$BASE_URL}") {
                         $(this).attr('href', $(this).attr('href') + '/index.php?course={$_GET['course']}');
                     }
                     else if ($(this).attr('href').indexOf("{$BASE_URL}") > -1) {
-                        if ($(this).attr('href').substr(-4) == '.php') {
+                        if ($(this).attr('href').substr(-4) == '.php' || $(this).attr('href').substr(-4) == '.cgi') {
                             $(this).attr('href', $(this).attr('href') + '?course={$_GET['course']}');
                         }
                         else {
@@ -41,6 +43,7 @@ HTML;
                     }
                 }
             });
+
             $('form').each(function() {
                 if ($(this).attr('method') == 'get') {
                     $(this).append("<input type='hidden' name='course' value='{$_GET['course']}' />");
@@ -54,6 +57,7 @@ HTML;
                     }
                 }
             });
+
         });
     </script>
 	</body>

@@ -22,7 +22,7 @@ SELENIUM_JAR=selenium-server-standalone.jar
 
 if [ ! -f "$DIR/$SELENIUM_JAR" ]; then
     echo "Downloading Selenium"
-    sudo wget -O "$DIR/$SELENIUM_JAR" "$SELENIUM_DOWNLOAD_URL"
+    wget -O "$DIR/$SELENIUM_JAR" "$SELENIUM_DOWNLOAD_URL"
     echo "Downloaded Selenium"
 fi
 

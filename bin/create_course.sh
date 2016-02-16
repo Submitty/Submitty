@@ -232,5 +232,7 @@ echo -e "\nMake sure to create the database: $DATABASE_NAME\n\n"
 
 echo -e "SUCCESS!  new course   $course $semester   CREATED HERE:   $course_dir"
 
+echo -e "SUCCESS!  submission url  https://submit.cs.rpi.edu/index.php?semester="$semester"&course="$course
+
 ########################################################################################################################
 ########################################################################################################################

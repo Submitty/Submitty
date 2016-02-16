@@ -217,7 +217,9 @@ HTML;
             $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
             print selectBox($k, $num, $old_grade);
             $checked = ($question['question_extra_credit'] == 1) ? "checked" : "";
+            print (($question['question_extra_credit'] == 1 && $disabled == "disabled") ? "<input type='hidden' name='ec-{$k}-{$num}'' value='on' />" : "");
             print <<<HTML
+
                         <input onclick='calculatePercentageTotal();' name="ec-{$k}-{$num}" type="checkbox" {$checked} {$disabled} />
                     </td>
 HTML;
@@ -332,21 +334,7 @@ HTML;
         </div>
     </form>
 </div>
-HTML;
 
-    if ($old_rubric['rubric_due_date'] != "") {
-        $date = explode(" ", $old_rubric['rubric_due_date']);
-        $date = explode("-", $date[0]);
-        $year = $date[0];
-        $month = intval($date[1]);
-        $day = intval($date[2]);
-        $date = "{year: {$year}, month: {$month}, day: {$day}}";
-    }
-    else {
-        $date = "null";
-    }
-
-    print <<<HTML
 <script type="text/javascript">
     var datepicker = $('.datepicker');
     datepicker.datetimepicker({
@@ -399,8 +387,8 @@ HTML;
         cell1.innerHTML = partNameString + "<br /><div class='part_submission_id'><input style='width: 47px;' type='text' name='rubric_part_"+partNameString+"_id' value='_part"+partNameString+"' /></div>";
         cell2.innerHTML='<textarea name="comment-' + partName + '-1" rows="1" style="width: 896px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea></span>'+
                           '<div class="btn btn-mini btn-default" onclick="toggleTA(' + partName + ',1)" style="margin-top:-5px;">TA Note</div>'+
-                          '<textarea name="ta-' + partName + '-1" id="individual-' + partName + '-1" rows="1" placeholder=" Message to TA" style="width: 954px; padding: 0px; resize: none; margin-top: 5px; margin-bottom: -80px; display: none;"></textarea>';
-        cell3.innerHTML=selectBox(partName, "1") + ' <input onclick="calculatePercentageTotal();" name="ec-' + partName + '-1" type="checkbox" />';
+                          '<textarea name="ta-' + partName + '-1" id="individual-' + partName + '-1" rows="1" placeholder=" Message to TA" style="width: 954px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: -80px; display: none;"></textarea>';
+        cell3.innerHTML = selectBox(partName, "1") + ' <input onclick="calculatePercentageTotal();" name="ec-' + partName + '-1" type="checkbox" />';
 
         row = table.insertRow(table.rows.length - 2);
         cell1 = row.insertCell(0);

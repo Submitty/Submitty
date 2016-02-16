@@ -18,7 +18,7 @@
 class TestResults {
 public:
 
-  TestResults(float g=-1, const std::string &m="") { my_grade = g; message = m; distance=0; }
+  TestResults(float g=-1, const std::string &m="", const std::string &sd="") { my_grade = g; message = m; swap_difference=sd; distance=0; }
 
   virtual ~TestResults() {}
   
@@ -57,6 +57,8 @@ public:
   void setMessage(const std::string &m) { message=m; }
 
 protected:
+  std::string swap_difference;
+
   std::string message;
   float my_grade;
 };
@@ -69,9 +71,12 @@ protected:
  * Extended in difference.cpp
  */
 inline void TestResults::printJSON(std::ostream & file_out) {
-
-  file_out << "{" << std::endl;
-  file_out << "}" << std::endl;
+  if (swap_difference != "") {
+    file_out << swap_difference << std::endl;
+  } else {
+    file_out << "{" << std::endl;
+    file_out << "}" << std::endl;
+  }
   return;
 }
 

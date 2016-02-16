@@ -49,10 +49,11 @@ class DatabaseUtils {
      * @param string $text the text representation of the postgres array
      * @param int $start index to start looking through $text at
      * @param int $end index of $text where we exist current pgArrayToPhp call
+     * @param bool $parseBools set to true to convert "true"/"false" to booleans instead of strings
      *
      * @return array PHP array representation
      */
-    public static function fromPGToPHPArray($text, $start=0, &$end=null) {
+    public static function fromPGToPHPArray($text, $start=0, &$end=null, $parseBools=false) {
         $text = trim($text);
 
         if(empty($text) || $text[0] != "{") {
@@ -81,7 +82,12 @@ class DatabaseUtils {
                             $return[] = $element + 0;
                         }
                         else {
-                            $return[] = (strtolower($element) == "true") ? true : false;
+                            if (!$parseBools) {
+                                $return[] = $element;
+                            }
+                            else {
+                                $return[] = (strtolower($element) == "true") ? true : false;
+                            }
                         }
                     }
                     $end = $i;
@@ -108,7 +114,12 @@ class DatabaseUtils {
                             $return[] = $element + 0;
                         }
                         else {
-                            $return[] = (strtolower($element) == "true") ? true : false;
+                            if (!$parseBools) {
+                                $return[] = $element;
+                            }
+                            else {
+                                $return[] = (strtolower($element) == "true") ? true : false;
+                            }
                         }
                     }
                     $element = "";

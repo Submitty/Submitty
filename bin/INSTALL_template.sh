@@ -288,6 +288,7 @@ replace_fillin_variables $HSS_INSTALL_DIR/bin/build_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/build_homework_function.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/fake_submit_button_press.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/untrusted_execute.c
+replace_fillin_variables $HSS_INSTALL_DIR/bin/setcsvfields
 
 # most of the scripts should be root only
 find $HSS_INSTALL_DIR/bin -type f -exec chown root:root {} \;

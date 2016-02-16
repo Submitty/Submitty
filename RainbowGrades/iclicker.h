@@ -50,7 +50,7 @@ public:
   }
 
   const std::string& getFilename() const { return filename; }
-  int getColumn() const { return 4 + which_question*6; }
+  int getColumn() const { return 4 + (which_question-1)*6; }
   bool participationQuestion() const { return correct_answer == "ABCDE"; }
   bool isCorrectAnswer(char c) { return correct_answer.find(c) != std::string::npos; }
 

@@ -73,11 +73,11 @@ $output .= <<<HTML
         border-bottom: 1px solid darkgray;
         margin-top: 5px;
     }
-    
+
     #table-rubrics td.rubrics-id {
         width: 50px;
     }
-    
+
     #table-rubrics td.rubrics-name {
         width: 200px;
     }
@@ -85,7 +85,7 @@ $output .= <<<HTML
     #table-rubrics td.rubrics-parts {
         width: 160px;
     }
-    
+
     #table-rubrics td.rubrics-questions {
         width: 160px;
     }
@@ -97,7 +97,7 @@ $output .= <<<HTML
     #table-rubrics td.rubrics-due {
         width: 260px;
     }
-    
+
     #table-rubrics td.rubrics-options {
         width: 100px;
     }
@@ -127,7 +127,7 @@ $output .= <<<HTML
         top:0;
         left:-310px;
     }
-    
+
     .submit-button {
         float: right;
         margin-top: -28px;
@@ -136,7 +136,8 @@ $output .= <<<HTML
 
 </style>
 <script type="text/javascript">
-    function deleteRubric(rubric_id, rubric_name) {
+    function deleteRubric(rubric_id) {
+        var rubric_name = $('td#rubric-'+rubric_id+'-title').text();
         var c = window.confirm("Are you sure you want to delete '" + rubric_name + "'?");
         if (c == true) {
             $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=delete&id='+rubric_id)
@@ -155,7 +156,7 @@ $output .= <<<HTML
                 });
         }
     }
-    
+
     function fixSequences() {
         $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=sequence')
             .done(function(response) {
@@ -195,10 +196,6 @@ $output .= <<<HTML
 HTML;
 
 foreach ($db->rows() as $rubric) {
-    $db->query("SELECT count(distinct(case when question_part_number > 0 then question_part_number 
-    else null end)), count(question_id), sum(case when question_extra_credit = 0 then question_total 
-    else 0 end) FROM questions WHERE rubric_id=?", array($rubric['rubric_id']));
-
     $output .= <<<HTML
         <tr id='rubric-{$rubric['rubric_id']}'">
             <td class="rubrics-id" id="rubric-{$rubric['rubric_id']}-id">{$rubric['rubric_id']}</td>
@@ -208,7 +205,7 @@ foreach ($db->rows() as $rubric) {
             <td class="rubrics-score" id="rubric-{$rubric['rubric_id']}-score">{$rubric['rubric_score']} ({$rubric['rubric_ec']})</td>
             <td class="rubrics-due" id="rubric-{$rubric['rubric_id']}-due">{$rubric['rubric_due_date']}</td>
             <td id="rubric-{$rubric['rubric_id']}-options"><a href="{$BASE_URL}/account/admin-rubric.php?course={$_GET['course']}&action=edit&id={$rubric['rubric_id']}">Edit</a> |
-            <a onclick="deleteRubric({$rubric['rubric_id']}, {$rubric['rubric_name']});">Delete</a></td>
+            <a onclick="deleteRubric({$rubric['rubric_id']});">Delete</a></td>
         </tr>
 HTML;
 }
