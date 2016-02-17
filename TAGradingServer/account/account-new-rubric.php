@@ -22,13 +22,39 @@ $icon = array();
 $icon_color = array();
 $color = array();
 
-if ($rubric->status == 1) {
-    $icon[0] = '<i class="icon-ok icon-white"></i>';
-    $icon_color[0] = "#008000";
+if (!$rubric->rubric_details['rubric_parts_sep']) {
+    if ($rubric->status == 1 && $rubric->days_late_used == 0) {
+        $icon[0] = '<i class="icon-ok icon-white"></i>';
+        $icon_color[0] = "#008000";
+        $part_status[0] = "Good";
+    }
+    else if ($rubric->status == 1 && $rubric->days_late_used > 0) {
+        $icon[$i] = '<i class="icon-exclamation-sign icon-white"></i>';
+        $color[0] = "#998100";
+        $icon_color[0] = "#FAA732";
+        $part_status[0] = 'Late';
+    }
+    else {
+        $icon[0] = '<i class="icon-remove icon-white"></i>';
+        $color[0] = "#998100";
+        $icon_color[0] = "#FAA732";
+        if ($rubric->active_assignment[1] == 0) {
+            $part_status[0] = 'Cancelled';
+        }
+        else {
+            $part_status[0] = 'Bad';
+        }
+    }
 }
 else {
-    $icon[0] = '<i class="icon-remove icon-white"></i>';
-    $icon_color[0] = "#DA4F49";
+    if($rubric->status == 1) {
+        $icon[0] = '<i class="icon-ok icon-white"></i>';
+        $icon_color[0] = "#008000";
+    }
+    else {
+        $icon[0] = '<i class="icon-remove icon-white"></i>';
+        $icon_color[0] = "#DA4F49";
+    }
 }
 
 for ($i = 1; $i <= $rubric->rubric_parts; $i++) {
@@ -39,9 +65,10 @@ for ($i = 1; $i <= $rubric->rubric_parts; $i++) {
     if($rubric->parts_status[$i] == 0) {
         $color[$i] = "#DA4F49";
         $icon_color[$i] = "#DA4F49";
-        $part_status[$i] = 'Bad';
+        $part_status[$i] = ($rubric->active_assignment[$i] == 0) ? "Cancelled" : "Bad";
         $icon[$i] = '<i class="icon-remove icon-white"></i>';
-    } else if($rubric->parts_status[$i] == 2) {
+    }
+    else if($rubric->parts_status[$i] == 2) {
         $color[$i] = "#998100";
         $icon_color[$i] = "#FAA732";
         $part_status[$i] = 'Late';
@@ -238,7 +265,15 @@ for($part = 1; $part <= $rubric->rubric_parts; $part++) {
                         <i class="icon-remove icon-white"></i>
                     </li>
                     <li class='active'><a href="#output-{$part}-1" data-toggle="tab">
-                        <b style="color:#DA4F49;">No Submission</b>
+HTML;
+        if ($rubric->active_assignment[$part] == 0) {
+            $output .= '<b style="color:#DA4F49;">Cancelled</b>';
+        }
+        else {
+            $output .= '<b style="color:#DA4F49;">No Submission</b>';
+        }
+
+        $output .= <<<HTML
                     </a></li>
                 </ul>
             </div>
@@ -428,7 +463,7 @@ HTML;
 
 $print_status = ($rubric->status == 1) ? "Good" : "Bad";
 $output .= <<<HTML
-                <b>Status: </b>$print_status<br />
+                <b>Status:</b> <span style="color: {$color[0]};">{$part_status[0]}</span><br />
 HTML;
 if ($rubric->rubric_details['rubric_parts_sep']) {
     for ($i = 1; $i <= $rubric->rubric_parts; $i++) {

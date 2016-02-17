@@ -16,6 +16,10 @@ fi
 # UBUNTU SETUP
 #################
 if [ ${VAGRANT} == 1 ]; then
+    chmod -x /etc/update-motd.d/*
+    chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
+    chmod +x /etc/update-motd.d/00-header
+    
     echo -e '
  __   __  _     _  _______  _______  ______    __   __  _______  ______
 |  | |  || | _ | ||       ||       ||    _ |  |  | |  ||       ||    _ |
@@ -34,6 +38,11 @@ if [ ${VAGRANT} == 1 ]; then
 ##  The following accounts have database accounts         ##
 ##  with same password as above:                          ##
 ##    hsdbu, postgres, root, vagrant                      ##
+##                                                        ##
+##  The VM can be accessed with the following urls:       ##
+##    https://192.168.56.101 (submission)                 ##
+##    https://192.168.56.102 (svn)                        ##
+##    https://192.168.56.103 (grading)                    ##
 ##                                                        ##
 ##  Happy developing!                                     ##
 ############################################################
@@ -159,10 +168,10 @@ auth required pam_unix.so
 account required pam_unix.so" > /etc/pam.d/httpd
 
 if [ ${VAGRANT} == 1 ]; then
-# Loosen password requirements
+    # Loosen password requirements on vagrant box
 	sed -i '25s/^/\#/' /etc/pam.d/common-password
 	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
-# Set the ServerName
+    # Set the ServerName
 	echo -e "\nServerName 10.0.2.15\n" >> /etc/apache2/apache2.conf
 fi
 
@@ -279,7 +288,7 @@ if [ ${VAGRANT} == 1 ]; then
 	service postgresql restart
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
-	su postgres -c "/vagrant/.setup/db_users.sh DATABASE";
+	su postgres -c "source /vagrant/.setup/db_users.sh";
 	echo "Finished creating PostgreSQL users"
 fi
 
@@ -287,15 +296,14 @@ fi
 # HWSERVER SETUP
 #################
 
-# link currently creates file permission issues, commented out
-#if [[ ${VAGRANT} == 1 ]]; then
-#	echo "creating link"
-#	ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
-#else
+if [[ ${VAGRANT} == 1 ]]; then
+	echo "creating link"
+	ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
+else
 	echo "cloning repository"
 	cd /usr/local/hss
 	git clone https://github.com/RCOS-Grading-Server/HWserver.git GIT_CHECKOUT_HWserver
-#fi
+fi
 
 HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
 cd ${HWSERVER_DIR}

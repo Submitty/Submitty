@@ -45,6 +45,11 @@ $part = (__USE_AUTOGRADER__) ? 0 : 1;
 
 $questions = array();
 if ($action == 'edit') {
+    $db->query("SELECT COUNT(*) as cnt FROM grades WHERE rubric_id=?", array($rubric_id));
+    if ($db->row()['cnt'] == 0) {
+        $db->query("DELETE FROM questions WHERE rubric_id=?", array($rubric_id));
+    }
+
     $db->query("SELECT * FROM questions WHERE rubric_id=? ORDER BY question_part_number, question_number", array($rubric_id));
     foreach ($db->rows() as $row) {
         $questions[$row['question_part_number']][$row['question_number']] = $row;
