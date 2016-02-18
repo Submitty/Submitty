@@ -550,7 +550,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
 
         for ($i = 0; $i < count($this->questions); $i++) {
             $question = &$this->questions[$i];
-            $part = ($this->rubric_parts['rubric_parts_sep']) ? $question['question_part_number'] : 1;
+            $status_part = ($this->rubric_parts['rubric_parts_sep']) ? $question['question_part_number'] : 1;
             if (!isset($question['grade_question_score'])) {
                 if ($this->status == 0) {
                     $question['grade_question_score'] = 0;
@@ -566,8 +566,8 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                         }
                     }
                 }
-                else if (!$this->parts_status[$part] || __ZERO_RUBRIC_GRADES__) {
-                    $question[$i]['grade_question_score'] = 0;
+                else if (!$this->parts_status[$status_part] || __ZERO_RUBRIC_GRADES__) {
+                    $question['grade_question_score'] = 0;
                 }
                 else {
                     $question['grade_question_score'] = $question['question_total'];
