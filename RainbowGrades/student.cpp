@@ -18,10 +18,10 @@ Student::Student() {
   independentstudy = false;
 
   // grade data
-  for (int i = 0; i < ALL_GRADEABLES.size(); i++) { 
+  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) { 
     GRADEABLE_ENUM g = ALL_GRADEABLES[i];
     all_values[g]       = std::vector<float>(GRADEABLES[g].getCount(),0);
-    //all_notes[g]       = std::vector<std::string>(GRADEABLES[g].getCount(),0);
+    all_notes[g]       = std::vector<std::string>(GRADEABLES[g].getCount(),"");
   }
   // (iclicker defaults to empty map)
   hws_late_days                             = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(),0);
@@ -47,7 +47,7 @@ Student::Student() {
 
 // lookup a student by username
 Student* GetStudent(const std::vector<Student*> &students, const std::string& username) {
-  for (int i = 0; i < students.size(); i++) {
+  for (unsigned int i = 0; i < students.size(); i++) {
     if (students[i]->getUserName() == username) return students[i];
   }
   return NULL;
@@ -65,7 +65,7 @@ float Student::getGradeableValue(GRADEABLE_ENUM g, int i) const {
   assert (i >= 0 && i < GRADEABLES[g].getCount());
   std::map<GRADEABLE_ENUM,std::vector<float> >::const_iterator itr = all_values.find(g);
   assert (itr != all_values.end());
-  assert (itr->second.size() > i);
+  assert (int(itr->second.size()) > i);
 
   float value = itr->second[i];
   if (g == GRADEABLE_ENUM::HOMEWORK && LATE_DAY_PERCENTAGE_PENALTY > 0) {
@@ -89,19 +89,19 @@ void Student::setGradeableValue(GRADEABLE_ENUM g, int i, float value) {
   assert (i >= 0 && i < GRADEABLES[g].getCount());
   std::map<GRADEABLE_ENUM,std::vector<float> >::iterator itr = all_values.find(g);
   assert (itr != all_values.end());
-  assert (itr->second.size() > i);
+  assert (int(itr->second.size()) > i);
   itr->second[i] = value;
 }
 
-/*
+
 void Student::setGradeableNote(GRADEABLE_ENUM g, int i, const std::string &note) {
   assert (i >= 0 && i < GRADEABLES[g].getCount());
   std::map<GRADEABLE_ENUM,std::vector<std::string> >::iterator itr = all_notes.find(g);
   assert (itr != all_notes.end());
-  assert (itr->second.size() > i);
+  assert (int(itr->second.size()) > i);
   itr->second[i] = note;
 }
-*/
+
 
 // =============================================================================================
 // GRADER CALCULATION HELPER FUNCTIONS
@@ -212,7 +212,7 @@ int Student::getAllowedLateDays(int which_lecture) const {
   
   float total = getIClickerTotal(which_lecture,0);
   
-  for (int i = 0; i < bonus_late_days_which_lecture.size(); i++) {
+  for (unsigned int i = 0; i < bonus_late_days_which_lecture.size(); i++) {
     if (bonus_late_days_which_lecture[i] <= which_lecture) {
       answer ++;
     }
@@ -244,7 +244,7 @@ int Student::getUsedLateDays() const {
 
 float Student::overall_b4_moss() const {
   float answer = 0;
-  for (int i = 0; i < ALL_GRADEABLES.size(); i++) { 
+  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) { 
     GRADEABLE_ENUM g = ALL_GRADEABLES[i];
     answer += GradeablePercent(g);
   }
@@ -383,7 +383,7 @@ float Student::getIClickerRecent() const {
 float Student::getIClickerTotal(int which_lecture, int start) const {
   if (getUserName() == "PERFECT") { return MAX_ICLICKER_TOTAL; } 
   float ans = 0;
-  for (int i = start; i < ICLICKER_QUESTION_NAMES.size(); i++) {
+  for (unsigned int i = start; i < ICLICKER_QUESTION_NAMES.size(); i++) {
     std::map<std::string,std::pair<char,iclicker_answer_enum> >::const_iterator itr = iclickeranswers.find(ICLICKER_QUESTION_NAMES[i]);
     if (itr == iclickeranswers.end()) continue;
     if (!iclickertotalhelper(itr->first,which_lecture)) continue;

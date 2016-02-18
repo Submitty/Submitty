@@ -159,7 +159,7 @@ private:
 
   // grade data
   std::map<GRADEABLE_ENUM,std::vector<float> > all_values;
-  //std::map<GRADEABLE_ENUM,std::vector<std::string> > all_notes;
+  std::map<GRADEABLE_ENUM,std::vector<std::string> > all_notes;
   std::map<std::string,std::pair<char,iclicker_answer_enum> > iclickeranswers;
   std::vector<float> hws_late_days;
   std::vector<std::string> zones;

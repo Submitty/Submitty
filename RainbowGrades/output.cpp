@@ -374,13 +374,13 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
 
 
 
-  for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
+  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
     student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff",gradeable_to_string(ALL_GRADEABLES[i])+" %"));
   }
   student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
 
 
-  for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
+  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
     GRADEABLE_ENUM g = ALL_GRADEABLES[i];
     for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
       student_data.push_back(counter);  
@@ -412,7 +412,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
 
   int myrank = 1;
   int myrow = 1;
-  for (int stu= 0; stu < students.size(); stu++) {
+  for (unsigned int stu= 0; stu < students.size(); stu++) {
     std::string default_color="ffffff";
     Student *this_student = students[stu];
     myrow++;
@@ -454,7 +454,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
     table.set(myrow,counter++,TableCell(grey_divider));
     
 
-    for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
+    for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
       enum GRADEABLE_ENUM g = ALL_GRADEABLES[i];
       float grade = this_student->GradeablePercent(g);
       std::string color = coloritcolor(grade,
@@ -468,7 +468,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
     table.set(myrow,counter++,TableCell(grey_divider));
     
     
-    for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
+    for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
       GRADEABLE_ENUM g = ALL_GRADEABLES[i];
       for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
         float grade = this_student->getGradeableValue(g,j);
@@ -497,7 +497,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
   for (int i = 0; i < table.numCols(); i++) {
     instructor_data.push_back(i);
   }
-  for (int i = 0; i < students.size(); i++) {
+  for (unsigned int i = 0; i < students.size(); i++) {
     all_students.push_back(i);
   }
 
@@ -513,7 +513,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
   table.output(ostr3, select_students,student_data,true);
   
 
-
+  exit(0);
 
   Student* s = NULL;
   if (rank != -1) {
@@ -526,8 +526,8 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
   // PRINT INSTRUCTOR SUPPLIED MESSAGES
 
   if (g == GRADEABLE_ENUM::NONE) {
-
-    for (int i = 0; i < MESSAGES.size(); i++) {
+    
+    for (unsigned int i = 0; i < MESSAGES.size(); i++) {
       ostr << "" << MESSAGES[i] << "<br>\n";
     }
     // get todays date
@@ -605,7 +605,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
     }
     ostr << "<td align=center>OVERALL</td>";
     ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
-    for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
+    for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
       ostr << "<td align=center>" << gradeable_to_string(ALL_GRADEABLES[i]) << " %</td>";
     }
   }
@@ -613,7 +613,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
   // -------------------------------------------------------------------------------  
   // GRADE DETAILS
   if (DISPLAY_GRADE_DETAILS) {
-    for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
+    for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
 
       if (!for_instructor && g != ALL_GRADEABLES[i]) {
         continue;
@@ -754,7 +754,7 @@ void output_line(std::ofstream &ostr,
     ostr << "<font color=\"magenta\">" << this_student->getOtherNote() << "</font>";
     ostr << "&nbsp;<font color=\"red\">";
     std::vector<std::string> ews = this_student->getEarlyWarnings();
-    for (int i = 0; i < ews.size(); i++) {
+    for (unsigned int i = 0; i < ews.size(); i++) {
       ostr << ews[i] << "<br>";
     }
     ostr << "</font></td>";
@@ -841,7 +841,7 @@ void output_line(std::ofstream &ostr,
     if (DISPLAY_GRADE_DETAILS) {
       ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
     }
-    for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
+    for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
       GRADEABLE_ENUM g = ALL_GRADEABLES[i];
       colorit(ostr,this_student->GradeablePercent(g),
               sp->GradeablePercent(g),
@@ -855,7 +855,7 @@ void output_line(std::ofstream &ostr,
   // -------------------------------------------------------------------------------  
   // GRADE DETAILS
   if (DISPLAY_GRADE_DETAILS) {
-    for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
+    for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
       GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
 
       if (for_instructor || g2 == GRADEABLE_ENUM::NONE || g == g2) { 
@@ -894,7 +894,7 @@ void output_line(std::ofstream &ostr,
       //*/
       ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
     }
-    for (int i = 0; i < ICLICKER_QUESTION_NAMES.size(); i++) {
+    for (unsigned int i = 0; i < ICLICKER_QUESTION_NAMES.size(); i++) {
       
       std::pair<std::string,float> answer = this_student->getIClickerAnswer(ICLICKER_QUESTION_NAMES[i]);
       

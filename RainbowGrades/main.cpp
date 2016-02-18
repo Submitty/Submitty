@@ -372,7 +372,7 @@ void MakeRosterFile(std::vector<Student*> &students) {
   std::ofstream ostr("./iclicker_Roster.txt");
 
 
-  for (int i = 0; i < students.size(); i++) {
+  for (unsigned int i = 0; i < students.size(); i++) {
     std::string foo = "active";
     if (students[i]->getLastName() == "") continue;
     if (students[i]->getSection() <= 0 || students[i]->getSection() > 10) continue;
@@ -920,7 +920,7 @@ void load_student_grades(std::vector<Student*> &students) {
           assert (which >= 0);
           assert (value >= 0.0);
           s->setGradeableValue(g,which,value);
-          //s->setGradeableNote(g,which,other_note);
+          s->setGradeableNote(g,which,other_note);
           if (label != "") {
             if (g == GRADEABLE_ENUM::TEST) {
               s->setTestZone(which,label);
@@ -1307,7 +1307,7 @@ int main(int argc, char* argv[]) {
   // ======================================================================
   // SUGGEST CURVES
 
-  for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
+  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
     GRADEABLE_ENUM g = ALL_GRADEABLES[i];
 
     for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
@@ -1322,7 +1322,7 @@ int main(int argc, char* argv[]) {
       
       std::map<int, int> section_counts;
       
-      for (int S = 0; S < students.size(); S++) {
+      for (unsigned int S = 0; S < students.size(); S++) {
         if (students[S]->getSection() > 0 && students[S]->getGradeableValue(g,i) > 0) {
           scores.push_back(students[S]->getGradeableValue(g,i));
           section_counts[students[S]->getSection()]++;
@@ -1332,13 +1332,13 @@ int main(int argc, char* argv[]) {
         //std::cout << "   " << scores.size() << " submitted" << std::endl;
         std::sort(scores.begin(),scores.end());
         float sum = 0;
-        for (int i = 0; i < scores.size(); i++) {
+        for (unsigned int i = 0; i < scores.size(); i++) {
           sum+=scores[i];
         }
         float average = sum / float(scores.size());
         std::cout << "    average=" << std::setprecision(2) << std::fixed << average;
         sum = 0;
-        for (int i = 0; i < scores.size(); i++) {
+        for (unsigned int i = 0; i < scores.size(); i++) {
           sum+=(average-scores[i])*(average-scores[i]);
         }
         float stddev = sqrt(sum/float(scores.size()));
