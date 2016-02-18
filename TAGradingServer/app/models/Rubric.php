@@ -549,31 +549,33 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
         $total = 0;
 
         for ($i = 0; $i < count($this->questions); $i++) {
-            if (!isset($this->questions[$i]['grade_question_score'])) {
+            $question = &$this->questions[$i];
+            $part = ($this->rubric_parts['rubric_parts_sep']) ? $question['question_part_number'] : 1;
+            if (!isset($question['grade_question_score'])) {
                 if ($this->status == 0) {
-                    $this->questions[$i]['grade_question_score'] = 0;
+                    $question['grade_question_score'] = 0;
                 }
-                else if (__USE_AUTOGRADER__ && $this->questions[$i]['question_part_number'] == 0) {
-                    $this->questions[$i]['grade_question_score'] = 0;
+                else if (__USE_AUTOGRADER__ && $question['question_part_number'] == 0) {
+                    $question['grade_question_score'] = 0;
                     foreach ($this->results_details as $part => $details) {
-                        if ($this->questions[$i]['question_number'] == 1) {
-                            $this->questions[$i]['grade_question_score'] += $this->results_details[$part]['non_extra_credit_points_awarded'];
+                        if ($question['question_number'] == 1) {
+                            $question['grade_question_score'] += $this->results_details[$part]['non_extra_credit_points_awarded'];
                         }
                         else {
-                            $this->questions[$i]['grade_question_score'] += $this->results_details[$part]['extra_credit_points_awarded'];
+                            $question['grade_question_score'] += $this->results_details[$part]['extra_credit_points_awarded'];
                         }
                     }
                 }
-                else if (!$this->parts_status[$this->questions[$i]['question_part_number']] || __ZERO_RUBRIC_GRADES__) {
-                    $this->questions[$i]['grade_question_score'] = 0;
+                else if (!$this->parts_status[$part] || __ZERO_RUBRIC_GRADES__) {
+                    $question[$i]['grade_question_score'] = 0;
                 }
                 else {
-                    $this->questions[$i]['grade_question_score'] = $this->questions[$i]['question_total'];
+                    $question['grade_question_score'] = $question['question_total'];
                 }
             }
 
-            if (!$this->questions[$i]['question_extra_credit']) {
-                $total += $this->questions[$i]['question_total'];
+            if (!$question['question_extra_credit']) {
+                $total += $question['question_total'];
             }
         }
         $this->rubric_details['rubric_total'] = $total;
