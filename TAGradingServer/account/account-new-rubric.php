@@ -57,18 +57,19 @@ else {
     }
 }
 
-for ($i = 1; $i <= $rubric->rubric_parts; $i++) {
+for ($i = 1; $i <= $rubric->rubric_details['rubric_parts']; $i++) {
     $color[$i] = "#008000";
     $icon_color[$i] = "#008000";
     $part_status[$i] = 'Good';
     $icon[$i] = '<i class="icon-ok icon-white"></i>';
-    if($rubric->parts_status[$i] == 0) {
+    $part = ($rubric->rubric_details['rubric_parts_sep']) ? $i : 1;
+    if($rubric->parts_status[$part] == 0) {
         $color[$i] = "#DA4F49";
         $icon_color[$i] = "#DA4F49";
-        $part_status[$i] = ($rubric->active_assignment[$i] == 0) ? "Cancelled" : "Bad";
+        $part_status[$i] = ($rubric->active_assignment[$part] == 0) ? "Cancelled" : "Bad";
         $icon[$i] = '<i class="icon-remove icon-white"></i>';
     }
-    else if($rubric->parts_status[$i] == 2) {
+    else if($rubric->parts_status[$part] == 2) {
         $color[$i] = "#998100";
         $icon_color[$i] = "#FAA732";
         $part_status[$i] = 'Late';
