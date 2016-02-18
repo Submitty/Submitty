@@ -1,63 +1,74 @@
 <?php
+
 require_once("controller/controller_functions.php");
-?>
 
-<html>
+echo '<html>';
+echo '<title>$course</title>';
+echo "<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700' rel='stylesheet' type='text/css'>";
+echo '<body>';
 
-<title><?php echo $course;?></title>
-<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700' rel='stylesheet' type='text/css'>
+echo '<div>';
 
-<body>
-	<div>
-		<div class="title-box">
-			<h1 class="title">Homework Submissions for <?php echo $course; ?></h1>
-			<h3 class="subtext">Submit Homeworks Here!</h3>
-		</div>
-		<div>
-			<div></div>
-			<div class="submissions">
+
+// =================================================================================
+
+
+echo '<div class="title-box">';
+echo '<h1 class="title">Homework Submissions for '.$course.'</h1>';
+echo '</div>';
+
+
+// =================================================================================
+
+echo '<div>';
+echo '<div class="submissions">';
 				
-
-
-<?php
-
-
-
 if (file_exists("custom_resources/".$semester."_".$course."_main.css")) {
-   print('<link href="custom_resources/'.$semester."_".$course.'_main.css" rel="stylesheet"></link>');
+  print('<link href="custom_resources/'.$semester."_".$course.'_main.css" rel="stylesheet"></link>');
 } else {
-   print('<link href="resources/default_main.css" rel="stylesheet"></link>');
+  print('<link href="resources/default_main.css" rel="stylesheet"></link>');
 }
 
 
+// =================================================================================
+
 print('<link href="resources/override.css" rel="stylesheet"></link>');
 
+echo "<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic' rel='stylesheet' type='text/css'>";
+echo "<link href='https://fonts.googleapis.com/css?family=PT+Sans:700,700italic' rel='stylesheet' type='text/css'>";
+echo '<link href="resources/bootmin.css" rel="stylesheet"></link>';
+echo '<link href="resources/badge.css" rel="stylesheet"></link>';
+echo '<script src="resources/script/main.js"></script>';
+
+
+
+// DIFF VIEWER STUFF 
+echo "<script src='diff-viewer/jquery.js'></script>";
+echo "<script src='diff-viewer/underscore.js'></script>";
+echo "<script src='diff-viewer/highlight.js'></script>";
+echo "<script src='diff-viewer/diff.js'></script>";
+echo "<script src='diff-viewer/diff_queue.js'></script>";
+echo '<link href="diff-viewer/diff.css" rel="stylesheet"></link>';
+
+echo "<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>";
+
+// =================================================================================
+
+$user = $_SESSION["id"];
+
+
+// =================================================================================
+// FUNCTIONS USED BY THE PULL-DOWN MENUS 
 
 
 ?>
-<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=PT+Sans:700,700italic' rel='stylesheet' type='text/css'>
-<link href="resources/bootmin.css" rel="stylesheet"></link>
-<link href="resources/badge.css" rel="stylesheet"></link>
-<script src="resources/script/main.js"></script>
 
-<!-- DIFF VIEWER STUFF -->
-<script src='diff-viewer/jquery.js'></script>
-<script src='diff-viewer/underscore.js'></script>
-<script src='diff-viewer/highlight.js'></script>
-<script src='diff-viewer/diff.js'></script>
-<script src='diff-viewer/diff_queue.js'></script>
-<link href="diff-viewer/diff.css" rel="stylesheet"></link>
-<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
-<?php $user = $_SESSION["id"]; ?>
+<script type="text/javascript">;
 
-<!-- FUNCTIONS USED BY THE PULL-DOWN MENUS -->
-<script type="text/javascript">
 function assignment_changed(){
-
    var php_course = "<?php echo $course; ?>";
    var php_semester = "<?php echo $semester; ?>";
-  window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+'#scroll=' + window.scrollY;
+   window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+'#scroll=' + window.scrollY;
 }
 function version_changed(){
    var php_course = "<?php echo $course; ?>";
@@ -68,89 +79,93 @@ function version_changed(){
 window.addEventListener('load', function() {
     // Do we have a #scroll in the URL hash?
     if(window.location.hash && /#scroll/.test(window.location.hash)) {
-        // Scroll to the #scroll value
+      // Scroll to the #scroll value
         window.scrollTo(0, window.location.hash.replace('#scroll=', ''));
     }
 });
+
 </script>
 
+<?php
 
-<!--- IDENTIFY USER & SELECT WHICH HOMEWORK NUMBER -->
-<div id="HWsubmission">
-    <h2 class="label">Homework Submission for <em> <?php echo $user;?> </em>
-          <?php
-          if (on_dev_team($user)) {
-             echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ]</font>";
-            }
-          ?>
-    </h2>
 
-    <!-- TOP MESSAGE (TEST ZONE ASSIGNMENT & PRIORITY HELP QUEUE)-->
-    <?php
-    $path_front = get_path_front_course($semester,$course);;
-    $message_path = "$path_front/reports/summary_html/".$username."_message.html";
-    if (file_exists($message_path)){
-        $message_file = file_get_contents($message_path);
-        echo $message_file;
+// =================================================================================
+// IDENTIFY USER & SELECT WHICH HOMEWORK NUMBER 
+
+echo '<div id="HWsubmission">';
+
+echo '<h2 class="label">Homework Submission for <em>'.$user.'</em>';
+if (on_dev_team($user)) {
+  echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ]</font>";
+}
+echo '</h2>';
+
+
+// =================================================================================
+// TOP MESSAGE (TEST ZONE ASSIGNMENT & PRIORITY HELP QUEUE)
+
+
+$path_front = get_path_front_course($semester,$course);;
+$message_path = "$path_front/reports/summary_html/".$username."_message.html";
+if (file_exists($message_path)){
+  $message_file = file_get_contents($message_path);
+  echo $message_file;
+}
+
+
+echo '<div class="sub">';
+echo '<form class="form_submit" action="">';
+echo '<label class="label">Select Assignment:</label>';
+echo '<select id="hwlist" name="assignment_id" onchange="assignment_changed();">';
+
+for ($i = 0; $i < count($all_assignments); $i++) {
+  $FLAG = "";
+  if ($all_assignments[$i]["released"] != true)
+    {
+      if (on_dev_team($user)) {
+        $FLAG = " NOT RELEASED";
+      } else {
+        continue;
+      }
+      }
+  echo "<option value=".$all_assignments[$i]["assignment_id"];
+  if ($all_assignments[$i]["assignment_id"] == $assignment_id)
+    {
+      echo " selected";
     }
-    ?>
-
-    <div class="sub"> <!-- sub -->
-        <form class="form_submit" action="">
-            <label class="label">Select Assignment:</label>
-            <select id="hwlist" name="assignment_id" onchange="assignment_changed();">
-                <?php
-                for ($i = 0; $i < count($all_assignments); $i++)
-                {
-                    $FLAG = "";
-                    if ($all_assignments[$i]["released"] != true)
-                    {
-                        if (on_dev_team($user)) {
-                            $FLAG = " NOT RELEASED";
-                        } else {
-                            continue;
-                        }
-                    }
-                    echo "<option value=".$all_assignments[$i]["assignment_id"];
-                    if ($all_assignments[$i]["assignment_id"] == $assignment_id)
-                    {
-                        echo " selected";
-                    }
-                    echo '>'.$all_assignments[$i]["assignment_name"].$FLAG;
-                    echo "</option>";
-                }
-                ?>
-            </select>
-        </form>
-    </div> <!-- end sub -->
-
-    <h2 class="label">Assignment: <?php echo $assignment_name;?></h2>
+  echo '>'.$all_assignments[$i]["assignment_name"].$FLAG;
+  echo "</option>";
+}
 
 
-    <div class="panel-body"> <!-- panel-body -->
-        <?php
-        if ($status && $status != "") {
-            echo '  <div class="outer_box">';
-            echo '  <h3 class="label2">';
-            echo $status;
-            echo '  </h3>';
-            echo '</div>';
-        }
-        ?>
+echo '</select>';
+echo '</form>';
+echo '</div>'; // end sub 
 
-        <!--- UPLOAD NEW VERSION -->
-        <div class="outer_box"> <!-- outer_box -->
-            <h3 class="label">Upload New Version</h3>
-            <p class="sub">
-                <?php 
-		echo $upload_message;
-		?>
-                
-            </p>
+
+echo '<h2 class="label">Assignment: '.$assignment_name.'</h2>';
+
+
+echo '<div class="panel-body">';
+
+if ($status && $status != "") {
+  echo '  <div class="outer_box">';
+  echo '  <h3 class="label2">';
+  echo $status;
+  echo '  </h3>';
+  echo '</div>';
+}
+
+
+// UPLOAD NEW VERSION 
+
+echo '<div class="outer_box">';
+echo '<h3 class="label">Upload New Version</h3>';
+echo '<p class="sub">'.$upload_message.'</p>';
 
 
 
-<?php if ($svn_checkout == true) {  
+if ($svn_checkout == true) {  
 
 	// NO FILE SUBMISSION, PULL FILES FROM SVN
 
@@ -183,221 +198,247 @@ window.addEventListener('load', function() {
       echo '</form>';
 
 }
+
+
+
+
+
+echo '</div>';
+
+/*
+// helpful for debugging
+echo "HIGHEST VERSION ".$highest_version." (most recent)<br>";
+echo "ASSIGNMENT VERSION ".$assignment_version." (what to view)<br>";
+echo "ACTIVE VERSION ".$active_version." (for TA grading)<br>";  // active
+*/
+
+// ============================================================================
+// INFO ON ALL VERSIONS
+
+if ($highest_version == -1) {
+  
+  // no submissions
+  echo '<div class="outer_box">';
+  echo '<em>No submission for this assignment.</em>';
+  echo '</div>';
+  
+} else if ($highest_version < 1) {
+  
+  // this should not happen
+  // $highest_version should not be negative -or- zero!
+  echo '<div class="outer_box">';
+  echo '<b>ERROR!  THIS SHOULD NOT HAPPEN!</b>';
+  echo '</div>';
+  
+} else {
+  
+  // $highest_version is >= 1
+  echo '<div class="outer_box">';
+  echo '<h3 class="label">Review Submissions</h3>';
+  
+  
+  // -----------------------------------------------------
+  // SELECT A PREVIOUS SUBMISSION PULL DOWN
+
+  echo '<div class="sub-text">';
+  echo '<div class="split-row">';  // left half of split row
+
+  echo '<form class="form_submit" action="">';
+  echo '<label class="label"><em>Select Submission Version:</em></label>';
+  echo '<input type="input" readonly="readonly" name="assignment_id" value="'.$assignment_id.'" style="display: none">';
+  echo '<select id="versionlist" name="assignment_version" onchange="version_changed();">';
+
+  // special blank option when an assignment is cancelled
+  if ($active_version == 0) {
+    echo '<option value="0"></option>';
+  }
+  
+  for ($i = 1; $i <= $highest_version; $i++) {
+    echo '<option value="'.$i.'"';
+    if ($i == $assignment_version) { echo 'selected'; }
+    echo ' > ';
+    echo 'Version #'.$i;
+    echo '&nbsp;&nbsp';
+    if ($points_visible != 0){
+      echo 'Score: '.$select_submission_data[$i-1]["score"].'&nbsp;&nbsp';
+    } else {
+      // don't display the score when there are no points
+    }
+    if ($select_submission_data[$i-1]["days_late"] != "") {
+      echo 'Days Late: '.$select_submission_data[$i-1]["days_late"];
+    }
+    if ($i == $active_version) { echo '&nbsp;&nbsp ACTIVE'; }
+    echo ' </option>';
+  }
+  echo '</select>';
+  echo '</form>';
+  echo '</div>'; // left half of split row
+  
+  // -----------------------------------------------------                  
+  // CHANGE ACTIVE VERSION & CANCEL SUBMISSION BUTTONS
+  
+  echo '<div class="split-row" style="margin-left: 15px;">';  // right half of split row
+
+  if ($assignment_version != $active_version) {
+    echo '&nbsp;&nbsp;&nbsp;&nbsp;';
+    echo '<a href="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'" style="text-align:center;">';
+    echo '<input type="submit" class="btn btn-primary" value="Set Version '.$assignment_version.' as ACTIVE Submission Version"></input></a>';
+  } 
+  
+  if ($active_version != 0) {
+    echo '&nbsp;&nbsp;&nbsp;&nbsp;';
+    echo '<a href="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version=0" style="text-align:center;">';
+    echo '<input type="submit" class="btn btn-primary" value="Cancel Submission"></input></a>';
+  }
+              
+  echo '</div>'; // right half of split row 
+  echo '</div>'; // sub-text
+  
+
+  // -----------------------------------------------------
+  // ACTIVE ASSIGNMENT & CANCELLED ASSIGNMENT MESSAGES
+  
+  echo '<div class="sub-text">';
+  if ($active_version == 0) {
+    echo '<span class="error_mess">Note: You have </span>';
+    echo '<b><span class="error_mess">CANCELLED</span></b>';
+    echo '<span class="error_mess"> all submissions for this assignment.<br>';
+    echo 'This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.</span>';
+  } else if ($assignment_version == $active_version) {
+    echo '<span class="message">Note: This is your "ACTIVE" submission version, which will be graded by the instructor/TAs and the score recorded in the gradebook.</span>';
+  }
+  echo '</div>'; // sub-text
+
+  // -----------------------------------------------------
+  // DETAILS OF SELECTED ASSIGNMENT
+
+
+  if ($assignment_version != 0) {
+    
+    //Box with name, size, and content of submitted files
+    render("filecontent_display",
+           array("download_files"=>$download_files,
+                 "submitted_files"=>$submitted_files,
+                 "semester"=>$semester,
+                 "course"=>$course,
+                 "username"=>$username,
+                 "assignment_id"=>$assignment_id,
+                 "assignment_version"=>$assignment_version,
+                 "files_to_view"=>$files_to_view
+                 ));
+    
+    
+    if        ($assignment_version_in_grading_queue2 == "batch_queue" ||
+               $assignment_version_in_grading_queue2 == "interactive_queue") {
+      echo "<span>Version ".$assignment_version." is in the queue to be graded</span>";
+    } else if ($assignment_version_in_grading_queue2 == "currently_grading") {
+      echo "<span>Version ".$assignment_version." is now currently being graded</span>";
+    } else if ($assignment_version_in_grading_queue2 == "error_does_not_exist") {
+      echo "<span> ERROR! Version ".$assignment_version." does not exist!  Please report this issue to your instructor/TA.</span>";
+    } else if ($assignment_version_in_grading_queue2 == "error_not_graded_and_not_in_queue") {
+      echo "<span> ERROR! Version ".$assignment_version." has not been graded!  Please report this issue to your instructor/TA.</span>";
+    } else if ($assignment_version_in_grading_queue2 == "graded") {
+      //echo "<span>".$assignment_version." has been graded</span>";
+    } else {
+      echo "<span> ERROR! Version ".$assignment_version." has an unknown state ".$assignment_version_in_grading_queue."</span>";
+    }
+    
+
+
+    if ($assignment_version_in_grading_queue2 == "graded") {
+      //Box with grades, outputs and diffs
+      render("homework_graded_display",
+             array("assignment_message"=>$assignment_message,
+                   "homework_tests"=>$homework_tests,
+                   "viewing_version_score"=>$viewing_version_score,
+                   "points_visible"=>$points_visible,
+                   "view_points"=>$view_points,
+                   "view_hidden_points"=>$view_hidden_points,
+                   ));
+    }
+  }
+  
+  echo '</div>';
+
+
+  
+  // ============================================================================
+  // TA GRADES SECTION
+
+  if (!isset($ta_grades) || (isset($ta_grades) && $ta_grades == true)){
+    if ($ta_grade_released == true) {
+      echo '<div class="outer_box"> <!-- outer_box -->';
+      
+      //<!--- TA GRADE -->
+      $path_front = get_path_front_course($semester,$course);;
+      $gradefile_path = "$path_front/reports/$assignment_id/".$username.".txt";
+      if (!file_exists($gradefile_path)) {
+        echo '<h3 class="label2">TA grade not available</h3>';
+      }
+      else
+        {
+          $grade_file = file_get_contents($gradefile_path);
+          echo '<h3 class="label">TA grade</h3>';
+          // echo "<em><p>Please see the <a href=\"https://www.cs.rpi.edu/academics/courses/fall14/csci1200/announcements.php\">Announcements</a> page for the curve for this homework.</p></em>";
+          echo "<pre>".$grade_file."</pre>";
+        }
+      echo "</div> <!-- end outer_box -->";
+    }
+    else
+      {
+        //echo '<div class="outer_box"> <!-- outer_box -->';
+        //echo '<h3 class="label2">TA grades for this homework not released yet</h3>';
+        //echo "</div> <!-- end outer_box -->";
+        
+      }
+    //<!-- END OF "IF AT LEAST ONE SUBMISSION... " -->
+  }
+  
+}
+
+
+// ============================================================================
+// GRADES SUMMARY SECTION
+
+
+if (!isset($grade_summary) || (isset($grade_summary) && $grade_summary == true)){
+  $path_front = get_path_front_course($semester,$course);;
+  $gradefile_path = "$path_front/reports/summary_html/".$username."_summary.html";
+  if (!file_exists($gradefile_path))
+    {
+      // echo '<div class="outer_box"> <!-- outer_box -->';
+      // echo '<h3 class="label2">Grade Summary not available</h3>';
+      // echo "</div> <!-- end outer_box -->";
+      
+    }
+  else
+    {
+      echo '<div class="outer_box"> <!-- outer_box -->';
+      $grade_file = file_get_contents($gradefile_path);
+      echo $grade_file;
+      echo "</div> <!-- end outer_box -->";
+      
+    }
+}
+
+echo '</div>'; // end panel-body 
+echo '</div>'; // end HWsubmission 
+
+
+
+
+
+
+
+
+
+// ============================================================================
+// ============================================================================
+
 ?>
 
-
-
-        </div> <!-- end outer_box -->
-
-        <!------------------------------------------------------------------------>
-        <!-- "IF AT LEAST ONE SUBMISSION... " -->
-            <!-- INFO ON ALL VERSIONS -->
-            <?php
-            if ($assignment_version >= 1)
-            {
-                ?>
-                <div class="outer_box">
-
-                    <h3 class="label">Review Submissions</h3>
-
-                    <!-- ACTIVE SUBMISION INFO -->
-
-                    <div class="sub-text">
-                        <div class="split-row">
-
-                            <!-- <div>
-                                <b>Active  Submission Version #
-                                    <?php
-                                    echo $submitting_version." of ".$highest_version.": </b> ";
-
-                                    if ($submitting_version_in_grading_queue)
-                                    {
-                                        echo " is currently being graded.";
-                                    }
-                                    else if ($points_visible != 0)
-                                    {
-                                        echo "  Score: ".$submitting_version_score;
-                                    }
-                                    ?>
-                            </div> -->
-
-                            <!-- SELECT A PREVIOUS SUBMISSION -->
-
-                            <form class="form_submit" action="">
-                                <label class="label"><em>Select Submission Version:</em></label>
-                                <input type="input" readonly="readonly" name="assignment_id" value="<?php echo $assignment_id;?>" style="display: none">
-                                <select id="versionlist" name="assignment_version" onchange="version_changed();">
-                                    <?php
-                                    for ($i = 1; $i <= $highest_version; $i++) {
-                                        echo '<option value="'.$i.'"';
-                                        if ($i == $assignment_version)
-                                        {
-                                            echo 'selected';
-                                        }
-                                        echo ' > ';
-                                        echo 'Version #'.$i;
-                                        echo '&nbsp;&nbsp';
-                                        if ($points_visible != 0){
-                                            echo 'Score: ';
-                                            echo $select_submission_data[$i-1]["score"];
-                                            echo '&nbsp;&nbsp';
-                                        }
-                                        else{
-					    echo 'Score: ';
-                                            echo $points_visible;
-					    echo '&nbsp;&nbsp';
-                                        }
-                                        if ($select_submission_data[$i-1]["days_late"] != "")
-                                        {
-                                            echo 'Days Late: ';
-                                            echo $select_submission_data[$i-1]["days_late"];
-                                        }
-                                        if ($i == $submitting_version) {
-                                            echo '&nbsp;&nbsp ACTIVE';
-                                        }
-                                        echo ' </option>';
-                                    }
-                                    ?>
-                                </select>
-                            </form>
-                        </div> <!-- class="split-row" -->
-                        <div class="split-row" style="margin-left: 15px;"> <!-- class="sub-text" -->
-                            <!-- CHANGE ACTIVE VERSION -->
-                            <?php
-                                if ($assignment_version != $submitting_version) {
-                                    echo '&nbsp;&nbsp;&nbsp;&nbsp;';
-                                    echo '<a href="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'" ';
-                                    echo 'style="text-align:center;"><input type="submit" class="btn btn-primary" value="Set Version '.$assignment_version.' as ACTIVE Submission Version"></input></a>';
-                                }
-                                else {
-                                    echo '<em>Note: This is your "ACTIVE" submission version, which will be graded and the score recorded in the gradebook.</em>';
-                                }
-                            ?>
-                        </div> <!-- class="split-row" -->
-                    </div>
-                    <!-- <?php
-                    //$date_submitted = get_submission_time($user,$semester,$course,$assignment_id,$assignment_version);
-                    //echo "<p><b>Date Submitted = ".$date_submitted."</b></p>";
-                    ?> -->
-                   <?php
-
-                    //Box with name, size, and content of submitted files
-                    render("filecontent_display",array(
-                        "download_files"=>$download_files,
-                        "submitted_files"=>$submitted_files,
-                        "semester"=>$semester,
-                        "course"=>$course,
-                        "username"=>$username,
-                        "assignment_id"=>$assignment_id,
-                        "assignment_version"=>$assignment_version,
-                        "files_to_view"=>$files_to_view
-                        ));
-
-
-		    if        ($assignment_version_in_grading_queue2 == "batch_queue" ||
-			       $assignment_version_in_grading_queue2 == "interactive_queue") {
-		      echo "<span>Version ".$assignment_version." is in the queue to be graded</span>";
-		    } else if ($assignment_version_in_grading_queue2 == "currently_grading") {
-		      echo "<span>Version ".$assignment_version." is now currently being graded</span>";
-		    } else if ($assignment_version_in_grading_queue2 == "error_does_not_exist") {
-		      echo "<span> ERROR! Version ".$assignment_version." does not exist!  Please report this issue to your instructor/TA.</span>";
-		    } else if ($assignment_version_in_grading_queue2 == "error_not_graded_and_not_in_queue") {
-		      echo "<span> ERROR! Version ".$assignment_version." has not been graded!  Please report this issue to your instructor/TA.</span>";
-		    } else if ($assignment_version_in_grading_queue2 == "graded") {
-		      //echo "<span>".$assignment_version." has been graded</span>";
-		    } else {
-		      echo "<span> ERROR! Version ".$assignment_version." has an unknown state ".$assignment_version_in_grading_queue."</span>";
-		    }
-
-
-
-		    /*
-                    if ($assignment_version_in_grading_queue) {
-                    ?>
-                        <span>Version <?php echo $assignment_version;?> is currently being graded.</span>
-
-                    <?php
-                    }
-                    else {
-		    */
-
-	            if ($assignment_version_in_grading_queue2 == "graded") {
-
-//	   echo "debuga: $points_visible";
-
-                        //Box with grades, outputs and diffs
-                        render("homework_graded_display",array(
-                            "assignment_message"=>$assignment_message,
-                            "homework_tests"=>$homework_tests,
-                            "viewing_version_score"=>$viewing_version_score,
-                            "points_visible"=>$points_visible,
-                            "view_points"=>$view_points,
-                            "view_hidden_points"=>$view_hidden_points,
-                        ));
-                    }
-                    ?>
-
-                    <!-- END OF "IS GRADED?" -->
-                </div>  <!-- end outer_box -->
-
-                <?php
-                if (!isset($ta_grades) || (isset($ta_grades) && $ta_grades == true)){
-                    if ($ta_grade_released == true) {
-                        echo '<div class="outer_box"> <!-- outer_box -->';
-
-                        //<!--- TA GRADE -->
-                            $path_front = get_path_front_course($semester,$course);;
-                            $gradefile_path = "$path_front/reports/$assignment_id/".$username.".txt";
-                            if (!file_exists($gradefile_path)) {
-                                echo '<h3 class="label2">TA grade not available</h3>';
-                            }
-                            else
-                            {
-                                $grade_file = file_get_contents($gradefile_path);
-                                echo '<h3 class="label">TA grade</h3>';
-                               // echo "<em><p>Please see the <a href=\"https://www.cs.rpi.edu/academics/courses/fall14/csci1200/announcements.php\">Announcements</a> page for the curve for this homework.</p></em>";
-                                    echo "<pre>".$grade_file."</pre>";
-                            }
-                        echo "</div> <!-- end outer_box -->";
-                    }
-                    else
-                    {
-                    //echo '<div class="outer_box"> <!-- outer_box -->';
-                    //echo '<h3 class="label2">TA grades for this homework not released yet</h3>';
-                    //echo "</div> <!-- end outer_box -->";
-
-                    }
-                    //<!-- END OF "IF AT LEAST ONE SUBMISSION... " -->
-                }
-
-            }
-
-            if (!isset($grade_summary) || (isset($grade_summary) && $grade_summary == true)){
-                $path_front = get_path_front_course($semester,$course);;
-                $gradefile_path = "$path_front/reports/summary_html/".$username."_summary.html";
-                if (!file_exists($gradefile_path))
-                {
-                    // echo '<div class="outer_box"> <!-- outer_box -->';
-                    // echo '<h3 class="label2">Grade Summary not available</h3>';
-                    // echo "</div> <!-- end outer_box -->";
-
-                }
-                else
-                {
-                    echo '<div class="outer_box"> <!-- outer_box -->';
-                    $grade_file = file_get_contents($gradefile_path);
-                    echo $grade_file;
-                    echo "</div> <!-- end outer_box -->";
-
-                }
-            }
-            ?>
-            <!------------------------------------------------------------------------>
-    </div> <!-- end panel-body -->
-</div> <!-- end HWsubmission -->
-
-</body>
 <script>
+
     function check_for_upload(assignment, versions_used, versions_allowed) {
         versions_used = parseInt(versions_used);
         versions_allowed = parseInt(versions_allowed);
@@ -407,19 +448,23 @@ window.addEventListener('load', function() {
         }
         return true;
     }
+
     // Go through diff queue and run viewer
     loadDiffQueue();
 
-    //Set time between asking server if the homework has been graded
-    //Last argument in ms
-    //TODO: Set time between server requests (currently at 5 seconds = 5000ms)
-    //                                                     (previously at 1 minute = 60000ms)
+
+    // Set time between asking server if the homework has been graded
+    // Last argument in ms
+    // Currently at 1 seconds = 1000ms
+    // Previously seconds = 5000ms
+
     <?php
-    if ($assignment_version_in_grading_queue || $submitting_version_in_grading_queue) {
-        echo 'init_refresh_on_update("'.$semester.'", "'.$course.'", "'.$assignment_id.'", "'.$assignment_version.'", "'.$submitting_version.'", "'.!$assignment_version_in_grading_queue.'", "'.!$submitting_version_in_grading_queue.'", 5000);';
+    if ($assignment_version_in_grading_queue || $active_version_in_grading_queue) {
+      echo 'init_refresh_on_update("'.$semester.'", "'.$course.'", "'.$assignment_id.'", "'.$assignment_version.'", "'.$active_version.'", "'.!$assignment_version_in_grading_queue.'", "'.!$active_version_in_grading_queue.'", 1000);';
     }
     ?>
     </script>
 </div>
 
+</body>
 </html>

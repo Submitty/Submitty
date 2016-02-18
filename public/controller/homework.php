@@ -13,13 +13,13 @@ if ($class_config == NULL) {
     <?php exit();
 }
 $most_recent_assignment_id =        most_recent_released_assignment_id($class_config);
-$most_recent_assignment_version =   most_recent_assignment_version($username, $semester,$course, $most_recent_assignment_id);
 $all_assignments =                  $class_config["assignments"];
 $dev_team =                         $class_config["dev_team"];
 //Get and validate assignment_id and assignment_version
 //If not valid do last homework, last version
 $assignment_id =                    parse_assignment_id_with_recent($class_config, $most_recent_assignment_id);
-$assignment_version =               parse_assignment_version_with_recent($username, $semester,$course, $assignment_id);
+//$assignment_version =               parse_assignment_version_with_recent($username, $semester,$course, $assignment_id);
+$assignment_version =               get_assignment_version($username, $semester,$course, $assignment_id);
 
 $assignment_name =                  name_for_assignment_id($class_config, $assignment_id);
 $assignment_link =                  link_for_assignment_id($class_config, $assignment_id);
@@ -29,7 +29,7 @@ $upload_message =                   get_upload_message($class_config);
 $svn_checkout =                     is_svn_checkout($class_config, $assignment_id);
 $view_points =                      is_points_visible($class_config, $assignment_id);
 $view_hidden_points =               is_hidden_points_visible($class_config, $assignment_id);
-$highest_version =                  most_recent_assignment_version($username, $semester,$course, $assignment_id);
+$highest_version =                  get_highest_assignment_version($username, $semester,$course, $assignment_id);
 
 //Assignment configuration data from assignmnet_config.json
 $assignment_config =                get_assignment_config($semester,$course, $assignment_id);
@@ -44,11 +44,11 @@ $points_possible = 0;
 $homework_tests =            get_homework_tests($username, $semester,$course, $assignment_id, $assignment_version, $assignment_config);
 
 //Active version / version to submit
-$submitting_version =        get_user_submitting_version($username, $semester,$course, $assignment_id);
+$active_version =        get_active_version($username, $semester,$course, $assignment_id);
 
-$submitting_homework_tests = get_homework_tests($username, $semester,$course, $assignment_id, $submitting_version, $assignment_config);
-$submitting_version_score =  0;
-$submitting_version_score =  get_awarded_points_visible($submitting_homework_tests)." / ".get_points_visible($submitting_homework_tests);
+$submitting_homework_tests = get_homework_tests($username, $semester,$course, $assignment_id, $active_version, $assignment_config);
+$active_version_score =  0;
+$active_version_score =  get_awarded_points_visible($submitting_homework_tests)." / ".get_points_visible($submitting_homework_tests);
 
 $viewing_version_score =     get_awarded_points_visible($homework_tests);
 
@@ -56,8 +56,8 @@ $viewing_version_score =     get_awarded_points_visible($homework_tests);
 $submitted_files =           get_submitted_files($username, $semester, $course, $assignment_id, $assignment_version);
 
 //Is the submitting version being graded
-$submitting_version_in_grading_queue = version_in_grading_queue($username, $semester,$course, $assignment_id, $submitting_version);
-$submitting_version_in_grading_queue2 = version_in_grading_queue2($username, $semester,$course, $assignment_id, $submitting_version);
+$active_version_in_grading_queue = version_in_grading_queue($username, $semester,$course, $assignment_id, $active_version);
+$active_version_in_grading_queue2 = version_in_grading_queue2($username, $semester,$course, $assignment_id, $active_version);
 
 //Is the viewing version being graded
 $assignment_version_in_grading_queue = version_in_grading_queue($username, $semester,$course, $assignment_id, $assignment_version);
@@ -126,16 +126,16 @@ render("homework", array(
 
     "homework_tests"=>          $homework_tests,
     "select_submission_data"=>  $select_submission_data,
-    "submitting_version"=>      $submitting_version,
-    "submitting_version_score"=>$submitting_version_score,
+    "active_version"=>      $active_version,
+    "active_version_score"=>$active_version_score,
     "viewing_version_score"=>   $viewing_version_score,
     "highest_version"=>         $highest_version,
     "assignment_version"=>      $assignment_version,
     "submitted_files"=>         $submitted_files,
     "max_submissions"=>         $max_submissions_for_assignment,
     "assignment_message"=>      $assignment_message,
-    "submitting_version_in_grading_queue"=>$submitting_version_in_grading_queue,
-    "submitting_version_in_grading_queue2"=>$submitting_version_in_grading_queue2,
+    "active_version_in_grading_queue"=>$active_version_in_grading_queue,
+    "active_version_in_grading_queue2"=>$active_version_in_grading_queue2,
     "assignment_version_in_grading_queue"=>$assignment_version_in_grading_queue,
     "assignment_version_in_grading_queue2"=>$assignment_version_in_grading_queue2,
     "status"=>                  $status,
