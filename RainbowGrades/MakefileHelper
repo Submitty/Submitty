@@ -35,10 +35,13 @@ push:
 	scp individual_summary_html/* ${USERNAME}@${HWSERVER}:${REPORTS_DIRECTORY}/summary_html
 
 
+#	g++ -Wall -std=c++11 -m32 -g \
+
 compile:
-	g++ -Wall -std=c++11 -m32 -g \
+	g++ -Wall -std=c++11 -g \
 		${RAINBOW_GRADES_DIRECTORY}/main.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/output.cpp \
+		${RAINBOW_GRADES_DIRECTORY}/table.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/student.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/iclicker.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/zone.cpp \
@@ -60,7 +63,8 @@ overall: compile
 	./process_grades.out by_overall
 
 memory_debug: compile
-	drmemory -- ./process_grades.out by_overall
+#	drmemory -- ./process_grades.out by_overall
+	valgrind ./process_grades.out by_overall
 
 iclicker: compile
 	./process_grades.out by_iclicker

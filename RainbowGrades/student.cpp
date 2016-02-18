@@ -21,6 +21,7 @@ Student::Student() {
   for (int i = 0; i < ALL_GRADEABLES.size(); i++) { 
     GRADEABLE_ENUM g = ALL_GRADEABLES[i];
     all_values[g]       = std::vector<float>(GRADEABLES[g].getCount(),0);
+    //all_notes[g]       = std::vector<std::string>(GRADEABLES[g].getCount(),0);
   }
   // (iclicker defaults to empty map)
   hws_late_days                             = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(),0);
@@ -91,6 +92,16 @@ void Student::setGradeableValue(GRADEABLE_ENUM g, int i, float value) {
   assert (itr->second.size() > i);
   itr->second[i] = value;
 }
+
+/*
+void Student::setGradeableNote(GRADEABLE_ENUM g, int i, const std::string &note) {
+  assert (i >= 0 && i < GRADEABLES[g].getCount());
+  std::map<GRADEABLE_ENUM,std::vector<std::string> >::iterator itr = all_notes.find(g);
+  assert (itr != all_notes.end());
+  assert (itr->second.size() > i);
+  itr->second[i] = note;
+}
+*/
 
 // =============================================================================================
 // GRADER CALCULATION HELPER FUNCTIONS
