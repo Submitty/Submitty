@@ -93,6 +93,13 @@ void Student::setGradeableValue(GRADEABLE_ENUM g, int i, float value) {
   itr->second[i] = value;
 }
 
+const std::string& Student::getGradeableNote(GRADEABLE_ENUM g, int i) const {
+  assert (i >= 0 && i < GRADEABLES[g].getCount());
+  std::map<GRADEABLE_ENUM,std::vector<std::string> >::const_iterator itr = all_notes.find(g);
+  assert (itr != all_notes.end());
+  assert (int(itr->second.size()) > i);
+  return itr->second[i];
+}
 
 void Student::setGradeableNote(GRADEABLE_ENUM g, int i, const std::string &note) {
   assert (i >= 0 && i < GRADEABLES[g].getCount());

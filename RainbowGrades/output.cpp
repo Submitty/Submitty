@@ -18,7 +18,7 @@
 #include "table.h"
 
 
-#define grey_divider "888888"
+#define grey_divider "aaaaaa"
 
 #include "constants_and_globals.h"
 
@@ -364,10 +364,17 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
   table.set(0,counter++,TableCell("ffffff","part."));
   table.set(0,counter++,TableCell("ffffff","under."));
   table.set(0,counter++,TableCell("ffffff","notes"));
-  student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","USERNAME"));
-  student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","LAST"));
+
+
+  table.set(0,counter++,TableCell("ffffff","USERNAME"));
+  table.set(0,counter++,TableCell("ffffff","LAST"));
   table.set(0,counter++,TableCell("ffffff","FIRST (LEGAL)"));
-  student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","FIRST"));
+  table.set(0,counter++,TableCell("ffffff","FIRST"));
+
+  student_data.push_back(counter-4);  
+  student_data.push_back(counter-1);  
+  student_data.push_back(counter-3);  
+
   student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
   student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","OVERALL"));
   student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
@@ -384,11 +391,16 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
     GRADEABLE_ENUM g = ALL_GRADEABLES[i];
     for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
       student_data.push_back(counter);  
-      table.set(0,counter++,TableCell("ffffff",gradeable_to_string(ALL_GRADEABLES[i])+" "+std::to_string(j)));
 
+      std::string gradeable_id = GRADEABLES[g].getID(j);
+       std::string gradeable_name = "";
+      if (GRADEABLES[g].hasCorrespondence(gradeable_id)) {
+        gradeable_name = GRADEABLES[g].getCorrespondence(gradeable_id).second;
+      }
+      table.set(0,counter++,TableCell("ffffff",gradeable_name));
       if (g==GRADEABLE_ENUM::READING) {
-        student_data.push_back(counter);  
-        table.set(0,counter++,TableCell("ffffff",gradeable_to_string(ALL_GRADEABLES[i])+" "+std::to_string(j)+" NOTES"));
+        //student_data.push_back(counter);  
+        //table.set(0,counter++,TableCell("ffffff",""));
       }
 
     }
@@ -409,6 +421,9 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
   select_students.push_back(1);
   select_students.push_back(-1);  // replace this with the real student!
   select_students.push_back(1);
+
+
+  std::map<int,std::string> student_correspondences;
 
   int myrank = 1;
   int myrow = 1;
@@ -432,6 +447,8 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
       } 
       table.set(myrow,counter++,TableCell(default_color,""));
     } else {
+      //std::cout << " WHO? " << this_student->getUserName() << std::endl;
+      student_correspondences[myrow] = this_student->getUserName();
       table.set(myrow,counter++,TableCell(default_color,std::to_string(myrank++)));
     }
     table.set(myrow,counter++,TableCell(default_color,this_student->getSection()));
@@ -478,11 +495,12 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
                                          sb->getGradeableValue(g,j),
                                          sc->getGradeableValue(g,j),
                                          sd->getGradeableValue(g,j));
-        table.set(myrow,counter++,TableCell(color,grade));
+        std::string details;
         if (g==GRADEABLE_ENUM::READING) {
-          std::string note = "a note";
-          table.set(myrow,counter++,TableCell("ffffff",note));
+          details = this_student->getGradeableNote(g,j);
         }
+        table.set(myrow,counter++,TableCell(color,grade,details));
+
       }
       table.set(myrow,counter++,TableCell(grey_divider));
     }
@@ -502,18 +520,22 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
   }
 
 
-  // random user
-  select_students[2] = 10;
 
 
   std::ofstream ostr2("all.html");
   table.output(ostr2, all_students,instructor_data);
 
-  std::ofstream ostr3("individual.html");
-  table.output(ostr3, select_students,student_data,true);
-  
 
-  exit(0);
+  for (std::map<int,std::string>::iterator itr = student_correspondences.begin();
+       itr != student_correspondences.end(); itr++) {
+    // random user
+    select_students[2] = itr->first;
+    std::string filename = "individual_summary_html/" + itr->second + "_summary.html";
+    std::cout << "FILENAME " << itr->first << " " << filename << std::endl;
+    std::ofstream ostr3(filename.c_str());
+    assert (ostr3.good());
+    table.output(ostr3, select_students,student_data,true,true);
+  }
 
   Student* s = NULL;
   if (rank != -1) {

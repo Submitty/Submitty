@@ -1063,8 +1063,12 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
   command = "ln -s " + summary_file + " " + OUTPUT_FILE;
   system(command.c_str());
   
+
   for (int S = 0; S < (int)students.size(); S++) {
     if (students[S]->getSection() == 0) continue;
+
+
+#if 0
     std::string file = INDIVIDUAL_FILES_OUTPUT_DIRECTORY + students[S]->getUserName() + "_summary.html";
 
     start_table_open_file(ostr,file,false,students,S,month,day,year,GRADEABLE_ENUM::NONE);
@@ -1080,7 +1084,6 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
     ostr << "</table><br>\n";
 
     /*
-
     for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
       enum GRADEABLE_ENUM g = ALL_GRADEABLES[i];
       start_table_output(ostr,file,false,students,S,month,day,year,g);
@@ -1096,10 +1099,9 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
     */    
     //bool any_notes = false;
     
-    
     end_table(ostr,false,students,S);
 
-
+#endif
 
     std::string file2 = INDIVIDUAL_FILES_OUTPUT_DIRECTORY + students[S]->getUserName() + "_message.html";
     std::ofstream ostr2(file2.c_str());

@@ -18,7 +18,7 @@ Date dateFromFilename(const std::string& filename_with_directory) {
   
   std::string filename = filename_with_directory;
   while (true) {
-    unsigned int pos = filename.find('/');
+    int pos = filename.find('/');
     if (pos == std::string::npos) break;
     filename = filename.substr(pos+1,filename.size()-pos-1);
   }
@@ -96,7 +96,7 @@ void MatchClickerRemotes(std::vector<Student*> &students, const std::string &rem
 
 
 std::string getItem(const std::string &line, int which) {
-  unsigned int comma_before = 0;
+  int comma_before = 0;
   for (int i = 0; i < which; i++) {
     comma_before = line.find(',',comma_before)+1;
     assert (comma_before != std::string::npos);

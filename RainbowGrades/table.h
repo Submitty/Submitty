@@ -6,11 +6,12 @@
 
 class TableCell {
 public:
-  TableCell() { color="ffcccc"; data =""; span =1; align="left";}
-  TableCell(std::string c, std::string d="", int s=1) { color=c; data=d; span=s; align="left";}
-  TableCell(std::string c, int d, int s=1) { color=c; data=std::to_string(d); span=s; align="left";}
-  TableCell(std::string c, float d, int s=1) { 
+  TableCell() { color="ffcccc"; data =""; note=""; span =1; align="left";}
+  TableCell(std::string c, std::string d="", std::string n="", int s=1) { color=c; data=d; note=n; span=s; align="left";}
+  TableCell(std::string c, int d, std::string n="", int s=1) { color=c; data=std::to_string(d); note=n; span=s; align="left";}
+  TableCell(std::string c, float d, std::string n="", int s=1) { 
     color=c; 
+    note=n;
     if (d > 0.0001) {
       std::stringstream ss;
       ss << std::setprecision(1) << std::fixed << d;
@@ -22,6 +23,7 @@ public:
   }
   std::string color;
   std::string data;
+  std::string note;
   int span;
   std::string align;
   friend std::ostream& operator<<(std::ostream &ostr, const TableCell &c);
@@ -52,7 +54,8 @@ public:
   void output(std::ostream& ostr,
               std::vector<int> which_students,
               std::vector<int> which_data,
-              bool transpose=false) const;
+              bool transpose=false,
+              bool show_details=false) const;
   
 
   int numRows() const { return cells.size(); }
