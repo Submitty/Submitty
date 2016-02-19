@@ -132,7 +132,7 @@ HTML;
 
 					<tr class="info">
 						<td colspan="2" style="text-align:center;">
-							Enrolled Students in Grading Section {$section_id}
+							Students Assigned to Grading Section {$section_id}
 						</td>
 					</tr>
 HTML;

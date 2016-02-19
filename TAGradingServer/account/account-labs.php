@@ -123,7 +123,7 @@ HTML;
         print <<<HTML
                         <tr class="info">
                             <td colspan="{$count}" style="text-align:center;" id="section-{$section['section_id']}">
-                                    Enrolled Students in Section {$section["section_id"]}
+                                    Students Enrolled in Section {$section["section_id"]}
                                     <a href="{$BASE_URL}/account/print/print_lab.php?course={$_GET['course']}&lab_id={$lab_row['lab_id']}&section_id={$section['section_id']}">
                                         <div class="icon-print"></div>
                                     </a>

@@ -22,7 +22,7 @@ read DATABASE_PASSWORD
 echo "What is the url for the Grading Server? (ex: https://192.168.56.103/ or https://hwgrading.cs.rpi.edu/)"
 read TAGRADING_URL
 
-echo "What is the SVN path to be used? (ex: svn+ssh://192.168.56.102 or svn+ssh://csci2600svn.cs.rpi.edu/var/lib/svn/csci2600)"
+echo "What is the SVN path to be used? (ex: svn+ssh://192.168.56.102 or svn+ssh://csci2600svn/var/lib/svn/csci2600)"
 read SVN_PATH
 
 ########################################################################################################################

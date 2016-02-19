@@ -61,6 +61,7 @@ int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_pro
   // FORK AND CLONE 
   if (my_program != "/usr/bin/g++" &&
       my_program != "/usr/bin/clang++" &&
+      my_program != "/usr/bin/gcc" &&
       my_program != "/usr/bin/time" &&
       my_program != "/usr/bin/javac" &&
       my_program != "/usr/bin/java" &&
