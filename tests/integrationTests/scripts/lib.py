@@ -124,6 +124,7 @@ class TestcaseWrapper:
     # is likely to run the compiler with a different working directory alongside
     # using relative paths.
     def compile_grading(self):
+        subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "build")])
         subprocess.call(["clang++",
             "-c", "-std=c++11",
             "-I" + os.path.join(self.testcase_path, "assignment_config")] +
