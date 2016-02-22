@@ -43,7 +43,7 @@ if($user_is_administrator)
 
     function selectBox($part, $question, $grade = 0) {
         $retVal = "<select name='point-{$part}-{$question}' class='points' onchange='calculatePercentageTotal();'>";
-        for($i = 0; $i <= 50; $i += 0.5) {
+        for($i = 0; $i <= 100; $i += 0.5) {
             $selected = ($grade == $i) ? "selected" : "";
             $retVal .= "<option {$selected}>{$i}</option>";
         }
@@ -316,7 +316,7 @@ HTML;
     }
     asort($sections);
 
-    $db->query("SELECT student_grading_id, count(student_id) as cnt FROM students GROUP BY student_grading_id", array());
+    $db->query("SELECT student_grading_id, count(student_id) as cnt FROM students GROUP BY student_grading_id ORDER BY student_grading_id", array());
     $a = array();
     foreach ($db->rows() as $row) {
         $a[] = "{$row['student_grading_id']} ({$row['cnt']} students)";

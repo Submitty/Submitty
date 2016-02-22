@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\e2e\accountTests\GradingServer;
+namespace tests\e2e\GradingServer\accountTests;
 
 use lib\Database;
 use tests\e2e\BaseTestCase;
