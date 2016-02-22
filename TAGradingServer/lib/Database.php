@@ -195,7 +195,7 @@ class Database
         foreach(Database::$all_queries as $query) {
             $print .= ($c++).") ".$query[0];
             foreach($query[1] as $parameter) {
-                $print = preg_replace('/\?/', "'".$parameter."''", $print, 1);
+                $print = preg_replace('/\?/', "'".$parameter."'", $print, 1);
             }
             $print .= "<br />---<br />";
         }
