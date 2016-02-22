@@ -194,13 +194,10 @@ class Database
         $print = "";
         foreach(Database::$all_queries as $query) {
             $print .= ($c++).") ".$query[0];
-            if (count($query[1]) > 0) {
-                $print .= " --- ";
-                foreach($query[1] as $parameter) {
-                    $print .= "?".$parameter." ";
-                }
+            foreach($query[1] as $parameter) {
+                $print = preg_replace('/\?/', "'".$parameter."''", $print, 1);
             }
-            $print .= "<br />";
+            $print .= "<br />---<br />";
         }
         return $print;
     }
