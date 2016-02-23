@@ -95,7 +95,7 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
         DatabaseTester::connect();
         Database::query("SELECT * FROM students");
         Database::query("SELECT * FROM students WHERE student_rcs=?", array('pevelm'));
-        $this->assertEquals("1) SELECT * FROM students<br />2) SELECT * FROM students WHERE student_rcs=? --- ?pevelm <br />",
+        $this->assertEquals("1) SELECT * FROM students<br />---<br />2) SELECT * FROM students WHERE student_rcs='pevelm'<br />---<br />",
                             Database::getQueries());
         DatabaseTester::disconnect();
     }
