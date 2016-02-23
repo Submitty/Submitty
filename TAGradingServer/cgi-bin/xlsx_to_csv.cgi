@@ -52,7 +52,7 @@ if (function_exists('popen')) {
 	$err_msgs .= (!empty(fread($proc_handle, 1))) ? "" : "xlsx2csv not available." . PHP_EOL;
 	pclose($proc_handle);
 } else {
-	$err_msgs .= "popen not available.\n";
+	$err_msgs .= "popen not available." . PHP_EOL;
 }
 
 //Check if URL parameters exist ("course={code}" is expected)
