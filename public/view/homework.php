@@ -3,7 +3,7 @@
 require_once("controller/controller_functions.php");
 
 echo '<html>';
-echo '<title>$course</title>';
+echo '<title>'.$course.'</title>';
 echo "<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700' rel='stylesheet' type='text/css'>";
 echo '<body>';
 
