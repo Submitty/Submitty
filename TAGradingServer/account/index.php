@@ -1,8 +1,8 @@
 <?php
+include "../header.php";
+
 use app\models\User;
 use lib\Database;
-
-include "../header.php";
 
 $account_subpages_unlock = true;
 

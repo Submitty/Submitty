@@ -3,6 +3,8 @@ include "../header.php";
 
 use lib\Database;
 
+check_administrator();
+
 print <<<HTML
 <style type="text/css">
     body {
