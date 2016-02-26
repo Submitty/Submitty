@@ -340,6 +340,11 @@ source ${HWSERVER_DIR}/INSTALL.sh
 source ${HWSERVER_DIR}/Docs/sample_bin/admin_scripts_setup
 cp ${HWSERVER_DIR}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
 cp ${HWSERVER_DIR}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
+cp -f ${HWSERVER_DIR}/Docs/www-data /etc/apache2/suexec/www-data
+
+# permissions: rw- r-- ---
+chmod 0640 /etc/apache2/sites-available/*.conf
+chmod 0640 /etc/apache2/suexec/www-data
 
 if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /root/bin/bottom.txt
