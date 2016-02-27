@@ -67,6 +67,9 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
         ss >> last >> first >> rcs >> building >> room >> zone >> time;
         if (last == "") break;
         Student *s = GetStudent(students,rcs);
+        if (s == NULL) {
+          std::cout << "seating assignment...  couldn't find this userid " << rcs << std::endl;
+        }
         assert (s != NULL);
         if (zone != "") {
           std::map<std::string,ZoneInfo>::iterator itr = zones.find(zone);
