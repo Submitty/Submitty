@@ -232,13 +232,46 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
       if ($res === TRUE) {
         $zip->extractTo($version_path."/");
         $zip->close();
+
+        $unlink_return = unlink ($homework_file["tmp_name"]);
+        if (!$unlink_return) {
+          display_error("failed to unlink(delete) uploaded zip file from");
+          return;
+        }
+
       }
       else {
+
+        // --------------------------------------------------------------
+
+        /*
+        // NOT SURE HOW THIS WAS WORKING BEFORE
+        // both mv and move_uploaded_file will reset the file group to hwphp
+        // we need it to be the sticky bit group csciXXXX_tas_www
+
         $result = move_uploaded_file($homework_file["tmp_name"], $version_path."/".$homework_file["name"]);
         if (!$result) {
             display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
             return;
         }
+        */
+
+        // SHOULD BE EQUIVALENT TO THIS:
+        if (is_uploaded_file($homework_file["tmp_name"])) {
+          $copy_return = copy ($homework_file["tmp_name"], $version_path."/".$homework_file["name"]);
+          if (!$copy_return) {
+            display_error("failed to copy uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
+            return;
+          }
+          $unlink_return = unlink ($homework_file["tmp_name"]);
+          if (!$unlink_return) {
+            display_error("failed to unlink(delete) uploaded file from ".$homework_file["tmp_name"]);
+            return;
+          }
+        }
+
+        // --------------------------------------------------------------
+
       }
     }
 
