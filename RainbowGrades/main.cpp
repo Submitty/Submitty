@@ -895,7 +895,7 @@ void load_student_grades(std::vector<Student*> &students) {
             s->setGradeableValue(GRADEABLE_ENUM::EXAM,0,value);
 
           } else {
-            std::cerr << "WARNING: INVALID gradeable item" << gradeable_name << " " << value << std::endl;
+            //std::cerr << "WARNING: INVALID gradeable item" << gradeable_name << " " << value << std::endl;
             
           }
         } else {
