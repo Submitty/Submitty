@@ -17,7 +17,18 @@ if($user_is_administrator)
                 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
 HTML;
     if (isset($_GET['update']) && $_GET['update'] == '1') {
-        echo "<div style='color:red'>Classlist Updated</div><br />";
+        $updated = isset($_GET['updated']) ? intval($_GET['updated']) : 0;
+        $inserted = isset($_GET['inserted']) ? intval($_GET['inserted']) : 0;
+        $deleted = isset($_GET['deleted']) ? intval($_GET['deleted']) : 0;
+        $moved = isset($_GET['moved']) ? intval($_GET['moved']) : 0;
+        echo <<<HTML
+                    <div style='color:red'>
+                        Classlist Updated:<br />
+                        <span style="margin-left: 20px">{$inserted} students added</span><br />
+                        <span style="margin-left: 20px">{$updated} students updated</span><br />
+                    </div><br />
+HTML;
+
     }
     echo <<<HTML
                     Upload Classlist: <input type="file" name="classlist" id="classlist"><br />
@@ -48,5 +59,4 @@ HTML;
 
     include "../footer.php";
 }
-        
-        
+
