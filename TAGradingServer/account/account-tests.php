@@ -1,7 +1,21 @@
 <?php
+use app\models\User;
+
 include "../header.php";
 
 $account_subpages_unlock = true;
+
+if (!User::$is_administrator) {
+    if (isset($_GET['all']) && $_GET['all'] == "true") {
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-tests.php?course={$_GET['course']}'>View Your Sections</a>";
+    }
+    else {
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-tests.php?course={$_GET['course']}&all=true'>View All Sections</a>";
+    }
+}
+else {
+    $button = "";
+}
 
 print <<<HTML
 
@@ -59,7 +73,8 @@ print <<<HTML
 
 <div id="container-tests">
     <div class="modal-header">
-        <h3 id="myModalLabel" style="width:50%; display:inline-block;">Tests</h3>
+        <h3 id="myModalLabel" style="width:20%; display:inline-block;">Tests</h3>
+        <span style="width: 79%; display: inline-block;">{$button}</span>
     </div>
 
     <div class="modal-body" style="padding-bottom:10px; padding-top:25px;">

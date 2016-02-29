@@ -63,8 +63,9 @@
 							$hw = $row['rubric_submission_id'];
 							$parts = explode(",", $row['rubric_pats_submission_id']);
 
+							$part_number = 0;
                             if ($row['rubric_parts_sep']) {
-                                $hw .= $parts[0];
+                                $hw .= $parts[$part_number];
                             }
                             $homework_directory_part = implode("/", array(__SUBMISSION_SERVER__, "results", $hw));
 							//print $homework_directory_part;
@@ -96,7 +97,7 @@
 											</td>
 
 											<td rowspan="<?php echo count($rcs_ids); ?>">
-												<?php echo $part_number; ?>
+												<?php echo $parts[$part_number]; ?>
 											</td>
 										<?php } ?>
 
@@ -110,7 +111,7 @@
 
 								$hw = $row['rubric_submission_id'];
 								if ($row['rubric_parts_sep']) {
-									$hw .= $parts[0];
+									$hw .= $parts[++$part_number];
 								}
 								else {
 									break;
