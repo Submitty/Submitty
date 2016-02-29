@@ -15,13 +15,8 @@ session_start();
  * which cannot be considered secure information.
  *
  * IMPORTANT: Expected data uploads contain data regulated by
-<<<<<<< HEAD
  * FERPA (20 U.S.C. § 1232g)
- * 
-=======
- * FERPA (20 U.S.C. � 1232g)
  *
->>>>>>> master
  * As this information must be made secure, existence of this data
  * (e.g. filenames) should not be shared by URL paramaters.  Therefore,
  * filenames will be hardcoded.
