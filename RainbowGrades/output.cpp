@@ -263,7 +263,7 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
   }
 
 
-#if 0
+#if 1
 
   ostr << "<table border=1 cellpadding=5 cellspacing=0 style=\"background-color:#ddffdd\">\n";
   ostr << "<tr><td>\n";

@@ -123,9 +123,11 @@ chmod o+r . *.jar
 #################
 echo "Getting DrMemory..."
 mkdir -p /usr/local/hss/DrMemory
-wget http://dl.bintray.com/bruening/DrMemory/DrMemory-Linux-1.8.0-8.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-1.8.0-8.tar.gz
-ln -s /usr/local/hss/DrMemory/DrMemory-Linux-1.8.0-8 /usr/local/hss/drmemory
+DRMEM_TAG=release_1.9.1_rc1
+DRMEM_VER=1.9.1-RC1
+wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz
+ln -s /usr/local/hss/DrMemory/DrMemory-Linux-${DRMEM_VER} /usr/local/hss/drmemory
 
 #################################################################
 # APACHE SETUP
@@ -215,6 +217,12 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser developer sudo
 fi
 
+
+# change the default user umask (was 002)
+sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs 
+grep -q "^UMASK 027" || (echo "ERROR! failed to set umask" && exit)
+
+
 adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
@@ -223,6 +231,15 @@ adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-pa
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwcron:hwcron" | sudo chpasswd
 fi
+
+
+# FIXME:  umask setting above not complete
+# might need to also set USERGROUPS_ENAB to "no", and manually create
+# the hwphp and hwcron single user groups.  See also /etc/login.defs
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
+
+
 adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then
 	echo "hsdbu:hsdbu" | sudo chpasswd
