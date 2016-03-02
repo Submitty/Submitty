@@ -1,18 +1,20 @@
 #!/bin/bash
 HSS_INSTALL_DIR=/usr/local/hss
+HSS_VAR_DIR=/var/local/hss
 HSS_REPOSITORY=/usr/local/hss/GIT_CHECKOUT_HWserver
 
 # Copy account maintenance scripts unless they exist
 mkdir -p $HSS_INSTALL_DIR/bin
 mkdir -p /root/bin
-mkdir -p /var/local/hss/instructors
-touch /var/local/hss/instructors/rcslist
-touch /var/local/hss/instructors/svnlist
-touch /var/local/hss/instructors/valid
-[ ! -f $HSS_INSTALL_DIR/bin/rcsonly.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/rcsonly.pl $HSS_INSTALL_DIR/bin/rcsonly.pl
-[ ! -f $HSS_INSTALL_DIR/bin/new.svnuser.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/new.svnuser.pl $HSS_INSTALL_DIR/bin/new.svnuser.pl
-[ ! -f $HSS_INSTALL_DIR/bin/validate.rcs.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/validate.rcs.pl $HSS_INSTALL_DIR/bin/validate.rcs.pl
-[ ! -f $HSS_INSTALL_DIR/bin/validate.svn.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/validate.svn.pl $HSS_INSTALL_DIR/bin/validate.svn.pl
+mkdir -p $HSS_VAR_DIR/instructors
+mkdir -p $HSS_VAR_DIR/bin
+touch $HSS_VAR_DIR/instructors/rcslist
+touch $HSS_VAR_DIR/instructors/svnlist
+touch $HSS_VAR_DIR/instructors/valid
+[ ! -f $HSS_VAR_DIR/bin/rcsonly.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/rcsonly.pl $HSS_VAR_DIR/bin/rcsonly.pl
+[ ! -f $HSS_VAR_DIR/bin/new.svnuser.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/new.svnuser.pl $HSS_VAR_DIR/bin/new.svnuser.pl
+[ ! -f $HSS_VAR_DIR/bin/validate.rcs.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/validate.rcs.pl $HSS_VAR_DIR/bin/validate.rcs.pl
+[ ! -f $HSS_VAR_DIR/bin/validate.svn.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/validate.svn.pl $HSS_VAR_DIR/bin/validate.svn.pl
 
 [ ! -f /root/bin/top.txt ] && cp $HSS_REPOSITORY/Docs/sample_bin/top.txt /root/bin/top.txt
 [ ! -f /root/bin/bottom.txt ] && cp $HSS_REPOSITORY/Docs/sample_bin/bottom.txt /root/bin/bottom.txt
@@ -20,11 +22,10 @@ touch /var/local/hss/instructors/valid
 [ ! -f /root/bin/regen.apache ] && cp $HSS_REPOSITORY/Docs/sample_bin/regen.apache /root/bin/regen.apache
 chgrp course_builders /root/bin/top.txt /root/bin/bottom.txt /root/bin/gen.middle /root/bin/regen.apache /var/local/hss/instructors/rcslist /var/local/hss/instructors/svnlist /var/local/hss/instructors/valid
 chmod 750 /root/bin/gen.middle /root/bin/regen.apache
-chmod 660 /var/local/hss/instructors/rcslist /var/local/hss/instructors/svnlist
-chmod 640 /var/local/hss/instructors/valid
+chmod 660 $HSS_VAR_DIR/instructors/rcslist $HSS_VAR_DIR/instructors/svnlist
+chmod 640 $HSS_VAR_DIR/instructors/valid
 
 # Prepare subversion
 [ ! -f /etc/init.d/svnserve ] && cp $HSS_REPOSITORY/Docs/sample_svnserve /etc/init.d/svnserve
 chmod +x /etc/init.d/svnserve
 update-rc.d svnserve defaults
-
