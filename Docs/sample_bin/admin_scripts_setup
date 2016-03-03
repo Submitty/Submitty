@@ -8,21 +8,21 @@ mkdir -p $HSS_INSTALL_DIR/bin
 mkdir -p /root/bin
 mkdir -p $HSS_VAR_DIR/instructors
 mkdir -p $HSS_VAR_DIR/bin
-touch $HSS_VAR_DIR/instructors/rcslist
+touch $HSS_VAR_DIR/instructors/authlist
 touch $HSS_VAR_DIR/instructors/svnlist
 touch $HSS_VAR_DIR/instructors/valid
-[ ! -f $HSS_VAR_DIR/bin/rcsonly.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/rcsonly.pl $HSS_VAR_DIR/bin/rcsonly.pl
+[ ! -f $HSS_VAR_DIR/bin/authonly.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/authonly.pl $HSS_VAR_DIR/bin/authonly.pl
 [ ! -f $HSS_VAR_DIR/bin/new.svnuser.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/new.svnuser.pl $HSS_VAR_DIR/bin/new.svnuser.pl
-[ ! -f $HSS_VAR_DIR/bin/validate.rcs.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/validate.rcs.pl $HSS_VAR_DIR/bin/validate.rcs.pl
+[ ! -f $HSS_VAR_DIR/bin/validate.auth.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/validate.auth.pl $HSS_VAR_DIR/bin/validate.auth.pl
 [ ! -f $HSS_VAR_DIR/bin/validate.svn.pl ] && cp $HSS_REPOSITORY/Docs/sample_bin/validate.svn.pl $HSS_VAR_DIR/bin/validate.svn.pl
 
 [ ! -f /root/bin/top.txt ] && cp $HSS_REPOSITORY/Docs/sample_bin/top.txt /root/bin/top.txt
 [ ! -f /root/bin/bottom.txt ] && cp $HSS_REPOSITORY/Docs/sample_bin/bottom.txt /root/bin/bottom.txt
 [ ! -f /root/bin/gen.middle ] && cp $HSS_REPOSITORY/Docs/sample_bin/gen.middle /root/bin/gen.middle
 [ ! -f /root/bin/regen.apache ] && cp $HSS_REPOSITORY/Docs/sample_bin/regen.apache /root/bin/regen.apache
-chgrp course_builders /root/bin/top.txt /root/bin/bottom.txt /root/bin/gen.middle /root/bin/regen.apache /var/local/hss/instructors/rcslist /var/local/hss/instructors/svnlist /var/local/hss/instructors/valid
+chgrp course_builders /root/bin/top.txt /root/bin/bottom.txt /root/bin/gen.middle /root/bin/regen.apache /var/local/hss/instructors/authlist /var/local/hss/instructors/svnlist /var/local/hss/instructors/valid
 chmod 750 /root/bin/gen.middle /root/bin/regen.apache
-chmod 660 $HSS_VAR_DIR/instructors/rcslist $HSS_VAR_DIR/instructors/svnlist
+chmod 660 $HSS_VAR_DIR/instructors/authlist $HSS_VAR_DIR/instructors/svnlist
 chmod 640 $HSS_VAR_DIR/instructors/valid
 
 # Prepare subversion
