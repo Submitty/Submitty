@@ -11,7 +11,7 @@ SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 
 	DocumentRoot /usr/local/hss/website/public
 
-	DirectoryIndex index.html index.php
+	DirectoryIndex index.html index.php index.htm index.cgi
 
 	<Files .*>
 		Order allow,deny
@@ -42,28 +42,16 @@ SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 
 	CustomLog ${APACHE_LOG_DIR}/submit.log combined
 
-	<Directory /usr/local/hss/website/public/cgi-bin>
-		Options ExecCGI Includes
-		AuthType Basic
-		AuthName "Please log in"
-		AllowOverride None
-		AuthBasicProvider external
-		AuthExternal pwauth
-		require valid-user
-		AddHandler cgi-script .cgi 
-		AddOutputFilter Includes html php 
-		Allow from all
-    </Directory>
-
 	<Directory /usr/local/hss/website/public>
-		Options Includes
+		Options ExecCGI FollowSymLinks Includes
 		AuthType Basic
 		AuthName "Please log in"
 		AllowOverride None
 		AuthBasicProvider external
 		AuthExternal pwauth
 		require valid-user
-		AddOutputFilter Includes html php
+		AddHandler cgi-script .cgi .pl .py .sh
+		AddOutputFilter Includes shtml html htm php ssi
 		Allow from all
 	</Directory>
 

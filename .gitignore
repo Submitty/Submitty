@@ -6,12 +6,13 @@ public/site_path.txt
 *.o
 INSTALL.sh
 .vagrant
+
+# ENVIRONMENT IGNORES
+.idea
 *.zip
 
-.idea
-
 tests/report
-.setup/selenium-server-standalone.jar
+/.setup/selenium-server-standalone.jar
 
 logs/
 *.csv
@@ -31,8 +32,3 @@ site/
 
 vendor/
 composer.lock
-
-*.aux
-*.log
-*.out
-*.synctex.gz
