@@ -1,16 +1,20 @@
-# Set the default behavior to override developer's core.autocrlf setting.
-# Default is 'lf' (Unix) to ensure consistency with running on Ubuntu Linux.
+# Override local user's core.autocrlf setting so that code files will always
+# have 'lf' line endings (Unix style) as needed by Ubuntu Linux.  This is
+# particularly important for Windows developers working with a Vagrant VM.
+
+# For all files, set default 'lf' line endings.
 * eol=lf
 
-# Explicitly declare 'eol=lf' for files you want to always be normalized on
-# checkout.
+# To be thorough, set specific code and text data files to 'lf' line endings.
 *.c eol=lf
 *.cgi eol=lf
 *.cpp eol=lf
 *.conf eol=lf
 *.css eol=lf
+*.csv eol=lf
 *.h eol=lf
 *.html eol=lf
+*.ini eol=lf
 *.js eol=lf
 *.json eol=lf
 *.md eol=lf
@@ -22,11 +26,10 @@
 *.txt eol=lf
 *.xml eol=lf
 *.yaml eol=lf
-*.csv eol=lf
 Vagrantfile eol=lf
 setcsvfields eol=lf
 
-# Denote all files that are truly binary and should not be modified.
+# Files marked 'binary' are not modified.
 # NOTE: *.odt, *.ods, *.odp are open file formats used by
 # Open Office, Libre Office, Google Docs, etc.
 *.zip binary
