@@ -1,35 +1,34 @@
-# Set the default behavior, in case people don't have core.autocrlf set.
-# Default to lf for Ubuntu Linux
-* text eol=lf
+# Set the default behavior to override developer's core.autocrlf setting.
+# Default is 'lf' (Unix) to ensure consistency with running on Ubuntu Linux.
+* eol=lf
 
-# Explicitly declare text files you want to always be normalized and converted
-# to native line endings on checkout.
-*.c text
-*.cgi text
-*.cpp text
-*.conf text
-*.css text
-*.h text
-*.html text
-*.js text
-*.json text
-*.md text
-*.php text
-*.pl text 
-*.py text
-*.sh text
-*.sql text
-*.txt text
-*.xml text
-*.yaml text
-Vagrantfile text
-setcsvfields text
-
-# Declare files that will always have CRLF line endings on checkout.
-# NONE
+# Explicitly declare 'eol=lf' for files you want to always be normalized on
+# checkout.
+*.c eol=lf
+*.cgi eol=lf
+*.cpp eol=lf
+*.conf eol=lf
+*.css eol=lf
+*.h eol=lf
+*.html eol=lf
+*.js eol=lf
+*.json eol=lf
+*.md eol=lf
+*.php eol=lf
+*.pl eol=lf 
+*.py eol=lf
+*.sh eol=lf
+*.sql eol=lf
+*.txt eol=lf
+*.xml eol=lf
+*.yaml eol=lf
+*.csv eol=lf
+Vagrantfile eol=lf
+setcsvfields eol=lf
 
 # Denote all files that are truly binary and should not be modified.
-# .odt, .ods, .odf are Libre Office format files
+# NOTE: *.odt, *.ods, *.odp are open file formats used by
+# Open Office, Libre Office, Google Docs, etc.
 *.zip binary
 *.pdf binary
 *.png binary
@@ -45,7 +44,7 @@ setcsvfields text
 *.ods binary
 *.pptx binary
 *.ppt binary
-*.odf binary
+*.odp binary
 *.cls binary
 *.tex binary
 *.out binary
