@@ -1,0 +1,48 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+# Default to lf for Ubuntu Linux
+* text=lf
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.c text
+*.cpp text
+*.conf text
+*.css text
+*.h text
+*.html text
+*.js text
+*.json text
+*.md text
+*.php text
+*.pl text 
+*.py text
+*.sh text
+*.sql text
+*.txt text
+*.xml text
+*.yaml text
+
+# Declare files that will always have CRLF line endings on checkout.
+# NONE
+
+# Denote all files that are truly binary and should not be modified.
+# .odt, .ods, .odf are Libre Office format files
+*.zip binary
+*.pdf binary
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.icons binary
+*.doc binary
+*.docx binary
+*.odt binary
+*.xls binary
+*.xlsx binary
+*.ods binary
+*.pptx binary
+*.ppt binary
+*.odf binary
+*.cls binary
+*.tex binary
+*.out binary
