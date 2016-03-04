@@ -5,6 +5,7 @@
 # Explicitly declare text files you want to always be normalized and converted
 # to native line endings on checkout.
 *.c text
+*.cgi text
 *.cpp text
 *.conf text
 *.css text
@@ -21,6 +22,9 @@
 *.txt text
 *.xml text
 *.yaml text
+Vagrantfile text
+setcsvfields text
+
 
 # Declare files that will always have CRLF line endings on checkout.
 # NONE
