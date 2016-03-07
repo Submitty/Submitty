@@ -19,7 +19,7 @@ if [ ${VAGRANT} == 1 ]; then
     chmod -x /etc/update-motd.d/*
     chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
     chmod +x /etc/update-motd.d/00-header
-    
+
     echo -e '
  __   __  _     _  _______  _______  ______    __   __  _______  ______
 |  | |  || | _ | ||       ||       ||    _ |  |  | |  ||       ||    _ |
@@ -87,7 +87,7 @@ php5enmod mcrypt
 # Install Oracle 8 Non-Interactively
 echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
-echo "instlling java8"
+echo "installing java8"
 apt-get install -qqy oracle-java8-installer > /dev/null 2>&1
 
 # Install Racket and Swi-prolog for Programming Languages
@@ -215,11 +215,13 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser developer --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 	echo "developer:developer" | sudo chpasswd
 	adduser developer sudo
+	adduser student --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+	echo "student:student" | sudo chpasswd
 fi
 
 
 # change the default user umask (was 002)
-sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs 
+sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs
 grep -q "^UMASK 027" || (echo "ERROR! failed to set umask" && exit)
 
 
@@ -411,6 +413,12 @@ if [[ ${VAGRANT} == 1 ]]; then
     psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
     psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
     psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+
+    echo "student" > /var/local/hss/instructors/authlist
+    /var/local/hss/bin/authonly.pl
+    psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
+    psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
+    psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
 fi
 
 # Deferred ownership change
