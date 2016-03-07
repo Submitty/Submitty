@@ -19,7 +19,7 @@ if [ ${VAGRANT} == 1 ]; then
     chmod -x /etc/update-motd.d/*
     chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
     chmod +x /etc/update-motd.d/00-header
-    
+
     echo -e '
  __   __  _     _  _______  _______  ______    __   __  _______  ______
 |  | |  || | _ | ||       ||       ||    _ |  |  | |  ||       ||    _ |
@@ -87,7 +87,7 @@ php5enmod mcrypt
 # Install Oracle 8 Non-Interactively
 echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
-echo "instlling java8"
+echo "installing java8"
 apt-get install -qqy oracle-java8-installer > /dev/null 2>&1
 
 # Install Racket and Swi-prolog for Programming Languages
@@ -215,11 +215,14 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser developer --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 	echo "developer:developer" | sudo chpasswd
 	adduser developer sudo
+    echo "student" > /var/local/hss/instructors/authlist
+    /var/local/hss/bin/authonly.pl
+    echo "student:student" | sudo chpasswd
 fi
 
 
 # change the default user umask (was 002)
-sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs 
+sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs
 grep -q "^UMASK 027" || (echo "ERROR! failed to set umask" && exit)
 
 
@@ -329,7 +332,7 @@ if [ ${VAGRANT} == 1 ]; then
 	echo -e "localhost
 hsdbu
 hsdbu
-http://192.168.56.103
+https://192.168.56.103
 svn+ssh:192.168.56.102" | source ${HWSERVER_DIR}/CONFIGURE.sh
 else
 	source ${HWSERVER_DIR}/CONFIGURE.sh
@@ -357,11 +360,13 @@ apache2ctl -t
 service apache2 restart
 
 if [[ ${VAGRANT} == 1 ]]; then
-  rm /var/local/hss/autograding_logs
-  rm /var/local/hss/tagrading_logs
-  rm /vagrant/.vagrant/autograding_logs
-  rm /vagrant/.vagrant/tagrading_logs
+  rm -r /var/local/hss/autograding_logs
+  rm -r /vagrant/.vagrant/autograding_logs
+  mkdir /vagrant/.vagrant/autograding_logs
   ln -s /vagrant/.vagrant/autograding_logs /var/local/hss/autograding_logs
+  rm -r /var/local/hss/tagrading_logs
+  rm -r /vagrant/.vagrant/tagrading_logs
+  mkdir /vagrant/.vagrant/tagrading_logs
   ln -s /vagrant/.vagrant/tagrading_logs /var/local/hss/tagrading_logs
 
     #################################################################
@@ -411,6 +416,10 @@ if [[ ${VAGRANT} == 1 ]]; then
     psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
     psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
     psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+
+    psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
+    psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
+    psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
 fi
 
 # Deferred ownership change
