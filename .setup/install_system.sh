@@ -332,7 +332,7 @@ if [ ${VAGRANT} == 1 ]; then
 	echo -e "localhost
 hsdbu
 hsdbu
-http://192.168.56.103
+https://192.168.56.103
 svn+ssh:192.168.56.102" | source ${HWSERVER_DIR}/CONFIGURE.sh
 else
 	source ${HWSERVER_DIR}/CONFIGURE.sh
