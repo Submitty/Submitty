@@ -8,7 +8,7 @@ $class_config=check_class_config($semester,$course);
 $dev_team=$class_config["dev_team"];
 $assignment_id=check_assignment_id($class_config);
 
-if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] == $_SESSION['csrf']) {
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $_SESSION['csrf']) {
   $_SESSION['status'] = 'invalid_token';
   header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
 }
