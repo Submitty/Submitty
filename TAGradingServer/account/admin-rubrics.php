@@ -140,38 +140,48 @@ $output .= <<<HTML
         var rubric_name = $('td#rubric-'+rubric_id+'-title').text();
         var c = window.confirm("Are you sure you want to delete '" + rubric_name + "'?");
         if (c == true) {
-            $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=delete&id='+rubric_id)
-                .done(function(response) {
-                    var res_array = response.split("|");
-                    if (res_array[0] == "success") {
-                        window.alert("'" + rubric_name + "' deleted");
-                        $('tr#rubric-'+rubric_id).remove();
-                    }
-                    else {
-                        window.alert("'" + rubric_name + "' could not be deleted");
-                    }
-                })
-                .fail(function() {
-                    window.alert("[ERROR] Refresh Page");
-                });
+            $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=delete&id='+rubric_id, {
+                type: "POST",
+		        data: {
+                    csrf_token: {$_SESSION['csrf']}
+                }
+            })
+            .done(function(response) {
+                var res_array = response.split("|");
+                if (res_array[0] == "success") {
+                    window.alert("'" + rubric_name + "' deleted");
+                    $('tr#rubric-'+rubric_id).remove();
+                }
+                else {
+                    window.alert("'" + rubric_name + "' could not be deleted");
+                }
+            })
+            .fail(function() {
+                window.alert("[ERROR] Refresh Page");
+            });
         }
     }
 
     function fixSequences() {
-        $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=sequence')
-            .done(function(response) {
-                var res_array = response.split("|");
-                if (res_array[0] == "success") {
-                    window.alert("DB Sequences recalculated");
-                }
-                else {
-                    console.log(response);
-                    window.alert("[DB ERROR] Refresh page");
-                }
-            })
-            .fail(function() {
-                window.alert("[AJAX ERROR] Refresh page");
-            });
+        $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=sequence', {
+            type: "POST",
+            data: {
+                csrf_token: {$_SESSION['csrf']}
+            }
+        })
+        .done(function(response) {
+            var res_array = response.split("|");
+            if (res_array[0] == "success") {
+                window.alert("DB Sequences recalculated");
+            }
+            else {
+                console.log(response);
+                window.alert("[DB ERROR] Refresh page");
+            }
+        })
+        .fail(function() {
+            window.alert("[AJAX ERROR] Refresh page");
+        });
     }
 </script>
 <div id="container-rubrics">

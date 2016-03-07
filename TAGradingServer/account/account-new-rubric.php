@@ -411,6 +411,7 @@ $grade_parts_days_late = implode(",", $rubric->parts_days_late);
 
 $output .= <<<HTML
             <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&hw={$rubric->rubric_details['rubric_id']}&student={$rubric->student['student_rcs']}&individual={$individual}" method="post">
+                <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
                 <input type="hidden" name="submitted" value="{$submitted}" />
                 <input type="hidden" name="status" value="{$rubric->status}" />
                 <input type="hidden" name="late" value="{$rubric->days_late}" />

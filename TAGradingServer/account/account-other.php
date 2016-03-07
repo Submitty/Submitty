@@ -208,7 +208,8 @@ echo <<<HTML
 			    type: "POST",
 			    data: {
 			        score: score,
-			        text: text
+			        text: text,
+			        csrf_token: {$_SESSION['csrf']}
 			    }
 			})
 		    .done(function(response) {

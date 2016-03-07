@@ -6,24 +6,28 @@ check_administrator();
 
 $action = $_GET['action'];
 
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $_SESSION['csrf']) {
+    exit("invalid csrf token");
+}
+
 switch($action) {
     case 'new':
-        $number         = intval($_GET['number']);
-        $code           = intval($_GET['code']) > 0 ? intval($_GET['code']) : null;
-        $checkpoints    = $_GET['checkpoints'];
+        $number         = intval($_POST['number']);
+        $code           = intval($_POST['code']) > 0 ? intval($_POST['code']) : null;
+        $checkpoints    = $_POST['checkpoints'];
 
         if ($number == 0) {
             exit("failure");
         }
 
         // don't allow duplicate lab numbers?
-        $db->query("SELECT * FROM labs WHERE lab_number=?",array($number));
+        $db->query("SELECT * FROM labs WHERE lab_number=?", array($number));
         if (count($db->rows()) > 0) {
             print "lab with that number already exists";
             exit("failure");
         }
 
-        $params = array($number,"Lab ".$number,$checkpoints,$code);
+        $params = array($number,"Lab ".$number, $checkpoints, $code);
         $db->query("INSERT INTO labs(lab_number, lab_title, lab_checkpoints, lab_code) VALUES (?, ?, ?, ?)",$params);
 
         $db->query("SELECT lab_id FROM labs WHERE lab_number=?",array($number));
@@ -31,10 +35,10 @@ switch($action) {
         print "success|".$row['lab_id'];
         break;
     case 'edit':
-        $id             = intval($_GET['id']);
-        $number         = intval($_GET['number']);
-        $code           = intval($_GET['code']) > 0 ? intval($_GET['code']) : null;
-        $checkpoints    = $_GET['checkpoints'];
+        $id             = intval($_POST['id']);
+        $number         = intval($_POST['number']);
+        $code           = intval($_POST['code']) > 0 ? intval($_POST['code']) : null;
+        $checkpoints    = $_POST['checkpoints'];
 
         if ($id == 0) {
             print "id failure";
@@ -56,10 +60,10 @@ switch($action) {
                 exit("failure");
             }
         }
-        
+
         $params = array($number,"Lab ".$number,$checkpoints,$code,$id);
         $db->query("UPDATE labs SET lab_number=?, lab_title=?, lab_checkpoints=?, lab_code=? WHERE lab_id=?",$params);
-        
+
         print "success|".$id;
         break;
     case 'delete':

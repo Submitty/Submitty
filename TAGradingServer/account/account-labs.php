@@ -295,17 +295,24 @@ print <<<HTML
     }
 
     function submitAJAX(url, callBackSucess, callBackFail, item) {
-        $.ajax(url)
-            .done(function(response) {
-                if(response == "updated") {
-                    callBackSucess(item);
-                }
-                else {
-                    callBackFail(item);
-                    console.log(response);
-                }
-            })
-            .fail(function() { window.alert("[SAVE ERROR] Refresh Page"); });
+        $.ajax(url, {
+            type: "POST",
+            data: {
+                csrf_token: {$_SESSION['csrf']}
+            }
+        })
+        .done(function(response) {
+            if(response == "updated") {
+                callBackSucess(item);
+            }
+            else {
+                callBackFail(item);
+                console.log(response);
+            }
+        })
+        .fail(function() {
+            window.alert("[SAVE ERROR] Refresh Page");
+        });
     }
 
     $(document).ready(function(){
