@@ -298,7 +298,7 @@ print <<<HTML
         $.ajax(url, {
             type: "POST",
             data: {
-                csrf_token: {$_SESSION['csrf']}
+                csrf_token: '{$_SESSION['csrf']}'
             }
         })
         .done(function(response) {

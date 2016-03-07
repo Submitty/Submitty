@@ -209,7 +209,7 @@ echo <<<HTML
 			    data: {
 			        score: score,
 			        text: text,
-			        csrf_token: {$_SESSION['csrf']}
+			        csrf_token: '{$_SESSION['csrf']}'
 			    }
 			})
 		    .done(function(response) {

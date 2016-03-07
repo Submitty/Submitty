@@ -113,7 +113,7 @@ $output .= <<<HTML
             $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&action=delete&id='+test_id, {
                 type: "POST",
 		        data: {
-                    csrf_token: {$_SESSION['csrf']}
+                    csrf_token: '{$_SESSION['csrf']}'
                 }
             })
             .done(function(response) {
@@ -153,7 +153,7 @@ $output .= <<<HTML
                 score: score,
                 curve: curve,
                 locked: locked,
-                csrf_token: {$_SESSION['csrf']}
+                csrf_token: '{$_SESSION['csrf']}'
             }
         })
         .done(function(response) {
@@ -249,7 +249,7 @@ $output .= <<<HTML
                 score: new_score,
                 curve: new_curve,
                 locked: new_locked,
-                csrf_token: {$_SESSION['csrf']}``
+                csrf_token: '{$_SESSION['csrf']}'
             }
         })
         .done(function(response) {

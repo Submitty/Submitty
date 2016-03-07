@@ -143,7 +143,7 @@ $output .= <<<HTML
             $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=delete&id='+rubric_id, {
                 type: "POST",
 		        data: {
-                    csrf_token: {$_SESSION['csrf']}
+                    csrf_token: '{$_SESSION['csrf']}'
                 }
             })
             .done(function(response) {
@@ -166,7 +166,7 @@ $output .= <<<HTML
         $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=sequence', {
             type: "POST",
             data: {
-                csrf_token: {$_SESSION['csrf']}
+                csrf_token: '{$_SESSION['csrf']}'
             }
         })
         .done(function(response) {
