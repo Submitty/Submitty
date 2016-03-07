@@ -106,7 +106,7 @@ $output .= <<<HTML
 </style>
 <script type="text/javascript">
     function deleteOther(other_id) {
-        var other_name = $('#other-'+other_id+'-name').val();
+        var other_name = $('#other-'+other_id+'-name').text();
         var c = window.confirm("Are you sure you want to delete " + other_name + "?");
         if (c == true) {
             $.ajax('{$BASE_URL}/account/ajax/admin-other.php?course={$_GET['course']}&action=delete&oid='+other_id, {
@@ -119,7 +119,7 @@ $output .= <<<HTML
                 var res_array = response.split("|");
                 if (res_array[0] == "success") {
                     window.alert(other_name + " deleted");
-                    $('tr#other-'+other_id).remove();
+                    $('tr#other-'+other_id+'-row').remove();
                 }
                 else {
                     window.alert(other_name + " could not be deleted");
