@@ -159,7 +159,7 @@ $output .= <<<HTML
         .done(function(response) {
             var res_array = response.split("|");
             if (res_array[0] == "success") {
-                var html_response = "<tr id='test-"+res_array[1]+"' test-number='"+number+"'>" +
+                var html_response = "<tr id='test-"+res_array[1]+"' test-number='"+number+"' test-type='"+type+"'>" +
                  "<td class='tests-number' id='test-"+res_array[1]+"-number'>"+type+" "+number+"</td>" +
                  "<td class='tests-score' id='test-"+res_array[1]+"-score'>"+score+"</td>" +
                  "<td class='tests-curve' id='test-"+res_array[1]+"-curve'>"+curve+"</td>" +

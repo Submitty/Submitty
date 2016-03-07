@@ -4,7 +4,7 @@ include "../../toolbox/functions.php";
 
 check_administrator();
 
-if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $_SESSION['csrf_token']) {
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $_SESSION['csrf']) {
     die("invalid csrf token");
 }
 $action = $_GET['action'];
