@@ -4,14 +4,18 @@ include "../../toolbox/functions.php";
 
 check_administrator();
 
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $_SESSION['csrf']) {
+    die("invalid csrf token");
+}
+
 $action = $_GET['action'];
 
 switch($action) {
     case 'new':
-        $id = strtolower($_GET['id']);
-        $name = $_GET['name'];
-        $score  = intval($_GET['score']) > 0 ? intval($_GET['score']) : 0;
-        $due_date = $_GET['due_date'];
+        $id = strtolower($_POST['id']);
+        $name = $_POST['name'];
+        $score  = intval($_POST['score']) > 0 ? intval($_POST['score']) : 0;
+        $due_date = $_POST['due_date'];
 
         // don't allow duplicate lab numbers?
         $db->query("SELECT * FROM other_grades WHERE other_id=?",array($id));
@@ -27,11 +31,11 @@ switch($action) {
         print "success|".$row['oid'];
         break;
     case 'edit':
-        $oid = intval($_GET['oid']);
-        $id = strtolower($_GET['id']);
-        $name = $_GET['name'];
-        $score  = intval($_GET['score']) > 0 ? intval($_GET['score']) : 0;
-        $due_date = $_GET['due_date'];
+        $oid = intval($_POST['oid']);
+        $id = strtolower($_POST['id']);
+        $name = $_POST['name'];
+        $score  = intval($_POST['score']) > 0 ? intval($_POST['score']) : 0;
+        $due_date = $_POST['due_date'];
 
         $db->query("SELECT * FROM other_grades WHERE oid=?",array($oid));
         if (count($db->rows()) == 0) {

@@ -109,22 +109,27 @@ $output .= <<<HTML
         var other_name = $('#other-'+other_id+'-name').val();
         var c = window.confirm("Are you sure you want to delete " + other_name + "?");
         if (c == true) {
-            $.ajax('{$BASE_URL}/account/ajax/admin-other.php?course={$_GET['course']}&action=delete&oid='+other_id)
-                .done(function(response) {
-                    var res_array = response.split("|");
-                    if (res_array[0] == "success") {
-                        window.alert(other_name + " deleted");
-                        $('tr#other-'+other_id).remove();
-                    }
-                    else {
-                        window.alert(other_name + " could not be deleted");
-                        console.log(response);
-                    }
-                })
-                .fail(function() {
-                    window.alert("[ERROR] Refresh Page");
+            $.ajax('{$BASE_URL}/account/ajax/admin-other.php?course={$_GET['course']}&action=delete&oid='+other_id, {
+                type: "POST",
+		        data: {
+                    csrf_token: {$_SESSION['csrf']}
+                }
+            })
+            .done(function(response) {
+                var res_array = response.split("|");
+                if (res_array[0] == "success") {
+                    window.alert(other_name + " deleted");
+                    $('tr#other-'+other_id).remove();
+                }
+                else {
+                    window.alert(other_name + " could not be deleted");
                     console.log(response);
-                });
+                }
+            })
+            .fail(function() {
+                window.alert("[ERROR] Refresh Page");
+                console.log(response);
+            });
         }
     }
 
@@ -135,40 +140,40 @@ $output .= <<<HTML
         var due_date     = $('input#new-other-due').val();
         console.log(id);
 
-        $.ajax('{$BASE_URL}/account/ajax/admin-other.php?course={$_GET['course']}&action=new',
-            {
-                type:'GET',
-                data: {
-                    id: id,
-                    name: name,
-                    score: score,
-                    due_date: due_date
-                }
-            })
-            .done(function(response) {
-                var res_array = response.split("|");
-                if (res_array[0] == "success") {
-                    var oid = res_array[1];
-                    var html_response = "<tr id='other-"+oid+"-row'>" +
-                     "<td class='other-id' id='other-"+oid+"-id'>"+id+"</td>" +
-                     "<td class='other-name' id='other-"+oid+"-name'>"+name+"</td>" +
-                     "<td class='other-score' id='other-"+oid+"-score'>"+score+"</td>" +
-                     "<td class='other-due' id='other-"+oid+"-due'>"+due_date+"</td>" +
-                     "<td class='other-options' id='other-"+oid+"-options'><a onclick='editOther("+oid+");'>Edit</a> | "+
-                     "<a onclick=\"deleteOther("+oid+");\">Delete</a></td>" +
-                     "</tr>";
-                    $('table#table-other').append(html_response);
-                    window.alert(name+" created");
-                }
-                else {
-                    window.alert(name + " not created");
-                    console.log(response);
-                }
-            })
-            .fail(function() {
-                window.alert("[ERROR] Refresh Page");
+        $.ajax('{$BASE_URL}/account/ajax/admin-other.php?course={$_GET['course']}&action=new', {
+            type:'POST',
+            data: {
+                id: id,
+                name: name,
+                score: score,
+                due_date: due_date,
+                csrf_token: {$_SESSION['csrf']}
+            }
+        })
+        .done(function(response) {
+            var res_array = response.split("|");
+            if (res_array[0] == "success") {
+                var oid = res_array[1];
+                var html_response = "<tr id='other-"+oid+"-row'>" +
+                 "<td class='other-id' id='other-"+oid+"-id'>"+id+"</td>" +
+                 "<td class='other-name' id='other-"+oid+"-name'>"+name+"</td>" +
+                 "<td class='other-score' id='other-"+oid+"-score'>"+score+"</td>" +
+                 "<td class='other-due' id='other-"+oid+"-due'>"+due_date+"</td>" +
+                 "<td class='other-options' id='other-"+oid+"-options'><a onclick='editOther("+oid+");'>Edit</a> | "+
+                 "<a onclick=\"deleteOther("+oid+");\">Delete</a></td>" +
+                 "</tr>";
+                $('table#table-other').append(html_response);
+                window.alert(name+" created");
+            }
+            else {
+                window.alert(name + " not created");
                 console.log(response);
-            });
+            }
+        })
+        .fail(function() {
+            window.alert("[ERROR] Refresh Page");
+            console.log(response);
+        });
 
         $('input#new-other-id').val("");
         $('input#new-other-name').val("");
@@ -228,13 +233,14 @@ $output .= <<<HTML
         var due_date;
 
         $.ajax('{$BASE_URL}/account/ajax/admin-other.php?course={$_GET['course']}&action=edit', {
-            type: 'GET',
+            type: 'POST',
             data: {
                 oid: other_id,
                 id: new_id,
                 name: new_name,
                 score: new_score,
-                due_date: new_due
+                due_date: new_due,
+                csrf_token: {$_SESSION['csrf']}
             }
         })
         .done(function(response) {

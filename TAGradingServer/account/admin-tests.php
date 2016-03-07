@@ -110,22 +110,27 @@ $output .= <<<HTML
         var test_number = $('#test-'+test_id).attr('test-number');
         var c = window.confirm("Are you sure you want to delete Test " + test_number + "?");
         if (c == true) {
-            $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&action=delete&id='+test_id)
-                .done(function(response) {
-                    var res_array = response.split("|");
-                    if (res_array[0] == "success") {
-                        window.alert("Test " + test_number + " deleted");
-                        $('tr#test-'+test_id).remove();
-                    }
-                    else {
-                        window.alert("Test " + test_number + " could not be deleted");
-                        console.log(response);
-                    }
-                })
-                .fail(function() {
-                    window.alert("[ERROR] Refresh Page");
+            $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&action=delete&id='+test_id, {
+                type: "POST",
+		        data: {
+                    csrf_token: {$_SESSION['csrf']}
+                }
+            })
+            .done(function(response) {
+                var res_array = response.split("|");
+                if (res_array[0] == "success") {
+                    window.alert("Test " + test_number + " deleted");
+                    $('tr#test-'+test_id).remove();
+                }
+                else {
+                    window.alert("Test " + test_number + " could not be deleted");
                     console.log(response);
-                });
+                }
+            })
+            .fail(function() {
+                window.alert("[ERROR] Refresh Page");
+                console.log(response);
+            });
         }
     }
 
@@ -138,44 +143,44 @@ $output .= <<<HTML
         var curve     = $('input#new-test-curve').val();
         var locked    = $('input#new-test-locked').val();
 
-        $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&action=new',
-            {
-                type:'GET',
-                data: {
-                    type: type,
-                    number: number,
-                    questions: questions,
-                    text: text,
-                    score: score,
-                    curve: curve,
-                    locked: locked
-                }
-            })
-            .done(function(response) {
-                var res_array = response.split("|");
-                if (res_array[0] == "success") {
-                    var html_response = "<tr id='test-"+res_array[1]+"' test-number='"+number+"'>" +
-                     "<td class='tests-number' id='test-"+res_array[1]+"-number'>"+type+" "+number+"</td>" +
-                     "<td class='tests-score' id='test-"+res_array[1]+"-score'>"+score+"</td>" +
-                     "<td class='tests-curve' id='test-"+res_array[1]+"-curve'>"+curve+"</td>" +
-                     "<td class='tests-questions' id='test-"+res_array[1]+"-questions'>"+questions+"</td>" +
-                     "<td class='tests-text' id='test-"+res_array[1]+"-text'>"+text+"</td>" +
-                     "<td class='tests-locked' id='test-"+res_array[1]+"-locked'>"+locked+"</td>" +
-                     "<td class='tests-options' id='test-"+res_array[1]+"-options'><a onclick='editTest("+res_array[1]+");'>Edit</a> | "+
-                     "<a onclick=\"deleteTest("+res_array[1]+");\">Delete</a></td>" +
-                     "</tr>";
-                    $('table#table-tests').append(html_response);
-                    window.alert(type+" "+number+" created");
-                }
-                else {
-                    window.alert(type+" " + number + " not created");
-                    console.log(response);
-                }
-            })
-            .fail(function() {
-                window.alert("[ERROR] Refresh Page");
+        $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&action=new', {
+            type:'POST',
+            data: {
+                type: type,
+                number: number,
+                questions: questions,
+                text: text,
+                score: score,
+                curve: curve,
+                locked: locked,
+                csrf_token: {$_SESSION['csrf']}
+            }
+        })
+        .done(function(response) {
+            var res_array = response.split("|");
+            if (res_array[0] == "success") {
+                var html_response = "<tr id='test-"+res_array[1]+"' test-number='"+number+"'>" +
+                 "<td class='tests-number' id='test-"+res_array[1]+"-number'>"+type+" "+number+"</td>" +
+                 "<td class='tests-score' id='test-"+res_array[1]+"-score'>"+score+"</td>" +
+                 "<td class='tests-curve' id='test-"+res_array[1]+"-curve'>"+curve+"</td>" +
+                 "<td class='tests-questions' id='test-"+res_array[1]+"-questions'>"+questions+"</td>" +
+                 "<td class='tests-text' id='test-"+res_array[1]+"-text'>"+text+"</td>" +
+                 "<td class='tests-locked' id='test-"+res_array[1]+"-locked'>"+locked+"</td>" +
+                 "<td class='tests-options' id='test-"+res_array[1]+"-options'><a onclick='editTest("+res_array[1]+");'>Edit</a> | "+
+                 "<a onclick=\"deleteTest("+res_array[1]+");\">Delete</a></td>" +
+                 "</tr>";
+                $('table#table-tests').append(html_response);
+                window.alert(type+" "+number+" created");
+            }
+            else {
+                window.alert(type+" " + number + " not created");
                 console.log(response);
-            });
+            }
+        })
+        .fail(function() {
+            window.alert("[ERROR] Refresh Page");
+            console.log(response);
+        });
 
         $('select#new-test-type').val("Test");
         $('input#new-test-number').val("");
@@ -235,7 +240,7 @@ $output .= <<<HTML
         var locked;
 
         $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&action=edit', {
-            type: 'GET',
+            type: 'POST',
             data: {
                 id: test_id,
                 number: new_number,
@@ -243,7 +248,8 @@ $output .= <<<HTML
                 text: new_text,
                 score: new_score,
                 curve: new_curve,
-                locked: new_locked
+                locked: new_locked,
+                csrf_token: {$_SESSION['csrf']}``
             }
         })
         .done(function(response) {

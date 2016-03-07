@@ -151,7 +151,9 @@ if($user_is_administrator)
 
 <div id="container-rubric">
     <form class="form-signin" action="{$BASE_URL}/account/submit/admin-rubric.php?action={$action}&id={$old_rubric['rubric_id']}" method="post" enctype="multipart/form-data">
-    <input type='hidden' name="part_count" value="{$part_count}" />
+        <input type='hidden' name="part_count" value="{$part_count}" />
+        <input type='hidden' name="csrf_token" value="{$_SESSION['csrf']}" />
+
         <div class="modal-header">
             <h3 id="myModalLabel">{$string} Rubric {$extra}</h3>
         </div>

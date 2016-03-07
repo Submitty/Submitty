@@ -4,6 +4,10 @@ include "../../toolbox/functions.php";
 
 check_administrator();
 
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $_SESSION['csrf']) {
+    die("invalid csrf token");
+}
+
 $rubric_parts_sep = (isset($_POST['rubric_parts_sep']) && intval($_POST['rubric_parts_sep']) == 1) ? 1 : 0;
 $rubric_late_days = intval($_POST['rubric_late_days']);
 $rubric_parts = intval($_POST['part_count']);
