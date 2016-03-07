@@ -360,11 +360,13 @@ apache2ctl -t
 service apache2 restart
 
 if [[ ${VAGRANT} == 1 ]]; then
-  rm /var/local/hss/autograding_logs
-  rm /var/local/hss/tagrading_logs
-  rm /vagrant/.vagrant/autograding_logs
-  rm /vagrant/.vagrant/tagrading_logs
+  rm -r /var/local/hss/autograding_logs
+  rm -r /vagrant/.vagrant/autograding_logs
+  mkdir /vagrant/.vagrant/autograding_logs
   ln -s /vagrant/.vagrant/autograding_logs /var/local/hss/autograding_logs
+  rm -r /var/local/hss/tagrading_logs
+  rm -r /vagrant/.vagrant/tagrading_logs
+  mkdir /vagrant/.vagrant/tagrading_logs
   ln -s /vagrant/.vagrant/tagrading_logs /var/local/hss/tagrading_logs
 
     #################################################################
