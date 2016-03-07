@@ -215,8 +215,9 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser developer --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 	echo "developer:developer" | sudo chpasswd
 	adduser developer sudo
-	adduser student --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-	echo "student:student" | sudo chpasswd
+    echo "student" > /var/local/hss/instructors/authlist
+    /var/local/hss/bin/authonly.pl
+    echo "student:student" | sudo chpasswd
 fi
 
 
@@ -414,8 +415,6 @@ if [[ ${VAGRANT} == 1 ]]; then
     psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
     psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
 
-    echo "student" > /var/local/hss/instructors/authlist
-    /var/local/hss/bin/authonly.pl
     psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
     psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
     psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
