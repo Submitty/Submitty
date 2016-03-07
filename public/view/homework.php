@@ -269,16 +269,16 @@ if ($highest_version == -1) {
 
   if ($assignment_version != $active_version) {
     echo '&nbsp;&nbsp;&nbsp;&nbsp;';
-    echo '<form class="form_submit" action="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'">';
-    echo '<input type="hidden" name="csrf_token" value="'.$_SESSION['csrf'].' />';
+    echo '<form class="form_submit" action="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'" method="POST">';
+    echo '<input type="hidden" name="csrf_token" value="'.$_SESSION['csrf'].'"" />';
     echo '<input type="submit" class="btn btn-primary" value="Set Version '.$assignment_version.' as ACTIVE Submission Version"></input>';
     echo '</form>';
   }
 
   if ($active_version != 0) {
     echo '&nbsp;&nbsp;&nbsp;&nbsp;';
-    echo '<form class="form_submit" action="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version=0">';
-    echo '<input type="hidden" name="csrf_token" value="'.$_SESSION['csrf'].' />';
+    echo '<form class="form_submit" action="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version=0" method="POST">';
+    echo '<input type="hidden" name="csrf_token" value="'.$_SESSION['csrf'].'"" />';
     echo '<input type="submit" class="btn btn-primary" value="Cancel Submission" />';
     echo '</form>';
   }
