@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 umask (0027);
 /*The user's umask is ignored for the user running php, so we need
@@ -17,8 +17,8 @@ if (isset($_SERVER['PHP_AUTH_USER'])) {
     $user = $_SERVER['PHP_AUTH_USER'];
 } else {
     // if not already authenticated do it
-    header('WWW-Authenticate: Basic realm=HWServer'); 
-    header('HTTP/1.0 401 Unauthorized'); 
+    header('WWW-Authenticate: Basic realm=HWServer');
+    header('HTTP/1.0 401 Unauthorized');
     exit;
 }
 
@@ -28,6 +28,9 @@ ini_set('display_errors', 1);
 
 session_start();
 $_SESSION["id"] = $user;
+if (!isset($_SESSION["csrf"])) {
+    $_SESSION["csrf"] = bin2hex(openssl_random_pseudo_bytes(16));
+}
 
 if (isset($_GET["page"])) {
     $page = htmlspecialchars($_GET["page"]);

@@ -55,12 +55,18 @@ function parse_status() {
         $status_code = htmlspecialchars($_SESSION["status"]);
         if ($status_code == "uploaded_no_error") {
             $status = "Upload Successful!";
-        } else if ($status_code == "upload_failed") {
+        }
+        else if ($status_code == "upload_failed") {
             $status = "Unknown error.  Upload failed.";
-        } else if ($status_code == "assignment_closed") {
+        }
+        else if ($status_code == "assignment_closed") {
             $status = "Unable to edit assignment, this assignment is closed";
-        } else if ($status_code != "") {
+        }
+        else if ($status_code != "") {
             $status = $status_code;
+        }
+        else if ($status_code == "invalid_token") {
+            $status = "CSRF token error, try the form again";
         }
         $_SESSION["status"] = "";
     }
@@ -80,7 +86,7 @@ function parse_assignment_id_with_recent($class_config, $most_recent_assignment_
         return $most_recent_assignment_id;
     }
     header("Location: index.php?page=displaymessage&semester=".check_semester()."&course=".check_course()."&assignment_id=".$most_recent_assignment_id);
-    
+
     //header("Location: index.php?page=displaymessage&semester=".check_semester()."&course=".check_course()."&assignment_id=".check_assignment_id(class_config));
     exit();
 
@@ -105,7 +111,7 @@ function get_assignment_version($username, $semester, $course, $assignment_id) {
 
   // otherwise, return -1 (no submission)
   return -1;
-  
+
 }
 
 

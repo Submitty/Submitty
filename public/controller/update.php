@@ -17,6 +17,11 @@ if (!can_edit_assignment($_SESSION["id"], $semester, $course, $assignment_id, $a
    header ("Location: index.php?semester=".$semester."&course=".$course."&assignment_id=".$assignment_id."&assignment_version=".$assignment_version);
    exit();
 }
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] == $_SESSION['csrf']) {
+   $_SESSION['status'] = "invalid_token";
+   header ("Location: index.php?semester=".$semester."&course=".$course."&assignment_id=".$assignment_id."&assignment_version=".$assignment_version);
+   exit();
+}
 change_assignment_version($_SESSION["id"], $semester, $course, $assignment_id, $assignment_version, $assignment_config);
 header ("Location: index.php?semester=".$semester."&course=".$course."&assignment_id=".$assignment_id."&assignment_version=".$assignment_version);
 exit();
