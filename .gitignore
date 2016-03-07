@@ -36,3 +36,5 @@ composer.lock
 *.log
 *.out
 *.synctex.gz
+
+db_update.php
