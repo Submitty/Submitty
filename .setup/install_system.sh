@@ -357,7 +357,8 @@ apache2ctl -t
 service apache2 restart
 
 if [[ ${VAGRANT} == 1 ]]; then
-    echo "student" > /var/local/hss/instructors/authlist
+    echo "student" >> /var/local/hss/instructors/authlist
+    echo "student" >> /var/local/hss/instructors/valid
     /var/local/hss/bin/authonly.pl
     echo "student:student" | sudo chpasswd
 

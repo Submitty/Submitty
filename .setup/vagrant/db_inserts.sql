@@ -7,7 +7,7 @@ INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email, user_is_
     VALUES ('TA', 'Ross', 'ta', 'ta@email.edu', 0, 0);
 
 INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email, user_is_administrator, user_is_developer)
-    VALUES ('Developer', 'Jackson', 'instructor', 'instructor@email.edu', 1, 1);
+    VALUES ('Developer', 'Jackson', 'developer', 'instructor@email.edu', 1, 1);
 
 -- Sections
 INSERT INTO sections (section_title, section_is_enabled)
