@@ -36,8 +36,8 @@ if (!$rubric->rubric_details['rubric_parts_sep']) {
     }
     else {
         $icon[0] = '<i class="icon-remove icon-white"></i>';
-        $color[0] = "#998100";
-        $icon_color[0] = "#FAA732";
+        $color[0] = "#DA4F49";
+        $icon_color[0] = "#DA4F49";
         if ($rubric->active_assignment[1] == 0) {
             $part_status[0] = 'Cancelled';
         }
@@ -668,7 +668,7 @@ HTML;
 else {
     $output .= <<<HTML
         <input class="btn btn-large btn-primary" type="button" value="Cannot Submit Homework Grade" />
-        <div style="width:100%; text-align:right; color:#777;">This homework has yet been opened for grading.</div>
+        <div style="width:100%; text-align:right; color:#777;">This homework has not been opened for grading.</div>
         <div id="inner-container-spacer" style="height:55px;"></div>
 HTML;
 }
