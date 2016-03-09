@@ -19,6 +19,7 @@ foreach(Database::rows() as $row) {
 
 $output = <<<HTML
 <form action="{$BASE_URL}/account/submit/admin-config.php?course={$_GET['course']}" method="post">
+<input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
 <div id="container" style="width:100%; margin-top:40px;">
     <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
         <div class="modal-header">

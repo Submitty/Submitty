@@ -266,21 +266,16 @@ echo <<<HTML
 
             }
             else {
-                if(isNaN(grade) && grade != "-")
-                {
+                if(isNaN(grade) && grade != "-") {
                     $(this).val("0");
                 }
-                else
-                {
-                    if(grade == "" || grade == "-")
-                    {
+                else {
+                    if(grade == "" || grade == "-") {
                         grade = "0";
                         $(this).val(grade);
                     }
-                    else
-                    {
+                    else {
                         $(this).val(grade);
-
                     }
                 }
             }
@@ -303,39 +298,41 @@ echo <<<HTML
             updateColor(this, url);
 		});
 
-		function updateColor(item, url)
-		{
+		function updateColor(item, url) {
 			$(item).css("border-right", "15px solid #149bdf");
 			// alert(url);
 			submitAJAX(url, updateSuccess, updateFail, item);
 		}
 
-		function updateSuccess(item)
-		{
+		function updateSuccess(item) {
 			$(item).stop(true, true).animate({"border-right-width":"0px"}, 400);
 		}
 
-		function updateFail(item)
-		{
+		function updateFail(item) {
 			$(item).css("border-right-width", "15px");
 			$(item).stop(true, true).animate({"border-right-color":"#DA4F49"}, 400);
 		}
 
-		function submitAJAX(url, callBackSucess, callBackFail, item)
-		{
-			$.ajax(url)
+		function submitAJAX(url, callBackSucess, callBackFail, item) {
+			$.ajax(url, {
+			    type: "POST",
+			    data: {
+			        csrf_token: '{$_SESSION['csrf']}'
+			    }
+			})
 		    .done(function(response) {
-		    	if(response == "updated")
-		    	{
+		    	if(response == "updated") {
 		    		callBackSucess(item);
 		    	}
-		    	else
-		    	{
+		    	else {
 		    		callBackFail(item);
                     console.log(response);
 		    	}
 		    })
-		    .fail(function() { updateFail(item); window.alert("[SAVE ERROR] Refresh Page");});
+		    .fail(function() {
+		        updateFail(item);
+		        window.alert("[SAVE ERROR] Refresh Page");
+            });
 		}
 	</script>
 HTML;

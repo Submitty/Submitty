@@ -1,10 +1,13 @@
 <?php
 
 require_once "../../toolbox/functions.php";
+use \lib\Database;
 
 check_administrator();
 
-use \lib\Database;
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $_SESSION['csrf']) {
+    die("invalid csrf token");
+}
 
 Database::query("SELECT * FROM config");
 foreach(Database::rows() as $config) {

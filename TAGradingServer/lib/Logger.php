@@ -129,6 +129,8 @@ class Logger {
         $log_message .= str_repeat("=-", 30)."="."\n";
 
         // Appends to the file using a locking mechanism, and supressing any potential error from this
-        @file_put_contents(Logger::$log_path."/".$filename.".txt", $log_message, FILE_APPEND | LOCK_EX);
+        if (file_put_contents(Logger::$log_path."/".$filename.".txt", $log_message, FILE_APPEND | LOCK_EX) === false) {
+            print "failure to log error";
+        }
     }
 }
