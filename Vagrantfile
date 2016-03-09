@@ -11,9 +11,11 @@ Vagrant.configure(2) do |config|
   config.vm.network "private_network", ip: "192.168.56.103"
 
   config.vm.provider "virtualbox" do |v|
-    v.memory = 2048
-    v.cpus = 2
+    v.memory = 1024
+    v.cpus = 1
   end
+  
+  config.vm.synced_folder ".", "/usr/local/hss/GIT_CHECKOUT_HWserver", owner: "root", group: "root"
 
   config.vm.provision "shell" do |s|
     s.path = ".setup/vagrant.sh"
