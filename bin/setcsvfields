@@ -1,18 +1,18 @@
-#!/usr/bin/env php
+#!/usr/bin/php
 
 <?php
 //Sysadmin tool to select what CSV fields are required for HSS class databases
 //This is a command line tool.  It does not work from HTTP.
 //Created by Peter Bailie, Systems Programmer, RPI Computer Science
 //
-//Last code update Feb 23, 2016 by PB
+//Last code update Dec 4, 2015 by PB
 
 //------------------------------------------------------------------------------
 
 //Constants
 define ("_INI_PATH",  "__INSTALL__FILLIN__HSS_INSTALL_DIR__/hwgrading_website/toolbox/configs/");
 define ("_INI_FILE",  "student_csv_fields.ini");
-define ("_INI_OWNER", "__INSTALL__FILLIN__HWPHP_USER__");
+define ("_INI_OWNER", "hwphp");
 
 //------------------------------------------------------------------------------
 
