@@ -215,9 +215,6 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser developer --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 	echo "developer:developer" | sudo chpasswd
 	adduser developer sudo
-    echo "student" > /var/local/hss/instructors/authlist
-    /var/local/hss/bin/authonly.pl
-    echo "student:student" | sudo chpasswd
 fi
 
 
@@ -229,6 +226,7 @@ grep -q "^UMASK 027" || (echo "ERROR! failed to set umask" && exit)
 adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
+	adduser hwphp vagrant
 fi
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then
@@ -360,14 +358,19 @@ apache2ctl -t
 service apache2 restart
 
 if [[ ${VAGRANT} == 1 ]]; then
-  rm -r /var/local/hss/autograding_logs
-  rm -r /vagrant/.vagrant/autograding_logs
-  mkdir /vagrant/.vagrant/autograding_logs
-  ln -s /vagrant/.vagrant/autograding_logs /var/local/hss/autograding_logs
-  rm -r /var/local/hss/tagrading_logs
-  rm -r /vagrant/.vagrant/tagrading_logs
-  mkdir /vagrant/.vagrant/tagrading_logs
-  ln -s /vagrant/.vagrant/tagrading_logs /var/local/hss/tagrading_logs
+    echo "student" >> /var/local/hss/instructors/authlist
+    echo "student" >> /var/local/hss/instructors/valid
+    /var/local/hss/bin/authonly.pl
+    echo "student:student" | sudo chpasswd
+
+    rm -r /var/local/hss/autograding_logs
+    rm -r /vagrant/.vagrant/autograding_logs
+    mkdir /vagrant/.vagrant/autograding_logs
+    ln -s /vagrant/.vagrant/autograding_logs /var/local/hss/autograding_logs
+    rm -r /var/local/hss/tagrading_logs
+    rm -r /vagrant/.vagrant/tagrading_logs
+    mkdir /vagrant/.vagrant/tagrading_logs
+    ln -s /vagrant/.vagrant/tagrading_logs /var/local/hss/tagrading_logs
 
     #################################################################
     # CRON SETUP

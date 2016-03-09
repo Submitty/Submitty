@@ -288,8 +288,8 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
 
     if ($svn_checkout == true) {
       if (!touch($version_path."/.submit.SVN_CHECKOUT")) {
-	display_error("Failed to touch file ".$version_path."/.submit.SVN_CHECKOUT");
-	return;
+          display_error("Failed to touch file ".$version_path."/.submit.SVN_CHECKOUT");
+          return;
       }
     }
 
@@ -612,16 +612,16 @@ function is_valid_semester($semester) {
 
   // RPI SPECIFIC CHECKS e.g., f15 s16
   // must be 3 characters long
-  if(strlen($semester) != 3) return false;	 
+  if(strlen($semester) != 3) return false;
   // first character must be alphabetic
-  if(!ctype_alpha(substr($semester,0,1))) return false;	 
+  if(!ctype_alpha(substr($semester,0,1))) return false;
   // last 2 characters must be a number
-  if(!is_numeric(substr($semester,1,2))) return false;	 
+  if(!is_numeric(substr($semester,1,2))) return false;
 
 
   $path_front_root = get_path_front_root();
   $semester_directory = $path_front_root."/courses/".$semester;
-  
+
   return is_dir($semester_directory);
 
 }
@@ -638,20 +638,20 @@ function is_valid_course($semester,$course) {
 
   // RPI SPECIFIC CHECKS e.g., csci1100 biol1010
   // must be 8 characters long
-  if(strlen($course) != 8) return false;	 
+  if(strlen($course) != 8) return false;
   // first 4 characters must be alphabetic
-  if(!ctype_alpha(substr($course,0,4))) return false;	 
+  if(!ctype_alpha(substr($course,0,4))) return false;
   // last 4 characters must be a number
-  if(!is_numeric(substr($course,4,4))) return false;	 
+  if(!is_numeric(substr($course,4,4))) return false;
 
 
   // CSCI SPECIFIC CHECKS
   // prefix must be csci
-  if(strtolower(substr($course,0,4)) != "csci") return false;	 
+  if(strtolower(substr($course,0,4)) != "csci") return false;
 
   $path_front_root = get_path_front_root();
   $course_directory = $path_front_root."/courses/".$semester."/".$course;
-  
+
   return is_dir($course_directory);
 
 }
@@ -659,7 +659,7 @@ function is_valid_course($semester,$course) {
 /*
 // Check to make sure instructor has added this assignment
 function is_valid_assignment($class_config, $assignment_id) {
-  
+
   if (contains_directory_traversal($assignment_id)) {
     return false;
   }
@@ -1138,7 +1138,7 @@ function get_all_testcase_diffs($username, $semester,$course, $assignment_id, $a
         $diff_result["diff_id"] = $diff["diff_id"];
 
         if (isset($diff["display_mode"]) && $diff["display_mode"] != "") {
-             $diff_result["display_mode"] = $diff["display_mode"];  
+             $diff_result["display_mode"] = $diff["display_mode"];
         }
         if (isset($diff["message"]) && $diff["message"] != "") {
             $diff_result["message"] = $diff["message"];

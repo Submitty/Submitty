@@ -9,7 +9,7 @@ echo <<<HTML
     body {
         overflow: scroll;
     }
-    
+
     #container-grading {
         width: 600px;
         margin: 100px auto;
@@ -30,6 +30,7 @@ echo <<<HTML
 </style>
 <div id="container-grading">
     <form action="{$BASE_URL}/account/submit/admin-grading-sections.php" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
         <div class="modal-header">
             <h3 id="myModalLabel">Setup Grading Sections</h3>
         </div>
