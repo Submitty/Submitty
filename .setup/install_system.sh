@@ -338,6 +338,8 @@ else
 fi
 
 HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
+INSTALL_DIR=/usr/local/hss
+
 cd ${HWSERVER_DIR}
 
 if [ ${VAGRANT} == 1 ]; then
@@ -350,7 +352,7 @@ else
 	source ${HWSERVER_DIR}/CONFIGURE.sh
 fi
 
-source ${HWSERVER_DIR}/INSTALL.sh
+source ${INSTALL_DIR}/INSTALL.sh
 
 source ${HWSERVER_DIR}/Docs/sample_bin/admin_scripts_setup
 cp ${HWSERVER_DIR}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
@@ -383,13 +385,13 @@ if [[ ${VAGRANT} == 1 ]]; then
     echo "student:student" | sudo chpasswd
 
     rm -r /var/local/hss/autograding_logs
-    rm -r /vagrant/.vagrant/autograding_logs
-    mkdir /vagrant/.vagrant/autograding_logs
-    ln -s /vagrant/.vagrant/autograding_logs /var/local/hss/autograding_logs
+    rm -r ${HWSERVER_DIR}/.vagrant/autograding_logs
+    mkdir ${HWSERVER_DIR}/.vagrant/autograding_logs
+    ln -s ${HWSERVER_DIR}/.vagrant/autograding_logs /var/local/hss/autograding_logs
     rm -r /var/local/hss/tagrading_logs
-    rm -r /vagrant/.vagrant/tagrading_logs
-    mkdir /vagrant/.vagrant/tagrading_logs
-    ln -s /vagrant/.vagrant/tagrading_logs /var/local/hss/tagrading_logs
+    rm -r ${HWSERVER_DIR}/.vagrant/tagrading_logs
+    mkdir ${HWSERVER_DIR}/.vagrant/tagrading_logs
+    ln -s ${HWSERVER_DIR}/.vagrant/tagrading_logs /var/local/hss/tagrading_logs
 
     #################################################################
     # CRON SETUP
@@ -408,7 +410,7 @@ if [[ ${VAGRANT} == 1 ]]; then
     #################################################################
     # COURSE SETUP
     #################
-    cd ${HWSERVER_DIR}/../bin
+    cd ${INSTALL_DIR}/bin
     ./create_course.sh f15 csci1100 instructor csci1100_tas_www
     ./create_course.sh f15 csci1200 instructor csci1200_tas_www
     ./create_course.sh f15 csci2600 instructor csci2600_tas_www

@@ -81,15 +81,15 @@ GRADE_STUDENTS_STARTS_PER_HOUR=20
 # confirm that the uid/gid of the untrusted users are sequential
 which_untrusted=0
 while [ $which_untrusted -lt $NUM_UNTRUSTED ]; do
-    an_untrusted_user=`printf "untrusted%.2d" $which_untrusted`
-    if [ `id -u $an_untrusted_user` -ne $(($FIRST_UNTRUSTED_UID+$which_untrusted)) ] ; then
-	echo "CONFIGURATION ERROR: untrusted UID not sequential: $an_untrusted_user"
-	exit
-    fi
-    if [ `id -g $an_untrusted_user` -ne $(($FIRST_UNTRUSTED_GID+$which_untrusted)) ] ; then
-	echo "CONFIGURATION ERROR: untrusted GID not sequential: $an_untrusted_user"
-    echo "AN UNTRUSTED $an_untrusted_user"
-	exit
+    an_untrusted_user=$(printf "untrusted%.2d" $which_untrusted)
+    if [ $(id -u $an_untrusted_user) -ne $($FIRST_UNTRUSTED_UID+$which_untrusted) ] ; then
+		echo "CONFIGURATION ERROR: untrusted UID not sequential: $an_untrusted_user"
+		exit
+	fi
+    if [ $(id -g $an_untrusted_user) -ne $($FIRST_UNTRUSTED_GID+$which_untrusted) ] ; then
+		echo "CONFIGURATION ERROR: untrusted GID not sequential: $an_untrusted_user"
+	    echo "AN UNTRUSTED $an_untrusted_user"
+		exit
     fi
     let which_untrusted=which_untrusted+1
 done
