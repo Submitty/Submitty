@@ -1,6 +1,6 @@
 System instructions here: [HOME](https://github.com/RCOS-Grading-Server/HWserver/wiki)
 
-[![Build Status](https://travis-ci.org/RCOS-Grading-Server/HWserver.svg)](https://travis-ci.org/RCOS-Grading-Server/HWserver)
+[![Build Status](https://travis-ci.org/RCOS-Grading-Server/HWserver.svg?branch=master)](https://travis-ci.org/RCOS-Grading-Server/HWserver)
 
 # BACKGROUND
 
