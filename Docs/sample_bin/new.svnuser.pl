@@ -7,16 +7,16 @@ use warnings;
 $ENV{ 'PATH' } = '/bin:/usr/bin';
 delete @ENV{'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
 
-system ("/usr/local/hss/bin/validate.svn.pl");
+system ("/var/local/hss/bin/validate.svn.pl");
 
-open LIST, "/var/local/hss/instructors/svnlist";	# Should have a list of RCS userids (not email), one per line 
+open LIST, "/var/local/hss/instructors/svnlist";	# Should have a list of userids (not email), one per line 
 
 while (<LIST>)
 {
 	chomp $_;
 	next if (!$_);  # Skip blank lines to avoid making a new repository at the base directory
 # create svn repository and set permissions, made clear rather than efficient
-	system ("/usr/sbin/adduser $_ --quiet --home /tmp --gecos \'RCS auth account\' --no-create-home --disabled-password --shell /usr/sbin/nologin");
+	system ("/usr/sbin/adduser $_ --quiet --home /tmp --gecos \'AUTH ONLY account\' --no-create-home --disabled-password --shell /usr/sbin/nologin");
 	system ("svnadmin create /var/lib/svn/csci2600/$_");
 	system ("touch /var/lib/svn/csci2600/$_/db/rep-cache.db");
 	system ("chmod g+w /var/lib/svn/csci2600/$_/db/rep-cache.db");

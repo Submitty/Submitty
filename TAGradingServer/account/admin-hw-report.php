@@ -6,7 +6,7 @@ check_administrator();
 echo <<<HTML
 <div id="container" style="width:100%; margin-top:40px;">
     <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
-        <form onsubmit="submitAJAX('ajax/admin-hw-report.php?course={$_GET['course']}&hw=');return false;">
+        <form onsubmit="submitAJAX('ajax/admin-hw-report.php?course={$_GET['course']}&hw='); return false;">
             <div class="modal-header">
                 <h3 id="myModalLabel">Generate Homework Report</h3>
             </div>
@@ -66,23 +66,26 @@ echo <<<HTML
             url = url + "&regrade=1";
         }
 
-        $.ajax(url)
-            .done(function(response) {
-                $('.loading-gif').css("display","none");
-                if(response == "updated")
-                {
-                    successAJAX();
-                }
-                else
-                {
-                    failureAJAX();
-                    console.log(response);
-                }
-            })
-            .fail(function() {
-                $('.loading-gif').css("display","none");
-                window.alert("[SAVE ERROR] Refresh Page");
-            });
+        $.ajax(url, {
+		    type: "POST",
+		    data: {
+                csrf_token: '{$_SESSION['csrf']}'
+            }
+        })
+        .done(function(response) {
+            $('.loading-gif').css("display","none");
+            if(response == "updated") {
+                successAJAX();
+            }
+            else {
+                failureAJAX();
+                console.log(response);
+            }
+        })
+        .fail(function() {
+            $('.loading-gif').css("display","none");
+            window.alert("[SAVE ERROR] Refresh Page");
+        });
     }
 </script>
 HTML;

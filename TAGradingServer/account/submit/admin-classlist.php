@@ -2,7 +2,6 @@
 require "../../toolbox/functions.php";
 
 check_administrator();
-session_start();
 
 /**
  * FILE: account/submit/admin-classlist.php
@@ -81,6 +80,10 @@ if (isset($_GET['xlsx2csv']) && $_GET['xlsx2csv'] == 1) {
 		//Neither XLSX or CSV detected.  Good bye...
 		die("Only xlsx or csv files are allowed!");
 	}
+}
+
+if (!isset($_SESSION['post']['csrf_token']) || $_SESSION['post']['csrf_token'] != $_SESSION['csrf']) {
+	die("invalid csrf token");
 }
 
 // Get CSV ini config
@@ -182,6 +185,7 @@ foreach ($students as $rcs => $student) {
 	}
 }
 
+unset($_SESSION['post']);
+
 \lib\Database::commit();
-session_destroy();
 header("Location: {$BASE_URL}/account/admin-classlist.php?course={$_GET['course']}&update=1&inserted={$inserted}&updated={$updated}&deleted={$deleted}&moved={$moved}");

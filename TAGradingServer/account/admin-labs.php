@@ -116,20 +116,25 @@ $output .= <<<HTML
         var lab_number = $('#lab-'+lab_id).attr('lab-number');
         var c = window.confirm("Are you sure you want to delete Lab " + lab_number + "?");
         if (c == true) {
-            $.ajax('{$BASE_URL}/account/ajax/admin-labs.php?course={$_GET['course']}&action=delete&id='+lab_id)
-                .done(function(response) {
-                    var res_array = response.split("|");
-                    if (res_array[0] == "success") {
-                        window.alert("Lab " + lab_number + " deleted");
-                        $('tr#lab-'+lab_id).remove();
-                    }
-                    else {
-                        window.alert("Lab " + lab_number + " could not be deleted");
-                    }
-                })
-                .fail(function() {
-                    window.alert("[ERROR] Refresh Page");
-                });
+            $.ajax('{$BASE_URL}/account/ajax/admin-labs.php?course={$_GET['course']}&action=delete&id='+lab_id, {
+                type: "POST",
+		        data: {
+                    csrf_token: '{$_SESSION['csrf']}'
+                }
+            })
+            .done(function(response) {
+                var res_array = response.split("|");
+                if (res_array[0] == "success") {
+                    window.alert("Lab " + lab_number + " deleted");
+                    $('tr#lab-'+lab_id).remove();
+                }
+                else {
+                    window.alert("Lab " + lab_number + " could not be deleted");
+                }
+            })
+            .fail(function() {
+                window.alert("[ERROR] Refresh Page");
+            });
         }
     }
 
@@ -138,35 +143,35 @@ $output .= <<<HTML
         var code   = $('input#new-lab-code').val();
         var checks = $('input#new-lab-checkpoints').val();
 
-        $.ajax('{$BASE_URL}/account/ajax/admin-labs.php?course={$_GET['course']}&action=new',
-            {
-                type:'GET',
-                data: {
-                    number: number,
-                    code: code,
-                    checkpoints: checks
-                }
-            })
-            .done(function(response) {
-                var res_array = response.split("|");
-                if (res_array[0] == "success") {
-                    var html_response = "<tr id='lab-"+res_array[1]+"' lab-number='"+number+"'>" +
-                     "<td class='labs-number' id='lab-"+res_array[1]+"-number'>Lab "+number+"</td>" +
-                     "<td class='labs-checkpoints' id='lab-"+res_array[1]+"-checkpoints'>"+checks+"</td>" +
-                     "<td class='labs-code' id='lab-"+res_array[1]+"-code'>"+code+"</td>" +
-                     "<td class='labs-options' id='lab-"+res_array[1]+"-options'><a onclick='editLab("+res_array[1]+");'>Edit</a> | "+
-                     "<a onclick=\"deleteLab("+res_array[1]+");\">Delete</a></td>" +
-                     "</tr>";
-                    $('table#table-labs').append(html_response);
-                    window.alert("Lab "+number+" created");
-                }
-                else {
-                    window.alert("Lab " + number + " not created");
-                }
-            })
-            .fail(function() {
-                window.alert("[ERROR] Refresh Page");
-            });
+        $.ajax('{$BASE_URL}/account/ajax/admin-labs.php?course={$_GET['course']}&action=new', {
+            type:'POST',
+            data: {
+                number: number,
+                code: code,
+                checkpoints: checks,
+                csrf_token: '{$_SESSION['csrf']}'
+            }
+        })
+        .done(function(response) {
+            var res_array = response.split("|");
+            if (res_array[0] == "success") {
+                var html_response = "<tr id='lab-"+res_array[1]+"' lab-number='"+number+"'>" +
+                 "<td class='labs-number' id='lab-"+res_array[1]+"-number'>Lab "+number+"</td>" +
+                 "<td class='labs-checkpoints' id='lab-"+res_array[1]+"-checkpoints'>"+checks+"</td>" +
+                 "<td class='labs-code' id='lab-"+res_array[1]+"-code'>"+code+"</td>" +
+                 "<td class='labs-options' id='lab-"+res_array[1]+"-options'><a onclick='editLab("+res_array[1]+");'>Edit</a> | "+
+                 "<a onclick=\"deleteLab("+res_array[1]+");\">Delete</a></td>" +
+                 "</tr>";
+                $('table#table-labs').append(html_response);
+                window.alert("Lab "+number+" created");
+            }
+            else {
+                window.alert("Lab " + number + " not created");
+            }
+        })
+        .fail(function() {
+            window.alert("[ERROR] Refresh Page");
+        });
 
         $('input#new-lab-number').val("");
         $('input#new-lab-code').val("");
@@ -206,12 +211,13 @@ $output .= <<<HTML
         var checks;
 
         $.ajax('{$BASE_URL}/account/ajax/admin-labs.php?course={$_GET['course']}&action=edit', {
-            type: 'GET',
+            type: 'POST',
             data: {
                 id: lab_id,
                 number: new_number,
                 code:   new_code,
-                checkpoints: new_checks
+                checkpoints: new_checks,
+                csrf_token: '{$_SESSION['csrf']}'
             }
         })
         .done(function(response) {
@@ -268,7 +274,7 @@ $output .= <<<HTML
              "<td class='labs-options' id='lab-"+lab_id+"-options'><a onclick='editLab("+lab_id+");'>Edit</a> | "+
              "<a onclick='deleteLab("+lab_id+");'>Delete</a></td>";
         $('tr#lab-'+lab_id).html(html_response);
-        $('tr#lab-'+lab_id).attr('lab-number',old_number);
+        $('tr#lab-'+lab_id).attr('lab-number', old_number);
     }
 </script>
 <div id="container-labs">
@@ -315,4 +321,3 @@ HTML;
 print $output;
 
 include "../footer.php";
-?>

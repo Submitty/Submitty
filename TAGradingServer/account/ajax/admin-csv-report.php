@@ -4,6 +4,10 @@ include  "../../toolbox/functions.php";
 
 check_administrator();
 
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $_SESSION['csrf']) {
+    die("invalid csrf token");
+}
+
 $csv_output = "";
 $nl = "\n";
 
@@ -27,9 +31,9 @@ $header = array();
 
 $header[] = "Username";
 $queries = array(
-    "LAB"  => "SELECT 'LAB' as key, lab_id AS id,lab_number as number, lab_code AS code, ('Lab ' || lab_number) as name FROM labs ORDER BY lab_number",
-    "HW"   => "SELECT 'HW' as key, rubric_id AS id,rubric_number as number, rubric_code AS code, rubric_name as name FROM rubrics ORDER BY rubric_due_date ASC",
-    "TEST" => "SELECT upper(test_type) as key, test_id AS id,test_number as number, test_code AS code, (test_type || ' ' || test_number) as name FROM tests ORDER BY test_number"
+    "LAB"  => "SELECT 'LAB' as key, lab_id AS id, lab_number as number, ('Lab ' || lab_number) as name FROM labs ORDER BY lab_number",
+    "HW"   => "SELECT 'HW' as key, rubric_id AS id, rubric_name as name FROM rubrics ORDER BY rubric_due_date ASC",
+    "TEST" => "SELECT upper(test_type) as key, test_id AS id, test_number as number, (test_type || ' ' || test_number) as name FROM tests ORDER BY test_type, test_number"
 );
 
 $totals = array("LAB"=>array(),"HW"=>array(),"TEST"=>array());
@@ -37,7 +41,7 @@ $totals = array("LAB"=>array(),"HW"=>array(),"TEST"=>array());
 foreach ($queries as $key => $query) {
     $db->query($query, array());
     foreach ($db->rows() as $row) {
-        $header[] = $row['name'] . (isset($row['code']) && !empty($row['code']) ? "|{$row['code']}" : "");
+        $header[] = $row['name'];
         $totals[$key][] = $row['id'];
     }
 }
@@ -59,10 +63,10 @@ foreach($students as $student) {
         LEFT JOIN (select lab_id,lab_number FROM labs) as l ON gl.lab_id=l.lab_id WHERE student_rcs=?
         GROUP BY gl.lab_id,l.lab_number ORDER BY l.lab_number",
         "HW"   => "SELECT g.rubric_id as id,sum(gq.grade_question_score) as score
-        FROM grades_questions AS gq, grades AS g LEFT JOIN (select rubric_number,rubric_id FROM rubrics) as r ON g.rubric_id=r.rubric_id
+        FROM grades_questions AS gq, grades AS g LEFT JOIN (select rubric_id, rubric_due_date FROM rubrics) as r ON g.rubric_id=r.rubric_id
         WHERE gq.grade_id=g.grade_id AND g.student_rcs=?
-        GROUP BY g.rubric_id,r.rubric_number
-        ORDER BY r.rubric_number",
+        GROUP BY g.rubric_id, r.rubric_due_date
+        ORDER BY r.rubric_due_date",
         "TEST" => "SELECT t.test_id as id,
         case when gt.value::numeric=0 or gt.value is null then 0
         else case when gt.value::numeric+t.test_curve > 100 then 100
