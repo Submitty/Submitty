@@ -50,13 +50,13 @@ COURSE_BUILDERS_GROUP=course_builders
 # This value must be at least 60: assumed in INSTALL.sh generation of crontab
 NUM_UNTRUSTED=60
 # FIXME: should check for existence of these users
-FIRST_UNTRUSTED_UID=`id -u untrusted00` # untrusted's user id
-FIRST_UNTRUSTED_GID=`id -g untrusted00` # untrusted's group id
+FIRST_UNTRUSTED_UID=$(id -u untrusted00) # untrusted's user id
+FIRST_UNTRUSTED_GID=$(id -g untrusted00) # untrusted's group id
 
-HWCRON_UID=`id -u hwcron`       # hwcron's user id
-HWCRON_GID=`id -g hwcron`       # hwcron's group id
-HWPHP_UID=`id -u hwphp`         # hwphp's user id
-HWPHP_GID=`id -g hwphp`         # hwphp's group id
+HWCRON_UID=$(id -u hwcron)       # hwcron's user id
+HWCRON_GID=$(id -g hwcron)       # hwcron's group id
+HWPHP_UID=$(id -u hwphp)         # hwphp's user id
+HWPHP_GID=$(id -g hwphp)         # hwphp's group id
 
 # adjust this number depending on the # of processors
 # available on your hardware
@@ -82,11 +82,11 @@ GRADE_STUDENTS_STARTS_PER_HOUR=20
 which_untrusted=0
 while [ $which_untrusted -lt $NUM_UNTRUSTED ]; do
     an_untrusted_user=$(printf "untrusted%.2d" $which_untrusted)
-    if [ $(id -u $an_untrusted_user) -ne $($FIRST_UNTRUSTED_UID+$which_untrusted) ] ; then
+    if [ $(id -u $an_untrusted_user) -ne $(($FIRST_UNTRUSTED_UID+$which_untrusted)) ] ; then
 		echo "CONFIGURATION ERROR: untrusted UID not sequential: $an_untrusted_user"
 		exit
 	fi
-    if [ $(id -g $an_untrusted_user) -ne $($FIRST_UNTRUSTED_GID+$which_untrusted) ] ; then
+    if [ $(id -g $an_untrusted_user) -ne $(($FIRST_UNTRUSTED_GID+$which_untrusted)) ] ; then
 		echo "CONFIGURATION ERROR: untrusted GID not sequential: $an_untrusted_user"
 	    echo "AN UNTRUSTED $an_untrusted_user"
 		exit
