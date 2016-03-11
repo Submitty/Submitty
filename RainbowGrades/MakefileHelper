@@ -22,7 +22,7 @@ endif
 
 # =============================================================================
 
-.PHONY: default pull push all compile overall section lab hw test final iclicker zone clean 
+.PHONY: default pull push all compile overall section lab hw test quiz final iclicker zone clean 
 
 default: overall
 
@@ -107,6 +107,9 @@ hw: compile
 
 test: compile
 	./process_grades.out by_test
+
+quiz: compile
+	./process_grades.out by_quiz
 
 exam: compile
 	./process_grades.out by_exam

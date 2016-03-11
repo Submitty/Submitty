@@ -719,9 +719,9 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
 
         if (g == GRADEABLE_ENUM::HOMEWORK ||
             g == GRADEABLE_ENUM::LAB ||
+            g == GRADEABLE_ENUM::READING ||
             g == GRADEABLE_ENUM::QUIZ ||
             g == GRADEABLE_ENUM::EXAM ||
-            g == GRADEABLE_ENUM::READING ||
             g == GRADEABLE_ENUM::PARTICIPATION ||
             g == GRADEABLE_ENUM::TEST) {
           ss >> which_token;
@@ -734,7 +734,11 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
           ss >> which;
         }
 
+        std::cout << gradesline << std::endl;
+
         if (!(ss >> p_score)) {
+
+          //std::cout << gradesline << std::endl;
           std::cout << "ERROR READING" << std::endl;
           std::cout << which_token << " " << p_score << std::endl;
           exit(1);
