@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+#PATHS
+HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
+INSTALL_DIR=/usr/local/hss
+
 #################################################################
 # PROVISION SETUP
 #################
@@ -64,7 +68,7 @@ apt-get install -qqy ntp
 service ntp restart
 
 # path for untrusted user creation script will be different if not using Vagrant
-/vagrant/bin/create.untrusted.users.pl
+${HWSERVER_DIR}/bin/create.untrusted.users.pl
 
 apt-get install -qqy libpam-passwdqc
 
@@ -104,8 +108,8 @@ echo "Binding SVN and HWgrading to \"Host-Only\" virtual network adapter."
 
 # Host Only adapter with IP 192.168.56.101 (submission) already created by Vagrant file. 
 # This will bind 192.168.56.102 (svn) and 192.168.56.103 (hwgrading) to that same adapter.
-printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1_ext.cfg
-printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1_ext.cfg
+printf "\nauto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces
+printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n" >> /etc/network/interfaces
 
 # Turn them on.
 ifup eth1:1 eth1:2
@@ -114,8 +118,8 @@ ifup eth1:1 eth1:2
 # JAR SETUP
 #################
 echo "Getting JUnit..."
-mkdir -p /usr/local/hss/JUnit
-cd /usr/local/hss/JUnit
+mkdir -p ${INSTALL_DIR}/JUnit
+cd ${INSTALL_DIR}/JUnit
 
 wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
@@ -136,7 +140,7 @@ chmod o+r . *.jar
 # DRMEMORY SETUP
 #################
 echo "Getting DrMemory..."
-mkdir -p /usr/local/hss/DrMemory
+mkdir -p ${INSTALL_DIR}/DrMemory
 DRMEM_TAG=release_1.9.1_rc1
 DRMEM_VER=1.9.1-RC1
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
@@ -328,19 +332,8 @@ fi
 # HWSERVER SETUP
 #################
 
-if [[ ${VAGRANT} == 1 ]]; then
-	echo "creating link"
-	ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
-else
-	echo "cloning repository"
-	cd /usr/local/hss
-	git clone https://github.com/RCOS-Grading-Server/HWserver.git GIT_CHECKOUT_HWserver
-fi
-
-HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
-INSTALL_DIR=/usr/local/hss
-
-cd ${HWSERVER_DIR}
+echo "cloning repository"
+git clone https://github.com/RCOS-Grading-Server/HWserver.git ${HWSERVER_DIR}
 
 if [ ${VAGRANT} == 1 ]; then
 	echo -e "localhost
