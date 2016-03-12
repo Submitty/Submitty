@@ -332,9 +332,6 @@ fi
 # HWSERVER SETUP
 #################
 
-echo "cloning repository"
-git clone https://github.com/RCOS-Grading-Server/HWserver.git ${HWSERVER_DIR}
-
 if [ ${VAGRANT} == 1 ]; then
 	echo -e "localhost
 hsdbu
@@ -421,28 +418,27 @@ if [[ ${VAGRANT} == 1 ]]; then
     # CREATE DATABASE
     #################
 
-	#Vagrant development only (otherwise this is a serious security risk on a live server)
-	if [ ${VAGRANT} == 1 ]; then
-		export PGPASSWORD="hsdbu"
-	
-		psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1100_f15;"
-		psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1200_f15;"
-		psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
-		
-		psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-		psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
-		psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-		psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
-		psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-		psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+	export PGPASSWORD="hsdbu"
 
-		psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
-		psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
-		psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
-	fi
+	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1100_f15;"
+	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1200_f15;"
+	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
+	
+	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
+	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
+	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
+	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+
+	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
+	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
+	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
+fi
 
 # Deferred ownership change
 chown hwphp:hwphp ${INSTALL_DIR}
 chmod 2771 ${INSTALL_DIR}
 
 echo "Done."
+exit 0
