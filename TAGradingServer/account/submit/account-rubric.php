@@ -2,7 +2,7 @@
 
 include "../../toolbox/functions.php";
 
-if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $_SESSION['csrf']) {
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
     die("invalid csrf token");
 }
 

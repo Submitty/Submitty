@@ -6,7 +6,7 @@ check_administrator();
 
 $action = $_GET['action'];
 
-if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $_SESSION['csrf']) {
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
     exit("invalid csrf token");
 }
 
