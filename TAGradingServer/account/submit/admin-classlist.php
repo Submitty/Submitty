@@ -82,7 +82,7 @@ if (isset($_GET['xlsx2csv']) && $_GET['xlsx2csv'] == 1) {
 	}
 }
 
-if (!isset($_SESSION['post']['csrf_token']) || $_SESSION['post']['csrf_token'] != $_SESSION['csrf']) {
+if (!isset($_SESSION['post']['csrf_token']) || $_SESSION['post']['csrf_token'] !== $_SESSION['csrf']) {
 	die("invalid csrf token");
 }
 
