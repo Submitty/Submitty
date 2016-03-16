@@ -89,7 +89,7 @@ if (!isset($_SESSION['post']['csrf_token']) || $_SESSION['post']['csrf_token'] !
 // Get CSV ini config
 $csvFieldsINI = parse_ini_file("../../toolbox/configs/student_csv_fields.ini", false, INI_SCANNER_RAW);
 if ($csvFieldsINI === false) {
-	die("Cannot read student list CSV confuguration file.  Please contact your sysadmin.");
+	die("Cannot read student list CSV configuration file.  Please contact your sysadmin to run setcsvfields tool.");
 }
 
 // Read file into row-by-row array.  Returns false on failure.

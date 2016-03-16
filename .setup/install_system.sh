@@ -150,7 +150,7 @@ ln -s /usr/local/hss/DrMemory/DrMemory-Linux-${DRMEM_VER} /usr/local/hss/drmemor
 #################################################################
 # APACHE SETUP
 #################
-a2enmod include actions suexec authnz_external headers ssl
+a2enmod include actions cgi suexec authnz_external headers ssl
 
 mkdir /etc/apache2/ssl
 cd /etc/apache2/ssl
@@ -434,6 +434,17 @@ if [[ ${VAGRANT} == 1 ]]; then
 	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
 	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
 	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
+	
+    #################################################################
+    # SET CSV FIELDS (for classlist upload data)
+    #################
+
+	# Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
+	# of Science 2015-2016.
+	
+	# Other Universities will need to rerun /bin/setcsvfields to match their
+	# classlist csv data.  See wiki for details.
+	printf "13 12 15 7" | source ${INSTALL_DIR}/bin/setcsvfields
 fi
 
 # Deferred ownership change
