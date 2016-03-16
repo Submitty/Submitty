@@ -66,7 +66,7 @@ if (isset($_SERVER['QUERY_STRING'])) {
 	$err_code .= (strpos($query_string, 'course=') !== false) ? "" : "course code missing." . PHP_EOL;
 	
 	//Check for directory traversal.
-	$err_code .= (strpos($query_string, '/') === false)) ? "" : "improper course code." . PHP_EOL;
+	$err_code .= (strpos($query_string, '/') === false) ? "" : "improper course code." . PHP_EOL;
 
 } else {
 	$err_msgs .= "course code not provided." . PHP_EOL;
