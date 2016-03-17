@@ -108,11 +108,12 @@ echo "Binding SVN and HWgrading to \"Host-Only\" virtual network adapter."
 
 # Host Only adapter with IP 192.168.56.101 (submission) already created by Vagrant file. 
 # This will bind 192.168.56.102 (svn) and 192.168.56.103 (hwgrading) to that same adapter.
-printf "\nauto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces
-printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n" >> /etc/network/interfaces
+printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
 
 # Turn them on.
-ifup eth1:1 eth1:2
+ifup eth1 eth1:1 eth1:2
 
 #################################################################
 # JAR SETUP
