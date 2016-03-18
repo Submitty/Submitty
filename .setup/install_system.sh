@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+#PATHS
+HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
+INSTALL_DIR=/usr/local/hss
+
 #################################################################
 # PROVISION SETUP
 #################
@@ -64,7 +68,7 @@ apt-get install -qqy ntp
 service ntp restart
 
 # path for untrusted user creation script will be different if not using Vagrant
-/vagrant/bin/create.untrusted.users.pl
+${HWSERVER_DIR}/bin/create.untrusted.users.pl
 
 apt-get install -qqy libpam-passwdqc
 
@@ -97,11 +101,26 @@ apt-get install -qqy racket > /dev/null 2>&1
 apt-get install -qqy swi-prolog > /dev/null 2>&1
 
 #################################################################
+# NETWORK CONFIGURATION
+#################
+
+echo "Binding SVN and HWgrading to \"Host-Only\" virtual network adapter."
+
+# Host Only adapter with IP 192.168.56.101 (submission) already created by Vagrant file. 
+# This will bind 192.168.56.102 (svn) and 192.168.56.103 (hwgrading) to that same adapter.
+printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
+
+# Turn them on.
+ifup eth1 eth1:1 eth1:2
+
+#################################################################
 # JAR SETUP
 #################
 echo "Getting JUnit..."
-mkdir -p /usr/local/hss/JUnit
-cd /usr/local/hss/JUnit
+mkdir -p ${INSTALL_DIR}/JUnit
+cd ${INSTALL_DIR}/JUnit
 
 wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
@@ -122,7 +141,7 @@ chmod o+r . *.jar
 # DRMEMORY SETUP
 #################
 echo "Getting DrMemory..."
-mkdir -p /usr/local/hss/DrMemory
+mkdir -p ${INSTALL_DIR}/DrMemory
 DRMEM_TAG=release_1.9.1_rc1
 DRMEM_VER=1.9.1-RC1
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
@@ -132,7 +151,7 @@ ln -s /usr/local/hss/DrMemory/DrMemory-Linux-${DRMEM_VER} /usr/local/hss/drmemor
 #################################################################
 # APACHE SETUP
 #################
-a2enmod include actions suexec authnz_external headers ssl
+a2enmod include actions cgi suexec authnz_external headers ssl
 
 mkdir /etc/apache2/ssl
 cd /etc/apache2/ssl
@@ -306,25 +325,13 @@ if [ ${VAGRANT} == 1 ]; then
 	service postgresql restart
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
-	su postgres -c "source /vagrant/.setup/db_users.sh";
+	su postgres -c "source ${HWSERVER_DIR}/.setup/db_users.sh";
 	echo "Finished creating PostgreSQL users"
 fi
 
 #################################################################
 # HWSERVER SETUP
 #################
-
-if [[ ${VAGRANT} == 1 ]]; then
-	echo "creating link"
-	ln -s /vagrant /usr/local/hss/GIT_CHECKOUT_HWserver
-else
-	echo "cloning repository"
-	cd /usr/local/hss
-	git clone https://github.com/RCOS-Grading-Server/HWserver.git GIT_CHECKOUT_HWserver
-fi
-
-HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
-cd ${HWSERVER_DIR}
 
 if [ ${VAGRANT} == 1 ]; then
 	echo -e "localhost
@@ -336,11 +343,16 @@ else
 	source ${HWSERVER_DIR}/CONFIGURE.sh
 fi
 
-source ${HWSERVER_DIR}/INSTALL.sh
+source ${INSTALL_DIR}/INSTALL.sh
 
 source ${HWSERVER_DIR}/Docs/sample_bin/admin_scripts_setup
 cp ${HWSERVER_DIR}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
 cp ${HWSERVER_DIR}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
+cp -f ${HWSERVER_DIR}/Docs/www-data /etc/apache2/suexec/www-data
+
+# permissions: rw- r-- ---
+chmod 0640 /etc/apache2/sites-available/*.conf
+chmod 0640 /etc/apache2/suexec/www-data
 
 if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /root/bin/bottom.txt
@@ -364,13 +376,13 @@ if [[ ${VAGRANT} == 1 ]]; then
     echo "student:student" | sudo chpasswd
 
     rm -r /var/local/hss/autograding_logs
-    rm -r /vagrant/.vagrant/autograding_logs
-    mkdir /vagrant/.vagrant/autograding_logs
-    ln -s /vagrant/.vagrant/autograding_logs /var/local/hss/autograding_logs
+    rm -r ${HWSERVER_DIR}/.vagrant/autograding_logs
+    mkdir ${HWSERVER_DIR}/.vagrant/autograding_logs
+    ln -s ${HWSERVER_DIR}/.vagrant/autograding_logs /var/local/hss/autograding_logs
     rm -r /var/local/hss/tagrading_logs
-    rm -r /vagrant/.vagrant/tagrading_logs
-    mkdir /vagrant/.vagrant/tagrading_logs
-    ln -s /vagrant/.vagrant/tagrading_logs /var/local/hss/tagrading_logs
+    rm -r ${HWSERVER_DIR}/.vagrant/tagrading_logs
+    mkdir ${HWSERVER_DIR}/.vagrant/tagrading_logs
+    ln -s ${HWSERVER_DIR}/.vagrant/tagrading_logs /var/local/hss/tagrading_logs
 
     #################################################################
     # CRON SETUP
@@ -389,7 +401,7 @@ if [[ ${VAGRANT} == 1 ]]; then
     #################################################################
     # COURSE SETUP
     #################
-    cd ${HWSERVER_DIR}/../bin
+    cd ${INSTALL_DIR}/bin
     ./create_course.sh f15 csci1100 instructor csci1100_tas_www
     ./create_course.sh f15 csci1200 instructor csci1200_tas_www
     ./create_course.sh f15 csci2600 instructor csci2600_tas_www
@@ -407,26 +419,38 @@ if [[ ${VAGRANT} == 1 ]]; then
     # CREATE DATABASE
     #################
 
-    export PGPASSWORD='hsdbu';
+	export PGPASSWORD="hsdbu"
 
-    psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1100_f15;"
-    psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1200_f15;"
-    psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
+	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1100_f15;"
+	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1200_f15;"
+	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
+	
+	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
+	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
+	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
+	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
 
-    psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-    psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
-    psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-    psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
-    psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-    psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
+	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
+	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
+	
+    #################################################################
+    # SET CSV FIELDS (for classlist upload data)
+    #################
 
-    psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
-    psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
-    psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
+	# Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
+	# of Science 2015-2016.
+	
+	# Other Universities will need to rerun /bin/setcsvfields to match their
+	# classlist csv data.  See wiki for details.
+	${INSTALL_DIR}/bin/setcsvfields 13 12 15 7
 fi
 
 # Deferred ownership change
-chown hwphp:hwphp /usr/local/hss
-chmod 2771 /usr/local/hss
+chown hwphp:hwphp ${INSTALL_DIR}
+chmod 2771 ${INSTALL_DIR}
 
 echo "Done."
+exit 0
