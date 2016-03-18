@@ -104,10 +104,13 @@ apt-get install -qqy swi-prolog > /dev/null 2>&1
 # NETWORK CONFIGURATION
 #################
 
-echo "Binding SVN and HWgrading to \"Host-Only\" virtual network adapter."
+echo "Binding static IPs to \"Host-Only\" virtual network interface."
 
-# Host Only adapter with IP 192.168.56.101 (submission) already created by Vagrant file. 
-# This will bind 192.168.56.102 (svn) and 192.168.56.103 (hwgrading) to that same adapter.
+# eth0 is auto-configured by Vagrant as NAT.  eth1 is a host-only adapter and
+# not auto-configured.  eth1 is manually set so that the host-only network
+# interface remains consistent among VM reboots as Vagrant has a bad habit of
+# discarding and recreating networking interfaces everytime the VM is restarted.
+# eth1 is statically bound to 192.168.56.101, 102, and 103.
 printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
 printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
 printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
