@@ -27,7 +27,7 @@
 
 // defined in seccomp_functions.cpp
 
-int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_program);
+
 
 // =====================================================================================
 // =====================================================================================
@@ -546,13 +546,10 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 
 
   // SECCOMP: install the filter (system calls restrictions)
-  //  if (SECCOMP_ENABLED != 0) {
-  if (install_syscall_filter(prog_is_32bit, true /*blacklist*/, my_program)) { 
+  if (install_syscall_filter(prog_is_32bit, my_program)) {
     std::cout << "seccomp filter install failed" << std::endl;
     return 1;
   }
-  // } else {
-  // }
   // END SECCOMP
   
   
@@ -573,7 +570,6 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 // Executes command (from shell) and returns error code (0 = success)
 int execute(const std::string &cmd, const std::string &execute_logfile, 
 	    const std::map<int,rlim_t> &test_case_limits) {
-
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
 
