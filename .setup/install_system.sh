@@ -3,6 +3,7 @@
 #PATHS
 HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
 INSTALL_DIR=/usr/local/hss
+DATA_DIR=/var/local/hss
 
 #################################################################
 # PROVISION SETUP
@@ -289,10 +290,10 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser instructor course_builders
 fi
 
-mkdir -p /var/local/hss
+mkdir -p ${DATA_DIR}
 
-mkdir -p /var/local/hss/instructors
-ls /home | sort > /var/local/hss/instructors/valid
+mkdir -p ${DATA_DIR}/instructors
+ls /home | sort > ${DATA_DIR}/instructors/valid
 
 #################################################################
 # SVN SETUP
@@ -373,19 +374,19 @@ apache2ctl -t
 service apache2 restart
 
 if [[ ${VAGRANT} == 1 ]]; then
-    echo "student" >> /var/local/hss/instructors/authlist
-    echo "student" >> /var/local/hss/instructors/valid
-    /var/local/hss/bin/authonly.pl
+    echo "student" >> ${DATA_DIR}/instructors/authlist
+    echo "student" >> ${DATA_DIR}/instructors/valid
+    ${DATA_DIR}/bin/authonly.pl
     echo "student:student" | sudo chpasswd
 
-    rm -r /var/local/hss/autograding_logs
+    rm -r ${DATA_DIR}/autograding_logs
     rm -r ${HWSERVER_DIR}/.vagrant/autograding_logs
     mkdir ${HWSERVER_DIR}/.vagrant/autograding_logs
-    ln -s ${HWSERVER_DIR}/.vagrant/autograding_logs /var/local/hss/autograding_logs
-    rm -r /var/local/hss/tagrading_logs
+    ln -s ${HWSERVER_DIR}/.vagrant/autograding_logs ${DATA_DIR}/autograding_logs
+    rm -r ${DATA_DIR}/tagrading_logs
     rm -r ${HWSERVER_DIR}/.vagrant/tagrading_logs
     mkdir ${HWSERVER_DIR}/.vagrant/tagrading_logs
-    ln -s ${HWSERVER_DIR}/.vagrant/tagrading_logs /var/local/hss/tagrading_logs
+    ln -s ${HWSERVER_DIR}/.vagrant/tagrading_logs ${DATA_DIR}/tagrading_logs
 
     #################################################################
     # CRON SETUP
@@ -409,13 +410,13 @@ if [[ ${VAGRANT} == 1 ]]; then
     ./create_course.sh f15 csci1200 instructor csci1200_tas_www
     ./create_course.sh f15 csci2600 instructor csci2600_tas_www
 
-    cd /var/local/hss/courses/f15/csci1100
+    cd ${DATA_DIR}/courses/f15/csci1100
     ./BUILD_csci1100.sh
 
-    cd /var/local/hss/courses/f15/csci1200
+    cd ${DATA_DIR}/courses/f15/csci1200
     ./BUILD_csci1200.sh
 
-    cd /var/local/hss/courses/f15/csci2600
+    cd ${DATA_DIR}/courses/f15/csci2600
     ./BUILD_csci2600.sh
 
     #################################################################
