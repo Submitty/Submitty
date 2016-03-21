@@ -96,6 +96,9 @@ apt-add-repository -y ppa:plt/racket  > /dev/null 2>&1
 apt-get install -qqy racket > /dev/null 2>&1
 apt-get install -qqy swi-prolog > /dev/null 2>&1
 
+# Install Image Magick for image comparison, etc.
+apt-get install imagemagick
+
 #################################################################
 # JAR SETUP
 #################
