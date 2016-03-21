@@ -83,6 +83,7 @@ int main(int argc, char *argv[]) {
       std::cout << "AFTER  " << cmd << std::endl;
 #endif
 
+
     std::string logfile = testcases[i].prefix() + "_execute_logfile.txt";
     // run the command, capturing STDOUT & STDERR
     int exit_no = execute(cmd +

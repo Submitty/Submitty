@@ -222,7 +222,13 @@ find $HSS_INSTALL_DIR/src -type f -exec chmod 444 {} \;
 
 #replace necessary variables
 replace_fillin_variables $HSS_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
+replace_fillin_variables $HSS_INSTALL_DIR/src/grading/system_call_check.cpp
 
+# build the helper program for strace output and restrictions by system call categories
+g++ $HSS_INSTALL_DIR/src/grading/system_call_check.cpp -o $HSS_INSTALL_DIR/bin/system_call_check.out
+# set the permissions
+chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/system_call_check.out
+chmod 550 $HSS_INSTALL_DIR/bin/system_call_check.out
 
 ########################################################################################################################
 ########################################################################################################################
