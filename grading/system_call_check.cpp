@@ -128,7 +128,7 @@ void parse_strace_output(std::ifstream &strace_output_file,
       int pos = line.find("] ");
       assert (pos != std::string::npos);
       line = line.substr(pos+2,line.size()-pos-2);
-      std::cout << "AFTER TRIMMING '" << line << "'" << std::endl;
+      //std::cout << "AFTER TRIMMING '" << line << "'" << std::endl;
     }
 
 
@@ -150,8 +150,8 @@ void parse_strace_output(std::ifstream &strace_output_file,
 
       // look up the category for this call
       std::map<std::string,std::string>::const_iterator itr = all_system_calls.find(full_name);
-      std::cout << "STRACE LINE '" << line << "'" << std::endl;
-      std::cout << "attempt " << full_name << std::endl;
+      //std::cout << "STRACE LINE '" << line << "'" << std::endl;
+      //std::cout << "attempt " << full_name << std::endl;
 
       if (line[0] == '<') {
         // skip lines like: '<... wait4 resumed> [{WIFEXITED(s) && WEXITSTATUS(s) == 0}], 0, NULL) = 2200'
@@ -162,7 +162,7 @@ void parse_strace_output(std::ifstream &strace_output_file,
         int pos = full_name.find("] ");
         assert (pos != std::string::npos);
         full_name = full_name.substr(pos+2,full_name.size()-pos-2);
-        std::cout << "AFTER TRIMMING '" << full_name << "'" << std::endl;
+        //std::cout << "AFTER TRIMMING '" << full_name << "'" << std::endl;
         itr = all_system_calls.find(full_name);
       }
       
@@ -172,7 +172,10 @@ void parse_strace_output(std::ifstream &strace_output_file,
         itr = all_system_calls.find(full_name);
       }
 
-
+      if (itr == all_system_calls.end()) {
+	std::cout << "ERROR!  couldn't find system call " << full_name << std::endl;
+	continue;
+      }
       assert (itr != all_system_calls.end());
       std::string which_category = itr->second;
 
