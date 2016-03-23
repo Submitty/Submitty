@@ -527,7 +527,7 @@ HTML;
         var ec = 0;
         $('select.points').each(function(){
             var elem = $(this).attr('name').replace('point','ec');
-            if (!$('[name="'+elem+'"]').prop('checked') == true) {
+            if (!$('[name="'+elem+'"]').is(':checked') == true) {
                 total += +($(this).val());
             }
             else {
