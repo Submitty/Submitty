@@ -257,7 +257,7 @@ HTML;
             $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
             print selectBox($k, $num, $old_grade);
             $checked = ($question['question_extra_credit'] == 1) ? "checked" : "";
-            print (($question['question_extra_credit'] == 1 && $disabled == "disabled") ? "<input type='hidden' name='ec-{$k}-{$num}'' value='on' />" : "");
+            print (($question['question_extra_credit'] == 1 && $disabled == "disabled") ? "<input type='hidden' name='ec-{$k}-{$num}' value='on' />" : "");
             print <<<HTML
 
                         <input onclick='calculatePercentageTotal();' name="ec-{$k}-{$num}" type="checkbox" {$checked} {$disabled} />
@@ -527,7 +527,7 @@ HTML;
         var ec = 0;
         $('select.points').each(function(){
             var elem = $(this).attr('name').replace('point','ec');
-            if (!$('[name="'+elem+'"]').prop('checked') == true) {
+            if (!$('[name="'+elem+'"]').is(':checked') == true) {
                 total += +($(this).val());
             }
             else {
