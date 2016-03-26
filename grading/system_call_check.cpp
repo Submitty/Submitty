@@ -72,6 +72,13 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
       std::stringstream ss(line);
       std::string token, type;
       ss >> token; 
+
+      if (token == "#define") {
+	assert (in_preprocessor_if);
+	assert (category != "");
+	continue;
+      } 
+
       assert (token == "//");
       ss >> type;
       if (type != "WHITELIST" && type != "RESTRICTED" && type != "FORBIDDEN") {
