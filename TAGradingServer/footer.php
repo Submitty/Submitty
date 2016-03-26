@@ -45,10 +45,10 @@ HTML;
             });
 
             $('form').each(function() {
-                if ($(this).attr('method') == 'get') {
+                if ($(this).attr('method').toLowerCase() == 'get') {
                     $(this).append("<input type='hidden' name='course' value='{$_GET['course']}' />");
                 }
-                else if ($(this).attr('method') == 'post') {
+                else if ($(this).attr('method').toLowerCase() == 'post') {
                     if ($(this).attr('action').substr(-4) == '.php') {
                         $(this).attr('action', $(this).attr('action') + '?course={$_GET['course']}');
                     }

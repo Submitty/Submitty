@@ -3,6 +3,7 @@
 // Display all errors on initial startup in case we have an early failure in autoloader, or DB setup, etc.
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+session_start();
 
 /*
 The user's umask is ignored for the user running php, so we need
@@ -90,6 +91,10 @@ $user_is_administrator = User::$is_administrator;
 $user_id = $user_info['user_id'];
 
 $DEVELOPER = User::$is_developer;
+
+if (!isset($_SESSION['csrf'])) {
+    $_SESSION['csrf'] = bin2hex(openssl_random_pseudo_bytes(16));
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // GENERAL

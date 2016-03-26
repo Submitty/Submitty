@@ -8,27 +8,32 @@ $class_config=check_class_config($semester,$course);
 $dev_team=$class_config["dev_team"];
 $assignment_id=check_assignment_id($class_config);
 
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
+  $_SESSION['status'] = 'invalid_token';
+  header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
+}
+
 if (isset($_POST["svn_checkout"]) && $_POST["svn_checkout"] == "true") {
-  
+
   $uploaded_file = "";
   $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id,$uploaded_file, true);
-  
+
   $_SESSION["status"] = "uploaded_no_error";
-  
+
 }  else {
 
   //Upload the files
   if (isset($_FILES["file"])) {
-    
+
     $uploaded_file = $_FILES["file"];
     $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id,$uploaded_file, false);
-    
+
     if (isset($result["error"])) {
       //Go to error page?
       if ($result["error"] == "assignment_closed") {
-	$_SESSION["status"] = "assignment_closed";
-	header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
-	exit();
+        $_SESSION["status"] = "assignment_closed";
+        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
+	    exit();
       }
       $_SESSION["status"] = isset($result["message"]) ? $result["message"] : "upload_failed";
       header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
@@ -39,11 +44,9 @@ if (isset($_POST["svn_checkout"]) && $_POST["svn_checkout"] == "true") {
   else {
     $_SESSION["status"] = "upload_failed";
   }
-  
+
 }
 
 
 //Go back to homework page
-header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
-
-?>
+header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);

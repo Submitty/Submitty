@@ -119,7 +119,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
   // do the assignments!
 
   int not_reg = 0;
-  int no_grades = 0;
+  int low_overall_grade = 0;
   int new_zone_assign = 0;
   int already_zoned = 0;
   int next_za = 0;
@@ -133,10 +133,13 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
     } else if (!validSection(s->getSection())) {
       not_reg++;
     } else if (s->overall() < GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT) {
-      no_grades++;
+      low_overall_grade++;
     } else {
       //      std::cout << "ERROR assigning zone for " << s->getUserName() << std::endl;
-      assert (next_za < int(randomized_available.size()));
+      if (next_za >= randomized_available.size()) {
+        std::cout << "OOPS!  we ran out of exam seating" << std::endl;
+      }
+      assert (next_za < randomized_available.size());
       ZoneInfo &zi = zones.find(randomized_available[next_za])->second;
       s->setExamRoom(zi.building+std::string(" ")+zi.room);
       s->setExamZone(zi.zone);
@@ -147,7 +150,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
   }
   
   std::cout << "new zone assignments             " << new_zone_assign << std::endl;
-  std::cout << "no grades (not assigning a zone) " << no_grades << std::endl;
+  std::cout << "low overall grade (not assigning a zone) " << low_overall_grade << std::endl;
   std::cout << "not registered in valid section  " << not_reg << std::endl;
 
   assert (new_zone_assign <= int(randomized_available.size()));

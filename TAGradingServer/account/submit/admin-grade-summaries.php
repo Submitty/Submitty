@@ -4,10 +4,13 @@ require "../../toolbox/functions.php";
 
 check_administrator();
 
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
+    die("invalid csrf token");
+}
+
 if (!is_dir(implode("/",array(__SUBMISSION_SERVER__, "reports","all_grades")))) {
     mkdir(implode("/",array(__SUBMISSION_SERVER__, "reports","all_grades")));
 }
-
 
 /************************************/
 /* Output Individual Student Files  */
@@ -155,7 +158,7 @@ foreach($db->rows() as $student_record) {
           $student_output_text .= 'other ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
 	}
     }
-    
+
     // ======================================================
 
     // WRITE REPORT FILE

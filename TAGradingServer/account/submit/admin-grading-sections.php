@@ -4,6 +4,10 @@ require_once "../../toolbox/functions.php";
 
 check_administrator();
 
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
+    die("invalid csrf token");
+}
+
 $type = $_POST['type'];
 $complete_update = 0;
 if ($type == 'section') {

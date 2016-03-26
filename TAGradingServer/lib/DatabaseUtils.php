@@ -83,7 +83,9 @@ class DatabaseUtils {
                         }
                         else {
                             if (!$parseBools) {
-                                $return[] = $element;
+                                if (strtolower($element) != "null") {
+                                    $return[] = $element;
+                                }
                             }
                             else {
                                 $return[] = (strtolower($element) == "true") ? true : false;

@@ -6,6 +6,10 @@ use lib\Database;
 
 check_administrator();
 
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
+    die("invalid csrf token");
+}
+
 $start = microtime_float();
 
 // Make sure we actually have a created output directory

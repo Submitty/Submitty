@@ -1,7 +1,21 @@
 <?php
+use app\models\User;
+
 include "../header.php";
 
 $account_subpages_unlock = true;
+
+if (!User::$is_administrator) {
+    if (isset($_GET['all']) && $_GET['all'] == "true") {
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-labs.php?course={$_GET['course']}'>View Your Sections</a>";
+    }
+    else {
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-labs.php?course={$_GET['course']}&all=true'>View All Sections</a>";
+    }
+}
+else {
+    $button = "";
+}
 
 print <<<HTML
 <style type="text/css">
@@ -44,7 +58,8 @@ print <<<HTML
 
 <div id="container-labs">
     <div class="modal-header">
-        <h3 id="myModalLabel" style="width:50%; display:inline-block;">Labs</h3>
+        <h3 id="myModalLabel" style="width:20%; display:inline-block;">Labs</h3>
+        <span style="width: 29%; display:inline-block;">{$button}</span>
         <div style="text-align:right; width:49%; display:inline-block;">
             <i class="icon-question-sign" rel="tooltip" title="No Color - No Credit
 Dark Blue - Full Credit
@@ -280,17 +295,24 @@ print <<<HTML
     }
 
     function submitAJAX(url, callBackSucess, callBackFail, item) {
-        $.ajax(url)
-            .done(function(response) {
-                if(response == "updated") {
-                    callBackSucess(item);
-                }
-                else {
-                    callBackFail(item);
-                    console.log(response);
-                }
-            })
-            .fail(function() { window.alert("[SAVE ERROR] Refresh Page"); });
+        $.ajax(url, {
+            type: "POST",
+            data: {
+                csrf_token: '{$_SESSION['csrf']}'
+            }
+        })
+        .done(function(response) {
+            if(response == "updated") {
+                callBackSucess(item);
+            }
+            else {
+                callBackFail(item);
+                console.log(response);
+            }
+        })
+        .fail(function() {
+            window.alert("[SAVE ERROR] Refresh Page");
+        });
     }
 
     $(document).ready(function(){

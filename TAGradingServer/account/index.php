@@ -1,6 +1,9 @@
 <?php
 include "../header.php";
 
+use app\models\User;
+use lib\Database;
+
 $account_subpages_unlock = true;
 
 $split = floatval($_COOKIE["split"]);
@@ -22,26 +25,23 @@ if(isset($_GET["hw"]) && isset($rubric["rubric_id"])) {
     $rubric_sep = $rubric["rubric_parts_sep"];
     $rubric_late_days = $rubric['rubric_late_days'];
     $rubric_due_date = $rubric['rubric_due_date'];
-    //$student_id = NULL;
-    $student_rcs = NULL;
-    $student_first_name = NULL;
-    $student_last_name = NULL;
+    $student_rcs = null;
+    $student_first_name = null;
+    $student_last_name = null;
     $student_allowed_lates = 0;
     $position_completed = 0;
     $position_total = 0;
     $position_other = 0;
-    $student_individual_graded = False;
+    $student_individual_graded = false;
     $previous_rcs = "";
     $next_rcs = "";
 
     if(isset($_GET["individual"]) || isset($_GET['prev']) || isset($_GET['next'])) {
-        if (isset($_GET['individual'])) {
+        if(isset($_GET['individual'])) {
             $student_rcs = $_GET["individual"];
-        }
-        else if (isset($_GET['prev'])) {
+        } else if(isset($_GET['prev'])) {
             $student_rcs = $_GET['prev'];
-        }
-        else {
+        } else {
             $student_rcs = $_GET['next'];
         }
 
@@ -62,11 +62,11 @@ if(isset($_GET["hw"]) && isset($rubric["rubric_id"])) {
         $student_individual_graded = isset($temp_row["grade_id"]);
     }
 
-    $params = array(\app\models\User::$user_id, $rubric_id);
+    $params = array(User::$user_id, $rubric_id);
     $db->query("SELECT * FROM homework_grading_sections WHERE user_id=? AND rubric_id=? ORDER BY grading_section_id", $params);
     //$db->query("SELECT section_id FROM relationships_users WHERE user_id=? ORDER BY section_id", $params);
-    foreach($db->rows() as $section) {
-        $params = array($rubric_id,intval($section["grading_section_id"]));
+    foreach ($db->rows() as $section) {
+        $params = array($rubric_id, intval($section["grading_section_id"]));
         $db->query("
 SELECT
     s.student_rcs
@@ -96,23 +96,23 @@ ORDER BY
         $prev_row = array('student_rcs' => "");
         $set_next = false;
 
-        foreach($db->rows() as $row) {
+        foreach ($db->rows() as $row) {
             $temp_row = $row;
 
-            if ($set_next) {
+            if($set_next) {
                 $next_rcs = $temp_row['student_rcs'];
                 $set_next = false;
             }
 
-            if ($student_rcs != NULL) {
-                if ($student_rcs == $temp_row['student_rcs']) {
+            if($student_rcs != null) {
+                if($student_rcs == $temp_row['student_rcs']) {
                     $previous_rcs = $prev_row['student_rcs'];
                     $set_next = true;
                 }
             }
 
             if(intval($temp_row["number_graded"]) == 0) {
-                if($student_rcs == NULL) {
+                if($student_rcs == null) {
                     $params = array($row["student_rcs"]);
                     $db->query("SELECT * FROM students WHERE student_rcs=?", $params);
                     $row = $db->row();
@@ -129,16 +129,14 @@ ORDER BY
 
                     $set_next = true;
                 }
-            }
-            else {
+            } else {
                 $params = array($row['student_rcs'], $rubric_id);
                 $db->query("SELECT grade_user_id FROM grades WHERE student_rcs=? AND rubric_id=?", $params);
                 $temp_row = $db->row();
 
                 if(intval($temp_row["grade_user_id"]) == \app\models\User::$user_id) {
                     $position_completed++;
-                }
-                else {
+                } else {
                     $position_other++;
                 }
             }
@@ -148,31 +146,126 @@ ORDER BY
         }
     }
 
-    if($student_rcs != NULL) {
+    if($student_rcs != null) {
         include "account-new-rubric.php";
-    }
-    else {
-        print <<<HTML
-    <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
-        <div class="modal-header">
-            <h3 id="myModalLabel">Grading Finished</h3>
-        </div>
+    } else {
+        if (User::$is_administrator) {
+            Database::query("
+SELECT
+    s.student_grading_id,
+    count(s.*) as total,
+    case when gg.graded is null then 0 else gg.graded end
+FROM
+    students as s
+    LEFT JOIN (
+        SELECT
+            ss.student_grading_id,
+            count(*) as graded
+        FROM
+            grades as g
+            LEFT JOIN (
+                SELECT
+                    student_grading_id,
+                    student_rcs
+                FROM
+                    students
+            ) as ss ON g.student_rcs = ss.student_rcs
+        WHERE
+            g.rubric_id=?
+        GROUP BY ss.student_grading_id
+    ) as gg ON s.student_grading_id = gg.student_grading_id
+GROUP BY
+    s.student_grading_id,
+    gg.graded
+ORDER BY
+    s.student_grading_id", array($rubric_id));
 
-        <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-            Congratulations, you have finished grading {$rubric_name}.
-            <br/>
-            <br/>
-            <i style="color:#777;">You can review the grades you have saved by using the navigation buttons at the bottom-right of the page or by going to the homework overview page.</i>
-        </div>
+            $sections = Database::rows();
+            $graded = 0;
+            $total = 0;
+            foreach ($sections as $section) {
+                $graded += $section['graded'];
+                $total += $section['total'];
+            }
 
-        <div class="modal-footer">
-            <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
-            <a class="btn" href="{$BASE_URL}/account/account-summary.php?hw={$_GET["hw"]}">{$rubric_name} Overview</a>
-            <!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
+            $percent = round(($graded / $total) * 100);
+
+            print <<<HTML
+        <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
+            <div class="modal-header">
+                <h3 id="myModalLabel">{$rubric_name} Grading Status</h3>
+            </div>
+
+            <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
+                Current percentage of grading done: {$percent}% ({$graded}/{$total})
+                <br/>
+                <br/>
+                By grading section:
+                <div style="margin-left: 20px">
+HTML;
+            foreach ($sections as $section) {
+                $section['percent'] = round(($section['graded'] / $section['total']) * 100);
+                print "Section {$section['student_grading_id']}: {$section['percent']}% ({$section['graded']} / {$section['total']})<br />";
+            }
+            print <<<HTML
+                </div>
+                <br />
+                Graders:
+                <div style="margin-left: 20px">
+HTML;
+            Database::query("SELECT gs.*, u.* FROM homework_grading_sections as gs LEFT JOIN (SELECT * FROM users) as u ON gs.user_id = u.user_id WHERE gs.rubric_id=? ORDER BY gs.grading_section_id, u.user_rcs", array($rubric_id));
+            $graders = array();
+            foreach (Database::rows() as $row) {
+                if(!isset($graders[$row['grading_section_id']])) {
+                    $graders[$row['grading_section_id']] = array();
+                }
+                $graders[$row['grading_section_id']][] = "{$row['user_firstname']} {$row['user_lastname']} ({$row['user_rcs']})";
+            }
+
+            foreach ($sections as $section) {
+                if(isset($graders[$section['student_grading_id']])) {
+                    print $section['student_grading_id'] . ": " . implode(",", $graders[$section['student_grading_id']]) . "<br />";
+                } else {
+                    print $section['student_grading_id'] . ": Nobody";
+                }
+            }
+
+            print <<<HTML
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
+                <a class="btn" href="{$BASE_URL}/account/account-summary.php?hw={$_GET["hw"]}">{$rubric_name} Overview</a>
+                <!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
+            </div>
         </div>
     </div>
-</div>
 HTML;
+        }
+        else {
+            print <<<HTML
+        <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
+            <div class="modal-header">
+                <h3 id="myModalLabel">Grading Finished</h3>
+            </div>
+
+            <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
+                Congratulations, you have finished grading {$rubric_name}.
+                <br/>
+                <br/>
+                <i style="color:#777;">You can review the grades you have saved by using the navigation buttons at the bottom-right of the page or by going to the homework overview page.</i>
+            </div>
+
+            <div class="modal-footer">
+                <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
+                <a class="btn" href="{$BASE_URL}/account/account-summary.php?hw={$_GET["hw"]}">{$rubric_name} Overview</a>
+                <!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
+            </div>
+        </div>
+    </div>
+HTML;
+        }
     }
 }
 else if(!isset($_GET["hw"])) {

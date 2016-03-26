@@ -4,20 +4,23 @@ include "../../toolbox/functions.php";
 
 check_administrator();
 
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
+    die("invalid csrf token");
+}
 $action = $_GET['action'];
 
 switch($action) {
     case 'new':
-        $type = $_GET['type'];
+        $type = $_POST['type'];
         if (!in_array($type, array('Test', 'Quiz', 'Exam'))) {
             exit("failure, invalid type '{$type}'");
         }
-        $number = intval($_GET['number']);
-        $questions = intval($_GET['questions']) > 0 ? intval($_GET['questions']) : 0;
-        $text   = intval($_GET['text']) > 0 ? intval($_GET['text']) : 0;
-        $score  = intval($_GET['score']);
-        $curve  = intval($_GET['curve']);
-        $locked = intval($_GET['locked']);
+        $number = intval($_POST['number']);
+        $questions = intval($_POST['questions']) > 0 ? intval($_POST['questions']) : 0;
+        $text   = intval($_POST['text']) > 0 ? intval($_POST['text']) : 0;
+        $score  = intval($_POST['score']);
+        $curve  = intval($_POST['curve']);
+        $locked = intval($_POST['locked']);
         $locked = ($locked == 0) ? 'FALSE' : 'TRUE';
 
         if ($number <= 0) {
@@ -25,27 +28,27 @@ switch($action) {
         }
 
         // don't allow duplicate lab numbers?
-        $db->query("SELECT * FROM tests WHERE test_number=? and test_type=?",array($number, $type));
+        $db->query("SELECT * FROM tests WHERE test_number=? and test_type=?", array($number, $type));
         if (count($db->rows()) > 0) {
             print "test with that number already exists";
             exit("failure");
         }
 
-        $params = array($type, $number,$questions,$text,$score,$curve,$locked);
+        $params = array($type, $number, $questions, $text, $score, $curve, $locked);
         $db->query("INSERT INTO tests(test_type, test_number,test_questions,test_text_fields,test_max_grade,test_curve,test_locked) VALUES (?, ?, ?, ?, ?, ?, ?)",$params);
 
-        $db->query("SELECT test_id FROM tests WHERE test_number=?",array($number));
+        $db->query("SELECT test_id FROM tests WHERE test_number=?", array($number));
         $row = $db->row();
         print "success|".$row['test_id'];
         break;
     case 'edit':
-        $id             = intval($_GET['id']);
-        $number         = intval($_GET['number']);
-        $questions      = intval($_GET['questions']) > 0 ? intval($_GET['questions']) : 0;
-        $text           = intval($_GET['text']) > 0 ? intval($_GET['text']) : 0;
-        $score          = intval($_GET['score']);
-        $curve          = intval($_GET['curve']);
-        $locked         = intval($_GET['locked']);
+        $id             = intval($_POST['id']);
+        $number         = intval($_POST['number']);
+        $questions      = intval($_POST['questions']) > 0 ? intval($_POST['questions']) : 0;
+        $text           = intval($_POST['text']) > 0 ? intval($_POST['text']) : 0;
+        $score          = intval($_POST['score']);
+        $curve          = intval($_POST['curve']);
+        $locked         = intval($_POST['locked']);
         $locked         = ($locked == 0) ? 'FALSE' : 'TRUE';
 
         if ($id <= 0) {
