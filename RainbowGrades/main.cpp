@@ -885,9 +885,6 @@ void load_student_grades(std::vector<Student*> &students) {
 
         std::string other_note;
         getline(ss,other_note);
-        if (other_note != "" && other_note != " ") {
-          std::cout << "OTHER NOTE '" << other_note << "'" << std::endl;
-        }
 
         if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
           invalid=true;
@@ -995,22 +992,18 @@ void end_table(std::ofstream &ostr,  bool full_details, const std::vector<Studen
 
 
 
-
 void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
 
-  //  Student *blank = GetStudent(students,"");
   Student *sp = GetStudent(students,"PERFECT");
   Student *sa = GetStudent(students,"LOWEST A-");
   Student *sb = GetStudent(students,"LOWEST B-");
   Student *sc = GetStudent(students,"LOWEST C-");
   Student *sd = GetStudent(students,"LOWEST D");
-  //  assert (blank != NULL);
   assert (sp != NULL);
   assert (sa != NULL);
   assert (sb != NULL);
   assert (sc != NULL);
   assert (sd != NULL);
-
 
   // get todays date;
   time_t now = time(0);  
@@ -1038,7 +1031,6 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
   int last_section = -1;
 
   for (int S = 0; S < (int)students.size(); S++) {
-    //    if (students[S] == blank) continue;
     int rank = next_rank;
     if (students[S] == sp ||
         students[S] == sa ||
@@ -1064,7 +1056,7 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
   ostr << "</table>\n";
   end_table(ostr,true,students,-1);
   
-  command = "ln -s " + summary_file + " " + OUTPUT_FILE;
+  command = "cp " + summary_file + " " + OUTPUT_FILE;
   system(command.c_str());
   
 

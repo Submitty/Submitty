@@ -191,8 +191,9 @@ find $HSS_INSTALL_DIR/website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
 # "other" can cd into all subdirectories
 chmod -R 400 $HSS_INSTALL_DIR/website
 find $HSS_INSTALL_DIR/website -type d -exec chmod uo+x {} \;
-# "other" can read all .txt & .css files
+# "other" can read all .txt, .jpg, & .css files
 find $HSS_INSTALL_DIR/website -type f -name \*.css -exec chmod o+r {} \;
+find $HSS_INSTALL_DIR/website -type f -name \*.jpg -exec chmod o+r {} \;
 find $HSS_INSTALL_DIR/website -type f -name \*.txt -exec chmod o+r {} \;
 # "other" can read & execute all .js files
 find $HSS_INSTALL_DIR/website -type f -name \*.js -exec chmod o+rx {} \;

@@ -1,7 +1,19 @@
 #HWsubmission {
+/*
+    background-image: url("glitter.jpg");
+    background-repeat:repeat;
+    background-size:80%;
+*/
     font-family: 'Source Sans Pro', sans-serif;
     padding-left: 10px;
 }
+
+
+#HWsubmission .confetti {
+    background:rgba(255,255,255,0.3);
+
+}
+
 
 
 #HWsubmission h1, #HWsubmission h2, #HWsubmission h3, #HWsubmission h4, #HWsubmission b, #HWsubmission em, #HWsubmission p{
@@ -197,6 +209,7 @@
     margin: 0;
 }
 
+
 #HWsubmission .outer_box {
     border-radius: 3px;
     padding: 20px;
@@ -204,8 +217,18 @@
     margin: 0;
     margin-bottom: 5px;
     background:rgba(255,255,255,0.8);
-
 }
+
+
+/*#HWsubmission .outer_box_confetti_a {
+    background:rgba(240,255,255,0.3);
+    border-radius: 3px;
+    padding: 20px;
+    border: 2px solid #F0F0F0;
+    margin: 0;
+    margin-bottom: 5px;
+}
+*/
 
 #HWsubmission .box {
     border-radius: 3px;

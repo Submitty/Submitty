@@ -6,10 +6,11 @@
 
 class TableCell {
 public:
-  TableCell() { color="ffcccc"; data =""; note=""; span =1; align="left";}
-  TableCell(std::string c, std::string d="", std::string n="", int s=1) { color=c; data=d; note=n; span=s; align="left";}
-  TableCell(std::string c, int d, std::string n="", int s=1) { color=c; data=std::to_string(d); note=n; span=s; align="left";}
+  TableCell() { color="ffcccc"; data =""; note=""; span =1; align="left"; rotate = 0; }
+  TableCell(std::string c, std::string d="", std::string n="", int s=1) { color=c; data=d; note=n; span=s; align="left"; rotate = 0;}
+  TableCell(std::string c, int d, std::string n="", int s=1) { color=c; data=std::to_string(d); note=n; span=s; align="left"; rotate = 0;}
   TableCell(std::string c, float d, std::string n="", int s=1) { 
+    rotate = 0;
     color=c; 
     note=n;
     if (d > 0.0001) {
@@ -27,6 +28,7 @@ public:
   int span;
   std::string align;
   friend std::ostream& operator<<(std::ostream &ostr, const TableCell &c);
+  int rotate;
 };
 
 
@@ -55,7 +57,8 @@ public:
               std::vector<int> which_students,
               std::vector<int> which_data,
               bool transpose=false,
-              bool show_details=false) const;
+              bool show_details=false,
+              std::string last_update="") const;
   
 
   int numRows() const { return cells.size(); }

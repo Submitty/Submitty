@@ -347,7 +347,6 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
                         enum GRADEABLE_ENUM g,
                         Student *sp, Student *sa, Student *sb, Student *sc, Student *sd) {
   
-  #define tablesize 10
 
   std::vector<int> all_students;
   std::vector<int> select_students;
@@ -356,6 +355,8 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
 
   Table table;
 
+
+    
 
   // DEFINE HEADER ROW
   int counter = 0;
@@ -496,22 +497,17 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
                                          sc->getGradeableValue(g,j),
                                          sd->getGradeableValue(g,j));
         std::string details;
-        if (g==GRADEABLE_ENUM::READING) {
-          details = this_student->getGradeableNote(g,j);
-        }
+        details = this_student->getGradeableNote(g,j);
+        
         table.set(myrow,counter++,TableCell(color,grade,details));
 
       }
       table.set(myrow,counter++,TableCell(grey_divider));
     }
-
-
-
-
   }
 
 
-
+  
   for (int i = 0; i < table.numCols(); i++) {
     instructor_data.push_back(i);
   }
@@ -519,22 +515,24 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
     all_students.push_back(i);
   }
 
-
-
-
   std::ofstream ostr2("all.html");
   table.output(ostr2, all_students,instructor_data);
 
 
   for (std::map<int,std::string>::iterator itr = student_correspondences.begin();
        itr != student_correspondences.end(); itr++) {
-    // random user
+
     select_students[2] = itr->first;
     std::string filename = "individual_summary_html/" + itr->second + "_summary.html";
-    std::cout << "FILENAME " << itr->first << " " << filename << std::endl;
     std::ofstream ostr3(filename.c_str());
     assert (ostr3.good());
-    table.output(ostr3, select_students,student_data,true,true);
+
+    Student *s = GetStudent(students,itr->second);
+    std::string last_update;
+    if (s != NULL) {
+      last_update = s->getLastUpdate();
+    }
+    table.output(ostr3, select_students,student_data,true,true,last_update);
   }
 
   Student* s = NULL;
@@ -544,23 +542,8 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
   }
 
 
-  // -------------------------------------------------------------------------------
-  // PRINT INSTRUCTOR SUPPLIED MESSAGES
 
-  if (g == GRADEABLE_ENUM::NONE) {
-    
-    for (unsigned int i = 0; i < MESSAGES.size(); i++) {
-      ostr << "" << MESSAGES[i] << "<br>\n";
-    }
-    // get todays date
-    //time_t now = time(0);  
-    //struct tm * now2 = localtime( & now );
-    if (s != NULL) {
-      ostr << "<em>Information last updated: " << s->getLastUpdate() << "</em><br>\n";
-    }
-  }
-
-  ostr << "<p>&nbsp;</p>\n";
+  ostr << "<br>&nbsp;<br>\n";
 
 
   // -------------------------------------------------------------------------------

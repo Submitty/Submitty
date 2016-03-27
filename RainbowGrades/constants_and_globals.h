@@ -3,7 +3,9 @@
 
 #define MAX_STRING_LENGTH 10000
 
+#include <map>
 #include "grade.h"
+class Student;
 
 // ==========================================================
 // What sections to display in the output table
