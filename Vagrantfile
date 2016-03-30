@@ -19,4 +19,6 @@ Vagrant.configure(2) do |config|
     s.path = ".setup/vagrant.sh"
     s.args = ["vagrant"]
   end
+
+  config.vm.network "forwarded_port", guest: 5432, host: 15432
 end
