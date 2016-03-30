@@ -6,18 +6,35 @@ public/site_path.txt
 *.o
 INSTALL.sh
 .vagrant
-
-# ENVIRONMENT IGNORES
-.idea
 *.zip
 
+.idea
+
 tests/report
-/.setup/selenium-server-standalone.jar
+.setup/selenium-server-standalone.jar
 
 logs/
 *.csv
+
+*.pyc
 
 TAGradingServer/toolbox/configs/*
 !TAGradingServer/toolbox/configs/master_template.php
 !TAGradingServer/toolbox/configs/sample_course.php
 !TAGradingServer/toolbox/configs/course_template.php
+
+site/
+#site/config/*
+#!site/config/master_template.php
+#!site/config/sample_course.php
+#!site/config/course_template.php
+
+vendor/
+composer.lock
+
+*.aux
+*.log
+*.out
+*.synctex.gz
+
+db_update.php

@@ -4,10 +4,13 @@ require "../../toolbox/functions.php";
 
 check_administrator();
 
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
+    die("invalid csrf token");
+}
+
 if (!is_dir(implode("/",array(__SUBMISSION_SERVER__, "reports","all_grades")))) {
     mkdir(implode("/",array(__SUBMISSION_SERVER__, "reports","all_grades")));
 }
-
 
 /************************************/
 /* Output Individual Student Files  */
@@ -50,7 +53,15 @@ $queries = array(
             student_rcs=?
         ) AS gt ON t.test_id=gt.test_id
     ORDER BY
-        t.test_id");
+        t.test_id",
+
+    "OTHER" => "SELECT g.*, o.*
+    FROM
+        grades_others as g
+        LEFT JOIN (SELECT * FROM other_grades) as o on o.oid = g.oid
+    WHERE
+        student_rcs=?"
+);
 
 // Query the database for all students registered in the class
 $params = array();
@@ -132,6 +143,20 @@ foreach($db->rows() as $student_record) {
 
 	    $testname = $row['test_type']." " . $row['test_number'];
         $student_output_text .= strtolower($row['test_type']) . ' ' .$row['test_number'] . ' "' . $testname . '" ' . $row['score'] . " " . implode(" ", pgArrayToPhp($row['test_text'])) . $nl;
+    }
+
+    $db->query($queries['OTHER'], $params);
+    foreach($db->rows() as $row) {
+        if ($row['grades_other_score'] <= 0) {
+            continue;
+        }
+	if (strpos($row['other_id'], 'reading') !== FALSE) {
+          $student_output_text .= 'reading ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
+	} else if (strpos($row['other_id'], 'participation') !== FALSE) {
+          $student_output_text .= 'participation ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
+	} else {
+          $student_output_text .= 'other ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
+	}
     }
 
     // ======================================================

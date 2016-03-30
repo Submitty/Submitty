@@ -232,13 +232,46 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
       if ($res === TRUE) {
         $zip->extractTo($version_path."/");
         $zip->close();
+
+        $unlink_return = unlink ($homework_file["tmp_name"]);
+        if (!$unlink_return) {
+          display_error("failed to unlink(delete) uploaded zip file from");
+          return;
+        }
+
       }
       else {
+
+        // --------------------------------------------------------------
+
+        /*
+        // NOT SURE HOW THIS WAS WORKING BEFORE
+        // both mv and move_uploaded_file will reset the file group to hwphp
+        // we need it to be the sticky bit group csciXXXX_tas_www
+
         $result = move_uploaded_file($homework_file["tmp_name"], $version_path."/".$homework_file["name"]);
         if (!$result) {
             display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
             return;
         }
+        */
+
+        // SHOULD BE EQUIVALENT TO THIS:
+        if (is_uploaded_file($homework_file["tmp_name"])) {
+          $copy_return = copy ($homework_file["tmp_name"], $version_path."/".$homework_file["name"]);
+          if (!$copy_return) {
+            display_error("failed to copy uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
+            return;
+          }
+          $unlink_return = unlink ($homework_file["tmp_name"]);
+          if (!$unlink_return) {
+            display_error("failed to unlink(delete) uploaded file from ".$homework_file["tmp_name"]);
+            return;
+          }
+        }
+
+        // --------------------------------------------------------------
+
       }
     }
 
@@ -255,8 +288,8 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
 
     if ($svn_checkout == true) {
       if (!touch($version_path."/.submit.SVN_CHECKOUT")) {
-	display_error("Failed to touch file ".$version_path."/.submit.SVN_CHECKOUT");
-	return;
+          display_error("Failed to touch file ".$version_path."/.submit.SVN_CHECKOUT");
+          return;
       }
     }
 
@@ -435,15 +468,16 @@ function get_contents($dir, $max_depth) {
 }
 
 // Find most recent submission from user
-function most_recent_assignment_version($username, $semester, $course, $assignment_id) {
+function get_highest_assignment_version($username, $semester, $course, $assignment_id) {
     $path_front = get_path_front_course($semester,$course);
     $path = $path_front."/submissions/".$assignment_id."/".$username;
-    $i = 1;
-    while (file_exists($path."/".$i)) {
-        $i++;
+    $recent = -1;
+    $x = 1;
+    while (file_exists($path."/".$x)) {
+      $recent = $x;
+      $x++;
     }
-    return $i - 1;
-
+    return $recent;
 }
 
 // Get name for assignment
@@ -554,29 +588,83 @@ function is_hidden_points_visible($class_config, $assignment_id) {
 }
 
 
+// This function returns true if the input string looks like it's
+// trying to traverse directories (a possible malicious attack).
+function contains_directory_traversal($string) {
+
+  // the string should not contain '/' or '..'
+  if (strpos($string, '/') !== FALSE)
+    return true;
+  if (strpos($string, '..') !== FALSE)
+    return true;
+
+  // otherwise, things are probably ok
+  return false;
+}
+
+
+
 function is_valid_semester($semester) {
 
-   $path_front_root = get_path_front_root();
-   $semester_directory = $path_front_root."/courses/".$semester;
+  if (contains_directory_traversal($semester)) {
+    return false;
+  }
 
-   return is_dir($semester_directory);
+  // RPI SPECIFIC CHECKS e.g., f15 s16
+  // must be 3 characters long
+  if(strlen($semester) != 3) return false;
+  // first character must be alphabetic
+  if(!ctype_alpha(substr($semester,0,1))) return false;
+  // last 2 characters must be a number
+  if(!is_numeric(substr($semester,1,2))) return false;
+
+
+  $path_front_root = get_path_front_root();
+  $semester_directory = $path_front_root."/courses/".$semester;
+
+  return is_dir($semester_directory);
 
 }
 
 
 function is_valid_course($semester,$course) {
 
-   $path_front_root = get_path_front_root();
-   $course_directory = $path_front_root."/courses/".$semester."/".$course;
+  if (!is_valid_semester($semester)) {
+    return false;
+  }
+  if (contains_directory_traversal($course)) {
+    return false;
+  }
 
-   return is_dir($course_directory);
+  // RPI SPECIFIC CHECKS e.g., csci1100 biol1010
+  // must be 8 characters long
+  if(strlen($course) != 8) return false;
+  // first 4 characters must be alphabetic
+  if(!ctype_alpha(substr($course,0,4))) return false;
+  // last 4 characters must be a number
+  if(!is_numeric(substr($course,4,4))) return false;
+
+
+  // CSCI SPECIFIC CHECKS
+  // prefix must be csci
+  if(strtolower(substr($course,0,4)) != "csci") return false;
+
+  $path_front_root = get_path_front_root();
+  $course_directory = $path_front_root."/courses/".$semester."/".$course;
+
+  return is_dir($course_directory);
 
 }
 
-
+/*
 // Check to make sure instructor has added this assignment
 function is_valid_assignment($class_config, $assignment_id) {
-    $assignments = $class_config["assignments"];
+
+  if (contains_directory_traversal($assignment_id)) {
+    return false;
+  }
+
+   $assignments = $class_config["assignments"];
     foreach ($assignments as $one) {
         if (isset($one["assignment_id"]) && $one["assignment_id"] == $assignment_id) {
 
@@ -585,6 +673,8 @@ function is_valid_assignment($class_config, $assignment_id) {
     }
     return false;
 }
+*/
+
 
 function is_open_assignment($class_config, $assignment_id){
     $assignments = $class_config["assignments"];
@@ -608,9 +698,26 @@ function is_open_assignment($class_config, $assignment_id){
 
 // Make sure student has actually submitted this version of an assignment
 function is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version) {
-    $path_front = get_path_front_course($semester,$course);
-    $path = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
-    return file_exists($path);
+
+  if (!is_valid_course($semester,$course)) {
+    return false;
+  }
+  if (contains_directory_traversal($assignment_id)) {
+    return false;
+  }
+  if (contains_directory_traversal($assignment_version)) {
+    return false;
+  }
+
+  // "no submission" = -1 = a valid assignment version
+  if ($assignment_version == -1) return true;
+
+  // "cancel" = 0 = a valid assignment version
+  if ($assignment_version == 0) return true;
+
+  $path_front = get_path_front_course($semester,$course);
+  $path = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;
+  return file_exists($path);
 }
 
 function is_valid_file_name($username, $semester, $course, $assignment_id, $assignment_version, $file_name){
@@ -664,6 +771,7 @@ function get_all_files($username, $semester, $course, $assignment_id, $assignmen
 
 
 function version_in_grading_queue($username, $semester, $course, $assignment_id, $assignment_version) {
+
     $path_front = get_path_front_course($semester,$course);
     if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {//If its not in the submissions folder
         return false;
@@ -919,11 +1027,11 @@ function removeTrailingCommas($json){
 
 //SUBMITTING VERSION
 
-function get_user_submitting_version($username, $semester,$course, $assignment_id) {
+function get_active_version($username, $semester,$course, $assignment_id) {
     $path_front = get_path_front_course($semester,$course);
     $file = $path_front."/submissions/".$assignment_id."/".$username."/user_assignment_settings.json";
     if (!file_exists($file)) {
-        return 0;
+      return -1; // no submissions
     }
     $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
     return $json["active_assignment"];
@@ -1028,6 +1136,10 @@ function get_all_testcase_diffs($username, $semester,$course, $assignment_id, $a
     foreach ($diffs as $diff) {
         $diff_result = get_testcase_diff($username, $semester,$course, $assignment_id, $assignment_version, $diff);
         $diff_result["diff_id"] = $diff["diff_id"];
+
+        if (isset($diff["display_mode"]) && $diff["display_mode"] != "") {
+             $diff_result["display_mode"] = $diff["display_mode"];
+        }
         if (isset($diff["message"]) && $diff["message"] != "") {
             $diff_result["message"] = $diff["message"];
         }

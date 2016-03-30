@@ -2,7 +2,7 @@
 
 if [[ "$RUN_E2E" = "true" ]]; then
     sudo apt-get update > /dev/null
-    sudo apt-get install -yqq --force-yes apache2 libapache2-mod-php5 php5-curl php5-mysql php5-intl php5-pgsql
+    sudo apt-get install -yqq --force-yes apache2 libapache2-mod-php5 php5-curl php5-intl php5-pgsql
 
     sudo sed -i -e "s,/var/www,$(pwd),g" /etc/apache2/sites-available/default
     # cat /etc/apache2/sites-available/default

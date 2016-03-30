@@ -136,41 +136,52 @@ $output .= <<<HTML
 
 </style>
 <script type="text/javascript">
-    function deleteRubric(rubric_id, rubric_name) {
+    function deleteRubric(rubric_id) {
+        var rubric_name = $('td#rubric-'+rubric_id+'-title').text();
         var c = window.confirm("Are you sure you want to delete '" + rubric_name + "'?");
         if (c == true) {
-            $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=delete&id='+rubric_id)
-                .done(function(response) {
-                    var res_array = response.split("|");
-                    if (res_array[0] == "success") {
-                        window.alert("'" + rubric_name + "' deleted");
-                        $('tr#rubric-'+rubric_id).remove();
-                    }
-                    else {
-                        window.alert("'" + rubric_name + "' could not be deleted");
-                    }
-                })
-                .fail(function() {
-                    window.alert("[ERROR] Refresh Page");
-                });
+            $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=delete&id='+rubric_id, {
+                type: "POST",
+		        data: {
+                    csrf_token: '{$_SESSION['csrf']}'
+                }
+            })
+            .done(function(response) {
+                var res_array = response.split("|");
+                if (res_array[0] == "success") {
+                    window.alert("'" + rubric_name + "' deleted");
+                    $('tr#rubric-'+rubric_id).remove();
+                }
+                else {
+                    window.alert("'" + rubric_name + "' could not be deleted");
+                }
+            })
+            .fail(function() {
+                window.alert("[ERROR] Refresh Page");
+            });
         }
     }
 
     function fixSequences() {
-        $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=sequence')
-            .done(function(response) {
-                var res_array = response.split("|");
-                if (res_array[0] == "success") {
-                    window.alert("DB Sequences recalculated");
-                }
-                else {
-                    console.log(response);
-                    window.alert("[DB ERROR] Refresh page");
-                }
-            })
-            .fail(function() {
-                window.alert("[AJAX ERROR] Refresh page");
-            });
+        $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=sequence', {
+            type: "POST",
+            data: {
+                csrf_token: '{$_SESSION['csrf']}'
+            }
+        })
+        .done(function(response) {
+            var res_array = response.split("|");
+            if (res_array[0] == "success") {
+                window.alert("DB Sequences recalculated");
+            }
+            else {
+                console.log(response);
+                window.alert("[DB ERROR] Refresh page");
+            }
+        })
+        .fail(function() {
+            window.alert("[AJAX ERROR] Refresh page");
+        });
     }
 </script>
 <div id="container-rubrics">
@@ -204,7 +215,7 @@ foreach ($db->rows() as $rubric) {
             <td class="rubrics-score" id="rubric-{$rubric['rubric_id']}-score">{$rubric['rubric_score']} ({$rubric['rubric_ec']})</td>
             <td class="rubrics-due" id="rubric-{$rubric['rubric_id']}-due">{$rubric['rubric_due_date']}</td>
             <td id="rubric-{$rubric['rubric_id']}-options"><a href="{$BASE_URL}/account/admin-rubric.php?course={$_GET['course']}&action=edit&id={$rubric['rubric_id']}">Edit</a> |
-            <a onclick="deleteRubric({$rubric['rubric_id']}, {$rubric['rubric_name']});">Delete</a></td>
+            <a onclick="deleteRubric({$rubric['rubric_id']});">Delete</a></td>
         </tr>
 HTML;
 }

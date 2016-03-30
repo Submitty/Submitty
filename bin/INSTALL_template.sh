@@ -23,7 +23,6 @@ HSS_DATA_DIR=__CONFIGURE__FILLIN__HSS_DATA_DIR__
 SVN_PATH=__CONFIGURE__FILLIN__SVN_PATH__
 
 HSS_REPOSITORY=__CONFIGURE__FILLIN__HSS_REPOSITORY__
-TAGRADING_REPOSITORY=__CONFIGURE__FILLIN__TAGRADING_REPOSITORY__
 
 HWPHP_USER=__CONFIGURE__FILLIN__HWPHP_USER__
 HWCRON_USER=__CONFIGURE__FILLIN__HWCRON_USER__
@@ -63,7 +62,6 @@ GRADE_STUDENTS_STARTS_PER_HOUR=__CONFIGURE__FILLIN__GRADE_STUDENTS_STARTS_PER_HO
 #this function takes a single argument, the name of the file to be edited
 function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__HSS_REPOSITORY__|$HSS_REPOSITORY|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__TAGRADING_REPOSITORY__|$TAGRADING_REPOSITORY|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|$HSS_INSTALL_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HSS_DATA_DIR__|$HSS_DATA_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SVN_PATH__|$SVN_PATH|g" $1
@@ -288,6 +286,7 @@ replace_fillin_variables $HSS_INSTALL_DIR/bin/build_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/build_homework_function.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/fake_submit_button_press.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/untrusted_execute.c
+replace_fillin_variables $HSS_INSTALL_DIR/bin/setcsvfields
 
 # most of the scripts should be root only
 find $HSS_INSTALL_DIR/bin -type f -exec chown root:root {} \;
@@ -331,11 +330,12 @@ popd > /dev/null
 
 echo -e "Copy the ta grading website"
 
-rsync  -rz $TAGRADING_REPOSITORY/*php         $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rz $TAGRADING_REPOSITORY/toolbox      $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rz $TAGRADING_REPOSITORY/lib          $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rz $TAGRADING_REPOSITORY/account      $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rz $TAGRADING_REPOSITORY/app          $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $HSS_REPOSITORY/TAGradingServer/*php         $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $HSS_REPOSITORY/TAGradingServer/toolbox      $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $HSS_REPOSITORY/TAGradingServer/lib          $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $HSS_REPOSITORY/TAGradingServer/account      $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $HSS_REPOSITORY/TAGradingServer/app          $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rz $HSS_REPOSITORY/TAGradingServer/cgi-bin      $HSS_INSTALL_DIR/hwgrading_website
 
 # set special user $HWPHP_USER as owner & group of all hwgrading_website files
 find $HSS_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
@@ -356,6 +356,9 @@ find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.gif -exec chmod o+r {} 
 
 # "other" can read & execute all .js files
 find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
+
+# set the execute bit for any .cgi scripts
+find $HSS_INSTALL_DIR/hwgrading_website -type f -name \*.cgi -exec chmod u+x {} \;
 
 replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php
 mv $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php

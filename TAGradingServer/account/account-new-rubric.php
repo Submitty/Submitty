@@ -22,26 +22,54 @@ $icon = array();
 $icon_color = array();
 $color = array();
 
-if ($rubric->status == 1) {
-    $icon[0] = '<i class="icon-ok icon-white"></i>';
-    $icon_color[0] = "#008000";
+if (!$rubric->rubric_details['rubric_parts_sep']) {
+    if ($rubric->status == 1 && $rubric->days_late_used == 0) {
+        $icon[0] = '<i class="icon-ok icon-white"></i>';
+        $icon_color[0] = "#008000";
+        $part_status[0] = "Good";
+    }
+    else if ($rubric->status == 1 && $rubric->days_late_used > 0) {
+        $icon[$i] = '<i class="icon-exclamation-sign icon-white"></i>';
+        $color[0] = "#998100";
+        $icon_color[0] = "#FAA732";
+        $part_status[0] = 'Late';
+    }
+    else {
+        $icon[0] = '<i class="icon-remove icon-white"></i>';
+        $color[0] = "#DA4F49";
+        $icon_color[0] = "#DA4F49";
+        if ($rubric->active_assignment[1] == 0) {
+            $part_status[0] = 'Cancelled';
+        }
+        else {
+            $part_status[0] = 'Bad';
+        }
+    }
 }
 else {
-    $icon[0] = '<i class="icon-remove icon-white"></i>';
-    $icon_color[0] = "#DA4F49";
+    if($rubric->status == 1) {
+        $icon[0] = '<i class="icon-ok icon-white"></i>';
+        $icon_color[0] = "#008000";
+    }
+    else {
+        $icon[0] = '<i class="icon-remove icon-white"></i>';
+        $icon_color[0] = "#DA4F49";
+    }
 }
 
-for ($i = 1; $i <= $rubric->rubric_parts; $i++) {
+for ($i = 1; $i <= $rubric->rubric_details['rubric_parts']; $i++) {
     $color[$i] = "#008000";
     $icon_color[$i] = "#008000";
     $part_status[$i] = 'Good';
     $icon[$i] = '<i class="icon-ok icon-white"></i>';
-    if($rubric->parts_status[$i] == 0) {
+    $part = ($rubric->rubric_details['rubric_parts_sep']) ? $i : 1;
+    if($rubric->parts_status[$part] == 0) {
         $color[$i] = "#DA4F49";
         $icon_color[$i] = "#DA4F49";
-        $part_status[$i] = 'Bad';
+        $part_status[$i] = ($rubric->active_assignment[$part] == 0) ? "Cancelled" : "Bad";
         $icon[$i] = '<i class="icon-remove icon-white"></i>';
-    } else if($rubric->parts_status[$i] == 2) {
+    }
+    else if($rubric->parts_status[$part] == 2) {
         $color[$i] = "#998100";
         $icon_color[$i] = "#FAA732";
         $part_status[$i] = 'Late';
@@ -238,7 +266,15 @@ for($part = 1; $part <= $rubric->rubric_parts; $part++) {
                         <i class="icon-remove icon-white"></i>
                     </li>
                     <li class='active'><a href="#output-{$part}-1" data-toggle="tab">
-                        <b style="color:#DA4F49;">No Submission</b>
+HTML;
+        if ($rubric->active_assignment[$part] == 0) {
+            $output .= '<b style="color:#DA4F49;">Cancelled</b>';
+        }
+        else {
+            $output .= '<b style="color:#DA4F49;">No Submission</b>';
+        }
+
+        $output .= <<<HTML
                     </a></li>
                 </ul>
             </div>
@@ -375,6 +411,7 @@ $grade_parts_days_late = implode(",", $rubric->parts_days_late);
 
 $output .= <<<HTML
             <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&hw={$rubric->rubric_details['rubric_id']}&student={$rubric->student['student_rcs']}&individual={$individual}" method="post">
+                <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
                 <input type="hidden" name="submitted" value="{$submitted}" />
                 <input type="hidden" name="status" value="{$rubric->status}" />
                 <input type="hidden" name="late" value="{$rubric->days_late}" />
@@ -428,7 +465,7 @@ HTML;
 
 $print_status = ($rubric->status == 1) ? "Good" : "Bad";
 $output .= <<<HTML
-                <b>Status: </b>$print_status<br />
+                <b>Status:</b> <span style="color: {$color[0]};">{$part_status[0]}</span><br />
 HTML;
 if ($rubric->rubric_details['rubric_parts_sep']) {
     for ($i = 1; $i <= $rubric->rubric_parts; $i++) {
@@ -631,7 +668,7 @@ HTML;
 else {
     $output .= <<<HTML
         <input class="btn btn-large btn-primary" type="button" value="Cannot Submit Homework Grade" />
-        <div style="width:100%; text-align:right; color:#777;">This homework has yet been opened for grading.</div>
+        <div style="width:100%; text-align:right; color:#777;">This homework has not been opened for grading.</div>
         <div id="inner-container-spacer" style="height:55px;"></div>
 HTML;
 }

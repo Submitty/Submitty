@@ -22,7 +22,7 @@ read DATABASE_PASSWORD
 echo "What is the url for the Grading Server? (ex: https://192.168.56.103/ or https://hwgrading.cs.rpi.edu/)"
 read TAGRADING_URL
 
-echo "What is the SVN path to be used? (ex: svn+ssh://192.168.56.102 or svn+ssh://csci2600svn.cs.rpi.edu/var/lib/svn/csci2600)"
+echo "What is the SVN path to be used? (ex: svn+ssh://192.168.56.102 or svn+ssh://csci2600svn/var/lib/svn/csci2600)"
 read SVN_PATH
 
 ########################################################################################################################
@@ -50,13 +50,13 @@ COURSE_BUILDERS_GROUP=course_builders
 # This value must be at least 60: assumed in INSTALL.sh generation of crontab
 NUM_UNTRUSTED=60
 # FIXME: should check for existence of these users
-FIRST_UNTRUSTED_UID=`id -u untrusted00` # untrusted's user id
-FIRST_UNTRUSTED_GID=`id -g untrusted00` # untrusted's group id
+FIRST_UNTRUSTED_UID=$(id -u untrusted00) # untrusted's user id
+FIRST_UNTRUSTED_GID=$(id -g untrusted00) # untrusted's group id
 
-HWCRON_UID=`id -u hwcron`       # hwcron's user id
-HWCRON_GID=`id -g hwcron`       # hwcron's group id
-HWPHP_UID=`id -u hwphp`         # hwphp's user id
-HWPHP_GID=`id -g hwphp`         # hwphp's group id
+HWCRON_UID=$(id -u hwcron)       # hwcron's user id
+HWCRON_GID=$(id -g hwcron)       # hwcron's group id
+HWPHP_UID=$(id -u hwphp)         # hwphp's user id
+HWPHP_GID=$(id -g hwphp)         # hwphp's group id
 
 # adjust this number depending on the # of processors
 # available on your hardware
@@ -81,15 +81,15 @@ GRADE_STUDENTS_STARTS_PER_HOUR=20
 # confirm that the uid/gid of the untrusted users are sequential
 which_untrusted=0
 while [ $which_untrusted -lt $NUM_UNTRUSTED ]; do
-    an_untrusted_user=`printf "untrusted%.2d" $which_untrusted`
-    if [ `id -u $an_untrusted_user` -ne $(($FIRST_UNTRUSTED_UID+$which_untrusted)) ] ; then
-	echo "CONFIGURATION ERROR: untrusted UID not sequential: $an_untrusted_user"
-	exit
-    fi
-    if [ `id -g $an_untrusted_user` -ne $(($FIRST_UNTRUSTED_GID+$which_untrusted)) ] ; then
-	echo "CONFIGURATION ERROR: untrusted GID not sequential: $an_untrusted_user"
-    echo "AN UNTRUSTED $an_untrusted_user"
-	exit
+    an_untrusted_user=$(printf "untrusted%.2d" $which_untrusted)
+    if [ $(id -u $an_untrusted_user) -ne $(($FIRST_UNTRUSTED_UID+$which_untrusted)) ] ; then
+		echo "CONFIGURATION ERROR: untrusted UID not sequential: $an_untrusted_user"
+		exit
+	fi
+    if [ $(id -g $an_untrusted_user) -ne $(($FIRST_UNTRUSTED_GID+$which_untrusted)) ] ; then
+		echo "CONFIGURATION ERROR: untrusted GID not sequential: $an_untrusted_user"
+	    echo "AN UNTRUSTED $an_untrusted_user"
+		exit
     fi
     let which_untrusted=which_untrusted+1
 done
@@ -102,46 +102,45 @@ done
 
 # copy the installation script
 rm $HSS_REPOSITORY/INSTALL.sh > /dev/null 2>&1
-cp $HSS_REPOSITORY/bin/INSTALL_template.sh $HSS_REPOSITORY/INSTALL.sh
+cp $HSS_REPOSITORY/bin/INSTALL_template.sh $HSS_INSTALL_DIR/INSTALL.sh
 
 # set the permissions of this file
-chown root:root $HSS_REPOSITORY/INSTALL.sh
-chmod 500 $HSS_REPOSITORY/INSTALL.sh
+chown root:root $HSS_INSTALL_DIR/INSTALL.sh
+chmod 500 $HSS_INSTALL_DIR/INSTALL.sh
 
 # fillin the necessary variables
-sed -i -e "s|__CONFIGURE__FILLIN__HSS_REPOSITORY__|$HSS_REPOSITORY|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_REPOSITORY__|$HSS_REPOSITORY/TAGradingServer|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HSS_INSTALL_DIR__|$HSS_INSTALL_DIR|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HSS_DATA_DIR__|$HSS_DATA_DIR|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__SVN_PATH__|$SVN_PATH|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__COURSE_BUILDERS_GROUP__|$COURSE_BUILDERS_GROUP|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HSS_REPOSITORY__|$HSS_REPOSITORY|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HSS_INSTALL_DIR__|$HSS_INSTALL_DIR|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HSS_DATA_DIR__|$HSS_DATA_DIR|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__SVN_PATH__|$SVN_PATH|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__COURSE_BUILDERS_GROUP__|$COURSE_BUILDERS_GROUP|g" $HSS_INSTALL_DIR/INSTALL.sh
 
-sed -i -e "s|__CONFIGURE__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__FIRST_UNTRUSTED_GID__|$FIRST_UNTRUSTED_GID|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__FIRST_UNTRUSTED_GID__|$FIRST_UNTRUSTED_GID|g" $HSS_INSTALL_DIR/INSTALL.sh
 
-sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_UID__|$HWCRON_UID|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_GID__|$HWPHP_GID|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_UID__|$HWCRON_UID|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_GID__|$HWPHP_GID|g" $HSS_INSTALL_DIR/INSTALL.sh
 
-sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_HOST__|$DATABASE_HOST|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_USER__|$DATABASE_USER|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_PASSWORD__|$DATABASE_PASSWORD|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_HOST__|$DATABASE_HOST|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_USER__|$DATABASE_USER|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_PASSWORD__|$DATABASE_PASSWORD|g" $HSS_INSTALL_DIR/INSTALL.sh
 
-sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $HSS_INSTALL_DIR/INSTALL.sh
 
-sed -i -e "s|__CONFIGURE__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $HSS_INSTALL_DIR/INSTALL.sh
 
 
-sed -i -e "s|__CONFIGURE__FILLIN__MAX_INSTANCES_OF_GRADE_STUDENTS__|$MAX_INSTANCES_OF_GRADE_STUDENTS|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__GRADE_STUDENTS_IDLE_SECONDS__|$GRADE_STUDENTS_IDLE_SECONDS|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__GRADE_STUDENTS_IDLE_TOTAL_MINUTES__|$GRADE_STUDENTS_IDLE_TOTAL_MINUTES|g" $HSS_REPOSITORY/INSTALL.sh
-sed -i -e "s|__CONFIGURE__FILLIN__GRADE_STUDENTS_STARTS_PER_HOUR__|$GRADE_STUDENTS_STARTS_PER_HOUR|g" $HSS_REPOSITORY/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__MAX_INSTANCES_OF_GRADE_STUDENTS__|$MAX_INSTANCES_OF_GRADE_STUDENTS|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__GRADE_STUDENTS_IDLE_SECONDS__|$GRADE_STUDENTS_IDLE_SECONDS|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__GRADE_STUDENTS_IDLE_TOTAL_MINUTES__|$GRADE_STUDENTS_IDLE_TOTAL_MINUTES|g" $HSS_INSTALL_DIR/INSTALL.sh
+sed -i -e "s|__CONFIGURE__FILLIN__GRADE_STUDENTS_STARTS_PER_HOUR__|$GRADE_STUDENTS_STARTS_PER_HOUR|g" $HSS_INSTALL_DIR/INSTALL.sh
 
 
 # FIXME: Add some error checking to make sure those values were filled in correctly
@@ -150,6 +149,6 @@ sed -i -e "s|__CONFIGURE__FILLIN__GRADE_STUDENTS_STARTS_PER_HOUR__|$GRADE_STUDEN
 ########################################################################################################################
 
 echo -e "Configuration completed.  Now you may run the installation script"
-echo -e "   sudo $HSS_REPOSITORY/INSTALL.sh"
+echo -e "   sudo $HSS_INSTALL_DIR/INSTALL.sh"
 echo -e "          or"
-echo -e "   sudo $HSS_REPOSITORY/INSTALL.sh clean\n\n"
+echo -e "   sudo $HSS_INSTALL_DIR/INSTALL.sh clean\n\n"

@@ -15,7 +15,8 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
                 array(array('breakfast','consulting'), array('meeting', 'lunch'))),
             array('{{"breakfast", "test"}, {{"another", "array"}, {"test", "me"}}}',
                 array(array('breakfast','test'),array(array('another','array'),array('test','me')))),
-            array('{true, false}', array(true, false))
+            array('{"true", "false"}', array("true", "false")),
+            array('{"M5"}', array('M5'))
         );
     }
 
@@ -82,5 +83,12 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals("{}", DatabaseUtils::fromPHPToPGArray(""));
         $this->assertEquals("{}", DatabaseUtils::fromPHPToPGArray("abcd"));
         $this->assertEquals("{}", DatabaseUtils::fromPHPToPGArray(1));
+    }
+
+    public function testNullPGArray() {
+        $this->assertEquals(array(), DatabaseUtils::fromPGToPHPArray("{NULL}"));
+    }
+    public function testBooleanPGToPHP() {
+        $this->assertEquals(array(true, false), DatabaseUtils::fromPGToPHPArray("{true, false}", true));
     }
 }

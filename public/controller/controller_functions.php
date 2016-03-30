@@ -1,6 +1,9 @@
 <?php
 //CONTROLLER FUNCTIONS
 
+
+// The instructor, TAs, and other developers who are listed as being
+// "on the dev team" can see all assignments, released and unreleased
 function on_dev_team($test_user) {
     global $dev_team;
     for ($u = 0; $u < count($dev_team); $u++) {
@@ -11,13 +14,16 @@ function on_dev_team($test_user) {
     return false;
 }
 
+
 function render($viewpage, $data = array()) {
     $path = 'view/'.$viewpage.'.php';
     if (file_exists($path)) {
         extract($data);
         require_once($path);
     } else {
-        echo "Error, render file path does not exist <br>";
+    	//FIXME: In production, debug information should never be sent to client browser.
+    	//       Send debug information to error log, instead.
+    	echo "Error, render file path does not exist <br>";
         echo "cwd = ";
         echo getcwd();
         echo "<br>path = ";
@@ -25,6 +31,7 @@ function render($viewpage, $data = array()) {
         //header('Location: index.php');
     }
 }
+
 
 function render_controller($viewpage, $data = array()) {
     $path = 'controller/'.$viewpage.'.php';
@@ -41,23 +48,31 @@ function render_controller($viewpage, $data = array()) {
     }
 }
 
+
 function parse_status() {
     $status = "";
     if (isset($_SESSION["status"])) {
         $status_code = htmlspecialchars($_SESSION["status"]);
         if ($status_code == "uploaded_no_error") {
             $status = "Upload Successful!";
-        } else if ($status_code == "upload_failed") {
+        }
+        else if ($status_code == "upload_failed") {
             $status = "Unknown error.  Upload failed.";
-        } else if ($status_code == "assignment_closed") {
+        }
+        else if ($status_code == "assignment_closed") {
             $status = "Unable to edit assignment, this assignment is closed";
-        } else if ($status_code != "") {
+        }
+        else if ($status_code != "") {
             $status = $status_code;
+        }
+        else if ($status_code == "invalid_token") {
+            $status = "CSRF token error, try the form again";
         }
         $_SESSION["status"] = "";
     }
     return $status;
 }
+
 
 function parse_assignment_id_with_recent($class_config, $most_recent_assignment_id) {
     if (isset($_GET["assignment_id"])) {//Which homework or which lab the user wants to see
@@ -71,33 +86,33 @@ function parse_assignment_id_with_recent($class_config, $most_recent_assignment_
         return $most_recent_assignment_id;
     }
     header("Location: index.php?page=displaymessage&semester=".check_semester()."&course=".check_course()."&assignment_id=".$most_recent_assignment_id);
+
+    //header("Location: index.php?page=displaymessage&semester=".check_semester()."&course=".check_course()."&assignment_id=".check_assignment_id(class_config));
     exit();
 
 }
 
-function parse_assignment_version_with_recent($username, $semester, $course, $assignment_id) {
-    if (isset($_GET["assignment_version"])) {
-        $assignment_version = htmlspecialchars($_GET["assignment_version"]);
-        if (is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {
-            return $assignment_version;
-        }
+
+function get_assignment_version($username, $semester, $course, $assignment_id) {
+
+  // if it's set in the URL, and a valid version (the directory exists), return it
+  if (isset($_GET["assignment_version"])) {
+    $assignment_version = htmlspecialchars($_GET["assignment_version"]);
+    if (is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {
+      return $assignment_version;
     }
-    $assignment_version = most_recent_assignment_version($username, $semester, $course, $assignment_id);
-    if (trim($assignment_version) == "" ||  trim($assignment_version) == 0){
-        return $assignment_version;
-    }
-    else if (!is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)){
-        $_SESSION["status"] = "Invalid assignment_version specified";
-        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
-        exit();
-    }
-    else{
-        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id."&assignment_version=".$assignment_version);
-        exit();
-    }
+  }
+
+  // otherwise, get the "active" assignment version
+  $assignment_version = get_active_version($username, $semester,$course, $assignment_id);
+  if (is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {
+    return $assignment_version;
+  }
+
+  // otherwise, return -1 (no submission)
+  return -1;
 
 }
-
 
 
 function check_semester(){
@@ -118,14 +133,12 @@ function check_semester(){
         if (isset($_GET["course"])) {
             $course = htmlspecialchars($_GET["course"]);
         }
-//FIXME: 
-//        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
-        header("Location: ERROR_bad_semester_error.html");
-        exit();
+//FIXME:  Please include error HTML file in repo to avoid triggering 404 errors in apache.
+//		header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
+//      header("Location: ERROR_Xbad_semester_error.html");
+		return "f00";
     }
-}	
-
-
+}
 
 
 function check_course() {
@@ -144,16 +157,21 @@ function check_course() {
     }
 
     if (is_valid_course($semester,$course)) {
+        $_SESSION["status"] = "";
+
         return $course;
     } else {
         $_SESSION["status"] = "Invalid course specified";
-//FIXME: 
-//        header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
-        header("Location: ERROR_bad_course_error.html");
-        exit();
+//FIXME:  Please include error HTML file in repo to avoid triggering 404 errors in apache.
+//      header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
+//      header("Location: ERROR_X_bad_course_error.html");
+	    return "csci0000";
     }
 }
 
+function get_username() {
+  return $_SESSION["id"];
+}
 
 function check_assignment_id($class_config){
     if (isset($_GET["assignment_id"])) {
@@ -172,24 +190,6 @@ function check_assignment_id($class_config){
     exit();
 }
 
-
-function check_assignment_version($semester, $course, $assignment_id){
-    if (isset($_GET["assignment_version"]) || trim(htmlspecialchars($_GET["assignment_version"])) == "") {
-        $assignment_version = htmlspecialchars($_GET["assignment_version"]);
-        $username = $_SESSION["id"];
-
-        if (is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {
-            return $assignment_version;
-        }
-        $_SESSION["status"] = "Invalid assignment_version specified";
-    }
-    else{
-        $_SESSION["status"] = "No assignment_version specified";
-    }
-    // FIXME, displaymesssage does not exist
-    header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
-    exit();
-}
 
 function check_file_name($semester, $course, $assignment_id, $assignment_version){
     if (isset($_GET["file_name"])) {

@@ -5,12 +5,12 @@ require_once("controller/controller_functions.php");
 $course=check_course();
 $semester=check_semester();
 
-if (isset($_POST["assignment_id"]) && isset($_POST["assignment_version"]) && isset($_POST["submitting_version"]) && isset($_POST["assignment_graded"]) && isset($_POST["submitting_graded"])) {
+if (isset($_POST["assignment_id"]) && isset($_POST["assignment_version"]) && isset($_POST["active_version"]) && isset($_POST["assignment_graded"]) && isset($_POST["active_graded"])) {
     $assignment_id = htmlspecialchars($_POST["assignment_id"]);
     $assignment_version = htmlspecialchars($_POST["assignment_version"]);
-    $submitting_version = htmlspecialchars($_POST["submitting_version"]);
+    $active_version = htmlspecialchars($_POST["active_version"]);
     $assignment_graded = htmlspecialchars($_POST["assignment_graded"]);
-    $submitting_graded = htmlspecialchars($_POST["submitting_graded"]);
+    $active_graded = htmlspecialchars($_POST["active_graded"]);
     if (!$assignment_graded) {
         $results = get_assignment_results($_SESSION["id"], $semester, $course, $assignment_id, $assignment_version);
         if ($results != NULL && $results != false) {
@@ -18,9 +18,9 @@ if (isset($_POST["assignment_id"]) && isset($_POST["assignment_version"]) && iss
             exit();
         }
     }
-    if (!$submitting_graded)
+    if (!$active_graded)
     {
-        $results = get_assignment_results($_SESSION["id"], $semester, $course, $assignment_id, $submitting_version);
+        $results = get_assignment_results($_SESSION["id"], $semester, $course, $assignment_id, $active_version);
         if ($results != NULL && $results != false) {
             echo "REFRESH_ME";
             exit();

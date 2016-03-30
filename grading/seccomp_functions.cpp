@@ -61,6 +61,7 @@ int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_pro
   // FORK AND CLONE 
   if (my_program != "/usr/bin/g++" &&
       my_program != "/usr/bin/clang++" &&
+      my_program != "/usr/bin/gcc" &&
       my_program != "/usr/bin/time" &&
       my_program != "/usr/bin/javac" &&
       my_program != "/usr/bin/java" &&
@@ -83,6 +84,7 @@ int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_pro
   // -------------------------------------------
   if (my_program != "/usr/bin/javac" &&
       my_program != "/usr/bin/java") {
+
     DISALLOW_SYSCALL(accept);
     DISALLOW_SYSCALL(sendto);
     DISALLOW_SYSCALL(recvfrom);
@@ -97,6 +99,7 @@ int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_pro
     DISALLOW_SYSCALL(setsockopt);
     DISALLOW_SYSCALL(getsockopt);
   }
+
   
   if (seccomp_load(sc) < 0)
     return 1; // failure                                                                                   

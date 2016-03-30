@@ -88,6 +88,10 @@ if ($user_logged_in) {
                         <li class="dropdown">
                             <a href="{$BASE_URL}/account/account-tests.php">Tests</a>
                         </li>
+
+                        <li class="dropdown">
+                            <a href="{$BASE_URL}/account/account-other.php">Other</a>
+                        </li>
 HTML;
     if ($user_is_administrator) {
         print <<<HTML
@@ -124,6 +128,9 @@ HTML;
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-tests.php" role="button" data-toggle="modal">
                                         Manage Tests
                                 </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-other.php" role="button" data-toggle="modal">
+                                        Manage Other
+                                </a></li>
                             </ul>
                         </li>
                         <li class="dropdown">
@@ -133,6 +140,12 @@ HTML;
                             <ul class="dropdown-menu" role="menu" aria-labelledby="drop-utility">
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-config.php" role="button" data-toggle="modal">
                                     System Configuration
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-students.php" role="button" data-toggle="modal">
+                                    View Students
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-users.php" role="button" data-toggle="modal">
+                                    View Users
                                 </a></li>
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-classlist.php" role="button" data-toggle="modal">
                                     Upload Classlist

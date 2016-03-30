@@ -9,6 +9,7 @@ check_administrator();
 if($user_is_administrator)
 {
     $have_old = false;
+    $has_grades = false;
     $old_rubric = array(
         'rubric_id' => -1,
         'rubric_number' => "",
@@ -32,6 +33,9 @@ if($user_is_administrator)
             $old_questions[$question['question_part_number']][$question['question_number']] = $question;
         }
         $have_old = true;
+
+        Database::query("SELECT COUNT(*) as cnt FROM grades WHERE rubric_id=?", array($rubric_id));
+        $has_grades = Database::row()['cnt'] > 0;
     }
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
@@ -39,7 +43,7 @@ if($user_is_administrator)
 
     function selectBox($part, $question, $grade = 0) {
         $retVal = "<select name='point-{$part}-{$question}' class='points' onchange='calculatePercentageTotal();'>";
-        for($i = 0; $i <= 50; $i += 0.5) {
+        for($i = 0; $i <= 100; $i += 0.5) {
             $selected = ($grade == $i) ? "selected" : "";
             $retVal .= "<option {$selected}>{$i}</option>";
         }
@@ -80,6 +84,7 @@ if($user_is_administrator)
 
     $rubric_sep_checked = ($old_rubric['rubric_parts_sep'] == 1) ? "checked" : "";
 
+    $extra = ($has_grades) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
     print <<<HTML
 
 <style type="text/css">
@@ -110,23 +115,54 @@ if($user_is_administrator)
         -moz-background-clip: padding-box;
         background-clip: padding-box;
     }
+
+    .question-icon {
+        display: block;
+        float: left;
+        margin-top: 5px;
+        margin-left: 5px;
+        position: relative;
+        width: 12px;
+        height: 12px;
+        overflow: hidden;
+    }
+
+    .question-icon-cross {
+        max-width: none;
+        position: absolute;
+        top:0;
+        left:-313px;
+    }
+
+    .question-icon-up {
+        max-width: none;
+        position: absolute;
+        top: -96px;
+        left: -290px;
+    }
+
+    .question-icon-down {
+        max-width: none;
+        position: absolute;
+        top: -96px;
+        left: -313px;
+    }
 </style>
 
 <div id="container-rubric">
     <form class="form-signin" action="{$BASE_URL}/account/submit/admin-rubric.php?action={$action}&id={$old_rubric['rubric_id']}" method="post" enctype="multipart/form-data">
-    <input type='hidden' name="part_count" value="{$part_count}" />
-HTML;
+        <input type='hidden' name="part_count" value="{$part_count}" />
+        <input type='hidden' name="csrf_token" value="{$_SESSION['csrf']}" />
 
-    print <<<HTML
         <div class="modal-header">
-            <h3 id="myModalLabel">{$string} Rubric</h3>
+            <h3 id="myModalLabel">{$string} Rubric {$extra}</h3>
         </div>
 
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:hidden;">
             Rubric Name: <input style='width: 227px' type='text' name='rubric_name' value="{$rubric_name}" />
 
             <span style="padding-left:143px">
-                Submission Server ID: <input style='width: 50px' type='text' name='rubric_submission_id' value="{$rubric_submission_id}" />
+                Submission Server ID: <input style='width: 200px' type='text' name='rubric_submission_id' value="{$rubric_submission_id}" />
             </span>
 
             <br/>
@@ -139,9 +175,9 @@ HTML;
             &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
             Separate Parts:
             <input type="checkbox" name="rubric_parts_sep" value="1" {$rubric_sep_checked} onchange='togglePartSubmissionId()'/>
-            &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+            &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
             Late Days:
-            <input name="rubric_late_days" type="text" value="{$old_rubric['rubric_late_days']}"/>
+            <input style="width: 50px" name="rubric_late_days" type="text" value="{$old_rubric['rubric_late_days']}"/>
             <br/>
 
             <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
@@ -182,15 +218,19 @@ HTML;
         $first = true;
         foreach ($v as $num => $question) {
             print <<<HTML
-                <tr>
+                <tr id="row-{$k}-{$num}">
 HTML;
             if ($first) {
                 print <<<HTML
-                    <td rowspan="{$count}" id="spanPart{$k}" style="position:relative">
-                        {$k}<br />
+                    <td rowspan="{$count}" id="part-{$k}" style="position:relative">
+                        <span id='spanPart{$k}'>{$k}</span><br />
 HTML;
                 if ($k > 0) {
                     print <<<HTML
+                        <a id="delete-{$k}" class="question-icon" onclick="deletePart({$k});"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+                        <!--<a id="down-{$k}" class="question-icon" onclick="movePartDown({$k});"><img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+                        <a id="up-{$k}" class="question-icon" onclick="movePartUp({$k});"><img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>-->
+                        <br />
                         <div class='part_submission_id'>
                             <input style='width: 47px' type="text" name="rubric_part_{$k}_id" value="{$rubric_parts_submission_id[$k]}" />
                         </div>
@@ -217,19 +257,27 @@ HTML;
             $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
             print selectBox($k, $num, $old_grade);
             $checked = ($question['question_extra_credit'] == 1) ? "checked" : "";
-            print (($question['question_extra_credit'] == 1 && $disabled == "disabled") ? "<input type='hidden' name='ec-{$k}-{$num}'' value='on' />" : "");
+            print (($question['question_extra_credit'] == 1 && $disabled == "disabled") ? "<input type='hidden' name='ec-{$k}-{$num}' value='on' />" : "");
             print <<<HTML
 
                         <input onclick='calculatePercentageTotal();' name="ec-{$k}-{$num}" type="checkbox" {$checked} {$disabled} />
-                    </td>
 HTML;
+            if ($k != 0) {
+                print <<<HTML
+                        <br />
+                        <a id="delete-{$k}-{$num}" class="question-icon" onclick="deleteQuestion({$k}, {$num});"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+                        <a id="down-{$k}-{$num}" class="question-icon" onclick="moveQuestionDown({$k}, {$num});"><img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+                        <a id="up-{$k}-{$num}" class="question-icon" onclick="moveQuestionUp({$k}, {$num});"><img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+HTML;
+            }
             print <<<HTML
+                    </td>
                 </tr>
 HTML;
         }
         if ($k > 0) {
             print <<<HTML
-                <tr>
+                <tr id="add-{$k}">
                     <td style="overflow: hidden;">
                         <div class="btn btn-small btn-success"  onclick="addQuestion({$k})"><i class="icon-plus icon-white"></i> Question</div>
                     </td>
@@ -270,6 +318,15 @@ HTML;
     }
     asort($sections);
 
+    $db->query("SELECT student_grading_id, count(student_id) as cnt FROM students GROUP BY student_grading_id ORDER BY student_grading_id", array());
+    $a = array();
+    foreach ($db->rows() as $row) {
+        $a[] = "{$row['student_grading_id']} ({$row['cnt']} students)";
+    }
+    $a = implode(", ", $a);
+
+    print "Available Grading Sections: {$a}<br /><br />";
+
     $i = 0;
     $db->query("SELECT * FROM users ORDER BY user_rcs ASC", array());
     $users = $db->rows();
@@ -289,44 +346,47 @@ HTML;
     $margintop = ($i*-40) . "px";
     $marginright =  650-(count($rubrics)*25) . "px";
     print <<<HTML
-        <table border="1" style="float:right; margin-top:{$margintop}; margin-right: {$marginright}">
-            <tr>
-                <td>User</td>
+            <div>
+
+                <table border="1" style="float: right; margin-top:{$margintop}; margin-right: {$marginright}">
+                    <tr>
+                        <td>User</td>
 HTML;
     foreach ($rubrics as $id => $number) {
         print <<<HTML
-                <td style="width: 20px; text-align: center">
-                    {$number}
-                </td>
+                        <td style="width: 20px; text-align: center">
+                            {$number}
+                        </td>
 HTML;
     }
 
     print <<<HTML
-            </tr>
+                </tr>
 HTML;
 
     foreach ($users as $user) {
         print <<<HTML
-            <tr>
-                <td>{$user['user_rcs']}</td>
+                    <tr>
+                        <td>{$user['user_rcs']}</td>
 HTML;
 
         foreach ($rubrics as $id => $rubric) {
             $number = (isset($sections[$id][$user['user_rcs']])) ? implode(",",$sections[$id][$user['user_rcs']]) : "";
             print <<<HTML
-                <td style="text-align: center">
-                    {$number}
-                </td>
+                        <td style="text-align: center">
+                            {$number}
+                        </td>
 HTML;
         }
         print <<<HTML
-            </tr>
+                    </tr>
 HTML;
     }
 
 
     print <<<HTML
-        </table>
+                </table>
+            </div>
         </div>
 
         <div class="modal-footer">
@@ -377,20 +437,31 @@ HTML;
         var partNameString = "" + partName;
         var table = document.getElementById("rubricTable");
         var row = table.insertRow(table.rows.length - 2);
+        row.id = 'row-' + partName + '-1';
         var cell1 = row.insertCell(0);
         cell1.rowSpan = "2";
-        cell1.setAttribute("id", "spanPart"+partName);
+        cell1.setAttribute("id", "part-"+partName);
         var cell2 = row.insertCell(1);
         cell2.style.overflow = "hidden";
         var cell3 = row.insertCell(2);
         cell3.style.backgroundColor = "#EEE";
-        cell1.innerHTML = partNameString + "<br /><div class='part_submission_id'><input style='width: 47px;' type='text' name='rubric_part_"+partNameString+"_id' value='_part"+partNameString+"' /></div>";
-        cell2.innerHTML='<textarea name="comment-' + partName + '-1" rows="1" style="width: 896px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea></span>'+
+        cell1.innerHTML = '<span id="spanPart' + partName + '">' + partNameString + "</span><br />" +
+        '<a id="delete-' + partName + '" class="question-icon" onclick="deletePart(' + partName + ');"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>' +
+        //'<a id="down-' + partName + '" class="question-icon" onclick="movePartDown(' + partName + ');"><img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>' +
+        //'<a id="up-' + partName + '" class="question-icon" onclick="movePartUp(' + partName + ');"><img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>' +
+        '<br />' +
+        "<div class='part_submission_id'><input style='width: 47px;' type='text' name='rubric_part_"+partNameString+"_id' value='_part"+partNameString+"' /></div>";
+        cell2.innerHTML = '<textarea name="comment-' + partName + '-1" rows="1" style="width: 885px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea></span>'+
                           '<div class="btn btn-mini btn-default" onclick="toggleTA(' + partName + ',1)" style="margin-top:-5px;">TA Note</div>'+
-                          '<textarea name="ta-' + partName + '-1" id="individual-' + partName + '-1" rows="1" placeholder=" Message to TA" style="width: 954px; padding: 0px; resize: none; margin-top: 5px; margin-bottom: -80px; display: none;"></textarea>';
-        cell3.innerHTML=selectBox(partName, "1") + ' <input onclick="calculatePercentageTotal();" name="ec-' + partName + '-1" type="checkbox" />';
+                          '<textarea name="ta-' + partName + '-1" id="individual-' + partName + '-1" rows="1" placeholder=" Message to TA" style="width: 954px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: -80px; display: none;"></textarea>';
+        cell3.innerHTML = selectBox(partName, "1") + ' <input onclick="calculatePercentageTotal();" name="ec-' + partName + '-1" type="checkbox" />';
 
+        cell3.innerHTML += "<br />" +
+                        "<a id='delete-" + partName + "-1' class=\"question-icon\" onclick=\"deleteQuestion(" + partName + ", 1);\"><img class=\"question-icon-cross\" src=\"../toolbox/include/bootstrap/img/glyphicons-halflings.png\"></a>" +
+                        "<a id='down-" + partName + "-1' class=\"question-icon\" onclick=\"moveQuestionDown(" + partName + ", 1);\"><img class=\"question-icon-down\" src=\"../toolbox/include/bootstrap/img/glyphicons-halflings.png\"></a>" +
+                        "<a id='up-" + partName + "-1' class=\"question-icon\" onclick=\"moveQuestionUp(" + partName + ", 1);\"><img class=\"question-icon-up\" src=\"../toolbox/include/bootstrap/img/glyphicons-halflings.png\"></a>";
         row = table.insertRow(table.rows.length - 2);
+        row.id = 'add-' + partName;
         cell1 = row.insertCell(0);
         cell2 = row.insertCell(1);
         cell2.style.borderLeft = '1px solid #F9F9F9';
@@ -402,23 +473,32 @@ HTML;
 
     function addQuestion(partName)
     {
+        var part = Number(partName);
+        if (part <= 0) {
+            return;
+        }
+
         var number = 0;
-        for (var i = 0; i < parts.length && i <= Number(partName); i++) {
+        for (var i = 0; i < parts.length && i <= part; i++) {
             number += parts[i];
         }
 
-        document.getElementById("spanPart"+partName).rowSpan = '' + (Number(document.getElementById("spanPart"+partName).rowSpan) + 1);
+        document.getElementById("part-"+partName).rowSpan = '' + (Number(document.getElementById("part-"+partName).rowSpan) + 1);
         var table = document.getElementById("rubricTable");
         var row = table.insertRow(number);
+        row.id = 'row-' + partName + '-' + parts[part];
         var cell1 = row.insertCell(0);
         cell1.style.overflow = "hidden";
         var cell2 = row.insertCell(1);
         cell2.style.backgroundColor = "#EEE";
-        cell1.innerHTML = '<textarea name="comment-' + partName + "-" + parts[Number(partName)] + '" rows="1" style="width:896px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea></span>'+
-                          '<div class="btn btn-mini btn-default" onclick="toggleTA(' + partName + "," + parts[Number(partName)] + ')" style="margin-top:-5px;">TA Note</div>'+
-                          '<textarea name="ta-' + partName + "-" + parts[Number(partName)] + '" id="individual-' + partName + "-" + parts[Number(partName)] + '" rows="1" placeholder=" Message to TA" style="width: 954px; padding: 0px; resize: none; margin-top: 5px; margin-bottom: -80px; display: none;"></textarea>';
-        cell2.innerHTML = selectBox(partName, parts[Number(partName)]) + ' <input onclick="calculatePercentageTotal();" name="ec-'+partName+'-'+parts[Number(partName)]+'" type="checkbox" />';
-
+        cell1.innerHTML = '<textarea name="comment-' + partName + "-" + parts[part] + '" rows="1" style="width:885px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea></span>'+
+                          '<div class="btn btn-mini btn-default" onclick="toggleTA(' + partName + "," + parts[part] + ')" style="margin-top:-5px;">TA Note</div>'+
+                          '<textarea name="ta-' + partName + "-" + parts[part] + '" id="individual-' + partName + "-" + parts[part] + '" rows="1" placeholder=" Message to TA" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: -80px; display: none;"></textarea>';
+        cell2.innerHTML = selectBox(partName, parts[part]) + ' <input onclick="calculatePercentageTotal();" name="ec-'+partName+'-'+parts[part]+'" type="checkbox" />';
+        cell2.innerHTML += "<br />" +
+                        "<a id='delete-" + partName + "-" + parts[part]+"' class=\"question-icon\" onclick=\"deleteQuestion(" + partName + ", " + parts[part] + ");\"><img class=\"question-icon-cross\" src=\"../toolbox/include/bootstrap/img/glyphicons-halflings.png\"></a>" +
+                        "<a id='down-" + partName + "-" + parts[part]+"' class=\"question-icon\" onclick=\"moveQuestionDown(" + partName + ", " + parts[part] + ");\"><img class=\"question-icon-down\" src=\"../toolbox/include/bootstrap/img/glyphicons-halflings.png\"></a>" +
+                        "<a id='up-" + partName + "-" + parts[part]+"' class=\"question-icon\" onclick=\"moveQuestionUp(" + partName + ", " + parts[part] + ");\"><img class=\"question-icon-up\" src=\"../toolbox/include/bootstrap/img/glyphicons-halflings.png\"></a>";
         parts[Number(partName)] += 1;
     }
 
@@ -443,11 +523,11 @@ HTML;
     }
 
     function calculatePercentageTotal() {
-        var total=0;
+        var total = 0;
         var ec = 0;
         $('select.points').each(function(){
             var elem = $(this).attr('name').replace('point','ec');
-            if (!$('[name="'+elem+'"]').prop('checked') == true) {
+            if (!$('[name="'+elem+'"]').is(':checked') == true) {
                 total += +($(this).val());
             }
             else {
@@ -455,6 +535,183 @@ HTML;
             }
         });
         document.getElementById("totalCalculation").innerHTML = total + " (" + ec + ")";
+    }
+
+    function deleteQuestion(part, question) {
+        if (part <= 0 || question <= 0) {
+            return;
+        }
+
+        var row = $('tr#row-' + part + '-' + question);
+
+        var part_id = "";
+        if (question == 1) {
+            part_id = row.children()[0].children[2].children[0].value;
+        }
+        row.remove();
+        for(var i = question+1; i < parts[part]; i++) {
+            updateRow(part, part, i, i-1);
+        }
+        parts[part] -= 1;
+
+        if (parts[part] == 1) {
+            $('tr#add-' + part).remove();
+            for (var ii = part + 1; ii < parts.length; ii++) {
+                for (var jj = 1; jj < parts[ii]; jj++) {
+                    updateRow(ii, ii-1, jj, jj);
+                }
+                $('span#spanPart' + ii).text(ii-1).attr('id', 'spanPart' + (ii-1));
+                $('input[name=rubric_part_' + ii + '_id').attr('name', 'rubric_part_' + (ii-1) + '_id');
+                $('tr#add-' + ii).attr('id', 'add-' + (ii-1)).find('div.btn').attr('onclick', 'addQuestion(' + (ii-1) + ')');
+                $('td#part-' + ii).attr('id', 'part-' + (ii-1));
+                $('a#delete-' + ii).attr('id', 'delete-' + (ii-1)).attr('onclick', 'deletePart(' + (ii-1) + ');');
+                //$('a#down-' + ii).attr('id', 'down-' + (ii-1)).attr('onclick', 'movePartDown(' + (ii-1) + ');');
+                //$('a#up-' + ii).attr('id', 'up-' + (ii-1)).attr('onclick', 'movePartUp(' + (ii-1) + ');');
+            }
+            parts.splice(part, 1);
+        }
+        else {
+            if (question == 1) {
+                $('tr#row-' + part + '-1').prepend('' +
+                '<td rowspan="' + parts[part] + '" id="part-' + part + '"><span id="spanPart' + part + '">' + part + '</span><br />' +
+                '<a id="delete-' + part + '" class="question-icon" onclick="deletePart(' + part + ');"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>' +
+                '<br />' +
+                '<div class="part_submission_id" style="display: none;"><input style="width: 47px;" type="text" name="rubric_part_' + part + '_id" value="' + part_id + '"></div></td>');
+            }
+            else {
+                $('tr#row-' + part + '-1').children('#part-' + part).attr('rowspan', parts[part]);
+            }
+        }
+        calculatePercentageTotal();
+    }
+
+    function updateRow(oldPart, newPart, oldNum, newNum) {
+        var row = $('tr#row-' + oldPart + '-' + oldNum);
+        row.attr('id', 'row-' + newPart + '-' + newNum);
+        row.find('textarea[name=comment-' + oldPart + '-' + oldNum + ']').attr('name', 'comment-' + newPart + '-' + newNum);
+        row.find('div.btn').attr('onclick', 'toggleTA(' + newPart + ',' + newNum + ')');
+        row.find('textarea[name=ta-' + oldPart + '-' + oldNum + ']').attr('name', 'ta-' + newPart + '-' + newNum).attr('id', 'individual-' + newPart + '-' + newNum);
+        row.find('select[name=point-' + oldPart + '-' + oldNum + ']').attr('name', 'point-' + newPart + '-' + newNum);
+        row.find('input[name=ec-' + oldPart + '-' + oldNum + ']').attr('name', 'ec-' + newPart + '-' + newNum);
+        row.find('a[id=delete-' + oldPart + '-' + oldNum + ']').attr('id', 'delete-' + newPart + '-' + newNum).attr('onclick', 'deleteQuestion(' + newPart + ', '+ newNum + ')');
+        row.find('a[id=down-' + oldPart + '-' + oldNum + ']').attr('id', 'down-' + newPart + '-' + newNum).attr('onclick', 'moveQuestionDown(' + newPart + ', '+ newNum + ')');
+        row.find('a[id=up-' + oldPart + '-' + oldNum + ']').attr('id', 'up-' + newPart + '-' + newNum).attr('onclick', 'moveQuestionUp(' + newPart + ', '+ newNum + ')');
+    }
+
+    function moveQuestionDown(part, question) {
+        if ((parts[part] - 1) == question || question <= 0 || part <= 0) {
+            return;
+        }
+
+        var currentRow = $('tr#row-' + part + '-' + question);
+        var newRow = $('tr#row-' + part + '-' + (question+1));
+        var child = 0;
+        if (question == 1) {
+            child = 1;
+        }
+
+
+        var temp = currentRow.children()[child].children[0].value;
+        currentRow.children()[child].children[0].value = newRow.children()[0].children[0].value;
+        newRow.children()[0].children[0].value = temp;
+
+        temp = currentRow.children()[child].children[2].value;
+        currentRow.children()[child].children[2].value = newRow.children()[0].children[2].value;
+        newRow.children()[0].children[2].value = temp;
+
+        child += 1;
+
+        temp = currentRow.children()[child].children[0].value;
+        currentRow.children()[child].children[0].value = newRow.children()[1].children[0].value;
+        newRow.children()[1].children[0].value = temp;
+
+        temp = currentRow.children()[child].children[1].checked;
+        currentRow.children()[child].children[1].checked = newRow.children()[1].children[1].checked;
+        newRow.children()[1].children[1].checked = temp;
+    }
+
+    function moveQuestionUp(part, question) {
+        if (question == 1 || question <= 0 || part <= 0) {
+            return;
+        }
+
+        var currentRow = $('tr#row-' + part + '-' + question);
+        var newRow = $('tr#row-' + part + '-' + (question-1));
+        var child = 0;
+        if (question == 2) {
+            child = 1;
+        }
+
+
+        var temp = currentRow.children()[0].children[0].value;
+        currentRow.children()[0].children[0].value = newRow.children()[child].children[0].value;
+        newRow.children()[child].children[0].value = temp;
+
+        temp = currentRow.children()[0].children[2].value;
+        currentRow.children()[0].children[2].value = newRow.children()[child].children[2].value;
+        newRow.children()[child].children[2].value = temp;
+
+        child += 1;
+
+        temp = currentRow.children()[1].children[0].value;
+        currentRow.children()[1].children[0].value = newRow.children()[child].children[0].value;
+        newRow.children()[child].children[0].value = temp;
+
+        temp = currentRow.children()[1].children[1].checked;
+        currentRow.children()[1].children[1].checked = newRow.children()[child].children[1].checked;
+        newRow.children()[child].children[1].checked = temp;
+    }
+
+    function deletePart(part) {
+        if (part < 1) {
+            return;
+        }
+
+        for (var i = 1; i < parts[part]; i++) {
+            $('tr#row-' + part + '-' + i).remove();
+        }
+        $('tr#add-' + part).remove();
+
+
+        for (var ii = part + 1; ii < parts.length; ii++) {
+            for (var jj = 1; jj < parts[ii]; jj++) {
+                updateRow(ii, ii-1, jj, jj);
+            }
+            $('span#spanPart' + ii).text(ii-1).attr('id', 'spanPart' + (ii-1));
+            $('input[name=rubric_part_' + ii + '_id').attr('name', 'rubric_part_' + (ii-1) + '_id');
+            $('tr#add-' + ii).attr('id', 'add-' + (ii-1)).find('div.btn').attr('onclick', 'addQuestion(' + (ii-1) + ')');;
+            $('td#part-' + ii).attr('id', 'part-' + (ii-1));
+            $('a#delete-' + ii).attr('id', 'delete-' + (ii-1)).attr('onclick', 'deletePart(' + (ii-1) + ');');
+            //$('a#down-' + ii).attr('id', 'down-' + (ii-1)).attr('onclick', 'movePartDown(' + (ii-1) + ');');
+            //$('a#up-' + ii).attr('id', 'up-' + (ii-1)).attr('onclick', 'movePartUp(' + (ii-1) + ');');
+        }
+        parts.splice(part, 1);
+
+        calculatePercentageTotal();
+    }
+
+    function movePartDown(part) {
+        if (parts.length - 1 <= part || part <= 0) {
+            return;
+        }
+
+        for (var i = 1; i < parts[part]; i++) {
+            updateRow(part, -1, i, i);
+        }
+
+        for (var j = 1; j < parts[part+1]; j++) {
+            updateRow(part+1, part, j, j);
+        }
+
+        for (var k = 1; k < parts[part]; k++) {
+            updateRow(-1, part+1, k, k);
+        }
+    }
+
+    function movePartUp(part) {
+        if (part <= 1 || parts.length - 1 < part) {
+            return;
+        }
     }
 
     togglePartSubmissionId();

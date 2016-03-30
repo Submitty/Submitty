@@ -3,6 +3,7 @@
 // Display all errors on initial startup in case we have an early failure in autoloader, or DB setup, etc.
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+session_start();
 
 /*
 The user's umask is ignored for the user running php, so we need
@@ -32,7 +33,7 @@ $start_time = microtime_float();
 
 if (isset($_GET['course'])) {
     // don't allow the user entered course to potentially point to a different directory via use of ../
-    $_GET['course'] = str_replace("/","_",$_GET['course']);
+    $_GET['course'] = str_replace("/", "_", $_GET['course']);
     $config = __DIR__."/configs/".$_GET['course'].".php";
     if (!file_exists($config)) {
         die(\lib\ErrorPage::get_error_page("Fatal Error: The config for the specified course '{$_GET['course']}' does not exist"));
@@ -90,6 +91,10 @@ $user_is_administrator = User::$is_administrator;
 $user_id = $user_info['user_id'];
 
 $DEVELOPER = User::$is_developer;
+
+if (!isset($_SESSION['csrf'])) {
+    $_SESSION['csrf'] = bin2hex(openssl_random_pseudo_bytes(16));
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // GENERAL

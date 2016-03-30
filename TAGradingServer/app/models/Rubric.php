@@ -10,6 +10,15 @@ use \lib\Utils;
 
 /**
  * Class Rubric
+ *
+ * This contains all the logic for loading a rubric for grading
+ * for a given student rcs and an existing rubric ID. The class
+ * gets the necessary files for the rubric (submission, svn, and
+ * result directories all scanned), calculates whether the assignment
+ * is late, not submitted, etc. on an assignment as a whole and per
+ * per part.
+ *
+ *
  * @package app\models
  */
 class Rubric {
@@ -80,16 +89,22 @@ class Rubric {
     public $status = 0;
 
     /**
+     * Was the assignment submitted (1) or not (0)?
      * @var int
      */
     public $submitted = 0;
 
     /**
+     * This is the assignment the student selected as active at the time of grading. If a rubric has
+     * been graded and then the active assignment changed, if the rubric is gone back to, it'll use
+     * the original active assignment from when it was first graded, not the new active assignment.
      * @var array
      */
     public $active_assignment = array();
 
     /**
+     * This is set to be the number of submissions a student has attempted at a homework, though
+     * this is not necessarily the assignment the student has selected as active
      * @var array
      */
     public $max_assignment = array();
@@ -151,8 +166,14 @@ class Rubric {
      */
     public $rubric_parts = 0;
 
+    /**
+     * @var array
+     */
     public $questions_count = array();
 
+    /**
+     * @var array
+     */
     private $submission_ids = array();
 
     /**
@@ -345,13 +366,22 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 continue;
             }
 
+            $objects = scandir($submission_directory);
+            $objects = array_filter($objects, function($element) use ($submission_directory) {
+                return is_dir($submission_directory."/".$element) && !in_array($element, array('.', '..'));
+            });
+            sort($objects);
+            if (count($objects) > 0) {
+                $this->max_assignment[$part] = end($objects);
+            }
+            else {
+                $part++;
+                continue;
+            }
+
             $details = array();
             $this->submitted = 1;
             $this->parts_submitted[$part] = 1;
-
-            $objects = scandir($submission_directory);
-            sort($objects);
-            $this->max_assignment[$part] = $objects[count($objects) - 2];
 
             if (isset($_GET["active_assignment_{$part}"]) && 1 == 2) {
                 $_GET["active_assignment_{$part}"] = intval($_GET["active_assignment_{$part}"]);
@@ -369,6 +399,11 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 if (file_exists(implode("/", array($submission_directory, "user_assignment_settings.json")))) {
                     $settings = json_decode(file_get_contents(implode("/", array($submission_directory, "user_assignment_settings.json"))), true);
                     $this->active_assignment[$part] = $settings['active_assignment'];
+                    // If the active_assignment is -1 in the file, then the submission was "cancelled"
+                    if ($settings['active_assignment'] == 0) {
+                        $part++;
+                        continue;
+                    }
                 }
                 else {
                     $this->active_assignment[$part] = $this->max_assignment[$part];
@@ -459,7 +494,11 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
     }
 
     /**
-     *
+     * Calculate the overall status of the homework. There is an entire homework status which can take
+     * on the values of 0 (not accepted) or 1 (accepted) where not accepted just means homework
+     * should get a 0 automatically and 1 means homework should be graded. Additionally, each part of
+     * the homework has its own status which can be 0 (not submitted or too late), 1 (it's fine) or
+     * 2 (it's late, but student has enough remaining late days to cover it).
      */
     private function calculateStatus() {
         if (!$this->submitted) {
@@ -502,42 +541,43 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
     }
 
     /**
-     *
+     * Calculate the current grade for each question. This is either the saved value in the DB (for a regrade),
+     * a 0 if the homework wasn't submitted, the part wasn't submitted or the ZERO_RUBRIC_GRADES flag is set,
+     * otherwise set the question to its potential full value.
      */
     private function setQuestionTotals() {
         $total = 0;
 
         for ($i = 0; $i < count($this->questions); $i++) {
-            if (!isset($this->questions[$i]['grade_question_score'])) {
+            $question = &$this->questions[$i];
+            $status_part = ($this->rubric_parts['rubric_parts_sep']) ? $question['question_part_number'] : 1;
+            if (!isset($question['grade_question_score'])) {
                 if ($this->status == 0) {
-                    $this->questions[$i]['grade_question_score'] = 0;
+                    $question['grade_question_score'] = 0;
                 }
-                else if (__USE_AUTOGRADER__ && $this->questions[$i]['question_part_number'] == 0) {
+                else if (__USE_AUTOGRADER__ && $question['question_part_number'] == 0) {
+                    $question['grade_question_score'] = 0;
                     foreach ($this->results_details as $part => $details) {
-                        if ($this->questions[$i]['question_number'] == 1) {
-                            $this->questions[$i]['grade_question_score'] = $this->results_details[$part]['non_extra_credit_points_awarded'];
+                        if ($question['question_number'] == 1) {
+                            $question['grade_question_score'] += $this->results_details[$part]['non_extra_credit_points_awarded'];
                         }
                         else {
-                            $this->questions[$i]['grade_question_score'] = $this->results_details[$part]['extra_credit_points_awarded'];
+                            $question['grade_question_score'] += $this->results_details[$part]['extra_credit_points_awarded'];
                         }
                     }
                 }
-                else if (!$this->status[$this->questions[$i]['question_part_number']] || __ZERO_RUBRIC_GRADES__) {
-                    $this->questions[$i]['grade_question_score'] = 0;
+                else if (!$this->parts_status[$status_part] || __ZERO_RUBRIC_GRADES__) {
+                    $question['grade_question_score'] = 0;
                 }
                 else {
-                    $this->questions[$i]['grade_question_score'] = $this->questions[$i]['question_total'];
+                    $question['grade_question_score'] = $question['question_total'];
                 }
             }
 
-            if (!$this->questions[$i]['question_extra_credit']) {
-                $total += $this->questions[$i]['question_total'];
+            if (!$question['question_extra_credit']) {
+                $total += $question['question_total'];
             }
         }
         $this->rubric_details['rubric_total'] = $total;
-    }
-
-    public function dumpStuff() {
-        var_dump($this);
     }
 }

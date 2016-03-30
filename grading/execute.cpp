@@ -37,17 +37,25 @@ bool system_program(const std::string &program) {
   assert (program.size() >= 1);
   if (program == "/bin/ls" ||
       program == "/usr/bin/time" ||
+      program == "/bin/mv" || 
+      program == "/bin/chmod" || 
+      program == "/usr/bin/find" || 
+      // for Computer Science I
+      program == "/usr/bin/python" ||
+      // for Data Structures
       program == "/usr/bin/clang++" ||
       program == "/usr/bin/g++" ||
       program == "/usr/bin/valgrind" ||
       program == "/usr/local/hss/drmemory/bin/drmemory" ||
-      program == "/bin/mv" || 
-      program == "/bin/chmod" || 
-      program == "/usr/bin/find" || 
       program == "/usr/bin/compare" ||  // image magick! 
-      program == "/usr/bin/python" ||
+      // for Principles of Software
       program == "/usr/bin/java" ||
-      program == "/usr/bin/javac") {
+      program == "/usr/bin/javac" ||
+      // for Operating Systems
+      program == "/usr/bin/gcc" ||
+      // for Programming Languages
+      program == "/usr/bin/swipl" ||
+      program == "/usr/bin/plt-r5rs") {
     return true;
   }
   return false;
@@ -80,9 +88,10 @@ void validate_program(const std::string &program) {
 void validate_filename(const std::string &filename) {
   assert (filename.size() >= 1);
   if (filename[0] == '-') {
-    std::cout << "ERROR: command line filename looks suspicious '" << filename << "'" << std::endl;
-    std::cerr << "ERROR: command line filename looks suspicious '" << filename << "'" << std::endl;
-    exit(1);
+    std::cout << "WARNING: command line filename looks suspicious '" << filename << "'" << std::endl;
+    std::cerr << "WARNING: command line filename looks suspicious '" << filename << "'" << std::endl;
+    // note: cannot enforce this when running drmemory on a program with options :(
+    //exit(1);
   }
 }
 
@@ -622,11 +631,22 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
                     elapsed+= 0.1;
                 }
                 else {
+  		    static int kill_counter = 0;
                     std::cout << "Killing child process" << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
                     // the '-' here means to kill the group
-                    kill(childPID, SIGKILL);
-                    kill(-childPID, SIGKILL);
-                    usleep(1000); /* wait 1/1000th of a second for the process to die */
+		    int success_kill_a = kill(childPID, SIGKILL);
+                    int success_kill_b = kill(-childPID, SIGKILL);
+		    kill_counter++;
+		    if (success_kill_a != 0 || success_kill_b != 0) {
+		      std::cout << "ERROR! kill pid " << childPID << " was not successful" << std::endl;
+		    }
+		    if (kill_counter >= 5) {
+		      std::cout << "ERROR! kill counter for pid " << childPID << " is " << kill_counter << std::endl;
+		      std::cout << "  Check /var/log/syslog (or other logs) for possible kernel bug \n" 
+				<< "  or hardware bug that is preventing killing this job. " << std::endl;
+		    }
+                    usleep(10000); /* wait 1/100th of a second for the process to die */
+		    elapsed+=0.001;
                     time_kill=1;
                 }
             }

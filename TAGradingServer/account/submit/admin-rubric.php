@@ -4,6 +4,10 @@ include "../../toolbox/functions.php";
 
 check_administrator();
 
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
+    die("invalid csrf token");
+}
+
 $rubric_parts_sep = (isset($_POST['rubric_parts_sep']) && intval($_POST['rubric_parts_sep']) == 1) ? 1 : 0;
 $rubric_late_days = intval($_POST['rubric_late_days']);
 $rubric_parts = intval($_POST['part_count']);
@@ -45,6 +49,11 @@ $part = (__USE_AUTOGRADER__) ? 0 : 1;
 
 $questions = array();
 if ($action == 'edit') {
+    $db->query("SELECT COUNT(*) as cnt FROM grades WHERE rubric_id=?", array($rubric_id));
+    if ($db->row()['cnt'] == 0) {
+        $db->query("DELETE FROM questions WHERE rubric_id=?", array($rubric_id));
+    }
+
     $db->query("SELECT * FROM questions WHERE rubric_id=? ORDER BY question_part_number, question_number", array($rubric_id));
     foreach ($db->rows() as $row) {
         $questions[$row['question_part_number']][$row['question_number']] = $row;
