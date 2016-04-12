@@ -12,8 +12,8 @@ Vagrant.configure(2) do |config|
     v.memory = 2048
     v.cpus = 2
   end
-  
-  config.vm.synced_folder ".", "/usr/local/hss/GIT_CHECKOUT_Submitty", owner: "vagrant", group: "vagrant"
+
+  config.vm.synced_folder ".", "/usr/local/hss/GIT_CHECKOUT_Submitty", owner: "vagrant", group: "vagrant", mount_options: ["dmode=755", "fmode=775"]
 
   config.vm.provision "shell" do |s|
     s.path = ".setup/vagrant.sh"
