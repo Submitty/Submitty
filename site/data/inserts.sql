@@ -12,3 +12,9 @@ INSERT INTO config (config_name, config_type, config_value) VALUES ('default_stu
 INSERT INTO config (config_name, config_type, config_value) VALUES ('use_autograder',3,'true');
 INSERT INTO config (config_name, config_type, config_value) VALUES ('generate_diff',3,'true');
 INSERT INTO config (config_name, config_type, config_value) VALUES ('zero_rubric_grades',3,'false');
+
+
+--
+-- Section Inserts
+--
+INSERT INTO sections (section_number, section_title, section_is_enabled) VALUES (-1, 'Disabled Section', 0);
