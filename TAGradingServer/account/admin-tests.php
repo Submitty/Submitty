@@ -146,8 +146,8 @@ $output .= <<<HTML
 
 function uploadGrades(test_id) {
     var test_number = $('#test-'+test_id).attr('test-number');
-    //var c = window.confirm("Are you sure you want to upload grades for " + test_number + "?");
-    if (true == true) {
+    var c = window.confirm("Are you sure you want to upload grades for " + test_number + "? This WILL overwrite any existing grades.");
+    if (c == true) {
         var formData = new FormData();
         formData.append('csrf_token', '{$_SESSION['csrf']}');
         var test_upload = $('#test-' + test_id + '-upload');
