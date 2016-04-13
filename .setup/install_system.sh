@@ -49,6 +49,8 @@ if [ ${VAGRANT} == 1 ]; then
 ##    https://192.168.56.102 (svn)                        ##
 ##    https://192.168.56.103 (grading)                    ##
 ##                                                        ##
+##  The database can be accessed via localhost:15432      ##
+##                                                        ##
 ##  Happy developing!                                     ##
 ############################################################
 ' > /etc/motd
@@ -334,6 +336,12 @@ if [ ${VAGRANT} == 1 ]; then
 	echo "Creating PostgreSQL users"
 	su postgres -c "source ${HWSERVER_DIR}/.setup/db_users.sh";
 	echo "Finished creating PostgreSQL users"
+
+    echo "Setting up Postgres to connect to via host"
+    PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}')"
+	sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
+	echo "host    all             all             all                     md5" >> "/etc/postgresql/${PG_VERSION}/main/pg_hba.conf"
+	service postgresql restart
 fi
 
 #################################################################
