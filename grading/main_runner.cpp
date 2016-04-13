@@ -58,7 +58,8 @@ int main(int argc, char *argv[]) {
   std::cout << "CUSTOMIZE AUTO GRADING replace " <<  replace_string_before << " with " << replace_string_after << std::endl;
 #endif
   
-  system ("ls -lta");
+  //system ("ls -lta");
+  system("find . -type f");
 
   // Run each test case and create output files
   for (unsigned int i = 0; i < testcases.size(); i++) {

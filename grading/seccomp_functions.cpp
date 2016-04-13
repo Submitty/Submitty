@@ -26,6 +26,7 @@
 #define long_test IGNORE_LONG_TEST
 #define medium_test IGNORE_MEDIUM_TEST
 #define short_test IGNORE_SHORT_TEST
+#define drmemory_flags IGNORE_DR_MEMORY_FLAGS
 #include "default_config.h"
 //
 // END FIXME LONGTERM
@@ -37,16 +38,24 @@
 #define ALLOW_SYSCALL(name) do {\
   int __res__ = seccomp_rule_add(sc, SCMP_ACT_ALLOW, SCMP_SYS(name), 0); \
   if (__res__ < 0) {\
+    execute_logfile << "WARNING:  Errno " << __res__ << " installing seccomp rule for " << #name << std::endl; \
+  }\
+} while (0)
+
+/*
+#define ALLOW_SYSCALL(name) do {\
+  int __res__ = seccomp_rule_add(sc, SCMP_ACT_ALLOW, SCMP_SYS(name), 0); \
+  if (__res__ < 0) {\
     fprintf(stderr, "Error %d installing seccomp rule for %s\n", __res__, #name); \
     return 1;\
   }\
 } while (0)
+*/
 
 // ===========================================================================
 // ===========================================================================
 
-int install_syscall_filter(bool is_32, const std::string &my_program) {
-    
+int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &execute_logfile) {
   int res;
   scmp_filter_ctx sc = seccomp_init(SCMP_ACT_KILL);
   int target_arch = is_32 ? SCMP_ARCH_X86 : SCMP_ARCH_X86_64;
@@ -120,6 +129,36 @@ int install_syscall_filter(bool is_32, const std::string &my_program) {
 #define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_MEMORY_ADVANCED
 #define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
 #define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SCHEDULING
+
+
+
+    // DESPERATE, WHITELIST EVERYTHING
+    // FIXME: determine what is non-deterministic about system calls for compilation :(
+#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_MEMORY_ADVANCED
+#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
+#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SYNCHRONIZATION
+#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SCHEDULING
+#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
+#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_GET_SET_USER_GROUP_ID
+#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY
+#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_PERMISSIONS
+#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_CAPABILITIES
+#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_EXTENDED_ATTRIBUTES
+#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_RARE
+#define ALLOW_SYSTEM_CALL_CATEGORY_DEVICE_MANAGEMENT_ADVANCED
+#define ALLOW_SYSTEM_CALL_CATEGORY_INFORMATION_MAINTENANCE_ADVANCED
+#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL
+#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SOCKETS
+#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SIGNALS
+#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION
+#define ALLOW_SYSTEM_CALL_CATEGORY_TGKILL
+#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_KILL
+#define ALLOW_SYSTEM_CALL_CATEGORY_UNKNOWN
+#define ALLOW_SYSTEM_CALL_CATEGORY_UNKNOWN_MODULE
+#define ALLOW_SYSTEM_CALL_CATEGORY_UNKNOWN_REMAP_PAGES
+
+
+
   }
 
   if (my_program == "/usr/bin/java") {

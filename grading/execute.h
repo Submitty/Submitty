@@ -8,7 +8,7 @@ int execute(const std::string &cmd,
 
 int exec_this_command(const std::string &cmd, std::ofstream &logfile);
 
-int install_syscall_filter(bool is_32, const std::string &my_program);
+int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &logfile);
 
 
 

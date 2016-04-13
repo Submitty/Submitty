@@ -128,6 +128,7 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Compiling User Code..." << std::endl;
 
+  system("find . -type f");
 
 #ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
   std::string replace_string_before = __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__;
@@ -176,6 +177,8 @@ int main(int argc, char *argv[]) {
   }
   std::cout << "========================================================" << std::endl;
   std::cout << "FINISHED ALL TESTS" << std::endl;
+
+  system("find . -type f");
 
   return 0;
 }
