@@ -103,11 +103,11 @@ CREATE SEQUENCE grade_test_sequence
 -- Name: grades; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE grades (
+CREATE TABLE grades_rubrics (
     grade_id integer DEFAULT nextval('grade_sequence'::regclass) NOT NULL,
     rubric_id character varying NOT NULL,
     grade_student_id character varying(255) NOT NULL,
-    grade_grader_id character varying(255) NOT NULL,
+    grade_grader_id character varying(255),
     grade_finish_timestamp timestamp(6) without time zone,
     grade_comment character varying(10240),
     grade_days_late integer DEFAULT 0 NOT NULL,
@@ -126,7 +126,7 @@ CREATE TABLE grades (
 -- Name: grades_academic_integrity; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE grades_academic_integrity (
+CREATE TABLE grades_rubrics_academic_integrity (
     rubric_id character varying NOT NULL,
     student_id character varying(255) NOT NULL,
     penalty numeric(3,3) DEFAULT NULL::numeric
@@ -143,7 +143,7 @@ CREATE TABLE grades_labs (
     grade_lab_id integer DEFAULT nextval('grade_lab_sequence'::regclass) NOT NULL,
     lab_number integer NOT NULL,
     grade_lab_student_id character varying(255) NOT NULL,
-    grade_lab_grader_id character varying(255) NOT NULL,
+    grade_lab_grader_id character varying(255),
     grade_lab_checkpoint integer NOT NULL,
     grade_lab_value integer DEFAULT 0 NOT NULL,
     grade_finish_timestamp timestamp without time zone
@@ -159,7 +159,7 @@ CREATE TABLE grades_others (
     grades_other_id integer NOT NULL,
     other_id character varying(255) NOT NULL,
     grades_other_student_id character varying NOT NULL,
-    grades_other_grader_id character varying(255) NOT NULL,
+    grades_other_grader_id character varying(255),
     grades_other_score numeric DEFAULT 0 NOT NULL,
     grades_other_text character varying DEFAULT ''::character varying NOT NULL
 );
@@ -210,7 +210,7 @@ CREATE TABLE grades_tests (
     grade_test_id integer DEFAULT nextval('grade_test_sequence'::regclass) NOT NULL,
     test_id integer,
     grade_test_student_id character varying(255) NOT NULL,
-    grade_test_grader_id character varying(255) NOT NULL,
+    grade_test_grader_id character varying(255),
     grade_test_questions numeric[],
     grade_test_value numeric DEFAULT 0 NOT NULL,
     grade_test_text character varying[]
@@ -414,11 +414,11 @@ ALTER TABLE ONLY grades_others ALTER COLUMN grades_other_id SET DEFAULT nextval(
 
 --
 -- TOC entry 1967 (class 2606 OID 24805)
--- Name: grades_academic_integrity_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: grades_rubrics_academic_integrity_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY grades_academic_integrity
-    ADD CONSTRAINT grades_academic_integrity_pkey PRIMARY KEY (rubric_id, student_id);
+ALTER TABLE ONLY grades_rubrics_academic_integrity
+    ADD CONSTRAINT grades_rubrics_academic_integrity_pkey PRIMARY KEY (rubric_id, student_id);
 
 
 --
@@ -462,8 +462,8 @@ ALTER TABLE ONLY grades_others
 -- Name: grades_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY grades
-    ADD CONSTRAINT grades_pkey PRIMARY KEY (grade_id);
+ALTER TABLE ONLY grades_rubrics
+    ADD CONSTRAINT grades_rubrics_pkey PRIMARY KEY (grade_id);
 
 
 --
@@ -498,8 +498,8 @@ ALTER TABLE ONLY grades_tests
 -- Name: grades_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY grades
-    ADD CONSTRAINT grades_unique UNIQUE (rubric_id, grade_student_id);
+ALTER TABLE ONLY grades_rubrics
+    ADD CONSTRAINT grades_rubrics_unique UNIQUE (rubric_id, grade_student_id);
 
 
 --
@@ -679,11 +679,11 @@ CREATE INDEX fki_relationships_users_section_fkey ON relationships_graders USING
 
 --
 -- TOC entry 2018 (class 2606 OID 24702)
--- Name: grades_academic_integerity_student_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: grades_rubrics_academic_integerity_student_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY grades_academic_integrity
-    ADD CONSTRAINT grades_academic_integerity_student_fkey FOREIGN KEY (student_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY grades_rubrics_academic_integrity
+    ADD CONSTRAINT grades_rubrics_academic_integerity_student_fkey FOREIGN KEY (student_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -691,17 +691,17 @@ ALTER TABLE ONLY grades_academic_integrity
 -- Name: grades_academic_integrity_rubric_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY grades_academic_integrity
-    ADD CONSTRAINT grades_academic_integrity_rubric_fkey FOREIGN KEY (rubric_id) REFERENCES rubrics(rubric_id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY grades_rubrics_academic_integrity
+    ADD CONSTRAINT grades_rubrics_academic_integrity_rubric_fkey FOREIGN KEY (rubric_id) REFERENCES rubrics(rubric_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
 -- TOC entry 2016 (class 2606 OID 24676)
--- Name: grades_grader_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: grades_rubrics_grader_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY grades
-    ADD CONSTRAINT grades_grader_fkey FOREIGN KEY (grade_grader_id) REFERENCES users(user_id) ON UPDATE SET NULL ON DELETE SET NULL;
+ALTER TABLE ONLY grades_rubrics
+    ADD CONSTRAINT grades_rubrics_grader_fkey FOREIGN KEY (grade_grader_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 --
@@ -719,7 +719,7 @@ ALTER TABLE ONLY grades_labs
 --
 
 ALTER TABLE ONLY grades_labs
-    ADD CONSTRAINT grades_labs_grader_fkey FOREIGN KEY (grade_lab_grader_id) REFERENCES users(user_id) ON UPDATE SET NULL ON DELETE SET NULL;
+    ADD CONSTRAINT grades_labs_grader_fkey FOREIGN KEY (grade_lab_grader_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 --
@@ -737,7 +737,7 @@ ALTER TABLE ONLY grades_labs
 --
 
 ALTER TABLE ONLY grades_others
-    ADD CONSTRAINT grades_other_grader_fkey FOREIGN KEY (grades_other_grader_id) REFERENCES users(user_id) ON UPDATE SET NULL ON DELETE SET NULL;
+    ADD CONSTRAINT grades_other_grader_fkey FOREIGN KEY (grades_other_grader_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 --
@@ -764,7 +764,7 @@ ALTER TABLE ONLY grades_others
 --
 
 ALTER TABLE ONLY grades_questions
-    ADD CONSTRAINT grades_questions_grade_fkey FOREIGN KEY (grade_id) REFERENCES grades(grade_id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT grades_questions_grade_fkey FOREIGN KEY (grade_id) REFERENCES grades_rubrics(grade_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -781,7 +781,7 @@ ALTER TABLE ONLY grades_questions
 -- Name: grades_rubric_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY grades
+ALTER TABLE ONLY grades_rubrics
     ADD CONSTRAINT grades_rubric_fkey FOREIGN KEY (rubric_id) REFERENCES rubrics(rubric_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
@@ -790,7 +790,7 @@ ALTER TABLE ONLY grades
 -- Name: grades_student_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY grades
+ALTER TABLE ONLY grades_rubrics
     ADD CONSTRAINT grades_student_fkey FOREIGN KEY (grade_student_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
@@ -809,7 +809,7 @@ ALTER TABLE ONLY grades_tests
 --
 
 ALTER TABLE ONLY grades_tests
-    ADD CONSTRAINT grades_tests_grader_fkey FOREIGN KEY (grade_test_grader_id) REFERENCES users(user_id) ON UPDATE SET NULL ON DELETE SET NULL;
+    ADD CONSTRAINT grades_tests_grader_fkey FOREIGN KEY (grade_test_grader_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 --
@@ -863,7 +863,7 @@ ALTER TABLE ONLY relationships_graders
 --
 
 ALTER TABLE ONLY rubrics_grading_sections
-    ADD CONSTRAINT rubrics_grading_sections_grader_fkey FOREIGN KEY (grader_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT rubrics_grading_sections_grader_fkey FOREIGN KEY (grader_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 --
