@@ -61,6 +61,8 @@ class Output {
      * getInstance method.
      *
      * @param string $view
+     *
+     * @return string
      */
     private static function getView($view) {
         if(!isset(static::$loaded_views[$view])) {
@@ -82,8 +84,33 @@ class Output {
     }
 
     /**
-     * Display an error to the user in a general "500" type error as we should
-     * only realistically be loading these when we hit "abnormal" usage
+     * Display an error to the user as a general "500" type error as we should
+     * only realistically be hitting this on "abnormal" usage
+     * (coming from ExceptionHandler generally) and we are just aborting.
+     * For handled exceptions, we would specify this within the execution as
+     * just another possible view (such as viewing an invalid rubric id).
+     * Additionally, we almost always want to die when we called this method, but
+     * we've included a way to not die mainly just so that we can test this function.
+     *
+     * @param string $exception
+     * @param bool $die
+     *
+     * @return string
+     */
+    public static function showException($exception = "", $die = true) {
+        /** @noinspection PhpUndefinedMethodInspection */
+        $exceptionPage = static::getView("Error")->exceptionPage($exception);
+        // @codeCoverageIgnore
+        if ($die) {
+            die($exceptionPage);
+        }
+
+        return $exceptionPage;
+    }
+
+    /**
+     * Display an error to the user as a general "500" type error as we should
+     * only realistically be hitting this on "abnormal" usage
      * (coming from ExceptionHandler generally) and we are just aborting.
      * For handled exceptions, we would specify this within the execution as
      * just another possible view (such as viewing an invalid rubric id).
@@ -92,6 +119,8 @@ class Output {
      *
      * @param string $error
      * @param bool $die
+     *
+     * @return string
      */
     public static function showError($error = "", $die = true) {
         /** @noinspection PhpUndefinedMethodInspection */

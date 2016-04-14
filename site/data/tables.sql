@@ -34,17 +34,6 @@ SET search_path = public, pg_catalog;
 
 SET default_with_oids = false;
 
---
--- TOC entry 170 (class 1259 OID 16389)
--- Name: config; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE config (
-    config_name character varying(255) NOT NULL,
-    config_type integer NOT NULL,
-    config_value character varying(255) NOT NULL
-);
-
 
 --
 -- TOC entry 171 (class 1259 OID 16395)
@@ -545,15 +534,6 @@ ALTER TABLE ONLY late_days
 
 ALTER TABLE ONLY other_grades
     ADD CONSTRAINT other_grades_pkey PRIMARY KEY (other_id);
-
-
---
--- TOC entry 1961 (class 2606 OID 16590)
--- Name: pk_config; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY config
-    ADD CONSTRAINT pk_config PRIMARY KEY (config_name);
 
 
 --

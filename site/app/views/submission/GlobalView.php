@@ -13,6 +13,7 @@ class GlobalView {
     <title>{$title}</title>
     <link type="text/css" href="{$base_url}public/css/homework.css" rel="stylesheet" />
     <script type="text/javascript" href="{$base_url}public/js/jquery.min.js" />
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700' rel='stylesheet' type='text/css'>
 </head>
 <body>
 HTML;

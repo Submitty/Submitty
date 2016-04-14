@@ -26,13 +26,14 @@ class User {
      *
      * @return bool
      */
-    public static function loadStaff($staff_rcs) {
-        $details = Database::queries()->getUserById($staff_rcs);
+    public static function loadUser($user_id) {
+        $details = Database::queries()->getUserById($user_id);
         if (count($details) == 0) {
             return false;
         }
 
         static::$details = $details;
+        static::$user_loaded = true;
 
         return true;
     }
@@ -47,5 +48,13 @@ class User {
 
     public static function accessGrading() {
         return static::$details['user_group'] > 1;
+    }
+
+    public static function accessAdmin() {
+        return static::$details['user_group'] >= 4;
+    }
+
+    public static function isDeveloper() {
+        return static::$details['user_group'] == 5;
     }
 }
