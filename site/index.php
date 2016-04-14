@@ -20,8 +20,12 @@ ini_set('display_errors', 1);
 require_once(__DIR__ . "/app/libraries/AutoLoader.php");
 AutoLoader::registerDirectory(__DIR__."/app", true, "app");
 
+/**
+ * A custom exception handler for our application which
+ * @param $throwable
+ */
 function exception_handler($throwable) {
-    Output::showError(ExceptionHandler::throwException($throwable));
+    Output::showException(ExceptionHandler::throwException($throwable));
 }
 set_exception_handler("exception_handler");
 
@@ -60,23 +64,24 @@ else {
 
 // attempt to load rcs as both student and user
 User::loaduser($username);
+if (!User::userLoaded()) {
+    Output::showError("Unrecognized username '{$username}'");
+}
 
 // Path components are Section, Controller, Action, Method
 $section = isset($_GET['component']) ? strtolower($_GET['component']) : 'submission';
 
 switch($section) {
     case 'grading':
-        if (!User::accessGrading()) {
-            Output::showError("Unrecognized username '{$username}'");
-        }
         $control = new app\controllers\GradingController();
         $control->run();
         break;
     case 'submission':
-        if (!User::userLoaded()) {
-            Output::showError("Unrecognized username '{$username}'");
-        }
         $control = new app\controllers\SubmissionController();
+        $control->run();
+        break;
+    case 'admin':
+        $control = new app\controllers\AdminController();
         $control->run();
         break;
     default:
