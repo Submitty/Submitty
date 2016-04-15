@@ -3,7 +3,6 @@
 namespace app\libraries;
 
 use app\exceptions\BaseException;
-use app\models\Config;
 
 /**
  * Class ExceptionHandler
@@ -15,11 +14,28 @@ use app\models\Config;
  */
 class ExceptionHandler {
 
+    private static $log_exceptions = false;
+    private static $display_exceptions = false;
+
     /**
      * This is a static class so it should never be instaniated or copied anywhere
      */
     private function __construct() { }
     private function __clone() { }
+
+    /**
+     * @param bool $boolean
+     */
+    public static function setLogExceptions($boolean) {
+        static::$log_exceptions = $boolean;
+    }
+
+    /**
+     * @param bool $boolean
+     */
+    public static function setDisplayExceptions($boolean) {
+        static::$display_exceptions = $boolean;
+    }
 
     /**
      * Takes in a Throwable (Exception or Error), and then we will log the details
@@ -35,7 +51,7 @@ class ExceptionHandler {
     public static function throwException($exception) {
         $display_message = false;
         $is_base_exception = false;
-        $log_exception = Config::$log_exceptions;
+        $log_exception = static::$log_exceptions;
         if (is_a($exception, 'BaseException')) {
             /** @var BaseException $exception */
             $is_base_exception = true;
@@ -83,7 +99,7 @@ class ExceptionHandler {
             Logger::fatal($message);
         }
 
-        if (Config::$debug || $display_message) {
+        if (static::$display_exceptions || $display_message) {
             return $message;
         }
         else {

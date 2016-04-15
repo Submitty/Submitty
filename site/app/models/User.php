@@ -2,59 +2,55 @@
 
 namespace app\models;
 
-use app\database\Database;
+use app\libraries\database\IDatabaseQueries;
+use app\libraries\Output;
 
 class User {
     /**
      * @var array
      */
-    private static $details = array();
+    private $details = array();
 
     /**
      * @var bool
      */
-    private static $user_loaded = false;
+    private $user_loaded = false;
 
     /**
-     * This is a singleton class, so no instation or duplication
-     */
-    private function __construct() { }
-    private function __clone() { }
-
-    /**
-     * @param string $staff_rcs: This is a user's RCS/username on the database
+     * User constructor.
      *
-     * @return bool
+     * @param string           $user_id
+     * @param IDatabaseQueries $database
      */
-    public static function loadUser($user_id) {
-        $details = Database::queries()->getUserById($user_id);
+    public function __construct($user_id, $database) {
+        $details = $database->getUserById($user_id);
         if (count($details) == 0) {
             return false;
         }
 
-        static::$details = $details;
-        static::$user_loaded = true;
+        $this->details = $details;
+        $this->user_loaded = true;
 
         return true;
     }
 
-    public static function getDetail($detail) {
-        return static::$details[$detail];
+    public function getDetail($detail) {
+        return $this->details[$detail];
     }
 
-    public static function userLoaded() {
-        return static::$user_loaded;
+    public function userLoaded() {
+        return $this->user_loaded;
     }
 
-    public static function accessGrading() {
-        return static::$details['user_group'] > 1;
+    public function accessGrading() {
+        return $this->details['user_group'] > 1;
     }
 
-    public static function accessAdmin() {
-        return static::$details['user_group'] >= 4;
+    public function accessAdmin() {
+        return $this->details['user_group'] >= 4;
     }
 
-    public static function isDeveloper() {
-        return static::$details['user_group'] == 5;
+    public function isDeveloper() {
+        return $this->details['user_group'] == 5;
     }
 }

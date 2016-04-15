@@ -15,11 +15,18 @@ class Logger {
     const ERROR = 3;
     const FATAL = 4;
 
+    private static $log_path;
+
     /**
      * Don't allow usage of this class outside a static context
      */
     private function __construct() { }
     private function __clone() { }
+
+
+    public static function setLogPath($path) {
+        static::$log_path = $path;
+    }
 
     /**
      * Log a debug message to the logger
@@ -85,7 +92,7 @@ class Logger {
     private static function log($level=0, $message="") {
         date_default_timezone_set("America/New_York");
 
-        FileUtils::createDir(Config::$hss_log_path);
+        FileUtils::createDir(static::$log_path);
 
         $date = getdate(time());
         $filename = $date['year'].Functions::pad($date['mon']).Functions::pad($date['mday']);
@@ -121,7 +128,7 @@ class Logger {
         $log_message .= str_repeat("=-", 30)."="."\n";
 
         // Appends to the file using a locking mechanism, and supressing any potential error from this
-        if (file_put_contents(Config::$hss_log_path."/".$filename.".txt", $log_message, FILE_APPEND | LOCK_EX) === false) {
+        if (file_put_contents(static::$log_path."/".$filename.".txt", $log_message, FILE_APPEND | LOCK_EX) === false) {
             print "failure to log error";
         }
     }

@@ -25,18 +25,18 @@ class Config {
      * turn on if running server in production environment.
      * @var bool
      */
-    public static $debug = true;
+    private $debug = true;
 
-    public static $semester;
-    public static $course;
+    private $semester;
+    private $course;
 
     /*** MASTER CONFIG ***/
-    public static $base_url;
-    public static $site_url;
-    public static $hss_path;
-    public static $hss_course_path;
-    public static $hss_log_path;
-    public static $log_exceptions;
+    private $base_url;
+    private $site_url;
+    private $hss_path;
+    private $hss_course_path;
+    private $hss_log_path;
+    private $log_exceptions;
 
     /**
      * Database host for PDO. The user does not need to set this
@@ -44,115 +44,106 @@ class Config {
      * to PostgreSQL.
      * @var string
      */
-    public static $database_type = "pgsql";
+    private $database_type = "pgsql";
 
     /**
      * Database host for PDO
      * @var string
      */
-    public static $database_host;
+    private $database_host;
 
     /**
      * Database user for PDO
      * @var string
      */
-    public static $database_user;
+    private $database_user;
 
     /**
      * Database password for PDO
      * @var string
      */
-    public static $database_password;
+    private $database_password;
 
     /*** COURSE SPECIFIC CONFIG ***/
     /**
      * Database name for PDO
      * @var string
      */
-    public static $database_name;
+    private $database_name;
 
     /*** COURSE DATABASE CONFIG ***/
 
-    public static $course_name;
-    public static $default_hw_late_days;
-    public static $default_student_late_days;
-    public static $zero_rubric_grades;
-    public static $generate_diff;
-    public static $use_autograder;
-
-    private static $database_configs = array();
+    private $course_name;
+    private $default_hw_late_days;
+    private $default_student_late_days;
+    private $zero_rubric_grades;
+    private $generate_diff;
+    private $use_autograder;
 
     /**
-     * Singleton static class
-     */
-    private function __construct() {}
-    private function __clone() {}
-
-    /**
+     * Config constructor.
+     *
      * @param $semester
      * @param $course
      */
-    public static function loadCourse($semester, $course) {
-        static::$semester = $semester;
-        static::$course = $course;
+    public function __construct($semester, $course) {
+        $this->semester = $semester;
+        $this->course = $course;
 
         // Load config details from the master config file
         $master = IniParser::readFile(__DIR__.'/../../config/master.ini');
 
-        static::setConfigValues($master, 'logging_details', array('hss_log_path', 'log_exceptions'));
-        static::setConfigValues($master, 'site_details', array('base_url', 'hss_path'));
-        static::setConfigValues($master, 'database_details', array('database_host', 'database_user', 'database_password'));
+        $this->setConfigValues($master, 'logging_details', array('hss_log_path', 'log_exceptions'));
+        $this->setConfigValues($master, 'site_details', array('base_url', 'hss_path'));
+        $this->setConfigValues($master, 'database_details', array('database_host', 'database_user', 'database_password'));
 
         if (isset($master['site_details']['debug'])) {
-            static::$debug = $master['site_details']['debug'];
+            $this->debug = $master['site_details']['debug'];
         }
 
         if (isset($master['database_details']['database_type'])) {
-            static::$database_type = $master['database_details']['database_type'];
+            $this->database_type = $master['database_details']['database_type'];
         }
 
-        static::$base_url = rtrim(static::$base_url, "/")."/";
-        static::$site_url = static::$base_url."index.php?semester=".static::$semester."&course=".static::$course;
+        $this->base_url = rtrim($this->base_url, "/")."/";
+        $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
 
         // Check that the paths from the config file are valid
         foreach(array('hss_path', 'hss_log_path') as $path) {
-            if (!is_dir(static::$$path)) {
+            if (!is_dir($this->$path)) {
                 throw new ConfigException("Invalid path for setting: {$path}");
             }
-            static::$$path = rtrim(static::$$path, "/");
+            $this->$path = rtrim($this->$path, "/");
         }
 
-        if (!is_dir(implode("/", array(static::$hss_path, "courses", static::$semester))) ||
-            !is_dir(implode("/", array(__DIR__, "..", "..", "config", static::$semester)))) {
-            throw new ConfigException("Invalid semester: ".static::$semester, true);
+        if (!is_dir(implode("/", array($this->hss_path, "courses", $this->semester))) ||
+            !is_dir(implode("/", array(__DIR__, "..", "..", "config", $this->semester)))) {
+            throw new ConfigException("Invalid semester: ".$this->semester, true);
         }
 
-        static::$hss_course_path = implode("/", array(static::$hss_path, "courses", static::$semester, static::$course));
-        if (!is_dir(static::$hss_course_path)) {
-            throw new ConfigException("Invalid course: ".static::$course, true);
+        $this->hss_course_path = implode("/", array($this->hss_path, "courses", $this->semester, $this->course));
+        if (!is_dir($this->hss_course_path)) {
+            throw new ConfigException("Invalid course: ".$this->course, true);
         }
 
-        $course_config = implode("/", array(__DIR__, '..', '..', 'config', static::$semester, static::$course.'.ini'));
+        $course_config = implode("/", array(__DIR__, '..', '..', 'config', $this->semester, $this->course.'.ini'));
         $course = IniParser::readFile($course_config);
 
-        static::setConfigValues($course, 'database_details', array('database_name'));
-        static::setConfigValues($course, 'course_details', array('course_name',
+        $this->setConfigValues($course, 'database_details', array('database_name'));
+        $this->setConfigValues($course, 'course_details', array('course_name',
             'default_hw_late_days', 'default_student_late_days', 'use_autograder',
             'generate_diff', 'zero_rubric_grades'));
 
         foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
-            static::$$key = intval(static::$$key);
+            $this->$key = intval($this->$key);
         }
 
         foreach (array('use_autograder', 'generate_diff', 'zero_rubric_grades') as $key) {
-            static::$$key = (static::$$key == true) ? true : false;
+            $this->$key = ($this->$key == true) ? true : false;
         }
-
-        Database::connect(static::$database_host, static::$database_user, static::$database_password,
-                          static::$database_name, static::$database_type);
     }
 
-    private static function setConfigValues($config, $section, $keys) {
+    private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {
             throw new ConfigException("Missing config section {$section} in master.ini");
         }
@@ -161,13 +152,147 @@ class Config {
             if (!isset($config[$section][$key])) {
                 throw new ConfigException("Missing config setting {$section}.{$key} in master.ini");
             }
-            static::$$key = $config[$section][$key];
+            $this->$key = $config[$section][$key];
         }
     }
 
-    public static function buildUrl($parts) {
-        return static::$site_url."&".implode("&", array_map(function($key) use ($parts) {
-            return strval($key)."=".strval($parts[$key]);
-        }, array_keys($parts)));
+    /**
+     * @return boolean
+     */
+    public function isDebug() {
+        return $this->debug;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSemester() {
+        return $this->semester;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCourse() {
+        return $this->course;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBaseUrl() {
+        return $this->base_url;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSiteUrl() {
+        return $this->site_url;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHssPath() {
+        return $this->hss_path;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHssCoursePath() {
+        return $this->hss_course_path;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHssLogPath() {
+        return $this->hss_log_path;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getLogExceptions() {
+        return $this->log_exceptions;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDatabaseType() {
+        return $this->database_type;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDatabaseHost() {
+        return $this->database_host;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDatabaseUser() {
+        return $this->database_user;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDatabasePassword() {
+        return $this->database_password;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDatabaseName() {
+        return $this->database_name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCourseName() {
+        return $this->course_name;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getDefaultHwLateDays() {
+        return $this->default_hw_late_days;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getDefaultStudentLateDays() {
+        return $this->default_student_late_days;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getZeroRubricGrades() {
+        return $this->zero_rubric_grades;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getGenerateDiff() {
+        return $this->generate_diff;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getUseAutograder() {
+        return $this->use_autograder;
     }
 }

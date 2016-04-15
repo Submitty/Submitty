@@ -2,21 +2,34 @@
 
 namespace app\controllers;
 
+use app\libraries\Core;
 use app\libraries\Output;
-use app\models\Config;
 
 class SubmissionController implements IController {
+    /**
+     * @var Core
+     */
+    private $core;
+
+    public function __construct(Core $core) {
+        $this->core = $core;
+    }
+
     public function run() {
-        Output::render(array('submission', 'Global'), 'header', Config::$course_name);
+        $assignments = $this->core->getQueries()->getAllAssignments();
+
+        Output::render(array('submission', 'Homework'), 'startContent');
+
+        $controller = null;
+        $_REQUEST['page'] = (isset($_REQUEST['page'])) ? strtolower($_REQUEST['page']) : "";
         switch ($_REQUEST['page']) {
             case 'homework':
-                $controller = new submission\Homework();
-                $controller->run();
-                break;
             default:
-                print "what";
-                Output::render('Error', 'invalidPage', $_REQUEST['page']);
+                $controller = new submission\HomeworkController($this->core, $assignments);
+                break;
         }
-        Output::render(array('submission', 'Global'), 'footer');
+
+        $controller->run();
+        Output::render(array('submission', 'Homework'), 'endContent');
     }
 }
