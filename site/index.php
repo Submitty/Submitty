@@ -1,10 +1,10 @@
 <?php
 
 use app\libraries\AutoLoader;
+use app\libraries\Core;
 use app\libraries\ExceptionHandler;
+use app\libraries\Logger;
 use app\libraries\Output;
-use app\models\Config;
-use app\models\User;
 
 /*
 The user's umask is ignored for the user running php, so we need
@@ -14,16 +14,20 @@ permissions aren't lost for newly created files & directories.
 umask (0027);
 date_default_timezone_set('America/New_York');
 
+session_start();
+$start = microtime(true);
+
+/*
+Show any notices, warnings, or errors as any of these appearing in a bootup
+class (AutoLoader, Config, etc.) could indicate a more serious issue down the
+line
+ */
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once(__DIR__ . "/app/libraries/AutoLoader.php");
 AutoLoader::registerDirectory(__DIR__."/app", true, "app");
 
-/**
- * A custom exception handler for our application which
- * @param $throwable
- */
 function exception_handler($throwable) {
     Output::showException(ExceptionHandler::throwException($throwable));
 }
@@ -39,15 +43,19 @@ if (!isset($_REQUEST['course'])) {
 $semester = basename($_REQUEST['semester']);
 $course = basename($_REQUEST['course']);
 
-Config::loadCourse($semester, $course);
+$core = new Core($semester, $course);
+Output::initializeOutput($core);
+Logger::setLogPath($core->getConfig()->getHssLogPath());
+ExceptionHandler::setLogExceptions($core->getConfig()->getLogExceptions());
+ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
 
-if(Config::$debug) {
+if($core->getConfig()->isDebug()) {
     error_reporting(E_ALL);
 } else {
     error_reporting(E_ERROR);
 }
 
-if (Config::$debug && isset($_GET['useUser'])) {
+if ($core->getConfig()->isDebug() && isset($_GET['useUser'])) {
     $username = $_GET['useUser'];
 }
 elseif (isset($_SERVER['PHP_AUTH_USER'])) {
@@ -62,26 +70,23 @@ else {
     exit;
 }
 
-// attempt to load rcs as both student and user
-User::loaduser($username);
-if (!User::userLoaded()) {
-    Output::showError("Unrecognized username '{$username}'");
-}
+$core->loadUser($username);
 
 // Path components are Section, Controller, Action, Method
 $section = isset($_GET['component']) ? strtolower($_GET['component']) : 'submission';
 
+Output::render("Global", 'header');
 switch($section) {
     case 'grading':
-        $control = new app\controllers\GradingController();
+        $control = new app\controllers\GradingController($core);
         $control->run();
         break;
     case 'submission':
-        $control = new app\controllers\SubmissionController();
+        $control = new app\controllers\SubmissionController($core);
         $control->run();
         break;
     case 'admin':
-        $control = new app\controllers\AdminController();
+        $control = new app\controllers\AdminController($core);
         $control->run();
         break;
     default:
@@ -89,4 +94,5 @@ switch($section) {
         break;
 }
 
-print(Output::getOutput());
+Output::render("Global", 'footer', (microtime(true) - $start));
+echo(Output::getOutput());

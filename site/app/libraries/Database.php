@@ -1,6 +1,6 @@
 <?php
 
-namespace app\database;
+namespace app\libraries;
 
 use \PDO;
 use \PDOException;
@@ -13,11 +13,6 @@ use app\exceptions\DatabaseException;
 class Database {
 
     /**
-     * @var iQueries
-     */
-    private static $queries;
-
-    /**
      * @var PDO
      */
     private static $link = null;
@@ -25,12 +20,12 @@ class Database {
     /**
      * @var array
      */
-    private static $results;
+    private static $results = array();
 
     /**
      * @var string
      */
-    private static $lastid;
+    private static $lastid = "";
 
     /**
      * @var int
@@ -48,10 +43,17 @@ class Database {
     private static $transaction = false;
 
     /**
-     * Don't allow other classes to instantiate/copy Database (Singleton)
+     * Database constructor.
+     *
+     * @param string $host
+     * @param string $user
+     * @param string $password
+     * @param string $name
+     * @param string $type
      */
-    private function __construct() { }
-    private function __clone() { }
+    public function __construct($host, $user, $password, $name, $type='pgsql') {
+        $this->connect($host, $user, $password, $name, $type);
+    }
 
     /**
      * Connect to a database via PDO
@@ -64,18 +66,11 @@ class Database {
      *
      * @throws DatabaseException
      */
-    static function connect($host, $user, $password, $name, $type='pgsql') {
+    public function connect($host, $user, $password, $name, $type='pgsql') {
         // Only start a new connection if we're not already connected to a DB
         if (Database::$link == null) {
             Database::$query_count = 0;
             Database::$all_queries = array();
-
-            if ($type == 'pgsql') {
-                Database::$queries = new QueriesPostgresql();
-            }
-            else {
-                throw new DatabaseException("Invalid database type '{$type}'");
-            }
 
             try {
                 Database::$link = new PDO("{$type}:host={$host};dbname={$name}", $user, $password);
@@ -89,10 +84,6 @@ class Database {
         }
     }
 
-    static function queries() {
-        return static::$queries;
-    }
-
     /**
      * Run a query against connected PDO link
      *
@@ -101,7 +92,7 @@ class Database {
      *
      * @return boolean
      */
-    static function query($query, $parameters=array()) {
+    public function query($query, $parameters=array()) {
         try {
             $statement = Database::$link->prepare($query);
             $statement->execute($parameters);
@@ -125,7 +116,7 @@ class Database {
      * Start a DB transaction, turning off autocommit mode. Queries won't be
      * actually commited to the database till Database::commit() is called.
      */
-    static function beginTransaction() {
+    public function beginTransaction() {
         if (!Database::$transaction) {
             Database::$transaction = Database::$link->beginTransaction();
         }
@@ -136,7 +127,7 @@ class Database {
      *
      * @throws \Exception
      */
-    static function commit() {
+    public function commit() {
         if (Database::$transaction) {
             Database::$link->commit();
             Database::$transaction = false;
@@ -147,9 +138,9 @@ class Database {
      * Returns a single row from the result set from running a query. Removes the row
      * from the result set before returning it
      *
-     * @return array|mixed
+     * @return array
      */
-    static function row() {
+    public function row() {
         if(Database::$results != NULL && count(Database::$results) > 0) {
             return array_shift(Database::$results);
         }
@@ -164,7 +155,7 @@ class Database {
      *
      * @return array
      */
-    static function rows() {
+    public function rows() {
         if(Database::$results != NULL && count(Database::$results) > 0) {
             return Database::$results;
         }
@@ -178,7 +169,7 @@ class Database {
      *
      * @return int
      */
-    static function totalQueries() {
+    public function totalQueries() {
         return Database::$query_count;
     }
 
@@ -187,18 +178,15 @@ class Database {
      *
      * @return string
      */
-    static function getQueries() {
+    public function getQueries() {
         $c = 1;
         $print = "";
         foreach(Database::$all_queries as $query) {
-            $print .= ($c++).") ".$query[0];
-            if (count($query[1]) > 0) {
-                $print .= " --- ";
-                foreach($query[1] as $parameter) {
-                    $print .= "?".$parameter." ";
-                }
+            $print .= ($c++).") ";
+            foreach($query[1] as $parameter) {
+                $query[0] = preg_replace('/\?/', "'{$parameter}'", $query[0], 1);
             }
-            $print .= "<br />";
+            $print .= "{$query[0]}<br />";
         }
         return $print;
     }
@@ -207,7 +195,10 @@ class Database {
      * "Disconnect" from current PDO connection by just setting
      * the link to null.
      */
-    static function disconnect() {
+    public function disconnect() {
+        if (Database::$transaction) {
+            Database::commit();
+        }
         Database::$link = null;
         Database::$query_count = 0;
         Database::$all_queries = array();
@@ -219,15 +210,15 @@ class Database {
      *
      * @return bool
      */
-    static function hasConnection() {
+    public function hasConnection() {
         return Database::$link !== null;
     }
 
-    static function inTransaction() {
+    public function inTransaction() {
         return Database::$transaction;
     }
 
-    static function getLastInsertId($name = "") {
+    public function getLastInsertId($name = "") {
         if (!empty($name)) {
             return Database::$link->lastInsertId($name);
         }

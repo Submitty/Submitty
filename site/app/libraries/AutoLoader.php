@@ -11,6 +11,8 @@ namespace app\libraries;
  *
  * Autoloads files for classes assuming that class name and file name are
  * are the same
+ *
+ * @since 1.0.0
  */
 class AutoLoader {
     /**
@@ -74,40 +76,6 @@ class AutoLoader {
      */
     public static function getClasses() {
         return AutoLoader::$classNames;
-    }
-
-    /**
-     * Generates the relative path to the root of the repo
-     * such that if you ran "cd $append" you would get there
-     *
-     * @param string $path: path we want to examine
-     *
-     * @return string: relative path to root of repo
-     */
-    public static function getPathToRoot($path) {
-        $dir = AutoLoader::getRootName();
-        $current_dir = explode("/", $path);
-        $start = array_search($dir, $current_dir);
-        $start = ($start == null) ? 0 : $start;
-        $append = "";
-        for ($i = $start; $i < count($current_dir)-1; $i++) {
-            $append .= "../";
-        }
-        return $append;
-    }
-
-    /**
-     * Returns the root name of the git repo.
-     *
-     * Useful if someone has renamed it from "TAGradingServer"
-     * to "hwgrading" or something, which might break
-     * autoloading without this
-     *
-     * @return mixed: Root name of the git repo
-     */
-    private static function getRootName() {
-        $dir = explode("/",str_replace("/site/lib", "", __DIR__));
-        return end($dir);
     }
 
     /**

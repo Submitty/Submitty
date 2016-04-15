@@ -10,12 +10,20 @@ use app\exceptions\IOException;
  * Class IniParser
  * @package app\libraries
  *
- *
+ * @since 1.0.0
  */
 class IniParser {
     /**
-     * @param $filename
+     * Reads in an ini file giving an associate array which is indexed by
+     * section names. Additionally, we further decode the array that PHP
+     * gives us in its builtin function to other primitive types than just
+     * string. "true", "on", "yes" evaluate to bool true while "false", "off",
+     * "no" evaluate to bool false, and "null" evaluates to null. Additionally,
+     * if the string is a numeric, we will parse it to either int or float as
+     * appropriate
      *
+     * @param string $filename
+     * @throws IniException | FileNotFoundException
      * @return array
      */
     public static function readFile($filename) {
@@ -27,7 +35,7 @@ class IniParser {
             throw new FileNotFoundException("Could not find ini file to parse: {$filename}");
         }
 
-        $parsed = parse_ini_file($filename, true, INI_SCANNER_RAW);
+        $parsed = @parse_ini_file($filename, true, INI_SCANNER_RAW);
         if ($parsed === false) {
             $e = error_get_last();
             $basename = basename($filename);
@@ -50,14 +58,15 @@ class IniParser {
 
         if (is_string($value)) {
             // Do we have a boolean?
-            if ($value == "true" || $value == "yes" || $value == "on") {
+            $test_value = strtolower($value);
+            if ($test_value == "true" || $test_value == "yes" || $test_value == "on") {
                 $value = true;
             }
-            else if ($value == "false" || $value == "no" || $value == "off") {
+            else if ($test_value == "false" || $test_value == "no" || $test_value == "off") {
                 $value = false;
             }
             // Or do we have a null?
-            else if ($value == "null") {
+            else if ($test_value == "null") {
                 $value = null;
             }
             // or is it a number?
@@ -90,35 +99,28 @@ class IniParser {
                     foreach ($value as $kkey => $vvalue) {
                         if (is_array($vvalue)) {
                             foreach ($vvalue as $vvvalue) {
-                                $to_write .= "{$kkey}[]=";
-                                if (is_string($vvvalue)) {
-                                    $to_write .= "\"{$vvvalue}\"\n";
+                                if (is_array($vvvalue)) {
+                                    throw new IniException("Cannot have nested arrays in ini files");
                                 }
-                                else {
-                                    $to_write .= "{$vvvalue}\n";
-                                }
+                                static::addElement($to_write, $kkey."[]", $vvvalue);
                             }
                         }
                         else {
-                            $to_write .= "{$key}=";
-                            if (is_string($vvalue)) {
-                                $to_write .= "\"{$vvalue}\"\n";
-                            }
-                            else {
-                                $to_write .= "{$vvalue}\n";
-                            }
+                            static::addElement($to_write, $kkey, $vvalue);
                         }
+                    }
+                }
+                else {
+                    foreach ($value as $kkey => $vvalue) {
+                        if (is_array($vvalue)) {
+                            throw new IniException("Cannot have nested arrays in ini files");
+                        }
+                        self::addElement($to_write, $key."[]", $vvalue);
                     }
                 }
             }
             else {
-                $to_write .= "{$key}=";
-                if (is_string($value)) {
-                    $to_write .= "\"{$value}\"\n";
-                }
-                else {
-                    $to_write .= "{$value}\n";
-                }
+                self::addElement($to_write, $key, $value);
             }
         }
 
@@ -127,8 +129,18 @@ class IniParser {
         }
     }
 
+    private static function addElement(&$to_write, $key, $value) {
+        $to_write .= "{$key}=";
+        if (is_string($value)) {
+            $to_write .= "\"{$value}\"\n";
+        }
+        else {
+            $to_write .= "{$value}\n";
+        }
+    }
     /**
-     * Given an array, we test if it might be a section or just an array
+     * Given an array, we test if it might be a section header or just an array
+     * within the
      * @param $array
      *
      * @return bool

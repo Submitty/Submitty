@@ -14,12 +14,17 @@ use app\exceptions\OutputException;
 class Output {
     private static $output_buffer = "";
     private static $loaded_views = array();
+    private static $start_time = 0;
+    /**
+     * @var Core
+     */
+    private static $core;
 
     private function __construct() {}
     private function __clone() {}
 
-    public static function initializeOutput() {
-
+    public static function initializeOutput($core) {
+        static::$core = $core;
     }
 
     /**
@@ -68,7 +73,7 @@ class Output {
         if(!isset(static::$loaded_views[$view])) {
             $class = "app\\views\\{$view}View";
             /** @noinspection PhpUndefinedMethodInspection */
-            static::$loaded_views[$view] = new $class;
+            static::$loaded_views[$view] = new $class(static::$core);
         }
 
         return static::$loaded_views[$view];
