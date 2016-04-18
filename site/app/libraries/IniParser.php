@@ -95,6 +95,9 @@ class IniParser {
             // is this a section?
             if (is_array($value)) {
                 if (static::isSection($value)) {
+                    if ($to_write != "") {
+                        $to_write .= "\n";
+                    }
                     $to_write .= "[{$key}]\n";
                     foreach ($value as $kkey => $vvalue) {
                         if (is_array($vvalue)) {
@@ -124,8 +127,8 @@ class IniParser {
             }
         }
 
-        if (file_put_contents($filename, $to_write) === false) {
-            throw new IOException("Could not write ini file");
+        if (@file_put_contents($filename, $to_write) === false) {
+            throw new IOException("Could not write ini file {$filename}");
         }
     }
 
@@ -135,7 +138,12 @@ class IniParser {
             $to_write .= "\"{$value}\"\n";
         }
         else {
-            $to_write .= "{$value}\n";
+            if (is_bool($value)) {
+                $to_write .= (($value) ? "true" : "false")."\n";
+            }
+            else {
+                $to_write .= "{$value}\n";
+            }
         }
     }
     /**

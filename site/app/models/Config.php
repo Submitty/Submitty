@@ -30,6 +30,8 @@ class Config {
     private $semester;
     private $course;
 
+    private $config_path;
+
     /*** MASTER CONFIG ***/
     private $base_url;
     private $site_url;
@@ -89,9 +91,10 @@ class Config {
     public function __construct($semester, $course) {
         $this->semester = $semester;
         $this->course = $course;
+        $this->config_path = implode("/", array(__DIR__, '..', '..', 'config'));
 
         // Load config details from the master config file
-        $master = IniParser::readFile(__DIR__.'/../../config/master.ini');
+        $master = IniParser::readFile(implode("/", array($this->config_path, 'master.ini')));
 
         $this->setConfigValues($master, 'logging_details', array('hss_log_path', 'log_exceptions'));
         $this->setConfigValues($master, 'site_details', array('base_url', 'hss_path'));
@@ -126,7 +129,7 @@ class Config {
             throw new ConfigException("Invalid course: ".$this->course, true);
         }
 
-        $course_config = implode("/", array(__DIR__, '..', '..', 'config', $this->semester, $this->course.'.ini'));
+        $course_config = implode("/", array($this->config_path, $this->semester, $this->course.'.ini'));
         $course = IniParser::readFile($course_config);
 
         $this->setConfigValues($course, 'database_details', array('database_name'));
@@ -294,5 +297,9 @@ class Config {
      */
     public function getUseAutograder() {
         return $this->use_autograder;
+    }
+
+    public function getConfigPath() {
+        return $this->config_path;
     }
 }

@@ -22,7 +22,6 @@ class GradingController implements IController{
         }
 
         $controller = null;
-        $_REQUEST['page'] = (isset($_REQUEST['page'])) ? strtolower($_REQUEST['page']) : "";
         switch ($_REQUEST['page']) {
             default:
                 Output::showError("Invalid page request for controller");

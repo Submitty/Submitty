@@ -20,7 +20,6 @@ class HomeworkController implements IController {
     }
 
     public function run() {
-        $_REQUEST['action'] = (isset($_REQUEST['action'])) ? strtolower($_REQUEST['action']) : 'display';
         switch($_REQUEST['action']) {
             case 'upload':
                 break;

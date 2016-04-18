@@ -34,6 +34,12 @@ class Core {
      */
     private $csrf_token;
 
+    /**
+     * Core constructor.
+     *
+     * @param $semester
+     * @param $course
+     */
     public function __construct($semester, $course) {
         $this->config = new Config($semester, $course);
 
@@ -53,11 +59,32 @@ class Core {
             $_SESSION['csrf_token'] = bin2hex(openssl_random_pseudo_bytes(16));
         }
 
+        $this->csrf_token = $_SESSION['csrf_token'];
+
         if (!isset($_SESSION['messages'])) {
-            $_SESSION['messages'] = array('errors' => array(), 'alerts' => array());
+            $_SESSION['messages'] = array();
         }
 
-        $this->csrf_token = $_SESSION['csrf_token'];
+        foreach (array('errors', 'alerts', 'successes') as $key) {
+            if (!isset($_SESSION['messages'][$key])) {
+                $_SESSION['messages'][$key] = array();
+            }
+        }
+
+        foreach (array('component', 'page', 'action') as $key) {
+            $_REQUEST[$key] = (isset($_REQUEST[$key])) ? strtolower($_REQUEST[$key]) : "";
+        }
+    }
+
+    /**
+     * Deconstructor for the Core. Cleans up any messages from the server as well as disconnects
+     * the database, running any open transactions that were left.
+     */
+    public function __destruct() {
+        foreach (array('errors', 'alerts', 'successes') as $key) {
+            $_SESSION['messages'][$key] = array();
+        }
+        $this->getDatabase()->disconnect();
     }
 
     /**
@@ -108,17 +135,14 @@ class Core {
 
     /**
      * @param $csrf_token
+     * @return bool
      */
     public function checkCsrfToken($csrf_token) {
-        if ($this->csrf_token != $csrf_token) {
-            Output::showError("Invalid CSRF token match. Try going back a page and trying again.");
-        }
+        return $this->csrf_token != $csrf_token;
     }
 
     public function buildUrl($parts) {
-        return $this->config->getSiteUrl()."&".implode("&", array_map(function($key) use ($parts) {
-            return strval($key)."=".strval($parts[$key]);
-        }, array_keys($parts)));
+        return $this->config->getSiteUrl()."&".http_build_query($parts);
     }
 
     public function redirect($url, $status_code = 302) {

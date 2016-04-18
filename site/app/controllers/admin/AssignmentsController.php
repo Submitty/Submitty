@@ -17,7 +17,6 @@ class AssignmentsController implements IController {
     }
 
     public function run() {
-        $_REQUEST['action'] = (isset($_REQUEST['action'])) ? strtolower($_REQUEST['action']) : "";
         switch($_REQUEST['action']) {
             case 'list':
                 $this->listAssignments();
@@ -56,5 +55,7 @@ class AssignmentsController implements IController {
                                                                   'action' => 'list')));
             }
         }
+
+        Output::render(array('admin', 'Assignments'), 'assignmentForm');
     }
 }

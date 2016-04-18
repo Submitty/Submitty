@@ -72,25 +72,20 @@ else {
 
 $core->loadUser($username);
 
-// Path components are Section, Controller, Action, Method
-$section = isset($_GET['component']) ? strtolower($_GET['component']) : 'submission';
-
 Output::render("Global", 'header');
-switch($section) {
+switch($_REQUEST['component']) {
+    case 'admin':
+        $control = new app\controllers\AdminController($core);
+        $control->run();
+        break;
     case 'grading':
         $control = new app\controllers\GradingController($core);
         $control->run();
         break;
     case 'submission':
+    default:
         $control = new app\controllers\SubmissionController($core);
         $control->run();
-        break;
-    case 'admin':
-        $control = new app\controllers\AdminController($core);
-        $control->run();
-        break;
-    default:
-        Output::showError("Invalid specified component");
         break;
 }
 

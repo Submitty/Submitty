@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\controllers\admin\AssignmentsController;
+use app\controllers\admin\ConfigurationController;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\models\User;
@@ -22,7 +23,6 @@ class AdminController implements IController {
             Output::showError("This account cannot access admin pages");
         }
 
-        $_REQUEST['page'] = (isset($_REQUEST['page'])) ? strtolower($_REQUEST['page']) : "";
         $controller = null;
         switch ($_REQUEST['page']) {
             case 'assignments':
@@ -33,6 +33,9 @@ class AdminController implements IController {
             case 'tests':
                 break;
             case 'users':
+                break;
+            case 'configuration':
+                $controller = new ConfigurationController($this->core);
                 break;
             default:
                 Output::showError("Invalid page request for controller");

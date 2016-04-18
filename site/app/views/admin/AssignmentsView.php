@@ -47,7 +47,7 @@ HTML;
         $return .= <<<HTML
         </table>
     </div>
-    <div style="height: 20px; padding-right: 10px;">
+    <div class="post-panel-btn">
         <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 
                                                                       'page' => 'assignments', 
                                                                       'action' => 'new'))}" style="float: right">
@@ -58,6 +58,23 @@ HTML;
 HTML;
 
         return $return;
+    }
+
+    public function assignmentForm() {
+        return <<<HTML
+<div id="content">
+    <h2>New Assignment</h2>
+    <div class="panel">
+        <form method="post">
+            <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+            Assignment ID: <input type="text" name="assignment_id" value="" />
+            <span style="margin-left: 40px;">Assignment Name: <input type="text" name="assignment_name" value="" /></span><br />
+           Assignment Due Date: <input type="text" name="assignment_due_date" value="" />
+        </form>
+    </div>
+</div>
+HTML;
+
     }
 
 }

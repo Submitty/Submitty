@@ -7,7 +7,7 @@ namespace app\libraries;
 
 /**
  * Class AutoLoader
- * @package lib
+ * @package app\libraries
  *
  * Autoloads files for classes assuming that class name and file name are
  * are the same
