@@ -21,7 +21,6 @@ class SubmissionController implements IController {
         Output::render(array('submission', 'Homework'), 'startContent');
 
         $controller = null;
-        $_REQUEST['page'] = (isset($_REQUEST['page'])) ? strtolower($_REQUEST['page']) : "";
         switch ($_REQUEST['page']) {
             case 'homework':
             default:

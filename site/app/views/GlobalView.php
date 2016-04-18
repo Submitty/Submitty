@@ -16,42 +16,47 @@ class GlobalView {
     }
 
     public function header() {
-        $errors = "";
-        if (count($_SESSION['messages']['errors']) > 0) {
-            $errors = <<<HTML
-<div class='message' id="error-messages">
-    <div class="inner-message alert alert-error">
-            <a class="fa fa-times message-close" onClick="removeBox('error-messages');"></a>
-
+        $messages = "";
+        $cnt = count($_SESSION['messages']['errors']) +
+            count($_SESSION['messages']['alerts']) + count($_SESSION['messages']['successes']);
+        if ($cnt > 0) {
+            $messages = <<<HTML
+<div id='messages'>
 HTML;
             foreach ($_SESSION['messages']['errors'] as $key => $error) {
-                $errors .= "{$error}<br />\n";
-                unset($_SESSION['messages']['errors'][$key]);
-            }
-            $errors .= <<<HTML
+                $messages .= <<<HTML
+    <div id='error-{$key}' class="inner-message alert alert-error">
+        <a class="fa fa-times message-close" onClick="removeBox('error-{$key}');"></a>
+        <i class="fa fa-times-circle"></i> {$error}
     </div>
+HTML;
+            }
+            foreach ($_SESSION['messages']['alerts'] as $key => $alert) {
+                $messages .= <<<HTML
+    <div id='alert-{$key}' class="inner-message alert alert-notice">
+        <a class="fa fa-times message-close" onClick="removeBox('alert-{$key}');"></a>
+        <i class="fa fa-exclamation-circle"></i> {$alert}
+    </div>
+HTML;
+            }
+            foreach ($_SESSION['messages']['successes'] as $key => $success) {
+                $messages .= <<<HTML
+    <div id="success-{$key}" class="inner-message alert alert-success">
+        <a class="fa fa-times message-close" onClick="removeBox('success-{$key}');"></a>
+        <i class="fa fa-check-circle"></i> {$success}
+    </div>
+HTML;
+            }
+            $messages .= <<<HTML
 </div>
-
 HTML;
         }
 
-        $alerts = "";
-        if (count($_SESSION['messages']['alerts']) > 0) {
-            $alerts = <<<HTML
-<div class='message' id="alert-messages">
-    <div class="inner-message alert alert-notice">
-            <a class="fa fa-times" style="float: right; margin-right: -20px; cursor: pointer;" href="#"></a>
-
-HTML;
-            foreach ($_SESSION['messages']['alerts'] as $key => $alert) {
-                $alerts .= "{$alert}<br />\n";
-                unset($_SESSION['messages']['alerts'][$key]);
-            }
-            $alerts .= <<<HTML
-    </div>
-</div>
-
-HTML;
+        if (file_exists($this->core->getConfig()->getHssCoursePath()."/override.css")) {
+            $override_css = "<link rel='stylesheet' type='text/css' href='{$this->core->getConfig()->getHssCoursePath()}/override.css' />";
+        }
+        else {
+            $override_css = '';
         }
 
         $return = <<<HTML
@@ -59,14 +64,14 @@ HTML;
 <html>
 <head>
     <title>{$this->core->getConfig()->getCourseName()} Submissions</title>
-    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}public/css/server.css" />
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}public/css/server.css" />
+    {$override_css}
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}public/js/jquery.min.js"></script>
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}public/js/server.js"></script>
 </head>
 <body>
-{$errors}
-{$alerts}
+{$messages}
 <div id="container">
 
 HTML;
@@ -95,7 +100,9 @@ HTML;
         </li>
         <li><a href="#">View Students</a></li>
         <li><a href="#">View Users</a></li>
-        <li><a href="#">Class Configuration</a></li>
+        <li><a href="{$this->core->buildUrl(array('component' => 'admin', 
+                                                  'page' => 'configuration', 
+                                                  'action' => 'view'))}">Class Configuration</a></li>
         <li><a href="#">View Orphans</a></li>
 
 HTML;
@@ -117,9 +124,10 @@ HTML;
 HTML;
         }
 
+        $course_name = htmlentities($this->core->getConfig()->getCourseName());
         $return .= <<<HTML
 <div id="header">
-    <h1 id="header-text">Homework Submissions for {$this->core->getConfig()->getCourseName()}</h1>
+    <h1 id="header-text">Homework Submissions for {$course_name}</h1>
 </div>
 
 
@@ -133,7 +141,9 @@ HTML;
 </div>
 <div id="footer">
     <span id="copyright">&copy; 2016 RPI</span>
-    <a href="https://github.com/RCOS-Grading-Server/HWserver"><div class="fa fa-github fa-lg"></div></a>
+    <a href="https://github.com/RCOS-Grading-Server/HWserver" target="blank" title="Fork us on Github">
+        <i class="fa fa-github fa-lg"></i>
+    </a>
 </div>
 
 <div id='page-info'>

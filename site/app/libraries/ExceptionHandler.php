@@ -14,8 +14,20 @@ use app\exceptions\BaseException;
  */
 class ExceptionHandler {
 
+    /**
+     * Should we log any of the exceptions that the application hit?
+     * @var bool
+     */
     private static $log_exceptions = false;
-    private static $display_exceptions = false;
+
+    /**
+     * Should we display the actual exception to the user or just a generic message?
+     * This should always be initially true in case we hit an exception in our initial
+     * setup routines
+     *
+     * @var bool
+     */
+    private static $display_exceptions = true;
 
     /**
      * This is a static class so it should never be instaniated or copied anywhere
@@ -24,14 +36,14 @@ class ExceptionHandler {
     private function __clone() { }
 
     /**
-     * @param bool $boolean
+     * @param bool $boolean True/False to control whether we log/not log exceptions
      */
     public static function setLogExceptions($boolean) {
         static::$log_exceptions = $boolean;
     }
 
     /**
-     * @param bool $boolean
+     * @param bool $boolean True/False to control whether we show/not show exceptions
      */
     public static function setDisplayExceptions($boolean) {
         static::$display_exceptions = $boolean;
@@ -44,9 +56,8 @@ class ExceptionHandler {
      * and the flag is set for it, otherwise just return a very generic message to
      * the user
      *
-     * @param \Throwable $exception
-     *
-     * @return string
+     * @return string   A string that either contains a generic message or the actual
+     *                  exception message depending on the value of $display_exceptions
      */
     public static function throwException($exception) {
         $display_message = false;
@@ -103,8 +114,11 @@ class ExceptionHandler {
             return $message;
         }
         else {
-            return "An exception was thrown. Please contact an administrator about what
-            you were doing that caused this exception.";
+            return <<<HTML
+An exception was thrown. Please contact an administrator about what<br />
+you were doing that caused this exception.
+
+HTML;
         }
     }
 }

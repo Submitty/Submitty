@@ -7,13 +7,16 @@ function togglePageDetails() {
     }
 }
 
-function removeBox(elem) {
-    $('#' + elem).fadeOut('slow');
+function removeAlert(elem) {
+    $('#' + elem).fadeOut('slow', function() {
+        $('#' + elem).remove();
+    });
 }
+
+/* TODO: Add way to add new errors/notices/successes to the screen for ajax forms */
 
 $(function() {
     setTimeout(function() {
-        removeBox('error-messages');
-        removeBox('alert-messages');
-    }, 4000);
+        $('.inner-message').fadeOut();
+    }, 5000);
 });
