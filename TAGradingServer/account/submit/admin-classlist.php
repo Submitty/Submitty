@@ -32,6 +32,8 @@ check_administrator();
  * register_shutdown_function()
  */
 
+$csvFile = null;
+
 //Verify:  Is this a new upload or a CSV converted from XLSX?
 if (isset($_GET['xlsx2csv']) && $_GET['xlsx2csv'] == 1) {
 
