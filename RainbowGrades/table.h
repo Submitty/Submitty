@@ -4,31 +4,29 @@
 #include <sstream>
 #include <iomanip>
 
+enum CELL_CONTENTS_STATUS { CELL_CONTENTS_VISIBLE, CELL_CONTENTS_HIDDEN, CELL_CONTENTS_NO_DETAILS };
+
 class TableCell {
 public:
-  TableCell() { color="ffcccc"; data =""; note=""; span =1; align="left"; rotate = 0; }
-  TableCell(std::string c, std::string d="", std::string n="", int s=1) { color=c; data=d; note=n; span=s; align="left"; rotate = 0;}
-  TableCell(std::string c, int d, std::string n="", int s=1) { color=c; data=std::to_string(d); note=n; span=s; align="left"; rotate = 0;}
-  TableCell(std::string c, float d, std::string n="", int s=1) { 
-    rotate = 0;
-    color=c; 
-    note=n;
-    if (d > 0.0001) {
-      std::stringstream ss;
-      ss << std::setprecision(1) << std::fixed << d;
-      data=ss.str(); span=s; 
-    } else {
-      data = "";
-    }
-    align="right";
-  }
+
+  // CONSTRUCTORS
+  TableCell(const std::string& c="ffcccc", const std::string& d="", const std::string& n="", 
+            CELL_CONTENTS_STATUS v=CELL_CONTENTS_VISIBLE, const std::string& a="left" , int s=1, int r=0);
+  TableCell(const std::string& c         , int                d   , const std::string& n="", 
+            CELL_CONTENTS_STATUS v=CELL_CONTENTS_VISIBLE, const std::string& a="left" , int s=1, int r=0);
+  TableCell(const std::string& c         , float              d   , const std::string& n="", 
+            CELL_CONTENTS_STATUS v=CELL_CONTENTS_VISIBLE, const std::string& a="right", int s=1, int r=0);
+
   std::string color;
   std::string data;
   std::string note;
-  int span;
   std::string align;
-  friend std::ostream& operator<<(std::ostream &ostr, const TableCell &c);
+  enum CELL_CONTENTS_STATUS visible;
+  int span;
   int rotate;
+
+  friend std::ostream& operator<<(std::ostream &ostr, const TableCell &c);
+
 };
 
 

@@ -226,7 +226,8 @@ int Student::getAllowedLateDays(int which_lecture) const {
   }
 
 
-  return answer += int(total / 30); //25);
+  //return answer += int(total / 30); //25);
+  return answer += int(total / 25);
   
 }
 

@@ -723,6 +723,7 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
             g == GRADEABLE_ENUM::QUIZ ||
             g == GRADEABLE_ENUM::EXAM ||
             g == GRADEABLE_ENUM::PARTICIPATION ||
+            g == GRADEABLE_ENUM::PROJECT ||
             g == GRADEABLE_ENUM::TEST) {
           ss >> which_token;
           
@@ -737,9 +738,7 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
         std::cout << gradesline << std::endl;
 
         if (!(ss >> p_score)) {
-
-          //std::cout << gradesline << std::endl;
-          std::cout << "ERROR READING" << std::endl;
+          std::cout << "ERROR READING: '" << gradesline << "'" << std::endl;
           std::cout << which_token << " " << p_score << std::endl;
           exit(1);
         }
@@ -813,7 +812,6 @@ void load_student_grades(std::vector<Student*> &students) {
       GRADEABLE_ENUM g;
       bool gradeable_enum_success = string_to_gradeable_enum(token,g);
 
-      //std::cout << "my TOKEN " << " " << token << std::endl;
       
       if (token == "rcs_id") {
         istr >> token;
@@ -849,24 +847,8 @@ void load_student_grades(std::vector<Student*> &students) {
         std::cout << "TOKEN IS EXAM SEATING" << std::endl;
         char line[MAX_STRING_LENGTH];
         istr.getline(line,MAX_STRING_LENGTH);
-      } else if (token == "academic" || token == "Academic") {
-        istr >> token; 
-        assert (token == "integrity" || token == "Integrity");
-        istr >> a; 
-        assert (a == 0 || a == 1);
-	s->setAcademicIntegrityForm();
-      } else if (token == "Participation") {
-        istr >> a; 
-        assert (a >= 0 && a <= 5);
-        s->setParticipation(a);
-      } else if (token == "Understanding") {
-        istr >> a; 
-        assert (a >= 0 && a <= 5);
-        s->setUnderstanding(a);
-      } 
 
-      
-      else if (gradeable_enum_success) {
+      } else if (gradeable_enum_success) {
           
         std::string line;
         getline(istr,line);
@@ -886,28 +868,21 @@ void load_student_grades(std::vector<Student*> &students) {
         std::string other_note;
         getline(ss,other_note);
 
+        // Search through the gradeable categories as needed to find where this item belongs
+        // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
         if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
-          invalid=true;
-          which = -1;
-
-          if (gradeable_name == "Lab15") {
-            //istr >> a; 
-            std::cout << "value " << s->getUserName() << " " << value << std::endl;
-            assert (value >= 0 && value <= 5);
-            s->setParticipation(value);
-          } else if (gradeable_name == "Lab16") {
-            assert (value >= 0 && value <= 5);
-            s->setUnderstanding(value);            
-
-          } else if (gradeable_name == "Test4") {
-            assert (value >= 0 && value <= 150);
-            s->setGradeableValue(GRADEABLE_ENUM::EXAM,0,value);
-
-          } else {
-            //std::cerr << "WARNING: INVALID gradeable item" << gradeable_name << " " << value << std::endl;
-            
+          for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
+            GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
+            if (GRADEABLES[g2].hasCorrespondence(gradeable_id)) {
+              g = g2;
+            }
           }
+        }
+        if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
+          invalid = false;
+          std::cerr << "ERROR! cannot find a category for this item " << gradeable_id << std::endl;
         } else {
+
           const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
           which = c.first;
           if (c.second == "") {
@@ -917,7 +892,7 @@ void load_student_grades(std::vector<Student*> &students) {
           }
         }
         
-         if (!invalid) {
+        if (!invalid) {
           assert (which >= 0);
           assert (value >= 0.0);
           s->setGradeableValue(g,which,value);
@@ -951,15 +926,20 @@ void load_student_grades(std::vector<Student*> &students) {
           }
         }
       } 
-
+      
       else {
         std::cout << "UNKNOWN TOKEN  Y" << token << std::endl;
         exit(0);
       }
+    
     }
     
     students.push_back(s);
+    
+    
   }
+  
+  
 }
 
 

@@ -1,8 +1,48 @@
+#include <cmath>
 #include "table.h"
 #include "constants_and_globals.h"
 
 
 bool global_details = false;
+
+TableCell::TableCell(const std::string& c, const std::string& d, const std::string& n, 
+                     CELL_CONTENTS_STATUS v, const std::string& a, int s, int r) { 
+  color=c; 
+  data=d; 
+  note=n; 
+  visible=v;
+  align=a;
+  span=s; 
+  rotate=r;
+}
+
+TableCell::TableCell(const std::string& c, int d, const std::string& n, 
+                     CELL_CONTENTS_STATUS v, const std::string& a, int s, int r) { 
+  color=c; 
+  data=std::to_string(d); 
+  note=n; 
+  visible=v;
+  align=a;
+  span=s; 
+  rotate=r;
+}
+
+TableCell::TableCell(const std::string& c, float d, const std::string& n, 
+                     CELL_CONTENTS_STATUS v, const std::string& a, int s, int r) { 
+  color=c; 
+  if (fabs(d) > 0.0001) {
+    std::stringstream ss;
+    ss << std::setprecision(1) << std::fixed << d;
+    data=ss.str(); span=s; 
+  } else {
+    data = "";
+  }
+  note=n;
+  visible=v;
+  align=a;
+  span=s; 
+  rotate = 0;
+}
 
 std::ostream& operator<<(std::ostream &ostr, const TableCell &c) {
   
@@ -13,13 +53,18 @@ std::ostream& operator<<(std::ostream &ostr, const TableCell &c) {
   ostr << "<font size=-1>";
   
 
-  if (c.data == "") {
+  if (c.data == "" || c.visible==CELL_CONTENTS_HIDDEN) {
     ostr << "<div></div>";
   } else {
     ostr << c.data; 
     if (c.note.length() > 0 &&
         c.note != " " && 
-        global_details) {
+        (global_details 
+         /*
+        || 
+        c.visible==CELL_CONTENTS_HIDDEN
+         */)
+        ) {
       ostr << "<br><em>" << c.note << "</em>";
     }
   }
