@@ -187,7 +187,7 @@ foreach($db->rows() as $student_record) {
 
 	    $testname = $row['test_type']." " . $row['test_number'];
         $student_output_text .= strtolower($row['test_type']) . ' ' .$row['test_number'] . ' "' . $testname . '" ' . $row['score'] . " " . implode(" ", pgArrayToPhp($row['test_text'])) . $nl;
-		if (empty($row['test_text']) || implode(" ", pgArrayToPhp($row['test_text'])) === '') {
+		if (implode(" ", pgArrayToPhp($row['test_text'])) === '') {
 			// add test => {test# => {testName, score}} to student json
 			// if there is not a text field
 			$student_output_json['Test'][strtolower($row['test_type']) . ' ' .$row['test_number']] = array('name' => $testname,'score' => floatval($row['score']));
@@ -207,7 +207,7 @@ foreach($db->rows() as $student_record) {
         if ($row['grades_other_score'] <= 0) {
             continue;
         }
-		// empty($row['grades_other_text']) || !isset($row['grades_other_text']) || 
+		
 		if ($row['grades_other_text'] === '') {
 			// add Other => {other_id => {name, score}} to student json
 			// if there is not a text field
@@ -216,6 +216,7 @@ foreach($db->rows() as $student_record) {
 			// add Other => {other_id => {name, score, text}} to student json otherwise
 			$student_output_json['Other'][$row['other_id']] = array('name' => $row['other_name'],'score' => floatval($row['grades_other_score']),'text' => $row['grades_other_text']);
 		}
+		
 		if (strpos($row['other_id'], 'reading') !== FALSE) {
 			$student_output_text .= 'reading ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
 		} else if (strpos($row['other_id'], 'participation') !== FALSE) {
