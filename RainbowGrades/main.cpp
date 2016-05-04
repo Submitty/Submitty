@@ -16,8 +16,9 @@
 #include "iclicker.h"
 #include "gradeable.h"
 #include "grade.h"
+#include "json.hpp"
 
-
+using nlohmann::json;
 
 // defined in iclicker.cpp
 std::string ReadQuoted(std::istream &istr);
@@ -783,6 +784,129 @@ void load_student_grades(std::vector<Student*> &students) {
   Student *perfect = GetStudent(students,"PERFECT");
   assert (perfect != NULL);
 
+  
+  std::string command2 = "ls -1 " + RAW_DATA_DIRECTORY + "*.json > files_json.txt";
+
+  system(command2.c_str());
+  
+  std::ifstream files_istr("files_json.txt");
+  assert(files_istr);
+  std::string filename;
+  int count = 0;
+  while (files_istr >> filename) {
+	std::ifstream istr(filename.c_str());
+	assert(istr);
+	Student *s = new Student();
+	
+	count++;
+	
+	json j(istr);
+
+	for (json::iterator itr = j.begin(); itr != j.end(); itr++) {
+	  std::string token (itr->first).get<std::string>();
+	  GRADEABLE_ENUM g;
+	  bool gradeable_enum_success = string_to_gradeable_enum(token,g);
+	  if (!gradeable_enum_success) {
+		if (token == "rcs_id") {
+			s->setUserName(j[token].get<std::string>());
+		} else if (token == "first_name") {
+			s->setFirstName(j[token].get<std::string>());
+		} else if (token == "last_name") {
+			s->setLastName(j[token].get<std::string>());
+		} else if (token == "last_update") {
+			s->setLastUpdate(j[token].get<std::string>());
+		} else if (token == "section") {
+		  int a = j[token].get<int>();
+		  if (!validSection(a)) {
+		    // the "drop" section is one bigger than the greatest valid section
+		    if (!validSection(a-1)){
+			  std::cerr << "WARNING: invalid section " << a << std::endl;
+		    }
+		     s->setSection(a);
+		  }
+		} else if (token == "Other") {
+		  for (json::iterator itr2 = j[token].begin(); it2 != j[token].end(); itr2++) {
+			std::string token2 = itr2.key();
+			gradeable_enum_success = string_to_gradeable_enum(token,g);
+			if (!gradeable_enum_success) {
+				std::cerr << "UNKNOWN Other" << std::endl;
+			} else {
+			  for (int i=0; i<j[token][token2].size(); i++) {
+			    int which;
+			    std::string token3 = j[token][token2][i]["id"].get<std::string>();
+			    const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(token3);
+			    which = c.first;
+			    float score = j[token][token2][i]["score"].get<float>();
+			    s->setGradeableValue(g,which,score);
+			  }
+			}
+		  }
+		}
+	  } else {
+	    for (json:iterator itr2 = (itr->second).begin(); itr2 != (itr->second).end(); itr2++) {
+		  int which;
+	      float value;
+	      std::string label;
+	      bool invalid = false;
+	      std::string gradeable_id;
+		  std::string gradeable_name;
+		  gradeable_id = (itr2->first).get<std::string>();
+		  gradeable_name = (itr2->second)["id"].get<std::string>();
+		  value = (itr->second)["score"].get<float>();
+		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
+		    invalid = true;
+		    which = -1;
+		    if (gradeable_name == "Lab15") {
+			  std::cout << "value " << s->getUserName() << " " << value << std::endl;
+			  assert (value >= 0 && value <= 5);
+			  s->setParticipation(value);
+		    } else if (gradeable_name == "Lab16") {
+			  assert (value >= 0 && value <= 5);
+			  s->setUnderstanding(value);
+		    } else if (gradeable_name == "Test4") {
+			  assert (value >= 0 && value <= 150);
+		    } else {
+			  //std::cerr << "WARNING: INVALID gradeable item" << gradeable_name << " " << value << std::endl;
+			}
+		  } else {
+			const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
+            which = c.first;
+			if (c.second == "") {
+              GRADEABLES[g].setCorrespondenceName(gradeable_id,gradeable_name); 
+            } else {
+              assert (c.second == gradeable_name);
+            }
+		  }
+		  if (!invalid) {
+			assert (which >= 0);
+			assert (value >= 0.0);
+			s->setGradeableValue(g,which,value);
+			if (token == "HW") {
+			  if (j[token][itr->second].find("days_late") != j[token][itr->second].end()) {
+			    if (value <= 0) {
+				  std::cout << "Should not be Charged a late day" << std::endl;
+			    } else {
+				  int a = j[token][gradeable_id]["days_late"].get<int>();
+				  s->->incrLateDaysUsed(which,a);
+			    }
+			  }
+		    }
+			if (label != "") {
+			  if (g == GRADEABLE_ENUM::TEST) {
+				s->setTestZone(which,label);
+			  } else {
+				assert (g == GRADEABLE_ENUM::EXAM);
+				s->setTestZone(which+GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),label);
+			  }
+			}
+		  }
+	    }
+	  }
+	}
+  }
+  students.push_back(s);
+  
+  /*
   std::string command = "ls -1 " + RAW_DATA_DIRECTORY + "*.txt > files.txt";
 
   system(command.c_str());
@@ -950,6 +1074,8 @@ void load_student_grades(std::vector<Student*> &students) {
     
     students.push_back(s);
   }
+  */
+  
 }
 
 
