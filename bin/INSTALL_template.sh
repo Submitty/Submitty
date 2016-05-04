@@ -191,8 +191,9 @@ find $HSS_INSTALL_DIR/website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
 # "other" can cd into all subdirectories
 chmod -R 400 $HSS_INSTALL_DIR/website
 find $HSS_INSTALL_DIR/website -type d -exec chmod uo+x {} \;
-# "other" can read all .txt & .css files
+# "other" can read all .txt, .jpg, & .css files
 find $HSS_INSTALL_DIR/website -type f -name \*.css -exec chmod o+r {} \;
+find $HSS_INSTALL_DIR/website -type f -name \*.jpg -exec chmod o+r {} \;
 find $HSS_INSTALL_DIR/website -type f -name \*.txt -exec chmod o+r {} \;
 # "other" can read & execute all .js files
 find $HSS_INSTALL_DIR/website -type f -name \*.js -exec chmod o+rx {} \;
@@ -222,6 +223,7 @@ find $HSS_INSTALL_DIR/src -type f -exec chmod 444 {} \;
 
 #replace necessary variables
 replace_fillin_variables $HSS_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
+replace_fillin_variables $HSS_INSTALL_DIR/src/grading/system_call_check.cpp
 
 
 ########################################################################################################################
@@ -303,6 +305,13 @@ chmod 550 $HSS_INSTALL_DIR/bin/grading_done.sh
 # fix the permissions specifically of the grade_students.sh script
 chown root:$HWCRON_USER $HSS_INSTALL_DIR/bin/grade_students.sh
 chmod 550 $HSS_INSTALL_DIR/bin/grade_students.sh
+
+
+# build the helper program for strace output and restrictions by system call categories
+g++ $HSS_INSTALL_DIR/src/grading/system_call_check.cpp -o $HSS_INSTALL_DIR/bin/system_call_check.out
+# set the permissions
+chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin/system_call_check.out
+chmod 550 $HSS_INSTALL_DIR/bin/system_call_check.out
 
 
 # prepare the untrusted_execute executable with suid

@@ -6,7 +6,7 @@
 #include <map>
 
 
-enum class GRADEABLE_ENUM { READING, EXERCISE, LAB, PARTICIPATION, HOMEWORK, PROJECT, QUIZ, TEST, EXAM };
+enum class GRADEABLE_ENUM { NONE, READING, EXERCISE, LAB, PARTICIPATION, HOMEWORK, PROJECT, QUIZ, TEST, EXAM };
 
 
 inline std::string gradeable_to_string(const GRADEABLE_ENUM &g) {
@@ -63,7 +63,7 @@ public:
 
   int setCorrespondence(const std::string& id) {
     assert (!hasCorrespondence(id));
-    assert (correspondences.size() < count);
+    assert (int(correspondences.size()) < count);
     int index = correspondences.size();
     correspondences[id] = std::make_pair(index,"");
     return index;

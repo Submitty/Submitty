@@ -248,7 +248,7 @@ fi
 
 # change the default user umask (was 002)
 sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs
-grep -q "^UMASK 027" || (echo "ERROR! failed to set umask" && exit)
+grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && exit)
 
 
 adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password

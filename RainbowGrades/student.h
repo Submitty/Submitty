@@ -30,7 +30,7 @@ public:
   // personal data
   const std::string& getUserName()      const { return username; }
   const std::string& getFirstName()     const { return first; }
-  const std::string& getPreferredName() const { return preferred; }
+  const std::string& getPreferredName() const { if (preferred != "") return preferred; return first; }
   const std::string& getLastName()      const { return last; }
   const std::string& getYear()          const { return year; }
   const std::string& getMajor1()        const { return major1; }
@@ -46,6 +46,7 @@ public:
 
   // grade data
   float getGradeableValue(GRADEABLE_ENUM g, int i) const;
+  const std::string& getGradeableNote(GRADEABLE_ENUM g, int i) const;
   const std::string& getZone(int i) const;
   int getAllowedLateDays(int which_lecture) const;
   int getUsedLateDays() const;
@@ -90,6 +91,7 @@ public:
   // grade data
   void setTestZone(int which_test, const std::string &zone)  { zones[which_test] = zone; }
   void setGradeableValue(GRADEABLE_ENUM g, int i, float value);
+  void setGradeableNote(GRADEABLE_ENUM g, int i, const std::string &note);
   void incrLateDaysUsed(int i, int x) { hws_late_days[i] += x; }
   void mossify(int hw, float penalty);
 
@@ -158,6 +160,7 @@ private:
 
   // grade data
   std::map<GRADEABLE_ENUM,std::vector<float> > all_values;
+  std::map<GRADEABLE_ENUM,std::vector<std::string> > all_notes;
   std::map<std::string,std::pair<char,iclicker_answer_enum> > iclickeranswers;
   std::vector<float> hws_late_days;
   std::vector<std::string> zones;

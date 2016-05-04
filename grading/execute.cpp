@@ -27,7 +27,7 @@
 
 // defined in seccomp_functions.cpp
 
-int install_syscall_filter(bool is_32, bool blacklist, const std::string &my_program);
+
 
 // =====================================================================================
 // =====================================================================================
@@ -395,7 +395,7 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
   } else if (what_signal == SIGPROF   /* 27,27,29  Term  Profiling timer expired  */) {
   } else if (what_signal == SIGSYS    /* 12,31,12  Core  Bad argument to routine (SVr4)  */) {
     std::cout << "********************************\nDETECTED BAD SYSTEM CALL\n***********************************" << std::endl;
-    message = "ERROR: DETECTED BAD SYSTEM CALL";
+    message = "ERROR: DETECTED BAD SYSTEM CALL, please report this error to hss-questions@cs.lists.rpi.edu";
   } else if (what_signal == SIGTRAP   /*  5        Core  Trace/breakpoint trap  */) {
   } else if (what_signal == SIGURG    /* 16,23,21  Ign   Urgent condition on socket (4.2BSD)  */) {
   } else if (what_signal == SIGVTALRM /* 26,26,28  Term  Virtual alarm clock (4.2BSD)  */) {
@@ -546,13 +546,10 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 
 
   // SECCOMP: install the filter (system calls restrictions)
-  //  if (SECCOMP_ENABLED != 0) {
-  if (install_syscall_filter(prog_is_32bit, true /*blacklist*/, my_program)) { 
+  if (install_syscall_filter(prog_is_32bit, my_program)) {
     std::cout << "seccomp filter install failed" << std::endl;
     return 1;
   }
-  // } else {
-  // }
   // END SECCOMP
   
   
@@ -573,7 +570,6 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 // Executes command (from shell) and returns error code (0 = success)
 int execute(const std::string &cmd, const std::string &execute_logfile, 
 	    const std::map<int,rlim_t> &test_case_limits) {
-
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
 

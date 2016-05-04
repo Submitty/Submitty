@@ -95,7 +95,7 @@ foreach($db->rows() as $student_record) {
     $student_output_json["rcs_id"] = $student_rcs;
     $student_output_json["first_name"] = $student_first_name;
     $student_output_json["last_name"] = $student_last_name;
-    $student_output_json["section"] = $student_section;
+    $student_output_json["section"] = intval($student_section);
 	
     // late update date (choice of format)
     //                                       Sunday, October 4, 2015
@@ -110,6 +110,7 @@ foreach($db->rows() as $student_record) {
     $params = array($student_rcs);
     $db->query($queries['LAB'], $params);
 
+	//check if query was empty; if so, do not create Lab in json
 	if (empty($db)) {
 		$student_output_json['Lab'] = array();
 	}
@@ -118,9 +119,6 @@ foreach($db->rows() as $student_record) {
     foreach($db->rows() as $row) {
         $lab_grades[$row['id']] = $row['score'];
     }
-
-    //make a way to check if labs are needed so it is not made needlessly
-    //$student_output_json["Lab"] = array(); 	
 	
     foreach($lab_grades as $id => $score) {
 	    // there is probbaly a better way...
@@ -139,12 +137,10 @@ foreach($db->rows() as $student_record) {
     foreach($db->rows() as $row) {
         $exceptions[$row['ex_rubric_id']] = $row['ex_late_days'];
     }
-	
-	//again make a way to check if hw's are needed
-    //$student_output_json['HW'] = array();
 
     $db->query($queries['HW'], $params);
 
+	//check if query was empty; if so, do not create HW in json
 	if (empty($db)) {
 		$student_output_json['HW'] = array();
 	}
@@ -157,7 +153,7 @@ foreach($db->rows() as $student_record) {
 		$student_output_text .= "hw " . $row['rubric_submission_id'] . " \"" . $row['rubric_name'] . "\" " . $row['score'] . $nl;
         
 		//add hw => (hw_id => (rubric_name, score))
-        $student_output_json["HW"]["hw " . $row['rubric_submission_id']] = array('id' => $row['rubric_name'],'score' => $row['score']);
+        $student_output_json["HW"]["hw " . $row['rubric_submission_id']] = array('id' => $row['rubric_name'],'score' => floatval($row['score']));
 		
 		$late_days = $row['grade_days_late'];
         if (isset($exceptions[$row['id']])) {
@@ -167,12 +163,13 @@ foreach($db->rows() as $student_record) {
         if ($late_days > 0) {
             $student_output_text .= "days_late " . $row['rubric_submission_id'] . " " . $late_days . $nl;
 			//add hw_id => (days_late => #daysLate)
-            $student_output_json["HW"]["hw " . $row['rubric_submission_id']][] = array("days_late" => $late_days);
+            $student_output_json["HW"]["hw " . $row['rubric_submission_id']][] = array("days_late" => intval($late_days));
         }
     }
 
     $db->query($queries['TEST'], $params);
 
+	//check if query was empty; if so, do not create test in json
 	if (empty($db)) {
 		$student_output_json['Test'] = array();
 	}
@@ -185,17 +182,10 @@ foreach($db->rows() as $student_record) {
 	    $testname = $row['test_type']." " . $row['test_number'];
         $student_output_text .= strtolower($row['test_type']) . ' ' .$row['test_number'] . ' "' . $testname . '" ' . $row['score'] . " " . implode(" ", pgArrayToPhp($row['test_text'])) . $nl;
 		//add test => (test# => (testName, score, testText))
-        $student_output_json['Test'][strtolower($row['test_type']) . ' ' .$row['test_number']] = array('id' => $testname,'score' => $row['score'],'comment' => implode(" ", pgArrayToPhp($row['test_text'])));
+        $student_output_json['Test'][strtolower($row['test_type']) . ' ' .$row['test_number']] = array('id' => $testname,'score' => floatval($row['score']),'comment' => implode(" ", pgArrayToPhp($row['test_text'])));
     }
-	
-	//check to make sure others exists
-    //$student_output_json['Other'] = array();
 
     $db->query($queries['OTHER'], $params);
-
-	if (empty($db)) {
-		$student_output_json['Other'] = array();
-	}
 	
     foreach($db->rows() as $row) {
         if ($row['grades_other_score'] <= 0) {
@@ -203,13 +193,13 @@ foreach($db->rows() as $student_record) {
         }
 		if (strpos($row['other_id'], 'reading') !== FALSE) {
 			  $student_output_text .= 'reading ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
-			  $student_output_json['Other'][$row['other_id']] = array('id' => $row['other_name'],'score' => $row['grades_other_score'],'comment' => $row['grades_other_text']);
+			  $student_output_json[$row['other_id']]['other_id'] = array('id' => $row['other_name'],'score' => floatval($row['grades_other_score']),'comment' => $row['grades_other_text']);
 		} else if (strpos($row['other_id'], 'participation') !== FALSE) {
 			  $student_output_text .= 'participation ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
-			  $student_output_json['Other'][$row['other_id']] = array('id' => $row['other_name'],'score' => $row['grades_other_score'],'comment' => $row['grades_other_text']);
+			  $student_output_json[$row['other_id']]['other_id'] = array('id' => $row['other_name'],'score' => floatval($row['grades_other_score']),'comment' => $row['grades_other_text']);
 		} else {
 			  $student_output_text .= 'other ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
-			  $student_output_json['Other'][$row['other_id']] = array('id' => $row['other_name'],'score' => $row['grades_other_score'],'comment' => $row['grades_other_text']);
+			  $student_output_json[$row['other_id']]['other_id'] = array('id' => $row['other_name'],'score' => floatval($row['grades_other_score']),'comment' => $row['grades_other_text']);
 		}
     }
 
