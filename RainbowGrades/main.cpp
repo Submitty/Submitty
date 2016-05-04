@@ -16,8 +16,9 @@
 #include "iclicker.h"
 #include "gradeable.h"
 #include "grade.h"
+#include "json.hpp"
 
-
+using nlohmann::json;
 
 // defined in iclicker.cpp
 std::string ReadQuoted(std::istream &istr);
@@ -372,7 +373,7 @@ void MakeRosterFile(std::vector<Student*> &students) {
   std::ofstream ostr("./iclicker_Roster.txt");
 
 
-  for (int i = 0; i < students.size(); i++) {
+  for (unsigned int i = 0; i < students.size(); i++) {
     std::string foo = "active";
     if (students[i]->getLastName() == "") continue;
     if (students[i]->getSection() <= 0 || students[i]->getSection() > 10) continue;
@@ -719,10 +720,11 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
 
         if (g == GRADEABLE_ENUM::HOMEWORK ||
             g == GRADEABLE_ENUM::LAB ||
+            g == GRADEABLE_ENUM::READING ||
             g == GRADEABLE_ENUM::QUIZ ||
             g == GRADEABLE_ENUM::EXAM ||
-            g == GRADEABLE_ENUM::READING ||
             g == GRADEABLE_ENUM::PARTICIPATION ||
+            g == GRADEABLE_ENUM::PROJECT ||
             g == GRADEABLE_ENUM::TEST) {
           ss >> which_token;
           
@@ -734,8 +736,10 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
           ss >> which;
         }
 
+        std::cout << gradesline << std::endl;
+
         if (!(ss >> p_score)) {
-          std::cout << "ERROR READING" << std::endl;
+          std::cout << "ERROR READING: '" << gradesline << "'" << std::endl;
           std::cout << which_token << " " << p_score << std::endl;
           exit(1);
         }
@@ -785,6 +789,144 @@ void load_student_grades(std::vector<Student*> &students) {
   Student *perfect = GetStudent(students,"PERFECT");
   assert (perfect != NULL);
 
+  
+  std::string command2 = "ls -1 " + RAW_DATA_DIRECTORY + "*.json > files_json.txt";
+
+  system(command2.c_str());
+  
+  std::ifstream files_istr("files_json.txt");
+  assert(files_istr);
+  std::string filename;
+  int count = 0;
+  while (files_istr >> filename) {
+	std::ifstream istr(filename.c_str());
+	assert(istr);
+	Student *s = new Student();
+	
+	count++;
+	
+	json j;
+	j << istr;
+
+	for (json::iterator itr = j.begin(); itr != j.end(); itr++) {
+	  //std::string token = (itr->first).get<std::string>();
+	  std::string token = itr.key();
+	  GRADEABLE_ENUM g;
+	  bool gradeable_enum_success = string_to_gradeable_enum(token,g);
+	  if (!gradeable_enum_success) {
+		if (token == "rcs_id") {
+			s->setUserName(j[token].get<std::string>());
+		} else if (token == "first_name") {
+			s->setFirstName(j[token].get<std::string>());
+		} else if (token == "last_name") {
+			s->setLastName(j[token].get<std::string>());
+		} else if (token == "last_update") {
+			s->setLastUpdate(j[token].get<std::string>());
+		} else if (token == "section") {
+		  int a = j[token].get<int>();
+		  if (!validSection(a)) {
+		    // the "drop" section is one bigger than the greatest valid section
+		    if (!validSection(a-1)){
+			  std::cerr << "WARNING: invalid section " << a << std::endl;
+		    }
+		  }
+		  s->setSection(a);
+		} else if (token == "exam_seating") {
+		  std::cout << "TOKEN IS EXAM SEATING" << std::endl;
+		  //???
+		} else {
+			std::cout << "UNKNOWN TOKEN Y " << token << std::endl;
+			exit(0);
+		}
+	  } else {
+	    for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+		  int which;
+	      float value;
+	      std::string label;
+	      bool invalid = false;
+	      
+		  std::string gradeable_id;
+		  std::string gradeable_name;
+		  std::string other_note;
+		  
+		  gradeable_id = itr2.key();
+		  gradeable_name = (itr2.value())["id"].get<std::string>();
+		  value = (itr.value())["score"].get<float>();
+		  other_note = (itr.value())["comment"].get<std::string>();
+		  // Search through the gradeable categories as needed to find where this item belongs
+          // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
+		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
+			for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
+			  GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
+			  if (GRADEABLES[g2].hasCorrespondence(gradeable_id)) {
+				  g = g2;
+			  }
+			}
+		  }
+		  
+		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
+			invalid = false;
+			std::cerr << "ERROR! cannot find a category for this item " << gradeable_id << std::endl;
+		    /*
+			invalid = true;
+		    which = -1;
+		    if (gradeable_name == "Lab15") {
+			  std::cout << "value " << s->getUserName() << " " << value << std::endl;
+			  assert (value >= 0 && value <= 5);
+			  s->setParticipation(value);
+		    } else if (gradeable_name == "Lab16") {
+			  assert (value >= 0 && value <= 5);
+			  s->setUnderstanding(value);
+		    } else if (gradeable_name == "Test4") {
+			  assert (value >= 0 && value <= 150);
+		    } else {
+			  //std::cerr << "WARNING: INVALID gradeable item" << gradeable_name << " " << value << std::endl;
+			}*/
+		  } else {
+			const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
+            which = c.first;
+			if (c.second == "") {
+              GRADEABLES[g].setCorrespondenceName(gradeable_id,gradeable_name); 
+            } else {
+              assert (c.second == gradeable_name);
+            }
+		  }
+		  
+		  if (!invalid) {
+			assert (which >= 0);
+			assert (value >= 0.0);
+			s->setGradeableValue(g,which,value);
+			s->setGradeableNote(g,which,other_note);
+			
+			if (token == "HW") {
+			  if (j[token][gradeable_id].find("days_late") != j[token][gradeable_id].end()) {
+			    if (value <= 0) {
+				  std::cout << "Should not be Charged a late day" << std::endl;
+			    } else {
+				  int a = j[token][gradeable_id]["days_late"].get<int>();
+				  s->incrLateDaysUsed(which,a);
+			    }
+			  }
+		    }
+			
+			if (label != "") {
+			  if (g == GRADEABLE_ENUM::TEST) {
+				s->setTestZone(which,label);
+			  } else {
+				assert (g == GRADEABLE_ENUM::EXAM);
+				s->setTestZone(which+GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),label);
+			  }
+			}
+			
+		  }
+	    }
+	  }
+	}
+	students.push_back(s);
+  }
+  
+  
+  /*
   std::string command = "ls -1 " + RAW_DATA_DIRECTORY + "*.txt > files.txt";
 
   system(command.c_str());
@@ -809,7 +951,6 @@ void load_student_grades(std::vector<Student*> &students) {
       GRADEABLE_ENUM g;
       bool gradeable_enum_success = string_to_gradeable_enum(token,g);
 
-      //std::cout << "my TOKEN " << " " << token << std::endl;
       
       if (token == "rcs_id") {
         istr >> token;
@@ -845,24 +986,8 @@ void load_student_grades(std::vector<Student*> &students) {
         std::cout << "TOKEN IS EXAM SEATING" << std::endl;
         char line[MAX_STRING_LENGTH];
         istr.getline(line,MAX_STRING_LENGTH);
-      } else if (token == "academic" || token == "Academic") {
-        istr >> token; 
-        assert (token == "integrity" || token == "Integrity");
-        istr >> a; 
-        assert (a == 0 || a == 1);
-	s->setAcademicIntegrityForm();
-      } else if (token == "Participation") {
-        istr >> a; 
-        assert (a >= 0 && a <= 5);
-        s->setParticipation(a);
-      } else if (token == "Understanding") {
-        istr >> a; 
-        assert (a >= 0 && a <= 5);
-        s->setUnderstanding(a);
-      } 
 
-      
-      else if (gradeable_enum_success) {
+      } else if (gradeable_enum_success) {
           
         std::string line;
         getline(istr,line);
@@ -881,32 +1006,22 @@ void load_student_grades(std::vector<Student*> &students) {
 
         std::string other_note;
         getline(ss,other_note);
-        if (other_note != "" && other_note != " ") {
-          std::cout << "OTHER NOTE '" << other_note << "'" << std::endl;
-        }
 
+        // Search through the gradeable categories as needed to find where this item belongs
+        // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
         if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
-          invalid=true;
-          which = -1;
-
-          if (gradeable_name == "Lab15") {
-            //istr >> a; 
-            std::cout << "value " << s->getUserName() << " " << value << std::endl;
-            assert (value >= 0 && value <= 5);
-            s->setParticipation(value);
-          } else if (gradeable_name == "Lab16") {
-            assert (value >= 0 && value <= 5);
-            s->setUnderstanding(value);            
-
-          } else if (gradeable_name == "Test4") {
-            assert (value >= 0 && value <= 150);
-            s->setGradeableValue(GRADEABLE_ENUM::EXAM,0,value);
-
-          } else {
-            //std::cerr << "WARNING: INVALID gradeable item" << gradeable_name << " " << value << std::endl;
-            
+          for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
+            GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
+            if (GRADEABLES[g2].hasCorrespondence(gradeable_id)) {
+              g = g2;
+            }
           }
+        }
+        if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
+          invalid = false;
+          std::cerr << "ERROR! cannot find a category for this item " << gradeable_id << std::endl;
         } else {
+
           const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
           which = c.first;
           if (c.second == "") {
@@ -916,11 +1031,11 @@ void load_student_grades(std::vector<Student*> &students) {
           }
         }
         
-         if (!invalid) {
+        if (!invalid) {
           assert (which >= 0);
           assert (value >= 0.0);
           s->setGradeableValue(g,which,value);
-          //s->setGradeableNote(g,which,other_note);
+          s->setGradeableNote(g,which,other_note);
           if (label != "") {
             if (g == GRADEABLE_ENUM::TEST) {
               s->setTestZone(which,label);
@@ -950,15 +1065,19 @@ void load_student_grades(std::vector<Student*> &students) {
           }
         }
       } 
-
+      
       else {
         std::cout << "UNKNOWN TOKEN  Y" << token << std::endl;
         exit(0);
       }
+    
     }
     
     students.push_back(s);
+    
+    
   }
+  */
 }
 
 
@@ -991,22 +1110,18 @@ void end_table(std::ofstream &ostr,  bool full_details, const std::vector<Studen
 
 
 
-
 void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
 
-  //  Student *blank = GetStudent(students,"");
   Student *sp = GetStudent(students,"PERFECT");
   Student *sa = GetStudent(students,"LOWEST A-");
   Student *sb = GetStudent(students,"LOWEST B-");
   Student *sc = GetStudent(students,"LOWEST C-");
   Student *sd = GetStudent(students,"LOWEST D");
-  //  assert (blank != NULL);
   assert (sp != NULL);
   assert (sa != NULL);
   assert (sb != NULL);
   assert (sc != NULL);
   assert (sd != NULL);
-
 
   // get todays date;
   time_t now = time(0);  
@@ -1034,7 +1149,6 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
   int last_section = -1;
 
   for (int S = 0; S < (int)students.size(); S++) {
-    //    if (students[S] == blank) continue;
     int rank = next_rank;
     if (students[S] == sp ||
         students[S] == sa ||
@@ -1060,11 +1174,15 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
   ostr << "</table>\n";
   end_table(ostr,true,students,-1);
   
-  command = "ln -s " + summary_file + " " + OUTPUT_FILE;
+  command = "cp " + summary_file + " " + OUTPUT_FILE;
   system(command.c_str());
   
+
   for (int S = 0; S < (int)students.size(); S++) {
     if (students[S]->getSection() == 0) continue;
+
+
+#if 0
     std::string file = INDIVIDUAL_FILES_OUTPUT_DIRECTORY + students[S]->getUserName() + "_summary.html";
 
     start_table_open_file(ostr,file,false,students,S,month,day,year,GRADEABLE_ENUM::NONE);
@@ -1080,7 +1198,6 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
     ostr << "</table><br>\n";
 
     /*
-
     for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
       enum GRADEABLE_ENUM g = ALL_GRADEABLES[i];
       start_table_output(ostr,file,false,students,S,month,day,year,g);
@@ -1096,10 +1213,9 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
     */    
     //bool any_notes = false;
     
-    
     end_table(ostr,false,students,S);
 
-
+#endif
 
     std::string file2 = INDIVIDUAL_FILES_OUTPUT_DIRECTORY + students[S]->getUserName() + "_message.html";
     std::ofstream ostr2(file2.c_str());
@@ -1307,7 +1423,7 @@ int main(int argc, char* argv[]) {
   // ======================================================================
   // SUGGEST CURVES
 
-  for (int i = 0; i < ALL_GRADEABLES.size(); i++) {
+  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
     GRADEABLE_ENUM g = ALL_GRADEABLES[i];
 
     for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
@@ -1322,7 +1438,7 @@ int main(int argc, char* argv[]) {
       
       std::map<int, int> section_counts;
       
-      for (int S = 0; S < students.size(); S++) {
+      for (unsigned int S = 0; S < students.size(); S++) {
         if (students[S]->getSection() > 0 && students[S]->getGradeableValue(g,i) > 0) {
           scores.push_back(students[S]->getGradeableValue(g,i));
           section_counts[students[S]->getSection()]++;
@@ -1332,13 +1448,13 @@ int main(int argc, char* argv[]) {
         //std::cout << "   " << scores.size() << " submitted" << std::endl;
         std::sort(scores.begin(),scores.end());
         float sum = 0;
-        for (int i = 0; i < scores.size(); i++) {
+        for (unsigned int i = 0; i < scores.size(); i++) {
           sum+=scores[i];
         }
         float average = sum / float(scores.size());
         std::cout << "    average=" << std::setprecision(2) << std::fixed << average;
         sum = 0;
-        for (int i = 0; i < scores.size(); i++) {
+        for (unsigned int i = 0; i < scores.size(); i++) {
           sum+=(average-scores[i])*(average-scores[i]);
         }
         float stddev = sqrt(sum/float(scores.size()));

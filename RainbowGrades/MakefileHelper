@@ -22,7 +22,7 @@ endif
 
 # =============================================================================
 
-.PHONY: default pull push all compile overall section lab hw test final iclicker zone clean 
+.PHONY: default pull push all compile overall section lab hw test quiz final iclicker zone clean 
 
 default: overall
 
@@ -37,8 +37,23 @@ push:
 
 #	g++ -Wall -std=c++11 -m32 -g \
 
+flags = -g
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)  #Linux)
+     flags = -g -std=c++11
+endif
+
+ifeq ($(UNAME_S),Linux)
+     flags = -g -std=c++0x
+endif
+
+
+
+
+
 compile:
-	g++ -Wall -std=c++11 -g \
+	g++ -Wall ${flags} \
 		${RAINBOW_GRADES_DIRECTORY}/main.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/output.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/table.cpp \
@@ -92,6 +107,9 @@ hw: compile
 
 test: compile
 	./process_grades.out by_test
+
+quiz: compile
+	./process_grades.out by_quiz
 
 exam: compile
 	./process_grades.out by_exam

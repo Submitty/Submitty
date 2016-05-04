@@ -94,6 +94,9 @@ window.addEventListener('load', function() {
 
 echo '<div id="HWsubmission">';
 
+//echo '<div class="confetti">';
+
+
 echo '<h2 class="label">Homework Submission for <em>'.$user.'</em>';
 if (on_dev_team($user)) {
   echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ]</font>";
@@ -216,6 +219,8 @@ if ($highest_version == -1) {
 } else {
 
   // $highest_version is >= 1
+  //  echo '<div class="outer_box_confetti">';
+  //echo '<div class="outer_box_confetti_a">';
   echo '<div class="outer_box">';
   echo '<h3 class="label">Review Submissions</h3>';
 
@@ -355,7 +360,8 @@ if ($highest_version == -1) {
     }
   }
 
-  echo '</div>';
+  echo '</div>';  // confetti_a
+  //echo '</div>';  // confetti
 
 
 
@@ -418,7 +424,13 @@ if (!isset($grade_summary) || (isset($grade_summary) && $grade_summary == true))
 }
 
 echo '</div>'; // end panel-body
+//echo '</div>'; // end confetti
 echo '</div>'; // end HWsubmission
+
+
+
+
+
 
 
 

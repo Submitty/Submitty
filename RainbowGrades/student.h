@@ -46,6 +46,7 @@ public:
 
   // grade data
   float getGradeableValue(GRADEABLE_ENUM g, int i) const;
+  const std::string& getGradeableNote(GRADEABLE_ENUM g, int i) const;
   const std::string& getZone(int i) const;
   int getAllowedLateDays(int which_lecture) const;
   int getUsedLateDays() const;
@@ -159,7 +160,7 @@ private:
 
   // grade data
   std::map<GRADEABLE_ENUM,std::vector<float> > all_values;
-  //std::map<GRADEABLE_ENUM,std::vector<std::string> > all_notes;
+  std::map<GRADEABLE_ENUM,std::vector<std::string> > all_notes;
   std::map<std::string,std::pair<char,iclicker_answer_enum> > iclickeranswers;
   std::vector<float> hws_late_days;
   std::vector<std::string> zones;

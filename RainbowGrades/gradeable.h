@@ -63,7 +63,7 @@ public:
 
   int setCorrespondence(const std::string& id) {
     assert (!hasCorrespondence(id));
-    assert (correspondences.size() < count);
+    assert (int(correspondences.size()) < count);
     int index = correspondences.size();
     correspondences[id] = std::make_pair(index,"");
     return index;

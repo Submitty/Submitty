@@ -67,6 +67,9 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
         ss >> last >> first >> rcs >> building >> room >> zone >> time;
         if (last == "") break;
         Student *s = GetStudent(students,rcs);
+        if (s == NULL) {
+          std::cout << "seating assignment...  couldn't find this userid " << rcs << std::endl;
+        }
         assert (s != NULL);
         if (zone != "") {
           std::map<std::string,ZoneInfo>::iterator itr = zones.find(zone);
@@ -121,7 +124,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
   int already_zoned = 0;
   int next_za = 0;
 
-  for (int i = 0; i < students.size(); i++) {
+  for (unsigned int i = 0; i < students.size(); i++) {
 
     Student* &s = students[i];
 
@@ -150,7 +153,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
   std::cout << "low overall grade (not assigning a zone) " << low_overall_grade << std::endl;
   std::cout << "not registered in valid section  " << not_reg << std::endl;
 
-  assert (new_zone_assign <= randomized_available.size());
+  assert (new_zone_assign <= int(randomized_available.size()));
 
 
   // ============================================================
@@ -161,7 +164,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
     std::ofstream ostr_zone_assignments(zone_assignments_filename.c_str());
     assert (ostr_zone_assignments.good());
     
-    for (int i = 0; i < students.size(); i++) {
+    for (unsigned int i = 0; i < students.size(); i++) {
       
       Student* &s = students[i];
       
