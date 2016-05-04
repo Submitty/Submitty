@@ -849,7 +849,7 @@ void load_student_grades(std::vector<Student*> &students) {
 		  gradeable_id = itr2.key();
 		  gradeable_name = (itr2.value())["name"].get<std::string>();
 		  value = (itr2.value())["score"].get<float>();
-		  if ((itr2.value()).find("text") != itr2.end()) {
+		  if ((itr2.value()).find("text") != (itr2.value()).end()) {
 			other_note = (itr2.value())["text"].get<std::string>();
 		  }
 		  // Search through the gradeable categories as needed to find where this item belongs
