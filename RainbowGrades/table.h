@@ -10,16 +10,17 @@ class TableCell {
 public:
 
   // CONSTRUCTORS
-  TableCell(const std::string& c="ffcccc", const std::string& d="", const std::string& n="", 
+  TableCell(const std::string& c="ffcccc", const std::string& d="", const std::string& n="", int ldu=0,
             CELL_CONTENTS_STATUS v=CELL_CONTENTS_VISIBLE, const std::string& a="left" , int s=1, int r=0);
-  TableCell(const std::string& c         , int                d   , const std::string& n="", 
+  TableCell(const std::string& c         , int                d   , const std::string& n="", int ldu=0,
             CELL_CONTENTS_STATUS v=CELL_CONTENTS_VISIBLE, const std::string& a="left" , int s=1, int r=0);
-  TableCell(const std::string& c         , float              d   , const std::string& n="", 
+  TableCell(const std::string& c         , float              d   , const std::string& n="", int ldu=0,
             CELL_CONTENTS_STATUS v=CELL_CONTENTS_VISIBLE, const std::string& a="right", int s=1, int r=0);
 
   std::string color;
   std::string data;
   std::string note;
+  int late_days_used;
   std::string align;
   enum CELL_CONTENTS_STATUS visible;
   int span;

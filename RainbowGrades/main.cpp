@@ -813,7 +813,8 @@ void load_student_grades(std::vector<Student*> &students) {
 	  std::string token = itr.key();
 	  GRADEABLE_ENUM g;
 	  bool gradeable_enum_success = string_to_gradeable_enum(token,g);
-	  if (!gradeable_enum_success || token == "Other" || token == "rubric") {
+	  //if (!gradeable_enum_success) {
+          if (!gradeable_enum_success && token != "Other" && token != "rubric" && token != "Test") {
 		if (token == "rcs_id") {
 			s->setUserName(j[token].get<std::string>());
 		} else if (token == "first_name") {
@@ -832,7 +833,7 @@ void load_student_grades(std::vector<Student*> &students) {
 		  }
 		  s->setSection(a);
 		} else {
-			std::cout << "UNKNOWN TOKEN Y " << token << std::endl;
+                  std::cout << "UNKNOWN TOKEN Y '" << token << "'" << std::endl;
 			exit(0);
 		}
 	  } else {

@@ -12,11 +12,11 @@ echo '<div>';
 
 // =================================================================================
 
-
+/*
 echo '<div class="title-box">';
 echo '<h1 class="title">Homework Submissions for '.$course.'</h1>';
 echo '</div>';
-
+*/
 
 // =================================================================================
 
@@ -92,16 +92,22 @@ window.addEventListener('load', function() {
 // =================================================================================
 // IDENTIFY USER & SELECT WHICH HOMEWORK NUMBER
 
+
+
 echo '<div id="HWsubmission">';
 
 //echo '<div class="confetti">';
 
+
+echo '<a href="http://tinyurl.com/gqvbyv9"><img align=right width=35% hspace="40" vspace="20" style="opacity: 0.2;filter: alpha(opacity=20);" src="resources/logo_fake.png"></a>';
 
 echo '<h2 class="label">Homework Submission for <em>'.$user.'</em>';
 if (on_dev_team($user)) {
   echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ]</font>";
 }
 echo '</h2>';
+
+
 
 
 // =================================================================================

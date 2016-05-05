@@ -117,6 +117,9 @@ exam: compile
 reading: compile
 	./process_grades.out by_reading
 
+project: compile
+	./process_grades.out by_project
+
 participation: compile
 	./process_grades.out by_participation
 
