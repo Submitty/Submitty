@@ -813,7 +813,8 @@ void load_student_grades(std::vector<Student*> &students) {
 	  std::string token = itr.key();
 	  GRADEABLE_ENUM g;
 	  bool gradeable_enum_success = string_to_gradeable_enum(token,g);
-	  if (!gradeable_enum_success) {
+	  //if (!gradeable_enum_success) {
+          if (!gradeable_enum_success && token != "Other" && token != "rubric" && token != "Test") {
 		if (token == "rcs_id") {
 			s->setUserName(j[token].get<std::string>());
 		} else if (token == "first_name") {
@@ -831,11 +832,8 @@ void load_student_grades(std::vector<Student*> &students) {
 		    }
 		  }
 		  s->setSection(a);
-		} else if (token == "exam_seating") {
-		  std::cout << "TOKEN IS EXAM SEATING" << std::endl;
-		  //???
 		} else {
-			std::cout << "UNKNOWN TOKEN Y " << token << std::endl;
+                  std::cout << "UNKNOWN TOKEN Y '" << token << "'" << std::endl;
 			exit(0);
 		}
 	  } else {
@@ -850,9 +848,11 @@ void load_student_grades(std::vector<Student*> &students) {
 		  std::string other_note;
 		  
 		  gradeable_id = itr2.key();
-		  gradeable_name = (itr2.value())["id"].get<std::string>();
-		  value = (itr.value())["score"].get<float>();
-		  other_note = (itr.value())["comment"].get<std::string>();
+		  gradeable_name = (itr2.value())["name"].get<std::string>();
+		  value = (itr2.value())["score"].get<float>();
+		  if ((itr2.value()).find("text") != (itr2.value()).end()) {
+			other_note = (itr2.value())["text"].get<std::string>();
+		  }
 		  // Search through the gradeable categories as needed to find where this item belongs
           // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
 		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
@@ -865,7 +865,7 @@ void load_student_grades(std::vector<Student*> &students) {
 		  }
 		  
 		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
-			invalid = false;
+			invalid = true;
 			std::cerr << "ERROR! cannot find a category for this item " << gradeable_id << std::endl;
 		    /*
 			invalid = true;
@@ -883,6 +883,7 @@ void load_student_grades(std::vector<Student*> &students) {
 			  //std::cerr << "WARNING: INVALID gradeable item" << gradeable_name << " " << value << std::endl;
 			}*/
 		  } else {
+			invalid = false;
 			const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
             which = c.first;
 			if (c.second == "") {
@@ -898,7 +899,7 @@ void load_student_grades(std::vector<Student*> &students) {
 			s->setGradeableValue(g,which,value);
 			s->setGradeableNote(g,which,other_note);
 			
-			if (token == "HW") {
+			if (token == "rubric") {
 			  if (j[token][gradeable_id].find("days_late") != j[token][gradeable_id].end()) {
 			    if (value <= 0) {
 				  std::cout << "Should not be Charged a late day" << std::endl;

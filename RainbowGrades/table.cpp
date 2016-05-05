@@ -5,29 +5,31 @@
 
 bool global_details = false;
 
-TableCell::TableCell(const std::string& c, const std::string& d, const std::string& n, 
+TableCell::TableCell(const std::string& c, const std::string& d, const std::string& n, int ldu,
                      CELL_CONTENTS_STATUS v, const std::string& a, int s, int r) { 
   color=c; 
   data=d; 
   note=n; 
+  late_days_used=ldu,
   visible=v;
   align=a;
   span=s; 
   rotate=r;
 }
 
-TableCell::TableCell(const std::string& c, int d, const std::string& n, 
+TableCell::TableCell(const std::string& c, int d, const std::string& n, int ldu,
                      CELL_CONTENTS_STATUS v, const std::string& a, int s, int r) { 
   color=c; 
   data=std::to_string(d); 
   note=n; 
+  late_days_used=ldu,
   visible=v;
   align=a;
   span=s; 
   rotate=r;
 }
 
-TableCell::TableCell(const std::string& c, float d, const std::string& n, 
+TableCell::TableCell(const std::string& c, float d, const std::string& n, int ldu,
                      CELL_CONTENTS_STATUS v, const std::string& a, int s, int r) { 
   color=c; 
   if (fabs(d) > 0.0001) {
@@ -38,6 +40,7 @@ TableCell::TableCell(const std::string& c, float d, const std::string& n,
     data = "";
   }
   note=n;
+  late_days_used=ldu,
   visible=v;
   align=a;
   span=s; 
@@ -57,6 +60,10 @@ std::ostream& operator<<(std::ostream &ostr, const TableCell &c) {
     ostr << "<div></div>";
   } else {
     ostr << c.data; 
+    if (c.late_days_used > 0) {
+      if (c.late_days_used > 3) { ostr << " (" << std::to_string(c.late_days_used) << "*)"; }
+      else { ostr << " " << std::string(c.late_days_used,'*'); }
+    }
     if (c.note.length() > 0 &&
         c.note != " " && 
         (global_details 

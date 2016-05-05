@@ -194,6 +194,7 @@ find $HSS_INSTALL_DIR/website -type d -exec chmod uo+x {} \;
 # "other" can read all .txt, .jpg, & .css files
 find $HSS_INSTALL_DIR/website -type f -name \*.css -exec chmod o+r {} \;
 find $HSS_INSTALL_DIR/website -type f -name \*.jpg -exec chmod o+r {} \;
+find $HSS_INSTALL_DIR/website -type f -name \*.png -exec chmod o+r {} \;
 find $HSS_INSTALL_DIR/website -type f -name \*.txt -exec chmod o+r {} \;
 # "other" can read & execute all .js files
 find $HSS_INSTALL_DIR/website -type f -name \*.js -exec chmod o+rx {} \;
