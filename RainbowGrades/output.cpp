@@ -522,7 +522,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
                                      sb->overall(),
                                      sc->overall(),
                                      sd->overall());
-    table.set(myrow,counter++,TableCell(color,grade));
+    table.set(myrow,counter++,TableCell(color,grade,2));
 
     table.set(myrow,counter++,TableCell(grey_divider));
     
@@ -537,7 +537,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
                                        sb->GradeablePercent(g),
                                        sc->GradeablePercent(g),
                                        sd->GradeablePercent(g));
-      table.set(myrow,counter++,TableCell(color,grade));
+      table.set(myrow,counter++,TableCell(color,grade,2));
     }
     table.set(myrow,counter++,TableCell(grey_divider));
     
@@ -565,7 +565,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
           late_days_used = this_student->getUsedLateDays(j);
         }
 
-        table.set(myrow,counter++,TableCell(color,grade,details,late_days_used,visible));
+        table.set(myrow,counter++,TableCell(color,grade,1,details,late_days_used,visible));
       }
       table.set(myrow,counter++,TableCell(grey_divider));
 
@@ -579,7 +579,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
                                            sb->adjusted_test(j),
                                            sc->adjusted_test(j),
                                            sd->adjusted_test(j));
-          table.set(myrow,counter++,TableCell(color,grade,"",0,visible));
+          table.set(myrow,counter++,TableCell(color,grade,1,"",0,visible));
         }
         table.set(myrow,counter++,TableCell(grey_divider));
       }
@@ -611,7 +611,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
                                          0.80*MAX_ICLICKER_TOTAL,
                                          0.60*MAX_ICLICKER_TOTAL,
                                          0.40*MAX_ICLICKER_TOTAL);
-        table.set(myrow,counter++,TableCell(color,grade));
+        table.set(myrow,counter++,TableCell(color,grade,1));
         grade = this_student->getIClickerRecent();
         color = coloritcolor(grade,
                              ICLICKER_RECENT,
@@ -619,7 +619,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
                              0.80*ICLICKER_RECENT,
                              0.60*ICLICKER_RECENT,
                              0.40*ICLICKER_RECENT);
-        table.set(myrow,counter++,TableCell(color,grade));
+        table.set(myrow,counter++,TableCell(color,grade,1));
       } else {
         color="ffffff"; // default_color;
         table.set(myrow,counter++,TableCell(color,""));

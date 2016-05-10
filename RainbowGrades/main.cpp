@@ -909,7 +909,7 @@ void load_student_grades(std::vector<Student*> &students) {
 			    }
 			  }
 		    }
-			
+			/*
 			if (label != "") {
 			  if (g == GRADEABLE_ENUM::TEST) {
 				s->setTestZone(which,label);
@@ -918,6 +918,7 @@ void load_student_grades(std::vector<Student*> &students) {
 				s->setTestZone(which+GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),label);
 			  }
 			}
+                        */
 			
 		  }
 	    }

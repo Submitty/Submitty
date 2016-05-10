@@ -363,9 +363,11 @@ void Student::outputgrade(std::ostream &ostr,bool flag_b4_moss,Student *lowest_d
 // =============================================================================================
 
 // zones for exams...
-const std::string& Student::getZone(int i) const {
+//const std::string& Student::getZone(int i) const {
+std::string Student::getZone(int i) const {
   assert (i >= 0 && i < GRADEABLES[GRADEABLE_ENUM::TEST].getCount()); return zones[i]; 
 }
+
 
 
 // =============================================================================================

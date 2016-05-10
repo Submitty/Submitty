@@ -47,7 +47,8 @@ public:
   // grade data
   float getGradeableValue(GRADEABLE_ENUM g, int i) const;
   const std::string& getGradeableNote(GRADEABLE_ENUM g, int i) const;
-  const std::string& getZone(int i) const;
+  //const std::string& getZone(int i) const;
+  std::string getZone(int i) const;
   int getAllowedLateDays(int which_lecture) const;
   int getUsedLateDays() const;
   int getUsedLateDays(int which) const;

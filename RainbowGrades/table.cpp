@@ -1,4 +1,6 @@
 #include <cmath>
+#include <cassert>
+
 #include "table.h"
 #include "constants_and_globals.h"
 
@@ -29,12 +31,13 @@ TableCell::TableCell(const std::string& c, int d, const std::string& n, int ldu,
   rotate=r;
 }
 
-TableCell::TableCell(const std::string& c, float d, const std::string& n, int ldu,
+TableCell::TableCell(const std::string& c, float d, int precision, const std::string& n, int ldu,
                      CELL_CONTENTS_STATUS v, const std::string& a, int s, int r) { 
+  assert (precision >= 0);
   color=c; 
   if (fabs(d) > 0.0001) {
     std::stringstream ss;
-    ss << std::setprecision(1) << std::fixed << d;
+    ss << std::setprecision(precision) << std::fixed << d;
     data=ss.str(); span=s; 
   } else {
     data = "";
