@@ -104,6 +104,8 @@ def run_all():
     if not success:
         sys.exit(1)
 
+
+
 # Helper class used to remove the burden of paths from the testcase author.
 # The path (in /var/local) of the testcase is provided to the constructor,
 # and is subsequently used in all methods for compilation, linkage, etc.
@@ -123,7 +125,19 @@ class TestcaseWrapper:
     # directory when compiling source files in bulk in this manner. The solution
     # is likely to run the compiler with a different working directory alongside
     # using relative paths.
+
+    '''
+    def use_cmake(self):
+        print "in use cmake"
+
+        subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "build2")])
+        subprocess.call(["cd", os.path.join(self.testcase_path, "build2")])
+
+    '''
+
+
     def compile_grading(self):
+        subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "build")])
         subprocess.call(["clang++",
             "-c", "-std=c++11",
             "-I" + os.path.join(self.testcase_path, "assignment_config")] +
@@ -140,7 +154,7 @@ class TestcaseWrapper:
                 ["-l" + lib for lib in libraries] +
                 ["-o", os.path.join(self.testcase_path, "build", target)] +
                 [os.path.join(self.testcase_path, "build", o) for o in objects] +
-                [o for o in glob.glob(os.path.join(self.testcase_path, "build", "*.o")) if not "main" in o])
+                [o for o in glob.glob(os.path.join(self.testcase_path, "build", "*.o")) if not "main" in o and not "system_call_check" in o])
 
     # Helper functions to link the four current executables.
     def link_compile(self):
@@ -163,9 +177,17 @@ class TestcaseWrapper:
     def run_validator(self):
         with open("/dev/null") as devnull:
             return_code = subprocess.call([os.path.join(self.testcase_path, "build", "validator.out"), "testassignment", "testuser", "1", "0"], \
-                    cwd=os.path.join(self.testcase_path, "data"), stdout=devnull, stderr=devnull)
+                    cwd=os.path.join(self.testcase_path, "data"), stdout=1, stderr=2)
             if return_code != 0:
                 raise RuntimeError("Validator exited with exit code " + str(return_code))
+
+    # Run the runner using some sane arguments.
+    def run_runner(self):
+        with open("/dev/null") as devnull:
+            return_code = subprocess.call([os.path.join(self.testcase_path, "build", "runner.out"), "testassignment", "testuser", "1", "0"], \
+                    cwd=os.path.join(self.testcase_path, "data"), stdout=1, stderr=2)
+            if return_code != 0:
+                raise RuntimeError("Runner exited with exit code" + str(return_code))
 
     # Run the UNIX diff command given a filename. The files are compared between the
     # data folder and the validation folder within the test package. For example,
