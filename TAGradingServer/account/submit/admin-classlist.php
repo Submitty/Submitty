@@ -182,7 +182,7 @@ foreach ($students as $rcs => $student) {
         $deleted++;
 	}
 	else {
-		\lib\Database::query("UPDATE students SET student_section_id=? WHERE student_rcs=?", array($_POST['missing_students'], $rcs));
+		\lib\Database::query("UPDATE students SET student_section_id=? WHERE student_rcs=?", array($_SESSION['post']['missing_students'], $rcs));
         $moved++;
 	}
 }
