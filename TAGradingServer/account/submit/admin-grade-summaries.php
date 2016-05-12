@@ -73,10 +73,8 @@ foreach($db->rows() as $student_record) {
     $student_rcs = $student_record["student_rcs"];
     $student_first_name = $student_record["student_first_name"];
     $student_last_name = $student_record["student_last_name"];
-    $student_output_filename = $student_rcs . "_summary.txt";
-    $student_output_text = "";
 
-    //create/reset student json
+    // create/reset student json
     $student_output_json = array();
     $student_output_json_name = $student_rcs . "_summary.json";	
 	
@@ -84,28 +82,15 @@ foreach($db->rows() as $student_record) {
 
     $params = array($student_id);
 
-
-    // WRITE STUDENTS NAME AT TOP OF REPORT FILE
-    $student_output_text .= "rcs_id " . $student_rcs . $nl;
-    $student_output_text .= "first_name " . $student_first_name . $nl;
-    $student_output_text .= "last_name " . $student_last_name . $nl;
-    $student_output_text .= "section " . $student_section . $nl;
-
-	//CREATE HEADER FOR JSON
+	// CREATE HEADER FOR JSON
     $student_output_json["rcs_id"] = $student_rcs;
     $student_output_json["first_name"] = $student_first_name;
     $student_output_json["last_name"] = $student_last_name;
     $student_output_json["section"] = intval($student_section);
-	
-    // late update date (choice of format)
-    //                                       Sunday, October 4, 2015
-    $student_output_text .= "last_update " . date("l, F j, Y") .$nl;
-    //                                          2015 09 29
-    // $student_output_text .= "last_update " . date("Y m d") . $nl;
 
-    //copy date above
+    // copy date above
     $student_output_json["last_update"] = date("l, F j, Y");
-    //$student_output_json["last_update"] = date("Y m d");
+    // $student_output_json["last_update"] = date("Y m d");
 	
     $params = array($student_rcs);
     $db->query($queries['LAB'], $params);
@@ -131,7 +116,6 @@ foreach($db->rows() as $student_record) {
         }
         $labid = "lab" . sprintf("%02d", $labnum);
         // eventually, the instructor could/should(?) have control both of the lab id & the lab title
-        $student_output_text .= 'lab ' . $labid . ' "' . $lab_titles[$id] . '" ' . floatval($score) . $nl;
 		// add Lab => {ladid => {name, score}} to student json
 		$student_output_json["Lab"][$labid] = array('name' => $lab_titles[$id],'score' => floatval($score));
     }
@@ -154,8 +138,6 @@ foreach($db->rows() as $student_record) {
             // $row['score'] = -7000000;
 			continue;
         }
-        
-		$student_output_text .= "hw " . $row['rubric_submission_id'] . " \"" . $row['rubric_name'] . "\" " . $row['score'] . $nl;
 		
 		$late_days = $row['grade_days_late'];
         if (isset($exceptions[$row['id']])) {
@@ -163,7 +145,6 @@ foreach($db->rows() as $student_record) {
         }
         $late_days = ($late_days < 0) ? 0 : $late_days;
         if ($late_days > 0) {
-            $student_output_text .= "days_late " . $row['rubric_submission_id'] . " " . $late_days . $nl;
 			// add rubric => {hw_id => {rubric_name, score, days_late}} to student json
 			// if there are late days
             $student_output_json["rubric"][$row['rubric_submission_id']] = array('name' => $row['rubric_name'],'score' => floatval($row['score']),'days_late' => intval($late_days));
@@ -186,14 +167,13 @@ foreach($db->rows() as $student_record) {
         }
 
 	    $testname = $row['test_type']." " . $row['test_number'];
-        $student_output_text .= strtolower($row['test_type']) . ' ' .$row['test_number'] . ' "' . $testname . '" ' . $row['score'] . " " . implode(" ", pgArrayToPhp($row['test_text'])) . $nl;
 		if (implode(" ", pgArrayToPhp($row['test_text'])) === '') {
 			// add test => {test# => {testName, score}} to student json
 			// if there is not a text field
-			$student_output_json['test'][strtolower($row['test_type']) . ' ' .$row['test_number']] = array('name' => $testname,'score' => floatval($row['score']));
+			$student_output_json['test'][strtolower($row['test_type']) . $row['test_number']] = array('name' => $testname,'score' => floatval($row['score']));
 		} else {
 			// add test => {test# => {testName, score, testText}} to student json otherwise 
-			$student_output_json['test'][strtolower($row['test_type']) . ' ' .$row['test_number']] = array('name' => $testname,'score' => floatval($row['score']),'text' => implode(" ", pgArrayToPhp($row['test_text'])));
+			$student_output_json['test'][strtolower($row['test_type']) . $row['test_number']] = array('name' => $testname,'score' => floatval($row['score']),'text' => implode(" ", pgArrayToPhp($row['test_text'])));
 		}
     }
 
@@ -216,28 +196,16 @@ foreach($db->rows() as $student_record) {
 			// add Other => {other_id => {name, score, text}} to student json otherwise
 			$student_output_json['Other'][$row['other_id']] = array('name' => $row['other_name'],'score' => floatval($row['grades_other_score']),'text' => $row['grades_other_text']);
 		}
-		
-		if (strpos($row['other_id'], 'reading') !== FALSE) {
-			$student_output_text .= 'reading ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
-		} else if (strpos($row['other_id'], 'participation') !== FALSE) {
-			$student_output_text .= 'participation ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
-		} else {
-			$student_output_text .= 'other ' . $row['other_id'].' "'.$row['other_name'].'" '.$row['grades_other_score'].' '.$row['grades_other_text'] . $nl;
-		}
     }
 
-    // ======================================================
-
-    // WRITE REPORT FILE
-    file_put_contents(implode("/", array(__SUBMISSION_SERVER__, "reports","all_grades", $student_output_filename)), $student_output_text);
-
-    echo "grade summary report produced for " . $student_rcs . "<br>";
-    //  break;
+    // ======================================================    
 	
     // WRITE THE JSON FILE
     file_put_contents(implode("/", array(__SUBMISSION_SERVER__, "reports","all_grades", $student_output_json_name)), json_encode($student_output_json,JSON_PRETTY_PRINT));
     
     echo "grade summary json produced for " . $student_rcs . "<br>";
+	
+	//  break;
 }
 
 echo "Queries run: ".$db->totalQueries();
