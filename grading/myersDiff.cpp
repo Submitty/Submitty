@@ -294,14 +294,6 @@ template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutp
 	// TODO: BOUNDS ERROR, is this the appropriate fix?
 	std::vector< int > v( ( a_size + b_size ) * 2 + 1, 0 );
 
-
-	// INITIALIZATION REDUNDANT, ALREADY DONE BY CONSTRUCTOR ABOVE
-	/*
-	for ( int i = 0; i < ( a_size + b_size ) + ( a_size + b_size ); i++ ) {
-		v[i] = 0;
-	}
-	*/
-
 	//loop until the correct diff (d) value is reached, or until end is reached
 	for ( int d = 0; d <= ( a_size + b_size ); d++ ) {
 		// find all the possibile k lines represented by  y = x-k from the max
@@ -313,7 +305,7 @@ template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutp
 		  bool down = ( k == -d
 				|| ( k != d && v[ ( k - 1 ) + ( a_size + b_size )]
 				     < v[ ( k + 1 ) + ( a_size + b_size )] ) );
-			int k_prev, a_start, b_start, a_end, b_end;
+			int k_prev, a_start, a_end, b_end;
 			if ( down ) {
 				k_prev = k + 1;
 				a_start = v[k_prev + ( a_size + b_size )];
@@ -324,14 +316,11 @@ template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutp
 				a_end = a_start + 1;
 			}
 
-			b_start = a_start - k_prev;
 			b_end = a_end - k;
 			// follow diagonal
-			int snake = 0;
 			while ( a_end < a_size && b_end < b_size && ( *a )[a_end] == ( *b )[b_end] ) {
 				a_end++;
 				b_end++;
-				snake++;
 			}
 
 			// save end point
