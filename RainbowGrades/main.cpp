@@ -811,35 +811,14 @@ void load_student_grades(std::vector<Student*> &students) {
 	for (json::iterator itr = j.begin(); itr != j.end(); itr++) {
 	  //std::string token = (itr->first).get<std::string>();
 	  std::string token = itr.key();
+	  std::cout << "token: " << token << "!" << std::endl;
 	  GRADEABLE_ENUM g;
 	  bool gradeable_enum_success = string_to_gradeable_enum(token,g);
-	  if (!gradeable_enum_success || token == "Other" || token == "rubric") {
-		if (token == "rcs_id") {
-			s->setUserName(j[token].get<std::string>());
-		} else if (token == "first_name") {
-			s->setFirstName(j[token].get<std::string>());
-		} else if (token == "last_name") {
-			s->setLastName(j[token].get<std::string>());
-		} else if (token == "last_update") {
-			s->setLastUpdate(j[token].get<std::string>());
-		} else if (token == "section") {
-		  int a = j[token].get<int>();
-		  if (!validSection(a)) {
-		    // the "drop" section is one bigger than the greatest valid section
-		    if (!validSection(a-1)){
-			  std::cerr << "WARNING: invalid section " << a << std::endl;
-		    }
-		  }
-		  s->setSection(a);
-		} else {
-			std::cout << "UNKNOWN TOKEN Y " << token << std::endl;
-			exit(0);
-		}
-	  } else {
-	    for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+	  if (gradeable_enum_success || token == "Other" || token == "rubric") {
+		for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
 		  int which;
 	      float value;
-	      std::string label;
+	      //std::string label;
 	      bool invalid = false;
 	      
 		  std::string gradeable_id;
@@ -852,6 +831,8 @@ void load_student_grades(std::vector<Student*> &students) {
 		  if ((itr2.value()).find("text") != (itr2.value()).end()) {
 			other_note = (itr2.value())["text"].get<std::string>();
 		  }
+		  std::cout << "gradeable_id: " << gradeable_id << " gradeable_name: " << gradeable_name 
+					<< " value: " << value << " text: " << other_note <<  std::endl;
 		  // Search through the gradeable categories as needed to find where this item belongs
           // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
 		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
@@ -896,7 +877,13 @@ void load_student_grades(std::vector<Student*> &students) {
 			assert (which >= 0);
 			assert (value >= 0.0);
 			s->setGradeableValue(g,which,value);
-			s->setGradeableNote(g,which,other_note);
+			if (g == GRADEABLE_ENUM::TEST) {
+			  s->setTestZone(which,other_note);
+			} else if (g == GRADEABLE_ENUM::EXAM) {
+			  s->setTestZone(which+GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),other_note);
+			} else {
+			  s->setGradeableNote(g,which,other_note);
+			}
 			
 			if (token == "rubric") {
 			  if (j[token][gradeable_id].find("days_late") != j[token][gradeable_id].end()) {
@@ -908,7 +895,7 @@ void load_student_grades(std::vector<Student*> &students) {
 			    }
 			  }
 		    }
-			
+			/*
 			if (label != "") {
 			  if (g == GRADEABLE_ENUM::TEST) {
 				s->setTestZone(which,label);
@@ -917,9 +904,31 @@ void load_student_grades(std::vector<Student*> &students) {
 				s->setTestZone(which+GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),label);
 			  }
 			}
-			
+			*/
 		  }
-	    }
+	    }  
+	  } else {
+		if (token == "rcs_id") {
+			s->setUserName(j[token].get<std::string>());
+		} else if (token == "first_name") {
+			s->setFirstName(j[token].get<std::string>());
+		} else if (token == "last_name") {
+			s->setLastName(j[token].get<std::string>());
+		} else if (token == "last_update") {
+			s->setLastUpdate(j[token].get<std::string>());
+		} else if (token == "section") {
+		  int a = j[token].get<int>();
+		  if (!validSection(a)) {
+		    // the "drop" section is one bigger than the greatest valid section
+		    if (!validSection(a-1)){
+			  std::cerr << "WARNING: invalid section " << a << std::endl;
+		    }
+		  }
+		  s->setSection(a);
+		} else {
+			std::cout << "UNKNOWN TOKEN Y " << token << std::endl;
+			//exit(0);
+		}
 	  }
 	}
 	students.push_back(s);
