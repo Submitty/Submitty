@@ -247,9 +247,16 @@ TestResults* diffLineSwapOk (const std::string & student_file, const std::string
 // ===============================================================================
 
 // Runs all the ses functions
-template<class T> Difference* ses ( T* a, T* b, bool secondary, bool extraStudentOutputOk  ) {
+/*
+@param T* stdnt_output - a pointer to a vector<vector<string> > that is the student output file
+@param T* inst_output - a pointer to a vector<vector<stirng> > that is the instructor output file
+@param bool secondary 
+@param bool extraStudentOutputOk - boolean that tells if it is okay to have extra student
+       output at the end of the student output file 
+*/
+template<class T> Difference* ses ( T* stdnt_output, T* inst_output, bool secondary, bool extraStudentOutputOk  ) {
 
-  metaData< T > meta_diff = sesSnapshots( ( T* ) a, ( T* ) b, extraStudentOutputOk );
+  metaData< T > meta_diff = sesSnapshots( ( T* ) stdnt_output, ( T* ) inst_output, extraStudentOutputOk );
   sesSnakes( meta_diff,  extraStudentOutputOk  );
 
   Difference* diff = sesChanges( meta_diff, extraStudentOutputOk );
@@ -273,6 +280,12 @@ template<class T> Difference* ses ( T* a, T* b, bool secondary, bool extraStuden
 
 // runs shortest edit script. Saves traces in snapshots,
 // the edit distance in distance and pointers to objects a and b
+/*
+@param T* a - a pointer to a vector<vector<string> > that is the student output file
+@param T* b - a pointer to a vector<vector<stirng> > that is the instructor output file
+@param bool extraStudentOutputOk - boolean that tells if it is okay to have extra student
+       output at the end of the student output file 
+*/
 template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutputOk ) {
 	//takes 2 strings or vectors of values and finds the shortest edit script
 	//to convert a into b
