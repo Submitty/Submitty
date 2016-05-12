@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include "myersDiff.h"
+#include "json.hpp"
 #include "tokens.h"
 #include "clean.h"
 
@@ -113,44 +114,33 @@ TestResults* myersDiffbyLinebyCharExtraStudentOutputOk ( const std::string & stu
 }
 
 
-// ===============================================================================
-// ===============================================================================
-
-// Helper function used by diffLineSwapOk to highlight incorrect,
-// missing, and duplicate lines in the file
-//
-// FIXME: this should be rewritten to use the json library!
 void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int student_line, int expected_line, bool only_student, bool only_expected) {
   if (!first_diff) {
     swap_difference << "  ,\n";
   }
-  swap_difference << "  {\n";
-  swap_difference << "    \"student\":\n";
-  swap_difference << "      {\n";
-  swap_difference << "        \"start\": " << student_line;
-  if (!only_expected) { 
-    swap_difference << ",\n";
-    swap_difference << "        \"line\": [ { \"line_number\": " << student_line << " } ]\n";
+  using json = nlohmann::json;
+
+  json j;
+  j["student"]["start"] = student_line;
+
+  if (!only_expected) {
+    json i;
+    i["line_number"] = student_line;
+    j["student"]["line"] = {{ i }};
   }
-  swap_difference << "\n";
-  swap_difference << "      },\n";
-  swap_difference << "    \"instructor\":\n";
-  swap_difference << "      {\n";
-  swap_difference << "        \"start\": " << expected_line;
-  if (!only_student) { 
-    swap_difference << ",\n";
-    swap_difference << "        \"line\": [ { \"line_number\": " << expected_line << " } ]\n";
+
+  j["instructor"]["start"] = expected_line;
+
+  if (!only_student) {
+    json i;
+    i["line_number"] = expected_line;
+    j["instructor"]["line"] = {{ i }};
   }
-  swap_difference << "\n";
-  swap_difference << "      }\n";
-  swap_difference << "  }\n";
+  swap_difference << j.dump(4) << std::endl;
   first_diff = false;
 }
 
 
-// Grader that requires every line to match, but the lines may be in a
-// different order than the expected file.
-//
 // FIXME: might be nice to highlight small errors on a line
 //
 TestResults* diffLineSwapOk (const std::string & student_file, const std::string & expected_file) {
@@ -224,10 +214,10 @@ TestResults* diffLineSwapOk (const std::string & student_file, const std::string
 
   // prepare the graded message for the student
   std::stringstream ss;
-  if (incorrect > 0) { 
+  if (incorrect > 0) {
     ss << "ERROR: " << incorrect << " incorrect line(s)";
   }
-  if (duplicates > 0) { 
+  if (duplicates > 0) {
     if (ss.str().size() > 0) {
       ss << ", ";
     }
@@ -239,7 +229,7 @@ TestResults* diffLineSwapOk (const std::string & student_file, const std::string
     }
     ss << "ERROR: " << missing << " missing line(s)";
   }
-  
+
   return new TestResults(score,ss.str(),swap_difference.str());
 }
 
@@ -556,8 +546,8 @@ void Difference::PrepareGrade() {
       //std::cout << "SES [ESOO] calculating grade " << this->distance << "/" << output_length << std::endl;
       //grade -= (this->distance / (float) output_length );
       grade -= count_of_missing_lines / float(output_length);
-      std::cout << 
-	"grade:  missing_lines [ " << count_of_missing_lines << 
+      std::cout <<
+	"grade:  missing_lines [ " << count_of_missing_lines <<
 	"] / output_length " << output_length << "]\n";
       //std::cout << "SES [ESOO] calculated grade = " << std::setprecision(1) << std::fixed << std::setw(5) << grade << " " << std::setw(5) << (int)floor(5*grade) << std::endl;
       if (grade < 1.0 && this->only_whitespace_changes) {
@@ -573,7 +563,7 @@ void Difference::PrepareGrade() {
       std::cout << "NO OUTPUT, GRADE IS ZERO" << std::endl;
       grade = 0;
     }
-    
+
     std::cout << "this test grade = " << grade << std::endl;
     this->setGrade(grade);
   }
@@ -588,8 +578,8 @@ void Difference::PrepareGrade() {
     } else {
       //std::cout << "SES  calculating grade " << this->distance << "/" << max_output_length << std::endl;
       grade -= (this->distance / (float) max_output_length );
-      std::cout << 
-	"grade:  this->distance [ " << this->distance << 
+      std::cout <<
+	"grade:  this->distance [ " << this->distance <<
 	"] / max_output_length " << max_output_length << "]\n";
       //std::cout << "SES calculated grade = " << grade << std::endl;
     }
@@ -622,7 +612,7 @@ template<class T> Difference* sesSecondary ( Difference* text_diff,
 
 			        // FIXME: does not compile with clang -std=c++11
 			        //metaData< typeof(*meta_diff.a)[current->a_changes[b]] > meta_second_diff;
-			  
+
 				Difference* second_diff;
 
 				// FIXME: so added auto instead

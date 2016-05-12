@@ -18,3 +18,7 @@ subprocess.call(["rsync",
 subprocess.call(["rsync"] +
         glob.glob(os.path.join(base_path, "..", "..", "..", "grading", "*.cpp")) +
         ["/var/local/hss/autograde_tests/src", "-r", "--delete"])
+        
+subprocess.call(["rsync"] +
+        glob.glob(os.path.join(base_path, "..", "..", "..", "grading", "*.hpp")) +
+        ["/var/local/hss/autograde_tests/src", "-r", "--delete"])

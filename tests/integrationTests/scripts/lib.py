@@ -167,6 +167,14 @@ class TestcaseWrapper:
             if return_code != 0:
                 raise RuntimeError("Validator exited with exit code " + str(return_code))
 
+    # Run the runner using some sane arguments.
+    def run_runner(self):
+        with open("/dev/null") as devnull:
+            return_code = subprocess.call([os.path.join(self.testcase_path, "build", "runner.out"), "testassignment", "testuser", "1", "0"], \
+                    cwd=os.path.join(self.testcase_path, "data"), stdout=1, stderr=2)
+            if return_code != 0:
+                raise RuntimeError("Runner exited with exit code" + str(return_code))
+
     # Run the UNIX diff command given a filename. The files are compared between the
     # data folder and the validation folder within the test package. For example,
     # running test.diff("foo.txt") within the test package "test_foo", the files
