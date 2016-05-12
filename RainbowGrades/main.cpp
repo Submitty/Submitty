@@ -809,105 +809,12 @@ void load_student_grades(std::vector<Student*> &students) {
 	j << istr;
 
 	for (json::iterator itr = j.begin(); itr != j.end(); itr++) {
-	  //std::string token = (itr->first).get<std::string>();
 	  std::string token = itr.key();
-	  std::cout << "token: " << token << "!" << std::endl;
+	  // std::cout << "token: " << token << "!" << std::endl;
 	  GRADEABLE_ENUM g;
 	  bool gradeable_enum_success = string_to_gradeable_enum(token,g);
-	  if (gradeable_enum_success || token == "Other" || token == "rubric") {
-		for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-		  int which;
-	      float value;
-	      //std::string label;
-	      bool invalid = false;
-	      
-		  std::string gradeable_id;
-		  std::string gradeable_name;
-		  std::string other_note;
-		  
-		  gradeable_id = itr2.key();
-		  gradeable_name = (itr2.value())["name"].get<std::string>();
-		  value = (itr2.value())["score"].get<float>();
-		  if ((itr2.value()).find("text") != (itr2.value()).end()) {
-			other_note = (itr2.value())["text"].get<std::string>();
-		  }
-		  std::cout << "gradeable_id: " << gradeable_id << " gradeable_name: " << gradeable_name 
-					<< " value: " << value << " text: " << other_note <<  std::endl;
-		  // Search through the gradeable categories as needed to find where this item belongs
-          // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
-		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
-			for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-			  GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
-			  if (GRADEABLES[g2].hasCorrespondence(gradeable_id)) {
-				  g = g2;
-			  }
-			}
-		  }
-		  
-		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
-			invalid = true;
-			std::cerr << "ERROR! cannot find a category for this item " << gradeable_id << std::endl;
-		    /*
-			invalid = true;
-		    which = -1;
-		    if (gradeable_name == "Lab15") {
-			  std::cout << "value " << s->getUserName() << " " << value << std::endl;
-			  assert (value >= 0 && value <= 5);
-			  s->setParticipation(value);
-		    } else if (gradeable_name == "Lab16") {
-			  assert (value >= 0 && value <= 5);
-			  s->setUnderstanding(value);
-		    } else if (gradeable_name == "Test4") {
-			  assert (value >= 0 && value <= 150);
-		    } else {
-			  //std::cerr << "WARNING: INVALID gradeable item" << gradeable_name << " " << value << std::endl;
-			}*/
-		  } else {
-			invalid = false;
-			const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
-            which = c.first;
-			if (c.second == "") {
-              GRADEABLES[g].setCorrespondenceName(gradeable_id,gradeable_name); 
-            } else {
-              assert (c.second == gradeable_name);
-            }
-		  }
-		  
-		  if (!invalid) {
-			assert (which >= 0);
-			assert (value >= 0.0);
-			s->setGradeableValue(g,which,value);
-			if (g == GRADEABLE_ENUM::TEST) {
-			  s->setTestZone(which,other_note);
-			} else if (g == GRADEABLE_ENUM::EXAM) {
-			  s->setTestZone(which+GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),other_note);
-			} else {
-			  s->setGradeableNote(g,which,other_note);
-			}
-			
-			if (token == "rubric") {
-			  if (j[token][gradeable_id].find("days_late") != j[token][gradeable_id].end()) {
-			    if (value <= 0) {
-				  std::cout << "Should not be Charged a late day" << std::endl;
-			    } else {
-				  int a = j[token][gradeable_id]["days_late"].get<int>();
-				  s->incrLateDaysUsed(which,a);
-			    }
-			  }
-		    }
-			/*
-			if (label != "") {
-			  if (g == GRADEABLE_ENUM::TEST) {
-				s->setTestZone(which,label);
-			  } else {
-				assert (g == GRADEABLE_ENUM::EXAM);
-				s->setTestZone(which+GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),label);
-			  }
-			}
-			*/
-		  }
-	    }  
-	  } else {
+      if (!gradeable_enum_success && token != "Other" && token != "rubric") {
+		// non grableables
 		if (token == "rcs_id") {
 			s->setUserName(j[token].get<std::string>());
 		} else if (token == "first_name") {
@@ -926,9 +833,82 @@ void load_student_grades(std::vector<Student*> &students) {
 		  }
 		  s->setSection(a);
 		} else {
-			std::cout << "UNKNOWN TOKEN Y " << token << std::endl;
-			//exit(0);
+            std::cout << "UNKNOWN TOKEN Y '" << token << "'" << std::endl;
+			exit(0);
 		}
+	  } else {
+	    for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+		  int which;
+		  float value;
+		  bool invalid = false;
+	      
+		  std::string gradeable_id;
+		  std::string gradeable_name;
+		  std::string other_note;
+		  
+		  gradeable_id = itr2.key();
+		  gradeable_name = (itr2.value())["name"].get<std::string>();
+		  value = (itr2.value())["score"].get<float>();
+		  
+		  if ((itr2.value()).find("text") != (itr2.value()).end()) {
+			other_note = (itr2.value())["text"].get<std::string>();
+		  }
+		  
+		  // std::cout << "gradeable_id: " << gradeable_id << " gradeable_name: " << gradeable_name 
+		  //			<< " value: " << value << " text: " << other_note <<  std::endl;
+		  
+		  // Search through the gradeable categories as needed to find where this item belongs
+          // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
+		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
+			for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
+			  GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
+			  if (GRADEABLES[g2].hasCorrespondence(gradeable_id)) {
+				  g = g2;
+			  }
+			}
+		  }
+		  
+		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
+			invalid = true;
+			std::cerr << "ERROR! cannot find a category for this item " << gradeable_id << std::endl;
+		  } else {
+			invalid = false;
+			const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
+            which = c.first;
+			if (c.second == "") {
+              GRADEABLES[g].setCorrespondenceName(gradeable_id,gradeable_name); 
+            } else {
+              assert (c.second == gradeable_name);
+            }
+		  }
+		  
+		  if (!invalid) {
+			assert (which >= 0);
+			assert (value >= 0.0);
+			s->setGradeableValue(g,which,value);
+			s->setGradeableNote(g,which,other_note);
+			
+			// set test zone for tests
+			if (g == GRADEABLE_ENUM::TEST) {
+			  s->setTestZone(which,other_note);
+			} else if (g == GRADEABLE_ENUM::EXAM) {
+			  s->setTestZone(which+GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),other_note);
+			}
+			
+			// late days for homework assignments
+			if (token == "rubric") {
+			  if (j[token][gradeable_id].find("days_late") != j[token][gradeable_id].end()) {
+			    if (value <= 0) {
+				  std::cout << "Should not be Charged a late day" << std::endl;
+			    } else {
+				  int a = j[token][gradeable_id]["days_late"].get<int>();
+				  s->incrLateDaysUsed(which,a);
+			    }
+			  }
+		    }
+			
+		  }
+	    }  
 	  }
 	}
 	students.push_back(s);

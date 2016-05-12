@@ -559,7 +559,13 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
                                          sd->getGradeableValue(g,j));
         std::string details;
         details = this_student->getGradeableNote(g,j);
-        table.set(myrow,counter++,TableCell(color,grade,details,visible));
+
+        int late_days_used = 0;
+        if (g == GRADEABLE_ENUM::HOMEWORK) {
+          late_days_used = this_student->getUsedLateDays(j);
+        }
+
+        table.set(myrow,counter++,TableCell(color,grade,details,late_days_used,visible));
       }
       table.set(myrow,counter++,TableCell(grey_divider));
 
@@ -573,7 +579,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
                                            sb->adjusted_test(j),
                                            sc->adjusted_test(j),
                                            sd->adjusted_test(j));
-          table.set(myrow,counter++,TableCell(color,grade,"",visible));
+          table.set(myrow,counter++,TableCell(color,grade,"",0,visible));
         }
         table.set(myrow,counter++,TableCell(grey_divider));
       }
@@ -622,10 +628,10 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
       if (this_student->getLastName() != "") {
         int allowed = this_student->getAllowedLateDays(100);
         std::string color = coloritcolor(allowed,5,4,3,2,2);
-        table.set(myrow,counter++,TableCell(color,allowed,"",CELL_CONTENTS_VISIBLE,"right"));
+        table.set(myrow,counter++,TableCell(color,allowed,"",0,CELL_CONTENTS_VISIBLE,"right"));
         int used = this_student->getUsedLateDays();
         color = coloritcolor(allowed-used+2, 5+2, 3+2, 2+2, 1+2, 0+2);
-        table.set(myrow,counter++,TableCell(color,used,"",CELL_CONTENTS_VISIBLE,"right"));
+        table.set(myrow,counter++,TableCell(color,used,"",0,CELL_CONTENTS_VISIBLE,"right"));
       } else {
         color="ffffff"; // default_color;
         table.set(myrow,counter++,TableCell(color,""));
@@ -646,7 +652,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
         } else {
           assert (answer.second == ICLICKER_NOANSWER);
         }
-        table.set(myrow,counter++,TableCell(color,thing,"",CELL_CONTENTS_HIDDEN,"center"));
+        table.set(myrow,counter++,TableCell(color,thing,"",0,CELL_CONTENTS_HIDDEN,"center"));
       }
       table.set(myrow,counter++,TableCell(grey_divider));
     }
