@@ -190,10 +190,10 @@ foreach($db->rows() as $student_record) {
 		if (implode(" ", pgArrayToPhp($row['test_text'])) === '') {
 			// add test => {test# => {testName, score}} to student json
 			// if there is not a text field
-			$student_output_json['Test'][strtolower($row['test_type']) . ' ' .$row['test_number']] = array('name' => $testname,'score' => floatval($row['score']));
+			$student_output_json['Test'][strtolower($row['test_type']) . $row['test_number']] = array('name' => $testname,'score' => floatval($row['score']));
 		} else {
 			// add test => {test# => {testName, score, testText}} to student json otherwise 
-			$student_output_json['Test'][strtolower($row['test_type']) . ' ' .$row['test_number']] = array('name' => $testname,'score' => floatval($row['score']),'text' => implode(" ", pgArrayToPhp($row['test_text'])));
+			$student_output_json['Test'][strtolower($row['test_type']) . $row['test_number']] = array('name' => $testname,'score' => floatval($row['score']),'text' => implode(" ", pgArrayToPhp($row['test_text'])));
 		}
     }
 

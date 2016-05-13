@@ -99,7 +99,15 @@ echo '<div id="HWsubmission">';
 //echo '<div class="confetti">';
 
 
-echo '<a href="http://tinyurl.com/gqvbyv9"><img align=right width=35% hspace="40" vspace="20" style="opacity: 0.2;filter: alpha(opacity=20);" src="resources/logo_fake.png"></a>';
+$random_logo = mt_rand(1,10);
+$random_logo_filename = "resources/logo_fake" . $random_logo . ".png";
+if (file_exists ($random_logo_filename)) {
+  echo '<a target="_top" href="http://tinyurl.com/gqvbyv9"><img align=right width=35% hspace="20" vspace="10" style="opacity: 0.2;filter: alpha(opacity=20);" src="';
+  echo $random_logo_filename;
+  echo '"></a>';
+}
+
+
 
 echo '<h2 class="label">Homework Submission for <em>'.$user.'</em>';
 if (on_dev_team($user)) {
