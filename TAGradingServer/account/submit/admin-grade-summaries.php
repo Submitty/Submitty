@@ -40,9 +40,9 @@ $queries = array(
 
     "TEST" => "SELECT t.test_type, t.test_number, t.test_id as id, gt.test_text,
     case when gt.value::numeric=0 or gt.value is null then 0
-    else case when gt.value::numeric+t.test_curve > (t.test_max_grade + t.test_curve)
-            then t.test_max_grade + t.test_curve
-        else gt.value::numeric+t.test_curve end end as score
+    else case when gt.value::numeric + t.test_curve > t.test_max_grade
+            then t.test_max_grade
+        else gt.value::numeric + t.test_curve end end as score
     FROM
         tests AS t LEFT JOIN (
         SELECT
