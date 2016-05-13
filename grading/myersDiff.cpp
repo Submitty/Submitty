@@ -219,7 +219,7 @@ TestResults* diffLineSwapOk (const std::string & student_file, const std::string
 
   // calculate the score
   int wrong = std::max(missing,duplicates+incorrect);
-  double score = double(expected.size()-wrong)/double(expected.size());
+  double score = double(int(expected.size())-wrong)/double(expected.size());
   score = std::max(0.0,score);
 
   // prepare the graded message for the student
