@@ -141,7 +141,7 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
     for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
       float my_value = getGradeableValue(g,i);
       std::string my_id = GRADEABLES[g].getID(i);
-      std::cout << "PROJECT THING val=" << my_value << " id=" << my_id << std::endl;
+      //std::cout << "PROJECT THING val=" << my_value << " id=" << my_id << std::endl;
       scores[my_id] = my_value;
     }
 
@@ -152,10 +152,10 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
       for (unsigned int j = 0; j < HACKMAXPROJECTS[i].size(); j++) {
         my_max = std::max(my_max,scores[HACKMAXPROJECTS[i][j]]);
       }
-      std::cout << "i=" << i << " max=" << my_max << std::endl;
+      //std::cout << "i=" << i << " max=" << my_max << std::endl;
       sum += my_max;
     }
-    std::cout << "sum=" << sum << std::endl;
+    //std::cout << "sum=" << sum << std::endl;
 
     return 100*GRADEABLES[g].getPercent()*sum/GRADEABLES[g].getMaximum();
 
