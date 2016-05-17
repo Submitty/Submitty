@@ -136,10 +136,10 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
       low_overall_grade++;
     } else {
       //      std::cout << "ERROR assigning zone for " << s->getUserName() << std::endl;
-      if (next_za >= randomized_available.size()) {
+      if (next_za >= (int)randomized_available.size()) {
         std::cout << "OOPS!  we ran out of exam seating" << std::endl;
       }
-      assert (next_za < randomized_available.size());
+      assert (next_za < (int)randomized_available.size());
       ZoneInfo &zi = zones.find(randomized_available[next_za])->second;
       s->setExamRoom(zi.building+std::string(" ")+zi.room);
       s->setExamZone(zi.zone);

@@ -450,7 +450,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
            << "<td align=center colspan=" << ICLICKER_QUESTION_NAMES.size() << ">ICLICKER QUESTIONS<br>CORRECT(green)=1.0, INCORRECT(red)=0.5, POLL(yellow)=1.0, NO ANSWER(white)=0.0<br>30.0 iClicker points = 3rd late day, 60.0 iClicker pts = 4th late day, 90.0 iClicker pts = 5th late day<br>&ge;8.0/12.0 most recent=Priority Help Queue (iClicker status highlighted in blue)</td>";
     */
 
-    for (int i = 0; i < ICLICKER_QUESTION_NAMES.size(); i++) {
+    for (unsigned int i = 0; i < ICLICKER_QUESTION_NAMES.size(); i++) {
       student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff",ICLICKER_QUESTION_NAMES[i]));
     }
     student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
@@ -652,7 +652,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
       }
 
       table.set(myrow,counter++,TableCell(grey_divider));
-      for (int i = 0; i < ICLICKER_QUESTION_NAMES.size(); i++) {
+      for (unsigned int i = 0; i < ICLICKER_QUESTION_NAMES.size(); i++) {
         std::pair<std::string,float> answer = this_student->getIClickerAnswer(ICLICKER_QUESTION_NAMES[i]);
         std::string thing = answer.first;
         std::string color = "ffffff"; //default_color;
