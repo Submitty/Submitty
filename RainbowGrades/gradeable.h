@@ -49,8 +49,9 @@ public:
     return "";
   }
 
-  bool hasCorrespondence(const std::string &id) {
-    return (correspondences.find(id) != correspondences.end());
+  bool hasCorrespondence(const std::string &id) const {
+    std::map<std::string,std::pair<int,std::string> >::const_iterator itr =  correspondences.find(id);
+    return (itr != correspondences.end());
   }
 
   const std::pair<int,std::string>& getCorrespondence(const std::string& id) {

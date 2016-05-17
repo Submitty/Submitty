@@ -336,6 +336,7 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
 // ====================================================================================================
 // ====================================================================================================
 
+void end_table(std::ofstream &ostr,  bool for_instructor, const std::vector<Student*> &students, int rank);
 
 void start_table_open_file(std::ofstream &ostr, std::string &filename, bool for_instructor,
                  const std::vector<Student*> &students, int rank, int month, int day, int year,
@@ -387,6 +388,12 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
   student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
   student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","OVERALL"));
   student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
+
+  if (DISPLAY_FINAL_GRADE) {
+    std::cout << "DISPLAY FINAL GRADE" << std::endl;
+    student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","FINAL GRADE"));
+    student_data.push_back(counter); table.set(0,counter++,TableCell(grey_divider));
+  } 
 
   // ----------------------------
   // % OF OVERALL AVERAGE FOR EACH GRADEABLE
@@ -478,7 +485,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
     Student *this_student = students[stu];
     myrow++;
     counter = 0;
-    if (this_student->getLastName() == "") {
+    if (this_student->getLastName() == "" && this_student->getUserName() != "AVERAGE") {
       select_students.push_back(myrow);
       if (this_student == sp) {
         default_color= coloritcolor(5,5,4,3,2,1);
@@ -523,9 +530,15 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
                                      sc->overall(),
                                      sd->overall());
     table.set(myrow,counter++,TableCell(color,grade,2));
-
     table.set(myrow,counter++,TableCell(grey_divider));
     
+    if (DISPLAY_FINAL_GRADE) {
+      std::string g = this_student->grade(false,sd);
+      color = GradeColor(g);
+      table.set(myrow,counter++,TableCell(color,g,"",0,CELL_CONTENTS_VISIBLE,"center"));
+      table.set(myrow,counter++,TableCell(grey_divider));
+    }
+
     // ----------------------------
     // % OF OVERALL AVERAGE FOR EACH GRADEABLE
     for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
@@ -663,13 +676,15 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
   for (int i = 0; i < table.numCols(); i++) {
     instructor_data.push_back(i);
   }
-  for (unsigned int i = 0; i < students.size(); i++) {
+  // need to add 2, for the perfect & average student.
+  for (unsigned int i = 0; i < students.size()+2; i++) {
     all_students.push_back(i);
   }
 
   std::ofstream ostr2("all.html");
   table.output(ostr2, all_students,instructor_data);
 
+  end_table(ostr2,true,students,-1);
 
   for (std::map<int,std::string>::iterator itr = student_correspondences.begin();
        itr != student_correspondences.end(); itr++) {
@@ -685,6 +700,8 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
       last_update = s->getLastUpdate();
     }
     table.output(ostr3, select_students,student_data,true,true,last_update);
+
+    end_table(ostr3,false,students,-1);
   }
 
   Student* s = NULL;
@@ -1085,6 +1102,8 @@ void output_line(std::ofstream &ostr,
 
 void end_table(std::ofstream &ostr,  bool for_instructor, const std::vector<Student*> &students, int rank) {
 
+  ostr << "<p>&nbsp;<p>\n";
+
 
   bool print_moss_message = false;
   if (rank != -1 && students[rank]->getMossPenalty() < -0.01) {
@@ -1151,19 +1170,19 @@ void end_table(std::ofstream &ostr,  bool for_instructor, const std::vector<Stud
   
   ostr << "<tr>\n";
   ostr << "<td width=150>average OVERALL<br>of students with<br>this FINAL GRADE</td>";
-  ostr << "<td align=center width=40>"<<grade_avg[Grade("A")]<<"</td><td align=center width=40>"<<grade_avg[Grade("A-")]<<"</td>";
-  ostr << "<td align=center width=40>"<<grade_avg[Grade("B+")]<<"</td><td align=center width=40>"<<grade_avg[Grade("B")]<<"</td><td align=center width=40>"<<grade_avg[Grade("B-")]<<"</td>";
-  ostr << "<td align=center width=40>"<<grade_avg[Grade("C+")]<<"</td><td align=center width=40>"<<grade_avg[Grade("C")]<<"</td><td align=center width=40>"<<grade_avg[Grade("C-")]<<"</td>";
+  ostr << "<td align=center width=40>"<<std::setprecision(1)<<std::fixed<<grade_avg[Grade("A")]<<"</td><td align=center width=40>"<<std::setprecision(1)<<std::fixed<<grade_avg[Grade("A-")]<<"</td>";
+  ostr << "<td align=center width=40>"<<std::setprecision(1)<<std::fixed<<grade_avg[Grade("B+")]<<"</td><td align=center width=40>"<<std::setprecision(1)<<std::fixed<<grade_avg[Grade("B")]<<"</td><td align=center width=40>"<<std::setprecision(1)<<std::fixed<<grade_avg[Grade("B-")]<<"</td>";
+  ostr << "<td align=center width=40>"<<std::setprecision(1)<<std::fixed<<grade_avg[Grade("C+")]<<"</td><td align=center width=40>"<<std::setprecision(1)<<std::fixed<<grade_avg[Grade("C")]<<"</td><td align=center width=40>"<<std::setprecision(1)<<std::fixed<<grade_avg[Grade("C-")]<<"</td>";
 
   if (for_instructor) {
-    ostr << "<td align=center width=40>"<<grade_avg[Grade("D+")]<<"</td><td align=center width=40>"<<grade_avg[Grade("D")]<<"</td>\n";
+    ostr << "<td align=center width=40>"<<std::setprecision(1)<<std::fixed<<grade_avg[Grade("D+")]<<"</td><td align=center width=40>"<<std::setprecision(1)<<std::fixed<<grade_avg[Grade("D")]<<"</td>\n";
   } else {
     ostr << "<td align=center width=40> &nbsp; </td><td align=center width=40> &nbsp; </td>\n";
   }
 
   if (for_instructor) {
-    ostr << "<td align=center width=40>"<<grade_avg[Grade("F")]<<"</td>\n";
-    //ostr << "<td align=center width=40>"<<grade_avg[Grade("")]<<"</td>\n";
+    ostr << "<td align=center width=40>"<<std::setprecision(1)<<std::fixed<<grade_avg[Grade("F")]<<"</td>\n";
+    //ostr << "<td align=center width=40>"<<std::setprecision(1)<<std::fixed<<grade_avg[Grade("")]<<"</td>\n";
     ostr << "<td align=center width=40>&nbsp;</td>\n";
     ostr << "<td align=center width=40>&nbsp;</td>\n";
     ostr << "<td align=center width=40>&nbsp;</td>\n";
