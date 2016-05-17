@@ -17,13 +17,15 @@
     - APPROVAL: REJECT
     - Should reject because a variety of causes for bad system call.  Most likely,
       this error will be caused due to students using black listed system calls like
-      fork.  Should add a clarifying message about checking for such black listed
-      commands.
+      fork.  Should add a note to check for warnings.  As instructors cannot give out
+      what they have blacklisted, so just put a note saying that the student did
+      something wrong.
 3. Floating point error
     - Current message: ERROR: FLOATING POINT ERROR Program Terminated
     - APPROVAL: REJECT
     - Should provide some sort of accompanying message suggesting students use a
-      debugger like gdb or such (for specific language)
+      debugger like gdb or such (for specific language).  Should also provide some
+      note to check for warnings.
     - Notes: This error is only thrown when there isn't an obvious floating point error
       like dividing by 0 as the compiler will throw a warning instead.  Possibly should
       find a way to combine these two possibilities to minimize confusion (although it

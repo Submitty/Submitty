@@ -20,6 +20,7 @@
 
 #include "TestCase.h"
 #include "execute.h"
+#include "error_message.h"
 
 
 #define DIR_PATH_MAX 1000
@@ -37,9 +38,9 @@ bool system_program(const std::string &program) {
   assert (program.size() >= 1);
   if (program == "/bin/ls" ||
       program == "/usr/bin/time" ||
-      program == "/bin/mv" || 
-      program == "/bin/chmod" || 
-      program == "/usr/bin/find" || 
+      program == "/bin/mv" ||
+      program == "/bin/chmod" ||
+      program == "/usr/bin/find" ||
       // for Computer Science I
       program == "/usr/bin/python" ||
       // for Data Structures
@@ -47,7 +48,7 @@ bool system_program(const std::string &program) {
       program == "/usr/bin/g++" ||
       program == "/usr/bin/valgrind" ||
       program == "/usr/local/hss/drmemory/bin/drmemory" ||
-      program == "/usr/bin/compare" ||  // image magick! 
+      program == "/usr/bin/compare" ||  // image magick!
       // for Principles of Software
       program == "/usr/bin/java" ||
       program == "/usr/bin/javac" ||
@@ -125,7 +126,7 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
 
   std::string before = pattern.substr(0,wildcard_loc);
   std::string after = pattern.substr(wildcard_loc+1,pattern.size()-wildcard_loc-1);
-  
+
   //  std::cout << "BEFORE " << before << " AFTER" << after << std::endl;
 
   // FIXME: we only handle a single wildcard!
@@ -150,7 +151,7 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
 
 
 void wildcard_expansion(std::vector<std::string> &my_args, const std::string &full_pattern, std::ofstream &logfile) {
-  
+
   // if the pattern does not contain a wildcard, just return that
   if (full_pattern.find("*") == std::string::npos) {
     my_args.push_back(full_pattern);
@@ -159,7 +160,7 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
 
   std::cout << "WILDCARD DETECTED:" << full_pattern << std::endl;
 
-  // otherwise, if our pattern contains directory structure, first remove that 
+  // otherwise, if our pattern contains directory structure, first remove that
   std::string directory = "";
   std::string file_pattern = full_pattern;
   while (1) {
@@ -171,7 +172,7 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
   std::cout << "  directory: " << directory << std::endl;
   std::cout << "  file_pattern " << file_pattern << std::endl;
 
-  // FIXME: could extend this to allow a wildcard in the directory name 
+  // FIXME: could extend this to allow a wildcard in the directory name
   // confirm that the directory does not contain a wildcard
   assert (directory.find("*") == std::string::npos);
   // confirm that the file pattern does contain a wildcard
@@ -218,9 +219,9 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
 
 std::string get_executable_name(const std::string &cmd) {
   std::string my_program;
-  
+
   std::stringstream ss(cmd);
-  
+
   ss >> my_program;
   assert (my_program.size() >= 1);
 
@@ -300,7 +301,7 @@ void parse_command_line(const std::string &cmd,
 
             // remainder of the arguments
             else if (tmp.find("*") != std::string::npos) {
-	      // unfortunately not all programs used the double dash convention 
+	      // unfortunately not all programs used the double dash convention
 	      /*
                 if (bare_double_dash != true) {
                     std::cout << "ERROR: Not allowed to use the wildcard before the bare double dash" << std::endl;
@@ -351,69 +352,16 @@ void parse_command_line(const std::string &cmd,
 // =====================================================================================
 // =====================================================================================
 
-
-
-
-#ifndef SIGPOLL
-  #define SIGPOLL SIGIO // SIGPOLL is obsolescent in POSIX, SIGIO is a synonym
-#endif
-
 void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &logfile) {
 
-  // default message (may be overwritten with more specific message below)
-  std::stringstream ss;
-  ss << "ERROR: Child terminated with signal " << what_signal; 
-  std::string message = ss.str();
-  
-  // reference: http://man7.org/linux/man-pages/man7/signal.7.html
-  if        (what_signal == SIGHUP    /*  1        Term  Hangup detected on controlling terminal or death of controlling process   */) {
-  } else if (what_signal == SIGINT    /*  2        Term  Interrupt from keyboard  */) {
-  } else if (what_signal == SIGQUIT   /*  3        Core  Quit from keyboard  */) {
-  } else if (what_signal == SIGILL    /*  4        Core  Illegal Instruction  */) {
-  } else if (what_signal == SIGABRT   /*  6        Core  Abort signal from abort(3)  */) {
-    message = "ERROR: ABORT SIGNAL";
-  } else if (what_signal == SIGFPE    /*  8        Core  Floating point exception  */) {
-    message = "ERROR: FLOATING POINT ERROR";
-  } else if (what_signal == SIGKILL   /*  9        Term  Kill signal  */) {
-    message = "ERROR: KILL SIGNAL";
-  } else if (what_signal == SIGSEGV   /* 11        Core  Invalid memory reference  */) {
-    message = "ERROR: INVALID MEMORY REFERENCE";
-  } else if (what_signal == SIGPIPE   /* 13        Term  Broken pipe: write to pipe with no readers  */) {
-  } else if (what_signal == SIGALRM   /* 14        Term  Timer signal from alarm(2)  */) {
-  } else if (what_signal == SIGTERM   /* 15        Term  Termination signal  */) {
-  } else if (what_signal == SIGUSR1   /* 30,10,16  Term  User-defined signal 1  */) {
-  } else if (what_signal == SIGUSR2   /* 31,12,17  Term  User-defined signal 2  */) {
-  } else if (what_signal == SIGCHLD   /* 20,17,18  Ign   Child stopped or terminated  */) {
-  } else if (what_signal == SIGCONT   /* 19,18,25  Cont  Continue if stopped  */) {
-  } else if (what_signal == SIGSTOP   /* 17,19,23  Stop  Stop process  */) {
-  } else if (what_signal == SIGTSTP   /* 18,20,24  Stop  Stop typed at terminal  */) {
-  } else if (what_signal == SIGTTIN   /* 21,21,26  Stop  Terminal input for background process  */) {
-  } else if (what_signal == SIGTTOU   /* 22,22,27  Stop  Terminal output for background process  */) {
-  } else if (what_signal == SIGBUS    /* 10,7,10   Core  Bus error (bad memory access)  */) {
-    message = "ERROR: BUS ERROR (BAD MEMORY ACCESS)";
-  } else if (what_signal == SIGPOLL   /*           Term  Pollable event (Sys V). Synonym for SIGIO  */) {
-  } else if (what_signal == SIGPROF   /* 27,27,29  Term  Profiling timer expired  */) {
-  } else if (what_signal == SIGSYS    /* 12,31,12  Core  Bad argument to routine (SVr4)  */) {
-    std::cout << "********************************\nDETECTED BAD SYSTEM CALL\n***********************************" << std::endl;
-    message = "ERROR: DETECTED BAD SYSTEM CALL";
-  } else if (what_signal == SIGTRAP   /*  5        Core  Trace/breakpoint trap  */) {
-  } else if (what_signal == SIGURG    /* 16,23,21  Ign   Urgent condition on socket (4.2BSD)  */) {
-  } else if (what_signal == SIGVTALRM /* 26,26,28  Term  Virtual alarm clock (4.2BSD)  */) {
-  } else if (what_signal == SIGXCPU   /* 24,24,30  Core  CPU time limit exceeded (4.2BSD)  */) {
-    message = "ERROR: CPU TIME LIMIT EXCEEDED";
-  } else if (what_signal == SIGXFSZ   /* 25,25,31  Core  File size limit exceeded (4.2BSD  */) {
-    message = "ERROR: FILE SIZE LIMIT EXCEEDED";
-  } else {
-  }
+    std::string message = RetrieveSignalErrorMessage(what_signal);
 
-  // output message to behind-the-scenes logfile (stdout), and to execute logfile (available to students)
-  std::cout << message << std::endl;
-  logfile   << message << "\nProgram Terminated " << std::endl;
-	    
+    // output message to behind-the-scenes logfile (stdout), and to execute
+    // logfile (available to students)
+    std::cout << message << std::endl;
+    logfile   << message << "\nProgram Terminated " << std::endl;
+
 }
-
-
-
 
 // =====================================================================================
 // =====================================================================================
@@ -488,14 +436,14 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 
 
 
-  
+
 
   //if (SECCOMP_ENABLED != 0) {
   std::cout << "seccomp filter enabled" << std::endl;
   //} else {
   //std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
   // }
-  
+
 
   // the default umask is 0027, so we need edit so that we can make
   // these files 'other read', so that we can read them when we switch
@@ -520,8 +468,8 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
   //  if (SECCOMP_ENABLED != 0) {
   std::cout << "going to install syscall filter for " << my_program << std::endl;
   //}
-  
-  
+
+
   // FIXME: if we want to assert or print stuff afterward, we should save
   // the originals and restore after the exec fails.
   if (my_stdin != "") {
@@ -547,21 +495,21 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 
   // SECCOMP: install the filter (system calls restrictions)
   //  if (SECCOMP_ENABLED != 0) {
-  if (install_syscall_filter(prog_is_32bit, true /*blacklist*/, my_program)) { 
+  if (install_syscall_filter(prog_is_32bit, true /*blacklist*/, my_program)) {
     std::cout << "seccomp filter install failed" << std::endl;
     return 1;
   }
   // } else {
   // }
   // END SECCOMP
-  
-  
-  
+
+
+
   int child_result =  execv ( my_program.c_str(), my_char_args );
   // if exec does not fail, we'll never get here
-  
+
   umask(prior_umask);  // reset to the prior umask
-  
+
   return child_result;
 }
 
@@ -571,7 +519,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 
 
 // Executes command (from shell) and returns error code (0 = success)
-int execute(const std::string &cmd, const std::string &execute_logfile, 
+int execute(const std::string &cmd, const std::string &execute_logfile,
 	    const std::map<int,rlim_t> &test_case_limits) {
 
 
@@ -588,7 +536,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
 
   std::string executable_name = get_executable_name(cmd);
   int seconds_to_run = get_the_limit(executable_name,RLIMIT_CPU,test_case_limits);
-  
+
   if (childPID == 0) {
     // CHILD PROCESS
 
@@ -625,7 +573,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
             if (wpid == 0) {
 	      // allow 10 extra seconds for differences in wall clock
 	      // vs CPU time (imperfect solution)
-	      if (elapsed < seconds_to_run + 10) {  
+	      if (elapsed < seconds_to_run + 10) {
                     // sleep 1/10 of a second
                     usleep(100000);
                     elapsed+= 0.1;
@@ -642,7 +590,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
 		    }
 		    if (kill_counter >= 5) {
 		      std::cout << "ERROR! kill counter for pid " << childPID << " is " << kill_counter << std::endl;
-		      std::cout << "  Check /var/log/syslog (or other logs) for possible kernel bug \n" 
+		      std::cout << "  Check /var/log/syslog (or other logs) for possible kernel bug \n"
 				<< "  or hardware bug that is preventing killing this job. " << std::endl;
 		    }
                     usleep(10000); /* wait 1/100th of a second for the process to die */
@@ -662,7 +610,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
 	      logfile << "Child exited with status = " << WEXITSTATUS(status) << std::endl;
 	      result=1;
 
-              // 
+              //
               // NOTE: If wrapping /usr/bin/time around a program that exits with signal = 25
               //       time exits with status = 153 (128 + 25)
               //
@@ -677,7 +625,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
 
 
 	    OutputSignalErrorMessageToExecuteLogfile(what_signal,logfile);
-	    
+
             //std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
 
             if (WTERMSIG(status) == 0){
