@@ -902,16 +902,14 @@ void load_student_grades(std::vector<Student*> &students) {
 		  }
 
 		  // Search through the gradeable categories as needed to find where this item belongs
-          // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
-		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
-			for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-			  GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
-			  if (GRADEABLES[g2].hasCorrespondence(gradeable_id)) {
-				  g = g2;
-			  }
-			}
+		  // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
+		  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
+		    GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
+		    if (GRADEABLES[g2].hasCorrespondence(gradeable_id)) {
+		      g = g2;
+		    }
 		  }
-		  
+
 		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
 			invalid = true;
 			//std::cerr << "ERROR! cannot find a category for this item " << gradeable_id << std::endl;

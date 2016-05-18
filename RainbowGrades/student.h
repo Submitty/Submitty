@@ -93,7 +93,7 @@ public:
   void setTestZone(int which_test, const std::string &zone)  { zones[which_test] = zone; }
   void setGradeableValue(GRADEABLE_ENUM g, int i, float value);
   void setGradeableNote(GRADEABLE_ENUM g, int i, const std::string &note);
-  void incrLateDaysUsed(int i, int x) { hws_late_days[i] += x; }
+  void incrLateDaysUsed(int i, int x) { assert (i >= 0 && i < (int)hws_late_days.size()); hws_late_days[i] += x; }
   void mossify(int hw, float penalty);
 
   // other grade-like data

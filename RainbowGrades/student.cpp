@@ -24,7 +24,13 @@ Student::Student() {
     all_notes[g]       = std::vector<std::string>(GRADEABLES[g].getCount(),"");
   }
   // (iclicker defaults to empty map)
-  hws_late_days                             = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(),0);
+
+  // FIXME: This is still broken.  Late days should be available for
+  // any item, not just homeworks.  I think the project late days
+  // aren't being correctly labeled.
+  hws_late_days                             = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount()+
+								 GRADEABLES[GRADEABLE_ENUM::PROJECT].getCount(),0);
+
   zones = std::vector<std::string>(GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),"");
   moss_penalty = 0;
   cached_hw = -1;
