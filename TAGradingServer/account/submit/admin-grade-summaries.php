@@ -184,7 +184,8 @@ foreach($db->rows() as $student_record) {
 	}
 
     foreach($db->rows() as $row) {
-        if ($row['grades_other_score'] <= 0) {
+        if ($row['grades_other_score'] <= 0 &&
+            $row['grades_other_text'] === '') {
             continue;
         }
 		
