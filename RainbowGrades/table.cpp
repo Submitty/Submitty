@@ -59,7 +59,7 @@ std::ostream& operator<<(std::ostream &ostr, const TableCell &c) {
   ostr << "<font size=-1>";
   
 
-  if (c.data == "" || c.visible==CELL_CONTENTS_HIDDEN) {
+  if ((c.data == "" && c.note=="") || c.visible==CELL_CONTENTS_HIDDEN) {
     ostr << "<div></div>";
   } else {
     ostr << c.data; 
