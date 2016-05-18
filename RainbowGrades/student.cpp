@@ -113,10 +113,12 @@ void Student::setGradeableNote(GRADEABLE_ENUM g, int i, const std::string &note)
 // =============================================================================================
 // GRADER CALCULATION HELPER FUNCTIONS
 
+extern std::vector<std::vector<std::string> > HACKMAXPROJECTS;
+
 float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   if (GRADEABLES[g].getCount() == 0) return 0;
   assert (GRADEABLES[g].getMaximum() > 0);
-  assert (GRADEABLES[g].getPercent() > 0);
+  assert (GRADEABLES[g].getPercent() >= 0);
 
   // special rules for tests
   if (g == GRADEABLE_ENUM::TEST && TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
@@ -125,6 +127,43 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   if (g == GRADEABLE_ENUM::TEST && LOWEST_TEST_COUNTS_HALF) {
     return lowest_test_counts_half_pct();
   }
+
+
+  // ============================================================================
+  // end special rule for projects for op sys
+  // HACK, NOT PERMANENT!
+
+  if (g == GRADEABLE_ENUM::PROJECT && HACKMAXPROJECTS.size() > 0) {
+
+    // collect the scores in a vector
+    std::map<std::string,float> scores;
+
+    for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
+      float my_value = getGradeableValue(g,i);
+      std::string my_id = GRADEABLES[g].getID(i);
+      //std::cout << "PROJECT THING val=" << my_value << " id=" << my_id << std::endl;
+      scores[my_id] = my_value;
+    }
+
+    // sum the projects
+    float sum = 0;
+    for (unsigned int i = 0; i < HACKMAXPROJECTS.size(); i++) {
+      float my_max = 0;
+      for (unsigned int j = 0; j < HACKMAXPROJECTS[i].size(); j++) {
+        my_max = std::max(my_max,scores[HACKMAXPROJECTS[i][j]]);
+      }
+      //std::cout << "i=" << i << " max=" << my_max << std::endl;
+      sum += my_max;
+    }
+    //std::cout << "sum=" << sum << std::endl;
+
+    return 100*GRADEABLES[g].getPercent()*sum/GRADEABLES[g].getMaximum();
+
+  }
+  // HACK, NOT PERMANENT!
+  // end special rule for projects for op sys
+  // ============================================================================
+
 
   // collect the scores in a vector
   std::vector<float> scores;
@@ -146,6 +185,8 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
 
   return 100*GRADEABLES[g].getPercent()*sum/GRADEABLES[g].getMaximum();
 }
+
+
 
 
 float Student::adjusted_test(int i) const {
@@ -363,9 +404,11 @@ void Student::outputgrade(std::ostream &ostr,bool flag_b4_moss,Student *lowest_d
 // =============================================================================================
 
 // zones for exams...
-const std::string& Student::getZone(int i) const {
+//const std::string& Student::getZone(int i) const {
+std::string Student::getZone(int i) const {
   assert (i >= 0 && i < GRADEABLES[GRADEABLE_ENUM::TEST].getCount()); return zones[i]; 
 }
+
 
 
 // =============================================================================================
