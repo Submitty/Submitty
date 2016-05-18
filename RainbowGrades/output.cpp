@@ -398,7 +398,12 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
   // ----------------------------
   // % OF OVERALL AVERAGE FOR EACH GRADEABLE
   for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff",gradeable_to_string(ALL_GRADEABLES[i])+" %"));
+    enum GRADEABLE_ENUM g = ALL_GRADEABLES[i];
+    if (g == GRADEABLE_ENUM::NOTE) {
+      assert (GRADEABLES[g].getPercent() < 0.01);
+      continue;
+    }
+    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff",gradeable_to_string(g)+" %"));
   }
   student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
 
@@ -408,7 +413,9 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
     GRADEABLE_ENUM g = ALL_GRADEABLES[i];
 
     for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
-      student_data.push_back(counter);  
+      if (g != GRADEABLE_ENUM::NOTE) {
+        student_data.push_back(counter);  
+      }
       std::string gradeable_id = GRADEABLES[g].getID(j);
       std::string gradeable_name = "";
       if (GRADEABLES[g].hasCorrespondence(gradeable_id)) {
@@ -416,7 +423,10 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
       }
       table.set(0,counter++,TableCell("ffffff",gradeable_name));
     }
-    student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
+    if (g != GRADEABLE_ENUM::NOTE) {
+      student_data.push_back(counter);  
+    }
+    table.set(0,counter++,TableCell(grey_divider));
 
     if (g == GRADEABLE_ENUM::TEST && TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
       for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
@@ -543,6 +553,10 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
     // % OF OVERALL AVERAGE FOR EACH GRADEABLE
     for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
       enum GRADEABLE_ENUM g = ALL_GRADEABLES[i];
+      if (g == GRADEABLE_ENUM::NOTE) {
+        assert (GRADEABLES[g].getPercent() < 0.01);
+        continue;
+      }
       float grade = this_student->GradeablePercent(g);
       std::string color = coloritcolor(grade,
                                        sp->GradeablePercent(g),

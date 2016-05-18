@@ -6,7 +6,7 @@
 #include <map>
 
 
-enum class GRADEABLE_ENUM { NONE, READING, EXERCISE, LAB, PARTICIPATION, HOMEWORK, PROJECT, QUIZ, TEST, EXAM };
+enum class GRADEABLE_ENUM { NONE, READING, EXERCISE, LAB, PARTICIPATION, HOMEWORK, PROJECT, QUIZ, TEST, EXAM, NOTE };
 
 
 inline std::string gradeable_to_string(const GRADEABLE_ENUM &g) {
@@ -19,6 +19,7 @@ inline std::string gradeable_to_string(const GRADEABLE_ENUM &g) {
   if (g == GRADEABLE_ENUM::QUIZ)          { return "QUIZ"; }
   if (g == GRADEABLE_ENUM::TEST)          { return "TEST"; }
   if (g == GRADEABLE_ENUM::EXAM)          { return "EXAM"; }
+  if (g == GRADEABLE_ENUM::NOTE)          { return "NOTE"; }
   std::cerr << "ERROR!  UNKNOWN GRADEABLE" << std::endl;
   exit(0);
 }

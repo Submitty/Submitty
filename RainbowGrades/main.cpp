@@ -289,6 +289,7 @@ bool string_to_gradeable_enum(const std::string &s, GRADEABLE_ENUM &return_value
   if (s == "quiz" || s == "quizze") { return_value = GRADEABLE_ENUM::QUIZ;           return true;  }
   if (s == "test")                  { return_value = GRADEABLE_ENUM::TEST;           return true;  }
   if (s == "exam")                  { return_value = GRADEABLE_ENUM::EXAM;           return true;  }
+  if (s == "instructor_note")       { return_value = GRADEABLE_ENUM::NOTE;           return true;  }
   return false;
 }
 
@@ -766,7 +767,8 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
             g == GRADEABLE_ENUM::EXAM ||
             g == GRADEABLE_ENUM::PARTICIPATION ||
             g == GRADEABLE_ENUM::PROJECT ||
-            g == GRADEABLE_ENUM::TEST) {
+            g == GRADEABLE_ENUM::TEST ||
+            g == GRADEABLE_ENUM::NOTE) {
           ss >> which_token;
           
           assert (!GRADEABLES[g].hasCorrespondence(which_token));
