@@ -935,7 +935,7 @@ void load_student_grades(std::vector<Student*> &students) {
 			if (g == GRADEABLE_ENUM::TEST) {
 			  s->setTestZone(which,other_note);
 			} else if (g == GRADEABLE_ENUM::EXAM) {
-			  s->setTestZone(which+GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),other_note);
+                          //			  s->setTestZone(which+GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),other_note);
 			}
 			
 			// late days for homework assignments
