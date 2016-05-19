@@ -248,15 +248,15 @@ TestResults* diffLineSwapOk (const std::string & student_file, const std::string
 
 // Runs all the ses functions
 /*
-@param T* stdnt_output - a pointer to a vector<vector<string> > that is the student output file
+@param T* student_output - a pointer to a vector<vector<string> > that is the student output file
 @param T* inst_output - a pointer to a vector<vector<stirng> > that is the instructor output file
 @param bool secondary 
 @param bool extraStudentOutputOk - boolean that tells if it is okay to have extra student
        output at the end of the student output file 
 */
-template<class T> Difference* ses ( T* stdnt_output, T* inst_output, bool secondary, bool extraStudentOutputOk  ) {
+template<class T> Difference* ses ( T* student_output, T* inst_output, bool secondary, bool extraStudentOutputOk  ) {
 
-  metaData< T > meta_diff = sesSnapshots( ( T* ) stdnt_output, ( T* ) inst_output, extraStudentOutputOk );
+  metaData< T > meta_diff = sesSnapshots( ( T* ) student_output, ( T* ) inst_output, extraStudentOutputOk );
   sesSnakes( meta_diff,  extraStudentOutputOk  );
 
   Difference* diff = sesChanges( meta_diff, extraStudentOutputOk );
@@ -270,7 +270,7 @@ template<class T> Difference* ses ( T* stdnt_output, T* inst_output, bool second
   diff->only_whitespace_changes = true;
 
   for (int x = 0; x < diff->changes.size(); x++) {
-    INSPECT_CHANGES(std::cout,diff->changes[x],*a,*b,diff->only_whitespace_changes,extraStudentOutputOk);
+    INSPECT_CHANGES(std::cout,diff->changes[x],*student_output,*inst_output,diff->only_whitespace_changes,extraStudentOutputOk);
   }
 
   diff->PrepareGrade();
@@ -281,26 +281,26 @@ template<class T> Difference* ses ( T* stdnt_output, T* inst_output, bool second
 // runs shortest edit script. Saves traces in snapshots,
 // the edit distance in distance and pointers to objects a and b
 /*
-@param T* a - a pointer to a vector<vector<string> > that is the student output file
-@param T* b - a pointer to a vector<vector<stirng> > that is the instructor output file
+@param T* student_output - a pointer to a vector<vector<string> > that is the student output file
+@param T* inst_output - a pointer to a vector<vector<stirng> > that is the instructor output file
 @param bool extraStudentOutputOk - boolean that tells if it is okay to have extra student
        output at the end of the student output file 
 */
-template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutputOk ) {
+template<class T> metaData< T > sesSnapshots ( T* student_output, T* inst_output, bool extraStudentOutputOk ) {
 	//takes 2 strings or vectors of values and finds the shortest edit script
 	//to convert a into b
-	int a_size = ( int ) a->size();
-	int b_size = ( int ) b->size();
+	int student_output_size = ( int ) student_output->size();
+	int inst_output_size = ( int ) inst_output->size();
 	metaData< T > text_diff;
-	if ( a_size == 0 && b_size == 0 ) {
+	if ( student_output_size == 0 && inst_output_size == 0 ) {
 		return text_diff;
 	}
-	text_diff.m = b_size;
-	text_diff.n = a_size;
+	text_diff.m = inst_output_size;
+	text_diff.n = student_output_size;
     // DISTANCE -1 MEANS WHAT?
     text_diff.distance = -1;
-    text_diff.a = a;
-    text_diff.b = b;
+    text_diff.a = student_output;
+    text_diff.b = inst_output;
 
 	// WHAT IS V?
 	//std::vector< int > v( ( a_size + b_size ) * 2, 0 );
@@ -315,34 +315,35 @@ template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutp
 		// points in the file
 		for ( int k = -d; k <= d; k += 2 ) {
 			//which is the farthest path reached in the previous iteration?
-		  bool down = ( k == -d
-				|| ( k != d && v[ ( k - 1 ) + ( a_size + b_size )]
-				     < v[ ( k + 1 ) + ( a_size + b_size )] ) );
+		  bool down = ( k == -d ||
+		  	          ( k != d && v[ ( k - 1 ) + ( student_output_size + inst_output_size )]
+				      < v[ ( k + 1 ) + ( a_size + b_size )] ) );
 			int k_prev, a_start, a_end, b_end;
 			if ( down ) {
 				k_prev = k + 1;
-				a_start = v[k_prev + ( a_size + b_size )];
+				a_start = v[k_prev + ( student_output_size\ + inst_output_size )];
 				a_end = a_start;
 			} else {
 				k_prev = k - 1;
-				a_start = v[k_prev + ( a_size + b_size )];
+				a_start = v[k_prev + ( student_output_size + inst_output_size )];
 				a_end = a_start + 1;
 			}
 
 			b_end = a_end - k;
 			// follow diagonal
-			while ( a_end < a_size && b_end < b_size && ( *a )[a_end] == ( *b )[b_end] ) {
+			while ( a_end < student_output_size && b_end < inst_output_size && ( *student_output )[a_end] == ( *inst_output )[b_end] ) {
 				a_end++;
 				b_end++;
 			}
 
 			// save end point
-			if (k+(a_size+b_size) < 0 || k+(a_size+b_size) >= v.size()) {
-			  std::cerr << "ERROR VALUE " << k+(a_size+b_size) << " OUT OF RANGE " << v.size() << " k=" << k << " a_size=" << a_size << " b_size=" << b_size << std::endl;
+			if (k+(student_output_size+inst_output_size) < 0 || k+(student_output_size+inst_output_size) >= v.size()) {
+			  std::cerr << "ERROR VALUE " << k+(student_output_size+inst_output_size) << " OUT OF RANGE " << v.size() << " k=" << k 
+			            << " a_size=" << student_output_size << " b_size=" << inst_output_size << std::endl;
 			}
-			v[k + ( a_size + b_size )] = a_end;
+			v[k + ( student_output_size + inst_output_size )] = a_end;
 			// check for solution
-			if ( a_end >= a_size && b_end >= b_size ) { /* solution has been found */
+			if ( a_end >= student_output_size && b_end >= inst_output_size ) { /* solution has been found */
 				text_diff.distance = d;
 				text_diff.snapshots.push_back( v );
 				return text_diff;
@@ -357,11 +358,16 @@ template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutp
 
 	}
 	return text_diff;
-	//return text_diff;
 }
 
 // takes a metaData object with snapshots and parses to find the "snake"
 // - a path that leads from the start to the end of both of a and b
+/*
+@param metaData<T> & meta_diff - container that has the two file sizes, pointers to the file,
+       and a vector of the snapshots found
+@param bool extraStudentOutputOk - boolean that tells if it is okay to have extra student
+       output at the end of the student output file 
+*/
 template<class T> metaData< T > sesSnakes ( metaData< T > & meta_diff, bool extraStudentOutputOk  ) {
 	int n = meta_diff.n;
 	int m = meta_diff.m;
