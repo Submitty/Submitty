@@ -13,7 +13,7 @@
 
 #FIXES: when there is not a full week the is a division by 0 error
 import os
-import numpy as np
+#import numpy as np
 
 print "lets parse some files!! "
 
@@ -43,7 +43,7 @@ def num_to_weekday(num):
 	
 	}[num]
 
-path = 'logfiles'
+path = '/var/local/hss/autograding_logs/'
 submissions_per_hour = [0]*24
 avg_hours_ot_week = [[0 for x in range(24)] for x in range(7)]
 avg_hours_ot_week_csci1200 = [[0 for x in range(24)] for x in range(7)]
@@ -69,7 +69,10 @@ full_week = 0
 f3 = open('BARsubmissions_per_week.csv','w+')
 f3.write(" , CS 1, Data Structures, FOCS, Principle of Software, Programming Languages, Operating Systems\n")
 for filename in os.listdir(path):
-	
+
+        # hack to skip first (badly formatted log file)
+        if (filename == "20150916.txt") : 
+                continue
 	
 	num_days = num_days+1
 	contents = open(path + '/'+filename)
@@ -78,15 +81,23 @@ for filename in os.listdir(path):
 	
 	for line in contents.readlines():
 
-		
-
 		if(line[40:45] != "BATCH"):
 
 			num_of_sumbissions = num_of_sumbissions + 1
 			
 
 			info = ((line[48:99]).strip()).split("__")
+                       
+
+                        if(len(info) < 3):
+                           print filename
+                           print info
+                           continue
+
 			all_students.add(info[3])
+
+
+
 			all_courses.add(info[1])#class
 
 
