@@ -53,6 +53,8 @@ float LATE_DAY_PERCENTAGE_PENALTY = 0;
 bool  TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT = false;
 bool  LOWEST_TEST_COUNTS_HALF = false;
 
+bool QUIZ_NORMALIZE_AND_DROP_TWO = false;
+
 std::vector<std::string> ICLICKER_QUESTION_NAMES;
 float MAX_ICLICKER_TOTAL;
 
@@ -373,6 +375,8 @@ void preprocesscustomizationfile() {
         istr.getline(line,MAX_STRING_LENGTH);
       } else if (token == "test_improvement_averaging_adjustment") {
         TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT = true;
+      } else if (token == "quiz_normalize_and_drop_two") {
+        QUIZ_NORMALIZE_AND_DROP_TWO = true;
       } else if (token == "lowest_test_counts_half") {
         LOWEST_TEST_COUNTS_HALF = true;
       } else {

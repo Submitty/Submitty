@@ -133,6 +133,7 @@ public:
   float adjusted_test(int i) const;
   float adjusted_test_pct() const;
   float lowest_test_counts_half_pct() const;
+  float quiz_normalize_and_drop_two() const;
   float overall_b4_moss() const;
   std::string grade(bool flag_b4_moss, Student *lowest_d) const;
   void outputgrade(std::ostream &ostr,bool flag_b4_moss,Student *lowest_d) const;

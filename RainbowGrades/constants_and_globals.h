@@ -37,6 +37,7 @@ extern bool  TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT;
 extern float LATE_DAY_PERCENTAGE_PENALTY;
 extern bool  LOWEST_TEST_COUNTS_HALF;
 
+extern bool QUIZ_NORMALIZE_AND_DROP_TWO;
 
 // ==========================================================
 extern std::map<int,std::string> sectionNames;
