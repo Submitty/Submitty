@@ -83,6 +83,7 @@ add_executable(compile.out
   ${GRADINGCODE}/grading/seccomp_functions.cpp 
   ${GRADINGCODE}/grading/execute.cpp 
   ${GRADINGCODE}/grading/execute_limits.cpp 
+  ${GRADINGCODE}/grading/error_message.cpp
 )
 
 add_executable(run.out
@@ -92,7 +93,8 @@ add_executable(run.out
   ${GRADINGCODE}/grading/main_runner.cpp 
   ${GRADINGCODE}/grading/seccomp_functions.cpp 
   ${GRADINGCODE}/grading/execute.cpp
-  ${GRADINGCODE}/grading/execute_limits.cpp 
+  ${GRADINGCODE}/grading/execute_limits.cpp
+  ${GRADINGCODE}/grading/error_message.cpp
 )
 
 add_executable(validate.out
@@ -102,6 +104,7 @@ add_executable(validate.out
   ${GRADINGCODE}/grading/seccomp_functions.cpp 
   ${GRADINGCODE}/grading/execute.cpp 
   ${GRADINGCODE}/grading/execute_limits.cpp 
+  ${GRADINGCODE}/grading/error_message.cpp
 )
 
 ###################################################################################
