@@ -1054,7 +1054,15 @@ function change_assignment_version($username, $semester,$course, $assignment_id,
     }
     $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
     $json["active_assignment"] = (int)$assignment_version;
+<<<<<<< 0dd5351c4fa339c9d72ce265a9e3f92e39ca1857
     $json["history"][] = array("version"=>(int)$assignment_version, "time"=>date("Y-m-d H:i:s"));
+=======
+
+    date_default_timezone_set('America/New_York');
+    $version_change_time = date("Y-m-d H:i:s");
+    $version_change = array("version"=>(int)$assignment_version, "time"=>$version_change_time);
+    array_push($json["history"],$version_change);
+>>>>>>> Added history of active version in user_assignment_settings.json
 
 /* // php symlinks disabled on server for security reasons
 
