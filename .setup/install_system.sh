@@ -151,11 +151,13 @@ chmod o+r . *.jar
 #################
 echo "Getting DrMemory..."
 mkdir -p ${INSTALL_DIR}/DrMemory
+cd /tmp
 DRMEM_TAG=release_1.10.1
 DRMEM_VER=1.10.1-3
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz
-ln -s /usr/local/hss/JUnit/DrMemory-Linux-${DRMEM_VER} /usr/local/hss/drmemory
+tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${INSTALL_DIR}/DrMemory
+ln -s ${INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${INSTALL_DIR}/drmemory
+rm DrMemory-Linux-${DRMEM_VER}.tar.gz
 
 #################################################################
 # APACHE SETUP
