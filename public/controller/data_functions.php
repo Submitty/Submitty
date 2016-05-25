@@ -279,9 +279,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     $settings_file = $user_path."/user_assignment_settings.json";
     if (!file_exists($settings_file)) {
         date_default_timezone_set('America/New_York');
-        $version_change_time = date("Y-m-d H:i:s");
-        $history = array(array("version"=>$upload_version, "time"=>$version_change_time));
-        $json = array("active_assignment"=>$upload_version, "history"=>$history);
+        $json = array("active_assignment"=>$upload_version, "history"=>array(array("version"=>$upload_version, "time"=>date("Y-m-d H:i:s"))));
         file_put_contents($settings_file, json_encode($json, JSON_PRETTY_PRINT));
     }
     else {
@@ -1062,11 +1060,8 @@ function change_assignment_version($username, $semester,$course, $assignment_id,
     }
     $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
     $json["active_assignment"] = (int)$assignment_version;
-
     date_default_timezone_set('America/New_York');
-    $version_change_time = date("Y-m-d H:i:s");
-    $version_change = array("version"=>(int)$assignment_version, "time"=>$version_change_time);
-    array_push($json["history"],$version_change);
+    $json["history"][] = array("version"=>(int)$assignment_version, "time"=>date("Y-m-d H:i:s"));
 
 /* // php symlinks disabled on server for security reasons
 
