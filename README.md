@@ -1,10 +1,12 @@
-System instructions here: [HOME](https://github.com/RCOS-Grading-Server/HWserver/wiki)
+System instructions here: [HOME](https://github.com/Submitty/Submitty/wiki)
 
-[![Build Status](https://travis-ci.org/RCOS-Grading-Server/HWserver.svg?branch=master)](https://travis-ci.org/RCOS-Grading-Server/HWserver)
+[![Build Status](https://travis-ci.org/Submitty/Submitty.svg?branch=master)](https://travis-ci.org/Submitty/Submitty)
 
 # BACKGROUND
 
 The homework server started out as a simple server for uploading student assignments for courses like Data Structures (CSCI 1200) and Computer Science I (CSCI 1100). Over time, the server has evolved and gained features for submission and grading which are used today for supporting more than 500 students at times for weekly homework. Because of the way the server is currently designed, creating scripts for grading homework and regrading homework are possible but require a significant amount of time for instructors. The server is currently managed by RPI lab staff and Professor Cutler from the Computer Science department. The goal of the project is to research and create algorithms to effectively grade different types of homework based on student output on submission. We will accomplish this by creating a modularized system for grading that improves the ability to create homework assignments on the server and by reducing the number of custom scripts required. Improvements to the server’s user interface will also be made to the student side to allow student to more effectively view their grades on assignment and improve the ability to submit homework.
+
+In Spring 2016 the server was renamed to Submitty. 
 
 ### LICENSING
 All non-RPI specific parts of the homework server are under the BSD "3-Clause" License.
