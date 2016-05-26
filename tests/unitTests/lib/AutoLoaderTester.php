@@ -15,10 +15,6 @@ class AutoLoaderTester extends \PHPUnit_Framework_TestCase {
         AutoLoader::setClasses($this->autoloader_classes);
     }
 
-    public function testGetPathToRoot() {
-        $this->assertEquals("../../../", AutoLoader::getPathToRoot(__DIR__));
-    }
-
     public function testRegisterDirectory() {
         AutoLoader::registerDirectory(__DIR__);
         $classes = AutoLoader::getClasses();
