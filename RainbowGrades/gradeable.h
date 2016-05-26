@@ -6,7 +6,7 @@
 #include <map>
 
 
-enum class GRADEABLE_ENUM { READING, EXERCISE, LAB, PARTICIPATION, HOMEWORK, PROJECT, QUIZ, TEST, EXAM };
+enum class GRADEABLE_ENUM { NONE, READING, EXERCISE, LAB, PARTICIPATION, HOMEWORK, PROJECT, QUIZ, TEST, EXAM, NOTE };
 
 
 inline std::string gradeable_to_string(const GRADEABLE_ENUM &g) {
@@ -19,6 +19,7 @@ inline std::string gradeable_to_string(const GRADEABLE_ENUM &g) {
   if (g == GRADEABLE_ENUM::QUIZ)          { return "QUIZ"; }
   if (g == GRADEABLE_ENUM::TEST)          { return "TEST"; }
   if (g == GRADEABLE_ENUM::EXAM)          { return "EXAM"; }
+  if (g == GRADEABLE_ENUM::NOTE)          { return "NOTE"; }
   std::cerr << "ERROR!  UNKNOWN GRADEABLE" << std::endl;
   exit(0);
 }
@@ -49,8 +50,9 @@ public:
     return "";
   }
 
-  bool hasCorrespondence(const std::string &id) {
-    return (correspondences.find(id) != correspondences.end());
+  bool hasCorrespondence(const std::string &id) const {
+    std::map<std::string,std::pair<int,std::string> >::const_iterator itr =  correspondences.find(id);
+    return (itr != correspondences.end());
   }
 
   const std::pair<int,std::string>& getCorrespondence(const std::string& id) {
@@ -63,7 +65,7 @@ public:
 
   int setCorrespondence(const std::string& id) {
     assert (!hasCorrespondence(id));
-    assert (correspondences.size() < count);
+    assert (int(correspondences.size()) < count);
     int index = correspondences.size();
     correspondences[id] = std::make_pair(index,"");
     return index;

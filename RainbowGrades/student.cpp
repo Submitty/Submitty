@@ -18,12 +18,19 @@ Student::Student() {
   independentstudy = false;
 
   // grade data
-  for (int i = 0; i < ALL_GRADEABLES.size(); i++) { 
+  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) { 
     GRADEABLE_ENUM g = ALL_GRADEABLES[i];
     all_values[g]       = std::vector<float>(GRADEABLES[g].getCount(),0);
+    all_notes[g]       = std::vector<std::string>(GRADEABLES[g].getCount(),"");
   }
   // (iclicker defaults to empty map)
-  hws_late_days                             = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(),0);
+
+  // FIXME: This is still broken.  Late days should be available for
+  // any item, not just homeworks.  I think the project late days
+  // aren't being correctly labeled.
+  hws_late_days                             = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount()+
+								 GRADEABLES[GRADEABLE_ENUM::PROJECT].getCount(),0);
+
   zones = std::vector<std::string>(GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),"");
   moss_penalty = 0;
   cached_hw = -1;
@@ -46,7 +53,7 @@ Student::Student() {
 
 // lookup a student by username
 Student* GetStudent(const std::vector<Student*> &students, const std::string& username) {
-  for (int i = 0; i < students.size(); i++) {
+  for (unsigned int i = 0; i < students.size(); i++) {
     if (students[i]->getUserName() == username) return students[i];
   }
   return NULL;
@@ -64,7 +71,7 @@ float Student::getGradeableValue(GRADEABLE_ENUM g, int i) const {
   assert (i >= 0 && i < GRADEABLES[g].getCount());
   std::map<GRADEABLE_ENUM,std::vector<float> >::const_iterator itr = all_values.find(g);
   assert (itr != all_values.end());
-  assert (itr->second.size() > i);
+  assert (int(itr->second.size()) > i);
 
   float value = itr->second[i];
   if (g == GRADEABLE_ENUM::HOMEWORK && LATE_DAY_PERCENTAGE_PENALTY > 0) {
@@ -88,25 +95,87 @@ void Student::setGradeableValue(GRADEABLE_ENUM g, int i, float value) {
   assert (i >= 0 && i < GRADEABLES[g].getCount());
   std::map<GRADEABLE_ENUM,std::vector<float> >::iterator itr = all_values.find(g);
   assert (itr != all_values.end());
-  assert (itr->second.size() > i);
+  assert (int(itr->second.size()) > i);
   itr->second[i] = value;
 }
+
+const std::string& Student::getGradeableNote(GRADEABLE_ENUM g, int i) const {
+  assert (i >= 0 && i < GRADEABLES[g].getCount());
+  std::map<GRADEABLE_ENUM,std::vector<std::string> >::const_iterator itr = all_notes.find(g);
+  assert (itr != all_notes.end());
+  assert (int(itr->second.size()) > i);
+  return itr->second[i];
+}
+
+void Student::setGradeableNote(GRADEABLE_ENUM g, int i, const std::string &note) {
+  assert (i >= 0 && i < GRADEABLES[g].getCount());
+  std::map<GRADEABLE_ENUM,std::vector<std::string> >::iterator itr = all_notes.find(g);
+  assert (itr != all_notes.end());
+  assert (int(itr->second.size()) > i);
+  itr->second[i] = note;
+}
+
 
 // =============================================================================================
 // GRADER CALCULATION HELPER FUNCTIONS
 
+extern std::vector<std::vector<std::string> > HACKMAXPROJECTS;
+
 float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   if (GRADEABLES[g].getCount() == 0) return 0;
   assert (GRADEABLES[g].getMaximum() > 0);
-  assert (GRADEABLES[g].getPercent() > 0);
+  assert (GRADEABLES[g].getPercent() >= 0);
 
   // special rules for tests
   if (g == GRADEABLE_ENUM::TEST && TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
     return adjusted_test_pct();
   }
+
+  // normalize & drop lowest 2
+  if (g == GRADEABLE_ENUM::QUIZ && QUIZ_NORMALIZE_AND_DROP_TWO) {
+    return quiz_normalize_and_drop_two();
+  }
+
   if (g == GRADEABLE_ENUM::TEST && LOWEST_TEST_COUNTS_HALF) {
     return lowest_test_counts_half_pct();
   }
+
+
+  // ============================================================================
+  // end special rule for projects for op sys
+  // HACK, NOT PERMANENT!
+
+  if (g == GRADEABLE_ENUM::PROJECT && HACKMAXPROJECTS.size() > 0) {
+
+    // collect the scores in a vector
+    std::map<std::string,float> scores;
+
+    for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
+      float my_value = getGradeableValue(g,i);
+      std::string my_id = GRADEABLES[g].getID(i);
+      //std::cout << "PROJECT THING val=" << my_value << " id=" << my_id << std::endl;
+      scores[my_id] = my_value;
+    }
+
+    // sum the projects
+    float sum = 0;
+    for (unsigned int i = 0; i < HACKMAXPROJECTS.size(); i++) {
+      float my_max = 0;
+      for (unsigned int j = 0; j < HACKMAXPROJECTS[i].size(); j++) {
+        my_max = std::max(my_max,scores[HACKMAXPROJECTS[i][j]]);
+      }
+      //std::cout << "i=" << i << " max=" << my_max << std::endl;
+      sum += my_max;
+    }
+    //std::cout << "sum=" << sum << std::endl;
+
+    return 100*GRADEABLES[g].getPercent()*sum/GRADEABLES[g].getMaximum();
+
+  }
+  // HACK, NOT PERMANENT!
+  // end special rule for projects for op sys
+  // ============================================================================
+
 
   // collect the scores in a vector
   std::vector<float> scores;
@@ -128,6 +197,8 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
 
   return 100*GRADEABLES[g].getPercent()*sum/GRADEABLES[g].getMaximum();
 }
+
+
 
 
 float Student::adjusted_test(int i) const {
@@ -155,6 +226,35 @@ float Student::adjusted_test_pct() const {
   }
   float answer =  100 * GRADEABLES[GRADEABLE_ENUM::TEST].getPercent() * sum / float (GRADEABLES[GRADEABLE_ENUM::TEST].getMaximum());
   return answer;
+}
+
+
+
+float Student::quiz_normalize_and_drop_two() const {
+
+  // collect the normalized quiz scores in a vector
+  std::vector<float> scores;
+  for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::QUIZ].getCount(); i++) {
+    // the max for this quiz
+    float p = PERFECT_STUDENT_POINTER->getGradeableValue(GRADEABLE_ENUM::QUIZ,i);
+    // this students score
+    float v = getGradeableValue(GRADEABLE_ENUM::QUIZ,i);
+    scores.push_back(v/p);
+  }
+
+  assert (scores.size() > 2);
+
+  // sort the scores
+  sort(scores.begin(),scores.end());
+
+  // sum up all but the lowest 2 scores
+  float sum = 0;
+  for (int i = 2; i < scores.size(); i++) {
+    sum += scores[i];
+  }
+
+  // the overall percent of the final grade for quizzes
+  return 100 * GRADEABLES[GRADEABLE_ENUM::QUIZ].getPercent() * sum / float (scores.size()-2);
 }
 
 
@@ -201,14 +301,15 @@ int Student::getAllowedLateDays(int which_lecture) const {
   
   float total = getIClickerTotal(which_lecture,0);
   
-  for (int i = 0; i < bonus_late_days_which_lecture.size(); i++) {
+  for (unsigned int i = 0; i < bonus_late_days_which_lecture.size(); i++) {
     if (bonus_late_days_which_lecture[i] <= which_lecture) {
       answer ++;
     }
   }
 
 
-  return answer += int(total / 30); //25);
+  //return answer += int(total / 30); //25);
+  return answer += int(total / 25);
   
 }
 
@@ -233,7 +334,7 @@ int Student::getUsedLateDays() const {
 
 float Student::overall_b4_moss() const {
   float answer = 0;
-  for (int i = 0; i < ALL_GRADEABLES.size(); i++) { 
+  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) { 
     GRADEABLE_ENUM g = ALL_GRADEABLES[i];
     answer += GradeablePercent(g);
   }
@@ -344,9 +445,11 @@ void Student::outputgrade(std::ostream &ostr,bool flag_b4_moss,Student *lowest_d
 // =============================================================================================
 
 // zones for exams...
-const std::string& Student::getZone(int i) const {
+//const std::string& Student::getZone(int i) const {
+std::string Student::getZone(int i) const {
   assert (i >= 0 && i < GRADEABLES[GRADEABLE_ENUM::TEST].getCount()); return zones[i]; 
 }
+
 
 
 // =============================================================================================
@@ -372,7 +475,7 @@ float Student::getIClickerRecent() const {
 float Student::getIClickerTotal(int which_lecture, int start) const {
   if (getUserName() == "PERFECT") { return MAX_ICLICKER_TOTAL; } 
   float ans = 0;
-  for (int i = start; i < ICLICKER_QUESTION_NAMES.size(); i++) {
+  for (unsigned int i = start; i < ICLICKER_QUESTION_NAMES.size(); i++) {
     std::map<std::string,std::pair<char,iclicker_answer_enum> >::const_iterator itr = iclickeranswers.find(ICLICKER_QUESTION_NAMES[i]);
     if (itr == iclickeranswers.end()) continue;
     if (!iclickertotalhelper(itr->first,which_lecture)) continue;

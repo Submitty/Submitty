@@ -26,11 +26,8 @@ std::vector<TestCase> testcases
   TestCase::MakeCompilation(
 	"Compilation",
 	"/usr/bin/clang++ -Wall -o a.out -- *.cpp",
-	"a.out",		// name of .exe created by student
-	TestCasePoints(3),
-	{   
-	  { RLIMIT_NPROC,      10           }   // 10 additional process
-	}
+	"a.out",
+	TestCasePoints(3)
 ),
 
 /******************** TEST CASES **********************/

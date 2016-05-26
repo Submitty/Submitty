@@ -103,9 +103,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   std::cout << "CUSTOMIZE AUTO GRADING replace " <<  GLOBAL_replace_string_before << " with " << GLOBAL_replace_string_after << std::endl;
 #endif
 
-
-  system ("ls -lta");
-
+  //system ("ls -lta");
+  system("find . -type f");
 
   // LOOP OVER ALL TEST CASES
   for (int i = 0; i < testcases.size(); ++i) {

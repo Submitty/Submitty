@@ -12,11 +12,11 @@ echo '<div>';
 
 // =================================================================================
 
-
+/*
 echo '<div class="title-box">';
 echo '<h1 class="title">Homework Submissions for '.$course.'</h1>';
 echo '</div>';
-
+*/
 
 // =================================================================================
 
@@ -92,13 +92,30 @@ window.addEventListener('load', function() {
 // =================================================================================
 // IDENTIFY USER & SELECT WHICH HOMEWORK NUMBER
 
+
+
 echo '<div id="HWsubmission">';
+
+//echo '<div class="confetti">';
+
+
+$random_logo = mt_rand(1,10);
+$random_logo_filename = "resources/logo_fake" . $random_logo . ".png";
+if (file_exists ($random_logo_filename)) {
+  echo '<a target="_top" href="http://tinyurl.com/gqvbyv9"><img align=right width=35% hspace="20" vspace="10" style="opacity: 0.2;filter: alpha(opacity=20);" src="';
+  echo $random_logo_filename;
+  echo '"></a>';
+}
+
+
 
 echo '<h2 class="label">Homework Submission for <em>'.$user.'</em>';
 if (on_dev_team($user)) {
   echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ]</font>";
 }
 echo '</h2>';
+
+
 
 
 // =================================================================================
@@ -216,6 +233,8 @@ if ($highest_version == -1) {
 } else {
 
   // $highest_version is >= 1
+  //  echo '<div class="outer_box_confetti">';
+  //echo '<div class="outer_box_confetti_a">';
   echo '<div class="outer_box">';
   echo '<h3 class="label">Review Submissions</h3>';
 
@@ -355,7 +374,8 @@ if ($highest_version == -1) {
     }
   }
 
-  echo '</div>';
+  echo '</div>';  // confetti_a
+  //echo '</div>';  // confetti
 
 
 
@@ -418,7 +438,13 @@ if (!isset($grade_summary) || (isset($grade_summary) && $grade_summary == true))
 }
 
 echo '</div>'; // end panel-body
+//echo '</div>'; // end confetti
 echo '</div>'; // end HWsubmission
+
+
+
+
+
 
 
 

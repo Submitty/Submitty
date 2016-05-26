@@ -18,7 +18,7 @@ Date dateFromFilename(const std::string& filename_with_directory) {
   
   std::string filename = filename_with_directory;
   while (true) {
-    int pos = filename.find('/');
+    std::string::size_type pos = filename.find('/');
     if (pos == std::string::npos) break;
     filename = filename.substr(pos+1,filename.size()-pos-1);
   }
@@ -96,7 +96,7 @@ void MatchClickerRemotes(std::vector<Student*> &students, const std::string &rem
 
 
 std::string getItem(const std::string &line, int which) {
-  int comma_before = 0;
+  std::string::size_type comma_before = 0;
   for (int i = 0; i < which; i++) {
     comma_before = line.find(',',comma_before)+1;
     assert (comma_before != std::string::npos);
@@ -108,10 +108,10 @@ std::string getItem(const std::string &line, int which) {
 
 void AddClickerScores(std::vector<Student*> &students, std::vector<std::vector<iClickerQuestion> > iclicker_questions) {
 
-  for (int which_lecture = 0; which_lecture < iclicker_questions.size(); which_lecture++) {
+  for (unsigned int which_lecture = 0; which_lecture < iclicker_questions.size(); which_lecture++) {
     //std::cout << "which lecture = " << which_lecture << std::endl;
     std::vector<iClickerQuestion>& lecture = iclicker_questions[which_lecture];
-    for (int which_question = 0; which_question < lecture.size(); which_question++) {
+    for (unsigned int which_question = 0; which_question < lecture.size(); which_question++) {
       iClickerQuestion& question = lecture[which_question];
 
       std::stringstream ss;
