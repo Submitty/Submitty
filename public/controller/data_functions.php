@@ -121,7 +121,6 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
 
     // Store the time, right now!
     // 2001-03-10 17:16:18 (the MySQL DATETIME format)
-    date_default_timezone_set('America/New_York');
     $TIMESTAMP = date("Y-m-d H:i:s");
 
 
@@ -278,8 +277,8 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
 
     $settings_file = $user_path."/user_assignment_settings.json";
     if (!file_exists($settings_file)) {
-        $json = array("active_assignment"=>$upload_version);
-        file_put_contents($settings_file, json_encode($json));
+        $json = array("active_assignment"=>$upload_version, "history"=>array(array("version"=>$upload_version, "time"=>date("Y-m-d H:i:s"))));
+        file_put_contents($settings_file, json_encode($json, JSON_PRETTY_PRINT));
     }
     else {
         change_assignment_version($username, $semester, $course, $assignment_id, $upload_version, $assignment_config);
@@ -381,14 +380,10 @@ function get_due_date($class_config, $assignment_id) {
         if ($one["assignment_id"] == $assignment_id) {
 
             if (isset($one["due_date"])) {
-
-                // TODO: Put this in cofig file
-                date_default_timezone_set('America/New_York');
                 $date = new DateTime($one["due_date"]);
                 return $date;
             }
             else {
-                date_default_timezone_set('America/New_York');
                 $date = new DateTime("2014-12-01 23:59:59.0");
                 return $date;
             }
@@ -1058,7 +1053,8 @@ function change_assignment_version($username, $semester,$course, $assignment_id,
         return;
     }
     $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
-    $json["active_assignment"] = $assignment_version;
+    $json["active_assignment"] = (int)$assignment_version;
+    $json["history"][] = array("version"=>(int)$assignment_version, "time"=>date("Y-m-d H:i:s"));
 
 /* // php symlinks disabled on server for security reasons
 
@@ -1070,7 +1066,7 @@ function change_assignment_version($username, $semester,$course, $assignment_id,
     $success = symlink ($user_path."/".$assignment_version,$user_path."/ACTIVE");
 */
 
-    file_put_contents($file, json_encode($json));
+    file_put_contents($file, json_encode($json, JSON_PRETTY_PRINT));
     return array("success"=>"Success");
 }
 
