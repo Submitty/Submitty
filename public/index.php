@@ -1,6 +1,7 @@
 <?php
 
 umask (0027);
+date_default_timezone_set('America/New_York');
 /*The user's umask is ignored for the user running php, so we need
 to set it from inside of php to make sure the group read & execute
 permissions aren't lost for newly created files & directories.*/
