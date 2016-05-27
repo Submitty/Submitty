@@ -552,12 +552,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 
 
   // SECCOMP: install the filter (system calls restrictions)
-<<<<<<< HEAD
   if (install_syscall_filter(prog_is_32bit, my_program,logfile)) {
-=======
-  //  if (SECCOMP_ENABLED != 0) {
-  if (install_syscall_filter(prog_is_32bit, true /*blacklist*/, my_program)) {
->>>>>>> 0e7c6d3177ac12610a6b03913dfef34de7d2f821
     std::cout << "seccomp filter install failed" << std::endl;
     return 1;
   }
