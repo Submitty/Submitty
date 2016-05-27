@@ -83,7 +83,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
 #define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_RARE
 #define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
 #define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
-
+  }
 
   // RACKET SCHEME
   if (my_program == "/usr/bin/plt-r5rs") {
