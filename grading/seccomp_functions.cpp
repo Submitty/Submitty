@@ -46,7 +46,6 @@
 // ===========================================================================
 
 int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &execute_logfile) {
-int install_syscall_filter(bool is_32, const std::string &my_program) {
   int res;
   scmp_filter_ctx sc = seccomp_init(SCMP_ACT_KILL);
   int target_arch = is_32 ? SCMP_ARCH_X86 : SCMP_ARCH_X86_64;
@@ -84,15 +83,6 @@ int install_syscall_filter(bool is_32, const std::string &my_program) {
 #define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_RARE
 #define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
 #define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
-<<<<<<< HEAD
-  }
-
-
-  // RACKET SCHEME
-  if (my_program == "/usr/bin/plt-r5rs") {
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION
-#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SIGNALS
-=======
   }
 
 
@@ -120,6 +110,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program) {
 #define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SCHEDULING
   }
   
+
   if (my_program == "/usr/bin/java") {
 #define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SIGNALS
 #define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL
@@ -133,11 +124,6 @@ int install_syscall_filter(bool is_32, const std::string &my_program) {
 #define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SCHEDULING
 #define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL
 #define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SOCKETS
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_PERMISSIONS
-#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_RARE
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
-#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
   }
   
   // JAVA
@@ -177,8 +163,6 @@ int install_syscall_filter(bool is_32, const std::string &my_program) {
 #define ALLOW_SYSTEM_CALL_CATEGORY_UNKNOWN_MODULE
 #define ALLOW_SYSTEM_CALL_CATEGORY_UNKNOWN_REMAP_PAGES
   }
-
-
 
   // HELPER UTILTIY PROGRAMS
   if (my_program == "/usr/bin/time") {
