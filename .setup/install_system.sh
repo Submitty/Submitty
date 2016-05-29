@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #PATHS
-HWSERVER_DIR=/usr/local/hss/GIT_CHECKOUT_HWserver
+SUBMITTY_DIR=/usr/local/hss/GIT_CHECKOUT_Submitty
 INSTALL_DIR=/usr/local/hss
 DATA_DIR=/var/local/hss
 
@@ -71,7 +71,7 @@ apt-get install -qqy ntp
 service ntp restart
 
 # path for untrusted user creation script will be different if not using Vagrant
-${HWSERVER_DIR}/bin/create.untrusted.users.pl
+${SUBMITTY_DIR}/bin/create.untrusted.users.pl
 
 apt-get install -qqy libpam-passwdqc
 
@@ -339,7 +339,7 @@ if [ ${VAGRANT} == 1 ]; then
 	service postgresql restart
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
-	su postgres -c "source ${HWSERVER_DIR}/.setup/db_users.sh";
+	su postgres -c "source ${SUBMITTY_DIR}/.setup/db_users.sh";
 	echo "Finished creating PostgreSQL users"
 
     echo "Setting up Postgres to connect to via host"
@@ -350,7 +350,7 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 #################################################################
-# HWSERVER SETUP
+# SUBMITTY SETUP
 #################
 
 if [ ${VAGRANT} == 1 ]; then
@@ -358,17 +358,17 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 https://192.168.56.103
-svn+ssh:192.168.56.102" | source ${HWSERVER_DIR}/CONFIGURE.sh
+svn+ssh:192.168.56.102" | source ${SUBMITTY_DIR}/CONFIGURE.sh
 else
-	source ${HWSERVER_DIR}/CONFIGURE.sh
+	source ${SUBMITTY_DIR}/CONFIGURE.sh
 fi
 
 source ${INSTALL_DIR}/INSTALL.sh
 
-source ${HWSERVER_DIR}/Docs/sample_bin/admin_scripts_setup
-cp ${HWSERVER_DIR}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
-cp ${HWSERVER_DIR}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
-cp -f ${HWSERVER_DIR}/Docs/www-data /etc/apache2/suexec/www-data
+source ${SUBMITTY_DIR}/Docs/sample_bin/admin_scripts_setup
+cp ${SUBMITTY_DIR}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
+cp ${SUBMITTY_DIR}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
+cp -f ${SUBMITTY_DIR}/Docs/www-data /etc/apache2/suexec/www-data
 
 # permissions: rw- r-- ---
 chmod 0640 /etc/apache2/sites-available/*.conf
@@ -396,13 +396,13 @@ if [[ ${VAGRANT} == 1 ]]; then
     echo "student:student" | sudo chpasswd
 
     rm -r ${DATA_DIR}/autograding_logs
-    rm -r ${HWSERVER_DIR}/.vagrant/autograding_logs
-    mkdir ${HWSERVER_DIR}/.vagrant/autograding_logs
-    ln -s ${HWSERVER_DIR}/.vagrant/autograding_logs ${DATA_DIR}/autograding_logs
+    rm -r ${SUBMITTY_DIR}/.vagrant/autograding_logs
+    mkdir ${SUBMITTY_DIR}/.vagrant/autograding_logs
+    ln -s ${SUBMITTY_DIR}/.vagrant/autograding_logs ${DATA_DIR}/autograding_logs
     rm -r ${DATA_DIR}/tagrading_logs
-    rm -r ${HWSERVER_DIR}/.vagrant/tagrading_logs
-    mkdir ${HWSERVER_DIR}/.vagrant/tagrading_logs
-    ln -s ${HWSERVER_DIR}/.vagrant/tagrading_logs ${DATA_DIR}/tagrading_logs
+    rm -r ${SUBMITTY_DIR}/.vagrant/tagrading_logs
+    mkdir ${SUBMITTY_DIR}/.vagrant/tagrading_logs
+    ln -s ${SUBMITTY_DIR}/.vagrant/tagrading_logs ${DATA_DIR}/tagrading_logs
 
     #################################################################
     # CRON SETUP
@@ -445,16 +445,16 @@ if [[ ${VAGRANT} == 1 ]]; then
 	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1200_f15;"
 	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
 	
-	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
-	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
-	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
-	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
+	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/tables.sql
+	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/inserts.sql
+	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/tables.sql
+	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/inserts.sql
+	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/tables.sql
+	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/inserts.sql
 
-	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
-	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
-	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
+	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/.setup/vagrant/db_inserts.sql
+	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/.setup/vagrant/db_inserts.sql
+	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/.setup/vagrant/db_inserts.sql
 	
     #################################################################
     # SET CSV FIELDS (for classlist upload data)

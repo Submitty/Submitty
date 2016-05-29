@@ -1,7 +1,7 @@
 #!/bin/bash
 HSS_INSTALL_DIR=/usr/local/hss
 HSS_VAR_DIR=/var/local/hss
-HSS_REPOSITORY=/usr/local/hss/GIT_CHECKOUT_HWserver
+HSS_REPOSITORY=/usr/local/hss/GIT_CHECKOUT_Submitty
 
 # Copy account maintenance scripts unless they exist
 mkdir -p $HSS_INSTALL_DIR/bin
