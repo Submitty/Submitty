@@ -1,0 +1,40 @@
+cmake_minimum_required (VERSION 2.8)
+project (sample_assignment)
+
+###################################################################################
+
+# these variables will be replaced by INSTALL.sh
+set (HSS_INSTALL_DIR __INSTALL__FILLIN__HSS_INSTALL_DIR__)
+set (HSS_DATA_DIR __INSTALL__FILLIN__HSS_DATA_DIR__)
+
+# assuming the core files for config, compilation, running, & grading are here:
+set (GRADINGCODE ${HSS_INSTALL_DIR}/src)
+
+###################################################################################
+# source files
+
+add_library(submitty_grading
+  ${GRADINGCODE}/grading/TestCase.cpp 
+  ${GRADINGCODE}/grading/JUnitGrader.cpp
+  ${GRADINGCODE}/grading/myersDiff.cpp 
+  ${GRADINGCODE}/grading/tokens.cpp 
+  ${GRADINGCODE}/grading/tokenSearch.cpp 
+  ${GRADINGCODE}/grading/diffNaive.cpp 
+  ${GRADINGCODE}/grading/clean.cpp 
+  ${GRADINGCODE}/grading/difference.cpp
+  ${GRADINGCODE}/grading/execute.cpp 
+  ${GRADINGCODE}/grading/execute_limits.cpp 
+  ${GRADINGCODE}/grading/error_message.cpp
+)
+
+###################################################################################
+
+target_link_libraries(submitty_grading seccomp)
+
+set_property(TARGET submitty_grading APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+
+include_directories(${GRADINGCODE})
+
+###################################################################################
+
+
