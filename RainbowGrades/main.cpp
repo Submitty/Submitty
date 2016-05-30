@@ -207,30 +207,6 @@ bool by_iclicker(const Student* s1, const Student* s2) {
   return (s1->getIClickerTotalFromStart() > s2->getIClickerTotalFromStart());
 }
 
-int convertMajor(const std::string &major);
-int convertYear(const std::string &major);
-
-bool by_year(const Student *s1, const Student *s2) {
-  int y1 = convertYear(s1->getYear());
-  int y2 = convertYear(s2->getYear());
-  if (y1 == y2) {
-    return by_overall(s1,s2);
-  } 
-  return (y1 < y2);
-}
-
-
-
-bool by_major(const Student *s1, const Student *s2) {
-  int m1 = std::max(convertMajor(s1->getMajor1()),
-                    convertMajor(s1->getMajor2()));
-  int m2 = std::max(convertMajor(s2->getMajor1()),
-                    convertMajor(s2->getMajor2()));
-  if (m1 == m2) {
-    return by_year(s1,s2);
-  } 
-  return (m1 > m2);
-}
 
 // sorting function for letter grades
 bool operator< (const Grade &a, const Grade &b) {  
@@ -1189,11 +1165,6 @@ int main(int argc, char* argv[]) {
 
     DISPLAY_ICLICKER = true;
 
-  } else if (sort_order == std::string("by_year")) {
-    std::sort(students.begin(),students.end(),by_year);
-  } else if (sort_order == std::string("by_major")) {
-    std::sort(students.begin(),students.end(),by_major);
-
   } else if (sort_order == std::string("by_test_and_exam")) {
     std::sort(students.begin(),students.end(),by_test_and_exam);
 
@@ -1208,7 +1179,7 @@ int main(int argc, char* argv[]) {
     }
     else {
       std::cerr << "UNKNOWN SORT OPTION " << sort_order << std::endl;
-      std::cerr << "  Usage: " << argv[0] << " [ by_overall | by_name | by_section | by_zone | by_iclicker | by_year | by_major | | by_lab | by_exercise | by_reading | by_hw | by_test | by_exam | by_test_and_exam ]" << std::endl;
+      std::cerr << "  Usage: " << argv[0] << " [ by_overall | by_name | by_section | by_zone | by_iclicker | by_lab | by_exercise | by_reading | by_hw | by_test | by_exam | by_test_and_exam ]" << std::endl;
       exit(1);
     }
   }

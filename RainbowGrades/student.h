@@ -52,10 +52,6 @@ public:
   const std::string& getFirstName()     const { return first; }
   const std::string& getPreferredName() const { if (preferred != "") return preferred; return first; }
   const std::string& getLastName()      const { return last; }
-  const std::string& getYear()          const { return year; }
-  const std::string& getMajor1()        const { return major1; }
-  const std::string& getMajor2()        const { return major2; }
-
   const std::string& getLastUpdate()    const { return lastUpdate; }
 
   // registration status
@@ -66,8 +62,6 @@ public:
 
   // grade data
   const ItemGrade& getGradeableItemGrade(GRADEABLE_ENUM g, int i) const;
-  //const std::string& getGradeableNote(GRADEABLE_ENUM g, int i) const;
-  //const std::string& getZone(int i) const;
   std::string getZone(int i) const;
   int getAllowedLateDays(int which_lecture) const;
   int getUsedLateDays() const;
@@ -166,9 +160,6 @@ private:
   std::string first;
   std::string preferred;
   std::string last;
-  std::string year;
-  std::string major1;
-  std::string major2;
 
   std::string lastUpdate;
 

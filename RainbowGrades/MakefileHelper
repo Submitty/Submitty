@@ -88,15 +88,6 @@ name: compile
 section: compile
 	./process_grades.out by_section
 
-
-year: compile
-	./process_grades.out by_year
-
-major: compile
-	./process_grades.out by_major
-
-
-
 lab: compile
 	./process_grades.out by_lab
 
