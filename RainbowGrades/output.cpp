@@ -577,20 +577,17 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
         visible = CELL_CONTENTS_NO_DETAILS;
       }
       for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
-        float grade = this_student->getGradeableValue(g,j);
+        float grade = this_student->getGradeableItemGrade(g,j).getValue();
         std::string color = coloritcolor(grade,
-                                         sp->getGradeableValue(g,j),
-                                         sa->getGradeableValue(g,j),
-                                         sb->getGradeableValue(g,j),
-                                         sc->getGradeableValue(g,j),
-                                         sd->getGradeableValue(g,j));
+                                         sp->getGradeableItemGrade(g,j).getValue(),
+                                         sa->getGradeableItemGrade(g,j).getValue(),
+                                         sb->getGradeableItemGrade(g,j).getValue(),
+                                         sc->getGradeableItemGrade(g,j).getValue(),
+                                         sd->getGradeableItemGrade(g,j).getValue());
         std::string details;
-        details = this_student->getGradeableNote(g,j);
+        details = this_student->getGradeableItemGrade(g,j).getNote();
 
-        int late_days_used = 0;
-        if (g == GRADEABLE_ENUM::HOMEWORK) {
-          late_days_used = this_student->getUsedLateDays(j);
-        }
+        int late_days_used = this_student->getGradeableItemGrade(g,j).getLateDaysUsed();
 
         table.set(myrow,counter++,TableCell(color,grade,1,details,late_days_used,visible));
       }
@@ -845,7 +842,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
 
 
 
-
+/*
 void output_line_helper(std::ofstream &ostr, GRADEABLE_ENUM g,
                         Student *this_student,
                         Student *sp, Student *sa, Student *sb, Student *sc, Student *sd) {
@@ -860,15 +857,15 @@ void output_line_helper(std::ofstream &ostr, GRADEABLE_ENUM g,
       if (count > 3) { bonus_text += "(" + std::to_string(count) + "*)"; }
       else { bonus_text += std::string(count,'*'); }
     }
-    float grade = this_student->getGradeableValue(g,i);
+    float grade = this_student->getGradeableItemGrade(g,i).getValue();
     ostr << std::setprecision(2) << std::fixed;
     colorit(ostr,
             grade, 
-            sp->getGradeableValue(g,i),
-            sa->getGradeableValue(g,i),
-            sb->getGradeableValue(g,i),
-            sc->getGradeableValue(g,i),
-            sd->getGradeableValue(g,i),1,false,bonus_text);
+            sp->getGradeableItemGrade(g,i).getValue(),
+            sa->getGradeableItemGrade(g,i).getValue(),
+            sb->getGradeableItemGrade(g,i).getValue(),
+            sc->getGradeableItemGrade(g,i).getValue(),
+            sd->getGradeableItemGrade(g,i).getValue(),1,false,bonus_text);
   }
 
   // special case for test
@@ -882,8 +879,10 @@ void output_line_helper(std::ofstream &ostr, GRADEABLE_ENUM g,
   }
 
 }
+*/
 
 
+/*
 void output_line(std::ofstream &ostr, 
                  int part,
                  bool for_instructor,
@@ -1048,7 +1047,7 @@ void output_line(std::ofstream &ostr,
       GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
 
       if (for_instructor || g2 == GRADEABLE_ENUM::NONE || g == g2) { 
-        output_line_helper(ostr,g2,this_student,sp,sa,sb,sc,sd);
+        //output_line_helper(ostr,g2,this_student,sp,sa,sb,sc,sd);
       }
     }
   }
@@ -1062,7 +1061,7 @@ void output_line(std::ofstream &ostr,
               0.80*MAX_ICLICKER_TOTAL,
               0.60*MAX_ICLICKER_TOTAL,
               0.40*MAX_ICLICKER_TOTAL);
-        //      /*
+        //      / *
       colorit(ostr,this_student->getIClickerRecent(),
               ICLICKER_RECENT,
               0.90*ICLICKER_RECENT,
@@ -1080,7 +1079,7 @@ void output_line(std::ofstream &ostr,
         coloritcolor(ostr, allowed-used+2, 5+2, 3+2, 2+2, 1+2, 0+2);
         ostr << ">" << used<<"</td>\n"; 
         }
-      //*/
+      // * /
       ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
     }
     for (unsigned int i = 0; i < ICLICKER_QUESTION_NAMES.size(); i++) {
@@ -1111,7 +1110,7 @@ void output_line(std::ofstream &ostr,
     }
   }
 }
-
+*/
 
 
 void end_table(std::ofstream &ostr,  bool for_instructor, const std::vector<Student*> &students, int rank) {
