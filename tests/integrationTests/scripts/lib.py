@@ -141,7 +141,7 @@ class TestcaseWrapper:
                 ["-l" + lib for lib in libraries] +
                 ["-o", os.path.join(self.testcase_path, "build", target)] +
                 [os.path.join(self.testcase_path, "build", o) for o in objects] +
-                [o for o in glob.glob(os.path.join(self.testcase_path, "build", "*.o")) if not "main" in o])
+                [o for o in glob.glob(os.path.join(self.testcase_path, "build", "*.o")) if not "main" in o and not "system_call_check" in o])])
 
     # Helper functions to link the four current executables.
     def link_compile(self):
