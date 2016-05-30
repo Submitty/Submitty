@@ -20,16 +20,9 @@ Student::Student() {
   // grade data
   for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) { 
     GRADEABLE_ENUM g = ALL_GRADEABLES[i];
-    all_values[g]       = std::vector<float>(GRADEABLES[g].getCount(),0);
-    all_notes[g]       = std::vector<std::string>(GRADEABLES[g].getCount(),"");
+    all_item_grades[g]   = std::vector<ItemGrade>(GRADEABLES[g].getCount(),ItemGrade(0));
   }
   // (iclicker defaults to empty map)
-
-  // FIXME: This is still broken.  Late days should be available for
-  // any item, not just homeworks.  I think the project late days
-  // aren't being correctly labeled.
-  hws_late_days                             = std::vector<float>(GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount()+
-								 GRADEABLES[GRADEABLE_ENUM::PROJECT].getCount(),0);
 
   zones = std::vector<std::string>(GRADEABLES[GRADEABLE_ENUM::TEST].getCount(),"");
   moss_penalty = 0;
@@ -67,53 +60,45 @@ Student* GetStudent(const std::vector<Student*> &students, const std::string& us
 // =============================================================================================
 // accessor & modifier for grade data
 
-float Student::getGradeableValue(GRADEABLE_ENUM g, int i) const {
+const ItemGrade& Student::getGradeableItemGrade(GRADEABLE_ENUM g, int i) const {
   assert (i >= 0 && i < GRADEABLES[g].getCount());
-  std::map<GRADEABLE_ENUM,std::vector<float> >::const_iterator itr = all_values.find(g);
-  assert (itr != all_values.end());
+  std::map<GRADEABLE_ENUM,std::vector<ItemGrade> >::const_iterator itr = all_item_grades.find(g);
+  assert (itr != all_item_grades.end());
   assert (int(itr->second.size()) > i);
+  
+  /*
 
-  float value = itr->second[i];
+    FIXME:  Where should this logic be re-located?
+
+  float value = itr->second[i].getValue();
   if (g == GRADEABLE_ENUM::HOMEWORK && LATE_DAY_PERCENTAGE_PENALTY > 0) {
     int d = getUsedLateDays(i);
 
     // grab the maximum score for this homework
     assert (PERFECT_STUDENT_POINTER != NULL);
-    std::map<GRADEABLE_ENUM,std::vector<float> >::const_iterator ps_itr = PERFECT_STUDENT_POINTER->all_values.find(g);
-    assert (ps_itr != all_values.end());
-    float ps_value = ps_itr->second[i];
+    std::map<GRADEABLE_ENUM,std::vector<ItemGrade> >::const_iterator ps_itr = PERFECT_STUDENT_POINTER->all_item_grades.find(g);
+    assert (ps_itr != all_item_grades.end());
+    float ps_value = ps_itr->second[i].getValue();
 
     // adjust the homework score
     value = std::max(0.0f, value - d*LATE_DAY_PERCENTAGE_PENALTY*ps_value);
   }
+  */
 
-  return value; 
+  return itr->second[i]; //return value; 
 }
 
 
-void Student::setGradeableValue(GRADEABLE_ENUM g, int i, float value) {
+
+void Student::setGradeableItemGrade(GRADEABLE_ENUM g, int i, float value, 
+                                    int late_days_used, const std::string &note) {
   assert (i >= 0 && i < GRADEABLES[g].getCount());
-  std::map<GRADEABLE_ENUM,std::vector<float> >::iterator itr = all_values.find(g);
-  assert (itr != all_values.end());
+  std::map<GRADEABLE_ENUM,std::vector<ItemGrade> >::iterator itr = all_item_grades.find(g);
+  assert (itr != all_item_grades.end());
   assert (int(itr->second.size()) > i);
-  itr->second[i] = value;
+  itr->second[i] = ItemGrade(value,late_days_used,note);
 }
 
-const std::string& Student::getGradeableNote(GRADEABLE_ENUM g, int i) const {
-  assert (i >= 0 && i < GRADEABLES[g].getCount());
-  std::map<GRADEABLE_ENUM,std::vector<std::string> >::const_iterator itr = all_notes.find(g);
-  assert (itr != all_notes.end());
-  assert (int(itr->second.size()) > i);
-  return itr->second[i];
-}
-
-void Student::setGradeableNote(GRADEABLE_ENUM g, int i, const std::string &note) {
-  assert (i >= 0 && i < GRADEABLES[g].getCount());
-  std::map<GRADEABLE_ENUM,std::vector<std::string> >::iterator itr = all_notes.find(g);
-  assert (itr != all_notes.end());
-  assert (int(itr->second.size()) > i);
-  itr->second[i] = note;
-}
 
 
 // =============================================================================================
@@ -151,7 +136,7 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
     std::map<std::string,float> scores;
 
     for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
-      float my_value = getGradeableValue(g,i);
+      float my_value = getGradeableItemGrade(g,i).getValue();
       std::string my_id = GRADEABLES[g].getID(i);
       //std::cout << "PROJECT THING val=" << my_value << " id=" << my_id << std::endl;
       scores[my_id] = my_value;
@@ -180,7 +165,7 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   // collect the scores in a vector
   std::vector<float> scores;
   for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
-    scores.push_back(getGradeableValue(g,i));
+    scores.push_back(getGradeableItemGrade(g,i).getValue());
   }
 
   // sort the scores (smallest first)
@@ -203,13 +188,13 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
 
 float Student::adjusted_test(int i) const {
   assert (i >= 0 && i <  GRADEABLES[GRADEABLE_ENUM::TEST].getCount());
-  float a = getGradeableValue(GRADEABLE_ENUM::TEST,i);
+  float a = getGradeableItemGrade(GRADEABLE_ENUM::TEST,i).getValue();
   float b;
   if (i+1 < GRADEABLES[GRADEABLE_ENUM::TEST].getCount()) {
-    b = getGradeableValue(GRADEABLE_ENUM::TEST,i+1);
+    b = getGradeableItemGrade(GRADEABLE_ENUM::TEST,i+1).getValue();
   } else {
     assert (GRADEABLES[GRADEABLE_ENUM::EXAM].getCount() == 1);
-    b = getGradeableValue(GRADEABLE_ENUM::EXAM,0);
+    b = getGradeableItemGrade(GRADEABLE_ENUM::EXAM,0).getValue();
     // HACK  need to scale the final exam!
     b *= 0.6667;
   }
@@ -236,9 +221,9 @@ float Student::quiz_normalize_and_drop_two() const {
   std::vector<float> scores;
   for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::QUIZ].getCount(); i++) {
     // the max for this quiz
-    float p = PERFECT_STUDENT_POINTER->getGradeableValue(GRADEABLE_ENUM::QUIZ,i);
+    float p = PERFECT_STUDENT_POINTER->getGradeableItemGrade(GRADEABLE_ENUM::QUIZ,i).getValue();
     // this students score
-    float v = getGradeableValue(GRADEABLE_ENUM::QUIZ,i);
+    float v = getGradeableItemGrade(GRADEABLE_ENUM::QUIZ,i).getValue();
     scores.push_back(v/p);
   }
 
@@ -266,7 +251,7 @@ float Student::lowest_test_counts_half_pct() const {
   // first, collect & sort the scores
   std::vector<float> scores;
   for (int i = 0; i < num_tests; i++) {
-    scores.push_back(getGradeableValue(GRADEABLE_ENUM::TEST,i));
+    scores.push_back(getGradeableItemGrade(GRADEABLE_ENUM::TEST,i).getValue());
   }
   std::sort(scores.begin(),scores.end());
 
@@ -313,19 +298,13 @@ int Student::getAllowedLateDays(int which_lecture) const {
   
 }
 
-
-// get the used late days for a particular homework
-int Student::getUsedLateDays(int which) const {
-  if (getSection() == 0) return 0;
-  assert (which >= 0 && which < GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount());
-  return hws_late_days[which];
-}
-
 // get the total used late days
 int Student::getUsedLateDays() const {
   int answer = 0;
-  for (int i = 0; i < GRADEABLES[GRADEABLE_ENUM::HOMEWORK].getCount(); i++) {
-    answer += getUsedLateDays(i);
+  for (std::map<GRADEABLE_ENUM,std::vector<ItemGrade> >::const_iterator itr = all_item_grades.begin(); itr != all_item_grades.end(); itr++) {
+    for (int i = 0; i < itr->second.size(); i++) {
+      answer += itr->second[i].getLateDaysUsed();
+    }
   }
   return answer;
 }
@@ -396,10 +375,10 @@ void Student::mossify(int hw, float penalty) {
                                  CUTOFFS["B"]-CUTOFFS["C"] +
                                  CUTOFFS["C"]-CUTOFFS["D"]) / 3.0;
 
-  if (!(getGradeableValue(GRADEABLE_ENUM::HOMEWORK,hw-1) > 0)) {
+  if (!(getGradeableItemGrade(GRADEABLE_ENUM::HOMEWORK,hw-1).getValue() > 0)) {
     std::cerr << "WARNING:  the grade for this homework is already 0, moss penalty error?" << std::endl;
   }
-  setGradeableValue(GRADEABLE_ENUM::HOMEWORK,hw-1,0);
+  setGradeableItemGrade(GRADEABLE_ENUM::HOMEWORK,hw-1,0);
 
   // the penalty is positive
   // but it will be multiplied by a negative and added to the total;
