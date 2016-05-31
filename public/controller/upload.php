@@ -23,9 +23,9 @@ if (isset($_POST["svn_checkout"]) && $_POST["svn_checkout"] == "true") {
 }  else {
 
   //Upload the files
-  if (isset($_FILES["file"])) {
+  if (isset($_FILES["files"])) { // if (isset($_FILES["file"])) {
 
-    $uploaded_file = $_FILES["file"];
+    $uploaded_file = $_FILES["files"]; // $uploaded_file = $_FILES["file"];
     $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id,$uploaded_file, false);
 
     if (isset($result["error"])) {

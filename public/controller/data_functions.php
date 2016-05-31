@@ -100,19 +100,23 @@ function display_file_permissions($perms) {
 
 
 
-
-
-
-
-
 // Upload HW Assignment to server and unzip
 function upload_homework($username, $semester, $course, $assignment_id, $homework_file, $svn_checkout) {
+
+  $count = count($homework_file["name"]);
+
+    // check if upload succeeded
     if ($svn_checkout == false) {
-      if (!isset($homework_file["tmp_name"]) || $homework_file["tmp_name"] == "") {
-        $error_text = "The file did not upload to POST[tmp_name].";
-        if (isset($homework_file["error"])) {
-	  $error_text = $error_text." Error code given for upload is ". $homework_file["error"]. " . This is defined at http://php.net/manual/en/features.file-upload.errors.php";
+      for($i = 0; $i < $count; $i++){
+        if (!isset($homework_file["tmp_name"][$i]) || $homework_file["tmp_name"][$i] == ""){
+          $error_text = $homework_file["name"][$i]." did not upload to POST[tmp_name]. ";
+          if (isset($homework_file["error"][$i])) {
+            $error_text = $error_text."Error code given for upload is ". $homework_file["error"][$i]." . ";
+          }
         }
+      }
+      if(isset($error_text)){
+       $error_text = $error_text. "Error(s) defined at http://php.net/manual/en/features.file-upload.errors.php";
         // display_error($error_text);
         return array("error"=>"Upload Failed", "message"=>"Upload Failed: ".$error_text);
       }
@@ -148,17 +152,29 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     }
 
 
+    $filename= [];
+    $extension= [];
+    // $filename="";
+    // $extension="";
 
-    $filename="";
-    $extension="";
-
+    // check uploaded file(s) size
     if ($svn_checkout==false) {
+      $file_size = 0;
+      for($i = 0; $i < $count; $i++){
+        $file_size += $homework_file["size"][$i];
+      }
+      // TODO:
+      // Check file size when files are a mixture of zips and others
+      if ($file_size / 1024 > $max_size) {
+        return array("error"=>"", "message"=>"File(s) uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file(s) was ".$file_size / 1024 ." kb.");
+      }
+      /*
       if ($homework_file["size"] / 1024 > $max_size || !is_valid_zip_size($homework_file["tmp_name"], $max_size)) {
         return array("error"=>"", "message"=>"File uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file was ".$homework_file["size"] / 1024 ." kb.");
       }
-
-      $filename = explode(".", $homework_file["name"]);
-      $extension = end($filename);
+      */
+      $filename[] = explode(".", $homework_file["name"][$i]);
+      $extension[] = end($filename[$i]);
     }
 
 
@@ -169,10 +185,10 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
 
     if (!file_exists($assignment_path)) {
       if (!mkdir($assignment_path))
-	{
-	  display_error("Failed to make folder ".$assignment_path);
-	  return;
-	}
+      {
+        display_error("Failed to make folder ".$assignment_path);
+        return;
+      }
     }
 
 
@@ -202,10 +218,10 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     // If user path doesn't exist, create new one
     if (!file_exists($user_path)) {
       if (!mkdir($user_path))
-	{
-	  display_error("Failed to make folder ".$user_path);
-	  return;
-	}
+      {
+        display_error("Failed to make folder ".$user_path);
+        return;
+      }
     }
 
     //Find the next homework version number
@@ -225,52 +241,54 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
 
 
     if ($svn_checkout == false) {
-      // Unzip files in folder
-      $zip = new ZipArchive;
-      $res = $zip->open($homework_file["tmp_name"]);
-      if ($res === TRUE) {
-        $zip->extractTo($version_path."/");
-        $zip->close();
+      for($i=0; $i < $count; $i++){
+        // Unzip files in folder
+        $zip = new ZipArchive;
+        $res = $zip->open($homework_file["tmp_name"][$i]);
+        if ($res === TRUE) {
+          $zip->extractTo($version_path."/");
+          $zip->close();
 
-        $unlink_return = unlink ($homework_file["tmp_name"]);
-        if (!$unlink_return) {
-          display_error("failed to unlink(delete) uploaded zip file from");
-          return;
-        }
-
-      }
-      else {
-
-        // --------------------------------------------------------------
-
-        /*
-        // NOT SURE HOW THIS WAS WORKING BEFORE
-        // both mv and move_uploaded_file will reset the file group to hwphp
-        // we need it to be the sticky bit group csciXXXX_tas_www
-
-        $result = move_uploaded_file($homework_file["tmp_name"], $version_path."/".$homework_file["name"]);
-        if (!$result) {
-            display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
-            return;
-        }
-        */
-
-        // SHOULD BE EQUIVALENT TO THIS:
-        if (is_uploaded_file($homework_file["tmp_name"])) {
-          $copy_return = copy ($homework_file["tmp_name"], $version_path."/".$homework_file["name"]);
-          if (!$copy_return) {
-            display_error("failed to copy uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
-            return;
-          }
-          $unlink_return = unlink ($homework_file["tmp_name"]);
+          $unlink_return = unlink ($homework_file["tmp_name"][$i]);
+          // TODO: Edit error messages
+          //
           if (!$unlink_return) {
-            display_error("failed to unlink(delete) uploaded file from ".$homework_file["tmp_name"]);
+            display_error("failed to unlink(delete) uploaded zip file from");
             return;
           }
         }
+        else{   // copy single file to folder
+          // --------------------------------------------------------------
 
-        // --------------------------------------------------------------
+          /*
+          // NOT SURE HOW THIS WAS WORKING BEFORE
+          // both mv and move_uploaded_file will reset the file group to hwphp
+          // we need it to be the sticky bit group csciXXXX_tas_www
 
+          $result = move_uploaded_file($homework_file["tmp_name"], $version_path."/".$homework_file["name"]);
+          if (!$result) {
+              display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
+              return;
+          }
+          */
+          // --------------------------------------------------------------
+
+          // SHOULD BE EQUIVALENT TO THIS:
+          if (is_uploaded_file($homework_file["tmp_name"][$i])) {
+            $copy_return = copy ($homework_file["tmp_name"][$i], $version_path."/".$homework_file["name"][$i]);
+            // TODO: Edit error messages
+            //
+            if (!$copy_return) {
+              display_error("failed to copy uploaded file from ".$homework_file["tmp_name"][$i]." to ".$version_path."/".$homework_file["name"][$i]);
+              return;
+            }
+            $unlink_return = unlink ($homework_file["tmp_name"][$i]);
+            if (!$unlink_return) {
+              display_error("failed to unlink(delete) uploaded file from ".$homework_file["tmp_name"][$i]);
+              return;
+            }
+          }
+        }
       }
     }
 

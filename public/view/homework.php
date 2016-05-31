@@ -52,6 +52,9 @@ echo '<link href="diff-viewer/diff.css" rel="stylesheet"></link>';
 
 echo "<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>";
 
+// DRAG AND DROP
+echo "<script src='drag-and-drop/drag_and_drop.js'></script>";
+
 // =================================================================================
 
 $user = $_SESSION["id"];
@@ -173,13 +176,11 @@ if ($status && $status != "") {
   echo '</div>';
 }
 
-
 // UPLOAD NEW VERSION
 
 echo '<div class="outer_box">';
 echo '<h3 class="label">Upload New Version</h3>';
 echo '<p class="sub">'.$upload_message.'</p>';
-
 
 echo '<form ';
 echo ' class="form_submit"';
@@ -204,6 +205,51 @@ if ($svn_checkout == true) {
 
 echo '</form>';
 echo '</div>';
+
+// DRAG AND DROP STARTS
+// ============================================================================
+echo '<div class="outer_box" id="upload">';
+echo '<h3 class="label">Drop Zone ';
+echo '<input type="file" name="files" id="input_file" style="display:none" onchange="addFile()" multiple/>';
+echo '<label id="add" for="input_file" class="label" style="color:#C70039">Or click me!</label>';
+echo '</h3>';
+echo '<p id="disp"><br>Drop files here:<br></p>';
+
+echo '<button ';
+echo 'type="button"';
+echo 'id= "submit" ';
+echo 'class="btn btn-primary" ';
+echo 'onclick="submit('."'?page=upload&semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id."', ";
+echo "'{$_SESSION['csrf']}', ";
+echo 'false';
+echo ' )" active>Submit</button>';
+
+// TO FIX:
+// 1. urrently uploading from dropzone does not check the number of version used. Add the check_for_upload function back.
+// 2. The page will not automatically refresh after new submission. - FIXED
+
+echo '<button ';
+echo 'type="button"';
+echo 'class="btn btn-primary" ';
+echo 'onclick="deleteFiles()" active>Delete All</button>';
+
+echo '</div>';
+
+?>
+
+<script type="text/javascript">;
+
+var dropzone = document.getElementById("upload");
+dropzone.addEventListener("dragenter", draghover, false);
+dropzone.addEventListener("dragover", draghover, false);
+dropzone.addEventListener("dragleave", dragleave, false);
+dropzone.addEventListener("drop", drop, false);
+// document.getElementById("submit").addEventListener("click", submit, false);
+</script>
+
+<?php
+// DRAG AND DROP ENDS
+// ============================================================================
 
 /*
 // helpful for debugging
