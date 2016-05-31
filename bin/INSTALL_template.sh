@@ -414,3 +414,20 @@ rm ${HWCRON_CRONTAB_FILE}
 
 
 echo -e "\nCompleted installation of the homework submission server\n"
+
+
+################################################################################################################
+################################################################################################################
+# INSTALL TEST SUITE & GENERATE & INSTALL THE CRONTAB FILE FOR THE hwcron USER
+
+# one optional argument installs & runs test suite
+if [[ "$#" -eq 1 && $1 == "run_test_suite" ]]; then
+    echo -e "\nInstall Augrading Test Suite\n"
+    python $HSS_REPOSITORY/tests/integrationTests/scripts/install_autograding_tests.py
+    echo -e "\nRun Augrading Test Suite\n"
+    python $HSS_REPOSITORY/tests/integrationTests/scripts/run.py
+    echo -e "\nCompleted Augrading Test Suite\n"
+fi
+
+################################################################################################################
+################################################################################################################
