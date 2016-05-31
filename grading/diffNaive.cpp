@@ -9,8 +9,7 @@
  * indices being compared, so errors in the beginning will propagate and cause
  * the entire output to be wrong. While useful for quick small output, not
  * recommended for large bodies of text unless instructor desires to be strict
- * on formatting of expected output. See link below:
- * https://github.com/JFrei86/HWserver/wiki/Naive-Difference
+ * on formatting of expected output. 
  */
 
 #ifndef __DIFFNAIVE__
@@ -118,7 +117,6 @@ Change diffNoSpace ( const std::string& _student,
  * object that indicates the indicies of characters the student string was off
  * by. The strings are not changed in this comparison. Runs in linear time
  * with respect to the longer string.
- * https://github.com/JFrei86/HWserver/wiki/Naive-Difference#usage
  */
 TestResults* diffLine ( const std::string& _student,
 			const std::string& _instructor ) {
@@ -180,7 +178,6 @@ TestResults* diffLine ( const std::string& _student,
  * that indicates the indicies of characters the student string was off by. The
  * strings are not changed in this comparison. Runs in linear time with respect to
  * the longer string.
- * https://github.com/JFrei86/HWserver/wiki/Naive-Difference#usage
  */
 TestResults* diffLineNoSpace ( const std::string& _student,
 			       const std::string& _instructor ) {

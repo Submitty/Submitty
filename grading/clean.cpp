@@ -7,8 +7,7 @@
  * The clean.h module is used for formatting raw output from students and
  * converting the format for various other modules. This module is a
  * dependency for a majority of the modules in this library and will be
- * required for creating custom grading modules. See the link below:
- * https://github.com/JFrei86/HWserver/wiki/Cleaning-Text
+ * required for creating custom grading modules.
  */
 
 #include "clean.h"

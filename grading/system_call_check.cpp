@@ -26,7 +26,7 @@
 // =====================================================================
 
 
-#define SYSTEM_CALL_CATEGORIES_HEADER "/usr/local/hss/GIT_CHECKOUT_HWserver/grading/system_call_categories.h"
+#define SYSTEM_CALL_CATEGORIES_HEADER "__INSTALL__FILLIN__HSS_INSTALL_DIR__/grading/system_call_categories.h"
 
 // ================================================================================================
 // ================================================================================================
