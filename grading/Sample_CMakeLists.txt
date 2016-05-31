@@ -57,39 +57,36 @@ endif(instructor_cmakelists)
 # source files
 
 # build this as a library, so we only have to compile it once
-add_library(seccomp_functions
+add_library(custom_functions
   ${GRADINGCODE}/grading/seccomp_functions.cpp 
+  ${custom_files}  
 )
 
 add_executable(configure.out
   ${GRADINGCODE}/grading/main_configure.cpp 
-  ${custom_files}  
 )
 
 add_executable(compile.out
   ${GRADINGCODE}/grading/main_compile.cpp 
-  ${custom_files}
 )
 
 add_executable(run.out
   ${GRADINGCODE}/grading/main_runner.cpp 
-  ${custom_files}
 )
 
 add_executable(validate.out
   ${GRADINGCODE}/grading/main_validator.cpp 
-  ${custom_files}
 )
 
 ###################################################################################
 
-target_link_libraries(seccomp_functions seccomp)
-set_property(TARGET seccomp_functions APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+target_link_libraries(custom_functions seccomp)
+set_property(TARGET custom_functions APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
 
-target_link_libraries(configure.out  ${GRADINGLIB}  seccomp  seccomp_functions)
-target_link_libraries(compile.out    ${GRADINGLIB}  seccomp  seccomp_functions)
-target_link_libraries(run.out        ${GRADINGLIB}  seccomp  seccomp_functions)
-target_link_libraries(validate.out   ${GRADINGLIB}  seccomp  seccomp_functions)
+target_link_libraries(configure.out  ${GRADINGLIB}  seccomp  custom_functions)
+target_link_libraries(compile.out    ${GRADINGLIB}  seccomp  custom_functions)
+target_link_libraries(run.out        ${GRADINGLIB}  seccomp  custom_functions)
+target_link_libraries(validate.out   ${GRADINGLIB}  seccomp  custom_functions)
 
 set_property(TARGET configure.out APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
 set_property(TARGET compile.out   APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
