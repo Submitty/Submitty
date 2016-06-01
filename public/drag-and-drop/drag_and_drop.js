@@ -8,26 +8,32 @@ http://www.html5rocks.com/en/tutorials/file/dndfiles/
 var name_array = [];	// stores the name of the files uploaded
 var files_to_upload = new FormData();
 
-function draghover(e){
-	e.preventDefault();
-	e.stopPropagation();
-	document.getElementById("upload").style.opacity = .5;
+function clicked_on_box(e){
+  document.getElementById("input_file").click();
+  e.stopPropagation();
 }
 
-function dragleave(e){
+function draghandle(e){
 	e.preventDefault();
 	e.stopPropagation();
-	document.getElementById("upload").style.opacity = "";
+	document.getElementById("upload").style.opacity = (e.type == "dragenter" || e.type == "dragover") ? .5 : "";
 }
 
 function drop(e){
-	dragleave(e);
+	draghandle(e);
+	var error = "";
 	// copy files dragged
 	for(var i=0; i<e.dataTransfer.files.length; i++){
+		// Uploading folder not allowed
+		if(e.dataTransfer.files[i].type == ""){
+			error = error + e.dataTransfer.files[i].name + "\n";
+			continue;
+		}
 		files_to_upload.append("files[]", e.dataTransfer.files[i]);
 		name_array.push(e.dataTransfer.files[i].name);
 	}
 	display_uploaded_files();
+	if(error) alert("Uploading folders is not allowed!\nFolder(s) not added to submission:\n" + error);
 }
 
 // copy files selected from the dialog box
@@ -49,8 +55,8 @@ function deleteFiles(){
 
 // display file names
 function display_uploaded_files(){
+	document.getElementById("disp").innerHTML = "<br>Drop files here:<br>";
 	if(name_array.length == 0){
-		document.getElementById("disp").innerHTML = "<br>Drop files here:<br>";
 		return;
 	}
 	var fname = "";
@@ -58,7 +64,7 @@ function display_uploaded_files(){
 		fname += name_array[i];
 		fname += "<br>";
 	}
-	document.getElementById("disp").innerHTML = "<br>Drop files here:<br>" + fname;
+	document.getElementById("disp").innerHTML += fname;
 }
 
 function submit(url, csrf_token, svn_checkout){

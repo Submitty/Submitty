@@ -187,7 +187,7 @@ echo ' class="form_submit"';
 echo ' action="?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'"';
 echo ' method="post"';
 echo ' enctype="multipart/form-data"';
-echo ' onsubmit="return check_for_upload('.$assignment_name.', '.$highest_version.', '.$max_submissions.' )"';
+echo ' onsubmit="return check_for_upload('."'".$assignment_name."'".', '.$highest_version.', '.$max_submissions.')"';
 echo '>';
 echo "<input type='hidden' name='csrf_token' value='{$_SESSION['csrf']}' />";
 
@@ -196,9 +196,9 @@ if ($svn_checkout == true) {
     echo '<input type="submit" name="submit" value="GRADE SVN" class="btn btn-primary">';
     echo '<input type="hidden" name="svn_checkout" value="true">';
 } else {
-    // SINGLE FILE OR ZIP FILE SUBMISSION
+    // MULTIPLE FILES OR ZIP FILES SUBMISSION
     echo '<label for="file" class="label">Select File:</label>';
-    echo '<input type="file" name="file" id="file" />';
+    echo '<input type="file" name="files[]" id="file" multiple/>';
     echo '<input type="submit" name="submit" value="Submit File" class="btn btn-primary">';
     echo '<input type="hidden" name="svn_checkout" value="false">';
 }
@@ -208,10 +208,10 @@ echo '</div>';
 
 // DRAG AND DROP STARTS
 // ============================================================================
-echo '<div class="outer_box" id="upload">';
+echo '<div class="outer_box" id="upload" style="cursor: pointer;">';
 echo '<h3 class="label">Drop Zone ';
 echo '<input type="file" name="files" id="input_file" style="display:none" onchange="addFile()" multiple/>';
-echo '<label id="add" for="input_file" class="label" style="color:#C70039">Or click me!</label>';
+// echo '<label id="add" for="input_file" class="label" style="color:#C70039">Or click me!</label>';
 echo '</h3>';
 echo '<p id="disp"><br>Drop files here:<br></p>';
 
@@ -219,19 +219,23 @@ echo '<button ';
 echo 'type="button"';
 echo 'id= "submit" ';
 echo 'class="btn btn-primary" ';
-echo 'onclick="submit('."'?page=upload&semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id."', ";
+/*
+//echo 'onclick="handle_submission('."'".$assignment_name."'".', '.$highest_version.', '.$max_submissions.', ';
+echo 'onclick="handle_submission('."'".check_version($assignment_name, $highest_version, $max_submissions)."', ";
+echo "'', ";  // due date check not implemented yet
+//echo "'".check_due_date()."', ";
+echo "'?page=upload&semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id."', ";
 echo "'{$_SESSION['csrf']}', ";
 echo 'false';
-echo ' )" active>Submit</button>';
-
-// TO FIX:
-// 1. urrently uploading from dropzone does not check the number of version used. Add the check_for_upload function back.
-// 2. The page will not automatically refresh after new submission. - FIXED
+echo ' )" ';
+*/
+echo 'active>Submit</button>';
 
 echo '<button ';
-echo 'type="button"';
+echo 'id="delete"';
 echo 'class="btn btn-primary" ';
-echo 'onclick="deleteFiles()" active>Delete All</button>';
+//echo 'onclick="deleteFiles()" ';
+echo 'active>Delete All</button>';
 
 echo '</div>';
 
@@ -240,11 +244,31 @@ echo '</div>';
 <script type="text/javascript">;
 
 var dropzone = document.getElementById("upload");
-dropzone.addEventListener("dragenter", draghover, false);
-dropzone.addEventListener("dragover", draghover, false);
-dropzone.addEventListener("dragleave", dragleave, false);
+dropzone.addEventListener("click", clicked_on_box, false);
+dropzone.addEventListener("dragenter", draghandle, false);
+dropzone.addEventListener("dragover", draghandle, false);
+dropzone.addEventListener("dragleave", draghandle, false);
 dropzone.addEventListener("drop", drop, false);
-// document.getElementById("submit").addEventListener("click", submit, false);
+
+//document.getElementById("submit").addEventListener("click", function(e){
+$("#submit").click(function(e){
+  handle_submission(<?php
+    echo "'".check_version($assignment_name, $highest_version, $max_submissions)."', ";
+    echo "'', ";  // due date check not implemented yet
+                  //echo "'".check_due_date()."', ";
+    echo "'?page=upload&semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id."', ";
+    echo "'{$_SESSION['csrf']}', ";
+    echo 'false';
+    ?>);
+  e.stopPropagation();
+})
+
+$("#delete").click(function(e){
+//document.getElementById("delete").addEventListener("click", function(e){
+  deleteFiles();
+  e.stopPropagation();
+})
+
 </script>
 
 <?php
@@ -506,15 +530,27 @@ echo '</div>'; // end HWsubmission
 ?>
 
 <script>
-
     function check_for_upload(assignment, versions_used, versions_allowed) {
         versions_used = parseInt(versions_used);
         versions_allowed = parseInt(versions_allowed);
         if (versions_used >= versions_allowed) {
-            var message = confirm("Are you sure you want to upload for " + assignment + " ?  You have already used up all of your free submissions (" + versions_used + " / " + versions_allowed + ").  Uploading may result in loss of points.");
+            var message = confirm("Are you sure you want to upload for " + assignment + "? You have already used up all of your free submissions (" + versions_used + " / " + versions_allowed + "). Uploading may result in loss of points.");
             return message;
         }
         return true;
+    }
+
+    /*
+    function check_due_date(){
+
+    }
+    */
+    function handle_submission(version_check, due_date_check, url, csrf_token, svn_checkout){
+      // TODO: Add checks for due date
+      if(!version_check || confirm(version_check)) {
+      //if((!version_check || confirm(version_check)) && (!due_date_check || confirm(due_date_check))){
+        submit(url, csrf_token, svn_checkout);
+      }
     }
 
     // Go through diff queue and run viewer

@@ -104,7 +104,6 @@ function display_file_permissions($perms) {
 function upload_homework($username, $semester, $course, $assignment_id, $homework_file, $svn_checkout) {
 
   $count = count($homework_file["name"]);
-
     // check if upload succeeded
     if ($svn_checkout == false) {
       for($i = 0; $i < $count; $i++){
@@ -1176,4 +1175,24 @@ function display_error($error) {
 function display_note($note) {
     ?><script>alert("Note: <?php echo $note;?>");</script><?php
 }
+
+function check_version($assignment_name, $versions_used, $versions_allowed){
+  $message = "";
+  if((int)$versions_used > (int)$versions_allowed){
+    $message = "Are you sure you want to upload for ".$assignment_name."? ";
+    $message = $message."You have already used up all of your free submissions (";
+    $message = $message.$versions_used." / ".$versions_allowed."). Uploading may result in loss of points.";
+    /*?><script>confirm("<?php echo $message;?>");</script><?php*/
+  }
+  return $message;
+}
+
+/*
+function check_due_date(){
+  if(can_edit_assignment())
+  // $due_date = get_due_date();
+  // $current_date = new DateTime();
+  // date("Y-m-d H:i:s")
+}
+*/
 ?>
