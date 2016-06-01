@@ -5,6 +5,7 @@ from lib import testcase, setup
 # This function is guaranteed to be run before all other test functions.
 @setup
 def build_validator(test): # Function names are arbitary
+    #test.use_cmake(); # Compiles grading code, including the header assignment_config/config.h
     test.compile_grading(); # Compiles grading code, including the header assignment_config/config.h
     test.link_validator() # Links the executable validator.out
     test.link_runner()

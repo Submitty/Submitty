@@ -3,8 +3,8 @@
 
 #define ASSIGNMENT_MESSAGE "Test of LineHighlight"
 
-#define TOTAL_POINTS 25
-#define AUTO_POINTS 25
+#define TOTAL_POINTS 40
+#define AUTO_POINTS 40
 #define TA_POINTS 0
 #define EXTRA_CREDIT_POINTS 0
 

@@ -12,21 +12,15 @@ import lib
 # are stored outside of the repository), as well as the "lib"
 # module residing within the repository in the scripts directory.
 
-base_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+tests_dir = "__INSTALL__FILLIN__HSS_REPOSITORY__/tests/integrationTests/tests"
+grading_source_dir = "__INSTALL__FILLIN__HSS_INSTALL_DIR__/src/grading"
+autograde_install_dir = "__INSTALL__FILLIN__HSS_DATA_DIR__/autograde_tests/"
 
-if os.environ.get("TEST_IN_PLACE") is None:
-    # Use an absolute path for the installed test packages
-    sys.path.insert(0, "/var/local/hss/autograde_tests")
-else:
-    run_dir = os.path.join(base_path, "..")
-    sys.path.insert(0, run_dir)
-    subprocess.call(["rsync"] +
-            glob.glob(os.path.join(base_path, "..", "..", "..", "grading", "*")) +
-            [os.path.join(run_dir, "src"), "-r", "--delete"])
+sys.path.insert(0, autograde_install_dir)
 
 # The directory containing lib.py should be the same as the one
 # that contains this file.
-sys.path.insert(0, base_path)
+sys.path.insert(0, "__INSTALL__FILLIN__HSS_INSTALL_DIR__/bin")
 
 # Load all test packages, which will populate the dictionary in
 # the "lib" module.

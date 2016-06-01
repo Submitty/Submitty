@@ -104,6 +104,8 @@ def run_all():
     if not success:
         sys.exit(1)
 
+
+
 # Helper class used to remove the burden of paths from the testcase author.
 # The path (in /var/local) of the testcase is provided to the constructor,
 # and is subsequently used in all methods for compilation, linkage, etc.
@@ -123,6 +125,17 @@ class TestcaseWrapper:
     # directory when compiling source files in bulk in this manner. The solution
     # is likely to run the compiler with a different working directory alongside
     # using relative paths.
+
+    '''
+    def use_cmake(self):
+        print "in use cmake"
+
+        subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "build2")])
+        subprocess.call(["cd", os.path.join(self.testcase_path, "build2")])
+
+    '''
+
+
     def compile_grading(self):
         subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "build")])
         subprocess.call(["clang++",
@@ -164,7 +177,7 @@ class TestcaseWrapper:
     def run_validator(self):
         with open("/dev/null") as devnull:
             return_code = subprocess.call([os.path.join(self.testcase_path, "build", "validator.out"), "testassignment", "testuser", "1", "0"], \
-                    cwd=os.path.join(self.testcase_path, "data"), stdout=devnull, stderr=devnull)
+                    cwd=os.path.join(self.testcase_path, "data"), stdout=1, stderr=2)
             if return_code != 0:
                 raise RuntimeError("Validator exited with exit code " + str(return_code))
 
