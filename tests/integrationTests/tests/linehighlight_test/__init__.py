@@ -1,6 +1,7 @@
 # Necessary imports. Provides library functions to ease writing tests.
-from lib import testcase, setup
+from lib import testcase
 
+'''
 # Within each test, there should be a single function decorated with @setup.
 # This function is guaranteed to be run before all other test functions.
 @setup
@@ -9,6 +10,7 @@ def build_validator(test): # Function names are arbitary
     test.compile_grading(); # Compiles grading code, including the header assignment_config/config.h
     test.link_validator() # Links the executable validator.out
     test.link_runner()
+'''
 
 @testcase
 def correct_json_output(test):

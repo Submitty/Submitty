@@ -1,9 +1,11 @@
-from lib import testcase, setup
+from lib import testcase
 
+'''
 @setup
 def build_validator(test):
     test.compile_grading();
     test.link_validator()
+'''
 
 @testcase
 def correct_json_output(test):

@@ -47,7 +47,9 @@ def run_test(name):
         print "--- BEGIN TEST MODULE " + name.upper() + " ---"
     cont = True
     try:
-        to_run[name].setup()
+        pass
+        #to_run[name].setup()
+        #to_run[name].build()
     except:
         cont = False
     if cont:
@@ -81,9 +83,12 @@ def run_all():
             print "--- BEGIN TEST MODULE " + key.upper() + " ---"
         cont = True
         try:
-            val.setup()
-        except e:
-            print "Setup failed with exception: " + e
+            pass
+            #val.setup()
+            #val.build()
+        except: # Exception as e:
+            #print "Setup failed with exception: " + e
+            print "hit an exception"
             cont = False
         if cont:
             total = len(val.testcases)
@@ -130,7 +135,7 @@ class TestcaseWrapper:
     # using relative paths.
 
 
-    def use_cmake(self):
+    def build(self):
         print "in cmake next gen"
         previousDir = os.getcwd()
         print "previous directory: "+previousDir 
@@ -175,6 +180,7 @@ class TestcaseWrapper:
         if return_code == 1:
             raise RuntimeError("Difference on file \"" + filename + "\" exited with exit code " + str(return_code))
 
+'''
 def setup(func):
     mod = inspect.getmodule(inspect.stack()[1][0])
     path = os.path.dirname(mod.__file__)
@@ -186,6 +192,7 @@ def setup(func):
     global to_run
     to_run[modname].setup = wrapper
     return wrapper
+'''
 
 # Decorator function using some inspection trickery to determine paths
 def testcase(func):
