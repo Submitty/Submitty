@@ -3,6 +3,10 @@ import os
 import subprocess
 import glob
 import inspect
+import traceback
+import json
+
+grading_source_dir = "__INSTALL__FILLIN__HSS_INSTALL_DIR__/src/grading"
 
 from collections import defaultdict
 
@@ -44,7 +48,9 @@ def run_test(name):
         print "--- BEGIN TEST MODULE " + name.upper() + " ---"
     cont = True
     try:
-        to_run[name].setup()
+        pass
+        #to_run[name].setup()
+        #to_run[name].build()
     except:
         cont = False
     if cont:
@@ -78,9 +84,12 @@ def run_all():
             print "--- BEGIN TEST MODULE " + key.upper() + " ---"
         cont = True
         try:
-            val.setup()
-        except e:
-            print "Setup failed with exception: " + e
+            pass
+            #val.setup()
+            #val.build()
+        except: # Exception as e:
+            #print "Setup failed with exception: " + e
+            print "hit an exception"
             cont = False
         if cont:
             total = len(val.testcases)
@@ -126,79 +135,141 @@ class TestcaseWrapper:
     # is likely to run the compiler with a different working directory alongside
     # using relative paths.
 
-    '''
-    def use_cmake(self):
-        print "in use cmake"
 
-        subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "build2")])
-        subprocess.call(["cd", os.path.join(self.testcase_path, "build2")])
-
-    '''
-
-
-    def compile_grading(self):
+    def build(self):
+        print "in build"
+        # save, so we can return to the current directory
+        previousDir = os.getcwd()
+        # the log directory will contain various log files
+        subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "log")])
+        # the build directory will contain the intermediate cmake files
         subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "build")])
-        subprocess.call(["clang++",
-            "-c", "-std=c++11",
-            "-I" + os.path.join(self.testcase_path, "assignment_config")] +
-            glob.glob(os.path.join(self.testcase_path, "..", "..", "src", "*.cpp")))
-        subprocess.call(["mv"] +
-                glob.glob(os.path.join(os.getcwd(), "*.o")) +
-                [os.path.join(self.testcase_path, "build")])
+        # the bin directory will contain the autograding executables
+        subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "bin")])
+        os.chdir(os.path.join(self.testcase_path, "build"))
+        # copy the cmake file to the build directory
+        subprocess.call(["cp", grading_source_dir+"/Sample_CMakeLists.txt", "CMakeLists.txt"])
+        f1 = open (os.path.join(self.testcase_path, "log","cmake_output.txt"),"w")
+        #f1 = open ("cmake_output.txt","w")
+        return_code = subprocess.call(["cmake", "-DASSIGNMENT_INSTALLATION=OFF", "."],stdout=f1,stderr=f1)
+        if return_code != 0:
+            raise RuntimeError("Build (cmake) exited with exit code" + str(return_code))
+        print "cmake complete"
+        f2 = open (os.path.join(self.testcase_path, "log","make_output.txt"),"w")
+        #f2 = open ("make_output.txt","w")
+        return_code = subprocess.call(["make"],stdout=f2,stderr=f2)
+        if return_code != 0:
+            raise RuntimeError("Build (make) exited with exit code" + str(return_code))
+        os.chdir(previousDir)
+        print "make complete"
 
-    # Link a given executable provided a list of libraries to link against and
-    # a file containing the main function. It is assumed that all source files
-    # prefixed with "main_" define a main function.
-    def link(self, target, libraries=[], objects=[]):
-        subprocess.call(["clang++", "-std=c++11"] +
-                ["-l" + lib for lib in libraries] +
-                ["-o", os.path.join(self.testcase_path, "build", target)] +
-                [os.path.join(self.testcase_path, "build", o) for o in objects] +
-                [o for o in glob.glob(os.path.join(self.testcase_path, "build", "*.o")) if not "main" in o and not "system_call_check" in o])
 
-    # Helper functions to link the four current executables.
-    def link_compile(self):
-        self.link("compile.out", libraries=["seccomp"], objects=["main_compile.o"])
 
-    def link_configure(self):
-        self.link("configure.out", libraries=["seccomp"], objects=["main_configure.o"])
+    # Run compile.out using some sane arguments.
+    def run_compile(self):
+        print "run compile.out"
+        f = open (os.path.join(self.testcase_path, "log","compile_output.txt"),"w")
+        return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "compile.out"), 
+                                      "testassignment", "testuser", "1", "0"], \
+                                      cwd=os.path.join(self.testcase_path, "data"), stdout=f, stderr=f)
+        if return_code != 0:
+            raise RuntimeError("Compile exited with exit code" + str(return_code))
+        print "finished with compile.out"
 
-    def link_runner(self):
-        self.link("runner.out", libraries=["seccomp"], objects=["main_runner.o"])
 
-    def link_validator(self):
-        self.link("validator.out", libraries=["seccomp"], objects=["main_validator.o"])
+    # Run the run.out using some sane arguments.
+    def run_run(self):
+        print "run run.out"
+        f = open (os.path.join(self.testcase_path, "log","run_output.txt"),"w")
+        return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "run.out"), 
+                                      "testassignment", "testuser", "1", "0"], \
+                                      cwd=os.path.join(self.testcase_path, "data"), stdout=f, stderr=f)
+        if return_code != 0:
+            raise RuntimeError("run.out exited with exit code" + str(return_code))
+        print "finished with run.out"
+
 
     # Run the validator using some sane arguments. Likely wants to be made much more
     # customizable (different submission numbers, multiple users, etc.)
     # TODO: Read "main" for other executables, determine what files they expect and
-    # the locations in which they expect them given different inputs. Define functions
-    # for compiler, configure, and runner.
+    # the locations in which they expect them given different inputs. 
     def run_validator(self):
-        with open("/dev/null") as devnull:
-            return_code = subprocess.call([os.path.join(self.testcase_path, "build", "validator.out"), "testassignment", "testuser", "1", "0"], \
-                    cwd=os.path.join(self.testcase_path, "data"), stdout=1, stderr=2)
-            if return_code != 0:
-                raise RuntimeError("Validator exited with exit code " + str(return_code))
-
-    # Run the runner using some sane arguments.
-    def run_runner(self):
-        with open("/dev/null") as devnull:
-            return_code = subprocess.call([os.path.join(self.testcase_path, "build", "runner.out"), "testassignment", "testuser", "1", "0"], \
-                    cwd=os.path.join(self.testcase_path, "data"), stdout=1, stderr=2)
-            if return_code != 0:
-                raise RuntimeError("Runner exited with exit code" + str(return_code))
-
+        print "run validate.out"
+        f = open (os.path.join(self.testcase_path, "log","validate_output.txt"),"w")
+        return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "validate.out"), 
+                                      "testassignment", "testuser", "1", "0"], 
+                                      cwd=os.path.join(self.testcase_path, "data"), stdout=f, stderr=f)
+        if return_code != 0:
+            raise RuntimeError("Validator exited with exit code " + str(return_code))
+        print "finished with validate.out"
+        
+        
     # Run the UNIX diff command given a filename. The files are compared between the
     # data folder and the validation folder within the test package. For example,
     # running test.diff("foo.txt") within the test package "test_foo", the files
     # /var/local/autograde_tests/tests/test_foo/data/foo.txt and
     # /var/local/autograde_tests/tests/test_foo/validation/foo.txt will be compared.
-    def diff(self, filename):
-        return_code = subprocess.call(["diff", "-b", os.path.join(self.testcase_path, "data", filename), os.path.join(self.testcase_path, "validation", filename)])
-        if return_code == 1:
-            raise RuntimeError("Difference on file \"" + filename + "\" exited with exit code " + str(return_code))
+    def diff(self, f1, f2=""):
+        # if only 1 filename provided...
+        if f2 == "": 
+            f2 = f1
+        # if no directory provided...
+        if os.path.dirname(f1) == "":
+            f1 = "data/"+f1
+        if os.path.dirname(f2) == "":
+            f2 = "validation/"+f2
 
+        print "run a diff between " + f1 + " and " + f2
+        filename1 = os.path.join(self.testcase_path, f1)
+        filename2 = os.path.join(self.testcase_path, f2)
+
+        return_code = subprocess.call(["diff", "-b", filename1, filename2])
+        if return_code == 1:
+            raise RuntimeError("Difference between " + filename1 + " and " + filename2 + " exited with exit code " + str(return_code))
+
+
+    # Helper function for json_diff.  Sorts each nested list.  Allows comparison.
+    # Credit: Zero Piraeus. 
+    # http://stackoverflow.com/questions/25851183/how-to-compare-two-json-objects-with-the-same-elements-in-a-different-order-equa
+    def json_ordered(self,obj):
+        if isinstance(obj, dict):
+            return sorted((k, self.json_ordered(v)) for k, v in obj.items())
+        if isinstance(obj, list):
+            return sorted(self.json_ordered(x) for x in obj)
+        else:
+            return obj
+            
+    # Compares two json files allowing differences in file whitespace
+    # (indentation, newlines, etc) and also alternate ordering of data
+    # inside dictionary/key-value pairs
+    def json_diff(self, f1, f2=""):
+        # if only 1 filename provided...
+        if f2 == "": 
+            f2 = f1
+        # if no directory provided...
+        if os.path.dirname(f1) == "":
+            f1 = "data/"+f1
+        if os.path.dirname(f2) == "":
+            f2 = "validation/"+f2
+            
+        print "run a json diff between " + f1 + " and " + f2
+        filename1 = os.path.join(self.testcase_path, f1)
+        filename2 = os.path.join(self.testcase_path, f2)
+        contents1 = json.loads(open(filename1).read())
+        contents2 = json.loads(open(filename2).read())
+        if self.json_ordered(contents1) != self.json_ordered(contents2):
+            raise RuntimeError("JSON files " + filename1 + " and " + filename2 + " are different")
+
+    def empty_file(self, f1):
+        # if no directory provided...
+        if os.path.dirname(f1) == "":
+            f1 = "data/"+f1        
+        filename1 = os.path.join(self.testcase_path, f1)
+        if os.stat(filename1).st_size != 0:
+            raise RuntimeError("ERROR: File "+f1+" should be empty")
+
+
+'''
 def setup(func):
     mod = inspect.getmodule(inspect.stack()[1][0])
     path = os.path.dirname(mod.__file__)
@@ -210,6 +281,7 @@ def setup(func):
     global to_run
     to_run[modname].setup = wrapper
     return wrapper
+'''
 
 # Decorator function using some inspection trickery to determine paths
 def testcase(func):

@@ -126,15 +126,16 @@ void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int stu
   if (!only_expected) {
     json i;
     i["line_number"] = student_line;
-    j["student"]["line"] = {{ i }};
+    j["student"]["line"] = { i };
   }
 
+  std::cout << "LINE HIGHLIGHT " << expected_line << std::endl;
   j["instructor"]["start"] = expected_line;
 
   if (!only_student) {
     json i;
     i["line_number"] = expected_line;
-    j["instructor"]["line"] = {{ i }};
+    j["instructor"]["line"] = { i };
   }
   swap_difference << j.dump(4) << std::endl;
   first_diff = false;
@@ -192,7 +193,9 @@ TestResults* diffLineSwapOk (const std::string & student_file, const std::string
       incorrect++;
     }
     if (!match || duplicate) {
+      std::cout << "!match or duplicate" <<std::endl;
       LineHighlight(swap_difference,first_diff,i,expected.size()+10,true,false);
+      //LineHighlight(swap_difference,first_diff,i,0,true,false);
     }
   }
 
@@ -200,7 +203,9 @@ TestResults* diffLineSwapOk (const std::string & student_file, const std::string
   for (unsigned int j = 0; j < expected.size(); j++) {
     if (matches[j] == 0) {
       missing++;
+      std::cout << "missing" <<std::endl;
       LineHighlight(swap_difference,first_diff,student.size()+10,j,false,true);
+      //LineHighlight(swap_difference,first_diff,0,j,false,true);
     }
     if (matches[j] > 1) duplicates+= (matches[j]-1);
   }
