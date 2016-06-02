@@ -208,7 +208,7 @@ find $HSS_INSTALL_DIR/website/public/custom_resources -exec chmod 775 {} \;
 
 ########################################################################################################################
 ########################################################################################################################
-# COPY THE CORE GRADING CODE (C++ files)
+# COPY THE CORE GRADING CODE (C++ files) & BUILD THE SUBMITTY GRADING LIBRARY
 
 echo -e "Copy the grading code"
 
@@ -222,9 +222,19 @@ find $HSS_INSTALL_DIR/src -type d -exec chmod 555 {} \;
 find $HSS_INSTALL_DIR/src -type f -exec chmod 444 {} \;
 
 
+
 #replace necessary variables
 replace_fillin_variables $HSS_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
+replace_fillin_variables $HSS_INSTALL_DIR/src/grading/CMakeLists.txt
 replace_fillin_variables $HSS_INSTALL_DIR/src/grading/system_call_check.cpp
+
+
+# building the autograding library 
+mkdir -p $HSS_INSTALL_DIR/src/grading/lib
+pushd $HSS_INSTALL_DIR/src/grading/lib
+cmake ..
+make
+popd
 
 
 ########################################################################################################################

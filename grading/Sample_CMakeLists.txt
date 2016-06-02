@@ -3,14 +3,13 @@ project (sample_assignment)
 
 ###################################################################################
 
-
 # these variables will be replaced by INSTALL.sh
 set (HSS_INSTALL_DIR __INSTALL__FILLIN__HSS_INSTALL_DIR__)
 set (HSS_DATA_DIR __INSTALL__FILLIN__HSS_DATA_DIR__)
 
-
 # assuming the core files for config, compilation, running, & grading are here:
-set (GRADINGCODE ${HSS_INSTALL_DIR}/src)
+set (GRADINGCODE  ${HSS_INSTALL_DIR}/src)
+set (GRADINGLIB   ${HSS_INSTALL_DIR}/src/grading/lib/libsubmitty_grading.a)
 
 ###################################################################################
 
@@ -57,66 +56,42 @@ endif(instructor_cmakelists)
 ###################################################################################
 # source files
 
-set (common_files
-  ${GRADINGCODE}/grading/TestCase.cpp 
-  ${GRADINGCODE}/grading/JUnitGrader.cpp
-  ${GRADINGCODE}/grading/myersDiff.cpp 
-  ${GRADINGCODE}/grading/tokens.cpp 
-  ${GRADINGCODE}/grading/tokenSearch.cpp 
-  ${GRADINGCODE}/grading/diffNaive.cpp 
-  ${GRADINGCODE}/grading/clean.cpp 
-  ${GRADINGCODE}/grading/difference.cpp
+# build this as a library, so we only have to compile it once
+add_library(custom_functions
+  ${GRADINGCODE}/grading/seccomp_functions.cpp 
+  ${custom_files}  
 )
 
 add_executable(configure.out
-  ${common_files}
-  # FIXME: I don't think custom files needs to/should be here
-  ${custom_files}
   ${GRADINGCODE}/grading/main_configure.cpp 
 )
 
 add_executable(compile.out
-  ${common_files}
-  # FIXME: I don't think custom files needs to/should be here
-  ${custom_files}
   ${GRADINGCODE}/grading/main_compile.cpp 
-  ${GRADINGCODE}/grading/seccomp_functions.cpp 
-  ${GRADINGCODE}/grading/execute.cpp 
-  ${GRADINGCODE}/grading/execute_limits.cpp 
-  ${GRADINGCODE}/grading/error_message.cpp
 )
 
 add_executable(run.out
-  ${common_files}
-  # FIXME: I don't think custom files needs to/should be here
-  ${custom_files}
   ${GRADINGCODE}/grading/main_runner.cpp 
-  ${GRADINGCODE}/grading/seccomp_functions.cpp 
-  ${GRADINGCODE}/grading/execute.cpp
-  ${GRADINGCODE}/grading/execute_limits.cpp
-  ${GRADINGCODE}/grading/error_message.cpp
 )
 
 add_executable(validate.out
-  ${common_files}
-  ${custom_files}
   ${GRADINGCODE}/grading/main_validator.cpp 
-  ${GRADINGCODE}/grading/seccomp_functions.cpp 
-  ${GRADINGCODE}/grading/execute.cpp 
-  ${GRADINGCODE}/grading/execute_limits.cpp 
-  ${GRADINGCODE}/grading/error_message.cpp
 )
 
 ###################################################################################
 
-target_link_libraries(compile.out seccomp)
-target_link_libraries(run.out seccomp)
-target_link_libraries(validate.out seccomp)
+target_link_libraries(custom_functions seccomp)
+set_property(TARGET custom_functions APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
+
+target_link_libraries(configure.out  ${GRADINGLIB}  seccomp  custom_functions)
+target_link_libraries(compile.out    ${GRADINGLIB}  seccomp  custom_functions)
+target_link_libraries(run.out        ${GRADINGLIB}  seccomp  custom_functions)
+target_link_libraries(validate.out   ${GRADINGLIB}  seccomp  custom_functions)
 
 set_property(TARGET configure.out APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
 set_property(TARGET compile.out   APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
 set_property(TARGET run.out       APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
-set_property(TARGET validate.out  APPEND_STRING PROPERTY COMPILE_FLAGS "-g  -std=c++11")
+set_property(TARGET validate.out  APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=c++11")
 
 include_directories(${MY_DIR})
 include_directories(${GRADINGCODE})
