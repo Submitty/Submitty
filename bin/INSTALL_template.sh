@@ -9,15 +9,18 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
-
-echo -e "NUM ARGS $#"
-
 # check optional argument
-if [[ "$#" -ge 1 && $1 != "run_test_suite" ]]; then
-    echo -e "ERROR:  Did you mean to run \"INSTALL.sh run_test_suite\"?"
+if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" ]]; then
+    echo -e "Usage:"
+    echo -e "   ./INSTALL.sh clean"
+    echo -e "   ./INSTALL.sh clean test"
+    echo -e "   ./INSTALL.sh clear test  <test_case_1>"
+    echo -e "   ./INSTALL.sh clear test  <test_case_1> <test_case_2> <test_case_3>"
+    echo -e "   ./INSTALL.sh test"
+    echo -e "   ./INSTALL.sh test  <test_case_1>"
+    echo -e "   ./INSTALL.sh test  <test_case_1> <test_case_2> <test_case_3>"
     exit
 fi
-
 
 echo -e "\nBeginning installation of the homework submission server\n"
 
@@ -115,7 +118,10 @@ mkdir -p $HSS_INSTALL_DIR
 
 
 # option for clean install (delete all existing directories/files
-if [[ "$#" -eq 1 && $1 == "clean" ]] ; then
+if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
+
+    # pop this argument from the list of arguments...
+    shift
 
     echo -e "\nDeleting directories for a clean installation\n"
 
@@ -123,6 +129,7 @@ if [[ "$#" -eq 1 && $1 == "clean" ]] ; then
     rm -r $HSS_INSTALL_DIR/hwgrading_website
     rm -r $HSS_INSTALL_DIR/src
     rm -r $HSS_INSTALL_DIR/bin
+    rm -r $HSS_INSTALL_DIR/test_suite
 fi
 
 
@@ -442,22 +449,19 @@ echo -e "\nCompleted installation of the homework submission server\n"
 
 
 # one optional argument installs & runs test suite
-if [[ "$#" -ge 1 && $1 == "run_test_suite" ]]; then
+if [[ "$#" -ge 1 && $1 == "test" ]]; then
 
+    # copy the directory tree and replace variables
     echo -e "Install Augrading Test Suite..."
-
-    rsync -rz  $HSS_REPOSITORY/tests/integrationTests/scripts/  $HSS_INSTALL_DIR/bin/
-    replace_fillin_variables $HSS_INSTALL_DIR/bin/install_autograding_tests.py
-    replace_fillin_variables $HSS_INSTALL_DIR/bin/run.py
-
-    python $HSS_INSTALL_DIR/bin/install_autograding_tests.py
+    rsync -rz  $HSS_REPOSITORY/tests/  $HSS_INSTALL_DIR/test_suite
+    replace_fillin_variables $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/run.py
+    replace_fillin_variables $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/lib.py
 
     echo -e "\nRun Augrading Test Suite...\n"
-
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
-    python $HSS_INSTALL_DIR/bin/run.py "$@" 
+    python $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/run.py  "$@" 
 
     echo -e "\nCompleted Augrading Test Suite\n"
 fi

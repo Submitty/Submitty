@@ -3,6 +3,9 @@ import os
 import subprocess
 import glob
 import inspect
+import traceback
+
+grading_source_dir = "__INSTALL__FILLIN__HSS_INSTALL_DIR__/src/grading"
 
 from collections import defaultdict
 
@@ -126,48 +129,21 @@ class TestcaseWrapper:
     # is likely to run the compiler with a different working directory alongside
     # using relative paths.
 
-    '''
+
     def use_cmake(self):
-        print "in use cmake"
+        print "in cmake next gen"
+        previousDir = os.getcwd()
+        print "previous directory: "+previousDir 
+        #subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "build")])
+        subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "bin")])
+        os.chdir(os.path.join(self.testcase_path, "assignment_config"))
+        curDir = os.getcwd()
+        subprocess.call(["cp", "-rv", grading_source_dir+"/Sample_CMakeLists.txt", "CMakeLists.txt"])
+        subprocess.call(["cmake", "-DASSIGNMENT_INSTALLATION=OFF", "."])
+        subprocess.call(["make"])
+        os.chdir(previousDir)
+        print "done with cmake"
 
-        subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "build2")])
-        subprocess.call(["cd", os.path.join(self.testcase_path, "build2")])
-
-    '''
-
-
-    def compile_grading(self):
-        subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "build")])
-        subprocess.call(["clang++",
-            "-c", "-std=c++11",
-            "-I" + os.path.join(self.testcase_path, "assignment_config")] +
-            glob.glob(os.path.join(self.testcase_path, "..", "..", "src", "*.cpp")))
-        subprocess.call(["mv"] +
-                glob.glob(os.path.join(os.getcwd(), "*.o")) +
-                [os.path.join(self.testcase_path, "build")])
-
-    # Link a given executable provided a list of libraries to link against and
-    # a file containing the main function. It is assumed that all source files
-    # prefixed with "main_" define a main function.
-    def link(self, target, libraries=[], objects=[]):
-        subprocess.call(["clang++", "-std=c++11"] +
-                ["-l" + lib for lib in libraries] +
-                ["-o", os.path.join(self.testcase_path, "build", target)] +
-                [os.path.join(self.testcase_path, "build", o) for o in objects] +
-                [o for o in glob.glob(os.path.join(self.testcase_path, "build", "*.o")) if not "main" in o and not "system_call_check" in o])
-
-    # Helper functions to link the four current executables.
-    def link_compile(self):
-        self.link("compile.out", libraries=["seccomp"], objects=["main_compile.o"])
-
-    def link_configure(self):
-        self.link("configure.out", libraries=["seccomp"], objects=["main_configure.o"])
-
-    def link_runner(self):
-        self.link("runner.out", libraries=["seccomp"], objects=["main_runner.o"])
-
-    def link_validator(self):
-        self.link("validator.out", libraries=["seccomp"], objects=["main_validator.o"])
 
     # Run the validator using some sane arguments. Likely wants to be made much more
     # customizable (different submission numbers, multiple users, etc.)
@@ -176,7 +152,7 @@ class TestcaseWrapper:
     # for compiler, configure, and runner.
     def run_validator(self):
         with open("/dev/null") as devnull:
-            return_code = subprocess.call([os.path.join(self.testcase_path, "build", "validator.out"), "testassignment", "testuser", "1", "0"], \
+            return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "validate.out"), "testassignment", "testuser", "1", "0"], \
                     cwd=os.path.join(self.testcase_path, "data"), stdout=1, stderr=2)
             if return_code != 0:
                 raise RuntimeError("Validator exited with exit code " + str(return_code))
@@ -184,7 +160,7 @@ class TestcaseWrapper:
     # Run the runner using some sane arguments.
     def run_runner(self):
         with open("/dev/null") as devnull:
-            return_code = subprocess.call([os.path.join(self.testcase_path, "build", "runner.out"), "testassignment", "testuser", "1", "0"], \
+            return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "runner.out"), "testassignment", "testuser", "1", "0"], \
                     cwd=os.path.join(self.testcase_path, "data"), stdout=1, stderr=2)
             if return_code != 0:
                 raise RuntimeError("Runner exited with exit code" + str(return_code))
