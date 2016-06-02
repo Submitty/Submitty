@@ -428,28 +428,28 @@ echo -e "\nCompleted installation of the homework submission server\n"
 
 ################################################################################################################
 ################################################################################################################
-# INSTALL TEST SUITE & GENERATE & INSTALL THE CRONTAB FILE FOR THE hwcron USER
+# INSTALL TEST SUITE
 
 
 # one optional argument installs & runs test suite
 if [[ "$#" -ge 1 && $1 == "run_test_suite" ]]; then
 
-    echo -e "Install Augrading Test Suite..."
+    echo -e "Install Autograding Test Suite..."
 
     rsync -rz  $HSS_REPOSITORY/tests/integrationTests/scripts/  $HSS_INSTALL_DIR/bin/
-    replace_fillin_variables $HSS_INSTALL_DIR/bin/install_autograding_tests.py
-    replace_fillin_variables $HSS_INSTALL_DIR/bin/run.py
+#    replace_fillin_variables $HSS_INSTALL_DIR/bin/install_autograding_tests.py
+#    replace_fillin_variables $HSS_INSTALL_DIR/bin/run.py
 
-    python $HSS_INSTALL_DIR/bin/install_autograding_tests.py
+#    python $HSS_INSTALL_DIR/bin/install_autograding_tests.py
 
-    echo -e "\nRun Augrading Test Suite...\n"
+    echo -e "\nRun Autograding Test Suite...\n"
 
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
     python $HSS_INSTALL_DIR/bin/run.py "$@" 
 
-    echo -e "\nCompleted Augrading Test Suite\n"
+    echo -e "\nCompleted Autograding Test Suite\n"
 fi
 
 ################################################################################################################
