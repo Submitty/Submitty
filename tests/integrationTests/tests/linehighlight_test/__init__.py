@@ -11,7 +11,8 @@ def check_output(test):
     test.diff("test03_output_extra.txt","extra_lines.txt")
     test.diff("test04_output_missing.txt","missing_lines.txt")
 
-    #def check_grade(test):
+@testcase
+def check_grade(test):
     test.run_validator() 
     test.diff("submission.json")
 
