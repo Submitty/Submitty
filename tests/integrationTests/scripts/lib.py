@@ -136,50 +136,79 @@ class TestcaseWrapper:
 
 
     def build(self):
-        print "in cmake next gen"
+        print "in build"
+        # save, so we can return to the current directory
         previousDir = os.getcwd()
-        print "previous directory: "+previousDir 
-        #subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "build")])
+        # the build directory will contain the intermediate cmake files
+        subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "build")])
+        # the bin directory will contain the autograding executables
         subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "bin")])
-        os.chdir(os.path.join(self.testcase_path, "assignment_config"))
-        curDir = os.getcwd()
-        subprocess.call(["cp", "-rv", grading_source_dir+"/Sample_CMakeLists.txt", "CMakeLists.txt"])
-        subprocess.call(["cmake", "-DASSIGNMENT_INSTALLATION=OFF", "."])
-        subprocess.call(["make"])
+        os.chdir(os.path.join(self.testcase_path, "build"))
+        # copy the cmake file to the build directory
+        subprocess.call(["cp", grading_source_dir+"/Sample_CMakeLists.txt", "CMakeLists.txt"])
+        f1 = open ("cmake_output.txt","w")
+        subprocess.call(["cmake", "-DASSIGNMENT_INSTALLATION=OFF", "."],stdout=f1,stderr=f1)
+        print "cmake complete"
+        f2 = open ("make_output.txt","w")
+        subprocess.call(["make"],stdout=f2,stderr=f2)
         os.chdir(previousDir)
-        print "done with cmake"
+        print "make complete"
+
+
+
+    # Run compile.out using some sane arguments.
+    def run_compile(self):
+        print "run compile.out"
+        f = open ("compile_output.txt","w")
+        return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "compile.out"), 
+                                      "testassignment", "testuser", "1", "0"], \
+                                      cwd=os.path.join(self.testcase_path, "data"), stdout=f, stderr=f)
+        if return_code != 0:
+            raise RuntimeError("Compile exited with exit code" + str(return_code))
+        print "finished with compile.out"
+
+
+    # Run the run.out using some sane arguments.
+    def run_run(self):
+        print "run run.out"
+        f = open ("run_output.txt","w")
+        return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "run.out"), 
+                                      "testassignment", "testuser", "1", "0"], \
+                                      cwd=os.path.join(self.testcase_path, "data"), stdout=f, stderr=f)
+        if return_code != 0:
+            raise RuntimeError("run.out exited with exit code" + str(return_code))
+        print "finished with run.out"
 
 
     # Run the validator using some sane arguments. Likely wants to be made much more
     # customizable (different submission numbers, multiple users, etc.)
     # TODO: Read "main" for other executables, determine what files they expect and
-    # the locations in which they expect them given different inputs. Define functions
-    # for compiler, configure, and runner.
+    # the locations in which they expect them given different inputs. 
     def run_validator(self):
-        with open("/dev/null") as devnull:
-            return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "validate.out"), "testassignment", "testuser", "1", "0"], \
-                    cwd=os.path.join(self.testcase_path, "data"), stdout=1, stderr=2)
-            if return_code != 0:
-                raise RuntimeError("Validator exited with exit code " + str(return_code))
-
-    # Run the runner using some sane arguments.
-    def run_runner(self):
-        with open("/dev/null") as devnull:
-            return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "runner.out"), "testassignment", "testuser", "1", "0"], \
-                    cwd=os.path.join(self.testcase_path, "data"), stdout=1, stderr=2)
-            if return_code != 0:
-                raise RuntimeError("Runner exited with exit code" + str(return_code))
-
+        print "run validate.out"
+        f = open ("validate_output.txt","w")
+        return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "validate.out"), 
+                                      "testassignment", "testuser", "1", "0"], 
+                                      cwd=os.path.join(self.testcase_path, "data"), stdout=f, stderr=f)
+        if return_code != 0:
+            raise RuntimeError("Validator exited with exit code " + str(return_code))
+        print "finished with validate.out"
+        
+        
     # Run the UNIX diff command given a filename. The files are compared between the
     # data folder and the validation folder within the test package. For example,
     # running test.diff("foo.txt") within the test package "test_foo", the files
     # /var/local/autograde_tests/tests/test_foo/data/foo.txt and
     # /var/local/autograde_tests/tests/test_foo/validation/foo.txt will be compared.
     def diff(self, filename):
-        return_code = subprocess.call(["diff", "-b", os.path.join(self.testcase_path, "data", filename), os.path.join(self.testcase_path, "validation", filename)])
+        print "run a diff between data/"+filename + " and validation/"+filename
+        return_code = subprocess.call(["diff", "-b", 
+                                       os.path.join(self.testcase_path, "data", filename), 
+                                       os.path.join(self.testcase_path, "validation", filename)])
         if return_code == 1:
             raise RuntimeError("Difference on file \"" + filename + "\" exited with exit code " + str(return_code))
-
+        print "diff completed"
+        
 '''
 def setup(func):
     mod = inspect.getmodule(inspect.stack()[1][0])

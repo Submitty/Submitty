@@ -48,6 +48,10 @@ else (ASSIGNMENT_INSTALLATION)
   get_filename_component(which_test ${which_test_dir} NAME)
   message("WHICH TEST: ${which_test}")
 
+  
+  include_directories(${which_test_dir}/assignment_config)
+
+
   # Where the compiled binaries are stored
   set(my_bin ${which_test_dir}/bin)
   message("this is where i'll put the executables ${my_bin}")
