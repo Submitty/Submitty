@@ -1,55 +1,70 @@
 {
 	"submission_number": 1,
-	"points_awarded": 18,
-	"nonhidden_points_awarded": 18,
-    "extra_credit_points_awarded": 0,
-	"non_extra_credit_points_awarded": 18,
+	"points_awarded": 17,
+	"nonhidden_points_awarded": 17,
+	"extra_credit_points_awarded": 0,
+	"non_extra_credit_points_awarded": 17,
 	"submission_time": "0",
 	"testcases": [
 		{
-            "test_name": "Test 1 words at least 5 chars long",
-            "execute_logfile": "test01_execute_logfile.txt",
- 			"diffs": [
- 				{
- 					"diff_id":"test01_0_diff",
- 					"student_file":"test01_student_output.txt",
- 					"instructor_file":"test_output/testassignment/good_output.txt",
-                    "difference":"test01_0_diff.json",
- 					"description": "student_output.txt",
- 					"message": " "
- 				}
- 			],
- 			"points_awarded": 10
- 		},
- 		{
- 			"test_name": "Test 2 words at least 5 chars long",
- 			"execute_logfile": "test02_execute_logfile.txt",
- 			"diffs": [
- 				{
- 					"diff_id":"test02_0_diff",
- 					"student_file":"test02_extra_lines.txt",
- 					"instructor_file":"test_output/testassignment/good_output.txt",
- 					"difference":"test02_0_diff.json",
- 					"description": "extra_lines.txt",
- 					"message": " ERROR: 21 incorrect line(s)"
- 				}
- 			],
- 			"points_awarded": 7
- 		},
- 		{
- 			"test_name": "Test 3 words at least 5 chars long",
- 			"execute_logfile": "test03_execute_logfile.txt",
- 			"diffs": [
- 				{
- 					"diff_id":"test03_0_diff",
- 					"student_file":"test03_missing_lines.txt",
- 					"instructor_file":"test_output/testassignment/good_output.txt",
- 					"difference":"test03_0_diff.json",
- 					"description": "missing_lines.txt",
- 					"message": " ERROR: 66 duplicate line(s), ERROR: 21 missing line(s)"
- 				}
- 			],
-            "points_awarded": 1
+			"test_name": "Test 1 words at least 5 chars long",
+			"execute_logfile": "test01_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test01_0_diff",
+					"student_file":"test01_output_correct.txt",
+					"instructor_file":"test_output/testassignment/output_instructor.txt",
+					"difference":"test01_0_diff.json",
+					"description": "",
+					"message": " "
+				}
+			],
+			"points_awarded": 10
+		},
+		{
+			"test_name": "Test 2 words at least 5 chars long",
+			"execute_logfile": "test02_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test02_0_diff",
+					"student_file":"test02_output_duplicates.txt",
+					"instructor_file":"test_output/testassignment/output_instructor.txt",
+					"difference":"test02_0_diff.json",
+					"description": "",
+					"message": " ERROR: 87 duplicate line(s)"
+				}
+			],
+			"points_awarded": 0
+		},
+		{
+			"test_name": "Test 3 words at least 5 chars long",
+			"execute_logfile": "test03_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test03_0_diff",
+					"student_file":"test03_output_extra.txt",
+					"instructor_file":"test_output/testassignment/output_instructor.txt",
+					"difference":"test03_0_diff.json",
+					"description": "",
+					"message": " ERROR: 87 missing line(s)"
+				}
+			],
+			"points_awarded": 0
+		},
+		{
+			"test_name": "Test 4 words at least 5 chars long",
+			"execute_logfile": "test04_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test04_0_diff",
+					"student_file":"test04_output_missing.txt",
+					"instructor_file":"test_output/testassignment/output_instructor.txt",
+					"difference":"test04_0_diff.json",
+					"description": "",
+					"message": " ERROR: 21 missing line(s)"
+				}
+			],
+			"points_awarded": 7
 		}
 	]
 }

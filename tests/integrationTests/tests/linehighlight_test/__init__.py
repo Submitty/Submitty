@@ -2,12 +2,16 @@
 from lib import testcase
 
 @testcase
-def correct_json_output(test):
+def check_output(test):
+    print "starting line highlight"
     test.build()
     test.run_run()
-    test.run_validator() # Runs validator.out with some sane arguments
-    # Check differences on output files. Files within the data directory are compared with
-    # their counterparts in the validation directory.
+    test.diff("test01_output_correct.txt","data/output_instructor.txt")
+    test.diff("test02_output_duplicates.txt","duplicate_lines.txt")
+    test.diff("test03_output_extra.txt","extra_lines.txt")
+    test.diff("test04_output_missing.txt","missing_lines.txt")
 
-#    test.diff("submission.json")
-    test.diff("duplicate_lines.json")
+    #def check_grade(test):
+    test.run_validator() 
+    test.diff("submission.json")
+

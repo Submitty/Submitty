@@ -139,6 +139,8 @@ class TestcaseWrapper:
         print "in build"
         # save, so we can return to the current directory
         previousDir = os.getcwd()
+        # the log directory will contain various log files
+        subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "log")])
         # the build directory will contain the intermediate cmake files
         subprocess.call(["mkdir", "-p", os.path.join(self.testcase_path, "build")])
         # the bin directory will contain the autograding executables
@@ -146,11 +148,17 @@ class TestcaseWrapper:
         os.chdir(os.path.join(self.testcase_path, "build"))
         # copy the cmake file to the build directory
         subprocess.call(["cp", grading_source_dir+"/Sample_CMakeLists.txt", "CMakeLists.txt"])
-        f1 = open ("cmake_output.txt","w")
-        subprocess.call(["cmake", "-DASSIGNMENT_INSTALLATION=OFF", "."],stdout=f1,stderr=f1)
+        f1 = open (os.path.join(self.testcase_path, "log","cmake_output.txt"),"w")
+        #f1 = open ("cmake_output.txt","w")
+        return_code = subprocess.call(["cmake", "-DASSIGNMENT_INSTALLATION=OFF", "."],stdout=f1,stderr=f1)
+        if return_code != 0:
+            raise RuntimeError("Build (cmake) exited with exit code" + str(return_code))
         print "cmake complete"
-        f2 = open ("make_output.txt","w")
-        subprocess.call(["make"],stdout=f2,stderr=f2)
+        f2 = open (os.path.join(self.testcase_path, "log","make_output.txt"),"w")
+        #f2 = open ("make_output.txt","w")
+        return_code = subprocess.call(["make"],stdout=f2,stderr=f2)
+        if return_code != 0:
+            raise RuntimeError("Build (make) exited with exit code" + str(return_code))
         os.chdir(previousDir)
         print "make complete"
 
@@ -159,7 +167,7 @@ class TestcaseWrapper:
     # Run compile.out using some sane arguments.
     def run_compile(self):
         print "run compile.out"
-        f = open ("compile_output.txt","w")
+        f = open (os.path.join(self.testcase_path, "log","compile_output.txt"),"w")
         return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "compile.out"), 
                                       "testassignment", "testuser", "1", "0"], \
                                       cwd=os.path.join(self.testcase_path, "data"), stdout=f, stderr=f)
@@ -171,7 +179,7 @@ class TestcaseWrapper:
     # Run the run.out using some sane arguments.
     def run_run(self):
         print "run run.out"
-        f = open ("run_output.txt","w")
+        f = open (os.path.join(self.testcase_path, "log","run_output.txt"),"w")
         return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "run.out"), 
                                       "testassignment", "testuser", "1", "0"], \
                                       cwd=os.path.join(self.testcase_path, "data"), stdout=f, stderr=f)
@@ -186,7 +194,7 @@ class TestcaseWrapper:
     # the locations in which they expect them given different inputs. 
     def run_validator(self):
         print "run validate.out"
-        f = open ("validate_output.txt","w")
+        f = open (os.path.join(self.testcase_path, "log","validate_output.txt"),"w")
         return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "validate.out"), 
                                       "testassignment", "testuser", "1", "0"], 
                                       cwd=os.path.join(self.testcase_path, "data"), stdout=f, stderr=f)
@@ -200,14 +208,24 @@ class TestcaseWrapper:
     # running test.diff("foo.txt") within the test package "test_foo", the files
     # /var/local/autograde_tests/tests/test_foo/data/foo.txt and
     # /var/local/autograde_tests/tests/test_foo/validation/foo.txt will be compared.
-    def diff(self, filename):
-        print "run a diff between data/"+filename + " and validation/"+filename
-        return_code = subprocess.call(["diff", "-b", 
-                                       os.path.join(self.testcase_path, "data", filename), 
-                                       os.path.join(self.testcase_path, "validation", filename)])
+    def diff(self, f1, f2=""):
+        # if only 1 filename provided...
+        if f2 == "": 
+            f2 = f1
+        # if no directory provided...
+        if os.path.dirname(f1) == "":
+            f1 = "data/"+f1
+        if os.path.dirname(f2) == "":
+            f2 = "validation/"+f2
+
+        print "run a diff between " + f1 + " and " + f2
+        filename1 = os.path.join(self.testcase_path, f1)
+        filename2 = os.path.join(self.testcase_path, f2)
+
+        return_code = subprocess.call(["diff", "-b", filename1, filename2])
         if return_code == 1:
-            raise RuntimeError("Difference on file \"" + filename + "\" exited with exit code " + str(return_code))
-        print "diff completed"
+            raise RuntimeError("Difference between " + filename1 + " and " + filename2 + " exited with exit code " + str(return_code))
+
         
 '''
 def setup(func):

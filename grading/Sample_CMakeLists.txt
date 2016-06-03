@@ -57,7 +57,7 @@ else (ASSIGNMENT_INSTALLATION)
   message("this is where i'll put the executables ${my_bin}")
 
   # configuration json file location
-  set(my_hw_config_file ${my_bin}/${which_test}_assignment_config.json)
+  set(my_hw_config_file ${which_test_dir}/data/assignment_config.json)
 
 endif(ASSIGNMENT_INSTALLATION)
 
