@@ -363,7 +363,7 @@ else
 	source ${HWSERVER_DIR}/CONFIGURE.sh
 fi
 
-source ${INSTALL_DIR}/INSTALL.sh
+source ${INSTALL_DIR}/INSTALL.sh clean test
 
 source ${HWSERVER_DIR}/Docs/sample_bin/admin_scripts_setup
 cp ${HWSERVER_DIR}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf

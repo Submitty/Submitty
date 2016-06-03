@@ -125,11 +125,11 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
 
     echo -e "\nDeleting directories for a clean installation\n"
 
-    rm -r $HSS_INSTALL_DIR/website
-    rm -r $HSS_INSTALL_DIR/hwgrading_website
-    rm -r $HSS_INSTALL_DIR/src
-    rm -r $HSS_INSTALL_DIR/bin
-    rm -r $HSS_INSTALL_DIR/test_suite
+    rm -rf $HSS_INSTALL_DIR/website
+    rm -rf $HSS_INSTALL_DIR/hwgrading_website
+    rm -rf $HSS_INSTALL_DIR/src
+    rm -rf $HSS_INSTALL_DIR/bin
+    rm -rf $HSS_INSTALL_DIR/test_suite
 fi
 
 

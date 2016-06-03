@@ -47,8 +47,12 @@ MY_COURSE_DIR=$HSS_DATA_DIR/courses/$semester/$course
 echo "BUILDING course=$course semester=$semester... "
 
 # build a few sample homeworks from the public repo
-build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/csci1200_lab01_getting_started/   $semester   $course   lab01
-build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/csci1100_hw01part1/               $semester   $course   pythontest
+build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/simple_python_homework/            $semester   $course   python_hw01
+
+build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/python_buggy_output/               $semester   $course   python_hw02
+
+build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/simple_cpp_lab/                    $semester   $course   cpp_lab01
+
 
 # build homeworks from a private repo
 #build_homework   $PRIVATE_REPO/csci1200_hw01_image_processing/                                      $semester   $course   hw01
