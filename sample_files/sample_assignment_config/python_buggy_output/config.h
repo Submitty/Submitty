@@ -12,65 +12,54 @@
 std::vector<TestCase> testcases
 {
   
-  // Test 1: FULLY CORRECT SOLUTION
   TestCase::MakeTestCase
-    ("words at least 5 chars long",
+    ("CORRECT SOLUTION",
      "gettysburg_address.txt",
      "/usr/bin/python code_correct.py gettysburg_address.txt output_correct.txt",
      TestCasePoints(10),
-     { new TestCaseComparison( &diffLineSwapOk,
-                               "output_correct.txt",
-                               "",
-                               "output_instructor.txt",
-                               1.0
-                               )
-         }
-     ),
+     { new TestCaseComparison(&diffLineSwapOk,        "output_correct.txt","","output_instructor.txt",0.5),
+       new TestCaseComparison(&myersDiffbyLinebyChar, "output_correct.txt","","output_instructor.txt",0.5),
+       new TestCaseComparison(&warnIfNotEmpty,        "STDOUT.txt","Standard OUTPUT (STDOUT)","",0.0),
+       new TestCaseComparison(&warnIfNotEmpty,        "STDERR.txt","Standard ERROR (STDERR)","",0.0)
+     }
+    ),
    
-  // Test 2: DUPLICATE LINES
   TestCase::MakeTestCase
-    ("words at least 5 chars long",
+    ("DUPLICATE LINES",
      "gettysburg_address.txt",
      "/usr/bin/python code_duplicate_lines.py gettysburg_address.txt output_duplicates.txt",
      TestCasePoints(10),
-     {new TestCaseComparison( &diffLineSwapOk,
-                              "output_duplicates.txt",
-                              "",
-                              "output_instructor.txt",
-                              1.0
-                              )
-         }
-     ),
+     { new TestCaseComparison(&diffLineSwapOk,        "output_duplicates.txt","","output_instructor.txt",0.5),
+       new TestCaseComparison(&myersDiffbyLinebyChar, "output_duplicates.txt","","output_instructor.txt",0.5),
+       new TestCaseComparison(&warnIfNotEmpty,        "STDOUT.txt","Standard OUTPUT (STDOUT)","",0.0),
+       new TestCaseComparison(&warnIfNotEmpty,        "STDERR.txt","Standard ERROR (STDERR)","",0.0)
+     }
+    ),
 
-  // Test 3: EXTRA LINES
   TestCase::MakeTestCase
-    ("words at least 5 chars long",
+    ("EXTRA LINES",
      "gettysburg_address.txt",
      "/usr/bin/python code_extra_lines_no_duplicates.py gettysburg_address.txt output_extra.txt",
      TestCasePoints(10),
-     {new TestCaseComparison( &diffLineSwapOk,
-                              "output_extra.txt",
-                              "",
-                              "output_instructor.txt",
-                              1.0
-                              )
-         }
-     ),
+     { new TestCaseComparison(&diffLineSwapOk,        "output_extra.txt","","output_instructor.txt",0.5),
+       new TestCaseComparison(&myersDiffbyLinebyChar, "output_extra.txt","","output_instructor.txt",0.5),
+       new TestCaseComparison(&warnIfNotEmpty,        "STDOUT.txt","Standard OUTPUT (STDOUT)","",0.0),
+       new TestCaseComparison(&warnIfNotEmpty,        "STDERR.txt","Standard ERROR (STDERR)","",0.0)
+     }
+    ),
 
-  // Test 4: MISSING LINES
   TestCase::MakeTestCase
-    ("words at least 5 chars long",
+    ("MISSING LINES",
      "gettysburg_address.txt",
      "/usr/bin/python code_missing_lines.py gettysburg_address.txt output_missing.txt",
      TestCasePoints(10),
-     {new TestCaseComparison( &diffLineSwapOk,
-                              "output_missing.txt",
-                              "",
-                              "output_instructor.txt",
-                              1.0
-                              )
+     { new TestCaseComparison(&diffLineSwapOk,        "output_missing.txt","","output_instructor.txt",0.5),
+       new TestCaseComparison(&myersDiffbyLinebyChar, "output_missing.txt","","output_instructor.txt",0.5),
+       new TestCaseComparison(&warnIfNotEmpty,        "STDOUT.txt","Standard OUTPUT (STDOUT)","",0.0),
+       new TestCaseComparison(&warnIfNotEmpty,        "STDERR.txt","Standard ERROR (STDERR)","",0.0)
          }
      )
-    };
+
+};
 
 #endif

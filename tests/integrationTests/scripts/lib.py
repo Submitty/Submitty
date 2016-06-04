@@ -4,6 +4,7 @@ import subprocess
 import glob
 import inspect
 import traceback
+import json
 
 grading_source_dir = "__INSTALL__FILLIN__HSS_INSTALL_DIR__/src/grading"
 
@@ -226,6 +227,35 @@ class TestcaseWrapper:
         if return_code == 1:
             raise RuntimeError("Difference between " + filename1 + " and " + filename2 + " exited with exit code " + str(return_code))
 
+
+    # Helper function for json_diff.  Sorts each nested list.  Allows comparison.
+    # Credit: Zero Piraeus. 
+    # http://stackoverflow.com/questions/25851183/how-to-compare-two-json-objects-with-the-same-elements-in-a-different-order-equa
+    def json_ordered(obj):
+        if isinstance(obj, dict):
+            return sorted((k, ordered(v)) for k, v in obj.items())
+        if isinstance(obj, list):
+            return sorted(ordered(x) for x in obj)
+        else:
+            return obj
+            
+    def json_diff(self, f1, f2=""):
+        # if only 1 filename provided...
+        if f2 == "": 
+            f2 = f1
+        # if no directory provided...
+        if os.path.dirname(f1) == "":
+            f1 = "data/"+f1
+        if os.path.dirname(f2) == "":
+            f2 = "validation/"+f2
+            
+        print "run a json diff between " + f1 + " and " + f2
+        filename1 = os.path.join(self.testcase_path, f1)
+        filename2 = os.path.join(self.testcase_path, f2)
+        contents1 = json.loads(filename1)
+        contents2 = json.loads(filename2)
+        if json_ordered(contents1) != json_ordered(contents2):
+            raise RuntimeError("JSON files " + filename1 + " and " + filename2 + " are different")
         
 '''
 def setup(func):

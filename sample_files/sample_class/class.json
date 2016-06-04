@@ -7,14 +7,28 @@
             "assignment_name":"Simple Python Homework",
             "released":true,
             "ta_grade_released":false,
-	    "due_date":"2015-09-02 23:59:59.0"
+	    "due_date":"2016-07-01 23:59:59.0"
+        },
+        {
+            "assignment_id":"python_hw02",
+            "assignment_name":"Buggy Python Output",
+            "released":true,
+            "ta_grade_released":false,
+	    "due_date":"2016-07-01 23:59:59.0"
         },
         {
             "assignment_id":"cpp_lab01",
             "assignment_name":"Simple C++ Lab",
             "released":true,
             "ta_grade_released":false,
-	    "due_date":"2015-09-02 23:59:59.0"
+	    "due_date":"2016-07-01 23:59:59.0"
+        },
+        {
+            "assignment_id":"cpp_lab02",
+            "assignment_name":"C++ Memory Debugging Lab",
+            "released":true,
+            "ta_grade_released":false,
+	    "due_date":"2016-07-01 23:59:59.0"
         }
     ]
 }

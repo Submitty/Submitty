@@ -312,7 +312,6 @@ replace_fillin_variables $HSS_INSTALL_DIR/bin/create_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/grade_students.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/grading_done.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/regrade.sh
-replace_fillin_variables $HSS_INSTALL_DIR/bin/build_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/build_homework_function.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/fake_submit_button_press.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/untrusted_execute.c

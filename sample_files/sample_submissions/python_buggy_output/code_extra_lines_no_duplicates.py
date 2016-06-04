@@ -10,7 +10,7 @@ def main():
     data_filtered_unique = list(set(data_filtered))
     x = 0
     with open(sys.argv[2], 'a') as output_file:
-        for item in data_filtered_uniqu:
+        for item in data_filtered_unique:
             output_file.write(item+"\n")
             x = (x + 1) % 4
             if x == 0:
