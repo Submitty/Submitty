@@ -231,14 +231,17 @@ class TestcaseWrapper:
     # Helper function for json_diff.  Sorts each nested list.  Allows comparison.
     # Credit: Zero Piraeus. 
     # http://stackoverflow.com/questions/25851183/how-to-compare-two-json-objects-with-the-same-elements-in-a-different-order-equa
-    def json_ordered(obj):
+    def json_ordered(self,obj):
         if isinstance(obj, dict):
-            return sorted((k, ordered(v)) for k, v in obj.items())
+            return sorted((k, self.json_ordered(v)) for k, v in obj.items())
         if isinstance(obj, list):
-            return sorted(ordered(x) for x in obj)
+            return sorted(self.json_ordered(x) for x in obj)
         else:
             return obj
             
+    # Compares two json files allowing differences in file whitespace
+    # (indentation, newlines, etc) and also alternate ordering of data
+    # inside dictionary/key-value pairs
     def json_diff(self, f1, f2=""):
         # if only 1 filename provided...
         if f2 == "": 
@@ -252,11 +255,20 @@ class TestcaseWrapper:
         print "run a json diff between " + f1 + " and " + f2
         filename1 = os.path.join(self.testcase_path, f1)
         filename2 = os.path.join(self.testcase_path, f2)
-        contents1 = json.loads(filename1)
-        contents2 = json.loads(filename2)
-        if json_ordered(contents1) != json_ordered(contents2):
+        contents1 = json.loads(open(filename1).read())
+        contents2 = json.loads(open(filename2).read())
+        if self.json_ordered(contents1) != self.json_ordered(contents2):
             raise RuntimeError("JSON files " + filename1 + " and " + filename2 + " are different")
-        
+
+    def empty_file(self, f1):
+        # if no directory provided...
+        if os.path.dirname(f1) == "":
+            f1 = "data/"+f1        
+        filename1 = os.path.join(self.testcase_path, f1)
+        if os.stat(filename1).st_size != 0:
+            raise RuntimeError("ERROR: File "+f1+" should be empty")
+
+
 '''
 def setup(func):
     mod = inspect.getmodule(inspect.stack()[1][0])

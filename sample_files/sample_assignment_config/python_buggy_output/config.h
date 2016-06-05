@@ -93,9 +93,9 @@ std::vector<TestCase> testcases
   TestCase::MakeTestCase
     ("OUT OF ORDER - Required Order",
      "gettysburg_address.txt",
-     "/usr/bin/python code_out_of_order.py gettysburg_address.txt output_missing.txt",
+     "/usr/bin/python code_out_of_order.py gettysburg_address.txt output_reordered.txt",
      TestCasePoints(10),
-     { new TestCaseComparison(&myersDiffbyLinebyChar, "output_missing.txt","","output_instructor.txt",1.0),
+     { new TestCaseComparison(&myersDiffbyLinebyChar, "output_reordered.txt","","output_instructor.txt",1.0),
        new TestCaseComparison(&warnIfNotEmpty,        "STDOUT.txt","Standard OUTPUT (STDOUT)","",0.0),
        new TestCaseComparison(&warnIfNotEmpty,        "STDERR.txt","Standard ERROR (STDERR)","",0.0)
          }
@@ -103,9 +103,9 @@ std::vector<TestCase> testcases
   TestCase::MakeTestCase
     ("OUT OF ORDER Re-Ordering OK",
      "gettysburg_address.txt",
-     "/usr/bin/python code_out_of_order.py gettysburg_address.txt output_missing.txt",
+     "/usr/bin/python code_out_of_order.py gettysburg_address.txt output_reordered.txt",
      TestCasePoints(10),
-     { new TestCaseComparison(&diffLineSwapOk,        "output_missing.txt","","output_instructor.txt",1.0),
+     { new TestCaseComparison(&diffLineSwapOk,        "output_reordered.txt","","output_instructor.txt",1.0),
        new TestCaseComparison(&warnIfNotEmpty,        "STDOUT.txt","Standard OUTPUT (STDOUT)","",0.0),
        new TestCaseComparison(&warnIfNotEmpty,        "STDERR.txt","Standard ERROR (STDERR)","",0.0)
          }
