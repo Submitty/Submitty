@@ -126,7 +126,7 @@ void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int stu
   if (!only_expected) {
     json i;
     i["line_number"] = student_line;
-    j["student"]["line"] = {{ i }};
+    j["student"]["line"] = { i };
   }
 
   std::cout << "LINE HIGHLIGHT " << expected_line << std::endl;
@@ -135,7 +135,7 @@ void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int stu
   if (!only_student) {
     json i;
     i["line_number"] = expected_line;
-    j["instructor"]["line"] = {{ i }};
+    j["instructor"]["line"] = { i };
   }
   swap_difference << j.dump(4) << std::endl;
   first_diff = false;
