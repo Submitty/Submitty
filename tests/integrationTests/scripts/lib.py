@@ -9,7 +9,12 @@ import json
 
 from collections import defaultdict
 
-grading_source_dir = "__INSTALL__FILLIN__HSS_INSTALL_DIR__/src/grading"
+
+# global variable available to be used by the test suite modules
+global HSS_INSTALL_DIR 
+HSS_INSTALL_DIR = "__INSTALL__FILLIN__HSS_INSTALL_DIR__"
+
+grading_source_dir =  HSS_INSTALL_DIR + "/src/grading"
 
 class TestcaseFile:
     def __init__(self):

@@ -1,5 +1,5 @@
 # Necessary imports. Provides library functions to ease writing tests.
-from lib import prebuild, testcase
+from lib import prebuild, testcase, HSS_INSTALL_DIR
 
 import subprocess
 import os
@@ -9,11 +9,8 @@ import glob
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-
-# FIXME:  THESE GLOBAL VARIABLE PATHS SHOULD BE SET ELSEWHERE (?)
-
-SAMPLE_ASSIGNMENT_CONFIG = "/usr/local/hss/sample_files/sample_assignment_config/python_buggy_output"
-SAMPLE_SUBMISSIONS       = "/usr/local/hss/sample_files/sample_submissions/python_buggy_output"
+SAMPLE_ASSIGNMENT_CONFIG = HSS_INSTALL_DIR + "/sample_files/sample_assignment_config/python_buggy_output"
+SAMPLE_SUBMISSIONS       = HSS_INSTALL_DIR + "/sample_files/sample_submissions/python_buggy_output"
 
 @prebuild
 def initialize(test):
