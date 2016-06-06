@@ -3,7 +3,6 @@ from __future__ import print_function
 import sys
 import os
 import subprocess
-import glob
 import inspect
 import traceback
 import json
@@ -14,6 +13,7 @@ grading_source_dir = "__INSTALL__FILLIN__HSS_INSTALL_DIR__/src/grading"
 
 class TestcaseFile:
     def __init__(self):
+        self.prebuild = lambda: None
         self.testcases = []
 
 to_run = defaultdict(lambda: TestcaseFile(), {})
@@ -50,6 +50,7 @@ def run_test(name):
     cont = True
     try:
         print("* Starting compilation...")
+        to_run[name].prebuild()
         to_run[name].wrapper.build()
         print("* Finished compilation")
     except Exception as e:
@@ -89,6 +90,7 @@ def run_all():
         cont = True
         try:
             print("* Starting compilation...")
+            val.prebuild()
             val.wrapper.build()
             print("* Finished compilation")
         except Exception as e:
@@ -117,7 +119,7 @@ def run_all():
         print()
         if not modsuccess:
             totalmodules -= 1
-    if success:
+    if totalmodules == len(to_run.keys()):
         with bold + green:
             print("All modules passed")
     else:
@@ -166,12 +168,12 @@ class TestcaseWrapper:
             return_code = subprocess.call(["cmake", "-DASSIGNMENT_INSTALLATION=OFF", "."],
                     cwd=os.path.join(self.testcase_path, "build"), stdout=cmake_output, stderr=cmake_output)
             if return_code != 0:
-                raise RuntimeError("Build (cmake) exited with exit code" + str(return_code))
+                raise RuntimeError("Build (cmake) exited with exit code " + str(return_code))
         with open(os.path.join(self.testcase_path, "log", "make_output.txt"), "w") as make_output:
             return_code = subprocess.call(["make"],
                     cwd=os.path.join(self.testcase_path, "build"), stdout=make_output, stderr=make_output)
             if return_code != 0:
-                raise RuntimeError("Build (make) exited with exit code" + str(return_code))
+                raise RuntimeError("Build (make) exited with exit code " + str(return_code))
 
 
 
@@ -182,7 +184,7 @@ class TestcaseWrapper:
                 "testassignment", "testuser", "1", "0"], \
                         cwd=os.path.join(self.testcase_path, "data"), stdout=log, stderr=log)
             if return_code != 0:
-                raise RuntimeError("Compile exited with exit code" + str(return_code))
+                raise RuntimeError("Compile exited with exit code " + str(return_code))
 
 
     # Run run.out using some sane arguments.
@@ -192,7 +194,7 @@ class TestcaseWrapper:
                 "testassignment", "testuser", "1", "0"], \
                         cwd=os.path.join(self.testcase_path, "data"), stdout=log, stderr=log)
             if return_code != 0:
-                raise RuntimeError("run.out exited with exit code" + str(return_code))
+                raise RuntimeError("run.out exited with exit code " + str(return_code))
 
 
     # Run the validator using some sane arguments. Likely wants to be made much more
@@ -282,6 +284,21 @@ class TestcaseWrapper:
         filename1 = os.path.join(self.testcase_path, f)
         if os.stat(filename1).st_size != 0:
             raise RuntimeError("File " + f + " should be empty")
+
+
+def prebuild(func):
+    mod = inspect.getmodule(inspect.stack()[1][0])
+    path = os.path.dirname(mod.__file__)
+    modname = mod.__name__
+    tw = TestcaseWrapper(path)
+    def wrapper():
+        print("* Starting prebuild for " + modname + "...")
+        func(tw)
+        print("* Finished prebuild for " + modname)
+    global to_run
+    to_run[modname].wrapper = tw
+    to_run[modname].prebuild = wrapper
+    return wrapper
 
 
 # Decorator function using some inspection trickery to determine paths
