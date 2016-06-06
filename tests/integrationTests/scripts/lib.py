@@ -226,6 +226,11 @@ class TestcaseWrapper:
         filename1 = os.path.join(self.testcase_path, f1)
         filename2 = os.path.join(self.testcase_path, f2)
 
+        if not os.path.isfile(filename1):
+            raise RuntimeError("File " + filename1 + " does not exist")
+        if not os.path.isfile(filename2):
+            raise RuntimeError("File " + filename2 + " does not exist")
+
         return_code = subprocess.call(["diff", "-b", filename1, filename2])
         if return_code == 1:
             raise RuntimeError("Difference between " + filename1 + " and " + filename2 + " exited with exit code " + str(return_code))
@@ -257,6 +262,12 @@ class TestcaseWrapper:
 
         filename1 = os.path.join(self.testcase_path, f1)
         filename2 = os.path.join(self.testcase_path, f2)
+
+        if not os.path.isfile(filename1):
+            raise RuntimeError("File " + filename1 + " does not exist")
+        if not os.path.isfile(filename2):
+            raise RuntimeError("File " + filename2 + " does not exist")
+
         with open(filename1) as file1:
             contents1 = json.loads(file1.read())
         with open(filename2) as file2:
