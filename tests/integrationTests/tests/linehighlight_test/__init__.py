@@ -19,6 +19,9 @@ SAMPLE_SUBMISSIONS       = "/usr/local/hss/sample_files/sample_submissions/pytho
 def initialize(test):
     try:
         os.mkdir(os.path.join(test.testcase_path, "assignment_config"))
+    except OSError:
+        pass
+    try:
         os.mkdir(os.path.join(test.testcase_path, "data"))
     except OSError:
         pass
