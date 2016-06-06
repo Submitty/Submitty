@@ -1,8 +1,9 @@
 # Necessary imports. Provides library functions to ease writing tests.
-from lib import testcase
+from lib import prebuild, testcase
 
 import subprocess
 import os
+import glob
 
 
 ############################################################################
@@ -14,19 +15,27 @@ import os
 SAMPLE_ASSIGNMENT_CONFIG = "/usr/local/hss/sample_files/sample_assignment_config/python_buggy_output"
 SAMPLE_SUBMISSIONS       = "/usr/local/hss/sample_files/sample_submissions/python_buggy_output"
 
-this_directory = os.path.dirname(os.path.realpath(__file__))
+@prebuild
+def initialize(test):
+    try:
+        os.mkdir(os.path.join(test.testcase_path, "assignment_config"))
+        os.mkdir(os.path.join(test.testcase_path, "data"))
+    except OSError:
+        pass
 
-# FIXME:  MAYBE THESE STATEMENTS SHOULD BE WRAPPED UP IN A FUNCTION?
+    subprocess.call(["cp",
+        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.h"),
+        os.path.join(test.testcase_path, "assignment_config")])
+    subprocess.call(["cp",
+        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_input", "gettysburg_address.txt"),
+        os.path.join(test.testcase_path, "data")])
+    subprocess.call(["cp",
+        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "output_instructor.txt"),
+        os.path.join(test.testcase_path, "data")])
 
-subprocess.call(["mkdir", "-p", this_directory+"/assignment_config"])
-subprocess.call(["mkdir", "-p", this_directory+"/data"])
-
-subprocess.call(["cp", SAMPLE_ASSIGNMENT_CONFIG+"/config.h", this_directory+"/assignment_config/"])
-subprocess.call(["cp", SAMPLE_ASSIGNMENT_CONFIG+"/test_input/gettysburg_address.txt", this_directory+"/data/"])
-subprocess.call(["cp", SAMPLE_ASSIGNMENT_CONFIG+"/test_output/output_instructor.txt", this_directory+"/data/"])
-#doing this so the wildcard expansion works
-os.system("cp "+SAMPLE_SUBMISSIONS+"/*py "+this_directory+"/data/")
-
+    subprocess.call(["cp"] +
+            glob.glob(os.path.join(SAMPLE_SUBMISSIONS, "*.py")) +
+            [os.path.join(test.testcase_path, "data")])
 
 
 ############################################################################
@@ -34,8 +43,6 @@ os.system("cp "+SAMPLE_SUBMISSIONS+"/*py "+this_directory+"/data/")
 
 @testcase
 def check_output(test):
-    print "starting line highlight"
-    test.build()
     test.run_run()
     test.diff("test01_output_correct.txt","data/output_instructor.txt")
     test.diff("test02_output_duplicates.txt","duplicate_lines.txt")
@@ -49,7 +56,7 @@ def check_output(test):
 
 @testcase
 def check_json(test):
-    test.run_validator() 
+    test.run_validator()
     test.json_diff("test01_0_diff.json")
     test.json_diff("test02_0_diff.json")
     test.json_diff("test03_0_diff.json")

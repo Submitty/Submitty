@@ -3,8 +3,7 @@ from lib import testcase
 
 @testcase
 def correct_json_output(test):
-    test.build()
-    test.run_validator() # Runs validator.out with some sane arguments
+    test.run_validator() # Runs validator.out with default arguments
     # Check differences on output files. Files within the data directory are compared with
     # their counterparts in the validation directory.
     test.diff("test01_0_diff.json")

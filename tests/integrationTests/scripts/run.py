@@ -2,7 +2,6 @@
 
 import sys
 import os
-import glob
 import subprocess
 
 import lib
@@ -14,7 +13,7 @@ import lib
 
 test_suite_install_dir = "__INSTALL__FILLIN__HSS_INSTALL_DIR__/test_suite/integrationTests"
 
-print "TEST SUITE INSTALLATION: "+test_suite_install_dir
+print("TEST SUITE INSTALLATION: "+test_suite_install_dir)
 sys.path.insert(0, test_suite_install_dir)
 
 # Load all test packages, which will populate the dictionary in
