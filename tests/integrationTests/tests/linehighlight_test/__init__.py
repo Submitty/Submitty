@@ -43,8 +43,6 @@ def initialize(test):
 
 @testcase
 def check_output(test):
-    print("starting line highlight")
-    test.build()
     test.run_run()
     test.diff("test01_output_correct.txt","data/output_instructor.txt")
     test.diff("test02_output_duplicates.txt","duplicate_lines.txt")
