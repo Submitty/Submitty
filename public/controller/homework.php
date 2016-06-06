@@ -20,7 +20,7 @@ $dev_team =                         $class_config["dev_team"];
 $assignment_id =                    parse_assignment_id_with_recent($class_config, $most_recent_assignment_id);
 //$assignment_version =               parse_assignment_version_with_recent($username, $semester,$course, $assignment_id);
 $assignment_version =               get_assignment_version($username, $semester,$course, $assignment_id);
-
+$num_parts =                        get_num_parts($class_config, $assignment_id);
 $assignment_name =                  name_for_assignment_id($class_config, $assignment_id);
 $assignment_link =                  link_for_assignment_id($class_config, $assignment_id);
 $assignment_description =            description_for_assignment_id($class_config, $assignment_id);

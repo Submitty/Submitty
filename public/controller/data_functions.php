@@ -101,16 +101,20 @@ function display_file_permissions($perms) {
 
 
 // Upload HW Assignment to server and unzip
-function upload_homework($username, $semester, $course, $assignment_id, $homework_file, $svn_checkout) {
-
-  $count = count($homework_file["name"]);
-    // check if upload succeeded
+function upload_homework($username, $semester, $course, $assignment_id, $num_parts, $homework_file, $svn_checkout) {
+    // parts in homework_file: 1 to num_parts
+    // check if upload succeeded for all parts
     if ($svn_checkout == false) {
-      for($i = 0; $i < $count; $i++){
-        if (!isset($homework_file["tmp_name"][$i]) || $homework_file["tmp_name"][$i] == ""){
-          $error_text = $homework_file["name"][$i]." did not upload to POST[tmp_name]. ";
-          if (isset($homework_file["error"][$i])) {
-            $error_text = $error_text."Error code given for upload is ". $homework_file["error"][$i]." . ";
+      for($n=1; $n <= $num_parts; $n++){
+        if(isset($homework_file[$n])){
+          $count[$n] = count($homework_file[$n]["name"]);
+          for($i = 0; $i < $count[$n]; $i++){
+            if (!isset($homework_file[$n]["tmp_name"][$i]) || $homework_file[$n]["tmp_name"][$i] == ""){
+              $error_text = $homework_file[$n]["name"][$i]." did not upload to POST[tmp_name]. ";
+              if (isset($homework_file[$n]["error"][$i])) {
+                $error_text = $error_text."Error code given for upload is ". $homework_file[$n]["error"][$i]." . ";
+              }
+            }
           }
         }
       }
@@ -138,6 +142,9 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     if (!is_open_assignment($class_config, $assignment_id)) {
         return array("error"=>"", "message"=>$assignment_id." is not a valid assignment");
     }
+    if ($num_parts !== get_num_parts($class_config, $assignment_id)) {
+        return array("error"=>"", "message"=>"Number of parts for this homework does not match configuration.  ".$num_parts." != ".get_num_parts($class_config, $assignment_id));
+    }
     $assignment_config = get_assignment_config($semester, $course, $assignment_id);
     if (!can_edit_assignment($username, $semester, $course, $assignment_id, $assignment_config)) {//Made sure the user can upload to this homework
         return array("error"=>"assignment_closed", "message"=>$assignment_id." is closed.");
@@ -149,31 +156,27 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
     if (isset($assignment_config["max_submission_size"])) {
         $max_size = $assignment_config["max_submission_size"];
     }
-
-
-    $filename= [];
-    $extension= [];
-    // $filename="";
-    // $extension="";
-
+    
     // check uploaded file(s) size
     if ($svn_checkout==false) {
       $file_size = 0;
-      for($i = 0; $i < $count; $i++){
-        $file_size += $homework_file["size"][$i];
+      for($n=1; $n <= $num_parts; $n++){
+        if(isset($homework_file[$n])){          
+          for($i = 0; $i < $count[$n]; $i++){
+            $filename = explode(".", $homework_file[$n]["name"][$i]);
+            $extension = end($filename);
+            if($extension == "zip"){
+              $file_size += get_zip_size($filename);
+            }
+            else {
+              $file_size += $homework_file[$n]["size"][$i];
+            }
+          }
+        }        
       }
-      // TODO:
-      // Check file size when files are a mixture of zips and others
       if ($file_size / 1024 > $max_size) {
         return array("error"=>"", "message"=>"File(s) uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file(s) was ".$file_size / 1024 ." kb.");
       }
-      /*
-      if ($homework_file["size"] / 1024 > $max_size || !is_valid_zip_size($homework_file["tmp_name"], $max_size)) {
-        return array("error"=>"", "message"=>"File uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file was ".$homework_file["size"] / 1024 ." kb.");
-      }
-      */
-      $filename[] = explode(".", $homework_file["name"][$i]);
-      $extension[] = end($filename[$i]);
     }
 
 
@@ -231,60 +234,79 @@ function upload_homework($username, $semester, $course, $assignment_id, $homewor
       $upload_version++;
     }
 
-    // Attempt to create folder
+    // Attempt to create folder for current version
     $version_path = $user_path."/".$upload_version;
     if (!mkdir($version_path)) {//Create a new directory corresponding to a new version number
       display_error("Failed to make folder ".$version_path);
       return;
     }
 
+    $part_path = [];
+    if($num_parts > 1){
+      // Create folder for multi-part homework
+      for($n=1; $n <= $num_parts; $n++){
+        $part_path[$n] = $version_path."/part".$n;
+        if (!mkdir($part_path[$n])) {//Create a new directory corresponding to a new version number
+          display_error("Failed to make folder ".$part_path[$n]);
+          return;
+        }
+      }
+    }
+    else{ // else if homework is single-parted, put it in the version path folder
+      $part_path[$num_parts] = $version_path;
+    }
 
     if ($svn_checkout == false) {
-      for($i=0; $i < $count; $i++){
-        // Unzip files in folder
-        $zip = new ZipArchive;
-        $res = $zip->open($homework_file["tmp_name"][$i]);
-        if ($res === TRUE) {
-          $zip->extractTo($version_path."/");
-          $zip->close();
+      for($n=1; $n <= $num_parts; $n++){
+        if(isset($homework_file[$n])){
 
-          $unlink_return = unlink ($homework_file["tmp_name"][$i]);
-          // TODO: Edit error messages
-          //
-          if (!$unlink_return) {
-            display_error("failed to unlink(delete) uploaded zip file from");
-            return;
-          }
-        }
-        else{   // copy single file to folder
-          // --------------------------------------------------------------
+          for($i=0; $i < $count[$n]; $i++){
+            // Unzip files in folder
+            $zip = new ZipArchive;
+            $res = $zip->open($homework_file[$n]["tmp_name"][$i]);
+            if ($res === TRUE) {
+              $zip->extractTo($part_path[$n]);
+              $zip->close();
 
-          /*
-          // NOT SURE HOW THIS WAS WORKING BEFORE
-          // both mv and move_uploaded_file will reset the file group to hwphp
-          // we need it to be the sticky bit group csciXXXX_tas_www
-
-          $result = move_uploaded_file($homework_file["tmp_name"], $version_path."/".$homework_file["name"]);
-          if (!$result) {
-              display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
-              return;
-          }
-          */
-          // --------------------------------------------------------------
-
-          // SHOULD BE EQUIVALENT TO THIS:
-          if (is_uploaded_file($homework_file["tmp_name"][$i])) {
-            $copy_return = copy ($homework_file["tmp_name"][$i], $version_path."/".$homework_file["name"][$i]);
-            // TODO: Edit error messages
-            //
-            if (!$copy_return) {
-              display_error("failed to copy uploaded file from ".$homework_file["tmp_name"][$i]." to ".$version_path."/".$homework_file["name"][$i]);
-              return;
+              $unlink_return = unlink ($homework_file[$n]["tmp_name"][$i]);
+              // TODO: Edit error messages
+              //
+              if (!$unlink_return) {
+                display_error("failed to unlink(delete) uploaded zip file from");
+                return;
+              }
             }
-            $unlink_return = unlink ($homework_file["tmp_name"][$i]);
-            if (!$unlink_return) {
-              display_error("failed to unlink(delete) uploaded file from ".$homework_file["tmp_name"][$i]);
-              return;
+            else{   // copy single file to folder
+              // --------------------------------------------------------------
+
+              /*
+              // NOT SURE HOW THIS WAS WORKING BEFORE
+              // both mv and move_uploaded_file will reset the file group to hwphp
+              // we need it to be the sticky bit group csciXXXX_tas_www
+
+              $result = move_uploaded_file($homework_file["tmp_name"], $version_path."/".$homework_file["name"]);
+              if (!$result) {
+                  display_error("failed to move uploaded file from ".$homework_file["tmp_name"]." to ".$version_path."/".$homework_file["name"]);
+                  return;
+              }
+              */
+              // --------------------------------------------------------------
+
+              // SHOULD BE EQUIVALENT TO THIS:
+              if (is_uploaded_file($homework_file[$n]["tmp_name"][$i])) {
+                $copy_return = copy ($homework_file[$n]["tmp_name"][$i], $part_path[$n]."/".$homework_file[$n]["name"][$i]);
+                // TODO: Edit error messages
+                //
+                if (!$copy_return) {
+                  display_error("failed to copy uploaded file from ".$homework_file[$n]["tmp_name"][$i]." to ".$part_path[$n]."/".$homework_file[$n]["name"][$i]);
+                  return;
+                }
+                $unlink_return = unlink ($homework_file[$n]["tmp_name"][$i]);
+                if (!$unlink_return) {
+                  display_error("failed to unlink(delete) uploaded file from ".$homework_file[$n]["tmp_name"][$i]);
+                  return;
+                }
+              }
             }
           }
         }
@@ -369,6 +391,25 @@ function is_valid_zip_size($filename, $max_size) {
     return true;
 }
 
+function get_zip_size($filename) {
+    $size = 0;
+    $zip = zip_open($filename);
+    //
+    // FIXME: bug with this check?  Getting this warning when a non zip is uploaded
+    //
+    // Warning: zip_read() expects parameter 1 to be resource, integer given
+    // Warning: zip_close() expects parameter 1 to be resource, integer given
+    //
+
+    if (is_resource($zip)) {
+        while ($inner_file = zip_read($zip)) {
+            $size += zip_entry_filesize($inner_file);
+        }
+    }
+      zip_close($zip);
+    return $size;
+}
+
 // Check if user has permission to edit homework
 function can_edit_assignment($username, $semester, $course, $assignment_id, $assignment_config) {
 
@@ -424,6 +465,19 @@ function get_class_config($semester,$course) {
     return json_decode(removeTrailingCommas(file_get_contents($file)), true);
 }
 
+function get_num_parts($class_config, $assignment_id) {
+  $assignments = $class_config["assignments"];
+  foreach ($assignments as $one) {
+    if ($one["assignment_id"] == $assignment_id) {
+      if (isset($one["num_parts"])) {
+          return $one["num_parts"];
+      }
+      else {
+        return 1; // default to have 1 part for each homework
+      }
+    }
+  }
+}
 
 function most_recent_released_assignment_id($class_config) {
     // eliminating "default_assignment" in class.json, always used last "released" homework!
@@ -1187,12 +1241,15 @@ function check_version($assignment_name, $versions_used, $versions_allowed){
   return $message;
 }
 
-/*
-function check_due_date(){
-  if(can_edit_assignment())
-  // $due_date = get_due_date();
-  // $current_date = new DateTime();
-  // date("Y-m-d H:i:s")
+function check_due_date($semester, $course, $assignment_id){
+    $message = "";
+    $due_date = get_due_date(get_class_config($semester, $course), $assignment_id);
+    $now = new DateTime("NOW");
+    if($now > $due_date){
+        $due_date->sub(new DateInterval("P1D"));  // ceiling up late days
+        $interval = date_diff($due_date, $now);
+        $message = "Your submission will be ".$interval->format('%r%a')." days late. Are you sure you want to continue?";
+    }
+    return $message;
 }
-*/
 ?>

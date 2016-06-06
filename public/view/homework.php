@@ -182,20 +182,22 @@ echo '<div class="outer_box">';
 echo '<h3 class="label">Upload New Version</h3>';
 echo '<p class="sub">'.$upload_message.'</p>';
 
-echo '<form ';
-echo ' class="form_submit"';
-echo ' action="?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'"';
-echo ' method="post"';
-echo ' enctype="multipart/form-data"';
-echo ' onsubmit="return check_for_upload('."'".$assignment_name."'".', '.$highest_version.', '.$max_submissions.')"';
-echo '>';
-echo "<input type='hidden' name='csrf_token' value='{$_SESSION['csrf']}' />";
-
 if ($svn_checkout == true) {
+    echo '<form ';
+    echo ' class="form_submit"';
+    echo ' action="?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'"';
+    echo ' method="post"';
+    echo ' enctype="multipart/form-data"';
+    echo ' onsubmit="return check_for_upload('."'".$assignment_name."'".', '.$highest_version.', '.$max_submissions.')"';
+    echo '>';
+    echo "<input type='hidden' name='csrf_token' value='{$_SESSION['csrf']}' />";
+
     // NO FILE SUBMISSION, PULL FILES FROM SVN
     echo '<input type="submit" name="submit" value="GRADE SVN" class="btn btn-primary">';
     echo '<input type="hidden" name="svn_checkout" value="true">';
+    echo '</form>';
 } else {
+/*
     // MULTIPLE FILES OR ZIP FILES SUBMISSION
     echo '<label for="file" class="label">Select File:</label>';
     echo '<input type="file" name="files[]" id="file" multiple/>';
@@ -205,75 +207,61 @@ if ($svn_checkout == true) {
 
 echo '</form>';
 echo '</div>';
-
+*/
 // DRAG AND DROP STARTS
 // ============================================================================
-echo '<div class="outer_box" id="upload" style="cursor: pointer;">';
-echo '<h3 class="label">Drop Zone ';
-echo '<input type="file" name="files" id="input_file" style="display:none" onchange="addFile()" multiple/>';
-// echo '<label id="add" for="input_file" class="label" style="color:#C70039">Or click me!</label>';
-echo '</h3>';
-echo '<p id="disp"><br>Drop files here:<br></p>';
 
-echo '<button ';
-echo 'type="button"';
-echo 'id= "submit" ';
-echo 'class="btn btn-primary" ';
-/*
-//echo 'onclick="handle_submission('."'".$assignment_name."'".', '.$highest_version.', '.$max_submissions.', ';
-echo 'onclick="handle_submission('."'".check_version($assignment_name, $highest_version, $max_submissions)."', ";
-echo "'', ";  // due date check not implemented yet
-//echo "'".check_due_date()."', ";
-echo "'?page=upload&semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id."', ";
-echo "'{$_SESSION['csrf']}', ";
-echo 'false';
-echo ' )" ';
-*/
-echo 'active>Submit</button>';
+// MULTIPLE PARTS
+  $num_parts = get_num_parts(get_class_config($semester, $course), $assignment_id);
+  for($i = 1; $i <= $num_parts; $i++){
+    echo '<div class="outer_box" id="upload'.$i.'" style="cursor: pointer; text-align: center">';
+    echo '<h3 class="label" id="l'.$i.'" >Click or drag your files here';
+    echo '<input type="file" name="files" id="input_file'.$i.'" style="display:none" onchange="addFile('.$i.')" multiple/>';
+    echo '</h3>';
+    echo '<p id="disp'.$i.'"><br></p>';
 
-echo '<button ';
-echo 'id="delete"';
-echo 'class="btn btn-primary" ';
-//echo 'onclick="deleteFiles()" ';
-echo 'active>Delete All</button>';
+    echo '<button class="btn btn-primary" id="delete'.$i.'" active>Delete All</button>';
+    echo '</div>';
+  }
+  echo '<button type="button" id= "submit" class="btn btn-primary" active>Submit</button>';
+  ?>
 
-echo '</div>';
+  <script type="text/javascript">
+    create_file_array(<?php echo $num_parts; ?>);
 
-?>
+    for(var i = 1; i <= <?php echo $num_parts; ?>; i++ ){
+      var dropzone = document.getElementById("upload" + i);
+      dropzone.addEventListener("click", clicked_on_box, false);
+      dropzone.addEventListener("dragenter", draghandle, false);
+      dropzone.addEventListener("dragover", draghandle, false);
+      dropzone.addEventListener("dragleave", draghandle, false);
+      dropzone.addEventListener("drop", drop, false);
 
-<script type="text/javascript">;
+      $("#delete" + i).click(function(e){
+      //document.getElementById("delete").addEventListener("click", function(e){
+        deleteFiles(get_part_number(e));
+        e.stopPropagation();
+      })
+    }
+  //document.getElementById("submit").addEventListener("click", function(e){
+  $("#submit").click(function(e){
+    handle_submission(<?php
+      echo "'".check_version($assignment_name, $highest_version, $max_submissions)."', ";
+      echo "'".check_due_date($semester, $course, $assignment_id)."', ";
+      echo "'?page=upload&semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id."', ";
+      echo "'{$_SESSION['csrf']}', ";
+      echo 'false';
+      ?>);
+    e.stopPropagation();
+  })
+  </script>
 
-var dropzone = document.getElementById("upload");
-dropzone.addEventListener("click", clicked_on_box, false);
-dropzone.addEventListener("dragenter", draghandle, false);
-dropzone.addEventListener("dragover", draghandle, false);
-dropzone.addEventListener("dragleave", draghandle, false);
-dropzone.addEventListener("drop", drop, false);
-
-//document.getElementById("submit").addEventListener("click", function(e){
-$("#submit").click(function(e){
-  handle_submission(<?php
-    echo "'".check_version($assignment_name, $highest_version, $max_submissions)."', ";
-    echo "'', ";  // due date check not implemented yet
-                  //echo "'".check_due_date()."', ";
-    echo "'?page=upload&semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id."', ";
-    echo "'{$_SESSION['csrf']}', ";
-    echo 'false';
-    ?>);
-  e.stopPropagation();
-})
-
-$("#delete").click(function(e){
-//document.getElementById("delete").addEventListener("click", function(e){
-  deleteFiles();
-  e.stopPropagation();
-})
-
-</script>
-
-<?php
+  <?php
 // DRAG AND DROP ENDS
 // ============================================================================
+}
+
+echo '</div>';
 
 /*
 // helpful for debugging
@@ -281,7 +269,6 @@ echo "HIGHEST VERSION ".$highest_version." (most recent)<br>";
 echo "ASSIGNMENT VERSION ".$assignment_version." (what to view)<br>";
 echo "ACTIVE VERSION ".$active_version." (for TA grading)<br>";  // active
 */
-
 // ============================================================================
 // INFO ON ALL VERSIONS
 
@@ -529,7 +516,7 @@ echo '</div>'; // end HWsubmission
 
 ?>
 
-<script>
+<script type="text/javascript">
     function check_for_upload(assignment, versions_used, versions_allowed) {
         versions_used = parseInt(versions_used);
         versions_allowed = parseInt(versions_allowed);
@@ -547,8 +534,8 @@ echo '</div>'; // end HWsubmission
     */
     function handle_submission(version_check, due_date_check, url, csrf_token, svn_checkout){
       // TODO: Add checks for due date
-      if(!version_check || confirm(version_check)) {
-      //if((!version_check || confirm(version_check)) && (!due_date_check || confirm(due_date_check))){
+      // if(!version_check || confirm(version_check)) {
+      if((!version_check || confirm(version_check)) && (!due_date_check || confirm(due_date_check))){
         submit(url, csrf_token, svn_checkout);
       }
     }
