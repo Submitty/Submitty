@@ -3,8 +3,8 @@
 
 ##########################################################################
 # VARIABLES CONFIGURED BY INSTALL.sh
-HSS_INSTALL_DIR=__INSTALL__FILLIN__HSS_INSTALL_DIR__
-HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
+HSS_INSTALL_DIR=__CREATE_COURSE__FILLIN__HSS_INSTALL_DIR__
+HSS_DATA_DIR=__CREATE_COURSE__FILLIN__HSS_DATA_DIR__
 
 # VARIABLES CONFIGURED BY create_course.sh
 semester=__CREATE_COURSE__FILLIN__SEMESTER__
@@ -47,8 +47,11 @@ MY_COURSE_DIR=$HSS_DATA_DIR/courses/$semester/$course
 echo "BUILDING course=$course semester=$semester... "
 
 # build a few sample homeworks from the public repo
-build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/csci1200_lab01_getting_started/   $semester   $course   lab01
-build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/csci1100_hw01part1/               $semester   $course   pythontest
+build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/python_simple_homework/            $semester   $course   python_hw01
+build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/python_buggy_output/               $semester   $course   python_hw02
+
+build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/cpp_simple_lab/                    $semester   $course   cpp_lab01
+build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/cpp_memory_debugging_lab/          $semester   $course   cpp_lab02
 
 # build homeworks from a private repo
 #build_homework   $PRIVATE_REPO/csci1200_hw01_image_processing/                                      $semester   $course   hw01

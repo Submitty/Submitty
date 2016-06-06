@@ -1,0 +1,530 @@
+{
+"differences":[
+    {
+        "student":
+        {
+            "start": 0,
+            "line": [
+                {
+                    "line_number": 0
+                }, {
+                    "line_number": 1
+                }, {
+                    "line_number": 2
+                }, {
+                    "line_number": 3
+                }, {
+                    "line_number": 4
+                }, {
+                    "line_number": 5
+                }, {
+                    "line_number": 6
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":0,
+            "line": [
+                {
+                    "line_number": 0
+                }, {
+                    "line_number": 1
+                }, {
+                    "line_number": 2
+                }, {
+                    "line_number": 3
+                }, {
+                    "line_number": 4
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 7
+        },
+        "instructor":
+        {
+            "start":6,
+            "line": [
+                {
+                    "line_number": 6
+                }, {
+                    "line_number": 7
+                }, {
+                    "line_number": 8
+                }, {
+                    "line_number": 9
+                }, {
+                    "line_number": 10
+                }, {
+                    "line_number": 11
+                }, {
+                    "line_number": 12
+                }, {
+                    "line_number": 13
+                }, {
+                    "line_number": 14
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 9,
+            "line": [
+                {
+                    "line_number": 9
+                }, {
+                    "line_number": 10
+                }, {
+                    "line_number": 11
+                }, {
+                    "line_number": 12
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":16,
+            "line": [
+                {
+                    "line_number": 16
+                }, {
+                    "line_number": 17
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 14,
+            "line": [
+                {
+                    "line_number": 14
+                }, {
+                    "line_number": 15
+                }, {
+                    "line_number": 16
+                }, {
+                    "line_number": 17
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":18
+        }
+    }, {
+        "student":
+        {
+            "start": 19,
+            "line": [
+                {
+                    "line_number": 19
+                }, {
+                    "line_number": 20
+                }, {
+                    "line_number": 21
+                }, {
+                    "line_number": 22
+                }, {
+                    "line_number": 23
+                }, {
+                    "line_number": 24
+                }, {
+                    "line_number": 25
+                }, {
+                    "line_number": 26
+                }, {
+                    "line_number": 27
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":20,
+            "line": [
+                {
+                    "line_number": 20
+                }, {
+                    "line_number": 21
+                }, {
+                    "line_number": 22
+                }, {
+                    "line_number": 23
+                }, {
+                    "line_number": 24
+                }, {
+                    "line_number": 25
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 29,
+            "line": [
+                {
+                    "line_number": 29
+                }, {
+                    "line_number": 30
+                }, {
+                    "line_number": 31
+                }, {
+                    "line_number": 32
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":27,
+            "line": [
+                {
+                    "line_number": 27
+                }, {
+                    "line_number": 28
+                }, {
+                    "line_number": 29
+                }, {
+                    "line_number": 30
+                }, {
+                    "line_number": 31
+                }, {
+                    "line_number": 32
+                }, {
+                    "line_number": 33
+                }, {
+                    "line_number": 34
+                }, {
+                    "line_number": 35
+                }, {
+                    "line_number": 36
+                }, {
+                    "line_number": 37
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 34,
+            "line": [
+                {
+                    "line_number": 34, 
+                    "char_number":[ 0, 1, 2, 3, 5 ]
+                }, {
+                    "line_number": 35, 
+                    "char_number":[ 0, 1, 2, 3, 4, 6 ]
+                }, {
+                    "line_number": 36, 
+                    "char_number":[ 0, 1, 5, 6, 7, 8, 9, 10 ]
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":39,
+            "line": [
+                {
+                    "line_number": 39, 
+                    "char_number":[ 0, 1, 2, 3, 4 ]
+                }, {
+                    "line_number": 40, 
+                    "char_number":[ 0, 2, 3, 4 ]
+                }, {
+                    "line_number": 41, 
+                    "char_number":[ 0, 1 ]
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 38,
+            "line": [
+                {
+                    "line_number": 38
+                }, {
+                    "line_number": 39
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":43,
+            "line": [
+                {
+                    "line_number": 43
+                }, {
+                    "line_number": 44
+                }, {
+                    "line_number": 45
+                }, {
+                    "line_number": 46
+                }, {
+                    "line_number": 47
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 40
+        },
+        "instructor":
+        {
+            "start":49,
+            "line": [
+                {
+                    "line_number": 49
+                }, {
+                    "line_number": 50
+                }, {
+                    "line_number": 51
+                }, {
+                    "line_number": 52
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 42,
+            "line": [
+                {
+                    "line_number": 42
+                }, {
+                    "line_number": 43
+                }, {
+                    "line_number": 44
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":54,
+            "line": [
+                {
+                    "line_number": 54
+                }, {
+                    "line_number": 55
+                }, {
+                    "line_number": 56
+                }, {
+                    "line_number": 57
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 46,
+            "line": [
+                {
+                    "line_number": 46
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":59,
+            "line": [
+                {
+                    "line_number": 59
+                }, {
+                    "line_number": 60
+                }, {
+                    "line_number": 61
+                }, {
+                    "line_number": 62
+                }, {
+                    "line_number": 63
+                }, {
+                    "line_number": 64
+                }, {
+                    "line_number": 65
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 48,
+            "line": [
+                {
+                    "line_number": 48
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":67,
+            "line": [
+                {
+                    "line_number": 67
+                }, {
+                    "line_number": 68
+                }, {
+                    "line_number": 69
+                }, {
+                    "line_number": 70
+                }, {
+                    "line_number": 71
+                }, {
+                    "line_number": 72
+                }, {
+                    "line_number": 73
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 50,
+            "line": [
+                {
+                    "line_number": 50
+                }, {
+                    "line_number": 51
+                }, {
+                    "line_number": 52
+                }, {
+                    "line_number": 53
+                }, {
+                    "line_number": 54
+                }, {
+                    "line_number": 55
+                }, {
+                    "line_number": 56
+                }, {
+                    "line_number": 57
+                }, {
+                    "line_number": 58
+                }, {
+                    "line_number": 59
+                }, {
+                    "line_number": 60
+                }, {
+                    "line_number": 61
+                }, {
+                    "line_number": 62
+                }, {
+                    "line_number": 63
+                }, {
+                    "line_number": 64
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":74
+        }
+    }, {
+        "student":
+        {
+            "start": 65
+        },
+        "instructor":
+        {
+            "start":76,
+            "line": [
+                {
+                    "line_number": 76
+                }, {
+                    "line_number": 77
+                }, {
+                    "line_number": 78
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 67,
+            "line": [
+                {
+                    "line_number": 67
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":80,
+            "line": [
+                {
+                    "line_number": 80
+                }, {
+                    "line_number": 81
+                }, {
+                    "line_number": 82
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 69,
+            "line": [
+                {
+                    "line_number": 69
+                }, {
+                    "line_number": 70
+                }, {
+                    "line_number": 71
+                }, {
+                    "line_number": 72
+                }, {
+                    "line_number": 73
+                }, {
+                    "line_number": 74
+                }, {
+                    "line_number": 75
+                }, {
+                    "line_number": 76
+                }, {
+                    "line_number": 77
+                }, {
+                    "line_number": 78
+                }, {
+                    "line_number": 79
+                }, {
+                    "line_number": 80
+                }, {
+                    "line_number": 81
+                }, {
+                    "line_number": 82
+                }, {
+                    "line_number": 83
+                }, {
+                    "line_number": 84
+                }, {
+                    "line_number": 85
+                }, {
+                    "line_number": 86
+                }, {
+                    "line_number": 87
+                }, {
+                    "line_number": 88
+                }, {
+                    "line_number": 89
+                }
+            ]
+        },
+        "instructor":
+        {
+            "start":84,
+            "line": [
+                {
+                    "line_number": 84
+                }, {
+                    "line_number": 85
+                }, {
+                    "line_number": 86
+                }
+            ]
+        }
+    }
+]
+}

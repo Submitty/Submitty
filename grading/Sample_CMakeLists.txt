@@ -13,26 +13,53 @@ set (GRADINGLIB   ${HSS_INSTALL_DIR}/src/grading/lib/libsubmitty_grading.a)
 
 ###################################################################################
 
-# assuming we are in a directory of this structure
-#   HSS_DATA_DIR/courses/which_semester/which_course/build/which_assignment
+# DEFAULT:  NORMAL ASSIGNMENT INSTALLATION
+# NON-DEFAULT:  TEST SUITE INSTALLATION
+option(ASSIGNMENT_INSTALLATION "Normal assignment installation" ON)
 
 set (MY_DIR ${CMAKE_SOURCE_DIR})
 
-# base directory for course
-set (course_dir ${MY_DIR}/../..)
-#alternately/equivalently
-#set (course_dir ${HSS_DATA_DIR}/courses)
+
+IF (ASSIGNMENT_INSTALLATION)
+  # assuming we are in a directory of this structure
+  #   HSS_DATA_DIR/courses/which_semester/which_course/build/which_assignment
+
+  # base directory for course
+  set (course_dir ${MY_DIR}/../..)
+  #alternately/equivalently
+  #set (course_dir ${HSS_DATA_DIR}/courses)
+
+  # just the last part of the current directory
+  get_filename_component(assignment ${MY_DIR} NAME)
+  message("ASSIGNMENT IS ${assignment}")
+
+  # Where the compiled binaries are stored, under the class directory
+  set(my_bin ${course_dir}/bin/${assignment})
+
+  # Assignment configuration json file location
+  set(my_hw_config_file ${course_dir}/config/${assignment}_assignment_config.json)
+
+else (ASSIGNMENT_INSTALLATION)
+  # Otherwise, this is part of the test suite....
+  # base directory for test suite is the immediate parent directory
+  get_filename_component(which_test_dir ${MY_DIR} DIRECTORY)
+
+  # the name of the test is the name of the parent directory
+  get_filename_component(which_test ${which_test_dir} NAME)
+  message("WHICH TEST: ${which_test}")
+
+  
+  include_directories(${which_test_dir}/assignment_config)
 
 
-# just the last part of the current directory
-get_filename_component(assignment ${MY_DIR} NAME)
-message("ASSIGNMENT IS ${assignment}")
+  # Where the compiled binaries are stored
+  set(my_bin ${which_test_dir}/bin)
+  message("this is where i'll put the executables ${my_bin}")
 
-# Where the compiled binaries are stored, under the class directory
-set(my_bin ${course_dir}/bin/${assignment})
+  # configuration json file location
+  set(my_hw_config_file ${which_test_dir}/data/assignment_config.json)
 
-# Assignment configuration json file location
-set(my_hw_config_file ${course_dir}/config/${assignment}_assignment_config.json)
+endif(ASSIGNMENT_INSTALLATION)
 
 
 ###################################################################################
