@@ -457,7 +457,7 @@ if [[ "$#" -ge 1 && $1 == "test" ]]; then
     replace_fillin_variables $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/lib.py
 
     # add a symlink to conveniently run the test suite or specific tests without the full reinstall
-    ln -s  $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/run.py  $HSS_INSTALL_DIR/bin/run_test_suite.py
+    ln -sf  $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/run.py  $HSS_INSTALL_DIR/bin/run_test_suite.py
 
     echo -e "\nRun Autograding Test Suite...\n"
 
