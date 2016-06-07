@@ -1,0 +1,299 @@
+{
+"differences":[
+    {
+        "student":
+        {
+            "start": 2
+        },
+        "instructor":
+        {
+            "start":3,
+            "line": [
+                {
+                    "line_number": 3
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 5
+        },
+        "instructor":
+        {
+            "start":7,
+            "line": [
+                {
+                    "line_number": 7
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 8
+        },
+        "instructor":
+        {
+            "start":11,
+            "line": [
+                {
+                    "line_number": 11
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 11
+        },
+        "instructor":
+        {
+            "start":15,
+            "line": [
+                {
+                    "line_number": 15
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 14
+        },
+        "instructor":
+        {
+            "start":19,
+            "line": [
+                {
+                    "line_number": 19
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 17
+        },
+        "instructor":
+        {
+            "start":23,
+            "line": [
+                {
+                    "line_number": 23
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 20
+        },
+        "instructor":
+        {
+            "start":27,
+            "line": [
+                {
+                    "line_number": 27
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 23
+        },
+        "instructor":
+        {
+            "start":31,
+            "line": [
+                {
+                    "line_number": 31
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 26
+        },
+        "instructor":
+        {
+            "start":35,
+            "line": [
+                {
+                    "line_number": 35
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 29
+        },
+        "instructor":
+        {
+            "start":39,
+            "line": [
+                {
+                    "line_number": 39
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 32
+        },
+        "instructor":
+        {
+            "start":43,
+            "line": [
+                {
+                    "line_number": 43
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 35
+        },
+        "instructor":
+        {
+            "start":47,
+            "line": [
+                {
+                    "line_number": 47
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 38
+        },
+        "instructor":
+        {
+            "start":51,
+            "line": [
+                {
+                    "line_number": 51
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 41
+        },
+        "instructor":
+        {
+            "start":55,
+            "line": [
+                {
+                    "line_number": 55
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 44
+        },
+        "instructor":
+        {
+            "start":59,
+            "line": [
+                {
+                    "line_number": 59
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 47
+        },
+        "instructor":
+        {
+            "start":63,
+            "line": [
+                {
+                    "line_number": 63
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 50
+        },
+        "instructor":
+        {
+            "start":67,
+            "line": [
+                {
+                    "line_number": 67
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 53
+        },
+        "instructor":
+        {
+            "start":71,
+            "line": [
+                {
+                    "line_number": 71
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 56
+        },
+        "instructor":
+        {
+            "start":75,
+            "line": [
+                {
+                    "line_number": 75
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 59
+        },
+        "instructor":
+        {
+            "start":79,
+            "line": [
+                {
+                    "line_number": 79
+                }
+            ]
+        }
+    }, {
+        "student":
+        {
+            "start": 62
+        },
+        "instructor":
+        {
+            "start":83,
+            "line": [
+                {
+                    "line_number": 83
+                }
+            ]
+        }
+    }
+]
+}

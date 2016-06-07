@@ -9,6 +9,19 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
+# check optional argument
+if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" ]]; then
+    echo -e "Usage:"
+    echo -e "   ./INSTALL.sh clean"
+    echo -e "   ./INSTALL.sh clean test"
+    echo -e "   ./INSTALL.sh clear test  <test_case_1>"
+    echo -e "   ./INSTALL.sh clear test  <test_case_1> <test_case_2> <test_case_3>"
+    echo -e "   ./INSTALL.sh test"
+    echo -e "   ./INSTALL.sh test  <test_case_1>"
+    echo -e "   ./INSTALL.sh test  <test_case_1> <test_case_2> <test_case_3>"
+    exit
+fi
+
 echo -e "\nBeginning installation of the homework submission server\n"
 
 
@@ -105,14 +118,18 @@ mkdir -p $HSS_INSTALL_DIR
 
 
 # option for clean install (delete all existing directories/files
-if [[ "$#" -eq 1 && $1 == "clean" ]] ; then
+if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
+
+    # pop this argument from the list of arguments...
+    shift
 
     echo -e "\nDeleting directories for a clean installation\n"
 
-    rm -r $HSS_INSTALL_DIR/website
-    rm -r $HSS_INSTALL_DIR/hwgrading_website
-    rm -r $HSS_INSTALL_DIR/src
-    rm -r $HSS_INSTALL_DIR/bin
+    rm -rf $HSS_INSTALL_DIR/website
+    rm -rf $HSS_INSTALL_DIR/hwgrading_website
+    rm -rf $HSS_INSTALL_DIR/src
+    rm -rf $HSS_INSTALL_DIR/bin
+    rm -rf $HSS_INSTALL_DIR/test_suite
 fi
 
 
@@ -295,7 +312,6 @@ replace_fillin_variables $HSS_INSTALL_DIR/bin/create_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/grade_students.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/grading_done.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/regrade.sh
-replace_fillin_variables $HSS_INSTALL_DIR/bin/build_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/build_homework_function.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/fake_submit_button_press.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/untrusted_execute.c
@@ -424,3 +440,34 @@ rm ${HWCRON_CRONTAB_FILE}
 
 
 echo -e "\nCompleted installation of the homework submission server\n"
+
+
+################################################################################################################
+################################################################################################################
+# INSTALL TEST SUITE
+
+
+# one optional argument installs & runs test suite
+if [[ "$#" -ge 1 && $1 == "test" ]]; then
+
+    # copy the directory tree and replace variables
+    echo -e "Install Autograding Test Suite..."
+    rsync -rz  $HSS_REPOSITORY/tests/  $HSS_INSTALL_DIR/test_suite
+    replace_fillin_variables $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/run.py
+    replace_fillin_variables $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/lib.py
+
+    # add a symlink to conveniently run the test suite or specific tests without the full reinstall
+    ln -sf  $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/run.py  $HSS_INSTALL_DIR/bin/run_test_suite.py
+
+    echo -e "\nRun Autograding Test Suite...\n"
+
+    # pop the first argument from the list of command args
+    shift
+    # pass any additional command line arguments to the run test suite
+    python $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/run.py  "$@" 
+
+    echo -e "\nCompleted Autograding Test Suite\n"
+fi
+
+################################################################################################################
+################################################################################################################
