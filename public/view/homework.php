@@ -207,19 +207,47 @@ if ($svn_checkout == true) {
 
 echo '</form>';
 echo '</div>';
+
 */
+
+//  PARSE PREVIOUSLY SUBMITTED FILES
+  $names = [];
+  $sizes = [];
+  for($i = 1; $i <= $num_parts; $i++){
+    $names[$i] = [];
+    $sizes[$i] = [];
+  }
+  foreach($submitted_files as $f){
+    if($num_parts == 1){
+      $names[$num_parts][] = $f['name'];
+      $sizes[$num_parts][] = $f['size'];
+    }
+    else{
+      //if(substr($f['name'], 0, 3) != "part") { // Error}
+      $names[$f['name'][4]][] = substr($f['name'], 6);
+      $sizes[$f['name'][4]][] = $f['size'];
+    }
+  }
 // DRAG AND DROP STARTS
 // ============================================================================
 
 // MULTIPLE PARTS
-  $num_parts = get_num_parts(get_class_config($semester, $course), $assignment_id);
   for($i = 1; $i <= $num_parts; $i++){
     echo '<div class="outer_box" id="upload'.$i.'" style="cursor: pointer; text-align: center">';
-    echo '<h3 class="label" id="l'.$i.'" >Click or drag your files here';
+    echo '<h3 class="label" id="label'.$i.'" >Click or drag your files here';
     echo '<input type="file" name="files" id="input_file'.$i.'" style="display:none" onchange="addFile('.$i.')" multiple/>';
     echo '</h3>';
-    echo '<p id="disp'.$i.'"><br></p>';
 
+    // ADD LABELS FOR FILES FROM PREVIOUS SUBMISSION
+    ?> <script type="text/javascript"> createArray(<?php echo $num_parts; ?>); </script> <?php
+
+    for($j = 0; $j < count($names[$i]); $j++){
+      ?> <script type="text/javascript">
+      addLabel(<?php echo '"'.$names[$i][$j].'", '.$sizes[$i][$j].', '.$i.", true"; ?>);
+      readPrevious(<?php echo '"'.$names[$i][$j].'", '.$i; ?>);
+      </script> <?php
+    }
+    echo '<hr style="border-top:dotted 2px">';
     echo '<button class="btn btn-primary" id="delete'.$i.'" active>Delete All</button>';
     echo '</div>';
   }
@@ -227,7 +255,11 @@ echo '</div>';
   ?>
 
   <script type="text/javascript">
-    create_file_array(<?php echo $num_parts; ?>);
+  // ONLY ALLOW ADDING/DELETING FILES IN HIGHEST VERSION / NO SUBMISSIONS / SUBMISSION CANCELLED
+  var assignment_version = <?php echo $assignment_version; ?>;
+  var active_version = <?php echo $active_version; ?>;
+  var highest_version = <?php echo $highest_version; ?>;
+  if((active_version == assignment_version && active_version == highest_version)|| assignment_version <= 0){
 
     for(var i = 1; i <= <?php echo $num_parts; ?>; i++ ){
       var dropzone = document.getElementById("upload" + i);
@@ -243,17 +275,33 @@ echo '</div>';
         e.stopPropagation();
       })
     }
-  //document.getElementById("submit").addEventListener("click", function(e){
-  $("#submit").click(function(e){
-    handle_submission(<?php
-      echo "'".check_version($assignment_name, $highest_version, $max_submissions)."', ";
-      echo "'".check_due_date($semester, $course, $assignment_id)."', ";
-      echo "'?page=upload&semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id."', ";
-      echo "'{$_SESSION['csrf']}', ";
-      echo 'false';
-      ?>);
-    e.stopPropagation();
-  })
+    //document.getElementById("submit").addEventListener("click", function(e){
+    $("#submit").click(function(e){
+      handle_submission(<?php
+        echo "'".check_version($assignment_name, $highest_version, $max_submissions)."', ";
+        echo "'".check_due_date($semester, $course, $assignment_id)."', ";
+        echo "'?page=upload&semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id."', ";
+        echo "'{$_SESSION['csrf']}', ";
+        echo 'false';
+        ?>);
+      e.stopPropagation();
+    })
+  }
+  else{
+    for(var i = 1; i <= <?php echo $num_parts; ?>; i++ ){
+      var dropzone = document.getElementById("upload" + i);
+      dropzone.style.background = "lightgrey";
+      // disable labels and buttons
+      var children = dropzone.childNodes;
+      for(var j=0; j<children.length; j++){
+        children[j].onclick = "";
+        children[j].disabled = true;
+      }
+      document.getElementById("upload" + i).style.cursor = "";
+      document.getElementById("submit").disabled = true;
+    }
+  }
+
   </script>
 
   <?php

@@ -17,7 +17,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
 if (isset($_POST["svn_checkout"]) && $_POST["svn_checkout"] == "true") {
 
   $uploaded_file = "";
-  $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id, $num_parts, $uploaded_file, true);
+  $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id, $num_parts, $uploaded_file, $previous_files, true);
 
   $_SESSION["status"] = "uploaded_no_error";
 
@@ -29,12 +29,13 @@ if (isset($_POST["svn_checkout"]) && $_POST["svn_checkout"] == "true") {
       $uploaded_file[$i+1] = $_FILES["files".($i+1)];
     }
   }
+  $previous_files = json_decode($_POST['previous_files']);
   //Upload the files
-  if (isset($uploaded_file)) {
+  if (isset($uploaded_file) || isset($previous_files)) {
   // if (isset($_FILES["files"])) { // if (isset($_FILES["file"])) {
 
     // $uploaded_file = $_FILES["files"]; // $uploaded_file = $_FILES["file"];
-    $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id, $num_parts, $uploaded_file, false);
+    $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id, $num_parts, $uploaded_file, $previous_files, false);
 
     if (isset($result["error"])) {
       //Go to error page?

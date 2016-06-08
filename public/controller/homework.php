@@ -112,6 +112,7 @@ render("homework", array(
     "assignment_description"=>  $assignment_description,
     "ta_grade_released"=>       $ta_grade_released,
     "upload_message"=>          $upload_message,
+    "num_parts"=>               $num_parts,
     "svn_checkout"=>            $svn_checkout,
     "all_assignments"=>         $all_assignments,
     "dev_team"=>                $dev_team,

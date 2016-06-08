@@ -101,7 +101,7 @@ function display_file_permissions($perms) {
 
 
 // Upload HW Assignment to server and unzip
-function upload_homework($username, $semester, $course, $assignment_id, $num_parts, $homework_file, $svn_checkout) {
+function upload_homework($username, $semester, $course, $assignment_id, $num_parts, $homework_file, $previous_files, $svn_checkout) {
     // parts in homework_file: 1 to num_parts
     // check if upload succeeded for all parts
     if ($svn_checkout == false) {
@@ -157,6 +157,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
         $max_size = $assignment_config["max_submission_size"];
     }
     
+    // TODO: check file size of uploaded files and files from previous submission
     // check uploaded file(s) size
     if ($svn_checkout==false) {
       $file_size = 0;
@@ -258,6 +259,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
 
     if ($svn_checkout == false) {
       for($n=1; $n <= $num_parts; $n++){
+        // upload files submitted
         if(isset($homework_file[$n])){
 
           for($i=0; $i < $count[$n]; $i++){
@@ -307,6 +309,16 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
                   return;
                 }
               }
+            }
+          }
+        }
+        // copy selected previous submitted files
+        if(isset($previous_files[$n-1])){
+          for($i=0; $i < count($previous_files[$n-1]); $i++){
+            $copy_return = copy ($user_path."/".($upload_version-1).substr($part_path[$n], strlen($version_path))."/".$previous_files[$n-1][$i], $part_path[$n]."/".$previous_files[$n-1][$i]);
+            if (!$copy_return) {
+              display_error("failed to copy previously submitted file from ".$user_path."/".($upload_version-1).substr($part_path[$n], strlen($version_path))."/".$previous_files[$n-1][$i]);
+              return;
             }
           }
         }
@@ -405,8 +417,8 @@ function get_zip_size($filename) {
         while ($inner_file = zip_read($zip)) {
             $size += zip_entry_filesize($inner_file);
         }
+        zip_close($zip);
     }
-      zip_close($zip);
     return $size;
 }
 
@@ -524,7 +536,7 @@ function get_contents($dir, $max_depth) {
                             array_push($contents, $child);
                         }
                     } else {
-                        array_push($contents, array("name"=>$dir."/".$file, "size"=>floor(filesize($dir."/".$file) / 1024)));
+                        array_push($contents, array("name"=>$dir."/".$file, "size"=>number_format((filesize($dir."/".$file) / 1024),2,".","")));
                     }
                 }
             }
