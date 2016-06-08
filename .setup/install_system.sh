@@ -86,7 +86,7 @@ hardening-includes python p7zip-full patchutils postgresql-client postgresql-cli
 unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libfile-mmagic-perl \
 libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
-libseccomp2 seccomp junit cmake xlsx2csv
+libseccomp2 seccomp junit cmake xlsx2csv libpcre3 libpcre3-dev flex bison 
 
 # Enable PHP5-mcrypt
 php5enmod mcrypt
