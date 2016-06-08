@@ -550,9 +550,8 @@ HTML;
                                     <textarea name="comment-{$question["question_part_number"]}-{$question["question_number"]}" rows="2" style="width:100%; padding:0px; resize:none; margin:0px 0px; border-radius:0px; border:none; padding:5px; border-left:3px #DDD solid; float:left; margin-right:-28px;" placeholder="Message for the student..." comment-position="0">{$question['grade_question_comment']}</textarea>
 HTML;
 
-    $comment = clean_string_javascript($question['grade_question_comment']);
+    $comment = htmlspecialchars($question['grade_question_comment']);
     $comments = \lib\DatabaseUtils::fromPGToPHPArray($question['comments']);
-    array_walk($comments, "clean_string_javascript");
     unset($comments[$comment]);
     if (count($comments) > 0 || ($comment != "" && count($comments) > 1)) {
         $output .= <<<HTML
@@ -571,7 +570,7 @@ HTML;
         $i = 1;
         foreach($comments as $comment)
         {
-            $output .= 'pastComments[' . $i++ . '] = "' . $comment . '";';
+            $output .= 'pastComments[' . $i++ . '] = "' . htmlspecialchars($comment) . '";';
             $output .= "\n";
         }
         $output .= <<<JS
