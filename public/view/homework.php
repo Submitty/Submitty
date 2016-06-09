@@ -247,7 +247,7 @@ echo '</div>';
       readPrevious(<?php echo '"'.$names[$i][$j].'", '.$i; ?>);
       </script> <?php
     }
-    echo '<hr style="border-top:dotted 2px">';
+    echo '<hr id="line'.$i.'" style="border-top:dotted 2px">';
     echo '<button class="btn btn-primary" id="delete'.$i.'" active>Delete All</button>';
     echo '</div>';
   }

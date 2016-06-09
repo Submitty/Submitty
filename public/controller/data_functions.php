@@ -105,23 +105,25 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
     // parts in homework_file: 1 to num_parts
     // check if upload succeeded for all parts
     if ($svn_checkout == false) {
-      for($n=1; $n <= $num_parts; $n++){
-        if(isset($homework_file[$n])){
-          $count[$n] = count($homework_file[$n]["name"]);
-          for($i = 0; $i < $count[$n]; $i++){
-            if (!isset($homework_file[$n]["tmp_name"][$i]) || $homework_file[$n]["tmp_name"][$i] == ""){
-              $error_text = $homework_file[$n]["name"][$i]." did not upload to POST[tmp_name]. ";
-              if (isset($homework_file[$n]["error"][$i])) {
-                $error_text = $error_text."Error code given for upload is ". $homework_file[$n]["error"][$i]." . ";
+      if(isset($homework_file)) {
+        for($n=1; $n <= $num_parts; $n++) {
+          if(isset($homework_file[$n])) {
+            $count[$n] = count($homework_file[$n]["name"]);
+            for($i = 0; $i < $count[$n]; $i++) {
+              if (!isset($homework_file[$n]["tmp_name"][$i]) || $homework_file[$n]["tmp_name"][$i] == "") {
+                $error_text = $homework_file[$n]["name"][$i]." did not upload to POST[tmp_name]. ";
+                if (isset($homework_file[$n]["error"][$i])) {
+                  $error_text = $error_text."Error code given for upload is ". $homework_file[$n]["error"][$i]." . ";
+                }
               }
             }
           }
         }
-      }
-      if(isset($error_text)){
-       $error_text = $error_text. "Error(s) defined at http://php.net/manual/en/features.file-upload.errors.php";
-        // display_error($error_text);
-        return array("error"=>"Upload Failed", "message"=>"Upload Failed: ".$error_text);
+        if(isset($error_text)) {
+         $error_text = $error_text. "Error(s) defined at http://php.net/manual/en/features.file-upload.errors.php";
+          // display_error($error_text);
+          return array("error"=>"Upload Failed", "message"=>"Upload Failed: ".$error_text);
+        }
       }
     }
 
@@ -152,34 +154,109 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
     //VALIDATE HOMEWORK CAN BE UPLOADED HERE
     //ex: homework number, due date, late days
 
+    // check if files from previous submission exists
+    if($svn_checkout == false) {
+      if(isset($previous_files)) {
+
+        // check if folder for this assignment exists
+        $assignment_path = $path_front_course."/submissions/".$assignment_id;
+        if(!file_exists($assignment_path)) {
+          display_error("Folder ".$assignment_path." from previous submission does not exist.");
+          return;
+        }
+
+        // check if folder for this user exists
+        $user_path = $assignment_path."/".$username;
+        if(!file_exists($assignment_path)) {
+          display_error("Folder ".$assignment_path." from previous submission does not exist.");
+          return;
+        }
+
+        //Find the previous homework version number
+        $previous_version = 1;
+        while (file_exists($user_path."/".$previous_version)) {
+          // FIXME: Replace with symlink
+          $previous_version++;
+        }
+        $previous_version -= 1;
+
+        // No previous submission, should not have entered this if statement
+        if($previous_version <= 0) {
+          display_error("No submission found. There should not be any files kept from previous submission.");
+          return;
+        }
+
+        $previous_version_path = $user_path."/".$previous_version;
+
+        // check if folders for parts exist
+        $previous_part_path = [];
+        if($num_parts > 1) {
+          // check folder for multi-part homework
+          for($n=1; $n <= $num_parts; $n++) {
+            $previous_part_path[$n] = $previous_version_path."/part".$n;
+            if (!file_exists($previous_part_path[$n])) {
+              display_error("Folder ".$previous_part_path[$n]." does not exist.");
+              return;
+            }
+          }
+        }
+        else {
+          $previous_part_path[$num_parts] = $previous_version_path;
+        }
+
+        // check if files from previous version exist
+        for($n=1; $n<=$num_parts; $n++) {
+          if(isset($previous_files[$n])) {
+            for($i=0; $i<count($previous_files[$n]); $i++) {
+              $filename = $previous_part_path[$n]."/".$previous_files[$n][$i];
+              if (!file_exists($filename)) {
+                display_error("File ".$filename." does not exist.");
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
+
+
     $max_size = 50;
     if (isset($assignment_config["max_submission_size"])) {
         $max_size = $assignment_config["max_submission_size"];
     }
     
-    // TODO: check file size of uploaded files and files from previous submission
-    // check uploaded file(s) size
+    // check file size of uploaded files and files from previous submission
     if ($svn_checkout==false) {
       $file_size = 0;
-      for($n=1; $n <= $num_parts; $n++){
-        if(isset($homework_file[$n])){          
-          for($i = 0; $i < $count[$n]; $i++){
-            $filename = explode(".", $homework_file[$n]["name"][$i]);
-            $extension = end($filename);
-            if($extension == "zip"){
-              $file_size += get_zip_size($filename);
-            }
-            else {
-              $file_size += $homework_file[$n]["size"][$i];
+      for($n=1; $n <= $num_parts; $n++) {
+        // files uploaded
+        // if(isset($homework_file)) {
+          if(isset($homework_file[$n])) {
+            for($i = 0; $i < $count[$n]; $i++) {
+              $filename = explode(".", $homework_file[$n]["name"][$i]);
+              $extension = end($filename);
+              if($extension == "zip") {
+                $file_size += get_zip_size($filename);
+              }
+              else {
+                $file_size += $homework_file[$n]["size"][$i];
+              }
             }
           }
-        }        
+        // }
+        // files from previous submission
+        // if(isset($previous_files)) {
+          if(isset($previous_files[$n])){
+            for($i=0; $i < count($previous_files[$n]); $i++){
+              $file_size += filesize($previous_part_path[$n]."/".$previous_files[$n][$i]);
+            }
+          }
+        // }
       }
       if ($file_size / 1024 > $max_size) {
         return array("error"=>"", "message"=>"File(s) uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file(s) was ".$file_size / 1024 ." kb.");
       }
     }
-
 
 
     // make folder for this homework (if it doesn't exist)
@@ -313,11 +390,12 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
           }
         }
         // copy selected previous submitted files
-        if(isset($previous_files[$n-1])){
-          for($i=0; $i < count($previous_files[$n-1]); $i++){
-            $copy_return = copy ($user_path."/".($upload_version-1).substr($part_path[$n], strlen($version_path))."/".$previous_files[$n-1][$i], $part_path[$n]."/".$previous_files[$n-1][$i]);
+        if(isset($previous_files[$n])){
+          for($i=0; $i < count($previous_files[$n]); $i++){
+            // $copy_return = copy ($user_path."/".($upload_version-1).substr($part_path[$n], strlen($version_path))."/".$previous_files[$n][$i], $part_path[$n]."/".$previous_files[$n][$i]);
+            $copy_return = copy ($previous_part_path[$n]."/".$previous_files[$n][$i], $part_path[$n]."/".$previous_files[$n][$i]);
             if (!$copy_return) {
-              display_error("failed to copy previously submitted file from ".$user_path."/".($upload_version-1).substr($part_path[$n], strlen($version_path))."/".$previous_files[$n-1][$i]);
+              display_error("failed to copy previously submitted file from ".$previous_part_path[$n]."/".$previous_files[$n][$i]);
               return;
             }
           }
