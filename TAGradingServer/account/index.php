@@ -147,7 +147,7 @@ ORDER BY
     }
 
     if($student_rcs != null) {
-        include "account-new-rubric.php";
+        include "account-rubric.php";
     } else {
         if (User::$is_administrator) {
             Database::query("

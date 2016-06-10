@@ -259,26 +259,6 @@ function sourceSettingsJS($filename, $number) {
 HTML;
 }
 
-function clean_string($str) {
-     $str = trim($str);
-     #$str = str_replace('\r\n', '\n', $str);
-     #$str = str_replace('\n', '\n', $str);
-     #$str = str_replace('\r', '\n', $str);
-     #$str = str_replace(PHP_EOL, '\n', $str);
-     #$str = str_replace("\x20\x0b", '\n', $str); # replace unicode character to prevent javascript errors.
-     #$str = str_replace("\x0d\x0a", '\n', $str); # replace unicode character to prevent javascript errors.
- 
-     return $str;
- }
- 
- function clean_string_javascript($str) {
-     #$str = str_replace('"', '\"', $str);
-     #$str = str_replace('\\\"', '\"', $str);
-     #$str = str_replace("\r","",$str);
-     #$str = str_replace("\n","\"+\n\"",$str);
- 
-     return $str;
- }
 
 /**
  * Given a path to a directory, this function checks to see if the directory exists, and if it doesn't tries to create it.
