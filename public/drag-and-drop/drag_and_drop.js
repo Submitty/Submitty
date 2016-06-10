@@ -42,7 +42,12 @@ function drop(e){
 }
 
 function get_part_number(e){
-	return e.target.id.substring(e.target.id.length - 1);
+	if(e.target.id.substring(0, 6) == "upload"){
+		return e.target.id.substring(6);
+	}
+	else{
+		return e.target.parentNode.id.substring(6);
+	}
 }
 
 // copy files selected from the dialog box
