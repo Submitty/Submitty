@@ -94,7 +94,6 @@ function parse_assignment_id_with_recent($class_config, $most_recent_assignment_
 
 
 function get_assignment_version($username, $semester, $course, $assignment_id) {
-
   // if it's set in the URL, and a valid version (the directory exists), return it
   if (isset($_GET["assignment_version"])) {
     $assignment_version = htmlspecialchars($_GET["assignment_version"]);
@@ -102,13 +101,11 @@ function get_assignment_version($username, $semester, $course, $assignment_id) {
       return $assignment_version;
     }
   }
-
   // otherwise, get the "active" assignment version
   $assignment_version = get_active_version($username, $semester,$course, $assignment_id);
   if (is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {
     return $assignment_version;
   }
-
   // otherwise, return -1 (no submission)
   return -1;
 

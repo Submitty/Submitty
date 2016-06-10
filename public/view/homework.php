@@ -2,6 +2,10 @@
 
 require_once("controller/controller_functions.php");
 
+if($assignment_version <= 0 && $active_version != $assignment_version){
+  header ("Location: index.php?semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
+}
+
 echo '<html>';
 echo '<title>'.$course.'</title>';
 echo "<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700' rel='stylesheet' type='text/css'>";
@@ -575,16 +579,10 @@ echo '</div>'; // end HWsubmission
         return true;
     }
 
-    /*
-    function check_due_date(){
-
-    }
-    */
     function handle_submission(version_check, due_date_check, url, csrf_token, svn_checkout){
-      // TODO: Add checks for due date
-      // if(!version_check || confirm(version_check)) {
       if((!version_check || confirm(version_check)) && (!due_date_check || confirm(due_date_check))){
-        submit(url, csrf_token, svn_checkout);
+        var loc = "?semester="+<?php echo '"'.$semester.'"';?>+"&course="+<?php echo '"'.$course.'"';?>+"&assignment_id="+<?php echo '"'.$assignment_id.'"';?>;
+        submit(url, csrf_token, svn_checkout, loc);
       }
     }
 

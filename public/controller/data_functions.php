@@ -864,12 +864,15 @@ function is_valid_assignment_version($username, $semester, $course, $assignment_
   if (contains_directory_traversal($assignment_version)) {
     return false;
   }
+  if(!is_numeric($assignment_version)) return false;
+
+  if($assignment_version < -1) return false;
 
   // "no submission" = -1 = a valid assignment version
-  if ($assignment_version == -1) return true;
+  if ($assignment_version === -1) return true;
 
   // "cancel" = 0 = a valid assignment version
-  if ($assignment_version == 0) return true;
+  if ($assignment_version === 0) return true;
 
   $path_front = get_path_front_course($semester,$course);
   $path = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;

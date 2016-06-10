@@ -203,7 +203,7 @@ function validSubmission(){
 	return false;
 }
 
-function submit(url, csrf_token, svn_checkout){
+function submit(url, csrf_token, svn_checkout, loc){
 	// alert(JSON.stringify(previous_files));
 	// Check if new submission
 	if(!validSubmission()){
@@ -232,7 +232,8 @@ function submit(url, csrf_token, svn_checkout){
         if (xhr.readyState == 4 && xhr.status == 200) {
             // Handle response.
             // alert(xhr.responseText);
-            window.location.reload();
+            // window.location.reload();
+            window.location.href = loc;
         }
     };
 	xhr.send(files_to_upload);
