@@ -190,7 +190,10 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
 
         // check if folders for parts exist
         $previous_part_path = [];
-        if($num_parts > 1) {
+        // ===========================================================================================
+        // Uncomment the if-else statement if want single-parted hw to be put under the version folder
+        // ===========================================================================================
+        //if($num_parts > 1) {
           // check folder for multi-part homework
           for($n=1; $n <= $num_parts; $n++) {
             $previous_part_path[$n] = $previous_version_path."/part".$n;
@@ -199,10 +202,10 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
               return;
             }
           }
-        }
-        else {
-          $previous_part_path[$num_parts] = $previous_version_path;
-        }
+        // }
+        // else {
+        //   $previous_part_path[$num_parts] = $previous_version_path;
+        // }
 
         // check if files from previous version exist
         for($n=1; $n<=$num_parts; $n++) {
@@ -320,7 +323,10 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
     }
 
     $part_path = [];
-    if($num_parts > 1){
+    // ===========================================================================================
+    // Uncomment the if-else statement if want single-parted hw to be put under the version folder
+    // ===========================================================================================
+    // if($num_parts > 1){
       // Create folder for multi-part homework
       for($n=1; $n <= $num_parts; $n++){
         $part_path[$n] = $version_path."/part".$n;
@@ -329,10 +335,10 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
           return;
         }
       }
-    }
-    else{ // else if homework is single-parted, put it in the version path folder
-      $part_path[$num_parts] = $version_path;
-    }
+    // }
+    // else{ // else if homework is single-parted, put it in the version path folder
+    //   $part_path[$num_parts] = $version_path;
+    // }
 
     if ($svn_checkout == false) {
       for($n=1; $n <= $num_parts; $n++){

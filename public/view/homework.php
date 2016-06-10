@@ -222,15 +222,18 @@ echo '</div>';
     $sizes[$i] = [];
   }
   foreach($submitted_files as $f){
-    if($num_parts == 1){
-      $names[$num_parts][] = $f['name'];
-      $sizes[$num_parts][] = $f['size'];
-    }
-    else{
+    // ===========================================================================================
+    // Uncomment the if-else statement if want single-parted hw to be put under the version folder
+    // ===========================================================================================
+    // if($num_parts == 1){
+    //   $names[$num_parts][] = $f['name'];
+    //   $sizes[$num_parts][] = $f['size'];
+    // }
+    // else{
       //if(substr($f['name'], 0, 3) != "part") { // Error}
       $names[$f['name'][4]][] = substr($f['name'], 6);
       $sizes[$f['name'][4]][] = $f['size'];
-    }
+    // }
   }
 // DRAG AND DROP STARTS
 // ============================================================================
