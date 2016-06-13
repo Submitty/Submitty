@@ -14,10 +14,8 @@ use app\libraries\IniParser;
  * the application. These variables are loaded from a combination of files and tables from
  * the database. We also allow for using this to write back to the variables within the database
  * (but not the variables in the files).
- *
- * @since 1.0.0
  */
-class Config {
+class Config extends Model {
 
     /**
      * Variable to set the system to debug mode, which allows, among other things
@@ -35,6 +33,8 @@ class Config {
     /*** MASTER CONFIG ***/
     private $base_url;
     private $site_url;
+    private $authentication;
+    private $timezone = "America/New_York";
     private $hss_path;
     private $hss_course_path;
     private $hss_log_path;
@@ -97,11 +97,15 @@ class Config {
         $master = IniParser::readFile(implode("/", array($this->config_path, 'master.ini')));
 
         $this->setConfigValues($master, 'logging_details', array('hss_log_path', 'log_exceptions'));
-        $this->setConfigValues($master, 'site_details', array('base_url', 'hss_path'));
+        $this->setConfigValues($master, 'site_details', array('base_url', 'hss_path', 'authentication'));
         $this->setConfigValues($master, 'database_details', array('database_host', 'database_user', 'database_password'));
 
         if (isset($master['site_details']['debug'])) {
             $this->debug = $master['site_details']['debug'];
+        }
+
+        if (isset($master['site_details']['timezone'])) {
+            $this->timezone = $master['site_details']['timezone'];
         }
 
         if (isset($master['database_details']['database_type'])) {
@@ -114,7 +118,7 @@ class Config {
         // Check that the paths from the config file are valid
         foreach(array('hss_path', 'hss_log_path') as $path) {
             if (!is_dir($this->$path)) {
-                throw new ConfigException("Invalid path for setting: {$path}");
+                throw new ConfigException("Invalid path for setting: {$path}\n\n{$this->$path}");
             }
             $this->$path = rtrim($this->$path, "/");
         }
@@ -301,5 +305,19 @@ class Config {
 
     public function getConfigPath() {
         return $this->config_path;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAuthentication() {
+        return $this->authentication;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTimezone() {
+        return $this->timezone;
     }
 }

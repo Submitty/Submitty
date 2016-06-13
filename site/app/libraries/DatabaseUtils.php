@@ -4,7 +4,9 @@ namespace app\libraries;
 
 /**
  * Class DatabaseUtils
- * @package lib
+ *
+ * Contains utility functions for interacting between a database and PHP. Generally, this means
+ * translating a field returned from a database into a specific type within PHP.
  */
 class DatabaseUtils {
 

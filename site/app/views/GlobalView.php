@@ -89,16 +89,13 @@ HTML;
             if($this->core->getUser()->accessAdmin()) {
                 $return .= <<<HTML
         <li><a href="#">Report Tools</a></li>
-        <li class="dropdown"><a href="#">Manage Gradeables</a>
-            <div class="dropdown-content">
-                <a href="{$this->core->buildUrl(array('component' => 'admin',
-                                                      'page' => 'assignments',
-                                                      'action' => 'list'))}">Manage Assignments</a>
-                <a href="#">Manage Labs</a>
-                <a href="#">Manage Tests</a>
-            </div>
+        <li><a href="{$this->core->buildUrl(array('component' => 'admin',
+                                                  'page' => 'gradeables',
+                                                  'action' => 'list'))}">Manage Gradeables</a>
         </li>
-        <li><a href="#">View Students</a></li>
+        <li><a href="{$this->core->buildUrl(array('component' => 'admin',
+                                                  'page' => 'users',
+                                                  'action' => 'listStudents'))}">View Students</a></li>
         <li><a href="#">View Users</a></li>
         <li><a href="{$this->core->buildUrl(array('component' => 'admin', 
                                                   'page' => 'configuration', 
@@ -127,6 +124,7 @@ HTML;
         $course_name = htmlentities($this->core->getConfig()->getCourseName());
         $return .= <<<HTML
 <div id="header">
+    <div id="header-logo"></div>
     <h1 id="header-text">Homework Submissions for {$course_name}</h1>
 </div>
 

@@ -8,9 +8,11 @@ use app\exceptions\IOException;
 
 /**
  * Class IniParser
- * @package app\libraries
  *
- * @since 1.0.0
+ * Helper to interact with ini files, both reading them in as well as writing out an array
+ * to the ini file. Loosely based on austinhyde's IniParser (@link https://github.com/austinhyde/IniParser)
+ * however stripped of some of its more advanced (and unnecessary features) as well as slight changes to
+ * type handling.
  */
 class IniParser {
     /**

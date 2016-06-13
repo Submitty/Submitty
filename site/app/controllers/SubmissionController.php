@@ -16,7 +16,7 @@ class SubmissionController implements IController {
     }
 
     public function run() {
-        $assignments = $this->core->getQueries()->getAllAssignments();
+        $assignments = $this->core->getQueries()->getAllGradeables();
 
         Output::render(array('submission', 'Homework'), 'startContent');
 

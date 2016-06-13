@@ -73,7 +73,7 @@ HTML;
 <h1 style="margin-left: 20px; margin-top: 10px;">403: Forbidden</h1>
 <div style="position: absolute; top: 218px; left: 203px; border: 1px dashed black; padding: 10px; font-family: monospace">
 It does not look like you're allowed to access this page.<br /><br />
-{$error_message}<br /><br />
+Reason: {$error_message}<br /><br />
 Please contact system administrators if you believe this is a mistake.
 </div>
 
