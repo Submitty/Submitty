@@ -1,0 +1,129 @@
+{
+	"submission_number": 1,
+	"points_awarded": 5,
+	"nonhidden_points_awarded": 5,
+	"extra_credit_points_awarded": 0,
+	"non_extra_credit_points_awarded": 5,
+	"submission_time": "0",
+	"testcases": [
+		{
+			"test_name": "Test 1 README",
+			"execute_logfile": "test01_execute_logfile.txt",
+			"points_awarded": 2
+		},
+		{
+			"test_name": "Test 2 Compilation",
+			"execute_logfile": "test02_execute_logfile.txt",
+			"compilation_output": "test02_STDERR.txt",
+			"points_awarded": 3
+		},
+		{
+			"test_name": "Test 3 Regular char by char comparision",
+			"execute_logfile": "test03_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test03_0_diff",
+					"student_file":"test03_output.txt",
+					"instructor_file":"test_output/testassignment/inst_output.txt",
+					"difference":"test03_0_diff.json",
+					"description": "output.txt",
+					"message": " "
+				},
+				{
+					"diff_id":"test03_1_diff",
+					"student_file":"test03_STDOUT.txt",
+					"description": "STDOUT",
+					"message": " "
+				},
+				{
+					"diff_id":"test03_2_diff",
+					"student_file":"test03_STDERR.txt",
+					"description": "STDERR",
+					"message": " "
+				}
+			],
+			"points_awarded": 0
+		},
+		{
+			"test_name": "Test 4 Test of by word comparison",
+			"execute_logfile": "test04_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test04_0_diff",
+					"student_file":"test04_output.txt",
+					"instructor_file":"test_output/testassignment/inst_output.txt",
+					"difference":"test04_0_diff.json",
+					"description": "output.txt",
+					"message": " "
+				},
+				{
+					"diff_id":"test04_1_diff",
+					"student_file":"test04_STDOUT.txt",
+					"description": "STDOUT",
+					"message": " "
+				},
+				{
+					"diff_id":"test04_2_diff",
+					"student_file":"test04_STDERR.txt",
+					"description": "STDERR",
+					"message": " "
+				}
+			],
+			"points_awarded": 0
+		},
+		{
+			"test_name": "Test 5 Test of by line comparison",
+			"execute_logfile": "test05_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test05_0_diff",
+					"student_file":"test05_output.txt",
+					"instructor_file":"test_output/testassignment/inst_output.txt",
+					"difference":"test05_0_diff.json",
+					"description": "output.txt",
+					"message": " "
+				},
+				{
+					"diff_id":"test05_1_diff",
+					"student_file":"test05_STDOUT.txt",
+					"description": "STDOUT",
+					"message": " "
+				},
+				{
+					"diff_id":"test05_2_diff",
+					"student_file":"test05_STDERR.txt",
+					"description": "STDERR",
+					"message": " "
+				}
+			],
+			"points_awarded": 0
+		},
+		{
+			"test_name": "Test 6 Test of by line without whitespace comparison",
+			"execute_logfile": "test06_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test06_0_diff",
+					"student_file":"test06_output.txt",
+					"instructor_file":"test_output/testassignment/inst_output.txt",
+					"difference":"test06_0_diff.json",
+					"description": "output.txt",
+					"message": " "
+				},
+				{
+					"diff_id":"test06_1_diff",
+					"student_file":"test06_STDOUT.txt",
+					"description": "STDOUT",
+					"message": " "
+				},
+				{
+					"diff_id":"test06_2_diff",
+					"student_file":"test06_STDERR.txt",
+					"description": "STDERR",
+					"message": " "
+				}
+			],
+			"points_awarded": 0
+		}
+	]
+}

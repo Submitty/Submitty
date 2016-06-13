@@ -291,6 +291,15 @@ class TestcaseWrapper:
         if os.stat(filename1).st_size != 0:
             raise RuntimeError("File " + f + " should be empty")
 
+    def empty_json_diff(self, f):
+        # if no directory provided...
+        if not os.path.dirname(f):
+            f = os.path.join("data", f)
+        filename1 = os.path.join(self.testcase_path, f)
+        filename2 = os.path.join(HSS_INSTALL_DIR,"test_suite/integrationTests/scripts/empty_json_diff_file.json")
+        return self.json_diff(filename1,filename2)
+
+
 
 def prebuild(func):
     mod = inspect.getmodule(inspect.stack()[1][0])
