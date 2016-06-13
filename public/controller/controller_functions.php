@@ -129,14 +129,10 @@ function check_semester(){
         return $semester;
     } else {
         $_SESSION["status"] = "Invalid semester specified";
-        $course = $default_course;
-        if (isset($_GET["course"])) {
-            $course = htmlspecialchars($_GET["course"]);
-        }
-//FIXME:  Please include error HTML file in repo to avoid triggering 404 errors in apache.
-//		header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
-//      header("Location: ERROR_Xbad_semester_error.html");
-		return "f00";
+        header("HTTP/1.0 404 Not Found");
+        echo "An error has occured: ";
+        echo "Invalid semester ".'"'.$semester.'"';
+        exit();
     }
 }
 
@@ -157,15 +153,13 @@ function check_course() {
     }
 
     if (is_valid_course($semester,$course)) {
-        $_SESSION["status"] = "";
-
         return $course;
     } else {
         $_SESSION["status"] = "Invalid course specified";
-//FIXME:  Please include error HTML file in repo to avoid triggering 404 errors in apache.
-//      header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
-//      header("Location: ERROR_X_bad_course_error.html");
-	    return "csci0000";
+        header("HTTP/1.0 404 Not Found");
+        echo "An error has occured: ";
+        echo "Invalid course ".'"'.$course.'"';
+        exit();
     }
 }
 
