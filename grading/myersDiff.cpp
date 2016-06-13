@@ -284,7 +284,7 @@ template<class T> Difference* ses ( T* student_output, T* inst_output, bool seco
 template<class T> metaData< T > sesSnapshots ( T* student_output, T* inst_output, bool extraStudentOutputOk ) {
 	//takes 2 strings or vectors of values and finds the shortest edit script
 	//to convert a into b
-	int student_output_size = ( int ) student_output->size();
+        int student_output_size = ( int ) student_output->size();
 	int inst_output_size = ( int ) inst_output->size();
 	metaData< T > text_diff;
 	if ( student_output_size == 0 && inst_output_size == 0 ) {
@@ -300,10 +300,10 @@ template<class T> metaData< T > sesSnapshots ( T* student_output, T* inst_output
 	// WHAT IS V?
 	//std::vector< int > v( ( a_size + b_size ) * 2, 0 );
 	// TODO: BOUNDS ERROR, is this the appropriate fix?
-	std::vector< int > v( ( a_size + b_size ) * 2 + 1, 0 );
+	std::vector< int > v( ( student_output_size + inst_output_size ) * 2 + 1, 0 );
 
 	//loop until the correct diff (d) value is reached, or until end is reached
-	for ( int d = 0; d <= ( a_size + b_size ); d++ ) {
+	for ( int d = 0; d <= ( student_output_size + inst_output_size ); d++ ) {
 		// find all the possibile k lines represented by  y = x-k from the max
 		// negative diff value to the max positive diff value
 		// represents the possibilities for additions and deletions at diffrent
@@ -312,11 +312,11 @@ template<class T> metaData< T > sesSnapshots ( T* student_output, T* inst_output
 			//which is the farthest path reached in the previous iteration?
 		  bool down = ( k == -d ||
 		  	          ( k != d && v[ ( k - 1 ) + ( student_output_size + inst_output_size )]
-				      < v[ ( k + 1 ) + ( a_size + b_size )] ) );
+				      < v[ ( k + 1 ) + ( student_output_size + inst_output_size )] ) );
 			int k_prev, a_start, a_end, b_end;
 			if ( down ) {
 				k_prev = k + 1;
-				a_start = v[k_prev + ( student_output_size\ + inst_output_size )];
+				a_start = v[k_prev + ( student_output_size + inst_output_size )];
 				a_end = a_start;
 			} else {
 				k_prev = k - 1;
@@ -334,7 +334,7 @@ template<class T> metaData< T > sesSnapshots ( T* student_output, T* inst_output
 			// save end point
 			if (k+(student_output_size+inst_output_size) < 0 || k+(student_output_size+inst_output_size) >= v.size()) {
 			  std::cerr << "ERROR VALUE " << k+(student_output_size+inst_output_size) << " OUT OF RANGE " << v.size() << " k=" << k 
-			            << " a_size=" << student_output_size << " b_size=" << inst_output_size << std::endl;
+			            << " student_output_size=" << student_output_size << " inst_output_size=" << inst_output_size << std::endl;
 			}
 			v[k + ( student_output_size + inst_output_size )] = a_end;
 			// check for solution

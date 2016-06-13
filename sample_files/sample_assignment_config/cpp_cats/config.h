@@ -33,7 +33,7 @@ std::vector<TestCase> testcases
     TestCase::MakeTestCase(
          "Regular char by char comparision",                    // title
          "./byChar.exe input.txt output.txt",                   // details
-         "./a.out cats.txt output.txt",                         // command
+         "./a.out CatBreeds.txt output.txt",                         // command
         TestCasePoints(4),                                      // points=0, hidden=false, extra_credit=false, view_test_case=true,  view_points=false
         {new TestCaseComparison(&myersDiffbyLinebyChar,         // compare function [V]
             "output.txt",                                       // output file name [V]
@@ -47,7 +47,7 @@ std::vector<TestCase> testcases
     TestCase::MakeTestCase(
          "Test of by word comparison",                                  // title
          "./byWord.exe input.txt output.txt",                           // details
-         "./a.out cats.txt output.txt",                                 // command
+         "./a.out CatBreeds.txt output.txt",                                 // command
         TestCasePoints(4),                                              // points=0, hidden=false, extra_credit=false, view_test_case=true,  view_points=false 
         {new TestCaseComparison(&myersDiffbyLinebyWord,                 // compare function [V]
             "output.txt",                                               // output file name [V]
@@ -61,7 +61,7 @@ std::vector<TestCase> testcases
     TestCase::MakeTestCase(
          "Test of by line comparison",                                  // title
          "./byLine.exe input.txt output.txt",                            // details
-         "./a.out cats.txt output.txt",                                 // command
+         "./a.out CatBreeds.txt output.txt",                                 // command
         TestCasePoints(4),                                              // points=0, hidden=false, extra_credit=false, view_test_case=true,  view_points=false 
         {new TestCaseComparison(&myersDiffbyLine,                       // compare function [V]
             "output.txt",                                               // output file name [V]
@@ -75,7 +75,7 @@ std::vector<TestCase> testcases
     TestCase::MakeTestCase(
          "Test of by line without whitespace comparison",               // title
          "./byLineNoWhite.exe input.txt output.txt",                     // details
-         "./a.out cats.txt output.txt",                                 // command
+         "./a.out CatBreeds.txt output.txt",                                 // command
         TestCasePoints(4),                                              // points=0, hidden=false, extra_credit=false, view_test_case=true,  view_points=false 
         {new TestCaseComparison(&myersDiffbyLineNoWhite,                // compare function [V]
             "output.txt",                                               // output file name [V]
@@ -87,3 +87,6 @@ std::vector<TestCase> testcases
         new TestCaseComparison(&warnIfNotEmpty,"STDERR.txt","STDERR","", 0)
         })
 };
+
+
+#endif
