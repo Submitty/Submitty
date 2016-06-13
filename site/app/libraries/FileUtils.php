@@ -2,7 +2,11 @@
 
 namespace app\libraries;
 
-
+/**
+ * Class FileUtils
+ *
+ * Contains various useful functions for interacting with files and directories.
+ */
 class FileUtils {
     /**
      * Recursively return all files in a directory and subdirectories, assuming the files
@@ -148,7 +152,7 @@ class FileUtils {
      *
      * @param $path
      *
-     * @return bool
+     * @return bool true if operation succeeded, false otherwise
      */
     public static function recursiveCreateDir($path) {
         $return = true;

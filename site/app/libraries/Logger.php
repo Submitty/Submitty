@@ -2,8 +2,6 @@
 
 namespace app\libraries;
 
-use app\models\Config;
-
 class Logger {
 
     /**
@@ -95,12 +93,12 @@ class Logger {
         FileUtils::createDir(static::$log_path);
 
         $date = getdate(time());
-        $filename = $date['year'].Functions::pad($date['mon']).Functions::pad($date['mday']);
+        $filename = $date['year']. Utils::pad($date['mon']) . Utils::pad($date['mday']);
 
-        $log_message = Functions::pad($date['mday'])."/".Functions::pad($date['mon'])."/".$date['year'];
+        $log_message = Utils::pad($date['mday']) ."/". Utils::pad($date['mon']) ."/".$date['year'];
         $log_message .= " ";
-        $log_message .= Functions::pad($date['hours']).":".Functions::pad($date['minutes']).":";
-        $log_message .= Functions::pad($date['seconds']);
+        $log_message .= Utils::pad($date['hours']) .":". Utils::pad($date['minutes']) .":";
+        $log_message .= Utils::pad($date['seconds']);
         $log_message .= " - ";
         switch($level) {
             case 0:

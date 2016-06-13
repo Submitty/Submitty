@@ -2,8 +2,9 @@
 
 namespace app\controllers;
 
-use app\controllers\admin\AssignmentsController;
+use app\controllers\admin\GradeablesController;
 use app\controllers\admin\ConfigurationController;
+use app\controllers\admin\UsersController;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\models\User;
@@ -25,20 +26,21 @@ class AdminController implements IController {
 
         $controller = null;
         switch ($_REQUEST['page']) {
-            case 'assignments':
-                $controller = new AssignmentsController($this->core);
+            case 'gradeables':
+                $controller = new GradeablesController($this->core);
                 break;
             case 'labs':
                 break;
             case 'tests':
                 break;
             case 'users':
+                $controller = new UsersController($this->core);
                 break;
             case 'configuration':
                 $controller = new ConfigurationController($this->core);
                 break;
             default:
-                Output::showError("Invalid page request for controller");
+                Output::showError("Invalid page request for controller ".get_class($this));
                 break;
         }
         $controller->run();

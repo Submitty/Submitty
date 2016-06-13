@@ -4,14 +4,11 @@ namespace app\libraries;
 
 /**
  * Class LipsumGenerator
- * @package app\libraries
  *
  * Provides a way to generate dummy text to be used on a page using
  * http://www.lipsum.com as the generator. More convinent than
  * having to go to the site itself and copy/paste and then
  * manually converting all line breaks into <br /> tags in the HTML!
- *
- * @since 1.0.0
  */
 class LipsumGenerator {
     const BASE_URL = "http://www.lipsum.com/feed/json";

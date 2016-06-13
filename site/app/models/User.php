@@ -3,9 +3,11 @@
 namespace app\models;
 
 use app\libraries\database\IDatabaseQueries;
-use app\libraries\Output;
 
-class User {
+/**
+ * Class User
+ */
+class User extends Model {
     /**
      * @var array
      */

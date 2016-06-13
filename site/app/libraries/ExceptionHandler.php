@@ -9,8 +9,6 @@ use app\exceptions\BaseException;
  *
  * Use this when want to throw an exception, but not necessarily
  * show the exact exception to the user (e.g. throwing database exceptions).
- *
- * @package lib
  */
 class ExceptionHandler {
 
@@ -84,8 +82,10 @@ class ExceptionHandler {
             }
             $line++;
         }
-        $message = "{$exception_name} thrown in {$file} ({$exception_line}) by:\n{$line_code}\n\n";
-        $message .= "Message:\n{$exception->getMessage()}\nStrack Trace:\n{$exception->getTraceAsString()}\n";
+        
+        $message = "{$exception_name} (Code: {$exception->getCode()}) thrown in {$file} 
+        ({$exception_line}) by:\n{$line_code}\n\nMessage:\n{$exception->getMessage()}\n
+        Strack Trace:\n{$exception->getTraceAsString()}\n";
 
         if ($is_base_exception) {
             /** @type BaseException $exception */

@@ -8,7 +8,6 @@ use app\exceptions\DatabaseException;
 
 /**
  * Class Database
- * @package lib
  */
 class Database {
 

@@ -7,12 +7,9 @@ namespace app\libraries;
 
 /**
  * Class AutoLoader
- * @package app\libraries
  *
  * Autoloads files for classes assuming that class name and file name are
  * are the same
- *
- * @since 1.0.0
  */
 class AutoLoader {
     /**
