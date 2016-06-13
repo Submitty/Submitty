@@ -238,7 +238,8 @@ class TestcaseWrapper:
         if not os.path.isfile(filename2):
             raise RuntimeError("File " + filename2 + " does not exist")
 
-        return_code = subprocess.call(["diff", "-b", filename1, filename2])
+        #return_code = subprocess.call(["diff", "-b", filename1, filename2]) #ignores changes in white space
+        return_code = subprocess.call(["diff", filename1, filename2])
         if return_code == 1:
             raise RuntimeError("Difference between " + filename1 + " and " + filename2 + " exited with exit code " + str(return_code))
 
