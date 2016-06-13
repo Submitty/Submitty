@@ -238,7 +238,8 @@ class TestcaseWrapper:
         if not os.path.isfile(filename2):
             raise RuntimeError("File " + filename2 + " does not exist")
 
-        return_code = subprocess.call(["diff", "-b", filename1, filename2])
+        #return_code = subprocess.call(["diff", "-b", filename1, filename2]) #ignores changes in white space
+        return_code = subprocess.call(["diff", filename1, filename2])
         if return_code == 1:
             raise RuntimeError("Difference between " + filename1 + " and " + filename2 + " exited with exit code " + str(return_code))
 
@@ -289,6 +290,15 @@ class TestcaseWrapper:
         filename1 = os.path.join(self.testcase_path, f)
         if os.stat(filename1).st_size != 0:
             raise RuntimeError("File " + f + " should be empty")
+
+    def empty_json_diff(self, f):
+        # if no directory provided...
+        if not os.path.dirname(f):
+            f = os.path.join("data", f)
+        filename1 = os.path.join(self.testcase_path, f)
+        filename2 = os.path.join(HSS_INSTALL_DIR,"test_suite/integrationTests/scripts/empty_json_diff_file.json")
+        return self.json_diff(filename1,filename2)
+
 
 
 def prebuild(func):
