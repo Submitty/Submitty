@@ -20,7 +20,7 @@ $dev_team =                         $class_config["dev_team"];
 $assignment_id =                    parse_assignment_id_with_recent($class_config, $most_recent_assignment_id);
 //$assignment_version =               parse_assignment_version_with_recent($username, $semester,$course, $assignment_id);
 $assignment_version =               get_assignment_version($username, $semester,$course, $assignment_id);
-
+$num_parts =                        get_num_parts($class_config, $assignment_id);
 $assignment_name =                  name_for_assignment_id($class_config, $assignment_id);
 $assignment_link =                  link_for_assignment_id($class_config, $assignment_id);
 $assignment_description =            description_for_assignment_id($class_config, $assignment_id);
@@ -112,6 +112,7 @@ render("homework", array(
     "assignment_description"=>  $assignment_description,
     "ta_grade_released"=>       $ta_grade_released,
     "upload_message"=>          $upload_message,
+    "num_parts"=>               $num_parts,
     "svn_checkout"=>            $svn_checkout,
     "all_assignments"=>         $all_assignments,
     "dev_team"=>                $dev_team,
