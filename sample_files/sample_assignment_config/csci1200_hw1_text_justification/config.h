@@ -22,7 +22,7 @@ std::vector<TestCase> testcases
 
     TestCase::MakeCompilation(
     "Compilation",
-    "/usr/bin/g++ -Wall -o a.out -- *.cpp",
+    "/usr/bin/g++ -Wall -o a.out -- part1/*.cpp",
     "a.out",		// name of .exe created by student
     TestCasePoints(3)
     ),

@@ -26,7 +26,7 @@ std::vector<TestCase> testcases
 
     TestCase::MakeCompilation(
     "Compilation",
-    "/usr/bin/gcc -Wall -o a.out *.c",
+    "/usr/bin/gcc -Wall -o a.out part1/*.c",
     "a.out",		// name of .exe created by student
     TestCasePoints(5)
     ),
