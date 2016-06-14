@@ -89,6 +89,8 @@ libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-z
 libseccomp2 seccomp junit cmake xlsx2csv
 
 pip install python-pam
+chmod 555 /usr/local/lib/python2.7/*
+chmod 555 /usr/lib/python2.7/dist-packages
 
 # Enable PHP5-mcrypt
 php5enmod mcrypt

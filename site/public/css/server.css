@@ -2,6 +2,12 @@
 @import url("https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700");
 @import url("https://fonts.googleapis.com/css?family=Inconsolata");
 @import url("bootstrap.css");
+@font-face {
+    font-family: 'Grand Hotel';
+    src: url('../fonts/grand-hotel/GrandHotel-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
 
 html {
     height: 100%;
@@ -137,7 +143,7 @@ textarea {
 
 #header {
     background-color: #edf6f6;
-    height: 100px;
+    height: 125px;
     /*text-align: center;*/
     box-shadow: 0 2px 15px -5px #888888;
     font-family: 'Open Sans Condensed', sans-serif;
@@ -150,12 +156,31 @@ textarea {
     margin-left: 20px;
 }
 
-#header-logo {
-    content: url("../img/logo.png");
+#logo-text {
     float: right;
-    height: 75px;
-    margin-top: 7px;
-    margin-right: 20px;
+    margin-top: 10px;
+    margin-right: 30px;
+}
+
+#logo-text h1 {
+    display: block;
+    font-size: 100px !important;
+    line-height: 80px;
+    letter-spacing: -1px;
+    text-align: center;
+    clear: both;
+    font-family: 'Grand Hotel', serif;
+}
+
+#logo-text h2 {
+    display: block;
+    font-family: "Roboto", sans-serif;
+    font-size: 13px !important;
+    font-weight: 300;
+    text-align: center;
+    padding-right: 20px;
+    clear: both;
+    position: relative;
 }
 
 #content {
@@ -272,8 +297,6 @@ textarea {
     margin-top: 10px;
     width: 30%;
 }
-
-
 
 .post-panel-btn {
     height: 20px;

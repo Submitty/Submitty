@@ -90,7 +90,7 @@ interface IDatabaseQueries {
 
     /**
      * @todo: write phpdoc
-     *      
+     *
      * @param $session_id
      *
      * @return array
@@ -107,8 +107,13 @@ interface IDatabaseQueries {
     public function newSession($user_id);
 
     /**
-     * Remove expired sessions that have the current time being past the current date time
-     * from the database.
+     * @param $session_id
+     */
+    public function updateSessionExpiration($session_id);
+
+    /**
+     * Remove sessions which have their expiration date before the
+     * current timestamp
      */
     public function removeExpiredSessions();
 }

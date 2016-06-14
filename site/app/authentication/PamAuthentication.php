@@ -44,11 +44,15 @@ class PamAuthentication implements IAuthentication {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getBaseUrl()."cgi-bin/pam_check.cgi?file={$file}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = json_decode(curl_exec($ch), true);
+        $output = curl_exec($ch);
+        if ($output === false) {
+            throw new AuthenticationException(curl_error($ch));
+        }
+        $output = json_decode($output, true);
         curl_close($ch);
 
         if (!isset($output['authenticated'])) {
-            throw new AuthenticationException("Could not run PAM authentication script");
+            throw new AuthenticationException("Could not authenticate against PAM");
         }
 
         return true;
