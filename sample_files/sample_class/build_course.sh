@@ -52,7 +52,7 @@ build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/python_b
 build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/python_simple_homework_multipart/  $semester   $course   multi_part_python
 
 build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/cpp_simple_lab/                    $semester   $course   cpp_lab01
-build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/cpp_memory_debugging_lab/          $semester   $course   cpp_lab02
+build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/cpp_memory_debugging/              $semester   $course   cpp_lab02
 build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/cpp_cats/                          $semester   $course   cpp_hw01
 
 # build homeworks from a private repo
