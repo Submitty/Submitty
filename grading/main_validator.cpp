@@ -138,13 +138,16 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
       if ( access( testcases[i].getFilename().c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
         std::cerr << "file does exist: " << testcases[i].getFilename() << std::endl;
-        testcase_pts = testcases[i].points();
         // CHECK IF WARNINGS EXIST
         std::ifstream ifstr(testcases[i].prefix() + "_STDERR.txt");
         if(!ifstr) std::cerr << testcases[i].prefix() <<  "_STDERR.txt" << " not open.";
         else if(ifstr.peek() != std::ifstream::traits_type::eof()){
           std::cerr << testcases[i].prefix() <<  "_STDERR.txt" << " not empty.";
+          testcase_pts = (int)floor( testcases[i].points()*(1 - testcases[i].get_warning_frac()) );
           message += "Unresolved warnings in your program!";
+        }
+        else{
+          testcase_pts = testcases[i].points();
         }
       }
       else {
