@@ -456,12 +456,6 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
 function is_valid_zip_size($filename, $max_size) {
     $size = 0;
     $zip = zip_open($filename);
-    //
-    // FIXME: bug with this check?  Getting this warning when a non zip is uploaded
-    //
-    // Warning: zip_read() expects parameter 1 to be resource, integer given
-    // Warning: zip_close() expects parameter 1 to be resource, integer given
-    //
 
     if (is_resource($zip)) {
         while ($inner_file = zip_read($zip)) {
