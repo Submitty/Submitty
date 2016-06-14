@@ -161,28 +161,25 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
         // check if folder for this assignment exists
         $assignment_path = $path_front_course."/submissions/".$assignment_id;
         if(!file_exists($assignment_path)) {
-          display_error("Folder ".$assignment_path." from previous submission does not exist.");
+          display_error("Files from previous submission not found. Folder for this assignment does not exist. Contact administrator to resolve this issue.");
           return;
         }
 
         // check if folder for this user exists
         $user_path = $assignment_path."/".$username;
         if(!file_exists($assignment_path)) {
-          display_error("Folder ".$assignment_path." from previous submission does not exist.");
+          display_error("Files from previous submission not found. Folder for this user does not exist. Contact administrator to resolve this issue.");
           return;
         }
 
         //Find the previous homework version number
-        $previous_version = 1;
-        while (file_exists($user_path."/".$previous_version)) {
-          // FIXME: Replace with symlink
-          $previous_version++;
-        }
+        $previous_version = 0;
+        while (file_exists($user_path."/".(++$previous_version)));
         $previous_version -= 1;
 
         // No previous submission, should not have entered this if statement
         if($previous_version <= 0) {
-          display_error("No submission found. There should not be any files kept from previous submission.");
+          display_error("No submission found. There should not be any files kept from previous submission. Contact administrator to resolve this issue.");
           return;
         }
 
@@ -198,7 +195,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
           for($n=1; $n <= $num_parts; $n++) {
             $previous_part_path[$n] = $previous_version_path."/part".$n;
             if (!file_exists($previous_part_path[$n])) {
-              display_error("Folder ".$previous_part_path[$n]." does not exist.");
+              display_error("Files from previous submission not found. Folder for previous submission does not exist. Contact administrator to resolve this issue.");
               return;
             }
           }
@@ -213,7 +210,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
             for($i=0; $i<count($previous_files[$n]); $i++) {
               $filename = $previous_part_path[$n]."/".$previous_files[$n][$i];
               if (!file_exists($filename)) {
-                display_error("File ".$filename." does not exist.");
+                display_error("File ".$filename." does not exist in previous submission. Contact administrator to resolve this issue.");
                 return;
               }
             }
@@ -223,7 +220,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
     }
 
 
-    $max_size = 50;
+    $max_size = 50; // this is in kb
     if (isset($assignment_config["max_submission_size"])) {
         $max_size = $assignment_config["max_submission_size"];
     }
@@ -269,7 +266,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
     if (!file_exists($assignment_path)) {
       if (!mkdir($assignment_path))
       {
-        display_error("Failed to make folder ".$assignment_path);
+        display_error("Failed to make folder for this assignment. Contact administrator to resolve this issue.");
         return;
       }
     }
@@ -302,23 +299,20 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
     if (!file_exists($user_path)) {
       if (!mkdir($user_path))
       {
-        display_error("Failed to make folder ".$user_path);
+        display_error("Failed to make folder for this user. Contact administrator to resolve this issue.");
         return;
       }
     }
 
     //Find the next homework version number
 
-    $upload_version = 1;
-    while (file_exists($user_path."/".$upload_version)) {
-      // FIXME: Replace with symlink
-      $upload_version++;
-    }
+    $upload_version = 0;
+    while (file_exists($user_path."/".(++$upload_version)));
 
     // Attempt to create folder for current version
     $version_path = $user_path."/".$upload_version;
     if (!mkdir($version_path)) {//Create a new directory corresponding to a new version number
-      display_error("Failed to make folder ".$version_path);
+      display_error("Failed to make folder for the current version. Contact administrator to resolve this issue.");
       return;
     }
 
@@ -331,7 +325,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
       for($n=1; $n <= $num_parts; $n++){
         $part_path[$n] = $version_path."/part".$n;
         if (!mkdir($part_path[$n])) {//Create a new directory corresponding to a new version number
-          display_error("Failed to make folder ".$part_path[$n]);
+          display_error("Failed to make folder for part ".$n.". Contact administrator to resolve this issue.");
           return;
         }
       }
@@ -354,10 +348,8 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
               $zip->close();
 
               $unlink_return = unlink ($homework_file[$n]["tmp_name"][$i]);
-              // TODO: Edit error messages
-              //
               if (!$unlink_return) {
-                display_error("failed to unlink(delete) uploaded zip file from");
+                display_error("Failed to unlink(delete) uploaded zip file ".$homework_file[$n]["name"][$i]." from temporary storage.");
                 return;
               }
             }
@@ -380,15 +372,13 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
               // SHOULD BE EQUIVALENT TO THIS:
               if (is_uploaded_file($homework_file[$n]["tmp_name"][$i])) {
                 $copy_return = copy ($homework_file[$n]["tmp_name"][$i], $part_path[$n]."/".$homework_file[$n]["name"][$i]);
-                // TODO: Edit error messages
-                //
                 if (!$copy_return) {
-                  display_error("failed to copy uploaded file from ".$homework_file[$n]["tmp_name"][$i]." to ".$part_path[$n]."/".$homework_file[$n]["name"][$i]);
+                  display_error("Failed to copy uploaded file ".$homework_file[$n]["name"][$i]." to current submission.");
                   return;
                 }
                 $unlink_return = unlink ($homework_file[$n]["tmp_name"][$i]);
                 if (!$unlink_return) {
-                  display_error("failed to unlink(delete) uploaded file from ".$homework_file[$n]["tmp_name"][$i]);
+                  display_error("Failed to unlink(delete) uploaded file ".$homework_file[$n]["name"][$i]." from temporary storage.");
                   return;
                 }
               }
@@ -401,7 +391,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
             // $copy_return = copy ($user_path."/".($upload_version-1).substr($part_path[$n], strlen($version_path))."/".$previous_files[$n][$i], $part_path[$n]."/".$previous_files[$n][$i]);
             $copy_return = copy ($previous_part_path[$n]."/".$previous_files[$n][$i], $part_path[$n]."/".$previous_files[$n][$i]);
             if (!$copy_return) {
-              display_error("failed to copy previously submitted file from ".$previous_part_path[$n]."/".$previous_files[$n][$i]);
+              display_error("Failed to copy previously submitted file ".$previous_files[$n][$i]." to current submission.");
               return;
             }
           }
@@ -422,7 +412,8 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
 
     if ($svn_checkout == true) {
       if (!touch($version_path."/.submit.SVN_CHECKOUT")) {
-          display_error("Failed to touch file ".$version_path."/.submit.SVN_CHECKOUT");
+          // display_error("Failed to touch file ".$version_path."/.submit.SVN_CHECKOUT");
+        display_error("Failed to touch file for svn submission.");
           return;
       }
     }
@@ -431,7 +422,8 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
     // CREATE THE TIMESTAMP FILE
     //touch($version_path."/.submit.timestamp");
     if (!file_put_contents($version_path."/.submit.timestamp",$TIMESTAMP."\n")) {
-      display_error("Failed to save timestamp file ".$version_path."/.submit.timestamp",$TIMESTAMP);
+      // display_error("Failed to save timestamp file ".$version_path."/.submit.timestamp",$TIMESTAMP);
+      display_error("Failed to save timestamp file for this submission.");
       return;
     }
 
@@ -490,13 +482,6 @@ function is_valid_zip_size($filename, $max_size) {
 function get_zip_size($filename) {
     $size = 0;
     $zip = zip_open($filename);
-    //
-    // FIXME: bug with this check?  Getting this warning when a non zip is uploaded
-    //
-    // Warning: zip_read() expects parameter 1 to be resource, integer given
-    // Warning: zip_close() expects parameter 1 to be resource, integer given
-    //
-
     if (is_resource($zip)) {
         while ($inner_file = zip_read($zip)) {
             $size += zip_entry_filesize($inner_file);
@@ -510,7 +495,7 @@ function get_zip_size($filename) {
 function can_edit_assignment($username, $semester, $course, $assignment_id, $assignment_config) {
 
 
-	// FIXME: HACK!  To not check due date
+    // FIXME: HACK!  To not check due date
     // TODO: FIXME: late submissions should be allowed (there are excused absenses)
     // TODOL FIXME: but the ACTIVE should not be updated ( we can manually adjust active for excused absenses)
 
@@ -963,17 +948,17 @@ function version_in_grading_queue2($username, $semester, $course, $assignment_id
 
     if (file_exists($interactive_queue_file)) {
       if (file_exists($GRADING_interactive_queue_file)) {
-	return "interactive_queue";
+        return "interactive_queue";
       } else {
-	return "currently_grading";
+        return "currently_grading";
       }
     }
 
     if (file_exists($batch_queue_file)) {
       if (file_exists($GRADING_batch_queue_file)) {
-	return "batch_queue";
+        return "batch_queue";
       } else {
-	return "currently_grading";
+        return "currently_grading";
       }
     }
 
@@ -995,11 +980,10 @@ function version_in_grading_queue2($username, $semester, $course, $assignment_id
 
 function get_submission_time($username, $semester,$course, $assignment_id, $assignment_version) {
     $version_results = get_assignment_results($username, $semester,$course, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
-    if ($version_results &&
-	      isset($version_results["submission_time"])) {
-	      return $version_results["submission_time"];
+    if ($version_results && isset($version_results["submission_time"])) {
+      return $version_results["submission_time"];
     } else {
-	      return "";
+      return "";
     }
 }
 
@@ -1014,7 +998,7 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
         $testcases_results = array();
     }
     $path_front = get_path_front_course($semester,$course);
-	$student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
+    $student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
     $homework_tests = array();
     for ($i = 0; $i < count($testcases_info); $i++) {
         for ($u = 0; $u < count($testcases_results); $u++){
@@ -1085,9 +1069,9 @@ function get_select_submission_data($username, $semester,$course, $assignment_id
         $class_config = get_class_config($semester,$course);
         $due_date = get_due_date($class_config,$assignment_id);
         //        $due_date = get_due_date($username, $semester,$course, $assignment_id, $assignment_config);
-        //	if (!isset($due_date) || !defined("due_date")) {
-        //		       $due_date = "";
-        //		       }
+        //  if (!isset($due_date) || !defined("due_date")) {
+        //           $due_date = "";
+        //           }
 
         $date_submitted = get_submission_time($username,$semester,$course,$assignment_id,$i);
 
@@ -1105,7 +1089,7 @@ function get_select_submission_data($username, $semester,$course, $assignment_id
             $interval = $date_submitted2->diff($due_date);
             $days_late = $interval->format("%a");
 
-	           //echo "days_late = $days_late<br>";
+            //echo "days_late = $days_late<br>";
         }
         $entry = array("score"=> $score, "days_late"=>$days_late);
         array_push($select_data, $entry);
