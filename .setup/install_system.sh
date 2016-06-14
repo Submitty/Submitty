@@ -82,11 +82,13 @@ apachectl -V | grep MPM
 
 echo "Preparing to install packages.  This may take a while."
 apt-get install -qqy clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
-hardening-includes python p7zip-full patchutils postgresql-client postgresql-client-9.3 postgresql-client-common \
+hardening-includes python python-pip p7zip-full patchutils postgresql-client postgresql-client-9.3 postgresql-client-common \
 unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libfile-mmagic-perl \
 libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
 libseccomp2 seccomp junit cmake xlsx2csv
+
+pip install python-pam
 
 # Enable PHP5-mcrypt
 php5enmod mcrypt
@@ -444,7 +446,7 @@ if [[ ${VAGRANT} == 1 ]]; then
 	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1100_f15;"
 	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1200_f15;"
 	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
-	
+
 	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
 	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/inserts.sql
 	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/TAGradingServer/data/tables.sql
@@ -455,14 +457,14 @@ if [[ ${VAGRANT} == 1 ]]; then
 	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
 	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
 	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${HWSERVER_DIR}/.setup/vagrant/db_inserts.sql
-	
+
     #################################################################
     # SET CSV FIELDS (for classlist upload data)
     #################
 
 	# Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
 	# of Science 2015-2016.
-	
+
 	# Other Universities will need to rerun /bin/setcsvfields to match their
 	# classlist csv data.  See wiki for details.
 	${INSTALL_DIR}/bin/setcsvfields 13 12 15 7
