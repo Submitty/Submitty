@@ -81,10 +81,16 @@ function addFiles(filestream, part){
 	for(var i=0; i<filestream.length; i++){
 		var f = filestream[i];
 		// Uploading folder not allowed
-		if(f.type == ""){
-			error = error + f.name + "\n";
-			continue;
-		}
+
+//
+// FIXME: Folder check does not seem to work on Mac Chrome or Mac Firefox
+//        cpp files are somehow incorrectly identified as folders :(
+//
+//		if(f.type == ""){
+//			error = error + f.name + "\n";
+//			continue;
+//		}
+
 		var j = fileExists(f, part);
 		if( j[0] == -1 ){	// file does not exist
 			file_array[part-1].push(f);
