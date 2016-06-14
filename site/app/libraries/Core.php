@@ -65,7 +65,7 @@ class Core {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the 
             IAuthentication interface.");
         }
-        $this->authentication = new $auth_class();
+        $this->authentication = new $auth_class($this);
         $this->session_manager = new SessionManager($this);
 
         switch ($this->config->getDatabaseType()) {

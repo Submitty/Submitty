@@ -1,6 +1,9 @@
 <?php
 
 namespace app\authentication;
+use app\exceptions\AuthenticationException;
+use app\libraries\Core;
+use app\libraries\FileUtils;
 
 /**
  * Class PamAuthentication
@@ -13,11 +16,41 @@ namespace app\authentication;
  * the filename via GET to this page, all using the cURL library.
  */
 class PamAuthentication implements IAuthentication {
-    public function __construct() {
+    private $core;
+
+    public function __construct(Core $core) {
+        $this->core = $core;
     }
 
     public function authenticate($username, $password) {
-        // authenticate against PAM
+        if (!FileUtils::createDir("/tmp/pam")) {
+            throw new AuthenticationException("Could not create tmp PAM directory.");
+        }
+
+        do {
+            $file = md5(uniqid(rand(), true));
+        } while (file_exists("/tmp/pam/{$file}"));
+
+        $contents = json_encode(array('username' => $username, 'password' => $password));
+        if (file_put_contents("/tmp/pam/{$file}", $contents) === false) {
+            throw new AuthenticationException("Could not create tmp user PAM file.");
+        }
+        register_shutdown_function(function() use ($file) {
+            unlink("/tmp/pam/{$file}");
+        });
+
+        // Open a cURL connection so we don't have to do a weird redirect chain to authenticate
+        // as that would require some hacky path handling specific to PAM authentication
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getBaseUrl()."cgi-bin/pam_check.cgi?file={$file}");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $output = json_decode(curl_exec($ch), true);
+        curl_close($ch);
+
+        if (!isset($output['authenticated'])) {
+            throw new AuthenticationException("Could not run PAM authentication script");
+        }
+
         return true;
     }
 }
