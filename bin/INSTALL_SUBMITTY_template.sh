@@ -12,17 +12,18 @@ fi
 # check optional argument
 if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" ]]; then
     echo -e "Usage:"
-    echo -e "   ./INSTALL.sh clean"
-    echo -e "   ./INSTALL.sh clean test"
-    echo -e "   ./INSTALL.sh clear test  <test_case_1>"
-    echo -e "   ./INSTALL.sh clear test  <test_case_1> <test_case_2> <test_case_3>"
-    echo -e "   ./INSTALL.sh test"
-    echo -e "   ./INSTALL.sh test  <test_case_1>"
-    echo -e "   ./INSTALL.sh test  <test_case_1> <test_case_2> <test_case_3>"
+    echo -e "   ./INSTALL_SUBMITTY.sh"
+    echo -e "   ./INSTALL_SUBMITTY.sh clean"
+    echo -e "   ./INSTALL_SUBMITTY.sh clean test"
+    echo -e "   ./INSTALL_SUBMITTY.sh clear test  <test_case_1>"
+    echo -e "   ./INSTALL_SUBMITTY.sh clear test  <test_case_1> ... <test_case_n>"
+    echo -e "   ./INSTALL_SUBMITTY.sh test"
+    echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1>"
+    echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1> ... <test_case_n>"
     exit
 fi
 
-echo -e "\nBeginning installation of the homework submission server\n"
+echo -e "\nBeginning installation of the Submitty homework submission server\n"
 
 
 ########################################################################################################################
@@ -421,13 +422,13 @@ fi
 
 # generate the file
 echo -e "\n\n"                                                                                >  ${HWCRON_CRONTAB_FILE}
-echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL.sh"                         >> ${HWCRON_CRONTAB_FILE}
+echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${HWCRON_CRONTAB_FILE}
 minutes=0
 while [ $minutes -lt 60 ]; do
     printf "%02d  * * * *   ${HSS_INSTALL_DIR}/bin/grade_students.sh  untrusted%02d  >  /dev/null\n"  $minutes $minutes  >> ${HWCRON_CRONTAB_FILE}
     minutes=$(($minutes + $GRADE_STUDENTS_FREQUENCY))
 done
-echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL.sh"                         >> ${HWCRON_CRONTAB_FILE}
+echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${HWCRON_CRONTAB_FILE}
 echo -e "\n\n"                                                                                >> ${HWCRON_CRONTAB_FILE}
 
 # install the crontab file for the hwcron user
@@ -439,7 +440,7 @@ rm ${HWCRON_CRONTAB_FILE}
 ################################################################################################################
 
 
-echo -e "\nCompleted installation of the homework submission server\n"
+echo -e "\nCompleted installation of the Submitty homework submission server\n"
 
 
 ################################################################################################################

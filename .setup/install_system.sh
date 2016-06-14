@@ -13,7 +13,7 @@ if [[ $1 == vagrant ]]; then
   VAGRANT=1
   export DEBIAN_FRONTEND=noninteractive
 else
-  #TODO: We should get options for ./CONFIGURE script
+  #TODO: We should get options for ./CONFIGURE_SUBMITTY.sh script
   VAGRANT=0
 fi
 
@@ -26,13 +26,13 @@ if [ ${VAGRANT} == 1 ]; then
     chmod +x /etc/update-motd.d/00-header
 
     echo -e '
- __   __  _     _  _______  _______  ______    __   __  _______  ______
-|  | |  || | _ | ||       ||       ||    _ |  |  | |  ||       ||    _ |
-|  |_|  || || || ||  _____||    ___||   | ||  |  |_|  ||    ___||   | ||
-|       ||       || |_____ |   |___ |   |_||_ |       ||   |___ |   |_||_
-|       ||       ||_____  ||    ___||    __  ||       ||    ___||    __  |
-|   _   ||   _   | _____| ||   |___ |   |  | | |     | |   |___ |   |  | |
-|__| |__||__| |__||_______||_______||___|  |_|  |___|  |_______||___|  |_|
+  _______  __   __  _______  __   __  ___   _______  _______  __   __ 
+|       ||  | |  ||  _    ||  |_|  ||   | |       ||       ||  | |  |
+|  _____||  | |  || |_|   ||       ||   | |_     _||_     _||  |_|  |
+| |_____ |  |_|  ||       ||       ||   |   |   |    |   |  |       |
+|_____  ||       ||  _   | |       ||   |   |   |    |   |  |_     _|
+ _____| ||       || |_|   || ||_|| ||   |   |   |    |   |    |   |  
+|_______||_______||_______||_|   |_||___|   |___|    |___|    |___|  
 
 ############################################################
 ##  All user accounts have same password unless otherwise ##
@@ -358,12 +358,13 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 https://192.168.56.103
-svn+ssh:192.168.56.102" | source ${SUBMITTY_DIR}/CONFIGURE.sh
+svn+ssh:192.168.56.102" | source ${SUBMITTY_DIR}/CONFIGURE_SUBMITTY.sh
 else
-	source ${SUBMITTY_DIR}/CONFIGURE.sh
+	source ${SUBMITTY_DIR}/CONFIGURE_SUBMITTY.sh
 fi
 
-source ${INSTALL_DIR}/INSTALL.sh clean test
+source ${INSTALL_DIR}/INSTALL_SUBMITTY.sh clean 
+#source ${INSTALL_DIR}/INSTALL_SUBMITTY.sh clean test
 
 source ${SUBMITTY_DIR}/Docs/sample_bin/admin_scripts_setup
 cp ${SUBMITTY_DIR}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
@@ -404,58 +405,12 @@ if [[ ${VAGRANT} == 1 ]]; then
     mkdir ${SUBMITTY_DIR}/.vagrant/tagrading_logs
     ln -s ${SUBMITTY_DIR}/.vagrant/tagrading_logs ${DATA_DIR}/tagrading_logs
 
-    #################################################################
-    # CRON SETUP
-    #################
-    #cd /home/hwcron
-    #echo "" > /home/hwcron/x
-    #sudo cp /home/hwcron/x /var/spool/cron/crontabs/hwcron
-    #sudo chown hwcron:crontab /var/spool/cron/crontabs/hwcron
-    #echo "0,15,30,45 * * * * /usr/local/hss/bin/grade_students.sh" > /home/hwcron/c
-    #su hwcron << EOF
-    #  cat /home/hwcron/c | crontab -
-    #EOF
-    #rm /home/hwcron/x
-    #rm /home/hwcron/c
 
-    #################################################################
-    # COURSE SETUP
-    #################
-    cd ${INSTALL_DIR}/bin
-    ./create_course.sh f15 csci1100 instructor csci1100_tas_www
-    ./create_course.sh f15 csci1200 instructor csci1200_tas_www
-    ./create_course.sh f15 csci2600 instructor csci2600_tas_www
+    # Call helper script that makes the courses and refreshes the database
+    ${SUBMITTY_DIR}/.setup/add_sample_courses.sh
 
-    cd ${DATA_DIR}/courses/f15/csci1100
-    ./BUILD_csci1100.sh
 
-    cd ${DATA_DIR}/courses/f15/csci1200
-    ./BUILD_csci1200.sh
 
-    cd ${DATA_DIR}/courses/f15/csci2600
-    ./BUILD_csci2600.sh
-
-    #################################################################
-    # CREATE DATABASE
-    #################
-
-	export PGPASSWORD="hsdbu"
-
-	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1100_f15;"
-	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1200_f15;"
-	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
-	
-	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/tables.sql
-	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/inserts.sql
-	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/tables.sql
-	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/inserts.sql
-	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/tables.sql
-	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/inserts.sql
-
-	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/.setup/vagrant/db_inserts.sql
-	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/.setup/vagrant/db_inserts.sql
-	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/.setup/vagrant/db_inserts.sql
-	
     #################################################################
     # SET CSV FIELDS (for classlist upload data)
     #################
