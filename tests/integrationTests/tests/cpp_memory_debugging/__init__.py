@@ -22,6 +22,10 @@ def initialize(test):
         os.mkdir(os.path.join(test.testcase_path, "data"))
     except OSError:
         pass
+    try:
+        os.mkdir(os.path.join(test.testcase_path, "data/part1"))
+    except OSError:
+        pass
 
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.h"),
@@ -35,7 +39,7 @@ def initialize(test):
 def buggy_code(test):
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "buggy_code.cpp"),
-        os.path.join(test.testcase_path, "data/code.cpp")])
+        os.path.join(test.testcase_path, "data/part1/code.cpp")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -46,7 +50,7 @@ def buggy_code(test):
 def nonbuggy_code(test):
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "nonbuggy_code.cpp"),
-        os.path.join(test.testcase_path, "data/code.cpp")])
+        os.path.join(test.testcase_path, "data/part1/code.cpp")])
     test.run_compile()
     test.run_run()
     test.run_validator()

@@ -23,7 +23,8 @@
             "assignment_name":"Simple C++ Lab",
             "released":true,
             "ta_grade_released":false,
-	    "due_date":"2016-07-01 23:59:59.0"
+	    "due_date":"2016-07-01 23:59:59.0",
+            "num_parts":2
         },
         {
             "assignment_id":"cpp_lab02",

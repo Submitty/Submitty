@@ -22,6 +22,10 @@ def initialize(test):
         os.mkdir(os.path.join(test.testcase_path, "data"))
     except OSError:
         pass
+    try:
+        os.mkdir(os.path.join(test.testcase_path, "data/part1"))
+    except OSError:
+        pass
 
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.h"),
@@ -48,7 +52,7 @@ def allCorrect(test):
         "-o",  # overwrite files
         os.path.join(test.testcase_path, "data/allCorrect.zip"),
         "-d",  # save to directory
-        os.path.join(test.testcase_path, "data/")])
+        os.path.join(test.testcase_path, "data/part1/")])
 
     test.run_compile()
     test.run_run()
@@ -92,7 +96,7 @@ def columnSpacingOff(test):
         "-o",  # overwrite files
         os.path.join(test.testcase_path, "data/columnSpacingOff.zip"),
         "-d",  # save to directory
-        os.path.join(test.testcase_path, "data/")])
+        os.path.join(test.testcase_path, "data/part1/")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -107,7 +111,7 @@ def extraLinesAtEnd(test):
         "-o",  # overwrite files
         os.path.join(test.testcase_path, "data/extraLinesAtEnd.zip"),
         "-d",  # save to directory
-        os.path.join(test.testcase_path, "data/")])
+        os.path.join(test.testcase_path, "data/part1/")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -122,7 +126,7 @@ def extraSpacesAtEnd(test):
         "-o",  # overwrite files
         os.path.join(test.testcase_path, "data/extraSpacesAtEnd.zip"),
         "-d",  # save to directory
-        os.path.join(test.testcase_path, "data/")])
+        os.path.join(test.testcase_path, "data/part1/")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -137,7 +141,7 @@ def frontSpacingOff(test):
         "-o",  # overwrite files
         os.path.join(test.testcase_path, "data/frontSpacingOff.zip"),
         "-d",  # save to directory
-        os.path.join(test.testcase_path, "data/")])
+        os.path.join(test.testcase_path, "data/part1/")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -152,7 +156,7 @@ def lineOrderOff(test):
         "-o",  # overwrite files
         os.path.join(test.testcase_path, "data/lineOrderOff.zip"),
         "-d",  # save to directory
-        os.path.join(test.testcase_path, "data/")])
+        os.path.join(test.testcase_path, "data/part1/")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -167,7 +171,7 @@ def spacingOff(test):
         "-o",  # overwrite files
         os.path.join(test.testcase_path, "data/spacingOff.zip"),
         "-d",  # save to directory
-        os.path.join(test.testcase_path, "data/")])
+        os.path.join(test.testcase_path, "data/part1/")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -182,7 +186,7 @@ def spellingOff(test):
         "-o",  # overwrite files
         os.path.join(test.testcase_path, "data/spellingOff.zip"),
         "-d",  # save to directory
-        os.path.join(test.testcase_path, "data/")])
+        os.path.join(test.testcase_path, "data/part1/")])
     test.run_compile()
     test.run_run()
     test.run_validator()

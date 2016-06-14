@@ -20,12 +20,12 @@ std::vector<TestCase> testcases
 
   TestCase::MakeFileExists(
 	"README",
-	"README.txt",
+	"part1/README.txt",
 	TestCasePoints(2)
 ),
   TestCase::MakeCompilation(
 	"Compilation",
-	"/usr/bin/clang++ -Wall -o a.out -- *.cpp",
+	"/usr/bin/clang++ -Wall -o a.out -- part2/*.cpp",
 	"a.out",
 	TestCasePoints(3)
 ),
