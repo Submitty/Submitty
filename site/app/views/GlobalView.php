@@ -75,8 +75,9 @@ HTML;
 <div id="container">
 
 HTML;
-        if ($this->core->getUser()->accessGrading()) {
-            $return .= <<<HTML
+        if ($this->core->getUser() != null) {
+            if($this->core->getUser()->accessGrading()) {
+                $return .= <<<HTML
 <div id="nav">
     <ul>
         <li><a href="{$this->core->buildUrl(array('component' => 'submission', 
@@ -86,8 +87,8 @@ HTML;
         <li><a href="#">Grade Tests</a></li>
 
 HTML;
-            if($this->core->getUser()->accessAdmin()) {
-                $return .= <<<HTML
+                if($this->core->getUser()->accessAdmin()) {
+                    $return .= <<<HTML
         <li><a href="#">Report Tools</a></li>
         <li><a href="{$this->core->buildUrl(array('component' => 'admin',
                                                   'page' => 'gradeables',
@@ -103,14 +104,14 @@ HTML;
         <li><a href="#">View Orphans</a></li>
 
 HTML;
-                if($this->core->getUser()->isDeveloper()) {
-                    $return .= <<<HTML
+                    if($this->core->getUser()->isDeveloper()) {
+                        $return .= <<<HTML
         <li><a href="#" onClick="togglePageDetails();">Show Page Details</a></li>
 
 HTML;
+                    }
                 }
-            }
-            $return .= <<<HTML
+                $return .= <<<HTML
     </ul>
     <span style="float: right; margin-top: 5px; margin-right: 10px;">
         Hello {$this->core->getUser()->getDetail('user_id')}
@@ -119,12 +120,16 @@ HTML;
 <div id="nav-clear"></div>
 
 HTML;
+            }
         }
 
         $course_name = htmlentities($this->core->getConfig()->getCourseName());
         $return .= <<<HTML
 <div id="header">
-    <div id="header-logo"></div>
+    <div id="logo-text">
+        <h1>Submitty</h1>
+        <h2>Rensselaer Center for Open Source</h2>
+    </div>
     <h1 id="header-text">Homework Submissions for {$course_name}</h1>
 </div>
 

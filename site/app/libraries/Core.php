@@ -61,9 +61,8 @@ class Core {
             $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
 
         $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
-        if (!in_array('IAuthentication', class_implements($auth_class))) {
-            throw new \Exception("Invalid module specified for Authentication. All modules should implement the 
-            IAuthentication interface.");
+        if (!in_array('app\authentication\IAuthentication', class_implements($auth_class))) {
+            throw new \Exception("Invalid module specified for Authentication. All modules should implement the IAuthentication interface.");
         }
         $this->authentication = new $auth_class($this);
         $this->session_manager = new SessionManager($this);
@@ -156,6 +155,11 @@ class Core {
         return $this->authentication;
     }
 
+    /**
+     * @param $session_id
+     *
+     * @return bool
+     */
     public function getSession($session_id) {
         $session = $this->session_manager->getSession($session_id);
         if ($session === false) {
@@ -165,23 +169,19 @@ class Core {
         $this->loadUser($session['user_id']);
     }
 
+    /**
+     * @param $user_id
+     * @param $password
+     *
+     * @return bool
+     */
     public function authenticate($user_id, $password) {
         $auth = false;
-
-        if (isset($_COOKIE['session_id'])) {
-            $auth = $this->session_manager->getSession($_COOKIE['session_id']);
+        if ($this->authentication->authenticate($user_id, $password)) {
+            $auth = true;
+            $session_id = $this->session_manager->newSession($user_id);
+            setcookie('session_id', $session_id);
         }
-
-        if (!$auth) {
-            if ($this->authentication->authenticate($user_id, $password)) {
-                $auth = true;
-                $session_id = $this->session_manager->newSession($user_id);
-                setcookie('session_id', $session_id);
-                $this->loadUser($user_id);
-            }
-
-        }
-
         return $auth;
     }
 
@@ -195,12 +195,14 @@ class Core {
     }
 
     /**
-     * @param $parts
+     * Given some number of URL parameters (parts), build a URL for the site using those parts
+     *
+     * @param array $parts
      *
      * @return string
      */
-    public function buildUrl($parts) {
-        return $this->config->getSiteUrl()."&".http_build_query($parts);
+    public function buildUrl($parts=array()) {
+        return $this->config->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
     }
 
     /**
@@ -210,5 +212,15 @@ class Core {
     public function redirect($url, $status_code = 302) {
         header('Location: ' . $url, true, $status_code);
         die();
+    }
+
+    /**
+     * Returns all the different parts of the url used for choosing the appropriate controller
+     * and method of that controller to run
+     *
+     * @return array
+     */
+    public function getControllerTypes() {
+        return array('component', 'page', 'action');
     }
 }

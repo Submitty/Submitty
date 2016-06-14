@@ -79,15 +79,25 @@ ORDER BY u.user_id");
     }
 
     public function getSession($session_id) {
-        // TODO: Implement getSession() method.
-        return array();
+        $this->database->query("SELECT * FROM sessions WHERE session_id=?", array($session_id));
+        return $this->database->row();
+    }
+
+    public function updateSessionExpiration($session_id) {
+        $this->database->query("UPDATE sessions SET session_expires=(current_timestamp + interval '24 hours') 
+        WHERE session_id=?", array($session_id));
     }
 
     public function newSession($user_id) {
+        $session_id = bin2hex(openssl_random_pseudo_bytes(16));
+        $csrf_token = bin2hex(openssl_random_pseudo_bytes(16));
+        $this->database->query("INSERT INTO sessions (session_id, user_id, csrf_token, session_expires) VALUES(?,?,?,?)",
+                               array($session_id, $user_id, $csrf_token, "current_timestamp + interval '24 hours'"));
+        return $session_id;
 
     }
-    
+
     public function removeExpiredSessions() {
-        // TODO: Implement removeOldSessions() method.
+        $this->database->query("DELETE FROM sessions WHERE session_expires < current_timestamp");
     }
 }

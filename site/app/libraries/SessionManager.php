@@ -38,8 +38,7 @@ class SessionManager {
             return false;
         }
 
-        // TODO: Set second parameter to be 24 hours from now
-        //$this->core->getQueries()->setSessionExpire($session_id, 0);
+        $this->core->getQueries()->updateSessionExpiration($session_id);
         $this->csrf_token = $session['csrf_token'];
 
         return true;

@@ -6,7 +6,6 @@ use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Output;
 
-
 /*
  * The user's umask is ignored for the user running php, so we need
  * to set it from inside of php to make sure the group read & execute
@@ -78,48 +77,37 @@ if($core->getConfig()->isDebug()) {
     error_reporting(E_ERROR);
 }
 
-
-/*
- * This is how we should handle authentication if not using apache...
-
-$session = $core->getSession($_COOKIE['session_id']);
-$user_id = isset($_POST['user_id']) ? $_POST['user_id'] : "";
-$password = isset($_POST['password']) ? $_POST['password'] : "";
-if ($session === false || !$core->authenticate($user_id, $password)) {
-    $_REQUEST['old_component'] = $_REQUEST['component'];
-    $_REQUEST['component'] = 'login';
-}
-else {
-    if ($_REQUEST['component'] == 'login') {
-        $_REQUEST['component'] = 'submission';
+$logged_in = false;
+if (isset($_COOKIE['session_id'])) {
+    $logged_in = $core->getSession($_COOKIE['session_id']);
+    if (!$logged_in) {
+        // delete the stale and invalid cookie
+        setcookie('session_id', "", time() - 3600);
     }
 }
-
-then not have lines 76 - 93 and have an "unrecognized user" error
- */
-if ($core->getConfig()->isDebug() && isset($_GET['useUser'])) {
-    $user_id = $_GET['useUser'];
-}
-elseif (isset($_SERVER['PHP_AUTH_USER'])) {
-    $user_id = $_SERVER['PHP_AUTH_USER'];
-}
-elseif (isset($_SERVER['REMOTE_USER'])) {
-    $user_id = $_SERVER['REMOTE_USER'];
-}
-else {
-    header('WWW-Authenticate: Basic realm=HWServer');
-    header('HTTP/1.0 401 Unauthorized');
-    exit;
-}
-
-if (!$core->authenticate($user_id, $_SERVER['PHP_AUTH_PW'])) {
-    Output::showError("Unrecognized user id: {$user_id}");
+if (!$logged_in) {
+    if ($_REQUEST['component'] != 'authentication') {
+        foreach ($core->getControllerTypes() as $key) {
+            if(isset($_REQUEST[$key])) {
+                $_REQUEST['old'][$key] = $_REQUEST[$key];
+                $_REQUEST[$key] = "";
+            } else if(isset($_REQUEST['old_' . $key])) {
+                $_REQUEST['old'][$key] = $_REQUEST['old_' . $key];
+                unset($_REQUEST['old_' . $key]);
+            }
+        }
+        $_REQUEST['component'] = 'authentication';
+    }
 }
 
 Output::render("Global", 'header');
 switch($_REQUEST['component']) {
     case 'admin':
         $control = new app\controllers\AdminController($core);
+        $control->run();
+        break;
+    case 'authentication':
+        $control = new app\controllers\AuthenticationController($core, $logged_in);
         $control->run();
         break;
     case 'grading':

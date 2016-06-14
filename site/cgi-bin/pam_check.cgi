@@ -11,15 +11,16 @@ import json
 import os
 import pam
 
-fail = "{'authenticated': false}"
 success = "{'authenticated': true}"
+fail = "{'authenticated': false}"
+
 print "Content-type: text/html"
 print
 
 try:
     arguments = cgi.FieldStorage()
     # prevent a user from figuring out a way of passing a path instead of a filename
-    f = os.path.basename(arguments['file'])
+    f = os.path.basename(arguments['file'].value)
     with open("/tmp/pam/" + f, "r") as read_file:
         j = json.loads(read_file.read())
         p = pam.pam()

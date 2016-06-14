@@ -82,10 +82,10 @@ class ExceptionHandler {
             }
             $line++;
         }
-        
-        $message = "{$exception_name} (Code: {$exception->getCode()}) thrown in {$file} 
-        ({$exception_line}) by:\n{$line_code}\n\nMessage:\n{$exception->getMessage()}\n
-        Strack Trace:\n{$exception->getTraceAsString()}\n";
+
+        $message = "{$exception_name} (Code: {$exception->getCode()}) thrown in {$file} (Line {$exception_line}) by:\n";
+        $message .= "{$line_code}\n\nMessage:\n{$exception->getMessage()}\nStrack Trace:\n";
+        $message .= "{$exception->getTraceAsString()}\n";
 
         if ($is_base_exception) {
             /** @type BaseException $exception */
