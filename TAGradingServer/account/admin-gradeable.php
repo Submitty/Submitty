@@ -180,7 +180,7 @@ if($user_is_administrator)
 
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
-            <button class="btn" id="import-json" type="button" style="float: right;">Import From JSON</button>
+            <button class="btn import-json" type="button" style="float: right;">Import From JSON</button>
             <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{$string} Gradeable</button>
         </div>
 
@@ -208,8 +208,8 @@ if($user_is_administrator)
             
             <!-- Values need to be associated with variables -->
             
-            <input type="radio" name="team-assignment" value="" > Yes
-            <input type="radio" name="team-assignment" value ="" > No
+            <input type="radio" name="team-assignment" value="yes" > Yes
+            <input type="radio" name="team-assignment" value ="no" > No
             <br /> <br />   
             
             <!-- This should not be changed after grading has begun? -->
@@ -243,10 +243,10 @@ if($user_is_administrator)
                 
                 <fieldset>
                     <!-- Should probably use lables, but CSS is weird-->
-                    <input type="radio" name="upload-type" value="Upload File"> Upload File(s)
-                    <input type="radio" name="upload-type" value="Repository"> Repository
+                    <input type="radio" class="upload-file" name="upload-type" value="Upload File"> Upload File(s)
+                    <input type="radio" class="upload-repo" name="upload-type" value="Repository"> Repository
                     
-                    <div class="upload-type" id="upload-file">
+                    <div class="upload-type upload-file" id="upload-file">
                         <br />
                         How many total "drop zones" (directories or paths) for upload? <input style="width: 50px" name="num-drop-zones" type="text" value="1"/> 
                         <br />
@@ -254,7 +254,7 @@ if($user_is_administrator)
                         <br />
                     </div>
                     
-                    <div class="upload-type" id="repository">
+                    <div class="upload-type upload-repo" id="repository">
                         <br />
                         Which subdirectory? <input style='width: 227px' type='text' name='subdirectory' value="" />
                         <br />
@@ -272,13 +272,13 @@ if($user_is_administrator)
                 -->
                 
                 <!-- Again these should probably be labels, but CSS is annoying (>_<) -->
-                <input type="radio" name="auto-grading" value="" /> Yes
-                <input type="radio" name="auto-grading" value ="" /> No
+                <input type="radio" name="auto-grading" value="yes" /> Yes
+                <input type="radio" name="auto-grading" value ="no" /> No
                 <br /> <br />
                 
                 Use TA grading? 
-                <input type="radio" name="ta-grading" value="" /> Yes
-                <input type="radio" name="ta-grading" value="" /> No
+                <input type="radio" name="ta-grading" value="yes" /> Yes
+                <input type="radio" name="ta-grading" value="no" /> No
                 <br /> <br />
                 
                 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
@@ -427,7 +427,7 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="num-checkpoints" type="text" class="checkpoint-label" value="Checkpoint 1"/> 
+                               <input style="width: 200px" name="checkpoint-label" type="text" class="checkpoint-label" value="Checkpoint 0"/> 
                            </td>     
                            <td>     
                                 <input type="checkbox" name="checkpoint-extra-1" class="checkpoint-extra" value="" />
@@ -439,7 +439,7 @@ HTML;
                       
                        <tr class="multi-field" id="mult-field-1">
                            <td>
-                               <input style="width: 200px" name="num-checkpoints" type="text" class="checkpoint-label" value="Checkpoint 1"/> 
+                               <input style="width: 200px" name="checkpoint-label" type="text" class="checkpoint-label" value="Checkpoint 1"/> 
                            </td>     
                            <td>     
                                 <input type="checkbox" name="checkpoint-extra-1" class="checkpoint-extra" value="" />
@@ -477,7 +477,7 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="num-checkpoints" type="text" class="numeric-label" value="1"/> 
+                               <input style="width: 200px" name="numeric-label" type="text" class="numeric-label" value="0"/> 
                            </td>  
                             <td>     
                                 <input style="width: 60px" type="text" name="max-score-1" class="max-score" value="" /> 
@@ -489,7 +489,7 @@ HTML;
                       
                        <tr class="multi-field" id="mult-field-1">
                            <td>
-                               <input style="width: 200px" name="num-checkpoints" type="text" class="numeric-label" value="1"/> 
+                               <input style="width: 200px" name="numeric-label" type="text" class="numeric-label" value="1"/> 
                            </td>  
                             <td>     
                                 <input style="width: 60px" type="text" name="max-score-1" class="max-score" value="" /> 
@@ -506,8 +506,8 @@ HTML;
                 
                 <br /> <br />
                 Do you want a box for an (optional) message from the TA to the student?
-                <input type="radio" name="opt-ta-messg" value="" /> Yes
-                <input type="radio" name="opt-ta-messg" value="" /> No
+                <input type="radio" name="opt-ta-messg" value="yes" /> Yes
+                <input type="radio" name="opt-ta-messg" value="no" /> No
                 
             </div>  
             
@@ -686,31 +686,30 @@ HTML;
 
         <div class="modal-footer">
                 <button class="btn btn-primary" type="submit" style="margin-top: 10px;">{$string} Gradeable</button>
-                <button class="btn" id="import-json" style="margin-top: 10px;">Import From JSON</button>
+                <button class="btn import-json" type="button" style="margin-top: 10px;">Import From JSON</button>
         </div>
     </form>
 </div>
 
 <script type="text/javascript">
-
-
     $.fn.serializeObject = function(){
         var o = {};
         var a = this.serializeArray();
-        
         var ignore = [];
         
-        ignore.push('csrf_token');
+        ignore.push('csrf_token'); // no need to save csrf to JSON :P
         
-        /*
-        // TODO if the radio button is not selected remove all child elements
         $(':radio').each(function(){
            if(! $(this).is(':checked')){
-               if(this.class !== undefined){
-                  ignoreClass.push(this.class);
+               //alert($(this).attr('class'));
+               if($(this).attr('class') !== undefined){
+                  // now remove all of the child elements names for the radio button
+                  $('.' + $(this).attr('class')).find('input, textarea, select').each(function(){
+                      ignore.push($(this).attr('name'));
+                  });
                }
            } 
-        }); */
+        }); 
         
         $.each(a, function() {
             if($.inArray(this.name,ignore) !== -1) {
@@ -729,7 +728,7 @@ HTML;
     };
 
     $(document).ready(function() {
-        $("#import-json").click(function(){
+        $(".import-json").click(function(){
             alert(JSON.stringify($('form').serializeObject()));
         }); 
     });
