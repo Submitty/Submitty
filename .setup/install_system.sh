@@ -67,18 +67,53 @@ fi
 echo "\n" | add-apt-repository ppa:webupd8team/java
 apt-get -qq update
 
+
+
+############################
+# NTP: Network Time Protocol
+# You want to be sure the clock stays in sync, especially if you have
+# deadlines for homework to be submitted.
+#
+# The default settings are ok, but you can edit /etc/ntp.conf and
+# replace the default servers with your local ntp server to reduce
+# traffic through your campus uplink (To replace the default servers
+# with your own, comment out the default servers by adding a # before
+# the lines that begin with “server” and add your server under the
+# line that says “Specify one or more NTP servers” with something
+# along the lines of “server xxx.xxx.xxx.xxx”)
+
 apt-get install -qqy ntp
 service ntp restart
+
+
 
 # path for untrusted user creation script will be different if not using Vagrant
 ${SUBMITTY_DIR}/bin/create.untrusted.users.pl
 
 apt-get install -qqy libpam-passwdqc
 
+
+# Use suphp to improve file permission granularity by running php
+# scripts as the user that owns the file instead of www-data 
+#
+# Set up apache to run with suphp in pre-fork mode since not all
+# modules are thread safe (do not combine the commands or you may get
+# the worker/threaded mode instead)
+
 apt-get install -qqy ssh sshpass unzip
 apt-get install -qqy apache2 postgresql postgresql-contrib php5 php5-xdebug libapache2-mod-suphp
 
+# Check to make sure you got the right setup by typing:
+#   apache2ctl -V | grep MPM
+# (it should say prefork)
+
 apachectl -V | grep MPM
+
+# Add additional packages for compiling, authentication, and security,
+# and program support
+
+# DOCUMENTATION FIXME: Go through this list and categorize purpose of
+# these packages (as appropriate.. )
 
 echo "Preparing to install packages.  This may take a while."
 apt-get install -qqy clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
@@ -109,6 +144,34 @@ apt-get install imagemagick
 #################################################################
 # NETWORK CONFIGURATION
 #################
+#
+# The goal here is to ensure the VM is accessible from your own
+# computer for code testing, has an outgoing connection to the
+# Internet to access github and receive Ubuntu updates, but is also
+# unreachable via incoming Internet connections so to block uninvited
+# guests.
+#
+# Open the VM’s Settings window and click on the “Network” tab.  There
+# are tabs for four network adapters.  Enable adapters #1 and #2.
+#
+# Adapter #1 should be attached to NAT and make sure the cable
+# connected box (under advanced) is checked.  You may ignore all other
+# settings for adapter #1.  This provides the VM’s outgoing Internet
+# connection, but uninvited guests on the Internet cannot see the VM.
+#
+# Adapter #2 should be attached to Host-only Network.  Under “name”,
+# there is a drop down menu to select Host-only Ethernet Adapter (or
+# vboxnet).  Recall that this was created in the previous section,
+# Create Virtual Network Adapters.  This adapter can only communicate
+# between your host OS and the VM, and it is unreachable to and from
+# the Internet.
+#
+# After Ubuntu is fully installed, you need to adjust the networking
+# configuration so that you may access the VM via static IP addressing
+# as a convenience for code testing.
+#
+# The VM’s host-only adapter provides a private connection to the VM,
+# but Ubuntu also needs to be configured to use this adapter. 
 
 echo "Binding static IPs to \"Host-Only\" virtual network interface."
 
@@ -136,6 +199,9 @@ mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
 wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F1.3%2Fhamcrest-core-1.3.jar hamcrest-core-1.3.jar
 
+
+# EMMA is a tool for computing code coverage of Java programs
+
 echo "Getting emma..."
 wget http://downloads.sourceforge.net/project/emma/emma-release/2.0.5312/emma-2.0.5312.zip -o /dev/null > /dev/null 2>&1
 unzip emma-2.0.5312.zip > /dev/null
@@ -149,6 +215,9 @@ chmod o+r . *.jar
 #################################################################
 # DRMEMORY SETUP
 #################
+
+# Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
+
 echo "Getting DrMemory..."
 mkdir -p ${INSTALL_DIR}/DrMemory
 cd /tmp
@@ -163,6 +232,21 @@ rm DrMemory-Linux-${DRMEM_VER}.tar.gz
 # APACHE SETUP
 #################
 a2enmod include actions cgi suexec authnz_external headers ssl
+
+
+# If you have real certificates, follow the directions from your
+# certificate provider.  
+#
+# If you are just developing and do not have real ssl certificates,
+# follow these directions for creating a self-signed (aka “snakeoil
+# certificate”)
+#
+# If it doesn’t already exist, create directory path 
+#   /etc/apache2/ssl/
+# 
+# An expiration of 365000 days (roughly 1000 years) is meant so that
+# the certificate essentially never expires.  make the certificates
+# world readable (but not the key):
 
 mkdir /etc/apache2/ssl
 cd /etc/apache2/ssl
@@ -207,6 +291,7 @@ if [ ${VAGRANT} == 1 ]; then
 	echo -e "\nServerName 10.0.2.15\n" >> /etc/apache2/apache2.conf
 fi
 
+
 # comment out directory configs - should be converted to something more flexible
 sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 
@@ -216,17 +301,26 @@ rm /etc/apache2/sites*/default-ssl.conf
 
 service apache2 reload
 
+
 #################################################################
 # PHP SETUP
 #################
 sed -i -e 's/^docroot=/docroot=\/usr\/local\/hss:/g' /etc/suphp/suphp.conf
+
+# only if you need to have a group of people able to edit the files
 sed -i -e 's/^allow_file_group_writeable=false/allow_file_group_writeable=true/g' /etc/suphp/suphp.conf
+# only if you need to have a group of people able to add/delete files and directories
 sed -i -e 's/^allow_directory_group_writeable=false/allow_directory_group_writeable=true/g' /etc/suphp/suphp.conf
+# do not allow others_writable files or directories or you will have even less security than without suphp
+
+# Edit php settings.  Note that if you need to accept larger files,
+# you’ll need to increase both upload_max_filesize and
+# post_max_filesize
+
 sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php5/cgi/php.ini
 sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php5/cgi/php.ini
 sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php5/cgi/php.ini
-sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /e
-tc/php5/apache2/php.ini
+sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php5/apache2/php.ini
 sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php5/cgi/php.ini
 sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php5/cgi/php.ini
 sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php5/cgi/php.ini
@@ -235,7 +329,23 @@ sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php5
 #################################################################
 # USERS SETUP
 #################
+
+# Special users and groups needed to run Submitty
+#
+# It is probably easiest to set and store passwords for the special
+# accounts, although you can also use ‘sudo su user’ to change to the
+# desired user on the local machine which works for most things.
+
+# The group hwcronphp allows hwphp to write the submissions, but give
+# read-only access to the hwcron user.  And the hwcron user writes the
+# results, and gives read-only access to the hwphp user.
+
 addgroup hwcronphp
+
+# The group course_builders allows instructors/head TAs/course
+# managers to write website custimization files and run course
+# management scripts.
+
 addgroup course_builders
 
 if [ ${VAGRANT} == 1 ]; then
@@ -283,7 +393,15 @@ adduser hwcron hwcronphp
 
 for COURSE in csci1100 csci1200 csci2600
 do
+
+        # for each course, create a group to contain the current
+        # instructor along the lines of:
+
 	addgroup $COURSE
+
+        # and another group to contain the current instructor, TAs,
+        # hwcron, and hwphp along the lines of
+
 	addgroup $COURSE\_tas_www
 	adduser hwphp $COURSE\_tas_www
 	adduser hwcron $COURSE\_tas_www
@@ -300,10 +418,18 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser instructor course_builders
 fi
 
+
+# create directories and fix permissions
+
 mkdir -p ${DATA_DIR}
+
+
+# create a list of valid userids and put them in /var/local/hss/instructors
+# one way to create your list is by listing all of the userids in /home  
 
 mkdir -p ${DATA_DIR}/instructors
 ls /home | sort > ${DATA_DIR}/instructors/valid
+
 
 #################################################################
 # SVN SETUP
@@ -315,16 +441,25 @@ a2enmod dav_fs
 a2enmod authz_svn
 a2enmod authz_groupfile
 
+# Choose a directory for holding your subversion files that will get
+# backed up if it is a production server.  We use /var/lib/svn by
+# default.
 mkdir -p /var/lib/svn
 chmod g+s /var/lib/svn
 
+# make a group and subdirectory for any classes requiring subversion
+# repositories:
 mkdir -p /var/lib/svn/csci2600
 touch /var/lib/svn/svngroups
 chown www-data:csci2600_tas_www /var/lib/svn/csci2600 /var/lib/svn/svngroups
 if [ ${VAGRANT} == 1 ]; then
+    # set up ssh keys for hwcron to connect to the subversion
+    # repository (do not use root/sudo except as shown)
 	su hwcron
+        # generate the key (accept the defaults):
 	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N "" > /dev/null 2>&1
 	echo "hwcron" > password.txt
+        # copy the key to test-svn:
 	sshpass -f password.txt ssh-copy-id hwcron@test-svn
 	rm password.txt
 	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
@@ -407,6 +542,7 @@ if [[ ${VAGRANT} == 1 ]]; then
 
 
     # Call helper script that makes the courses and refreshes the database
+    chmod u+x ${SUBMITTY_DIR}/.setup/add_sample_courses.sh
     ${SUBMITTY_DIR}/.setup/add_sample_courses.sh
 
 
@@ -425,7 +561,11 @@ fi
 
 # Deferred ownership change
 chown hwphp:hwphp ${INSTALL_DIR}
+
+# With this line, subdirectories inherit the group by default and
+# blocks r/w access to the directory by others on the system.
 chmod 2771 ${INSTALL_DIR}
+
 
 echo "Done."
 exit 0

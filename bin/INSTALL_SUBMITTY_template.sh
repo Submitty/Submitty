@@ -404,6 +404,18 @@ mv $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $HSS_I
 ################################################################################################################
 ################################################################################################################
 # GENERATE & INSTALL THE CRONTAB FILE FOR THE hwcron USER
+#
+# The system requires a background process that starts automatically
+# and runs one or more instances of the grade_students.sh script
+# continuously, checking for new submissions and promptly grading them
+# in chronological order.  This script must be run as the ```hwcron```
+# user.
+# 
+# Note that standard (non error) output of the grade_students.sh
+# script is discarded.  You will want to verify that the standard
+# error output is logged and/or emailed to the appropriate
+# admin/developer, so problems can be promptly addressed.
+#
 
 echo -e "Generate & install the crontab file for hwcron user"
 
