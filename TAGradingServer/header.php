@@ -131,6 +131,9 @@ HTML;
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-other.php" role="button" data-toggle="modal">
                                         Manage Other
                                 </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-gradeables.php" role="button" data-toggle="modal">
+                                        Manage Gradeables
+                                </a></li>
                             </ul>
                         </li>
                         <li class="dropdown">
