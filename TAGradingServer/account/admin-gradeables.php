@@ -91,7 +91,6 @@ $output .= <<<HTML
         width: 100px;
     }
 
-
     .edit-gradeables-icon {
         display: block;
         float:left;

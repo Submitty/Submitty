@@ -72,7 +72,6 @@ if($user_is_administrator){
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
     $account_subpages_unlock = true;
-    
     function selectBox($question, $grade = 0) {
         $retVal = "<select name='point-{$question}' class='points' onchange='calculatePercentageTotal();'>";
         for($i = 0; $i <= 100; $i += 0.5) {
@@ -188,6 +187,10 @@ if($user_is_administrator){
         display: none;
     }
     
+<<<<<<< HEAD
+=======
+    
+>>>>>>> gradeable form layout and dynamic content for form types
     fieldset {
         margin: 8px;
         border: 1px solid silver;
@@ -898,7 +901,6 @@ HTML;
         }
         calculatePercentageTotal();
     }
-
     // Shows the radio inputs dynamically
     $('input:radio[name="gradeable-type"]').change(
     function(){
@@ -967,7 +969,7 @@ HTML;
         retVal = retVal + '</select>';
         return retVal;
     }
-
+    
     function calculatePercentageTotal() {
         var total = 0;
         var ec = 0;
@@ -1073,7 +1075,6 @@ HTML;
     calculatePercentageTotal();
     </script>
 HTML;
-
 }
 
 include "../footer.php";
