@@ -38,7 +38,11 @@ function draghandle(e){
 
 function drop(e){
 	draghandle(e);
-	addFiles(e.dataTransfer.files, get_part_number(e));
+	var filestream= e.dataTransfer.files;
+	var part = get_part_number(e);
+	for(var i=0; i<filestream.length; i++){
+		addFileWithCheck(filestream[i], part); // check for folders
+	}
 }
 
 function get_part_number(e){
@@ -51,8 +55,11 @@ function get_part_number(e){
 }
 
 // copy files selected from the dialog box
-function addFile(part){
-	addFiles(document.getElementById("input_file" + part).files, part);
+function addFilesFromInput(part){
+	var filestream = document.getElementById("input_file" + part).files;
+	for(var i=0; i<filestream.length; i++){
+		addFile(filestream[i], part); // folders will not be selected in file browser, no need for check
+	}
 }
 
 // Check for duplicate file names. This function returns an array.
@@ -62,59 +69,61 @@ function addFile(part){
 // -1 - does not exist files with the same name
 // Second element: index of the file with the same name (if found)
 function fileExists(file, part){
-	for(var j=0; j<previous_files[part-1].length; j++){
-		if(previous_files[part-1][j] == file.name){
-			return [1, j];
+	for(var i=0; i<previous_files[part-1].length; i++){
+		if(previous_files[part-1][i] == file.name){
+			return [1, i];
 		}
 	}
-	for(var j=0; j<file_array[part-1].length; j++){
-		if(file_array[part-1][j].name == file.name){
-			return [0, j];
+	for(var i=0; i<file_array[part-1].length; i++){
+		if(file_array[part-1][i].name == file.name){
+			return [0, i];
 		}
 	}
 	return [-1];
 }
 
-function addFiles(filestream, part){
-	var error = "";
-	// copy files dragged
-	for(var i=0; i<filestream.length; i++){
-		var f = filestream[i];
-		// Uploading folder not allowed
-
-//
-// FIXME: Folder check does not seem to work on Mac Chrome or Mac Firefox
-//        cpp files are somehow incorrectly identified as folders :(
-//
-//		if(f.type == ""){
-//			error = error + f.name + "\n";
-//			continue;
-//		}
-
-		var j = fileExists(f, part);
-		if( j[0] == -1 ){	// file does not exist
-			file_array[part-1].push(f);
-			addLabel(f.name, (f.size/1024).toFixed(2), part, false);
-		}
-		else if(j[0] == 0){	// file already selected
-			if(confirm("Note: " + file_array[part-1][j[1]].name + "is already selected. Do you want to replace it?")){
-				file_array[part-1].splice(j[1], 1, f);
-				removeLabel(f.name, part);
-				addLabel(f.name, (f.size/1024).toFixed(2), part, false);
-			}
-		}
-		else{	// file in previous submission
-			if(confirm("Note: " + previous_files[part-1][j[1]] + "was in your previous submission. Do you want to replace it?")){
-				file_array[part-1].push(f);
-				previous_files[part-1].splice(j[1], 1);
-				removeLabel(f.name, part);
-				addLabel(f.name, (f.size/1024).toFixed(2), part, false);
-				changed = true;
-			}
-		}
-		// TODO: Maybe storing the names in a separate array and rename when uploading
+function addFileWithCheck(file, part){
+	if(!file.type || file.size%4096 == 0){
+		var reader = new FileReader();
+		reader.onload = notFolder(file, part);
+		reader.onerror = isFolder(file);
+		reader.readAsBinaryString(file);
 	}
-	if(error) alert("Uploading folders is not allowed!\nFolder(s) not added to submission:\n" + error);
+	else{
+		addFile(file, part);
+	}
+}
+
+function notFolder(file, part){
+	return function(e){ addFile(file, part); }
+}
+
+function isFolder(file){
+	return function(e){ alert("Upload failed: " + file.name + " might be a folder."); }
+}
+
+function addFile(file, part){
+	var i = fileExists(file, part);
+	if( i[0] == -1 ){	// file does not exist
+		file_array[part-1].push(file);
+		addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+	}
+	else if(i[0] == 0){	// file already selected
+		if(confirm("Note: " + file_array[part-1][i[1]].name + "is already selected. Do you want to replace it?")){
+			file_array[part-1].splice(i[1], 1, file);
+			removeLabel(file.name, part);
+			addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+		}
+	}
+	else{	// file in previous submission
+		if(confirm("Note: " + previous_files[part-1][i[1]] + "was in your previous submission. Do you want to replace it?")){
+			file_array[part-1].push(file);
+			previous_files[part-1].splice(i[1], 1);
+			removeLabel(file.name, part);
+			addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+			changed = true;
+		}
+	}
 }
 
 // remove all files uploaded
@@ -215,7 +224,6 @@ function validSubmission(){
 }
 
 function submit(url, csrf_token, svn_checkout, loc){
-	// alert(JSON.stringify(previous_files));
 	// Check if new submission
 	if(!validSubmission()){
 		alert("Not a new submission.");
