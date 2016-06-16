@@ -173,8 +173,8 @@ if($user_is_administrator)
 </style>
 
 <div id="container-rubric">
-    <!-- <form class="form-signin" action="{$BASE_URL}/account/submit/admin-rubric.php?action={$action}&id={$old_rubric['rubric_id']}" method="post" enctype="multipart/form-data"> -->
-    <form class="form-signin" method="post" enctype="multipart/form-data">
+    <form class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_rubric['rubric_id']}" method="post" enctype="multipart/form-data"> 
+    <!-- <form class="form-signin" method="post" enctype="multipart/form-data"> -->
         <input type='hidden' name="part_count" value="{$part_count}" />
         <input type='hidden' name="csrf_token" value="{$_SESSION['csrf']}" />
 
@@ -683,7 +683,6 @@ HTML;
 
     print <<<HTML
         </div>
-
         <div class="modal-footer">
                 <button class="btn btn-primary" type="submit" style="margin-top: 10px;">{$string} Gradeable</button>
                 <button class="btn import-json" type="button" style="margin-top: 10px;">Import From JSON</button>
@@ -729,51 +728,14 @@ HTML;
 
     $(document).ready(function() {
         $(".import-json").click(function(){
-            alert(JSON.stringify($('form').serializeObject()));
+            $.post('{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_rubric['rubric_id']}&course='
+                +'{$_GET['course']}', 'gradeableJSON=' + JSON.stringify($('form').serializeObject())+'&csrf_token=' 
+                + '{$_SESSION['csrf']}', function (response) {
+              alert(response);
+            });
         }); 
     });
     
-    /*
-
-            //comma separated list from lb to ub
-            function max_score_list(max_score,ub){
-                var cs_list = '';
-                for (var i=1; i<ub; ++i){
-                    cs_list += max_score + ',';
-                }
-                cs_list += max_score;
-                return cs_list;
-            } 
-            
-            //comma separated list from lb to ub
-            function csl(lb,ub){
-                var cs_list = '';
-                for (var i=lb; i<ub; ++i){
-                    cs_list += i + ',';
-                }
-                cs_list += ub;
-                return cs_list;
-            }
-            
-            function updateLabels(){
-                var text_items = Number($('#numeric-num-text-items').val());
-                var numeric_items = Number($('#numeric-num-items').val());
-                if (!$.isNumeric(text_items) || text_items < 0 || !$.isNumeric(numeric_items) || numeric_items < 0) return;
-                $('#numeric-item-labels').attr('value',csl(1,text_items + numeric_items));
-                $('#max-score-labels').attr('value',max_score_list(100,text_items + numeric_items));
-                $('#extra-credit-numeric').attr('value',max_score_list('N',text_items + numeric_items));
-            }
-
-            $('#numeric-num-items').on('input', function() {
-                updateLabels();
-            });
-            
-            $('#numeric-num-text-items').on('input', function() {
-                updateLabels();
-            });
-    
-    */
-
     $(document).ready(function() {
             var numCheckpoints=1;
             $('.multi-field-wrapper-checkpoints').each(function() {
@@ -797,7 +759,6 @@ HTML;
             });
             $('#remove-checkpoint-field').hide();
     });
-    
     
     $(document).ready(function() {
             var numNumeric=1;
@@ -885,7 +846,6 @@ HTML;
             }
         }
     });
-    
 
     var parts = {$parts};
 
@@ -905,8 +865,6 @@ HTML;
         cell3.style.backgroundColor = "#EEE";
         cell1.innerHTML = '<span id="spanPart' + partName + '">' + partNameString + "</span><br />" +
         '<a id="delete-' + partName + '" class="question-icon" onclick="deletePart(' + partName + ');"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>' +
-        //'<a id="down-' + partName + '" class="question-icon" onclick="movePartDown(' + partName + ');"><img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>' +
-        //'<a id="up-' + partName + '" class="question-icon" onclick="movePartUp(' + partName + ');"><img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>' +
         '<br />' +
         "<div class='part_submission_id'><input style='width: 47px;' type='text' name='rubric_part_"+partNameString+"_id' value='_part"+partNameString+"' /></div>";
         cell2.innerHTML = '<textarea name="comment-' + partName + '-1" rows="1" style="width: 885px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea></span>'+
@@ -1148,7 +1106,6 @@ HTML;
 
         calculatePercentageTotal();
     }
-    
     
     function movePartDown(part) {
         if (parts.length - 1 <= part || part <= 0) {
