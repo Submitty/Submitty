@@ -187,10 +187,6 @@ if($user_is_administrator){
         display: none;
     }
     
-<<<<<<< HEAD
-=======
-    
->>>>>>> gradeable form layout and dynamic content for form types
     fieldset {
         margin: 8px;
         border: 1px solid silver;
@@ -728,7 +724,6 @@ HTML;
               alert(response);
             });
         }); 
-
         var numCheckpoints=1;
         
         function addCheckpoint(label, extra_credit){

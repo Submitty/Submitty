@@ -13,6 +13,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
  $gradeableJSON = $_POST['gradeableJSON'];
  
  $fp = fopen(__SUBMISSION_SERVER__ . '/config/gradeable.json', 'w');
+
  if (!$fp){
     die('failed to open file');
  }
@@ -207,5 +208,6 @@ $db->commit();
 echo 'TRANSACTION COMPLETED';
 
 header('Location: '.__BASE_URL__.'/account/admin-gradeables.php?course='.$_GET['course']);
+
 
 ?>
