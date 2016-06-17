@@ -54,14 +54,15 @@ class ExceptionHandler {
      * and the flag is set for it, otherwise just return a very generic message to
      * the user
      *
-     * @return string   A string that either contains a generic message or the actual
-     *                  exception message depending on the value of $display_exceptions
+     * @param \Exception $exception
+     * @return string    A string that either contains a generic message or the actual
+     *                   exception message depending on the value of $display_exceptions
      */
-    public static function throwException($exception) {
+    public static function throwException(\Exception $exception) {
         $display_message = false;
         $is_base_exception = false;
         $log_exception = static::$log_exceptions;
-        if (is_a($exception, 'BaseException')) {
+        if (is_a($exception, '\app\exceptions\BaseException')) {
             /** @var BaseException $exception */
             $is_base_exception = true;
             $display_message = $exception->displayMessage();

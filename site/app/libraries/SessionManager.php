@@ -5,7 +5,6 @@ namespace app\libraries;
 /**
  * Class SessionManager
  *
- * TODO: Actually hook this up to some tables
  * Handles dealing with session information given a session id or
  * a user id. The session allows for a user to remain logged in
  * as well as contains their CSRF token that was generated when
@@ -17,10 +16,7 @@ class SessionManager {
      */
     private $core;
 
-    /**
-     * @var string
-     */
-    private $csrf_token = null;
+    private $session = array();
 
     /**
      * SessionManager constructor.
@@ -31,31 +27,60 @@ class SessionManager {
         $this->core = $core;
     }
 
+    /**
+     * Given a session id, grab the assiociated row from the database returning false if
+     * no such row exists or returning true if the row does exist. If the row exists, additionally
+     * update when it'll expire by 24 hours
+     *
+     * @param $session_id
+     *
+     * @return bool
+     */
     public function getSession($session_id) {
         $this->core->getQueries()->removeExpiredSessions();
-        $session = $this->core->getQueries()->getSession($session_id);
+        $this->session = $this->core->getQueries()->getSession($session_id);
         if (empty($session)) {
             return false;
         }
-
         $this->core->getQueries()->updateSessionExpiration($session_id);
-        $this->csrf_token = $session['csrf_token'];
 
-        return true;
-    }
-
-    public function newSession($user_id) {
-        $session = $this->core->getQueries()->newSession($user_id);
-        setcookie('session_id', $session['session_id']);
-        $this->csrf_token = $session['csrf_token'];
-        return $session['session_id'];
+        return $this->session['user_id'];
     }
 
     /**
-     * @return string
+     * @param $user_id
+     *
+     * @return mixed
+     */
+    public function newSession($user_id) {
+        if (!isset($this->session['session_id'])) {
+            $this->session = $this->core->getQueries()->newSession(Utils::generateRandomString(), $user_id,
+                                                                   Utils::generateRandomString());
+        }
+        return $this->session['session_id'];
+    }
+
+    /**
+     * Deletes the session currently loaded within the SessionManager
+     */
+    public function removeCurrentSession() {
+        if (isset($this->session['session_id'])) {
+            $this->core->getQueries()->removeSessionById($this->session['session_id']);
+            $this->session = array();
+        }
+    }
+
+    /**
+     * Gets the CSRF token that is loaded within the current session, if it exists,
+     * otherwise return False
+     *
+     * @return bool|string
      */
     public function getCsrfToken() {
-        return $this->csrf_token;
+        if (isset($this->session['csrf_token'])) {
+            return $this->session['csrf_token'];
+        }
+        return false;
     }
 
 }

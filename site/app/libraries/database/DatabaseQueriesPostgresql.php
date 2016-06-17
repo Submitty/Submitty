@@ -5,13 +5,11 @@ namespace app\libraries\database;
 use app\libraries\Database;
 
 class DatabaseQueriesPostgresql implements IDatabaseQueries{
+    /**
+     * @var Database
+     */
     private $database;
 
-    /**
-     * QueriesPostgresql constructor.
-     *
-     * @param Database $database
-     */
     public function __construct(Database $database) {
         $this->database = $database;
     }
@@ -84,20 +82,21 @@ ORDER BY u.user_id");
     }
 
     public function updateSessionExpiration($session_id) {
-        $this->database->query("UPDATE sessions SET session_expires=(current_timestamp + interval '24 hours') 
+        $this->database->query("UPDATE sessions SET session_expires=(current_timestamp + interval '336 hours') 
         WHERE session_id=?", array($session_id));
     }
 
-    public function newSession($user_id) {
-        $session_id = bin2hex(openssl_random_pseudo_bytes(16));
-        $csrf_token = bin2hex(openssl_random_pseudo_bytes(16));
-        $this->database->query("INSERT INTO sessions (session_id, user_id, csrf_token, session_expires) VALUES(?,?,?,?)",
-                               array($session_id, $user_id, $csrf_token, "current_timestamp + interval '24 hours'"));
-        return $session_id;
+    public function newSession($session_id, $user_id, $csrf_token) {
+        $this->database->query("INSERT INTO sessions (session_id, user_id, csrf_token, session_expires) VALUES(?,?,?,current_timestamp + interval '336 hours')",
+                               array($session_id, $user_id, $csrf_token));
 
     }
 
     public function removeExpiredSessions() {
         $this->database->query("DELETE FROM sessions WHERE session_expires < current_timestamp");
+    }
+
+    public function removeSessionById($session_id) {
+        $this->database->query("DELETE FROM sessions WHERE session_id=?", array($session_id));
     }
 }

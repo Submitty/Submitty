@@ -55,6 +55,7 @@ if (!isset($_REQUEST['course'])) {
     Output::showError("Need to specify a course (ex: &course=csci1100) in the URL");
 }
 
+// Sanitize the inputted semester & course to prevent directory attacks
 $semester = basename($_REQUEST['semester']);
 $course = basename($_REQUEST['course']);
 
@@ -77,6 +78,8 @@ if($core->getConfig()->isDebug()) {
     error_reporting(E_ERROR);
 }
 
+// Check if we have a saved cookie with a session id and then that there exists a session with that id
+// If there is no session, then we delete the cookie
 $logged_in = false;
 if (isset($_COOKIE['session_id'])) {
     $logged_in = $core->getSession($_COOKIE['session_id']);
@@ -85,6 +88,8 @@ if (isset($_COOKIE['session_id'])) {
         setcookie('session_id', "", time() - 3600);
     }
 }
+
+// Prevent anyone who isn't logged in from going to any other controller than authentication
 if (!$logged_in) {
     if ($_REQUEST['component'] != 'authentication') {
         foreach ($core->getControllerTypes() as $key) {

@@ -54,7 +54,7 @@ class PamAuthentication implements IAuthentication {
         if (!isset($output['authenticated'])) {
             throw new AuthenticationException("Could not authenticate against PAM");
         }
-
-        return true;
+        
+        return $output['authenticated'];
     }
 }
