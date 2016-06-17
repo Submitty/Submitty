@@ -52,6 +52,7 @@ class AuthenticationController implements IController {
 
     public function logout() {
         setcookie('session_id', "", time()-3600);
+        
         $this->core->redirect($this->core->buildUrl());
     }
 

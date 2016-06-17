@@ -263,6 +263,8 @@ adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-pas
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
 	adduser hwphp vagrant
+	# FIXME: We should figure out what the method for PAM authentication is
+	adduser hwphp shadow
 fi
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then

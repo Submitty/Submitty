@@ -161,12 +161,20 @@ class Core {
      * @return bool
      */
     public function getSession($session_id) {
-        $session = $this->session_manager->getSession($session_id);
-        if ($session === false) {
+        $user_id = $this->session_manager->getSession($session_id);
+        if ($user_id === false) {
             return false;
         }
 
-        $this->loadUser($session['user_id']);
+        $this->loadUser($user_id);
+        return true;
+    }
+    
+    /**
+     * Remove the currently loaded session within the session manager
+     */
+    public function removeCurrentSession() {
+        $this->session_manager->removeCurrentSession();
     }
 
     /**
@@ -180,7 +188,8 @@ class Core {
         if ($this->authentication->authenticate($user_id, $password)) {
             $auth = true;
             $session_id = $this->session_manager->newSession($user_id);
-            setcookie('session_id', $session_id);
+            // We set the cookie to expire 10 years into the future effectly making it last forever
+            setcookie('session_id', $session_id, time() + (10 * 365 * 24 * 60 * 60));
         }
         return $auth;
     }

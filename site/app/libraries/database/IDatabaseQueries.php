@@ -25,7 +25,7 @@ interface IDatabaseQueries {
      *      'user_assignment_section'
      * );
      *
-     * @param $user_id
+     * @param string $user_id
      *
      * @return array
      */
@@ -40,7 +40,7 @@ interface IDatabaseQueries {
      *      '',
      * );
      *
-     * @param $assignment_id
+     * @param string $assignment_id
      *
      * @return array
      */
@@ -100,14 +100,17 @@ interface IDatabaseQueries {
     /**
      * @todo: write phpdoc
      *
-     * @param $user_id
+     * @param string $session_id
+     * @param string $user_id
+     * @param string $csrf_token
      *
-     * @return array
+     * @return string
      */
-    public function newSession($user_id);
+    public function newSession($session_id, $user_id, $csrf_token);
 
     /**
-     * @param $session_id
+     * Updates a given session by setting it's expiration date to be 2 weeks into the future
+     * @param string $session_id
      */
     public function updateSessionExpiration($session_id);
 
@@ -116,4 +119,10 @@ interface IDatabaseQueries {
      * current timestamp
      */
     public function removeExpiredSessions();
+
+    /**
+     * Remove a session associated with a given session_id
+     * @param $session_id
+     */
+    public function removeSessionById($session_id);
 }
