@@ -194,6 +194,7 @@ create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/
 # NOTE:    instructor uploads TA HW grade reports & overall grade scores here
 #               drwxr-s---       instructor   ta_www_group    reports/
 create_and_set  u=rwx,g=rwxs,o=   $instructor   $ta_www_group   $course_dir/reports
+create_and_set  u=rwx,g=rwxs,o=   $instructor   $ta_www_group   $course_dir/reports/summary_html
 
 
 ########################################################################################################################
