@@ -241,9 +241,8 @@ echo '</div>';
 // MULTIPLE PARTS
   for($i = 1; $i <= $num_parts; $i++){
     echo '<div class="outer_box" id="upload'.$i.'" style="cursor: pointer; text-align: center">';
-    echo '<h3 class="label" id="label'.$i.'" >Click or drag your files here';
-    echo '<input type="file" name="files" id="input_file'.$i.'" style="display:none" onchange="addFile('.$i.')" multiple/>';
-    echo '</h3>';
+    echo '<h3 class="label" id="label'.$i.'" >Click or drag your files here</h3>';
+    echo '<input type="file" name="files" id="input_file'.$i.'" style="display:none" onchange="addFilesFromInput('.$i.')" multiple/>';
 
     // ADD LABELS FOR FILES FROM PREVIOUS SUBMISSION
     ?> <script type="text/javascript"> createArray(<?php echo $num_parts; ?>); </script> <?php
