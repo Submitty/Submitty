@@ -21,7 +21,7 @@ std::vector<TestCase> testcases
   TestCase::MakeCompilation
   (
    "Compilation of Submitted Files (for Dr. Memory): g++ -m32 -g -Wall *cpp -o submitted_32.out",
-   "/usr/bin/clang++ " + drmemory_flags + " -Wall -o submitted_32.out -- *.cpp",
+   "/usr/bin/clang++ " + drmemory_flags + " -Wall -o submitted_32.out -- part1/*.cpp",
    "submitted_32.out",	
    TestCasePoints(2)
    ),
@@ -29,7 +29,7 @@ std::vector<TestCase> testcases
   TestCase::MakeCompilation
   (
    "Compilation of Submitted Files (for Valgrind): g++ -g -Wall *cpp -o submitted.out",
-   "/usr/bin/clang++ -g -Wall -o submitted.out -- *.cpp",
+   "/usr/bin/clang++ -g -Wall -o submitted.out -- part1/*.cpp",
    "submitted.out",
    TestCasePoints(2)
    ),
@@ -43,7 +43,7 @@ TestCase::MakeTestCase
    "drmemory -brief -- ./submitted_32.out",
    drmemory_path + " -brief -- ./submitted_32.out",
    TestCasePoints(5),
-   {new TestCaseComparison(&errorIfEmpty,"STDOUT.txt","STDOUT"),
+   {new TestCaseComparison(&warnIfEmpty,"STDOUT.txt","STDOUT"),
        new TestCaseTokens(&searchToken,"STDERR.txt","STDERR", std::vector<std::string>(1,std::string("NO ERRORS FOUND:")))}
    ),
 
@@ -53,8 +53,8 @@ TestCase::MakeTestCase
    "valgrind --leak-check=full ./submitted.out",
    "/usr/bin/valgrind --leak-check=full ./submitted.out",
    TestCasePoints(5),
-   {new TestCaseComparison(&errorIfEmpty,"STDOUT.txt","STDOUT"),
-   new TestCaseTokens(&searchToken,"STDERR.txt","STDERR", std::vector<std::string>(1,std::string("ERROR SUMMARY: 0 errors from 0 contexts")))
+   {new TestCaseComparison(&warnIfEmpty,"STDOUT.txt","STDOUT"),
+       new TestCaseTokens(&searchToken,"STDERR.txt","STDERR", std::vector<std::string>(1,std::string("ERROR SUMMARY: 0 errors from 0 contexts")))
        }
    )
 

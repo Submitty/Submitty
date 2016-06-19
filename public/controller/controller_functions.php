@@ -94,7 +94,6 @@ function parse_assignment_id_with_recent($class_config, $most_recent_assignment_
 
 
 function get_assignment_version($username, $semester, $course, $assignment_id) {
-
   // if it's set in the URL, and a valid version (the directory exists), return it
   if (isset($_GET["assignment_version"])) {
     $assignment_version = htmlspecialchars($_GET["assignment_version"]);
@@ -102,13 +101,11 @@ function get_assignment_version($username, $semester, $course, $assignment_id) {
       return $assignment_version;
     }
   }
-
   // otherwise, get the "active" assignment version
   $assignment_version = get_active_version($username, $semester,$course, $assignment_id);
   if (is_valid_assignment_version($username, $semester, $course, $assignment_id, $assignment_version)) {
     return $assignment_version;
   }
-
   // otherwise, return -1 (no submission)
   return -1;
 
@@ -129,14 +126,10 @@ function check_semester(){
         return $semester;
     } else {
         $_SESSION["status"] = "Invalid semester specified";
-        $course = $default_course;
-        if (isset($_GET["course"])) {
-            $course = htmlspecialchars($_GET["course"]);
-        }
-//FIXME:  Please include error HTML file in repo to avoid triggering 404 errors in apache.
-//		header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
-//      header("Location: ERROR_Xbad_semester_error.html");
-		return "f00";
+        header("HTTP/1.0 404 Not Found");
+        echo "An error has occured: ";
+        echo "Invalid semester ".'"'.$semester.'"';
+        exit();
     }
 }
 
@@ -157,15 +150,13 @@ function check_course() {
     }
 
     if (is_valid_course($semester,$course)) {
-        $_SESSION["status"] = "";
-
         return $course;
     } else {
         $_SESSION["status"] = "Invalid course specified";
-//FIXME:  Please include error HTML file in repo to avoid triggering 404 errors in apache.
-//      header("Location: index.php?page=displaymessage&semester=".$semester."&course=".$course);
-//      header("Location: ERROR_X_bad_course_error.html");
-	    return "csci0000";
+        header("HTTP/1.0 404 Not Found");
+        echo "An error has occured: ";
+        echo "Invalid course ".'"'.$course.'"';
+        exit();
     }
 }
 

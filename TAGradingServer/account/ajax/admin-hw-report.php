@@ -131,7 +131,7 @@ ORDER BY r.rubric_due_date ASC
                 if(isset($grade_record["grade_id"])) {
                     $grade_id = intval($grade_record["grade_id"]);
                     $grade_user_id = intval($grade_record["grade_user_id"]);
-                    $grade_comment = $grade_record["grade_comment"];
+                    $grade_comment = htmlspecialchars($grade_record["grade_comment"]);
 
                     // Query database to gather TA info
                     $params = array($grade_user_id);
@@ -212,7 +212,7 @@ ORDER BY q.question_part_number ASC, q.question_number ASC", $params);
                         {
                             $grade_question_score = floatval($grade_question_record["grade_question_score"]);
                             //$grade_question_comment = $grade_question_record["grade_question_comment"];
-                            $grade_question_comment = clean_string_javascript($grade_question_record["grade_question_comment"]);
+                            $grade_question_comment = htmlspecialchars($grade_question_record["grade_question_comment"]);
                         }
 
                         // we only need to do that for homeworks without separate parts

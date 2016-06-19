@@ -2,6 +2,10 @@
 
 require_once("controller/controller_functions.php");
 
+if($assignment_version <= 0 && $active_version != $assignment_version){
+  header ("Location: index.php?semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
+}
+
 echo '<html>';
 echo '<title>'.$course.'</title>';
 echo "<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700' rel='stylesheet' type='text/css'>";
@@ -51,6 +55,9 @@ echo "<script src='diff-viewer/diff_queue.js'></script>";
 echo '<link href="diff-viewer/diff.css" rel="stylesheet"></link>';
 
 echo "<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>";
+
+// DRAG AND DROP
+echo "<script src='drag-and-drop/drag_and_drop.js'></script>";
 
 // =================================================================================
 
@@ -173,36 +180,142 @@ if ($status && $status != "") {
   echo '</div>';
 }
 
-
 // UPLOAD NEW VERSION
 
 echo '<div class="outer_box">';
 echo '<h3 class="label">Upload New Version</h3>';
 echo '<p class="sub">'.$upload_message.'</p>';
 
-
-echo '<form ';
-echo ' class="form_submit"';
-echo ' action="?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'"';
-echo ' method="post"';
-echo ' enctype="multipart/form-data"';
-echo ' onsubmit="return check_for_upload('.$assignment_name.', '.$highest_version.', '.$max_submissions.' )"';
-echo '>';
-echo "<input type='hidden' name='csrf_token' value='{$_SESSION['csrf']}' />";
-
 if ($svn_checkout == true) {
+    echo '<form ';
+    echo ' class="form_submit"';
+    echo ' action="?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'"';
+    echo ' method="post"';
+    echo ' enctype="multipart/form-data"';
+    echo ' onsubmit="return check_for_upload('."'".$assignment_name."'".', '.$highest_version.', '.$max_submissions.')"';
+    echo '>';
+    echo "<input type='hidden' name='csrf_token' value='{$_SESSION['csrf']}' />";
+
     // NO FILE SUBMISSION, PULL FILES FROM SVN
     echo '<input type="submit" name="submit" value="GRADE SVN" class="btn btn-primary">';
     echo '<input type="hidden" name="svn_checkout" value="true">';
+    echo '</form>';
 } else {
-    // SINGLE FILE OR ZIP FILE SUBMISSION
+/*
+    // MULTIPLE FILES OR ZIP FILES SUBMISSION
     echo '<label for="file" class="label">Select File:</label>';
-    echo '<input type="file" name="file" id="file" />';
+    echo '<input type="file" name="files[]" id="file" multiple/>';
     echo '<input type="submit" name="submit" value="Submit File" class="btn btn-primary">';
     echo '<input type="hidden" name="svn_checkout" value="false">';
 }
 
 echo '</form>';
+echo '</div>';
+
+*/
+
+//  PARSE PREVIOUSLY SUBMITTED FILES
+  $names = [];
+  $sizes = [];
+  for($i = 1; $i <= $num_parts; $i++){
+    $names[$i] = [];
+    $sizes[$i] = [];
+  }
+  foreach($submitted_files as $f){
+    // ===========================================================================================
+    // Uncomment the if-else statement if want single-parted hw to be put under the version folder
+    // ===========================================================================================
+    // if($num_parts == 1){
+    //   $names[$num_parts][] = $f['name'];
+    //   $sizes[$num_parts][] = $f['size'];
+    // }
+    // else{
+      //if(substr($f['name'], 0, 3) != "part") { // Error}
+      $names[$f['name'][4]][] = substr($f['name'], 6);
+      $sizes[$f['name'][4]][] = $f['size'];
+    // }
+  }
+// DRAG AND DROP STARTS
+// ============================================================================
+
+// MULTIPLE PARTS
+  for($i = 1; $i <= $num_parts; $i++){
+    echo '<div class="outer_box" id="upload'.$i.'" style="cursor: pointer; text-align: center">';
+    echo '<h3 class="label" id="label'.$i.'" >Click or drag your files here';
+    echo '<input type="file" name="files" id="input_file'.$i.'" style="display:none" onchange="addFile('.$i.')" multiple/>';
+    echo '</h3>';
+
+    // ADD LABELS FOR FILES FROM PREVIOUS SUBMISSION
+    ?> <script type="text/javascript"> createArray(<?php echo $num_parts; ?>); </script> <?php
+
+    for($j = 0; $j < count($names[$i]); $j++){
+      ?> <script type="text/javascript">
+      addLabel(<?php echo '"'.$names[$i][$j].'", '.$sizes[$i][$j].', '.$i.", true"; ?>);
+      readPrevious(<?php echo '"'.$names[$i][$j].'", '.$i; ?>);
+      </script> <?php
+    }
+    echo '<hr id="line'.$i.'" style="border-top:dotted 2px">';
+    echo '<button class="btn btn-primary" id="delete'.$i.'" active>Delete All</button>';
+    echo '</div>';
+  }
+  echo '<button type="button" id= "submit" class="btn btn-primary" active>Submit</button>';
+  ?>
+
+  <script type="text/javascript">
+  // ONLY ALLOW ADDING/DELETING FILES IN HIGHEST VERSION / NO SUBMISSIONS / SUBMISSION CANCELLED
+  var assignment_version = <?php echo $assignment_version; ?>;
+  var active_version = <?php echo $active_version; ?>;
+  var highest_version = <?php echo $highest_version; ?>;
+  if((active_version == assignment_version && active_version == highest_version)|| assignment_version <= 0){
+
+    for(var i = 1; i <= <?php echo $num_parts; ?>; i++ ){
+      var dropzone = document.getElementById("upload" + i);
+      dropzone.addEventListener("click", clicked_on_box, false);
+      dropzone.addEventListener("dragenter", draghandle, false);
+      dropzone.addEventListener("dragover", draghandle, false);
+      dropzone.addEventListener("dragleave", draghandle, false);
+      dropzone.addEventListener("drop", drop, false);
+
+      $("#delete" + i).click(function(e){
+      //document.getElementById("delete").addEventListener("click", function(e){
+        deleteFiles(get_part_number(e));
+        e.stopPropagation();
+      })
+    }
+    //document.getElementById("submit").addEventListener("click", function(e){
+    $("#submit").click(function(e){
+      handle_submission(<?php
+        echo "'".check_version($assignment_name, $highest_version, $max_submissions)."', ";
+        echo "'".check_due_date($semester, $course, $assignment_id)."', ";
+        echo "'?page=upload&semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id."', ";
+        echo "'{$_SESSION['csrf']}', ";
+        echo 'false';
+        ?>);
+      e.stopPropagation();
+    })
+  }
+  else{
+    for(var i = 1; i <= <?php echo $num_parts; ?>; i++ ){
+      var dropzone = document.getElementById("upload" + i);
+      dropzone.style.background = "lightgrey";
+      // disable labels and buttons
+      var children = dropzone.childNodes;
+      for(var j=0; j<children.length; j++){
+        children[j].onclick = "";
+        children[j].disabled = true;
+      }
+      document.getElementById("upload" + i).style.cursor = "";
+      document.getElementById("submit").disabled = true;
+    }
+  }
+
+  </script>
+
+  <?php
+// DRAG AND DROP ENDS
+// ============================================================================
+}
+
 echo '</div>';
 
 /*
@@ -211,7 +324,6 @@ echo "HIGHEST VERSION ".$highest_version." (most recent)<br>";
 echo "ASSIGNMENT VERSION ".$assignment_version." (what to view)<br>";
 echo "ACTIVE VERSION ".$active_version." (for TA grading)<br>";  // active
 */
-
 // ============================================================================
 // INFO ON ALL VERSIONS
 
@@ -459,16 +571,22 @@ echo '</div>'; // end HWsubmission
 
 ?>
 
-<script>
-
+<script type="text/javascript">
     function check_for_upload(assignment, versions_used, versions_allowed) {
         versions_used = parseInt(versions_used);
         versions_allowed = parseInt(versions_allowed);
         if (versions_used >= versions_allowed) {
-            var message = confirm("Are you sure you want to upload for " + assignment + " ?  You have already used up all of your free submissions (" + versions_used + " / " + versions_allowed + ").  Uploading may result in loss of points.");
+            var message = confirm("Are you sure you want to upload for " + assignment + "? You have already used up all of your free submissions (" + versions_used + " / " + versions_allowed + "). Uploading may result in loss of points.");
             return message;
         }
         return true;
+    }
+
+    function handle_submission(version_check, due_date_check, url, csrf_token, svn_checkout){
+      if((!version_check || confirm(version_check)) && (!due_date_check || confirm(due_date_check))){
+        var loc = "?semester="+<?php echo '"'.$semester.'"';?>+"&course="+<?php echo '"'.$course.'"';?>+"&assignment_id="+<?php echo '"'.$assignment_id.'"';?>;
+        submit(url, csrf_token, svn_checkout, loc);
+      }
     }
 
     // Go through diff queue and run viewer
