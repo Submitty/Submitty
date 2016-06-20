@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ "$RUN_E2E" = "true" ]]; then
-    chmod -R 755 /home/travis/build
+    sudo chmod -R 755 /home/travis/build
     sudo apt-get update > /dev/null
     sudo apt-get install -yqq --force-yes apache2 libapache2-mod-php5 php5-curl php5-intl php5-pgsql
 
