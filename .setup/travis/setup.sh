@@ -36,7 +36,8 @@ cp -r sample_files /usr/local/hss/sample_files
 
 
 # copy the files from the repo
-cp -r grading /usr/local/hss/src/
+mkdir -p /usr/local/hss/src
+cp -r grading /usr/local/hss/src/grading
 ls /usr/local/hss
 ls /usr/local/hss/src
 
