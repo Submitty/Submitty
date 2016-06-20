@@ -21,6 +21,9 @@
 #ifndef MAX_SUBMISSION_SIZE
 #define MAX_SUBMISSION_SIZE 100000 
 #endif
+#ifndef PART_NAMES
+#define PART_NAMES { }
+#endif
 
 // ========================================================================================
 

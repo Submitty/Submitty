@@ -91,12 +91,25 @@ int main(int argc, char *argv[]) {
   }
 
   std::string id = getAssignmentIdFromCurrentDirectory(std::string(argv[0]));
+  std::vector<std::string> part_names = PART_NAMES;
 
   init << "{\n\t\"id\": \"" << id << "\"," << std::endl;
   init << "\t\"assignment_message\": \"" << ASSIGNMENT_MESSAGE << "\"," << std::endl;
 
   init << "\t\"max_submissions\": " << MAX_NUM_SUBMISSIONS << "," << std::endl;
   init << "\t\"max_submission_size\": " << MAX_SUBMISSION_SIZE << "," << std::endl;
+
+  if (part_names.size() > 1) {
+    init << "\t\"num_parts\": " << part_names.size() << "," << std::endl;
+    init << "\t\"part_names\": [" << std::endl;
+    for (int i = 0; i < part_names.size(); i++) {
+      init << "\t\t\"" << part_names[i] << "\"";
+      if (i != part_names.size()-1) 
+        init << ",";
+      init << std::endl;
+    }
+    init << "\t]," << std::endl;
+  }
 
   init << "\t\"auto_pts\": " << AUTO_POINTS << "," << std::endl;
   int visible = 0;

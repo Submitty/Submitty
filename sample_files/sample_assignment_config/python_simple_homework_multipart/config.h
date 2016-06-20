@@ -9,6 +9,9 @@
 #define AUTO_POINTS 10
 #define TA_POINTS 0
 #define EXTRA_CREDIT_POINTS 0
+
+#define PART_NAMES { "Part 1", "Part 2", "Part 3" }
+
 std::vector<TestCase> testcases 
   {
     

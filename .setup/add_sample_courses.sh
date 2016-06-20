@@ -68,6 +68,7 @@ function one_course {
         # set the homework deadlines 2 days apart, starting 2 days ago
         my_date=`date --date="$(($i*2-2)) day" +"%Y-%m-%d "`
         echo "        {"                                                  >> $class_json_file
+        #FIXME:  Using the full directory name as the assignment_id is rather bulky...
         echo "               \"assignment_id\":\"$val\","                 >> $class_json_file
         echo "               \"assignment_name\":\"$val\","               >> $class_json_file
         echo "               \"released\":true,"                          >> $class_json_file
