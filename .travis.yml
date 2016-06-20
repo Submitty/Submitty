@@ -20,6 +20,7 @@ before_script:
   - psql -f TAGradingServer/data/tables.sql -U postgres -d test_hwgrading
   - psql -f TAGradingServer/data/inserts.sql -U postgres -d test_hwgrading
   - psql -f tests/testData/travis.sql -U postgres -d test_hwgrading
+  - chmod -R 755 ${TRAVIS_BUILD_DIR}
 
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
