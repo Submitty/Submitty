@@ -39,6 +39,9 @@ ls /usr/local/hss
 ls /usr/local/hss/src
 ls /usr/local/hss/src/grading
 
+gcc --version
+g++ --version
+
 sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/test_suite/integrationTests/scripts/lib.py
 sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/test_suite/integrationTests/scripts/run.py
 sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/src/grading/system_call_check.cpp
