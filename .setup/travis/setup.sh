@@ -2,7 +2,7 @@
 
 if [[ "$RUN_E2E" = "true" ]]; then
     sudo apt-get update > /dev/null
-    sudo apt-get install -yqq --force-yes apache2 libapache2-mod-php5 php5-curl php5-intl php5-pgsql
+    sudo apt-get install -yqq --force-yes apache2 libapache2-mod-php5 php5-curl php5-intl php5-pgsql python
 
     sudo sed -i -e "s,/var/www,$(pwd),g" /etc/apache2/sites-available/default
     # cat /etc/apache2/sites-available/default
@@ -25,3 +25,9 @@ fi
 echo "Setting up config files"
 cp "$TRAVIS_BUILD_DIR/tests/test.php" "$TRAVIS_BUILD_DIR/TAGradingServer/toolbox/configs/master.php"
 touch "$TRAVIS_BUILD_DIR/TAGradingServer/toolbox/configs/test_course.php"
+
+mkdir -p /usr/local/hss
+cp tests /usr/local/hss/test_suite
+cp sample_files /usr/local/hss/sample_files
+sed -i -e "s|__INSTALL__FILLIN__HSS_REPOSITORY__|/usr/local/hss|g" /usr/local/hss/test_suite/scripts/lib.py
+sed -i -e "s|__INSTALL__FILLIN__HSS_REPOSITORY__|/usr/local/hss|g" /usr/local/hss/test_suite/scripts/run.py
