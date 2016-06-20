@@ -7,7 +7,7 @@ if [[ "$TRAVIS_BRANCH" = "master" ]]; then
     RUN_E2E=true
 fi
 
-BEFORE_SCRIPT_DIR=$(dirname $0)
+BEFORE_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source ${BEFORE_SCRIPT_DIR}/common/common_env.sh
 
