@@ -18,13 +18,13 @@ std::vector<TestCase> testcases
 
     TestCase::MakeFileExists(
     "README",
-    "part1/README.txt",
+    "README.txt",
     TestCasePoints(2)
     ),
 
     TestCase::MakeCompilation(
     "Compilation",
-    "/usr/bin/clang++ -Wall -o a.out -- part1/*.cpp",
+    "/usr/bin/clang++ -Wall -o a.out -- *.cpp",
     "a.out",        // name of .exe created by student
     TestCasePoints(3)
     ),

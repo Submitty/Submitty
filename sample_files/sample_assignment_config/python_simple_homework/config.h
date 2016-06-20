@@ -10,7 +10,7 @@ std::vector<TestCase> testcases
      TestCase::MakeTestCase
     ("Lab 1 Checkpoint 1",       //  title
      "python *.py",              //  command (seen by students)
-     "/usr/bin/python part1/*.py",     //  actual command (full path req'd)
+     "/usr/bin/python *.py",     //  actual command (full path req'd)
      TestCasePoints(0),          //  no points/grading awarded
      {new TestCaseComparison
      (&myersDiffbyLinebyChar,    //  comparison function
