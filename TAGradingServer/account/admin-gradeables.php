@@ -8,22 +8,10 @@ $output = "";
 
 $db->query("
 SELECT
-    r.*,q.rubric_parts,q.rubric_questions,q.rubric_score,q.rubric_ec
+    g.*
 FROM
-    rubrics as r
-LEFT JOIN(
-    SELECT
-        rubric_id as rid,
-        count(distinct(question_part_number)) as rubric_parts,
-        count(question_id) as rubric_questions,
-        sum(case when question_extra_credit = 0 then question_total else 0 end) as rubric_score,
-        sum(case when question_extra_credit = 1 then question_total else 0 end) as rubric_ec
-    FROM
-        questions
-    GROUP BY
-        rubric_id
-) as q ON r.rubric_id = q.rid
-ORDER BY rubric_id ASC",array());
+    gradeable AS g
+ORDER BY g_id ASC",array());
 
 $output .= <<<HTML
 <style type="text/css">
@@ -37,7 +25,7 @@ $output .= <<<HTML
         min-width: 60px;
     }
 
-    #container-rubrics
+    #container-gradeables
     {
         width:1200px;
         margin:100px auto;
@@ -56,54 +44,54 @@ $output .= <<<HTML
         background-clip: padding-box;
     }
 
-    #table-rubrics {
+    #table-gradeables {
         /*width: 80%;*/
         margin-left: 30px;
         margin-top: 10px;
     }
 
-    #table-rubrics td {
+    #table-gradeables td {
         display: inline-block;
         overflow: auto;
         padding-top: 10px;
         padding-bottom: 10px;
     }
 
-    #table-rubrics tr {
+    #table-gradeables tr {
         border-bottom: 1px solid darkgray;
         margin-top: 5px;
     }
 
-    #table-rubrics td.rubrics-id {
+    #table-gradeables td.gradeables-id {
         width: 50px;
     }
 
-    #table-rubrics td.rubrics-name {
+    #table-gradeables td.gradeables-name {
         width: 200px;
     }
 
-    #table-rubrics td.rubrics-parts {
+    #table-gradeables td.gradeables-parts {
         width: 160px;
     }
 
-    #table-rubrics td.rubrics-questions {
+    #table-gradeables td.gradeables-questions {
         width: 160px;
     }
 
-    #table-rubrics td.rubrics-score {
+    #table-gradeables td.gradeables-score {
         width: 160px;
     }
 
-    #table-rubrics td.rubrics-due {
+    #table-gradeables td.gradeables-due {
         width: 260px;
     }
 
-    #table-rubrics td.rubrics-options {
+    #table-gradeables td.gradeables-options {
         width: 100px;
     }
 
 
-    .edit-rubrics-icon {
+    .edit-gradeables-icon {
         display: block;
         float:left;
         margin-right:20px;
@@ -114,14 +102,14 @@ $output .= <<<HTML
         overflow: hidden;
     }
 
-    .edit-rubrics-confirm {
+    .edit-gradeables-confirm {
         max-width: none;
         position: absolute;
         top:0;
         left:-280px;
     }
 
-    .edit-rubrics-cancel {
+    .edit-gradeables-cancel {
         max-width: none;
         position: absolute;
         top:0;
@@ -136,11 +124,11 @@ $output .= <<<HTML
 
 </style>
 <script type="text/javascript">
-    function deleteRubric(rubric_id) {
-        var rubric_name = $('td#rubric-'+rubric_id+'-title').text();
-        var c = window.confirm("Are you sure you want to delete '" + rubric_name + "'?");
+    function deleteGradeable(gradeable_id) {
+        var gradeable_name = $('td#gradeable-'+gradeable_id+'-title').text();
+        var c = window.confirm("Are you sure you want to delete '" + gradeable_name + "'?");
         if (c == true) {
-            $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=delete&id='+rubric_id, {
+            $.ajax('{$BASE_URL}/account/ajax/admin-gradeables.php?course={$_GET['course']}&action=delete&id='+gradeable_id, {
                 type: "POST",
 		        data: {
                     csrf_token: '{$_SESSION['csrf']}'
@@ -149,11 +137,11 @@ $output .= <<<HTML
             .done(function(response) {
                 var res_array = response.split("|");
                 if (res_array[0] == "success") {
-                    window.alert("'" + rubric_name + "' deleted");
-                    $('tr#rubric-'+rubric_id).remove();
+                    window.alert("'" + gradeable_name + "' deleted");
+                    $('tr#gradeable-'+gradeable_id).remove();
                 }
                 else {
-                    window.alert("'" + rubric_name + "' could not be deleted");
+                    window.alert("'" + gradeable_name + "' could not be deleted");
                 }
             })
             .fail(function() {
@@ -163,7 +151,7 @@ $output .= <<<HTML
     }
 
     function fixSequences() {
-        $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=sequence', {
+        $.ajax('{$BASE_URL}/account/ajax/admin-gradeables.php?course={$_GET['course']}&action=sequence', {
             type: "POST",
             data: {
                 csrf_token: '{$_SESSION['csrf']}'
@@ -184,38 +172,38 @@ $output .= <<<HTML
         });
     }
 </script>
-<div id="container-rubrics">
+<div id="container-gradeables">
     <div class="modal-header">
-        <h3 id="myModalRubricel">Manage Rubrics</h3>
+        <h3 id="myModalgradeableel">Manage Gradeables</h3>
         <span class="submit-button">
             <input class="btn btn-primary" onclick="window.location.href='{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}'" type="submit" value="Create New Gradeable"/>
             &nbsp;&nbsp;
             <input class="btn btn-primary" onclick="fixSequences();" type="submit" value="Fix DB Sequences" />
         </span>
     </div>
-    <table id="table-rubrics">
+    <table id="table-gradeables">
         <tr>
-            <td class="rubrics-id">ID</td>
-            <td class="rubrics-name">Name</td>
-            <td class="rubrics-parts">Parts</td>
-            <td class="rubrics-questions">Questions</td>
-            <td class="rubrics-score">Score</td>
-            <td class="rubrics-due">Due Date</td>
-            <td class="rubrics-options">Options</td>
+            <td class="gradeables-id">ID</td>
+            <td class="gradeables-name">Name</td>
+            <td class="gradeables-parts">Parts</td>
+            <td class="gradeables-questions">Questions</td>
+            <td class="gradeables-score">Score</td>
+            <td class="gradeables-due">Due Date</td>
+            <td class="gradeables-options">Options</td>
         </tr>
 HTML;
 
-foreach ($db->rows() as $rubric) {
+foreach ($db->rows() as $gradeable) {
     $output .= <<<HTML
-        <tr id='rubric-{$rubric['rubric_id']}'">
-            <td class="rubrics-id" id="rubric-{$rubric['rubric_id']}-id">{$rubric['rubric_id']}</td>
-            <td class="rubrics-name" id="rubric-{$rubric['rubric_id']}-title">{$rubric['rubric_name']}</td>
-            <td class="rubrics-parts" id="rubric-{$rubric['rubric_id']}-parts">{$rubric['rubric_parts']}</td>
-            <td class="rubrics-questions" id="rubric-{$rubric['rubric_id']}-questions">{$rubric['rubric_questions']}</td>
-            <td class="rubrics-score" id="rubric-{$rubric['rubric_id']}-score">{$rubric['rubric_score']} ({$rubric['rubric_ec']})</td>
-            <td class="rubrics-due" id="rubric-{$rubric['rubric_id']}-due">{$rubric['rubric_due_date']}</td>
-            <td id="rubric-{$rubric['rubric_id']}-options"><a href="{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&action=edit&id={$rubric['rubric_id']}">Edit</a> |
-            <a onclick="deleteRubric({$rubric['rubric_id']});">Delete</a></td>
+        <tr id='gradeable-{$gradeable['g_id']}'">
+            <td class="gradeables-id" id="gradeable-{$gradeable['g_id']}-id">{$gradeable['g_id']}</td>
+            <td class="gradeables-name" id="gradeable-{$gradeable['g_id']}-title">{$gradeable['g_title']}</td>
+            <td class="gradeables-parts" id="gradeable-{$gradeable['g_id']}-parts"><!--{$gradeable['gradeable_parts']}--></td>
+            <td class="gradeables-questions" id="gradeable-{$gradeable['g_id']}-questions"><!--{$gradeable['gradeable_questions']} --></td>
+            <td class="gradeables-score" id="gradeable-{$gradeable['g_id']}-score"><!-- {$gradeable['gradeable_score']} ({$gradeable['gradeable_ec']}) --></td>
+            <td class="gradeables-due" id="gradeable-{$gradeable['g_id']}-due">{$gradeable['g_grade_released_date']}</td>
+            <td id="gradeable-{$gradeable['g_id']}-options"><a href="{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&action=edit&id={$gradeable['g_id']}">Edit</a> |
+            <a onclick="deleteGradeable({$gradeable['g_id']});">Delete</a></td>
         </tr>
 HTML;
 }

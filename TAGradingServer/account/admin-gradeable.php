@@ -10,32 +10,41 @@ if($user_is_administrator)
 {
     $have_old = false;
     $has_grades = false;
-    $old_rubric = array(
-        'rubric_id' => -1,
-        'rubric_number' => "",
-        'rubric_due_date' => date('Y/m/d 23:59:59'),
-        'rubric_code' => "",
-        'rubric_parts_sep' => false,
-        'rubric_late_days' => __DEFAULT_LATE_DAYS__
+    $old_gradeable = array(
+        'g_id' => -1,
+        'g_title' => "",
+        'g_overall_ta_instructions' => '',
+        'g_team_assignment' => false,
+        'g_gradeable_type' => 0,
+        'g_grade_by_registration' => false,
+        'g_grade_start_date' => date('Y/m/d 23:59:59'),
+        'g_grade_released_date' => date('Y/m/d 23:59:59'),
+        'g_syllabus_bucket' => ''
     );
     $old_questions = array();
+
     if (isset($_GET['action']) && $_GET['action'] == 'edit') {
-        $rubric_id = intval($_GET['id']);
-        Database::query("SELECT * FROM rubrics WHERE rubric_id=?",array($rubric_id));
+        $gradeable_id = $_GET['id'];
+        Database::query("SELECT * FROM gradeable WHERE g_id=?",array($gradeable_id));
         if (count(Database::rows()) == 0) {
-            die("No rubric found");
+            die("No gradeable found");
         }
-        $old_rubric = Database::row();
-        Database::query("SELECT * FROM questions WHERE rubric_id=? ORDER BY question_part_number, question_number", array($old_rubric['rubric_id']));
+        $old_gradeable = Database::row();
+        // This is where the parts logic should go, checkpoint 1,2,3
+        
+        Database::query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($old_gradeable['g_id']));
+        $components = Database::rows();
+        /*Database::query("SELECT * FROM questions WHERE rubric_id=? ORDER BY question_part_number, question_number", array($old_rubric['rubric_id']));
         $questions = Database::rows();
         foreach ($questions as $question) {
             $question['question_total'] = floatval($question['question_total']);
             $old_questions[$question['question_part_number']][$question['question_number']] = $question;
         }
+        */
         $have_old = true;
-
+        /*
         Database::query("SELECT COUNT(*) as cnt FROM grades WHERE rubric_id=?", array($rubric_id));
-        $has_grades = Database::row()['cnt'] > 0;
+        $has_grades = Database::row()['cnt'] > 0;*/
     }
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
@@ -52,31 +61,37 @@ if($user_is_administrator)
         return $retVal;
     }
 
-    $rubrics = array();
-    $db->query("SELECT rubric_id from rubrics ORDER BY rubric_id", array());
+    $gradeables = array();
+    $db->query("SELECT g_id from gradeable ORDER BY g_id", array());
     foreach ($db->rows() as $row) {
-        $rubrics[$row['rubric_id']] = intval($row['rubric_id']);
+        $gradeables[$row['g_id']] = $row['g_id'];
     }
 
     if (!$have_old) {
-        $rubricNumberQuery = (count($rubrics) > 0) ? end($rubrics) + 1 : 1;
-        $rubric_name = "Homework {$rubricNumberQuery}";
-        $rubric_submission_id = "hw".Functions::pad($rubricNumberQuery);
-        $rubric_parts_submission_id[1] = "_part1";
+        $gradeableNumberQuery = (count($gradeables) > 0) ? end($gradeables) + 1 : 1;
+        $gradeable_name = "Gradeable {$gradeableNumberQuery}";
+        $gradeable_submission_id = "gradeable".Functions::pad($gradeableNumberQuery);
+        $gradeable_parts_submission_id[1] = "_part1";
         $part_count = 1;
         $string = "Add";
         $action = strtolower($string);
     }
     else {
-        $rubricNumberQuery = $old_rubric['rubric_id'];
-        $rubric_name = $old_rubric['rubric_name'];
-        $rubric_submission_id = $old_rubric['rubric_submission_id'];
-        $rubric_parts_submission_id = array();
+        $gradeableNumberQuery = 0;
+        $gradeable_name = $old_gradeable['g_title'];
+        $gradeable_submission_id = $old_gradeable['g_id'];
+        $gradeable_parts_submission_id = array();
+        $g_overall_ta_instructions = $old_gradeable['g_overall_ta_instructions'];
+        $g_gradeable_type = $old_gradeable['g_gradeable_type'];
+        $g_grade_by_registration = $old_gradeable['g_grade_by_registration'];
+        $g_syllabus_bucket = $old_gradeable['g_syllabus_bucket'];
+        $g_grade_start_date = $old_gradeable['g_grade_start_date'];
+        $g_grade_released_date = $old_gradeable['g_grade_released_date'];
         $part_count = 0;
-        foreach(explode(",", $old_rubric['rubric_parts_submission_id']) as $k => $v) {
+        /*foreach(explode(",", $old_rubric['rubric_parts_submission_id']) as $k => $v) {
             $part_count++;
             $rubric_parts_submission_id[$k + 1] = $v;
-        }
+        }*/
 
         $string = "Edit";
         $action = strtolower($string);
@@ -174,7 +189,6 @@ if($user_is_administrator)
 
 <div id="container-rubric">
     <form class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_rubric['rubric_id']}" method="post" enctype="multipart/form-data"> 
-    <!-- <form class="form-signin" method="post" enctype="multipart/form-data"> -->
         <input type='hidden' name="part_count" value="{$part_count}" />
         <input type='hidden' name="csrf_token" value="{$_SESSION['csrf']}" />
 
@@ -185,46 +199,56 @@ if($user_is_administrator)
         </div>
 
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
-            
-            
             <!-- check to make sure this id is actually unique -->
-            What is the unique id of this gradeable?: <input style='width: 200px' type='text' name='rubric_submission_id' value="{$rubric_submission_id}" />
+            What is the unique id of this gradeable?: <input style='width: 200px' type='text' name='gradeable_id' value="{$gradeable_submission_id}" />
             <br />
-            What is the title of this gradeable?: <input style='width: 227px' type='text' name='rubric_name' value="{$rubric_name}" />
+            What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' value="{$gradeable_name}" />
             <br />
-            
-            <!-- Optional field, not sure how to enforce yet :P Currently has no value associated with it.-->
             What overall instructions should be provided to the TA?: 
-            
             <br />
-
-            <textarea rows="4" cols="200" name="ta_instructions" placeholder="(Optional)" style="width: 500px;"></textarea> 
+            <textarea rows="4" cols="200" name="ta_instructions" placeholder="(Optional)" style="width: 500px;">
+HTML;
+            echo htmlspecialchars($g_overall_ta_instructions);
             
-            <!-- <input style='width: 227px' type='text' placeholder="(Optional)" name='ta_instructions' /> -->
-            
-            <br />
-            
-            Is this a team assignment?:
-            
-            <!-- Values need to be associated with variables -->
-            
-            <input type="radio" name="team-assignment" value="yes" > Yes
-            <input type="radio" name="team-assignment" value ="no" > No
+    print <<<HTML
+        </textarea>
+        <br />
+        Is this a team assignment?:
+        <input type="radio" name="team-assignment" value="yes"
+HTML;            
+    
+    echo ($g_team_assignment==true)?'checked':''; 
+    print <<<HTML
+        > Yes
+            <input type="radio" name="team-assignment" value ="no" 
+HTML;
+            echo ($g_team_assignment==false)?'checked':'' ;
+    print <<<HTML
+            > No
             <br /> <br />   
             
             <!-- This should not be changed after grading has begun? -->
             What is the type of your gradeable?:
            
-            <!-- Values not connected with any PHP vars yet -->
-           
             <fieldset>
-            <!-- <legend>What is the type of your gradeable?:</legend> -->
-            <input type='radio' class="electronic-file" name="gradeable-type" value="Electronic File"> 
+            <input type='radio' id="radio-electronic-file" class="electronic-file" name="gradeable-type" value="Electronic File"
+HTML;
+            echo ($g_gradeable_type === 0)?'checked':'';
+    print <<<HTML
+            > 
             Electronic File
-            <input type='radio' class="checkpoints" name="gradeable-type" value="Checkpoints">
+            <input type='radio' id="radio-checkpoints" class="checkpoints" name="gradeable-type" value="Checkpoints"
+HTML;
+            echo ($g_gradeable_type === 1)?'checked':'';
+    print <<<HTML
+            >
             Checkpoints
-            <input type='radio' class="numeric" name="gradeable-type" value="Numeric">
-            Numeric
+            <input type='radio' id="radio-numeric" class="numeric" name="gradeable-type" value="Numeric"
+HTML;
+            echo ($g_gradeable_type === 2)?'checked':'';
+    print <<<HTML
+            >
+            Numeric/Text
             
             <!-- This is only relevant to Electronic Files -->
             <div class="gradeable-type-options electronic-file" id="electronic-file" >    
@@ -427,25 +451,25 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="checkpoint-label" type="text" class="checkpoint-label" value="Checkpoint 0"/> 
+                               <input style="width: 200px" name="checkpoint-label-0" type="text" class="checkpoint-label" value="Checkpoint 0"/> 
                            </td>     
                            <td>     
-                                <input type="checkbox" name="checkpoint-extra-1" class="checkpoint-extra" value="" />
+                                <input type="checkbox" name="checkpoint-extra-0" class="checkpoint-extra" value="true" />
                            </td> 
                            <td>     
-                                <input type="checkbox" name="optional-ta-messg-1" class="optional-ta-messg" value="" /> 
+                                <input type="checkbox" name="optional-ta-messg-0" class="optional-ta-messg" value="true" /> 
                            </td>
                         </tr>
                       
                        <tr class="multi-field" id="mult-field-1">
                            <td>
-                               <input style="width: 200px" name="checkpoint-label" type="text" class="checkpoint-label" value="Checkpoint 1"/> 
+                               <input style="width: 200px" name="checkpoint-label-1" type="text" class="checkpoint-label" value="Checkpoint 1"/> 
                            </td>     
                            <td>     
-                                <input type="checkbox" name="checkpoint-extra-1" class="checkpoint-extra" value="" />
+                                <input type="checkbox" name="checkpoint-extra-1" class="checkpoint-extra" value="true" />
                            </td> 
                            <td>     
-                                <input type="checkbox" name="optional-ta-messg-1" class="optional-ta-messg" value="" /> 
+                                <input type="checkbox" name="optional-ta-messg-1" class="optional-ta-messg" value="true" /> 
                            </td>
                         </tr>
                   </table>
@@ -502,25 +526,28 @@ HTML;
                   <button type="button" id="add-numeric-field">Add </button>  
                   <button type="button" id="remove-numeric-field" id="remove-numeric" style="visibilty:hidden;">Remove</button>   
                 </div>  
-                
-                
                 <br /> <br />
                 Do you want a box for an (optional) message from the TA to the student?
                 <input type="radio" name="opt-ta-messg" value="yes" /> Yes
                 <input type="radio" name="opt-ta-messg" value="no" /> No
-                
             </div>  
-            
             </fieldset>
-
             <br/>
-            
-            
+
             <!-- Should not lock to a particular gradeable type -->
             Who is assigned to grade this item?:
             <br /> <br />
-            <input type="radio" name="section-type" value="reg-section" /> Registration Section
-            <input type="radio" name="section-type" value="grade-section" /> Grading Section
+            <input type="radio" name="section-type" value="reg-section" 
+            
+HTML;
+            echo ($g_grade_by_registration===true)?'checked':'';
+    print <<<HTML
+            /> Registration Section
+            <input type="radio" name="section-type" value="grade-section" 
+HTML;
+            echo ($g_grade_by_registration!==true)?'checked':'';
+    print <<<HTML
+            /> Grading Section
             <br /> <br />
             
             <!-- For each TA/mentor 
@@ -620,29 +647,20 @@ HTML;
                     </tr>
 HTML;
     }
-
-
     print <<<HTML
                 </table>
             </div>
-HTML;
-    
-    
-    print <<<HTML
-            
             <br />
-            
             <!-- TODO include this section from the Google Doc -->
-            
-            
+
             <!-- TODO default to the submission + late days for electronic -->
-            What date can the TAs start grading this?: <input name="date_grade" class="datepicker" type="text"
+            What date can the TAs start grading this?: <input name="date_grade" id="date_grade" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
             
             <br />
             
             <!-- TODO default to never -->    
-            What date will the TA grades be released to the students? <input name="date_released" class="datepicker" type="text"
+            What date will the TA grades be released to the students? <input name="date_released" id="date_released" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">    
             
             <br />
@@ -650,17 +668,62 @@ HTML;
             What syllabus/iris "bucket" does this item belong to?:
             
             <select name="gradeable-buckets" style="width: 170px;">
-                <option value="homework">Homework</option>
-                <option value="assignment">Assignment</option>
-                <option value="quiz">Quiz</option>
-                <option value="test">Test</option>
-                <option value="reading">Reading</option>
-                <option value="participation">Participation</option>
-                <option value="exam">Exam</option>
-                <option value="lab">Lab</option>
-                <option value="recitation">Recitation</option>
-                <option value="problem-set">ProblemSet</option>
-                <option value="project">Project</option>
+                <option value="homework"
+                
+HTML;
+    echo ($g_syllabus_bucket === 'homework')?'selected':'';
+    print <<<HTML
+                >Homework</option>
+                <option value="assignment"
+HTML;
+    echo ($g_syllabus_bucket === 'assignment')?'selected':'';
+    print <<<HTML
+                >Assignment</option>
+                <option value="quiz"
+HTML;
+    echo ($g_syllabus_bucket === 'quiz')?'selected':'';
+    print <<<HTML
+                >Quiz</option>
+                <option value="test"
+HTML;
+    echo ($g_syllabus_bucket === 'test')?'selected':'';
+    print <<<HTML
+                >Test</option>
+                <option value="reading"
+HTML;
+    echo ($g_syllabus_bucket === 'reading')?'selected':'';
+    print <<<HTML
+                >Reading</option>
+                <option value="participation"
+HTML;
+    echo ($g_syllabus_bucket === 'participation')?'selected':'';
+    print <<<HTML
+                >Participation</option>
+                <option value="exam"
+HTML;
+    echo ($g_syllabus_bucket === 'exam')?'selected':'';
+    print <<<HTML
+                >Exam</option>
+                <option value="lab"
+HTML;
+    echo ($g_syllabus_bucket === 'lab')?'selected':'';
+    print <<<HTML
+                >Lab</option>
+                <option value="recitation"
+HTML;
+    echo ($g_syllabus_bucket === 'recitation')?'selected':'';
+    print <<<HTML
+                >Recitation</option>
+                <option value="problem-set"
+HTML;
+    echo ($g_syllabus_bucket === 'problem-set')?'selected':'';
+    print <<<HTML
+                >ProblemSet</option>
+                <option value="project"
+HTML;
+    echo ($g_syllabus_bucket === 'project')?'selected':'';
+    print <<<HTML
+                >Project</option>
                 <!-- May add more as needed -->
             </select>
             
@@ -677,11 +740,6 @@ HTML;
                 If this is an edit of an existing AND there are existing grades this gradeable
                 regenerates the grade reports. And possibly re-runs the generate grade summaries?
             -->
-            
-            
-HTML;
-
-    print <<<HTML
         </div>
         <div class="modal-footer">
                 <button class="btn btn-primary" type="submit" style="margin-top: 10px;">{$string} Gradeable</button>
@@ -743,6 +801,7 @@ HTML;
                 $("#add-checkpoint-field", $(this)).click(function(e) {
                     numCheckpoints++;
                     $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numCheckpoints).find('.checkpoint-label').val('Checkpoint ' + numCheckpoints).focus();
+                    $('#mult-field-' + numCheckpoints).find('.checkpoint-label').attr('name','checkpoint-label-'+numCheckpoints);
                     $('#mult-field-' + numCheckpoints).find('.checkpoint-extra').attr('name','checkpoint-extra-'+numCheckpoints);
                     $('#mult-field-' + numCheckpoints).find('.optional-ta-messg').attr('name','optional-ta-messg'+numCheckpoints);
                     $('#remove-checkpoint-field').show();
@@ -790,7 +849,8 @@ HTML;
 	    showTimezone: false
     });
 
-    datepicker.datetimepicker('setDate', (new Date("{$old_rubric['rubric_due_date']}")));
+    $('#date_grade').datetimepicker('setDate', (new Date("{$g_grade_start_date}")));;
+    $('#date_released').datetimepicker('setDate', (new Date("{$g_grade_released_date}")));;
 
     function toggleTA(part, question) {
         if(document.getElementById("individual-" + part + "-" + question ).style.display == "block") {
@@ -816,6 +876,22 @@ HTML;
 
     print <<<JS
     
+    
+    //expand the radio buttons on edit
+    $(document).ready(function(){
+        $('.gradeable-type-options').hide();
+
+        if($('#radio-electronic-file').is(':checked')){ 
+            $('#electronic-file').show();
+        }
+        else if ($('#radio-checkpoints').is(':checked')){ 
+            $('#checkpoints').show();
+        }
+        else if ($('#radio-numeric').is(':checked')){ 
+            $('#numeric').show();
+        }
+    });
+
     // Shows the radio inputs dynamically
     $('input:radio[name="gradeable-type"]').change(
     function(){
@@ -982,8 +1058,6 @@ HTML;
                 $('tr#add-' + ii).attr('id', 'add-' + (ii-1)).find('div.btn').attr('onclick', 'addQuestion(' + (ii-1) + ')');
                 $('td#part-' + ii).attr('id', 'part-' + (ii-1));
                 $('a#delete-' + ii).attr('id', 'delete-' + (ii-1)).attr('onclick', 'deletePart(' + (ii-1) + ');');
-                //$('a#down-' + ii).attr('id', 'down-' + (ii-1)).attr('onclick', 'movePartDown(' + (ii-1) + ');');
-                //$('a#up-' + ii).attr('id', 'up-' + (ii-1)).attr('onclick', 'movePartUp(' + (ii-1) + ');');
             }
             parts.splice(part, 1);
         }
