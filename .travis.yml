@@ -1,6 +1,6 @@
 language: php
 sudo: true
-#dist: trusty
+dist: trusty
 #we should switch to this after figuring out how to use newer version of PHPUnit
 php:
   - 5.5
