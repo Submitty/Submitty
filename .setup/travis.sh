@@ -3,9 +3,9 @@
 # Bash Script responsible for setting up Travis Environment. Keep definitions to common_env.sh,
 # installation to setup.sh and then spinning up services to start.sh
 
-if [[ "$TRAVIS_BRANCH" = "master" ]]; then
+#if [[ "$TRAVIS_BRANCH" = "master" ]]; then
     RUN_E2E=true
-fi
+#fi
 
 BEFORE_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
