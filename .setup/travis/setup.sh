@@ -24,8 +24,8 @@ if [[ "$RUN_E2E" = "true" ]]; then
 fi
 
 echo "Setting up config files"
-cp "$TRAVIS_BUILD_DIR/tests/test.php" "$TRAVIS_BUILD_DIR/TAGradingServer/toolbox/configs/master.php"
-touch "$TRAVIS_BUILD_DIR/TAGradingServer/toolbox/configs/test_course.php"
+cp ${TRAVIS_BUILD_DIR}/tests/test.php ${TRAVIS_BUILD_DIR}/TAGradingServer/toolbox/configs/master.php
+touch ${TRAVIS_BUILD_DIR}/TAGradingServer/toolbox/configs/test_course.php
 
 echo "Setting up auto-grader test suite"
 apt-get install -yqq --force-yes python automake cmake make clang gcc g++ g++-multilib libseccomp2 seccomp libseccomp-dev valgrind
