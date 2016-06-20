@@ -31,8 +31,8 @@ script:
   - python /usr/local/hss/test_suite/integrationTests/scripts/run.py
 
 after_script:
-  - sudo locate access.log
-  - sudo locate access_log
-  
+  - sudo ls /var/log
+  - sudo cat /etc/apache2/apache2.conf
+
 notifications:
   email: false
