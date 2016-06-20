@@ -35,12 +35,6 @@ mkdir -p /usr/local/hss/src
 cp -r tests /usr/local/hss/test_suite
 cp -r sample_files /usr/local/hss/sample_files
 cp -r grading/ /usr/local/hss/src/
-ls /usr/local/hss
-ls /usr/local/hss/src
-ls /usr/local/hss/src/grading
-
-gcc --version
-g++ --version
 
 sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/test_suite/integrationTests/scripts/lib.py
 sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/test_suite/integrationTests/scripts/run.py
