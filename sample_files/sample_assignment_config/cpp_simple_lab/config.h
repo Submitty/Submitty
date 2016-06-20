@@ -27,7 +27,8 @@ std::vector<TestCase> testcases
 	"Compilation",
 	"/usr/bin/clang++ -Wall -o a.out -- part2/*.cpp",
 	"a.out",
-	TestCasePoints(3)
+	TestCasePoints(3),
+        0.5
 ),
 
 /******************** TEST CASES **********************/
