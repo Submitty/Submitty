@@ -31,15 +31,13 @@ echo "Setting up auto-grader test suite"
 apt-get install -yqq --force-yes python clang cmake make
 mkdir -p /usr/local/hss
 mkdir -p /var/local/hss
+mkdir -p /usr/local/hss/src
 cp -r tests /usr/local/hss/test_suite
 cp -r sample_files /usr/local/hss/sample_files
-
-
-# copy the files from the repo
-mkdir -p /usr/local/hss/src
-cp -r grading /usr/local/hss/src/grading
+cp -r grading/ /usr/local/hss/src/
 ls /usr/local/hss
 ls /usr/local/hss/src
+ls /usr/local/hss/src/grading
 
 sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/test_suite/integrationTests/scripts/lib.py
 sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/test_suite/integrationTests/scripts/run.py
