@@ -23,15 +23,16 @@ before_script:
   - chmod -R 755 ${TRAVIS_BUILD_DIR}
 
 script:
-  - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-  - vendor/phpunit/phpunit/phpunit --version
-  - vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml
+#  - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+#  - vendor/phpunit/phpunit/phpunit --version
+#  - vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml
 #  - if [[ "$TRAVIS_BRANCH" = "master" ]]; then vendor/phpunit/phpunit/phpunit --configuration tests/phpunit_e2e.xml; fi
   - vendor/phpunit/phpunit/phpunit --configuration tests/phpunit_e2e.xml
-  - python /usr/local/hss/test_suite/integrationTests/scripts/run.py
+#  - python /usr/local/hss/test_suite/integrationTests/scripts/run.py
 
 after_script:
   - sudo ls /var/log
+  - sudo ls /var/log/apache2
   - sudo cat /etc/apache2/apache2.conf
 
 notifications:

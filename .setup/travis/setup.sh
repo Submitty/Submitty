@@ -26,4 +26,4 @@ echo "Setting up config files"
 cp ${TRAVIS_BUILD_DIR}/tests/test.php ${TRAVIS_BUILD_DIR}/TAGradingServer/toolbox/configs/master.php
 touch ${TRAVIS_BUILD_DIR}/TAGradingServer/toolbox/configs/test_course.php
 
-sudo bash ${BEFORE_SCRIPT_DIR}/travis/autograder.sh
+# sudo bash ${BEFORE_SCRIPT_DIR}/travis/autograder.sh
