@@ -2,6 +2,6 @@
     "name": "submitty/submitty",
     "require": {
         "phpunit/phpunit": "5.*",
-        "phpunit/phpunit-selenium": "3.*"
+        "phpunit/phpunit-selenium": "2.*"
     }
 }
