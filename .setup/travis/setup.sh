@@ -29,5 +29,6 @@ touch "$TRAVIS_BUILD_DIR/TAGradingServer/toolbox/configs/test_course.php"
 mkdir -p /usr/local/hss
 cp tests /usr/local/hss/test_suite
 cp sample_files /usr/local/hss/sample_files
+chmod -R 777 /usr/local/hss
 sed -i -e "s|__INSTALL__FILLIN__HSS_REPOSITORY__|/usr/local/hss|g" /usr/local/hss/test_suite/scripts/lib.py
 sed -i -e "s|__INSTALL__FILLIN__HSS_REPOSITORY__|/usr/local/hss|g" /usr/local/hss/test_suite/scripts/run.py
