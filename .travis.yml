@@ -31,9 +31,9 @@ script:
 #  - python /usr/local/hss/test_suite/integrationTests/scripts/run.py
 
 after_script:
-  - sudo ls /var/log
   - sudo ls /var/log/apache2
-  - sudo cat /etc/apache2/apache2.conf
+  - sudo cat /var/log/apache2/access.log
+  - sudo cat /var/log/apache2/error.log
 
 notifications:
   email: false
