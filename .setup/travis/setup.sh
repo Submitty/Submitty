@@ -28,7 +28,7 @@ cp "$TRAVIS_BUILD_DIR/tests/test.php" "$TRAVIS_BUILD_DIR/TAGradingServer/toolbox
 touch "$TRAVIS_BUILD_DIR/TAGradingServer/toolbox/configs/test_course.php"
 
 echo "Setting up auto-grader test suite"
-apt-get install -yqq --force-yes python automake cmake make clang gcc g++ g++-multilib
+apt-get install -yqq --force-yes python automake cmake make clang gcc g++ g++-multilib libseccomp2 seccomp
 mkdir -p /usr/local/hss
 mkdir -p /var/local/hss
 mkdir -p /usr/local/hss/src
