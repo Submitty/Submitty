@@ -21,7 +21,7 @@ std::vector<TestCase> testcases
   TestCase::MakeCompilation
   (
    "Compilation of Submitted Files (for Dr. Memory): g++ -m32 -g -Wall *cpp -o submitted_32.out",
-   "/usr/bin/clang++ " + drmemory_flags + " -Wall -o submitted_32.out -- part1/*.cpp",
+   "/usr/bin/clang++ " + drmemory_flags + " -Wall -o submitted_32.out -- *.cpp",
    "submitted_32.out",	
    TestCasePoints(2)
    ),
@@ -29,7 +29,7 @@ std::vector<TestCase> testcases
   TestCase::MakeCompilation
   (
    "Compilation of Submitted Files (for Valgrind): g++ -g -Wall *cpp -o submitted.out",
-   "/usr/bin/clang++ -g -Wall -o submitted.out -- part1/*.cpp",
+   "/usr/bin/clang++ -g -Wall -o submitted.out -- *.cpp",
    "submitted.out",
    TestCasePoints(2)
    ),
