@@ -31,33 +31,12 @@ MY_COURSE_DIR=$HSS_DATA_DIR/courses/$semester/$course
 #chmod o+r $HSS_INSTALL_DIR/website/public/custom_resources/$semester_$course_main.css
 
 ##########################################################################
-
-# RECOMMENDED:  Store your homework configurations in a private repository.
-#               Insert location of private repository here.  E.g.:
-
-#PRIVATE_REPO=$HSS_DATA_DIR/PRIVATE_GIT_CHECKOUT
-# or
-#PRIVATE_REPO=$HSS_DATA_DIR/courses/$semester/$course/PRIVATE_GIT_CHECKOUT
-
-
-##########################################################################
 # SPECIFIC HOMEWORKS
-# NOTE: also need to edit the HSS_DATA_DIR/courses/$semester/$course/config/class.json file
 
 echo "BUILDING course=$course semester=$semester... "
 
-# build a few sample homeworks from the public repo
-build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/python_simple_homework/            $semester   $course   python_hw01
-build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/python_buggy_output/               $semester   $course   python_hw02
-build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/python_simple_homework_multipart/  $semester   $course   multi_part_python
-
-build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/cpp_simple_lab/                    $semester   $course   cpp_lab01
-build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/cpp_memory_debugging/              $semester   $course   cpp_lab02
-build_homework   $HSS_INSTALL_DIR/sample_files/sample_assignment_config/cpp_cats/                          $semester   $course   cpp_hw01
-
-# build homeworks from a private repo
-#build_homework   $PRIVATE_REPO/csci1200_hw01_image_processing/                                      $semester   $course   hw01
-#build_homework   $PRIVATE_REPO/csci1200_hw02_tennis_classes/                                        $semester   $course   hw02
+# pull in the homeworks from an auto-generated file
+. $MY_COURSE_DIR/ASSIGNMENTS.txt
 
 echo "done building course=$course semester=$semester"
 
