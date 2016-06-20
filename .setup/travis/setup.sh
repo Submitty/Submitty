@@ -2,7 +2,7 @@
 
 if [[ "$RUN_E2E" = "true" ]]; then
     sudo chmod -R 755 /home/travis/build
-    usermod -a -G travis www-data
+    sudo usermod -a -G travis www-data
     sudo apt-get update > /dev/null
     sudo apt-get install -yqq --force-yes apache2 libapache2-mod-php5 php5-curl php5-intl php5-pgsql
 
