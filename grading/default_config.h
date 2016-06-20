@@ -21,6 +21,9 @@
 #ifndef MAX_SUBMISSION_SIZE
 #define MAX_SUBMISSION_SIZE 100000      // 100 KB submitted files size
 #endif
+#ifndef PART_NAMES
+#define PART_NAMES { }
+#endif
 
 // ========================================================================================
 
