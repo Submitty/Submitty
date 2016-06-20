@@ -84,6 +84,7 @@ else{
                 g_gradeable_type, g_grade_by_registration, g_grade_start_date, g_grade_released_date,
                 g_syllabus_bucket,g_min_grading_group) VALUES (?,?,?,?,?,?,?,?,?,?)", $params);
 }
+
 // Now that the assignment is specified create the checkpoints for checkpoint based stuffs
 // The type of assignment will determine how the gradeable-component(s) are generated
 
@@ -148,7 +149,6 @@ else if($g_gradeable_type === GradeableType::checkpoints){
     }
     $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
     $num_old_checkpoints = intval($db->row()['cnt']);
-    
     // insert the checkpoints
     for($i=1; $i<=$num_checkpoints; ++$i){
         $gc_is_extra_credit = (isset($_POST["checkpoint-extra-".strval($i)])) ? "true" : "false";

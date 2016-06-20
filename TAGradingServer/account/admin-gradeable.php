@@ -627,7 +627,6 @@ HTML;
             What date will the TA grades be released to the students? 
             <input name="date_released" id="date_released" class="datepicker" type="text" 
                    style="cursor: auto; background-color: #FFF; width: 250px;">    
-            
             <br />
             What syllabus/iris "bucket" does this item belong to?:
             
@@ -896,6 +895,7 @@ HTML;
         }
         calculatePercentageTotal();
     }
+
     // Shows the radio inputs dynamically
     $('input:radio[name="gradeable-type"]').change(
     function(){
