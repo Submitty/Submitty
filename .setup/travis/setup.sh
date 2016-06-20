@@ -4,8 +4,7 @@ if [[ "$RUN_E2E" = "true" ]]; then
     sudo apt-get update > /dev/null
     sudo apt-get install -yqq --force-yes apache2 libapache2-mod-php5 php5-curl php5-intl php5-pgsql
 
-    sudo sed -i -e "s,/var/www/html,${TRAVIS_BUILD_DIR},g" /etc/apache2/sites-available/000-default.conf
-    sudo cat /etc/apache2/sites-available/000-default.conf
+    sudo sed -i -e "s,/var/www/html,${TRAVIS_BUILD_DIR}/,g" /etc/apache2/sites-available/000-default.conf
     # cat /etc/apache2/sites-available/default
     sudo /etc/init.d/apache2 restart
 
