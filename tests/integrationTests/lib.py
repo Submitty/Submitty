@@ -11,7 +11,7 @@ from collections import defaultdict
 
 
 # global variable available to be used by the test suite modules
-global HSS_INSTALL_DIR 
+global HSS_INSTALL_DIR
 HSS_INSTALL_DIR = "__INSTALL__FILLIN__HSS_INSTALL_DIR__"
 
 grading_source_dir =  HSS_INSTALL_DIR + "/src/grading"
@@ -48,47 +48,12 @@ cyan = ASCIIEscapeManager([36])
 white = ASCIIEscapeManager([37])
 
 
-# Run a single test case
-def run_test(name):
-    with bold:
-        print("--- BEGIN TEST MODULE " + name.upper() + " ---")
-    cont = True
-    try:
-        print("* Starting compilation...")
-        to_run[name].prebuild()
-        to_run[name].wrapper.build()
-        print("* Finished compilation")
-    except Exception as e:
-        print("Build failed with exception: %s" % e)
-        cont = False
-    if cont:
-        total = len(to_run[name].testcases)
-        for index, f in zip(xrange(1, len(to_run[name].testcases) + 1), to_run[name].testcases):
-            try:
-                f()
-            except Exception as e:
-                with bold + red:
-                    print("Test #" + str(index) + " failed with exception:", e)
-                    total -= 1
-                    cont = False
-        if total == len(to_run[name].testcases):
-            with bold + green:
-                print("All tests passed")
-        else:
-            with bold + red:
-                print(str(total) + "/" + str(len(to_run[name].testcases)) + " tests passed")
-                success = False
-    with bold:
-        print("--- END TEST MODULE " + name.upper() + " ---")
-    print()
-    if not cont:
-        sys.exit(1)
-
-# Run every test currently loaded
-def run_all():
+# Run the given list of test case names
+def run_tests(names):
     success = True
-    totalmodules = len(to_run.keys())
-    for key, val in to_run.iteritems():
+    totalmodules = len(names)
+    for key in names:
+        val = to_run[key]
         modsuccess = True
         with bold:
             print("--- BEGIN TEST MODULE " + key.upper() + " ---")
@@ -124,7 +89,7 @@ def run_all():
         print()
         if not modsuccess:
             totalmodules -= 1
-    if totalmodules == len(to_run.keys()):
+    if totalmodules == len(names):
         with bold + green:
             print("All modules passed")
     else:
@@ -132,6 +97,9 @@ def run_all():
             print(str(totalmodules) + "/" + str(len(to_run.keys())) + " modules passed")
         sys.exit(1)
 
+# Run every test currently loaded
+def run_all():
+    run_tests(to_run.keys())
 
 
 # Helper class used to remove the burden of paths from the testcase author.
@@ -296,7 +264,7 @@ class TestcaseWrapper:
         if not os.path.dirname(f):
             f = os.path.join("data", f)
         filename1 = os.path.join(self.testcase_path, f)
-        filename2 = os.path.join(HSS_INSTALL_DIR,"test_suite/integrationTests/scripts/empty_json_diff_file.json")
+        filename2 = os.path.join(HSS_INSTALL_DIR,"test_suite/integrationTests/data/empty_json_diff_file.json")
         return self.json_diff(filename1,filename2)
 
 
