@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
   init << "\t\"max_submissions\": " << MAX_NUM_SUBMISSIONS << "," << std::endl;
   init << "\t\"max_submission_size\": " << MAX_SUBMISSION_SIZE << "," << std::endl;
 
-  if (part_names.size() > 1) {
+  if (part_names.size() > 0) {
     init << "\t\"num_parts\": " << part_names.size() << "," << std::endl;
     init << "\t\"part_names\": [" << std::endl;
     for (int i = 0; i < part_names.size(); i++) {
