@@ -307,9 +307,9 @@ service apache2 reload
 #################
 sed -i -e 's/^docroot=/docroot=\/usr\/local\/hss:/g' /etc/suphp/suphp.conf
 
-# only if you need to have a group of people able to edit the files
+# Assumes you need to have a group of people able to edit the files.  Comment out if not needed
 sed -i -e 's/^allow_file_group_writeable=false/allow_file_group_writeable=true/g' /etc/suphp/suphp.conf
-# only if you need to have a group of people able to add/delete files and directories
+# Assumes you need to have a group of people able to add/delete files and directories.  Comment out if not needed.
 sed -i -e 's/^allow_directory_group_writeable=false/allow_directory_group_writeable=true/g' /etc/suphp/suphp.conf
 # do not allow others_writable files or directories or you will have even less security than without suphp
 
