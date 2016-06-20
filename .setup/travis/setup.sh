@@ -42,10 +42,10 @@ ls /usr/local/hss/src/grading
 sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/test_suite/integrationTests/scripts/lib.py
 sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/test_suite/integrationTests/scripts/run.py
 sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/src/grading/system_call_check.cpp
-sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/src/grading/Sample_CMakeLists.cpp
-sed -i -e "s|__INSTALL__FILLIN__HSS_DATA_DIR__|/var/local/hss|g" /usr/local/hss/src/grading/Sample_CMakeLists.cpp
-sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/src/grading/CMakeLists.cpp
-sed -i -e "s|__INSTALL__FILLIN__HSS_DATA_DIR__|/var/local/hss|g" /usr/local/hss/src/grading/CMakeLists.cpp
+sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/src/grading/Sample_CMakeLists.txt
+sed -i -e "s|__INSTALL__FILLIN__HSS_DATA_DIR__|/var/local/hss|g" /usr/local/hss/src/grading/Sample_CMakeLists.txt
+sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/src/grading/CMakeLists.txt
+sed -i -e "s|__INSTALL__FILLIN__HSS_DATA_DIR__|/var/local/hss|g" /usr/local/hss/src/grading/CMakeLists.txt
 
 # building the autograding library
 mkdir -p /usr/local/hss/src/grading/lib
