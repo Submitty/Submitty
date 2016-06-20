@@ -19,7 +19,7 @@
 #define SUBMISSION_PENALTY 5
 #endif
 #ifndef MAX_SUBMISSION_SIZE
-#define MAX_SUBMISSION_SIZE 100000 
+#define MAX_SUBMISSION_SIZE 100000      // 100 KB submitted files size
 #endif
 
 // ========================================================================================

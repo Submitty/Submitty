@@ -186,7 +186,7 @@ echo '<div class="outer_box">';
 echo '<h3 class="label">Upload New Version</h3>';
 echo '<p class="sub">'.$upload_message.'</p>';
 
-if ($svn_checkout == true) {
+if ($svn_checkout == true) {  // svn upload
     echo '<form ';
     echo ' class="form_submit"';
     echo ' action="?page=upload&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'"';
@@ -200,122 +200,124 @@ if ($svn_checkout == true) {
     echo '<input type="submit" name="submit" value="GRADE SVN" class="btn btn-primary">';
     echo '<input type="hidden" name="svn_checkout" value="true">';
     echo '</form>';
-} else {
-/*
-    // MULTIPLE FILES OR ZIP FILES SUBMISSION
-    echo '<label for="file" class="label">Select File:</label>';
-    echo '<input type="file" name="files[]" id="file" multiple/>';
-    echo '<input type="submit" name="submit" value="Submit File" class="btn btn-primary">';
-    echo '<input type="hidden" name="svn_checkout" value="false">';
-}
+} else {  // file upload
 
-echo '</form>';
-echo '</div>';
-
-*/
-
-//  PARSE PREVIOUSLY SUBMITTED FILES
-  $names = [];
-  $sizes = [];
+  //  GET NAMES AND SIZES OF PREVIOUSLY SUBMITTED FILES
+  $previous_names = [];
+  $previous_sizes = [];
   for($i = 1; $i <= $num_parts; $i++){
-    $names[$i] = [];
-    $sizes[$i] = [];
+    $previous_names[$i] = [];
+    $previous_sizes[$i] = [];
   }
   foreach($submitted_files as $f){
-    // ===========================================================================================
-    // Uncomment the if-else statement if want single-parted hw to be put under the version folder
-    // ===========================================================================================
-    // if($num_parts == 1){
-    //   $names[$num_parts][] = $f['name'];
-    //   $sizes[$num_parts][] = $f['size'];
-    // }
-    // else{
-      //if(substr($f['name'], 0, 3) != "part") { // Error}
-      $names[$f['name'][4]][] = substr($f['name'], 6);
-      $sizes[$f['name'][4]][] = $f['size'];
-    // }
-  }
-// DRAG AND DROP STARTS
-// ============================================================================
-
-// MULTIPLE PARTS
-  for($i = 1; $i <= $num_parts; $i++){
-    echo '<div class="outer_box" id="upload'.$i.'" style="cursor: pointer; text-align: center">';
-    echo '<h3 class="label" id="label'.$i.'" >Click or drag your files here</h3>';
-    echo '<input type="file" name="files" id="input_file'.$i.'" style="display:none" onchange="addFilesFromInput('.$i.')" multiple/>';
-
-    // ADD LABELS FOR FILES FROM PREVIOUS SUBMISSION
-    ?> <script type="text/javascript"> createArray(<?php echo $num_parts; ?>); </script> <?php
-
-    for($j = 0; $j < count($names[$i]); $j++){
-      ?> <script type="text/javascript">
-      addLabel(<?php echo '"'.$names[$i][$j].'", '.$sizes[$i][$j].', '.$i.", true"; ?>);
-      readPrevious(<?php echo '"'.$names[$i][$j].'", '.$i; ?>);
-      </script> <?php
+  // ==============================================================================================
+  // Comment the if-else statement out if want single-parted hw to be put under subfolder (/part1)
+  // ==============================================================================================
+    if($num_parts == 1){  // files in version folder for 1-part hw
+      $previous_names[$num_parts][] = $f['name'];
+      $previous_sizes[$num_parts][] = $f['size'];
     }
-    echo '<hr id="line'.$i.'" style="border-top:dotted 2px">';
-    echo '<button class="btn btn-primary" id="delete'.$i.'" active>Delete All</button>';
+    else{ // files in version_path/partn folders for multi-part hw
+      // if(substr($f['name'], 0, 3) != "part") {} // TODO: Error check here
+      $previous_names[$f['name'][4]][] = substr($f['name'], 6);
+      $previous_sizes[$f['name'][4]][] = $f['size'];
+    }
+  }
+
+  // DRAG AND DROP STARTS
+  // ============================================================================
+  // DROP ZONES FOR MULTIPLE PARTS
+  for($i = 1; $i <= $num_parts; $i++){
+    echo '<div class="outer_box" id="upload'.$i.'" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey;">';
+    echo '<h3 class="label" id="label'.$i.'" >Drag your files here or click to open browser</h3>';
+    echo '<input type="file" name="files" id="input_file'.$i.'" style="display:none" onchange="addFilesFromInput('.$i.')" multiple/>';
+    // Uncomment if want buttons for emptying single bucket
+    // echo '<button class="btn btn-primary" id="delete'.$i.'" active>Delete All</button>';
     echo '</div>';
   }
   echo '<button type="button" id= "submit" class="btn btn-primary" active>Submit</button>';
+  echo '&nbsp&nbsp&nbsp&nbsp';
+  echo '<button type="button" id= "startnew" class="btn btn-primary" active>Start New</button>';
+  if($highest_version > 0){
+    echo '&nbsp&nbsp&nbsp&nbsp';
+    echo '<button type="button" id= "getprev" class="btn btn-primary" active>Start from Version '.$highest_version.'</button>';
+  }
   ?>
 
   <script type="text/javascript">
-  // ONLY ALLOW ADDING/DELETING FILES IN HIGHEST VERSION / NO SUBMISSIONS / SUBMISSION CANCELLED
+  // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
+  var num_parts = <?php echo $num_parts; ?>;
+  createArray(num_parts);
   var assignment_version = <?php echo $assignment_version; ?>;
   var active_version = <?php echo $active_version; ?>;
   var highest_version = <?php echo $highest_version; ?>;
-  if((active_version == assignment_version && active_version == highest_version)|| assignment_version <= 0){
+  for(var i = 1; i <= num_parts; i++ ){
+    var dropzone = document.getElementById("upload" + i);
+    dropzone.addEventListener("click", clicked_on_box, false);
+    dropzone.addEventListener("dragenter", draghandle, false);
+    dropzone.addEventListener("dragover", draghandle, false);
+    dropzone.addEventListener("dragleave", draghandle, false);
+    dropzone.addEventListener("drop", drop, false);
+    /*
+    // Uncomment if want buttons for emptying single bucket
+    $("#delete" + i).click(function(e){
+    //document.getElementById("delete").addEventListener("click", function(e){
+      deleteFiles(get_part_number(e));
+      e.stopPropagation();
+    })
+    */
+  }
 
-    for(var i = 1; i <= <?php echo $num_parts; ?>; i++ ){
-      var dropzone = document.getElementById("upload" + i);
-      dropzone.addEventListener("click", clicked_on_box, false);
-      dropzone.addEventListener("dragenter", draghandle, false);
-      dropzone.addEventListener("dragover", draghandle, false);
-      dropzone.addEventListener("dragleave", draghandle, false);
-      dropzone.addEventListener("drop", drop, false);
-
-      $("#delete" + i).click(function(e){
-      //document.getElementById("delete").addEventListener("click", function(e){
-        deleteFiles(get_part_number(e));
-        e.stopPropagation();
-      })
+  $("#startnew").click(function(e){ // Clear all the selected files in the buckets
+    for(var i=1; i<= num_parts; i++){
+      deleteFiles(i);
     }
-    //document.getElementById("submit").addEventListener("click", function(e){
-    $("#submit").click(function(e){
-      handle_submission(<?php
-        echo "'".check_version($assignment_name, $highest_version, $max_submissions)."', ";
-        echo "'".check_due_date($semester, $course, $assignment_id)."', ";
-        echo "'?page=upload&semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id."', ";
-        echo "'{$_SESSION['csrf']}', ";
-        echo 'false';
-        ?>);
+    e.stopPropagation();
+  })
+  $("#submit").click(function(e){ // Submit button
+    handle_submission(<?php
+      echo "'".check_version($assignment_name, $highest_version, $max_submissions)."', ";
+      echo "'".check_due_date($semester, $course, $assignment_id)."', ";
+      echo "'?page=upload&semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id."', ";
+      echo "'{$_SESSION['csrf']}', ";
+      echo 'false';
+      ?>);
+    e.stopPropagation();
+  })
+
+  // START FROM FILES OF THE HIGHEST VERSION
+  if(assignment_version == highest_version && highest_version > 0){ // get highest version files if in highest version
+    document.getElementById("getprev").innerHTML = "Get Version " + assignment_version + " files";
+    $("#getprev").click(function(e){
+      $("#startnew").click();
+      <?php
+      for($i = 1; $i <= $num_parts; $i++){
+        for($j = 0; $j < count($previous_names[$i]); $j++){
+        ?>
+          addLabel(<?php echo '"'.$previous_names[$i][$j].'", '.$previous_sizes[$i][$j].', '.$i.", true"; ?>);
+          readPrevious(<?php echo '"'.$previous_names[$i][$j].'", '.$i; ?>);
+        <?php
+        }
+      }
+      ?>
       e.stopPropagation();
     })
   }
-  else{
-    for(var i = 1; i <= <?php echo $num_parts; ?>; i++ ){
-      var dropzone = document.getElementById("upload" + i);
-      dropzone.style.background = "lightgrey";
-      // disable labels and buttons
-      var children = dropzone.childNodes;
-      for(var j=0; j<children.length; j++){
-        children[j].onclick = "";
-        children[j].disabled = true;
-      }
-      document.getElementById("upload" + i).style.cursor = "";
-      document.getElementById("submit").disabled = true;
-    }
+  else if(highest_version > 0){ // else go to the highest version
+    $('#getprev').click(function(e){
+      window.location.href =
+      <?php
+        echo "'?semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$highest_version."';";
+        ?>
+    })
   }
-
   </script>
 
   <?php
+}
+echo '</div>';
 // DRAG AND DROP ENDS
 // ============================================================================
-}
-
-echo '</div>';
 
 /*
 // helpful for debugging

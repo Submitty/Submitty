@@ -187,10 +187,10 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
 
         // check if folders for parts exist
         $previous_part_path = [];
-        // ===========================================================================================
-        // Uncomment the if-else statement if want single-parted hw to be put under the version folder
-        // ===========================================================================================
-        //if($num_parts > 1) {
+        // ==============================================================================================
+        // Comment the if-else statement out if want single-parted hw to be put under subfolder (/part1)
+        // ==============================================================================================
+        if($num_parts > 1) {
           // check folder for multi-part homework
           for($n=1; $n <= $num_parts; $n++) {
             $previous_part_path[$n] = $previous_version_path."/part".$n;
@@ -199,10 +199,10 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
               return;
             }
           }
-        // }
-        // else {
-        //   $previous_part_path[$num_parts] = $previous_version_path;
-        // }
+        }
+        else {
+          $previous_part_path[$num_parts] = $previous_version_path;
+        }
 
         // check if files from previous version exist
         for($n=1; $n<=$num_parts; $n++) {
@@ -219,8 +219,8 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
       }
     }
 
-
-    $max_size = 50; // this is in kb
+    // note: all sizes in bytes
+    $max_size = 50000;
     if (isset($assignment_config["max_submission_size"])) {
         $max_size = $assignment_config["max_submission_size"];
     }
@@ -229,32 +229,26 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
     if ($svn_checkout==false) {
       $file_size = 0;
       for($n=1; $n <= $num_parts; $n++) {
-        // files uploaded
-        // if(isset($homework_file)) {
-          if(isset($homework_file[$n])) {
-            for($i = 0; $i < $count[$n]; $i++) {
-              $filename = explode(".", $homework_file[$n]["name"][$i]);
-              $extension = end($filename);
-              if($extension == "zip") {
-                $file_size += get_zip_size($filename);
-              }
-              else {
-                $file_size += $homework_file[$n]["size"][$i];
-              }
+        if(isset($homework_file[$n])) { // files uploaded
+          for($i = 0; $i < $count[$n]; $i++) {
+            $filename = explode(".", $homework_file[$n]["name"][$i]);
+            $extension = end($filename);
+            if($extension == "zip") {
+              $file_size += get_zip_size($filename);
+            }
+            else {
+              $file_size += $homework_file[$n]["size"][$i];
             }
           }
-        // }
-        // files from previous submission
-        // if(isset($previous_files)) {
-          if(isset($previous_files[$n])){
-            for($i=0; $i < count($previous_files[$n]); $i++){
-              $file_size += filesize($previous_part_path[$n]."/".$previous_files[$n][$i]);
-            }
+        }
+        if(isset($previous_files[$n])){ // files from previous submission
+          for($i=0; $i < count($previous_files[$n]); $i++){
+            $file_size += filesize($previous_part_path[$n]."/".$previous_files[$n][$i]);
           }
-        // }
+        }
       }
-      if ($file_size / 1024 > $max_size) {
-        return array("error"=>"", "message"=>"File(s) uploaded is too large.  Maximum size is ".$max_size." kb. Uploaded file(s) was ".$file_size / 1024 ." kb.");
+      if ($file_size > $max_size) {
+        return array("error"=>"", "message"=>"File(s) uploaded too large.  Maximum size is ".($max_size/1000)." kb. Uploaded file(s) was ".($file_size/1000)." kb.");
       }
     }
 
@@ -317,10 +311,10 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
     }
 
     $part_path = [];
-    // ===========================================================================================
-    // Uncomment the if-else statement if want single-parted hw to be put under the version folder
-    // ===========================================================================================
-    // if($num_parts > 1){
+        // ==============================================================================================
+        // Comment the if-else statement out if want single-parted hw to be put under subfolder (/part1)
+        // ==============================================================================================
+    if($num_parts > 1){
       // Create folder for multi-part homework
       for($n=1; $n <= $num_parts; $n++){
         $part_path[$n] = $version_path."/part".$n;
@@ -329,10 +323,10 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
           return;
         }
       }
-    // }
-    // else{ // else if homework is single-parted, put it in the version path folder
-    //   $part_path[$num_parts] = $version_path;
-    // }
+    }
+    else{ // else if homework is single-parted, put it in the version path folder
+      $part_path[$num_parts] = $version_path;
+    }
 
     if ($svn_checkout == false) {
       for($n=1; $n <= $num_parts; $n++){
@@ -388,7 +382,6 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
         // copy selected previous submitted files
         if(isset($previous_files[$n])){
           for($i=0; $i < count($previous_files[$n]); $i++){
-            // $copy_return = copy ($user_path."/".($upload_version-1).substr($part_path[$n], strlen($version_path))."/".$previous_files[$n][$i], $part_path[$n]."/".$previous_files[$n][$i]);
             $copy_return = copy ($previous_part_path[$n]."/".$previous_files[$n][$i], $part_path[$n]."/".$previous_files[$n][$i]);
             if (!$copy_return) {
               display_error("Failed to copy previously submitted file ".$previous_files[$n][$i]." to current submission.");
@@ -854,10 +847,10 @@ function is_valid_assignment_version($username, $semester, $course, $assignment_
   if($assignment_version < -1) return false;
 
   // "no submission" = -1 = a valid assignment version
-  if ($assignment_version === -1) return true;
+  if ($assignment_version == -1) return true;
 
   // "cancel" = 0 = a valid assignment version
-  if ($assignment_version === 0) return true;
+  if ($assignment_version == 0) return true;
 
   $path_front = get_path_front_course($semester,$course);
   $path = $path_front."/submissions/".$assignment_id."/".$username."/".$assignment_version;

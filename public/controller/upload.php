@@ -25,7 +25,6 @@ if (isset($_POST["svn_checkout"]) && $_POST["svn_checkout"] == "true") {
 
   for($i=0; $i<$num_parts; $i++){
     if(isset($_FILES["files".($i+1)])){
-      // $uploaded_files["part".($i+1)] = $_FILES["files".($i+1)];
       $uploaded_files[$i+1] = $_FILES["files".($i+1)];
     }
   }
@@ -40,8 +39,6 @@ if (isset($_POST["svn_checkout"]) && $_POST["svn_checkout"] == "true") {
   //Upload the files
   if (isset($uploaded_files) || isset($previous_files)) {
   // if (isset($_FILES["files"])) { // if (isset($_FILES["file"])) {
-
-    // $uploaded_files = $_FILES["files"]; // $uploaded_files = $_FILES["file"];
     $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id, $num_parts, $uploaded_files, $previous_files, false);
 
     if (isset($result["error"])) {
