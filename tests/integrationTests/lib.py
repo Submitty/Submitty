@@ -1,14 +1,12 @@
-import sys
+from __future__ import print_function
+from collections import defaultdict
+import inspect
+import json
 import os
 import subprocess
-import inspect
-import traceback
-import json
 import time
+import traceback
 import sys
-
-from collections import defaultdict
-
 
 # global variable available to be used by the test suite modules
 HSS_INSTALL_DIR = "__INSTALL__FILLIN__HSS_INSTALL_DIR__"
