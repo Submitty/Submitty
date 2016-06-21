@@ -547,7 +547,11 @@ function grade_this_item {
 	
   	# give the untrusted user read/write/execute permissions on the tmp directory & files
 	chmod -R go+rwx $tmp
-	
+        # remove the read/write permissions for the compilation log
+        chmod 660 .submit_compile_output.txt
+        # remove the execute bit for any text files
+	chmod -R go-x *.txt
+
 	# run the run.out as the untrusted user
 	echo '$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$assignment" "$user" "$version" "$submission_time" >& .submit_runner_output.txt'
 	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$assignment" "$user" "$version" "$submission_time" >& .submit_runner_output.txt
