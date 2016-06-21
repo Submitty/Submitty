@@ -7,8 +7,7 @@ cp -r tests /usr/local/hss/test_suite
 cp -r sample_files /usr/local/hss/sample_files
 cp -r grading/ /usr/local/hss/src/
 
-sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/test_suite/integrationTests/scripts/lib.py
-sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/test_suite/integrationTests/scripts/run.py
+sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/test_suite/integrationTests/lib.py
 sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/src/grading/system_call_check.cpp
 sed -i -e "s|__INSTALL__FILLIN__HSS_INSTALL_DIR__|/usr/local/hss|g" /usr/local/hss/src/grading/Sample_CMakeLists.txt
 sed -i -e "s|__INSTALL__FILLIN__HSS_DATA_DIR__|/var/local/hss|g" /usr/local/hss/src/grading/Sample_CMakeLists.txt

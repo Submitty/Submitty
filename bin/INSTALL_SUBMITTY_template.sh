@@ -248,7 +248,7 @@ replace_fillin_variables $HSS_INSTALL_DIR/src/grading/CMakeLists.txt
 replace_fillin_variables $HSS_INSTALL_DIR/src/grading/system_call_check.cpp
 
 
-# building the autograding library 
+# building the autograding library
 mkdir -p $HSS_INSTALL_DIR/src/grading/lib
 pushd $HSS_INSTALL_DIR/src/grading/lib
 cmake ..
@@ -411,7 +411,7 @@ mv $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $HSS_I
 # continuously, checking for new submissions and promptly grading them
 # in chronological order.  This script must be run as the ```hwcron```
 # user.
-# 
+#
 # Note that standard (non error) output of the grade_students.sh
 # script is discarded.  You will want to verify that the standard
 # error output is logged and/or emailed to the appropriate
@@ -467,18 +467,17 @@ if [[ "$#" -ge 1 && $1 == "test" ]]; then
     # copy the directory tree and replace variables
     echo -e "Install Autograding Test Suite..."
     rsync -rtz  $HSS_REPOSITORY/tests/  $HSS_INSTALL_DIR/test_suite
-    replace_fillin_variables $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/run.py
-    replace_fillin_variables $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/lib.py
+    replace_fillin_variables $HSS_INSTALL_DIR/test_suite/integrationTests/lib.py
 
     # add a symlink to conveniently run the test suite or specific tests without the full reinstall
-    ln -sf  $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/run.py  $HSS_INSTALL_DIR/bin/run_test_suite.py
+    ln -sf  $HSS_INSTALL_DIR/test_suite/integrationTests/run.py  $HSS_INSTALL_DIR/bin/run_test_suite.py
 
     echo -e "\nRun Autograding Test Suite...\n"
 
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
-    python $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/run.py  "$@" 
+    python $HSS_INSTALL_DIR/test_suite/integrationTests/run.py  "$@"
 
     echo -e "\nCompleted Autograding Test Suite\n"
 fi
