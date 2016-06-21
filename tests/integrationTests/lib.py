@@ -17,15 +17,21 @@ log_file = None
 log_dir = SUBMITTY_INSTALL_DIR + "/test_suite/log"
 
 
-def print(message="", end="\n"):
+def print(*args, **kwargs):
     global log_file
+    if "sep" not in kwargs:
+        kwargs["sep"] = " "
+    if "end" not in kwargs:
+        kwargs["end"] = '\n'
+
+    message = kwargs["sep"].join(map(str, args)) + kwargs["end"]
     if log_file is None:
         # include a couple microseconds in string so that we have unique log file
         # per test run
         log_file = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[:-3]
     with open(os.path.join(log_dir, log_file), 'a') as write_file:
-        write_file.write(message + end)
-    sys.stdout.write(message + end)
+        write_file.write(message)
+    sys.stdout.write(message)
 
 
 class TestcaseFile:
