@@ -7,7 +7,6 @@ if [[ "$RUN_E2E" = "true" ]]; then
     sudo apt-get install -yqq --force-yes apache2 libapache2-mod-php5 php5-curl php5-intl php5-pgsql
 
     sudo cp ${BEFORE_SCRIPT_DIR}/travis/000-default.conf /etc/apache2/sites-available/000-default.conf
-    sudo cat /etc/apache2/sites-available/000-default.conf
     sudo /etc/init.d/apache2 restart
 
     sh -e /etc/init.d/xvfb start
