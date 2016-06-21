@@ -1,10 +1,10 @@
 from __future__ import print_function
 from collections import defaultdict
+import datetime
 import inspect
 import json
 import os
 import subprocess
-import time
 import traceback
 import sys
 
@@ -17,10 +17,12 @@ log_file = None
 log_dir = HSS_INSTALL_DIR + "/test_suite/log"
 
 
-def print(message, end="\n"):
+def print(message="", end="\n"):
     global log_file
     if log_file is None:
-        log_file = str(int(time.time()))
+        # include a couple microseconds in string so that we have unique log file
+        # per test run
+        log_file = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[:-3]
     with open(os.path.join(log_dir, log_file), 'a') as write_file:
         write_file.write(message + end)
     sys.stdout.write(message + end)
