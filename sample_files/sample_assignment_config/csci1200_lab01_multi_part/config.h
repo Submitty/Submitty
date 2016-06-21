@@ -11,6 +11,8 @@
 #define TA_POINTS 0
 #define EXTRA_CREDIT_POINTS 2
 
+#define PART_NAMES { "README", "CODE" }
+
 // ===================================================================================
 
 // Test cases
