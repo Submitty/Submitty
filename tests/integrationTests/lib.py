@@ -106,7 +106,7 @@ def run_tests(names):
             print("All modules passed")
     else:
         with bold + red:
-            print(str(totalmodules) + "/" + str(len(to_run.keys())) + " modules passed")
+            print(str(totalmodules) + "/" + str(len(names)) + " modules passed")
         sys.exit(1)
 
 # Run every test currently loaded
