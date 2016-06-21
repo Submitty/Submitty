@@ -4,6 +4,7 @@ mkdir -p /usr/local/hss
 mkdir -p /var/local/hss
 mkdir -p /usr/local/hss/src
 cp -r tests /usr/local/hss/test_suite
+mkdir -p /usr/local/hss/test_suite/log
 cp -r sample_files /usr/local/hss/sample_files
 cp -r grading/ /usr/local/hss/src/
 
