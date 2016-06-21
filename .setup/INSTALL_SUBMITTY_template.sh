@@ -130,6 +130,7 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
     rm -rf $SUBMITTY_INSTALL_DIR/hwgrading_website
     rm -rf $SUBMITTY_INSTALL_DIR/src
     rm -rf $SUBMITTY_INSTALL_DIR/bin
+    rm -rf $SUBMITTY_INSTALL_DIR/.setup
     rm -rf $SUBMITTY_INSTALL_DIR/test_suite
 fi
 
@@ -298,7 +299,7 @@ popd > /dev/null
 
 ########################################################################################################################
 ########################################################################################################################
-# COPY THE SCRIPTS TO GRADE UPLOADED CODE (bash scripts & untrusted_execute)
+# COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
 
 echo -e "Copy the scripts"
 
@@ -316,7 +317,6 @@ replace_fillin_variables $SUBMITTY_INSTALL_DIR/bin/grading_done.sh
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/bin/regrade.sh
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/bin/build_homework_function.sh
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/bin/fake_submit_button_press.sh
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/bin/untrusted_execute.c
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/bin/setcsvfields
 
 # most of the scripts should be root only
@@ -335,7 +335,6 @@ chmod 550 $SUBMITTY_INSTALL_DIR/bin/grading_done.sh
 chown root:$HWCRON_USER $SUBMITTY_INSTALL_DIR/bin/grade_students.sh
 chmod 550 $SUBMITTY_INSTALL_DIR/bin/grade_students.sh
 
-
 # build the helper program for strace output and restrictions by system call categories
 g++ $SUBMITTY_INSTALL_DIR/src/grading/system_call_check.cpp -o $SUBMITTY_INSTALL_DIR/bin/system_call_check.out
 # set the permissions
@@ -343,22 +342,30 @@ chown root:$COURSE_BUILDERS_GROUP $SUBMITTY_INSTALL_DIR/bin/system_call_check.ou
 chmod 550 $SUBMITTY_INSTALL_DIR/bin/system_call_check.out
 
 
-# prepare the untrusted_execute executable with suid
+
+########################################################################################################################
+########################################################################################################################
+# PREPARE THE UNTRUSTED_EXEUCTE EXECUTABLE WITH SUID
+
+# copy the file
+rsync -rtz  $SUBMITTY_REPOSITORY/.setup/untrusted_execute.c   $SUBMITTY_INSTALL_DIR/.setup/
+# replace necessary variables
+replace_fillin_variables $SUBMITTY_INSTALL_DIR/.setup/untrusted_execute.c
 
 # SUID (Set owner User ID up on execution), allows the $HWCRON_USER
 # to run this executable as sudo/root, which is necessary for the
 # "switch user" to untrusted as part of the sandbox.
 
-pushd $SUBMITTY_INSTALL_DIR/bin/ > /dev/null
+pushd $SUBMITTY_INSTALL_DIR/.setup/ > /dev/null
 # set ownership/permissions on the source code
 chown root:root untrusted_execute.c
 chmod 500 untrusted_execute.c
 # compile the code
-g++ -static untrusted_execute.c -o untrusted_execute
+g++ -static untrusted_execute.c -o $SUBMITTY_INSTALL_DIR/bin/untrusted_execute
 # change permissions & set suid: (must be root)
-chown root untrusted_execute
-chgrp $HWCRON_USER untrusted_execute
-chmod 4550 untrusted_execute
+chown root  $SUBMITTY_INSTALL_DIR/bin/untrusted_execute
+chgrp $HWCRON_USER  $SUBMITTY_INSTALL_DIR/bin/untrusted_execute
+chmod 4550  $SUBMITTY_INSTALL_DIR/bin/untrusted_execute
 popd > /dev/null
 
 

@@ -13,7 +13,7 @@ if [[ $1 == vagrant ]]; then
   VAGRANT=1
   export DEBIAN_FRONTEND=noninteractive
 else
-  #TODO: We should get options for ./CONFIGURE_SUBMITTY.sh script
+  #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.sh script
   VAGRANT=0
 fi
 
@@ -61,6 +61,8 @@ if [ ${VAGRANT} == 1 ]; then
     echo "192.168.56.103    test-hwgrading test-hwgrading.cs.rpi.edu hwgrading" >> /etc/hosts
 fi
 
+
+
 #################################################################
 # PACKAGE SETUP
 #################
@@ -88,7 +90,7 @@ service ntp restart
 
 
 # path for untrusted user creation script will be different if not using Vagrant
-${SUBMITTY_REPOSITORY}/bin/create.untrusted.users.pl
+${SUBMITTY_REPOSITORY}/.setup/create.untrusted.users.pl
 
 apt-get install -qqy libpam-passwdqc
 
@@ -493,13 +495,13 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 https://192.168.56.103
-svn+ssh:192.168.56.102" | source ${SUBMITTY_REPOSITORY}/CONFIGURE_SUBMITTY.sh
+svn+ssh:192.168.56.102" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 else
-	source ${SUBMITTY_REPOSITORY}/CONFIGURE_SUBMITTY.sh
+	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 fi
 
-source ${SUBMITTY_INSTALL_DIR}/INSTALL_SUBMITTY.sh clean 
-#source ${SUBMITTY_INSTALL_DIR}/INSTALL_SUBMITTY.sh clean test
+source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean 
+#source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean test
 
 source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
 cp ${SUBMITTY_REPOSITORY}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
