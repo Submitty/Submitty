@@ -18,6 +18,7 @@ log_dir = HSS_INSTALL_DIR + "/test_suite/log"
 
 
 def print(message, end="\n"):
+    global log_file
     if log_file is None:
         log_file = int(time.time())
     with open(os.path.join(log_dir, log_file), 'a') as write_file:
