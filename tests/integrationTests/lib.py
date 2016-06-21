@@ -11,10 +11,10 @@ from collections import defaultdict
 
 
 # global variable available to be used by the test suite modules
-global HSS_INSTALL_DIR
-HSS_INSTALL_DIR = "__INSTALL__FILLIN__HSS_INSTALL_DIR__"
+global SUBMITTY_INSTALL_DIR
+SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
 
-grading_source_dir =  HSS_INSTALL_DIR + "/src/grading"
+grading_source_dir =  SUBMITTY_INSTALL_DIR + "/src/grading"
 
 class TestcaseFile:
     def __init__(self):
@@ -264,7 +264,7 @@ class TestcaseWrapper:
         if not os.path.dirname(f):
             f = os.path.join("data", f)
         filename1 = os.path.join(self.testcase_path, f)
-        filename2 = os.path.join(HSS_INSTALL_DIR,"test_suite/integrationTests/data/empty_json_diff_file.json")
+        filename2 = os.path.join(SUBMITTY_INSTALL_DIR,"test_suite/integrationTests/data/empty_json_diff_file.json")
         return self.json_diff(filename1,filename2)
 
 

@@ -20,8 +20,8 @@ check_administrator();
  * (e.g. filenames) should not be shared by URL paramaters.  Therefore,
  * filenames will be hardcoded.
  *
- * Path for detected XLSX files            /tmp/_HSS_xlsx
- * Path for xlsx to CSV converted files    /tmp/_HSS_csv
+ * Path for detected XLSX files            /tmp/_SUBMITTY_xlsx
+ * Path for xlsx to CSV converted files    /tmp/_SUBMITTY_csv
  * These should be defined constants in this script and in CGI script.
  *
  * THESE FILES MUST BE IMMEDIATELY PURGED

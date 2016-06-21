@@ -13,5 +13,5 @@ define("__LOG_PATH__", "__INSTALL__FILLIN__TAGRADING_LOG_PATH__");
 
 /* -- static configs for hard coded values ---------------------------------- */
 //Used by xslx_to_csv conversion process
-define('__TMP_XLSX_PATH__', '/tmp/_HSS_xlsx');
-define('__TMP_CSV_PATH__',  '/tmp/_HSS_csv');
+define('__TMP_XLSX_PATH__', '/tmp/_SUBMITTY_xlsx');
+define('__TMP_CSV_PATH__',  '/tmp/_SUBMITTY_csv');

@@ -29,7 +29,7 @@
 #include "testResults.h"
 #include "tokens.h"
 
-const std::string drmemory_path = "/usr/local/hss/drmemory/bin/drmemory";
+const std::string drmemory_path = "/usr/local/submitty/drmemory/bin/drmemory";
 
 // =================================================================================
 

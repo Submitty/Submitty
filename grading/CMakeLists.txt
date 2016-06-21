@@ -4,11 +4,11 @@ project (sample_assignment)
 ###################################################################################
 
 # these variables will be replaced by INSTALL.sh
-set (HSS_INSTALL_DIR __INSTALL__FILLIN__HSS_INSTALL_DIR__)
-set (HSS_DATA_DIR __INSTALL__FILLIN__HSS_DATA_DIR__)
+set (SUBMITTY_INSTALL_DIR __INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__)
+set (SUBMITTY_DATA_DIR __INSTALL__FILLIN__SUBMITTY_DATA_DIR__)
 
 # assuming the core files for config, compilation, running, & grading are here:
-set (GRADINGCODE ${HSS_INSTALL_DIR}/src)
+set (GRADINGCODE ${SUBMITTY_INSTALL_DIR}/src)
 
 ###################################################################################
 # source files

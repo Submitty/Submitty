@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 #PATHS
-SUBMITTY_DIR=/usr/local/hss/GIT_CHECKOUT_Submitty
-INSTALL_DIR=/usr/local/hss
-DATA_DIR=/var/local/hss
+SUBMITTY_DIR=/usr/local/submitty/GIT_CHECKOUT_Submitty
+INSTALL_DIR=/usr/local/submitty
+DATA_DIR=/var/local/submitty
 
 #################################################################
 # PROVISION SETUP
@@ -305,7 +305,7 @@ service apache2 reload
 #################################################################
 # PHP SETUP
 #################
-sed -i -e 's/^docroot=/docroot=\/usr\/local\/hss:/g' /etc/suphp/suphp.conf
+sed -i -e 's/^docroot=/docroot=\/usr\/local\/submitty:/g' /etc/suphp/suphp.conf
 
 # Assumes you need to have a group of people able to edit the files.  Comment out if not needed
 sed -i -e 's/^allow_file_group_writeable=false/allow_file_group_writeable=true/g' /etc/suphp/suphp.conf
@@ -424,7 +424,7 @@ fi
 mkdir -p ${DATA_DIR}
 
 
-# create a list of valid userids and put them in /var/local/hss/instructors
+# create a list of valid userids and put them in /var/local/submitty/instructors
 # one way to create your list is by listing all of the userids in /home  
 
 mkdir -p ${DATA_DIR}/instructors
@@ -513,8 +513,8 @@ chmod 0640 /etc/apache2/suexec/www-data
 if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /root/bin/bottom.txt
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
-	sed -i 's/hss.crt/submit.crt/g' /etc/apache2/sites-available/submit.conf
-	sed -i 's/hss.key/submit.key/g' /etc/apache2/sites-available/submit.conf
+	sed -i 's/submitty.crt/submit.crt/g' /etc/apache2/sites-available/submit.conf
+	sed -i 's/submitty.key/submit.key/g' /etc/apache2/sites-available/submit.conf
 	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /etc/apache2/sites-available/hwgrading.conf
 	sed -i 's/hwgrading.cer/hwgrading.crt/g' /etc/apache2/sites-available/hwgrading.conf
 fi
