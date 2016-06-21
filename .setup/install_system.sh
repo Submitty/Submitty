@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 #PATHS
-SUBMITTY_DIR=/usr/local/submitty/GIT_CHECKOUT_Submitty
-INSTALL_DIR=/usr/local/submitty
-DATA_DIR=/var/local/submitty
+SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
+SUBMITTY_INSTALL_DIR=/usr/local/submitty
+SUBMITTY_DATA_DIR=/var/local/submitty
 
 #################################################################
 # PROVISION SETUP
@@ -88,7 +88,7 @@ service ntp restart
 
 
 # path for untrusted user creation script will be different if not using Vagrant
-${SUBMITTY_DIR}/bin/create.untrusted.users.pl
+${SUBMITTY_REPOSITORY}/bin/create.untrusted.users.pl
 
 apt-get install -qqy libpam-passwdqc
 
@@ -191,8 +191,8 @@ ifup eth1 eth1:1 eth1:2
 # JAR SETUP
 #################
 echo "Getting JUnit..."
-mkdir -p ${INSTALL_DIR}/JUnit
-cd ${INSTALL_DIR}/JUnit
+mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
+cd ${SUBMITTY_INSTALL_DIR}/JUnit
 
 wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
@@ -219,13 +219,13 @@ chmod o+r . *.jar
 # Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
 
 echo "Getting DrMemory..."
-mkdir -p ${INSTALL_DIR}/DrMemory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
 cd /tmp
 DRMEM_TAG=release_1.10.1
 DRMEM_VER=1.10.1-3
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${INSTALL_DIR}/DrMemory
-ln -s ${INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${INSTALL_DIR}/drmemory
+tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${SUBMITTY_INSTALL_DIR}/DrMemory
+ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
 rm DrMemory-Linux-${DRMEM_VER}.tar.gz
 
 #################################################################
@@ -421,14 +421,14 @@ fi
 
 # create directories and fix permissions
 
-mkdir -p ${DATA_DIR}
+mkdir -p ${SUBMITTY_DATA_DIR}
 
 
 # create a list of valid userids and put them in /var/local/submitty/instructors
 # one way to create your list is by listing all of the userids in /home  
 
-mkdir -p ${DATA_DIR}/instructors
-ls /home | sort > ${DATA_DIR}/instructors/valid
+mkdir -p ${SUBMITTY_DATA_DIR}/instructors
+ls /home | sort > ${SUBMITTY_DATA_DIR}/instructors/valid
 
 
 #################################################################
@@ -474,7 +474,7 @@ if [ ${VAGRANT} == 1 ]; then
 	service postgresql restart
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
-	su postgres -c "source ${SUBMITTY_DIR}/.setup/db_users.sh";
+	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/db_users.sh";
 	echo "Finished creating PostgreSQL users"
 
     echo "Setting up Postgres to connect to via host"
@@ -493,18 +493,18 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 https://192.168.56.103
-svn+ssh:192.168.56.102" | source ${SUBMITTY_DIR}/CONFIGURE_SUBMITTY.sh
+svn+ssh:192.168.56.102" | source ${SUBMITTY_REPOSITORY}/CONFIGURE_SUBMITTY.sh
 else
-	source ${SUBMITTY_DIR}/CONFIGURE_SUBMITTY.sh
+	source ${SUBMITTY_REPOSITORY}/CONFIGURE_SUBMITTY.sh
 fi
 
-source ${INSTALL_DIR}/INSTALL_SUBMITTY.sh clean 
-#source ${INSTALL_DIR}/INSTALL_SUBMITTY.sh clean test
+source ${SUBMITTY_INSTALL_DIR}/INSTALL_SUBMITTY.sh clean 
+#source ${SUBMITTY_INSTALL_DIR}/INSTALL_SUBMITTY.sh clean test
 
-source ${SUBMITTY_DIR}/Docs/sample_bin/admin_scripts_setup
-cp ${SUBMITTY_DIR}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
-cp ${SUBMITTY_DIR}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
-cp -f ${SUBMITTY_DIR}/Docs/www-data /etc/apache2/suexec/www-data
+source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
+cp ${SUBMITTY_REPOSITORY}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
+cp ${SUBMITTY_REPOSITORY}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
+cp -f ${SUBMITTY_REPOSITORY}/Docs/www-data /etc/apache2/suexec/www-data
 
 # permissions: rw- r-- ---
 chmod 0640 /etc/apache2/sites-available/*.conf
@@ -526,24 +526,24 @@ apache2ctl -t
 service apache2 restart
 
 if [[ ${VAGRANT} == 1 ]]; then
-    echo "student" >> ${DATA_DIR}/instructors/authlist
-    echo "student" >> ${DATA_DIR}/instructors/valid
-    ${DATA_DIR}/bin/authonly.pl
+    echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+    echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+    ${SUBMITTY_DATA_DIR}/bin/authonly.pl
     echo "student:student" | sudo chpasswd
 
-    rm -r ${DATA_DIR}/autograding_logs
-    rm -r ${SUBMITTY_DIR}/.vagrant/autograding_logs
-    mkdir ${SUBMITTY_DIR}/.vagrant/autograding_logs
-    ln -s ${SUBMITTY_DIR}/.vagrant/autograding_logs ${DATA_DIR}/autograding_logs
-    rm -r ${DATA_DIR}/tagrading_logs
-    rm -r ${SUBMITTY_DIR}/.vagrant/tagrading_logs
-    mkdir ${SUBMITTY_DIR}/.vagrant/tagrading_logs
-    ln -s ${SUBMITTY_DIR}/.vagrant/tagrading_logs ${DATA_DIR}/tagrading_logs
+    rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
+    rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
+    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs ${SUBMITTY_DATA_DIR}/autograding_logs
+    rm -r ${SUBMITTY_DATA_DIR}/tagrading_logs
+    rm -r ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
+    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs ${SUBMITTY_DATA_DIR}/tagrading_logs
 
 
     # Call helper script that makes the courses and refreshes the database
-    chmod u+x ${SUBMITTY_DIR}/.setup/add_sample_courses.sh
-    ${SUBMITTY_DIR}/.setup/add_sample_courses.sh
+    chmod u+x ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.sh
+    ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.sh
 
 
 
@@ -556,15 +556,15 @@ if [[ ${VAGRANT} == 1 ]]; then
 	
 	# Other Universities will need to rerun /bin/setcsvfields to match their
 	# classlist csv data.  See wiki for details.
-	${INSTALL_DIR}/bin/setcsvfields 13 12 15 7
+	${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
 fi
 
 # Deferred ownership change
-chown hwphp:hwphp ${INSTALL_DIR}
+chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
 
 # With this line, subdirectories inherit the group by default and
 # blocks r/w access to the directory by others on the system.
-chmod 2771 ${INSTALL_DIR}
+chmod 2771 ${SUBMITTY_INSTALL_DIR}
 
 
 echo "Done."

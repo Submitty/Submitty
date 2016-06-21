@@ -93,10 +93,12 @@ function one_course {
     # ---------------------------------------------------------------
     # CREATE & POPULATE THE DATABASE
     export PGPASSWORD="hsdbu"
-    psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE submitty_${semester}_${course};"
-    psql -d submitty_${course}_${semester} -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/TAGradingServer/data/tables.sql
-    psql -d submitty_${course}_${semester} -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/TAGradingServer/data/inserts.sql
-    psql -d submitty_${course}_${semester} -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_inserts.sql
+    DATABASE_NAME=submitty_${semester}_${course}
+    echo 'here' $DATABASE_NAME
+    psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE $DATABASE_NAME"   
+    psql -d submitty_${semester}_${course} -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/TAGradingServer/data/tables.sql
+    psql -d submitty_${semester}_${course} -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/TAGradingServer/data/inserts.sql
+    psql -d submitty_${semester}_${course} -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_inserts.sql
     unset PGPASSWORD
 }
 
