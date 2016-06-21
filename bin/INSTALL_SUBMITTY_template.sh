@@ -467,6 +467,7 @@ if [[ "$#" -ge 1 && $1 == "test" ]]; then
     # copy the directory tree and replace variables
     echo -e "Install Autograding Test Suite..."
     rsync -rtz  $HSS_REPOSITORY/tests/  $HSS_INSTALL_DIR/test_suite
+    mkdir -p $HSS_INSTALL_DIR/test_suite/log
     replace_fillin_variables $HSS_INSTALL_DIR/test_suite/integrationTests/lib.py
 
     # add a symlink to conveniently run the test suite or specific tests without the full reinstall
