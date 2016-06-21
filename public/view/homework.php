@@ -229,7 +229,8 @@ if ($svn_checkout == true) {  // svn upload
   // DROP ZONES FOR MULTIPLE PARTS
   for($i = 1; $i <= $num_parts; $i++){
     echo '<div class="outer_box" id="upload'.$i.'" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey;">';
-    echo '<h3 class="label" id="label'.$i.'" >Drag your files here or click to open browser</h3>';
+    // echo '<h3 class="label" id="label'.$i.'" >Drag your files here or click to open browser</h3>';
+    echo '<h3 class="label" id="label'.$i.'" >Drag your '.$part_names[$i-1].' here or click to open file browser</h3>';
     echo '<input type="file" name="files" id="input_file'.$i.'" style="display:none" onchange="addFilesFromInput('.$i.')" multiple/>';
     // Uncomment if want buttons for emptying single bucket
     // echo '<button class="btn btn-primary" id="delete'.$i.'" active>Delete All</button>';
@@ -287,7 +288,7 @@ if ($svn_checkout == true) {  // svn upload
 
   // START FROM FILES OF THE HIGHEST VERSION
   if(assignment_version == highest_version && highest_version > 0){ // get highest version files if in highest version
-    document.getElementById("getprev").innerHTML = "Get Version " + assignment_version + " files";
+    document.getElementById("getprev").innerHTML = "Get Version " + assignment_version + " Files";
     $("#getprev").click(function(e){
       $("#startnew").click();
       <?php
