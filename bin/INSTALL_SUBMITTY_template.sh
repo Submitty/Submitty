@@ -12,17 +12,18 @@ fi
 # check optional argument
 if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" ]]; then
     echo -e "Usage:"
-    echo -e "   ./INSTALL.sh clean"
-    echo -e "   ./INSTALL.sh clean test"
-    echo -e "   ./INSTALL.sh clear test  <test_case_1>"
-    echo -e "   ./INSTALL.sh clear test  <test_case_1> <test_case_2> <test_case_3>"
-    echo -e "   ./INSTALL.sh test"
-    echo -e "   ./INSTALL.sh test  <test_case_1>"
-    echo -e "   ./INSTALL.sh test  <test_case_1> <test_case_2> <test_case_3>"
+    echo -e "   ./INSTALL_SUBMITTY.sh"
+    echo -e "   ./INSTALL_SUBMITTY.sh clean"
+    echo -e "   ./INSTALL_SUBMITTY.sh clean test"
+    echo -e "   ./INSTALL_SUBMITTY.sh clear test  <test_case_1>"
+    echo -e "   ./INSTALL_SUBMITTY.sh clear test  <test_case_1> ... <test_case_n>"
+    echo -e "   ./INSTALL_SUBMITTY.sh test"
+    echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1>"
+    echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1> ... <test_case_n>"
     exit
 fi
 
-echo -e "\nBeginning installation of the homework submission server\n"
+echo -e "\nBeginning installation of the Submitty homework submission server\n"
 
 
 ########################################################################################################################
@@ -181,6 +182,7 @@ chmod  770                                  $HSS_DATA_DIR/to_be_graded_batch
 #  a = archive, recurse through directories, preserves file permissions, owner  [ NOT USED, DON'T WANT TO MESS W/ PERMISSIONS ]
 #  r = recursive
 #  v = verbose, what was actually copied
+#  t = preserve modification times
 #  u = only copy things that have changed
 #  z = compresses (faster for text, maybe not for binary)
 #  (--delete, but probably dont want)
@@ -195,7 +197,7 @@ chmod  770                                  $HSS_DATA_DIR/to_be_graded_batch
 echo -e "Copy the submission website"
 
 # copy the website from the repo
-rsync -rz   $HSS_REPOSITORY/public   $HSS_INSTALL_DIR/website
+rsync -rtz   $HSS_REPOSITORY/public   $HSS_INSTALL_DIR/website
 
 # automatically create the site path file, storing the data directory in the file
 echo $HSS_DATA_DIR > $HSS_INSTALL_DIR/website/public/site_path.txt
@@ -230,7 +232,7 @@ find $HSS_INSTALL_DIR/website/public/custom_resources -exec chmod 775 {} \;
 echo -e "Copy the grading code"
 
 # copy the files from the repo
-rsync -rz $HSS_REPOSITORY/grading $HSS_INSTALL_DIR/src
+rsync -rtz $HSS_REPOSITORY/grading $HSS_INSTALL_DIR/src
 # root will be owner & group of these files
 chown -R  root:root $HSS_INSTALL_DIR/src
 # "other" can cd into & ls all subdirectories
@@ -246,7 +248,7 @@ replace_fillin_variables $HSS_INSTALL_DIR/src/grading/CMakeLists.txt
 replace_fillin_variables $HSS_INSTALL_DIR/src/grading/system_call_check.cpp
 
 
-# building the autograding library 
+# building the autograding library
 mkdir -p $HSS_INSTALL_DIR/src/grading/lib
 pushd $HSS_INSTALL_DIR/src/grading/lib
 cmake ..
@@ -261,7 +263,7 @@ popd
 echo -e "Copy the sample files"
 
 # copy the files from the repo
-rsync -rz $HSS_REPOSITORY/sample_files $HSS_INSTALL_DIR
+rsync -rtz $HSS_REPOSITORY/sample_files $HSS_INSTALL_DIR
 
 # root will be owner & group of these files
 chown -R  root:root $HSS_INSTALL_DIR/sample_files
@@ -277,7 +279,7 @@ find $HSS_INSTALL_DIR/sample_files -type f -exec chmod 444 {} \;
 echo -e "Build the junit test runner"
 
 # copy the file from the repo
-rsync -rz $HSS_REPOSITORY/junit_test_runner/TestRunner.java $HSS_INSTALL_DIR/JUnit/TestRunner.java
+rsync -rtz $HSS_REPOSITORY/junit_test_runner/TestRunner.java $HSS_INSTALL_DIR/JUnit/TestRunner.java
 
 pushd $HSS_INSTALL_DIR/JUnit > /dev/null
 # root will be owner & group of the source file
@@ -306,7 +308,7 @@ chown root:$COURSE_BUILDERS_GROUP $HSS_INSTALL_DIR/bin
 chmod 751 $HSS_INSTALL_DIR/bin
 
 # copy all of the files
-rsync -rz  $HSS_REPOSITORY/bin/*   $HSS_INSTALL_DIR/bin/
+rsync -rtz  $HSS_REPOSITORY/bin/*   $HSS_INSTALL_DIR/bin/
 #replace necessary variables in the copied scripts
 replace_fillin_variables $HSS_INSTALL_DIR/bin/create_course.sh
 replace_fillin_variables $HSS_INSTALL_DIR/bin/grade_students.sh
@@ -366,12 +368,12 @@ popd > /dev/null
 
 echo -e "Copy the ta grading website"
 
-rsync  -rz $HSS_REPOSITORY/TAGradingServer/*php         $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rz $HSS_REPOSITORY/TAGradingServer/toolbox      $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rz $HSS_REPOSITORY/TAGradingServer/lib          $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rz $HSS_REPOSITORY/TAGradingServer/account      $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rz $HSS_REPOSITORY/TAGradingServer/app          $HSS_INSTALL_DIR/hwgrading_website
-rsync  -rz $HSS_REPOSITORY/TAGradingServer/cgi-bin      $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rtz $HSS_REPOSITORY/TAGradingServer/*php         $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rtz $HSS_REPOSITORY/TAGradingServer/toolbox      $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rtz $HSS_REPOSITORY/TAGradingServer/lib          $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rtz $HSS_REPOSITORY/TAGradingServer/account      $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rtz $HSS_REPOSITORY/TAGradingServer/app          $HSS_INSTALL_DIR/hwgrading_website
+rsync  -rtz $HSS_REPOSITORY/TAGradingServer/cgi-bin      $HSS_INSTALL_DIR/hwgrading_website
 
 # set special user $HWPHP_USER as owner & group of all hwgrading_website files
 find $HSS_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
@@ -403,6 +405,18 @@ mv $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $HSS_I
 ################################################################################################################
 ################################################################################################################
 # GENERATE & INSTALL THE CRONTAB FILE FOR THE hwcron USER
+#
+# The system requires a background process that starts automatically
+# and runs one or more instances of the grade_students.sh script
+# continuously, checking for new submissions and promptly grading them
+# in chronological order.  This script must be run as the ```hwcron```
+# user.
+#
+# Note that standard (non error) output of the grade_students.sh
+# script is discarded.  You will want to verify that the standard
+# error output is logged and/or emailed to the appropriate
+# admin/developer, so problems can be promptly addressed.
+#
 
 echo -e "Generate & install the crontab file for hwcron user"
 
@@ -421,13 +435,13 @@ fi
 
 # generate the file
 echo -e "\n\n"                                                                                >  ${HWCRON_CRONTAB_FILE}
-echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL.sh"                         >> ${HWCRON_CRONTAB_FILE}
+echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${HWCRON_CRONTAB_FILE}
 minutes=0
 while [ $minutes -lt 60 ]; do
     printf "%02d  * * * *   ${HSS_INSTALL_DIR}/bin/grade_students.sh  untrusted%02d  >  /dev/null\n"  $minutes $minutes  >> ${HWCRON_CRONTAB_FILE}
     minutes=$(($minutes + $GRADE_STUDENTS_FREQUENCY))
 done
-echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL.sh"                         >> ${HWCRON_CRONTAB_FILE}
+echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${HWCRON_CRONTAB_FILE}
 echo -e "\n\n"                                                                                >> ${HWCRON_CRONTAB_FILE}
 
 # install the crontab file for the hwcron user
@@ -439,7 +453,7 @@ rm ${HWCRON_CRONTAB_FILE}
 ################################################################################################################
 
 
-echo -e "\nCompleted installation of the homework submission server\n"
+echo -e "\nCompleted installation of the Submitty homework submission server\n"
 
 
 ################################################################################################################
@@ -452,19 +466,18 @@ if [[ "$#" -ge 1 && $1 == "test" ]]; then
 
     # copy the directory tree and replace variables
     echo -e "Install Autograding Test Suite..."
-    rsync -rz  $HSS_REPOSITORY/tests/  $HSS_INSTALL_DIR/test_suite
-    replace_fillin_variables $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/run.py
-    replace_fillin_variables $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/lib.py
+    rsync -rtz  $HSS_REPOSITORY/tests/  $HSS_INSTALL_DIR/test_suite
+    replace_fillin_variables $HSS_INSTALL_DIR/test_suite/integrationTests/lib.py
 
     # add a symlink to conveniently run the test suite or specific tests without the full reinstall
-    ln -sf  $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/run.py  $HSS_INSTALL_DIR/bin/run_test_suite.py
+    ln -sf  $HSS_INSTALL_DIR/test_suite/integrationTests/run.py  $HSS_INSTALL_DIR/bin/run_test_suite.py
 
     echo -e "\nRun Autograding Test Suite...\n"
 
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
-    python $HSS_INSTALL_DIR/test_suite/integrationTests/scripts/run.py  "$@" 
+    python $HSS_INSTALL_DIR/test_suite/integrationTests/run.py  "$@"
 
     echo -e "\nCompleted Autograding Test Suite\n"
 fi

@@ -275,9 +275,9 @@ def prebuild(func):
     modname = mod.__name__
     tw = TestcaseWrapper(path)
     def wrapper():
-        print("* Starting prebuild for " + modname + "...")
+        print("* Starting prebuild for " + modname + "... ", end="")
         func(tw)
-        print("* Finished prebuild for " + modname)
+        print("Done")
     global to_run
     to_run[modname].wrapper = tw
     to_run[modname].prebuild = wrapper
@@ -298,9 +298,17 @@ def testcase(func):
     modname = mod.__name__
     tw = TestcaseWrapper(path)
     def wrapper():
-        print("* Starting test " + modname + "." + func.__name__ + "...")
-        func(tw)
-        print("* Finished test " + modname + "." + func.__name__)
+        print("* Starting test " + modname + "." + func.__name__ + "... ", end="")
+        try:
+            func(tw)
+            with bold + green:
+                print("PASSED")
+        except Exception as e:
+            # TODO: We should add additional exception to know if test failed or errored for more appropriate message
+            with bold + red:
+                print("FAILED")
+            print(e)
+
     global to_run
     to_run[modname].wrapper = tw
     to_run[modname].testcases.append(wrapper)

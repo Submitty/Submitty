@@ -23,7 +23,7 @@ def initialize(test):
     except OSError:
         pass
     try:
-        os.mkdir(os.path.join(test.testcase_path, "data/part1"))
+        os.mkdir(os.path.join(test.testcase_path, "data"))
     except OSError:
         pass
 
@@ -39,7 +39,7 @@ def initialize(test):
 
     subprocess.call(["cp"] +
             glob.glob(os.path.join(SAMPLE_SUBMISSIONS, "*.py")) +
-            [os.path.join(test.testcase_path, "data/part1")])
+            [os.path.join(test.testcase_path, "data")])
 
 
 ############################################################################
