@@ -1,20 +1,30 @@
 from __future__ import print_function
-
-import sys
+from collections import defaultdict
+import inspect
+import json
 import os
 import subprocess
-import inspect
+import time
 import traceback
-import json
-
-from collections import defaultdict
-
+import sys
 
 # global variable available to be used by the test suite modules
-global HSS_INSTALL_DIR
 HSS_INSTALL_DIR = "__INSTALL__FILLIN__HSS_INSTALL_DIR__"
 
 grading_source_dir =  HSS_INSTALL_DIR + "/src/grading"
+
+log_file = None
+log_dir = HSS_INSTALL_DIR + "/test_suite/log"
+
+
+def print(message, end="\n"):
+    global log_file
+    if log_file is None:
+        log_file = int(time.time())
+    with open(os.path.join(log_dir, log_file), 'a') as write_file:
+        write_file.write(message + end)
+    sys.stdout.write(message + end)
+
 
 class TestcaseFile:
     def __init__(self):
@@ -304,10 +314,9 @@ def testcase(func):
             with bold + green:
                 print("PASSED")
         except Exception as e:
-            # TODO: We should add additional exception to know if test failed or errored for more appropriate message
             with bold + red:
                 print("FAILED")
-            print(e)
+            raise e
 
     global to_run
     to_run[modname].wrapper = tw
