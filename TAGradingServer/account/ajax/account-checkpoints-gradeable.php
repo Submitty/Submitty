@@ -47,6 +47,7 @@ WHERE g.g_id=?
 AND gd_user_id=?
 AND gc_order=?
     ", $params);
+
     $temp = $db->row();
     $old_mode = (isset($temp["gcd_score"]) ? $temp["gcd_score"] : 0);
 
@@ -97,7 +98,6 @@ AND gc_order=?
             $params = array($gc_id, $gd_id, $mode,'');                                  
             $db->query("INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score,gcd_component_comment) VALUES (?,?,?,?)", $params);
         }
-    }
 }
 
 echo "updated";

@@ -22,7 +22,7 @@ if($user_is_administrator){
     );
     $old_questions = $old_components = $electronic_gradeable = array();
     $num_numeric = $num_text = 0;
-    
+
     if (isset($_GET['action']) && $_GET['action'] == 'edit') {
         $g_id = $_GET['id'];
         Database::query("SELECT * FROM gradeable WHERE g_id=?",array($g_id));
