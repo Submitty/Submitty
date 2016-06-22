@@ -1,7 +1,7 @@
 echo "Setting up auto-grader test suite"
 
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
-SUBMITTY_DATAL_DIR=/var/local/submitty
+SUBMITTY_DATA_DIR=/var/local/submitty
 
 apt-get install -yqq --force-yes python automake cmake make clang gcc g++ g++-multilib libseccomp2 seccomp libseccomp-dev valgrind
 
@@ -10,7 +10,7 @@ mkdir -p ${SUBMITTY_DATA_DIR}
 mkdir -p ${SUBMITTY_INSTALL_DIR}/src
 mkdir -p ${SUBMITTY_INSTALL_DIR}/test_suite
 mkdir -p ${SUBMITTY_INSTALL_DIR}/test_suite/log
-cp -r tests ${SUBMITTY_INSTALL_DIR}/test_suite
+cp -r tests/. ${SUBMITTY_INSTALL_DIR}/test_suite
 cp -r sample_files ${SUBMITTY_INSTALL_DIR}/sample_files
 cp -r grading/ ${SUBMITTY_INSTALL_DIR}/src/
 
