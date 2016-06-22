@@ -43,5 +43,5 @@ CREATE TABLE gradeable_component_data(
     gc_id INT REFERENCES gradeable_component(gc_id) NOT NULL,
     gd_id INT REFERENCES gradeable_data(gd_id) NOT NULL,
     gcd_score NUMERIC NOT NULL,
-    gcd_component_score VARCHAR NOT NULL
+    gcd_component_comment VARCHAR NOT NULL
 );
