@@ -225,9 +225,11 @@ class TestcaseWrapper:
             raise RuntimeError("File " + filename2 + " does not exist")
 
         #return_code = subprocess.call(["diff", "-b", filename1, filename2]) #ignores changes in white space
-        return_code = subprocess.call(["diff", filename1, filename2])
-        if return_code == 1:
-            raise RuntimeError("Difference between " + filename1 + " and " + filename2 + " exited with exit code " + str(return_code))
+        process = subprocess.Popen(["diff", filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = process.communicate()
+        if process.returncode == 1:
+            raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
+            " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
 
 
     # Helper function for json_diff.  Sorts each nested list.  Allows comparison.
