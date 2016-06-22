@@ -92,14 +92,20 @@ def run_tests(names):
                     f()
                 except Exception as e:
                     with bold + red:
-                        print("Test #" + str(index) + " failed with exception:", e)
+                        lineno = None
+                        tb = traceback.extract_tb(sys.exc_info()[2])
+                        for i in range(len(tb)-1, -1, -1):
+                            if os.path.basename(tb[i][0]) == '__init__.py':
+                                lineno = tb[i][1]
+                        print("Test #" + str(index) + " failed (on line " + str(lineno) + ") with exception: ", e)
+                        sys.exc_info()
                         total -= 1
             if total == len(val.testcases):
                 with bold + green:
-                    print("All tests passed")
+                    print("All testcases passed")
             else:
                 with bold + red:
-                    print(str(total) + "/" + str(len(val.testcases)) + " tests passed")
+                    print(str(total) + "/" + str(len(val.testcases)) + " testcases passed")
                     modsuccess = False
                     success = False
         with bold:
@@ -328,7 +334,8 @@ def testcase(func):
         except Exception as e:
             with bold + red:
                 print("FAILED")
-            raise e
+            # blank raise raises the last exception as is
+            raise
 
     global to_run
     to_run[modname].wrapper = tw
