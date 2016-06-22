@@ -26,13 +26,13 @@ if [ ${VAGRANT} == 1 ]; then
     chmod +x /etc/update-motd.d/00-header
 
     echo -e '
-  _______  __   __  _______  __   __  ___   _______  _______  __   __ 
+  _______  __   __  _______  __   __  ___   _______  _______  __   __
 |       ||  | |  ||  _    ||  |_|  ||   | |       ||       ||  | |  |
 |  _____||  | |  || |_|   ||       ||   | |_     _||_     _||  |_|  |
 | |_____ |  |_|  ||       ||       ||   |   |   |    |   |  |       |
 |_____  ||       ||  _   | |       ||   |   |   |    |   |  |_     _|
- _____| ||       || |_|   || ||_|| ||   |   |   |    |   |    |   |  
-|_______||_______||_______||_|   |_||___|   |___|    |___|    |___|  
+ _____| ||       || |_|   || ||_|| ||   |   |   |    |   |    |   |
+|_______||_______||_______||_|   |_||___|   |___|    |___|    |___|
 
 ############################################################
 ##  All user accounts have same password unless otherwise ##
@@ -96,7 +96,7 @@ apt-get install -qqy libpam-passwdqc
 
 
 # Use suphp to improve file permission granularity by running php
-# scripts as the user that owns the file instead of www-data 
+# scripts as the user that owns the file instead of www-data
 #
 # Set up apache to run with suphp in pre-fork mode since not all
 # modules are thread safe (do not combine the commands or you may get
@@ -123,7 +123,7 @@ hardening-includes python p7zip-full patchutils postgresql-client postgresql-cli
 unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libfile-mmagic-perl \
 libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
-libseccomp2 seccomp junit cmake xlsx2csv libpcre3 libpcre3-dev flex bison 
+libseccomp2 seccomp junit cmake xlsx2csv libpcre3 libpcre3-dev flex bison
 
 # Enable PHP5-mcrypt
 php5enmod mcrypt
@@ -173,7 +173,7 @@ apt-get install imagemagick
 # as a convenience for code testing.
 #
 # The VM’s host-only adapter provides a private connection to the VM,
-# but Ubuntu also needs to be configured to use this adapter. 
+# but Ubuntu also needs to be configured to use this adapter.
 
 echo "Binding static IPs to \"Host-Only\" virtual network interface."
 
@@ -237,15 +237,15 @@ a2enmod include actions cgi suexec authnz_external headers ssl
 
 
 # If you have real certificates, follow the directions from your
-# certificate provider.  
+# certificate provider.
 #
 # If you are just developing and do not have real ssl certificates,
 # follow these directions for creating a self-signed (aka “snakeoil
 # certificate”)
 #
-# If it doesn’t already exist, create directory path 
+# If it doesn’t already exist, create directory path
 #   /etc/apache2/ssl/
-# 
+#
 # An expiration of 365000 days (roughly 1000 years) is meant so that
 # the certificate essentially never expires.  make the certificates
 # world readable (but not the key):
@@ -427,7 +427,7 @@ mkdir -p ${SUBMITTY_DATA_DIR}
 
 
 # create a list of valid userids and put them in /var/local/submitty/instructors
-# one way to create your list is by listing all of the userids in /home  
+# one way to create your list is by listing all of the userids in /home
 
 mkdir -p ${SUBMITTY_DATA_DIR}/instructors
 ls /home | sort > ${SUBMITTY_DATA_DIR}/instructors/valid
@@ -476,7 +476,7 @@ if [ ${VAGRANT} == 1 ]; then
 	service postgresql restart
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
-	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/db_users.sh";
+	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
 	echo "Finished creating PostgreSQL users"
 
     echo "Setting up Postgres to connect to via host"
@@ -500,7 +500,7 @@ else
 	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 fi
 
-source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean 
+source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 #source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean test
 
 source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
@@ -555,7 +555,7 @@ if [[ ${VAGRANT} == 1 ]]; then
 
 	# Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
 	# of Science 2015-2016.
-	
+
 	# Other Universities will need to rerun /bin/setcsvfields to match their
 	# classlist csv data.  See wiki for details.
 	${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
