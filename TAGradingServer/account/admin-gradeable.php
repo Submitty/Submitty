@@ -22,6 +22,7 @@ if($user_is_administrator)
         'g_syllabus_bucket' => ''
     );
     $old_questions = array();
+    $old_components = array();
 
     if (isset($_GET['action']) && $_GET['action'] == 'edit') {
         $gradeable_id = $_GET['id'];
@@ -30,21 +31,9 @@ if($user_is_administrator)
             die("No gradeable found");
         }
         $old_gradeable = Database::row();
-        // This is where the parts logic should go, checkpoint 1,2,3
-        
-        Database::query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($old_gradeable['g_id']));
-        $components = Database::rows();
-        /*Database::query("SELECT * FROM questions WHERE rubric_id=? ORDER BY question_part_number, question_number", array($old_rubric['rubric_id']));
-        $questions = Database::rows();
-        foreach ($questions as $question) {
-            $question['question_total'] = floatval($question['question_total']);
-            $old_questions[$question['question_part_number']][$question['question_number']] = $question;
-        }
-        */
+        Database::query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($gradeable_id));
+        $old_components = json_encode(Database::rows());
         $have_old = true;
-        /*
-        Database::query("SELECT COUNT(*) as cnt FROM grades WHERE rubric_id=?", array($rubric_id));
-        $has_grades = Database::row()['cnt'] > 0;*/
     }
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
@@ -57,7 +46,6 @@ if($user_is_administrator)
             $retVal .= "<option {$selected}>{$i}</option>";
         }
         $retVal .= "</select>";
-
         return $retVal;
     }
 
@@ -72,6 +60,8 @@ if($user_is_administrator)
         $gradeable_name = "Gradeable {$gradeableNumberQuery}";
         $gradeable_submission_id = "gradeable".Functions::pad($gradeableNumberQuery);
         $gradeable_parts_submission_id[1] = "_part1";
+        $g_team_assignment = json_encode($old_gradeable['g_team_assignment']);
+        $g_grade_by_registration = json_encode($old_gradeable['g_grade_by_registration']);
         $part_count = 1;
         $string = "Add";
         $action = strtolower($string);
@@ -83,6 +73,7 @@ if($user_is_administrator)
         $gradeable_parts_submission_id = array();
         $g_overall_ta_instructions = $old_gradeable['g_overall_ta_instructions'];
         $g_gradeable_type = $old_gradeable['g_gradeable_type'];
+        $g_team_assignment = $old_gradeable['g_team_assignment'];
         $g_grade_by_registration = $old_gradeable['g_grade_by_registration'];
         $g_syllabus_bucket = $old_gradeable['g_syllabus_bucket'];
         $g_grade_start_date = $old_gradeable['g_grade_start_date'];
@@ -97,6 +88,7 @@ if($user_is_administrator)
         $action = strtolower($string);
     }
 
+    $have_old = json_encode($have_old);
     $rubric_sep_checked = ($old_rubric['rubric_parts_sep'] == 1) ? "checked" : "";
 
     $extra = ($has_grades) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
@@ -188,13 +180,13 @@ if($user_is_administrator)
 </style>
 
 <div id="container-rubric">
-    <form class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_rubric['rubric_id']}" method="post" enctype="multipart/form-data"> 
+    <form class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" method="post" enctype="multipart/form-data"> 
         <input type='hidden' name="part_count" value="{$part_count}" />
         <input type='hidden' name="csrf_token" value="{$_SESSION['csrf']}" />
 
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
-            <button class="btn import-json" type="button" style="float: right;">Import From JSON</button>
+            <!-- <button class="btn import-json" type="button" style="float: right;">Import From JSON</button>-->
             <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{$string} Gradeable</button>
         </div>
 
@@ -208,21 +200,20 @@ if($user_is_administrator)
             <br />
             <textarea rows="4" cols="200" name="ta_instructions" placeholder="(Optional)" style="width: 500px;">
 HTML;
-            echo htmlspecialchars($g_overall_ta_instructions);
-            
+    echo htmlspecialchars($g_overall_ta_instructions);  
     print <<<HTML
         </textarea>
         <br />
         Is this a team assignment?:
         <input type="radio" name="team-assignment" value="yes"
-HTML;            
+HTML;
     
-    echo ($g_team_assignment==true)?'checked':''; 
+    echo ($g_team_assignment===true)?'checked':''; 
     print <<<HTML
         > Yes
             <input type="radio" name="team-assignment" value ="no" 
 HTML;
-            echo ($g_team_assignment==false)?'checked':'' ;
+    echo ($g_team_assignment===false)?'checked':'' ;
     print <<<HTML
             > No
             <br /> <br />   
@@ -233,7 +224,7 @@ HTML;
             <fieldset>
             <input type='radio' id="radio-electronic-file" class="electronic-file" name="gradeable-type" value="Electronic File"
 HTML;
-            echo ($g_gradeable_type === 0)?'checked':'';
+    echo ($g_gradeable_type === 0)?'checked':'';
     print <<<HTML
             > 
             Electronic File
@@ -437,7 +428,7 @@ HTML;
             <div class="gradeable-type-options checkpoints" id="checkpoints">
                 <br />
                 <div class="multi-field-wrapper-checkpoints">
-                  <table class="multi-fields table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
+                  <table class="checkpoints-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
                         <!-- Headings -->
                         <thead style="background: #E1E1E1;">
                              <tr>
@@ -540,12 +531,12 @@ HTML;
             <input type="radio" name="section-type" value="reg-section" 
             
 HTML;
-            echo ($g_grade_by_registration===true)?'checked':'';
+    echo ($g_grade_by_registration===true)?'checked':'';
     print <<<HTML
             /> Registration Section
             <input type="radio" name="section-type" value="grade-section" 
 HTML;
-            echo ($g_grade_by_registration!==true)?'checked':'';
+    echo ($g_grade_by_registration===false)?'checked':'';
     print <<<HTML
             /> Grading Section
             <br /> <br />
@@ -743,7 +734,7 @@ HTML;
         </div>
         <div class="modal-footer">
                 <button class="btn btn-primary" type="submit" style="margin-top: 10px;">{$string} Gradeable</button>
-                <button class="btn import-json" type="button" style="margin-top: 10px;">Import From JSON</button>
+                <!--<button class="btn import-json" type="button" style="margin-top: 10px;">Import From JSON</button>-->
         </div>
     </form>
 </div>
@@ -792,55 +783,98 @@ HTML;
               alert(response);
             });
         }); 
-    });
-    
-    $(document).ready(function() {
-            var numCheckpoints=1;
-            $('.multi-field-wrapper-checkpoints').each(function() {
-                var wrapper = $('.multi-fields', this);
-                $("#add-checkpoint-field", $(this)).click(function(e) {
-                    numCheckpoints++;
-                    $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numCheckpoints).find('.checkpoint-label').val('Checkpoint ' + numCheckpoints).focus();
-                    $('#mult-field-' + numCheckpoints).find('.checkpoint-label').attr('name','checkpoint-label-'+numCheckpoints);
-                    $('#mult-field-' + numCheckpoints).find('.checkpoint-extra').attr('name','checkpoint-extra-'+numCheckpoints);
-                    $('#mult-field-' + numCheckpoints).find('.optional-ta-messg').attr('name','optional-ta-messg'+numCheckpoints);
-                    $('#remove-checkpoint-field').show();
-                    $('#mult-field-' + numCheckpoints).show();
-                });
-                $('#remove-checkpoint-field').click(function() {
-                    if (numCheckpoints > 1){
-                        $('#mult-field-'+numCheckpoints).remove();
-                        if(--numCheckpoints === 1){
-                            $('#remove-checkpoint-field').hide();
-                        }
-                    }
-                });
+
+        var numCheckpoints=1;
+        
+        function addCheckpoint(label, extra_credit, messg){
+            var wrapper = $('.checkpoints-table');
+            ++numCheckpoints;
+            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numCheckpoints).find('.checkpoint-label').val(label).focus();
+            $('#mult-field-' + numCheckpoints).find('.checkpoint-label').attr('name','checkpoint-label-'+numCheckpoints);
+            $('#mult-field-' + numCheckpoints).find('.checkpoint-extra').attr('name','checkpoint-extra-'+numCheckpoints);
+            $('#mult-field-' + numCheckpoints).find('.optional-ta-messg').attr('name','optional-ta-messg'+numCheckpoints);
+            if(extra_credit){
+                $('#mult-field-' + numCheckpoints).find('.checkpoint-extra').attr('checked',true); 
+            }
+            if(messg){
+                $('#mult-field-' + numCheckpoints).find('.optional-ta-messg').attr('checked',true);   
+            }
+            $('#remove-checkpoint-field').show();
+            $('#mult-field-' + numCheckpoints).show();
+        }
+        
+        function removeCheckpoint(){
+            if (numCheckpoints > 0){
+                $('#mult-field-'+numCheckpoints).remove();
+                if(--numCheckpoints === 1){
+                    $('#remove-checkpoint-field').hide();
+                }
+            }
+        }
+        
+        $('.multi-field-wrapper-checkpoints').each(function() {
+            $("#add-checkpoint-field", $(this)).click(function(e) {
+                addCheckpoint('Checkpoint '+(numCheckpoints+1),false,false);
             });
-            $('#remove-checkpoint-field').hide();
-    });
-    
-    $(document).ready(function() {
-            var numNumeric=1;
-            $('.multi-field-wrapper-numeric').each(function() {
-                var wrapper = $('.multi-fields', this);
-                $("#add-numeric-field", $(this)).click(function(e) {
-                    numNumeric++;
-                    $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numNumeric).find('.numeric-label').val(numNumeric).focus();
-                    $('#mult-field-' + numNumeric).find('.numeric-extra').attr('name','numeric-extra-'+numNumeric);
-                    $('#mult-field-' + numNumeric).find('.max-score').attr('name','max-score'+numNumeric);
-                    $('#remove-numeric-field').show();
-                    $('#mult-field-' + numNumeric).show();
-                });
-                $('#remove-numeric-field').click(function() {
-                    if (numNumeric > 1){
-                        $('#mult-field-'+numNumeric).remove();
-                        if(--numNumeric === 1){
-                            $('#remove-numeric-field').hide();
-                        }
-                    }
-                });
+            $('#remove-checkpoint-field').click(function() {
+                removeCheckpoint();
             });
-            $('#remove-numeric-field').hide();
+        });
+        
+        $('#remove-checkpoint-field').hide();
+
+        var numNumeric=1;
+        $('.multi-field-wrapper-numeric').each(function() {
+            var wrapper = $('.multi-fields', this);
+            $("#add-numeric-field", $(this)).click(function(e) {
+                numNumeric++;
+                $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numNumeric).find('.numeric-label').val(numNumeric).focus();
+                $('#mult-field-' + numNumeric).find('.numeric-extra').attr('name','numeric-extra-'+numNumeric);
+                $('#mult-field-' + numNumeric).find('.max-score').attr('name','max-score'+numNumeric);
+                $('#remove-numeric-field').show();
+                $('#mult-field-' + numNumeric).show();
+            });
+            $('#remove-numeric-field').click(function() {
+                if (numNumeric > 1){
+                    $('#mult-field-'+numNumeric).remove();
+                    if(--numNumeric === 1){
+                        $('#remove-numeric-field').hide();
+                    }
+                }
+            });
+        });
+        $('#remove-numeric-field').hide();
+        $('.gradeable-type-options').hide();
+        
+        if ($('input[name=gradeable-type]').is(':checked')){
+            $('input[name=gradeable-type]').each(function(){
+                if(!($(this).is(':checked'))){
+                    $(this).attr("disabled",true);    
+                }
+            });
+        }
+        
+        if($('#radio-electronic-file').is(':checked')){ 
+            $('#electronic-file').show();
+        }
+        else if ($('#radio-checkpoints').is(':checked')){
+            var components = {$old_components};
+            //TODO fix the ta-message
+            // remove the default checkpoint
+            removeCheckpoint(); 
+            $.each(components, function(i,elem){
+                addCheckpoint(elem.gc_title,elem.gc_is_extra_credit,false);
+            });
+            $('#checkpoints').show();
+        }
+        else if ($('#radio-numeric').is(':checked')){ 
+            $('#numeric').show();
+        }
+        
+        if({$have_old}){
+            $('input[name=gradeable_id]').attr('readonly', true);
+        }
+        
     });
 
     var datepicker = $('.datepicker');
@@ -876,22 +910,6 @@ HTML;
 
     print <<<JS
     
-    
-    //expand the radio buttons on edit
-    $(document).ready(function(){
-        $('.gradeable-type-options').hide();
-
-        if($('#radio-electronic-file').is(':checked')){ 
-            $('#electronic-file').show();
-        }
-        else if ($('#radio-checkpoints').is(':checked')){ 
-            $('#checkpoints').show();
-        }
-        else if ($('#radio-numeric').is(':checked')){ 
-            $('#numeric').show();
-        }
-    });
-
     // Shows the radio inputs dynamically
     $('input:radio[name="gradeable-type"]').change(
     function(){
