@@ -13,6 +13,7 @@ FROM
     gradeable AS g
 ORDER BY g_id ASC",array());
 
+$gradeables = $db->rows();
 $output .= <<<HTML
 <style type="text/css">
     body {
@@ -193,17 +194,25 @@ $output .= <<<HTML
         </tr>
 HTML;
 
-foreach ($db->rows() as $gradeable) {
+
+
+foreach ($gradeables as $gradeable) {
+    $g_id = htmlspecialchars($gradeable['g_id']);
+    $g_title = htmlspecialchars($gradeable['g_title']);
+    
+    $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($gradeable['g_id']));
+    $num_questions = intval($db->row()['cnt']);
+    
     $output .= <<<HTML
-        <tr id='gradeable-{$gradeable['g_id']}'">
-            <td class="gradeables-id" id="gradeable-{$gradeable['g_id']}-id">{$gradeable['g_id']}</td>
-            <td class="gradeables-name" id="gradeable-{$gradeable['g_id']}-title">{$gradeable['g_title']}</td>
-            <td class="gradeables-parts" id="gradeable-{$gradeable['g_id']}-parts"><!--{$gradeable['gradeable_parts']}--></td>
-            <td class="gradeables-questions" id="gradeable-{$gradeable['g_id']}-questions"><!--{$gradeable['gradeable_questions']} --></td>
-            <td class="gradeables-score" id="gradeable-{$gradeable['g_id']}-score"><!-- {$gradeable['gradeable_score']} ({$gradeable['gradeable_ec']}) --></td>
-            <td class="gradeables-due" id="gradeable-{$gradeable['g_id']}-due">{$gradeable['g_grade_released_date']}</td>
-            <td id="gradeable-{$gradeable['g_id']}-options"><a href="{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&action=edit&id={$gradeable['g_id']}">Edit</a> |
-            <a onclick="deleteGradeable({$gradeable['g_id']});">Delete</a></td>
+        <tr id='gradeable-{$g_id}'">
+            <td class="gradeables-id" id="gradeable-{$g_id}-id">{$g_id}</td>
+            <td class="gradeables-name" id="gradeable-{$g_id}-title">{$g_title}</td>
+            <td class="gradeables-parts" id="gradeable-{$g_id}-parts"><!--{$gradeable['gradeable_parts']}--></td>
+            <td class="gradeables-questions" id="gradeable-{$g_id}-questions">{$num_questions}</td>
+            <td class="gradeables-score" id="gradeable-{$g_id}-score"><!-- {$gradeable['gradeable_score']} ({$gradeable['gradeable_ec']}) --></td>
+            <td class="gradeables-due" id="gradeable-{$g_id}-due">{$gradeable['g_grade_released_date']}</td>
+            <td id="gradeable-{$g_id}-options"><a href="{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&action=edit&id={$g_id}">Edit</a> |
+            <a onclick="deleteGradeable({$g_id});">Delete</a></td>
         </tr>
 HTML;
 }
