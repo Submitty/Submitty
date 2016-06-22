@@ -63,4 +63,4 @@ def run_test(test):
         test.json_diff("test0%d_0_diff.json" % i)
         test.empty_file("test0%d_STDERR.txt" % i)
         test.empty_file("test0%d_STDOUT.txt" % i)
-        test.empty_file("test0%d_execute_logfile.txt")
+        test.empty_file("test0%d_execute_logfile.txt" % i)
