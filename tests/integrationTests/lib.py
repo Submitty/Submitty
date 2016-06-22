@@ -275,8 +275,10 @@ class TestcaseWrapper:
         # if no directory provided...
         if not os.path.dirname(f):
             f = os.path.join("data", f)
-        filename1 = os.path.join(self.testcase_path, f)
-        if os.stat(filename1).st_size != 0:
+        filename = os.path.join(self.testcase_path, f)
+        if not os.path.isfile(filename):
+            raise RuntimeError("File " + f + " should exist")
+        if os.stat(filename).st_size != 0:
             raise RuntimeError("File " + f + " should be empty")
 
     def empty_json_diff(self, f):
