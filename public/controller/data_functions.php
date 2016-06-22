@@ -145,9 +145,6 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
         return array("error"=>"", "message"=>$assignment_id." is not a valid assignment");
     }
     $assignment_config = get_assignment_config($semester, $course, $assignment_id);
-    if ($num_parts !== get_num_parts($assignment_config)) {
-        return array("error"=>"", "message"=>"Number of parts for this homework does not match configuration.  ".$num_parts." != ".get_num_parts($assignment_config));
-    }
     if (!can_edit_assignment($username, $semester, $course, $assignment_id, $assignment_config)) {//Made sure the user can upload to this homework
         return array("error"=>"assignment_closed", "message"=>$assignment_id." is closed.");
     }
@@ -512,24 +509,10 @@ function get_class_config($semester,$course) {
     }
     return json_decode(removeTrailingCommas(file_get_contents($file)), true);
 }
-/*
-function get_num_parts($class_config, $assignment_id) {
-  $assignments = $class_config["assignments"];
-  foreach ($assignments as $one) {
-    if ($one["assignment_id"] == $assignment_id) {
-      if (isset($one["num_parts"])) {
-          return $one["num_parts"];
-      }
-      else {
-        return 1; // default to have 1 part for each homework
-      }
-    }
-  }
-}
-*/
+
 function get_num_parts($assignment_config) {
-  if(isset($assignment_config["num_parts"])) {
-    return $assignment_config["num_parts"];
+  if(isset($assignment_config["part_names"])) {
+    return count($assignment_config["part_names"]);
   }
   return 1;
 }
@@ -1300,32 +1283,11 @@ function display_note($note) {
     ?><script>alert("Note: <?php echo $note;?>");</script><?php
 }
 
-function check_version($assignment_name, $versions_used, $versions_allowed){
-  $message = "";
-  if((int)$versions_used > (int)$versions_allowed){
-    $message = "Are you sure you want to upload for ".$assignment_name."? ";
-    $message = $message."You have already used up all of your free submissions (";
-    $message = $message.$versions_used." / ".$versions_allowed."). Uploading may result in loss of points.";
-    /*?><script>confirm("<?php echo $message;?>");</script><?php*/
-  }
-  return $message;
-}
-
-function check_due_date($semester, $course, $assignment_id){
-    $message = "";
-    $due_date = get_due_date(get_class_config($semester, $course), $assignment_id);
-    $now = new DateTime("NOW");
-    if($now > $due_date){
-        $due_date->sub(new DateInterval("P1D"));  // ceiling up late days
-        $days_late = date_diff($due_date, $now)->format('%r%a');
-        if($days_late <= get_late_days_allowed(get_assignment_config($semester, $course, $assignment_id))) {
-          $message = "Your submission will be ".$days_late." days late. Are you sure you want to use ".$days_late." late day(s)?";
-        }
-        else{
-          $message = "Your submission will be ".$days_late." days late. You are not supposed to submit unless you have an excused absense. Are you sure you want to continue?";
-        }
-    }
-    return $message;
+function calculate_days_late($semester, $course, $assignment_id){
+  $due_date = get_due_date(get_class_config($semester, $course), $assignment_id);
+  $now = new DateTime("NOW");
+  $due_date->sub(new DateInterval("P1D"));  // ceiling up late days
+  return date_diff($due_date, $now)->format('%r%a');
 }
 
 function get_late_days_allowed($assignment_config){

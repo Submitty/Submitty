@@ -277,8 +277,6 @@ if ($svn_checkout == true) {  // svn upload
   })
   $("#submit").click(function(e){ // Submit button
     handle_submission(<?php
-      echo "'".check_version($assignment_name, $highest_version, $max_submissions)."', ";
-      echo "'".check_due_date($semester, $course, $assignment_id)."', ";
       echo "'?page=upload&semester=".$semester.'&course='.$course.'&assignment_id='.$assignment_id."', ";
       echo "'{$_SESSION['csrf']}', ";
       echo 'false';
@@ -402,7 +400,9 @@ if ($highest_version == -1) {
 
   if ($assignment_version != $active_version) {
     echo '&nbsp;&nbsp;&nbsp;&nbsp;';
-    echo '<form class="form_submit" action="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'" method="POST">';
+    echo '<form class="form_submit" action="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version='.$assignment_version.'" method="POST"';
+    echo 'onsubmit="return check_version_change()"';
+    echo'>';
     echo '<input type="hidden" name="csrf_token" value="'.$_SESSION['csrf'].'"" />';
     echo '<input type="submit" class="btn btn-primary" value="Set Version '.$assignment_version.' as ACTIVE Submission Version"></input>';
     echo '</form>';
@@ -410,7 +410,9 @@ if ($highest_version == -1) {
 
   if ($active_version != 0) {
     echo '&nbsp;&nbsp;&nbsp;&nbsp;';
-    echo '<form class="form_submit" action="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version=0" method="POST">';
+    echo '<form class="form_submit" action="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version=0" method="POST"';
+    echo 'onsubmit="return check_version_change()"';
+    echo'>';
     echo '<input type="hidden" name="csrf_token" value="'.$_SESSION['csrf'].'"" />';
     echo '<input type="submit" class="btn btn-primary" value="Cancel Submission" />';
     echo '</form>';
@@ -584,13 +586,40 @@ echo '</div>'; // end HWsubmission
         return true;
     }
 
-    function handle_submission(version_check, due_date_check, url, csrf_token, svn_checkout){
-      if((!version_check || confirm(version_check)) && (!due_date_check || confirm(due_date_check))){
-        var loc = "?semester="+<?php echo '"'.$semester.'"';?>+"&course="+<?php echo '"'.$course.'"';?>+"&assignment_id="+<?php echo '"'.$assignment_id.'"';?>;
-        submit(url, csrf_token, svn_checkout, loc);
+    function handle_submission(url, csrf_token, svn_checkout){
+      var days_late = <?php echo calculate_days_late($semester, $course, $assignment_id);?>;
+      var late_days_allowed = <?php echo get_late_days_allowed($semester, $course, $assignment_id);?>;
+      var versions_used = <?php echo $highest_version;?>;
+      var versions_allowed = <?php echo $max_submissions;?>;
+
+      var message = "";
+      // check versions used
+      if(versions_used >= versions_allowed) {
+        message = "You have already made " + versions_used + "/" + versions_allowed + " submissions. Are you sure you want to continue? Uploading may result in loss of points.";
+        if(!confirm(message)) return;
       }
+      // check due date
+      if(days_late > 0 && days_late <= late_days_allowed) {
+        message = "Your submission will be " + days_late + " day(s) late. Are you sure you want to use " +days_late + " late day(s)?";
+        if(!confirm(message)) return;
+      } else if(days_late > 0){
+        message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absense. Are you sure you want to continue?";
+        if(!confirm(message)) return;
+      }
+      var loc = <?php echo "'"."?semester=".$semester."&course=".$course."&assignment_id=".$assignment_id."'" ?>;
+      submit(url, csrf_token, svn_checkout, loc);
     }
 
+    function check_version_change(){
+      var days_late = <?php echo calculate_days_late($semester, $course, $assignment_id);?>;
+      var late_days_allowed = <?php echo get_late_days_allowed($semester, $course, $assignment_id);?>;
+      if(days_late > late_days_allowed){
+        var message = "The max late days allowed for this assignment is " + late_days_allowed + " days. ";
+        message += "You are not supposed to change your active version after this time unless you have permission from the instructor. Are you sure you want to continue?";
+        return confirm(message);
+      }
+      return true;
+    }
     // Go through diff queue and run viewer
     loadDiffQueue();
 
