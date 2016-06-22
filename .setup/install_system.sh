@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 #PATHS
-SUBMITTY_DIR=/usr/local/hss/GIT_CHECKOUT_Submitty
-INSTALL_DIR=/usr/local/hss
-DATA_DIR=/var/local/hss
+SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
+SUBMITTY_INSTALL_DIR=/usr/local/submitty
+SUBMITTY_DATA_DIR=/var/local/submitty
 
 #################################################################
 # PROVISION SETUP
@@ -13,7 +13,7 @@ if [[ $1 == vagrant ]]; then
   VAGRANT=1
   export DEBIAN_FRONTEND=noninteractive
 else
-  #TODO: We should get options for ./CONFIGURE_SUBMITTY.sh script
+  #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.sh script
   VAGRANT=0
 fi
 
@@ -26,13 +26,13 @@ if [ ${VAGRANT} == 1 ]; then
     chmod +x /etc/update-motd.d/00-header
 
     echo -e '
-  _______  __   __  _______  __   __  ___   _______  _______  __   __ 
+  _______  __   __  _______  __   __  ___   _______  _______  __   __
 |       ||  | |  ||  _    ||  |_|  ||   | |       ||       ||  | |  |
 |  _____||  | |  || |_|   ||       ||   | |_     _||_     _||  |_|  |
 | |_____ |  |_|  ||       ||       ||   |   |   |    |   |  |       |
 |_____  ||       ||  _   | |       ||   |   |   |    |   |  |_     _|
- _____| ||       || |_|   || ||_|| ||   |   |   |    |   |    |   |  
-|_______||_______||_______||_|   |_||___|   |___|    |___|    |___|  
+ _____| ||       || |_|   || ||_|| ||   |   |   |    |   |    |   |
+|_______||_______||_______||_|   |_||___|   |___|    |___|    |___|
 
 ############################################################
 ##  All user accounts have same password unless otherwise ##
@@ -61,6 +61,8 @@ if [ ${VAGRANT} == 1 ]; then
     echo "192.168.56.103    test-hwgrading test-hwgrading.cs.rpi.edu hwgrading" >> /etc/hosts
 fi
 
+
+
 #################################################################
 # PACKAGE SETUP
 #################
@@ -88,13 +90,13 @@ service ntp restart
 
 
 # path for untrusted user creation script will be different if not using Vagrant
-${SUBMITTY_DIR}/bin/create.untrusted.users.pl
+${SUBMITTY_REPOSITORY}/.setup/create.untrusted.users.pl
 
 apt-get install -qqy libpam-passwdqc
 
 
 # Use suphp to improve file permission granularity by running php
-# scripts as the user that owns the file instead of www-data 
+# scripts as the user that owns the file instead of www-data
 #
 # Set up apache to run with suphp in pre-fork mode since not all
 # modules are thread safe (do not combine the commands or you may get
@@ -121,7 +123,7 @@ hardening-includes python p7zip-full patchutils postgresql-client postgresql-cli
 unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libfile-mmagic-perl \
 libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
-libseccomp2 seccomp junit cmake xlsx2csv libpcre3 libpcre3-dev flex bison 
+libseccomp2 seccomp junit cmake xlsx2csv libpcre3 libpcre3-dev flex bison
 
 # Enable PHP5-mcrypt
 php5enmod mcrypt
@@ -171,7 +173,7 @@ apt-get install imagemagick
 # as a convenience for code testing.
 #
 # The VM’s host-only adapter provides a private connection to the VM,
-# but Ubuntu also needs to be configured to use this adapter. 
+# but Ubuntu also needs to be configured to use this adapter.
 
 echo "Binding static IPs to \"Host-Only\" virtual network interface."
 
@@ -191,8 +193,8 @@ ifup eth1 eth1:1 eth1:2
 # JAR SETUP
 #################
 echo "Getting JUnit..."
-mkdir -p ${INSTALL_DIR}/JUnit
-cd ${INSTALL_DIR}/JUnit
+mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
+cd ${SUBMITTY_INSTALL_DIR}/JUnit
 
 wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
@@ -219,13 +221,13 @@ chmod o+r . *.jar
 # Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
 
 echo "Getting DrMemory..."
-mkdir -p ${INSTALL_DIR}/DrMemory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
 cd /tmp
 DRMEM_TAG=release_1.10.1
 DRMEM_VER=1.10.1-3
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${INSTALL_DIR}/DrMemory
-ln -s ${INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${INSTALL_DIR}/drmemory
+tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${SUBMITTY_INSTALL_DIR}/DrMemory
+ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
 rm DrMemory-Linux-${DRMEM_VER}.tar.gz
 
 #################################################################
@@ -235,15 +237,15 @@ a2enmod include actions cgi suexec authnz_external headers ssl
 
 
 # If you have real certificates, follow the directions from your
-# certificate provider.  
+# certificate provider.
 #
 # If you are just developing and do not have real ssl certificates,
 # follow these directions for creating a self-signed (aka “snakeoil
 # certificate”)
 #
-# If it doesn’t already exist, create directory path 
+# If it doesn’t already exist, create directory path
 #   /etc/apache2/ssl/
-# 
+#
 # An expiration of 365000 days (roughly 1000 years) is meant so that
 # the certificate essentially never expires.  make the certificates
 # world readable (but not the key):
@@ -305,7 +307,7 @@ service apache2 reload
 #################################################################
 # PHP SETUP
 #################
-sed -i -e 's/^docroot=/docroot=\/usr\/local\/hss:/g' /etc/suphp/suphp.conf
+sed -i -e 's/^docroot=/docroot=\/usr\/local\/submitty:/g' /etc/suphp/suphp.conf
 
 # Assumes you need to have a group of people able to edit the files.  Comment out if not needed
 sed -i -e 's/^allow_file_group_writeable=false/allow_file_group_writeable=true/g' /etc/suphp/suphp.conf
@@ -421,14 +423,14 @@ fi
 
 # create directories and fix permissions
 
-mkdir -p ${DATA_DIR}
+mkdir -p ${SUBMITTY_DATA_DIR}
 
 
-# create a list of valid userids and put them in /var/local/hss/instructors
-# one way to create your list is by listing all of the userids in /home  
+# create a list of valid userids and put them in /var/local/submitty/instructors
+# one way to create your list is by listing all of the userids in /home
 
-mkdir -p ${DATA_DIR}/instructors
-ls /home | sort > ${DATA_DIR}/instructors/valid
+mkdir -p ${SUBMITTY_DATA_DIR}/instructors
+ls /home | sort > ${SUBMITTY_DATA_DIR}/instructors/valid
 
 
 #################################################################
@@ -474,7 +476,7 @@ if [ ${VAGRANT} == 1 ]; then
 	service postgresql restart
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
-	su postgres -c "source ${SUBMITTY_DIR}/.setup/db_users.sh";
+	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
 	echo "Finished creating PostgreSQL users"
 
     echo "Setting up Postgres to connect to via host"
@@ -493,18 +495,18 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 https://192.168.56.103
-svn+ssh:192.168.56.102" | source ${SUBMITTY_DIR}/CONFIGURE_SUBMITTY.sh
+svn+ssh:192.168.56.102" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 else
-	source ${SUBMITTY_DIR}/CONFIGURE_SUBMITTY.sh
+	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 fi
 
-source ${INSTALL_DIR}/INSTALL_SUBMITTY.sh clean 
-#source ${INSTALL_DIR}/INSTALL_SUBMITTY.sh clean test
+source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+#source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean test
 
-source ${SUBMITTY_DIR}/Docs/sample_bin/admin_scripts_setup
-cp ${SUBMITTY_DIR}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
-cp ${SUBMITTY_DIR}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
-cp -f ${SUBMITTY_DIR}/Docs/www-data /etc/apache2/suexec/www-data
+source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
+cp ${SUBMITTY_REPOSITORY}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
+cp ${SUBMITTY_REPOSITORY}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
+cp -f ${SUBMITTY_REPOSITORY}/Docs/www-data /etc/apache2/suexec/www-data
 
 # permissions: rw- r-- ---
 chmod 0640 /etc/apache2/sites-available/*.conf
@@ -513,8 +515,8 @@ chmod 0640 /etc/apache2/suexec/www-data
 if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /root/bin/bottom.txt
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
-	sed -i 's/hss.crt/submit.crt/g' /etc/apache2/sites-available/submit.conf
-	sed -i 's/hss.key/submit.key/g' /etc/apache2/sites-available/submit.conf
+	sed -i 's/submitty.crt/submit.crt/g' /etc/apache2/sites-available/submit.conf
+	sed -i 's/submitty.key/submit.key/g' /etc/apache2/sites-available/submit.conf
 	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /etc/apache2/sites-available/hwgrading.conf
 	sed -i 's/hwgrading.cer/hwgrading.crt/g' /etc/apache2/sites-available/hwgrading.conf
 fi
@@ -526,24 +528,24 @@ apache2ctl -t
 service apache2 restart
 
 if [[ ${VAGRANT} == 1 ]]; then
-    echo "student" >> ${DATA_DIR}/instructors/authlist
-    echo "student" >> ${DATA_DIR}/instructors/valid
-    ${DATA_DIR}/bin/authonly.pl
+    echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+    echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+    ${SUBMITTY_DATA_DIR}/bin/authonly.pl
     echo "student:student" | sudo chpasswd
 
-    rm -r ${DATA_DIR}/autograding_logs
-    rm -r ${SUBMITTY_DIR}/.vagrant/autograding_logs
-    mkdir ${SUBMITTY_DIR}/.vagrant/autograding_logs
-    ln -s ${SUBMITTY_DIR}/.vagrant/autograding_logs ${DATA_DIR}/autograding_logs
-    rm -r ${DATA_DIR}/tagrading_logs
-    rm -r ${SUBMITTY_DIR}/.vagrant/tagrading_logs
-    mkdir ${SUBMITTY_DIR}/.vagrant/tagrading_logs
-    ln -s ${SUBMITTY_DIR}/.vagrant/tagrading_logs ${DATA_DIR}/tagrading_logs
+    rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
+    rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
+    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs ${SUBMITTY_DATA_DIR}/autograding_logs
+    rm -r ${SUBMITTY_DATA_DIR}/tagrading_logs
+    rm -r ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
+    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs ${SUBMITTY_DATA_DIR}/tagrading_logs
 
 
     # Call helper script that makes the courses and refreshes the database
-    chmod u+x ${SUBMITTY_DIR}/.setup/add_sample_courses.sh
-    ${SUBMITTY_DIR}/.setup/add_sample_courses.sh
+    chmod u+x ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.sh
+    ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.sh
 
 
 
@@ -553,18 +555,18 @@ if [[ ${VAGRANT} == 1 ]]; then
 
 	# Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
 	# of Science 2015-2016.
-	
+
 	# Other Universities will need to rerun /bin/setcsvfields to match their
 	# classlist csv data.  See wiki for details.
-	${INSTALL_DIR}/bin/setcsvfields 13 12 15 7
+	${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
 fi
 
 # Deferred ownership change
-chown hwphp:hwphp ${INSTALL_DIR}
+chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
 
 # With this line, subdirectories inherit the group by default and
 # blocks r/w access to the directory by others on the system.
-chmod 2771 ${INSTALL_DIR}
+chmod 2771 ${SUBMITTY_INSTALL_DIR}
 
 
 echo "Done."
