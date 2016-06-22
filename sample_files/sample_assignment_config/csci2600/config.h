@@ -12,9 +12,9 @@
 // ===================================================================================
 
 //path to .jar will change
-const std::string junit_jar_path =         "/usr/local/hss/JUnit/junit-4.12.jar";
-const std::string hamcrest_core_jar_path = "/usr/local/hss/JUnit/hamcrest-core-1.3.jar";
-const std::string emma_jar_path =          "/usr/local/hss/JUnit/emma.jar";
+const std::string junit_jar_path =         "/usr/local/submitty/JUnit/junit-4.12.jar";
+const std::string hamcrest_core_jar_path = "/usr/local/submitty/JUnit/hamcrest-core-1.3.jar";
+const std::string emma_jar_path =          "/usr/local/submitty/JUnit/emma.jar";
 
 // ===================================================================================
 

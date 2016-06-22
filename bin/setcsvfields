@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 
 <?php
-//Sysadmin tool to select what CSV fields are required for HSS class databases
+//Sysadmin tool to select what CSV fields are required for Submitty databases
 //This is a command line tool.  It does not work from HTTP.
 //Created by Peter Bailie, Systems Programmer, RPI Computer Science
 //
@@ -10,7 +10,7 @@
 //------------------------------------------------------------------------------
 
 //Constants
-define ("_INI_PATH",  "__INSTALL__FILLIN__HSS_INSTALL_DIR__/hwgrading_website/toolbox/configs/");
+define ("_INI_PATH",  "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/hwgrading_website/toolbox/configs/");
 define ("_INI_FILE",  "student_csv_fields.ini");
 define ("_INI_OWNER", "__INSTALL__FILLIN__HWPHP_USER__");
 
@@ -107,7 +107,7 @@ function Show_help() {
 	print <<< help_message
 Usage: setcsvfields  First_name  Last_name  Campus_email  Section_id
 
-This tool sets an INI that tells HSS HW Grading which fields to look for in a
+This tool sets an INI that tells Submitty which fields to look for in a
 CSV class list.  This is a zero based count (first field is designated field 0).
 All arguments must be unique integers >= 0.
 
