@@ -7,7 +7,8 @@ $semester=check_semester();
 $class_config=check_class_config($semester,$course);
 $dev_team=$class_config["dev_team"];
 $assignment_id=check_assignment_id($class_config);
-$num_parts=get_num_parts($class_config, $assignment_id);
+$assignment_config = get_assignment_config($semester,$course, $assignment_id);
+$num_parts=get_num_parts($assignment_config);
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
   $_SESSION['status'] = 'invalid_token';
