@@ -36,16 +36,16 @@ $_POST["late"] = intval($_POST['late']);
 if(isset($row["grade_id"])) {
     $grade_id = intval($row["grade_id"]);
     if (isset($_POST['overwrite']) && intval($_POST['overwrite']) == 1) {
-        $params = array(clean_string($_POST["comment-general"]), \app\models\User::$user_id, $_POST["late"], $submitted, $status, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status'], $grade_id);
+        $params = array($_POST["comment-general"], \app\models\User::$user_id, $_POST["late"], $submitted, $status, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status'], $grade_id);
         $db->query("UPDATE grades SET grade_comment=?, grade_finish_timestamp=NOW(), grade_user_id=?, grade_days_late=?, grade_is_regraded=1, grade_submitted=?, grade_status=?, grade_active_assignment=?, grade_parts_days_late=?, grade_parts_submitted=?, grade_parts_status=? WHERE grade_id=?", $params);
     }
     else {
-        $params = array(clean_string($_POST["comment-general"]), $_POST["late"], $submitted, $status, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status'], $grade_id);
+        $params = array($_POST["comment-general"], $_POST["late"], $submitted, $status, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status'], $grade_id);
         $db->query("UPDATE grades SET grade_comment=?, grade_finish_timestamp=NOW(), grade_days_late=?, grade_is_regraded=1, grade_submitted=?, grade_status=?, grade_active_assignment=?, grade_parts_days_late=?, grade_parts_submitted=?, grade_parts_status=? WHERE grade_id=?", $params);
     }
 }
 else {
-    $params = array($rubric_id, $student_id, clean_string($_POST["comment-general"]), \app\models\User::$user_id, $_POST["late"], $student_rcs, $submitted, $status, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status']);
+    $params = array($rubric_id, $student_id, $_POST["comment-general"], \app\models\User::$user_id, $_POST["late"], $student_rcs, $submitted, $status, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status']);
     $db->query("INSERT INTO grades (rubric_id, student_id, grade_comment, grade_finish_timestamp, grade_user_id, grade_days_late, student_rcs, grade_submitted, grade_status, grade_active_assignment, grade_parts_days_late, grade_parts_submitted, grade_parts_status) VALUES (?,?,?,NOW(),?,?,?,?,?,?,?,?,?)", $params);
 
     $params = array($rubric_id, $student_rcs);
@@ -60,7 +60,7 @@ foreach($db->rows() as $row) {
     $params = array($grade_id, $row["question_id"]);
     $db->query("DELETE FROM grades_questions WHERE grade_id=? AND question_id=?", $params);
 
-    $params = array($grade_id, $row["question_id"], $_POST["grade-" . $row["question_part_number"] . "-" . $row["question_number"]],  clean_string($_POST["comment-" . $row["question_part_number"] . "-" . $row["question_number"]]));
+    $params = array($grade_id, $row["question_id"], $_POST["grade-" . $row["question_part_number"] . "-" . $row["question_number"]],  $_POST["comment-" . $row["question_part_number"] . "-" . $row["question_number"]]);
     $db->query("INSERT INTO grades_questions (grade_id, question_id, grade_question_score, grade_question_comment) VALUES (?,?,?,?)", $params);
 }
 

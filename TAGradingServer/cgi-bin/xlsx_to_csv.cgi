@@ -18,8 +18,8 @@
  * (e.g. filenames) should not be shared by URL paramaters.  Therefore,
  * filenames will be hardcoded.
  *
- * Path for detected XLSX files            /tmp/_HSS_xlsx
- * Path for xlsx to CSV converted files    /tmp/_HSS_csv
+ * Path for detected XLSX files            /tmp/_SUBMITTY_xlsx
+ * Path for xlsx to CSV converted files    /tmp/_SUBMITTY_csv
  * These should be defined constants in this script and in CGI script.
  *
  * THESE FILES MUST BE IMMEDIATELY PURGED
@@ -86,7 +86,7 @@ $proc_handle = popen("xlsx2csv -d , -i -s 0 -p '' " . __TMP_XLSX_PATH__ . " " . 
 $err_msgs .= (empty(fread($proc_handle, 1))) ? "" : "failed converting xlsx to csv." . PHP_EOL;
 pclose($proc_handle);
 
-//Check to make sure _HSS_csv was written.
+//Check to make sure _SUBMITTY_csv was written.
 $err_msgs .= (file_exists(__TMP_CSV_PATH__)) ? "" : "file not available after csv conversion." . PHP_EOL;
 
 //Print error and die if any checks failed.

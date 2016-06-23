@@ -47,7 +47,7 @@ bool system_program(const std::string &program) {
       program == "/usr/bin/clang++" ||
       program == "/usr/bin/g++" ||
       program == "/usr/bin/valgrind" ||
-      program == "/usr/local/hss/drmemory/bin/drmemory" ||
+      program == "/usr/local/submitty/drmemory/bin/drmemory" ||
       program == "/usr/bin/compare" ||  // image magick!
       // for Principles of Software
       program == "/usr/bin/java" ||
@@ -392,7 +392,7 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
   } else if (what_signal == SIGPROF   /* 27,27,29  Term  Profiling timer expired  */) {
   } else if (what_signal == SIGSYS    /* 12,31,12  Core  Bad argument to routine (SVr4)  */) {
     std::cout << "********************************\nDETECTED BAD SYSTEM CALL\n***********************************" << std::endl;
-    message = "ERROR: DETECTED BAD SYSTEM CALL, please report this error to hss-questions@cs.lists.rpi.edu";
+    message = "ERROR: DETECTED BAD SYSTEM CALL, please report this error to submitty@cs.rpi.edu";
   } else if (what_signal == SIGTRAP   /*  5        Core  Trace/breakpoint trap  */) {
   } else if (what_signal == SIGURG    /* 16,23,21  Ign   Urgent condition on socket (4.2BSD)  */) {
   } else if (what_signal == SIGVTALRM /* 26,26,28  Term  Virtual alarm clock (4.2BSD)  */) {

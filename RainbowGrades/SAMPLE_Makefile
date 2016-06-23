@@ -2,9 +2,9 @@
 # EDIT THESE VARIABLES
 
 USERNAME=username
-RAINBOW_GRADES_DIRECTORY=/<PATH_TO_HWSERVER_REPO>/RainbowGrades
-HWSERVER=hss.cs.rpi.edu
-REPORTSDIRECTORY=/var/local/hss/courses/<SEMESTER>/<COURSE>/reports
+RAINBOW_GRADES_DIRECTORY=/<PATH_TO_SUBMITTY_REPO>/RainbowGrades
+HWSERVER=submit.cs.rpi.edu
+REPORTSDIRECTORY=/var/local/submitty/courses/<SEMESTER>/<COURSE>/reports
 
 # =============================================================================
 

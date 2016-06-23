@@ -1,484 +1,688 @@
-<?php 
+<?php
 
-if($account_subpages_unlock) {    
-    print <<<HTML
-	<div id="rubric" style="overflow-y:scroll;">
-		<div id="inner-container">
-HTML;
-    /* 
-        Variables defined in account-homework.php or index.php:
-            $rubric_id
-            $rubric_lates
-            $homework_number
-    */
-    
-    $previous_grade = array();
-    
-    $params = array($student_rcs, $rubric_id);
-    $db->query("SELECT grade_id, grade_user_id, grade_comment, grade_finish_timestamp, grade_days_late FROM grades WHERE student_rcs=? AND rubric_id=?", $params);
-    $row = $db->row();
+/*
+ * Variables from index.php:
+$student_rcs
+$rubric_id
+ */
 
-    $grade_days_late = -1;
-    if(isset($row["grade_id"]))
-    {
-        $grade_comment = $row["grade_comment"];
-        $grade_finish_timestamp = "Last Graded: " . date("m/d/y g:i A", strtotime($row["grade_finish_timestamp"]));
-        //$grade_days_late = intval($row["grade_days_late"]);
-        $params = array($row["grade_id"]);
-        $db->query("SELECT * FROM grades_questions WHERE grade_id=?", $params);
-    
-        foreach($db->rows() as $temp_row)
-        {
-            $previous_grade[intval($temp_row["question_id"])] = array(floatval($temp_row["grade_question_score"]), $temp_row["grade_question_comment"]);
+use \app\models\Rubric;
+
+$rubric = new Rubric($student_rcs, $rubric_id);
+
+$now = new DateTime('now');
+$homeworkDate = new DateTime($rubric->rubric_details['rubric_due_date']);
+if ($rubric->rubric_details['rubric_late_days'] > 0) {
+    $homeworkDate->add(new DateInterval("PT{$rubric->rubric_details['rubric_late_days']}H"));
+}
+$grade_select_extra = $now < $homeworkDate ? 'disabled="true"' : "";
+
+$part_status = array();
+$icon = array();
+$icon_color = array();
+$color = array();
+
+if (!$rubric->rubric_details['rubric_parts_sep']) {
+    if ($rubric->status == 1 && $rubric->days_late_used == 0) {
+        $icon[0] = '<i class="icon-ok icon-white"></i>';
+        $icon_color[0] = "#008000";
+        $part_status[0] = "Good";
+    }
+    else if ($rubric->status == 1 && $rubric->days_late_used > 0) {
+        $icon[$i] = '<i class="icon-exclamation-sign icon-white"></i>';
+        $color[0] = "#998100";
+        $icon_color[0] = "#FAA732";
+        $part_status[0] = 'Late';
+    }
+    else {
+        $icon[0] = '<i class="icon-remove icon-white"></i>';
+        $color[0] = "#DA4F49";
+        $icon_color[0] = "#DA4F49";
+        if ($rubric->active_assignment[1] == 0) {
+            $part_status[0] = 'Cancelled';
         }
-        
-        $db->query("SELECT * FROM users WHERE user_id='{$row['grade_user_id']}'");
-        $user = $db->row();
-        $submitted = 1;
+        else {
+            $part_status[0] = 'Bad';
+        }
     }
-    else
-    {
-        $grade_comment = "";
-        $grade_finish_timestamp = "";
-        $grade_days_late = -1;
-        $user = array();
-    }
-    
-    $params = array($student_rcs, $rubric_id);
-    $db->query("SELECT * FROM late_day_exceptions WHERE ex_student_rcs=? AND ex_rubric_id=?", $params);
-    
-    if (count($db->rows())) {
-        $row = $db->row();
+}
+else {
+    if($rubric->status == 1) {
+        $icon[0] = '<i class="icon-ok icon-white"></i>';
+        $icon_color[0] = "#008000";
     }
     else {
-        $row = array("ex_late_days"=>0);
+        $icon[0] = '<i class="icon-remove icon-white"></i>';
+        $icon_color[0] = "#DA4F49";
+    }
+}
+
+for ($i = 1; $i <= $rubric->rubric_details['rubric_parts']; $i++) {
+    $color[$i] = "#008000";
+    $icon_color[$i] = "#008000";
+    $part_status[$i] = 'Good';
+    $icon[$i] = '<i class="icon-ok icon-white"></i>';
+    $part = ($rubric->rubric_details['rubric_parts_sep']) ? $i : 1;
+    if($rubric->parts_status[$part] == 0) {
+        $color[$i] = "#DA4F49";
+        $icon_color[$i] = "#DA4F49";
+        $part_status[$i] = ($rubric->active_assignment[$part] == 0) ? "Cancelled" : "Bad";
+        $icon[$i] = '<i class="icon-remove icon-white"></i>';
+    }
+    else if($rubric->parts_status[$part] == 2) {
+        $color[$i] = "#998100";
+        $icon_color[$i] = "#FAA732";
+        $part_status[$i] = 'Late';
+        $icon[$i] = '<i class="icon-exclamation-sign icon-white"></i>';
+    }
+}
+
+$calculate_diff = __CALCULATE_DIFF__;
+if ($calculate_diff) {
+    $output = <<<HTML
+
+<script>
+    function openFile(file) {
+        window.open("{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "&add_submission_path=1","_blank","toolbar=no,scrollbars=yes, resizable=yes, width=700, height=600");
+        return false;
     }
 
-    $max_late = 0;
-    $min_late = 1000;
-    foreach($rubric_lates as $late)
-    {
-        $max_late = max($max_late, $late);
-        $min_late = min($min_late, $late);
+    function openFrame(file, part, num) {
+        var iframe = $('#file_viewer_' + part + '_' + num);
+        if (!iframe.hasClass('open')) {
+            var iframeId = "file_viewer_" + part + "_" + num + "_iframe";
+            iframe.html("<iframe id='" + iframeId + "' onLoad='resizeFrame(\"" + iframeId + "\");' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "' width='750px' style='border: 0'></iframe>");
+            iframe.addClass('open');
+        }
+
+        if (!iframe.hasClass('shown')) {
+            iframe.show();
+            iframe.addClass('shown');
+            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-plus').addClass('icon-minus');
+        }
+        else {
+            iframe.hide();
+            iframe.removeClass('shown');
+            $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-minus').addClass('icon-plus');
+        }
+        return false;
     }
 
-    // TODO: Should only consider homeworks due previous to this one
-    $params = array($student_rcs, $rubric_id);
-    $db->query("
-SELECT (SUM(g.grade_days_late) - SUM(s.ex_late_days)) as used_late_days
-FROM grades as g 
-LEFT JOIN 
-	(
-	SELECT * FROM late_day_exceptions
-	) as s 
-	on s.ex_rubric_id = g.rubric_id and s.ex_student_rcs=g.student_rcs
-WHERE g.student_rcs=? AND g.status=1 AND g.rubric_id<?", $params);
-    $late_row = $db->row();
-    if (empty($late_row)) {
-        $late_row['used_late_days'] = 0;
+    function resizeFrame(id) {
+        var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
+        if (height > 500) {
+            document.getElementById(id).height= "500px";
+        }
+        else {
+            document.getElementById(id).height = (height+18) + "px";
+        }
     }
-    //$used_late_days = (isset($late_row["used_late_days"]) && $late_row["used_late_days"] >= 0) ? $late_row["used_late_days"] : 0;
-    $used_late_days = (isset($late_row['used_late_days']) && $late_row["used_late_days"] >= 0) ? $late_row["used_late_days"] : 0;
-    $late_days_to_use = $max_late - $row['ex_late_days'];
-    $late_days_to_use = ($late_days_to_use < 0) ? 0 : $late_days_to_use;
-    //print $used_late_days." ".$late_days_to_use." ".$student_allowed_lates;
-    if(($used_late_days + $late_days_to_use <= $student_allowed_lates || $student_allowed_lates < 0) && ($late_days_to_use <= $rubric_late_days || $rubric_late_days < 0) || $max_late <= 0) {
-        $late_days_max_surpassed = false;
+
+    function openDiv(id) {
+        var elem = $('#' + id);
+        if (elem.hasClass('open')) {
+            elem.hide();
+            elem.removeClass('open');
+            $('#' + id + '-span').removeClass('icon-folder-open').addClass('icon-folder-closed');
+        }
+        else {
+            elem.show();
+            elem.addClass('open');
+            $('#' + id + '-span').removeClass('icon-folder-closed').addClass('icon-folder-open');
+        }
+        return false;
+    }
+
+    function autoResize(id) {
+        var newheight;
+
+        if(document.getElementById) {
+            newheight=document.getElementById(id).contentWindow.document.body.scrollHeight;
+        }
+
+        if (newheight < 10) {
+            newheight = document.getElementById(id).contentWindow.document.body.offsetHeight;
+        }
+        document.getElementById(id).height= (newheight) + "px";
+    }
+
+    function calculatePercentageTotal() {
+        var total=0;
+
+        $('#rubric-table').find('select.grades').each(function() {
+            total += parseFloat($(this).val());
+        });
+
+        $("#score_total").html(total);
+    }
+
+    function load_tab_icon(tab_id, iframe_id, points_user, points_total) {
+        var is_difference = $('#'+iframe_id).contents().find("input[name='exists_difference']").val() == "1";
+        tab_id = '#' + tab_id;
+        if (points_total > 0) {
+            if (points_total == points_user) {
+                if (!is_difference) {
+                    $(tab_id).addClass('check-full');
+                }
+                else {
+                    $(tab_id).addClass('check-partial');
+                }
+            }
+            else {
+                $(tab_id).addClass('cross');
+            }
+        }
+        else {
+            if (is_difference) {
+                $(tab_id).addClass('cross');
+            }
+            else {
+                $(tab_id).addClass('check-full');
+            }
+        }
+
+    }
+</script>
+
+HTML;
+
+}
+
+$code_number = 0;
+
+$output .= <<<HTML
+
+<span id="left" class="resbox">
+    <div id="content">
+HTML;
+
+$source_number = 0;
+
+$j = 0;
+function display_files($file, &$output, $part, $indent = 1) {
+    global $j;
+    $margin_left = 15;
+    $neg_margin_left = -15 * ($indent);
+    if (is_array($file)) {
+        foreach($file as $k => $v) {
+            if (!is_integer($k)) {
+                $id = str_replace("/", "_", $k);
+                $indent += 1;
+                $output .= <<<HTML
+<div>
+    <span id='{$id}-span' class='icon-folder-closed'></span><a onclick='openDiv("{$id}");'>{$k}</a>
+    <div id='{$id}' style='margin-left: {$margin_left}px; display: none'>
+
+HTML;
+            }
+
+            display_files($v, $output, $part, $indent);
+
+            if (!is_integer($k)) {
+                $indent -= 1;
+                $output .= <<<HTML
+
+    </div>\n
+</div>
+
+HTML;
+            }
+        }
     }
     else {
-        $late_days_max_surpassed = true;
-    }
+        $file = htmlentities($file);
+        $output .= <<<HTML
+    <div>
+        <div class="file-viewer"><a onclick='openFrame("{$file}", {$part}, {$j})'>
+            <span class='icon-plus'></span>{$file}</a>
+        </div> <a onclick='openFile("{$file}")'>(Popout)</a><br />
+        <div id="file_viewer_{$part}_{$j}" style='margin-left: {$neg_margin_left}px'></div>
+    </div>
 
-    if ($submitted == 1 && $late_days_max_surpassed == false) {
-        $status = 1;
+HTML;
+        $j++;
+    }
+}
+
+for($part = 1; $part <= $rubric->rubric_parts; $part++) {
+
+    if ($rubric->rubric_details['rubric_parts_sep']) {
+        $show_part = "Part: {$part}<br />";
     }
     else {
-        $status = 0;
+        $show_part = "";
     }
-    
-    $individual = intval(isset($_GET["individual"]));
-    if (isset($_COOKIE['auto'])) { 
-        $cookie_auto = (intval($_COOKIE["auto"]) == 1 ? "checked" : ""); 
-    }
-    else {
-        $cookie_auto = "";
-    }
-    
-    print <<<HTML
-			<div id="rubric-title">
-				<div class="span2" style="float:left; text-align: left;"><b>Homework {$homework_number}</b></div>
-				<div class="span2" style="float:right; text-align: right; margin-top: -20px;"><b>{$student_last_name}, {$student_first_name}<br/>RCS: {$student_rcs}</b></div>
-			</div>
-			
-			<form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&hw={$homework_number}&student={$student_rcs}&individual={$individual}" method="post">
-			    <input type="hidden" name="submitted" value="{$submitted}" />
-			    <input type="hidden" name="status" value="{$status}" />
-			    <input type="hidden" name="late" value="{$max_late}" />
-				<div id="inner-container-seperator" style="background-color:#AAA; margin-top: 0; margin-bottom:0;"></div>
-				
-				<div style="margin-top: 0; margin-bottom:35px;">
-					<input type="checkbox" style="margin-top:0; margin-right:5px;" id="rubric-autoscroll-checkbox" {$cookie_auto} /><span style="font-size:11px;">Rubric Auto Scroll</span>
-				</div>
-				
-				<!--<div style="width:100%;"></div>-->
-HTML;
-    if ($rubric_late_days >= 0) {
-        print <<<HTML
-				<span style="color: black">Homework allows {$rubric_late_days} late day(s).</span><br />
-HTML;
-    }
-    if ($student_allowed_lates >= 0) {
-        print <<<HTML
-                <span style="color: black">Student has used {$used_late_days}/{$student_allowed_lates} late day(s) this semester.</span><br />
-HTML;
-    }
-    print <<<HTML
-				Late Days Used on Assignment:&nbsp;{$max_late}<br />
-HTML;
-    
-    if ($row['ex_late_days'] > 0) {
-        print <<<HTML
-                <span style="color: green">Student has an exception of {$row['ex_late_days']} late day(s).</span><br />                  
-HTML;
-    }
-    print <<<HTML
-				<b>Late Days Used:</b>&nbsp;{$late_days_to_use}<br />
-HTML;
-    if($late_days_max_surpassed) {
-        print <<<HTML
-					<b style="color:#DA4F49;">Too many total late days used for this assignment</b><br />
-HTML;
-    }
-    $print_status = ($status == 1) ? "Good" : "Bad";
-    print <<<HTML
-        <b>Status: </b>$print_status
-HTML;
-    
-    print <<<HTML
-				<br/><br/>
-				<table class="table table-bordered table-striped" id="rubric-table">
-					<thead>
-HTML;
-    if(isset($_GET["individual"])) { ?>
-							<tr style="background-color:#EEE;">
-								<th style="padding-left: 1px; padding-right: 0px; border-bottom:5px #FAA732 solid;"><i class="icon-time" id="progress-icon" style="margin-top: 2px;"></th>
-								<th style="width:40px; border-bottom:5px #FAA732 solid;">Part</th>
-								<th style="border-bottom:5px #FAA732 solid;">Question</th>
-								<th style="width:40px; border-bottom:5px #FAA732 solid;">Points</th>
-								<th style="width:40px; border-bottom:5px #FAA732 solid;">Total</th>
-							</tr>
-    <?php } else { ?>
-							<tr style="background-color:#EEE;">
-								<th style="padding-left: 1px; padding-right: 0px;"><i class="icon-time" id="progress-icon" style="margin-top: 2px;"></th>
-								<th style="width:40px;">Part</th>
-								<th>Question</th>
-								<th style="width:40px;">Points</th>
-								<th style="width:40px;">Total</th>
-							</tr>
-    <?php }?>
-					</thead>
-				
-					<tbody>
-					
-						<?php 
-							$c = 1;
-							$rubric_total = 0;
-							$last_seen_part = -1;
-							$params = array($rubric_id);
-							$db->query("SELECT * FROM questions WHERE rubric_id=? ORDER BY question_part_number, question_number", $params);
-							foreach($db->rows() as $row)
-							{ 
-								$total = floatval($row["question_total"]);
-								$rubric_total += $total;
-								$question_id = intval($row["question_id"]);
-								$grade = $total;
-								$comment = "";
-								
-								?>
-								
-								<tr class="accordion-toggle" data-toggle="collapse" data-target="#rubric-<?php echo $c; ?>">	  
-									<?php 
-										if($last_seen_part != $row["question_part_number"]) 
-										{
-											$last_seen_part = $row["question_part_number"]; 
-											
-											$params = array($rubric_id, $row["question_part_number"]);
-											$db->query("SELECT COUNT(question_id) as span_amount FROM questions WHERE rubric_id=? AND question_part_number=?", $params);
-											$temp_row = $db->row();
-											$span_amount = intval($temp_row["span_amount"]);
 
-											if (!isset($rubric_lates[$row['question_part_number']])) {
-												$rubric_lates[$row['question_part_number']] = ($row['question_part_number'] > 0) ? 3 : 3;
-											}
+    //$output .= $rubric->submission_details[$part];
+    if (!isset($rubric->submission_details[$part])) {
+        $output .= <<<HTML
+        <div id="inner-container">
+            <div id="inner-container-spacer"></div>
+            {$show_part}
+            <div id="inner-container-spacer"></div>
+            <div class="tabbable">
+                <ul id="myTab" class="nav nav-tabs">
+                    <li style="margin-right:2px; height:34px; width:20px; text-align:center; line-height:16px; padding-top:3px; -webkit-border-radius: 4px 4px 0 0; -moz-border-radius: 4px 4px 0 0; border-radius: 4px 4px 0 0; background-color: #DA4F49;">
+                        <i class="icon-remove icon-white"></i>
+                    </li>
+                    <li class='active'><a href="#output-{$part}-1" data-toggle="tab">
+HTML;
+        if ($rubric->active_assignment[$part] == 0) {
+            $output .= '<b style="color:#DA4F49;">Cancelled</b>';
+        }
+        else {
+            $output .= '<b style="color:#DA4F49;">No Submission</b>';
+        }
 
-											$late_number = $rubric_lates[$row["question_part_number"]];
-											
-											if($grade_days_late > -1)
-											{
-												$late_number = $grade_days_late;
-											}
-											
-											if($late_number == 0 && $status == 1)
-											{
-												$late_color = "green";
-												$late_icon = '<i class="icon-ok icon-white"></i>';
-											}
-											else if($late_number > 0 && $status == 1)
-											{														
-												$late_color = "#FAA732";
-												$late_icon = '<i class="icon-exclamation-sign icon-white"></i><br/>';
-											}
-                                            /*
-											elseif($late_number == 2)
-											{
-												$late_color = "#FAA732";
-												$late_icon = '<i class="icon-exclamation-sign icon-white"></i><br/><i class="icon-exclamation-sign icon-white"></i>';
-											}
-                                            */
-											else
-											{
-												$late_color = "#DA4F49";
-												$late_icon = '<i class="icon-remove icon-white"></i>';
-												//$grade = 0;
-											}
-											
-											echo '<td class="lates" rowspan="' . $span_amount * 2 . '" style="padding:8px 0px; width: 1px; line-height:16px; padding-left:1px;background-color:' . $late_color . ';">' . $late_icon . '</td>';	  
-											echo '<td rowspan="' . $span_amount * 2 . '">' . $last_seen_part . '</td>';
-										}
-										else
-										{
-											if($late_days_max_surpassed)
-											{
-												//$grade = 0;
-											}
-										}
+        $output .= <<<HTML
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+HTML;
+        continue;
+    }
+
+    $results_details = $rubric->results_details[$part];
+
+    $submitted_details = $rubric->submission_details[$part];
+
+    $output .= <<<HTML
+        <div id="inner-container">
+            <div id="inner-container-spacer"></div>
+            <br />
+            Submitted: {$results_details['submission_time']}<br />
+            {$show_part}
+            Submission Number: {$rubric->active_assignment[$part]} / {$rubric->max_assignment[$part]}
+            <div id="inner-container-spacer"></div>
+            <div class="tabbable">
+                <ul id="myTab" class="nav nav-tabs">
+                    <li style="margin-right:2px; height:34px; width:20px; text-align:center; line-height:16px; padding-top:3px; -webkit-border-radius: 4px 4px 0 0; -moz-border-radius: 4px 4px 0 0; border-radius: 4px 4px 0 0; background-color: {$icon_color[$part]};">
+                        {$icon[$part]}
+                    </li>
+HTML;
+
+    $i = 0;
+    $active = true;
+    foreach ($results_details['testcases'] as $k => $testcase) {
+        $active_text  = ($active == true) ? 'active' : '';
+        $j = $i + 1;
+        $pa = $testcase['points_awarded'];
+        $pt = $rubric->config_details[$part]['testcases'][$k]['points'];
+        $output .= <<<HTML
+
+                    <li class="{$active_text}" >
+                        <span id="tab-{$part}-{$i}" class="diff"></span>
+                        <a href="#output-{$part}-{$i}" data-toggle="tab">Output Test {$j} [{$pa}/{$pt}]</a>
+                    </li>
+HTML;
+        $i++;
+        $active = false;
+    }
+
+    $output .= <<<HTML
+
+                </ul>
+                <div class="tab-content" style="width: 100%; overflow-x: hidden;">
+HTML;
+
+    $i = 0;
+    $active = true;
+    foreach ($results_details['testcases'] as $k => $testcase) {
+        $active_text = ($active) ? 'active' : '';
+        $url = $BASE_URL."/account/iframe/test-pane.php?course={$_GET['course']}&testcases=".urlencode(json_encode($testcase))."&directory=".urlencode($results_details['directory']);
+
+        $output .= <<<HTML
+
+                    <div class="tab-pane {$active_text}" id="output-{$part}-{$i}">
+                        <div style="width:95%; margin: auto auto auto auto; overflow-y:auto; overflow-x:hidden; padding-top:20px;">
+                            <iframe src="{$url}" id='iframe-{$part}-{$i}' width='750px' style='border: 0' onLoad="autoResize('iframe-{$part}-{$i}'); load_tab_icon('tab-{$part}-{$i}', 'iframe-{$part}-{$i}', {$testcase['points_awarded']}, {$rubric->config_details[$part]['testcases'][$k]['points']}); ">
+                            </iframe>
+                            <br />
+                            Logfile
+                            <textarea id="code{$source_number}">
+HTML;
+        $output .= htmlentities(file_get_contents($results_details['directory']."/".$testcase['execute_logfile']));
+        $output .= <<<HTML
+                            </textarea>
+HTML;
+        $output .= sourceSettingsJS($testcase['execute_logfile'], $source_number);
+        $output .= <<<HTML
+                        </div>
+                    </div>
+HTML;
+
+        $i++;
+        $active = false;
+        $source_number++;
+    }
 
 
-										if(isset($previous_grade[intval($row["question_id"])]))
-										{
-											$grade = min($previous_grade[intval($row["question_id"])][0], $total);
-											$comment = $previous_grade[intval($row["question_id"])][1];
-										}
-                                        else if ($status == 0) {
-                                            $grade = 0;
+    $output .= <<<HTML
+
+                </div>
+            </div>
+            <div style='margin-top: 20px' class="tabbable">
+HTML;
+    $j = 0;
+
+    $output .= "\n";
+
+    display_files($rubric->rubric_files[$part], $output, $part);
+
+    $output .= <<<HTML
+        </div>
+    </div>
+    <hr style="background-color: #000; height: 1px; margin-left: 25px; margin-right: 25px;"/>
+HTML;
+
+    $active = false;
+}
+$output .= <<<HTML
+    </div>
+</span>
+
+<span id="pane"></span>
+
+<span id="panemover" onmousedown="dragStart(event, 'left', 'right'); return false;" onmousemove="drag(event, 'left', 'right');" onmouseout="dragRelease();" onmouseup="dragRelease();"></span>
+
+<span id="right" class="resbox">
+    <div id="rubric" style="overflow-y:scroll;">
+        <div id="inner-container">
+            <div id="rubric-title">
+                <div class="span2" style="float:left; text-align: left;"><b>{$rubric->rubric_details['rubric_name']}</b></div>
+                <div class="span2" style="float:right; text-align: right; margin-top: -20px;"><b>{$rubric->student['student_last_name']}, {$rubric->student['student_first_name']}<br/>RCS: {$rubric->student['student_rcs']}</b></div>
+            </div>
+HTML;
+
+$submitted = ($rubric->submitted) ? "1" : "0";
+$individual = intval(isset($_GET["individual"]));
+if (isset($_COOKIE['auto'])) {
+    $cookie_auto = (intval($_COOKIE["auto"]) == 1 ? "checked" : "");
+}
+else {
+    $cookie_auto = "";
+}
+
+$active_assignments = implode(",",$rubric->active_assignment);
+$grade_parts_status = implode(",", $rubric->parts_status);
+$grade_parts_submitted = implode(",", $rubric->parts_submitted);
+$grade_parts_days_late = implode(",", $rubric->parts_days_late);
+
+$output .= <<<HTML
+            <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&hw={$rubric->rubric_details['rubric_id']}&student={$rubric->student['student_rcs']}&individual={$individual}" method="post">
+                <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
+                <input type="hidden" name="submitted" value="{$submitted}" />
+                <input type="hidden" name="status" value="{$rubric->status}" />
+                <input type="hidden" name="late" value="{$rubric->days_late}" />
+                <input type="hidden" name="active_assignment" value="{$active_assignments}" />
+                <input type="hidden" name="grade_parts_days_late" value="{$grade_parts_days_late}" />
+                <input type="hidden" name="grade_parts_submitted" value="{$grade_parts_submitted}" />
+                <input type="hidden" name="grade_parts_status" value="{$grade_parts_status}" />
+                <div id="inner-container-seperator" style="background-color:#AAA; margin-top: 0; margin-bottom:0;"></div>
+
+                <div style="margin-top: 0; margin-bottom:35px;">
+                    <input type="checkbox" style="margin-top:0; margin-right:5px;" id="rubric-autoscroll-checkbox" {$cookie_auto} /><span style="font-size:11px;">Rubric Auto Scroll</span>
+                </div>
+HTML;
+
+if ($rubric->rubric_details['rubric_late_days'] >= 0) {
+    $output .= <<<HTML
+                <span style="color: black">Homework allows {$rubric->rubric_details['rubric_late_days']} late day(s).</span><br />
+HTML;
+}
+
+if ($rubric->student['student_allowed_lates'] >= 0) {
+    $output .= <<<HTML
+                <span style="color: black">Student has used {$rubric->student['used_late_days']}/{$rubric->student['student_allowed_lates']} late day(s) this semester.</span><br />
+HTML;
+}
+
+$output .= <<<HTML
+                Late Days Used on Assignment:&nbsp;{$rubric->days_late}<br />
+HTML;
+if ($rubric->rubric_details['rubric_parts_sep']) {
+    for($i = 1; $i <= $rubric->rubric_parts; $i++) {
+        $output .= <<<HTML
+                <span style="margin-left: 50px"">Late Days for Part {$i}: {$rubric->parts_days_late[$i]}</span><br />
+HTML;
+    }
+}
+if ($rubric->late_days_exception > 0) {
+    $output .= <<<HTML
+                <span style="color: green">Student has an exception of {$rubric->late_days_exception} late day(s).</span><br />
+HTML;
+    $output .= <<<HTML
+                <b>Late Days Used:</b>&nbsp;{$rubric->days_late_used}<br />
+HTML;
+}
+
+if($rubric->status == 0 && $rubric->submitted == 1) {
+    $output .= <<<HTML
+                <b style="color:#DA4F49;">Too many total late days used for this assignment</b><br />
+HTML;
+}
+
+$print_status = ($rubric->status == 1) ? "Good" : "Bad";
+$output .= <<<HTML
+                <b>Status:</b> <span style="color: {$color[0]};">{$part_status[0]}</span><br />
+HTML;
+if ($rubric->rubric_details['rubric_parts_sep']) {
+    for ($i = 1; $i <= $rubric->rubric_parts; $i++) {
+        $output .= <<<HTML
+                <span style="margin-left: 50px;">Part {$i} Status: <span style="color: {$color[$i]};">{$part_status[$i]}</span></span><br />
+HTML;
+    }
+}
+
+$output .= <<<HTML
+                <br/><br/>
+                <table class="table table-bordered table-striped" id="rubric-table">
+                    <thead>
+HTML;
+if(isset($_GET["individual"])) {
+    $output .= <<<HTML
+                        <tr style="background-color:#EEE;">
+                            <th style="padding-left: 1px; padding-right: 0px; border-bottom:5px #FAA732 solid;"><i class="icon-time" id="progress-icon" style="margin-top: 2px;"></th>
+                            <th style="width:40px; border-bottom:5px #FAA732 solid;">Part</th>
+                            <th style="border-bottom:5px #FAA732 solid;">Question</th>
+                            <th style="width:40px; border-bottom:5px #FAA732 solid;">Points</th>
+                            <th style="width:40px; border-bottom:5px #FAA732 solid;">Total</th>
+                        </tr>
+HTML;
+}
+else {
+    $output .= <<<HTML
+                        <tr style="background-color:#EEE;">
+                            <th style="padding-left: 1px; padding-right: 0px;"><i class="icon-time" id="progress-icon" style="margin-top: 2px;"></th>
+                            <th style="width:40px;">Part</th>
+                            <th>Question</th>
+                            <th style="width:40px;">Points</th>
+                            <th style="width:40px;">Total</th>
+                        </tr>
+HTML;
+}
+
+$output .= <<<HTML
+                    </thead>
+                    <tbody>
+HTML;
+
+$c = 1;
+$last_seen_part = -1;
+foreach ($rubric->questions as $question) {
+    $output .= <<<HTML
+
+                        <tr class="accordion-toggle" data-toggle="collapse" data-target="#rubric-{$c}">
+HTML;
+    if ($last_seen_part != $question['question_part_number']) {
+        $output .= '<td class="lates" rowspan="' . $rubric->questions_count[$question['question_part_number']] * 2 . '" style="padding:8px 0px; width: 1px; line-height:16px; padding-left:1px;background-color: '.$icon_color[$question['question_part_number']].';">'.$icon[$question['question_part_number']].'</td>';
+        $output .= '<td rowspan="' . $rubric->questions_count[$question['question_part_number']] * 2 . '">' . $question['question_part_number'] . '</td>';
+        $last_seen_part = $question['question_part_number'];
+    }
+
+    $message = htmlentities($question["question_message"]);
+    $note = htmlentities($question["question_grading_note"]);
+    if ($note != "") {
+        $note = "<br/><br/><div style='margin-bottom:5px; color:#777;'><i><b>Note: </b>" . $note . "</i></div>";
+    }
+    $output .= <<<HTML
+                            <td style="font-size: 12px">
+                                {$message} {$note}
+                            </td>
+                            <td>
+                                <select name="grade-{$question['question_part_number']}-{$question['question_number']}" id="changer" class="grades" style="width: 65px; height: 25px; min-width:0px;" onchange="calculatePercentageTotal();" {$grade_select_extra}>
+HTML;
+
+    for ($i = 0; $i <= $question['question_total'] * 2; $i++) {
+        $output .= '<option' . (($i * 0.5) == $question['grade_question_score'] ? " selected" : "") . '>' . round(($i * 0.5), 1) . '</option>';
+    }
+
+    $comment = ($question['grade_question_comment'] != "") ? "in" : "";
+    $output .= <<<HTML
+                                </select>
+                            </td>
+                            <td><strong>{$question['question_total']}</strong></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="padding:0; border-top:none;">
+                                <div class="accordian-body collapse {$comment}" id="rubric-{$c}">
+                                    <textarea name="comment-{$question["question_part_number"]}-{$question["question_number"]}" rows="2" style="width:100%; padding:0px; resize:none; margin:0px 0px; border-radius:0px; border:none; padding:5px; border-left:3px #DDD solid; float:left; margin-right:-28px;" placeholder="Message for the student..." comment-position="0">{$question['grade_question_comment']}</textarea>
+HTML;
+
+    $comment = htmlspecialchars($question['grade_question_comment']);
+    $comments = \lib\DatabaseUtils::fromPGToPHPArray($question['comments']);
+    unset($comments[$comment]);
+    if (count($comments) > 0 || ($comment != "" && count($comments) > 1)) {
+        $output .= <<<HTML
+                                    <div>
+                                        <a class="btn" name="comment-{$question['question_part_number']}-{$question["question_number"]}-up" style="border-radius: 0px; padding:0px;" onclick="updateCommentBox_{$question["question_part_number"]}_{$question["question_number"]}(-1);" disabled="true"><i class="icon-chevron-up" style="height:20px; width:13px;"></i></a>
+                                        <br/>
+                                        <a class="btn" name="comment-{$question["question_part_number"]}-{$question["question_number"]}-down" style="border-radius: 0px; padding:0px;" onclick="updateCommentBox_{$question["question_part_number"]}_{$question["question_number"]}(1);"><i class="icon-chevron-down" style="height:20px; width:13px;"></i></a>
+                                    </div>
+                                    <script type="text/javascript">
+                                        function updateCommentBox_{$question["question_part_number"]}_{$question["question_number"]}(delta)
+                                        {
+                                            var pastComments = [];
+                                            pastComments[0] = "{$comment}";
+
+HTML;
+        $i = 1;
+        foreach($comments as $comment)
+        {
+            $output .= 'pastComments[' . $i++ . '] = "' . htmlspecialchars($comment) . '";';
+            $output .= "\n";
+        }
+        $output .= <<<JS
+
+                                            var new_position = parseInt($('[name=comment-{$question["question_part_number"]}-{$question["question_number"]}]').attr("comment-position"));
+                                            new_position += delta;
+
+                                            if(new_position >= pastComments.length - 1)
+                                            {
+                                                new_position = pastComments.length - 1;
+                                                $('a[name=comment-{$question["question_part_number"]}-{$question["question_number"]}-down]').attr("disabled", "true");
+                                            }
+                                            else
+                                            {
+                                                $('a[name=comment-{$question["question_part_number"]}-{$question["question_number"]}-down]').removeAttr("disabled");
+                                            }
+
+                                            if(new_position <= 0)
+                                            {
+                                                new_position = 0;
+                                                $('a[name=comment-{$question["question_part_number"]}-{$question["question_number"]}-up]').attr("disabled", "true");
+                                            }
+                                            else
+                                            {
+                                                $('a[name=comment-{$question["question_part_number"]}-{$question["question_number"]}-up]').removeAttr("disabled");
+                                            }
+
+                                            var textarea = $('textarea[name=comment-{$question["question_part_number"]}-{$question["question_number"]}]');
+                                            textarea.attr("comment-position", new_position);
+                                            textarea.html(pastComments[new_position]);
                                         }
-                                        else if(__USE_AUTOGRADER__ && $row['question_part_number'] == 0) {
-                                            $grade = ($row['question_number'] == 1) ? $autograder : $autograder_ec;
-                                        }
-										else if($row['question_extra_credit'] == 1)
-										{
-											$grade = 0;
-											$rubric_total -= $total;
-										}
-                                        else if (__ZERO_RUBRIC_GRADES__) {
-                                            $grade = 0;
-                                        }
-										
-										$note = $row["question_grading_note"];
-										if($note != "")
-										{
-											$note = "<br/><br/><div style='margin-bottom:5px; color:#777;'><i><b>Note: </b>" . $note . "</i></div>";
-										}
-									?>
-									
-									<td style="font-size: 12px">
-										<?php echo htmlentities($row["question_message"]); ?>
-										<?php echo $note; ?>
-									</td>
-									<td>
-			                    		<select name="grade-<?php echo $row["question_part_number"]; ?>-<?php echo $row["question_number"]; ?>" id="changer" class="grades" style="width: 65px; height: 25px; min-width:0px;" onchange="calculatePercentageTotal();">
-										<?php
-											for($i = 0; $i <= $total * 2; $i++)
-											{
-												echo '<option' . (($i * 0.5) == $grade ? " selected" : "") . '>' . round(($i * 0.5),1) . '</option>';
-											}
-										?>
-			                    		</select>
-									</td>
-									<td><strong><?php echo $total; ?></strong></td>
-								</tr>
-								
-								<tr>
-						            <td colspan="3" style="padding:0px; border-top:none;">
-						            	<div class="accordian-body collapse <?php echo ($comment != "" ? "in" : ""); ?>" id="rubric-<?php echo $c++; ?>">
-							            	<textarea name="comment-<?php echo $row["question_part_number"]; ?>-<?php echo $row["question_number"]; ?>" rows="2" style="width:100%; padding:0px; resize:none; margin:0px 0px; border-radius:0px; border:none; padding:5px; border-left:3px #DDD solid; float:left; margin-right:-28px;" placeholder="Message for the student..." comment-position="0"><?php echo $comment; ?></textarea>
-											<?php 
-												$used_comments = array();
-												$params = array($question_id, "");
-												$db->query("SELECT grade_question_comment FROM grades_questions WHERE question_id=? AND grade_question_comment<>?", $params);
-												foreach($db->rows() as $row2)
-												{
-													$used_comment = clean_string_javascript($row2["grade_question_comment"]);
-													if(isset($used_comments[$used_comment]))
-													{
-														$used_comments[$used_comment] += 1;
-													}
-													else
-													{
-														$used_comments[$used_comment] = 1;
-													}
-												}
-												array_multisort($used_comments, SORT_DESC);
 
-												unset($used_comments[$comment]);
+JS;
+        $output .= "                                    </script>";
 
-												if(count($used_comments) > 0 || ($comment != "" && count($used_comments) > 1))
-												{
-											?>
-								            	<div>
-									            	<a class="btn" name="comment-<?php echo $row["question_part_number"]; ?>-<?php echo $row["question_number"]; ?>-up" style="border-radius: 0px; padding:0px;" onclick="updateCommentBox_<?php echo $row["question_part_number"]; ?>_<?php echo $row["question_number"]; ?>(-1);" disabled="true"><i class="icon-chevron-up" style="height:20px; width:13px;"></i></a>
-									            	<br/>
-													<a class="btn" name="comment-<?php echo $row["question_part_number"]; ?>-<?php echo $row["question_number"]; ?>-down" style="border-radius: 0px; padding:0px;" onclick="updateCommentBox_<?php echo $row["question_part_number"]; ?>_<?php echo $row["question_number"]; ?>(1);"><i class="icon-chevron-down" style="height:20px; width:13px;"></i></a>
-								            	</div>
+    }
+    $output .= <<<HTML
 
-								            	<script type="text/javascript">
-													function updateCommentBox_<?php echo $row["question_part_number"]; ?>_<?php echo $row["question_number"]; ?>(delta) 
-													{
-														var pastComments = Array();
-														pastComments[0] = "<?php echo clean_string_javascript($comment); ?>";
-										            	<?php 
-															$i = 1;
-															foreach($used_comments as $used_comment => $used_comment_frequency)
-															{
-																print 'pastComments[' . $i++ . '] = "' . $used_comment . '";';
-																print "\n";
-															} 
-										            	?>
+                                </div>
+                            </td>
+                        </tr>
+HTML;
+    $c++;
+}
 
-										            	var new_position = parseInt($('[name=comment-<?php echo $row["question_part_number"]; ?>-<?php echo $row["question_number"]; ?>]').attr("comment-position"));
-										            	new_position += delta;
+if(isset($_GET["individual"])) {
+    $output .= <<<HTML
+                        <tr>
+                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;"></td>
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;"></td>
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;"><strong>CURRENT GRADE</strong></td>
+                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;"><strong id="score_total">0</strong></td>
+                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;"><strong>{$rubric->rubric_details['rubric_total']}</strong></td>
+                        </tr>
+HTML;
+}
+else {
+    $output .= <<<HTML
+                        <tr>
+                            <td style="background-color: #EEE; border-top: 1px solid #CCC;"></td>
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"></td>
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"><strong>CURRENT GRADE</strong></td>
+                            <td style="background-color: #EEE; border-top: 1px solid #CCC;"><strong id="score_total">0</strong></td>
+                            <td style="background-color: #EEE; border-top: 1px solid #CCC;"><strong>{$rubric->rubric_details['rubric_total']}</strong></td>
+                        </tr>
+HTML;
+}
 
-										            	if(new_position >= pastComments.length - 1)
-										            	{
-										            		new_position = pastComments.length - 1;
-										            		$('a[name=comment-<?php echo $row["question_part_number"]; ?>-<?php echo $row["question_number"]; ?>-down]').attr("disabled", "true");
-										            	}
-										            	else
-										            	{
-										            		$('a[name=comment-<?php echo $row["question_part_number"]; ?>-<?php echo $row["question_number"]; ?>-down]').removeAttr("disabled");
-										            	}
+$output .= <<<HTML
+                    </tbody>
+                </table>
+                <div style="width:100%;"><b>General Comment:</b></div>
+                <textarea name="comment-general" rows="5" style="width:98%; padding:5px; resize:none;" placeholder="Overall message for student about the homework...">{$rubric->rubric_details['grade_comment']}</textarea>
+                <div style="width:100%; height:40px;"></div>
+HTML;
+if (isset($rubric->rubric_details['user_email'])) {
+    $output .= "Graded By: {$rubric->rubric_details['user_email']}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br /><br />";
+}
 
-										            	if(new_position <= 0)
-										            	{
-										            		new_position = 0;
-										            		$('a[name=comment-<?php echo $row["question_part_number"]; ?>-<?php echo $row["question_number"]; ?>-up]').attr("disabled", "true");
-										            	}
-										            	else
-										            	{
-										            		$('a[name=comment-<?php echo $row["question_part_number"]; ?>-<?php echo $row["question_number"]; ?>-up]').removeAttr("disabled");
-										            	}
+if (!($now < $homeworkDate)) {
+    if((!isset($_GET["individual"])) || (isset($_GET["individual"]) && !$student_individual_graded)) {
+        $output .= <<<HTML
+        <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade"/>
+        <div id="inner-container-spacer" style="height:75px;"></div>
+HTML;
+    } else {
+        $output .= <<<HTML
+        <input class="btn btn-large btn-warning" type="submit" value="Submit Homework Re-Grade" onclick="createCookie('backup',1,1000);"/>
+        <div style="width:100%; text-align:right; color:#777;">{$rubric->rubric_details['grade_finish_timestamp']}</div>
+        <div id="inner-container-spacer" style="height:55px;"></div>
+HTML;
+    }
+}
+else {
+    $output .= <<<HTML
+        <input class="btn btn-large btn-primary" type="button" value="Cannot Submit Homework Grade" />
+        <div style="width:100%; text-align:right; color:#777;">This homework has not been opened for grading.</div>
+        <div id="inner-container-spacer" style="height:55px;"></div>
+HTML;
+}
 
-										            	$('textarea[name=comment-<?php echo $row["question_part_number"]; ?>-<?php echo $row["question_number"]; ?>]').attr("comment-position", new_position);
-										            	$('textarea[name=comment-<?php echo $row["question_part_number"]; ?>-<?php echo $row["question_number"]; ?>]').html(pastComments[new_position]);
-											        }
+$output .= <<<HTML
+            </form>
+        </div>
+    </div>
+</span>
+HTML;
 
-												</script>
-											<?php } ?>
-						            	</div>
-						            </td>
-						        </tr>
-						        
-						    <?php }
-						?>
-					
-						<?php if(isset($_GET["individual"])) { ?>
-							<tr>	  
-								<td style="background-color: #EEE; border-top:5px #FAA732 solid;"></td>	  
-								<td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;"></td>	  
-								<td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;"><strong>CURRENT GRADE</strong></td>
-								<td style="background-color: #EEE; border-top:5px #FAA732 solid;"><strong id="score_total">0</strong></td>
-								<td style="background-color: #EEE; border-top:5px #FAA732 solid;"><strong><?php echo $rubric_total; ?></strong></td>
-							</tr>
-						<?php } else { ?>
-							<tr>	  
-								<td style="background-color: #EEE; border-top: 1px solid #CCC;"></td>	  
-								<td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"></td>	  
-								<td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"><strong>CURRENT GRADE</strong></td>
-								<td style="background-color: #EEE; border-top: 1px solid #CCC;"><strong id="score_total">0</strong></td>
-								<td style="background-color: #EEE; border-top: 1px solid #CCC;"><strong><?php echo $rubric_total; ?></strong></td>
-							</tr>
-						<?php }?>
-						
-					</tbody>
-				</table>
-				
-				<div style="width:100%;"><b>General Comment:</b></div>
-				<textarea name="comment-general" rows="5" style="width:98%; padding:5px; resize:none;" placeholder="Overall message for student about the homework..."><?php echo $grade_comment; ?></textarea>
-				
-				<div style="width:100%; height:40px;"></div>
-				<?php 
-    if (isset($user['user_email'])) { 
-        print "Graded By: {$user['user_email']}<br />Overwrite Grader: <input type='checkbox' name='overwrite' /><br /><br />"; 
-    } 
-    ?>
-				<?php if((!isset($_GET["individual"])) || (isset($_GET["individual"]) && !$student_individual_graded))  { ?>
-					<input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade"/> 
-					<div id="inner-container-spacer" style="height:75px;"></div>
-				<?php } else { ?>
-					<input class="btn btn-large btn-warning" type="submit" value="Submit Homework Re-Grade" onclick="createCookie('backup',1,1000);"/>
-					<div style="width:100%; text-align:right; color:#777;"><?php echo $grade_finish_timestamp; ?></div>
-					<div id="inner-container-spacer" style="height:55px;"></div>
-				<?php }	?>
-			</form>
-		</div>
-	</div>
-	
-	<script type="text/javascript">
-	
-		calculatePercentageTotal();
-		
-		function calculatePercentageTotal() 
-		{
-			var total=0;
-			
-			$('#rubric-table select.grades').each(function()
-			{
-				total += parseFloat($(this).val());
-/* 				$(this).next('.accordian-body').collapse('show'); */
-			});
-		
-			$("#score_total").html(total);
-		}
-		
-		function updateLates()
-		{
-			var late_number = parseInt($("select#late-select").val());
-			
-			$('.lates').each(function()
-			{
-				if(late_number == 0)
-				{
-					var late_color = "green";
-					var late_icon = '<i class="icon-ok icon-white">';
-				}
-				else if(late_number == 1)
-				{														
-					var late_color = "#FAA732";
-					var late_icon = '<i class="icon-exclamation-sign icon-white"><br/>';
-				}
-				else if(late_number == 2)
-				{
-					var late_color = "#FAA732";
-					var late_icon = '<i class="icon-exclamation-sign icon-white"><br/><i class="icon-exclamation-sign icon-white">';
-				}
-				else
-				{
-					var late_color = "#DA4F49";
-					var late_icon = '<i class="icon-remove icon-white">';
-					
-					$('#rubric-table select.grades').each(function()
-					{
-						$(this).val(0);
-					});
-				}
-				
-				$(this).css("background-color", late_color);
-				$(this).html(late_icon);
-			});
-			
-			calculatePercentageTotal()
-		}
-		
-	</script>
-		
-<?php } ?>
+$output .= <<<HTML
+<script>
+calculatePercentageTotal();
+</script>
+HTML;
+
+print $output;

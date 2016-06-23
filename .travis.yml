@@ -1,7 +1,6 @@
 language: php
 sudo: true
-#dist: trusty
-#we should switch to this after figuring out how to use newer version of PHPUnit
+dist: trusty
 php:
   - 5.5
   - 5.6
@@ -25,7 +24,10 @@ script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
   - vendor/phpunit/phpunit/phpunit --version
   - vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml
-  - if [[ "$TRAVIS_BRANCH" = "master" ]]; then vendor/phpunit/phpunit/phpunit --configuration tests/phpunit_e2e.xml; fi
+#  - if [[ "$TRAVIS_BRANCH" = "master" ]]; then vendor/phpunit/phpunit/phpunit --configuration tests/phpunit_e2e.xml; fi
+  - vendor/phpunit/phpunit/phpunit --configuration tests/phpunit_e2e.xml
+  - python /usr/local/submitty/test_suite/integrationTests/run.py
+
 
 notifications:
   email: false

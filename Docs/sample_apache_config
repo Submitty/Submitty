@@ -2,14 +2,14 @@
 SSLUseStapling On
 SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 <VirtualHost test-submit:443>
-	suPHP_ConfigPath /usr/local/hss
+	suPHP_ConfigPath /usr/local/submitty
 	AddDefaultCharset utf-8
 	AddExternalAuth pwauth /usr/sbin/pwauth
 	SetExternalAuthMethod pwauth pipe
 	ServerAdmin ADMIN@DOMAIN.HERE
 	ServerName test-submit
 
-	DocumentRoot /usr/local/hss/website/public
+	DocumentRoot /usr/local/submitty/website/public
 
 	DirectoryIndex index.html index.php
 
@@ -42,7 +42,7 @@ SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 
 	CustomLog ${APACHE_LOG_DIR}/submit.log combined
 
-	<Directory /usr/local/hss/website/public/cgi-bin>
+	<Directory /usr/local/submitty/website/public/cgi-bin>
 		Options ExecCGI Includes
 		AuthType Basic
 		AuthName "Please log in"
@@ -55,7 +55,7 @@ SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 		Allow from all
     </Directory>
 
-	<Directory /usr/local/hss/website/public>
+	<Directory /usr/local/submitty/website/public>
 		Options Includes
 		AuthType Basic
 		AuthName "Please log in"

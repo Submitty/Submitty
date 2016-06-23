@@ -1,7 +1,7 @@
 {
-    "name": "rcos-grading-server/hwserver",
+    "name": "submitty/submitty",
     "require": {
         "phpunit/phpunit": "5.*",
-        "phpunit/phpunit-selenium": "2.*"
+        "phpunit/phpunit-selenium": "3.*"
     }
 }

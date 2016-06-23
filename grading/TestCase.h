@@ -29,7 +29,7 @@
 #include "testResults.h"
 #include "tokens.h"
 
-const std::string drmemory_path = "/usr/local/hss/drmemory/bin/drmemory";
+const std::string drmemory_path = "/usr/local/submitty/drmemory/bin/drmemory";
 
 // =================================================================================
 
@@ -170,11 +170,12 @@ public:
 				   const std::string &compilation_command,
 				   const std::string &executable_filename, // single executable file converted into vector
 				   const TestCasePoints &tcp,
+           float w_frac = 0,
 				   const std::map<int,rlim_t> &test_case_limits = {} ) {
     return MakeCompilation(title,
 			   compilation_command,
 			   std::vector<std::string>(1,executable_filename),
-			   tcp,test_case_limits);
+			   tcp, w_frac, test_case_limits);
   }
 
 
@@ -182,6 +183,7 @@ public:
 				   const std::string &compilation_command,
 				   const std::vector<std::string> &executable_filenames,
 				   const TestCasePoints &tcp,
+           float w_frac = 0,
 				   const std::map<int,rlim_t> &test_case_limits={}) {
 
     TestCase answer;
@@ -191,7 +193,7 @@ public:
     answer._filenames = executable_filenames;
     answer._command = compilation_command;
     assert (answer._command != "");
-
+    answer.warning_frac = w_frac;
 
     answer.COMPILATION = true;
     answer._test_case_limits = test_case_limits;
@@ -343,7 +345,7 @@ public:
   
   bool isFileExistsTest() { return FILE_EXISTS; }
   bool isCompilationTest() { return COMPILATION; }
-
+  float get_warning_frac() { return warning_frac; }
 private:
 
   std::string _title;
@@ -363,7 +365,7 @@ public:
 private:
   bool FILE_EXISTS;
   bool COMPILATION;
-
+  float warning_frac;
   int test_case_id;
   static int next_test_case_id;
 };

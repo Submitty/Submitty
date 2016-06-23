@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include "myersDiff.h"
+#include "json.hpp"
 #include "tokens.h"
 #include "clean.h"
 
@@ -113,44 +114,34 @@ TestResults* myersDiffbyLinebyCharExtraStudentOutputOk ( const std::string & stu
 }
 
 
-// ===============================================================================
-// ===============================================================================
-
-// Helper function used by diffLineSwapOk to highlight incorrect,
-// missing, and duplicate lines in the file
-//
-// FIXME: this should be rewritten to use the json library!
 void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int student_line, int expected_line, bool only_student, bool only_expected) {
   if (!first_diff) {
     swap_difference << "  ,\n";
   }
-  swap_difference << "  {\n";
-  swap_difference << "    \"student\":\n";
-  swap_difference << "      {\n";
-  swap_difference << "        \"start\": " << student_line;
-  if (!only_expected) { 
-    swap_difference << ",\n";
-    swap_difference << "        \"line\": [ { \"line_number\": " << student_line << " } ]\n";
+  using json = nlohmann::json;
+
+  json j;
+  j["student"]["start"] = student_line;
+
+  if (!only_expected) {
+    json i;
+    i["line_number"] = student_line;
+    j["student"]["line"] = { i };
   }
-  swap_difference << "\n";
-  swap_difference << "      },\n";
-  swap_difference << "    \"instructor\":\n";
-  swap_difference << "      {\n";
-  swap_difference << "        \"start\": " << expected_line;
-  if (!only_student) { 
-    swap_difference << ",\n";
-    swap_difference << "        \"line\": [ { \"line_number\": " << expected_line << " } ]\n";
+
+  std::cout << "LINE HIGHLIGHT " << expected_line << std::endl;
+  j["instructor"]["start"] = expected_line;
+
+  if (!only_student) {
+    json i;
+    i["line_number"] = expected_line;
+    j["instructor"]["line"] = { i };
   }
-  swap_difference << "\n";
-  swap_difference << "      }\n";
-  swap_difference << "  }\n";
+  swap_difference << j.dump(4) << std::endl;
   first_diff = false;
 }
 
 
-// Grader that requires every line to match, but the lines may be in a
-// different order than the expected file.
-//
 // FIXME: might be nice to highlight small errors on a line
 //
 TestResults* diffLineSwapOk (const std::string & student_file, const std::string & expected_file) {
@@ -202,7 +193,9 @@ TestResults* diffLineSwapOk (const std::string & student_file, const std::string
       incorrect++;
     }
     if (!match || duplicate) {
+      std::cout << "!match or duplicate" <<std::endl;
       LineHighlight(swap_difference,first_diff,i,expected.size()+10,true,false);
+      //LineHighlight(swap_difference,first_diff,i,0,true,false);
     }
   }
 
@@ -210,7 +203,9 @@ TestResults* diffLineSwapOk (const std::string & student_file, const std::string
   for (unsigned int j = 0; j < expected.size(); j++) {
     if (matches[j] == 0) {
       missing++;
+      std::cout << "missing" <<std::endl;
       LineHighlight(swap_difference,first_diff,student.size()+10,j,false,true);
+      //LineHighlight(swap_difference,first_diff,0,j,false,true);
     }
     if (matches[j] > 1) duplicates+= (matches[j]-1);
   }
@@ -224,10 +219,10 @@ TestResults* diffLineSwapOk (const std::string & student_file, const std::string
 
   // prepare the graded message for the student
   std::stringstream ss;
-  if (incorrect > 0) { 
+  if (incorrect > 0) {
     ss << "ERROR: " << incorrect << " incorrect line(s)";
   }
-  if (duplicates > 0) { 
+  if (duplicates > 0) {
     if (ss.str().size() > 0) {
       ss << ", ";
     }
@@ -239,7 +234,7 @@ TestResults* diffLineSwapOk (const std::string & student_file, const std::string
     }
     ss << "ERROR: " << missing << " missing line(s)";
   }
-  
+
   return new TestResults(score,ss.str(),swap_difference.str());
 }
 
@@ -247,9 +242,16 @@ TestResults* diffLineSwapOk (const std::string & student_file, const std::string
 // ===============================================================================
 
 // Runs all the ses functions
-template<class T> Difference* ses ( T* a, T* b, bool secondary, bool extraStudentOutputOk  ) {
+/*
+@param T* student_output - a pointer to a vector<vector<string> > that is the student output file
+@param T* inst_output - a pointer to a vector<vector<stirng> > that is the instructor output file
+@param bool secondary 
+@param bool extraStudentOutputOk - boolean that tells if it is okay to have extra student
+       output at the end of the student output file 
+*/
+template<class T> Difference* ses ( T* student_output, T* inst_output, bool secondary, bool extraStudentOutputOk  ) {
 
-  metaData< T > meta_diff = sesSnapshots( ( T* ) a, ( T* ) b, extraStudentOutputOk );
+  metaData< T > meta_diff = sesSnapshots( ( T* ) student_output, ( T* ) inst_output, extraStudentOutputOk );
   sesSnakes( meta_diff,  extraStudentOutputOk  );
 
   Difference* diff = sesChanges( meta_diff, extraStudentOutputOk );
@@ -263,7 +265,7 @@ template<class T> Difference* ses ( T* a, T* b, bool secondary, bool extraStuden
   diff->only_whitespace_changes = true;
 
   for (int x = 0; x < diff->changes.size(); x++) {
-    INSPECT_CHANGES(std::cout,diff->changes[x],*a,*b,diff->only_whitespace_changes,extraStudentOutputOk);
+    INSPECT_CHANGES(std::cout,diff->changes[x],*student_output,*inst_output,diff->only_whitespace_changes,extraStudentOutputOk);
   }
 
   diff->PrepareGrade();
@@ -273,74 +275,70 @@ template<class T> Difference* ses ( T* a, T* b, bool secondary, bool extraStuden
 
 // runs shortest edit script. Saves traces in snapshots,
 // the edit distance in distance and pointers to objects a and b
-template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutputOk ) {
+/*
+@param T* student_output - a pointer to a vector<vector<string> > that is the student output file
+@param T* inst_output - a pointer to a vector<vector<stirng> > that is the instructor output file
+@param bool extraStudentOutputOk - boolean that tells if it is okay to have extra student
+       output at the end of the student output file 
+*/
+template<class T> metaData< T > sesSnapshots ( T* student_output, T* inst_output, bool extraStudentOutputOk ) {
 	//takes 2 strings or vectors of values and finds the shortest edit script
 	//to convert a into b
-	int a_size = ( int ) a->size();
-	int b_size = ( int ) b->size();
+        int student_output_size = ( int ) student_output->size();
+	int inst_output_size = ( int ) inst_output->size();
 	metaData< T > text_diff;
-	if ( a_size == 0 && b_size == 0 ) {
+	if ( student_output_size == 0 && inst_output_size == 0 ) {
 		return text_diff;
 	}
-	text_diff.m = b_size;
-	text_diff.n = a_size;
+	text_diff.m = inst_output_size;
+	text_diff.n = student_output_size;
     // DISTANCE -1 MEANS WHAT?
     text_diff.distance = -1;
-    text_diff.a = a;
-    text_diff.b = b;
+    text_diff.a = student_output;
+    text_diff.b = inst_output;
 
 	// WHAT IS V?
 	//std::vector< int > v( ( a_size + b_size ) * 2, 0 );
 	// TODO: BOUNDS ERROR, is this the appropriate fix?
-	std::vector< int > v( ( a_size + b_size ) * 2 + 1, 0 );
-
-
-	// INITIALIZATION REDUNDANT, ALREADY DONE BY CONSTRUCTOR ABOVE
-	/*
-	for ( int i = 0; i < ( a_size + b_size ) + ( a_size + b_size ); i++ ) {
-		v[i] = 0;
-	}
-	*/
+	std::vector< int > v( ( student_output_size + inst_output_size ) * 2 + 1, 0 );
 
 	//loop until the correct diff (d) value is reached, or until end is reached
-	for ( int d = 0; d <= ( a_size + b_size ); d++ ) {
+	for ( int d = 0; d <= ( student_output_size + inst_output_size ); d++ ) {
 		// find all the possibile k lines represented by  y = x-k from the max
 		// negative diff value to the max positive diff value
 		// represents the possibilities for additions and deletions at diffrent
 		// points in the file
 		for ( int k = -d; k <= d; k += 2 ) {
 			//which is the farthest path reached in the previous iteration?
-		  bool down = ( k == -d
-				|| ( k != d && v[ ( k - 1 ) + ( a_size + b_size )]
-				     < v[ ( k + 1 ) + ( a_size + b_size )] ) );
-			int k_prev, a_start, b_start, a_end, b_end;
+		  bool down = ( k == -d ||
+		  	          ( k != d && v[ ( k - 1 ) + ( student_output_size + inst_output_size )]
+				      < v[ ( k + 1 ) + ( student_output_size + inst_output_size )] ) );
+			int k_prev, a_start, a_end, b_end;
 			if ( down ) {
 				k_prev = k + 1;
-				a_start = v[k_prev + ( a_size + b_size )];
+				a_start = v[k_prev + ( student_output_size + inst_output_size )];
 				a_end = a_start;
 			} else {
 				k_prev = k - 1;
-				a_start = v[k_prev + ( a_size + b_size )];
+				a_start = v[k_prev + ( student_output_size + inst_output_size )];
 				a_end = a_start + 1;
 			}
 
-			b_start = a_start - k_prev;
 			b_end = a_end - k;
 			// follow diagonal
-			int snake = 0;
-			while ( a_end < a_size && b_end < b_size && ( *a )[a_end] == ( *b )[b_end] ) {
+			while ( a_end < student_output_size && b_end < inst_output_size && ( *student_output )[a_end] == ( *inst_output )[b_end] ) {
 				a_end++;
 				b_end++;
-				snake++;
 			}
 
 			// save end point
-			if (k+(a_size+b_size) < 0 || k+(a_size+b_size) >= v.size()) {
-			  std::cerr << "ERROR VALUE " << k+(a_size+b_size) << " OUT OF RANGE " << v.size() << " k=" << k << " a_size=" << a_size << " b_size=" << b_size << std::endl;
+			if (k+(student_output_size+inst_output_size) < 0 || k+(student_output_size+inst_output_size) >= v.size()) {
+			  std::cerr << "ERROR VALUE " << k+(student_output_size+inst_output_size) << " OUT OF RANGE " << v.size() << " k=" << k 
+			            << " student_output_size=" << student_output_size << " inst_output_size=" << inst_output_size << std::endl;
 			}
-			v[k + ( a_size + b_size )] = a_end;
+			v[k + ( student_output_size + inst_output_size )] = a_end;
 			// check for solution
-			if ( a_end >= a_size && b_end >= b_size ) { /* solution has been found */
+			if ( a_end >= student_output_size && b_end >= inst_output_size ) { /* solution has been found */
 				text_diff.distance = d;
 				text_diff.snapshots.push_back( v );
 				return text_diff;
@@ -355,11 +353,16 @@ template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutp
 
 	}
 	return text_diff;
-	//return text_diff;
 }
 
 // takes a metaData object with snapshots and parses to find the "snake"
 // - a path that leads from the start to the end of both of a and b
+/*
+@param metaData<T> & meta_diff - container that has the two file sizes, pointers to the file,
+       and a vector of the snapshots found
+@param bool extraStudentOutputOk - boolean that tells if it is okay to have extra student
+       output at the end of the student output file 
+*/
 template<class T> metaData< T > sesSnakes ( metaData< T > & meta_diff, bool extraStudentOutputOk  ) {
 	int n = meta_diff.n;
 	int m = meta_diff.m;
@@ -556,8 +559,8 @@ void Difference::PrepareGrade() {
       //std::cout << "SES [ESOO] calculating grade " << this->distance << "/" << output_length << std::endl;
       //grade -= (this->distance / (float) output_length );
       grade -= count_of_missing_lines / float(output_length);
-      std::cout << 
-	"grade:  missing_lines [ " << count_of_missing_lines << 
+      std::cout <<
+	"grade:  missing_lines [ " << count_of_missing_lines <<
 	"] / output_length " << output_length << "]\n";
       //std::cout << "SES [ESOO] calculated grade = " << std::setprecision(1) << std::fixed << std::setw(5) << grade << " " << std::setw(5) << (int)floor(5*grade) << std::endl;
       if (grade < 1.0 && this->only_whitespace_changes) {
@@ -573,7 +576,7 @@ void Difference::PrepareGrade() {
       std::cout << "NO OUTPUT, GRADE IS ZERO" << std::endl;
       grade = 0;
     }
-    
+
     std::cout << "this test grade = " << grade << std::endl;
     this->setGrade(grade);
   }
@@ -588,8 +591,8 @@ void Difference::PrepareGrade() {
     } else {
       //std::cout << "SES  calculating grade " << this->distance << "/" << max_output_length << std::endl;
       grade -= (this->distance / (float) max_output_length );
-      std::cout << 
-	"grade:  this->distance [ " << this->distance << 
+      std::cout <<
+	"grade:  this->distance [ " << this->distance <<
 	"] / max_output_length " << max_output_length << "]\n";
       //std::cout << "SES calculated grade = " << grade << std::endl;
     }
@@ -622,7 +625,7 @@ template<class T> Difference* sesSecondary ( Difference* text_diff,
 
 			        // FIXME: does not compile with clang -std=c++11
 			        //metaData< typeof(*meta_diff.a)[current->a_changes[b]] > meta_second_diff;
-			  
+
 				Difference* second_diff;
 
 				// FIXME: so added auto instead

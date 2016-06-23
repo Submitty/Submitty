@@ -26,7 +26,6 @@
 #define long_test IGNORE_LONG_TEST
 #define medium_test IGNORE_MEDIUM_TEST
 #define short_test IGNORE_SHORT_TEST
-#define drmemory_flags IGNORE_DR_MEMORY_FLAGS
 #include "default_config.h"
 //
 // END FIXME LONGTERM
@@ -46,6 +45,7 @@
 // ===========================================================================
 
 int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &execute_logfile) {
+
   int res;
   scmp_filter_ctx sc = seccomp_init(SCMP_ACT_KILL);
   int target_arch = is_32 ? SCMP_ARCH_X86 : SCMP_ARCH_X86_64;
@@ -166,6 +166,23 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   // HELPER UTILTIY PROGRAMS
   if (my_program == "/usr/bin/time") {
 #define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD    
+  } 
+
+  // C++ Memory Debugging
+  // FIXME: update with the actual dr memory install location?
+  if (my_program.find("drmemory") != std::string::npos || 
+      my_program.find("valgrind") != std::string::npos) {
+#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SIGNALS
+#define ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION
+#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_EXTENDED_ATTRIBUTES
+#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY
+#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_PERMISSIONS
+#define ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_RARE
+#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED
+#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_GET_SET_USER_GROUP_ID
+#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD
+#define ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_SYNCHRONIZATION
+#define ALLOW_SYSTEM_CALL_CATEGORY_DEVICE_MANAGEMENT_NEW_DEVICE
   } 
 
   // IMAGE COMPARISON

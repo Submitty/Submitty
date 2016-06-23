@@ -26,7 +26,7 @@
 // =====================================================================
 
 
-#define SYSTEM_CALL_CATEGORIES_HEADER "/usr/local/hss/GIT_CHECKOUT_HWserver/grading/system_call_categories.h"
+#define SYSTEM_CALL_CATEGORIES_HEADER "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/src/grading/system_call_categories.h"
 
 // ================================================================================================
 // ================================================================================================
@@ -280,7 +280,7 @@ int main(int argc, char* argv[]) {
   // parse the system call categories file
   std::ifstream system_call_categories_file (SYSTEM_CALL_CATEGORIES_HEADER);
   if (!system_call_categories_file.good()) {
-    std::cerr << "ERROR! could not open system call cateogies file" << SYSTEM_CALL_CATEGORIES_HEADER << std::endl;
+    std::cerr << "ERROR! could not open system call categories file" << SYSTEM_CALL_CATEGORIES_HEADER << std::endl;
     exit(0);
   }
   std::map<std::string,std::string> all_system_calls;

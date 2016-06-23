@@ -8,9 +8,9 @@ delete @ENV{'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
 
 print "Validating user list...\n";
 
-open LIST, "/var/local/hss/instructors/svnlist" or die "file svnlist not found";	# Should have a list of userids to be enabled, one per line
+open LIST, "/var/local/submitty/instructors/svnlist" or die "file svnlist not found";	# Should have a list of userids to be enabled, one per line
 
-my $GOOD = "/var/local/hss/instructors/valid";
+my $GOOD = "/var/local/submitty/instructors/valid";
 
 while (<LIST>)
 {
