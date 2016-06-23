@@ -4,12 +4,12 @@ project (sample_assignment)
 ###################################################################################
 
 # these variables will be replaced by INSTALL.sh
-set (HSS_INSTALL_DIR __INSTALL__FILLIN__HSS_INSTALL_DIR__)
-set (HSS_DATA_DIR __INSTALL__FILLIN__HSS_DATA_DIR__)
+set (SUBMITTY_INSTALL_DIR __INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__)
+set (SUBMITTY_DATA_DIR __INSTALL__FILLIN__SUBMITTY_DATA_DIR__)
 
 # assuming the core files for config, compilation, running, & grading are here:
-set (GRADINGCODE  ${HSS_INSTALL_DIR}/src)
-set (GRADINGLIB   ${HSS_INSTALL_DIR}/src/grading/lib/libsubmitty_grading.a)
+set (GRADINGCODE  ${SUBMITTY_INSTALL_DIR}/src)
+set (GRADINGLIB   ${SUBMITTY_INSTALL_DIR}/src/grading/lib/libsubmitty_grading.a)
 
 ###################################################################################
 
@@ -22,12 +22,12 @@ set (MY_DIR ${CMAKE_SOURCE_DIR})
 
 IF (ASSIGNMENT_INSTALLATION)
   # assuming we are in a directory of this structure
-  #   HSS_DATA_DIR/courses/which_semester/which_course/build/which_assignment
+  #   SUBMITTY_DATA_DIR/courses/which_semester/which_course/build/which_assignment
 
   # base directory for course
   set (course_dir ${MY_DIR}/../..)
   #alternately/equivalently
-  #set (course_dir ${HSS_DATA_DIR}/courses)
+  #set (course_dir ${SUBMITTY_DATA_DIR}/courses)
 
   # just the last part of the current directory
   get_filename_component(assignment ${MY_DIR} NAME)

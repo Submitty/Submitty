@@ -10,7 +10,7 @@
 #
 #################################################################################
 
-HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
+SUBMITTY_DATA_DIR=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__
 
 # check the number of arguments
 if [ "$#" -ne 1 ] && [ "$#" -ne 2 ]; then 
@@ -57,8 +57,8 @@ if [ "$pattern_length" -eq "$base_path_length" ]; then
 fi
 
 # ensure we extracted the base path
-if [ "$base_path" != "$HSS_DATA_DIR" ]; then
-    echo "ERROR:  $base_path != $HSS_DATA_DIR"
+if [ "$base_path" != "$SUBMITTY_DATA_DIR" ]; then
+    echo "ERROR:  $base_path != $SUBMITTY_DATA_DIR"
     exit
 fi
 

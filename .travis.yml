@@ -26,7 +26,8 @@ script:
   - vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml
 #  - if [[ "$TRAVIS_BRANCH" = "master" ]]; then vendor/phpunit/phpunit/phpunit --configuration tests/phpunit_e2e.xml; fi
   - vendor/phpunit/phpunit/phpunit --configuration tests/phpunit_e2e.xml
-  - python /usr/local/hss/test_suite/integrationTests/run.py
+  - python /usr/local/submitty/test_suite/integrationTests/run.py
+
 
 notifications:
   email: false

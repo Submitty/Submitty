@@ -23,8 +23,8 @@
 ########################################################################################################################
 # these variables will be replaced by INSTALL.sh
 
-HSS_INSTALL_DIR=__INSTALL__FILLIN__HSS_INSTALL_DIR__
-HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
+SUBMITTY_INSTALL_DIR=__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__
+SUBMITTY_DATA_DIR=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__
 
 HWPHP_USER=__INSTALL__FILLIN__HWPHP_USER__
 HWCRON_USER=__INSTALL__FILLIN__HWCRON_USER__
@@ -53,9 +53,9 @@ homework=$4
 
 
 # some error checking
-submissions_dir=$HSS_DATA_DIR/courses/$semester/$course/submissions
+submissions_dir=$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions
 
-config_file=$HSS_DATA_DIR/courses/$semester/$course/config/${homework}_assignment_config.json
+config_file=$SUBMITTY_DATA_DIR/courses/$semester/$course/config/${homework}_assignment_config.json
 
 if [ ! -d "$submissions_dir" ]; then
     echo -e "ERROR: specific course submissions " $course_dir " does not exist!"

@@ -9,12 +9,12 @@ import traceback
 import sys
 
 # global variable available to be used by the test suite modules
-HSS_INSTALL_DIR = "__INSTALL__FILLIN__HSS_INSTALL_DIR__"
+SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
 
-grading_source_dir =  HSS_INSTALL_DIR + "/src/grading"
+grading_source_dir =  SUBMITTY_INSTALL_DIR + "/src/grading"
 
 log_file = None
-log_dir = HSS_INSTALL_DIR + "/test_suite/log"
+log_dir = SUBMITTY_INSTALL_DIR + "/test_suite/log"
 
 
 def print(message="", end="\n"):
@@ -276,7 +276,7 @@ class TestcaseWrapper:
         if not os.path.dirname(f):
             f = os.path.join("data", f)
         filename1 = os.path.join(self.testcase_path, f)
-        filename2 = os.path.join(HSS_INSTALL_DIR,"test_suite/integrationTests/data/empty_json_diff_file.json")
+        filename2 = os.path.join(SUBMITTY_INSTALL_DIR,"test_suite/integrationTests/data/empty_json_diff_file.json")
         return self.json_diff(filename1,filename2)
 
 

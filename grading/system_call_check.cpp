@@ -26,7 +26,7 @@
 // =====================================================================
 
 
-#define SYSTEM_CALL_CATEGORIES_HEADER "__INSTALL__FILLIN__HSS_INSTALL_DIR__/src/grading/system_call_categories.h"
+#define SYSTEM_CALL_CATEGORIES_HEADER "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/src/grading/system_call_categories.h"
 
 // ================================================================================================
 // ================================================================================================
