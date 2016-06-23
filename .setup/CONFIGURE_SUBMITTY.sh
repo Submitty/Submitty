@@ -103,6 +103,7 @@ done
 #        (variables are different from each other, directories valid/exist/writeable, etc)
 
 # make the installation setup directory
+rm -rf $SUBMITTY_INSTALL_DIR/.setup
 mkdir -p $SUBMITTY_INSTALL_DIR/.setup
 chown root:root $SUBMITTY_INSTALL_DIR/.setup
 chmod 700 $SUBMITTY_INSTALL_DIR/.setup
