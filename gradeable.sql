@@ -2,7 +2,13 @@ DROP TABLE IF EXISTS gradeable_component_data;
 DROP TABLE IF EXISTS gradeable_data;
 DROP TABLE IF EXISTS gradeable_component;
 DROP TABLE IF EXISTS gradeable;
-
+DROP TABLE IF EXISTS registration_section;
+DROP TABLE IF EXISTS rotating_section;
+DROP TABLE IF EXISTS users; 
+DROP TABLE IF EXISTS late_days;
+DROP TABLE IF EXISTS late_day_exceptions;
+DROP TABLE IF EXISTS grading_registration;
+DROP TABLE IF EXISTS rotating_grading_group;
 
 CREATE TABLE gradeable(
     g_id VARCHAR PRIMARY KEY,
@@ -13,7 +19,8 @@ CREATE TABLE gradeable(
     g_grade_by_registration BOOLEAN NOT NULL,
     g_grade_start_date TIMESTAMP(6) WITHOUT TIME ZONE NOT NULL,
     g_grade_released_date TIMESTAMP(6) WITHOUT TIME ZONE NOT NULL,
-    g_syllabus_bucket VARCHAR NOT NULL
+    g_syllabus_bucket VARCHAR NOT NULL,
+    g_min_grading_group INT NOT NULL
 );
 
 CREATE TABLE gradeable_component(
@@ -43,5 +50,50 @@ CREATE TABLE gradeable_component_data(
     gc_id INT REFERENCES gradeable_component(gc_id) NOT NULL,
     gd_id INT REFERENCES gradeable_data(gd_id) NOT NULL,
     gcd_score NUMERIC NOT NULL,
-    gcd_component_comment VARCHAR NOT NULL
+    gcd_component_comment VARCHAR NOT NULL,
+    PRIMARY KEY(gc_id,gd_id)
+);
+
+CREATE TABLE registration_section(
+    registration_section_id INT PRIMARY KEY
+);
+
+CREATE TABLE rotating_section(
+    rotating_section_id INT PRIMARY KEY
+);
+
+CREATE TABLE users(
+    user_id VARCHAR PRIMARY KEY,
+    user_firstname VARCHAR NOT NULL,
+    user_lastname VARCHAR NOT NULL,
+    user_email VARCHAR NOT NULL,
+    user_group int4range(1,4) NOT NULL,
+    registration_section INT REFERENCES registration_section(registration_section_id) NOT NULL,
+    rotating_section INT REFERENCES rotating_section(rotating_section_id) NOT NULL
+);
+
+CREATE TABLE late_days(
+    user_id VARCHAR PRIMARY KEY REFERENCES users(user_id) NOT NULL,
+    allowed_late_days INT NOT NULL,
+    since_timestamp TIMESTAMP NOT NULL
+);
+
+CREATE TABLE late_day_exceptions(
+    g_id VARCHAR REFERENCES gradeable(g_id) NOT NULL,
+    user_id VARCHAR REFERENCES users(user_id) NOT NULL,
+    late_day_exceptions INT NOT NULL,
+    PRIMARY KEY(g_id,user_id)
+);
+
+CREATE TABLE grading_registration(
+    registration_section INT REFERENCES registration_section(registration_section_id) NOT NULL,
+    user_id VARCHAR REFERENCES users(user_id) NOT NULL,
+    PRIMARY KEY(registration_section, user_id)
+);
+
+CREATE TABLE rotating_grading_group(
+    g_id VARCHAR REFERENCES gradeable(g_id) NOT NULL,
+    user_id VARCHAR REFERENCES users(user_id) NOT NULL,
+    rotating_section INT REFERENCES rotating_section(registration_section_id) NOT NULL
+    PRIMARY KEY (g_id, user_id)
 );

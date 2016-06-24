@@ -717,6 +717,16 @@ HTML;
                 >Project</option>
                 <!-- May add more as needed -->
             </select>
+
+            <br />
+            What is the lowest privileged user group that can grade this?
+            
+            <select name="minimum-grading-group" style="width:180px;">
+                <option value='1'>Instructor</option>
+                <option value='2'>Full Access Grader</option>
+                <option value='3'>Limited Access Grader</option>
+                <option value='4'>Student</option>
+            </select>
             
             <!-- When the form is completed and the "SAVE GRADEABLE" button is pushed
                 
