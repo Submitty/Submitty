@@ -153,6 +153,9 @@ HTML;
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-grading-sections.php" role="button" data-toggle="modal">
                                     Setup Grading Sections
                                 </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-latedays-exceptions.php" role="button" data-toggle="modal">
+                                    Add Late Day Exceptions
+                                </a></li>
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-orphans.php" role="button" data-toggle="modal">
                                     View Orphans
                                 </a></li>
