@@ -201,6 +201,49 @@ function digit_to_ordinal($number) {
 // UTILITIES
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+function getContentType($filename){
+    switch (strtolower(pathinfo($filename, PATHINFO_EXTENSION))) {
+        // pdf
+        case 'pdf':
+            $content_type = "application/pdf";
+            break;
+        // images
+        case 'png':
+            $content_type = "image/png";
+            break;
+        case 'jpg':
+        case 'jpeg':
+            $content_type = "image/jpeg";
+            break;
+        case 'gif':
+            $content_type = "image/gif";
+            break;
+        case 'bmp':
+            $content_type = "image/bmp";
+            break;
+        // text
+        case 'c':
+            $content_type = 'text/x-csrc';
+            break;
+        case 'cpp':
+        case 'cxx':
+        case 'h':
+        case 'hpp':
+        case 'hxx':
+            $content_type = 'text/x-c++src';
+            break;
+        case 'java':
+            $content_type = 'text/x-java';
+            break;
+        case 'py':
+            $content_type = 'text/x-python';
+            break;
+        default:
+            $content_type = 'text/x-sh';
+            break;
+    }
+    return $content_type;
+}
 
 /**
  * @param $filename
@@ -209,28 +252,7 @@ function digit_to_ordinal($number) {
  * @return string
  */
 function sourceSettingsJS($filename, $number) {
-    switch(strtolower(pathinfo($filename, PATHINFO_EXTENSION))) {
-        case 'c':
-            $type = 'text/x-csrc';
-            break;
-        case 'cpp':
-        case 'cxx':
-        case 'h':
-        case 'hpp':
-        case 'hxx':
-            $type = 'text/x-c++src';
-            break;
-        case 'java':
-            $type = 'text/x-java';
-            break;
-        case 'py':
-            $type = 'text/x-python';
-            break;
-        default:
-            $type = 'text/x-sh';
-            break;
-    }
-
+    $type = getContentType($filename);
     $number = intval($number);
     return <<<HTML
 <script>

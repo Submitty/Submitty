@@ -568,7 +568,7 @@ function get_contents($dir, $max_depth) {
     if (is_dir($dir)) {
         if ($handle = opendir($dir)) {
             while (($file = readdir($handle)) !== false) {
-                if ($file[0] && $file[0] != ".") {
+                if (isset($file[0]) && $file[0] != ".") {
                     if (is_dir($dir."/".$file)) {
                         $children = get_contents($dir."/".$file, $max_depth - 1);
                         foreach ($children as $child) {
