@@ -22,12 +22,14 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
  # for debugging
  echo print_r($_POST);
  
+ 
  $g_id = $_POST['gradeable_id'];
  $g_title = $_POST['gradeable_title'];
  $g_overall_ta_instr = $_POST['ta_instructions'];
  $g_use_teams = ($_POST['team-assignment'] === 'yes') ? "true" : "false";
  $g_gradeable_type = null; 
- 
+ $g_min_grading_group=intval($_POST['minimum-grading-group']);
+
  abstract class GradeableType{
     const electronic_file = 0;
     const checkpoints = 1;
@@ -70,18 +72,18 @@ if ($action=='edit'){
     echo 'EDITING';
     $params = array($g_title, $g_overall_ta_instr, $g_use_teams, $g_gradeable_type, 
                 $g_grade_by_registration, $g_grade_start_date, $g_grade_released_date, 
-                $g_syllabus_bucket,$g_id);
+                $g_syllabus_bucket,$g_min_grading_group, $g_id);
     $db->query("UPDATE gradeable SET g_title=?, g_overall_ta_instructions=?, g_team_assignment=?, g_gradeable_type=?, 
-                g_grade_by_registration=?, g_grade_start_date=?, g_grade_released_date=?, g_syllabus_bucket=? 
-                WHERE g_id=?", $params);
+                g_grade_by_registration=?, g_grade_start_date=?, g_grade_released_date=?, g_syllabus_bucket=?, 
+                g_min_grading_group=? WHERE g_id=?", $params);
 }  
 else{
     $params = array($g_id,$g_title, $g_overall_ta_instr, $g_use_teams, $g_gradeable_type, 
                 $g_grade_by_registration, $g_grade_start_date, $g_grade_released_date, 
-                $g_syllabus_bucket);
+                $g_syllabus_bucket, $g_min_grading_group);
     $db->query("INSERT INTO gradeable(g_id,g_title, g_overall_ta_instructions, g_team_assignment, 
                 g_gradeable_type, g_grade_by_registration, g_grade_start_date, g_grade_released_date,
-                g_syllabus_bucket) VALUES (?,?,?,?,?,?,?,?,?)", $params);
+                g_syllabus_bucket,g_min_grading_group) VALUES (?,?,?,?,?,?,?,?,?,?)", $params);
 }
 // Now that the assignment is specified create the checkpoints for checkpoint based stuffs
 // The type of assignment will determine how the gradeable-component(s) are generated
@@ -119,7 +121,13 @@ else if($g_gradeable_type === GradeableType::checkpoints){
     }
     // remove deleted checkpoints 
     for($i=$num_checkpoints+1; $i<=$num_old_checkpoints; ++$i){
-        $db->query("DELETE FROM gradeable_component WHERE g_id=? AND gc_order=?", array($g_id, $i));
+        //DELETE all grades associated with these checkpoints
+        $params = array($g_id,$i);
+        $db->query("SELECT gc_id FROM gradeable_component WHERE g_id=? AND gc_order=?",$params);
+        $gc_id = $db->row()['gc_id'];
+        
+        $db->query("DELETE FROM gradeable_component_data AS gcd WHERE gc_id=?",array($gc_id));
+        $db->query("DELETE FROM gradeable_component WHERE gc_id=?", array($gc_id));
     }
 }
 else if($g_gradeable_type === GradeableType::numeric){
