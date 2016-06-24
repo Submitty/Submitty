@@ -25,6 +25,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
  # for debugging
  echo print_r($_POST);
  
+ 
  $g_id = $_POST['gradeable_id'];
  $g_title = $_POST['gradeable_title'];
  $g_overall_ta_instr = $_POST['ta_instructions'];
@@ -149,10 +150,7 @@ else if($g_gradeable_type === GradeableType::checkpoints){
     }
     $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
     $num_old_checkpoints = intval($db->row()['cnt']);
-<<<<<<< HEAD
-=======
-    
->>>>>>> labs/checkpoint based assignments
+
     // insert the checkpoints
     for($i=1; $i<=$num_checkpoints; ++$i){
         $gc_is_extra_credit = (isset($_POST["checkpoint-extra-".strval($i)])) ? "true" : "false";
