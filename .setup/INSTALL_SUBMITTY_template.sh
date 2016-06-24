@@ -130,7 +130,6 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
     rm -rf $SUBMITTY_INSTALL_DIR/hwgrading_website
     rm -rf $SUBMITTY_INSTALL_DIR/src
     rm -rf $SUBMITTY_INSTALL_DIR/bin
-    rm -rf $SUBMITTY_INSTALL_DIR/.setup
     rm -rf $SUBMITTY_INSTALL_DIR/test_suite
 fi
 
