@@ -79,15 +79,13 @@ $db->query("SELECT * FROM gradeable WHERE g_gradeable_type=? ORDER BY g_grade_st
 
 $first = true;
 
-// remove lab tab references
-
 foreach($db->rows() as $c_gradeable_row) {
     print <<<HTML
-            <li class="lab_tab
+            <li class="check_g_tab
 HTML;
     print ($first)?" active":"";
     print <<<HTML
-            "><a href="#lab{$c_gradeable_row["g_id"]}" data-toggle="tab">{$c_gradeable_row["g_title"]}</a></li>
+            "><a href="#check_g{$c_gradeable_row["g_id"]}" data-toggle="tab">{$c_gradeable_row["g_title"]}</a></li>
 HTML;
     $first = false;
 }
@@ -101,22 +99,22 @@ HTML;
 $first = true;
 
 // rename these vars without lab
-foreach($db->rows() as $lab_row) {
-    $params = array($lab_row['g_id']);
+foreach($db->rows() as $check_g_row) {
+    $params = array($check_g_row['g_id']);
     $db->query("SELECT gc_title from gradeable_component WHERE g_id=?", $params);
-    $lab_row_checkpoints = array();
+    $check_g_row_checkpoints = array();
     foreach($db->rows() as $row){
-        array_push($lab_row_checkpoints, $row['gc_title']);
+        array_push($check_g_row_checkpoints, $row['gc_title']);
     }
     $active = ($first) ? 'active in' : '';
     print <<<HTML
-                <div class="tab-pane fade {$active}" id="lab{$lab_row["g_id"]}">
+                <div class="tab-pane fade {$active}" id="check_g{$check_g_row["g_id"]}">
                     <table class="table table-bordered striped-table" id="g-checkpoints-table" style=" border: 1px solid #AAA;">
                         <thead style="background: #E1E1E1;">
                             <tr>
-                                <th>RCS ID</th>
+                                <th>User ID</th>
 HTML;
-    foreach($lab_row_checkpoints as $checkpoint) {
+    foreach($check_g_row_checkpoints as $checkpoint) {
         print <<<HTML
                                 <th>{$checkpoint}</th>
 HTML;
@@ -138,19 +136,19 @@ HTML;
 
     // TODO bring back the print lab part
     foreach($db->rows() as $section) {
-        $count = count($lab_row_checkpoints) + 1;
+        $count = count($check_g_row_checkpoints) + 1;
         print <<<HTML
                         <tr class="info">
                             <td colspan="{$count}" style="text-align:center;" id="section-{$section['section_id']}">
                                     Students Enrolled in Section {$section["section_id"]}
-                                   <!-- <a href="{$BASE_URL}/account/print/print_lab.php?course={$_GET['course']}&lab_id={$lab_row['lab_id']}&section_id={$section['section_id']}">
+                                    <a href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&g_id={$check_g_row['g_id']}&section_id={$section['section_id']}">
                                         <div class="icon-print"></div>
-                                    </a>-->
+                                    </a>
                             </td>
                         </tr>
                         <tbody>
 HTML;
-        $params = array($lab_row["g_id"],intval($section["section_id"]));
+        $params = array($check_g_row["g_id"],intval($section["section_id"]));
         // rewrite this query
         $db->query("
         
@@ -171,7 +169,7 @@ FROM
             , gd_user_id
             , g_id
         FROM
-            gradeable_component_data AS gcd RIGHT JOIN (
+            gradeable_component_data AS gcd INNER JOIN (
                 SELECT 
                     gd.g_id
                     ,gd_id
@@ -214,13 +212,13 @@ ORDER BY
             $student_info = $row;
             print <<<HTML
                             <tr>
-                                <td class="cell-all" id="cell-{$lab_row["g_id"]}-all-{$row["student_rcs"]}" cell-status="0">
+                                <td class="cell-all" id="cell-{$check_g_row["g_id"]}-all-{$row["student_rcs"]}" cell-status="0">
                                     {$student_info["student_rcs"]} ({$student_info["student_last_name"]}, {$student_info["student_first_name"]})
                                 </td>
 HTML;
             $count = 1;
 
-            foreach($lab_row_checkpoints as $checkpoint) {
+            foreach($check_g_row_checkpoints as $checkpoint) {
                 if(isset($grades[$count])) {
                     $grade_value = $grades[$count];
                 }
@@ -243,7 +241,7 @@ HTML;
                 }
 
                 print <<<HTML
-                                <td id="cell-{$lab_row["g_id"]}-check{$count}-{$row["student_rcs"]}" cell-status="{$mode}" style="{$background_color}"></td>
+                                <td id="cell-{$check_g_row["g_id"]}-check{$count}-{$row["student_rcs"]}" cell-status="{$mode}" style="{$background_color}"></td>
 HTML;
                 $count++;
             }
@@ -280,12 +278,6 @@ print <<<HTML
         var check = name[2].replace("check", "");
         var rcs = name[3];
         
-        console.log("Name:" + name);
-        console.log("Gradeable:" + gradeable);
-        console.log("Check:" + check);
-        console.log("RCS:" + rcs);
-        console.log("Mode:" + cell_status);
-            
         var url = "{$BASE_URL}/account/ajax/account-checkpoints-gradeable.php?course={$_GET['course']}&g_id=" + gradeable + "&check=" + check + "&rcs=" + rcs + "&mode=" + cell_status;
 
         if($(this).hasClass("cell-all")) {
