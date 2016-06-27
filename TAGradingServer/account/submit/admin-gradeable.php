@@ -1,4 +1,6 @@
 <?php
+use \lib\Database;
+use \lib\Functions;
 
 //TODO MORE error checking
 
@@ -6,9 +8,24 @@ include "../../toolbox/functions.php";
 
 check_administrator();
 
-if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
-    die("invalid csrf token");
-}
+if($user_is_administrator)
+{
+    $have_old = false;
+    $has_grades = false;
+    $old_gradeable = array(
+        'g_id' => -1,
+        'g_title' => "",
+        'g_overall_ta_instructions' => '',
+        'g_team_assignment' => false,
+        'g_gradeable_type' => 0,
+        'g_grade_by_registration' => false,
+        'g_grade_start_date' => date('Y/m/d 23:59:59'),
+        'g_grade_released_date' => date('Y/m/d 23:59:59'),
+        'g_syllabus_bucket' => '',
+        'g_min_grading_group' => ''
+    );
+    $old_questions = array();
+    $old_components = array();
 
  $gradeableJSON = $_POST['gradeableJSON'];
  
@@ -208,8 +225,5 @@ else if($g_gradeable_type === GradeableType::numeric){
 
 $db->commit();
 echo 'TRANSACTION COMPLETED';
-
-header('Location: '.__BASE_URL__.'/account/admin-gradeables.php?course='.$_GET['course']);
-
 
 ?>

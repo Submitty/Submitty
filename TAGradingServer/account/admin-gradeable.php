@@ -72,6 +72,7 @@ if($user_is_administrator){
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
     $account_subpages_unlock = true;
+
     function selectBox($question, $grade = 0) {
         $retVal = "<select name='point-{$question}' class='points' onchange='calculatePercentageTotal();'>";
         for($i = 0; $i <= 100; $i += 0.5) {
