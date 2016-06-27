@@ -15,7 +15,7 @@ Section: <b>{$section}</b>
 <br /><br />
 <table border="1">
     <tr>
-    <td style="width: 20%">User ID</td>
+    <td style="width: 20%">User Id</td>
     <td style="width: 20%">Last Name</td>
     <td style="width: 20%">First Name</td>
 HTML;
