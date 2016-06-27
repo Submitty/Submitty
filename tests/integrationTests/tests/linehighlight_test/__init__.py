@@ -46,7 +46,7 @@ def initialize(test):
 
 
 @testcase
-def check_output(test):
+def run_test(test):
     test.run_run()
     test.diff("test01_output_correct.txt","data/output_instructor.txt")
     test.diff("test02_output_duplicates.txt","duplicate_lines.txt")
@@ -57,51 +57,10 @@ def check_output(test):
     test.diff("test07_output_missing.txt","missing_lines.txt")
     test.diff("test08_output_reordered.txt","output_reordered.txt")
     test.diff("test09_output_reordered.txt","output_reordered.txt")
-
-@testcase
-def check_json(test):
     test.run_validator()
-    test.json_diff("test01_0_diff.json")
-    test.json_diff("test02_0_diff.json")
-    test.json_diff("test03_0_diff.json")
-    test.json_diff("test04_0_diff.json")
-    test.json_diff("test05_0_diff.json")
-    test.json_diff("test06_0_diff.json")
-    test.json_diff("test07_0_diff.json")
-    test.json_diff("test08_0_diff.json")
-    test.json_diff("test09_0_diff.json")
-
-@testcase
-def check_grade(test):
     test.diff("submission.json")
-
-@testcase
-def check_empty(test):
-    test.empty_file("test01_STDERR.txt")
-    test.empty_file("test01_STDOUT.txt")
-    test.empty_file("test02_STDERR.txt")
-    test.empty_file("test02_STDOUT.txt")
-    test.empty_file("test03_STDERR.txt")
-    test.empty_file("test03_STDOUT.txt")
-    test.empty_file("test04_STDERR.txt")
-    test.empty_file("test04_STDOUT.txt")
-    test.empty_file("test05_STDERR.txt")
-    test.empty_file("test05_STDOUT.txt")
-    test.empty_file("test06_STDERR.txt")
-    test.empty_file("test06_STDOUT.txt")
-    test.empty_file("test07_STDERR.txt")
-    test.empty_file("test07_STDOUT.txt")
-    test.empty_file("test08_STDERR.txt")
-    test.empty_file("test08_STDOUT.txt")
-    test.empty_file("test09_STDERR.txt")
-    test.empty_file("test09_STDOUT.txt")
-
-    test.empty_file("test01_execute_logfile.txt")
-    test.empty_file("test02_execute_logfile.txt")
-    test.empty_file("test03_execute_logfile.txt")
-    test.empty_file("test04_execute_logfile.txt")
-    test.empty_file("test05_execute_logfile.txt")
-    test.empty_file("test06_execute_logfile.txt")
-    test.empty_file("test07_execute_logfile.txt")
-    test.empty_file("test08_execute_logfile.txt")
-    test.empty_file("test09_execute_logfile.txt")
+    for i in range(1, 10):
+        test.json_diff("test0%d_0_diff.json" % i)
+        test.empty_file("test0%d_STDERR.txt" % i)
+        test.empty_file("test0%d_STDOUT.txt" % i)
+        test.empty_file("test0%d_execute_logfile.txt" % i)
