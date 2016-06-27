@@ -194,8 +194,6 @@ $output .= <<<HTML
         </tr>
 HTML;
 
-
-
 foreach ($gradeables as $gradeable) {
     $g_id = htmlspecialchars($gradeable['g_id']);
     $g_title = htmlspecialchars($gradeable['g_title']);
@@ -212,7 +210,7 @@ foreach ($gradeables as $gradeable) {
             <td class="gradeables-score" id="gradeable-{$g_id}-score"><!-- {$gradeable['gradeable_score']} ({$gradeable['gradeable_ec']}) --></td>
             <td class="gradeables-due" id="gradeable-{$g_id}-due">{$gradeable['g_grade_released_date']}</td>
             <td id="gradeable-{$g_id}-options"><a href="{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&action=edit&id={$g_id}">Edit</a> |
-            <a onclick="deleteGradeable({$g_id});">Delete</a></td>
+            <a onclick="deleteGradeable('{$g_id}');">Delete</a></td>
         </tr>
 HTML;
 }

@@ -19,7 +19,8 @@ if($user_is_administrator)
         'g_grade_by_registration' => false,
         'g_grade_start_date' => date('Y/m/d 23:59:59'),
         'g_grade_released_date' => date('Y/m/d 23:59:59'),
-        'g_syllabus_bucket' => ''
+        'g_syllabus_bucket' => '',
+        'g_min_grading_group' => ''
     );
     $old_questions = array();
     $old_components = array();
@@ -34,13 +35,18 @@ if($user_is_administrator)
         Database::query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($gradeable_id));
         $old_components = json_encode(Database::rows());
         $have_old = true;
+        
+        //figure out if the gradeable has grades or not
+        $db->query("SELECT COUNT(*) as cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id 
+                    INNER JOIN gradeable_component_data AS gcd ON gcd.gc_id=gc.gc_id WHERE g.g_id=?",array($gradeable_id));
+       $has_grades = $db->row()['cnt'];
     }
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
     $account_subpages_unlock = true;
 
-    function selectBox($part, $question, $grade = 0) {
-        $retVal = "<select name='point-{$part}-{$question}' class='points' onchange='calculatePercentageTotal();'>";
+    function selectBox($question, $grade = 0) {
+        $retVal = "<select name='point-{$question}' class='points' onchange='calculatePercentageTotal();'>";
         for($i = 0; $i <= 100; $i += 0.5) {
             $selected = ($grade == $i) ? "selected" : "";
             $retVal .= "<option {$selected}>{$i}</option>";
@@ -59,10 +65,8 @@ if($user_is_administrator)
         $gradeableNumberQuery = (count($gradeables) > 0) ? end($gradeables) + 1 : 1;
         $gradeable_name = "Gradeable {$gradeableNumberQuery}";
         $gradeable_submission_id = "gradeable".Functions::pad($gradeableNumberQuery);
-        $gradeable_parts_submission_id[1] = "_part1";
         $g_team_assignment = json_encode($old_gradeable['g_team_assignment']);
         $g_grade_by_registration = json_encode($old_gradeable['g_grade_by_registration']);
-        $part_count = 1;
         $string = "Add";
         $action = strtolower($string);
     }
@@ -78,12 +82,8 @@ if($user_is_administrator)
         $g_syllabus_bucket = $old_gradeable['g_syllabus_bucket'];
         $g_grade_start_date = $old_gradeable['g_grade_start_date'];
         $g_grade_released_date = $old_gradeable['g_grade_released_date'];
+        $g_min_grading_group = $old_gradeable['g_min_grading_group'];
         $part_count = 0;
-        /*foreach(explode(",", $old_rubric['rubric_parts_submission_id']) as $k => $v) {
-            $part_count++;
-            $rubric_parts_submission_id[$k + 1] = $v;
-        }*/
-
         $string = "Edit";
         $action = strtolower($string);
     }
@@ -434,7 +434,6 @@ HTML;
                              <tr>
                                 <th> Label </th>
                                 <th> Extra Credit? </th>
-                                <th> Message from TA to Students?</th>
                             </tr>
                         </thead>
                         <tbody style="background: #f9f9f9;">
@@ -447,9 +446,6 @@ HTML;
                            <td>     
                                 <input type="checkbox" name="checkpoint-extra-0" class="checkpoint-extra" value="true" />
                            </td> 
-                           <td>     
-                                <input type="checkbox" name="optional-ta-messg-0" class="optional-ta-messg" value="true" /> 
-                           </td>
                         </tr>
                       
                        <tr class="multi-field" id="mult-field-1">
@@ -459,14 +455,15 @@ HTML;
                            <td>     
                                 <input type="checkbox" name="checkpoint-extra-1" class="checkpoint-extra" value="true" />
                            </td> 
-                           <td>     
-                                <input type="checkbox" name="optional-ta-messg-1" class="optional-ta-messg" value="true" /> 
-                           </td>
                         </tr>
                   </table>
                   <button type="button" id="add-checkpoint-field">Add </button>  
                   <button type="button" id="remove-checkpoint-field" id="remove-checkpoint" style="visibilty:hidden;">Remove</button>   
-                </div>                
+                </div> 
+                <br />
+                Do you want a box for an (optional) message from the TA to the student?
+                <input type="radio" name="checkpt-opt-ta-messg" value="yes" /> Yes
+                <input type="radio" name="checkpt-opt-ta-messg" value="no" /> No
             </div>
             
             <div class="gradeable-type-options numeric" id="numeric">
@@ -715,17 +712,32 @@ HTML;
     echo ($g_syllabus_bucket === 'project')?'selected':'';
     print <<<HTML
                 >Project</option>
-                <!-- May add more as needed -->
             </select>
 
             <br />
             What is the lowest privileged user group that can grade this?
             
             <select name="minimum-grading-group" style="width:180px;">
-                <option value='1'>Instructor</option>
-                <option value='2'>Full Access Grader</option>
-                <option value='3'>Limited Access Grader</option>
-                <option value='4'>Student</option>
+                <option value='1'
+HTML;
+    echo ($g_min_grading_group === 1)?'selected':'';
+    print <<<HTML
+                >Instructor</option>
+                <option value='2'
+HTML;
+    echo ($g_min_grading_group === 2)?'selected':''; 
+    print <<<HTML
+                >Full Access Grader</option>
+                <option value='3'
+HTML;
+    echo ($g_min_grading_group === 3)?'selected':'';
+    print <<<HTML
+                >Limited Access Grader</option>
+                <option value='4'
+HTML;
+    echo ($g_min_grading_group === 4)?'selected':'';
+    print <<<HTML
+                >Student</option>
             </select>
             
             <!-- When the form is completed and the "SAVE GRADEABLE" button is pushed
@@ -796,18 +808,14 @@ HTML;
 
         var numCheckpoints=1;
         
-        function addCheckpoint(label, extra_credit, messg){
+        function addCheckpoint(label, extra_credit){
             var wrapper = $('.checkpoints-table');
             ++numCheckpoints;
             $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numCheckpoints).find('.checkpoint-label').val(label).focus();
             $('#mult-field-' + numCheckpoints).find('.checkpoint-label').attr('name','checkpoint-label-'+numCheckpoints);
             $('#mult-field-' + numCheckpoints).find('.checkpoint-extra').attr('name','checkpoint-extra-'+numCheckpoints);
-            $('#mult-field-' + numCheckpoints).find('.optional-ta-messg').attr('name','optional-ta-messg'+numCheckpoints);
             if(extra_credit){
                 $('#mult-field-' + numCheckpoints).find('.checkpoint-extra').attr('checked',true); 
-            }
-            if(messg){
-                $('#mult-field-' + numCheckpoints).find('.optional-ta-messg').attr('checked',true);   
             }
             $('#remove-checkpoint-field').show();
             $('#mult-field-' + numCheckpoints).show();
@@ -824,7 +832,7 @@ HTML;
         
         $('.multi-field-wrapper-checkpoints').each(function() {
             $("#add-checkpoint-field", $(this)).click(function(e) {
-                addCheckpoint('Checkpoint '+(numCheckpoints+1),false,false);
+                addCheckpoint('Checkpoint '+(numCheckpoints+1),false);
             });
             $('#remove-checkpoint-field').click(function() {
                 removeCheckpoint();
@@ -873,7 +881,7 @@ HTML;
             // remove the default checkpoint
             removeCheckpoint(); 
             $.each(components, function(i,elem){
-                addCheckpoint(elem.gc_title,elem.gc_is_extra_credit,false);
+                addCheckpoint(elem.gc_title,elem.gc_is_extra_credit);
             });
             $('#checkpoints').show();
         }
