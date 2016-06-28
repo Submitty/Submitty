@@ -1,13 +1,15 @@
 <?php
-use \lib\Database;
-use \lib\Functions;
 
+<<<<<<< HEAD
 //TODO MORE error checking
 
+=======
+>>>>>>> numerictext gradeable
 include "../../toolbox/functions.php";
 
 check_administrator();
 
+<<<<<<< HEAD
 if($user_is_administrator)
 {
     $have_old = false;
@@ -26,11 +28,19 @@ if($user_is_administrator)
     );
     $old_questions = array();
     $old_components = array();
+=======
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
+    die("invalid csrf token");
+}
+>>>>>>> numerictext gradeable
 
  $gradeableJSON = $_POST['gradeableJSON'];
  
  $fp = fopen(__SUBMISSION_SERVER__ . '/config/gradeable.json', 'w');
+<<<<<<< HEAD
 
+=======
+>>>>>>> numerictext gradeable
  if (!$fp){
     die('failed to open file');
  }
@@ -41,8 +51,7 @@ if($user_is_administrator)
 
  # for debugging
  echo print_r($_POST);
- 
- 
+
  $g_id = $_POST['gradeable_id'];
  $g_title = $_POST['gradeable_title'];
  $g_overall_ta_instr = $_POST['ta_instructions'];
@@ -190,7 +199,6 @@ else if($g_gradeable_type === GradeableType::checkpoints){
 else if($g_gradeable_type === GradeableType::numeric){
     $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
     $num_old_numerics = intval($db->row()['cnt']);
-    
     $num_numeric = intval($_POST['num-numeric-items']);
     $num_text= intval($_POST['num-text-items']);
     
@@ -218,7 +226,6 @@ else if($g_gradeable_type === GradeableType::numeric){
             $db->query("INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_max_value,
                         gc_is_text, gc_is_extra_credit, gc_order) VALUES (?,?,?,?,?,?,?,?)",$params);
         }
-    }
     //remove deleted numerics
     deleteComponents($num_numeric+$num_text+1, $num_old_numerics,$g_id);
 }

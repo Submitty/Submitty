@@ -47,7 +47,6 @@ WHERE g.g_id=?
 AND gd_user_id=?
 AND gc_order=?
     ", $params);
-
     $temp = $db->row();
     $old_mode = (isset($temp["gcd_score"]) ? $temp["gcd_score"] : 0);
 
