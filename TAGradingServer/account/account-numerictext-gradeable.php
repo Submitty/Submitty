@@ -7,10 +7,10 @@ $account_subpages_unlock = true;
 
 if (!User::$is_administrator) {
     if (isset($_GET['all']) && $_GET['all'] == "true") {
-        $button = "<a class='btn' href='{$BASE_URL}/account/account-tests.php?course={$_GET['course']}'>View Your Sections</a>";
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}'>View Your Sections</a>";
     }
     else {
-        $button = "<a class='btn' href='{$BASE_URL}/account/account-tests.php?course={$_GET['course']}&all=true'>View All Sections</a>";
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&all=true'>View All Sections</a>";
     }
 }
 else {
@@ -26,7 +26,8 @@ print <<<HTML
 
     #container-tests
     {
-        width:700px;
+        min-width:700px;
+        width: 80%;
         margin:100px auto;
         margin-top: 130px;
         background-color: #fff;
@@ -46,11 +47,12 @@ print <<<HTML
     .input-container
     {
         padding: 0px !important;
+        width: 10px !important;
     }
 
     input[type="text"]
     {
-        width: 90%;
+        width: 80%;
         padding: 5px;
         background-color: transparent;
         -webkit-box-shadow: none;
@@ -68,12 +70,18 @@ print <<<HTML
     {
         outline: none !important;
     }
+    
+    ::-webkit-scrollbar {
+        width:  2px !important;
+        height: 6px;
+        background-color:transparent;
+    }
 
 </style>
 
 <div id="container-tests">
     <div class="modal-header">
-        <h3 id="myModalLabel" style="width:20%; display:inline-block;">Tests</h3>
+        <h3 id="myModalLabel" style="width:20%; display:inline-block;">(╯°□°）╯︵ ┻━┻</h3>
         <span style="width: 79%; display: inline-block;">{$button}</span>
     </div>
 
@@ -82,22 +90,23 @@ print <<<HTML
             <ul id="myTab" class="nav nav-tabs">
 HTML;
 
+
+// MAYBE REORDER THIS
 $params = array();
-$db->query("SELECT * FROM tests ORDER BY test_type DESC, test_id ASC", $params);
+$db->query("SELECT * FROM gradeable WHERE g_gradeable_type=2 ORDER BY g_id ASC", $params);
 
 $first = true;
 $tests = $db->rows();
-foreach($tests as $test_row)
-{
-    $locked = ($test_row['test_locked']) ? "(Locked)" : "";
+foreach($tests as $test_row){
+    //$locked = ($test_row['test_locked']) ? "(Locked)" : "";
     if($first) {
         print <<<HTML
-                <li class="active"><a href="#test{$test_row["test_id"]}" data-toggle="tab">{$test_row['test_type']} {$test_row["test_number"]} {$locked}</a></li>
+                <li class="active"><a href="#test{$test_row["g_id"]}" data-toggle="tab">{$test_row['g_title']} {$locked}</a></li>
 HTML;
     }
     else {
         print <<<HTML
-                <li><a href="#test{$test_row["test_id"]}" data-toggle="tab">{$test_row['test_type']} {$test_row["test_number"]} {$locked}</a></li>
+                <li><a href="#test{$test_row["g_id"]}" data-toggle="tab">{$test_row['g_title']}{$locked}</a></li>
 HTML;
     }
 
@@ -105,35 +114,40 @@ HTML;
 }
 
 print <<<HTML
-
-
             </ul>
-
             <div id="myTabContent" class="tab-content">
 HTML;
 $first = true;
-foreach($tests as $test_row)
-{
-    $disabled = ($test_row['test_locked'] && !$user_is_administrator) ? "disabled" : "";
+foreach($tests as $test_row){
+    //$disabled = ($test_row['test_locked'] && !$user_is_administrator) ? "disabled" : "";
     $extra = ($first) ? ' active in' : '';
-    $colspan = $test_row['test_questions'];
-    $colspan2 = $test_row['test_text_fields'];
+    
+    // get the number of numeric tests questions
+    $params = array($g_id);
+    $db->query("SELECT COUNT(*) AS cnt from gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='false'", $params);
+    $num_numeric = $db->row()['cnt'];
+
+    // get the number of text questions
+    $db->query("SELECT COUNT(*) AS cnt from gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", $params);
+    $num_text = $db->row()['cnt'];
+    
+    $colspan = $num_numeric;
+    $colspan2 = $num_text;
     print <<<HTML
-                <div class="tab-pane fade{$extra}" id="test{$test_row["test_id"]}">
+                <div class="tab-pane fade{$extra}" id="test{$test_row["g_id"]}">
                     <table class="table table-bordered" id="testsTable" style=" border: 1px solid #AAA;">
                         <thead style="background: #E1E1E1;">
                             <tr>
-                                <th width="40%">RCS ID</th>
+                                <th width="30%">RCS ID</th>
                                 <th colspan="{$colspan}">Grades</th>
-                                <th>Total</th>
+                                <th width="5%">Total</th>
 HTML;
     if ($colspan2 > 0) {
         print <<<HTML
-                                <th colspan="{$colspan2}">Text</th>
+                                <th width="30%" colspan="{$colspan2}">Text</th>
 HTML;
     }
     print <<<HTML
-
                             </tr>
                         </thead>
 
@@ -141,13 +155,11 @@ HTML;
 HTML;
 
     $params = array($user_id);
-    if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true)
-    {
+    if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true){
         $params = array();
         $db->query("SELECT * FROM sections ORDER BY section_id ASC", $params);
     }
-    else
-    {
+    else{
         $params = array($user_id);
         $db->query("SELECT * FROM relationships_users WHERE user_id=? ORDER BY section_id ASC", $params);
     }
@@ -155,44 +167,95 @@ HTML;
     $colspan += 2;
     $colspan += $colspan2;
 
-    foreach($db->rows() as $section)
-    {
+    foreach($db->rows() as $section){
         $section_id = intval($section['section_id']);
 		print <<<HTML
-
                             <tr class="info">
                                 <td colspan="{$colspan}" style="text-align:center;">
                                     Students Enrolled in Section {$section_id}
                                 </td>
                             </tr>
 HTML;
-        $params = array($test_row['test_id'],intval($section["section_id"]));
-        $db->query("SELECT s.*,gt.grade_test_value,gt.grade_test_questions,gt.grade_test_text FROM students AS s LEFT JOIN (SELECT * FROM grades_tests WHERE test_id=?) 
-                    AS gt ON s.student_rcs=gt.student_rcs WHERE s.student_section_id=? ORDER BY student_rcs ASC", $params);
-        foreach($db->rows() as $row)
-        {
+        $params = array($test_row['g_id'],intval($section["section_id"])); 
+        $db->query("
+        
+SELECT
+    s.student_rcs
+    , s.student_id
+    , s.student_first_name
+    , s.student_last_name
+    , case when gcds.grade_value_array is null then '{}' else gcds.grade_value_array end
+    , case when gcds.grade_checkpoint_array is null then '{}' else gcds.grade_checkpoint_array end
+    , g_id
+    , gc_max_value
+FROM
+    students AS s
+    LEFT JOIN (
+        SELECT
+            array_agg(gcd_score) as grade_value_array
+            , array_agg(gc_order) as grade_checkpoint_array
+            , gd_user_id
+            , g_id
+            , gc_max_value
+        FROM
+            gradeable_component_data AS gcd INNER JOIN (
+                SELECT 
+                    gd.g_id
+                    ,gd_id
+                    ,gc_id
+                    ,gc_order
+                    ,gd_user_id
+                    ,gc_max_value
+                FROM 
+                    gradeable_data AS gd INNER JOIN (
+                        SELECT
+                            g.g_id
+                            , gc_id
+                            , gc_order
+                            , gc_max_value
+                        FROM 
+                            gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id = gc.g_id
+                        WHERE g.g_gradeable_type=2
+                    ) AS components ON components.g_id = gd.g_id    
+            ) AS data_components ON gcd.gc_id = data_components.gc_id AND gcd.gd_id = data_components.gd_id                
+        WHERE
+            g_id=? 
+        GROUP BY
+            gd_user_id
+            , g_id
+            , gc_max_value
+    ) AS gcds ON gcds.gd_user_id = s.student_rcs
+WHERE
+    s.student_section_id=?
+ORDER BY
+    s.student_rcs", $params);
+        
+        /*$db->query("SELECT s.*,gt.grade_test_value,gt.grade_test_questions,gt.grade_test_text FROM students AS s LEFT JOIN (SELECT * FROM grades_tests WHERE test_id=?) 
+                    AS gt ON s.student_rcs=gt.student_rcs WHERE s.student_section_id=? ORDER BY student_rcs ASC", $params);*/
+        foreach($db->rows() as $row){
             $student_info = $row;
             $temp = $row;
             print <<<HTML
                             <tr>
-                                <td style="width:40%;">
+                                <td style="width:30%;">
                                     {$student_info["student_rcs"]} ({$student_info["student_last_name"]}, {$student_info["student_first_name"]})
                                 </td>
 HTML;
-            //$params = array(intval($test_row["test_id"]), intval($row["student_id"]));
-            //$db->query("SELECT grade_test_value FROM grades_tests WHERE test_id=? AND student_id=?", $params);
-            //$temp = $db->row();
-            $test_grade = (isset($temp["grade_test_value"]) ? $temp["grade_test_value"] : "0");
-            if (isset($temp['grade_test_questions'])) {
-                $question_grades = pgArrayToPhp($temp['grade_test_questions']);
+            if (isset($temp['grade_value_array'])) {
+                $question_grades = pgArrayToPhp($temp['grade_value_array']);
             }
             else {
                 $question_grades = array();
-                for ($i = 0; $i < $test_row['test_questions']; $i++) {
-                    $question_grades[] = 0;
+                for ($i = 0; $i < $num_numeric; $i++) {
+                    $question_grades[$i] = 0;
                 }
             }
-
+            
+            // calculate the overall grade for this test
+            $test_grade = array_sum($question_grades);
+           
+           //get the text fields
+           /*
             if (isset($temp['grade_test_text'])) {
                 $text_fields = pgArrayToPhp($temp['grade_test_text']);
             }
@@ -208,17 +271,18 @@ HTML;
                                     <input id="cell-{$test_row["test_id"]}-{$row["student_rcs"]}-q{$i}" type="text" value="{$question_grades[$i]}" {$disabled} />
                                 </td>
 HTML;
-            }
+            }*/
             print <<<HTML
-                                <td style="width: 40px" id="cell-{$test_row["test_id"]}-{$row['student_rcs']}-score">{$test_grade}</td>
+                                <td style="width: 10px" id="cell-{$test_row["g_id"]}-{$row['student_rcs']}-score">{$test_grade}</td>
 HTML;
-            for ($i = 0; $i < $test_row['test_text_fields']; $i++) {
+            // print the text fields
+            /*for ($i = 0; $i < $test_row['test_text_fields']; $i++) {
                 print <<<HTML
                                 <td class="input-container" style="border: 1px solid black">
                                     <input id="cell-{$test_row["test_id"]}-{$row["student_rcs"]}-t{$i}" elem="text" type="text" value="{$text_fields[$i]}" {$disabled} />
                                 </td>
 HTML;
-            }
+            }*/
             print <<<HTML
                             </tr>
 HTML;
@@ -243,9 +307,18 @@ $js_array_grades = "";
 $js_array_questions = "";
 $js_array_text = "";
 foreach ($tests as $test) {
-    $js_array_grades .= $test['test_id'].':"'.$test['test_max_grade'].'",';
-    $js_array_questions .= $test['test_id'].':"'.$test['test_questions'].'",';
-    $js_array_text .= $test['test_id'].':"'.$test['test_text_fields'].'",';
+    $params = array($g_id);
+    $db->query("SELECT SUM(gc_max_value) AS max_grade FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id WHERE g.g_id=? GROUP BY gc_id", $params);
+    $max_grade = $db->row()['max_grade'];
+    $db->query("SELECT COUNT(*) AS cnt from gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='false'", $params);
+    $num_numeric = $db->row()['cnt'];
+    $db->query("SELECT COUNT(*) AS cnt from gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", $params);
+    $num_text = $db->row()['cnt'];
+    
+    
+    $js_array_grades .= $test['g_id'].':"'.$max_grade.'",';
+    $js_array_questions .= $test['g_id'].':"'.$num_numeric.'",';
+    $js_array_text .= $test['g_id'].':"'.$num_text.'",';
 }
 
 echo <<<HTML
@@ -295,7 +368,7 @@ echo <<<HTML
 			    extra += "&t"+j+"="+text;
 			}
 			$("#cell-"+test+"-"+rcs+"-score").text(total);
-			url = "{$BASE_URL}/account/ajax/account-tests.php?course={$_GET['course']}&test=" + test + "&rcs=" + rcs + "&grade=" + total + extra;
+			url = "{$BASE_URL}/account/ajax/account-numerictext-gradeable.php?course={$_GET['course']}&id=" + test + "&rcs=" + rcs + "&grade=" + total + extra; 
             updateColor(this, url);
 		});
 
