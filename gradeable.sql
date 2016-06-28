@@ -98,3 +98,15 @@ CREATE TABLE grading_rotating(
     sections_rotating INT REFERENCES sections_rotating(sections_rotating_id) NOT NULL,
     PRIMARY KEY (g_id, user_id)
 );
+
+/* CREATE 4 accounts
+    student - Joe Student | RCS - student 
+    Instructor - Instructor Elric | RCS - instructor
+    TA - TA Ross | RCS - ta
+    Developer - Developer Jackson | RCS - developer
+
+
+ 
+ INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES('student','Joe','Student','student@email.edu','4', '1');
+    */
