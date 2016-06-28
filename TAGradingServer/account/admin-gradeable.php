@@ -74,7 +74,6 @@ if($user_is_administrator)
         $gradeableNumberQuery = 0;
         $gradeable_name = $old_gradeable['g_title'];
         $gradeable_submission_id = $old_gradeable['g_id'];
-        $gradeable_parts_submission_id = array();
         $g_overall_ta_instructions = $old_gradeable['g_overall_ta_instructions'];
         $g_gradeable_type = $old_gradeable['g_gradeable_type'];
         $g_team_assignment = $old_gradeable['g_team_assignment'];
@@ -83,7 +82,6 @@ if($user_is_administrator)
         $g_grade_start_date = $old_gradeable['g_grade_start_date'];
         $g_grade_released_date = $old_gradeable['g_grade_released_date'];
         $g_min_grading_group = $old_gradeable['g_min_grading_group'];
-        $part_count = 0;
         $string = "Edit";
         $action = strtolower($string);
     }
@@ -181,7 +179,6 @@ if($user_is_administrator)
 
 <div id="container-rubric">
     <form class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" method="post" enctype="multipart/form-data"> 
-        <input type='hidden' name="part_count" value="{$part_count}" />
         <input type='hidden' name="csrf_token" value="{$_SESSION['csrf']}" />
 
         <div class="modal-header" style="overflow: auto;">
@@ -191,7 +188,6 @@ if($user_is_administrator)
         </div>
 
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
-            <!-- check to make sure this id is actually unique -->
             What is the unique id of this gradeable?: <input style='width: 200px' type='text' name='gradeable_id' value="{$gradeable_submission_id}" />
             <br />
             What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' value="{$gradeable_name}" />
@@ -475,7 +471,7 @@ HTML;
                 <br /> <br />
                 
                 <div class="multi-field-wrapper-numeric">
-                  <table class="multi-fields table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
+                  <table class="numerics-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
                         <!-- Headings -->
                         <thead style="background: #E1E1E1;">
                              <tr>
@@ -489,19 +485,19 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="numeric-label" type="text" class="numeric-label" value="0"/> 
+                               <input style="width: 200px" name="numeric-label-0" type="text" class="numeric-label" value="0"/> 
                            </td>  
                             <td>     
-                                <input style="width: 60px" type="text" name="max-score-1" class="max-score" value="" /> 
+                                <input style="width: 60px" type="text" name="max-score-0" class="max-score" value="" /> 
                            </td>                           
                            <td>     
-                                <input type="checkbox" name="numeric-extra-1" class="numeric-extra" value="" />
+                                <input type="checkbox" name="numeric-extra-0" class="numeric-extra" value="" />
                            </td> 
                         </tr>
                       
                        <tr class="multi-field" id="mult-field-1">
                            <td>
-                               <input style="width: 200px" name="numeric-label" type="text" class="numeric-label" value="1"/> 
+                               <input style="width: 200px" name="numeric-label-1" type="text" class="numeric-label" value="1"/> 
                            </td>  
                             <td>     
                                 <input style="width: 60px" type="text" name="max-score-1" class="max-score" value="" /> 
@@ -812,18 +808,18 @@ HTML;
             var wrapper = $('.checkpoints-table');
             ++numCheckpoints;
             $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numCheckpoints).find('.checkpoint-label').val(label).focus();
-            $('#mult-field-' + numCheckpoints).find('.checkpoint-label').attr('name','checkpoint-label-'+numCheckpoints);
-            $('#mult-field-' + numCheckpoints).find('.checkpoint-extra').attr('name','checkpoint-extra-'+numCheckpoints);
+            $('#mult-field-' + numCheckpoints,wrapper).find('.checkpoint-label').attr('name','checkpoint-label-'+numCheckpoints);
+            $('#mult-field-' + numCheckpoints,wrapper).find('.checkpoint-extra').attr('name','checkpoint-extra-'+numCheckpoints);
             if(extra_credit){
-                $('#mult-field-' + numCheckpoints).find('.checkpoint-extra').attr('checked',true); 
+                $('#mult-field-' + numCheckpoints,wrapper).find('.checkpoint-extra').attr('checked',true); 
             }
             $('#remove-checkpoint-field').show();
-            $('#mult-field-' + numCheckpoints).show();
+            $('#mult-field-' + numCheckpoints,wrapper).show();
         }
         
         function removeCheckpoint(){
             if (numCheckpoints > 0){
-                $('#mult-field-'+numCheckpoints).remove();
+                $('#mult-field-'+numCheckpoints,'.checkpoints-table').remove();
                 if(--numCheckpoints === 1){
                     $('#remove-checkpoint-field').hide();
                 }
@@ -842,19 +838,24 @@ HTML;
         $('#remove-checkpoint-field').hide();
 
         var numNumeric=1;
+        
+        function addNumeric(){
+            var wrapper = $('.numerics-table');
+            numNumeric++;
+            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numNumeric).find('.numeric-label').val(numNumeric).focus();
+            $('#mult-field-' + numNumeric,wrapper).find('.numeric-extra').attr('name','numeric-extra-'+numNumeric);
+            $('#mult-field-' + numNumeric,wrapper).find('.numeric-label').attr('name','numeric-label-'+numNumeric);
+            $('#mult-field-' + numNumeric,wrapper).find('.max-score').attr('name','max-score-'+numNumeric);
+            $('#remove-numeric-field').show();
+            $('#mult-field-' + numNumeric,wrapper).show();
+        }
         $('.multi-field-wrapper-numeric').each(function() {
-            var wrapper = $('.multi-fields', this);
             $("#add-numeric-field", $(this)).click(function(e) {
-                numNumeric++;
-                $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numNumeric).find('.numeric-label').val(numNumeric).focus();
-                $('#mult-field-' + numNumeric).find('.numeric-extra').attr('name','numeric-extra-'+numNumeric);
-                $('#mult-field-' + numNumeric).find('.max-score').attr('name','max-score'+numNumeric);
-                $('#remove-numeric-field').show();
-                $('#mult-field-' + numNumeric).show();
+                addNumeric();
             });
             $('#remove-numeric-field').click(function() {
                 if (numNumeric > 1){
-                    $('#mult-field-'+numNumeric).remove();
+                    $('#mult-field-'+numNumeric,'.numerics-table').remove();
                     if(--numNumeric === 1){
                         $('#remove-numeric-field').hide();
                     }
