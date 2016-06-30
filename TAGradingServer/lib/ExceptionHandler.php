@@ -69,6 +69,7 @@ class ExceptionHandler {
             throw $exception;
         }
         else {
+        	echo nl2br($exception); //REMOVE this line before making pull request to master
             throw new ServerException("An unexpected exception was encountered. Please report this to an administrator.");
         }
     }

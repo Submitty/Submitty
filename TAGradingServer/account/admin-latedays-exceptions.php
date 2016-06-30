@@ -7,8 +7,7 @@
 include "../header.php";
 
 //Retrieve view data
-$view = array();
-set_views($view);
+$view = get_views();
 
 echo $view['head'];
 
@@ -18,24 +17,13 @@ if($user_is_administrator) {
 //User is administrator -- proceed with process.
 
 	/* Process -------------------------------------------------------------- */
-	//Retrieve rubrics/gradeables DB data
-	$rubrics = retrieve_gradeables_from_db();
+	//Check POST
 
-	
 	//print form
-
+	echo $view['form'];
 	
-	//Build student table
-	$students = retrieve_students_from_db($g_id); //TODO: g_id retrieved from POST
-	$view['student_form_body'] = '';
-	foreach ($students as $count) {
-		//TODO: build HTML table from data
-	}
-
-
 	//print student table
-
-
+	echo $view['student_review_table'];
 	
 	/* END Process ---------------------------------------------------------- */
 
@@ -83,7 +71,7 @@ SQL;
 
 /* ========================================================================== */
 
-function retrieve_students_from_db($gradeable_id) {
+function retrieve_students_from_db($gradeable_id = 0) {
 
 	//Old Schema
 	$sql = <<<SQL
@@ -91,7 +79,7 @@ SELECT
 	students.student_rcs,
 	students.student_first_name,
 	students.student_last_name,
-late_day_exceptions.ex_late_days
+	late_day_exceptions.ex_late_days
 FROM students
 FULL OUTER JOIN late_day_exceptions
 ON students.student_rcs=late_day_exceptions.ex_student_rcs
@@ -135,12 +123,15 @@ SQL;
 
 /* ========================================================================== */
 
-function upsert($student_id, $late_days) {
+function upsert(array $data) {
 
 }
 
-function set_views(array &$view) {
+function get_views() {
+	$utf8_styled_x  = "&#x2718";
+	$utf8_checkmark = "&#x2714";
 
+	$view = array();
 	$view['head'] = <<<HTML
 <div id="container" style="width:100%; margin-top:40px;">
 <div class="modal hide fade in" style="display:block; margin-top:5%; z-index:100;">
@@ -150,45 +141,88 @@ function set_views(array &$view) {
 HTML;
 
 	$view['tail'] = <<<HTML
-</div></div>	
+</div>
+</div>	
 HTML;
 
+	//BUILD input form
+	//Retrieve rubrics/gradeables DB data
+	$rubrics = retrieve_gradeables_from_db();
+	
+	$view['form'] = <<<HTML
+HTML;
+         
+	//BUILD student review table of existing late day exceptions
+	$late_day_records = retrieve_students_from_db(/*$g_id*/ 3); //TODO: $g_id retrieved from POST
+	
+	if (!is_array($late_day_records) || count($late_day_records) < 1) {
+	//No late days in DB -- indicate as much.
+
+		$view['student_review_table'] = <<<HTML
+<div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
+<p style="font-weight:bold; font-size:1.2em;">No late day exceptions are currently entered for this assignment.
+</div>
+HTML;
+	} else {
+	//Late days found in DB -- build table to display
+
+		//Table HEAD
+		$view['student_review_table'] = <<<HTML
+<div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
+<table style="border:5px solid white; border-collapse:collapse; margin: 0 auto; text-align:center;">
+<caption style="caption-side:top; font-weight:bold; font-size:1.2em;">
+Current Late Day Exceptions
+</caption>
+<th style="background:lavender; width:25%;">Student ID</th>
+<th style="background:lavender; width:25%;">First Name</th>
+<th style="background:lavender; width:25%;">Last Name</th>
+<th style="background:lavender; width:25%;">Late Day Exceptions</th>
+HTML;
+	
+		//Table BODY
+		$cell_color = array('white', 'aliceblue');
+		foreach ($late_day_records as $index => $record) {
+			$view['student_review_table'] .= <<<HTML
+<tr>
+<td style="background:{$cell_color[$index%2]};">{$record[0]}</td>
+<td style="background:{$cell_color[$index%2]};">{$record[1]}</td>
+<td style="background:{$cell_color[$index%2]};">{$record[2]}</td>
+<td style="background:{$cell_color[$index%2]};">{$record[3]}</td>
+</tr>
+HTML;
+	}
+
+		//Table TAIL
+		$view['student_review_table'] .= <<<HTML
+</table>
+</div>
+HTML;
+	}
+	
 	//%s = student_id.  Output with printf().
 	$view['student_not_found'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-<em style="color:red; font-weight:bold; font-style:normal;">&#x2718 Student %s not found.</em>
-</div>
-HTML;
-
-	$view['form_head'] = <<<HTML
-HTML;
-         
-	$view['form_tail'] = <<<HTML
-HTML;
-
-	$view['student_review_head'] = <<<HTML
-<div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-<h4>Students With Late Days</4>
-HTML;
-
-	$view['student_review_tail'] = <<<HTML
+<p><em style="color:red; font-weight:bold; font-style:normal;">{$utf8_styled_x} Student %s not found.</em>
 </div>
 HTML;
 
 	//%s = student_id, %d = late days, %s = gradeable.  Output with printf().
 	$view['confirmed'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-<em style="color:green; font-weight:bold; font-style:normal;">
-&#x2714 Student %s now has %d late days for %s.
+<p><em style="color:green; font-weight:bold; font-style:normal;">
+{$utf8_checkmark} Student %s now has %d late days for %s.
 </em>
 </div>
 HTML;
 
 	$view['unauthorized'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-<em style="color:red; font-weight:bold; font-style:normal;">&#x2718 You are not permitted to add late day exceptions.</em>
+<p><em style="color:red; font-weight:bold; font-style:normal;">{$utf8_styled_x} You are not permitted to add late day exceptions.</em>
 </div>
 HTML;
+
+	return $view;
 }
 
 /* EOF ====================================================================== */
+?>
