@@ -128,6 +128,57 @@ ul.dropdown-menu li#logout a:hover {
     vertical-align : top;
 }
 
+/*======================================*/
+#grade {
+    position:absolute;
+    bottom: 5%;
+    left: 40%;
+    /*height: 5%;*/
+    /*width: 20%;*/
+    height: 40px;
+    width: 286px;
+    background: #C3BEFF;
+    opacity:0.5;
+    z-index: 100;
+}
+#grade:hover {
+/*    left: 35%;
+    width: 30%;
+    height: 100%;*/
+    cursor: move;
+    /*opacity:1;*/
+}
+/*
+#grade:hover #rubric{
+    display:inline-block;
+}*/
+#rubric {
+    position:absolute;
+    bottom: 5%;
+    left: 40%;
+    height: 85%;
+    width: 40%;
+    background: #C3BEFF;
+    opacity:0.9;
+
+    /*right: 0;*/
+    /*width: 30%;*/
+    display:none;
+}
+#stats {
+    position:absolute;
+    bottom: 20%;
+    left: 5%;
+    height: 40%;
+    width: 30%;
+    background: #C3BEFF;
+    opacity:0.9;
+
+    /*right: 0;*/
+    /*width: 30%;*/
+    display:none;
+}
+/*************************************/
 .resbox {
     display : inline-block;
     height : 100%;
@@ -264,7 +315,8 @@ form {
 
 #rubric-title {
     height: 30px;
-    margin-top: 80px;
+    margin-top: 30px;
+    /*margin-top: 80px;*/
     width: 100%;
     margin-left: auto;
     margin-right: auto;
@@ -395,7 +447,86 @@ table {
     height: 14px;
     width: 14px;
 }
+/******************************************************************************/
+.icon-status {
+    background: url('../../bootstrap/img/glyphicons-4-user.png') no-repeat;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-grading-panel {
+    background: url('../../bootstrap/img/glyphicons-151-edit.png') no-repeat;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-auto-grading-results {
+    background: url('../../bootstrap/img/glyphicons-40-notes.png') no-repeat;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-files {
+    background: url('../../bootstrap/img/glyphicons-145-folder-open.png') no-repeat;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-toolbar-up {
+    background: url('../../bootstrap/img/glyphicons-416-disk-open.png') no-repeat -1px 0px;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-left {
+    background: url('../../bootstrap/img/glyphicons-225-chevron-left.png') no-repeat;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-right {
+    background: url('../../bootstrap/img/glyphicons-224-chevron-right.png') no-repeat;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-home {
+    background: url('../../bootstrap/img/glyphicons-21-home.png') no-repeat -2px -1px;
+    color: rgb(51, 51, 51);
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+#grade span:hover{
+    cursor: pointer;
+    box-shadow: 0px 0px 5px 5px yellow;
+}
+.icon-selected {
+    box-shadow: 0px 0px 5px 5px aqua;
 
+}
+/******************************************************************************/
 .file-viewer{
     float: left;
     margin-right: 10px;

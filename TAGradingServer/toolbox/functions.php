@@ -264,10 +264,16 @@ function sourceSettingsJS($filename, $number) {
     });
 
     var lineCount = editor{$number}.lineCount();
-    if (lineCount == 0) {
-        //lineCount += 1;
+    if (lineCount == 1) {
+        editor{$number}.setSize("100%", (editor{$number}.defaultTextHeight() * 2) + "px");
     }
-    editor{$number}.setSize("100%", (editor{$number}.defaultTextHeight() * (lineCount+1)) + "px");
+    else {
+        editor{$number}.setSize("100%", "auto");
+    }
+    // editor{$number}.setSize("100%", (editor{$number}.defaultTextHeight() * (lineCount+1)) + "px");
+    // editor{$number}.setSize("100%", "100%" + "px");
+    // editor{$number}.setSize("100%", "auto");
+    // editor{$number}.setOption("viewportMargin", "infinity");
     editor{$number}.setOption("theme", "eclipse");
     editor{$number}.setOption("mode", "{$type}");
 

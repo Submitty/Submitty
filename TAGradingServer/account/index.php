@@ -415,7 +415,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
 
     var split = 0;
     var width = window.innerWidth - 8 - 2 - 2;
-    split = <?php echo ($split == "" || $split < 50 || 75 < $split ? 65 : $split); ?> / 100.0;
+    split = <?php echo ($split == "" || $split < 50 || 75 < $split ? 50 : $split); ?> / 100.0;
     if (document.getElementById('left') != null) {
         document.getElementById('left').style.width = (width * (split)) + 'px';
     }
@@ -440,8 +440,73 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
     };
 
-    function dragStart(e, left, right) {
+    window.onkeydown = function(e) {
+      if (e.defaultPrevented)   return;                                     // key event was already consumed.
+      if (e.target.type == "textarea" || e.target.type == "input")  return; // disable keyboard event when typing to textarea/input
+      handleKeyPress(e.code);
+      e.preventDefault();   // Consume the event for suppressing "double action".
+    };
 
+    function handleKeyPress(key) {
+      console.log("pressed " + key);
+      switch (key) {
+        case "KeyG":
+          togglePanel("rubric");
+          break;
+        case "KeyS":
+          togglePanel("stats");
+          break;
+        case "KeyF":
+          $('#grade .icon-files').toggleClass('icon-selected');
+          toggleTabs();
+          break;
+        case "KeyA":
+          $('#grade .icon-auto-grading-results').toggleClass('icon-selected');
+          toggleTabs();
+          break;
+        default:
+          break;
+      }
+    }
+
+    // show or hide the grading panel/status panel
+    function togglePanel(id) {
+        document.getElementById(id).style.display = document.getElementById(id).style.display == "none" ? "inline-block" : "none";
+    }
+
+    // show or hide auto-grading results/files
+    function toggleTabs(){
+        var left = document.getElementById('left');
+        var right =  document.getElementById('right');
+        if($('#grade .icon-selected').length == 2) {
+            left.style.display = "";
+            right.style.display = "";
+            left.style.width = (width * (split)) + 'px';
+            right.style.width = ((width * (1 - split)) - 10) + 'px';
+            document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
+        }
+        else if($('#grade .icon-selected').length == 0) {
+            left.style.display = "none";
+            right.style.display = "none";
+        }
+        else {
+            if($('#grade .icon-selected').hasClass('icon-auto-grading-results')) {
+                left.style.display = "";
+                right.style.display = "none";
+                left.style.width = window.innerWidth + 'px';
+            }
+            else if($('#grade .icon-selected').hasClass('icon-files')) {
+                left.style.display = "none";
+                right.style.display = "";
+                right.style.width = (window.innerWidth - 10) + 'px';
+            }
+        }
+    }
+
+    // ========================================================
+    // Drag to resize auto-grading results and files
+    function dragStart(e, left, right) {
+        console.log("drag panemover start");
         document.getElementById('panemover').style.width = '100%';
         document.getElementById('panemover').style.left = '0px';
 
@@ -452,7 +517,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     }
 
     function dragRelease() {
-
+        console.log("drag panemover end");
         document.getElementById('panemover').style.width = '10px';
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
 
@@ -468,20 +533,53 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     }
 
     function drag(e, left, right) {
-
+        console.log("dragging panemover");
         if (!mousedown) {
-            return
+            return;
         }
-        x = e.clientX
-        tmpLeft = dragOffsetLeft + x
-        tmpRight = dragOffsetRight - x
-        minWidthLeft = window.innerWidth * 0.50;
+        x = e.clientX;
+        tmpLeft = dragOffsetLeft + x;
+        tmpRight = dragOffsetRight - x;
+        minWidthLeft = window.innerWidth * 0.30;
         minWidthRight = window.innerWidth * 0.25;
         if (tmpLeft < minWidthLeft || tmpRight < minWidthRight) {
             return
         }
         document.getElementById('left').style.width = (tmpLeft - 1) + 'px';
         document.getElementById('right').style.width = (tmpRight - 10) + 'px';
+    }
+
+    // ========================================================
+    // Drag to move toolbar/grading/status panel around
+    function dragPanelStart(e) {
+        console.log("drag start");
+        mousedown = true;
+        x = e.clientX;
+        y = e.clientY;
+    }
+    function dragPanel(e) {
+        if(!mousedown) return;
+
+        var element = document.getElementById( e.target.id ? e.target.id : e.target.parentNode.id );
+        console.log("dragging");
+        console.log(element.id);
+        element.style.left = (element.offsetLeft - (x - e.clientX)) + 'px';
+        element.style.top = (element.offsetTop - (y - e.clientY)) + 'px';
+        x = e.clientX;
+        y = e.clientY;
+        /*
+        // todo: add check for dragging off sight or add a reposition function
+        if((grade.offsetRight - grade.offsetWidth) < 5) {
+            grade.style.right = '5px';
+        }
+        if((grade.offsetBottom - grade.offsetHeight) < 5) {
+            grade.style.bottom = '5px';
+        }
+        */
+    }
+    function dragPanelEnd(e) {
+        console.log("drag end");
+        mousedown = false;
     }
 
     eraseCookie("reset");
