@@ -172,6 +172,6 @@ else if($g_gradeable_type === GradeableType::numeric){
 $db->commit();
 echo 'TRANSACTION COMPLETED';
 
-header('Location: '.__BASE_URL__.'/account/admin-gradeables.php?course='.$_GET['course']);
+//header('Location: '.__BASE_URL__.'/account/admin-gradeables.php?course='.$_GET['course']);
 
 ?>
