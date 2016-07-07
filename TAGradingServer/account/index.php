@@ -414,13 +414,13 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     document.getElementById('container').style.height = (window.innerHeight - 20 - 40) + 'px';
 
     var split = 0;
-    var width = window.innerWidth - 8 - 2 - 2;
+    var width = window.innerWidth - 7;
     split = <?php echo ($split == "" || $split < 50 || 75 < $split ? 50 : $split); ?> / 100.0;
     if (document.getElementById('left') != null) {
         document.getElementById('left').style.width = (width * (split)) + 'px';
     }
     if (document.getElementById('right') != null) {
-        document.getElementById('right').style.width = ((width * (1.0 - split)) - 10) + 'px';
+        document.getElementById('right').style.width = ((width * (1.0 - split)) ) + 'px';
     }
     if (document.getElementById('panemover') != null) {
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
@@ -428,16 +428,21 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     }
 
     window.onresize = function(event) {
-        width = (window.innerWidth - 8 - 2 - 2);
+        document.getElementById('grade').style.left = parseFloat(window.innerWidth * document.getElementById('grade').offsetLeft/(width + 7)) + 'px';
+        document.getElementById('rubric').style.left = parseFloat(window.innerWidth * document.getElementById('rubric').offsetLeft/(width + 7)) + 'px';
+        document.getElementById('stats').style.left = parseFloat(window.innerWidth * document.getElementById('stats').offsetLeft/(width + 7)) + 'px';
+
+        width = window.innerWidth - 7;
         split = (parseInt(document.getElementById('left').style.width) / (parseInt(document.getElementById('left').style.width) + parseInt(document.getElementById('right').style.width))).toFixed(2);
 
-        document.getElementById('left').style.width = (width * (split)) + 'px';
-        document.getElementById('right').style.width = ((width * (1 - split)) - 10) + 'px';
+        document.getElementById('left').style.width = (width * split) + 'px';
+        document.getElementById('right').style.width = (width * (1 - split)) + 'px';
 
         document.getElementById('prog').style.width = (document.documentElement.clientWidth - 157) + 'px';
         document.getElementById('container').style.width = window.innerWidth + 'px';
         document.getElementById('container').style.height = (window.innerHeight - 20 - 40) + 'px';
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
+        toggleTabs();
     };
 
     window.onkeydown = function(e) {
@@ -478,27 +483,33 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     function toggleTabs(){
         var left = document.getElementById('left');
         var right =  document.getElementById('right');
+        var pane = document.getElementById('pane');
+        var panemover = document.getElementById('panemover');
+        pane.style.display = "inline-block";
+        panemover.style.display = "inline-block";
         if($('#grade .icon-selected').length == 2) {
-            left.style.display = "";
-            right.style.display = "";
-            left.style.width = (width * (split)) + 'px';
-            right.style.width = ((width * (1 - split)) - 10) + 'px';
-            document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
+            left.style.display = "inline-block";
+            right.style.display = "inline-block";
+            left.style.width = (width * split) + 'px';
+            right.style.width = (width * (1 - split)) + 'px';
+            panemover.style.left = pane.offsetLeft + 'px';
         }
         else if($('#grade .icon-selected').length == 0) {
             left.style.display = "none";
             right.style.display = "none";
         }
         else {
+            pane.style.display = "none";
+            panemover.style.display = "none";
             if($('#grade .icon-selected').hasClass('icon-auto-grading-results')) {
-                left.style.display = "";
+                left.style.display = "inline-block";
                 right.style.display = "none";
                 left.style.width = window.innerWidth + 'px';
             }
             else if($('#grade .icon-selected').hasClass('icon-files')) {
                 left.style.display = "none";
-                right.style.display = "";
-                right.style.width = (window.innerWidth - 10) + 'px';
+                right.style.display = "inline-block";
+                right.style.width = window.innerWidth + 'px';
             }
         }
     }
@@ -512,8 +523,8 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
 
         mousedown = true;
         x = e.clientX;
-        dragOffsetLeft = document.getElementById(left).offsetWidth - x;
-        dragOffsetRight = document.getElementById(right).offsetWidth + x;
+        dragOffsetLeft = parseFloat(document.getElementById(left).style.width.substring(0, document.getElementById(left).style.width.length - 2)) - x;
+        dragOffsetRight = parseFloat(document.getElementById(right).style.width.substring(0, document.getElementById(right).style.width.length - 2)) + x;
     }
 
     function dragRelease() {
@@ -540,13 +551,15 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         x = e.clientX;
         tmpLeft = dragOffsetLeft + x;
         tmpRight = dragOffsetRight - x;
-        minWidthLeft = window.innerWidth * 0.30;
-        minWidthRight = window.innerWidth * 0.25;
+
+        minWidthLeft = (window.innerWidth - 7) * 0.30;
+        minWidthRight = (window.innerWidth - 7) * 0.25;
         if (tmpLeft < minWidthLeft || tmpRight < minWidthRight) {
             return
         }
-        document.getElementById('left').style.width = (tmpLeft - 1) + 'px';
-        document.getElementById('right').style.width = (tmpRight - 10) + 'px';
+
+        document.getElementById('left').style.width = tmpLeft + 'px';
+        document.getElementById('right').style.width = tmpRight + 'px';
     }
 
     // ========================================================
@@ -581,6 +594,21 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         console.log("drag end");
         mousedown = false;
     }
+    $('#stats').resizable({
+        handles: 'n, e, s, w',
+        minWidth: 50,
+        maxWidth: 500,
+        minHeight: 50,
+        maxHeight: 500
+    });
+
+    $('#rubric').resizable({
+        handles: 'n, e, s, w',
+        minWidth: 200,
+        maxWidth: 1000,
+        minHeight: 200,
+        maxHeight: 1000
+    });
 
     eraseCookie("reset");
 

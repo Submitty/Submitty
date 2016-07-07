@@ -135,7 +135,6 @@ if ($calculate_diff) {
 
     function autoResize(id) {
         var newheight;
-
         if(document.getElementById) {
             newheight=document.getElementById(id).contentWindow.document.body.scrollHeight;
         }
@@ -337,7 +336,7 @@ HTML;
 
                     <div class="tab-pane {$active_text}" id="output-{$part}-{$i}">
                         <div style="width:95%; margin: auto auto auto auto; overflow-y:auto; overflow-x:hidden; padding-top:20px;">
-                            <iframe src="{$url}" id='iframe-{$part}-{$i}' width='750px' style='border: 0' onLoad="autoResize('iframe-{$part}-{$i}'); load_tab_icon('tab-{$part}-{$i}', 'iframe-{$part}-{$i}', {$testcase['points_awarded']}, {$rubric->config_details[$part]['testcases'][$k]['points']}); ">
+                            <iframe src="{$url}" id='iframe-{$part}-{$i}' width='750px' style='border: 0' onload="autoResize('iframe-{$part}-{$i}'); load_tab_icon('tab-{$part}-{$i}', 'iframe-{$part}-{$i}', {$testcase['points_awarded']}, {$rubric->config_details[$part]['testcases'][$k]['points']}); ">
                             </iframe>
                             <br />
                             Logfile
@@ -383,34 +382,35 @@ HTML;
 
     $output .= <<<HTML
     </div>
-</span>
+</span><!-- puts no space between spans
 
-<span id="pane"></span>
-<span id="panemover" onmousedown="dragStart(event, 'left', 'right'); return false;" onmousemove="drag(event, 'left', 'right');" onmouseout="dragRelease();" onmouseup="dragRelease();"></span>
+--><span id="pane"></span><!--
+--><span id="panemover" onmousedown="dragStart(event, 'left', 'right'); return false;" onmousemove="drag(event, 'left', 'right');" onmouseout="dragRelease();" onmouseup="dragRelease();"></span><!--
 
-<span id="right" class="resbox" style="overflow:hidden;">
-<div id="inner-container" >
-    <div id="inner-container-spacer"></div>
+--><span id="right" class="resbox"style="overflow-y:auto;">
+<div id="inner-container-spacer"></div><div id="inner-container" >
 HTML;
     $output .= "\n";
     display_files($rubric->rubric_files[1], $output, 1);
     $output .= <<<HTML
 </div>
-</span>
+</span><!---->
 
 <span id="grade" class="resbox" style="padding:5px;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseout="dragPanelEnd(event);" onmouseup="dragPanelEnd(event);">
-    <span class="icon-status" onclick="handleKeyPress('KeyS')"></span>
-    <span class="icon-grading-panel" onclick="handleKeyPress('KeyG')"></span>
-    <span class="icon-auto-grading-results icon-selected" onclick="handleKeyPress('KeyA');"></span>
-    <span class="icon-files icon-selected" onclick="handleKeyPress('KeyF')"></span>
-    <span class="icon-left" ></span>
-    <span class="icon-home" ></span>
-    <span class="icon-right" ></span>
-    <span class="icon-toolbar-up" ></span>
+    <span title="Show/Hide Submission Info (Press S)" class="icon-status" onclick="handleKeyPress('KeyS')"></span>
+    <span title="Show/Hide Grading Panel (Press G)" class="icon-grading-panel" onclick="handleKeyPress('KeyG')"></span>
+    <span title="Show/Hide Auto Grading Results (Press A)" class="icon-auto-grading-results icon-selected" onclick="handleKeyPress('KeyA');"></span>
+    <span title="Show/Hide Files Viewer (Press F)" class="icon-files icon-selected" onclick="handleKeyPress('KeyF')"></span>
+    <span title="Go to the previous student (Press Left Arrow)" class="icon-left" ></span>
+    <span title="Go to the main page (Press H)" class="icon-home" ></span>
+    <span title="Go to the next student (Press Right Arrow)" class="icon-right" ></span>
+    <span title="Pin Toolbar" class="icon-toolbar-up" ></span>
 </span>
 
 <span id="stats" class="resbox" style="display:none;">
-    <div style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseout="dragPanelEnd(event);" onmouseup="dragPanelEnd(event);" ></div>
+    <div style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseout="dragPanelEnd(event);" onmouseup="dragPanelEnd(event);" >
+    <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyS')" ></span>
+    </div>
     <div id="inner-container" style="margin:5px;">
         <div id="rubric-title">
             <div class="span2" style="float:left; text-align: left;"><b>{$rubric->rubric_details['rubric_name']}</b></div>
@@ -492,8 +492,10 @@ $output .= <<<HTML
 </span>
 
 <span id="rubric" class="resbox" style="display:none; overflow-y=hidden;">
-    <div style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseout="dragPanelEnd(event);" onmouseup="dragPanelEnd(event);" ></div>
-    <div style="overflow-y:auto; bottom:0; height:100%">
+    <div style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseout="dragPanelEnd(event);" onmouseup="dragPanelEnd(event);" >
+        <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyG')" ></span>
+    </div>
+    <div class="inner-container" style="overflow-y:auto; margin:1px; height:100%">
         <div id="inner-container">
 
 HTML;

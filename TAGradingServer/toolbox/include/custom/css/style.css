@@ -160,7 +160,9 @@ ul.dropdown-menu li#logout a:hover {
     width: 40%;
     background: #C3BEFF;
     opacity:0.9;
-
+    border-width: 2px 5px 5px 5px;
+    border-color: #99cccc;
+    border-style:solid;
     /*right: 0;*/
     /*width: 30%;*/
     display:none;
@@ -173,7 +175,9 @@ ul.dropdown-menu li#logout a:hover {
     width: 30%;
     background: #C3BEFF;
     opacity:0.9;
-
+    border-width: 2px 5px 5px 5px;
+    border-color: #99cccc;
+    border-style:solid;
     /*right: 0;*/
     /*width: 30%;*/
     display:none;
@@ -450,7 +454,6 @@ table {
 /******************************************************************************/
 .icon-status {
     background: url('../../bootstrap/img/glyphicons-4-user.png') no-repeat;
-    color: rgb(51, 51, 51);
     display: inline-block;
     height: 22px;
     width: 22px;
@@ -458,7 +461,6 @@ table {
 }
 .icon-grading-panel {
     background: url('../../bootstrap/img/glyphicons-151-edit.png') no-repeat;
-    color: rgb(51, 51, 51);
     display: inline-block;
     height: 22px;
     width: 22px;
@@ -466,7 +468,6 @@ table {
 }
 .icon-auto-grading-results {
     background: url('../../bootstrap/img/glyphicons-40-notes.png') no-repeat;
-    color: rgb(51, 51, 51);
     display: inline-block;
     height: 22px;
     width: 22px;
@@ -474,7 +475,6 @@ table {
 }
 .icon-files {
     background: url('../../bootstrap/img/glyphicons-145-folder-open.png') no-repeat;
-    color: rgb(51, 51, 51);
     display: inline-block;
     height: 22px;
     width: 22px;
@@ -482,7 +482,6 @@ table {
 }
 .icon-toolbar-up {
     background: url('../../bootstrap/img/glyphicons-416-disk-open.png') no-repeat -1px 0px;
-    color: rgb(51, 51, 51);
     display: inline-block;
     height: 22px;
     width: 22px;
@@ -490,40 +489,44 @@ table {
 }
 .icon-left {
     background: url('../../bootstrap/img/glyphicons-225-chevron-left.png') no-repeat;
-    color: rgb(51, 51, 51);
     display: inline-block;
-    height: 22px;
-    width: 22px;
     height: 22px;
     width: 22px;
     margin: 5px;
 }
 .icon-right {
     background: url('../../bootstrap/img/glyphicons-224-chevron-right.png') no-repeat;
-    color: rgb(51, 51, 51);
     display: inline-block;
-    height: 22px;
-    width: 22px;
     height: 22px;
     width: 22px;
     margin: 5px;
 }
 .icon-home {
     background: url('../../bootstrap/img/glyphicons-21-home.png') no-repeat -2px -1px;
-    color: rgb(51, 51, 51);
     display: inline-block;
-    height: 22px;
-    width: 22px;
     height: 22px;
     width: 22px;
     margin: 5px;
 }
+.icon-down {
+    background: url('../../bootstrap/img/glyphicons-602-chevron-down.png') no-repeat 0px 2px;
+    height: 18px;
+    width: 22px;
+    cursor: pointer;
+    float: right;
+    opacity: 0.5
+}
+.icon-down:hover{
+    background-color: red;
+}
 #grade span:hover{
     cursor: pointer;
     box-shadow: 0px 0px 5px 5px yellow;
+    background-color: yellow;
 }
 .icon-selected {
     box-shadow: 0px 0px 5px 5px aqua;
+    background-color: aqua;
 
 }
 /******************************************************************************/
