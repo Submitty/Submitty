@@ -14,8 +14,8 @@ fi
 
 # these variables will be replaced by INSTALL.sh
 
-HSS_INSTALL_DIR=__INSTALL__FILLIN__HSS_INSTALL_DIR__
-HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
+SUBMITTY_INSTALL_DIR=__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__
+SUBMITTY_DATA_DIR=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__
 
 HWPHP_USER=__INSTALL__FILLIN__HWPHP_USER__
 HWCRON_USER=__INSTALL__FILLIN__HWCRON_USER__
@@ -94,7 +94,7 @@ fi
 ########################################################################################################################
 ########################################################################################################################
 
-course_dir=$HSS_DATA_DIR/courses/$semester/$course
+course_dir=$SUBMITTY_DATA_DIR/courses/$semester/$course
 
 if [ -d "$course_dir" ]; then
     echo -e "ERROR: specific course directory " $course_dir " already exists"
@@ -105,15 +105,15 @@ fi
 ########################################################################################################################
 ########################################################################################################################
 
-DATABASE_NAME=hss_${course}_${semester}
+DATABASE_NAME=submitty_${semester}_${course}
 
 ########################################################################################################################
 ########################################################################################################################
 
 #this function takes a single argument, the name of the file to be edited
 function replace_fillin_variables {
-    sed -i -e "s|__CREATE_COURSE__FILLIN__HSS_INSTALL_DIR__|$HSS_INSTALL_DIR|g" $1
-    sed -i -e "s|__CREATE_COURSE__FILLIN__HSS_DATA_DIR__|$HSS_DATA_DIR|g" $1
+    sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $1
+    sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $1
 
@@ -130,20 +130,20 @@ function replace_fillin_variables {
 ########################################################################################################################
 ########################################################################################################################
 
-if [ ! -d "$HSS_DATA_DIR" ]; then
-    echo -e "ERROR: base directory " $HSS_DATA_DIR " does not exist\n"
+if [ ! -d "$SUBMITTY_DATA_DIR" ]; then
+    echo -e "ERROR: base directory " $SUBMITTY_DATA_DIR " does not exist\n"
     exit
 fi
 
-if [ ! -d "$HSS_DATA_DIR/courses" ]; then
-    echo -e "ERROR: courses directory " $HSS_DATA_DIR/courses " does not exist\n"
+if [ ! -d "$SUBMITTY_DATA_DIR/courses" ]; then
+    echo -e "ERROR: courses directory " $SUBMITTY_DATA_DIR/courses " does not exist\n"
     exit
 fi
 
-if [ ! -d "$HSS_DATA_DIR/courses/$semester" ]; then
-    mkdir                               $HSS_DATA_DIR/courses/$semester
-    chown root:$COURSE_BUILDERS_GROUP   $HSS_DATA_DIR/courses/$semester
-    chmod 751                           $HSS_DATA_DIR/courses/$semester
+if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester" ]; then
+    mkdir                               $SUBMITTY_DATA_DIR/courses/$semester
+    chown root:$COURSE_BUILDERS_GROUP   $SUBMITTY_DATA_DIR/courses/$semester
+    chmod 751                           $SUBMITTY_DATA_DIR/courses/$semester
 fi
 
 ########################################################################################################################
@@ -194,35 +194,36 @@ create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/
 # NOTE:    instructor uploads TA HW grade reports & overall grade scores here
 #               drwxr-s---       instructor   ta_www_group    reports/
 create_and_set  u=rwx,g=rwxs,o=   $instructor   $ta_www_group   $course_dir/reports
+create_and_set  u=rwx,g=rwxs,o=   $instructor   $ta_www_group   $course_dir/reports/summary_html
 
 
 ########################################################################################################################
 ########################################################################################################################
 
 # copy the build_course.sh script
-cp $HSS_INSTALL_DIR/sample_files/sample_class/build_course.sh $course_dir/BUILD_${course}.sh
+cp $SUBMITTY_INSTALL_DIR/sample_files/sample_class/build_course.sh $course_dir/BUILD_${course}.sh
 chown $instructor:$ta_www_group $course_dir/BUILD_${course}.sh
 chmod 770 $course_dir/BUILD_${course}.sh
 replace_fillin_variables $course_dir/BUILD_${course}.sh
 
 # copy the sample_main.css file for webpage customizations
-cp $HSS_INSTALL_DIR/sample_files/sample_class/sample_main.css $course_dir/${semester}_${course}_main.css
+cp $SUBMITTY_INSTALL_DIR/sample_files/sample_class/sample_main.css $course_dir/${semester}_${course}_main.css
 chown $instructor:$ta_www_group $course_dir/${semester}_${course}_main.css
 chmod 660 $course_dir/${semester}_${course}_main.css
 replace_fillin_variables $course_dir/${semester}_${course}_main.css
 
 # copy the sample_main.css file for webpage customizations
-cp $HSS_INSTALL_DIR/sample_files/sample_class/class.json $course_dir/config/class.json
+cp $SUBMITTY_INSTALL_DIR/sample_files/sample_class/class.json $course_dir/config/class.json
 chown $instructor:$ta_www_group $course_dir/config/class.json
 chmod 660 $course_dir/config/class.json
 #replace_fillin_variables $course_dir/config/class.json
 
 
 # copy the config file for TA grading & replace the variables
-cp $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/sample_course.php $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
-chown hwphp:hwphp $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
-chmod 400 $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
-replace_fillin_variables $HSS_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+cp $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/sample_course.php $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+chown hwphp:hwphp $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+chmod 400 $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+replace_fillin_variables $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
 
 echo -e "\nMake sure to create the database: $DATABASE_NAME\n\n"
 

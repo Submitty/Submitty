@@ -9,7 +9,7 @@ iface lo inet loopback
 auto eth0
 iface eth0 inet dhcp
 
-# test-hss
+# test-submitty
 auto eth0:1
 iface eth0:1 inet static
 	address 192.168.56.1

@@ -1,20 +1,38 @@
 from __future__ import print_function
-
-import sys
+from collections import defaultdict
+import datetime
+import inspect
+import json
 import os
 import subprocess
-import inspect
 import traceback
-import json
-
-from collections import defaultdict
-
+import sys
 
 # global variable available to be used by the test suite modules
-global HSS_INSTALL_DIR 
-HSS_INSTALL_DIR = "__INSTALL__FILLIN__HSS_INSTALL_DIR__"
+SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
 
-grading_source_dir =  HSS_INSTALL_DIR + "/src/grading"
+GRADING_SOURCE_DIR =  SUBMITTY_INSTALL_DIR + "/src/grading"
+
+LOG_FILE = None
+LOG_DIR = SUBMITTY_INSTALL_DIR + "/test_suite/log"
+
+
+def print(*args, **kwargs):
+    global LOG_FILE
+    if "sep" not in kwargs:
+        kwargs["sep"] = " "
+    if "end" not in kwargs:
+        kwargs["end"] = '\n'
+
+    message = kwargs["sep"].join(map(str, args)) + kwargs["end"]
+    if LOG_FILE is None:
+        # include a couple microseconds in string so that we have unique log file
+        # per test run
+        LOG_FILE = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[:-3]
+    with open(os.path.join(LOG_DIR, LOG_FILE), 'a') as write_file:
+        write_file.write(message)
+    sys.stdout.write(message)
+
 
 class TestcaseFile:
     def __init__(self):
@@ -48,47 +66,12 @@ cyan = ASCIIEscapeManager([36])
 white = ASCIIEscapeManager([37])
 
 
-# Run a single test case
-def run_test(name):
-    with bold:
-        print("--- BEGIN TEST MODULE " + name.upper() + " ---")
-    cont = True
-    try:
-        print("* Starting compilation...")
-        to_run[name].prebuild()
-        to_run[name].wrapper.build()
-        print("* Finished compilation")
-    except Exception as e:
-        print("Build failed with exception: %s" % e)
-        cont = False
-    if cont:
-        total = len(to_run[name].testcases)
-        for index, f in zip(xrange(1, len(to_run[name].testcases) + 1), to_run[name].testcases):
-            try:
-                f()
-            except Exception as e:
-                with bold + red:
-                    print("Test #" + str(index) + " failed with exception:", e)
-                    total -= 1
-                    cont = False
-        if total == len(to_run[name].testcases):
-            with bold + green:
-                print("All tests passed")
-        else:
-            with bold + red:
-                print(str(total) + "/" + str(len(to_run[name].testcases)) + " tests passed")
-                success = False
-    with bold:
-        print("--- END TEST MODULE " + name.upper() + " ---")
-    print()
-    if not cont:
-        sys.exit(1)
-
-# Run every test currently loaded
-def run_all():
+# Run the given list of test case names
+def run_tests(names):
     success = True
-    totalmodules = len(to_run.keys())
-    for key, val in to_run.iteritems():
+    totalmodules = len(names)
+    for key in names:
+        val = to_run[key]
         modsuccess = True
         with bold:
             print("--- BEGIN TEST MODULE " + key.upper() + " ---")
@@ -109,14 +92,20 @@ def run_all():
                     f()
                 except Exception as e:
                     with bold + red:
-                        print("Test #" + str(index) + " failed with exception:", e)
+                        lineno = None
+                        tb = traceback.extract_tb(sys.exc_info()[2])
+                        for i in range(len(tb)-1, -1, -1):
+                            if os.path.basename(tb[i][0]) == '__init__.py':
+                                lineno = tb[i][1]
+                        print("Testcase " + str(index) + " failed on line " + str(lineno) + " with exception: ", e)
+                        sys.exc_info()
                         total -= 1
             if total == len(val.testcases):
                 with bold + green:
-                    print("All tests passed")
+                    print("All testcases passed")
             else:
                 with bold + red:
-                    print(str(total) + "/" + str(len(val.testcases)) + " tests passed")
+                    print(str(total) + "/" + str(len(val.testcases)) + " testcases passed")
                     modsuccess = False
                     success = False
         with bold:
@@ -124,14 +113,17 @@ def run_all():
         print()
         if not modsuccess:
             totalmodules -= 1
-    if totalmodules == len(to_run.keys()):
+    if totalmodules == len(names):
         with bold + green:
             print("All modules passed")
     else:
         with bold + red:
-            print(str(totalmodules) + "/" + str(len(to_run.keys())) + " modules passed")
+            print(str(totalmodules) + "/" + str(len(names)) + " modules passed")
         sys.exit(1)
 
+# Run every test currently loaded
+def run_all():
+    run_tests(to_run.keys())
 
 
 # Helper class used to remove the burden of paths from the testcase author.
@@ -167,7 +159,7 @@ class TestcaseWrapper:
             pass
         # copy the cmake file to the build directory
         subprocess.call(["cp",
-            os.path.join(grading_source_dir, "Sample_CMakeLists.txt"),
+            os.path.join(GRADING_SOURCE_DIR, "Sample_CMakeLists.txt"),
             os.path.join(self.testcase_path, "build", "CMakeLists.txt")])
         with open(os.path.join(self.testcase_path, "log", "cmake_output.txt"), "w") as cmake_output:
             return_code = subprocess.call(["cmake", "-DASSIGNMENT_INSTALLATION=OFF", "."],
@@ -239,9 +231,11 @@ class TestcaseWrapper:
             raise RuntimeError("File " + filename2 + " does not exist")
 
         #return_code = subprocess.call(["diff", "-b", filename1, filename2]) #ignores changes in white space
-        return_code = subprocess.call(["diff", filename1, filename2])
-        if return_code == 1:
-            raise RuntimeError("Difference between " + filename1 + " and " + filename2 + " exited with exit code " + str(return_code))
+        process = subprocess.Popen(["diff", filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = process.communicate()
+        if process.returncode == 1:
+            raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
+            " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
 
 
     # Helper function for json_diff.  Sorts each nested list.  Allows comparison.
@@ -287,8 +281,10 @@ class TestcaseWrapper:
         # if no directory provided...
         if not os.path.dirname(f):
             f = os.path.join("data", f)
-        filename1 = os.path.join(self.testcase_path, f)
-        if os.stat(filename1).st_size != 0:
+        filename = os.path.join(self.testcase_path, f)
+        if not os.path.isfile(filename):
+            raise RuntimeError("File " + f + " should exist")
+        if os.stat(filename).st_size != 0:
             raise RuntimeError("File " + f + " should be empty")
 
     def empty_json_diff(self, f):
@@ -296,7 +292,7 @@ class TestcaseWrapper:
         if not os.path.dirname(f):
             f = os.path.join("data", f)
         filename1 = os.path.join(self.testcase_path, f)
-        filename2 = os.path.join(HSS_INSTALL_DIR,"test_suite/integrationTests/scripts/empty_json_diff_file.json")
+        filename2 = os.path.join(SUBMITTY_INSTALL_DIR,"test_suite/integrationTests/data/empty_json_diff_file.json")
         return self.json_diff(filename1,filename2)
 
 
@@ -307,9 +303,9 @@ def prebuild(func):
     modname = mod.__name__
     tw = TestcaseWrapper(path)
     def wrapper():
-        print("* Starting prebuild for " + modname + "...")
+        print("* Starting prebuild for " + modname + "... ", end="")
         func(tw)
-        print("* Finished prebuild for " + modname)
+        print("Done")
     global to_run
     to_run[modname].wrapper = tw
     to_run[modname].prebuild = wrapper
@@ -330,9 +326,17 @@ def testcase(func):
     modname = mod.__name__
     tw = TestcaseWrapper(path)
     def wrapper():
-        print("* Starting test " + modname + "." + func.__name__ + "...")
-        func(tw)
-        print("* Finished test " + modname + "." + func.__name__)
+        print("* Starting testcase " + modname + "." + func.__name__ + "... ", end="")
+        try:
+            func(tw)
+            with bold + green:
+                print("PASSED")
+        except Exception as e:
+            with bold + red:
+                print("FAILED")
+            # blank raise raises the last exception as is
+            raise
+
     global to_run
     to_run[modname].wrapper = tw
     to_run[modname].testcases.append(wrapper)

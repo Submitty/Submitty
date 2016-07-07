@@ -1,5 +1,5 @@
 # Necessary imports. Provides library functions to ease writing tests.
-from lib import prebuild, testcase, HSS_INSTALL_DIR
+from lib import prebuild, testcase, SUBMITTY_INSTALL_DIR
 
 import subprocess
 import os
@@ -9,8 +9,8 @@ import glob
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-SAMPLE_ASSIGNMENT_CONFIG = HSS_INSTALL_DIR + "/sample_files/sample_assignment_config/cpp_memory_debugging"
-SAMPLE_SUBMISSIONS       = HSS_INSTALL_DIR + "/sample_files/sample_submissions/cpp_memory_debugging"
+SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/sample_files/sample_assignment_config/cpp_memory_debugging"
+SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/sample_files/sample_submissions/cpp_memory_debugging"
 
 @prebuild
 def initialize(test):
@@ -23,7 +23,7 @@ def initialize(test):
     except OSError:
         pass
     try:
-        os.mkdir(os.path.join(test.testcase_path, "data/part1"))
+        os.mkdir(os.path.join(test.testcase_path, "data"))
     except OSError:
         pass
 
@@ -39,7 +39,7 @@ def initialize(test):
 def buggy_code(test):
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "buggy_code.cpp"),
-        os.path.join(test.testcase_path, "data/part1/code.cpp")])
+        os.path.join(test.testcase_path, "data/code.cpp")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -50,7 +50,7 @@ def buggy_code(test):
 def nonbuggy_code(test):
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "nonbuggy_code.cpp"),
-        os.path.join(test.testcase_path, "data/part1/code.cpp")])
+        os.path.join(test.testcase_path, "data/code.cpp")])
     test.run_compile()
     test.run_run()
     test.run_validator()

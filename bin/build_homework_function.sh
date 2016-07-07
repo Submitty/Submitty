@@ -6,8 +6,8 @@
 function build_homework {
 
     # these variables will be replaced by INSTALL.sh
-    HSS_INSTALL_DIR=__INSTALL__FILLIN__HSS_INSTALL_DIR__
-    HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
+    SUBMITTY_INSTALL_DIR=__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__
+    SUBMITTY_DATA_DIR=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__
 
 
     # location of the homework source files, including:
@@ -23,7 +23,7 @@ function build_homework {
     course=$3
     assignment=$4
 
-    course_dir=$HSS_DATA_DIR/courses/$semester/$course
+    course_dir=$SUBMITTY_DATA_DIR/courses/$semester/$course
 
     hw_build_path=$course_dir/build/$assignment
     hw_bin_path=$course_dir/bin/$assignment
@@ -40,7 +40,7 @@ function build_homework {
     find $hw_build_path -type f -exec chmod 660 {} \;
 
     # grab the universal cmake file
-    cp $HSS_INSTALL_DIR/src/grading/Sample_CMakeLists.txt   $hw_build_path/CMakeLists.txt
+    cp $SUBMITTY_INSTALL_DIR/src/grading/Sample_CMakeLists.txt   $hw_build_path/CMakeLists.txt
     chmod 660 $hw_build_path/CMakeLists.txt
 
     # go to the build directory

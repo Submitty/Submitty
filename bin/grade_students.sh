@@ -38,8 +38,8 @@ fi
 # ======================================================================
 # these variables will be replaced by INSTALL.sh
 
-HSS_INSTALL_DIR=__INSTALL__FILLIN__HSS_INSTALL_DIR__
-HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
+SUBMITTY_INSTALL_DIR=__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__
+SUBMITTY_DATA_DIR=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__
 
 SVN_PATH=__INSTALL__FILLIN__SVN_PATH__
 
@@ -55,38 +55,38 @@ GRADE_STUDENTS_IDLE_TOTAL_MINUTES=__INSTALL__FILLIN__GRADE_STUDENTS_IDLE_TOTAL_M
 # from the data directory, we expect:
 
 # a subdirectory for each course
-# HSS_DATA_DIR/courses/which_semester/course_apple/
-# HSS_DATA_DIR/courses/which_semester/course_banana/
+# SUBMITTY_DATA_DIR/courses/which_semester/course_apple/
+# SUBMITTY_DATA_DIR/courses/which_semester/course_banana/
 
 # a directory within each course for the submissions, further
 # subdirectories for each assignment, then subdirectories for each
 # user, and finally subdirectories for multiple submissions (version)
-# HSS_DATA_DIR/courses/which_semester/course_apple/submissions/
-# HSS_DATA_DIR/courses/which_semester/course_apple/submissions/hw1/
-# HSS_DATA_DIR/courses/which_semester/course_apple/submissions/hw1/smithj
-# HSS_DATA_DIR/courses/which_semester/course_apple/submissions/hw1/smithj/1
-# HSS_DATA_DIR/courses/which_semester/course_apple/submissions/hw1/smithj/2
+# SUBMITTY_DATA_DIR/courses/which_semester/course_apple/submissions/
+# SUBMITTY_DATA_DIR/courses/which_semester/course_apple/submissions/hw1/
+# SUBMITTY_DATA_DIR/courses/which_semester/course_apple/submissions/hw1/smithj
+# SUBMITTY_DATA_DIR/courses/which_semester/course_apple/submissions/hw1/smithj/1
+# SUBMITTY_DATA_DIR/courses/which_semester/course_apple/submissions/hw1/smithj/2
 
 # input & output files are stored in a similar structure
-# HSS_DATA_DIR/courses/which_semester/course_apple/test_input/hw1/first.txt
-# HSS_DATA_DIR/courses/which_semester/course_apple/test_input/hw1/second.txt
-# HSS_DATA_DIR/courses/which_semester/course_apple/test_output/hw1/solution1.txt
-# HSS_DATA_DIR/courses/which_semester/course_apple/test_output/hw1/solution2.txt
+# SUBMITTY_DATA_DIR/courses/which_semester/course_apple/test_input/hw1/first.txt
+# SUBMITTY_DATA_DIR/courses/which_semester/course_apple/test_input/hw1/second.txt
+# SUBMITTY_DATA_DIR/courses/which_semester/course_apple/test_output/hw1/solution1.txt
+# SUBMITTY_DATA_DIR/courses/which_semester/course_apple/test_output/hw1/solution2.txt
 
 # each assignment has executables to be run during grading
-# HSS_DATA_DIR/courses/which_semester/course_apple/bin/hw1/run.out
-# HSS_DATA_DIR/courses/which_semester/course_apple/bin/hw1/validate.out
+# SUBMITTY_DATA_DIR/courses/which_semester/course_apple/bin/hw1/run.out
+# SUBMITTY_DATA_DIR/courses/which_semester/course_apple/bin/hw1/validate.out
 
 
 # =====================================================================
 # The todo lists of the most recent (ungraded) submissions have a dummy
 # file in one of these directories:
 
-# HSS_DATA_DIR/to_be_graded/which_semester__course_apple__hw1__smithj__1
-# HSS_DATA_DIR/to_be_graded/which_semester__course_banana__hw2__doej__5
+# SUBMITTY_DATA_DIR/to_be_graded/which_semester__course_apple__hw1__smithj__1
+# SUBMITTY_DATA_DIR/to_be_graded/which_semester__course_banana__hw2__doej__5
 
-TO_BE_GRADED_INTERACTIVE=$HSS_DATA_DIR/to_be_graded_interactive
-TO_BE_GRADED_BATCH=$HSS_DATA_DIR/to_be_graded_batch
+TO_BE_GRADED_INTERACTIVE=$SUBMITTY_DATA_DIR/to_be_graded_interactive
+TO_BE_GRADED_BATCH=$SUBMITTY_DATA_DIR/to_be_graded_batch
 
 
 if [ ! -d "$TO_BE_GRADED_INTERACTIVE" ]; then
@@ -295,66 +295,66 @@ function grade_this_item {
     
     # --------------------------------------------------------------------
     # check to see if directory exists & is readable
-    submission_path=$HSS_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user/$version
+    submission_path=$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user/$version
     
-    if [ ! -d "$HSS_DATA_DIR" ]
+    if [ ! -d "$SUBMITTY_DATA_DIR" ]
     then
-	echo "ERROR: directory does not exist '$HSS_DATA_DIR'" >&2
+	echo "ERROR: directory does not exist '$SUBMITTY_DATA_DIR'" >&2
 	return
 	fi
-    if [ ! -d "$HSS_DATA_DIR/courses" ]
+    if [ ! -d "$SUBMITTY_DATA_DIR/courses" ]
     then
-	echo "ERROR: directory does not exist '$HSS_DATA_DIR'" >&2
+	echo "ERROR: directory does not exist '$SUBMITTY_DATA_DIR'" >&2
 	return
     fi
-    if [ ! -d "$HSS_DATA_DIR/courses/$semester" ]
+    if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester" ]
     then
-	echo "ERROR: directory does not exist '$HSS_DATA_DIR'" >&2
+	echo "ERROR: directory does not exist '$SUBMITTY_DATA_DIR'" >&2
 	return
     fi
     # note we do not expect these directories to be readable
     
-    if [ ! -d "$HSS_DATA_DIR/courses/$semester/$course" ]
+    if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester/$course" ]
     then
-	echo "ERROR: directory does not exist '$HSS_DATA_DIR/courses/$semester/$course'" >&2
+	echo "ERROR: directory does not exist '$SUBMITTY_DATA_DIR/courses/$semester/$course'" >&2
 	return
     fi
-    if [ ! -r "$HSS_DATA_DIR/courses/$semester/$course" ]
+    if [ ! -r "$SUBMITTY_DATA_DIR/courses/$semester/$course" ]
     then
-	echo "ERROR: A directory is not readable '$HSS_DATA_DIR/courses/$semester/$course'" >&2
-	return
-    fi
-    
-    if [ ! -d "$HSS_DATA_DIR/courses/$semester/$course/submissions" ]
-    then
-	echo "ERROR: B directory does not exist '$HSS_DATA_DIR/courses/$semester/$course/submissions'" >&2
-	return
-    fi
-    if [ ! -r "$HSS_DATA_DIR/courses/$semester/$course/submissions" ]
-    then
-	echo "ERROR: C directory is not readable '$HSS_DATA_DIR/courses/$semester/$course/submissions'" >&2
+	echo "ERROR: A directory is not readable '$SUBMITTY_DATA_DIR/courses/$semester/$course'" >&2
 	return
     fi
     
-    if [ ! -d "$HSS_DATA_DIR/courses/$semester/$course/submissions/$assignment" ]
+    if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions" ]
     then
-	echo "ERROR: D directory does not exist '$HSS_DATA_DIR/courses/$semester/$course/submissions/$assignment'" >&2
+	echo "ERROR: B directory does not exist '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions'" >&2
 	return
     fi
-    if [ ! -r "$HSS_DATA_DIR/courses/$semester/$course/submissions/$assignment" ]
+    if [ ! -r "$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions" ]
     then
-	echo "ERROR: E directory is not readable '$HSS_DATA_DIR/courses/$semester/$course/submissions/$assignment'" >&2
+	echo "ERROR: C directory is not readable '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions'" >&2
 	return
     fi
     
-    if [ ! -d "$HSS_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user" ]
+    if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment" ]
     then
-	echo "ERROR: F directory does not exist '$HSS_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user'" >&2
+	echo "ERROR: D directory does not exist '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment'" >&2
 	return
     fi
-    if [ ! -r "$HSS_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user" ]
+    if [ ! -r "$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment" ]
     then
-	echo "ERROR: G directory is not readable '$HSS_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user'" >&2
+	echo "ERROR: E directory is not readable '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment'" >&2
+	return
+    fi
+    
+    if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user" ]
+    then
+	echo "ERROR: F directory does not exist '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user'" >&2
+	return
+    fi
+    if [ ! -r "$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user" ]
+    then
+	echo "ERROR: G directory is not readable '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user'" >&2
 	return
     fi
     
@@ -376,12 +376,12 @@ function grade_this_item {
     
     
     
-    test_code_path="$HSS_DATA_DIR/courses/$semester/$course/test_code/$assignment"
-    test_input_path="$HSS_DATA_DIR/courses/$semester/$course/test_input/$assignment"
-    test_output_path="$HSS_DATA_DIR/courses/$semester/$course/test_output/$assignment"
-    checkout_path="$HSS_DATA_DIR/courses/$semester/$course/checkout/$assignment/$user/$version"
-    results_path="$HSS_DATA_DIR/courses/$semester/$course/results/$assignment/$user/$version"
-    bin_path="$HSS_DATA_DIR/courses/$semester/$course/bin"
+    test_code_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/test_code/$assignment"
+    test_input_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/test_input/$assignment"
+    test_output_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/test_output/$assignment"
+    checkout_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/checkout/$assignment/$user/$version"
+    results_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$assignment/$user/$version"
+    bin_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/bin"
     
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
@@ -412,7 +412,7 @@ function grade_this_item {
     rsync 1>/dev/null  2>&1  -r $submission_path/ $tmp_compilation || log_error "$NEXT_TO_GRADE" "Failed to copy submitted files to temporary compilation directory: rsync -r $submission_path/ $tmp_compilation [ exitcode=$? ]"
 
     # use the jq json parsing command line utility to grab the svn_checkout flag from the class.json config file
-    class_json_config="$HSS_DATA_DIR/courses/$semester/$course/config/class.json"
+    class_json_config="$SUBMITTY_DATA_DIR/courses/$semester/$course/config/class.json"
     svn_checkout=`cat $class_json_config | jq '.assignments[] | if .assignment_id == "'${assignment}'" then .svn_checkout else empty end'`
     
     # also save the due date
@@ -474,7 +474,7 @@ function grade_this_item {
     then
 	rsync -a $test_code_path/ "$tmp_compilation" || log_error "$NEXT_TO_GRADE" "Failed to copy instructor files to temporary compilation directory:  cp -rf $test_code_path/ $tmp_compilation"
 
-	#cp -rf $HSS_DATA_DIR/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $HSS_DATA_DIR/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
+	#cp -rf $SUBMITTY_DATA_DIR/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $SUBMITTY_DATA_DIR/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
     fi
     
     pushd $tmp_compilation > /dev/null
@@ -494,8 +494,8 @@ function grade_this_item {
 	chmod -R go+rwx $tmp
 	
 	# run the compile.out as the untrusted user
-	echo '$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$assignment" "$user" "$version" "$submission_time" >& $tmp/.submit_compile_output.txt'
-	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$assignment" "$user" "$version" "$submission_time" >& $tmp/.submit_compile_output.txt
+	echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$assignment" "$user" "$version" "$submission_time" >& $tmp/.submit_compile_output.txt'
+	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$assignment" "$user" "$version" "$submission_time" >& $tmp/.submit_compile_output.txt
 	
 	compile_error_code="$?"
 	if [[ "$compile_error_code" -ne 0 ]] ;
@@ -547,25 +547,29 @@ function grade_this_item {
 	
   	# give the untrusted user read/write/execute permissions on the tmp directory & files
 	chmod -R go+rwx $tmp
-	
+        # remove the read/write permissions for the compilation log
+        chmod 660 .submit_compile_output.txt
+        # remove the execute bit for any text files
+	chmod -R go-x *.txt
+
 	# run the run.out as the untrusted user
-	echo '$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$assignment" "$user" "$version" "$submission_time" >& .submit_runner_output.txt'
-	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$assignment" "$user" "$version" "$submission_time" >& .submit_runner_output.txt
+	echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$assignment" "$user" "$version" "$submission_time" >& .submit_runner_output.txt'
+	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$assignment" "$user" "$version" "$submission_time" >& .submit_runner_output.txt
 	runner_error_code="$?"
 
 	# change permissions of all files created by untrusted in this directory (so hwcron can archive/grade them)
-	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp -user "${ARGUMENT_UNTRUSTED_USER}" -exec /bin/chmod o+r {} \;   >>  .submit_runner_output.txt 2>&1
+	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp -user "${ARGUMENT_UNTRUSTED_USER}" -exec /bin/chmod o+r {} \;   >>  .submit_runner_output.txt 2>&1
 
 
 	# FIXME
 	# ugly cleanup dr memory stuff (not sure why this needs to be added now... was working last semester)
-	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /bin/rm -rf $tmp/symcache
-	$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /bin/rm -rf $tmp/DrMemory-*
+	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /bin/rm -rf $tmp/symcache
+	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /bin/rm -rf $tmp/DrMemory-*
 	# need to revisit directory & file permissions, and decide who will be responsible for deleting this
 
 	# this didn't fix it (didn't give hwcron ability to delete these files
 	# also need to add execute on the directories...
-	#$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp -user "${ARGUMENT_UNTRUSTED_USER}" -type d -exec /bin/chmod o+x {} \;   >>  .submit_runner_output.txt 2>&1
+	#$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp -user "${ARGUMENT_UNTRUSTED_USER}" -type d -exec /bin/chmod o+x {} \;   >>  .submit_runner_output.txt 2>&1
 
 
 
@@ -596,8 +600,8 @@ function grade_this_item {
             echo "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
             "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
         else
-            echo '$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'
-            "$HSS_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" " "/usr/bin/valgrind" "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+            echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'
+            "$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" " "/usr/bin/valgrind" "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
         fi
 
 	validator_error_code="$?"

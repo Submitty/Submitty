@@ -6,9 +6,9 @@ use warnings;
 $ENV{ 'PATH' } = '/bin:/usr/bin:/usr/sbin:/usr/local/bin';
 delete @ENV{'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
 
-system ("/var/local/hss/bin/validate.auth.pl");
+system ("/var/local/submitty/bin/validate.auth.pl");
 
-open LIST, "/var/local/hss/instructors/authlist";	# Should have a list of userids, one per line
+open LIST, "/var/local/submitty/instructors/authlist";	# Should have a list of userids, one per line
 
 while (<LIST>)
 {

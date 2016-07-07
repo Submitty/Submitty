@@ -7,9 +7,9 @@ use warnings;
 $ENV{ 'PATH' } = '/bin:/usr/bin';
 delete @ENV{'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
 
-system ("/var/local/hss/bin/validate.svn.pl");
+system ("/var/local/submitty/bin/validate.svn.pl");
 
-open LIST, "/var/local/hss/instructors/svnlist";	# Should have a list of userids (not email), one per line 
+open LIST, "/var/local/submitty/instructors/svnlist";	# Should have a list of userids (not email), one per line 
 
 while (<LIST>)
 {

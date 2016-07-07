@@ -1,4 +1,5 @@
 /*
+References:
 https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications
 https://developer.mozilla.org/en-US/docs/Web/API/FormData/Using_FormData_Objects
 https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Submitting_forms_and_uploading_files
@@ -8,9 +9,13 @@ https://www.sitepoint.com/html5-ajax-file-upload/
 http://www.html5rocks.com/en/tutorials/file/dndfiles/
 */
 
-var file_array = [];
-var previous_files = [];
-var changed = false;
+// INITIALIZATION
+//========================================================================================
+var file_array = [];		// contains files uploaded for this submission
+var previous_files = [];	// contains names of files selected from previous submission
+var changed = false;		// if files from previous submission changed
+
+// initializing file_array and prevous_files
 function createArray(num_parts){
 	if(file_array.length == 0){
 		for(var i=0; i<num_parts; i++){
@@ -20,25 +25,37 @@ function createArray(num_parts){
 	}
 }
 
+// read in name of previously submitted file
 function readPrevious(filename, part){
+	changed = false;
 	previous_files[part-1].push(filename);
 }
 
+// DRAG AND DROP EFFECT
+//========================================================================================
 // open a file browser if clicked on drop zone
 function clicked_on_box(e){
   document.getElementById("input_file" + get_part_number(e)).click();
   e.stopPropagation();
 }
 
+// hover effect
 function draghandle(e){
 	e.preventDefault();
 	e.stopPropagation();
 	document.getElementById("upload" + get_part_number(e)).style.opacity = (e.type == "dragenter" || e.type == "dragover") ? .5 : "";
 }
 
+// ADD FILES FOR NEW SUBMISSION
+//========================================================================================
+// add files dragged
 function drop(e){
 	draghandle(e);
-	addFiles(e.dataTransfer.files, get_part_number(e));
+	var filestream= e.dataTransfer.files;
+	var part = get_part_number(e);
+	for(var i=0; i<filestream.length; i++){
+		addFileWithCheck(filestream[i], part); // check for folders
+	}
 }
 
 function get_part_number(e){
@@ -50,9 +67,12 @@ function get_part_number(e){
 	}
 }
 
-// copy files selected from the dialog box
-function addFile(part){
-	addFiles(document.getElementById("input_file" + part).files, part);
+// copy files selected from the file browser
+function addFilesFromInput(part){
+	var filestream = document.getElementById("input_file" + part).files;
+	for(var i=0; i<filestream.length; i++){
+		addFile(filestream[i], part); // folders will not be selected in file browser, no need for check
+	}
 }
 
 // Check for duplicate file names. This function returns an array.
@@ -62,62 +82,70 @@ function addFile(part){
 // -1 - does not exist files with the same name
 // Second element: index of the file with the same name (if found)
 function fileExists(file, part){
-	for(var j=0; j<previous_files[part-1].length; j++){
-		if(previous_files[part-1][j] == file.name){
-			return [1, j];
+	for(var i=0; i<previous_files[part-1].length; i++){
+		if(previous_files[part-1][i] == file.name){
+			return [1, i];
 		}
 	}
-	for(var j=0; j<file_array[part-1].length; j++){
-		if(file_array[part-1][j].name == file.name){
-			return [0, j];
+	for(var i=0; i<file_array[part-1].length; i++){
+		if(file_array[part-1][i].name == file.name){
+			return [0, i];
 		}
 	}
 	return [-1];
 }
 
-function addFiles(filestream, part){
-	var error = "";
-	// copy files dragged
-	for(var i=0; i<filestream.length; i++){
-		var f = filestream[i];
-		// Uploading folder not allowed
-
-//
-// FIXME: Folder check does not seem to work on Mac Chrome or Mac Firefox
-//        cpp files are somehow incorrectly identified as folders :(
-//
-//		if(f.type == ""){
-//			error = error + f.name + "\n";
-//			continue;
-//		}
-
-		var j = fileExists(f, part);
-		if( j[0] == -1 ){	// file does not exist
-			file_array[part-1].push(f);
-			addLabel(f.name, (f.size/1024).toFixed(2), part, false);
-		}
-		else if(j[0] == 0){	// file already selected
-			if(confirm("Note: " + file_array[part-1][j[1]].name + "is already selected. Do you want to replace it?")){
-				file_array[part-1].splice(j[1], 1, f);
-				removeLabel(f.name, part);
-				addLabel(f.name, (f.size/1024).toFixed(2), part, false);
-			}
-		}
-		else{	// file in previous submission
-			if(confirm("Note: " + previous_files[part-1][j[1]] + "was in your previous submission. Do you want to replace it?")){
-				file_array[part-1].push(f);
-				previous_files[part-1].splice(j[1], 1);
-				removeLabel(f.name, part);
-				addLabel(f.name, (f.size/1024).toFixed(2), part, false);
-				changed = true;
-			}
-		}
-		// TODO: Maybe storing the names in a separate array and rename when uploading
+// add file with folder check
+function addFileWithCheck(file, part){
+	// try to open file if it looks suspicious:
+	// no type, or with size of a typical folder size
+	if(!file.type || file.size%4096 == 0){
+		var reader = new FileReader();
+		reader.onload = notFolder(file, part);
+		reader.onerror = isFolder(file);
+		reader.readAsBinaryString(file);
 	}
-	if(error) alert("Uploading folders is not allowed!\nFolder(s) not added to submission:\n" + error);
+	else{
+		addFile(file, part);
+	}
 }
 
-// remove all files uploaded
+// add file if is not a folder
+function notFolder(file, part){
+	return function(e){ addFile(file, part); }
+}
+
+function isFolder(file){
+	return function(e){ alert("Upload failed: " + file.name + " might be a folder."); }
+}
+
+function addFile(file, part){
+	var i = fileExists(file, part);
+	if( i[0] == -1 ){	// file does not exist
+		file_array[part-1].push(file);
+		addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+	}
+	else if(i[0] == 0){	// file already selected
+		if(confirm("Note: " + file_array[part-1][i[1]].name + "is already selected. Do you want to replace it?")){
+			file_array[part-1].splice(i[1], 1, file);
+			removeLabel(file.name, part);
+			addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+		}
+	}
+	else{	// file in previous submission
+		if(confirm("Note: " + previous_files[part-1][i[1]] + "was in your previous submission. Do you want to replace it?")){
+			file_array[part-1].push(file);
+			previous_files[part-1].splice(i[1], 1);
+			removeLabel(file.name, part);
+			addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+			changed = true;
+		}
+	}
+}
+
+// REMOVE FILES
+//========================================================================================
+// delete files selected for a part
 function deleteFiles(part){
 	if(file_array.length != 0){
 		file_array[part-1] = [];
@@ -155,6 +183,8 @@ function deleteSingleFile(filename, part, previous){
 	}
 }
 
+// LABELS FOR SELECTED FILES
+//========================================================================================
 function removeLabel(filename, part){
 	var dropzone = document.getElementById("upload" + part);
 	var labels = dropzone.getElementsByClassName("mylabel");
@@ -190,12 +220,15 @@ function addLabel(filename, filesize, part, previous){
 	}
 	// add to parent div
 	var dropzone = document.getElementById("upload" + part);
-	var deletebutton = document.getElementById("delete" + part);
+	// Uncomment if want buttons for emptying single bucket
+	// var deletebutton = document.getElementById("delete" + part);
 	dropzone.appendChild(tmp);
-	dropzone.insertBefore(tmp, deletebutton);
+	// dropzone.insertBefore(tmp, deletebutton);
 }
 
-function validSubmission(){
+// HANDLE SUBMISSION
+//========================================================================================
+function isValidSubmission(){
 	// check if new files added
 	for(var i=0; i < file_array.length; i++){
 		if(file_array[i].length != 0){
@@ -215,9 +248,8 @@ function validSubmission(){
 }
 
 function submit(url, csrf_token, svn_checkout, loc){
-	// alert(JSON.stringify(previous_files));
 	// Check if new submission
-	if(!validSubmission()){
+	if(!isValidSubmission()){
 		alert("Not a new submission.");
 		window.location.reload();
 		return;
@@ -227,13 +259,13 @@ function submit(url, csrf_token, svn_checkout, loc){
 	files_to_upload.append('csrf_token', csrf_token);
 	files_to_upload.append('svn_checkout', svn_checkout);
 
-	// Files uploaded
+	// Files selected
 	for(var i=0; i<file_array.length; i++){
 		for(var j=0; j<file_array[i].length; j++){
 			files_to_upload.append('files' + (i+1) + '[]', file_array[i][j]);
-			// files_to_upload.append('files[' + (i+1) + '][]', file_array[i][j]);
 		}
 	}
+	// Files from previous submission
 	files_to_upload.append('previous_files', JSON.stringify(previous_files));
 
 	// xhr
@@ -241,24 +273,9 @@ function submit(url, csrf_token, svn_checkout, loc){
 	xhr.open("POST", url, true);
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4 && xhr.status == 200) {
-            // Handle response.
-            // alert(xhr.responseText);
-            // window.location.reload();
             window.location.href = loc;
         }
     };
 	xhr.send(files_to_upload);
-	/*
-	//
-	jQuery.ajax(url, {
-		data: files_to_upload,
-		method: "post"
-	})
-	.complete(function() {
-
-	})
-	.error(function() {
-
-	})
-*/
+	// TODO: Maybe rewrite file upload in jQuery AJAX?
 }

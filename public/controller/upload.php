@@ -7,7 +7,8 @@ $semester=check_semester();
 $class_config=check_class_config($semester,$course);
 $dev_team=$class_config["dev_team"];
 $assignment_id=check_assignment_id($class_config);
-$num_parts=get_num_parts($class_config, $assignment_id);
+$assignment_config = get_assignment_config($semester,$course, $assignment_id);
+$num_parts=get_num_parts($assignment_config);
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
   $_SESSION['status'] = 'invalid_token';
@@ -25,7 +26,6 @@ if (isset($_POST["svn_checkout"]) && $_POST["svn_checkout"] == "true") {
 
   for($i=0; $i<$num_parts; $i++){
     if(isset($_FILES["files".($i+1)])){
-      // $uploaded_files["part".($i+1)] = $_FILES["files".($i+1)];
       $uploaded_files[$i+1] = $_FILES["files".($i+1)];
     }
   }
@@ -40,8 +40,6 @@ if (isset($_POST["svn_checkout"]) && $_POST["svn_checkout"] == "true") {
   //Upload the files
   if (isset($uploaded_files) || isset($previous_files)) {
   // if (isset($_FILES["files"])) { // if (isset($_FILES["file"])) {
-
-    // $uploaded_files = $_FILES["files"]; // $uploaded_files = $_FILES["file"];
     $result = upload_homework($_SESSION["id"], $semester, $course, $assignment_id, $num_parts, $uploaded_files, $previous_files, false);
 
     if (isset($result["error"])) {

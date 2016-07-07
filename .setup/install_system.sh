@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 #PATHS
-SUBMITTY_DIR=/usr/local/hss/GIT_CHECKOUT_Submitty
-INSTALL_DIR=/usr/local/hss
-DATA_DIR=/var/local/hss
+SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
+SUBMITTY_INSTALL_DIR=/usr/local/submitty
+SUBMITTY_DATA_DIR=/var/local/submitty
 
 #################################################################
 # PROVISION SETUP
@@ -13,7 +13,7 @@ if [[ $1 == vagrant ]]; then
   VAGRANT=1
   export DEBIAN_FRONTEND=noninteractive
 else
-  #TODO: We should get options for ./CONFIGURE script
+  #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.sh script
   VAGRANT=0
 fi
 
@@ -26,13 +26,13 @@ if [ ${VAGRANT} == 1 ]; then
     chmod +x /etc/update-motd.d/00-header
 
     echo -e '
- __   __  _     _  _______  _______  ______    __   __  _______  ______
-|  | |  || | _ | ||       ||       ||    _ |  |  | |  ||       ||    _ |
-|  |_|  || || || ||  _____||    ___||   | ||  |  |_|  ||    ___||   | ||
-|       ||       || |_____ |   |___ |   |_||_ |       ||   |___ |   |_||_
-|       ||       ||_____  ||    ___||    __  ||       ||    ___||    __  |
-|   _   ||   _   | _____| ||   |___ |   |  | | |     | |   |___ |   |  | |
-|__| |__||__| |__||_______||_______||___|  |_|  |___|  |_______||___|  |_|
+  _______  __   __  _______  __   __  ___   _______  _______  __   __
+|       ||  | |  ||  _    ||  |_|  ||   | |       ||       ||  | |  |
+|  _____||  | |  || |_|   ||       ||   | |_     _||_     _||  |_|  |
+| |_____ |  |_|  ||       ||       ||   |   |   |    |   |  |       |
+|_____  ||       ||  _   | |       ||   |   |   |    |   |  |_     _|
+ _____| ||       || |_|   || ||_|| ||   |   |   |    |   |    |   |
+|_______||_______||_______||_|   |_||___|   |___|    |___|    |___|
 
 ############################################################
 ##  All user accounts have same password unless otherwise ##
@@ -61,24 +61,61 @@ if [ ${VAGRANT} == 1 ]; then
     echo "192.168.56.103    test-hwgrading test-hwgrading.cs.rpi.edu hwgrading" >> /etc/hosts
 fi
 
+
+
 #################################################################
 # PACKAGE SETUP
 #################
 echo "\n" | add-apt-repository ppa:webupd8team/java
 apt-get -qq update
 
+
+
+############################
+# NTP: Network Time Protocol
+# You want to be sure the clock stays in sync, especially if you have
+# deadlines for homework to be submitted.
+#
+# The default settings are ok, but you can edit /etc/ntp.conf and
+# replace the default servers with your local ntp server to reduce
+# traffic through your campus uplink (To replace the default servers
+# with your own, comment out the default servers by adding a # before
+# the lines that begin with “server” and add your server under the
+# line that says “Specify one or more NTP servers” with something
+# along the lines of “server xxx.xxx.xxx.xxx”)
+
 apt-get install -qqy ntp
 service ntp restart
 
+
+
 # path for untrusted user creation script will be different if not using Vagrant
-${SUBMITTY_DIR}/bin/create.untrusted.users.pl
+${SUBMITTY_REPOSITORY}/.setup/create.untrusted.users.pl
 
 apt-get install -qqy libpam-passwdqc
+
+
+# Use suphp to improve file permission granularity by running php
+# scripts as the user that owns the file instead of www-data
+#
+# Set up apache to run with suphp in pre-fork mode since not all
+# modules are thread safe (do not combine the commands or you may get
+# the worker/threaded mode instead)
 
 apt-get install -qqy ssh sshpass unzip
 apt-get install -qqy apache2 postgresql postgresql-contrib php5 php5-xdebug libapache2-mod-suphp
 
+# Check to make sure you got the right setup by typing:
+#   apache2ctl -V | grep MPM
+# (it should say prefork)
+
 apachectl -V | grep MPM
+
+# Add additional packages for compiling, authentication, and security,
+# and program support
+
+# DOCUMENTATION FIXME: Go through this list and categorize purpose of
+# these packages (as appropriate.. )
 
 echo "Preparing to install packages.  This may take a while."
 apt-get install -qqy clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
@@ -87,10 +124,13 @@ unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev ja
 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libfile-mmagic-perl \
 libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
 libseccomp2 seccomp junit cmake xlsx2csv libpcre3 libpcre3-dev flex bison
+<<<<<<< HEAD
 
 pip install python-pam
 chmod 555 /usr/local/lib/python2.7/*
 chmod 555 /usr/lib/python2.7/dist-packages
+=======
+>>>>>>> master
 
 # Enable PHP5-mcrypt
 php5enmod mcrypt
@@ -113,6 +153,34 @@ apt-get install imagemagick
 #################################################################
 # NETWORK CONFIGURATION
 #################
+#
+# The goal here is to ensure the VM is accessible from your own
+# computer for code testing, has an outgoing connection to the
+# Internet to access github and receive Ubuntu updates, but is also
+# unreachable via incoming Internet connections so to block uninvited
+# guests.
+#
+# Open the VM’s Settings window and click on the “Network” tab.  There
+# are tabs for four network adapters.  Enable adapters #1 and #2.
+#
+# Adapter #1 should be attached to NAT and make sure the cable
+# connected box (under advanced) is checked.  You may ignore all other
+# settings for adapter #1.  This provides the VM’s outgoing Internet
+# connection, but uninvited guests on the Internet cannot see the VM.
+#
+# Adapter #2 should be attached to Host-only Network.  Under “name”,
+# there is a drop down menu to select Host-only Ethernet Adapter (or
+# vboxnet).  Recall that this was created in the previous section,
+# Create Virtual Network Adapters.  This adapter can only communicate
+# between your host OS and the VM, and it is unreachable to and from
+# the Internet.
+#
+# After Ubuntu is fully installed, you need to adjust the networking
+# configuration so that you may access the VM via static IP addressing
+# as a convenience for code testing.
+#
+# The VM’s host-only adapter provides a private connection to the VM,
+# but Ubuntu also needs to be configured to use this adapter.
 
 echo "Binding static IPs to \"Host-Only\" virtual network interface."
 
@@ -132,13 +200,16 @@ ifup eth1 eth1:1 eth1:2
 # JAR SETUP
 #################
 echo "Getting JUnit..."
-mkdir -p ${INSTALL_DIR}/JUnit
-cd ${INSTALL_DIR}/JUnit
+mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
+cd ${SUBMITTY_INSTALL_DIR}/JUnit
 
 wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
 wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F1.3%2Fhamcrest-core-1.3.jar hamcrest-core-1.3.jar
+
+
+# EMMA is a tool for computing code coverage of Java programs
 
 echo "Getting emma..."
 wget http://downloads.sourceforge.net/project/emma/emma-release/2.0.5312/emma-2.0.5312.zip -o /dev/null > /dev/null 2>&1
@@ -153,20 +224,38 @@ chmod o+r . *.jar
 #################################################################
 # DRMEMORY SETUP
 #################
+
+# Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
+
 echo "Getting DrMemory..."
-mkdir -p ${INSTALL_DIR}/DrMemory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
 cd /tmp
 DRMEM_TAG=release_1.10.1
 DRMEM_VER=1.10.1-3
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${INSTALL_DIR}/DrMemory
-ln -s ${INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${INSTALL_DIR}/drmemory
+tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${SUBMITTY_INSTALL_DIR}/DrMemory
+ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
 rm DrMemory-Linux-${DRMEM_VER}.tar.gz
 
 #################################################################
 # APACHE SETUP
 #################
 a2enmod include actions cgi suexec authnz_external headers ssl
+
+
+# If you have real certificates, follow the directions from your
+# certificate provider.
+#
+# If you are just developing and do not have real ssl certificates,
+# follow these directions for creating a self-signed (aka “snakeoil
+# certificate”)
+#
+# If it doesn’t already exist, create directory path
+#   /etc/apache2/ssl/
+#
+# An expiration of 365000 days (roughly 1000 years) is meant so that
+# the certificate essentially never expires.  make the certificates
+# world readable (but not the key):
 
 mkdir /etc/apache2/ssl
 cd /etc/apache2/ssl
@@ -211,6 +300,7 @@ if [ ${VAGRANT} == 1 ]; then
 	echo -e "\nServerName 10.0.2.15\n" >> /etc/apache2/apache2.conf
 fi
 
+
 # comment out directory configs - should be converted to something more flexible
 sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 
@@ -220,12 +310,22 @@ rm /etc/apache2/sites*/default-ssl.conf
 
 service apache2 reload
 
+
 #################################################################
 # PHP SETUP
 #################
-sed -i -e 's/^docroot=/docroot=\/usr\/local\/hss:/g' /etc/suphp/suphp.conf
+sed -i -e 's/^docroot=/docroot=\/usr\/local\/submitty:/g' /etc/suphp/suphp.conf
+
+# Assumes you need to have a group of people able to edit the files.  Comment out if not needed
 sed -i -e 's/^allow_file_group_writeable=false/allow_file_group_writeable=true/g' /etc/suphp/suphp.conf
+# Assumes you need to have a group of people able to add/delete files and directories.  Comment out if not needed.
 sed -i -e 's/^allow_directory_group_writeable=false/allow_directory_group_writeable=true/g' /etc/suphp/suphp.conf
+# do not allow others_writable files or directories or you will have even less security than without suphp
+
+# Edit php settings.  Note that if you need to accept larger files,
+# you’ll need to increase both upload_max_filesize and
+# post_max_filesize
+
 sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php5/cgi/php.ini
 sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php5/cgi/php.ini
 sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php5/cgi/php.ini
@@ -238,7 +338,23 @@ sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php5
 #################################################################
 # USERS SETUP
 #################
+
+# Special users and groups needed to run Submitty
+#
+# It is probably easiest to set and store passwords for the special
+# accounts, although you can also use ‘sudo su user’ to change to the
+# desired user on the local machine which works for most things.
+
+# The group hwcronphp allows hwphp to write the submissions, but give
+# read-only access to the hwcron user.  And the hwcron user writes the
+# results, and gives read-only access to the hwphp user.
+
 addgroup hwcronphp
+
+# The group course_builders allows instructors/head TAs/course
+# managers to write website custimization files and run course
+# management scripts.
+
 addgroup course_builders
 
 if [ ${VAGRANT} == 1 ]; then
@@ -288,7 +404,15 @@ adduser hwcron hwcronphp
 
 for COURSE in csci1100 csci1200 csci2600
 do
+
+        # for each course, create a group to contain the current
+        # instructor along the lines of:
+
 	addgroup $COURSE
+
+        # and another group to contain the current instructor, TAs,
+        # hwcron, and hwphp along the lines of
+
 	addgroup $COURSE\_tas_www
 	adduser hwphp $COURSE\_tas_www
 	adduser hwcron $COURSE\_tas_www
@@ -305,10 +429,18 @@ if [ ${VAGRANT} == 1 ]; then
 	adduser instructor course_builders
 fi
 
-mkdir -p ${DATA_DIR}
 
-mkdir -p ${DATA_DIR}/instructors
-ls /home | sort > ${DATA_DIR}/instructors/valid
+# create directories and fix permissions
+
+mkdir -p ${SUBMITTY_DATA_DIR}
+
+
+# create a list of valid userids and put them in /var/local/submitty/instructors
+# one way to create your list is by listing all of the userids in /home
+
+mkdir -p ${SUBMITTY_DATA_DIR}/instructors
+ls /home | sort > ${SUBMITTY_DATA_DIR}/instructors/valid
+
 
 #################################################################
 # SVN SETUP
@@ -320,16 +452,25 @@ a2enmod dav_fs
 a2enmod authz_svn
 a2enmod authz_groupfile
 
+# Choose a directory for holding your subversion files that will get
+# backed up if it is a production server.  We use /var/lib/svn by
+# default.
 mkdir -p /var/lib/svn
 chmod g+s /var/lib/svn
 
+# make a group and subdirectory for any classes requiring subversion
+# repositories:
 mkdir -p /var/lib/svn/csci2600
 touch /var/lib/svn/svngroups
 chown www-data:csci2600_tas_www /var/lib/svn/csci2600 /var/lib/svn/svngroups
 if [ ${VAGRANT} == 1 ]; then
+    # set up ssh keys for hwcron to connect to the subversion
+    # repository (do not use root/sudo except as shown)
 	su hwcron
+        # generate the key (accept the defaults):
 	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N "" > /dev/null 2>&1
 	echo "hwcron" > password.txt
+        # copy the key to test-svn:
 	sshpass -f password.txt ssh-copy-id hwcron@test-svn
 	rm password.txt
 	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
@@ -344,7 +485,7 @@ if [ ${VAGRANT} == 1 ]; then
 	service postgresql restart
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
-	su postgres -c "source ${SUBMITTY_DIR}/.setup/db_users.sh";
+	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
 	echo "Finished creating PostgreSQL users"
 
     echo "Setting up Postgres to connect to via host"
@@ -363,17 +504,18 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 https://192.168.56.103
-svn+ssh:192.168.56.102" | source ${SUBMITTY_DIR}/CONFIGURE.sh
+svn+ssh:192.168.56.102" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 else
-	source ${SUBMITTY_DIR}/CONFIGURE.sh
+	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 fi
 
-source ${INSTALL_DIR}/INSTALL.sh clean test
+source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+#source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean test
 
-source ${SUBMITTY_DIR}/Docs/sample_bin/admin_scripts_setup
-cp ${SUBMITTY_DIR}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
-cp ${SUBMITTY_DIR}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
-cp -f ${SUBMITTY_DIR}/Docs/www-data /etc/apache2/suexec/www-data
+source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
+cp ${SUBMITTY_REPOSITORY}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
+cp ${SUBMITTY_REPOSITORY}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
+cp -f ${SUBMITTY_REPOSITORY}/Docs/www-data /etc/apache2/suexec/www-data
 
 # permissions: rw- r-- ---
 chmod 0640 /etc/apache2/sites-available/*.conf
@@ -382,8 +524,8 @@ chmod 0640 /etc/apache2/suexec/www-data
 if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /root/bin/bottom.txt
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
-	sed -i 's/hss.crt/submit.crt/g' /etc/apache2/sites-available/submit.conf
-	sed -i 's/hss.key/submit.key/g' /etc/apache2/sites-available/submit.conf
+	sed -i 's/submitty.crt/submit.crt/g' /etc/apache2/sites-available/submit.conf
+	sed -i 's/submitty.key/submit.key/g' /etc/apache2/sites-available/submit.conf
 	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /etc/apache2/sites-available/hwgrading.conf
 	sed -i 's/hwgrading.cer/hwgrading.crt/g' /etc/apache2/sites-available/hwgrading.conf
 fi
@@ -395,71 +537,24 @@ apache2ctl -t
 service apache2 restart
 
 if [[ ${VAGRANT} == 1 ]]; then
-    echo "student" >> ${DATA_DIR}/instructors/authlist
-    echo "student" >> ${DATA_DIR}/instructors/valid
-    ${DATA_DIR}/bin/authonly.pl
+    echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+    echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+    ${SUBMITTY_DATA_DIR}/bin/authonly.pl
     echo "student:student" | sudo chpasswd
 
-    rm -r ${DATA_DIR}/autograding_logs
-    rm -r ${SUBMITTY_DIR}/.vagrant/autograding_logs
-    mkdir ${SUBMITTY_DIR}/.vagrant/autograding_logs
-    ln -s ${SUBMITTY_DIR}/.vagrant/autograding_logs ${DATA_DIR}/autograding_logs
-    rm -r ${DATA_DIR}/tagrading_logs
-    rm -r ${SUBMITTY_DIR}/.vagrant/tagrading_logs
-    mkdir ${SUBMITTY_DIR}/.vagrant/tagrading_logs
-    ln -s ${SUBMITTY_DIR}/.vagrant/tagrading_logs ${DATA_DIR}/tagrading_logs
+    rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
+    rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
+    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs ${SUBMITTY_DATA_DIR}/autograding_logs
+    rm -r ${SUBMITTY_DATA_DIR}/tagrading_logs
+    rm -r ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
+    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs ${SUBMITTY_DATA_DIR}/tagrading_logs
 
-    #################################################################
-    # CRON SETUP
-    #################
-    #cd /home/hwcron
-    #echo "" > /home/hwcron/x
-    #sudo cp /home/hwcron/x /var/spool/cron/crontabs/hwcron
-    #sudo chown hwcron:crontab /var/spool/cron/crontabs/hwcron
-    #echo "0,15,30,45 * * * * /usr/local/hss/bin/grade_students.sh" > /home/hwcron/c
-    #su hwcron << EOF
-    #  cat /home/hwcron/c | crontab -
-    #EOF
-    #rm /home/hwcron/x
-    #rm /home/hwcron/c
 
-    #################################################################
-    # COURSE SETUP
-    #################
-    cd ${INSTALL_DIR}/bin
-    ./create_course.sh f15 csci1100 instructor csci1100_tas_www
-    ./create_course.sh f15 csci1200 instructor csci1200_tas_www
-    ./create_course.sh f15 csci2600 instructor csci2600_tas_www
-
-    cd ${DATA_DIR}/courses/f15/csci1100
-    ./BUILD_csci1100.sh
-
-    cd ${DATA_DIR}/courses/f15/csci1200
-    ./BUILD_csci1200.sh
-
-    cd ${DATA_DIR}/courses/f15/csci2600
-    ./BUILD_csci2600.sh
-
-    #################################################################
-    # CREATE DATABASE
-    #################
-
-	export PGPASSWORD="hsdbu"
-
-	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1100_f15;"
-	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci1200_f15;"
-	psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE hss_csci2600_f15;"
-
-	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/tables.sql
-	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/inserts.sql
-	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/tables.sql
-	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/inserts.sql
-	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/tables.sql
-	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/TAGradingServer/data/inserts.sql
-
-	psql -d hss_csci1100_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/.setup/vagrant/db_inserts.sql
-	psql -d hss_csci1200_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/.setup/vagrant/db_inserts.sql
-	psql -d hss_csci2600_f15 -h localhost -U hsdbu -f ${SUBMITTY_DIR}/.setup/vagrant/db_inserts.sql
+    # Call helper script that makes the courses and refreshes the database
+    chmod u+x ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.sh
+    ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.sh
 
     #################################################################
     # SET CSV FIELDS (for classlist upload data)
@@ -470,12 +565,16 @@ if [[ ${VAGRANT} == 1 ]]; then
 
 	# Other Universities will need to rerun /bin/setcsvfields to match their
 	# classlist csv data.  See wiki for details.
-	${INSTALL_DIR}/bin/setcsvfields 13 12 15 7
+	${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
 fi
 
 # Deferred ownership change
-chown hwphp:hwphp ${INSTALL_DIR}
-chmod 2771 ${INSTALL_DIR}
+chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
+
+# With this line, subdirectories inherit the group by default and
+# blocks r/w access to the directory by others on the system.
+chmod 2771 ${SUBMITTY_INSTALL_DIR}
+
 
 echo "Done."
 exit 0

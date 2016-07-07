@@ -11,14 +11,14 @@
 # ======================================================================
 # these variables will be replaced by INSTALL.sh
 
-HSS_INSTALL_DIR=__INSTALL__FILLIN__HSS_INSTALL_DIR__
-HSS_DATA_DIR=__INSTALL__FILLIN__HSS_DATA_DIR__
+SUBMITTY_INSTALL_DIR=__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__
+SUBMITTY_DATA_DIR=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__
 
 # ======================================================================
 # some error checking on the queues (& permissions of this user)
 
-INTERACTIVE_QUEUE=$HSS_DATA_DIR/to_be_graded_interactive
-BATCH_QUEUE=$HSS_DATA_DIR/to_be_graded_batch
+INTERACTIVE_QUEUE=$SUBMITTY_DATA_DIR/to_be_graded_interactive
+BATCH_QUEUE=$SUBMITTY_DATA_DIR/to_be_graded_batch
 
 if [ ! -d "$INTERACTIVE_QUEUE" ]; then
     echo "ERROR: interactive queue $INTERACTIVE_QUEUE does not exist"
