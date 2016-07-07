@@ -346,9 +346,12 @@ HTML;
 
         print <<<HTML
                 <td style="overflow: hidden;">
-                    <textarea name="comment-{$num}" rows="1" style="width: 885px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" {$readonly}>{$question['question_message']}</textarea>
-                    <div class="btn btn-mini btn-default" onclick="toggleTA({$num})" style="margin-top:-5px;">TA Note</div>
+                    <textarea name="comment-{$num}" rows="1" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" {$readonly}>{$question['question_message']}</textarea>
+                    <div class="btn btn-mini btn-default" onclick="toggleQuestion({$num}, 'individual')" style="margin-top:-5px;">TA Note</div>
+                    <div class="btn btn-mini btn-default" onclick="toggleQuestion({$num}, 'student')" style="margin-top:-5px;">Student Note</div>
                     <textarea name="ta-{$num}" id="individual-{$num}" rows="1" placeholder=" Message to TA" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; display: {$display_ta};">{$question['question_grading_note']}</textarea>
+                    <!-- Some fields need to change here TODO -->
+                    <textarea name="student-{$num}" id="student-{$num}" rows="1" placeholder=" Message to Student" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; display: {$display_ta};">{$question['question_grading_note']}</textarea>
                 </td>
 
                 <td style="background-color:#EEE;">
@@ -956,18 +959,19 @@ HTML;
     $('#date_grade').datetimepicker('setDate', (new Date("{$g_grade_start_date}")));;
     $('#date_released').datetimepicker('setDate', (new Date("{$g_grade_released_date}")));;
 
-    function toggleTA(question) {
-        if(document.getElementById("individual-" + question ).style.display == "block") {
-            $("#individual-" + question ).animate({marginBottom:"-80px"});
-            setTimeout(function(){document.getElementById("individual-"+ question ).style.display = "none";}, 175);
+    function toggleQuestion(question, role) {
+        if(document.getElementById(role +"-" + question ).style.display == "block") {
+            $("#" + role + "-" + question ).animate({marginBottom:"-80px"});
+            setTimeout(function(){document.getElementById(role + "-"+ question ).style.display = "none";}, 175);
 
         }
         else {
-            $("#individual-" + question ).animate({marginBottom:"5px"});
-            setTimeout(function(){document.getElementById("individual-" + question ).style.display = "block";}, 175);
+            $("#" + role + "-" + question ).animate({marginBottom:"5px"});
+            setTimeout(function(){document.getElementById(role+"-" + question ).style.display = "block";}, 175);
         }
         calculatePercentageTotal();
     }
+    
 HTML;
 
     print <<<JS
@@ -1010,9 +1014,12 @@ HTML;
         var sBox = selectBox(newQ);
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
             <td style="overflow: hidden;"> \
-                <textarea name="comment-'+newQ+'" rows="1" style="width: 885px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea> \
-                <div class="btn btn-mini btn-default" onclick="toggleTA(' + newQ + ')" style="margin-top:-5px;">TA Note</div> \
+                <textarea name="comment-'+newQ+'" rows="1" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea> \
+                <div class="btn btn-mini btn-default" onclick="toggleQuestion(' + newQ + ',\'individual\''+')" style="margin-top:-5px;">TA Note</div> \
+                <div class="btn btn-mini btn-default" onclick="toggleQuestion(' + newQ + ',\'student\''+')" style="margin-top:-5px;">Student Note</div> \
                 <textarea name="ta-'+newQ+'" id="individual-'+newQ+'" rows="1" placeholder=" Message to TA" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
+                <!-- Some fields need to change here TODO --> \
+                <textarea name="student-'+newQ+'" id="student-'+newQ+'" rows="1" placeholder=" Message to Student" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
             </td> \
             <td style="background-color:#EEE;">' + sBox + ' \
                 <input onclick="calculatePercentageTotal();" name="ec-'+newQ+'" type="checkbox" /> \
@@ -1065,7 +1072,7 @@ HTML;
         var row = $('tr#row-'+ oldNum);
         row.attr('id', 'row-' + newNum);
         row.find('textarea[name=comment-' + oldNum + ']').attr('name', 'comment-' + newNum);
-        row.find('div.btn').attr('onclick', 'toggleTA(' + newNum + ')');
+        row.find('div.btn').attr('onclick', 'toggleQuestion(' + newNum + ',"individual"' + ')');
         row.find('textarea[name=ta-' + oldNum + ']').attr('name', 'ta-' + newNum).attr('id', 'individual-' + newNum);
         row.find('select[name=point-' + oldNum + ']').attr('name', 'point-' + newNum);
         row.find('input[name=ec-' + oldNum + ']').attr('name', 'ec-' + newNum);
