@@ -6,8 +6,7 @@ include "../header.php";
 
 check_administrator();
 
-if($user_is_administrator)
-{
+if($user_is_administrator){
     $have_old = false;
     $has_grades = false;
     $old_gradeable = array(
@@ -25,6 +24,9 @@ if($user_is_administrator)
     $old_questions = array();
     $old_components = array();
 
+    $num_numeric = 0;
+    $num_text = 0;
+    
     if (isset($_GET['action']) && $_GET['action'] == 'edit') {
         $gradeable_id = $_GET['id'];
         Database::query("SELECT * FROM gradeable WHERE g_id=?",array($gradeable_id));
@@ -36,6 +38,15 @@ if($user_is_administrator)
         $old_components = json_encode(Database::rows());
         $have_old = true;
         
+        // get the number of text and numeric fields for the form
+        if ($old_gradeable['g_gradeable_type']==2){
+            $params=array($gradeable_id);
+            $db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='false'", $params);
+            $num_numeric = $db->row()['cnt'];
+            $db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", $params);
+            $num_text = $db->row()['cnt'];
+        }
+        
         //figure out if the gradeable has grades or not
         $db->query("SELECT COUNT(*) as cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id 
                     INNER JOIN gradeable_component_data AS gcd ON gcd.gc_id=gc.gc_id WHERE g.g_id=?",array($gradeable_id));
@@ -45,6 +56,7 @@ if($user_is_administrator)
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
     $account_subpages_unlock = true;
 
+    
     function selectBox($question, $grade = 0) {
         $retVal = "<select name='point-{$question}' class='points' onchange='calculatePercentageTotal();'>";
         for($i = 0; $i <= 100; $i += 0.5) {
@@ -87,7 +99,6 @@ if($user_is_administrator)
     }
 
     $have_old = json_encode($have_old);
-    $rubric_sep_checked = ($old_rubric['rubric_parts_sep'] == 1) ? "checked" : "";
 
     $extra = ($has_grades) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
     print <<<HTML
@@ -297,9 +308,8 @@ HTML;
                 <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
                     <thead style="background: #E1E1E1;">
                         <tr>
-                            <!-- <th style="width:61px;">Part</th> -->
                             <th>Question</th>
-                            <th style="width:100px;">Points</th>
+                            <th style="width:120px;">Points</th>
                         </tr>
                     </thead>
 
@@ -308,108 +318,80 @@ HTML;
 
     if (count($old_questions) == 0) {
         if (__USE_AUTOGRADER__) {
-            $old_questions[0][1] = array('question_message'      => "AUTO-GRADING",
+            $old_questions[0] = array('question_message'      => "AUTO-GRADING",
                                          'question_grading_note' => "",
                                          'question_total'        => 0,
                                          'question_extra_credit' => 0);
-            $old_questions[0][2] = array('question_message'      => "AUTO-GRADING EXTRA CREDIT",
+            $old_questions[1] = array('question_message'      => "AUTO-GRADING EXTRA CREDIT",
                                          'question_grading_note' => "",
                                          'question_total'        => 0,
                                          'question_extra_credit' => 1);
         }
-        $old_questions[1][1] = array('question_message'      => "",
+        $old_questions[2] = array('question_message'      => "",
                                      'question_grading_note' => "",
                                      'question_total'        => 0,
                                      'question_extra_credit' => 0);
     }
 
-    foreach ($old_questions as $k => $v) {
-        $count = count($old_questions[$k]) + (($k > 0) ? 1 : 0);
 
-        $disabled = ($k == 0) ? "disabled" : "";
-        $readonly = ($k == 0) ? "readonly" : "";
+    
+    foreach ($old_questions as $num => $question) {
+        $disabled = ($num<2) ? "disabled" : "";
+        $readonly = ($num<2) ? "readonly" : "";
+        print <<<HTML
+            <tr class="rubric-row" id="row-{$num}">
+HTML;
 
-        $first = true;
-        foreach ($v as $num => $question) {
+        $display_ta = ($question['question_grading_note'] != "") ? 'block' : 'none';
+
+        print <<<HTML
+                <td style="overflow: hidden;">
+                    <textarea name="comment-{$num}" rows="1" style="width: 885px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" {$readonly}>{$question['question_message']}</textarea>
+                    <div class="btn btn-mini btn-default" onclick="toggleTA({$num})" style="margin-top:-5px;">TA Note</div>
+                    <textarea name="ta-{$num}" id="individual-{$num}" rows="1" placeholder=" Message to TA" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; display: {$display_ta};">{$question['question_grading_note']}</textarea>
+                </td>
+
+                <td style="background-color:#EEE;">
+HTML;
+        $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
+        print selectBox($num, $old_grade);
+        $checked = ($question['question_extra_credit'] == 1) ? "checked" : "";
+        print (($question['question_extra_credit'] == 1 && $disabled == "disabled") ? "<input type='hidden' name='ec-{$num}' value='on' />" : "");
+        print <<<HTML
+                    <input onclick='calculatePercentageTotal();' name="ec-{$num}" type="checkbox" {$checked} {$disabled} />
+HTML;
+        if($num > 1){
             print <<<HTML
-                <tr id="row-{$k}-{$num}">
-HTML;
-            if ($first) {
-                print <<<HTML
-                    <td rowspan="{$count}" id="part-{$k}" style="position:relative; display: none;">
-                        <span id='spanPart{$k}'>{$k}</span><br />
-HTML;
-                if ($k > 0) {
-                    print <<<HTML
-                        <a id="delete-{$k}" class="question-icon" onclick="deletePart({$k});"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
-                        <!--<a id="down-{$k}" class="question-icon" onclick="movePartDown({$k});"><img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
-                        <a id="up-{$k}" class="question-icon" onclick="movePartUp({$k});"><img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>-->
-                        <br />
-                        <div class='part_submission_id'>
-                            <input style='width: 47px' type="text" name="rubric_part_{$k}_id" value="{$rubric_parts_submission_id[$k]}" />
-                        </div>
-HTML;
-                }
-
-                print <<<HTML
-                    </td>
-HTML;
-                $first = false;
-            }
-
-            $display_ta = ($question['question_grading_note'] != "") ? 'block' : 'none';
-
-            print <<<HTML
-                    <td style="overflow: hidden;">
-                        <textarea name="comment-{$k}-{$num}" rows="1" style="width: 885px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" {$readonly}>{$question['question_message']}</textarea>
-                        <div class="btn btn-mini btn-default" onclick="toggleTA({$k}, {$num})" style="margin-top:-5px;">TA Note</div>
-                        <textarea name="ta-{$k}-{$num}" id="individual-{$k}-{$num}" rows="1" placeholder=" Message to TA" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; display: {$display_ta};">{$question['question_grading_note']}</textarea>
-                    </td>
-
-                    <td style="background-color:#EEE;">
-HTML;
-            $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
-            print selectBox($k, $num, $old_grade);
-            $checked = ($question['question_extra_credit'] == 1) ? "checked" : "";
-            print (($question['question_extra_credit'] == 1 && $disabled == "disabled") ? "<input type='hidden' name='ec-{$k}-{$num}' value='on' />" : "");
-            print <<<HTML
-
-                        <input onclick='calculatePercentageTotal();' name="ec-{$k}-{$num}" type="checkbox" {$checked} {$disabled} />
-HTML;
-            if ($k != 0) {
-                print <<<HTML
-                        <br />
-                        <a id="delete-{$k}-{$num}" class="question-icon" onclick="deleteQuestion({$k}, {$num});"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
-                        <a id="down-{$k}-{$num}" class="question-icon" onclick="moveQuestionDown({$k}, {$num});"><img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
-                        <a id="up-{$k}-{$num}" class="question-icon" onclick="moveQuestionUp({$k}, {$num});"><img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
-HTML;
-            }
-            print <<<HTML
-                    </td>
-                </tr>
+                    <br />
+                    <a id="delete-{$num}" class="question-icon" onclick="deleteQuestion({$num});"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+                    <a id="down-{$num}" class="question-icon" onclick="moveQuestionDown({$num});"><img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+                    <a id="up-{$num}" class="question-icon" onclick="moveQuestionUp({$num});"><img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
 HTML;
         }
-        if ($k > 0) {
-            print <<<HTML
-                <tr id="add-{$k}">
-                    <td style="overflow: hidden;">
-                        <div class="btn btn-small btn-success"  onclick="addQuestion({$k})"><i class="icon-plus icon-white"></i> Question</div>
-                    </td>
-
-                    <td style="border-left: 1px solid #F9F9F9;"></td>
-                </tr>
+        print <<<HTML
+                </td>
+            </tr>
 HTML;
-        }
     }
-    print <<<HTML
+
+        print <<<HTML
+            <tr id="add-question">
+                <td style="overflow: hidden;">
+                    <div class="btn btn-small btn-success" id="rubric-add-button" onclick="addQuestion()"><i class="icon-plus icon-white"></i> Question</div>
+                </td>
+
+                <td style="border-left: 1px solid #F9F9F9;"></td>
+            </tr>
+HTML;
+
+        print <<<HTML
                 <tr>
                     <td style="border-left: 1px solid #F9F9F9;"></td>
                     <td style="border-left: 1px solid #F9F9F9;"></td>
                 </tr>
 HTML;
-    print <<<HTML
+        print <<<HTML
                     <tr>
-                        <td style="background-color: #EEE; border-top: 2px solid #CCC;"></td>
                         <td style="background-color: #EEE; border-top: 2px solid #CCC; border-left: 1px solid #EEE;"><strong>TOTAL POINTS</strong></td>
                         <td style="background-color: #EEE; border-top: 2px solid #CCC;"><strong id="totalCalculation"></strong></td>
                     </tr>
@@ -471,7 +453,8 @@ HTML;
                 <br /> <br />
                 
                 <div class="multi-field-wrapper-numeric">
-                  <table class="numerics-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
+                    <h5>Numeric Items</h5>
+                    <table class="numerics-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
                         <!-- Headings -->
                         <thead style="background: #E1E1E1;">
                              <tr>
@@ -488,27 +471,35 @@ HTML;
                                <input style="width: 200px" name="numeric-label-0" type="text" class="numeric-label" value="0"/> 
                            </td>  
                             <td>     
-                                <input style="width: 60px" type="text" name="max-score-0" class="max-score" value="" /> 
+                                <input style="width: 60px" type="text" name="max-score-0" class="max-score" value="0" /> 
                            </td>                           
                            <td>     
                                 <input type="checkbox" name="numeric-extra-0" class="numeric-extra" value="" />
                            </td> 
                         </tr>
                       
-                       <tr class="multi-field" id="mult-field-1">
+                    </table>
+                    
+                    <h5>Text Items</h5>
+                    <table class="text-table table table-bordered" style=" border: 1px solid #AAA; max-width:25% !important;">
+                        <thead style="background: #E1E1E1;">
+                             <tr>
+                                <th> Label </th>
+                            </tr>
+                        </thead>
+                        <tbody style="background: #f9f9f9;">
+                        
+                        <!-- This is a bit of a hack, but it works (^_^) -->
+                        <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="numeric-label-1" type="text" class="numeric-label" value="1"/> 
+                               <input style="width: 200px" name="text-label-0" type="text" class="text-label" value="0"/> 
                            </td>  
-                            <td>     
-                                <input style="width: 60px" type="text" name="max-score-1" class="max-score" value="" /> 
-                           </td>                           
-                           <td>     
-                                <input type="checkbox" name="numeric-extra-1" class="numeric-extra" value="" />
-                           </td> 
                         </tr>
-                  </table>
-                  <button type="button" id="add-numeric-field">Add </button>  
-                  <button type="button" id="remove-numeric-field" id="remove-numeric" style="visibilty:hidden;">Remove</button>   
+                    </table>
+                   
+                  
+                  <!-- <button type="button" id="add-numeric-field">Add </button>  -->
+                  <!-- <button type="button" id="remove-numeric-field" id="remove-numeric" style="visibilty:hidden;">Remove</button> -->
                 </div>  
                 <br /> <br />
                 Do you want a box for an (optional) message from the TA to the student?
@@ -591,7 +582,6 @@ HTML;
         $i++;
     }
     
-    // TODO: Style this less dumb
     $margintop = ($i*-40) . "px";
     $marginright =  650-(count($rubrics)*25) . "px";
     print <<<HTML
@@ -767,7 +757,6 @@ HTML;
         
         $(':radio').each(function(){
            if(! $(this).is(':checked')){
-               //alert($(this).attr('class'));
                if($(this).attr('class') !== undefined){
                   // now remove all of the child elements names for the radio button
                   $('.' + $(this).attr('class')).find('input, textarea, select').each(function(){
@@ -837,29 +826,79 @@ HTML;
         
         $('#remove-checkpoint-field').hide();
 
-        var numNumeric=1;
+        var numNumeric=0;
+        var numText=0;
         
-        function addNumeric(){
+        //Remove the code with hiding add and remove buttons
+        
+        function addNumeric(label, max_score, extra_credit){
             var wrapper = $('.numerics-table');
             numNumeric++;
-            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numNumeric).find('.numeric-label').val(numNumeric).focus();
+            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numNumeric).find('.numeric-label').val(label).focus();
             $('#mult-field-' + numNumeric,wrapper).find('.numeric-extra').attr('name','numeric-extra-'+numNumeric);
             $('#mult-field-' + numNumeric,wrapper).find('.numeric-label').attr('name','numeric-label-'+numNumeric);
-            $('#mult-field-' + numNumeric,wrapper).find('.max-score').attr('name','max-score-'+numNumeric);
-            $('#remove-numeric-field').show();
+            $('#mult-field-' + numNumeric,wrapper).find('.max-score').attr('name','max-score-'+numNumeric).val(max_score);
+            if(extra_credit){
+                $('#mult-field-' + numNumeric,wrapper).find('.numeric-extra').attr('checked',true); 
+            }
             $('#mult-field-' + numNumeric,wrapper).show();
         }
+        
+        function removeNumeric(){
+            if (numNumeric > 0){
+                $('#mult-field-'+numNumeric,'.numerics-table').remove();
+            }
+            --numNumeric;
+        }
+        
+        function addText(label){
+            var wrapper = $('.text-table');
+            numText++;
+            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numText).find('.text-label').val(label).focus();
+            $('#mult-field-' + numText,wrapper).find('.text-label').attr('name','text-label-'+numText);
+            $('#mult-field-' + numText,wrapper).show();
+        }
+        function removeText(){
+            if (numText > 0){
+               $('#mult-field-'+numText,'.text-table').remove(); 
+            }
+            --numText;
+        }
+        
+        $('#numeric-num-text-items').on('input', function(e){
+            var requestedText = this.value;
+            if (isNaN(requestedText) || requestedText < 0){
+               requestedText = 0;
+            }
+            while(numText < requestedText){
+                addText('');   
+            }
+            while(numText > requestedText){
+               removeText();
+            }
+        });
+
+        
+        $('#numeric-num-items').on('input',function(e){
+           var requestedNumeric = this.value;
+           if (isNaN(requestedNumeric) || requestedNumeric < 0){
+               requestedNumeric = 0;
+           }
+           while(numNumeric < requestedNumeric){
+                addNumeric(numNumeric+1,0,false);   
+           }
+           while(numNumeric > requestedNumeric){
+               removeNumeric();
+           }
+        });
+        
+        //REMOVE THIS 
         $('.multi-field-wrapper-numeric').each(function() {
             $("#add-numeric-field", $(this)).click(function(e) {
-                addNumeric();
+                addNumeric(numNumeric+1,0,false);
             });
             $('#remove-numeric-field').click(function() {
-                if (numNumeric > 1){
-                    $('#mult-field-'+numNumeric,'.numerics-table').remove();
-                    if(--numNumeric === 1){
-                        $('#remove-numeric-field').hide();
-                    }
-                }
+                removeNumeric();
             });
         });
         $('#remove-numeric-field').hide();
@@ -887,6 +926,18 @@ HTML;
             $('#checkpoints').show();
         }
         else if ($('#radio-numeric').is(':checked')){ 
+            var components = {$old_components};
+            //TODO fix the ta-message
+            $.each(components, function(i,elem){
+                if(i < {$num_numeric}){
+                    addNumeric(elem.gc_title,elem.gc_max_value,elem.gc_is_extra_credit);
+                }
+                else{
+                    addText(elem.gc_title);
+                }
+            });
+            $('#numeric-num-items').val({$num_numeric});
+            $('#numeric-num-text-items').val({$num_text});
             $('#numeric').show();
         }
         
@@ -905,27 +956,19 @@ HTML;
     $('#date_grade').datetimepicker('setDate', (new Date("{$g_grade_start_date}")));;
     $('#date_released').datetimepicker('setDate', (new Date("{$g_grade_released_date}")));;
 
-    function toggleTA(part, question) {
-        if(document.getElementById("individual-" + part + "-" + question ).style.display == "block") {
-            $("#individual-" + part + "-" + question ).animate({marginBottom:"-80px"});
-            setTimeout(function(){document.getElementById("individual-" + part + "-" + question ).style.display = "none";}, 175);
+    function toggleTA(question) {
+        if(document.getElementById("individual-" + question ).style.display == "block") {
+            $("#individual-" + question ).animate({marginBottom:"-80px"});
+            setTimeout(function(){document.getElementById("individual-"+ question ).style.display = "none";}, 175);
 
         }
         else {
-            $("#individual-" + part + "-" + question ).animate({marginBottom:"5px"});
-            setTimeout(function(){document.getElementById("individual-" + part + "-" + question ).style.display = "block";}, 175);
+            $("#individual-" + question ).animate({marginBottom:"5px"});
+            setTimeout(function(){document.getElementById("individual-" + question ).style.display = "block";}, 175);
         }
-
         calculatePercentageTotal();
     }
 HTML;
-
-    $parts = "[";
-    for($i = 0; $i <= max(array_keys($old_questions)); $i++) {
-        $parts .= (isset($old_questions[$i]) ? (count($old_questions[$i]) + (($i > 0) ? 1 : 0)) : 0).",";
-    }
-    $parts = rtrim($parts, ",");
-    $parts .= "]";
 
     print <<<JS
     
@@ -960,96 +1003,34 @@ HTML;
         }
     });
 
-    var parts = {$parts};
-
-    function addPart() {
-        parts.push(2);
-        var partName = parts.length - 1;
-        var partNameString = "" + partName;
-        var table = document.getElementById("rubricTable");
-        var row = table.insertRow(table.rows.length - 2);
-        row.id = 'row-' + partName + '-1';
-        var cell1 = row.insertCell(0);
-        cell1.rowSpan = "2";
-        cell1.setAttribute("id", "part-"+partName);
-        var cell2 = row.insertCell(1);
-        cell2.style.overflow = "hidden";
-        var cell3 = row.insertCell(2);
-        cell3.style.backgroundColor = "#EEE";
-        cell1.innerHTML = '<span id="spanPart' + partName + '">' + partNameString + "</span><br />" +
-        '<a id="delete-' + partName + '" class="question-icon" onclick="deletePart(' + partName + ');"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>' +
-        '<br />' +
-        "<div class='part_submission_id'><input style='width: 47px;' type='text' name='rubric_part_"+partNameString+"_id' value='_part"+partNameString+"' /></div>";
-        cell2.innerHTML = '<textarea name="comment-' + partName + '-1" rows="1" style="width: 885px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea></span>'+
-                          '<div class="btn btn-mini btn-default" onclick="toggleTA(' + partName + ',1)" style="margin-top:-5px;">TA Note</div>'+
-                          '<textarea name="ta-' + partName + '-1" id="individual-' + partName + '-1" rows="1" placeholder=" Message to TA" style="width: 954px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: -80px; display: none;"></textarea>';
-        cell3.innerHTML = selectBox(partName, "1") + ' <input onclick="calculatePercentageTotal();" name="ec-' + partName + '-1" type="checkbox" />';
-
-        cell3.innerHTML += "<br />" +
-                        "<a id='delete-" + partName + "-1' class=\"question-icon\" onclick=\"deleteQuestion(" + partName + ", 1);\"><img class=\"question-icon-cross\" src=\"../toolbox/include/bootstrap/img/glyphicons-halflings.png\"></a>" +
-                        "<a id='down-" + partName + "-1' class=\"question-icon\" onclick=\"moveQuestionDown(" + partName + ", 1);\"><img class=\"question-icon-down\" src=\"../toolbox/include/bootstrap/img/glyphicons-halflings.png\"></a>" +
-                        "<a id='up-" + partName + "-1' class=\"question-icon\" onclick=\"moveQuestionUp(" + partName + ", 1);\"><img class=\"question-icon-up\" src=\"../toolbox/include/bootstrap/img/glyphicons-halflings.png\"></a>";
-        row = table.insertRow(table.rows.length - 2);
-        row.id = 'add-' + partName;
-        cell1 = row.insertCell(0);
-        cell2 = row.insertCell(1);
-        cell2.style.borderLeft = '1px solid #F9F9F9';
-        cell1.innerHTML='<div class="btn btn-small btn-success"  onclick="addQuestion('+partName+')"><i class="icon-plus icon-white"></i> Question</div>';
-        var elem = $("input[name='part_count']");
-        elem.val(parseInt(elem.val())+1);
-        togglePartSubmissionId();
+    function addQuestion(){
+        //get the last question number
+        var num = parseInt($('.rubric-row').last().attr('id').split('-')[1]);
+        var newQ = num+1;
+        var sBox = selectBox(newQ);
+        $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
+            <td style="overflow: hidden;"> \
+                <textarea name="comment-'+newQ+'" rows="1" style="width: 885px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea> \
+                <div class="btn btn-mini btn-default" onclick="toggleTA(' + newQ + ')" style="margin-top:-5px;">TA Note</div> \
+                <textarea name="ta-'+newQ+'" id="individual-'+newQ+'" rows="1" placeholder=" Message to TA" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
+            </td> \
+            <td style="background-color:#EEE;">' + sBox + ' \
+                <input onclick="calculatePercentageTotal();" name="ec-'+newQ+'" type="checkbox" /> \
+                <br /> \
+                <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a> \
+                <a id="down-'+newQ+'" class="question-icon" onclick="moveQuestionDown('+newQ+');"><img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a> \
+                <a id="up-'+newQ+'" class="question-icon" onclick="moveQuestionUp('+newQ+');"><img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a> \
+            </td> \
+        </tr>');
     }
 
-    function addQuestion(partName)
-    {
-        var part = Number(partName);
-        if (part <= 0) {
-            return;
-        }
-
-        var number = 0;
-        for (var i = 0; i < parts.length && i <= part; i++) {
-            number += parts[i];
-        }
-
-        document.getElementById("part-"+partName).rowSpan = '' + (Number(document.getElementById("part-"+partName).rowSpan) + 1);
-        var table = document.getElementById("rubricTable");
-        var row = table.insertRow(number);
-        row.id = 'row-' + partName + '-' + parts[part];
-        var cell1 = row.insertCell(0);
-        cell1.style.overflow = "hidden";
-        var cell2 = row.insertCell(1);
-        cell2.style.backgroundColor = "#EEE";
-        cell1.innerHTML = '<textarea name="comment-' + partName + "-" + parts[part] + '" rows="1" style="width:885px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea></span>'+
-                          '<div class="btn btn-mini btn-default" onclick="toggleTA(' + partName + "," + parts[part] + ')" style="margin-top:-5px;">TA Note</div>'+
-                          '<textarea name="ta-' + partName + "-" + parts[part] + '" id="individual-' + partName + "-" + parts[part] + '" rows="1" placeholder=" Message to TA" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: -80px; display: none;"></textarea>';
-        cell2.innerHTML = selectBox(partName, parts[part]) + ' <input onclick="calculatePercentageTotal();" name="ec-'+partName+'-'+parts[part]+'" type="checkbox" />';
-        cell2.innerHTML += "<br />" +
-                        "<a id='delete-" + partName + "-" + parts[part]+"' class=\"question-icon\" onclick=\"deleteQuestion(" + partName + ", " + parts[part] + ");\"><img class=\"question-icon-cross\" src=\"../toolbox/include/bootstrap/img/glyphicons-halflings.png\"></a>" +
-                        "<a id='down-" + partName + "-" + parts[part]+"' class=\"question-icon\" onclick=\"moveQuestionDown(" + partName + ", " + parts[part] + ");\"><img class=\"question-icon-down\" src=\"../toolbox/include/bootstrap/img/glyphicons-halflings.png\"></a>" +
-                        "<a id='up-" + partName + "-" + parts[part]+"' class=\"question-icon\" onclick=\"moveQuestionUp(" + partName + ", " + parts[part] + ");\"><img class=\"question-icon-up\" src=\"../toolbox/include/bootstrap/img/glyphicons-halflings.png\"></a>";
-        parts[Number(partName)] += 1;
-
-    }
-
-    function selectBox(part, question)
-    {
-        var retVal = '<select name="point-' + part + "-" + question + '" class="points" onchange="calculatePercentageTotal()">';
+    function selectBox(question){
+        var retVal = '<select name="point-' + question + '" class="points" onchange="calculatePercentageTotal()">';
         for(var i = 0; i <= 100; i++) {
             retVal = retVal + '<option>' + (i * 0.5) + '</option>';
         }
         retVal = retVal + '</select>';
-
         return retVal;
-    }
-
-    function togglePartSubmissionId() {
-        if ($("input[name='rubric_parts_sep']").prop('checked') == true) {
-            $('.part_submission_id').show();
-        }
-        else {
-            $('.part_submission_id').hide();
-        }
     }
 
     function calculatePercentageTotal() {
@@ -1067,77 +1048,43 @@ HTML;
         document.getElementById("totalCalculation").innerHTML = total + " (" + ec + ")";
     }
 
-    function deleteQuestion(part, question) {
-        if (part <= 0 || question <= 0) {
+    function deleteQuestion(question) {
+        if (question <= 0) {
             return;
         }
-
-        var row = $('tr#row-' + part + '-' + question);
-
-        var part_id = "";
-        if (question == 1) {
-            part_id = row.children()[0].children[2].children[0].value;
-        }
+        var row = $('tr#row-'+ question);
         row.remove();
-        for(var i = question+1; i < parts[part]; i++) {
-            updateRow(part, part, i, i-1);
-        }
-        parts[part] -= 1;
-
-        if (parts[part] == 1) {
-            $('tr#add-' + part).remove();
-            for (var ii = part + 1; ii < parts.length; ii++) {
-                for (var jj = 1; jj < parts[ii]; jj++) {
-                    updateRow(ii, ii-1, jj, jj);
-                }
-                $('span#spanPart' + ii).text(ii-1).attr('id', 'spanPart' + (ii-1));
-                $('input[name=rubric_part_' + ii + '_id').attr('name', 'rubric_part_' + (ii-1) + '_id');
-                $('tr#add-' + ii).attr('id', 'add-' + (ii-1)).find('div.btn').attr('onclick', 'addQuestion(' + (ii-1) + ')');
-                $('td#part-' + ii).attr('id', 'part-' + (ii-1));
-                $('a#delete-' + ii).attr('id', 'delete-' + (ii-1)).attr('onclick', 'deletePart(' + (ii-1) + ');');
-            }
-            parts.splice(part, 1);
-        }
-        else {
-            if (question == 1) {
-                $('tr#row-' + part + '-1').prepend('' +
-                '<td rowspan="' + parts[part] + '" id="part-' + part + '"><span id="spanPart' + part + '">' + part + '</span><br />' +
-                '<a id="delete-' + part + '" class="question-icon" onclick="deletePart(' + part + ');"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>' +
-                '<br />' +
-                '<div class="part_submission_id" style="display: none;"><input style="width: 47px;" type="text" name="rubric_part_' + part + '_id" value="' + part_id + '"></div></td>');
-            }
-            else {
-                $('tr#row-' + part + '-1').children('#part-' + part).attr('rowspan', parts[part]);
-            }
+        var totalQ = parseInt($('.rubric-row').last().attr('id').split('-')[1]);
+        for(var i=question+1; i<= totalQ; ++i){
+            updateRow(i,i-1);
         }
         calculatePercentageTotal();
     }
 
-    function updateRow(oldPart, newPart, oldNum, newNum) {
-        var row = $('tr#row-' + oldPart + '-' + oldNum);
-        row.attr('id', 'row-' + newPart + '-' + newNum);
-        row.find('textarea[name=comment-' + oldPart + '-' + oldNum + ']').attr('name', 'comment-' + newPart + '-' + newNum);
-        row.find('div.btn').attr('onclick', 'toggleTA(' + newPart + ',' + newNum + ')');
-        row.find('textarea[name=ta-' + oldPart + '-' + oldNum + ']').attr('name', 'ta-' + newPart + '-' + newNum).attr('id', 'individual-' + newPart + '-' + newNum);
-        row.find('select[name=point-' + oldPart + '-' + oldNum + ']').attr('name', 'point-' + newPart + '-' + newNum);
-        row.find('input[name=ec-' + oldPart + '-' + oldNum + ']').attr('name', 'ec-' + newPart + '-' + newNum);
-        row.find('a[id=delete-' + oldPart + '-' + oldNum + ']').attr('id', 'delete-' + newPart + '-' + newNum).attr('onclick', 'deleteQuestion(' + newPart + ', '+ newNum + ')');
-        row.find('a[id=down-' + oldPart + '-' + oldNum + ']').attr('id', 'down-' + newPart + '-' + newNum).attr('onclick', 'moveQuestionDown(' + newPart + ', '+ newNum + ')');
-        row.find('a[id=up-' + oldPart + '-' + oldNum + ']').attr('id', 'up-' + newPart + '-' + newNum).attr('onclick', 'moveQuestionUp(' + newPart + ', '+ newNum + ')');
+    function updateRow(oldNum, newNum) {
+        var row = $('tr#row-'+ oldNum);
+        row.attr('id', 'row-' + newNum);
+        row.find('textarea[name=comment-' + oldNum + ']').attr('name', 'comment-' + newNum);
+        row.find('div.btn').attr('onclick', 'toggleTA(' + newNum + ')');
+        row.find('textarea[name=ta-' + oldNum + ']').attr('name', 'ta-' + newNum).attr('id', 'individual-' + newNum);
+        row.find('select[name=point-' + oldNum + ']').attr('name', 'point-' + newNum);
+        row.find('input[name=ec-' + oldNum + ']').attr('name', 'ec-' + newNum);
+        row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
+        row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
+        row.find('a[id=up-' + oldNum + ']').attr('id', 'up-' + newNum).attr('onclick', 'moveQuestionUp(' + newNum + ')');
     }
 
-    function moveQuestionDown(part, question) {
-        if ((parts[part] - 1) == question || question <= 0 || part <= 0) {
+    function moveQuestionDown(question) {
+        if (question <= 1) {
             return;
         }
 
-        var currentRow = $('tr#row-' + part + '-' + question);
-        var newRow = $('tr#row-' + part + '-' + (question+1));
+        var currentRow = $('tr#row-' + question);
+        var newRow = $('tr#row-' + (question+1));
         var child = 0;
         if (question == 1) {
             child = 1;
         }
-
 
         var temp = currentRow.children()[child].children[0].value;
         currentRow.children()[child].children[0].value = newRow.children()[0].children[0].value;
@@ -1158,18 +1105,17 @@ HTML;
         newRow.children()[1].children[1].checked = temp;
     }
 
-    function moveQuestionUp(part, question) {
-        if (question == 1 || question <= 0 || part <= 0) {
+    function moveQuestionUp(question) {
+        if (question <=2) {
             return;
         }
 
-        var currentRow = $('tr#row-' + part + '-' + question);
-        var newRow = $('tr#row-' + part + '-' + (question-1));
+        var currentRow = $('tr#row-' + question);
+        var newRow = $('tr#row-' + (question-1));
         var child = 0;
         if (question == 2) {
             child = 1;
         }
-
 
         var temp = currentRow.children()[0].children[0].value;
         currentRow.children()[0].children[0].value = newRow.children()[child].children[0].value;
@@ -1190,59 +1136,6 @@ HTML;
         newRow.children()[child].children[1].checked = temp;
     }
 
-    function deletePart(part) {
-        if (part < 1) {
-            return;
-        }
-
-        for (var i = 1; i < parts[part]; i++) {
-            $('tr#row-' + part + '-' + i).remove();
-        }
-        $('tr#add-' + part).remove();
-
-
-        for (var ii = part + 1; ii < parts.length; ii++) {
-            for (var jj = 1; jj < parts[ii]; jj++) {
-                updateRow(ii, ii-1, jj, jj);
-            }
-            $('span#spanPart' + ii).text(ii-1).attr('id', 'spanPart' + (ii-1));
-            $('input[name=rubric_part_' + ii + '_id').attr('name', 'rubric_part_' + (ii-1) + '_id');
-            $('tr#add-' + ii).attr('id', 'add-' + (ii-1)).find('div.btn').attr('onclick', 'addQuestion(' + (ii-1) + ')');;
-            $('td#part-' + ii).attr('id', 'part-' + (ii-1));
-            $('a#delete-' + ii).attr('id', 'delete-' + (ii-1)).attr('onclick', 'deletePart(' + (ii-1) + ');');
-            //$('a#down-' + ii).attr('id', 'down-' + (ii-1)).attr('onclick', 'movePartDown(' + (ii-1) + ');');
-            //$('a#up-' + ii).attr('id', 'up-' + (ii-1)).attr('onclick', 'movePartUp(' + (ii-1) + ');');
-        }
-        parts.splice(part, 1);
-
-        calculatePercentageTotal();
-    }
-    
-    function movePartDown(part) {
-        if (parts.length - 1 <= part || part <= 0) {
-            return;
-        }
-
-        for (var i = 1; i < parts[part]; i++) {
-            updateRow(part, -1, i, i);
-        }
-
-        for (var j = 1; j < parts[part+1]; j++) {
-            updateRow(part+1, part, j, j);
-        }
-
-        for (var k = 1; k < parts[part]; k++) {
-            updateRow(-1, part+1, k, k);
-        }
-    }
-
-    function movePartUp(part) {
-        if (part <= 1 || parts.length - 1 < part) {
-            return;
-        }
-    }
-
-    togglePartSubmissionId();
     calculatePercentageTotal();
 JS;
     print <<<HTML
