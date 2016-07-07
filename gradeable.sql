@@ -65,12 +65,23 @@ CREATE TABLE gradeable_data(
     gd_active_version INT NOT NULL
 );
 
+CREATE OR REPLACE FUNCTION check_valid_score (numeric,int)
+RETURNS BOOLEAN AS $valid_score$
+declare
+	valid_score BOOLEAN;
+BEGIN
+   SELECT $1<=gc_max_value INTO valid_score FROM gradeable_component AS gc WHERE gc.gc_id=$2;
+   RETURN valid_score;
+END;
+$valid_score$ LANGUAGE plpgsql;
+
 CREATE TABLE gradeable_component_data(
     gc_id INT NOT NULL REFERENCES gradeable_component(gc_id) ON DELETE CASCADE,
     gd_id INT NOT NULL REFERENCES gradeable_data(gd_id) ON DELETE CASCADE,
     gcd_score NUMERIC NOT NULL,
     gcd_component_comment VARCHAR NOT NULL,
-    PRIMARY KEY(gc_id,gd_id)
+    PRIMARY KEY(gc_id,gd_id),
+    CHECK (check_valid_score(gcd_score,gc_id))
 );
 
 CREATE TABLE late_days(
