@@ -192,9 +192,10 @@ echo "Binding static IPs to \"Host-Only\" virtual network interface."
 printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
 printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
 printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
+printf "auto eth1:3\niface eth1:3 inet static\naddress 192.168.56.104\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
 
 # Turn them on.
-ifup eth1 eth1:1 eth1:2
+ifup eth1 eth1:1 eth1:2 eth1:3
 
 #################################################################
 # JAR SETUP
@@ -515,7 +516,8 @@ source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
 cp ${SUBMITTY_REPOSITORY}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
 cp ${SUBMITTY_REPOSITORY}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
-cp -f ${SUBMITTY_REPOSITORY}/Docs/www-data /etc/apache2/suexec/www-data
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/submitty.conf /etc/apache2/sites-available/submitty.conf
+cp -f ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
 
 # permissions: rw- r-- ---
 chmod 0640 /etc/apache2/sites-available/*.conf
@@ -532,6 +534,7 @@ fi
 
 a2ensite submit
 a2ensite hwgrading
+a2ensite submitty
 
 apache2ctl -t
 service apache2 restart

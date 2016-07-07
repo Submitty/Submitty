@@ -410,6 +410,33 @@ mv $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $
 
 ################################################################################################################
 ################################################################################################################
+# COPY THE 1.0 Grading Website
+
+echo -e "Copy the 1.0 grading website"
+
+# copy the website from the repo
+rsync -rtz   $SUBMITTY_REPOSITORY/site   $SUBMITTY_INSTALL_DIR
+
+# set special user $HWPHP_USER as owner & group of all website files
+find $SUBMITTY_INSTALL_DIR/site -exec chown $HWPHP_USER:$HWPHP_USER {} \;
+
+# set the permissions of all files
+# $HWPHP_USER can read & execute all directories and read all files
+# "other" can cd into all subdirectories
+chmod -R 400 $SUBMITTY_INSTALL_DIR/site
+find $SUBMITTY_INSTALL_DIR/site -type d -exec chmod uo+x {} \;
+# "other" can read all .txt, .jpg, & .css files
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.css -exec chmod o+r {} \;
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.jpg -exec chmod o+r {} \;
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.png -exec chmod o+r {} \;
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.txt -exec chmod o+r {} \;
+# "other" can read & execute all .js files
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.js -exec chmod o+rx {} \;
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.cgi -exec chmod u+x {} \;
+
+
+################################################################################################################
+################################################################################################################
 # GENERATE & INSTALL THE CRONTAB FILE FOR THE hwcron USER
 #
 # The system requires a background process that starts automatically
