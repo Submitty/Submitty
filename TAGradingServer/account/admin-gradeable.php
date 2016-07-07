@@ -887,8 +887,18 @@ HTML;
 	    showTimezone: false
     });
 
+<<<<<<< HEAD
     $('#date_grade').datetimepicker('setDate', (new Date("{$g_grade_start_date}")));
     $('#date_released').datetimepicker('setDate', (new Date("{$g_grade_released_date}")));
+=======
+    $('#date_grade').datetimepicker('setDate', (new Date("{$g_grade_start_date}")));;
+    $('#date_released').datetimepicker('setDate', (new Date("{$g_grade_released_date}")));;
+
+    function toggleQuestion(question, role) {
+        if(document.getElementById(role +"-" + question ).style.display == "block") {
+            $("#" + role + "-" + question ).animate({marginBottom:"-80px"});
+            setTimeout(function(){document.getElementById(role + "-"+ question ).style.display = "none";}, 175);
+>>>>>>> student comment on rubric
 
     function toggleQuestion(question, role) {
         if(document.getElementById(role +"-" + question ).style.display == "block") {
@@ -901,6 +911,13 @@ HTML;
         }
         calculatePercentageTotal();
     }
+<<<<<<< HEAD
+=======
+    
+HTML;
+
+    print <<<JS
+>>>>>>> student comment on rubric
     
     // Shows the radio inputs dynamically
     $('input:radio[name="gradeable-type"]').change(

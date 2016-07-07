@@ -1,15 +1,11 @@
 <?php
 
-<<<<<<< HEAD
 //TODO MORE error checking
 
-=======
->>>>>>> numerictext gradeable
 include "../../toolbox/functions.php";
 
 check_administrator();
 
-<<<<<<< HEAD
 if($user_is_administrator)
 {
     $have_old = false;
@@ -28,19 +24,11 @@ if($user_is_administrator)
     );
     $old_questions = array();
     $old_components = array();
-=======
-if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
-    die("invalid csrf token");
-}
->>>>>>> numerictext gradeable
 
  $gradeableJSON = $_POST['gradeableJSON'];
  
  $fp = fopen(__SUBMISSION_SERVER__ . '/config/gradeable.json', 'w');
-<<<<<<< HEAD
 
-=======
->>>>>>> numerictext gradeable
  if (!$fp){
     die('failed to open file');
  }
@@ -51,12 +39,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
 
  # for debugging
  echo print_r($_POST);
-<<<<<<< HEAD
 
-=======
- 
- 
->>>>>>> numeric text gradeables, remove parts from gradeable from, new schema install script
  $g_id = $_POST['gradeable_id'];
  $g_title = $_POST['gradeable_title'];
  $g_overall_ta_instr = $_POST['ta_instructions'];
