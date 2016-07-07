@@ -22,6 +22,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
  # for debugging
  echo print_r($_POST);
  
+ 
  $g_id = $_POST['gradeable_id'];
  $g_title = $_POST['gradeable_title'];
  $g_overall_ta_instr = $_POST['ta_instructions'];
@@ -68,7 +69,6 @@ $action = $_GET['action'];
 
 $db->beginTransaction();  
 if ($action=='edit'){
-    echo 'EDITING';
     $params = array($g_title, $g_overall_ta_instr, $g_use_teams, $g_gradeable_type, 
                 $g_grade_by_registration, $g_grade_start_date, $g_grade_released_date, 
                 $g_syllabus_bucket,$g_min_grading_group, $g_id);
@@ -142,10 +142,17 @@ else if($g_gradeable_type === GradeableType::numeric){
     
     for($i=1; $i<=$num_numeric+$num_text; ++$i){
         //CREATE the numeric items in gradeable component
-        $gc_title = $_POST['numeric-label-'. strval($i)];
-        $gc_max_value = $_POST['max-score-'. strval($i)];
-        $gc_is_extra_credit = (isset($_POST['numeric-extra-'.strval($i)]))? "true" : "false";
         $gc_is_text = ($i > $num_numeric)? "true" : "false";
+        if($i > $num_numeric){
+            $gc_title = (isset($_POST['text-label-'. strval($i-$num_numeric)]))? $_POST['text-label-'. strval($i-$num_numeric)] : '';
+            $gc_max_value = 0;
+            $gc_is_extra_credit ="false";
+        }
+        else{
+            $gc_title = (isset($_POST['numeric-label-'. strval($i)]))? $_POST['numeric-label-'. strval($i)] : '';
+            $gc_max_value = (isset($_POST['max-score-'. strval($i)]))? $_POST['max-score-'. strval($i)] : 0;
+            $gc_is_extra_credit = (isset($_POST['numeric-extra-'.strval($i)]))? "true" : "false";
+        }
         
         if($action=='edit' && $i<=$num_old_numerics){
             $params = array($gc_title, '','',$gc_max_value, $gc_is_text, $gc_is_extra_credit,$g_id,$i);
