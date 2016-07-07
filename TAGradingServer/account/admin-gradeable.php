@@ -23,6 +23,9 @@ if($user_is_administrator){
     $old_questions = $old_components = $electronic_gradeable = array();
     $num_numeric = $num_text = 0;
 
+    $num_numeric = 0;
+    $num_text = 0;
+    
     if (isset($_GET['action']) && $_GET['action'] == 'edit') {
         $g_id = $_GET['id'];
         Database::query("SELECT * FROM gradeable WHERE g_id=?",array($g_id));
@@ -73,6 +76,7 @@ if($user_is_administrator){
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
     $account_subpages_unlock = true;
 
+    
     function selectBox($question, $grade = 0) {
         $retVal = "<select name='point-{$question}' class='points' onchange='calculatePercentageTotal();'>";
         for($i = 0; $i <= 100; $i += 0.5) {
@@ -371,7 +375,6 @@ HTML;
                               style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
                               display: {$display_ta};">{$question['student_grading_note']}</textarea>
                 </td>
-
                 <td style="background-color:#EEE;">
 HTML;
         $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
@@ -503,6 +506,7 @@ HTML;
                             </tr>
                         </thead>
                         <tbody style="background: #f9f9f9;">
+
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
@@ -580,6 +584,7 @@ HTML;
 HTML;
         $i++;
     }
+    
     $margintop = ($i*-40) . "px";
     $marginright =  650-(count($rubrics)*25) . "px";
     print <<<HTML
@@ -896,7 +901,7 @@ HTML;
         }
         calculatePercentageTotal();
     }
-
+    
     // Shows the radio inputs dynamically
     $('input:radio[name="gradeable-type"]').change(
     function(){
@@ -965,7 +970,7 @@ HTML;
         retVal = retVal + '</select>';
         return retVal;
     }
-    
+
     function calculatePercentageTotal() {
         var total = 0;
         var ec = 0;
@@ -1068,6 +1073,7 @@ HTML;
         currentRow.children()[1].children[1].checked = newRow.children()[child].children[1].checked;
         newRow.children()[child].children[1].checked = temp;
     }
+    
     calculatePercentageTotal();
     </script>
 HTML;

@@ -345,7 +345,7 @@ echo <<<HTML
 			    extra += "&q"+i+"="+score;
                 total += score;
 			}
-
+            
             for (var j = questions[nt_gradeable]; j <questions[nt_gradeable]+text_fields[nt_gradeable]; ++j){
 			    var text = $("#cell-"+nt_gradeable+"-"+rcs+"-t"+j).val();
 			    extra += "&t"+j+"="+text;

@@ -51,7 +51,12 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
 
  # for debugging
  echo print_r($_POST);
+<<<<<<< HEAD
 
+=======
+ 
+ 
+>>>>>>> numeric text gradeables, remove parts from gradeable from, new schema install script
  $g_id = $_POST['gradeable_id'];
  $g_title = $_POST['gradeable_title'];
  $g_overall_ta_instr = $_POST['ta_instructions'];
