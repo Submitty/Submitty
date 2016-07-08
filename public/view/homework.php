@@ -126,21 +126,37 @@ if($assignment_version <= 0 && $active_version != $assignment_version){
 </head>
 
 <body>
+
+<?php
+// Gather Variables
+$user = $_SESSION["id"];
+
+?>
+
+
+<div class="site-nav">
+<h3>
+<?php
+
+  echo '<a class="page-link" href="/">Submitty '.$semester.'</a>';
+  echo '> <a class="page-link" href="/">'.$course.'</a>';
+  echo '> <a class="page-link">'.$assignment_name.'</a>';
+  if (on_dev_team($user)) {
+    echo '<span color=\"ff0000\">[ dev team ]</span>';
+  } else {
+    echo '<span>'.$user.'</span>';
+  }
+
+?>
+</h3>
+</div> <!-- site-nav -->
+
 <div id="HWsubmission">
 
 
 <?php
 
 // =================================================================================
-
-// USERNAME PRINT
-$user = $_SESSION["id"];
-echo '<h2 class="label">Homework Submission for <em>'.$user.'</em>';
-if (on_dev_team($user)) {
-  echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ]</font>";
-}
-echo '</h2>';
-
 
 // TOP MESSAGE (TEST ZONE ASSIGNMENT & PRIORITY HELP QUEUE)
 $path_front = get_path_front_course($semester,$course);;
@@ -180,10 +196,6 @@ for ($i = 0; $i < count($all_assignments); $i++) {
 echo '</select>';
 echo '</form>';
 echo '</div>'; // end 5 .sub
-
-
-echo '<h2 class="label">Assignment: '.$assignment_name.'</h2>';
-
 
 echo '<div class="panel-body">'; // 6 .panel-body
 
@@ -360,17 +372,15 @@ if ($highest_version == -1) {
 
   // $highest_version is >= 1
   echo '<div class="outer_box">'; // 9 outer_box
-  echo '<h3 class="label">Review Submissions</h3>';
-
 
   // -----------------------------------------------------
   // SELECT A PREVIOUS SUBMISSION PULL DOWN
 
-  echo '<div class="sub-text">';
-  echo '<div class="split-row">';  // left half of split row
+  echo '<div class="sub">';  // left half of split row
 
+  echo '<h3>';
   echo '<form class="form_submit" action="">';
-  echo '<label class="label"><em>Select Submission Version:</em></label>';
+  echo '<label class="label">Select Submission Version:</label>';
   echo '<input type="input" readonly="readonly" name="assignment_id" value="'.$assignment_id.'" style="display: none">';
   echo '<select id="versionlist" name="assignment_version" onchange="version_changed();">';
 
@@ -402,12 +412,9 @@ if ($highest_version == -1) {
   }
   echo '</select>';
   echo '</form>';
-  echo '</div>'; // left half of split row
 
   // -----------------------------------------------------
   // CHANGE ACTIVE VERSION & CANCEL SUBMISSION BUTTONS
-
-  echo '<div class="split-row" style="margin-left: 15px;">';  // right half of split row
 
   if ($assignment_version != $active_version) {
     echo '&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -415,41 +422,39 @@ if ($highest_version == -1) {
     echo 'onsubmit="return check_version_change()"';
     echo'>';
     echo '<input type="hidden" name="csrf_token" value="'.$_SESSION['csrf'].'"" />';
-    echo '<input type="submit" class="btn btn-primary" value="Set Version '.$assignment_version.' as ACTIVE Submission Version"></input>';
+    echo '<input type="submit" class="btn btn-primary" value="Make Version '.$assignment_version.' ACTIVE (Grade This Version)"></input>';
     echo '</form>';
   }
 
-  if ($active_version != 0) {
+  if ($active_version != 0 && $assignment_version == $active_version) {
     echo '&nbsp;&nbsp;&nbsp;&nbsp;';
     echo '<form class="form_submit" action="?page=update&semester='.$semester.'&course='.$course.'&assignment_id='.$assignment_id.'&assignment_version=0" method="POST"';
     echo 'onsubmit="return check_version_change()"';
     echo'>';
     echo '<input type="hidden" name="csrf_token" value="'.$_SESSION['csrf'].'"" />';
-    echo '<input type="submit" class="btn btn-primary" value="Cancel Submission" />';
+    echo '<input type="submit" class="btn btn-default" value="Do Not Grade This Version (Mark All Inactive)" />';
     echo '</form>';
   }
-
-  echo '</div>'; // right half of split row
-  echo '</div>'; // sub-text
-
-
+  echo '</h3>';
+  echo '</div>'; // end of selection
   // -----------------------------------------------------
   // ACTIVE ASSIGNMENT & CANCELLED ASSIGNMENT MESSAGES
 
   echo '<div class="sub-text">';
   if ($active_version == 0) {
-    echo '<span class="error_mess">Note: You have </span>';
-    echo '<b><span class="error_mess">CANCELLED</span></b>';
-    echo '<span class="error_mess"> all submissions for this assignment.<br>';
+    echo '<p class="error_mess">';
+    echo 'Note: You have <strong>NO ACTIVE</strong> submissions for this assignment.<br>';
     echo 'This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.</span>';
+    echo '</p>';
   } else if ($assignment_version == $active_version) {
-    echo '<span class="message">Note: This is your "ACTIVE" submission version, which will be graded by the instructor/TAs and the score recorded in the gradebook.</span>';
+    echo '<p class="message">';
+    echo 'Note: This is your "ACTIVE" submission version, which will be graded by the instructor/TAs and the score recorded in the gradebook.';
+    echo '</p>';
   }
   echo '</div>'; // sub-text
 
   // -----------------------------------------------------
   // DETAILS OF SELECTED ASSIGNMENT
-
 
   if ($assignment_version != 0) {
 
@@ -495,7 +500,7 @@ if ($highest_version == -1) {
     }
   }
 
-  echo '</div>';  // end 9 .outer_box
+  echo '</div>';  // end 10 .outer_box
 
 
 
