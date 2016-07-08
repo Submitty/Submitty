@@ -22,9 +22,6 @@ if($user_is_administrator){
     );
     $old_questions = $old_components = $electronic_gradeable = array();
     $num_numeric = $num_text = 0;
-
-    $num_numeric = 0;
-    $num_text = 0;
     
     if (isset($_GET['action']) && $_GET['action'] == 'edit') {
         $g_id = $_GET['id'];
@@ -75,7 +72,6 @@ if($user_is_administrator){
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
     $account_subpages_unlock = true;
-
     
     function selectBox($question, $grade = 0) {
         $retVal = "<select name='point-{$question}' class='points' onchange='calculatePercentageTotal();'>";
@@ -206,8 +202,9 @@ if($user_is_administrator){
 </style>
 
 <div id="container-rubric">
-    <form class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" 
-                 method="post" enctype="multipart/form-data"> 
+    <form id="gradeable-form" class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" 
+          method="post" enctype="multipart/form-data"> 
+
         <input type='hidden' name="csrf_token" value="{$_SESSION['csrf']}" />
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
@@ -273,8 +270,9 @@ HTML;
                 What is the due date? <input name="date_due" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
                 <br />
+                <!-- TODO: set default late days -->
                 How many late days may students use on this assignment? <input style="width: 50px" name="rubric_late_days" 
-                                                                         type="text" value="{$old_rubric['rubric_late_days']}"/>
+                                                                         type="text" />
                 <br/>
                 
                 <fieldset>
@@ -375,6 +373,7 @@ HTML;
                               style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
                               display: {$display_ta};">{$question['student_grading_note']}</textarea>
                 </td>
+
                 <td style="background-color:#EEE;">
 HTML;
         $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
@@ -506,7 +505,6 @@ HTML;
                             </tr>
                         </thead>
                         <tbody style="background: #f9f9f9;">
-
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
@@ -549,80 +547,6 @@ HTML;
                         or edit any gradeables in any sections, but per gradeable can read/write access be granted.
                 NOTE:  Flag as error if some sections have no grader    
             -->
-HTML;
-    $db->query("SELECT s.user_id, u.user_rcs, u.user_email, s.rubric_id, s.grading_section_id
-    FROM homework_grading_sections as s, users as u WHERE u.user_id = s.user_id
-    ORDER BY rubric_id, grading_section_id", array());
-    $sections = array();
-    foreach ($db->rows() as $row) {
-        if (!isset($sections[$row['rubric_id']][$row['user_rcs']])) {
-            $sections[$row['rubric_id']][$row['user_rcs']] = array();
-        }
-        $sections[$row['rubric_id']][$row['user_rcs']][] = $row['grading_section_id'];
-    }
-    asort($sections);
-
-    $db->query("SELECT student_grading_id, count(student_id) as cnt FROM students GROUP BY student_grading_id ORDER BY student_grading_id", array());
-    $a = array();
-    foreach ($db->rows() as $row) {
-        $a[] = "{$row['student_grading_id']} ({$row['cnt']} students)";
-    }
-    $a = implode(", ", $a);
-
-    print "Available Grading Sections: {$a}<br /><br />";
-    $i = 0;
-    $db->query("SELECT * FROM users ORDER BY user_rcs ASC", array());
-    $users = $db->rows();
-    foreach($users as $user) {
-        $value =  isset($sections[$old_rubric['rubric_id']][$user['user_rcs']]) ? implode(",", $sections[$old_rubric['rubric_id']][$user['user_rcs']]) : -1;
-        print <<<HTML
-            <span style='display:inline-block; width:300px; padding-right: 5px'>{$user['user_lastname']},
-                    {$user['user_firstname']}:</span>
-            <input style='width: 30px; text-align: center' type='text' name='{$user['user_id']}-section'
-                    value='{$value}' />
-            <br />
-HTML;
-        $i++;
-    }
-    
-    $margintop = ($i*-40) . "px";
-    $marginright =  650-(count($rubrics)*25) . "px";
-    print <<<HTML
-            <div>
-                <table border="1" style="float: right; margin-top:{$margintop}; margin-right: {$marginright}">
-                    <tr>
-                        <td>User</td>
-HTML;
-    foreach ($rubrics as $id => $number) {
-        print <<<HTML
-                        <td style="width: 20px; text-align: center">
-                            {$number}
-                        </td>
-HTML;
-    }
-    print <<<HTML
-                </tr>
-HTML;
-    foreach ($users as $user) {
-        print <<<HTML
-                    <tr>
-                        <td>{$user['user_rcs']}</td>
-HTML;
-        foreach ($rubrics as $id => $rubric) {
-            $number = (isset($sections[$id][$user['user_rcs']])) ? implode(",",$sections[$id][$user['user_rcs']]) : "";
-            print <<<HTML
-                        <td style="text-align: center">
-                            {$number}
-                        </td>
-HTML;
-        }
-        print <<<HTML
-                    </tr>
-HTML;
-    }
-    print <<<HTML
-                </table>
-            </div>
             <br />
             <!-- TODO default to the submission + late days for electronic -->
             What date can the TAs start grading this?: <input name="date_grade" id="date_grade" class="datepicker" type="text"
@@ -633,6 +557,7 @@ HTML;
             What date will the TA grades be released to the students? 
             <input name="date_released" id="date_released" class="datepicker" type="text" 
                    style="cursor: auto; background-color: #FFF; width: 250px;">    
+            
             <br />
             What syllabus/iris "bucket" does this item belong to?:
             
@@ -721,14 +646,14 @@ HTML;
         return o;
     };
 
+    $('#gradeable-form').on('submit', function(e){
+         $('<input />').attr('type', 'hidden')
+            .attr('name', 'gradeableJSON')
+            .attr('value', JSON.stringify($('form').serializeObject()))
+            .appendTo('#gradeable-form');
+    });
+
     $(document).ready(function() {
-        $(".import-json").click(function(){
-            $.post('{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_rubric['rubric_id']}&course='
-                +'{$_GET['course']}', 'gradeableJSON=' + JSON.stringify($('form').serializeObject())+'&csrf_token=' 
-                + '{$_SESSION['csrf']}', function (response) {
-              alert(response);
-            });
-        }); 
         var numCheckpoints=1;
         
         function addCheckpoint(label, extra_credit){
@@ -887,18 +812,8 @@ HTML;
 	    showTimezone: false
     });
 
-<<<<<<< HEAD
     $('#date_grade').datetimepicker('setDate', (new Date("{$g_grade_start_date}")));
     $('#date_released').datetimepicker('setDate', (new Date("{$g_grade_released_date}")));
-=======
-    $('#date_grade').datetimepicker('setDate', (new Date("{$g_grade_start_date}")));;
-    $('#date_released').datetimepicker('setDate', (new Date("{$g_grade_released_date}")));;
-
-    function toggleQuestion(question, role) {
-        if(document.getElementById(role +"-" + question ).style.display == "block") {
-            $("#" + role + "-" + question ).animate({marginBottom:"-80px"});
-            setTimeout(function(){document.getElementById(role + "-"+ question ).style.display = "none";}, 175);
->>>>>>> student comment on rubric
 
     function toggleQuestion(question, role) {
         if(document.getElementById(role +"-" + question ).style.display == "block") {
@@ -911,14 +826,7 @@ HTML;
         }
         calculatePercentageTotal();
     }
-<<<<<<< HEAD
-=======
-    
-HTML;
 
-    print <<<JS
->>>>>>> student comment on rubric
-    
     // Shows the radio inputs dynamically
     $('input:radio[name="gradeable-type"]').change(
     function(){
@@ -1090,10 +998,10 @@ HTML;
         currentRow.children()[1].children[1].checked = newRow.children()[child].children[1].checked;
         newRow.children()[child].children[1].checked = temp;
     }
-    
     calculatePercentageTotal();
     </script>
 HTML;
+
 }
 
 include "../footer.php";
