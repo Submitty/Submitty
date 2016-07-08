@@ -23,39 +23,63 @@ if($user_is_administrator){
     );
     $old_questions = array();
     $old_components = array();
+    $electronic_gradeable = array();
+    $use_ta_grading=json_encode(true);
 
     $num_numeric = 0;
     $num_text = 0;
     
     if (isset($_GET['action']) && $_GET['action'] == 'edit') {
-        $gradeable_id = $_GET['id'];
-        Database::query("SELECT * FROM gradeable WHERE g_id=?",array($gradeable_id));
+        $g_id = $_GET['id'];
+        Database::query("SELECT * FROM gradeable WHERE g_id=?",array($g_id));
         if (count(Database::rows()) == 0) {
             die("No gradeable found");
         }
         $old_gradeable = Database::row();
-        Database::query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($gradeable_id));
+        Database::query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($g_id));
         $old_components = json_encode(Database::rows());
         $have_old = true;
         
         // get the number of text and numeric fields for the form
         if ($old_gradeable['g_gradeable_type']==2){
-            $params=array($gradeable_id);
-            $db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='false'", $params);
+            $params=array($g_id);
+            $db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc 
+                        ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='false'", $params);
             $num_numeric = $db->row()['cnt'];
-            $db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", $params);
+            $db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc 
+                        ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", $params);
             $num_text = $db->row()['cnt'];
         }
         
         //figure out if the gradeable has grades or not
         $db->query("SELECT COUNT(*) as cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id 
-                    INNER JOIN gradeable_component_data AS gcd ON gcd.gc_id=gc.gc_id WHERE g.g_id=?",array($gradeable_id));
-       $has_grades = $db->row()['cnt'];
+                    INNER JOIN gradeable_component_data AS gcd ON gcd.gc_id=gc.gc_id WHERE g.g_id=?",array($g_id));
+        $has_grades= $db->row()['cnt'];
+       
+       //if electonic file then add all of the old questions
+       if($old_gradeable['g_gradeable_type']==0){
+           
+            //get the electronic file stuff
+            $db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($g_id));
+            $electronic_gradeable = $db->row();
+            
+            $use_ta_grading = json_encode($electronic_gradeable['eg_use_ta_grading']);
+           
+            $db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_max_value, gc_is_extra_credit FROM gradeable_component 
+                        WHERE g_id=? GROUP BY gc_id ORDER BY gc_order ASC",array($g_id));
+            $tmp_questions = $db->rows();
+            foreach($tmp_questions as $question){
+                array_push($old_questions, array('question_message' => $question['gc_title'],
+                                                'question_grading_note' => $question['gc_ta_comment'],
+                                                'student_grading_note'  => $question['gc_student_comment'],
+                                                'question_total'        => $question['gc_max_value'],
+                                                'question_extra_credit' => $question['gc_is_extra_credit']));
+            }
+       }
     }
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
     $account_subpages_unlock = true;
-
     
     function selectBox($question, $grade = 0) {
         $retVal = "<select name='point-{$question}' class='points' onchange='calculatePercentageTotal();'>";
@@ -189,7 +213,8 @@ if($user_is_administrator){
 </style>
 
 <div id="container-rubric">
-    <form class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" method="post" enctype="multipart/form-data"> 
+    <form class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" 
+                 method="post" enctype="multipart/form-data"> 
         <input type='hidden' name="csrf_token" value="{$_SESSION['csrf']}" />
 
         <div class="modal-header" style="overflow: auto;">
@@ -260,7 +285,8 @@ HTML;
                 What is the due date? <input name="date_due" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
                 <br />
-                How many late days may students use on this assignment? <input style="width: 50px" name="rubric_late_days" type="text" value="{$old_rubric['rubric_late_days']}"/>
+                How many late days may students use on this assignment? <input style="width: 50px" name="rubric_late_days" 
+                                                                         type="text" value="{$old_rubric['rubric_late_days']}"/>
                 <br/>
                 
                 <fieldset>
@@ -269,11 +295,13 @@ HTML;
                     <input type="radio" class="upload-repo" name="upload-type" value="Repository"> Repository
                     
                     <div class="upload-type upload-file" id="upload-file">
+                        <!--<br />
+                        How many total "drop zones" (directories or paths) for upload? 
+                        <input style="width: 50px" name="num-drop-zones" type="text" value="1"/> 
                         <br />
-                        How many total "drop zones" (directories or paths) for upload? <input style="width: 50px" name="num-drop-zones" type="text" value="1"/> 
-                        <br />
-                        Limit on total sum of size of files uploaded <input style="width: 50px" name="total-file-size" type="text" value="1 MB"/> (default is... ?) 
-                        <br />
+                        Limit on total sum of size of files uploaded 
+                        <input style="width: 50px" name="total-file-size" type="text" value="1 MB"/> (default is... ?) 
+                        <br />-->
                     </div>
                     
                     <div class="upload-type upload-repo" id="repository">
@@ -284,23 +312,14 @@ HTML;
                     
                 </fieldset>
                 <!-- Path to .h config may or not be included -->
-                
-                Use autograding?
-                
-                <!-- The max and extra credit max will be read automatically
-                     Would be nice to display this now
-                     can read these from config.h, but that would be messy
-                     can read from the .json file for this assingnment, only after compilation
-                -->
-                
-                <!-- Again these should probably be labels, but CSS is annoying (>_<) -->
-                <input type="radio" name="auto-grading" value="yes" /> Yes
-                <input type="radio" name="auto-grading" value ="no" /> No
+                Path to autograding config: 
+                <input style='width: 227px' type='text' name='config-path' value="" />
                 <br /> <br />
                 
+                
                 Use TA grading? 
-                <input type="radio" name="ta-grading" value="yes" /> Yes
-                <input type="radio" name="ta-grading" value="no" /> No
+                <input type="radio" id="yes_ta_grade" name="ta-grading" value="yes" /> Yes
+                <input type="radio" id="no_ta_grade""name="ta-grading" value="no" /> No
                 <br /> <br />
                 
                 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
@@ -320,21 +339,22 @@ HTML;
         if (__USE_AUTOGRADER__) {
             $old_questions[0] = array('question_message'      => "AUTO-GRADING",
                                          'question_grading_note' => "",
+                                         'student_grading_note' =>"",
                                          'question_total'        => 0,
                                          'question_extra_credit' => 0);
             $old_questions[1] = array('question_message'      => "AUTO-GRADING EXTRA CREDIT",
                                          'question_grading_note' => "",
+                                         'student_grading_note'  => "",
                                          'question_total'        => 0,
                                          'question_extra_credit' => 1);
         }
         $old_questions[2] = array('question_message'      => "",
                                      'question_grading_note' => "",
+                                     'student_grading_note'  => "",
                                      'question_total'        => 0,
                                      'question_extra_credit' => 0);
     }
 
-
-    
     foreach ($old_questions as $num => $question) {
         $disabled = ($num<2) ? "disabled" : "";
         $readonly = ($num<2) ? "readonly" : "";
@@ -351,7 +371,7 @@ HTML;
                     <div class="btn btn-mini btn-default" onclick="toggleQuestion({$num}, 'student')" style="margin-top:-5px;">Student Note</div>
                     <textarea name="ta-{$num}" id="individual-{$num}" rows="1" placeholder=" Message to TA" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; display: {$display_ta};">{$question['question_grading_note']}</textarea>
                     <!-- Some fields need to change here TODO -->
-                    <textarea name="student-{$num}" id="student-{$num}" rows="1" placeholder=" Message to Student" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; display: {$display_ta};">{$question['question_grading_note']}</textarea>
+                    <textarea name="student-{$num}" id="student-{$num}" rows="1" placeholder=" Message to Student" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; display: {$display_ta};">{$question['student_grading_note']}</textarea>
                 </td>
 
                 <td style="background-color:#EEE;">
@@ -376,7 +396,6 @@ HTML;
             </tr>
 HTML;
     }
-
         print <<<HTML
             <tr id="add-question">
                 <td style="overflow: hidden;">
@@ -386,7 +405,6 @@ HTML;
                 <td style="border-left: 1px solid #F9F9F9;"></td>
             </tr>
 HTML;
-
         print <<<HTML
                 <tr>
                     <td style="border-left: 1px solid #F9F9F9;"></td>
@@ -401,11 +419,8 @@ HTML;
                 </tbody>
             </table>
 HTML;
-    
     print <<<HTML
-                
             </div>
-            
             <div class="gradeable-type-options checkpoints" id="checkpoints">
                 <br />
                 <div class="multi-field-wrapper-checkpoints">
@@ -467,7 +482,6 @@ HTML;
                             </tr>
                         </thead>
                         <tbody style="background: #f9f9f9;">
-                      
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
@@ -480,7 +494,6 @@ HTML;
                                 <input type="checkbox" name="numeric-extra-0" class="numeric-extra" value="" />
                            </td> 
                         </tr>
-                      
                     </table>
                     
                     <h5>Text Items</h5>
@@ -491,7 +504,6 @@ HTML;
                             </tr>
                         </thead>
                         <tbody style="background: #f9f9f9;">
-                        
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
@@ -499,10 +511,6 @@ HTML;
                            </td>  
                         </tr>
                     </table>
-                   
-                  
-                  <!-- <button type="button" id="add-numeric-field">Add </button>  -->
-                  <!-- <button type="button" id="remove-numeric-field" id="remove-numeric" style="visibilty:hidden;">Remove</button> -->
                 </div>  
                 <br /> <br />
                 Do you want a box for an (optional) message from the TA to the student?
@@ -512,7 +520,6 @@ HTML;
             </fieldset>
             <br/>
 
-            <!-- Should not lock to a particular gradeable type -->
             Who is assigned to grade this item?:
             <br /> <br />
             <input type="radio" name="section-type" value="reg-section" 
@@ -543,12 +550,13 @@ HTML;
                         or edit any gradeables in any sections, but per gradeable can read/write access be granted.
 
                 NOTE:  Ok to have multiple people assigned to same section
-                NOTE:  Paranoid instructors can remove access to any and all teaching assistants / graders after the bulk of grading for this gradeable is complete to force regrade requests to go through the instructor.
-                NOTE:  Paranoid instructors can remove access to any and all teaching assistants / graders after the bulk of grading for this gradeable is complete to force regrade requests to go through the instructor.
+                NOTE:  Paranoid instructors can remove access to any and all teaching assistants / graders after the bulk 
+                       of grading for this gradeable is complete to force regrade requests to go through the instructor.
+                NOTE:  Paranoid instructors can remove access to any and all teaching assistants / graders after the bulk 
+                       of grading for this gradeable is complete to force regrade requests to go through the instructor.
                 NOTE:  Flag as error if some sections have no grader    
             -->
 HTML;
-
     $db->query("SELECT s.user_id, u.user_rcs, u.user_email, s.rubric_id, s.grading_section_id
     FROM homework_grading_sections as s, users as u WHERE u.user_id = s.user_id
     ORDER BY rubric_id, grading_section_id", array());
@@ -569,7 +577,6 @@ HTML;
     $a = implode(", ", $a);
 
     print "Available Grading Sections: {$a}<br /><br />";
-
     $i = 0;
     $db->query("SELECT * FROM users ORDER BY user_rcs ASC", array());
     $users = $db->rows();
@@ -584,7 +591,6 @@ HTML;
 HTML;
         $i++;
     }
-    
     $margintop = ($i*-40) . "px";
     $marginright =  650-(count($rubrics)*25) . "px";
     print <<<HTML
@@ -601,17 +607,14 @@ HTML;
                         </td>
 HTML;
     }
-
     print <<<HTML
                 </tr>
 HTML;
-
     foreach ($users as $user) {
         print <<<HTML
                     <tr>
                         <td>{$user['user_rcs']}</td>
 HTML;
-
         foreach ($rubrics as $id => $rubric) {
             $number = (isset($sections[$id][$user['user_rcs']])) ? implode(",",$sections[$id][$user['user_rcs']]) : "";
             print <<<HTML
@@ -646,8 +649,8 @@ HTML;
             
             <select name="gradeable-buckets" style="width: 170px;">
                 <option value="homework"
-                
 HTML;
+    // TODO restyle this?
     echo ($g_syllabus_bucket === 'homework')?'selected':'';
     print <<<HTML
                 >Homework</option>
@@ -733,7 +736,7 @@ HTML;
                 
                 If this is an electronic assignment:
                     Generate a new config/class.json
-                    NOTE: similar to the current format with thsi new gradeable and all other electonic gradeables
+                    NOTE: similar to the current format with this new gradeable and all other electonic gradeables
                     
                     Writes the inner contents for BUILD_csciXXXX.sh script
                     
@@ -745,7 +748,6 @@ HTML;
         </div>
         <div class="modal-footer">
                 <button class="btn btn-primary" type="submit" style="margin-top: 10px;">{$string} Gradeable</button>
-                <!--<button class="btn import-json" type="button" style="margin-top: 10px;">Import From JSON</button>-->
         </div>
     </form>
 </div>
@@ -755,9 +757,7 @@ HTML;
         var o = {};
         var a = this.serializeArray();
         var ignore = [];
-        
         ignore.push('csrf_token'); // no need to save csrf to JSON :P
-        
         $(':radio').each(function(){
            if(! $(this).is(':checked')){
                if($(this).attr('class') !== undefined){
@@ -832,8 +832,6 @@ HTML;
         var numNumeric=0;
         var numText=0;
         
-        //Remove the code with hiding add and remove buttons
-        
         function addNumeric(label, max_score, extra_credit){
             var wrapper = $('.numerics-table');
             numNumeric++;
@@ -881,7 +879,6 @@ HTML;
             }
         });
 
-        
         $('#numeric-num-items').on('input',function(e){
            var requestedNumeric = this.value;
            if (isNaN(requestedNumeric) || requestedNumeric < 0){
@@ -895,16 +892,6 @@ HTML;
            }
         });
         
-        //REMOVE THIS 
-        $('.multi-field-wrapper-numeric').each(function() {
-            $("#add-numeric-field", $(this)).click(function(e) {
-                addNumeric(numNumeric+1,0,false);
-            });
-            $('#remove-numeric-field').click(function() {
-                removeNumeric();
-            });
-        });
-        $('#remove-numeric-field').hide();
         $('.gradeable-type-options').hide();
         
         if ($('input[name=gradeable-type]').is(':checked')){
@@ -916,6 +903,14 @@ HTML;
         }
         
         if($('#radio-electronic-file').is(':checked')){ 
+            $('input[name=instructions-url]').val('{$electronic_gradeable['eg_instructions_url']}');
+            $('input[name=date_submit]').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_open_date']}")));
+            $('input[name=date_due]').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_due_date']}")));
+            //set radio button is repository in php code 
+            $('input[name=subdirectory]').val({$electronic_gradeable['eg_subdirectory']});
+            // set ta autograding with conditional in php code
+            $('input[name=config-path]').val('{$electronic_gradeable['eg_config_path']}');
+            
             $('#electronic-file').show();
         }
         else if ($('#radio-checkpoints').is(':checked')){
@@ -943,11 +938,9 @@ HTML;
             $('#numeric-num-text-items').val({$num_text});
             $('#numeric').show();
         }
-        
         if({$have_old}){
             $('input[name=gradeable_id]').attr('readonly', true);
         }
-        
     });
 
     var datepicker = $('.datepicker');
@@ -956,14 +949,13 @@ HTML;
 	    showTimezone: false
     });
 
-    $('#date_grade').datetimepicker('setDate', (new Date("{$g_grade_start_date}")));;
-    $('#date_released').datetimepicker('setDate', (new Date("{$g_grade_released_date}")));;
+    $('#date_grade').datetimepicker('setDate', (new Date("{$g_grade_start_date}")));
+    $('#date_released').datetimepicker('setDate', (new Date("{$g_grade_released_date}")));
 
     function toggleQuestion(question, role) {
         if(document.getElementById(role +"-" + question ).style.display == "block") {
             $("#" + role + "-" + question ).animate({marginBottom:"-80px"});
             setTimeout(function(){document.getElementById(role + "-"+ question ).style.display = "none";}, 175);
-
         }
         else {
             $("#" + role + "-" + question ).animate({marginBottom:"5px"});
@@ -971,11 +963,7 @@ HTML;
         }
         calculatePercentageTotal();
     }
-    
-HTML;
 
-    print <<<JS
-    
     // Shows the radio inputs dynamically
     $('input:radio[name="gradeable-type"]').change(
     function(){
@@ -1144,10 +1132,9 @@ HTML;
     }
 
     calculatePercentageTotal();
-JS;
-    print <<<HTML
-</script>
+    </script>
 HTML;
+
 }
 
 include "../footer.php";
