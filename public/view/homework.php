@@ -208,7 +208,6 @@ if ($status && $status != "") {
 // UPLOAD NEW VERSION
 
 echo '<div class="outer_box">'; // 8 .outer_box
-echo '<h3 class="label">Upload New Version</h3>';
 echo '<p class="sub">'.$upload_message.'</p>';
 
 if ($svn_checkout == true) {  // svn upload
