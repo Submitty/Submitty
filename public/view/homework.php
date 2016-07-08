@@ -126,19 +126,14 @@ if($assignment_version <= 0 && $active_version != $assignment_version){
 </head>
 
 <body>
+<div id="HWsubmission">
+
 
 <?php
 
-$user = $_SESSION["id"];
-
-
 // =================================================================================
-// IDENTIFY USER & SELECT WHICH HOMEWORK NUMBER
 
-
-
-echo '<div id="HWsubmission">'; // 4 .HWsubmission
-
+// LOGO SELECTION
 $random_logo = mt_rand(1,10);
 $random_logo_filename = "resources/logo_fake" . $random_logo . ".png";
 if (file_exists ($random_logo_filename)) {
@@ -148,7 +143,8 @@ if (file_exists ($random_logo_filename)) {
 }
 
 
-
+// USERNAME PRINT
+$user = $_SESSION["id"];
 echo '<h2 class="label">Homework Submission for <em>'.$user.'</em>';
 if (on_dev_team($user)) {
   echo "&nbsp;&nbsp;<font color=\"ff0000\"> [ dev team ]</font>";
@@ -156,18 +152,16 @@ if (on_dev_team($user)) {
 echo '</h2>';
 
 
-
-
-// =================================================================================
 // TOP MESSAGE (TEST ZONE ASSIGNMENT & PRIORITY HELP QUEUE)
-
-
 $path_front = get_path_front_course($semester,$course);;
 $message_path = "$path_front/reports/summary_html/".$username."_message.html";
 if (file_exists($message_path)){
   $message_file = file_get_contents($message_path);
   echo $message_file;
 }
+
+
+// =================================================================================
 
 
 echo '<div class="sub">'; // 5 .sub
@@ -584,12 +578,13 @@ if (!isset($grade_summary) || (isset($grade_summary) && $grade_summary == true))
 }
 
 echo '</div>'; // end panel-body
-echo '</div>'; // end HWsubmission
 
 // ============================================================================
 // ============================================================================
 
 ?>
+
+</div> <!-- HWsubmission -->
 
 </body>
 </html>
