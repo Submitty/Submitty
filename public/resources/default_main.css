@@ -64,3 +64,7 @@ body{
     margin-right: 10px;
 }
 
+.btn-default {
+  float: right;
+  padding: 2px;
+}
