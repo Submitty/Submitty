@@ -13,17 +13,6 @@ echo '<body>';
 
 echo '<div>';
 
-
-// =================================================================================
-
-/*
-echo '<div class="title-box">';
-echo '<h1 class="title">Homework Submissions for '.$course.'</h1>';
-echo '</div>';
-*/
-
-// =================================================================================
-
 echo '<div>';
 echo '<div class="submissions">';
 
