@@ -1,52 +1,56 @@
 <?php
-
 require_once("controller/controller_functions.php");
-
 if($assignment_version <= 0 && $active_version != $assignment_version){
   header ("Location: index.php?semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
 }
+?>
 
-echo '<html>';
-echo '<title>'.$course.'</title>';
-echo "<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700' rel='stylesheet' type='text/css'>";
-echo '<body>';
+<html>
+<head>
+
+  <!-- CSS Styles and Scripts-->
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=PT+Sans:700,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
+
+  <link href="resources/override.css" rel="stylesheet"></link>
+  <link href="resources/bootmin.css" rel="stylesheet"></link>
+  <link href="resources/badge.css" rel="stylesheet"></link>
+  <script src="resources/script/main.js"></script>
+
+  <!-- DIFF VIEWER STUFF -->
+  <script src='diff-viewer/jquery.js'></script>
+  <script src='diff-viewer/underscore.js'></script>
+  <script src='diff-viewer/highlight.js'></script>
+  <script src='diff-viewer/diff.js'></script>
+  <script src='diff-viewer/diff_queue.js'></script>
+  <link href="diff-viewer/diff.css" rel="stylesheet"></link>
+
+  <!-- DRAG & DROP -->
+  <script src='drag-and-drop/drag_and_drop.js'></script>
+
+  <!-- PHP Vars Needed -->
+  <?php
+  echo '<title>'.$course.'</title>';
+  if (file_exists("custom_resources/".$semester."_".$course."_main.css")) {
+    print('<link href="custom_resources/'.$semester."_".$course.'_main.css" rel="stylesheet"></link>');
+  } else {
+    print('<link href="resources/default_main.css" rel="stylesheet"></link>');
+  }
+  ?>
+
+</head>
+
+<body>
+
+<?php
 
 echo '<div>';
 
 echo '<div>';
 echo '<div class="submissions">';
 
-if (file_exists("custom_resources/".$semester."_".$course."_main.css")) {
-  print('<link href="custom_resources/'.$semester."_".$course.'_main.css" rel="stylesheet"></link>');
-} else {
-  print('<link href="resources/default_main.css" rel="stylesheet"></link>');
-}
-
-
-// =================================================================================
-
-print('<link href="resources/override.css" rel="stylesheet"></link>');
-
-echo "<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic' rel='stylesheet' type='text/css'>";
-echo "<link href='https://fonts.googleapis.com/css?family=PT+Sans:700,700italic' rel='stylesheet' type='text/css'>";
-echo '<link href="resources/bootmin.css" rel="stylesheet"></link>';
-echo '<link href="resources/badge.css" rel="stylesheet"></link>';
-echo '<script src="resources/script/main.js"></script>';
-
-
-
-// DIFF VIEWER STUFF
-echo "<script src='diff-viewer/jquery.js'></script>";
-echo "<script src='diff-viewer/underscore.js'></script>";
-echo "<script src='diff-viewer/highlight.js'></script>";
-echo "<script src='diff-viewer/diff.js'></script>";
-echo "<script src='diff-viewer/diff_queue.js'></script>";
-echo '<link href="diff-viewer/diff.css" rel="stylesheet"></link>';
-
-echo "<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>";
-
-// DRAG AND DROP
-echo "<script src='drag-and-drop/drag_and_drop.js'></script>";
 
 // =================================================================================
 
@@ -91,9 +95,6 @@ window.addEventListener('load', function() {
 
 
 echo '<div id="HWsubmission">';
-
-//echo '<div class="confetti">';
-
 
 $random_logo = mt_rand(1,10);
 $random_logo_filename = "resources/logo_fake" . $random_logo . ".png";
@@ -543,21 +544,7 @@ if (!isset($grade_summary) || (isset($grade_summary) && $grade_summary == true))
 }
 
 echo '</div>'; // end panel-body
-//echo '</div>'; // end confetti
 echo '</div>'; // end HWsubmission
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ============================================================================
 // ============================================================================
