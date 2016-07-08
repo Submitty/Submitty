@@ -443,6 +443,13 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
 
   }
 
+
+  // LATE DAYS
+  student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ALLOWED LATE DAYS"));
+  student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","USED LATE DAYS"));
+  student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
+
+
   // ----------------------------
   // ICLICKER
   if (DISPLAY_ICLICKER && ICLICKER_QUESTION_NAMES.size() > 0) {
@@ -451,8 +458,6 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
     student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
     student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ICLICKER TOTAL"));
     student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ICLICKER RECENT"));
-    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ALLOWED LATE DAYS"));
-    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","USED LATE DAYS"));
     student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
     
     /*
@@ -611,6 +616,23 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
 
     }
 
+
+    // LATE DAYS
+    if (this_student->getLastName() != "") {
+      int allowed = this_student->getAllowedLateDays(100);
+      std::string color = coloritcolor(allowed,5,4,3,2,2);
+      table.set(myrow,counter++,TableCell(color,allowed,"",0,CELL_CONTENTS_VISIBLE,"right"));
+      int used = this_student->getUsedLateDays();
+      color = coloritcolor(allowed-used+2, 5+2, 3+2, 2+2, 1+2, 0+2);
+      table.set(myrow,counter++,TableCell(color,used,"",0,CELL_CONTENTS_VISIBLE,"right"));
+    } else {
+      color="ffffff"; // default_color;
+      table.set(myrow,counter++,TableCell(color,""));
+      table.set(myrow,counter++,TableCell(color,""));
+    }
+    table.set(myrow,counter++,TableCell(grey_divider));
+
+
     // ----------------------------
     // ICLICKER
     if (DISPLAY_ICLICKER && ICLICKER_QUESTION_NAMES.size() > 0) {
@@ -644,18 +666,6 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
                              0.60*ICLICKER_RECENT,
                              0.40*ICLICKER_RECENT);
         table.set(myrow,counter++,TableCell(color,grade,1));
-      } else {
-        color="ffffff"; // default_color;
-        table.set(myrow,counter++,TableCell(color,""));
-        table.set(myrow,counter++,TableCell(color,""));
-      }
-      if (this_student->getLastName() != "") {
-        int allowed = this_student->getAllowedLateDays(100);
-        std::string color = coloritcolor(allowed,5,4,3,2,2);
-        table.set(myrow,counter++,TableCell(color,allowed,"",0,CELL_CONTENTS_VISIBLE,"right"));
-        int used = this_student->getUsedLateDays();
-        color = coloritcolor(allowed-used+2, 5+2, 3+2, 2+2, 1+2, 0+2);
-        table.set(myrow,counter++,TableCell(color,used,"",0,CELL_CONTENTS_VISIBLE,"right"));
       } else {
         color="ffffff"; // default_color;
         table.set(myrow,counter++,TableCell(color,""));
