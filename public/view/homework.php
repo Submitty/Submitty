@@ -46,9 +46,6 @@ if($assignment_version <= 0 && $active_version != $assignment_version){
 
 <?php
 
-echo '<div class="submissions">'; // 3 .submissions
-
-
 // =================================================================================
 
 $user = $_SESSION["id"];
@@ -605,8 +602,6 @@ echo '</div>'; // end HWsubmission
     }
     ?>
     </script>
-
-</div> <!-- // end .submissions -->
 
 </body>
 </html>
