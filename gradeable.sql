@@ -4,10 +4,11 @@ DROP TABLE IF EXISTS late_day_exceptions;
 DROP TABLE IF EXISTS late_days;
 DROP TABLE IF EXISTS gradeable_component_data;
 DROP TABLE IF EXISTS gradeable_data;
-DROP TABLE IF EXISTS users; 
+/*DROP TABLE IF EXISTS users;*/ 
 DROP TABLE IF EXISTS sections_rotating;
 DROP TABLE IF EXISTS sections_registration;
 DROP TABLE IF EXISTS gradeable_component;
+DROP TABLE IF EXISTS electronic_gradeable;
 DROP TABLE IF EXISTS gradeable;
 
 CREATE TABLE gradeable(
@@ -21,6 +22,17 @@ CREATE TABLE gradeable(
     g_grade_released_date TIMESTAMP(6) WITHOUT TIME ZONE NOT NULL,
     g_syllabus_bucket VARCHAR(255) NOT NULL,
     g_min_grading_group INT NOT NULL
+);
+
+CREATE TABLE electronic_gradeable(
+    g_id VARCHAR(255) NOT NULL REFERENCES gradeable(g_id) ON DELETE CASCADE,
+    eg_instructions_url VARCHAR(255) NOT NULL,
+    eg_submission_open_date TIMESTAMP(6) WITHOUT TIME ZONE NOT NULL,
+    eg_submission_due_date TIMESTAMP(6) WITHOUT TIME ZONE NOT NULL,
+    eg_is_repository BOOLEAN NOT NULL,
+    eg_subdirectory VARCHAR(1024) NOT NULL,
+    eg_use_ta_grading BOOLEAN NOT NULL,
+    eg_config_path VARCHAR(1024) NOT NULL
 );
 
 CREATE TABLE gradeable_component(
