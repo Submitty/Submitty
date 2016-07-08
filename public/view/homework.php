@@ -40,6 +40,27 @@ if($assignment_version <= 0 && $active_version != $assignment_version){
   }
   ?>
 
+  <!-- JS for Reloading the Page used by pull-down menus -->
+  <script type="text/javascript">;
+  function assignment_changed(){
+    var php_course = "<?php echo $course; ?>";
+    var php_semester = "<?php echo $semester; ?>";
+    window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+'#scroll=' + window.scrollY;
+  }
+  function version_changed(){
+    var php_course = "<?php echo $course; ?>";
+    var php_semester = "<?php echo $semester; ?>";
+    window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+"&assignment_version="+document.getElementById('versionlist').value+'#scroll=' + window.scrollY;
+  }
+  window.addEventListener('load', function() {
+    // Do we have a #scroll in the URL hash?
+    if(window.location.hash && /#scroll/.test(window.location.hash)) {
+      // Scroll to the #scroll value
+      window.scrollTo(0, window.location.hash.replace('#scroll=', ''));
+    }
+  });
+  </script>
+
 </head>
 
 <body>
@@ -57,28 +78,7 @@ $user = $_SESSION["id"];
 
 ?>
 
-<script type="text/javascript">;
 
-function assignment_changed(){
-   var php_course = "<?php echo $course; ?>";
-   var php_semester = "<?php echo $semester; ?>";
-   window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+'#scroll=' + window.scrollY;
-}
-function version_changed(){
-   var php_course = "<?php echo $course; ?>";
-   var php_semester = "<?php echo $semester; ?>";
-  window.location.href="?semester="+php_semester+"&course="+php_course+"&assignment_id="+document.getElementById('hwlist').value+"&assignment_version="+document.getElementById('versionlist').value+'#scroll=' + window.scrollY;
-}
-
-window.addEventListener('load', function() {
-    // Do we have a #scroll in the URL hash?
-    if(window.location.hash && /#scroll/.test(window.location.hash)) {
-      // Scroll to the #scroll value
-        window.scrollTo(0, window.location.hash.replace('#scroll=', ''));
-    }
-});
-
-</script>
 
 <?php
 
