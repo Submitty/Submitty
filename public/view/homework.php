@@ -61,26 +61,75 @@ if($assignment_version <= 0 && $active_version != $assignment_version){
   });
   </script>
 
+  <!-- JS for File Upload -->
+  <script type="text/javascript">
+  function check_for_upload(assignment, versions_used, versions_allowed) {
+    versions_used = parseInt(versions_used);
+    versions_allowed = parseInt(versions_allowed);
+    if (versions_used >= versions_allowed) {
+      var message = confirm("Are you sure you want to upload for " + assignment + "? You have already used up all of your free submissions (" + versions_used + " / " + versions_allowed + "). Uploading may result in loss of points.");
+      return message;
+    }
+    return true;
+  }
+
+  function handle_submission(url, csrf_token, svn_checkout){
+    var days_late = <?php echo calculate_days_late($semester, $course, $assignment_id);?>;
+    var late_days_allowed = <?php echo get_late_days_allowed($semester, $course, $assignment_id);?>;
+    var versions_used = <?php echo $highest_version;?>;
+    var versions_allowed = <?php echo $max_submissions;?>;
+
+    var message = "";
+    // check versions used
+    if(versions_used >= versions_allowed) {
+      message = "You have already made " + versions_used + "/" + versions_allowed + " submissions. Are you sure you want to continue? Uploading may result in loss of points.";
+      if(!confirm(message)) return;
+    }
+    // check due date
+    if(days_late > 0 && days_late <= late_days_allowed) {
+      message = "Your submission will be " + days_late + " day(s) late. Are you sure you want to use " +days_late + " late day(s)?";
+      if(!confirm(message)) return;
+    } else if(days_late > 0){
+      message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absense. Are you sure you want to continue?";
+      if(!confirm(message)) return;
+    }
+    var loc = <?php echo "'"."?semester=".$semester."&course=".$course."&assignment_id=".$assignment_id."'" ?>;
+    submit(url, csrf_token, svn_checkout, loc);
+  }
+
+  function check_version_change(){
+    var days_late = <?php echo calculate_days_late($semester, $course, $assignment_id);?>;
+    var late_days_allowed = <?php echo get_late_days_allowed($semester, $course, $assignment_id);?>;
+    if(days_late > late_days_allowed){
+      var message = "The max late days allowed for this assignment is " + late_days_allowed + " days. ";
+      message += "You are not supposed to change your active version after this time unless you have permission from the instructor. Are you sure you want to continue?";
+      return confirm(message);
+    }
+    return true;
+  }
+  // Go through diff queue and run viewer
+  loadDiffQueue();
+
+
+  // Set time between asking server if the homework has been graded
+  // Last argument in ms
+  // Currently at 1 seconds = 1000ms
+  // Previously seconds = 5000ms
+
+  <?php
+  if ($assignment_version_in_grading_queue || $active_version_in_grading_queue) {
+    echo 'init_refresh_on_update("'.$semester.'", "'.$course.'", "'.$assignment_id.'", "'.$assignment_version.'", "'.$active_version.'", "'.!$assignment_version_in_grading_queue.'", "'.!$active_version_in_grading_queue.'", 1000);';
+  }
+  ?>
+  </script>
+
 </head>
 
 <body>
 
 <?php
 
-// =================================================================================
-
 $user = $_SESSION["id"];
-
-
-// =================================================================================
-// FUNCTIONS USED BY THE PULL-DOWN MENUS
-
-
-?>
-
-
-
-<?php
 
 
 // =================================================================================
@@ -541,67 +590,6 @@ echo '</div>'; // end HWsubmission
 // ============================================================================
 
 ?>
-
-<script type="text/javascript">
-    function check_for_upload(assignment, versions_used, versions_allowed) {
-        versions_used = parseInt(versions_used);
-        versions_allowed = parseInt(versions_allowed);
-        if (versions_used >= versions_allowed) {
-            var message = confirm("Are you sure you want to upload for " + assignment + "? You have already used up all of your free submissions (" + versions_used + " / " + versions_allowed + "). Uploading may result in loss of points.");
-            return message;
-        }
-        return true;
-    }
-
-    function handle_submission(url, csrf_token, svn_checkout){
-      var days_late = <?php echo calculate_days_late($semester, $course, $assignment_id);?>;
-      var late_days_allowed = <?php echo get_late_days_allowed($semester, $course, $assignment_id);?>;
-      var versions_used = <?php echo $highest_version;?>;
-      var versions_allowed = <?php echo $max_submissions;?>;
-
-      var message = "";
-      // check versions used
-      if(versions_used >= versions_allowed) {
-        message = "You have already made " + versions_used + "/" + versions_allowed + " submissions. Are you sure you want to continue? Uploading may result in loss of points.";
-        if(!confirm(message)) return;
-      }
-      // check due date
-      if(days_late > 0 && days_late <= late_days_allowed) {
-        message = "Your submission will be " + days_late + " day(s) late. Are you sure you want to use " +days_late + " late day(s)?";
-        if(!confirm(message)) return;
-      } else if(days_late > 0){
-        message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absense. Are you sure you want to continue?";
-        if(!confirm(message)) return;
-      }
-      var loc = <?php echo "'"."?semester=".$semester."&course=".$course."&assignment_id=".$assignment_id."'" ?>;
-      submit(url, csrf_token, svn_checkout, loc);
-    }
-
-    function check_version_change(){
-      var days_late = <?php echo calculate_days_late($semester, $course, $assignment_id);?>;
-      var late_days_allowed = <?php echo get_late_days_allowed($semester, $course, $assignment_id);?>;
-      if(days_late > late_days_allowed){
-        var message = "The max late days allowed for this assignment is " + late_days_allowed + " days. ";
-        message += "You are not supposed to change your active version after this time unless you have permission from the instructor. Are you sure you want to continue?";
-        return confirm(message);
-      }
-      return true;
-    }
-    // Go through diff queue and run viewer
-    loadDiffQueue();
-
-
-    // Set time between asking server if the homework has been graded
-    // Last argument in ms
-    // Currently at 1 seconds = 1000ms
-    // Previously seconds = 5000ms
-
-    <?php
-    if ($assignment_version_in_grading_queue || $active_version_in_grading_queue) {
-      echo 'init_refresh_on_update("'.$semester.'", "'.$course.'", "'.$assignment_id.'", "'.$assignment_version.'", "'.$active_version.'", "'.!$assignment_version_in_grading_queue.'", "'.!$active_version_in_grading_queue.'", 1000);';
-    }
-    ?>
-    </script>
 
 </body>
 </html>
