@@ -46,10 +46,7 @@ if($assignment_version <= 0 && $active_version != $assignment_version){
 
 <?php
 
-echo '<div>';
-
-echo '<div>';
-echo '<div class="submissions">';
+echo '<div class="submissions">'; // 3 .submissions
 
 
 // =================================================================================
@@ -94,7 +91,7 @@ window.addEventListener('load', function() {
 
 
 
-echo '<div id="HWsubmission">';
+echo '<div id="HWsubmission">'; // 4 .HWsubmission
 
 $random_logo = mt_rand(1,10);
 $random_logo_filename = "resources/logo_fake" . $random_logo . ".png";
@@ -127,7 +124,7 @@ if (file_exists($message_path)){
 }
 
 
-echo '<div class="sub">';
+echo '<div class="sub">'; // 5 .sub
 echo '<form class="form_submit" action="">';
 echo '<label class="label">Select Assignment:</label>';
 echo '<select id="hwlist" name="assignment_id" onchange="assignment_changed();">';
@@ -154,13 +151,13 @@ for ($i = 0; $i < count($all_assignments); $i++) {
 
 echo '</select>';
 echo '</form>';
-echo '</div>'; // end sub
+echo '</div>'; // end 5 .sub
 
 
 echo '<h2 class="label">Assignment: '.$assignment_name.'</h2>';
 
 
-echo '<div class="panel-body">';
+echo '<div class="panel-body">'; // 6 .panel-body
 
 if ($status && $status != "") {
   echo '  <div class="outer_box">';
@@ -172,7 +169,7 @@ if ($status && $status != "") {
 
 // UPLOAD NEW VERSION
 
-echo '<div class="outer_box">';
+echo '<div class="outer_box">'; // 8 .outer_box
 echo '<h3 class="label">Upload New Version</h3>';
 echo '<p class="sub">'.$upload_message.'</p>';
 
@@ -304,7 +301,7 @@ if ($svn_checkout == true) {  // svn upload
 
   <?php
 }
-echo '</div>';
+echo '</div>'; // end 8 .outer_box
 // DRAG AND DROP ENDS
 // ============================================================================
 
@@ -335,9 +332,7 @@ if ($highest_version == -1) {
 } else {
 
   // $highest_version is >= 1
-  //  echo '<div class="outer_box_confetti">';
-  //echo '<div class="outer_box_confetti_a">';
-  echo '<div class="outer_box">';
+  echo '<div class="outer_box">'; // 9 outer_box
   echo '<h3 class="label">Review Submissions</h3>';
 
 
@@ -480,8 +475,7 @@ if ($highest_version == -1) {
     }
   }
 
-  echo '</div>';  // confetti_a
-  //echo '</div>';  // confetti
+  echo '</div>';  // end 9 .outer_box
 
 
 
@@ -611,7 +605,8 @@ echo '</div>'; // end HWsubmission
     }
     ?>
     </script>
-</div>
+
+</div> <!-- // end .submissions -->
 
 </body>
 </html>
