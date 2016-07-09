@@ -91,7 +91,13 @@ if ($calculate_diff) {
         var iframe = $('#file_viewer_' + part + '_' + num);
         if (!iframe.hasClass('open')) {
             var iframeId = "file_viewer_" + part + "_" + num + "_iframe";
-            iframe.html("<iframe id='" + iframeId + "' onLoad='resizeFrame(\"" + iframeId + "\");' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "' width='750px' style='border: 0'></iframe>");
+            // handle pdf
+            if(file.substring(file.length - 3) == "pdf") {
+                iframe.html("<iframe id='" + iframeId + "' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "' width='750px' height='600px' style='border: 0'></iframe>");
+            }
+            else {
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "' width='750px' style='border: 0'></iframe>");
+            }
             iframe.addClass('open');
         }
 
