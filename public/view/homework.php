@@ -32,7 +32,7 @@ if($assignment_version <= 0 && $active_version != $assignment_version){
 
   <!-- PHP Vars Needed -->
   <?php
-  echo '<title>'.$course.'</title>';
+  echo '<title>'.$assignment_name.'</title>';
   if (file_exists("custom_resources/".$semester."_".$course."_main.css")) {
     print('<link href="custom_resources/'.$semester."_".$course.'_main.css" rel="stylesheet"></link>');
   } else {
