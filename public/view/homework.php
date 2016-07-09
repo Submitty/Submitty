@@ -378,9 +378,8 @@ if ($highest_version == -1) {
 
   echo '<div class="sub">';  // left half of split row
 
-  echo '<h3>';
   echo '<form class="form_submit" action="">';
-  echo '<label class="label">Select Submission Version:</label>';
+  echo '<label class="label"><h3 style="float: left;">Select Submission Version:</h3></label>';
   echo '<input type="input" readonly="readonly" name="assignment_id" value="'.$assignment_id.'" style="display: none">';
   echo '<select id="versionlist" name="assignment_version" onchange="version_changed();">';
 
@@ -435,7 +434,6 @@ if ($highest_version == -1) {
     echo '<input type="submit" class="btn btn-default" value="Do Not Grade This Version (Mark All Inactive)" />';
     echo '</form>';
   }
-  echo '</h3>';
   echo '</div>'; // end of selection
   // -----------------------------------------------------
   // ACTIVE ASSIGNMENT & CANCELLED ASSIGNMENT MESSAGES

@@ -68,3 +68,17 @@ body{
   float: right;
   padding: 2px;
 }
+
+select {
+    margin: 0px 10px;
+    border: 1px solid #111;
+    background: transparent;
+    padding: 5px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    height: 34px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: #fff;
+}
