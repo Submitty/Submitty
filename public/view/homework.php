@@ -4,7 +4,7 @@ if($assignment_version <= 0 && $active_version != $assignment_version){
   header ("Location: index.php?semester=".$semester."&course=".$course."&assignment_id=".$assignment_id);
 }
 ?>
-
+<!DOCTYPE html>
 <html>
 <head>
 
