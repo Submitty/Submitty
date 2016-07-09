@@ -431,7 +431,7 @@ if ($highest_version == -1) {
     echo 'onsubmit="return check_version_change()"';
     echo'>';
     echo '<input type="hidden" name="csrf_token" value="'.$_SESSION['csrf'].'"" />';
-    echo '<input type="submit" class="btn btn-default" value="Do Not Grade This Version (Mark All Inactive)" />';
+    echo '<input type="submit" class="btn btn-default btn-secondary" value="Do Not Grade This Version (Mark All Inactive)" />';
     echo '</form>';
   }
   echo '</div>'; // end of selection
