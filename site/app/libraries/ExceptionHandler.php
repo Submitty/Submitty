@@ -85,7 +85,7 @@ class ExceptionHandler {
         }
 
         $message = "{$exception_name} (Code: {$exception->getCode()}) thrown in {$file} (Line {$exception_line}) by:\n";
-        $message .= "{$line_code}\n\nMessage:\n{$exception->getMessage()}\nStrack Trace:\n";
+        $message .= "{$line_code}\n\nMessage:\n{$exception->getMessage()}\n\nStrack Trace:\n";
         $message .= "{$exception->getTraceAsString()}\n";
 
         if ($is_base_exception) {

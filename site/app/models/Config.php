@@ -118,7 +118,7 @@ class Config extends Model {
         // Check that the paths from the config file are valid
         foreach(array('hss_path', 'hss_log_path') as $path) {
             if (!is_dir($this->$path)) {
-                throw new ConfigException("Invalid path for setting: {$path}\n\n{$this->$path}");
+                throw new ConfigException("Invalid path for setting: {$path}\n{$this->$path}");
             }
             $this->$path = rtrim($this->$path, "/");
         }

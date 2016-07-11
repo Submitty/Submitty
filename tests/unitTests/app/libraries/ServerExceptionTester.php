@@ -1,8 +1,8 @@
 <?php
 
-namespace tests\integrationTests\lib;
+namespace tests\integrationTests\app\libraries;
 
-use \lib\ServerException;
+use \app\libraries\ServerException;
 
 class ServerExceptionTester extends \PHPUnit_Framework_TestCase {
     public function testException() {

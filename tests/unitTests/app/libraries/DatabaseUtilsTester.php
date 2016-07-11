@@ -1,8 +1,8 @@
 <?php
 
-namespace tests\integrationTests\lib;
+namespace tests\integrationTests\app\libraries;
 
-use \lib\DatabaseUtils;
+use \app\libraries\DatabaseUtils;
 
 class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
     public function arrayData() {
@@ -18,18 +18,6 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
             array('{"true", "false"}', array("true", "false")),
             array('{"M5"}', array('M5'))
         );
-    }
-
-    /**
-     * Test to make sure DatabaseUtils is a proper singleton
-     */
-    public function testSingletonPattern() {
-        $d = DatabaseUtils::getInstance();
-        $this->assertEquals($d, DatabaseUtils::getInstance());
-
-        $d = new \ReflectionClass("\\lib\\DatabaseUtils");
-        $this->assertTrue($d->getMethod("__clone")->isPrivate());
-        $this->assertTrue($d->getMethod("__construct")->isPrivate());
     }
 
     /**
@@ -86,9 +74,9 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
     }
 
     public function testNullPGArray() {
-        $this->assertEquals(array(), DatabaseUtils::fromPGToPHPArray("{NULL}"));
+        $this->assertEquals(array(null), DatabaseUtils::fromPGToPHPArray("{NULL}"));
     }
     public function testBooleanPGToPHP() {
-        $this->assertEquals(array(true, false), DatabaseUtils::fromPGToPHPArray("{true, false}", true));
+        $this->assertEquals(array(true, false, 'test'), DatabaseUtils::fromPGToPHPArray("{true, false, 'test'}", true));
     }
 }

@@ -2,14 +2,12 @@
 
 namespace app\exceptions;
 
-use app\libraries\ExceptionHandler;
-
 /**
  * Class BaseException
  *
  * Base Exception class that all other extensions within Submitty should extend from.
  * This allows us to send additional details to be logged within our ExceptionHandler
- * (@see ExceptionHandler). We should 
+ * (@see ExceptionHandler). We should
  */
 class BaseException extends \RuntimeException{
     protected $details;

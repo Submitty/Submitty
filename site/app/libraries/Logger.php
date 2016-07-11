@@ -13,7 +13,7 @@ class Logger {
     const ERROR = 3;
     const FATAL = 4;
 
-    private static $log_path;
+    private static $log_path = null;
 
     /**
      * Don't allow usage of this class outside a static context
@@ -129,5 +129,9 @@ class Logger {
         if (file_put_contents(static::$log_path."/".$filename.".txt", $log_message, FILE_APPEND | LOCK_EX) === false) {
             print "failure to log error";
         }
+    }
+
+    public static function getLogPath() {
+        return self::$log_path;
     }
 }

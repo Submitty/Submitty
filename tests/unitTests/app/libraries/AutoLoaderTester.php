@@ -1,8 +1,8 @@
 <?php
 
-namespace tests\integrationTests\lib;
+namespace tests\integrationTests\app\libraries;
 
-use lib\AutoLoader;
+use \app\libraries\AutoLoader;
 
 class AutoLoaderTester extends \PHPUnit_Framework_TestCase {
     private $autoloader_classes;

@@ -1,8 +1,8 @@
 <?php
 
-namespace tests\integrationTests\lib;
+namespace tests\integrationTests\app\libraries;
 
-use lib\DiffViewer;
+use \app\libraries\DiffViewer;
 
 class DiffViewerTester extends \PHPUnit_Framework_TestCase {
 

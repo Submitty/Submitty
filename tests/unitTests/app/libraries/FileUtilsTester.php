@@ -1,8 +1,8 @@
 <?php
 
-namespace tests\integrationTests\lib;
+namespace tests\integrationTests\app\libraries;
 
-use \lib\FileUtils;
+use \app\libraries\FileUtils;
 
 class FileUtilsTester extends \PHPUnit_Framework_TestCase {
     public static function setUpBeforeClass() {

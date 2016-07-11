@@ -9,36 +9,6 @@ namespace app\libraries;
  * translating a field returned from a database into a specific type within PHP.
  */
 class DatabaseUtils {
-
-    /**
-     * Get instance of DatabaseUtils
-     *
-     * Creates a DatabaeUtils if one doesn't exist
-     * and then subsequently returns the same object in the future
-     *
-     * @return DatabaseUtils The instance of DatabaseUtils
-     */
-    public static function getInstance() {
-        static $instance = null;
-        if ($instance === null) {
-            $instance = new DatabaseUtils();
-        }
-        return $instance;
-    }
-
-    /**
-     * Don't allow anyone outside of DatabaseUtils and subclasses
-     * to initailze a singleton object
-     */
-    private function __construct() { }
-
-    /**
-     * Don't allow someone to clone a singleton object
-     *
-     * @codeCoverageIgnore
-     */
-    private function __clone() { }
-
     /**
      * Converts a Postgres style array to a PHP array
      *
@@ -48,14 +18,14 @@ class DatabaseUtils {
      *
      * ex: "{1, 2, 3, 4}" => array(1, 2, 3, 4)
      *
-     * @param string $text the text representation of the postgres array
-     * @param int $start index to start looking through $text at
-     * @param int $end index of $text where we exist current pgArrayToPhp call
-     * @param bool $parseBools set to true to convert "true"/"false" to booleans instead of strings
+     * @param string $text        the text representation of the postgres array
+     * @param bool   $parse_bools set to true to convert "true"/"false" to booleans instead of strings
+     * @param int    $start       index to start looking through $text at
+     * @param int    $end         index of $text where we exist current pgArrayToPhp call
      *
      * @return array PHP array representation
      */
-    public static function fromPGToPHPArray($text, $parseBools=false, $start=0, &$end=null) {
+    public static function fromPGToPHPArray($text, $parse_bools = false, $start=0, &$end=null) {
         $text = trim($text);
 
         if(empty($text) || $text[0] != "{") {
@@ -73,25 +43,10 @@ class DatabaseUtils {
                     $in_array = true;
                 }
                 else if (!$in_string && $ch == "{") {
-                    $return[] = DatabaseUtils::fromPGToPHPArray($text, $parseBools, $i, $i);
+                    $return[] = DatabaseUtils::fromPGToPHPArray($text, $parse_bools, $i, $i);
                 }
                 else if (!$in_string && $ch == "}") {
-                    if ($have_string) {
-                        $return[] = $element;
-                    }
-                    else if (strlen($element) > 0) {
-                        if (is_numeric($element)) {
-                            $return[] = $element + 0;
-                        }
-                        else {
-                            if (!$parseBools) {
-                                $return[] = $element;
-                            }
-                            else {
-                                $return[] = (strtolower($element) == "true") ? true : false;
-                            }
-                        }
-                    }
+                    self::parsePGValue($element, $have_string, $parse_bools, $return);
                     $end = $i;
                     return $return;
                 }
@@ -107,23 +62,7 @@ class DatabaseUtils {
                     continue;
                 }
                 else if (!$in_string && $ch == ",") {
-                    if ($have_string) {
-                        $return[] = $element;
-                    }
-                    else if (strlen($element) > 0) {
-
-                        if (is_numeric($element)) {
-                            $return[] = $element + 0;
-                        }
-                        else {
-                            if (!$parseBools) {
-                                $return[] = $element;
-                            }
-                            else {
-                                $return[] = (strtolower($element) == "true") ? true : false;
-                            }
-                        }
-                    }
+                    self::parsePGValue($element, $have_string, $parse_bools, $return);
                     $element = "";
                 }
                 else {
@@ -133,6 +72,39 @@ class DatabaseUtils {
         }
 
         return array();
+    }
+
+    /**
+     * Method that given an element figures out how to add it to the $return array whether it's a string, a numeric,
+     * a null, a boolean, or an unquoted string
+     *
+     * @param string $element     element to analyze
+     * @param bool   $have_string do we have a quoted element (using either ' or " characters around the string)
+     * @param bool   $parse_bools set to true to convert "true"/"false" to booleans instead of strings
+     * @param array  &$return     this is the array being built to contain the parsed PG array
+     */
+    private static function parsePGValue($element, $have_string, $parse_bools, &$return) {
+        if ($have_string) {
+            $return[] = $element;
+        }
+        else if (strlen($element) > 0) {
+            if (is_numeric($element)) {
+                $return[] = ($element + 0);
+            }
+            else {
+                if ($parse_bools) {
+                    if (in_array(strtolower($element), array("true", "false"))) {
+                        $return[] = (strtolower($element) == "true") ? true : false;
+                        return;
+                    }
+                }
+                if (strtolower($element) == "null") {
+                    $return[] = null;
+                    return;
+                }
+                $return[] =  $element;
+            }
+        }
     }
 
     /**
