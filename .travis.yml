@@ -30,6 +30,7 @@ script:
 
 after_script:
   - tail -n +1 /usr/local/submitty/test_suite/integrationTests/tests/java_coverage_factorial/log/*
+  - tail -n +1 /usr/local/submitty/test_suite/integrationTests/tests/java_coverage_factorial/data/test04*
 
 notifications:
   email: false
