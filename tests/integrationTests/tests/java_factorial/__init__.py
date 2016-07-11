@@ -99,8 +99,8 @@ def buggy(test):
     test.empty_file("test01_STDOUT.txt")
     test.empty_file("test02_STDOUT.txt")
     test.junit_diff("test03_STDOUT.txt", "buggy_test03_STDOUT.txt")
-        for i in range(3):
-            test.empty_file("test0%d_STDERR.txt" % i)
+    for i in range(3):
+        test.empty_file("test0%d_STDERR.txt" % i)
     test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
     test.diff(".submit.grade", "buggy_.submit.grade")
     test.diff("submission.json", "buggy_submission.json")
