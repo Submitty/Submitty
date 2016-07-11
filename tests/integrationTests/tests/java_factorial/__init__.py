@@ -42,9 +42,9 @@ def cleanup(test):
             glob.glob(os.path.join(test.testcase_path, "data/", "Factorial.java")))
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "test*.txt")))
-    subprocess.call(["rm"] + ["-f"] + 
+    subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/.submit.grade")))
-    subprocess.call(["rm"] + ["-f"] + 
+    subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/submission.json")))
 
 
@@ -58,14 +58,13 @@ def correct(test):
     test.run_run()
     test.run_validator()
     test.empty_file("test01_STDOUT.txt")
-    test.empty_file("test01_STDERR.txt")
     test.empty_file("test02_STDOUT.txt")
-    test.empty_file("test02_STDERR.txt")
-    test.junit_diff("test03_STDOUT.txt","correct_test03_STDOUT.txt")
-    test.empty_file("test03_STDERR.txt")
+    test.junit_diff("test03_STDOUT.txt", "correct_test03_STDOUT.txt")
+    for i in range(3):
+        test.empty_file("test0%d_STDERR.txt" % i)
     test.empty_file("test03_execute_logfile.txt")
-    test.diff(".submit.grade","correct_.submit.grade")
-    test.diff("submission.json","correct_submission.json")
+    test.diff(".submit.grade", "correct_.submit.grade")
+    test.diff("submission.json", "correct_submission.json")
 
 
 @testcase
@@ -78,14 +77,14 @@ def does_not_compile(test):
     test.run_run()
     test.run_validator()
     test.empty_file("test01_STDOUT.txt")
-    test.diff("test01_STDERR.txt","does_not_compile_test01_STDERR.txt")
+    test.diff("test01_STDERR.txt", "does_not_compile_test01_STDERR.txt")
     test.empty_file("test02_STDOUT.txt")
-    test.diff("test02_STDERR.txt","does_not_compile_test02_STDERR.txt")
-    test.junit_diff("test03_STDOUT.txt","does_not_compile_test03_STDOUT.txt")
+    test.diff("test02_STDERR.txt", "does_not_compile_test02_STDERR.txt")
+    test.junit_diff("test03_STDOUT.txt", "does_not_compile_test03_STDOUT.txt")
     test.empty_file("test03_STDERR.txt")
-    test.diff("test03_execute_logfile.txt","exit_status_1.txt")
-    test.diff(".submit.grade","does_not_compile_.submit.grade")
-    test.diff("submission.json","does_not_compile_submission.json")
+    test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
+    test.diff(".submit.grade", "does_not_compile_.submit.grade")
+    test.diff("submission.json", "does_not_compile_submission.json")
 
 
 @testcase
@@ -98,14 +97,13 @@ def buggy(test):
     test.run_run()
     test.run_validator()
     test.empty_file("test01_STDOUT.txt")
-    test.empty_file("test01_STDERR.txt")
     test.empty_file("test02_STDOUT.txt")
-    test.empty_file("test02_STDERR.txt")
-    test.junit_diff("test03_STDOUT.txt","buggy_test03_STDOUT.txt")
-    test.empty_file("test03_STDERR.txt")
-    test.diff("test03_execute_logfile.txt","exit_status_1.txt")
-    test.diff(".submit.grade","buggy_.submit.grade")
-    test.diff("submission.json","buggy_submission.json")
+    test.junit_diff("test03_STDOUT.txt", "buggy_test03_STDOUT.txt")
+        for i in range(3):
+            test.empty_file("test0%d_STDERR.txt" % i)
+    test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
+    test.diff(".submit.grade", "buggy_.submit.grade")
+    test.diff("submission.json", "buggy_submission.json")
 
 
 @testcase
@@ -118,12 +116,11 @@ def still_buggy(test):
     test.run_run()
     test.run_validator()
     test.empty_file("test01_STDOUT.txt")
-    test.empty_file("test01_STDERR.txt")
     test.empty_file("test02_STDOUT.txt")
-    test.empty_file("test02_STDERR.txt")
-    test.junit_diff("test03_STDOUT.txt","still_buggy_test03_STDOUT.txt")
-    test.empty_file("test03_STDERR.txt")
-    test.diff("test03_execute_logfile.txt","exit_status_1.txt")
-    test.diff(".submit.grade","still_buggy_.submit.grade")
-    test.diff("submission.json","still_buggy_submission.json")
+    test.junit_diff("test03_STDOUT.txt", "still_buggy_test03_STDOUT.txt")
+    for i in range(3):
+        test.empty_file("test0%d_STDERR.txt" % i)
+    test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
+    test.diff(".submit.grade", "still_buggy_.submit.grade")
+    test.diff("submission.json", "still_buggy_submission.json")
 

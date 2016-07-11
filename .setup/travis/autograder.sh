@@ -5,8 +5,6 @@ SUBMITTY_DATA_DIR=/var/local/submitty
 
 apt-get install -yqq --force-yes python automake cmake make clang gcc g++ g++-multilib libseccomp2 seccomp libseccomp-dev valgrind
 
-apt-get install -qqy oracle-java8-installer 
-
 mkdir -p ${SUBMITTY_INSTALL_DIR}
 mkdir -p ${SUBMITTY_DATA_DIR}
 mkdir -p ${SUBMITTY_INSTALL_DIR}/src
@@ -44,10 +42,6 @@ rm DrMemory-Linux-${DRMEM_VER}.tar.gz
 popd
 
 
-
-
-
-
 echo "Getting JUnit..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
 cd ${SUBMITTY_INSTALL_DIR}/JUnit
@@ -56,7 +50,6 @@ wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.
 mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
 wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F1.3%2Fhamcrest-core-1.3.jar hamcrest-core-1.3.jar
-
 
 # EMMA is a tool for computing code coverage of Java programs
 
@@ -69,3 +62,6 @@ rm emma-2.0.5312.zip
 rm index.html* > /dev/null 2>&1
 
 chmod o+r . *.jar
+
+cd ${SUBMITTY_INSTALL_DIR}
+cd ${SUBMITTY_INSTALL_DIR}/JUnit
