@@ -60,7 +60,7 @@ def correct(test):
     test.empty_file("test01_STDOUT.txt")
     test.empty_file("test02_STDOUT.txt")
     test.junit_diff("test03_STDOUT.txt", "correct_test03_STDOUT.txt")
-    for i in range(3):
+    for i in range(1, 4):
         test.empty_file("test0%d_STDERR.txt" % i)
     test.empty_file("test03_execute_logfile.txt")
     test.diff(".submit.grade", "correct_.submit.grade")
@@ -99,7 +99,7 @@ def buggy(test):
     test.empty_file("test01_STDOUT.txt")
     test.empty_file("test02_STDOUT.txt")
     test.junit_diff("test03_STDOUT.txt", "buggy_test03_STDOUT.txt")
-    for i in range(3):
+    for i in range(1, 4):
         test.empty_file("test0%d_STDERR.txt" % i)
     test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
     test.diff(".submit.grade", "buggy_.submit.grade")
@@ -118,7 +118,7 @@ def still_buggy(test):
     test.empty_file("test01_STDOUT.txt")
     test.empty_file("test02_STDOUT.txt")
     test.junit_diff("test03_STDOUT.txt", "still_buggy_test03_STDOUT.txt")
-    for i in range(3):
+    for i in range(1, 4):
         test.empty_file("test0%d_STDERR.txt" % i)
     test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
     test.diff(".submit.grade", "still_buggy_.submit.grade")

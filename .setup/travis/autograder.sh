@@ -64,4 +64,4 @@ rm index.html* > /dev/null 2>&1
 chmod o+r . *.jar
 
 ls ${SUBMITTY_INSTALL_DIR}
-ls ${SUBMITTY_INSTALL_DIR}/JUnit
+ls /usr/local/submitty/JUnit
