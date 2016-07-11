@@ -135,23 +135,15 @@ ul.dropdown-menu li#logout a:hover {
     left: 40%;
     /*height: 5%;*/
     /*width: 20%;*/
-    height: 40px;
+    height: 60px;
     width: 286px;
     background: #C3BEFF;
     opacity:0.5;
     z-index: 100;
 }
-#grade:hover {
-/*    left: 35%;
-    width: 30%;
-    height: 100%;*/
+.draggable {
     cursor: move;
-    /*opacity:1;*/
 }
-/*
-#grade:hover #rubric{
-    display:inline-block;
-}*/
 #rubric {
     position:absolute;
     bottom: 5%;
@@ -519,7 +511,7 @@ table {
 .icon-down:hover{
     background-color: red;
 }
-#grade span:hover{
+#grade i:not(.icon-disabled):hover{
     cursor: pointer;
     box-shadow: 0px 0px 5px 5px yellow;
     background-color: yellow;
@@ -528,6 +520,10 @@ table {
     box-shadow: 0px 0px 5px 5px aqua;
     background-color: aqua;
 
+}
+
+#grade a{
+    cursor: default;
 }
 /******************************************************************************/
 .file-viewer{

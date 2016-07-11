@@ -353,6 +353,39 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     }
 
     ?>
+<span id="grade" class="resbox draggable" style="padding:5px;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseup="dragPanelEnd(event);">
+    <i title="Show/Hide Submission Info (Press S)" class="icon-status" onclick="handleKeyPress('KeyS')"></i>
+    <i title="Show/Hide Grading Panel (Press G)" class="icon-grading-panel" onclick="handleKeyPress('KeyG')"></i>
+    <i title="Show/Hide Auto Grading Results (Press A)" class="icon-auto-grading-results icon-selected" onclick="handleKeyPress('KeyA');"></i>
+    <i title="Show/Hide Files Viewer (Press F)" class="icon-files icon-selected" onclick="handleKeyPress('KeyF')"></i>
+    <a <?php echo ($previous_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&prev={$previous_rcs}\""); ?> ><i title="Go to the previous student (Press Left Arrow)" class="icon-left <?php echo ($previous_rcs == "" ? 'icon-disabled"' : '"'); ?> ></i></a>
+    <a href="<?php echo $BASE_URL; ?>/account/account-summary.php?hw=<?php echo $_GET["hw"]; ?>"><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
+    <a <?php echo ($next_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&next={$next_rcs}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($previous_rcs == "" ? 'icon-disabled"' : '"'); ?>></i></a>
+    <i title="Pin Toolbar" class="icon-toolbar-up" ></i>
+    <div style="width:100%; height: 15px; bottome:0;">
+        <?php if($position_other == 0) { ?>
+            <div class="progress" id="prog" style="border:#AAA solid 2px; ">
+                <div class="bar bar-primary" style="width: <?php echo (($position_completed - $position_backup) / $position_total) * 95; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
+                <div class="bar bar-warning" style="width: <?php echo ($position_backup / $position_total) * 95; ?>%;"><i class="icon-refresh icon-white" id="progress-icon"></i></div>
+                <div class="bar" style="width: 5%; background-image: none; background-color: #777;"><?php echo round(($position_completed / $position_total) * 100, 1); ?>%</div>
+            </div>
+        <?php } elseif($position_other < $position_total) { ?>
+            <div class="progress" id="prog" style="border:#AAA solid 2px; ">
+                <div class="bar bar-info" style="width: <?php echo ($position_other / $position_total) * 94; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
+                <div class="bar" style="width: 1%; background-image: none; background-color: #777;"></div>
+                <div class="bar bar-primary" style="width: <?php echo (($position_completed - $position_backup) / $position_total) * 94; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
+                <div class="bar bar-warning" style="width: <?php echo ($position_backup / $position_total) * 94; ?>%;"><i class="icon-refresh icon-white" id="progress-icon"></i></div>
+                <div class="bar" style="width: 5%; background-image: none; background-color: #777;"><?php echo round((($position_completed + $position_other) / $position_total) * 100, 1); ?>%</div>
+            </div>
+        <?php } else { ?>
+            <div class="progress" id="prog" style="border:#AAA solid 2px; ">
+                <div class="bar bar-info" style="width: <?php echo ($position_other / $position_total) * 95; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
+                <div class="bar" style="width: 5%; background-image: none; background-color: #777;"><?php echo round(($position_other / $position_total) * 100, 1); ?>%</div>
+            </div>
+        <?php } ?>
+    </div>
+</span>
+
     <div style="border-top:#AAA solid 2px; width:100%; height: 20px; position:absolute; bottom:0; background-color:#fff; z-index:999;">
         <?php if($position_other == 0) { ?>
             <div class="progress" id="prog">
@@ -456,9 +489,11 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
       console.log("pressed " + key);
       switch (key) {
         case "KeyG":
+          $('#grade .icon-grading-panel').toggleClass('icon-selected');
           togglePanel("rubric");
           break;
         case "KeyS":
+          $('#grade .icon-status').toggleClass('icon-selected');
           togglePanel("stats");
           break;
         case "KeyF":
@@ -485,31 +520,31 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         var right =  document.getElementById('right');
         var pane = document.getElementById('pane');
         var panemover = document.getElementById('panemover');
-        pane.style.display = "inline-block";
-        panemover.style.display = "inline-block";
-        if($('#grade .icon-selected').length == 2) {
+        if($('#grade .icon-auto-grading-results').hasClass('icon-selected') && $('#grade .icon-files').hasClass('icon-selected')) {
+            pane.style.display = "inline-block";
+            panemover.style.display = "inline-block";
             left.style.display = "inline-block";
             right.style.display = "inline-block";
             left.style.width = (width * split) + 'px';
             right.style.width = (width * (1 - split)) + 'px';
             panemover.style.left = pane.offsetLeft + 'px';
         }
-        else if($('#grade .icon-selected').length == 0) {
-            left.style.display = "none";
-            right.style.display = "none";
-        }
         else {
             pane.style.display = "none";
             panemover.style.display = "none";
-            if($('#grade .icon-selected').hasClass('icon-auto-grading-results')) {
+            if($('#grade .icon-auto-grading-results').hasClass('icon-selected')) {
                 left.style.display = "inline-block";
                 right.style.display = "none";
                 left.style.width = window.innerWidth + 'px';
             }
-            else if($('#grade .icon-selected').hasClass('icon-files')) {
+            else if($('#grade .icon-files').hasClass('icon-selected')) {
                 left.style.display = "none";
                 right.style.display = "inline-block";
                 right.style.width = window.innerWidth + 'px';
+            }
+            else {
+                left.style.display = "none";
+                right.style.display = "none";
             }
         }
     }
@@ -565,6 +600,15 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     // ========================================================
     // Drag to move toolbar/grading/status panel around
     function dragPanelStart(e) {
+        // console.log("html:  " + $(this).html());
+        // if(!($(this).hasClass('draggable'))) {
+        //     console.log('not draggable');
+        //     return;
+        // }
+        if(!hasClass(e.target, "draggable")){
+            console.log("not draggable");
+            return;
+        }
         console.log("drag start");
         mousedown = true;
         x = e.clientX;
@@ -574,6 +618,10 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         if(!mousedown) return;
 
         var element = document.getElementById( e.target.id ? e.target.id : e.target.parentNode.id );
+        if(!element){
+            console.log("null");
+            // return;
+        }
         console.log("dragging");
         console.log(element.id);
         element.style.left = (element.offsetLeft - (x - e.clientX)) + 'px';
@@ -590,6 +638,23 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         }
         */
     }
+// change class javascript, may or may not be useful
+function hasClass(element, cls) {
+    return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
+}
+
+function removeClass(element, cls) {
+    element.className = element.className.replace( /(?:^|\s)MyClass(?!\S)/g , '' );
+}
+
+function addClass(element, cls) {
+    element.className += " " + cls;
+}
+
+function toggleClass(element, cls) {
+    if(hasClass(element, cls)) removeClass(element, cls);
+    else addClass(element, cls);
+}
     function dragPanelEnd(e) {
         console.log("drag end");
         mousedown = false;

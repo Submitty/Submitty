@@ -396,19 +396,8 @@ HTML;
 </div>
 </span><!---->
 
-<span id="grade" class="resbox" style="padding:5px;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseout="dragPanelEnd(event);" onmouseup="dragPanelEnd(event);">
-    <span title="Show/Hide Submission Info (Press S)" class="icon-status" onclick="handleKeyPress('KeyS')"></span>
-    <span title="Show/Hide Grading Panel (Press G)" class="icon-grading-panel" onclick="handleKeyPress('KeyG')"></span>
-    <span title="Show/Hide Auto Grading Results (Press A)" class="icon-auto-grading-results icon-selected" onclick="handleKeyPress('KeyA');"></span>
-    <span title="Show/Hide Files Viewer (Press F)" class="icon-files icon-selected" onclick="handleKeyPress('KeyF')"></span>
-    <span title="Go to the previous student (Press Left Arrow)" class="icon-left" ></span>
-    <span title="Go to the main page (Press H)" class="icon-home" ></span>
-    <span title="Go to the next student (Press Right Arrow)" class="icon-right" ></span>
-    <span title="Pin Toolbar" class="icon-toolbar-up" ></span>
-</span>
-
 <span id="stats" class="resbox" style="display:none;">
-    <div style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseout="dragPanelEnd(event);" onmouseup="dragPanelEnd(event);" >
+    <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseup="dragPanelEnd(event);" >
     <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyS')" ></span>
     </div>
     <div id="inner-container" style="margin:5px;">
@@ -492,7 +481,7 @@ $output .= <<<HTML
 </span>
 
 <span id="rubric" class="resbox" style="display:none; overflow-y=hidden;">
-    <div style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseout="dragPanelEnd(event);" onmouseup="dragPanelEnd(event);" >
+    <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);" onmouseup="dragPanelEnd(event);" >
         <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyG')" ></span>
     </div>
     <div class="inner-container" style="overflow-y:auto; margin:1px; height:100%">
