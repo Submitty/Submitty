@@ -63,5 +63,5 @@ rm index.html* > /dev/null 2>&1
 
 chmod o+r . *.jar
 
-cd ${SUBMITTY_INSTALL_DIR}
-cd ${SUBMITTY_INSTALL_DIR}/JUnit
+ls ${SUBMITTY_INSTALL_DIR}
+ls ${SUBMITTY_INSTALL_DIR}/JUnit
