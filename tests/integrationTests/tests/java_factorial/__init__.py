@@ -58,13 +58,14 @@ def correct(test):
     test.run_run()
     test.run_validator()
     test.empty_file("test01_STDOUT.txt")
+    test.empty_file("test01_STDERR.txt")
     test.empty_file("test02_STDOUT.txt")
-    test.junit_diff("test03_STDOUT.txt", "correct_test03_STDOUT.txt")
-    for i in range(1, 4):
-        test.empty_file("test0%d_STDERR.txt" % i)
+    test.empty_file("test02_STDERR.txt")
+    test.junit_diff("test03_STDOUT.txt","correct_test03_STDOUT.txt")
+    test.empty_file("test03_STDERR.txt")
     test.empty_file("test03_execute_logfile.txt")
-    test.diff(".submit.grade", "correct_.submit.grade")
-    test.diff("submission.json", "correct_submission.json")
+    test.diff(".submit.grade","correct_.submit.grade")
+    test.diff("submission.json","correct_submission.json")
 
 
 @testcase
@@ -97,13 +98,14 @@ def buggy(test):
     test.run_run()
     test.run_validator()
     test.empty_file("test01_STDOUT.txt")
+    test.empty_file("test01_STDERR.txt")
     test.empty_file("test02_STDOUT.txt")
-    test.junit_diff("test03_STDOUT.txt", "buggy_test03_STDOUT.txt")
-    for i in range(1, 4):
-        test.empty_file("test0%d_STDERR.txt" % i)
-    test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
-    test.diff(".submit.grade", "buggy_.submit.grade")
-    test.diff("submission.json", "buggy_submission.json")
+    test.empty_file("test02_STDERR.txt")
+    test.junit_diff("test03_STDOUT.txt","buggy_test03_STDOUT.txt")
+    test.empty_file("test03_STDERR.txt")
+    test.diff("test03_execute_logfile.txt","exit_status_1.txt")
+    test.diff(".submit.grade","buggy_.submit.grade")
+    test.diff("submission.json","buggy_submission.json")
 
 
 @testcase
@@ -116,11 +118,12 @@ def still_buggy(test):
     test.run_run()
     test.run_validator()
     test.empty_file("test01_STDOUT.txt")
+    test.empty_file("test01_STDERR.txt")
     test.empty_file("test02_STDOUT.txt")
-    test.junit_diff("test03_STDOUT.txt", "still_buggy_test03_STDOUT.txt")
-    for i in range(1, 4):
-        test.empty_file("test0%d_STDERR.txt" % i)
-    test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
-    test.diff(".submit.grade", "still_buggy_.submit.grade")
-    test.diff("submission.json", "still_buggy_submission.json")
+    test.empty_file("test02_STDERR.txt")
+    test.junit_diff("test03_STDOUT.txt","still_buggy_test03_STDOUT.txt")
+    test.empty_file("test03_STDERR.txt")
+    test.diff("test03_execute_logfile.txt","exit_status_1.txt")
+    test.diff(".submit.grade","still_buggy_.submit.grade")
+    test.diff("submission.json","still_buggy_submission.json")
 
