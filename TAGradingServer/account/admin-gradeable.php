@@ -7,8 +7,7 @@ include "../header.php";
 check_administrator();
 
 if($user_is_administrator){
-    $have_old = false;
-    $has_grades = false;
+    $have_old = $has_grades = false;
     $old_gradeable = array(
         'g_id' => -1,
         'g_title' => "",
@@ -21,13 +20,8 @@ if($user_is_administrator){
         'g_syllabus_bucket' => '',
         'g_min_grading_group' => ''
     );
-    $old_questions = array();
-    $old_components = array();
-    $electronic_gradeable = array();
-    $use_ta_grading=json_encode(true);
-
-    $num_numeric = 0;
-    $num_text = 0;
+    $old_questions = $old_components = $electronic_gradeable = array();
+    $num_numeric = $num_text = 0;
     
     if (isset($_GET['action']) && $_GET['action'] == 'edit') {
         $g_id = $_GET['id'];
@@ -58,13 +52,11 @@ if($user_is_administrator){
        
        //if electonic file then add all of the old questions
        if($old_gradeable['g_gradeable_type']==0){
-           
             //get the electronic file stuff
             $db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($g_id));
             $electronic_gradeable = $db->row();
-            
-            $use_ta_grading = json_encode($electronic_gradeable['eg_use_ta_grading']);
-           
+            $use_ta_grading = $electronic_gradeable['eg_use_ta_grading'];
+            $is_repository = $electronic_gradeable['eg_is_repository'];
             $db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_max_value, gc_is_extra_credit FROM gradeable_component 
                         WHERE g_id=? GROUP BY gc_id ORDER BY gc_order ASC",array($g_id));
             $tmp_questions = $db->rows();
@@ -123,7 +115,6 @@ if($user_is_administrator){
     }
 
     $have_old = json_encode($have_old);
-
     $extra = ($has_grades) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
     print <<<HTML
 
@@ -197,7 +188,6 @@ if($user_is_administrator){
         display: none;
     }
     
-    
     fieldset {
         margin: 8px;
         border: 1px solid silver;
@@ -209,20 +199,17 @@ if($user_is_administrator){
         padding: 2px;  
         font-size: 12pt;
     }
-    
 </style>
 
 <div id="container-rubric">
     <form class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" 
                  method="post" enctype="multipart/form-data"> 
         <input type='hidden' name="csrf_token" value="{$_SESSION['csrf']}" />
-
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
             <!-- <button class="btn import-json" type="button" style="float: right;">Import From JSON</button>-->
             <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{$string} Gradeable</button>
         </div>
-
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
             What is the unique id of this gradeable?: <input style='width: 200px' type='text' name='gradeable_id' value="{$gradeable_submission_id}" />
             <br />
@@ -249,12 +236,10 @@ HTML;
     print <<<HTML
             > No
             <br /> <br />   
-            
-            <!-- This should not be changed after grading has begun? -->
             What is the type of your gradeable?:
-           
+
             <fieldset>
-            <input type='radio' id="radio-electronic-file" class="electronic-file" name="gradeable-type" value="Electronic File"
+                <input type='radio' id="radio-electronic-file" class="electronic-file" name="gradeable-type" value="Electronic File"
 HTML;
     echo ($g_gradeable_type === 0)?'checked':'';
     print <<<HTML
@@ -272,7 +257,6 @@ HTML;
     print <<<HTML
             >
             Numeric/Text
-            
             <!-- This is only relevant to Electronic Files -->
             <div class="gradeable-type-options electronic-file" id="electronic-file" >    
                 <br />
@@ -290,9 +274,16 @@ HTML;
                 <br/>
                 
                 <fieldset>
-                    <!-- Should probably use lables, but CSS is weird-->
-                    <input type="radio" class="upload-file" name="upload-type" value="Upload File"> Upload File(s)
-                    <input type="radio" class="upload-repo" name="upload-type" value="Repository"> Repository
+                    <input type="radio" class="upload-file" name="upload-type" value="Upload File"
+HTML;
+                    echo ($is_repository===false)?'checked':'';
+        print <<<HTML
+                    > Upload File(s)
+                    <input type="radio" id="repository_radio" class="upload-repo" name="upload-type" value="Repository"
+HTML;
+                    echo ($is_repository===true)?'checked':'';
+        print <<<HTML
+                    > Repository
                     
                     <div class="upload-type upload-file" id="upload-file">
                         <!--<br />
@@ -316,14 +307,18 @@ HTML;
                 <input style='width: 227px' type='text' name='config-path' value="" />
                 <br /> <br />
                 
-                
                 Use TA grading? 
-                <input type="radio" id="yes_ta_grade" name="ta-grading" value="yes" /> Yes
-                <input type="radio" id="no_ta_grade""name="ta-grading" value="no" /> No
+                <input type="radio" id="yes_ta_grade" name="ta-grading" value="yes" 
+HTML;
+                echo ($use_ta_grading===true)?'checked':'';
+        print <<<HTML
+                /> Yes
+                <input type="radio" id="no_ta_grade" name="ta-grading" value="no" 
+HTML;
+                echo ($use_ta_grading===false)?'checked':'';
+        print <<<HTML
+                /> No
                 <br /> <br />
-                
-                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-                
                 <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
                     <thead style="background: #E1E1E1;">
                         <tr>
@@ -331,7 +326,6 @@ HTML;
                             <th style="width:120px;">Points</th>
                         </tr>
                     </thead>
-
                     <tbody style="background: #f9f9f9;">
 HTML;
 
@@ -361,17 +355,21 @@ HTML;
         print <<<HTML
             <tr class="rubric-row" id="row-{$num}">
 HTML;
-
         $display_ta = ($question['question_grading_note'] != "") ? 'block' : 'none';
 
         print <<<HTML
                 <td style="overflow: hidden;">
-                    <textarea name="comment-{$num}" rows="1" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" {$readonly}>{$question['question_message']}</textarea>
+                    <textarea name="comment-{$num}" rows="1" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" 
+                              {$readonly}>{$question['question_message']}</textarea>
                     <div class="btn btn-mini btn-default" onclick="toggleQuestion({$num}, 'individual')" style="margin-top:-5px;">TA Note</div>
                     <div class="btn btn-mini btn-default" onclick="toggleQuestion({$num}, 'student')" style="margin-top:-5px;">Student Note</div>
-                    <textarea name="ta-{$num}" id="individual-{$num}" rows="1" placeholder=" Message to TA" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; display: {$display_ta};">{$question['question_grading_note']}</textarea>
+                    <textarea name="ta-{$num}" id="individual-{$num}" rows="1" placeholder=" Message to TA" 
+                                               style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
+                                               display: {$display_ta};">{$question['question_grading_note']}</textarea>
                     <!-- Some fields need to change here TODO -->
-                    <textarea name="student-{$num}" id="student-{$num}" rows="1" placeholder=" Message to Student" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; display: {$display_ta};">{$question['student_grading_note']}</textarea>
+                    <textarea name="student-{$num}" id="student-{$num}" rows="1" placeholder=" Message to Student" 
+                              style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
+                              display: {$display_ta};">{$question['student_grading_note']}</textarea>
                 </td>
 
                 <td style="background-color:#EEE;">
@@ -383,12 +381,15 @@ HTML;
         print <<<HTML
                     <input onclick='calculatePercentageTotal();' name="ec-{$num}" type="checkbox" {$checked} {$disabled} />
 HTML;
-        if($num > 1){
+        if($num>1){
             print <<<HTML
                     <br />
-                    <a id="delete-{$num}" class="question-icon" onclick="deleteQuestion({$num});"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
-                    <a id="down-{$num}" class="question-icon" onclick="moveQuestionDown({$num});"><img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
-                    <a id="up-{$num}" class="question-icon" onclick="moveQuestionUp({$num});"><img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+                    <a id="delete-{$num}" class="question-icon" onclick="deleteQuestion({$num});">
+                    <img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+                    <a id="down-{$num}" class="question-icon" onclick="moveQuestionDown({$num});">
+                    <img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+                    <a id="up-{$num}" class="question-icon" onclick="moveQuestionUp({$num});">
+                    <img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
 HTML;
         }
         print <<<HTML
@@ -401,7 +402,6 @@ HTML;
                 <td style="overflow: hidden;">
                     <div class="btn btn-small btn-success" id="rubric-add-button" onclick="addQuestion()"><i class="icon-plus icon-white"></i> Question</div>
                 </td>
-
                 <td style="border-left: 1px solid #F9F9F9;"></td>
             </tr>
 HTML;
@@ -461,7 +461,6 @@ HTML;
                 <input type="radio" name="checkpt-opt-ta-messg" value="yes" /> Yes
                 <input type="radio" name="checkpt-opt-ta-messg" value="no" /> No
             </div>
-            
             <div class="gradeable-type-options numeric" id="numeric">
                 <br />
                 How many numeric items? <input style="width: 50px" id="numeric-num-items" name="num-numeric-items" type="text" value="0"/> 
@@ -523,7 +522,6 @@ HTML;
             Who is assigned to grade this item?:
             <br /> <br />
             <input type="radio" name="section-type" value="reg-section" 
-            
 HTML;
     echo ($g_grade_by_registration===true)?'checked':'';
     print <<<HTML
@@ -534,7 +532,6 @@ HTML;
     print <<<HTML
             /> Grading Section
             <br /> <br />
-            
             <!-- For each TA/mentor 
                  Checkboxes (select, zero, one, or more for the available sections)
                  Single checkbox per user to indicate if this grader can see/edit
@@ -542,18 +539,10 @@ HTML;
                  
                  NOTE: Course policy defaults per user:
                         Instructor:  has admin access to create gradeables, can always see and edit all gradeables
-                        
                         [need generic name --  maybe “teaching assistant”]  Our graduate TAs:  by default can see and 
                         edit all gradeables in all sections, but this can be disabled per gradeable
-                        
                         [need generic name -- maybe “grader”]  Our undergraduate mentors/UTAs:   by default can’t see 
                         or edit any gradeables in any sections, but per gradeable can read/write access be granted.
-
-                NOTE:  Ok to have multiple people assigned to same section
-                NOTE:  Paranoid instructors can remove access to any and all teaching assistants / graders after the bulk 
-                       of grading for this gradeable is complete to force regrade requests to go through the instructor.
-                NOTE:  Paranoid instructors can remove access to any and all teaching assistants / graders after the bulk 
-                       of grading for this gradeable is complete to force regrade requests to go through the instructor.
                 NOTE:  Flag as error if some sections have no grader    
             -->
 HTML;
@@ -595,7 +584,6 @@ HTML;
     $marginright =  650-(count($rubrics)*25) . "px";
     print <<<HTML
             <div>
-
                 <table border="1" style="float: right; margin-top:{$margintop}; margin-right: {$marginright}">
                     <tr>
                         <td>User</td>
@@ -631,117 +619,61 @@ HTML;
                 </table>
             </div>
             <br />
-            <!-- TODO include this section from the Google Doc -->
-
             <!-- TODO default to the submission + late days for electronic -->
             What date can the TAs start grading this?: <input name="date_grade" id="date_grade" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
             
             <br />
-            
             <!-- TODO default to never -->    
-            What date will the TA grades be released to the students? <input name="date_released" id="date_released" class="datepicker" type="text"
-                style="cursor: auto; background-color: #FFF; width: 250px;">    
+            What date will the TA grades be released to the students? 
+            <input name="date_released" id="date_released" class="datepicker" type="text" 
+                   style="cursor: auto; background-color: #FFF; width: 250px;">    
             
             <br />
-
             What syllabus/iris "bucket" does this item belong to?:
             
             <select name="gradeable-buckets" style="width: 170px;">
-                <option value="homework"
+                <!--<option value="homework"-->
 HTML;
-    // TODO restyle this?
-    echo ($g_syllabus_bucket === 'homework')?'selected':'';
-    print <<<HTML
-                >Homework</option>
-                <option value="assignment"
-HTML;
-    echo ($g_syllabus_bucket === 'assignment')?'selected':'';
-    print <<<HTML
-                >Assignment</option>
-                <option value="quiz"
-HTML;
-    echo ($g_syllabus_bucket === 'quiz')?'selected':'';
-    print <<<HTML
-                >Quiz</option>
-                <option value="test"
-HTML;
-    echo ($g_syllabus_bucket === 'test')?'selected':'';
-    print <<<HTML
-                >Test</option>
-                <option value="reading"
-HTML;
-    echo ($g_syllabus_bucket === 'reading')?'selected':'';
-    print <<<HTML
-                >Reading</option>
-                <option value="participation"
-HTML;
-    echo ($g_syllabus_bucket === 'participation')?'selected':'';
-    print <<<HTML
-                >Participation</option>
-                <option value="exam"
-HTML;
-    echo ($g_syllabus_bucket === 'exam')?'selected':'';
-    print <<<HTML
-                >Exam</option>
-                <option value="lab"
-HTML;
-    echo ($g_syllabus_bucket === 'lab')?'selected':'';
-    print <<<HTML
-                >Lab</option>
-                <option value="recitation"
-HTML;
-    echo ($g_syllabus_bucket === 'recitation')?'selected':'';
-    print <<<HTML
-                >Recitation</option>
-                <option value="problem-set"
-HTML;
-    echo ($g_syllabus_bucket === 'problem-set')?'selected':'';
-    print <<<HTML
-                >ProblemSet</option>
-                <option value="project"
-HTML;
-    echo ($g_syllabus_bucket === 'project')?'selected':'';
-    print <<<HTML
-                >Project</option>
-            </select>
 
+    $valid_assignment_type = array('homework','assignment','quiz','test','reading','participation',
+                                   'exam','lab','recitation','problem-set','project');
+    foreach ($valid_assignment_type as $type){
+        print <<<HTML
+                <option value="{$type}"
+HTML;
+        echo ($g_syllabus_bucket === $type)?'selected':'';
+        $title = ucwords($type);
+        print <<<HTML
+                >{$title}</option>
+HTML;
+    }
+    print <<<HTML
+            </select>
             <br />
             What is the lowest privileged user group that can grade this?
-            
             <select name="minimum-grading-group" style="width:180px;">
-                <option value='1'
 HTML;
-    echo ($g_min_grading_group === 1)?'selected':'';
-    print <<<HTML
-                >Instructor</option>
-                <option value='2'
+
+    $grading_groups = array('1' => 'Instructor','2' => 'Full Access Grader','3' => 'Limited Access Grader', '4' => 'Student');
+    foreach ($grading_groups as $num => $role){
+        print <<<HTML
+                <option value='{$num}'
 HTML;
-    echo ($g_min_grading_group === 2)?'selected':''; 
-    print <<<HTML
-                >Full Access Grader</option>
-                <option value='3'
+        echo ($g_min_grading_group === $num)?'selected':'';
+        print <<<HTML
+            >{$role}</option>
 HTML;
-    echo ($g_min_grading_group === 3)?'selected':'';
+    }
+    
     print <<<HTML
-                >Limited Access Grader</option>
-                <option value='4'
-HTML;
-    echo ($g_min_grading_group === 4)?'selected':'';
-    print <<<HTML
-                >Student</option>
             </select>
-            
             <!-- When the form is completed and the "SAVE GRADEABLE" button is pushed
-                
                 If this is an electronic assignment:
                     Generate a new config/class.json
                     NOTE: similar to the current format with this new gradeable and all other electonic gradeables
-                    
                     Writes the inner contents for BUILD_csciXXXX.sh script
-                    
                     (probably can't do this due to security concerns) Run BUILD_csciXXXX.sh script
-                    
                 If this is an edit of an existing AND there are existing grades this gradeable
                 regenerates the grade reports. And possibly re-runs the generate grade summaries?
             -->
@@ -902,14 +834,17 @@ HTML;
             });
         }
         
+        
         if($('#radio-electronic-file').is(':checked')){ 
             $('input[name=instructions-url]').val('{$electronic_gradeable['eg_instructions_url']}');
             $('input[name=date_submit]').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_open_date']}")));
             $('input[name=date_due]').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_due_date']}")));
-            //set radio button is repository in php code 
-            $('input[name=subdirectory]').val({$electronic_gradeable['eg_subdirectory']});
-            // set ta autograding with conditional in php code
+            $('input[name=subdirectory]').val('{$electronic_gradeable['eg_subdirectory']}');
             $('input[name=config-path]').val('{$electronic_gradeable['eg_config_path']}');
+            
+            if($('#repository_radio').is(':checked')){
+                $('#repository').show();
+            }
             
             $('#electronic-file').show();
         }
@@ -1005,16 +940,21 @@ HTML;
                 <textarea name="comment-'+newQ+'" rows="1" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea> \
                 <div class="btn btn-mini btn-default" onclick="toggleQuestion(' + newQ + ',\'individual\''+')" style="margin-top:-5px;">TA Note</div> \
                 <div class="btn btn-mini btn-default" onclick="toggleQuestion(' + newQ + ',\'student\''+')" style="margin-top:-5px;">Student Note</div> \
-                <textarea name="ta-'+newQ+'" id="individual-'+newQ+'" rows="1" placeholder=" Message to TA" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
+                <textarea name="ta-'+newQ+'" id="individual-'+newQ+'" rows="1" placeholder=" Message to TA" style="width: 940px; padding: 0 0 0 10px; \
+                          resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
                 <!-- Some fields need to change here TODO --> \
-                <textarea name="student-'+newQ+'" id="student-'+newQ+'" rows="1" placeholder=" Message to Student" style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
+                <textarea name="student-'+newQ+'" id="student-'+newQ+'" rows="1" placeholder=" Message to Student" style="width: 940px; padding: 0 0 0 10px; \
+                          resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
             </td> \
             <td style="background-color:#EEE;">' + sBox + ' \
                 <input onclick="calculatePercentageTotal();" name="ec-'+newQ+'" type="checkbox" /> \
                 <br /> \
-                <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"><img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a> \
-                <a id="down-'+newQ+'" class="question-icon" onclick="moveQuestionDown('+newQ+');"><img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a> \
-                <a id="up-'+newQ+'" class="question-icon" onclick="moveQuestionUp('+newQ+');"><img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a> \
+                <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
+                    <img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a> \
+                <a id="down-'+newQ+'" class="question-icon" onclick="moveQuestionDown('+newQ+');"> \
+                    <img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a> \
+                <a id="up-'+newQ+'" class="question-icon" onclick="moveQuestionUp('+newQ+');"> \
+                <img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a> \
             </td> \
         </tr>');
     }
@@ -1130,7 +1070,6 @@ HTML;
         currentRow.children()[1].children[1].checked = newRow.children()[child].children[1].checked;
         newRow.children()[child].children[1].checked = temp;
     }
-
     calculatePercentageTotal();
     </script>
 HTML;
