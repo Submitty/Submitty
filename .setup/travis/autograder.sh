@@ -51,6 +51,36 @@ mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
 wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F1.3%2Fhamcrest-core-1.3.jar hamcrest-core-1.3.jar
 
+
+
+
+
+
+echo -e "Build the junit test runner"
+
+# copy the file from the repo
+cp junit_test_runner/TestRunner.java $SUBMITTY_INSTALL_DIR/JUnit/TestRunner.java
+
+pushd $SUBMITTY_INSTALL_DIR/JUnit 
+# root will be owner & group of the source file
+chown  root:root  TestRunner.java
+# everyone can read this file
+chmod  444 TestRunner.java
+
+# compile the executable
+javac -cp ./junit-4.12.jar TestRunner.java
+
+# everyone can read the compiled file
+chown root:root TestRunner.class
+chmod 444 TestRunner.class
+
+popd 
+
+
+
+
+
+
 # EMMA is a tool for computing code coverage of Java programs
 
 echo "Getting emma..."
