@@ -55,7 +55,7 @@ std::vector<TestCase> testcases
     (
      "Compilation of student and instructor test cases: *Test.java",
      "/usr/bin/javac -cp "+junit_jar_path+":. hw0/test/*Test.java",
-     "hw0/test/ALMHiddenFactorialTest.class",
+     "hw0/test/FactorialTest.class",
      TestCasePoints(2)
      // java_test_case_limits
      ),
@@ -108,7 +108,7 @@ std::vector<TestCase> testcases
       (
        "Instructor Test",
        "",
-       "/usr/bin/java -noverify -cp "+junit_jar_path+":"+hamcrest_core_jar_path+":"+emma_jar_path+":. org.junit.runner.JUnitCore hw0.test.ALMHiddenFactorialTest",
+       "/usr/bin/java -noverify -cp "+junit_jar_path+":"+hamcrest_core_jar_path+":"+emma_jar_path+":. org.junit.runner.JUnitCore hw0.test.FactorialTest",
        TestCasePoints(6),
        { TestCaseJUnit::JUnitTestGrader("STDOUT.txt",4,1.0),
 	   new TestCaseComparison(&warnIfNotEmpty, "STDERR.txt", "syntax error output from running junit","",0.0) }
