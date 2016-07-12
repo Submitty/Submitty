@@ -17,6 +17,12 @@ if (!file_exists($filename)) {
 	die();
 }
 
+$content_type = getContentType($filename);
+if( substr($content_type, 0, 4) !== "text"){
+    header("Content-type: ".$content_type);
+    header('Content-Disposition: inline; filename="' .  basename($filename) . '"');
+    echo file_get_contents($filename);
+} else {
 $output = <<<HTML
 <!doctype html>
 <html>
@@ -49,5 +55,6 @@ $output .= <<<HTML
 </body>
 </html>
 HTML;
-
 print $output;
+}
+

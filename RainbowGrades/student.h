@@ -15,6 +15,26 @@
 
 //====================================================================
 //====================================================================
+// stores the grade for a single gradeable
+
+class ItemGrade {
+public:
+  ItemGrade(float v, int ldu=0, const std::string& n="") {
+    value = v;
+    late_days_used = ldu;
+    note = n;
+  }
+  float getValue() const { return value; }
+  int getLateDaysUsed() const { return late_days_used; }
+  const std::string& getNote() const { return note; }
+private:
+  float value;
+  int late_days_used;
+  std::string note;
+};
+
+//====================================================================
+//====================================================================
 
 class Student {
 
@@ -32,10 +52,6 @@ public:
   const std::string& getFirstName()     const { return first; }
   const std::string& getPreferredName() const { if (preferred != "") return preferred; return first; }
   const std::string& getLastName()      const { return last; }
-  const std::string& getYear()          const { return year; }
-  const std::string& getMajor1()        const { return major1; }
-  const std::string& getMajor2()        const { return major2; }
-
   const std::string& getLastUpdate()    const { return lastUpdate; }
 
   // registration status
@@ -45,13 +61,10 @@ public:
   bool getIndependentStudy() const { return independentstudy; }
 
   // grade data
-  float getGradeableValue(GRADEABLE_ENUM g, int i) const;
-  const std::string& getGradeableNote(GRADEABLE_ENUM g, int i) const;
-  //const std::string& getZone(int i) const;
+  const ItemGrade& getGradeableItemGrade(GRADEABLE_ENUM g, int i) const;
   std::string getZone(int i) const;
   int getAllowedLateDays(int which_lecture) const;
   int getUsedLateDays() const;
-  int getUsedLateDays(int which) const;
   float getMossPenalty() const { return moss_penalty; }
 
   void add_bonus_late_day(int which_lecture) { bonus_late_days_which_lecture.push_back(which_lecture); }
@@ -91,9 +104,8 @@ public:
 
   // grade data
   void setTestZone(int which_test, const std::string &zone)  { zones[which_test] = zone; }
-  void setGradeableValue(GRADEABLE_ENUM g, int i, float value);
-  void setGradeableNote(GRADEABLE_ENUM g, int i, const std::string &note);
-  void incrLateDaysUsed(int i, int x) { assert (i >= 0 && i < (int)hws_late_days.size()); hws_late_days[i] += x; }
+  void setGradeableItemGrade(GRADEABLE_ENUM g, int i, float value, int late_days_used=0, const std::string &note="");
+
   void mossify(int hw, float penalty);
 
   // other grade-like data
@@ -148,9 +160,6 @@ private:
   std::string first;
   std::string preferred;
   std::string last;
-  std::string year;
-  std::string major1;
-  std::string major2;
 
   std::string lastUpdate;
 
@@ -161,10 +170,9 @@ private:
   bool independentstudy;
 
   // grade data
-  std::map<GRADEABLE_ENUM,std::vector<float> > all_values;
-  std::map<GRADEABLE_ENUM,std::vector<std::string> > all_notes;
+  std::map<GRADEABLE_ENUM,std::vector<ItemGrade> > all_item_grades;
   std::map<std::string,std::pair<char,iclicker_answer_enum> > iclickeranswers;
-  std::vector<float> hws_late_days;
+  
   std::vector<std::string> zones;
   float moss_penalty;
   float cached_hw;
