@@ -449,10 +449,8 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     };
 
     window.onkeydown = function(e) {
-      if (e.defaultPrevented)   return;                                     // key event was already consumed.
       if (e.target.type == "textarea" || e.target.type == "input")  return; // disable keyboard event when typing to textarea/input
       handleKeyPress(e.code);
-      e.preventDefault();   // Consume the event for suppressing "double action".
     };
 
     function handleKeyPress(key) {
