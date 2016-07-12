@@ -136,7 +136,8 @@ ul.dropdown-menu li#logout a:hover {
     /*height: 5%;*/
     /*width: 20%;*/
     height: 60px;
-    width: 286px;
+    /*width: 286px;*/
+    width: 290px;
     background: #C3BEFF;
     opacity:0.5;
     z-index: 100;
@@ -158,6 +159,7 @@ ul.dropdown-menu li#logout a:hover {
     /*right: 0;*/
     /*width: 30%;*/
     display:none;
+    z-index: 1;
 }
 #stats {
     position:absolute;
@@ -173,6 +175,7 @@ ul.dropdown-menu li#logout a:hover {
     /*right: 0;*/
     /*width: 30%;*/
     display:none;
+    z-index: 2;
 }
 /*************************************/
 .resbox {

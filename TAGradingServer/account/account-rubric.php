@@ -480,7 +480,7 @@ $output .= <<<HTML
     </div>
 </span>
 
-<span id="rubric" class="resbox" style="display:none; overflow-y=hidden;">
+<span id="rubric" class="resbox" style="display:none; overflow-y=hidden;" >
     <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);" onmouseup="dragPanelEnd(event);" >
         <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyG')" ></span>
     </div>

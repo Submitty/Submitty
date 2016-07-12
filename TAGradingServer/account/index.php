@@ -360,7 +360,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     <i title="Show/Hide Files Viewer (Press F)" class="icon-files icon-selected" onclick="handleKeyPress('KeyF')"></i>
     <a <?php echo ($previous_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&prev={$previous_rcs}\""); ?> ><i title="Go to the previous student (Press Left Arrow)" class="icon-left <?php echo ($previous_rcs == "" ? 'icon-disabled"' : '"'); ?> ></i></a>
     <a href="<?php echo $BASE_URL; ?>/account/account-summary.php?hw=<?php echo $_GET["hw"]; ?>"><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
-    <a <?php echo ($next_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&next={$next_rcs}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($previous_rcs == "" ? 'icon-disabled"' : '"'); ?>></i></a>
+    <a <?php echo ($next_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&next={$next_rcs}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($next_rcs == "" ? 'icon-disabled"' : '"'); ?>></i></a>
     <i title="Pin Toolbar" class="icon-toolbar-up" ></i>
     <div style="width:100%; height: 15px; bottome:0;">
         <?php if($position_other == 0) { ?>
@@ -386,36 +386,6 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     </div>
 </span>
 
-    <div style="border-top:#AAA solid 2px; width:100%; height: 20px; position:absolute; bottom:0; background-color:#fff; z-index:999;">
-        <?php if($position_other == 0) { ?>
-            <div class="progress" id="prog">
-                <div class="bar bar-primary" style="width: <?php echo (($position_completed - $position_backup) / $position_total) * 97; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
-                <div class="bar bar-warning" style="width: <?php echo ($position_backup / $position_total) * 97; ?>%;"><i class="icon-refresh icon-white" id="progress-icon"></i></div>
-                <div class="bar" style="width: 3%; background-image: none; background-color: #777;"><?php echo round(($position_completed / $position_total) * 100, 1); ?>%</div>
-            </div>
-        <?php } elseif($position_other < $position_total) { ?>
-            <div class="progress" id="prog">
-                <div class="bar bar-info" style="width: <?php echo ($position_other / $position_total) * 96; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
-                <div class="bar" style="width: 1%; background-image: none; background-color: #777;"></div>
-                <div class="bar bar-primary" style="width: <?php echo (($position_completed - $position_backup) / $position_total) * 96; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
-                <div class="bar bar-warning" style="width: <?php echo ($position_backup / $position_total) * 96; ?>%;"><i class="icon-refresh icon-white" id="progress-icon"></i></div>
-                <div class="bar" style="width: 3%; background-image: none; background-color: #777;"><?php echo round((($position_completed + $position_other) / $position_total) * 100, 1); ?>%</div>
-            </div>
-        <?php } else { ?>
-            <div class="progress" id="prog">
-                <div class="bar bar-info" style="width: <?php echo ($position_other / $position_total) * 97; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
-                <div class="bar" style="width: 3%; background-image: none; background-color: #777;"><?php echo round(($position_other / $position_total) * 100, 1); ?>%</div>
-            </div>
-        <?php } ?>
-
-        <div class="navigation">
-            <div class="btn-group" id="nav-group">
-                <a class="btn" style="border-radius: 0px;" <?php echo ($previous_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&prev={$previous_rcs}\""); ?> <?php echo ($previous_rcs == "" ? "disabled" : ""); ?>><i class="icon-chevron-left"></i></a>
-                <a class="btn" style="border-radius: 0px;" href="<?php echo $BASE_URL; ?>/account/account-summary.php?hw=<?php echo $_GET["hw"]; ?>"><i class="icon-align-justify"></i></a>
-                <a class="btn" style="border-radius: 0px;" <?php echo ($next_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&next={$next_rcs}\""); ?> <?php echo ($next_rcs == "" ? "disabled" : ""); ?>><i class="icon-chevron-right"></i></a>
-            </div>
-        </div>
-    </div>
 <?php } ?>
 <script type="text/javascript">
     var mousedown = false;
@@ -438,13 +408,13 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         }
     });
 
-    var progressBar = document.getElementById('pro');
-    if (progressBar != null) {
-        progressBar.style.width = (document.documentElement.clientWidth - 157) + 'px';
-    }
+    // var progressBar = document.getElementById('pro');
+    // if (progressBar != null) {
+    //     progressBar.style.width = (document.documentElement.clientWidth - 157) + 'px';
+    // }
 
     document.getElementById('container').style.width = window.innerWidth + 'px';
-    document.getElementById('container').style.height = (window.innerHeight - 20 - 40) + 'px';
+    document.getElementById('container').style.height = (window.innerHeight - 40) + 'px';
 
     var split = 0;
     var width = window.innerWidth - 7;
@@ -471,9 +441,9 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         document.getElementById('left').style.width = (width * split) + 'px';
         document.getElementById('right').style.width = (width * (1 - split)) + 'px';
 
-        document.getElementById('prog').style.width = (document.documentElement.clientWidth - 157) + 'px';
+        // document.getElementById('prog').style.width = (document.documentElement.clientWidth - 157) + 'px';
         document.getElementById('container').style.width = window.innerWidth + 'px';
-        document.getElementById('container').style.height = (window.innerHeight - 20 - 40) + 'px';
+        document.getElementById('container').style.height = (window.innerHeight - 40) + 'px';
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
         toggleTabs();
     };
@@ -566,6 +536,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         console.log("drag panemover end");
         document.getElementById('panemover').style.width = '10px';
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
+        split = parseFloat(document.getElementById('left').style.width) / (parseFloat(document.getElementById('left').style.width) + parseFloat(document.getElementById('right').style.width));
 
         var date = new Date();
         date.setTime(date.getTime()+(180*24*60*60*1000));
@@ -600,11 +571,6 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     // ========================================================
     // Drag to move toolbar/grading/status panel around
     function dragPanelStart(e) {
-        // console.log("html:  " + $(this).html());
-        // if(!($(this).hasClass('draggable'))) {
-        //     console.log('not draggable');
-        //     return;
-        // }
         if(!hasClass(e.target, "draggable")){
             console.log("not draggable");
             return;
@@ -675,6 +641,17 @@ function toggleClass(element, cls) {
         maxHeight: 1000
     });
 
+// NOTE: This function should place the panel clicked on top of other panels (if overlaping). It currently does not work.
+function changeStackingOrder(e) {
+    console.log("in changeStackingOrder: e: " + e.target.id);
+    var tmpElement = document.getElementById( e.target.id == "stats" ? "rubric" : "stats" );
+    if( tmpElement.style.display != "none" && e.target.style.zIndex < tmpElement.style.zIndex) {
+        var tmp = e.target.style.zIndex;
+        e.target.style.zIndex = tmpElement.style.zIndex;
+        tmpElement.style.zIndex = tmp;
+        console.log("changed stacking order");
+    }
+}
     eraseCookie("reset");
 
 </script>
