@@ -28,9 +28,5 @@ script:
   - vendor/phpunit/phpunit/phpunit --configuration tests/phpunit_e2e.xml
   - python /usr/local/submitty/test_suite/integrationTests/run.py
 
-after_script:
-  - tail -n +1 /usr/local/submitty/test_suite/integrationTests/tests/java_coverage_factorial/log/*
-  - tail -n +1 /usr/local/submitty/test_suite/integrationTests/tests/java_coverage_factorial/data/test04*
-
 notifications:
   email: false

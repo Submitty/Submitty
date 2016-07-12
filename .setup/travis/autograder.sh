@@ -41,8 +41,6 @@ ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_IN
 rm DrMemory-Linux-${DRMEM_VER}.tar.gz
 popd
 
-
-
 echo "Getting JUnit..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit
@@ -53,7 +51,6 @@ wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1
 mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F1.3%2Fhamcrest-core-1.3.jar hamcrest-core-1.3.jar
 
 # EMMA is a tool for computing code coverage of Java programs
-
 echo "Getting emma..."
 wget http://downloads.sourceforge.net/project/emma/emma-release/2.0.5312/emma-2.0.5312.zip -o /dev/null > /dev/null 2>&1
 unzip emma-2.0.5312.zip > /dev/null
@@ -65,8 +62,6 @@ rm index.html* > /dev/null 2>&1
 chmod o+r . *.jar
 
 popd
-
-
 
 echo -e "Build the junit test runner"
 
@@ -87,10 +82,3 @@ chown root:root TestRunner.class
 chmod 444 TestRunner.class
 
 popd 
-
-
-
-
-
-
-
