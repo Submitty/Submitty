@@ -443,6 +443,13 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
 
   }
 
+
+  // LATE DAYS
+  student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ALLOWED LATE DAYS"));
+  student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","USED LATE DAYS"));
+  student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
+
+
   // ----------------------------
   // ICLICKER
   if (DISPLAY_ICLICKER && ICLICKER_QUESTION_NAMES.size() > 0) {
@@ -451,8 +458,6 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
     student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
     student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ICLICKER TOTAL"));
     student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ICLICKER RECENT"));
-    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ALLOWED LATE DAYS"));
-    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","USED LATE DAYS"));
     student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
     
     /*
@@ -577,20 +582,17 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
         visible = CELL_CONTENTS_NO_DETAILS;
       }
       for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
-        float grade = this_student->getGradeableValue(g,j);
+        float grade = this_student->getGradeableItemGrade(g,j).getValue();
         std::string color = coloritcolor(grade,
-                                         sp->getGradeableValue(g,j),
-                                         sa->getGradeableValue(g,j),
-                                         sb->getGradeableValue(g,j),
-                                         sc->getGradeableValue(g,j),
-                                         sd->getGradeableValue(g,j));
+                                         sp->getGradeableItemGrade(g,j).getValue(),
+                                         sa->getGradeableItemGrade(g,j).getValue(),
+                                         sb->getGradeableItemGrade(g,j).getValue(),
+                                         sc->getGradeableItemGrade(g,j).getValue(),
+                                         sd->getGradeableItemGrade(g,j).getValue());
         std::string details;
-        details = this_student->getGradeableNote(g,j);
+        details = this_student->getGradeableItemGrade(g,j).getNote();
 
-        int late_days_used = 0;
-        if (g == GRADEABLE_ENUM::HOMEWORK) {
-          late_days_used = this_student->getUsedLateDays(j);
-        }
+        int late_days_used = this_student->getGradeableItemGrade(g,j).getLateDaysUsed();
 
         table.set(myrow,counter++,TableCell(color,grade,1,details,late_days_used,visible));
       }
@@ -613,6 +615,23 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
 
 
     }
+
+
+    // LATE DAYS
+    if (this_student->getLastName() != "") {
+      int allowed = this_student->getAllowedLateDays(100);
+      std::string color = coloritcolor(allowed,5,4,3,2,2);
+      table.set(myrow,counter++,TableCell(color,allowed,"",0,CELL_CONTENTS_VISIBLE,"right"));
+      int used = this_student->getUsedLateDays();
+      color = coloritcolor(allowed-used+2, 5+2, 3+2, 2+2, 1+2, 0+2);
+      table.set(myrow,counter++,TableCell(color,used,"",0,CELL_CONTENTS_VISIBLE,"right"));
+    } else {
+      color="ffffff"; // default_color;
+      table.set(myrow,counter++,TableCell(color,""));
+      table.set(myrow,counter++,TableCell(color,""));
+    }
+    table.set(myrow,counter++,TableCell(grey_divider));
+
 
     // ----------------------------
     // ICLICKER
@@ -647,18 +666,6 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
                              0.60*ICLICKER_RECENT,
                              0.40*ICLICKER_RECENT);
         table.set(myrow,counter++,TableCell(color,grade,1));
-      } else {
-        color="ffffff"; // default_color;
-        table.set(myrow,counter++,TableCell(color,""));
-        table.set(myrow,counter++,TableCell(color,""));
-      }
-      if (this_student->getLastName() != "") {
-        int allowed = this_student->getAllowedLateDays(100);
-        std::string color = coloritcolor(allowed,5,4,3,2,2);
-        table.set(myrow,counter++,TableCell(color,allowed,"",0,CELL_CONTENTS_VISIBLE,"right"));
-        int used = this_student->getUsedLateDays();
-        color = coloritcolor(allowed-used+2, 5+2, 3+2, 2+2, 1+2, 0+2);
-        table.set(myrow,counter++,TableCell(color,used,"",0,CELL_CONTENTS_VISIBLE,"right"));
       } else {
         color="ffffff"; // default_color;
         table.set(myrow,counter++,TableCell(color,""));
@@ -843,274 +850,6 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
   ostr << "</td></tr>\n";    
 }
 
-
-
-
-void output_line_helper(std::ofstream &ostr, GRADEABLE_ENUM g,
-                        Student *this_student,
-                        Student *sp, Student *sa, Student *sb, Student *sc, Student *sd) {
-
-  for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
-    if (i == 0) ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
- 
-    std::string bonus_text = "";
-    // special case for homework
-    if (g == GRADEABLE_ENUM::HOMEWORK) {
-      int count = this_student->getUsedLateDays(i);
-      if (count > 3) { bonus_text += "(" + std::to_string(count) + "*)"; }
-      else { bonus_text += std::string(count,'*'); }
-    }
-    float grade = this_student->getGradeableValue(g,i);
-    ostr << std::setprecision(2) << std::fixed;
-    colorit(ostr,
-            grade, 
-            sp->getGradeableValue(g,i),
-            sa->getGradeableValue(g,i),
-            sb->getGradeableValue(g,i),
-            sc->getGradeableValue(g,i),
-            sd->getGradeableValue(g,i),1,false,bonus_text);
-  }
-
-  // special case for test
-  if (g == GRADEABLE_ENUM::TEST) {
-    if (TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
-      ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
-      for (int i = 0; i < GRADEABLES[g].getCount(); i++) {
-        colorit(ostr,this_student->adjusted_test(i),sp->adjusted_test(i),sa->adjusted_test(i),sb->adjusted_test(i),sc->adjusted_test(i),sd->adjusted_test(i));
-      }
-    }
-  }
-
-}
-
-
-void output_line(std::ofstream &ostr, 
-                 int part,
-                 bool for_instructor,
-                 Student *this_student,
-                 int rank,
-                 Student *sp, Student *sa, Student *sb, Student *sc, Student *sd,
-                 enum GRADEABLE_ENUM g) {
-  
-  assert (this_student != NULL);
-
-  
-  if (this_student->getParticipation() + this_student->getUnderstanding() >= 9) {
-    //std::cout << "recommend " << this_student->getUserName() << " " << myTA(this_student->getSection()) << std::endl;
-  }
-
-
-#if 0
-  if (this_student->overall() < 20 && validSection(this_student->getSection()) && this_student->getUserName() != "" &&
-      for_instructor) {
-    std::cout << "warning " << this_student->getUserName() << " failing(2)" << std::endl;
-  }
-#endif
-
-
-  // open the row
-  ostr << "<tr>";
-
-
-  std::string my_color="ffffff";
-  if (this_student->getSection() == 0 && this_student->getUserName() != "") {
-    if (this_student->getUserName() == "PERFECT")        my_color = coloritcolor(1.0, 1.0,0.9,0.8,0.7,0.6);
-    else if (this_student->getUserName() == "LOWEST A-") my_color = coloritcolor(0.9, 1.0,0.9,0.8,0.7,0.6);
-    else if (this_student->getUserName() == "LOWEST B-") my_color = coloritcolor(0.8, 1.0,0.9,0.8,0.7,0.6);
-    else if (this_student->getUserName() == "LOWEST C-") my_color = coloritcolor(0.7, 1.0,0.9,0.8,0.7,0.6);
-    else if (this_student->getUserName() == "LOWEST D")  my_color = coloritcolor(0.6, 1.0,0.9,0.8,0.7,0.6);
-    else my_color="ff0000";
-  }
-
-  // -------------------------------------------------------------------------------
-  // RANK & SECTION
-  if (for_instructor) {
-    if (rank != -1) {
-      ostr << "<td bgcolor=\"" << my_color << "\"align=center>" << rank << "</td>";   
-    } else {
-      ostr << "<td bgcolor=\"" << my_color << "\"align=center>&nbsp;</td>";   
-    }
-  }
-  colorit_section(ostr,this_student->getSection(), for_instructor, my_color);
-
-
-  // -------------------------------------------------------------------------------
-  // INSTRUCTOR NOTES
-  if (for_instructor && DISPLAY_INSTRUCTOR_NOTES) {
-    //colorit(ostr,this_student->getParticipation(),5,4,3,2,1,0);
-    //colorit(ostr,this_student->getUnderstanding(),5,4,3,2,1,0);
-    ostr << "<td><font color=\"blue\">" << this_student->getTA_recommendation() << "</font>";
-    ostr << "<font color=\"magenta\">" << this_student->getOtherNote() << "</font>";
-    ostr << "&nbsp;<font color=\"red\">";
-    std::vector<std::string> ews = this_student->getEarlyWarnings();
-    for (unsigned int i = 0; i < ews.size(); i++) {
-      ostr << ews[i] << "<br>";
-    }
-    ostr << "</font></td>";
-  }
-
-
-  // -------------------------------------------------------------------------------  
-  // NAME
-  ostr << "<td bgcolor=\"" << my_color << "\">" << this_student->getUserName() << "</td>";
-  ostr << "<td bgcolor=\"" << my_color << "\">" << this_student->getLastName() << "</td>";
-  ostr << "<td bgcolor=\"" << my_color << "\">" << this_student->getFirstName() << "</td>";
-
-  // -------------------------------------------------------------------------------  
-  // EXAM SEATING
-  if (DISPLAY_EXAM_SEATING) {
-    ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
-    ostr << "<td bgcolor=\"" << my_color << "\"align=center>" << this_student->getExamRoom() << "</td>";   
-    ostr << "<td bgcolor=\"" << my_color << "\"align=center>" << this_student->getExamZone() << "</td>";   
-    ostr << "<td bgcolor=\"" << my_color << "\"align=center>" << this_student->getExamTime() << "</td>";   
-  }
-
-  // -------------------------------------------------------------------------------  
-  // ICLICKER REMOTE
-  if (DISPLAY_ICLICKER && ICLICKER_QUESTION_NAMES.size() > 0) {
-    if (this_student->getRemoteID() != "" && this_student->hasPriorityHelpStatus()) {
-      ostr << "<td bgcolor=ccccff>registered</td>";
-      //ostr << "<td bgcolor=ccccff>" << this_student->getRemoteID() << "</td>";
-    } else if (this_student->getRemoteID() != "") {
-      ostr << "<td>registered</td>";
-      //      ostr << "<td>" << this_student->getRemoteID() << "</td>";
-    } else if (this_student->getLastName() == "") {
-      ostr << "<td>&nbsp;</td>";
-    } else {
-      ostr << "<td bgcolor=ffcccc>no iclicker registration</td>";
-    }
-  }
-
-  // -------------------------------------------------------------------------------  
-  // GRADE SUMMARY
-  if (DISPLAY_GRADE_SUMMARY &&
-      (for_instructor || g == GRADEABLE_ENUM::NONE)) {
-    
-    if (DISPLAY_FINAL_GRADE) {
-      ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
-      if (!this_student->getAudit() &&
-          !this_student->getWithdraw() &&
-          validSection(this_student->getSection())) {
-        //this_student->outputgrade(ostr,true,sd);
-        this_student->outputgrade(ostr,false,sd);
-      } else {
-        ostr << "<td>&nbsp;</td>";
-      }
-    }
-    if (DISPLAY_GRADE_DETAILS) {
-      if (for_instructor && DISPLAY_MOSS_DETAILS) {
-        if (this_student->getSection() != 0 && !this_student->getAudit() && this_student->getMossPenalty() < 0) {
-          this_student->outputgrade(ostr,true,sd);
-        } else { 
-          ostr << "<td align=center bgcolor=ffffff>&nbsp;</td>";
-        }
-      }
-
-      ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
-    }
-    ostr << std::setprecision(2) << std::fixed;
-
-    if (for_instructor && DISPLAY_MOSS_DETAILS) {
-      if (this_student->getUserName() != "LOWEST D" && this_student->getMossPenalty() < 0) {
-        colorit(ostr,this_student->overall(),sp->overall(),sa->overall(),sb->overall(),sc->overall(),sd->overall());
-      } else { 
-        ostr << "<td align=center bgcolor=ffffff>&nbsp;</td>";
-      }
-    }
-
-    if (this_student->getUserName() != "LOWEST D") {
-      colorit(ostr,this_student->overall_b4_moss(),sp->overall(),sa->overall(),sb->overall(),sc->overall(),sd->overall());
-    }
-    else { 
-      ostr << "<td align=center bgcolor=ffffff>&nbsp;</td>";
-    }
-
-
-    ostr << std::setprecision(2) << std::fixed;
-    if (DISPLAY_GRADE_DETAILS) {
-      ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
-    }
-    for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-      GRADEABLE_ENUM g = ALL_GRADEABLES[i];
-      colorit(ostr,this_student->GradeablePercent(g),
-              sp->GradeablePercent(g),
-              sa->GradeablePercent(g),
-              sb->GradeablePercent(g),
-              sc->GradeablePercent(g),
-              sd->GradeablePercent(g));
-    }
-  }
-
-  // -------------------------------------------------------------------------------  
-  // GRADE DETAILS
-  if (DISPLAY_GRADE_DETAILS) {
-    for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-      GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
-
-      if (for_instructor || g2 == GRADEABLE_ENUM::NONE || g == g2) { 
-        output_line_helper(ostr,g2,this_student,sp,sa,sb,sc,sd);
-      }
-    }
-  }
-
-  if (DISPLAY_ICLICKER) {
-    if (ICLICKER_QUESTION_NAMES.size() > 0) {
-      ostr << "<td align=center bgcolor=888888>&nbsp;</td>";
-      colorit(ostr,this_student->getIClickerTotalFromStart(),
-              MAX_ICLICKER_TOTAL,
-              0.90*MAX_ICLICKER_TOTAL,
-              0.80*MAX_ICLICKER_TOTAL,
-              0.60*MAX_ICLICKER_TOTAL,
-              0.40*MAX_ICLICKER_TOTAL);
-        //      /*
-      colorit(ostr,this_student->getIClickerRecent(),
-              ICLICKER_RECENT,
-              0.90*ICLICKER_RECENT,
-              0.80*ICLICKER_RECENT,
-              0.60*ICLICKER_RECENT,
-              0.40*ICLICKER_RECENT);
-      int allowed = this_student->getAllowedLateDays(100);
-      colorit(ostr,allowed,5,4,3,2,2,0,true);
-      int used = this_student->getUsedLateDays();
-      
-      if (this_student->getSection() == 0) {
-        ostr << "<td align=center bgcolor=ffffff>&nbsp;</td>";
-      } else {
-        ostr << "<td align=center bgcolor=";
-        coloritcolor(ostr, allowed-used+2, 5+2, 3+2, 2+2, 1+2, 0+2);
-        ostr << ">" << used<<"</td>\n"; 
-        }
-      //*/
-      ostr << "<td align=center bgcolor=888888>&nbsp;</td>\n"; 
-    }
-    for (unsigned int i = 0; i < ICLICKER_QUESTION_NAMES.size(); i++) {
-      
-      std::pair<std::string,float> answer = this_student->getIClickerAnswer(ICLICKER_QUESTION_NAMES[i]);
-      
-      if (for_instructor && this_student->getUserName() == "PERFECT") {
-        ostr << "<td align=center bgcolor=ffffff>" << ICLICKER_QUESTION_NAMES[i] << "</td>\n"; 
-        
-      } else {
-        
-        std::string thing = answer.first;
-        if (!for_instructor) {
-          thing = "&nbsp;";
-        }
-        
-        if (answer.second == ICLICKER_CORRECT) {
-          ostr << "<td align=center bgcolor=aaffaa>" << thing << "</td>\n"; 
-        } else if (answer.second == ICLICKER_PARTICIPATED) {
-          ostr << "<td align=center bgcolor=ffffaa>" << thing << "</td>\n"; 
-        } else if (answer.second == ICLICKER_INCORRECT) {
-          ostr << "<td align=center bgcolor=ffaaaa>" << thing << "</td>\n"; 
-        } else {
-          assert (answer.second == ICLICKER_NOANSWER);
-          ostr << "<td align=center bgcolor=ffffff>&nbsp;</td>\n"; 
-        }
-      }
-    }
-  }
-}
 
 
 
