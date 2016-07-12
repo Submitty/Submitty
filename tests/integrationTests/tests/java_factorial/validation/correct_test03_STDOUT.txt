@@ -1,0 +1,6 @@
+JUnit version 4.12
+....
+Time: 0.004
+
+OK (4 tests)
+

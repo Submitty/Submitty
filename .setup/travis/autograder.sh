@@ -40,3 +40,57 @@ tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${SUBMITTY_INSTALL_DIR}/DrMemory
 ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
 rm DrMemory-Linux-${DRMEM_VER}.tar.gz
 popd
+
+
+
+echo "Getting JUnit..."
+mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
+pushd ${SUBMITTY_INSTALL_DIR}/JUnit
+
+wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar -o /dev/null > /dev/null 2>&1
+mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
+wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar -o /dev/null > /dev/null 2>&1
+mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F1.3%2Fhamcrest-core-1.3.jar hamcrest-core-1.3.jar
+
+# EMMA is a tool for computing code coverage of Java programs
+
+echo "Getting emma..."
+wget http://downloads.sourceforge.net/project/emma/emma-release/2.0.5312/emma-2.0.5312.zip -o /dev/null > /dev/null 2>&1
+unzip emma-2.0.5312.zip > /dev/null
+mv emma-2.0.5312/lib/emma.jar emma.jar
+rm -rf emma-2.0.5312
+rm emma-2.0.5312.zip
+rm index.html* > /dev/null 2>&1
+
+chmod o+r . *.jar
+
+popd
+
+
+
+echo -e "Build the junit test runner"
+
+# copy the file from the repo
+cp junit_test_runner/TestRunner.java $SUBMITTY_INSTALL_DIR/JUnit/TestRunner.java
+
+pushd $SUBMITTY_INSTALL_DIR/JUnit 
+# root will be owner & group of the source file
+chown  root:root  TestRunner.java
+# everyone can read this file
+chmod  444 TestRunner.java
+
+# compile the executable
+javac -cp ./junit-4.12.jar TestRunner.java
+
+# everyone can read the compiled file
+chown root:root TestRunner.class
+chmod 444 TestRunner.class
+
+popd 
+
+
+
+
+
+
+
