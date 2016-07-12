@@ -396,7 +396,7 @@ HTML;
 </div>
 </span><!---->
 
-<span id="stats" class="resbox" style="display:none;">
+<span id="stats" class="resbox" style="display:none; z-index: 2;" onmousedown="changeStackingOrder(event);">
     <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseup="dragPanelEnd(event);" >
     <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyS')" ></span>
     </div>
@@ -480,7 +480,7 @@ $output .= <<<HTML
     </div>
 </span>
 
-<span id="rubric" class="resbox" style="display:none; overflow-y=hidden;" >
+<span id="rubric" class="resbox" style="display:none; overflow-y=hidden; z-index: 1;" onmousedown="changeStackingOrder(event);">
     <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);" onmouseup="dragPanelEnd(event);" >
         <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyG')" ></span>
     </div>

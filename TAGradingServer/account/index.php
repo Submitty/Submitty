@@ -586,7 +586,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         var element = document.getElementById( e.target.id ? e.target.id : e.target.parentNode.id );
         if(!element){
             console.log("null");
-            // return;
+            return;
         }
         console.log("dragging");
         console.log(element.id);
@@ -641,16 +641,18 @@ function toggleClass(element, cls) {
         maxHeight: 1000
     });
 
-// NOTE: This function should place the panel clicked on top of other panels (if overlaping). It currently does not work.
+// Place the panel selected on top of other panels (if overlaping).
 function changeStackingOrder(e) {
-    console.log("in changeStackingOrder: e: " + e.target.id);
-    var tmpElement = document.getElementById( e.target.id == "stats" ? "rubric" : "stats" );
-    if( tmpElement.style.display != "none" && e.target.style.zIndex < tmpElement.style.zIndex) {
-        var tmp = e.target.style.zIndex;
-        e.target.style.zIndex = tmpElement.style.zIndex;
+    if(e.currentTarget.style.zIndex == "") return;
+    console.log("in changeStackingOrder, object calling: " + e.currentTarget.id);
+    var tmpElement = document.getElementById( e.currentTarget.id == "stats" ? "rubric" : "stats" );
+    if( tmpElement.style.display != "none" && e.currentTarget.style.zIndex < tmpElement.style.zIndex) {
+        var tmp = e.currentTarget.style.zIndex;
+        e.currentTarget.style.zIndex = tmpElement.style.zIndex;
         tmpElement.style.zIndex = tmp;
         console.log("changed stacking order");
     }
+    e.stopPropagation();
 }
     eraseCookie("reset");
 
