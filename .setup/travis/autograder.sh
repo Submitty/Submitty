@@ -42,6 +42,7 @@ rm DrMemory-Linux-${DRMEM_VER}.tar.gz
 popd
 
 
+
 echo "Getting JUnit..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit
@@ -63,17 +64,11 @@ rm index.html* > /dev/null 2>&1
 
 chmod o+r . *.jar
 
-ls ${SUBMITTY_INSTALL_DIR}
-ls /usr/local/submitty/JUnit
-
 popd
 
 
+
 echo -e "Build the junit test runner"
-
-pwd
-
-ls -lta .
 
 # copy the file from the repo
 cp junit_test_runner/TestRunner.java $SUBMITTY_INSTALL_DIR/JUnit/TestRunner.java
