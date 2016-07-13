@@ -113,7 +113,7 @@ one_course csci1100 csci1100_tas_www  "${python_homework[@]}"
 cpp_homework=( cpp_simple_lab cpp_cats cpp_memory_debugging )
 one_course csci1200 csci1200_tas_www  "${cpp_homework[@]}"
 
-java_homework=( csci2600 )
+java_homework=( java_factorial java_coverage_factorial )
 one_course csci2600 csci2600_tas_www  "${java_homework[@]}"
 
 #####################################################################
