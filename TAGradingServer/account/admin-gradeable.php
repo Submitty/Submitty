@@ -202,8 +202,8 @@ if($user_is_administrator){
 </style>
 
 <div id="container-rubric">
-    <form class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" 
-                 method="post" enctype="multipart/form-data"> 
+    <form id="gradeable-form" class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" 
+          method="post" enctype="multipart/form-data"> 
         <input type='hidden' name="csrf_token" value="{$_SESSION['csrf']}" />
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
@@ -648,6 +648,7 @@ HTML;
                 >{$title}</option>
 HTML;
     }
+    
     print <<<HTML
             </select>
             <br />
@@ -716,16 +717,16 @@ HTML;
         });
         return o;
     };
+    
+    
+    $('#gradeable-form').on('submit', function(e){
+         $('<input />').attr('type', 'hidden')
+            .attr('name', 'gradeableJSON')
+            .attr('value', JSON.stringify($('form').serializeObject()))
+            .appendTo('#gradeable-form');
+    });
 
     $(document).ready(function() {
-        $(".import-json").click(function(){
-            $.post('{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_rubric['rubric_id']}&course='
-                +'{$_GET['course']}', 'gradeableJSON=' + JSON.stringify($('form').serializeObject())+'&csrf_token=' 
-                + '{$_SESSION['csrf']}', function (response) {
-              alert(response);
-            });
-        }); 
-
         var numCheckpoints=1;
         
         function addCheckpoint(label, extra_credit){
