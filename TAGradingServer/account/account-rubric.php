@@ -194,10 +194,13 @@ HTML;
 }
 
 $code_number = 0;
-
+$display_stats = ($show_stats == 0) ? "none" : "inline-block";
+$display_rubric = ($show_rubric == 0) ? "none" : "inline-block";
+$display_left = ($show_left == 0) ? "none" : "inline-block";
+$display_right = ($show_right == 0) ? "none" : "inline-block";
 $output .= <<<HTML
 
-<span id="left" class="resbox">
+<span id="left" class="resbox" style="display: {$display_left};">
     <div id="content">
 HTML;
 
@@ -393,16 +396,17 @@ HTML;
 --><span id="pane"></span><!--
 --><span id="panemover" onmousedown="dragStart(event, 'left', 'right'); return false;" onmousemove="drag(event, 'left', 'right');" onmouseout="dragRelease();" onmouseup="dragRelease();"></span><!--
 
---><span id="right" class="resbox"style="overflow-y:auto;">
+--><span id="right" class="resbox" style="display: {$display_right}; overflow-y:auto;">
 <div id="inner-container-spacer"></div><div id="inner-container" >
 HTML;
     $output .= "\n";
     display_files($rubric->rubric_files[1], $output, 1);
+
     $output .= <<<HTML
 </div>
 </span><!---->
 
-<span id="stats" class="resbox" style="display:none; z-index: 2;" onmousedown="changeStackingOrder(event);">
+<span id="stats" class="resbox" style="display: {$display_stats}; z-index: 2;" onmousedown="changeStackingOrder(event);">
     <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseup="dragPanelEnd(event);" >
     <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyS')" ></span>
     </div>
@@ -486,7 +490,7 @@ $output .= <<<HTML
     </div>
 </span>
 
-<span id="rubric" class="resbox" style="display:none; overflow-y=hidden; z-index: 1;" onmousedown="changeStackingOrder(event);">
+<span id="rubric" class="resbox" style="display: {$display_rubric}; z-index: 1; overflow-y=hidden;" onmousedown="changeStackingOrder(event);">
     <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);" onmouseup="dragPanelEnd(event);" >
         <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyG')" ></span>
     </div>

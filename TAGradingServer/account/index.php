@@ -7,6 +7,10 @@ use lib\Database;
 $account_subpages_unlock = true;
 
 $split = floatval($_COOKIE["split"]);
+$show_stats = isset($_COOKIE["show_stats"]) ? intval($_COOKIE["show_stats"]) : 0;
+$show_rubric = isset($_COOKIE["show_rubric"]) ? intval($_COOKIE["show_rubric"]) : 0;
+$show_left = isset($_COOKIE["show_left"]) ? intval($_COOKIE["show_left"]) : 1;
+$show_right = isset($_COOKIE["show_right"]) ? intval($_COOKIE["show_right"]) : 1;
 $rubric_late_days = 0;
 
 print <<<HTML
@@ -354,10 +358,10 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
 
     ?>
 <span id="grade" class="resbox draggable" style="padding:5px;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseup="dragPanelEnd(event);">
-    <i title="Show/Hide Submission Info (Press S)" class="icon-status" onclick="handleKeyPress('KeyS')"></i>
-    <i title="Show/Hide Grading Panel (Press G)" class="icon-grading-panel" onclick="handleKeyPress('KeyG')"></i>
-    <i title="Show/Hide Auto Grading Results (Press A)" class="icon-auto-grading-results icon-selected" onclick="handleKeyPress('KeyA');"></i>
-    <i title="Show/Hide Files Viewer (Press F)" class="icon-files icon-selected" onclick="handleKeyPress('KeyF')"></i>
+    <i title="Show/Hide Submission Info (Press S)" <?php echo "class='icon-status".(($show_stats == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyS')"></i>
+    <i title="Show/Hide Grading Panel (Press G)" <?php echo "class='icon-grading-panel".(($show_rubric == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyG')"></i>
+    <i title="Show/Hide Auto Grading Results (Press A)" <?php echo "class='icon-auto-grading-results".(($show_left == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyA');"></i>
+    <i title="Show/Hide Files Viewer (Press F)" <?php echo "class='icon-files".(($show_right == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyF')"></i>
     <a <?php echo ($previous_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&prev={$previous_rcs}\""); ?> ><i title="Go to the previous student (Press Left Arrow)" class="icon-left <?php echo ($previous_rcs == "" ? 'icon-disabled"' : '"'); ?> ></i></a>
     <a href="<?php echo $BASE_URL; ?>/account/account-summary.php?hw=<?php echo $_GET["hw"]; ?>"><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
     <a <?php echo ($next_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&next={$next_rcs}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($next_rcs == "" ? 'icon-disabled"' : '"'); ?>></i></a>
@@ -418,7 +422,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
 
     var split = 0;
     var width = window.innerWidth - 7;
-    split = <?php echo ($split == "" || $split < 50 || 75 < $split ? 50 : $split); ?> / 100.0;
+    split = <?php echo ($split == "" || $split < 25 || 75 < $split ? 50 : $split); ?> / 100.0;
     if (document.getElementById('left') != null) {
         document.getElementById('left').style.width = (width * (split)) + 'px';
     }
@@ -429,6 +433,8 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
         document.getElementById('panemover').style.width = '10px';
     }
+
+    window.onload = updateDisplay();
 
     window.onresize = function(event) {
         document.getElementById('grade').style.left = parseFloat(window.innerWidth * document.getElementById('grade').offsetLeft/(width + 7)) + 'px';
@@ -445,7 +451,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         document.getElementById('container').style.width = window.innerWidth + 'px';
         document.getElementById('container').style.height = (window.innerHeight - 40) + 'px';
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
-        toggleTabs();
+        updateDisplay();
     };
 
     window.onkeydown = function(e) {
@@ -466,33 +472,49 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
           break;
         case "KeyF":
           $('#grade .icon-files').toggleClass('icon-selected');
-          toggleTabs();
+          togglePanel("right");
+          updateDisplay();
           break;
         case "KeyA":
           $('#grade .icon-auto-grading-results').toggleClass('icon-selected');
-          toggleTabs();
+          togglePanel("left");
+          updateDisplay();
           break;
+        case "KeyR": // Reset all cookies to default
+          setCookie("show_stats", 0, 180*24*60*60);
+          setCookie("show_rubric", 0, 180*24*60*60);
+          setCookie("show_left", 1, 180*24*60*60);
+          setCookie("show_right", 1, 180*24*60*60);
+            break;
         default:
           break;
       }
     }
 
-    // show or hide the grading panel/status panel
-    function togglePanel(id) {
-        document.getElementById(id).style.display = document.getElementById(id).style.display == "none" ? "inline-block" : "none";
+    function setCookie(name, value, seconds) {
+        var date = new Date();
+        date.setTime(date.getTime()+(seconds*1000));
+        var expires = "; expires="+date.toGMTString();
+        var path = "; path=/;";
+        document.cookie = name + "=" + value + expires + path;
     }
 
-    // show or hide auto-grading results/files
-    function toggleTabs(){
+    // show or hide the panels
+    function togglePanel(id) {
+        document.getElementById(id).style.display = document.getElementById(id).style.display == "none" ? "inline-block" : "none";
+        setCookie("show_"+id, (document.getElementById(id).style.display == "none" ? 0 : 1), 180*24*60*60);
+    }
+
+    // update display for auto-grading results and files panel
+    function updateDisplay() {
         var left = document.getElementById('left');
         var right =  document.getElementById('right');
         var pane = document.getElementById('pane');
         var panemover = document.getElementById('panemover');
-        if($('#grade .icon-auto-grading-results').hasClass('icon-selected') && $('#grade .icon-files').hasClass('icon-selected')) {
+        if(left.style.display != "none" && right.style.display != "none") {
+            console.log("show both");
             pane.style.display = "inline-block";
             panemover.style.display = "inline-block";
-            left.style.display = "inline-block";
-            right.style.display = "inline-block";
             left.style.width = (width * split) + 'px';
             right.style.width = (width * (1 - split)) + 'px';
             panemover.style.left = pane.offsetLeft + 'px';
@@ -500,19 +522,13 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         else {
             pane.style.display = "none";
             panemover.style.display = "none";
-            if($('#grade .icon-auto-grading-results').hasClass('icon-selected')) {
-                left.style.display = "inline-block";
-                right.style.display = "none";
+            if(left.style.display != "none") {
+                console.log("show left");
                 left.style.width = window.innerWidth + 'px';
             }
-            else if($('#grade .icon-files').hasClass('icon-selected')) {
-                left.style.display = "none";
-                right.style.display = "inline-block";
-                right.style.width = window.innerWidth + 'px';
-            }
             else {
-                left.style.display = "none";
-                right.style.display = "none";
+                console.log("show right");
+                right.style.width = window.innerWidth + 'px';
             }
         }
     }

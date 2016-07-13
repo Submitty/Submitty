@@ -476,7 +476,22 @@ table {
     margin: 5px;
 }
 .icon-toolbar-up {
-    background: url('../../bootstrap/img/glyphicons-416-disk-open.png') no-repeat -1px 0px;
+    /*background: url('../../bootstrap/img/glyphicons-416-disk-open.png') no-repeat -1px 0px;*/
+    background: url('../../bootstrap/img/glyphicons-336-pushpin.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-pin {
+    background: url('../../bootstrap/img/glyphicons-336-pushpin.png') no-repeat;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+.icon-unpin {
+    background: url('../../bootstrap/img/unpin.png') no-repeat;
     display: inline-block;
     height: 22px;
     width: 22px;
