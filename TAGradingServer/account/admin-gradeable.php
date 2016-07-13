@@ -204,6 +204,7 @@ if($user_is_administrator){
 <div id="container-rubric">
     <form id="gradeable-form" class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" 
           method="post" enctype="multipart/form-data"> 
+
         <input type='hidden' name="csrf_token" value="{$_SESSION['csrf']}" />
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
@@ -648,7 +649,6 @@ HTML;
                 >{$title}</option>
 HTML;
     }
-    
     print <<<HTML
             </select>
             <br />
@@ -717,8 +717,7 @@ HTML;
         });
         return o;
     };
-    
-    
+
     $('#gradeable-form').on('submit', function(e){
          $('<input />').attr('type', 'hidden')
             .attr('name', 'gradeableJSON')

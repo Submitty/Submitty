@@ -82,6 +82,11 @@ AND gc_order=?
                 $gd_id = intval($row['gd_id']);
             }
             
+<<<<<<< HEAD
+=======
+            //THEN CREATE THE GRADE FOR THE CHECKPT
+            
+>>>>>>> d20ec087e6ed4d8447cd902cf48133c49dc3cac7
             //FIGURE OUT THE gc_id from gc_order and g_id
             $params = array($g_id,$check);
             $db->query("SELECT gc_id 
