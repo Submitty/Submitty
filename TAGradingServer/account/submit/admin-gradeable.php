@@ -1,224 +1,360 @@
 <?php
 
-//TODO MORE error checking
+// TODO MORE error checking
+// Make sure transactions are in the right spots
+// Should use more functions
 
 include "../../toolbox/functions.php";
 
 check_administrator();
 
-if($user_is_administrator)
-{
-    $have_old = false;
-    $has_grades = false;
-    $old_gradeable = array(
-        'g_id' => -1,
-        'g_title' => "",
-        'g_overall_ta_instructions' => '',
-        'g_team_assignment' => false,
-        'g_gradeable_type' => 0,
-        'g_grade_by_registration' => false,
-        'g_grade_start_date' => date('Y/m/d 23:59:59'),
-        'g_grade_released_date' => date('Y/m/d 23:59:59'),
-        'g_syllabus_bucket' => '',
-        'g_min_grading_group' => ''
-    );
-    $old_questions = array();
-    $old_components = array();
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
+    die("invalid csrf token");
+}
 
- $gradeableJSON = $_POST['gradeableJSON'];
- 
- $fp = fopen(__SUBMISSION_SERVER__ . '/config/gradeable.json', 'w');
+ class Gradeable{
+     protected $g_id;
+     protected $g_title;
+     protected $g_overall_ta_instr;
+     protected $g_use_teams;
+     protected $g_gradeable_type; 
+     protected $g_min_grading_group;
+     protected $g_grade_by_registration;
+     protected $g_grade_start_date;
+     protected $g_grade_released_date;
+     protected $g_syllabus_bucket;
+     
+    function __construct(& $params){
+         $this->g_id = $params['gradeable_id'];
+         $this->g_title = $params['gradeable_title'];
+         $this->g_overall_ta_instr = $params['ta_instructions'];
+         $this->g_use_teams = $params['team_assignment'];
+         $this->g_gradeable_type = $params['gradeable_type']; 
+         $this->g_min_grading_group= $params['min_grading_group'];
+         $this->g_grade_by_registration = $params['section_type'];
+         $this->g_grade_start_date = $params['date_grade'];
+         $this->g_grade_released_date = $params['date_released'];
+         $this->g_syllabus_bucket = $params['bucket'];
+    }
+    
+    function updateGradeable(& $db){
+        $params = array($this->g_title, $this->g_overall_ta_instr, $this->g_use_teams, $this->g_gradeable_type, 
+                        $this->g_grade_by_registration, $this->g_grade_start_date, $this->g_grade_released_date, 
+                        $this->g_syllabus_bucket, $this->g_min_grading_group, $this->g_id);
+        $db->query("UPDATE gradeable SET g_title=?, g_overall_ta_instructions=?, g_team_assignment=?, g_gradeable_type=?, 
+                    g_grade_by_registration=?, g_grade_start_date=?, g_grade_released_date=?, g_syllabus_bucket=?, 
+                    g_min_grading_group=? WHERE g_id=?", $params);
+    }
 
- if (!$fp){
-    die('failed to open file');
+    function createGradeable(& $db){
+        $params = array($this->g_id,$this->g_title, $this->g_overall_ta_instr, $this->g_use_teams, 
+                        $this->g_gradeable_type, $this->g_grade_by_registration, $this->g_grade_start_date, 
+                        $this->g_grade_released_date, $this->g_syllabus_bucket, $this->g_min_grading_group);
+        $db->query("INSERT INTO gradeable(g_id,g_title, g_overall_ta_instructions, g_team_assignment, 
+                    g_gradeable_type, g_grade_by_registration, g_grade_start_date, g_grade_released_date,
+                    g_syllabus_bucket,g_min_grading_group) VALUES (?,?,?,?,?,?,?,?,?,?)", $params);
+    }
+    
+     function deleteComponents(& $db,$lb,$ub){
+         // REWRITE THIS, multiple queries here are bad
+        for($i=$lb; $i<=$ub; ++$i){
+            //DELETE all grades associated with these gcs
+            $params = array($this->g_id,$i);
+            $db->query("SELECT gc_id FROM gradeable_component WHERE g_id=? AND gc_order=?",$params);
+            $gc_id = $db->row()['gc_id'];
+            $db->query("DELETE FROM gradeable_component_data AS gcd WHERE gc_id=?",array($gc_id));
+            $db->query("DELETE FROM gradeable_component WHERE gc_id=?", array($gc_id));
+        } 
+    }
+    
+    //Overriden function, polymorphism 
+    function createComponents(& $db, $action, & $add_args){}
  }
  
- #decode for pretty print
- fwrite($fp, json_encode(json_decode($gradeableJSON), JSON_PRETTY_PRINT));
- fclose($fp);
+ class ElectronicGradeable extends Gradeable{
+    private $instructions_url;
+    private $date_submit;
+    private $date_due;
+    private $is_repo;
+    private $subdirectory;
+    private $ta_grading;
+    private $config_path;
+    
+     function __construct(& $params){
+         parent::__construct($params);
+         //new constructor stuff for electronic gradeables
+         $this->instructions_url = $params['instructions_url']; 
+         $this->date_submit = $params['date_submit'];
+         $this->date_due =$params['date_due'];
+         $this->is_repo = $params['is_repo'];
+         $this->subdirectory =$params['subdirectory'];
+         $this->ta_grading = $params['ta_grading'];
+         $this->config_path = $params['config_path'];
+     }
+     
+     //TODO extract to multiple functions 
+     function createComponents(& $db, $action, & $add_args){
+        if ($action=='edit'){
+            $params = array($this->instructions_url, $this->date_submit, $this->date_due, $this->is_repo, 
+                            $this->subdirectory, $this->ta_grading, $this->config_path, $this->g_id);
+            $db->query("UPDATE electronic_gradeable SET eg_instructions_url=?, eg_submission_open_date=?,eg_submission_due_date=?, 
+                        eg_is_repository=?, eg_subdirectory=?, eg_use_ta_grading=?, eg_config_path=? WHERE g_id=?", $params);
+        }
+        else{
+            $params = array($this->g_id, $this->instructions_url, $this->date_submit, $this->date_due, 
+                            $this->is_repo, $this->subdirectory, $this->ta_grading, $this->config_path);
+            $db->query("INSERT INTO electronic_gradeable(g_id, eg_instructions_url, eg_submission_open_date, eg_submission_due_date, 
+                eg_is_repository, eg_subdirectory, eg_use_ta_grading, eg_config_path) VALUES(?,?,?,?,?,?,?,?)", $params);
+        }
 
- # for debugging
- echo print_r($_POST);
+        $num_questions = 0;
+        foreach($add_args as $k=>$v){
+            if(strpos($k,'comment') !== false){
+                ++$num_questions;
+            }
+        }
+        $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($this->g_id));
+        $num_old_questions = intval($db->row()['cnt']);
+        //insert the questions
+        for ($i=0; $i<$num_questions; ++$i){
+            $gc_title = $add_args["comment-".strval($i)];
+            $gc_ta_comment = $add_args["ta-".strval($i)];
+            $gc_student_comment = $add_args["student-".strval($i)];
+            $gc_max_value = $add_args['point-'.strval($i)];
+            $gc_is_text = "false";
+            $gc_is_ec = ($add_args['ec-'.strval($i)]=='on')? "true" : "false";
+            if($action=='edit' && $i<$num_old_questions){
+                //update the values for the electronic gradeable
+                $params = array($gc_title, $gc_ta_comment, $gc_student_comment, $gc_max_value, $gc_is_text, $gc_is_ec, $this->g_id,$i);
+                $db->query("UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?,gc_student_comment=?, gc_max_value=?, 
+                            gc_is_text=?, gc_is_extra_credit=? WHERE g_id=? AND gc_order=?", $params);
+            }
+            else{
+                $params = array($this->g_id, $gc_title, $gc_ta_comment, $gc_student_comment, $gc_max_value, $gc_is_text, $gc_is_ec,$i);
+                $db->query("INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_max_value, 
+                            gc_is_text, gc_is_extra_credit, gc_order) VALUES(?,?,?,?,?,?,?,?)",$params);
+            }
+        }
+        $this->deleteComponents($db, $num_questions,$num_old_questions);
+     }
+ }
+ 
+ class CheckpointGradeable extends Gradeable{
+    function __construct(& $params){
+        parent::__construct($params);
+    }
+    //TODO EXTRACT TO MULTIPLE FUNCTIONS 
+    function createComponents(& $db, $action, & $add_args){
+         // create a gradeable component for each checkpoint
+        $num_checkpoints = -1; // remove 1 for the template
+        foreach($add_args as $k=>$v){
+            if(strpos($k, 'checkpoint-label') !== false){
+                ++$num_checkpoints;
+            }    
+        }
+        $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($this->g_id));
+        $num_old_checkpoints = intval($db->row()['cnt']);
+        
+        // insert the checkpoints
+        for($i=1; $i<=$num_checkpoints; ++$i){
+            $gc_is_extra_credit = (isset($add_args["checkpoint-extra-".strval($i)])) ? "true" : "false";
+            $gc_title = $add_args['checkpoint-label-'. strval($i)];
+            
+            if($action=='edit' && $i <= $num_old_checkpoints){
+                $params = array($gc_title, '', '', 1, "false", $gc_is_extra_credit, $this->g_id, $i);
+                $db->query("UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?,
+                            gc_max_value=?, gc_is_text=?, gc_is_extra_credit=? WHERE g_id=? AND gc_order=?", $params);
+            }
+            else{
+                $params = array($this->g_id, $gc_title, '','',1,"false",$gc_is_extra_credit,$i);
+                $db->query("INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment,
+                            gc_max_value,gc_is_text,gc_is_extra_credit,gc_order) VALUES (?,?,?,?,?,?,?,?)", $params);
+            }
+        }
+        // remove deleted checkpoints 
+        $this->deleteComponents($db, $num_checkpoints+1,$num_old_checkpoints); 
+    }    
+ }
 
- $g_id = $_POST['gradeable_id'];
- $g_title = $_POST['gradeable_title'];
- $g_overall_ta_instr = $_POST['ta_instructions'];
- $g_use_teams = ($_POST['team-assignment'] === 'yes') ? "true" : "false";
- $g_gradeable_type = null; 
- $g_min_grading_group=intval($_POST['minimum-grading-group']);
-
- abstract class GradeableType{
+ class NumericGradeable extends Gradeable{
+    function __construct(& $params){
+        parent::__construct($params);
+    }
+    
+    //TODO split into multiple functions 
+    function createComponents(& $db, $action, & $add_args){
+        $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($this->g_id));
+        $num_old_numerics = intval($db->row()['cnt']);
+        
+        $num_numeric = intval($add_args['num-numeric-items']);
+        $num_text= intval($add_args['num-text-items']);
+        
+        for($i=1; $i<=$num_numeric+$num_text; ++$i){
+            //CREATE the numeric items in gradeable component
+            $gc_is_text = ($i > $num_numeric)? "true" : "false";
+            if($i > $num_numeric){
+                $gc_title = (isset($add_args['text-label-'. strval($i-$num_numeric)]))? $add_args['text-label-'. strval($i-$num_numeric)] : '';
+                $gc_max_value = 0;
+                $gc_is_extra_credit ="false";
+            }
+            else{
+                $gc_title = (isset($add_args['numeric-label-'. strval($i)]))? $add_args['numeric-label-'. strval($i)] : '';
+                $gc_max_value = (isset($add_args['max-score-'. strval($i)]))? $add_args['max-score-'. strval($i)] : 0;
+                $gc_is_extra_credit = (isset($add_args['numeric-extra-'.strval($i)]))? "true" : "false";
+            }
+            
+            if($action=='edit' && $i<=$num_old_numerics){
+                $params = array($gc_title, '','',$gc_max_value, $gc_is_text, $gc_is_extra_credit,$this->g_id,$i);
+                $db->query("UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?, 
+                            gc_max_value=?, gc_is_text=?, gc_is_extra_credit=? WHERE g_id=? AND gc_order=?", $params);
+            }
+            else{
+                $params = array($this->g_id, $gc_title,'','',$gc_max_value,$gc_is_text,$gc_is_extra_credit,$i);
+                $db->query("INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_max_value,
+                            gc_is_text, gc_is_extra_credit, gc_order) VALUES (?,?,?,?,?,?,?,?)",$params);
+            }
+        }
+        //remove deleted numerics
+        $this->deleteComponents($db, $num_numeric+$num_text+1, $num_old_numerics); 
+    }    
+ }
+ 
+ function writeFormJSON($g_id, & $gradeableJSON){
+    $fp = fopen(__SUBMISSION_SERVER__ . '/config/form/form_'.$g_id.'.json', 'w');
+    if (!$fp){
+        die('failed to open file');
+    }
+    #decode for pretty print
+    fwrite($fp, json_encode(json_decode($gradeableJSON), JSON_PRETTY_PRINT));
+    fclose($fp); 
+ }
+ 
+// this all comes from the post data for just a single insert
+// MAKE SURE THE TRANSACTIONS are in the right spot!
+ 
+abstract class GradeableType{
     const electronic_file = 0;
     const checkpoints = 1;
     const numeric = 2;
 }
  
- if ($_POST['gradeable-type'] === "Electronic File"){
-    $g_gradeable_type = GradeableType::electronic_file;
- }
- else if ($_POST['gradeable-type'] === "Checkpoints"){
-    $g_gradeable_type = GradeableType::checkpoints;
- }
- else if ($_POST['gradeable-type'] === "Numeric"){
-    $g_gradeable_type = GradeableType::numeric;
- }
- 
- $g_grade_by_registration = ($_POST['section-type'] === 'reg-section') ? "true" : "false";
- $g_grade_start_date = ($_POST['date_grade']);
- $g_grade_released_date = ($_POST['date_released']);
- $g_syllabus_bucket = ($_POST['gradeable-buckets']);
- 
- function deleteComponents($lb,$ub, $g_id){
-    for($i=$lb; $i<=$ub; ++$i){
-        //DELETE all grades associated with these gcs
-        $params = array($g_id,$i);
-        $db->query("SELECT gc_id FROM gradeable_component WHERE g_id=? AND gc_order=?",$params);
-        $gc_id = $db->row()['gc_id'];
+ function constructGradeable (& $request_args){
+     $g_id = $request_args['gradeable_id'];
+     $g_title = $request_args['gradeable_title'];
+     $g_overall_ta_instr = $request_args['ta_instructions'];
+     $g_use_teams = ($request_args['team-assignment'] === 'yes') ? "true" : "false";
+     $g_min_grading_group=intval($request_args['minimum-grading-group']);
+     $g_grade_by_registration = ($request_args['section-type'] === 'reg-section') ? "true" : "false";
+     $g_grade_start_date = $request_args['date_grade'];
+     $g_grade_released_date = $request_args['date_released'];
+     $g_syllabus_bucket = $request_args['gradeable-buckets'];
+     
+     $g_constructor_params = array('gradeable_id' => $g_id, 'gradeable_title' => $g_title, 'ta_instructions' => $g_overall_ta_instr,
+                                   'team_assignment' => $g_use_teams, 'min_grading_group' => $g_min_grading_group, 
+                                   'section_type' => $g_grade_by_registration, 'date_grade' => $g_grade_start_date, 
+                                   'date_released' =>$g_grade_released_date, 'bucket' => $g_syllabus_bucket);
+     
+     if ($request_args['gradeable-type'] === "Electronic File"){
+        $g_constructor_params['gradeable_type'] = GradeableType::electronic_file;
         
-        $db->query("DELETE FROM gradeable_component_data AS gcd WHERE gc_id=?",array($gc_id));
-        $db->query("DELETE FROM gradeable_component WHERE gc_id=?", array($gc_id));
-    } 
-}
- 
+        $instructions_url = $request_args['instructions-url'];
+        $date_submit = $request_args['date_submit'];
+        $date_due = $request_args['date_due'];
+        $is_repo = ($request_args['upload-type'] == 'Repository')? "true" : "false";
+        $subdirectory = (isset($request_args['subdirectory']) && $is_repo == "true")? $request_args['subdirectory'] : '';
+        $ta_grading = ($request_args['ta-grading'] == 'yes')? "true" : "false";
+        $config_path = $request_args['config-path'];
+        
+        $g_constructor_params['instructions_url'] = $instructions_url;
+        $g_constructor_params['date_submit'] = $date_submit;
+        $g_constructor_params['date_due'] = $date_due;
+        $g_constructor_params['is_repo'] = $is_repo;
+        $g_constructor_params['subdirectory'] = $subdirectory;
+        $g_constructor_params['ta_grading'] = $ta_grading;
+        $g_constructor_params['config_path'] = $config_path;
+        
+        $gradeable = new ElectronicGradeable($g_constructor_params);
+     }
+     else if ($request_args['gradeable-type'] === "Checkpoints"){
+        $g_constructor_params['gradeable_type'] = GradeableType::checkpoints;
+        $gradeable = new CheckpointGradeable($g_constructor_params);
+     }
+     else if ($request_args['gradeable-type'] === "Numeric"){
+        $g_constructor_params['gradeable_type'] = GradeableType::numeric;
+        $gradeable = new NumericGradeable($g_constructor_params);
+     }
+     return $gradeable;
+ }
+
 $action = $_GET['action'];
 
-$db->beginTransaction();  
-if ($action=='edit'){
-    $params = array($g_title, $g_overall_ta_instr, $g_use_teams, $g_gradeable_type, 
-                $g_grade_by_registration, $g_grade_start_date, $g_grade_released_date, 
-                $g_syllabus_bucket,$g_min_grading_group, $g_id);
-    $db->query("UPDATE gradeable SET g_title=?, g_overall_ta_instructions=?, g_team_assignment=?, g_gradeable_type=?, 
-                g_grade_by_registration=?, g_grade_start_date=?, g_grade_released_date=?, g_syllabus_bucket=?, 
-                g_min_grading_group=? WHERE g_id=?", $params);
-}  
-else{
-    $params = array($g_id,$g_title, $g_overall_ta_instr, $g_use_teams, $g_gradeable_type, 
-                $g_grade_by_registration, $g_grade_start_date, $g_grade_released_date, 
-                $g_syllabus_bucket, $g_min_grading_group);
-    $db->query("INSERT INTO gradeable(g_id,g_title, g_overall_ta_instructions, g_team_assignment, 
-                g_gradeable_type, g_grade_by_registration, g_grade_start_date, g_grade_released_date,
-                g_syllabus_bucket,g_min_grading_group) VALUES (?,?,?,?,?,?,?,?,?,?)", $params);
-}
-
-// Now that the assignment is specified create the checkpoints for checkpoint based stuffs
-// The type of assignment will determine how the gradeable-component(s) are generated
-
-if ($g_gradeable_type === GradeableType::electronic_file){
-    // create the specifics of the electronic file
-    $instructions_url = $_POST['instructions-url'];
-    $date_submit = $_POST['date_submit'];
-    $date_due = $_POST['date_due'];
-    $is_repo = ($_POST['upload-type'] == 'Repository')? "true" : "false";
-    $subdirectory = (isset($_POST['subdirectory']) && $is_repo == "true")? $_POST['subdirectory'] : '';
-    $ta_grading = ($_POST['ta-grading'] == 'yes')? "true" : "false";
-    $config_path = $_POST['config-path'];
-    
+// single update or create
+if ($action != 'import'){
+    $gradeable = constructGradeable($_POST);
+    $db->beginTransaction();  
     if ($action=='edit'){
-        $params = array($instructions_url, $date_submit, $date_due, $is_repo, $subdirectory, $ta_grading, $config_path, $g_id);
-        $db->query("UPDATE electronic_gradeable SET eg_instructions_url=?, eg_submission_open_date=?,eg_submission_due_date=?, 
-                    eg_is_repository=?, eg_subdirectory=?, eg_use_ta_grading=?, eg_config_path=? WHERE g_id=?", $params);
-    }
+        $gradeable->updateGradeable($db);
+    }  
     else{
-        $params = array($g_id, $instructions_url, $date_submit, $date_due, $is_repo, $subdirectory, $ta_grading, $config_path);
-        $db->query("INSERT INTO electronic_gradeable(g_id, eg_instructions_url, eg_submission_open_date, eg_submission_due_date, 
-            eg_is_repository, eg_subdirectory, eg_use_ta_grading, eg_config_path) VALUES(?,?,?,?,?,?,?,?)", $params);
+        $gradeable->createGradeable($db);
+    }
+    $gradeable->createComponents($db, $action, $_POST);
+    $db->commit();
+    writeFormJSON($_POST['gradeable_id'],$_POST['gradeableJSON']);
+}
+// batch update or create
+else{
+    // open each of the form files and import them
+    //open each of the json configs
+    $files = glob(__SUBMISSION_SERVER__ . '/config/form/form_*.json');
+    $num_files = count($files);
+    $num_success = 0;
+    $failed_files = array();
+    //TODO add transactions
+    foreach($files as $file){
+        try{
+            $fp = fopen($file, 'r');
+            if (!$fp){
+                array_push($failed_files, $file);
+                continue;
+            }
+            $form_json = fread($fp,filesize($file));
+            $request_args = json_decode($form_json, true);
+            $gradeable = constructGradeable($request_args);
+            $gradeable->createGradeable($db);
+            $gradeable->createComponents($db, $action, $request_args);
+            ++$num_success;
+        } catch (Exception $e){
+          array_push($failed_files, $file);
+        } finally{
+            fclose($fp);
+        }
+    }
+    print $num_success.' of '.$num_files." successfully imported.\n";
+    if(count($failed_files) > 0){
+        print "Files failed:\n";
+        foreach($failed_files as $failed_file){
+            print "\t".$failed_file."\n";
+        }
     }
 
-    $num_questions = 0;
-    foreach($_POST as $k=>$v){
-        if(strpos($k,'comment') !== false){
-            ++$num_questions;
-        }
-    }
-    $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
-    $num_old_questions = intval($db->row()['cnt']);
-    //insert the questions
-    for ($i=0; $i<$num_questions; ++$i){
-        $gc_title = $_POST["comment-".strval($i)];
-        $gc_ta_comment = $_POST["ta-".strval($i)];
-        $gc_student_comment = $_POST["student-".strval($i)];
-        $gc_max_value = $_POST['point-'.strval($i)];
-        $gc_is_text = "false";
-        $gc_is_ec = ($_POST['ec-'.strval($i)]=='on')? "true" : "false";
-        if($action=='edit' && $i<$num_old_questions){
-            //update the values for the electronic gradeable
-            $params = array($gc_title, $gc_ta_comment, $gc_student_comment, $gc_max_value, $gc_is_text, $gc_is_ec, $g_id,$i);
-            $db->query("UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?,gc_student_comment=?, gc_max_value=?, 
-                        gc_is_text=?, gc_is_extra_credit=? WHERE g_id=? AND gc_order=?", $params);
-        }
-        else{
-            $params = array($g_id, $gc_title, $gc_ta_comment, $gc_student_comment, $gc_max_value, $gc_is_text, $gc_is_ec,$i);
-            $db->query("INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_max_value, 
-                        gc_is_text, gc_is_extra_credit, gc_order) VALUES(?,?,?,?,?,?,?,?)",$params);
-        }
-    }
-    //deleteComponents($num_questions,$num_old_questions,$g_id);
 }
-else if($g_gradeable_type === GradeableType::checkpoints){
-    // create a gradeable component for each checkpoint
-    $num_checkpoints = -1; // remove 1 for the template
-    foreach($_POST as $k=>$v){
-        if(strpos($k, 'checkpoint-label') !== false){
-            ++$num_checkpoints;
-        }    
-    }
-    $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
-    $num_old_checkpoints = intval($db->row()['cnt']);
+//TODO update configs
 
-    // insert the checkpoints
-    for($i=1; $i<=$num_checkpoints; ++$i){
-        $gc_is_extra_credit = (isset($_POST["checkpoint-extra-".strval($i)])) ? "true" : "false";
-        $gc_title = $_POST['checkpoint-label-'. strval($i)];
-        
-        if($action=='edit' && $i <= $num_old_checkpoints){
-            $params = array($gc_title, '', '', 1, "false", $gc_is_extra_credit, $g_id, $i);
-            $db->query("UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?,
-                        gc_max_value=?, gc_is_text=?, gc_is_extra_credit=? WHERE g_id=? AND gc_order=?", $params);
-        }
-        else{
-            $params = array($g_id, $gc_title, '','',1,"false",$gc_is_extra_credit,$i);
-            $db->query("INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment,
-                        gc_max_value,gc_is_text,gc_is_extra_credit,gc_order) VALUES (?,?,?,?,?,?,?,?)", $params);
-        }
-    }
-    // remove deleted checkpoints 
-    deleteComponents($num_checkpoints+1,$num_old_checkpoints,$g_id);
-}
-else if($g_gradeable_type === GradeableType::numeric){
-    $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
-    $num_old_numerics = intval($db->row()['cnt']);
-    $num_numeric = intval($_POST['num-numeric-items']);
-    $num_text= intval($_POST['num-text-items']);
-    
-    for($i=1; $i<=$num_numeric+$num_text; ++$i){
-        //CREATE the numeric items in gradeable component
-        $gc_is_text = ($i > $num_numeric)? "true" : "false";
-        if($i > $num_numeric){
-            $gc_title = (isset($_POST['text-label-'. strval($i-$num_numeric)]))? $_POST['text-label-'. strval($i-$num_numeric)] : '';
-            $gc_max_value = 0;
-            $gc_is_extra_credit ="false";
-        }
-        else{
-            $gc_title = (isset($_POST['numeric-label-'. strval($i)]))? $_POST['numeric-label-'. strval($i)] : '';
-            $gc_max_value = (isset($_POST['max-score-'. strval($i)]))? $_POST['max-score-'. strval($i)] : 0;
-            $gc_is_extra_credit = (isset($_POST['numeric-extra-'.strval($i)]))? "true" : "false";
-        }
-        
-        if($action=='edit' && $i<=$num_old_numerics){
-            $params = array($gc_title, '','',$gc_max_value, $gc_is_text, $gc_is_extra_credit,$g_id,$i);
-            $db->query("UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?, gc_student_comment=?, 
-                        gc_max_value=?, gc_is_text=?, gc_is_extra_credit=? WHERE g_id=? AND gc_order=?", $params);
-        }
-        else{
-            $params = array($g_id, $gc_title,'','',$gc_max_value,$gc_is_text,$gc_is_extra_credit,$i);
-            $db->query("INSERT INTO gradeable_component(g_id, gc_title, gc_ta_comment, gc_student_comment, gc_max_value,
-                        gc_is_text, gc_is_extra_credit, gc_order) VALUES (?,?,?,?,?,?,?,?)",$params);
-        }
-    //remove deleted numerics
-    deleteComponents($num_numeric+$num_text+1, $num_old_numerics,$g_id);
+/*
+$fp = fopen(__SUBMISSION_SERVER__.'/ASSIGNMENTS.txt', 'a');
+if (!$fp){
+ die('failed to open'. __SUBMISSION_SERVER__.'/ASSIGNMENTS.txt');
 }
 
-$db->commit();
-echo 'TRANSACTION COMPLETED';
+
+fwrite($fp, "build_homework <TBD_PATH> ".__COURSE_CODE__. " ".__COURSE_SEMESTER__." ".__DATABASE_NAME__."\n");
+fclose($fp);
+*/
+
+
+if($action != 'import'){
+    header('Location: '.__BASE_URL__.'/account/admin-gradeables.php?course='.$_GET['course']);
+}
 
 ?>

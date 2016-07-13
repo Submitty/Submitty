@@ -171,6 +171,31 @@ $output .= <<<HTML
             window.alert("[AJAX ERROR] Refresh page");
         });
     }
+    
+    function batchImportJSON(){
+         $.ajax('{$BASE_URL}/account/submit/admin-gradeable.php?course={$_GET['course']}&action=import', {
+            type: "POST",
+            data: {
+                csrf_token: '{$_SESSION['csrf']}'
+            }
+        })
+        .done(function(response) {
+            //TODO CHANGE THIS
+            console.log(response);
+            /*
+            var res_array = response.split("|");
+            if (res_array[0] == "success") {
+                window.alert("DB Sequences recalculated");
+            }
+            else {
+                console.log(response);
+                window.alert("[DB ERROR] Refresh page");
+            }*/
+        })
+        .fail(function() {
+            window.alert("[AJAX ERROR] Refresh page");
+        });
+    }
 </script>
 <div id="container-gradeables">
     <div class="modal-header">
@@ -179,6 +204,16 @@ $output .= <<<HTML
             <input class="btn btn-primary" onclick="window.location.href='{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}'" type="submit" value="Create New Gradeable"/>
             &nbsp;&nbsp;
             <input class="btn btn-primary" onclick="fixSequences();" type="submit" value="Fix DB Sequences" />
+            &nbsp;&nbsp;
+            <!-- TODO import from JSON 
+                Basically 
+                1. This should take all of the JSON configs that are saved in the JSON configs folder or wherever
+                2. Fill out the form
+                3. Send the request
+                    i. Always overwrite existing files 
+                    ii. 
+            -->
+            <input class="btn btn-primary" onclick="batchImportJSON();" type="submit" value="Import From JSON" />
         </span>
     </div>
     <table id="table-gradeables">
