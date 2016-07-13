@@ -66,6 +66,8 @@ cyan = ASCIIEscapeManager([36])
 white = ASCIIEscapeManager([37])
 
 
+###################################################################################
+###################################################################################
 # Run the given list of test case names
 def run_tests(names):
     success = True
@@ -126,6 +128,8 @@ def run_all():
     run_tests(to_run.keys())
 
 
+###################################################################################
+###################################################################################
 # Helper class used to remove the burden of paths from the testcase author.
 # The path (in /var/local) of the testcase is provided to the constructor,
 # and is subsequently used in all methods for compilation, linkage, etc.
@@ -207,6 +211,7 @@ class TestcaseWrapper:
                 raise RuntimeError("Validator exited with exit code " + str(return_code))
 
 
+    ###################################################################################
     # Run the UNIX diff command given a filename. The files are compared between the
     # data folder and the validation folder within the test package. For example,
     # running test.diff("foo.txt") within the test package "test_foo", the files
@@ -238,6 +243,19 @@ class TestcaseWrapper:
             " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
 
 
+    ###################################################################################
+    def empty_file(self, f):
+        # if no directory provided...
+        if not os.path.dirname(f):
+            f = os.path.join("data", f)
+        filename = os.path.join(self.testcase_path, f)
+        if not os.path.isfile(filename):
+            raise RuntimeError("File " + f + " should exist")
+        if os.stat(filename).st_size != 0:
+            raise RuntimeError("File " + f + " should be empty")
+
+
+    ###################################################################################
     # Helper function for json_diff.  Sorts each nested list.  Allows comparison.
     # Credit: Zero Piraeus.
     # http://stackoverflow.com/questions/25851183/how-to-compare-two-json-objects-with-the-same-elements-in-a-different-order-equa
@@ -277,16 +295,6 @@ class TestcaseWrapper:
         if self.json_ordered(contents1) != self.json_ordered(contents2):
             raise RuntimeError("JSON files " + filename1 + " and " + filename2 + " are different")
 
-    def empty_file(self, f):
-        # if no directory provided...
-        if not os.path.dirname(f):
-            f = os.path.join("data", f)
-        filename = os.path.join(self.testcase_path, f)
-        if not os.path.isfile(filename):
-            raise RuntimeError("File " + f + " should exist")
-        if os.stat(filename).st_size != 0:
-            raise RuntimeError("File " + f + " should be empty")
-
     def empty_json_diff(self, f):
         # if no directory provided...
         if not os.path.dirname(f):
@@ -296,7 +304,87 @@ class TestcaseWrapper:
         return self.json_diff(filename1,filename2)
 
 
+    ###################################################################################
+    # remove the running time, and many of the system stack trace lines
+    def simplify_junit_output(self,filename):
+        if not os.path.isfile(filename):
+            raise RuntimeError("File " + filename + " does not exist")
+        simplified = []
+        with open(filename,'r') as file:
+            for line in file:
+                if 'Time' in line:
+                    continue
+                if 'org.junit' in line:
+                    continue
+                if 'sun.reflect' in line:
+                    continue
+                if 'java.lang' in line:
+                    continue
+                if 'java.net' in line:
+                    continue
+                if 'sun.misc' in line:
+                    continue
+                if '... ' in line and ' more' in line:
+                    continue
+                #sys.stdout.write("LINE: " + line)
+                simplified.append(line)
+        return simplified
 
+    # Compares two junit output files, ignoring the run time
+    def junit_diff(self, f1, f2=""):
+        # if only 1 filename provided...
+        if not f2:
+            f2 = f1
+        # if no directory provided...
+        if not os.path.dirname(f1):
+            f1 = os.path.join("data", f1)
+        if not os.path.dirname(f2):
+            f2 = os.path.join("validation", f2)
+
+        filename1 = os.path.join(self.testcase_path, f1)
+        filename2 = os.path.join(self.testcase_path, f2)
+
+        if self.simplify_junit_output(filename1) != self.simplify_junit_output(filename2):
+            raise RuntimeError("JUNIT OUTPUT files " + filename1 + " and " + filename2 + " are different")
+
+
+
+
+    ###################################################################################
+    # remove the timestamp on the emma coverage report
+    def simplify_emma_coverage(self,filename):
+        if not os.path.isfile(filename):
+            raise RuntimeError("File " + filename + " does not exist")
+        simplified = []
+        with open(filename,'r') as file:
+            for line in file:
+                if ' report, generated ' in line:
+                    continue
+                #sys.stdout.write("LINE: " + line)
+                simplified.append(line)
+        return simplified
+
+    # Compares two emma coverage report files, ignoring the timestamp on the report
+    def emma_coverage_diff(self, f1, f2=""):
+        # if only 1 filename provided...
+        if not f2:
+            f2 = f1
+        # if no directory provided...
+        if not os.path.dirname(f1):
+            f1 = os.path.join("data", f1)
+        if not os.path.dirname(f2):
+            f2 = os.path.join("validation", f2)
+
+        filename1 = os.path.join(self.testcase_path, f1)
+        filename2 = os.path.join(self.testcase_path, f2)
+
+        if self.simplify_emma_coverage(filename1) != self.simplify_emma_coverage(filename2):
+            raise RuntimeError("JUNIT OUTPUT files " + filename1 + " and " + filename2 + " are different")
+
+
+
+###################################################################################
+###################################################################################
 def prebuild(func):
     mod = inspect.getmodule(inspect.stack()[1][0])
     path = os.path.dirname(mod.__file__)

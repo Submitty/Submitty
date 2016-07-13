@@ -1,0 +1,6 @@
+Factorial.java:24: error: cannot find symbol
+	    return tailFac(n-1, acc*n);
+	           ^
+  symbol:   method tailFac(int,int)
+  location: class Factorial
+1 error
