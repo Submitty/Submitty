@@ -14,11 +14,11 @@ if($user_is_administrator) {
 	$view = new local_view();
 
 	/* Process -------------------------------------------------------------- */
-	//$state affects what's displayed in browser)
+	//$state affects what's displayed in browser.
 	//Default state.
 	$state = "";
 
-	/* POST SUPERGLOBAL ----------------------------------------------------- */
+	/* POST/FILES SUPERGLOBALS ---------------------------------------------- */
 	//Examine drop-down and get $g_id (gradeable_id)
 	if (isset($_POST['selected_gradeable'])) {
 		$g_id = intval(substr($_POST['selected_gradeable'], 2));
@@ -26,29 +26,43 @@ if($user_is_administrator) {
 		$g_id = retrieve_newest_gradeable_id_from_db();
 	}
 		
-	//Examine Student ID and Late Day input fields.
-	if (isset($_POST['student_id']) && ($_POST['student_id'] !== "") &&
-	    isset($_POST['late_days']) && ($_POST['late_days'] !== "")) {
+	//Check to see if a CSV file was submitted.
+	if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
+	
+		$data = array();
+		if (!parse_and_validate_csv($_FILES['csv_upload']['tmp_name'], $data)) {
+			$state = 'bad_upload';
+		} else {
+			upsert($data);
+			$state = 'upsert_done';
+		}
 
-		//Validate that late days entered is an integer
+	//if no file upload, examine Student ID and Late Day input fields.	
+	} else if (isset($_POST['student_id']) && ($_POST['student_id'] !== "") &&
+	           isset($_POST['late_days'])  && ($_POST['late_days']  !== "")) {
+
+		//Validate that late days entered is an integer >= 0.
+		//Negative values will fail ctype_digit test.
 		if (!ctype_digit($_POST['late_days'])) {
 			$state = 'late_days_not_integer';
 		}
 		
-		//"Student Not Found" error has precedence over late days being non-numerical.
-		//This is the more likely error to happen of these two.
-		if (verify_student_in_db($_POST['student_id']) === 0) {
+		//Validate that student does exist in DB (per rcs_id)
+		//"Student Not Found" error has precedence over late days being non-numerical
+		//as it is the more likely error to happen.
+		if (!verify_student_in_db($_POST['student_id'])) {
 			$state = 'student_not_found';
 		}
 		
 		//Process upsert if no errors were flagged.
 		if (empty($state)) {
-			//upsert argument requires 2D array
+
+			//upsert argument requires 2D array.
 			upsert(array(array($_POST['student_id'], $g_id, intval($_POST['late_days']))));
-			$state = 'upsert_confirmed';
+			$state = 'upsert_done';
 		}
 	}
-	/* END POST SUPERGLOBAL ------------------------------------------------- */
+	/* END POST/FILES SUPERGLOBAL ------------------------------------------- */
 
 	//configure form
 	$gradeables_db_data = retrieve_gradeables_from_db();
@@ -75,9 +89,77 @@ exit;
 
 /* END MAIN ================================================================= */
 
-function verify_student_in_db($student_id) {
+function parse_and_validate_csv($csv_file, &$data) {
+//IN:  * csv file name and path
+//     * (by reference) empty data array that will be filled.
+//OUT: TRUE should csv file be properly validated and data array filled.
+//     FALSE otherwise.
+//PURPOSE:  (1) vet uploaded csv file so it may be parsed.
+//          (2) create data array of csv information that may be batch upserted.
+	
+	//Validate file MIME type (needs to be "text/plain")
+	$file_info = finfo_open(FILEINFO_MIME_TYPE);
+	$mime_type = finfo_file($file_info, $_FILES['csv_upload']['tmp_name']);
+	finfo_close($file_info);
+	
+	if ($mime_type !== "text/plain") {
+		$data = null;
+		return false;
+	}
+	
+	$rows = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+	
+	if ($rows === false) {
+		$data = null;
+		return false;
+	}
+	
+	foreach($rows as $row) {
+	
+		$fields = explode(',', $row);
+		
+		//Each row has three fields
+		if (count($fields) !== 3) {
+			$data = null;
+			return false;
+		}
+		
+		//$fields[0]: Verify student exists in class (check by RCS ID)
+		if (!verify_student_in_db($fields[0])) {
+			$data = null;
+			return false;
+		}		
+		
+		//$fields[1]: Verify that gradeable exists (by title)
+		if (!identify_gradeable_in_db($fields[1])) {
+			$data = null;
+			return false;
+		}		
+		
+		//$fields[2]: Number of late day exceptions must be an integer >= 0
+		//            ctype_digit() returns false with negative integers as strings
+		if (!ctype_digit($fields[2])) {
+			$data = null;
+			return false;
+		}
+		
+		//Fields information seems okay.  Push fields onto data array.
+		$data[] = $fields;
+	}
 
-	//Old Schema
+	//Validation successful.
+	return true;
+}
+
+/* END FUNCTION parse_and_validate_csv() ==================================== */
+
+function verify_student_in_db($student) {
+//IN:  RCS student ID
+//OUT: TRUE should RCS ID be found in the database
+//     FALSE otherwise
+//PURPOSE:  Verify that student is in database (indicating the student is enrolled)
+
+	//SQL for "old schema"
 	$sql = <<<SQL
 SELECT
 	COUNT(1)
@@ -87,31 +169,91 @@ WHERE
 	student_rcs=?
 SQL;
 
+	//SQL for "new schema"
+	//FIXME: update 'user_group' property to match the STUDENTS group
+/* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	$sql = <<<SQL
+SELECT
+	COUNT(1)
+FROM users
+WHERE
+	user_id=?
+AND
+	user_group=0
+SQL;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
+
 	\lib\Database::beginTransaction();
-	\lib\Database::query($sql, array($student_id));
+	\lib\Database::query($sql, array($student));
 	\lib\Database::commit();
 	
- 	return \lib\Database::row()['count'];
+	if (\lib\Database::row()['count'] === 1) {
+		return true;
+	} else {
+		return false;
+	}
 }
+
+/* END FUNCTION verify_student_in_db() ====================================== */
+
+function identify_gradeable_in_db(&$gradeable) {
+
+	//SQL for "old schema"
+	$sql = <<<SQL
+SELECT
+	rubric_id
+FROM
+	rubrics
+WHERE
+	rubric_name=?
+SQL;
+
+	//SQL for "new schema"
+/* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	$sql = <<<SQL
+SELECT
+	g_id
+FROM
+	gradeables
+WHERE
+	g_title=?
+SQL;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
+
+	\lib\Database::beginTransaction();
+	\lib\Database::query($sql, array($gradeable));
+	\lib\Database::commit();
+	
+	$row = \lib\Database::row();
+ 	if (isset($row[0]) && ($row[0] !== "")) {
+ 		$gradeable = $row[0];
+ 		return true;
+ 	} else {
+ 		$gradeable = null;
+ 		return false;
+ 	}
+}
+
+/* END FUNCTION verify_gradeable_in_db() ==================================== */
 
 function retrieve_newest_gradeable_id_from_db() {
 
-	//Old Schema
+	//SQL for "old schema"
 	$sql = <<<SQL
 SELECT
 	MAX(rubric_id)
 FROM rubrics;
 SQL;
 
-	//New Schema
-	//FIXME: update 'gradeable_type' property to locate any gradeable of which late days are permissible.
+	//SQL for "new schema"
+	//FIXME: update 'g_gradeable_type' property to match any gradeable of which late days are permissible.
 /* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	$sql = <<<SQL
 SELECT
-	MAX(gradeable_id)
+	MAX(g_id)
 FROM gradeables
 WHERE
-	gradeable_type=0"
+	g_gradeable_type=0"
 SQL;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
 
@@ -126,7 +268,7 @@ SQL;
 
 function retrieve_gradeables_from_db() {
 
-	//Old Schema
+	//SQL for "old schema"
 	$sql = <<<SQL
 SELECT
 	rubric_id,
@@ -135,17 +277,17 @@ FROM rubrics
 ORDER BY rubric_id DESC;
 SQL;
 
-	//New Schema
-	//FIXME: update 'gradeable_type' property to locate any gradeable of which late days are permissible.
+	//SQL for "new schema"
+	//FIXME: update 'g_gradeable_type' property to match any gradeable of which late days are permissible.
 /* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	$sql = <<<SQL
 SELECT
-	gradeable_id,
+	g_id,
 	g_title
 FROM gradeables
 WHERE
-	gradeable_type=0"
-ORDER BY gradeable_id DESC;
+	g_gradeable_type=0"
+ORDER BY g_id DESC;
 SQL;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
 
@@ -182,7 +324,7 @@ ORDER BY students.student_rcs ASC;
 SQL;
 	
 	//New Schema
-	//FIXME: update user.user_group property to equal value representing students.
+	//FIXME: update user.user_group property to match value representing students.
 /* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	$sql = <<<SQL
 SELECT
@@ -192,15 +334,15 @@ SELECT
 	late_day_exceptions.late_day_exceptions
 FROM users
 FULL OUTER JOIN late_day_expceptions
-ON users.user_id=late_day_exceptions.student_id
+ON users.user_id=late_day_exceptions.user_id
 WHERE
-	late_day_exceptions.assignmemt_id=?
+	late_day_exceptions.g_id=?
 AND
 	users.user_group=0
 AND
-	late_day_exceptions.ex_late_days IS NOT NULL
+	late_day_exceptions.late_day-exceptions IS NOT NULL
 AND
-	late_day_exceptions.ex_late_days>0
+	late_day_exceptions.late_day_excpetions>0
 ORDER BY users.user_email ASC;
 SQL;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
@@ -216,15 +358,15 @@ SQL;
 
 function upsert(array $data) {
 
-	echo nl2br("\n\n\n\n\n" . count($data));
-
+	//This SQL code was adapted from upsert discussion on Stack Overflow.
+	//This SQL code is compatible with PostgreSQL prior to 9.5.
 	//q.v. http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
 
-	//Old Schema
+	//SQL for "old schema"
 	$sql = array();
 	
 	//TEMPORARY table to hold all new values that will be "upserted"
-	$sql['temp'] = <<<SQL
+	$sql['temp_table'] = <<<SQL
 CREATE TEMPORARY TABLE temp
 	(student_rcs VARCHAR(255),
 	gradeable_id INTEGER,
@@ -232,7 +374,8 @@ CREATE TEMPORARY TABLE temp
 ON COMMIT DROP;
 SQL;
 
-	//Needed for "upsert" records
+	//INSERT new data into temporary table -- prepares all data to be upserted
+	//in a single DB transaction.
 	for ($i=0; $i<count($data); $i++) {
 		$sql["data_{$i}"] = <<<SQL
 INSERT INTO temp VALUES (?,?,?);
@@ -244,7 +387,7 @@ SQL;
 LOCK TABLE late_day_exceptions IN EXCLUSIVE MODE;
 SQL;
 
-	//UPDATE will only occur when a record already exists.
+	//This portion ensures that UPDATE will only occur when a record already exists.
 	$sql['update'] = <<<SQL
 UPDATE
 	late_day_exceptions
@@ -258,7 +401,7 @@ AND
 	late_day_exceptions.ex_rubric_id=temp.gradeable_id;
 SQL;
 
-	//INSERT will only occur when a record does not exist
+	//This portion ensures that INSERT will only occur when data record is new.
 	$sql['insert'] = <<<SQL
 INSERT INTO
 	late_day_exceptions
@@ -283,11 +426,75 @@ OR
 	late_day_exceptions.ex_rubric_id IS NULL;
 SQL;
 
-	/* TO DO: Need SQL for new Schema */
+	//SQL code for "new schema"
+/* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	//Begin!
+	//TEMPORARY table to hold all new values that will be "upserted"
+	$sql['temp_table'] = <<<SQL
+CREATE TEMPORARY TABLE temp
+	(student_rcs VARCHAR(255),
+	gradeable_id INTEGER,
+	late_days INTEGER)
+ON COMMIT DROP;
+SQL;
+
+	//INSERT new data into temporary table -- prepares all data to be upserted
+	//in a single DB transaction.
+	for ($i=0; $i<count($data); $i++) {
+		$sql["data_{$i}"] = <<<SQL
+INSERT INTO temp VALUES (?,?,?);
+SQL;
+	}
+
+	//LOCK will prevent sharing collisions while upsert is in process.
+	$sql['lock'] = <<<SQL
+LOCK TABLE late_day_exceptions IN EXCLUSIVE MODE;
+SQL;
+
+	//This portion ensures that UPDATE will only occur when a record already exists.
+	$sql['update'] = <<<SQL
+UPDATE
+	late_day_exceptions
+SET
+	late_day_exceptions=temp.late_days
+FROM
+	temp
+WHERE
+	late_day_exceptions.user_id=temp.student_rcs
+AND
+	late_day_exceptions.g_id=temp.gradeable_id;
+SQL;
+
+	//This portion ensures that INSERT will only occur when data record is new.
+	$sql['insert'] = <<<SQL
+INSERT INTO
+	late_day_exceptions
+	(user_id,
+	g_id,
+	late_day-exceptions)
+SELECT
+	temp.student_rcs,
+	temp.gradeable_id,
+	temp.late_days
+FROM 
+	temp 
+LEFT OUTER JOIN
+	late_day_exceptions
+ON
+	late_day_exceptions.user_id=temp.student_rcs
+AND
+	late_day_exceptions.g_id=temp.gradeable_id
+WHERE
+	late_day_exceptions.user_id IS NULL
+OR
+	late_day_exceptions.g_id IS NULL;
+SQL;
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */	
+
+	//Begin DB transaction
 	\lib\Database::beginTransaction();
-	\lib\Database::query($sql['temp']);
+	\lib\Database::query($sql['temp_table']);
 	
 	foreach ($data as $index => $record) {
 		\lib\Database::query($sql["data_{$index}"], array($record[0], $record[1], $record[2]));
@@ -304,11 +511,14 @@ SQL;
 /* END FUNCTION upsert() ==================================================== */
 
 class local_view {
+//View class for admin-latedays-exceptions.php
 
+	//Properties
 	static private $utf8_styled;
 	static private $utf8_checkmark;
-	static private $view;
+	static private $view;  //HTML data to be sent to browser
 	
+	//Constructor
 	public function __construct() {
 		$this->utf8_styled_x  = "&#x2718";
 		$this->utf8_checkmark = "&#x2714";
@@ -330,7 +540,7 @@ HTML;
 		$this->view['bad_upload'] = <<<HTML
 <div class="modal-body">
 <p><em style="color:red; font-weight:bold; font-style:normal;">
-{$this->utf8_styled_x} Could not process CSV upload.</em>
+{$this->utf8_styled_x} Something is wrong with the CSV upload.  No update done.</em>
 </div>
 HTML;
 
@@ -348,10 +558,10 @@ HTML;
 </div>
 HTML;
 
-		$this->view['upsert_confirmed'] = <<<HTML
+		$this->view['upsert_done'] = <<<HTML
 <div class="modal-body">
 <p><em style="color:green; font-weight:bold; font-style:normal;">
-{$this->utf8_checkmark} Late days are updated.</em>
+{$this->utf8_checkmark} Late day exceptions are updated.</em>
 </div>
 HTML;
 
@@ -364,10 +574,18 @@ HTML;
 
 	}
 	
+/* END CLASS CONSTRUCTOR ---------------------------------------------------- */	
+
 	public function configure_form($g_id, $db_data) {
+	//IN:  selected gradeable id and data from database used to build form
+	//OUT: no return (although private view['form'] property is filled)
+	//PURPOSE: Craft HTML required to display input form.  $g_id and $dv_data
+	//         Are essential for crafting a proper drop-down menu for selecting
+	//         a gradeable.  That is, only gradeables that exist are shown.
+	
 		$this->view['form'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-<form action="admin-latedays-exceptions.php" method="POST">
+<form action="admin-latedays-exceptions.php" method="POST" enctype="multipart/form-data">
 <p>Select Rubric:
 <select name="selected_gradeable" onchange="this.form.submit()">
 HTML;
@@ -400,8 +618,14 @@ HTML;
 HTML;
 
 	}
+
+/* END CLASS METHOD configure_form() ---------------------------------------- */
 	
 	public function configure_table($db_data) {
+	//IN:  data from database used to build table of granted late day exceptions for selected gradeable
+	//OUT: no return (although private view['student_review_table'] property is filled)
+	//PUTRPOSE: Craft HTML required to display a table of existing late day exceptions	
+	
 		if (!is_array($db_data) || count($db_data) < 1) {
 		//No late days in DB -- indicate as much.
 
@@ -446,8 +670,13 @@ HTML;
 HTML;
 		}
 	}
+	
+/* END CLASS METHOD configure_table() --------------------------------------- */
 
 	public function display($state) {
+	//IN:  Current "display state" determined in MAIN process
+	//OUT: No return, although ALL crafted HTML is sent to browser
+	//PURPOSE:  Display appropriate page contents.
 	
 		switch($state) {
 		case 'unauthorized':
@@ -476,10 +705,10 @@ HTML;
 			     $this->view['student_review_table']  .
 			     $this->view['tail'];
 		    break;
-		case 'upsert_confirmed':
+		case 'upsert_done':
 			echo $this->view['head']                 .
 				 $this->view['form']                 . 
-				 $this->view['upsert_confirmed']     . 
+				 $this->view['upsert_done']          . 
 			     $this->view['student_review_table'] .
 			     $this->view['tail'];
 			break;
@@ -491,8 +720,8 @@ HTML;
 			break;
 		}
 	}
-}	
-
+}
+/* END CLASS METHOD display() ----------------------------------------------- */
 /* END CLASS local_view ===================================================== */
 /* EOF ====================================================================== */
 ?>
