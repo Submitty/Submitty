@@ -575,7 +575,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     // ========================================================
     // Drag to move toolbar/grading/status panel around
     function dragPanelStart(e, id) {
-        if (e.target.type == "textarea" || e.target.type == "input")  return; // disable dragging when typing to textarea/input
+        if (e.target.tagName == "TEXTAREA" || e.target.tagName == "INPUT" || e.target.tagName == "SELECT") // disable dragging when editing textarea/input
         dragging_panel = true;
         mouse_x = e.clientX;
         mouse_y = e.clientY;
