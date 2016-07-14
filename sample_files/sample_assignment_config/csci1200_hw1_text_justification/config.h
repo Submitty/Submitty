@@ -4,7 +4,7 @@
 // ===================================================================================
 
 // Grading parameters
-#definte TOTAL_POINTS 50
+#define TOTAL_POINTS 50
 #define AUTO_POINTS 25
 #define TA_POINTS 25
 #define EXTRA_CREDIT_POINTS 5

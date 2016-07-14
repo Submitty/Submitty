@@ -999,6 +999,19 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
                 break;
             }
         }
+        // still get testcases when assignment version is 0 and give a score of 0 on every testcase
+        if($assignment_version == 0 && isset($testcases_info[$i]["title"])) {
+            $data = array();
+            $data["title"] = isset($testcases_info[$i]["title"]) ? $testcases_info[$i]["title"] : "";
+            $data["details"] = isset($testcases_info[$i]["details"]) ? $testcases_info[$i]["details"] : "";
+            $data["points_possible"] = isset($testcases_info[$i]["points"]) ? $testcases_info[$i]["points"] : 0;
+            $data["score"] = 0;
+            $data["is_hidden"] = isset($testcases_info[$i]["hidden"]) ? $testcases_info[$i]["hidden"] : false;
+            $data["is_extra_credit"] = isset($testcases_info[$i]["extracredit"]) ? $testcases_info[$i]["extracredit"] : false;
+            $data["visible"] = isset($testcases_info[$i]["visible"]) ? $testcases_info[$i]["visible"] : true;
+            $data["view_test_points"] = isset($testcases_info[$i]["view_test_points"]) ? $testcases_info[$i]["view_test_points"] : true;
+            array_push($homework_tests, $data);
+        }
     }
     return $homework_tests;
 }

@@ -89,11 +89,6 @@
 #HWsubmission .row{
     margin: 0;
 }
-#HWsubmission .split-row{
-    margin: 0;
-    display:inline-block;
-    vertical-align: middle;
-}
 
 #HWsubmission .view_diff{
     float: left;
@@ -191,7 +186,6 @@
 }
 
 #HWsubmission .sub{
-    margin-left: 3%;
     margin-top: 1%;
     margin-bottom: 1%;
 }
