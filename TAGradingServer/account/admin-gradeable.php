@@ -270,8 +270,9 @@ HTML;
                 What is the due date? <input name="date_due" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
                 <br />
+                <!-- TODO: set default late days -->
                 How many late days may students use on this assignment? <input style="width: 50px" name="rubric_late_days" 
-                                                                         type="text" value="{$old_rubric['rubric_late_days']}"/>
+                                                                         type="text" />
                 <br/>
                 
                 <fieldset>
@@ -546,79 +547,6 @@ HTML;
                         or edit any gradeables in any sections, but per gradeable can read/write access be granted.
                 NOTE:  Flag as error if some sections have no grader    
             -->
-HTML;
-    $db->query("SELECT s.user_id, u.user_rcs, u.user_email, s.rubric_id, s.grading_section_id
-    FROM homework_grading_sections as s, users as u WHERE u.user_id = s.user_id
-    ORDER BY rubric_id, grading_section_id", array());
-    $sections = array();
-    foreach ($db->rows() as $row) {
-        if (!isset($sections[$row['rubric_id']][$row['user_rcs']])) {
-            $sections[$row['rubric_id']][$row['user_rcs']] = array();
-        }
-        $sections[$row['rubric_id']][$row['user_rcs']][] = $row['grading_section_id'];
-    }
-    asort($sections);
-
-    $db->query("SELECT student_grading_id, count(student_id) as cnt FROM students GROUP BY student_grading_id ORDER BY student_grading_id", array());
-    $a = array();
-    foreach ($db->rows() as $row) {
-        $a[] = "{$row['student_grading_id']} ({$row['cnt']} students)";
-    }
-    $a = implode(", ", $a);
-
-    print "Available Grading Sections: {$a}<br /><br />";
-    $i = 0;
-    $db->query("SELECT * FROM users ORDER BY user_rcs ASC", array());
-    $users = $db->rows();
-    foreach($users as $user) {
-        $value =  isset($sections[$old_rubric['rubric_id']][$user['user_rcs']]) ? implode(",", $sections[$old_rubric['rubric_id']][$user['user_rcs']]) : -1;
-        print <<<HTML
-            <span style='display:inline-block; width:300px; padding-right: 5px'>{$user['user_lastname']},
-                    {$user['user_firstname']}:</span>
-            <input style='width: 30px; text-align: center' type='text' name='{$user['user_id']}-section'
-                    value='{$value}' />
-            <br />
-HTML;
-        $i++;
-    }
-    $margintop = ($i*-40) . "px";
-    $marginright =  650-(count($rubrics)*25) . "px";
-    print <<<HTML
-            <div>
-                <table border="1" style="float: right; margin-top:{$margintop}; margin-right: {$marginright}">
-                    <tr>
-                        <td>User</td>
-HTML;
-    foreach ($rubrics as $id => $number) {
-        print <<<HTML
-                        <td style="width: 20px; text-align: center">
-                            {$number}
-                        </td>
-HTML;
-    }
-    print <<<HTML
-                </tr>
-HTML;
-    foreach ($users as $user) {
-        print <<<HTML
-                    <tr>
-                        <td>{$user['user_rcs']}</td>
-HTML;
-        foreach ($rubrics as $id => $rubric) {
-            $number = (isset($sections[$id][$user['user_rcs']])) ? implode(",",$sections[$id][$user['user_rcs']]) : "";
-            print <<<HTML
-                        <td style="text-align: center">
-                            {$number}
-                        </td>
-HTML;
-        }
-        print <<<HTML
-                    </tr>
-HTML;
-    }
-    print <<<HTML
-                </table>
-            </div>
             <br />
             <!-- TODO default to the submission + late days for electronic -->
             What date can the TAs start grading this?: <input name="date_grade" id="date_grade" class="datepicker" type="text"

@@ -257,7 +257,6 @@ abstract class GradeableType{
      if ($request_args['gradeable-type'] === "Electronic File"){
         $g_constructor_params['gradeable_type'] = GradeableType::electronic_file;
         
-        //TODO revise this probably branch on import vs other actions
         $instructions_url = $request_args['instructions-url'];
         $date_submit = $request_args['date_submit'];
         $date_due = $request_args['date_due'];
@@ -314,29 +313,19 @@ else{
     //TODO add transactions
     foreach($files as $file){
         try{
-            print $file."\n";
             $fp = fopen($file, 'r');
-            print 'after open';
             if (!$fp){
                 array_push($failed_files, $file);
-                print 'Cannot open file';
                 continue;
             }
             $form_json = fread($fp,filesize($file));
             $request_args = json_decode($form_json, true);
-            print_r($request_args);
             $gradeable = constructGradeable($request_args);
-            print 'gradeable constructed';
-            //for now just create it
             $gradeable->createGradeable($db);
-            print 'gradeable created';
             $gradeable->createComponents($db, $action, $request_args);
-            print 'components created';
             ++$num_success;
         } catch (Exception $e){
-          print 'exception caught';
           array_push($failed_files, $file);
-          
         } finally{
             fclose($fp);
         }
