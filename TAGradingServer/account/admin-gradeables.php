@@ -180,17 +180,7 @@ $output .= <<<HTML
             }
         })
         .done(function(response) {
-            //TODO CHANGE THIS
-            console.log(response);
-            /*
-            var res_array = response.split("|");
-            if (res_array[0] == "success") {
-                window.alert("DB Sequences recalculated");
-            }
-            else {
-                console.log(response);
-                window.alert("[DB ERROR] Refresh page");
-            }*/
+            window.alert(response);
         })
         .fail(function() {
             window.alert("[AJAX ERROR] Refresh page");
@@ -239,9 +229,9 @@ foreach ($gradeables as $gradeable) {
         <tr id='gradeable-{$g_id}'">
             <td class="gradeables-id" id="gradeable-{$g_id}-id">{$g_id}</td>
             <td class="gradeables-name" id="gradeable-{$g_id}-title">{$g_title}</td>
-            <td class="gradeables-parts" id="gradeable-{$g_id}-parts"><!--{$gradeable['gradeable_parts']}--></td>
+            <td class="gradeables-parts" id="gradeable-{$g_id}-parts"></td>
             <td class="gradeables-questions" id="gradeable-{$g_id}-questions">{$num_questions}</td>
-            <td class="gradeables-score" id="gradeable-{$g_id}-score"><!-- {$gradeable['gradeable_score']} ({$gradeable['gradeable_ec']}) --></td>
+            <td class="gradeables-score" id="gradeable-{$g_id}-score"></td>
             <td class="gradeables-due" id="gradeable-{$g_id}-due">{$gradeable['g_grade_released_date']}</td>
             <td id="gradeable-{$g_id}-options"><a href="{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&action=edit&id={$g_id}">Edit</a> |
             <a onclick="deleteGradeable('{$g_id}');">Delete</a></td>
