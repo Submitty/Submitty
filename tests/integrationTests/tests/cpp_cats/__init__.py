@@ -22,10 +22,6 @@ def initialize(test):
         os.mkdir(os.path.join(test.testcase_path, "data"))
     except OSError:
         pass
-    try:
-        os.mkdir(os.path.join(test.testcase_path, "data"))
-    except OSError:
-        pass
 
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.h"),
