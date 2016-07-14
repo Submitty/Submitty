@@ -197,6 +197,9 @@ SQL;
 /* END FUNCTION verify_student_in_db() ====================================== */
 
 function identify_gradeable_in_db(&$gradeable) {
+//IN:  (by reference) gradeable's title
+//OUT:  No return, but gradeable variable reference will be updated with gradeable's ID
+//PURPOSE:  Find a gradeable's serial ID by a gradeable's title.
 
 	//SQL for "old schema"
 	$sql = <<<SQL
@@ -237,6 +240,12 @@ SQL;
 /* END FUNCTION verify_gradeable_in_db() ==================================== */
 
 function retrieve_newest_gradeable_id_from_db() {
+//IN:  No parameters
+//OUT: Find "maximum value" of the gradeable sequential ID.
+//PURPOSE:  Gradeable drop down menu is ordered with newest first.
+//          By locating the "maximum value" of the sequential ID, the "newest"
+//          gradeable is determined.  This is used as the "default" gradeable
+//          selection.
 
 	//SQL for "old schema"
 	$sql = <<<SQL
@@ -267,6 +276,10 @@ SQL;
 /* END FUNCTION retrieve_newest_gradeable_id_from_db() ====================== */
 
 function retrieve_gradeables_from_db() {
+//IN:  No parameterd
+//OUT: All permissable gradeables ID and title, ordered dscending by ID
+//PURPOSE:  To build drop down menu of selectable gradeables.  Ordered
+//          descending so "newer" are higher in the menu.
 
 	//SQL for "old schema"
 	$sql = <<<SQL
@@ -301,8 +314,12 @@ SQL;
 /* END FUNCTION retrieve_gradeables_from_db() =============================== */
 
 function retrieve_students_from_db($gradeable_id = 0) {
+//IN:  gradeable ID from database
+//OUT: all students who have late day exceptions, per gradeable ID parameter.
+//     retrieves student rcs, first name, last name, and late day exceptions.
+//PURPOSE:  Retrieve list of students to display current late day exceptions.
 
-	//Old Schema
+	//SQL for "old schema"
 	$sql = <<<SQL
 SELECT
 	students.student_rcs,
@@ -323,7 +340,7 @@ AND
 ORDER BY students.student_rcs ASC;
 SQL;
 	
-	//New Schema
+	//SQL for "new schema"
 	//FIXME: update user.user_group property to match value representing students.
 /* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	$sql = <<<SQL
@@ -357,10 +374,18 @@ SQL;
 /* END FUNCTION retrieve_students_from_db() ================================= */
 
 function upsert(array $data) {
+//IN:  Data to be "upserted"
+//OUT: No return.  This is assumed to work.  (Server should throw an exception
+//     if this process fails)
+//PURPOSE:  "Update/Insert" data into the database.  This can handle large
+//          "batch" upserts in a single transaction (for when upserting via CSV)
 
-	//This SQL code was adapted from upsert discussion on Stack Overflow.
-	//This SQL code is compatible with PostgreSQL prior to 9.5.
-	//q.v. http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
+/* -----------------------------------------------------------------------------
+ * This SQL code was adapted from upsert discussion on Stack Overflow and is
+ * meant to be compatible with PostgreSQL prior to v9.5.
+ *
+ * 	q.v. http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
+ * -------------------------------------------------------------------------- */
 
 	//SQL for "old schema"
 	$sql = array();
@@ -375,7 +400,7 @@ ON COMMIT DROP;
 SQL;
 
 	//INSERT new data into temporary table -- prepares all data to be upserted
-	//in a single DB transaction.
+	//in a single batch DB transaction.
 	for ($i=0; $i<count($data); $i++) {
 		$sql["data_{$i}"] = <<<SQL
 INSERT INTO temp VALUES (?,?,?);
