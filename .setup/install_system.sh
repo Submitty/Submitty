@@ -103,7 +103,7 @@ apt-get install -qqy libpam-passwdqc
 # the worker/threaded mode instead)
 
 apt-get install -qqy ssh sshpass unzip
-apt-get install -qqy apache2 postgresql postgresql-contrib php5 php5-xdebug libapache2-mod-suphp
+apt-get install -qqy apache2 postgresql postgresql-contrib php5 php5-xdebug libapache2-mod-suphp php5-curl
 
 # Check to make sure you got the right setup by typing:
 #   apache2ctl -V | grep MPM
@@ -402,7 +402,7 @@ fi
 adduser hwphp hwcronphp
 adduser hwcron hwcronphp
 
-for COURSE in csci1100 csci1200 csci2600
+for COURSE in csci1000 csci1100 csci1200 csci2600
 do
 
         # for each course, create a group to contain the current

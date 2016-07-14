@@ -35,9 +35,9 @@ class Config extends Model {
     private $site_url;
     private $authentication;
     private $timezone = "America/New_York";
-    private $hss_path;
-    private $hss_course_path;
-    private $hss_log_path;
+    private $submitty_path;
+    private $submitty_course_path;
+    private $submitty_log_path;
     private $log_exceptions;
 
     /**
@@ -96,8 +96,8 @@ class Config extends Model {
         // Load config details from the master config file
         $master = IniParser::readFile(implode("/", array($this->config_path, 'master.ini')));
 
-        $this->setConfigValues($master, 'logging_details', array('hss_log_path', 'log_exceptions'));
-        $this->setConfigValues($master, 'site_details', array('base_url', 'hss_path', 'authentication'));
+        $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
+        $this->setConfigValues($master, 'site_details', array('base_url', 'submitty_path', 'authentication'));
         $this->setConfigValues($master, 'database_details', array('database_host', 'database_user', 'database_password'));
 
         if (isset($master['site_details']['debug'])) {
@@ -116,20 +116,20 @@ class Config extends Model {
         $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
 
         // Check that the paths from the config file are valid
-        foreach(array('hss_path', 'hss_log_path') as $path) {
+        foreach(array('submitty_path', 'submitty_log_path') as $path) {
             if (!is_dir($this->$path)) {
                 throw new ConfigException("Invalid path for setting: {$path}\n{$this->$path}");
             }
             $this->$path = rtrim($this->$path, "/");
         }
 
-        if (!is_dir(implode("/", array($this->hss_path, "courses", $this->semester))) ||
+        if (!is_dir(implode("/", array($this->submitty_path, "courses", $this->semester))) ||
             !is_dir(implode("/", array(__DIR__, "..", "..", "config", $this->semester)))) {
             throw new ConfigException("Invalid semester: ".$this->semester, true);
         }
 
-        $this->hss_course_path = implode("/", array($this->hss_path, "courses", $this->semester, $this->course));
-        if (!is_dir($this->hss_course_path)) {
+        $this->submitty_course_path = implode("/", array($this->submitty_path, "courses", $this->semester, $this->course));
+        if (!is_dir($this->submitty_course_path)) {
             throw new ConfigException("Invalid course: ".$this->course, true);
         }
 
@@ -201,22 +201,22 @@ class Config extends Model {
     /**
      * @return string
      */
-    public function getHssPath() {
-        return $this->hss_path;
+    public function getSubmittyPath() {
+        return $this->submitty_path;
     }
 
     /**
      * @return string
      */
-    public function getHssCoursePath() {
-        return $this->hss_course_path;
+    public function getCoursePath() {
+        return $this->submitty_course_path;
     }
 
     /**
      * @return string
      */
-    public function getHssLogPath() {
-        return $this->hss_log_path;
+    public function getLogPath() {
+        return $this->submitty_log_path;
     }
 
     /**
@@ -262,7 +262,7 @@ class Config extends Model {
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getCourseName() {
         return $this->course_name;

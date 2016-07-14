@@ -14,9 +14,9 @@ class AuthenticationView {
     public function loginForm() {
         $return = <<<HTML
 <div id="content">
-    <h2>Login for {$this->core->getConfig()->getCourseName()}</h2>
+    <h2>Login for {$this->core->getFullCourseName()}</h2>
     <div class="sub">
-        <form action="{$this->core->getConfig()->getSiteUrl()}" method="post">
+        <form action="{$this->core->getConfig()->getSiteUrl()}" method="post" id="login">
             <input type="hidden" name="component" value="authentication" />
             <input type="hidden" name="page" value="checkLogin" />
 HTML;
@@ -28,7 +28,7 @@ HTML;
         $return .= <<<HTML
             <input type="text" name="user_id" placeholder="User ID" /><br />
             <input type="password" name="password" placeholder="Password" /><br />
-            <input type="submit" value="Login" />
+            <input type="submit" value="Login" class="btn btn-default" />
         </form>
     </div>
 </div>

@@ -14,11 +14,6 @@ class User extends Model {
     private $details = array();
 
     /**
-     * @var bool
-     */
-    private $user_loaded = false;
-
-    /**
      * User constructor.
      *
      * @param string           $user_id
@@ -31,17 +26,12 @@ class User extends Model {
         }
 
         $this->details = $details;
-        $this->user_loaded = true;
 
         return true;
     }
 
     public function getDetail($detail) {
         return $this->details[$detail];
-    }
-
-    public function userLoaded() {
-        return $this->user_loaded;
     }
 
     public function accessGrading() {

@@ -44,7 +44,7 @@ class Core {
     /**
      * @var User
      */
-    private $user;
+    private $user = null;
 
     /**
      * Core constructor.
@@ -135,10 +135,22 @@ class Core {
     }
 
     /**
+     * Returns the user that the client is logged in as. Will return null if there is no user
+     * to be logged in as.
+     * 
      * @return User
      */
     public function getUser() {
         return $this->user;
+    }
+
+    /**
+     * Is a user loaded into the Core to be used for the client to be logged in as
+     *
+     * @return bool
+     */
+    public function userLoaded() {
+        return $this->user !== null;
     }
 
     /**
@@ -169,7 +181,7 @@ class Core {
         $this->loadUser($user_id);
         return true;
     }
-    
+
     /**
      * Remove the currently loaded session within the session manager
      */
@@ -189,7 +201,9 @@ class Core {
             $auth = true;
             $session_id = $this->session_manager->newSession($user_id);
             // We set the cookie to expire 10 years into the future effectly making it last forever
-            setcookie('session_id', $session_id, time() + (10 * 365 * 24 * 60 * 60));
+            if (setcookie('session_id', $session_id, time() + (10 * 365 * 24 * 60 * 60), "/") === false) {
+                return false;
+            }
         }
         return $auth;
     }
@@ -231,5 +245,19 @@ class Core {
      */
     public function getControllerTypes() {
         return array('component', 'page', 'action');
+    }
+
+    /**
+     * Returns a string that contains the course code as well as the course name only if the course name is not
+     * blank, placing a colon between the two (if both are displayed)
+     *
+     * @return string
+     */
+    public function getFullCourseName() {
+        $course_name = strtoupper($this->getConfig()->getCourse());
+        if ($this->getConfig()->getCourseName() !== "") {
+            $course_name .= ": ".htmlentities($this->getConfig()->getCourseName());
+        }
+        return $course_name;
     }
 }

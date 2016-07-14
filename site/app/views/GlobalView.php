@@ -52,8 +52,8 @@ HTML;
 HTML;
         }
 
-        if (file_exists($this->core->getConfig()->getHssCoursePath()."/override.css")) {
-            $override_css = "<link rel='stylesheet' type='text/css' href='{$this->core->getConfig()->getHssCoursePath()}/override.css' />";
+        if (file_exists($this->core->getConfig()->getCoursePath()."/override.css")) {
+            $override_css = "<link rel='stylesheet' type='text/css' href='{$this->core->getConfig()->getCoursePath()}/override.css' />";
         }
         else {
             $override_css = '';
@@ -113,9 +113,6 @@ HTML;
                 }
                 $return .= <<<HTML
     </ul>
-    <span style="float: right; margin-top: 5px; margin-right: 10px;">
-        Hello {$this->core->getUser()->getDetail('user_id')}
-    </span>
 </div>
 <div id="nav-clear"></div>
 
@@ -123,14 +120,32 @@ HTML;
             }
         }
 
-        $course_name = htmlentities($this->core->getConfig()->getCourseName());
         $return .= <<<HTML
 <div id="header">
     <div id="logo-text">
         <h1>Submitty</h1>
         <h2>Rensselaer Center for Open Source</h2>
     </div>
-    <h1 id="header-text">Homework Submissions for {$course_name}</h1>
+    <div id="header-text">
+        <h2>
+HTML;
+        if ($this->core->userLoaded()) {
+            $return .= <<<HTML
+            Hello {$this->core->getUser()->getDetail('user_firstname')} ({$this->core->getUser()->getDetail('user_id')})
+HTML;
+        }
+        else {
+            $return .= <<<HTML
+            Hello Guest
+HTML;
+        }
+        $return .= <<<HTML
+        </h2>
+        <h2>
+        <a href='{$this->core->getConfig()->getSiteUrl()}semester=f16'>F16</a> >
+        <a href="{$this->core->buildUrl()}">{$this->core->getFullCourseName()}</a>
+        </h2>
+    </div>
 </div>
 
 

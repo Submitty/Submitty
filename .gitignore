@@ -23,10 +23,9 @@ TAGradingServer/toolbox/configs/*
 !TAGradingServer/toolbox/configs/sample_course.php
 !TAGradingServer/toolbox/configs/course_template.php
 
-site/config/*
-!site/config/master_template.php
-!site/config/sample_course.php
-!site/config/course_template.php
+#site/config/*
+#!site/config/master_template.php
+#!site/config/course_template.php
 
 vendor/
 composer.lock

@@ -67,11 +67,12 @@ $course = basename($_REQUEST['course']);
 $core = new Core($semester, $course);
 date_default_timezone_set($core->getConfig()->getTimezone());
 Output::initializeOutput($core);
-Logger::setLogPath($core->getConfig()->getHssLogPath());
+Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->getLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
 
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
+ini_set('display_errors', 1);
 if($core->getConfig()->isDebug()) {
     error_reporting(E_ALL);
 } else {

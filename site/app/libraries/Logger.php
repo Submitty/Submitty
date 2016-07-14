@@ -88,6 +88,10 @@ class Logger {
      * @param $message: message to log to the file
      */
     private static function log($level=0, $message="") {
+        if (static::$log_path === null) {
+            return;
+        }
+        
         date_default_timezone_set("America/New_York");
 
         FileUtils::createDir(static::$log_path);

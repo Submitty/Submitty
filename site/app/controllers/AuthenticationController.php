@@ -82,6 +82,7 @@ class AuthenticationController implements IController {
                     break;
                 }
             }
+            $_SESSION['messages']['successes'][] = "Successfully logged in as ".htmlentities($_POST['user_id']);
             $this->core->buildUrl($redirect);
         }
         else {
