@@ -357,7 +357,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     }
 
     ?>
-<span id="grade" class="resbox draggable" style="padding:5px;" onmousedown="dragPanelStart(event); return false;" onmousemove="dragPanel(event);"  onmouseup="dragPanelEnd(event);">
+<span id="grade" class="resbox draggable" style="padding:5px;" onmousedown="dragPanelStart(event, 'grade'); return false;" onmousemove="dragPanel(event, 'grade');"  onmouseup="dragPanelEnd(event);">
     <i title="Show/Hide Submission Info (Press S)" <?php echo "class='icon-status".(($show_stats == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyS')"></i>
     <i title="Show/Hide Grading Panel (Press G)" <?php echo "class='icon-grading-panel".(($show_rubric == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyG')"></i>
     <i title="Show/Hide Auto Grading Results (Press A)" <?php echo "class='icon-auto-grading-results".(($show_left == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyA');"></i>
@@ -393,6 +393,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
 <?php } ?>
 <script type="text/javascript">
     var mousedown = false;
+    var dragging_panel = false;
 
     $("#rubric-autoscroll-checkbox").change(function() {
         if($("#rubric-autoscroll-checkbox").is(':checked')) {
@@ -510,6 +511,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         var right =  document.getElementById('right');
         var pane = document.getElementById('pane');
         var panemover = document.getElementById('panemover');
+        if(left == null || right == null) return;
         if(left.style.display != "none" && right.style.display != "none") {
             pane.style.display = "inline-block";
             panemover.style.display = "inline-block";
@@ -572,25 +574,22 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
 
     // ========================================================
     // Drag to move toolbar/grading/status panel around
-    function dragPanelStart(e) {
-        if(!hasClass(e.target, "draggable")){
-            return;
-        }
-        mousedown = true;
-        x = e.clientX;
-        y = e.clientY;
+    function dragPanelStart(e, id) {
+        if (e.target.type == "textarea" || e.target.type == "input")  return; // disable dragging when typing to textarea/input
+        dragging_panel = true;
+        mouse_x = e.clientX;
+        mouse_y = e.clientY;
+        drag_id = id;
     }
-    function dragPanel(e) {
-        if(!mousedown) return;
+    function dragPanel(e, id) {
+        if(!dragging_panel) return;
+        if(id != drag_id) return;
 
-        var element = document.getElementById( e.target.id ? e.target.id : e.target.parentNode.id );
-        if(!element){
-            return;
-        }
-        element.style.left = (element.offsetLeft - (x - e.clientX)) + 'px';
-        element.style.top = (element.offsetTop - (y - e.clientY)) + 'px';
-        x = e.clientX;
-        y = e.clientY;
+        var element = document.getElementById(id);
+        element.style.left = (element.offsetLeft - (mouse_x - e.clientX)) + 'px';
+        element.style.top = (element.offsetTop - (mouse_y - e.clientY)) + 'px';
+        mouse_x = e.clientX;
+        mouse_y = e.clientY;
         /*
         // TODO: Add check for dragging off sight or add a function to reset panel positions somewhere?
         if((grade.offsetRight - grade.offsetWidth) < 5) {
@@ -603,7 +602,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     }
 
     function dragPanelEnd(e) {
-        mousedown = false;
+        dragging_panel = false;
     }
 
     // checks if an element has a class using javascript, may or may not be useful

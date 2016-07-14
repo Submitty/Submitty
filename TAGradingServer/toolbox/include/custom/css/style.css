@@ -140,7 +140,7 @@ ul.dropdown-menu li#logout a:hover {
     width: 290px;
     background: #C3BEFF;
     opacity:0.5;
-    z-index: 100;
+    z-index: 201;
 }
 .draggable {
     cursor: move;
@@ -159,7 +159,7 @@ ul.dropdown-menu li#logout a:hover {
     /*right: 0;*/
     /*width: 30%;*/
     display:none;
-    z-index: 1;
+    z-index: 199;
 }
 #stats {
     position:absolute;
@@ -175,7 +175,7 @@ ul.dropdown-menu li#logout a:hover {
     /*right: 0;*/
     /*width: 30%;*/
     display:none;
-    z-index: 2;
+    z-index: 200;
 }
 /*************************************/
 .resbox {
