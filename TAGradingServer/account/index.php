@@ -373,7 +373,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
                 <div class="bar bar-warning" style="width: <?php echo ($position_backup / $position_total) * 95; ?>%;"><i class="icon-refresh icon-white" id="progress-icon"></i></div>
                 <div class="bar" style="width: 5%; background-image: none; background-color: #777;"><?php echo round(($position_completed / $position_total) * 100, 1); ?>%</div>
             </div>
-        <?php } elseif($position_other < $position_total) { ?>
+        <?php } else if($position_other < $position_total) { ?>
             <div class="progress" id="prog" style="border:#AAA solid 2px; ">
                 <div class="bar bar-info" style="width: <?php echo ($position_other / $position_total) * 94; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
                 <div class="bar" style="width: 1%; background-image: none; background-color: #777;"></div>
@@ -455,40 +455,39 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     };
 
     window.onkeydown = function(e) {
-      if (e.target.type == "textarea" || e.target.type == "input")  return; // disable keyboard event when typing to textarea/input
-      handleKeyPress(e.code);
+        if (e.target.type == "textarea" || e.target.type == "input")  return; // disable keyboard event when typing to textarea/input
+        handleKeyPress(e.code);
     };
 
     function handleKeyPress(key) {
-      console.log("pressed " + key);
-      switch (key) {
-        case "KeyG":
-          $('#grade .icon-grading-panel').toggleClass('icon-selected');
-          togglePanel("rubric");
-          break;
-        case "KeyS":
-          $('#grade .icon-status').toggleClass('icon-selected');
-          togglePanel("stats");
-          break;
-        case "KeyF":
-          $('#grade .icon-files').toggleClass('icon-selected');
-          togglePanel("right");
-          updateDisplay();
-          break;
-        case "KeyA":
-          $('#grade .icon-auto-grading-results').toggleClass('icon-selected');
-          togglePanel("left");
-          updateDisplay();
-          break;
-        case "KeyR": // Reset all cookies to default
-          setCookie("show_stats", 0, 180*24*60*60);
-          setCookie("show_rubric", 0, 180*24*60*60);
-          setCookie("show_left", 1, 180*24*60*60);
-          setCookie("show_right", 1, 180*24*60*60);
-            break;
-        default:
-          break;
-      }
+        switch (key) {
+            case "KeyG":
+                $('#grade .icon-grading-panel').toggleClass('icon-selected');
+                togglePanel("rubric");
+                break;
+            case "KeyS":
+                $('#grade .icon-status').toggleClass('icon-selected');
+                togglePanel("stats");
+                break;
+            case "KeyF":
+                $('#grade .icon-files').toggleClass('icon-selected');
+                togglePanel("right");
+                updateDisplay();
+                break;
+            case "KeyA":
+                $('#grade .icon-auto-grading-results').toggleClass('icon-selected');
+                togglePanel("left");
+                updateDisplay();
+                break;
+            case "KeyR": // Reset all cookies to default // TODO: Checkbox that lets user choose to save cookie or not?
+                setCookie("show_stats", 0, 180*24*60*60);
+                setCookie("show_rubric", 0, 180*24*60*60);
+                setCookie("show_left", 1, 180*24*60*60);
+                setCookie("show_right", 1, 180*24*60*60);
+                break;
+            default:
+                break;
+        }
     }
 
     function setCookie(name, value, seconds) {
@@ -499,7 +498,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         document.cookie = name + "=" + value + expires + path;
     }
 
-    // show or hide the panels
+    // show or hide the panels and remember user preference
     function togglePanel(id) {
         document.getElementById(id).style.display = document.getElementById(id).style.display == "none" ? "inline-block" : "none";
         setCookie("show_"+id, (document.getElementById(id).style.display == "none" ? 0 : 1), 180*24*60*60);
@@ -512,7 +511,6 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         var pane = document.getElementById('pane');
         var panemover = document.getElementById('panemover');
         if(left.style.display != "none" && right.style.display != "none") {
-            console.log("show both");
             pane.style.display = "inline-block";
             panemover.style.display = "inline-block";
             left.style.width = (width * split) + 'px';
@@ -523,11 +521,9 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
             pane.style.display = "none";
             panemover.style.display = "none";
             if(left.style.display != "none") {
-                console.log("show left");
                 left.style.width = window.innerWidth + 'px';
             }
             else {
-                console.log("show right");
                 right.style.width = window.innerWidth + 'px';
             }
         }
@@ -536,7 +532,6 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     // ========================================================
     // Drag to resize auto-grading results and files
     function dragStart(e, left, right) {
-        console.log("drag panemover start");
         document.getElementById('panemover').style.width = '100%';
         document.getElementById('panemover').style.left = '0px';
 
@@ -547,24 +542,17 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     }
 
     function dragRelease() {
-        console.log("drag panemover end");
         document.getElementById('panemover').style.width = '10px';
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
         split = parseFloat(document.getElementById('left').style.width) / (parseFloat(document.getElementById('left').style.width) + parseFloat(document.getElementById('right').style.width));
 
-        var date = new Date();
-        date.setTime(date.getTime()+(180*24*60*60*1000));
-        var expires = "; expires="+date.toGMTString();
-
         var splitVar = parseFloat(100 * (parseFloat(document.getElementById('left').style.width) / (parseFloat(document.getElementById('left').style.width) + parseFloat(document.getElementById('right').style.width)))).toFixed(2);
-
-        document.cookie ='split='+splitVar+'; expires='+expires+'; path=/';
+        setCookie("split", splitVar, 180*24*60*60);
 
         mousedown = false;
     }
 
     function drag(e, left, right) {
-        console.log("dragging panemover");
         if (!mousedown) {
             return;
         }
@@ -586,10 +574,8 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     // Drag to move toolbar/grading/status panel around
     function dragPanelStart(e) {
         if(!hasClass(e.target, "draggable")){
-            console.log("not draggable");
             return;
         }
-        console.log("drag start");
         mousedown = true;
         x = e.clientX;
         y = e.clientY;
@@ -599,17 +585,14 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
 
         var element = document.getElementById( e.target.id ? e.target.id : e.target.parentNode.id );
         if(!element){
-            console.log("null");
             return;
         }
-        console.log("dragging");
-        console.log(element.id);
         element.style.left = (element.offsetLeft - (x - e.clientX)) + 'px';
         element.style.top = (element.offsetTop - (y - e.clientY)) + 'px';
         x = e.clientX;
         y = e.clientY;
         /*
-        // todo: add check for dragging off sight or add a reposition function
+        // TODO: Add check for dragging off sight or add a function to reset panel positions somewhere?
         if((grade.offsetRight - grade.offsetWidth) < 5) {
             grade.style.right = '5px';
         }
@@ -618,27 +601,17 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         }
         */
     }
-// change class javascript, may or may not be useful
-function hasClass(element, cls) {
-    return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
-}
 
-function removeClass(element, cls) {
-    element.className = element.className.replace( /(?:^|\s)MyClass(?!\S)/g , '' );
-}
-
-function addClass(element, cls) {
-    element.className += " " + cls;
-}
-
-function toggleClass(element, cls) {
-    if(hasClass(element, cls)) removeClass(element, cls);
-    else addClass(element, cls);
-}
     function dragPanelEnd(e) {
-        console.log("drag end");
         mousedown = false;
     }
+
+    // checks if an element has a class using javascript, may or may not be useful
+    function hasClass(element, cls) {
+        return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
+    }
+
+    // Set grading panel and status panel to be resizable
     $('#stats').resizable({
         handles: 'n, e, s, w',
         minWidth: 50,
@@ -655,19 +628,18 @@ function toggleClass(element, cls) {
         maxHeight: 1000
     });
 
-// Place the panel selected on top of other panels (if overlaping).
-function changeStackingOrder(e) {
-    if(e.currentTarget.style.zIndex == "") return;
-    console.log("in changeStackingOrder, object calling: " + e.currentTarget.id);
-    var tmpElement = document.getElementById( e.currentTarget.id == "stats" ? "rubric" : "stats" );
-    if( tmpElement.style.display != "none" && e.currentTarget.style.zIndex < tmpElement.style.zIndex) {
-        var tmp = e.currentTarget.style.zIndex;
-        e.currentTarget.style.zIndex = tmpElement.style.zIndex;
-        tmpElement.style.zIndex = tmp;
-        console.log("changed stacking order");
+    // Place the panel selected on top of other panels (if overlaping).
+    function changeStackingOrder(e) {
+        if(e.currentTarget.style.zIndex == "") return;
+        var tmpElement = document.getElementById( e.currentTarget.id == "stats" ? "rubric" : "stats" );
+        if( tmpElement.style.display != "none" && e.currentTarget.style.zIndex < tmpElement.style.zIndex) {
+            var tmp = e.currentTarget.style.zIndex;
+            e.currentTarget.style.zIndex = tmpElement.style.zIndex;
+            tmpElement.style.zIndex = tmp;
+        }
+        e.stopPropagation();
     }
-    e.stopPropagation();
-}
+
     eraseCookie("reset");
 
 </script>
