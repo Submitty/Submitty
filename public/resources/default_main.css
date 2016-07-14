@@ -7,7 +7,7 @@ body{
 }
 
 .title-box{
-    background-color: #EDF6F6; 
+    background-color: #EDF6F6;
     padding:2%;
     margin: 0;
     box-shadow: 0px 2px 15px -5px #888888;
@@ -40,4 +40,45 @@ body{
     box-shadow: 0px 2px 15px -5px #888888;
 }
 
+.site-nav {
+    text-align: left;
+    line-height: 46px;
+    border-top: 5px solid #424242;
+    border-bottom: 1px solid #e8e8e8;
+    min-height: 46px;
+    position: relative;
+    background: white;
+}
+.site-nav span {
+    /* user name */
+    text-align: right;
+    float: right;
+    margin-right: 10px;
+}
+.site-nav .page-link {
+    color: #111;
+    line-height: 1.5;
+    margin-left: 10px;
+}
+.site-nav .page-link:not(:last-child) {
+    margin-right: 10px;
+}
 
+.btn-secondary {
+  float: right;
+  padding: 2px;
+}
+
+select {
+    margin: 0px 10px;
+    border: 1px solid #111;
+    background: transparent;
+    padding: 5px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    height: 34px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: #fff;
+}
