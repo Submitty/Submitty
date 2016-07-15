@@ -18,11 +18,8 @@ if (!file_exists($filename)) {
 }
 
 $content_type = getContentType($filename);
-if( substr($content_type, 0, 4) !== "text"){
-    header("Content-type: ".$content_type);
-    header('Content-Disposition: inline; filename="' .  basename($filename) . '"');
-    echo file_get_contents($filename);
-} else {
+if(substr($content_type, 0, 4) === "text")
+{
 $output = <<<HTML
 <!doctype html>
 <html>
@@ -48,13 +45,15 @@ HTML;
     $output .= <<<HTML
     </textarea>
 HTML;
-
 $output .= sourceSettingsJS($filename, 0);
-
 $output .= <<<HTML
 </body>
 </html>
 HTML;
 print $output;
 }
-
+else if (substr($content_type, 0, 5) === "image" || $content_type === "application/pdf") {
+    header("Content-type: ".$content_type);
+    header('Content-Disposition: inline; filename="' .  basename($filename) . '"');
+    echo file_get_contents($filename);
+}
