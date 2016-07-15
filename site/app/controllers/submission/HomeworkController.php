@@ -4,6 +4,7 @@ namespace app\controllers\submission;
 
 use app\controllers\IController;
 use app\libraries\Core;
+use app\libraries\Utils;
 use app\libraries\Output;
 
 class HomeworkController implements IController {
@@ -42,12 +43,15 @@ class HomeworkController implements IController {
                 reset($this->assignments);
             }
 
-            Output::render(array('submission', 'Homework'), 'assignmentSelect', $this->assignments);
+            $details = Utils::loadJsonFile($this->core->getConfig()->getCoursePath()."/config/".$assignment."_assignment_config.json");
+            $this->assignments[$assignment] = array_merge($this->assignments[$assignment], $details);
 
-            Output::render(array('submission', 'Homework'), 'showAssignment', $this->assignments[$assignment]);
+            $select = Output::render_template(array('submission', 'Homework'), 'assignmentSelect', $this->assignments, $this->assignments[$assignment]['assignment_id']);
+
+            Output::render_output(array('submission', 'Homework'), 'showAssignment', $this->assignments[$assignment], $select);
         }
         else {
-            Output::render(array('submission', 'Homework'), 'noAssignments');
+            Output::render_output(array('submission', 'Homework'), 'noAssignments');
         }
     }
 }

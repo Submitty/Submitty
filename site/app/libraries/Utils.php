@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+use app\exceptions\IOException;
 
 /**
  * Class Utils
@@ -73,5 +74,23 @@ class Utils {
      */
     public static function generateRandomString() {
         return bin2hex(openssl_random_pseudo_bytes(16));
+    }
+
+    /**
+     * Given a filename, load the file and then parse it as a json file, creating an associative array if
+     * possible. Right now, we will strip any trailing commas in the JSON specification, but any other sort of
+     * malformation will cause an IOException to be thrown for the file outputting the error for the json file.
+     *
+     * @param $filename
+     *
+     * @return string
+     * @throws IOException
+     */
+    public static function loadJsonFile($filename) {
+        $json = json_decode(self::removeTrailingCommas(file_get_contents($filename)), true);
+        if ($json === null) {
+            throw new IOException("Invalid JSON file '{$filename}'. Error: ".json_last_error_msg());
+        }
+        return $json;
     }
 }

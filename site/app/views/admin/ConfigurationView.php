@@ -16,7 +16,7 @@ class ConfigurationView {
         $zero_checked = ($fields['zero_rubric_grades'] === true) ? 'checked' : '';
 
         return <<<HTML
-<div id="content">
+<div class="content">
     <h2>Manage Class Configuration</h2>
     <form id="configForm" method="post" action="{$this->core->buildUrl(array('component' => 'admin', 
                                                                              'page'      => 'configuration', 

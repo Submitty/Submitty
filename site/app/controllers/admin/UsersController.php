@@ -40,7 +40,7 @@ class UsersController implements IController {
 
     public function listStudents() {
         $students = $this->core->getQueries()->getAllStudents();
-        Output::render(array('admin', 'Users'), 'listStudents', $students);
+        Output::render_output(array('admin', 'Users'), 'listStudents', $students);
     }
 
     public function userForm($edit_user = false, $student = true) {
@@ -87,6 +87,6 @@ class UsersController implements IController {
             );
         }
 
-        Output::render(array('admin', 'Users'), 'userForm', $user, $groups, $sections);
+        Output::render_output(array('admin', 'Users'), 'userForm', $user, $groups, $sections);
     }
 }

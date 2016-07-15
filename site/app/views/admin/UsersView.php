@@ -14,7 +14,7 @@ class UsersView {
     public function listStudents($students) {
         $section = null;
         $return = <<<HTML
-<div id="content">
+<div class="content">
     <h2>View students</h2>
     <div class="panel">
         <table>

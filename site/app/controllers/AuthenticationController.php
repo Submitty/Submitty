@@ -52,12 +52,12 @@ class AuthenticationController implements IController {
 
     public function logout() {
         setcookie('session_id', "", time()-3600);
-        
+
         $this->core->redirect($this->core->buildUrl());
     }
 
     public function loginForm() {
-        Output::render('Authentication', 'loginForm');
+        Output::render_output('Authentication', 'loginForm');
     }
 
     public function checkLogin() {

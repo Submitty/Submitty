@@ -16,9 +16,13 @@ class SubmissionController implements IController {
     }
 
     public function run() {
-        $assignments = $this->core->getQueries()->getAllGradeables();
-
-        Output::render(array('submission', 'Homework'), 'startContent');
+        $class_json = json_decode(file_get_contents($this->core->getConfig()->getCoursePath()."/config/class.json"), true);
+        $assignments = array();
+        foreach ($class_json['assignments'] as $assignment) {
+            if ((isset($assignment['released']) && $assignment['released'] == true) || ($this->core->getUser()->accessAdmin())) {
+                $assignments[$assignment['assignment_id']] = $assignment;
+            }
+        }
 
         $controller = null;
         switch ($_REQUEST['page']) {
@@ -29,6 +33,5 @@ class SubmissionController implements IController {
         }
 
         $controller->run();
-        Output::render(array('submission', 'Homework'), 'endContent');
     }
 }

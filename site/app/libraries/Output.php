@@ -28,20 +28,34 @@ class Output {
     }
 
     /**
+     * Similar to render_template, this loads a View, but instead of returning it
+     * to the user for use, it just appends it directly to the output buffer. This is
+     * the general method that should be called within the application and only really
+     * using render_template when you plan to then use that rendered View in
+     * rendering another View
+     */
+    public static function render_output() {
+        $func = call_user_func_array('self::render_template', func_get_args());
+        static::$output_buffer .= $func;
+    }
+
+    /**
      * This function loads a ViewClass (if not done so already) and then calls the
-     * requested ViewFunction passing it the rest of the vargs (2...) and adds it to
-     * the current Output buffer. The first argument is a string if it's a top level
+     * requested ViewFunction passing it the rest of the vargs (2...) returning the parsed
+     * View to the caller. The first argument is a string if it's a top level
      * view or an array of strings if its a view in a subdirectory/sub-namespace.
      * Additionally, we only pass in just the non "View" part of the class name that
      * we are looking for.
      *
-     * Output::render("Error", "errorPage", $message)
+     * Output::render_template("Error", "errorPage", $message)
      * Would load views\ErrorView->errorPage($message)
      *
-     * Output::render(array("submission", "Global"), "header")
+     * Output::render_template(array("submission", "Global"), "header")
      * Would load views\submission\GlobalView->header()
+     *
+     * @return string
      */
-    public static function render() {
+    public static function render_template() {
         if (func_num_args() < 2) {
             throw new \InvalidArgumentException("Render requires at least two parameters (View, Function)");
         }
@@ -57,7 +71,7 @@ class Output {
         if ($func === false) {
             throw new OutputException("Cannot find function '{$args[1]}' in requested view '{$args[0]}'");
         }
-        static::$output_buffer .= $func;
+        return $func;
     }
 
     /**

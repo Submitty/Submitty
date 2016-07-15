@@ -58,7 +58,7 @@ class ConfigurationController implements IController {
             unset($_SESSION['request']);
         }
 
-        Output::render(array('admin', 'Configuration'), 'viewConfig', $fields);
+        Output::render_output(array('admin', 'Configuration'), 'viewConfig', $fields);
     }
 
     public function updateConfiguration() {

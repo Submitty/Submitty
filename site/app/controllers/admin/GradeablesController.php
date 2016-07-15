@@ -36,7 +36,7 @@ class GradeablesController implements IController {
     public function listGradeables() {
         //$assignments = $this->core->getQueries()->getAllGradeables();
         $assignments = array();
-        Output::render(array('admin', 'Gradeables'), 'gradeablesTable', $assignments);
+        Output::render_output(array('admin', 'Gradeables'), 'gradeablesTable', $assignments);
     }
 
     public function gradeablesForm($edit_assignment=false) {
@@ -57,6 +57,6 @@ class GradeablesController implements IController {
             }
         }
 
-        Output::render(array('admin', 'Gradeables'), 'gradeableForm');
+        Output::render_output(array('admin', 'Gradeables'), 'gradeableForm');
     }
 }

@@ -13,7 +13,7 @@ class GradeablesView {
 
     public function gradeablesTable($gradeables) {
         $return = <<<HTML
-<div id="content">
+<div class="content">
     <h2>Manage Gradeables</h2>
     <div class="panel">
         <table>
@@ -57,7 +57,7 @@ HTML;
 
     public function gradeableForm() {
         return <<<HTML
-<div id="content">
+<div class="content">
     <h2>New Gradeable</h2>
     <div class="panel">
         <form method="post">

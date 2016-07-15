@@ -156,6 +156,12 @@ textarea {
     margin-left: 20px;
 }
 
+#header-text a,
+#header-text a:link,
+#header-text a:visited {
+    color: #000;
+}
+
 #logo-text {
     float: right;
     margin-top: 10px;
@@ -183,12 +189,16 @@ textarea {
     position: relative;
 }
 
-#content {
+.content {
     box-shadow: 0 2px 15px -5px #888888;
     background-color: #E9EFEF;
     border-radius: 3px;
-    margin: 2%;
     padding: 2%;
+    margin: 0 2% 15px;
+}
+
+#footer {
+    margin-top: 30px;
 }
 
 #push, #footer {
@@ -318,11 +328,19 @@ textarea {
 
 select {
     margin: 0 10px;
-    padding: 5px;
+    padding: 5px 15px;
     font-size: 16px;
     border: 1px solid #ccc;
     height: 34px;
     -webkit-appearance: none;
     -moz-appearance: none;
     background: #fff;
+}
+
+#upload-boxes .label {
+    font-family: 'PT Sans', sans-serif;
+    font-weight: 700;
+    margin-top: .5em;
+    margin-right: 0;
+    margin-left: 0;
 }

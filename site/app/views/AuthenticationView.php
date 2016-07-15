@@ -13,7 +13,7 @@ class AuthenticationView {
 
     public function loginForm() {
         $return = <<<HTML
-<div id="content">
+<div class="content">
     <h2>Login for {$this->core->getFullCourseName()}</h2>
     <div class="sub">
         <form action="{$this->core->getConfig()->getSiteUrl()}" method="post" id="login">

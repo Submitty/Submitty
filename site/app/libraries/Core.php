@@ -137,7 +137,7 @@ class Core {
     /**
      * Returns the user that the client is logged in as. Will return null if there is no user
      * to be logged in as.
-     * 
+     *
      * @return User
      */
     public function getUser() {
