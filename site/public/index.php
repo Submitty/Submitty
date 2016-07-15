@@ -29,8 +29,8 @@ ini_set('display_errors', 1);
  * such that we can easily and quickly load classes on the fly as needed. All
  * classes should follow the PSR-4 namespace naming conventions
  */
-require_once(__DIR__ . "/app/libraries/AutoLoader.php");
-AutoLoader::registerDirectory(__DIR__."/app", true, "app");
+require_once(__DIR__ . "/../app/libraries/AutoLoader.php");
+AutoLoader::registerDirectory(__DIR__ . "/../app", true, "app");
 
 /*
  * Register a custom expection handler that will get run anytmie our application
@@ -106,7 +106,7 @@ if (!$logged_in) {
     }
 }
 
-Output::render("Global", 'header');
+Output::render_output("Global", 'header');
 switch($_REQUEST['component']) {
     case 'admin':
         $control = new app\controllers\AdminController($core);
@@ -127,5 +127,5 @@ switch($_REQUEST['component']) {
         break;
 }
 
-Output::render("Global", 'footer', (microtime(true) - $start));
+Output::render_output("Global", 'footer', (microtime(true) - $start));
 echo(Output::getOutput());

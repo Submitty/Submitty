@@ -63,12 +63,12 @@ HTML;
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{$this->core->getConfig()->getCourseName()} Submissions</title>
+    <title>{$this->core->getFullCourseName()}</title>
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" />
-    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}public/css/server.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/server.css" />
     {$override_css}
-    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}public/js/jquery.min.js"></script>
-    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}public/js/server.js"></script>
+    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.min.js"></script>
+    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/server.js"></script>
 </head>
 <body>
 {$messages}
