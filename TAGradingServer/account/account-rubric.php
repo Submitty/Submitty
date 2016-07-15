@@ -141,7 +141,6 @@ if ($calculate_diff) {
 
     function autoResize(id) {
         var newheight;
-
         if(document.getElementById) {
             newheight=document.getElementById(id).contentWindow.document.body.scrollHeight;
         }
@@ -195,10 +194,13 @@ HTML;
 }
 
 $code_number = 0;
-
+$display_stats = ($show_stats == 0) ? "none" : "inline-block";
+$display_rubric = ($show_rubric == 0) ? "none" : "inline-block";
+$display_left = ($show_left == 0) ? "none" : "inline-block";
+$display_right = ($show_right == 0) ? "none" : "inline-block";
 $output .= <<<HTML
 
-<span id="left" class="resbox">
+<span id="left" class="resbox" style="display: {$display_left};">
     <div id="content">
 HTML;
 
@@ -266,6 +268,7 @@ for($part = 1; $part <= $rubric->rubric_parts; $part++) {
             <div id="inner-container-spacer"></div>
             {$show_part}
             <div id="inner-container-spacer"></div>
+
             <div class="tabbable">
                 <ul id="myTab" class="nav nav-tabs">
                     <li style="margin-right:2px; height:34px; width:20px; text-align:center; line-height:16px; padding-top:3px; -webkit-border-radius: 4px 4px 0 0; -moz-border-radius: 4px 4px 0 0; border-radius: 4px 4px 0 0; background-color: #DA4F49;">
@@ -342,7 +345,7 @@ HTML;
 
                     <div class="tab-pane {$active_text}" id="output-{$part}-{$i}">
                         <div style="width:95%; margin: auto auto auto auto; overflow-y:auto; overflow-x:hidden; padding-top:20px;">
-                            <iframe src="{$url}" id='iframe-{$part}-{$i}' width='750px' style='border: 0' onLoad="autoResize('iframe-{$part}-{$i}'); load_tab_icon('tab-{$part}-{$i}', 'iframe-{$part}-{$i}', {$testcase['points_awarded']}, {$rubric->config_details[$part]['testcases'][$k]['points']}); ">
+                            <iframe src="{$url}" id='iframe-{$part}-{$i}' width='750px' style='border: 0' onload="autoResize('iframe-{$part}-{$i}'); load_tab_icon('tab-{$part}-{$i}', 'iframe-{$part}-{$i}', {$testcase['points_awarded']}, {$rubric->config_details[$part]['testcases'][$k]['points']}); ">
                             </iframe>
                             <br />
                             Logfile
@@ -371,11 +374,12 @@ HTML;
             <div style='margin-top: 20px' class="tabbable">
 HTML;
     $j = 0;
-
+    $output .= "\n"."Old file viewer here.";
+/*
     $output .= "\n";
 
     display_files($rubric->rubric_files[$part], $output, $part);
-
+*/
     $output .= <<<HTML
         </div>
     </div>
@@ -384,23 +388,34 @@ HTML;
 
     $active = false;
 }
-$output .= <<<HTML
+
+    $output .= <<<HTML
     </div>
-</span>
+</span><!-- puts no space between spans
 
-<span id="pane"></span>
+--><span id="pane"></span><!--
+--><span id="panemover" onmousedown="dragStart(event, 'left', 'right'); return false;" onmousemove="drag(event, 'left', 'right');" onmouseout="dragRelease();" onmouseup="dragRelease();"></span><!--
 
-<span id="panemover" onmousedown="dragStart(event, 'left', 'right'); return false;" onmousemove="drag(event, 'left', 'right');" onmouseout="dragRelease();" onmouseup="dragRelease();"></span>
-
-<span id="right" class="resbox">
-    <div id="rubric" style="overflow-y:scroll;">
-        <div id="inner-container">
-            <div id="rubric-title">
-                <div class="span2" style="float:left; text-align: left;"><b>{$rubric->rubric_details['rubric_name']}</b></div>
-                <div class="span2" style="float:right; text-align: right; margin-top: -20px;"><b>{$rubric->student['student_last_name']}, {$rubric->student['student_first_name']}<br/>RCS: {$rubric->student['student_rcs']}</b></div>
-            </div>
+--><span id="right" class="resbox" style="display: {$display_right}; overflow-y:auto;">
+<div id="inner-container-spacer"></div><div id="inner-container" >
 HTML;
+    $output .= "\n";
+    display_files($rubric->rubric_files[1], $output, 1);
 
+    $output .= <<<HTML
+</div>
+</span><!---->
+
+<span id="stats" class="resbox" style="display: {$display_stats}; z-index: 200;" onmousedown="changeStackingOrder(event); dragPanelStart(event, 'stats'); return false;" onmousemove="dragPanel(event, 'stats');"  onmouseup="dragPanelEnd(event);">
+    <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event, 'stats'); return false;" onmousemove="dragPanel(event, 'stats');"  onmouseup="dragPanelEnd(event);">
+    <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyS')" ></span>
+    </div>
+    <div id="inner-container" style="margin:5px;">
+        <div id="rubric-title">
+            <div class="span2" style="float:left; text-align: left;"><b>{$rubric->rubric_details['rubric_name']}</b></div>
+            <div class="span2" style="float:right; text-align: right; margin-top: -20px;"><b>{$rubric->student['student_last_name']}, {$rubric->student['student_first_name']}<br/>RCS: {$rubric->student['student_rcs']}</b></div>
+        </div>
+HTML;
 $submitted = ($rubric->submitted) ? "1" : "0";
 $individual = intval(isset($_GET["individual"]));
 if (isset($_COOKIE['auto'])) {
@@ -472,7 +487,20 @@ HTML;
 $print_status = ($rubric->status == 1) ? "Good" : "Bad";
 $output .= <<<HTML
                 <b>Status:</b> <span style="color: {$color[0]};">{$part_status[0]}</span><br />
+    </div>
+</span>
+
+<span id="rubric" class="resbox" style="display: {$display_rubric}; z-index: 199; overflow-y=hidden;" onmousedown="changeStackingOrder(event); dragPanelStart(event, 'rubric');" onmousemove="dragPanel(event, 'rubric');" onmouseup="dragPanelEnd(event);">
+    <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;"  >
+        <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyG')" ></span>
+    </div>
+    <div class="inner-container" style="overflow-y:auto; margin:1px; height:100%">
+        <div id="inner-container">
+
 HTML;
+
+
+//============================================================
 if ($rubric->rubric_details['rubric_parts_sep']) {
     for ($i = 1; $i <= $rubric->rubric_parts; $i++) {
         $output .= <<<HTML
@@ -482,7 +510,7 @@ HTML;
 }
 
 $output .= <<<HTML
-                <br/><br/>
+
                 <table class="table table-bordered table-striped" id="rubric-table">
                     <thead>
 HTML;
@@ -650,23 +678,24 @@ $output .= <<<HTML
                 </table>
                 <div style="width:100%;"><b>General Comment:</b></div>
                 <textarea name="comment-general" rows="5" style="width:98%; padding:5px; resize:none;" placeholder="Overall message for student about the homework...">{$rubric->rubric_details['grade_comment']}</textarea>
-                <div style="width:100%; height:40px;"></div>
 HTML;
 if (isset($rubric->rubric_details['user_email'])) {
-    $output .= "Graded By: {$rubric->rubric_details['user_email']}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br /><br />";
+    $output .= <<<HTML
+    <div style="width:100%; height:40px;">
+        Graded By: {$rubric->rubric_details['user_email']}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br /><br />
+    </div>
+HTML;
 }
 
 if (!($now < $homeworkDate)) {
     if((!isset($_GET["individual"])) || (isset($_GET["individual"]) && !$student_individual_graded)) {
         $output .= <<<HTML
         <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade"/>
-        <div id="inner-container-spacer" style="height:75px;"></div>
 HTML;
     } else {
         $output .= <<<HTML
         <input class="btn btn-large btn-warning" type="submit" value="Submit Homework Re-Grade" onclick="createCookie('backup',1,1000);"/>
         <div style="width:100%; text-align:right; color:#777;">{$rubric->rubric_details['grade_finish_timestamp']}</div>
-        <div id="inner-container-spacer" style="height:55px;"></div>
 HTML;
     }
 }
@@ -674,7 +703,6 @@ else {
     $output .= <<<HTML
         <input class="btn btn-large btn-primary" type="button" value="Cannot Submit Homework Grade" />
         <div style="width:100%; text-align:right; color:#777;">This homework has not been opened for grading.</div>
-        <div id="inner-container-spacer" style="height:55px;"></div>
 HTML;
 }
 
