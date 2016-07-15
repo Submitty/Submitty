@@ -73,6 +73,61 @@ HTML;
     </div>
     <button type="button" id="submit" class="btn btn-primary">Submit</button>
     <button type="button" id="startnew" class="btn btn-primary">Start New</button>
+    <!--
+    <script type="text/javascript">
+        // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
+        var num_parts = {$assignment['num_parts']};
+        createArray(num_parts);
+        var assignment_version = {assignment_version};
+        var active_version = {active_version};
+        var highest_version = {highest_version};
+        for(var i = 1; i <= num_parts; i++ ){
+            var dropzone = document.getElementById("upload" + i);
+            dropzone.addEventListener("click", clicked_on_box, false);
+            dropzone.addEventListener("dragenter", draghandle, false);
+            dropzone.addEventListener("dragover", draghandle, false);
+            dropzone.addEventListener("dragleave", draghandle, false);
+            dropzone.addEventListener("drop", drop, false);
+            /*
+            // Uncomment if want buttons for emptying single bucket
+            $("#delete" + i).click(function(e){
+            //document.getElementById("delete").addEventListener("click", function(e){
+              deleteFiles(get_part_number(e));
+              e.stopPropagation();
+            })
+            */
+        }
+        
+        $("#startnew").click(function(e){ // Clear all the selected files in the buckets
+            for(var i=1; i<= num_parts; i++){
+              deleteFiles(i);
+            }
+            e.stopPropagation();
+        });
+        $("#submit").click(function(e){ // Submit button
+            handle_submission("?page=upload&semester={semester}&course={course}&assignment_id={assignment_id}", '{$this->core->getCsrfToken()}', false);
+            e.stopPropagation();
+        });
+        
+        // GET FILES OF THE HIGHEST VERSION
+        if(assignment_version == highest_version && highest_version > 0) {
+            $("#getprev").click(function(e){
+                $("#startnew").click();
+HTML;
+            for($i = 1; $i <= $assignment['num_parts']; $i++) {
+                for ($j = 0; $j < count($previous_names[$i]); $j++) {
+                    $return .= <<<HTML
+                addLabel('{$previous_names[$i][$j]}', '{$previous_sizes[$i][$j]}', {$i}, true);
+                readPrevious('{$previous_names[$i][$j]}', {$i});
+HTML;
+                }
+            }
+            $return .= <<<HTML
+                e.stopPropagation();
+            });
+        }
+    </script>
+    -->
 </div>
 <div class="content">
     <span style="font-style: italic">No submissions for this assignment.</span>
@@ -80,6 +135,5 @@ HTML;
 HTML;
 
         return $return;
-
     }
 }

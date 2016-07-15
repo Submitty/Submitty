@@ -122,7 +122,7 @@ switch($_REQUEST['component']) {
         break;
     case 'submission':
     default:
-        $control = new app\controllers\SubmissionController($core);
+        $control = new app\controllers\StudentController($core);
         $control->run();
         break;
 }

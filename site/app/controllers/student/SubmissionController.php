@@ -1,13 +1,13 @@
 <?php
 
-namespace app\controllers\submission;
+namespace app\controllers\student;
 
 use app\controllers\IController;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\libraries\Output;
 
-class HomeworkController implements IController {
+class SubmissionController implements IController {
     private $assignments = array();
 
     /**
@@ -47,6 +47,13 @@ class HomeworkController implements IController {
             $this->assignments[$assignment] = array_merge($this->assignments[$assignment], $details);
 
             $select = Output::render_template(array('submission', 'Homework'), 'assignmentSelect', $this->assignments, $this->assignments[$assignment]['assignment_id']);
+
+            $previous_names = array();
+            $previous_sizes = array();
+            for ($i = 0; $i < $this->assignments[$assignment]['num_parts']; $i++) {
+                $previous_names[] = array();
+                $previous_sizes[] = array();
+            }
 
             Output::render_output(array('submission', 'Homework'), 'showAssignment', $this->assignments[$assignment], $select);
         }
