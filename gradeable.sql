@@ -133,3 +133,4 @@ CREATE TABLE grading_rotating(
  INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
     VALUES('student','Joe','Student','student@email.edu','4', '1');
     */
+

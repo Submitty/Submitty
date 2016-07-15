@@ -171,7 +171,7 @@ $output .= <<<HTML
             window.alert("[AJAX ERROR] Refresh page");
         });
     }
-    
+
     function batchImportJSON(){
          $.ajax('{$BASE_URL}/account/submit/admin-gradeable.php?course={$_GET['course']}&action=import', {
             type: "POST",
@@ -186,6 +186,7 @@ $output .= <<<HTML
             window.alert("[AJAX ERROR] Refresh page");
         });
     }
+
 </script>
 <div id="container-gradeables">
     <div class="modal-header">

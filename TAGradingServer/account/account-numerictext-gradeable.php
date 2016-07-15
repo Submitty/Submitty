@@ -316,6 +316,10 @@ echo <<<HTML
 			var grade = $(this).val();
 			var name = $(this).attr("id");
 			name = name.split("-");
+<<<<<<< HEAD
+=======
+			var nt_gradeable = name[1];
+>>>>>>> eaf9325598fd877de250905862e8d40d208ec077
 			var rcs = name[2];
 
             if ($(this).attr('elem') == 'text') {
@@ -345,7 +349,7 @@ echo <<<HTML
 			    extra += "&q"+i+"="+score;
                 total += score;
 			}
-            
+
             for (var j = questions[nt_gradeable]; j <questions[nt_gradeable]+text_fields[nt_gradeable]; ++j){
 			    var text = $("#cell-"+nt_gradeable+"-"+rcs+"-t"+j).val();
 			    extra += "&t"+j+"="+text;
