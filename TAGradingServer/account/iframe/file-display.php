@@ -45,9 +45,7 @@ HTML;
     $output .= <<<HTML
     </textarea>
 HTML;
-
 $output .= sourceSettingsJS($filename, 0);
-
 $output .= <<<HTML
 </body>
 </html>
