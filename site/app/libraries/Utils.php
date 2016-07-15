@@ -68,12 +68,15 @@ class Utils {
 
     /**
      * Generates a pseudo-random string that should be cryptographically secure for use
-     * as tokens and other things where uniqueness is of absolute importance
+     * as tokens and other things where uniqueness is of absolute importance. The generated
+     * string is twice as long as the given number of bytes as the parameter.
+     *
+     * @param int $bytes
      *
      * @return string
      */
-    public static function generateRandomString() {
-        return bin2hex(openssl_random_pseudo_bytes(16));
+    public static function generateRandomString($bytes = 16) {
+        return bin2hex(openssl_random_pseudo_bytes($bytes));
     }
 
     /**

@@ -50,7 +50,6 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
 
         $this->assertFileExists(__TEST_DIRECTORY__."/EHLogs/".$filename.".txt");
         $actual = file_get_contents(__TEST_DIRECTORY__."/EHLogs/".$filename.".txt");
-        print($actual);
         $this->assertEquals(1, preg_match('/[0-9]{2}\/[0-9]{2}\/[0-9]{4}\ [0-9]{2}\:[0-9]{2}\:[0-9]{2} \- FATAL ERROR\napp.+/', $actual));
         $this->assertEquals(1, preg_match('/Extra Details:\n\ttest: b\n\ttest2:\n\t\ta\n\t\tc/', $actual));
         ExceptionHandler::setLogExceptions(false);

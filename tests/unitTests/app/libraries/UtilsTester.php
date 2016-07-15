@@ -22,4 +22,16 @@ class UtilsTester extends \PHPUnit_Framework_TestCase {
         $expected = '[ "element": { "a", "b"}]';
         $this->assertEquals($expected, Utils::removeTrailingCommas($json));
     }
+
+    public function testGenerateRandomString() {
+        $first = Utils::generateRandomString();
+        $second = Utils::generateRandomString();
+        $this->assertNotEquals($first, $second);
+        $this->assertEquals(32, strlen($first));
+        $this->assertEquals(32, strlen($second));
+    }
+
+    public function testGenerateRandomString2() {
+        $this->assertEquals(16, strlen(Utils::generateRandomString(8)));
+    }
 }
