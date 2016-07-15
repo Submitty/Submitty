@@ -25,7 +25,10 @@ switch($action) {
     case 'delete':
         $id = $_GET['id'];
         $db->query("DELETE FROM gradeable WHERE g_id=?",array($id));
-        // find the form json and delete it
+        $json_config = __SUBMISSION_SERVER__ . '/config/form/form_'.$id.'.json';
+        if (is_file($json_config)){
+            unlink($json_config);
+        }
         print "success|".$id;
         break;
     default:
