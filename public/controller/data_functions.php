@@ -339,12 +339,6 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
             if ($res === TRUE) {
               $zip->extractTo($part_path[$n]);
               $zip->close();
-
-              $unlink_return = unlink ($homework_file[$n]["tmp_name"][$i]);
-              if (!$unlink_return) {
-                display_error("Failed to unlink(delete) uploaded zip file ".$homework_file[$n]["name"][$i]." from temporary storage.");
-                return;
-              }
             }
             else{   // copy single file to folder
               // --------------------------------------------------------------
@@ -369,12 +363,12 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
                   display_error("Failed to copy uploaded file ".$homework_file[$n]["name"][$i]." to current submission.");
                   return;
                 }
-                $unlink_return = unlink ($homework_file[$n]["tmp_name"][$i]);
-                if (!$unlink_return) {
-                  display_error("Failed to unlink(delete) uploaded file ".$homework_file[$n]["name"][$i]." from temporary storage.");
-                  return;
-                }
               }
+            }
+            $unlink_return = unlink ($homework_file[$n]["tmp_name"][$i]);
+            if (!$unlink_return) {
+               display_error("Failed to unlink(delete) uploaded zip file ".$homework_file[$n]["name"][$i]." from temporary storage.");
+               return;
             }
           }
         }
