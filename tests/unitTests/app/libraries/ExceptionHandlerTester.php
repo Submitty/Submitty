@@ -15,7 +15,7 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
             FileUtils::emptyDir(__TEST_DIRECTORY__."/EHLogs");
         }
         else {
-            FileUtils::recursiveCreateDir(__TEST_DIRECTORY__."/EHLogs");
+            FileUtils::createDir(__TEST_DIRECTORY__."/EHLogs", true);
         }
 
         Logger::setLogPath(__TEST_DIRECTORY__."/EHLogs/");

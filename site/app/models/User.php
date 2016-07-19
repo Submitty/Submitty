@@ -45,4 +45,8 @@ class User extends Model {
     public function isDeveloper() {
         return $this->details['user_group'] == 5;
     }
+
+    public function getUserId() {
+        return $this->details['user_id'];
+    }
 }

@@ -33,14 +33,14 @@ class UsersController implements IController {
                 $this->listStudents();
                 break;
             default:
-                Output::showError("Invalid page request for controller");
+                $this->core->getOutput()->showError("Invalid page request for controller");
                 break;
         }
     }
 
     public function listStudents() {
         $students = $this->core->getQueries()->getAllStudents();
-        Output::render_output(array('admin', 'Users'), 'listStudents', $students);
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students);
     }
 
     public function userForm($edit_user = false, $student = true) {
@@ -87,6 +87,6 @@ class UsersController implements IController {
             );
         }
 
-        Output::render_output(array('admin', 'Users'), 'userForm', $user, $groups, $sections);
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'userForm', $user, $groups, $sections);
     }
 }

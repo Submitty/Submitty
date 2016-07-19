@@ -21,7 +21,7 @@ class AdminController implements IController {
 
     public function run() {
         if (!$this->core->getUser()->accessAdmin()) {
-            Output::showError("This account cannot access admin pages");
+            $this->core->getOutput()->showError("This account cannot access admin pages");
         }
 
         $controller = null;
@@ -40,7 +40,7 @@ class AdminController implements IController {
                 $controller = new ConfigurationController($this->core);
                 break;
             default:
-                Output::showError("Invalid page request for controller ".get_class($this));
+                $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));
                 break;
         }
         $controller->run();

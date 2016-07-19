@@ -28,7 +28,7 @@ class GradeablesController implements IController {
                 $this->gradeablesForm(true);
                 break;
             default:
-                Output::showError("Invalid action for controller ".get_class($this));
+                $this->core->getOutput()->showError("Invalid action for controller ".get_class($this));
                 break;
         }
     }
@@ -36,7 +36,7 @@ class GradeablesController implements IController {
     public function listGradeables() {
         //$assignments = $this->core->getQueries()->getAllGradeables();
         $assignments = array();
-        Output::render_output(array('admin', 'Gradeables'), 'gradeablesTable', $assignments);
+        $this->core->getOutput()->renderOutput(array('admin', 'Gradeables'), 'gradeablesTable', $assignments);
     }
 
     public function gradeablesForm($edit_assignment=false) {
@@ -57,6 +57,6 @@ class GradeablesController implements IController {
             }
         }
 
-        Output::render_output(array('admin', 'Gradeables'), 'gradeableForm');
+        $this->core->getOutput()->renderOutput(array('admin', 'Gradeables'), 'gradeableForm');
     }
 }

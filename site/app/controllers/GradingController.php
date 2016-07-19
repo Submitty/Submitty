@@ -18,13 +18,13 @@ class GradingController implements IController{
 
     public function run() {
         if (!$this->core->getUser()->accessGrading()) {
-            Output::showError("This account is not authorized to view grading section");
+            $this->core->getOutput()->showError("This account is not authorized to view grading section");
         }
 
         $controller = null;
         switch ($_REQUEST['page']) {
             default:
-                Output::showError("Invalid page request for controller ".get_class($this));
+                $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));
                 break;
         }
         $controller->run();

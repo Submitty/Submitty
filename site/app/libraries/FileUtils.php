@@ -12,9 +12,11 @@ class FileUtils {
      * Recursively return all files in a directory and subdirectories, assuming the files
      * are part of the $allowed_file_extensions array (if it's non-empty).
      *
-     * @param       $dir
-     * @param array $allowed_file_extensions
-     * @param array $skip_files
+     * TODO: Add in flag for whether or not it should work recursively
+     *
+     * @param string $dir
+     * @param array  $allowed_file_extensions
+     * @param array  $skip_files
      * @return array
      */
     public static function getAllFiles($dir, $allowed_file_extensions=array(), $skip_files=array()) {
@@ -86,7 +88,7 @@ class FileUtils {
      * Recursively goes through a directory deleting everything in it
      * before deleting the folder itself
      *
-     * @param $dir
+     * @param string $dir
      */
     public static function recursiveRmdir($dir) {
         if (is_dir($dir)) {
@@ -109,7 +111,7 @@ class FileUtils {
     /**
      * Remove all files inside of a dir, but leave the directory
      *
-     * @param $dir
+     * @param string $dir
      */
     public static function emptyDir($dir) {
         if (is_dir($dir)) {
@@ -130,44 +132,98 @@ class FileUtils {
      * Create a directory if it doesn't already exist. If it's a file,
      * delete the file, and then try to create directory.
      *
-     * @param $dir
+     * @param string $dir
+     * @param bool   $recursive
      *
      * @return bool
      */
-    public static function createDir($dir) {
+    public static function createDir($dir, $recursive = false) {
         $return = true;
         if (!is_dir($dir)) {
             if (file_exists($dir)) {
                 unlink($dir);
             }
-            $return = @mkdir($dir);
+            $return = @mkdir($dir, 0777, $recursive);
         }
+        return $return;
+    }
+    
+    /**
+     * Given a path, return all directories in an array that are contained in that path.
+     *
+     * @param string $path
+     *
+     * @return array
+     */
+    public static function getAllDirs($path) {
+        $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
+        $return = array();
+        if (is_dir($path)) {
+            if ($handle = opendir($path)) {
+                while (false !== ($entry = readdir($handle))) {
+                    if(in_array(strtolower($entry), $disallowed_folders)) {
+                        continue;
+                    }
+                    $file = "{$path}/{$entry}";
+                    if(is_dir($file)) {
+                        $return[] = $entry;
+                    }
+                }
+            }
+        }
+        sort($return);
         return $return;
     }
 
     /**
-     * Given a path, it then attempts to create each folder in the path. For example, if we are given
-     * /a/b/c, we then attempt to create directory /a, /a/b, and then /a/b/c (skipping any that exist).
-     * If any folder creation fails, then we return false, otherwise return true.
+     * Given a filename, load the file and then parse it as a json file, creating an associative array if
+     * possible. For any loaded file, we perform a bit of regex that attempts to remove the comma on the last
+     * element of any list if it exists
      *
-     * @param $path
+     * @param string $filename
      *
-     * @return bool true if operation succeeded, false otherwise
+     * @return string
      */
-    public static function recursiveCreateDir($path) {
-        $return = true;
-        $total = ($path[0] == "/") ? "/" : "";
-        $dirs = explode("/", $path);
-        foreach($dirs as $dir) {
-            $total .= $dir;
-            if (!is_dir($total)) {
-                if (!FileUtils::createDir($total)) {
-                    $return = false;
-                    break;
-                }
-            }
-            $total .= "/";
+    public static function loadJsonFile($filename) {
+        $json = json_decode(Utils::removeTrailingCommas(file_get_contents($filename)), true);
+        if ($json === null) {
+            return false;
         }
-        return $return;
+        return $json;
+    }
+    
+    /**
+     * Given a file, returns its mimetype based on the file's so-called maagic bytes.
+     *
+     * @param string $filename
+     *
+     * @return string
+     */
+    public static function getMimeType($filename) {
+        $finfo = finfo_open(FILEINFO_MIME);
+        $mimetype = finfo_file($finfo, $filename);
+        finfo_close($finfo);
+        $mimetype = explode(";", $mimetype);
+        return trim($mimetype[0]);
+    }
+    
+    /**
+     * Given a filename of a zip, open the zip, and then read in each entry in the zip, getting its size
+     * and then returning that to the user. If the file is not a zip, then the returned size should be 0.
+     *
+     * @param $filename
+     *
+     * @return int
+     */
+    public static function getZipSize($filename) {
+        $size = 0;
+        $zip = zip_open($filename);
+        if (is_resource($zip)) {
+            while ($inner_file = zip_read($zip)) {
+                $size += zip_entry_filesize($inner_file);
+            }
+            zip_close($zip);
+        }
+        return $size;
     }
 }

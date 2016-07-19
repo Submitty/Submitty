@@ -23,7 +23,7 @@ class ConfigurationController implements IController {
                 $this->updateConfiguration();
                 break;
             default:
-                Output::showError("Invalid page request for controller");
+                $this->core->getOutput()->showError("Invalid page request for controller");
                 break;
         }
     }
@@ -58,11 +58,11 @@ class ConfigurationController implements IController {
             unset($_SESSION['request']);
         }
 
-        Output::render_output(array('admin', 'Configuration'), 'viewConfig', $fields);
+        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields);
     }
 
     public function updateConfiguration() {
-        if ($this->core->checkCsrfToken($_POST['csrf_token'])) {
+        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $_SESSION['messages']['errors'][] = "Invalid CSRF token. Try again.";
             $_SESSION['request'] = $_POST;
             $this->core->redirect($this->core->buildUrl(array('component' => 'admin',

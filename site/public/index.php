@@ -32,16 +32,23 @@ ini_set('display_errors', 1);
 require_once(__DIR__ . "/../app/libraries/AutoLoader.php");
 AutoLoader::registerDirectory(__DIR__ . "/../app", true, "app");
 
+$core = new Core();
 /*
- * Register a custom expection handler that will get run anytmie our application
- * throws something. This allows us to print a very generic error page instead of
- * the actual exception/stack trace during execution
+ * Register custom expection and error handlers that will get run anytime our application
+ * throws something or suffers a fatal error. This allows us to print a very generic error
+ * page instead of the actual exception/stack trace during execution, both logging the error
+ * and preventing the user from knowing exactly how our system is failing.
  */
 function exception_handler($throwable) {
-    Output::showException(ExceptionHandler::throwException($throwable));
+    global $core;
+    $core->getOutput()->showException(ExceptionHandler::throwException($throwable));
 }
 set_exception_handler("exception_handler");
 
+function error_handler($errno, $errstr, $errfile, $errline) {
+    throw new \app\exceptions\BaseException("Fatal Error (".$errno."): ".$errstr." in file ".$errfile." on line ".$errline);
+}
+set_error_handler("error_handler", E_ERROR);
 /*
  * Check that we have a semester and a course specified by the user and then that there's no
  * potential for path trickery by using basename which will return only the last part of a
@@ -49,10 +56,10 @@ set_exception_handler("exception_handler");
  */
 if (!isset($_REQUEST['semester'])) {
     // @todo: should check for a default semester if one is not specified, opposed to throwing an exception
-    Output::showError("Need to specify a semester (ex: &semester=s16) in the URL");
+    $core->getOutput()->showError("Need to specify a semester (ex: &semester=s16) in the URL");
 }
 if (!isset($_REQUEST['course'])) {
-    Output::showError("Need to specify a course (ex: &course=csci1100) in the URL");
+    $core->getOutput()->showError("Need to specify a course (ex: &course=csci1100) in the URL");
 }
 
 // Sanitize the inputted semester & course to prevent directory attacks
@@ -64,9 +71,8 @@ $course = basename($_REQUEST['course']);
  * and then we initialize our Output engine (as it requires Core to run) and then set the
  * paths for the Logger and ExceptionHandler
  */
-$core = new Core($semester, $course);
+$core->loadConfig($semester, $course);
 date_default_timezone_set($core->getConfig()->getTimezone());
-Output::initializeOutput($core);
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->getLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
@@ -106,7 +112,7 @@ if (!$logged_in) {
     }
 }
 
-Output::render_output("Global", 'header');
+$core->getOutput()->renderOutput("Global", 'header');
 switch($_REQUEST['component']) {
     case 'admin':
         $control = new app\controllers\AdminController($core);
@@ -120,12 +126,12 @@ switch($_REQUEST['component']) {
         $control = new app\controllers\GradingController($core);
         $control->run();
         break;
-    case 'submission':
+    case 'student':
     default:
         $control = new app\controllers\StudentController($core);
         $control->run();
         break;
 }
 
-Output::render_output("Global", 'footer', (microtime(true) - $start));
-echo(Output::getOutput());
+$core->getOutput()->renderOutput("Global", 'footer', (microtime(true) - $start));
+echo($core->getOutput()->getOutput());

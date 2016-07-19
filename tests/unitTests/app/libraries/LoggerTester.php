@@ -11,7 +11,7 @@ class LoggerTester extends \PHPUnit_Framework_TestCase {
 
     public static function setUpBeforeClass() {
         Logger::setLogPath(__TEST_DIRECTORY__."/LoggerTesterLogs");
-        FileUtils::recursiveCreateDir(__TEST_DIRECTORY__."/LoggerTesterLogs");
+        FileUtils::createDir(__TEST_DIRECTORY__."/LoggerTesterLogs", true);
         FileUtils::emptyDir(__TEST_DIRECTORY__."/LoggerTesterLogs");
         $date = getdate(time());
         LoggerTester::$file_name = __TEST_DIRECTORY__."/LoggerTesterLogs/".

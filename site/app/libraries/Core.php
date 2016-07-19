@@ -49,12 +49,30 @@ class Core {
     /**
      * Core constructor.
      *
-     * @param $semester
-     * @param $course
-     *
-     * @throws \Exception|DatabaseException
      */
-    public function __construct($semester, $course) {
+    public function __construct() {
+        $this->output = new Output($this);
+    
+        // initialize our alert queue if it doesn't exist
+        if(!isset($_SESSION['messages'])) {
+            $_SESSION['messages'] = array();
+        }
+    
+        // initialize our alert types if one of them doesn't exist
+        foreach (array('errors', 'alerts', 'successes') as $key) {
+            if(!isset($_SESSION['messages'][$key])) {
+                $_SESSION['messages'][$key] = array();
+            }
+        }
+    
+        // we cast each of our controller markers to lower to normalize our controller switches
+        // and prevent any unexpected page failures for users in entering a capitalized controller
+        foreach (array('component', 'page', 'action') as $key) {
+            $_REQUEST[$key] = (isset($_REQUEST[$key])) ? strtolower($_REQUEST[$key]) : "";
+        }
+    }
+    
+    public function loadConfig($semester, $course) {
         $this->config = new Config($semester, $course);
 
         $this->database = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
@@ -73,24 +91,6 @@ class Core {
                 break;
             default:
                 throw new DatabaseException("Unrecognized database type");
-        }
-
-        // initialize our alert queue if it doesn't exist
-        if (!isset($_SESSION['messages'])) {
-            $_SESSION['messages'] = array();
-        }
-
-        // initialize our alert types if one of them doesn't exist
-        foreach (array('errors', 'alerts', 'successes') as $key) {
-            if (!isset($_SESSION['messages'][$key])) {
-                $_SESSION['messages'][$key] = array();
-            }
-        }
-
-        // we cast each of our controller markers to lower to normalize our controller switches
-        // and prevent any unexpected page failures for users in entering a capitalized controller
-        foreach (array('component', 'page', 'action') as $key) {
-            $_REQUEST[$key] = (isset($_REQUEST[$key])) ? strtolower($_REQUEST[$key]) : "";
         }
     }
 
@@ -209,12 +209,15 @@ class Core {
     }
 
     /**
-     * @param $csrf_token
+     * Checks the inputted $csrf_token against the one that is loaded from the session table for the particular
+     * signed in user.
+     *
+     * @param string $csrf_token
      *
      * @return bool
      */
     public function checkCsrfToken($csrf_token) {
-        return $this->getCsrfToken() != $csrf_token;
+        return $this->getCsrfToken() === $csrf_token;
     }
 
     /**
@@ -259,5 +262,12 @@ class Core {
             $course_name .= ": ".htmlentities($this->getConfig()->getCourseName());
         }
         return $course_name;
+    }
+    
+    /**
+     * @return Output
+     */
+    public function getOutput() {
+        return $this->output;
     }
 }

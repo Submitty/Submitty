@@ -57,7 +57,7 @@ class AuthenticationController implements IController {
     }
 
     public function loginForm() {
-        Output::render_output('Authentication', 'loginForm');
+        $this->core->getOutput()->renderOutput('Authentication', 'loginForm');
     }
 
     public function checkLogin() {

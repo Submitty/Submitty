@@ -59,6 +59,7 @@ HTML;
             $override_css = '';
         }
 
+        $is_dev = ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) ? "true" : "false";
         $return = <<<HTML
 <!DOCTYPE html>
 <html>
@@ -69,6 +70,9 @@ HTML;
     {$override_css}
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.min.js"></script>
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/server.js"></script>
+    <script type="text/javascript">
+        var is_developer = {$is_dev};
+    </script>
 </head>
 <body>
 {$messages}
@@ -154,7 +158,7 @@ HTML;
     }
 
     public function footer($runtime) {
-        return <<<HTML
+        $return = <<<HTML
     <div id="push"></div>
 </div>
 <div id="footer">
@@ -163,17 +167,23 @@ HTML;
         <i class="fa fa-github fa-lg"></i>
     </a>
 </div>
-
+HTML;
+        if ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) {
+            $return .= <<<HTML
 <div id='page-info'>
     Total Queries: {$this->core->getDatabase()->totalQueries()}<br />
     Runtime: {$runtime}<br />
     Queries: <br /> {$this->core->getDatabase()->getQueries()}
 </div>
-
+HTML;
+        }
+        $return .= <<<HTML
 </body>
 </html>
 
 HTML;
+        
+        return $return;
     }
 
     public function invalidPage($page) {

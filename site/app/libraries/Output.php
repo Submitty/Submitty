@@ -12,31 +12,28 @@ use app\exceptions\OutputException;
  */
 
 class Output {
-    private static $output_buffer = "";
-    private static $loaded_views = array();
-    private static $start_time = 0;
+    private $output_buffer = "";
+    private $json_buffer = "";
+    private $loaded_views = array();
+    private $start_time = 0;
     /**
      * @var Core
      */
-    private static $core;
-
-    private function __construct() {}
-    private function __clone() {}
-
-    public static function initializeOutput($core) {
-        static::$core = $core;
+    private $core;
+    
+    public function __construct(Core $core) {
+        $this->core = $core;
     }
 
     /**
-     * Similar to render_template, this loads a View, but instead of returning it
+     * Similar to renderTemplate, this loads a View, but instead of returning it
      * to the user for use, it just appends it directly to the output buffer. This is
      * the general method that should be called within the application and only really
-     * using render_template when you plan to then use that rendered View in
+     * using renderTemplate when you plan to then use that rendered View in
      * rendering another View
      */
-    public static function render_output() {
-        $func = call_user_func_array('self::render_template', func_get_args());
-        static::$output_buffer .= $func;
+    public function renderOutput() {
+        $this->output_buffer .= call_user_func_array('self::renderTemplate', func_get_args());
     }
 
     /**
@@ -47,15 +44,15 @@ class Output {
      * Additionally, we only pass in just the non "View" part of the class name that
      * we are looking for.
      *
-     * Output::render_template("Error", "errorPage", $message)
+     * Output()->renderTemplate("Error", "errorPage", $message)
      * Would load views\ErrorView->errorPage($message)
      *
-     * Output::render_template(array("submission", "Global"), "header")
+     * Output()->renderTemplate(array("submission", "Global"), "header")
      * Would load views\submission\GlobalView->header()
      *
      * @return string
      */
-    public static function render_template() {
+    public function renderTemplate() {
         if (func_num_args() < 2) {
             throw new \InvalidArgumentException("Render requires at least two parameters (View, Function)");
         }
@@ -73,6 +70,10 @@ class Output {
         }
         return $func;
     }
+    
+    public function renderJson($json) {
+        $this->json_buffer .= json_encode($json);
+    }
 
     /**
      * Returns the requested view, initializing it if it's never been called before.
@@ -83,23 +84,36 @@ class Output {
      *
      * @return string
      */
-    private static function getView($view) {
-        if(!isset(static::$loaded_views[$view])) {
+    private function getView($view) {
+        if(!isset($this->loaded_views[$view])) {
             $class = "app\\views\\{$view}View";
             /** @noinspection PhpUndefinedMethodInspection */
-            static::$loaded_views[$view] = new $class(static::$core);
+            $this->loaded_views[$view] = new $class($this->core);
         }
 
-        return static::$loaded_views[$view];
+        return $this->loaded_views[$view];
     }
 
+    public function getOutput() {
+        if ($this->json_buffer !== "") {
+            return $this->json_buffer;
+        }
+        else {
+            return $this->output_buffer;
+        }
+    }
     /**
      * Returns the stored output buffer that we've been building
      *
      * @return string
      */
-    public static function getOutput() {
-        return static::$output_buffer;
+    public function displayOutput() {
+        if ($this->json_buffer !== "") {
+            print($this->json_buffer);
+        }
+        else {
+            print($this->output_buffer);
+        }
     }
 
     /**
@@ -116,9 +130,9 @@ class Output {
      *
      * @return string
      */
-    public static function showException($exception = "", $die = true) {
+    public function showException($exception = "", $die = true) {
         /** @noinspection PhpUndefinedMethodInspection */
-        $exceptionPage = static::getView("Error")->exceptionPage($exception);
+        $exceptionPage = $this->getView("Error")->exceptionPage($exception);
         // @codeCoverageIgnore
         if ($die) {
             die($exceptionPage);
@@ -141,7 +155,7 @@ class Output {
      *
      * @return string
      */
-    public static function showError($error = "", $die = true) {
+    public function showError($error = "", $die = true) {
         /** @noinspection PhpUndefinedMethodInspection */
         $errorPage = static::getView("Error")->errorPage($error);
         // @codeCoverageIgnore

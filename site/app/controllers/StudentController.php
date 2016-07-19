@@ -16,7 +16,7 @@ class StudentController implements IController {
     }
 
     public function run() {
-        $assignment = (isset($_REQUEST['assignment'])) ? $_REQUEST['assignment'] : null;
+        $assignment = (isset($_REQUEST['assignment_id'])) ? $_REQUEST['assignment_id'] : null;
         $class_info = new ClassJson($this->core, $assignment);
 
         $controller = null;
