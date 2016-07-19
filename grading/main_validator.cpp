@@ -75,7 +75,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
 
-  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::array());
+  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
   int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
   int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
   int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
@@ -183,7 +183,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
       std::vector<std::string> diff_vectors;
       double my_score = 1.0;
-      double fraction_sum = 0.0;
+      double deduction_sum = 0.0;
       
       for (int j = 0; j < my_testcase.numFileGraders(); j++) {
         std::vector<std::string> diff_vector;
@@ -203,15 +203,14 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
           std::cout << "result->getGrade() = " << result->getGrade() << std::endl;
 	  assert (result->getGrade() >= 0.0 && result->getGrade() <= 1.0);
 
-          double pts_fraction = my_testcase.test_case_grader_vec[j]->points_fraction;
-          std::cout << "pts_fraction = " << pts_fraction << std::endl;
-
-          if (pts_fraction < -0.5) {
-            pts_fraction = 1 / double(my_testcase.numFileGraders());
+          double deduction = my_testcase.test_case_grader_vec[j]->deduction;
+          if (deduction < -0.5) {
+            deduction = 1 / double(my_testcase.numFileGraders());
           }
-          fraction_sum += pts_fraction;
+          deduction_sum += deduction;
+          std::cout << "deduction multiplier = " << deduction << std::endl;
 	  
-          my_score -= pts_fraction*(1-result->getGrade());
+          my_score -= deduction*(1-result->getGrade());
 
           std::cout << "my_score = " << my_score << std::endl;
 
@@ -272,10 +271,13 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
       testcase_vector.push_back("\t\t\t\"diffs\": [\n" + join(diff_vectors) + "\t\t\t]");
 
-      if (fraction_sum < 0.99 || fraction_sum > 1.01) {
-        std::cout << "WARNING: Fraction sum " << fraction_sum << std::endl;
+      std::cout << "check these vals " << my_testcase.points() << " " << deduction_sum << std::endl; 
+      if (my_testcase.points() > 0.01) {
+        if (deduction_sum < 0.99 || deduction_sum > 1.01) {
+          std::cout << "WARNING: deduction sum " << deduction_sum << std::endl;
+        }
+        assert (deduction_sum > 0.99); 
       }
-      assert (fraction_sum > 0.99); 
       assert (my_score <= 1.00001);
       my_score = std::max(0.0,std::min(1.0,my_score));
       std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
@@ -290,7 +292,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
     if (!my_testcase.hidden()) {
       nonhidden_auto_pts += testcase_pts;
-      if (my_testcase.extracredit()) {
+      if (my_testcase.extra_credit()) {
         nonhidden_extra_credit += testcase_pts; //my_testcase.points();
       }
       else {
@@ -298,7 +300,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       }
     } 
     hidden_auto_pts += testcase_pts;
-    if (my_testcase.extracredit()) {
+    if (my_testcase.extra_credit()) {
       hidden_extra_credit += testcase_pts; //my_testcase.points();
     }
     else {
@@ -321,6 +323,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   } // end test case loop
 
   int total_possible_pts = possible_ta_pts + hidden_possible_pts;
+
+  std::cout << "totals " << possible_ta_pts << " " << hidden_possible_pts << " " << TOTAL_POINTS << std::endl;
 
   std::cout << "penalty                 " <<  penalty << std::endl;
   std::cout << "nonhidden auto pts      " <<  nonhidden_auto_pts << std::endl;

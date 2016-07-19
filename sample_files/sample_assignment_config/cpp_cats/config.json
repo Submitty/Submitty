@@ -34,11 +34,13 @@
                 },
                 {
                     "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt"
+                    "filename" : "STDOUT.txt",
+                    "description" : "Standard Output (STDOUT)"
                 },
                 {
                     "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt"
+                    "filename" : "STDERR.txt",
+                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -56,11 +58,13 @@
                 },
                 {
                     "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt"
+                    "filename" : "STDOUT.txt",
+                    "description" : "Standard Output (STDOUT)"
                 },
                 {
                     "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt"
+                    "filename" : "STDERR.txt",
+                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -78,11 +82,13 @@
                 },
                 {
                     "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt"
+                    "filename" : "STDOUT.txt",
+                    "description" : "Standard Output (STDOUT)"
                 },
                 {
                     "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt"
+                    "filename" : "STDERR.txt",
+                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -100,11 +106,13 @@
                 },
                 {
                     "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt"
+                    "filename" : "STDOUT.txt",
+                    "description" : "Standard Output (STDOUT)"
                 },
                 {
                     "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt"
+                    "filename" : "STDERR.txt",
+                    "description" : "Standard Error (STDERR)"
                 }
             ]
         }

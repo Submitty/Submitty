@@ -19,7 +19,6 @@ option(ASSIGNMENT_INSTALLATION "Normal assignment installation" ON)
 
 set (MY_DIR ${CMAKE_SOURCE_DIR})
 
-
 IF (ASSIGNMENT_INSTALLATION)
   # assuming we are in a directory of this structure
   #   SUBMITTY_DATA_DIR/courses/which_semester/which_course/build/which_assignment
@@ -32,6 +31,8 @@ IF (ASSIGNMENT_INSTALLATION)
   # just the last part of the current directory
   get_filename_component(assignment ${MY_DIR} NAME)
   message("ASSIGNMENT IS ${assignment}")
+
+  set (my_config_json ${course_dir}/build/${assignment}/config.json)
 
   # Where the compiled binaries are stored, under the class directory
   set(my_bin ${course_dir}/bin/${assignment})
@@ -47,10 +48,10 @@ else (ASSIGNMENT_INSTALLATION)
   # the name of the test is the name of the parent directory
   get_filename_component(which_test ${which_test_dir} NAME)
   message("WHICH TEST: ${which_test}")
-
   
   include_directories(${which_test_dir}/assignment_config)
 
+  set (my_config_json ${which_test_dir}/assignment_config/config.json)
 
   # Where the compiled binaries are stored
   set(my_bin ${which_test_dir}/bin)
@@ -83,7 +84,7 @@ endif(instructor_cmakelists)
 ###################################################################################
 # embed the config.json within a generated .cpp source file
 
-file(READ config.json json_generated)
+file(READ ${my_config_json} json_generated)
 
 # escape " and \ and newline
 string(REGEX REPLACE "([\"\\\n])" "\\\\\\1" json_generated "${json_generated}")

@@ -1,0 +1,48 @@
+{
+    "grading_parameters" : {
+        "TOTAL_POINTS" : 20,
+        "AUTO_POINTS" : 20
+    },
+
+    "resource_limits" : {
+        "RLIMIT_CPU" : 60,
+        "RLIMIT_NPROC" : 100,
+        "RLIMIT_AS" : 18446744073709551615
+    },
+
+    "test_cases" : [
+        {
+            "type" : "Compilation",
+            "title" : "Compilation of student code: Factorial.java",
+            "command" : "/usr/bin/javac -cp /usr/local/submitty/JUnit/junit-4.12.jar Factorial.java",   
+            "executable_name" : "Factorial.class",
+            "points" : 2
+        },
+        {
+            "type" : "Compilation",
+            "title" : "Compilation of instructor test cases: *Test.java",
+            "command" : "/usr/bin/javac -cp /usr/local/submitty/JUnit/junit-4.12.jar:. FactorialTest.java",
+            "executable_name" : "FactorialTest.class",
+            "points" : 2
+        },
+        {
+            "title" : "FactorialTest",
+            "command" : "/usr/bin/java -cp /usr/local/submitty/JUnit/junit-4.12.jar:/usr/local/submitty/JUnit/hamcrest-core-1.3.jar:/usr/local/submitty/JUnit/emma.jar:. org.junit.runner.JUnitCore FactorialTest",
+            "points" : 16,
+            "validation" : [
+                {
+                    "method" : "JUnitTestGrader",
+                    "filename" : "STDOUT.txt",
+                    "num_tests" : 4,
+                    "deduction" : 1.0
+                },
+                { 
+                    "method" : "warnIfNotEmpty",
+                    "filename" : "STDERR.txt",
+                    "description" : "syntax error output from running junit",
+                    "deduction" : 1.0
+                }
+            ]
+        }
+    ]
+}

@@ -242,6 +242,38 @@ class TestcaseWrapper:
             raise RuntimeError("Difference between " + filename1 + " and " + filename2 +
             " exited with exit code " + str(process.returncode) + '\n\nDiff:\n' + out)
 
+    # Loads 2 files, truncates them after specified number of lines,
+    # and then checks to see if they match
+    def diff_truncate(self, num_lines_to_compare, f1, f2=""):
+        # if only 1 filename provided...
+        if not f2:
+            f2 = f1
+        # if no directory provided...
+        if not os.path.dirname(f1):
+            f1 = os.path.join("data", f1)
+        if not os.path.dirname(f2):
+            f2 = os.path.join("validation", f2)
+
+        filename1 = os.path.join(self.testcase_path, f1)
+        filename2 = os.path.join(self.testcase_path, f2)
+
+        if not os.path.isfile(filename1):
+            raise RuntimeError("File " + filename1 + " does not exist")
+        if not os.path.isfile(filename2):
+            raise RuntimeError("File " + filename2 + " does not exist")
+
+        with open(filename1) as file1:
+            contents1 = file1.readlines()
+        with open(filename2) as file2:
+            contents2 = file2.readlines()
+            
+        # delete/truncate the file
+        del contents1[num_lines_to_compare:]
+        del contents2[num_lines_to_compare:]
+
+        if contents1 != contents2:
+            raise RuntimeError("Files " + filename1 + " and " + filename2 + " are different within the first " + num_lines_to_compare + " lines.")
+
 
     ###################################################################################
     def empty_file(self, f):

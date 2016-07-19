@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
   
-  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::array());
+  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
   int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
   int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
   int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
@@ -111,7 +111,8 @@ int main(int argc, char *argv[]) {
 			  " 1>" + my_testcase.prefix() + "_STDOUT.txt" +
 			  " 2>" + my_testcase.prefix() + "_STDERR.txt",
 			  logfile,
-			  my_testcase.get_test_case_limits());
+			  my_testcase.get_test_case_limits(),
+                          config_json.value("resource_limits",nlohmann::json())); 
     
     // rename any key files created by this test case to prepend the test number
     for (int f = 0; f < my_testcase.numFileGraders(); f++) {
@@ -121,7 +122,8 @@ int main(int argc, char *argv[]) {
 	access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists 
 	execute ("/bin/mv "+raw_filename+" "+filename,
 		 "/dev/null",
-		 my_testcase.get_test_case_limits()); 
+                 my_testcase.get_test_case_limits(),
+                 config_json.value("resource_limits",nlohmann::json())); 
 
 	std::cout << "RUNNER!  /bin/mv "+raw_filename+" "+filename << std::endl;
 

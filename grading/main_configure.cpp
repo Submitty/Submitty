@@ -22,9 +22,7 @@ nlohmann::json printTestCase(TestCase test) {
   //if (test.details() != "") 
   j["details"] = test.details();
   j["points"] = test.points();
-  //if (test.extracredit()) 
-  j["extracredit"] = false; //true";
-  //if (test.hidden())
+  j["extra_credit"] = test.extra_credit();
   j["hidden"] = false;
   j["visible"] = true;
   //if (test.hidden_points())
@@ -42,9 +40,6 @@ int main(int argc, char *argv[]) {
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
   
-  std::cout << "@configure main : assignment_limits size " << assignment_limits.size() << std::endl;
-  assert (assignment_limits.size() == 16);
-
   nlohmann::json j;
 
   if (argc != 2) {
@@ -63,8 +58,9 @@ int main(int argc, char *argv[]) {
   assert (tc != config_json.end());
 
   nlohmann::json all;
-
+  std::cout << "num test cases" << tc->size() << std::endl;
   for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++) {
+    //std::cout << "TEST CASE " << std::endl;
     int points = itr->value("points",0);
     bool extra_credit = itr->value("extra_credit",false);
     bool hidden = itr->value("hidden",false);
@@ -78,13 +74,14 @@ int main(int argc, char *argv[]) {
     TestCase tc = TestCase::MakeTestCase(*itr);
     all.push_back(printTestCase(tc)); 
   }
+  std::cout << "processed " << all.size() << " test cases" << std::endl;
   j["num_testcases"] = all.size();
   j["testcases"] = all;
  
   std::string start_red_text = "\033[1;31m";
   std::string end_red_text   = "\033[0m";
 
-  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::array());
+  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
   int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
   int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
   int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
@@ -108,18 +105,20 @@ int main(int argc, char *argv[]) {
 
 
   std::string id = getAssignmentIdFromCurrentDirectory(std::string(argv[0]));
-  std::vector<std::string> part_names = PART_NAMES;
+  //std::vector<std::string> part_names = PART_NAMES;
 
-
+  
   j["id"] = id;
-  j["assignment_message"] = ASSIGNMENT_MESSAGE;
+  if (config_json.find("assignment_message") != config_json.end()) {
+    j["assignment_message"] = config_json.value("assignment_message",""); }
   j["max_submissions"] = MAX_NUM_SUBMISSIONS;
   j["max_submission_size"] = MAX_SUBMISSION_SIZE;
 
-  if (part_names.size() > 0) {
-    j["num_parts"] = part_names.size();
-    for (int i = 0; i < part_names.size(); i++) {
-      j["part_names"].push_back(part_names[i]);
+  nlohmann::json::iterator parts = config_json.find("part_names");
+  if (parts != config_json.end()) {
+    j["num_parts"] = parts->size();
+    for (int i = 0; i < parts->size(); i++) {
+      j["part_names"].push_back((*parts)[i]);
     }
   }
 
@@ -142,6 +141,9 @@ int main(int argc, char *argv[]) {
   }
 
   init << j.dump(4) << std::endl;
+
+  std::cout << "FINISHED CONFIGURATION OF " << std::flush;
+  system ("pwd");
   
   return 0;
 }

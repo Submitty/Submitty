@@ -106,14 +106,11 @@ int main(int argc, char *argv[]) {
 
   std::cout << "JSON PARSED" << std::endl;
 
-  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::array());
+  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
   int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
   int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
   int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
   int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
-
-
-  assert (assignment_limits.size() == 16);
 
   std::string hw_id = "";
   std::string rcsid = "";
@@ -189,7 +186,8 @@ int main(int argc, char *argv[]) {
 			    " 1>" + my_testcase.prefix() + "_STDOUT.txt" +
 			    " 2>" + my_testcase.prefix() + "_STDERR.txt",
 			    my_testcase.prefix() + "_execute_logfile.txt",
-			    my_testcase.get_test_case_limits());
+			    my_testcase.get_test_case_limits(),
+                            config_json.value("resource_limits",nlohmann::json())); 
       
       std::cout<< "Exited with exit_no: "<<exit_no<<std::endl;
     }
