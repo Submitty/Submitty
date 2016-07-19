@@ -104,6 +104,8 @@ function display_file_permissions($perms) {
 function upload_homework($username, $semester, $course, $assignment_id, $num_parts, $homework_file, $previous_files, $svn_checkout) {
     // parts in homework_file: 1 to num_parts
     // check if upload succeeded for all parts
+    $count = array();
+    
     if ($svn_checkout == false) {
       if(isset($homework_file)) {
         for($n=1; $n <= $num_parts; $n++) {
@@ -231,7 +233,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
             $filename = explode(".", $homework_file[$n]["name"][$i]);
             $extension = end($filename);
             if($extension == "zip") {
-              $file_size += get_zip_size($filename);
+              $file_size += get_zip_size($homework_file[$n]["tmp_name"][$i]);
             }
             else {
               $file_size += $homework_file[$n]["size"][$i];
