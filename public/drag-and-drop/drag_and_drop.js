@@ -73,6 +73,7 @@ function addFilesFromInput(part){
 	for(var i=0; i<filestream.length; i++){
 		addFile(filestream[i], part); // folders will not be selected in file browser, no need for check
 	}
+	$('#input_file' + part).val(""); // clear the input type='file'
 }
 
 // Check for duplicate file names. This function returns an array.
