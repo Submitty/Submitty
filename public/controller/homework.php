@@ -69,12 +69,6 @@ $assignment_version_in_grading_queue2 = version_in_grading_queue2($username, $se
 // FIXME:  This looks correct.  Why are they different?  Why are there two?
 $points_visible =            get_points_visible($submitting_homework_tests);
 
-
-//List of submitted files that server is allowed to display
-$files_to_view =            get_files_to_view($class_config,$semester,$course,$assignment_id, $username,$assignment_version);
-
-
-
 //List of submitted files that server is allowed to display
 $files_to_view =            get_files_to_view($class_config,$semester,$course,$assignment_id, $username,$assignment_version);
 
