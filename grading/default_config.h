@@ -46,7 +46,7 @@
 #define RLIMIT_CPU_VALUE        10                // 10 seconds per test
 #endif
 #ifndef RLIMIT_FSIZE_VALUE
-#define RLIMIT_FSIZE_VALUE      100*1000          // 100 KB created file size
+#define RLIMIT_FSIZE_VALUE      10*1000           // 10 KB created file size
 #endif
 #ifndef RLIMIT_DATA_VALUE
 #define RLIMIT_DATA_VALUE       500*1000*1000     // 500 MB heap
