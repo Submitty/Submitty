@@ -57,8 +57,8 @@ if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name
 /* END POST/FILES SUPERGLOBAL ----------------------------------------------- */
 
 //configure student table
-//$student_table_db_data = retrieve_students_from_db($g_id);
-$view->configure_table(/*$student_table_db_data*/ null);
+$student_table_db_data = retrieve_students_from_db();
+$view->configure_table($student_table_db_data);
 
 //display
 $view->display($state);
@@ -111,15 +111,18 @@ function parse_and_validate_csv($csv_file, &$data) {
 			return false;
 		}		
 		
-		//$fields[1] represents gradeable id.  It must (1) be an integer >= 0
-		//           AND exist in database
-		//           ctype_digit() returns false with negative integers as strings
-		if (!ctype_digit($fields[1]) || !verify_gradeable_in_db($fields[1])) {
+		/* this may require php5-intl extension (Ubuntu 14.04) -------------- */
+		/* sudo apt-get install php5-intl                                     */
+
+		//$fields[1] represents timestamp.  Format will be inputted through an
+		//HTML date field.  Some browsers (notably Chrome) provide a date
+		//picker in the locally defined date format.
+/*
 			$data = null;
 			return false;
-		}		
+*/
 		
-		//$fields[2]: Number of late day exceptions must be an integer >= 0
+		//$fields[2]: Number of late days must be an integer >= 0
 		if (!ctype_digit($fields[2])) {
 			$data = null;
 			return false;
@@ -178,8 +181,8 @@ SELECT
 	students.student_rcs,
 	students.student_first_name,
 	students.student_last_name,
-	late_days.student_rcs,
-	late_days.since_timestamp
+	late_days.allowed_lates,
+	late_days.since_timestamp::timestamp::date
 FROM students
 FULL OUTER JOIN late_days
 	ON students.student_rcs=late_days.student_rcs
@@ -196,19 +199,20 @@ SELECT
 	users.user_email,
 	users.user_firstname,
 	users.user_lastname,
-	late_day_exceptions.late_day_exceptions
+	late_days.user_id,
+	late_days.since_timestamp
 FROM users
-FULL OUTER JOIN late_day_expceptions
-	ON users.user_id=late_day_exceptions.user_id
+FULL OUTER JOIN late_days
+	ON users.user_id=late_days.user_id
 WHERE late_day_exceptions.g_id=?
 	AND users.user_group=0
-	AND	late_day_exceptions.late_day-exceptions IS NOT NULL
-	AND	late_day_exceptions.late_day_excpetions>0
+	AND	late_days.allowed_late_days IS NOT NULL
+	AND	late_days.allowed_late_days>0
 ORDER BY users.user_email ASC;
 SQL;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
 
-	\lib\Database::query($sql, array($gradeable_id));
+	\lib\Database::query($sql);
 	return \lib\Database::rows();
 }
 
@@ -235,7 +239,7 @@ function upsert(array $data) {
 	$sql['temp_table'] = <<<SQL
 CREATE TEMPORARY TABLE temp
 	(student_rcs VARCHAR(255),
-	gradeable_id INTEGER,
+	date TIMESTAMP,
 	late_days INTEGER)
 ON COMMIT DROP;
 SQL;
@@ -250,34 +254,33 @@ SQL;
 
 	//LOCK will prevent sharing collisions while upsert is in process.
 	$sql['lock'] = <<<SQL
-LOCK TABLE late_day_exceptions IN EXCLUSIVE MODE;
+LOCK TABLE late_days IN EXCLUSIVE MODE;
 SQL;
 
 	//This portion ensures that UPDATE will only occur when a record already exists.
 	$sql['update'] = <<<SQL
-UPDATE late_day_exceptions
-SET ex_late_days=temp.late_days
+UPDATE late_days
+SET
+	allowed_late_days=temp.late_days,
+	since_timestamp=temp.date
 FROM temp
-WHERE late_day_exceptions.ex_student_rcs=temp.student_rcs
-	AND late_day_exceptions.ex_rubric_id=temp.gradeable_id;
+WHERE late_days.student_rcs=temp.student_rcs
 SQL;
 
 	//This portion ensures that INSERT will only occur when data record is new.
 	$sql['insert'] = <<<SQL
-INSERT INTO late_day_exceptions
-	(ex_student_rcs,
-	ex_rubric_id,
-	ex_late_days)
+INSERT INTO late_days
+	(student_rcs,
+	since_timestamp,
+	allowed_lates
 SELECT
 	temp.student_rcs,
 	temp.gradeable_id,
 	temp.late_days
 FROM temp 
-LEFT OUTER JOIN late_day_exceptions
-	ON late_day_exceptions.ex_student_rcs=temp.student_rcs
-	AND	late_day_exceptions.ex_rubric_id=temp.gradeable_id
-WHERE late_day_exceptions.ex_student_rcs IS NULL
-	OR late_day_exceptions.ex_rubric_id IS NULL;
+LEFT OUTER JOIN late_days
+	ON late_days.student_rcs=temp.student_rcs
+WHERE late_days.student_rcs IS NULL
 SQL;
 
 	//SQL code for "new schema"
@@ -287,7 +290,7 @@ SQL;
 	$sql['temp_table'] = <<<SQL
 CREATE TEMPORARY TABLE temp
 	(student_rcs VARCHAR(255),
-	gradeable_id INTEGER,
+	date TIMESTAMP,
 	late_days INTEGER)
 ON COMMIT DROP;
 SQL;
@@ -302,34 +305,31 @@ SQL;
 
 	//LOCK will prevent sharing collisions while upsert is in process.
 	$sql['lock'] = <<<SQL
-LOCK TABLE late_day_exceptions IN EXCLUSIVE MODE;
+LOCK TABLE late_days IN EXCLUSIVE MODE;
 SQL;
 
 	//This portion ensures that UPDATE will only occur when a record already exists.
 	$sql['update'] = <<<SQL
-UPDATE late_day_exceptions
-SET late_day_exceptions=temp.late_days
+UPDATE late_days
+SET allowed_late_days=temp.late_days
 FROM temp
-WHERE late_day_exceptions.user_id=temp.student_rcs
-	AND late_day_exceptions.g_id=temp.gradeable_id;
+WHERE late_day.user_id=temp.student_rcs
 SQL;
 
 	//This portion ensures that INSERT will only occur when data record is new.
 	$sql['insert'] = <<<SQL
 INSERT INTO late_day_exceptions
 	(user_id,
-	g_id,
-	late_day-exceptions)
+	since_timestamp,
+	allowed_late_days)
 SELECT
 	temp.student_rcs,
-	temp.gradeable_id,
+	temp.date,
 	temp.late_days
 FROM temp 
-LEFT OUTER JOIN late_day_exceptions
-	ON late_day_exceptions.user_id=temp.student_rcs
-	AND late_day_exceptions.g_id=temp.gradeable_id
-WHERE late_day_exceptions.user_id IS NULL
-	OR late_day_exceptions.g_id IS NULL;
+LEFT OUTER JOIN late_days
+	ON late_days.user_id=temp.student_rcs
+WHERE late_days.user_id IS NULL
 SQL;
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */	
@@ -377,7 +377,8 @@ HTML;
 
 		$this->view['tail'] = <<<HTML
 </div>
-</div>	
+</div>
+</div>
 HTML;
 
 		$this->view['bad_upload'] = <<<HTML
@@ -438,7 +439,6 @@ HTML;
 
 			$this->view['student_review_table'] = <<<HTML
 <p style="font-weight:bold; font-size:1.2em;">No late days are currently entered.
-</div>
 HTML;
 		} else {
 		//Late days found in DB -- build table to display
@@ -464,8 +464,8 @@ HTML;
 <td style="background:{$cell_color[$index%2]};">{$record[0]}</td>
 <td style="background:{$cell_color[$index%2]};">{$record[1]}</td>
 <td style="background:{$cell_color[$index%2]};">{$record[2]}</td>
-<td style="background:{$cell_color[$index%2]};">{$record[2]}</td>
 <td style="background:{$cell_color[$index%2]};">{$record[3]}</td>
+<td style="background:{$cell_color[$index%2]};">{$record[4]}</td>
 </tr>
 HTML;
 			}
@@ -473,7 +473,6 @@ HTML;
 			//Table TAIL
 			$this->view['student_review_table'] .= <<<HTML
 </table>
-</div>
 HTML;
 		}
 	}
