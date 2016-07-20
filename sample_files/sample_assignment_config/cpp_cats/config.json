@@ -1,0 +1,112 @@
+{
+    "grading_parameters" : {
+        "TOTAL_POINTS" : 21,
+        "AUTO_POINTS" : 21,
+        "TA_POINTS" : 0,
+        "EXTRA_CREDIT_POINTS" : 0
+    },
+
+    "test_cases" : [
+        {
+            "type" : "FileExists",
+            "title" : "README",
+            "filename" : "README.txt",
+            "points" : 2
+        },
+        {
+            "type" : "Compilation",
+            "title" : "Compilation",
+            "command" : "/usr/bin/clang++ -Wall -o a.out -- *.cpp",
+            "executable_name" : "a.out",
+            "points" : 3
+        },
+        {
+            "title" : "Regular char by char comparision",
+            "details" : "./byChar.exe input.txt output.txt",
+            "command" : "./a.out CatBreeds.txt output.txt",
+            "points" : 4,
+            "validation" : [
+                {
+                    "method" : "myersDiffbyLinebyChar",
+                    "filename" : "output.txt",
+                    "instructor_file" : "inst_output.txt",
+                    "deduction" : 1.0
+                },
+                {
+                    "method" : "warnIfNotEmpty",
+                    "filename" : "STDOUT.txt"
+                },
+                {
+                    "method" : "warnIfNotEmpty",
+                    "filename" : "STDERR.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Test of by word comparison",
+            "details" : "./byWord.exe input.txt output.txt",
+            "command" : "./a.out CatBreeds.txt output.txt",
+            "points" : 4,
+            "validation" : [
+                {
+                    "method" : "myersDiffbyLinebyWord",
+                    "filename" : "output.txt",
+                    "instructor_file" : "inst_output.txt",
+                    "deduction" : 1.0
+                },
+                {
+                    "method" : "warnIfNotEmpty",
+                    "filename" : "STDOUT.txt"
+                },
+                {
+                    "method" : "warnIfNotEmpty",
+                    "filename" : "STDERR.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Test of by line comparison",
+            "details" : "./byLine.exe input.txt output.txt",
+            "command" : "./a.out CatBreeds.txt output.txt",
+            "points" : 4,
+            "validation" : [
+                {
+                    "method" : "myersDiffbyLine",
+                    "filename" : "output.txt",
+                    "instructor_file" : "inst_output.txt",
+                    "deduction" : 1.0
+                },
+                {
+                    "method" : "warnIfNotEmpty",
+                    "filename" : "STDOUT.txt"
+                },
+                {
+                    "method" : "warnIfNotEmpty",
+                    "filename" : "STDERR.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Test of by line without whitespace comparison",
+            "details" : "./byLineNoWhite.exe input.txt output.txt",
+            "command" : "./a.out CatBreeds.txt output.txt",
+            "points" : 4,
+            "validation" : [
+                {
+                    "method" : "myersDiffbyLineNoWhite",
+                    "filename" : "output.txt",
+                    "instructor_file" : "inst_output.txt",
+                    "deduction" : 1.0
+                },
+                {
+                    "method" : "warnIfNotEmpty",
+                    "filename" : "STDOUT.txt"
+                },
+                {
+                    "method" : "warnIfNotEmpty",
+                    "filename" : "STDERR.txt"
+                }
+            ]
+        }
+    ]
+}

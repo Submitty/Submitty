@@ -81,11 +81,26 @@ endif(instructor_cmakelists)
 
 
 ###################################################################################
+# embed the config.json within a generated .cpp source file
+
+file(READ config.json json_generated)
+
+# escape " and \ and newline
+string(REGEX REPLACE "([\"\\\n])" "\\\\\\1" json_generated "${json_generated}")
+
+set(cpp_header "const char *GLOBAL_config_json_string = \"")
+set(cpp_footer "\";\n")
+file(WRITE json_generated.cpp "${cpp_header}${json_generated}${cpp_footer}")
+set_source_files_properties(json_generated.cpp PROPERTIES GENERATED true)
+
+
+###################################################################################
 # source files
 
 # build this as a library, so we only have to compile it once
 add_library(custom_functions
-  ${GRADINGCODE}/grading/seccomp_functions.cpp 
+  ${GRADINGCODE}/grading/seccomp_functions.cpp  
+  json_generated.cpp
   ${custom_files}  
 )
 
@@ -104,6 +119,7 @@ add_executable(run.out
 add_executable(validate.out
   ${GRADINGCODE}/grading/main_validator.cpp 
 )
+
 
 ###################################################################################
 

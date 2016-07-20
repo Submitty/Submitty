@@ -109,8 +109,8 @@ rlim_t get_the_limit(const std::string &program_name,
   assert (s_itr != system_limits.end());
 
   // then, grab the assignment value (this value must also exist)
-  // (it might be the default defined in default_config.h
-  //  or it might be instructor defined in config.h)
+  // (it might be the default defined in config.json
+  //  or it might be instructor defined in config.json)
   std::map<int,rlim_t>::const_iterator a_itr = assignment_limits.find(which_limit);
   assert (a_itr != assignment_limits.end());
 

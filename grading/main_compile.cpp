@@ -98,6 +98,21 @@ void SearchForDisallowedWords(std::set<std::string> &disallowed_words,
 
 int main(int argc, char *argv[]) {
 
+  std::cout << "MAIN COMPILE" << std::endl;
+
+  nlohmann::json config_json;
+  std::stringstream sstr(GLOBAL_config_json_string);
+  sstr >> config_json;
+
+  std::cout << "JSON PARSED" << std::endl;
+
+  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::array());
+  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
+  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
+  int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
+  int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
+
+
   assert (assignment_limits.size() == 16);
 
   std::string hw_id = "";
@@ -140,16 +155,20 @@ int main(int argc, char *argv[]) {
   system ("ls -lta");
 
   // Run each COMPILATION TEST
-  for (unsigned int i = 0; i < testcases.size(); i++) {
+  nlohmann::json::iterator tc = config_json.find("test_cases");
+  assert (tc != config_json.end());
+  for (unsigned int i = 0; i < tc->size(); i++) {
 
-    if (testcases[i].isCompilationTest()) {
+    TestCase my_testcase = TestCase::MakeTestCase((*tc)[i]);
+
+    if (my_testcase.isCompilationTest()) {
       
-      assert (testcases[i].numFileGraders() == 0);
+      assert (my_testcase.numFileGraders() == 0);
       
       std::cout << "========================================================" << std::endl;
-      std::cout << "TEST " << i+1 << " " << testcases[i].command() << " IS COMPILATION!" << std::endl;
+      std::cout << "TEST " << i+1 << " " << my_testcase.command() << " IS COMPILATION!" << std::endl;
       
-      std::string cmd = testcases[i].command();
+      std::string cmd = my_testcase.command();
       assert (cmd != "");
 
 
@@ -167,10 +186,10 @@ int main(int argc, char *argv[]) {
       
       // run the command, capturing STDOUT & STDERR
       int exit_no = execute(cmd +
-			    " 1>" + testcases[i].prefix() + "_STDOUT.txt" +
-			    " 2>" + testcases[i].prefix() + "_STDERR.txt",
-			    testcases[i].prefix() + "_execute_logfile.txt",
-			    testcases[i].get_test_case_limits());
+			    " 1>" + my_testcase.prefix() + "_STDOUT.txt" +
+			    " 2>" + my_testcase.prefix() + "_STDERR.txt",
+			    my_testcase.prefix() + "_execute_logfile.txt",
+			    my_testcase.get_test_case_limits());
       
       std::cout<< "Exited with exit_no: "<<exit_no<<std::endl;
     }

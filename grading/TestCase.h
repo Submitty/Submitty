@@ -15,6 +15,8 @@
 */
 
 
+#include "json.hpp"
+
 #ifndef __TESTCASE_H__
 #define __TESTCASE_H__
 
@@ -147,8 +149,53 @@ private:
     FILE_EXISTS = false;
     COMPILATION = false;
   }
-
+  
 public:
+
+
+  static TestCase MakeTestCase (nlohmann::json j) {
+    std::string type = j.value("type","DEFAULT");
+    //std::cout << "TYPE = " << type << std::endl;
+    if (type == "FileExists") {
+      return MakeFileExists(j.value("title","TITLE MISSING"),
+                            j.value("filename","FILENAME MISSING"),
+                            TestCasePoints(j.value("points",0)));
+    } else if (type == "Compilation") {
+      return MakeCompilation(j.value("title","TITLE MISSING"),
+                             j.value("command","COMMAND MISSING"),
+                             j.value("executable_name","EXECUTABLE FILENAME MISSING"),
+                             TestCasePoints(j.value("points",0)));
+    } else {
+      assert (type == "DEFAULT");
+      std::vector<TestCaseGrader*> graders;
+      nlohmann::json::iterator itr = j.find("validation");
+      assert (itr != j.end());
+
+      for (nlohmann::json::iterator itr2 = (itr)->begin(); itr2 != (itr)->end(); itr2++) {
+        std::string method = itr2->value("method","MISSING METHOD");
+        TestResults* (*cmp) ( const std::string&, const std::string& );
+        if      (method == "myersDiffbyLinebyChar")  cmp = &myersDiffbyLinebyChar;
+        else if (method == "myersDiffbyLinebyWord")  cmp = &myersDiffbyLinebyWord;
+        else if (method == "myersDiffbyLine")        cmp = &myersDiffbyLine;
+        else if (method == "myersDiffbyLineNoWhite") cmp = &myersDiffbyLineNoWhite;
+        else if (method == "warnIfNotEmpty")         cmp = &warnIfNotEmpty;
+        else {
+          exit(0);
+        }
+        std::string filename = itr2->value("filename","MISSING FILENAME");
+        std::string description = itr2->value("description",filename);
+        std::string instructor_file = itr2->value("instructor_file","");
+        TestCaseGrader* x = new TestCaseComparison(cmp,filename,description,instructor_file);
+        graders.push_back(x);
+      }
+      return MakeTestCase(j.value("title","TITLE MISSING"),
+                          j.value("details","DETAILS MISSING"),
+                          j.value("command","COMMAND MISSING"),
+                          TestCasePoints(j.value("points",0)),
+                          graders,
+                          {});
+    }
+  }
 
 
   static TestCase MakeFileExists ( const std::string &title,
@@ -333,8 +380,12 @@ public:
   bool view_test_points () const {
       return _test_case_points.view_test_points;
   }
+  bool hidden_points() const { 
+    return !_test_case_points.view_test_points;
+  }
   bool visible () const {
-      return _test_case_points.visible;
+    assert (_test_case_points.visible == !_test_case_points.hidden);
+    return _test_case_points.visible;
   }
 
   /* Calls the function designated by the function pointer; if the function pointer
