@@ -36,7 +36,6 @@ def initialize(test):
 
 @testcase
 def correct(test):
-    return
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))
     subprocess.call(["cp",
@@ -54,7 +53,6 @@ def correct(test):
 
 @testcase
 def buggy(test):
-    return
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))
     subprocess.call(["cp",
@@ -72,7 +70,6 @@ def buggy(test):
 
 @testcase
 def buggy2(test):
-    return
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))
     subprocess.call(["cp",
@@ -90,7 +87,6 @@ def buggy2(test):
 
 @testcase
 def syntax_error(test):
-    return
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))
     subprocess.call(["cp",
@@ -111,7 +107,6 @@ def syntax_error(test):
 
 @testcase
 def infinite_loop_too_much_output(test):
-    return
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "*.py")))
     subprocess.call(["rm"] + ["-f"] +
