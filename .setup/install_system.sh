@@ -568,6 +568,13 @@ chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
 # blocks r/w access to the directory by others on the system.
 chmod 2771 ${SUBMITTY_INSTALL_DIR}
 
+#################################################################
+# ANALYSIS TOOLS SETUP
+#################
+if [ ${VAGRANT} == 1 ]; then
+    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+fi
+
 
 echo "Done."
 exit 0
