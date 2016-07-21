@@ -30,10 +30,12 @@ if ($now < $homeworkDate) {
     die("Homework is not open for grading yet.");
 }
 
-$student_rcs = $_GET["student"];
-$db->query("SELECT student_id FROM students WHERE student_rcs=?", array($student_rcs));
+/*
+$student = $_GET["student"];
+$db->query("SELECT user_id FROM users WHERE user_id=?", array($student));
 $row = $db->row();
 $student_id = $row['student_id'];
+*/
 
 // get the gradeable data from the student
 $params = array($g_id);

@@ -39,9 +39,9 @@ HTML;
                         <option value="-2">Nothing</option>
                         <option value="-1">Delete</option>
 HTML;
-    \lib\Database::query("SELECT * FROM sections ORDER BY section_id");
+    \lib\Database::query("SELECT * FROM sections_registration ORDER BY sections_registration_id");
     foreach(\lib\Database::rows() as $section) {
-        echo "                        <option value='{$section['section_id']}'>Move to {$section['section_title']}</option>";
+        echo "                        <option value='{$section['sections_registration_id']}'>Move to Section {$section['sections_registration_id']}</option>";
     }
     echo <<<HTML
                     </select><br />

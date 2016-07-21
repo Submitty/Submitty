@@ -47,7 +47,7 @@ class ElectronicGradeable {
     /**
      * @var string
      */
-    public $student_rcs;
+    public $student_id;
 
     /**
      * @var null|int
@@ -128,7 +128,7 @@ class ElectronicGradeable {
     /**
      * @var array
      */
-    public $submission_details;
+    public $submission_details = array();
 
     /**
      * @var array
@@ -158,20 +158,20 @@ class ElectronicGradeable {
     private $submission_ids = array();
 
     /**
-     * @param null|string $student_rcs
+     * @param null|string $student_id
      * @param null|int $rubric_id
      *
      * @throws \InvalidArgumentException|\RuntimeException|ServerException
      */
-    function __construct($student_rcs=null, $g_id=null) {
+    function __construct($student_id=null, $g_id=null) {
         try {
-            if ($student_rcs === null || $g_id == null) {
+            if ($student_id === null || $g_id == null) {
                 throw new \InvalidArgumentException("Invalid instantiation of ElectronicGradeable
-                class using student_rcs: {$student_rcs} and g_id:
+                class using student_id: {$student_id} and g_id:
                 {$g_id}");
             }
 
-            $this->student_rcs = $student_rcs;
+            $this->student_id = $student_id;
             $this->g_id = $g_id;
 
             $this->setEGDetails();
@@ -189,7 +189,7 @@ class ElectronicGradeable {
     }
 
     /**
-     * Get the student details from the database using given student_rcs
+     * Get the student details from the database using given student_id
      *
      * @throws \InvalidArgumentException
      */
@@ -200,27 +200,27 @@ class ElectronicGradeable {
         if (!isset($this->student)) {
             
 //GETS THE ALLOWED LATE DAYS FOR A STUDENT AS OF THE SUBMISSION DATE
-            Database::query("
+           /* Database::query("
 SELECT s.*, COALESCE(ld.allowed_lates,0) as student_allowed_lates
 FROM students as s
 LEFT JOIN (
     SELECT allowed_lates
     FROM late_days
-    WHERE since_timestamp <= ? and student_rcs=?
+    WHERE since_timestamp <= ? and student_id=?
     ORDER BY since_timestamp DESC
 ) as ld on 1=1
-WHERE s.student_rcs=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $this->student_rcs, $this->student_rcs));
+WHERE s.student_id=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $this->student_id, $this->student_id));
             $this->student = Database::row();
             if ($this->student == array()) {
-                throw new \InvalidArgumentException("Could not find student '{$this->student_rcs}'");
+                throw new \InvalidArgumentException("Could not find student '{$this->student_id}'");
             }
 
-            $params = array($this->student_rcs, $this->eg_details['g_id']);
-            Database::query("SELECT * FROM late_day_exceptions WHERE ex_student_rcs=? AND ex_rubric_id=?", $params);
+            $params = array($this->student_id, $this->eg_details['g_id']);
+            Database::query("SELECT * FROM late_day_exceptions WHERE ex_student_id=? AND ex_rubric_id=?", $params);
             $row = Database::row();
             $this->late_days_exception = (isset($row['ex_late_days'])) ? $row['ex_late_days'] : 0;
 
-            $params = array($this->student_rcs, $this->eg_details['eg_submission_due_date']);
+            $params = array($this->student_id, $this->eg_details['eg_submission_due_date']);
 //TODO factor in the status
 //DETERMINE THE NUMBER OF LATE DAYS USED FOR A GRADEABLE 
             Database::query("
@@ -229,14 +229,20 @@ FROM grades as g
     LEFT JOIN
     (
         SELECT * FROM late_day_exceptions
-    ) as s on s.ex_rubric_id = g.rubric_id and s.ex_student_rcs=g.student_rcs
+    ) as s on s.ex_rubric_id = g.rubric_id and s.ex_student_id=g.student_id
     LEFT JOIN
     (
         SELECT rubric_id, rubric_due_date FROM rubrics
     ) as r on r.rubric_id = g.rubric_id
-WHERE g.student_rcs=? AND r.rubric_due_date<?", $params); 
+WHERE g.student_id=? AND r.rubric_due_date<?", $params); 
             $row = Database::row();
             $this->student['used_late_days'] = isset($row['used_late_days']) ? $row['used_late_days'] : 0;
+        }*/
+            Database::query("SELECT * FROM users WHERE user_id=?", array($this->student_id));
+            $this->student = Database::row();
+            $this->late_days_exception = 0;
+            $this->student['used_late_days'] = 0;
+            $this->student['student_allowed_lates'] = 2;
         }
     }
 
@@ -252,28 +258,26 @@ WHERE g.student_rcs=? AND r.rubric_due_date<?", $params);
 SELECT g_title, gd_overall_comment, eg.* FROM electronic_gradeable AS eg 
     INNER JOIN gradeable AS g ON eg.g_id = g.g_id
     INNER JOIN gradeable_data AS gd ON gd.g_id=g.g_id 
-        WHERE gd_user_id=? AND g.g_id=?", array($this->student_rcs, $this->g_id));
+        WHERE gd_user_id=? AND g.g_id=?", array($this->student_id, $this->g_id));
         
         $this->eg_details = Database::row();
         
-        echo "<script>alert('SET eg_details'); </script>";
+        //echo "<script>alert('SET eg_details'); </script>";
 
         // Problem in the logic here
         // retrieval is throwing this off
         
         // CREATE THE GRADEABLE DATA
-        if (count(Database::rows()) == 0) {
-            echo "<script>alert('Created gradeable data'); </script>";
+        if (!isset($this->eg_details['g_title'])) {
             // TODO FACTOR IN LATE DAYS                     //TODO replace with grader id
-            $params = array($this->g_id, $this->student_rcs, 1, '', 0,0,1); 
+            $params = array($this->g_id, $this->student_id, $this->student_id, '', 0,0,1); 
             Database::query("INSERT INTO gradeable_data(g_id,gd_user_id,gd_grader_id,gd_overall_comment, gd_status,gd_late_days_used,gd_active_version) VALUES(?,?,?,?,?,?,?)", $params); 
             $this->gd_id = \lib\Database::getLastInsertId('gradeable_data_gd_id_seq');
         }
         else{
-            echo "<script>alert('THIS SHOULD BE HIT');</script>";
             //get the gd_id 
             //TODO change this to accounts
-            $params=array($this->student_rcs, $this->g_id);
+            $params=array($this->student_id, $this->g_id);
             Database::query("SELECT gd_id FROM gradeable as g INNER JOIN gradeable_data AS gd ON g.g_id=gd.g_id WHERE gd_user_id=? AND g.g_id =?", $params);
             $this->gd_id = Database::row()['gd_id'];
         }
@@ -316,7 +320,7 @@ ORDER BY gc_order ASC
     private function setEGSubmissionDetails() {
         
         foreach($this->submission_ids as $submission_id) {
-            $submission_directory = implode("/", array(__SUBMISSION_SERVER__, "submissions", $submission_id, $this->student_rcs));
+            $submission_directory = implode("/", array(__SUBMISSION_SERVER__, "submissions", $submission_id, $this->student_id));
             if (!file_exists($submission_directory)) {
                 continue;
             }
@@ -358,8 +362,8 @@ ORDER BY gc_order ASC
             }
 
             $details['submission_directory'] = $submission_directory;
-            $details['svn_directory'] = implode("/", array(__SUBMISSION_SERVER__, "checkout", $submission_id, $this->student_rcs, $this->active_assignment));
-            $this->submission_detailssubmission_details = $details;
+            $details['svn_directory'] = implode("/", array(__SUBMISSION_SERVER__, "checkout", $submission_id, $this->student_id, $this->active_assignment));
+            $this->submission_details = $details;
             $this->eg_files = array_merge($this->eg_files, FileUtils::getAllFiles($details['submission_directory']));
             $this->eg_files = array_merge($this->eg_files, FileUtils::getAllFiles($details['svn_directory']));
 
@@ -375,18 +379,19 @@ ORDER BY gc_order ASC
     private function setEGResults() {
         foreach($this->submission_ids as $submission_id) {
             $result_directory = implode("/", array(__SUBMISSION_SERVER__, "results",
-                                $submission_id, $this->student_rcs, $this->active_assignment));
+                                $submission_id, $this->student_id, $this->active_assignment));
 
             if (!file_exists($result_directory) || !is_dir($result_directory)) {
-                echo "<script>alert('no exist'); </script>";
                 continue;
             }
 
             $submission_details = $result_directory."/submission.json";
             if (!file_exists($submission_details)) {
                 $details = array();
+                echo "<script>alert('submission details don't exist'); </script>";
             }
             else {
+                echo "<script>alert('submission details exist'); </script>";
                 $details = json_decode(file_get_contents($submission_details), true);
                 // TODO: Convert this to using DateTime and DateTimeInterval objects
                 $date_submission = strtotime($details['submission_time']);
@@ -394,23 +399,36 @@ ORDER BY gc_order ASC
                 $late_days = round((($date_submission - $date_due) / (60 * 60 * 24)) + .5, 0);
                 $late_days = ($late_days < 0) ? 0 : $late_days;
             }
+            
+            //print "Submission details file path: ". $submission_details; // checked 
 
             $details['directory'] = $result_directory;
 
             // We can lazy load the actual results till we need them (such as the diffs, etc.)
             $this->results_details = $details;
+            
+            //var_dump($this->results_details);
+            
             $skip_files = array();
+            //$i = 0;
             foreach ($this->results_details['testcases'] as $testcase) {
                 if (isset($testcase['execute_logfile'])) {
                     $skip_files[] = $testcase['execute_logfile'];
                 }
+                /*if ($i ==2){
+                    var_dump($testcase);
+                    ++$i;
+                }
+                ++$i; */
                 if (isset($testcase['compilation_output'])) {
                     $skip_files[] = $testcase['compilation_output'];
                 }
-                foreach($testcase['diffs'] as $diff) {
-                    foreach(array('instructor_file', 'student_file', 'diff_id') as $file) {
-                        if(isset($diff[$file])) {
-                            $skip_files[] = $diff[$file] . ($file == 'diff_id' ? '.json' : '');
+                if (isset($testcase['diffs'])){
+                    foreach($testcase['diffs'] as $diff) {
+                        foreach(array('instructor_file', 'student_file', 'diff_id') as $file) {
+                            if(isset($diff[$file])) {
+                                $skip_files[] = $diff[$file] . ($file == 'diff_id' ? '.json' : '');
+                            }
                         }
                     }
                 }
@@ -478,7 +496,6 @@ ORDER BY gc_order ASC
                     $question['gcd_score'] = 0;
                 }
                 else {
-                    // TODO check this logic
                     $question['gcd_score'] = $question['gc_max_value'];
                 }
             }
@@ -487,6 +504,6 @@ ORDER BY gc_order ASC
                 $total += $question['gc_max_value'];
             }
         }
-        $this->eg_details['eg_total'] = $total;  // maybe change the name of this
+        $this->eg_details['eg_total'] = $total; 
     }
 }

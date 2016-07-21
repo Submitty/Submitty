@@ -315,10 +315,7 @@ echo <<<HTML
 			var grade = $(this).val();
 			var name = $(this).attr("id");
 			name = name.split("-");
-<<<<<<< HEAD
-=======
 			var nt_gradeable = name[1];
->>>>>>> eaf9325598fd877de250905862e8d40d208ec077
 			var rcs = name[2];
 
             if ($(this).attr('elem') == 'text') {

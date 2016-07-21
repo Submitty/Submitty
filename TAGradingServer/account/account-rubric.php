@@ -2,13 +2,13 @@
 
 /*
  * Variables from index.php:
-$student_rcs
+$s_user_id
 $g_id
  */
 
 use \app\models\ElectronicGradeable;
 
-$eg = new ElectronicGradeable($student_rcs, $g_id);
+$eg = new ElectronicGradeable($s_user_id, $g_id);
 
 $now = new DateTime('now');
 
@@ -19,6 +19,9 @@ if ($eg->eg_details['rubric_late_days'] > 0) {
     $eg_due_date->add(new DateInterval("PT{$eg->eg_details['rubric_late_days']}H")); //TODO late days does not exist yet
 }
 $grade_select_extra = $now < $eg_due_date ? 'disabled="true"' : "";
+
+//not sure if correct
+$color = "#998100";
 
 
 if ($eg->status == 1 && $eg->days_late_used == 0) {
@@ -218,7 +221,8 @@ HTML;
 ///////////////////////////////////
     $show_part = "";
 
-    $output .= $eg->submission_details;
+
+    //$output .= $eg->submission_details;
     if (!isset($eg->submission_details)) {
         $output .= <<<HTML
         <div id="inner-container">
@@ -298,14 +302,14 @@ HTML;
 
         $output .= <<<HTML
                     <div class="tab-pane {$active_text}" id="output-{$i}">
-                        <div style="width:95%; margin: auto auto auto auto; overflow-y:auto; overflow-x:hidden; padding-top:20px;">                                                                                             <!--//PART?-->    
+                        <div style="width:95%; margin: auto auto auto auto; overflow-y:auto; overflow-x:hidden; padding-top:20px;">                                                                                               
                             <iframe src="{$url}" id='iframe-{$i}' width='750px' style='border: 0' onload="autoResize('iframe-{$i}'); load_tab_icon('tab-{$i}', 'iframe-{$i}', {$testcase['points_awarded']}, {$eg->config_details['testcases'][$k]['points']}); ">
                             </iframe>
                             <br />
                             Logfile
                             <textarea id="code{$source_number}">
 HTML;
-        $output .= htmlentities(file_get_contents($results_details['directory']."/".$testcase['execute_logfile']));
+        //$output .= htmlentities(file_get_contents($results_details['directory']."/".$testcase['execute_logfile']));
         $output .= <<<HTML
                             </textarea>
 HTML;
@@ -365,8 +369,8 @@ HTML;
     <div id="inner-container" style="margin:5px;">
         <div id="rubric-title">
             <div class="span2" style="float:left; text-align: left;"><b>{$eg->eg_details['g_title']}</b></div>
-            <div class="span2" style="float:right; text-align: right; margin-top: -20px;"><b>{$eg->student['student_last_name']}, 
-                {$eg->student['student_first_name']}<br/>RCS: {$eg->student['student_rcs']}</b></div>
+            <div class="span2" style="float:right; text-align: right; margin-top: -20px;"><b>{$eg->student['user_lastname']}, 
+                {$eg->student['user_firstname']}<br/>ID: {$eg->student['user_id']}</b></div>
         </div>
 HTML;
 $submitted = ($eg->submitted) ? "1" : "0";
@@ -381,7 +385,7 @@ else {
 $active_assignments = $eg->active_assignment;
 
 $output .= <<<HTML
-            <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&g_id={$eg->eg_details['g_id']}&student={$eg->student['student_rcs']}&individual={$individual}" method="post">
+            <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&g_id={$eg->eg_details['g_id']}&student={$eg->student['user_id']}&individual={$individual}" method="post">
                 <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
                 <input type="hidden" name="submitted" value="{$submitted}" />
                 <input type="hidden" name="status" value="{$eg->status}" />
@@ -425,7 +429,7 @@ HTML;
 
 $print_status = ($eg->status == 1) ? "Good" : "Bad";
 $output .= <<<HTML
-                <b>Status:</b> <span style="color: {$color[0]};">{$part_status}</span><br />
+                <b>Status:</b> <span style="color: {$color};">{$part_status}</span><br />
     </div>
 </span>
 
@@ -596,8 +600,6 @@ else {
 HTML;
 }
 
-print_r($eg->eg_details);
-
 $output .= <<<HTML
                     </tbody>
                 </table>
@@ -605,10 +607,10 @@ $output .= <<<HTML
                 <textarea name="comment-general" rows="5" style="width:98%; padding:5px; resize:none;" 
                           placeholder="Overall message for student about the gradeable...">{$eg->eg_details['gd_overall_comment']}</textarea>
 HTML;
-if (isset($eg->rubric_details['user_email'])) {
+if (isset($eg->eg_details['user_email'])) {
     $output .= <<<HTML
     <div style="width:100%; height:40px;">
-        Graded By: {$eg->rubric_details['user_email']}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br /><br />
+        Graded By: {$eg->eg_details['user_email']}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br /><br />
     </div>
 HTML;
 }
@@ -621,9 +623,10 @@ HTML;
     } else {
         $output .= <<<HTML
         <input class="btn btn-large btn-warning" type="submit" value="Submit Homework Re-Grade" onclick="createCookie('backup',1,1000);"/>
-        <div style="width:100%; text-align:right; color:#777;">{$eg->rubric_details['grade_finish_timestamp']}</div>
 HTML;
     }
+    // TODO support  graded timestamp  <div style="width:100%; text-align:right; color:#777;">{$eg->eg_details['grade_finish_timestamp']}</div>
+
 }
 else {
     $output .= <<<HTML
