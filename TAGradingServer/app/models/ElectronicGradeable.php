@@ -262,8 +262,6 @@ SELECT g_title, gd_overall_comment, eg.* FROM electronic_gradeable AS eg
         
         $this->eg_details = Database::row();
         
-        //echo "<script>alert('SET eg_details'); </script>";
-
         // Problem in the logic here
         // retrieval is throwing this off
         
@@ -283,10 +281,7 @@ SELECT g_title, gd_overall_comment, eg.* FROM electronic_gradeable AS eg
         }
 
         $this->submission_ids[1] = $this->eg_details['g_id'];
-        
-        //TODO: A LARGE AMOUNT OF CODE WAS DELETED. REVIEW THE CHANGES FROM RUBRIC 
-        //check if has grades
-        
+                
         //TODO REMOVE THIS 
         //
         //
@@ -295,8 +290,6 @@ SELECT g_title, gd_overall_comment, eg.* FROM electronic_gradeable AS eg
         
         //
         //
-        
-        
         $params = array($this->eg_details['g_id'], $this->gd_id);
         
         //GET ALL questions and scores ASSOCIATED WITH A GRADEABLE
@@ -388,10 +381,8 @@ ORDER BY gc_order ASC
             $submission_details = $result_directory."/submission.json";
             if (!file_exists($submission_details)) {
                 $details = array();
-                echo "<script>alert('submission details don't exist'); </script>";
             }
             else {
-                echo "<script>alert('submission details exist'); </script>";
                 $details = json_decode(file_get_contents($submission_details), true);
                 // TODO: Convert this to using DateTime and DateTimeInterval objects
                 $date_submission = strtotime($details['submission_time']);
