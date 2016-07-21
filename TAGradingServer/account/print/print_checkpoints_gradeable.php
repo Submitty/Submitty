@@ -39,7 +39,7 @@ print <<<HTML
     </tr>
 HTML;
 
-$db->query("SELECT * FROM students WHERE student_section_id=? ORDER BY student_rcs", array($section));
+$db->query("SELECT * FROM users WHERE registration_section=? AND user_group=? ORDER BY user_id", array($section,4));
 
 $j = 0;
 foreach($db->rows() as $student) {
@@ -47,13 +47,13 @@ foreach($db->rows() as $student) {
     print <<<HTML
     <tr style="background-color: {$color}">
         <td>
-            {$student['student_rcs']}
+            {$student['user_id']}
         </td>
         <td>
-            {$student['student_last_name']}
+            {$student['user_lastname']}
         </td>
         <td>
-            {$student['student_first_name']}
+            {$student['user_firstname']}
         </td>
 HTML;
     for($i = 0; $i < count($checkpoints); $i++) {

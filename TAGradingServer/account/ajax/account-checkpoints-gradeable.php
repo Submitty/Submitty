@@ -7,11 +7,8 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
 
 $g_id = $_GET["g_id"];
 $check = intval($_GET["check"]);
-$rcs = $_GET["rcs"];
-$mode = intval($_GET["mode"]);
-$db->query("SELECT student_id FROM students WHERE student_rcs=?",array($rcs));
-$row = $db->row();
-$id = $row['student_id'];
+$user_id = $_GET["user_id"];
+$mode = $_GET["mode"];
 
 if($check == "all") {
     $params = array($g_id);
@@ -33,7 +30,7 @@ else {
 
 foreach($checks as $check) {
     //find the grade entry for one checkpoint
-    $params = array($g_id, $rcs, $check);
+    $params = array($g_id, $user_id, $check);
     $db->query("SELECT 
     gc.gc_id
     ,gd.gd_id
@@ -63,7 +60,7 @@ AND gc_order=?
             
             // INSERT
             //CHECK if the gradeable data exists, if not create it first
-            $params = array($g_id, $rcs);
+            $params = array($g_id, $user_id);
             $db->query("SELECT gd_id, COUNT(*) AS cnt 
             FROM gradeable_data AS gd INNER JOIN gradeable g ON gd.g_id = g.g_id
             WHERE g.g_id =?
@@ -72,21 +69,15 @@ AND gc_order=?
             ",$params);
             $row = $db->row();
             if ($row['cnt']==0){
-                //TODO FILL IN THE CORRECT STATUS?
-               $params = array($g_id, $rcs, $user_id, '', 0,0,1); 
+                //TODO FILL IN THE CORRECT STATUS? UPDATE the grader as the current user
+               $params = array($g_id, $user_id, $user_id, '', 0,0,1); 
                $db->query("INSERT INTO gradeable_data(g_id,gd_user_id,gd_grader_id,gd_overall_comment, gd_status,gd_late_days_used,gd_active_version) VALUES(?,?,?,?,?,?,?)", $params); 
-               //GET the gd_id and set it here
                $gd_id = \lib\Database::getLastInsertId('gradeable_data_gd_id_seq');
             }
             else{
                 $gd_id = intval($row['gd_id']);
             }
             
-<<<<<<< HEAD
-=======
-            //THEN CREATE THE GRADE FOR THE CHECKPT
-            
->>>>>>> d20ec087e6ed4d8447cd902cf48133c49dc3cac7
             //FIGURE OUT THE gc_id from gc_order and g_id
             $params = array($g_id,$check);
             $db->query("SELECT gc_id 

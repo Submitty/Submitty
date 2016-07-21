@@ -5,8 +5,9 @@ use app\models\User;
 
 	$account_subpages_unlock = true;
 
-	$rubric_id = intval($_GET['hw']);
+	$g_id = intval($_GET['g_id']);
 
+    /*
 	$params = array($rubric_id);
 	$db->query("SELECT r.rubric_id, r.rubric_name, sum(question_total) as score FROM rubrics AS r,
 	questions AS q WHERE r.rubric_id=? AND q.rubric_id=r.rubric_id GROUP BY r.rubric_id", $params);
@@ -37,7 +38,7 @@ FROM
 			, g.grade_id
 			, g.rubric_id
 	) as gt ON gt.student_rcs=s.student_rcs";
-
+*/
 print <<<HTML
 	<style type="text/css">
 		body {
@@ -69,12 +70,12 @@ if (!isset($homework_info['rubric_id'])) {
     print <<<HTML
     <div id="container-rubric">
 		<div class="modal-header">
-			<h3 id="myModalLabel">Invalid Homework</h3>
+			<h3 id="myModalLabel">Invalid Gradeable</h3>
 		</div>
 
 		<div class="modal-body" style="padding-bottom:10px; padding-top:25px;">
-			Could not find a homework with that ID.<br /><br />
-			<a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
+			Could not find a gradeable with that ID.<br /><br />
+			<a class="btn" href="{$BASE_URL}/account/index.php">Select Different Gradeable</a>
         </div>
     </div>
 HTML;
@@ -82,10 +83,10 @@ HTML;
 else {
     if (!User::$is_administrator) {
         if (isset($_GET['all']) && $_GET['all'] == "true") {
-            $button = "<a class='btn' href='{$BASE_URL}/account/account-summary.php?hw={$rubric_id}&course={$_GET['course']}'>View Your Sections</a>";
+            $button = "<a class='btn' href='{$BASE_URL}/account/account-summary.php?g_id={$rubric_id}&course={$_GET['course']}'>View Your Sections</a>";
         }
         else {
-            $button = "<a class='btn' href='{$BASE_URL}/account/account-summary.php?hw={$rubric_id}&course={$_GET['course']}&all=true'>View All Sections</a>";
+            $button = "<a class='btn' href='{$BASE_URL}/account/account-summary.php?g_id={$rubric_id}&course={$_GET['course']}&all=true'>View All Sections</a>";
         }
     }
     else {
@@ -176,15 +177,15 @@ HTML;
         if(count($db->rows()) > 0) {
             if(isset($row['score'])) {
                 if($row['score'] >= 0) {
-                    echo "<a class='btn' href='{$BASE_URL}/account/index.php?hw=" . $_GET["hw"] . "&individual=" . $student["student_rcs"] . "'>[ " . $row['score'] . " / " . $rubric_total . " ]</a>";
+                    echo "<a class='btn' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["student_rcs"] . "'>[ " . $row['score'] . " / " . $rubric_total . " ]</a>";
                 } else {
-                    echo "<a class='btn btn-danger' href='{$BASE_URL}/account/index.php?hw=" . $_GET["hw"] . "&individual=" . $student["student_rcs"] . "'>[ GRADING ERROR ]</a>";
+                    echo "<a class='btn btn-danger' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["student_rcs"] . "'>[ GRADING ERROR ]</a>";
                 }
             } else {
-                echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?hw=" . $_GET["hw"] . "&individual=" . $student["student_rcs"] . "'>Grade</a>";
+                echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["student_rcs"] . "'>Grade</a>";
             }
         } else {
-            echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?hw=" . $_GET["hw"] . "&individual=" . $student["student_rcs"] . "'>Grade</a>";
+            echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["student_rcs"] . "'>Grade</a>";
         }
         print <<<HTML
                     </td>
@@ -198,7 +199,7 @@ HTML;
 
 		<div class="modal-footer">
 			<a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
-			<a class="btn" href="{$BASE_URL}/account/index.php?hw={$_GET['hw']}">Grade Next Student</a>
+			<a class="btn" href="{$BASE_URL}/account/index.php?g_id={$_GET['g_id']}">Grade Next Student</a>
 		</div>
 	</div>
 HTML;

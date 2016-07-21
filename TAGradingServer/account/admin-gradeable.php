@@ -22,6 +22,10 @@ if($user_is_administrator){
     );
     $old_questions = $old_components = $electronic_gradeable = array();
     $num_numeric = $num_text = 0;
+    $g_gradeable_type = $is_repository = $g_syllabus_bucket = $g_min_grading_group = -1;
+    $use_ta_grading = true;
+    $g_overall_ta_instructions = '';
+    
     
     if (isset($_GET['action']) && $_GET['action'] == 'edit') {
         $g_id = $_GET['id'];
@@ -216,13 +220,11 @@ if($user_is_administrator){
             <br />
             What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' value="{$gradeable_name}" />
             <br />
-            What overall instructions should be provided to the TA?: 
-            <br />
-            <textarea rows="4" cols="200" name="ta_instructions" placeholder="(Optional)" style="width: 500px;">
+            What overall instructions should be provided to the TA?:<br /><textarea rows="4" cols="200" name="ta_instructions" placeholder="(Optional)" style="width: 500px;">
 HTML;
     echo htmlspecialchars($g_overall_ta_instructions);  
     print <<<HTML
-        </textarea>
+</textarea>
         <br />
         Is this a team assignment?:
         <input type="radio" name="team-assignment" value="yes"

@@ -91,15 +91,14 @@ $db->query("SELECT * FROM gradeable WHERE g_gradeable_type=2 ORDER BY g_id ASC",
 $first = true;
 $nt_gradeables = $db->rows();
 foreach($nt_gradeables as $nt_row){
-    //$locked = ($nt_row['nt_gradeable_locked']) ? "(Locked)" : "";
     if($first) {
         print <<<HTML
-                <li class="active"><a href="#nt_gradeable{$nt_row["g_id"]}" data-toggle="tab">{$nt_row['g_title']} {$locked}</a></li>
+                <li class="active"><a href="#nt_gradeable{$nt_row["g_id"]}" data-toggle="tab">{$nt_row['g_title']}</a></li>
 HTML;
     }
     else {
         print <<<HTML
-                <li><a href="#nt_gradeable{$nt_row["g_id"]}" data-toggle="tab">{$nt_row['g_title']}{$locked}</a></li>
+                <li><a href="#nt_gradeable{$nt_row["g_id"]}" data-toggle="tab">{$nt_row['g_title']}</a></li>
 HTML;
     }
     $first = false;
@@ -159,18 +158,18 @@ HTML;
     $params = array($user_id);
     if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true){
         $params = array();
-        $db->query("SELECT * FROM sections ORDER BY section_id ASC", $params);
+        $db->query("SELECT * FROM sections_registration ORDER BY sections_registration_id ASC", $params);
     }
     else{
         $params = array($user_id);
-        $db->query("SELECT * FROM relationships_users WHERE user_id=? ORDER BY section_id ASC", $params);
+        $db->query("SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC", $params);
     }
 
     $colspan += 2;
     $colspan += $colspan2;
 
     foreach($db->rows() as $section){
-        $section_id = intval($section['section_id']);
+        $section_id = intval($section['sections_registration_id']);
 		print <<<HTML
                             <tr class="info">
                                 <td colspan="{$colspan}" style="text-align:center;">
@@ -178,19 +177,18 @@ HTML;
                                 </td>
                             </tr>
 HTML;
-        $params = array($nt_row['g_id'],intval($section["section_id"])); 
+        $params = array($nt_row['g_id'],intval($section["sections_registration_id"]),4); 
         $db->query("
         
 SELECT
-    s.student_rcs
-    , s.student_id
-    , s.student_first_name
-    , s.student_last_name
+    s.user_id
+    , s.user_firstname
+    , s.user_lastname
     , case when gcds.grade_value_array is null then '{}' else gcds.grade_value_array end
     , case when gcds.grade_text is null then '{}' else gcds.grade_text end
     , g_id
 FROM
-    students AS s
+    users AS s
     LEFT JOIN (
         SELECT
             array_agg(gcd_score ORDER BY gc_order ASC) as grade_value_array
@@ -221,11 +219,12 @@ FROM
         GROUP BY
             gd_user_id
             , g_id
-    ) AS gcds ON gcds.gd_user_id = s.student_rcs
+    ) AS gcds ON gcds.gd_user_id = s.user_id
 WHERE
-    s.student_section_id=?
+    s.registration_section=?
+    AND s.user_group=?
 ORDER BY
-    s.student_rcs", $params);
+    s.user_id", $params);
         
         foreach($db->rows() as $row){
             $student_info = $row;
@@ -233,7 +232,7 @@ ORDER BY
             print <<<HTML
                             <tr>
                                 <td>
-                                    {$student_info["student_rcs"]} ({$student_info["student_last_name"]}, {$student_info["student_first_name"]})
+                                    {$student_info["user_id"]} ({$student_info["user_lastname"]}, {$student_info["user_firstname"]})
                                 </td>
 HTML;
             $question_grades=pgArrayToPhp($temp['grade_value_array']);
@@ -258,19 +257,19 @@ HTML;
             for($i = 0; $i < $num_numeric; ++$i) {
                 print <<<HTML
                                 <td class="input-container" style="border: 1px solid black">
-                                    <input id="cell-{$nt_row["g_id"]}-{$row["student_rcs"]}-q{$i}" type="text" value="{$question_grades[$i]}" {$disabled} />
+                                    <input id="cell-{$nt_row["g_id"]}-{$row["user_id"]}-q{$i}" type="text" value="{$question_grades[$i]}" />
                                 </td>
 HTML;
             }
             print <<<HTML
-                                <td style="width: 10px" id="cell-{$nt_row["g_id"]}-{$row['student_rcs']}-score">{$total_grade}</td>
+                                <td style="width: 10px" id="cell-{$nt_row["g_id"]}-{$row['user_id']}-score">{$total_grade}</td>
 HTML;
             
             //print the text fields
             for ($i = $num_numeric; $i <$num_numeric+$num_text; ++$i) {
                 print <<<HTML
                                 <td class="input-container" style="border: 1px solid black">
-                                    <input id="cell-{$nt_row["g_id"]}-{$row["student_rcs"]}-t{$i}" elem="text" type="text" value="{$text_fields[$i]}" {$disabled} />
+                                    <input id="cell-{$nt_row["g_id"]}-{$row["user_id"]}-t{$i}" elem="text" type="text" value="{$text_fields[$i]}" />
                                 </td>
 HTML;
             }

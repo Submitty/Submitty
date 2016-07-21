@@ -98,7 +98,6 @@ HTML;
 
 $first = true;
 
-// rename these vars without lab
 foreach($db->rows() as $check_g_row) {
     $params = array($check_g_row['g_id']);
     $db->query("SELECT gc_title from gradeable_component WHERE g_id=?", $params);
@@ -124,44 +123,40 @@ HTML;
                         </thead>
 HTML;
 
-    $params = array($user_id);
     if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true) {
         $params = array();
-        $db->query("SELECT * FROM sections ORDER BY section_id ASC", $params);
+        $db->query("SELECT * FROM sections_registration ORDER BY sections_registration_id ASC", $params);
     }
     else {
         $params = array($user_id);
-        $db->query("SELECT * FROM relationships_users WHERE user_id=? ORDER BY section_id ASC", $params);
+        $db->query("SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC", $params);
     }
 
-    // TODO bring back the print lab part
     foreach($db->rows() as $section) {
         $count = count($check_g_row_checkpoints) + 1;
         print <<<HTML
                         <tr class="info">
-                            <td colspan="{$count}" style="text-align:center;" id="section-{$section['section_id']}">
-                                    Students Enrolled in Section {$section["section_id"]}
-                                    <a href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&g_id={$check_g_row['g_id']}&section_id={$section['section_id']}">
+                            <td colspan="{$count}" style="text-align:center;" id="section-{$section['sections_registration_id']}">
+                                    Students Enrolled in Section {$section["sections_registration_id"]}
+                                    <a href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&g_id={$check_g_row['g_id']}&section_id={$section['sections_registration_id']}">
                                         <div class="icon-print"></div>
                                     </a>
                             </td>
                         </tr>
                         <tbody>
 HTML;
-        $params = array($check_g_row["g_id"],intval($section["section_id"]));
-        // rewrite this query
+        $params = array($check_g_row["g_id"],intval($section["sections_registration_id"]), 4);
         $db->query("
         
 SELECT
-    s.student_rcs
-    , s.student_id
-    , s.student_first_name
-    , s.student_last_name
+    s.user_id
+    , s.user_firstname
+    , s.user_lastname
     , case when gcds.grade_value_array is null then '{}' else gcds.grade_value_array end
     , case when gcds.grade_checkpoint_array is null then '{}' else gcds.grade_checkpoint_array end
     , g_id
 FROM
-    students AS s
+    users AS s
     LEFT JOIN (
         SELECT
             array_agg(gcd_score) as grade_value_array
@@ -193,11 +188,12 @@ FROM
         GROUP BY
             gd_user_id
             , g_id
-    ) AS gcds ON gcds.gd_user_id = s.student_rcs
+    ) AS gcds ON gcds.gd_user_id = s.user_id
 WHERE
-    s.student_section_id=?
+    s.registration_section=?
+    AND s.user_group=?
 ORDER BY
-    s.student_rcs", $params);
+    s.user_id", $params);
 
         foreach($db->rows() as $row) {
             $grade_value_array = pgArrayToPhp($row['grade_value_array']);
@@ -212,8 +208,8 @@ ORDER BY
             $student_info = $row;
             print <<<HTML
                             <tr>
-                                <td class="cell-all" id="cell-{$check_g_row["g_id"]}-all-{$row["student_rcs"]}" cell-status="0">
-                                    {$student_info["student_rcs"]} ({$student_info["student_last_name"]}, {$student_info["student_first_name"]})
+                                <td class="cell-all" id="cell-{$check_g_row["g_id"]}-all-{$row["user_id"]}" cell-status="0">
+                                    {$student_info["user_id"]} ({$student_info["user_lastname"]}, {$student_info["user_firstname"]})
                                 </td>
 HTML;
             $count = 1;
@@ -235,13 +231,13 @@ HTML;
                     $background_color = "#149bdf";
                     $background_color = "background-color:#149bdf";
                 }
-                elseif($mode == 2) {
+                elseif($mode == 0.5) {
                     $background_color = "#88d0f4";
                     $background_color = "background-color:#88d0f4";
                 }
 
                 print <<<HTML
-                                <td id="cell-{$check_g_row["g_id"]}-check{$count}-{$row["student_rcs"]}" cell-status="{$mode}" style="{$background_color}"></td>
+                                <td id="cell-{$check_g_row["g_id"]}-check{$count}-{$row["user_id"]}" cell-status="{$mode}" style="{$background_color}"></td>
 HTML;
                 $count++;
             }
@@ -271,19 +267,19 @@ print <<<HTML
     //TODO rename stuff
 
     $("td[id^=cell-]").click(function() {
-        var cell_status = (parseInt($(this).attr('cell-status')) + 1) % 3;
+        var cell_status = (parseFloat($(this).attr('cell-status')) == 0) ? 1: parseFloat($(this).attr('cell-status')) - 0.5;
         var name = $(this).attr("id");
         name = name.split("-");
         var gradeable = name[1];
         var check = name[2].replace("check", "");
-        var rcs = name[3];
+        var user_id = name[3];
         
-        var url = "{$BASE_URL}/account/ajax/account-checkpoints-gradeable.php?course={$_GET['course']}&g_id=" + gradeable + "&check=" + check + "&rcs=" + rcs + "&mode=" + cell_status;
+        var url = "{$BASE_URL}/account/ajax/account-checkpoints-gradeable.php?course={$_GET['course']}&g_id=" + gradeable + "&check=" + check + "&user_id=" + user_id + "&mode=" + cell_status;
 
         if($(this).hasClass("cell-all")) {
             // Named cell
             $(this).attr('cell-status', cell_status);
-            updateColor("td[id^=cell-" + gradeable + "-check][id$=-" + rcs + "]", cell_status, url);
+            updateColor("td[id^=cell-" + gradeable + "-check][id$=-" + user_id + "]", cell_status, url);
         }
         else {
             // Non-named cell
@@ -302,7 +298,7 @@ print <<<HTML
             $(item).css("background-color", "#149bdf");
             $(item).css("border-right", "15px solid #f9f9f9");
         }
-        else if(mode == 2) {
+        else if(mode == 0.5) {
             $(item).css("background-color", "#88d0f4");
             $(item).css("border-right", "15px solid #f9f9f9");
         }
