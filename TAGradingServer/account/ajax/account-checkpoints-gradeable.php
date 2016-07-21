@@ -91,7 +91,6 @@ AND gc_order=?
             $params = array($gc_id, $gd_id, $mode,'');                                  
             $db->query("INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score,gcd_component_comment) VALUES (?,?,?,?)", $params);
         }
-    }
 }
 
 echo "updated";
