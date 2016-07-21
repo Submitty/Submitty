@@ -154,11 +154,13 @@ if ($calculate_diff) {
     function calculatePercentageTotal() {
         var total=0;
 
-        $('#rubric-table').find('select.grades').each(function() {
-            total += parseFloat($(this).val());
+        $('#rubric-table').find('.grades').each(function() {
+            if(!isNaN(parseFloat($(this).val()))) {
+                total += parseFloat($(this).val());
+            }
         });
 
-        $("#score_total").html(total);
+        $("#score_total").html(total + " / {$rubric->rubric_details['rubric_total']}");
     }
 
     function load_tab_icon(tab_id, iframe_id, points_user, points_total) {
@@ -495,7 +497,6 @@ $output .= <<<HTML
         <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyG')" ></span>
     </div>
     <div class="inner-container" style="overflow-y:auto; margin:1px; height:100%">
-        <div id="inner-container">
 
 HTML;
 
@@ -519,9 +520,7 @@ if(isset($_GET["individual"])) {
                         <tr style="background-color:#EEE;">
                             <th style="padding-left: 1px; padding-right: 0px; border-bottom:5px #FAA732 solid;"><i class="icon-time" id="progress-icon" style="margin-top: 2px;"></th>
                             <th style="width:40px; border-bottom:5px #FAA732 solid;">Part</th>
-                            <th style="border-bottom:5px #FAA732 solid;">Question</th>
-                            <th style="width:40px; border-bottom:5px #FAA732 solid;">Points</th>
-                            <th style="width:40px; border-bottom:5px #FAA732 solid;">Total</th>
+                            <th style="border-bottom:5px #FAA732 solid;" colspan="2">Questions</th>
                         </tr>
 HTML;
 }
@@ -530,9 +529,7 @@ else {
                         <tr style="background-color:#EEE;">
                             <th style="padding-left: 1px; padding-right: 0px;"><i class="icon-time" id="progress-icon" style="margin-top: 2px;"></th>
                             <th style="width:40px;">Part</th>
-                            <th>Question</th>
-                            <th style="width:40px;">Points</th>
-                            <th style="width:40px;">Total</th>
+                            <th colspan="2">Questions</th>
                         </tr>
 HTML;
 }
@@ -547,7 +544,7 @@ $last_seen_part = -1;
 foreach ($rubric->questions as $question) {
     $output .= <<<HTML
 
-                        <tr class="accordion-toggle" data-toggle="collapse" data-target="#rubric-{$c}">
+                        <tr>
 HTML;
     if ($last_seen_part != $question['question_part_number']) {
         $output .= '<td class="lates" rowspan="' . $rubric->questions_count[$question['question_part_number']] * 2 . '" style="padding:8px 0px; width: 1px; line-height:16px; padding-left:1px;background-color: '.$icon_color[$question['question_part_number']].';">'.$icon[$question['question_part_number']].'</td>';
@@ -558,30 +555,48 @@ HTML;
     $message = htmlentities($question["question_message"]);
     $note = htmlentities($question["question_grading_note"]);
     if ($note != "") {
-        $note = "<br/><br/><div style='margin-bottom:5px; color:#777;'><i><b>Note: </b>" . $note . "</i></div>";
+        $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note: </b>" . $note . "</i></div>";
     }
     $output .= <<<HTML
-                            <td style="font-size: 12px">
+                            <td style="font-size: 12px" colspan="2">
                                 {$message} {$note}
                             </td>
-                            <td>
-                                <select name="grade-{$question['question_part_number']}-{$question['question_number']}" id="changer" class="grades" style="width: 65px; height: 25px; min-width:0px;" onchange="calculatePercentageTotal();" {$grade_select_extra}>
+                        </tr>
 HTML;
-
-    for ($i = 0; $i <= $question['question_total'] * 2; $i++) {
-        $output .= '<option' . (($i * 0.5) == $question['grade_question_score'] ? " selected" : "") . '>' . round(($i * 0.5), 1) . '</option>';
-    }
 
     $comment = ($question['grade_question_comment'] != "") ? "in" : "";
     $output .= <<<HTML
-                                </select>
-                            </td>
-                            <td><strong>{$question['question_total']}</strong></td>
-                        </tr>
-                        <tr>
-                            <td colspan="3" style="padding:0; border-top:none;">
-                                <div class="accordian-body collapse {$comment}" id="rubric-{$c}">
-                                    <textarea name="comment-{$question["question_part_number"]}-{$question["question_number"]}" rows="2" style="width:100%; padding:0px; resize:none; margin:0px 0px; border-radius:0px; border:none; padding:5px; border-left:3px #DDD solid; float:left; margin-right:-28px;" placeholder="Message for the student..." comment-position="0">{$question['grade_question_comment']}</textarea>
+    <tr style="background-color: #f9f9f9;">
+                            <td style="white-space:nowrap; vertical-align:middle; text-align:center;"><input type="number" id="test-{$question["question_part_number"]}-{$question["question_number"]}" class="grades" name="grade-{$question['question_part_number']}-{$question['question_number']}" value="{$question['grade_question_score']}" min="0" max="{$question['question_total']}" step="0.5" placeholder="&plusmn;0.5" onchange="validateInput_{$question["question_part_number"]}_{$question["question_number"]}(0.5); calculatePercentageTotal();" style="width:50px; resize:none;"></textarea><strong> / {$question['question_total']}</strong></td>
+                            <td style="width:100%; padding:0px">
+                                <div id="rubric-{$c}">
+                                    <textarea name="comment-{$question["question_part_number"]}-{$question["question_number"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:100%; height:100%; padding:0px; resize:none; margin:0px 0px; border-radius:0px; border:none; padding:5px; border-left:3px #DDD solid; float:left; margin-right:-28px;" placeholder="Message for the student..." comment-position="0">{$question['grade_question_comment']}</textarea>
+HTML;
+    $output .= <<<HTML
+    <script>
+    // delta in this function is the incremental step of points, currently hardcoded to 0.5pts
+    function validateInput_{$question["question_part_number"]}_{$question["question_number"]}(delta){
+        var ele = $('#test-{$question["question_part_number"]}-{$question["question_number"]}');
+        if(isNaN(parseFloat(ele.val())) || ele.val() == ""){
+            ele.val("");
+            return;
+        }
+        if(ele.val() < 0) {
+            ele.val( 0 );
+        }
+        if(ele.val() > parseFloat("{$question['question_total']}")) {
+            ele.val( "{$question['question_total']}" );
+        }
+        if(ele.val() % delta != 0) {
+            ele.val( Math.round(ele.val() / delta) * delta );
+        }
+    }
+    // autoresize the comment box
+    function autoResizeComment(e){
+        e.target.style.height ="";
+        e.target.style.height = e.target.scrollHeight + "px";
+    }
+    </script>
 HTML;
 
     $comment = htmlspecialchars($question['grade_question_comment']);
@@ -656,8 +671,7 @@ if(isset($_GET["individual"])) {
                             <td style="background-color: #EEE; border-top:5px #FAA732 solid;"></td>
                             <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;"></td>
                             <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;"><strong>CURRENT GRADE</strong></td>
-                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;"><strong id="score_total">0</strong></td>
-                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;"><strong>{$rubric->rubric_details['rubric_total']}</strong></td>
+                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;"><strong id="score_total">0 / {$rubric->rubric_details['rubric_total']}</strong></td>
                         </tr>
 HTML;
 }
@@ -708,7 +722,7 @@ HTML;
 
 $output .= <<<HTML
             </form>
-        </div>
+
     </div>
 </span>
 HTML;

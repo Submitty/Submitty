@@ -456,7 +456,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     };
 
     window.onkeydown = function(e) {
-        if (e.target.type == "textarea" || e.target.type == "input")  return; // disable keyboard event when typing to textarea/input
+        if (e.target.tagName == "TEXTAREA" || e.target.tagName == "INPUT" || e.target.tagName == "SELECT") return; // disable keyboard event when typing to textarea/input
         handleKeyPress(e.code);
     };
 

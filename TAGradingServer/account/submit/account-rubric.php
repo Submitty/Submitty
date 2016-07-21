@@ -60,7 +60,7 @@ foreach($db->rows() as $row) {
     $params = array($grade_id, $row["question_id"]);
     $db->query("DELETE FROM grades_questions WHERE grade_id=? AND question_id=?", $params);
 
-    $params = array($grade_id, $row["question_id"], $_POST["grade-" . $row["question_part_number"] . "-" . $row["question_number"]],  $_POST["comment-" . $row["question_part_number"] . "-" . $row["question_number"]]);
+    $params = array($grade_id, $row["question_id"], (float)$_POST["grade-" . $row["question_part_number"] . "-" . $row["question_number"]],  $_POST["comment-" . $row["question_part_number"] . "-" . $row["question_number"]]);
     $db->query("INSERT INTO grades_questions (grade_id, question_id, grade_question_score, grade_question_comment) VALUES (?,?,?,?)", $params);
 }
 
