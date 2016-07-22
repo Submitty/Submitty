@@ -31,13 +31,16 @@ if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name
 
 //if no file upload, examine Student ID and Late Day input fields.	
 } else if (isset($_POST['student_id']) && ($_POST['student_id'] !== "") &&
-		   isset($_POST['late_days'])  && ($_POST['late_days']  !== "")) {
+		   isset($_POST['late_days'])  && ($_POST['late_days']  !== "") &&
+		   isset($_POST['timestamp'])) {
 
 	//Validate that late days entered is an integer >= 0.
 	//Negative values will fail ctype_digit test.
 	if (!ctype_digit($_POST['late_days'])) {
 		$state = 'late_days_not_integer';
 	}
+	
+	//TODO: timestamp validation
 	
 	//Validate that student does exist in DB (per rcs_id)
 	//"Student Not Found" error has precedence over late days being non-numerical
@@ -50,7 +53,7 @@ if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name
 	if (empty($state)) {
 
 		//upsert argument requires 2D array.
-		upsert(array(array($_POST['student_id'], $g_id, intval($_POST['late_days']))));
+		upsert(array(array($_POST['student_id'], $_POST['timestamp'], intval($_POST['late_days']))));
 		$state = 'upsert_done';
 	}
 }
@@ -111,16 +114,30 @@ function parse_and_validate_csv($csv_file, &$data) {
 			return false;
 		}		
 		
-		/* this may require php5-intl extension (Ubuntu 14.04) -------------- */
-		/* sudo apt-get install php5-intl                                     */
-
-		//$fields[1] represents timestamp.  Format will be inputted through an
-		//HTML date field.  Some browsers (notably Chrome) provide a date
-		//picker in the locally defined date format.
-/*
+		//$fields[1] represents timestamp in the format (MM/DD/YY),
+		//(MM/DD/YYYY), (MM-DD-YY), or (MM-DD-YYYY).
+		
+		//This bizzare switch-case style actually does work in PHP.
+		//This operates as a form of "white list" of valid patterns.
+		//Don't try this switch/case code style in C/C++.
+		$tmp = array(	DateTime::createFromFormat('m-d-Y', $fields[1]),
+						DateTime::createFromFormat('m/d/Y', $fields[1]),
+						DateTime::createFromFormat('m-d-y', $fields[1]),
+						DateTime::createFromFormat('m/d/y', $fields[1])	);
+		
+		
+		switch (true) {
+		case ($tmp[0] && $tmp->format('m-d-Y') === $fields[1]):
+		case ($tmp[1] && $tmp->format('m/d/Y') === $fields[1]):
+		case ($tmp[2] && $tmp->format('m-d-y') === $fields[1]):
+		case ($tmp[3] && $tmp->format('m/d/y') === $fields[1]):
+			//If process windws up here, validation passed.
+			//"Fall out" of this block to continue.
+		default:
+			//If process winds up here, validation failed -- bail out!
 			$data = null;
 			return false;
-*/
+		}
 		
 		//$fields[2]: Number of late days must be an integer >= 0
 		if (!ctype_digit($fields[2])) {
@@ -200,7 +217,7 @@ SELECT
 	users.user_firstname,
 	users.user_lastname,
 	late_days.user_id,
-	late_days.since_timestamp
+	late_days.since_timestamp::timestamp::date
 FROM users
 FULL OUTER JOIN late_days
 	ON users.user_id=late_days.user_id
@@ -413,10 +430,10 @@ HTML;
 <form action="admin-latedays-exceptions.php" method="POST" enctype="multipart/form-data">
 <h4>Single Student Entry</h4>
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Student ID:<br><input type="text" name="student_id" style="width:95%;"></div>
-<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Timestamp:<br><input type="date" name="timestamp" style="width:95%;"></div>
+<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Timestamp (MM/DD/YY):<br><input type="text" name="timestamp" style="width:95%;"></div>
 <div style="width:15%; display:inline-block; vertical-align:top; padding-right:15px;">Late Days:<br><input type="text" name="late_days" style="width:95%;"></div>
 <div style="display:inline-block; vertical-align:top; padding-top:1.5em;"><input type="submit" value="Submit"></div>
-<div style="display:inline-block; vertical-align:top; padding-bottom:20px;">If you leave Timestamp blank, the current date will be assumed.</div>
+<div style="display:inline-block; vertical-align:top; padding-bottom:20px;">If you leave Timestamp blank, today's date will be assumed.</div>
 <h4>Multiple Student Entry Via CSV Upload</h4>
 <div style="padding-bottom:20px;"><input type="file" name="csv_upload" onchange="this.form.submit()"></div>
 </form>
