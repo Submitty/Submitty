@@ -269,7 +269,7 @@ function submit(url, csrf_token, svn_checkout, loc){
 	// Files from previous submission
 	files_to_upload.append('previous_files', JSON.stringify(previous_files));
 	$.ajax({
-		url: submit_url,
+		url: url,
 		data: files_to_upload,
 		processData: false,
 		contentType: false,
