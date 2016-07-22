@@ -21,14 +21,14 @@ HTML;
 if(isset($_GET["g_id"])) {
     $g_id = $_GET["g_id"];
     $params = array($g_id);
-    $db->query("SELECT g.g_id, g_title, eg_submission_due_date FROM gradeable AS g INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id WHERE g.g_id=?", $params);
+    $db->query("SELECT g.g_id, g_title, eg_submission_due_date, eg_late_days FROM gradeable AS g INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id WHERE g.g_id=?", $params);
     $rubric = $db->row();
 }
 
 if(isset($_GET["g_id"]) && isset($rubric["g_id"])) {
     $g_id = $rubric["g_id"];
     $g_title = $rubric['g_title'];
-    $rubric_late_days = 2;// TODO set this$rubric['rubric_late_days'];
+    $rubric_late_days = $rubric['eg_late_days'];
     $eg_submission_due_date = $rubric['eg_submission_due_date'];
     $s_user_id = null;
     $student_first_name = null;
@@ -298,7 +298,6 @@ else if(!isset($_GET["g_id"])) {
     // update with the gradeable data 
     $params = array();
     
-    //TODO ADD THE late days
     $db->query("SELECT g_title, g.g_id, eg_submission_due_date FROM gradeable AS g INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id", $params);
     $results = $db->rows();
 
@@ -321,9 +320,9 @@ HTML;
         foreach($results as $row) {
             $homeworkDate = new DateTime($row['eg_submission_due_date']);
             //TODO ADD LATE DAYS
-            /*if ($row['rubric_late_days'] > 0) {
-                $homeworkDate->add(new DateInterval("PT{$row['rubric_late_days']}H"));
-            }*/
+            if ($row['eg_late_days'] > 0) {
+                $homeworkDate->add(new DateInterval("PT{$row['eg_late_days']}H"));
+            }
             $extra = ($now < $homeworkDate) ? "(Gradable: {$homeworkDate->format("Y-m-d H:i:s")})" : "";
             echo "<option value='{$row['g_id']}' ".($last["g_id"] == $row["g_id"] ? "selected" : "").">{$row['g_title']} {$extra}</option>";
             $c++;

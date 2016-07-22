@@ -254,11 +254,13 @@ WHERE g.student_id=? AND r.rubric_due_date<?", $params);
     private function setEGDetails() {
         //CHECK IF THERE IS A GRADEABLE FOR THIS STUDENT 
         
-        Database::query("
+        $eg_details_query = "
 SELECT g_title, gd_overall_comment, eg.* FROM electronic_gradeable AS eg 
     INNER JOIN gradeable AS g ON eg.g_id = g.g_id
     INNER JOIN gradeable_data AS gd ON gd.g_id=g.g_id 
-        WHERE gd_user_id=? AND g.g_id=?", array($this->student_id, $this->g_id));
+        WHERE gd_user_id=? AND g.g_id=?";
+        
+        Database::query($eg_details_query, array($this->student_id, $this->g_id));
         
         $this->eg_details = Database::row();
         
@@ -266,11 +268,16 @@ SELECT g_title, gd_overall_comment, eg.* FROM electronic_gradeable AS eg
         // retrieval is throwing this off
         
         // CREATE THE GRADEABLE DATA
-        if (!isset($this->eg_details['g_title'])) {
+        if (empty($this->eg_details)) {
             // TODO FACTOR IN LATE DAYS                     //TODO replace with grader id
             $params = array($this->g_id, $this->student_id, $this->student_id, '', 0,0,1); 
             Database::query("INSERT INTO gradeable_data(g_id,gd_user_id,gd_grader_id,gd_overall_comment, gd_status,gd_late_days_used,gd_active_version) VALUES(?,?,?,?,?,?,?)", $params); 
             $this->gd_id = \lib\Database::getLastInsertId('gradeable_data_gd_id_seq');
+            
+            Database::query( $eg_details_query, array($this->student_id, $this->g_id));
+        
+            $this->eg_details = Database::row();
+            
         }
         else{
             //get the gd_id 
@@ -406,11 +413,6 @@ ORDER BY gc_order ASC
                 if (isset($testcase['execute_logfile'])) {
                     $skip_files[] = $testcase['execute_logfile'];
                 }
-                /*if ($i ==2){
-                    var_dump($testcase);
-                    ++$i;
-                }
-                ++$i; */
                 if (isset($testcase['compilation_output'])) {
                     $skip_files[] = $testcase['compilation_output'];
                 }

@@ -579,7 +579,7 @@ ALTER TABLE ONLY grading_rotating
 --
 
 ALTER TABLE ONLY grading_rotating
-    ADD CONSTRAINT grading_rotating_sections_rotating_fkey FOREIGN KEY (sections_rotating) REFERENCES sections_rotating(sections_rotating_id);
+    ADD CONSTRAINT grading_rotating_sections_rotating_fkey FOREIGN KEY (sections_rotating) REFERENCES sections_rotating(sections_rotating_id) ON DELETE CASCADE;
 
 
 --

@@ -248,8 +248,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     fclose($fp); 
  }
  
-// this all comes from the post data for just a single insert
-// MAKE SURE THE TRANSACTIONS are in the right spot!
+// TODO MAKE SURE THE TRANSACTIONS are in the right spot!
  
 abstract class GradeableType{
     const electronic_file = 0;
@@ -317,20 +316,23 @@ function getGraders(& $var){
     return $graders;
 }
  
-function addAssignmentsTxt($assignments){
-    /* FIXME update the ASSIGNMENTS.txt file
-    // Should probably a member function of $gradeable 
+ /* FIXME update the ASSIGNMENTS.txt file */
+ // FIXME make member function of gradeable THIS IS BAD
+ // FIXME NAIVE IMPLEMENTATION
+function addAssignmentsTxt($db, $assignments){
     $fp = fopen(__SUBMISSION_SERVER__.'/ASSIGNMENTS.txt', 'a');
     if (!$fp){
         die('failed to open'. __SUBMISSION_SERVER__.'/ASSIGNMENTS.txt');
     }
-
+    //THIS IS BAD
     foreach ($assignments as $assignment){
-        fwrite($fp, "build_homework <TBD_PATH> " .__COURSE_SEMESTER__. " ".__COURSE_CODE__. " ". $assignment ."\n");
+        $db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($assignment));
+        $eg = $db->row();
+        if(!empty($eg)){
+            fwrite($fp, "build_homework" . "  " . $eg['eg_config_path'] . "  ". __COURSE_SEMESTER__. " ".__COURSE_CODE__. " ". $assignment ."\n");
+        }
     }
-
     fclose($fp);
-    */
 }
 
 $action = $_GET['action'];
@@ -352,7 +354,7 @@ if ($action != 'import'){
     
     $db->commit();
     if($action != 'edit'){
-        addAssignmentsTxt(array($gradeable->get_GID()));
+        addAssignmentsTxt($db,array($gradeable->get_GID()));
     }
     writeFormJSON($_POST['gradeable_id'],$_POST['gradeableJSON']);
 }
@@ -388,7 +390,7 @@ else{
             fclose($fp);
         }
     }
-    addAssignmentsTxt($success_gids);
+    addAssignmentsTxt($db,$success_gids);
     print count($success_gids).' of '.$num_files." successfully imported.\n";
     if(count($failed_files) > 0){
         print "Files failed:\n";

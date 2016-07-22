@@ -1,5 +1,7 @@
 <?php
 
+// TODO update SQL queries to support new schema
+
 require "../../toolbox/functions.php";
 
 check_administrator();

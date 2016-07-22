@@ -219,15 +219,12 @@ HTML;
 }
 
 ///////////////////////////////////
-    $show_part = "";
-
 
     //$output .= $eg->submission_details;
     if (!isset($eg->submission_details)) {
         $output .= <<<HTML
         <div id="inner-container">
             <div id="inner-container-spacer"></div>
-            {$show_part}
             <div id="inner-container-spacer"></div>
 
             <div class="tabbable">
@@ -255,13 +252,14 @@ HTML;
     $results_details = $eg->results_details;
 
     $submitted_details = $eg->submission_details;
+    
+    $submission_time = isset($results_details['submission_time']) ?  $results_details['submission_time'] : '';
 
     $output .= <<<HTML
         <div id="inner-container">
             <div id="inner-container-spacer"></div>
             <br />
-            Submitted: {$results_details['submission_time']}<br />
-            {$show_part}
+            Submitted: {$submission_time}<br />
             Submission Number: {$eg->active_assignment} / {$eg->max_assignment}
             <div id="inner-container-spacer"></div>
             <div class="tabbable">
@@ -273,21 +271,22 @@ HTML;
 
     $i = 0;
     $active = true;
-    foreach ($results_details['testcases'] as $k => $testcase) {
-        $active_text  = ($active == true) ? 'active' : '';
-        $j = $i + 1;
-        $pa = $testcase['points_awarded'];
-        $pt = $eg->config_details['testcases'][$k]['points'];
-        $output .= <<<HTML
-                    <li class="{$active_text}" >
-                        <span id="tab-{$i}" class="diff"></span>
-                        <a href="#output-{$i}" data-toggle="tab">Output Test {$j} [{$pa}/{$pt}]</a>
-                    </li>
+    if(isset($results_details['testcases'])){
+        foreach ($results_details['testcases'] as $k => $testcase) {
+            $active_text  = ($active == true) ? 'active' : '';
+            $j = $i + 1;
+            $pa = $testcase['points_awarded'];
+            $pt = $eg->config_details['testcases'][$k]['points'];
+            $output .= <<<HTML
+                        <li class="{$active_text}" >
+                            <span id="tab-{$i}" class="diff"></span>
+                            <a href="#output-{$i}" data-toggle="tab">Output Test {$j} [{$pa}/{$pt}]</a>
+                        </li>
 HTML;
-        $i++;
-        $active = false;
+            $i++;
+            $active = false;
+        }
     }
-
     $output .= <<<HTML
 
                 </ul>
@@ -296,34 +295,34 @@ HTML;
 
     $i = 0;
     $active = true;
-    foreach ($results_details['testcases'] as $k => $testcase) {
-        $active_text = ($active) ? 'active' : '';
-        $url = $BASE_URL."/account/iframe/test-pane.php?course={$_GET['course']}&testcases=".urlencode(json_encode($testcase))."&directory=".urlencode($results_details['directory']);
+    if(isset($results_details['testcases'])){
+        foreach ($results_details['testcases'] as $k => $testcase) {
+            $active_text = ($active) ? 'active' : '';
+            $url = $BASE_URL."/account/iframe/test-pane.php?course={$_GET['course']}&testcases=".urlencode(json_encode($testcase))."&directory=".urlencode($results_details['directory']);
 
-        $output .= <<<HTML
-                    <div class="tab-pane {$active_text}" id="output-{$i}">
-                        <div style="width:95%; margin: auto auto auto auto; overflow-y:auto; overflow-x:hidden; padding-top:20px;">                                                                                               
-                            <iframe src="{$url}" id='iframe-{$i}' width='750px' style='border: 0' onload="autoResize('iframe-{$i}'); load_tab_icon('tab-{$i}', 'iframe-{$i}', {$testcase['points_awarded']}, {$eg->config_details['testcases'][$k]['points']}); ">
-                            </iframe>
-                            <br />
-                            Logfile
-                            <textarea id="code{$source_number}">
+            $output .= <<<HTML
+                        <div class="tab-pane {$active_text}" id="output-{$i}">
+                            <div style="width:95%; margin: auto auto auto auto; overflow-y:auto; overflow-x:hidden; padding-top:20px;">                                                                                               
+                                <iframe src="{$url}" id='iframe-{$i}' width='750px' style='border: 0' onload="autoResize('iframe-{$i}'); load_tab_icon('tab-{$i}', 'iframe-{$i}', {$testcase['points_awarded']}, {$eg->config_details['testcases'][$k]['points']}); ">
+                                </iframe>
+                                <br />
+                                Logfile
+                                <textarea id="code{$source_number}">
 HTML;
-        //$output .= htmlentities(file_get_contents($results_details['directory']."/".$testcase['execute_logfile']));
-        $output .= <<<HTML
-                            </textarea>
+            //$output .= htmlentities(file_get_contents($results_details['directory']."/".$testcase['execute_logfile']));
+            $output .= <<<HTML
+                                </textarea>
 HTML;
-        $output .= sourceSettingsJS($testcase['execute_logfile'], $source_number);
-        $output .= <<<HTML
+            $output .= sourceSettingsJS($testcase['execute_logfile'], $source_number);
+            $output .= <<<HTML
+                            </div>
                         </div>
-                    </div>
 HTML;
-
-        $i++;
-        $active = false;
-        $source_number++;
+            $i++;
+            $active = false;
+            $source_number++;
+        }
     }
-
     $output .= <<<HTML
 
                 </div>

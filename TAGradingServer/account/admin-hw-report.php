@@ -16,12 +16,12 @@ echo <<<HTML
                     <option value="-1">No Homework</option>
 HTML;
                     $params = array();
-                    $db->query("SELECT * FROM rubrics ORDER BY rubric_due_date ASC", $params);
+                    $db->query("SELECT * FROM gradeables AS g INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id ORDER BY eg_submission_due_date ASC", $params);
                     $temp = $db->rows();
                     for($i = 0; $i < count($temp); $i++)
                     {
                         $row = $temp[$i];
-                        echo '<option' . ($i == count($temp) -1 ? " selected " : "") . ' value='.$row['rubric_id'].'>' . $row["rubric_name"] . '</option>';
+                        echo '<option' . ($i == count($temp) -1 ? " selected " : "") . ' value='.$row['g_id'].'>' . $row["g_titlle"] . '</option>';
                     }
 echo <<<HTML
                 </select>

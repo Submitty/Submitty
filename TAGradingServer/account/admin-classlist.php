@@ -1,4 +1,6 @@
 <?php
+//TODO currently not supported by the new schema
+
 include "../header.php";
 
 check_administrator();

@@ -22,28 +22,24 @@ $now = new DateTime('now');
 $homeworkDate = new DateTime($gradeable['eg_submission_due_date']);
 
 //TODO ADD LATEDAYS 
-/*if ($rubric['rubric_late_days'] > 0) {
-    $homeworkDate->add(new DateInterval("PT{$rubric['rubric_late_days']}H"));
-}*/
+if ($gradeable['eg_late_days'] > 0) {
+    $homeworkDate->add(new DateInterval("PT{$gradeable['eg_late_days']}H"));
+}
 
 if ($now < $homeworkDate) {
     die("Homework is not open for grading yet.");
 }
 
-/*
 $student = $_GET["student"];
 $db->query("SELECT user_id FROM users WHERE user_id=?", array($student));
 $row = $db->row();
-$student_id = $row['student_id'];
-*/
+$student_id = $row['user_id'];
 
 // get the gradeable data from the student
 $params = array($g_id);
 $db->query("SELECT * FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id 
             WHERE g.g_id=? ORDER BY gc_order ASC", $params);
 $rows = $db->rows();
-
-print_r($_POST);
 
 $params = array($g_id);
 $db->query("SELECT gd_id FROM gradeable_data AS gd INNER JOIN gradeable AS g ON gd.g_id=g.g_id WHERE g.g_id=?",$params);
@@ -68,19 +64,17 @@ $params = array($overall_comment, $gd_id);
 $db->query("UPDATE gradeable_data SET gd_overall_comment=? WHERE gd_id=?",$params);
 
 // CREATE / UPDATE THE GRADEABLE GRADES FOR THE STUDENT 
-/*
 
+/*
 $status = intval($_POST['status']);
 $submitted = intval($_POST['submitted']);
 $_POST["late"] = intval($_POST['late']);
-
-
-//create the grades here
-
+*/
+//TODO UPDATE THE STATUS
 
 if($_GET["individual"] == "1") {
     header('Location: '.$BASE_URL.'/account/account-summary.php?course='.$_GET['course'].'&g_id=' . $_GET["g_id"]);
 }
 else {
     header('Location: '.$BASE_URL.'/account/index.php?course='.$_GET['course'].'&g_id=' . $_GET["g_id"]);
-}*/
+}

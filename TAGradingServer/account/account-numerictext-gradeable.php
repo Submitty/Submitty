@@ -1,4 +1,6 @@
 <?php
+// TODO add labels to numeric text fields
+// Pull out tabs to separate URL
 use app\models\User;
 
 include "../header.php";

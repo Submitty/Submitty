@@ -1,5 +1,7 @@
 <?php
 
+// TODO support new schema
+
 include "../../toolbox/functions.php";
 
 use lib\Database;

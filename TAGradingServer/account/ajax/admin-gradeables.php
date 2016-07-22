@@ -29,6 +29,9 @@ switch($action) {
         if (is_file($json_config)){
             unlink($json_config);
         }
+        
+        //TODO ON DELETE if it's an electronic gradeable repopulate ASSIGNMENTS.txt
+        
         print "success|".$id;
         break;
     default:

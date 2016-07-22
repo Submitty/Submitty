@@ -526,12 +526,12 @@ HTML;
 
             Who is assigned to grade this item?:
             <br /> <br />
-            <input type="radio" name="section-type" value="reg-section" 
+            <input type="radio" name="section-type" value="reg-section"
 HTML;
     echo ($action==='edit' && $g_grade_by_registration===true)?'checked':'';
     print <<<HTML
             /> Registration Section
-            <input type="radio" name="section-type" value="rotating-section" id="rotating-section"
+            <input type="radio" name="section-type" value="rotating-section" id="rotating-section" class="graders"
 HTML;
     echo ($action==='edit' && $g_grade_by_registration===false)?'checked':'';
     print <<<HTML
@@ -581,7 +581,7 @@ HTML;
     }
     
     print <<<HTML
-    <div id="rotating-sections" style="display:none;">
+    <div id="rotating-sections" class="graders" style="display:none;">
         <br />
         Available rotating sections: {$num_rotating_sections}
         <br /> <br />
@@ -626,7 +626,7 @@ HTML;
         print <<<HTML
         <tr>
             <td>{$la_grader['user_id']}</td>
-            <td><input style="width: 227px" type="text" name="grader-{$la_grader['user_id']}" value="
+            <td><input style="width: 227px" type="text" name="grader-{$la_grader['user_id']}" class="graders" value="
 HTML;
         if($action==='edit' && !$g_grade_by_registration) {
             print (isset($graders_to_sections[$la_grader['user_id']])) ? $graders_to_sections[$la_grader['user_id']] : '';
@@ -717,7 +717,7 @@ HTML;
         var o = {};
         var a = this.serializeArray();
         var ignore = [];
-        ignore.push('csrf_token'); // no need to save csrf to JSON :P
+        ignore.push('csrf_token');
         $(':radio').each(function(){
            if(! $(this).is(':checked')){
                if($(this).attr('class') !== undefined){
