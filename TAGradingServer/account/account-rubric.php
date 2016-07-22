@@ -567,36 +567,10 @@ HTML;
     $comment = ($question['grade_question_comment'] != "") ? "in" : "";
     $output .= <<<HTML
     <tr style="background-color: #f9f9f9;">
-                            <td style="white-space:nowrap; vertical-align:middle; text-align:center;"><input type="number" id="test-{$question["question_part_number"]}-{$question["question_number"]}" class="grades" name="grade-{$question['question_part_number']}-{$question['question_number']}" value="{$question['grade_question_score']}" min="0" max="{$question['question_total']}" step="0.5" placeholder="&plusmn;0.5" onchange="validateInput_{$question["question_part_number"]}_{$question["question_number"]}(0.5); calculatePercentageTotal();" style="width:50px; resize:none;"></textarea><strong> / {$question['question_total']}</strong></td>
+                            <td style="white-space:nowrap; vertical-align:middle; text-align:center;"><input type="number" id="test-{$question["question_part_number"]}-{$question["question_number"]}" class="grades" name="grade-{$question['question_part_number']}-{$question['question_number']}" value="{$question['grade_question_score']}" min="0" max="{$question['question_total']}" step="0.5" placeholder="&plusmn;0.5" onchange="validateInput('{$question["question_part_number"]}', '{$question["question_number"]}', '{$question["question_total"]}',  0.5); calculatePercentageTotal();" style="width:50px; resize:none;"></textarea><strong> / {$question['question_total']}</strong></td>
                             <td style="width:100%; padding:0px">
                                 <div id="rubric-{$c}">
-                                    <textarea name="comment-{$question["question_part_number"]}-{$question["question_number"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:100%; height:100%; padding:0px; resize:none; margin:0px 0px; border-radius:0px; border:none; padding:5px; border-left:3px #DDD solid; float:left; margin-right:-28px;" placeholder="Message for the student..." comment-position="0">{$question['grade_question_comment']}</textarea>
-HTML;
-    $output .= <<<HTML
-    <script>
-    // delta in this function is the incremental step of points, currently hardcoded to 0.5pts
-    function validateInput_{$question["question_part_number"]}_{$question["question_number"]}(delta){
-        var ele = $('#test-{$question["question_part_number"]}-{$question["question_number"]}');
-        if(isNaN(parseFloat(ele.val())) || ele.val() == ""){
-            ele.val("");
-            return;
-        }
-        if(ele.val() < 0) {
-            ele.val( 0 );
-        }
-        if(ele.val() > parseFloat("{$question['question_total']}")) {
-            ele.val( "{$question['question_total']}" );
-        }
-        if(ele.val() % delta != 0) {
-            ele.val( Math.round(ele.val() / delta) * delta );
-        }
-    }
-    // autoresize the comment box
-    function autoResizeComment(e){
-        e.target.style.height ="";
-        e.target.style.height = e.target.scrollHeight + "px";
-    }
-    </script>
+                                    <textarea name="comment-{$question["question_part_number"]}-{$question["question_number"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:100%; height:100%; resize:none; margin:0px 0px; border-radius:0px; border:none; padding:5px; float:left; margin-right:-25px;" placeholder="Message for the student..." comment-position="0">{$question['grade_question_comment']}</textarea>
 HTML;
 
     $comment = htmlspecialchars($question['grade_question_comment']);
@@ -729,7 +703,29 @@ HTML;
 
 $output .= <<<HTML
 <script>
-calculatePercentageTotal();
+    // delta in this function is the incremental step of points, currently hardcoded to 0.5pts
+    function validateInput(question_part_number, question_number, question_total, delta){
+        var ele = $('#test-' + question_part_number + '-' + question_number);
+        if(isNaN(parseFloat(ele.val())) || ele.val() == ""){
+            ele.val("");
+            return;
+        }
+        if(ele.val() < 0) {
+            ele.val( 0 );
+        }
+        if(ele.val() > parseFloat(question_total)) {
+            ele.val(question_total);
+        }
+        if(ele.val() % delta != 0) {
+            ele.val( Math.round(ele.val() / delta) * delta );
+        }
+    }
+    // autoresize the comment box
+    function autoResizeComment(e){
+        e.target.style.height ="";
+        e.target.style.height = e.target.scrollHeight + "px";
+    }
+    calculatePercentageTotal();
 </script>
 HTML;
 
