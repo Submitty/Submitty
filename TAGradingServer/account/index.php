@@ -11,6 +11,19 @@ $show_stats = isset($_COOKIE["show_stats"]) ? intval($_COOKIE["show_stats"]) : 0
 $show_rubric = isset($_COOKIE["show_rubric"]) ? intval($_COOKIE["show_rubric"]) : 0;
 $show_left = isset($_COOKIE["show_left"]) ? intval($_COOKIE["show_left"]) : 1;
 $show_right = isset($_COOKIE["show_right"]) ? intval($_COOKIE["show_right"]) : 1;
+
+$stats_left = floatval($_COOKIE["stats_left"]);
+$stats_top = floatval($_COOKIE["stats_top"]);
+$stats_width = floatval($_COOKIE["stats_width"]);
+$stats_height = floatval($_COOKIE["stats_height"]);
+
+$rubric_left = floatval($_COOKIE["rubric_left"]);
+$rubric_top = floatval($_COOKIE["rubric_top"]);
+$rubric_width = floatval($_COOKIE["rubric_width"]);
+$rubric_height = floatval($_COOKIE["rubric_height"]);
+
+$grade_left = floatval($_COOKIE["grade_left"]); // position of toolbar should also be remembered. Not implemented yet
+$grade_top = floatval($_COOKIE["grade_top"]);
 $rubric_late_days = 0;
 
 print <<<HTML
@@ -421,8 +434,11 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     document.getElementById('container').style.width = window.innerWidth + 'px';
     document.getElementById('container').style.height = (window.innerHeight - 40) + 'px';
 
-    var split = 0;
     var width = window.innerWidth - 7;
+    var height = window.innerHeight - 40;
+
+    // get cookies of panel size and position
+    var split = 0;
     split = <?php echo ($split == "" || $split < 25 || 75 < $split ? 50 : $split); ?> / 100.0;
     if (document.getElementById('left') != null) {
         document.getElementById('left').style.width = (width * (split)) + 'px';
@@ -434,6 +450,29 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
         document.getElementById('panemover').style.width = '10px';
     }
+    if(document.getElementById('stats') != null) {
+        stats_width = (<?php echo $stats_width;?> == 0) ? 0.2 * width : <?php echo $stats_width;?>;
+        stats_height = (<?php echo $stats_height;?> == 0) ? 0.4 * height : <?php echo $stats_height;?>;
+        document.getElementById('stats').style.width = stats_width + "px";
+        document.getElementById('stats').style.height = stats_height + "px";
+
+        stats_left = (<?php echo $stats_left;?> == 0) ? 0.1 * width : <?php echo $stats_left;?>;
+        stats_top = (<?php echo $stats_top;?> == 0) ? 0.55 * height : <?php echo $stats_top;?>;
+        document.getElementById('stats').style.left = stats_left + "px";
+        document.getElementById('stats').style.top = stats_top + "px";
+    }
+
+    if(document.getElementById('rubric') != null) {
+        rubric_width = (<?php echo $rubric_width;?> == 0) ? 0.45 * width : <?php echo $rubric_width;?>;
+        rubric_height = (<?php echo $rubric_height;?> == 0) ? 0.80 * height : <?php echo $rubric_height;?>;
+        document.getElementById('rubric').style.width = rubric_width + "px";
+        document.getElementById('rubric').style.height = rubric_height + "px";
+
+        rubric_left = (<?php echo $rubric_left;?> == 0) ? 0.4 * width : <?php echo $rubric_left;?>;
+        rubric_top = (<?php echo $rubric_top;?> == 0) ? 0.15 * height : <?php echo $rubric_top;?>;
+        document.getElementById('rubric').style.left = rubric_left + "px";
+        document.getElementById('rubric').style.top = rubric_top + "px";
+    }
 
     window.onload = updateDisplay();
 
@@ -442,7 +481,12 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         document.getElementById('rubric').style.left = parseFloat(window.innerWidth * document.getElementById('rubric').offsetLeft/(width + 7)) + 'px';
         document.getElementById('stats').style.left = parseFloat(window.innerWidth * document.getElementById('stats').offsetLeft/(width + 7)) + 'px';
 
+        document.getElementById('grade').style.top = parseFloat(window.innerHeight * document.getElementById('grade').offsetTop/height) + 'px';
+        document.getElementById('rubric').style.top = parseFloat(window.innerHeight * document.getElementById('rubric').offsetTop/height) + 'px';
+        document.getElementById('stats').style.top = parseFloat(window.innerHeight * document.getElementById('stats').offsetTop/height) + 'px';
+
         width = window.innerWidth - 7;
+        height = window.innerHeight;
         split = (parseInt(document.getElementById('left').style.width) / (parseInt(document.getElementById('left').style.width) + parseInt(document.getElementById('right').style.width))).toFixed(2);
 
         document.getElementById('left').style.width = (width * split) + 'px';
@@ -481,10 +525,20 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
                 updateDisplay();
                 break;
             case "KeyR": // Reset all cookies to default // TODO: Checkbox that lets user choose to save cookie or not?
-                setCookie("show_stats", 0, 180*24*60*60);
-                setCookie("show_rubric", 0, 180*24*60*60);
-                setCookie("show_left", 1, 180*24*60*60);
-                setCookie("show_right", 1, 180*24*60*60);
+                setCookie("show_stats", 0, -180*24*60*60);
+                setCookie("show_rubric", 0, -180*24*60*60);
+                setCookie("show_left", 1, -180*24*60*60);
+                setCookie("show_right", 1, -180*24*60*60);
+                setCookie("stats_width", 0, -180*24*60*60);
+                setCookie("stats_height", 0, -180*24*60*60);
+                setCookie("stats_left", 0, -180*24*60*60);
+                setCookie("stats_top", 0, -180*24*60*60);
+                setCookie("rubric_width", 0, -180*24*60*60);
+                setCookie("rubric_height", 0, -180*24*60*60);
+                setCookie("rubric_left", 0, -180*24*60*60);
+                setCookie("rubric_top", 0, -180*24*60*60);
+                setCookie("grade_left", 0, -180*24*60*60);
+                setCookie("grade_top", 0, -180*24*60*60);
                 break;
             default:
                 break;
@@ -591,6 +645,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         element.style.top = (element.offsetTop - (mouse_y - e.clientY)) + 'px';
         mouse_x = e.clientX;
         mouse_y = e.clientY;
+        savePosition(id);
         /*
         // TODO: Add check for dragging off sight or add a function to reset panel positions somewhere?
         if((grade.offsetRight - grade.offsetWidth) < 5) {
@@ -617,7 +672,11 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         minWidth: 50,
         maxWidth: 500,
         minHeight: 50,
-        maxHeight: 500
+        maxHeight: 500,
+        resize: function () {
+            saveSize("stats");
+            savePosition("stats");
+        }
     });
 
     $('#rubric').resizable({
@@ -625,8 +684,24 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         minWidth: 200,
         maxWidth: 1000,
         minHeight: 200,
-        maxHeight: 1000
+        maxHeight: 1000,
+        resize: function () {
+            saveSize("rubric");
+            savePosition("rubric");
+        }
     });
+
+    function saveSize(id) {
+        var ele = document.getElementById(id);
+        setCookie( id + "_width", ele.offsetWidth, 180*24*60*60);
+        setCookie(id + "_height", ele.offsetHeight, 180*24*60*60);
+    }
+
+    function savePosition(id) {
+        var ele = document.getElementById(id);
+        setCookie( id + "_left", ele.offsetLeft, 180*24*60*60);
+        setCookie(id + "_top", ele.offsetTop, 180*24*60*60);
+    }
 
     // Place the panel selected on top of other panels (if overlaping).
     function changeStackingOrder(e) {
