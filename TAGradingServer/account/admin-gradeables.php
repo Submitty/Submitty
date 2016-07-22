@@ -46,7 +46,7 @@ $output .= <<<HTML
     }
 
     #table-gradeables {
-        /*width: 80%;*/
+        width: 90%;
         margin-left: 30px;
         margin-top: 10px;
     }
@@ -64,7 +64,7 @@ $output .= <<<HTML
     }
 
     #table-gradeables td.gradeables-id {
-        width: 50px;
+        width: 200px;
     }
 
     #table-gradeables td.gradeables-name {
@@ -80,11 +80,11 @@ $output .= <<<HTML
     }
 
     #table-gradeables td.gradeables-score {
-        width: 160px;
+        width: 120px;
     }
 
     #table-gradeables td.gradeables-due {
-        width: 260px;
+        width: 240px;
     }
 
     #table-gradeables td.gradeables-options {
@@ -211,7 +211,6 @@ $output .= <<<HTML
         <tr>
             <td class="gradeables-id">ID</td>
             <td class="gradeables-name">Name</td>
-            <td class="gradeables-parts">Parts</td>
             <td class="gradeables-questions">Questions</td>
             <td class="gradeables-score">Score</td>
             <td class="gradeables-due">Due Date</td>
@@ -226,13 +225,27 @@ foreach ($gradeables as $gradeable) {
     $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($gradeable['g_id']));
     $num_questions = intval($db->row()['cnt']);
     
+    //calculate total worth
+    
+    $db->query("
+    SELECT SUM(gc_max_value) AS score
+    FROM 
+        gradeable as g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id
+    WHERE 
+        g.g_id=?
+        AND NOT gc_is_extra_credit
+    GROUP BY
+        g.g_id
+    ", array($g_id));
+    
+    $score = $db->row()['score'];
+    
     $output .= <<<HTML
         <tr id='gradeable-{$g_id}'">
             <td class="gradeables-id" id="gradeable-{$g_id}-id">{$g_id}</td>
             <td class="gradeables-name" id="gradeable-{$g_id}-title">{$g_title}</td>
-            <td class="gradeables-parts" id="gradeable-{$g_id}-parts"></td>
             <td class="gradeables-questions" id="gradeable-{$g_id}-questions">{$num_questions}</td>
-            <td class="gradeables-score" id="gradeable-{$g_id}-score"></td>
+            <td class="gradeables-score" id="gradeable-{$g_id}-score">{$score}</td>
             <td class="gradeables-due" id="gradeable-{$g_id}-due">{$gradeable['g_grade_released_date']}</td>
             <td id="gradeable-{$g_id}-options"><a href="{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&action=edit&id={$g_id}">Edit</a> |
             <a onclick="deleteGradeable('{$g_id}');">Delete</a></td>

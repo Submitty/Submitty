@@ -129,7 +129,7 @@ foreach($nt_gradeables as $nt_row){
                     <table class="table table-bordered" id="nt_gradeablesTable" style=" border: 1px solid #AAA;">
                         <thead style="background: #E1E1E1;">
                             <tr>
-                                <th>RCS ID</th>
+                                <th>User ID</th>
 HTML;
     if ($colspan2 === 0){
         print <<<HTML
@@ -267,9 +267,10 @@ HTML;
             
             //print the text fields
             for ($i = $num_numeric; $i <$num_numeric+$num_text; ++$i) {
+                $text_field = isset($text_fields[$i]) ? $text_fields[$i] : "";
                 print <<<HTML
                                 <td class="input-container" style="border: 1px solid black">
-                                    <input id="cell-{$nt_row["g_id"]}-{$row["user_id"]}-t{$i}" elem="text" type="text" value="{$text_fields[$i]}" />
+                                    <input id="cell-{$nt_row["g_id"]}-{$row["user_id"]}-t{$i}" elem="text" type="text" value="{$text_field}" />
                                 </td>
 HTML;
             }
@@ -316,7 +317,7 @@ echo <<<HTML
 			var name = $(this).attr("id");
 			name = name.split("-");
 			var nt_gradeable = name[1];
-			var rcs = name[2];
+			var user_id = name[2];
 
             if ($(this).attr('elem') == 'text') {
 
@@ -338,7 +339,7 @@ echo <<<HTML
 			var total = 0;
 			var extra = "";
 			for (var i = 0; i < questions[nt_gradeable]; i++) {
-			    var score = parseFloat($("#cell-"+nt_gradeable+"-"+rcs+"-q"+i).val());
+			    var score = parseFloat($("#cell-"+nt_gradeable+"-"+user_id+"-q"+i).val());
 			    if (isNaN(score)) {
 			        score = 0;
 			    }
@@ -347,12 +348,12 @@ echo <<<HTML
 			}
 
             for (var j = questions[nt_gradeable]; j <questions[nt_gradeable]+text_fields[nt_gradeable]; ++j){
-			    var text = $("#cell-"+nt_gradeable+"-"+rcs+"-t"+j).val();
+			    var text = $("#cell-"+nt_gradeable+"-"+user_id+"-t"+j).val();
 			    extra += "&t"+j+"="+text;
 			}
             
-			$("#cell-"+nt_gradeable+"-"+rcs+"-score").text(total);
-			url = "{$BASE_URL}/account/ajax/account-numerictext-gradeable.php?course={$_GET['course']}&id=" + nt_gradeable + "&rcs=" + rcs + "&grade=" + total + extra; 
+			$("#cell-"+nt_gradeable+"-"+user_id+"-score").text(total);
+			url = "{$BASE_URL}/account/ajax/account-numerictext-gradeable.php?course={$_GET['course']}&id=" + nt_gradeable + "&user_id=" + user_id + "&grade=" + total + extra; 
             updateColor(this, url);
 		});
         

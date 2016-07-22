@@ -99,9 +99,22 @@ HTML;
                                 </a></li>
                             </ul>
                         </li>
-                        <li><a tabindex="-1" href="{$BASE_URL}/account/admin-gradeables.php" role="button" data-toggle="modal">
+                        <li class="dropdown">
+                            <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
+                                Gradeables <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="drop-grade">
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-gradeables.php" role="button" data-toggle="modal">
                                 Manage Gradeables
-                        </a></li>
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/account-numerictext-gradeable.php" role="button" data-toggle="modal">
+                                Numeric/Text Gradeables
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/account-checkpoints-gradeable.php" role="button" data-toggle="modal">
+                                Checkpoints Gradeables
+                                </a></li>
+                            </ul>
+                        </li>                        
                         <li class="dropdown">
                             <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
                                 System Management <b class="caret"></b>
@@ -120,7 +133,7 @@ HTML;
                                     Upload Classlist
                                 </a></li>
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-grading-sections.php" role="button" data-toggle="modal">
-                                    Setup Grading Sections
+                                    Setup Rotating Sections
                                 </a></li>
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-latedays-exceptions.php" role="button" data-toggle="modal">
                                     Add Late Day Exceptions

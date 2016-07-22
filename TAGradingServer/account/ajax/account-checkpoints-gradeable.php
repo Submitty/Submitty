@@ -61,14 +61,13 @@ AND gc_order=?
             // INSERT
             //CHECK if the gradeable data exists, if not create it first
             $params = array($g_id, $user_id);
-            $db->query("SELECT gd_id, COUNT(*) AS cnt 
+            $db->query("SELECT gd_id
             FROM gradeable_data AS gd INNER JOIN gradeable g ON gd.g_id = g.g_id
             WHERE g.g_id =?
             AND  gd_user_id =?
-            GROUP BY gd_id
             ",$params);
             $row = $db->row();
-            if ($row['cnt']==0){
+            if (empty($row)){
                 //TODO FILL IN THE CORRECT STATUS? UPDATE the grader as the current user
                $params = array($g_id, $user_id, $user_id, '', 0,0,1); 
                $db->query("INSERT INTO gradeable_data(g_id,gd_user_id,gd_grader_id,gd_overall_comment, gd_status,gd_late_days_used,gd_active_version) VALUES(?,?,?,?,?,?,?)", $params); 

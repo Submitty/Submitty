@@ -6,7 +6,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
 }
 
 $g_id = $_GET["id"];
-$rcs = $_GET["rcs"];
+$user_id = $_GET["user_id"];
 $grade = floatval($_GET["grade"]);
 
 $params = array($g_id);
@@ -27,15 +27,16 @@ for ($i = $num_numeric; $i <$num_numeric+$num_text; ++$i) {
     ++$j;
 }
 
-$params = array($g_id, $rcs);
+$params = array($g_id, $user_id);
 
-//FIRST check if there is gradeable data for this gradeable and rcs
-$db->query("SELECT gd_id, COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_data AS gd ON g.g_id=gd.g_id WHERE g.g_id=? AND gd_user_id=? GROUP BY gd_id", $params);
+//FIRST check if there is gradeable data for this gradeable and user_id
+$db->query("SELECT gd_id FROM gradeable AS g INNER JOIN gradeable_data AS gd ON g.g_id=gd.g_id WHERE g.g_id=? AND gd_user_id=?", $params);
 $row = $db->row();
-if ($row['cnt'] == 0){
+
+if (empty($row)){
    // GRADEABLE DATA DOES NOT EXIST 
    //TODO FILL IN THE CORRECT STATUS?
-   $params = array($g_id, $rcs, $user_id, '', 0,0,1); 
+   $params = array($g_id, $user_id, $user_id, '', 0,0,1); 
    $db->query("INSERT INTO gradeable_data (g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status, gd_late_days_used, gd_active_version)
                 VALUES(?,?,?,?,?,?,?)", $params);
    $gd_id = \lib\Database::getLastInsertId('gradeable_data_gd_id_seq');
@@ -45,7 +46,7 @@ else{
 }
 
 for ($i=1; $i<=$num_numeric+$num_text; ++$i){
-    $params = array($g_id, $rcs, $i);
+    $params = array($g_id, $user_id, $i);
         $db->query("SELECT 
         gc.gc_id
         ,gd.gd_id

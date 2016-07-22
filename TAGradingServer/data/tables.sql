@@ -72,7 +72,8 @@ CREATE TABLE electronic_gradeable (
     eg_is_repository boolean NOT NULL,
     eg_subdirectory character varying(1024) NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
-    eg_config_path character varying(1024) NOT NULL
+    eg_config_path character varying(1024) NOT NULL,
+    eg_late_days integer DEFAULT (-1) NOT NULL
 );
 
 
@@ -450,7 +451,7 @@ ALTER TABLE ONLY grading_registration
 --
 
 ALTER TABLE ONLY grading_rotating
-    ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (g_id, user_id);
+    ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (g_id, user_id, section_rotating);
 
 
 --
@@ -570,7 +571,7 @@ ALTER TABLE ONLY grading_registration
 --
 
 ALTER TABLE ONLY grading_rotating
-    ADD CONSTRAINT grading_rotating_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id);
+    ADD CONSTRAINT grading_rotating_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
 
 
 --
@@ -586,7 +587,7 @@ ALTER TABLE ONLY grading_rotating
 --
 
 ALTER TABLE ONLY grading_rotating
-    ADD CONSTRAINT grading_rotating_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
+    ADD CONSTRAINT grading_rotating_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
 
 
 --

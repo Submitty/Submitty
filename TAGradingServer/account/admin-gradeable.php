@@ -24,7 +24,7 @@ if($user_is_administrator){
     $num_numeric = $num_text = 0;
     $g_gradeable_type = $is_repository = $g_syllabus_bucket = $g_min_grading_group = -1;
     $use_ta_grading = true;
-    $g_overall_ta_instructions = '';
+    $g_overall_ta_instructions = $g_id = '';
     
     
     if (isset($_GET['action']) && $_GET['action'] == 'edit') {
@@ -61,6 +61,7 @@ if($user_is_administrator){
             $electronic_gradeable = $db->row();
             $use_ta_grading = $electronic_gradeable['eg_use_ta_grading'];
             $is_repository = $electronic_gradeable['eg_is_repository'];
+            $late_days = $electronic_gradeable['eg_late_days'];
             $db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_max_value, gc_is_extra_credit FROM gradeable_component 
                         WHERE g_id=? GROUP BY gc_id ORDER BY gc_order ASC",array($g_id));
             $tmp_questions = $db->rows();
@@ -98,7 +99,7 @@ if($user_is_administrator){
         $gradeable_name = "Gradeable {$gradeableNumberQuery}";
         $gradeable_submission_id = "gradeable".Functions::pad($gradeableNumberQuery);
         $g_team_assignment = json_encode($old_gradeable['g_team_assignment']);
-        $g_grade_by_registration = json_encode($old_gradeable['g_grade_by_registration']);
+        $g_grade_by_registration = $old_gradeable['g_grade_by_registration'];
         $string = "Add";
         $action = strtolower($string);
     }
@@ -273,8 +274,8 @@ HTML;
                 style="cursor: auto; background-color: #FFF; width: 250px;">
                 <br />
                 <!-- TODO: set default late days -->
-                How many late days may students use on this assignment? <input style="width: 50px" name="rubric_late_days" 
-                                                                         type="text" />
+                How many late days may students use on this assignment? <input style="width: 50px" name="eg_late_days" 
+                                                                         type="text"/>
                 <br/>
                 
                 <fieldset>
@@ -527,15 +528,15 @@ HTML;
             <br /> <br />
             <input type="radio" name="section-type" value="reg-section" 
 HTML;
-    echo ($g_grade_by_registration===true)?'checked':'';
+    echo ($action==='edit' && $g_grade_by_registration===true)?'checked':'';
     print <<<HTML
             /> Registration Section
-            <input type="radio" name="section-type" value="grade-section" 
+            <input type="radio" name="section-type" value="rotating-section" id="rotating-section"
 HTML;
-    echo ($g_grade_by_registration===false)?'checked':'';
+    echo ($action==='edit' && $g_grade_by_registration===false)?'checked':'';
     print <<<HTML
-            /> Grading Section
-            <br /> <br />
+            /> Rotating Section
+            <br />
             <!-- For each TA/mentor 
                  Checkboxes (select, zero, one, or more for the available sections)
                  Single checkbox per user to indicate if this grader can see/edit
@@ -549,7 +550,103 @@ HTML;
                         or edit any gradeables in any sections, but per gradeable can read/write access be granted.
                 NOTE:  Flag as error if some sections have no grader    
             -->
-            <br />
+HTML;
+
+    $db->query("SELECT COUNT(*) AS cnt FROM sections_rotating", array());
+    $num_rotating_sections = $db->row()['cnt'];
+    $all_sections = str_replace(array('[', ']'), '', 
+                    htmlspecialchars(json_encode(range(1,$num_rotating_sections)), ENT_NOQUOTES));
+
+    
+    // write a sql query to relate graders to all of their grading sections
+    // i.e. grader => [sections]
+    $db->query("
+    SELECT 
+        u.user_id, array_agg(sections_rotating ORDER BY sections_rotating ASC) AS sections
+    FROM 
+        users AS u INNER JOIN grading_rotating AS gr ON u.user_id = gr.user_id
+    WHERE 
+        g_id=?
+    AND 
+        u.user_group BETWEEN 2 AND 3
+    GROUP BY 
+        u.user_id
+    ",array($g_id));
+    
+    $graders_to_sections = array();
+    
+    foreach($db->rows() as $grader){
+        $graders_to_sections[$grader['user_id']] = str_replace(array('[', ']'), '', 
+                                                   htmlspecialchars(json_encode(pgArrayToPhp($grader['sections'])), ENT_NOQUOTES));
+    }
+    
+    print <<<HTML
+    <div id="rotating-sections" style="display:none;">
+        <br />
+        Available rotating sections: {$num_rotating_sections}
+        <br /> <br />
+HTML;
+    
+    //  ONE for TAs  
+    print <<<HTML
+            <table>
+                <th>Full Access Graders</th>
+HTML;
+    
+   $db->query("SELECT user_id FROM users WHERE user_group=?", array(2));
+      
+    foreach($db->rows() as $fa_grader){
+        print <<<HTML
+        <tr>
+            <td>{$fa_grader['user_id']}</td>
+            <td><input style="width: 227px" type="text" name="grader-{$fa_grader['user_id']}" value="
+HTML;
+        if($action==='edit' && !$g_grade_by_registration) {
+            print (isset($graders_to_sections[$fa_grader['user_id']])) ? $graders_to_sections[$fa_grader['user_id']] : '';
+        } 
+        else{
+            print $all_sections; 
+        }
+        print <<<HTML
+            "></td>
+        </tr>
+HTML;
+    }
+    
+    print <<<HTML
+            </table>
+            <br/>
+            <table>
+                <th>Limited Access Graders</th>
+HTML;
+
+   $db->query("SELECT user_id FROM users WHERE user_group=?", array(3));
+      
+    foreach($db->rows() as $la_grader){
+        print <<<HTML
+        <tr>
+            <td>{$la_grader['user_id']}</td>
+            <td><input style="width: 227px" type="text" name="grader-{$la_grader['user_id']}" value="
+HTML;
+        if($action==='edit' && !$g_grade_by_registration) {
+            print (isset($graders_to_sections[$la_grader['user_id']])) ? $graders_to_sections[$la_grader['user_id']] : '';
+        } 
+        else{
+            print $all_sections; 
+        }
+        print <<<HTML
+"></td>
+        </tr>
+HTML;
+    }
+
+    print <<<HTML
+        </table>
+    </div> 
+        <br />
+HTML;
+
+    print <<<HTML
             <!-- TODO default to the submission + late days for electronic -->
             What date can the TAs start grading this?: <input name="date_grade" id="date_grade" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
@@ -764,6 +861,19 @@ HTML;
             });
         }
         
+        if($('#rotating-section').is(':checked')){
+            $('#rotating-sections').show();
+        }
+        $('input:radio[name="section-type"]').change(
+        function(){
+            $('#rotating-sections').hide();
+            if ($(this).is(':checked')){
+                if($(this).val() == 'rotating-section'){ 
+                    $('#rotating-sections').show();
+                }
+            }
+        });
+        
         
         if($('#radio-electronic-file').is(':checked')){ 
             $('input[name=instructions-url]').val('{$electronic_gradeable['eg_instructions_url']}');
@@ -771,6 +881,7 @@ HTML;
             $('input[name=date_due]').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_due_date']}")));
             $('input[name=subdirectory]').val('{$electronic_gradeable['eg_subdirectory']}');
             $('input[name=config-path]').val('{$electronic_gradeable['eg_config_path']}');
+            $('input[name=eg_late_days]').val('{$electronic_gradeable['eg_late_days']}');
             
             if($('#repository_radio').is(':checked')){
                 $('#repository').show();

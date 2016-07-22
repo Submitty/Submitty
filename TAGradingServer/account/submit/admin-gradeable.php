@@ -1,8 +1,8 @@
 <?php
 
 // TODO MORE error checking
-// Make sure transactions are in the right spots
-// Should use more functions
+// TODO Make sure transactions are in the right spots
+// TODO functionalize more
 
 include "../../toolbox/functions.php";
 
@@ -56,7 +56,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     }
     
      function deleteComponents(& $db,$lb,$ub){
-         // REWRITE THIS, multiple queries here are bad
+         // TODO REWRITE THIS, multiple queries here are bad
         for($i=$lb; $i<=$ub; ++$i){
             //DELETE all grades associated with these gcs
             $params = array($this->g_id,$i);
@@ -67,8 +67,25 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
         } 
     }
     
-    //Overriden function, polymorphism 
+    //Overridden function, polymorphism 
     function createComponents(& $db, $action, & $add_args){}
+    
+    function get_GID(){
+        return $this->g_id;
+    }
+    
+    function setupRotatingSections(& $db, $graders){
+        if ($this->g_grade_by_registration === 'true') return;
+        
+        // delete all exisiting rotating sections 
+        $db->query("DELETE FROM grading_rotating WHERE g_id=?", array($this->g_id));
+        foreach ($graders as $grader=>$sections){
+            foreach($sections as $i=>$section){
+                //print "ENTRY CREATED";
+                $db->query("INSERT INTO grading_rotating(g_id, user_id, sections_rotating) VALUES(?,?,?)", array($this->g_id,$grader,$section));
+            }
+        }
+    }
  }
  
  class ElectronicGradeable extends Gradeable{
@@ -79,6 +96,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     private $subdirectory;
     private $ta_grading;
     private $config_path;
+    private $late_days;
     
      function __construct(& $params){
          parent::__construct($params);
@@ -90,21 +108,22 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
          $this->subdirectory =$params['subdirectory'];
          $this->ta_grading = $params['ta_grading'];
          $this->config_path = $params['config_path'];
+         $this->late_days = $params['late_days'];
      }
      
      //TODO extract to multiple functions 
      function createComponents(& $db, $action, & $add_args){
         if ($action=='edit'){
             $params = array($this->instructions_url, $this->date_submit, $this->date_due, $this->is_repo, 
-                            $this->subdirectory, $this->ta_grading, $this->config_path, $this->g_id);
+                            $this->subdirectory, $this->ta_grading, $this->config_path, $this->late_days, $this->g_id);
             $db->query("UPDATE electronic_gradeable SET eg_instructions_url=?, eg_submission_open_date=?,eg_submission_due_date=?, 
-                        eg_is_repository=?, eg_subdirectory=?, eg_use_ta_grading=?, eg_config_path=? WHERE g_id=?", $params);
+                        eg_is_repository=?, eg_subdirectory=?, eg_use_ta_grading=?, eg_config_path=?, eg_late_days=? WHERE g_id=?", $params);
         }
         else{
             $params = array($this->g_id, $this->instructions_url, $this->date_submit, $this->date_due, 
-                            $this->is_repo, $this->subdirectory, $this->ta_grading, $this->config_path);
+                            $this->is_repo, $this->subdirectory, $this->ta_grading, $this->config_path, $this->late_days);
             $db->query("INSERT INTO electronic_gradeable(g_id, eg_instructions_url, eg_submission_open_date, eg_submission_due_date, 
-                eg_is_repository, eg_subdirectory, eg_use_ta_grading, eg_config_path) VALUES(?,?,?,?,?,?,?,?)", $params);
+                eg_is_repository, eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days) VALUES(?,?,?,?,?,?,?,?,?)", $params);
         }
 
         $num_questions = 0;
@@ -122,7 +141,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
             $gc_student_comment = $add_args["student-".strval($i)];
             $gc_max_value = $add_args['point-'.strval($i)];
             $gc_is_text = "false";
-            $gc_is_ec = ($add_args['ec-'.strval($i)]=='on')? "true" : "false";
+            $gc_is_ec = (isset($add_args['ec-'.strval($i)]) && $add_args['ec-'.strval($i)]=='on')? "true" : "false";
             if($action=='edit' && $i<$num_old_questions){
                 //update the values for the electronic gradeable
                 $params = array($gc_title, $gc_ta_comment, $gc_student_comment, $gc_max_value, $gc_is_text, $gc_is_ec, $this->g_id,$i);
@@ -264,6 +283,7 @@ abstract class GradeableType{
         $subdirectory = (isset($request_args['subdirectory']) && $is_repo == "true")? $request_args['subdirectory'] : '';
         $ta_grading = ($request_args['ta-grading'] == 'yes')? "true" : "false";
         $config_path = $request_args['config-path'];
+        $eg_late_days = intval($request_args['eg_late_days']);
         
         $g_constructor_params['instructions_url'] = $instructions_url;
         $g_constructor_params['date_submit'] = $date_submit;
@@ -272,6 +292,7 @@ abstract class GradeableType{
         $g_constructor_params['subdirectory'] = $subdirectory;
         $g_constructor_params['ta_grading'] = $ta_grading;
         $g_constructor_params['config_path'] = $config_path;
+        $g_constructor_params['late_days'] = $eg_late_days;
         
         $gradeable = new ElectronicGradeable($g_constructor_params);
      }
@@ -285,6 +306,32 @@ abstract class GradeableType{
      }
      return $gradeable;
  }
+  
+function getGraders(& $var){
+    $graders = array();
+    foreach ($var as $k => $v ) {
+        if (substr($k,0,7) === 'grader-' && !empty(trim($v))) {
+            $graders[explode('-', $k)[1]]=explode(',',$v);
+        }
+    }
+    return $graders;
+}
+ 
+function addAssignmentsTxt($assignments){
+    /* FIXME update the ASSIGNMENTS.txt file
+    // Should probably a member function of $gradeable 
+    $fp = fopen(__SUBMISSION_SERVER__.'/ASSIGNMENTS.txt', 'a');
+    if (!$fp){
+        die('failed to open'. __SUBMISSION_SERVER__.'/ASSIGNMENTS.txt');
+    }
+
+    foreach ($assignments as $assignment){
+        fwrite($fp, "build_homework <TBD_PATH> " .__COURSE_SEMESTER__. " ".__COURSE_CODE__. " ". $assignment ."\n");
+    }
+
+    fclose($fp);
+    */
+}
 
 $action = $_GET['action'];
 
@@ -299,7 +346,14 @@ if ($action != 'import'){
         $gradeable->createGradeable($db);
     }
     $gradeable->createComponents($db, $action, $_POST);
+    
+    $graders = getGraders($_POST);
+    $gradeable->setupRotatingSections($db, $graders);
+    
     $db->commit();
+    if($action != 'edit'){
+        addAssignmentsTxt(array($gradeable->get_GID()));
+    }
     writeFormJSON($_POST['gradeable_id'],$_POST['gradeableJSON']);
 }
 // batch update or create
@@ -308,9 +362,9 @@ else{
     //open each of the json configs
     $files = glob(__SUBMISSION_SERVER__ . '/config/form/form_*.json');
     $num_files = count($files);
-    $num_success = 0;
+    $success_gids = array();
     $failed_files = array();
-    //TODO add transactions
+
     foreach($files as $file){
         try{
             $fp = fopen($file, 'r');
@@ -323,14 +377,19 @@ else{
             $gradeable = constructGradeable($request_args);
             $gradeable->createGradeable($db);
             $gradeable->createComponents($db, $action, $request_args);
-            ++$num_success;
+            // TODO pass in filtered array here
+            $graders = getGraders($request_args);
+            $gradeable->setupRotatingSections($db, $graders);
+            
+            array_push($success_gids, $gradeable->getGID());
         } catch (Exception $e){
           array_push($failed_files, $file);
         } finally{
             fclose($fp);
         }
     }
-    print $num_success.' of '.$num_files." successfully imported.\n";
+    addAssignmentsTxt($success_gids);
+    print count($success_gids).' of '.$num_files." successfully imported.\n";
     if(count($failed_files) > 0){
         print "Files failed:\n";
         foreach($failed_files as $failed_file){
@@ -339,19 +398,6 @@ else{
     }
 
 }
-//TODO update configs
-
-/*
-$fp = fopen(__SUBMISSION_SERVER__.'/ASSIGNMENTS.txt', 'a');
-if (!$fp){
- die('failed to open'. __SUBMISSION_SERVER__.'/ASSIGNMENTS.txt');
-}
-
-
-fwrite($fp, "build_homework <TBD_PATH> ".__COURSE_CODE__. " ".__COURSE_SEMESTER__." ".__DATABASE_NAME__."\n");
-fclose($fp);
-*/
-
 
 if($action != 'import'){
     header('Location: '.__BASE_URL__.'/account/admin-gradeables.php?course='.$_GET['course']);

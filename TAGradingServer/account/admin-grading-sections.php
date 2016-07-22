@@ -40,19 +40,9 @@ HTML;
 if (isset($_GET['update']) && $_GET['update'] == '1') {
     echo "<div style='color:red'>Rotating Sections Updated</div><br />";
 }
-/*
+
 echo <<<HTML
-            <input type="radio" name="type" value="section" checked="checked" /> Setup grading sections by lab section<br />
-HTML;
-foreach (\lib\Database::rows() as $section) {
-    echo <<<HTML
-            <div style="margin-left: 30px">
-                {$section['section_title']}: <input style="width: 25px" type="text" name="section_{$section['section_id']}" value="{$section['section_id']}" />
-            </div>
-HTML;
-}*/
-echo <<<HTML
-            <input type="radio" name="type" value="arrange" /> Place students in
+           Place students in
             <input type="text" name="sections" placeholder="#" style="width:25px" /> rotating sections
                 <select name="arrange_type">
                     <option value="random">randomly</option>
