@@ -11,6 +11,8 @@
     },
 
     "testcases" : [
+
+        // *************** COMPILATION *****************
         {
             "type" : "Compilation",
             "title" : "Compilation of student code: Factorial.java",
@@ -25,6 +27,8 @@
             "executable_name" : "FactorialTest.class",
             "points" : 2
         },
+
+        // *************** TEST CASES *****************
         {
             "title" : "FactorialTest",
             "command" : "/usr/bin/java -cp /usr/local/submitty/JUnit/junit-4.12.jar:/usr/local/submitty/JUnit/hamcrest-core-1.3.jar:/usr/local/submitty/JUnit/emma.jar:. org.junit.runner.JUnitCore FactorialTest",

@@ -9,6 +9,8 @@
     "assignment_message" : "The homework submission area & autograding points for Lab are just practice.<br>The only grades for Lab are the 3 checkpoints recorded by your TA & mentors.",
 
     "testcases" : [
+
+        // *************** COMPILATION *****************
         {
             "type" : "Compilation",
             "title" : "Compilation of Submitted Files (for Dr. Memory): g++ -m32 -g -Wall *cpp",
@@ -23,6 +25,8 @@
             "executable_name" : "submitted.out",
             "points" : 2
         },
+
+        // *************** TEST CASES *****************
         {
             "title" : "Under Dr Memory",
             "details" : "drmemory -brief -- ./submitted_32.out",

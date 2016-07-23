@@ -7,12 +7,16 @@
     },
 
     "testcases" : [
+
+        // *************** README *****************
         {
             "type" : "FileExists",
             "title" : "README",
             "filename" : "README.txt",
             "points" : 2
         },
+
+        // *************** COMPILATION *****************
         {
             "type" : "Compilation",
             "title" : "Compilation",
@@ -20,6 +24,8 @@
             "executable_name" : "a.out",
             "points" : 3
         },
+
+        // *************** TEST CASES *****************
         {
             "title" : "Regular char by char comparision",
             "details" : "./byChar.exe input.txt output.txt",
