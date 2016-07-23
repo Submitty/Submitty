@@ -104,6 +104,8 @@ function display_file_permissions($perms) {
 function upload_homework($username, $semester, $course, $assignment_id, $num_parts, $homework_file, $previous_files, $svn_checkout) {
     // parts in homework_file: 1 to num_parts
     // check if upload succeeded for all parts
+    $count = array();
+    
     if ($svn_checkout == false) {
       if(isset($homework_file)) {
         for($n=1; $n <= $num_parts; $n++) {
@@ -231,7 +233,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
             $filename = explode(".", $homework_file[$n]["name"][$i]);
             $extension = end($filename);
             if($extension == "zip") {
-              $file_size += get_zip_size($filename);
+              $file_size += get_zip_size($homework_file[$n]["tmp_name"][$i]);
             }
             else {
               $file_size += $homework_file[$n]["size"][$i];
@@ -337,12 +339,6 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
             if ($res === TRUE) {
               $zip->extractTo($part_path[$n]);
               $zip->close();
-
-              $unlink_return = unlink ($homework_file[$n]["tmp_name"][$i]);
-              if (!$unlink_return) {
-                display_error("Failed to unlink(delete) uploaded zip file ".$homework_file[$n]["name"][$i]." from temporary storage.");
-                return;
-              }
             }
             else{   // copy single file to folder
               // --------------------------------------------------------------
@@ -367,12 +363,12 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
                   display_error("Failed to copy uploaded file ".$homework_file[$n]["name"][$i]." to current submission.");
                   return;
                 }
-                $unlink_return = unlink ($homework_file[$n]["tmp_name"][$i]);
-                if (!$unlink_return) {
-                  display_error("Failed to unlink(delete) uploaded file ".$homework_file[$n]["name"][$i]." from temporary storage.");
-                  return;
-                }
               }
+            }
+            $unlink_return = unlink ($homework_file[$n]["tmp_name"][$i]);
+            if (!$unlink_return) {
+               display_error("Failed to unlink(delete) uploaded zip file ".$homework_file[$n]["name"][$i]." from temporary storage.");
+               return;
             }
           }
         }
@@ -980,7 +976,7 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
                 $data["points_possible"] = isset($testcases_info[$i]["points"]) ? $testcases_info[$i]["points"] : 0;
                 $data["score"] = isset($testcases_results[$u]["points_awarded"]) ? $testcases_results[$u]["points_awarded"] : 0;
                 $data["is_hidden"] = isset($testcases_info[$i]["hidden"]) ? $testcases_info[$i]["hidden"] : false;
-                $data["is_extra_credit"] = isset($testcases_info[$i]["extracredit"]) ? $testcases_info[$i]["extracredit"] : false;
+                $data["is_extra_credit"] = isset($testcases_info[$i]["extra_credit"]) ? $testcases_info[$i]["extra_credit"] : false;
                 $data["visible"] = isset($testcases_info[$i]["visible"]) ? $testcases_info[$i]["visible"] : true;
                 $data["view_test_points"] = isset($testcases_info[$i]["view_test_points"]) ? $testcases_info[$i]["view_test_points"] : true;
                 $data["message"] = isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "";
@@ -1007,7 +1003,7 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
             $data["points_possible"] = isset($testcases_info[$i]["points"]) ? $testcases_info[$i]["points"] : 0;
             $data["score"] = 0;
             $data["is_hidden"] = isset($testcases_info[$i]["hidden"]) ? $testcases_info[$i]["hidden"] : false;
-            $data["is_extra_credit"] = isset($testcases_info[$i]["extracredit"]) ? $testcases_info[$i]["extracredit"] : false;
+            $data["is_extra_credit"] = isset($testcases_info[$i]["extra_credit"]) ? $testcases_info[$i]["extra_credit"] : false;
             $data["visible"] = isset($testcases_info[$i]["visible"]) ? $testcases_info[$i]["visible"] : true;
             $data["view_test_points"] = isset($testcases_info[$i]["view_test_points"]) ? $testcases_info[$i]["view_test_points"] : true;
             array_push($homework_tests, $data);

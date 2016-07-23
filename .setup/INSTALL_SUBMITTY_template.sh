@@ -253,6 +253,10 @@ mkdir -p $SUBMITTY_INSTALL_DIR/src/grading/lib
 pushd $SUBMITTY_INSTALL_DIR/src/grading/lib
 cmake ..
 make
+if [ $? -ne 0 ] ; then
+    echo "ERROR BUILDING AUTOGRADING LIBRARY" 
+    exit 1
+fi
 popd
 
 

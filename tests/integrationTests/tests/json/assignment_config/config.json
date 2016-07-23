@@ -1,0 +1,24 @@
+{
+    "grading_parameters" : {
+        "TOTAL_POINTS" : 10,
+        "AUTO_POINTS" : 10
+    },
+
+    "testcases" : [
+        {
+            "title" : "hello world",
+	    "details" : "details",
+	    "command" : "./a.out <nonleapyear.txt",
+	    "points" : 10,
+	    "validation" : [
+                {
+                    "method" : "myersDiffbyLinebyChar",
+                    "filename" : "STDOUT.txt",
+                    "description" : "Standard OUTPUT (STDOUT)",
+		    "instructor_file" : "test1_output.txt",
+                    "deduction" : 1.0
+                }
+            ]
+        }
+    ]
+}

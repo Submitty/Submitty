@@ -8,7 +8,7 @@
 /*
 
   Generates a file in json format containing all of the information defined in
-  config.h for easier parsing.
+  config.json for easier parsing.
 
 */
 
@@ -16,35 +16,31 @@
 // =====================================================================
 // =====================================================================
 
-void printTestCase(std::ostream &out, TestCase test) {
-  std::string hidden = (test.hidden()) ? "true" : "false";
-  std::string extracredit = (test.extracredit()) ? "true" : "false";
-  std::string visible = (test.visible()) ? "true" : "false";
-  std::string view_test_points = (test.view_test_points()) ? "true" : "false";
-  std::string view_file = '"'+(test.getView_file())+'"';
-  std::string view_file_results = (test.getView_file_results())? "true" : "false";
-  out << "\t{" << std::endl;
-  out << "\t\t\"title\": \"" << test.title() << "\"," << std::endl;
-  out << "\t\t\"details\": \"" << test.details() << "\"," << std::endl;
-  out << "\t\t\"points\": " << test.points() << "," << std::endl;
-  out << "\t\t\"hidden\": " << hidden << "," << std::endl;
-  out << "\t\t\"extracredit\": " << extracredit << "," << std::endl;
-  out << "\t\t\"visible\": " << visible << "," << std::endl;
-  out << "\t\t\"view_test_points\": " << view_test_points << "," << std::endl;
-  out << "\t\t\"view_file\": " << view_file << "," << std::endl;
-  out << "\t\t\"view_file_results\": " << view_file_results << "," << std::endl;
-
-  //  out << "\t\t\"expected_output\": "
-  //   << "\"" << test.expected(0) << "\"" << std::endl;
-  out << "\t}";
+nlohmann::json printTestCase(TestCase test) {
+  nlohmann::json j;
+  j["title"] = test.title();
+  //if (test.details() != "") 
+  j["details"] = test.details();
+  j["points"] = test.points();
+  j["extra_credit"] = test.extra_credit();
+  j["hidden"] = false;
+  j["visible"] = true;
+  //if (test.hidden_points())
+  //j["hidden_points"] = true;
+  //if (test.getView_file_results())
+  j["view_file_results"] = test.getView_file_results();
+  j["view_test_points"] = true;
+  j["view_file"] = test.getView_file();
+  return j;
 }
 
 int main(int argc, char *argv[]) {
 
-
-  std::cout << "@configure main : assignment_limits size " << assignment_limits.size() << std::endl;
-  assert (assignment_limits.size() == 16);
-
+  nlohmann::json config_json;
+  std::stringstream sstr(GLOBAL_config_json_string);
+  sstr >> config_json;
+  
+  nlohmann::json j;
 
   if (argc != 2) {
     std::cout << "USAGE: " << argv[0] << " [output_file]" << std::endl;
@@ -53,19 +49,45 @@ int main(int argc, char *argv[]) {
   std::cout << "FILENAME " << argv[0] << std::endl;
   int total_nonec = 0;
   int total_ec = 0;
-  for (unsigned int i = 0; i < testcases.size(); i++) {
 
-    if (testcases[i].extracredit())
-      total_ec += testcases[i].points();
+  int visible = 0;
+
+  std::cout << "config.json.size " << config_json.size() << std::endl;
+  nlohmann::json::iterator tc = config_json.find("testcases");
+  
+  assert (tc != config_json.end());
+
+  nlohmann::json all;
+  std::cout << "num test cases" << tc->size() << std::endl;
+  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++) {
+    //std::cout << "TEST CASE " << std::endl;
+    int points = itr->value("points",0);
+    bool extra_credit = itr->value("extra_credit",false);
+    bool hidden = itr->value("hidden",false);
+    if (!extra_credit)
+      total_nonec += points;
     else
-      total_nonec += testcases[i].points();
-  }
+      total_ec += points;
+    if (!hidden)
+      visible += points;
 
+    TestCase tc = TestCase::MakeTestCase(*itr);
+    all.push_back(printTestCase(tc)); 
+  }
+  std::cout << "processed " << all.size() << " test cases" << std::endl;
+  j["num_testcases"] = all.size();
+  j["testcases"] = all;
+ 
   std::string start_red_text = "\033[1;31m";
   std::string end_red_text   = "\033[0m";
 
+  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
+  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
+  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
+  int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
+  int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
+
   if (total_nonec != AUTO_POINTS) {
-    
     std::cout << "\n" << start_red_text << "ERROR: Automated Points do not match testcases." << total_nonec 
 	      << "!=" << AUTO_POINTS << end_red_text << "\n" << std::endl;
     return 1;
@@ -81,6 +103,35 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+
+  std::string id = getAssignmentIdFromCurrentDirectory(std::string(argv[0]));
+  //std::vector<std::string> part_names = PART_NAMES;
+
+  
+  j["id"] = id;
+  if (config_json.find("assignment_message") != config_json.end()) {
+    j["assignment_message"] = config_json.value("assignment_message",""); 
+  }
+  j["max_submissions"] = MAX_NUM_SUBMISSIONS;
+  j["max_submission_size"] = MAX_SUBMISSION_SIZE;
+
+  nlohmann::json::iterator parts = config_json.find("part_names");
+  if (parts != config_json.end()) {
+    j["num_parts"] = parts->size();
+    for (int i = 0; i < parts->size(); i++) {
+      j["part_names"].push_back((*parts)[i]);
+    }
+  }
+
+  j["auto_pts"] = AUTO_POINTS;
+  j["points_visible"] = visible;
+  j["ta_pts"] = TA_POINTS;
+  j["total_pts"] = TOTAL_POINTS;
+  
+
+  // =================================================================================
+  // EXPORT THE JSON FILE
+
   std::ofstream init;
   init.open(argv[1], std::ios::out);
 
@@ -90,50 +141,7 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  std::string id = getAssignmentIdFromCurrentDirectory(std::string(argv[0]));
-  std::vector<std::string> part_names = PART_NAMES;
-
-  init << "{\n\t\"id\": \"" << id << "\"," << std::endl;
-  init << "\t\"assignment_message\": \"" << ASSIGNMENT_MESSAGE << "\"," << std::endl;
-
-  init << "\t\"max_submissions\": " << MAX_NUM_SUBMISSIONS << "," << std::endl;
-  init << "\t\"max_submission_size\": " << MAX_SUBMISSION_SIZE << "," << std::endl;
-
-  if (part_names.size() > 0) {
-    init << "\t\"num_parts\": " << part_names.size() << "," << std::endl;
-    init << "\t\"part_names\": [" << std::endl;
-    for (int i = 0; i < part_names.size(); i++) {
-      init << "\t\t\"" << part_names[i] << "\"";
-      if (i != part_names.size()-1) 
-        init << ",";
-      init << std::endl;
-    }
-    init << "\t]," << std::endl;
-  }
-
-  init << "\t\"auto_pts\": " << AUTO_POINTS << "," << std::endl;
-  int visible = 0;
-  for (unsigned int i = 0; i < testcases.size(); i++) {
-    if (!testcases[i].hidden())
-      visible += testcases[i].points();
-  }
-  init << "\t\"points_visible\": " << visible << "," << std::endl;
-  init << "\t\"ta_pts\": " << TA_POINTS << "," << std::endl;
-  init << "\t\"total_pts\": " << TOTAL_POINTS << "," << std::endl;
-
-  init << "\t\"num_testcases\": " << testcases.size() << "," << std::endl;
-
-  init << "\t\"testcases\": [" << std::endl;
-
-  for (unsigned int i = 0; i < testcases.size(); i++) {
-    printTestCase(init, testcases[i]);
-    if (i != testcases.size() - 1)
-      init << "," << std::endl;
-  }
-
-  init << " ]\n}" << std::endl;
-
-  init.close();
-
+  init << j.dump(4) << std::endl;
+  
   return 0;
 }
