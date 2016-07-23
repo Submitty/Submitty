@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include "TestCase.h"
+#include "JUnitGrader.h"
 
 
 std::string GLOBAL_replace_string_before = "";
@@ -7,6 +8,97 @@ std::string GLOBAL_replace_string_after = "";
 
 
 int TestCase::next_test_case_id = 1;
+
+
+
+TestCase TestCase::MakeTestCase (nlohmann::json j) {
+  std::string type = j.value("type","DEFAULT");
+  //std::cout << "TYPE = " << type << std::endl;
+  if (type == "FileExists") {
+    return MakeFileExists(j.value("title","TITLE MISSING"),
+                          j.value("filename","FILENAME MISSING"),
+                          TestCasePoints(j.value("points",0)));
+  } else if (type == "Compilation") {
+    return MakeCompilation(j.value("title","TITLE MISSING"),
+                           j.value("command","COMMAND MISSING"),
+                           j.value("executable_name","EXECUTABLE FILENAME MISSING"),
+                           TestCasePoints(j.value("points",0)),
+                           j.value("warning_deduction",0),
+                           j.value("resource_limits", nlohmann::json()));
+  } else {
+    assert (type == "DEFAULT");
+    std::vector<TestCaseGrader*> graders;
+    nlohmann::json::iterator itr = j.find("validation");
+    assert (itr != j.end());
+    int num_graders = itr->size();
+    for (nlohmann::json::iterator itr2 = (itr)->begin(); itr2 != (itr)->end(); itr2++) {
+      std::string method = itr2->value("method","MISSING METHOD");
+      float deduction = itr2->value("deduction",1.0/float(num_graders));
+      std::string filename = itr2->value("filename","MISSING FILENAME");
+      std::string description = itr2->value("description",filename);
+      std::string instructor_file = itr2->value("instructor_file","");
+      std::vector<std::string> data_vec;
+      nlohmann::json::iterator data_json = itr2->find("data");
+      if (data_json != itr2->end()) {
+        for (int i = 0; i < data_json->size(); i++) {
+          data_vec.push_back((*data_json)[i]);
+        }
+      }
+      
+
+
+      if (method == "JUnitTestGrader") {
+        int num_tests = itr2->value("num_tests",1);
+        graders.push_back(TestCaseJUnit::JUnitTestGrader(filename,num_tests,deduction)); 
+
+      } else if (method == "EmmaInstrumentationGrader") {
+        graders.push_back(TestCaseJUnit::EmmaInstrumentationGrader(filename,deduction)); 
+        
+      } else if (method == "MultipleJUnitTestGrader") {
+        graders.push_back(TestCaseJUnit::MultipleJUnitTestGrader(filename,deduction)); 
+
+      } else if (method == "EmmaCoverageReportGrader") {
+        float coverage_threshold = itr2->value("coverage_threshold",100);
+        graders.push_back(TestCaseJUnit::EmmaCoverageReportGrader(filename,coverage_threshold,deduction)); 
+
+      } else if (method == "searchToken") {
+        graders.push_back(new TestCaseTokens(&searchToken,filename,description,data_vec,deduction));
+        
+      } else {
+        TestResults* (*cmp) ( const std::string&, const std::string& ) = NULL;
+        if      (method == "myersDiffbyLinebyChar")  cmp = &myersDiffbyLinebyChar;
+        else if (method == "myersDiffbyLinebyWord")  cmp = &myersDiffbyLinebyWord;
+        else if (method == "myersDiffbyLine")        cmp = &myersDiffbyLine;
+        else if (method == "myersDiffbyLineNoWhite") cmp = &myersDiffbyLineNoWhite;
+        else if (method == "diffLineSwapOk")         cmp = &diffLineSwapOk;
+        else if (method == "warnIfNotEmpty")         { cmp = &warnIfNotEmpty; deduction = 0.0; }
+        else if (method == "warnIfEmpty")            { cmp = &warnIfEmpty; deduction = 0.0; }
+        else if (method == "errorIfNotEmpty")         { cmp = &errorIfNotEmpty; } //deduction = 1.0; }
+        else if (method == "errorIfEmpty")            { cmp = &errorIfEmpty; } //deduction = 1.0; }
+        else {
+          std::cout << "UNKNOWN METHOD " << method << std::endl;
+          assert (0);
+        }
+        graders.push_back(new TestCaseComparison(cmp,filename,description,instructor_file,deduction));
+      }
+    }
+    bool hidden = j.value("hidden",false);
+    bool extra_credit = j.value("extra_credit",false);
+    return MakeTestCase(j.value("title","TITLE MISSING"),
+                        j.value("details","DETAILS MISSING"),
+                        j.value("command","COMMAND MISSING"),
+                        TestCasePoints(j.value("points",0),hidden,extra_credit),
+                        graders,
+                        "",
+                        j.value("resource_limits",nlohmann::json()));
+                        //{});
+  }
+}
+
+
+
+
+
 
 
 TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {

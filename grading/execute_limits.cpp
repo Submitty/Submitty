@@ -8,6 +8,7 @@
 #include <map>
 
 #include "execute.h"
+#include "json.hpp"
 
 // =====================================================================================
 
@@ -87,7 +88,7 @@ std::string rlimit_name_decoder(int i) {
 };
 
 
-extern const std::map<int,rlim_t> assignment_limits;  // defined in default_config.h
+extern const std::map<int,rlim_t> default_limits;  // defined in default_config.h
 
 // =====================================================================================
 // 
@@ -96,52 +97,93 @@ extern const std::map<int,rlim_t> assignment_limits;  // defined in default_conf
 //
 // =====================================================================================
 
+
+void CheckResourceLimits(nlohmann::json &resource_limits) {
+  nlohmann::json::iterator itr = resource_limits.begin();
+  while (itr != resource_limits.end()) {
+    // make sure the resource limit names are correctly spelled
+    bool valid = false;
+    for (int i = 0; i < 16; i++) {
+      if (rlimit_name_decoder(i) == itr.key()) {
+        valid = true;
+        break;
+      }
+    }
+    if (!valid) {
+      std::cerr << "ERROR! INVALID RESOURCE LIMIT: " << itr.key();
+      exit(1);
+    }
+    // the only non number value allowed is for infinity
+    if (itr.value().type() == nlohmann::json::value_t::string) {
+      assert (itr.value() == "RLIM_INFINITY");
+      // replace the string with the integer value
+      itr.value() = RLIM_INFINITY;
+    }
+    assert (itr.value().is_number());
+    itr++;
+  }
+}
+
+
 rlim_t get_the_limit(const std::string &program_name,
 		     int which_limit,
-		     const std::map<int,rlim_t> &test_case_limits) {
-  
+                     nlohmann::json &test_case_limits,
+                     nlohmann::json &assignment_limits) {
 
-  assert (assignment_limits.size() == 16);
+
+  CheckResourceLimits(test_case_limits);
+  CheckResourceLimits(assignment_limits);
+  
+  std::string which_limit_name = rlimit_name_decoder(which_limit);
 
 
   // first, grab the system limit (this value must exist)
   std::map<int,rlim_t>::const_iterator s_itr = system_limits.find(which_limit);
   assert (s_itr != system_limits.end());
 
-  // then, grab the assignment value (this value must also exist)
-  // (it might be the default defined in default_config.h
-  //  or it might be instructor defined in config.h)
-  std::map<int,rlim_t>::const_iterator a_itr = assignment_limits.find(which_limit);
-  assert (a_itr != assignment_limits.end());
-
-  rlim_t answer;
-  // check to see if the assignment value exceeds the system limit
-  if (a_itr->second > s_itr->second) {
-    std::cout << "ERROR: Assignment limit value " << a_itr->second 
-	      << " for " << rlimit_name_decoder(which_limit) 
-	      << " exceeds system limit " << s_itr->second << std::endl;
-    answer = s_itr->second;
-  } else {
-    answer = a_itr->second;
-  }
 
   // then, look for a test case specific value
-  std::map<int,rlim_t>::const_iterator t_itr = test_case_limits.find(which_limit);
+  nlohmann::json::iterator t_itr = test_case_limits.find(which_limit_name);
   if (t_itr != test_case_limits.end()) {
+    int val = test_case_limits[which_limit_name];
     // check to see if the test case specific value exceeds the system limit
-    if (t_itr->second > s_itr->second) {
-      std::cout << "ERROR: Test case limit value " << t_itr->second 
-		<< " for " << rlimit_name_decoder(which_limit) 
+    if (val > s_itr->second) {
+      std::cout << "ERROR: Test_Case limit value " << val
+		<< " for " << which_limit_name
 		<< " exceeds system limit " << s_itr->second << std::endl;
-      answer = s_itr->second;
+      return s_itr->second;
     } else {
-      answer = std::max(answer,t_itr->second);
+      return val;
     }
   }
 
-  // return the max of the test case & assignment values
-  assert (answer <= s_itr->second);
-  return answer;
+
+  // otherwise look for an assignment specific value
+  nlohmann::json::iterator a_itr = assignment_limits.find(which_limit_name);
+  if (a_itr != assignment_limits.end()) {
+    int val = assignment_limits[which_limit_name];
+    // check to see if the test case specific value exceeds the system limit
+    if (val > s_itr->second) {
+      std::cout << "ERROR: Assignment limit value " << val
+		<< " for " << which_limit_name
+		<< " exceeds system limit " << s_itr->second << std::endl;
+      return s_itr->second;
+    } else {
+      return val;
+    }
+  }
+
+
+  // then, grab the default value (this value must also exist)
+  // (it might be the default defined in config.json
+  //  or it might be instructor defined in config.json)
+  std::map<int,rlim_t>::const_iterator d_itr = default_limits.find(which_limit);
+  assert (d_itr != default_limits.end());
+
+  // default value must not exceed system limit
+  assert (d_itr->second <= s_itr->second);
+
+  return d_itr->second;
 }
 
 
@@ -151,7 +193,8 @@ rlim_t get_the_limit(const std::string &program_name,
 // =====================================================================================
 
 void enable_all_setrlimit(const std::string &program_name,
-			  const std::map<int,rlim_t> &test_case_limits) {
+                          nlohmann::json &test_case_limits,
+                          nlohmann::json &assignment_limits) {
 
   int success;
   rlimit current_rl;
@@ -167,7 +210,7 @@ void enable_all_setrlimit(const std::string &program_name,
     assert (success == 0);
 
     // decide on the new limits
-    rlim_t new_limit = get_the_limit(program_name,limit_names[i],test_case_limits);
+    rlim_t new_limit = get_the_limit(program_name,limit_names[i],test_case_limits, assignment_limits);
     assert (new_limit >= (rlim_t)0 && new_limit <= RLIM_INFINITY);
 
     // only change a value to decrease / restrict the process

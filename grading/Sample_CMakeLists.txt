@@ -19,7 +19,6 @@ option(ASSIGNMENT_INSTALLATION "Normal assignment installation" ON)
 
 set (MY_DIR ${CMAKE_SOURCE_DIR})
 
-
 IF (ASSIGNMENT_INSTALLATION)
   # assuming we are in a directory of this structure
   #   SUBMITTY_DATA_DIR/courses/which_semester/which_course/build/which_assignment
@@ -32,6 +31,9 @@ IF (ASSIGNMENT_INSTALLATION)
   # just the last part of the current directory
   get_filename_component(assignment ${MY_DIR} NAME)
   message("ASSIGNMENT IS ${assignment}")
+
+  set (my_config_json ${course_dir}/build/${assignment}/config.json)
+  set (my_config_json_no_comments ${course_dir}/build/${assignment}/config_no_comments.json)
 
   # Where the compiled binaries are stored, under the class directory
   set(my_bin ${course_dir}/bin/${assignment})
@@ -47,10 +49,11 @@ else (ASSIGNMENT_INSTALLATION)
   # the name of the test is the name of the parent directory
   get_filename_component(which_test ${which_test_dir} NAME)
   message("WHICH TEST: ${which_test}")
-
   
   include_directories(${which_test_dir}/assignment_config)
 
+  set (my_config_json ${which_test_dir}/assignment_config/config.json)
+  set (my_config_json_no_comments ${which_test_dir}/assignment_config/config_no_comments.json)
 
   # Where the compiled binaries are stored
   set(my_bin ${which_test_dir}/bin)
@@ -81,11 +84,49 @@ endif(instructor_cmakelists)
 
 
 ###################################################################################
+
+# Use the C Pre-Processor to strip the C & C++ comments from config.json
+get_filename_component(cc_dir ${CMAKE_C_COMPILER} PATH)
+find_program(CPP_PATH cpp HINTS ${cc_dir} DOC "path to C preprocessor")
+# Rather than passing -P to avoid the line markers, which also
+# collapses blank lines, we pass nothing to preserve line number parity
+# and remove the # lines.
+execute_process(COMMAND ${CPP_PATH} ${my_config_json} OUTPUT_VARIABLE 
+  json_generated RESULT_VARIABLE cpp_res ERROR_VARIABLE cpp_err)
+if (cpp_res OR cpp_err)
+  message(FATAL_ERROR "Failed to run ${CPP_PATH} on ${my_config_json}")
+endif ()
+# remove cpp # markers
+string(REGEX REPLACE "(^|\n)#[^\n]*\n" "" json_generated "${json_generated}")
+# write out a copy of the file without comments
+file(WRITE "${my_config_json_no_comments}" "${json_generated}")
+
+
+# Now run the comment-free version of the json file through a simple
+# python json syntax checker
+find_program(PYTHON_PATH python DOC "path to python")
+execute_process(COMMAND ${PYTHON_PATH} ${GRADINGCODE}/grading/json_syntax_checker.py
+  "${my_config_json_no_comments}" OUTPUT_QUIET RESULT_VARIABLE py_res ERROR_VARIABLE py_err)
+if (py_res OR py_err)
+  message(FATAL_ERROR "JSON syntax error found: ${py_err}")
+endif ()
+
+
+# Then embed the config.json within a generated .cpp source file
+string(REGEX REPLACE "([\"\\\n])" "\\\\\\1" json_generated "${json_generated}")
+set(cpp_header "const char *GLOBAL_config_json_string = \"")
+set(cpp_footer "\";\n")
+file(WRITE json_generated.cpp "${cpp_header}${json_generated}${cpp_footer}")
+set_source_files_properties(json_generated.cpp PROPERTIES GENERATED true)
+
+
+###################################################################################
 # source files
 
 # build this as a library, so we only have to compile it once
 add_library(custom_functions
-  ${GRADINGCODE}/grading/seccomp_functions.cpp 
+  ${GRADINGCODE}/grading/seccomp_functions.cpp  
+  json_generated.cpp
   ${custom_files}  
 )
 
@@ -104,6 +145,7 @@ add_executable(run.out
 add_executable(validate.out
   ${GRADINGCODE}/grading/main_validator.cpp 
 )
+
 
 ###################################################################################
 
