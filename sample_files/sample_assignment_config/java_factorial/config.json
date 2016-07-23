@@ -7,10 +7,10 @@
     "resource_limits" : {
         "RLIMIT_CPU" : 60,
         "RLIMIT_NPROC" : 100,
-        "RLIMIT_AS" : 18446744073709551615
+        "RLIMIT_AS" : "RLIM_INFINITY"
     },
 
-    "test_cases" : [
+    "testcases" : [
         {
             "type" : "Compilation",
             "title" : "Compilation of student code: Factorial.java",

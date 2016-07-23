@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
   int visible = 0;
 
   std::cout << "config.json.size " << config_json.size() << std::endl;
-  nlohmann::json::iterator tc = config_json.find("test_cases");
+  nlohmann::json::iterator tc = config_json.find("testcases");
   
   assert (tc != config_json.end());
 
@@ -110,7 +110,8 @@ int main(int argc, char *argv[]) {
   
   j["id"] = id;
   if (config_json.find("assignment_message") != config_json.end()) {
-    j["assignment_message"] = config_json.value("assignment_message",""); }
+    j["assignment_message"] = config_json.value("assignment_message",""); 
+  }
   j["max_submissions"] = MAX_NUM_SUBMISSIONS;
   j["max_submission_size"] = MAX_SUBMISSION_SIZE;
 
@@ -141,9 +142,6 @@ int main(int argc, char *argv[]) {
   }
 
   init << j.dump(4) << std::endl;
-
-  std::cout << "FINISHED CONFIGURATION OF " << std::flush;
-  system ("pwd");
   
   return 0;
 }

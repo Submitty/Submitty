@@ -10,7 +10,7 @@
 
     "part_names" : [ "README", "CODE" ],
 
-    "test_cases" : [
+    "testcases" : [
         {
             "type" : "FileExists",
             "title" : "README",

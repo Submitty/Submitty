@@ -1,5 +1,5 @@
 {
-    "test_cases" : [
+    "testcases" : [
         {
             "title" : "Lab 1 Checkpoint 1",
             "details" : "python *.py",

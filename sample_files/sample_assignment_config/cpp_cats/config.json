@@ -6,7 +6,7 @@
         "EXTRA_CREDIT_POINTS" : 0
     },
 
-    "test_cases" : [
+    "testcases" : [
         {
             "type" : "FileExists",
             "title" : "README",

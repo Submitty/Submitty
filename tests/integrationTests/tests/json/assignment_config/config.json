@@ -4,7 +4,7 @@
         "AUTO_POINTS" : 10
     },
 
-    "test_cases" : [
+    "testcases" : [
         {
             "title" : "hello world",
 	    "details" : "details",

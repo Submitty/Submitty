@@ -97,10 +97,42 @@ extern const std::map<int,rlim_t> default_limits;  // defined in default_config.
 //
 // =====================================================================================
 
+
+void CheckResourceLimits(nlohmann::json &resource_limits) {
+  nlohmann::json::iterator itr = resource_limits.begin();
+  while (itr != resource_limits.end()) {
+    // make sure the resource limit names are correctly spelled
+    bool valid = false;
+    for (int i = 0; i < 16; i++) {
+      if (rlimit_name_decoder(i) == itr.key()) {
+        valid = true;
+        break;
+      }
+    }
+    if (!valid) {
+      std::cerr << "ERROR! INVALID RESOURCE LIMIT: " << itr.key();
+      exit(1);
+    }
+    // the only non number value allowed is for infinity
+    if (itr.value().type() == nlohmann::json::value_t::string) {
+      assert (itr.value() == "RLIM_INFINITY");
+      // replace the string with the integer value
+      itr.value() = RLIM_INFINITY;
+    }
+    assert (itr.value().is_number());
+    itr++;
+  }
+}
+
+
 rlim_t get_the_limit(const std::string &program_name,
 		     int which_limit,
                      nlohmann::json &test_case_limits,
                      nlohmann::json &assignment_limits) {
+
+
+  CheckResourceLimits(test_case_limits);
+  CheckResourceLimits(assignment_limits);
   
   std::string which_limit_name = rlimit_name_decoder(which_limit);
 

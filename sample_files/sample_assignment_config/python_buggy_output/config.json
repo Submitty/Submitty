@@ -3,34 +3,32 @@
         "TOTAL_POINTS" : 90,
         "AUTO_POINTS" : 90
     },
-
     "assignment_message" : "Test of diffLineSwapOk compared to myersDiffbyLinebyChar",
-
-    "test_cases" : [
+    "testcases" : [
         {
             "title" : "CORRECT SOLUTION",
             "details" : "gettysburg_address.txt",
             "command" : "/usr/bin/python code_correct.py gettysburg_address.txt output_correct.txt",
             "points" : 10,
             "validation" : [
-                { 
+                {
                     "method" : "diffLineSwapOk",
                     "filename" : "output_correct.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 0.5
                 },
-                { 
+                {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "output_correct.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 0.5
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDOUT.txt",
                     "description" : "Standard Output (STDOUT)"
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDERR.txt",
                     "description" : "Standard Error (STDERR)"
@@ -44,18 +42,18 @@
             "command" : "/usr/bin/python code_duplicate_lines.py gettysburg_address.txt output_duplicates.txt",
             "points" : 10,
             "validation" : [
-                { 
+                {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "output_duplicates.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDOUT.txt",
                     "description" : "Standard Output (STDOUT)"
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDERR.txt",
                     "description" : "Standard Error (STDERR)"
@@ -68,18 +66,18 @@
             "command" : "/usr/bin/python code_duplicate_lines.py gettysburg_address.txt output_duplicates.txt",
             "points" : 10,
             "validation" : [
-                { 
+                {
                     "method" : "diffLineSwapOk",
                     "filename" : "output_duplicates.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDOUT.txt",
                     "description" : "Standard Output (STDOUT)"
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDERR.txt",
                     "description" : "Standard Error (STDERR)"
@@ -93,18 +91,18 @@
             "command" : "/usr/bin/python code_extra_lines_no_duplicates.py gettysburg_address.txt output_extra.txt",
             "points" : 10,
             "validation" : [
-                { 
+                {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "output_extra.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDOUT.txt",
                     "description" : "Standard Output (STDOUT)"
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDERR.txt",
                     "description" : "Standard Error (STDERR)"
@@ -117,18 +115,18 @@
             "command" : "/usr/bin/python code_extra_lines_no_duplicates.py gettysburg_address.txt output_extra.txt",
             "points" : 10,
             "validation" : [
-                { 
+                {
                     "method" : "diffLineSwapOk",
                     "filename" : "output_extra.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDOUT.txt",
                     "description" : "Standard Output (STDOUT)"
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDERR.txt",
                     "description" : "Standard Error (STDERR)"
@@ -142,18 +140,18 @@
             "command" : "/usr/bin/python code_missing_lines.py gettysburg_address.txt output_missing.txt",
             "points" : 10,
             "validation" : [
-                { 
+                {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "output_missing.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDOUT.txt",
                     "description" : "Standard Output (STDOUT)"
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDERR.txt",
                     "description" : "Standard Error (STDERR)"
@@ -166,18 +164,18 @@
             "command" : "/usr/bin/python code_missing_lines.py gettysburg_address.txt output_missing.txt",
             "points" : 10,
             "validation" : [
-                { 
+                {
                     "method" : "diffLineSwapOk",
                     "filename" : "output_missing.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDOUT.txt",
                     "description" : "Standard Output (STDOUT)"
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDERR.txt",
                     "description" : "Standard Error (STDERR)"
@@ -191,18 +189,18 @@
             "command" : "/usr/bin/python code_out_of_order.py gettysburg_address.txt output_reordered.txt",
             "points" : 10,
             "validation" : [
-                { 
+                {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "output_reordered.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDOUT.txt",
                     "description" : "Standard Output (STDOUT)"
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDERR.txt",
                     "description" : "Standard Error (STDERR)"
@@ -215,18 +213,18 @@
             "command" : "/usr/bin/python code_out_of_order.py gettysburg_address.txt output_reordered.txt",
             "points" : 10,
             "validation" : [
-                { 
+                {
                     "method" : "diffLineSwapOk",
                     "filename" : "output_reordered.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDOUT.txt",
                     "description" : "Standard Output (STDOUT)"
                 },
-                { 
+                {
                     "method" : "warnIfNotEmpty",
                     "filename" : "STDERR.txt",
                     "description" : "Standard Error (STDERR)"

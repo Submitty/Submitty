@@ -119,7 +119,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   system("find . -type f");
 
   // LOOP OVER ALL TEST CASES
-  nlohmann::json::iterator tc = config_json.find("test_cases");
+  nlohmann::json::iterator tc = config_json.find("testcases");
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
 

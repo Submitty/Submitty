@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
   system("find . -type f");
 
   // Run each test case and create output files
-  nlohmann::json::iterator tc = config_json.find("test_cases");
+  nlohmann::json::iterator tc = config_json.find("testcases");
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
 

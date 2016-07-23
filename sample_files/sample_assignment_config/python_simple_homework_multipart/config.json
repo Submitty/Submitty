@@ -7,7 +7,7 @@
     "assignment_message" : "Submit each part of your homework to the right bucket or you will not receive credit.",
     "part_names" : [ "Part 1", "Part 2", "Part 3" ],
 
-    "test_cases" : [
+    "testcases" : [
         {
             "title" : "Part 1 Compute square root",
             "details" : "python *.py",
