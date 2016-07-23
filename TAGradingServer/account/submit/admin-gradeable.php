@@ -97,10 +97,10 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     private $ta_grading;
     private $config_path;
     private $late_days;
+    private $point_precision;
     
      function __construct(& $params){
          parent::__construct($params);
-         //new constructor stuff for electronic gradeables
          $this->instructions_url = $params['instructions_url']; 
          $this->date_submit = $params['date_submit'];
          $this->date_due =$params['date_due'];
@@ -109,21 +109,22 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
          $this->ta_grading = $params['ta_grading'];
          $this->config_path = $params['config_path'];
          $this->late_days = $params['late_days'];
+         $this->point_precision = $params['point_precision'];
      }
      
      //TODO extract to multiple functions 
      function createComponents(& $db, $action, & $add_args){
         if ($action=='edit'){
             $params = array($this->instructions_url, $this->date_submit, $this->date_due, $this->is_repo, 
-                            $this->subdirectory, $this->ta_grading, $this->config_path, $this->late_days, $this->g_id);
+                            $this->subdirectory, $this->ta_grading, $this->config_path, $this->late_days, $this->point_precision, $this->g_id);
             $db->query("UPDATE electronic_gradeable SET eg_instructions_url=?, eg_submission_open_date=?,eg_submission_due_date=?, 
-                        eg_is_repository=?, eg_subdirectory=?, eg_use_ta_grading=?, eg_config_path=?, eg_late_days=? WHERE g_id=?", $params);
+                        eg_is_repository=?, eg_subdirectory=?, eg_use_ta_grading=?, eg_config_path=?, eg_late_days=?, eg_precision=? WHERE g_id=?", $params);
         }
         else{
             $params = array($this->g_id, $this->instructions_url, $this->date_submit, $this->date_due, 
-                            $this->is_repo, $this->subdirectory, $this->ta_grading, $this->config_path, $this->late_days);
+                            $this->is_repo, $this->subdirectory, $this->ta_grading, $this->config_path, $this->late_days, $this->point_precision);
             $db->query("INSERT INTO electronic_gradeable(g_id, eg_instructions_url, eg_submission_open_date, eg_submission_due_date, 
-                eg_is_repository, eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days) VALUES(?,?,?,?,?,?,?,?,?)", $params);
+                eg_is_repository, eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision) VALUES(?,?,?,?,?,?,?,?,?,?)", $params);
         }
 
         $num_questions = 0;
@@ -283,6 +284,7 @@ abstract class GradeableType{
         $ta_grading = ($request_args['ta-grading'] == 'yes')? "true" : "false";
         $config_path = $request_args['config-path'];
         $eg_late_days = intval($request_args['eg_late_days']);
+        $eg_pt_precision = floatval($request_args['point-precision']);
         
         $g_constructor_params['instructions_url'] = $instructions_url;
         $g_constructor_params['date_submit'] = $date_submit;
@@ -292,6 +294,7 @@ abstract class GradeableType{
         $g_constructor_params['ta_grading'] = $ta_grading;
         $g_constructor_params['config_path'] = $config_path;
         $g_constructor_params['late_days'] = $eg_late_days;
+        $g_constructor_params['point_precision'] = $eg_pt_precision;
         
         $gradeable = new ElectronicGradeable($g_constructor_params);
      }

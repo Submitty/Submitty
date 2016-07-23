@@ -132,7 +132,7 @@ HTML;
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-classlist.php" role="button" data-toggle="modal">
                                     Upload Classlist
                                 </a></li>
-                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-grading-sections.php" role="button" data-toggle="modal">
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-rotating-sections.php" role="button" data-toggle="modal">
                                     Setup Rotating Sections
                                 </a></li>
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-latedays-exceptions.php" role="button" data-toggle="modal">

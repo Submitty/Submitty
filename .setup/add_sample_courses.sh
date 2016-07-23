@@ -88,7 +88,7 @@ function one_course {
 
     # ---------------------------------------------------------------
     # CREATE THE FORM DIRECTORY (FOR GRADEABLE FORM JSON TEMPLATES)
-    class_form_directory=/var/local/submitty/courses/$semester/$course/config/form/
+    class_form_directory=${SUBMITTY_DATA_DIR}/courses/$semester/$course/config/form/
     mkdir $class_form_directory
     chown hwphp $class_form_directory
     

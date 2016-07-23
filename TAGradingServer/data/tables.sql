@@ -73,7 +73,8 @@ CREATE TABLE electronic_gradeable (
     eg_subdirectory character varying(1024) NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
     eg_config_path character varying(1024) NOT NULL,
-    eg_late_days integer DEFAULT (-1) NOT NULL
+    eg_late_days integer DEFAULT (-1) NOT NULL,
+    eg_precision numeric NOT NULL 
 );
 
 

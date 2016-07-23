@@ -310,6 +310,9 @@ HTML;
                 <!-- Path to .h config may or not be included -->
                 Path to autograding config: 
                 <input style='width: 227px' type='text' name='config-path' value="" />
+                <br />
+                Point precision: 
+                <input style='width: 50px' type='text' name='point-precision' value="" />
                 <br /> <br />
                 
                 Use TA grading? 
@@ -882,6 +885,7 @@ HTML;
             $('input[name=subdirectory]').val('{$electronic_gradeable['eg_subdirectory']}');
             $('input[name=config-path]').val('{$electronic_gradeable['eg_config_path']}');
             $('input[name=eg_late_days]').val('{$electronic_gradeable['eg_late_days']}');
+            $('input[name=point-precision]').val('{$electronic_gradeable['eg_precision']}');
             
             if($('#repository_radio').is(':checked')){
                 $('#repository').show();
