@@ -4,6 +4,7 @@ namespace app\controllers\student;
 
 use app\controllers\IController;
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -33,6 +34,7 @@ class SubmissionController implements IController {
                 $this->uploadSubmission();
                 break;
             case 'update':
+                $this->updateSubmissionVersion();
                 break;
             case 'display':
             default:
@@ -45,7 +47,8 @@ class SubmissionController implements IController {
         if (count($this->class_info->getAssignments()) > 0) {
             $select = $this->core->getOutput()->renderTemplate(array('submission', 'Homework'), 'assignmentSelect', $this->class_info->getAssignments(), $this->class_info->getCurrentAssignment()->getAssignmentId());
     
-            $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'showAssignment', $select, $this->class_info->getCurrentAssignment());
+            $days_late = DateUtils::calculateDayDiff($this->class_info->getCurrentAssignment()->getDueDate());
+            $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'showAssignment', $select, $this->class_info->getCurrentAssignment(), $days_late);
         }
         else {
             $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noAssignments');
@@ -278,7 +281,7 @@ class SubmissionController implements IController {
         // TODO: If any of these fail, should we "cancel" (delete) the entire submission attempt or just leave it?
         if (!file_put_contents($settings_file, json_encode($json, JSON_PRETTY_PRINT))) {
             return $this->uploadResult("Failed to write to settings file.", false);
-        };
+        }
     
         // TODO: should we really be outputting an error on this as we've basically created all other files
         // at this point
@@ -299,5 +302,54 @@ class SubmissionController implements IController {
     private function uploadResult($message, $success = true) {
         $this->core->getOutput()->renderJson(array('success' => $success, 'error' => !$success, 'message' => $message));
         return $success;
+    }
+    
+    private function updateSubmissionVersion() {
+        if (!isset($_REQUEST['assignment_id']) || !array_key_exists($_REQUEST['assignment_id'], $this->class_info->getAssignments())) {
+            $_SESSION['messages']['error'][] = "Invalid assigment id";
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student')));
+        }
+        
+        $assignment = $this->class_info->getCurrentAssignment();
+        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            $_SESSION['messages']['error'][] = "Invalid CSRF token. Refresh the page and try again.";
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'assignment_id' => $assignment->getAssignmentId())));
+        }
+        
+        $new_version = intval($_REQUEST['new_version']);
+        if ($new_version < 0) {
+            $_SESSION['messages']['error'][] = "Cannot set the version below 0.";
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'assignment_id' => $assignment->getAssignmentId())));
+        }
+    
+        
+        if ($new_version > $assignment->getHighestVersion()) {
+            $_SESSION['messages']['error'][] = "Cannot set the version past ".$this->class_info->getCurrentAssignment()->getHighestVersion();
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'assignment_id' => $assignment->getAssignmentId())));
+        }
+    
+        $settings_file = $this->core->getConfig()->getCoursePath()."/submissions/".$assignment->getAssignmentId()."/".
+            $this->core->getUser()->getUserId()."/user_assignment_settings.json";
+        $json = FileUtils::loadJsonFile($settings_file);
+        if ($json === false) {
+            return $this->uploadResult("Failed to open settings file.", false);
+        }
+        $json["active_assignment"] = $new_version;
+        $json["history"][] = array("version"=> $new_version, "time" => date("Y-m-d H:i:s"));
+    
+        if (!file_put_contents($settings_file, json_encode($json, JSON_PRETTY_PRINT))) {
+            $_SESSION['messages']['error'][] = "Could not write to settings file.";
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'assignment_id' => $assignment->getAssignmentId())));
+        }
+        
+        if ($new_version == 0) {
+            $_SESSION['messages']['success'][] = "Cancelled submission for assignment";
+        }
+        else {
+            $_SESSION['messages']['success'][] = "Updated version of assignment to version #" . $new_version;
+        }
+        $this->core->redirect($this->core->buildUrl(array('component' => 'student',
+                                                          'assignment_id' => $assignment->getAssignmentId(),
+                                                          'assignment_version' => $new_version)));
     }
 }

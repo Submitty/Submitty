@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\integrationTests\app\libraries;
+namespace tests\unitTests\app\libraries;
 
 use \app\libraries\DiffViewer;
 
@@ -37,53 +37,33 @@ class DiffViewerTester extends \PHPUnit_Framework_TestCase {
      * @dataProvider diffDir
      */
     public function testDiffViewer($diffDir) {
-        $diff = new DiffViewer();
-        $diff->load("{$diffDir}/input_actual.txt", "{$diffDir}/input_expected.txt", "{$diffDir}/input_differences.json");
+        $diff = new DiffViewer("{$diffDir}/input_actual.txt", "{$diffDir}/input_expected.txt", "{$diffDir}/input_differences.json");
         $this->assertStringEqualsFile($diffDir."/output_actual.txt", $diff->getDisplayActual());
         $this->assertStringEqualsFile($diffDir."/output_expected.txt", $diff->getDisplayExpected());
-        $this->assertTrue($diff->exists_difference());
+        $this->assertTrue($diff->existsDifference());
     }
 
     /**
      * @expectedException \Exception
      */
     public function testActualException() {
-        $diff = new DiffViewer();
-        $diff->load("file_that_doesnt_exist", "", "");
+        $diff = new DiffViewer("file_that_doesnt_exist", "", "");
     }
 
     /**
      * @expectedException \Exception
      */
     public function testExpectedException() {
-        $diff = new DiffViewer();
-        $diff->load(__TEST_DIRECTORY__."/diffs/diff_test_01/input_actual.txt",
-                    "file_that_doesnt_exist", "");
+        $diff = new DiffViewer(__TEST_DIRECTORY__."/diffs/diff_test_01/input_actual.txt",
+                               "file_that_doesnt_exist", "");
     }
 
     /**
      * @expectedException \Exception
      */
     public function testDifferencesException() {
-        $diff = new DiffViewer();
-        $diff->load(__TEST_DIRECTORY__."/diffs/diff_test_01/input_actual.txt",
-                    __TEST_DIRECTORY__."/diffs/diff_test_01/input_expected.txt",
-                    "file_that_doesnt_exist");
-    }
-
-    public function testHasCSS() {
-        $diff = new DiffViewer();
-        $this->assertNotEmpty($diff->getCSS());
-    }
-
-    public function testHasJavascript() {
-        $diff = new DiffViewer();
-        $this->assertNotEmpty($diff->getJavascript());
-    }
-
-    public function testEmptyDisplay() {
-        $diff = new DiffViewer();
-        $this->assertEmpty($diff->getDisplayActual());
-        $this->assertEmpty($diff->getDisplayExpected());
+        $diff = new DiffViewer(__TEST_DIRECTORY__."/diffs/diff_test_01/input_actual.txt",
+                               __TEST_DIRECTORY__."/diffs/diff_test_01/input_expected.txt",
+                               "file_that_doesnt_exist");
     }
 }

@@ -42,7 +42,7 @@ class GradeablesController implements IController {
     public function gradeablesForm($edit_assignment=false) {
         if ($edit_assignment) {
             if (!isset($_REQUEST['gradeables_id'])) {
-                $_SESSION['messages']['errors'][] = 'Invalid Gradeables ID';
+                $_SESSION['messages']['error'] = 'Invalid Gradeables ID';
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
                                                                   'page' => 'gradeables',
                                                                   'action' => 'list')));
@@ -50,7 +50,7 @@ class GradeablesController implements IController {
 
             $assignment = $this->core->getQueries()->getAssignmentById($_REQUEST['assignment_id']);
             if (empty($assignment)) {
-                $_SESSION['messages']['errors'][] = 'Invalid Gradeables ID';
+                $_SESSION['messages']['error'] = 'Invalid Gradeables ID';
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
                                                                   'page' => 'gradeables',
                                                                   'action' => 'list')));

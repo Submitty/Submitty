@@ -16,41 +16,26 @@ class GlobalView {
     }
 
     public function header() {
-        $messages = "";
-        $cnt = count($_SESSION['messages']['errors']) +
-            count($_SESSION['messages']['alerts']) + count($_SESSION['messages']['successes']);
-        if ($cnt > 0) {
-            $messages = <<<HTML
+        $messages = <<<HTML
 <div id='messages'>
+
 HTML;
-            foreach ($_SESSION['messages']['errors'] as $key => $error) {
+        foreach (array('error', 'notice', 'success') as $type) {
+            foreach ($_SESSION['messages'][$type] as $key => $error) {
                 $messages .= <<<HTML
-    <div id='error-{$key}' class="inner-message alert alert-error">
-        <a class="fa fa-times message-close" onClick="removeBox('error-{$key}');"></a>
+    <div id='{$type}-{$key}' class="inner-message alert alert-{$type}">
+        <a class="fa fa-times message-close" onClick="removeMessagePopup('{$type}-{$key}');"></a>
         <i class="fa fa-times-circle"></i> {$error}
     </div>
+
 HTML;
+                unset($_SESSION['messages'][$type][$key]);
             }
-            foreach ($_SESSION['messages']['alerts'] as $key => $alert) {
-                $messages .= <<<HTML
-    <div id='alert-{$key}' class="inner-message alert alert-notice">
-        <a class="fa fa-times message-close" onClick="removeBox('alert-{$key}');"></a>
-        <i class="fa fa-exclamation-circle"></i> {$alert}
-    </div>
-HTML;
-            }
-            foreach ($_SESSION['messages']['successes'] as $key => $success) {
-                $messages .= <<<HTML
-    <div id="success-{$key}" class="inner-message alert alert-success">
-        <a class="fa fa-times message-close" onClick="removeBox('success-{$key}');"></a>
-        <i class="fa fa-check-circle"></i> {$success}
-    </div>
-HTML;
-            }
-            $messages .= <<<HTML
-</div>
-HTML;
         }
+        $messages .= <<<HTML
+</div>
+
+HTML;
 
         if (file_exists($this->core->getConfig()->getCoursePath()."/override.css")) {
             $override_css = "<link rel='stylesheet' type='text/css' href='{$this->core->getConfig()->getCoursePath()}/override.css' />";
@@ -67,8 +52,10 @@ HTML;
     <title>{$this->core->getFullCourseName()}</title>
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/server.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
     {$override_css}
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.min.js"></script>
+    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/diff-viewer.js"></script>
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/server.js"></script>
     <script type="text/javascript">
         var is_developer = {$is_dev};
@@ -126,10 +113,12 @@ HTML;
 
         $return .= <<<HTML
 <div id="header">
+    <a href="http://submitty.org">
     <div id="logo-text">
         <h1>Submitty</h1>
         <h2>Rensselaer Center for Open Source</h2>
     </div>
+    </a>
     <div id="header-text">
         <h2>
 HTML;

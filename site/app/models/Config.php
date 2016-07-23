@@ -79,8 +79,7 @@ class Config extends Model {
     private $default_hw_late_days;
     private $default_student_late_days;
     private $zero_rubric_grades;
-    private $generate_diff;
-    private $use_autograder;
+    private $display_hidden;
 
     /**
      * Config constructor.
@@ -138,14 +137,13 @@ class Config extends Model {
 
         $this->setConfigValues($course, 'database_details', array('database_name'));
         $this->setConfigValues($course, 'course_details', array('course_name',
-            'default_hw_late_days', 'default_student_late_days', 'use_autograder',
-            'generate_diff', 'zero_rubric_grades'));
+            'default_hw_late_days', 'default_student_late_days', 'zero_rubric_grades'));
 
         foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
             $this->$key = intval($this->$key);
         }
 
-        foreach (array('use_autograder', 'generate_diff', 'zero_rubric_grades') as $key) {
+        foreach (array('zero_rubric_grades', 'display_hidden') as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
     }
@@ -285,22 +283,12 @@ class Config extends Model {
     /**
      * @return bool
      */
-    public function getZeroRubricGrades() {
+    public function shouldZeroRubricGrades() {
         return $this->zero_rubric_grades;
     }
-
-    /**
-     * @return bool
-     */
-    public function getGenerateDiff() {
-        return $this->generate_diff;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getUseAutograder() {
-        return $this->use_autograder;
+    
+    public function shouldDisplayHidden() {
+        return $this->display_hidden;
     }
 
     public function getConfigPath() {

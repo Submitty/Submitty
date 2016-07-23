@@ -156,9 +156,9 @@ textarea {
     margin-left: 20px;
 }
 
-#header-text a,
-#header-text a:link,
-#header-text a:visited {
+#header a,
+#header a:link,
+#header a:visited {
     color: #000;
 }
 
@@ -230,6 +230,14 @@ textarea {
     margin-left: 1%;
     margin-top: 1%;
     margin-bottom: 1%;
+}
+
+.sub::after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
 }
 
 .panel {
@@ -337,10 +345,108 @@ select {
     background: #fff;
 }
 
-#upload-boxes .label {
+.label {
     font-family: 'PT Sans', sans-serif;
     font-weight: 700;
     margin-top: .5em;
     margin-right: 0;
     margin-left: 0;
+}
+
+.green-message {
+    font-style: italic;
+    font-weight: bold;
+    color: #008800;
+}
+
+.red-message {
+    font-style: italic;
+    color: #af0000;
+}
+
+.sub-text {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.box {
+    border-radius: 3px;
+    border: 1px solid #dddddd;
+    width: 100%;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    position: relative;
+    float: left;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 2px 2px 4px -3px #dddddd;
+    padding: 5px 5px 10px;
+}
+
+.box > h4 {
+    margin-bottom: 10px;
+    margin-left: 10px;
+    margin-top: 10px;
+}
+.box-block {
+    vertical-align: top;
+    margin-left: 10px;
+    padding: 10px;
+}
+
+.box-block > h4 {
+    margin-bottom: 10px;
+}
+
+.box-block > code,
+.box-block > pre {
+    padding: 10px;
+    background-color: #F8F8F8;
+    border: 1px solid #ddd;
+    white-space: pre;
+}
+
+.half {
+    width: 48%;
+    margin-right: 10px;
+}
+
+.diff-element {
+    width: 48%;
+    float: left;
+    margin-right: 20px;
+}
+
+.badge {
+    float: right;
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-weight: bold;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    background-color: #999;
+    border-radius: 10px;
+    margin-top: 10px;
+    margin-right: 20px;
+}
+
+.green-background {
+    background-color: #006600;
+}
+
+.yellow-background {
+    background-color: #eac73d;
+    color: #000000;
+}
+
+.red-background {
+    background-color: #c00000;
+}
+
+.italics {
+    font-style: italic;
+    text-decoration: none;
 }

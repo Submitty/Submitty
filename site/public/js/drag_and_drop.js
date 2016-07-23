@@ -73,6 +73,7 @@ function addFilesFromInput(part){
     for(var i=0; i<filestream.length; i++){
         addFile(filestream[i], part); // folders will not be selected in file browser, no need for check
     }
+    $('#input_file' + part).val("");
 }
 
 // Check for duplicate file names. This function returns an array.
@@ -308,10 +309,9 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
         data: formData,
         processData: false,
         contentType: false,
-        //dataType: 'json',
+        dataType: 'json',
         type: 'POST',
         success: function(data) {
-            console.log(data);
             data = JSON.parse(data);
             var response = "ERROR! Please contact administrator with following error:\n\n";
             var redirect = false;
@@ -325,29 +325,7 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
             }
         },
         error: function() {
-            alert("Failure to upload files.");
+            alert("ERROR! Please contact administrator that you could not upload files.");
         }
-    })
-    /*
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", submit_url, true);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            console.log(xhr.responseText);
-            var j = JSON.parse(xhr.responseText);
-            var response = "ERROR! Please contact administrator with following error:\n\n";
-            var redirect = false;
-            if (j['success']) {
-                response = "SUCCESS!\n\n";
-                redirect = true;
-            }
-            alert(response + j['message']);
-            if (redirect) {
-                window.location.href = return_url;
-            }
-        }
-    };
-    xhr.send(files_to_upload);
-    // TODO: Maybe rewrite file upload in jQuery AJAX?
-    */
+    });
 }

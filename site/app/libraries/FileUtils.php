@@ -9,76 +9,53 @@ namespace app\libraries;
  */
 class FileUtils {
     /**
-     * Recursively return all files in a directory and subdirectories, assuming the files
-     * are part of the $allowed_file_extensions array (if it's non-empty).
-     *
-     * TODO: Add in flag for whether or not it should work recursively
+     * Return all files from a given directory. If the $recursive flag is true, then also scan subdirectories
+     * recursively to get files from them. All subdirectories are an array pointing to their files (and additional
+     * subdirecotires pointing to their files, so on and so forth). If the $recursive flag is false, then we skip
+     * any subdirectories and do not include them in the returned array. If passed a file, the function will not
+     * return anything. If the $flatten flag is true, any subdirectory arrays are flattened to just be elements
+     * of the directory array with they key being {subdirectory}/{entry} giving a one-dimensional array.
      *
      * @param string $dir
-     * @param array  $allowed_file_extensions
      * @param array  $skip_files
+     * @param bool   $recursive
+     * @param bool   $flatten
      * @return array
      */
-    public static function getAllFiles($dir, $allowed_file_extensions=array(), $skip_files=array()) {
-        // we never want to include these files/folders as they do not contain any useful
-        // information for us and would just end up making the file viewer have way too many files
-        // case them to lowercase for easier string comparisons
+    public static function getAllFiles($dir, $skip_files=array(), $recursive=false, $flatten=false) {
         $skip_files = array_map(function($str) { return strtolower($str); }, $skip_files);
-
+    
+        // we ignore these files and folders as they're "junk" folders that are
+        // not really useful in the context of our application that potentially
+        // would just add a ton of additional files we wouldn't want or use
         $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
         $disallowed_files = array('.ds_store');
         $return = array();
-        if (file_exists($dir)) {
-            // If it's not an array, assume it's a comma separated string, and use that
-            if(!is_array($allowed_file_extensions)) {
-                $allowed_file_extensions = explode(",", $allowed_file_extensions);
-            }
-
-            $check_extension = count($allowed_file_extensions) > 0;
-
-            if(is_dir($dir)) {
-                if($handle = opendir($dir)) {
-                    while (false !== ($entry = readdir($handle))) {
-                        if(in_array(strtolower($entry), $disallowed_folders)) {
-                            continue;
-                        }
-                        if (in_array(strtolower($entry), $skip_files)) {
-                            continue;
-                        }
-                        $file = "{$dir}/{$entry}";
-                        if(is_dir($file)) {
-                            $return = array_merge($return, array($entry => FileUtils::getAllFiles($file, $allowed_file_extensions)));
-                        } else {
-                            $info = pathinfo($file);
-                            if($check_extension) {
-                                if(in_array($info['extension'], $allowed_file_extensions)) {
-                                    $return[] = $file;
-                                }
-                            } else {
-                                if(!in_array(strtolower($entry), $disallowed_files)) {
-                                    $return[] = $file;
+        if (is_dir($dir)) {
+            if ($handle = opendir($dir)) {
+                while (false !== ($entry = readdir($handle))) {
+                    $path = "{$dir}/{$entry}";
+                    if (is_dir($path) && !in_array(strtolower($entry), $disallowed_folders)) {
+                        if ($recursive) {
+                            $temp = FileUtils::getAllFiles($path, $skip_files);
+                            if ($flatten) {
+                                foreach ($temp as $file => $details) {
+                                    $return[$entry."/".$file] = $details;
                                 }
                             }
+                            else {
+                                $return[$entry] = $temp;
+                            }
+                            
                         }
                     }
-                }
-            } else if(is_file($dir)) {
-                $check = explode("/", $dir);
-                if (!in_array($check[count($check)-1], $skip_files)) {
-                    $info = pathinfo($dir);
-                    if($check_extension) {
-                        if(in_array($info['extension'], $allowed_file_extensions)) {
-                            $return[] = $dir;
-                        }
-                    } else {
-                        if(!in_array(strtolower($dir), $disallowed_files)) {
-                            $return[] = $dir;
-                        }
+                    else if (is_file($path) && !in_array(strtolower($entry), $skip_files) &&
+                        !in_array(strtolower($entry), $disallowed_files)) {
+                        $return[$entry] = array('name' => $entry, 'path' => $path, 'size' => filesize($path));
                     }
                 }
             }
-            sort($return);
-            $return = array($dir => $return);
+            ksort($return);
         }
 
         return $return;
@@ -120,7 +97,8 @@ class FileUtils {
                 if ($object != "." && $object != "..") {
                     if (filetype($dir . "/" . $object) == "dir") {
                         FileUtils::recursiveRmdir($dir . "/" . $object);
-                    } else {
+                    }
+                    else {
                         unlink($dir . "/" . $object);
                     }
                 }
@@ -161,11 +139,8 @@ class FileUtils {
         if (is_dir($path)) {
             if ($handle = opendir($path)) {
                 while (false !== ($entry = readdir($handle))) {
-                    if(in_array(strtolower($entry), $disallowed_folders)) {
-                        continue;
-                    }
                     $file = "{$path}/{$entry}";
-                    if(is_dir($file)) {
+                    if(is_dir($file) && !in_array(strtolower($entry), $disallowed_folders)) {
                         $return[] = $entry;
                     }
                 }
@@ -211,7 +186,7 @@ class FileUtils {
      * Given a filename of a zip, open the zip, and then read in each entry in the zip, getting its size
      * and then returning that to the user. If the file is not a zip, then the returned size should be 0.
      *
-     * @param $filename
+     * @param string $filename
      *
      * @return int
      */

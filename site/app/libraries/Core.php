@@ -52,14 +52,13 @@ class Core {
      */
     public function __construct() {
         $this->output = new Output($this);
-    
         // initialize our alert queue if it doesn't exist
         if(!isset($_SESSION['messages'])) {
             $_SESSION['messages'] = array();
         }
     
         // initialize our alert types if one of them doesn't exist
-        foreach (array('errors', 'alerts', 'successes') as $key) {
+        foreach (array('error', 'notice', 'success') as $key) {
             if(!isset($_SESSION['messages'][$key])) {
                 $_SESSION['messages'][$key] = array();
             }
@@ -99,10 +98,9 @@ class Core {
      * the database, running any open transactions that were left.
      */
     public function __destruct() {
-        foreach (array('errors', 'alerts', 'successes') as $key) {
-            $_SESSION['messages'][$key] = array();
+        if ($this->database !== null) {
+            $this->getDatabase()->disconnect();
         }
-        $this->getDatabase()->disconnect();
     }
 
     /**

@@ -61,7 +61,7 @@ class UsersController implements IController {
         $user = null;
         if ($edit_user) {
             if (!isset($_REQUEST['user_id'])) {
-                $_SESSION['messages']['errors'][] = "Invalid requested user id for editing";
+                $_SESSION['messages']['error'][] = "Invalid requested user id for editing";
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
                                                                   'page' => 'users',
                                                                   'action' => $action)));
@@ -69,7 +69,7 @@ class UsersController implements IController {
 
             $user = $this->core->getQueries()->getUserById($_REQUEST['user_id']);
             if (empty($user)) {
-                $_SESSION['messages']['errors'][] = "Invalid requested user id for editing";
+                $_SESSION['messages']['error'][] = "Invalid requested user id for editing";
                 $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
                                                                   'page' => 'users',
                                                                   'action' => $action)));

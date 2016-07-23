@@ -2,7 +2,9 @@
 
 namespace app\models;
 
+use app\exceptions\NotImplementedException;
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 
 /**
@@ -25,10 +27,39 @@ class Assignment {
     private $assignment_id;
 
     private $submissions = 0;
+    /**
+     * The set active version for the assignment
+     * @var int
+     */
     private $active = -1;
+    /**
+     * The current version of the assignment being viewed
+     * @var int
+     */
     private $current = -1;
+    /**
+     * @var int Highest version submitted for an assignment
+     */
+    private $highest = 0;
     private $history = array();
     private $versions = array();
+    
+    /**
+     * @var int Non hidden, non extra credit points
+     */
+    private $normal_points = 0;
+    
+    /**
+     * @var int Non hidden points (including extra credit)
+     */
+    private $non_hidden_points = 0;
+    
+    private $current_points_awarded = 0;
+    
+    /**
+     * @var AssignmentTestcase[]
+     */
+    private $testcases = array();
     
     /**
      * Default max size allowed for upload if the field does exist in the config file for the assignment.
@@ -43,8 +74,10 @@ class Assignment {
      * @var array
      */
     private $submitted_files = array();
+    private $meta_files = array();
+    private $previous_files = array();
 
-    private $result_details = array();
+    private $result_details;
 
     public function __construct(Core $core, $assignment) {
         $this->core = $core;
@@ -54,8 +87,23 @@ class Assignment {
         $this->details = array_merge($this->details, FileUtils::loadJsonFile($course_path."/config/".$this->assignment_id.
                                                                          "_assignment_config.json"));
 
+        if (isset($this->details['assignment_message'])) {
+            $message = str_replace("<br>", "<br />", trim($this->details['assignment_message']));
+            $message = explode("<br />", nl2br($message));
+            foreach ($message as $key => $value) {
+                $message[$key] = htmlentities(trim($value));
+            }
+            $this->details['assignment_message'] = implode("<br />", $message);
+            
+        }
         if (!isset($this->details['num_parts'])) {
             $this->details['num_parts'] = 1;
+        }
+        if (!isset($this->details['max_submission_size'])) {
+            $this->details['max_submission_size'] = $this->default_max;
+        }
+        else {
+            $this->details['max_submission_size'] = floatval($this->details['max_submission_size']);
         }
         
         if (!isset($this->details['part_names']) || count($this->details['part_names']) < $this->details['num_parts']) {
@@ -66,13 +114,33 @@ class Assignment {
         }
 
         $submission_path = $course_path."/submissions/".$this->assignment_id."/".$this->core->getUser()->getUserId();
+        $results_path = $course_path."/results/".$this->assignment_id."/".$this->core->getUser()->getUserId();
+        
         if (is_file($submission_path."/user_assignment_settings.json")) {
             $settings = FileUtils::loadJsonFile($submission_path."/user_assignment_settings.json");
             $this->active = $settings['active_assignment'];
             $this->history = $settings['history'];
         }
 
-        $this->versions = FileUtils::getAllDirs($submission_path);
+        $versions = array_map("intval", FileUtils::getAllDirs($submission_path));
+        $temp = array_slice($versions, -1, 1);
+        $this->highest = count($temp) > 0 ? intval(array_pop($temp)) : 0;
+        foreach ($versions as $version) {
+            $this->versions[$version] = FileUtils::loadJsonFile($results_path."/".$version."/submission.json");
+            $this->versions[$version] = array_merge($this->versions[$version], FileUtils::loadJsonFile($results_path."/".$version."/.grade.timestamp"));
+            $this->versions[$version]['days_late'] = $this->versions[$version]['days_late_(before_extensions)'];
+            if ($this->versions[$version]['days_late'] < 0) {
+                $this->versions[$version]['days_late'] = 0;
+            }
+            $this->versions[$version]['points'] = 0;
+            // TODO: We don't want to take into account points_awarded for hidden testcases
+            for ($i = 0; $i < count($this->testcases); $i++) {
+                if (!$this->testcases[$i]->isHidden()) {
+                    $this->versions[$version]['points'] += $this->versions[$version]['testcases'][$i]['points_awarded'];
+                }
+            }
+        }
+        
         $this->submissions = count($this->versions);
 
         if ($this->active < 0 && $this->active > $this->submissions) {
@@ -81,47 +149,62 @@ class Assignment {
         }
 
         if (isset($_REQUEST['assignment_version'])) {
-            $this->current = $_REQUEST['assignment_version'];
+            $this->current = intval($_REQUEST['assignment_version']);
         }
 
-        if ($this->current == 0 && $this->active > 0) {
+        if ($this->current < 0 && $this->active >= 0) {
             $this->current = $this->active;
         }
         else if ($this->current > $this->submissions) {
             $this->current = $this->active;
         }
-
-        $submission_path .= "/".$this->current;
-
-        for ($i = 0; $i <= $this->details['num_parts']; $i++) {
-            $this->submitted_files[$i] = array();
+    
+        if (isset($this->details['testcases'])) {
+            foreach ($this->details['testcases'] as $testcase) {
+                $testcase = new AssignmentTestcase($this->core, $testcase);
+                $this->testcases[] = $testcase;
+                $this->normal_points += $testcase->getNormalPoints();
+                $this->non_hidden_points += $testcase->getNonHiddenPoints();
+            }
         }
-        if ($this->details['num_parts'] > 1) {
-            for ($i = 1; $i <= $this->details['num_parts']; $i++) {
-                $submitted_files = FileUtils::getAllFiles($submission_path."/{$i}");
-                if (count($submitted_files) > 0) {
-                    foreach ($submitted_files as $file) {
-                        $this->submitted_files[$i][basename($file)] = array('name' => basename($file),
-                                                                            'full_path' => $file,
-                                                                            'size' => filesize($file));
+
+        $submission_current_path = $submission_path."/".$this->current;
+        
+        $submitted_files = FileUtils::getAllFiles($submission_current_path, array(), true, true);
+        foreach ($submitted_files as $file => $details) {
+            if (substr(basename($file), 0, 1) === '.') {
+                $this->meta_files[$file] = $details;
+            }
+            else {
+                $this->submitted_files[$file] = $details;
+            }
+        }
+        
+        if ($this->getNumParts() > 1) {
+            for ($i = 1; $i <= $this->getNumParts(); $i++) {
+                $this->previous_files[$i] = array();
+                foreach ($this->submitted_files as $file => $details) {
+                    if (substr($file, 0, strlen("part{$i}/")) === "part{$i}/") {
+                        $this->previous_files[$i][$file] = $details;
                     }
                 }
             }
         }
         else {
-            $submitted_files = FileUtils::getAllFiles($submission_path);
-            foreach ($submitted_files as $file) {
-                $this->submitted_files[1][basename($file)] = array('name' => basename($file), 'full_path' => $file,
-                                                                   'size' => filesize($file));
+            $this->previous_files[1] = $this->submitted_files;
+        }
+    
+        if ($this->current > 0) {
+            $this->result_details = $this->versions[$this->current];
+            for ($i = 0; $i < count($this->result_details['testcases']); $i++) {
+                $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], $results_path."/".$this->current);
             }
         }
-
-        $result_path = $course_path."/results/".$this->assignment_id."/".$this->core->getUser()->getUserId()."/".$this->current;
-        if (is_file($result_path."/submission.json")) {
-            $this->result_details = FileUtils::loadJsonFile($result_path . "/submission.json");
-        }
-
+        
+        $this->possible_days_late = DateUtils::calculateDayDiff($this->details['due_date']);
+    
         // TODO: Get TA grade details
+        
     }
 
     public function getAssignmentId() {
@@ -141,8 +224,7 @@ class Assignment {
     }
 
     public function getHighestVersion() {
-        $array = array_slice($this->versions, -1, 1, true);
-        return (count($array) > 0) ? array_pop($array) : 0;
+        return $this->highest;
     }
 
     public function getActiveVersion() {
@@ -154,25 +236,16 @@ class Assignment {
     }
 
     public function getPreviousFiles($part = 1) {
-        $part = ($this->details['num_parts'] < $part || $part < 1) ? 1 : $part;
-        return $this->submitted_files[$part];
+        $part = ($this->getNumParts() < $part || $part < 1) ? 1 : $part;
+        return $this->previous_files[$part];
     }
     
     public function getMaxSubmissions() {
         return $this->details['max_submissions'];
     }
     
-    /**
-     * Returns the number of days between the due date of the assignment and the current time
-     * showing the possible number of late days used if the assignment were to be submitted.
-     *
-     * @return int
-     */
-    public function getPossibleDaysLate() {
-        $due_date = new \DateTime($this->details['due_date']);
-        $now = new \DateTime("NOW");
-        $due_date->sub(new \DateInterval("P1D"));  // ceiling up late days
-        return intval(date_diff($due_date, $now)->format('%r%a'));
+    public function getSubmissionCount() {
+        return $this->submissions;
     }
     
     public function getAllowedLateDays() {
@@ -191,5 +264,63 @@ class Assignment {
     
     public function getVersions() {
         return $this->versions;
+    }
+    
+    /**
+     * Returns the total number of points for testcases that are not hidden nor are extra credit
+     * @return int
+     */
+    public function getNormalPoints() {
+        return $this->normal_points;
+    }
+    
+    public function getTotalHiddenPoints() {
+        throw new NotImplementedException();
+    }
+    
+    public function getExtraCreditPoints() {
+        throw new NotImplementedException();
+    }
+    
+    public function getHiddenExtraCreditPoints() {
+        throw new NotImplementedException();
+    }
+    
+    public function getDueDate() {
+        return $this->details['due_date'];
+    }
+    
+    public function getDaysLate() {
+        return ($this->hasCurrentResults()) ? $this->result_details['days_late'] : 0;
+    }
+    
+    /**
+     * Check to see if we have the result_details array from the results directory.
+     * If false, we don't want to display any result details to the user about the
+     * version.
+     *
+     * @return bool
+     */
+    public function hasCurrentResults() {
+        return isset($this->result_details);
+    }
+    
+    public function getCurrentResults() {
+        return $this->result_details;
+    }
+    
+    public function getSubmittedFiles() {
+        return $this->submitted_files;
+    }
+    
+    public function getTestcases() {
+        return $this->testcases;
+    }
+    
+    public function hasMessage() {
+        return isset($this->details['assignment_message']) && trim($this->details['assignment_message']) !== "";
+    }
+    public function getMessage() {
+        return $this->details['assignment_message'];
     }
 }

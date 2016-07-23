@@ -18,6 +18,8 @@ class ClassJson {
      */
     private $core;
 
+    private $class;
+    
     /**
      * @var array()
      */
@@ -75,5 +77,9 @@ class ClassJson {
      */
     public function getCurrentAssignment() {
         return $this->assignment;
+    }
+    
+    public function isValidAssignment() {
+        
     }
 }

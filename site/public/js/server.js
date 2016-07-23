@@ -17,19 +17,33 @@ function togglePageDetails() {
  * user
  * @param elem
  */
-function removeAlert(elem) {
+function removeMessagePopup(elem) {
     $('#' + elem).fadeOut('slow', function() {
         $('#' + elem).remove();
     });
 }
 
 function assignmentChange(url, sel){
-    url = url.replace("change_assignment_id", sel.value);
+    url = url + sel.value;
     window.location.href = url;
 }
 function versionChange(url, sel){
-    url = url.replace("change_assignment_version", sel.value);
+    url = url + sel.value;
     window.location.href = url;
+}
+
+function checkVersionChange(days_late, late_days_allowed){
+    if(days_late > late_days_allowed){
+        var message = "The max late days allowed for this assignment is " + late_days_allowed + " days. ";
+        message += "You are not supposed to change your active version after this time unless you have permission from the instructor. Are you sure you want to continue?";
+        return confirm(message);
+    }
+    return true;
+}
+
+function toggleDiv(id) {
+    $("#" + id).toggle();
+    return true;
 }
 
 /* TODO: Add way to add new errors/notices/successes to the screen for ajax forms */

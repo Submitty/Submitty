@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\integrationTests\app\libraries;
+namespace tests\unitTests\app\libraries;
 
 use \app\libraries\Utils;
 

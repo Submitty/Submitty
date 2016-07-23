@@ -44,24 +44,7 @@ class ConfigurationView {
                 <div class="option-title">Default Student Late Days</div>
                 <div class="option-alt">Number of late days a student has when added to the server. Additional late days can be
                 given to the student throughout the semester.</div>
-            </div>
-                
-        </div>
-        <div class="option">
-            <div class="option-input"><input type="checkbox" name="use_autograder" value="true" {$autograder_checked} /></div>
-            <div class="option-desc">
-                <div class="option-title">Use Autograder</div>
-                <div class="option-alt">Should the autograder be used for assignments? This must be enabled before making a rubric
-                if you want that rubric to use the autograder.</div>
-            </div>
-        </div>
-        <div class="option">
-            <div class="option-input"><input type="checkbox" name="generate_diff" value="true" {$diff_checked} /></div>
-            <div class="option-desc">
-                <div class="option-title">Generate Diff</div>
-                <div class="option-alt">Should a diff be generated when viewing testcases? If disabled, it'll just show the 
-                expected and actual outputs without any sort of highlighting.</div>
-            </div>
+            </div>  
         </div>
         <div class="option">
             <div class="option-input"><input type="checkbox" name="zero_rubric_grades" value="true" {$zero_checked} /></div>
@@ -70,6 +53,14 @@ class ConfigurationView {
                 <div class="option-alt">Should rubrics start out at zero when TAs are grading? If disabled, the rubric will
                 start at full credit unless the submission was too late/not submitted at which point it'll be zeroed out
                 automatically.</div>
+            </div>
+        </div>
+        <div class="option">
+            <div class="option-input"><input type="checkbox" name="display_hidden" value="true" {$hidden_checked} /></div>
+            <div class="option-desc">
+                <div class="option-title">Display Hidden Points</div>
+                <div class="option-alt">Should the points be visible for hidden testcases for submissions? The details
+                about the score of the test (diffs, etc.) will not be shown to the student.</div>
             </div>
         </div>
     </div>

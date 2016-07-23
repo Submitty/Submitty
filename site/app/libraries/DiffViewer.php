@@ -41,16 +41,6 @@ class DiffViewer {
     private $add = array();
 
     /**
-     * @var string
-     */
-    private $expected_name;
-
-    /**
-     * @var string
-     */
-    private $actual_name;
-
-    /**
      * @var array
      */
     private $link = array();
@@ -59,16 +49,7 @@ class DiffViewer {
      * @var string
      */
     private $id = "id";
-
-    /**
-     * @param string $expected name of expected in difference file
-     * @param string $actual name of actual in difference file
-     */
-    public function __construct($expected="instructor", $actual="student") {
-        $this->expected_name = $expected;
-        $this->actual_name = $actual;
-    }
-
+    
     /**
      * Reset the DiffViewer to its starting values.
      */
@@ -82,10 +63,9 @@ class DiffViewer {
         $this->link = array();
         $this->id = "id";
     }
-
+    
     /**
-     * Load the actual file, expected file, and diff json,
-     * using them to populate the necessary arrays for
+     * Load the actual file, expected file, and diff json, using them to populate the necessary arrays for
      * display them later back to the user
      *
      * @param $actual_file
@@ -95,16 +75,23 @@ class DiffViewer {
      *
      * @throws \Exception
      */
-    public function load($actual_file, $expected_file, $diff_file, $id_prepend="id") {
+    public function __construct($actual_file, $expected_file, $diff_file, $id_prepend="id") {
         $this->reset();
         $this->id = rtrim($id_prepend,"_")."_";
         if (!file_exists($actual_file) && $actual_file != "") {
             throw new \Exception("'{$actual_file}' could not be found.");
         }
         else if ($actual_file != "") {
-            $this->actual = explode("\n", file_get_contents($actual_file));
+            $this->actual = file_get_contents($actual_file);
+            if (trim($this->actual) !== "") {
+                $this->actual = explode("\n", $this->actual);
+            }
+            else {
+                $this->actual = array();
+            }
             $this->display_actual = true;
         }
+        
         if (!file_exists($expected_file) && $expected_file != "") {
             throw new \Exception("'{$expected_file}' could not be found.");
         }
@@ -112,18 +99,13 @@ class DiffViewer {
             $this->expected = explode("\n", file_get_contents($expected_file));
             $this->display_expected = true;
         }
+        
         if (!file_exists($diff_file) && $diff_file != "") {
             throw new \Exception("'{$diff_file}' could not be found.");
         }
         else if ($diff_file != "") {
-            $diff = json_decode(file_get_contents($diff_file), true);
+            $diff = FileUtils::loadJsonFile($diff_file);
         }
-
-        /*
-        $this->actual = ($actual_file != "") ? explode("\n", file_get_contents($actual_file)) : "";
-        $this->expected = ($expected_file != "") ? explode("\n", file_get_contents($expected_file)) : "";
-        $diff = ($diff_file != "") ? json_decode(file_get_contents($diff_file), true) : array();
-        */
 
         $this->diff = array('expected' => array(), 'actual' => array());
         $this->add = array('expected' => array(), 'actual' => array());
@@ -139,14 +121,14 @@ class DiffViewer {
             foreach ($diffs as $diff) {
                 $act_ins = 0;
                 $exp_ins = 0;
-                $act_start = $diff[$this->actual_name]['start'];
+                $act_start = $diff["student"]['start'];
                 $act_final = $act_start;
-                if (isset($diff[$this->actual_name]['line'])) {
-                    $act_ins = count($diff[$this->actual_name]['line']);
-                    foreach ($diff[$this->actual_name]['line'] as $line) {
+                if (isset($diff["student"]['line'])) {
+                    $act_ins = count($diff["student"]['line']);
+                    foreach ($diff["student"]['line'] as $line) {
                         $line_num = $line['line_number'];
                         if (isset($line['char_number'])) {
-                            $this->diff['actual'][$line_num] = $this->compress_range($line['char_number']);
+                            $this->diff['actual'][$line_num] = $this->compressRange($line['char_number']);
                         } else {
                             $this->diff['actual'][$line_num] = array();
                         }
@@ -154,14 +136,14 @@ class DiffViewer {
                     }
                 }
 
-                $exp_start = $diff[$this->expected_name]['start'];
+                $exp_start = $diff["instructor"]['start'];
                 $exp_final = $exp_start;
-                if (isset($diff[$this->expected_name]['line'])) {
-                    $exp_ins = count($diff[$this->expected_name]['line']);
-                    foreach ($diff[$this->expected_name]['line'] as $line) {
+                if (isset($diff["instructor"]['line'])) {
+                    $exp_ins = count($diff["instructor"]['line']);
+                    foreach ($diff["instructor"]['line'] as $line) {
                         $line_num = $line['line_number'];
                         if (isset($line['char_number'])) {
-                            $this->diff['expected'][$line_num] = $this->compress_range($line['char_number']);
+                            $this->diff['expected'][$line_num] = $this->compressRange($line['char_number']);
                         } else {
                             $this->diff['expected'][$line_num] = array();
                         }
@@ -181,6 +163,28 @@ class DiffViewer {
                 }
             }
         }
+    }
+    
+    /**
+     * @return bool
+     */
+    public function hasDisplayActual() {
+        return $this->display_actual;
+    }
+    
+    public function hasActualOutput() {
+        return count($this->actual) > 0;
+    }
+    
+    /**
+     * @return bool
+     */
+    public function hasDisplayExpected() {
+        return $this->display_expected;
+    }
+    
+    public function hasExpectedOutput() {
+        return count($this->expected) > 0;
     }
 
     /**
@@ -297,116 +301,6 @@ class DiffViewer {
     }
 
     /**
-     * Return JS required for DiffViewer to function
-     *
-     * @return string
-     */
-    public function getJavascript() {
-        return <<<HTML
-<script type="text/javascript">
-    $(document).ready(function() {
-        var types = ['expected', 'actual'];
-        var hoverOn = function(e) {
-            var args = $(e.currentTarget).attr('id').split("_");
-            var id = args.length-1;
-            types.forEach(function(type) {
-                $('#'+args[0]+'_'+type+'_' + args[id]).children().each(function(index) {
-                    $(this).addClass('highlight-hover');
-                });
-            });
-        };
-
-        var hoverOff = function(e) {
-            var args = $(e.currentTarget).attr('id').split("_");
-            var id = args.length-1;
-            types.forEach(function(type) {
-                $('#'+args[0]+'_'+type+'_' + args[id]).children().each(function(index) {
-                    $(this).removeClass('highlight-hover');
-                });
-            });
-        };
-
-        $('.highlight').hover(hoverOn, hoverOff);
-    });
-</script>
-HTML;
-    }
-
-    /**
-     * Return CSS required for DiffViewer
-     *
-     * @return string
-     */
-    public static function getCSS() {
-        return <<<HTML
-        <style type="text/css" scoped>
-            .diff-container {
-                width: 700px;
-                overflow-x: auto;
-                background-color: #F8F8F8;
-                margin-right: 100px;
-                /*float: left;*/
-            }
-
-            .diff-code {
-                padding: 5px;
-                font-family: monospace;
-                width: 700px
-            }
-
-            .diff-code tr, td {
-                padding-top: 2px;
-                height: 20px;
-            }
-
-            .bad {
-                background-color: #fedede;
-
-            }
-
-            .highlight {
-
-            }
-
-            .highlight-hover {
-                background-color: yellow !important;
-            }
-            .highlight-char {
-                background-color: #fffdbe;
-            }
-
-            .line_number {
-                display: inline-block;
-                min-width: 40px;
-                text-align: center;
-                background-color: #f2f2f2;
-                opacity: .55;
-                margin-right: 10px;
-                float: left;
-            }
-
-            .line_code {
-                min-width: 610px;
-                white-space: nowrap;
-                overflow-x: auto;
-            }
-
-            .line-code pre {
-                display: block;
-                font-family: monospace;
-                white-space: pre;
-                margin: 1em 0;
-            }
-
-            .empty_line {
-                width: 700px;
-            }
-        </style>
-HTML;
-
-    }
-
-    /**
      * Compress an array of numbers into ranges
      *
      * Given some array of numbers, it sorts the array, then condenses
@@ -418,7 +312,7 @@ HTML;
      *
      * @return array A condensed array with ranges
      */
-    private function compress_range($range) {
+    private function compressRange($range) {
         sort($range);
         $range[] = -100;
         $last = -100;
@@ -443,7 +337,7 @@ HTML;
      *
      * @return bool
      */
-    public function exists_difference() {
+    public function existsDifference() {
         $return = false;
         foreach(array('expected', 'actual') as $key) {
             if(count($this->diff[$key]) > 0 || count($this->add[$key]) > 0) {
@@ -453,35 +347,3 @@ HTML;
         return $return;
     }
 }
-
-
-// Test out diffs directly below
-/*
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-$diff = new DiffViewer();
-$diff->load("../tests/data/diffs/diff_test_04/input_actual.txt",
-            "../tests/data/diffs/diff_test_04/input_expected.txt",
-            "../tests/data/diffs/diff_test_04/input_differences.json");
-print <<<HTML
-<html>
-    <head>
-        <title>DiffViewer Test</title>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-        {$diff->getCSS()}
-        {$diff->getJavascript()}
-    </head>
-    <body>
-HTML;
-
-print "Actual&emsp;Expected<br />\n";
-print $diff->getDisplayActual()."&emsp;&emsp;\n".$diff->getDisplayExpected();
-print "<br />";
-print "<br />";
-
-print <<<HTML
-    </body>
-</html>
-HTML;
-*/
-?>
