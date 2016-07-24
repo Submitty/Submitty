@@ -686,7 +686,7 @@ HTML;
             <select name="minimum-grading-group" style="width:180px;">
 HTML;
 
-    $grading_groups = array('1' => 'Instructor','2' => 'Full Access Grader','3' => 'Limited Access Grader', '4' => 'Student');
+    $grading_groups = array('1' => 'Instructor','2' => 'Full Access Grader','3' => 'Limited Access Grader');
     foreach ($grading_groups as $num => $role){
         print <<<HTML
                 <option value='{$num}'

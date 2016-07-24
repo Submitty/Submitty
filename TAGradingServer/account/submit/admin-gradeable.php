@@ -24,7 +24,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
      protected $g_grade_released_date;
      protected $g_syllabus_bucket;
      
-    function __construct(& $params){
+    function __construct($params){
          $this->g_id = $params['gradeable_id'];
          $this->g_title = $params['gradeable_title'];
          $this->g_overall_ta_instr = $params['ta_instructions'];
@@ -37,7 +37,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
          $this->g_syllabus_bucket = $params['bucket'];
     }
     
-    function updateGradeable(& $db){
+    function updateGradeable($db){
         $params = array($this->g_title, $this->g_overall_ta_instr, $this->g_use_teams, $this->g_gradeable_type, 
                         $this->g_grade_by_registration, $this->g_grade_start_date, $this->g_grade_released_date, 
                         $this->g_syllabus_bucket, $this->g_min_grading_group, $this->g_id);
@@ -46,7 +46,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
                     g_min_grading_group=? WHERE g_id=?", $params);
     }
 
-    function createGradeable(& $db){
+    function createGradeable($db){
         $params = array($this->g_id,$this->g_title, $this->g_overall_ta_instr, $this->g_use_teams, 
                         $this->g_gradeable_type, $this->g_grade_by_registration, $this->g_grade_start_date, 
                         $this->g_grade_released_date, $this->g_syllabus_bucket, $this->g_min_grading_group);
@@ -55,7 +55,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
                     g_syllabus_bucket,g_min_grading_group) VALUES (?,?,?,?,?,?,?,?,?,?)", $params);
     }
     
-     function deleteComponents(& $db,$lb,$ub){
+     function deleteComponents($db,$lb,$ub){
          // TODO REWRITE THIS, multiple queries here are bad
         for($i=$lb; $i<=$ub; ++$i){
             //DELETE all grades associated with these gcs
@@ -68,13 +68,13 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     }
     
     //Overridden function, polymorphism 
-    function createComponents(& $db, $action, & $add_args){}
+    function createComponents($db, $action, $add_args){}
     
     function get_GID(){
         return $this->g_id;
     }
     
-    function setupRotatingSections(& $db, $graders){
+    function setupRotatingSections($db, $graders){
         if ($this->g_grade_by_registration === 'true') return;
         
         // delete all exisiting rotating sections 
@@ -99,7 +99,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     private $late_days;
     private $point_precision;
     
-     function __construct(& $params){
+     function __construct($params){
          parent::__construct($params);
          $this->instructions_url = $params['instructions_url']; 
          $this->date_submit = $params['date_submit'];
@@ -113,7 +113,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
      }
      
      //TODO extract to multiple functions 
-     function createComponents(& $db, $action, & $add_args){
+     function createComponents($db, $action, $add_args){
         if ($action=='edit'){
             $params = array($this->instructions_url, $this->date_submit, $this->date_due, $this->is_repo, 
                             $this->subdirectory, $this->ta_grading, $this->config_path, $this->late_days, $this->point_precision, $this->g_id);
@@ -160,11 +160,11 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
  }
  
  class CheckpointGradeable extends Gradeable{
-    function __construct(& $params){
+    function __construct($params){
         parent::__construct($params);
     }
     //TODO EXTRACT TO MULTIPLE FUNCTIONS 
-    function createComponents(& $db, $action, & $add_args){
+    function createComponents($db, $action, $add_args){
          // create a gradeable component for each checkpoint
         $num_checkpoints = -1; // remove 1 for the template
         foreach($add_args as $k=>$v){
@@ -197,12 +197,12 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
  }
 
  class NumericGradeable extends Gradeable{
-    function __construct(& $params){
+    function __construct($params){
         parent::__construct($params);
     }
     
     //TODO split into multiple functions 
-    function createComponents(& $db, $action, & $add_args){
+    function createComponents($db, $action, $add_args){
         $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($this->g_id));
         $num_old_numerics = intval($db->row()['cnt']);
         
@@ -239,7 +239,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     }    
  }
  
- function writeFormJSON($g_id, & $gradeableJSON){
+ function writeFormJSON($g_id, $gradeableJSON){
     $fp = fopen(__SUBMISSION_SERVER__ . '/config/form/form_'.$g_id.'.json', 'w');
     if (!$fp){
         die('failed to open file');
@@ -257,7 +257,7 @@ abstract class GradeableType{
     const numeric = 2;
 }
  
- function constructGradeable (& $request_args){
+ function constructGradeable ($request_args){
      $g_id = $request_args['gradeable_id'];
      $g_title = $request_args['gradeable_title'];
      $g_overall_ta_instr = $request_args['ta_instructions'];
@@ -309,7 +309,7 @@ abstract class GradeableType{
      return $gradeable;
  }
   
-function getGraders(& $var){
+function getGraders($var){
     $graders = array();
     foreach ($var as $k => $v ) {
         if (substr($k,0,7) === 'grader-' && !empty(trim($v))) {
