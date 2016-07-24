@@ -25,7 +25,7 @@ print <<<HTML
 
     #container-g-checkpoints
     {
-        width:700px;
+        width:75%;
         margin:100px auto;
         margin-top: 130px;
         background-color: #fff;
@@ -123,29 +123,37 @@ HTML;
                         </thead>
 HTML;
 
-    if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true) {
+    $grade_by_reg_section = $check_g_row['g_grade_by_registration'];
+    $params = array($user_id);
+    if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true){
         $params = array();
-        $db->query("SELECT * FROM sections_registration ORDER BY sections_registration_id ASC", $params);
+        $query = ($grade_by_reg_section ? "SELECT * FROM sections_registration ORDER BY sections_registration_id ASC"
+                                        : "SELECT * FROM sections_rotating ORDER BY sections_rotating_id ASC");
+        $db->query($query, $params);
     }
-    else {
+    else{
         $params = array($user_id);
-        $db->query("SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC", $params);
+        $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC"
+                                        : "SELECT * FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating ASC");
+        $db->query($query, $params);
     }
 
     foreach($db->rows() as $section) {
+        $section_id = intval(($grade_by_reg_section ? $section['sections_registration_id'] : $section['sections_rotating_id']));
+        $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
         $count = count($check_g_row_checkpoints) + 1;
         print <<<HTML
                         <tr class="info">
-                            <td colspan="{$count}" style="text-align:center;" id="section-{$section['sections_registration_id']}">
-                                    Students Enrolled in Section {$section["sections_registration_id"]}
-                                    <a href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&g_id={$check_g_row['g_id']}&section_id={$section['sections_registration_id']}">
+                            <td colspan="{$count}" style="text-align:center;" id="section-{$section_id}">
+                                    Students Enrolled in {$section_type} Section {$section_id}
+                                    <a href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&g_id={$check_g_row['g_id']}&section_id={$section_id}&grade_by_reg_section={$grade_by_reg_section}">
                                         <div class="icon-print"></div>
                                     </a>
                             </td>
                         </tr>
                         <tbody>
 HTML;
-        $params = array($check_g_row["g_id"],intval($section["sections_registration_id"]), 4);
+        $params = array($check_g_row["g_id"],$section_id, 4);
         $db->query("
         
 SELECT
@@ -189,8 +197,8 @@ FROM
             gd_user_id
             , g_id
     ) AS gcds ON gcds.gd_user_id = s.user_id
-WHERE
-    s.registration_section=?
+WHERE s.".($grade_by_reg_section ? "registration_section": "rotating_section").
+    "=?
     AND s.user_group=?
 ORDER BY
     s.user_id", $params);

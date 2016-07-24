@@ -71,7 +71,7 @@ foreach(Database::rows() as $student) {
         print <<<HTML
             <tr class="info">
                 <td colspan="4" style="text-align:center;" id="section-{$student['registration_section']}">
-                        Students Enrolled in Section {$student["registration_section"]}
+                        Students Enrolled in Registration Section {$student["registration_section"]}
                 </td>
             </tr>
             <tbody>

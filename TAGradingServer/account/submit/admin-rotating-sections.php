@@ -15,7 +15,7 @@ $grading_sections = intval($_POST['sections']);
 if ($grading_sections > 0) {
     $complete_update = 1;
     
-    \lib\Database::query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_lastname ASC", array(4));
+    \lib\Database::query("SELECT user_id FROM users WHERE (user_group=? AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_lastname ASC;", array(4));
     
     $good_users = array();
     foreach (\lib\Database::rows() as $user) {
@@ -26,10 +26,9 @@ if ($grading_sections > 0) {
         shuffle($good_users);
     }
     
-    //remove existing rotating sections
-    
     \lib\Database::query("UPDATE users SET rotating_section=NULL");
-    \lib\Database::query("DELETE FROM sections_rotating WHERE 1=?", array(1));
+    \lib\Database::query("SELECT MAX(sections_rotating_id) as max FROM sections_rotating WHERE 1=?", array(1));
+    $highest_section = \lib\Database::row()['max'];
     
     $per_section = ceil(count($good_users) / $grading_sections);
     for ($i = 1; $i <= $grading_sections; $i++) {
@@ -39,7 +38,9 @@ if ($grading_sections > 0) {
             continue;
         }
         $update_string = array_pad(array(), count($update), "?");
-        \lib\Database::query("INSERT INTO sections_rotating (sections_rotating_id) VALUES(?)", array($i));
+        if ($i > $highest_section){
+            \lib\Database::query("INSERT INTO sections_rotating (sections_rotating_id) VALUES(?)", array($i));
+        }
         \lib\Database::query("UPDATE users SET rotating_section=? WHERE user_id IN (".implode(",", $update_string).")", array_merge(array($i), $update));
     }
 }

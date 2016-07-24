@@ -3,15 +3,18 @@
 include "../../toolbox/functions.php";
 $g_id = $_GET['g_id'];
 $section = intval($_GET['section_id']);
+$grade_by_reg_section = $_GET['grade_by_reg_section'];
 
 $db->query("SELECT * FROM gradeable WHERE g_id=?", array($g_id));
 $check_g = $db->row();
+
+$section_type = ($grade_by_reg_section ? "Registration": "Rotating");
 
 print <<<HTML
 Name: ____________&emsp;&emsp;&emsp;&emsp;
 Date: ____________________&emsp;&emsp;&emsp;
 <b>{$check_g['g_title']}</b>&emsp;&emsp;&emsp;&emsp;
-Section: <b>{$section}</b>
+{$section_type} Section: <b>{$section}</b>
 <br /><br />
 <table border="1">
     <tr>
@@ -21,7 +24,6 @@ Section: <b>{$section}</b>
 HTML;
 
 //Get the names of all of the checkpoints 
-
 $db->query("SELECT gc_title FROM gradeable as g INNER JOIN gradeable_component gc ON g.g_id = gc.g_id WHERE g.g_id=?",array($g_id));
 $checkpoints = array();
 foreach($db->rows() as $row){
@@ -39,7 +41,9 @@ print <<<HTML
     </tr>
 HTML;
 
-$db->query("SELECT * FROM users WHERE registration_section=? AND user_group=? ORDER BY user_id", array($section,4));
+$query = ($grade_by_reg_section) ? "SELECT * FROM users WHERE registration_section=? AND user_group=? ORDER BY user_id"
+                                 : "SELECT * FROM users WHERE rotating_section=? AND user_group=? ORDER BY user_id";
+$db->query($query, array($section,4));
 
 $j = 0;
 foreach($db->rows() as $student) {

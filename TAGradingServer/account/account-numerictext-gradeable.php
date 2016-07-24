@@ -1,5 +1,5 @@
 <?php
-// TODO add labels to numeric text fields
+//TODO add labels to numeric text fields
 // Pull out tabs to separate URL
 use app\models\User;
 
@@ -156,30 +156,36 @@ HTML;
                         </thead>
                         <tbody style="background: #f9f9f9;">
 HTML;
-
+//
+    $grade_by_reg_section = $nt_row['g_grade_by_registration'];
     $params = array($user_id);
     if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true){
         $params = array();
-        $db->query("SELECT * FROM sections_registration ORDER BY sections_registration_id ASC", $params);
+        $query = ($grade_by_reg_section ? "SELECT * FROM sections_registration ORDER BY sections_registration_id ASC"
+                                        : "SELECT * FROM sections_rotating ORDER BY sections_rotating_id ASC");
+        $db->query($query, $params);
     }
     else{
         $params = array($user_id);
-        $db->query("SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC", $params);
+        $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC"
+                                        : "SELECT * FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating ASC");
+        $db->query($query, $params);
     }
 
     $colspan += 2;
     $colspan += $colspan2;
 
     foreach($db->rows() as $section){
-        $section_id = intval($section['sections_registration_id']);
+        $section_id = intval(($grade_by_reg_section ? $section['sections_registration_id'] : $section['sections_rotating_id']));
+        $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
 		print <<<HTML
                             <tr class="info">
                                 <td colspan="{$colspan}" style="text-align:center;">
-                                    Students Enrolled in Section {$section_id}
+                                    Students Enrolled in {$section_type} Section {$section_id}
                                 </td>
                             </tr>
 HTML;
-        $params = array($nt_row['g_id'],intval($section["sections_registration_id"]),4); 
+        $params = array($nt_row['g_id'],intval($section_id),4); 
         $db->query("
         
 SELECT
@@ -222,12 +228,12 @@ FROM
             gd_user_id
             , g_id
     ) AS gcds ON gcds.gd_user_id = s.user_id
-WHERE
-    s.registration_section=?
+WHERE s.".($grade_by_reg_section ? "registration_section": "rotating_section").
+    "=?
     AND s.user_group=?
 ORDER BY
     s.user_id", $params);
-        
+        //
         foreach($db->rows() as $row){
             $student_info = $row;
             $temp = $row;

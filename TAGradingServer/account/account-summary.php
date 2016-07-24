@@ -13,7 +13,8 @@ use app\models\User;
 	$db->query("
 SELECT 
     g.g_id, 
-    g_title, 
+    g_title,
+    g_grade_by_registration,
     sum(gc_max_value) as score 
 FROM 
     gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id
@@ -22,7 +23,7 @@ WHERE
     AND NOT gc_is_extra_credit
 GROUP BY 
     g.g_id", $params);
-	$homework_info = $db->row();
+	$gradeable_info = $db->row();
     
 // students and their grade data    
 $query = "
@@ -72,7 +73,7 @@ print <<<HTML
 	</style>
 HTML;
 
-if (!isset($homework_info['g_id'])) {
+if (!isset($gradeable_info['g_id'])) {
     print <<<HTML
     <div id="container-rubric">
 		<div class="modal-header">
@@ -100,12 +101,12 @@ else {
     }
     
     
-    $rubric_total = $homework_info["score"];
+    $rubric_total = $gradeable_info["score"];
     
     print <<<HTML
 	<div id="container-rubric">
 		<div class="modal-header">
-			<h3 id="myModalLabel" style="width: 75%; display: inline-block">{$homework_info['g_title']} Summary</h3>
+			<h3 id="myModalLabel" style="width: 75%; display: inline-block">{$gradeable_info['g_title']} Summary</h3>
 			{$button}
 		</div>
 
@@ -121,28 +122,26 @@ else {
 				<tbody style="background: #f9f9f9;">
 HTML;
 
-
+    
     $where = array();
     $order = array();
 
-    if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true) {
-        $params = array();
-        $db->query("SELECT * FROM sections_registration ORDER BY sections_registration_id ASC", $params);
-        
-        $sections = array(array("sections_registration_id" => 0));
-        $require_section = false;
-
-    } else {
-        // TODO update with rotating sections
+    $grade_by_reg_section = $gradeable_info['g_grade_by_registration'];
+    $section_title = ($grade_by_reg_section ? 'Registration': 'Rotating');
+    $user_section_field =  ($grade_by_reg_section ? 'registration_section': 'rotating_section');
+    $section_section_field = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
+    
+    if(!((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true)) {
         $params = array($user_id);
-        $db->query("SELECT sections_registration_id FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id", $params);
+        $query = ($grade_by_reg_section) ? "SELECT sections_registration_id FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id"
+                                         : "SELECT sections_rotating FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating";
+        $db->query($query, $params);
         $sections = array();
         foreach ($db->rows() as $section) {
-            $sections[] = $section['sections_registration_id'];
+            $sections[] = $section[$section_section_field];
         }
-        $require_section = true;
-        if(count($sections) > 0) {
-            $where[] = "s.registration_section IN (" . implode(",", $sections) . ")";
+        if(count($sections) > 0){
+            $where[] = "s.".$user_section_field."IN (" . implode(",", $sections) . ")";
         } else {
             $where[] = "s.user_id = null";
         }
@@ -150,7 +149,7 @@ HTML;
     
     $where[] = 'user_group=4';
 
-    $order[] = "s.registration_section";
+    $order[] = "s.".$user_section_field;
     $order[] = "s.user_id";
 
     if(count($where) > 0) {
@@ -168,13 +167,13 @@ HTML;
     $students = $db->rows();
 
     foreach ($students as $student) {
-        if($prev_section !== $student['registration_section']) {
-            $section_id = intval($student['registration_section']);
+        if($prev_section !== $student[$user_section_field]) {
+            $section_id = intval($student[$user_section_field]);
             print <<<HTML
 
 					<tr class="info">
 						<td colspan="2" style="text-align:center;">
-							Students Assigned to Grading Section {$section_id}
+							Students Assigned to {$section_title} Section {$section_id}
 						</td>
 					</tr>
 HTML;

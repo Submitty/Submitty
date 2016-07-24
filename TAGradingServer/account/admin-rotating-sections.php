@@ -2,7 +2,6 @@
 include "../header.php";
 
 check_administrator();
-//\lib\Database::query("SELECT * FROM sections ORDER BY section_id");
 
 echo <<<HTML
 <style type="text/css">

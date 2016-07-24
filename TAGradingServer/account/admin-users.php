@@ -56,7 +56,7 @@ print <<<HTML
                     <th>ID</th>
                     <th>First Name</th>
                     <th>Last Name</th>
-                    <th>Sections</th>
+                    <th>Registration Sections</th>
                     <th>Administrator</th>
                 </tr>
             </thead>
