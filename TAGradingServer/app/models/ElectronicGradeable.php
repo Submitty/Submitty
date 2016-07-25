@@ -255,7 +255,7 @@ WHERE g.student_id=? AND r.rubric_due_date<?", $params);
         //CHECK IF THERE IS A GRADEABLE FOR THIS STUDENT 
         
         $eg_details_query = "
-SELECT g_title, gd_overall_comment, eg.* FROM electronic_gradeable AS eg 
+SELECT g_title, gd_overall_comment, g_grade_start_date, eg.* FROM electronic_gradeable AS eg 
     INNER JOIN gradeable AS g ON eg.g_id = g.g_id
     INNER JOIN gradeable_data AS gd ON gd.g_id=g.g_id 
         WHERE gd_user_id=? AND g.g_id=?";
@@ -263,9 +263,6 @@ SELECT g_title, gd_overall_comment, eg.* FROM electronic_gradeable AS eg
         Database::query($eg_details_query, array($this->student_id, $this->g_id));
         
         $this->eg_details = Database::row();
-        
-        // Problem in the logic here
-        // retrieval is throwing this off
         
         // CREATE THE GRADEABLE DATA
         if (empty($this->eg_details)) {
@@ -289,14 +286,6 @@ SELECT g_title, gd_overall_comment, eg.* FROM electronic_gradeable AS eg
 
         $this->submission_ids[1] = $this->eg_details['g_id'];
                 
-        //TODO REMOVE THIS 
-        //
-        //
-        
-        $this->eg_details['rubric_late_days'] = 2;
-        
-        //
-        //
         $params = array($this->eg_details['g_id'], $this->gd_id);
         
         //GET ALL questions and scores ASSOCIATED WITH A GRADEABLE

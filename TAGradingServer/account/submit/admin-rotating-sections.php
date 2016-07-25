@@ -27,7 +27,7 @@ if ($grading_sections > 0) {
     }
     
     \lib\Database::query("UPDATE users SET rotating_section=NULL");
-    \lib\Database::query("SELECT MAX(sections_rotating_id) as max FROM sections_rotating WHERE 1=?", array(1));
+    \lib\Database::query("SELECT MAX(sections_rotating_id) as max FROM sections_rotating", array());
     $highest_section = \lib\Database::row()['max'];
     
     $per_section = ceil(count($good_users) / $grading_sections);

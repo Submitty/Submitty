@@ -6,7 +6,6 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     die("invalid csrf token");
 }
 
-//TODO update queries for new data model
 $g_id = $_GET['g_id'];
 
 //GET THE GRADEABLE 
@@ -21,7 +20,6 @@ if (!isset($gradeable['g_id'])){
 $now = new DateTime('now');
 $homeworkDate = new DateTime($gradeable['eg_submission_due_date']);
 
-//TODO ADD LATEDAYS 
 if ($gradeable['eg_late_days'] > 0) {
     $homeworkDate->add(new DateInterval("PT{$gradeable['eg_late_days']}H"));
 }
@@ -30,10 +28,9 @@ if ($now < $homeworkDate) {
     die("Homework is not open for grading yet.");
 }
 
-$student = $_GET["student"];
-$db->query("SELECT user_id FROM users WHERE user_id=?", array($student));
-$row = $db->row();
-$student_id = $row['user_id'];
+$student = $_GET['student'];
+
+
 
 // get the gradeable data from the student
 $params = array($g_id);
@@ -41,8 +38,9 @@ $db->query("SELECT * FROM gradeable AS g INNER JOIN gradeable_component AS gc ON
             WHERE g.g_id=? ORDER BY gc_order ASC", $params);
 $rows = $db->rows();
 
-$params = array($g_id);
-$db->query("SELECT gd_id FROM gradeable_data AS gd INNER JOIN gradeable AS g ON gd.g_id=g.g_id WHERE g.g_id=?",$params);
+$params = array($g_id, $student);
+$db->query("SELECT gd_id FROM gradeable_data AS gd INNER JOIN gradeable AS g ON gd.g_id=g.g_id 
+            INNER JOIN users AS u ON u.user_id=gd.gd_user_id WHERE g.g_id=? AND u.user_id=?",$params);
 $gd_id = $db->row()['gd_id'];
 
 //update each gradeable component data

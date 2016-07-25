@@ -17,11 +17,10 @@ print <<<HTML
 <div id="container" style="width:100%; margin-top:40px;">
 HTML;
 
-// REPLACE HW WITH G_ID
 if(isset($_GET["g_id"])) {
     $g_id = $_GET["g_id"];
     $params = array($g_id);
-    $db->query("SELECT g.g_id, g_title, eg_submission_due_date, eg_late_days FROM gradeable AS g INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id WHERE g.g_id=?", $params);
+    $db->query("SELECT g.g_id, g_title, g_grade_by_registration, eg_submission_due_date, eg_late_days FROM gradeable AS g INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id WHERE g.g_id=?", $params);
     $rubric = $db->row();
 }
 
@@ -29,6 +28,11 @@ if(isset($_GET["g_id"]) && isset($rubric["g_id"])) {
     $g_id = $rubric["g_id"];
     $g_title = $rubric['g_title'];
     $rubric_late_days = $rubric['eg_late_days'];
+    $grade_by_reg_section = $rubric['g_grade_by_registration'];
+    $section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
+    $user_section_param = ($grade_by_reg_section ? 'registration_section': 'rotating_section');
+    $grading_section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
+    $section_title = ($grade_by_reg_section ? 'Registration': 'Rotating');
     $eg_submission_due_date = $rubric['eg_submission_due_date'];
     $s_user_id = null;
     $student_first_name = null;
@@ -51,7 +55,6 @@ if(isset($_GET["g_id"]) && isset($rubric["g_id"])) {
         }
 
         $params = array($s_user_id);
-        //TODO replace with new user schema
         $db->query("SELECT * FROM users WHERE user_id=?", $params);
         $temp_row = $db->row();
         $student_first_name = $temp_row["user_firstname"];
@@ -68,15 +71,15 @@ if(isset($_GET["g_id"]) && isset($rubric["g_id"])) {
         $params = array($s_user_id, $g_id);
         $db->query("SELECT COUNT(*) AS cnt FROM gradeable_data as gd INNER JOIN gradeable_component_data AS gcd ON gd.gd_id=gcd.gd_id WHERE gd_user_id=? and g_id=? GROUP BY g_id", $params);
         $temp_row = $db->row();
-        // TODO may not work?
         $student_individual_graded = isset($temp_row['cnt']) && $temp_row['cnt'] > 0;
     }
 
     $params = array(User::$user_id);
-    //TODO rewrite this to support rotating sections
-    $db->query("SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id", $params);
+    $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC"
+                                    : "SELECT * FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating ASC");
+    $db->query($query, $params);
     foreach ($db->rows() as $section) {
-        $params = array($g_id, intval($section["sections_registration_id"]));
+        $params = array($g_id, intval($section[$section_param]));
         $db->query("
 SELECT
     s.user_id
@@ -99,7 +102,7 @@ FROM
     ) AS g
     ON s.user_id=g.user_id
 WHERE
-    s.registration_section=?
+    s.".$user_section_param."=?
 ORDER BY
     s.s_user_id ASC
                 ", $params);
@@ -162,45 +165,38 @@ ORDER BY
         include "account-rubric.php";
     } else {
         
-        //grading section, total students overall, total students  graded
-        
-        //TODO update to support rotating sections
-        
-        // I think this query is off, returning 100% right now
-        
         if (User::$is_administrator) {
             Database::query("
 SELECT
-    s.registration_section,
+    s.".$user_section_param.",
     count(s.*) as total,
     case when gg.graded is null then 0 else gg.graded end
 FROM
     users as s
     LEFT JOIN (
         SELECT
-            uu.registration_section,
+            uu.".$user_section_param.",
             count(*) as graded
         FROM
             users as uu 
-            LEFT JOIN (
+            INNER JOIN (
                 SELECT
-                    gd_user_id
+                    DISTINCT(gd_user_id)
                 FROM gradeable_data AS gd
                 INNER JOIN gradeable_component_data AS gcd ON gd.gd_id=gcd.gd_id
                 WHERE
                     gd.g_id=?
-                LIMIT 1    
             ) AS gdd ON gdd.gd_user_id=uu.user_id 
             WHERE uu.user_group=?
-        GROUP BY uu.registration_section
-    ) as gg ON s.registration_section = gg.registration_section
+        GROUP BY uu.".$user_section_param."
+    ) as gg ON s.".$user_section_param." = gg.".$user_section_param."
 WHERE
     user_group=?
 GROUP BY
-    s.registration_section,
+    s.".$user_section_param.",
     gg.graded
 ORDER BY
-    s.registration_section", array($g_id,4,4));
+    s.".$user_section_param, array($g_id,4,4));
 
             $sections = Database::rows();
             $graded = 0;
@@ -227,7 +223,7 @@ ORDER BY
 HTML;
             foreach ($sections as $section) {
                 $section['percent'] = round(($section['graded'] / $section['total']) * 100);
-                print "Section {$section['registration_section']}: {$section['percent']}% ({$section['graded']} / {$section['total']})<br />";
+                print "Section {$section[$user_section_param]}: {$section['percent']}% ({$section['graded']} / {$section['total']})<br />";
             }
             print <<<HTML
                 </div>
@@ -235,22 +231,28 @@ HTML;
                 Graders:
                 <div style="margin-left: 20px">
 HTML;
-
-            // TODO ALLOW FOR ROTATING SECTIONS 
-            Database::query("SELECT gr.*, u.* FROM grading_registration gr LEFT JOIN (SELECT * FROM users) as u ON gr.user_id = u.user_id WHERE user_group <=3 ORDER BY gr.sections_registration_id, u.user_id ");
+            $query = ($grade_by_reg_section ? "SELECT gr.*, u.* FROM grading_registration gr LEFT JOIN (SELECT * FROM users) as u ON gr.user_id = u.user_id WHERE user_group <=3 ORDER BY gr.sections_registration_id, u.user_id"
+                                            : "SELECT gr.*, u.* FROM grading_rotating gr LEFT JOIN (SELECT * FROM users) as u ON gr.user_id = u.user_id WHERE user_group <=3 AND g_id=? ORDER BY gr.sections_rotating, u.user_id");
+            
+            if ($grade_by_reg_section){
+                Database::query($query, array());
+            } else{
+                Database::query($query, array($g_id));
+            }
+           
             $graders = array();
             foreach (Database::rows() as $row) {
-                if(!isset($graders[$row['sections_registration_id']])) {
-                    $graders[$row['sections_registration_id']] = array();
+                if(!isset($graders[$row[$grading_section_param]])) {
+                    $graders[$row[$grading_section_param]] = array();
                 }
-                $graders[$row['sections_registration_id']][] = "{$row['user_firstname']} {$row['user_lastname']} ({$row['user_id']})";
+                $graders[$row[$grading_section_param]][] = "{$row['user_firstname']} {$row['user_lastname']} ({$row['user_id']})";
             }
 
             foreach ($sections as $section) {
-                if(isset($graders[$section['registration_section']])) {
-                    print $section['registration_section'] . ": " . implode(",", $graders[$section['registration_section']]) . "<br />";
+                if(isset($graders[$section[$user_section_param]])) {
+                    print $section[$user_section_param] . ": " . implode(",", $graders[$section[$user_section_param]]) . "<br />";
                 } else {
-                    print $section['registration_section'] . ": Nobody";
+                    print $section[$user_section_param] . ": Nobody";
                 }
             }
 
@@ -293,7 +295,6 @@ HTML;
     }
 }
 else if(!isset($_GET["g_id"])) {
-
 
     // update with the gradeable data 
     $params = array();

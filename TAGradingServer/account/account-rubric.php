@@ -2,9 +2,9 @@
 
 /*
  * Variables from index.php:
-$s_user_id
-$g_id
- */
+    $s_user_id
+    $g_id
+*/
 
 use \app\models\ElectronicGradeable;
 
@@ -14,15 +14,13 @@ $now = new DateTime('now');
 
 $eg_due_date = new DateTime($eg->eg_details['eg_submission_due_date']);
 
-//TOOD find the number of late days
-if ($eg->eg_details['rubric_late_days'] > 0) {
-    $eg_due_date->add(new DateInterval("PT{$eg->eg_details['rubric_late_days']}H")); //TODO late days does not exist yet
+if ($eg->eg_details['eg_late_days'] > 0) {
+    $eg_due_date->add(new DateInterval("PT{$eg->eg_details['eg_late_days']}H"));
 }
 $grade_select_extra = $now < $eg_due_date ? 'disabled="true"' : "";
 
 //not sure if correct
 $color = "#998100";
-
 
 if ($eg->status == 1 && $eg->days_late_used == 0) {
     $icon= '<i class="icon-ok icon-white"></i>';
@@ -395,9 +393,11 @@ $output .= <<<HTML
                 </div>
 HTML;
 
-if ($eg->eg_details['rubric_late_days'] >= 0) {
+if ($eg->eg_details['eg_late_days'] >= 0) {
+    $late_days = $eg->eg_details['eg_late_days'];
+    $plural = (($late_days > 1) ? 's': '');
     $output .= <<<HTML
-                <span style="color: black">Gradeable allows {$eg->eg_details['rubric_late_days']} late day(s).</span><br />
+                <span style="color: black">Gradeable allows {$late_days} late day{$plural}.</span><br />
 HTML;
 }
 
@@ -613,8 +613,8 @@ if (isset($eg->eg_details['user_email'])) {
     </div>
 HTML;
 }
-
-if (!($now < $eg_due_date)) {
+             
+if (!($now < new DateTime($eg->eg_details['g_grade_start_date']))) {
     if((!isset($_GET["individual"])) || (isset($_GET["individual"]) && !$student_individual_graded)) {
         $output .= <<<HTML
         <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade"/>

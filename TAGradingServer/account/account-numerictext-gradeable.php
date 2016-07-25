@@ -156,8 +156,10 @@ HTML;
                         </thead>
                         <tbody style="background: #f9f9f9;">
 HTML;
-//
+
     $grade_by_reg_section = $nt_row['g_grade_by_registration'];
+    $section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
+    $user_section_param = ($grade_by_reg_section ? 'registration_section': 'rotating_section');
     $params = array($user_id);
     if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true){
         $params = array();
@@ -176,7 +178,11 @@ HTML;
     $colspan += $colspan2;
 
     foreach($db->rows() as $section){
-        $section_id = intval(($grade_by_reg_section ? $section['sections_registration_id'] : $section['sections_rotating_id']));
+        $params = array($section[$section_param]);
+        $db->query("SELECT COUNT(*) AS cnt FROM users WHERE ".$user_section_param."=?",$params);
+        if($db->row()['cnt']==0) continue;
+        
+        $section_id = intval($section[$section_param]);
         $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
 		print <<<HTML
                             <tr class="info">
@@ -228,12 +234,12 @@ FROM
             gd_user_id
             , g_id
     ) AS gcds ON gcds.gd_user_id = s.user_id
-WHERE s.".($grade_by_reg_section ? "registration_section": "rotating_section").
+WHERE s.".$user_section_param.
     "=?
     AND s.user_group=?
 ORDER BY
     s.user_id", $params);
-        //
+        
         foreach($db->rows() as $row){
             $student_info = $row;
             $temp = $row;
