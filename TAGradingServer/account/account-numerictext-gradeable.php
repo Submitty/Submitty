@@ -325,13 +325,13 @@ echo <<<HTML
         var text_fields = {{$js_array_text}};
         var url = "";
 
-		$("input[id^=cell-]").change(function() {
+        $("input[id^=cell-]").change(function() {
 
-			var grade = $(this).val();
-			var name = $(this).attr("id");
-			name = name.split("-");
-			var nt_gradeable = name[1];
-			var user_id = name[2];
+            var grade = $(this).val();
+            var name = $(this).attr("id");
+            name = name.split("-");
+            var nt_gradeable = name[1];
+            var user_id = name[2];
 
             if ($(this).attr('elem') == 'text') {
 
@@ -350,27 +350,27 @@ echo <<<HTML
                     }
                 }
             }
-			var total = 0;
-			var extra = "";
-			for (var i = 0; i < questions[nt_gradeable]; i++) {
-			    var score = parseFloat($("#cell-"+nt_gradeable+"-"+user_id+"-q"+i).val());
-			    if (isNaN(score)) {
-			        score = 0;
-			    }
-			    extra += "&q"+i+"="+score;
+            var total = 0;
+            var extra = "";
+            for (var i = 0; i < questions[nt_gradeable]; i++) {
+                var score = parseFloat($("#cell-"+nt_gradeable+"-"+user_id+"-q"+i).val());
+                if (isNaN(score)) {
+                    score = 0;
+                }
+                extra += "&q"+i+"="+score;
                 total += score;
-			}
+            }
 
             for (var j = questions[nt_gradeable]; j <questions[nt_gradeable]+text_fields[nt_gradeable]; ++j){
-			    var text = $("#cell-"+nt_gradeable+"-"+user_id+"-t"+j).val();
-			    extra += "&t"+j+"="+text;
-			}
-            
-			$("#cell-"+nt_gradeable+"-"+user_id+"-score").text(total);
-			url = "{$BASE_URL}/account/ajax/account-numerictext-gradeable.php?course={$_GET['course']}&id=" + nt_gradeable + "&user_id=" + user_id + "&grade=" + total + extra; 
+                var text = $("#cell-"+nt_gradeable+"-"+user_id+"-t"+j).val();
+                extra += "&t"+j+"="+text;
+            }
+
+            $("#cell-"+nt_gradeable+"-"+user_id+"-score").text(total);
+            url = "{$BASE_URL}/account/ajax/account-numerictext-gradeable.php?course={$_GET['course']}&id=" + nt_gradeable + "&user_id=" + user_id + "&grade=" + total + extra; 
             updateColor(this, url);
-		});
-        
+        });
+
         // TODO FIX this
         function sciNotationToDecimal(sciStr){
             rep = sciStr.toString().split('e');
@@ -379,42 +379,41 @@ echo <<<HTML
             return rep[0] + rep[0].substring(2) + Array(parseInt(rep[1].substr(1))-mantissaLen).join('0');
         }
 
-		function updateColor(item, url) {
-			$(item).css("border-right", "15px solid #149bdf");
-			// alert(url);
-			submitAJAX(url, updateSuccess, updateFail, item);
-		}
+        function updateColor(item, url) {
+            $(item).css("border-right", "15px solid #149bdf");
+            submitAJAX(url, updateSuccess, updateFail, item);
+        }
 
-		function updateSuccess(item) {
-			$(item).stop(true, true).animate({"border-right-width":"0px"}, 400);
-		}
+        function updateSuccess(item) {
+            $(item).stop(true, true).animate({"border-right-width":"0px"}, 400);
+        }
 
-		function updateFail(item) {
-			$(item).css("border-right-width", "15px");
-			$(item).stop(true, true).animate({"border-right-color":"#DA4F49"}, 400);
-		}
+        function updateFail(item) {
+            $(item).css("border-right-width", "15px");
+            $(item).stop(true, true).animate({"border-right-color":"#DA4F49"}, 400);
+        }
 
-		function submitAJAX(url, callBackSucess, callBackFail, item) {
-			$.ajax(url, {
-			    type: "POST",
-			    data: {
-			        csrf_token: '{$_SESSION['csrf']}'
-			    }
-			})
-		    .done(function(response) {
-		    	if(response == "updated") {
-		    		callBackSucess(item);
-		    	}
-		    	else {
-		    		callBackFail(item);
+        function submitAJAX(url, callBackSucess, callBackFail, item) {
+            $.ajax(url, {
+                type: "POST",
+                data: {
+                    csrf_token: '{$_SESSION['csrf']}'
+                }
+            })
+            .done(function(response) {
+                if(response == "updated") {
+                    callBackSucess(item);
+                }
+                else {
+                    callBackFail(item);
                     console.log(response);
-		    	}
-		    })
-		    .fail(function() {
-		        updateFail(item);
-		        window.alert("[SAVE ERROR] Refresh Page");
+                }
+            })
+            .fail(function() {
+                updateFail(item);
+                window.alert("[SAVE ERROR] Refresh Page");
             });
-		}
+        }
 	</script>
 HTML;
 
