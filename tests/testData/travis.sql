@@ -5,9 +5,15 @@ INSERT INTO sections_registration (sections_registration_id) VALUES (2);
 -- Developers
 
 INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+VALUES ('developer', 'Bob', 'Developer', 'developer@rpi.edu', 0, 1, NULL);
+
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
     VALUES ('pevelm-dev', 'Peveler', 'Matthew', 'pevelm@rpi.edu', 0, 1, NULL);
 
 -- Administrators
+
+INSERT INTO users(user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('instructor', 'Steve', 'Instructor', 'instructor@rpi.edu', 1, 1, NULL);
 
 INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
     VALUES ('pevelm', 'Peveler', 'Matthew', 'pevelm@rpi.edu', 1, 1, NULL);
