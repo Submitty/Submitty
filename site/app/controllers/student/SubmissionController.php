@@ -45,10 +45,28 @@ class SubmissionController implements IController {
 
     private function showHomeworkPage() {
         if (count($this->class_info->getAssignments()) > 0) {
-            $select = $this->core->getOutput()->renderTemplate(array('submission', 'Homework'), 'assignmentSelect', $this->class_info->getAssignments(), $this->class_info->getCurrentAssignment()->getAssignmentId());
+            $select = $this->core->getOutput()->renderTemplate(array('submission', 'Homework'), 'assignmentSelect',
+                                                               $this->class_info->getAssignments(),
+                                                               $this->class_info->getCurrentAssignment()->getAssignmentId());
     
             $days_late = DateUtils::calculateDayDiff($this->class_info->getCurrentAssignment()->getDueDate());
-            $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'showAssignment', $select, $this->class_info->getCurrentAssignment(), $days_late);
+            $upload_message = $this->class_info->getUploadMessage();
+    
+            $gradefile_path = $this->core->getConfig()->getCoursePath()."/reports/summary_html/".
+                $this->core->getUser()->getUserId()."_summary.html";
+            
+            $grade_file = null;
+            if (file_exists($gradefile_path)) {
+                $grade_file = file_get_contents($gradefile_path);
+            }
+            
+            $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'showAssignment',
+                                                   $this->class_info->getCurrentAssignment(),
+                                                   $this->class_info->showTaGrades(),
+                                                   $this->class_info->showGradeSummary(),
+                                                   $grade_file,
+                                                   $select,
+                                                   $upload_message, $days_late);
         }
         else {
             $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noAssignments');
@@ -113,7 +131,7 @@ class SubmissionController implements IController {
             $part_path[1] = $version_path;
         }
         
-        $current_time = date("Y-m-d H:i:s");
+        $current_time = date("Y-m-d H:i:s.u");
         $max_size = $assignment->getMaxSize();
         
         if ($svn_checkout === false) {
@@ -220,7 +238,6 @@ class SubmissionController implements IController {
                         if ($uploaded_files[$i]["is_zip"][$j] === true) {
                             $zip = new \ZipArchive();
                             $res = $zip->open($uploaded_files[$i]["tmp_name"][$j]);
-                            $zip = new \ZipArchive;
                             if ($res === true) {
                                 $zip->extractTo($part_path[$i]);
                                 $zip->close();
@@ -265,7 +282,7 @@ class SubmissionController implements IController {
     
         $settings_file = $user_path."/user_assignment_settings.json";
         if (!file_exists($settings_file)) {
-            $json = array("active_assignment" => $new_version,
+            $json = array("active_version" => $new_version,
                           "history" => array(array("version" => $new_version,
                                                    "time" => $current_time)));
         }
@@ -274,7 +291,7 @@ class SubmissionController implements IController {
             if ($json === false) {
                 return $this->uploadResult("Failed to open settings file.", false);
             }
-            $json["active_assignment"] = $new_version;
+            $json["active_version"] = $new_version;
             $json["history"][] = array("version"=> $new_version, "time" => $current_time);
         }
     
@@ -334,7 +351,7 @@ class SubmissionController implements IController {
         if ($json === false) {
             return $this->uploadResult("Failed to open settings file.", false);
         }
-        $json["active_assignment"] = $new_version;
+        $json["active_version"] = $new_version;
         $json["history"][] = array("version"=> $new_version, "time" => date("Y-m-d H:i:s"));
     
         if (!file_put_contents($settings_file, json_encode($json, JSON_PRETTY_PRINT))) {

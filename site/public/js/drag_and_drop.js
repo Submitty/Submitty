@@ -309,10 +309,16 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
         data: formData,
         processData: false,
         contentType: false,
-        dataType: 'json',
         type: 'POST',
         success: function(data) {
-            data = JSON.parse(data);
+            console.log(data);
+            try {
+                data = JSON.parse(data);
+            }
+            catch (e) {
+                alert("Error parsing response from server. Try refereshing the page.");
+                console.log(data);
+            }
             var response = "ERROR! Please contact administrator with following error:\n\n";
             var redirect = false;
             if (data['success']) {

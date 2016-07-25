@@ -31,22 +31,35 @@ class AssignmentTestcase {
                 $this->compilation_output = file_get_contents($result_path . "/" . $this->testcase['compilation_output']);
         }
         
-        foreach ($this->testcase['diffs'] as $diff) {
-            $student_file = $instructor_file = $difference_file = "";
-            if(isset($diff['student_file']) && file_exists($result_path . "/" . $diff['student_file'])) {
-                $student_file = $result_path . "/" . $diff['student_file'];
+        if (isset($this->testcase['diffs'])) {
+            foreach ($this->testcase['diffs'] as $diff) {
+                $student_file = $instructor_file = $difference_file = "";
+                if(isset($diff['student_file']) && file_exists($result_path . "/" . $diff['student_file'])) {
+                    $student_file = $result_path . "/" . $diff['student_file'];
+                }
+        
+                if(isset($diff['instructor_file']) &&
+                    file_exists($this->core->getConfig()->getCoursePath() . "/" . $diff['instructor_file'])) {
+                    $instructor_file = $this->core->getConfig()->getCoursePath() . "/" . $diff['instructor_file'];
+                }
+        
+                if(isset($diff['difference']) && file_exists($result_path . "/" . $diff['difference'])) {
+                    $difference_file = $result_path . "/" . $diff['difference'];
+                }
+                $this->diffs[] = array_merge($diff, array('diff_viewer' => new DiffViewer($student_file,
+                                                                                          $instructor_file,
+                                                                                          $difference_file)));
             }
-            
-            if(isset($diff['instructor_file']) && file_exists($this->core->getConfig()->getCoursePath() . "/" . $diff['instructor_file'])) {
-                $instructor_file = $this->core->getConfig()->getCoursePath() . "/" . $diff['instructor_file'];
+        }
+        
+        if (isset($this->testcase['points_awarded'])) {
+            $this->testcase['points_awarded'] = intval($this->testcase['points_awarded']);
+            if ($this->testcase['points_awarded'] > $this->testcase['points']) {
+                $this->testcase['points_awarded'] = $this->testcase['points'];
             }
-    
-            if(isset($diff['difference']) && file_exists($result_path . "/" . $diff['difference'])) {
-                $difference_file = $result_path . "/" . $diff['difference'];
-            }
-            $this->diffs[] = array_merge($diff, array('diff_viewer' => new DiffViewer($student_file,
-                                                                                      $instructor_file,
-                                                                                      $difference_file)));
+        }
+        else {
+            $this->testcase['points_awarded'] = 0;
         }
     }
     

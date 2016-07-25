@@ -6,6 +6,7 @@ use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\Utils;
 
 /**
  * Class Assignment
@@ -25,6 +26,7 @@ class Assignment {
 
     private $details;
     private $assignment_id;
+    private $assignment_name;
 
     private $submissions = 0;
     /**
@@ -54,8 +56,6 @@ class Assignment {
      */
     private $non_hidden_points = 0;
     
-    private $current_points_awarded = 0;
-    
     /**
      * @var AssignmentTestcase[]
      */
@@ -79,6 +79,11 @@ class Assignment {
 
     private $result_details;
 
+    private $svn_checkout = false;
+    private $ta_grades_released = false;
+    
+    private $grade_file = null;
+    
     public function __construct(Core $core, $assignment) {
         $this->core = $core;
         $this->details = $assignment;
@@ -87,18 +92,24 @@ class Assignment {
         $this->details = array_merge($this->details, FileUtils::loadJsonFile($course_path."/config/".$this->assignment_id.
                                                                          "_assignment_config.json"));
 
-        if (isset($this->details['assignment_message'])) {
-            $message = str_replace("<br>", "<br />", trim($this->details['assignment_message']));
-            $message = explode("<br />", nl2br($message));
-            foreach ($message as $key => $value) {
-                $message[$key] = htmlentities(trim($value));
-            }
-            $this->details['assignment_message'] = implode("<br />", $message);
-            
+        if (isset($this->details['assignment_name']) && $this->details['assignment_name'] !== "") {
+            $this->assignment_name = $this->details['assignment_name'];
         }
+        else {
+            $this->assignment_name = $this->details['assignment_id'];
+        }
+        
+        $this->svn_checkout = isset($this->details['svn_checkout']) ? $this->details['svn_checkout'] === true : false;
+        $this->ta_grades_released = isset($this->details['ta_grade_released']) ? $this->details['ta_grade_released'] === true : false;
+        
+        if (isset($this->details['assignment_message'])) {
+            $this->details['assignment_message'] = Utils::prepareHtmlMessage($this->details['assignment_message']);
+        }
+        
         if (!isset($this->details['num_parts'])) {
             $this->details['num_parts'] = 1;
         }
+        
         if (!isset($this->details['max_submission_size'])) {
             $this->details['max_submission_size'] = $this->default_max;
         }
@@ -112,13 +123,22 @@ class Assignment {
                 $this->details['part_names'][] = 'Part '.($i + 1);
             }
         }
+    
+        if (isset($this->details['testcases'])) {
+            foreach ($this->details['testcases'] as $testcase) {
+                $testcase = new AssignmentTestcase($this->core, $testcase);
+                $this->testcases[] = $testcase;
+                $this->normal_points += $testcase->getNormalPoints();
+                $this->non_hidden_points += $testcase->getNonHiddenPoints();
+            }
+        }
 
         $submission_path = $course_path."/submissions/".$this->assignment_id."/".$this->core->getUser()->getUserId();
         $results_path = $course_path."/results/".$this->assignment_id."/".$this->core->getUser()->getUserId();
         
         if (is_file($submission_path."/user_assignment_settings.json")) {
             $settings = FileUtils::loadJsonFile($submission_path."/user_assignment_settings.json");
-            $this->active = $settings['active_assignment'];
+            $this->active = $settings['active_version'];
             $this->history = $settings['history'];
         }
 
@@ -127,8 +147,10 @@ class Assignment {
         $this->highest = count($temp) > 0 ? intval(array_pop($temp)) : 0;
         foreach ($versions as $version) {
             $this->versions[$version] = FileUtils::loadJsonFile($results_path."/".$version."/submission.json");
-            $this->versions[$version] = array_merge($this->versions[$version], FileUtils::loadJsonFile($results_path."/".$version."/.grade.timestamp"));
-            $this->versions[$version]['days_late'] = $this->versions[$version]['days_late_(before_extensions)'];
+            $this->versions[$version] = array_merge($this->versions[$version],
+                                                    FileUtils::loadJsonFile($results_path."/".$version."/.grade.timestamp"));
+            $this->versions[$version]['days_late'] = isset($this->versions[$version]['days_late_(before_extensions)']) ?
+                intval($this->versions[$version]['days_late_(before_extensions)']) : 0;
             if ($this->versions[$version]['days_late'] < 0) {
                 $this->versions[$version]['days_late'] = 0;
             }
@@ -136,7 +158,12 @@ class Assignment {
             // TODO: We don't want to take into account points_awarded for hidden testcases
             for ($i = 0; $i < count($this->testcases); $i++) {
                 if (!$this->testcases[$i]->isHidden()) {
-                    $this->versions[$version]['points'] += $this->versions[$version]['testcases'][$i]['points_awarded'];
+                    if ($this->versions[$version]['testcases'][$i]['points_awarded'] <= $this->testcases[$i]->getPoints()) {
+                        $this->versions[$version]['points'] += $this->versions[$version]['testcases'][$i]['points_awarded'];
+                    }
+                    else {
+                        $this->versions[$version]['points'] += $this->testcases[$i]->getPoints();
+                    }
                 }
             }
         }
@@ -157,15 +184,6 @@ class Assignment {
         }
         else if ($this->current > $this->submissions) {
             $this->current = $this->active;
-        }
-    
-        if (isset($this->details['testcases'])) {
-            foreach ($this->details['testcases'] as $testcase) {
-                $testcase = new AssignmentTestcase($this->core, $testcase);
-                $this->testcases[] = $testcase;
-                $this->normal_points += $testcase->getNormalPoints();
-                $this->non_hidden_points += $testcase->getNonHiddenPoints();
-            }
         }
 
         $submission_current_path = $submission_path."/".$this->current;
@@ -200,10 +218,13 @@ class Assignment {
                 $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], $results_path."/".$this->current);
             }
         }
-        
-        $this->possible_days_late = DateUtils::calculateDayDiff($this->details['due_date']);
     
         // TODO: Get TA grade details
+        
+        $grade_file = $this->core->getConfig()->getCoursePath()."/reports/".$this->getAssignmentId()."/".$this->core->getUser()->getUserId().".txt";
+        if (is_file($grade_file)) {
+            $this->grade_file = htmlentities(file_get_contents($grade_file));
+        }
         
     }
 
@@ -212,7 +233,7 @@ class Assignment {
     }
 
     public function getAssignmentName() {
-        return $this->details['assignment_name'];
+        return $this->assignment_name;
     }
 
     public function getNumParts() {
@@ -317,10 +338,27 @@ class Assignment {
         return $this->testcases;
     }
     
-    public function hasMessage() {
+    public function hasAssignmentMessage() {
         return isset($this->details['assignment_message']) && trim($this->details['assignment_message']) !== "";
     }
-    public function getMessage() {
-        return $this->details['assignment_message'];
+    
+    public function getAssignmentMessage() {
+        return isset($this->details['assignment_message']) ? $this->details['assignment_message'] : "";
+    }
+    
+    public function useSvnCheckout() {
+        return $this->svn_checkout;
+    }
+    
+    public function hasGradeFile() {
+        return $this->grade_file !== null;
+    }
+    
+    public function getGradeFile() {
+        return $this->grade_file;
+    }
+    
+    public function taGradesReleased() {
+        return $this->ta_grades_released;
     }
 }

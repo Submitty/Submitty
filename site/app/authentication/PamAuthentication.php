@@ -51,8 +51,11 @@ class PamAuthentication implements IAuthentication {
         $output = json_decode($output, true);
         curl_close($ch);
 
-        if (!isset($output['authenticated'])) {
-            throw new AuthenticationException("Could not authenticate against PAM");
+        if ($output === null) {
+            throw new AuthenticationException("Error JSON response for PAM: ".json_last_error_msg());
+        }
+        else if (!isset($output['authenticated'])) {
+            throw new AuthenticationException("Missing response in JSON for PAM");
         }
         
         return $output['authenticated'];

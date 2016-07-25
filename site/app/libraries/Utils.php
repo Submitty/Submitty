@@ -78,4 +78,16 @@ class Utils {
     public static function generateRandomString($bytes = 16) {
         return bin2hex(openssl_random_pseudo_bytes($bytes));
     }
+    
+    /**
+     * Given a string, convert all newline characters to "<br />" while also
+     * performing htmlentities on all elements that are not for the new lines
+     * @param string $string
+     * @return string
+     */
+    public static function prepareHtmlMessage($string) {
+        $string = str_replace("<br>", "<br />", nl2br($string));
+        $string = explode("<br />", $string);
+        return implode("<br />", array_map("htmlentities", $string));
+    }
 }

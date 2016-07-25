@@ -62,7 +62,7 @@ class AuthenticationController implements IController {
 
     public function checkLogin() {
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
-            $_SESSION['messages']['errors'][] = "Cannot leave user id or password blank";
+            $_SESSION['messages']['error'][] = "Cannot leave user id or password blank";
             $redirect = array();
             foreach ($this->core->getControllerTypes() as $type) {
                 if (isset($_REQUEST['old'][$type])) {
@@ -82,18 +82,18 @@ class AuthenticationController implements IController {
                     break;
                 }
             }
-            $_SESSION['messages']['successes'][] = "Successfully logged in as ".htmlentities($_POST['user_id']);
-            $this->core->buildUrl($redirect);
+            $_SESSION['messages']['success'][] = "Successfully logged in as ".htmlentities($_POST['user_id']);
+            $this->core->redirect($this->core->buildUrl($redirect));
         }
         else {
-            $_SESSION['messages']['errors'][] = "Could not login using given user id or password";
+            $_SESSION['messages']['error'][] = "Could not login using that user id or password";
             $redirect = array();
             foreach ($this->core->getControllerTypes() as $type) {
                 if (isset($_REQUEST['old'][$type])) {
                     $redirect['old_'.$type] = $_REQUEST['old'][$type];
                 }
             }
-            $this->core->buildUrl($redirect);
+            $this->core->redirect($this->core->buildUrl($redirect));
         }
     }
 }

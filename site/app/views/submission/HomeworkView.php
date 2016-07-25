@@ -52,59 +52,76 @@ HTML;
     }
     
     /**
-     * @param string     $assignment_select
      * @param Assignment $assignment
+     * @param bool       $show_ta_grades
+     * @param bool       $show_grade_summary
+     * @param string     $grade_file
+     * @param string     $assignment_select
+     * @param string     $upload_message
      * @param int        $days_late
      *
      * @return string
      */
-    public function showAssignment($assignment_select, $assignment, $days_late) {
+    public function showAssignment($assignment, $show_ta_grades, $show_grade_summary, $grade_file, $assignment_select,
+                                   $upload_message, $days_late) {
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag_and_drop.js"></script>
 {$assignment_select}
 <div class="content">
     <h2>View Assignment {$assignment->getAssignmentName()}</h2>
     <div class="sub">
-        Prepare your assignment for submission exactly as described on the course webpage.
-        By clicking "Submit File" you are confirming that you have read, understand, and agree to follow the
-        Academic Integrity Policy.
+        {$upload_message}
     </div>
+HTML;
+        if ($assignment->useSvnCheckout()) {
+            $return .= <<<HTML
+    <form action="{$this->core->buildUrl(array())}" method="post" 
+        onsubmit="return checkVersionsUsed('{$assignment->getAssignmentName()}', {$assignment->getHighestVersion()},
+                                            {$assignment->getMaxSubmissions()});">
+        <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+        <input type="hidden" name="svn_checkout" value="true" />
+        <input type="submit" id="submit" class="btn btn-primary" value="Grade SVN" />
+    </form>
+HTML;
+        }
+        else {
+            $return .= <<<HTML
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
-        for ($i = 1; $i <= $assignment->getNumParts(); $i++) {
-            $return .= <<<HTML
+            for ($i = 1; $i <= $assignment->getNumParts(); $i++) {
+                $return .= <<<HTML
         
         <div id="upload{$i}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
-            <h3 class="label" id="label{$i}">Drag your {$assignment->getPartsNames()[($i-1)]} here or click to open file browser</h3>
+            <h3 class="label" id="label{$i}">Drag your {$assignment->getPartsNames()[($i - 1)]} here or click to open file browser</h3>
             <input type="file" name="files" id="input_file{$i}" style="display: none" onchange="addFilesFromInput({$i})" />
         </div>
 HTML;
-        }
-
-        $old_files = "";
-        for($i = 1; $i <= $assignment->getNumParts(); $i++) {
-            foreach ($assignment->getPreviousFiles($i) as $file) {
-                $old_files .= <<<HTML
-            
-                addLabel('{$file['name']}', '{$file['size']}', {$i}, true);
-                readPrevious('{$file['name']}', {$i});
-HTML;
             }
-        }
     
-        $return .= <<<HTML
+            $return .= <<<HTML
     </div>
     <button type="button" id="submit" class="btn btn-primary">Submit</button>
     <button type="button" id="startnew" class="btn btn-primary">Start New</button>
 
 HTML;
-        if ($assignment->getCurrentVersion() === $assignment->getHighestVersion() && $assignment->getCurrentVersion() > 0) {
-            $return .= <<<HTML
+            if($assignment->getCurrentVersion() === $assignment->getHighestVersion() && $assignment->getCurrentVersion() > 0) {
+                $return .= <<<HTML
     <button type="button" id= "getprev" class="btn btn-primary">Get Version {$assignment->getHighestVersion()} Files</button>
 HTML;
-        }
-        
-    $return .= <<<HTML
+            }
+    
+            $old_files = "";
+            for ($i = 1; $i <= $assignment->getNumParts(); $i++) {
+                foreach ($assignment->getPreviousFiles($i) as $file) {
+                    $old_files .= <<<HTML
+            
+                addLabel('{$file['name']}', '{$file['size']}', {$i}, true);
+                readPrevious('{$file['name']}', {$i});
+HTML;
+                }
+            }
+    
+            $return .= <<<HTML
     
     <script type="text/javascript">
         // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
@@ -128,11 +145,8 @@ HTML;
             e.stopPropagation();
         });
         $("#submit").click(function(e){ // Submit button
-            handleSubmission("{$this->core->buildUrl(array('component' => 'student', 
-                                                           'action' => 'upload', 
-                                                           'assignment_id' => $assignment->getAssignmentId()))}",
-                             "{$this->core->buildUrl(array('component' => 'student', 
-                                                           'assignment_id' => $assignment->getAssignmentId()))}",
+            handleSubmission("{$this->core->buildUrl(array('component' => 'student', 'action' => 'upload', 'assignment_id' => $assignment->getAssignmentId()))}",
+                             "{$this->core->buildUrl(array('component' => 'student', 'assignment_id' => $assignment->getAssignmentId()))}",
                              {$days_late},
                              {$assignment->getAllowedLateDays()},
                              {$assignment->getHighestVersion()},
@@ -150,8 +164,13 @@ HTML;
             });
         }
     </script>
+HTML;
+        }
+        
+        $return .= <<<HTML
 </div>
 HTML;
+        
         if ($assignment->getSubmissionCount() === 0) {
             $return .= <<<HTML
 <div class="content">
@@ -253,6 +272,7 @@ HTML;
         <h4>Submitted Files</h4>
         <div class="box half">
 HTML;
+            // TODO: This is going to be different for SVN
             foreach ($assignment->getSubmittedFiles() as $submitted_file) {
                 $size = number_format($submitted_file['size']/1024,2);
                 $return .= "{$submitted_file['name']} ({$size}kb)<br />";
@@ -279,9 +299,9 @@ HTML;
     <div class="sub">
         <h4>Results</h4>
 HTML;
-            if ($assignment->hasMessage()) {
+            if ($assignment->hasAssignmentMessage()) {
                 $return .= <<<HTML
-        <span class="green-message">Note: {$assignment->getMessage()}</span> 
+        <span class="green-message">Note: {$assignment->getAssignmentMessage()}</span> 
 HTML;
             }
             if (!$assignment->hasCurrentResults()) {
@@ -294,9 +314,18 @@ HTML;
             else {
                 $results = $assignment->getCurrentResults();
                 if ($assignment->getNormalPoints() > 0) {
+                    if ($results['points'] >= $assignment->getNormalPoints()) {
+                        $background = "green-background";
+                    }
+                    else if ($results['points'] > 0) {
+                        $background = "yellow-background";
+                    }
+                    else {
+                        $background = "red-background";
+                    }
                     $return .= <<<HTML
         <div class="box">
-            <span class="badge">{$results['points']} / {$assignment->getNormalPoints()}</span>
+            <span class="badge {$background}">{$results['points']} / {$assignment->getNormalPoints()}</span>
             <h4>Total</h4>
         </div>
 HTML;
@@ -307,6 +336,7 @@ HTML;
                     $return .= <<<HTML
         <div class="box">
 HTML;
+                    $display_box = "block";
                     if ($testcase->hasPoints()) {
                         if($testcase->isHidden()) {
                             $return .= <<<HTML
@@ -314,8 +344,18 @@ HTML;
 HTML;
                         }
                         else {
+                            if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
+                                $background = "green-background";
+                                $display_box = "none";
+                            }
+                            else if ($testcase->getPointsAwarded() > 0) {
+                                $background = "yellow-background";
+                            }
+                            else {
+                                $background = "red-background";
+                            }
                             $return .= <<<HTML
-                            <span class="badge">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</span>
+                            <span class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</span>
 HTML;
                         }
                     }
@@ -327,7 +367,7 @@ HTML;
                     $command = htmlentities($testcase->getCommand());
                     $return .= <<<HTML
             <h4 onclick="return toggleDiv('testcase_{$count}');" style="cursor: pointer;">{$name} <code>{$command}</code></h4>
-            <div id="testcase_{$count}">
+            <div id="testcase_{$count}" style="display: {$display_box};">
 HTML;
                     if (!$testcase->isHidden()) {
                         if ($testcase->hasCompilationOutput()) {
@@ -389,9 +429,49 @@ HTML;
             }
             $return .= <<<HTML
     </div>
+HTML;
+            
+            $return .= <<<HTML
 </div>
 HTML;
+            if ($show_ta_grades && $assignment->taGradesReleased()) {
+                $return .= <<<HTML
+<div class="content">
+HTML;
+                if ($assignment->hasGradeFile()) {
+                    $return .= <<<HTML
+    <h3 class="label">TA grade</h3>
+    <pre>{$assignment->getGradeFile()}</pre>
+HTML;
+                }
+                else {
+                    $return .= <<<HTML
+    <h3 class="label">TA grade not available</h3>
+HTML;
+                }
+                $return .= <<<HTML
+</div>
+HTML;
+            }
         }
+    
+        if ($show_grade_summary) {
+            $return .= <<<HTML
+<div class="content">
+    <h3 class="label">Grade Summary</h3>
+HTML;
+            if ($grade_file !== null) {
+                $return .= <<<HTML
+    {$grade_file}
+HTML;
+            }
+            
+            $return .= <<<HTML
+</div>
+HTML;
+
+        }
+        
         return $return;
     }
 }

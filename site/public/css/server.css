@@ -348,7 +348,7 @@ select {
 .label {
     font-family: 'PT Sans', sans-serif;
     font-weight: 700;
-    margin-top: .5em;
+    margin-top: 5px;
     margin-right: 0;
     margin-left: 0;
 }

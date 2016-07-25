@@ -125,6 +125,7 @@ one_course csci1200 csci1200_tas_www  "${cpp_homework[@]}"
 java_homework=( java_factorial java_coverage_factorial )
 one_course csci2600 csci2600_tas_www  "${java_homework[@]}"
 
-one_course csci1000 csci1000_tas_www  "${python_homework[@]}"
+combined_homework=(python_simple_homework python_simple_homework_multipart cpp_cats)
+one_course csci1000 csci1000_tas_www  "${combined_homework[@]}"
 
 #####################################################################

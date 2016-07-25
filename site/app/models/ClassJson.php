@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\libraries\Core;
 use app\libraries\FileUtils;
+use app\libraries\Utils;
 
 /**
  * Class ClassJson
@@ -33,6 +34,15 @@ class ClassJson {
     public function __construct(Core $core, $assignment = null) {
         $this->core = $core;
         $this->class = FileUtils::loadJsonFile($this->core->getConfig()->getCoursePath()."/config/class.json");
+        $this->class['ta_grades'] = isset($this->class['ta_grades']) ?
+            $this->class['ta_grades'] !== false : true;
+        $this->class['grade_summary'] = isset($this->class['grade_summary']) ?
+            $this->class['grade_summary'] !== false : true;
+        $this->class['download_files'] = isset($this->class['download_files']) ?
+            $this->class['download_files'] === true : false;
+        $this->class['upload_message'] = isset($this->class['upload_message']) ?
+            Utils::prepareHtmlMessage($this->class['upload_message']) : "";
+        
         $this->getAssignments();
         
         if ($assignment === null || !array_key_exists($assignment, $this->allowed_assignments)) {
@@ -43,7 +53,6 @@ class ClassJson {
             $assignment = $this->allowed_assignments[$assignment];
         }
         
-
         if ($assignment !== null) {
             $this->assignment = new Assignment($this->core, $assignment);
         }
@@ -64,6 +73,10 @@ class ClassJson {
         if ($this->allowed_assignments === null) {
             $this->allowed_assignments = array();
             foreach ($this->getAllAssignments() as $assignment) {
+                if (!isset($assignment['assignment_id']) ||
+                    array_key_exists($assignment['assignment_id'], $this->allowed_assignments)) {
+                    continue;
+                }
                 if ($this->core->getUser()->accessAdmin() || $assignment['released'] === true) {
                     $this->allowed_assignments[$assignment['assignment_id']] = $assignment;
                 }
@@ -79,7 +92,19 @@ class ClassJson {
         return $this->assignment;
     }
     
-    public function isValidAssignment() {
-        
+    public function getUploadMessage() {
+        return isset($this->class['upload_message']) ? $this->class['upload_message'] : "";
+    }
+    
+    public function showTaGrades() {
+        return $this->class['ta_grades'];
+    }
+    
+    public function showGradeSummary() {
+        return $this->class['grade_summary'];
+    }
+    
+    public function downloadFiles() {
+        return $this->class['download_files'];
     }
 }
