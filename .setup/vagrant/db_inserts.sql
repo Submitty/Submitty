@@ -1,22 +1,22 @@
--- Users
+-- Add all registration sections
 
-INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email, user_is_administrator, user_is_developer)
-    VALUES ('Instructor', 'Elric', 'instructor', 'instructor@email.edu', 1, 0);
+INSERT INTO sections_registration(sections_registration_id)
+    VALUES (1);
 
-INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email, user_is_administrator, user_is_developer)
-    VALUES ('TA', 'Ross', 'ta', 'ta@email.edu', 0, 0);
+-- Add all instructors / TAs, administrators
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('developer', 'Developer', 'Jackson', 'instructor@email.edu', 0, NULL, NULL);
 
-INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email, user_is_administrator, user_is_developer)
-    VALUES ('Developer', 'Jackson', 'developer', 'instructor@email.edu', 1, 1);
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('instructor', 'Instructor', 'Elric', 'instructor@email.edu', 1, NULL, NULL);
 
--- Sections
-INSERT INTO sections (section_title, section_is_enabled)
-    VALUES ('Section 1', 1);
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('ta', 'TA', 'Ross', 'ta@email.edu', 2, 1, NULL);
 
--- Relationships
-INSERT INTO relationships_users (user_id, section_id)
-    VALUES (2, 1);
+-- Assign TAs to registration_sections
+INSERT INTO grading_registration(sections_registration_id, user_id)
+    VALUES(1, 'ta');
 
 -- Students
-INSERT INTO students (student_rcs, student_last_name, student_first_name, student_section_id, student_grading_id, student_manual)
-    VALUES ('student', 'Joe', 'Student', 1, 1, 0);
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('student', 'Joe', 'Student', 'student@email.com', 4, 1, NULL);

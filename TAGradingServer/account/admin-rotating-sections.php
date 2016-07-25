@@ -2,7 +2,6 @@
 include "../header.php";
 
 check_administrator();
-\lib\Database::query("SELECT * FROM sections ORDER BY section_id");
 
 echo <<<HTML
 <style type="text/css">
@@ -29,42 +28,30 @@ echo <<<HTML
     }
 </style>
 <div id="container-grading">
-    <form action="{$BASE_URL}/account/submit/admin-grading-sections.php" method="post" enctype="multipart/form-data">
+    <form action="{$BASE_URL}/account/submit/admin-rotating-sections.php" method="post" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
         <div class="modal-header">
-            <h3 id="myModalLabel">Setup Grading Sections</h3>
+            <h3 id="myModalLabel">Setup Rotating Sections</h3>
         </div>
 
         <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
 HTML;
 if (isset($_GET['update']) && $_GET['update'] == '1') {
-    echo "<div style='color:red'>Grading Sections Updated</div><br />";
+    echo "<div style='color:red'>Rotating Sections Updated</div><br />";
 }
+
 echo <<<HTML
-            <input type="radio" name="type" value="section" checked="checked" /> Setup grading sections by lab section<br />
-HTML;
-foreach (\lib\Database::rows() as $section) {
-    echo <<<HTML
-            <div style="margin-left: 30px">
-                {$section['section_title']}: <input style="width: 25px" type="text" name="section_{$section['section_id']}" value="{$section['section_id']}" />
-            </div>
-HTML;
-}
-echo <<<HTML
-            <input type="radio" name="type" value="arrange" /> Place students in
-            <input type="text" name="sections" placeholder="#" style="width:25px" /> grading sections
+           Place students in
+            <input type="text" name="sections" placeholder="#" style="width:25px" /> rotating sections
                 <select name="arrange_type">
                     <option value="random">randomly</option>
                     <option value="alphabetically">alphabetically</option>
                 </select>
-            <div style="margin-left: 30px">
-                <input type="checkbox" name="skip_disabled" value="1" checked="checked" /> Ignore students in disabled sections (place them in own section)
-            </div>
         </div>
 
         <div class="modal-footer">
             <div style="width:50%; float:right; margin-top:5px;">
-                <input class="btn btn-primary" type="submit" value="Setup Grading Sections" />
+                <input class="btn btn-primary" type="submit" value="Setup Rotating Sections" />
             </div>
         </div>
     </form>
