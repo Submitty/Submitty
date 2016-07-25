@@ -24,7 +24,7 @@ def initialize(test):
         pass
 
     subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.h"),
+        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
         os.path.join(test.testcase_path, "assignment_config")])
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "hw01part1_sol.txt"),
@@ -116,7 +116,8 @@ def infinite_loop_too_much_output(test):
         os.path.join(test.testcase_path, "data")])
     test.run_run()
     test.run_validator()
-    test.diff("test01_STDOUT.txt","test01_STDOUT.txt_infinite_loop_too_much_output")
+    # truncate the output before comparing (tolerate changes in the file size cutoff)
+    test.diff_truncate(100,"test01_STDOUT.txt","test01_STDOUT.txt_infinite_loop_too_much_output")
     test.diff("test01_STDERR.txt","test01_STDERR.txt_infinite_loop_too_much_output")
     test.diff("test01_execute_logfile.txt","test01_execute_logfile.txt_infinite_loop_too_much_output")
     test.diff(".submit.grade",".submit.grade_infinite_loop_too_much_output")

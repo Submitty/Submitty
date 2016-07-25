@@ -35,7 +35,10 @@ $assignment_config =                get_assignment_config($semester,$course, $as
 $num_parts =                        get_num_parts($assignment_config);
 $part_names =                       get_part_names($assignment_config);
 $max_submissions_for_assignment =   $assignment_config["max_submissions"];
-$assignment_message =               $assignment_config["assignment_message"];
+$assignment_message = "";
+if (isset($assignment_config["assignment_message"])) {
+  $assignment_message = $assignment_config["assignment_message"];
+}
 
 $points_received = 0;
 $points_possible = 0;

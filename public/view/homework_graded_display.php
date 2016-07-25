@@ -188,7 +188,7 @@
 			     echo '</div>'; //<!-- end student diff element -->
 			     if (isset($diff["instructor"]) && trim($diff["instructor"]) != ""){
 			       echo '<div class="diff-element">'; //<!-- instructor diff element -->
-			       echo '<b>Expected';
+			       echo '<b>Expected ';
 			       if (isset($diff["description"])) { echo htmlentities($diff["description"]); }
 			       echo '</b>';
 			       echo '<div class="panel panel-default" id="';

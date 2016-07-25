@@ -16,7 +16,8 @@
 					"instructor_file":"test_output/testassignment/hw01part1_sol.txt",
 					"difference":"test01_0_diff.json",
 					"description": "Program Output",
-					"message": " "
+					"message": " ERROR!  Student file too large for grader<br>
+"
 				},
 				{
 					"diff_id":"test01_1_diff",

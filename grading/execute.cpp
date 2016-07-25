@@ -575,7 +575,8 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 
 // Executes command (from shell) and returns error code (0 = success)
 int execute(const std::string &cmd, const std::string &execute_logfile,
-	    const std::map<int,rlim_t> &test_case_limits) {
+	    nlohmann::json test_case_limits,
+	    nlohmann::json assignment_limits) {
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
 
@@ -589,13 +590,13 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
   assert (childPID >= 0);
 
   std::string executable_name = get_executable_name(cmd);
-  int seconds_to_run = get_the_limit(executable_name,RLIMIT_CPU,test_case_limits);
+  int seconds_to_run = get_the_limit(executable_name,RLIMIT_CPU,test_case_limits,assignment_limits);
 
   if (childPID == 0) {
     // CHILD PROCESS
 
 
-    enable_all_setrlimit(executable_name,test_case_limits);
+    enable_all_setrlimit(executable_name,test_case_limits,assignment_limits);
 
 
     // Student's shouldn't be forking & making threads/processes...

@@ -24,7 +24,7 @@ def initialize(test):
         pass
 
     subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.h"),
+        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
         os.path.join(test.testcase_path, "assignment_config")])
     subprocess.call(["cp", "-r",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_code"),
@@ -114,7 +114,6 @@ def buggy_coverage(test):
 
 @testcase
 def buggy_no_coverage(test):
-    return
     cleanup(test)
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "buggy_no_coverage/hw0.zip"),
