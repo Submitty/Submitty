@@ -239,11 +239,46 @@ WHERE s.".$user_section_param.
     AND s.user_group=?
 ORDER BY
     s.user_id", $params);
+    
+        $students_grades = $db->rows();
+
+        $db->query("SELECT gc_title FROM gradeable_component WHERE g_id=? ORDER BY gc_order ASC", array($g_id));
+        $titles = $db->rows();
+        print <<<HTML
+                    <tr style="background: #E1E1E1;">
+                    <td></td>
+HTML;
+        for($i=0; $i<$num_numeric; ++$i){
+            $title = $titles[$i];
+            print <<<HTML
+                    <td>{$title['gc_title']}</td>
+HTML;
+        }
+        print <<<HTML
+                    <td></td>
+HTML;
+        for($i=$num_numeric; $i<$num_numeric+$num_text; ++$i){
+            $title = $titles[$i];
+            print <<<HTML
+                    <td>{$title['gc_title']}</td>
+HTML;
+        }
+
+        print <<<HTML
+                    </tr>
+HTML;
         
-        foreach($db->rows() as $row){
+        foreach($students_grades as $row){
             $student_info = $row;
             $temp = $row;
+            
             print <<<HTML
+                        </tr>
+HTML;
+            
+            print <<<HTML
+            
+                            
                             <tr>
                                 <td>
                                     {$student_info["user_id"]} ({$student_info["user_lastname"]}, {$student_info["user_firstname"]})
