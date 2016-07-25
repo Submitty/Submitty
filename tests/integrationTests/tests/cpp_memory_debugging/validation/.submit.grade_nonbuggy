@@ -1,7 +1,7 @@
 Grade for: testuser
   submission#: 1
-  Test  1:Compilation of Submitted Files (for Dr. Memory): g++ -m32 -g -Wall *cpp -o submitted_32.out  2 /  2
-  Test  2:Compilation of Submitted Files (for Valgrind): g++ -g -Wall *cpp -o submitted.out  2 /  2
+  Test  1:Compilation of Submitted Files (for Dr. Memory): g++ -m32 -g -Wall *cpp  2 /  2
+  Test  2:Compilation of Submitted Files (for Valgrind): g++ -g -Wall *cpp  2 /  2
   Test  3:Under Dr Memory                 5 /  5
   Test  4:Under Valgrind                  5 /  5
 Automatic extra credit (w/o hidden):               + 0 points
