@@ -20,6 +20,7 @@
 //     files, do this hack to change the name.
 //    
 //
+#define default_limits IGNORE_DEFAULT_LIMITS
 #define testcases IGNORE_TESTCASES
 #define assignment_limits IGNORE_ASSIGNMENT_LIMITS
 #define drmemory_flags IGNORE_DR_MEMORY_FLAGS

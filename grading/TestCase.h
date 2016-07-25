@@ -15,6 +15,8 @@
 */
 
 
+#include "json.hpp"
+
 #ifndef __TESTCASE_H__
 #define __TESTCASE_H__
 
@@ -22,7 +24,6 @@
 #include <sstream>
 #include <cassert>
 #include <iomanip>
-#include <map>
 #include <sys/resource.h>
 #include "tokenSearch.h"
 #include "myersDiff.h"
@@ -49,10 +50,10 @@ public:
 
 class TestCaseGrader {
 public:
-  TestCaseGrader(const std::string &f, const std::string &d) : filename(f), description(d) { points_fraction = -1; }
+  TestCaseGrader(const std::string &f, const std::string &d) : filename(f), description(d) { deduction = -1; }
   std::string filename;
   std::string description;
-  float points_fraction;
+  float deduction;
 
   virtual TestResults* doit(const std::string &prefix) = 0;
 
@@ -66,8 +67,8 @@ public:
 		     const std::string file,
 		     const std::string desc,
 		     const std::string expect = "",
-             float points_frac=-1.0)
-    : TestCaseGrader(file,desc), cmp_output(cmp), expected_file(expect)  {points_fraction=points_frac;}
+                     float deduct=-1.0)
+    : TestCaseGrader(file,desc), cmp_output(cmp), expected_file(expect)  {deduction=deduct;}
   TestResults* (*cmp_output) ( const std::string&, const std::string& );
   std::string expected_file;
   virtual std::string getExpected() const { return expected_file; }
@@ -80,8 +81,8 @@ public:
 		 const std::string file,
 		 const std::string desc,
 		 const std::vector<std::string> &_tokens,
-         float points_frac=-1.0)
-    : TestCaseGrader(file,desc), token_grader(cmp), tokens(_tokens) {points_fraction=points_frac;}
+                 float deduct=-1.0)
+    : TestCaseGrader(file,desc), token_grader(cmp), tokens(_tokens) {deduction=deduct;}
 
 
   TestResults* (*token_grader) ( const std::string&, const std::vector<std::string>& );
@@ -99,8 +100,8 @@ public:
 		 const std::string file,
 		 const std::string desc,
 		 const std::string arg_string,
-		 float points_frac=-1.0)
-    : TestCaseGrader(file,desc), custom_grader(custom_grader_) { my_arg_string = arg_string; points_fraction=points_frac; my_display_mode = ""; }
+		 float deduct=-1.0)
+    : TestCaseGrader(file,desc), custom_grader(custom_grader_) { my_arg_string = arg_string; deduction=deduct; my_display_mode = ""; }
 
   float (*custom_grader)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv,  TestCaseCustom& custom_testcase);
   virtual TestResults* doit(const std::string &prefix);
@@ -116,18 +117,25 @@ private:
 
 // =================================================================================
 
-static void adjust_test_case_limits(std::map<int,rlim_t> &modified_test_case_limits,
+
+std::string rlimit_name_decoder(int i);
+
+static void adjust_test_case_limits(nlohmann::json &modified_test_case_limits,
 				    int rlimit_name, rlim_t value) {
   
+  std::string rlimit_name_string = rlimit_name_decoder(rlimit_name);
+
   // first, see if this quantity already has a value
-  std::map<int,rlim_t>::iterator t_itr = modified_test_case_limits.find(rlimit_name);
+  nlohmann::json::iterator t_itr = modified_test_case_limits.find(rlimit_name_string);
   
   if (t_itr == modified_test_case_limits.end()) {
     // if it does not, add it
-    modified_test_case_limits.insert(std::make_pair(rlimit_name,value));
+    modified_test_case_limits[rlimit_name_string] = value;
   } else {
     // otherwise set it to the max
-    t_itr->second = std::max(value,t_itr->second);
+    //t_itr->second = std::max(value,t_itr->second);
+    if (int(value) > int(modified_test_case_limits[rlimit_name_string]))
+      modified_test_case_limits[rlimit_name_string] = value;
   }
 }
 
@@ -147,8 +155,11 @@ private:
     FILE_EXISTS = false;
     COMPILATION = false;
   }
-
+  
 public:
+
+
+  static TestCase MakeTestCase (nlohmann::json j);
 
 
   static TestCase MakeFileExists ( const std::string &title,
@@ -170,8 +181,8 @@ public:
 				   const std::string &compilation_command,
 				   const std::string &executable_filename, // single executable file converted into vector
 				   const TestCasePoints &tcp,
-           float w_frac = 0,
-				   const std::map<int,rlim_t> &test_case_limits = {} ) {
+                                   float w_frac, // = 0,
+                                   nlohmann::json test_case_limits) { // = nlohmann::json() ) {
     return MakeCompilation(title,
 			   compilation_command,
 			   std::vector<std::string>(1,executable_filename),
@@ -183,8 +194,8 @@ public:
 				   const std::string &compilation_command,
 				   const std::vector<std::string> &executable_filenames,
 				   const TestCasePoints &tcp,
-           float w_frac = 0,
-				   const std::map<int,rlim_t> &test_case_limits={}) {
+                                   float w_frac, // = 0,
+                                   nlohmann::json test_case_limits) { //=nlohmann::json()) {
 
     TestCase answer;
     answer._title = title;
@@ -233,8 +244,8 @@ public:
 				   const std::string &command,
 				   const TestCasePoints &tcp,
 				   std::vector<TestCaseGrader*> tcc,
-				   const std::string &filename = "",
-				   const std::map<int,rlim_t> &test_case_limits = {} ) {
+				   const std::string &filename, //  = "",
+                                   nlohmann::json test_case_limits) { // = nlohmann::json() ) {
     TestCase answer;
     answer._title = title;
     answer._details = details;
@@ -327,21 +338,25 @@ public:
   bool hidden () const {
     return _test_case_points.hidden;
   }
-  bool extracredit () const {
+  bool extra_credit () const {
     return _test_case_points.extra_credit;
   }
   bool view_test_points () const {
       return _test_case_points.view_test_points;
   }
+  bool hidden_points() const { 
+    return !_test_case_points.view_test_points;
+  }
   bool visible () const {
-      return _test_case_points.visible;
+    assert (_test_case_points.visible == !_test_case_points.hidden);
+    return _test_case_points.visible;
   }
 
   /* Calls the function designated by the function pointer; if the function pointer
      is NULL, defaults to returning the result of diffLine(). */
   TestResults* do_the_grading (int j, std::string &message);
 
-  const std::map<int,rlim_t> get_test_case_limits() const { return _test_case_limits; }
+  const nlohmann::json get_test_case_limits() const { return _test_case_limits; }
   
   bool isFileExistsTest() { return FILE_EXISTS; }
   bool isCompilationTest() { return COMPILATION; }
@@ -354,7 +369,7 @@ private:
   std::vector<std::string> _filenames;
   std::string _command;
 
-  std::map<int,rlim_t> _test_case_limits;
+  nlohmann::json _test_case_limits;
 
   bool view_file_results;
   //std::string view_file;

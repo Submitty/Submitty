@@ -976,7 +976,7 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
                 $data["points_possible"] = isset($testcases_info[$i]["points"]) ? $testcases_info[$i]["points"] : 0;
                 $data["score"] = isset($testcases_results[$u]["points_awarded"]) ? $testcases_results[$u]["points_awarded"] : 0;
                 $data["is_hidden"] = isset($testcases_info[$i]["hidden"]) ? $testcases_info[$i]["hidden"] : false;
-                $data["is_extra_credit"] = isset($testcases_info[$i]["extracredit"]) ? $testcases_info[$i]["extracredit"] : false;
+                $data["is_extra_credit"] = isset($testcases_info[$i]["extra_credit"]) ? $testcases_info[$i]["extra_credit"] : false;
                 $data["visible"] = isset($testcases_info[$i]["visible"]) ? $testcases_info[$i]["visible"] : true;
                 $data["view_test_points"] = isset($testcases_info[$i]["view_test_points"]) ? $testcases_info[$i]["view_test_points"] : true;
                 $data["message"] = isset($testcases_results[$u]["message"]) ? $testcases_results[$u]["message"] : "";
@@ -1003,7 +1003,7 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
             $data["points_possible"] = isset($testcases_info[$i]["points"]) ? $testcases_info[$i]["points"] : 0;
             $data["score"] = 0;
             $data["is_hidden"] = isset($testcases_info[$i]["hidden"]) ? $testcases_info[$i]["hidden"] : false;
-            $data["is_extra_credit"] = isset($testcases_info[$i]["extracredit"]) ? $testcases_info[$i]["extracredit"] : false;
+            $data["is_extra_credit"] = isset($testcases_info[$i]["extra_credit"]) ? $testcases_info[$i]["extra_credit"] : false;
             $data["visible"] = isset($testcases_info[$i]["visible"]) ? $testcases_info[$i]["visible"] : true;
             $data["view_test_points"] = isset($testcases_info[$i]["view_test_points"]) ? $testcases_info[$i]["view_test_points"] : true;
             array_push($homework_tests, $data);

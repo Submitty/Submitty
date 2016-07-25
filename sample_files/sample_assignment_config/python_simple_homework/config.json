@@ -1,0 +1,23 @@
+{
+    "testcases" : [
+        {
+            "title" : "Lab 1 Checkpoint 1",
+            "details" : "python *.py",
+            "command" : "/usr/bin/python *.py",
+            "points" : 0,
+            "validation" : [
+                {
+                    "method" : "myersDiffbyLinebyChar",
+                    "filename" : "STDOUT.txt",
+                    "description" : "Program Output",
+                    "instructor_file" : "hw01part1_sol.txt"
+                },
+                {
+                    "method" : "warnIfNotEmpty",
+                    "filename" : "STDERR.txt",
+                    "description" : "syntax error output from running python"
+                }
+            ]
+        }
+    ]
+}
