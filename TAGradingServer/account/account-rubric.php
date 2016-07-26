@@ -130,7 +130,7 @@ if ($calculate_diff) {
             }
         });
 
-        $("#score_total").html(total + " / {$rubric->rubric_details['rubric_total']}");
+        $("#score_total").html(total + " / {$eg->eg_details['eg_total']}");
     }
 
     function load_tab_icon(tab_id, iframe_id, points_user, points_total) {
