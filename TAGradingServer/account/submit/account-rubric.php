@@ -8,7 +8,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
 
 $g_id = $_GET['g_id'];
 
-//GET THE GRADEABLE 
+//GET THE GRADEABLE
 
 $db->query("SELECT * FROM gradeable_data AS gd INNER JOIN gradeable AS g ON gd.g_id=g.g_id 
             INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id WHERE g.g_id = ?", array($g_id));
@@ -45,7 +45,7 @@ $gd_id = $db->row()['gd_id'];
 
 //update each gradeable component data
 foreach($rows AS $row){
-    $grade = $_POST["grade-" . $row["gc_order"]];
+    $grade = floatval($_POST["grade-" . $row["gc_order"]]);
     $comment = $_POST["comment-" . $row["gc_order"]];
     $gc_id = $row['gc_id'];
     
@@ -61,7 +61,7 @@ $overall_comment = $_POST['comment-general'];
 $params = array($overall_comment, $gd_id);
 $db->query("UPDATE gradeable_data SET gd_overall_comment=? WHERE gd_id=?",$params);
 
-// CREATE / UPDATE THE GRADEABLE GRADES FOR THE STUDENT 
+// CREATE / UPDATE THE GRADEABLE GRADES FOR THE STUDENT
 
 /*
 $status = intval($_POST['status']);
