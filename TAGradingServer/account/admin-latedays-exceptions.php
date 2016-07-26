@@ -19,7 +19,7 @@ $state = "";
 /* POST/FILES SUPERGLOBALS -------------------------------------------------- */
 //Examine drop-down and get $g_id (gradeable_id)
 if (isset($_POST['selected_gradeable'])) {
-	$g_id = intval(substr($_POST['selected_gradeable'], 2));
+	$g_id = $_POST['selected_gradeable'];
 } else {
 	$g_id = retrieve_newest_gradeable_id_from_db();
 }
@@ -150,23 +150,12 @@ function verify_student_in_db($student) {
 //OUT: TRUE should RCS ID be found in the database.  FALSE otherwise.
 //PURPOSE:  Verify that student is in database (indicating the student is enrolled)
 
-	//SQL for "old schema"
-	$sql = <<<SQL
-SELECT COUNT(1)
-FROM students
-WHERE student_rcs=?
-SQL;
-
-	//SQL for "new schema"
-	//FIXME: update 'user_group' property to match the STUDENTS group
-/* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	$sql = <<<SQL
 SELECT COUNT(1)
 FROM users
 WHERE user_id=?
-AND	user_group=0
+AND	user_group=4
 SQL;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
 
 	\lib\Database::query($sql, array($student));
 
@@ -181,21 +170,11 @@ function verify_gradeable_in_db($gradeable_id) {
 //OUT:  TRUE when gradeable ID is found in database.  FALSE otherwise.
 //PURPOSE:  Find a gradeable's serial ID by a gradeable's title.
 
-	//SQL for "old schema"
 	$sql = <<<SQL
 SELECT COUNT(1)
-FROM rubrics
-WHERE rubric_id=?
-SQL;
-
-	//SQL for "new schema"
-/* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	$sql = <<<SQL
-SELECT COUNT(1)
-FROM gradeables
+FROM gradeable
 WHERE g_id=?
 SQL;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
 
 	\lib\Database::query($sql, array($gradeable_id));
 	
@@ -213,23 +192,15 @@ function retrieve_newest_gradeable_id_from_db() {
 //          ID, the "newest" gradeable is determined.  This is used as the
 //          "default" gradeable selection.
 
-	//SQL for "old schema"
-	$sql = <<<SQL
-SELECT MAX(rubric_id)
-FROM rubrics;
-SQL;
 
-	//SQL for "new schema"
-/* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	$sql = <<<SQL
 SELECT g_id
-FROM gradeables
+FROM gradeable
 ORDER BY g_grade_start_date DESC LIMIT 1;
 SQL;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
 
 	\lib\Database::query($sql);
-	return \lib\Database::row()['max'];
+	return \lib\Database::row()['g_id'];
 }
 
 /* END FUNCTION retrieve_newest_gradeable_id_from_db() ====================== */
@@ -240,23 +211,13 @@ function retrieve_gradeables_from_db() {
 //PURPOSE:  To build drop down menu of selectable gradeables.  Ordered
 //          descending so "newer" are higher in the menu.
 
-	//SQL for "old schema"
-	$sql = <<<SQL
-SELECT
-	rubric_id,
-	rubric_name
-FROM rubrics
-ORDER BY rubric_id DESC;
-SQL;
 
-	//SQL for "new schema"
-/* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	$sql = <<<SQL
 SELECT g_id, g_title
-FROM gradeables
+FROM gradeable
+WHERE g_gradeable_type=0
 ORDER BY g_grade_released_date DESC;
 SQL;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
 
 	\lib\Database::query($sql);
 	return \lib\Database::rows();
@@ -270,25 +231,6 @@ function retrieve_students_from_db($gradeable_id = 0) {
 //     retrieves student rcs, first name, last name, and late day exceptions.
 //PURPOSE:  Retrieve list of students to display current late day exceptions.
 
-	//SQL for "old schema"
-	$sql = <<<SQL
-SELECT 
-	students.student_rcs,
-	students.student_first_name,
-	students.student_last_name,
-	late_day_exceptions.ex_late_days
-FROM students
-FULL OUTER JOIN late_day_exceptions
-	ON students.student_rcs=late_day_exceptions.ex_student_rcs
-WHERE late_day_exceptions.ex_rubric_id=?
-	AND late_day_exceptions.ex_late_days IS NOT NULL
-	AND late_day_exceptions.ex_late_days>0
-ORDER BY students.student_rcs ASC;
-SQL;
-	
-	//SQL for "new schema"
-	//FIXME: update user.user_group property to match value representing students.
-/* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	$sql = <<<SQL
 SELECT
 	users.user_email,
@@ -296,15 +238,14 @@ SELECT
 	users.user_lastname,
 	late_day_exceptions.late_day_exceptions
 FROM users
-FULL OUTER JOIN late_day_expceptions
+FULL OUTER JOIN late_day_exceptions
 	ON users.user_id=late_day_exceptions.user_id
 WHERE late_day_exceptions.g_id=?
-	AND users.user_group=0
-	AND	late_day_exceptions.late_day-exceptions IS NOT NULL
-	AND	late_day_exceptions.late_day_excpetions>0
+	AND users.user_group=4
+	AND	late_day_exceptions.late_day_exceptions IS NOT NULL
+	AND	late_day_exceptions.late_day_exceptions>0
 ORDER BY users.user_email ASC;
 SQL;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
 
 	\lib\Database::query($sql, array($gradeable_id));
 	return \lib\Database::rows();
@@ -329,63 +270,15 @@ function upsert(array $data) {
 	//SQL for "old schema"
 	$sql = array();
 	
-	//TEMPORARY table to hold all new values that will be "upserted"
-	$sql['temp_table'] = <<<SQL
-CREATE TEMPORARY TABLE temp
-	(student_rcs VARCHAR(255),
-	gradeable_id INTEGER,
-	late_days INTEGER)
-ON COMMIT DROP;
-SQL;
-
-	//INSERT new data into temporary table -- prepares all data to be upserted
-	//in a single batch DB transaction.
-	for ($i=0; $i<count($data); $i++) {
-		$sql["data_{$i}"] = <<<SQL
-INSERT INTO temp VALUES (?,?,?);
-SQL;
-	}
-
-	//LOCK will prevent sharing collisions while upsert is in process.
-	$sql['lock'] = <<<SQL
-LOCK TABLE late_day_exceptions IN EXCLUSIVE MODE;
-SQL;
-
-	//This portion ensures that UPDATE will only occur when a record already exists.
-	$sql['update'] = <<<SQL
-UPDATE late_day_exceptions
-SET ex_late_days=temp.late_days
-FROM temp
-WHERE late_day_exceptions.ex_student_rcs=temp.student_rcs
-	AND late_day_exceptions.ex_rubric_id=temp.gradeable_id;
-SQL;
-
-	//This portion ensures that INSERT will only occur when data record is new.
-	$sql['insert'] = <<<SQL
-INSERT INTO late_day_exceptions
-	(ex_student_rcs,
-	ex_rubric_id,
-	ex_late_days)
-SELECT
-	temp.student_rcs,
-	temp.gradeable_id,
-	temp.late_days
-FROM temp 
-LEFT OUTER JOIN late_day_exceptions
-	ON late_day_exceptions.ex_student_rcs=temp.student_rcs
-	AND	late_day_exceptions.ex_rubric_id=temp.gradeable_id
-WHERE late_day_exceptions.ex_student_rcs IS NULL
-	OR late_day_exceptions.ex_rubric_id IS NULL;
-SQL;
 
 	//SQL code for "new schema"
-/* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 	//TEMPORARY table to hold all new values that will be "upserted"
 	$sql['temp_table'] = <<<SQL
 CREATE TEMPORARY TABLE temp
 	(student_rcs VARCHAR(255),
-	gradeable_id INTEGER,
+	gradeable_id VARCHAR(255),
 	late_days INTEGER)
 ON COMMIT DROP;
 SQL;
@@ -397,6 +290,8 @@ SQL;
 INSERT INTO temp VALUES (?,?,?);
 SQL;
 	}
+    
+    print_r($data);
 
 	//LOCK will prevent sharing collisions while upsert is in process.
 	$sql['lock'] = <<<SQL
@@ -417,7 +312,7 @@ SQL;
 INSERT INTO late_day_exceptions
 	(user_id,
 	g_id,
-	late_day-exceptions)
+	late_day_exceptions)
 SELECT
 	temp.student_rcs,
 	temp.gradeable_id,
@@ -429,8 +324,6 @@ LEFT OUTER JOIN late_day_exceptions
 WHERE late_day_exceptions.user_id IS NULL
 	OR late_day_exceptions.g_id IS NULL;
 SQL;
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */	
 
 	//Begin DB transaction
 	\lib\Database::beginTransaction();
@@ -454,17 +347,17 @@ class local_view {
 //View class for admin-latedays-exceptions.php
 
 	//Properties
-	static private $utf8_styled;
-	static private $utf8_checkmark;
+	private $utf8_styled_x;
+	private $utf8_checkmark;
 	static private $view;  //HTML data to be sent to browser
 	
 	//Constructor
 	public function __construct() {
 		$this->utf8_styled_x  = "&#x2718";
 		$this->utf8_checkmark = "&#x2714";
-		$this->view = array();
+		self::$view = array();
 		
-		$this->view['head'] = <<<HTML
+		self::$view['head'] = <<<HTML
 <div id="container" style="width:100%; margin-top:40px;">
 <div class="modal hide fade in" style="display:block; margin-top:5%; z-index:100;">
 <div class="modal-header">
@@ -472,33 +365,33 @@ class local_view {
 </div>
 HTML;
 
-		$this->view['tail'] = <<<HTML
+		self::$view['tail'] = <<<HTML
 </div>
 </div>	
 HTML;
 
-		$this->view['bad_upload'] = <<<HTML
+		self::$view['bad_upload'] = <<<HTML
 <div class="modal-body">
 <p><em style="color:red; font-weight:bold; font-style:normal;">
 {$this->utf8_styled_x} Something is wrong with the CSV upload.  No update done.</em>
 </div>
 HTML;
 
-		$this->view['student_not_found'] = <<<HTML
+		self::$view['student_not_found'] = <<<HTML
 <div class="modal-body">
 <p><em style="color:red; font-weight:bold; font-style:normal;">
 {$this->utf8_styled_x} Student not found.</em>
 </div>
 HTML;
 
-		$this->view['late_days_not_integer'] = <<<HTML
+		self::$view['late_days_not_integer'] = <<<HTML
 <div class="modal-body">
 <em style="color:red; font-weight:bold; font-style:normal;">
 {$this->utf8_styled_x} Late days must be an integer at least 0.</em>
 </div>
 HTML;
 
-		$this->view['upsert_done'] = <<<HTML
+		self::$view['upsert_done'] = <<<HTML
 <div class="modal-body">
 <p><em style="color:green; font-weight:bold; font-style:normal;">
 {$this->utf8_checkmark} Late day exceptions are updated.</em>
@@ -516,7 +409,7 @@ HTML;
 	//         Are essential for crafting a proper drop-down menu for selecting
 	//         a gradeable.  That is, only gradeables that exist are shown.
 	
-		$this->view['form'] = <<<HTML
+		self::$view['form'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
 <form action="admin-latedays-exceptions.php" method="POST" enctype="multipart/form-data">
 <p>Select Rubric:
@@ -526,17 +419,17 @@ HTML;
 		foreach($db_data as $index => $gradeable) {
 		
 			if ($g_id == $gradeable[0]) {
-				$this->view['form'] .= <<<HTML
-<option value="g_{$gradeable[0]}" selected="selected">{$gradeable[1]}</option>
+				self::$view['form'] .= <<<HTML
+<option value="{$gradeable[0]}" selected="selected">{$gradeable[1]}</option>
 HTML;
 			} else {
-				$this->view['form'] .= <<<HTML
-<option value="g_{$gradeable[0]}">{$gradeable[1]}</option>
+				self::$view['form'] .= <<<HTML
+<option value="{$gradeable[0]}">{$gradeable[1]}</option>
 HTML;
 			}
 		}
 
-		$this->view['form'] .= <<<HTML
+		self::$view['form'] .= <<<HTML
 </select>
 <h4>Single Student Entry</h4>
 <table style="border:5px solid white;"><tr>
@@ -562,7 +455,7 @@ HTML;
 		if (!is_array($db_data) || count($db_data) < 1) {
 		//No late days in DB -- indicate as much.
 
-			$this->view['student_review_table'] = <<<HTML
+			self::$view['student_review_table'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
 <p style="font-weight:bold; font-size:1.2em;">No late day exceptions are currently entered for this assignment.
 </div>
@@ -571,7 +464,7 @@ HTML;
 		//Late days found in DB -- build table to display
 
 			//Table HEAD
-			$this->view['student_review_table'] = <<<HTML
+			self::$view['student_review_table'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
 <table style="border:5px solid white; border-collapse:collapse; margin: 0 auto; text-align:center;">
 <caption style="caption-side:top; font-weight:bold; font-size:1.2em;">
@@ -586,7 +479,7 @@ HTML;
 			//Table BODY
 			$cell_color = array('white', 'aliceblue');
 			foreach ($db_data as $index => $record) {
-				$this->view['student_review_table'] .= <<<HTML
+				self::$view['student_review_table'] .= <<<HTML
 <tr>
 <td style="background:{$cell_color[$index%2]};">{$record[0]}</td>
 <td style="background:{$cell_color[$index%2]};">{$record[1]}</td>
@@ -597,7 +490,7 @@ HTML;
 			}
 
 			//Table TAIL
-			$this->view['student_review_table'] .= <<<HTML
+			self::$view['student_review_table'] .= <<<HTML
 </table>
 </div>
 HTML;
@@ -613,38 +506,38 @@ HTML;
 	
 		switch($state) {
 		case 'bad_upload':
-			echo $this->view['head']                 .
-   				 $this->view['form']                 . 
-			     $this->view['bad_upload']           .
-			     $this->view['student_review_table'] .
-			     $this->view['tail'];
+			echo self::$view['head']                 .
+   				 self::$view['form']                 . 
+			     self::$view['bad_upload']           .
+			     self::$view['student_review_table'] .
+			     self::$view['tail'];
 			break;
 		case 'student_not_found':
-			echo $this->view['head']                 .
-   				 $this->view['form']                 . 
-			     $this->view['student_not_found']    .
-			     $this->view['student_review_table'] .
-			     $this->view['tail'];
+			echo self::$view['head']                 .
+   				 self::$view['form']                 . 
+			     self::$view['student_not_found']    .
+			     self::$view['student_review_table'] .
+			     self::$view['tail'];
 			break;
 		case 'late_days_not_integer':
-			echo $this->view['head']                  .
-   				 $this->view['form']                  . 
-			     $this->view['late_days_not_integer'] .   				 
-			     $this->view['student_review_table']  .
-			     $this->view['tail'];
+			echo self::$view['head']                  .
+   				 self::$view['form']                  . 
+			     self::$view['late_days_not_integer'] .   				 
+			     self::$view['student_review_table']  .
+			     self::$view['tail'];
 		    break;
 		case 'upsert_done':
-			echo $this->view['head']                 .
-				 $this->view['form']                 . 
-				 $this->view['upsert_done']          . 
-			     $this->view['student_review_table'] .
-			     $this->view['tail'];
+			echo self::$view['head']                 .
+				 self::$view['form']                 . 
+				 self::$view['upsert_done']          . 
+			     self::$view['student_review_table'] .
+			     self::$view['tail'];
 			break;
 		default:
-			echo $this->view['head']                 .
-				 $this->view['form']                 . 
-			     $this->view['student_review_table'] .
-			     $this->view['tail'];
+			echo self::$view['head']                 .
+				 self::$view['form']                 . 
+			     self::$view['student_review_table'] .
+			     self::$view['tail'];
 			break;
 		}
 	}

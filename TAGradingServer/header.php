@@ -77,21 +77,6 @@ if ($user_logged_in) {
                     <a class="brand" href="{$BASE_URL}/account/index.php">$COURSE_NAME Grading Server</a>
 
                     <ul class="nav" role="navigation">
-                        <li class="dropdown">
-                            <a href="{$BASE_URL}/account/index.php">Homeworks</a>
-                        </li>
-
-                        <li class="dropdown">
-                            <a href="{$BASE_URL}/account/account-labs.php">Labs</a>
-                        </li>
-
-                        <li class="dropdown">
-                            <a href="{$BASE_URL}/account/account-tests.php">Tests</a>
-                        </li>
-
-                        <li class="dropdown">
-                            <a href="{$BASE_URL}/account/account-other.php">Other</a>
-                        </li>
 HTML;
     if ($user_is_administrator) {
         print <<<HTML
@@ -116,23 +101,20 @@ HTML;
                         </li>
                         <li class="dropdown">
                             <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
-                                Manage Assignments <b class="caret"></b>
+                                Gradeables <b class="caret"></b>
                             </a>
-                            <ul class="dropdown-menu" role="menu" aria-labelledby="drop-assignments">
-                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-rubrics.php" role="button" data-toggle="modal">
-                                        Manage Rubrics
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="drop-grade">
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-gradeables.php" role="button" data-toggle="modal">
+                                Manage Gradeables
                                 </a></li>
-                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-labs.php" role="button" data-toggle="modal">
-                                        Manage Labs
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/account-numerictext-gradeable.php" role="button" data-toggle="modal">
+                                Numeric/Text Gradeables
                                 </a></li>
-                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-tests.php" role="button" data-toggle="modal">
-                                        Manage Tests
-                                </a></li>
-                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-other.php" role="button" data-toggle="modal">
-                                        Manage Other
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/account-checkpoints-gradeable.php" role="button" data-toggle="modal">
+                                Checkpoints Gradeables
                                 </a></li>
                             </ul>
-                        </li>
+                        </li>                        
                         <li class="dropdown">
                             <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
                                 System Management <b class="caret"></b>
@@ -150,17 +132,14 @@ HTML;
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-classlist.php" role="button" data-toggle="modal">
                                     Upload Classlist
                                 </a></li>
-                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-grading-sections.php" role="button" data-toggle="modal">
-                                    Setup Grading Sections
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-rotating-sections.php" role="button" data-toggle="modal">
+                                    Setup Rotating Sections
                                 </a></li>
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-latedays.php" role="button" data-toggle="modal">
                                     Add Late Days To Course
                                 </a></li>
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-latedays-exceptions.php" role="button" data-toggle="modal">
                                     Add Late Day Exceptions For Students
-                                </a></li>
-                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-orphans.php" role="button" data-toggle="modal">
-                                    View Orphans
                                 </a></li>
                             </ul>
                         </li>

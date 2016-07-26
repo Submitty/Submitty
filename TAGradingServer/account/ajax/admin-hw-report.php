@@ -22,6 +22,9 @@ $all = isset($_GET['all']) ? intval($_GET['all']) == 1 : false;
 
 // Get and setup all of the cases of cheating (academic integrity) we've found to be applied when
 // generating the reports
+//TODO academic integrity changes
+
+/*
 $academic_integrity = array();
 $academic_resolutions = array();
 $db->query("SELECT * FROM grades_academic_integrity ORDER BY rubric_id",array());
@@ -34,19 +37,20 @@ foreach ($db->rows() as $row) {
     if ($row['penalty'] != null) {
         $academic_resolutions[$row['rubric_id']][$row['student_rcs']] = floatval($row['penalty']);
     }
-}
+}*/
 
 $nl = "\n";
 $write_output = True;
 
-$get_rubric_id = intval($_GET["hw"]);
-Database::query("SELECT * FROM rubrics WHERE rubric_id=?", array($get_rubric_id));
-$get_rubric = Database::row();
-if (!isset($get_rubric['rubric_id'])) {
+$get_g_id = intval($_GET["g_id"]);
+Database::query("SELECT * FROM gradeables WHERE g_id=?", array($get_g_id));
+$get_gradeable = Database::row();
+if (!isset($get_gradeable['g_id'])) {
     echo "failed|Invalid ID";
     exit(1);
 }
 
+/*
 // Query the database for all students registered in the class
 $params = array();
 $db->query("
@@ -344,4 +348,4 @@ echo "updated";
 
 if (isset($_GET['develop']) && $_GET['develop'] == "1" && app\models\User::$is_developer) {
     echo "|".(microtime_float()-$start)."|".$db->totalQueries();
-}
+}*/

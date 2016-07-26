@@ -147,33 +147,29 @@ ul.dropdown-menu li#logout a:hover {
 }
 #rubric {
     position:absolute;
-    bottom: 5%;
     left: 40%;
-    height: 85%;
-    width: 40%;
+    top: 15%;
+    width: 45%;
+    height: 80%;
     background: #C3BEFF;
     opacity:0.9;
     border-width: 2px 5px 5px 5px;
     border-color: #99cccc;
     border-style:solid;
-    /*right: 0;*/
-    /*width: 30%;*/
     display:none;
     z-index: 199;
 }
 #stats {
     position:absolute;
-    bottom: 20%;
-    left: 5%;
+    left: 10%;
+    top: 55%;
+    width: 20%;
     height: 40%;
-    width: 30%;
     background: #C3BEFF;
     opacity:0.9;
     border-width: 2px 5px 5px 5px;
     border-color: #99cccc;
     border-style:solid;
-    /*right: 0;*/
-    /*width: 30%;*/
     display:none;
     z-index: 200;
 }

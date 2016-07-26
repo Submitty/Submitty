@@ -110,7 +110,7 @@ foreach($contents as $content) {
 	$details = explode(",", trim($content));
 	$rows[] = array( 'student_first_name' => $details[$csvFieldsINI['student_first_name']],
 	                 'student_last_name'  => $details[$csvFieldsINI['student_last_name']],
-	                 'student_rcs'        => explode("@", $details[$csvFieldsINI['student_email']])[0],
+	                 'student_user_id'        => explode("@", $details[$csvFieldsINI['student_email']])[0],
 	                 'student_section'    => intval($details[$csvFieldsINI['student_section']]) );
 
 	//Validate massaged data.  First, make sure we're working on the most recent entry (should be the "end" element).
@@ -125,7 +125,7 @@ foreach($contents as $content) {
 	//Student section must be greater than zero (intval($str) returns zero when $str is not integer)
 	$error_message .= ($val['student_section'] > 0) ? "" : "Error in student section column, row #{$row_being_processed}: {$val['student_section']}<br>";
 
-	//No check on rcs (computing login ID) -- different Univeristies have different formats.
+	//No check on user_id (computing login ID) -- different Univeristies have different formats.
 }
 
 //Display any accumulated errors.  Quit on errors, otherwise continue.
@@ -133,11 +133,11 @@ if (empty($error_message) === false) {
 	die($error_message . "Contact your sysadmin.");
 }
 
-//Collect existing student list, group data by rcs
+//Collect existing student list, group data by user_id
 $students = array();
-\lib\Database::query("SELECT * FROM students");
+\lib\Database::query("SELECT * FROM users");
 foreach(\lib\Database::rows() as $student) {
-    $students[$student['student_rcs']] = $student;
+    $students[$student['user_id']] = $student;
 }
 
 $inserted = 0;
@@ -149,27 +149,28 @@ $updated = 0;
 // student_manual is true)
 \lib\Database::beginTransaction();
 foreach ($rows as $row) {
-	$columns = array("student_rcs", "student_first_name", "student_last_name", "student_section_id", "student_grading_id");
-	$values = array($row['student_rcs'], $row['student_first_name'], $row['student_last_name'], $row['student_section'], 1);
-	$rcs = $row['student_rcs'];
-	if (array_key_exists($rcs, $students)) {
-		if (isset($_SESSION['post']['ignore_manual_1']) && $_SESSION['post']['ignore_manual_1'] == true && $students[$rcs]['student_manual'] == 1) {
+    // TODO add email
+	$columns = array("user_id", "user_firstname", "user_lastname", "user_email", "registration_section");
+	$values = array($row['student_user_id'], $row['student_first_name'], $row['student_last_name'], $row['student_section'], 1);
+	$user_id = $row['student_user_id'];
+	if (array_key_exists($user_id, $students)) {
+		if (isset($_SESSION['post']['ignore_manual_1']) && $_SESSION['post']['ignore_manual_1'] == true && $students[$user_id]['student_manual'] == 1) {
 			continue;
 		}
-		\lib\Database::query("UPDATE students SET student_section_id=? WHERE student_rcs=?", array($row['student_section'], $rcs));
+		\lib\Database::query("UPDATE users SET registration_section=? WHERE user_id?", array($row['student_section'], $user_id));
         $updated++;
-		unset($students[$rcs]);
+		unset($students[$user_id]);
 	}
 	else {
-		$db->query("INSERT INTO students (" . (implode(",", $columns)) . ") VALUES (?, ?, ?, ?, ?)", $values);
-		\lib\Database::query("INSERT INTO late_days (student_rcs, allowed_lates, since_timestamp) VALUES(?, ?, TIMESTAMP '1970-01-01 00:00:01')", array($rcs, __DEFAULT_LATE_DAYS_STUDENT__));
+		$db->query("INSERT INTO users (" . (implode(",", $columns)) . ") VALUES (?, ?, ?, ?, ?)", $values);
+		\lib\Database::query("INSERT INTO late_days (student_user_id, allowed_lates, since_timestamp) VALUES(?, ?, TIMESTAMP '1970-01-01 00:00:01')", array($user_id, __DEFAULT_LATE_DAYS_STUDENT__));
         $inserted++;
 	}
 }
 
 $moved = 0;
 $deleted = 0;
-foreach ($students as $rcs => $student) {
+foreach ($students as $user_id => $student) {
 	if (isset($_SESSION['post']['ignore_manual_2']) && $_SESSION['post']['ignore_manual_2'] == true && $student['student_manual'] == 1) {
 		continue;
 	}
@@ -178,11 +179,11 @@ foreach ($students as $rcs => $student) {
 		continue;
 	}
 	else if ($_SESSION['post']['missing_students'] == -1) {
-		\lib\Database::query("DELETE FROM students WHERE student_rcs=?", array($rcs));
+		\lib\Database::query("DELETE FROM users WHERE user_id=?", array($user_id));
         $deleted++;
 	}
 	else {
-		\lib\Database::query("UPDATE students SET student_section_id=? WHERE student_rcs=?", array($_SESSION['post']['missing_students'], $rcs));
+		\lib\Database::query("UPDATE users SET registration_section=? WHERE user_id=?", array($_SESSION['post']['missing_students'], $user_id));
         $moved++;
 	}
 }

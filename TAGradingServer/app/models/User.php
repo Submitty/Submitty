@@ -44,16 +44,16 @@ class User {
      *
      * @throws \InvalidArgumentException|\lib\ServerException
      */
-    public static function loadUser($user_rcs) {
-        Database::query("SELECT * FROM users WHERE user_rcs=?",array($user_rcs));
+    public static function loadUser($user_id) {
+        Database::query("SELECT * FROM users WHERE user_id=?",array($user_id));
         User::$user_details = Database::row();
         if (User::$user_details == array()) {
             ExceptionHandler::$debug = true;
-            ExceptionHandler::throwException("User", new \InvalidArgumentException("Cannot load user '{$user_rcs}'"));
+            ExceptionHandler::throwException("User", new \InvalidArgumentException("Cannot load user '{$user_id}'"));
         } // @codeCoverageIgnore
         
         User::$user_id = User::$user_details['user_id'];
-        User::$is_developer = User::$user_details['user_is_developer'] == 1;
-        User::$is_administrator = User::$user_details['user_is_administrator'] == 1 || User::$is_developer;
+        User::$is_developer = User::$user_details['user_group'] == 0;
+        User::$is_administrator = User::$user_details['user_group'] == 1 || User::$is_developer;
     }
 }

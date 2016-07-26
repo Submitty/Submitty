@@ -25,10 +25,28 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 SET search_path = public, pg_catalog;
 
+--
+-- Name: check_valid_score(numeric, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION check_valid_score(numeric, integer) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $_$
+declare
+valid_score BOOLEAN;
+BEGIN
+   SELECT $1<=gc_max_value INTO valid_score FROM gradeable_component AS gc WHERE gc.gc_id=$2;
+   RETURN valid_score;
+END;
+$_$;
+
+
+SET default_tablespace = '';
+
 SET default_with_oids = false;
 
 --
--- Name: config; Type: TABLE; Schema: public; Owner: -
+-- Name: config; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE config (
@@ -39,10 +57,76 @@ CREATE TABLE config (
 
 
 --
--- Name: grade_lab_sequence; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: electronic_gradeable; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE SEQUENCE grade_lab_sequence
+CREATE TABLE electronic_gradeable (
+    g_id character varying(255) NOT NULL,
+    eg_instructions_url character varying(255) NOT NULL,
+    eg_submission_open_date timestamp(6) without time zone NOT NULL,
+    eg_submission_due_date timestamp(6) without time zone NOT NULL,
+    eg_is_repository boolean NOT NULL,
+    eg_subdirectory character varying(1024) NOT NULL,
+    eg_use_ta_grading boolean NOT NULL,
+    eg_config_path character varying(1024) NOT NULL,
+    eg_late_days integer DEFAULT (-1) NOT NULL,
+    eg_precision numeric NOT NULL
+);
+
+
+--
+-- Name: gradeable; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE gradeable (
+    g_id character varying(255) NOT NULL,
+    g_title character varying(255) NOT NULL,
+    g_overall_ta_instructions character varying NOT NULL,
+    g_team_assignment boolean NOT NULL,
+    g_gradeable_type integer NOT NULL,
+    g_grade_by_registration boolean NOT NULL,
+    g_grade_start_date timestamp(6) without time zone NOT NULL,
+    g_grade_released_date timestamp(6) without time zone NOT NULL,
+    g_syllabus_bucket character varying(255) NOT NULL,
+    g_min_grading_group integer NOT NULL
+);
+
+
+--
+-- Name: gradeable_component; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE gradeable_component (
+    gc_id integer NOT NULL,
+    g_id character varying(255) NOT NULL,
+    gc_title character varying(255) NOT NULL,
+    gc_ta_comment character varying NOT NULL,
+    gc_student_comment character varying NOT NULL,
+    gc_max_value numeric NOT NULL,
+    gc_is_text boolean NOT NULL,
+    gc_is_extra_credit boolean NOT NULL,
+    gc_order integer NOT NULL
+);
+
+
+--
+-- Name: gradeable_component_data; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE gradeable_component_data (
+    gc_id integer NOT NULL,
+    gd_id integer NOT NULL,
+    gcd_score numeric NOT NULL,
+    gcd_component_comment character varying NOT NULL,
+    CONSTRAINT gradeable_component_data_check CHECK (check_valid_score(gcd_score, gc_id))
+);
+
+
+--
+-- Name: gradeable_component_gc_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gradeable_component_gc_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -51,10 +135,33 @@ CREATE SEQUENCE grade_lab_sequence
 
 
 --
--- Name: grade_question_sequence; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: gradeable_component_gc_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE grade_question_sequence
+ALTER SEQUENCE gradeable_component_gc_id_seq OWNED BY gradeable_component.gc_id;
+
+
+--
+-- Name: gradeable_data; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE gradeable_data (
+    gd_id integer NOT NULL,
+    g_id character varying(255) NOT NULL,
+    gd_user_id character varying(255) NOT NULL,
+    gd_grader_id character varying(255) NOT NULL,
+    gd_overall_comment character varying NOT NULL,
+    gd_status integer NOT NULL,
+    gd_late_days_used integer NOT NULL,
+    gd_active_version integer NOT NULL
+);
+
+
+--
+-- Name: gradeable_data_gd_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gradeable_data_gd_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -63,686 +170,178 @@ CREATE SEQUENCE grade_question_sequence
 
 
 --
--- Name: grade_sequence; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: gradeable_data_gd_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE grade_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+ALTER SEQUENCE gradeable_data_gd_id_seq OWNED BY gradeable_data.gd_id;
 
 
 --
--- Name: grade_test_sequence; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: grading_registration; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE SEQUENCE grade_test_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: grades; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE grades (
-    grade_id integer DEFAULT nextval('grade_sequence'::regclass) NOT NULL,
-    rubric_id integer,
-    student_id integer,
-    grade_user_id integer,
-    grade_finish_timestamp timestamp(6) without time zone,
-    grade_comment character varying(10240),
-    grade_days_late integer,
-    grade_is_regraded integer,
-    student_rcs character varying,
-    grade_submitted integer DEFAULT 0 NOT NULL,
-    grade_status integer DEFAULT 0 NOT NULL,
-    grade_parts_days_late character varying DEFAULT '0'::character varying NOT NULL,
-    grade_parts_submitted character varying DEFAULT '0'::character varying NOT NULL,
-    grade_parts_status character varying DEFAULT '0'::character varying NOT NULL,
-    grade_active_assignment character varying DEFAULT '1'::character varying NOT NULL
+CREATE TABLE grading_registration (
+    sections_registration_id integer NOT NULL,
+    user_id character varying NOT NULL
 );
 
 
 --
--- Name: grades_academic_integrity_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: grading_rotating; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE SEQUENCE grades_academic_integrity_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: grades_academic_integrity; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE grades_academic_integrity (
-    gai_id integer DEFAULT nextval('grades_academic_integrity_seq'::regclass) NOT NULL,
-    student_id integer,
-    student_rcs character varying,
-    rubric_id integer,
-    penalty numeric(3,3) DEFAULT NULL::numeric
+CREATE TABLE grading_rotating (
+    g_id character varying NOT NULL,
+    user_id character varying NOT NULL,
+    sections_rotating integer NOT NULL
 );
 
 
 --
--- Name: grades_labs; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE grades_labs (
-    grade_lab_id integer DEFAULT nextval('grade_lab_sequence'::regclass) NOT NULL,
-    lab_id integer,
-    student_id integer,
-    grade_lab_user_id integer,
-    grade_finish_timestamp timestamp without time zone,
-    grade_lab_value integer,
-    grade_lab_checkpoint integer,
-    student_rcs character varying
-);
-
---
--- Name: grades_others; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE grades_others (
-    grades_other_id integer NOT NULL,
-    oid integer NOT NULL,
-    grades_other_score numeric DEFAULT 0 NOT NULL,
-    grades_other_text character varying DEFAULT ''::character varying NOT NULL,
-    student_rcs character varying NOT NULL,
-    grades_other_user_id integer NOT NULL
-);
-
-
---
--- Name: grades_others_grades_other_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE grades_others_grades_other_id_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
-
-
---
--- Dependencies: 209
--- Name: grades_others_grades_other_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE grades_others_grades_other_id_seq OWNED BY grades_others.grades_other_id;
-
-
---
--- Name: grades_questions; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE grades_questions (
-    grade_question_id integer DEFAULT nextval('grade_question_sequence'::regclass) NOT NULL,
-    grade_id integer,
-    question_id integer,
-    grade_question_score real,
-    grade_question_comment character varying(10240)
-);
-
-
---
--- Name: grades_tests; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE grades_tests (
-    grade_test_id integer DEFAULT nextval('grade_test_sequence'::regclass) NOT NULL,
-    test_id integer,
-    student_id integer,
-    grade_test_user_id integer,
-    student_rcs character varying,
-    grade_test_questions numeric[],
-    grade_test_value numeric DEFAULT 0 NOT NULL,
-    grade_test_text character varying[]
-);
-
-
---
--- Name: hw_grading_sec_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE hw_grading_sec_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: homework_grading_sections; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE homework_grading_sections (
-    hgs_id integer DEFAULT nextval('hw_grading_sec_seq'::regclass) NOT NULL,
-    user_id integer,
-    rubric_id integer,
-    grading_section_id integer
-);
-
-
---
--- Name: lab_sequence; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE lab_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: labs; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE labs (
-    lab_id integer DEFAULT nextval('lab_sequence'::regclass) NOT NULL,
-    lab_number integer,
-    lab_title character varying,
-    lab_checkpoints character varying,
-    lab_code character varying(8)
-);
-
-
---
--- Name: late_day_exceptions_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE late_day_exceptions_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -
+-- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE late_day_exceptions (
-    ex_id integer DEFAULT nextval('late_day_exceptions_seq'::regclass) NOT NULL,
-    ex_student_rcs character varying NOT NULL,
-    ex_rubric_id integer NOT NULL,
-    ex_late_days integer DEFAULT 0 NOT NULL
+    g_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    late_day_exceptions integer NOT NULL
 );
 
 
 --
--- Name: late_days; Type: TABLE; Schema: public; Owner: -
+-- Name: late_days; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE late_days (
-    student_rcs character varying NOT NULL,
-    allowed_lates integer DEFAULT 0 NOT NULL,
+    user_id character varying(255) NOT NULL,
+    allowed_late_days integer NOT NULL,
     since_timestamp timestamp without time zone NOT NULL
 );
 
+
 --
--- TOC entry 207 (class 1259 OID 25622)
--- Name: other_grades; Type: TABLE; Schema: public; Owner: -
+-- Name: sections_registration; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE TABLE other_grades (
-    other_name character varying NOT NULL,
-    other_due_date timestamp(6) without time zone NOT NULL,
-    other_score numeric NOT NULL,
-    other_id character varying NOT NULL,
-    oid integer NOT NULL
+CREATE TABLE sections_registration (
+    sections_registration_id integer NOT NULL
 );
 
 
 --
--- Name: other_grades_oid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: sections_rotating; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE SEQUENCE other_grades_oid_seq
-START WITH 1
-INCREMENT BY 1
-NO MINVALUE
-NO MAXVALUE
-CACHE 1;
-
-
---
--- Name: other_grades_oid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE other_grades_oid_seq OWNED BY other_grades.oid;
-
---
--- Name: question_sequence; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE question_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: questions; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE questions (
-    question_id integer DEFAULT nextval('question_sequence'::regclass) NOT NULL,
-    rubric_id integer NOT NULL,
-    question_part_number integer NOT NULL,
-    question_number integer NOT NULL,
-    question_message character varying,
-    question_grading_note character varying,
-    question_total real NOT NULL,
-    question_extra_credit integer DEFAULT 0,
-    question_default character varying
+CREATE TABLE sections_rotating (
+    sections_rotating_id integer NOT NULL
 );
 
 
 --
--- Name: relationship_user_sequence; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE relationship_user_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: relationships_users; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE relationships_users (
-    relationship_user_id integer DEFAULT nextval('relationship_user_sequence'::regclass) NOT NULL,
-    user_id integer,
-    section_id integer
-);
-
-
---
--- Name: reset_sequence; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE reset_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: rubric_sequence; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE rubric_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: rubrics; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE rubrics (
-    rubric_id integer DEFAULT nextval('rubric_sequence'::regclass) NOT NULL,
-    rubric_due_date timestamp(6) without time zone,
-    rubric_parts_sep integer DEFAULT 0 NOT NULL,
-    rubric_late_days integer DEFAULT (-1) NOT NULL,
-    rubric_name character varying,
-    rubric_submission_id character varying NOT NULL,
-    rubric_parts_submission_id character varying DEFAULT ''::character varying NOT NULL
-);
-
-
---
--- Name: section_sequence; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE section_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: sections; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE sections (
-    section_id integer DEFAULT nextval('section_sequence'::regclass) NOT NULL,
-    section_title character varying(255),
-    section_is_enabled integer
-);
-
-
---
--- Name: session_sequence; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE session_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: student_sequence; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE student_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: students; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE students (
-    student_id integer DEFAULT nextval('student_sequence'::regclass) NOT NULL,
-    student_rcs character varying(255) NOT NULL,
-    student_last_name character varying(64),
-    student_first_name character varying(64),
-    student_section_id integer NOT NULL,
-    student_grading_id integer DEFAULT 1 NOT NULL,
-    student_manual integer DEFAULT 0 NOT NULL
-);
-
-
---
--- Name: test_sequence; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE test_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: tests; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE tests (
-    test_id integer DEFAULT nextval('test_sequence'::regclass) NOT NULL,
-    test_number integer,
-    test_type character varying NOT NULL,
-    test_code character varying(8),
-    test_max_grade numeric DEFAULT 100 NOT NULL,
-    test_curve numeric DEFAULT 0 NOT NULL,
-    test_questions integer DEFAULT 0 NOT NULL,
-    test_locked boolean DEFAULT false NOT NULL,
-    test_text_fields integer DEFAULT 0 NOT NULL
-);
-
-
---
--- Name: user_sequence; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE user_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: users; Type: TABLE; Schema: public; Owner: -
+-- Name: users; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE users (
-    user_id integer DEFAULT nextval('user_sequence'::regclass) NOT NULL,
-    user_firstname character varying(255),
-    user_lastname character varying(255),
-    user_rcs character varying(255),
-    user_email character varying(255),
-    user_is_administrator integer DEFAULT 0 NOT NULL,
-    user_is_developer integer DEFAULT 0 NOT NULL
+    user_id character varying NOT NULL,
+    user_firstname character varying NOT NULL,
+    user_lastname character varying NOT NULL,
+    user_email character varying NOT NULL,
+    user_group integer NOT NULL,
+    registration_section integer,
+    rotating_section integer,
+    manual_registration boolean DEFAULT false,
+    CONSTRAINT users_user_group_check CHECK (((user_group >= 0) AND (user_group <= 4)))
 );
 
 
 --
--- Name: verify_sequence; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: gc_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE verify_sequence
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+ALTER TABLE ONLY gradeable_component ALTER COLUMN gc_id SET DEFAULT nextval('gradeable_component_gc_id_seq'::regclass);
 
 
 --
--- TOC entry 2311 (class 2604 OID 25654)
--- Name: grades_other_id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: gd_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY grades_others ALTER COLUMN grades_other_id SET DEFAULT nextval('grades_others_grades_other_id_seq'::regclass);
-
-
---
--- TOC entry 2310 (class 2604 OID 25637)
--- Name: oid; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY other_grades ALTER COLUMN oid SET DEFAULT nextval('other_grades_oid_seq'::regclass);
+ALTER TABLE ONLY gradeable_data ALTER COLUMN gd_id SET DEFAULT nextval('gradeable_data_gd_id_seq'::regclass);
 
 
 --
--- Name: grades_academic_integrity_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: gradeable_component_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
-ALTER TABLE ONLY grades_academic_integrity
-    ADD CONSTRAINT grades_academic_integrity_pkey PRIMARY KEY (gai_id);
-
-
---
--- Name: grades_labs_copy_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades_tests
-    ADD CONSTRAINT grades_labs_copy_pkey PRIMARY KEY (grade_test_id);
+ALTER TABLE ONLY gradeable_component_data
+    ADD CONSTRAINT gradeable_component_data_pkey PRIMARY KEY (gc_id, gd_id);
 
 
 --
--- Name: grades_labs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: gradeable_component_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
-ALTER TABLE ONLY grades_labs
-    ADD CONSTRAINT grades_labs_pkey PRIMARY KEY (grade_lab_id);
-
-
---
--- Name: grades_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades
-    ADD CONSTRAINT grades_pkey PRIMARY KEY (grade_id);
+ALTER TABLE ONLY gradeable_component
+    ADD CONSTRAINT gradeable_component_pkey PRIMARY KEY (gc_id);
 
 
 --
--- Name: grades_questions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: gradeable_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
-ALTER TABLE ONLY grades_questions
-    ADD CONSTRAINT grades_questions_pkey PRIMARY KEY (grade_question_id);
-
-
---
--- Name: homework_grading_sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY homework_grading_sections
-    ADD CONSTRAINT homework_grading_sections_pkey PRIMARY KEY (hgs_id);
+ALTER TABLE ONLY gradeable_data
+    ADD CONSTRAINT gradeable_data_pkey PRIMARY KEY (gd_id);
 
 
 --
--- Name: labs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: gradeable_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
-ALTER TABLE ONLY labs
-    ADD CONSTRAINT labs_pkey PRIMARY KEY (lab_id);
-
-
---
--- Name: late_days_pk; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY late_days
-    ADD CONSTRAINT late_days_pk PRIMARY KEY (student_rcs, since_timestamp);
+ALTER TABLE ONLY gradeable
+    ADD CONSTRAINT gradeable_pkey PRIMARY KEY (g_id);
 
 
 --
--- Name: pk_config; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: grading_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
-ALTER TABLE ONLY config
-    ADD CONSTRAINT pk_config PRIMARY KEY (config_name);
+ALTER TABLE ONLY grading_registration
+    ADD CONSTRAINT grading_registration_pkey PRIMARY KEY (sections_registration_id, user_id);
 
 
 --
--- Name: pkey_ex_id; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: late_day_exceptions_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY late_day_exceptions
-    ADD CONSTRAINT pkey_ex_id PRIMARY KEY (ex_id);
+    ADD CONSTRAINT late_day_exceptions_pkey PRIMARY KEY (g_id, user_id);
 
 
 --
--- Name: questions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: late_days_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
-ALTER TABLE ONLY questions
-    ADD CONSTRAINT questions_pkey PRIMARY KEY (question_id);
-
---
--- TOC entry 2369 (class 2606 OID 25661)
--- Name: pkey_grades_other_id; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades_others
-ADD CONSTRAINT pkey_grades_other_id PRIMARY KEY (grades_other_id);
+ALTER TABLE ONLY late_days
+    ADD CONSTRAINT late_days_pkey PRIMARY KEY (user_id);
 
 
 --
--- TOC entry 2365 (class 2606 OID 25646)
--- Name: pkey_other_grades_id; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: sections_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
-ALTER TABLE ONLY other_grades
-ADD CONSTRAINT pkey_other_grades_id PRIMARY KEY (oid);
-
---
--- Name: relationships_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY relationships_users
-    ADD CONSTRAINT relationships_users_pkey PRIMARY KEY (relationship_user_id);
+ALTER TABLE ONLY sections_registration
+    ADD CONSTRAINT sections_registration_pkey PRIMARY KEY (sections_registration_id);
 
 
 --
--- Name: rubrics_name_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: sections_rotating_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
-ALTER TABLE ONLY rubrics
-    ADD CONSTRAINT rubrics_name_unique UNIQUE (rubric_name);
-
-
---
--- Name: rubrics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY rubrics
-    ADD CONSTRAINT rubrics_pkey PRIMARY KEY (rubric_id);
+ALTER TABLE ONLY sections_rotating
+    ADD CONSTRAINT sections_rotating_pkey PRIMARY KEY (sections_rotating_id);
 
 
 --
--- Name: rubrics_submission_id; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY rubrics
-    ADD CONSTRAINT rubrics_submission_id UNIQUE (rubric_submission_id);
-
-
---
--- Name: sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY sections
-    ADD CONSTRAINT sections_pkey PRIMARY KEY (section_id);
-
-
---
--- Name: students_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY students
-    ADD CONSTRAINT students_pkey PRIMARY KEY (student_rcs);
-
-
---
--- Name: students_rcs_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY students
-    ADD CONSTRAINT students_rcs_unique UNIQUE (student_rcs);
-
-
---
--- Name: tests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY tests
-    ADD CONSTRAINT tests_pkey PRIMARY KEY (test_id);
-
-
---
--- TOC entry 2367 (class 2606 OID 25648)
--- Name: unq_other_grades_id; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY other_grades
-ADD CONSTRAINT unq_other_grades_id UNIQUE (other_id);
-
-
---
--- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY users
@@ -750,260 +349,149 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: fki_grades_labs_fkey; Type: INDEX; Schema: public; Owner: -
+-- Name: electronic_gradeable_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-CREATE INDEX fki_grades_labs_fkey ON grades_labs USING btree (lab_id);
-
-
---
--- Name: fki_grades_questions_fkey; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX fki_grades_questions_fkey ON grades_questions USING btree (grade_id);
+ALTER TABLE ONLY electronic_gradeable
+    ADD CONSTRAINT electronic_gradeable_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
 
 
 --
--- Name: fki_grades_rubric_fkey; Type: INDEX; Schema: public; Owner: -
+-- Name: gradeable_component_data_gc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-CREATE INDEX fki_grades_rubric_fkey ON grades USING btree (rubric_id);
-
-
---
--- Name: fki_grades_student_fkey; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX fki_grades_student_fkey ON grades USING btree (student_rcs);
+ALTER TABLE ONLY gradeable_component_data
+    ADD CONSTRAINT gradeable_component_data_gc_id_fkey FOREIGN KEY (gc_id) REFERENCES gradeable_component(gc_id) ON DELETE CASCADE;
 
 
 --
--- Name: fki_grades_tests_fkey; Type: INDEX; Schema: public; Owner: -
+-- Name: gradeable_component_data_gd_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-CREATE INDEX fki_grades_tests_fkey ON grades_tests USING btree (test_id);
-
-
---
--- Name: fki_grades_tests_student_fkey; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX fki_grades_tests_student_fkey ON grades_tests USING btree (student_rcs);
+ALTER TABLE ONLY gradeable_component_data
+    ADD CONSTRAINT gradeable_component_data_gd_id_fkey FOREIGN KEY (gd_id) REFERENCES gradeable_data(gd_id) ON DELETE CASCADE;
 
 
 --
--- Name: fki_grades_user_fkey; Type: INDEX; Schema: public; Owner: -
+-- Name: gradeable_component_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-CREATE INDEX fki_grades_user_fkey ON grades USING btree (grade_user_id);
-
-
---
--- Name: fki_questions_fkey; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX fki_questions_fkey ON questions USING btree (rubric_id);
+ALTER TABLE ONLY gradeable_component
+    ADD CONSTRAINT gradeable_component_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
 
 
 --
--- Name: fki_relationships_users_section_fkey; Type: INDEX; Schema: public; Owner: -
+-- Name: gradeable_data_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-CREATE INDEX fki_relationships_users_section_fkey ON relationships_users USING btree (section_id);
-
-
---
--- Name: fki_relationships_users_user_fkey; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX fki_relationships_users_user_fkey ON relationships_users USING btree (user_id);
+ALTER TABLE ONLY gradeable_data
+    ADD CONSTRAINT gradeable_data_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
 
 
 --
--- Name: fkey_rubric_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: gradeable_data_gd_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gradeable_data
+    ADD CONSTRAINT gradeable_data_gd_grader_id_fkey FOREIGN KEY (gd_grader_id) REFERENCES users(user_id);
+
+
+--
+-- Name: gradeable_data_gd_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gradeable_data
+    ADD CONSTRAINT gradeable_data_gd_user_id_fkey FOREIGN KEY (gd_user_id) REFERENCES users(user_id);
+
+
+--
+-- Name: grading_registration_sections_registration_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grading_registration
+    ADD CONSTRAINT grading_registration_sections_registration_id_fkey FOREIGN KEY (sections_registration_id) REFERENCES sections_registration(sections_registration_id);
+
+
+--
+-- Name: grading_registration_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grading_registration
+    ADD CONSTRAINT grading_registration_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
+
+
+--
+-- Name: grading_rotating_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grading_rotating
+    ADD CONSTRAINT grading_rotating_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: grading_rotating_sections_rotating_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grading_rotating
+    ADD CONSTRAINT grading_rotating_sections_rotating_fkey FOREIGN KEY (sections_rotating) REFERENCES sections_rotating(sections_rotating_id) ON DELETE CASCADE;
+
+
+--
+-- Name: grading_rotating_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grading_rotating
+    ADD CONSTRAINT grading_rotating_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: late_day_exceptions_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY late_day_exceptions
-    ADD CONSTRAINT fkey_rubric_id FOREIGN KEY (ex_rubric_id) REFERENCES rubrics(rubric_id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT late_day_exceptions_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id);
 
 
 --
--- Name: fkey_student_rcs; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: late_day_exceptions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY late_day_exceptions
-    ADD CONSTRAINT fkey_student_rcs FOREIGN KEY (ex_student_rcs) REFERENCES students(student_rcs) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT late_day_exceptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
 
 
 --
--- TOC entry 2390 (class 2606 OID 25662)
--- Name: fkey_grades_other_oid; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades_others
-ADD CONSTRAINT fkey_grades_other_oid FOREIGN KEY (oid) REFERENCES other_grades(oid) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- TOC entry 2391 (class 2606 OID 25667)
--- Name: fkey_grades_other_rcs; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades_others
-ADD CONSTRAINT fkey_grades_other_rcs FOREIGN KEY (student_rcs) REFERENCES students(student_rcs) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- TOC entry 2392 (class 2606 OID 25672)
--- Name: fkey_grades_other_user; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades_others
-ADD CONSTRAINT fkey_grades_other_user FOREIGN KEY (grades_other_user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: grades_academic_integrity_rubric_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades_academic_integrity
-    ADD CONSTRAINT grades_academic_integrity_rubric_fkey FOREIGN KEY (rubric_id) REFERENCES rubrics(rubric_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: grades_academic_integrity_student; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades_academic_integrity
-    ADD CONSTRAINT grades_academic_integrity_student FOREIGN KEY (student_rcs) REFERENCES students(student_rcs) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: grades_labs_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades_labs
-    ADD CONSTRAINT grades_labs_fkey FOREIGN KEY (lab_id) REFERENCES labs(lab_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: grades_labs_student_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades_labs
-    ADD CONSTRAINT grades_labs_student_fkey FOREIGN KEY (student_rcs) REFERENCES students(student_rcs) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: grades_questions_grade_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades_questions
-    ADD CONSTRAINT grades_questions_grade_fkey FOREIGN KEY (grade_id) REFERENCES grades(grade_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: grades_questions_question_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades_questions
-    ADD CONSTRAINT grades_questions_question_fkey FOREIGN KEY (question_id) REFERENCES questions(question_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: grades_rubric_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades
-    ADD CONSTRAINT grades_rubric_fkey FOREIGN KEY (rubric_id) REFERENCES rubrics(rubric_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: grades_student_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades
-    ADD CONSTRAINT grades_student_fkey FOREIGN KEY (student_rcs) REFERENCES students(student_rcs) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: grades_tests_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades_tests
-    ADD CONSTRAINT grades_tests_fkey FOREIGN KEY (test_id) REFERENCES tests(test_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: grades_tests_students_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades_tests
-    ADD CONSTRAINT grades_tests_students_fkey FOREIGN KEY (student_rcs) REFERENCES students(student_rcs) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: grades_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY grades
-    ADD CONSTRAINT grades_user_fkey FOREIGN KEY (grade_user_id) REFERENCES users(user_id) ON UPDATE SET NULL ON DELETE SET NULL;
-
-
---
--- Name: homework_grading_sections_rubric_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY homework_grading_sections
-    ADD CONSTRAINT homework_grading_sections_rubric_id_fkey FOREIGN KEY (rubric_id) REFERENCES rubrics(rubric_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: homework_grading_sections_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY homework_grading_sections
-    ADD CONSTRAINT homework_grading_sections_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: late_days_student_rcs_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: late_days_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY late_days
-    ADD CONSTRAINT late_days_student_rcs_fkey FOREIGN KEY (student_rcs) REFERENCES students(student_rcs) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT late_days_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
 
 
 --
--- Name: questions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: users_registration_section_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY questions
-    ADD CONSTRAINT questions_fkey FOREIGN KEY (rubric_id) REFERENCES rubrics(rubric_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: relationships_users_section_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY relationships_users
-    ADD CONSTRAINT relationships_users_section_fkey FOREIGN KEY (section_id) REFERENCES sections(section_id);
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_registration_section_fkey FOREIGN KEY (registration_section) REFERENCES sections_registration(sections_registration_id);
 
 
 --
--- Name: relationships_users_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: users_rotating_section_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY relationships_users
-    ADD CONSTRAINT relationships_users_user_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES sections_rotating(sections_rotating_id);
 
 
 --
--- Name: student_section_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: public; Type: ACL; Schema: -; Owner: -
 --
 
-ALTER TABLE ONLY students
-    ADD CONSTRAINT student_section_fkey FOREIGN KEY (student_section_id) REFERENCES sections(section_id);
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --
