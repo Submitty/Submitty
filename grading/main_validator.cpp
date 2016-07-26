@@ -195,6 +195,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
         // PREPARE THE JSON DIFF FILE
         std::stringstream diff_path;
+
         diff_path << my_testcase.prefix() << "_" << j << "_diff.json";
         std::ofstream diff_stream(diff_path.str().c_str());
 
@@ -203,7 +204,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
           std::cout << "result->getGrade() = " << result->getGrade() << std::endl;
 	  assert (result->getGrade() >= 0.0 && result->getGrade() <= 1.0);
 
-          double deduction = my_testcase.test_case_grader_vec[j]->deduction;
+          double deduction = my_testcase.test_case_grader_vec[j].value("deduction",1.0); //->deduction;
           if (deduction < -0.5) {
             deduction = 1 / double(my_testcase.numFileGraders());
           }
@@ -223,7 +224,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         // JSON FOR THIS COMPARISON
         diff_vector.push_back("\t\t\t\t\t\"diff_id\":\"" + my_testcase.prefix() + "_" + std::to_string(j) + "_diff\"");
 
-	std::string dm = my_testcase.test_case_grader_vec[j]->display_mode();
+	std::string dm = my_testcase.test_case_grader_vec[j].value("display_mode",""); //->display_mode();
 	if (dm != "") {
 	  diff_vector.push_back("\t\t\t\t\t\"display_mode\":\""+dm+"\"");
 	}
@@ -231,11 +232,13 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         diff_vector.push_back("\t\t\t\t\t\"student_file\":\"" + my_testcase.filename(j) + "\"");
 
         std::string expected = "";
-        if (my_testcase.test_case_grader_vec[j] != NULL) {
-          expected = my_testcase.test_case_grader_vec[j]->getExpected();
-        }
+        //if (my_testcase.test_case_grader_vec[j] != NULL) {
+        std::cout << "DUMP" << my_testcase.test_case_grader_vec[j] << std::endl;
+        //expected = my_testcase.test_case_grader_vec[j].value("instructor_file", "MISSING INSTRUCTOR FILE"); //->getExpected();
+        expected = my_testcase.test_case_grader_vec[j].value("instructor_file", "");
+        //}
 
-
+        std::cout << "EXPECTED FILE IS " << expected << std::endl;
 
 	//#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
 	if (GLOBAL_replace_string_before != "") {

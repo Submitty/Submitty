@@ -25,10 +25,10 @@
 #include <cassert>
 #include <iomanip>
 #include <sys/resource.h>
-#include "tokenSearch.h"
-#include "myersDiff.h"
+//#include "tokenSearch.h"
+//#include "myersDiff.h"
 #include "testResults.h"
-#include "tokens.h"
+//#include "tokens.h"
 
 const std::string drmemory_path = "/usr/local/submitty/drmemory/bin/drmemory";
 
@@ -47,6 +47,8 @@ public:
 
 // =================================================================================
 // =================================================================================
+
+/*
 
 class TestCaseGrader {
 public:
@@ -114,8 +116,10 @@ private:
   std::string my_display_mode;
 };
 
+*/
 
 // =================================================================================
+
 
 
 std::string rlimit_name_decoder(int i);
@@ -243,7 +247,8 @@ public:
   static TestCase MakeTestCase   ( const std::string &title, const std::string &details,
 				   const std::string &command,
 				   const TestCasePoints &tcp,
-				   std::vector<TestCaseGrader*> tcc,
+				   //std::vector<TestCaseGrader*> tcc,
+				   std::vector<nlohmann::json> graders,
 				   const std::string &filename, //  = "",
                                    nlohmann::json test_case_limits) { // = nlohmann::json() ) {
     TestCase answer;
@@ -252,8 +257,8 @@ public:
     answer._command = command;
     assert (answer._command != "");
     answer._test_case_points = tcp;
-    assert (tcc.size() >= 1); // && tcc.size() <= 4);
-    answer.test_case_grader_vec = tcc; 
+    assert (graders.size() >= 1); // && tcc.size() <= 4);
+    answer.test_case_grader_vec = graders;
     answer._filenames.push_back(filename);
     answer.view_file_results = true;
     answer._test_case_limits = test_case_limits;
@@ -319,7 +324,7 @@ public:
 
   std::string raw_filename (int i) const {
     assert (i >= 0 && i < numFileGraders());
-    return test_case_grader_vec[i]->filename;
+    return test_case_grader_vec[i].value("filename","MISSING FILENAME");
   }
 
   std::string prefix() const {
@@ -330,7 +335,7 @@ public:
 
   std::string description (int i) const {
     assert (i >= 0 && i < numFileGraders());
-    return test_case_grader_vec[i]->description;
+    return test_case_grader_vec[i].value("description", raw_filename(i)); //"MISSING DESCRIPTION");
   }
   int points () const {
     return _test_case_points.points;
@@ -376,7 +381,7 @@ private:
 
   TestCasePoints _test_case_points;
 public:
-  std::vector<TestCaseGrader*> test_case_grader_vec;
+  std::vector<nlohmann::json> test_case_grader_vec;
 private:
   bool FILE_EXISTS;
   bool COMPILATION;
@@ -387,6 +392,13 @@ private:
 
 
 std::string getAssignmentIdFromCurrentDirectory(std::string);
+
+
+
+
+bool getFileContents(const std::string &filename, std::string &file_contents);
+bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::string &message);
+bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string &instructor_file_contents, std::string &message);
 
 
 // FIXME: file organization should be re-structured

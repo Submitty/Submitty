@@ -1,6 +1,17 @@
 #include <unistd.h>
 #include "TestCase.h"
 #include "JUnitGrader.h"
+#include "myersDiff.h"
+
+
+#include "tokenSearch.h"
+
+// FIXME should be configurable within the homework, but should not exceed what is reasonable to myers diff
+
+//#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 50   // in characters  (approx 1000 lines with 50 characters per line)
+#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 60   // in characters  (approx 1000 lines with 60 characters per line)
+#define OTHER_MAX_FILE_SIZE      1000 * 100  // in characters  (approx 1000 lines with 100 characters per line)
+
 
 
 std::string GLOBAL_replace_string_before = "";
@@ -8,6 +19,132 @@ std::string GLOBAL_replace_string_after = "";
 
 
 int TestCase::next_test_case_id = 1;
+
+
+bool getFileContents(const std::string &filename, std::string &file_contents) {
+  /*
+  //#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
+  if (GLOBAL_replace_string_before != "") {
+    std::cout << "BEFORE " << expected << std::endl;
+    while (1) {
+      int location = expected.find(GLOBAL_replace_string_before);
+      if (location == std::string::npos) 
+	break;
+      expected.replace(location,GLOBAL_replace_string_before.size(),GLOBAL_replace_string_after);
+    }
+    std::cout << "AFTER  " << expected << std::endl;
+  }
+  //#endif
+  */
+
+
+
+  std::ifstream file(filename);
+  if (!file.good()) { return false; }
+  file_contents = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+  std::cout << "file contents size = " << file_contents.size() << std::endl;
+  return true;
+}
+
+
+bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::string &message) {
+  std::string filename = j.value("filename","");
+  if (filename == "") {
+    message += "ERROR!  STUDENT FILENAME MISSING<br>";
+    return false;
+  }
+  std::string prefix = tc.prefix() + "_";
+  if (!getFileContents(prefix+filename,student_file_contents)) {
+    message += "ERROR!  Could not open student file: '" + prefix+filename + "'<br>";
+    return false;
+  }
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
+    message += "ERROR!  Student file '" + prefix+filename + "' too large for grader<br>";
+    return false;
+  }
+  return true;
+}
+
+
+bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string &instructor_file_contents, std::string &message) {
+  std::string filename = j.value("instructor_file","");
+  if (filename == "") {
+    message += "ERROR!  INSTRUCTOR FILENAME MISSING<br>";
+    return false;
+  }
+  if (!getFileContents(filename,instructor_file_contents)) {
+    message += "ERROR!  Could not open instructor file: '" + filename + "'<br>";
+    return false;
+  }
+  if (instructor_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
+    message += "ERROR!  Instructor expected file '" + filename + "' too large for grader<br>";
+    return false;
+  }
+  return true;
+}
+
+
+
+//TestResults* TestCaseTokens_doit(const TestCase& tc, const nlohmann::json& j);
+
+
+TestResults* json_grader_doit(const TestCase& tc, const nlohmann::json& j) {
+
+
+  std::string method = j.value("method","MISSING METHOD");
+  float deduction = j.value("deduction",1.0); ///float(num_graders));
+  std::string filename = j.value("filename","MISSING FILENAME");
+  //std::string description = j.value("description",filename);
+  //std::string instructor_file = j.value("instructor_file","");
+
+  
+  std::string prefix = tc.prefix();
+
+  //TestCaseGrader *g;
+
+  if (method == "JUnitTestGrader") {
+    int num_tests = j.value("num_tests",1);
+    TestCaseJUnit *g = TestCaseJUnit::JUnitTestGrader(filename,num_tests,deduction); 
+    return g->doit(prefix);
+    
+
+  } else if (method == "EmmaInstrumentationGrader") {
+    TestCaseJUnit *g = TestCaseJUnit::EmmaInstrumentationGrader(filename,deduction); 
+    return g->doit(prefix);
+  
+
+  } else if (method == "MultipleJUnitTestGrader") {
+    TestCaseJUnit *g = TestCaseJUnit::MultipleJUnitTestGrader(filename,deduction); 
+    return g->doit(prefix);
+    
+  } else if (method == "EmmaCoverageReportGrader") {
+    float coverage_threshold = j.value("coverage_threshold",100);
+    TestCaseJUnit *g = TestCaseJUnit::EmmaCoverageReportGrader(filename,coverage_threshold,deduction); 
+    return g->doit(prefix);
+    
+  } else if (method == "searchToken") {
+    //TestCaseTokens *g = new TestCaseTokens(&searchToken,filename,description,data_vec,deduction);
+    return searchToken_doit(tc,j); //(&searchToken,filename,description,data_vec,deduction);
+    
+  } else {
+    TestResults* (*cmp) ( const std::string&, const std::string& ) = NULL;
+    if      (method == "myersDiffbyLinebyChar")  return myersDiffbyLinebyChar_doit(tc,j);
+    else if (method == "myersDiffbyLinebyWord")  return myersDiffbyLinebyWord_doit(tc,j);
+    else if (method == "myersDiffbyLine")        return myersDiffbyLine_doit(tc,j);
+    else if (method == "myersDiffbyLineNoWhite") return myersDiffbyLineNoWhite_doit(tc,j);
+    else if (method == "diffLineSwapOk")         return diffLineSwapOk_doit(tc,j);
+    else if (method == "warnIfNotEmpty")         return warnIfNotEmpty_doit(tc,j);
+    else if (method == "warnIfEmpty")            return warnIfEmpty_doit(tc,j); 
+    else if (method == "errorIfNotEmpty")        return errorIfNotEmpty_doit(tc,j); 
+    else if (method == "errorIfEmpty")           return errorIfEmpty_doit(tc,j);
+    else {
+      std::cout << "UNKNOWN METHOD " << method << std::endl;
+      assert (0);
+    }
+    //g = new TestCaseComparison(cmp,filename,description,instructor_file,deduction);
+  }
+
+}
 
 
 
@@ -27,71 +164,37 @@ TestCase TestCase::MakeTestCase (nlohmann::json j) {
                            j.value("resource_limits", nlohmann::json()));
   } else {
     assert (type == "DEFAULT");
-    std::vector<TestCaseGrader*> graders;
+    std::vector<nlohmann::json> json_graders;
     nlohmann::json::iterator itr = j.find("validation");
     assert (itr != j.end());
     int num_graders = itr->size();
     for (nlohmann::json::iterator itr2 = (itr)->begin(); itr2 != (itr)->end(); itr2++) {
-      std::string method = itr2->value("method","MISSING METHOD");
-      float deduction = itr2->value("deduction",1.0/float(num_graders));
-      std::string filename = itr2->value("filename","MISSING FILENAME");
-      std::string description = itr2->value("description",filename);
-      std::string instructor_file = itr2->value("instructor_file","");
-      std::vector<std::string> data_vec;
-      nlohmann::json::iterator data_json = itr2->find("data");
-      if (data_json != itr2->end()) {
-        for (int i = 0; i < data_json->size(); i++) {
-          data_vec.push_back((*data_json)[i]);
+      nlohmann::json j = *itr2;
+      std::string method = j.value("method","");
+      std::string description = j.value("description","");
+      if (description=="") {
+        if (method == "EmmaInstrumentationGrader") {
+          j["description"] = "JUnit EMMA instrumentation output";
+        } else if (method =="JUnitTestGrader") {
+          j["description"] = "JUnit output";
+        } else if (method =="EmmaCoverageReportGrader") {
+          j["description"] = "JUnit EMMA coverage report";
+        } else if (method =="MultipleJUnitTestGrader") {
+          j["description"] = "TestRunner output";
         }
       }
-      
-
-
-      if (method == "JUnitTestGrader") {
-        int num_tests = itr2->value("num_tests",1);
-        graders.push_back(TestCaseJUnit::JUnitTestGrader(filename,num_tests,deduction)); 
-
-      } else if (method == "EmmaInstrumentationGrader") {
-        graders.push_back(TestCaseJUnit::EmmaInstrumentationGrader(filename,deduction)); 
-        
-      } else if (method == "MultipleJUnitTestGrader") {
-        graders.push_back(TestCaseJUnit::MultipleJUnitTestGrader(filename,deduction)); 
-
-      } else if (method == "EmmaCoverageReportGrader") {
-        float coverage_threshold = itr2->value("coverage_threshold",100);
-        graders.push_back(TestCaseJUnit::EmmaCoverageReportGrader(filename,coverage_threshold,deduction)); 
-
-      } else if (method == "searchToken") {
-        graders.push_back(new TestCaseTokens(&searchToken,filename,description,data_vec,deduction));
-        
-      } else {
-        TestResults* (*cmp) ( const std::string&, const std::string& ) = NULL;
-        if      (method == "myersDiffbyLinebyChar")  cmp = &myersDiffbyLinebyChar;
-        else if (method == "myersDiffbyLinebyWord")  cmp = &myersDiffbyLinebyWord;
-        else if (method == "myersDiffbyLine")        cmp = &myersDiffbyLine;
-        else if (method == "myersDiffbyLineNoWhite") cmp = &myersDiffbyLineNoWhite;
-        else if (method == "diffLineSwapOk")         cmp = &diffLineSwapOk;
-        else if (method == "warnIfNotEmpty")         { cmp = &warnIfNotEmpty; deduction = 0.0; }
-        else if (method == "warnIfEmpty")            { cmp = &warnIfEmpty; deduction = 0.0; }
-        else if (method == "errorIfNotEmpty")         { cmp = &errorIfNotEmpty; } //deduction = 1.0; }
-        else if (method == "errorIfEmpty")            { cmp = &errorIfEmpty; } //deduction = 1.0; }
-        else {
-          std::cout << "UNKNOWN METHOD " << method << std::endl;
-          assert (0);
-        }
-        graders.push_back(new TestCaseComparison(cmp,filename,description,instructor_file,deduction));
-      }
+      json_graders.push_back(j);
     }
+
     bool hidden = j.value("hidden",false);
     bool extra_credit = j.value("extra_credit",false);
     return MakeTestCase(j.value("title","TITLE MISSING"),
                         j.value("details","DETAILS MISSING"),
                         j.value("command","COMMAND MISSING"),
                         TestCasePoints(j.value("points",0),hidden,extra_credit),
-                        graders,
+                        json_graders,
                         "",
                         j.value("resource_limits",nlohmann::json()));
-                        //{});
   }
 }
 
@@ -120,7 +223,8 @@ TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {
   std::string expected = "";
   assert (test_case_grader_vec[j] != NULL);
   //  if (test_case_grader[j] != NULL) {
-  expected = test_case_grader_vec[j]->getExpected();
+  //expected = test_case_grader_vec[j]->getExpected();
+  expected = test_case_grader_vec[j].value("instructor_file",""); //MISSING INSTRUCTOR FILE");
     //}
 
   std::cout << "IN TEST CASE " << std::endl;
@@ -149,18 +253,16 @@ TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {
     helper_message += tmp.str();
     ok_to_compare = false;
   }
-  return test_case_grader_vec[j]->doit(prefix());
+  //return test_case_grader_vec[j]->doit(prefix());
+
+  std::cout << "PREFIX IS '" << prefix() << "'" << std::endl;
+  return json_grader_doit(*this,test_case_grader_vec[j]); //,prefix());
 }
 
 
-// FIXME should be configurable within the homework, but should not exceed what is reasonable to myers diff
-
-//#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 50   // in characters  (approx 1000 lines with 50 characters per line)
-#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 60   // in characters  (approx 1000 lines with 60 characters per line)
-#define OTHER_MAX_FILE_SIZE      1000 * 100  // in characters  (approx 1000 lines with 100 characters per line)
 
 
-
+/*
 TestResults* TestCaseComparison::doit(const std::string &prefix) {
 
 
@@ -225,11 +327,31 @@ TestResults* TestCaseComparison::doit(const std::string &prefix) {
   //return test_case_grader[j]->cmp_output (s,e);
   return cmp_output (s,e);
 }
+*/
+
+/*
+
+TestResults* TestCaseTokens_doit(nlohmann::json j, const std::string &prefix) {
+
+  std::string message;
+  std::string student_file_contents;
+  if (!openStudentFile(tc,j,student_file_contents,message)) { 
+    return new TestResults(0.0,message);
+  }
 
 
 
-TestResults* TestCaseTokens::doit(const std::string &prefix) {
-
+  float deduction = j.value("deduction",1.0); ///float(num_graders));
+  std::string filename = j.value("filename","MISSING FILENAME");
+  std::string description = j.value("description",filename);
+  std::string instructor_file = j.value("instructor_file","");
+  std::vector<std::string> data_vec;
+  nlohmann::json::iterator data_json = j.find("data");
+  if (data_json != j.end()) {
+    for (int i = 0; i < data_json->size(); i++) {
+      data_vec.push_back((*data_json)[i]);
+    }
+  }
 
   std::ifstream student_instr((prefix+"_"+filename).c_str());
 
@@ -248,13 +370,14 @@ TestResults* TestCaseTokens::doit(const std::string &prefix) {
   }
 
   //return test_case_grader[j]->cmp_output (s,e);
-  return token_grader(s,tokens);
+  //return token_grader(s,tokens);
+  return token_grader(s,data_vec); //tokens);
 }
+*/
 
 
-
-
-TestResults* TestCaseCustom::doit(const std::string &prefix) {
+/*
+TestResults* TestCaseCustom_doit(nlohmann::json j,const std::string &prefix) {
 
 
   std::ifstream student_instr((prefix+"_"+filename).c_str());
@@ -302,7 +425,7 @@ TestResults* TestCaseCustom::doit(const std::string &prefix) {
   return new TestResults(answer,replaced);
 
 }
-
+*/
 
 
 
