@@ -53,38 +53,38 @@ print <<<HTML
         <table class="table table-bordered striped-table" id="labsTable" style=" border: 1px solid #AAA;">
             <thead style="background: #E1E1E1;">
                 <tr>
-                    <th>RCS ID</th>
+                    <th>Student ID</th>
                     <th>First Name</th>
                     <th>Last Name</th>
-                    <th>Grading Section</th>
+                    <th>Rotating Section</th>
                 </tr>
             </thead>
 HTML;
 
-Database::query("SELECT * FROM students ORDER BY student_section_id, student_rcs");
+Database::query("SELECT * FROM users WHERE user_group=? ORDER BY registration_section, user_id", array(4));
 $last_section = -1;
 foreach(Database::rows() as $student) {
-    if ($student['student_section_id'] != $last_section) {
+    if ($student['registration_section'] != $last_section) {
         if ($last_section != -1) {
             print "            </tbody>\n";
         }
         print <<<HTML
             <tr class="info">
-                <td colspan="4" style="text-align:center;" id="section-{$student['student_section_id']}">
-                        Students Enrolled in Section {$student["student_section_id"]}
+                <td colspan="4" style="text-align:center;" id="section-{$student['registration_section']}">
+                        Students Enrolled in Registration Section {$student["registration_section"]}
                 </td>
             </tr>
             <tbody>
 HTML;
-        $last_section = $student['student_section_id'];
+        $last_section = $student['registration_section'];
     }
 
     print <<<HTML
                 <tr>
-                    <td>{$student['student_rcs']}</td>
-                    <td>{$student['student_first_name']}</td>
-                    <td>{$student['student_last_name']}</td>
-                    <td>{$student['student_grading_id']}</td>
+                    <td>{$student['user_id']}</td>
+                    <td>{$student['user_firstname']}</td>
+                    <td>{$student['user_lastname']}</td>
+                    <td>{$student['rotating_section']}</td>
                 </tr>
 HTML;
 }

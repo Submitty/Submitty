@@ -48,7 +48,7 @@ class TestCaseJUnit : public TestCaseGrader {
   // the actual constructor is private
   TestCaseJUnit(const std::string& file, const std::string &description, float points_frac) : 
     TestCaseGrader(file,description) { 
-    points_fraction=points_frac;
+    deduction=points_frac;
     num_junit_tests = -1;
     coverage_threshhold = -1;
   }

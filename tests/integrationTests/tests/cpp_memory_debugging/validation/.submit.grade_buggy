@@ -1,13 +1,13 @@
 Grade for: testuser
   submission#: 1
-  Test  1:Compilation of Submitted Files (for Dr. Memory): g++ -m32 -g -Wall *cpp -o submitted_32.out  2 /  2
-  Test  2:Compilation of Submitted Files (for Valgrind): g++ -g -Wall *cpp -o submitted.out  2 /  2
-  Test  3:Under Dr Memory                 2 /  5
-  Test  4:Under Valgrind                  2 /  5
+  Test  1:Compilation of Submitted Files (for Dr. Memory): g++ -m32 -g -Wall *cpp  2 /  2
+  Test  2:Compilation of Submitted Files (for Valgrind): g++ -g -Wall *cpp  2 /  2
+  Test  3:Under Dr Memory                 0 /  5
+  Test  4:Under Valgrind                  0 /  5
 Automatic extra credit (w/o hidden):               + 0 points
-Automatic grading total (w/o hidden):              8 / 14
+Automatic grading total (w/o hidden):              4 / 14
 Max possible hidden automatic grading points:      0
 Automatic extra credit:                            + 0 points
-Automatic grading total:                           8 / 14
+Automatic grading total:                           4 / 14
 Remaining points to be graded by TA:               0
 Max points for assignment (excluding extra credit):14

@@ -167,7 +167,8 @@ HTML;
                             </tr>
 HTML;
         $params = array($test_row['test_id'],intval($section["section_id"]));
-        $db->query("SELECT s.*,gt.grade_test_value,gt.grade_test_questions,gt.grade_test_text FROM students AS s LEFT JOIN (SELECT * FROM grades_tests WHERE test_id=?) AS gt ON s.student_rcs=gt.student_rcs WHERE s.student_section_id=? ORDER BY student_rcs ASC", $params);
+        $db->query("SELECT s.*,gt.grade_test_value,gt.grade_test_questions,gt.grade_test_text FROM students AS s LEFT JOIN (SELECT * FROM grades_tests WHERE test_id=?) 
+                    AS gt ON s.student_rcs=gt.student_rcs WHERE s.student_section_id=? ORDER BY student_rcs ASC", $params);
         foreach($db->rows() as $row)
         {
             $student_info = $row;

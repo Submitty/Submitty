@@ -73,6 +73,7 @@ function addFilesFromInput(part){
 	for(var i=0; i<filestream.length; i++){
 		addFile(filestream[i], part); // folders will not be selected in file browser, no need for check
 	}
+	$('#input_file' + part).val(""); // clear the input type='file'
 }
 
 // Check for duplicate file names. This function returns an array.
@@ -126,14 +127,14 @@ function addFile(file, part){
 		addLabel(file.name, (file.size/1024).toFixed(2), part, false);
 	}
 	else if(i[0] == 0){	// file already selected
-		if(confirm("Note: " + file_array[part-1][i[1]].name + "is already selected. Do you want to replace it?")){
+		if(confirm("Note: " + file_array[part-1][i[1]].name + " is already selected. Do you want to replace it?")){
 			file_array[part-1].splice(i[1], 1, file);
 			removeLabel(file.name, part);
 			addLabel(file.name, (file.size/1024).toFixed(2), part, false);
 		}
 	}
 	else{	// file in previous submission
-		if(confirm("Note: " + previous_files[part-1][i[1]] + "was in your previous submission. Do you want to replace it?")){
+		if(confirm("Note: " + previous_files[part-1][i[1]] + " was in your previous submission. Do you want to replace it?")){
 			file_array[part-1].push(file);
 			previous_files[part-1].splice(i[1], 1);
 			removeLabel(file.name, part);
@@ -267,15 +268,14 @@ function submit(url, csrf_token, svn_checkout, loc){
 	}
 	// Files from previous submission
 	files_to_upload.append('previous_files', JSON.stringify(previous_files));
-
-	// xhr
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", url, true);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            window.location.href = loc;
-        }
-    };
-	xhr.send(files_to_upload);
-	// TODO: Maybe rewrite file upload in jQuery AJAX?
+	$.ajax({
+		url: url,
+		data: files_to_upload,
+		processData: false,
+		contentType: false,
+		type: 'POST',
+		success: function(data) {
+			window.location.href = loc;
+		}
+	});
 }

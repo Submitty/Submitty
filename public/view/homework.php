@@ -107,20 +107,7 @@ if($assignment_version <= 0 && $active_version != $assignment_version){
     }
     return true;
   }
-  // Go through diff queue and run viewer
-  loadDiffQueue();
 
-
-  // Set time between asking server if the homework has been graded
-  // Last argument in ms
-  // Currently at 1 seconds = 1000ms
-  // Previously seconds = 5000ms
-
-  <?php
-  if ($assignment_version_in_grading_queue || $active_version_in_grading_queue) {
-    echo 'init_refresh_on_update("'.$semester.'", "'.$course.'", "'.$assignment_id.'", "'.$assignment_version.'", "'.$active_version.'", "'.!$assignment_version_in_grading_queue.'", "'.!$active_version_in_grading_queue.'", 1000);';
-  }
-  ?>
   </script>
 
 </head>
@@ -559,6 +546,23 @@ echo '</div>'; // end panel-body
 ?>
 
 </div> <!-- HWsubmission -->
+
+  <script type="text/javascript">;
+  // Go through diff queue and run viewer
+  loadDiffQueue();
+
+
+  // Set time between asking server if the homework has been graded
+  // Last argument in ms
+  // Currently at 1 seconds = 1000ms
+  // Previously seconds = 5000ms
+
+  <?php
+  if ($assignment_version_in_grading_queue || $active_version_in_grading_queue) {
+    echo 'init_refresh_on_update("'.$semester.'", "'.$course.'", "'.$assignment_id.'", "'.$assignment_version.'", "'.$active_version.'", "'.!$assignment_version_in_grading_queue.'", "'.!$active_version_in_grading_queue.'", 1000);';
+  }
+  ?>
+</script>
 
 </body>
 </html>

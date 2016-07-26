@@ -28,7 +28,7 @@ def initialize(test):
         pass
 
     subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.h"),
+        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
         os.path.join(test.testcase_path, "assignment_config")])
 
 

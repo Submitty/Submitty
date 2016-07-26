@@ -53,27 +53,32 @@ print <<<HTML
         <table class="table table-bordered striped-table" id="labsTable" style=" border: 1px solid #AAA;">
             <thead style="background: #E1E1E1;">
                 <tr>
-                    <th>RCS ID</th>
+                    <th>ID</th>
                     <th>First Name</th>
                     <th>Last Name</th>
-                    <th>Sections</th>
+                    <th>Registration Sections</th>
                     <th>Administrator</th>
                 </tr>
             </thead>
             <tbody>
 HTML;
 
-Database::query("SELECT u.*, array_agg(r.section_id) as sections FROM users as u LEFT JOIN (SELECT user_id, section_id FROM relationships_users ORDER BY user_id, section_id) as r ON u.user_id = r.user_id GROUP BY u.user_id");
+Database::query("SELECT * FROM users WHERE user_group <=?", array(3));
 foreach (Database::rows() as $user) {
-    $user['sections'] = \lib\DatabaseUtils::fromPGToPHPArray($user['sections']);
-    $user['sections'] = implode(", ", $user['sections']);
+    $is_admin = $user['user_group'] <=1;
+    if ($user['user_group'] <=1){
+        $sections = 'All';
+    }
+    else{
+        $sections = '';
+    }
     print <<<HTML
                 <tr>
-                    <td>{$user['user_rcs']}</td>
+                    <td>{$user['user_id']}</td>
                     <td>{$user['user_firstname']}</td>
                     <td>{$user['user_lastname']}</td>
-                    <td>{$user['sections']}</td>
-                    <td>{$user['user_is_administrator']}</td>
+                    <td>{$sections}</td>
+                    <td>{$is_admin}</td>
                 </tr>
 HTML;
 }
