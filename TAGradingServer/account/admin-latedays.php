@@ -398,14 +398,20 @@ class local_view {
 //View class for admin-latedays-exceptions.php
 
 	//Properties
-	private $utf8_styled;
-	private $utf8_checkmark;
-	static private $view;  //HTML data to be sent to browser
+	//Class constants to represent unicode styled X and checkmark symbols.
+	const UTF8_STYLED_X = "&#x2718";
+	const UTF8_CHECKMARK = "&#x2714";
+
+	//HTML data to be sent to browser
+	static private $view;
 	
 	//Constructor
 	public function __construct() {
-		$this->utf8_styled_x  = "&#x2718";
-		$this->utf8_checkmark = "&#x2714";
+		//Class constants cannot be expanded in strings with {}
+		//So they are copied here for LOCAL use.
+		$utf8_styled_x  = self::UTF8_STYLED_X;
+		$utf8_checkmark = self::UTF8_CHECKMARK;
+
 		self::$view = array();
 		
 		self::$view['head'] = <<<HTML
@@ -425,27 +431,27 @@ HTML;
 
 		self::$view['bad_upload'] = <<<HTML
 <p style="margin:0; padding-bottom:20px;"><em style="color:red; font-weight:bold; font-style:normal;">
-{$this->utf8_styled_x} Something is wrong with the CSV upload.  No update done.</em>
+{$utf8_styled_x} Something is wrong with the CSV upload.  No update done.</em>
 HTML;
 
 		self::$view['student_not_found'] = <<<HTML
 <p style="margin:0; padding-bottom:20px;"><em style="color:red; font-weight:bold; font-style:normal;">
-{$this->utf8_styled_x} Student not found.</em>
+{$utf8_styled_x} Student not found.</em>
 HTML;
 
 		self::$view['invalid_datestamp'] = <<<HTML
 <p style="margin:0; padding-bottom:20px;"><em style="color:red; font-weight:bold; font-style:normal;">
-{$this->utf8_styled_x} Invalid date or timestamp not properly formatted.</em>
+{$utf8_styled_x} Invalid date or timestamp not properly formatted.</em>
 HTML;
 
 		self::$view['late_days_not_integer'] = <<<HTML
 <p style="margin:0; padding-bottom:20px;"><em style="color:red; font-weight:bold; font-style:normal;">
-{$this->utf8_styled_x} Late days must be an integer at least 0.</em>
+{$utf8_styled_x} Late days must be an integer at least 0.</em>
 HTML;
 
 		self::$view['upsert_done'] = <<<HTML
 <p style="margin:0; padding-bottom:20px;"><em style="color:green; font-weight:bold; font-style:normal;">
-{$this->utf8_checkmark} Late days are updated.</em>
+{$utf8_checkmark} Late days are updated.</em>
 HTML;
 
 		self::$view['form'] = <<<HTML
