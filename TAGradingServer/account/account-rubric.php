@@ -476,7 +476,7 @@ if(isset($_GET["individual"])) {
     $output .= <<<HTML
                         <tr style="background-color:#EEE;">
                             <th style="padding-left: 1px; padding-right: 0px; border-bottom:5px #FAA732 solid;"><i class="icon-time" id="progress-icon" style="margin-top: 2px;"></th>
-                            <th style="width:40px; border-bottom:5px #FAA732 solid;">Part</th>
+                            <!-- <th style="width:40px; border-bottom:5px #FAA732 solid;">Part</th> -->
                             <th style="border-bottom:5px #FAA732 solid;" colspan="2">Questions</th>
                         </tr>
 HTML;
