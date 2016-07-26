@@ -32,7 +32,7 @@ if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name
 //if no file upload, examine Student ID and Late Day input fields.	
 } else if (isset($_POST['student_id']) && ($_POST['student_id'] !== "") &&
 		   isset($_POST['late_days'])  && ($_POST['late_days']  !== "") &&
-		   isset($_POST['timestamp'])) {
+		   isset($_POST['datestamp'])  && ($_POST['datestamp']  !== "")) {
 
 	//Validate that late days entered is an integer >= 0.
 	//Negative values will fail ctype_digit test.
@@ -40,7 +40,10 @@ if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name
 		$state = 'late_days_not_integer';
 	}
 	
-	//TODO: timestamp validation
+	//Timestamp validation
+	if (!validate_timestamp($_POST['datestamp'])) {
+		$state = 'invalid_datestamp';
+	}
 	
 	//Validate that student does exist in DB (per rcs_id)
 	//"Student Not Found" error has precedence over late days being non-numerical
@@ -53,7 +56,7 @@ if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name
 	if (empty($state)) {
 
 		//upsert argument requires 2D array.
-		upsert(array(array($_POST['student_id'], $_POST['timestamp'], intval($_POST['late_days']))));
+		upsert(array(array($_POST['student_id'], $_POST['datestamp'], intval($_POST['late_days']))));
 		$state = 'upsert_done';
 	}
 }
@@ -116,28 +119,10 @@ function parse_and_validate_csv($csv_file, &$data) {
 		
 		//$fields[1] represents timestamp in the format (MM/DD/YY),
 		//(MM/DD/YYYY), (MM-DD-YY), or (MM-DD-YYYY).
-		
-		//This bizzare switch-case style actually does work in PHP.
-		//This operates as a form of "white list" of valid patterns.
-		//Don't try this switch/case code style in C/C++.
-		$tmp = array(	DateTime::createFromFormat('m-d-Y', $fields[1]),
-						DateTime::createFromFormat('m/d/Y', $fields[1]),
-						DateTime::createFromFormat('m-d-y', $fields[1]),
-						DateTime::createFromFormat('m/d/y', $fields[1])	);
-		
-		
-		switch (true) {
-		case ($tmp[0] && $tmp->format('m-d-Y') === $fields[1]):
-		case ($tmp[1] && $tmp->format('m/d/Y') === $fields[1]):
-		case ($tmp[2] && $tmp->format('m-d-y') === $fields[1]):
-		case ($tmp[3] && $tmp->format('m/d/y') === $fields[1]):
-			//If process windws up here, validation passed.
-			//"Fall out" of this block to continue.
-		default:
-			//If process winds up here, validation failed -- bail out!
+		if (!validate_timestamp($fields[1])) {
 			$data = null;
 			return false;
-		}
+		}		
 		
 		//$fields[2]: Number of late days must be an integer >= 0
 		if (!ctype_digit($fields[2])) {
@@ -154,6 +139,41 @@ function parse_and_validate_csv($csv_file, &$data) {
 }
 
 /* END FUNCTION parse_and_validate_csv() ==================================== */
+
+function validate_timestamp($timestamp) {
+//IN:  $timestamp is actually a date string, not a Uix timestamp.
+//OUT: TRUE when date string conforms to an accetpable pattern
+//      FALSE otherwise.
+//PURPOSE: Validate string to (1) be a valid date and (2) conform to specific
+//         date patterns.
+//         'm-d-Y' -> mm-dd-yyyy
+//         'm-d-y' -> mm-dd-yy
+//         'm/d/Y' -> mm/dd/yyyy
+//         'm/d/y' -> mm/dd/yy
+
+	//This bizzare/inverted switch-case block actually does work in PHP.
+	//This operates as a form of "white list" of valid patterns.
+	//This checks to ensure a date pattern is acceptable AND the date actually
+	//exists.  e.g. "02-29-2016" is valid, while "06-31-2016" is not.
+	//That is, 2016 is a leap year, but June has only 30 days.
+	$tmp = array(	DateTime::createFromFormat('m-d-Y', $timestamp),
+					DateTime::createFromFormat('m/d/Y', $timestamp),
+					DateTime::createFromFormat('m-d-y', $timestamp),
+					DateTime::createFromFormat('m/d/y', $timestamp)
+				);
+
+	switch (true) {
+	case ($tmp[0] && $tmp[0]->format('m-d-Y') === $timestamp):
+	case ($tmp[1] && $tmp[1]->format('m/d/Y') === $timestamp):
+	case ($tmp[2] && $tmp[2]->format('m-d-y') === $timestamp):
+	case ($tmp[3] && $tmp[3]->format('m/d/y') === $timestamp):
+		return true;
+	default:
+		return false;
+	}
+}
+
+/* END FUNCTION validate_timestamp() ==================================== */
 
 function verify_student_in_db($student) {
 //IN:  RCS student ID
@@ -174,7 +194,7 @@ SQL;
 SELECT COUNT(1)
 FROM users
 WHERE user_id=?
-AND	user_group=0
+AND	user_group=4
 SQL;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
 
@@ -188,9 +208,9 @@ SQL;
 
 function retrieve_students_from_db() {
 //IN:  gradeable ID from database
-//OUT: all students who have late day exceptions, per gradeable ID parameter.
-//     retrieves student rcs, first name, last name, and late day exceptions.
-//PURPOSE:  Retrieve list of students to display current late day exceptions.
+//OUT: all students who have late days.  Retrieves student rcs, first name,
+//     last name, timestamp and number of late days.
+//PURPOSE:  Retrieve list of students to display current late days.
 
 	//SQL for "old schema"
 	$sql = <<<SQL
@@ -205,7 +225,9 @@ FULL OUTER JOIN late_days
 	ON students.student_rcs=late_days.student_rcs
 WHERE late_days.allowed_lates IS NOT NULL
 	AND late_days.allowed_lates>0
-ORDER BY students.student_rcs ASC;
+ORDER BY
+	students.student_rcs ASC,
+	late_days.since_timestamp DESC;
 SQL;
 	
 	//SQL for "new schema"
@@ -221,11 +243,12 @@ SELECT
 FROM users
 FULL OUTER JOIN late_days
 	ON users.user_id=late_days.user_id
-WHERE late_day_exceptions.g_id=?
-	AND users.user_group=0
-	AND	late_days.allowed_late_days IS NOT NULL
+WHERE late_days.allowed_late_days IS NOT NULL
 	AND	late_days.allowed_late_days>0
-ORDER BY users.user_email ASC;
+	AND	users.user_group=4
+ORDER BY
+	users.user_email ASC,
+	late_days.since_timestamp DESC;
 SQL;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
 
@@ -277,11 +300,10 @@ SQL;
 	//This portion ensures that UPDATE will only occur when a record already exists.
 	$sql['update'] = <<<SQL
 UPDATE late_days
-SET
-	allowed_late_days=temp.late_days,
-	since_timestamp=temp.date
+SET allowed_lates=temp.late_days
 FROM temp
 WHERE late_days.student_rcs=temp.student_rcs
+	AND late_days.since_timestamp=temp.date
 SQL;
 
 	//This portion ensures that INSERT will only occur when data record is new.
@@ -289,14 +311,15 @@ SQL;
 INSERT INTO late_days
 	(student_rcs,
 	since_timestamp,
-	allowed_lates
+	allowed_lates)
 SELECT
 	temp.student_rcs,
-	temp.gradeable_id,
+	temp.date,
 	temp.late_days
 FROM temp 
 LEFT OUTER JOIN late_days
 	ON late_days.student_rcs=temp.student_rcs
+	AND late_days.since_timestamp=temp.date
 WHERE late_days.student_rcs IS NULL
 SQL;
 
@@ -331,6 +354,7 @@ UPDATE late_days
 SET allowed_late_days=temp.late_days
 FROM temp
 WHERE late_day.user_id=temp.student_rcs
+	AND late_days.since_timestamp=temp.date
 SQL;
 
 	//This portion ensures that INSERT will only occur when data record is new.
@@ -346,6 +370,7 @@ SELECT
 FROM temp 
 LEFT OUTER JOIN late_days
 	ON late_days.user_id=temp.student_rcs
+	AND late_days.since_timestamp=temp.date
 WHERE late_days.user_id IS NULL
 SQL;
 
@@ -373,17 +398,17 @@ class local_view {
 //View class for admin-latedays-exceptions.php
 
 	//Properties
-	static private $utf8_styled;
-	static private $utf8_checkmark;
+	private $utf8_styled;
+	private $utf8_checkmark;
 	static private $view;  //HTML data to be sent to browser
 	
 	//Constructor
 	public function __construct() {
 		$this->utf8_styled_x  = "&#x2718";
 		$this->utf8_checkmark = "&#x2714";
-		$this->view = array();
+		self::$view = array();
 		
-		$this->view['head'] = <<<HTML
+		self::$view['head'] = <<<HTML
 <div id="container" style="width:100%; margin-top:40px;">
 <div class="modal hide fade in" style="display:block; margin-top:5%; z-index:100;">
 <div class="modal-header">
@@ -392,48 +417,44 @@ class local_view {
 <div class="modal-body" style="padding-top:10px; padding-bottom:10px;">
 HTML;
 
-		$this->view['tail'] = <<<HTML
+		self::$view['tail'] = <<<HTML
 </div>
 </div>
 </div>
 HTML;
 
-		$this->view['bad_upload'] = <<<HTML
-<div class="modal-body">
-<p><em style="color:red; font-weight:bold; font-style:normal;">
+		self::$view['bad_upload'] = <<<HTML
+<p style="margin:0; padding-bottom:20px;"><em style="color:red; font-weight:bold; font-style:normal;">
 {$this->utf8_styled_x} Something is wrong with the CSV upload.  No update done.</em>
-</div>
 HTML;
 
-		$this->view['student_not_found'] = <<<HTML
-<div class="modal-body">
-<p><em style="color:red; font-weight:bold; font-style:normal;">
+		self::$view['student_not_found'] = <<<HTML
+<p style="margin:0; padding-bottom:20px;"><em style="color:red; font-weight:bold; font-style:normal;">
 {$this->utf8_styled_x} Student not found.</em>
-</div>
 HTML;
 
-		$this->view['late_days_not_integer'] = <<<HTML
-<div class="modal-body">
-<em style="color:red; font-weight:bold; font-style:normal;">
+		self::$view['invalid_datestamp'] = <<<HTML
+<p style="margin:0; padding-bottom:20px;"><em style="color:red; font-weight:bold; font-style:normal;">
+{$this->utf8_styled_x} Invalid date or timestamp not properly formatted.</em>
+HTML;
+
+		self::$view['late_days_not_integer'] = <<<HTML
+<p style="margin:0; padding-bottom:20px;"><em style="color:red; font-weight:bold; font-style:normal;">
 {$this->utf8_styled_x} Late days must be an integer at least 0.</em>
-</div>
 HTML;
 
-		$this->view['upsert_done'] = <<<HTML
-<div class="modal-body">
-<p><em style="color:green; font-weight:bold; font-style:normal;">
-{$this->utf8_checkmark} Late day exceptions are updated.</em>
-</div>
+		self::$view['upsert_done'] = <<<HTML
+<p style="margin:0; padding-bottom:20px;"><em style="color:green; font-weight:bold; font-style:normal;">
+{$this->utf8_checkmark} Late days are updated.</em>
 HTML;
 
-		$this->view['form'] = <<<HTML
-<form action="admin-latedays-exceptions.php" method="POST" enctype="multipart/form-data">
+		self::$view['form'] = <<<HTML
+<form action="admin-latedays.php" method="POST" enctype="multipart/form-data">
 <h4>Single Student Entry</h4>
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Student ID:<br><input type="text" name="student_id" style="width:95%;"></div>
-<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Timestamp (MM/DD/YY):<br><input type="text" name="timestamp" style="width:95%;"></div>
+<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Datestamp (MM/DD/YY):<br><input type="text" name="datestamp" style="width:95%;"></div>
 <div style="width:15%; display:inline-block; vertical-align:top; padding-right:15px;">Late Days:<br><input type="text" name="late_days" style="width:95%;"></div>
 <div style="display:inline-block; vertical-align:top; padding-top:1.5em;"><input type="submit" value="Submit"></div>
-<div style="display:inline-block; vertical-align:top; padding-bottom:20px;">If you leave Timestamp blank, today's date will be assumed.</div>
 <h4>Multiple Student Entry Via CSV Upload</h4>
 <div style="padding-bottom:20px;"><input type="file" name="csv_upload" onchange="this.form.submit()"></div>
 </form>
@@ -448,20 +469,20 @@ HTML;
 	//     for selected gradeable
 	//OUT: no return (although private view['student_review_table'] property is
 	//     filled)
-	//PUTRPOSE: Craft HTML required to display a table of existing late day
-	//          exceptions	
+	//PURPOSE: Craft HTML required to display a table of existing late day
+	//         exceptions	
 	
 		if (!is_array($db_data) || count($db_data) < 1) {
 		//No late days in DB -- indicate as much.
 
-			$this->view['student_review_table'] = <<<HTML
-<p style="font-weight:bold; font-size:1.2em;">No late days are currently entered.
+			self::$view['student_review_table'] = <<<HTML
+<p><em style="font-weight:bold; font-size:1.2em; font-style:normal;">No late days are currently entered.</em>
 HTML;
 		} else {
 		//Late days found in DB -- build table to display
 
 			//Table HEAD
-			$this->view['student_review_table'] = <<<HTML
+			self::$view['student_review_table'] = <<<HTML
 <table style="border:5px solid white; border-collapse:collapse; margin: 0 auto; text-align:center;">
 <caption style="caption-side:top; font-weight:bold; font-size:1.2em;">
 Current Late Day Exceptions
@@ -476,7 +497,7 @@ HTML;
 			//Table BODY
 			$cell_color = array('white', 'aliceblue');
 			foreach ($db_data as $index => $record) {
-				$this->view['student_review_table'] .= <<<HTML
+				self::$view['student_review_table'] .= <<<HTML
 <tr>
 <td style="background:{$cell_color[$index%2]};">{$record[0]}</td>
 <td style="background:{$cell_color[$index%2]};">{$record[1]}</td>
@@ -488,7 +509,7 @@ HTML;
 			}
 
 			//Table TAIL
-			$this->view['student_review_table'] .= <<<HTML
+			self::$view['student_review_table'] .= <<<HTML
 </table>
 HTML;
 		}
@@ -503,38 +524,45 @@ HTML;
 	
 		switch($state) {
 		case 'bad_upload':
-			echo $this->view['head']                 .
-   				 $this->view['form']                 . 
-			     $this->view['bad_upload']           .
-			     $this->view['student_review_table'] .
-			     $this->view['tail'];
+			echo self::$view['head']                 .
+   				 self::$view['form']                 . 
+			     self::$view['bad_upload']           .
+			     self::$view['student_review_table'] .
+			     self::$view['tail'];
 			break;
 		case 'student_not_found':
-			echo $this->view['head']                 .
-   				 $this->view['form']                 . 
-			     $this->view['student_not_found']    .
-			     $this->view['student_review_table'] .
-			     $this->view['tail'];
+			echo self::$view['head']                 .
+   				 self::$view['form']                 . 
+			     self::$view['student_not_found']    .
+			     self::$view['student_review_table'] .
+			     self::$view['tail'];
 			break;
+		case 'invalid_datestamp':
+			echo self::$view['head']                 .
+			     self::$view['form']                 . 
+			     self::$view['invalid_datestamp']    .   				 
+			     self::$view['student_review_table'] .
+			     self::$view['tail'];
+		    break;
 		case 'late_days_not_integer':
-			echo $this->view['head']                  .
-			     $this->view['form']                  . 
-			     $this->view['late_days_not_integer'] .   				 
-			     $this->view['student_review_table']  .
-			     $this->view['tail'];
+			echo self::$view['head']                  .
+			     self::$view['form']                  . 
+			     self::$view['late_days_not_integer'] .   				 
+			     self::$view['student_review_table']  .
+			     self::$view['tail'];
 		    break;
 		case 'upsert_done':
-			echo $this->view['head']                 .
-				 $this->view['form']                 . 
-				 $this->view['upsert_done']          . 
-			     $this->view['student_review_table'] .
-			     $this->view['tail'];
+			echo self::$view['head']                 .
+				 self::$view['form']                 . 
+				 self::$view['upsert_done']          . 
+			     self::$view['student_review_table'] .
+			     self::$view['tail'];
 			break;
 		default:
-			echo $this->view['head']                 .
-				 $this->view['form']                 . 
-			     $this->view['student_review_table'] .
-			     $this->view['tail'];
+			echo self::$view['head']                 .
+				 self::$view['form']                 . 
+			     self::$view['student_review_table'] .
+			     self::$view['tail'];
 			break;
 		}
 	}
