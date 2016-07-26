@@ -395,7 +395,7 @@ SQL;
 /* END FUNCTION upsert() ==================================================== */
 
 class local_view {
-//View class for admin-latedays-exceptions.php
+//View class for admin-latedays.php
 
 	//Properties
 	//Class constants to represent unicode styled X and checkmark symbols.
