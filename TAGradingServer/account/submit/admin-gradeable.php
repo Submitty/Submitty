@@ -348,6 +348,10 @@ if ($action != 'import'){
         $gradeable->updateGradeable($db);
     }  
     else{
+        $db->query("SELECT COUNT(*) AS cnt FROM gradeable WHERE g_id=?", array($_POST['gradeable_id']));
+        if ($db->row()['cnt'] == 1){
+            die("gradeable with g_id ". $_POST['gradeable_id'] . " already exists");
+        }
         $gradeable->createGradeable($db);
     }
     $gradeable->createComponents($db, $action, $_POST);
@@ -382,7 +386,6 @@ else{
             $gradeable = constructGradeable($request_args);
             $gradeable->createGradeable($db);
             $gradeable->createComponents($db, $action, $request_args);
-            // TODO pass in filtered array here
             $graders = getGraders($request_args);
             $gradeable->setupRotatingSections($db, $graders);
             

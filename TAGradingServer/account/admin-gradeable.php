@@ -22,7 +22,7 @@ if($user_is_administrator){
     );
     $old_questions = $old_components = $electronic_gradeable = array();
     $num_numeric = $num_text = 0;
-    $g_gradeable_type = $is_repository = $g_syllabus_bucket = $g_min_grading_group = -1;
+    $g_gradeable_type = $is_repository = $g_syllabus_bucket = $g_min_grading_group = $default_late_days = -1;
     $use_ta_grading = true;
     $g_overall_ta_instructions = $g_id = '';
     
@@ -73,6 +73,14 @@ if($user_is_administrator){
                                                 'question_extra_credit' => $question['gc_is_extra_credit']));
             }
        }
+    }
+    else{
+        // get the default late days
+        $db->query("SELECT * FROM config WHERE config_name='default_late_days'", array());
+        $row = $db->row();
+        if(isset($row)){
+            $default_late_days = intval($row['config_value']);
+        }
     }
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
@@ -312,7 +320,7 @@ HTML;
                 <input style='width: 227px' type='text' name='config-path' value="" />
                 <br />
                 Point precision: 
-                <input style='width: 50px' type='text' name='point-precision' value="" />
+                <input style='width: 50px' type='text' name='point-precision' value="0.5" />
                 <br /> <br />
                 
                 Use TA grading? 
@@ -526,7 +534,24 @@ HTML;
             </div>  
             </fieldset>
             <br/>
+            What is the lowest privileged user group that can grade this?
+            <select name="minimum-grading-group" style="width:180px;">
+HTML;
 
+    $grading_groups = array('1' => 'Instructor','2' => 'Full Access Grader','3' => 'Limited Access Grader');
+    foreach ($grading_groups as $num => $role){
+        print <<<HTML
+                <option value='{$num}'
+HTML;
+        echo ($g_min_grading_group === $num)?'selected':'';
+        print <<<HTML
+            >{$role}</option>
+HTML;
+    }
+    
+    print <<<HTML
+            </select>
+            <br /> <br />
             Who is assigned to grade this item?:
             <br /> <br />
             <input type="radio" name="section-type" value="reg-section"
@@ -560,9 +585,6 @@ HTML;
     $all_sections = str_replace(array('[', ']'), '', 
                     htmlspecialchars(json_encode(range(1,$num_rotating_sections)), ENT_NOQUOTES));
 
-    
-    // write a sql query to relate graders to all of their grading sections
-    // i.e. grader => [sections]
     $db->query("
     SELECT 
         u.user_id, array_agg(sections_rotating ORDER BY sections_rotating ASC) AS sections
@@ -587,11 +609,12 @@ HTML;
     <div id="rotating-sections" class="graders" style="display:none;">
         <br />
         Available rotating sections: {$num_rotating_sections}
-        <br /> <br />
+        
 HTML;
     
-    //  ONE for TAs  
     print <<<HTML
+        <div id="full-access-graders" style="display:none;">
+            <br />
             <table>
                 <th>Full Access Graders</th>
 HTML;
@@ -619,6 +642,8 @@ HTML;
     print <<<HTML
             </table>
             <br/>
+        </div>
+        <div id="limited-access-graders" style="display:none;">
             <table>
                 <th>Limited Access Graders</th>
 HTML;
@@ -647,6 +672,7 @@ HTML;
         </table>
     </div> 
         <br />
+    </div>
 HTML;
 
     print <<<HTML
@@ -682,23 +708,6 @@ HTML;
     print <<<HTML
             </select>
             <br />
-            What is the lowest privileged user group that can grade this?
-            <select name="minimum-grading-group" style="width:180px;">
-HTML;
-
-    $grading_groups = array('1' => 'Instructor','2' => 'Full Access Grader','3' => 'Limited Access Grader');
-    foreach ($grading_groups as $num => $role){
-        print <<<HTML
-                <option value='{$num}'
-HTML;
-        echo ($g_min_grading_group === $num)?'selected':'';
-        print <<<HTML
-            >{$role}</option>
-HTML;
-    }
-    
-    print <<<HTML
-            </select>
             <!-- When the form is completed and the "SAVE GRADEABLE" button is pushed
                 If this is an electronic assignment:
                     Generate a new config/class.json
@@ -877,6 +886,20 @@ HTML;
             }
         });
         
+        $('select[name="minimum-grading-group"]').change(
+        function(){
+            var graders = ['','','full-access-graders', 'limited-access-graders']; 
+            for(var i=parseInt(this.value)+1; i<graders.length; ++i){
+                $('#'+graders[i]).hide();
+            }
+            for(var i=0; i <= parseInt(this.value) ; ++i){
+                $('#'+graders[i]).show();
+            }
+        });
+        
+        if({$default_late_days} != -1){
+            $('input[name=eg_late_days]').val('{$default_late_days}');
+        }
         
         if($('#radio-electronic-file').is(':checked')){ 
             $('input[name=instructions-url]').val('{$electronic_gradeable['eg_instructions_url']}');
