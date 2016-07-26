@@ -13,12 +13,22 @@ class DiffViewer {
     /**
      * @var bool
      */
+    private $has_actual = false;
+
+    /**
+     * @var bool
+     */
     private $display_actual = false;
 
     /**
      * @var array
      */
     private $actual = array();
+    
+    /**
+     * @var bool
+     */
+    private $has_expected = false;
 
     /**
      * @var bool
@@ -54,8 +64,10 @@ class DiffViewer {
      * Reset the DiffViewer to its starting values.
      */
     public function reset() {
+        $this->has_actual = false;
         $this->display_actual = false;
         $this->actual = array();
+        $this->has_expected = false;
         $this->display_expected = false;
         $this->expected = array();
         $this->diff = array();
@@ -83,12 +95,8 @@ class DiffViewer {
         }
         else if ($actual_file != "") {
             $this->actual = file_get_contents($actual_file);
-            if (trim($this->actual) !== "") {
-                $this->actual = explode("\n", $this->actual);
-            }
-            else {
-                $this->actual = array();
-            }
+            $this->has_actual = trim($this->actual) !== "" ? true: false;
+            $this->actual = explode("\n", $this->actual);
             $this->display_actual = true;
         }
         
@@ -96,7 +104,9 @@ class DiffViewer {
             throw new \Exception("'{$expected_file}' could not be found.");
         }
         else if ($expected_file != "") {
-            $this->expected = explode("\n", file_get_contents($expected_file));
+            $this->expected = file_get_contents($expected_file);
+            $this->has_expected = trim($this->expected) !== "" ? true : false;
+            $this->expected = explode("\n", $this->expected);
             $this->display_expected = true;
         }
         
@@ -172,19 +182,32 @@ class DiffViewer {
         return $this->display_actual;
     }
     
+    /**
+     * Boolean flag to indicate whether or not the actual file had any contents to display (or was
+     * blank/empty lines). Assuming we do not have a difference file, we can use this flag to indicate
+     * if we should actually print out the actual file or not, such as an error file (which ideally is
+     * empty in most cases).
+     *
+     * @return bool
+     */
     public function hasActualOutput() {
-        return count($this->actual) > 0;
+        return $this->has_actual;
     }
     
     /**
+     * Was there a given expected file and were we able to successfully read from it
      * @return bool
      */
     public function hasDisplayExpected() {
         return $this->display_expected;
     }
     
+    /**
+     * Returns boolean indicating whether or not there is any input in the expected.
+     * @return bool
+     */
     public function hasExpectedOutput() {
-        return count($this->expected) > 0;
+        return $this->has_expected;
     }
 
     /**

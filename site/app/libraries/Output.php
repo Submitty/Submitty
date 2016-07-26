@@ -15,7 +15,12 @@ class Output {
     private $output_buffer = "";
     private $json_buffer = "";
     private $loaded_views = array();
-    private $start_time = 0;
+    
+    private $use_header = true;
+    private $use_footer = true;
+    
+    private $start_time;
+    
     /**
      * @var Core
      */
@@ -23,6 +28,7 @@ class Output {
     
     public function __construct(Core $core) {
         $this->core = $core;
+        $this->start_time = microtime(true);
     }
 
     /**
@@ -72,7 +78,9 @@ class Output {
     }
     
     public function renderJson($json) {
-        $this->json_buffer .= json_encode($json);
+        $this->output_buffer = json_encode($json, JSON_PRETTY_PRINT);
+        $this->useFooter(false);
+        $this->useHeader(false);
     }
 
     /**
@@ -95,12 +103,16 @@ class Output {
     }
 
     public function getOutput() {
-        if ($this->json_buffer !== "") {
-            return $this->json_buffer;
+        $return = "";
+        if ($this->use_header) {
+            $return .= $this->renderTemplate("Global", 'header');
         }
-        else {
-            return $this->output_buffer;
+        $return .= $this->output_buffer;
+        if ($this->use_footer) {
+            $return .= $this->renderTemplate("Global", 'footer', (microtime(true) - $this->start_time));
         }
+        return $return;
+        
     }
     /**
      * Returns the stored output buffer that we've been building
@@ -108,12 +120,7 @@ class Output {
      * @return string
      */
     public function displayOutput() {
-        if ($this->json_buffer !== "") {
-            print($this->json_buffer);
-        }
-        else {
-            print($this->output_buffer);
-        }
+        print($this->getOutput());
     }
 
     /**
@@ -164,5 +171,17 @@ class Output {
         }
 
         return $errorPage;
+    }
+    
+    /**
+     * Enable or disable whether to use the global header
+     * @param bool $bool
+     */
+    public function useHeader($bool = true) {
+        $this->use_header = $bool;
+    }
+    
+    public function useFooter($bool = true) {
+        $this->use_footer = $bool;
     }
 }

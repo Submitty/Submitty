@@ -14,7 +14,6 @@ use app\libraries\Output;
 umask (0027);
 
 session_start();
-$start = microtime(true);
 
 /*
  * Show any notices, warnings, or errors as any of these appearing in a bootup
@@ -112,7 +111,6 @@ if (!$logged_in) {
     }
 }
 
-$core->getOutput()->renderOutput("Global", 'header');
 switch($_REQUEST['component']) {
     case 'admin':
         $control = new app\controllers\AdminController($core);
@@ -133,5 +131,4 @@ switch($_REQUEST['component']) {
         break;
 }
 
-$core->getOutput()->renderOutput("Global", 'footer', (microtime(true) - $start));
 echo($core->getOutput()->getOutput());
