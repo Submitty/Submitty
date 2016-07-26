@@ -6,67 +6,73 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     die("invalid csrf token");
 }
 
-$rubric_id = intval($_GET['hw']);
-$db->query("SELECT * FROM rubrics WHERE rubric_id=?", array($rubric_id));
-$rubric = $db->row();
-if (!isset($rubric['rubric_id'])) {
-    die("Invalid rubric specified.");
+$g_id = $_GET['g_id'];
+
+//GET THE GRADEABLE
+
+$db->query("SELECT * FROM gradeable_data AS gd INNER JOIN gradeable AS g ON gd.g_id=g.g_id 
+            INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id WHERE g.g_id = ?", array($g_id));
+$gradeable = $db->row();
+if (!isset($gradeable['g_id'])){
+    die("Invalid gradeable specified");
 }
+
 $now = new DateTime('now');
-$homeworkDate = new DateTime($rubric['rubric_due_date']);
-if ($rubric['rubric_late_days'] > 0) {
-    $homeworkDate->add(new DateInterval("PT{$rubric['rubric_late_days']}H"));
+$homeworkDate = new DateTime($gradeable['eg_submission_due_date']);
+
+if ($gradeable['eg_late_days'] > 0) {
+    $homeworkDate->add(new DateInterval("PT{$gradeable['eg_late_days']}H"));
 }
+
 if ($now < $homeworkDate) {
     die("Homework is not open for grading yet.");
 }
-$student_rcs = $_GET["student"];
-$db->query("SELECT student_id FROM students WHERE student_rcs=?", array($student_rcs));
-$row = $db->row();
-$student_id = $row['student_id'];
 
-$params = array($rubric_id, $student_rcs);
-$db->query("SELECT grade_id FROM grades WHERE rubric_id=? AND student_rcs=?", $params);
-$row = $db->row();
+$student = $_GET['student'];
 
+
+
+// get the gradeable data from the student
+$params = array($g_id);
+$db->query("SELECT * FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id 
+            WHERE g.g_id=? ORDER BY gc_order ASC", $params);
+$rows = $db->rows();
+
+$params = array($g_id, $student);
+$db->query("SELECT gd_id FROM gradeable_data AS gd INNER JOIN gradeable AS g ON gd.g_id=g.g_id 
+            INNER JOIN users AS u ON u.user_id=gd.gd_user_id WHERE g.g_id=? AND u.user_id=?",$params);
+$gd_id = $db->row()['gd_id'];
+
+//update each gradeable component data
+foreach($rows AS $row){
+    $grade = floatval($_POST["grade-" . $row["gc_order"]]);
+    $comment = $_POST["comment-" . $row["gc_order"]];
+    $gc_id = $row['gc_id'];
+    
+    $params = array($gd_id, $gc_id);
+    $db->query("DELETE FROM gradeable_component_data WHERE gd_id=? AND gc_id=?", $params);
+    
+    $params = array($gc_id, $gd_id, $grade, $comment);
+    $db->query("INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment) VALUES(?,?,?,?)",$params);
+}
+
+//update the gradeable data
+$overall_comment = $_POST['comment-general'];
+$params = array($overall_comment, $gd_id);
+$db->query("UPDATE gradeable_data SET gd_overall_comment=? WHERE gd_id=?",$params);
+
+// CREATE / UPDATE THE GRADEABLE GRADES FOR THE STUDENT
+
+/*
 $status = intval($_POST['status']);
 $submitted = intval($_POST['submitted']);
 $_POST["late"] = intval($_POST['late']);
-
-if(isset($row["grade_id"])) {
-    $grade_id = intval($row["grade_id"]);
-    if (isset($_POST['overwrite']) && intval($_POST['overwrite']) == 1) {
-        $params = array($_POST["comment-general"], \app\models\User::$user_id, $_POST["late"], $submitted, $status, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status'], $grade_id);
-        $db->query("UPDATE grades SET grade_comment=?, grade_finish_timestamp=NOW(), grade_user_id=?, grade_days_late=?, grade_is_regraded=1, grade_submitted=?, grade_status=?, grade_active_assignment=?, grade_parts_days_late=?, grade_parts_submitted=?, grade_parts_status=? WHERE grade_id=?", $params);
-    }
-    else {
-        $params = array($_POST["comment-general"], $_POST["late"], $submitted, $status, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status'], $grade_id);
-        $db->query("UPDATE grades SET grade_comment=?, grade_finish_timestamp=NOW(), grade_days_late=?, grade_is_regraded=1, grade_submitted=?, grade_status=?, grade_active_assignment=?, grade_parts_days_late=?, grade_parts_submitted=?, grade_parts_status=? WHERE grade_id=?", $params);
-    }
-}
-else {
-    $params = array($rubric_id, $student_id, $_POST["comment-general"], \app\models\User::$user_id, $_POST["late"], $student_rcs, $submitted, $status, $_POST['active_assignment'], $_POST['grade_parts_days_late'], $_POST['grade_parts_submitted'], $_POST['grade_parts_status']);
-    $db->query("INSERT INTO grades (rubric_id, student_id, grade_comment, grade_finish_timestamp, grade_user_id, grade_days_late, student_rcs, grade_submitted, grade_status, grade_active_assignment, grade_parts_days_late, grade_parts_submitted, grade_parts_status) VALUES (?,?,?,NOW(),?,?,?,?,?,?,?,?,?)", $params);
-
-    $params = array($rubric_id, $student_rcs);
-    $db->query("SELECT grade_id FROM grades WHERE rubric_id=? AND student_rcs=?", $params);
-    $row = $db->row();
-    $grade_id = intval($row["grade_id"]);
-}
-
-$params = array($rubric_id);
-$db->query("SELECT * FROM questions WHERE rubric_id=? ORDER BY question_part_number, question_number", $params);
-foreach($db->rows() as $row) {
-    $params = array($grade_id, $row["question_id"]);
-    $db->query("DELETE FROM grades_questions WHERE grade_id=? AND question_id=?", $params);
-
-    $params = array($grade_id, $row["question_id"], $_POST["grade-" . $row["question_part_number"] . "-" . $row["question_number"]],  $_POST["comment-" . $row["question_part_number"] . "-" . $row["question_number"]]);
-    $db->query("INSERT INTO grades_questions (grade_id, question_id, grade_question_score, grade_question_comment) VALUES (?,?,?,?)", $params);
-}
+*/
+//TODO UPDATE THE STATUS
 
 if($_GET["individual"] == "1") {
-    header('Location: '.$BASE_URL.'/account/account-summary.php?course='.$_GET['course'].'&hw=' . $_GET["hw"]);
+    header('Location: '.$BASE_URL.'/account/account-summary.php?course='.$_GET['course'].'&g_id=' . $_GET["g_id"]);
 }
 else {
-    header('Location: '.$BASE_URL.'/account/index.php?course='.$_GET['course'].'&hw=' . $_GET["hw"]);
+    header('Location: '.$BASE_URL.'/account/index.php?course='.$_GET['course'].'&g_id=' . $_GET["g_id"]);
 }

@@ -5,38 +5,46 @@ use app\models\User;
 
 	$account_subpages_unlock = true;
 
-	$rubric_id = intval($_GET['hw']);
+	$g_id = $_GET['g_id'];
 
-	$params = array($rubric_id);
-	$db->query("SELECT r.rubric_id, r.rubric_name, sum(question_total) as score FROM rubrics AS r,
-	questions AS q WHERE r.rubric_id=? AND q.rubric_id=r.rubric_id GROUP BY r.rubric_id", $params);
-	$homework_info = $db->row();
-
-	$query = "
+	$params = array($g_id);
+    
+    //get the total score for the gradeable
+	$db->query("
+SELECT 
+    g.g_id, 
+    g_title,
+    g_grade_by_registration,
+    sum(gc_max_value) as score 
+FROM 
+    gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id
+WHERE 
+    g.g_id=?
+    AND NOT gc_is_extra_credit
+GROUP BY 
+    g.g_id", $params);
+	$gradeable_info = $db->row();
+    
+// students and their grade data    
+$query = "
 SELECT
 	s.*,
-	gt.grade_id,
-	gt.rubric_id,
-	gt.score
+	gt.g_id,
+	case when gt.score is null then 0 else gt.score end
 FROM
-	students AS s
+	users AS s
 	LEFT JOIN (
-		SELECT
-			g.grade_id
-			, g.rubric_id
-			, g.student_rcs
-			, sum(case when gq.grade_question_score is null then -100000 else gq.grade_question_score end) as score
-		FROM
-			grades AS g
-			, grades_questions AS gq
-		WHERE
-			gq.grade_id=g.grade_id
-			AND g.rubric_id=?
-		GROUP BY
-			gq.grade_id
-			, g.grade_id
-			, g.rubric_id
-	) as gt ON gt.student_rcs=s.student_rcs";
+		SELECT 
+           g_id, 
+           gd_user_id,
+           sum(gcd_score) AS score
+        FROM 
+            gradeable_data AS gd INNER JOIN gradeable_component_data AS gcd ON gd.gd_id = gcd.gd_id
+        WHERE g_id = ?
+        GROUP BY 
+            g_id, 
+            gd_user_id
+	) as gt ON gt.gd_user_id=s.user_id"; 
 
 print <<<HTML
 	<style type="text/css">
@@ -65,16 +73,16 @@ print <<<HTML
 	</style>
 HTML;
 
-if (!isset($homework_info['rubric_id'])) {
+if (!isset($gradeable_info['g_id'])) {
     print <<<HTML
     <div id="container-rubric">
 		<div class="modal-header">
-			<h3 id="myModalLabel">Invalid Homework</h3>
+			<h3 id="myModalLabel">Invalid Gradeable</h3>
 		</div>
 
 		<div class="modal-body" style="padding-bottom:10px; padding-top:25px;">
-			Could not find a homework with that ID.<br /><br />
-			<a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
+			Could not find a gradeable with that ID.<br /><br />
+			<a class="btn" href="{$BASE_URL}/account/index.php">Select Different Gradeable</a>
         </div>
     </div>
 HTML;
@@ -82,21 +90,23 @@ HTML;
 else {
     if (!User::$is_administrator) {
         if (isset($_GET['all']) && $_GET['all'] == "true") {
-            $button = "<a class='btn' href='{$BASE_URL}/account/account-summary.php?hw={$rubric_id}&course={$_GET['course']}'>View Your Sections</a>";
+            $button = "<a class='btn' href='{$BASE_URL}/account/account-summary.php?g_id={$g_id}&course={$_GET['course']}'>View Your Sections</a>";
         }
         else {
-            $button = "<a class='btn' href='{$BASE_URL}/account/account-summary.php?hw={$rubric_id}&course={$_GET['course']}&all=true'>View All Sections</a>";
+            $button = "<a class='btn' href='{$BASE_URL}/account/account-summary.php?g_id={$g_id}&course={$_GET['course']}&all=true'>View All Sections</a>";
         }
     }
     else {
         $button = "";
     }
-    $rubric_total = $homework_info["score"];
-
+    
+    
+    $rubric_total = $gradeable_info["score"];
+    
     print <<<HTML
 	<div id="container-rubric">
 		<div class="modal-header">
-			<h3 id="myModalLabel" style="width: 75%; display: inline-block">{$homework_info['rubric_name']} Summary</h3>
+			<h3 id="myModalLabel" style="width: 75%; display: inline-block">{$gradeable_info['g_title']} Summary</h3>
 			{$button}
 		</div>
 
@@ -104,7 +114,7 @@ else {
 			<table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
 				<thead style="background: #E1E1E1;">
 					<tr>
-						<th>RCS ID</th>
+						<th>ID</th>
 						<th>Status</th>
 					</tr>
 				</thead>
@@ -112,34 +122,35 @@ else {
 				<tbody style="background: #f9f9f9;">
 HTML;
 
-
+    
     $where = array();
     $order = array();
 
-    if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true) {
-        /*$params = array();
-        $db->query("SELECT * FROM sections ORDER BY section_id ASC", $params);
-        */
-        $sections = array(array("grading_section_id" => 0));
-        $require_section = false;
-
-    } else {
-        $params = array($user_id, $rubric_id);
-        $db->query("SELECT grading_section_id FROM homework_grading_sections WHERE user_id=? AND rubric_id=? ORDER BY grading_section_id", $params);
+    $grade_by_reg_section = $gradeable_info['g_grade_by_registration'];
+    $section_title = ($grade_by_reg_section ? 'Registration': 'Rotating');
+    $user_section_field =  ($grade_by_reg_section ? 'registration_section': 'rotating_section');
+    $section_section_field = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
+    
+    if(!((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true)) {
+        $params = array($user_id);
+        $query = ($grade_by_reg_section) ? "SELECT sections_registration_id FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id"
+                                         : "SELECT sections_rotating FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating";
+        $db->query($query, $params);
         $sections = array();
         foreach ($db->rows() as $section) {
-            $sections[] = $section['grading_section_id'];
+            $sections[] = $section[$section_section_field];
         }
-        $require_section = true;
-        if(count($sections) > 0) {
-            $where[] = "s.student_grading_id IN (" . implode(",", $sections) . ")";
+        if(count($sections) > 0){
+            $where[] = "s.".$user_section_field."IN (" . implode(",", $sections) . ")";
         } else {
-            $where[] = "s.student_rcs = null";
+            $where[] = "s.user_id = null";
         }
     }
+    
+    $where[] = 'user_group=4';
 
-    $order[] = "s.student_grading_id";
-    $order[] = "s.student_rcs";
+    $order[] = "s.".$user_section_field;
+    $order[] = "s.user_id";
 
     if(count($where) > 0) {
         $query .= " WHERE " . implode(" AND ", $where);
@@ -150,16 +161,19 @@ HTML;
 
     $prev_section = null;
 
-    $params = array($rubric_id);
+    $params = array($g_id);
+    
     $db->query($query, $params);
-    foreach ($db->rows() as $student) {
-        if($prev_section !== $student['student_grading_id']) {
-            $section_id = intval($student['student_grading_id']);
+    $students = $db->rows();
+
+    foreach ($students as $student) {
+        if($prev_section !== $student[$user_section_field]) {
+            $section_id = intval($student[$user_section_field]);
             print <<<HTML
 
 					<tr class="info">
 						<td colspan="2" style="text-align:center;">
-							Students Assigned to Grading Section {$section_id}
+							Students Assigned to {$section_title} Section {$section_id}
 						</td>
 					</tr>
 HTML;
@@ -169,22 +183,22 @@ HTML;
         print <<<HTML
                 <tr>
                     <td>
-                        {$student["student_rcs"]} ({$student["student_last_name"]}, {$student["student_first_name"]})
+                        {$student["user_id"]} ({$student["user_lastname"]}, {$student["user_firstname"]})
                     </td>
                     <td>
 HTML;
-        if(count($db->rows()) > 0) {
+        if(count($students) > 0) {
             if(isset($row['score'])) {
                 if($row['score'] >= 0) {
-                    echo "<a class='btn' href='{$BASE_URL}/account/index.php?hw=" . $_GET["hw"] . "&individual=" . $student["student_rcs"] . "'>[ " . $row['score'] . " / " . $rubric_total . " ]</a>";
+                    echo "<a class='btn' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>[ " . $row['score'] . " / " . $rubric_total . " ]</a>";
                 } else {
-                    echo "<a class='btn btn-danger' href='{$BASE_URL}/account/index.php?hw=" . $_GET["hw"] . "&individual=" . $student["student_rcs"] . "'>[ GRADING ERROR ]</a>";
+                    echo "<a class='btn btn-danger' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>[ GRADING ERROR ]</a>";
                 }
             } else {
-                echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?hw=" . $_GET["hw"] . "&individual=" . $student["student_rcs"] . "'>Grade</a>";
+                echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>Grade</a>";
             }
         } else {
-            echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?hw=" . $_GET["hw"] . "&individual=" . $student["student_rcs"] . "'>Grade</a>";
+            echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>Grade</a>";
         }
         print <<<HTML
                     </td>
@@ -198,7 +212,7 @@ HTML;
 
 		<div class="modal-footer">
 			<a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
-			<a class="btn" href="{$BASE_URL}/account/index.php?hw={$_GET['hw']}">Grade Next Student</a>
+			<a class="btn" href="{$BASE_URL}/account/index.php?g_id={$_GET['g_id']}">Grade Next Student</a>
 		</div>
 	</div>
 HTML;

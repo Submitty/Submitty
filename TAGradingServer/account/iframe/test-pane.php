@@ -31,7 +31,7 @@ $i = 0;
 if (isset($testcase['test_name']) && $testcase['test_name'] != "") {
     $iframe .= "<h3>{$testcase['test_name']}</h3>";
 }
-if (count($testcase['diffs']) > 0) {
+if (isset($testcase['diffs']) && count($testcase['diffs']) > 0) {
     foreach ($testcase['diffs'] as $diff) {
         $iframe .= "<div style='height:auto'><h3>{$diff['description']}</h3>";
         $actual = $expected = $difference = "";

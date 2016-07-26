@@ -59,9 +59,9 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
 
     public function testQuery() {
         DatabaseTester::connect();
-        Database::query("SELECT student_rcs FROM students WHERE student_rcs='pevelm'");
+        Database::query("SELECT user_id FROM users WHERE user_id='pevelm'");
         $this->assertEquals(1, count(Database::rows()));
-        $this->assertEquals(array('student_rcs' => 'pevelm', '0' => 'pevelm'), Database::row());
+        $this->assertEquals(array('user_id' => 'pevelm', '0' => 'pevelm'), Database::row());
         DatabaseTester::disconnect();
     }
 
@@ -70,13 +70,13 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
      */
     public function testQueryBad() {
         DatabaseTester::connect();
-        Database::query("SELECT student_rcs FROM bad_table");
+        Database::query("SELECT user_id FROM bad_table");
         DatabaseTester::disconnect();
     }
 
     public function testEmptyResult() {
         DatabaseTester::connect();
-        Database::query("SELECT * FROM students WHERE student_rcs='nonstudent'");
+        Database::query("SELECT * FROM users WHERE user_id='nonstudent'");
         $this->assertEquals(0, count(Database::rows()));
         $this->assertEquals(array(), Database::row());
         DatabaseTester::disconnect();
@@ -85,7 +85,7 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
     public function testQueryCount() {
         DatabaseTester::connect();
         for ($i = 0; $i < 10; $i++) {
-            Database::query("SELECT * FROM students LIMIT 1");
+            Database::query("SELECT * FROM users LIMIT 1");
         }
         $this->assertEquals(10, Database::totalQueries());
         DatabaseTester::disconnect();
@@ -93,9 +93,9 @@ class DatabaseTester extends \PHPUnit_Framework_TestCase {
 
     public function testPrintQueries() {
         DatabaseTester::connect();
-        Database::query("SELECT * FROM students");
-        Database::query("SELECT * FROM students WHERE student_rcs=?", array('pevelm'));
-        $this->assertEquals("1) SELECT * FROM students<br />---<br />2) SELECT * FROM students WHERE student_rcs='pevelm'<br />---<br />",
+        Database::query("SELECT * FROM users");
+        Database::query("SELECT * FROM users WHERE user_id=?", array('pevelm'));
+        $this->assertEquals("1) SELECT * FROM users<br />---<br />2) SELECT * FROM users WHERE user_id='pevelm'<br />---<br />",
                             Database::getQueries());
         DatabaseTester::disconnect();
     }
