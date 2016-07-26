@@ -133,8 +133,8 @@ class Assignment {
             }
         }
 
-        $submission_path = $course_path."/submissions/".$this->assignment_id."/".$this->core->getUser()->getUserId();
-        $results_path = $course_path."/results/".$this->assignment_id."/".$this->core->getUser()->getUserId();
+        $submission_path = $course_path."/submissions/".$this->assignment_id."/".$this->core->getUser()->getId();
+        $results_path = $course_path."/results/".$this->assignment_id."/".$this->core->getUser()->getId();
         
         if (is_file($submission_path."/user_assignment_settings.json")) {
             $settings = FileUtils::loadJsonFile($submission_path."/user_assignment_settings.json");
@@ -221,7 +221,7 @@ class Assignment {
     
         // TODO: Get TA grade details
         
-        $grade_file = $this->core->getConfig()->getCoursePath()."/reports/".$this->getAssignmentId()."/".$this->core->getUser()->getUserId().".txt";
+        $grade_file = $this->core->getConfig()->getCoursePath()."/reports/".$this->getAssignmentId()."/".$this->core->getUser()->getId().".txt";
         if (is_file($grade_file)) {
             $this->grade_file = htmlentities(file_get_contents($grade_file));
         }

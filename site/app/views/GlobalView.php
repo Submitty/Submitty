@@ -124,7 +124,7 @@ HTML;
 HTML;
         if ($this->core->userLoaded()) {
             $return .= <<<HTML
-            Hello {$this->core->getUser()->getDetail('user_firstname')} ({$this->core->getUser()->getDetail('user_id')})
+            Hello {$this->core->getUser()->getFirstName()} ({$this->core->getUser()->getId()})
 HTML;
         }
         else {

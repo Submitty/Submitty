@@ -30,23 +30,51 @@ class User extends Model {
         return true;
     }
 
-    public function getDetail($detail) {
-        return $this->details[$detail];
-    }
-
     public function accessGrading() {
-        return $this->details['user_group'] > 1;
+        return $this->details['user_group'] < 4;
+    }
+    
+    public function accessFullGrading() {
+        return $this->details['user_group'] < 3;
     }
 
     public function accessAdmin() {
-        return $this->details['user_group'] >= 4;
+        return $this->details['user_group'] <= 1;
     }
 
     public function isDeveloper() {
-        return $this->details['user_group'] == 5;
+        return $this->details['user_group'] == 0;
     }
 
-    public function getUserId() {
+    public function getId() {
         return $this->details['user_id'];
+    }
+    
+    public function getFirstName() {
+        return $this->details['user_firstname'];
+    }
+    
+    public function getLastName() {
+        return $this->details['user_lastname'];
+    }
+    
+    public function getEmail() {
+        return $this->details['user_email'];
+    }
+    
+    public function getGroup() {
+        return $this->details['user_group'];
+    }
+    
+    public function getRegistrationSection() {
+        return $this->details['registration_section'];
+    }
+    
+    public function getRotatingSection() {
+        return $this->details['rotating_section'];
+    }
+    
+    public function isManualRegistration() {
+        return $this->details['manual_registration'];
     }
 }
