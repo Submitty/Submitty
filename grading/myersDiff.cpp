@@ -220,7 +220,6 @@ TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
     return new TestResults(0.0,message);
   }
 
-//TestResults* diffLineSwapOk (const std::string & student_file, const std::string & expected_file) {
 
   // break each file (at the newlines) into vectors of strings
   vectorOfLines student = stringToLines( student_file_contents );

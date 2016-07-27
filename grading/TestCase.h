@@ -50,52 +50,6 @@ public:
 
 /*
 
-class TestCaseGrader {
-public:
-  TestCaseGrader(const std::string &f, const std::string &d) : filename(f), description(d) { deduction = -1; }
-  std::string filename;
-  std::string description;
-  float deduction;
-
-  virtual TestResults* doit(const std::string &prefix) = 0;
-
-  virtual std::string getExpected() const { return ""; }
-  virtual std::string display_mode() const { return ""; }
-};
-
-class TestCaseComparison : public TestCaseGrader {
-public:
-  TestCaseComparison(TestResults* (*cmp) ( const std::string&, const std::string& ),
-		     const std::string file,
-		     const std::string desc,
-		     const std::string expect = "",
-                     float deduct=-1.0)
-    : TestCaseGrader(file,desc), cmp_output(cmp), expected_file(expect)  {deduction=deduct;}
-  TestResults* (*cmp_output) ( const std::string&, const std::string& );
-  std::string expected_file;
-  virtual std::string getExpected() const { return expected_file; }
-  virtual TestResults* doit(const std::string &prefix);
-};
-
-class TestCaseTokens : public TestCaseGrader {
-public:
-  TestCaseTokens(TestResults* (*cmp) ( const std::string&, const std::vector<std::string> &tokens ),
-		 const std::string file,
-		 const std::string desc,
-		 const std::vector<std::string> &_tokens,
-                 float deduct=-1.0)
-    : TestCaseGrader(file,desc), token_grader(cmp), tokens(_tokens) {deduction=deduct;}
-
-
-  TestResults* (*token_grader) ( const std::string&, const std::vector<std::string>& );
-  std::vector<std::string> tokens;
-
-  virtual TestResults* doit(const std::string &prefix);
-};
-
-
-
-
 class TestCaseCustom : public TestCaseGrader {
 public:
   TestCaseCustom(float (*custom_grader_)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv, TestCaseCustom& custom_testcase),

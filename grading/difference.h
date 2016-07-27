@@ -216,22 +216,7 @@ inline Difference::Difference() :
   type(OtherType), extraStudentOutputOk(false), only_whitespace_changes(false) {
 }
 
-/*
-float Difference::grade() {
-  //	int max =
-  //			(output_length_a > output_length_b) ?
-  //					output_length_a : output_length_b;
 
-  int max = std::max(output_length_a, output_length_b);
-
-	/ * CHANGED FROM distance to (1-distance) * /
-	/ * because distance == 0 when the files are perfect, and that should be worth full credit * /
-
-	if (max == 0) return 1;
-
-	return (float) (1 - (distance / (float) max ));
-}
-*/
 
 
 #endif /* defined(__differences__difference__) */

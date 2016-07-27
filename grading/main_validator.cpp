@@ -104,7 +104,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   int possible_ta_pts = TA_POINTS;
 
   std::stringstream testcase_json;
-  //std::vector<std::string> all_testcases;
 
   nlohmann::json all_testcases;
 
@@ -128,7 +127,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     std::string title = "Test " + std::to_string(i+1) + " " + (*tc)[i].value("title","MISSING TITLE");
     int points = (*tc)[i].value("points",0);
 
-    //for (int i = 0; i < testcases.size(); ++i) {
     std::cout << "------------------------------------------\n" << title << " - points: " << points << std::endl;
     
     // START JSON FOR TEST CASE
@@ -181,7 +179,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     }
     else {
       // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
-      nlohmann::json diff_js;//std::vector<std::string> diff_vectors;
+      nlohmann::json diff_js;
       double my_score = 1.0;
       double deduction_sum = 0.0;
       

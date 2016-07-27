@@ -263,14 +263,6 @@ TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {
 
 
 /*
-TestResults* TestCaseComparison::doit(const std::string &prefix) {
-
-
-  std::cout << "IN DOIT FOR COMPARISON '" << prefix+"_"+filename << "' '" << expected_file << "'" << std::endl;
-
-  std::ifstream student_instr((prefix+"_"+filename).c_str());
-
-
 
 
   //#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
@@ -289,92 +281,7 @@ TestResults* TestCaseComparison::doit(const std::string &prefix) {
 
 
 
-
-  //std::ifstream expected_instr(expected_file.c_str());
-  std::ifstream expected_instr(expected.c_str());
-
-  std::string s = "";
-  std::string e = "";
-
-  if (student_instr) {
-    std::cout << "STUDENT FILE EXISTS" << std::endl;
-    s = std::string(std::istreambuf_iterator<char>(student_instr),
-		    std::istreambuf_iterator<char>());
-    std::cout << "student file size = " << s.size() << std::endl;
-  }
-  if (expected_instr) {
-    std::cout << "EXPECTED FILE EXISTS" << std::endl;
-    e = std::string(std::istreambuf_iterator<char>(expected_instr),
-		    std::istreambuf_iterator<char>());
-    std::cout << "expected file size = " << e.size() << std::endl;
-  }
-
-
-
-
-  if (s.size() > MYERS_DIFF_MAX_FILE_SIZE) {
-    std::cout << "ERROR: student file size too big " << s.size() << " > " << MYERS_DIFF_MAX_FILE_SIZE << std::endl;
-    return new TestResults(0,"ERROR!  Student file too large for grader<br>\n");
-  }
-  if (e.size() > MYERS_DIFF_MAX_FILE_SIZE) {
-    std::cout << "ERROR: expected file size too big " << e.size() << " > " << MYERS_DIFF_MAX_FILE_SIZE << std::endl;
-    return new TestResults(0,"ERROR!  Instructor expected file too large for grader<br>\n");
-  }
-
-
-  std::cout << "GOING TO COMPARE studentsize=" << s.size() << "  expectedsize="<< e.size() << std::endl;
-
-  //return test_case_grader[j]->cmp_output (s,e);
-  return cmp_output (s,e);
-}
 */
-
-/*
-
-TestResults* TestCaseTokens_doit(nlohmann::json j, const std::string &prefix) {
-
-  std::string message;
-  std::string student_file_contents;
-  if (!openStudentFile(tc,j,student_file_contents,message)) { 
-    return new TestResults(0.0,message);
-  }
-
-
-
-  float deduction = j.value("deduction",1.0); ///float(num_graders));
-  std::string filename = j.value("filename","MISSING FILENAME");
-  std::string description = j.value("description",filename);
-  std::string instructor_file = j.value("instructor_file","");
-  std::vector<std::string> data_vec;
-  nlohmann::json::iterator data_json = j.find("data");
-  if (data_json != j.end()) {
-    for (int i = 0; i < data_json->size(); i++) {
-      data_vec.push_back((*data_json)[i]);
-    }
-  }
-
-  std::ifstream student_instr((prefix+"_"+filename).c_str());
-
-  std::string s = "";
-
-  if (student_instr) {
-    std::cout << "STUDENT FILE EXISTS" << std::endl;
-    s = std::string(std::istreambuf_iterator<char>(student_instr),
-		    std::istreambuf_iterator<char>());
-    std::cout << "student file size = " << s.size() << std::endl;
-  }
-
-  if (s.size() > OTHER_MAX_FILE_SIZE) {
-    std::cout << "ERROR: student file size too big " << s.size() << " > " << OTHER_MAX_FILE_SIZE << std::endl;
-    return new TestResults(0,"ERROR! Student file too large for grader<br>\n");
-  }
-
-  //return test_case_grader[j]->cmp_output (s,e);
-  //return token_grader(s,tokens);
-  return token_grader(s,data_vec); //tokens);
-}
-*/
-
 
 /*
 TestResults* TestCaseCustom_doit(nlohmann::json j,const std::string &prefix) {
