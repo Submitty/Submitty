@@ -58,7 +58,7 @@ def run_test(test):
     test.diff("test08_output_reordered.txt","output_reordered.txt")
     test.diff("test09_output_reordered.txt","output_reordered.txt")
     test.run_validator()
-    test.diff("submission.json")
+    test.json_diff("submission.json")
     for i in range(1, 10):
         test.json_diff("test0%d_0_diff.json" % i)
         test.empty_file("test0%d_STDERR.txt" % i)
