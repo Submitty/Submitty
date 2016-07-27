@@ -25,6 +25,15 @@ Melissa Lindquist
 Beverly Sihsobhon
 
 Stanley Cheung
+
+We'd like to recognize and thank:
+
+Andrew Fasano
+Markus Gaasedelen
+Nick Burnett
+Toshi Piazza
+
+For their bug reports of specific security vulnerabilities :)
 	
 Tyler Shepard
  	
