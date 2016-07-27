@@ -20,3 +20,6 @@ INSERT INTO grading_registration(sections_registration_id, user_id)
 -- Students
 INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
     VALUES ('student', 'Joe', 'Student', 'student@email.com', 4, 1, NULL);
+    
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('smithj', 'John', 'Smith', 'smithj@email.com', 4, 1, NULL);

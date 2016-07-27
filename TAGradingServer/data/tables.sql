@@ -88,7 +88,8 @@ CREATE TABLE gradeable (
     g_grade_start_date timestamp(6) without time zone NOT NULL,
     g_grade_released_date timestamp(6) without time zone NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
-    g_min_grading_group integer NOT NULL
+    g_min_grading_group integer NOT NULL,
+    g_closed_date timestamp(6)
 );
 
 
