@@ -180,23 +180,12 @@ function verify_student_in_db($student) {
 //OUT: TRUE should RCS ID be found in the database.  FALSE otherwise.
 //PURPOSE:  Verify that student is in database (indicating the student is enrolled)
 
-	//SQL for "old schema"
-	$sql = <<<SQL
-SELECT COUNT(1)
-FROM students
-WHERE student_rcs=?
-SQL;
-
-	//SQL for "new schema"
-	//FIXME: update 'user_group' property to match the STUDENTS group
-/* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	$sql = <<<SQL
 SELECT COUNT(1)
 FROM users
 WHERE user_id=?
 AND	user_group=4
 SQL;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
 
 	\lib\Database::query($sql, array($student));
 
@@ -212,33 +201,12 @@ function retrieve_students_from_db() {
 //     last name, timestamp and number of late days.
 //PURPOSE:  Retrieve list of students to display current late days.
 
-	//SQL for "old schema"
-	$sql = <<<SQL
-SELECT 
-	students.student_rcs,
-	students.student_first_name,
-	students.student_last_name,
-	late_days.allowed_lates,
-	late_days.since_timestamp::timestamp::date
-FROM students
-FULL OUTER JOIN late_days
-	ON students.student_rcs=late_days.student_rcs
-WHERE late_days.allowed_lates IS NOT NULL
-	AND late_days.allowed_lates>0
-ORDER BY
-	students.student_rcs ASC,
-	late_days.since_timestamp DESC;
-SQL;
-	
-	//SQL for "new schema"
-	//FIXME: update user.user_group property to match value representing students.
-/* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	$sql = <<<SQL
 SELECT
-	users.user_email,
+	late_days.user_id,
 	users.user_firstname,
 	users.user_lastname,
-	late_days.user_id,
+	late_days.allowed_late_days,
 	late_days.since_timestamp::timestamp::date
 FROM users
 FULL OUTER JOIN late_days
@@ -250,7 +218,6 @@ ORDER BY
 	users.user_email ASC,
 	late_days.since_timestamp DESC;
 SQL;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */
 
 	\lib\Database::query($sql);
 	return \lib\Database::rows();
@@ -272,64 +239,12 @@ function upsert(array $data) {
  * 	q.v. http://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
  * -------------------------------------------------------------------------- */
 
-	//SQL for "old schema"
 	$sql = array();
 	
 	//TEMPORARY table to hold all new values that will be "upserted"
 	$sql['temp_table'] = <<<SQL
 CREATE TEMPORARY TABLE temp
-	(student_rcs VARCHAR(255),
-	date TIMESTAMP,
-	late_days INTEGER)
-ON COMMIT DROP;
-SQL;
-
-	//INSERT new data into temporary table -- prepares all data to be upserted
-	//in a single batch DB transaction.
-	for ($i=0; $i<count($data); $i++) {
-		$sql["data_{$i}"] = <<<SQL
-INSERT INTO temp VALUES (?,?,?);
-SQL;
-	}
-
-	//LOCK will prevent sharing collisions while upsert is in process.
-	$sql['lock'] = <<<SQL
-LOCK TABLE late_days IN EXCLUSIVE MODE;
-SQL;
-
-	//This portion ensures that UPDATE will only occur when a record already exists.
-	$sql['update'] = <<<SQL
-UPDATE late_days
-SET allowed_lates=temp.late_days
-FROM temp
-WHERE late_days.student_rcs=temp.student_rcs
-	AND late_days.since_timestamp=temp.date
-SQL;
-
-	//This portion ensures that INSERT will only occur when data record is new.
-	$sql['insert'] = <<<SQL
-INSERT INTO late_days
-	(student_rcs,
-	since_timestamp,
-	allowed_lates)
-SELECT
-	temp.student_rcs,
-	temp.date,
-	temp.late_days
-FROM temp 
-LEFT OUTER JOIN late_days
-	ON late_days.student_rcs=temp.student_rcs
-	AND late_days.since_timestamp=temp.date
-WHERE late_days.student_rcs IS NULL
-SQL;
-
-	//SQL code for "new schema"
-/* DISABLED CODE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-	//TEMPORARY table to hold all new values that will be "upserted"
-	$sql['temp_table'] = <<<SQL
-CREATE TEMPORARY TABLE temp
-	(student_rcs VARCHAR(255),
+	(student_id VARCHAR(255),
 	date TIMESTAMP,
 	late_days INTEGER)
 ON COMMIT DROP;
@@ -353,28 +268,26 @@ SQL;
 UPDATE late_days
 SET allowed_late_days=temp.late_days
 FROM temp
-WHERE late_day.user_id=temp.student_rcs
+WHERE late_days.user_id=temp.student_id
 	AND late_days.since_timestamp=temp.date
 SQL;
 
 	//This portion ensures that INSERT will only occur when data record is new.
 	$sql['insert'] = <<<SQL
-INSERT INTO late_day_exceptions
+INSERT INTO late_days
 	(user_id,
 	since_timestamp,
 	allowed_late_days)
 SELECT
-	temp.student_rcs,
+	temp.student_id,
 	temp.date,
 	temp.late_days
 FROM temp 
 LEFT OUTER JOIN late_days
-	ON late_days.user_id=temp.student_rcs
+	ON late_days.user_id=temp.student_id
 	AND late_days.since_timestamp=temp.date
 WHERE late_days.user_id IS NULL
 SQL;
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ END DISABLED CODE */	
 
 	//Begin DB transaction
 	\lib\Database::beginTransaction();
