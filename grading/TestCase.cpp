@@ -64,7 +64,7 @@ TestCase TestCase::MakeTestCase (nlohmann::json j) {
       } else if (method == "searchToken") {
         graders.push_back(new TestCaseTokens(&searchToken,filename,description,data_vec,deduction));
 
-      } else _TERM_COMPARISON_DEF(int, std::stoi)
+      } else _TERM_COMPARISON_DEF(int)
         
       else {
         TestResults* (*cmp) ( const std::string&, const std::string& ) = NULL;

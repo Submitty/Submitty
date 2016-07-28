@@ -114,7 +114,7 @@ private:
   std::string my_display_mode;
 };
 
-#define _TERM_COMPARISON_DEF(T, FROMSTR)\
+#define _TERM_COMPARISON_DEF(T)\
 if (method == #T "Comparison") {\
         bool (*cmp)(const int& a, const int& b) = NULL;\
         std::string cmpstr(itr2->value("comparison",""));\
@@ -124,7 +124,10 @@ if (method == #T "Comparison") {\
         else if (cmpstr == "lt") cmp = [](const T& a, const T& b){return a < b;};\
         else if (cmpstr == "ge") cmp = [](const T& a, const T& b){return a >= b;};\
         else if (cmpstr == "le") cmp = [](const T& a, const T& b){return a <= b;};\
-		if (cmp != NULL) graders.push_back(new TestCaseTermComparison<T>(filename, description, cmp, FROMSTR(itr2->value("term", "0"))));\
+	    T object;\
+	    std::stringstream ss(itr2->value("term", "0"));\
+	    ss >> object;\
+		if (cmp != NULL) graders.push_back(new TestCaseTermComparison<T>(filename, description, cmp, object));\
 }
 
 template <typename T>
