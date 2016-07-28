@@ -127,15 +127,18 @@ if (method == #T "Comparison") {\
 	    T object;\
 	    std::stringstream ss(itr2->value("term", "0"));\
 	    ss >> object;\
-		if (cmp != NULL) graders.push_back(new TestCaseTermComparison<T>(filename, description, cmp, object));\
+		if (cmp != NULL) graders.push_back(\
+				new TestCaseTermComparison<T>(filename, description, cmp, object,\
+					std::stof(itr2->value("deduction", "-1.0"))));\
 }
 
 template <typename T>
 class TestCaseTermComparison : public TestCaseGrader {
 public:
   TestCaseTermComparison(const std::string file, const std::string desc,
-                         bool (*m)(const T& a, const T& b), const T& o)
-    : TestCaseGrader(file, desc), method(m), object(o) {}
+                         bool (*m)(const T& a, const T& b), const T& o,
+						 float deduct=-1.0)
+    : TestCaseGrader(file, desc), method(m), object(o) {deduction = deduct;}
 
   virtual TestResults* doit(const std::string &prefix) {
     T contents;
