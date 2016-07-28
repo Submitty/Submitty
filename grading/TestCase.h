@@ -97,6 +97,27 @@ static void adjust_test_case_limits(nlohmann::json &modified_test_case_limits,
   }
 }
 
+
+inline std::vector<std::string> stringOrArrayOfStrings(nlohmann::json j, const std::string what) {
+  std::vector<std::string> answer;
+  nlohmann::json::const_iterator itr = j.find(what);
+  if (itr == j.end())
+    return answer;
+  if (itr->is_string()) {
+    answer.push_back(*itr);    
+  } else {
+    assert (itr->is_array());
+    nlohmann::json::const_iterator itr2 = itr->begin();
+    while (itr2 != itr->end()) {
+      assert (itr2->is_string());
+      answer.push_back(*itr2);
+      itr2++;
+    }
+  }
+  return answer;
+}
+
+
 // =================================================================================
 // =================================================================================
 
@@ -136,20 +157,20 @@ public:
 
 
   static TestCase MakeCompilation( const std::string &title,
-				   const std::string &compilation_command,
+				   const std::vector<std::string> &compilation_commands,
 				   const std::string &executable_filename, // single executable file converted into vector
 				   const TestCasePoints &tcp,
                                    float w_frac, // = 0,
                                    nlohmann::json test_case_limits) { // = nlohmann::json() ) {
     return MakeCompilation(title,
-			   compilation_command,
+			   compilation_commands,
 			   std::vector<std::string>(1,executable_filename),
 			   tcp, w_frac, test_case_limits);
   }
 
 
   static TestCase MakeCompilation( const std::string &title,
-				   const std::string &compilation_command,
+				   const std::vector<std::string> &compilation_commands,
 				   const std::vector<std::string> &executable_filenames,
 				   const TestCasePoints &tcp,
                                    float w_frac, // = 0,
@@ -160,8 +181,8 @@ public:
     assert (executable_filenames.size() > 0 && 
 	    executable_filenames[0] != "");
     answer._filenames = executable_filenames;
-    answer._command = compilation_command;
-    assert (answer._command != "");
+    assert (compilation_commands.size() > 0);
+    answer._commands = compilation_commands;
     answer.warning_frac = w_frac;
 
     answer.COMPILATION = true;
@@ -199,7 +220,7 @@ public:
 
 
   static TestCase MakeTestCase   ( const std::string &title, const std::string &details,
-				   const std::string &command,
+				   const std::vector<std::string> &commands,
 				   const TestCasePoints &tcp,
 				   //std::vector<TestCaseGrader*> tcc,
 				   std::vector<nlohmann::json> graders,
@@ -208,8 +229,8 @@ public:
     TestCase answer;
     answer._title = title;
     answer._details = details;
-    answer._command = command;
-    assert (answer._command != "");
+    assert (commands.size() > 0);
+    answer._commands = commands;
     answer._test_case_points = tcp;
     assert (graders.size() >= 1); // && tcc.size() <= 4);
     answer.test_case_grader_vec = graders;
@@ -237,7 +258,8 @@ public:
 			return _details;
 		}
 		std::string command () const {
-			return _command;
+                  assert (_commands.size() > 0);
+                  return _commands[0];
 		}
 
   // FIXME: filename/rawfilename is messy/confusing, sort this out
@@ -276,9 +298,14 @@ public:
   }
 
 
+
+
+
   std::string raw_filename (int i) const {
     assert (i >= 0 && i < numFileGraders());
-    return test_case_grader_vec[i].value("filename","MISSING FILENAME");
+    std::vector<std::string> files = stringOrArrayOfStrings(test_case_grader_vec[i],"filename");
+    assert (files.size() > 0);
+    return files[0];
   }
 
   std::string prefix() const {
@@ -326,7 +353,7 @@ private:
   std::string _details;
 
   std::vector<std::string> _filenames;
-  std::string _command;
+  std::vector<std::string> _commands;
 
   nlohmann::json _test_case_limits;
 

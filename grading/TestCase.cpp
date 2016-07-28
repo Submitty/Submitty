@@ -13,6 +13,7 @@
 #define OTHER_MAX_FILE_SIZE      1000 * 100  // in characters  (approx 1000 lines with 100 characters per line)
 
 
+TestResults* custom_grader(const TestCase &tc, const nlohmann::json &j);
 
 std::string GLOBAL_replace_string_before = "";
 std::string GLOBAL_replace_string_after = "";
@@ -93,7 +94,10 @@ TestResults* json_grader_doit(const TestCase& tc, const nlohmann::json& j) {
 
   std::string method = j.value("method","MISSING METHOD");
   float deduction = j.value("deduction",1.0); ///float(num_graders));
-  std::string filename = j.value("filename","MISSING FILENAME");
+
+  std::vector<std::string> filenames = stringOrArrayOfStrings(j,"filename");
+  assert (filenames.size() > 0);
+  std::string filename = filenames[0]; //j.value("filename","MISSING FILENAME");
   //std::string description = j.value("description",filename);
   //std::string instructor_file = j.value("instructor_file","");
 
@@ -123,8 +127,10 @@ TestResults* json_grader_doit(const TestCase& tc, const nlohmann::json& j) {
     return g->doit(prefix);
     
   } else if (method == "searchToken") {
-    //TestCaseTokens *g = new TestCaseTokens(&searchToken,filename,description,data_vec,deduction);
-    return searchToken_doit(tc,j); //(&searchToken,filename,description,data_vec,deduction);
+    return searchToken_doit(tc,j); 
+
+  } else if (method == "custom") {
+    return custom_grader(tc,j); 
     
   } else {
     TestResults* (*cmp) ( const std::string&, const std::string& ) = NULL;
@@ -156,8 +162,9 @@ TestCase TestCase::MakeTestCase (nlohmann::json j) {
                           j.value("filename","FILENAME MISSING"),
                           TestCasePoints(j.value("points",0)));
   } else if (type == "Compilation") {
+    std::vector<std::string> commands = stringOrArrayOfStrings(j,"command");
     return MakeCompilation(j.value("title","TITLE MISSING"),
-                           j.value("command","COMMAND MISSING"),
+                           commands, //j.value("command","COMMAND MISSING"),
                            j.value("executable_name","EXECUTABLE FILENAME MISSING"),
                            TestCasePoints(j.value("points",0)),
                            j.value("warning_deduction",0),
@@ -188,9 +195,10 @@ TestCase TestCase::MakeTestCase (nlohmann::json j) {
 
     bool hidden = j.value("hidden",false);
     bool extra_credit = j.value("extra_credit",false);
+    std::vector<std::string> commands = stringOrArrayOfStrings(j,"command");
     return MakeTestCase(j.value("title","TITLE MISSING"),
-                        j.value("details","DETAILS MISSING"),
-                        j.value("command","COMMAND MISSING"),
+                        j.value("details",""),
+                        commands,
                         TestCasePoints(j.value("points",0),hidden,extra_credit),
                         json_graders,
                         "",

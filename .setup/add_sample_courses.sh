@@ -117,7 +117,7 @@ function one_course {
 python_homework=( python_simple_homework python_buggy_output python_simple_homework_multipart )
 one_course csci1100 csci1100_tas_www  "${python_homework[@]}"
 
-cpp_homework=( cpp_simple_lab cpp_cats cpp_memory_debugging )
+cpp_homework=( cpp_simple_lab cpp_cats cpp_memory_debugging cpp_custom)
 one_course csci1200 csci1200_tas_www  "${cpp_homework[@]}"
 
 java_homework=( java_factorial java_coverage_factorial )

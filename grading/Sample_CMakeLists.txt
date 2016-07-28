@@ -80,6 +80,8 @@ include(instructor_CMakeLists.txt OPTIONAL RESULT_VARIABLE instructor_cmakelists
 if (instructor_cmakelists)
 message("DETECTED INSTRUCTOR CUSTOMIZATIONS in ${instructor_cmakelists}")
 message("  custom_files: ${custom_files}")
+else()
+set (custom_files ${GRADINGCODE}/grading/empty_custom_function.cpp)
 endif(instructor_cmakelists)
 
 
@@ -147,6 +149,7 @@ add_executable(validate.out
 )
 
 
+
 ###################################################################################
 
 target_link_libraries(custom_functions seccomp)
@@ -164,6 +167,7 @@ set_property(TARGET validate.out  APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=
 
 include_directories(${MY_DIR})
 include_directories(${GRADINGCODE})
+include_directories(${GRADINGCODE}/grading)
 
 SET(EXECUTABLE_OUTPUT_PATH ${my_bin})
 
