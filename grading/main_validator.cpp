@@ -227,7 +227,12 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
           diff_j["display_mode"] = dm;
 	}
 
-        diff_j["student_file"] = my_testcase.filename(j);
+        std::vector<std::string> filenames = stringOrArrayOfStrings(my_testcase.test_case_grader_vec[j],"filename");
+
+        for (int i = 0; i < filenames.size(); i++) {
+          diff_j["student_file"].push_back(my_testcase.prefix() + "_" + filenames[0]);
+        }
+
 
         std::string expected = "";
         expected = my_testcase.test_case_grader_vec[j].value("instructor_file", "");

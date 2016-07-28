@@ -9,8 +9,8 @@ import glob
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/sample_files/sample_assignment_config/python_buggy_output"
-SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/sample_files/sample_submissions/python_buggy_output"
+SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/sample_files/sample_assignment_config/python_linehighlight"
+SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/sample_files/sample_submissions/python_linehighlight"
 
 @prebuild
 def initialize(test):

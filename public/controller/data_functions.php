@@ -1246,10 +1246,12 @@ function get_testcase_diff($username, $semester,$course, $assignment_id, $assign
             $data["instructor"] = file_get_contents($instructor_file_path);
         }
     }
-    if (isset($diff["student_file"]) && file_exists($student_path . $diff["student_file"])) {
-        $file_size = filesize($student_path. $diff["student_file"]);
+    if (isset($diff["student_file"]) &&
+        count($diff["student_file"]) > 0 &&
+        file_exists($student_path . $diff["student_file"][0])) {
+        $file_size = filesize($student_path. $diff["student_file"][0]);
         if ($file_size / 1024 < 10000) {
-            $data["student"] = file_get_contents($student_path.$diff["student_file"]);
+            $data["student"] = file_get_contents($student_path.$diff["student_file"][0]);
         } else {
             $data["student"] = "ERROR: Unable to read student output file.  Student output file is greater than or equal to ". ($file_size / 1024). " kb.  File could be corrupted or is too large.";
         }
