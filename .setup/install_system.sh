@@ -70,7 +70,6 @@ echo "\n" | add-apt-repository ppa:webupd8team/java
 apt-get -qq update
 
 
-
 ############################
 # NTP: Network Time Protocol
 # You want to be sure the clock stays in sync, especially if you have
@@ -86,8 +85,6 @@ apt-get -qq update
 
 apt-get install -qqy ntp
 service ntp restart
-
-
 
 # path for untrusted user creation script will be different if not using Vagrant
 ${SUBMITTY_REPOSITORY}/.setup/create.untrusted.users.pl
@@ -125,11 +122,8 @@ apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgr
 libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
 libseccomp2 seccomp junit cmake xlsx2csv libpcre3 libpcre3-dev flex bison
 
-# TODO: We should look into making it so that only certain users have access to certain packages
-# so that hwphp is the only one who could use PAM for example
-pip install python-pam
-chmod 555 /usr/local/lib/python2.7/*
-chmod 555 /usr/lib/python2.7/dist-packages
+apt-get install -qqy subversion subversion-tools
+apt-get install -qqy libapache2-svn
 
 # Enable PHP5-mcrypt
 php5enmod mcrypt
@@ -147,7 +141,16 @@ apt-get install -qqy racket > /dev/null 2>&1
 apt-get install -qqy swi-prolog > /dev/null 2>&1
 
 # Install Image Magick for image comparison, etc.
-apt-get install imagemagick
+apt-get install -qqy imagemagick
+
+apt-get -qqy autoremove
+
+
+# TODO: We should look into making it so that only certain users have access to certain packages
+# so that hwphp is the only one who could use PAM for example
+pip install python-pam
+chmod 555 /usr/local/lib/python2.7/*
+chmod 555 /usr/lib/python2.7/dist-packages
 
 #################################################################
 # NETWORK CONFIGURATION
@@ -405,13 +408,13 @@ adduser hwcron hwcronphp
 for COURSE in csci1000 csci1100 csci1200 csci2600
 do
 
-        # for each course, create a group to contain the current
-        # instructor along the lines of:
+    # for each course, create a group to contain the current
+    # instructor along the lines of:
 
 	addgroup $COURSE
 
-        # and another group to contain the current instructor, TAs,
-        # hwcron, and hwphp along the lines of
+    # and another group to contain the current instructor, TAs,
+    # hwcron, and hwphp along the lines of
 
 	addgroup $COURSE\_tas_www
 	adduser hwphp $COURSE\_tas_www
@@ -445,8 +448,6 @@ ls /home | sort > ${SUBMITTY_DATA_DIR}/instructors/valid
 #################################################################
 # SVN SETUP
 #################
-apt-get install -qqy subversion subversion-tools
-apt-get install -qqy libapache2-svn
 a2enmod dav
 a2enmod dav_fs
 a2enmod authz_svn
@@ -483,15 +484,13 @@ if [ ${VAGRANT} == 1 ]; then
 	echo "postgres:postgres" | chpasswd postgres
 	adduser postgres shadow
 	service postgresql restart
-	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
+	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}')"
+	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost       all    all    192.168.56.0\/24    pam\nhost       all    all    all                md5/" /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
 	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
 	echo "Finished creating PostgreSQL users"
 
-    echo "Setting up Postgres to connect to via host"
-    PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}')"
 	sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
-	echo "host    all             all             all                     md5" >> "/etc/postgresql/${PG_VERSION}/main/pg_hba.conf"
 	service postgresql restart
 fi
 
