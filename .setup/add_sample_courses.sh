@@ -107,7 +107,7 @@ function one_course {
 #####################################################################
 # CREATE A FEW SAMPLE COURSES
 
-python_homework=( python_simple_homework python_buggy_output python_simple_homework_multipart )
+python_homework=( python_simple_homework python_buggy_output python_simple_homework_multipart python_static_analysis )
 one_course csci1100 csci1100_tas_www  "${python_homework[@]}"
 
 cpp_homework=( cpp_simple_lab cpp_cats cpp_memory_debugging )

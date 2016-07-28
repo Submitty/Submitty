@@ -114,6 +114,43 @@ private:
   std::string my_display_mode;
 };
 
+#define _TERM_COMPARISON_DEF(T, FROMSTR)\
+if (method == #T "Comparison") {\
+        bool (*cmp)(const int& a, const int& b) = NULL;\
+        std::string cmpstr(itr2->value("comparison",""));\
+        if (cmpstr == "eq") cmp = [](const T& a, const T& b){return a == b;};\
+        else if (cmpstr == "ne") cmp = [](const T& a, const T& b){return a != b;};\
+        else if (cmpstr == "gt") cmp = [](const T& a, const T& b){return a > b;};\
+        else if (cmpstr == "lt") cmp = [](const T& a, const T& b){return a < b;};\
+        else if (cmpstr == "ge") cmp = [](const T& a, const T& b){return a >= b;};\
+        else if (cmpstr == "le") cmp = [](const T& a, const T& b){return a <= b;};\
+		if (cmp != NULL) graders.push_back(new TestCaseTermComparison<T>(filename, description, cmp, FROMSTR(itr2->value("term", "0"))));\
+}
+
+template <typename T>
+class TestCaseTermComparison : public TestCaseGrader {
+public:
+  TestCaseTermComparison(const std::string file, const std::string desc,
+                         bool (*m)(const T& a, const T& b), const T& o)
+    : TestCaseGrader(file, desc), method(m), object(o) {}
+
+  virtual TestResults* doit(const std::string &prefix) {
+    T contents;
+    std::ifstream student_instr((prefix + "_" + filename).c_str());
+    student_instr >> contents;
+    student_instr.close();
+    if (method(contents, object)) {
+      return new TestResults(1);
+    } else {
+      return new TestResults(0);
+    }
+  }
+
+private:
+  bool (*method)(const T& a, const T& b);
+  T object;
+};
+
 
 // =================================================================================
 

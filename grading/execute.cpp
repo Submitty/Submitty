@@ -41,6 +41,10 @@ bool system_program(const std::string &program) {
       program == "/bin/mv" ||
       program == "/bin/chmod" ||
       program == "/usr/bin/find" ||
+	  // analysis tools
+	  program == "/bin/cat" ||
+	  program == "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_token" ||
+	  program == "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node" ||
       // for Computer Science I
       program == "/usr/bin/python" ||
       // for Data Structures
