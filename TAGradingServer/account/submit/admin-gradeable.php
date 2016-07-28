@@ -141,12 +141,12 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
         $num_old_questions = intval($db->row()['cnt']);
         //insert the questions
         for ($i=0; $i<$num_questions; ++$i){
-            $gc_title = $add_args["comment-".strval($i)];
-            $gc_ta_comment = $add_args["ta-".strval($i)];
-            $gc_student_comment = $add_args["student-".strval($i)];
-            $gc_max_value = $add_args['point-'.strval($i)];
+            $gc_title = $add_args["comment_".strval($i)];
+            $gc_ta_comment = $add_args["ta_".strval($i)];
+            $gc_student_comment = $add_args["student_".strval($i)];
+            $gc_max_value = $add_args['point_'.strval($i)];
             $gc_is_text = "false";
-            $gc_is_ec = (isset($add_args['ec-'.strval($i)]) && $add_args['ec-'.strval($i)]=='on')? "true" : "false";
+            $gc_is_ec = (isset($add_args['ec_'.strval($i)]) && $add_args['ec_'.strval($i)]=='on')? "true" : "false";
             if($action=='edit' && $i<$num_old_questions){
                 //update the values for the electronic gradeable
                 $params = array($gc_title, $gc_ta_comment, $gc_student_comment, $gc_max_value, $gc_is_text, $gc_is_ec, $this->g_id,$i);
@@ -172,7 +172,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
          // create a gradeable component for each checkpoint
         $num_checkpoints = -1; // remove 1 for the template
         foreach($add_args as $k=>$v){
-            if(strpos($k, 'checkpoint-label') !== false){
+            if(strpos($k, 'checkpoint_label') !== false){
                 ++$num_checkpoints;
             }    
         }
@@ -181,8 +181,8 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
         
         // insert the checkpoints
         for($i=1; $i<=$num_checkpoints; ++$i){
-            $gc_is_extra_credit = (isset($add_args["checkpoint-extra-".strval($i)])) ? "true" : "false";
-            $gc_title = $add_args['checkpoint-label-'. strval($i)];
+            $gc_is_extra_credit = (isset($add_args["checkpoint_extra_".strval($i)])) ? "true" : "false";
+            $gc_title = $add_args['checkpoint_label_'. strval($i)];
             
             if($action=='edit' && $i <= $num_old_checkpoints){
                 $params = array($gc_title, '', '', 1, "false", $gc_is_extra_credit, $this->g_id, $i);
@@ -210,21 +210,21 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
         $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($this->g_id));
         $num_old_numerics = intval($db->row()['cnt']);
         
-        $num_numeric = intval($add_args['num-numeric-items']);
-        $num_text= intval($add_args['num-text-items']);
+        $num_numeric = intval($add_args['num_numeric_items']);
+        $num_text= intval($add_args['num_text_items']);
         
         for($i=1; $i<=$num_numeric+$num_text; ++$i){
             //CREATE the numeric items in gradeable component
             $gc_is_text = ($i > $num_numeric)? "true" : "false";
             if($i > $num_numeric){
-                $gc_title = (isset($add_args['text-label-'. strval($i-$num_numeric)]))? $add_args['text-label-'. strval($i-$num_numeric)] : '';
+                $gc_title = (isset($add_args['text_label_'. strval($i-$num_numeric)]))? $add_args['text_label_'. strval($i-$num_numeric)] : '';
                 $gc_max_value = 0;
                 $gc_is_extra_credit ="false";
             }
             else{
-                $gc_title = (isset($add_args['numeric-label-'. strval($i)]))? $add_args['numeric-label-'. strval($i)] : '';
-                $gc_max_value = (isset($add_args['max-score-'. strval($i)]))? $add_args['max-score-'. strval($i)] : 0;
-                $gc_is_extra_credit = (isset($add_args['numeric-extra-'.strval($i)]))? "true" : "false";
+                $gc_title = (isset($add_args['numeric_label_'. strval($i)]))? $add_args['numeric_label_'. strval($i)] : '';
+                $gc_max_value = (isset($add_args['max_score_'. strval($i)]))? $add_args['max_score_'. strval($i)] : 0;
+                $gc_is_extra_credit = (isset($add_args['numeric_extra_'.strval($i)]))? "true" : "false";
             }
             
             if($action=='edit' && $i<=$num_old_numerics){
@@ -265,30 +265,30 @@ abstract class GradeableType{
      $g_id = $request_args['gradeable_id'];
      $g_title = $request_args['gradeable_title'];
      $g_overall_ta_instr = $request_args['ta_instructions'];
-     $g_use_teams = ($request_args['team-assignment'] === 'yes') ? "true" : "false";
-     $g_min_grading_group=intval($request_args['minimum-grading-group']);
-     $g_grade_by_registration = ($request_args['section-type'] === 'reg-section') ? "true" : "false";
+     $g_use_teams = ($request_args['team_assignment'] === 'yes') ? "true" : "false";
+     $g_min_grading_group=intval($request_args['minimum_grading_group']);
+     $g_grade_by_registration = ($request_args['section_type'] === 'reg_section') ? "true" : "false";
      $g_grade_start_date = $request_args['date_grade'];
      $g_grade_released_date = $request_args['date_released'];
-     $g_syllabus_bucket = $request_args['gradeable-buckets'];
+     $g_syllabus_bucket = $request_args['gradeable_buckets'];
      
      $g_constructor_params = array('gradeable_id' => $g_id, 'gradeable_title' => $g_title, 'ta_instructions' => $g_overall_ta_instr,
                                    'team_assignment' => $g_use_teams, 'min_grading_group' => $g_min_grading_group, 
                                    'section_type' => $g_grade_by_registration, 'date_grade' => $g_grade_start_date, 
                                    'date_released' =>$g_grade_released_date, 'bucket' => $g_syllabus_bucket);
      
-     if ($request_args['gradeable-type'] === "Electronic File"){
+     if ($request_args['gradeable_type'] === "Electronic File"){
         $g_constructor_params['gradeable_type'] = GradeableType::electronic_file;
         
-        $instructions_url = $request_args['instructions-url'];
+        $instructions_url = $request_args['instructions_url'];
         $date_submit = $request_args['date_submit'];
         $date_due = $request_args['date_due'];
-        $is_repo = ($request_args['upload-type'] == 'Repository')? "true" : "false";
+        $is_repo = ($request_args['upload_type'] == 'Repository')? "true" : "false";
         $subdirectory = (isset($request_args['subdirectory']) && $is_repo == "true")? $request_args['subdirectory'] : '';
-        $ta_grading = ($request_args['ta-grading'] == 'yes')? "true" : "false";
-        $config_path = $request_args['config-path'];
+        $ta_grading = ($request_args['ta_grading'] == 'yes')? "true" : "false";
+        $config_path = $request_args['config_path'];
         $eg_late_days = intval($request_args['eg_late_days']);
-        $eg_pt_precision = floatval($request_args['point-precision']);
+        $eg_pt_precision = floatval($request_args['point_precision']);
         
         $g_constructor_params['instructions_url'] = $instructions_url;
         $g_constructor_params['date_submit'] = $date_submit;
@@ -302,11 +302,11 @@ abstract class GradeableType{
         
         $gradeable = new ElectronicGradeable($g_constructor_params);
      }
-     else if ($request_args['gradeable-type'] === "Checkpoints"){
+     else if ($request_args['gradeable_type'] === "Checkpoints"){
         $g_constructor_params['gradeable_type'] = GradeableType::checkpoints;
         $gradeable = new CheckpointGradeable($g_constructor_params);
      }
-     else if ($request_args['gradeable-type'] === "Numeric"){
+     else if ($request_args['gradeable_type'] === "Numeric"){
         $g_constructor_params['gradeable_type'] = GradeableType::numeric;
         $gradeable = new NumericGradeable($g_constructor_params);
      }
@@ -316,7 +316,7 @@ abstract class GradeableType{
 function getGraders($var){
     $graders = array();
     foreach ($var as $k => $v ) {
-        if (substr($k,0,7) === 'grader-' && !empty(trim($v))) {
+        if (substr($k,0,7) === 'grader_' && !empty(trim($v))) {
             $graders[explode('-', $k)[1]]=explode(',',$v);
         }
     }
