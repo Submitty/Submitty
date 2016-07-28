@@ -8,8 +8,6 @@ use \lib\FileUtils;
 use \lib\ServerException;
 use \lib\Utils;
 
-//TODO replace RCS references
-
 /**
  * Class ElectronicGradeable
  *
@@ -173,7 +171,6 @@ class ElectronicGradeable {
 
             $this->student_id = $student_id;
             $this->g_id = $g_id;
-
             $this->setEGDetails();
             $this->setStudentDetails();
             $this->setEGSubmissionDetails();
@@ -194,55 +191,50 @@ class ElectronicGradeable {
      * @throws \InvalidArgumentException
      */
      
-     // TODO USE NEW USER TABLE 
-     
     private function setStudentDetails() {
         if (!isset($this->student)) {
             
 //GETS THE ALLOWED LATE DAYS FOR A STUDENT AS OF THE SUBMISSION DATE
-           /* Database::query("
-SELECT s.*, COALESCE(ld.allowed_lates,0) as student_allowed_lates
-FROM students as s
+           Database::query("
+SELECT s.*, COALESCE(ld.allowed_late_days,0) as student_allowed_lates
+FROM users as s
 LEFT JOIN (
-    SELECT allowed_lates
+    SELECT allowed_late_days
     FROM late_days
-    WHERE since_timestamp <= ? and student_id=?
+    WHERE since_timestamp <= ? and user_id=?
     ORDER BY since_timestamp DESC
 ) as ld on 1=1
-WHERE s.student_id=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $this->student_id, $this->student_id));
+WHERE s.user_id=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $this->student_id, $this->student_id));
             $this->student = Database::row();
             if ($this->student == array()) {
                 throw new \InvalidArgumentException("Could not find student '{$this->student_id}'");
             }
 
             $params = array($this->student_id, $this->eg_details['g_id']);
-            Database::query("SELECT * FROM late_day_exceptions WHERE ex_student_id=? AND ex_rubric_id=?", $params);
+            Database::query("SELECT * FROM late_day_exceptions WHERE user_id=? AND g_id=?", $params);
             $row = Database::row();
-            $this->late_days_exception = (isset($row['ex_late_days'])) ? $row['ex_late_days'] : 0;
+            $this->late_days_exception = (isset($row['late_day_exceptions'])) ? $row['late_day_exceptions'] : 0;
 
             $params = array($this->student_id, $this->eg_details['eg_submission_due_date']);
-//TODO factor in the status
-//DETERMINE THE NUMBER OF LATE DAYS USED FOR A GRADEABLE 
             Database::query("
-SELECT GREATEST(SUM(g.grade_days_late) - COALESCE(SUM(s.ex_late_days),0),0) as used_late_days
-FROM grades as g
-    LEFT JOIN
-    (
-        SELECT * FROM late_day_exceptions
-    ) as s on s.ex_rubric_id = g.rubric_id and s.ex_student_id=g.student_id
-    LEFT JOIN
-    (
-        SELECT rubric_id, rubric_due_date FROM rubrics
-    ) as r on r.rubric_id = g.rubric_id
-WHERE g.student_id=? AND r.rubric_due_date<?", $params); 
+SELECT ABS(SUM(decrease)) AS used_late_days
+FROM (
+    SELECT *, COALESCE(allowed_late_days - LAG(allowed_late_days) over(ORDER BY since_timestamp ASC),0) AS decrease 
+    FROM 
+        late_days 
+    WHERE
+        user_id=?
+    AND 
+        since_timestamp<=?
+    ORDER BY 
+        since_timestamp DESC
+) AS u
+WHERE u.decrease <= 0
+GROUP BY u.user_id", $params); 
+
             $row = Database::row();
-            $this->student['used_late_days'] = isset($row['used_late_days']) ? $row['used_late_days'] : 0;
-        }*/
-            Database::query("SELECT * FROM users WHERE user_id=?", array($this->student_id));
-            $this->student = Database::row();
-            $this->late_days_exception = 0;
-            $this->student['used_late_days'] = 0;
-            $this->student['student_allowed_lates'] = 2;
+
+            $this->student['used_late_days'] = (isset($row['used_late_days']) ? $row['used_late_days'] : 0);
         }
     }
 
@@ -266,7 +258,7 @@ SELECT g_title, gd_overall_comment, g_grade_start_date, eg.* FROM electronic_gra
         
         // CREATE THE GRADEABLE DATA
         if (empty($this->eg_details)) {
-            // TODO FACTOR IN LATE DAYS                     //TODO replace with grader id
+                                //TODO replace with grader id
             $params = array($this->g_id, $this->student_id, $this->student_id, '', 0,0,1); 
             Database::query("INSERT INTO gradeable_data(g_id,gd_user_id,gd_grader_id,gd_overall_comment, gd_status,gd_late_days_used,gd_active_version) VALUES(?,?,?,?,?,?,?)", $params); 
             $this->gd_id = \lib\Database::getLastInsertId('gradeable_data_gd_id_seq');
@@ -277,8 +269,6 @@ SELECT g_title, gd_overall_comment, g_grade_start_date, eg.* FROM electronic_gra
             
         }
         else{
-            //get the gd_id 
-            //TODO change this to accounts
             $params=array($this->student_id, $this->g_id);
             Database::query("SELECT gd_id FROM gradeable as g INNER JOIN gradeable_data AS gd ON g.g_id=gd.g_id WHERE gd_user_id=? AND g.g_id =?", $params);
             $this->gd_id = Database::row()['gd_id'];
@@ -383,21 +373,16 @@ ORDER BY gc_order ASC
                 // TODO: Convert this to using DateTime and DateTimeInterval objects
                 $date_submission = strtotime($details['submission_time']);
                 $date_due = strtotime($this->eg_details["eg_submission_due_date"]) + 1 + __SUBMISSION_GRACE_PERIOD_SECONDS__;
-                $late_days = round((($date_submission - $date_due) / (60 * 60 * 24)) + .5, 0);
-                $late_days = ($late_days < 0) ? 0 : $late_days;
+                $days_late = round((($date_submission - $date_due) / (60 * 60 * 24)) + .5, 0);
+                $this->days_late = ($days_late < 0) ? 0 : $days_late;
             }
-            
-            //print "Submission details file path: ". $submission_details; // checked 
 
             $details['directory'] = $result_directory;
 
             // We can lazy load the actual results till we need them (such as the diffs, etc.)
             $this->results_details = $details;
-            
-            //var_dump($this->results_details);
-            
+          
             $skip_files = array();
-            //$i = 0;
             foreach ($this->results_details['testcases'] as $testcase) {
                 if (isset($testcase['execute_logfile'])) {
                     $skip_files[] = $testcase['execute_logfile'];
@@ -430,25 +415,18 @@ ORDER BY gc_order ASC
             return;
         }
         
-        //TODO update with late days IMPLEMENT THIS 
-        /*
         // IF MORE LATEDAYS WERE USED ON THIS ASSIGNMENT THAN ALLOWED => FAIL
-        if ($this->eg_details['rubric_late_days'] >= 0 &&
-            $this->parts_days_late_used[$i] > $this->eg_details['rubric_late_days']) {
-            //$this->parts_status[$i] = 0;
-            $this->status =0;
+        if ($this->days_late > ($this->eg_details['eg_late_days'] + $this->late_days_exception)) {
+            $this->status=0;
         }
         // IF MORE LATEDAYS WERE USED THAN THE STUDENT IS ALLOWED => FAIL
         else if ($this->student['student_allowed_lates'] >= 0 &&
-            $this->student['used_late_days'] + $this->parts_days_late_used[$i] > $this->student['student_allowed_lates']) {
-            //$this->parts_status[$i] = 0;
+                 $this->student['used_late_days'] + $this->days_late > $this->student['student_allowed_lates']) {
             $this->status = 0;
         }
-
         else{
             $this->status = 1;
-        }*/
-        $this->status = 1;
+        }
     }
 
     /**

@@ -322,7 +322,7 @@ ALTER TABLE ONLY late_day_exceptions
 --
 
 ALTER TABLE ONLY late_days
-    ADD CONSTRAINT late_days_pkey PRIMARY KEY (user_id);
+    ADD CONSTRAINT late_days_pkey PRIMARY KEY (user_id, since_timestamp);
 
 
 --

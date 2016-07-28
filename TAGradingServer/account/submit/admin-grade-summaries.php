@@ -101,7 +101,7 @@ foreach($db->rows() as $student_record) {
 	
     foreach($db->rows() as $gradeable){
         $this_g = array();
-        $this_g[$gradeable['g_id']] = array("name" => $gradeable['g_title'], "score" => $gradeable['score']);
+        $this_g[$gradeable['g_id']] = array("name" => $gradeable['g_title'], "score" => floatval($gradeable['score']));
        
         // TODO add late days for electronic gradeables
         if($gradeable['g_gradeable_type'] == 0){
@@ -134,7 +134,7 @@ foreach($db->rows() as $student_record) {
             
             for($i=0; $i < count($problem_scores); ++$i){
                 if (trim($comments[$i]) === ''){
-                    array_push($component_scores,array($titles[$i] => $problem_scores[$i]));
+                    array_push($component_scores,array($titles[$i] => floatval($problem_scores[$i])));
                 }
             }
 

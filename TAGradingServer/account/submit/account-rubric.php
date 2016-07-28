@@ -8,8 +8,6 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
 
 $g_id = $_GET['g_id'];
 
-//GET THE GRADEABLE
-
 $db->query("SELECT * FROM gradeable_data AS gd INNER JOIN gradeable AS g ON gd.g_id=g.g_id 
             INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id WHERE g.g_id = ?", array($g_id));
 $gradeable = $db->row();
@@ -30,8 +28,6 @@ if ($now < $homeworkDate) {
 
 $student = $_GET['student'];
 
-
-
 // get the gradeable data from the student
 $params = array($g_id);
 $db->query("SELECT * FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id 
@@ -46,7 +42,7 @@ $gd_id = $db->row()['gd_id'];
 //update each gradeable component data
 foreach($rows AS $row){
     $grade = floatval($_POST["grade-" . $row["gc_order"]]);
-    $comment = $_POST["comment-" . $row["gc_order"]];
+    $comment = isset($_POST["comment-" . $row["gc_order"]]) ? $_POST["comment-" . $row["gc_order"]] : '';
     $gc_id = $row['gc_id'];
     
     $params = array($gd_id, $gc_id);
@@ -61,18 +57,25 @@ $overall_comment = $_POST['comment-general'];
 $params = array($overall_comment, $gd_id);
 $db->query("UPDATE gradeable_data SET gd_overall_comment=? WHERE gd_id=?",$params);
 
-// CREATE / UPDATE THE GRADEABLE GRADES FOR THE STUDENT
 
-/*
 $status = intval($_POST['status']);
 $submitted = intval($_POST['submitted']);
+$is_graded = boolval($_POST['is_graded']);
 $_POST["late"] = intval($_POST['late']);
-*/
-//TODO UPDATE THE STATUS
 
+var_dump($is_graded);
+
+//update the number of late days for the student the first time grades are submitted
+if ($status == 1 && !$is_graded){
+    echo 'update lates';
+    $db->query("SELECT COALESCE(allowed_late_days,0) AS last_lates FROM late_days WHERE user_id=? ORDER BY since_timestamp DESC LIMIT 1", array($student));
+    $new_lates = $db->row()['last_lates'] - intval($_POST['late']);
+    $db->query("INSERT INTO late_days (user_id, since_timestamp, allowed_late_days) VALUES (?,?,?)", array($student, 'now', $new_lates));
+}
+/*
 if($_GET["individual"] == "1") {
     header('Location: '.$BASE_URL.'/account/account-summary.php?course='.$_GET['course'].'&g_id=' . $_GET["g_id"]);
 }
 else {
     header('Location: '.$BASE_URL.'/account/index.php?course='.$_GET['course'].'&g_id=' . $_GET["g_id"]);
-}
+}*/
