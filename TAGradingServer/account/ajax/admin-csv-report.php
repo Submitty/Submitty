@@ -11,110 +11,61 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
 $csv_output = "";
 $nl = "\n";
 
-$academic_integrity = array();
-$academic_resolutions = array();
-
-$db->query("SELECT * FROM grades_academic_integrity ORDER BY rubric_id",array());
-foreach ($db->rows() as $row) {
-    if (!isset($academic_integrity[$row['rubric_id']])) {
-        $academic_integrity[$row['rubric_id']] = array();
-        $academic_resolutions[$row['rubric_id']] = array();
-    }
-    array_push($academic_integrity[$row['rubric_id']],$row['student_rcs']);
-    if ($row['penalty'] != null) {
-        $academic_resolutions[$row['rubric_id']][$row['student_rcs']] = floatval($row['penalty']);
-    }
-}
-
 // Create column headers and the IDs/Codes of all assignments
 $header = array();
 
 $header[] = "Username";
-$queries = array(
-    "LAB"  => "SELECT 'LAB' as key, lab_id AS id, lab_number as number, ('Lab ' || lab_number) as name FROM labs ORDER BY lab_number",
-    "HW"   => "SELECT 'HW' as key, rubric_id AS id, rubric_name as name FROM rubrics ORDER BY rubric_due_date ASC",
-    "TEST" => "SELECT upper(test_type) as key, test_id AS id, test_number as number, (test_type || ' ' || test_number) as name FROM tests ORDER BY test_type, test_number"
-);
 
-$totals = array("LAB"=>array(),"HW"=>array(),"TEST"=>array());
+$totals = array();
 
-foreach ($queries as $key => $query) {
-    $db->query($query, array());
+// find the syllabus buckets
+$db->query("SELECT DISTINCT g_syllabus_bucket FROM gradeable WHERE g_grade_released_date < now() ORDER BY g_syllabus_bucket ASC", array());
+$buckets = $db->rows();
+// populate the header
+foreach ($buckets as $bucket){
+    $db->query("SELECT g_title, g_id, g_syllabus_bucket FROM gradeable WHERE g_grade_released_date < now() AND g_syllabus_bucket=? ORDER BY g_grade_released_date ASC", array($bucket['g_syllabus_bucket']));
     foreach ($db->rows() as $row) {
-        $header[] = $row['name'];
-        $totals[$key][] = $row['id'];
+        $header[] = $row['g_title'];
+        $totals[$row['g_syllabus_bucket']][] = $row['g_id'];
     }
 }
 
 $csv_output .= implode(",", $header) . $nl;
 
-// Loop through every student, getting their sums for assignments to add to the CSV
-$db->query("SELECT * FROM students ORDER BY student_rcs",array());
-$students = $db->rows();
-foreach($students as $student) {
-    $student_row = array();
-    $student_row[] = $student['student_rcs'];
-    $params = array($student['student_rcs']);
+// GET ALL student users
+$db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
+$users = $db->rows();
 
-    // generate the reports for the assignments for the student
-    $queries = array(
-        "LAB"  => "SELECT gl.lab_id as id,sum(case when grade_lab_value=2 then .5 else grade_lab_value end) AS score
-        FROM grades_labs AS gl
-        LEFT JOIN (select lab_id,lab_number FROM labs) as l ON gl.lab_id=l.lab_id WHERE student_rcs=?
-        GROUP BY gl.lab_id,l.lab_number ORDER BY l.lab_number",
-        "HW"   => "SELECT g.rubric_id as id,sum(gq.grade_question_score) as score
-        FROM grades_questions AS gq, grades AS g LEFT JOIN (select rubric_id, rubric_due_date FROM rubrics) as r ON g.rubric_id=r.rubric_id
-        WHERE gq.grade_id=g.grade_id AND g.student_rcs=?
-        GROUP BY g.rubric_id, r.rubric_due_date
-        ORDER BY r.rubric_due_date",
-        "TEST" => "SELECT t.test_id as id,
-        case when gt.value::numeric=0 or gt.value is null then 0
-        else case when gt.value::numeric+t.test_curve > 100 then 100
-            else gt.value::numeric+t.test_curve end end as score
+foreach ($users as $user){
+    // returns all syllabus buckets with gradeable id, student_ids, and total scores on assignments
+    $db->query("
+    SELECT * FROM (
+        SELECT g.g_id, u.user_id, case when score is null then 0 else score end
         FROM
-	        tests AS t LEFT JOIN (
-	        SELECT
-		        test_id,grade_test_value as value
-	        FROM
-		        grades_tests
-	        WHERE
-		        student_rcs=?
-	        ) AS gt ON t.test_id=gt.test_id
-        ORDER BY
-        	t.test_id");
-    foreach($queries as $key => $query) {
-        $db->query($query,$params);
-        $results = array();
-        // For labs, a score might not exist for a student for a lab so have to check ids
-        // against the ones we know exist (so give a score for existing and zero for missing)
-        foreach ($db->rows() as $row) {
-            $results[$row['id']] = $row['score'];
-        }
+            users AS u CROSS JOIN gradeable AS g 
+            LEFT JOIN (
+                SELECT g_id, gd_user_id, score 
+                FROM 
+                    gradeable_data AS gd INNER JOIN(
+                    SELECT 
+                        gd_id, SUM(gcd_score) AS score
+                    FROM 
+                        gradeable_component_data
+                    GROUP BY gd_id
+                ) AS gd_sum ON gd.gd_id=gd_sum.gd_id
+            ) AS total ON total.g_id = g.g_id AND total.gd_user_id=u.user_id
+        WHERE 
+            g_grade_released_date < now()
+        ORDER BY g_syllabus_bucket ASC, g_grade_released_date ASC, u.user_id ASC
+        ) AS user_grades
+    WHERE user_id=?
+        ",array($user['user_id']));
 
-        foreach($totals[$key] as $id) {
-            if ($key == "HW") {
-                if (isset($academic_integrity[$id]) && in_array($student['student_rcs'], $academic_integrity[$id]) && !(isset($academic_resolutions[$id]) && array_key_exists($student['student_rcs'], $academic_resolutions[$id]))) {
-                    $student_row[] = "";
-                    continue;
-                }
-            }
-            if (array_key_exists($id,$results)) {
-
-                if($key == "HW" && isset($academic_resolutions[$id]) && array_key_exists($student['student_rcs'], $academic_resolutions[$id])) {
-                    $student_row[] = $results[$id]*$academic_resolutions[$id][$student['student_rcs']];
-                }
-                else {
-                    $student_row[] = $results[$id];
-                }
-            }
-            else if ($key != "HW") {
-                // don't upload grades for ungraded homeworks (all other types are fine for it)
-                $student_row[] = "0";
-            }
-            else if ($key == "HW") {
-                $student_row[] = "";
-            }
-        }
+    $student_grades = $db->rows();
+    $student_row = array();
+    $student_row[] = $user['user_id'];
+    foreach($student_grades as $student_grade) {
+        $student_row[] = $student_grade['score'];
     }
     $csv_output .= implode(",", $student_row).$nl;
 }

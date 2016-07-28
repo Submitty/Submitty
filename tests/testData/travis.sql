@@ -1,24 +1,56 @@
 -- TEST DATA
-INSERT INTO sections (section_title, section_is_enabled) VALUES ('Section 1', 1);
-INSERT INTO sections (section_title, section_is_enabled) VALUES ('Section 2', 1);
+INSERT INTO sections_registration (sections_registration_id) VALUES (1);
+INSERT INTO sections_registration (sections_registration_id) VALUES (2);
 
-INSERT INTO students (student_rcs, student_last_name, student_first_name, student_section_id, student_grading_id)
-    VALUES ('pevelm', 'Peveler', 'Matthew', 1, 1);
-INSERT INTO students (student_rcs, student_last_name, student_first_name, student_section_id, student_grading_id)
-    VALUES ('cutler', 'Cutler', 'Barb', 1, 1);
+-- Developers
 
-INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email)
-    VALUES ('Teaching', 'Assistant', 'ta', 'ta@rpi.edu');
-INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email, user_is_administrator)
-    VALUES ('Instructor', 'Bob', 'instructor', 'instructor@rpi.edu',1);
-INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email, user_is_developer)
-    VALUES ('Developer', 'Sid', 'developer', 'developer@rpi.edu', 1);
-INSERT INTO users (user_firstname, user_lastname, user_rcs, user_email, user_is_developer)
-    VALUES ('Matthew', 'Peveler', 'pevelm', 'pevelm@rpi.edu', 1);
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+VALUES ('developer', 'Bob', 'Developer', 'developer@rpi.edu', 0, 1, NULL);
 
-INSERT INTO labs (lab_number, lab_title, lab_checkpoints, lab_code)
-    VALUES (1, 'Lab 1', 'Checkpoint 1,Checkpoint 2,Checkpoint 3', '');
-INSERT INTO labs (lab_number, lab_title, lab_checkpoints, lab_code)
-    VALUES (2, 'Lab 2', 'Checkpoint 1,Checkpoint 2,Checkpoint 3', '');
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('pevelm-dev', 'Peveler', 'Matthew', 'pevelm@rpi.edu', 0, 1, NULL);
 
-INSERT INTO relationships_users (user_id, section_id) VALUES (1, 1);
+-- Administrators
+
+INSERT INTO users(user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('instructor', 'Steve', 'Instructor', 'instructor@rpi.edu', 1, 1, NULL);
+
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('pevelm', 'Peveler', 'Matthew', 'pevelm@rpi.edu', 1, 1, NULL);
+
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('cutler', 'Barb', 'Cutler', 'cutler@cs.rpi.edu', 1, 1, NULL);
+
+-- Teaching Assistants
+
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('ta', 'Teaching', 'Assistant', 'ta@.rpi.edu', 2, 1, NULL);
+
+-- Undergraduate Assistants
+
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('drumhb', 'Brandon', 'Drumheller', 'drumhb@rpi.edu', 3, 1, NULL);
+
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('brees', 'Samuel', 'Brees', 'brees@rpi.edu', 3, 1, NULL);
+
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('lees', 'Samantha', 'Lee', 'lees@rpi.edu', 3, 1, NULL);
+
+-- Students
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('smithj', 'John', 'Smith', 'smithj@email.com', 4, 1, NULL);
+
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('scottm', 'Michael', 'Scott', 'scottm@dundermifflen.com', 4, 1, NULL);
+
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('whitew', 'Walter', 'White', 'breakingbad@email.com', 4, 1, NULL);
+
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('bradyb', 'Michael', 'Brady', 'bunch@email.com', 4, 1, NULL);
+
+-- Assign TAs to sections
+
+INSERT INTO grading_registration (sections_registration_id, user_id) VALUES (1, 'ta');
+INSERT INTO grading_registration (sections_registration_id, user_id) VALUES (1, 'drumhb');

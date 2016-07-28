@@ -6,30 +6,48 @@ use lib\Database;
 
 $account_subpages_unlock = true;
 
-$split = floatval($_COOKIE["split"]);
+$split = isset($_COOKIE["split"]) ? floatval($_COOKIE["split"]) : 50;
 $show_stats = isset($_COOKIE["show_stats"]) ? intval($_COOKIE["show_stats"]) : 0;
 $show_rubric = isset($_COOKIE["show_rubric"]) ? intval($_COOKIE["show_rubric"]) : 0;
 $show_left = isset($_COOKIE["show_left"]) ? intval($_COOKIE["show_left"]) : 1;
 $show_right = isset($_COOKIE["show_right"]) ? intval($_COOKIE["show_right"]) : 1;
+
+$stats_left = isset($_COOKIE["stats_left"]) ? floatval($_COOKIE["stats_left"]) : 0;
+$stats_top = isset($_COOKIE["stats_top"]) ? floatval($_COOKIE["stats_top"]) : 0;
+$stats_width = isset($_COOKIE["stats_width"]) ? floatval($_COOKIE["stats_width"]) : 0;
+$stats_height = isset($_COOKIE["stats_height"]) ? floatval($_COOKIE["stats_height"]) : 0;
+
+$rubric_left = isset($_COOKIE["rubric_left"]) ? floatval($_COOKIE["rubric_left"]) : 0;
+$rubric_top = isset($_COOKIE["rubric_top"]) ? floatval($_COOKIE["rubric_top"]) : 0;
+$rubric_width = isset($_COOKIE["rubric_width"]) ? floatval($_COOKIE["rubric_width"]) : 0;
+$rubric_height = isset($_COOKIE["rubric_height"]) ? floatval($_COOKIE["rubric_height"]) : 0;
+
+$grade_left = isset($_COOKIE["grade_left"]) ? floatval($_COOKIE["grade_left"]) : 0; // position of toolbar should also be remembered. Not implemented yet
+$grade_top = isset($_COOKIE["grade_top"]) ? floatval($_COOKIE["grade_top"]) : 0;
 $rubric_late_days = 0;
 
 print <<<HTML
 <div id="container" style="width:100%; margin-top:40px;">
 HTML;
-if(isset($_GET["hw"])) {
-    $homework_id = $_GET["hw"];
-    $params = array($homework_id);
-    $db->query("SELECT rubric_id, rubric_name, rubric_parts_sep, rubric_late_days, rubric_due_date FROM rubrics WHERE rubric_id=?", $params);
+
+if(isset($_GET["g_id"])) {
+    $g_id = $_GET["g_id"];
+    $params = array($g_id);
+    $db->query("SELECT g.g_id, g_title, g_grade_by_registration, eg_submission_due_date, eg_late_days FROM gradeable AS g INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id WHERE g.g_id=?", $params);
     $rubric = $db->row();
 }
 
-if(isset($_GET["hw"]) && isset($rubric["rubric_id"])) {
-    $rubric_id = $rubric["rubric_id"];
-    $rubric_name = $rubric['rubric_name'];
-    $rubric_sep = $rubric["rubric_parts_sep"];
-    $rubric_late_days = $rubric['rubric_late_days'];
-    $rubric_due_date = $rubric['rubric_due_date'];
-    $student_rcs = null;
+if(isset($_GET["g_id"]) && isset($rubric["g_id"])) {
+    $g_id = $rubric["g_id"];
+    $g_title = $rubric['g_title'];
+    $rubric_late_days = $rubric['eg_late_days'];
+    $grade_by_reg_section = $rubric['g_grade_by_registration'];
+    $section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
+    $user_section_param = ($grade_by_reg_section ? 'registration_section': 'rotating_section');
+    $grading_section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
+    $section_title = ($grade_by_reg_section ? 'Registration': 'Rotating');
+    $eg_submission_due_date = $rubric['eg_submission_due_date'];
+    $s_user_id = null;
     $student_first_name = null;
     $student_last_name = null;
     $student_allowed_lates = 0;
@@ -37,108 +55,114 @@ if(isset($_GET["hw"]) && isset($rubric["rubric_id"])) {
     $position_total = 0;
     $position_other = 0;
     $student_individual_graded = false;
-    $previous_rcs = "";
-    $next_rcs = "";
+    $previous_user_id = "";
+    $next_user_id = "";
 
     if(isset($_GET["individual"]) || isset($_GET['prev']) || isset($_GET['next'])) {
         if(isset($_GET['individual'])) {
-            $student_rcs = $_GET["individual"];
+            $s_user_id = $_GET["individual"];
         } else if(isset($_GET['prev'])) {
-            $student_rcs = $_GET['prev'];
+            $s_user_id = $_GET['prev'];
         } else {
-            $student_rcs = $_GET['next'];
+            $s_user_id = $_GET['next'];
         }
 
-        $params = array($student_rcs);
-        $db->query("SELECT * FROM students WHERE student_rcs=?", $params);
+        $params = array($s_user_id);
+        $db->query("SELECT * FROM users WHERE user_id=?", $params);
         $temp_row = $db->row();
-        //$student_id = intval($temp_row["student_id"]);
-        $student_first_name = $temp_row["student_first_name"];
-        $student_last_name = $temp_row["student_last_name"];
-        $params = array($temp_row['student_rcs'], $rubric['rubric_due_date']);
-        $db->query("SELECT * FROM late_days WHERE student_rcs=? AND since_timestamp <= ? ORDER BY since_timestamp DESC LIMIT 1", $params);
+        $student_first_name = $temp_row["user_firstname"];
+        $student_last_name = $temp_row["user_lastname"];
+        $params = array($temp_row['user_id'], $rubric['eg_submission_due_date']);
+        
+        //HANDLE LATE DAYS AND LATE DAY EXCEPTIONS
+        //TODO handle late day exceptions
+        //$db->query("SELECT * FROM late_days WHERE s_user_id=? AND since_timestamp <= ? ORDER BY since_timestamp DESC LIMIT 1", $params);
         $lates = $db->row();
-        $student_allowed_lates = isset($lates['allowed_lates']) ? intval($lates['allowed_lates']) : 0;
+        $student_allowed_lates = 2;//isset($lates['allowed_lates']) ? intval($lates['allowed_lates']) : 0;
 
-        $params = array($student_rcs, $rubric_id);
-        $db->query("SELECT grade_id FROM grades WHERE student_rcs=? and rubric_id=?", $params);
+        // DETERMINE IF A STUDENT HAS BEEN GRADED 
+        $params = array($s_user_id, $g_id);
+        $db->query("SELECT COUNT(*) AS cnt FROM gradeable_data as gd INNER JOIN gradeable_component_data AS gcd ON gd.gd_id=gcd.gd_id WHERE gd_user_id=? and g_id=? GROUP BY g_id", $params);
         $temp_row = $db->row();
-        $student_individual_graded = isset($temp_row["grade_id"]);
+        $student_individual_graded = isset($temp_row['cnt']) && $temp_row['cnt'] > 0;
     }
 
-    $params = array(User::$user_id, $rubric_id);
-    $db->query("SELECT * FROM homework_grading_sections WHERE user_id=? AND rubric_id=? ORDER BY grading_section_id", $params);
-    //$db->query("SELECT section_id FROM relationships_users WHERE user_id=? ORDER BY section_id", $params);
+    $params = array(User::$user_id);
+    $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC"
+                                    : "SELECT * FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating ASC");
+    $db->query($query, $params);
     foreach ($db->rows() as $section) {
-        $params = array($rubric_id, intval($section["grading_section_id"]));
+        $params = array($g_id, intval($section[$section_param]));
         $db->query("
 SELECT
-    s.student_rcs
-    , s.student_first_name
-    , s.student_last_name
+    s.user_id
+    , s.user_firstname
+    , s.user_lastname
     , case when g.number_graded is null then 0 else g.number_graded end
 FROM
-    students AS s
+    users AS s
     LEFT JOIN (
     SELECT
-        student_rcs
-        , count(grade_id) as number_graded
+        user_id
+        , count(*) as number_graded
     FROM
-        grades
+        gradeable_data AS gd INNER JOIN gradeable_component_data AS gcd
+        ON gd.gd_id = gcd.gd_id
     WHERE
-        rubric_id=?
+        g_id=?
     GROUP BY
-        student_rcs
+        user_id
     ) AS g
-    ON s.student_rcs=g.student_rcs
+    ON s.user_id=g.user_id
 WHERE
-    s.student_grading_id=?
+    s.".$user_section_param."=?
 ORDER BY
-    s.student_rcs ASC
+    s.s_user_id ASC
                 ", $params);
 
-        $prev_row = array('student_rcs' => "");
+        $prev_row = array('user_id' => "");
         $set_next = false;
 
         foreach ($db->rows() as $row) {
             $temp_row = $row;
 
             if($set_next) {
-                $next_rcs = $temp_row['student_rcs'];
+                $next_user_id = $temp_row['user_id'];
                 $set_next = false;
             }
 
-            if($student_rcs != null) {
-                if($student_rcs == $temp_row['student_rcs']) {
-                    $previous_rcs = $prev_row['student_rcs'];
+            if($s_user_id != null) {
+                if($s_user_id == $temp_row['user_id']) {
+                    $previous_user_id = $prev_row['user_id'];
                     $set_next = true;
                 }
             }
 
             if(intval($temp_row["number_graded"]) == 0) {
-                if($student_rcs == null) {
-                    $params = array($row["student_rcs"]);
-                    $db->query("SELECT * FROM students WHERE student_rcs=?", $params);
+                if($s_user_id == null) {
+                    $params = array($row["user_id"]);
+                    $db->query("SELECT * FROM users WHERE user_id=?", $params);
                     $row = $db->row();
 
-                    $student_first_name = $row["student_first_name"];
-                    $student_last_name = $row["student_last_name"];
-                    $student_rcs = $row["student_rcs"];
-                    $previous_rcs = $prev_row['student_rcs'];
+                    $student_first_name = $row["user_firstname"];
+                    $student_last_name = $row["user_lastname"];
+                    $s_user_id = $row["user_id"];
+                    $previous_user_id = $prev_row['user_id'];
 
-                    $params = array($row['student_rcs'], $rubric_due_date);
-                    $db->query("SELECT * FROM late_days WHERE student_rcs=? AND since_timestamp <= ?", $params);
+                    $params = array($row['user_id'], $eg_submission_due_date);
+                    //TODO SET LATE DAYS
+                    //$db->query("SELECT * FROM late_days WHERE s_user_id=? AND since_timestamp <= ?", $params);
                     $lates = $db->row();
-                    $student_allowed_lates = intval($lates['allowed_lates']);
+                    $student_allowed_lates = 2;//intval($lates['allowed_lates']);
 
                     $set_next = true;
                 }
             } else {
-                $params = array($row['student_rcs'], $rubric_id);
-                $db->query("SELECT grade_user_id FROM grades WHERE student_rcs=? AND rubric_id=?", $params);
+                $params = array($row['user_id'], $g_id);
+                $db->query("SELECT gd_grader_id FROM gradeable_data WHERE user_id=? AND g_id=?", $params);
                 $temp_row = $db->row();
 
-                if(intval($temp_row["grade_user_id"]) == \app\models\User::$user_id) {
+                if(intval($temp_row["gd_grader_id"]) == \app\models\User::$user_id) {
                     $position_completed++;
                 } else {
                     $position_other++;
@@ -150,39 +174,42 @@ ORDER BY
         }
     }
 
-    if($student_rcs != null) {
+    if($s_user_id != null) {
         include "account-rubric.php";
     } else {
+        
         if (User::$is_administrator) {
             Database::query("
 SELECT
-    s.student_grading_id,
+    s.".$user_section_param.",
     count(s.*) as total,
     case when gg.graded is null then 0 else gg.graded end
 FROM
-    students as s
+    users as s
     LEFT JOIN (
         SELECT
-            ss.student_grading_id,
+            uu.".$user_section_param.",
             count(*) as graded
         FROM
-            grades as g
-            LEFT JOIN (
+            users as uu 
+            INNER JOIN (
                 SELECT
-                    student_grading_id,
-                    student_rcs
-                FROM
-                    students
-            ) as ss ON g.student_rcs = ss.student_rcs
-        WHERE
-            g.rubric_id=?
-        GROUP BY ss.student_grading_id
-    ) as gg ON s.student_grading_id = gg.student_grading_id
+                    DISTINCT(gd_user_id)
+                FROM gradeable_data AS gd
+                INNER JOIN gradeable_component_data AS gcd ON gd.gd_id=gcd.gd_id
+                WHERE
+                    gd.g_id=?
+            ) AS gdd ON gdd.gd_user_id=uu.user_id 
+            WHERE uu.user_group=?
+        GROUP BY uu.".$user_section_param."
+    ) as gg ON s.".$user_section_param." = gg.".$user_section_param."
+WHERE
+    user_group=?
 GROUP BY
-    s.student_grading_id,
+    s.".$user_section_param.",
     gg.graded
 ORDER BY
-    s.student_grading_id", array($rubric_id));
+    s.".$user_section_param, array($g_id,4,4));
 
             $sections = Database::rows();
             $graded = 0;
@@ -197,7 +224,7 @@ ORDER BY
             print <<<HTML
         <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
             <div class="modal-header">
-                <h3 id="myModalLabel">{$rubric_name} Grading Status</h3>
+                <h3 id="myModalLabel">{$g_title} Grading Status</h3>
             </div>
 
             <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
@@ -209,7 +236,7 @@ ORDER BY
 HTML;
             foreach ($sections as $section) {
                 $section['percent'] = round(($section['graded'] / $section['total']) * 100);
-                print "Section {$section['student_grading_id']}: {$section['percent']}% ({$section['graded']} / {$section['total']})<br />";
+                print "Section {$section[$user_section_param]}: {$section['percent']}% ({$section['graded']} / {$section['total']})<br />";
             }
             print <<<HTML
                 </div>
@@ -217,20 +244,28 @@ HTML;
                 Graders:
                 <div style="margin-left: 20px">
 HTML;
-            Database::query("SELECT gs.*, u.* FROM homework_grading_sections as gs LEFT JOIN (SELECT * FROM users) as u ON gs.user_id = u.user_id WHERE gs.rubric_id=? ORDER BY gs.grading_section_id, u.user_rcs", array($rubric_id));
+            $query = ($grade_by_reg_section ? "SELECT gr.*, u.* FROM grading_registration gr LEFT JOIN (SELECT * FROM users) as u ON gr.user_id = u.user_id WHERE user_group <=3 ORDER BY gr.sections_registration_id, u.user_id"
+                                            : "SELECT gr.*, u.* FROM grading_rotating gr LEFT JOIN (SELECT * FROM users) as u ON gr.user_id = u.user_id WHERE user_group <=3 AND g_id=? ORDER BY gr.sections_rotating, u.user_id");
+            
+            if ($grade_by_reg_section){
+                Database::query($query, array());
+            } else{
+                Database::query($query, array($g_id));
+            }
+           
             $graders = array();
             foreach (Database::rows() as $row) {
-                if(!isset($graders[$row['grading_section_id']])) {
-                    $graders[$row['grading_section_id']] = array();
+                if(!isset($graders[$row[$grading_section_param]])) {
+                    $graders[$row[$grading_section_param]] = array();
                 }
-                $graders[$row['grading_section_id']][] = "{$row['user_firstname']} {$row['user_lastname']} ({$row['user_rcs']})";
+                $graders[$row[$grading_section_param]][] = "{$row['user_firstname']} {$row['user_lastname']} ({$row['user_id']})";
             }
 
             foreach ($sections as $section) {
-                if(isset($graders[$section['student_grading_id']])) {
-                    print $section['student_grading_id'] . ": " . implode(",", $graders[$section['student_grading_id']]) . "<br />";
+                if(isset($graders[$section[$user_section_param]])) {
+                    print $section[$user_section_param] . ": " . implode(",", $graders[$section[$user_section_param]]) . "<br />";
                 } else {
-                    print $section['student_grading_id'] . ": Nobody";
+                    print $section[$user_section_param] . ": Nobody";
                 }
             }
 
@@ -240,7 +275,7 @@ HTML;
 
             <div class="modal-footer">
                 <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
-                <a class="btn" href="{$BASE_URL}/account/account-summary.php?hw={$_GET["hw"]}">{$rubric_name} Overview</a>
+                <a class="btn" href="{$BASE_URL}/account/account-summary.php?g_id={$_GET["g_id"]}">{$g_title} Overview</a>
                 <!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
             </div>
         </div>
@@ -255,7 +290,7 @@ HTML;
             </div>
 
             <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-                Congratulations, you have finished grading {$rubric_name}.
+                Congratulations, you have finished grading {$g_title}.
                 <br/>
                 <br/>
                 <i style="color:#777;">You can review the grades you have saved by using the navigation buttons at the bottom-right of the page or by going to the homework overview page.</i>
@@ -263,7 +298,7 @@ HTML;
 
             <div class="modal-footer">
                 <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
-                <a class="btn" href="{$BASE_URL}/account/account-summary.php?hw={$_GET["hw"]}">{$rubric_name} Overview</a>
+                <a class="btn" href="{$BASE_URL}/account/account-summary.php?g_id={$_GET["g_id"]}">{$g_title} Overview</a>
                 <!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
             </div>
         </div>
@@ -272,10 +307,12 @@ HTML;
         }
     }
 }
-else if(!isset($_GET["hw"])) {
+else if(!isset($_GET["g_id"])) {
 
+    // update with the gradeable data 
     $params = array();
-    $db->query("SELECT rubric_name, rubric_id, rubric_due_date, rubric_late_days FROM rubrics ORDER BY rubric_due_date ASC, rubric_id ASC", $params);
+    
+    $db->query("SELECT g_title, g.g_id, eg_submission_due_date FROM gradeable AS g INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id", $params);
     $results = $db->rows();
 
     if(count($results) > 0) {
@@ -283,11 +320,11 @@ else if(!isset($_GET["hw"])) {
     <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
         <form action="{$BASE_URL}/account/index.php" method="get">
             <div class="modal-header">
-                <h3 id="myModalLabel">Select Homework</h3>
+                <h3 id="myModalLabel">Select Gradeable</h3>
             </div>
 
             <div class="modal-body" style="vertical-align: middle; padding-top:20px; padding-bottom:20px;">
-                <select style="width:400px" name="hw">
+                <select style="width:400px" name="g_id">
 HTML;
 
         $last = end($results);
@@ -295,19 +332,19 @@ HTML;
         $c = 0;
         $now = new DateTime('now');
         foreach($results as $row) {
-            $homeworkDate = new DateTime($row['rubric_due_date']);
-            if ($row['rubric_late_days'] > 0) {
-                $homeworkDate->add(new DateInterval("PT{$row['rubric_late_days']}H"));
+            $homeworkDate = new DateTime($row['eg_submission_due_date']);
+            //TODO ADD LATE DAYS
+            if ($row['eg_late_days'] > 0) {
+                $homeworkDate->add(new DateInterval("PT{$row['eg_late_days']}H"));
             }
             $extra = ($now < $homeworkDate) ? "(Gradable: {$homeworkDate->format("Y-m-d H:i:s")})" : "";
-            echo "<option value='{$row['rubric_id']}' ".($last["rubric_id"] == $row["rubric_id"] ? "selected" : "").">{$row['rubric_name']} {$extra}</option>";
+            echo "<option value='{$row['g_id']}' ".($last["g_id"] == $row["g_id"] ? "selected" : "").">{$row['g_title']} {$extra}</option>";
             $c++;
         }
         print <<<HTML
 
                 </select>
             </div>
-
             <div class="modal-footer">
                 <input class="btn btn-primary" type="submit" value="Grade" onclick="createCookie('backup',0,1000);"/>
             </div>
@@ -319,11 +356,11 @@ HTML;
         print <<<HTML
     <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
         <div class="modal-header">
-            <h3 id="myModalLabel">Homeworks Not Available Yet</h3>
+            <h3 id="myModalLabel">Gradeables Not Available Yet</h3>
         </div>
 
         <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-            No homeworks have been added to the system yet.
+            No gradeables have been added to the system yet.
         </div>
     </div>
 HTML;
@@ -333,7 +370,7 @@ else {
     print <<<HTML
     <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
         <div class="modal-header">
-            <h3 id="myModalLabel">Rubric Error</h3>
+            <h3 id="myModalLabel">Gradeable Error</h3>
         </div>
 
         <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
@@ -341,7 +378,7 @@ else {
         </div>
 
         <div class="modal-footer">
-            <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
+            <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Gradable</a>
         </div>
     </div>
 HTML;
@@ -351,7 +388,7 @@ print <<<HTML
 HTML;
 
 // TODO: Rewrite this (Issue #43)
-if(isset($_GET["hw"]) && isset($rubric_id)) {
+if(isset($_GET["g_id"]) && isset($g_id)) {
     if($position_total == 0) {
         $position_total = 0.001;
     }
@@ -362,9 +399,9 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     <i title="Show/Hide Grading Panel (Press G)" <?php echo "class='icon-grading-panel".(($show_rubric == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyG')"></i>
     <i title="Show/Hide Auto Grading Results (Press A)" <?php echo "class='icon-auto-grading-results".(($show_left == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyA');"></i>
     <i title="Show/Hide Files Viewer (Press F)" <?php echo "class='icon-files".(($show_right == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyF')"></i>
-    <a <?php echo ($previous_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&prev={$previous_rcs}\""); ?> ><i title="Go to the previous student (Press Left Arrow)" class="icon-left <?php echo ($previous_rcs == "" ? 'icon-disabled"' : '"'); ?> ></i></a>
-    <a href="<?php echo $BASE_URL; ?>/account/account-summary.php?hw=<?php echo $_GET["hw"]; ?>"><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
-    <a <?php echo ($next_rcs == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&hw={$_GET['hw']}&next={$next_rcs}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($next_rcs == "" ? 'icon-disabled"' : '"'); ?>></i></a>
+    <a <?php echo ($previous_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&g_id={$_GET['g_id']}&prev={$previous_user_id}\""); ?> ><i title="Go to the previous student (Press Left Arrow)" class="icon-left <?php echo ($previous_user_id == "" ? 'icon-disabled"' : '"'); ?> ></i></a>
+    <a href="<?php echo $BASE_URL; ?>/account/account-summary.php?g_id=<?php echo $_GET["g_id"]; ?>"><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
+    <a <?php echo ($next_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&g_id={$_GET['g_id']}&next={$next_user_id}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($next_user_id == "" ? 'icon-disabled"' : '"'); ?>></i></a>
     <i title="Pin Toolbar" class="icon-toolbar-up" ></i>
     <div style="width:100%; height: 15px; bottome:0;">
         <?php if($position_other == 0) { ?>
@@ -413,16 +450,14 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         }
     });
 
-    // var progressBar = document.getElementById('pro');
-    // if (progressBar != null) {
-    //     progressBar.style.width = (document.documentElement.clientWidth - 157) + 'px';
-    // }
-
     document.getElementById('container').style.width = window.innerWidth + 'px';
     document.getElementById('container').style.height = (window.innerHeight - 40) + 'px';
 
-    var split = 0;
     var width = window.innerWidth - 7;
+    var height = window.innerHeight - 40;
+
+    // get cookies of panel size and position
+    var split = 0;
     split = <?php echo ($split == "" || $split < 25 || 75 < $split ? 50 : $split); ?> / 100.0;
     if (document.getElementById('left') != null) {
         document.getElementById('left').style.width = (width * (split)) + 'px';
@@ -434,6 +469,29 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
         document.getElementById('panemover').style.width = '10px';
     }
+    if(document.getElementById('stats') != null) {
+        stats_width = (<?php echo $stats_width;?> == 0) ? 0.2 * width : <?php echo $stats_width;?>;
+        stats_height = (<?php echo $stats_height;?> == 0) ? 0.4 * height : <?php echo $stats_height;?>;
+        document.getElementById('stats').style.width = stats_width + "px";
+        document.getElementById('stats').style.height = stats_height + "px";
+
+        stats_left = (<?php echo $stats_left;?> == 0) ? 0.1 * width : <?php echo $stats_left;?>;
+        stats_top = (<?php echo $stats_top;?> == 0) ? 0.55 * height : <?php echo $stats_top;?>;
+        document.getElementById('stats').style.left = stats_left + "px";
+        document.getElementById('stats').style.top = stats_top + "px";
+    }
+
+    if(document.getElementById('rubric') != null) {
+        rubric_width = (<?php echo $rubric_width;?> == 0) ? 0.45 * width : <?php echo $rubric_width;?>;
+        rubric_height = (<?php echo $rubric_height;?> == 0) ? 0.80 * height : <?php echo $rubric_height;?>;
+        document.getElementById('rubric').style.width = rubric_width + "px";
+        document.getElementById('rubric').style.height = rubric_height + "px";
+
+        rubric_left = (<?php echo $rubric_left;?> == 0) ? 0.4 * width : <?php echo $rubric_left;?>;
+        rubric_top = (<?php echo $rubric_top;?> == 0) ? 0.15 * height : <?php echo $rubric_top;?>;
+        document.getElementById('rubric').style.left = rubric_left + "px";
+        document.getElementById('rubric').style.top = rubric_top + "px";
+    }
 
     window.onload = updateDisplay();
 
@@ -442,7 +500,12 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         document.getElementById('rubric').style.left = parseFloat(window.innerWidth * document.getElementById('rubric').offsetLeft/(width + 7)) + 'px';
         document.getElementById('stats').style.left = parseFloat(window.innerWidth * document.getElementById('stats').offsetLeft/(width + 7)) + 'px';
 
+        document.getElementById('grade').style.top = parseFloat(window.innerHeight * document.getElementById('grade').offsetTop/height) + 'px';
+        document.getElementById('rubric').style.top = parseFloat(window.innerHeight * document.getElementById('rubric').offsetTop/height) + 'px';
+        document.getElementById('stats').style.top = parseFloat(window.innerHeight * document.getElementById('stats').offsetTop/height) + 'px';
+
         width = window.innerWidth - 7;
+        height = window.innerHeight;
         split = (parseInt(document.getElementById('left').style.width) / (parseInt(document.getElementById('left').style.width) + parseInt(document.getElementById('right').style.width))).toFixed(2);
 
         document.getElementById('left').style.width = (width * split) + 'px';
@@ -456,7 +519,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     };
 
     window.onkeydown = function(e) {
-        if (e.target.type == "textarea" || e.target.type == "input")  return; // disable keyboard event when typing to textarea/input
+        if (e.target.tagName == "TEXTAREA" || e.target.tagName == "INPUT" || e.target.tagName == "SELECT") return; // disable keyboard event when typing to textarea/input
         handleKeyPress(e.code);
     };
 
@@ -481,10 +544,20 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
                 updateDisplay();
                 break;
             case "KeyR": // Reset all cookies to default // TODO: Checkbox that lets user choose to save cookie or not?
-                setCookie("show_stats", 0, 180*24*60*60);
-                setCookie("show_rubric", 0, 180*24*60*60);
-                setCookie("show_left", 1, 180*24*60*60);
-                setCookie("show_right", 1, 180*24*60*60);
+                setCookie("show_stats", 0, -180*24*60*60);
+                setCookie("show_rubric", 0, -180*24*60*60);
+                setCookie("show_left", 1, -180*24*60*60);
+                setCookie("show_right", 1, -180*24*60*60);
+                setCookie("stats_width", 0, -180*24*60*60);
+                setCookie("stats_height", 0, -180*24*60*60);
+                setCookie("stats_left", 0, -180*24*60*60);
+                setCookie("stats_top", 0, -180*24*60*60);
+                setCookie("rubric_width", 0, -180*24*60*60);
+                setCookie("rubric_height", 0, -180*24*60*60);
+                setCookie("rubric_left", 0, -180*24*60*60);
+                setCookie("rubric_top", 0, -180*24*60*60);
+                setCookie("grade_left", 0, -180*24*60*60);
+                setCookie("grade_top", 0, -180*24*60*60);
                 break;
             default:
                 break;
@@ -546,9 +619,11 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     function dragRelease() {
         document.getElementById('panemover').style.width = '10px';
         document.getElementById('panemover').style.left = document.getElementById('pane').offsetLeft + 'px';
-        split = parseFloat(document.getElementById('left').style.width) / (parseFloat(document.getElementById('left').style.width) + parseFloat(document.getElementById('right').style.width));
+        split = parseFloat(document.getElementById('left').style.width) / (parseFloat(document.getElementById('left').style.width) 
+                + parseFloat(document.getElementById('right').style.width));
 
-        var splitVar = parseFloat(100 * (parseFloat(document.getElementById('left').style.width) / (parseFloat(document.getElementById('left').style.width) + parseFloat(document.getElementById('right').style.width)))).toFixed(2);
+        var splitVar = parseFloat(100 * (parseFloat(document.getElementById('left').style.width) / (parseFloat(document.getElementById('left').style.width) 
+                       + parseFloat(document.getElementById('right').style.width)))).toFixed(2);
         setCookie("split", splitVar, 180*24*60*60);
 
         mousedown = false;
@@ -576,6 +651,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
     // Drag to move toolbar/grading/status panel around
     function dragPanelStart(e, id) {
         if (e.target.tagName == "TEXTAREA" || e.target.tagName == "INPUT" || e.target.tagName == "SELECT") return; // disable dragging when editing textarea/input
+        if (hasClass(e.target, "ui-resizable-handle")) return; // disable dragging when resizing panel
         dragging_panel = true;
         mouse_x = e.clientX;
         mouse_y = e.clientY;
@@ -590,6 +666,7 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         element.style.top = (element.offsetTop - (mouse_y - e.clientY)) + 'px';
         mouse_x = e.clientX;
         mouse_y = e.clientY;
+        savePosition(id);
         /*
         // TODO: Add check for dragging off sight or add a function to reset panel positions somewhere?
         if((grade.offsetRight - grade.offsetWidth) < 5) {
@@ -616,7 +693,11 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         minWidth: 50,
         maxWidth: 500,
         minHeight: 50,
-        maxHeight: 500
+        maxHeight: 500,
+        resize: function () {
+            saveSize("stats");
+            savePosition("stats");
+        }
     });
 
     $('#rubric').resizable({
@@ -624,8 +705,24 @@ if(isset($_GET["hw"]) && isset($rubric_id)) {
         minWidth: 200,
         maxWidth: 1000,
         minHeight: 200,
-        maxHeight: 1000
+        maxHeight: 1000,
+        resize: function () {
+            saveSize("rubric");
+            savePosition("rubric");
+        }
     });
+
+    function saveSize(id) {
+        var ele = document.getElementById(id);
+        setCookie( id + "_width", ele.offsetWidth, 180*24*60*60);
+        setCookie(id + "_height", ele.offsetHeight, 180*24*60*60);
+    }
+
+    function savePosition(id) {
+        var ele = document.getElementById(id);
+        setCookie( id + "_left", ele.offsetLeft, 180*24*60*60);
+        setCookie(id + "_top", ele.offsetTop, 180*24*60*60);
+    }
 
     // Place the panel selected on top of other panels (if overlaping).
     function changeStackingOrder(e) {
