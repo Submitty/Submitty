@@ -125,8 +125,9 @@ $user = $_SESSION["id"];
 <h3>
 <?php
 
-  echo '<a class="page-link" href="/">Submitty '.$semester.'</a>';
-  echo '> <a class="page-link" href="/">'.$course.'</a>';
+  echo '<a class="page-link" href="http://submitty.org/">Submitty</a>';
+  echo '> <a class="page-link" href="/">'.$semester.'</a>';
+  echo '> <a class="page-link" href="?page=coursepage&semester='.$semester.'&course='.$course.'">'.$course.'</a>';
   echo '> <a class="page-link">'.$assignment_name.'</a>';
   if (on_dev_team($user)) {
     echo '<span color=\"ff0000\">[ dev team ]</span>';
