@@ -61,7 +61,11 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
             //DELETE all grades associated with these gcs
             $params = array($this->g_id,$i);
             $db->query("SELECT gc_id FROM gradeable_component WHERE g_id=? AND gc_order=?",$params);
-            $gc_id = $db->row()['gc_id'];
+            $row = $db->row();
+            if (!isset($row['gc_id'])) {
+                continue;
+            }
+            $gc_id = $row['gc_id'];
             $db->query("DELETE FROM gradeable_component_data AS gcd WHERE gc_id=?",array($gc_id));
             $db->query("DELETE FROM gradeable_component WHERE gc_id=?", array($gc_id));
         } 
@@ -245,7 +249,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
         die('failed to open file');
     }
     #decode for pretty print
-    fwrite($fp, json_encode(json_decode($gradeableJSON), JSON_PRETTY_PRINT));
+    fwrite($fp, json_encode(json_decode($gradeableJSON), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     fclose($fp); 
  }
  
