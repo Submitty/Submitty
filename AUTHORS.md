@@ -1,42 +1,29 @@
 ##Members
+[Barbara Cutler](http://www.cs.rpi.edu/~cutler/)  
+[Matthew Peveler](http://mpeveler.com/)
 
-Barbara Cutler
+**Members of [Rensselaer Center for Open Source](rcos.rpi.edu)**  
+Chris Berger  
+Jesse Freitas  
+Severin Ibarluzea  
+Kiana McNellis  
+Kienan Knight-Boehm  
+Sam Seng  
+Victor Zhu  
+Melissa Lindquist  
+Beverly Sihsobhon  
+Stanley Cheung  
+Tyler Shepard  
+Seema Bhaskar  
+Andrea Wong  
+Samuel Breese  
+Brandon Drumheller  
+Zishan Huang 
 
-Matthew Peveler
-
-**Members of Rensselaer Center for Open Source (rcos.rpi.edu)**
-
-Chris Berger
-	
-Jesse Freitas
-	
-Severin Ibarluzea
-	
-Kiana McNellis
- 	
-Kienan Knight-Boehm
- 	
-Sam Seng
- 	
-Victor Zhu
- 	
-Melissa Lindquist
- 	
-Beverly Sihsobhon
-
-Stanley Cheung
-
-We'd like to recognize and thank:
-
-Andrew Fasano
-Markus Gaasedelen
-Nick Burnett
-Toshi Piazza
-
+------------------------------
+We'd like to recognize and thank [RPISec](https://rpis.ec/) and these individual members:  
+Andrew Fasano  
+Markus Gaasedelen  
+Nick Burnett  
+Toshi Piazza  
 For their bug reports of specific security vulnerabilities :)
-	
-Tyler Shepard
- 	
-Seema Bhaskar
- 	
-Andrea Wong
