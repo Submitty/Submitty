@@ -1,0 +1,153 @@
+{
+	"submission_number": 1,
+	"points_awarded": 9,
+	"nonhidden_points_awarded": 9,
+	"extra_credit_points_awarded": 0,
+	"non_extra_credit_points_awarded": 9,
+	"submission_time": "0",
+	"testcases": [
+		{
+			"test_name": "Test 1 Problem 1 - Does your program produce the correct answer?",
+			"execute_logfile": "test01_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test01_0_diff",
+					"student_file":"test01_STDOUT.txt",
+					"instructor_file":"test_output/testassignment/p1_out.txt",
+					"difference":"test01_0_diff.json",
+					"description": "Program Output",
+					"message": " "
+				},
+				{
+					"diff_id":"test01_1_diff",
+					"student_file":"test01_STDERR.txt",
+					"description": "syntax error output from running python",
+					"message": " "
+				}
+			],
+			"points_awarded": 1
+		},
+		{
+			"test_name": "Test 2 Problem 1 - Did you use a print statement?",
+			"execute_logfile": "test02_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test02_0_diff",
+					"student_file":"test02_STDOUT.txt",
+					"description": "Number of print statements",
+					"message": " "
+				}
+			],
+			"points_awarded": 1
+		},
+		{
+			"test_name": "Test 3 Problem 2 - Is the provided list of variable names correct?",
+			"execute_logfile": "test03_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test03_0_diff",
+					"student_file":"test03_STDOUT.txt",
+					"instructor_file":"test_output/testassignment/p2_out.txt",
+					"difference":"test03_0_diff.json",
+					"description": "Program Output",
+					"message": " "
+				}
+			],
+			"points_awarded": 1
+		},
+		{
+			"test_name": "Test 4 Problem 3 - Does your program produce the correct answer?",
+			"execute_logfile": "test04_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test04_0_diff",
+					"student_file":"test04_STDOUT.txt",
+					"instructor_file":"test_output/testassignment/p3_out.txt",
+					"difference":"test04_0_diff.json",
+					"description": "Program Output",
+					"message": " "
+				},
+				{
+					"diff_id":"test04_1_diff",
+					"student_file":"test04_STDERR.txt",
+					"description": "syntax error output from running python",
+					"message": " "
+				}
+			],
+			"points_awarded": 1
+		},
+		{
+			"test_name": "Test 5 Problem 3 - Did you use at least five variables?",
+			"execute_logfile": "test05_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test05_0_diff",
+					"student_file":"test05_STDOUT.txt",
+					"description": "Number of assignments",
+					"message": " "
+				}
+			],
+			"points_awarded": 1
+		},
+		{
+			"test_name": "Test 6 Problem 3 - Did you use at least two multiplications?",
+			"execute_logfile": "test06_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test06_0_diff",
+					"student_file":"test06_STDOUT.txt",
+					"description": "Number of multiplications",
+					"message": " "
+				}
+			],
+			"points_awarded": 1
+		},
+		{
+			"test_name": "Test 7 Problem 3 - Did you use at least one addition?",
+			"execute_logfile": "test07_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test07_0_diff",
+					"student_file":"test07_STDOUT.txt",
+					"description": "Number of multiplications",
+					"message": " "
+				}
+			],
+			"points_awarded": 1
+		},
+		{
+			"test_name": "Test 8 Problem 4 - Does your program produce the correct answer?",
+			"execute_logfile": "test08_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test08_0_diff",
+					"student_file":"test08_STDOUT.txt",
+					"instructor_file":"test_output/testassignment/p4_out.txt",
+					"difference":"test08_0_diff.json",
+					"description": "Program Output",
+					"message": " "
+				},
+				{
+					"diff_id":"test08_1_diff",
+					"student_file":"test08_STDERR.txt",
+					"description": "syntax error output from running python",
+					"message": " "
+				}
+			],
+			"points_awarded": 1
+		},
+		{
+			"test_name": "Test 9 Problem 4 - Did you use a while loop?",
+			"execute_logfile": "test09_execute_logfile.txt",
+			"diffs": [
+				{
+					"diff_id":"test09_0_diff",
+					"student_file":"test09_STDOUT.txt",
+					"description": "Number of while loops",
+					"message": " "
+				}
+			],
+			"points_awarded": 1
+		}
+	]
+}
