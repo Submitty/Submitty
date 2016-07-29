@@ -51,6 +51,8 @@ class ElectronicGradeable {
      * @var null|int
      */
     public $g_id;
+    
+    public $autograding_points = 0;
 
     /**
      * Do we have a grade for this student on this gradeable in the database?
@@ -399,8 +401,11 @@ ORDER BY gc_order ASC
                         }
                     }
                 }
+                //FIXME this won't work for extra credit auto-grading
+                if (isset($testcase['points_awarded'])){
+                    $this->autograding_points += $testcase['points_awarded'];
+                }
             }
-
             $this->eg_files = array_merge($this->eg_files, FileUtils::getAllFiles($result_directory, array(), $skip_files));
         }
     }

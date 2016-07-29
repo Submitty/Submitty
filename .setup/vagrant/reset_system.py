@@ -103,7 +103,7 @@ if __name__ == '__main__':
 
     shutil.rmtree('/root/bin', True)
 
-    users = ["instructor", "ta", "developer", "student", "hwphp", "hwcron", "hsdbu"]
+    users = ["instructor", "ta", "developer", "student", "smithj", "hwphp", "hwcron", "hsdbu"]
     for user in users:
         os.system("userdel " + user)
 

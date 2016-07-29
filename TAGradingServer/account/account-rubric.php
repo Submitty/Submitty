@@ -515,18 +515,24 @@ HTML;
 
 $c = 1;
 
+$precision = floatval($eg->eg_details['eg_precision']);
+
 foreach ($eg->questions as $question) {
     // hide auto-grading if it has no value
     if ($question['gc_max_value'] == 0){
         continue;
     }
+    // FIXME add autograding extra credit 
+    else if($question['gcd_score'] ==0 && substr($question['gc_title'], 0, 12) === "AUTO-GRADING"){
+        $question['gcd_score'] = $eg->autograding_points;
+    }
+    
     $disabled = '';
     if(substr($question['gc_title'], 0, 12) === "AUTO-GRADING"){
         $disabled = 'disabled';
     }
     
     $output .= <<<HTML
-
                         <tr>
 HTML;
 
@@ -555,7 +561,7 @@ HTML;
     $output .= <<<HTML
     <tr style="background-color: #f9f9f9;">
                             <td style="white-space:nowrap; vertical-align:middle; text-align:center;"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}"
-                                min="0" max="{$question['gc_max_value']}" step="0.5" placeholder="&plusmn;0.5" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  0.5); calculatePercentageTotal();" 
+                                min="0" max="{$question['gc_max_value']}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  {$precision}); calculatePercentageTotal();" 
                                 style="width:50px; resize:none;" {$disabled}></textarea><strong> / {$question['gc_max_value']}</strong></td>
                             <td style="width:100%; padding:0px">
                                 <div id="rubric-{$c}">
