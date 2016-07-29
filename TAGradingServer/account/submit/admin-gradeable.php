@@ -259,13 +259,19 @@ abstract class GradeableType{
     const numeric = 2;
 }
  
- function constructGradeable ($request_args){
+ function constructGradeable ($db, $request_args){
      $g_id = $request_args['gradeable_id'];
+     
+     $db->query("SELECT COUNT(*) AS cnt FROM gradeable WHERE g_id=?", array($g_id));
+     if ($db->row()['cnt'] > 0){
+        throw new Exception('Gradeable already exists');
+     } 
+     
      $g_title = $request_args['gradeable_title'];
      $g_overall_ta_instr = $request_args['ta_instructions'];
-     $g_use_teams = ($request_args['team_assignment'] === 'yes') ? "true" : "false";
-     $g_min_grading_group=intval($request_args['minimum_grading_group']);
-     $g_grade_by_registration = ($request_args['section_type'] === 'reg_section') ? "true" : "false";
+     $g_use_teams = (isset($request_args['team_assignment']) && $request_args['team_assignment'] === 'yes') ? "true" : "false";
+     $g_min_grading_group=(isset($request_args['minimum_grading_group'])) ? intval($request_args['minimum_grading_group']) : 1;
+     $g_grade_by_registration = (isset($request_args['section_type']) && $request_args['section_type'] === 'reg_section') ? "true" : "false";
      $g_grade_start_date = $request_args['date_grade'];
      $g_grade_released_date = $request_args['date_released'];
      $g_syllabus_bucket = $request_args['gradeable_buckets'];
@@ -275,6 +281,7 @@ abstract class GradeableType{
                                    'section_type' => $g_grade_by_registration, 'date_grade' => $g_grade_start_date, 
                                    'date_released' =>$g_grade_released_date, 'bucket' => $g_syllabus_bucket);
      
+
      if ($request_args['gradeable_type'] === "Electronic File"){
         $g_constructor_params['gradeable_type'] = GradeableType::electronic_file;
         
@@ -344,7 +351,7 @@ $action = $_GET['action'];
 
 // single update or create
 if ($action != 'import'){
-    $gradeable = constructGradeable($_POST);
+    $gradeable = constructGradeable($db, $_POST);
     $db->beginTransaction();  
     if ($action=='edit'){
         $gradeable->updateGradeable($db);
@@ -378,7 +385,7 @@ else{
 
     foreach($files as $file){
         try{
-            $db->beginTransaction();  
+            //$db->beginTransaction();  
             $fp = fopen($file, 'r');
             if (!$fp){
                 array_push($failed_files, $file);
@@ -386,7 +393,7 @@ else{
             }
             $form_json = fread($fp,filesize($file));
             $request_args = json_decode($form_json, true);
-            $gradeable = constructGradeable($request_args);
+            $gradeable = constructGradeable($db, $request_args);
             $gradeable->createGradeable($db);
             $gradeable->createComponents($db, $action, $request_args);
             $graders = getGraders($request_args);
@@ -397,7 +404,7 @@ else{
             array_push($failed_files, $file);
         } finally{
             fclose($fp);
-            $db->commit();
+            //$db->commit();
         }
     }
     addAssignmentsTxt($db,$success_gids);
