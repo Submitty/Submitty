@@ -1306,10 +1306,8 @@ function get_late_days_allowed($assignment_config){
 
 function get_gradeable_addresses($semester, $course) {
     $path = get_path_front_course($semester,$course)."/config/form";
-  ?><script>console.log("in get gradeable addresses, path: " + <?php echo '"'.$path.'"'; ?>);</script><?php
     $addresses = array();
     if (is_dir($path)) {
-      ?><script>console.log("is dir");</script><?php
         if ($handle = opendir($path)) {
             while (($file = readdir($handle)) !== false) {
                 if (isset($file[0]) && $file[0] != ".") {
