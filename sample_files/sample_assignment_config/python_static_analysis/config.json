@@ -1,6 +1,10 @@
 {
+    "grading_parameters" : {
+        "TOTAL_POINTS" : 9,
+        "AUTO_POINTS" : 9
+    },
     "assignment_message" : "Submit each part of your homework to the right bucket or you will not receive credit.",
-    "part_names" : [ "Problem 1", "Problem 2", "Problem 3", "Problem 4", "Problem 5" ],
+    "part_names" : [ "Problem 1", "Problem 2", "Problem 3", "Problem 4" ],
 
     "resource_limits" : {
         "RLIMIT_CPU" : 60,
@@ -13,13 +17,14 @@
             "title" : "Problem 1 - Does your program produce the correct answer?",
             "details" : "python *.py",
             "command" : "/usr/bin/python part1/*.py",
-            "points" : 0,
+            "points" : 1,
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "p1_out.txt"
+                    "instructor_file" : "p1_out.txt",
+		    "deduction" : 1.0
                 },
                 {
                     "method" : "warnIfNotEmpty",
@@ -32,7 +37,7 @@
             "title" : "Problem 1 - Did you use a print statement?",
             "details" : "",
             "command" : "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 print part1/*.py",
-            "points" : 0,
+            "points" : 1,
             "validation" : [
                 {
                     "method" : "intComparison",
@@ -47,13 +52,14 @@
             "title" : "Problem 2 - Is the provided list of variable names correct?",
             "details" : "",
 	    "command" : "/bin/cat part2/*",
-            "points" : 0,
+            "points" : 1,
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-		    "instructor_file" : "p2_sol.txt"
+		    "instructor_file" : "p2_sol.txt",
+		    "deduction" : 1.0
                 }
             ]
         },
@@ -61,13 +67,14 @@
             "title" : "Problem 3 - Does your program produce the correct answer?",
             "details" : "python *.py",
             "command" : "/usr/bin/python part3/*.py",
-            "points" : 0,
+            "points" : 1,
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "p3_out.txt"
+                    "instructor_file" : "p3_out.txt",
+		    "deduction" : 1.0
                 },
                 {
                     "method" : "warnIfNotEmpty",
@@ -80,7 +87,7 @@
             "title" : "Problem 3 - Did you use at least five variables?",
             "details" : "",
             "command" : "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 assign part3/*.py",
-            "points" : 0,
+            "points" : 1,
             "validation" : [
                 {
                     "method" : "intComparison",
@@ -95,7 +102,7 @@
             "title" : "Problem 3 - Did you use at least two multiplications?",
             "details" : "",
             "command" : "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 mul part3/*.py",
-            "points" : 0,
+            "points" : 1,
             "validation" : [
                 {
                     "method" : "intComparison",
@@ -110,7 +117,7 @@
             "title" : "Problem 3 - Did you use at least one addition?",
             "details" : "",
             "command" : "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 add part3/*.py",
-            "points" : 0,
+            "points" : 1,
             "validation" : [
                 {
                     "method" : "intComparison",
@@ -125,13 +132,14 @@
             "title" : "Problem 4 - Does your program produce the correct answer?",
             "details" : "python *.py",
             "command" : "/usr/bin/python part4/*.py",
-            "points" : 0,
+            "points" : 1,
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "p4_out.txt"
+                    "instructor_file" : "p4_out.txt",
+		    "deduction" : 1.0
                 },
                 {
                     "method" : "warnIfNotEmpty",
@@ -144,7 +152,7 @@
             "title" : "Problem 4 - Did you use a while loop?",
             "details" : "",
             "command" : "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_token while part4/*.py",
-            "points" : 0,
+            "points" : 1,
             "validation" : [
                 {
                     "method" : "intComparison",

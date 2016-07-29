@@ -129,7 +129,7 @@ if (method == #T "Comparison") {\
 	    ss >> object;\
 		if (cmp != NULL) graders.push_back(\
 				new TestCaseTermComparison<T>(filename, description, cmp, object,\
-					std::stof(itr2->value("deduction", "-1.0"))));\
+					deduction));\
 }
 
 template <typename T>
