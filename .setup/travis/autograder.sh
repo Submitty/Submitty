@@ -82,3 +82,11 @@ chown root:root TestRunner.class
 chmod 444 TestRunner.class
 
 popd 
+
+echo -e "Compile and install analysis tools"
+git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+git pull origin master
+make ubuntudeps
+make
+popd
