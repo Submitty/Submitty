@@ -1,7 +1,6 @@
 <?php
 
 // TODO MORE error checking
-// TODO Make sure transactions are in the right spots
 // TODO functionalize more
 
 include "../../toolbox/functions.php";
@@ -56,7 +55,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     }
     
      function deleteComponents($db,$lb,$ub){
-         // TODO REWRITE THIS, multiple queries here are bad
+         // TODO REWRITE THIS could be done in one query
         for($i=$lb; $i<=$ub; ++$i){
             //DELETE all grades associated with these gcs
             $params = array($this->g_id,$i);
@@ -85,7 +84,6 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
         $db->query("DELETE FROM grading_rotating WHERE g_id=?", array($this->g_id));
         foreach ($graders as $grader=>$sections){
             foreach($sections as $i=>$section){
-                //print "ENTRY CREATED";
                 $db->query("INSERT INTO grading_rotating(g_id, user_id, sections_rotating) VALUES(?,?,?)", array($this->g_id,$grader,$section));
             }
         }
@@ -380,6 +378,7 @@ else{
 
     foreach($files as $file){
         try{
+            $db->beginTransaction();  
             $fp = fopen($file, 'r');
             if (!$fp){
                 array_push($failed_files, $file);
@@ -395,9 +394,10 @@ else{
             
             array_push($success_gids, $gradeable->get_GID());
         } catch (Exception $e){
-          array_push($failed_files, $file);
+            array_push($failed_files, $file);
         } finally{
             fclose($fp);
+            $db->commit();
         }
     }
     addAssignmentsTxt($db,$success_gids);

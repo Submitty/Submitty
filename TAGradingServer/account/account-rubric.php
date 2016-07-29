@@ -501,9 +501,9 @@ HTML;
 else {
     $output .= <<<HTML
                         <tr style="background-color:#EEE;">
-                            <th style="padding-left: 1px; padding-right: 0px;"><i class="icon-time" id="progress-icon" style="margin-top: 2px;"></th>
+                            <!--<th style="padding-left: 1px; padding-right: 0px;"><i class="icon-time" id="progress-icon" style="margin-top: 2px;"></th>
                             <th style="width:40px;">Part</th>
-                            <th colspan="2">Questions</th>
+                            <th colspan="2">Questions</th>-->
                         </tr>
 HTML;
 }
@@ -533,11 +533,20 @@ HTML;
     $message = htmlentities($question["gc_title"]);
     $note = htmlentities($question["gc_ta_comment"]);
     if ($note != "") {
-        $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note: </b>" . $note . "</i></div>";
+        $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
     }
     $output .= <<<HTML
                             <td style="font-size: 12px" colspan="2">
                                 <b>{$message}</b> {$note}
+HTML;
+
+    $student_note = htmlentities($question['gc_student_comment']);
+    if ($student_note != ''){
+        $student_note = "<div style='margin-bottom:5px; color:#777;'><i><b>Note to Student: </b>" . $student_note . "</i></div>";
+        
+    }
+    $output .= <<<HTML
+                                {$student_note}
                             </td>
                         </tr>
 HTML;

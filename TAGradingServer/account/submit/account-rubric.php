@@ -63,8 +63,6 @@ $submitted = intval($_POST['submitted']);
 $is_graded = boolval($_POST['is_graded']);
 $_POST["late"] = intval($_POST['late']);
 
-var_dump($is_graded);
-
 //update the number of late days for the student the first time grades are submitted
 if ($status == 1 && !$is_graded){
     echo 'update lates';
@@ -72,10 +70,10 @@ if ($status == 1 && !$is_graded){
     $new_lates = $db->row()['last_lates'] - intval($_POST['late']);
     $db->query("INSERT INTO late_days (user_id, since_timestamp, allowed_late_days) VALUES (?,?,?)", array($student, 'now', $new_lates));
 }
-/*
+
 if($_GET["individual"] == "1") {
     header('Location: '.$BASE_URL.'/account/account-summary.php?course='.$_GET['course'].'&g_id=' . $_GET["g_id"]);
 }
 else {
     header('Location: '.$BASE_URL.'/account/index.php?course='.$_GET['course'].'&g_id=' . $_GET["g_id"]);
-}*/
+}

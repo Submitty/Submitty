@@ -370,10 +370,10 @@ HTML;
                               {$readonly}>{$question['question_message']}</textarea>
                     <div class="btn btn-mini btn-default" onclick="toggleQuestion({$num}, 'individual')" style="margin-top:-5px;">TA Note</div>
                     <div class="btn btn-mini btn-default" onclick="toggleQuestion({$num}, 'student')" style="margin-top:-5px;">Student Note</div>
-                    <textarea name="ta_{$num}" id="individual_{$num}" rows="1" placeholder=" Message to TA" 
+                    <textarea name="ta_{$num}" id="individual_{$num}" rows="1" placeholder=" Message to TA"  onkeyup="autoResizeComment(event);"
                                                style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
                                                display: {$display_ta};">{$question['question_grading_note']}</textarea>
-                    <textarea name="student_{$num}" id="student_{$num}" rows="1" placeholder=" Message to Student" 
+                    <textarea name="student_{$num}" id="student_{$num}" rows="1" placeholder=" Message to Student" onkeyup="autoResizeComment(event);"
                               style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
                               display: {$display_ta};">{$question['student_grading_note']}</textarea>
                 </td>
@@ -933,13 +933,13 @@ HTML;
     $('#date_released').datetimepicker('setDate', (new Date("{$g_grade_released_date}")));
 
     function toggleQuestion(question, role) {
-        if(document.getElementById(role +"-" + question ).style.display == "block") {
-            $("#" + role + "-" + question ).animate({marginBottom:"-80px"});
-            setTimeout(function(){document.getElementById(role + "-"+ question ).style.display = "none";}, 175);
+        if(document.getElementById(role +"_" + question ).style.display == "block") {
+            $("#" + role + "_" + question ).animate({marginBottom:"-80px"});
+            setTimeout(function(){document.getElementById(role + "_"+ question ).style.display = "none";}, 175);
         }
         else {
-            $("#" + role + "-" + question ).animate({marginBottom:"5px"});
-            setTimeout(function(){document.getElementById(role+"-" + question ).style.display = "block";}, 175);
+            $("#" + role + "_" + question ).animate({marginBottom:"5px"});
+            setTimeout(function(){document.getElementById(role+"_" + question ).style.display = "block";}, 175);
         }
         calculatePercentageTotal();
     }
@@ -985,10 +985,10 @@ HTML;
                 <textarea name="comment_'+newQ+'" rows="1" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea> \
                 <div class="btn btn-mini btn-default" onclick="toggleQuestion(' + newQ + ',\'individual\''+')" style="margin-top:-5px;">TA Note</div> \
                 <div class="btn btn-mini btn-default" onclick="toggleQuestion(' + newQ + ',\'student\''+')" style="margin-top:-5px;">Student Note</div> \
-                <textarea name="ta_'+newQ+'" id="individual_'+newQ+'" rows="1" placeholder=" Message to TA" style="width: 940px; padding: 0 0 0 10px; \
-                          resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
-                <textarea name="student_'+newQ+'" id="student_'+newQ+'" rows="1" placeholder=" Message to Student" style="width: 940px; padding: 0 0 0 10px; \
-                          resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
+                <textarea name="ta_'+newQ+'" id="individual_'+newQ+'" rows="1" placeholder=" Message to TA"  onkeyup="autoResizeComment(event);" \
+                          style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
+                <textarea name="student_'+newQ+'" id="student_'+newQ+'" rows="1" placeholder=" Message to Student"  onkeyup="autoResizeComment(event);" \
+                          style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
             </td> \
             <td style="background-color:#EEE;">' + sBox + ' \
                 <input onclick="calculatePercentageTotal();" name="ec_'+newQ+'" type="checkbox" /> \
@@ -1001,6 +1001,12 @@ HTML;
                 <img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a> \
             </td> \
         </tr>');
+    }
+    
+    // autoresize the comment box
+    function autoResizeComment(e){
+        e.target.style.height ="";
+        e.target.style.height = e.target.scrollHeight + "px";
     }
 
     function selectBox(question){
