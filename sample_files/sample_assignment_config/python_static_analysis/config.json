@@ -58,7 +58,7 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-		    "instructor_file" : "p2_sol.txt",
+		    "instructor_file" : "p2_out.txt",
 		    "deduction" : 1.0
                 }
             ]
