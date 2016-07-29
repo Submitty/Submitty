@@ -6,24 +6,24 @@ use lib\Database;
 
 $account_subpages_unlock = true;
 
-$split = floatval($_COOKIE["split"]);
+$split = isset($_COOKIE["split"]) ? floatval($_COOKIE["split"]) : 50;
 $show_stats = isset($_COOKIE["show_stats"]) ? intval($_COOKIE["show_stats"]) : 0;
 $show_rubric = isset($_COOKIE["show_rubric"]) ? intval($_COOKIE["show_rubric"]) : 0;
 $show_left = isset($_COOKIE["show_left"]) ? intval($_COOKIE["show_left"]) : 1;
 $show_right = isset($_COOKIE["show_right"]) ? intval($_COOKIE["show_right"]) : 1;
 
-$stats_left = floatval($_COOKIE["stats_left"]);
-$stats_top = floatval($_COOKIE["stats_top"]);
-$stats_width = floatval($_COOKIE["stats_width"]);
-$stats_height = floatval($_COOKIE["stats_height"]);
+$stats_left = isset($_COOKIE["stats_left"]) ? floatval($_COOKIE["stats_left"]) : 0;
+$stats_top = isset($_COOKIE["stats_top"]) ? floatval($_COOKIE["stats_top"]) : 0;
+$stats_width = isset($_COOKIE["stats_width"]) ? floatval($_COOKIE["stats_width"]) : 0;
+$stats_height = isset($_COOKIE["stats_height"]) ? floatval($_COOKIE["stats_height"]) : 0;
 
-$rubric_left = floatval($_COOKIE["rubric_left"]);
-$rubric_top = floatval($_COOKIE["rubric_top"]);
-$rubric_width = floatval($_COOKIE["rubric_width"]);
-$rubric_height = floatval($_COOKIE["rubric_height"]);
+$rubric_left = isset($_COOKIE["rubric_left"]) ? floatval($_COOKIE["rubric_left"]) : 0;
+$rubric_top = isset($_COOKIE["rubric_top"]) ? floatval($_COOKIE["rubric_top"]) : 0;
+$rubric_width = isset($_COOKIE["rubric_width"]) ? floatval($_COOKIE["rubric_width"]) : 0;
+$rubric_height = isset($_COOKIE["rubric_height"]) ? floatval($_COOKIE["rubric_height"]) : 0;
 
-$grade_left = floatval($_COOKIE["grade_left"]); // position of toolbar should also be remembered. Not implemented yet
-$grade_top = floatval($_COOKIE["grade_top"]);
+$grade_left = isset($_COOKIE["grade_left"]) ? floatval($_COOKIE["grade_left"]) : 0; // position of toolbar should also be remembered. Not implemented yet
+$grade_top = isset($_COOKIE["grade_top"]) ? floatval($_COOKIE["grade_top"]) : 0;
 $rubric_late_days = 0;
 
 print <<<HTML
