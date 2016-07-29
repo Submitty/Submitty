@@ -211,6 +211,7 @@ public:
   void PrepareGrade();
 };
 
+
 inline Difference::Difference() :
   TestResults(), output_length_a(0), output_length_b(0), edit_distance(0), 
   type(OtherType), extraStudentOutputOk(false), only_whitespace_changes(false) {

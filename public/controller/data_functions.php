@@ -987,8 +987,8 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
                 if (isset($testcases_results[$u]["compilation_output"])) {
                     $data["compilation_output"] = get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]);
                 }
-                if ($include_diffs && isset($testcases_results[$u]["diffs"])) {
-                    $data["diffs"] = get_all_testcase_diffs($username, $semester,$course, $assignment_id, $assignment_version, $testcases_results[$u]["diffs"]);
+                if ($include_diffs && isset($testcases_results[$u]["autochecks"])) {
+                    $data["autochecks"] = get_all_testcase_diffs($username, $semester,$course, $assignment_id, $assignment_version, $testcases_results[$u]["autochecks"]);
                 }
 
                 array_push($homework_tests, $data);
@@ -1247,11 +1247,10 @@ function get_testcase_diff($username, $semester,$course, $assignment_id, $assign
         }
     }
     if (isset($diff["student_file"]) &&
-        count($diff["student_file"]) > 0 &&
-        file_exists($student_path . $diff["student_file"][0])) {
-        $file_size = filesize($student_path. $diff["student_file"][0]);
+        file_exists($student_path . $diff["student_file"])) {
+        $file_size = filesize($student_path. $diff["student_file"]);
         if ($file_size / 1024 < 10000) {
-            $data["student"] = file_get_contents($student_path.$diff["student_file"][0]);
+            $data["student"] = file_get_contents($student_path.$diff["student_file"]);
         } else {
             $data["student"] = "ERROR: Unable to read student output file.  Student output file is greater than or equal to ". ($file_size / 1024). " kb.  File could be corrupted or is too large.";
         }
@@ -1266,13 +1265,13 @@ function get_all_testcase_diffs($username, $semester,$course, $assignment_id, $a
     $results = array();
     foreach ($diffs as $diff) {
         $diff_result = get_testcase_diff($username, $semester,$course, $assignment_id, $assignment_version, $diff);
-        $diff_result["diff_id"] = $diff["diff_id"];
+        $diff_result["autocheck_id"] = $diff["autocheck_id"];
 
         if (isset($diff["display_mode"]) && $diff["display_mode"] != "") {
              $diff_result["display_mode"] = $diff["display_mode"];
         }
-        if (isset($diff["message"]) && $diff["message"] != "") {
-            $diff_result["message"] = $diff["message"];
+        if (isset($diff["messages"])) {
+            $diff_result["messages"] = $diff["messages"];
         }
         if (isset($diff["description"]) && $diff["description"] != "") {
             $diff_result["description"] = $diff["description"];

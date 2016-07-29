@@ -21,18 +21,16 @@
 		{
 			"test_name": "Test 3 FactorialTest",
 			"execute_logfile": "test03_execute_logfile.txt",
-			"diffs": [
+			"autochecks": [
 				{
-					"diff_id":"test03_0_diff",
+					"autocheck_id":"test03_0_autocheck",
 					"student_file":"test03_STDOUT.txt",
-					"description": "JUnit output",
-					"message": " "
+					"description": "JUnit output"
 				},
 				{
-					"diff_id":"test03_1_diff",
+					"autocheck_id":"test03_1_autocheck",
 					"student_file":"test03_STDERR.txt",
-					"description": "syntax error output from running junit",
-					"message": " "
+					"description": "syntax error output from running junit"
 				}
 			],
 			"points_awarded": 16

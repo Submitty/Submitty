@@ -1,6 +1,6 @@
 {
     "grading_parameters" : {
-        "AUTO_POINTS" : 15
+        "AUTO_POINTS" : 20
     },
 
     "testcases" : [
@@ -18,7 +18,7 @@
         {
             "title" : "Sum of 5 random numbers",
             "command" : "./a.out 5",
-            "points" : 6,
+            "points" : 8,
             "validation" : [
                 {
                     "method" : "custom",
@@ -36,7 +36,7 @@
         {
             "title" : "Sum of 10 random numbers",
             "command" : "./a.out 10",
-            "points" : 4,
+            "points" : 6,
             "validation" : [
                 {
                     "method" : "custom",
@@ -58,7 +58,7 @@
                 "./a.out 5",
                 "./a.out 5"
             ],
-            "points" : 3,
+            "points" : 4,
             "validation" : [
                 {
                     "method" : "custom",
@@ -68,15 +68,7 @@
                         "STDOUT_0.txt",
                         "STDOUT_1.txt"
                     ],
-                    "deduction" : 1.0,
-                    "description" : "first run.."
-                },
-                // NOTE: WANT TO GET RID OF NECESSITY OF THIS DUMMY GRADER TO SHOW BOTH FILES FROM PREVIOUS GRADER
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT_1.txt",
-                    "description" : "second run..",
-                    "deduction" : 0.0
+                    "deduction" : 1.0
                 },
                 {
                     "method" : "warnIfNotEmpty",

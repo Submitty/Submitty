@@ -25,10 +25,7 @@
 #include <cassert>
 #include <iomanip>
 #include <sys/resource.h>
-//#include "tokenSearch.h"
-//#include "myersDiff.h"
 #include "testResults.h"
-//#include "tokens.h"
 
 const std::string drmemory_path = "/usr/local/submitty/drmemory/bin/drmemory";
 
@@ -43,34 +40,6 @@ public:
   bool visible;
   bool view_test_points;
 };
-
-
-// =================================================================================
-// =================================================================================
-
-/*
-
-class TestCaseCustom : public TestCaseGrader {
-public:
-  TestCaseCustom(float (*custom_grader_)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv, TestCaseCustom& custom_testcase),
-		 const std::string file,
-		 const std::string desc,
-		 const std::string arg_string,
-		 float deduct=-1.0)
-    : TestCaseGrader(file,desc), custom_grader(custom_grader_) { my_arg_string = arg_string; deduction=deduct; my_display_mode = ""; }
-
-  float (*custom_grader)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv,  TestCaseCustom& custom_testcase);
-  virtual TestResults* doit(const std::string &prefix);
-  virtual std::string display_mode() const { return my_display_mode; }
-
-  void set_display_mode(const std::string& dm) { my_display_mode = dm; }
-
-private:
-  std::string my_arg_string;
-  std::string my_display_mode;
-};
-
-*/
 
 // =================================================================================
 
@@ -340,7 +309,7 @@ public:
 
   /* Calls the function designated by the function pointer; if the function pointer
      is NULL, defaults to returning the result of diffLine(). */
-  TestResults* do_the_grading (int j, std::string &message);
+  TestResults* do_the_grading (int j);
 
   const nlohmann::json get_test_case_limits() const { return _test_case_limits; }
   

@@ -177,99 +177,71 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         tc_j["compilation_output"] = my_testcase.prefix() + "_STDERR.txt";
       }
     }
-    else {
-      // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
-      nlohmann::json diff_js;
+    else {   // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
+      nlohmann::json autocheck_js;
       double my_score = 1.0;
       double deduction_sum = 0.0;
-      
       for (int j = 0; j < my_testcase.numFileGraders(); j++) {
-        nlohmann::json diff_j; //std::vector<std::string> diff_vector;
-
-        std::cerr << "comparison #" << j << std::endl;
-        std::string helper_message = "";
-
-        TestResults *result = my_testcase.do_the_grading(j,helper_message);
-
-        // PREPARE THE JSON DIFF FILE
-        std::stringstream diff_path;
-
-        diff_path << my_testcase.prefix() << "_" << j << "_diff.json";
-        std::ofstream diff_stream(diff_path.str().c_str());
-
-        if (result != NULL) {
-          // THE GRADE (will be compiled across all comparisons)
-          std::cout << "result->getGrade() = " << result->getGrade() << std::endl;
-	  assert (result->getGrade() >= 0.0 && result->getGrade() <= 1.0);
-
-          double deduction = my_testcase.test_case_grader_vec[j].value("deduction",1.0); //->deduction;
-          if (deduction < -0.5) {
-            deduction = 1 / double(my_testcase.numFileGraders());
-          }
-          deduction_sum += deduction;
-          std::cout << "deduction multiplier = " << deduction << std::endl;
-	  
-          my_score -= deduction*(1-result->getGrade());
-
-          std::cout << "my_score = " << my_score << std::endl;
-
-          result->printJSON(diff_stream);
-          helper_message += " " + result->get_message();
-          // CLEANUP THIS COMPARISON
-          delete result;
-        }
-
-        // JSON FOR THIS COMPARISON
-        diff_j["diff_id"] = my_testcase.prefix() + "_" + std::to_string(j) + "_diff";
-
-	std::string dm = my_testcase.test_case_grader_vec[j].value("display_mode",""); //->display_mode();
-	if (dm != "") {
-          diff_j["display_mode"] = dm;
-	}
-
+        std::cerr << "autocheck #" << j << std::endl;
+        TestResults *result = my_testcase.do_the_grading(j);
+        assert (result != NULL);
+        // loop over the student files
         std::vector<std::string> filenames = stringOrArrayOfStrings(my_testcase.test_case_grader_vec[j],"filename");
-
-        for (int i = 0; i < filenames.size(); i++) {
-          diff_j["student_file"].push_back(my_testcase.prefix() + "_" + filenames[0]);
+        for (int FN = 0; FN < filenames.size(); FN++) {
+          // JSON FOR THIS COMPARISON
+          nlohmann::json autocheck_j; 
+          autocheck_j["student_file"] = my_testcase.prefix() + "_" + filenames[FN];
+          std::string expected = "";
+          expected = my_testcase.test_case_grader_vec[j].value("instructor_file", "");
+          if (GLOBAL_replace_string_before != "") {
+            while (1) {
+              int location = expected.find(GLOBAL_replace_string_before);
+              if (location == std::string::npos) break;
+              expected.replace(location,GLOBAL_replace_string_before.size(),GLOBAL_replace_string_after);
+            }
+          }
+          std::string autocheckid = std::to_string(j);
+          if (filenames.size() > 1) {
+            autocheckid += "_" + std::to_string(FN);
+            assert (expected == "");
+          }
+          autocheck_j["autocheck_id"] = my_testcase.prefix() + "_" + autocheckid + "_autocheck";
+          //std::string dm = my_testcase.test_case_grader_vec[j].value("display_mode",""); //->display_mode();
+          //if (dm != "") { autocheck_j["display_mode"] = dm; }
+          if (expected != "") { // PREPARE THE JSON DIFF FILE
+            std::stringstream diff_path;
+            diff_path << my_testcase.prefix() << "_" << j << "_diff.json";
+            std::ofstream diff_stream(diff_path.str().c_str());
+            result->printJSON(diff_stream);
+            std::stringstream expected_path;
+            std::string id = hw_id;
+            std::string expected_out_dir = "test_output/" + id + "/";
+            expected_path << expected_out_dir << expected;
+            autocheck_j["instructor_file"] = expected_path.str();
+            autocheck_j["difference"] = my_testcase.prefix() + "_" + std::to_string(j) + "_diff.json";
+          }
+          autocheck_j["description"] = my_testcase.description(j);
+          if (FN==0) {
+            for (int m = 0; m < result->getMessages().size(); m++) {
+              if (result->getMessages()[m] != "")
+                autocheck_j["messages"].push_back(result->getMessages()[m]); 
+            }
+          }
+          autocheck_js.push_back(autocheck_j);
         }
-
-
-        std::string expected = "";
-        expected = my_testcase.test_case_grader_vec[j].value("instructor_file", "");
-
-	//#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-	if (GLOBAL_replace_string_before != "") {
-	  std::cout << "BEFORE " << expected << std::endl;
-	  while (1) {
-	    int location = expected.find(GLOBAL_replace_string_before);
-	    if (location == std::string::npos) 
-	      break;
-	    expected.replace(location,GLOBAL_replace_string_before.size(),GLOBAL_replace_string_after);
-	  }
-	  std::cout << "AFTER  " << expected << std::endl;
-	}
-	//#endif
-	
-
-
-
-        if (expected != "") {
-          std::stringstream expected_path;
-          std::string id = hw_id;
-          std::string expected_out_dir = "test_output/" + id + "/";
-          expected_path << expected_out_dir << expected;
-          diff_j["instructor_file"] = expected_path.str();
-          diff_j["difference"] = my_testcase.prefix() + "_" + std::to_string(j) + "_diff.json";
-        }
-
-        diff_j["description"] = my_testcase.description(j);
-        if (helper_message != "") {
-          diff_j["message"] = helper_message;
-        }
-        diff_js.push_back(diff_j);
+        std::cout << "result->getGrade() = " << result->getGrade() << std::endl;
+        assert (result->getGrade() >= 0.0 && result->getGrade() <= 1.0);
+        double deduction = my_testcase.test_case_grader_vec[j].value("deduction",1.0); 
+        if (deduction < -0.5) { deduction = 1 / double(my_testcase.numFileGraders()); }
+        deduction_sum += deduction;
+        std::cout << "deduction multiplier = " << deduction << std::endl;
+        my_score -= deduction*(1-result->getGrade());
+        std::cout << "my_score = " << my_score << std::endl;
+         delete result;
+        result = NULL;
       } // END COMPARISON LOOP
 
-      tc_j["diffs"] = diff_js;
+      tc_j["autochecks"] = autocheck_js;
 
       std::cout << "check these vals " << my_testcase.points() << " " << deduction_sum << std::endl; 
       if (my_testcase.points() > 0.01) {
@@ -309,7 +281,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     
     tc_j["points_awarded"] = testcase_pts;
     if (message != "") {
-      tc_j["message"] = message;
+      tc_j["messages"].push_back(message);
     }
 
     all_testcases.push_back(tc_j); 

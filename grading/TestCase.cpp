@@ -212,8 +212,10 @@ TestCase TestCase::MakeTestCase (nlohmann::json j) {
 
 
 
-TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {
+TestResults* TestCase::do_the_grading (int j) {
   assert (j >= 0 && j < numFileGraders());
+
+  std::string helper_message = "";
 
   bool ok_to_compare = true;
 
@@ -261,18 +263,14 @@ TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {
     helper_message += tmp.str();
     ok_to_compare = false;
   }
-  //return test_case_grader_vec[j]->doit(prefix());
-
-  std::cout << "PREFIX IS '" << prefix() << "'" << std::endl;
-  return json_grader_doit(*this,test_case_grader_vec[j]); //,prefix());
+  TestResults *answer = json_grader_doit(*this,test_case_grader_vec[j]); //,prefix());
+  if (helper_message != "") {
+    answer->addMessage(helper_message);
+  }
+  return answer;
 }
 
-
-
-
 /*
-
-
   //#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
   std::string expected = expected_file;
   if (GLOBAL_replace_string_before != "") {
@@ -286,62 +284,7 @@ TestResults* TestCase::do_the_grading (int j, std::string &helper_message) {
     std::cout << "AFTER  " << expected << std::endl;
   }
   //#endif
-
-
-
 */
-
-/*
-TestResults* TestCaseCustom_doit(nlohmann::json j,const std::string &prefix) {
-
-
-  std::ifstream student_instr((prefix+"_"+filename).c_str());
-
-  std::string s = "";
-
-  if (!student_instr) {
-    std::cout << "ERROR: STUDENT FILE DOES NOT EXIST" << std::endl;
-    return new TestResults(0,"ERROR! Student file does not exist<br>\n");
-  }
-
-
-  std::vector<std::string> argv;
-
-  argv.push_back("MY_EXECUTABLE.out");
-
-  std::stringstream ss(my_arg_string);
-  std::string token;
-  while (ss >> token) {
-    argv.push_back(token);
-  }
-
-
-  std::stringstream output;
-  float answer = custom_grader(student_instr,output,argv,*this); //my_display_mode);
-
-
-  std::cout << "GRADE: " << answer << "\nOUTPUT:\n" << output.str() << std::endl;
-
-
-  std::string tmp = output.str();
-  std::string replaced;
-  for (int i = 0; i < tmp.size(); i++) {
-    if (tmp[i] != '\n') {
-      replaced.push_back(tmp[i]);
-    }
-    else {
-      replaced += "<br>\n";
-    }
-  }
-
-
-
-
-  return new TestResults(answer,replaced);
-
-}
-*/
-
 
 
 std::string getAssignmentIdFromCurrentDirectory(std::string dir) {

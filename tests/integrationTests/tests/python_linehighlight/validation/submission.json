@@ -9,34 +9,30 @@
 		{
 			"test_name": "Test 1 CORRECT SOLUTION",
 			"execute_logfile": "test01_execute_logfile.txt",
-			"diffs": [
+			"autochecks": [
 				{
-					"diff_id":"test01_0_diff",
+					"autocheck_id":"test01_0_autocheck",
 					"student_file":"test01_output_correct.txt",
 					"instructor_file":"test_output/testassignment/output_instructor.txt",
 					"difference":"test01_0_diff.json",
-					"description": "output_correct.txt",
-					"message": " "
+					"description": "output_correct.txt"
 				},
 				{
-					"diff_id":"test01_1_diff",
+					"autocheck_id":"test01_1_autocheck",
 					"student_file":"test01_output_correct.txt",
 					"instructor_file":"test_output/testassignment/output_instructor.txt",
 					"difference":"test01_1_diff.json",
-					"description": "output_correct.txt",
-					"message": " "
+					"description": "output_correct.txt"
 				},
 				{
-					"diff_id":"test01_2_diff",
+					"autocheck_id":"test01_2_autocheck",
 					"student_file":"test01_STDOUT.txt",
-					"description": "Standard Output (STDOUT)",
-					"message": " "
+					"description": "Standard Output (STDOUT)"
 				},
 				{
-					"diff_id":"test01_3_diff",
+					"autocheck_id":"test01_3_autocheck",
 					"student_file":"test01_STDERR.txt",
-					"description": "Standard Error (STDERR)",
-					"message": " "
+					"description": "Standard Error (STDERR)"
 				}
 			],
 			"points_awarded": 10
@@ -44,26 +40,23 @@
 		{
 			"test_name": "Test 2 DUPLICATE LINES - Required Order",
 			"execute_logfile": "test02_execute_logfile.txt",
-			"diffs": [
+			"autochecks": [
 				{
-					"diff_id":"test02_0_diff",
+					"autocheck_id":"test02_0_autocheck",
 					"student_file":"test02_output_duplicates.txt",
 					"instructor_file":"test_output/testassignment/output_instructor.txt",
 					"difference":"test02_0_diff.json",
-					"description": "output_duplicates.txt",
-					"message": " "
+					"description": "output_duplicates.txt"
 				},
 				{
-					"diff_id":"test02_1_diff",
+					"autocheck_id":"test02_1_autocheck",
 					"student_file":"test02_STDOUT.txt",
-					"description": "Standard Output (STDOUT)",
-					"message": " "
+					"description": "Standard Output (STDOUT)"
 				},
 				{
-					"diff_id":"test02_2_diff",
+					"autocheck_id":"test02_2_autocheck",
 					"student_file":"test02_STDERR.txt",
-					"description": "Standard Error (STDERR)",
-					"message": " "
+					"description": "Standard Error (STDERR)"
 				}
 			],
 			"points_awarded": 8
@@ -71,26 +64,24 @@
 		{
 			"test_name": "Test 3 DUPLICATE LINES - Re-Ordering OK",
 			"execute_logfile": "test03_execute_logfile.txt",
-			"diffs": [
+			"autochecks": [
 				{
-					"diff_id":"test03_0_diff",
+					"autocheck_id":"test03_0_autocheck",
 					"student_file":"test03_output_duplicates.txt",
 					"instructor_file":"test_output/testassignment/output_instructor.txt",
 					"difference":"test03_0_diff.json",
 					"description": "output_duplicates.txt",
-					"message": " ERROR: 17 duplicate line(s)"
+					"messages": ["ERROR: 17 duplicate line(s)"]
 				},
 				{
-					"diff_id":"test03_1_diff",
+					"autocheck_id":"test03_1_autocheck",
 					"student_file":"test03_STDOUT.txt",
-					"description": "Standard Output (STDOUT)",
-					"message": " "
+					"description": "Standard Output (STDOUT)"
 				},
 				{
-					"diff_id":"test03_2_diff",
+					"autocheck_id":"test03_2_autocheck",
 					"student_file":"test03_STDERR.txt",
-					"description": "Standard Error (STDERR)",
-					"message": " "
+					"description": "Standard Error (STDERR)"
 				}
 			],
 			"points_awarded": 8
@@ -98,26 +89,23 @@
 		{
 			"test_name": "Test 4 EXTRA LINES - Required Order",
 			"execute_logfile": "test04_execute_logfile.txt",
-			"diffs": [
+			"autochecks": [
 				{
-					"diff_id":"test04_0_diff",
+					"autocheck_id":"test04_0_autocheck",
 					"student_file":"test04_output_extra.txt",
 					"instructor_file":"test_output/testassignment/output_instructor.txt",
 					"difference":"test04_0_diff.json",
-					"description": "output_extra.txt",
-					"message": " "
+					"description": "output_extra.txt"
 				},
 				{
-					"diff_id":"test04_1_diff",
+					"autocheck_id":"test04_1_autocheck",
 					"student_file":"test04_STDOUT.txt",
-					"description": "Standard Output (STDOUT)",
-					"message": " "
+					"description": "Standard Output (STDOUT)"
 				},
 				{
-					"diff_id":"test04_2_diff",
+					"autocheck_id":"test04_2_autocheck",
 					"student_file":"test04_STDERR.txt",
-					"description": "Standard Error (STDERR)",
-					"message": " "
+					"description": "Standard Error (STDERR)"
 				}
 			],
 			"points_awarded": 8
@@ -125,26 +113,24 @@
 		{
 			"test_name": "Test 5 EXTRA LINES - Re-Ordering OK",
 			"execute_logfile": "test05_execute_logfile.txt",
-			"diffs": [
+			"autochecks": [
 				{
-					"diff_id":"test05_0_diff",
+					"autocheck_id":"test05_0_autocheck",
 					"student_file":"test05_output_extra.txt",
 					"instructor_file":"test_output/testassignment/output_instructor.txt",
 					"difference":"test05_0_diff.json",
 					"description": "output_extra.txt",
-					"message": " ERROR: 21 incorrect line(s)"
+					"messages": ["ERROR: 21 incorrect line(s)"]
 				},
 				{
-					"diff_id":"test05_1_diff",
+					"autocheck_id":"test05_1_autocheck",
 					"student_file":"test05_STDOUT.txt",
-					"description": "Standard Output (STDOUT)",
-					"message": " "
+					"description": "Standard Output (STDOUT)"
 				},
 				{
-					"diff_id":"test05_2_diff",
+					"autocheck_id":"test05_2_autocheck",
 					"student_file":"test05_STDERR.txt",
-					"description": "Standard Error (STDERR)",
-					"message": " "
+					"description": "Standard Error (STDERR)"
 				}
 			],
 			"points_awarded": 7
@@ -152,26 +138,23 @@
 		{
 			"test_name": "Test 6 MISSING LINES - Required Order",
 			"execute_logfile": "test06_execute_logfile.txt",
-			"diffs": [
+			"autochecks": [
 				{
-					"diff_id":"test06_0_diff",
+					"autocheck_id":"test06_0_autocheck",
 					"student_file":"test06_output_missing.txt",
 					"instructor_file":"test_output/testassignment/output_instructor.txt",
 					"difference":"test06_0_diff.json",
-					"description": "output_missing.txt",
-					"message": " "
+					"description": "output_missing.txt"
 				},
 				{
-					"diff_id":"test06_1_diff",
+					"autocheck_id":"test06_1_autocheck",
 					"student_file":"test06_STDOUT.txt",
-					"description": "Standard Output (STDOUT)",
-					"message": " "
+					"description": "Standard Output (STDOUT)"
 				},
 				{
-					"diff_id":"test06_2_diff",
+					"autocheck_id":"test06_2_autocheck",
 					"student_file":"test06_STDERR.txt",
-					"description": "Standard Error (STDERR)",
-					"message": " "
+					"description": "Standard Error (STDERR)"
 				}
 			],
 			"points_awarded": 7
@@ -179,26 +162,24 @@
 		{
 			"test_name": "Test 7 MISSING LINES - Re-Ordering OK",
 			"execute_logfile": "test07_execute_logfile.txt",
-			"diffs": [
+			"autochecks": [
 				{
-					"diff_id":"test07_0_diff",
+					"autocheck_id":"test07_0_autocheck",
 					"student_file":"test07_output_missing.txt",
 					"instructor_file":"test_output/testassignment/output_instructor.txt",
 					"difference":"test07_0_diff.json",
 					"description": "output_missing.txt",
-					"message": " ERROR: 21 missing line(s)"
+					"messages": ["ERROR: 21 missing line(s)"]
 				},
 				{
-					"diff_id":"test07_1_diff",
+					"autocheck_id":"test07_1_autocheck",
 					"student_file":"test07_STDOUT.txt",
-					"description": "Standard Output (STDOUT)",
-					"message": " "
+					"description": "Standard Output (STDOUT)"
 				},
 				{
-					"diff_id":"test07_2_diff",
+					"autocheck_id":"test07_2_autocheck",
 					"student_file":"test07_STDERR.txt",
-					"description": "Standard Error (STDERR)",
-					"message": " "
+					"description": "Standard Error (STDERR)"
 				}
 			],
 			"points_awarded": 7
@@ -206,26 +187,23 @@
 		{
 			"test_name": "Test 8 OUT OF ORDER - Required Order",
 			"execute_logfile": "test08_execute_logfile.txt",
-			"diffs": [
+			"autochecks": [
 				{
-					"diff_id":"test08_0_diff",
+					"autocheck_id":"test08_0_autocheck",
 					"student_file":"test08_output_reordered.txt",
 					"instructor_file":"test_output/testassignment/output_instructor.txt",
 					"difference":"test08_0_diff.json",
-					"description": "output_reordered.txt",
-					"message": " "
+					"description": "output_reordered.txt"
 				},
 				{
-					"diff_id":"test08_1_diff",
+					"autocheck_id":"test08_1_autocheck",
 					"student_file":"test08_STDOUT.txt",
-					"description": "Standard Output (STDOUT)",
-					"message": " "
+					"description": "Standard Output (STDOUT)"
 				},
 				{
-					"diff_id":"test08_2_diff",
+					"autocheck_id":"test08_2_autocheck",
 					"student_file":"test08_STDERR.txt",
-					"description": "Standard Error (STDERR)",
-					"message": " "
+					"description": "Standard Error (STDERR)"
 				}
 			],
 			"points_awarded": 1
@@ -233,26 +211,24 @@
 		{
 			"test_name": "Test 9 OUT OF ORDER - Re-Ordering OK",
 			"execute_logfile": "test09_execute_logfile.txt",
-			"diffs": [
+			"autochecks": [
 				{
-					"diff_id":"test09_0_diff",
+					"autocheck_id":"test09_0_autocheck",
 					"student_file":"test09_output_reordered.txt",
 					"instructor_file":"test_output/testassignment/output_instructor.txt",
 					"difference":"test09_0_diff.json",
 					"description": "output_reordered.txt",
-					"message": " ERROR: 3 incorrect line(s), ERROR: 3 duplicate line(s), ERROR: 3 missing line(s)"
+					"messages": ["ERROR: 3 incorrect line(s), ERROR: 3 duplicate line(s), ERROR: 3 missing line(s)"]
 				},
 				{
-					"diff_id":"test09_1_diff",
+					"autocheck_id":"test09_1_autocheck",
 					"student_file":"test09_STDOUT.txt",
-					"description": "Standard Output (STDOUT)",
-					"message": " "
+					"description": "Standard Output (STDOUT)"
 				},
 				{
-					"diff_id":"test09_2_diff",
+					"autocheck_id":"test09_2_autocheck",
 					"student_file":"test09_STDERR.txt",
-					"description": "Standard Error (STDERR)",
-					"message": " "
+					"description": "Standard Error (STDERR)"
 				}
 			],
 			"points_awarded": 9

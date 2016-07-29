@@ -13,17 +13,18 @@
             "test_name": "Test 1 Compilation"
         },
         {
-            "diffs": [
+            "autochecks": [
                 {
+                    "autocheck_id": "test02_0_autocheck",
                     "description": "STDOUT.txt",
-                    "diff_id": "test02_0_diff",
-                    "message": " ERROR!  INCORRECT TOTAL ",
+                    "messages": [
+                        "ERROR!  INCORRECT TOTAL"
+                    ],
                     "student_file": "test02_STDOUT.txt"
                 },
                 {
+                    "autocheck_id": "test02_1_autocheck",
                     "description": "Standard Error (STDERR)",
-                    "diff_id": "test02_1_diff",
-                    "message": " ",
                     "student_file": "test02_STDERR.txt"
                 }
             ],
@@ -32,17 +33,18 @@
             "test_name": "Test 2 Sum of 5 random numbers"
         },
         {
-            "diffs": [
+            "autochecks": [
                 {
+                    "autocheck_id": "test03_0_autocheck",
                     "description": "STDOUT.txt",
-                    "diff_id": "test03_0_diff",
-                    "message": " ERROR!  INCORRECT TOTAL ",
+                    "messages": [
+                        "ERROR!  INCORRECT TOTAL"
+                    ],
                     "student_file": "test03_STDOUT.txt"
                 },
                 {
+                    "autocheck_id": "test03_1_autocheck",
                     "description": "Standard Error (STDERR)",
-                    "diff_id": "test03_1_diff",
-                    "message": " ",
                     "student_file": "test03_STDERR.txt"
                 }
             ],
@@ -51,29 +53,28 @@
             "test_name": "Test 3 Sum of 10 random numbers"
         },
         {
-            "diffs": [
+            "autochecks": [
                 {
-                    "description": "first run..",
-                    "diff_id": "test04_0_diff",
-                    "message": " ERROR!  INCORRECT TOTAL ",
+                    "autocheck_id": "test04_0_0_autocheck",
+                    "description": "STDOUT_0.txt",
+                    "messages": [
+                        "ERROR!  INCORRECT TOTAL"
+                    ],
                     "student_file": "test04_STDOUT_0.txt"
                 },
                 {
-                    "description": "second run..",
-                    "diff_id": "test04_1_diff",
-                    "message": " WARNING: This file should be empty",
+                    "autocheck_id": "test04_0_1_autocheck",
+                    "description": "STDOUT_0.txt",
                     "student_file": "test04_STDOUT_1.txt"
                 },
                 {
+                    "autocheck_id": "test04_1_autocheck",
                     "description": "Standard Error (STDERR)",
-                    "diff_id": "test04_2_diff",
-                    "message": " ",
                     "student_file": "test04_STDERR_0.txt"
                 },
                 {
+                    "autocheck_id": "test04_2_autocheck",
                     "description": "Standard Error (STDERR)",
-                    "diff_id": "test04_3_diff",
-                    "message": " ",
                     "student_file": "test04_STDERR_1.txt"
                 }
             ],
