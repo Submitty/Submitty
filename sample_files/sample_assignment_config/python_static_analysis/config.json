@@ -27,7 +27,8 @@
                     "filename" : "STDOUT_1.txt",
                     "description" : "Number of print statements",
 		    "comparison" : "ge",
-                    "term" : 0.5
+		    "deduction" : 0.5,
+                    "term" : 1
                 },
                 {
                     "method" : "warnIfNotEmpty",
