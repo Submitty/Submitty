@@ -1,8 +1,8 @@
 {
     "extra_credit_points_awarded": 0,
-    "non_extra_credit_points_awarded": 5,
-    "nonhidden_points_awarded": 5,
-    "points_awarded": 5,
+    "non_extra_credit_points_awarded": 4,
+    "nonhidden_points_awarded": 4,
+    "points_awarded": 4,
     "submission_number": 1,
     "submission_time": "0",
     "testcases": [
@@ -18,6 +18,9 @@
                 {
                     "autocheck_id": "test01_1_autocheck",
                     "description": "Number of print statements",
+                    "messages": [
+                         "FAILURE! Number of print statements 0 ge 1"
+                     ],
                     "student_file": "test01_STDOUT_1.txt"
                 },
                 {
@@ -27,7 +30,7 @@
                 }
             ],
             "execute_logfile": "test01_execute_logfile.txt",
-            "points_awarded": 1,
+            "points_awarded": 0,
             "test_name": "Test 1 Convert Temperature"
         },
         {
