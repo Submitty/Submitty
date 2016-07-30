@@ -181,6 +181,7 @@ $output .= <<<HTML
         })
         .done(function(response) {
             window.alert(response);
+            location.reload(true);
         })
         .fail(function() {
             window.alert("[AJAX ERROR] Refresh page");
@@ -193,9 +194,9 @@ $output .= <<<HTML
         <h3 id="myModalgradeableel">Manage Gradeables</h3>
         <span class="submit-button">
             <input class="btn btn-primary" onclick="window.location.href='{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}'" type="submit" value="Create New Gradeable"/>
-            &nbsp;&nbsp;
+
             <input class="btn btn-primary" onclick="fixSequences();" type="submit" value="Fix DB Sequences" />
-            &nbsp;&nbsp;
+
             <!-- TODO import from JSON 
                 Basically 
                 1. This should take all of the JSON configs that are saved in the JSON configs folder or wherever
