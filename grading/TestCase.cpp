@@ -85,54 +85,35 @@ bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string
 }
 
 
-
-//TestResults* TestCaseTokens_doit(const TestCase& tc, const nlohmann::json& j);
-
-
-/*
-#define _TERM_COMPARISON_DEF(T)\
-if (method == #T "Comparison") {\
-        bool (*cmp)(const int& a, const int& b) = NULL;\
-        std::string cmpstr(itr2->value("comparison",""));\
-        if (cmpstr == "eq") cmp = [](const T& a, const T& b){return a == b;};\
-        else if (cmpstr == "ne") cmp = [](const T& a, const T& b){return a != b;};\
-        else if (cmpstr == "gt") cmp = [](const T& a, const T& b){return a > b;};\
-        else if (cmpstr == "lt") cmp = [](const T& a, const T& b){return a < b;};\
-        else if (cmpstr == "ge") cmp = [](const T& a, const T& b){return a >= b;};\
-        else if (cmpstr == "le") cmp = [](const T& a, const T& b){return a <= b;};\
-	    T object;\
-	    std::stringstream ss(itr2->value("term", "0"));\
-	    ss >> object;\
-		if (cmp != NULL) graders.push_back(\
-				new TestCaseTermComparison<T>(filename, description, cmp, object,\
-					deduction));\
+TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::string student_file_contents;
+  std::string error_message;
+  if (!openStudentFile(tc,j,student_file_contents,error_message)) { 
+    return new TestResults(0.0,error_message);
+  }
+  int value = std::stoi(student_file_contents);
+  nlohmann::json::const_iterator itr = j.find("term");
+  if (itr == j.end() || !itr->is_number()) {
+    return new TestResults(0.0,"ERROR!  integer \"term\" not specified");
+  }
+  int term = (*itr);
+  std::string cmpstr = j.value("comparison","MISSING COMPARISON");
+  bool success;
+  if (cmpstr == "eq")      success = (value == term);
+  else if (cmpstr == "ne") success = (value != term);
+  else if (cmpstr == "gt") success = (value > term);
+  else if (cmpstr == "lt") success = (value < term);
+  else if (cmpstr == "ge") success = (value >= term);
+  else if (cmpstr == "le") success = (value <= term);
+  else {
+    return new TestResults(0.0, "ERROR! UNKNOWN COMPARISON "+cmpstr);
+  }
+  if (success) 
+    return new TestResults(1.0);
+  std::string description = j.value("description","MISSING DESCRIPTION");
+  return new TestResults(0.0,"FAILURE! "+description+" "+std::to_string(value)+" "+cmpstr+" "+std::to_string(term));
 }
 
-template <typename T>
-class TestCaseTermComparison : public TestCaseGrader {
-public:
-  TestCaseTermComparison(const std::string file, const std::string desc,
-                         bool (*m)(const T& a, const T& b), const T& o,
-						 float deduct=-1.0)
-    : TestCaseGrader(file, desc), method(m), object(o) {deduction = deduct;}
-
-  virtual TestResults* doit(const std::string &prefix) {
-    T contents;
-    std::ifstream student_instr((prefix + "_" + filename).c_str());
-    student_instr >> contents;
-    student_instr.close();
-    if (method(contents, object)) {
-      return new TestResults(1);
-    } else {
-      return new TestResults(0);
-    }
-  }
-
-private:
-  bool (*method)(const T& a, const T& b);
-  T object;
-};
-*/
 
 
 
@@ -175,6 +156,9 @@ TestResults* json_grader_doit(const TestCase& tc, const nlohmann::json& j) {
     
   } else if (method == "searchToken") {
     return searchToken_doit(tc,j); 
+
+  } else if (method == "intComparison") {
+    return intComparison_doit(tc,j); 
 
   } else if (method == "custom") {
     return custom_grader(tc,j); 

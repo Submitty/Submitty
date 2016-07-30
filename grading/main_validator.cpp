@@ -74,12 +74,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
 
-  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
-  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
-  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
-  int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
-  int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
-  
 
   std::string grade_path = ".submit.grade";
   std::ofstream gradefile(grade_path.c_str());
@@ -100,8 +94,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
   int nonhidden_possible_pts = 0;
   int hidden_possible_pts = 0;
-
-  int possible_ta_pts = TA_POINTS;
 
   std::stringstream testcase_json;
 
@@ -293,6 +285,14 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
   } // end test case loop
 
+
+  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
+  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",hidden_possible_pts);
+  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
+  int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
+  int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
+  
+  int possible_ta_pts = TA_POINTS;
   int total_possible_pts = possible_ta_pts + hidden_possible_pts;
 
   std::cout << "totals " << possible_ta_pts << " " << hidden_possible_pts << " " << TOTAL_POINTS << std::endl;
