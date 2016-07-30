@@ -70,7 +70,6 @@ echo "\n" | add-apt-repository ppa:webupd8team/java
 apt-get -qq update
 
 
-
 ############################
 # NTP: Network Time Protocol
 # You want to be sure the clock stays in sync, especially if you have
@@ -86,8 +85,6 @@ apt-get -qq update
 
 apt-get install -qqy ntp
 service ntp restart
-
-
 
 # path for untrusted user creation script will be different if not using Vagrant
 ${SUBMITTY_REPOSITORY}/.setup/create.untrusted.users.pl
@@ -125,6 +122,9 @@ apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgr
 libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
 libseccomp2 seccomp junit cmake xlsx2csv libpcre3 libpcre3-dev flex bison
 
+apt-get install -qqy subversion subversion-tools
+apt-get install -qqy libapache2-svn
+
 # Enable PHP5-mcrypt
 php5enmod mcrypt
 
@@ -141,7 +141,10 @@ apt-get install -qqy racket > /dev/null 2>&1
 apt-get install -qqy swi-prolog > /dev/null 2>&1
 
 # Install Image Magick for image comparison, etc.
-apt-get install imagemagick
+apt-get install -qqy imagemagick
+
+apt-get -qqy autoremove
+
 
 #################################################################
 # NETWORK CONFIGURATION
@@ -184,10 +187,11 @@ echo "Binding static IPs to \"Host-Only\" virtual network interface."
 # eth1 is statically bound to 192.168.56.101, 102, and 103.
 printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
 printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
+printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+printf "auto eth1:3\niface eth1:3 inet static\naddress 192.168.56.104\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
 
 # Turn them on.
-ifup eth1 eth1:1 eth1:2
+ifup eth1 eth1:1 eth1:2 eth1:3
 
 #################################################################
 # JAR SETUP
@@ -393,16 +397,16 @@ fi
 adduser hwphp hwcronphp
 adduser hwcron hwcronphp
 
-for COURSE in csci1100 csci1200 csci2600
+for COURSE in csci1000 csci1100 csci1200 csci2600
 do
 
-        # for each course, create a group to contain the current
-        # instructor along the lines of:
+    # for each course, create a group to contain the current
+    # instructor along the lines of:
 
 	addgroup $COURSE
 
-        # and another group to contain the current instructor, TAs,
-        # hwcron, and hwphp along the lines of
+    # and another group to contain the current instructor, TAs,
+    # hwcron, and hwphp along the lines of
 
 	addgroup $COURSE\_tas_www
 	adduser hwphp $COURSE\_tas_www
@@ -436,8 +440,6 @@ ls /home | sort > ${SUBMITTY_DATA_DIR}/instructors/valid
 #################################################################
 # SVN SETUP
 #################
-apt-get install -qqy subversion subversion-tools
-apt-get install -qqy libapache2-svn
 a2enmod dav
 a2enmod dav_fs
 a2enmod authz_svn
@@ -474,16 +476,21 @@ if [ ${VAGRANT} == 1 ]; then
 	echo "postgres:postgres" | chpasswd postgres
 	adduser postgres shadow
 	service postgresql restart
-	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost    all    all    192.168.56.0\/24    pam/" /etc/postgresql/9.3/main/pg_hba.conf
+	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}')"
+	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost       all    all    192.168.56.0\/24    pam\nhost       all    all    all                md5/" /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
 	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
 	echo "Finished creating PostgreSQL users"
 
-    echo "Setting up Postgres to connect to via host"
-    PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}')"
 	sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
-	echo "host    all             all             all                     md5" >> "/etc/postgresql/${PG_VERSION}/main/pg_hba.conf"
 	service postgresql restart
+fi
+
+#################################################################
+# ANALYSIS TOOLS SETUP
+#################
+if [ ${VAGRANT} == 1 ]; then
+    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 fi
 
 #################################################################
@@ -567,7 +574,6 @@ chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
 # With this line, subdirectories inherit the group by default and
 # blocks r/w access to the directory by others on the system.
 chmod 2771 ${SUBMITTY_INSTALL_DIR}
-
 
 echo "Done."
 exit 0

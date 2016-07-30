@@ -89,6 +89,53 @@ bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string
 //TestResults* TestCaseTokens_doit(const TestCase& tc, const nlohmann::json& j);
 
 
+/*
+#define _TERM_COMPARISON_DEF(T)\
+if (method == #T "Comparison") {\
+        bool (*cmp)(const int& a, const int& b) = NULL;\
+        std::string cmpstr(itr2->value("comparison",""));\
+        if (cmpstr == "eq") cmp = [](const T& a, const T& b){return a == b;};\
+        else if (cmpstr == "ne") cmp = [](const T& a, const T& b){return a != b;};\
+        else if (cmpstr == "gt") cmp = [](const T& a, const T& b){return a > b;};\
+        else if (cmpstr == "lt") cmp = [](const T& a, const T& b){return a < b;};\
+        else if (cmpstr == "ge") cmp = [](const T& a, const T& b){return a >= b;};\
+        else if (cmpstr == "le") cmp = [](const T& a, const T& b){return a <= b;};\
+	    T object;\
+	    std::stringstream ss(itr2->value("term", "0"));\
+	    ss >> object;\
+		if (cmp != NULL) graders.push_back(\
+				new TestCaseTermComparison<T>(filename, description, cmp, object,\
+					deduction));\
+}
+
+template <typename T>
+class TestCaseTermComparison : public TestCaseGrader {
+public:
+  TestCaseTermComparison(const std::string file, const std::string desc,
+                         bool (*m)(const T& a, const T& b), const T& o,
+						 float deduct=-1.0)
+    : TestCaseGrader(file, desc), method(m), object(o) {deduction = deduct;}
+
+  virtual TestResults* doit(const std::string &prefix) {
+    T contents;
+    std::ifstream student_instr((prefix + "_" + filename).c_str());
+    student_instr >> contents;
+    student_instr.close();
+    if (method(contents, object)) {
+      return new TestResults(1);
+    } else {
+      return new TestResults(0);
+    }
+  }
+
+private:
+  bool (*method)(const T& a, const T& b);
+  T object;
+};
+*/
+
+
+
 TestResults* json_grader_doit(const TestCase& tc, const nlohmann::json& j) {
 
 
