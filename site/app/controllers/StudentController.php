@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\libraries\Core;
+use app\models\GradeableList;
 use app\models\ClassJson;
 
 class StudentController implements IController {
@@ -16,14 +17,11 @@ class StudentController implements IController {
     }
 
     public function run() {
-        $assignment = (isset($_REQUEST['assignment_id'])) ? $_REQUEST['assignment_id'] : null;
-        $class_info = new ClassJson($this->core, $assignment);
-
         $controller = null;
         switch ($_REQUEST['page']) {
             case 'submission':
             default:
-                $controller = new student\SubmissionController($this->core, $class_info);
+                $controller = new student\SubmissionController($this->core);
                 break;
         }
 

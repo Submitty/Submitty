@@ -5,7 +5,9 @@ namespace app\authentication;
 /**
  * Interface IAuthentication
  *
- * Authentication interface that all authentication modules need to implement. 
+ * Authentication interface that all authentication modules need to implement. Any concrete class
+ * that implements this class, its __construct method can take it the current instance of the
+ * Core library class.
  */
 interface IAuthentication {
     /**
@@ -13,8 +15,8 @@ interface IAuthentication {
      * return a true or false depending on whether or not the user was able to
      * be authenticated.
      *
-     * @param $username
-     * @param $password
+     * @param string $username
+     * @param string $password
      *
      * @return bool
      */

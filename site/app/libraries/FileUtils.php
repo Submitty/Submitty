@@ -159,7 +159,10 @@ class FileUtils {
      *
      * @return string
      */
-    public static function loadJsonFile($filename) {
+    public static function readJsonFile($filename) {
+        if (!is_file($filename)) {
+            return false;
+        }
         $json = json_decode(Utils::removeTrailingCommas(file_get_contents($filename)), true);
         if ($json === null) {
             return false;

@@ -91,11 +91,11 @@ if __name__ == '__main__':
     shutil.rmtree('/etc/apache2/ssl', True)
     remove_file('/etc/apache2/suexec/www-data')
 
-    os.system("a2dissite submit")
-    os.system("a2dissite hwgrading")
-    for folder in ["/etc/apache2/sites-available", "/etc/apache2/sites-enabled"]:
+    for folder in ["/etc/apache2/sites-enabled", "/etc/apache2/sites-available"]:
         if os.path.isdir(folder):
             for the_file in os.listdir(folder):
+                if folder == "/etc/apache2/sites-available":
+                    os.system("a2dissite " + the_file.replace(".conf", ""))
                 file_path = os.path.join(folder, the_file)
                 remove_file(file_path)
 

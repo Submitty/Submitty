@@ -6,6 +6,7 @@ use app\database\Database;
 use app\exceptions\ConfigException;
 use app\exceptions\FileNotFoundException;
 use app\libraries\IniParser;
+use app\libraries\Utils;
 
 /**
  * Class Config
@@ -15,7 +16,7 @@ use app\libraries\IniParser;
  * the database. We also allow for using this to write back to the variables within the database
  * (but not the variables in the files).
  */
-class Config extends Model {
+class Config {
 
     /**
      * Variable to set the system to debug mode, which allows, among other things
@@ -81,6 +82,10 @@ class Config extends Model {
     private $zero_rubric_grades;
     private $display_hidden;
 
+    private $upload_message;
+    private $ta_grades;
+    private $grade_summary;
+    
     /**
      * Config constructor.
      *
@@ -136,14 +141,16 @@ class Config extends Model {
         $course = IniParser::readFile($course_config);
 
         $this->setConfigValues($course, 'database_details', array('database_name'));
-        $this->setConfigValues($course, 'course_details', array('course_name',
-            'default_hw_late_days', 'default_student_late_days', 'zero_rubric_grades'));
+        $this->setConfigValues($course, 'course_details', array('course_name', 'default_hw_late_days',
+            'default_student_late_days', 'zero_rubric_grades', 'upload_message', 'ta_grades', 'grade_summary'));
 
+        $this->upload_message = Utils::prepareHtmlString($this->upload_message);
+        
         foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
             $this->$key = intval($this->$key);
         }
 
-        foreach (array('zero_rubric_grades', 'display_hidden') as $key) {
+        foreach (array('zero_rubric_grades', 'ta_grades', 'grade_summary') as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
     }
@@ -155,7 +162,7 @@ class Config extends Model {
 
         foreach ($keys as $key) {
             if (!isset($config[$section][$key])) {
-                throw new ConfigException("Missing config setting {$section}.{$key} in master.ini");
+                throw new ConfigException("Missing config setting {$section}.{$key} in configuration ini file");
             }
             $this->$key = $config[$section][$key];
         }
@@ -307,5 +314,17 @@ class Config extends Model {
      */
     public function getTimezone() {
         return $this->timezone;
+    }
+    
+    public function getUploadMessage() {
+        return $this->upload_message;
+    }
+    
+    public function showTaGrades() {
+        return $this->ta_grades;
+    }
+    
+    public function showGradeSummary() {
+        return $this->grade_summary;
     }
 }

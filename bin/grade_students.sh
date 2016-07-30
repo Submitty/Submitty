@@ -131,7 +131,7 @@ exec 201>/var/lock/homework_submissions_server_log_lockfile || exit 1
 
 function log_message {
 
-    if [[ $# != 5 ]] ; 
+    if [[ $# != 5 ]] ;
     then
 	echo "ERROR: log_message called with the wrong number of arguments"
 	echo "  num arguments = $#"
@@ -156,9 +156,9 @@ function log_message {
     flock -w 5 $LOG_LOCK_FILE || { echo "ERROR: flock() failed. $NEXT_ITEM" >&2; exit 1; }
 
     time_unit="sec"
-    if [[ $timelabel == "" && $elapsed_time == "" ]] ; 
-    then 
-	time_unit="" 
+    if [[ $timelabel == "" && $elapsed_time == "" ]] ;
+    then
+	time_unit=""
     fi
 
     printf "%-28s | %-6s | %5s | %-50s | %-6s %5s %3s | %s\n" \
@@ -177,7 +177,7 @@ function log_message {
 
 function log_error {
 
-    if [[ $# != 2 ]] ; 
+    if [[ $# != 2 ]] ;
     then
 	echo "ERROR: log_error called with the wrong number of arguments"
 	echo "  num arguments = $#"
@@ -197,7 +197,7 @@ function log_error {
 
 function log_exit {
 
-    if [[ $# != 2 ]] ; 
+    if [[ $# != 2 ]] ;
     then
 	echo "ERROR: log_exit called with the wrong number of arguments"
 	echo "  num arguments = $#"
@@ -224,9 +224,9 @@ function log_exit {
 # =====================================================================
 
 function grade_this_item {
-    
+
     NEXT_TO_GRADE=$1
-    
+
     echo "========================================================================"
     echo "GRADE $NEXT_TO_GRADE"
 
@@ -291,12 +291,12 @@ function grade_this_item {
 	echo "ERROR IN VERSION: $NEXT_TO_GRADE" >&2
 	return
     fi
-    
-    
+
+
     # --------------------------------------------------------------------
     # check to see if directory exists & is readable
     submission_path=$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user/$version
-    
+
     if [ ! -d "$SUBMITTY_DATA_DIR" ]
     then
 	echo "ERROR: directory does not exist '$SUBMITTY_DATA_DIR'" >&2
@@ -313,7 +313,7 @@ function grade_this_item {
 	return
     fi
     # note we do not expect these directories to be readable
-    
+
     if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester/$course" ]
     then
 	echo "ERROR: directory does not exist '$SUBMITTY_DATA_DIR/courses/$semester/$course'" >&2
@@ -324,7 +324,7 @@ function grade_this_item {
 	echo "ERROR: A directory is not readable '$SUBMITTY_DATA_DIR/courses/$semester/$course'" >&2
 	return
     fi
-    
+
     if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions" ]
     then
 	echo "ERROR: B directory does not exist '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions'" >&2
@@ -335,7 +335,7 @@ function grade_this_item {
 	echo "ERROR: C directory is not readable '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions'" >&2
 	return
     fi
-    
+
     if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment" ]
     then
 	echo "ERROR: D directory does not exist '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment'" >&2
@@ -346,7 +346,7 @@ function grade_this_item {
 	echo "ERROR: E directory is not readable '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment'" >&2
 	return
     fi
-    
+
     if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user" ]
     then
 	echo "ERROR: F directory does not exist '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user'" >&2
@@ -357,7 +357,7 @@ function grade_this_item {
 	echo "ERROR: G directory is not readable '$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions/$assignment/$user'" >&2
 	return
     fi
-    
+
     if [ ! -d "$submission_path" ]
     then
 	echo "ERROR: directory does not exist '$submission_path'" >&2
@@ -373,20 +373,20 @@ function grade_this_item {
 	log_error "$NEXT_TO_GRADE" "Directory is unreadable, student wasn't graded"
 	return
     fi
-    
-    
-    
+
+
+
     test_code_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/test_code/$assignment"
     test_input_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/test_input/$assignment"
     test_output_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/test_output/$assignment"
     checkout_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/checkout/$assignment/$user/$version"
     results_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$assignment/$user/$version"
     bin_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/bin"
-    
+
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
     tmp=`mktemp -d /tmp/temp.XXXXXXXX`
-    
+
     submission_time=""
     if [ -e "$submission_path/.submit.timestamp" ]
     then
@@ -399,24 +399,25 @@ function grade_this_item {
 
     # switch to tmp directory
     pushd $tmp > /dev/null
-    
+
     # --------------------------------------------------------------------
     # COMPILE THE SUBMITTED CODE
-    
+
     # copy submitted files to a tmp compilation directory
     tmp_compilation=$tmp/TMP_COMPILATION
     mkdir -p $tmp_compilation
-    
-    
-    # copy the .submit.timestamp file and any files from submission zip 
+
+
+    # copy the .submit.timestamp file and any files from submission zip
     rsync 1>/dev/null  2>&1  -r $submission_path/ $tmp_compilation || log_error "$NEXT_TO_GRADE" "Failed to copy submitted files to temporary compilation directory: rsync -r $submission_path/ $tmp_compilation [ exitcode=$? ]"
 
-    # use the jq json parsing command line utility to grab the svn_checkout flag from the class.json config file
-    class_json_config="$SUBMITTY_DATA_DIR/courses/$semester/$course/config/class.json"
-    svn_checkout=`cat $class_json_config | jq '.assignments[] | if .assignment_id == "'${assignment}'" then .svn_checkout else empty end'`
-    
+    # use the jq json parsing command line utility to grab the svn_checkout flag from the config file
+    json_config="$SUBMITTY_DATA_DIR/courses/$semester/$course/config/form/form_${assignment}.json"
+    step=`cat ${json_config} | jq '.["upload-type"]'`
+    if [ "$step" = "Repository" ]; then svn_checkout=true; else svn_checkout=false; fi
+
     # also save the due date
-    global_assignment_deadline=`cat $class_json_config | jq '.assignments[] | if .assignment_id == "'${assignment}'" then .due_date else empty end'`
+    global_assignment_deadline=`cat ${json_config} | jq .date_due`
     # need to chop off first & last characters (double quotes)
     global_assignment_deadline=`date -d "${global_assignment_deadline:1:-1}"`
 
@@ -425,78 +426,78 @@ function grade_this_item {
     # that date/time from the svn server
     if [ "$svn_checkout" == true ]
     then
-	
-	# grab the svn subdirectory (if any) from the class.json config file
-	svn_subdirectory=`cat $class_json_config | jq '.assignments[] | if .assignment_id == "'${assignment}'" then .svn_subdirectory else empty end'`
-	if [ $svn_subdirectory == "null" ]
-	then
-	    svn_subdirectory=""
-	else
-	    # remove double quotes from the value
-	    svn_subdirectory=${svn_subdirectory//\"/}
-	fi
-	
-	##############
-	# SVN documentation
-	#
-	# students can access SVN only their own top SVN repo directory with this command:
-	# svn co https://csci2600svn.cs.rpi.edu/USERNAME --username USERNAME
-	#
-	# the hwcron user can access all students SVN repo directories with this command:
-	# svn co svn+ssh://csci2600svn.cs.rpi.edu/local/svn/csci2600/USERNAME
-	#
-	# -r specifies which version to checkout (by timestamp)
-	##############
+
+        # grab the svn subdirectory (if any) from the config file
+        svn_subdirectory=`cat ${json_config} | jq .subdirectory`
+        if [ $svn_subdirectory == "null" ]
+        then
+            svn_subdirectory=""
+        else
+            # remove double quotes from the value
+            svn_subdirectory=${svn_subdirectory//\"/}
+        fi
+
+        ##############
+        # SVN documentation
+        #
+        # students can access SVN only their own top SVN repo directory with this command:
+        # svn co https://csci2600svn.cs.rpi.edu/USERNAME --username USERNAME
+        #
+        # the hwcron user can access all students SVN repo directories with this command:
+        # svn co svn+ssh://csci2600svn.cs.rpi.edu/local/svn/csci2600/USERNAME
+        #
+        # -r specifies which version to checkout (by timestamp)
+        ##############
 
         # first, clean out all of the old files if this is a re-run
         rm -rf "$checkout_path"
-	
-	# svn checkout into the archival directory 
-	mkdir -p $checkout_path
-	pushd $checkout_path > /dev/null
-	svn co $SVN_PATH/$user/$svn_subdirectory@{"$submission_time"} . > $tmp/.submit_svn_checkout.txt 2>&1
-	popd > /dev/null
-	
-	# copy checkout into tmp compilation directory
-	rsync 1>/dev/null  2>&1  -r $checkout_path/ $tmp_compilation || log_error "$NEXT_TO_GRADE" "Failed to copy checkout files into compilation directory: rsync -r $checkout_path/ $tmp_compilation"
 
-	svn_checkout_error_code="$?"
-	if [[ "$svn_checkout_error_code" -ne 0 ]] ;
-	then
-	    log_error "$NEXT_TO_GRADE" "SVN CHECKOUT FAILURE $svn_checkout_error_code"
-	else
-	    echo "SVN CHECKOUT OK" 
-	fi
+        # svn checkout into the archival directory
+        mkdir -p $checkout_path
+        pushd $checkout_path > /dev/null
+        svn co $SVN_PATH/$user/$svn_subdirectory@{"$submission_time"} . > $tmp/.submit_svn_checkout.txt 2>&1
+        popd > /dev/null
+
+        # copy checkout into tmp compilation directory
+        rsync 1>/dev/null  2>&1  -r $checkout_path/ $tmp_compilation || log_error "$NEXT_TO_GRADE" "Failed to copy checkout files into compilation directory: rsync -r $checkout_path/ $tmp_compilation"
+
+        svn_checkout_error_code="$?"
+        if [[ "$svn_checkout_error_code" -ne 0 ]] ;
+        then
+            log_error "$NEXT_TO_GRADE" "SVN CHECKOUT FAILURE $svn_checkout_error_code"
+        else
+            echo "SVN CHECKOUT OK"
+        fi
     fi
-    
+
     # copy any instructor provided code files to tmp compilation directory
     if [ -d "$test_code_path" ]
     then
-	rsync -a $test_code_path/ "$tmp_compilation" || log_error "$NEXT_TO_GRADE" "Failed to copy instructor files to temporary compilation directory:  cp -rf $test_code_path/ $tmp_compilation"
+        rsync -a $test_code_path/ "$tmp_compilation" || log_error "$NEXT_TO_GRADE" "Failed to copy instructor files to temporary compilation directory:  cp -rf $test_code_path/ $tmp_compilation"
 
-	#cp -rf $SUBMITTY_DATA_DIR/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $SUBMITTY_DATA_DIR/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
+        #cp -rf $SUBMITTY_DATA_DIR/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $SUBMITTY_DATA_DIR/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
     fi
-    
+
     pushd $tmp_compilation > /dev/null
-    
+
     # first delete any submitted .out or .exe executable files
     rm -f *.out *.exe test*.txt
-    
+
     if [ ! -r "$bin_path/$assignment/compile.out" ]
     then
 	log_error "$NEXT_TO_GRADE" "$bin_path/$assignment/compile.out does not exist/is not readable"
     else
-	
+
    	# copy compile.out to the current directory
 	cp -f "$bin_path/$assignment/compile.out" $tmp_compilation/my_compile.out
-	
+
   	# give the untrusted user read/write/execute permissions on the tmp directory & files
 	chmod -R go+rwx $tmp
-	
+
 	# run the compile.out as the untrusted user
 	echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$assignment" "$user" "$version" "$submission_time" >& $tmp/.submit_compile_output.txt'
 	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$assignment" "$user" "$version" "$submission_time" >& $tmp/.submit_compile_output.txt
-	
+
 	compile_error_code="$?"
 	if [[ "$compile_error_code" -ne 0 ]] ;
 	then
@@ -505,46 +506,46 @@ function grade_this_item {
 	    echo "COMPILE OK"
 	fi
     fi
-    
+
     # return to the main tmp directory
     popd > /dev/null
-    
-    
+
+
     # move all executable files from the compilation directory to the main tmp directory
     # Note: Must preserve the directory structure of compiled files (esp for Java)
-    
+
     # at the same time grab the README files and the testXX_ STDOUT, STDERR, & execute_logfiles
     # FIXME: This might need to be revised depending on future needs...
-    
+
     #  -r  recursive
     #  -m  prune empty directories
     #  --include="*/"  match all subdirectories
     #  --include="*.XXX"  grab all .XXX files
     #  --exclude="*"  exclude everything else
 
-    rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"  --include="*.class"  --include="*.py" --include="*.pl"  --include="*.rkt"  --include="*README*"  --include="test*.txt" --include="data/*" 	--exclude="*"  $tmp_compilation/  $tmp  
-    
+    rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"  --include="*.class"  --include="*.py" --include="*.pl"  --include="*.rkt"  --include="*README*"  --include="test*.txt" --include="data/*" 	--exclude="*"  $tmp_compilation/  $tmp
+
     # NOTE: Also grabbing all student data files (files with 'data/' directory in path)
     # remove the compilation directory
     rm -rf $tmp_compilation
-    
+
     # --------------------------------------------------------------------
     # RUN RUNNER
-    
+
     # copy input files to tmp directory
     if [ -d "$test_input_path" ]
     then
 	cp -rf $test_input_path/* "$tmp" || log_error "$NEXT_TO_GRADE" "Failed to copy input files to temporary directory $test_input_path to $tmp : cp -rf $test_input_path/* $tmp"
     fi
-    
+
     # copy run.out to the tmp directory
     if [ ! -r "$bin_path/$assignment/run.out" ]
     then
 	log_error "$NEXT_TO_GRADE" "$bin_path/$assignment/run.out does not exist/is not readable"
     else
-	
+
 	cp -f "$bin_path/$assignment/run.out" $tmp/my_run.out
-	
+
   	# give the untrusted user read/write/execute permissions on the tmp directory & files
 	chmod -R go+rwx $tmp
         # remove the read/write permissions for the compilation log
@@ -580,21 +581,21 @@ function grade_this_item {
 	    echo "RUNNER OK"
 	fi
     fi
-    
+
     # --------------------------------------------------------------------
     # RUN VALIDATOR
-    
+
     # copy output files to tmp directory  (SHOULD CHANGE THIS)
     if [ -d "$test_output_path" ]
     then
 	cp -rf $test_output_path/* "$tmp" || log_error "$NEXT_TO_GRADE" "Failed to copy output files to temporary directory $test_output_path to $tmp :  cp -rf $test_output_path/* $tmp"
     fi
-    
+
     if [ ! -r "$bin_path/$assignment/validate.out" ]
     then
 	log_error "$NEXT_TO_GRADE" "$bin_path/$assignment/validate.out does not exist/is not readable"
     else
-	
+
 	#FIXME: do we still need valgrind here?
         if [[ 0 -eq 0 ]] ; then
             echo "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
@@ -612,16 +613,16 @@ function grade_this_item {
 	    echo "VALIDATOR OK"
 	fi
     fi
-    
+
     # --------------------------------------------------------------------
     # MAKE RESULTS DIRECTORY & COPY ALL THE FILES THERE
-    
+
     # Get working directory back to bin
     cd "$bin_path"
-    
+
     # clean out all of the old files if this is a re-run
     rm -rf "$results_path"
-    
+
     # Make directory structure in results if it doesn't exist
     mkdir -p "$results_path" || log_error "$NEXT_TO_GRADE" "Could not create results path $results_path"
 
@@ -646,15 +647,15 @@ function grade_this_item {
     global_grade_timestamp_file_location=${results_path}/.grade.timestamp
     printf "temporary data" > $global_grade_timestamp_file_location
 
-    
+
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY
-    
+
     # step out of this directory
     popd > /dev/null
     # and remove the directory
     rm -rf $tmp
- 
+
 }
 
 
@@ -785,7 +786,7 @@ while true; do
 
 	# mark the start time
 	STARTTIME=$(date +%s)
-	
+
 	# when was this job put in the queue?
 	FILE_TIMESTAMP=`stat -c %Y $NEXT_TO_GRADE 2>&1`
 
@@ -799,7 +800,7 @@ while true; do
 	fi
 	WAITTIME=$(($STARTTIME - ${FILE_TIMESTAMP:-0}))
 
-	
+
 	# log the start
 	log_message "$IS_BATCH_JOB"  "$NEXT_ITEM"  "wait:"  "$WAITTIME"  ""
 
@@ -831,7 +832,7 @@ while true; do
 
 
 	# -------------------------------------------------------------
-	# PREPARE THE .grade.timestamp json file 
+	# PREPARE THE .grade.timestamp json file
 	# FIXME: could use a json library to create this file
 	printf "{\n"                                                                                     >  $global_grade_timestamp_file_location
 	printf "  \"assignment_deadline\"            : \"%s\",\n"          "$global_assignment_deadline" >> $global_grade_timestamp_file_location
@@ -861,8 +862,8 @@ while true; do
 	# break out of the loop (need to check for new interactive items)
 	graded_something=true
 	break
-    
-    done    
+
+    done
 
     # -------------------------------------------------------------
     # if no work was done in this iteration...
@@ -875,7 +876,7 @@ while true; do
 	    ((sleep_count++))
 	    echo "sleep iter $sleep_count: no work"
 	fi
-	
+
 	# either quit the loop or sleep
 	if [[ $(($sleep_count * ${GRADE_STUDENTS_IDLE_SECONDS})) -gt $((${GRADE_STUDENTS_IDLE_TOTAL_MINUTES} * 60)) ]] ; then
 	    break;
@@ -887,7 +888,7 @@ while true; do
 	    continue;
 	fi
     fi
-    
+
 done
 
 

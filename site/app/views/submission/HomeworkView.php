@@ -5,6 +5,7 @@ namespace app\views\submission;
 use app\libraries\Core;
 use app\libraries\DiffViewer;
 use app\models\Assignment;
+use app\models\Gradeable;
 use app\models\User;
 
 class HomeworkView {
@@ -17,30 +18,36 @@ class HomeworkView {
         $this->core = $core;
     }
 
-    public function noAssignments() {
+    public function noGradeables() {
         return <<<HTML
 <div class="content">
-    There are currently no released assignments. Try checking back later.
+    There are currently no released gradeables. Try checking back later.
 </div>
 
 HTML;
     }
-
-    public function assignmentSelect($assignments, $assignment_id) {
+    
+    /**
+     * @param Gradeable[] $gradeables
+     * @param $gradeable_id
+     *
+     * @return string
+     */
+    public function gradeableSelect($gradeables, $gradeable_id) {
         $return = <<<HTML
 <div class="sub">
     <span style="font-weight: bold;">Select Assignment:</span>
-    <select style="margin-left: 5px" onChange="assignmentChange('{$this->core->buildUrl(array('component' => 'student', 
-                                                                                 'assignment_id' => ''))}', this);">
+    <select style="margin-left: 5px" onChange="gradeableChange('{$this->core->buildUrl(array('component' => 'student', 
+                                                                                'gradeable_id' => ''))}', this);">
 HTML;
-        foreach ($assignments as $assignment) {
-            if ($assignment_id === $assignment['assignment_id']) {
+        foreach ($gradeables as $gradeable) {
+            if ($gradeable_id === $gradeable->getId()) {
                 $selected = "selected";
             }
             else {
                 $selected = "";
             }
-            $return .= "\t\t<option {$selected}>{$assignment['assignment_name']}</option>\n";
+            $return .= "\t\t<option value='{$gradeable->getId()}' {$selected}>{$gradeable->getName()}</option>\n";
         }
 
         $return .= <<<HTML
@@ -52,32 +59,31 @@ HTML;
     }
     
     /**
-     * @param Assignment $assignment
-     * @param bool       $show_ta_grades
-     * @param bool       $show_grade_summary
-     * @param string     $grade_file
-     * @param string     $assignment_select
-     * @param string     $upload_message
-     * @param int        $days_late
+     * @param Gradeable $gradeable
+     * @param string    $grade_file
+     * @param string    $gradeable_select
+     * @param int       $days_late
      *
      * @return string
      */
-    public function showAssignment($assignment, $show_ta_grades, $show_grade_summary, $grade_file, $assignment_select,
-                                   $upload_message, $days_late) {
+    public function showGradeable($gradeable, $grade_file, $gradeable_select, $days_late) {
+        $show_ta_grades = $this->core->getConfig()->showTaGrades();
+        $show_grade_summary = $this->core->getConfig()->showGradeSummary();
+        $upload_message = $this->core->getConfig()->getUploadMessage();
         $return = <<<HTML
-<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag_and_drop.js"></script>
-{$assignment_select}
+<script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
+{$gradeable_select}
 <div class="content">
-    <h2>View Assignment {$assignment->getAssignmentName()}</h2>
+    <h2>View Assignment {$gradeable->getName()}</h2>
     <div class="sub">
         {$upload_message}
     </div>
 HTML;
-        if ($assignment->useSvnCheckout()) {
+        if($gradeable->useSvnCheckout()) {
             $return .= <<<HTML
     <form action="{$this->core->buildUrl(array())}" method="post" 
-        onsubmit="return checkVersionsUsed('{$assignment->getAssignmentName()}', {$assignment->getHighestVersion()},
-                                            {$assignment->getMaxSubmissions()});">
+        onsubmit="return checkVersionsUsed('{$gradeable->getName()}', {$gradeable->getHighestVersion()},
+                                            {$gradeable->getMaxSubmissions()});">
         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
         <input type="hidden" name="svn_checkout" value="true" />
         <input type="submit" id="submit" class="btn btn-primary" value="Grade SVN" />
@@ -88,11 +94,11 @@ HTML;
             $return .= <<<HTML
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
-            for ($i = 1; $i <= $assignment->getNumParts(); $i++) {
+            for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 $return .= <<<HTML
         
         <div id="upload{$i}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
-            <h3 class="label" id="label{$i}">Drag your {$assignment->getPartsNames()[($i - 1)]} here or click to open file browser</h3>
+            <h3 class="label" id="label{$i}">Drag your {$gradeable->getPartsNames()[$i]} here or click to open file browser</h3>
             <input type="file" name="files" id="input_file{$i}" style="display: none" onchange="addFilesFromInput({$i})" />
         </div>
 HTML;
@@ -104,15 +110,15 @@ HTML;
     <button type="button" id="startnew" class="btn btn-primary">Start New</button>
 
 HTML;
-            if($assignment->getCurrentVersion() === $assignment->getHighestVersion() && $assignment->getCurrentVersion() > 0) {
+            if($gradeable->getCurrentVersion() === $gradeable->getHighestVersion() && $gradeable->getCurrentVersion() > 0) {
                 $return .= <<<HTML
-    <button type="button" id= "getprev" class="btn btn-primary">Get Version {$assignment->getHighestVersion()} Files</button>
+    <button type="button" id= "getprev" class="btn btn-primary">Get Version {$gradeable->getHighestVersion()} Files</button>
 HTML;
             }
     
             $old_files = "";
-            for ($i = 1; $i <= $assignment->getNumParts(); $i++) {
-                foreach ($assignment->getPreviousFiles($i) as $file) {
+            for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+                foreach ($gradeable->getPreviousFiles($i) as $file) {
                     $old_files .= <<<HTML
             
                 addLabel('{$file['name']}', '{$file['size']}', {$i}, true);
@@ -125,10 +131,10 @@ HTML;
     
     <script type="text/javascript">
         // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
-        var num_parts = {$assignment->getNumParts()};
+        var num_parts = {$gradeable->getNumParts()};
         createArray(num_parts);
-        var assignment_version = {$assignment->getCurrentVersion()};
-        var highest_version = {$assignment->getHighestVersion()};
+        var assignment_version = {$gradeable->getCurrentVersion()};
+        var highest_version = {$gradeable->getHighestVersion()};
         for(var i = 1; i <= num_parts; i++ ){
             var dropzone = document.getElementById("upload" + i);
             dropzone.addEventListener("click", clicked_on_box, false);
@@ -145,12 +151,12 @@ HTML;
             e.stopPropagation();
         });
         $("#submit").click(function(e){ // Submit button
-            handleSubmission("{$this->core->buildUrl(array('component' => 'student', 'action' => 'upload', 'assignment_id' => $assignment->getAssignmentId()))}",
-                             "{$this->core->buildUrl(array('component' => 'student', 'assignment_id' => $assignment->getAssignmentId()))}",
+            handleSubmission("{$this->core->buildUrl(array('component' => 'student', 'action' => 'upload', 'gradeable_id' => $gradeable->getId()))}",
+                             "{$this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()))}",
                              {$days_late},
-                             {$assignment->getAllowedLateDays()},
-                             {$assignment->getHighestVersion()},
-                             {$assignment->getMaxSubmissions()},
+                             {$gradeable->getAllowedLateDays()},
+                             {$gradeable->getHighestVersion()},
+                             {$gradeable->getMaxSubmissions()},
                              "{$this->core->getCsrfToken()}", false);
             e.stopPropagation();
         });
@@ -171,7 +177,7 @@ HTML;
 </div>
 HTML;
         
-        if ($assignment->getSubmissionCount() === 0) {
+        if($gradeable->getSubmissionCount() === 0) {
             $return .= <<<HTML
 <div class="content">
     <span style="font-style: italic">No submissions for this assignment.</span>
@@ -183,33 +189,33 @@ HTML;
 <div class="content">
     <h3 class='label' style="float: left">Select Submission Version:</h3> 
     <select name="submission_version" onChange="versionChange('{$this->core->buildUrl(array('component' => 'student', 
-                                                                                            'assignment_id' => $assignment->getAssignmentId(), 
-                                                                                            'assignment_version' => ""))}', this)">
+                                                                                            'gradeable_id' => $gradeable->getId(), 
+                                                                                            'gradeable_version' => ""))}', this)">
 
 HTML;
-            if ($assignment->getActiveVersion() == 0) {
-                $selected = ($assignment->getCurrentVersion() == $assignment->getActiveVersion()) ? "selected" : "";
+            if($gradeable->getActiveVersion() == 0) {
+                $selected = ($gradeable->getCurrentVersion() == $gradeable->getActiveVersion()) ? "selected" : "";
                 $return .= <<<HTML
         <option value="0" {$selected}>Cancelled</option>
 HTML;
 
             }
-            foreach ($assignment->getVersions() as $version => $version_details) {
+            foreach ($gradeable->getVersions() as $version => $version_details) {
                 $selected = "";
                 $select_text = array("Version #{$version}");
-                if ($assignment->getNormalPoints() > 0) {
-                    $select_text[] = "Score: ".$version_details['points']." / ".$assignment->getNormalPoints();
+                if($gradeable->getNormalPoints() > 0) {
+                    $select_text[] = "Score: ".$version_details['points']." / " . $gradeable->getNormalPoints();
                 }
                 
                 if ($version_details['days_late'] > 0) {
                     $select_text[] = "Days Late: ".$version_details['days_late'];
                 }
     
-                if ($version == $assignment->getActiveVersion()) {
+                if ($version == $gradeable->getActiveVersion()) {
                     $select_text[] = "ACTIVE";
                 }
                 
-                if ($version == $assignment->getCurrentVersion()) {
+                if ($version == $gradeable->getCurrentVersion()) {
                     $selected = "selected";
                 }
                 
@@ -224,19 +230,19 @@ HTML;
     </select>
 HTML;
             // If viewing the active version, show cancel button, otherwise so button to switch active
-            if ($assignment->getCurrentVersion() > 0) {
-                if($assignment->getCurrentVersion() == $assignment->getActiveVersion()) {
+            if($gradeable->getCurrentVersion() > 0) {
+                if($gradeable->getCurrentVersion() == $gradeable->getActiveVersion()) {
                     $version = 0;
                     $button = '<input type="submit" class="btn btn-default" value="Do Not Grade This Version (Mark All Inactive)">';
                 } else {
-                    $version = $assignment->getCurrentVersion();
+                    $version = $gradeable->getCurrentVersion();
                     $button = '<input type="submit" class="btn btn-primary" value="Make Active">';
                 }
                 $return .= <<<HTML
-    <form style="display: inline;" method="post" onsubmit="return checkVersionChange({$assignment->getDaysLate()}, {$assignment->getAllowedLateDays()})" 
+    <form style="display: inline;" method="post" onsubmit="return checkVersionChange({$gradeable->getDaysLate()}, {$gradeable->getAllowedLateDays()})" 
             action="{$this->core->buildUrl(array('component' => 'student',
                                                  'action' => 'update',
-                                                 'assignment_id' => $assignment->getAssignmentId(),
+                                                 'gradeable_id' => $gradeable->getId(),
                                                  'new_version' => $version))}">
         <input type='hidden' name="csrf_token" value="{$this->core->getCsrfToken()}" />
         {$button}
@@ -246,7 +252,7 @@ HTML;
 HTML;
             }
             
-            if ($assignment->getActiveVersion() == 0) {
+            if($gradeable->getActiveVersion() == 0) {
                 $return .= <<<HTML
     <div class="sub">
         <p class="red">
@@ -257,7 +263,7 @@ HTML;
 
 HTML;
             }
-            else if ($assignment->getActiveVersion() > 0 && $assignment->getActiveVersion() === $assignment->getCurrentVersion()) {
+            else if($gradeable->getActiveVersion() > 0 && $gradeable->getActiveVersion() === $gradeable->getCurrentVersion()) {
                 $return .= <<<HTML
     <div class="sub">
         <p class="green-message">
@@ -273,7 +279,7 @@ HTML;
         <div class="box half">
 HTML;
             // TODO: This is going to be different for SVN
-            foreach ($assignment->getSubmittedFiles() as $submitted_file) {
+            foreach ($gradeable->getSubmittedFiles() as $submitted_file) {
                 $size = number_format($submitted_file['size']/1024,2);
                 $return .= "{$submitted_file['name']} ({$size}kb)<br />";
             }
@@ -281,8 +287,8 @@ HTML;
         </div>
         <div class="box half">
 HTML;
-            if ($assignment->hasCurrentResults()) {
-                $details = $assignment->getCurrentResults();
+            if($gradeable->hasCurrentResults()) {
+                $details = $gradeable->getCurrentResults();
                 $return .= <<<HTML
 submission timestamp: {$details['submission_time']}<br />
 days late (before extensions): {$details['days_late']}<br />
@@ -299,12 +305,12 @@ HTML;
     <div class="sub">
         <h4>Results</h4>
 HTML;
-            if ($assignment->hasAssignmentMessage()) {
+            if($gradeable->hasAssignmentMessage()) {
                 $return .= <<<HTML
-        <span class="green-message">Note: {$assignment->getAssignmentMessage()}</span> 
+        <span class="green-message">Note: {$gradeable->getAssignmentMessage()}</span> 
 HTML;
             }
-            if (!$assignment->hasCurrentResults()) {
+            if (!$gradeable->hasCurrentResults()) {
                 $return .= <<<HTML
         <p class="red-message">
             Currently being graded
@@ -312,9 +318,9 @@ HTML;
 HTML;
             }
             else {
-                $results = $assignment->getCurrentResults();
-                if ($assignment->getNormalPoints() > 0) {
-                    if ($results['points'] >= $assignment->getNormalPoints()) {
+                $results = $gradeable->getCurrentResults();
+                if($gradeable->getNormalPoints() > 0) {
+                    if ($results['points'] >= $gradeable->getNormalPoints()) {
                         $background = "green-background";
                     }
                     else if ($results['points'] > 0) {
@@ -325,14 +331,14 @@ HTML;
                     }
                     $return .= <<<HTML
         <div class="box">
-            <span class="badge {$background}">{$results['points']} / {$assignment->getNormalPoints()}</span>
+            <span class="badge {$background}">{$results['points']} / {$gradeable->getNormalPoints()}</span>
             <h4>Total</h4>
         </div>
 HTML;
                 }
                 
                 $count = 0;
-                foreach ($assignment->getTestcases() as $testcase) {
+                foreach ($gradeable->getTestcases() as $testcase) {
                     $return .= <<<HTML
         <div class="box">
 HTML;
@@ -364,7 +370,7 @@ HTML;
                     if ($testcase->isExtraCredit()) {
                         $name = "<span class='italics'>Extra Credit</span> ".$name;
                     }
-                    $command = htmlentities($testcase->getCommand());
+                    $command = htmlentities($testcase->getDetails());
                     $return .= <<<HTML
             <h4 onclick="return toggleDiv('testcase_{$count}');" style="cursor: pointer;">{$name} <code>{$command}</code></h4>
             <div id="testcase_{$count}" style="display: {$display_box};">
@@ -394,9 +400,8 @@ HTML;
                             $return .= <<<HTML
                 <div class="box-block">
 HTML;
-                            /** @var DiffViewer $diff_viewer */
-                            $diff_viewer = $diff['diff_viewer'];
-                            $description = (isset($diff['description']) && $diff['description'] != "") ? $diff['description'] : "";
+                            $diff_viewer = $diff->getDiffViewer();
+                            $description = $diff->getDescription();
                             if($diff_viewer->hasActualOutput()) {
                                 $return .= <<<HTML
                             <div class='diff-element'>
@@ -434,14 +439,14 @@ HTML;
             $return .= <<<HTML
 </div>
 HTML;
-            if ($show_ta_grades && $assignment->taGradesReleased()) {
+            if ($show_ta_grades && $gradeable->taGradesReleased()) {
                 $return .= <<<HTML
 <div class="content">
 HTML;
-                if ($assignment->hasGradeFile()) {
+                if($gradeable->hasGradeFile()) {
                     $return .= <<<HTML
     <h3 class="label">TA grade</h3>
-    <pre>{$assignment->getGradeFile()}</pre>
+    <pre>{$gradeable->getGradeFile()}</pre>
 HTML;
                 }
                 else {

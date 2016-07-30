@@ -12,9 +12,9 @@ use \app\libraries\Utils;
  * Class Rubric
  *
  * Model to handle grading rubrics for students
- * @deprecated 
+ * @deprecated
  */
-class Rubric extends Model {
+class Rubric {
 
     /**
      * Array containing information about student from students table

@@ -99,4 +99,9 @@ ORDER BY u.user_id");
     public function removeSessionById($session_id) {
         $this->database->query("DELETE FROM sessions WHERE session_id=?", array($session_id));
     }
+    
+    public function getAllGradeablesIds() {
+        $this->database->query("SELECT g_id FROM gradeable ORDER BY g_id");
+        return $this->database->rows();
+    }
 }

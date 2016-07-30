@@ -254,7 +254,7 @@ pushd $SUBMITTY_INSTALL_DIR/src/grading/lib
 cmake ..
 make
 if [ $? -ne 0 ] ; then
-    echo "ERROR BUILDING AUTOGRADING LIBRARY" 
+    echo "ERROR BUILDING AUTOGRADING LIBRARY"
     exit 1
 fi
 popd
@@ -408,8 +408,8 @@ find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+r
 # set the execute bit for any .cgi scripts
 find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.cgi -exec chmod u+x {} \;
 
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php
-mv $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
+#replace_fillin_variables $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php
+#mv $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
 
 
 ################################################################################################################
@@ -431,6 +431,7 @@ chmod -R 400 $SUBMITTY_INSTALL_DIR/site
 find $SUBMITTY_INSTALL_DIR/site -type d -exec chmod uo+x {} \;
 # "other" can read all .txt, .jpg, & .css files
 find $SUBMITTY_INSTALL_DIR/site -type f -name \*.css -exec chmod o+r {} \;
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.otf -exec chmod o+r {} \;
 find $SUBMITTY_INSTALL_DIR/site -type f -name \*.jpg -exec chmod o+r {} \;
 find $SUBMITTY_INSTALL_DIR/site -type f -name \*.png -exec chmod o+r {} \;
 find $SUBMITTY_INSTALL_DIR/site -type f -name \*.txt -exec chmod o+r {} \;
@@ -438,6 +439,8 @@ find $SUBMITTY_INSTALL_DIR/site -type f -name \*.txt -exec chmod o+r {} \;
 find $SUBMITTY_INSTALL_DIR/site -type f -name \*.js -exec chmod o+rx {} \;
 find $SUBMITTY_INSTALL_DIR/site -type f -name \*.cgi -exec chmod u+x {} \;
 
+replace_fillin_variables $SUBMITTY_INSTALL_DIR/site/config/master_template.ini
+mv $SUBMITTY_INSTALL_DIR/site/config/master_template.ini $SUBMITTY_INSTALL_DIR/site/config/master.ini
 
 ################################################################################################################
 ################################################################################################################

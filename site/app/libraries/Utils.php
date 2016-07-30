@@ -82,12 +82,19 @@ class Utils {
     /**
      * Given a string, convert all newline characters to "<br />" while also
      * performing htmlentities on all elements that are not for the new lines
+     *
      * @param string $string
+     *
      * @return string
      */
-    public static function prepareHtmlMessage($string) {
+    public static function prepareHtmlString($string) {
         $string = str_replace("<br>", "<br />", nl2br($string));
         $string = explode("<br />", $string);
         return implode("<br />", array_map("htmlentities", $string));
+    }
+    
+    public static function getLastArrayElement($array) {
+        $temp = array_slice($array, -1);
+        return (count($temp) > 0) ? array_pop($temp) : null;
     }
 }

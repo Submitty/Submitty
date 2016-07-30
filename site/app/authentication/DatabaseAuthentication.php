@@ -12,10 +12,17 @@ use app\libraries\Core;
  * should be hashed via the password_hash function so we can then use
  * password_verify to check (and not worry about salt's and things)
  * @link http://php.net/manual/en/function.password-hash.php
+ * @link http://php.net/manual/en/function.password-verify.php
  */
 class DatabaseAuthentication implements IAuthentication {
+    /** @var Core Core library for running the application */
     private $core;
-
+    
+    /**
+     * DatabaseAuthentication constructor.
+     *
+     * @param Core $core
+     */
     public function __construct(Core $core) {
         $this->core = $core;
     }

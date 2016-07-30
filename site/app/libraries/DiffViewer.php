@@ -114,7 +114,7 @@ class DiffViewer {
             throw new \Exception("'{$diff_file}' could not be found.");
         }
         else if ($diff_file != "") {
-            $diff = FileUtils::loadJsonFile($diff_file);
+            $diff = FileUtils::readJsonFile($diff_file);
         }
 
         $this->diff = array('expected' => array(), 'actual' => array());

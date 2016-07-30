@@ -15,7 +15,7 @@ class GlobalView {
         $this->core = $core;
     }
 
-    public function header() {
+    public function header($breadcrumbs) {
         $messages = <<<HTML
 <div id='messages'>
 
@@ -135,8 +135,7 @@ HTML;
         $return .= <<<HTML
         </h2>
         <h2>
-        <a href='{$this->core->getConfig()->getSiteUrl()}semester=f16'>F16</a> >
-        <a href="{$this->core->buildUrl()}">{$this->core->getFullCourseName()}</a>
+        {$breadcrumbs}
         </h2>
     </div>
 </div>

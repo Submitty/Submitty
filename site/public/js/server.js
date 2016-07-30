@@ -23,7 +23,7 @@ function removeMessagePopup(elem) {
     });
 }
 
-function assignmentChange(url, sel){
+function gradeableChange(url, sel){
     url = url + sel.value;
     window.location.href = url;
 }
@@ -41,12 +41,11 @@ function checkVersionChange(days_late, late_days_allowed){
     return true;
 }
 
-function checkVersionsUsed(assignment, versions_used, versions_allowed) {
+function checkVersionsUsed(gradeable, versions_used, versions_allowed) {
     versions_used = parseInt(versions_used);
     versions_allowed = parseInt(versions_allowed);
     if (versions_used >= versions_allowed) {
-        var message = confirm("Are you sure you want to upload for " + assignment + "? You have already used up all of your free submissions (" + versions_used + " / " + versions_allowed + "). Uploading may result in loss of points.");
-        return message;
+        return confirm("Are you sure you want to upload for " + gradeable + "? You have already used up all of your free submissions (" + versions_used + " / " + versions_allowed + "). Uploading may result in loss of points.");
     }
     return true;
 }

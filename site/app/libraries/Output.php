@@ -13,7 +13,7 @@ use app\exceptions\OutputException;
 
 class Output {
     private $output_buffer = "";
-    private $json_buffer = "";
+    private $breadcrumbs = array();
     private $loaded_views = array();
     
     private $use_header = true;
@@ -105,7 +105,7 @@ class Output {
     public function getOutput() {
         $return = "";
         if ($this->use_header) {
-            $return .= $this->renderTemplate("Global", 'header');
+            $return .= $this->renderTemplate("Global", 'header', implode(" > ", $this->breadcrumbs));
         }
         $return .= $this->output_buffer;
         if ($this->use_footer) {
@@ -183,5 +183,9 @@ class Output {
     
     public function useFooter($bool = true) {
         $this->use_footer = $bool;
+    }
+    
+    public function addBreadcrumb($string) {
+        $this->breadcrumbs[] = $string;
     }
 }

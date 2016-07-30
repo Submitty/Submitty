@@ -16,8 +16,14 @@ use app\libraries\FileUtils;
  * the filename via GET to this page, all using the cURL library.
  */
 class PamAuthentication implements IAuthentication {
+    /** @var Core Core library for running the application */
     private $core;
-
+    
+    /**
+     * PamAuthentication constructor.
+     *
+     * @param Core $core
+     */
     public function __construct(Core $core) {
         $this->core = $core;
     }

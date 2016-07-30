@@ -125,4 +125,10 @@ interface IDatabaseQueries {
      * @param $session_id
      */
     public function removeSessionById($session_id);
+    
+    /**
+     * Gets array of all gradeables ids in the database returning it in a list sorted alphabetically
+     * @return mixed
+     */
+    public function getAllGradeablesIds();
 }
