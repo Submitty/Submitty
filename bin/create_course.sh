@@ -220,10 +220,11 @@ chmod 660 $course_dir/config/class.json
 
 
 # copy the config file for TA grading & replace the variables
-cp $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/sample_course.php $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
-chown hwphp:hwphp $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
-chmod 400 $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/${course}.php
+mkdir -p $SUBMITTY_INSTALL_DIR/site/config
+cp $SUBMITTY_INSTALL_DIR/site/config/course_template.ini $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
+chown hwphp:hwphp $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
+chmod 400 $$SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
+replace_fillin_variables $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
 
 echo -e "\nMake sure to create the database: $DATABASE_NAME\n\n"
 

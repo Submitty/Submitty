@@ -17,7 +17,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
      protected $g_title;
      protected $g_overall_ta_instr;
      protected $g_use_teams;
-     protected $g_gradeable_type; 
+     protected $g_gradeable_type;
      protected $g_min_grading_group;
      protected $g_grade_by_registration;
      protected $g_grade_start_date;
@@ -29,7 +29,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
          $this->g_title = $params['gradeable_title'];
          $this->g_overall_ta_instr = $params['ta_instructions'];
          $this->g_use_teams = $params['team_assignment'];
-         $this->g_gradeable_type = $params['gradeable_type']; 
+         $this->g_gradeable_type = $params['gradeable_type'];
          $this->g_min_grading_group= $params['min_grading_group'];
          $this->g_grade_by_registration = $params['section_type'];
          $this->g_grade_start_date = $params['date_grade'];
@@ -37,47 +37,65 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
          $this->g_syllabus_bucket = $params['bucket'];
     }
     
+     /**
+      * @param \lib\Database $db
+      */
     function updateGradeable($db){
-        $params = array($this->g_title, $this->g_overall_ta_instr, $this->g_use_teams, $this->g_gradeable_type, 
-                        $this->g_grade_by_registration, $this->g_grade_start_date, $this->g_grade_released_date, 
+        $params = array($this->g_title, $this->g_overall_ta_instr, $this->g_use_teams, $this->g_gradeable_type,
+                        $this->g_grade_by_registration, $this->g_grade_start_date, $this->g_grade_released_date,
                         $this->g_syllabus_bucket, $this->g_min_grading_group, $this->g_id);
         $db->query("UPDATE gradeable SET g_title=?, g_overall_ta_instructions=?, g_team_assignment=?, g_gradeable_type=?, 
                     g_grade_by_registration=?, g_grade_start_date=?, g_grade_released_date=?, g_syllabus_bucket=?, 
                     g_min_grading_group=? WHERE g_id=?", $params);
     }
-
+    
+     /**
+      * @param \lib\Database $db
+      */
     function createGradeable($db){
-        $params = array($this->g_id,$this->g_title, $this->g_overall_ta_instr, $this->g_use_teams, 
-                        $this->g_gradeable_type, $this->g_grade_by_registration, $this->g_grade_start_date, 
+        $params = array($this->g_id,$this->g_title, $this->g_overall_ta_instr, $this->g_use_teams,
+                        $this->g_gradeable_type, $this->g_grade_by_registration, $this->g_grade_start_date,
                         $this->g_grade_released_date, $this->g_syllabus_bucket, $this->g_min_grading_group);
         $db->query("INSERT INTO gradeable(g_id,g_title, g_overall_ta_instructions, g_team_assignment, 
                     g_gradeable_type, g_grade_by_registration, g_grade_start_date, g_grade_released_date,
                     g_syllabus_bucket,g_min_grading_group) VALUES (?,?,?,?,?,?,?,?,?,?)", $params);
     }
     
+     /**
+      * @param \lib\Database $db
+      * @param $lb
+      * @param $ub
+      */
      function deleteComponents($db,$lb,$ub){
          // TODO REWRITE THIS, multiple queries here are bad
         for($i=$lb; $i<=$ub; ++$i){
             //DELETE all grades associated with these gcs
             $params = array($this->g_id,$i);
             $db->query("SELECT gc_id FROM gradeable_component WHERE g_id=? AND gc_order=?",$params);
-            $gc_id = $db->row()['gc_id'];
+            $row = $db->row();
+            if (!isset($row['gc_id'])) {
+                continue;
+            }
             $db->query("DELETE FROM gradeable_component_data AS gcd WHERE gc_id=?",array($gc_id));
             $db->query("DELETE FROM gradeable_component WHERE gc_id=?", array($gc_id));
-        } 
+        }
     }
     
-    //Overridden function, polymorphism 
+    //Overridden function, polymorphism
     function createComponents($db, $action, $add_args){}
     
     function get_GID(){
         return $this->g_id;
     }
     
+     /**
+      * @param \lib\Database $db
+      * @param $graders
+      */
     function setupRotatingSections($db, $graders){
         if ($this->g_grade_by_registration === 'true') return;
         
-        // delete all exisiting rotating sections 
+        // delete all exisiting rotating sections
         $db->query("DELETE FROM grading_rotating WHERE g_id=?", array($this->g_id));
         foreach ($graders as $grader=>$sections){
             foreach($sections as $i=>$section){
@@ -101,7 +119,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     
      function __construct($params){
          parent::__construct($params);
-         $this->instructions_url = $params['instructions_url']; 
+         $this->instructions_url = $params['instructions_url'];
          $this->date_submit = $params['date_submit'];
          $this->date_due =$params['date_due'];
          $this->is_repo = $params['is_repo'];
@@ -112,16 +130,16 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
          $this->point_precision = $params['point_precision'];
      }
      
-     //TODO extract to multiple functions 
+     //TODO extract to multiple functions
      function createComponents($db, $action, $add_args){
         if ($action=='edit'){
-            $params = array($this->instructions_url, $this->date_submit, $this->date_due, $this->is_repo, 
+            $params = array($this->instructions_url, $this->date_submit, $this->date_due, $this->is_repo,
                             $this->subdirectory, $this->ta_grading, $this->config_path, $this->late_days, $this->point_precision, $this->g_id);
             $db->query("UPDATE electronic_gradeable SET eg_instructions_url=?, eg_submission_open_date=?,eg_submission_due_date=?, 
                         eg_is_repository=?, eg_subdirectory=?, eg_use_ta_grading=?, eg_config_path=?, eg_late_days=?, eg_precision=? WHERE g_id=?", $params);
         }
         else{
-            $params = array($this->g_id, $this->instructions_url, $this->date_submit, $this->date_due, 
+            $params = array($this->g_id, $this->instructions_url, $this->date_submit, $this->date_due,
                             $this->is_repo, $this->subdirectory, $this->ta_grading, $this->config_path, $this->late_days, $this->point_precision);
             $db->query("INSERT INTO electronic_gradeable(g_id, eg_instructions_url, eg_submission_open_date, eg_submission_due_date, 
                 eg_is_repository, eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision) VALUES(?,?,?,?,?,?,?,?,?,?)", $params);
@@ -163,14 +181,14 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     function __construct($params){
         parent::__construct($params);
     }
-    //TODO EXTRACT TO MULTIPLE FUNCTIONS 
+    //TODO EXTRACT TO MULTIPLE FUNCTIONS
     function createComponents($db, $action, $add_args){
          // create a gradeable component for each checkpoint
         $num_checkpoints = -1; // remove 1 for the template
         foreach($add_args as $k=>$v){
             if(strpos($k, 'checkpoint-label') !== false){
                 ++$num_checkpoints;
-            }    
+            }
         }
         $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($this->g_id));
         $num_old_checkpoints = intval($db->row()['cnt']);
@@ -191,9 +209,9 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
                             gc_max_value,gc_is_text,gc_is_extra_credit,gc_order) VALUES (?,?,?,?,?,?,?,?)", $params);
             }
         }
-        // remove deleted checkpoints 
-        $this->deleteComponents($db, $num_checkpoints+1,$num_old_checkpoints); 
-    }    
+        // remove deleted checkpoints
+        $this->deleteComponents($db, $num_checkpoints+1,$num_old_checkpoints);
+    }
  }
 
  class NumericGradeable extends Gradeable{
@@ -201,7 +219,12 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
         parent::__construct($params);
     }
     
-    //TODO split into multiple functions 
+    //TODO split into multiple functions
+     /**
+      * @param \lib\Database $db
+      * @param $action
+      * @param $add_args
+      */
     function createComponents($db, $action, $add_args){
         $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($this->g_id));
         $num_old_numerics = intval($db->row()['cnt']);
@@ -235,8 +258,8 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
             }
         }
         //remove deleted numerics
-        $this->deleteComponents($db, $num_numeric+$num_text+1, $num_old_numerics); 
-    }    
+        $this->deleteComponents($db, $num_numeric+$num_text+1, $num_old_numerics);
+    }
  }
  
  function writeFormJSON($g_id, $gradeableJSON){
@@ -245,8 +268,8 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
         die('failed to open file');
     }
     #decode for pretty print
-    fwrite($fp, json_encode(json_decode($gradeableJSON), JSON_PRETTY_PRINT));
-    fclose($fp); 
+    fwrite($fp, json_encode(json_decode(urldecode($gradeableJSON)), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    fclose($fp);
  }
  
 // TODO MAKE SURE THE TRANSACTIONS are in the right spot!
@@ -269,8 +292,8 @@ abstract class GradeableType{
      $g_syllabus_bucket = $request_args['gradeable-buckets'];
      
      $g_constructor_params = array('gradeable_id' => $g_id, 'gradeable_title' => $g_title, 'ta_instructions' => $g_overall_ta_instr,
-                                   'team_assignment' => $g_use_teams, 'min_grading_group' => $g_min_grading_group, 
-                                   'section_type' => $g_grade_by_registration, 'date_grade' => $g_grade_start_date, 
+                                   'team_assignment' => $g_use_teams, 'min_grading_group' => $g_min_grading_group,
+                                   'section_type' => $g_grade_by_registration, 'date_grade' => $g_grade_start_date,
                                    'date_released' =>$g_grade_released_date, 'bucket' => $g_syllabus_bucket);
      
      if ($request_args['gradeable-type'] === "Electronic File"){
@@ -343,10 +366,10 @@ $action = $_GET['action'];
 // single update or create
 if ($action != 'import'){
     $gradeable = constructGradeable($_POST);
-    $db->beginTransaction();  
+    $db->beginTransaction();
     if ($action=='edit'){
         $gradeable->updateGradeable($db);
-    }  
+    }
     else{
         $gradeable->createGradeable($db);
     }
