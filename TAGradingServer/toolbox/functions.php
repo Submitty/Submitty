@@ -34,8 +34,9 @@ $start_time = microtime_float();
 
 if (isset($_GET['course'])) {
     // don't allow the user entered course to potentially point to a different directory via use of ../
-    $_GET['course'] = str_replace("/", "_", $_GET['course']);
-    $config = __DIR__."/../../site/config/f16/".$_GET['course'].".ini";
+    $_GET['course'] = isset($_GET['course']) ? str_replace("/", "_", $_GET['course']) : "";
+    $_GET['semester'] = isset($_GET['semester']) ? str_replace("/", "_", $_GET['semester']) : "";
+    $config = __DIR__."/../../site/config/".$_GET['semester']."/".$_GET['course'].".ini";
     if (!file_exists($config)) {
         die(\lib\ErrorPage::get_error_page("Fatal Error: The config for the specified course '{$_GET['course']}' does not exist"));
     }
@@ -52,7 +53,7 @@ define("__DATABASE_HOST__", $a['database_details']['database_host']);
 define("__DATABASE_USER__", $a['database_details']['database_user']);
 define("__DATABASE_PASSWORD__", $a['database_details']['database_password']);
 
-define("__SUBMISSION_SERVER__", $a['site_details']['submitty_path']."/courses/f16/".$_GET['course']);
+define("__SUBMISSION_SERVER__", $a['site_details']['submitty_path']."/courses/".$_GET['semester']."/".$_GET['course']);
 
 define("__DEBUG__", $a['site_details']['debug']);
 
@@ -64,6 +65,7 @@ define('__TMP_CSV_PATH__',  '/tmp/_SUBMITTY_csv');
 
 $a = IniParser::readFile($config);
 define("__COURSE_CODE__", $_GET['course']);
+define("__COURSE_SEMESTER__", $_GET['semester']);
 define("__DATABASE_NAME__", $a['database_details']['database_name']);
 define("__COURSE_NAME__", $a['course_details']['course_name']);
 define("__CALCULATE_DIFF__", true);
