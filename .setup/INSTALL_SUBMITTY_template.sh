@@ -491,6 +491,17 @@ rm ${HWCRON_CRONTAB_FILE}
 
 ################################################################################################################
 ################################################################################################################
+# COMPILE AND INSTALL ANALYSIS TOOLS
+
+echo -e "Compile and install analysis tools"
+pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+git pull origin master
+make ubuntudeps
+make
+popd
+
+################################################################################################################
+################################################################################################################
 
 
 echo -e "\nCompleted installation of the Submitty homework submission server\n"

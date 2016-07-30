@@ -495,6 +495,13 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 #################################################################
+# ANALYSIS TOOLS SETUP
+#################
+if [ ${VAGRANT} == 1 ]; then
+    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+fi
+
+#################################################################
 # SUBMITTY SETUP
 #################
 
@@ -575,7 +582,6 @@ chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
 # With this line, subdirectories inherit the group by default and
 # blocks r/w access to the directory by others on the system.
 chmod 2771 ${SUBMITTY_INSTALL_DIR}
-
 
 echo "Done."
 exit 0

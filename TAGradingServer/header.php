@@ -135,8 +135,11 @@ HTML;
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-rotating-sections.php" role="button" data-toggle="modal">
                                     Setup Rotating Sections
                                 </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-latedays.php" role="button" data-toggle="modal">
+                                    Add Late Days To Course
+                                </a></li>
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-latedays-exceptions.php" role="button" data-toggle="modal">
-                                    Add Late Day Exceptions
+                                    Add Late Day Exceptions For Students
                                 </a></li>
                             </ul>
                         </li>
