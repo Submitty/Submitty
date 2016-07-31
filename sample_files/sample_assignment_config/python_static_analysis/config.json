@@ -19,15 +19,13 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT_0.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "p1_out.txt",
-		    "deduction" : 0.5
+                    "instructor_file" : "p1_out.txt"
                 },
                 {
                     "method" : "intComparison",
                     "filename" : "STDOUT_1.txt",
                     "description" : "Number of print statements",
 		    "comparison" : "ge",
-		    "deduction" : 0.5,
                     "term" : 1
                 }
             ]
@@ -41,8 +39,7 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-		    "instructor_file" : "p2_out.txt",
-		    "deduction" : 1.0
+		    "instructor_file" : "p2_out.txt"
                 }
             ]
         },
@@ -58,32 +55,28 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT_0.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "p3_out.txt",
-		    "deduction" : 0.25
+                    "instructor_file" : "p3_out.txt"
                 },
                 {
                     "method" : "intComparison",
                     "filename" : "STDOUT_1.txt",
                     "description" : "Number of assignments",
 		    "comparison" : "ge",
-                    "term" : 5,
-		    "deduction" : 0.25
+                    "term" : 5
                 },
                 {
                     "method" : "intComparison",
                     "filename" : "STDOUT_2.txt",
                     "description" : "Number of multiplications",
 		    "comparison" : "ge",
-                    "term" : 2,
-		    "deduction" : 0.25
+                    "term" : 2
                 },
                 {
                     "method" : "intComparison",
                     "filename" : "STDOUT_3.txt",
                     "description" : "Number of additions",
 		    "comparison" : "ge",
-                    "term" : 1,
-		    "deduction" : 0.25
+                    "term" : 1
                 }
             ]
         },
@@ -97,16 +90,14 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT_0.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "p4_out.txt",
-		    "deduction" : 0.5
+                    "instructor_file" : "p4_out.txt"
                 },
                 {
                     "method" : "intComparison",
                     "filename" : "STDOUT_1.txt",
                     "description" : "Number of while loops",
 		    "comparison" : "ge",
-                    "term" : 1,
-		    "deduction" : 0.5
+                    "term" : 1
                 }
             ]
         }

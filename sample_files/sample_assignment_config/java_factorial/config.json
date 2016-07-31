@@ -37,8 +37,7 @@
                 {
                     "method" : "JUnitTestGrader",
                     "filename" : "STDOUT.txt",
-                    "num_tests" : 4,
-                    "deduction" : 1.0
+                    "num_tests" : 4
                 }
             ]
         }

@@ -35,8 +35,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "output.txt",
-                    "instructor_file" : "inst_output.txt",
-                    "deduction" : 1.0
+                    "instructor_file" : "inst_output.txt"
                 }
             ]
         },
@@ -49,8 +48,7 @@
                 {
                     "method" : "myersDiffbyLinebyWord",
                     "filename" : "output.txt",
-                    "instructor_file" : "inst_output.txt",
-                    "deduction" : 1.0
+                    "instructor_file" : "inst_output.txt"
                 }
             ]
         },
@@ -63,8 +61,7 @@
                 {
                     "method" : "myersDiffbyLine",
                     "filename" : "output.txt",
-                    "instructor_file" : "inst_output.txt",
-                    "deduction" : 1.0
+                    "instructor_file" : "inst_output.txt"
                 }
             ]
         },
@@ -77,8 +74,7 @@
                 {
                     "method" : "myersDiffbyLineNoWhite",
                     "filename" : "output.txt",
-                    "instructor_file" : "inst_output.txt",
-                    "deduction" : 1.0
+                    "instructor_file" : "inst_output.txt"
                 }
             ]
         }

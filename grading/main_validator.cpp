@@ -172,7 +172,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     else {   // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
       nlohmann::json autocheck_js;
       double my_score = 1.0;
-      double deduction_sum = 0.0;
       for (int j = 0; j < my_testcase.numFileGraders(); j++) {
         std::cerr << "autocheck #" << j << std::endl;
         TestResults *result = my_testcase.do_the_grading(j);
@@ -224,8 +223,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         std::cout << "result->getGrade() = " << result->getGrade() << std::endl;
         assert (result->getGrade() >= 0.0 && result->getGrade() <= 1.0);
         double deduction = my_testcase.test_case_grader_vec[j].value("deduction",1.0); 
-        if (deduction < -0.5) { deduction = 1 / double(my_testcase.numFileGraders()); }
-        deduction_sum += deduction;
+        assert (deduction >= -0.001 && deduction <= 1.001);
         std::cout << "deduction multiplier = " << deduction << std::endl;
         my_score -= deduction*(1-result->getGrade());
         std::cout << "my_score = " << my_score << std::endl;
@@ -234,14 +232,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       } // END COMPARISON LOOP
 
       tc_j["autochecks"] = autocheck_js;
-
-      std::cout << "check these vals " << my_testcase.points() << " " << deduction_sum << std::endl; 
-      if (my_testcase.points() > 0.01) {
-        if (deduction_sum < 0.99 || deduction_sum > 1.01) {
-          std::cout << "WARNING: deduction sum " << deduction_sum << std::endl;
-        }
-        assert (deduction_sum > 0.99); 
-      }
       assert (my_score <= 1.00001);
       my_score = std::max(0.0,std::min(1.0,my_score));
       std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;

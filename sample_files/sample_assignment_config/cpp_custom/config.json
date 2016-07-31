@@ -23,8 +23,7 @@
                 {
                     "method" : "custom",
                     "args" : "5",
-                    "filename" : "STDOUT.txt",
-                    "deduction" : 1.0
+                    "filename" : "STDOUT.txt"
                 }
             ]
         },
@@ -36,8 +35,7 @@
                 {
                     "method" : "custom",
                     "args" : "10",
-                    "filename" : "STDOUT.txt",
-                    "deduction" : 1.0
+                    "filename" : "STDOUT.txt"
                 }
             ]
         },
@@ -57,8 +55,7 @@
                     [
                         "STDOUT_0.txt",
                         "STDOUT_1.txt"
-                    ],
-                    "deduction" : 1.0
+                    ]
                 }
             ]
         }

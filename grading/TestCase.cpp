@@ -122,29 +122,26 @@ TestResults* json_grader_doit(const TestCase& tc, const nlohmann::json& j) {
 
 
   std::string method = j.value("method","MISSING METHOD");
-  float deduction = j.value("deduction",1.0); ///float(num_graders));
+
+  nlohmann::json::const_iterator itr = j.find("deduction");
+  assert (itr != j.end() && itr->is_number());
+  float deduction = (*itr);
+  assert (deduction >= -0.001 && deduction < 1.001);
 
   std::vector<std::string> filenames = stringOrArrayOfStrings(j,"filename");
   assert (filenames.size() > 0);
-  std::string filename = filenames[0]; //j.value("filename","MISSING FILENAME");
-  //std::string description = j.value("description",filename);
-  //std::string instructor_file = j.value("instructor_file","");
-
+  std::string filename = filenames[0];
   
   std::string prefix = tc.prefix();
-
-  //TestCaseGrader *g;
 
   if (method == "JUnitTestGrader") {
     int num_tests = j.value("num_tests",1);
     TestCaseJUnit *g = TestCaseJUnit::JUnitTestGrader(filename,num_tests,deduction); 
     return g->doit(prefix);
-    
 
   } else if (method == "EmmaInstrumentationGrader") {
     TestCaseJUnit *g = TestCaseJUnit::EmmaInstrumentationGrader(filename,deduction); 
     return g->doit(prefix);
-  
 
   } else if (method == "MultipleJUnitTestGrader") {
     TestCaseJUnit *g = TestCaseJUnit::MultipleJUnitTestGrader(filename,deduction); 
@@ -179,10 +176,33 @@ TestResults* json_grader_doit(const TestCase& tc, const nlohmann::json& j) {
       std::cout << "UNKNOWN METHOD " << method << std::endl;
       assert (0);
     }
-    //g = new TestCaseComparison(cmp,filename,description,instructor_file,deduction);
   }
-
 }
+
+
+// Make sure the sum of deductions across graders adds to at least 1.0.
+// If a grader does not have a deduction setting, set it to 1/# of (non default) graders.
+void VerifyGraderDeductions(std::vector<nlohmann::json> &json_graders) {
+  assert (json_graders.size() > 0);
+  float default_deduction = 1.0 / float(json_graders.size());
+  float sum = 0.0;
+  for (int i = 0; i < json_graders.size(); i++) {
+    nlohmann::json::const_iterator itr = json_graders[i].find("deduction");
+    float deduction;
+    if (itr == json_graders[i].end()) {
+      json_graders[i]["deduction"] = default_deduction;
+      deduction = default_deduction;
+    } else {
+      assert (itr->is_number());
+      deduction = (*itr);
+    }
+    sum += deduction;
+  }
+  if (sum < 0.99) {
+    std::cout << "ERROR! DEDUCTION SUM < 1.0: " << sum << std::endl;
+  }
+}
+
 
 
 // If we don't already have a grader for the indicated file, add a
@@ -281,6 +301,8 @@ TestCase TestCase::MakeTestCase (nlohmann::json j) {
     }
     assert (commands.size() > 0);
     assert (json_graders.size() > 0);
+
+    VerifyGraderDeductions(json_graders);
     AddDefaultGraders(commands,json_graders);
 
     bool hidden = j.value("hidden",false);
