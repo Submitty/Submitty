@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <set>
 #include "TestCase.h"
 #include "JUnitGrader.h"
 #include "myersDiff.h"
@@ -184,10 +185,64 @@ TestResults* json_grader_doit(const TestCase& tc, const nlohmann::json& j) {
 }
 
 
+// If we don't already have a grader for the indicated file, add a
+// simple "WarnIfNotEmpty" check, that will print the contents of the
+// file to help the student debug if their output has gone to the
+// wrong place or if there was an execution error
+void AddDefaultGrader(const std::string &command,
+                      const std::set<std::string> &files_covered,
+                      std::vector<nlohmann::json> &json_graders,
+                      const std::string &filename) {
+  if (files_covered.find(filename) != files_covered.end())
+    return;
+  std::cout << "ADD GRADER WarnIfNotEmpty test for " << filename << std::endl;
+  nlohmann::json j;
+  j["method"] = "warnIfNotEmpty";
+  j["filename"] = filename;
+  if (filename.find("STDOUT") != std::string::npos) {
+    j["description"] = "Standard Output (STDOUT)";
+  } else if (filename.find("STDERR") != std::string::npos) {
+    if (command.find("/usr/bin/python") != std::string::npos) {
+      j["description"] = "syntax error output from running python";
+    } else if (command.find("/usr/bin/java") != std::string::npos) {
+      j["description"] = "syntax error output from running java";
+    } else {
+      j["description"] = "Standard Error (STDERR)";
+    }
+  } else {
+    j["description"] = filename;
+  }
+  j["deduction"] = 0.0;
+  json_graders.push_back(j);
+}
+
+
+// Every command sends standard output and standard error to two
+// files.  Make sure those files are sent to a grader.
+void AddDefaultGraders(const std::vector<std::string> &commands,
+                       std::vector<nlohmann::json> &json_graders) {
+  std::set<std::string> files_covered;
+  for (int i = 0; i < json_graders.size(); i++) {
+    std::vector<std::string> filenames = stringOrArrayOfStrings(json_graders[i],"filename");
+    for (int j = 0; j < filenames.size(); j++) {
+      files_covered.insert(filenames[j]);
+    }
+  }
+  assert (commands.size() > 0);
+  if (commands.size() == 1) {
+    AddDefaultGrader(commands[0],files_covered,json_graders,"STDOUT.txt");
+    AddDefaultGrader(commands[0],files_covered,json_graders,"STDERR.txt");
+  } else {
+    for (int i = 0; i < commands.size(); i++) {
+      AddDefaultGrader(commands[i],files_covered,json_graders,"STDOUT_"+std::to_string(i)+".txt");
+      AddDefaultGrader(commands[i],files_covered,json_graders,"STDERR_"+std::to_string(i)+".txt");
+    }
+  }
+}
+
 
 TestCase TestCase::MakeTestCase (nlohmann::json j) {
   std::string type = j.value("type","DEFAULT");
-  //std::cout << "TYPE = " << type << std::endl;
   if (type == "FileExists") {
     return MakeFileExists(j.value("title","TITLE MISSING"),
                           j.value("filename","FILENAME MISSING"),
@@ -195,13 +250,14 @@ TestCase TestCase::MakeTestCase (nlohmann::json j) {
   } else if (type == "Compilation") {
     std::vector<std::string> commands = stringOrArrayOfStrings(j,"command");
     return MakeCompilation(j.value("title","TITLE MISSING"),
-                           commands, //j.value("command","COMMAND MISSING"),
+                           commands, 
                            j.value("executable_name","EXECUTABLE FILENAME MISSING"),
                            TestCasePoints(j.value("points",0)),
                            j.value("warning_deduction",0),
                            j.value("resource_limits", nlohmann::json()));
   } else {
     assert (type == "DEFAULT");
+    std::vector<std::string> commands = stringOrArrayOfStrings(j,"command");
     std::vector<nlohmann::json> json_graders;
     nlohmann::json::iterator itr = j.find("validation");
     assert (itr != j.end());
@@ -223,10 +279,12 @@ TestCase TestCase::MakeTestCase (nlohmann::json j) {
       }
       json_graders.push_back(j);
     }
+    assert (commands.size() > 0);
+    assert (json_graders.size() > 0);
+    AddDefaultGraders(commands,json_graders);
 
     bool hidden = j.value("hidden",false);
     bool extra_credit = j.value("extra_credit",false);
-    std::vector<std::string> commands = stringOrArrayOfStrings(j,"command");
     return MakeTestCase(j.value("title","TITLE MISSING"),
                         j.value("details",""),
                         commands,

@@ -30,7 +30,7 @@
 				{
 					"autocheck_id":"test03_1_autocheck",
 					"student_file":"test03_STDERR.txt",
-					"description": "Error output from running instrumentation"
+					"description": "syntax error output from running java"
 				}
 			],
 			"points_awarded": 0
@@ -48,7 +48,7 @@
 				{
 					"autocheck_id":"test04_1_autocheck",
 					"student_file":"test04_STDERR.txt",
-					"description": "syntax error output from running junit"
+					"description": "syntax error output from running java"
 				}
 			],
 			"points_awarded": 1
@@ -70,7 +70,7 @@
 				{
 					"autocheck_id":"test05_2_autocheck",
 					"student_file":"test05_STDERR.txt",
-					"description": "error output from running EclEmma report generation"
+					"description": "syntax error output from running java"
 				}
 			],
 			"points_awarded": 6
@@ -88,7 +88,7 @@
 				{
 					"autocheck_id":"test06_1_autocheck",
 					"student_file":"test06_STDERR.txt",
-					"description": "syntax error output from running junit"
+					"description": "syntax error output from running java"
 				}
 			],
 			"points_awarded": 1

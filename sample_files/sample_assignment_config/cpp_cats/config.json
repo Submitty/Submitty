@@ -37,16 +37,6 @@
                     "filename" : "output.txt",
                     "instructor_file" : "inst_output.txt",
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -61,16 +51,6 @@
                     "filename" : "output.txt",
                     "instructor_file" : "inst_output.txt",
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -85,16 +65,6 @@
                     "filename" : "output.txt",
                     "instructor_file" : "inst_output.txt",
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -109,16 +79,6 @@
                     "filename" : "output.txt",
                     "instructor_file" : "inst_output.txt",
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
                 }
             ]
         }

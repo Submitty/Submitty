@@ -39,12 +39,6 @@
                     "filename" : "STDOUT.txt",
                     "num_tests" : 4,
                     "deduction" : 1.0
-                },
-                { 
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running junit",
-                    "deduction" : 1.0
                 }
             ]
         }

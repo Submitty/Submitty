@@ -20,11 +20,6 @@
                     "description" : "Program Output",
                     "instructor_file" : "part1_sol.txt", 
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running python"
                 }
             ]
         },
@@ -40,11 +35,6 @@
                     "description" : "Program Output",
                     "instructor_file" : "part2_sol.txt", 
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running python"
                 }
             ]
         },
@@ -60,11 +50,6 @@
                     "description" : "Program Output",
                     "instructor_file" : "part3_sol.txt", 
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running python"
                 }
             ]
         }

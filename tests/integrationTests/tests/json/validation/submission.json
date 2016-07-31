@@ -16,6 +16,11 @@
                                         "instructor_file":"test_output/testassignment/test1_output.txt",
                                         "difference":"test01_0_diff.json",
                                         "description": "Standard OUTPUT (STDOUT)"
+                                },
+                                {
+                                    "autocheck_id": "test01_1_autocheck",
+                                    "description": "Standard Error (STDERR)",
+                                    "student_file": "test01_STDERR.txt"
                                 }
                         ],
                         "points_awarded": 10

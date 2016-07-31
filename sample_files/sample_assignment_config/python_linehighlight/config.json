@@ -22,16 +22,6 @@
                     "filename" : "output_correct.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 0.5
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -47,16 +37,6 @@
                     "filename" : "output_duplicates.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -71,16 +51,6 @@
                     "filename" : "output_duplicates.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -96,16 +66,6 @@
                     "filename" : "output_extra.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -120,16 +80,6 @@
                     "filename" : "output_extra.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -145,16 +95,6 @@
                     "filename" : "output_missing.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -169,16 +109,6 @@
                     "filename" : "output_missing.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -194,16 +124,6 @@
                     "filename" : "output_reordered.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
                 }
             ]
         },
@@ -218,16 +138,6 @@
                     "filename" : "output_reordered.txt",
                     "instructor_file" : "output_instructor.txt",
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
                 }
             ]
         }
