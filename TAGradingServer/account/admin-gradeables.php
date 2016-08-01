@@ -128,7 +128,7 @@ $output .= <<<HTML
         var gradeable_name = $('td#gradeable-'+gradeable_id+'-title').text();
         var c = window.confirm("Are you sure you want to delete '" + gradeable_name + "'?");
         if (c == true) {
-            $.ajax('{$BASE_URL}/account/ajax/admin-gradeables.php?course={$_GET['course']}&action=delete&id='+gradeable_id, {
+            $.ajax('{$BASE_URL}/account/ajax/admin-gradeables.php?course={$_GET['course']}&semester={$_GET['semester']}&action=delete&id='+gradeable_id, {
                 type: "POST",
 		        data: {
                     csrf_token: '{$_SESSION['csrf']}'
@@ -151,7 +151,7 @@ $output .= <<<HTML
     }
 
     function fixSequences() {
-        $.ajax('{$BASE_URL}/account/ajax/admin-gradeables.php?course={$_GET['course']}&action=sequence', {
+        $.ajax('{$BASE_URL}/account/ajax/admin-gradeables.php?course={$_GET['course']}&semester={$_GET['semester']}&action=sequence', {
             type: "POST",
             data: {
                 csrf_token: '{$_SESSION['csrf']}'
@@ -173,7 +173,7 @@ $output .= <<<HTML
     }
 
     function batchImportJSON(){
-         $.ajax('{$BASE_URL}/account/submit/admin-gradeable.php?course={$_GET['course']}&action=import', {
+         $.ajax('{$BASE_URL}/account/submit/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&action=import', {
             type: "POST",
             data: {
                 csrf_token: '{$_SESSION['csrf']}'

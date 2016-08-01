@@ -63,8 +63,10 @@ TestCase TestCase::MakeTestCase (nlohmann::json j) {
 
       } else if (method == "searchToken") {
         graders.push_back(new TestCaseTokens(&searchToken,filename,description,data_vec,deduction));
+
+      } else _TERM_COMPARISON_DEF(int)
         
-      } else {
+      else {
         TestResults* (*cmp) ( const std::string&, const std::string& ) = NULL;
         if      (method == "myersDiffbyLinebyChar")  cmp = &myersDiffbyLinebyChar;
         else if (method == "myersDiffbyLinebyWord")  cmp = &myersDiffbyLinebyWord;

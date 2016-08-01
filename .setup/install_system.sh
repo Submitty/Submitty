@@ -100,7 +100,7 @@ apt-get install -qqy libpam-passwdqc
 # the worker/threaded mode instead)
 
 apt-get install -qqy ssh sshpass unzip
-apt-get install -qqy apache2 postgresql postgresql-contrib php5 php5-xdebug libapache2-mod-suphp
+apt-get install -qqy apache2 postgresql postgresql-contrib php5 php5-xdebug libapache2-mod-suphp php5-curl
 
 # Check to make sure you got the right setup by typing:
 #   apache2ctl -V | grep MPM
@@ -116,7 +116,7 @@ apachectl -V | grep MPM
 
 echo "Preparing to install packages.  This may take a while."
 apt-get install -qqy clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
-hardening-includes python p7zip-full patchutils postgresql-client postgresql-client-9.3 postgresql-client-common \
+hardening-includes python python-pip p7zip-full patchutils postgresql-client postgresql-client-9.3 postgresql-client-common \
 unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libfile-mmagic-perl \
 libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
@@ -145,6 +145,12 @@ apt-get install -qqy imagemagick
 
 apt-get -qqy autoremove
 
+
+# TODO: We should look into making it so that only certain users have access to certain packages
+# so that hwphp is the only one who could use PAM for example
+pip install python-pam
+chmod 555 /usr/local/lib/python2.7/*
+chmod 555 /usr/lib/python2.7/dist-packages
 
 #################################################################
 # NETWORK CONFIGURATION
@@ -187,7 +193,7 @@ echo "Binding static IPs to \"Host-Only\" virtual network interface."
 # eth1 is statically bound to 192.168.56.101, 102, and 103.
 printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
 printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
 printf "auto eth1:3\niface eth1:3 inet static\naddress 192.168.56.104\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
 
 # Turn them on.
@@ -376,6 +382,8 @@ adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-pas
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
 	adduser hwphp vagrant
+	# FIXME: We should figure out what the method for PAM authentication is
+	adduser hwphp shadow
 fi
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then
@@ -487,6 +495,13 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 
 #################################################################
+# ANALYSIS TOOLS SETUP
+#################
+if [ ${VAGRANT} == 1 ]; then
+    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+fi
+
+#################################################################
 # SUBMITTY SETUP
 #################
 
@@ -506,7 +521,8 @@ source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
 cp ${SUBMITTY_REPOSITORY}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
 cp ${SUBMITTY_REPOSITORY}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
-cp -f ${SUBMITTY_REPOSITORY}/Docs/www-data /etc/apache2/suexec/www-data
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/submitty.conf /etc/apache2/sites-available/submitty.conf
+cp -f ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
 
 # permissions: rw- r-- ---
 chmod 0640 /etc/apache2/sites-available/*.conf
@@ -523,6 +539,7 @@ fi
 
 a2ensite submit
 a2ensite hwgrading
+a2ensite submitty
 
 apache2ctl -t
 service apache2 restart
@@ -550,8 +567,6 @@ if [[ ${VAGRANT} == 1 ]]; then
     chmod u+x ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.sh
     ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.sh
 
-
-
     #################################################################
     # SET CSV FIELDS (for classlist upload data)
     #################
@@ -570,7 +585,6 @@ chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
 # With this line, subdirectories inherit the group by default and
 # blocks r/w access to the directory by others on the system.
 chmod 2771 ${SUBMITTY_INSTALL_DIR}
-
 
 echo "Done."
 exit 0

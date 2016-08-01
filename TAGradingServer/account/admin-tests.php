@@ -152,7 +152,7 @@ function uploadGrades(test_id) {
         formData.append('csrf_token', '{$_SESSION['csrf']}');
         var test_upload = $('#test-' + test_id + '-upload');
         formData.append('file', test_upload[0].files[0]);
-        $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&action=upload&id='+test_id, {
+        $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&semester={$_GET['semester']}&action=upload&id='+test_id, {
             type: "POST",
             data: formData,
             processData: false,
@@ -181,7 +181,7 @@ function deleteTest(test_id) {
     var test_number = $('#test-'+test_id).attr('test-number');
     var c = window.confirm("Are you sure you want to delete Test " + test_number + "?");
     if (c == true) {
-        $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&action=delete&id='+test_id, {
+        $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&semester={$_GET['semester']}&action=delete&id='+test_id, {
             type: "POST",
             data: {
                 csrf_token: '{$_SESSION['csrf']}'
@@ -214,7 +214,7 @@ function createTest() {
     var curve     = $('input#new-test-curve').val();
     var locked    = $('input#new-test-locked').val();
 
-    $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&action=new', {
+    $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&semester={$_GET['semester']}&action=new', {
         type:'POST',
         data: {
             type: type,
@@ -318,7 +318,7 @@ function submitEdit(test_id) {
     var curve;
     var locked;
 
-    $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&action=edit', {
+    $.ajax('{$BASE_URL}/account/ajax/admin-tests.php?course={$_GET['course']}&semester={$_GET['semester']}&action=edit', {
         type: 'POST',
         data: {
             id: test_id,

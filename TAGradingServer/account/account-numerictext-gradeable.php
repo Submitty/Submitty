@@ -10,10 +10,10 @@ $account_subpages_unlock = true;
 $button = "";
 if (!User::$is_administrator) {
     if (isset($_GET['all']) && $_GET['all'] == "true") {
-        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}'>View Your Sections</a>";
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}'>View Your Sections</a>";
     }
     else {
-        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&all=true'>View All Sections</a>";
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&all=true'>View All Sections</a>";
     }
 }
 
@@ -191,7 +191,7 @@ HTML;
                                 </td>
                             </tr>
 HTML;
-        $params = array($nt_row['g_id'],intval($section_id),4); 
+        $params = array($nt_row['g_id'],intval($section_id),4);
         $db->query("
         
 SELECT
@@ -402,7 +402,7 @@ echo <<<HTML
             }
 
             $("#cell-"+nt_gradeable+"-"+user_id+"-score").text(total);
-            url = "{$BASE_URL}/account/ajax/account-numerictext-gradeable.php?course={$_GET['course']}&id=" + nt_gradeable + "&user_id=" + user_id + "&grade=" + total + extra; 
+            url = "{$BASE_URL}/account/ajax/account-numerictext-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&id=" + nt_gradeable + "&user_id=" + user_id + "&grade=" + total + extra; 
             updateColor(this, url);
         });
 

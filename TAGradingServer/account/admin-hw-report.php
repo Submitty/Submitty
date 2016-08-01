@@ -6,7 +6,7 @@ check_administrator();
 echo <<<HTML
 <div id="container" style="width:100%; margin-top:40px;">
     <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
-        <form onsubmit="submitAJAX('ajax/admin-hw-report.php?course={$_GET['course']}&g_id='); return false;">
+        <form onsubmit="submitAJAX('ajax/admin-hw-report.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id='); return false;">
             <div class="modal-header">
                 <h3 id="myModalLabel">Generate Homework Report</h3>
             </div>
