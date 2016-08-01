@@ -86,11 +86,6 @@ function one_course {
     echo "    ]"                                                          >> $class_json_file
     echo "}"                                                              >> $class_json_file
 
-    # ---------------------------------------------------------------
-    # CREATE THE FORM DIRECTORY (FOR GRADEABLE FORM JSON TEMPLATES)
-    class_form_directory=${SUBMITTY_DATA_DIR}/courses/$semester/$course/config/form/
-    mkdir $class_form_directory
-    chown hwphp $class_form_directory
 
     # ---------------------------------------------------------------
     # RUN THE BUILD SCRIPT
