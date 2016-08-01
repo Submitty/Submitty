@@ -231,7 +231,7 @@ chmod 660 $course_dir/config/class.json
 mkdir -p $SUBMITTY_INSTALL_DIR/site/config
 cp $SUBMITTY_INSTALL_DIR/site/config/course_template.ini $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
 chown hwphp:hwphp $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
-chmod 400 $$SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
+chmod 400 $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
 
 echo -e "\nMake sure to create the database: $DATABASE_NAME\n\n"
