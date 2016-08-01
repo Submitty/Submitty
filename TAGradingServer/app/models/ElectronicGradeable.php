@@ -358,7 +358,7 @@ ORDER BY gc_order ASC
 
             $this->config_details = json_decode(
                 removeTrailingCommas(file_get_contents(implode("/",array(__SUBMISSION_SERVER__,"config",
-                    $submission_id."_assignment_config.json")))), true);
+                                                                         "build","build_".$submission_id.".json")))), true);
         }
     }
 

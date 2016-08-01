@@ -55,7 +55,7 @@ homework=$4
 # some error checking
 submissions_dir=$SUBMITTY_DATA_DIR/courses/$semester/$course/submissions
 
-config_file=$SUBMITTY_DATA_DIR/courses/$semester/$course/config/${homework}_assignment_config.json
+config_file=$SUBMITTY_DATA_DIR/courses/$semester/$course/config/build/build_${homework}.json
 
 if [ ! -d "$submissions_dir" ]; then
     echo -e "ERROR: specific course submissions " $course_dir " does not exist!"

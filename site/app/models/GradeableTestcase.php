@@ -10,7 +10,7 @@ use app\libraries\Utils;
  * Class GradeableTestcase
  *
  * Contains information pertaining to individual auto-grader test cases that are
- * detailed in the *_assignment_config.json files. Additionally, can load in information
+ * detailed in the config/build/build_*.json files. Additionally, can load in information
  * from a submission.json file to set additional information pertaining to each testcase.
  * We only really need to do this for the version we're actually looking at and no others
  * as we don't need that high level of information (as we really only ever need late days,

@@ -39,7 +39,7 @@ IF (ASSIGNMENT_INSTALLATION)
   set(my_bin ${course_dir}/bin/${assignment})
 
   # Assignment configuration json file location
-  set(my_hw_config_file ${course_dir}/config/${assignment}_assignment_config.json)
+  set(my_hw_config_file ${course_dir}/config/build/build_${assignment}.json)
 
 else (ASSIGNMENT_INSTALLATION)
   # Otherwise, this is part of the test suite....
@@ -60,7 +60,8 @@ else (ASSIGNMENT_INSTALLATION)
   message("this is where i'll put the executables ${my_bin}")
 
   # configuration json file location
-  set(my_hw_config_file ${which_test_dir}/data/assignment_config.json)
+  # set(my_hw_config_file ${which_test_dir}/data/assignment_config.json)
+  set(my_hw_config_file ${which_test_dir}/data/build_config.json)
 
 endif(ASSIGNMENT_INSTALLATION)
 

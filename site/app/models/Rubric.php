@@ -397,7 +397,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
 
             $this->config_details[$part] = json_decode(
                 removeTrailingCommas(file_get_contents(implode("/",array(__SUBMISSION_SERVER__,"config",
-                    $submission_id."_assignment_config.json")))), true);
+                                                                         "build","build_".$submission_id.".json")))), true);
             $part++;
         }
     }

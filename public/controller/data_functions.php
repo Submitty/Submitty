@@ -1080,7 +1080,7 @@ function get_select_submission_data($username, $semester,$course, $assignment_id
 // Get the test cases from the instructor configuration file
 function get_assignment_config($semester,$course, $assignment_id) {
     $path_front = get_path_front_course($semester,$course);
-    $file = $path_front."/config/".$assignment_id."_assignment_config.json";
+    $file = $path_front."/config/build/build_".$assignment_id.".json";
     if (!file_exists($file)) {
         return false;//TODO Handle this case
     }

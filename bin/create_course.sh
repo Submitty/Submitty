@@ -146,6 +146,12 @@ if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester" ]; then
     chmod 751                           $SUBMITTY_DATA_DIR/courses/$semester
 fi
 
+if [ ! -d "$SUBMITTY_INSTALL_DIR/config/$semester" ]; then
+    mkdir               $SUBMITTY_INSTALL_DIR/config/$semester
+    chown hwphp:hwphp   $SUBMITTY_INSTALL_DIR/config/$semester
+    chmod 400           $SUBMITTY_INSTALL_DIR/config/$semester
+fi
+
 ########################################################################################################################
 ########################################################################################################################
 
@@ -169,6 +175,8 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir
 #               drwxrws---       instructor   ta_www_group    config/
 create_and_set  u=rwx,g=rwxs,o=  $instructor  $ta_www_group   $course_dir/build
 create_and_set  u=rwx,g=rwxs,o=  $instructor  $ta_www_group   $course_dir/config
+create_and_set  u=rwx,g=rwxs,o=  $instructor  $ta_www_group   $course_dir/config/build
+create_and_set  u=rwx,g=rwxs,o=  $instructor  $ta_www_group   $course_dir/config/form
 
 
 # NOTE: when homework is    installed, grading executables, code, & datafiles are placed here
