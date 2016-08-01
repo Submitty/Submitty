@@ -385,7 +385,7 @@ else{
 
     foreach($files as $file){
         try{
-            //$db->beginTransaction();  
+            $db->beginTransaction();  
             $fp = fopen($file, 'r');
             if (!$fp){
                 array_push($failed_files, $file);
@@ -398,13 +398,13 @@ else{
             $gradeable->createComponents($db, $action, $request_args);
             $graders = getGraders($request_args);
             $gradeable->setupRotatingSections($db, $graders);
+            $db->commit();
             
             array_push($success_gids, $gradeable->get_GID());
         } catch (Exception $e){
             array_push($failed_files, $file);
         } finally{
             fclose($fp);
-            //$db->commit();
         }
     }
     addAssignmentsTxt($db,$success_gids);

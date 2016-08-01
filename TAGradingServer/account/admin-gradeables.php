@@ -197,14 +197,6 @@ $output .= <<<HTML
 
             <input class="btn btn-primary" onclick="fixSequences();" type="submit" value="Fix DB Sequences" />
 
-            <!-- TODO import from JSON 
-                Basically 
-                1. This should take all of the JSON configs that are saved in the JSON configs folder or wherever
-                2. Fill out the form
-                3. Send the request
-                    i. Always overwrite existing files 
-                    ii. 
-            -->
             <input class="btn btn-primary" onclick="batchImportJSON();" type="submit" value="Import From JSON" />
         </span>
     </div>

@@ -217,6 +217,8 @@ WHERE s.user_id=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $
             $row = Database::row();
             $this->late_days_exception = (isset($row['late_day_exceptions'])) ? $row['late_day_exceptions'] : 0;
 
+            
+            //replace this with the late days used table 
             $params = array($this->student_id, $this->eg_details['eg_submission_due_date']);
             Database::query("
 SELECT ABS(SUM(decrease)) AS used_late_days
@@ -268,7 +270,6 @@ SELECT g_title, gd_overall_comment, g_grade_start_date, eg.* FROM electronic_gra
             Database::query( $eg_details_query, array($this->student_id, $this->g_id));
         
             $this->eg_details = Database::row();
-            
         }
         else{
             $params=array($this->student_id, $this->g_id);

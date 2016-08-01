@@ -89,7 +89,7 @@ CREATE TABLE gradeable (
     g_grade_released_date timestamp(6) without time zone NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
     g_min_grading_group integer NOT NULL,
-    g_closed_date timestamp(6)
+    g_closed_date timestamp(6) without time zone
 );
 
 
@@ -217,6 +217,17 @@ CREATE TABLE late_days (
     user_id character varying(255) NOT NULL,
     allowed_late_days integer NOT NULL,
     since_timestamp timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: late_days_used; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE late_days_used (
+    user_id character varying(255) NOT NULL,
+    g_id character varying(255) NOT NULL,
+    late_days_used integer NOT NULL
 );
 
 
@@ -459,6 +470,22 @@ ALTER TABLE ONLY late_day_exceptions
 
 ALTER TABLE ONLY late_day_exceptions
     ADD CONSTRAINT late_day_exceptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
+
+
+--
+-- Name: late_days_used_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY late_days_used
+    ADD CONSTRAINT late_days_used_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id);
+
+
+--
+-- Name: late_days_used_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY late_days_used
+    ADD CONSTRAINT late_days_used_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
 
 
 --
