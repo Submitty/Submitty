@@ -193,7 +193,7 @@ $output .= <<<HTML
     <div class="modal-header">
         <h3 id="myModalgradeableel">Manage Gradeables</h3>
         <span class="submit-button">
-            <input class="btn btn-primary" onclick="window.location.href='{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}'" type="submit" value="Create New Gradeable"/>
+            <input class="btn btn-primary" onclick="window.location.href='{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}'" type="submit" value="Create New Gradeable"/>
 
             <input class="btn btn-primary" onclick="fixSequences();" type="submit" value="Fix DB Sequences" />
 
@@ -240,7 +240,7 @@ foreach ($gradeables as $gradeable) {
             <td class="gradeables-questions" id="gradeable-{$g_id}-questions">{$num_questions}</td>
             <td class="gradeables-score" id="gradeable-{$g_id}-score">{$score}</td>
             <td class="gradeables-due" id="gradeable-{$g_id}-due">{$gradeable['g_grade_released_date']}</td>
-            <td id="gradeable-{$g_id}-options"><a href="{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&action=edit&id={$g_id}">Edit</a> |
+            <td id="gradeable-{$g_id}-options"><a href="{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&action=edit&id={$g_id}">Edit</a> |
             <a onclick="deleteGradeable('{$g_id}');">Delete</a></td>
         </tr>
 HTML;

@@ -106,27 +106,8 @@ foreach($db->rows() as $student_record) {
         // TODO verify that this works 
         // adds late days for electronic gradeables 
         if($gradeable['g_gradeable_type'] == 0){
-            
-            $db->query("SELECT eg_submission_due_date FROM electronic_gradeable WHERE g_id=?", array($gradeable['g_id']));
-            $due_date = $db->row()['eg_submission_due_date'];
-            
-            $db->query("
-SELECT ABS(SUM(decrease)) AS used_late_days
-    FROM (
-        SELECT *, COALESCE(allowed_late_days - LAG(allowed_late_days) over(ORDER BY since_timestamp ASC),0) AS decrease 
-        FROM 
-            late_days 
-        WHERE
-            user_id=?
-        AND 
-            since_timestamp<=?
-        ORDER BY 
-            since_timestamp DESC
-    ) AS u
-    WHERE u.decrease <= 0
-    GROUP BY u.user_id", array($student_id, $due_date));
-            
-            $this_g[$gradeable['g_id']]["days_late"] = $db->row()['used_late_days'];
+            $db->query("SELECT late_days_used FROM late_days_used WHERE g_id=? AND user_id=?", $gradeable['g_id'],$student_id);
+            $this_g[$gradeable['g_id']]["days_late"] = $db->row()['late_days_used'];
         }
 
         // Add text for numeric/text gradeables and electronic gradeables

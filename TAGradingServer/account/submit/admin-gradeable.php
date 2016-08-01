@@ -284,10 +284,13 @@ abstract class GradeableType{
  function constructGradeable ($db, $request_args){
      $g_id = $request_args['gradeable_id'];
      
-     $db->query("SELECT COUNT(*) AS cnt FROM gradeable WHERE g_id=?", array($g_id));
-     if ($db->row()['cnt'] > 0){
-        throw new Exception('Gradeable already exists');
-     } 
+     if ($_GET['action'] != 'edit'){
+         $db->query("SELECT COUNT(*) AS cnt FROM gradeable WHERE g_id=?", array($g_id));
+         if ($db->row()['cnt'] > 0){
+            throw new Exception('Gradeable already exists');
+         }  
+     }
+
      
      $g_title = $request_args['gradeable_title'];
      $g_overall_ta_instr = $request_args['ta_instructions'];
@@ -442,7 +445,7 @@ else{
 }
 
 if($action != 'import'){
-    header('Location: '.__BASE_URL__.'/account/admin-gradeables.php?course='.$_GET['course']);
+    header('Location: '.__BASE_URL__.'/account/admin-gradeables.php?course='.$_GET['course'].'&semester='.$_GET['semester']);
 }
 
 ?>

@@ -65,10 +65,10 @@ $_POST["late"] = intval($_POST['late']);
 
 //update the number of late days for the student the first time grades are submitted
 if ($status == 1 && !$is_graded){
-    echo 'update lates';
     $db->query("SELECT COALESCE(allowed_late_days,0) AS last_lates FROM late_days WHERE user_id=? ORDER BY since_timestamp DESC LIMIT 1", array($student));
     $new_lates = $db->row()['last_lates'] - intval($_POST['late']);
     $db->query("INSERT INTO late_days (user_id, since_timestamp, allowed_late_days) VALUES (?,?,?)", array($student, 'now', $new_lates));
+    $db->query("INSERT INTO late_days_used (user_id, g_id, late_days_used) VALUES (?,?,?)", array($student, $g_id, intval($_POST['late'])));
 }
 
 if($_GET["individual"] == "1") {

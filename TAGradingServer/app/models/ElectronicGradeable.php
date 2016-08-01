@@ -217,24 +217,20 @@ WHERE s.user_id=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $
             $row = Database::row();
             $this->late_days_exception = (isset($row['late_day_exceptions'])) ? $row['late_day_exceptions'] : 0;
 
-            
-            //replace this with the late days used table 
+            // late days used for the semester as of submission date
             $params = array($this->student_id, $this->eg_details['eg_submission_due_date']);
             Database::query("
-SELECT ABS(SUM(decrease)) AS used_late_days
-FROM (
-    SELECT *, COALESCE(allowed_late_days - LAG(allowed_late_days) over(ORDER BY since_timestamp ASC),0) AS decrease 
-    FROM 
-        late_days 
-    WHERE
-        user_id=?
-    AND 
-        since_timestamp<=?
-    ORDER BY 
-        since_timestamp DESC
-) AS u
-WHERE u.decrease <= 0
-GROUP BY u.user_id", $params); 
+SELECT 
+    SUM(late_days) AS used_late_days
+FROM 
+    late_days_used ldu INNER JOIN electronic_gradeable AS eg
+    ON ldu.g_id = eg.g_id 
+WHERE 
+    user_id=?
+AND 
+     eg.eg_submission_due_date <=?
+GROUP BY 
+    u.user_id", $params); 
 
             $row = Database::row();
 
