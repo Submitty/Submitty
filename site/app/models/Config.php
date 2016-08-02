@@ -33,6 +33,7 @@ class Config {
 
     /*** MASTER CONFIG ***/
     private $base_url;
+    private $cgi_url;
     private $site_url;
     private $authentication;
     private $timezone = "America/New_York";
@@ -101,7 +102,7 @@ class Config {
         $master = IniParser::readFile(implode("/", array($this->config_path, 'master.ini')));
 
         $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
-        $this->setConfigValues($master, 'site_details', array('base_url', 'submitty_path', 'authentication'));
+        $this->setConfigValues($master, 'site_details', array('base_url', 'cgi_url', 'submitty_path', 'authentication'));
         $this->setConfigValues($master, 'database_details', array('database_host', 'database_user', 'database_password'));
 
         if (isset($master['site_details']['debug'])) {
@@ -117,6 +118,7 @@ class Config {
         }
 
         $this->base_url = rtrim($this->base_url, "/")."/";
+        $this->cgi_url = rtrim($this->cgi_url, "/")."/";
         $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
 
         // Check that the paths from the config file are valid
@@ -194,6 +196,13 @@ class Config {
      */
     public function getBaseUrl() {
         return $this->base_url;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getCgiUrl() {
+        return $this->cgi_url;
     }
 
     /**
