@@ -396,12 +396,13 @@ HTML;
 HTML;
                         }
                     
-                        foreach ($testcase->getDiffs() as $diff) {
+                        foreach ($testcase->getAutochecks() as $autocheck) {
                             $return .= <<<HTML
                 <div class="box-block">
+                    <span class="red-message">{$autocheck->getMessage()}</span>
 HTML;
-                            $diff_viewer = $diff->getDiffViewer();
-                            $description = $diff->getDescription();
+                            $diff_viewer = $autocheck->getDiffViewer();
+                            $description = $autocheck->getDescription();
                             if($diff_viewer->hasActualOutput()) {
                                 $return .= <<<HTML
                             <div class='diff-element'>
