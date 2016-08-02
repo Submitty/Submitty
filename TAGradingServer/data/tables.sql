@@ -46,17 +46,6 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: config; Type: TABLE; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE TABLE config (
-    config_name character varying(255) NOT NULL,
-    config_type integer NOT NULL,
-    config_value character varying(255) NOT NULL
-);
-
-
---
 -- Name: electronic_gradeable; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -477,7 +466,7 @@ ALTER TABLE ONLY late_day_exceptions
 --
 
 ALTER TABLE ONLY late_days_used
-    ADD CONSTRAINT late_days_used_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id);
+    ADD CONSTRAINT late_days_used_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
 
 
 --
@@ -485,7 +474,7 @@ ALTER TABLE ONLY late_days_used
 --
 
 ALTER TABLE ONLY late_days_used
-    ADD CONSTRAINT late_days_used_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
+    ADD CONSTRAINT late_days_used_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
 
 
 --

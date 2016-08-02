@@ -17,13 +17,21 @@ if (!isset($gradeable['g_id'])){
 
 $now = new DateTime('now');
 $homeworkDate = new DateTime($gradeable['eg_submission_due_date']);
+$status = intval($_POST['status']);
+$submitted = intval($_POST['submitted']);
+$is_graded = boolval($_POST['is_graded']);
+$_POST["late"] = intval($_POST['late']);
 
 if ($gradeable['eg_late_days'] > 0) {
     $homeworkDate->add(new DateInterval("PT{$gradeable['eg_late_days']}H"));
 }
 
 if ($now < $homeworkDate) {
-    die("Homework is not open for grading yet.");
+    die("Gradeable is not open for grading yet.");
+}
+
+if ($status != 1){
+    die("Gradeable cannot be graded due to a bad status");
 }
 
 $student = $_GET['student'];
@@ -38,6 +46,7 @@ $params = array($g_id, $student);
 $db->query("SELECT gd_id FROM gradeable_data AS gd INNER JOIN gradeable AS g ON gd.g_id=g.g_id 
             INNER JOIN users AS u ON u.user_id=gd.gd_user_id WHERE g.g_id=? AND u.user_id=?",$params);
 $gd_id = $db->row()['gd_id'];
+
 
 //update each gradeable component data
 foreach($rows AS $row){
@@ -57,23 +66,14 @@ $overall_comment = $_POST['comment-general'];
 $params = array($overall_comment, $gd_id);
 $db->query("UPDATE gradeable_data SET gd_overall_comment=? WHERE gd_id=?",$params);
 
-
-$status = intval($_POST['status']);
-$submitted = intval($_POST['submitted']);
-$is_graded = boolval($_POST['is_graded']);
-$_POST["late"] = intval($_POST['late']);
-
 //update the number of late days for the student the first time grades are submitted
 if ($status == 1 && !$is_graded){
-    $db->query("SELECT COALESCE(allowed_late_days,0) AS last_lates FROM late_days WHERE user_id=? ORDER BY since_timestamp DESC LIMIT 1", array($student));
-    $new_lates = $db->row()['last_lates'] - intval($_POST['late']);
-    $db->query("INSERT INTO late_days (user_id, since_timestamp, allowed_late_days) VALUES (?,?,?)", array($student, 'now', $new_lates));
     $db->query("INSERT INTO late_days_used (user_id, g_id, late_days_used) VALUES (?,?,?)", array($student, $g_id, intval($_POST['late'])));
 }
 
 if($_GET["individual"] == "1") {
-    header('Location: '.$BASE_URL.'/account/account-summary.php?course='.$_GET['course'].'&g_id=' . $_GET["g_id"]);
+    header('Location: '.$BASE_URL.'/account/account-summary.php?course='.$_GET['course'].'&semester='.$_GET['semester'].'&g_id=' . $_GET["g_id"]);
 }
 else {
-    header('Location: '.$BASE_URL.'/account/index.php?course='.$_GET['course'].'&g_id=' . $_GET["g_id"]);
+    header('Location: '.$BASE_URL.'/account/index.php?course='.$_GET['course'].'&semester='.$_GET['semester'].'&g_id=' . $_GET["g_id"]);
 }

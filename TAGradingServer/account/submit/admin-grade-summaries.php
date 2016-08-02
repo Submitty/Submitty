@@ -103,11 +103,12 @@ foreach($db->rows() as $student_record) {
         $this_g = array();
         $this_g[$gradeable['g_id']] = array("name" => $gradeable['g_title'], "score" => floatval($gradeable['score']));
        
-        // TODO verify that this works 
         // adds late days for electronic gradeables 
         if($gradeable['g_gradeable_type'] == 0){
-            $db->query("SELECT late_days_used FROM late_days_used WHERE g_id=? AND user_id=?", $gradeable['g_id'],$student_id);
-            $this_g[$gradeable['g_id']]["days_late"] = $db->row()['late_days_used'];
+            $db->query("SELECT late_days_used FROM late_days_used WHERE g_id=? AND user_id=?", array($gradeable['g_id'],$student_id));
+            $row = $db->row();
+            $late_days_used = isset($row['late_days_used']) ? $row['late_days_used'] : 0;
+            $this_g[$gradeable['g_id']]["days_late"] = $late_days_used;
         }
 
         // Add text for numeric/text gradeables and electronic gradeables

@@ -314,7 +314,7 @@ else if(!isset($_GET["g_id"])) {
     // update with the gradeable data 
     $params = array();
     
-    $db->query("SELECT g_title, g.g_id, eg_submission_due_date FROM gradeable AS g INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id", $params);
+    $db->query("SELECT g_title, g.g_id, g_grade_start_date FROM gradeable AS g INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id", $params);
     $results = $db->rows();
 
     if(count($results) > 0) {
@@ -334,7 +334,7 @@ HTML;
         $c = 0;
         $now = new DateTime('now');
         foreach($results as $row) {
-            $homeworkDate = new DateTime($row['eg_submission_due_date']);
+            $homeworkDate = new DateTime($row['g_grade_start_date']);
             //TODO ADD LATE DAYS
             if ($row['eg_late_days'] > 0) {
                 $homeworkDate->add(new DateInterval("PT{$row['eg_late_days']}H"));

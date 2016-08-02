@@ -7,11 +7,11 @@ check_administrator();
 $output = "";
 
 $db->query("
-SELECT
-    g.*
+SELECT g.*, eg_submission_due_date 
 FROM
-    gradeable AS g
-ORDER BY g_id ASC",array());
+    gradeable AS g LEFT JOIN electronic_gradeable AS eg
+    ON g.g_id = eg.g_id
+ORDER BY g.g_id ASC",array());
 
 $gradeables = $db->rows();
 $output .= <<<HTML
@@ -219,7 +219,6 @@ foreach ($gradeables as $gradeable) {
     $num_questions = intval($db->row()['cnt']);
     
     //calculate total worth
-    
     $db->query("
     SELECT SUM(gc_max_value) AS score
     FROM 
@@ -232,6 +231,7 @@ foreach ($gradeables as $gradeable) {
     ", array($g_id));
     
     $score = $db->row()['score'];
+    $due_date = (isset($gradeable['eg_submission_due_date']) ? $gradeable['eg_submission_due_date'] : '');
     
     $output .= <<<HTML
         <tr id='gradeable-{$g_id}'">
@@ -239,7 +239,7 @@ foreach ($gradeables as $gradeable) {
             <td class="gradeables-name" id="gradeable-{$g_id}-title">{$g_title}</td>
             <td class="gradeables-questions" id="gradeable-{$g_id}-questions">{$num_questions}</td>
             <td class="gradeables-score" id="gradeable-{$g_id}-score">{$score}</td>
-            <td class="gradeables-due" id="gradeable-{$g_id}-due">{$gradeable['g_grade_released_date']}</td>
+            <td class="gradeables-due" id="gradeable-{$g_id}-due">{$due_date}</td>
             <td id="gradeable-{$g_id}-options"><a href="{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&action=edit&id={$g_id}">Edit</a> |
             <a onclick="deleteGradeable('{$g_id}');">Delete</a></td>
         </tr>

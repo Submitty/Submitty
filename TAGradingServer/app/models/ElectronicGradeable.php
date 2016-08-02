@@ -221,16 +221,16 @@ WHERE s.user_id=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $
             $params = array($this->student_id, $this->eg_details['eg_submission_due_date']);
             Database::query("
 SELECT 
-    SUM(late_days) AS used_late_days
+    SUM(LEAST(eg_late_days,late_days_used)) AS used_late_days
 FROM 
     late_days_used ldu INNER JOIN electronic_gradeable AS eg
     ON ldu.g_id = eg.g_id 
 WHERE 
-    user_id=?
+    ldu.user_id=?
 AND 
      eg.eg_submission_due_date <=?
 GROUP BY 
-    u.user_id", $params); 
+    ldu.user_id", $params); 
 
             $row = Database::row();
 
@@ -417,13 +417,17 @@ ORDER BY gc_order ASC
             return;
         }
         
+        Database::query("SELECT * FROM late_days_used WHERE user_id=? AND g_id=?", array($this->student_id, $this->eg_details['g_id']));
+        
+        $submitted_lates = isset( Database::row()['g_id']);
+        
         // IF MORE LATEDAYS WERE USED ON THIS ASSIGNMENT THAN ALLOWED => FAIL
         if ($this->days_late > ($this->eg_details['eg_late_days'] + $this->late_days_exception)) {
             $this->status=0;
         }
         // IF MORE LATEDAYS WERE USED THAN THE STUDENT IS ALLOWED => FAIL
-        else if ($this->student['student_allowed_lates'] >= 0 &&
-                 $this->student['used_late_days'] + $this->days_late > $this->student['student_allowed_lates']) {
+        else if ($this->student['student_allowed_lates'] >= 0 && !$submitted_lates && 
+                 $this->days_late + $this->student['used_late_days'] > $this->student['student_allowed_lates']) {
             $this->status = 0;
         }
         else{

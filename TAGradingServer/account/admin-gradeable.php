@@ -75,12 +75,7 @@ if($user_is_administrator){
        }
     }
     else{
-        // get the default late days
-        $db->query("SELECT * FROM config WHERE config_name='default_late_days'", array());
-        $row = $db->row();
-        if(isset($row)){
-            $default_late_days = intval($row['config_value']);
-        }
+            $default_late_days = __DEFAULT_LATE_DAYS__;
     }
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";

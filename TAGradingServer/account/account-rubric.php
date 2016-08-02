@@ -54,7 +54,7 @@ if ($calculate_diff) {
 
 <script>
     function openFile(file) {
-        window.open("{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "&add_submission_path=1","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        window.open("{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" + file + "&add_submission_path=1","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
 
@@ -64,11 +64,11 @@ if ($calculate_diff) {
             var iframeId = "file_viewer_" + part + "_" + num + "_iframe";
             // handle pdf
             if(file.substring(file.length - 3) == "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file 
+                iframe.html("<iframe id='" + iframeId + "' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" + file 
                             + "' width='750px' height='600px' style='border: 0'></iframe>");
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" 
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" 
                             + file + "' width='750px' style='border: 0'></iframe>");
             }
             iframe.addClass('open');
@@ -334,7 +334,7 @@ HTML;
     if(isset($results_details['testcases'])){
         foreach ($results_details['testcases'] as $k => $testcase) {
             $active_text = ($active) ? 'active' : '';
-            $url = $BASE_URL."/account/iframe/test-pane.php?course={$_GET['course']}&testcases=".urlencode(json_encode($testcase))."&directory=".urlencode($results_details['directory']);
+            $url = $BASE_URL."/account/iframe/test-pane.php?course={$_GET['course']}&semester={$_GET['semester']}&testcases=".urlencode(json_encode($testcase))."&directory=".urlencode($results_details['directory']);
 
             $output .= <<<HTML
                         <div class="tab-pane {$active_text}" id="output-{$i}">
@@ -418,7 +418,7 @@ else {
 $active_assignments = $eg->active_assignment;
 
 $output .= <<<HTML
-            <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&g_id={$eg->eg_details['g_id']}&student={$eg->student['user_id']}&individual={$individual}" method="post">
+            <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$eg->eg_details['g_id']}&student={$eg->student['user_id']}&individual={$individual}" method="post">
                 <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
                 <input type="hidden" name="submitted" value="{$submitted}" />
                 <input type="hidden" name="status" value="{$eg->status}" />
@@ -665,7 +665,7 @@ if (isset($eg->eg_details['user_email'])) {
 HTML;
 }
              
-if (!($now < new DateTime($eg->eg_details['g_grade_start_date']))) {
+if (!($now < new DateTime($eg->eg_details['g_grade_start_date'])) && $eg->status==1) {
     if((!isset($_GET["individual"])) || (isset($_GET["individual"]) && !$student_individual_graded)) {
         $output .= <<<HTML
         <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade"/>
@@ -676,10 +676,16 @@ HTML;
 HTML;
     }
 }
-else {
+else if ($now < new DateTime($eg->eg_details['g_grade_start_date'])) {
     $output .= <<<HTML
         <input class="btn btn-large btn-primary" type="button" value="Cannot Submit Homework Grade" />
         <div style="width:100%; text-align:right; color:#777;">This homework has not been opened for grading.</div>
+HTML;
+}
+else{
+    $output .= <<<HTML
+        <input class="btn btn-large btn-primary" type="button" value="Cannot Submit Homework Grade" />
+        <div style="width:100%; text-align:right; color:#777;">This assingment has a bad status.</div>
 HTML;
 }
 
