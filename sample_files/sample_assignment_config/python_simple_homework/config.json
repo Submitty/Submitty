@@ -11,11 +11,6 @@
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
                     "instructor_file" : "hw01part1_sol.txt"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running python"
                 }
             ]
         }

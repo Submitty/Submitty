@@ -10,7 +10,6 @@
     "testcases" : [
         {
             "title" : "Part 1 Compute square root",
-            "details" : "python *.py",
             "command" : "/usr/bin/python part1/*.py",
             "points" : 3,
             "validation" : [
@@ -18,19 +17,12 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "part1_sol.txt", 
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running python"
+                    "instructor_file" : "part1_sol.txt"
                 }
             ]
         },
         {
             "title" : "Part 2 Solve for x^2 + 5x + 6 = 0", 
-            "details" : "python *.py",
             "command" : "/usr/bin/python part2/*.py",
             "points" : 4,
             "validation" : [
@@ -38,19 +30,12 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "part2_sol.txt", 
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running python"
+                    "instructor_file" : "part2_sol.txt"
                 }
             ]
         },
         {
             "title" : "Part 3 Count from 1 to 10",
-            "details" : "python *.py",
             "command" : "/usr/bin/python part3/*.py",
             "points" : 3,
             "validation" : [
@@ -58,13 +43,7 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "part3_sol.txt", 
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running python"
+                    "instructor_file" : "part3_sol.txt"
                 }
             ]
         }

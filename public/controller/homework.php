@@ -30,7 +30,7 @@ $view_points =                      is_points_visible($class_config, $assignment
 $view_hidden_points =               is_hidden_points_visible($class_config, $assignment_id);
 $highest_version =                  get_highest_assignment_version($username, $semester,$course, $assignment_id);
 
-//Assignment configuration data from assignment_config.json
+//Assignment configuration data from config/build/build_XXX.json
 $assignment_config =                get_assignment_config($semester,$course, $assignment_id);
 $num_parts =                        get_num_parts($assignment_config);
 $part_names =                       get_part_names($assignment_config);
@@ -43,7 +43,7 @@ if (isset($assignment_config["assignment_message"])) {
 $points_received = 0;
 $points_possible = 0;
 
-//Gets testcase configuration data from assignment_config.json and matches it with results data for each testcase
+//Gets testcase configuration data from config/build/build_XXX.json and matches it with results data for each testcase
 $homework_tests =            get_homework_tests($username, $semester,$course, $assignment_id, $assignment_version, $assignment_config);
 
 //Active version / version to submit

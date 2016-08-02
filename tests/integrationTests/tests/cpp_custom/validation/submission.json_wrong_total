@@ -1,0 +1,86 @@
+{
+    "extra_credit_points_awarded": 0,
+    "non_extra_credit_points_awarded": 11,
+    "nonhidden_points_awarded": 11,
+    "points_awarded": 11,
+    "submission_number": 1,
+    "submission_time": "0",
+    "testcases": [
+        {
+            "compilation_output": "test01_STDERR.txt",
+            "execute_logfile": "test01_execute_logfile.txt",
+            "points_awarded": 2,
+            "test_name": "Test 1 Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "autocheck_id": "test02_0_autocheck",
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        "ERROR!  INCORRECT TOTAL"
+                    ],
+                    "student_file": "test02_STDOUT.txt"
+                },
+                {
+                    "autocheck_id": "test02_1_autocheck",
+                    "description": "Standard Error (STDERR)",
+                    "student_file": "test02_STDERR.txt"
+                }
+            ],
+            "execute_logfile": "test02_execute_logfile.txt",
+            "points_awarded": 4,
+            "test_name": "Test 2 Sum of 5 random numbers"
+        },
+        {
+            "autochecks": [
+                {
+                    "autocheck_id": "test03_0_autocheck",
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        "ERROR!  INCORRECT TOTAL"
+                    ],
+                    "student_file": "test03_STDOUT.txt"
+                },
+                {
+                    "autocheck_id": "test03_1_autocheck",
+                    "description": "Standard Error (STDERR)",
+                    "student_file": "test03_STDERR.txt"
+                }
+            ],
+            "execute_logfile": "test03_execute_logfile.txt",
+            "points_awarded": 3,
+            "test_name": "Test 3 Sum of 10 random numbers"
+        },
+        {
+            "autochecks": [
+                {
+                    "autocheck_id": "test04_0_0_autocheck",
+                    "description": "STDOUT_0.txt",
+                    "messages": [
+                        "ERROR!  INCORRECT TOTAL"
+                    ],
+                    "student_file": "test04_STDOUT_0.txt"
+                },
+                {
+                    "autocheck_id": "test04_0_1_autocheck",
+                    "description": "STDOUT_0.txt",
+                    "student_file": "test04_STDOUT_1.txt"
+                },
+                {
+                    "autocheck_id": "test04_1_autocheck",
+                    "description": "Standard Error (STDERR)",
+                    "student_file": "test04_STDERR_0.txt"
+                },
+                {
+                    "autocheck_id": "test04_2_autocheck",
+                    "description": "Standard Error (STDERR)",
+                    "student_file": "test04_STDERR_1.txt"
+                }
+            ],
+            "execute_logfile": "test04_execute_logfile.txt",
+            "points_awarded": 2,
+            "test_name": "Test 4 Is it random?  (Is it different on each run?)"
+        }
+    ]
+}

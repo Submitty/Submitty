@@ -15,8 +15,7 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Standard OUTPUT (STDOUT)",
-		    "instructor_file" : "test1_output.txt",
-                    "deduction" : 1.0
+		    "instructor_file" : "test1_output.txt"
                 }
             ]
         }

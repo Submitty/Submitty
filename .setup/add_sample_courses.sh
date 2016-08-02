@@ -86,11 +86,6 @@ function one_course {
     echo "    ]"                                                          >> $class_json_file
     echo "}"                                                              >> $class_json_file
 
-    # ---------------------------------------------------------------
-    # CREATE THE FORM DIRECTORY (FOR GRADEABLE FORM JSON TEMPLATES)
-    class_form_directory=${SUBMITTY_DATA_DIR}/courses/$semester/$course/config/form/
-    mkdir $class_form_directory
-    chown hwphp $class_form_directory
 
     # ---------------------------------------------------------------
     # RUN THE BUILD SCRIPT
@@ -122,10 +117,10 @@ function one_course {
 #####################################################################
 # CREATE A FEW SAMPLE COURSES
 
-python_homework=( python_simple_homework python_buggy_output python_simple_homework_multipart python_static_analysis )
+python_homework=( python_simple_homework python_linehighlight python_simple_homework_multipart python_static_analysis )
 one_course csci1100 csci1100_tas_www  "${python_homework[@]}"
 
-cpp_homework=( cpp_simple_lab cpp_cats cpp_memory_debugging )
+cpp_homework=( cpp_simple_lab cpp_cats cpp_memory_debugging cpp_custom)
 one_course csci1200 csci1200_tas_www  "${cpp_homework[@]}"
 
 java_homework=( java_factorial java_coverage_factorial )

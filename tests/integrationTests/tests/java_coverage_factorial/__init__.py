@@ -68,7 +68,7 @@ def correct(test):
     test.run_run()
     test.run_validator()
     test.diff(".submit.grade","correct_.submit.grade")
-    test.diff("submission.json","correct_submission.json")
+    test.json_diff("submission.json","correct_submission.json")
     test.emma_coverage_diff("test05_emma_report.txt","correct_test05_emma_report.txt")
 
 
@@ -88,7 +88,7 @@ def correct_no_coverage(test):
     test.run_run()
     test.run_validator()
     test.diff(".submit.grade","correct_no_coverage_.submit.grade")
-    test.diff("submission.json","correct_no_coverage_submission.json")
+    test.json_diff("submission.json","correct_no_coverage_submission.json")
     test.emma_coverage_diff("test05_emma_report.txt","correct_no_coverage_test05_emma_report.txt")
 
 
@@ -108,7 +108,7 @@ def buggy_coverage(test):
     test.run_run()
     test.run_validator()
     test.diff(".submit.grade","buggy_coverage_.submit.grade")
-    test.diff("submission.json","buggy_coverage_submission.json")
+    test.json_diff("submission.json","buggy_coverage_submission.json")
     test.emma_coverage_diff("test05_emma_report.txt","buggy_coverage_test05_emma_report.txt")
 
 
@@ -128,7 +128,7 @@ def buggy_no_coverage(test):
     test.run_run()
     test.run_validator()
     test.diff(".submit.grade","buggy_no_coverage_.submit.grade")
-    test.diff("submission.json","buggy_no_coverage_submission.json")
+    test.json_diff("submission.json","buggy_no_coverage_submission.json")
     test.emma_coverage_diff("test05_emma_report.txt","buggy_no_coverage_test05_emma_report.txt")
 
 

@@ -9,14 +9,18 @@
                 {
                         "test_name": "Test 1 hello world",
                         "execute_logfile": "test01_execute_logfile.txt",
-                        "diffs": [
+                        "autochecks": [
                                 {
-                                        "diff_id":"test01_0_diff",
+                                        "autocheck_id":"test01_0_autocheck",
                                         "student_file":"test01_STDOUT.txt",
                                         "instructor_file":"test_output/testassignment/test1_output.txt",
                                         "difference":"test01_0_diff.json",
-                                        "description": "Standard OUTPUT (STDOUT)",
-                                        "message": " "
+                                        "description": "Standard OUTPUT (STDOUT)"
+                                },
+                                {
+                                    "autocheck_id": "test01_1_autocheck",
+                                    "description": "Standard Error (STDERR)",
+                                    "student_file": "test01_STDERR.txt"
                                 }
                         ],
                         "points_awarded": 10

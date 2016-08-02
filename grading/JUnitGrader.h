@@ -5,8 +5,13 @@
 
 // This class parses the different output types from JUnit and assigns grades
 
-class TestCaseJUnit : public TestCaseGrader {
+class TestCaseJUnit { //: public TestCaseGrader {
  public:
+
+  std::string filename;
+  std::string description;
+  float deduction;
+
 
   // We have 3 constructor helper functions for the 3 different types
   // of test cases related to JUnit.
@@ -46,8 +51,9 @@ class TestCaseJUnit : public TestCaseGrader {
  private:
 
   // the actual constructor is private
-  TestCaseJUnit(const std::string& file, const std::string &description, float points_frac) : 
-    TestCaseGrader(file,description) { 
+  TestCaseJUnit(const std::string& file, const std::string &desc, float points_frac) { 
+    filename = file;
+    description = desc; //TestCaseGrader(file,description) { 
     deduction=points_frac;
     num_junit_tests = -1;
     coverage_threshhold = -1;
