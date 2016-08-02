@@ -20,7 +20,7 @@
         {
             "type" : "Compilation",
             "title" : "Compilation",
-            "command" : "/usr/bin/clang++ -Wall -o a.out -- *.cpp",
+            "command" : "clang++ -Wall -o a.out -- *.cpp",
             "executable_name" : "a.out",
             "points" : 3
         },

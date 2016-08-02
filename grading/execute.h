@@ -22,3 +22,4 @@ rlim_t get_the_limit(const std::string &program_name, int which_limit,
                           nlohmann::json &test_case_limits,
                           nlohmann::json &assignment_limits);
 
+std::string get_executable_name(const std::string &cmd);

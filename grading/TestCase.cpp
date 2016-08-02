@@ -3,9 +3,8 @@
 #include "TestCase.h"
 #include "JUnitGrader.h"
 #include "myersDiff.h"
-
-
 #include "tokenSearch.h"
+#include "execute.h"
 
 // FIXME should be configurable within the homework, but should not exceed what is reasonable to myers diff
 
@@ -222,10 +221,13 @@ void AddDefaultGrader(const std::string &command,
   if (filename.find("STDOUT") != std::string::npos) {
     j["description"] = "Standard Output (STDOUT)";
   } else if (filename.find("STDERR") != std::string::npos) {
-    if (command.find("/usr/bin/python") != std::string::npos) {
+    std::string executable_name = get_executable_name(command);
+    if (executable_name == "/usr/bin/python") {
       j["description"] = "syntax error output from running python";
-    } else if (command.find("/usr/bin/java") != std::string::npos) {
+    } else if (executable_name == "/usr/bin/java") {
       j["description"] = "syntax error output from running java";
+    } else if (executable_name == "/usr/bin/javac") {
+      j["description"] = "syntax error output from running javac";
     } else {
       j["description"] = "Standard Error (STDERR)";
     }

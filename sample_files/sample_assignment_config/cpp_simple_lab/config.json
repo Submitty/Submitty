@@ -24,7 +24,7 @@
         {
             "type" : "Compilation",
             "title" : "Compilation",
-            "command" : "/usr/bin/clang++ -Wall -o a.out -- part2/*.cpp",
+            "command" : "clang++ -Wall -o a.out -- part2/*.cpp",
             "executable_name" : "a.out",
             "points" : 3
         },
