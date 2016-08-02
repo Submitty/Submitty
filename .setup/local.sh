@@ -27,5 +27,5 @@ if [ ! -f "$DIR/$SELENIUM_JAR" ]; then
 fi
 
 echo "Starting selenium..."
-java -jar "$DIR/$SELENIUM_JAR" -browserSessionReuse
+java -jar "$DIR/$SELENIUM_JAR"
 # Goto http://localhost:4444/selenium-server/driver/?cmd=shutDownSeleniumServer to kill it
