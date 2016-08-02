@@ -123,8 +123,11 @@ HTML;
         <h2>
 HTML;
         if ($this->core->userLoaded()) {
+            $logout_link = $this->core->buildUrl(array('component' => 'login', 'page' => 'logout'));
+            $first_name = $this->core->getUser()->getFirstName();
+            $id = $this->core->getUser()->getId();
             $return .= <<<HTML
-            Hello {$this->core->getUser()->getFirstName()} ({$this->core->getUser()->getId()})
+            Hello {$first_name} ({$id}) (<a id='logout' href='{$logout_link}'>Logout</a>)
 HTML;
         }
         else {
