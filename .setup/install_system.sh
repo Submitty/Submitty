@@ -385,6 +385,9 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 
 adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwphp-cgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+# TODO: REMOVE THIS REMOVE THIS REMOVE THIS REMOVE THIS
+adduser hwphp shadow
+adduser hwphp-cgi hwphp
 adduser hwphp-cgi shadow
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
@@ -551,6 +554,7 @@ fi
 a2ensite submit
 a2ensite hwgrading
 a2ensite submitty
+a2ensite cgi
 
 apache2ctl -t
 service apache2 restart
