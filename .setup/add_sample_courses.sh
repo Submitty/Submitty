@@ -99,16 +99,8 @@ function one_course {
     DATABASE_NAME=submitty_${semester}_${course}
     echo 'here' $DATABASE_NAME
     psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE $DATABASE_NAME"
-    if [[ "$course" = "csci1000" ]]
-    then
-        psql -d submitty_${semester}_${course} -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/site/data/tables.sql
-        psql -d submitty_${semester}_${course} -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_inserts.sql
-    else
-        psql -d submitty_${semester}_${course} -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/TAGradingServer/data/tables.sql
-        psql -d submitty_${semester}_${course} -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/TAGradingServer/data/inserts.sql
-        psql -d submitty_${semester}_${course} -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_inserts.sql
-
-    fi
+    psql -d submitty_${semester}_${course} -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/site/data/tables.sql
+    psql -d submitty_${semester}_${course} -h localhost -U hsdbu -f ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_inserts.sql
 
     unset PGPASSWORD
 }

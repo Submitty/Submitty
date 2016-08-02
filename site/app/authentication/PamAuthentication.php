@@ -48,7 +48,7 @@ class PamAuthentication implements IAuthentication {
         // Open a cURL connection so we don't have to do a weird redirect chain to authenticate
         // as that would require some hacky path handling specific to PAM authentication
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getBaseUrl()."cgi-bin/pam_check.cgi?file={$file}");
+        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pam_check.cgi?file={$file}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
         if ($output === false) {
