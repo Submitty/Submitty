@@ -99,7 +99,7 @@ if __name__ == '__main__':
                 file_path = os.path.join(folder, the_file)
                 remove_file(file_path)
 
-    remove_lines('/etc/apache2/apache2.conf', ["ServerName 10.0.2.15"])
+    #remove_lines('/etc/apache2/apache2.conf', ["ServerName 10.0.2.15"])
 
     shutil.rmtree('/root/bin', True)
 
