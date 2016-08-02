@@ -82,6 +82,10 @@ class Output {
         $this->useFooter(false);
         $this->useHeader(false);
     }
+    
+    public function renderString($string) {
+        $this->output_buffer .= $string;
+    }
 
     /**
      * Returns the requested view, initializing it if it's never been called before.

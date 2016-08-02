@@ -5,6 +5,7 @@ namespace app\models;
 use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
+use app\libraries\GradeableType;
 use app\libraries\Utils;
 
 /**
@@ -408,7 +409,7 @@ abstract class Gradeable {
     }
     
     public function getDaysLate() {
-        return ($this->hasCurrentResults()) ? $this->result_details['days_late'] : 0;
+        return ($this->hasResults()) ? $this->result_details['days_late'] : 0;
     }
     
     /**
@@ -418,11 +419,11 @@ abstract class Gradeable {
      *
      * @return bool
      */
-    public function hasCurrentResults() {
+    public function hasResults() {
         return isset($this->result_details);
     }
     
-    public function getCurrentResults() {
+    public function getResults() {
         return $this->result_details;
     }
     

@@ -384,7 +384,6 @@ rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/toolbox      $SUBMITTY_INSTALL_
 rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/lib          $SUBMITTY_INSTALL_DIR/hwgrading_website
 rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/account      $SUBMITTY_INSTALL_DIR/hwgrading_website
 rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/app          $SUBMITTY_INSTALL_DIR/hwgrading_website
-rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/cgi-bin      $SUBMITTY_INSTALL_DIR/hwgrading_website
 
 # set special user $HWPHP_USER as owner & group of all hwgrading_website files
 find $SUBMITTY_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
@@ -405,9 +404,6 @@ find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.gif -exec chmod o+
 
 # "other" can read & execute all .js files
 find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
-
-# set the execute bit for any .cgi scripts
-find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.cgi -exec chmod u+x {} \;
 
 #replace_fillin_variables $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php
 #mv $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php

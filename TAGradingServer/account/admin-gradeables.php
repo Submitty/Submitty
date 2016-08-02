@@ -192,7 +192,7 @@ $output .= <<<HTML
     <div class="modal-header">
         <h3 id="myModalgradeableel">Manage Gradeables</h3>
         <span class="submit-button">
-            <input class="btn btn-primary" onclick="window.location.href='{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}'" type="submit" value="Create New Gradeable"/>
+            <input class="btn btn-primary" onclick="window.location.href='{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}'" type="submit" value="Create New Gradeable"/>
             &nbsp;&nbsp;
             <input class="btn btn-primary" onclick="fixSequences();" type="submit" value="Fix DB Sequences" />
             &nbsp;&nbsp;
