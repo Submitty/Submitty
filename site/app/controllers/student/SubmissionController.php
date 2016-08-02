@@ -36,6 +36,9 @@ class SubmissionController implements IController {
             case 'update':
                 $this->updateSubmissionVersion();
                 break;
+            case 'check_refresh':
+                $this->checkRefresh();
+                break;
             case 'display':
             default:
                 $this->showHomeworkPage();
@@ -345,32 +348,29 @@ class SubmissionController implements IController {
         $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $_SESSION['messages']['error'][] = "Invalid CSRF token. Refresh the page and try again.";
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student',
-                                                              'gradeable_id' => $gradeable->getId())));
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId())));
         }
-        
+    
         $new_version = intval($_REQUEST['new_version']);
         if ($new_version < 0) {
             $_SESSION['messages']['error'][] = "Cannot set the version below 0.";
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student',
-                                                              'gradeable_id' => $gradeable->getId())));
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId())));
         }
-    
         
         if ($new_version > $gradeable->getHighestVersion()) {
-            $_SESSION['messages']['error'][] = "Cannot set the version past ".$gradeable->getHighestVersion();
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student',
-                                                              'gradeable_id' => $gradeable->getId())));
+            $_SESSION['messages']['error'][] = "Cannot set the version past " . $gradeable->getHighestVersion();
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId())));
         }
     
-        $settings_file = $this->core->getConfig()->getCoursePath()."/submissions/".$gradeable->getId()."/".
-            $this->core->getUser()->getId()."/user_assignment_settings.json";
+        $settings_file = $this->core->getConfig()->getCoursePath() . "/submissions/" .
+            $gradeable->getId() . "/" . $this->core->getUser()->getId() . "/user_assignment_settings.json";
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
-            return $this->uploadResult("Failed to open settings file.", false);
+            $_SESSION['messages']['error'][] = "Failed to open settings file.";
+            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId())));
         }
         $json["active_version"] = $new_version;
-        $json["history"][] = array("version"=> $new_version,
+        $json["history"][] = array("version" => $new_version,
                                    "time" => new \DateTime('now', new \DateTimeZone($this->core->getConfig()->getTimezone())));
     
         if (!file_put_contents($settings_file, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES))) {
@@ -388,5 +388,25 @@ class SubmissionController implements IController {
         $this->core->redirect($this->core->buildUrl(array('component' => 'student',
                                                           'gradeable_id' => $gradeable->getId(),
                                                           'gradeable_version' => $new_version)));
+    }
+    
+    /**
+     * Check if the results folder exists for a given gradeable and version submission.json
+     * in the results/ directory. If the file exists, we output a string that the calling
+     * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
+     */
+    public function checkRefresh() {
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        $g_id = $_REQUEST['gradeable_id'];
+        $version = $_REQUEST['gradeable_version'];
+        $path = $this->core->getConfig()->getCoursePath()."/results/".$g_id."/".
+                    $this->core->getUser()->getId()."/".$version;
+        if (file_exists($path."/submission.json")) {
+            $this->core->getOutput()->renderString("REFRESH_ME");
+        }
+        else {
+            $this->core->getOutput()->renderString("NO_REFRESH");
+        }
     }
 }

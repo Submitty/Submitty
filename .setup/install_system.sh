@@ -37,8 +37,9 @@ if [ ${VAGRANT} == 1 ]; then
 ############################################################
 ##  All user accounts have same password unless otherwise ##
 ##  noted below. The following user accounts exist:       ##
-##    vagrant/vagrant, root/vagrant, hsdbu, hwphp         ##
-##    hwcron, ta, instructor, developer, postgres         ##
+##    vagrant/vagrant, root/vagrant, hsdbu, hwphp,        ##
+##    hwphp-cgi hwcron, ta, instructor, developer,        ##
+##    postgres                                            ##
 ##                                                        ##
 ##  The following accounts have database accounts         ##
 ##  with same password as above:                          ##
@@ -48,8 +49,11 @@ if [ ${VAGRANT} == 1 ]; then
 ##    https://192.168.56.101 (submission)                 ##
 ##    https://192.168.56.102 (svn)                        ##
 ##    https://192.168.56.103 (grading)                    ##
+##    https://192.168.56.104 (new-submission)             ##
+##    https://192.168.56.105 (cgi-bin scripts)            ##
 ##                                                        ##
-##  The database can be accessed via localhost:15432      ##
+##  The database can be accessed on the host machine at   ##
+##   localhost:15432                                      ##
 ##                                                        ##
 ##  Happy developing!                                     ##
 ############################################################
@@ -190,14 +194,15 @@ echo "Binding static IPs to \"Host-Only\" virtual network interface."
 # not auto-configured.  eth1 is manually set so that the host-only network
 # interface remains consistent among VM reboots as Vagrant has a bad habit of
 # discarding and recreating networking interfaces everytime the VM is restarted.
-# eth1 is statically bound to 192.168.56.101, 102, and 103.
+# eth1 is statically bound to 192.168.56.101, 102, 103, 104, and 105.
 printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
 printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
-printf "auto eth1:3\niface eth1:3 inet static\naddress 192.168.56.104\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
+printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+printf "auto eth1:3\niface eth1:3 inet static\naddress 192.168.56.104\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+printf "auto eth1:4\niface eth1:4 inet static\naddress 192.168.56.105\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
 
 # Turn them on.
-ifup eth1 eth1:1 eth1:2 eth1:3
+ifup eth1 eth1:1 eth1:2 eth1:3 eth1:4
 
 #################################################################
 # JAR SETUP
@@ -379,11 +384,13 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 
 
 adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser hwphp-cgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser hwphp-cgi shadow
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
+	echo "hwphp-cgi:hwphp-cgi" | sudo chpasswd
 	adduser hwphp vagrant
-	# FIXME: We should figure out what the method for PAM authentication is
-	adduser hwphp shadow
+	adduser hwphp-cgi vagrant
 fi
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then
@@ -395,6 +402,7 @@ fi
 # might need to also set USERGROUPS_ENAB to "no", and manually create
 # the hwphp and hwcron single user groups.  See also /etc/login.defs
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp-cgi/.profile
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
 
 
@@ -509,7 +517,9 @@ if [ ${VAGRANT} == 1 ]; then
 	echo -e "localhost
 hsdbu
 hsdbu
+http://192.168.56.104
 https://192.168.56.103
+http://192.168.56.105
 svn+ssh:192.168.56.102" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 else
 	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
@@ -522,6 +532,7 @@ source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
 cp ${SUBMITTY_REPOSITORY}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
 cp ${SUBMITTY_REPOSITORY}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
 cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/submitty.conf /etc/apache2/sites-available/submitty.conf
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/cgi.conf /etc/apache2/sites-available/cgi.conf
 cp -f ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
 
 # permissions: rw- r-- ---

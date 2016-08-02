@@ -61,7 +61,7 @@ if __name__ == '__main__':
     remove_lines("/etc/hosts", hosts)
 
     # Scrub out the network interfaces that were created for Vagrant
-    subprocess.call(["ifdown", "eth1", "eth1:1", "eth1:2", "eth1:3"])
+    subprocess.call(["ifdown", "eth1", "eth1:1", "eth1:2", "eth1:3", "eth1:4"])
     remove_file("/etc/network/interfaces.d/eth1.cfg")
 
     # Remove the data directories for submitty

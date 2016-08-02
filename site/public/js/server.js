@@ -55,6 +55,25 @@ function toggleDiv(id) {
     return true;
 }
 
+
+function checkRefreshSubmissionPage(url) {
+    setTimeout(function() {
+        check_server(url)
+    }, 1000);
+}
+
+function check_server(url) {
+    $.post(url,
+        function(data) {
+            if (data.indexOf("REFRESH_ME") > -1) {
+                location.reload(true);
+            } else {
+                init_refresh_on_update(url);
+            }
+        }
+    );
+}
+
 /* TODO: Add way to add new errors/notices/successes to the screen for ajax forms */
 $(function() {
     setTimeout(function() {

@@ -57,6 +57,8 @@ DATABASE_USER=__CONFIGURE__FILLIN__DATABASE_USER__
 DATABASE_PASSWORD=__CONFIGURE__FILLIN__DATABASE_PASSWORD__
 
 TAGRADING_URL=__CONFIGURE__FILLIN__TAGRADING_URL__
+SUBMISSION_URL=__CONFIGURE__FILLIN__SUBMISSION_URL__
+CGI_URL=__CONFIGURE__FILLIN__CGI_URL__
 TAGRADING_LOG_PATH=__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__
 
 
@@ -99,6 +101,8 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__DATABASE_PASSWORD__|$DATABASE_PASSWORD|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__CGI_URL__|$CGI_URL|g" $1
     sed -i -e "s|__INSTALL__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $1
@@ -384,7 +388,6 @@ rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/toolbox      $SUBMITTY_INSTALL_
 rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/lib          $SUBMITTY_INSTALL_DIR/hwgrading_website
 rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/account      $SUBMITTY_INSTALL_DIR/hwgrading_website
 rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/app          $SUBMITTY_INSTALL_DIR/hwgrading_website
-rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/cgi-bin      $SUBMITTY_INSTALL_DIR/hwgrading_website
 
 # set special user $HWPHP_USER as owner & group of all hwgrading_website files
 find $SUBMITTY_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
@@ -405,9 +408,6 @@ find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.gif -exec chmod o+
 
 # "other" can read & execute all .js files
 find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
-
-# set the execute bit for any .cgi scripts
-find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.cgi -exec chmod u+x {} \;
 
 #replace_fillin_variables $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php
 #mv $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php

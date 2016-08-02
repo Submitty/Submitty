@@ -428,7 +428,7 @@ else{
 }
 
 if($action != 'import'){
-    header('Location: '.__BASE_URL__.'/account/admin-gradeables.php?course='.$_GET['course']);
+    header('Location: '.__BASE_URL__.'/account/admin-gradeables.php?course='.$_GET['course']."&semester=".$_GET['semester']);
 }
 
 ?>
