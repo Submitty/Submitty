@@ -8,6 +8,7 @@ check_administrator();
 
 if($user_is_administrator){
     $have_old = $has_grades = false;
+    $current_date = date('Y/m/d 23:59:59');
     $old_gradeable = array(
         'g_id' => -1,
         'g_title' => "",
@@ -15,8 +16,8 @@ if($user_is_administrator){
         'g_team_assignment' => false,
         'g_gradeable_type' => 0,
         'g_grade_by_registration' => false,
-        'g_grade_start_date' => date('Y/m/d 23:59:59'),
-        'g_grade_released_date' => date('Y/m/d 23:59:59'),
+        'g_grade_start_date' => $current_date,
+        'g_grade_released_date' => $current_date,
         'g_syllabus_bucket' => '',
         'g_min_grading_group' => ''
     );
@@ -923,9 +924,11 @@ HTML;
         timeFormat: "HH:mm:ss",
 	    showTimezone: false
     });
-
-    $('#date_grade').datetimepicker('setDate', (new Date("{$g_grade_start_date}")));
-    $('#date_released').datetimepicker('setDate', (new Date("{$g_grade_released_date}")));
+    
+    datepicker.datetimepicker('setDate', (new Date("{$current_date}")));
+    
+    $('#date_grade').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_start_date']}")));
+    $('#date_released').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_released_date']}")));
 
     function toggleQuestion(question, role) {
         if(document.getElementById(role +"_" + question ).style.display == "block") {

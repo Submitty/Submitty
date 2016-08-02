@@ -221,10 +221,11 @@ WHERE s.user_id=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $
             $params = array($this->student_id, $this->eg_details['eg_submission_due_date']);
             Database::query("
 SELECT 
-    SUM(LEAST(eg_late_days,late_days_used)) AS used_late_days
+    SUM(GREATEST(late_days_used - COALESCE(late_day_exceptions,0),0)) AS used_late_days
 FROM 
     late_days_used ldu INNER JOIN electronic_gradeable AS eg
-    ON ldu.g_id = eg.g_id 
+    ON ldu.g_id = eg.g_id LEFT JOIN late_day_exceptions AS lde ON
+    lde.g_id = eg.g_id    
 WHERE 
     ldu.user_id=?
 AND 
