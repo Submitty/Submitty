@@ -1,10 +1,6 @@
 {
-    "grading_parameters" : {
-        "TOTAL_POINTS" : 9,
-        "AUTO_POINTS" : 9
-    },
     "assignment_message" : "Submit each part of your homework to the right bucket or you will not receive credit.",
-    "part_names" : [ "Problem 1", "Problem 2", "Problem 3", "Problem 4" ],
+    "part_names" : [ "Problem 1: Temperature", "Problem 2: Variables", "Problem 3: Area & Volume", "Problem 4: Count Odd" ],
 
     "resource_limits" : {
         "RLIMIT_CPU" : 60,
@@ -14,43 +10,28 @@
 
     "testcases" : [
         {
-            "title" : "Problem 1 - Does your program produce the correct answer?",
-            "details" : "python *.py",
-            "command" : "/usr/bin/python part1/*.py",
-            "points" : 1,
+            "title" : "Convert Temperature",
+            "command" : [ "/usr/bin/python part1/*.py",
+                          "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 print part1/*.py" ],
+            "points" : 2,
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
+                    "filename" : "STDOUT_0.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "p1_out.txt",
-		    "deduction" : 1.0
+                    "instructor_file" : "p1_out.txt"
                 },
                 {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running python"
-                }
-            ]
-        },
-        {
-            "title" : "Problem 1 - Did you use a print statement?",
-            "details" : "",
-            "command" : "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 print part1/*.py",
-            "points" : 1,
-            "validation" : [
-                {
                     "method" : "intComparison",
-                    "filename" : "STDOUT.txt",
+                    "filename" : "STDOUT_1.txt",
                     "description" : "Number of print statements",
 		    "comparison" : "ge",
-                    "term" : "1"
+                    "term" : 1
                 }
             ]
         },
         {
-            "title" : "Problem 2 - Is the provided list of variable names correct?",
-            "details" : "",
+            "title" : "Legal Variable Names",
 	    "command" : "/bin/cat part2/*",
             "points" : 1,
             "validation" : [
@@ -58,108 +39,65 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-		    "instructor_file" : "p2_out.txt",
-		    "deduction" : 1.0
+		    "instructor_file" : "p2_out.txt"
                 }
             ]
         },
         {
-            "title" : "Problem 3 - Does your program produce the correct answer?",
-            "details" : "python *.py",
-            "command" : "/usr/bin/python part3/*.py",
-            "points" : 1,
+            "title" : "Volume and Area",
+            "command" : [ "/usr/bin/python part3/*.py",
+                          "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 assign part3/*.py",
+                          "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 mul part3/*.py",
+                          "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 add part3/*.py" ], 
+           "points" : 4,
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
+                    "filename" : "STDOUT_0.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "p3_out.txt",
-		    "deduction" : 1.0
+                    "instructor_file" : "p3_out.txt"
                 },
                 {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running python"
-                }
-            ]
-        },
-        {
-            "title" : "Problem 3 - Did you use at least five variables?",
-            "details" : "",
-            "command" : "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 assign part3/*.py",
-            "points" : 1,
-            "validation" : [
-                {
                     "method" : "intComparison",
-                    "filename" : "STDOUT.txt",
+                    "filename" : "STDOUT_1.txt",
                     "description" : "Number of assignments",
 		    "comparison" : "ge",
-                    "term" : "5"
-                }
-            ]
-        },
-        {
-            "title" : "Problem 3 - Did you use at least two multiplications?",
-            "details" : "",
-            "command" : "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 mul part3/*.py",
-            "points" : 1,
-            "validation" : [
+                    "term" : 5
+                },
                 {
                     "method" : "intComparison",
-                    "filename" : "STDOUT.txt",
+                    "filename" : "STDOUT_2.txt",
                     "description" : "Number of multiplications",
 		    "comparison" : "ge",
-                    "term" : "2"
-                }
-            ]
-        },
-        {
-            "title" : "Problem 3 - Did you use at least one addition?",
-            "details" : "",
-            "command" : "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 add part3/*.py",
-            "points" : 1,
-            "validation" : [
+                    "term" : 2
+                },
                 {
                     "method" : "intComparison",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Number of multiplications",
+                    "filename" : "STDOUT_3.txt",
+                    "description" : "Number of additions",
 		    "comparison" : "ge",
-                    "term" : "1"
+                    "term" : 1
                 }
             ]
         },
         {
-            "title" : "Problem 4 - Does your program produce the correct answer?",
-            "details" : "python *.py",
-            "command" : "/usr/bin/python part4/*.py",
-            "points" : 1,
+            "title" : "Count Odd",
+            "command" : [ "/usr/bin/python part4/*.py",
+                          "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_token while part4/*.py" ],
+            "points" : 2,
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
+                    "filename" : "STDOUT_0.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "p4_out.txt",
-		    "deduction" : 1.0
+                    "instructor_file" : "p4_out.txt"
                 },
                 {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running python"
-                }
-            ]
-        },
-        {
-            "title" : "Problem 4 - Did you use a while loop?",
-            "details" : "",
-            "command" : "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_token while part4/*.py",
-            "points" : 1,
-            "validation" : [
-                {
                     "method" : "intComparison",
-                    "filename" : "STDOUT.txt",
+                    "filename" : "STDOUT_1.txt",
                     "description" : "Number of while loops",
 		    "comparison" : "ge",
-                    "term" : "1"
+                    "term" : 1
                 }
             ]
         }

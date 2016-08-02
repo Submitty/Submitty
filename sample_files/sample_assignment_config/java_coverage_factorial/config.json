@@ -35,14 +35,7 @@
             "validation" : [ 
                 { 
                     "method" : "EmmaInstrumentationGrader",
-                    "filename" : "STDOUT.txt",
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Error output from running instrumentation",
-                    "deduction" : 0.0
+                    "filename" : "STDOUT.txt"
                 }
             ]
         },
@@ -55,14 +48,7 @@
             "validation" : [
                 { 
                     "method" : "MultipleJUnitTestGrader",
-                    "filename" : "STDOUT.txt",
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running junit",
-                    "deduction" : 0.0
+                    "filename" : "STDOUT.txt"
                 }
             ]
         },
@@ -84,12 +70,6 @@
                     "filename" : "emma_report.txt",
                     "coverage_threshold" : 90,
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "error output from running EclEmma report generation",
-                    "deduction" : 0.0
                 }
             ]
         },
@@ -103,14 +83,7 @@
                 {
                     "method" : "JUnitTestGrader",
                     "filename" : "STDOUT.txt",
-                    "num_tests" : 4,
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running junit",
-                    "deduction" : 0.0
+                    "num_tests" : 4
                 }
             ]
         }

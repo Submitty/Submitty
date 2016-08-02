@@ -82,38 +82,54 @@ int main(int argc, char *argv[]) {
     //if (type == "Compilation") continue;
     if (my_testcase.isFileExistsTest()) continue;
     if (my_testcase.isCompilationTest()) continue;
-    std::string cmd = (*tc)[i].value("command","MISSING COMMAND");
+    //std::string cmd = (*tc)[i].value("command","MISSING COMMAND");
+    std::vector<std::string> commands = stringOrArrayOfStrings((*tc)[i],"command");
+    assert (commands.size() > 0);
 
     std::cout << "========================================================" << std::endl;
-    std::cout << "TEST " << i+1 << " " << cmd << std::endl;
+    std::string title = (*tc)[i].value("title","MISSING TITLE");
+    std::cout << "TEST " << i+1 << " " << title << std::endl;
     
-    assert (cmd != "MISSING COMMAND");
-    assert (cmd != "");
+
+
+    for (int x = 0; x < commands.size(); x++) {
+
+      std::cout << "COMMAND " << commands[x] << std::endl;
+
+      assert (commands[x] != "MISSING COMMAND");
+      assert (commands[x] != "");
 
 
 #ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-      std::cout << "BEFORE " << cmd << std::endl;
+      std::cout << "BEFORE " << commands[x] << std::endl;
       while (1) {
-	int location = cmd.find(replace_string_before);
+	int location = commands[x].find(replace_string_before);
 	if (location == std::string::npos) 
 	  break;
-	cmd.replace(location,replace_string_before.size(),replace_string_after);
+	commands[x].replace(location,replace_string_before.size(),replace_string_after);
       }
-      std::cout << "AFTER  " << cmd << std::endl;
+      std::cout << "AFTER  " << commands[x] << std::endl;
 #endif
       
-    //std::string title = (*tc)[i].value("title","MISSING TITLE");
-
-
-    std::string logfile = my_testcase.prefix() + "_execute_logfile.txt";
-    // run the command, capturing STDOUT & STDERR
-    int exit_no = execute(cmd +
-			  " 1>" + my_testcase.prefix() + "_STDOUT.txt" +
-			  " 2>" + my_testcase.prefix() + "_STDERR.txt",
-			  logfile,
-			  my_testcase.get_test_case_limits(),
-                          config_json.value("resource_limits",nlohmann::json())); 
+      
+      std::string which = "";
+      if (commands.size() > 1) {
+        which = "_" + std::to_string(x);
+      }
+      
+      
+      std::string logfile = my_testcase.prefix() + "_execute_logfile.txt";
+      // run the command, capturing STDOUT & STDERR
+      int exit_no = execute(commands[x] +
+                            " 1>" + my_testcase.prefix() + "_STDOUT" + which + ".txt" +
+                            " 2>" + my_testcase.prefix() + "_STDERR" + which + ".txt",
+                            logfile,
+                            my_testcase.get_test_case_limits(),
+                            config_json.value("resource_limits",nlohmann::json())); 
+      
+    }
     
+
     // rename any key files created by this test case to prepend the test number
     for (int f = 0; f < my_testcase.numFileGraders(); f++) {
       std::string raw_filename = my_testcase.raw_filename(f);

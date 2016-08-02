@@ -10,7 +10,7 @@ use app\libraries\Utils;
  * Class GradeableTestcase
  *
  * Contains information pertaining to individual auto-grader test cases that are
- * detailed in the *_assignment_config.json files. Additionally, can load in information
+ * detailed in the config/build/build_*.json files. Additionally, can load in information
  * from a submission.json file to set additional information pertaining to each testcase.
  * We only really need to do this for the version we're actually looking at and no others
  * as we don't need that high level of information (as we really only ever need late days,
@@ -31,7 +31,7 @@ class GradeableTestcase {
     private $points_awarded = 0;
     private $log_file = "";
     private $compilation_output = "";
-    private $diffs = array();
+    private $autochecks = array();
     
     public function __construct(Core $core, $testcase) {
         $this->core = $core;
@@ -66,9 +66,9 @@ class GradeableTestcase {
                 $this->compilation_output = file_get_contents($result_path . "/" . $testcase['compilation_output']);
         }
         
-        if (isset($testcase['diffs'])) {
-            foreach ($testcase['diffs'] as $diff) {
-                $this->diffs[] = new GradeableDiff($diff, $this->core->getConfig()->getCoursePath(), $result_path);
+        if (isset($testcase['autochecks'])) {
+            foreach ($testcase['autochecks'] as $autocheck) {
+                $this->autochecks[] = new GradeableAutocheck($autocheck, $this->core->getConfig()->getCoursePath(), $result_path);
             }
         }
         
@@ -137,9 +137,9 @@ class GradeableTestcase {
     
     /**
      *
-     * @return GradeableDiff[]
+     * @return GradeableAutocheck[]
      */
-    public function getDiffs() {
-        return $this->diffs;
+    public function getAutochecks() {
+        return $this->autochecks;
     }
 }

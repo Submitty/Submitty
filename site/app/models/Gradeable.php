@@ -75,7 +75,7 @@ abstract class Gradeable {
     /** @var string Url to any instructions for the gradeable for students */
     protected $instructions_url = "";
 
-    /** @var string Path to the config.json file used to build the *_assignment_config.json file */
+    /** @var string Path to the config.json file used to build the config/build/build_XXX.json file */
     protected $config_path = "";
 
     /** @var float Precision to allow for inputting points when grading (such that precision of 0.5 then allows grades
@@ -152,7 +152,7 @@ abstract class Gradeable {
     }
     
     /**
-     * Loads the *_assignment_config.json file for a gradeable
+     * Loads the config/build/build_*.json file for a gradeable
      */
     protected function loadGradeableConfig() {
         if ($this->type !== GradeableType::ELECTRONIC_FILE) {
@@ -160,7 +160,7 @@ abstract class Gradeable {
         }
         
         $course_path = $this->core->getConfig()->getCoursePath();
-        $details = FileUtils::readJsonFile($course_path."/config/".$this->id."_assignment_config.json");
+        $details = FileUtils::readJsonFile($course_path."/config/build/build_".$this->id.".json");
         
         // Was there actually a config file to read from
         if ($details === false) {

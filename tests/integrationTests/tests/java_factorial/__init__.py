@@ -65,7 +65,7 @@ def correct(test):
     test.empty_file("test03_STDERR.txt")
     test.empty_file("test03_execute_logfile.txt")
     test.diff(".submit.grade","correct_.submit.grade")
-    test.diff("submission.json","correct_submission.json")
+    test.json_diff("submission.json","correct_submission.json")
 
 
 @testcase
@@ -85,7 +85,7 @@ def does_not_compile(test):
     test.empty_file("test03_STDERR.txt")
     test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
     test.diff(".submit.grade", "does_not_compile_.submit.grade")
-    test.diff("submission.json", "does_not_compile_submission.json")
+    test.json_diff("submission.json", "does_not_compile_submission.json")
 
 
 @testcase
@@ -105,7 +105,7 @@ def buggy(test):
     test.empty_file("test03_STDERR.txt")
     test.diff("test03_execute_logfile.txt","exit_status_1.txt")
     test.diff(".submit.grade","buggy_.submit.grade")
-    test.diff("submission.json","buggy_submission.json")
+    test.json_diff("submission.json","buggy_submission.json")
 
 
 @testcase
@@ -125,5 +125,5 @@ def still_buggy(test):
     test.empty_file("test03_STDERR.txt")
     test.diff("test03_execute_logfile.txt","exit_status_1.txt")
     test.diff(".submit.grade","still_buggy_.submit.grade")
-    test.diff("submission.json","still_buggy_submission.json")
+    test.json_diff("submission.json","still_buggy_submission.json")
 

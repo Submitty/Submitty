@@ -25,10 +25,7 @@
 #include <cassert>
 #include <iomanip>
 #include <sys/resource.h>
-#include "tokenSearch.h"
-#include "myersDiff.h"
 #include "testResults.h"
-#include "tokens.h"
 
 const std::string drmemory_path = "/usr/local/submitty/drmemory/bin/drmemory";
 
@@ -44,121 +41,11 @@ public:
   bool view_test_points;
 };
 
-
-// =================================================================================
 // =================================================================================
 
-class TestCaseGrader {
-public:
-  TestCaseGrader(const std::string &f, const std::string &d) : filename(f), description(d) { deduction = -1; }
-  std::string filename;
-  std::string description;
-  float deduction;
-
-  virtual TestResults* doit(const std::string &prefix) = 0;
-
-  virtual std::string getExpected() const { return ""; }
-  virtual std::string display_mode() const { return ""; }
-};
-
-class TestCaseComparison : public TestCaseGrader {
-public:
-  TestCaseComparison(TestResults* (*cmp) ( const std::string&, const std::string& ),
-		     const std::string file,
-		     const std::string desc,
-		     const std::string expect = "",
-                     float deduct=-1.0)
-    : TestCaseGrader(file,desc), cmp_output(cmp), expected_file(expect)  {deduction=deduct;}
-  TestResults* (*cmp_output) ( const std::string&, const std::string& );
-  std::string expected_file;
-  virtual std::string getExpected() const { return expected_file; }
-  virtual TestResults* doit(const std::string &prefix);
-};
-
-class TestCaseTokens : public TestCaseGrader {
-public:
-  TestCaseTokens(TestResults* (*cmp) ( const std::string&, const std::vector<std::string> &tokens ),
-		 const std::string file,
-		 const std::string desc,
-		 const std::vector<std::string> &_tokens,
-                 float deduct=-1.0)
-    : TestCaseGrader(file,desc), token_grader(cmp), tokens(_tokens) {deduction=deduct;}
-
-
-  TestResults* (*token_grader) ( const std::string&, const std::vector<std::string>& );
-  std::vector<std::string> tokens;
-
-  virtual TestResults* doit(const std::string &prefix);
-};
 
 
 
-
-class TestCaseCustom : public TestCaseGrader {
-public:
-  TestCaseCustom(float (*custom_grader_)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv, TestCaseCustom& custom_testcase),
-		 const std::string file,
-		 const std::string desc,
-		 const std::string arg_string,
-		 float deduct=-1.0)
-    : TestCaseGrader(file,desc), custom_grader(custom_grader_) { my_arg_string = arg_string; deduction=deduct; my_display_mode = ""; }
-
-  float (*custom_grader)(std::istream &INPUT, std::ostream &OUTPUT,  std::vector<std::string> &argv,  TestCaseCustom& custom_testcase);
-  virtual TestResults* doit(const std::string &prefix);
-  virtual std::string display_mode() const { return my_display_mode; }
-
-  void set_display_mode(const std::string& dm) { my_display_mode = dm; }
-
-private:
-  std::string my_arg_string;
-  std::string my_display_mode;
-};
-
-#define _TERM_COMPARISON_DEF(T)\
-if (method == #T "Comparison") {\
-        bool (*cmp)(const int& a, const int& b) = NULL;\
-        std::string cmpstr(itr2->value("comparison",""));\
-        if (cmpstr == "eq") cmp = [](const T& a, const T& b){return a == b;};\
-        else if (cmpstr == "ne") cmp = [](const T& a, const T& b){return a != b;};\
-        else if (cmpstr == "gt") cmp = [](const T& a, const T& b){return a > b;};\
-        else if (cmpstr == "lt") cmp = [](const T& a, const T& b){return a < b;};\
-        else if (cmpstr == "ge") cmp = [](const T& a, const T& b){return a >= b;};\
-        else if (cmpstr == "le") cmp = [](const T& a, const T& b){return a <= b;};\
-	    T object;\
-	    std::stringstream ss(itr2->value("term", "0"));\
-	    ss >> object;\
-		if (cmp != NULL) graders.push_back(\
-				new TestCaseTermComparison<T>(filename, description, cmp, object,\
-					deduction));\
-}
-
-template <typename T>
-class TestCaseTermComparison : public TestCaseGrader {
-public:
-  TestCaseTermComparison(const std::string file, const std::string desc,
-                         bool (*m)(const T& a, const T& b), const T& o,
-						 float deduct=-1.0)
-    : TestCaseGrader(file, desc), method(m), object(o) {deduction = deduct;}
-
-  virtual TestResults* doit(const std::string &prefix) {
-    T contents;
-    std::ifstream student_instr((prefix + "_" + filename).c_str());
-    student_instr >> contents;
-    student_instr.close();
-    if (method(contents, object)) {
-      return new TestResults(1);
-    } else {
-      return new TestResults(0);
-    }
-  }
-
-private:
-  bool (*method)(const T& a, const T& b);
-  T object;
-};
-
-
-// =================================================================================
 
 
 std::string rlimit_name_decoder(int i);
@@ -181,6 +68,27 @@ static void adjust_test_case_limits(nlohmann::json &modified_test_case_limits,
       modified_test_case_limits[rlimit_name_string] = value;
   }
 }
+
+
+inline std::vector<std::string> stringOrArrayOfStrings(nlohmann::json j, const std::string what) {
+  std::vector<std::string> answer;
+  nlohmann::json::const_iterator itr = j.find(what);
+  if (itr == j.end())
+    return answer;
+  if (itr->is_string()) {
+    answer.push_back(*itr);    
+  } else {
+    assert (itr->is_array());
+    nlohmann::json::const_iterator itr2 = itr->begin();
+    while (itr2 != itr->end()) {
+      assert (itr2->is_string());
+      answer.push_back(*itr2);
+      itr2++;
+    }
+  }
+  return answer;
+}
+
 
 // =================================================================================
 // =================================================================================
@@ -221,20 +129,20 @@ public:
 
 
   static TestCase MakeCompilation( const std::string &title,
-				   const std::string &compilation_command,
+				   const std::vector<std::string> &compilation_commands,
 				   const std::string &executable_filename, // single executable file converted into vector
 				   const TestCasePoints &tcp,
                                    float w_frac, // = 0,
                                    nlohmann::json test_case_limits) { // = nlohmann::json() ) {
     return MakeCompilation(title,
-			   compilation_command,
+			   compilation_commands,
 			   std::vector<std::string>(1,executable_filename),
 			   tcp, w_frac, test_case_limits);
   }
 
 
   static TestCase MakeCompilation( const std::string &title,
-				   const std::string &compilation_command,
+				   const std::vector<std::string> &compilation_commands,
 				   const std::vector<std::string> &executable_filenames,
 				   const TestCasePoints &tcp,
                                    float w_frac, // = 0,
@@ -245,8 +153,8 @@ public:
     assert (executable_filenames.size() > 0 && 
 	    executable_filenames[0] != "");
     answer._filenames = executable_filenames;
-    answer._command = compilation_command;
-    assert (answer._command != "");
+    assert (compilation_commands.size() > 0);
+    answer._commands = compilation_commands;
     answer.warning_frac = w_frac;
 
     answer.COMPILATION = true;
@@ -284,19 +192,20 @@ public:
 
 
   static TestCase MakeTestCase   ( const std::string &title, const std::string &details,
-				   const std::string &command,
+				   const std::vector<std::string> &commands,
 				   const TestCasePoints &tcp,
-				   std::vector<TestCaseGrader*> tcc,
+				   //std::vector<TestCaseGrader*> tcc,
+				   std::vector<nlohmann::json> graders,
 				   const std::string &filename, //  = "",
                                    nlohmann::json test_case_limits) { // = nlohmann::json() ) {
     TestCase answer;
     answer._title = title;
     answer._details = details;
-    answer._command = command;
-    assert (answer._command != "");
+    assert (commands.size() > 0);
+    answer._commands = commands;
     answer._test_case_points = tcp;
-    assert (tcc.size() >= 1); // && tcc.size() <= 4);
-    answer.test_case_grader_vec = tcc; 
+    assert (graders.size() >= 1); // && tcc.size() <= 4);
+    answer.test_case_grader_vec = graders;
     answer._filenames.push_back(filename);
     answer.view_file_results = true;
     answer._test_case_limits = test_case_limits;
@@ -321,7 +230,8 @@ public:
 			return _details;
 		}
 		std::string command () const {
-			return _command;
+                  assert (_commands.size() > 0);
+                  return _commands[0];
 		}
 
   // FIXME: filename/rawfilename is messy/confusing, sort this out
@@ -360,9 +270,14 @@ public:
   }
 
 
+
+
+
   std::string raw_filename (int i) const {
     assert (i >= 0 && i < numFileGraders());
-    return test_case_grader_vec[i]->filename;
+    std::vector<std::string> files = stringOrArrayOfStrings(test_case_grader_vec[i],"filename");
+    assert (files.size() > 0);
+    return files[0];
   }
 
   std::string prefix() const {
@@ -373,7 +288,7 @@ public:
 
   std::string description (int i) const {
     assert (i >= 0 && i < numFileGraders());
-    return test_case_grader_vec[i]->description;
+    return test_case_grader_vec[i].value("description", raw_filename(i)); //"MISSING DESCRIPTION");
   }
   int points () const {
     return _test_case_points.points;
@@ -397,7 +312,7 @@ public:
 
   /* Calls the function designated by the function pointer; if the function pointer
      is NULL, defaults to returning the result of diffLine(). */
-  TestResults* do_the_grading (int j, std::string &message);
+  TestResults* do_the_grading (int j);
 
   const nlohmann::json get_test_case_limits() const { return _test_case_limits; }
   
@@ -410,7 +325,7 @@ private:
   std::string _details;
 
   std::vector<std::string> _filenames;
-  std::string _command;
+  std::vector<std::string> _commands;
 
   nlohmann::json _test_case_limits;
 
@@ -419,7 +334,7 @@ private:
 
   TestCasePoints _test_case_points;
 public:
-  std::vector<TestCaseGrader*> test_case_grader_vec;
+  std::vector<nlohmann::json> test_case_grader_vec;
 private:
   bool FILE_EXISTS;
   bool COMPILATION;
@@ -430,6 +345,13 @@ private:
 
 
 std::string getAssignmentIdFromCurrentDirectory(std::string);
+
+
+
+
+bool getFileContents(const std::string &filename, std::string &file_contents);
+bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::string &message);
+bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string &instructor_file_contents, std::string &message);
 
 
 // FIXME: file organization should be re-structured

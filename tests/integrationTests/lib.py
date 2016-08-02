@@ -324,7 +324,13 @@ class TestcaseWrapper:
             contents1 = json.loads(file1.read())
         with open(filename2) as file2:
             contents2 = json.loads(file2.read())
-        if self.json_ordered(contents1) != self.json_ordered(contents2):
+        ordered1 = self.json_ordered(contents1)
+        ordered2 = self.json_ordered(contents2)
+        if ordered1 != ordered2:
+            print ("\n\nORDEREDA") 
+            print (ordered1)
+            print ("\nORDEREDB") 
+            print (ordered2)
             raise RuntimeError("JSON files " + filename1 + " and " + filename2 + " are different")
 
     def empty_json_diff(self, f):

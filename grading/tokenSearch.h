@@ -17,6 +17,9 @@
 #include "difference.h"
 #include "tokens.h"
 
+#include "TestCase.h"
+#include "json.hpp"
+
 /* METHOD: RabinKarpSingle
  * ARGS: token: string with token to search for, searchstring: string of where to search for token
  * RETURN: int
@@ -42,8 +45,8 @@ std::vector< std::string > splitTokens ( const std::string& tokens );
  * linear with respect to the token. Overall, the algorithm runs in O(N + M)
  * time where N is the length of the student and M is the length of the token.
  */
-TestResults* searchToken ( const std::string& student,
-			   			   const std::vector<std::string>& tokens );
+TestResults* searchToken_doit (const TestCase &tc, const nlohmann::json& j);
+//( const std::string& student,			   			   const std::vector<std::string>& tokens );
 
 /* METHOD: searchTokens
  * ARGS: student: string of student output, token_vec: vector of strings based
