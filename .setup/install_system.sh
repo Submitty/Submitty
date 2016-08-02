@@ -517,7 +517,9 @@ if [ ${VAGRANT} == 1 ]; then
 	echo -e "localhost
 hsdbu
 hsdbu
+http://192.168.56.104
 https://192.168.56.103
+http://192.168.56.105
 svn+ssh:192.168.56.102" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 else
 	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh

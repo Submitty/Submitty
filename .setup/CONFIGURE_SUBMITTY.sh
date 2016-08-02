@@ -19,8 +19,14 @@ read DATABASE_USER
 echo "What is the database password for the database user $DATABASE_USER?"
 read DATABASE_PASSWORD
 
+echo "What is the url for submission? (ex: http://192.168.56.104/"
+read SUBMISSION_URL
+
 echo "What is the url for the Grading Server? (ex: https://192.168.56.103/ or https://hwgrading.cs.rpi.edu/)"
 read TAGRADING_URL
+
+echo "What is the url for the CGI scripts (cgi-bin)? (ex: http://192.168.56.105/)"
+read CGI_URL
 
 #echo "What is the SVN path to be used? (ex: svn+ssh://192.168.56.102 or svn+ssh://csci2600svn/var/lib/svn/csci2600)"
 echo "What is the SVN path to be used? (ex: svn+ssh://192.168.56.102 or file:///var/lib/svn/csci2600)"
@@ -140,6 +146,8 @@ sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_USER__|$DATABASE_USER|g" $SUBMITTY_IN
 sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_PASSWORD__|$DATABASE_PASSWORD|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 
 sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+sed -i -e "s|__CONFIGURE__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+sed -i -e "s|__CONFIGURE__FILLIN__CGI_URL__|$CGI_URL|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 
 sed -i -e "s|__CONFIGURE__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
