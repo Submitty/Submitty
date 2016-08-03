@@ -18,19 +18,15 @@
 
 nlohmann::json printTestCase(TestCase test) {
   nlohmann::json j;
-  j["title"] = test.title();
-  //if (test.details() != "") 
-  j["details"] = test.details();
-  j["points"] = test.points();
-  j["extra_credit"] = test.extra_credit();
-  j["hidden"] = false;
-  j["visible"] = true;
-  //if (test.hidden_points())
-  //j["hidden_points"] = true;
-  //if (test.getView_file_results())
-  j["view_file_results"] = test.getView_file_results();
+  j["title"] = "Test " + std::to_string(test.getID()) + test.getTitle();
+  j["details"] = test.getDetails();
+  j["points"] = test.getPoints();
+  j["extra_credit"] = test.getExtraCredit();
+  j["hidden"] = test.getHidden();
+  j["visible"] = !test.getHidden();
+  j["view_file_results"] = true; //test.getView_file_results();
   j["view_test_points"] = true;
-  j["view_file"] = test.getView_file();
+  j["view_file"] = ""; //test.getView_file();
   return j;
 }
 
@@ -71,7 +67,7 @@ int main(int argc, char *argv[]) {
     if (!hidden)
       visible += points;
 
-    TestCase tc = TestCase::MakeTestCase(*itr);
+    TestCase tc(*itr);
     all.push_back(printTestCase(tc)); 
   }
   std::cout << "processed " << all.size() << " test cases" << std::endl;

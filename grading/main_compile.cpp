@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
 
-    TestCase my_testcase = TestCase::MakeTestCase((*tc)[i]);
+    TestCase my_testcase((*tc)[i]);
 
     if (my_testcase.isCompilationTest()) {
       

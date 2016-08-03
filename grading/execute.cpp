@@ -30,6 +30,8 @@
 // defined in seccomp_functions.cpp
 
 
+#define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
+
 
 // =====================================================================================
 // =====================================================================================
@@ -49,8 +51,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "compare",                "/usr/bin/compare" }, //image magick!
 
     // Submitty Analysis Tools
-    { "submitty_count_token",   "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_token" },
-    { "submitty_count_node",    "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node" },
+    { "submitty_count_token",   SUBMITTY_INSTALL_DIRECTORY+"/GIT_CHECKOUT_AnalysisTools/bin/count_token" },
+    { "submitty_count_node",    SUBMITTY_INSTALL_DIRECTORY+"/GIT_CHECKOUT_AnalysisTools/bin/count_node" },
 
     // for Computer Science I
     { "python",                 "/usr/bin/python" },
@@ -58,7 +60,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     // for Data Structures
     { "g++",                    "/usr/bin/g++" },
     { "clang++",                "/usr/bin/clang++" },
-    { "drmemory",               "/usr/local/submitty/drmemory/bin/drmemory" },
+    { "drmemory",               SUBMITTY_INSTALL_DIRECTORY+"/drmemory/bin/drmemory" },
     { "valgrind",               "/usr/bin/valgrind" },
 
     // for Principles of Software
@@ -135,13 +137,13 @@ void validate_filename(const std::string &filename) {
 std::string validate_option(const std::string &program, const std::string &option) {
   const std::map<std::string,std::map<std::string,std::string> > option_replacements = {
     { "/usr/bin/javac",
-      { { "submitty_junit.jar",     "/usr/local/submitty/JUnit/junit-4.12.jar" } },
+      { { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" } },
     },
     { "/usr/bin/java",
-      { { "submitty_emma.jar",      "/usr/local/submitty/JUnit/emma.jar" },
-        { "submitty_junit.jar",     "/usr/local/submitty/JUnit/junit-4.12.jar" },
-        { "submitty_hamcrest.jar",  "/usr/local/submitty/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        "/usr/local/submitty/JUnit/" }
+      { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
+        { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
+        { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
+        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
       }
     }
   };

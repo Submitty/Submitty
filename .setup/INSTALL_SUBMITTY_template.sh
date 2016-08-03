@@ -251,6 +251,7 @@ find $SUBMITTY_INSTALL_DIR/src -type f -exec chmod 444 {} \;
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/CMakeLists.txt
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/system_call_check.cpp
+replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/execute.cpp
 
 
 # building the autograding library

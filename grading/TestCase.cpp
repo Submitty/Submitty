@@ -21,6 +21,47 @@ std::string GLOBAL_replace_string_after = "";
 
 int TestCase::next_test_case_id = 1;
 
+std::string rlimit_name_decoder(int i);
+
+void adjust_test_case_limits(nlohmann::json &modified_test_case_limits,
+                             int rlimit_name, rlim_t value) {
+  
+  std::string rlimit_name_string = rlimit_name_decoder(rlimit_name);
+  
+  // first, see if this quantity already has a value
+  nlohmann::json::iterator t_itr = modified_test_case_limits.find(rlimit_name_string);
+  
+  if (t_itr == modified_test_case_limits.end()) {
+    // if it does not, add it
+    modified_test_case_limits[rlimit_name_string] = value;
+  } else {
+    // otherwise set it to the max
+    //t_itr->second = std::max(value,t_itr->second);
+    if (int(value) > int(modified_test_case_limits[rlimit_name_string]))
+      modified_test_case_limits[rlimit_name_string] = value;
+  }
+}
+
+
+std::vector<std::string> stringOrArrayOfStrings(nlohmann::json j, const std::string what) {
+  std::vector<std::string> answer;
+  nlohmann::json::const_iterator itr = j.find(what);
+  if (itr == j.end())
+    return answer;
+  if (itr->is_string()) {
+    answer.push_back(*itr);    
+  } else {
+    assert (itr->is_array());
+    nlohmann::json::const_iterator itr2 = itr->begin();
+    while (itr2 != itr->end()) {
+      assert (itr2->is_string());
+      answer.push_back(*itr2);
+      itr2++;
+    }
+  }
+  return answer;
+}
+
 
 bool getFileContents(const std::string &filename, std::string &file_contents) {
   /*
@@ -113,6 +154,15 @@ TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
   std::string description = j.value("description","MISSING DESCRIPTION");
   return new TestResults(0.0,"FAILURE! "+description+" "+std::to_string(value)+" "+cmpstr+" "+std::to_string(term));
 }
+
+
+
+
+
+// =================================================================================
+// =================================================================================
+
+
 
 
 
@@ -263,20 +313,44 @@ void AddDefaultGraders(const std::vector<std::string> &commands,
 }
 
 
-TestCase TestCase::MakeTestCase (nlohmann::json j) {
+TestCase::TestCase (nlohmann::json j) {
+
+  test_case_id = next_test_case_id;
+  next_test_case_id++;
+  FILE_EXISTS = false;
+  COMPILATION = false;
+  
   std::string type = j.value("type","DEFAULT");
+    
   if (type == "FileExists") {
-    return MakeFileExists(j.value("title","TITLE MISSING"),
-                          j.value("filename","FILENAME MISSING"),
-                          TestCasePoints(j.value("points",0)));
+    _filenames.push_back(j.value("filename","FILENAME MISSING"));
+    FILE_EXISTS = true;
+    // view_file_results = false;
   } else if (type == "Compilation") {
-    std::vector<std::string> commands = stringOrArrayOfStrings(j,"command");
-    return MakeCompilation(j.value("title","TITLE MISSING"),
-                           commands, 
-                           j.value("executable_name","EXECUTABLE FILENAME MISSING"),
-                           TestCasePoints(j.value("points",0)),
-                           j.value("warning_deduction",0),
-                           j.value("resource_limits", nlohmann::json()));
+    _filenames = stringOrArrayOfStrings(j,"executable_name");
+    assert (_filenames.size() > 0);
+    _commands = stringOrArrayOfStrings(j,"command");
+    assert (_commands.size() > 0);
+    warning_frac = j.value("warning_deduction",0);
+    COMPILATION = true;
+    _test_case_limits = j.value("resource_limits", nlohmann::json());
+  
+    // compilation (g++, clang++, javac) usually requires multiple
+    // threads && produces a large executable
+    
+    // Over multiple semesters of Data Structures C++ assignments, the
+    // maximum number of vfork (or fork or clone) system calls needed
+    // to compile a student submissions was 28.
+    //
+    // It seems that g++     uses approximately 2 * (# of .cpp files + 1) processes
+    // It seems that clang++ uses approximately 2 +  # of .cpp files      processes
+    
+    adjust_test_case_limits(_test_case_limits,RLIMIT_NPROC,100);
+  
+    // 10 seconds was sufficient time to compile most Data Structures
+    // homeworks, but some submissions required slightly more time
+    adjust_test_case_limits(_test_case_limits,RLIMIT_CPU,60);              // 60 seconds 
+    adjust_test_case_limits(_test_case_limits,RLIMIT_FSIZE,10*1000*1000);  // 10 MB executable
   } else {
     assert (type == "DEFAULT");
     std::vector<std::string> commands = stringOrArrayOfStrings(j,"command");
@@ -303,24 +377,18 @@ TestCase TestCase::MakeTestCase (nlohmann::json j) {
     }
     assert (commands.size() > 0);
     assert (json_graders.size() > 0);
-
     VerifyGraderDeductions(json_graders);
     AddDefaultGraders(commands,json_graders);
-
-    bool hidden = j.value("hidden",false);
-    bool extra_credit = j.value("extra_credit",false);
-    return MakeTestCase(j.value("title","TITLE MISSING"),
-                        j.value("details",""),
-                        commands,
-                        TestCasePoints(j.value("points",0),hidden,extra_credit),
-                        json_graders,
-                        "",
-                        j.value("resource_limits",nlohmann::json()));
+    assert (commands.size() > 0);
+    _commands = commands;
+    assert (json_graders.size() >= 1); 
+    test_case_grader_vec = json_graders;
+    _filenames.push_back("");
+    _test_case_limits = j.value("resource_limits",nlohmann::json());
   }
+  
+  _json = j;
 }
-
-
-
 
 
 
@@ -333,11 +401,12 @@ TestResults* TestCase::do_the_grading (int j) {
   bool ok_to_compare = true;
 
   // GET THE FILES READY
-  std::ifstream student_file(filename(j).c_str());
+  std::string pf = getPrefixFilename(j);
+  std::ifstream student_file(pf.c_str());
   if (!student_file) {
     std::stringstream tmp;
     //tmp << "Error: comparison " << j << ": Student's " << filename(j) << " does not exist";
-    tmp << "ERROR! Student's " << filename(j) << " does not exist";
+    tmp << "ERROR! Student's " << pf << " does not exist";
     std::cerr << tmp.str() << std::endl;
     helper_message += tmp.str();
     ok_to_compare = false;

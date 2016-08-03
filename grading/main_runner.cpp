@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
 
-    TestCase my_testcase = TestCase::MakeTestCase((*tc)[i]);
+    TestCase my_testcase((*tc)[i]);
 
     //std::string type = (*tc)[i].value("type","MISSING TYPE");
     //if (type == "FileExists") continue;
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
     // rename any key files created by this test case to prepend the test number
     for (int f = 0; f < my_testcase.numFileGraders(); f++) {
       std::string raw_filename = my_testcase.raw_filename(f);
-      std::string filename     = my_testcase.filename(f);
+      std::string filename     = my_testcase.getPrefixFilename(f);
       if (raw_filename != "" &&
 	access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists 
 	execute ("/bin/mv "+raw_filename+" "+filename,

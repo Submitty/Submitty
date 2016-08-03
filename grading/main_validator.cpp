@@ -114,7 +114,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
 
-    TestCase my_testcase = TestCase::MakeTestCase((*tc)[i]);
+    TestCase my_testcase((*tc)[i]);
 
     std::string title = "Test " + std::to_string(i+1) + " " + (*tc)[i].value("title","MISSING TITLE");
     int points = (*tc)[i].value("points",0);
@@ -137,7 +137,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
       if ( access( (std::string("")+my_testcase.getFilename()).c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
         std::cerr << "file does exist: " << my_testcase.getFilename() << std::endl;
-        testcase_pts = my_testcase.points();
+        testcase_pts = my_testcase.getPoints();
       }
       else {
         std::cerr << "ERROR file DOES NOT exist: " << my_testcase.getFilename() << std::endl;
@@ -154,11 +154,11 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         if(!ifstr) std::cerr << my_testcase.prefix() <<  "_STDERR.txt" << " not open.";
         else if(ifstr.peek() != std::ifstream::traits_type::eof()){
           std::cerr << my_testcase.prefix() <<  "_STDERR.txt" << " not empty.";
-          testcase_pts = (int)floor( my_testcase.points()*(1 - my_testcase.get_warning_frac()) );
+          testcase_pts = (int)floor( my_testcase.getPoints()*(1 - my_testcase.get_warning_frac()) );
           message += "Unresolved warnings in your program!";
         }
         else{
-          testcase_pts = my_testcase.points();
+          testcase_pts = my_testcase.getPoints();
         }
       }
       else {
@@ -235,7 +235,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       assert (my_score <= 1.00001);
       my_score = std::max(0.0,std::min(1.0,my_score));
       std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
-      testcase_pts = (int)floor(my_score * my_testcase.points());
+      testcase_pts = (int)floor(my_score * my_testcase.getPoints());
     } // end if/else of test case type
 
     // output grade & message
@@ -244,21 +244,21 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
     // TODO: LOGIC NEEDS TO BE TESTED WITH MORE COMPLEX HOMEWORK!
 
-    if (!my_testcase.hidden()) {
+    if (!my_testcase.getHidden()) {
       nonhidden_auto_pts += testcase_pts;
-      if (my_testcase.extra_credit()) {
-        nonhidden_extra_credit += testcase_pts; //my_testcase.points();
+      if (my_testcase.getExtraCredit()) {
+        nonhidden_extra_credit += testcase_pts; 
       }
       else {
-        nonhidden_possible_pts += my_testcase.points();
+        nonhidden_possible_pts += my_testcase.getPoints();
       }
     } 
     hidden_auto_pts += testcase_pts;
-    if (my_testcase.extra_credit()) {
-      hidden_extra_credit += testcase_pts; //my_testcase.points();
+    if (my_testcase.getExtraCredit()) {
+      hidden_extra_credit += testcase_pts; 
     }
     else {
-      hidden_possible_pts += my_testcase.points();
+      hidden_possible_pts += my_testcase.getPoints();
     }
     
     tc_j["points_awarded"] = testcase_pts;
@@ -269,9 +269,9 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     all_testcases.push_back(tc_j); 
 
     gradefile << "  Test " << std::setw(2) << std::right << i+1 << ":" 
-        << std::setw(30) << std::left << my_testcase.just_title() << " " 
+        << std::setw(30) << std::left << my_testcase.getTitle() << " " 
         << std::setw(2) << std::right << testcase_pts << " / " 
-        << std::setw(2) << std::right << my_testcase.points() << std::endl;
+        << std::setw(2) << std::right << my_testcase.getPoints() << std::endl;
 
   } // end test case loop
 
