@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# TIMEZONE
+timedatectl set-timezone America/New_York
+
 #PATHS
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
