@@ -51,6 +51,7 @@ AUTOGRADING_LOG_PATH=$SUBMITTY_DATA_DIR/autograding_logs/
 
 # recommended names for special users & groups related to the SUBMITTY system
 HWPHP_USER=hwphp
+HWCGI_USER=hwcgi
 HWCRON_USER=hwcron
 HWCRONPHP_GROUP=hwcronphp
 COURSE_BUILDERS_GROUP=course_builders
@@ -61,10 +62,12 @@ NUM_UNTRUSTED=60
 FIRST_UNTRUSTED_UID=$(id -u untrusted00) # untrusted's user id
 FIRST_UNTRUSTED_GID=$(id -g untrusted00) # untrusted's group id
 
-HWCRON_UID=$(id -u hwcron)       # hwcron's user id
-HWCRON_GID=$(id -g hwcron)       # hwcron's group id
-HWPHP_UID=$(id -u hwphp)         # hwphp's user id
-HWPHP_GID=$(id -g hwphp)         # hwphp's group id
+HWCRON_UID=$(id -u ${HWCRON_USER})       # hwcron's user id
+HWCRON_GID=$(id -g ${HWCRON_USER})       # hwcron's group id
+HWPHP_UID=$(id -u ${HWPHP_USER})         # hwphp's user id
+HWPHP_GID=$(id -g ${HWPHP_USER})         # hwphp's group id
+HWCGI_UID=$(id -u ${HWCGI_USER})
+HWCGI_GID=$(id -g ${HWCGI_USER})
 
 # adjust this number depending on the # of processors
 # available on your hardware

@@ -103,7 +103,7 @@ if __name__ == '__main__':
 
     shutil.rmtree('/root/bin', True)
 
-    users = ["instructor", "ta", "developer", "student", "hwphp", "hwphp-cgi", "hwcron", "hsdbu"]
+    users = ["instructor", "ta", "developer", "student", "hwphp", "hwcgi", "hwcron", "hsdbu"]
     for user in users:
         os.system("userdel " + user)
         if os.path.isdir("/home/" + user):

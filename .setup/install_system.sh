@@ -38,7 +38,7 @@ if [ ${VAGRANT} == 1 ]; then
 ##  All user accounts have same password unless otherwise ##
 ##  noted below. The following user accounts exist:       ##
 ##    vagrant/vagrant, root/vagrant, hsdbu, hwphp,        ##
-##    hwphp-cgi hwcron, ta, instructor, developer,        ##
+##    hwcgi hwcron, ta, instructor, developer,            ##
 ##    postgres                                            ##
 ##                                                        ##
 ##  The following accounts have database accounts         ##
@@ -384,16 +384,14 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 
 
 adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser hwphp-cgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-# TODO: REMOVE THIS REMOVE THIS REMOVE THIS REMOVE THIS
-adduser hwphp shadow
-adduser hwphp-cgi hwphp
-adduser hwphp-cgi shadow
+adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser hwcgi hwphp
+adduser hwcgi shadow
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
-	echo "hwphp-cgi:hwphp-cgi" | sudo chpasswd
+	echo "hwcgi:hwcgi" | sudo chpasswd
 	adduser hwphp vagrant
-	adduser hwphp-cgi vagrant
+	adduser hwcgi vagrant
 fi
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then
@@ -405,7 +403,7 @@ fi
 # might need to also set USERGROUPS_ENAB to "no", and manually create
 # the hwphp and hwcron single user groups.  See also /etc/login.defs
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp-cgi/.profile
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcgi/.profile
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
 
 
