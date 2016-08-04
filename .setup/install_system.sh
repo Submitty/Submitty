@@ -127,7 +127,7 @@ hardening-includes python python-pip p7zip-full patchutils postgresql-client pos
 unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libfile-mmagic-perl \
 libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
-libseccomp2 seccomp junit cmake xlsx2csv libpcre3 libpcre3-dev flex bison
+libseccomp2 seccomp junit cmake libpcre3 libpcre3-dev flex bison
 
 apt-get install -qqy subversion subversion-tools
 apt-get install -qqy libapache2-svn
@@ -156,6 +156,8 @@ apt-get -qqy autoremove
 # TODO: We should look into making it so that only certain users have access to certain packages
 # so that hwphp is the only one who could use PAM for example
 pip install python-pam
+pip install xlsx2csv
+
 chmod 555 /usr/local/lib/python2.7/*
 chmod 555 /usr/lib/python2.7/dist-packages
 

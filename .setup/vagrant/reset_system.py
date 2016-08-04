@@ -8,6 +8,7 @@ in configuration files or pre-existing databses.
 """
 
 import os
+import pwd
 import shutil
 import subprocess
 import tempfile
@@ -110,9 +111,14 @@ if __name__ == '__main__':
 
     users = ["instructor", "ta", "developer", "student", "hwphp", "hwcgi", "hwcron", "hsdbu"]
     for user in users:
-        os.system("userdel " + user)
-        if os.path.isdir("/home/" + user):
-            shutil.rmtree("/home/" + user)
+        try:
+            pwd.getpwnam(user)
+            os.system("userdel " + user)
+            if os.path.isdir("/home/" + user):
+                shutil.rmtree("/home/" + user)
+        except KeyError:
+            # user doesn't exist, so skip that person
+            pass
 
     groups = ["hwcronphp", "course_builders"]
     courses = ["csci1000", "csci1100", "csci1200", "csci2600"]
