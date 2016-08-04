@@ -149,7 +149,7 @@ fi
 if [ ! -d "$SUBMITTY_INSTALL_DIR/site/config/$semester" ]; then
     mkdir               $SUBMITTY_INSTALL_DIR/site/config/$semester
     chown hwphp:hwphp   $SUBMITTY_INSTALL_DIR/site/config/$semester
-    chmod 400           $SUBMITTY_INSTALL_DIR/site/config/$semester
+    chmod 500           $SUBMITTY_INSTALL_DIR/site/config/$semester
 fi
 
 ########################################################################################################################
@@ -228,7 +228,6 @@ chmod 660 $course_dir/config/class.json
 
 
 # copy the config file for TA grading & replace the variables
-mkdir -p $SUBMITTY_INSTALL_DIR/site/config/${semester}
 cp $SUBMITTY_INSTALL_DIR/site/config/course_template.ini $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
 chown hwphp:hwphp $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
 chmod 400 $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
