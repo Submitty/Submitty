@@ -1,38 +1,10 @@
 #include <cassert>
 #include <unistd.h>
-#include "TestCase.h"
 #include "JUnitGrader.h"
 
-
 // =============================================================================
 // =============================================================================
 
-TestResults* TestCaseJUnit::doit(const std::string &prefix) {
-
-  // open the specified runtime JUnit output/log file
-  std::ifstream junit_output((prefix+"_"+filename).c_str());
-
-  // check to see if the file was opened successfully
-  if (!junit_output.good()) {
-    return new TestResults(0.0,"ERROR: JUnit output does not exist");
-  }
-
-  // dispatch to the function that does the work
-  if (junit_grader_type == "JUNIT_TEST") {
-    return doit_junit_test(junit_output);
-  } else if (junit_grader_type == "MULTIPLE_JUNIT_TESTS") {
-    return doit_multiple_junit_tests(junit_output);
-  } else if (junit_grader_type == "EMMA_INSTRUMENTATION") {
-    return doit_emma_instrumentation(junit_output);
-  } else if (junit_grader_type == "EMMA_COVERAGE_REPORT") {
-    return doit_emma_coverage_report(junit_output);
-  } else {
-    return new TestResults(0.0,"ERROR: UNKNOWN JUNIT TEST GRADER TYPE: "+junit_grader_type);
-  }
-}
-
-// =============================================================================
-// =============================================================================
 /*
 This method parses the output of TestRunner. Output file format is one of the following:
 
@@ -49,7 +21,8 @@ or, if code is not instrumented
 
 JUnit version 4.12
 kfjdkfdj
-TEST-RUNNER-FAILURES!!!                                                                                                                         Tests run: 13, Failures: 13
+TEST-RUNNER-FAILURES!!!
+Tests run: 13, Failures: 13
 
 SUCCESS:
 
@@ -69,21 +42,24 @@ All other output is exceptional, will be garded 0
 
 */
 
-TestResults* TestCaseJUnit::doit_multiple_junit_tests(std::ifstream &junit_output) {
+TestResults* MultipleJUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) {
+
+  std::string filename = j.value("filename","");
+
+  // open the specified runtime JUnit output/log file
+  std::ifstream junit_output((tc.getPrefix()+"_"+filename).c_str());
+
+  // check to see if the file was opened successfully
+  if (!junit_output.good()) {
+    return new TestResults(0.0,"ERROR: JUnit output does not exist");
+  }
+
   // look for version number on opening line
   std::string token1, token2, token3, token4, token5, token6;
   junit_output >> token1 >> token2 >> token3;
   if (token1 != "JUnit" || token2 != "version" || token3 != "4.12") {
     return new TestResults(0.0,"ERROR: TestRunner output format and/or version number incompatible with grader");
   }
-
-  /*
-  junit_output >> token1 >> token2 >> token3 >> token4 >> token5 >> token6;
-  // EMMA: collecting runtime coverage data ...
-  if (token1 != "EMMA:" || token2 != "collecting" || token3 != "runtime" || token4 != "coverage" || token5 != "data" || token6 != "...") {
-    return new TestResults(0.0,"ERROR: TestRunner output format incompatible with grader");
-  }
-  */
 
   while (junit_output >> token1) {
 
@@ -152,7 +128,22 @@ TestResults* TestCaseJUnit::doit_multiple_junit_tests(std::ifstream &junit_outpu
 // =============================================================================
 // =============================================================================
 
-TestResults* TestCaseJUnit::doit_junit_test(std::ifstream &junit_output) {
+
+
+TestResults* JUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) {
+
+  std::string filename = j.value("filename","");
+
+  // open the specified runtime JUnit output/log file
+  std::ifstream junit_output((tc.getPrefix()+"_"+filename).c_str());
+
+  // check to see if the file was opened successfully
+  if (!junit_output.good()) {
+    return new TestResults(0.0,"ERROR: JUnit output does not exist");
+  }
+
+  int num_junit_tests = j.value("num_tests",1);
+
   // look for version number on opening line
   std::string token1, token2, token3;
   junit_output >> token1 >> token2 >> token3;
@@ -242,7 +233,19 @@ TestResults* TestCaseJUnit::doit_junit_test(std::ifstream &junit_output) {
 
 // =============================================================================
 
-TestResults* TestCaseJUnit::doit_emma_instrumentation(std::ifstream &junit_output) {
+
+TestResults* EmmaInstrumentationGrader_doit (const TestCase &tc, const nlohmann::json& j) {
+
+  std::string filename = j.value("filename","");
+
+  // open the specified runtime JUnit output/log file
+  std::ifstream junit_output((tc.getPrefix()+"_"+filename).c_str());
+
+  // check to see if the file was opened successfully
+  if (!junit_output.good()) {
+    return new TestResults(0.0,"ERROR: JUnit output does not exist");
+  }
+
   // look for version number on opening line
   std::string token;
 
@@ -268,7 +271,19 @@ TestResults* TestCaseJUnit::doit_emma_instrumentation(std::ifstream &junit_outpu
 
 // =============================================================================
 
-TestResults* TestCaseJUnit::doit_emma_coverage_report(std::ifstream &junit_output) {
+TestResults* EmmaCoverageReportGrader_doit (const TestCase &tc, const nlohmann::json& j) {
+
+  std::string filename = j.value("filename","");
+
+  // open the specified runtime JUnit output/log file
+  std::ifstream junit_output((tc.getPrefix()+"_"+filename).c_str());
+
+  // check to see if the file was opened successfully
+  if (!junit_output.good()) {
+    return new TestResults(0.0,"ERROR: JUnit output does not exist");
+  }
+
+  float coverage_threshold = j.value("coverage_threshold",100);
 
   // look for version number on opening line
   std::string token1, token2;
@@ -307,19 +322,19 @@ TestResults* TestCaseJUnit::doit_emma_coverage_report(std::ifstream &junit_outpu
 
       std::stringstream ss2;
 
-      assert (coverage_threshhold >= 0.0 && coverage_threshhold <= 100.0);
+      assert (coverage_threshold >= 0.0 && coverage_threshold <= 100.0);
 
-      if (block_p >= coverage_threshhold) {
-	// && line_p >= coverage_threshhold) {
+      if (block_p >= coverage_threshold) {
+	// && line_p >= coverage_threshold) {
 	return new TestResults(1.0,""); // Awarding full credit, no message
       }
 
       else {
 	// simple formula for partial credit based on coverage.
-	// float partial = float(std::min(block_p,line_p)) / coverage_threshhold;
-	float partial = float(block_p) / coverage_threshhold;
-	ss2 << "ERROR: Insuffficient block coverage below threshhold for... " << name
-	    << " (" << block_p << "/" << coverage_threshhold << " = " << partial << ")";
+	// float partial = float(std::min(block_p,line_p)) / coverage_threshold;
+	float partial = float(block_p) / coverage_threshold;
+	ss2 << "ERROR: Insuffficient block coverage below threshold for... " << name
+	    << " (" << block_p << "/" << coverage_threshold << " = " << partial << ")";
 	return new TestResults(partial,ss2.str());
       }
     }

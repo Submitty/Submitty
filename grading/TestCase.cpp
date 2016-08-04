@@ -13,7 +13,7 @@
 #define OTHER_MAX_FILE_SIZE      1000 * 100  // in characters  (approx 1000 lines with 100 characters per line)
 
 
-TestResults* custom_grader(const TestCase &tc, const nlohmann::json &j);
+//TestResults* custom_grader(const TestCase &tc, const nlohmann::json &j);
 
 std::string GLOBAL_replace_string_before = "";
 std::string GLOBAL_replace_string_after = "";
@@ -95,7 +95,7 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
     message += "ERROR!  STUDENT FILENAME MISSING<br>";
     return false;
   }
-  std::string prefix = tc.prefix() + "_";
+  std::string prefix = tc.getPrefix() + "_";
   if (!getFileContents(prefix+filename,student_file_contents)) {
     message += "ERROR!  Could not open student file: '" + prefix+filename + "'<br>";
     return false;
@@ -157,77 +157,30 @@ TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
 
 
 
-
-
 // =================================================================================
 // =================================================================================
 
-
-
-
-
-
-TestResults* json_grader_doit(const TestCase& tc, const nlohmann::json& j) {
-
-
-  std::string method = j.value("method","MISSING METHOD");
-
-  nlohmann::json::const_iterator itr = j.find("deduction");
-  assert (itr != j.end() && itr->is_number());
-  float deduction = (*itr);
-  assert (deduction >= -0.001 && deduction < 1.001);
-
-  std::vector<std::string> filenames = stringOrArrayOfStrings(j,"filename");
-  assert (filenames.size() > 0);
-
-  //std::string filename = filenames[0];
-  
-  std::string prefix = tc.prefix();
-
-  if (method == "JUnitTestGrader") {
-    int num_tests = j.value("num_tests",1);
-    TestCaseJUnit *g = TestCaseJUnit::JUnitTestGrader(filenames[0],num_tests,deduction);
-    return g->doit(prefix);
-
-  } else if (method == "EmmaInstrumentationGrader") {
-    TestCaseJUnit *g = TestCaseJUnit::EmmaInstrumentationGrader(filenames[0],deduction);
-    return g->doit(prefix);
-
-  } else if (method == "MultipleJUnitTestGrader") {
-    TestCaseJUnit *g = TestCaseJUnit::MultipleJUnitTestGrader(filenames[0],deduction);
-    return g->doit(prefix);
-    
-  } else if (method == "EmmaCoverageReportGrader") {
-    float coverage_threshold = j.value("coverage_threshold",100);
-    TestCaseJUnit *g = TestCaseJUnit::EmmaCoverageReportGrader(filenames[0],coverage_threshold,deduction);
-    return g->doit(prefix);
-    
-  } else if (method == "searchToken") {
-    return searchToken_doit(tc,j); 
-
-  } else if (method == "intComparison") {
-    return intComparison_doit(tc,j); 
-
-  } else if (method == "custom") {
-    return custom_grader(tc,j); 
-    
-  } else {
-    TestResults* (*cmp) ( const std::string&, const std::string& ) = NULL;
-    if      (method == "myersDiffbyLinebyChar")  return myersDiffbyLinebyChar_doit(tc,j);
-    else if (method == "myersDiffbyLinebyWord")  return myersDiffbyLinebyWord_doit(tc,j);
-    else if (method == "myersDiffbyLine")        return myersDiffbyLine_doit(tc,j);
-    else if (method == "myersDiffbyLineNoWhite") return myersDiffbyLineNoWhite_doit(tc,j);
-    else if (method == "diffLineSwapOk")         return diffLineSwapOk_doit(tc,j);
-    else if (method == "warnIfNotEmpty")         return warnIfNotEmpty_doit(tc,j);
-    else if (method == "warnIfEmpty")            return warnIfEmpty_doit(tc,j); 
-    else if (method == "errorIfNotEmpty")        return errorIfNotEmpty_doit(tc,j); 
-    else if (method == "errorIfEmpty")           return errorIfEmpty_doit(tc,j);
-    else {
-      std::cout << "UNKNOWN METHOD " << method << std::endl;
-      assert (0);
-    }
-  }
+TestResults* TestCase::dispatch(const nlohmann::json& grader) const {
+  std::string method = grader.value("method","");
+  if      (method == "JUnitTestGrader")            { return JUnitTestGrader_doit(*this,grader);           }
+  else if (method == "EmmaInstrumentationGrader")  { return EmmaInstrumentationGrader_doit(*this,grader); }
+  else if (method == "MultipleJUnitTestGrader")    { return MultipleJUnitTestGrader_doit(*this,grader);   }
+  else if (method == "EmmaCoverageReportGrader")   { return EmmaCoverageReportGrader_doit(*this,grader);  }
+  else if (method == "searchToken")                { return searchToken_doit(*this,grader);               }
+  else if (method == "intComparison")              { return intComparison_doit(*this,grader);             }
+  else if (method == "myersDiffbyLinebyChar")      { return myersDiffbyLinebyChar_doit(*this,grader);     }
+  else if (method == "myersDiffbyLinebyWord")      { return myersDiffbyLinebyWord_doit(*this,grader);     }
+  else if (method == "myersDiffbyLine")            { return myersDiffbyLine_doit(*this,grader);           }
+  else if (method == "myersDiffbyLineNoWhite")     { return myersDiffbyLineNoWhite_doit(*this,grader);    }
+  else if (method == "diffLineSwapOk")             { return diffLineSwapOk_doit(*this,grader);            }
+  else if (method == "warnIfNotEmpty")             { return warnIfNotEmpty_doit(*this,grader);            }
+  else if (method == "warnIfEmpty")                { return warnIfEmpty_doit(*this,grader);               }
+  else if (method == "errorIfNotEmpty")            { return errorIfNotEmpty_doit(*this,grader);           }
+  else if (method == "errorIfEmpty")               { return errorIfEmpty_doit(*this,grader);              }
+  else                                             { return custom_dispatch(grader);                      }
 }
+
+
 
 
 // Make sure the sum of deductions across graders adds to at least 1.0.
@@ -283,7 +236,7 @@ void AddDefaultGrader(const std::string &command,
       j["description"] = "Standard Error (STDERR)";
     }
   } else {
-    j["description"] = filename;
+    j["description"] = "DEFAULTING TO "+filename;
   }
   j["deduction"] = 0.0;
   json_graders.push_back(j);
@@ -315,46 +268,25 @@ void AddDefaultGraders(const std::vector<std::string> &commands,
 
 // =================================================================================
 // =================================================================================
+// CONSTRUCTOR
 
-TestCase::TestCase (const nlohmann::json& j) {
+TestCase::TestCase (const nlohmann::json& input) {
 
   test_case_id = next_test_case_id;
   next_test_case_id++;
-  //FILE_EXISTS = false;
-  //COMPILATION = false;
   
-  std::string type = j.value("type","DEFAULT");
-    
-  if (type == "FileExists") {
-    //FILE_EXISTS = true;
-  } else if (type == "Compilation") {
-    //_commands = stringOrArrayOfStrings(j,"command");
-    //assert (_commands.size() > 0);
-    //COMPILATION = true;
-    _test_case_limits = j.value("resource_limits", nlohmann::json());
-  
-    // compilation (g++, clang++, javac) usually requires multiple
-    // threads && produces a large executable
-    
-    // Over multiple semesters of Data Structures C++ assignments, the
-    // maximum number of vfork (or fork or clone) system calls needed
-    // to compile a student submissions was 28.
-    //
-    // It seems that g++     uses approximately 2 * (# of .cpp files + 1) processes
-    // It seems that clang++ uses approximately 2 +  # of .cpp files      processes
-    
-    adjust_test_case_limits(_test_case_limits,RLIMIT_NPROC,100);
-  
-    // 10 seconds was sufficient time to compile most Data Structures
-    // homeworks, but some submissions required slightly more time
-    adjust_test_case_limits(_test_case_limits,RLIMIT_CPU,60);              // 60 seconds 
-    adjust_test_case_limits(_test_case_limits,RLIMIT_FSIZE,10*1000*1000);  // 10 MB executable
-  } else {
-    assert (type == "DEFAULT");
+  _json = input;
 
+  if (isFileExistsTest()) {
+    //SanityCheckFileExistsTest();
+  } else if (isCompilationTest()) {
+    //SanityCheckFileExistsTest();
+  } else {
+    assert (isDefaultTest());
+    //SanityCheckFileExistsTest();
     std::vector<nlohmann::json> json_graders;
-    nlohmann::json::const_iterator itr = j.find("validation");
-    assert (itr != j.end());
+    nlohmann::json::const_iterator itr = _json.find("validation");
+    assert (itr != _json.end());
     int num_graders = itr->size();
     for (nlohmann::json::const_iterator itr2 = (itr)->begin(); itr2 != (itr)->end(); itr2++) {
       nlohmann::json j = *itr2;
@@ -373,21 +305,14 @@ TestCase::TestCase (const nlohmann::json& j) {
       }
       json_graders.push_back(j);
     }
-    //assert (commands.size() > 0);
     assert (json_graders.size() > 0);
-    std::vector<std::string> commands = stringOrArrayOfStrings(j,"command");
+    std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
     assert (commands.size() > 0);
-
     VerifyGraderDeductions(json_graders);
     AddDefaultGraders(commands,json_graders);
-    //assert (commands.size() > 0);
-    //_commands = commands;
     assert (json_graders.size() >= 1); 
     test_case_grader_vec = json_graders;
-    _test_case_limits = j.value("resource_limits",nlohmann::json());
   }
-  
-  _json = j;
 }
 
 // =================================================================================
@@ -403,6 +328,64 @@ std::string TestCase::getTitle() const {
   assert (itr->is_string());
   return (*itr);
 }
+
+
+std::string TestCase::getPrefix() const {
+  std::stringstream ss;
+  ss << "test" << std::setw(2) << std::setfill('0') << test_case_id;
+  return ss.str();
+}
+
+
+std::vector<std::vector<std::string>> TestCase::getFilenames() const {
+  std::cout << "getfilenames" << std::endl;
+  std::vector<std::vector<std::string>> filenames;
+  if (isCompilationTest()) {
+    std::cout << "compilation" << std::endl;
+    filenames.push_back(stringOrArrayOfStrings(_json,"executable_name"));
+    assert (filenames.size() > 0);
+  } else if (isFileExistsTest()) {
+    std::cout << "file exists" << std::endl;
+    filenames.push_back(stringOrArrayOfStrings(_json,"filename"));
+    assert (filenames.size() > 0);
+  } else {
+    std::cout << "regular" << std::endl;
+    assert (_json.find("filename") == _json.end());
+    for (int v = 0; v < test_case_grader_vec.size(); v++) {
+      filenames.push_back(stringOrArrayOfStrings(test_case_grader_vec[v],"filename"));
+      assert (filenames[v].size() > 0);
+    }
+  }
+  return filenames;
+}
+
+
+
+const nlohmann::json TestCase::get_test_case_limits() const {
+  nlohmann::json _test_case_limits = _json.value("resource_limits", nlohmann::json());
+
+  if (isCompilationTest()) {
+    // compilation (g++, clang++, javac) usually requires multiple
+    // threads && produces a large executable
+
+    // Over multiple semesters of Data Structures C++ assignments, the
+    // maximum number of vfork (or fork or clone) system calls needed
+    // to compile a student submissions was 28.
+    //
+    // It seems that g++     uses approximately 2 * (# of .cpp files + 1) processes
+    // It seems that clang++ uses approximately 2 +  # of .cpp files      processes
+
+    adjust_test_case_limits(_test_case_limits,RLIMIT_NPROC,100);
+
+    // 10 seconds was sufficient time to compile most Data Structures
+    // homeworks, but some submissions required slightly more time
+    adjust_test_case_limits(_test_case_limits,RLIMIT_CPU,60);              // 60 seconds
+    adjust_test_case_limits(_test_case_limits,RLIMIT_FSIZE,10*1000*1000);  // 10 MB executable
+  }
+
+  return _test_case_limits;
+}
+
 
 // =================================================================================
 // =================================================================================
@@ -430,10 +413,7 @@ TestResults* TestCase::do_the_grading (int j) {
 
   std::string expected = "";
   assert (test_case_grader_vec[j] != NULL);
-  //  if (test_case_grader[j] != NULL) {
-  //expected = test_case_grader_vec[j]->getExpected();
   expected = test_case_grader_vec[j].value("instructor_file",""); //MISSING INSTRUCTOR FILE");
-    //}
 
   std::cout << "IN TEST CASE " << std::endl;
 
@@ -461,7 +441,7 @@ TestResults* TestCase::do_the_grading (int j) {
     helper_message += tmp.str();
     ok_to_compare = false;
   }
-  TestResults *answer = json_grader_doit(*this,test_case_grader_vec[j]);
+  TestResults *answer = this->dispatch(test_case_grader_vec[j]);
   if (helper_message != "") {
     answer->addMessage(helper_message);
   }

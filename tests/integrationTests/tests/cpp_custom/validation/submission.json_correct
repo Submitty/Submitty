@@ -55,7 +55,7 @@
                 },
                 {
                     "autocheck_id": "test04_0_1_autocheck",
-                    "description": "STDOUT_0.txt",
+                    "description": "STDOUT_1.txt",
                     "student_file": "test04_STDOUT_1.txt"
                 },
                 {

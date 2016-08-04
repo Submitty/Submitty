@@ -22,19 +22,25 @@ public:
 
   // -------------------------------
   // CONSTRUCTOR
-  TestCase (const nlohmann::json &j);
+  TestCase (const nlohmann::json &input);
 
 
   // -------------------------------
-  // ACCESSOR
+  // ACCESSORS
+
   int getID() const { return test_case_id; }
-
   std::string getTitle() const;
+  std::string getDetails () const { return _json.value("details",""); }
 
+  int getPoints() const { return _json.value("points", 0); }
+  bool getHidden() const { return _json.value("hidden", false); }
+  bool getExtraCredit() const { return _json.value("extra_credit",false); }
 
-  std::string getDetails () const {
-    return _json.value("details","");
-  }
+  bool isFileExistsTest() const { return _json.value("type","DEFAULT") == "FileExists"; }
+  bool isCompilationTest() const { return _json.value("type","DEFAULT") == "Compilation"; }
+  bool isDefaultTest() const { return _json.value("type","DEFAULT") == "DEFAULT"; }
+
+  float get_warning_frac() const { assert (isCompilationTest()); return _json.value("warning_deduction",0.0); }
 
   std::vector<std::string> getCommands() const {
     std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
@@ -42,96 +48,39 @@ public:
     return commands;
   }
 
-  std::vector<std::vector<std::string>> getFilenames() const {
-    std::cout << "getfilenames" << std::endl;
-    std::vector<std::vector<std::string>> filenames;
-    if (isCompilationTest()) {
-      std::cout << "compilation" << std::endl;
-      filenames.push_back(stringOrArrayOfStrings(_json,"executable_name"));
-      assert (filenames.size() > 0);
-    } else if (isFileExistsTest()) {
-      std::cout << "file exists" << std::endl;
-      filenames.push_back(stringOrArrayOfStrings(_json,"filename"));
-      assert (filenames.size() > 0);
-    } else {
-      std::cout << "regular" << std::endl;
-      assert (_json.find("filename") == _json.end());
-      for (int v = 0; v < test_case_grader_vec.size(); v++) {
-        filenames.push_back(stringOrArrayOfStrings(test_case_grader_vec[v],"filename"));
-        assert (filenames[v].size() > 0);
-      }
-    }
-    return filenames;
-  }
-
+  std::vector<std::vector<std::string>> getFilenames() const;
   std::string getMyFilename(int v, int i) const {
     const std::vector<std::vector<std::string> > filenames = getFilenames();
     assert (filenames.size() > 0);
     assert (filenames[v].size() > 0);
     return filenames[v][i];
   }
+  std::string getMyPrefixFilename (int v, int i) const { return getPrefix()+"_"+getMyFilename(v,i); }
 
-  std::string getMyPrefixFilename (int v, int i) const {
-    return prefix()+"_"+getMyFilename(v,i);
-  }
-
-
-
-  int numFileGraders() const {
-    return test_case_grader_vec.size();
-  }
-
-
+  int numFileGraders() const { return test_case_grader_vec.size(); }
   const nlohmann::json& getGrader(int i) const {
     assert (i >= 0 && i < numFileGraders());
     return test_case_grader_vec[i];
   }
 
-
-
-  std::string getFilenameDescription (int v) const {
-    assert (v >= 0 && v < numFileGraders());
-    return test_case_grader_vec[v].value("description", getMyFilename(v,0));
-  }
-
-  int getPoints() const { return _json.value("points", 0); }
-  bool getHidden() const { return _json.value("hidden", false); }
-  bool getExtraCredit() const { return _json.value("extra_credit",false); }
-  bool isFileExistsTest() const { return _json.value("type","DEFAULT") == "FileExists"; }
-  bool isCompilationTest() const { return _json.value("type","DEFAULT") == "Compilation"; }
-
-  float get_warning_frac() { assert (isCompilationTest()); return _json.value("warning_deduction",0.0); }
-
   TestResults* do_the_grading (int j);
 
-  const nlohmann::json get_test_case_limits() const { return _test_case_limits; }
-  
-
-
+  const nlohmann::json get_test_case_limits() const;
 
   // PRIVATE HELPER FUNCTIONS
 
-  std::string prefix() const {
-    std::stringstream ss;
-    ss << "test" << std::setw(2) << std::setfill('0') << test_case_id;
-    return ss.str();
-  }
-
-public:
-
-
-
+  std::string getPrefix() const;
 
 private:
 
-  nlohmann::json _json;
+  TestResults* dispatch(const nlohmann::json& grader) const;
+  TestResults* custom_dispatch(const nlohmann::json& grader) const;
 
-  nlohmann::json _test_case_limits;
+  nlohmann::json _json;
   std::vector<nlohmann::json> test_case_grader_vec;
 
+  // -------------------------------
   // REPRESENTATION
-  //bool FILE_EXISTS;
-  //bool COMPILATION;
   int test_case_id;
   static int next_test_case_id;
 };
@@ -154,7 +103,7 @@ bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string
 
 
 // FIXME: file organization should be re-structured
-#include "JUnitGrader.h"
+//#include "JUnitGrader.h"
 
 
 #endif

@@ -128,7 +128,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
     nlohmann::json tc_j;
     tc_j["test_name"] = title;
-    tc_j["execute_logfile"] = my_testcase.prefix() + "_execute_logfile.txt";
+    tc_j["execute_logfile"] = my_testcase.getPrefix() + "_execute_logfile.txt";
     int testcase_pts = 0;
     std::string message = "";
 
@@ -157,10 +157,10 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       if ( access( filename.c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
         std::cerr << "file does exist: " << filename << std::endl;
         // CHECK IF WARNINGS EXIST
-        std::ifstream ifstr(my_testcase.prefix() + "_STDERR.txt");
-        if(!ifstr) std::cerr << my_testcase.prefix() <<  "_STDERR.txt" << " not open.";
+        std::ifstream ifstr(my_testcase.getPrefix() + "_STDERR.txt");
+        if(!ifstr) std::cerr << my_testcase.getPrefix() <<  "_STDERR.txt" << " not open.";
         else if(ifstr.peek() != std::ifstream::traits_type::eof()){
-          std::cerr << my_testcase.prefix() <<  "_STDERR.txt" << " not empty.";
+          std::cerr << my_testcase.getPrefix() <<  "_STDERR.txt" << " not empty.";
           testcase_pts = (int)floor( my_testcase.getPoints()*(1 - my_testcase.get_warning_frac()) );
           std::cout << "testcase_pts B " << testcase_pts << std::endl;
           message += "Unresolved warnings in your program!";
@@ -175,7 +175,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         message += "Error: compilation was not successful!";
       }
       if (my_testcase.isCompilationTest()) {
-        tc_j["compilation_output"] = my_testcase.prefix() + "_STDERR.txt";
+        tc_j["compilation_output"] = my_testcase.getPrefix() + "_STDERR.txt";
       }
     }
     else {   // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
@@ -192,7 +192,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         for (int FN = 0; FN < filenames.size(); FN++) {
           // JSON FOR THIS COMPARISON
           nlohmann::json autocheck_j; 
-          autocheck_j["student_file"] = my_testcase.prefix() + "_" + filenames[FN];
+          autocheck_j["student_file"] = my_testcase.getPrefix() + "_" + filenames[FN];
           std::string expected = "";
           expected = tcg.value("instructor_file", "");
           if (GLOBAL_replace_string_before != "") {
@@ -207,12 +207,12 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
             autocheckid += "_" + std::to_string(FN);
             assert (expected == "");
           }
-          autocheck_j["autocheck_id"] = my_testcase.prefix() + "_" + autocheckid + "_autocheck";
+          autocheck_j["autocheck_id"] = my_testcase.getPrefix() + "_" + autocheckid + "_autocheck";
           //std::string dm = my_testcase.test_case_grader_vec[j].value("display_mode",""); //->display_mode();
           //if (dm != "") { autocheck_j["display_mode"] = dm; }
           if (expected != "") { // PREPARE THE JSON DIFF FILE
             std::stringstream diff_path;
-            diff_path << my_testcase.prefix() << "_" << j << "_diff.json";
+            diff_path << my_testcase.getPrefix() << "_" << j << "_diff.json";
             std::ofstream diff_stream(diff_path.str().c_str());
             result->printJSON(diff_stream);
             std::stringstream expected_path;
@@ -220,9 +220,9 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
             std::string expected_out_dir = "test_output/" + id + "/";
             expected_path << expected_out_dir << expected;
             autocheck_j["instructor_file"] = expected_path.str();
-            autocheck_j["difference"] = my_testcase.prefix() + "_" + std::to_string(j) + "_diff.json";
+            autocheck_j["difference"] = my_testcase.getPrefix() + "_" + std::to_string(j) + "_diff.json";
           }
-          autocheck_j["description"] = my_testcase.getFilenameDescription(j);
+          autocheck_j["description"] = tcg.value("description",filenames[FN]);
           if (FN==0) {
             for (int m = 0; m < result->getMessages().size(); m++) {
               if (result->getMessages()[m] != "")

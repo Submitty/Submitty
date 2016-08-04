@@ -7,12 +7,15 @@
 #include "grading/TestCase.h"
 #include "grading/json.hpp"
 
-TestResults* custom_grader(const TestCase &tc, const nlohmann::json &j) {
+TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
+
+  std::string method = grader.value("method","");
+  assert (method == "custom");
 
   // ========================================
   // GRAB THE COMMAND LINE ARG
   int num;
-  std::string args = j.value("args","");
+  std::string args = grader.value("args","");
   num = std::stoi(args.c_str());
   if (num <= 0) {
     return new TestResults(0.0,"ERROR! args should be > 1 (specify number of values to sum)");
@@ -20,11 +23,11 @@ TestResults* custom_grader(const TestCase &tc, const nlohmann::json &j) {
 
   // ========================================
   // OPEN THE STUDENT OUTPUT FILES
-  std::vector<std::string> filenames = stringOrArrayOfStrings(j,"filename");
+  std::vector<std::string> filenames = stringOrArrayOfStrings(grader,"filename");
   std::vector<std::string> contents_of_files;
   for (int i = 0; i < filenames.size(); i++) {
     std::string file_contents;
-    std::string f = tc.prefix() + "_" + filenames[i];
+    std::string f = this->getPrefix() + "_" + filenames[i];
     if (!getFileContents(f,file_contents)) {
       return new TestResults(0.0,"ERROR!  Could not open student file: '" + f);
     }    

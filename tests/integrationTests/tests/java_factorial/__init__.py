@@ -90,7 +90,6 @@ def does_not_compile(test):
 
 @testcase
 def buggy(test):
-    return
     cleanup(test)
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "buggy/Factorial.java"),
@@ -111,7 +110,6 @@ def buggy(test):
 
 @testcase
 def still_buggy(test):
-    return
     cleanup(test)
     subprocess.call(["cp",
         os.path.join(SAMPLE_SUBMISSIONS, "still_buggy/Factorial.java"),
