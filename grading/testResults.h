@@ -14,11 +14,14 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <vector>
 
 class TestResults {
 public:
 
-  TestResults(float g=-1, const std::string &m="", const std::string &sd="") { my_grade = g; message = m; swap_difference=sd; distance=0; }
+  TestResults(float g, const std::vector<std::string> &m, const std::string &sd="") { my_grade = g; messages = m; swap_difference=sd; distance=0; }
+  TestResults(float g=0.0, const std::string &m="", const std::string &sd="") { my_grade = g; if (m != "") messages.push_back(m); swap_difference=sd; distance=0; }
 
   virtual ~TestResults() {}
   
@@ -47,19 +50,15 @@ public:
    * RETURN: string
    * PURPOSE: Returns a string containing the message for the test
    */
-  std::string get_message() { return message; }
+  std::vector<std::string> getMessages() { return messages; }
 
-  /* METHOD: setMessage
-   * ARGS: m - new message to be set
-   * RETURN: void
-   * PURPOSE: Sets the current message to the new message passed in
-   */
-  void setMessage(const std::string &m) { message=m; }
+  void addMessage(const std::string &m) { messages.push_back(m); }
+
 
 protected:
   std::string swap_difference;
 
-  std::string message;
+  std::vector<std::string> messages;
   float my_grade;
 };
 

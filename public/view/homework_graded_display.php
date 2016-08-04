@@ -60,7 +60,7 @@
 				$class = "badge";
 			}
 			if($test["is_hidden"] == false && (
-				(isset($test["diffs"])
+				(isset($test["autochecks"])
 				|| (isset($test["compilation_output"]) && trim($test["compilation_output"])!="")
 				|| (isset($test["execute_logfile"]) && trim($test["execute_logfile"])!="")
 				))) {
@@ -146,17 +146,14 @@
 
 			<?php
 
-			 if (isset($test["diffs"])) {
+			 if (isset($test["autochecks"])) {
 		
-			   foreach ($test["diffs"] as $diff) {
-
-			     if (isset($diff["message"]) && trim($diff["message"])!="") {
-			       echo '<div class="error_mess_diff">'.html_entity_decode($diff["message"]).'</div>';
-			       
-			       //echo '<div class="diff-block"><div class="error_mess_diff">'.html_entity_decode($diff["message"]).'</div></div>';
-
-			       //echo '<div class="spacer"></div>';
-			     }
+			   foreach ($test["autochecks"] as $diff) {
+			     if (isset($diff["messages"])) {
+                               foreach ($diff["messages"] as $message) {
+                                 echo '<div class="error_mess_diff">'.html_entity_decode($message).'</div>';
+                               }
+                             }
 			     if ((!isset($diff["student"]) || trim($diff["student"]) == "") &&
 				 (!isset($diff["instructor"]) || trim($diff["instructor"]) == "")) {
 			       continue;
@@ -170,7 +167,7 @@
 			     echo '</b>';
 			     if (isset($diff["student"]) && trim($diff["student"]) != "" && !isset($diff["display_mode"])) {
 			       echo '<div class="panel panel-default" id="';
-			       echo htmlentities($diff["diff_id"]);
+			       echo htmlentities($diff["autocheck_id"]);
 			       echo '_student">';
 			       echo '<tt class="mono">';
 			       $str=$diff["student"];
@@ -192,7 +189,7 @@
 			       if (isset($diff["description"])) { echo htmlentities($diff["description"]); }
 			       echo '</b>';
 			       echo '<div class="panel panel-default" id="';
-			       echo htmlentities($diff["diff_id"]);
+			       echo htmlentities($diff["autocheck_id"]);
 			       echo '_instructor">';
 			       if (isset($diff["instructor"]) && trim($diff["instructor"]) != "") {
 				 echo '<tt class="mono">';
@@ -211,10 +208,10 @@
 			       //					 <!-- <div style="clear:both;"></div> -->
 			       echo '<script>'; //<!-- script -->
 			       echo 'diff_queue.push("';
-			       echo $diff["diff_id"];
+			       echo $diff["autocheck_id"];
 			       echo '");';
 			       echo 'diff_objects["';
-			       echo $diff["diff_id"];
+			       echo $diff["autocheck_id"];
 			       echo '"] = ';
 			       echo $diff["difference"];
 			       echo ';';

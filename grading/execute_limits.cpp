@@ -200,8 +200,8 @@ void enable_all_setrlimit(const std::string &program_name,
   rlimit current_rl;
   rlimit new_rl;
   
-  std::cout << "SETTING LIMITS FOR PROCESS! " << program_name << std::endl;
-
+  //std::cout << "SETTING LIMITS FOR PROCESS! " << program_name << std::endl;
+  
   // loop over all of the limits
   for (int i = 0; i < limit_names.size(); i++) {
 
@@ -215,15 +215,17 @@ void enable_all_setrlimit(const std::string &program_name,
 
     // only change a value to decrease / restrict the process
     if (current_rl.rlim_max > new_limit) {
-      std::cout << "   SET LIMIT FOR " << rlimit_name_decoder(limit_names[i]) << " to " << new_limit << std::endl;
+      //std::cout << "   SET LIMIT FOR " << rlimit_name_decoder(limit_names[i]) << " to " << new_limit << std::endl;
       new_rl.rlim_cur = new_rl.rlim_max = new_limit;
       success = setrlimit(limit_names[i], &new_rl);
       assert (success == 0);
     } else {
       // otherwise print a warning
-      std::cout << " WARNING: no change for limit " << rlimit_name_decoder(limit_names[i]) 
+      /*
+        std::cout << " WARNING: no change for limit " << rlimit_name_decoder(limit_names[i]) 
 		<< " requested " << new_limit
 		<< " but keeping " << current_rl.rlim_max << std::endl;
+      */
     }
   }
 

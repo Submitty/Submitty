@@ -27,7 +27,7 @@ function build_homework {
 
     hw_build_path=$course_dir/build/$assignment
     hw_bin_path=$course_dir/bin/$assignment
-    hw_config=$course_dir/config/${assignment}_assignment_config.json
+    hw_config=$course_dir/config/build/build_${assignment}.json
 
 
     echo "---------------------------------------------------"

@@ -26,7 +26,7 @@ if($user_is_administrator){
     $g_gradeable_type = $is_repository = $g_syllabus_bucket = $g_min_grading_group = $default_late_days = -1;
     $use_ta_grading = true;
     $g_overall_ta_instructions = $g_id = '';
-    
+    $edit = json_encode(isset($_GET['action']) && $_GET['action'] == 'edit');
     
     if (isset($_GET['action']) && $_GET['action'] == 'edit') {
         $g_id = $_GET['id'];
@@ -83,8 +83,8 @@ if($user_is_administrator){
     $account_subpages_unlock = true;
     
     function selectBox($question, $grade = 0) {
-        $retVal = "<select name='point_{$question}' class='points' onchange='calculatePercentageTotal();'>";
-        for($i = 0; $i <= 100; $i += 0.5) {
+        $retVal = "<select name='point_{$question}' class='points complex_type' onchange='calculatePercentageTotal();'>";
+        for($i = -100; $i <= 100; $i += 0.5) {
             $selected = ($grade == $i) ? "selected" : "";
             $retVal .= "<option {$selected}>{$i}</option>";
         }
@@ -92,23 +92,15 @@ if($user_is_administrator){
         return $retVal;
     }
 
-    $gradeables = array();
-    $db->query("SELECT g_id from gradeable ORDER BY g_id", array());
-    foreach ($db->rows() as $row) {
-        $gradeables[$row['g_id']] = $row['g_id'];
-    }
-
     if (!$have_old) {
-        $gradeableNumberQuery = (count($gradeables) > 0) ? end($gradeables) + 1 : 1;
-        $gradeable_name = "Gradeable {$gradeableNumberQuery}";
-        $gradeable_submission_id = "gradeable".Functions::pad($gradeableNumberQuery);
+        $gradeable_name = "";
+        $gradeable_submission_id = "";
         $g_team_assignment = json_encode($old_gradeable['g_team_assignment']);
         $g_grade_by_registration = $old_gradeable['g_grade_by_registration'];
         $string = "Add";
         $action = strtolower($string);
     }
     else {
-        $gradeableNumberQuery = 0;
         $gradeable_name = $old_gradeable['g_title'];
         $gradeable_submission_id = $old_gradeable['g_id'];
         $g_overall_ta_instructions = $old_gradeable['g_overall_ta_instructions'];
@@ -214,7 +206,7 @@ if($user_is_administrator){
     <form id="gradeable-form" class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" 
           method="post" enctype="multipart/form-data"> 
 
-        <input type='hidden' name="csrf_token" value="{$_SESSION['csrf']}" />
+        <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
             <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{$string} Gradeable</button>
@@ -224,12 +216,8 @@ if($user_is_administrator){
             <br />
             What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' value="{$gradeable_name}" />
             <br />
-            What overall instructions should be provided to the TA?:<br /><textarea rows="4" cols="200" name="ta_instructions" placeholder="(Optional)" style="width: 500px;">
-HTML;
-    echo htmlspecialchars($g_overall_ta_instructions);  
-    print <<<HTML
-</textarea>
-        <br />
+            
+       <!-- <br />
         Is this a team assignment?:
         <input type="radio" name="team_assignment" value="yes"
 HTML;
@@ -241,8 +229,8 @@ HTML;
 HTML;
     echo ($g_team_assignment===false)?'checked':'' ;
     print <<<HTML
-            > No
-            <br /> <br />   
+            > No -->
+            <br />   
             What is the type of your gradeable?:
 
             <fieldset>
@@ -276,7 +264,7 @@ HTML;
                 What is the due date? <input name="date_due" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
                 <br />
-                How many late days may students use on this assignment? <input style="width: 50px" name="eg_late_days" 
+                How many late days may students use on this assignment? <input style="width: 50px" name="eg_late_days" class="int_val"
                                                                          type="text"/>
                 <br/>
                 
@@ -307,16 +295,16 @@ HTML;
                 <input style='width: 227px' type='text' name='config_path' value="" />
                 <br />
                 Point precision: 
-                <input style='width: 50px' type='text' name='point_precision' value="0.5" />
+                <input style='width: 50px' type='text' name='point_precision' value="0.5" class="float_val" />
                 <br /> <br />
                 
                 Use TA grading? 
-                <input type="radio" id="yes_ta_grade" name="ta_grading" value="yes" 
+                <input type="radio" id="yes_ta_grade" name="ta_grading" value="yes" class="bool_val"
 HTML;
                 echo ($use_ta_grading===true)?'checked':'';
         print <<<HTML
                 /> Yes
-                <input type="radio" id="no_ta_grade" name="ta_grading" value="no" 
+                <input type="radio" id="no_ta_grade" name="ta_grading" value="no" class="bool_val"
 HTML;
                 echo ($use_ta_grading===false)?'checked':'';
         print <<<HTML
@@ -333,19 +321,7 @@ HTML;
 HTML;
 
     if (count($old_questions) == 0) {
-        if (__USE_AUTOGRADER__) {
-            $old_questions[0] = array('question_message'      => "AUTO-GRADING",
-                                         'question_grading_note' => "",
-                                         'student_grading_note' =>"",
-                                         'question_total'        => 0,
-                                         'question_extra_credit' => 0);
-            $old_questions[1] = array('question_message'      => "AUTO-GRADING EXTRA CREDIT",
-                                         'question_grading_note' => "",
-                                         'student_grading_note'  => "",
-                                         'question_total'        => 0,
-                                         'question_extra_credit' => 1);
-        }
-        $old_questions[2] = array('question_message'      => "",
+        $old_questions[0] = array('question_message'      => "",
                                      'question_grading_note' => "",
                                      'student_grading_note'  => "",
                                      'question_total'        => 0,
@@ -353,8 +329,6 @@ HTML;
     }
 
     foreach ($old_questions as $num => $question) {
-        $disabled = ($num<2) ? "disabled" : "";
-        $readonly = ($num<2) ? "readonly" : "";
         print <<<HTML
             <tr class="rubric-row" id="row-{$num}">
 HTML;
@@ -362,14 +336,14 @@ HTML;
 
         print <<<HTML
                 <td style="overflow: hidden;">
-                    <textarea name="comment_{$num}" rows="1" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" 
-                              {$readonly}>{$question['question_message']}</textarea>
+                    <textarea name="comment_title_{$num}" rows="1" class="comment_title complex_type" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" 
+                              >{$question['question_message']}</textarea>
                     <div class="btn btn-mini btn-default" onclick="toggleQuestion({$num}, 'individual')" style="margin-top:-5px;">TA Note</div>
                     <div class="btn btn-mini btn-default" onclick="toggleQuestion({$num}, 'student')" style="margin-top:-5px;">Student Note</div>
-                    <textarea name="ta_{$num}" id="individual_{$num}" rows="1" placeholder=" Message to TA"  onkeyup="autoResizeComment(event);"
+                    <textarea name="ta_comment_{$num}" id="individual_{$num}" class="ta_comment complex_type" rows="1" placeholder=" Message to TA"  onkeyup="autoResizeComment(event);"
                                                style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
                                                display: {$display_ta};">{$question['question_grading_note']}</textarea>
-                    <textarea name="student_{$num}" id="student_{$num}" rows="1" placeholder=" Message to Student" onkeyup="autoResizeComment(event);"
+                    <textarea name="student_comment_{$num}" id="student_{$num}" class="student_comment complex_type" rows="1" placeholder=" Message to Student" onkeyup="autoResizeComment(event);"
                               style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
                               display: {$display_ta};">{$question['student_grading_note']}</textarea>
                 </td>
@@ -378,10 +352,9 @@ HTML;
 HTML;
         $old_grade = (isset($question['question_total'])) ? $question['question_total'] : 0;
         print selectBox($num, $old_grade);
-        $checked = ($question['question_extra_credit'] == 1) ? "checked" : "";
-        print (($question['question_extra_credit'] == 1 && $disabled == "disabled") ? "<input type='hidden' name='ec_{$num}' value='on' />" : "");
+        $checked = ($question['question_extra_credit']) ? "checked" : "";
         print <<<HTML
-                    <input onclick='calculatePercentageTotal();' name="ec_{$num}" type="checkbox" {$checked} {$disabled} />
+                    <input onclick='calculatePercentageTotal();' name="ec_{$num}" type="checkbox" class='ec bool_val' value='on' {$checked}/>
 HTML;
         if($num>1){
             print <<<HTML
@@ -439,19 +412,19 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="checkpoint_label_0" type="text" class="checkpoint_label" value="Checkpoint 0"/> 
+                               <input style="width: 200px" name="checkpoint_label_0" type="text" class="checkpoint_label complex_type" value="Checkpoint 0"/> 
                            </td>     
                            <td>     
-                                <input type="checkbox" name="checkpoint_extra_0" class="checkpoint_extra" value="true" />
+                                <input type="checkbox" name="checkpoint_extra_0" class="checkpoint_extra bool_val" value="true" />
                            </td> 
                         </tr>
                       
                        <tr class="multi-field" id="mult-field-1">
                            <td>
-                               <input style="width: 200px" name="checkpoint_label_1" type="text" class="checkpoint_label" value="Checkpoint 1"/> 
+                               <input style="width: 200px" name="checkpoint_label_1" type="text" class="checkpoint_label complex_type" value="Checkpoint 1"/> 
                            </td>     
                            <td>     
-                                <input type="checkbox" name="checkpoint_extra_1" class="checkpoint_extra" value="true" />
+                                <input type="checkbox" name="checkpoint_extra_1" class="checkpoint_extra bool_val" value="true" />
                            </td> 
                         </tr>
                   </table>
@@ -459,16 +432,16 @@ HTML;
                   <button type="button" id="remove-checkpoint_field" id="remove-checkpoint" style="visibilty:hidden;">Remove</button>   
                 </div> 
                 <br />
-                Do you want a box for an (optional) message from the TA to the student?
+                <!--Do you want a box for an (optional) message from the TA to the student?
                 <input type="radio" name="checkpoint_opt_ta_messg" value="yes" /> Yes
-                <input type="radio" name="checkpoint_opt_ta_messg" value="no" /> No
+                <input type="radio" name="checkpoint_opt_ta_messg" value="no" /> No-->
             </div>
             <div class="gradeable_type_options numeric" id="numeric">
                 <br />
-                How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0"/> 
+                How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val"/> 
                 &emsp;&emsp;
                 
-                How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0"/>
+                How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val"/>
                 <br /> <br />
                 
                 <div class="multi-field-wrapper-numeric">
@@ -486,10 +459,10 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="numeric_label_0" type="text" class="numeric-label" value="0"/> 
+                               <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label complex_type" value="0"/> 
                            </td>  
                             <td>     
-                                <input style="width: 60px" type="text" name="max_score_0" class="max-score" value="0" /> 
+                                <input style="width: 60px" type="text" name="max_score_0" class="max_score complex_type" value="0" /> 
                            </td>                           
                            <td>     
                                 <input type="checkbox" name="numeric_extra_0" class="numeric-extra" value="" />
@@ -508,20 +481,19 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="text_label_0" type="text" class="text-label" value="0"/> 
+                               <input style="width: 200px" name="text_label_0" type="text" class="text_label complex_type" value="0"/> 
                            </td>  
                         </tr>
                     </table>
                 </div>  
-                <br /> <br />
-                Do you want a box for an (optional) message from the TA to the student?
+                <br />
+                <!--Do you want a box for an (optional) message from the TA to the student?
                 <input type="radio" name="opt_ta_messg" value="yes" /> Yes
-                <input type="radio" name="opt_ta_messg" value="no" /> No
+                <input type="radio" name="opt_ta_messg" value="no" /> No-->
             </div>  
             </fieldset>
-            <br/>
             What is the lowest privileged user group that can grade this?
-            <select name="minimum_grading_group" style="width:180px;">
+            <select name="minimum_grading_group" class="int_val" style="width:180px;">
 HTML;
 
     $grading_groups = array('1' => 'Instructor','2' => 'Full Access Grader','3' => 'Limited Access Grader');
@@ -537,20 +509,27 @@ HTML;
     
     print <<<HTML
             </select>
-            <br /> <br />
+            <br />
+            What overall instructions should be provided to the TA?:<br /><textarea rows="4" cols="200" name="ta_instructions" placeholder="(Optional)" style="width: 500px;">
+HTML;
+    echo htmlspecialchars($g_overall_ta_instructions);  
+    print <<<HTML
+</textarea>
+            
+            <br />
             Who is assigned to grade this item?:
-            <br /> <br />
-            <input type="radio" name="section_type" value="reg_section"
+            <br />
+            <fieldset>
+                <input type="radio" name="section_type" value="reg_section"
 HTML;
     echo ($action==='edit' && $g_grade_by_registration===true)?'checked':'';
     print <<<HTML
-            /> Registration Section
-            <input type="radio" name="section_type" value="rotating-section" id="rotating-section" class="graders"
+                /> Registration Section
+                <input type="radio" name="section_type" value="rotating-section" id="rotating-section" class="graders"
 HTML;
     echo ($action==='edit' && $g_grade_by_registration===false)?'checked':'';
     print <<<HTML
-            /> Rotating Section
-            <br />
+                /> Rotating Section
 HTML;
 
     $db->query("SELECT COUNT(*) AS cnt FROM sections_rotating", array());
@@ -643,9 +622,11 @@ HTML;
 
     print <<<HTML
         </table>
+
     </div> 
         <br />
     </div>
+    </fieldset>
 HTML;
 
     print <<<HTML
@@ -663,7 +644,6 @@ HTML;
             What syllabus/iris "bucket" does this item belong to?:
             
             <select name="gradeable_buckets" style="width: 170px;">
-                <!--<option value="homework"-->
 HTML;
 
     $valid_assignment_type = array('homework','assignment','quiz','test','reading','participation',
@@ -702,7 +682,17 @@ HTML;
         var o = {};
         var a = this.serializeArray();
         var ignore = [];
-        ignore.push('csrf_token');
+
+        $('.ignore').each(function(){
+            ignore.push($(this).attr('name'));
+        });
+        
+        ignore.push("numeric_label_0");
+        ignore.push("max_score_0");
+        ignore.push("numeric_extra_0");
+        ignore.push("text_label_0");
+        ignore.push("checkpoint_label_0");
+        
         $(':radio').each(function(){
            if(! $(this).is(':checked')){
                if($(this).attr('class') !== undefined){
@@ -718,13 +708,39 @@ HTML;
             if($.inArray(this.name,ignore) !== -1) {
                 return;
             }
-            if (o[this.name] !== undefined) {
+            
+            var val = this.value;
+            if($("[name="+this.name+"]").hasClass('int_val')){
+                val = parseInt(val);
+            }
+            else if($("[name="+this.name+"]").hasClass('float_val')){
+                val = parseFloat(val);
+            }
+            //FIXME update for boolean types 
+             else if($("[name="+this.name+"]").hasClass('bool_val')){
+                //val = (this.value === 'yes' || this.value === 'true');
+            }
+            
+            if($("[name="+this.name+"]").hasClass('complex_type')){
+                var classes = $("[name="+this.name+"]").closest('.complex_type').prop('class').split(" ");
+                console.log("Classes: " + classes);
+                classes.splice( classes.indexOf('complex_type'), 1);
+                var complex_type = classes[0];
+                
+                if (o[complex_type] === undefined){
+                    o[complex_type] = [];
+                }
+                o[complex_type].push(val);
+                
+            } 
+            
+            else if (o[this.name] !== undefined) {
                 if (!o[this.name].push) {
                     o[this.name] = [o[this.name]];
                 }
-                o[this.name].push(this.value || '');
+                o[this.name].push(val || '');
             } else {
-                o[this.name] = this.value || '';
+                o[this.name] = val || '';
             }
         });
         return o;
@@ -779,10 +795,10 @@ HTML;
         function addNumeric(label, max_score, extra_credit){
             var wrapper = $('.numerics-table');
             numNumeric++;
-            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numNumeric).find('.numeric-label').val(label).focus();
+            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numNumeric).find('.numeric_label').val(label).focus();
             $('#mult-field-' + numNumeric,wrapper).find('.numeric-extra').attr('name','numeric_extra_'+numNumeric);
-            $('#mult-field-' + numNumeric,wrapper).find('.numeric-label').attr('name','numeric_label_'+numNumeric);
-            $('#mult-field-' + numNumeric,wrapper).find('.max-score').attr('name','max_score_'+numNumeric).val(max_score);
+            $('#mult-field-' + numNumeric,wrapper).find('.numeric_label').attr('name','numeric_label_'+numNumeric);
+            $('#mult-field-' + numNumeric,wrapper).find('.max_score').attr('name','max_score_'+numNumeric).val(max_score);
             if(extra_credit){
                 $('#mult-field-' + numNumeric,wrapper).find('.numeric-extra').attr('checked',true); 
             }
@@ -799,8 +815,8 @@ HTML;
         function addText(label){
             var wrapper = $('.text-table');
             numText++;
-            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numText).find('.text-label').val(label).focus();
-            $('#mult-field-' + numText,wrapper).find('.text-label').attr('name','text_label_'+numText);
+            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numText).find('.text_label').val(label).focus();
+            $('#mult-field-' + numText,wrapper).find('.text_label').attr('name','text_label_'+numText);
             $('#mult-field-' + numText,wrapper).show();
         }
         function removeText(){
@@ -840,7 +856,7 @@ HTML;
         
         if ($('input[name=gradeable_type]').is(':checked')){
             $('input[name=gradeable_type]').each(function(){
-                if(!($(this).is(':checked'))){
+                if(!($(this).is(':checked')) && {$edit}){
                     $(this).attr("disabled",true);    
                 }
             });
@@ -891,7 +907,6 @@ HTML;
         }
         else if ($('#radio_checkpoints').is(':checked')){
             var components = {$old_components};
-            //TODO fix the ta_message
             // remove the default checkpoint
             removeCheckpoint(); 
             $.each(components, function(i,elem){
@@ -901,7 +916,6 @@ HTML;
         }
         else if ($('#radio_numeric').is(':checked')){ 
             var components = {$old_components};
-            //TODO fix the ta_message
             $.each(components, function(i,elem){
                 if(i < {$num_numeric}){
                     addNumeric(elem.gc_title,elem.gc_max_value,elem.gc_is_extra_credit);
@@ -925,7 +939,7 @@ HTML;
 	    showTimezone: false
     });
     
-    datepicker.datetimepicker('setDate', (new Date("{$current_date}")));
+    $('#date_submit').datetimepicker('setDate', (new Date("{$current_date}")));
     
     $('#date_grade').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_start_date']}")));
     $('#date_released').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_released_date']}")));
@@ -980,16 +994,16 @@ HTML;
         var sBox = selectBox(newQ);
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
             <td style="overflow: hidden;"> \
-                <textarea name="comment_'+newQ+'" rows="1" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea> \
+                <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea> \
                 <div class="btn btn-mini btn-default" onclick="toggleQuestion(' + newQ + ',\'individual\''+')" style="margin-top:-5px;">TA Note</div> \
                 <div class="btn btn-mini btn-default" onclick="toggleQuestion(' + newQ + ',\'student\''+')" style="margin-top:-5px;">Student Note</div> \
-                <textarea name="ta_'+newQ+'" id="individual_'+newQ+'" rows="1" placeholder=" Message to TA"  onkeyup="autoResizeComment(event);" \
+                <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA"  onkeyup="autoResizeComment(event);" \
                           style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
-                <textarea name="student_'+newQ+'" id="student_'+newQ+'" rows="1" placeholder=" Message to Student"  onkeyup="autoResizeComment(event);" \
+                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student"  onkeyup="autoResizeComment(event);" \
                           style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
             </td> \
             <td style="background-color:#EEE;">' + sBox + ' \
-                <input onclick="calculatePercentageTotal();" name="ec_'+newQ+'" type="checkbox" /> \
+                <input onclick="calculatePercentageTotal();" name="ec_'+newQ+'" type="checkbox" class="ec bool_val" value="on"/> \
                 <br /> \
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
                     <img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a> \
@@ -1008,9 +1022,14 @@ HTML;
     }
 
     function selectBox(question){
-        var retVal = '<select name="point_' + question + '" class="points" onchange="calculatePercentageTotal()">';
-        for(var i = 0; i <= 100; i++) {
-            retVal = retVal + '<option>' + (i * 0.5) + '</option>';
+        var retVal = '<select name="point_' + question + '" class="point complex_type" onchange="calculatePercentageTotal()">';
+        for(var i = -100; i <= 100; i++) {
+            if(i==0){
+                retVal = retVal + '<option selected="selected">' + (i * 0.5) + '</option>';
+            }
+            else{
+                retVal = retVal + '<option>' + (i * 0.5) + '</option>';
+            }
         }
         retVal = retVal + '</select>';
         return retVal;
@@ -1021,11 +1040,13 @@ HTML;
         var ec = 0;
         $('select.points').each(function(){
             var elem = $(this).attr('name').replace('point','ec');
-            if (!$('[name="'+elem+'"]').is(':checked') == true) {
-                total += +($(this).val());
-            }
-            else {
-                ec += +($(this).val());
+            if ($(this).val() > 0){
+                if (!$('[name="'+elem+'"]').is(':checked') == true) {
+                    total += +($(this).val());
+                }
+                else {
+                    ec += +($(this).val());
+                }
             }
         });
         document.getElementById("totalCalculation").innerHTML = total + " (" + ec + ")";

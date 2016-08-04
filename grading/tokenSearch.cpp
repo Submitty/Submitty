@@ -50,8 +50,28 @@ void buildTable ( int* V, const std::string& keyword ) {
  * linear with respect to the token. Overall, the algorithm runs in O(N + M)
  * time where N is the length of the student and M is the length of the token.
  */
-TestResults* searchToken ( const std::string& student,
-			   			   const std::vector<std::string>& token_vec ) {
+
+
+
+TestResults* searchToken_doit (const TestCase &tc, const nlohmann::json& j) {
+  
+  std::vector<std::string> token_vec;
+  nlohmann::json::const_iterator data_json = j.find("data");
+  if (data_json != j.end()) {
+   for (int i = 0; i < data_json->size(); i++) {
+     token_vec.push_back((*data_json)[i]);
+   }
+  }
+
+  std::string message;
+  std::string student_file_contents;
+  if (!openStudentFile(tc,j,student_file_contents,message)) { 
+    return new TestResults(0.0,message);
+  }
+
+
+//TestResults* searchToken ( const std::string& student,
+//			   			   const std::vector<std::string>& token_vec ) {
 
 	//Build a table to use for the search
 	Tokens* diff = new Tokens();
@@ -66,9 +86,9 @@ TestResults* searchToken ( const std::string& student,
 
 	int m = 0;
 	int i = 0;
-	while ( m + i < student.size() ) {
-	  //if ( student[i + m] == token[i] ) {
-		if ( student[i + m] == token_vec[0][i] ) {
+	while ( m + i < student_file_contents.size() ) {
+	  //if ( student_file_contents[i + m] == token[i] ) {
+		if ( student_file_contents[i + m] == token_vec[0][i] ) {
 		  //if ( i == token.size() - 1 ) {
 			if ( i == token_vec[0].size() - 1 ) {
 				diff->tokens_found.push_back( m );

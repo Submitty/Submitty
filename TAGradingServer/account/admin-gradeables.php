@@ -194,7 +194,6 @@ $output .= <<<HTML
         <h3 id="myModalgradeableel">Manage Gradeables</h3>
         <span class="submit-button">
             <input class="btn btn-primary" onclick="window.location.href='{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}'" type="submit" value="Create New Gradeable"/>
-
             <input class="btn btn-primary" onclick="fixSequences();" type="submit" value="Fix DB Sequences" />
 
             <input class="btn btn-primary" onclick="batchImportJSON();" type="submit" value="Import From JSON" />
@@ -226,6 +225,7 @@ foreach ($gradeables as $gradeable) {
     WHERE 
         g.g_id=?
         AND NOT gc_is_extra_credit
+        AND gc_max_value >= 0
     GROUP BY
         g.g_id
     ", array($g_id));

@@ -450,7 +450,7 @@ ALTER TABLE ONLY grading_rotating
 --
 
 ALTER TABLE ONLY late_day_exceptions
-    ADD CONSTRAINT late_day_exceptions_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id);
+    ADD CONSTRAINT late_day_exceptions_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
 
 
 --
@@ -458,7 +458,7 @@ ALTER TABLE ONLY late_day_exceptions
 --
 
 ALTER TABLE ONLY late_day_exceptions
-    ADD CONSTRAINT late_day_exceptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
+    ADD CONSTRAINT late_day_exceptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
 
 
 --

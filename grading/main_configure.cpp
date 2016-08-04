@@ -82,8 +82,8 @@ int main(int argc, char *argv[]) {
   std::string end_red_text   = "\033[0m";
 
   nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
-  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);
-  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
+  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",total_nonec);
+  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",total_ec);
   int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
   int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
 

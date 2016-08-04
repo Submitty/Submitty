@@ -5,6 +5,7 @@ namespace app\models;
 use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
+use app\libraries\GradeableType;
 use app\libraries\Utils;
 
 /**
@@ -75,7 +76,7 @@ abstract class Gradeable {
     /** @var string Url to any instructions for the gradeable for students */
     protected $instructions_url = "";
 
-    /** @var string Path to the config.json file used to build the *_assignment_config.json file */
+    /** @var string Path to the config.json file used to build the config/build/build_XXX.json file */
     protected $config_path = "";
 
     /** @var float Precision to allow for inputting points when grading (such that precision of 0.5 then allows grades
@@ -152,7 +153,7 @@ abstract class Gradeable {
     }
     
     /**
-     * Loads the *_assignment_config.json file for a gradeable
+     * Loads the config/build/build_*.json file for a gradeable
      */
     protected function loadGradeableConfig() {
         if ($this->type !== GradeableType::ELECTRONIC_FILE) {
@@ -160,7 +161,7 @@ abstract class Gradeable {
         }
         
         $course_path = $this->core->getConfig()->getCoursePath();
-        $details = FileUtils::readJsonFile($course_path."/config/".$this->id."_assignment_config.json");
+        $details = FileUtils::readJsonFile($course_path."/config/build/build_".$this->id.".json");
         
         // Was there actually a config file to read from
         if ($details === false) {
@@ -408,7 +409,7 @@ abstract class Gradeable {
     }
     
     public function getDaysLate() {
-        return ($this->hasCurrentResults()) ? $this->result_details['days_late'] : 0;
+        return ($this->hasResults()) ? $this->result_details['days_late'] : 0;
     }
     
     /**
@@ -418,11 +419,11 @@ abstract class Gradeable {
      *
      * @return bool
      */
-    public function hasCurrentResults() {
+    public function hasResults() {
         return isset($this->result_details);
     }
     
-    public function getCurrentResults() {
+    public function getResults() {
         return $this->result_details;
     }
     

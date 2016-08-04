@@ -39,13 +39,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test1_output.txt",
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
+                    "instructor_file" : "test1_output.txt"
                 }
             ]
         },
@@ -58,13 +52,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test2_output.txt",
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
+                    "instructor_file" : "test2_output.txt"
                 }
             ]
         },
@@ -78,13 +66,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test3_output.txt",
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
+                    "instructor_file" : "test3_output.txt"
                 }
             ]
         },
@@ -97,13 +79,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test4_output.txt",
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
+                    "instructor_file" : "test4_output.txt"
                 }
             ]
         },
@@ -116,13 +92,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test5_output.txt",
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
+                    "instructor_file" : "test5_output.txt"
                 }
             ]
         },
@@ -137,14 +107,12 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test6_output.txt",
-                    "deduction" : 0.5
+                    "instructor_file" : "test6_output.txt"
                 },
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDERR.txt",
-                    "instructor_file" : "test6_outputB.txt",
-                    "deduction" : 0.5
+                    "instructor_file" : "test6_outputB.txt"
                 }
             ]
         },
@@ -158,14 +126,12 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test7_output.txt",
-                    "deduction" : 0.5
+                    "instructor_file" : "test7_output.txt"
                 },
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDERR.txt",
-                    "instructor_file" : "test7_outputB.txt",
-                    "deduction" : 0.5
+                    "instructor_file" : "test7_outputB.txt"
                 }
             ]
         }

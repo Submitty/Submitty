@@ -1,6 +1,6 @@
 <?php
 
-namespace app\models;
+namespace app\libraries;
 
 abstract class GradeableType{
     const ELECTRONIC_FILE = 0;

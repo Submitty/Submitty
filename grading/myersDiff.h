@@ -32,6 +32,9 @@
 #include "difference.h"
 #include "metaData.h"
 
+#include "TestCase.h"
+
+#include "json.hpp"
 
 //template<class T> Difference* ses ( T& a, T& b, bool secondary = false, bool extraStudentOutputOk =false );
 template<class T> Difference* ses ( T* a, T* b, bool secondary = false, bool extraStudentOutputOk =false );
@@ -45,19 +48,19 @@ template<class T> Difference* printJSON ( Difference & text_diff, std::ofstream 
 
 
 
-TestResults* warnIfNotEmpty (const std::string & student_file, const std::string & expected_file);
-TestResults* errorIfNotEmpty ( const std::string & student_file, const std::string & expected_file);
-TestResults* warnIfEmpty ( const std::string & student_file, const std::string & expected_file);
-TestResults* errorIfEmpty ( const std::string & student_file, const std::string & expected_file);
+TestResults* warnIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j);
+TestResults* errorIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j);
+TestResults* warnIfEmpty_doit (const TestCase &tc, const nlohmann::json& j);
+TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j);
 
-TestResults* myersDiffbyLinebyWord ( const std::string & student_file, const std::string & expected_file);
-TestResults* myersDiffbyLineNoWhite ( const std::string & student_file, const std::string & expected_file);
-TestResults* myersDiffbyLine ( const std::string & student_file, const std::string & expected_file);
-TestResults* myersDiffbyLinebyChar ( const std::string & student_file, const std::string & expected_file);
-TestResults* myersDiffbyLinebyCharExtraStudentOutputOk ( const std::string & student_file, const std::string & expected_file);
+TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::json& j);
+TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::json& j);
+TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j);
+TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::json& j);
+TestResults* myersDiffbyLinebyCharExtraStudentOutputOk_doit (const TestCase &tc, const nlohmann::json& j);
 
 
-TestResults* diffLineSwapOk ( const std::string & student_file, const std::string & expected_file);
+TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j);
 
 
 #endif

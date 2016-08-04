@@ -147,7 +147,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
 
         $num_questions = 0;
         foreach($add_args as $k=>$v){
-            if(strpos($k,'comment') !== false){
+            if(strpos($k,'comment_title_') !== false){
                 ++$num_questions;
             }
         }
@@ -155,9 +155,9 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
         $num_old_questions = intval($db->row()['cnt']);
         //insert the questions
         for ($i=0; $i<$num_questions; ++$i){
-            $gc_title = $add_args["comment_".strval($i)];
-            $gc_ta_comment = $add_args["ta_".strval($i)];
-            $gc_student_comment = $add_args["student_".strval($i)];
+            $gc_title = $add_args["comment_title_".strval($i)];
+            $gc_ta_comment = $add_args["ta_comment_".strval($i)];
+            $gc_student_comment = $add_args["student_comment_".strval($i)];
             $gc_max_value = $add_args['point_'.strval($i)];
             $gc_is_text = "false";
             $gc_is_ec = (isset($add_args['ec_'.strval($i)]) && $add_args['ec_'.strval($i)]=='on')? "true" : "false";
@@ -272,9 +272,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     fwrite($fp, json_encode(json_decode(urldecode($gradeableJSON)), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     fclose($fp);
  }
- 
-// TODO MAKE SURE THE TRANSACTIONS are in the right spot!
- 
+
 abstract class GradeableType{
     const electronic_file = 0;
     const checkpoints = 1;
@@ -291,7 +289,6 @@ abstract class GradeableType{
          }  
      }
 
-     
      $g_title = $request_args['gradeable_title'];
      $g_overall_ta_instr = $request_args['ta_instructions'];
      $g_use_teams = (isset($request_args['team_assignment']) && $request_args['team_assignment'] === 'yes') ? "true" : "false";
@@ -306,7 +303,6 @@ abstract class GradeableType{
                                    'section_type' => $g_grade_by_registration, 'date_grade' => $g_grade_start_date,
                                    'date_released' =>$g_grade_released_date, 'bucket' => $g_syllabus_bucket);
      
-
      if ($request_args['gradeable_type'] === "Electronic File"){
         $g_constructor_params['gradeable_type'] = GradeableType::electronic_file;
         
@@ -353,24 +349,6 @@ function getGraders($var){
     return $graders;
 }
  
- /* FIXME update the ASSIGNMENTS.txt file */
- // FIXME make member function of gradeable THIS IS BAD
- // FIXME NAIVE IMPLEMENTATION
-function addAssignmentsTxt($db, $assignments){
-    $fp = fopen(__SUBMISSION_SERVER__.'/ASSIGNMENTS.txt', 'a');
-    if (!$fp){
-        die('failed to open'. __SUBMISSION_SERVER__.'/ASSIGNMENTS.txt');
-    }
-    //THIS IS BAD
-    foreach ($assignments as $assignment){
-        $db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($assignment));
-        $eg = $db->row();
-        if(!empty($eg)){
-            fwrite($fp, "build_homework" . "  " . $eg['eg_config_path'] . "  ". __COURSE_SEMESTER__. " ".__COURSE_CODE__. " ". $assignment ."\n");
-        }
-    }
-    fclose($fp);
-}
 
 $action = $_GET['action'];
 
@@ -395,9 +373,6 @@ if ($action != 'import'){
     $gradeable->setupRotatingSections($db, $graders);
     
     $db->commit();
-    if($action != 'edit'){
-        addAssignmentsTxt($db,array($gradeable->get_GID()));
-    }
     writeFormJSON($_POST['gradeable_id'],$_POST['gradeableJSON']);
 }
 // batch update or create
@@ -421,6 +396,17 @@ else{
             $request_args = json_decode($form_json, true);
             $gradeable = constructGradeable($db, $request_args);
             $gradeable->createGradeable($db);
+            
+            $offset = (is_a($gradeable, "ElectronicGradeable")) ? 0 : 1;
+            
+            foreach($request_args AS $k=>$v){
+                if (is_array($v)){
+                    for($i=0; $i< count($v); ++$i){
+                       $request_args[$k.'_'.intval($i+$offset)] = $v[$i];    
+                    } 
+                }  
+            }
+            
             $gradeable->createComponents($db, $action, $request_args);
             $graders = getGraders($request_args);
             $gradeable->setupRotatingSections($db, $graders);
@@ -433,7 +419,7 @@ else{
             fclose($fp);
         }
     }
-    addAssignmentsTxt($db,$success_gids);
+
     print count($success_gids).' of '.$num_files." successfully imported.\n";
     if(count($failed_files) > 0){
         print "Files failed:\n";

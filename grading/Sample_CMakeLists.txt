@@ -39,7 +39,7 @@ IF (ASSIGNMENT_INSTALLATION)
   set(my_bin ${course_dir}/bin/${assignment})
 
   # Assignment configuration json file location
-  set(my_hw_config_file ${course_dir}/config/${assignment}_assignment_config.json)
+  set(my_hw_config_file ${course_dir}/config/build/build_${assignment}.json)
 
 else (ASSIGNMENT_INSTALLATION)
   # Otherwise, this is part of the test suite....
@@ -60,7 +60,8 @@ else (ASSIGNMENT_INSTALLATION)
   message("this is where i'll put the executables ${my_bin}")
 
   # configuration json file location
-  set(my_hw_config_file ${which_test_dir}/data/assignment_config.json)
+  # set(my_hw_config_file ${which_test_dir}/data/assignment_config.json)
+  set(my_hw_config_file ${which_test_dir}/data/build_config.json)
 
 endif(ASSIGNMENT_INSTALLATION)
 
@@ -80,6 +81,8 @@ include(instructor_CMakeLists.txt OPTIONAL RESULT_VARIABLE instructor_cmakelists
 if (instructor_cmakelists)
 message("DETECTED INSTRUCTOR CUSTOMIZATIONS in ${instructor_cmakelists}")
 message("  custom_files: ${custom_files}")
+else()
+set (custom_files ${GRADINGCODE}/grading/empty_custom_function.cpp)
 endif(instructor_cmakelists)
 
 
@@ -147,6 +150,7 @@ add_executable(validate.out
 )
 
 
+
 ###################################################################################
 
 target_link_libraries(custom_functions seccomp)
@@ -164,6 +168,7 @@ set_property(TARGET validate.out  APPEND_STRING PROPERTY COMPILE_FLAGS "-g -std=
 
 include_directories(${MY_DIR})
 include_directories(${GRADINGCODE})
+include_directories(${GRADINGCODE}/grading)
 
 SET(EXECUTABLE_OUTPUT_PATH ${my_bin})
 

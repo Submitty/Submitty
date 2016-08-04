@@ -1,106 +1,63 @@
 #!/usr/bin/env php
 
 <?php
-//xlsx_to_csv CGI spcript.  Converts uploaded XLSX spreadsheet to CSV
-//Created by Peter Bailie, Systems Programmer, RPI Computer Science
-//
-//Last code update Feb 23, 2016 by PB
-
 /**
- * This script will work with account/submit/admin-classlist.php to convert an
- * uploaded XLSX file to CSV.  Pertininent info must be passed to this script
- * via URL parameters, which cannot be considered secure information.
- *
- * IMPORTANT: Expected data uploads contain data regulated by
- * FERPA (20 U.S.C. § 1232g)
- * 
- * As this information must be made secure, existence of this data
- * (e.g. filenames) should not be shared by URL paramaters.  Therefore,
- * filenames will be hardcoded.
- *
- * Path for detected XLSX files            /tmp/_HSS_xlsx
- * Path for xlsx to CSV converted files    /tmp/_HSS_csv
- * These should be defined constants in this script and in CGI script.
- *
- * THESE FILES MUST BE IMMEDIATELY PURGED
- * (1) after the information is inserted into DB.  --OR--
- * (2) when the script is abruptly halted due to error condition.  e.g. die()
- *
- * Both conditions can be met as a closure registered with
- * register_shutdown_function()
+ * This script will convert a given xlsx (excel) file to csv format such
+ * that PHP can then natively parse the file using the fgetcsv builtin function.
+ * We utilize the xlsx2csv python package which we assume is available on the
+ * command line to do this conversion. The parameters to this script are a name
+ * for a XLSX file to convert and a name for the resulting CSV file. Deletion of
+ * these files should then be handled (if necessary) in the calling script, not
+ * in this file. Files handled by this script generally contain data that is
+ * regulate by FERPA (20 U.S.C. § 1232g) and thus should be treated in a manner
+ * such that unintended access is generally not possible. As such, the URL should
+ * not be indicated to the user (ie. through obvious redirection to this script)
+ * or by directly encoding it into a javascript ajax call. It should just be called
+ * via an internal call of the server, thus not making the url accessible.
  */
- 
-require "../toolbox/configs/master.php";
 
-//Ensure protected data (uploaded spreadsheet) is destroyed should this script die on error.
-register_shutdown_function(
-	function() {
-		if (file_exists(__TMP_XLSX_PATH__)) {
-			unlink(__TMP_XLSX_PATH__);
-		}
-	}
-);
+function return_error($string) {
+    $json = json_encode(array('success' => false, 'error' => true, 'error_message' => $string));
+    print "<HTML><BODY>{$json}</BODY></HTML>";
+}
 
-//Validate before process.  When $err_msgs is empty, no errors found.
-$err_msgs = "";
+function return_success() {
+    print "<HTML><BODY>{'success': true, 'error': false}</BODY></HTML>";
+}
 
 //Check if popen() is allowed
 if (function_exists('popen')) {
-
-	//Check if xlsx2csv file exists
-	$proc_handle = popen("command -v xlsx2csv", "r");
-	$err_msgs .= (!empty(fread($proc_handle, 1))) ? "" : "xlsx2csv not available." . PHP_EOL;
-	pclose($proc_handle);
+    //Check if xlsx2csv file exists
+    $proc_handle = popen("command -v xlsx2csv", "r");
+    if ((!empty(fread($proc_handle, 1)))) {
+        return_error("xlsx2csv not available.");
+    }
+    pclose($proc_handle);
 } else {
-	$err_msgs .= "popen not available." . PHP_EOL;
+    return_error("popen not available");
 }
 
-//Check if URL parameters exist ("course={code}" is expected)
-if (isset($_SERVER['QUERY_STRING'])) {
-	
-	//Check for HTML tags as a deterrent against possible XSS attack.
-	$query_string = filter_var($_SERVER['QUERY_STRING'], FILTER_SANITIZE_STRING);
-	$err_msgs .= ($query_string === $_SERVER['QUERY_STRING']) ? "" : "improper URL parameter."  . PHP_EOL;
-	
-	//Check to make sure course code is provided.
-	$err_code .= (strpos($query_string, 'course=') !== false) ? "" : "course code missing." . PHP_EOL;
-	
-	//Check for directory traversal.
-	$err_code .= (strpos($query_string, '/') === false) ? "" : "improper course code." . PHP_EOL;
-
-} else {
-	$err_msgs .= "course code not provided." . PHP_EOL;
-}
+$xlsx_file = basename($_REQUEST['xlsx_file']);
+$csv_file = basename($_REQUEST['csv_file']);
  
-//Check that XLSX file was uploaded.
-$err_msgs .= (file_exists(__TMP_XLSX_PATH__)) ? "" : "spreadsheet not available." . PHP_EOL;
-
-//Print error and die if any checks failed.
-die_on_error($err_msgs);
+if (!file_exists("/tmp/".$xlsx_file)) {
+    return_error("XLSX spreadsheet not found");
+}
 
 //XLSX to CSV conversion
-$proc_handle = popen("xlsx2csv -d , -i -s 0 -p '' " . __TMP_XLSX_PATH__ . " " . __TMP_CSV_PATH__ . " 2>&1", "r");
+$proc_handle = popen("xlsx2csv -d , -i -s 0 -p '' {$xlsx_file} {$csv_file} 2>&1", "r");
 
 //Validate result after process.
 //Check for traceback from xlsx2csv process (no message when process successful).
-$err_msgs .= (empty(fread($proc_handle, 1))) ? "" : "failed converting xlsx to csv." . PHP_EOL;
+$tmp = fread($proc_handle, 1);
 pclose($proc_handle);
+if (empty($tmp)) {
+    return_error("Failed converting xlsx to csv.");
+}
 
 //Check to make sure _HSS_csv was written.
-$err_msgs .= (file_exists(__TMP_CSV_PATH__)) ? "" : "file not available after csv conversion." . PHP_EOL;
-
-//Print error and die if any checks failed.
-die_on_error($err_msgs);
-
-//CSV conversion all done, and tmp csv file written.  Return to HWgrading.
-print '<HTML><META HTTP-EQUIV="refresh" CONTENT="0;URL=' . __BASE_URL__ . '/account/submit/admin-classlist.php?' . $query_string . '&xlsx2csv=1"></HTML>';
-exit(0);
-
-/* -------------------------------------------------------------------------- */
-
-function die_on_error($errors) {
-	if (!empty($errors)) {
-		die("xlsx_to_csv error(s):" . PHP_EOL . $errors . "Please contact your sysadmin.");
-	}
+if (!file_exists(__TMP_CSV_PATH__)) {
+    return_error("CSV file not available after the conversion");
 }
-?>
+
+return_success();

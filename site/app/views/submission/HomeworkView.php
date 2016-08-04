@@ -3,10 +3,7 @@
 namespace app\views\submission;
 
 use app\libraries\Core;
-use app\libraries\DiffViewer;
-use app\models\Assignment;
 use app\models\Gradeable;
-use app\models\User;
 
 class HomeworkView {
     /**
@@ -287,14 +284,15 @@ HTML;
         </div>
         <div class="box half">
 HTML;
-            if($gradeable->hasCurrentResults()) {
-                $details = $gradeable->getCurrentResults();
+            $results = $gradeable->getResults();
+            if($gradeable->getResults()) {
+                
                 $return .= <<<HTML
-submission timestamp: {$details['submission_time']}<br />
-days late (before extensions): {$details['days_late']}<br />
+submission timestamp: {$results['submission_time']}<br />
+days late (before extensions): {$results['days_late']}<br />
 <br />
-wait time: {$details['wait_time']}<br />
-grade time: {$details['grade_time']}<br />
+wait time: {$results['wait_time']}<br />
+grade time: {$results['grade_time']}<br />
 HTML;
             }
             $return .= <<<HTML
@@ -310,15 +308,21 @@ HTML;
         <span class="green-message">Note: {$gradeable->getAssignmentMessage()}</span> 
 HTML;
             }
-            if (!$gradeable->hasCurrentResults()) {
+            if (!$gradeable->hasResults()) {
                 $return .= <<<HTML
         <p class="red-message">
             Currently being graded
         </p>
+        <script type="text/javascript">
+            checkRefreshSubmissionPage('{$this->core->buildUrl(array('component' => 'student', 
+                                                                    'page' => 'submission', 
+                                                                    'action' => 'check_refresh', 
+                                                                    'gradeable_id' => $gradeable->getId(), 
+                                                                    'gradeable_version' => $gradeable->getCurrentVersion()))}')
+        </script>
 HTML;
             }
             else {
-                $results = $gradeable->getCurrentResults();
                 if($gradeable->getNormalPoints() > 0) {
                     if ($results['points'] >= $gradeable->getNormalPoints()) {
                         $background = "green-background";
@@ -396,12 +400,13 @@ HTML;
 HTML;
                         }
                     
-                        foreach ($testcase->getDiffs() as $diff) {
+                        foreach ($testcase->getAutochecks() as $autocheck) {
                             $return .= <<<HTML
                 <div class="box-block">
+                    <span class="red-message">{$autocheck->getMessage()}</span>
 HTML;
-                            $diff_viewer = $diff->getDiffViewer();
-                            $description = $diff->getDescription();
+                            $diff_viewer = $autocheck->getDiffViewer();
+                            $description = $autocheck->getDescription();
                             if($diff_viewer->hasActualOutput()) {
                                 $return .= <<<HTML
                             <div class='diff-element'>
