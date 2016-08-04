@@ -55,10 +55,10 @@ set_error_handler("error_handler", E_ERROR);
  */
 if (!isset($_REQUEST['semester'])) {
     // @todo: should check for a default semester if one is not specified, opposed to throwing an exception
-    $core->getOutput()->showError("Need to specify a semester (ex: &semester=s16) in the URL");
+    $core->getOutput()->showError("Need to specify a semester in the URL");
 }
 if (!isset($_REQUEST['course'])) {
-    $core->getOutput()->showError("Need to specify a course (ex: &course=csci1100) in the URL");
+    $core->getOutput()->showError("Need to specify a course in the URL");
 }
 
 // Sanitize the inputted semester & course to prevent directory attacks

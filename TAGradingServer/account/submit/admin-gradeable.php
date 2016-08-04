@@ -409,7 +409,7 @@ else{
             $graders = getGraders($request_args);
             $gradeable->setupRotatingSections($db, $graders);
             
-            array_push($success_gids, $gradeable->getGID());
+            array_push($success_gids, $gradeable->get_GID());
         } catch (Exception $e){
           array_push($failed_files, $file);
         } finally{
