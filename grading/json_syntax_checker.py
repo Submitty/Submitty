@@ -5,7 +5,7 @@ import json
 import re
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="JSON validatorStrip out C++ style comments from a JSON file")
+    parser = argparse.ArgumentParser(description="JSON validator to ensure that a JSON is of proper format")
     parser.add_argument("file", metavar="file_name", type=str,
                         help="File name of JSON file to validate")
     args = parser.parse_args()

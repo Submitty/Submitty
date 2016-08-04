@@ -39,6 +39,7 @@ SVN_PATH=__CONFIGURE__FILLIN__SVN_PATH__
 SUBMITTY_REPOSITORY=__CONFIGURE__FILLIN__SUBMITTY_REPOSITORY__
 
 HWPHP_USER=__CONFIGURE__FILLIN__HWPHP_USER__
+HWCGI_USER=__CONFIGURE__FILLIN__HWCGI_USER__
 HWCRON_USER=__CONFIGURE__FILLIN__HWCRON_USER__
 HWCRONPHP_GROUP=__CONFIGURE__FILLIN__HWCRONPHP_GROUP__
 COURSE_BUILDERS_GROUP=__CONFIGURE__FILLIN__COURSE_BUILDERS_GROUP__
@@ -51,6 +52,8 @@ HWCRON_UID=__CONFIGURE__FILLIN__HWCRON_UID__
 HWCRON_GID=__CONFIGURE__FILLIN__HWCRON_GID__
 HWPHP_UID=__CONFIGURE__FILLIN__HWPHP_UID__
 HWPHP_GID=__CONFIGURE__FILLIN__HWPHP_GID__
+HWCGI_UID=__CONFIGURE__FILLIN__HWCGI_UID__
+HWCGI_GID=__CONFIGURE__FILLIN__HWCGI_GID__
 
 DATABASE_HOST=__CONFIGURE__FILLIN__DATABASE_HOST__
 DATABASE_USER=__CONFIGURE__FILLIN__DATABASE_USER__
@@ -81,6 +84,7 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SVN_PATH__|$SVN_PATH|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWCGI_USER__|$HWCGI_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $1
@@ -94,6 +98,8 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_GID__|$HWPHP_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWCGI_UID__|$HWCGI_UID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWCGI_GID__|$HWCGI_GID|g" $1
 
 
     sed -i -e "s|__INSTALL__FILLIN__DATABASE_HOST__|$DATABASE_HOST|g" $1
@@ -160,9 +166,9 @@ chown  root:$COURSE_BUILDERS_GROUP   $SUBMITTY_DATA_DIR
 chmod  751                           $SUBMITTY_DATA_DIR
 chown  root:$COURSE_BUILDERS_GROUP   $SUBMITTY_DATA_DIR/courses
 chmod  751                           $SUBMITTY_DATA_DIR/courses
-chown  hwphp:$COURSE_BUILDERS_GROUP  $SUBMITTY_DATA_DIR/tagrading_logs
+chown  $HWPHP_USER:$COURSE_BUILDERS_GROUP  $SUBMITTY_DATA_DIR/tagrading_logs
 chmod  u+rwx,g+rxs                   $SUBMITTY_DATA_DIR/tagrading_logs
-chown  hwcron:$COURSE_BUILDERS_GROUP $SUBMITTY_DATA_DIR/autograding_logs
+chown  $HWCRON_USER:$COURSE_BUILDERS_GROUP $SUBMITTY_DATA_DIR/autograding_logs
 chmod  u+rwx,g+rxs                   $SUBMITTY_DATA_DIR/autograding_logs
 
 # if the to_be_graded directories do not exist, then make them
@@ -424,12 +430,14 @@ rsync -rtz   $SUBMITTY_REPOSITORY/site   $SUBMITTY_INSTALL_DIR
 
 # set special user $HWPHP_USER as owner & group of all website files
 find $SUBMITTY_INSTALL_DIR/site -exec chown $HWPHP_USER:$HWPHP_USER {} \;
+find $SUBMITTY_INSTALL_DIR/site/cgi-bin -exec chown $HWCGI_USER:$HWCGI_USER {} \;
 
 # set the permissions of all files
 # $HWPHP_USER can read & execute all directories and read all files
 # "other" can cd into all subdirectories
-chmod -R 400 $SUBMITTY_INSTALL_DIR/site
-find $SUBMITTY_INSTALL_DIR/site -type d -exec chmod uo+x {} \;
+chmod -R 440 $SUBMITTY_INSTALL_DIR/site
+find $SUBMITTY_INSTALL_DIR/site -type d -exec chmod ogu+x {} \;
+
 # "other" can read all .txt, .jpg, & .css files
 find $SUBMITTY_INSTALL_DIR/site -type f -name \*.css -exec chmod o+r {} \;
 find $SUBMITTY_INSTALL_DIR/site -type f -name \*.otf -exec chmod o+r {} \;
@@ -486,7 +494,7 @@ echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"  
 echo -e "\n\n"                                                                                >> ${HWCRON_CRONTAB_FILE}
 
 # install the crontab file for the hwcron user
-crontab  -u hwcron  ${HWCRON_CRONTAB_FILE}
+crontab  -u ${HWCRON_USER}  ${HWCRON_CRONTAB_FILE}
 rm ${HWCRON_CRONTAB_FILE}
 
 
