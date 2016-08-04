@@ -35,14 +35,14 @@ class PamAuthentication implements IAuthentication {
 
         do {
             $file = md5(uniqid(rand(), true));
-        } while (file_exists("/tmp/pam/{$file}"));
+        } while (file_exists("/tmp/{$file}"));
 
         $contents = json_encode(array('username' => $username, 'password' => $password));
-        if (file_put_contents("/tmp/pam/{$file}", $contents) === false) {
+        if (file_put_contents("/tmp/{$file}", $contents) === false) {
             throw new AuthenticationException("Could not create tmp user PAM file.");
         }
         register_shutdown_function(function() use ($file) {
-            unlink("/tmp/pam/{$file}");
+            unlink("/tmp/{$file}");
         });
 
         // Open a cURL connection so we don't have to do a weird redirect chain to authenticate
