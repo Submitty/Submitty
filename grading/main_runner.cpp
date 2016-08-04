@@ -129,24 +129,26 @@ int main(int argc, char *argv[]) {
       
     }
     
-
+    std::vector<std::vector<std::string>> filenames = my_testcase.getFilenames();
+    assert (filenames.size() > 0);
+    assert (filenames.size() == my_testcase.numFileGraders());
     // rename any key files created by this test case to prepend the test number
-    for (int f = 0; f < my_testcase.numFileGraders(); f++) {
-      std::string raw_filename = my_testcase.raw_filename(f);
-      std::string filename     = my_testcase.getPrefixFilename(f);
-      if (raw_filename != "" &&
-	access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists 
-	execute ("/bin/mv "+raw_filename+" "+filename,
-		 "/dev/null",
-                 my_testcase.get_test_case_limits(),
-                 config_json.value("resource_limits",nlohmann::json())); 
-
-	std::cout << "RUNNER!  /bin/mv "+raw_filename+" "+filename << std::endl;
-
-
+    for (int v = 0; v < filenames.size(); v++) {
+      assert (filenames[0].size() > 0);
+      for (int i = 0; i < filenames[v].size(); i++) {
+        std::cout << "main runner " << v << " " << i << std::endl;
+        std::string raw_filename = my_testcase.getMyFilename(v,i);
+        std::string filename     = my_testcase.getMyPrefixFilename(v,i);
+        assert (raw_filename != "");
+        if (access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists
+          execute ("/bin/mv "+raw_filename+" "+filename,
+                   "/dev/null",
+                   my_testcase.get_test_case_limits(),
+                   config_json.value("resource_limits",nlohmann::json()));
+          std::cout << "RUNNER!  /bin/mv "+raw_filename+" "+filename << std::endl;
+        }
       }
     }
-
   }
   
   std::cout << "========================================================" << std::endl;

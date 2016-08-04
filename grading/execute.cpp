@@ -312,6 +312,7 @@ void parse_command_line(const std::string &cmd,
 			std::string &my_stderr,
 			std::ofstream &logfile) {
 
+  std::cout << "PARSE COMMAND LINE " << cmd << std::endl;
 
   my_args.clear();
   my_program = my_stdin = my_stdout = my_stderr = "";

@@ -86,6 +86,9 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     gradefile << "  penalty for excessive submissions: " << penalty << " points" << std::endl;
   }
 
+  std::cout << "PENALTY IS " << penalty << std::endl;
+  assert (penalty <= 0 && penalty >= -10);
+
   int nonhidden_auto_pts = penalty;
   int hidden_auto_pts = penalty;
 
@@ -131,38 +134,44 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
     // FILE EXISTS & COMPILATION TESTS DON'T HAVE FILE COMPARISONS
     if (my_testcase.isFileExistsTest()) {
+      std::string filename = my_testcase.getMyFilename(0,0);
 
-      std::cerr << "THIS IS A FILE EXISTS TEST! " << my_testcase.getFilename() << std::endl;
-      assert (my_testcase.getFilename() != "");
+      std::cerr << "THIS IS A FILE EXISTS TEST! " << filename << std::endl;
+      assert (filename != "");
 
-      if ( access( (std::string("")+my_testcase.getFilename()).c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
-        std::cerr << "file does exist: " << my_testcase.getFilename() << std::endl;
+      if ( access( (std::string("")+filename).c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
+        std::cerr << "file does exist: " << filename << std::endl;
         testcase_pts = my_testcase.getPoints();
+        std::cout << "testcase_pts A " << testcase_pts << std::endl;
       }
       else {
-        std::cerr << "ERROR file DOES NOT exist: " << my_testcase.getFilename() << std::endl;
-        message += "Error: " + my_testcase.getFilename() + " was not found!";
+        std::cerr << "ERROR file DOES NOT exist: " << filename << std::endl;
+        message += "Error: " + filename + " was not found!";
       }
     }
     else if (my_testcase.isCompilationTest()) {
       std::cerr << "THIS IS A COMPILATION! " << std::endl;
 
-      if ( access( my_testcase.getFilename().c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
-        std::cerr << "file does exist: " << my_testcase.getFilename() << std::endl;
+      std::string filename = my_testcase.getMyFilename(0,0);
+
+      if ( access( filename.c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
+        std::cerr << "file does exist: " << filename << std::endl;
         // CHECK IF WARNINGS EXIST
         std::ifstream ifstr(my_testcase.prefix() + "_STDERR.txt");
         if(!ifstr) std::cerr << my_testcase.prefix() <<  "_STDERR.txt" << " not open.";
         else if(ifstr.peek() != std::ifstream::traits_type::eof()){
           std::cerr << my_testcase.prefix() <<  "_STDERR.txt" << " not empty.";
           testcase_pts = (int)floor( my_testcase.getPoints()*(1 - my_testcase.get_warning_frac()) );
+          std::cout << "testcase_pts B " << testcase_pts << std::endl;
           message += "Unresolved warnings in your program!";
         }
         else{
           testcase_pts = my_testcase.getPoints();
+          std::cout << "testcase_pts C " << testcase_pts << std::endl;
         }
       }
       else {
-        std::cerr << "ERROR file DOES NOT exist: " << my_testcase.getFilename() << std::endl;
+        std::cerr << "ERROR file DOES NOT exist: " << filename << std::endl;
         message += "Error: compilation was not successful!";
       }
       if (my_testcase.isCompilationTest()) {
@@ -177,13 +186,15 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         TestResults *result = my_testcase.do_the_grading(j);
         assert (result != NULL);
         // loop over the student files
-        std::vector<std::string> filenames = stringOrArrayOfStrings(my_testcase.test_case_grader_vec[j],"filename");
+        const nlohmann::json& tcg = my_testcase.getGrader(j);
+
+        std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"filename");
         for (int FN = 0; FN < filenames.size(); FN++) {
           // JSON FOR THIS COMPARISON
           nlohmann::json autocheck_j; 
           autocheck_j["student_file"] = my_testcase.prefix() + "_" + filenames[FN];
           std::string expected = "";
-          expected = my_testcase.test_case_grader_vec[j].value("instructor_file", "");
+          expected = tcg.value("instructor_file", "");
           if (GLOBAL_replace_string_before != "") {
             while (1) {
               int location = expected.find(GLOBAL_replace_string_before);
@@ -211,7 +222,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
             autocheck_j["instructor_file"] = expected_path.str();
             autocheck_j["difference"] = my_testcase.prefix() + "_" + std::to_string(j) + "_diff.json";
           }
-          autocheck_j["description"] = my_testcase.description(j);
+          autocheck_j["description"] = my_testcase.getFilenameDescription(j);
           if (FN==0) {
             for (int m = 0; m < result->getMessages().size(); m++) {
               if (result->getMessages()[m] != "")
@@ -222,7 +233,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         }
         std::cout << "result->getGrade() = " << result->getGrade() << std::endl;
         assert (result->getGrade() >= 0.0 && result->getGrade() <= 1.0);
-        double deduction = my_testcase.test_case_grader_vec[j].value("deduction",1.0); 
+        double deduction = tcg.value("deduction",1.0);
         assert (deduction >= -0.001 && deduction <= 1.001);
         std::cout << "deduction multiplier = " << deduction << std::endl;
         my_score -= deduction*(1-result->getGrade());
@@ -236,12 +247,13 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       my_score = std::max(0.0,std::min(1.0,my_score));
       std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
       testcase_pts = (int)floor(my_score * my_testcase.getPoints());
+      std::cout << "testcase_pts D " << testcase_pts << std::endl;
     } // end if/else of test case type
 
     // output grade & message
 
     std::cout << "Grade: " << testcase_pts << std::endl;
-
+    std::cout << "testcase_pts E " << testcase_pts << std::endl;
     // TODO: LOGIC NEEDS TO BE TESTED WITH MORE COMPLEX HOMEWORK!
 
     if (!my_testcase.getHidden()) {

@@ -18,15 +18,17 @@
 
 nlohmann::json printTestCase(TestCase test) {
   nlohmann::json j;
-  j["title"] = "Test " + std::to_string(test.getID()) + test.getTitle();
+  j["title"] = "Test " + std::to_string(test.getID()) + " " + test.getTitle();
   j["details"] = test.getDetails();
   j["points"] = test.getPoints();
   j["extra_credit"] = test.getExtraCredit();
   j["hidden"] = test.getHidden();
   j["visible"] = !test.getHidden();
-  j["view_file_results"] = true; //test.getView_file_results();
+
+  // THESE ELEMENTS ARE DEPRECATED / NEED TO BE REPLACED
+  j["view_file_results"] = true;
   j["view_test_points"] = true;
-  j["view_file"] = ""; //test.getView_file();
+  j["view_file"] = "";
   return j;
 }
 

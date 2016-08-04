@@ -179,26 +179,27 @@ TestResults* json_grader_doit(const TestCase& tc, const nlohmann::json& j) {
 
   std::vector<std::string> filenames = stringOrArrayOfStrings(j,"filename");
   assert (filenames.size() > 0);
-  std::string filename = filenames[0];
+
+  //std::string filename = filenames[0];
   
   std::string prefix = tc.prefix();
 
   if (method == "JUnitTestGrader") {
     int num_tests = j.value("num_tests",1);
-    TestCaseJUnit *g = TestCaseJUnit::JUnitTestGrader(filename,num_tests,deduction); 
+    TestCaseJUnit *g = TestCaseJUnit::JUnitTestGrader(filenames[0],num_tests,deduction);
     return g->doit(prefix);
 
   } else if (method == "EmmaInstrumentationGrader") {
-    TestCaseJUnit *g = TestCaseJUnit::EmmaInstrumentationGrader(filename,deduction); 
+    TestCaseJUnit *g = TestCaseJUnit::EmmaInstrumentationGrader(filenames[0],deduction);
     return g->doit(prefix);
 
   } else if (method == "MultipleJUnitTestGrader") {
-    TestCaseJUnit *g = TestCaseJUnit::MultipleJUnitTestGrader(filename,deduction); 
+    TestCaseJUnit *g = TestCaseJUnit::MultipleJUnitTestGrader(filenames[0],deduction);
     return g->doit(prefix);
     
   } else if (method == "EmmaCoverageReportGrader") {
     float coverage_threshold = j.value("coverage_threshold",100);
-    TestCaseJUnit *g = TestCaseJUnit::EmmaCoverageReportGrader(filename,coverage_threshold,deduction); 
+    TestCaseJUnit *g = TestCaseJUnit::EmmaCoverageReportGrader(filenames[0],coverage_threshold,deduction);
     return g->doit(prefix);
     
   } else if (method == "searchToken") {
@@ -312,27 +313,24 @@ void AddDefaultGraders(const std::vector<std::string> &commands,
   }
 }
 
+// =================================================================================
+// =================================================================================
 
-TestCase::TestCase (nlohmann::json j) {
+TestCase::TestCase (const nlohmann::json& j) {
 
   test_case_id = next_test_case_id;
   next_test_case_id++;
-  FILE_EXISTS = false;
-  COMPILATION = false;
+  //FILE_EXISTS = false;
+  //COMPILATION = false;
   
   std::string type = j.value("type","DEFAULT");
     
   if (type == "FileExists") {
-    _filenames.push_back(j.value("filename","FILENAME MISSING"));
-    FILE_EXISTS = true;
-    // view_file_results = false;
+    //FILE_EXISTS = true;
   } else if (type == "Compilation") {
-    _filenames = stringOrArrayOfStrings(j,"executable_name");
-    assert (_filenames.size() > 0);
-    _commands = stringOrArrayOfStrings(j,"command");
-    assert (_commands.size() > 0);
-    warning_frac = j.value("warning_deduction",0);
-    COMPILATION = true;
+    //_commands = stringOrArrayOfStrings(j,"command");
+    //assert (_commands.size() > 0);
+    //COMPILATION = true;
     _test_case_limits = j.value("resource_limits", nlohmann::json());
   
     // compilation (g++, clang++, javac) usually requires multiple
@@ -353,12 +351,12 @@ TestCase::TestCase (nlohmann::json j) {
     adjust_test_case_limits(_test_case_limits,RLIMIT_FSIZE,10*1000*1000);  // 10 MB executable
   } else {
     assert (type == "DEFAULT");
-    std::vector<std::string> commands = stringOrArrayOfStrings(j,"command");
+
     std::vector<nlohmann::json> json_graders;
-    nlohmann::json::iterator itr = j.find("validation");
+    nlohmann::json::const_iterator itr = j.find("validation");
     assert (itr != j.end());
     int num_graders = itr->size();
-    for (nlohmann::json::iterator itr2 = (itr)->begin(); itr2 != (itr)->end(); itr2++) {
+    for (nlohmann::json::const_iterator itr2 = (itr)->begin(); itr2 != (itr)->end(); itr2++) {
       nlohmann::json j = *itr2;
       std::string method = j.value("method","");
       std::string description = j.value("description","");
@@ -375,21 +373,39 @@ TestCase::TestCase (nlohmann::json j) {
       }
       json_graders.push_back(j);
     }
-    assert (commands.size() > 0);
+    //assert (commands.size() > 0);
     assert (json_graders.size() > 0);
+    std::vector<std::string> commands = stringOrArrayOfStrings(j,"command");
+    assert (commands.size() > 0);
+
     VerifyGraderDeductions(json_graders);
     AddDefaultGraders(commands,json_graders);
-    assert (commands.size() > 0);
-    _commands = commands;
+    //assert (commands.size() > 0);
+    //_commands = commands;
     assert (json_graders.size() >= 1); 
     test_case_grader_vec = json_graders;
-    _filenames.push_back("");
     _test_case_limits = j.value("resource_limits",nlohmann::json());
   }
   
   _json = j;
 }
 
+// =================================================================================
+// =================================================================================
+// ACCESSORS
+
+
+std::string TestCase::getTitle() const {
+  const nlohmann::json::const_iterator& itr = _json.find("title");
+  if (itr == _json.end()) {
+    std::cerr << "ERROR! MISSING TITLE" << std::endl;
+  }
+  assert (itr->is_string());
+  return (*itr);
+}
+
+// =================================================================================
+// =================================================================================
 
 
 
@@ -401,7 +417,7 @@ TestResults* TestCase::do_the_grading (int j) {
   bool ok_to_compare = true;
 
   // GET THE FILES READY
-  std::string pf = getPrefixFilename(j);
+  std::string pf = getMyPrefixFilename(j,0);
   std::ifstream student_file(pf.c_str());
   if (!student_file) {
     std::stringstream tmp;
@@ -445,7 +461,7 @@ TestResults* TestCase::do_the_grading (int j) {
     helper_message += tmp.str();
     ok_to_compare = false;
   }
-  TestResults *answer = json_grader_doit(*this,test_case_grader_vec[j]); //,prefix());
+  TestResults *answer = json_grader_doit(*this,test_case_grader_vec[j]);
   if (helper_message != "") {
     answer->addMessage(helper_message);
   }

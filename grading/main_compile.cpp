@@ -162,34 +162,36 @@ int main(int argc, char *argv[]) {
       
       assert (my_testcase.numFileGraders() == 0);
       
+      std::vector<std::string> commands = my_testcase.getCommands();
+
       std::cout << "========================================================" << std::endl;
-      std::cout << "TEST " << i+1 << " " << my_testcase.command() << " IS COMPILATION!" << std::endl;
-      
-      std::string cmd = my_testcase.command();
-      assert (cmd != "");
+      std::cout << "TEST " << i+1 << " IS COMPILATION!" << std::endl;
 
-
+      assert (commands.size() > 0);
+      for (int j = 0; j < commands.size(); j++) {
+        std::cout << "COMMAND #" << j << ": " << commands[j] << std::endl;
 
 #ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-      std::cout << "BEFORE " << cmd << std::endl;
-      while (1) {
-	int location = cmd.find(replace_string_before);
-	if (location == std::string::npos) 
-	  break;
-	cmd.replace(location,replace_string_before.size(),replace_string_after);
-      }
-      std::cout << "AFTER  " << cmd << std::endl;
+        std::cout << "BEFORE " << commands[j] << std::endl;
+        while (1) {
+          int location = commands[j].find(replace_string_before);
+          if (location == std::string::npos)
+            break;
+          commands[j].replace(location,replace_string_before.size(),replace_string_after);
+        }
+        std::cout << "AFTER  " << commands[j] << std::endl;
 #endif
       
-      // run the command, capturing STDOUT & STDERR
-      int exit_no = execute(cmd +
-			    " 1>" + my_testcase.prefix() + "_STDOUT.txt" +
-			    " 2>" + my_testcase.prefix() + "_STDERR.txt",
-			    my_testcase.prefix() + "_execute_logfile.txt",
-			    my_testcase.get_test_case_limits(),
-                            config_json.value("resource_limits",nlohmann::json())); 
-      
-      std::cout<< "Exited with exit_no: "<<exit_no<<std::endl;
+        // run the command, capturing STDOUT & STDERR
+        int exit_no = execute(commands[j] +
+                              " 1>" + my_testcase.prefix() + "_STDOUT.txt" +
+                              " 2>" + my_testcase.prefix() + "_STDERR.txt",
+                              my_testcase.prefix() + "_execute_logfile.txt",
+                              my_testcase.get_test_case_limits(),
+                              config_json.value("resource_limits",nlohmann::json()));
+
+        std::cout<< "FINISHED COMMAND, exited with exit_no: "<<exit_no<<std::endl;
+      }
     }
   }
   std::cout << "========================================================" << std::endl;
