@@ -42,13 +42,19 @@ public:
 
   float get_warning_frac() const { assert (isCompilationTest()); return _json.value("warning_deduction",0.0); }
 
+
+  // -------------------------------
+  // COMMANDS
   std::vector<std::string> getCommands() const {
     std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
     assert (commands.size() > 0);
     return commands;
   }
 
-  std::vector<std::vector<std::string>> getFilenames() const;
+
+  // -------------------------------
+  // FILENAMES
+  std::string getPrefix() const;
   std::string getMyFilename(int v, int i) const {
     const std::vector<std::vector<std::string> > filenames = getFilenames();
     assert (filenames.size() > 0);
@@ -56,54 +62,50 @@ public:
     return filenames[v][i];
   }
   std::string getMyPrefixFilename (int v, int i) const { return getPrefix()+"_"+getMyFilename(v,i); }
+  std::vector<std::vector<std::string>> getFilenames() const;
 
+
+  // -------------------------------
+  // GRADING & GRADERS
+  TestResults* do_the_grading (int j);
   int numFileGraders() const { return test_case_grader_vec.size(); }
   const nlohmann::json& getGrader(int i) const {
     assert (i >= 0 && i < numFileGraders());
     return test_case_grader_vec[i];
   }
-
-  TestResults* do_the_grading (int j);
-
   const nlohmann::json get_test_case_limits() const;
-
-  // PRIVATE HELPER FUNCTIONS
-
-  std::string getPrefix() const;
 
 private:
 
+  // -------------------------------
+  // PRIVATE HELPER FUNCTIONS
   TestResults* dispatch(const nlohmann::json& grader) const;
   TestResults* custom_dispatch(const nlohmann::json& grader) const;
-
-  nlohmann::json _json;
-  std::vector<nlohmann::json> test_case_grader_vec;
 
   // -------------------------------
   // REPRESENTATION
   int test_case_id;
   static int next_test_case_id;
+
+  nlohmann::json _json;
+  std::vector<nlohmann::json> test_case_grader_vec;
 };
 
 
-// helper functions
-void adjust_test_case_limits(nlohmann::json &modified_test_case_limits, int rlimit_name, rlim_t value);
 
 
 // =================================================================================
+// =================================================================================
+
+// NON MEMBER  HELPER FUNCTIONS
+
+void adjust_test_case_limits(nlohmann::json &modified_test_case_limits, int rlimit_name, rlim_t value);
 
 std::string getAssignmentIdFromCurrentDirectory(std::string);
-
-
-
 
 bool getFileContents(const std::string &filename, std::string &file_contents);
 bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::string &message);
 bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string &instructor_file_contents, std::string &message);
-
-
-// FIXME: file organization should be re-structured
-//#include "JUnitGrader.h"
 
 
 #endif
