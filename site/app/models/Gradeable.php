@@ -190,9 +190,10 @@ abstract class Gradeable {
         }
         
         for ($i = 1; $i <= $this->num_parts; $i++) {
-            if (isset($details['part_names']) && isset($details['part_names'][$i]) &&
-                trim($details['part_names'][$i]) !== "") {
-                $this->part_names[$i] = $details['part_names'][$i];
+            $j = $i - 1;
+            if (isset($details['part_names']) && isset($details['part_names'][$j]) &&
+                trim($details['part_names'][$j]) !== "") {
+                $this->part_names[$i] = $details['part_names'][$j];
             }
             else {
                 $this->part_names[$i] = "Part ".$i;
@@ -286,7 +287,7 @@ abstract class Gradeable {
 
         $submission_current_path = $submission_path."/".$this->current;
         
-        $submitted_files = FileUtils::getAllFiles($submission_current_path, array(), true, true);
+        $submitted_files = FileUtils::getAllFiles($submission_current_path, array(), true);
         foreach ($submitted_files as $file => $details) {
             if (substr(basename($file), 0, 1) === '.') {
                 $this->meta_files[$file] = $details;
