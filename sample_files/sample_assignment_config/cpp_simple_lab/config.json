@@ -14,7 +14,7 @@
 
         // *************** README *****************
         {
-            "type" : "FileExists",
+            "type" : "FileCheck",
             "title" : "README",
             "filename" : "part1/README.txt",
             "points" : 2

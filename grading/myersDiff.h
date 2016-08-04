@@ -36,9 +36,7 @@
 
 #include "json.hpp"
 
-//template<class T> Difference* ses ( T& a, T& b, bool secondary = false, bool extraStudentOutputOk =false );
 template<class T> Difference* ses ( T* a, T* b, bool secondary = false, bool extraStudentOutputOk =false );
-//template<class T> metaData< T > sesSnapshots ( T& a, T& b, bool extraStudentOutputOk  );
 template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutputOk  );
 template<class T> metaData< T > sesSnakes ( metaData< T > & meta_diff, bool extraStudentOutputOk  );
 template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extraStudentOutputOk);
@@ -48,6 +46,7 @@ template<class T> Difference* printJSON ( Difference & text_diff, std::ofstream 
 
 
 
+TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j);
 TestResults* warnIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j);
 TestResults* errorIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j);
 TestResults* warnIfEmpty_doit (const TestCase &tc, const nlohmann::json& j);

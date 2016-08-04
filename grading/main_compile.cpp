@@ -156,15 +156,41 @@ int main(int argc, char *argv[]) {
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
 
+    std::cout << "========================================================" << std::endl;
+
     TestCase my_testcase((*tc)[i]);
 
-    if (my_testcase.isCompilationTest()) {
+    if (my_testcase.isFileCheck()) {
+
+
+      std::cout << "TEST " << i+1 << " IS FILE CHECK!" << std::endl;
+
+      std::vector<std::vector<std::string>> filenames = my_testcase.getFilenames();
+      for (int i = 0; i < filenames.size(); i++) {
+        for (int j = 0; j < filenames[i].size(); j++) {
+          std::cout << "PATTERN: " << filenames[i][j] << std::endl;
+          std::vector<std::string> files;
+          wildcard_expansion(files, filenames[i][j], std::cout);
+          for (int i = 0; i < files.size(); i++) {
+            std::cout << "  rescue  FILE #" << i << ": " << files[i] << std::endl;
+            std::string new_filename = my_testcase.getPrefix() + "_" + replace_slash_with_double_underscore(files[i]);
+            execute ("/bin/cp "+files[i]+" "+new_filename,
+                     "/dev/null",
+                     my_testcase.get_test_case_limits(),
+                     config_json.value("resource_limits",nlohmann::json()));
+
+          }
+        }
+      }
+
+
+
+    } else if (my_testcase.isCompilation()) {
       
-      assert (my_testcase.numFileGraders() == 0);
+      assert (my_testcase.numFileGraders() > 0);
       
       std::vector<std::string> commands = my_testcase.getCommands();
 
-      std::cout << "========================================================" << std::endl;
       std::cout << "TEST " << i+1 << " IS COMPILATION!" << std::endl;
 
       assert (commands.size() > 0);
@@ -192,6 +218,8 @@ int main(int argc, char *argv[]) {
 
         std::cout<< "FINISHED COMMAND, exited with exit_no: "<<exit_no<<std::endl;
       }
+    } else {
+      std::cout << "TEST " << i+1 << " IS EXECUTION!" << std::endl;
     }
   }
   std::cout << "========================================================" << std::endl;

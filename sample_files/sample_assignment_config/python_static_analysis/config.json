@@ -31,13 +31,14 @@
             ]
         },
         {
+            "type" : "FileCheck",
             "title" : "Legal Variable Names",
-	    "command" : "/bin/cat part2/*",
             "points" : 1,
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
+//                    "filename" : "part2/p2_sol.py",
+                    "filename" : "part2/*.txt",
                     "description" : "Program Output",
 		    "instructor_file" : "p2_out.txt"
                 }

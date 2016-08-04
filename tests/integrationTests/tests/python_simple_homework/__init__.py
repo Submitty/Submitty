@@ -45,7 +45,6 @@ def correct(test):
     test.run_validator()
     test.diff("test01_STDOUT.txt","data/hw01part1_sol.txt")
     test.empty_file("test01_STDERR.txt")
-    test.empty_file("test01_execute_logfile.txt")
     test.empty_json_diff("test01_0_diff.json")
     test.diff(".submit.grade",".submit.grade_correct")
     test.json_diff("submission.json","submission.json_correct")
@@ -62,7 +61,6 @@ def buggy(test):
     test.run_validator()
     test.diff("test01_STDOUT.txt","test01_STDOUT.txt_buggy")
     test.empty_file("test01_STDERR.txt")
-    test.empty_file("test01_execute_logfile.txt")
     test.json_diff("test01_0_diff.json","test01_0_diff.json_buggy")
     test.diff(".submit.grade",".submit.grade_buggy")
     test.json_diff("submission.json","submission.json_buggy")
@@ -79,7 +77,6 @@ def buggy2(test):
     test.run_validator()
     test.diff("test01_STDOUT.txt","test01_STDOUT.txt_buggy2")
     test.empty_file("test01_STDERR.txt")
-    test.empty_file("test01_execute_logfile.txt")
     test.json_diff("test01_0_diff.json","test01_0_diff.json_buggy2")
     test.diff(".submit.grade",".submit.grade_buggy2")
     test.json_diff("submission.json","submission.json_buggy2")
@@ -147,5 +144,3 @@ def infinite_loop_time_cutoff(test):
     # cleanup the non empty logfile
     subprocess.call(["rm",
         os.path.join(test.testcase_path, "data/", "test01_execute_logfile.txt")])
-
-

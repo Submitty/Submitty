@@ -19,7 +19,7 @@
 
 #include "TestCase.h"
 #include "default_config.h"
-
+#include "execute.h"
 #include "json.hpp"
 
 extern std::string GLOBAL_replace_string_before;
@@ -33,28 +33,19 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
 int main(int argc, char *argv[]) {
 
-  std::string hw_id = "";
-  std::string rcsid = "";
-  int subnum = -1;
-  std::string time_of_submission = "";
-
-  /* Check argument usage */
-  if (argc == 5) {
-    hw_id = argv[1];
-    rcsid = argv[2];
-    subnum = atoi(argv[3]);
-    time_of_submission = argv[4];
-  }
-  else {
+  // PARSE ARGUMENTS
+  if (argc != 5) {
     std::cerr << "VALIDATOR USAGE: validator <hw_id> <rcsid> <submission#> <time-of-submission>" << std::endl;
     return 1;
-  } 
+  }
+  std::string hw_id = argv[1];
+  std::string rcsid = argv[2];
+  int subnum = atoi(argv[3]);
+  std::string time_of_submission = argv[4];
 
   // TODO: add more error checking of arguments
 
-
   int rc = validateTestCases(hw_id,rcsid,subnum,time_of_submission);
-
   if (rc > 0) {
     std::cerr << "Validator terminated" << std::endl;
     return 1;
@@ -64,7 +55,119 @@ int main(int argc, char *argv[]) {
 }
 
 
+double ValidateGrader(const TestCase &my_testcase, int which_grader,
+                      nlohmann::json &autocheck_js, const std::string &hw_id) {
 
+  std::cerr << "autocheck #" << which_grader << std::endl;
+  TestResults* result = my_testcase.do_the_grading(which_grader);
+  assert (result != NULL);
+
+  //my_testcase.debugJSON();
+
+  // loop over the student files
+  const nlohmann::json& tcg = my_testcase.getGrader(which_grader);
+
+  float grade = result->getGrade();
+  std::cout << "result->getGrade() = " << grade << std::endl;
+  assert (grade >= 0.0 && grade <= 1.0);
+  double deduction = tcg.value("deduction",1.0);
+  assert (deduction >= -0.001 && deduction <= 1.001);
+  std::cout << "deduction multiplier = " << deduction << std::endl;
+  double score = deduction*(1-grade);
+  std::cout << "score = " << score << std::endl;
+
+  std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"filename");
+  for (int FN = 0; FN < filenames.size(); FN++) {
+
+    // JSON FOR THIS FILE DISPLAY
+    nlohmann::json autocheck_j;
+    autocheck_j["description"] = tcg.value("description",filenames[FN]);
+
+    if (my_testcase.isCompilation() && autocheck_j.value("description","") == "executable created") {
+      // SKIPPING BECAUSE ITS A COMPILATION
+      continue;
+    }
+
+    if (my_testcase.isCompilation() && filenames[FN].find("STDERR") != std::string::npos) {
+      // FIXME might want to do something different here?
+    }
+
+    std::string autocheckid = std::to_string(which_grader);
+    if (filenames.size() > 1) {
+      autocheckid += "_" + std::to_string(FN);
+    }
+    autocheck_j["autocheck_id"] = my_testcase.getPrefix() + "_" + autocheckid + "_autocheck";
+    std::string student_file = my_testcase.getPrefix() + "_" + filenames[FN];
+
+
+    student_file = replace_slash_with_double_underscore(student_file);
+    std::vector<std::string> files;
+    wildcard_expansion(files, student_file, std::cout);
+    for (int i = 0; i < files.size(); i++) {
+      student_file = files[i];
+    }
+
+
+    bool studentFileExists, studentFileEmpty;
+    bool instructorFileExists=false, instructorFileEmpty=false;
+    fileStatus(student_file, studentFileExists,studentFileEmpty);
+
+    std::string expected;
+
+    if (studentFileExists) {
+      autocheck_j["student_file"] = student_file;
+      expected = tcg.value("instructor_file", "");
+      if (expected != "") {
+        fileStatus(expected, instructorFileExists,instructorFileEmpty);
+        assert (instructorFileExists);
+        // PREPARE THE JSON DIFF FILE
+        std::stringstream diff_path;
+        diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
+        std::ofstream diff_stream(diff_path.str().c_str());
+        result->printJSON(diff_stream);
+        std::stringstream expected_path;
+        std::string id = hw_id;
+        std::string expected_out_dir = "test_output/" + id + "/";
+        expected_path << expected_out_dir << expected;
+        autocheck_j["instructor_file"] = expected_path.str();
+        autocheck_j["difference"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
+      }
+    }
+
+    if (FN==0) {
+      for (int m = 0; m < result->getMessages().size(); m++) {
+        if (result->getMessages()[m] != "")
+          autocheck_j["messages"].push_back(result->getMessages()[m]);
+      }
+    }
+
+    std::cout << "AUTOCHECK GRADE " << grade << std::endl;
+    std::cout << "MESSAGES SIZE " << result->getMessages().size() << std::endl;
+    std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
+    std::cout << "INSTRUCTOR FILEEXISTS " << instructorFileExists << " EMPTY " << instructorFileEmpty << std::endl;
+
+    std::cout << "-----" << std::endl;
+    system (("ls -lta " + student_file).c_str());
+    std::cout << "-----" << std::endl;
+    system (("more " + student_file).c_str());
+    std::cout << "-----" << std::endl;
+    if (expected != "") {
+      system (("ls -lta " + expected).c_str());
+      std::cout << "-----" << std::endl;
+      system (("more " + expected).c_str());
+      std::cout << "-----" << std::endl;
+    }
+
+    if (grade < 1.0 ||
+        result->getMessages().size() > 0 ||
+        (studentFileExists && !studentFileEmpty) ) {
+      std::cout << "GOING TO OUTPUT" << std::endl;
+      autocheck_js.push_back(autocheck_j);
+    }
+  }
+  delete result;
+  return score;
+}
 
 
 /* Runs through each test case, pulls in the correct files, validates, and outputs the results */
@@ -73,7 +176,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   nlohmann::json config_json;
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
-
 
   std::string grade_path = ".submit.grade";
   std::ofstream gradefile(grade_path.c_str());
@@ -85,16 +187,12 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   if (penalty != 0) {
     gradefile << "  penalty for excessive submissions: " << penalty << " points" << std::endl;
   }
-
-  std::cout << "PENALTY IS " << penalty << std::endl;
   assert (penalty <= 0 && penalty >= -10);
 
   int nonhidden_auto_pts = penalty;
   int hidden_auto_pts = penalty;
-
   int nonhidden_extra_credit = 0;
   int hidden_extra_credit = 0;
-
   int nonhidden_possible_pts = 0;
   int hidden_possible_pts = 0;
 
@@ -117,143 +215,44 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
 
-    TestCase my_testcase((*tc)[i]);
+    std::cout << "------------------------------------------\n";
+    std::cout << "Test # " + std::to_string(i+1) << std::endl;
 
+    TestCase my_testcase((*tc)[i]);
     std::string title = "Test " + std::to_string(i+1) + " " + (*tc)[i].value("title","MISSING TITLE");
     int points = (*tc)[i].value("points",0);
-
-    std::cout << "------------------------------------------\n" << title << " - points: " << points << std::endl;
+    std::cout << title << " - points: " << points << std::endl;
     
-    // START JSON FOR TEST CASE
-
     nlohmann::json tc_j;
     tc_j["test_name"] = title;
-    tc_j["execute_logfile"] = my_testcase.getPrefix() + "_execute_logfile.txt";
+
+    bool fileExists, fileEmpty;
+    fileStatus(my_testcase.getPrefix() + "_execute_logfile.txt", fileExists,fileEmpty);
+    if (fileExists && !fileEmpty) {
+      tc_j["execute_logfile"] = my_testcase.getPrefix() + "_execute_logfile.txt";
+    }
+
     int testcase_pts = 0;
-    std::string message = "";
-
-    // FILE EXISTS & COMPILATION TESTS DON'T HAVE FILE COMPARISONS
-    if (my_testcase.isFileExistsTest()) {
-      std::string filename = my_testcase.getMyFilename(0,0);
-
-      std::cerr << "THIS IS A FILE EXISTS TEST! " << filename << std::endl;
-      assert (filename != "");
-
-      if ( access( (std::string("")+filename).c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
-        std::cerr << "file does exist: " << filename << std::endl;
-        testcase_pts = my_testcase.getPoints();
-        std::cout << "testcase_pts A " << testcase_pts << std::endl;
-      }
-      else {
-        std::cerr << "ERROR file DOES NOT exist: " << filename << std::endl;
-        message += "Error: " + filename + " was not found!";
-      }
+    //std::string message = "";
+    //message += "Unresolved warnings in your program!";
+    //message += "Error: compilation was not successful!";
+    nlohmann::json autocheck_js;
+    double my_score = 1.0;
+    assert (my_testcase.numFileGraders() > 0);
+    for (int j = 0; j < my_testcase.numFileGraders(); j++) {
+      my_score -= ValidateGrader(my_testcase, j, autocheck_js,hw_id);
     }
-    else if (my_testcase.isCompilationTest()) {
-      std::cerr << "THIS IS A COMPILATION! " << std::endl;
-
-      std::string filename = my_testcase.getMyFilename(0,0);
-
-      if ( access( filename.c_str(), F_OK|R_OK|W_OK ) != -1 ) { /* file exists */
-        std::cerr << "file does exist: " << filename << std::endl;
-        // CHECK IF WARNINGS EXIST
-        std::ifstream ifstr(my_testcase.getPrefix() + "_STDERR.txt");
-        if(!ifstr) std::cerr << my_testcase.getPrefix() <<  "_STDERR.txt" << " not open.";
-        else if(ifstr.peek() != std::ifstream::traits_type::eof()){
-          std::cerr << my_testcase.getPrefix() <<  "_STDERR.txt" << " not empty.";
-          testcase_pts = (int)floor( my_testcase.getPoints()*(1 - my_testcase.get_warning_frac()) );
-          std::cout << "testcase_pts B " << testcase_pts << std::endl;
-          message += "Unresolved warnings in your program!";
-        }
-        else{
-          testcase_pts = my_testcase.getPoints();
-          std::cout << "testcase_pts C " << testcase_pts << std::endl;
-        }
-      }
-      else {
-        std::cerr << "ERROR file DOES NOT exist: " << filename << std::endl;
-        message += "Error: compilation was not successful!";
-      }
-      if (my_testcase.isCompilationTest()) {
-        tc_j["compilation_output"] = my_testcase.getPrefix() + "_STDERR.txt";
-      }
-    }
-    else {   // ALL OTHER TESTS HAVE 1 OR MORE FILE COMPARISONS
-      nlohmann::json autocheck_js;
-      double my_score = 1.0;
-      for (int j = 0; j < my_testcase.numFileGraders(); j++) {
-        std::cerr << "autocheck #" << j << std::endl;
-        TestResults *result = my_testcase.do_the_grading(j);
-        assert (result != NULL);
-        // loop over the student files
-        const nlohmann::json& tcg = my_testcase.getGrader(j);
-
-        std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"filename");
-        for (int FN = 0; FN < filenames.size(); FN++) {
-          // JSON FOR THIS COMPARISON
-          nlohmann::json autocheck_j; 
-          autocheck_j["student_file"] = my_testcase.getPrefix() + "_" + filenames[FN];
-          std::string expected = "";
-          expected = tcg.value("instructor_file", "");
-          if (GLOBAL_replace_string_before != "") {
-            while (1) {
-              int location = expected.find(GLOBAL_replace_string_before);
-              if (location == std::string::npos) break;
-              expected.replace(location,GLOBAL_replace_string_before.size(),GLOBAL_replace_string_after);
-            }
-          }
-          std::string autocheckid = std::to_string(j);
-          if (filenames.size() > 1) {
-            autocheckid += "_" + std::to_string(FN);
-            assert (expected == "");
-          }
-          autocheck_j["autocheck_id"] = my_testcase.getPrefix() + "_" + autocheckid + "_autocheck";
-          //std::string dm = my_testcase.test_case_grader_vec[j].value("display_mode",""); //->display_mode();
-          //if (dm != "") { autocheck_j["display_mode"] = dm; }
-          if (expected != "") { // PREPARE THE JSON DIFF FILE
-            std::stringstream diff_path;
-            diff_path << my_testcase.getPrefix() << "_" << j << "_diff.json";
-            std::ofstream diff_stream(diff_path.str().c_str());
-            result->printJSON(diff_stream);
-            std::stringstream expected_path;
-            std::string id = hw_id;
-            std::string expected_out_dir = "test_output/" + id + "/";
-            expected_path << expected_out_dir << expected;
-            autocheck_j["instructor_file"] = expected_path.str();
-            autocheck_j["difference"] = my_testcase.getPrefix() + "_" + std::to_string(j) + "_diff.json";
-          }
-          autocheck_j["description"] = tcg.value("description",filenames[FN]);
-          if (FN==0) {
-            for (int m = 0; m < result->getMessages().size(); m++) {
-              if (result->getMessages()[m] != "")
-                autocheck_j["messages"].push_back(result->getMessages()[m]); 
-            }
-          }
-          autocheck_js.push_back(autocheck_j);
-        }
-        std::cout << "result->getGrade() = " << result->getGrade() << std::endl;
-        assert (result->getGrade() >= 0.0 && result->getGrade() <= 1.0);
-        double deduction = tcg.value("deduction",1.0);
-        assert (deduction >= -0.001 && deduction <= 1.001);
-        std::cout << "deduction multiplier = " << deduction << std::endl;
-        my_score -= deduction*(1-result->getGrade());
-        std::cout << "my_score = " << my_score << std::endl;
-         delete result;
-        result = NULL;
-      } // END COMPARISON LOOP
-
+    if (autocheck_js.size() > 0) {
       tc_j["autochecks"] = autocheck_js;
-      assert (my_score <= 1.00001);
-      my_score = std::max(0.0,std::min(1.0,my_score));
-      std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
-      testcase_pts = (int)floor(my_score * my_testcase.getPoints());
-      std::cout << "testcase_pts D " << testcase_pts << std::endl;
-    } // end if/else of test case type
+    }
+    assert (my_score <= 1.00001);
+    my_score = std::max(0.0,std::min(1.0,my_score));
+    std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
+    testcase_pts = (int)floor(my_score * my_testcase.getPoints());
 
     // output grade & message
 
     std::cout << "Grade: " << testcase_pts << std::endl;
-    std::cout << "testcase_pts E " << testcase_pts << std::endl;
     // TODO: LOGIC NEEDS TO BE TESTED WITH MORE COMPLEX HOMEWORK!
 
     if (!my_testcase.getHidden()) {
@@ -274,12 +273,10 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     }
     
     tc_j["points_awarded"] = testcase_pts;
-    if (message != "") {
-      tc_j["messages"].push_back(message);
-    }
-
+    //if (message != "") {
+    //  tc_j["messages"].push_back(message);
+    //}
     all_testcases.push_back(tc_j); 
-
     gradefile << "  Test " << std::setw(2) << std::right << i+1 << ":" 
         << std::setw(30) << std::left << my_testcase.getTitle() << " " 
         << std::setw(2) << std::right << testcase_pts << " / " 

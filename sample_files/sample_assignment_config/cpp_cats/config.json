@@ -10,7 +10,7 @@
 
         // *************** README *****************
         {
-            "type" : "FileExists",
+            "type" : "FileCheck",
             "title" : "README",
             "filename" : "README.txt",
             "points" : 2

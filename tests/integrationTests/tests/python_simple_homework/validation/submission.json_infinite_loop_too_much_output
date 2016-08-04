@@ -8,7 +8,7 @@
 	"testcases": [
 		{
 			"test_name": "Test 1 Lab 1 Checkpoint 1",
-			"execute_logfile": "test01_execute_logfile.txt",
+                        "execute_logfile": "test01_execute_logfile.txt",
 			"autochecks": [
 				{
 					"autocheck_id":"test01_0_autocheck",
@@ -16,7 +16,7 @@
 					"instructor_file":"test_output/testassignment/hw01part1_sol.txt",
 					"difference":"test01_0_diff.json",
 					"description": "Program Output",
-					"messages": ["ERROR!  Student file 'test01_STDOUT.txt' too large for grader<br>"]
+					"messages": ["ERROR!  Student file 'test01_STDOUT.txt' too large for grader"]
 				},
 				{
 					"autocheck_id":"test01_1_autocheck",

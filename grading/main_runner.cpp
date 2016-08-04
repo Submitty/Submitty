@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
   int subnum = -1;
   std::string time_of_submission = "";
 
-  /* Check argument usage */
+  // Check command line arguments
   if (argc == 5) {
     hw_id = argv[1];
     rcsid = argv[2];
@@ -43,18 +43,6 @@ int main(int argc, char *argv[]) {
     std::cerr << "INCORRECT ARGUMENTS TO RUNNER" << std::endl;
     return 1;
   } 
-
-
-  // Make sure arguments are entered correctly
-  /*
-  if (argc != 1) {
-    // Pass in the current working directory to run the programs
-    std::cout << "Incorrect # of arguments:" << argc << std::endl;
-    std::cout << "Usage : " << std::endl << "     ./runner" << std::endl;
-    return 2;
-  }
-  */
-
 
   // necessary since the untrusted user does not have a home directory
   setenv("DYNAMORIO_CONFIGDIR", ".", 1);
@@ -67,7 +55,6 @@ int main(int argc, char *argv[]) {
   std::cout << "CUSTOMIZE AUTO GRADING replace " <<  replace_string_before << " with " << replace_string_after << std::endl;
 #endif
   
-  //system ("ls -lta");
   system("find . -type f");
 
   // Run each test case and create output files
@@ -75,23 +62,18 @@ int main(int argc, char *argv[]) {
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
 
+    std::cout << "========================================================" << std::endl;
+    std::cout << "TEST #" << i+1 << std::endl;
+
     TestCase my_testcase((*tc)[i]);
 
-    //std::string type = (*tc)[i].value("type","MISSING TYPE");
-    //if (type == "FileExists") continue;
-    //if (type == "Compilation") continue;
-    if (my_testcase.isFileExistsTest()) continue;
-    if (my_testcase.isCompilationTest()) continue;
-    //std::string cmd = (*tc)[i].value("command","MISSING COMMAND");
+    if (my_testcase.isFileCheck()) continue;
+    if (my_testcase.isCompilation()) continue;
     std::vector<std::string> commands = stringOrArrayOfStrings((*tc)[i],"command");
     assert (commands.size() > 0);
 
-    std::cout << "========================================================" << std::endl;
-    std::string title = (*tc)[i].value("title","MISSING TITLE");
-    std::cout << "TEST " << i+1 << " " << title << std::endl;
+    std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
     
-
-
     for (int x = 0; x < commands.size(); x++) {
 
       std::cout << "COMMAND " << commands[x] << std::endl;

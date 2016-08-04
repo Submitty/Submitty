@@ -45,6 +45,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "ls",                     "/bin/ls", },
     { "time",                   "/usr/bin/time" },
     { "mv",                     "/bin/mv" },
+    { "cp",                     "/bin/cp" },
     { "chmod",                  "/bin/chmod" },
     { "find",                   "/usr/bin/find" },
     { "cat",                    "/bin/cat" },
@@ -193,7 +194,21 @@ std::string validate_option(const std::string &program, const std::string &optio
 
 // =====================================================================================
 
-bool wildcard_match(const std::string &pattern, const std::string &thing, std::ofstream &logfile) {
+std::string replace_slash_with_double_underscore(const std::string& input) {
+  std::string answer;
+  for (int i = 0; i < input.size(); i++) {
+    if (input[i] != '/') answer.push_back(input[i]);
+    else {
+      answer.push_back('_');
+      answer.push_back('_');
+    }
+  }
+  return answer;
+}
+
+// =====================================================================
+
+bool wildcard_match(const std::string &pattern, const std::string &thing, std::ostream &logfile) {
   //  std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
 
   int wildcard_loc = pattern.find("*");
@@ -225,7 +240,9 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
 }
 
 
-void wildcard_expansion(std::vector<std::string> &my_args, const std::string &full_pattern, std::ofstream &logfile) {
+void wildcard_expansion(std::vector<std::string> &my_args, const std::string &full_pattern, std::ostream &logfile) {
+
+  std::cout << "IN WILDCARD EXPANSION " << full_pattern << std::endl;
 
   // if the pattern does not contain a wildcard, just return that
   if (full_pattern.find("*") == std::string::npos) {

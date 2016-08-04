@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
   nlohmann::json all;
   std::cout << "num test cases" << tc->size() << std::endl;
   for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++) {
-    //std::cout << "TEST CASE " << std::endl;
+    std::cout << "TEST CASE " << std::endl;
     int points = itr->value("points",0);
     bool extra_credit = itr->value("extra_credit",false);
     bool hidden = itr->value("hidden",false);
@@ -68,7 +68,6 @@ int main(int argc, char *argv[]) {
       total_ec += points;
     if (!hidden)
       visible += points;
-
     TestCase tc(*itr);
     all.push_back(printTestCase(tc)); 
   }
