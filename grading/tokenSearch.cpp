@@ -63,10 +63,10 @@ TestResults* searchToken_doit (const TestCase &tc, const nlohmann::json& j) {
    }
   }
 
-  std::string message;
+  std::vector<std::string> messages;
   std::string student_file_contents;
-  if (!openStudentFile(tc,j,student_file_contents,message)) { 
-    return new TestResults(0.0,message);
+  if (!openStudentFile(tc,j,student_file_contents,messages)) {
+    return new TestResults(0.0,messages);
   }
 
 

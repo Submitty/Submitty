@@ -27,7 +27,7 @@ float Tokens::grade() {
 */
 
 Tokens::Tokens() :
-  TestResults(1,""), num_tokens(0), tokensfound(0), partial(true), harsh(false) {
+  TestResults(1), num_tokens(0), tokensfound(0), partial(true), harsh(false) {
 }
 
 void Tokens::printJSON(std::ostream & file_out){

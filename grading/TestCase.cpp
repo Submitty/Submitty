@@ -89,37 +89,37 @@ bool getFileContents(const std::string &filename, std::string &file_contents) {
 }
 
 
-bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::string &message) {
+bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::vector<std::string> &messages) {
   std::string filename = j.value("filename","");
   if (filename == "") {
-    message += "ERROR!  STUDENT FILENAME MISSING<br>";
+    messages.push_back("ERROR!  STUDENT FILENAME MISSING");
     return false;
   }
   std::string prefix = tc.getPrefix() + "_";
   if (!getFileContents(prefix+filename,student_file_contents)) {
-    message += "ERROR!  Could not open student file: '" + prefix+filename + "'<br>";
+    messages.push_back("ERROR!  Could not open student file: '" + prefix+filename);
     return false;
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
-    message += "ERROR!  Student file '" + prefix+filename + "' too large for grader<br>";
+    messages.push_back("ERROR!  Student file '" + prefix+filename + "' too large for grader");
     return false;
   }
   return true;
 }
 
 
-bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string &instructor_file_contents, std::string &message) {
+bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string &instructor_file_contents, std::vector<std::string> &messages) {
   std::string filename = j.value("instructor_file","");
   if (filename == "") {
-    message += "ERROR!  INSTRUCTOR FILENAME MISSING<br>";
+    messages.push_back("ERROR!  INSTRUCTOR FILENAME MISSING");
     return false;
   }
   if (!getFileContents(filename,instructor_file_contents)) {
-    message += "ERROR!  Could not open instructor file: '" + filename + "'<br>";
+    messages.push_back("ERROR!  Could not open instructor file: '" + filename);
     return false;
   }
   if (instructor_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
-    message += "ERROR!  Instructor expected file '" + filename + "' too large for grader<br>";
+    messages.push_back("ERROR!  Instructor expected file '" + filename + "' too large for grader");
     return false;
   }
   return true;
@@ -128,14 +128,14 @@ bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string
 
 TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
   std::string student_file_contents;
-  std::string error_message;
-  if (!openStudentFile(tc,j,student_file_contents,error_message)) { 
-    return new TestResults(0.0,error_message);
+  std::vector<std::string> error_messages;
+  if (!openStudentFile(tc,j,student_file_contents,error_messages)) {
+    return new TestResults(0.0,error_messages);
   }
   int value = std::stoi(student_file_contents);
   nlohmann::json::const_iterator itr = j.find("term");
   if (itr == j.end() || !itr->is_number()) {
-    return new TestResults(0.0,"ERROR!  integer \"term\" not specified");
+    return new TestResults(0.0,{"ERROR!  integer \"term\" not specified"});
   }
   int term = (*itr);
   std::string cmpstr = j.value("comparison","MISSING COMPARISON");
@@ -147,12 +147,12 @@ TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
   else if (cmpstr == "ge") success = (value >= term);
   else if (cmpstr == "le") success = (value <= term);
   else {
-    return new TestResults(0.0, "ERROR! UNKNOWN COMPARISON "+cmpstr);
+    return new TestResults(0.0, {"ERROR! UNKNOWN COMPARISON "+cmpstr});
   }
   if (success) 
     return new TestResults(1.0);
   std::string description = j.value("description","MISSING DESCRIPTION");
-  return new TestResults(0.0,"FAILURE! "+description+" "+std::to_string(value)+" "+cmpstr+" "+std::to_string(term));
+  return new TestResults(0.0,{"FAILURE! "+description+" "+std::to_string(value)+" "+cmpstr+" "+std::to_string(term)});
 }
 
 

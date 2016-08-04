@@ -1,21 +1,5 @@
-/* FILENAME: difference.cpp
- * YEAR: 2014
- * AUTHORS: Please refer to 'AUTHORS.md' for a list of contributors
- * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
- *
- * RELEVANT DOCUMENTATION: 
- * Extends the printJSON method to format results into JSON format
- */
-
 #include "difference.h"
 #include "json.hpp"
-
-/* METHOD: printJSON
- * ARGS: ostream
- * RETURN: void
- * PURPOSE: print out the data in JSON format for student's result and expected result
- */
-
 
 // FIXME: Thus function has terrible variable names (diff1, diff2, a, b) 
 //   and the code is insufficiently commented for long term maintenance.

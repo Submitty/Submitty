@@ -18,7 +18,7 @@ TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
   std::string args = grader.value("args","");
   num = std::stoi(args.c_str());
   if (num <= 0) {
-    return new TestResults(0.0,"ERROR! args should be > 1 (specify number of values to sum)");
+    return new TestResults(0.0,{"ERROR! args should be > 1 (specify number of values to sum)"});
   }
 
   // ========================================
@@ -29,7 +29,7 @@ TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
     std::string file_contents;
     std::string f = this->getPrefix() + "_" + filenames[i];
     if (!getFileContents(f,file_contents)) {
-      return new TestResults(0.0,"ERROR!  Could not open student file: '" + f);
+      return new TestResults(0.0,{"ERROR!  Could not open student file: '" + f});
     }    
     contents_of_files.push_back(file_contents);
   }
@@ -67,7 +67,7 @@ TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
       try {
         total = std::stoi(token.c_str());
       } catch (...) {
-        return new TestResults(0.0,"ERROR! could not parse total value as an integer");
+        return new TestResults(0.0,{"ERROR! could not parse total value as an integer"});
       }
     }
     if (!found_total_string) {

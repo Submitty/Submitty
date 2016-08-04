@@ -104,8 +104,8 @@ void adjust_test_case_limits(nlohmann::json &modified_test_case_limits, int rlim
 std::string getAssignmentIdFromCurrentDirectory(std::string);
 
 bool getFileContents(const std::string &filename, std::string &file_contents);
-bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::string &message);
-bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string &instructor_file_contents, std::string &message);
+bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::vector<std::string> &messages);
+bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string &instructor_file_contents, std::vector<std::string> &messages);
 
 
 #endif
