@@ -6,13 +6,18 @@ php:
   - 5.6
   - 7.0
 
+cache:
+  - pip
+  directories:
+    - $HOME/.composer/cache
+
 addons:
   postgresql: "9.3"
 
 before_script:
 #  - if [[ "$TRAVIS_PHP_VERSION" = "hhvm" ]]; then source ./.setup/travis/hhvm.sh; fi
   - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
-  - composer install
+  - composer install --prefer-dist
   - ./.setup/travis.sh
   - psql -c 'create database test_hwgrading;' -U postgres
   - psql --host=localhost --username=postgres --command="CREATE GROUP test_hwgrading ROLE postgres"
