@@ -3,7 +3,8 @@
 namespace app\models;
 
 use \app\libraries\Core;
-use app\libraries\FileUtils;
+use \app\libraries\FileUtils;
+use \app\libraries\GradeableType;
 
 /**
  * Class GradeableFile
