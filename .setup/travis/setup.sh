@@ -1,6 +1,7 @@
 #!/bin/bash
 
 if [[ "$RUN_E2E" = "true" ]]; then
+    sudo iptables -t nat -A OUTPUT -p all -d 192.168.56.104 -j DNAT --to-destination 127.0.0.1
     sudo chmod -R 755 /home/travis/build
     sudo usermod -a -G travis www-data
     sudo apt-get update > /dev/null
