@@ -575,10 +575,9 @@ if [[ ${VAGRANT} == 1 ]]; then
     mkdir ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
     ln -s ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs ${SUBMITTY_DATA_DIR}/tagrading_logs
 
-
     # Call helper script that makes the courses and refreshes the database
-    chmod u+x ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.sh
-    ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.sh
+    chmod u+x ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py
+    ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py
 
     #################################################################
     # SET CSV FIELDS (for classlist upload data)

@@ -84,6 +84,7 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SVN_PATH__|$SVN_PATH|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWCGI_USER__|$HWCGI_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $1
@@ -429,7 +430,7 @@ rsync -rtz   $SUBMITTY_REPOSITORY/site   $SUBMITTY_INSTALL_DIR
 
 # set special user $HWPHP_USER as owner & group of all website files
 find $SUBMITTY_INSTALL_DIR/site -exec chown $HWPHP_USER:$HWPHP_USER {} \;
-find $SUBMITTY_INSTALL_DIR/site/cgi-bin -exec chown $HWCGI_USER:HWCGI_USER {} \;
+find $SUBMITTY_INSTALL_DIR/site/cgi-bin -exec chown $HWCGI_USER:$HWCGI_USER {} \;
 
 # set the permissions of all files
 # $HWPHP_USER can read & execute all directories and read all files
