@@ -71,7 +71,7 @@ $course = basename($_REQUEST['course']);
  * paths for the Logger and ExceptionHandler
  */
 $core->loadConfig($semester, $course);
-$core->getOutput()->addBreadcrumb("<a href='{$core->getConfig()->getSiteUrl()}semester=f16'>F16</a>");
+$core->getOutput()->addBreadcrumb("F16");
 $core->getOutput()->addBreadcrumb("<a href='{$core->buildUrl()}'>{$core->getFullCourseName()}</a>");
 date_default_timezone_set($core->getConfig()->getTimezone());
 Logger::setLogPath($core->getConfig()->getLogPath());
