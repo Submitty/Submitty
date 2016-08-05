@@ -4,7 +4,7 @@
 # installation to setup.sh and then spinning up services to start.sh
 
 #if [[ "$TRAVIS_BRANCH" = "master" ]]; then
-    RUN_E2E=true
+#    RUN_E2E=true
 #fi
 
 BEFORE_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
