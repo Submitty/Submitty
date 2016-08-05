@@ -30,9 +30,6 @@ if ($now < $homeworkDate) {
     die("Gradeable is not open for grading yet.");
 }
 
-if ($status != 1){
-    die("Gradeable cannot be graded due to a bad status");
-}
 
 $student = $_GET['student'];
 

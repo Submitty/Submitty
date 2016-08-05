@@ -21,6 +21,7 @@ FROM
 WHERE 
     g.g_id=?
     AND NOT gc_is_extra_credit
+    AND gc_max_value > 0
 GROUP BY 
     g.g_id", $params);
 	$gradeable_info = $db->row();

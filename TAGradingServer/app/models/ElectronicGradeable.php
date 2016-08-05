@@ -467,7 +467,7 @@ ORDER BY gc_order ASC
                 }
             }
 
-            if (!$question['gc_is_extra_credit']) {
+            if (!$question['gc_is_extra_credit'] && $question['gc_max_value'] > 0) {
                 $total += $question['gc_max_value'];
             }
         }

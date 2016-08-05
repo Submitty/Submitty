@@ -154,14 +154,14 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
         $db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($this->g_id));
         $num_old_questions = intval($db->row()['cnt']);
         //insert the questions
-        for ($i=0; $i<$num_questions; ++$i){
+        for ($i=1; $i<=$num_questions; ++$i){
             $gc_title = $add_args["comment_title_".strval($i)];
             $gc_ta_comment = $add_args["ta_comment_".strval($i)];
             $gc_student_comment = $add_args["student_comment_".strval($i)];
-            $gc_max_value = $add_args['point_'.strval($i)];
+            $gc_max_value = $add_args['max_score_'.strval($i)];
             $gc_is_text = "false";
-            $gc_is_ec = (isset($add_args['ec_'.strval($i)]) && $add_args['ec_'.strval($i)]=='on')? "true" : "false";
-            if($action=='edit' && $i<$num_old_questions){
+            $gc_is_ec = (isset($add_args['eg_extra_'.strval($i)]) && $add_args['eg_extra_'.strval($i)]=='on')? "true" : "false";
+            if($action=='edit' && $i<=$num_old_questions){
                 //update the values for the electronic gradeable
                 $params = array($gc_title, $gc_ta_comment, $gc_student_comment, $gc_max_value, $gc_is_text, $gc_is_ec, $this->g_id,$i);
                 $db->query("UPDATE gradeable_component SET gc_title=?, gc_ta_comment=?,gc_student_comment=?, gc_max_value=?, 
@@ -173,7 +173,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
                             gc_is_text, gc_is_extra_credit, gc_order) VALUES(?,?,?,?,?,?,?,?)",$params);
             }
         }
-        $this->deleteComponents($db, $num_questions,$num_old_questions);
+        $this->deleteComponents($db, $num_questions+1,$num_old_questions);
      }
  }
  
@@ -311,7 +311,7 @@ abstract class GradeableType{
         $date_due = $request_args['date_due'];
         $is_repo = ($request_args['upload_type'] == 'Repository')? "true" : "false";
         $subdirectory = (isset($request_args['subdirectory']) && $is_repo == "true")? $request_args['subdirectory'] : '';
-        $ta_grading = ($request_args['ta_grading'] == 'yes')? "true" : "false";
+        $ta_grading = ($request_args['ta_grading'] == "true")? "true" : "false";
         $config_path = $request_args['config_path'];
         $eg_late_days = intval($request_args['eg_late_days']);
         $eg_pt_precision = floatval($request_args['point_precision']);
@@ -343,7 +343,7 @@ function getGraders($var){
     $graders = array();
     foreach ($var as $k => $v ) {
         if (substr($k,0,7) === 'grader_' && !empty(trim($v))) {
-            $graders[explode('-', $k)[1]]=explode(',',$v);
+            $graders[explode('_', $k)[1]]=explode(',',trim($v));
         }
     }
     return $graders;
@@ -397,13 +397,25 @@ else{
             $gradeable = constructGradeable($db, $request_args);
             $gradeable->createGradeable($db);
             
-            $offset = (is_a($gradeable, "ElectronicGradeable")) ? 0 : 1;
-            
             foreach($request_args AS $k=>$v){
                 if (is_array($v)){
-                    for($i=0; $i< count($v); ++$i){
-                       $request_args[$k.'_'.intval($i+$offset)] = $v[$i];    
-                    } 
+                    if (strpos($k, '_extra') !== false){
+                        for($i=1; $i<= count($v); ++$i){
+                           $request_args[$k.'_'.intval($v[$i-1])] = "";    
+                        } 
+                    }
+                    else if (strpos($k, 'grader') !== false){
+                        foreach($v as $k2 => $v2){
+                            foreach($v2 as $k3 => $v3){
+                                $request_args['grader_'.$k3] =$v3;
+                            } 
+                        }
+                    }
+                    else{
+                        for($i=1; $i<= count($v); ++$i){
+                           $request_args[$k.'_'.intval($i)] = $v[$i-1];    
+                        } 
+                    }
                 }  
             }
             
@@ -429,6 +441,7 @@ else{
     }
 
 }
+
 
 if($action != 'import'){
     header('Location: '.__BASE_URL__.'/account/admin-gradeables.php?course='.$_GET['course'].'&semester='.$_GET['semester']);

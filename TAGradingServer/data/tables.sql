@@ -35,7 +35,10 @@ CREATE FUNCTION check_valid_score(numeric, integer) RETURNS boolean
 declare
 valid_score BOOLEAN;
 BEGIN
-   SELECT $1<=gc_max_value INTO valid_score FROM gradeable_component AS gc WHERE gc.gc_id=$2;
+   SELECT  
+   CASE WHEN gc_max_value >=0 THEN $1<=gc_max_value AND $1>=0 
+        ELSE $1>=gc_max_value AND $1<=0
+   END INTO valid_score FROM gradeable_component AS gc WHERE gc.gc_id=$2;
    RETURN valid_score;
 END;
 $_$;

@@ -169,10 +169,16 @@ if ($calculate_diff) {
             ele.val("");
             return;
         }
-        if(ele.val() < 0) {
+        if(ele.val() < 0 && parseFloat(question_total) > 0) {
             ele.val( 0 );
         }
-        if(ele.val() > parseFloat(question_total)) {
+        if(ele.val() > 0 && parseFloat(question_total) < 0) {
+            ele.val( 0 );
+        }
+        if(ele.val() < parseFloat(question_total) && parseFloat(question_total) < 0) {
+            ele.val(question_total);
+        }
+        if(ele.val() > parseFloat(question_total) && parseFloat(question_total) > 0) {
             ele.val(question_total);
         }
         if(ele.val() % delta != 0) {
@@ -558,10 +564,14 @@ HTML;
 HTML;
 
     $comment = ($question['gcd_component_comment'] != "") ? "in" : "";
+    
+    $min_val = (intval($question['gc_max_value']) > 0) ? 0 : intval($question['gc_max_value']);
+    $max_val = (intval($question['gc_max_value']) > 0) ? intval($question['gc_max_value']) : 0;
+    
     $output .= <<<HTML
     <tr style="background-color: #f9f9f9;">
                             <td style="white-space:nowrap; vertical-align:middle; text-align:center;"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}"
-                                min="0" max="{$question['gc_max_value']}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  {$precision}); calculatePercentageTotal();" 
+                                min="{$min_val}" max="{$max_val}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  {$precision}); calculatePercentageTotal();" 
                                 style="width:50px; resize:none;" {$disabled}></textarea><strong> / {$question['gc_max_value']}</strong></td>
                             <td style="width:100%; padding:0px">
                                 <div id="rubric-{$c}">
@@ -665,7 +675,7 @@ if (isset($eg->eg_details['user_email'])) {
 HTML;
 }
              
-if (!($now < new DateTime($eg->eg_details['g_grade_start_date'])) && $eg->status==1) {
+if (!($now < new DateTime($eg->eg_details['g_grade_start_date']))) {
     if((!isset($_GET["individual"])) || (isset($_GET["individual"]) && !$student_individual_graded)) {
         $output .= <<<HTML
         <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade"/>
@@ -676,18 +686,13 @@ HTML;
 HTML;
     }
 }
-else if ($now < new DateTime($eg->eg_details['g_grade_start_date'])) {
+else {
     $output .= <<<HTML
         <input class="btn btn-large btn-primary" type="button" value="Cannot Submit Homework Grade" />
         <div style="width:100%; text-align:right; color:#777;">This homework has not been opened for grading.</div>
 HTML;
 }
-else{
-    $output .= <<<HTML
-        <input class="btn btn-large btn-primary" type="button" value="Cannot Submit Homework Grade" />
-        <div style="width:100%; text-align:right; color:#777;">This assingment has a bad status.</div>
-HTML;
-}
+
 
 $output .= <<<HTML
             </form>

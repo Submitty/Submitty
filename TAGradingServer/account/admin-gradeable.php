@@ -6,6 +6,8 @@ include "../header.php";
 
 check_administrator();
 
+// start the question for electronic gradeables from 1
+
 if($user_is_administrator){
     $have_old = $has_grades = false;
     $current_date = date('Y/m/d 23:59:59');
@@ -83,7 +85,7 @@ if($user_is_administrator){
     $account_subpages_unlock = true;
     
     function selectBox($question, $grade = 0) {
-        $retVal = "<select name='point_{$question}' class='points complex_type' onchange='calculatePercentageTotal();'>";
+        $retVal = "<select name='max_score_{$question}' class='max_score complex_type' onchange='calculatePercentageTotal();'>";
         for($i = -100; $i <= 100; $i += 0.5) {
             $selected = ($grade == $i) ? "selected" : "";
             $retVal .= "<option {$selected}>{$i}</option>";
@@ -200,6 +202,12 @@ if($user_is_administrator){
         padding: 2px;  
         font-size: 12pt;
     }
+    
+    .required::-webkit-input-placeholder { color: red; }
+    .required:-moz-placeholder { color: red; }
+    .required::-moz-placeholder { color: red; }
+    .required:-ms-input-placeholder { color: red; 
+        
 </style>
 
 <div id="container-rubric">
@@ -212,9 +220,9 @@ if($user_is_administrator){
             <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{$string} Gradeable</button>
         </div>
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
-            What is the unique id of this gradeable?: <input style='width: 200px' type='text' name='gradeable_id' value="{$gradeable_submission_id}" />
+            What is the unique id of this gradeable?: <input style='width: 200px' type='text' name='gradeable_id' class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
             <br />
-            What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' value="{$gradeable_name}" />
+            What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' class="required" value="{$gradeable_name}" placeholder="(Required)" />
             <br />
             
        <!-- <br />
@@ -299,12 +307,12 @@ HTML;
                 <br /> <br />
                 
                 Use TA grading? 
-                <input type="radio" id="yes_ta_grade" name="ta_grading" value="yes" class="bool_val"
+                <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val"
 HTML;
                 echo ($use_ta_grading===true)?'checked':'';
         print <<<HTML
                 /> Yes
-                <input type="radio" id="no_ta_grade" name="ta_grading" value="no" class="bool_val"
+                <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val"
 HTML;
                 echo ($use_ta_grading===false)?'checked':'';
         print <<<HTML
@@ -328,24 +336,24 @@ HTML;
                                      'question_extra_credit' => 0);
     }
 
+    //this is a hack
+    array_unshift($old_questions, "tmp");
+    
     foreach ($old_questions as $num => $question) {
+        if($num == 0) continue;
         print <<<HTML
             <tr class="rubric-row" id="row-{$num}">
 HTML;
-        $display_ta = ($question['question_grading_note'] != "") ? 'block' : 'none';
-
         print <<<HTML
                 <td style="overflow: hidden;">
                     <textarea name="comment_title_{$num}" rows="1" class="comment_title complex_type" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" 
                               >{$question['question_message']}</textarea>
-                    <div class="btn btn-mini btn-default" onclick="toggleQuestion({$num}, 'individual')" style="margin-top:-5px;">TA Note</div>
-                    <div class="btn btn-mini btn-default" onclick="toggleQuestion({$num}, 'student')" style="margin-top:-5px;">Student Note</div>
                     <textarea name="ta_comment_{$num}" id="individual_{$num}" class="ta_comment complex_type" rows="1" placeholder=" Message to TA"  onkeyup="autoResizeComment(event);"
                                                style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
-                                               display: {$display_ta};">{$question['question_grading_note']}</textarea>
+                                               display: block;">{$question['question_grading_note']}</textarea>
                     <textarea name="student_comment_{$num}" id="student_{$num}" class="student_comment complex_type" rows="1" placeholder=" Message to Student" onkeyup="autoResizeComment(event);"
                               style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
-                              display: {$display_ta};">{$question['student_grading_note']}</textarea>
+                              display: block;">{$question['student_grading_note']}</textarea>
                 </td>
 
                 <td style="background-color:#EEE;">
@@ -354,19 +362,23 @@ HTML;
         print selectBox($num, $old_grade);
         $checked = ($question['question_extra_credit']) ? "checked" : "";
         print <<<HTML
-                    <input onclick='calculatePercentageTotal();' name="ec_{$num}" type="checkbox" class='ec bool_val' value='on' {$checked}/>
+                    <input onclick='calculatePercentageTotal();' name="eg_extra_{$num}" type="checkbox" class='eg_extra extra' value='on' {$checked}/>
 HTML;
-        if($num>1){
-            print <<<HTML
-                    <br />
-                    <a id="delete-{$num}" class="question-icon" onclick="deleteQuestion({$num});">
-                    <img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
-                    <a id="down-{$num}" class="question-icon" onclick="moveQuestionDown({$num});">
-                    <img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
-                    <a id="up-{$num}" class="question-icon" onclick="moveQuestionUp({$num});">
-                    <img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+        print <<<HTML
+                <br />
+HTML;
+        if ($num > 1){
+        print <<<HTML
+                <a id="delete-{$num}" class="question-icon" onclick="deleteQuestion({$num});">
+                <img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+                <a id="down-{$num}" class="question-icon" onclick="moveQuestionDown({$num});">
+                <img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
+        
+                <a id="up-{$num}" class="question-icon" onclick="moveQuestionUp({$num});">
+                <img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
 HTML;
         }
+        
         print <<<HTML
                 </td>
             </tr>
@@ -415,7 +427,7 @@ HTML;
                                <input style="width: 200px" name="checkpoint_label_0" type="text" class="checkpoint_label complex_type" value="Checkpoint 0"/> 
                            </td>     
                            <td>     
-                                <input type="checkbox" name="checkpoint_extra_0" class="checkpoint_extra bool_val" value="true" />
+                                <input type="checkbox" name="checkpoint_extra_0" class="checkpoint_extra extra" value="true" />
                            </td> 
                         </tr>
                       
@@ -424,7 +436,7 @@ HTML;
                                <input style="width: 200px" name="checkpoint_label_1" type="text" class="checkpoint_label complex_type" value="Checkpoint 1"/> 
                            </td>     
                            <td>     
-                                <input type="checkbox" name="checkpoint_extra_1" class="checkpoint_extra bool_val" value="true" />
+                                <input type="checkbox" name="checkpoint_extra_1" class="checkpoint_extra extra" value="true" />
                            </td> 
                         </tr>
                   </table>
@@ -462,10 +474,10 @@ HTML;
                                <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label complex_type" value="0"/> 
                            </td>  
                             <td>     
-                                <input style="width: 60px" type="text" name="max_score_0" class="max_score complex_type" value="0" /> 
+                                <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" /> 
                            </td>                           
                            <td>     
-                                <input type="checkbox" name="numeric_extra_0" class="numeric-extra" value="" />
+                                <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" value="" />
                            </td> 
                         </tr>
                     </table>
@@ -522,7 +534,7 @@ HTML;
             <fieldset>
                 <input type="radio" name="section_type" value="reg_section"
 HTML;
-    echo ($action==='edit' && $g_grade_by_registration===true)?'checked':'';
+    echo (($action==='edit' && $g_grade_by_registration===true) || $action != 'edit')?'checked':'';
     print <<<HTML
                 /> Registration Section
                 <input type="radio" name="section_type" value="rotating-section" id="rotating-section" class="graders"
@@ -558,7 +570,7 @@ HTML;
     }
     
     print <<<HTML
-    <div id="rotating-sections" class="graders" style="display:none;">
+    <div id="rotating-sections" class="grader" style="display:none;">
         <br />
         Available rotating sections: {$num_rotating_sections}
         
@@ -577,7 +589,7 @@ HTML;
         print <<<HTML
         <tr>
             <td>{$fa_grader['user_id']}</td>
-            <td><input style="width: 227px" type="text" name="grader_{$fa_grader['user_id']}" value="
+            <td><input style="width: 227px" type="text" name="grader_{$fa_grader['user_id']}" class="grader" value="
 HTML;
         if($action==='edit' && !$g_grade_by_registration) {
             print (isset($graders_to_sections[$fa_grader['user_id']])) ? $graders_to_sections[$fa_grader['user_id']] : '';
@@ -593,9 +605,9 @@ HTML;
     
     print <<<HTML
             </table>
-            <br/>
         </div>
         <div id="limited-access-graders" style="display:none;">
+            <br />
             <table>
                 <th>Limited Access Graders</th>
 HTML;
@@ -606,7 +618,7 @@ HTML;
         print <<<HTML
         <tr>
             <td>{$la_grader['user_id']}</td>
-            <td><input style="width: 227px" type="text" name="grader_{$la_grader['user_id']}" class="graders" value="
+            <td><input style="width: 227px" type="text" name="grader_{$la_grader['user_id']}" class="grader" value="
 HTML;
         if($action==='edit' && !$g_grade_by_registration) {
             print (isset($graders_to_sections[$la_grader['user_id']])) ? $graders_to_sections[$la_grader['user_id']] : '';
@@ -716,14 +728,39 @@ HTML;
             else if($("[name="+this.name+"]").hasClass('float_val')){
                 val = parseFloat(val);
             }
-            //FIXME update for boolean types 
-             else if($("[name="+this.name+"]").hasClass('bool_val')){
-                //val = (this.value === 'yes' || this.value === 'true');
+
+            else if($("[name="+this.name+"]").hasClass('bool_val')){
+                val = (this.value === 'true');
+            }
+           
+            if($("[name="+this.name+"]").hasClass('grader')){
+                var tmp = this.name.split('_');
+                var grader = tmp[1];
+                if (o['grader'] === undefined){
+                    o['grader'] = [];
+                }
+                var arr = {};
+                arr[grader] = this.value.trim();
+                o['grader'].push(arr);
+            }
+            else if ($("[name="+this.name+"]").hasClass('max_score')){
+                if (o['max_score'] === undefined){
+                    o['max_score'] = [];
+                }
+                o['max_score'].push(parseFloat(this.value));
+            }
+            else if($("[name="+this.name+"]").hasClass('extra')){
+                var tmp = this.name.split('_');
+                var bucket = tmp[0] + '_' + tmp[1];
+                if (o[bucket] === undefined){
+                    o[bucket] = [];
+                }
+                val = parseInt(tmp[2]);
+                o[bucket].push(val);
             }
             
-            if($("[name="+this.name+"]").hasClass('complex_type')){
+            else if($("[name="+this.name+"]").hasClass('complex_type')){
                 var classes = $("[name="+this.name+"]").closest('.complex_type').prop('class').split(" ");
-                console.log("Classes: " + classes);
                 classes.splice( classes.indexOf('complex_type'), 1);
                 var complex_type = classes[0];
                 
@@ -796,11 +833,11 @@ HTML;
             var wrapper = $('.numerics-table');
             numNumeric++;
             $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id','mult-field-'+numNumeric).find('.numeric_label').val(label).focus();
-            $('#mult-field-' + numNumeric,wrapper).find('.numeric-extra').attr('name','numeric_extra_'+numNumeric);
+            $('#mult-field-' + numNumeric,wrapper).find('.numeric_extra').attr('name','numeric_extra_'+numNumeric);
             $('#mult-field-' + numNumeric,wrapper).find('.numeric_label').attr('name','numeric_label_'+numNumeric);
             $('#mult-field-' + numNumeric,wrapper).find('.max_score').attr('name','max_score_'+numNumeric).val(max_score);
             if(extra_credit){
-                $('#mult-field-' + numNumeric,wrapper).find('.numeric-extra').attr('checked',true); 
+                $('#mult-field-' + numNumeric,wrapper).find('.numeric_extra').attr('checked',true); 
             }
             $('#mult-field-' + numNumeric,wrapper).show();
         }
@@ -875,15 +912,21 @@ HTML;
             }
         });
         
-        $('select[name="minimum_grading_group"]').change(
-        function(){
+        function showGroups(val){
             var graders = ['','','full-access-graders', 'limited-access-graders']; 
-            for(var i=parseInt(this.value)+1; i<graders.length; ++i){
+            for(var i=parseInt(val)+1; i<graders.length; ++i){
                 $('#'+graders[i]).hide();
             }
-            for(var i=0; i <= parseInt(this.value) ; ++i){
+            for(var i=0; i <= parseInt(val) ; ++i){
                 $('#'+graders[i]).show();
             }
+        }
+        
+        showGroups($('select[name="minimum_grading_group"] option:selected').attr('value'));
+        
+        $('select[name="minimum_grading_group"]').change(
+        function(){
+            showGroups(this.value);
         });
         
         if({$default_late_days} != -1){
@@ -995,15 +1038,13 @@ HTML;
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
             <td style="overflow: hidden;"> \
                 <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea> \
-                <div class="btn btn-mini btn-default" onclick="toggleQuestion(' + newQ + ',\'individual\''+')" style="margin-top:-5px;">TA Note</div> \
-                <div class="btn btn-mini btn-default" onclick="toggleQuestion(' + newQ + ',\'student\''+')" style="margin-top:-5px;">Student Note</div> \
                 <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA"  onkeyup="autoResizeComment(event);" \
                           style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
                 <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student"  onkeyup="autoResizeComment(event);" \
                           style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
             </td> \
             <td style="background-color:#EEE;">' + sBox + ' \
-                <input onclick="calculatePercentageTotal();" name="ec_'+newQ+'" type="checkbox" class="ec bool_val" value="on"/> \
+                <input onclick="calculatePercentageTotal();" name="eg_extra_'+newQ+'" type="checkbox" class="eg_extra extra" value="on"/> \
                 <br /> \
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
                     <img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a> \
@@ -1022,7 +1063,7 @@ HTML;
     }
 
     function selectBox(question){
-        var retVal = '<select name="point_' + question + '" class="point complex_type" onchange="calculatePercentageTotal()">';
+        var retVal = '<select name="max_score_' + question + '" class="max_score" onchange="calculatePercentageTotal()">';
         for(var i = -100; i <= 100; i++) {
             if(i==0){
                 retVal = retVal + '<option selected="selected">' + (i * 0.5) + '</option>';
@@ -1038,8 +1079,8 @@ HTML;
     function calculatePercentageTotal() {
         var total = 0;
         var ec = 0;
-        $('select.points').each(function(){
-            var elem = $(this).attr('name').replace('point','ec');
+        $('select.max_score').each(function(){
+            var elem = $(this).attr('name').replace('max_score_','eg_extra_');
             if ($(this).val() > 0){
                 if (!$('[name="'+elem+'"]').is(':checked') == true) {
                     total += +($(this).val());
@@ -1068,18 +1109,19 @@ HTML;
     function updateRow(oldNum, newNum) {
         var row = $('tr#row-'+ oldNum);
         row.attr('id', 'row-' + newNum);
-        row.find('textarea[name=comment_' + oldNum + ']').attr('name', 'comment_' + newNum);
+        row.find('textarea[name=comment_title_' + oldNum + ']').attr('name', 'comment_title_' + newNum);
         row.find('div.btn').attr('onclick', 'toggleQuestion(' + newNum + ',"individual"' + ')');
-        row.find('textarea[name=ta_' + oldNum + ']').attr('name', 'ta_' + newNum).attr('id', 'individual_' + newNum);
-        row.find('select[name=point_' + oldNum + ']').attr('name', 'point_' + newNum);
-        row.find('input[name=ec_' + oldNum + ']').attr('name', 'ec_' + newNum);
+        row.find('textarea[name=ta_comment_' + oldNum + ']').attr('name', 'ta_comment_' + newNum).attr('id', 'individual_' + newNum);
+        row.find('textarea[name=student_comment_' + oldNum + ']').attr('name', 'student_comment_' + newNum).attr('id', 'student_' + newNum);
+        row.find('select[name=max_score_' + oldNum + ']').attr('name', 'max_score_' + newNum);
+        row.find('input[name=eg_extra_' + oldNum + ']').attr('name', 'eg_extra_' + newNum);
         row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
         row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');
         row.find('a[id=up-' + oldNum + ']').attr('id', 'up-' + newNum).attr('onclick', 'moveQuestionUp(' + newNum + ')');
     }
 
     function moveQuestionDown(question) {
-        if (question <= 1) {
+        if (question < 1) {
             return;
         }
 
@@ -1110,16 +1152,13 @@ HTML;
     }
 
     function moveQuestionUp(question) {
-        if (question <=2) {
+        if (question < 1) {
             return;
         }
 
         var currentRow = $('tr#row-' + question);
         var newRow = $('tr#row-' + (question-1));
         var child = 0;
-        if (question == 2) {
-            child = 1;
-        }
 
         var temp = currentRow.children()[0].children[0].value;
         currentRow.children()[0].children[0].value = newRow.children()[child].children[0].value;
