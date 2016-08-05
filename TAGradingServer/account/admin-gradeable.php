@@ -11,6 +11,7 @@ check_administrator();
 if($user_is_administrator){
     $have_old = $has_grades = false;
     $current_date = date('Y/m/d 23:59:59');
+    $yesterday = date('Y/m/d 23:59:59', strtotime( '-1 days' ));
     $old_gradeable = array(
         'g_id' => -1,
         'g_title' => "",
@@ -18,8 +19,8 @@ if($user_is_administrator){
         'g_team_assignment' => false,
         'g_gradeable_type' => 0,
         'g_grade_by_registration' => false,
-        'g_grade_start_date' => $current_date,
-        'g_grade_released_date' => $current_date,
+        'g_grade_start_date' => date('Y/m/d 23:59:59', strtotime( '+7 days' )),
+        'g_grade_released_date' => date('Y/m/d 23:59:59', strtotime( '+14 days' )),
         'g_syllabus_bucket' => '',
         'g_min_grading_group' => ''
     );
@@ -239,7 +240,7 @@ HTML;
     print <<<HTML
             > No -->
             <br />   
-            What is the type of your gradeable?:
+            What is the type of your gradeable?: <div id="required_type" style="color:red; display:inline;">(Required)</div>
 
             <fieldset>
                 <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File"
@@ -263,13 +264,13 @@ HTML;
             <!-- This is only relevant to Electronic Files -->
             <div class="gradeable_type_options electronic_file" id="electronic_file" >    
                 <br />
-                What date does the submission open to students?: <input name="date_submit" class="datepicker" type="text"
+                What date does the submission open to students?: <input id="date_submit" name="date_submit" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
                 <br />
                 What is the URL to the assignment instructions? (shown to student) 
                 <input style='width: 227px' type='text' name='instructions_url' placeholder="(Optional)" value="" />
                 <br />
-                What is the due date? <input name="date_due" class="datepicker" type="text"
+                What is the due date? <input id="date_due" name="date_due" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
                 <br />
                 How many late days may students use on this assignment? <input style="width: 50px" name="eg_late_days" class="int_val"
@@ -300,14 +301,14 @@ HTML;
                 </fieldset>
 
                 Path to autograding config: 
-                <input style='width: 227px' type='text' name='config_path' value="" />
+                <input style='width: 227px' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
                 <br />
                 Point precision: 
                 <input style='width: 50px' type='text' name='point_precision' value="0.5" class="float_val" />
                 <br /> <br />
                 
                 Use TA grading? 
-                <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val"
+                <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
 HTML;
                 echo ($use_ta_grading===true)?'checked':'';
         print <<<HTML
@@ -317,6 +318,7 @@ HTML;
                 echo ($use_ta_grading===false)?'checked':'';
         print <<<HTML
                 /> No
+                <div id="rubric_questions" class="bool_val rubric_questions">
                 <br /> <br />
                 <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
                     <thead style="background: #E1E1E1;">
@@ -405,6 +407,7 @@ HTML;
                     </tr>
                 </tbody>
             </table>
+            </div>
 HTML;
     print <<<HTML
             </div>
@@ -647,7 +650,6 @@ HTML;
                 style="cursor: auto; background-color: #FFF; width: 250px;">
             
             <br />
-            <!-- TODO default to never -->    
             What date will the TA grades be released to the students? 
             <input name="date_released" id="date_released" class="datepicker" type="text" 
                    style="cursor: auto; background-color: #FFF; width: 250px;">    
@@ -912,6 +914,20 @@ HTML;
             }
         });
         
+        if ( $('input:radio[name="ta_grading"]:checked').attr('value')==='false'){
+            $('#rubric_questions').hide();
+        }
+        
+        $('input:radio[name="ta_grading"]').change(
+        function(){
+            $('#rubric_questions').hide();
+            if ($(this).is(':checked')){
+                if($(this).val() == 'true'){ 
+                    $('#rubric_questions').show();
+                }
+            }
+        });
+        
         function showGroups(val){
             var graders = ['','','full-access-graders', 'limited-access-graders']; 
             for(var i=parseInt(val)+1; i<graders.length; ++i){
@@ -979,10 +995,14 @@ HTML;
     var datepicker = $('.datepicker');
     datepicker.datetimepicker({
         timeFormat: "HH:mm:ss",
-	    showTimezone: false
+        showTimezone: false
     });
     
-    $('#date_submit').datetimepicker('setDate', (new Date("{$current_date}")));
+    if(!{$have_old}){
+        $('#date_submit').datetimepicker('setDate', (new Date("{$yesterday}")));
+        $('#date_due').datetimepicker('setDate', (new Date("{$current_date}")));
+        
+    }
     
     $('#date_grade').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_start_date']}")));
     $('#date_released').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_released_date']}")));
@@ -998,10 +1018,15 @@ HTML;
         }
         calculatePercentageTotal();
     }
+    
+    if({$have_old}){
+        $('#required_type').hide();
+    }
 
     // Shows the radio inputs dynamically
     $('input:radio[name="gradeable_type"]').change(
     function(){
+        $('#required_type').hide();
         $('.gradeable_type_options').hide();
         if ($(this).is(':checked')){ 
             if($(this).val() == 'Electronic File'){ 
