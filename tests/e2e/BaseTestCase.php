@@ -20,12 +20,15 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
     /** @var string URL to use as the base for the tests */
     protected $test_url = null;
     
+    private $logged_in = false;
+    
     // For every browser, always specify sessionStrategy to be shared
     // as this causes one browser window per test class as opposed to
     // one browser window per test function (which is way slower)
     public static $browsers = array(
         array(
-            'browserName' => 'firefox',
+            'browserName' => 'phantomjs',
+            //'browserName' => 'firefox',
             'sessionStrategy' => 'shared'
         )
     );
@@ -39,18 +42,34 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
      */
     public function setUpPage() {
         $this->url("/index.php?semester=f16&course=csci1000");
-        $this->byName("user_id")->value($this->user_id);
-        $this->byName("password")->value($this->password);
-        $this->byName("login")->click();
-        $this->waitForUserInput();
+        try {
+            $this->byId("login-guest");
+            $this->byName("user_id")->value($this->user_id);
+            $this->byName("password")->value($this->password);
+            $this->byName("login")->click();
+        }
+        catch (\PHPUnit_Extensions_Selenium2TestCase_WebDriverException $e) {
+            // We're logged in already to the system, just ensure that we're logged in as the right user below
+        }
+        
+        $time = $this->timeouts()->getLastImplicitWaitValue();
+        $this->timeouts()->implicitWait(2500);
+        $this->byId('login');
+        $this->assertEquals($this->user_id, $this->byId('login-id')->text());
+        
+        $this->timeouts()->implicitWait($time);
+        $this->logged_in = true;
     }
     
     /**
      * Log out of the site, making sure there's no open sessions (so to not affect the next test that gets
-     * run which might need to be logged in as a different user)
+     * run which might need to be logged in as a different user). However, we need to make sure we're actually
+     * logged into the system (from the setup method), else we shouldn't bother trying to logout
      */
     public function tearDown() {
-        
+        if ($this->logged_in) {
+            $this->byId("logout")->click();
+        }
     }
     
     /**
