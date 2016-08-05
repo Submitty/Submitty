@@ -158,7 +158,7 @@ apt-get -qqy autoremove
 pip install python-pam
 pip install xlsx2csv
 
-chmod 555 /usr/local/lib/python2.7/*
+chmod -R 555 /usr/local/lib/python2.7/*
 chmod 555 /usr/lib/python2.7/dist-packages
 
 #################################################################
@@ -513,6 +513,7 @@ fi
 #################
 if [ ${VAGRANT} == 1 ]; then
     git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+    make ubuntudeps
 fi
 
 #################################################################
