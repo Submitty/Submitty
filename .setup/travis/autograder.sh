@@ -3,7 +3,8 @@ echo "Setting up auto-grader test suite"
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
-apt-get install -yqq --force-yes python automake cmake make clang gcc g++ g++-multilib libseccomp2 seccomp libseccomp-dev valgrind
+apt-get install -yqq --force-yes python automake cmake make clang gcc g++ g++-multilib \
+libseccomp2 seccomp libseccomp-dev valgrind pkg-config flex bison python3 libpcre3 libpcre3-dev
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}
 mkdir -p ${SUBMITTY_DATA_DIR}
@@ -30,6 +31,7 @@ popd
 
 chmod -R 777 ${SUBMITTY_INSTALL_DIR}
 
+# --------------------------------------
 echo "Getting DrMemory..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
 pushd /tmp
@@ -41,6 +43,7 @@ ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_IN
 rm DrMemory-Linux-${DRMEM_VER}.tar.gz
 popd
 
+# --------------------------------------
 echo "Getting JUnit..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
 pushd ${SUBMITTY_INSTALL_DIR}/JUnit
@@ -60,15 +63,15 @@ rm emma-2.0.5312.zip
 rm index.html* > /dev/null 2>&1
 
 chmod o+r . *.jar
-
 popd
 
+# --------------------------------------
 echo -e "Build the junit test runner"
 
 # copy the file from the repo
 cp junit_test_runner/TestRunner.java $SUBMITTY_INSTALL_DIR/JUnit/TestRunner.java
 
-pushd $SUBMITTY_INSTALL_DIR/JUnit 
+pushd $SUBMITTY_INSTALL_DIR/JUnit
 # root will be owner & group of the source file
 chown  root:root  TestRunner.java
 # everyone can read this file
@@ -80,13 +83,12 @@ javac -cp ./junit-4.12.jar TestRunner.java
 # everyone can read the compiled file
 chown root:root TestRunner.class
 chmod 444 TestRunner.class
+popd
 
-popd 
-
+# --------------------------------------
 echo -e "Compile and install analysis tools"
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 git pull origin master
-make ubuntudeps
 make
 popd
