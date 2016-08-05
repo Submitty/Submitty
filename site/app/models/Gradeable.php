@@ -226,7 +226,7 @@ abstract class Gradeable {
         
         if (is_file($submission_path."/user_assignment_settings.json")) {
             $settings = FileUtils::readJsonFile($submission_path."/user_assignment_settings.json");
-            $this->active = $settings['active_version'];
+            $this->active = intval($settings['active_version']);
             $this->history = $settings['history'];
         }
 
@@ -274,8 +274,8 @@ abstract class Gradeable {
             $this->active = $this->submissions;
         }
 
-        if (isset($_REQUEST['assignment_version'])) {
-            $this->current = intval($_REQUEST['assignment_version']);
+        if (isset($_REQUEST['gradeable_version'])) {
+            $this->current = intval($_REQUEST['gradeable_version']);
         }
 
         if ($this->current < 0 && $this->active >= 0) {

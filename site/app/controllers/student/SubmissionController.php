@@ -77,10 +77,7 @@ class SubmissionController implements IController {
             }
             
             $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'showGradeable',
-                                                   $gradeable,
-                                                   $grade_file,
-                                                   $select,
-                                                   $days_late);
+                                                   $gradeable, $select, $days_late);
         }
         else {
             $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeables');
@@ -346,6 +343,7 @@ class SubmissionController implements IController {
         }
         
         $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
+        $gradeable->loadSubmissionDetails();
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $_SESSION['messages']['error'][] = "Invalid CSRF token. Refresh the page and try again.";
             $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId())));

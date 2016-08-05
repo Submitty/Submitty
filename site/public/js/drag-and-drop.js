@@ -13,6 +13,8 @@ http://www.html5rocks.com/en/tutorials/file/dndfiles/
 //========================================================================================
 var file_array = [];        // contains files uploaded for this submission
 var previous_files = [];    // contains names of files selected from previous submission
+var label_array = [];
+var use_previous = false;
 var changed = false;        // if files from previous submission changed
 
 // initializing file_array and prevous_files
@@ -21,6 +23,7 @@ function createArray(num_parts){
         for(var i=0; i<num_parts; i++){
             file_array.push([]);
             previous_files.push([]);
+            label_array.push([]);
         }
     }
 }
@@ -29,6 +32,10 @@ function createArray(num_parts){
 function readPrevious(filename, part){
     changed = false;
     previous_files[part-1].push(filename);
+}
+
+function setUsePrevious() {
+    use_previous = true;
 }
 
 // DRAG AND DROP EFFECT
@@ -143,6 +150,8 @@ function addFile(file, part){
             changed = true;
         }
     }
+
+    setButtonStatus()
 }
 
 // REMOVE FILES
@@ -161,12 +170,13 @@ function deleteFiles(part) {
         dropzone.removeChild(labels[0]);
     }
     changed = true;
+    setButtonStatus();
 }
 
 function deleteSingleFile(filename, part, previous) {
     // Remove files from previous submission
     if (previous) {
-        for(var i = 0; i < previous_files[part-1].length; i++){
+        for (var i = 0; i < previous_files[part-1].length; i++){
             if(previous_files[part-1][i] == filename){
                 previous_files[part-1].splice(i, 1);
                 changed = true;
@@ -183,6 +193,37 @@ function deleteSingleFile(filename, part, previous) {
             }
         }
     }
+    setButtonStatus();
+}
+
+function setButtonStatus() {
+    // we only want to clear buckets if there's any labels in it (otherwise it's "blank")
+    var labels = 0;
+    for (var i = 0; i < label_array.length; i++) {
+        labels += label_array[i].length;
+    }
+
+    if (labels == 0) {
+        $("#startnew").prop("disabled", true);
+    }
+    else {
+        $("#startnew").prop("disabled", false);
+    }
+
+    // We only have "non-previous" submissions if there's stuff in the file array as well as if we've
+    // toggled the necessary flag that we're on a submission that would have previous (to prevent costly dom
+    // lookups for the existance of #getprev id in the page)
+    var files = 0;
+    for (var j = 0; j < file_array.length; j++) {
+        files += file_array[j].length;
+    }
+
+    if (use_previous && !changed && files == 0) {
+        $("#getprev").prop("disabled", true);
+    }
+    else if (use_previous) {
+        $("#getprev").prop("disabled", false);
+    }
 }
 
 // LABELS FOR SELECTED FILES
@@ -190,9 +231,10 @@ function deleteSingleFile(filename, part, previous) {
 function removeLabel(filename, part){
     var dropzone = document.getElementById("upload" + part);
     var labels = dropzone.getElementsByClassName("mylabel");
-    for(var i=0 ; i<labels.length; i++){
+    for(var i = 0 ; i < labels.length; i++){
         if(labels[i].innerHTML.substring(0, filename.length) == filename){
             dropzone.removeChild(labels[i]);
+            label_array[part-1].splice(i, 1);
             break;
         }
     }
@@ -226,6 +268,7 @@ function addLabel(filename, filesize, part, previous){
     // var deletebutton = document.getElementById("delete" + part);
     dropzone.appendChild(tmp);
     // dropzone.insertBefore(tmp, deletebutton);
+    label_array[part-1].push(filename);
 }
 
 // HANDLE SUBMISSION

@@ -47,7 +47,10 @@ class FileUtils {
                     }
                     else if (is_file($path) && !in_array(strtolower($entry), $skip_files) &&
                         !in_array(strtolower($entry), $disallowed_files)) {
-                        $return[$entry] = array('name' => $entry, 'path' => $path, 'size' => filesize($path));
+                        $return[$entry] = array('name' => $entry,
+                                                'path' => $path,
+                                                'size' => filesize($path),
+                                                'relative_name' => $entry);
                     }
                 }
             }
