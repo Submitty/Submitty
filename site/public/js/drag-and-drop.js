@@ -169,6 +169,7 @@ function deleteFiles(part) {
     while(labels[0]){
         dropzone.removeChild(labels[0]);
     }
+    label_array[part-1] = [];
     changed = true;
     setButtonStatus();
 }
@@ -179,6 +180,7 @@ function deleteSingleFile(filename, part, previous) {
         for (var i = 0; i < previous_files[part-1].length; i++){
             if(previous_files[part-1][i] == filename){
                 previous_files[part-1].splice(i, 1);
+                label_array[part-1].splice(i, 1);
                 changed = true;
                 break;
             }
@@ -189,6 +191,7 @@ function deleteSingleFile(filename, part, previous) {
         for (var j = 0; j < file_array[part-1].length; j++){
             if (file_array[part-1][j].name == filename) {
                 file_array[part-1].splice(j, 1);
+                label_array[part-1].splice(j, 1);
                 break;
             }
         }
@@ -354,7 +357,6 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
         contentType: false,
         type: 'POST',
         success: function(data) {
-            console.log(data);
             try {
                 data = JSON.parse(data);
             }
