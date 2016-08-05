@@ -10,18 +10,12 @@ if [[ "$RUN_E2E" = "true" ]]; then
     sudo cp ${BEFORE_SCRIPT_DIR}/travis/000-default.conf /etc/apache2/sites-available/000-default.conf
     sudo /etc/init.d/apache2 restart
 
-    sh -e /etc/init.d/xvfb start
-    export DISPLAY=:99.0
-
     if [ ! -f "$SELENIUM_JAR" ]; then
         echo "Downloading Selenium"
         sudo mkdir -p $(dirname "$SELENIUM_JAR")
         sudo wget -nv -O "$SELENIUM_JAR" "$SELENIUM_DOWNLOAD_URL"
         echo "Downloaded Selenium"
     fi
-
-    echo "Installing Firefox"
-    sudo apt-get install firefox -yqq --no-install-recommends
 fi
 
 echo "Setting up config files"
