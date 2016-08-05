@@ -388,7 +388,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
 
     $settings_file = $user_path."/user_assignment_settings.json";
     if (!file_exists($settings_file)) {
-        $json = array("active_assignment"=>$upload_version, "history"=>array(array("version"=>$upload_version, "time"=>date("Y-m-d H:i:s"))));
+        $json = array("active_version"=>$upload_version, "history"=>array(array("version"=>$upload_version, "time"=>date("Y-m-d H:i:s"))));
         file_put_contents($settings_file, json_encode($json, JSON_PRETTY_PRINT));
     }
     else {
@@ -1162,7 +1162,7 @@ function get_active_version($username, $semester,$course, $assignment_id) {
       return -1; // no submissions
     }
     $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
-    return $json["active_assignment"];
+    return $json["active_version"];
 }
 
 function change_assignment_version($username, $semester,$course, $assignment_id, $assignment_version, $assignment_config) {
@@ -1186,7 +1186,7 @@ function change_assignment_version($username, $semester,$course, $assignment_id,
         return;
     }
     $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
-    $json["active_assignment"] = (int)$assignment_version;
+    $json["active_version"] = (int)$assignment_version;
     $json["history"][] = array("version"=>(int)$assignment_version, "time"=>date("Y-m-d H:i:s"));
 
 /* // php symlinks disabled on server for security reasons

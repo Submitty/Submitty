@@ -21,7 +21,7 @@ try:
     arguments = cgi.FieldStorage()
     # prevent a user from figuring out a way of passing a path instead of a filename
     f = os.path.basename(arguments['file'].value)
-    with open("/tmp/pam/" + f, "r") as read_file:
+    with open("/tmp/" + f, "r") as read_file:
         j = json.loads(read_file.read())
         p = pam.pam()
         if p.authenticate(j['username'], j['password']):

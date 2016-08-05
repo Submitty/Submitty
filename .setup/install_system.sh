@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# TIMEZONE
+timedatectl set-timezone America/New_York
+
 #PATHS
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
@@ -38,7 +41,7 @@ if [ ${VAGRANT} == 1 ]; then
 ##  All user accounts have same password unless otherwise ##
 ##  noted below. The following user accounts exist:       ##
 ##    vagrant/vagrant, root/vagrant, hsdbu, hwphp,        ##
-##    hwphp-cgi hwcron, ta, instructor, developer,        ##
+##    hwcgi hwcron, ta, instructor, developer,            ##
 ##    postgres                                            ##
 ##                                                        ##
 ##  The following accounts have database accounts         ##
@@ -384,13 +387,14 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 
 
 adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser hwphp-cgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser hwphp-cgi shadow
+adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser hwcgi hwphp
+adduser hwcgi shadow
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
-	echo "hwphp-cgi:hwphp-cgi" | sudo chpasswd
+	echo "hwcgi:hwcgi" | sudo chpasswd
 	adduser hwphp vagrant
-	adduser hwphp-cgi vagrant
+	adduser hwcgi vagrant
 fi
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then
@@ -402,7 +406,7 @@ fi
 # might need to also set USERGROUPS_ENAB to "no", and manually create
 # the hwphp and hwcron single user groups.  See also /etc/login.defs
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp-cgi/.profile
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcgi/.profile
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
 
 
@@ -551,6 +555,7 @@ fi
 a2ensite submit
 a2ensite hwgrading
 a2ensite submitty
+a2ensite cgi
 
 apache2ctl -t
 service apache2 restart
@@ -573,10 +578,9 @@ if [[ ${VAGRANT} == 1 ]]; then
     mkdir ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
     ln -s ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs ${SUBMITTY_DATA_DIR}/tagrading_logs
 
-
     # Call helper script that makes the courses and refreshes the database
-    chmod u+x ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.sh
-    ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.sh
+    chmod u+x ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py
+    ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py
 
     #################################################################
     # SET CSV FIELDS (for classlist upload data)
