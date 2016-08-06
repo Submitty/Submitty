@@ -14,19 +14,54 @@ cache:
 
 addons:
   postgresql: "9.3"
+  apt:
+    sources:
+      - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
+      - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
+    packages:
+      - apache2
+      - libapache2-mod-fastcgi
+      - python
+      - build-essential
+      - automake
+      - cmake
+      - clang
+      - g++-multilib
+      - libseccomp2
+      - seccomp
+      - libseccomp-dev
+      - valgrind
+      - pkg-config
+      - flex
+      - bison
+      - python3
+      - libpcre3
+      - libpcre3-dev
 
 install:
   - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
-  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - export PATH="$PATH:$HOME/.composer/vendor/bin"
   - travis_retry composer install --prefer-dist --no-interaction
 
 before_script:
+  - sudo iptables -t nat -A OUTPUT -p all -d 192.168.56.104 -j DNAT --to-destination 127.0.0.1
+  - sudo usermod -a -G travis www-data
+  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - sudo a2enmod rewrite actions fastcgi alias
+  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo cp .setup/travis/www.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/; fi
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - sudo cp -f .setup/travis/000-default.conf /etc/apache2/sites-available/000-default.conf
+  - sudo sed -e "s?%TRAVIS_BUILD_DIR?$(pwd)?g" --in-place /etc/apache2/sites-available/000-default.conf
+  - sudo service apache2 restart
 #  - if [[ "$TRAVIS_PHP_VERSION" = "hhvm" ]]; then source ./.setup/travis/hhvm.sh; fi
-  - ./.setup/travis.sh
+  - ./.setup/travis/setup.sh
+  - sudo ./.setup/travis/autograder.sh
   - psql -c 'create database test_hwgrading;' -U postgres
   - psql --host=localhost --username=postgres --command="CREATE GROUP test_hwgrading ROLE postgres"
   - psql -f site/data/tables.sql -U postgres -d test_hwgrading
   - psql -f tests/testData/travis.sql -U postgres -d test_hwgrading
+  - ./.setup/travis/start.sh
 
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l

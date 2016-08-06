@@ -1,10 +1,9 @@
+#!/bin/bash
+
 echo "Setting up auto-grader test suite"
 
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
-
-apt-get install -yqq --force-yes python automake cmake make clang gcc g++ g++-multilib \
-libseccomp2 seccomp libseccomp-dev valgrind pkg-config flex bison python3 libpcre3 libpcre3-dev
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}
 mkdir -p ${SUBMITTY_DATA_DIR}
