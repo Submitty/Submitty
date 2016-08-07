@@ -32,9 +32,6 @@ check_administrator();
  * register_shutdown_function()
  */
 
-$csv_file = null;
-$xlsx_file = null;
-
 //Verify that upload is a true CSV or XLSX file (check file extension and MIME type)
 $fileType = pathinfo($_FILES['classlist']['name'], PATHINFO_EXTENSION);
 $fh = finfo_open(FILEINFO_MIME_TYPE);
@@ -42,41 +39,23 @@ $mimeType = finfo_file($fh, $_FILES['classlist']['tmp_name']);
 finfo_close($fh); //No longer needed once mime type is determined.
 
 if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-    $csv_file = \lib\Utils::generateRandomString();
-    $xlsx_file = \lib\Utils::generateRandomString();
-    //XLSX detected, need to do conversion.  Call up CGI script.
-    if (move_uploaded_file($_FILES['classlist']['tmp_name'], "/tmp/".$xlsx_file)) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, __CGI_URL__."/xlsx_to_csv.cgi?xlsx_file={$xlsx_file}&csv_file={$csv_file}");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($ch);
-        curl_close($ch);
-        if ($output === false) {
-            die("Error parsing xlsx to csv.");
-        }
-        $output = json_decode($output, true);
-        if ($output['error'] === true) {
-            die("Error parsing xlsx to csv: ".$output['error_message']);
-        }
-        else if ($output['success'] !== true) {
-            die("Error on response on parsing xlsx");
-        }
-        $csv_file = "/tmp/".$csv_file;
-    } else {
-        die("Error isolating uploaded XLSX.  Please contact tech support.");
-    }
-} else if (($fileType == 'csv' && $mimeType == 'text/plain')) {
-
+    $csv_file = "/tmp/".\lib\Utils::generateRandomString();
+    file_put_contents($csv_file, "");
+    chmod($csv_file, 0660);
+    $xlsx_file = "/tmp/".\lib\Utils::generateRandomString();
+}
+else if (($fileType == 'csv' && $mimeType == 'text/plain')) {
     //CSV detected.  No conversion needed.
     $csv_file = $_FILES['classlist']['tmp_name'];
-} else {
-    
+    $xlsx_file = null;
+}
+else {
     //Neither XLSX or CSV detected.  Good bye...
     die("Only xlsx or csv files are allowed!");
 }
 
 register_shutdown_function(
-    function($csv_file, $xlsx_file) {
+    function() use ($csv_file, $xlsx_file) {
         if (file_exists($xlsx_file)) {
             unlink($xlsx_file);
         }
@@ -84,11 +63,43 @@ register_shutdown_function(
         if (file_exists($csv_file)) {
             unlink($csv_file);
         }
-    }, $csv_file, $xlsx_file
+    }
 );
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
-	die("invalid csrf token");
+    die("invalid csrf token");
+}
+
+if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+    //XLSX detected, need to do conversion.  Call up CGI script.
+    if (move_uploaded_file($_FILES['classlist']['tmp_name'], $xlsx_file)) {
+        $xlsx_tmp = basename($xlsx_file);
+        $csv_tmp = basename($csv_file);
+        error_reporting(E_ALL);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, __CGI_URL__."/xlsx_to_csv.cgi?xlsx_file={$xlsx_tmp}&csv_file={$csv_tmp}");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $output = curl_exec($ch);
+        if ($output === false) {
+            die("Error parsing xlsx to csv.");
+        }
+        $output = json_decode($output, true);
+        if ($output === null) {
+            die("Error parsing JSON response: ".json_last_error_msg());
+        }
+        else if ($output['error'] === true) {
+            die("Error parsing xlsx to csv: ".$output['error_message']);
+        }
+        else if ($output['success'] !== true) {
+            var_dump($output);
+            print(curl_error($ch));
+            die("Error on response on parsing xlsx");
+        }
+        curl_close($ch);
+    }
+    else {
+        die("Error isolating uploaded XLSX.  Please contact tech support.");
+    }
 }
 
 // Get CSV ini config
@@ -154,11 +165,11 @@ $updated = 0;
 // student_manual is true)
 \lib\Database::beginTransaction();
 foreach ($rows as $row) {
-	$columns = array("user_id", "user_firstname", "user_lastname", "user_email", "user_group","registration_section");
-	$values = array($row['user_id'], $row['student_first_name'], $row['student_last_name'], $row['student_email'],4, $row['registration_section']);
+	$columns = array("user_id", "user_firstname", "user_lastname", "user_email", "user_group", "registration_section");
+	$values = array($row['user_id'], $row['student_first_name'], $row['student_last_name'], $row['student_email'], 4, $row['registration_section']);
 	$user_id = $row['user_id'];
 	if (array_key_exists($user_id, $students)) {
-	if (isset($_POST['ignore_manual_1']) && $_POST['ignore_manual_1'] == true && $students[$user_id]['student_manual'] == 1) {
+	if (isset($_POST['ignore_manual_1']) && $_POST['ignore_manual_1'] == true && $students[$user_id]['manual_registration'] == true) {
 			continue;
 		}
 		\lib\Database::query("UPDATE users SET registration_section=? WHERE user_id=?", array($row['registration_section'], $user_id));
@@ -166,7 +177,7 @@ foreach ($rows as $row) {
 		unset($students[$user_id]);
 	}
 	else {
-		$db->query("INSERT INTO users (" . (implode(",", $columns)) . ") VALUES (?, ?, ?, ?, ?, ?)", $values);
+		\lib\Database::query("INSERT INTO users (" . (implode(",", $columns)) . ") VALUES (?, ?, ?, ?, ?, ?)", $values);
 		\lib\Database::query("INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) VALUES(?, ?, TIMESTAMP '1970-01-01 00:00:01')", array($user_id, __DEFAULT_LATE_DAYS_STUDENT__));
         $inserted++;
 	}
@@ -175,7 +186,7 @@ foreach ($rows as $row) {
 $moved = 0;
 $deleted = 0;
 foreach ($students as $user_id => $student) {
-	if (isset($_POST['ignore_manual_2']) && $_POST['ignore_manual_2'] == true && $student['student_manual'] == 1) {
+	if (isset($_POST['ignore_manual_2']) && $_POST['ignore_manual_2'] == true && $student['manual_registration'] == true) {
 		continue;
 	}
 	$_POST['missing_students'] = intval($_POST['missing_students']);
@@ -193,4 +204,4 @@ foreach ($students as $user_id => $student) {
 }
 
 \lib\Database::commit();
-header("Location: {$BASE_URL}/account/admin-classlist.php?course={$_GET['course']}&update=1&inserted={$inserted}&updated={$updated}&deleted={$deleted}&moved={$moved}");
+header("Location: {$BASE_URL}/account/admin-classlist.php?course={$_GET['course']}&semester={$_GET['semester']}&update=1&inserted={$inserted}&updated={$updated}&deleted={$deleted}&moved={$moved}");

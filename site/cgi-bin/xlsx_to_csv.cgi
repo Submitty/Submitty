@@ -16,48 +16,69 @@
  * via an internal call of the server, thus not making the url accessible.
  */
 
+/**
+ * @param $string
+ */
 function return_error($string) {
-    $json = json_encode(array('success' => false, 'error' => true, 'error_message' => $string));
-    print "<HTML><BODY>{$json}</BODY></HTML>";
+    $json = json_encode(array('success' => false, 'error' => true, 'error_message' => $string), JSON_UNESCAPED_SLASHES);
+    die($json);
 }
 
+/**
+ *
+ */
 function return_success() {
-    print "<HTML><BODY>{'success': true, 'error': false}</BODY></HTML>";
+    die("{'success': true, 'error': false}");
 }
+
+parse_str($_SERVER['QUERY_STRING'], $_REQUEST);
 
 //Check if popen() is allowed
 if (function_exists('popen')) {
     //Check if xlsx2csv file exists
     $proc_handle = popen("command -v xlsx2csv", "r");
-    if ((!empty(fread($proc_handle, 1)))) {
+    $tmp = fread($proc_handle, 1);
+    pclose($proc_handle);
+    if (empty($tmp)) {
         return_error("xlsx2csv not available.");
     }
-    pclose($proc_handle);
-} else {
+}
+else {
     return_error("popen not available");
 }
 
-$xlsx_file = basename($_REQUEST['xlsx_file']);
-$csv_file = basename($_REQUEST['csv_file']);
- 
-if (!file_exists("/tmp/".$xlsx_file)) {
+$xlsx_file = "/tmp/".basename($_REQUEST['xlsx_file']);
+$csv_file = "/tmp/".basename($_REQUEST['csv_file']);
+
+if (!file_exists($xlsx_file)) {
     return_error("XLSX spreadsheet not found");
+}
+else if (!file_exists($csv_file)) {
+    return_error("CSV file not found");
 }
 
 //XLSX to CSV conversion
-$proc_handle = popen("xlsx2csv -d , -i -s 0 -p '' {$xlsx_file} {$csv_file} 2>&1", "r");
+$proc_handle = popen("xlsx2csv -d , -i -s 0 {$xlsx_file} {$csv_file}_folder 2>&1", "r");
 
 //Validate result after process.
 //Check for traceback from xlsx2csv process (no message when process successful).
 $tmp = fread($proc_handle, 1);
 pclose($proc_handle);
-if (empty($tmp)) {
+if (!empty($tmp)) {
     return_error("Failed converting xlsx to csv.");
 }
 
 //Check to make sure _HSS_csv was written.
-if (!file_exists(__TMP_CSV_PATH__)) {
-    return_error("CSV file not available after the conversion");
+if (is_dir($csv_file."_folder")) {
+    if (file_put_contents($csv_file, file_get_contents($csv_file."_folder/Sheet1.csv")) === false) {
+        system("rm -rf {$csv_file}_folder");
+        return_error(error_get_last());
+    }
+    
 }
+else {
+    file_put_contents($csv_file, file_get_contents($csv_file."_folder"));
+}
+system("rm -rf {$csv_file}_folder");
 
 return_success();
