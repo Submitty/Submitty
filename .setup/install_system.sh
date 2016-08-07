@@ -513,7 +513,9 @@ fi
 #################
 if [ ${VAGRANT} == 1 ]; then
     git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+    pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
     make ubuntudeps
+    popd
 fi
 
 #################################################################
