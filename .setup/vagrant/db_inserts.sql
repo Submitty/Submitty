@@ -20,3 +20,13 @@ INSERT INTO grading_registration(sections_registration_id, user_id)
 -- Students
 INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
     VALUES ('student', 'Joe', 'Student', 'student@email.com', 4, 1, NULL);
+    
+INSERT INTO users (user_id, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('smithj', 'John', 'Smith', 'smithj@email.com', 4, 1, NULL);
+    
+-- Late days    
+INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
+    VALUES ('student', 3, timestamp '1970-01-01 00:00:00');
+    
+INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
+    VALUES ('smithj', 3, timestamp '1970-01-01 00:00:00');

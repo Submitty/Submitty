@@ -120,9 +120,6 @@ HTML;
                                 System Management <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu" role="menu" aria-labelledby="drop-utility">
-                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-config.php" role="button" data-toggle="modal">
-                                    System Configuration
-                                </a></li>
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-students.php" role="button" data-toggle="modal">
                                     View Students
                                 </a></li>
