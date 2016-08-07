@@ -1,33 +1,31 @@
 {
     "gradeable_id": "cpp_memory_debugging",
     "gradeable_title": "CPP Memory Debugging",
+    "gradeable_type": "Electronic File",
+    "date_submit": "07/30/2016 00:00:01",
+    "instructions_url": "https://github.com/Submitty/Submitty/tree/master/sample_files/sample_submissions/cpp_memory_debugging",
+    "date_due": "08/07/2016 23:59:59",
+    "eg_late_days": 2,
+    "upload_type": "Upload File",
+    "config_path": "/usr/local/submitty/sample_files/sample_assignment_config/cpp_memory_debugging/config.json",
+    "point_precision": 0.5,
+    "ta_grading": true,
+    "comment_title": [
+        "Test"
+    ],
+    "ta_comment": [
+        ""
+    ],
+    "student_comment": [
+        ""
+    ],
+    "points": [
+        5
+    ],
+    "minimum_grading_group": 1,
     "ta_instructions": "",
-    "team-assignment": "no",
-    "gradeable-type": "Electronic File",
-    "date_submit": "08/02/2016 23:59:59",
-    "instructions-url": "https://github.com/Submitty/Submitty/tree/master/sample_files/sample_submissions/cpp_memory_debugging",
-    "date_due": "08/06/2016 23:59:59",
-    "eg_late_days": "2",
-    "upload-type": "Upload File",
-    "config-path": "/usr/local/submitty/sample_files/sample_assignment_config/cpp_memory_debugging/config.json",
-    "point-precision": "0.5",
-    "ta-grading": "yes",
-    "comment-0": "AUTO-GRADING",
-    "ta-0": "",
-    "student-0": "",
-    "point-0": "21",
-    "comment-1": "AUTO-GRADING EXTRA CREDIT",
-    "ta-1": "",
-    "student-1": "",
-    "point-1": "0",
-    "ec-1": "on",
-    "comment-2": "Test",
-    "ta-2": "",
-    "student-2": "",
-    "point-2": "5",
-    "section-type": "reg-section",
-    "date_grade": "08/10/2016 23:59:59",
-    "date_released": "08/11/2016 23:59:59",
-    "gradeable-buckets": "homework",
-    "minimum-grading-group": "1"
+    "section_type": "reg_section",
+    "date_grade": "08/11/2016 23:59:59",
+    "date_released": "08/08/2016 23:59:59",
+    "gradeable_buckets": "homework"
 }
