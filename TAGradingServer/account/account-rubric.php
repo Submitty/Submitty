@@ -38,10 +38,10 @@ else {
     $color  = "#DA4F49";
     $icon_color  = "#DA4F49";
     if ($eg->active_assignment == -1) {
-        $part_status  = 'Cancelled';
+        $part_status  = 'No Submission';
     }
     else if($eg->active_assignment == 0){
-        $part_status = 'No Submission';
+        $part_status = 'Cancelled';
     }
     else {
         $part_status  = 'Bad';
