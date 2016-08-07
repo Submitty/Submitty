@@ -49,8 +49,6 @@ if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedo
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, __CGI_URL__."/xlsx_to_csv.cgi?xlsx_file={$xlsx_file}&csv_file={$csv_file}");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        var_dump($ch);
-        var_dump($output);
         $output = curl_exec($ch);
         curl_close($ch);
         if ($output === false) {
@@ -160,11 +158,7 @@ foreach ($rows as $row) {
 	$values = array($row['user_id'], $row['student_first_name'], $row['student_last_name'], $row['student_email'],4, $row['registration_section']);
 	$user_id = $row['user_id'];
 	if (array_key_exists($user_id, $students)) {
-//<<<<<<< HEAD
-		if (isset($_SESSION['post']['ignore_manual_1']) && $_SESSION['post']['ignore_manual_1'] == true && $students[$user_id]['manual_registration'] == 1) {
-//=======
-	//	if (isset($_POST['ignore_manual_1']) && $_POST['ignore_manual_1'] == true && $students[$user_id]['student_manual'] == 1) {
-//>>>>>>> origin/master
+	if (isset($_POST['ignore_manual_1']) && $_POST['ignore_manual_1'] == true && $students[$user_id]['student_manual'] == 1) {
 			continue;
 		}
 		\lib\Database::query("UPDATE users SET registration_section=? WHERE user_id=?", array($row['registration_section'], $user_id));
@@ -181,11 +175,7 @@ foreach ($rows as $row) {
 $moved = 0;
 $deleted = 0;
 foreach ($students as $user_id => $student) {
-//<<<<<<< HEAD
-	if (isset($_SESSION['post']['ignore_manual_2']) && $_SESSION['post']['ignore_manual_2'] == true && $student['manual_registration'] == 1) {
-//=======
-	//if (isset($_POST['ignore_manual_2']) && $_POST['ignore_manual_2'] == true && $student['student_manual'] == 1) {
-//>>>>>>> origin/master
+	if (isset($_POST['ignore_manual_2']) && $_POST['ignore_manual_2'] == true && $student['student_manual'] == 1) {
 		continue;
 	}
 	$_POST['missing_students'] = intval($_POST['missing_students']);

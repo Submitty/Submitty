@@ -266,10 +266,10 @@ HTML;
                     <li class='active'><a href="#output-1" data-toggle="tab">
 HTML;
         if ($eg->active_assignment == 0) {
-            $output .= '<b style="color:#DA4F49;">No Submission</b>';
+            $output .= '<b style="color:#DA4F49;">Cancelled</b>';
         }
         else {
-            $output .= '<b style="color:#DA4F49;">Cancelled</b>';
+            $output .= '<b style="color:#DA4F49;">No Submission</b>';
         }
 
         $output .= <<<HTML

@@ -86,7 +86,7 @@ if($user_is_administrator){
     $account_subpages_unlock = true;
     
     function selectBox($question, $grade = 0) {
-        $retVal = "<select name='max_score_{$question}' class='max_score complex_type' onchange='calculatePercentageTotal();'>";
+        $retVal = "<select name='points_{$question}' class='points' onchange='calculatePercentageTotal();'>";
         for($i = -100; $i <= 100; $i += 0.5) {
             $selected = ($grade == $i) ? "selected" : "";
             $retVal .= "<option {$selected}>{$i}</option>";
@@ -313,7 +313,7 @@ HTML;
                 echo ($use_ta_grading===true)?'checked':'';
         print <<<HTML
                 /> Yes
-                <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val"
+                <input type="radio" id="no_ta_grade" name="ta_grading" value="false"
 HTML;
                 echo ($use_ta_grading===false)?'checked':'';
         print <<<HTML
@@ -573,7 +573,7 @@ HTML;
     }
     
     print <<<HTML
-    <div id="rotating-sections" class="grader" style="display:none;">
+    <div id="rotating-sections" class="graders" style="display:none;">
         <br />
         Available rotating sections: {$num_rotating_sections}
         
@@ -722,7 +722,6 @@ HTML;
             if($.inArray(this.name,ignore) !== -1) {
                 return;
             }
-            
             var val = this.value;
             if($("[name="+this.name+"]").hasClass('int_val')){
                 val = parseInt(val);
@@ -750,6 +749,12 @@ HTML;
                     o['max_score'] = [];
                 }
                 o['max_score'].push(parseFloat(this.value));
+            }
+            else if ($("[name="+this.name+"]").hasClass('points')){
+                if (o['points'] === undefined){
+                    o['points'] = [];
+                }
+                o['points'].push(parseFloat(this.value));
             }
             else if($("[name="+this.name+"]").hasClass('extra')){
                 var tmp = this.name.split('_');
@@ -1088,7 +1093,7 @@ HTML;
     }
 
     function selectBox(question){
-        var retVal = '<select name="max_score_' + question + '" class="max_score" onchange="calculatePercentageTotal()">';
+        var retVal = '<select name="points_' + question + '" class="points" onchange="calculatePercentageTotal()">';
         for(var i = -100; i <= 100; i++) {
             if(i==0){
                 retVal = retVal + '<option selected="selected">' + (i * 0.5) + '</option>';
@@ -1104,8 +1109,8 @@ HTML;
     function calculatePercentageTotal() {
         var total = 0;
         var ec = 0;
-        $('select.max_score').each(function(){
-            var elem = $(this).attr('name').replace('max_score_','eg_extra_');
+        $('select.points').each(function(){
+            var elem = $(this).attr('name').replace('points_','eg_extra_');
             if ($(this).val() > 0){
                 if (!$('[name="'+elem+'"]').is(':checked') == true) {
                     total += +($(this).val());
@@ -1138,7 +1143,7 @@ HTML;
         row.find('div.btn').attr('onclick', 'toggleQuestion(' + newNum + ',"individual"' + ')');
         row.find('textarea[name=ta_comment_' + oldNum + ']').attr('name', 'ta_comment_' + newNum).attr('id', 'individual_' + newNum);
         row.find('textarea[name=student_comment_' + oldNum + ']').attr('name', 'student_comment_' + newNum).attr('id', 'student_' + newNum);
-        row.find('select[name=max_score_' + oldNum + ']').attr('name', 'max_score_' + newNum);
+        row.find('select[name=points_' + oldNum + ']').attr('name', 'points_' + newNum);
         row.find('input[name=eg_extra_' + oldNum + ']').attr('name', 'eg_extra_' + newNum);
         row.find('a[id=delete-' + oldNum + ']').attr('id', 'delete-' + newNum).attr('onclick', 'deleteQuestion(' + newNum + ')');
         row.find('a[id=down-' + oldNum + ']').attr('id', 'down-' + newNum).attr('onclick', 'moveQuestionDown(' + newNum + ')');

@@ -158,7 +158,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
             $gc_title = $add_args["comment_title_".strval($i)];
             $gc_ta_comment = $add_args["ta_comment_".strval($i)];
             $gc_student_comment = $add_args["student_comment_".strval($i)];
-            $gc_max_value = $add_args['max_score_'.strval($i)];
+            $gc_max_value = $add_args['points_'.strval($i)];
             $gc_is_text = "false";
             $gc_is_ec = (isset($add_args['eg_extra_'.strval($i)]) && $add_args['eg_extra_'.strval($i)]=='on')? "true" : "false";
             if($action=='edit' && $i<=$num_old_questions){

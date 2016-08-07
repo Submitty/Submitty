@@ -322,9 +322,9 @@ ORDER BY gc_order ASC
             if (!$this->has_grade || !isset($this->active_assignment) || $this->active_assignment <= 0) {
                 if (file_exists(implode("/", array($submission_directory, "user_assignment_settings.json")))) {
                     $settings = json_decode(file_get_contents(implode("/", array($submission_directory, "user_assignment_settings.json"))), true);
-                    $this->active_assignment = $settings['active_assignment'];
+                    $this->active_assignment = $settings['active_version'];
                     // If the active_assignment is -1 in the file, then the submission was "cancelled"
-                    if ($settings['active_assignment'] == 0) {
+                    if ($settings['active_version'] == 0) {
                         continue;
                     }
                 }
