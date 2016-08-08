@@ -377,7 +377,7 @@ ALTER TABLE ONLY users
 --
 
 ALTER TABLE ONLY sessions
-    ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES users(user_id)
+    ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
 
 
 --
