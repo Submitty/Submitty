@@ -1304,4 +1304,19 @@ function get_late_days_allowed($assignment_config){
   return 2;
   // TODO: Get max late days allowed for an assignment from the config
 }
+
+function get_gradeable_addresses($semester, $course) {
+    $path = get_path_front_course($semester,$course)."/config/form";
+    $addresses = array();
+    if (is_dir($path)) {
+        if ($handle = opendir($path)) {
+            while (($file = readdir($handle)) !== false) {
+                if (isset($file[0]) && $file[0] != ".") {
+                    $addresses[] = $path."/".$file;
+                }
+            }
+        }
+    }
+    return $addresses;
+}
 ?>

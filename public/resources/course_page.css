@@ -1,0 +1,60 @@
+body {
+	background: rgba(239, 244, 244, 1);
+}
+table {
+	width: 100%;
+	padding: 50px;
+	padding-top: 0px;
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size: 18px;
+	text-align: left;
+}
+table .colspan{
+	padding: 10px;
+	font-size: 28px;
+	font-weight: 600;
+}
+table .bar{
+	height:20px;
+}
+table .gradeable_title {
+	padding-left: 50px;
+}
+table a{
+	text-decoration: none;
+}
+table .has-url:hover {
+	cursor: pointer;
+	color: #F7F305;
+}
+table .student .gradeable_title {
+	width: 45%;
+}
+table .student .date {
+	width: 30%;
+}
+table .student .option {
+	width: 25%;
+}
+table .ta .gradeable_title{
+	width: 25%;
+}
+table .ta .date{
+	width: 25%;
+	text-align: center;
+}
+table .ta .option{
+	width: 12.5%;
+}
+table .instructor .gradeable_title{
+	width: 25%;
+}
+table .instructor .date{
+	width: 15%;
+}
+table .instructor .option{
+	width: 10%;
+}
+table .instructor .two-options{
+	width: 15%;
+}
