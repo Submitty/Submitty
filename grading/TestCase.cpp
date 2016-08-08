@@ -165,7 +165,6 @@ TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
   if (!openStudentFile(tc,j,student_file_contents,error_messages)) {
     return new TestResults(0.0,error_messages);
   }
-<<<<<<< HEAD
   if (student_file_contents.size() == 0) {
     return new TestResults(0.0,{"ERROR!  FILE EMPTY"});
   }
