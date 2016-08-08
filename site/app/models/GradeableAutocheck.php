@@ -21,8 +21,8 @@ class GradeableAutocheck {
     /** @var string Description to show for displaying the diff */
     private $description = "";
     
-    /** @var string Message to show underneath the description for a diff */
-    private $message = "";
+    /** @var String[] Message to show underneath the description for a diff */
+    private $messages = array();
     
     public function __construct($details, $course_path, $result_path) {
         $this->id = $details['autocheck_id'];
@@ -31,8 +31,10 @@ class GradeableAutocheck {
             $this->description = Utils::prepareHtmlString($details['description']);
         }
         
-        if (isset($details['message'])) {
-            $this->message = Utils::prepareHtmlString($details['message']);
+        if (isset($details['messages'])) {
+            foreach ($details['messages'] as $message) {
+                $this->messages[] = Utils::prepareHtmlString($message);
+            }
         }
         
         $student_file = $instructor_file = $difference_file = "";
@@ -71,9 +73,9 @@ class GradeableAutocheck {
     }
     
     /**
-     * @return string
+     * @return String[]
      */
-    public function getMessage() {
-        return $this->message;
+    public function getMessages() {
+        return $this->messages;
     }
 }

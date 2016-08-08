@@ -1,17 +1,14 @@
 <phpunit
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/5.2/phpunit.xsd"
-        bootstrap="bootstrap.php"
+        bootstrap="e2e/bootstrap.php"
         colors="true"
         verbose="true">
     <testsuites>
-        <testsuite name="Functional Tests">
+        <testsuite name="E2E Tests">
             <directory suffix="Tester.php">e2e</directory>
         </testsuite>
     </testsuites>
 
     <!-- don't bother logging coverage as doesn't do anything -->
-    <php>
-        <env name="TEST_URL" value="http://localhost/"/>
-    </php>
 </phpunit>

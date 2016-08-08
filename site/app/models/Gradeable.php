@@ -190,9 +190,10 @@ abstract class Gradeable {
         }
         
         for ($i = 1; $i <= $this->num_parts; $i++) {
-            if (isset($details['part_names']) && isset($details['part_names'][$i]) &&
-                trim($details['part_names'][$i]) !== "") {
-                $this->part_names[$i] = $details['part_names'][$i];
+            $j = $i - 1;
+            if (isset($details['part_names']) && isset($details['part_names'][$j]) &&
+                trim($details['part_names'][$j]) !== "") {
+                $this->part_names[$i] = $details['part_names'][$j];
             }
             else {
                 $this->part_names[$i] = "Part ".$i;
@@ -225,7 +226,7 @@ abstract class Gradeable {
         
         if (is_file($submission_path."/user_assignment_settings.json")) {
             $settings = FileUtils::readJsonFile($submission_path."/user_assignment_settings.json");
-            $this->active = $settings['active_version'];
+            $this->active = intval($settings['active_version']);
             $this->history = $settings['history'];
         }
 
@@ -273,8 +274,8 @@ abstract class Gradeable {
             $this->active = $this->submissions;
         }
 
-        if (isset($_REQUEST['assignment_version'])) {
-            $this->current = intval($_REQUEST['assignment_version']);
+        if (isset($_REQUEST['gradeable_version'])) {
+            $this->current = intval($_REQUEST['gradeable_version']);
         }
 
         if ($this->current < 0 && $this->active >= 0) {
@@ -286,7 +287,7 @@ abstract class Gradeable {
 
         $submission_current_path = $submission_path."/".$this->current;
         
-        $submitted_files = FileUtils::getAllFiles($submission_current_path, array(), true, true);
+        $submitted_files = FileUtils::getAllFiles($submission_current_path, array(), true);
         foreach ($submitted_files as $file => $details) {
             if (substr(basename($file), 0, 1) === '.') {
                 $this->meta_files[$file] = $details;

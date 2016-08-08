@@ -127,12 +127,12 @@ HTML;
             $first_name = $this->core->getUser()->getFirstName();
             $id = $this->core->getUser()->getId();
             $return .= <<<HTML
-            Hello {$first_name} ({$id}) (<a id='logout' href='{$logout_link}'>Logout</a>)
+            <span id="login">Hello {$first_name} (<span id="login-id">{$id}</span>)</span> (<a id='logout' href='{$logout_link}'>Logout</a>)
 HTML;
         }
         else {
             $return .= <<<HTML
-            Hello Guest
+            <span id="login-guest">Hello Guest</span>
 HTML;
         }
         $return .= <<<HTML
