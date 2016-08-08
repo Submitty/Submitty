@@ -156,6 +156,10 @@ class SubmissionController implements IController {
                 }
             }
             
+            if (empty($uploaded_files)) {
+                return_error("No files actually uploaded");
+            }
+            
             $errors = array();
             $count = array();
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {

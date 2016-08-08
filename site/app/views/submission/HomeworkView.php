@@ -422,8 +422,12 @@ HTML;
                             foreach ($testcase->getAutochecks() as $autocheck) {
                                 $return .= <<<HTML
                 <div class="box-block">
-                    <span class="red-message">{$autocheck->getMessage()}</span>
 HTML;
+                                foreach ($autocheck->getMessages() as $message) {
+                                    $return .= <<<HTML
+                    <div class="red-message">{$message}</div>
+HTML;
+                                }
                                 $diff_viewer = $autocheck->getDiffViewer();
                                 $description = $autocheck->getDescription();
                                 if($diff_viewer->hasActualOutput()) {

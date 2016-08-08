@@ -57,7 +57,7 @@ class GradeableTestcase {
     }
     
     public function addResultTestcase($testcase, $result_path) {
-        if (file_exists($result_path."/".$testcase['execute_logfile'])) {
+        if (isset($testcase['execute_logfile']) && file_exists($result_path."/".$testcase['execute_logfile'])) {
             $this->log_file = file_get_contents($result_path . "/" . $testcase['execute_logfile']);
         }
         
