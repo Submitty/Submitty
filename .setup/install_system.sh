@@ -127,7 +127,7 @@ hardening-includes python python-pip p7zip-full patchutils postgresql-client pos
 unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libfile-mmagic-perl \
 libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
-libseccomp2 seccomp junit cmake xlsx2csv libpcre3 libpcre3-dev flex bison
+libseccomp2 seccomp junit cmake libpcre3 libpcre3-dev flex bison
 
 apt-get install -qqy subversion subversion-tools
 apt-get install -qqy libapache2-svn
@@ -156,7 +156,9 @@ apt-get -qqy autoremove
 # TODO: We should look into making it so that only certain users have access to certain packages
 # so that hwphp is the only one who could use PAM for example
 pip install python-pam
-chmod 555 /usr/local/lib/python2.7/*
+pip install xlsx2csv
+
+chmod -R 555 /usr/local/lib/python2.7/*
 chmod 555 /usr/lib/python2.7/dist-packages
 
 #################################################################
@@ -308,7 +310,7 @@ if [ ${VAGRANT} == 1 ]; then
 	sed -i '25s/^/\#/' /etc/pam.d/common-password
 	sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
     # Set the ServerName
-	echo -e "\nServerName 10.0.2.15\n" >> /etc/apache2/apache2.conf
+	# echo -e "\nServerName 10.0.2.15\n" >> /etc/apache2/apache2.conf
 fi
 
 

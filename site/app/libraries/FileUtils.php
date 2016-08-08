@@ -11,18 +11,16 @@ class FileUtils {
     /**
      * Return all files from a given directory. If the $recursive flag is true, then also scan subdirectories
      * recursively to get files from them. All subdirectories are an array pointing to their files (and additional
-     * subdirecotires pointing to their files, so on and so forth). If the $recursive flag is false, then we skip
-     * any subdirectories and do not include them in the returned array. If passed a file, the function will not
+     * subdirecotires pointing to their files, so on and so forth). If passed a file, the function will not
      * return anything. If the $flatten flag is true, any subdirectory arrays are flattened to just be elements
      * of the directory array with they key being {subdirectory}/{entry} giving a one-dimensional array.
      *
      * @param string $dir
      * @param array  $skip_files
-     * @param bool   $recursive
      * @param bool   $flatten
      * @return array
      */
-    public static function getAllFiles($dir, $skip_files=array(), $recursive=false, $flatten=false) {
+    public static function getAllFiles($dir, $skip_files=array(), $flatten=false) {
         $skip_files = array_map(function($str) { return strtolower($str); }, $skip_files);
     
         // we ignore these files and folders as they're "junk" folders that are
@@ -36,22 +34,23 @@ class FileUtils {
                 while (false !== ($entry = readdir($handle))) {
                     $path = "{$dir}/{$entry}";
                     if (is_dir($path) && !in_array(strtolower($entry), $disallowed_folders)) {
-                        if ($recursive) {
-                            $temp = FileUtils::getAllFiles($path, $skip_files);
-                            if ($flatten) {
-                                foreach ($temp as $file => $details) {
-                                    $return[$entry."/".$file] = $details;
-                                }
+                        $temp = FileUtils::getAllFiles($path, $skip_files);
+                        if ($flatten) {
+                            foreach ($temp as $file => $details) {
+                                $details['relative_name'] = $entry."/".$details['name'];
+                                $return[$entry."/".$file] = $details;
                             }
-                            else {
-                                $return[$entry] = $temp;
-                            }
-                            
+                        }
+                        else {
+                            $return[$entry] = $temp;
                         }
                     }
                     else if (is_file($path) && !in_array(strtolower($entry), $skip_files) &&
                         !in_array(strtolower($entry), $disallowed_files)) {
-                        $return[$entry] = array('name' => $entry, 'path' => $path, 'size' => filesize($path));
+                        $return[$entry] = array('name' => $entry,
+                                                'path' => $path,
+                                                'size' => filesize($path),
+                                                'relative_name' => $entry);
                     }
                 }
             }
