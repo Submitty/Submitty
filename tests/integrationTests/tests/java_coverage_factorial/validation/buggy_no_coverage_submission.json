@@ -8,53 +8,36 @@
 	"testcases": [
 		{
 			"test_name": "Test 1 Compilation of student code: Factorial.java",
-			"execute_logfile": "test01_execute_logfile.txt",
-			"compilation_output": "test01_STDERR.txt",
 			"points_awarded": 2
 		},
 		{
 			"test_name": "Test 2 Compilation of student and instructor test cases: *Test.java",
-			"execute_logfile": "test02_execute_logfile.txt",
-			"compilation_output": "test02_STDERR.txt",
 			"points_awarded": 2
 		},
 		{
 			"test_name": "Test 3 Instrumentation of student code",
-			"execute_logfile": "test03_execute_logfile.txt",
 			"autochecks": [
 				{
 					"autocheck_id":"test03_0_autocheck",
 					"student_file":"test03_STDOUT.txt",
 					"description": "JUnit EMMA instrumentation output"
-				},
-				{
-					"autocheck_id":"test03_1_autocheck",
-					"student_file":"test03_STDERR.txt",
-					"description": "syntax error output from running java"
 				}
 			],
 			"points_awarded": 0
 		},
 		{
 			"test_name": "Test 4 Running student tests in hw0/tests/",
-			"execute_logfile": "test04_execute_logfile.txt",
 			"autochecks": [
 				{
 					"autocheck_id":"test04_0_autocheck",
 					"student_file":"test04_STDOUT.txt",
 					"description": "TestRunner output"
-				},
-				{
-					"autocheck_id":"test04_1_autocheck",
-					"student_file":"test04_STDERR.txt",
-					"description": "syntax error output from running java"
 				}
 			],
 			"points_awarded": 4
 		},
 		{
 			"test_name": "Test 5 Generating coverage report for student tests",
-			"execute_logfile": "test05_execute_logfile.txt",
 			"autochecks": [
 				{
 					"autocheck_id":"test05_0_autocheck",
@@ -65,29 +48,18 @@
 					"autocheck_id":"test05_1_autocheck",
 					"student_file":"test05_emma_report.txt",
 					"description": "JUnit EMMA coverage report"
-				},
-				{
-					"autocheck_id":"test05_2_autocheck",
-					"student_file":"test05_STDERR.txt",
-					"description": "syntax error output from running java"
 				}
 			],
 			"points_awarded": 6
 		},
 		{
 			"test_name": "Test 6 Instructor Test",
-			"execute_logfile": "test06_execute_logfile.txt",
 			"autochecks": [
 				{
 					"autocheck_id":"test06_0_autocheck",
 					"student_file":"test06_STDOUT.txt",
 					"description": "JUnit output",
 					"messages": ["ERROR: Number of tests specified in configuration does not match!"]
-				},
-				{
-					"autocheck_id":"test06_1_autocheck",
-					"student_file":"test06_STDERR.txt",
-					"description": "syntax error output from running java"
 				}
 			],
 			"points_awarded": 0

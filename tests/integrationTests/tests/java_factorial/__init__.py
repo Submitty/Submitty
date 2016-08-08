@@ -126,4 +126,3 @@ def still_buggy(test):
     test.diff("test03_execute_logfile.txt","exit_status_1.txt")
     test.diff(".submit.grade","still_buggy_.submit.grade")
     test.json_diff("submission.json","still_buggy_submission.json")
-

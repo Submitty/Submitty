@@ -13,6 +13,7 @@
 #include <iostream>
 #include <sstream>
 #include <cassert>
+#include <map>
 
 // for system call filtering
 #include <seccomp.h>
@@ -29,40 +30,69 @@
 // defined in seccomp_functions.cpp
 
 
+#define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
+
 
 // =====================================================================================
 // =====================================================================================
 
 
-bool system_program(const std::string &program) {
-  assert (program.size() >= 1);
-  if (program == "/bin/ls" ||
-      program == "/usr/bin/time" ||
-      program == "/bin/mv" ||
-      program == "/bin/chmod" ||
-      program == "/usr/bin/find" ||
-      // analysis tools
-      program == "/bin/cat" ||
-      program == "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_token" ||
-      program == "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node" ||
-      // for Computer Science I
-      program == "/usr/bin/python" ||
-      // for Data Structures
-      program == "/usr/bin/clang++" ||
-      program == "/usr/bin/g++" ||
-      program == "/usr/bin/valgrind" ||
-      program == "/usr/local/submitty/drmemory/bin/drmemory" ||
-      program == "/usr/bin/compare" ||  // image magick!
-      // for Principles of Software
-      program == "/usr/bin/java" ||
-      program == "/usr/bin/javac" ||
-      // for Operating Systems
-      program == "/usr/bin/gcc" ||
-      // for Programming Languages
-      program == "/usr/bin/swipl" ||
-      program == "/usr/bin/plt-r5rs") {
+bool system_program(const std::string &program, std::string &full_path_executable) {
+
+  const std::map<std::string,std::string> allowed_system_programs = {
+
+    // Basic System Utilities (for debugging)
+    { "ls",                     "/bin/ls", },
+    { "time",                   "/usr/bin/time" },
+    { "mv",                     "/bin/mv" },
+    { "cp",                     "/bin/cp" },
+    { "chmod",                  "/bin/chmod" },
+    { "find",                   "/usr/bin/find" },
+    { "cat",                    "/bin/cat" },
+    { "compare",                "/usr/bin/compare" }, //image magick!
+
+    // Submitty Analysis Tools
+    { "submitty_count_token",   SUBMITTY_INSTALL_DIRECTORY+"/GIT_CHECKOUT_AnalysisTools/bin/count_token" },
+    { "submitty_count_node",    SUBMITTY_INSTALL_DIRECTORY+"/GIT_CHECKOUT_AnalysisTools/bin/count_node" },
+
+    // for Computer Science I
+    { "python",                 "/usr/bin/python" },
+
+    // for Data Structures
+    { "g++",                    "/usr/bin/g++" },
+    { "clang++",                "/usr/bin/clang++" },
+    { "drmemory",               SUBMITTY_INSTALL_DIRECTORY+"/drmemory/bin/drmemory" },
+    { "valgrind",               "/usr/bin/valgrind" },
+
+    // for Principles of Software
+    { "java",                   "/usr/bin/java" },
+    { "javac",                  "/usr/bin/javac" },
+
+    // for Operating Systems
+    { "gcc",                    "/usr/bin/gcc" },
+
+    // for Programming Languages
+    { "swipl",                  "/usr/bin/swipl" },
+    { "plt-r5rs",               "/usr/bin/plt-r5rs" }
+
+  };
+
+  // find full path name
+  std::map<std::string,std::string>::const_iterator itr = allowed_system_programs.find(program);
+  if (itr != allowed_system_programs.end()) {
+    full_path_executable = itr->second;
     return true;
   }
+
+  // did they already use the full path name?
+  for (itr = allowed_system_programs.begin(); itr != allowed_system_programs.end(); itr++) {
+    if (itr->second == program) {
+      full_path_executable = program;
+      return true;
+    }
+  }
+
+  // not an allowed system program
   return false;
 }
 
@@ -79,10 +109,14 @@ bool local_executable (const std::string &program) {
 }
 
 
-void validate_program(const std::string &program) {
+std::string validate_program(const std::string &program) {
+  std::string full_path_executable;
   assert (program.size() >= 1);
-  if (!system_program(program) &&
-      !local_executable(program)) {
+  if (system_program(program,full_path_executable)) {
+    return full_path_executable;
+  } else if (local_executable(program)) {
+    return program;
+  } else {
     std::cout << "ERROR: program looks suspicious '" << program << "'" << std::endl;
     std::cerr << "ERROR: program looks suspicious '" << program << "'" << std::endl;
     exit(1);
@@ -101,7 +135,44 @@ void validate_filename(const std::string &filename) {
 }
 
 
-void validate_option(const std::string &program, const std::string &option) {
+std::string validate_option(const std::string &program, const std::string &option) {
+  const std::map<std::string,std::map<std::string,std::string> > option_replacements = {
+    { "/usr/bin/javac",
+      { { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" } },
+    },
+    { "/usr/bin/java",
+      { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
+        { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
+        { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
+        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
+      }
+    }
+  };
+
+  // see if this program has option replacements
+  std::map<std::string,std::map<std::string,std::string> >::const_iterator itr = option_replacements.find(program);
+  if (itr != option_replacements.end()) {
+    std::string answer = option;
+    // loop over all replacements and see if any match
+    std::map<std::string,std::string>::const_iterator itr2;
+    for (itr2 = itr->second.begin(); itr2 != itr->second.end(); itr2++) {
+      std::string pattern = itr2->first;
+      std::string::size_type pos = answer.find(pattern);
+      if (pos == std::string::npos) continue;
+      std::string before = answer.substr(0,pos);
+      std::string after =  answer.substr(pos+pattern.length(),answer.length()-pos-pattern.length());
+      answer = before + itr2->second + after;
+    }
+    if (option != answer) {
+      std::cout << "REPLACE OPTION '" << option << "' with '" << answer << "'" << std::endl;
+    }
+    return answer;
+  }
+
+  // otherwise, just use the option
+  return option;
+
+  /*
   static std::string last_option = "";
   assert (option.size() >= 1);
   if (option[0] == '-') {
@@ -118,11 +189,26 @@ void validate_option(const std::string &program, const std::string &option) {
     //exit(1);
   }
   last_option = option;
+  */
 }
 
 // =====================================================================================
 
-bool wildcard_match(const std::string &pattern, const std::string &thing, std::ofstream &logfile) {
+std::string replace_slash_with_double_underscore(const std::string& input) {
+  std::string answer;
+  for (int i = 0; i < input.size(); i++) {
+    if (input[i] != '/') answer.push_back(input[i]);
+    else {
+      answer.push_back('_');
+      answer.push_back('_');
+    }
+  }
+  return answer;
+}
+
+// =====================================================================
+
+bool wildcard_match(const std::string &pattern, const std::string &thing, std::ostream &logfile) {
   //  std::cout << "WILDCARD MATCH? " << pattern << " " << thing << std::endl;
 
   int wildcard_loc = pattern.find("*");
@@ -154,7 +240,9 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
 }
 
 
-void wildcard_expansion(std::vector<std::string> &my_args, const std::string &full_pattern, std::ofstream &logfile) {
+void wildcard_expansion(std::vector<std::string> &my_args, const std::string &full_pattern, std::ostream &logfile) {
+
+  std::cout << "IN WILDCARD EXPANSION " << full_pattern << std::endl;
 
   // if the pattern does not contain a wildcard, just return that
   if (full_pattern.find("*") == std::string::npos) {
@@ -223,14 +311,13 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
 
 std::string get_executable_name(const std::string &cmd) {
   std::string my_program;
-
   std::stringstream ss(cmd);
 
   ss >> my_program;
   assert (my_program.size() >= 1);
 
-  validate_program(my_program);
-  return my_program;
+  std::string full_path_executable = validate_program(my_program);
+  return full_path_executable;
 }
 
 
@@ -242,106 +329,89 @@ void parse_command_line(const std::string &cmd,
 			std::string &my_stderr,
 			std::ofstream &logfile) {
 
-    std::stringstream ss(cmd);
-    std::string tmp;
-    bool bare_double_dash = false;
+  std::cout << "PARSE COMMAND LINE " << cmd << std::endl;
 
-    while (ss >> tmp) {
-        assert (tmp.size() >= 1);
+  my_args.clear();
+  my_program = my_stdin = my_stdout = my_stderr = "";
 
-        // grab the program name
-        if (my_program == "") {
-            assert (my_args.size() == 0);
-            // program name
-            my_program = tmp;
-            validate_program(my_program);
-        }
+  std::stringstream ss(cmd);
+  std::string token;
 
-        // grab the arguments
-        else {
-            assert (my_program != "");
+  while (ss >> token) {
+    assert (token.size() >= 1);
 
-            // look for the bare double dash
-            if (tmp == "--") {
-                assert (bare_double_dash == false);
-                bare_double_dash = true;
-                my_args.push_back(tmp);
-            }
-
-            // look for stdin/stdout/stderr
-            else if (tmp.size() >= 1 && tmp.substr(0,1) == "<") {
-                assert (my_stdin == "");
-                if (tmp.size() == 1) {
-                    ss >> tmp; bool success = ss.good();
-                    assert (success);
-                    my_stdin = tmp;
-                } else {
-                    my_stdin = tmp.substr(1,tmp.size()-1);
-                }
-                validate_filename(my_stdin);
-            }
-            else if (tmp.size() >= 2 && tmp.substr(0,2) == "1>") {
-                assert (my_stdout == "");
-                if (tmp.size() == 2) {
-                    ss >> tmp; bool success = ss.good();
-                    assert (success);
-                    my_stdout = tmp;
-                } else {
-                    my_stdout = tmp.substr(2,tmp.size()-2);
-                }
-                validate_filename(my_stdout);
-            }
-            else if (tmp.size() >= 2 && tmp.substr(0,2) == "2>") {
-                assert (my_stderr == "");
-                if (tmp.size() == 2) {
-                    ss >> tmp; bool success = ss.good();
-                    assert (success);
-                    my_stderr = tmp;
-                } else {
-                    my_stderr = tmp.substr(2,tmp.size()-2);
-                }
-                validate_filename(my_stderr);
-            }
-
-            // remainder of the arguments
-            else if (tmp.find("*") != std::string::npos) {
-	      // unfortunately not all programs used the double dash convention
-	      /*
-                if (bare_double_dash != true) {
-                    std::cout << "ERROR: Not allowed to use the wildcard before the bare double dash" << std::endl;
-                    std::cerr << "ERROR: Not allowed to use the wildcard before the bare double dash" << std::endl;
-                    exit(1);
-                }
-	      */
-	      wildcard_expansion(my_args,tmp,logfile);
-            }
-
-            // special exclude file option
-            // FIXME: this is ugly, don't know how I want it to be done though
-            else if (tmp == "-EXCLUDE_FILE") {
-              ss >> tmp;
-              std::cout << "EXCLUDE THIS FILE " << tmp << std::endl;
-
-              for (std::vector<std::string>::iterator itr = my_args.begin();
-                   itr != my_args.end(); ) {
-                if (*itr == tmp) {  std::cout << "FOUND IT!" << std::endl; itr = my_args.erase(itr);  }
-                else { itr++; }
-              }
-
-            }
-
-            else {
-                if (bare_double_dash == true) {
-                    validate_filename(tmp);
-                } else {
-                    validate_option(my_program,tmp);
-                }
-                my_args.push_back(tmp);
-            }
-        }
+    // grab the program name
+    if (my_program == "") {
+      assert (my_args.size() == 0);
+      // program name
+      my_program = validate_program(token);
+      assert (my_program != "");
     }
 
-  /*
+    // look for stdin/stdout/stderr
+    else if (token.substr(0,1) == "<") {
+      assert (my_stdin == "");
+      if (token.size() == 1) {
+        ss >> token; bool success = ss.good();
+        assert (success);
+        my_stdin = token;
+      } else {
+        my_stdin = token.substr(1,token.size()-1);
+      }
+      validate_filename(my_stdin);
+    }
+    else if (token.size() >= 2 && token.substr(0,2) == "1>") {
+      assert (my_stdout == "");
+      if (token.size() == 2) {
+        ss >> token; bool success = ss.good();
+        assert (success);
+        my_stdout = token;
+      } else {
+        my_stdout = token.substr(2,token.size()-2);
+      }
+      validate_filename(my_stdout);
+    }
+    else if (token.size() >= 2 && token.substr(0,2) == "2>") {
+      assert (my_stderr == "");
+      if (token.size() == 2) {
+        ss >> token; bool success = ss.good();
+        assert (success);
+        my_stderr = token;
+      } else {
+        my_stderr = token.substr(2,token.size()-2);
+      }
+      validate_filename(my_stderr);
+    }
+
+    // remainder of the arguments
+    else if (token.find("*") != std::string::npos) {
+      wildcard_expansion(my_args,token,logfile);
+    }
+
+    // special exclude file option
+    // FIXME: this is ugly, don't know how I want it to be done though
+    else if (token == "-EXCLUDE_FILE") {
+      ss >> token;
+      std::cout << "EXCLUDE THIS FILE " << token << std::endl;
+      for (std::vector<std::string>::iterator itr = my_args.begin();
+           itr != my_args.end(); ) {
+        if (*itr == token) {  std::cout << "FOUND IT!" << std::endl; itr = my_args.erase(itr);  }
+        else { itr++; }
+      }
+    }
+
+    else {
+      // validate_filename(token);
+      // validate_option(my_program,token);
+      std::cout << "before TOKEN IS " << token << std::endl;
+      token = validate_option(my_program,token);
+      std::cout << "after  TOKEN IS " << token << std::endl;
+      my_args.push_back(token);
+    }
+  }
+
+
+
   // FOR DEBUGGING
   std::cout << std::endl << std::endl;
   std::cout << "MY PROGRAM: '" << my_program << "'" << std::endl;
@@ -349,7 +419,7 @@ void parse_command_line(const std::string &cmd,
   std::cout << "MY STDOUT:  '" << my_stdout  << "'" << std::endl;
   std::cout << "MY STDERR:  '" << my_stderr  << "'" << std::endl;
   std::cout << "MY ARGS (" << my_args.size() << ") :";
-  */
+
 }
 
 // =====================================================================================

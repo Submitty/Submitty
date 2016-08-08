@@ -16,6 +16,7 @@ cp -r grading/ ${SUBMITTY_INSTALL_DIR}/src/
 
 sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|${SUBMITTY_INSTALL_DIR}|g" ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/lib.py
 sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|${SUBMITTY_INSTALL_DIR}|g" ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp
+sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|${SUBMITTY_INSTALL_DIR}|g" ${SUBMITTY_INSTALL_DIR}/src/grading/execute.cpp
 sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|${SUBMITTY_INSTALL_DIR}|g" ${SUBMITTY_INSTALL_DIR}/src/grading/Sample_CMakeLists.txt
 sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DATA_DIR__|${SUBMITTY_DATA_DIR}|g" ${SUBMITTY_INSTALL_DIR}/src/grading/Sample_CMakeLists.txt
 sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|${SUBMITTY_INSTALL_DIR}|g" ${SUBMITTY_INSTALL_DIR}/src/grading/CMakeLists.txt

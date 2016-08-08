@@ -22,19 +22,8 @@
                         "FAILURE! Number of print statements 0 ge 1"
                     ],
                     "student_file": "test01_STDOUT_1.txt"
-                },
-                {
-                    "autocheck_id": "test01_2_autocheck",
-                    "description": "syntax error output from running python",
-                    "student_file": "test01_STDERR_0.txt"
-                },
-                {
-                    "autocheck_id": "test01_3_autocheck",
-                    "description": "Standard Error (STDERR)",
-                    "student_file": "test01_STDERR_1.txt"
                 }
             ],
-            "execute_logfile": "test01_execute_logfile.txt",
             "points_awarded": 0,
             "test_name": "Test 1 Convert Temperature"
         },
@@ -45,18 +34,9 @@
                     "description": "Program Output",
                     "difference": "test02_0_diff.json",
                     "instructor_file": "test_output/testassignment/p2_out.txt",
-                    "student_file": "test02_STDOUT.txt"
-                },
-                {
-                    "autocheck_id": "test02_1_autocheck",
-                    "description": "Standard Error (STDERR)",
-                    "messages": [
-                        "WARNING: This file should be empty"
-                    ],
-                    "student_file": "test02_STDERR.txt"
+                    "student_file": "test02_part2__p2_bug.txt"
                 }
             ],
-            "execute_logfile": "test02_execute_logfile.txt",
             "points_awarded": 0,
             "test_name": "Test 2 Legal Variable Names"
         },
@@ -86,29 +66,8 @@
                     "autocheck_id": "test03_3_autocheck",
                     "description": "Number of additions",
                     "student_file": "test03_STDOUT_3.txt"
-                },
-                {
-                    "autocheck_id": "test03_4_autocheck",
-                    "description": "syntax error output from running python",
-                    "student_file": "test03_STDERR_0.txt"
-                },
-                {
-                    "autocheck_id": "test03_5_autocheck",
-                    "description": "Standard Error (STDERR)",
-                    "student_file": "test03_STDERR_1.txt"
-                },
-                {
-                    "autocheck_id": "test03_6_autocheck",
-                    "description": "Standard Error (STDERR)",
-                    "student_file": "test03_STDERR_2.txt"
-                },
-                {
-                    "autocheck_id": "test03_7_autocheck",
-                    "description": "Standard Error (STDERR)",
-                    "student_file": "test03_STDERR_3.txt"
                 }
             ],
-            "execute_logfile": "test03_execute_logfile.txt",
             "points_awarded": 3,
             "test_name": "Test 3 Volume and Area"
         },
@@ -128,19 +87,8 @@
                         "FAILURE! Number of while loops 0 ge 1"
                     ],
                     "student_file": "test04_STDOUT_1.txt"
-                },
-                {
-                    "autocheck_id": "test04_2_autocheck",
-                    "description": "syntax error output from running python",
-                    "student_file": "test04_STDERR_0.txt"
-                },
-                {
-                    "autocheck_id": "test04_3_autocheck",
-                    "description": "Standard Error (STDERR)",
-                    "student_file": "test04_STDERR_1.txt"
                 }
             ],
-            "execute_logfile": "test04_execute_logfile.txt",
             "points_awarded": 1,
             "test_name": "Test 4 Count Odd"
         }

@@ -18,19 +18,17 @@
 
 nlohmann::json printTestCase(TestCase test) {
   nlohmann::json j;
-  j["title"] = test.title();
-  //if (test.details() != "") 
-  j["details"] = test.details();
-  j["points"] = test.points();
-  j["extra_credit"] = test.extra_credit();
-  j["hidden"] = false;
-  j["visible"] = true;
-  //if (test.hidden_points())
-  //j["hidden_points"] = true;
-  //if (test.getView_file_results())
-  j["view_file_results"] = test.getView_file_results();
+  j["title"] = "Test " + std::to_string(test.getID()) + " " + test.getTitle();
+  j["details"] = test.getDetails();
+  j["points"] = test.getPoints();
+  j["extra_credit"] = test.getExtraCredit();
+  j["hidden"] = test.getHidden();
+  j["visible"] = !test.getHidden();
+
+  // THESE ELEMENTS ARE DEPRECATED / NEED TO BE REPLACED
+  j["view_file_results"] = true;
   j["view_test_points"] = true;
-  j["view_file"] = test.getView_file();
+  j["view_file"] = "";
   return j;
 }
 
@@ -60,7 +58,7 @@ int main(int argc, char *argv[]) {
   nlohmann::json all;
   std::cout << "num test cases" << tc->size() << std::endl;
   for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++) {
-    //std::cout << "TEST CASE " << std::endl;
+    std::cout << "TEST CASE " << std::endl;
     int points = itr->value("points",0);
     bool extra_credit = itr->value("extra_credit",false);
     bool hidden = itr->value("hidden",false);
@@ -70,8 +68,7 @@ int main(int argc, char *argv[]) {
       total_ec += points;
     if (!hidden)
       visible += points;
-
-    TestCase tc = TestCase::MakeTestCase(*itr);
+    TestCase tc(*itr);
     all.push_back(printTestCase(tc)); 
   }
   std::cout << "processed " << all.size() << " test cases" << std::endl;

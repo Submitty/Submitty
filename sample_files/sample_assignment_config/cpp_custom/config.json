@@ -9,7 +9,7 @@
         {
             "type" : "Compilation",
             "title" : "Compilation",
-            "command" : "/usr/bin/g++ -std=c++11 -Wall -o a.out *.cpp",
+            "command" : "g++ -std=c++11 -Wall -o a.out *.cpp",
             "executable_name" : "a.out",
             "points" : 2
         },

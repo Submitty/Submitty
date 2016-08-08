@@ -3,7 +3,7 @@
         {
             "title" : "Lab 1 Checkpoint 1",
             "details" : "python *.py",
-            "command" : "/usr/bin/python *.py",
+            "command" : "python *.py",
             "points" : 0,
             "validation" : [
                 {
