@@ -14,14 +14,14 @@
         {
             "type" : "Compilation",
             "title" : "Compilation of student code: Factorial.java",
-            "command" : "/usr/bin/javac -cp /usr/local/submitty/JUnit/junit-4.12.jar hw0/Factorial.java",   
+            "command" : "javac -cp submitty_junit.jar hw0/Factorial.java",
             "executable_name" : "hw0/Factorial.class",
             "points" : 2
         },
         {
             "type" : "Compilation",
             "title" : "Compilation of student and instructor test cases: *Test.java",
-            "command" : "/usr/bin/javac -cp /usr/local/submitty/JUnit/junit-4.12.jar:. hw0/test/*Test.java",
+            "command" : "javac -cp submitty_junit.jar:. hw0/test/*Test.java",
             "executable_name" : "hw0/test/FactorialTest.class",
             "points" : 2
         },
@@ -30,19 +30,12 @@
         // ************* INSTRUMENTATION FOR EMMA *************
         {
             "title" : "Instrumentation of student code",
-            "command" : "/usr/bin/java -cp /usr/local/submitty/JUnit/emma.jar emma instr -m overwrite -ip hw0",
+            "command" : "java -cp submitty_emma.jar emma instr -m overwrite -ip hw0",
             "points" : 0,
             "validation" : [ 
                 { 
                     "method" : "EmmaInstrumentationGrader",
-                    "filename" : "STDOUT.txt",
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Error output from running instrumentation",
-                    "deduction" : 0.0
+                    "filename" : "STDOUT.txt"
                 }
             ]
         },
@@ -50,19 +43,12 @@
         // ************* RUNNING STUDENT TESTS *************
         {
             "title" : "Running student tests in hw0/tests/",
-            "command" : "/usr/bin/java -noverify -cp /usr/local/submitty/JUnit/junit-4.12.jar:/usr/local/submitty/JUnit/hamcrest-core-1.3.jar:/usr/local/submitty/JUnit/emma.jar:/usr/local/submitty/JUnit/:. TestRunner hw0",
+            "command" : "java -noverify -cp submitty_junit.jar:submitty_hamcrest.jar:submitty_emma.jar:submitty_junit/:. TestRunner hw0",
             "points" : 4,
             "validation" : [
                 { 
                     "method" : "MultipleJUnitTestGrader",
-                    "filename" : "STDOUT.txt",
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running junit",
-                    "deduction" : 0.0
+                    "filename" : "STDOUT.txt"
                 }
             ]
         },
@@ -70,7 +56,7 @@
         // ************* MEASURING COVERAGE ACHIEVED BY STUDENT TESTS *************
         {
             "title" : "Generating coverage report for student tests",
-            "command" : "/usr/bin/java -cp /usr/local/submitty/JUnit/emma.jar emma report -r txt -in coverage.em,coverage.ec -Dreport.txt.out.file=emma_report.txt",
+            "command" : "java -cp submitty_emma.jar emma report -r txt -in coverage.em,coverage.ec -Dreport.txt.out.file=emma_report.txt",
             "points" : 6,
             "validation" : [
                 {
@@ -84,12 +70,6 @@
                     "filename" : "emma_report.txt",
                     "coverage_threshold" : 90,
                     "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "error output from running EclEmma report generation",
-                    "deduction" : 0.0
                 }
             ]
         },
@@ -97,20 +77,13 @@
         // ************* RUNNING INSTRUCTOR TESTS *************
         {
             "title" : "Instructor Test",
-            "command" : "/usr/bin/java -noverify -cp /usr/local/submitty/JUnit/junit-4.12.jar:/usr/local/submitty/JUnit/hamcrest-core-1.3.jar:/usr/local/submitty/JUnit/emma.jar:. org.junit.runner.JUnitCore hw0.test.FactorialTest",
+            "command" : "java -noverify -cp submitty_junit.jar:submitty_hamcrest.jar:submitty_emma.jar:. org.junit.runner.JUnitCore hw0.test.FactorialTest",
             "points" : 6,
             "validation" : [
                 {
                     "method" : "JUnitTestGrader",
                     "filename" : "STDOUT.txt",
-                    "num_tests" : 4,
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "syntax error output from running junit",
-                    "deduction" : 0.0
+                    "num_tests" : 4
                 }
             ]
         }

@@ -39,6 +39,7 @@ SVN_PATH=__CONFIGURE__FILLIN__SVN_PATH__
 SUBMITTY_REPOSITORY=__CONFIGURE__FILLIN__SUBMITTY_REPOSITORY__
 
 HWPHP_USER=__CONFIGURE__FILLIN__HWPHP_USER__
+HWCGI_USER=__CONFIGURE__FILLIN__HWCGI_USER__
 HWCRON_USER=__CONFIGURE__FILLIN__HWCRON_USER__
 HWCRONPHP_GROUP=__CONFIGURE__FILLIN__HWCRONPHP_GROUP__
 COURSE_BUILDERS_GROUP=__CONFIGURE__FILLIN__COURSE_BUILDERS_GROUP__
@@ -51,12 +52,16 @@ HWCRON_UID=__CONFIGURE__FILLIN__HWCRON_UID__
 HWCRON_GID=__CONFIGURE__FILLIN__HWCRON_GID__
 HWPHP_UID=__CONFIGURE__FILLIN__HWPHP_UID__
 HWPHP_GID=__CONFIGURE__FILLIN__HWPHP_GID__
+HWCGI_UID=__CONFIGURE__FILLIN__HWCGI_UID__
+HWCGI_GID=__CONFIGURE__FILLIN__HWCGI_GID__
 
 DATABASE_HOST=__CONFIGURE__FILLIN__DATABASE_HOST__
 DATABASE_USER=__CONFIGURE__FILLIN__DATABASE_USER__
 DATABASE_PASSWORD=__CONFIGURE__FILLIN__DATABASE_PASSWORD__
 
 TAGRADING_URL=__CONFIGURE__FILLIN__TAGRADING_URL__
+SUBMISSION_URL=__CONFIGURE__FILLIN__SUBMISSION_URL__
+CGI_URL=__CONFIGURE__FILLIN__CGI_URL__
 TAGRADING_LOG_PATH=__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__
 
 
@@ -79,6 +84,7 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SVN_PATH__|$SVN_PATH|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWCGI_USER__|$HWCGI_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $1
@@ -92,6 +98,8 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__HWCRON_GID__|$HWCRON_GID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_UID__|$HWPHP_UID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__HWPHP_GID__|$HWPHP_GID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWCGI_UID__|$HWCGI_UID|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__HWCGI_GID__|$HWCGI_GID|g" $1
 
 
     sed -i -e "s|__INSTALL__FILLIN__DATABASE_HOST__|$DATABASE_HOST|g" $1
@@ -99,6 +107,8 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__DATABASE_PASSWORD__|$DATABASE_PASSWORD|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" $1
+    sed -i -e "s|__INSTALL__FILLIN__CGI_URL__|$CGI_URL|g" $1
     sed -i -e "s|__INSTALL__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $1
@@ -128,6 +138,7 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
 
     rm -rf $SUBMITTY_INSTALL_DIR/website
     rm -rf $SUBMITTY_INSTALL_DIR/hwgrading_website
+    rm -rf $SUBMITTY_INSTALL_DIR/site
     rm -rf $SUBMITTY_INSTALL_DIR/src
     rm -rf $SUBMITTY_INSTALL_DIR/bin
     rm -rf $SUBMITTY_INSTALL_DIR/test_suite
@@ -155,9 +166,9 @@ chown  root:$COURSE_BUILDERS_GROUP   $SUBMITTY_DATA_DIR
 chmod  751                           $SUBMITTY_DATA_DIR
 chown  root:$COURSE_BUILDERS_GROUP   $SUBMITTY_DATA_DIR/courses
 chmod  751                           $SUBMITTY_DATA_DIR/courses
-chown  hwphp:$COURSE_BUILDERS_GROUP  $SUBMITTY_DATA_DIR/tagrading_logs
+chown  $HWPHP_USER:$COURSE_BUILDERS_GROUP  $SUBMITTY_DATA_DIR/tagrading_logs
 chmod  u+rwx,g+rxs                   $SUBMITTY_DATA_DIR/tagrading_logs
-chown  hwcron:$COURSE_BUILDERS_GROUP $SUBMITTY_DATA_DIR/autograding_logs
+chown  $HWCRON_USER:$COURSE_BUILDERS_GROUP $SUBMITTY_DATA_DIR/autograding_logs
 chmod  u+rwx,g+rxs                   $SUBMITTY_DATA_DIR/autograding_logs
 
 # if the to_be_graded directories do not exist, then make them
@@ -246,6 +257,7 @@ find $SUBMITTY_INSTALL_DIR/src -type f -exec chmod 444 {} \;
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/CMakeLists.txt
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/system_call_check.cpp
+replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/execute.cpp
 
 
 # building the autograding library
@@ -254,7 +266,7 @@ pushd $SUBMITTY_INSTALL_DIR/src/grading/lib
 cmake ..
 make
 if [ $? -ne 0 ] ; then
-    echo "ERROR BUILDING AUTOGRADING LIBRARY" 
+    echo "ERROR BUILDING AUTOGRADING LIBRARY"
     exit 1
 fi
 popd
@@ -383,7 +395,6 @@ rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/toolbox      $SUBMITTY_INSTALL_
 rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/lib          $SUBMITTY_INSTALL_DIR/hwgrading_website
 rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/account      $SUBMITTY_INSTALL_DIR/hwgrading_website
 rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/app          $SUBMITTY_INSTALL_DIR/hwgrading_website
-rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/cgi-bin      $SUBMITTY_INSTALL_DIR/hwgrading_website
 
 # set special user $HWPHP_USER as owner & group of all hwgrading_website files
 find $SUBMITTY_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
@@ -405,12 +416,41 @@ find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.gif -exec chmod o+
 # "other" can read & execute all .js files
 find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
 
-# set the execute bit for any .cgi scripts
-find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.cgi -exec chmod u+x {} \;
+#replace_fillin_variables $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php
+#mv $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
 
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php
-mv $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
 
+################################################################################################################
+################################################################################################################
+# COPY THE 1.0 Grading Website
+
+echo -e "Copy the 1.0 grading website"
+
+# copy the website from the repo
+rsync -rtz   $SUBMITTY_REPOSITORY/site   $SUBMITTY_INSTALL_DIR
+
+# set special user $HWPHP_USER as owner & group of all website files
+find $SUBMITTY_INSTALL_DIR/site -exec chown $HWPHP_USER:$HWPHP_USER {} \;
+find $SUBMITTY_INSTALL_DIR/site/cgi-bin -exec chown $HWCGI_USER:$HWCGI_USER {} \;
+
+# set the permissions of all files
+# $HWPHP_USER can read & execute all directories and read all files
+# "other" can cd into all subdirectories
+chmod -R 440 $SUBMITTY_INSTALL_DIR/site
+find $SUBMITTY_INSTALL_DIR/site -type d -exec chmod ogu+x {} \;
+
+# "other" can read all .txt, .jpg, & .css files
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.css -exec chmod o+r {} \;
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.otf -exec chmod o+r {} \;
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.jpg -exec chmod o+r {} \;
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.png -exec chmod o+r {} \;
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.txt -exec chmod o+r {} \;
+# "other" can read & execute all .js files
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.js -exec chmod o+rx {} \;
+find $SUBMITTY_INSTALL_DIR/site -type f -name \*.cgi -exec chmod u+x {} \;
+
+replace_fillin_variables $SUBMITTY_INSTALL_DIR/site/config/master_template.ini
+mv $SUBMITTY_INSTALL_DIR/site/config/master_template.ini $SUBMITTY_INSTALL_DIR/site/config/master.ini
 
 ################################################################################################################
 ################################################################################################################
@@ -455,9 +495,20 @@ echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"  
 echo -e "\n\n"                                                                                >> ${HWCRON_CRONTAB_FILE}
 
 # install the crontab file for the hwcron user
-crontab  -u hwcron  ${HWCRON_CRONTAB_FILE}
+crontab  -u ${HWCRON_USER}  ${HWCRON_CRONTAB_FILE}
 rm ${HWCRON_CRONTAB_FILE}
 
+
+################################################################################################################
+################################################################################################################
+# COMPILE AND INSTALL ANALYSIS TOOLS
+
+echo -e "Compile and install analysis tools"
+pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+git pull origin master
+make ubuntudeps
+make
+popd
 
 ################################################################################################################
 ################################################################################################################

@@ -6,6 +6,7 @@
  * RELEVANT DOCUMENTATION:
  */
 
+#include <unistd.h>
 #include <algorithm>
 
 #include "myersDiff.h"
@@ -13,98 +14,188 @@
 #include "tokens.h"
 #include "clean.h"
 
-TestResults* warnIfNotEmpty (const std::string & student_file, const std::string & expected_file) {
-  // the instructor file should be empty
-  assert (expected_file == "");
-  // simply check the student file
-  if (student_file == "") {
-    return new TestResults(1.0);
-  } else {
-    return new TestResults(1.0,"WARNING: This file should be empty");
+#include "execute.h"
+
+
+
+// ==============================================================================
+// ==============================================================================
+
+
+TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::string filename = j.value("filename","MISSING FILENAME");
+
+  if (!tc.isCompilation()) {
+    filename = tc.getPrefix() + "_" + filename;
+    filename = replace_slash_with_double_underscore(filename);
   }
-}
 
-TestResults* errorIfNotEmpty ( const std::string & student_file, const std::string & expected_file) {
-  // the instructor file should be empty
-  assert (expected_file == "");
-  // simply check the student file
-  if (student_file == "") {
-    return new TestResults(1.0);
-  } else {
-    return new TestResults(0.0,"ERROR: This file should be empty!");
+  std::cout << "FILE EXISTS CHECK: " << filename << std::endl;
+
+  std::vector<std::string> files;
+  wildcard_expansion(files, filename, std::cout);
+  for (int i = 0; i < files.size(); i++) {
+    std::cout << "FILE CANDIDATE: " << files[i] << std::endl;
+    if (access( files[i].c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists
+      std::cout << "WILDCARD FILE FOUND: " << files[i] << std::endl;
+      return new TestResults(1.0);
+    }
+    std::cout << "OOPS, does not exist: " << files[i] << std::endl;
   }
+
+  std::cout << "DIDN'T FIND IT " << std::endl;
+  return new TestResults(0.0,{"ERROR: " + filename + " does not exist"});
+
 }
 
 
-TestResults* warnIfEmpty (const std::string & student_file, const std::string & expected_file) {
-  // the instructor file should be empty
-  assert (expected_file == "");
-  // simply check the student file
-  if (student_file == "") {
-    return new TestResults(1.0,"WARNING: This file should not be empty");
-  } else {
-    return new TestResults(1.0);
+TestResults* warnIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::vector<std::string> messages;
+  std::string student_file_contents;
+  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
+    return new TestResults(1.0,messages);
   }
-}
-
-TestResults* errorIfEmpty ( const std::string & student_file, const std::string & expected_file) {
-  // the instructor file should be empty
-  assert (expected_file == "");
-  // simply check the student file
-  if (student_file == "") {
-    return new TestResults(0.0,"ERROR: This file should not be empty!");
-  } else {
-    return new TestResults(1.0);
+  if (student_file_contents != "") {
+    return new TestResults(1.0,{"WARNING: This file should be empty"});
   }
+  return new TestResults(1.0);
 }
 
 
-TestResults* myersDiffbyLinebyWord ( const std::string & student_file, const std::string & expected_file) {
-	vectorOfWords text_a = stringToWords( student_file );
-	vectorOfWords text_b = stringToWords( expected_file );
-	Difference* diff = ses( &text_a, &text_b, true );
-	diff->type = ByLineByWord;
-	return diff;
+TestResults* errorIfNotEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::vector<std::string> messages;
+  std::string student_file_contents;
+  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
+  if (student_file_contents != "") {
+    return new TestResults(0.0,{"ERROR: This file should be empty!"});
+  }
+  return new TestResults(1.0);
 }
 
-TestResults* myersDiffbyLineNoWhite ( const std::string & student_file, const std::string & expected_file) {
-	vectorOfWords text_a = stringToWords( student_file );
-	vectorOfWords text_b = stringToWords( expected_file );
-	Difference* diff = ses( &text_a, &text_b, false );
-	diff->type = ByLineByWord;
-	return diff;
+
+TestResults* warnIfEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::vector<std::string> messages;
+  std::string student_file_contents;
+  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
+    return new TestResults(1.0,messages);
+  }
+  if (student_file_contents == "") {
+    return new TestResults(1.0,{"WARNING: This file should not be empty"});
+  }
+  return new TestResults(1.0);
 }
 
-TestResults* myersDiffbyLine ( const std::string & student_file, const std::string & expected_file) {
-	vectorOfLines text_a = stringToLines( student_file );
-	vectorOfLines text_b = stringToLines( expected_file );
-	Difference* diff = ses( &text_a, &text_b, false );
-	diff->type = ByLineByChar;
-	return diff;
 
+TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::vector<std::string> messages;
+  std::string student_file_contents;
+  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
+  if (student_file_contents == "") {
+    return new TestResults(0.0,{"ERROR: This file should not be empty!"});
+  }
+  return new TestResults(1.0);
 }
 
-TestResults* myersDiffbyLinebyChar ( const std::string & student_file, const std::string & expected_file) {
-	vectorOfLines text_a = stringToLines( student_file );
-	vectorOfLines text_b = stringToLines( expected_file );
-	Difference* diff = ses( &text_a, &text_b, true );
-	diff->type = ByLineByChar;
-	return diff;
+// ==============================================================================
+// ==============================================================================
 
+TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::vector<std::string> messages;
+  std::string student_file_contents;
+  std::string instructor_file_contents;
+  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
+  if (!openInstructorFile(tc,j,instructor_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
+  vectorOfWords text_a = stringToWords( student_file_contents );
+  vectorOfWords text_b = stringToWords( instructor_file_contents );
+  Difference* diff = ses( &text_a, &text_b, true );
+  diff->type = ByLineByWord;
+  return diff;
 }
 
-TestResults* myersDiffbyLinebyCharExtraStudentOutputOk ( const std::string & student_file, const std::string & expected_file) {
+
+TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::vector<std::string> messages;
+  std::string student_file_contents;
+  std::string instructor_file_contents;
+  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
+  if (!openInstructorFile(tc,j,instructor_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
+  vectorOfWords text_a = stringToWords( student_file_contents );
+  vectorOfWords text_b = stringToWords( instructor_file_contents );
+  Difference* diff = ses( &text_a, &text_b, false );
+  diff->type = ByLineByWord;
+  return diff;
+}
+
+
+TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::vector<std::string> messages;
+  std::string student_file_contents;
+  std::string instructor_file_contents;
+  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
+  if (!openInstructorFile(tc,j,instructor_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
+  vectorOfLines text_a = stringToLines( student_file_contents );
+  vectorOfLines text_b = stringToLines( instructor_file_contents );
+  Difference* diff = ses( &text_a, &text_b, false );
+  diff->type = ByLineByChar;
+  return diff;
+}
+
+
+TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::vector<std::string> messages;
+  std::string student_file_contents;
+  std::string instructor_file_contents;
+  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
+  if (!openInstructorFile(tc,j,instructor_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
+  vectorOfLines text_a = stringToLines( student_file_contents );
+  vectorOfLines text_b = stringToLines( instructor_file_contents );
+  Difference* diff = ses( &text_a, &text_b, true );
+  diff->type = ByLineByChar;
+  return diff;
+}
+
+
+TestResults* myersDiffbyLinebyCharExtraStudentOutputOk_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::vector<std::string> messages;
+  std::string student_file_contents;
+  std::string instructor_file_contents;
+  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
+  if (!openInstructorFile(tc,j,instructor_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
 #if 0
   //from nowhite
-	vectorOfWords text_a = stringToWords( student_file );
-	vectorOfWords text_b = stringToWords( expected_file );
-	Difference* diff = ses( &text_a, &text_b, true, extraStudentOutputOk );
-	diff->type = ByLineByWord;
+	vectorOfWords text_a = stringToWords( student_file_contents );
+	vectorOfWords text_b = stringToWords( instructor_file_contents );
+	Difference diff = *(ses( &text_a, &text_b, true, extraStudentOutputOk ));
+	diff.type = ByLineByWord;
 	return diff;
 #else
 	std::cout << "MYERS DIFF EXTRA STUDENT OUTPUT" << std::endl;
-	vectorOfLines text_a = stringToLines( student_file );
-	vectorOfLines text_b = stringToLines( expected_file );
+	vectorOfLines text_a = stringToLines( student_file_contents );
+	vectorOfLines text_b = stringToLines( instructor_file_contents );
 	bool extraStudentOutputOk = true;
 	Difference* diff = ses( &text_a, &text_b, true, extraStudentOutputOk );
 	diff->type = ByLineByChar;
@@ -113,8 +204,11 @@ TestResults* myersDiffbyLinebyCharExtraStudentOutputOk ( const std::string & stu
 #endif
 }
 
+// ==============================================================================
+// ==============================================================================
 
-void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int student_line, int expected_line, bool only_student, bool only_expected) {
+void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int student_line, 
+                   int expected_line, bool only_student, bool only_expected) {
   if (!first_diff) {
     swap_difference << "  ,\n";
   }
@@ -144,15 +238,25 @@ void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int stu
 
 // FIXME: might be nice to highlight small errors on a line
 //
-TestResults* diffLineSwapOk (const std::string & student_file, const std::string & expected_file) {
+TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
+  std::vector<std::string> messages;
+  std::string student_file_contents;
+  std::string instructor_file_contents;
+  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
+  if (!openInstructorFile(tc,j,instructor_file_contents,messages)) { 
+    return new TestResults(0.0,messages);
+  }
+
 
   // break each file (at the newlines) into vectors of strings
-  vectorOfLines student = stringToLines( student_file );
-  vectorOfLines expected = stringToLines( expected_file );
+  vectorOfLines student = stringToLines( student_file_contents );
+  vectorOfLines expected = stringToLines( instructor_file_contents );
 
   // check for an empty solution file
   if (expected.size() < 1) {
-    return new TestResults(0.0,"ERROR!  expected file is empty");
+    return new TestResults(0.0,{"ERROR!  expected file is empty"});
   }
   assert (expected.size() > 0);
 
@@ -235,7 +339,7 @@ TestResults* diffLineSwapOk (const std::string & student_file, const std::string
     ss << "ERROR: " << missing << " missing line(s)";
   }
 
-  return new TestResults(score,ss.str(),swap_difference.str());
+  return new TestResults(score,{ss.str()},swap_difference.str());
 }
 
 // ===============================================================================
@@ -443,9 +547,9 @@ template<class T> metaData< T > sesSnakes ( metaData< T > & meta_diff, bool extr
 // by if they are neighboring. Also fills diff_a and diff_b with the diffrences
 // All differences are stored by element number
 template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extraStudentOutputOk ) {
-	Difference* diff = new Difference();
-	diff->extraStudentOutputOk = extraStudentOutputOk;
-	diff->edit_distance = meta_diff.distance;
+       Difference* diff = new Difference();
+       diff->extraStudentOutputOk = extraStudentOutputOk;
+       diff->edit_distance = meta_diff.distance;
     if (meta_diff.a != NULL){
         diff->output_length_a = ( int ) meta_diff.a->size();
     }
@@ -544,8 +648,6 @@ void Difference::PrepareGrade() {
     // only missing lines (deletions) are a problem
     int count_of_missing_lines = 0;
     for (int x = 0; x < this->changes.size(); x++) {
-      //std::cout << "CHANGE " << x << "\n";
-      //PRINT_CHANGES (std::cout, this->changes[x]);
       int num_b_lines = this->changes[x].b_changes.size();
       if (num_b_lines > 0) {
 	count_of_missing_lines += num_b_lines;

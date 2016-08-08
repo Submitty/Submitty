@@ -7,10 +7,10 @@ $account_subpages_unlock = true;
 
 if (!User::$is_administrator) {
     if (isset($_GET['all']) && $_GET['all'] == "true") {
-        $button = "<a class='btn' href='{$BASE_URL}/account/account-tests.php?course={$_GET['course']}'>View Your Sections</a>";
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-tests.php?course={$_GET['course']}&semester={$_GET['semester']}'>View Your Sections</a>";
     }
     else {
-        $button = "<a class='btn' href='{$BASE_URL}/account/account-tests.php?course={$_GET['course']}&all=true'>View All Sections</a>";
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-tests.php?course={$_GET['course']}&semester={$_GET['semester']}&all=true'>View All Sections</a>";
     }
 }
 else {
@@ -295,7 +295,7 @@ echo <<<HTML
 			    extra += "&t"+j+"="+text;
 			}
 			$("#cell-"+test+"-"+rcs+"-score").text(total);
-			url = "{$BASE_URL}/account/ajax/account-tests.php?course={$_GET['course']}&test=" + test + "&rcs=" + rcs + "&grade=" + total + extra;
+			url = "{$BASE_URL}/account/ajax/account-tests.php?course={$_GET['course']}&semester={$_GET['semester']}&test=" + test + "&rcs=" + rcs + "&grade=" + total + extra;
             updateColor(this, url);
 		});
 

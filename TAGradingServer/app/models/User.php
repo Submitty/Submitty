@@ -32,7 +32,13 @@ class User {
      * @var bool
      */
     public static $is_developer = false;
-
+    
+    /**
+    * What privledge level is this user?  
+    * @var integer
+    */
+    public static $user_group;
+    
     /**
      * This is a singleton class, so no instation or duplication
      */
@@ -53,6 +59,7 @@ class User {
         } // @codeCoverageIgnore
         
         User::$user_id = User::$user_details['user_id'];
+        User::$user_group = User::$user_details['user_group'];
         User::$is_developer = User::$user_details['user_group'] == 0;
         User::$is_administrator = User::$user_details['user_group'] == 1 || User::$is_developer;
     }

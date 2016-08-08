@@ -45,10 +45,9 @@ def correct(test):
     test.run_validator()
     test.diff("test01_STDOUT.txt","data/hw01part1_sol.txt")
     test.empty_file("test01_STDERR.txt")
-    test.empty_file("test01_execute_logfile.txt")
     test.empty_json_diff("test01_0_diff.json")
     test.diff(".submit.grade",".submit.grade_correct")
-    test.diff("submission.json","submission.json_correct")
+    test.json_diff("submission.json","submission.json_correct")
 
 
 @testcase
@@ -62,10 +61,9 @@ def buggy(test):
     test.run_validator()
     test.diff("test01_STDOUT.txt","test01_STDOUT.txt_buggy")
     test.empty_file("test01_STDERR.txt")
-    test.empty_file("test01_execute_logfile.txt")
-    test.diff("test01_0_diff.json","test01_0_diff.json_buggy")
+    test.json_diff("test01_0_diff.json","test01_0_diff.json_buggy")
     test.diff(".submit.grade",".submit.grade_buggy")
-    test.diff("submission.json","submission.json_buggy")
+    test.json_diff("submission.json","submission.json_buggy")
 
 
 @testcase
@@ -79,10 +77,9 @@ def buggy2(test):
     test.run_validator()
     test.diff("test01_STDOUT.txt","test01_STDOUT.txt_buggy2")
     test.empty_file("test01_STDERR.txt")
-    test.empty_file("test01_execute_logfile.txt")
-    test.diff("test01_0_diff.json","test01_0_diff.json_buggy2")
+    test.json_diff("test01_0_diff.json","test01_0_diff.json_buggy2")
     test.diff(".submit.grade",".submit.grade_buggy2")
-    test.diff("submission.json","submission.json_buggy2")
+    test.json_diff("submission.json","submission.json_buggy2")
 
 
 @testcase
@@ -97,9 +94,9 @@ def syntax_error(test):
     test.diff("test01_STDOUT.txt","test01_STDOUT.txt_syntax_error")
     test.diff("test01_STDERR.txt","test01_STDERR.txt_syntax_error")
     test.diff("test01_execute_logfile.txt","test01_execute_logfile.txt_syntax_error")
-    test.diff("test01_0_diff.json","test01_0_diff.json_syntax_error")
+    test.json_diff("test01_0_diff.json","test01_0_diff.json_syntax_error")
     test.diff(".submit.grade",".submit.grade_syntax_error")
-    test.diff("submission.json","submission.json_syntax_error")
+    test.json_diff("submission.json","submission.json_syntax_error")
     # cleanup the non empty logfile
     subprocess.call(["rm",
         os.path.join(test.testcase_path, "data/", "test01_execute_logfile.txt")])
@@ -121,7 +118,7 @@ def infinite_loop_too_much_output(test):
     test.diff("test01_STDERR.txt","test01_STDERR.txt_infinite_loop_too_much_output")
     test.diff("test01_execute_logfile.txt","test01_execute_logfile.txt_infinite_loop_too_much_output")
     test.diff(".submit.grade",".submit.grade_infinite_loop_too_much_output")
-    test.diff("submission.json","submission.json_infinite_loop_too_much_output")
+    test.json_diff("submission.json","submission.json_infinite_loop_too_much_output")
     # cleanup the non empty logfile
     subprocess.call(["rm",
         os.path.join(test.testcase_path, "data/", "test01_execute_logfile.txt")])
@@ -140,10 +137,10 @@ def infinite_loop_time_cutoff(test):
     test.run_validator()
     test.empty_file("test01_STDOUT.txt")
     test.empty_file("test01_STDERR.txt")
-    test.diff("test01_0_diff.json","test01_0_diff.json_time_cutoff")
+    test.json_diff("test01_0_diff.json","test01_0_diff.json_time_cutoff")
     test.diff("test01_execute_logfile.txt","test01_execute_logfile.txt_infinite_loop_time_cutoff")
     test.diff(".submit.grade",".submit.grade_infinite_loop_time_cutoff")
-    test.diff("submission.json","submission.json_infinite_loop_time_cutoff")
+    test.json_diff("submission.json","submission.json_infinite_loop_time_cutoff")
     # cleanup the non empty logfile
     subprocess.call(["rm",
         os.path.join(test.testcase_path, "data/", "test01_execute_logfile.txt")])

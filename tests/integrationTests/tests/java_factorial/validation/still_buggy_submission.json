@@ -8,31 +8,21 @@
 	"testcases": [
 		{
 			"test_name": "Test 1 Compilation of student code: Factorial.java",
-			"execute_logfile": "test01_execute_logfile.txt",
-			"compilation_output": "test01_STDERR.txt",
 			"points_awarded": 2
 		},
 		{
 			"test_name": "Test 2 Compilation of instructor test cases: *Test.java",
-			"execute_logfile": "test02_execute_logfile.txt",
-			"compilation_output": "test02_STDERR.txt",
 			"points_awarded": 2
 		},
 		{
 			"test_name": "Test 3 FactorialTest",
 			"execute_logfile": "test03_execute_logfile.txt",
-			"diffs": [
+			"autochecks": [
 				{
-					"diff_id":"test03_0_diff",
+					"autocheck_id":"test03_0_autocheck",
 					"student_file":"test03_STDOUT.txt",
 					"description": "JUnit output",
-					"message": " ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4"
-				},
-				{
-					"diff_id":"test03_1_diff",
-					"student_file":"test03_STDERR.txt",
-					"description": "syntax error output from running junit",
-					"message": " "
+					"messages": ["ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4"]
 				}
 			],
 			"points_awarded": 4

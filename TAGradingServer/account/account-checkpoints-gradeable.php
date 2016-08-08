@@ -7,10 +7,10 @@ $account_subpages_unlock = true;
 
 if (!User::$is_administrator) {
     if (isset($_GET['all']) && $_GET['all'] == "true") {
-        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}'>View Your Sections</a>";
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}'>View Your Sections</a>";
     }
     else {
-        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&all=true'>View All Sections</a>";
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&all=true'>View All Sections</a>";
     }
 }
 else {
@@ -152,7 +152,7 @@ HTML;
                         <tr class="info">
                             <td colspan="{$count}" style="text-align:center;" id="section-{$section_id}">
                                     Students Enrolled in {$section_type} Section {$section_id}
-                                    <a href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&g_id={$check_g_row['g_id']}&section_id={$section_id}&grade_by_reg_section={$grade_by_reg_section}">
+                                    <a href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$check_g_row['g_id']}&section_id={$section_id}&grade_by_reg_section={$grade_by_reg_section}">
                                         <div class="icon-print"></div>
                                     </a>
                             </td>
@@ -288,7 +288,7 @@ print <<<HTML
         var check = name[2].replace("check", "");
         var user_id = name[3];
         
-        var url = "{$BASE_URL}/account/ajax/account-checkpoints-gradeable.php?course={$_GET['course']}&g_id=" + gradeable + "&check=" + check + "&user_id=" + user_id + "&mode=" + cell_status;
+        var url = "{$BASE_URL}/account/ajax/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id=" + gradeable + "&check=" + check + "&user_id=" + user_id + "&mode=" + cell_status;
 
         if($(this).hasClass("cell-all")) {
             // Named cell

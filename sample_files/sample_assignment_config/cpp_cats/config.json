@@ -10,7 +10,7 @@
 
         // *************** README *****************
         {
-            "type" : "FileExists",
+            "type" : "FileCheck",
             "title" : "README",
             "filename" : "README.txt",
             "points" : 2
@@ -20,7 +20,7 @@
         {
             "type" : "Compilation",
             "title" : "Compilation",
-            "command" : "/usr/bin/clang++ -Wall -o a.out -- *.cpp",
+            "command" : "clang++ -Wall -o a.out -- *.cpp",
             "executable_name" : "a.out",
             "points" : 3
         },
@@ -35,18 +35,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "output.txt",
-                    "instructor_file" : "inst_output.txt",
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
+                    "instructor_file" : "inst_output.txt"
                 }
             ]
         },
@@ -59,18 +48,7 @@
                 {
                     "method" : "myersDiffbyLinebyWord",
                     "filename" : "output.txt",
-                    "instructor_file" : "inst_output.txt",
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
+                    "instructor_file" : "inst_output.txt"
                 }
             ]
         },
@@ -83,18 +61,7 @@
                 {
                     "method" : "myersDiffbyLine",
                     "filename" : "output.txt",
-                    "instructor_file" : "inst_output.txt",
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
+                    "instructor_file" : "inst_output.txt"
                 }
             ]
         },
@@ -107,18 +74,7 @@
                 {
                     "method" : "myersDiffbyLineNoWhite",
                     "filename" : "output.txt",
-                    "instructor_file" : "inst_output.txt",
-                    "deduction" : 1.0
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDOUT.txt",
-                    "description" : "Standard Output (STDOUT)"
-                },
-                {
-                    "method" : "warnIfNotEmpty",
-                    "filename" : "STDERR.txt",
-                    "description" : "Standard Error (STDERR)"
+                    "instructor_file" : "inst_output.txt"
                 }
             ]
         }

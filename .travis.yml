@@ -16,14 +16,13 @@ before_script:
   - ./.setup/travis.sh
   - psql -c 'create database test_hwgrading;' -U postgres
   - psql --host=localhost --username=postgres --command="CREATE GROUP test_hwgrading ROLE postgres"
-  - psql -f TAGradingServer/data/tables.sql -U postgres -d test_hwgrading
-  - psql -f TAGradingServer/data/inserts.sql -U postgres -d test_hwgrading
+  - psql -f site/data/tables.sql -U postgres -d test_hwgrading
   - psql -f tests/testData/travis.sql -U postgres -d test_hwgrading
 
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-  - vendor/phpunit/phpunit/phpunit --version
-  - vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml
+  - vendor/bin/phpunit --version
+  - vendor/bin/phpunit --configuration tests/phpunit.xml
 #  - if [[ "$TRAVIS_BRANCH" = "master" ]]; then vendor/phpunit/phpunit/phpunit --configuration tests/phpunit_e2e.xml; fi
 #  - vendor/phpunit/phpunit/phpunit --configuration tests/phpunit_e2e.xml
   - python /usr/local/submitty/test_suite/integrationTests/run.py

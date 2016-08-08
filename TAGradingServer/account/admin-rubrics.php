@@ -140,7 +140,7 @@ $output .= <<<HTML
         var rubric_name = $('td#rubric-'+rubric_id+'-title').text();
         var c = window.confirm("Are you sure you want to delete '" + rubric_name + "'?");
         if (c == true) {
-            $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=delete&id='+rubric_id, {
+            $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&semester={$_GET['semester']}&action=delete&id='+rubric_id, {
                 type: "POST",
 		        data: {
                     csrf_token: '{$_SESSION['csrf']}'
@@ -163,7 +163,7 @@ $output .= <<<HTML
     }
 
     function fixSequences() {
-        $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&action=sequence', {
+        $.ajax('{$BASE_URL}/account/ajax/admin-rubrics.php?course={$_GET['course']}&semester={$_GET['semester']}&action=sequence', {
             type: "POST",
             data: {
                 csrf_token: '{$_SESSION['csrf']}'
@@ -188,7 +188,7 @@ $output .= <<<HTML
     <div class="modal-header">
         <h3 id="myModalRubricel">Manage Rubrics</h3>
         <span class="submit-button">
-            <input class="btn btn-primary" onclick="window.location.href='{$BASE_URL}/account/admin-rubric.php?course={$_GET['course']}'" type="submit" value="Create New Rubric"/>
+            <input class="btn btn-primary" onclick="window.location.href='{$BASE_URL}/account/admin-rubric.php?course={$_GET['course']}&semester={$_GET['semester']}'" type="submit" value="Create New Rubric"/>
             &nbsp;&nbsp;
             <input class="btn btn-primary" onclick="fixSequences();" type="submit" value="Fix DB Sequences" />
         </span>
@@ -214,7 +214,7 @@ foreach ($db->rows() as $rubric) {
             <td class="rubrics-questions" id="rubric-{$rubric['rubric_id']}-questions">{$rubric['rubric_questions']}</td>
             <td class="rubrics-score" id="rubric-{$rubric['rubric_id']}-score">{$rubric['rubric_score']} ({$rubric['rubric_ec']})</td>
             <td class="rubrics-due" id="rubric-{$rubric['rubric_id']}-due">{$rubric['rubric_due_date']}</td>
-            <td id="rubric-{$rubric['rubric_id']}-options"><a href="{$BASE_URL}/account/admin-rubric.php?course={$_GET['course']}&action=edit&id={$rubric['rubric_id']}">Edit</a> |
+            <td id="rubric-{$rubric['rubric_id']}-options"><a href="{$BASE_URL}/account/admin-rubric.php?course={$_GET['course']}&semester={$_GET['semester']}&action=edit&id={$rubric['rubric_id']}">Edit</a> |
             <a onclick="deleteRubric({$rubric['rubric_id']});">Delete</a></td>
         </tr>
 HTML;

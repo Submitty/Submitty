@@ -1,0 +1,71 @@
+.diff-container {
+    /*width: 700px;*/
+    width: 100%;
+    overflow-x: auto;
+    background-color: #F8F8F8;
+    border: 1px solid #ddd;
+    /*float: left;*/
+}
+
+.diff-container table,
+.diff-container tr,
+.diff-container td {
+    text-align: left;
+    vertical-align: middle;
+}
+
+.diff-code {
+    padding: 5px;
+    font-family: monospace;
+}
+
+.diff-code tr, td {
+    padding-top: 2px;
+}
+
+.bad {
+    /*background-color: #fedede;*/
+    background-color: #fdffe0;
+}
+
+.highlight {
+
+}
+
+.highlight-hover {
+    /*background-color: yellow !important;*/
+    background-color: #ddf !important;
+}
+
+.highlight-char {
+    /*background-color: #fffdbe;*/
+    background-color: #fe5b5b;
+}
+
+.line_number {
+    display: inline-block;
+    min-width: 20px;
+    padding-left: 3px;
+    text-align: center;
+    background-color: #f2f2f2;
+    opacity: .55;
+    margin-right: 10px;
+    float: left;
+}
+
+.line_code {
+    /*min-width: 610px;*/
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.line-code pre {
+    display: block;
+    font-family: monospace;
+    white-space: pre;
+    margin: 1em 0;
+}
+
+.empty_line {
+    /*width: 700px;*/
+}

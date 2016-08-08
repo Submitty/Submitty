@@ -13,7 +13,11 @@ Vagrant.configure(2) do |config|
     v.cpus = 2
   end
 
-  config.vm.synced_folder ".", "/usr/local/submitty/GIT_CHECKOUT_Submitty", owner: "vagrant", group: "vagrant", mount_options: ["dmode=775", "fmode=775"]
+  config.vm.synced_folder ".", "/usr/local/submitty/GIT_CHECKOUT_Submitty", create: true, owner: "vagrant", group: "vagrant", mount_options: ["dmode=777", "fmode=777"]
+
+  config.vm.provision "shell" do |s|
+    s.path = ".setup/vagrant/reset_system.py"
+  end
 
   config.vm.provision "shell" do |s|
     s.path = ".setup/vagrant.sh"

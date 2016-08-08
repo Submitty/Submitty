@@ -19,8 +19,14 @@ read DATABASE_USER
 echo "What is the database password for the database user $DATABASE_USER?"
 read DATABASE_PASSWORD
 
+echo "What is the url for submission? (ex: http://192.168.56.104/"
+read SUBMISSION_URL
+
 echo "What is the url for the Grading Server? (ex: https://192.168.56.103/ or https://hwgrading.cs.rpi.edu/)"
 read TAGRADING_URL
+
+echo "What is the url for the CGI scripts (cgi-bin)? (ex: http://192.168.56.105/)"
+read CGI_URL
 
 #echo "What is the SVN path to be used? (ex: svn+ssh://192.168.56.102 or svn+ssh://csci2600svn/var/lib/svn/csci2600)"
 echo "What is the SVN path to be used? (ex: svn+ssh://192.168.56.102 or file:///var/lib/svn/csci2600)"
@@ -45,6 +51,7 @@ AUTOGRADING_LOG_PATH=$SUBMITTY_DATA_DIR/autograding_logs/
 
 # recommended names for special users & groups related to the SUBMITTY system
 HWPHP_USER=hwphp
+HWCGI_USER=hwcgi
 HWCRON_USER=hwcron
 HWCRONPHP_GROUP=hwcronphp
 COURSE_BUILDERS_GROUP=course_builders
@@ -55,10 +62,12 @@ NUM_UNTRUSTED=60
 FIRST_UNTRUSTED_UID=$(id -u untrusted00) # untrusted's user id
 FIRST_UNTRUSTED_GID=$(id -g untrusted00) # untrusted's group id
 
-HWCRON_UID=$(id -u hwcron)       # hwcron's user id
-HWCRON_GID=$(id -g hwcron)       # hwcron's group id
-HWPHP_UID=$(id -u hwphp)         # hwphp's user id
-HWPHP_GID=$(id -g hwphp)         # hwphp's group id
+HWCRON_UID=$(id -u ${HWCRON_USER})       # hwcron's user id
+HWCRON_GID=$(id -g ${HWCRON_USER})       # hwcron's group id
+HWPHP_UID=$(id -u ${HWPHP_USER})         # hwphp's user id
+HWPHP_GID=$(id -g ${HWPHP_USER})         # hwphp's group id
+HWCGI_UID=$(id -u ${HWCGI_USER})
+HWCGI_GID=$(id -g ${HWCGI_USER})
 
 # adjust this number depending on the # of processors
 # available on your hardware
@@ -121,6 +130,7 @@ sed -i -e "s|__CONFIGURE__FILLIN__SUBMITTY_REPOSITORY__|$SUBMITTY_REPOSITORY|g" 
 sed -i -e "s|__CONFIGURE__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 sed -i -e "s|__CONFIGURE__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 sed -i -e "s|__CONFIGURE__FILLIN__SVN_PATH__|$SVN_PATH|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+sed -i -e "s|__CONFIGURE__FILLIN__HWCGI_USER__|$HWCGI_USER|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 sed -i -e "s|__CONFIGURE__FILLIN__HWPHP_USER__|$HWPHP_USER|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 sed -i -e "s|__CONFIGURE__FILLIN__HWCRON_USER__|$HWCRON_USER|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 sed -i -e "s|__CONFIGURE__FILLIN__HWCRONPHP_GROUP__|$HWCRONPHP_GROUP|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
@@ -140,6 +150,8 @@ sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_USER__|$DATABASE_USER|g" $SUBMITTY_IN
 sed -i -e "s|__CONFIGURE__FILLIN__DATABASE_PASSWORD__|$DATABASE_PASSWORD|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 
 sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+sed -i -e "s|__CONFIGURE__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+sed -i -e "s|__CONFIGURE__FILLIN__CGI_URL__|$CGI_URL|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 
 sed -i -e "s|__CONFIGURE__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh

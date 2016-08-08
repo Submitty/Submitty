@@ -388,7 +388,7 @@ function upload_homework($username, $semester, $course, $assignment_id, $num_par
 
     $settings_file = $user_path."/user_assignment_settings.json";
     if (!file_exists($settings_file)) {
-        $json = array("active_assignment"=>$upload_version, "history"=>array(array("version"=>$upload_version, "time"=>date("Y-m-d H:i:s"))));
+        $json = array("active_version"=>$upload_version, "history"=>array(array("version"=>$upload_version, "time"=>date("Y-m-d H:i:s"))));
         file_put_contents($settings_file, json_encode($json, JSON_PRETTY_PRINT));
     }
     else {
@@ -987,8 +987,8 @@ function get_homework_tests($username, $semester,$course, $assignment_id, $assig
                 if (isset($testcases_results[$u]["compilation_output"])) {
                     $data["compilation_output"] = get_compilation_output($student_path . $testcases_results[$u]["compilation_output"]);
                 }
-                if ($include_diffs && isset($testcases_results[$u]["diffs"])) {
-                    $data["diffs"] = get_all_testcase_diffs($username, $semester,$course, $assignment_id, $assignment_version, $testcases_results[$u]["diffs"]);
+                if ($include_diffs && isset($testcases_results[$u]["autochecks"])) {
+                    $data["autochecks"] = get_all_testcase_diffs($username, $semester,$course, $assignment_id, $assignment_version, $testcases_results[$u]["autochecks"]);
                 }
 
                 array_push($homework_tests, $data);
@@ -1080,7 +1080,7 @@ function get_select_submission_data($username, $semester,$course, $assignment_id
 // Get the test cases from the instructor configuration file
 function get_assignment_config($semester,$course, $assignment_id) {
     $path_front = get_path_front_course($semester,$course);
-    $file = $path_front."/config/".$assignment_id."_assignment_config.json";
+    $file = $path_front."/config/build/build_".$assignment_id.".json";
     if (!file_exists($file)) {
         return false;//TODO Handle this case
     }
@@ -1162,7 +1162,7 @@ function get_active_version($username, $semester,$course, $assignment_id) {
       return -1; // no submissions
     }
     $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
-    return $json["active_assignment"];
+    return $json["active_version"];
 }
 
 function change_assignment_version($username, $semester,$course, $assignment_id, $assignment_version, $assignment_config) {
@@ -1186,7 +1186,7 @@ function change_assignment_version($username, $semester,$course, $assignment_id,
         return;
     }
     $json = json_decode(removeTrailingCommas(file_get_contents($file)), true);
-    $json["active_assignment"] = (int)$assignment_version;
+    $json["active_version"] = (int)$assignment_version;
     $json["history"][] = array("version"=>(int)$assignment_version, "time"=>date("Y-m-d H:i:s"));
 
 /* // php symlinks disabled on server for security reasons
@@ -1246,7 +1246,8 @@ function get_testcase_diff($username, $semester,$course, $assignment_id, $assign
             $data["instructor"] = file_get_contents($instructor_file_path);
         }
     }
-    if (isset($diff["student_file"]) && file_exists($student_path . $diff["student_file"])) {
+    if (isset($diff["student_file"]) &&
+        file_exists($student_path . $diff["student_file"])) {
         $file_size = filesize($student_path. $diff["student_file"]);
         if ($file_size / 1024 < 10000) {
             $data["student"] = file_get_contents($student_path.$diff["student_file"]);
@@ -1264,13 +1265,13 @@ function get_all_testcase_diffs($username, $semester,$course, $assignment_id, $a
     $results = array();
     foreach ($diffs as $diff) {
         $diff_result = get_testcase_diff($username, $semester,$course, $assignment_id, $assignment_version, $diff);
-        $diff_result["diff_id"] = $diff["diff_id"];
+        $diff_result["autocheck_id"] = $diff["autocheck_id"];
 
         if (isset($diff["display_mode"]) && $diff["display_mode"] != "") {
              $diff_result["display_mode"] = $diff["display_mode"];
         }
-        if (isset($diff["message"]) && $diff["message"] != "") {
-            $diff_result["message"] = $diff["message"];
+        if (isset($diff["messages"])) {
+            $diff_result["messages"] = $diff["messages"];
         }
         if (isset($diff["description"]) && $diff["description"] != "") {
             $diff_result["description"] = $diff["description"];

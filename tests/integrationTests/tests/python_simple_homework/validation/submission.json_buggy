@@ -8,21 +8,13 @@
 	"testcases": [
 		{
 			"test_name": "Test 1 Lab 1 Checkpoint 1",
-			"execute_logfile": "test01_execute_logfile.txt",
-			"diffs": [
+			"autochecks": [
 				{
-					"diff_id":"test01_0_diff",
+					"autocheck_id":"test01_0_autocheck",
 					"student_file":"test01_STDOUT.txt",
 					"instructor_file":"test_output/testassignment/hw01part1_sol.txt",
 					"difference":"test01_0_diff.json",
-					"description": "Program Output",
-					"message": " "
-				},
-				{
-					"diff_id":"test01_1_diff",
-					"student_file":"test01_STDERR.txt",
-					"description": "syntax error output from running python",
-					"message": " "
+					"description": "Program Output"
 				}
 			],
 			"points_awarded": 0
