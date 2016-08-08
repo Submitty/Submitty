@@ -71,6 +71,13 @@ foreach (Database::rows() as $user) {
     }
     else{
         $sections = '';
+        Database::query("SELECT * FROM grading_registration WHERE user_id=?", array($user['user_id']));
+        foreach (Database::rows() as $section){
+            if($sections != ''){
+                $sections .= ',';
+            }
+            $sections .= $section['sections_registration_id'];
+        }
     }
     print <<<HTML
                 <tr>

@@ -37,8 +37,11 @@ else {
     $icon = '<i class="icon-remove icon-white"></i>';
     $color  = "#DA4F49";
     $icon_color  = "#DA4F49";
-    if ($eg->active_assignment == 0) {
-        $part_status  = 'Cancelled';
+    if ($eg->active_assignment == -1) {
+        $part_status  = 'No Submission';
+    }
+    else if($eg->active_assignment == 0){
+        $part_status = 'Cancelled';
     }
     else {
         $part_status  = 'Bad';
@@ -51,7 +54,7 @@ if ($calculate_diff) {
 
 <script>
     function openFile(file) {
-        window.open("{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file + "&add_submission_path=1","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        window.open("{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" + file + "&add_submission_path=1","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
 
@@ -61,11 +64,11 @@ if ($calculate_diff) {
             var iframeId = "file_viewer_" + part + "_" + num + "_iframe";
             // handle pdf
             if(file.substring(file.length - 3) == "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" + file 
+                iframe.html("<iframe id='" + iframeId + "' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" + file 
                             + "' width='750px' height='600px' style='border: 0'></iframe>");
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&filename=" 
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" 
                             + file + "' width='750px' style='border: 0'></iframe>");
             }
             iframe.addClass('open');
@@ -166,10 +169,16 @@ if ($calculate_diff) {
             ele.val("");
             return;
         }
-        if(ele.val() < 0) {
+        if(ele.val() < 0 && parseFloat(question_total) > 0) {
             ele.val( 0 );
         }
-        if(ele.val() > parseFloat(question_total)) {
+        if(ele.val() > 0 && parseFloat(question_total) < 0) {
+            ele.val( 0 );
+        }
+        if(ele.val() < parseFloat(question_total) && parseFloat(question_total) < 0) {
+            ele.val(question_total);
+        }
+        if(ele.val() > parseFloat(question_total) && parseFloat(question_total) > 0) {
             ele.val(question_total);
         }
         if(ele.val() % delta != 0) {
@@ -281,8 +290,19 @@ HTML;
         <div id="inner-container">
             <div id="inner-container-spacer"></div>
             <br />
+HTML;
+    if ($eg->active_assignment == 0){
+        $output .= <<<HTML
+            No submission <br />
+HTML;
+    }
+    else{
+        $output .= <<<HTML
             Submitted: {$submission_time}<br />
             Submission Number: {$eg->active_assignment} / {$eg->max_assignment}
+HTML;
+    }
+    $output .= <<<HTML
             <div id="inner-container-spacer"></div>
             <div class="tabbable">
                 <ul id="myTab" class="nav nav-tabs">
@@ -320,7 +340,7 @@ HTML;
     if(isset($results_details['testcases'])){
         foreach ($results_details['testcases'] as $k => $testcase) {
             $active_text = ($active) ? 'active' : '';
-            $url = $BASE_URL."/account/iframe/test-pane.php?course={$_GET['course']}&testcases=".urlencode(json_encode($testcase))."&directory=".urlencode($results_details['directory']);
+            $url = $BASE_URL."/account/iframe/test-pane.php?course={$_GET['course']}&semester={$_GET['semester']}&testcases=".urlencode(json_encode($testcase))."&directory=".urlencode($results_details['directory']);
 
             $output .= <<<HTML
                         <div class="tab-pane {$active_text}" id="output-{$i}">
@@ -352,11 +372,9 @@ HTML;
             <div style='margin-top: 20px' class="tabbable">
 HTML;
     $j = 0;
-    $output .= "\n"."Old file viewer here.";
     $output .= <<<HTML
         </div>
     </div>
-    <hr style="background-color: #000; height: 1px; margin-left: 25px; margin-right: 25px;"/>
 HTML;
 
     $active = false;
@@ -406,10 +424,11 @@ else {
 $active_assignments = $eg->active_assignment;
 
 $output .= <<<HTML
-            <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&g_id={$eg->eg_details['g_id']}&student={$eg->student['user_id']}&individual={$individual}" method="post">
+            <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$eg->eg_details['g_id']}&student={$eg->student['user_id']}&individual={$individual}" method="post">
                 <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
                 <input type="hidden" name="submitted" value="{$submitted}" />
                 <input type="hidden" name="status" value="{$eg->status}" />
+                <input type="hidden" name="is_graded" value="{$student_individual_graded}" />
                 <input type="hidden" name="late" value="{$eg->days_late}" />
                 <input type="hidden" name="active_assignment" value="{$active_assignments}" />
                 <div style="margin-top: 0; margin-bottom:35px;">
@@ -426,8 +445,10 @@ HTML;
 }
 
 if ($eg->student['student_allowed_lates'] >= 0) {
+    $allowed_lates = $eg->student['student_allowed_lates'];
+    $plural = (($allowed_lates > 1) ? 's': '');
     $output .= <<<HTML
-                <span style="color: black">Student has used {$eg->student['used_late_days']}/{$eg->student['student_allowed_lates']} late day(s) this semester.</span><br />
+                <span style="color: black">Student has used {$eg->student['used_late_days']}/{$allowed_lates} late day{$plural} this semester.</span><br />
 HTML;
 }
 
@@ -436,8 +457,10 @@ $output .= <<<HTML
 HTML;
 
 if ($eg->late_days_exception > 0) {
+    $late_days_exception = $eg->late_days_exception;
+    $plural = (($late_days_exception > 1) ? 's': '');
     $output .= <<<HTML
-                <span style="color: green">Student has an exception of {$eg->late_days_exception} late day(s).</span><br />
+                <span style="color: green">Student has an exception of {$late_days_exception} late day{$plural}.</span><br />
 HTML;
     $output .= <<<HTML
                 <b>Late Days Used:</b>&nbsp;{$eg->days_late_used}<br />
@@ -474,19 +497,19 @@ $output .= <<<HTML
 HTML;
 if(isset($_GET["individual"])) {
     $output .= <<<HTML
-                        <tr style="background-color:#EEE;">
+                        <!--<tr style="background-color:#EEE;">
                             <th style="padding-left: 1px; padding-right: 0px; border-bottom:5px #FAA732 solid;"><i class="icon-time" id="progress-icon" style="margin-top: 2px;"></th>
                             <th style="width:40px; border-bottom:5px #FAA732 solid;">Part</th>
                             <th style="border-bottom:5px #FAA732 solid;" colspan="2">Questions</th>
-                        </tr>
+                        </tr> -->
 HTML;
 }
 else {
     $output .= <<<HTML
                         <tr style="background-color:#EEE;">
-                            <th style="padding-left: 1px; padding-right: 0px;"><i class="icon-time" id="progress-icon" style="margin-top: 2px;"></th>
+                            <!--<th style="padding-left: 1px; padding-right: 0px;"><i class="icon-time" id="progress-icon" style="margin-top: 2px;"></th>
                             <th style="width:40px;">Part</th>
-                            <th colspan="2">Questions</th>
+                            <th colspan="2">Questions</th>-->
                         </tr>
 HTML;
 }
@@ -498,31 +521,62 @@ HTML;
 
 $c = 1;
 
-foreach ($eg->questions as $question) {
-    $output .= <<<HTML
+$precision = floatval($eg->eg_details['eg_precision']);
 
+foreach ($eg->questions as $question) {
+    // hide auto-grading if it has no value
+    if ($question['gc_max_value'] == 0){
+        continue;
+    }
+    // FIXME add autograding extra credit 
+    else if($question['gcd_score'] ==0 && substr($question['gc_title'], 0, 12) === "AUTO-GRADING"){
+        $question['gcd_score'] = $eg->autograding_points;
+    }
+    
+    $disabled = '';
+    if(substr($question['gc_title'], 0, 12) === "AUTO-GRADING"){
+        $disabled = 'disabled';
+    }
+    
+    $output .= <<<HTML
                         <tr>
 HTML;
 
     $message = htmlentities($question["gc_title"]);
     $note = htmlentities($question["gc_ta_comment"]);
     if ($note != "") {
-        $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note: </b>" . $note . "</i></div>";
+        $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
     }
     $output .= <<<HTML
                             <td style="font-size: 12px" colspan="2">
-                                {$message} {$note}
+                                <b>{$message}</b> {$note}
+HTML;
+
+    $student_note = htmlentities($question['gc_student_comment']);
+    if ($student_note != ''){
+        $student_note = "<div style='margin-bottom:5px; color:#777;'><i><b>Note to Student: </b>" . $student_note . "</i></div>";
+        
+    }
+    $output .= <<<HTML
+                                {$student_note}
                             </td>
                         </tr>
 HTML;
 
     $comment = ($question['gcd_component_comment'] != "") ? "in" : "";
+    
+    $min_val = (intval($question['gc_max_value']) > 0) ? 0 : intval($question['gc_max_value']);
+    $max_val = (intval($question['gc_max_value']) > 0) ? intval($question['gc_max_value']) : 0;
+    
     $output .= <<<HTML
     <tr style="background-color: #f9f9f9;">
-                            <td style="white-space:nowrap; vertical-align:middle; text-align:center;"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}" min="0" max="{$question['gc_max_value']}" step="0.5" placeholder="&plusmn;0.5" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  0.5); calculatePercentageTotal();" style="width:50px; resize:none;"></textarea><strong> / {$question['gc_max_value']}</strong></td>
+                            <td style="white-space:nowrap; vertical-align:middle; text-align:center;"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}"
+                                min="{$min_val}" max="{$max_val}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  {$precision}); calculatePercentageTotal();" 
+                                style="width:50px; resize:none;" {$disabled}></textarea><strong> / {$question['gc_max_value']}</strong></td>
                             <td style="width:100%; padding:0px">
                                 <div id="rubric-{$c}">
-                                    <textarea name="comment-{$question["gc_order"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:100%; height:100%; resize:none; margin:0px 0px; border-radius:0px; border:none; padding:5px; float:left; margin-right:-25px;" placeholder="Message for the student..." comment-position="0">{$question['gcd_component_comment']}</textarea>
+                                    <textarea name="comment-{$question["gc_order"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:100%; height:100%; resize:none; margin:0px 0px; border-radius:0px; border:none; padding:5px; float:left; margin-right:-25px;" 
+                                        placeholder="Message for the student..." comment-position="0" {$disabled}>{$question['gcd_component_comment']}</textarea>
 HTML;
 
     $comment = htmlspecialchars($question['gcd_component_comment']);
@@ -631,8 +685,6 @@ HTML;
         <input class="btn btn-large btn-warning" type="submit" value="Submit Homework Re-Grade" onclick="createCookie('backup',1,1000);"/>
 HTML;
     }
-    // TODO support  graded timestamp  <div style="width:100%; text-align:right; color:#777;">{$eg->eg_details['grade_finish_timestamp']}</div>
-
 }
 else {
     $output .= <<<HTML
@@ -640,6 +692,7 @@ else {
         <div style="width:100%; text-align:right; color:#777;">This homework has not been opened for grading.</div>
 HTML;
 }
+
 
 $output .= <<<HTML
             </form>

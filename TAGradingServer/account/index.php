@@ -68,7 +68,7 @@ if(isset($_GET["g_id"]) && isset($rubric["g_id"])) {
         }
 
         $params = array($s_user_id);
-        $db->query("SELECT * FROM users WHERE user_id=?", $params);
+        $db->query("SELECT * FROM users WHERE user_id=? AND user_group=4", $params);
         $temp_row = $db->row();
         $student_first_name = $temp_row["user_firstname"];
         $student_last_name = $temp_row["user_lastname"];
@@ -103,7 +103,7 @@ FROM
     users AS s
     LEFT JOIN (
     SELECT
-        user_id
+        gd_user_id
         , count(*) as number_graded
     FROM
         gradeable_data AS gd INNER JOIN gradeable_component_data AS gcd
@@ -111,13 +111,15 @@ FROM
     WHERE
         g_id=?
     GROUP BY
-        user_id
+        gd_user_id
     ) AS g
-    ON s.user_id=g.user_id
+    ON s.user_id=g.gd_user_id
 WHERE
     s.".$user_section_param."=?
+AND 
+    user_group=4
 ORDER BY
-    s.s_user_id ASC
+    s.user_id ASC
                 ", $params);
 
         $prev_row = array('user_id' => "");
@@ -159,7 +161,7 @@ ORDER BY
                 }
             } else {
                 $params = array($row['user_id'], $g_id);
-                $db->query("SELECT gd_grader_id FROM gradeable_data WHERE user_id=? AND g_id=?", $params);
+                $db->query("SELECT gd_grader_id FROM gradeable_data WHERE gd_user_id=? AND g_id=?", $params);
                 $temp_row = $db->row();
 
                 if(intval($temp_row["gd_grader_id"]) == \app\models\User::$user_id) {
@@ -312,7 +314,7 @@ else if(!isset($_GET["g_id"])) {
     // update with the gradeable data 
     $params = array();
     
-    $db->query("SELECT g_title, g.g_id, eg_submission_due_date FROM gradeable AS g INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id", $params);
+    $db->query("SELECT g_title, g.g_id, g_grade_start_date FROM gradeable AS g INNER JOIN electronic_gradeable AS eg ON g.g_id=eg.g_id", $params);
     $results = $db->rows();
 
     if(count($results) > 0) {
@@ -332,7 +334,7 @@ HTML;
         $c = 0;
         $now = new DateTime('now');
         foreach($results as $row) {
-            $homeworkDate = new DateTime($row['eg_submission_due_date']);
+            $homeworkDate = new DateTime($row['g_grade_start_date']);
             //TODO ADD LATE DAYS
             if ($row['eg_late_days'] > 0) {
                 $homeworkDate->add(new DateInterval("PT{$row['eg_late_days']}H"));

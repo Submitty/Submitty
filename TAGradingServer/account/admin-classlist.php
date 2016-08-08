@@ -1,12 +1,10 @@
 <?php
-//TODO currently not supported by the new schema
 
 include "../header.php";
 
 check_administrator();
 
-if($user_is_administrator)
-{
+if($user_is_administrator){
     $account_subpages_unlock = true;
     echo <<<HTML
     <div id="container" style="width:100%; margin-top:40px;">

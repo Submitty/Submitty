@@ -46,4 +46,4 @@ if ($grading_sections > 0) {
 }
 
 
-header('Location: '.__BASE_URL__.'/account/admin-grading-sections.php?course='.$_GET['course']."&update={$complete_update}");
+header('Location: '.__BASE_URL__.'/account/admin-rotating-sections.php?course='.$_GET['course'].'&semester='.$_GET['semester']."&update={$complete_update}");

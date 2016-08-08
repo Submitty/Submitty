@@ -7,11 +7,11 @@ check_administrator();
 $output = "";
 
 $db->query("
-SELECT
-    g.*
+SELECT g.*, eg_submission_due_date 
 FROM
-    gradeable AS g
-ORDER BY g_id ASC",array());
+    gradeable AS g LEFT JOIN electronic_gradeable AS eg
+    ON g.g_id = eg.g_id
+ORDER BY g.g_id ASC",array());
 
 $gradeables = $db->rows();
 $output .= <<<HTML
@@ -181,6 +181,7 @@ $output .= <<<HTML
         })
         .done(function(response) {
             window.alert(response);
+            location.reload(true);
         })
         .fail(function() {
             window.alert("[AJAX ERROR] Refresh page");
@@ -193,17 +194,8 @@ $output .= <<<HTML
         <h3 id="myModalgradeableel">Manage Gradeables</h3>
         <span class="submit-button">
             <input class="btn btn-primary" onclick="window.location.href='{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}'" type="submit" value="Create New Gradeable"/>
-            &nbsp;&nbsp;
             <input class="btn btn-primary" onclick="fixSequences();" type="submit" value="Fix DB Sequences" />
-            &nbsp;&nbsp;
-            <!-- TODO import from JSON 
-                Basically 
-                1. This should take all of the JSON configs that are saved in the JSON configs folder or wherever
-                2. Fill out the form
-                3. Send the request
-                    i. Always overwrite existing files 
-                    ii. 
-            -->
+
             <input class="btn btn-primary" onclick="batchImportJSON();" type="submit" value="Import From JSON" />
         </span>
     </div>
@@ -226,7 +218,6 @@ foreach ($gradeables as $gradeable) {
     $num_questions = intval($db->row()['cnt']);
     
     //calculate total worth
-    
     $db->query("
     SELECT SUM(gc_max_value) AS score
     FROM 
@@ -234,11 +225,13 @@ foreach ($gradeables as $gradeable) {
     WHERE 
         g.g_id=?
         AND NOT gc_is_extra_credit
+        AND gc_max_value >= 0
     GROUP BY
         g.g_id
     ", array($g_id));
     
     $score = $db->row()['score'];
+    $due_date = (isset($gradeable['eg_submission_due_date']) ? $gradeable['eg_submission_due_date'] : '');
     
     $output .= <<<HTML
         <tr id='gradeable-{$g_id}'">
@@ -246,8 +239,8 @@ foreach ($gradeables as $gradeable) {
             <td class="gradeables-name" id="gradeable-{$g_id}-title">{$g_title}</td>
             <td class="gradeables-questions" id="gradeable-{$g_id}-questions">{$num_questions}</td>
             <td class="gradeables-score" id="gradeable-{$g_id}-score">{$score}</td>
-            <td class="gradeables-due" id="gradeable-{$g_id}-due">{$gradeable['g_grade_released_date']}</td>
-            <td id="gradeable-{$g_id}-options"><a href="{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&action=edit&id={$g_id}">Edit</a> |
+            <td class="gradeables-due" id="gradeable-{$g_id}-due">{$due_date}</td>
+            <td id="gradeable-{$g_id}-options"><a href="{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&action=edit&id={$g_id}">Edit</a> |
             <a onclick="deleteGradeable('{$g_id}');">Delete</a></td>
         </tr>
 HTML;

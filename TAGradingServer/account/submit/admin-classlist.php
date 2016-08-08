@@ -108,17 +108,19 @@ $error_message = ""; //Used to show accumulated errors during data validation
 $row_being_processed = 1; //Offset to account for header (user will cross-reference with his data sheet)
 $rows = array();
 unset($contents[0]); //header should be thrown away (does not affect cross-reference)
+
 foreach($contents as $content) {
 	$row_being_processed++;
 	$details = explode(",", trim($content));
 	$rows[] = array( 'student_first_name' => $details[$csvFieldsINI['student_first_name']],
 	                 'student_last_name'  => $details[$csvFieldsINI['student_last_name']],
-	                 'student_user_id'    => explode("@", $details[$csvFieldsINI['student_email']])[0],
-	                 'student_section'    => intval($details[$csvFieldsINI['student_section']]) );
+	                 'user_id'            => explode("@", $details[$csvFieldsINI['student_email']])[0],
+                     'student_email'      =>  $details[$csvFieldsINI['student_email']],
+	                 'registration_section'    => intval($details[$csvFieldsINI['student_section']]) );
 
 	//Validate massaged data.  First, make sure we're working on the most recent entry (should be the "end" element).
 	$val = end($rows);
-
+    
 	//First name must be alpha characters, white-space, or certain punctuation.
 	$error_message .= (preg_match("~^[a-zA-Z.'`\- ]+$~", $val['student_first_name'])) ? "" : "Error in student first name column, row #{$row_being_processed}: {$val['student_first_name']}<br>";
 
@@ -126,7 +128,7 @@ foreach($contents as $content) {
 	$error_message .= (preg_match("~^[a-zA-Z.'`\- ]+$~", $val['student_last_name'])) ? "" : "Error in student last name column, row #{$row_being_processed}: {$val['student_last_name']}<br>";
 
 	//Student section must be greater than zero (intval($str) returns zero when $str is not integer)
-	$error_message .= ($val['student_section'] > 0) ? "" : "Error in student section column, row #{$row_being_processed}: {$val['student_section']}<br>";
+	$error_message .= ($val['registration_section'] > 0) ? "" : "Error in student section column, row #{$row_being_processed}: {$val['student_section']}<br>";
 
 	//No check on user_id (computing login ID) -- different Univeristies have different formats.
 }
@@ -152,21 +154,20 @@ $updated = 0;
 // student_manual is true)
 \lib\Database::beginTransaction();
 foreach ($rows as $row) {
-    // TODO add email
-	$columns = array("user_id", "user_firstname", "user_lastname", "user_email", "registration_section");
-	$values = array($row['student_user_id'], $row['student_first_name'], $row['student_last_name'], $row['student_section'], 1);
-	$user_id = $row['student_user_id'];
+	$columns = array("user_id", "user_firstname", "user_lastname", "user_email", "user_group","registration_section");
+	$values = array($row['user_id'], $row['student_first_name'], $row['student_last_name'], $row['student_email'],4, $row['registration_section']);
+	$user_id = $row['user_id'];
 	if (array_key_exists($user_id, $students)) {
-		if (isset($_POST['ignore_manual_1']) && $_POST['ignore_manual_1'] == true && $students[$user_id]['student_manual'] == 1) {
+	if (isset($_POST['ignore_manual_1']) && $_POST['ignore_manual_1'] == true && $students[$user_id]['student_manual'] == 1) {
 			continue;
 		}
-		\lib\Database::query("UPDATE users SET registration_section=? WHERE user_id?", array($row['student_section'], $user_id));
+		\lib\Database::query("UPDATE users SET registration_section=? WHERE user_id=?", array($row['registration_section'], $user_id));
         $updated++;
 		unset($students[$user_id]);
 	}
 	else {
-		$db->query("INSERT INTO users (" . (implode(",", $columns)) . ") VALUES (?, ?, ?, ?, ?)", $values);
-		\lib\Database::query("INSERT INTO late_days (student_user_id, allowed_lates, since_timestamp) VALUES(?, ?, TIMESTAMP '1970-01-01 00:00:01')", array($user_id, __DEFAULT_LATE_DAYS_STUDENT__));
+		$db->query("INSERT INTO users (" . (implode(",", $columns)) . ") VALUES (?, ?, ?, ?, ?, ?)", $values);
+		\lib\Database::query("INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) VALUES(?, ?, TIMESTAMP '1970-01-01 00:00:01')", array($user_id, __DEFAULT_LATE_DAYS_STUDENT__));
         $inserted++;
 	}
 }
