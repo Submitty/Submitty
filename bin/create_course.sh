@@ -146,12 +146,15 @@ if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester" ]; then
     chmod 751                           $SUBMITTY_DATA_DIR/courses/$semester
 fi
 
+<<<<<<< HEAD
 if [ ! -d "$SUBMITTY_INSTALL_DIR/site/config/$semester" ]; then
     mkdir               $SUBMITTY_INSTALL_DIR/site/config/$semester
     chown hwphp:hwphp   $SUBMITTY_INSTALL_DIR/site/config/$semester
     chmod 500           $SUBMITTY_INSTALL_DIR/site/config/$semester
 fi
 
+=======
+>>>>>>> 87ab4f6... Move course config ini file to /var/local/submitty/courses/semester/course/config instead of site/config/semester
 ########################################################################################################################
 ########################################################################################################################
 
@@ -228,10 +231,10 @@ chmod 660 $course_dir/config/class.json
 
 
 # copy the config file for TA grading & replace the variables
-cp $SUBMITTY_INSTALL_DIR/site/config/course_template.ini $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
-chown hwphp:hwphp $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
-chmod 400 $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/site/config/${semester}/${course}.ini
+cp $SUBMITTY_INSTALL_DIR/site/config/course_template.ini ${course_dir}/config/config.ini
+chown ${HWPHP_USER}:${HWPHP_USER} ${course_dir}/config/config.ini
+chmod 400 ${course_dir}/config/config.ini
+replace_fillin_variables ${course_dir}/config/config.ini
 
 echo -e "\nMake sure to create the database: $DATABASE_NAME\n\n"
 

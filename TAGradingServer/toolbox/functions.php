@@ -32,18 +32,8 @@ $start_time = microtime_float();
 // INCLUDES
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-if (isset($_GET['course'])) {
-    // don't allow the user entered course to potentially point to a different directory via use of ../
-    $_GET['course'] = isset($_GET['course']) ? str_replace("/", "_", $_GET['course']) : "";
-    $_GET['semester'] = isset($_GET['semester']) ? str_replace("/", "_", $_GET['semester']) : "";
-    $config = __DIR__."/../../site/config/".$_GET['semester']."/".$_GET['course'].".ini";
-    if (!file_exists($config)) {
-        die(\lib\ErrorPage::get_error_page("Fatal Error: The config for the specified course '{$_GET['course']}' does not exist"));
-    }
-}
-else {
-    die(\lib\ErrorPage::get_error_page("Fatal Error: You must have course=#### in the URL bar"));
-}
+$_GET['course'] = isset($_GET['course']) ? str_replace("/", "_", $_GET['course']) : "";
+$_GET['semester'] = isset($_GET['semester']) ? str_replace("/", "_", $_GET['semester']) : "";
 
 $a = IniParser::readFile(__DIR__."/../../site/config/master.ini");
 define("__BASE_URL__", $a['site_details']['ta_base_url']);
@@ -63,6 +53,12 @@ define("__LOG_EXCEPTIONS__", $a['logging_details']['log_exceptions']);
 
 define('__TMP_XLSX_PATH__', '/tmp/_SUBMITTY_xlsx');
 define('__TMP_CSV_PATH__',  '/tmp/_SUBMITTY_csv');
+
+$config = __SUBMISSION_SERVER__."/config/config.ini";
+if (!file_exists($config)) {
+    die(\lib\ErrorPage::get_error_page("Fatal Error: The config for the specified semester '${_GET['semester']}' and 
+    specified course '{$_GET['course']}' does not exist"));
+}
 
 $a = IniParser::readFile($config);
 define("__COURSE_CODE__", $_GET['course']);
