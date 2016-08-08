@@ -14,7 +14,7 @@
 
         // *************** README *****************
         {
-            "type" : "FileExists",
+            "type" : "FileCheck",
             "title" : "README",
             "filename" : "part1/README.txt",
             "points" : 2
@@ -24,7 +24,7 @@
         {
             "type" : "Compilation",
             "title" : "Compilation",
-            "command" : "/usr/bin/clang++ -Wall -o a.out -- part2/*.cpp",
+            "command" : "clang++ -Wall -o a.out -- part2/*.cpp",
             "executable_name" : "a.out",
             "points" : 3
         },

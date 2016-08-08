@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
   int subnum = -1;
   std::string time_of_submission = "";
 
-  /* Check argument usage */
+  // Check command line arguments
   if (argc == 5) {
     hw_id = argv[1];
     rcsid = argv[2];
@@ -43,18 +43,6 @@ int main(int argc, char *argv[]) {
     std::cerr << "INCORRECT ARGUMENTS TO RUNNER" << std::endl;
     return 1;
   } 
-
-
-  // Make sure arguments are entered correctly
-  /*
-  if (argc != 1) {
-    // Pass in the current working directory to run the programs
-    std::cout << "Incorrect # of arguments:" << argc << std::endl;
-    std::cout << "Usage : " << std::endl << "     ./runner" << std::endl;
-    return 2;
-  }
-  */
-
 
   // necessary since the untrusted user does not have a home directory
   setenv("DYNAMORIO_CONFIGDIR", ".", 1);
@@ -67,7 +55,6 @@ int main(int argc, char *argv[]) {
   std::cout << "CUSTOMIZE AUTO GRADING replace " <<  replace_string_before << " with " << replace_string_after << std::endl;
 #endif
   
-  //system ("ls -lta");
   system("find . -type f");
 
   // Run each test case and create output files
@@ -75,23 +62,18 @@ int main(int argc, char *argv[]) {
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
 
-    TestCase my_testcase = TestCase::MakeTestCase((*tc)[i]);
+    std::cout << "========================================================" << std::endl;
+    std::cout << "TEST #" << i+1 << std::endl;
 
-    //std::string type = (*tc)[i].value("type","MISSING TYPE");
-    //if (type == "FileExists") continue;
-    //if (type == "Compilation") continue;
-    if (my_testcase.isFileExistsTest()) continue;
-    if (my_testcase.isCompilationTest()) continue;
-    //std::string cmd = (*tc)[i].value("command","MISSING COMMAND");
+    TestCase my_testcase((*tc)[i]);
+
+    if (my_testcase.isFileCheck()) continue;
+    if (my_testcase.isCompilation()) continue;
     std::vector<std::string> commands = stringOrArrayOfStrings((*tc)[i],"command");
     assert (commands.size() > 0);
 
-    std::cout << "========================================================" << std::endl;
-    std::string title = (*tc)[i].value("title","MISSING TITLE");
-    std::cout << "TEST " << i+1 << " " << title << std::endl;
+    std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
     
-
-
     for (int x = 0; x < commands.size(); x++) {
 
       std::cout << "COMMAND " << commands[x] << std::endl;
@@ -118,35 +100,37 @@ int main(int argc, char *argv[]) {
       }
       
       
-      std::string logfile = my_testcase.prefix() + "_execute_logfile.txt";
+      std::string logfile = my_testcase.getPrefix() + "_execute_logfile.txt";
       // run the command, capturing STDOUT & STDERR
       int exit_no = execute(commands[x] +
-                            " 1>" + my_testcase.prefix() + "_STDOUT" + which + ".txt" +
-                            " 2>" + my_testcase.prefix() + "_STDERR" + which + ".txt",
+                            " 1>" + my_testcase.getPrefix() + "_STDOUT" + which + ".txt" +
+                            " 2>" + my_testcase.getPrefix() + "_STDERR" + which + ".txt",
                             logfile,
                             my_testcase.get_test_case_limits(),
                             config_json.value("resource_limits",nlohmann::json())); 
       
     }
     
-
+    std::vector<std::vector<std::string>> filenames = my_testcase.getFilenames();
+    assert (filenames.size() > 0);
+    assert (filenames.size() == my_testcase.numFileGraders());
     // rename any key files created by this test case to prepend the test number
-    for (int f = 0; f < my_testcase.numFileGraders(); f++) {
-      std::string raw_filename = my_testcase.raw_filename(f);
-      std::string filename     = my_testcase.filename(f);
-      if (raw_filename != "" &&
-	access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists 
-	execute ("/bin/mv "+raw_filename+" "+filename,
-		 "/dev/null",
-                 my_testcase.get_test_case_limits(),
-                 config_json.value("resource_limits",nlohmann::json())); 
-
-	std::cout << "RUNNER!  /bin/mv "+raw_filename+" "+filename << std::endl;
-
-
+    for (int v = 0; v < filenames.size(); v++) {
+      assert (filenames[0].size() > 0);
+      for (int i = 0; i < filenames[v].size(); i++) {
+        std::cout << "main runner " << v << " " << i << std::endl;
+        std::string raw_filename = my_testcase.getMyFilename(v,i);
+        std::string filename     = my_testcase.getMyPrefixFilename(v,i);
+        assert (raw_filename != "");
+        if (access( raw_filename.c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists
+          execute ("/bin/mv "+raw_filename+" "+filename,
+                   "/dev/null",
+                   my_testcase.get_test_case_limits(),
+                   config_json.value("resource_limits",nlohmann::json()));
+          std::cout << "RUNNER!  /bin/mv "+raw_filename+" "+filename << std::endl;
+        }
       }
     }
-
   }
   
   std::cout << "========================================================" << std::endl;

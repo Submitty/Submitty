@@ -34,28 +34,82 @@ def initialize(test):
             os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "p" + i + "_out.txt"),
             os.path.join(test.testcase_path, "data")])
 
+
+def cleanup(test):
+    subprocess.call(["rm"] + ["-f"] +
+            glob.glob(os.path.join(test.testcase_path, "data", "part*", "*")))
+    subprocess.call(["rm"] + ["-f"] +
+            glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+
+
 @testcase
 def correct(test):
-    subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data", "part*", "*.py")))
-    for i in [str(n) for n in range(1, 5)]:
-        subprocess.call(["cp",
-            os.path.join(SAMPLE_SUBMISSIONS, "p" + i + "_sol.py"),
-            os.path.join(test.testcase_path, "data", "part" + i)])
+    cleanup(test)
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p1_sol.py"),
+                     os.path.join(test.testcase_path, "data", "part1")])
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p2_sol.txt"),
+                     os.path.join(test.testcase_path, "data", "part2")])
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p3_sol.py"),
+                     os.path.join(test.testcase_path, "data", "part3")])
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p4_sol.py"),
+                     os.path.join(test.testcase_path, "data", "part4")])
+    test.run_compile()  # NOTE: This is necessary to rename part2 file
     test.run_run()
     test.run_validator()
     test.diff(".submit.grade", ".submit.grade_correct")
     test.json_diff("submission.json", "submission.json_correct")
 
+
 @testcase
 def buggy(test):
-    subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data", "part*", "*.py")))
-    for i in [str(n) for n in range(1, 5)]:
-        subprocess.call(["cp",
-            os.path.join(SAMPLE_SUBMISSIONS, "p" + i + "_bug.py"),
-            os.path.join(test.testcase_path, "data", "part" + i)])
+    cleanup(test)
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p1_bug.py"),
+                     os.path.join(test.testcase_path, "data", "part1")])
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p2_bug.txt"),
+                     os.path.join(test.testcase_path, "data", "part2")])
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p3_bug.py"),
+                     os.path.join(test.testcase_path, "data", "part3")])
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p4_bug.py"),
+                     os.path.join(test.testcase_path, "data", "part4")])
+    test.run_compile()  # NOTE: This is necessary to rename part2 file
     test.run_run()
     test.run_validator()
     test.diff(".submit.grade", ".submit.grade_buggy")
     test.json_diff("submission.json", "submission.json_buggy")
+
+
+'''
+# THIS IS AN INFINITE LOOP?
+@testcase
+def buggy2(test):
+    cleanup(test)
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p2_bug2.txt"),
+                     os.path.join(test.testcase_path, "data", "part2")])
+    test.run_compile()  # NOTE: This is necessary to rename part2 file
+    test.run_run()
+    test.run_validator()
+    test.diff(".submit.grade", ".submit.grade_buggy2")
+    test.json_diff("submission.json", "submission.json_buggy2")
+
+
+@testcase
+def buggy3(test):
+    cleanup(test)
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p2_bug3.txt"),
+                     os.path.join(test.testcase_path, "data", "part2")])
+    test.run_compile()  # NOTE: This is necessary to rename part2 file
+    test.run_run()
+    test.run_validator()
+    test.diff(".submit.grade", ".submit.grade_buggy3")
+    test.json_diff("submission.json", "submission.json_buggy3")
+'''

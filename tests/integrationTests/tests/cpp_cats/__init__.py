@@ -188,3 +188,4 @@ def spellingOff(test):
     test.run_validator()
     test.diff(".submit.grade",".submit.grade_spellingOff")
     test.json_diff("submission.json","submission.json_spellingOff")
+

@@ -7,6 +7,7 @@ import os
 import subprocess
 import traceback
 import sys
+from pprint import pprint
 
 # global variable available to be used by the test suite modules
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
@@ -321,17 +322,22 @@ class TestcaseWrapper:
             raise RuntimeError("File " + filename2 + " does not exist")
 
         with open(filename1) as file1:
-            contents1 = json.loads(file1.read())
+            contents1 = json.load(file1)
         with open(filename2) as file2:
-            contents2 = json.loads(file2.read())
+            contents2 = json.load(file2)
         ordered1 = self.json_ordered(contents1)
         ordered2 = self.json_ordered(contents2)
         if ordered1 != ordered2:
-            print ("\n\nORDEREDA") 
-            print (ordered1)
-            print ("\nORDEREDB") 
-            print (ordered2)
-            raise RuntimeError("JSON files " + filename1 + " and " + filename2 + " are different")
+            # NOTE: The ordered json has extra syntax....
+            # so instead, print the original contents to a file and diff that
+            # (yes clumsy)
+            with open ('json_ordered_1.json','w') as outfile:
+                json.dump(contents1,outfile,sort_keys=True,indent=4, separators=(',', ': '))
+            with open ('json_ordered_2.json','w') as outfile:
+                json.dump(contents2,outfile,sort_keys=True,indent=4, separators=(',', ': '))
+            print ("\ndiff json_ordered_1.json json_ordered_2.json\n")
+            process = subprocess.Popen(["diff", 'json_ordered_1.json', 'json_ordered_2.json'])
+            raise RuntimeError("JSON files are different:  " + filename1 + " " + filename2)
 
     def empty_json_diff(self, f):
         # if no directory provided...

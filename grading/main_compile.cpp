@@ -156,40 +156,70 @@ int main(int argc, char *argv[]) {
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
 
-    TestCase my_testcase = TestCase::MakeTestCase((*tc)[i]);
+    std::cout << "========================================================" << std::endl;
 
-    if (my_testcase.isCompilationTest()) {
-      
-      assert (my_testcase.numFileGraders() == 0);
-      
-      std::cout << "========================================================" << std::endl;
-      std::cout << "TEST " << i+1 << " " << my_testcase.command() << " IS COMPILATION!" << std::endl;
-      
-      std::string cmd = my_testcase.command();
-      assert (cmd != "");
+    TestCase my_testcase((*tc)[i]);
+
+    if (my_testcase.isFileCheck()) {
 
 
+      std::cout << "TEST " << i+1 << " IS FILE CHECK!" << std::endl;
+
+      std::vector<std::vector<std::string>> filenames = my_testcase.getFilenames();
+      for (int i = 0; i < filenames.size(); i++) {
+        for (int j = 0; j < filenames[i].size(); j++) {
+          std::cout << "PATTERN: " << filenames[i][j] << std::endl;
+          std::vector<std::string> files;
+          wildcard_expansion(files, filenames[i][j], std::cout);
+          for (int i = 0; i < files.size(); i++) {
+            std::cout << "  rescue  FILE #" << i << ": " << files[i] << std::endl;
+            std::string new_filename = my_testcase.getPrefix() + "_" + replace_slash_with_double_underscore(files[i]);
+            execute ("/bin/cp "+files[i]+" "+new_filename,
+                     "/dev/null",
+                     my_testcase.get_test_case_limits(),
+                     config_json.value("resource_limits",nlohmann::json()));
+
+          }
+        }
+      }
+
+
+
+    } else if (my_testcase.isCompilation()) {
+      
+      assert (my_testcase.numFileGraders() > 0);
+      
+      std::vector<std::string> commands = my_testcase.getCommands();
+
+      std::cout << "TEST " << i+1 << " IS COMPILATION!" << std::endl;
+
+      assert (commands.size() > 0);
+      for (int j = 0; j < commands.size(); j++) {
+        std::cout << "COMMAND #" << j << ": " << commands[j] << std::endl;
 
 #ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-      std::cout << "BEFORE " << cmd << std::endl;
-      while (1) {
-	int location = cmd.find(replace_string_before);
-	if (location == std::string::npos) 
-	  break;
-	cmd.replace(location,replace_string_before.size(),replace_string_after);
-      }
-      std::cout << "AFTER  " << cmd << std::endl;
+        std::cout << "BEFORE " << commands[j] << std::endl;
+        while (1) {
+          int location = commands[j].find(replace_string_before);
+          if (location == std::string::npos)
+            break;
+          commands[j].replace(location,replace_string_before.size(),replace_string_after);
+        }
+        std::cout << "AFTER  " << commands[j] << std::endl;
 #endif
       
-      // run the command, capturing STDOUT & STDERR
-      int exit_no = execute(cmd +
-			    " 1>" + my_testcase.prefix() + "_STDOUT.txt" +
-			    " 2>" + my_testcase.prefix() + "_STDERR.txt",
-			    my_testcase.prefix() + "_execute_logfile.txt",
-			    my_testcase.get_test_case_limits(),
-                            config_json.value("resource_limits",nlohmann::json())); 
-      
-      std::cout<< "Exited with exit_no: "<<exit_no<<std::endl;
+        // run the command, capturing STDOUT & STDERR
+        int exit_no = execute(commands[j] +
+                              " 1>" + my_testcase.getPrefix() + "_STDOUT.txt" +
+                              " 2>" + my_testcase.getPrefix() + "_STDERR.txt",
+                              my_testcase.getPrefix() + "_execute_logfile.txt",
+                              my_testcase.get_test_case_limits(),
+                              config_json.value("resource_limits",nlohmann::json()));
+
+        std::cout<< "FINISHED COMMAND, exited with exit_no: "<<exit_no<<std::endl;
+      }
+    } else {
+      std::cout << "TEST " << i+1 << " IS EXECUTION!" << std::endl;
     }
   }
   std::cout << "========================================================" << std::endl;

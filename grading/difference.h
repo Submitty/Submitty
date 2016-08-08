@@ -1,14 +1,3 @@
-/* FILENAME: difference.h
- * YEAR: 2014
- * AUTHORS: Please refer to 'AUTHORS.md' for a list of contributors
- * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
- *
- * RELEVANT DOCUMENTATION: 
- * Contains the Change class that keeps track of differences between the expected output
- * and the resulting output.  Differences contains a vector of changes.  Used to hold 
- * all the data regarding the differences in output of a test.
- */
-
 #ifndef __differences__difference__
 #define __differences__difference__
 #include <string>
@@ -47,28 +36,6 @@ public:
 	void clear();
 };
 
-/* METHOD: PRINT_CHANGES
- * ARGS: ostream, c - contains a block of text with discrepancies
- * RETURN: void
- * PURPOSE: Print out the changes for the block for both student and expected
- */
-inline void PRINT_CHANGES(std::ostream& ostr, const Change &c) {
-
-  ostr << "MY CHANGE\n";
-  ostr << "a_start " << c.a_start << std::endl;
-  ostr << "b_start " << c.b_start << std::endl;
-
-  ostr << "a_changes: ";
-  for (int i = 0; i < c.a_changes.size(); i++) {
-    ostr << c.a_changes[i] << " ";
-  }
-  ostr << std::endl;
-  ostr << "b_changes: ";
-  for (int i = 0; i < c.b_changes.size(); i++) {
-    ostr << c.b_changes[i] << " ";
-  }
-  ostr << std::endl;
-}
 
 /* METHOD: INSPECT_CHANGES
  * ARGS: ostream, c - contains a block of text with discrepancies, 
@@ -88,8 +55,6 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
 }
 
 
-#define VERBOSE_INSPECT_CHANGES 0
-//#define VERBOSE_INSPECT_CHANGES 1
 
 /* METHOD: INSPECT_CHANGES
  * ARGS: ostream, c - contains a block of text with discrepancies, 
@@ -105,23 +70,6 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
 			    bool &only_whitespace,
 			    bool extra_student_output_ok) { 
 
-#if VERBOSE_INSPECT_CHANGES
-  ostr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nINSPECT CHANGES\n";
-  ostr << "a_start " << c.a_start << std::endl;
-  ostr << "b_start " << c.b_start << std::endl;
-  ostr << "a_changes: ";
-  for (int i = 0; i < c.a_changes.size(); i++) {
-    ostr << c.a_changes[i] << " ";
-  }
-  ostr << std::endl;
-  ostr << "b_changes: ";
-  for (int i = 0; i < c.b_changes.size(); i++) {
-    ostr << c.b_changes[i] << " ";
-  }
-  ostr << std::endl;
-#endif
-
-  
   // if there are more lines in b (instructor) 
   if (c.a_changes.size() < c.b_changes.size()) only_whitespace = false;
 
@@ -135,44 +83,20 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
   }
 
   for (int i = 0; i < c.a_characters.size(); i++) {
-#if VERBOSE_INSPECT_CHANGES
-    ostr << "a_characters["<<i<<"]: ";
-#endif
     for (int j = 0; j < c.a_characters[i].size(); j++) {
       int row = c.a_changes[i];
       int col = c.a_characters[i][j];
-#if VERBOSE_INSPECT_CHANGES
-      ostr << "" << c.a_characters[i][j] << "='" << adata[row][col] << "' " ;
-#endif
       if (adata[row][col] != ' ') only_whitespace = false;
     }
-#if VERBOSE_INSPECT_CHANGES
-    std::cout << std::endl;
-#endif
   }
-#if VERBOSE_INSPECT_CHANGES
-  ostr << std::endl;
-#endif
 
   for (int i = 0; i < c.b_characters.size(); i++) {
-#if VERBOSE_INSPECT_CHANGES
-    ostr << "b_characters["<<i<<"]: ";
-#endif
     for (int j = 0; j < c.b_characters[i].size(); j++) {
       int row = c.b_changes[i];
       int col = c.b_characters[i][j];
-#if VERBOSE_INSPECT_CHANGES
-      ostr << "" << c.b_characters[i][j] << "='" << bdata[row][col] << "' " ;
-#endif
       if (bdata[row][col] != ' ') only_whitespace = false;
     }
-#if VERBOSE_INSPECT_CHANGES
-    std::cout << std::endl;
-#endif
   }
-#if VERBOSE_INSPECT_CHANGES
-  ostr << std::endl;
-#endif
 
   if (only_whitespace) {
     std::cout << "ONLY WHITESPACE CHANGES!!!!!!!!!!!!!" << std::endl;
@@ -192,21 +116,20 @@ inline void Change::clear() {
 	b_changes.clear();
 }
 
+
 class Difference: public TestResults {
 public:
-	Difference();
-	std::vector<Change> changes;
-	std::vector<int> diff_a; //student
-	std::vector<int> diff_b; //expected
-	void printJSON(std::ostream & file_out);
-  //float grade();
-	int output_length_a;
-	int output_length_b;
-	int edit_distance;
-	int type;
+  Difference();
+  std::vector<Change> changes;
+  std::vector<int> diff_a; //student
+  std::vector<int> diff_b; //expected
+  void printJSON(std::ostream & file_out);
+  int output_length_a;
+  int output_length_b;
+  int edit_distance;
+  int type;
   bool extraStudentOutputOk;
   bool only_whitespace_changes;
-
 
   void PrepareGrade();
 };

@@ -2,6 +2,7 @@
     "assignment_message" : "Submit each part of your homework to the right bucket or you will not receive credit.",
     "part_names" : [ "Problem 1: Temperature", "Problem 2: Variables", "Problem 3: Area & Volume", "Problem 4: Count Odd" ],
 
+    // FIXME:  This section of resource limits should go away soon
     "resource_limits" : {
         "RLIMIT_CPU" : 60,
         "RLIMIT_NPROC" : 100,
@@ -11,17 +12,19 @@
     "testcases" : [
         {
             "title" : "Convert Temperature",
-            "command" : [ "/usr/bin/python part1/*.py",
-                          "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 print part1/*.py" ],
+            "command" : [ "python part1/*.py",
+                          "submitty_count_node -l python2 print part1/*.py" ],
             "points" : 2,
             "validation" : [
                 {
+                    // verify program output
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT_0.txt",
                     "description" : "Program Output",
                     "instructor_file" : "p1_out.txt"
                 },
                 {
+                    // number of print statements must be >= 1
                     "method" : "intComparison",
                     "filename" : "STDOUT_1.txt",
                     "description" : "Number of print statements",
@@ -31,13 +34,14 @@
             ]
         },
         {
+            "type" : "FileCheck",
             "title" : "Legal Variable Names",
-	    "command" : "/bin/cat part2/*",
             "points" : 1,
             "validation" : [
                 {
+                    // verify correctness of answer
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
+                    "filename" : "part2/*.txt",
                     "description" : "Program Output",
 		    "instructor_file" : "p2_out.txt"
                 }
@@ -45,19 +49,21 @@
         },
         {
             "title" : "Volume and Area",
-            "command" : [ "/usr/bin/python part3/*.py",
-                          "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 assign part3/*.py",
-                          "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 mul part3/*.py",
-                          "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_node -l python2 add part3/*.py" ], 
+            "command" : [ "python part3/*.py",
+                          "submitty_count_node -l python2 assign part3/*.py",
+                          "submitty_count_node -l python2 mul part3/*.py",
+                          "submitty_count_node -l python2 add part3/*.py" ],
            "points" : 4,
             "validation" : [
                 {
+                    // verify program output
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT_0.txt",
                     "description" : "Program Output",
                     "instructor_file" : "p3_out.txt"
                 },
                 {
+                    // number of assignments must be >= 5
                     "method" : "intComparison",
                     "filename" : "STDOUT_1.txt",
                     "description" : "Number of assignments",
@@ -65,6 +71,7 @@
                     "term" : 5
                 },
                 {
+                    // number of multiplications must be >= 2
                     "method" : "intComparison",
                     "filename" : "STDOUT_2.txt",
                     "description" : "Number of multiplications",
@@ -72,6 +79,7 @@
                     "term" : 2
                 },
                 {
+                    // number of additions must be >= 1
                     "method" : "intComparison",
                     "filename" : "STDOUT_3.txt",
                     "description" : "Number of additions",
@@ -82,17 +90,19 @@
         },
         {
             "title" : "Count Odd",
-            "command" : [ "/usr/bin/python part4/*.py",
-                          "/usr/local/submitty/GIT_CHECKOUT_AnalysisTools/bin/count_token while part4/*.py" ],
+            "command" : [ "python part4/*.py",
+                          "submitty_count_token while part4/*.py" ],
             "points" : 2,
             "validation" : [
                 {
+                    // verify program output
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT_0.txt",
                     "description" : "Program Output",
                     "instructor_file" : "p4_out.txt"
                 },
                 {
+                    // number of while loops must be >= 1
                     "method" : "intComparison",
                     "filename" : "STDOUT_1.txt",
                     "description" : "Number of while loops",

@@ -8,7 +8,7 @@
 	"testcases": [
 		{
 			"test_name": "Test 1 Lab 1 Checkpoint 1",
-			"execute_logfile": "test01_execute_logfile.txt",
+                        "execute_logfile": "test01_execute_logfile.txt",
 			"autochecks": [
 				{
 					"autocheck_id":"test01_0_autocheck",
