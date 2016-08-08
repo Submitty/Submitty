@@ -33,64 +33,63 @@ echo <<<HTML
 HTML;
 
 // get gradeables from json
-// note: assume already sorted chronologically
+//==================================================
+// FIXME: add code to sort the items chronologically
+//==================================================
 $all_gradeables = parse_json($gradeable_addresses);
 
+//==============================================
+// FIXME: links to grading/editing gradeable page yet to be added
+//==============================================
 if(isInstructor($username)) {
-	echo '<tr class="colspan"><td colspan="4">Future Items</td></tr>';
-	foreach ($all_gradeables['future'] as $gradeable) {
-		echo <<<HTML
-		<tr>
-		<td>{$gradeable["gradeable_title"]}</td>
-		<td>Submit Open {$gradeable["date_submit"]->format("M j H:i ")}</td>
-		<td><button class="btn">Grade</button></td>
-		<td><button class='btn'>Edit</button></td>
-		</tr>
+	foreach(array_merge(array("Future Items"), $all_gradeables['future'], array("Open Items"), $all_gradeables['submission_open'], array("Closed Items"), $all_gradeables['submission_closed'], array("Items Being Graded"), $all_gradeables['grading_open'], array("Graded Items"), $all_gradeables['graded']) as $gradeable) {
+		if(is_string($gradeable)) {
+			echo '<tr class="bar"><td colspan="6"></td></tr>';
+			echo '<tr class="colspan"><td colspan="6" style="border-bottom:2px black solid;">'.$gradeable.'</td></tr>';
+		}
+		else {
+			if(isElectronic($gradeable)) {
+				if($gradeable['ta-grading'] == "yes" && $gradeable['instructions-url'] != "") {
+					$gradeable_title = '<a href="'.$gradeable['instructions-url'].'" onclick="goToPage("'.$gradeable['instructions-url'].'"); return false;"><label class="has-url">'.$gradeable['gradeable_title'].'</label></a>';
+				}
+				else {
+					$gradeable_title = '<label>'.$gradeable['gradeable_title'].'</label>';
+				}
+
+				$submission_date = $gradeable["date_submit"]->format("M j H:i ").' - '.$gradeable["date_due"]->format("M j H:i ");
+				$submission_option = '<button class="btn btn-primary" style="width:80%;" onclick="location.href=\'?semester='.$semester.'&course='.$course.'&assignment_id='.$gradeable["gradeable_id"].'\'">Submit</button></td>';
+
+				if($gradeable['ta-grading'] == "yes") {
+					$grading_date = $gradeable["date_grade"]->format("M j H:i ").' - '.$gradeable["date_released"]->format("M j H:i ");
+					$grading_option = '<button class="btn btn-primary" style="width:80%;" onclick="location.href=\"#\"">Grade</button>';
+				}
+				else{
+					$grading_date = "";
+					$grading_option = "";
+				}
+			}
+			else {
+				$gradeable_title = '<label>'.$gradeable['gradeable_title'].'</label>';
+				$submission_date = '';
+				$submission_option = '';
+				$grading_date = $gradeable["date_grade"]->format("M j H:i ").' - '.$gradeable["date_released"]->format("M j H:i ");
+				$grading_option = '<button class="btn btn-primary" style="width:80%;" onclick="location.href=\"#\"">Grade</button>';
+			}
+			//=======================================================================================
+			// FIXME: shortcut to open grading for a closed item and releasing grades to be added
+			//=======================================================================================
+			$edit_option = '<button class="btn btn-primary" style="width:100%;" onclick="location.href=\"#\"">Edit</button>';
+			echo <<<HTML
+				<tr class="instructor">
+					<td class="gradeable_title">{$gradeable_title}</td>
+					<td class="date">{$submission_date}</td>
+					<td class="option">{$submission_option}</td>
+					<td class="date">{$grading_date}</td>
+					<td class="option">{$grading_option}</td>
+					<td class="two-options">{$edit_option}</td>
+				</tr>
 HTML;
-	}
-	echo '<tr class="colspan"><td colspan="4">Open Items</td></tr>';
-	foreach ($all_gradeables['submission_open'] as $gradeable) {
-		echo <<<HTML
-		<tr>
-		<td>{$gradeable["gradeable_title"]}</td>
-		<td>Submit Due {$gradeable["date_due"]->format("M j H:i ")}</td>
-		<td><button class="btn">Grade</button></td>
-		<td><button class='btn'>Edit</button></td>
-		</tr>
-HTML;
-	}
-	echo '<tr class="colspan"><td colspan="4">Closed Items</td></tr>';
-	foreach ($all_gradeables['submission_closed'] as $gradeable) {
-		echo <<<HTML
-		<tr>
-		<td>{$gradeable["gradeable_title"]}</td>
-		<td>Submissions</td>
-		<td><button class="btn">Grading open {$gradeable["date_grade"]->format("M j H:i ")}</button></td>
-		<td><button class='btn' style="width:50%">Edit</button><button class='btn' style="width:50%">Open</button></td>
-		</tr>
-HTML;
-	}
-	echo '<tr class="colspan"><td colspan="4">Items Being Graded</td></tr>';
-	foreach ($all_gradeables['grading_open'] as $gradeable) {
-		echo <<<HTML
-		<tr>
-		<td>{$gradeable["gradeable_title"]}</td>
-		<td>Submissions</td>
-		<td><button class="btn">Grading by {$gradeable["date_released"]->format("M j H:i ")}</button></td>
-		<td><button class='btn' style="width:50%">Edit</button><button class='btn' style="width:50%">Publish</button></td>
-		</tr>
-HTML;
-	}
-	echo '<tr class="colspan"><td colspan="4">Graded Items</td></tr>';
-	foreach ($all_gradeables['graded'] as $gradeable) {
-		echo <<<HTML
-		<tr>
-		<td>{$gradeable["gradeable_title"]}</td>
-		<td>Submissions</td>
-		<td><button class="btn">Grade</button></td>
-		<td><button class='btn'>Edit</button></td>
-		</tr>
-HTML;
+		}
 	}
 }
 
@@ -103,43 +102,55 @@ else if (isTA($username)) {
 			echo '<tr class="bar"><td colspan="5"></td></tr>';
 			echo '<tr class="colspan"><td colspan="5" style="border-bottom:2px black solid;">'.$gradeable.'</td></tr>';
 		}
-		else if(isElectronic($gradeable)){
-			$instructions_url = ($gradeable['instructions-url'] != "" ? "href=\"{$gradeable['instructions-url']}\"" : "");
-			$url = ($gradeable['instructions-url'] != "" ? "{$gradeable['instructions-url']}" : "");
-			$title_class = $gradeable['instructions-url'] != "" ? "class='has-url'" : "";
-			$button_class = "btn btn-primary";
-			echo <<<HTML
-			<tr class="ta">
-			<td class="gradeable_title"><a {$instructions_url} onclick="goToPage('{$url}'); return false;"><label {$title_class}>{$gradeable["gradeable_title"]}</label></a></td>
-			<td class="date">{$gradeable["date_submit"]->format("M j H:i ")} - {$gradeable["date_due"]->format("M j H:i ")}</td>
-			<td class="option"><button class="btn btn-primary" style="width:100%;" onclick="location.href='?semester={$semester}&course={$course}&assignment_id={$gradeable["gradeable_id"]}'">Submit</button></td>
-HTML;
-			if($gradeable['ta-grading'] == "yes") {	// ta-grading enabled
-				$disabled = ($gradeable['date_grade'] > new DateTime('NOW')) ? "disabled" : "";
-				echo <<<HTML
-				<td class="date">{$gradeable["date_grade"]->format("M j H:i ")} - {$gradeable["date_released"]->format("M j H:i ")}</td>
-				<td class="option"><button class="{$button_class}" {$disabled} style="width:100%;" onclick="location.href='#'">Grade</button></td>
-				</tr>
-HTML;
-			}
-			else {	// ta-grading disabled
-				echo <<<HTML
-				<td class="date"></td>
-				<td class="option"></td>
-				</tr>
-HTML;
-			}
-		}
-		// display itmes of checkpoint type or numeric/text type
 		else{
+			if(isElectronic($gradeable)) {
+				if($gradeable['ta-grading'] == "yes" && $gradeable['instructions-url'] != "") {
+					$gradeable_title = '<a href="'.$gradeable['instructions-url'].'" onclick="goToPage("'.$gradeable['instructions-url'].'"); return false;"><label class="has-url">'.$gradeable['gradeable_title'].'</label></a>';
+				}
+				else {
+					$gradeable_title = '<label>'.$gradeable['gradeable_title'].'</label>';
+				}
+
+				$submission_date = $gradeable["date_submit"]->format("M j H:i ").' - '.$gradeable["date_due"]->format("M j H:i ");
+				$submission_option = '<button class="btn btn-primary" style="width:100%;" onclick="location.href=\'?semester='.$semester.'&course='.$course.'&assignment_id='.$gradeable["gradeable_id"].'\'">Submit</button></td>';
+
+				if($gradeable['ta-grading'] == "yes") {
+					$grading_date = $gradeable["date_grade"]->format("M j H:i ").' - '.$gradeable["date_released"]->format("M j H:i ");
+					if($gradeable['date_grade'] > new DateTime('NOW')) {
+						$grading_option = '<button class="btn btn-primary" style="width:100%;" disabled>Grade</button>';
+					}
+					else {
+						$grading_option = '<button class="btn btn-primary" style="width:100%;" onclick="location.href=\"#\"">Grade</button>';
+					}
+				}
+				else{
+				//==================================================================
+				// NOTE: If ta-grading disabled and the item is closed, should TAs still be able to see the item and item listed in being graded?
+				//==================================================================
+					$grading_date = "";
+					$grading_option = "";
+				}
+			}
+			else {
+				$gradeable_title = '<label>'.$gradeable['gradeable_title'].'</label>';
+				$submission_date = '';
+				$submission_option = '';
+				$grading_date = $gradeable["date_grade"]->format("M j H:i ").' - '.$gradeable["date_released"]->format("M j H:i ");
+				if($gradeable['date_grade'] > new DateTime('NOW')) {
+					$grading_option = '<button class="btn btn-primary" style="width:100%;" disabled>Grade</button>';
+				}
+				else {
+					$grading_option = '<button class="btn btn-primary" style="width:100%;" onclick="location.href=\"#\"">Grade</button>';
+				}
+			}
 			echo <<<HTML
-			<tr class="ta">
-			<td class="gradeable_title"><label>{$gradeable["gradeable_title"]}</label></td>
-			<td class="date"></td>
-			<td class="option"></td>
-			<td class="date">{$gradeable["date_grade"]->format("M j H:i ")} - {$gradeable["date_released"]->format("M j H:i ")}</td>
-			<td class="option"><button class="btn btn-primary" style="width:100%;" onclick="location.href='#'">Grade</button></td>
-			</tr>
+				<tr class="ta">
+					<td class="gradeable_title">{$gradeable_title}</td>
+					<td class="date">{$submission_date}</td>
+					<td class="option">{$submission_option}</td>
+					<td class="date">{$grading_date}</td>
+					<td class="option">{$grading_option}</td>
+				</tr>
 HTML;
 		}
 	}
@@ -183,6 +194,9 @@ echo <<<HTML
 		</table>
 	</body>
 	<script>
+	//===============================
+	// FIXME: add code that goes to editing gradeable page
+	//===============================
 	function goEdit(id){
 		window.location.href = "";
 	}
@@ -229,7 +243,7 @@ function parse_json($gradeable_addresses) {
 	    	$future[] = $gradeable;
 	    	?><script>console.log("is future");</script><?php
 	    }
-	    else if (isset($gradeable['date_submit']) && $gradeable['date_due'] > $now) {
+	    else if (isset($gradeable['date_due']) && $gradeable['date_due'] > $now) {
 	    	$submission_open[] = $gradeable;
 	    	?><script>console.log("is open");</script><?php
 	    }
@@ -267,5 +281,34 @@ function isElectronic($gradeable) {
 	?><script>console.log("is electronic");</script><?php
 	return $gradeable["gradeable-type"] === "Electronic File";
 }
+
+//===============================================================================
+// Functions not fully tested, might be useful for replacing date checks?
+function isFutureItem($gradeable) {
+	// $now = new DateTime("NOW");
+	return isset($gradeable['date_submit']) && $gradeable['date_submit'] > new DateTime("NOW");
+	?><script>console.log("in isFutureItem");</script><?php
+}
+
+function isOpenItem($gradeable) {
+	return isFutureItem($gradeable) && isset($gradeable['date_due']) && $gradeable['date_due'] > new DateTime("NOW");
+	?><script>console.log("in isOpenItem");</script><?php
+}
+
+function isClosedItem($gradeable) {
+	return isOpenItem($gradeable) && isset($gradeable['date_grade']) && $gradeable['date_grade'] > new DateTime("NOW");
+	?><script>console.log("in isClosedItem");</script><?php
+}
+
+function isBeingGradedItem($gradeable) {
+	return isClosedItem($gradeable) && isset($gradeable['date_released']) && $gradeable['date_released'] > new DateTime("NOW");
+	?><script>console.log("in isBeingGradedItem");</script><?php
+}
+
+function isGradedItem($gradeable) {
+	return !isBeingGradedItem($gradeable);
+	?><script>console.log("in isGradedItem");</script><?php
+}
+//===============================================================================
 
 ?>

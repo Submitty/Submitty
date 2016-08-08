@@ -46,3 +46,15 @@ table .ta .date{
 table .ta .option{
 	width: 12.5%;
 }
+table .instructor .gradeable_title{
+	width: 25%;
+}
+table .instructor .date{
+	width: 15%;
+}
+table .instructor .option{
+	width: 10%;
+}
+table .instructor .two-options{
+	width: 15%;
+}
