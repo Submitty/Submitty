@@ -12,7 +12,7 @@ INSTALL.sh
 .idea
 
 tests/report
-.setup/selenium-server-standalone.jar
+selenium-server-standalone.jar
 
 logs/
 *.csv

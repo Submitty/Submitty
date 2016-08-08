@@ -35,8 +35,8 @@ CREATE FUNCTION check_valid_score(numeric, integer) RETURNS boolean
 declare
 valid_score BOOLEAN;
 BEGIN
-   SELECT  
-   CASE WHEN gc_max_value >=0 THEN $1<=gc_max_value AND $1>=0 
+   SELECT
+   CASE WHEN gc_max_value >=0 THEN $1<=gc_max_value AND $1>=0
         ELSE $1>=gc_max_value AND $1<=0
    END INTO valid_score FROM gradeable_component AS gc WHERE gc.gc_id=$2;
    RETURN valid_score;
@@ -49,7 +49,7 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: electronic_gradeable; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: electronic_gradeable; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE electronic_gradeable (
@@ -67,7 +67,7 @@ CREATE TABLE electronic_gradeable (
 
 
 --
--- Name: gradeable; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: gradeable; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE gradeable (
@@ -86,7 +86,7 @@ CREATE TABLE gradeable (
 
 
 --
--- Name: gradeable_component; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: gradeable_component; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE gradeable_component (
@@ -103,7 +103,7 @@ CREATE TABLE gradeable_component (
 
 
 --
--- Name: gradeable_component_data; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: gradeable_component_data; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE gradeable_component_data (
@@ -135,7 +135,7 @@ ALTER SEQUENCE gradeable_component_gc_id_seq OWNED BY gradeable_component.gc_id;
 
 
 --
--- Name: gradeable_data; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: gradeable_data; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE gradeable_data (
@@ -170,7 +170,7 @@ ALTER SEQUENCE gradeable_data_gd_id_seq OWNED BY gradeable_data.gd_id;
 
 
 --
--- Name: grading_registration; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: grading_registration; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE grading_registration (
@@ -180,7 +180,7 @@ CREATE TABLE grading_registration (
 
 
 --
--- Name: grading_rotating; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: grading_rotating; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE grading_rotating (
@@ -191,7 +191,7 @@ CREATE TABLE grading_rotating (
 
 
 --
--- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE late_day_exceptions (
@@ -202,7 +202,7 @@ CREATE TABLE late_day_exceptions (
 
 
 --
--- Name: late_days; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: late_days; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE late_days (
@@ -213,7 +213,7 @@ CREATE TABLE late_days (
 
 
 --
--- Name: late_days_used; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: late_days_used; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE late_days_used (
@@ -224,7 +224,7 @@ CREATE TABLE late_days_used (
 
 
 --
--- Name: sections_registration; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: sections_registration; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE sections_registration (
@@ -233,7 +233,7 @@ CREATE TABLE sections_registration (
 
 
 --
--- Name: sections_rotating; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: sections_rotating; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE sections_rotating (
@@ -242,7 +242,19 @@ CREATE TABLE sections_rotating (
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: session; Type: TABLE; Schema: public; Owner: -; Tablespace:
+--
+
+CREATE TABLE sessions (
+    session_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    csrf_token character varying(255) NOT NULL,
+    session_expires timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: -; Tablespace:
 --
 
 CREATE TABLE users (
@@ -273,7 +285,7 @@ ALTER TABLE ONLY gradeable_data ALTER COLUMN gd_id SET DEFAULT nextval('gradeabl
 
 
 --
--- Name: gradeable_component_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: gradeable_component_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY gradeable_component_data
@@ -281,7 +293,7 @@ ALTER TABLE ONLY gradeable_component_data
 
 
 --
--- Name: gradeable_component_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: gradeable_component_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY gradeable_component
@@ -289,7 +301,7 @@ ALTER TABLE ONLY gradeable_component
 
 
 --
--- Name: gradeable_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: gradeable_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY gradeable_data
@@ -297,7 +309,7 @@ ALTER TABLE ONLY gradeable_data
 
 
 --
--- Name: gradeable_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: gradeable_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY gradeable
@@ -305,7 +317,7 @@ ALTER TABLE ONLY gradeable
 
 
 --
--- Name: grading_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: grading_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY grading_registration
@@ -313,7 +325,7 @@ ALTER TABLE ONLY grading_registration
 
 
 --
--- Name: late_day_exceptions_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: late_day_exceptions_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY late_day_exceptions
@@ -321,7 +333,7 @@ ALTER TABLE ONLY late_day_exceptions
 
 
 --
--- Name: late_days_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: late_days_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY late_days
@@ -329,7 +341,7 @@ ALTER TABLE ONLY late_days
 
 
 --
--- Name: sections_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: sections_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY sections_registration
@@ -337,7 +349,7 @@ ALTER TABLE ONLY sections_registration
 
 
 --
--- Name: sections_rotating_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: sections_rotating_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY sections_rotating
@@ -345,11 +357,27 @@ ALTER TABLE ONLY sections_rotating
 
 
 --
--- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+--
+
+ALTER TABLE ONLY sessions
+    ADD CONSTRAINT sessions_pkey PRIMARY KEY (session_id);
+
+
+--
+-- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
 --
 
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
+
+
+--
+-- Name: sessions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY sessions
+    ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
 
 
 --
