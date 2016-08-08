@@ -38,7 +38,7 @@ class Config {
     private $authentication;
     private $timezone = "America/New_York";
     private $submitty_path;
-    private $submitty_course_path;
+    private $course_path;
     private $submitty_log_path;
     private $log_exceptions;
 
@@ -129,17 +129,17 @@ class Config {
             $this->$path = rtrim($this->$path, "/");
         }
 
-        if (!is_dir(implode("/", array($this->submitty_path, "courses", $this->semester))) ||
-            !is_dir(implode("/", array(__DIR__, "..", "..", "config", $this->semester)))) {
+        if (!is_dir(implode(DIRECTORY_SEPARATOR, array($this->submitty_path, "courses", $this->semester))) ||
+            !is_dir(implode(DIRECTORY_SEPARATOR, array(__DIR__, "..", "..", "config", $this->semester)))) {
             throw new ConfigException("Invalid semester: ".$this->semester, true);
         }
 
-        $this->submitty_course_path = implode("/", array($this->submitty_path, "courses", $this->semester, $this->course));
-        if (!is_dir($this->submitty_course_path)) {
+        $this->course_path = implode(DIRECTORY_SEPARATOR, array($this->submitty_path, "courses", $this->semester, $this->course));
+        if (!is_dir($this->course_path)) {
             throw new ConfigException("Invalid course: ".$this->course, true);
         }
 
-        $course_config = implode("/", array($this->config_path, $this->semester, $this->course.'.ini'));
+        $course_config = implode(DIRECTORY_SEPARATOR, array($this->course_path, "config", "config.ini"));
         $course = IniParser::readFile($course_config);
 
         $this->setConfigValues($course, 'database_details', array('database_name'));
@@ -223,7 +223,7 @@ class Config {
      * @return string
      */
     public function getCoursePath() {
-        return $this->submitty_course_path;
+        return $this->course_path;
     }
 
     /**
