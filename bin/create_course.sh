@@ -146,15 +146,6 @@ if [ ! -d "$SUBMITTY_DATA_DIR/courses/$semester" ]; then
     chmod 751                           $SUBMITTY_DATA_DIR/courses/$semester
 fi
 
-<<<<<<< HEAD
-if [ ! -d "$SUBMITTY_INSTALL_DIR/site/config/$semester" ]; then
-    mkdir               $SUBMITTY_INSTALL_DIR/site/config/$semester
-    chown hwphp:hwphp   $SUBMITTY_INSTALL_DIR/site/config/$semester
-    chmod 500           $SUBMITTY_INSTALL_DIR/site/config/$semester
-fi
-
-=======
->>>>>>> 87ab4f6... Move course config ini file to /var/local/submitty/courses/semester/course/config instead of site/config/semester
 ########################################################################################################################
 ########################################################################################################################
 
