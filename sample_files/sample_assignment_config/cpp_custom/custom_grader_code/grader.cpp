@@ -23,7 +23,7 @@ TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
 
   // ========================================
   // OPEN THE STUDENT OUTPUT FILES
-  std::vector<std::string> filenames = stringOrArrayOfStrings(grader,"filename");
+  std::vector<std::string> filenames = stringOrArrayOfStrings(grader,"actual_file");
   std::vector<std::string> contents_of_files;
   for (int i = 0; i < filenames.size(); i++) {
     std::string file_contents;

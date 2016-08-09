@@ -19,14 +19,14 @@
                 {
                     // verify program output
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT_0.txt",
+                    "actual_file" : "STDOUT_0.txt",
                     "description" : "Program Output",
                     "expected_file" : "p1_out.txt"
                 },
                 {
                     // number of print statements must be >= 1
                     "method" : "intComparison",
-                    "filename" : "STDOUT_1.txt",
+                    "actual_file" : "STDOUT_1.txt",
                     "description" : "Number of print statements",
 		    "comparison" : "ge",
                     "term" : 1
@@ -41,7 +41,7 @@
                 {
                     // verify correctness of answer
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "part2/*.txt",
+                    "actual_file" : "part2/*.txt",
                     "description" : "Program Output",
 		    "expected_file" : "p2_out.txt"
                 }
@@ -58,14 +58,14 @@
                 {
                     // verify program output
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT_0.txt",
+                    "actual_file" : "STDOUT_0.txt",
                     "description" : "Program Output",
                     "expected_file" : "p3_out.txt"
                 },
                 {
                     // number of assignments must be >= 5
                     "method" : "intComparison",
-                    "filename" : "STDOUT_1.txt",
+                    "actual_file" : "STDOUT_1.txt",
                     "description" : "Number of assignments",
 		    "comparison" : "ge",
                     "term" : 5
@@ -73,7 +73,7 @@
                 {
                     // number of multiplications must be >= 2
                     "method" : "intComparison",
-                    "filename" : "STDOUT_2.txt",
+                    "actual_file" : "STDOUT_2.txt",
                     "description" : "Number of multiplications",
 		    "comparison" : "ge",
                     "term" : 2
@@ -81,7 +81,7 @@
                 {
                     // number of additions must be >= 1
                     "method" : "intComparison",
-                    "filename" : "STDOUT_3.txt",
+                    "actual_file" : "STDOUT_3.txt",
                     "description" : "Number of additions",
 		    "comparison" : "ge",
                     "term" : 1
@@ -97,14 +97,14 @@
                 {
                     // verify program output
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT_0.txt",
+                    "actual_file" : "STDOUT_0.txt",
                     "description" : "Program Output",
                     "expected_file" : "p4_out.txt"
                 },
                 {
                     // number of while loops must be >= 1
                     "method" : "intComparison",
-                    "filename" : "STDOUT_1.txt",
+                    "actual_file" : "STDOUT_1.txt",
                     "description" : "Number of while loops",
 		    "comparison" : "ge",
                     "term" : 1

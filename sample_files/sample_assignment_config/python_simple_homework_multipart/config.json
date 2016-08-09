@@ -15,7 +15,7 @@
             "validation" : [
                 { 
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
+                    "actual_file" : "STDOUT.txt",
                     "description" : "Program Output",
                     "expected_file" : "part1_sol.txt"
                 }
@@ -28,7 +28,7 @@
             "validation" : [
                 { 
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
+                    "actual_file" : "STDOUT.txt",
                     "description" : "Program Output",
                     "expected_file" : "part2_sol.txt"
                 }
@@ -41,7 +41,7 @@
             "validation" : [
                 { 
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
+                    "actual_file" : "STDOUT.txt",
                     "description" : "Program Output",
                     "expected_file" : "part3_sol.txt"
                 }

@@ -12,12 +12,12 @@
             "validation" : [
                 {
                     "method" : "diffLineSwapOk",
-                    "filename" : "output_correct.txt",
+                    "actual_file" : "output_correct.txt",
                     "expected_file" : "output_instructor.txt"
                 },
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "output_correct.txt",
+                    "actual_file" : "output_correct.txt",
                     "expected_file" : "output_instructor.txt"
                 }
             ]
@@ -30,7 +30,7 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "output_duplicates.txt",
+                    "actual_file" : "output_duplicates.txt",
                     "expected_file" : "output_instructor.txt"
                 }
             ]
@@ -42,7 +42,7 @@
             "validation" : [
                 {
                     "method" : "diffLineSwapOk",
-                    "filename" : "output_duplicates.txt",
+                    "actual_file" : "output_duplicates.txt",
                     "expected_file" : "output_instructor.txt"
                 }
             ]
@@ -55,7 +55,7 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "output_extra.txt",
+                    "actual_file" : "output_extra.txt",
                     "expected_file" : "output_instructor.txt"
                 }
             ]
@@ -67,7 +67,7 @@
             "validation" : [
                 {
                     "method" : "diffLineSwapOk",
-                    "filename" : "output_extra.txt",
+                    "actual_file" : "output_extra.txt",
                     "expected_file" : "output_instructor.txt"
                 }
             ]
@@ -80,7 +80,7 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "output_missing.txt",
+                    "actual_file" : "output_missing.txt",
                     "expected_file" : "output_instructor.txt"
                 }
             ]
@@ -92,7 +92,7 @@
             "validation" : [
                 {
                     "method" : "diffLineSwapOk",
-                    "filename" : "output_missing.txt",
+                    "actual_file" : "output_missing.txt",
                     "expected_file" : "output_instructor.txt"
                 }
             ]
@@ -105,7 +105,7 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "output_reordered.txt",
+                    "actual_file" : "output_reordered.txt",
                     "expected_file" : "output_instructor.txt"
                 }
             ]
@@ -117,7 +117,7 @@
             "validation" : [
                 {
                     "method" : "diffLineSwapOk",
-                    "filename" : "output_reordered.txt",
+                    "actual_file" : "output_reordered.txt",
                     "expected_file" : "output_instructor.txt"
                 }
             ]

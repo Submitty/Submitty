@@ -44,7 +44,7 @@ All other output is exceptional, will be garded 0
 
 TestResults* MultipleJUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) {
 
-  std::string filename = j.value("filename","");
+  std::string filename = j.value("actual_file","");
 
   // open the specified runtime JUnit output/log file
   std::ifstream junit_output((tc.getPrefix()+"_"+filename).c_str());
@@ -132,7 +132,7 @@ TestResults* MultipleJUnitTestGrader_doit (const TestCase &tc, const nlohmann::j
 
 TestResults* JUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) {
 
-  std::string filename = j.value("filename","");
+  std::string filename = j.value("actual_file","");
 
   // open the specified runtime JUnit output/log file
   std::ifstream junit_output((tc.getPrefix()+"_"+filename).c_str());
@@ -236,7 +236,7 @@ TestResults* JUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) 
 
 TestResults* EmmaInstrumentationGrader_doit (const TestCase &tc, const nlohmann::json& j) {
 
-  std::string filename = j.value("filename","");
+  std::string filename = j.value("actual_file","");
 
   // open the specified runtime JUnit output/log file
   std::ifstream junit_output((tc.getPrefix()+"_"+filename).c_str());
@@ -273,7 +273,7 @@ TestResults* EmmaInstrumentationGrader_doit (const TestCase &tc, const nlohmann:
 
 TestResults* EmmaCoverageReportGrader_doit (const TestCase &tc, const nlohmann::json& j) {
 
-  std::string filename = j.value("filename","");
+  std::string filename = j.value("actual_file","");
 
   // open the specified runtime JUnit output/log file
   std::ifstream junit_output((tc.getPrefix()+"_"+filename).c_str());

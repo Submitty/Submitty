@@ -12,7 +12,7 @@
         {
             "type" : "FileCheck",
             "title" : "README",
-            "filename" : "README.txt",
+            "actual_file" : "README.txt",
             "points" : 2
         },
 
@@ -34,7 +34,7 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "output.txt",
+                    "actual_file" : "output.txt",
                     "expected_file" : "inst_output.txt"
                 }
             ]
@@ -47,7 +47,7 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyWord",
-                    "filename" : "output.txt",
+                    "actual_file" : "output.txt",
                     "expected_file" : "inst_output.txt"
                 }
             ]
@@ -60,7 +60,7 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLine",
-                    "filename" : "output.txt",
+                    "actual_file" : "output.txt",
                     "expected_file" : "inst_output.txt"
                 }
             ]
@@ -73,7 +73,7 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLineNoWhite",
-                    "filename" : "output.txt",
+                    "actual_file" : "output.txt",
                     "expected_file" : "inst_output.txt"
                 }
             ]

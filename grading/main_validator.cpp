@@ -76,7 +76,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
   double score = deduction*(1-grade);
   std::cout << "score = " << score << std::endl;
 
-  std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"filename");
+  std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"actual_file");
   for (int FN = 0; FN < filenames.size(); FN++) {
 
     // JSON FOR THIS FILE DISPLAY

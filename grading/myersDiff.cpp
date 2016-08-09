@@ -23,7 +23,7 @@
 
 
 TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::string filename = j.value("filename","MISSING FILENAME");
+  std::string filename = j.value("actual_file","MISSING FILENAME");
 
   if (!tc.isCompilation()) {
     filename = tc.getPrefix() + "_" + filename;

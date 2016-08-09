@@ -117,8 +117,8 @@ class DiffViewer {
             $diff = FileUtils::readJsonFile($diff_file);
         }
 
-        $this->diff = array('expected' => array(), 'actual' => array());
-        $this->add = array('expected' => array(), 'actual' => array());
+        $this->diff = array("expected" => array(), "actual" => array());
+        $this->add = array("expected" => array(), "actual" => array());
 
         if (isset($diff['differences'])) {
             $diffs = $diff['differences'];
@@ -138,9 +138,9 @@ class DiffViewer {
                     foreach ($diff["actual"]['line'] as $line) {
                         $line_num = $line['line_number'];
                         if (isset($line['char_number'])) {
-                            $this->diff['actual'][$line_num] = $this->compressRange($line['char_number']);
+                            $this->diff["actual"][$line_num] = $this->compressRange($line['char_number']);
                         } else {
-                            $this->diff['actual'][$line_num] = array();
+                            $this->diff["actual"][$line_num] = array();
                         }
                         $act_final = $line_num;
                     }
@@ -153,23 +153,23 @@ class DiffViewer {
                     foreach ($diff["expected"]['line'] as $line) {
                         $line_num = $line['line_number'];
                         if (isset($line['char_number'])) {
-                            $this->diff['expected'][$line_num] = $this->compressRange($line['char_number']);
+                            $this->diff["expected"][$line_num] = $this->compressRange($line['char_number']);
                         } else {
-                            $this->diff['expected'][$line_num] = array();
+                            $this->diff["expected"][$line_num] = array();
                         }
                         $exp_final = $line_num;
                     }
                 }
 
-                $this->link['actual'][($act_start)] = (isset($this->link['actual'])) ? count($this->link['actual']) : 0;
-                $this->link['expected'][($exp_start)] = (isset($this->link['expected'])) ? count($this->link['expected']) : 0;
+                $this->link["actual"][($act_start)] = (isset($this->link["actual"])) ? count($this->link["actual"]) : 0;
+                $this->link["expected"][($exp_start)] = (isset($this->link["expected"])) ? count($this->link["expected"]) : 0;
 
                 // Do we need to insert blank lines into actual?
                 if ($act_ins < $exp_ins) {
-                    $this->add['actual'][($act_final)] = $exp_ins - $act_ins;
+                    $this->add["actual"][($act_final)] = $exp_ins - $act_ins;
                 } // Or into expected?
                 else if ($act_ins > $exp_ins) {
-                    $this->add['expected'][($exp_final)] = $act_ins - $exp_ins;
+                    $this->add["expected"][($exp_final)] = $act_ins - $exp_ins;
                 }
             }
         }
@@ -217,7 +217,7 @@ class DiffViewer {
      */
     public function getDisplayActual() {
         if ($this->display_actual) {
-            return $this->getDisplay($this->actual, 'actual');
+            return $this->getDisplay($this->actual, "actual");
         }
         else {
             return "";
@@ -232,7 +232,7 @@ class DiffViewer {
      */
     public function getDisplayExpected() {
         if ($this->display_expected) {
-            return $this->getDisplay($this->expected, 'expected');
+            return $this->getDisplay($this->expected, "expected");
         }
         else {
             return "";
@@ -251,7 +251,7 @@ class DiffViewer {
      *
      * @return string html to be displayed to user
      */
-    private function getDisplay($lines, $type='expected') {
+    private function getDisplay($lines, $type="expected") {
         $start = null;
         $html = "<div class='diff-container'><table cellpadding='0' cellspacing='0' class='diff-code'>\n";
 
@@ -362,7 +362,7 @@ class DiffViewer {
      */
     public function existsDifference() {
         $return = false;
-        foreach(array('expected', 'actual') as $key) {
+        foreach(array("expected", "actual") as $key) {
             if(count($this->diff[$key]) > 0 || count($this->add[$key]) > 0) {
                 $return = true;
             }

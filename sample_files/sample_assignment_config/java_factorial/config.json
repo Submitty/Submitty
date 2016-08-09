@@ -36,7 +36,7 @@
             "validation" : [
                 {
                     "method" : "JUnitTestGrader",
-                    "filename" : "STDOUT.txt",
+                    "actual_file" : "STDOUT.txt",
                     "num_tests" : 4
                 }
             ]
