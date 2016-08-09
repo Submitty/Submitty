@@ -96,11 +96,6 @@ HTML;
 {$utf8_styled_x} Student not found.</em>
 HTML;
 
-		self::$view['missing_student_id'] = <<<HTML
-<p style="margin:0; padding-bottom:20px;"><em style="color:red; font-weight:bold; font-style:normal;">
-{$utf8_styled_x} Student ID field required.</em>
-HTML;
-
 		self::$view['invalid_student_info'] = <<<HTML
 <p style="margin:0; padding-bottom:20px;"><em style="color:red; font-weight:bold; font-style:normal;">
 {$utf8_styled_x} Invalid student information.</em>
@@ -197,13 +192,7 @@ HTML;
 			     self::$view['student_not_found'] .
 			     self::$view['tail'];
 			break;
-		case 'missing_student_id':
-			echo self::$view['head']                .
-				 self::$view['form']                . 
-				 self::$view['missing_student_id']  . 
-			     self::$view['tail'];
-			break;
-		case 'missing_required_fields':
+		case 'invalid_student_info':
 			echo self::$view['head']                  .
 				 self::$view['form']                  . 
 				 self::$view['invalid_student_info']  . 
