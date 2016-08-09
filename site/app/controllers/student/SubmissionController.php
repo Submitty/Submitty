@@ -319,8 +319,7 @@ class SubmissionController implements IController {
         }
         
         $this->upload_details['assignment_settings'] = true;
-    
-        // at this point
+
         if (!file_put_contents($version_path."/.submit.timestamp", $current_time."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
