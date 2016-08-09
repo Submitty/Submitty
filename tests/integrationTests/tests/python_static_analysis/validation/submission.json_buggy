@@ -12,7 +12,7 @@
                     "autocheck_id": "test01_0_autocheck",
                     "description": "Program Output",
                     "difference": "test01_0_diff.json",
-                    "instructor_file": "test_output/testassignment/p1_out.txt",
+                    "expected": "test_output/testassignment/p1_out.txt",
                     "student_file": "test01_STDOUT_0.txt"
                 },
                 {
@@ -33,7 +33,7 @@
                     "autocheck_id": "test02_0_autocheck",
                     "description": "Program Output",
                     "difference": "test02_0_diff.json",
-                    "instructor_file": "test_output/testassignment/p2_out.txt",
+                    "expected": "test_output/testassignment/p2_out.txt",
                     "student_file": "test02_part2__p2_bug.txt"
                 }
             ],
@@ -46,7 +46,7 @@
                     "autocheck_id": "test03_0_autocheck",
                     "description": "Program Output",
                     "difference": "test03_0_diff.json",
-                    "instructor_file": "test_output/testassignment/p3_out.txt",
+                    "expected": "test_output/testassignment/p3_out.txt",
                     "student_file": "test03_STDOUT_0.txt"
                 },
                 {
@@ -77,7 +77,7 @@
                     "autocheck_id": "test04_0_autocheck",
                     "description": "Program Output",
                     "difference": "test04_0_diff.json",
-                    "instructor_file": "test_output/testassignment/p4_out.txt",
+                    "expected": "test_output/testassignment/p4_out.txt",
                     "student_file": "test04_STDOUT_0.txt"
                 },
                 {

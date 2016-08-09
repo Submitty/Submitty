@@ -1240,10 +1240,10 @@ function get_testcase_diff($username, $semester,$course, $assignment_id, $assign
     $data = array();
     $data["difference"] = "{differences:[]}";//This needs to be here to render the diff viewer without a teacher file
 
-    if (isset($diff["instructor_file"])) {
-        $instructor_file_path = "$path_front/".$diff["instructor_file"];
-        if (file_exists($instructor_file_path)) {
-            $data["instructor"] = file_get_contents($instructor_file_path);
+    if (isset($diff["expected"])) {
+        $expected_file_path = "$path_front/".$diff["expected"];
+        if (file_exists($expected_file_path)) {
+            $data["instructor"] = file_get_contents($expected_file_path);
         }
     }
     if (isset($diff["student_file"]) &&

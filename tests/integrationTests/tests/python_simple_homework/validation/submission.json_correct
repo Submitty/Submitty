@@ -12,7 +12,7 @@
 				{
 					"autocheck_id":"test01_0_autocheck",
 					"student_file":"test01_STDOUT.txt",
-					"instructor_file":"test_output/testassignment/hw01part1_sol.txt",
+					"expected":"test_output/testassignment/hw01part1_sol.txt",
 					"difference":"test01_0_diff.json",
 					"description": "Program Output"
 				}

@@ -116,7 +116,7 @@ std::string getAssignmentIdFromCurrentDirectory(std::string);
 
 bool getFileContents(const std::string &filename, std::string &file_contents);
 bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::vector<std::string> &messages);
-bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string &instructor_file_contents, std::vector<std::string> &messages);
+bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, std::vector<std::string> &messages);
 
 void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty);
 

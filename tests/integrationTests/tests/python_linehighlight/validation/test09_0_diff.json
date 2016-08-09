@@ -1,7 +1,7 @@
 {
 "differences":[
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
     "student": {
@@ -15,7 +15,7 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
     "student": {
@@ -29,7 +29,7 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
     "student": {
@@ -43,7 +43,7 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
     "student": {
@@ -57,7 +57,7 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
     "student": {
@@ -71,7 +71,7 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
     "student": {
@@ -85,7 +85,7 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 10
@@ -99,7 +99,7 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 21
@@ -113,7 +113,7 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 32

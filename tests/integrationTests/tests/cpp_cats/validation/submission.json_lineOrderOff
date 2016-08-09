@@ -27,7 +27,7 @@
 				{
 					"autocheck_id":"test03_0_autocheck",
 					"student_file":"test03_output.txt",
-					"instructor_file":"test_output/testassignment/inst_output.txt",
+					"expected":"test_output/testassignment/inst_output.txt",
 					"difference":"test03_0_diff.json",
 					"description": "output.txt"
 				}
@@ -40,7 +40,7 @@
 				{
 					"autocheck_id":"test04_0_autocheck",
 					"student_file":"test04_output.txt",
-					"instructor_file":"test_output/testassignment/inst_output.txt",
+					"expected":"test_output/testassignment/inst_output.txt",
 					"difference":"test04_0_diff.json",
 					"description": "output.txt"
 				}
@@ -53,7 +53,7 @@
 				{
 					"autocheck_id":"test05_0_autocheck",
 					"student_file":"test05_output.txt",
-					"instructor_file":"test_output/testassignment/inst_output.txt",
+					"expected":"test_output/testassignment/inst_output.txt",
 					"difference":"test05_0_diff.json",
 					"description": "output.txt"
 				}
@@ -66,7 +66,7 @@
 				{
 					"autocheck_id":"test06_0_autocheck",
 					"student_file":"test06_output.txt",
-					"instructor_file":"test_output/testassignment/inst_output.txt",
+					"expected":"test_output/testassignment/inst_output.txt",
 					"difference":"test06_0_diff.json",
 					"description": "output.txt"
 				}

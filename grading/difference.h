@@ -70,7 +70,7 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
 			    bool &only_whitespace,
 			    bool extra_student_output_ok) { 
 
-  // if there are more lines in b (instructor) 
+  // if there are more lines in b (expected) 
   if (c.a_changes.size() < c.b_changes.size()) only_whitespace = false;
 
   // if there are more lines in a (student), that might be ok...

@@ -39,7 +39,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test1_output.txt"
+                    "expected" : "test1_output.txt"
                 }
             ]
         },
@@ -52,7 +52,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test2_output.txt"
+                    "expected" : "test2_output.txt"
                 }
             ]
         },
@@ -66,7 +66,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test3_output.txt"
+                    "expected" : "test3_output.txt"
                 }
             ]
         },
@@ -79,7 +79,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test4_output.txt"
+                    "expected" : "test4_output.txt"
                 }
             ]
         },
@@ -92,7 +92,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test5_output.txt"
+                    "expected" : "test5_output.txt"
                 }
             ]
         },
@@ -107,12 +107,12 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test6_output.txt"
+                    "expected" : "test6_output.txt"
                 },
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDERR.txt",
-                    "instructor_file" : "test6_outputB.txt"
+                    "expected" : "test6_outputB.txt"
                 }
             ]
         },
@@ -126,12 +126,12 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
-                    "instructor_file" : "test7_output.txt"
+                    "expected" : "test7_output.txt"
                 },
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDERR.txt",
-                    "instructor_file" : "test7_outputB.txt"
+                    "expected" : "test7_outputB.txt"
                 }
             ]
         }

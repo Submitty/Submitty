@@ -37,21 +37,21 @@ class GradeableAutocheck {
             }
         }
         
-        $student_file = $instructor_file = $difference_file = "";
+        $student_file = $expected_file = $difference_file = "";
         if(isset($details['student_file']) && file_exists($result_path . "/" . $details['student_file'])) {
             $student_file = $result_path . "/" . $details['student_file'];
         }
     
-        if(isset($details['instructor_file']) &&
-            file_exists($course_path . "/" . $details['instructor_file'])) {
-            $instructor_file = $course_path . "/" . $details['instructor_file'];
+        if(isset($details['expected']) &&
+            file_exists($course_path . "/" . $details['expected'])) {
+            $expected_file = $course_path . "/" . $details['expected'];
         }
     
         if(isset($details['difference']) && file_exists($result_path . "/" . $details['difference'])) {
             $difference_file = $result_path . "/" . $details['difference'];
         }
         
-        $this->diff_viewer = new DiffViewer($student_file, $instructor_file, $difference_file);
+        $this->diff_viewer = new DiffViewer($student_file, $expected_file, $difference_file);
     }
     
     public function getId() {

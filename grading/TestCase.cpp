@@ -141,18 +141,18 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
 }
 
 
-bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string &instructor_file_contents, std::vector<std::string> &messages) {
-  std::string filename = j.value("instructor_file","");
+bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, std::vector<std::string> &messages) {
+  std::string filename = j.value("expected","");
   if (filename == "") {
-    messages.push_back("ERROR!  INSTRUCTOR FILENAME MISSING");
+    messages.push_back("ERROR!  EXPECTED FILENAME MISSING");
     return false;
   }
-  if (!getFileContents(filename,instructor_file_contents)) {
-    messages.push_back("ERROR!  Could not open instructor file: '" + filename);
+  if (!getFileContents(filename,expected_file_contents)) {
+    messages.push_back("ERROR!  Could not open expected file: '" + filename);
     return false;
   }
-  if (instructor_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
-    messages.push_back("ERROR!  Instructor expected file '" + filename + "' too large for grader");
+  if (expected_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
+    messages.push_back("ERROR!  Expected file '" + filename + "' too large for grader");
     return false;
   }
   return true;

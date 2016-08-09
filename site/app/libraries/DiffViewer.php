@@ -146,11 +146,11 @@ class DiffViewer {
                     }
                 }
 
-                $exp_start = $diff["instructor"]['start'];
+                $exp_start = $diff["expected"]['start'];
                 $exp_final = $exp_start;
-                if (isset($diff["instructor"]['line'])) {
-                    $exp_ins = count($diff["instructor"]['line']);
-                    foreach ($diff["instructor"]['line'] as $line) {
+                if (isset($diff["expected"]['line'])) {
+                    $exp_ins = count($diff["expected"]['line']);
+                    foreach ($diff["expected"]['line'] as $line) {
                         $line_num = $line['line_number'];
                         if (isset($line['char_number'])) {
                             $this->diff['expected'][$line_num] = $this->compressRange($line['char_number']);

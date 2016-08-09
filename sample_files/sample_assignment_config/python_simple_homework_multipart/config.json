@@ -17,7 +17,7 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "part1_sol.txt"
+                    "expected" : "part1_sol.txt"
                 }
             ]
         },
@@ -30,7 +30,7 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "part2_sol.txt"
+                    "expected" : "part2_sol.txt"
                 }
             ]
         },
@@ -43,7 +43,7 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-                    "instructor_file" : "part3_sol.txt"
+                    "expected" : "part3_sol.txt"
                 }
             ]
         }

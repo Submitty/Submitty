@@ -109,17 +109,17 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
 
 
     bool studentFileExists, studentFileEmpty;
-    bool instructorFileExists=false, instructorFileEmpty=false;
+    bool expectedFileExists=false, expectedFileEmpty=false;
     fileStatus(student_file, studentFileExists,studentFileEmpty);
 
     std::string expected;
 
     if (studentFileExists) {
       autocheck_j["student_file"] = student_file;
-      expected = tcg.value("instructor_file", "");
+      expected = tcg.value("expected", "");
       if (expected != "") {
-        fileStatus(expected, instructorFileExists,instructorFileEmpty);
-        assert (instructorFileExists);
+        fileStatus(expected, expectedFileExists,expectedFileEmpty);
+        assert (expectedFileExists);
         // PREPARE THE JSON DIFF FILE
         std::stringstream diff_path;
         diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
@@ -129,7 +129,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
         std::string id = hw_id;
         std::string expected_out_dir = "test_output/" + id + "/";
         expected_path << expected_out_dir << expected;
-        autocheck_j["instructor_file"] = expected_path.str();
+        autocheck_j["expected"] = expected_path.str();
         autocheck_j["difference"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
       }
     }
@@ -144,7 +144,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
     std::cout << "AUTOCHECK GRADE " << grade << std::endl;
     std::cout << "MESSAGES SIZE " << result->getMessages().size() << std::endl;
     std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
-    std::cout << "INSTRUCTOR FILEEXISTS " << instructorFileExists << " EMPTY " << instructorFileEmpty << std::endl;
+    std::cout << "EXPECTED FILEEXISTS " << expectedFileExists << " EMPTY " << expectedFileEmpty << std::endl;
 
     std::cout << "-----" << std::endl;
     system (("ls -lta " + student_file).c_str());
