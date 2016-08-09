@@ -157,10 +157,6 @@ class SubmissionController implements IController {
                 }
             }
             
-            if (empty($uploaded_files)) {
-                return_error("No files actually uploaded");
-            }
-            
             $errors = array();
             $count = array();
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
@@ -190,6 +186,10 @@ class SubmissionController implements IController {
                 if (count($tmp[$i]) > 0) {
                     $previous_files[$i + 1] = $tmp[$i];
                 }
+            }
+            
+            if (empty($uploaded_files) && empty($previous_files)) {
+                return $this->uploadResult("No files to be submitted", false);
             }
             
             if (count($previous_files) > 0) {
