@@ -115,8 +115,8 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
     std::string expected;
 
     if (studentFileExists) {
-      autocheck_j["student_file"] = student_file;
-      expected = tcg.value("expected", "");
+      autocheck_j["actual_file"] = student_file;
+      expected = tcg.value("expected_file", "");
       if (expected != "") {
         fileStatus(expected, expectedFileExists,expectedFileEmpty);
         assert (expectedFileExists);
@@ -129,8 +129,8 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
         std::string id = hw_id;
         std::string expected_out_dir = "test_output/" + id + "/";
         expected_path << expected_out_dir << expected;
-        autocheck_j["expected"] = expected_path.str();
-        autocheck_j["difference"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
+        autocheck_j["expected_file"] = expected_path.str();
+        autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
       }
     }
 

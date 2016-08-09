@@ -21,7 +21,7 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT_0.txt",
                     "description" : "Program Output",
-                    "expected" : "p1_out.txt"
+                    "expected_file" : "p1_out.txt"
                 },
                 {
                     // number of print statements must be >= 1
@@ -43,7 +43,7 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "part2/*.txt",
                     "description" : "Program Output",
-		    "expected" : "p2_out.txt"
+		    "expected_file" : "p2_out.txt"
                 }
             ]
         },
@@ -60,7 +60,7 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT_0.txt",
                     "description" : "Program Output",
-                    "expected" : "p3_out.txt"
+                    "expected_file" : "p3_out.txt"
                 },
                 {
                     // number of assignments must be >= 5
@@ -99,7 +99,7 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT_0.txt",
                     "description" : "Program Output",
-                    "expected" : "p4_out.txt"
+                    "expected_file" : "p4_out.txt"
                 },
                 {
                     // number of while loops must be >= 1

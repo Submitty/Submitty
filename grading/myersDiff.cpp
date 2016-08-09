@@ -215,12 +215,12 @@ void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int stu
   using json = nlohmann::json;
 
   json j;
-  j["student"]["start"] = student_line;
+  j["actual"]["start"] = student_line;
 
   if (!only_expected) {
     json i;
     i["line_number"] = student_line;
-    j["student"]["line"] = { i };
+    j["actual"]["line"] = { i };
   }
 
   std::cout << "LINE HIGHLIGHT " << expected_line << std::endl;

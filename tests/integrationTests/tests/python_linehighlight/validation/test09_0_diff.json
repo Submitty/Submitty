@@ -4,7 +4,7 @@
     "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 3
@@ -18,7 +18,7 @@
     "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 5
@@ -32,7 +32,7 @@
     "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 27
@@ -46,7 +46,7 @@
     "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 52
@@ -60,7 +60,7 @@
     "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 80
@@ -74,7 +74,7 @@
     "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 89
@@ -93,7 +93,7 @@
         ],
         "start": 10
     },
-    "student": {
+    "actual": {
         "start": 100
     }
 }
@@ -107,7 +107,7 @@
         ],
         "start": 21
     },
-    "student": {
+    "actual": {
         "start": 100
     }
 }
@@ -121,7 +121,7 @@
         ],
         "start": 32
     },
-    "student": {
+    "actual": {
         "start": 100
     }
 }

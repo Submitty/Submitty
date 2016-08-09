@@ -154,7 +154,7 @@
                                  echo '<div class="error_mess_diff">'.html_entity_decode($message).'</div>';
                                }
                              }
-			     if ((!isset($diff["student"]) || trim($diff["student"]) == "") &&
+			     if ((!isset($diff["actual"]) || trim($diff["actual"]) == "") &&
 				 (!isset($diff["expected"]) || trim($diff["expected"]) == "")) {
 			       continue;
 			     }
@@ -165,20 +165,20 @@
 			     echo '<b>Student ';
 			     if (isset($diff["description"])) { echo htmlentities($diff["description"]); }
 			     echo '</b>';
-			     if (isset($diff["student"]) && trim($diff["student"]) != "" && !isset($diff["display_mode"])) {
+			     if (isset($diff["actual"]) && trim($diff["actual"]) != "" && !isset($diff["display_mode"])) {
 			       echo '<div class="panel panel-default" id="';
 			       echo htmlentities($diff["autocheck_id"]);
 			       echo '_student">';
 			       echo '<tt class="mono">';
-			       $str=$diff["student"];
+			       $str=$diff["actual"];
 			       $str=str_replace("\r","\\r",$str);
 			       echo htmlentities($str);
 			       echo '</tt>';
 			       echo '</div>';
 			     }
 
-			     if (isset($diff["student"]) && trim($diff["student"]) != "" && isset($diff["display_mode"]) && $diff["display_mode"] == "svg_validated") {
-			       $str=$diff["student"];
+			     if (isset($diff["actual"]) && trim($diff["actual"]) != "" && isset($diff["display_mode"]) && $diff["display_mode"] == "svg_validated") {
+			       $str=$diff["actual"];
 			       echo $str;
 			     }
 
@@ -203,7 +203,7 @@
 			       echo '</div>';
 			       echo '</div>'; //<!-- end instructor diff element -->
 			     }
-			     if ((isset($diff["student"]) && trim($diff["student"]) != "") &&
+			     if ((isset($diff["actual"]) && trim($diff["actual"]) != "") &&
 				 (isset($diff["expected"]) && trim($diff["expected"]) != "")) {
 			       //					 <!-- <div style="clear:both;"></div> -->
 			       echo '<script>'; //<!-- script -->
@@ -213,7 +213,7 @@
 			       echo 'diff_objects["';
 			       echo $diff["autocheck_id"];
 			       echo '"] = ';
-			       echo $diff["difference"];
+			       echo $diff["difference_file"];
 			       echo ';';
 			       echo '</script>'; //<!-- end script -->
 			     }

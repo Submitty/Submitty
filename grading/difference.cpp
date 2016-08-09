@@ -76,7 +76,7 @@ void Difference::printJSON(std::ostream & file_out) {
       expected[diff1_name].push_back(d1);
     }
     
-    blob["student"] = student;
+    blob["actual"] = student;
     blob["expected"] = expected;
     whole_file["differences"].push_back(blob);
   }

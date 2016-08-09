@@ -1238,25 +1238,25 @@ function get_testcase_diff($username, $semester,$course, $assignment_id, $assign
     $student_path = "$path_front/results/$assignment_id/$username/$assignment_version/";
 
     $data = array();
-    $data["difference"] = "{differences:[]}";//This needs to be here to render the diff viewer without a teacher file
+    $data["difference_file"] = "{differences:[]}";//This needs to be here to render the diff viewer without a teacher file
 
-    if (isset($diff["expected"])) {
-        $expected_file_path = "$path_front/".$diff["expected"];
+    if (isset($diff["expected_file"])) {
+        $expected_file_path = "$path_front/".$diff["expected_file"];
         if (file_exists($expected_file_path)) {
             $data["instructor"] = file_get_contents($expected_file_path);
         }
     }
-    if (isset($diff["student_file"]) &&
-        file_exists($student_path . $diff["student_file"])) {
-        $file_size = filesize($student_path. $diff["student_file"]);
+    if (isset($diff["actual_file"]) &&
+        file_exists($student_path . $diff["actual_file"])) {
+        $file_size = filesize($student_path. $diff["actual_file"]);
         if ($file_size / 1024 < 10000) {
-            $data["student"] = file_get_contents($student_path.$diff["student_file"]);
+            $data["student"] = file_get_contents($student_path.$diff["actual_file"]);
         } else {
             $data["student"] = "ERROR: Unable to read student output file.  Student output file is greater than or equal to ". ($file_size / 1024). " kb.  File could be corrupted or is too large.";
         }
     }
-    if (isset($diff["difference"]) && file_exists($student_path . $diff["difference"])) {
-        $data["difference"] = file_get_contents($student_path.$diff["difference"]);
+    if (isset($diff["difference_file"]) && file_exists($student_path . $diff["difference_file"])) {
+        $data["difference_file"] = file_get_contents($student_path.$diff["difference_file"]);
     }
     return $data;
 }

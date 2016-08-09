@@ -142,7 +142,7 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
 
 
 bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, std::vector<std::string> &messages) {
-  std::string filename = j.value("expected","");
+  std::string filename = j.value("expected_file","");
   if (filename == "") {
     messages.push_back("ERROR!  EXPECTED FILENAME MISSING");
     return false;

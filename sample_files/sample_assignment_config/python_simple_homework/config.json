@@ -10,7 +10,7 @@
                     "method" : "myersDiffbyLinebyChar",
                     "filename" : "STDOUT.txt",
                     "description" : "Program Output",
-                    "expected" : "hw01part1_sol.txt"
+                    "expected_file" : "hw01part1_sol.txt"
                 }
             ]
         }
