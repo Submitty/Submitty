@@ -42,9 +42,9 @@ class GradeableAutocheck {
             $student_file = $result_path . "/" . $details['student_file'];
         }
     
-        if(isset($details['expected']) &&
-            file_exists($course_path . "/" . $details['expected'])) {
-            $expected_file = $course_path . "/" . $details['expected'];
+        if(isset($details['expected_file']) &&
+            file_exists($course_path . "/" . $details['expected_file'])) {
+            $expected_file = $course_path . "/" . $details['expected_file'];
         }
     
         if(isset($details['difference']) && file_exists($result_path . "/" . $details['difference'])) {
