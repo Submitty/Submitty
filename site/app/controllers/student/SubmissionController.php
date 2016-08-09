@@ -328,7 +328,7 @@ class SubmissionController implements IController {
             $gradeable->getId(), $this->core->getUser()->getId(), $new_version);
         $touch_file = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_interactive/".implode("__", $touch_file);
         if (!touch($touch_file)) {
-            return $this->uploadResult("Failed to create file for grading queue.");
+            return $this->uploadResult("Failed to create file for grading queue.", false);
         }
         
         return $this->uploadResult("Successfully uploaded files");
