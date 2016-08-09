@@ -266,7 +266,6 @@ class SubmissionController implements IController {
                         }
                         else {
                             if (is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
-                                
                                 if (!copy($uploaded_files[$i]["tmp_name"][$j], $part_path[$i]."/".$uploaded_files[$i]["name"][$j])) {
                                     return $this->uploadResult("Failed to copy uploaded file ".$uploaded_files[$i]["name"][$j]." to current submission.", false);
                                 }
@@ -284,9 +283,9 @@ class SubmissionController implements IController {
     
                 // copy selected previous submitted files
                 if (isset($previous_files[$i])){
-                    for ($i=0; $i < count($previous_files[$i]); $i++){
-                        if (!copy($previous_part_path[$i]."/".$previous_files[$i][$i], $part_path[$i]."/".$previous_files[$i][$i])) {
-                            return $this->uploadResult("Failed to copy previously submitted file ".$previous_files[$i][$i]." to current submission.", false);
+                    for ($j=0; $j < count($previous_files[$i]); $j++){
+                        if (!copy($previous_part_path[$i]."/".$previous_files[$i][$j], $part_path[$i]."/".$previous_files[$i][$j])) {
+                            return $this->uploadResult("Failed to copy previously submitted file ".$previous_files[$i][$j]." to current submission.", false);
                         }
                     }
                 }
