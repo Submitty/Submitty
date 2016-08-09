@@ -307,6 +307,7 @@ function isValidSubmission(){
  * @param svn_checkout
  */
 function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout){
+    $("#submit").prop("disabled", true);
 
     var message = "";
     // check versions used
@@ -374,6 +375,7 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and" +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
                 console.log(data);
+                $("#submit").prop("disabled", false);
             }
         },
         error: function() {

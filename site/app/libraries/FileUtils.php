@@ -203,4 +203,8 @@ class FileUtils {
         }
         return $size;
     }
+    
+    public static function encodeJson($string) {
+        return json_encode($string, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    }
 }

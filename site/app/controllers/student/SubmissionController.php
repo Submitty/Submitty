@@ -314,7 +314,7 @@ class SubmissionController implements IController {
         }
     
         // TODO: If any of these fail, should we "cancel" (delete) the entire submission attempt or just leave it?
-        if (!file_put_contents($settings_file, json_encode($json, JSON_PRETTY_PRINT))) {
+        if (!file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             return $this->uploadResult("Failed to write to settings file.", false);
         }
     
@@ -375,7 +375,7 @@ class SubmissionController implements IController {
         $json["history"][] = array("version" => $new_version,
                                    "time" => new \DateTime('now', new \DateTimeZone($this->core->getConfig()->getTimezone())));
     
-        if (!file_put_contents($settings_file, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES))) {
+        if (!file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $_SESSION['messages']['error'][] = "Could not write to settings file.";
             $this->core->redirect($this->core->buildUrl(array('component' => 'student',
                                                               'gradeable_id' => $gradeable->getId())));
