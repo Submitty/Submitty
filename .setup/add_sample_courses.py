@@ -25,6 +25,8 @@ def create_course(course, semester, course_group, assignments):
     :param course_group: what is the primary group that should own the directories for the course
     :param assignments: what assignments should be built and added to this course
     """
+    course_group_gid = grp.getgrnam(course_group).gr_gid
+
     # ---------------------------------------------------------------
     # CREATE THE COURSE
     os.system("%s/bin/create_course.sh %s %s %s %s" % (
@@ -41,7 +43,7 @@ def create_course(course, semester, course_group, assignments):
                                                                         semester, course,
                                                                         assignment) + "\n")
 
-    os.chown(assignments_file, *hwphp)
+    os.chown(assignments_file, hwphp[0], course_group_gid)
 
     # ---------------------------------------------------------------
     # WRITE THE CLASS JSON (TODO: REMOVE THIS ONCE 1.0 FULLY TESTED)
@@ -74,9 +76,11 @@ def create_course(course, semester, course_group, assignments):
             form_json["date_released"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp2.year, tmp2.month,
                                                                           tmp2.day)
 
-            with open("{}/courses/{}/{}/config/form/form_{}.json".format(
-                    submitty_data_dir, semester, course, assignment), "w") as form_file:
-                json.dump(form_json, form_file, indent=2)
+            form_file = "{}/courses/{}/{}/config/form/form_{}.json".format(submitty_data_dir, semester, course,
+                                                                           assignment)
+            with open(form_file, "w") as form_write:
+                json.dump(form_json, form_write, indent=2)
+            os.chown(form_file, hwphp[0], course_group_gid)
 
             elem = OrderedDict()
             elem['assignment_id'] = assignment
