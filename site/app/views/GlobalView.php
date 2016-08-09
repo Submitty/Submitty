@@ -115,8 +115,11 @@ HTML;
 <div id="header">
     <a href="http://submitty.org">
     <div id="logo-text">
+          <img height=80 width=230 src="http://submitty.org/images/submitty_logo.png">
+<!--
         <h1>Submitty</h1>
         <h2>Rensselaer Center for Open Source</h2>
+-->
     </div>
     </a>
     <div id="header-text">
