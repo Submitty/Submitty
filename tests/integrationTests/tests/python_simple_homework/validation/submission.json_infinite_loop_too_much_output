@@ -8,8 +8,12 @@
 	"testcases": [
 		{
 			"test_name": "Test 1 Lab 1 Checkpoint 1",
-                        "execute_logfile": "test01_execute_logfile.txt",
 			"autochecks": [
+			    {
+                                "actual_file": "test01_execute_logfile.txt",
+                                "autocheck_id": "test01_execute_logfile_autocheck",
+                                "description": "Execution Logfile"
+                            },
 				{
 					"autocheck_id":"test01_0_autocheck",
 					"actual_file":"test01_STDOUT.txt",

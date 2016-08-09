@@ -55,14 +55,18 @@
 		},
 		{
 			"test_name": "Test 6 Instructor Test",
-                        "execute_logfile": "test06_execute_logfile.txt",
 			"autochecks": [
-				{
-					"autocheck_id":"test06_0_autocheck",
-					"actual_file":"test06_STDOUT.txt",
-					"description": "JUnit output",
-					"messages": ["ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4"]
-				}
+			    {
+                                "actual_file": "test06_execute_logfile.txt",
+                                "autocheck_id": "test06_execute_logfile_autocheck",
+                                "description": "Execution Logfile"
+                            },
+			    {
+				"autocheck_id":"test06_0_autocheck",
+				"actual_file":"test06_STDOUT.txt",
+				"description": "JUnit output",
+				"messages": ["ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 1/4"]
+			    }
 			],
 			"points_awarded": 1
 		}

@@ -225,18 +225,23 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     
     nlohmann::json tc_j;
     tc_j["test_name"] = title;
+    nlohmann::json autocheck_js;
 
     bool fileExists, fileEmpty;
     fileStatus(my_testcase.getPrefix() + "_execute_logfile.txt", fileExists,fileEmpty);
     if (fileExists && !fileEmpty) {
-      tc_j["execute_logfile"] = my_testcase.getPrefix() + "_execute_logfile.txt";
+      nlohmann::json autocheck_j;
+      autocheck_j["autocheck_id"] = my_testcase.getPrefix() + "_execute_logfile_autocheck";
+      autocheck_j["actual_file"] = my_testcase.getPrefix() + "_execute_logfile.txt";
+      autocheck_j["description"] = "Execution Logfile";
+      autocheck_js.push_back(autocheck_j);
     }
 
     int testcase_pts = 0;
     //std::string message = "";
     //message += "Unresolved warnings in your program!";
     //message += "Error: compilation was not successful!";
-    nlohmann::json autocheck_js;
+
     double my_score = 1.0;
     assert (my_testcase.numFileGraders() > 0);
     for (int j = 0; j < my_testcase.numFileGraders(); j++) {
