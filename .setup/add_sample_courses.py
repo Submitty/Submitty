@@ -25,6 +25,8 @@ def create_course(course, semester, course_group, assignments):
     :param course_group: what is the primary group that should own the directories for the course
     :param assignments: what assignments should be built and added to this course
     """
+    course_group_gid = grp.getgrnam(course_group).gr_gid
+
     # ---------------------------------------------------------------
     # CREATE THE COURSE
     os.system("%s/bin/create_course.sh %s %s %s %s" % (
@@ -41,7 +43,17 @@ def create_course(course, semester, course_group, assignments):
                                                                         semester, course,
                                                                         assignment) + "\n")
 
-    os.chown(assignments_file, *hwphp)
+    # ---------------------------------------------------------------
+    # CREATE THE COURSE DATABASE AND POPULATE IT
+    os.chown(assignments_file, hwphp[0], course_group_gid)
+
+    os.environ['PGPASSWORD'] = 'hsdbu'
+    database = "submitty_" + semester + "_" + course
+    os.system('psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE ' + database + '"')
+    os.system("psql -d %s -h localhost -U hsdbu -f %s/site/data/tables.sql" %
+              (database, submitty_repository))
+    os.system("psql -d %s -h localhost -U hsdbu -f %s/.setup/vagrant/db_inserts.sql" %
+              (database, submitty_repository))
 
     # ---------------------------------------------------------------
     # WRITE THE CLASS JSON (TODO: REMOVE THIS ONCE 1.0 FULLY TESTED)
@@ -74,16 +86,31 @@ def create_course(course, semester, course_group, assignments):
             form_json["date_released"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp2.year, tmp2.month,
                                                                           tmp2.day)
 
-            with open("{}/courses/{}/{}/config/form/form_{}.json".format(
-                    submitty_data_dir, semester, course, assignment), "w") as form_file:
-                json.dump(form_json, form_file, indent=2)
+            form_file = "{}/courses/{}/{}/config/form/form_{}.json".format(submitty_data_dir, semester, course,
+                                                                           assignment)
+            with open(form_file, "w") as form_write:
+                json.dump(form_json, form_write, indent=2)
+            os.chown(form_file, hwphp[0], course_group_gid)
+
+            os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO gradeable VALUES ('{}', "
+                      "'{}', '', false, 0, true, '{}', '{}', 'homework', 1, NULL)\""
+                      .format(database, form_json['gradeable_id'], form_json['gradeable_title'],
+                              form_json['date_grade'], form_json['date_released']))
+            os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO electronic_gradeable "
+                      "VALUES ('{}', '{}', '{}', '{}', false, '', true, '{}', 2, {})\""
+                      .format(database, form_json['gradeable_id'], form_json['instructions_url'],
+                              form_json['date_submit'], form_json['date_due'],
+                              form_json['config_path'], form_json['point_precision']))
+            os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO gradeable_component "
+                      "VALUES ({:d}, '{}', 'Test', '', '', 5, false, false, 1)\""
+                      .format(database, i, form_json['gradeable_id']))
 
             elem = OrderedDict()
             elem['assignment_id'] = assignment
             elem["assignment_name"] = form_json['gradeable_title']
             elem["released"] = True if otmp <= date.today() else False
             elem["ta_grade_released"] = False
-            elem["due_date"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp.year, tmp.month, tmp.day)
+            elem["due_date"] = form_json["date_due"]
             class_json['assignments'].append(elem)
 
         json.dump(class_json, write_file, indent=2)
@@ -93,14 +120,9 @@ def create_course(course, semester, course_group, assignments):
     os.system("%s/courses/%s/%s/BUILD_%s.sh" % (submitty_data_dir, semester, course, course))
 
     # ---------------------------------------------------------------
-    # CREATE THE COURSE DATABASE AND POPULATE IT
-    os.environ['PGPASSWORD'] = 'hsdbu'
-    database = "submitty_" + semester + "_" + course
-    os.system('psql -d postgres -h localhost -U hsdbu -c "CREATE DATABASE ' + database + '"')
-    os.system("psql -d %s -h localhost -U hsdbu -f %s/site/data/tables.sql" %
-              (database, submitty_repository))
-    os.system("psql -d %s -h localhost -U hsdbu -f %s/.setup/vagrant/db_inserts.sql" %
-              (database, submitty_repository))
+    # DELETE THE PGPASSWORD FILE
+    os.system("psql -d {} -h localhost -U hsdbu -c \"SELECT pg_catalog.setval("
+              "'gradeable_component_gc_id_seq', {:d}, true)\"".format(database, len(assignments)))
     del os.environ['PGPASSWORD']
 
 if __name__ == "__main__":
