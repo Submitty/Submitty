@@ -131,11 +131,11 @@ class DiffViewer {
             foreach ($diffs as $diff) {
                 $act_ins = 0;
                 $exp_ins = 0;
-                $act_start = $diff["student"]['start'];
+                $act_start = $diff["actual"]['start'];
                 $act_final = $act_start;
-                if (isset($diff["student"]['line'])) {
-                    $act_ins = count($diff["student"]['line']);
-                    foreach ($diff["student"]['line'] as $line) {
+                if (isset($diff["actual"]['line'])) {
+                    $act_ins = count($diff["actual"]['line']);
+                    foreach ($diff["actual"]['line'] as $line) {
                         $line_num = $line['line_number'];
                         if (isset($line['char_number'])) {
                             $this->diff['actual'][$line_num] = $this->compressRange($line['char_number']);
