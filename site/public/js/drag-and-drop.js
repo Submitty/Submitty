@@ -208,9 +208,11 @@ function setButtonStatus() {
 
     if (labels == 0) {
         $("#startnew").prop("disabled", true);
+        $("#submit").prop("disabled", true);
     }
     else {
         $("#startnew").prop("disabled", false);
+        $("#submit").prop("disabled", false);
     }
 
     // We only have "non-previous" submissions if there's stuff in the file array as well as if we've
