@@ -361,11 +361,11 @@ HTML;
                     }
             
                     $count = 0;
+                    $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
                     foreach ($gradeable->getTestcases() as $testcase) {
                         $return .= <<<HTML
         <div class="box">
 HTML;
-                        $display_box = "block";
                         if ($testcase->hasPoints()) {
                             if ($testcase->isHidden()) {
                                 $return .= <<<HTML
@@ -375,7 +375,6 @@ HTML;
                             else {
                                 if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
                                     $background = "green-background";
-                                    $display_box = "none";
                                 }
                                 else if ($testcase->getPointsAwarded() > 0) {
                                     $background = "yellow-background";
