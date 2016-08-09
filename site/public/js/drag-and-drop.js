@@ -359,20 +359,21 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
         success: function(data) {
             try {
                 data = JSON.parse(data);
+                var response = "ERROR! Please contact administrator with following error:\n\n";
+                var redirect = false;
+                if (data['success']) {
+                    response = "SUCCESS!\n\n";
+                    redirect = true;
+                }
+                alert(response + data['message']);
+                if (redirect) {
+                    window.location.href = return_url;
+                }
             }
             catch (e) {
-                alert("Error parsing response from server. Try refereshing the page.");
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and" +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
                 console.log(data);
-            }
-            var response = "ERROR! Please contact administrator with following error:\n\n";
-            var redirect = false;
-            if (data['success']) {
-                response = "SUCCESS!\n\n";
-                redirect = true;
-            }
-            alert(response + data['message']);
-            if (redirect) {
-                window.location.href = return_url;
             }
         },
         error: function() {
