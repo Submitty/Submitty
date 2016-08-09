@@ -358,6 +358,7 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
         contentType: false,
         type: 'POST',
         success: function(data) {
+            $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
                 var response = "ERROR! Please contact administrator with following error:\n\n";
@@ -372,13 +373,13 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
                 }
             }
             catch (e) {
-                alert("Error parsing response from server. Please copy the contents of your Javascript Console and" +
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
                 console.log(data);
-                $("#submit").prop("disabled", false);
             }
         },
         error: function() {
+            $("#submit").prop("disabled", false);
             alert("ERROR! Please contact administrator that you could not upload files.");
         }
     });
