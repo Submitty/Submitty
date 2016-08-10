@@ -244,7 +244,7 @@ abstract class Gradeable {
                 continue;
             }
             
-            $this->versions[$version] = FileUtils::readJsonFile($results_path."/".$version."/submission.json");
+            $this->versions[$version] = FileUtils::readJsonFile($results_path."/".$version."/results.json");
             $this->versions[$version]['status'] = true;
             $this->versions[$version] = array_merge($this->versions[$version],
                                                     FileUtils::readJsonFile($results_path."/".$version."/.grade.timestamp"));

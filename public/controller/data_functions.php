@@ -945,14 +945,14 @@ function version_in_grading_queue2($username, $semester, $course, $assignment_id
 //RESULTS DATA
 
 function get_submission_time($username, $semester,$course, $assignment_id, $assignment_version) {
-    $version_results = get_assignment_results($username, $semester,$course, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
+    $version_results = get_assignment_results($username, $semester,$course, $assignment_id, $assignment_version);//Gets user results data from results.json for the specific version of the assignment
     return "";
 }
 
 function get_homework_tests($username, $semester,$course, $assignment_id, $assignment_version, $assignment_config, $include_diffs = true) {
     //These are the tests run on a homework (for grading etc.)
     $testcases_info = (isset($assignment_config["testcases"])) ? $assignment_config["testcases"] : array();
-    //Gets user results data from submission.json for the specific version of the assignment
+    //Gets user results data from results.json for the specific version of the assignment
     $version_results = get_assignment_results($username, $semester,$course, $assignment_id, $assignment_version);
     if (isset($version_results["testcases"])) {
         $testcases_results = $version_results["testcases"];
@@ -1086,7 +1086,7 @@ function get_assignment_config($semester,$course, $assignment_id) {
 // Get results from test cases for a student submission
 function get_assignment_results($username, $semester,$course, $assignment_id, $assignment_version) {
     $path_front = get_path_front_course($semester,$course);
-    $file = $path_front."/results/".$assignment_id."/".$username."/".$assignment_version."/submission.json";
+    $file = $path_front."/results/".$assignment_id."/".$username."/".$assignment_version."/results.json";
     if (!file_exists($file)) {
         return array();
     }
@@ -1227,7 +1227,7 @@ function get_student_file($file) {
 
 //DIFF FUNCTIONS
 
-// Converts the JSON "diff" field from submission.json to an array containing
+// Converts the JSON "diff" field from results.json to an array containing
 // file contents
 function get_testcase_diff($username, $semester,$course, $assignment_id, $assignment_version, $diff){
     $path_front = get_path_front_course($semester,$course);
