@@ -50,7 +50,7 @@ if (isset($_POST['student_id']) && $_POST['student_id'] !== "") {
 								 $_POST['first_name'],
 								 $_POST['last_name'],
 								 $_POST['email'],
-								($_POST['r_section') === "") ? "NULL" : $_POST['r_section'],
+								($_POST['r_section'] === "") ? "NULL" : $_POST['r_section'],
 								 $_POST['is_manual'] )));
 		} else {
 			$state = 'invalid_student_info';
