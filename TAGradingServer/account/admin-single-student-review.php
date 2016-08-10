@@ -32,8 +32,9 @@ if (isset($_POST['student_id']) && $_POST['student_id'] !== "") {
 		//Do form data validation.
 		//No validation on student id as pattern varies among Universities.
 		//No validation on checkbox as only possible values are true or false.
-		//Email regex should match most cases (including unusual TLDs).
+		//Email regex should match most cases, including unusual TLDs.
 		//Email regex will NOT match domains dictated by IP address.
+		//    (who the heck has an email@[ip_address] anyway?)
 		if (preg_match("~^[a-zA-Z.'`\- ]+$~",                               $_POST['first_name']) &&
 		    preg_match("~^[a-zA-Z.'`\- ]+$~",                               $_POST['last_name'] ) &&
 		    preg_match("~^[a-zA-Z0-9._\-]+@[a-zA-Z0-9.\-]+.[a-zA-Z]{2,}$~", $_POST['email']     ) &&
@@ -46,11 +47,11 @@ if (isset($_POST['student_id']) && $_POST['student_id'] !== "") {
 		if ($is_validated) {
 			//upsert's argument expects 2D array
 			upsert(array( array( $_POST['student_id'],
-			                     $_POST['first_name'],
-			                     $_POST['last_name'],
-			                     $_POST['email'],
-								 ($_POST['r_section') === "") ? "NULL" : $_POST['r_section'],
-			                     $_POST['is_manual'] )));
+								 $_POST['first_name'],
+								 $_POST['last_name'],
+								 $_POST['email'],
+								($_POST['r_section') === "") ? "NULL" : $_POST['r_section'],
+								 $_POST['is_manual'] )));
 		} else {
 			$state = 'invalid_student_info';
 		}
@@ -70,6 +71,8 @@ exit;
 function lookup_student_in_db($student_id) {
 
 }
+
+/* END FUNCTION lookup_student_in_db() ====================================== */
 
 function upsert(array $data) {
 //IN:  Data to be "upserted" as 2D array.
@@ -317,7 +320,7 @@ HTML;
 			echo self::$view['head']                 .
 				 self::$view['form']                 . 
 				 self::$view['invalid_student_info'] . 
-			     self::$view['tail'];
+				 self::$view['tail'];
 			break;
 		case 'upsert_done':
 			echo self::$view['head']        .
