@@ -67,7 +67,8 @@ foreach($db->rows() as $student_record) {
             case when score is null then -100 else score end, 
             titles, 
             comments,
-            scores
+            scores,
+            is_texts
         FROM
             users AS u CROSS JOIN gradeable AS g 
             LEFT JOIN (
@@ -77,7 +78,8 @@ foreach($db->rows() as $student_record) {
                     score, 
                     titles, 
                     comments,
-                    scores
+                    scores,
+                    is_texts
                 FROM 
                     gradeable_data AS gd INNER JOIN(
                     SELECT 
@@ -85,7 +87,8 @@ foreach($db->rows() as $student_record) {
                         SUM(gcd_score) AS score, 
                         array_agg(gc_title ORDER BY gc_order ASC) AS titles, 
                         array_agg(gcd_component_comment ORDER BY gc_order ASC) AS comments,
-                        array_agg(gcd_score ORDER BY gc_order ASC) AS scores
+                        array_agg(gcd_score ORDER BY gc_order ASC) AS scores,
+                        array_agg(gc_is_text ORDER BY gc_order ASC) AS is_texts
                     FROM 
                         gradeable_component_data AS gcd INNER JOIN 
                             gradeable_component AS gc ON gcd.gc_id=gc.gc_id
@@ -141,9 +144,10 @@ foreach($db->rows() as $student_record) {
             $titles = pgArrayToPhp($gradeable['titles']);
             $problem_scores = pgArrayToPhp($gradeable['scores']);
             $comments = pgArrayToPhp($gradeable['comments']);
-            
+            $is_texts = pgArrayToPhp($gradeable['is_texts']);
+
             for($i=0; $i < count($problem_scores); ++$i){
-                if (trim($comments[$i]) === ''){
+                if (trim($comments[$i]) === '' && $is_texts[$i] === 'f'){
                     array_push($component_scores,array($titles[$i] => floatval($problem_scores[$i])));
                 }
             }

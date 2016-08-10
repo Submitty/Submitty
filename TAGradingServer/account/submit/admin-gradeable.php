@@ -159,6 +159,11 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
             $gc_ta_comment = $add_args["ta_comment_".strval($i)];
             $gc_student_comment = $add_args["student_comment_".strval($i)];
             $gc_max_value = $add_args['points_'.strval($i)];
+            
+            if ($gc_max_value==0){
+                    die('Max score cannot be 0 [Question '.$i.']');
+            }
+
             $gc_is_text = "false";
             $gc_is_ec = (isset($add_args['eg_extra_'.strval($i)]) && $add_args['eg_extra_'.strval($i)]=='on')? "true" : "false";
             if($action=='edit' && $i<=$num_old_questions){
@@ -244,6 +249,9 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
                 $gc_title = (isset($add_args['numeric_label_'. strval($i)]))? $add_args['numeric_label_'. strval($i)] : '';
                 $gc_max_value = (isset($add_args['max_score_'. strval($i)]))? $add_args['max_score_'. strval($i)] : 0;
                 $gc_is_extra_credit = (isset($add_args['numeric_extra_'.strval($i)]))? "true" : "false";
+                if ($gc_max_value==0){
+                    die('Max score cannot be 0 [Question '.$i.']');
+                }
             }
             
             if($action=='edit' && $i<=$num_old_numerics){
