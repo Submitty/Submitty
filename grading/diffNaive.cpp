@@ -4,11 +4,11 @@
  * LICENSE: Please refer to 'LICENSE.md' for the conditions of using this code
  *
  * RELEVANT DOCUMENTATION:
- * A naive comparison between student and instructor output. Since this does a
+ * A naive comparison between student and expected output. Since this does a
  * per character comparision, insertions or deletions will cause a shift in the
  * indices being compared, so errors in the beginning will propagate and cause
  * the entire output to be wrong. While useful for quick small output, not
- * recommended for large bodies of text unless instructor desires to be strict
+ * recommended for large bodies of text unless expected desires to be strict
  * on formatting of expected output. 
  */
 
@@ -24,31 +24,31 @@
 
 /* METHOD: diffNaive
  * ARGS: student: the student generated output file contents as a string
- * instructor: the instructor expected output file contents as a string
+ * expected: the instructor expected output file contents as a string
  * RETURN: Change: The difference of the two strings
  * PURPOSE: diffNaive is used as a helper to the diffLine function.
  * It does a per character comparison including white space and new lines. The
  * strings are not changed in this comparison. Runs in linear time with respect
  * to the longer string.
  */
-Change diffNaive ( const std::string& student, const std::string& instructor ) {
+Change diffNaive ( const std::string& student, const std::string& expected ) {
 	Change differences;
 	differences.a_start = 0;
 	differences.b_start = 0;
 
 	unsigned int len =
-		( unsigned int ) ( student.size() < instructor.size() ) ?
+		( unsigned int ) ( student.size() < expected.size() ) ?
 		( unsigned int ) student.length() :
-		( unsigned int ) instructor.length();
+		( unsigned int ) expected.length();
 
 	unsigned int i = 0;
 	for ( i = 0; i < len; i++ ) {
-		if ( student[i] != instructor[i] ) {
+		if ( student[i] != expected[i] ) {
 			differences.a_changes.push_back( i );
 			differences.b_changes.push_back( i );
 		}
 	}
-	while ( i < instructor.length() ) {
+	while ( i < expected.length() ) {
 		differences.b_changes.push_back( i );
 		i++;
 	}
@@ -61,7 +61,7 @@ Change diffNaive ( const std::string& student, const std::string& instructor ) {
 
 /* METHOD: diffNoSpace
  * ARGS: student: the student generated output file contents as a string
- * instructor: the instructor expected output file contents as a string
+ * expected: the instructor expected output file contents as a string
  * RETURN: Change: The difference of the two strings
  * PURPOSE: diffNoSpace is a helper function to the diffLineNoSpace function.
  * diffNoSpace does a per character comparison not including white space but
@@ -69,26 +69,26 @@ Change diffNaive ( const std::string& student, const std::string& instructor ) {
  * in linear time with respect to the longer string.
  */
 Change diffNoSpace ( const std::string& _student,
-		     const std::string& _instructor ) {
+		     const std::string& _expected ) {
 	Change differences;
 	differences.a_start = 0;
 	differences.b_start = 0;
 	
 	std::string student = string_trim_right( _student );
-	std::string instructor = string_trim_right( _instructor );
+	std::string expected = string_trim_right( _expected );
 	
 	unsigned int i = 0;
 	unsigned int j = 0;
-	while ( i != student.size() && j != instructor.size() ) {
+	while ( i != student.size() && j != expected.size() ) {
 		if ( student[i] == ' ' ) {
 			i++;
 			continue;
 		}
-		if ( instructor[j] == ' ' ) {
+		if ( expected[j] == ' ' ) {
 			j++;
 			continue;
 		}
-		if ( student[i] != instructor[j] ) {
+		if ( student[i] != expected[j] ) {
 			differences.a_changes.push_back( i );
 			differences.b_changes.push_back( j );
 		}
@@ -100,8 +100,8 @@ Change diffNoSpace ( const std::string& _student,
 			differences.a_changes.push_back( i );
 		i++;
 	}	
-	while ( j != instructor.size() ) {
-		if ( instructor[j] != ' ' )
+	while ( j != expected.size() ) {
+		if ( expected[j] != ' ' )
 			differences.b_changes.push_back( j );
 		j++;
 	}
@@ -110,7 +110,7 @@ Change diffNoSpace ( const std::string& _student,
 
 /* METHOD: diffLine
  * ARGS: student: the student generated output file contents as a string
- * instructor: the instructor expected output file contents as a string
+ * expected: the instructor expected output file contents as a string
  * RETURN: Difference: The difference of the two files
  * PURPOSE: diffLine does a per character comparison including white space and
  * including new lines. Comparison is done per line and returns a Difference
@@ -119,7 +119,7 @@ Change diffNoSpace ( const std::string& _student,
  * with respect to the longer string.
  */
 TestResults* diffLine ( const std::string& _student,
-			const std::string& _instructor ) {
+			const std::string& _expected ) {
 	Difference* diffs = new Difference();
 	diffs->type = 1;
 	
@@ -129,8 +129,8 @@ TestResults* diffLine ( const std::string& _student,
 	file.a_start = file.b_start = 0;
 	std::stringstream student;
 	student.str( _student );
-	std::stringstream instructor;
-	instructor.str( _instructor );
+	std::stringstream expected;
+	expected.str( _expected );
 	std::string s_line;
 	std::string i_line;
 	unsigned int i = 0;
@@ -138,7 +138,7 @@ TestResults* diffLine ( const std::string& _student,
 	bool s_eof = false;
 	while ( !i_eof || !s_eof ) {
 		std::getline( student, s_line );
-		std::getline( instructor, i_line );
+		std::getline( expected, i_line );
 		if ( !i_eof )
 			diffs->output_length_b++;
 		if ( !s_eof )
@@ -147,7 +147,7 @@ TestResults* diffLine ( const std::string& _student,
 			s_eof = true;
 			s_line = "";
 		}
-		if ( !instructor ) {
+		if ( !expected ) {
 			i_eof = true;
 			i_line = "";
 		}
@@ -171,7 +171,7 @@ TestResults* diffLine ( const std::string& _student,
 
 /* METHOD: diffLineNoSpace
  * ARGS: student: the student generated output file contents as a string
- * instructor: the instructor expected output file contents as a string
+ * expected: the instructor expected output file contents as a string
  * RETURN: Difference: The difference of the two strings
  * PURPOSE: diffLineNoSpace does a per character comparison for each line in the respective
  * strings. Comparison is done per line and returns a Difference object
@@ -180,7 +180,7 @@ TestResults* diffLine ( const std::string& _student,
  * the longer string.
  */
 TestResults* diffLineNoSpace ( const std::string& _student,
-			       const std::string& _instructor ) {
+			       const std::string& _expected ) {
 	Difference* diffs = new Difference();
 	diffs->type = 1;
 
@@ -188,8 +188,8 @@ TestResults* diffLineNoSpace ( const std::string& _student,
 	file.a_start = file.b_start = 0;
 	std::stringstream student;
 	student.str( _student );
-	std::stringstream instructor;
-	instructor.str( _instructor );
+	std::stringstream expected;
+	expected.str( _expected );
 	std::string s_line;
 	std::string i_line;
 	int i = 0;
@@ -197,12 +197,12 @@ TestResults* diffLineNoSpace ( const std::string& _student,
 	bool s_eof = false;
 	while ( !i_eof || !s_eof ) {
 		std::getline( student, s_line );
-		std::getline( instructor, i_line );
+		std::getline( expected, i_line );
 		if ( !student ) {
 			s_eof = true;
 			s_line = "";
 		}
-		if ( !instructor ) {
+		if ( !expected ) {
 			i_eof = true;
 			i_line = "";
 		}

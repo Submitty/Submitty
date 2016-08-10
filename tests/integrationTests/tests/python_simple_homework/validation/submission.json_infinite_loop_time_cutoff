@@ -8,13 +8,17 @@
 	"testcases": [
 		{
 			"test_name": "Test 1 Lab 1 Checkpoint 1",
-                        "execute_logfile": "test01_execute_logfile.txt",
 			"autochecks": [
+			    {
+                                "actual_file": "test01_execute_logfile.txt",
+                                "autocheck_id": "test01_execute_logfile_autocheck",
+                                "description": "Execution Logfile"
+                            },
 				{
 					"autocheck_id":"test01_0_autocheck",
-					"student_file":"test01_STDOUT.txt",
-					"instructor_file":"test_output/testassignment/hw01part1_sol.txt",
-					"difference":"test01_0_diff.json",
+					"actual_file":"test01_STDOUT.txt",
+					"expected_file":"test_output/testassignment/hw01part1_sol.txt",
+					"difference_file":"test01_0_diff.json",
 					"description": "Program Output"
 				}
 			],

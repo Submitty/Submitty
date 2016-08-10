@@ -35,7 +35,7 @@
             "validation" : [ 
                 { 
                     "method" : "EmmaInstrumentationGrader",
-                    "filename" : "STDOUT.txt"
+                    "actual_file" : "STDOUT.txt"
                 }
             ]
         },
@@ -48,7 +48,7 @@
             "validation" : [
                 { 
                     "method" : "MultipleJUnitTestGrader",
-                    "filename" : "STDOUT.txt"
+                    "actual_file" : "STDOUT.txt"
                 }
             ]
         },
@@ -61,13 +61,13 @@
             "validation" : [
                 {
                     "method" : "errorIfEmpty",
-                    "filename" : "STDOUT.txt",
+                    "actual_file" : "STDOUT.txt",
                     "description" : "EclEmma report generation output",
                     "deduction" : 0.0
                 },
 	        {
                     "method" : "EmmaCoverageReportGrader",
-                    "filename" : "emma_report.txt",
+                    "actual_file" : "emma_report.txt",
                     "coverage_threshold" : 90,
                     "deduction" : 1.0
                 }
@@ -82,7 +82,7 @@
             "validation" : [
                 {
                     "method" : "JUnitTestGrader",
-                    "filename" : "STDOUT.txt",
+                    "actual_file" : "STDOUT.txt",
                     "num_tests" : 4
                 }
             ]

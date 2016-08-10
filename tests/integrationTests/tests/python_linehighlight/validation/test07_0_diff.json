@@ -1,7 +1,7 @@
 {
 "differences":[
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 3
@@ -9,13 +9,13 @@
         ],
         "start": 3
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 7
@@ -23,13 +23,13 @@
         ],
         "start": 7
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 11
@@ -37,13 +37,13 @@
         ],
         "start": 11
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 15
@@ -51,13 +51,13 @@
         ],
         "start": 15
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 19
@@ -65,13 +65,13 @@
         ],
         "start": 19
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 23
@@ -79,13 +79,13 @@
         ],
         "start": 23
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 27
@@ -93,13 +93,13 @@
         ],
         "start": 27
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 31
@@ -107,13 +107,13 @@
         ],
         "start": 31
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 35
@@ -121,13 +121,13 @@
         ],
         "start": 35
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 39
@@ -135,13 +135,13 @@
         ],
         "start": 39
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 43
@@ -149,13 +149,13 @@
         ],
         "start": 43
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 47
@@ -163,13 +163,13 @@
         ],
         "start": 47
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 51
@@ -177,13 +177,13 @@
         ],
         "start": 51
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 55
@@ -191,13 +191,13 @@
         ],
         "start": 55
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 59
@@ -205,13 +205,13 @@
         ],
         "start": 59
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 63
@@ -219,13 +219,13 @@
         ],
         "start": 63
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 67
@@ -233,13 +233,13 @@
         ],
         "start": 67
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 71
@@ -247,13 +247,13 @@
         ],
         "start": 71
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 75
@@ -261,13 +261,13 @@
         ],
         "start": 75
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 79
@@ -275,13 +275,13 @@
         ],
         "start": 79
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 83
@@ -289,7 +289,7 @@
         ],
         "start": 83
     },
-    "student": {
+    "actual": {
         "start": 76
     }
 }

@@ -8,40 +8,52 @@
 	"testcases": [
 		{
 			"test_name": "Test 1 Compilation of student code: Factorial.java",
-			"execute_logfile": "test01_execute_logfile.txt",
 			"points_awarded": 0,
                         "autochecks": [
-                        {
-                            "autocheck_id": "test01_1_autocheck",
-                            "description": "compilation warnings and errors",
-                            "messages": [ "ERROR: This file should be empty!" ],
-                            "student_file": "test01_STDERR.txt"
-                        }
+			    {
+                                "actual_file": "test01_execute_logfile.txt",
+                                "autocheck_id": "test01_execute_logfile_autocheck",
+                                "description": "Execution Logfile"
+                            },
+                            {
+                                "autocheck_id": "test01_1_autocheck",
+                                "description": "compilation warnings and errors",
+                                "messages": [ "ERROR: This file should be empty!" ],
+                                "actual_file": "test01_STDERR.txt"
+                            }
                     ]
 		},
 		{
 			"test_name": "Test 2 Compilation of instructor test cases: *Test.java",
-			"execute_logfile": "test02_execute_logfile.txt",
 			"points_awarded": 2,
                         "autochecks": [
-                        {
-                            "autocheck_id": "test02_1_autocheck",
-                            "description": "compilation warnings and errors",
-                            "messages": [ "ERROR: This file should be empty!" ],
-                            "student_file": "test02_STDERR.txt"
-                        }
+			    {
+                                "actual_file": "test02_execute_logfile.txt",
+                                "autocheck_id": "test02_execute_logfile_autocheck",
+                                "description": "Execution Logfile"
+                            },
+                            {
+                                "autocheck_id": "test02_1_autocheck",
+                                "description": "compilation warnings and errors",
+                                "messages": [ "ERROR: This file should be empty!" ],
+                                "actual_file": "test02_STDERR.txt"
+                            }
                         ]
 		},
 		{
 			"test_name": "Test 3 FactorialTest",
-                        "execute_logfile": "test03_execute_logfile.txt",
 			"autochecks": [
-				{
-					"autocheck_id":"test03_0_autocheck",
-					"student_file":"test03_STDOUT.txt",
-					"description": "JUnit output",
-					"messages": ["ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 0/4"]
-				}
+			    {
+                                "actual_file": "test03_execute_logfile.txt",
+                                "autocheck_id": "test03_execute_logfile_autocheck",
+                                "description": "Execution Logfile"
+                            },
+			    {
+				"autocheck_id":"test03_0_autocheck",
+				"actual_file":"test03_STDOUT.txt",
+				"description": "JUnit output",
+				"messages": ["ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 0/4"]
+			    }
 			],
 			"points_awarded": 0
 		}

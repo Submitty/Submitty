@@ -13,9 +13,9 @@
 	    "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
+                    "actual_file" : "STDOUT.txt",
                     "description" : "Standard OUTPUT (STDOUT)",
-		    "instructor_file" : "test1_output.txt"
+		    "expected_file" : "test1_output.txt"
                 }
             ]
         }

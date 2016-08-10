@@ -1,11 +1,11 @@
 {
   "differences":[
     {
-      "student":
+      "actual":
       {
         "start": -1
       },
-      "instructor":
+      "expected":
       {
         "start":0,
         "line": [

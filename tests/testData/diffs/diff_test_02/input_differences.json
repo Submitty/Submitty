@@ -1,7 +1,7 @@
 {
 "differences":[
     {
-        "student":
+        "actual":
         {
             "start": 2,
             "line": [
@@ -14,16 +14,16 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":1
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 5
         },
-        "instructor":
+        "expected":
         {
             "start":3,
             "line": [

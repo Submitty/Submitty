@@ -23,7 +23,7 @@
 
 
 TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::string filename = j.value("filename","MISSING FILENAME");
+  std::string filename = j.value("actual_file","MISSING FILENAME");
 
   if (!tc.isCompilation()) {
     filename = tc.getPrefix() + "_" + filename;
@@ -106,15 +106,15 @@ TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j) {
 TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::json& j) {
   std::vector<std::string> messages;
   std::string student_file_contents;
-  std::string instructor_file_contents;
+  std::string expected_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
-  if (!openInstructorFile(tc,j,instructor_file_contents,messages)) { 
+  if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
   vectorOfWords text_a = stringToWords( student_file_contents );
-  vectorOfWords text_b = stringToWords( instructor_file_contents );
+  vectorOfWords text_b = stringToWords( expected_file_contents );
   Difference* diff = ses( &text_a, &text_b, true );
   diff->type = ByLineByWord;
   return diff;
@@ -124,15 +124,15 @@ TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::jso
 TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::json& j) {
   std::vector<std::string> messages;
   std::string student_file_contents;
-  std::string instructor_file_contents;
+  std::string expected_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
-  if (!openInstructorFile(tc,j,instructor_file_contents,messages)) { 
+  if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
   vectorOfWords text_a = stringToWords( student_file_contents );
-  vectorOfWords text_b = stringToWords( instructor_file_contents );
+  vectorOfWords text_b = stringToWords( expected_file_contents );
   Difference* diff = ses( &text_a, &text_b, false );
   diff->type = ByLineByWord;
   return diff;
@@ -142,15 +142,15 @@ TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::js
 TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) {
   std::vector<std::string> messages;
   std::string student_file_contents;
-  std::string instructor_file_contents;
+  std::string expected_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
-  if (!openInstructorFile(tc,j,instructor_file_contents,messages)) { 
+  if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
   vectorOfLines text_a = stringToLines( student_file_contents );
-  vectorOfLines text_b = stringToLines( instructor_file_contents );
+  vectorOfLines text_b = stringToLines( expected_file_contents );
   Difference* diff = ses( &text_a, &text_b, false );
   diff->type = ByLineByChar;
   return diff;
@@ -160,15 +160,15 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
 TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::json& j) {
   std::vector<std::string> messages;
   std::string student_file_contents;
-  std::string instructor_file_contents;
+  std::string expected_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
-  if (!openInstructorFile(tc,j,instructor_file_contents,messages)) { 
+  if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
   vectorOfLines text_a = stringToLines( student_file_contents );
-  vectorOfLines text_b = stringToLines( instructor_file_contents );
+  vectorOfLines text_b = stringToLines( expected_file_contents );
   Difference* diff = ses( &text_a, &text_b, true );
   diff->type = ByLineByChar;
   return diff;
@@ -178,24 +178,24 @@ TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::jso
 TestResults* myersDiffbyLinebyCharExtraStudentOutputOk_doit (const TestCase &tc, const nlohmann::json& j) {
   std::vector<std::string> messages;
   std::string student_file_contents;
-  std::string instructor_file_contents;
+  std::string expected_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
-  if (!openInstructorFile(tc,j,instructor_file_contents,messages)) { 
+  if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
 #if 0
   //from nowhite
 	vectorOfWords text_a = stringToWords( student_file_contents );
-	vectorOfWords text_b = stringToWords( instructor_file_contents );
+	vectorOfWords text_b = stringToWords( expected_file_contents );
 	Difference diff = *(ses( &text_a, &text_b, true, extraStudentOutputOk ));
 	diff.type = ByLineByWord;
 	return diff;
 #else
 	std::cout << "MYERS DIFF EXTRA STUDENT OUTPUT" << std::endl;
 	vectorOfLines text_a = stringToLines( student_file_contents );
-	vectorOfLines text_b = stringToLines( instructor_file_contents );
+	vectorOfLines text_b = stringToLines( expected_file_contents );
 	bool extraStudentOutputOk = true;
 	Difference* diff = ses( &text_a, &text_b, true, extraStudentOutputOk );
 	diff->type = ByLineByChar;
@@ -215,21 +215,21 @@ void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int stu
   using json = nlohmann::json;
 
   json j;
-  j["student"]["start"] = student_line;
+  j["actual"]["start"] = student_line;
 
   if (!only_expected) {
     json i;
     i["line_number"] = student_line;
-    j["student"]["line"] = { i };
+    j["actual"]["line"] = { i };
   }
 
   std::cout << "LINE HIGHLIGHT " << expected_line << std::endl;
-  j["instructor"]["start"] = expected_line;
+  j["expected"]["start"] = expected_line;
 
   if (!only_student) {
     json i;
     i["line_number"] = expected_line;
-    j["instructor"]["line"] = { i };
+    j["expected"]["line"] = { i };
   }
   swap_difference << j.dump(4) << std::endl;
   first_diff = false;
@@ -241,18 +241,18 @@ void LineHighlight(std::stringstream &swap_difference, bool &first_diff, int stu
 TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
   std::vector<std::string> messages;
   std::string student_file_contents;
-  std::string instructor_file_contents;
+  std::string expected_file_contents;
   if (!openStudentFile(tc,j,student_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
-  if (!openInstructorFile(tc,j,instructor_file_contents,messages)) { 
+  if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
 
 
   // break each file (at the newlines) into vectors of strings
   vectorOfLines student = stringToLines( student_file_contents );
-  vectorOfLines expected = stringToLines( instructor_file_contents );
+  vectorOfLines expected = stringToLines( expected_file_contents );
 
   // check for an empty solution file
   if (expected.size() < 1) {
@@ -348,7 +348,7 @@ TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
 // Runs all the ses functions
 /*
 @param T* student_output - a pointer to a vector<vector<string> > that is the student output file
-@param T* inst_output - a pointer to a vector<vector<stirng> > that is the instructor output file
+@param T* inst_output - a pointer to a vector<vector<stirng> > that is the expected output file
 @param bool secondary 
 @param bool extraStudentOutputOk - boolean that tells if it is okay to have extra student
        output at the end of the student output file 
@@ -381,7 +381,7 @@ template<class T> Difference* ses ( T* student_output, T* inst_output, bool seco
 // the edit distance in distance and pointers to objects a and b
 /*
 @param T* student_output - a pointer to a vector<vector<string> > that is the student output file
-@param T* inst_output - a pointer to a vector<vector<stirng> > that is the instructor output file
+@param T* inst_output - a pointer to a vector<vector<stirng> > that is the expected output file
 @param bool extraStudentOutputOk - boolean that tells if it is okay to have extra student
        output at the end of the student output file 
 */

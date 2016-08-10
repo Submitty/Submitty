@@ -1,7 +1,7 @@
 {
 "differences":[
     {
-        "student":
+        "actual":
         {
             "start": 5,
             "line": [
@@ -10,12 +10,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":4
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 11,
             "line": [
@@ -24,12 +24,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":9
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 17,
             "line": [
@@ -38,12 +38,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":14
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 23,
             "line": [
@@ -52,12 +52,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":19
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 29,
             "line": [
@@ -66,12 +66,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":24
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 35,
             "line": [
@@ -80,12 +80,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":29
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 41,
             "line": [
@@ -94,12 +94,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":34
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 47,
             "line": [
@@ -108,12 +108,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":39
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 53,
             "line": [
@@ -122,12 +122,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":44
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 59,
             "line": [
@@ -136,12 +136,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":49
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 65,
             "line": [
@@ -150,12 +150,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":54
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 71,
             "line": [
@@ -164,12 +164,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":59
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 77,
             "line": [
@@ -178,12 +178,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":64
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 83,
             "line": [
@@ -192,12 +192,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":69
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 89,
             "line": [
@@ -206,12 +206,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":74
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 95,
             "line": [
@@ -220,12 +220,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":79
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 101,
             "line": [
@@ -234,7 +234,7 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":84
         }
