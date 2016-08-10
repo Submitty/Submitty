@@ -1,11 +1,5 @@
-{
-	"submission_number": 1,
-	"points_awarded": 21,
-	"nonhidden_points_awarded": 21,
-	"extra_credit_points_awarded": 0,
-	"non_extra_credit_points_awarded": 21,
-	"submission_time": "0",
-	"testcases": [
+{	"points_awarded": 21,
+"testcases": [
 		{
 			"test_name": "Test 1 README",
 			"points_awarded": 2,

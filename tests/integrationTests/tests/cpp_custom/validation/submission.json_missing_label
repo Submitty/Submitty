@@ -1,11 +1,4 @@
-{
-    "extra_credit_points_awarded": 0,
-    "non_extra_credit_points_awarded": 15,
-    "nonhidden_points_awarded": 15,
-    "points_awarded": 15,
-    "submission_number": 1,
-    "submission_time": "0",
-    "testcases": [
+{    "points_awarded": 15,    "testcases": [
         {
             "points_awarded": 2,
             "test_name": "Test 1 Compilation"

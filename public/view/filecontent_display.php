@@ -148,10 +148,7 @@
       $timestampdata = json_decode(removeTrailingCommas(file_get_contents($grade_timestamp_file)), true);
 
       echo "<p>";
-      if (isset($timestampdata["submission_time"])) {
-	echo "<b>submission timestamp:</b> ". $timestampdata["submission_time"]."<br>";
-      }
-
+      
       if (isset($timestampdata["days_late_(before_extensions)"])) {
 	echo "<b>days late (before extensions):</b> ". $timestampdata["days_late_(before_extensions)"]."<br>";
       }

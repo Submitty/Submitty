@@ -946,11 +946,7 @@ function version_in_grading_queue2($username, $semester, $course, $assignment_id
 
 function get_submission_time($username, $semester,$course, $assignment_id, $assignment_version) {
     $version_results = get_assignment_results($username, $semester,$course, $assignment_id, $assignment_version);//Gets user results data from submission.json for the specific version of the assignment
-    if ($version_results && isset($version_results["submission_time"])) {
-      return $version_results["submission_time"];
-    } else {
-      return "";
-    }
+    return "";
 }
 
 function get_homework_tests($username, $semester,$course, $assignment_id, $assignment_version, $assignment_config, $include_diffs = true) {

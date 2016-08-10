@@ -315,12 +315,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
   /* Generate submission.json */
   nlohmann::json sj;
-  sj["submission_number"] = subnum;
   sj["points_awarded"] = hidden_auto_pts;
-  sj["nonhidden_points_awarded"] = nonhidden_auto_pts;
-  sj["extra_credit_points_awarded"] = hidden_extra_credit;
-  sj["non_extra_credit_points_awarded"] = hidden_auto_pts - hidden_extra_credit;
-  sj["submission_time"] = subtime;
   sj["testcases"] = all_testcases;
 
 

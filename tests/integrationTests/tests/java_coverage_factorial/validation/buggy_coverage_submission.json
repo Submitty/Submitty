@@ -1,11 +1,5 @@
-{
-	"submission_number": 1,
-	"points_awarded": 12,
-	"nonhidden_points_awarded": 12,
-	"extra_credit_points_awarded": 0,
-	"non_extra_credit_points_awarded": 12,
-	"submission_time": "0",
-	"testcases": [
+{	"points_awarded": 12,
+"testcases": [
 		{
 			"test_name": "Test 1 Compilation of student code: Factorial.java",
 			"points_awarded": 2

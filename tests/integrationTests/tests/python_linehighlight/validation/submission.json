@@ -1,11 +1,5 @@
-{
-	"submission_number": 1,
-	"points_awarded": 65,
-	"nonhidden_points_awarded": 65,
-	"extra_credit_points_awarded": 0,
-	"non_extra_credit_points_awarded": 65,
-	"submission_time": "0",
-	"testcases": [
+{	"points_awarded": 65,
+"testcases": [
 		{
 			"test_name": "Test 1 CORRECT SOLUTION",
 			"autochecks": [
