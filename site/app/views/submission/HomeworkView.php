@@ -129,19 +129,23 @@ HTML;
 HTML;
                 }
             }
-    
-            // TODO: We probably want to move this into the ready element into drag-and-drop.js
             if ($gradeable->getCurrentVersion() == $gradeable->getHighestVersion() && $gradeable->getCurrentVersion() > 0) {
                 $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() { 
+        $(document).ready(function() {
             setUsePrevious();
             {$old_files}
+        }};
+    </script>
+HTML;
+            }
+                $return .= <<<HTML
+    <script type="text/javascript">
+        $(document).ready(function() {
             setButtonStatus();
         });
     </script>
 HTML;
-            }
             $return .= <<<HTML
     
     <script type="text/javascript">
