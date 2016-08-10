@@ -446,7 +446,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                     $skip_files[] = $testcase['compilation_output'];
                 }
                 foreach($testcase['diffs'] as $diff) {
-                    foreach(array('instructor_file', 'student_file', 'diff_id') as $file) {
+                    foreach(array("expected_file", "actual_file", "diff_id") as $file) {
                         if(isset($diff[$file])) {
                             $skip_files[] = $diff[$file] . ($file == 'diff_id' ? '.json' : '');
                         }

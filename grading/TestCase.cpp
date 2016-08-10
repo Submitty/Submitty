@@ -104,7 +104,7 @@ bool getFileContents(const std::string &filename, std::string &file_contents) {
 
 
 bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::vector<std::string> &messages) {
-  std::string filename = j.value("filename","");
+  std::string filename = j.value("actual_file","");
   if (filename == "") {
     messages.push_back("ERROR!  STUDENT FILENAME MISSING");
     return false;
@@ -141,18 +141,18 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
 }
 
 
-bool openInstructorFile(const TestCase &tc, const nlohmann::json &j, std::string &instructor_file_contents, std::vector<std::string> &messages) {
-  std::string filename = j.value("instructor_file","");
+bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, std::vector<std::string> &messages) {
+  std::string filename = j.value("expected_file","");
   if (filename == "") {
-    messages.push_back("ERROR!  INSTRUCTOR FILENAME MISSING");
+    messages.push_back("ERROR!  EXPECTED FILENAME MISSING");
     return false;
   }
-  if (!getFileContents(filename,instructor_file_contents)) {
-    messages.push_back("ERROR!  Could not open instructor file: '" + filename);
+  if (!getFileContents(filename,expected_file_contents)) {
+    messages.push_back("ERROR!  Could not open expected file: '" + filename);
     return false;
   }
-  if (instructor_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
-    messages.push_back("ERROR!  Instructor expected file '" + filename + "' too large for grader");
+  if (expected_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
+    messages.push_back("ERROR!  Expected file '" + filename + "' too large for grader");
     return false;
   }
   return true;
@@ -264,7 +264,7 @@ void AddDefaultGrader(const std::string &command,
   //std::cout << "ADD GRADER WarnIfNotEmpty test for " << filename << std::endl;
   nlohmann::json j;
   j["method"] = "warnIfNotEmpty";
-  j["filename"] = filename;
+  j["actual_file"] = filename;
   if (filename.find("STDOUT") != std::string::npos) {
     j["description"] = "Standard Output (STDOUT)";
   } else if (filename.find("STDERR") != std::string::npos) {
@@ -293,7 +293,7 @@ void AddDefaultGraders(const std::vector<std::string> &commands,
   std::set<std::string> files_covered;
   assert (json_graders.is_array());
   for (int i = 0; i < json_graders.size(); i++) {
-    std::vector<std::string> filenames = stringOrArrayOfStrings(json_graders[i],"filename");
+    std::vector<std::string> filenames = stringOrArrayOfStrings(json_graders[i],"actual_file");
     for (int j = 0; j < filenames.size(); j++) {
       files_covered.insert(filenames[j]);
     }
@@ -359,14 +359,14 @@ void TestCase::FileCheck_Helper() {
   nlohmann::json::iterator f_itr,v_itr;
 
   // Check the required fields for all test types
-  f_itr = _json.find("filename");
+  f_itr = _json.find("actual_file");
   v_itr = _json.find("validation");
 
   if (f_itr != _json.end()) {
     assert (v_itr == _json.end());
     nlohmann::json v;
     v["method"] = "fileExists";
-    v["filename"] = (*f_itr);
+    v["actual_file"] = (*f_itr);
     v["description"] = (*f_itr);
     _json["validation"].push_back(v);
     _json.erase(f_itr);
@@ -374,7 +374,7 @@ void TestCase::FileCheck_Helper() {
     assert (v_itr != _json.end());
   }
 
-  f_itr = _json.find("filename");
+  f_itr = _json.find("actual_file");
   v_itr = _json.find("validation");
 
   assert (f_itr == _json.end());
@@ -392,7 +392,7 @@ void TestCase::Compilation_Helper() {
   if (f_itr != _json.end()) {
     nlohmann::json v;
     v["method"] = "fileExists";
-    v["filename"] = (*f_itr);
+    v["actual_file"] = (*f_itr);
     v["description"] = "executable created";
     v["deduction"] = 1.0;
     _json["validation"].push_back(v);
@@ -408,7 +408,7 @@ void TestCase::Compilation_Helper() {
     assert (warning_fraction >= 0.0 && warning_fraction <= 1.0);
     nlohmann::json v2;
     v2["method"] = "errorIfNotEmpty";
-    v2["filename"] = "STDERR.txt";
+    v2["actual_file"] = "STDERR.txt";
     v2["description"] = "compilation warnings and errors";
     v2["deduction"] = warning_fraction;
     _json["validation"].push_back(v2);
@@ -475,12 +475,12 @@ std::vector<std::vector<std::string>> TestCase::getFilenames() const {
   std::cout << "getfilenames of " << _json << std::endl;
   std::vector<std::vector<std::string>> filenames;
 
-  assert (_json.find("filename") == _json.end());
+  assert (_json.find("actual_file") == _json.end());
   int num = numFileGraders();
   assert (num > 0);
   std::cout << "num file graders" << num << std::endl;
   for (int v = 0; v < num; v++) {
-    filenames.push_back(stringOrArrayOfStrings(getGrader(v),"filename"));
+    filenames.push_back(stringOrArrayOfStrings(getGrader(v),"actual_file"));
     assert (filenames[v].size() > 0);
   }
   std::cout << "filenames.size() " << filenames.size() << std::endl;

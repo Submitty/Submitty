@@ -11,9 +11,9 @@
                         "autochecks": [
                                 {
                                         "autocheck_id":"test01_0_autocheck",
-                                        "student_file":"test01_STDOUT.txt",
-                                        "instructor_file":"test_output/testassignment/test1_output.txt",
-                                        "difference":"test01_0_diff.json",
+                                        "actual_file":"test01_STDOUT.txt",
+                                        "expected_file":"test_output/testassignment/test1_output.txt",
+                                        "difference_file":"test01_0_diff.json",
                                         "description": "Standard OUTPUT (STDOUT)"
                                 }
                         ],

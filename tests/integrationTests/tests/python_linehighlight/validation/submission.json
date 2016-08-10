@@ -11,16 +11,16 @@
 			"autochecks": [
 				{
 					"autocheck_id":"test01_0_autocheck",
-					"student_file":"test01_output_correct.txt",
-					"instructor_file":"test_output/testassignment/output_instructor.txt",
-					"difference":"test01_0_diff.json",
+					"actual_file":"test01_output_correct.txt",
+					"expected_file":"test_output/testassignment/output_instructor.txt",
+					"difference_file":"test01_0_diff.json",
 					"description": "output_correct.txt"
 				},
 				{
 					"autocheck_id":"test01_1_autocheck",
-					"student_file":"test01_output_correct.txt",
-					"instructor_file":"test_output/testassignment/output_instructor.txt",
-					"difference":"test01_1_diff.json",
+					"actual_file":"test01_output_correct.txt",
+					"expected_file":"test_output/testassignment/output_instructor.txt",
+					"difference_file":"test01_1_diff.json",
 					"description": "output_correct.txt"
 				}
 			],
@@ -31,9 +31,9 @@
 			"autochecks": [
 				{
 					"autocheck_id":"test02_0_autocheck",
-					"student_file":"test02_output_duplicates.txt",
-					"instructor_file":"test_output/testassignment/output_instructor.txt",
-					"difference":"test02_0_diff.json",
+					"actual_file":"test02_output_duplicates.txt",
+					"expected_file":"test_output/testassignment/output_instructor.txt",
+					"difference_file":"test02_0_diff.json",
 					"description": "output_duplicates.txt"
 				}
 			],
@@ -44,9 +44,9 @@
 			"autochecks": [
 				{
 					"autocheck_id":"test03_0_autocheck",
-					"student_file":"test03_output_duplicates.txt",
-					"instructor_file":"test_output/testassignment/output_instructor.txt",
-					"difference":"test03_0_diff.json",
+					"actual_file":"test03_output_duplicates.txt",
+					"expected_file":"test_output/testassignment/output_instructor.txt",
+					"difference_file":"test03_0_diff.json",
 					"description": "output_duplicates.txt",
 					"messages": ["ERROR: 17 duplicate line(s)"]
 				}
@@ -58,9 +58,9 @@
 			"autochecks": [
 				{
 					"autocheck_id":"test04_0_autocheck",
-					"student_file":"test04_output_extra.txt",
-					"instructor_file":"test_output/testassignment/output_instructor.txt",
-					"difference":"test04_0_diff.json",
+					"actual_file":"test04_output_extra.txt",
+					"expected_file":"test_output/testassignment/output_instructor.txt",
+					"difference_file":"test04_0_diff.json",
 					"description": "output_extra.txt"
 				}
 			],
@@ -71,9 +71,9 @@
 			"autochecks": [
 				{
 					"autocheck_id":"test05_0_autocheck",
-					"student_file":"test05_output_extra.txt",
-					"instructor_file":"test_output/testassignment/output_instructor.txt",
-					"difference":"test05_0_diff.json",
+					"actual_file":"test05_output_extra.txt",
+					"expected_file":"test_output/testassignment/output_instructor.txt",
+					"difference_file":"test05_0_diff.json",
 					"description": "output_extra.txt",
 					"messages": ["ERROR: 21 incorrect line(s)"]
 				}
@@ -85,9 +85,9 @@
 			"autochecks": [
 				{
 					"autocheck_id":"test06_0_autocheck",
-					"student_file":"test06_output_missing.txt",
-					"instructor_file":"test_output/testassignment/output_instructor.txt",
-					"difference":"test06_0_diff.json",
+					"actual_file":"test06_output_missing.txt",
+					"expected_file":"test_output/testassignment/output_instructor.txt",
+					"difference_file":"test06_0_diff.json",
 					"description": "output_missing.txt"
 				}
 			],
@@ -98,9 +98,9 @@
 			"autochecks": [
 				{
 					"autocheck_id":"test07_0_autocheck",
-					"student_file":"test07_output_missing.txt",
-					"instructor_file":"test_output/testassignment/output_instructor.txt",
-					"difference":"test07_0_diff.json",
+					"actual_file":"test07_output_missing.txt",
+					"expected_file":"test_output/testassignment/output_instructor.txt",
+					"difference_file":"test07_0_diff.json",
 					"description": "output_missing.txt",
 					"messages": ["ERROR: 21 missing line(s)"]
 				}
@@ -112,9 +112,9 @@
 			"autochecks": [
 				{
 					"autocheck_id":"test08_0_autocheck",
-					"student_file":"test08_output_reordered.txt",
-					"instructor_file":"test_output/testassignment/output_instructor.txt",
-					"difference":"test08_0_diff.json",
+					"actual_file":"test08_output_reordered.txt",
+					"expected_file":"test_output/testassignment/output_instructor.txt",
+					"difference_file":"test08_0_diff.json",
 					"description": "output_reordered.txt"
 				}
 			],
@@ -125,9 +125,9 @@
 			"autochecks": [
 				{
 					"autocheck_id":"test09_0_autocheck",
-					"student_file":"test09_output_reordered.txt",
-					"instructor_file":"test_output/testassignment/output_instructor.txt",
-					"difference":"test09_0_diff.json",
+					"actual_file":"test09_output_reordered.txt",
+					"expected_file":"test_output/testassignment/output_instructor.txt",
+					"difference_file":"test09_0_diff.json",
 					"description": "output_reordered.txt",
 					"messages": ["ERROR: 3 incorrect line(s), ERROR: 3 duplicate line(s), ERROR: 3 missing line(s)"]
 				}

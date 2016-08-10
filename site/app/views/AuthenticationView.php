@@ -28,7 +28,7 @@ HTML;
         $return .= <<<HTML
             <input type="text" name="user_id" placeholder="User ID" /><br />
             <input type="password" name="password" placeholder="Password" /><br />
-            <input type="submit" value="Login" class="btn btn-default" />
+            <input type="submit" name="login" value="Login" class="btn btn-default" />
         </form>
     </div>
 </div>

@@ -48,6 +48,8 @@ if ($page == "upload") {
     require_once("controller/check_refresh.php");
 } else if ($page == "viewfile") {
     require_once("controller/viewfile.php");
+} else if ($page == "coursepage"){
+    require_once("controller/course_page.php");
 } else {
     require_once("controller/homework.php");
 }

@@ -394,7 +394,7 @@ ORDER BY gc_order ASC
                 }
                 if (isset($testcase['diffs'])){
                     foreach($testcase['diffs'] as $diff) {
-                        foreach(array('instructor_file', 'student_file', 'diff_id') as $file) {
+                        foreach(array("expected_file", "actual_file", "diff_id") as $file) {
                             if(isset($diff[$file])) {
                                 $skip_files[] = $diff[$file] . ($file == 'diff_id' ? '.json' : '');
                             }

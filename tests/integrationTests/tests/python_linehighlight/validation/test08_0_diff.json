@@ -1,7 +1,7 @@
 {
 "differences":[
     {
-        "student":
+        "actual":
         {
             "start": 0,
             "line": [
@@ -22,7 +22,7 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":0,
             "line": [
@@ -40,11 +40,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 7
         },
-        "instructor":
+        "expected":
         {
             "start":6,
             "line": [
@@ -70,7 +70,7 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 9,
             "line": [
@@ -85,7 +85,7 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":16,
             "line": [
@@ -97,7 +97,7 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 14,
             "line": [
@@ -112,12 +112,12 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":18
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 19,
             "line": [
@@ -142,7 +142,7 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":20,
             "line": [
@@ -162,7 +162,7 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 29,
             "line": [
@@ -177,7 +177,7 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":27,
             "line": [
@@ -207,7 +207,7 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 34,
             "line": [
@@ -223,7 +223,7 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":39,
             "line": [
@@ -240,7 +240,7 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 38,
             "line": [
@@ -251,7 +251,7 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":43,
             "line": [
@@ -269,11 +269,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 40
         },
-        "instructor":
+        "expected":
         {
             "start":49,
             "line": [
@@ -289,7 +289,7 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 42,
             "line": [
@@ -302,7 +302,7 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":54,
             "line": [
@@ -318,7 +318,7 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 46,
             "line": [
@@ -327,7 +327,7 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":59,
             "line": [
@@ -349,7 +349,7 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 48,
             "line": [
@@ -358,7 +358,7 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":67,
             "line": [
@@ -380,7 +380,7 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 50,
             "line": [
@@ -417,16 +417,16 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":74
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 65
         },
-        "instructor":
+        "expected":
         {
             "start":76,
             "line": [
@@ -440,7 +440,7 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 67,
             "line": [
@@ -449,7 +449,7 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":80,
             "line": [
@@ -463,7 +463,7 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 69,
             "line": [
@@ -512,7 +512,7 @@
                 }
             ]
         },
-        "instructor":
+        "expected":
         {
             "start":84,
             "line": [

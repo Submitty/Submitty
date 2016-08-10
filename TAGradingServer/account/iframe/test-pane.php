@@ -39,8 +39,8 @@ if (isset($testcase['diffs']) && count($testcase['diffs']) > 0) {
             $actual = $_GET['directory'] . "/" . $diff['student_file'];
         }
 
-        if (isset($diff['instructor_file']) && file_exists(implode("/", array(__SUBMISSION_SERVER__, $diff['instructor_file'])))) {
-            $expected = implode("/", array(__SUBMISSION_SERVER__, $diff['instructor_file']));
+        if (isset($diff["expected_file"]) && file_exists(implode("/", array(__SUBMISSION_SERVER__, $diff["expected_file"])))) {
+            $expected = implode("/", array(__SUBMISSION_SERVER__, $diff["expected_file"]));
         }
 
         if (isset($diff['difference']) && file_exists($_GET['directory'] . "/" . $diff['difference'])) {
@@ -76,7 +76,7 @@ HTML;
     Instructor File<br />
     <textarea id="code{$i}">{$out}</textarea>
 HTML;
-                $iframe .= sourceSettingsJS($diff['instructor_file'], $i++);
+                $iframe .= sourceSettingsJS($diff["expected_file"], $i++);
             }
         }
         $iframe .= "\n</div>";

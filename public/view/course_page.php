@@ -9,7 +9,6 @@ echo <<<HTML
 		<link href='/resources/font/sans_pro.css' rel='stylesheet'>
 		<link href='/resources/font/pt_sans.css' rel='stylesheet'>
 		<link href='/resources/font/inconsolata.css' rel='stylesheet'>
-
 		<link href="/resources/override.css" rel="stylesheet" />
 		<link href="/resources/bootmin.css" rel="stylesheet" />
 		<link href="/resources/badge.css" rel="stylesheet" />
@@ -133,7 +132,6 @@ HTML;
 				else{
 				//==================================================================
 				// NOTE: If ta_grading disabled and the item is closed, should TAs still be able to see the item and item listed in being graded?
-				//==================================================================
 					$grading_date = "";
 					$grading_option = "";
 				}
@@ -202,6 +200,7 @@ HTML;
 echo <<<HTML
 		</table>
 	</body>
+<<<<<<< HEAD
 </html>
 HTML;
 

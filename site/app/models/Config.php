@@ -129,8 +129,7 @@ class Config {
             $this->$path = rtrim($this->$path, "/");
         }
 
-        if (!is_dir(implode(DIRECTORY_SEPARATOR, array($this->submitty_path, "courses", $this->semester))) ||
-            !is_dir(implode(DIRECTORY_SEPARATOR, array(__DIR__, "..", "..", "config", $this->semester)))) {
+        if (!is_dir(implode(DIRECTORY_SEPARATOR, array($this->submitty_path, "courses", $this->semester)))) {
             throw new ConfigException("Invalid semester: ".$this->semester, true);
         }
 

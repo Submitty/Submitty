@@ -13,7 +13,7 @@
                          {
                                "autocheck_id": "test01_0_autocheck",
                                "description": "README.txt",
-                               "student_file": "test01_README.txt"
+                               "actual_file": "test01_README.txt"
                          }
                          ]
                 },
@@ -26,9 +26,9 @@
 			"autochecks": [
 				{
 					"autocheck_id":"test03_0_autocheck",
-					"student_file":"test03_output.txt",
-					"instructor_file":"test_output/testassignment/inst_output.txt",
-					"difference":"test03_0_diff.json",
+					"actual_file":"test03_output.txt",
+					"expected_file":"test_output/testassignment/inst_output.txt",
+					"difference_file":"test03_0_diff.json",
 					"description": "output.txt"
 				}
 			],
@@ -39,9 +39,9 @@
 			"autochecks": [
 				{
 					"autocheck_id":"test04_0_autocheck",
-					"student_file":"test04_output.txt",
-					"instructor_file":"test_output/testassignment/inst_output.txt",
-					"difference":"test04_0_diff.json",
+					"actual_file":"test04_output.txt",
+					"expected_file":"test_output/testassignment/inst_output.txt",
+					"difference_file":"test04_0_diff.json",
 					"description": "output.txt"
 				}
 			],
@@ -52,9 +52,9 @@
 			"autochecks": [
 				{
 					"autocheck_id":"test05_0_autocheck",
-					"student_file":"test05_output.txt",
-					"instructor_file":"test_output/testassignment/inst_output.txt",
-					"difference":"test05_0_diff.json",
+					"actual_file":"test05_output.txt",
+					"expected_file":"test_output/testassignment/inst_output.txt",
+					"difference_file":"test05_0_diff.json",
 					"description": "output.txt"
 				}
 			],
@@ -65,9 +65,9 @@
 			"autochecks": [
 				{
 					"autocheck_id":"test06_0_autocheck",
-					"student_file":"test06_output.txt",
-					"instructor_file":"test_output/testassignment/inst_output.txt",
-					"difference":"test06_0_diff.json",
+					"actual_file":"test06_output.txt",
+					"expected_file":"test_output/testassignment/inst_output.txt",
+					"difference_file":"test06_0_diff.json",
 					"description": "output.txt"
 				}
 			],

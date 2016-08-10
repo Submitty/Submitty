@@ -1,11 +1,11 @@
 {
 "differences":[
     {
-        "student":
+        "actual":
         {
             "start": 2
         },
-        "instructor":
+        "expected":
         {
             "start":3,
             "line": [
@@ -15,11 +15,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 5
         },
-        "instructor":
+        "expected":
         {
             "start":7,
             "line": [
@@ -29,11 +29,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 8
         },
-        "instructor":
+        "expected":
         {
             "start":11,
             "line": [
@@ -43,11 +43,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 11
         },
-        "instructor":
+        "expected":
         {
             "start":15,
             "line": [
@@ -57,11 +57,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 14
         },
-        "instructor":
+        "expected":
         {
             "start":19,
             "line": [
@@ -71,11 +71,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 17
         },
-        "instructor":
+        "expected":
         {
             "start":23,
             "line": [
@@ -85,11 +85,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 20
         },
-        "instructor":
+        "expected":
         {
             "start":27,
             "line": [
@@ -99,11 +99,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 23
         },
-        "instructor":
+        "expected":
         {
             "start":31,
             "line": [
@@ -113,11 +113,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 26
         },
-        "instructor":
+        "expected":
         {
             "start":35,
             "line": [
@@ -127,11 +127,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 29
         },
-        "instructor":
+        "expected":
         {
             "start":39,
             "line": [
@@ -141,11 +141,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 32
         },
-        "instructor":
+        "expected":
         {
             "start":43,
             "line": [
@@ -155,11 +155,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 35
         },
-        "instructor":
+        "expected":
         {
             "start":47,
             "line": [
@@ -169,11 +169,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 38
         },
-        "instructor":
+        "expected":
         {
             "start":51,
             "line": [
@@ -183,11 +183,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 41
         },
-        "instructor":
+        "expected":
         {
             "start":55,
             "line": [
@@ -197,11 +197,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 44
         },
-        "instructor":
+        "expected":
         {
             "start":59,
             "line": [
@@ -211,11 +211,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 47
         },
-        "instructor":
+        "expected":
         {
             "start":63,
             "line": [
@@ -225,11 +225,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 50
         },
-        "instructor":
+        "expected":
         {
             "start":67,
             "line": [
@@ -239,11 +239,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 53
         },
-        "instructor":
+        "expected":
         {
             "start":71,
             "line": [
@@ -253,11 +253,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 56
         },
-        "instructor":
+        "expected":
         {
             "start":75,
             "line": [
@@ -267,11 +267,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 59
         },
-        "instructor":
+        "expected":
         {
             "start":79,
             "line": [
@@ -281,11 +281,11 @@
             ]
         }
     }, {
-        "student":
+        "actual":
         {
             "start": 62
         },
-        "instructor":
+        "expected":
         {
             "start":83,
             "line": [

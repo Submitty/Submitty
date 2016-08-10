@@ -68,7 +68,7 @@ function check_server(url) {
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
             } else {
-                init_refresh_on_update(url);
+                checkRefreshSubmissionPage(url);
             }
         }
     );

@@ -8,24 +8,15 @@
 
 
 # This sets DIR equal to the directory that contains this bash script
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-source ${DIR}/common/common_env.sh
+source common/common_env.sh
 
-SELENIUM_JAR=selenium-server-standalone.jar
-
-if [ ! -f "$DIR/$SELENIUM_JAR" ]; then
+if [ ! -f "${SELENIUM_JAR}" ]; then
     echo "Downloading Selenium"
-    wget -O "$DIR/$SELENIUM_JAR" "$SELENIUM_DOWNLOAD_URL"
+    wget -O ${SELENIUM_JAR} ${SELENIUM_DOWNLOAD_URL}
     echo "Downloaded Selenium"
 fi
 
 echo "Starting selenium..."
-java -jar "$DIR/$SELENIUM_JAR" -browserSessionReuse
+java -jar "${SELENIUM_JAR}"
 # Goto http://localhost:4444/selenium-server/driver/?cmd=shutDownSeleniumServer to kill it

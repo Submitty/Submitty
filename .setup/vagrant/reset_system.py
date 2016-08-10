@@ -8,6 +8,7 @@ in configuration files or pre-existing databses.
 """
 
 import os
+import pwd
 import shutil
 import subprocess
 import tempfile
@@ -104,15 +105,20 @@ if __name__ == '__main__':
                 file_path = os.path.join(folder, the_file)
                 remove_file(file_path)
 
-    remove_lines('/etc/apache2/apache2.conf', ["ServerName 10.0.2.15"])
+    #remove_lines('/etc/apache2/apache2.conf', ["ServerName 10.0.2.15"])
 
     shutil.rmtree('/root/bin', True)
     users = ["instructor", "ta", "developer", "student", "smithj", "hwphp", "hwcgi", "hwcron", "hsdbu"]
 
     for user in users:
-        os.system("userdel " + user)
-        if os.path.isdir("/home/" + user):
-            shutil.rmtree("/home/" + user)
+        try:
+            pwd.getpwnam(user)
+            os.system("userdel " + user)
+            if os.path.isdir("/home/" + user):
+                shutil.rmtree("/home/" + user)
+        except KeyError:
+            # user doesn't exist, so skip that person
+            pass
 
     groups = ["hwcronphp", "course_builders"]
     courses = ["csci1000", "csci1100", "csci1200", "csci2600"]
