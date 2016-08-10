@@ -7,6 +7,7 @@ use \lib\ExceptionHandler;
 use \lib\FileUtils;
 use \lib\ServerException;
 use \lib\Utils;
+use \app\models\User;
 
 /**
  * Class ElectronicGradeable
@@ -259,8 +260,9 @@ SELECT g_title, gd_overall_comment, g_grade_start_date, eg.* FROM electronic_gra
         
         // CREATE THE GRADEABLE DATA
         if (empty($this->eg_details)) {
-                                //TODO replace with grader id
-            $params = array($this->g_id, $this->student_id, $this->student_id, '', 0,0,1); 
+                                //FIX ACTIVE VERSION
+                                //FIXME
+            $params = array($this->g_id, $this->student_id, User::$user_id, '', 0,0,1); 
             Database::query("INSERT INTO gradeable_data(g_id,gd_user_id,gd_grader_id,gd_overall_comment, gd_status,gd_late_days_used,gd_active_version) VALUES(?,?,?,?,?,?,?)", $params); 
             $this->gd_id = \lib\Database::getLastInsertId('gradeable_data_gd_id_seq');
             

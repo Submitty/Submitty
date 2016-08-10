@@ -6,8 +6,6 @@ include "../header.php";
 
 check_administrator();
 
-// start the question for electronic gradeables from 1
-
 if($user_is_administrator){
     $have_old = $has_grades = false;
     $current_date = date('Y/m/d 23:59:59');

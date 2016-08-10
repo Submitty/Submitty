@@ -3,6 +3,7 @@
 include "../../toolbox/functions.php";
 
 use lib\Database;
+use app\models;
 
 check_administrator();
 
@@ -22,6 +23,19 @@ $write_output = True;
 
 // Query the database for all students registered in the class
 $params = array();
+
+function autogradingTotalAwarded($g_id, $student_id, $active_version){
+    $total = 0;
+    $results_file = __SUBMISSION_SERVER__."/results/".$g_id."/".$student_id."/".$active_version."/submission.json";
+    if (file_exists($results_file)) {
+        $results_file_contents = file_get_contents($results_file);
+        $results = json_decode($results_file_contents, true);
+        foreach($results['testcases'] as $testcase){
+            $total += floatval($testcase['points_awarded']);
+        }
+    }
+    return $total;
+}
 
 $db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
 foreach($db->rows() as $student_record) {
@@ -53,7 +67,8 @@ foreach($db->rows() as $student_record) {
             gd_overall_comment,
             is_extra_credits,
             gd_active_version,
-            grading_notes
+            grading_notes,
+            max_scores
         FROM
             users AS u CROSS JOIN gradeable AS g 
             LEFT JOIN (
@@ -70,7 +85,8 @@ foreach($db->rows() as $student_record) {
                     gd_overall_comment,
                     is_extra_credits,
                     gd_active_version,
-                    grading_notes
+                    grading_notes,
+                    max_scores
                 FROM 
                     gradeable_data AS gd INNER JOIN(
                     SELECT 
@@ -80,7 +96,8 @@ foreach($db->rows() as $student_record) {
                         array_agg(gcd_component_comment ORDER BY gc_order ASC) AS comments,
                         array_agg(gcd_score ORDER BY gc_order ASC) AS scores,
                         array_agg(gc_is_extra_credit ORDER BY gc_order ASC) AS is_extra_credits,
-                        array_agg(gc_student_comment ORDER BY gc_order ASC) AS grading_notes
+                        array_agg(gc_student_comment ORDER BY gc_order ASC) AS grading_notes,
+                        array_agg(gc_max_value ORDER BY gc_order ASC) AS max_scores
                     FROM 
                         gradeable_component_data AS gcd INNER JOIN 
                             gradeable_component AS gc ON gcd.gc_id=gc.gc_id
@@ -103,6 +120,7 @@ foreach($db->rows() as $student_record) {
         $student_allowed_lates = isset($late_day['allowed_late_days']) ? $late_day['allowed_late_days'] : 0;
         $g_id = $gradeable['g_id'];
         $rubric_total = 0;
+        $ta_max_score = 0;
         // Gather student info, set output filename, reset output
         $student_output_text_main = "";
         $student_output_text = "";
@@ -153,11 +171,25 @@ foreach($db->rows() as $student_record) {
             $question_messages = pgArrayToPhp($gradeable['titles']);
             $question_extra_credits = pgArrayToPhp($gradeable['is_extra_credits']);
             $question_grading_notes = pgArrayToPhp($gradeable['grading_notes']);
+            $question_max_scores = pgArrayToPhp($gradeable['max_scores']);
             $question_total = 0; 
+
+            $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$gradeable['gd_active_version']."/.submit.grade";
+            if (!file_exists($submit_file)) {
+                $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
+            }
+            else {
+                $auto_grading_awarded = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);        
+                                                                                                //TODO replace with autograding total
+                $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . "0" . " ]";
+                $gradefilecontents = file_get_contents($submit_file);
+                $student_output_text .= $nl.$nl.$gradefilecontents.$nl;
+            } 
 
             for ($i=0; $i < count($grading_notes); ++$i){
                 $grading_note = $grading_notes[$i];
                 $question_total = floatval($question_totals[$i]);
+                $question_max_score = floatval($question_max_scores[$i]);
                 $question_message = $question_messages[$i];
                 $question_extra_credit = intval($question_extra_credits[$i]) == 1;
                 $question_grading_note = $question_grading_notes[$i];
@@ -173,7 +205,7 @@ foreach($db->rows() as $student_record) {
                     $grade_question_comment = htmlspecialchars($grading_note);
                 }
                 // Generate output for each question
-                $student_output_text .= $question_message . " [ " . $grade_question_score . " / " . $question_total . " ]" . $nl;
+                $student_output_text .= $question_message . " [ " . $grade_question_score . " / " . $question_max_score . " ]" . $nl;
                 // general rubric notes intended for TA & student
                 if ($question_grading_note != "") {
                     $student_output_text .= "Rubric: ". $question_grading_note . $nl;
@@ -187,27 +219,12 @@ foreach($db->rows() as $student_record) {
                 $student_output_text .= $nl;
                 // Keep track of students grade and rubric total
                 $student_grade += $grade_question_score;
-                $rubric_total += (($question_extra_credit && $question_total > 0) ? 0 : $question_total);
-
-                if ($i == 0) {
-                    // If it's part 0, then we append auto-grading total as well as auto-grader log
-                                                                                           //TODO replace with total overall score
-                    $student_output_text .= "AUTO-GRADING TOTAL [ " . $student_grade . " / " . "0" . " ]";
-                    $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$gradeable['gd_active_version']."/.submit.grade";
-
-                    if (!file_exists($submit_file)) {
-                        $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
-                    }
-                    else {
-                        $gradefilecontents = file_get_contents($submit_file);
-                        $student_output_text .= $nl.$nl.$gradefilecontents.$nl;
-                    }
-                }
-                else {                                                                      //TODO replace with total overall score
-                    $student_output_text .= "TA GRADING TOTAL [ " . $student_grade . " / " . "0" . " ]". $nl;
-                }
-                $student_output_text .= "----------------------------------------------------------------------" . $nl;
+                $rubric_total += (($question_extra_credit && $question_max_score > 0) ? 0 : $question_max_score);
+                $ta_max_score += (($question_extra_credit && $question_max_score > 0) ? 0 : $question_max_score);
             }
+                                                            //TODO replace with total overall score
+            $student_output_text .= "TA GRADING TOTAL [ " . $student_grade . " / " . $ta_max_score . " ]". $nl;
+            $student_output_text .= "----------------------------------------------------------------------" . $nl;
         } 
     
         if($write_output){
