@@ -135,7 +135,7 @@ HTML;
         $(document).ready(function() {
             setUsePrevious();
             {$old_files}
-        }};
+        });
     </script>
 HTML;
             }
@@ -453,6 +453,7 @@ HTML;
                     
                                 $return .= <<<HTML
                 </div>
+                <div class="clear"></div>
 HTML;
                             }
                         }

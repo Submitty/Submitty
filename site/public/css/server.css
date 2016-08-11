@@ -250,6 +250,10 @@ textarea {
     height: 30px;
 }
 
+.clear {
+    clear: both;
+}
+
 #page-info {
     visibility: hidden;
     position: absolute;
@@ -411,7 +415,6 @@ select {
 }
 
 .diff-element {
-    width: 48%;
     float: left;
     margin-right: 20px;
 }

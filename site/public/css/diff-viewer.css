@@ -1,34 +1,23 @@
 .diff-container {
-    /*width: 700px;*/
-    width: 100%;
-    overflow-x: auto;
     background-color: #F8F8F8;
     border: 1px solid #ddd;
-    /*float: left;*/
-}
-
-.diff-container table,
-.diff-container tr,
-.diff-container td {
-    text-align: left;
-    vertical-align: middle;
+    width: 100%;
 }
 
 .diff-code {
-    padding: 5px;
+    padding: 0 0 0 5px;
     font-family: monospace;
 }
 
-.diff-code tr, td {
-    padding-top: 2px;
+.diff-code .row {
+    width: 100%;
 }
 
-.bad {
-    /*background-color: #fedede;*/
+.diff-code .bad {
     background-color: #fdffe0;
 }
 
-.highlight {
+.diff-code .highlight {
 
 }
 
@@ -43,27 +32,35 @@
 }
 
 .line_number {
+    color: gray;
     display: inline-block;
     min-width: 20px;
-    padding-left: 3px;
-    text-align: center;
-    background-color: #f2f2f2;
-    opacity: .55;
-    margin-right: 10px;
-    float: left;
+    border-right: 1px solid lightgrey;
+}
+
+.line_number, .line_code {
+    vertical-align: top;
+    max-height: 20px !important;
+    height: 20px !important;
+    font-family: 'Inconsolata', serif !important;
+    font-size: 16px;
+    line-height: 20px !important;
+    padding: 0;
+}
+
+.line_code_inner {
+    max-height: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
+    padding: 0 !important;
+    white-space: pre !important;
+    overflow-x: scroll !important;
+    font-family: monospace;
 }
 
 .line_code {
-    /*min-width: 610px;*/
     white-space: nowrap;
-    overflow-x: auto;
-}
-
-.line-code pre {
-    display: block;
-    font-family: monospace;
-    white-space: pre;
-    margin: 1em 0;
+    padding-left: 10px;
 }
 
 .empty_line {
