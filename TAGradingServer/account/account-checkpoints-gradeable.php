@@ -106,8 +106,11 @@ foreach($db->rows() as $check_g_row) {
         array_push($check_g_row_checkpoints, $row['gc_title']);
     }
     $active = ($first) ? 'active in' : '';
+    $ta_instructions = (trim($check_g_row['g_overall_ta_instructions']) == '') ? '' : '<b>Grading Instructions</b>: ' . $check_g_row['g_overall_ta_instructions'];
+
     print <<<HTML
                 <div class="tab-pane fade {$active}" id="check_g{$check_g_row["g_id"]}">
+                    {$ta_instructions} <br /> <br />
                     <table class="table table-bordered striped-table" id="g-checkpoints-table" style=" border: 1px solid #AAA;">
                         <thead style="background: #E1E1E1;">
                             <tr>

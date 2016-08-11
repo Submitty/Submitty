@@ -150,28 +150,6 @@ $output .= <<<HTML
         }
     }
 
-    function fixSequences() {
-        $.ajax('{$BASE_URL}/account/ajax/admin-gradeables.php?course={$_GET['course']}&semester={$_GET['semester']}&action=sequence', {
-            type: "POST",
-            data: {
-                csrf_token: '{$_SESSION['csrf']}'
-            }
-        })
-        .done(function(response) {
-            var res_array = response.split("|");
-            if (res_array[0] == "success") {
-                window.alert("DB Sequences recalculated");
-            }
-            else {
-                console.log(response);
-                window.alert("[DB ERROR] Refresh page");
-            }
-        })
-        .fail(function() {
-            window.alert("[AJAX ERROR] Refresh page");
-        });
-    }
-
     function batchImportJSON(){
          $.ajax('{$BASE_URL}/account/submit/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&action=import', {
             type: "POST",
@@ -194,8 +172,6 @@ $output .= <<<HTML
         <h3 id="myModalgradeableel">Manage Gradeables</h3>
         <span class="submit-button">
             <input class="btn btn-primary" onclick="window.location.href='{$BASE_URL}/account/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}'" type="submit" value="Create New Gradeable"/>
-            <input class="btn btn-primary" onclick="fixSequences();" type="submit" value="Fix DB Sequences" />
-
             <input class="btn btn-primary" onclick="batchImportJSON();" type="submit" value="Import From JSON" />
         </span>
     </div>

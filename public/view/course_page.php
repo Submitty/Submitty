@@ -5,11 +5,10 @@ echo <<<HTML
 <html>
 	<head>
 		<!-- CSS Styles and Scripts from submission page -->
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700' rel='stylesheet' type='text/css'>
-		<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic' rel='stylesheet' type='text/css'>
-		<link href='https://fonts.googleapis.com/css?family=PT+Sans:700,700italic' rel='stylesheet' type='text/css'>
-		<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
-
+		<link href='/resources/font/open_sans_condensed.css' rel='stylesheet'>
+		<link href='/resources/font/sans_pro.css' rel='stylesheet'>
+		<link href='/resources/font/pt_sans.css' rel='stylesheet'>
+		<link href='/resources/font/inconsolata.css' rel='stylesheet'>
 		<link href="/resources/override.css" rel="stylesheet" />
 		<link href="/resources/bootmin.css" rel="stylesheet" />
 		<link href="/resources/badge.css" rel="stylesheet" />
@@ -42,24 +41,28 @@ $all_gradeables = parse_json($gradeable_addresses);
 // FIXME: links to grading/editing gradeable page yet to be added
 //==============================================
 if(isInstructor($username)) {
-	foreach(array_merge(array("Future Items"), $all_gradeables['future'], array("Open Items"), $all_gradeables['submission_open'], array("Closed Items"), $all_gradeables['submission_closed'], array("Items Being Graded"), $all_gradeables['grading_open'], array("Graded Items"), $all_gradeables['graded']) as $gradeable) {
+	foreach(array_merge(array("Future Items"), $all_gradeables['future'], array("Open Items"), $all_gradeables['submission_open'], array("Closed Items"), 
+                        $all_gradeables['submission_closed'], array("Items Being Graded"), $all_gradeables['grading_open'], array("Graded Items"), 
+                        $all_gradeables['graded']) as $gradeable) {
 		if(is_string($gradeable)) {
 			echo '<tr class="bar"><td colspan="6"></td></tr>';
 			echo '<tr class="colspan"><td colspan="6" style="border-bottom:2px black solid;">'.$gradeable.'</td></tr>';
 		}
 		else {
 			if(isElectronic($gradeable)) {
-				if($gradeable['ta-grading'] == "yes" && $gradeable['instructions-url'] != "") {
-					$gradeable_title = '<a href="'.$gradeable['instructions-url'].'" onclick="goToPage("'.$gradeable['instructions-url'].'"); return false;"><label class="has-url">'.$gradeable['gradeable_title'].'</label></a>';
+				if($gradeable['ta_grading'] == "yes" && $gradeable['instructions_url'] != "") {
+					$gradeable_title = '<a href="'.$gradeable['instructions_url'].'" target="_blank"><label class="has-url">'.$gradeable['gradeable_title'].'</label></a>';
 				}
 				else {
 					$gradeable_title = '<label>'.$gradeable['gradeable_title'].'</label>';
 				}
 
 				$submission_date = $gradeable["date_submit"]->format("M j H:i ").' - '.$gradeable["date_due"]->format("M j H:i ");
-				$submission_option = '<button class="btn btn-primary" style="width:80%;" onclick="location.href=\'?semester='.$semester.'&course='.$course.'&assignment_id='.$gradeable["gradeable_id"].'\'">Submit</button></td>';
-
-				if($gradeable['ta-grading'] == "yes") {
+				$submission_option = <<<HTML
+                <button class="btn btn-primary" style="width:100%;" onclick="location.href=\'?semester='{$semester}'&course='{$course}'\\
+                &assignment_id='{$gradeable["gradeable_id"]}'\'">Submit</button></td>';
+HTML;
+				if($gradeable['ta_grading'] == "yes") {
 					$grading_date = $gradeable["date_grade"]->format("M j H:i ").' - '.$gradeable["date_released"]->format("M j H:i ");
 					$grading_option = '<button class="btn btn-primary" style="width:80%;" onclick="location.href=\"#\"">Grade</button>';
 				}
@@ -97,24 +100,27 @@ HTML;
 // FIXME: links to grading page yet to be added
 //==============================================
 else if (isTA($username)) {
-	foreach (array_merge(array("Open Items"), $all_gradeables['submission_open'], array("Closed Items"), $all_gradeables['submission_closed'], array("Items Being Graded"), $all_gradeables['grading_open'], array("Graded Items"), $all_gradeables['graded']) as $gradeable) {
+	foreach (array_merge(array("Open Items"), $all_gradeables['submission_open'], array("Closed Items"), $all_gradeables['submission_closed'], 
+                         array("Items Being Graded"), $all_gradeables['grading_open'], array("Graded Items"), $all_gradeables['graded']) as $gradeable) {
 		if(is_string($gradeable)) {
 			echo '<tr class="bar"><td colspan="5"></td></tr>';
 			echo '<tr class="colspan"><td colspan="5" style="border-bottom:2px black solid;">'.$gradeable.'</td></tr>';
 		}
 		else{
 			if(isElectronic($gradeable)) {
-				if($gradeable['ta-grading'] == "yes" && $gradeable['instructions-url'] != "") {
-					$gradeable_title = '<a href="'.$gradeable['instructions-url'].'" onclick="goToPage("'.$gradeable['instructions-url'].'"); return false;"><label class="has-url">'.$gradeable['gradeable_title'].'</label></a>';
+				if($gradeable['ta_grading'] == "yes" && $gradeable['instructions_url'] != "") {
+					$gradeable_title = '<a href="'.$gradeable['instructions_url'].'" target="_blank"><label class="has-url">'.$gradeable['gradeable_title'].'</label></a>';
 				}
 				else {
 					$gradeable_title = '<label>'.$gradeable['gradeable_title'].'</label>';
 				}
 
 				$submission_date = $gradeable["date_submit"]->format("M j H:i ").' - '.$gradeable["date_due"]->format("M j H:i ");
-				$submission_option = '<button class="btn btn-primary" style="width:100%;" onclick="location.href=\'?semester='.$semester.'&course='.$course.'&assignment_id='.$gradeable["gradeable_id"].'\'">Submit</button></td>';
-
-				if($gradeable['ta-grading'] == "yes") {
+				$submission_option = <<<HTML
+                <button class="btn btn-primary" style="width:100%;" onclick="location.href=\'?semester='{$semester}'&course='{$course}'\\
+                &assignment_id='{$gradeable["gradeable_id"]}'\'">Submit</button></td>';
+HTML;
+				if($gradeable['ta_grading'] == "yes") {
 					$grading_date = $gradeable["date_grade"]->format("M j H:i ").' - '.$gradeable["date_released"]->format("M j H:i ");
 					if($gradeable['date_grade'] > new DateTime('NOW')) {
 						$grading_option = '<button class="btn btn-primary" style="width:100%;" disabled>Grade</button>';
@@ -125,8 +131,7 @@ else if (isTA($username)) {
 				}
 				else{
 				//==================================================================
-				// NOTE: If ta-grading disabled and the item is closed, should TAs still be able to see the item and item listed in being graded?
-				//==================================================================
+				// NOTE: If ta_grading disabled and the item is closed, should TAs still be able to see the item and item listed in being graded?
 					$grading_date = "";
 					$grading_option = "";
 				}
@@ -156,7 +161,8 @@ HTML;
 	}
 }
 else if (isStudent($username)) {
-	foreach (array_merge(array("Open Items"), $all_gradeables['submission_open'], array("Closed Items"), $all_gradeables['submission_closed'], $all_gradeables['grading_open'], array("Graded Items"), $all_gradeables['graded']) as $gradeable) {
+	foreach (array_merge(array("Open Items"), $all_gradeables['submission_open'], array("Closed Items"), $all_gradeables['submission_closed'], 
+             $all_gradeables['grading_open'], array("Graded Items"), $all_gradeables['graded']) as $gradeable) {
 		// check if is a separator
 		if(is_string($gradeable)) {
 			echo '<tr class="bar"><td colspan="3"></td></tr>';
@@ -174,16 +180,17 @@ else if (isStudent($username)) {
 				$button_class = "btn btn-success";
 			}
 
-			// add link if instructions-url provided
-			$instructions_url = ($gradeable['instructions-url'] != "" ? "href=\"{$gradeable['instructions-url']}\"" : "");
-			$url = ($gradeable['instructions-url'] != "" ? "{$gradeable['instructions-url']}" : "");
-			$title_class = $gradeable['instructions-url'] != "" ? "class='has-url'" : "";
+			// add link if instructions_url provided
+			$instructions_url = ($gradeable['instructions_url'] != "" ? "href=\"{$gradeable['instructions_url']}\"" : "");
+			$url = ($gradeable['instructions_url'] != "" ? "{$gradeable['instructions_url']}" : "");
+			$title_class = $gradeable['instructions_url'] != "" ? "class='has-url'" : "";
 
 			echo <<<HTML
 			<tr class="student">
-			<td class="gradeable_title"><a {$instructions_url} onclick="goToPage('{$url}'); return false;"><label {$title_class}>{$gradeable["gradeable_title"]}</label></a></td>
+			<td class="gradeable_title"><a {$instructions_url} href='{$url}' target="_blank"><label {$title_class}>{$gradeable["gradeable_title"]}</label></a></td>
 			<td class="date">{$gradeable["date_due"]->format("M j H:i ")}</td>
-			<td class="option"><button class="{$button_class}" style="width:100%;" onclick="location.href='?semester={$semester}&course={$course}&assignment_id={$gradeable["gradeable_id"]}'">{$submission_message}</button></td>
+			<td class="option"><button class="{$button_class}" style="width:100%;" onclick="location.href='?semester={$semester}&course={$course} \\
+                        &assignment_id={$gradeable["gradeable_id"]}'">{$submission_message}</button></td>
 			</tr>
 HTML;
 		}
@@ -193,23 +200,9 @@ HTML;
 echo <<<HTML
 		</table>
 	</body>
-	<script>
-	//===============================
-	// FIXME: add code that goes to editing gradeable page
-	//===============================
-	function goEdit(id){
-		window.location.href = "";
-	}
-
-	function goToPage(url){
-		if(url)
-			window.location.href = url;
-	}
-	</script>
+<<<<<<< HEAD
 </html>
 HTML;
-
-
 
 function parse_json($gradeable_addresses) {
     $future = array();
@@ -260,7 +253,8 @@ function parse_json($gradeable_addresses) {
 	    	?><script>console.log("is graded");</script><?php
 	    }
 	}
-    $all_gradeables = array('future'=>$future, 'submission_open'=>$submission_open, 'submission_closed'=>$submission_closed, 'grading_open'=>$grading_open, 'graded'=>$graded);
+    $all_gradeables = array('future'=>$future, 'submission_open'=>$submission_open, 'submission_closed'=>$submission_closed, 
+                            'grading_open'=>$grading_open, 'graded'=>$graded);
     return $all_gradeables;
 }
 
@@ -279,7 +273,7 @@ function isStudent($username){
 
 function isElectronic($gradeable) {
 	?><script>console.log("is electronic");</script><?php
-	return $gradeable["gradeable-type"] === "Electronic File";
+	return $gradeable["gradeable_type"] === "Electronic File";
 }
 
 //===============================================================================
