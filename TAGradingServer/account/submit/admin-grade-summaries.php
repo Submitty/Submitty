@@ -18,6 +18,20 @@ if (!is_dir(implode("/",array(__SUBMISSION_SERVER__, "reports","all_grades")))) 
 
 $nl = "\n";
 
+//calculate the maximum score for autograding
+function autogradingTotalAwarded($g_id, $student_id, $active_version){
+    $total = 0;
+    $results_file = __SUBMISSION_SERVER__."/results/".$g_id."/".$student_id."/".$active_version."/submission.json";
+    if (file_exists($results_file)) {
+        $results_file_contents = file_get_contents($results_file);
+        $results = json_decode($results_file_contents, true);
+        foreach($results['testcases'] as $testcase){
+            $total += floatval($testcase['points_awarded']);
+        }
+    }
+    return $total;
+}
+
 // find the syllabus buckets
 $db->query("SELECT DISTINCT g_syllabus_bucket FROM gradeable WHERE g_grade_released_date < now() ORDER BY g_syllabus_bucket ASC", array());
 $buckets = $db->rows();
@@ -68,7 +82,8 @@ foreach($db->rows() as $student_record) {
             titles, 
             comments,
             scores,
-            is_texts
+            is_texts,
+            gd_active_version
         FROM
             users AS u CROSS JOIN gradeable AS g 
             LEFT JOIN (
@@ -79,7 +94,8 @@ foreach($db->rows() as $student_record) {
                     titles, 
                     comments,
                     scores,
-                    is_texts
+                    is_texts,
+                    gd_active_version
                 FROM 
                     gradeable_data AS gd INNER JOIN(
                     SELECT 
@@ -104,7 +120,8 @@ foreach($db->rows() as $student_record) {
 	
     foreach($db->rows() as $gradeable){
         $this_g = array();
-        $this_g[$gradeable['g_id']] = array("name" => $gradeable['g_title'], "score" => floatval($gradeable['score']));
+        $autograding_score = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);
+        $this_g[$gradeable['g_id']] = array("name" => $gradeable['g_title'], "score" => (floatval($gradeable['score'])+floatval($autograding_score)));
        
         // adds late days for electronic gradeables 
         if($gradeable['g_gradeable_type'] == 0){

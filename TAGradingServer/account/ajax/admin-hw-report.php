@@ -37,6 +37,23 @@ function autogradingTotalAwarded($g_id, $student_id, $active_version){
     return $total;
 }
 
+function getAutogradingMaxScore($g_id){
+    $total = 0;
+    $build_file = __SUBMISSION_SERVER__."/config/build/build_".$g_id.".json";
+     if (file_exists($build_file)) {
+        $build_file_contents = file_get_contents($build_file);
+        $results = json_decode($build_file_contents, true);
+        foreach($results['testcases'] as $testcase){
+            $testcase_value = floatval($testcase['points']);
+            if ($testcase_value > 0 && !$testcase['extra_credit']){
+                $total += $testcase_value;
+            }
+        }
+    }
+    return $total;
+}
+
+
 $db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
 foreach($db->rows() as $student_record) {
     // Gather student info, set output filename, reset output
@@ -180,8 +197,8 @@ foreach($db->rows() as $student_record) {
             }
             else {
                 $auto_grading_awarded = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);        
-                                                                                                //TODO replace with autograding total
-                $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . "0" . " ]";
+                $auto_grading_max_score = getAutogradingMaxScore($gradeable['g_id']);                                                                                
+                $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]";
                 $gradefilecontents = file_get_contents($submit_file);
                 $student_output_text .= $nl.$nl.$gradefilecontents.$nl;
             } 
@@ -225,6 +242,8 @@ foreach($db->rows() as $student_record) {
                                                             //TODO replace with total overall score
             $student_output_text .= "TA GRADING TOTAL [ " . $student_grade . " / " . $ta_max_score . " ]". $nl;
             $student_output_text .= "----------------------------------------------------------------------" . $nl;
+            $rubric_total += $auto_grading_max_score;
+            $student_grade += $auto_grading_awarded;
         } 
     
         if($write_output){
