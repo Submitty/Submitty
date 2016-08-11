@@ -433,7 +433,7 @@ HTML;
                                 }
                                 $diff_viewer = $autocheck->getDiffViewer();
                                 $description = $autocheck->getDescription();
-                                if($diff_viewer->hasActualOutput()) {
+                                if($diff_viewer->hasDisplayActual()) {
                                     $return .= <<<HTML
                             <div class='diff-element'>
                                 <h4>Student {$description}</h4>
@@ -442,7 +442,7 @@ HTML;
 HTML;
                                 }
                     
-                                if($diff_viewer->hasDisplayExpected() && $diff_viewer->hasExpectedOutput()) {
+                                if($diff_viewer->hasDisplayExpected()) {
                                     $return .= <<<HTML
                             <div class='diff-element'>
                                 <h4>Instructor {$description}</h4>
