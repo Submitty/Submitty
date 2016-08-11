@@ -155,7 +155,8 @@ class ElectronicGradeable {
     
     
     /**
-        The maximum score for autograding excluding extra credit
+     * @var float
+     * The maximum score for autograding excluding extra credit
     **/
     public $autograding_max = 0;
 

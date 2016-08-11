@@ -12,12 +12,6 @@ echo <<<HTML
             </div>
 
             <div class="modal-footer">
-                <!--<div style="float:left; text-align:left;">
-                    <label style="display: inline;"><input type="radio" style="margin-top:0" name="type" value='all' checked="checked" /> Grade all submissions for selected and past homeworks</label><br />
-                    <label style="display: inline;"><input type="radio" style="margin-top:0" name="type" value='default' /> Fully grade selected homework and regrade past homeworks)</label><br />
-                    <label style="display: inline;"><input type="radio" style="margin-top:0" name="type" value='regrade' /> Only regrade selected and past homeworks (ignore new grades)</label><br />
-                </div>
-                -->
                 <div class="loading-gif" style="display:none;"><span style="float: left;margin-left: -100px;margin-top: 10px;">Generating...</span><img src="{$BASE_URL}/toolbox/include/custom/img/loading.gif"></div>
                 <div style="width:50%; margin-left: 50%; margin-top: 20px; float: right;">
                     <input class="btn btn-primary" type="submit" value="Generate Homework Reports"/>

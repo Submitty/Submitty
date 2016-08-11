@@ -113,7 +113,7 @@ if($user_is_administrator){
         $g_grade_released_date = $old_gradeable['g_grade_released_date'];
         $g_min_grading_group = $old_gradeable['g_min_grading_group'];
         $string = "Save";
-        $action = strtolower('edit');
+        $action = 'edit';
     }
 
     $have_old = json_encode($have_old);
