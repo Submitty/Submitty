@@ -1,5 +1,4 @@
 <?php
-//TODO add labels to numeric text fields
 // Pull out tabs to separate URL
 use app\models\User;
 
@@ -86,7 +85,6 @@ print <<<HTML
             <ul id="myTab" class="nav nav-tabs">
 HTML;
 
-// MAYBE REORDER THIS
 $params = array();
 $db->query("SELECT * FROM gradeable WHERE g_gradeable_type=2 ORDER BY g_id ASC", $params);
 
@@ -123,11 +121,23 @@ foreach($nt_gradeables as $nt_row){
     // get the number of text questions
     $db->query("SELECT COUNT(*) AS cnt from gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", $params);
     $num_text = $db->row()['cnt'];
+    
+    $params = array($g_id);
+    $db->query("
+    SELECT 
+        array_agg(gc_max_value ORDER BY gc_order ASC) as max_scores
+        FROM gradeable_component
+        WHERE g_id=?
+    ", $params);
+    
+    $max_scores = pgArrayToPhp($db->row()['max_scores']);
 
     $colspan = $num_numeric;
     $colspan2 = $num_text;
+    $ta_instructions = (trim($nt_row['g_overall_ta_instructions']) == '') ? '' : '<b>Grading Instructions</b>: ' . $nt_row['g_overall_ta_instructions'];
     print <<<HTML
                 <div class="tab-pane fade{$extra}" id="nt_gradeable{$nt_row["g_id"]}">
+                    {$ta_instructions} <br /> <br />
                     <table class="table table-bordered" id="nt_gradeablesTable" style=" border: 1px solid #AAA;">
                         <thead style="background: #E1E1E1;">
                             <tr>
@@ -251,7 +261,7 @@ HTML;
         for($i=0; $i<$num_numeric; ++$i){
             $title = $titles[$i];
             print <<<HTML
-                    <td>{$title['gc_title']}</td>
+                    <td>{$title['gc_title']} ({$max_scores[$i]})</td>
 HTML;
         }
         print <<<HTML
@@ -277,8 +287,6 @@ HTML;
 HTML;
             
             print <<<HTML
-            
-                            
                             <tr>
                                 <td>
                                     {$student_info["user_id"]} ({$student_info["user_lastname"]}, {$student_info["user_firstname"]})
@@ -314,7 +322,6 @@ HTML;
                                 <td style="width: 10px" id="cell-{$nt_row["g_id"]}-{$row['user_id']}-score">{$total_grade}</td>
 HTML;
             
-            //print the text fields
             for ($i = $num_numeric; $i <$num_numeric+$num_text; ++$i) {
                 $text_field = isset($text_fields[$i]) ? $text_fields[$i] : "";
                 print <<<HTML

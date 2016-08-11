@@ -3,6 +3,7 @@
 include "../../toolbox/functions.php";
 
 use lib\Database;
+use app\models;
 
 check_administrator();
 
@@ -17,335 +18,260 @@ if (!is_dir(implode("/",array(__SUBMISSION_SERVER__,"reports")))) {
     mkdir(implode("/",array(__SUBMISSION_SERVER__,"reports")));
 }
 
-$only_regrade = isset($_GET['regrade']) ? intval($_GET['regrade']) == 1 : false;
-$all = isset($_GET['all']) ? intval($_GET['all']) == 1 : false;
-
-// Get and setup all of the cases of cheating (academic integrity) we've found to be applied when
-// generating the reports
-//TODO academic integrity changes
-
-/*
-$academic_integrity = array();
-$academic_resolutions = array();
-$db->query("SELECT * FROM grades_academic_integrity ORDER BY rubric_id",array());
-foreach ($db->rows() as $row) {
-    if (!isset($academic_integrity[$row['rubric_id']])) {
-        $academic_integrity[$row['rubric_id']] = array();
-        $academic_resolutions[$row['rubric_id']] = array();
-    }
-    array_push($academic_integrity[$row['rubric_id']],$row['student_rcs']);
-    if ($row['penalty'] != null) {
-        $academic_resolutions[$row['rubric_id']][$row['student_rcs']] = floatval($row['penalty']);
-    }
-}*/
-
 $nl = "\n";
 $write_output = True;
 
-$get_g_id = intval($_GET["g_id"]);
-Database::query("SELECT * FROM gradeables WHERE g_id=?", array($get_g_id));
-$get_gradeable = Database::row();
-if (!isset($get_gradeable['g_id'])) {
-    echo "failed|Invalid ID";
-    exit(1);
-}
-
-/*
 // Query the database for all students registered in the class
 $params = array();
-$db->query("
-SELECT *
-FROM students
-ORDER BY student_rcs ASC", $params);
-foreach($db->rows() as $student_record)
-{
-    $student_id = intval($student_record["student_id"]);
-    $student_rcs = $student_record["student_rcs"];
-    $student_last_name = $student_record["student_last_name"];
-    $student_first_name = $student_record["student_first_name"];
-    $student_output_filename = $student_rcs . ".txt";
 
-    $student_section_id = $student_record["student_section_id"];
+function autogradingTotalAwarded($g_id, $student_id, $active_version){
+    $total = 0;
+    $results_file = __SUBMISSION_SERVER__."/results/".$g_id."/".$student_id."/".$active_version."/submission.json";
+    if (file_exists($results_file)) {
+        $results_file_contents = file_get_contents($results_file);
+        $results = json_decode($results_file_contents, true);
+        foreach($results['testcases'] as $testcase){
+            $total += floatval($testcase['points_awarded']);
+        }
+    }
+    return $total;
+}
 
-    if(intval($student_section_id) != 0) {
-        $db->query("
-SELECT r.*, g.*, (case when ex_late_days is null then 0 else ex_late_days end)
-FROM rubrics r
-LEFT JOIN (
-	SELECT *
-	FROM grades
-	WHERE student_rcs=?
-) as g on r.rubric_id=g.rubric_id
-LEFT JOIN (
-	SELECT ex_rubric_id, ex_late_days
-	FROM late_day_exceptions
-	WHERE ex_student_rcs=?
-) as ex on r.rubric_id=ex.ex_rubric_id
-WHERE r.rubric_due_date<=?
-ORDER BY r.rubric_due_date ASC
-", array($student_rcs, $student_rcs, $get_rubric['rubric_due_date']));
-        $late_days_used_overall = 0;
-        $late_days_used_remaining = 0;
-        foreach ($db->rows() as $rubric) {
-            $params = array($student_rcs, $rubric['rubric_due_date']);
-            $db->query("SELECT allowed_lates FROM late_days WHERE student_rcs=? AND since_timestamp <= ? ORDER BY since_timestamp DESC LIMIT 1", $params);
-            $late_day = $db->row();
-            $student_allowed_lates = isset($late_day['allowed_lates']) ? $late_day['allowed_lates'] : 0;
-            $rubric_id = $rubric['rubric_id'];
-            $rubric_sep = $rubric['rubric_parts_sep'];
-            $rubric_total = 0;
-            $regraded_only = !($rubric_id == $get_rubric_id);
+function getAutogradingMaxScore($g_id){
+    $total = 0;
+    $build_file = __SUBMISSION_SERVER__."/config/build/build_".$g_id.".json";
+     if (file_exists($build_file)) {
+        $build_file_contents = file_get_contents($build_file);
+        $results = json_decode($build_file_contents, true);
+        foreach($results['testcases'] as $testcase){
+            $testcase_value = floatval($testcase['points']);
+            if ($testcase_value > 0 && !$testcase['extra_credit']){
+                $total += $testcase_value;
+            }
+        }
+    }
+    return $total;
+}
 
-            // Gather student info, set output filename, reset output
-            $student_output_text_main = "";
-            $student_output_academic = "";
-            $student_output_text = array();
-            $student_grade = array();
-            $grade_comment = "";
 
-            if(isset($academic_integrity[$rubric_id]) && in_array($student_rcs, $academic_integrity[$rubric_id])
-                && !(isset($academic_resolutions[$rubric_id]) && array_key_exists($student_rcs, $academic_resolutions[$rubric_id]))) {
+$db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
+foreach($db->rows() as $student_record) {
+    // Gather student info, set output filename, reset output
+    $student_id = $student_record["user_id"];
+    $student_first_name = $student_record["user_firstname"];
+    $student_last_name = $student_record["user_lastname"];
+    $student_output_filename = $student_id . ".txt";	
+    $student_section = intval($student_record['registration_section']);
+    $late_days_used_overall = 0;
+    $params = array($student_id);
+    
+    // SQL sorcery ༼╰( ͡° ͜ʖ ͡° )つ──☆*:・ﾟ
+    $db->query("
+    SELECT * FROM (
+        SELECT 
+            g_syllabus_bucket, 
+            g_title, 
+            g_gradeable_type, 
+            g.g_id, 
+            u.user_id, 
+            case when score is null then -100 else score end, 
+            titles, 
+            comments,
+            scores,
+            eg_submission_due_date,
+            gd_status,
+            gd_grader_id,
+            gd_overall_comment,
+            is_extra_credits,
+            gd_active_version,
+            grading_notes,
+            max_scores
+        FROM
+            users AS u CROSS JOIN gradeable AS g 
+            LEFT JOIN (
+                SELECT 
+                    gd.g_id, 
+                    gd_user_id, 
+                    score, 
+                    titles, 
+                    comments,
+                    scores,
+                    eg_submission_due_date,
+                    gd_status,
+                    gd_grader_id,
+                    gd_overall_comment,
+                    is_extra_credits,
+                    gd_active_version,
+                    grading_notes,
+                    max_scores
+                FROM 
+                    gradeable_data AS gd INNER JOIN(
+                    SELECT 
+                        gd_id, 
+                        SUM(gcd_score) AS score, 
+                        array_agg(gc_title ORDER BY gc_order ASC) AS titles, 
+                        array_agg(gcd_component_comment ORDER BY gc_order ASC) AS comments,
+                        array_agg(gcd_score ORDER BY gc_order ASC) AS scores,
+                        array_agg(gc_is_extra_credit ORDER BY gc_order ASC) AS is_extra_credits,
+                        array_agg(gc_student_comment ORDER BY gc_order ASC) AS grading_notes,
+                        array_agg(gc_max_value ORDER BY gc_order ASC) AS max_scores
+                    FROM 
+                        gradeable_component_data AS gcd INNER JOIN 
+                            gradeable_component AS gc ON gcd.gc_id=gc.gc_id
+                    GROUP BY gd_id
+                ) AS gd_sum ON gd.gd_id=gd_sum.gd_id
+                INNER JOIN electronic_gradeable AS eg ON gd.g_id=eg.g_id
+            ) AS total ON total.g_id = g.g_id AND total.gd_user_id=u.user_id
+        WHERE 
+            g_grade_released_date < now()
+        ORDER BY g_syllabus_bucket ASC, g_grade_released_date ASC, u.user_id ASC
+        ) AS user_grades
+    WHERE user_id=?
+    AND g_gradeable_type='0'
+        ",array($student_id));
+	
+    foreach($db->rows() as $gradeable){
+        $params = array($student_id, $gradeable['eg_submission_due_date']);
+        $db->query("SELECT allowed_late_days FROM late_days WHERE user_id=? AND since_timestamp <= ? ORDER BY since_timestamp DESC LIMIT 1", $params);
+        $late_day = $db->row();
+        $student_allowed_lates = isset($late_day['allowed_late_days']) ? $late_day['allowed_late_days'] : 0;
+        $g_id = $gradeable['g_id'];
+        $rubric_total = 0;
+        $ta_max_score = 0;
+        // Gather student info, set output filename, reset output
+        $student_output_text_main = "";
+        $student_output_text = "";
+        $student_grade = 0;
+        $grade_comment = "";
+        
+        if ($gradeable['gd_status'] == 1) {
+            $db->query("SELECT late_days_used FROM late_days_used WHERE g_id=? AND user_id=?", array($g_id, $student_id));
+            $late_days_used = $db->row()['late_days_used'];
+            $grade_days_late = $late_days_used;
+        }
+        else {
+            $grade_days_late = 0;
+        }
+    
+        $late_days_used_overall += $grade_days_late;
+        
+        // Check to see if student has been graded yet
+        $graded=true;
+        if($gradeable["score"] != -100 && isset($gradeable["gd_grader_id"])) {
+            $grade_user_id = $gradeable["gd_grader_id"];
+            $grade_comment = htmlspecialchars($gradeable["gd_overall_comment"]);
+            // Query database to gather TA info
+            $params = array($grade_user_id);
+            $db->query("SELECT * FROM users WHERE user_id=?", $params);
+            $user_record = $db->row();
+            $grade_user_first_name = $user_record["user_firstname"];
+            $grade_user_last_name = $user_record["user_lastname"];
+            $grade_user_email = $user_record["user_email"];
+            
+            // Generate output 
+            $student_output_text_main .= strtoupper($gradeable['g_title']) . " GRADE" . $nl;
+            $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
+            if (!($grade_user_first_name == "Mentor" || $grade_user_first_name == "TA" || $grade_user_first_name == "")) {
+                $student_output_text_main .= "Graded by: " . $grade_user_first_name . " " . $grade_user_last_name . " <" . $grade_user_email . ">" . $nl;
+            }
+            $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: " . $grade_user_email . $nl;
+            $student_output_text_main .= "Late days used on this homework: " . $grade_days_late . $nl;
+            if ($student_allowed_lates > 0) {
+                $student_output_text_main .= "Late days used overall: " . $late_days_used_overall . $nl;
+                $student_output_text_main .= "Late days remaining: " . max(0, $student_allowed_lates - $late_days_used_overall) . $nl;
+            }
+            $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
 
-                $db->query("SELECT question_part_number FROM questions WHERE rubric_id=? GROUP BY question_part_number",array($rubric_id));
-                for($i = 1; $i <= count($db->rows()); $i++) {
-                    $student_output_text[$i] = "academic";
-                }
-                $student_output_text_main .= "[ YOUR HOMEWORK IS BEING FURTHER REVIEWED FOR EVIDENCE OF ACADEMIC INTEGRITY VIOLATION ]";
+            // Query database for specific questions from this rubric
+            $grading_notes = pgArrayToPhp($gradeable['comments']);
+            $question_totals = pgArrayToPhp($gradeable['scores']);
+            $question_messages = pgArrayToPhp($gradeable['titles']);
+            $question_extra_credits = pgArrayToPhp($gradeable['is_extra_credits']);
+            $question_grading_notes = pgArrayToPhp($gradeable['grading_notes']);
+            $question_max_scores = pgArrayToPhp($gradeable['max_scores']);
+            $question_total = 0; 
+
+            $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$gradeable['gd_active_version']."/.submit.grade";
+            if (!file_exists($submit_file)) {
+                $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
             }
             else {
+                $auto_grading_awarded = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);        
+                $auto_grading_max_score = getAutogradingMaxScore($gradeable['g_id']);                                                                                
+                $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]";
+                $gradefilecontents = file_get_contents($submit_file);
+                $student_output_text .= $nl.$nl.$gradefilecontents.$nl;
+            } 
 
-                if ($rubric['grade_status'] == 1) {
-                    $grade_days_late = max(0, $rubric['grade_days_late'] - $rubric['ex_late_days']);
+            for ($i=0; $i < count($grading_notes); ++$i){
+                $grading_note = $grading_notes[$i];
+                $question_total = floatval($question_totals[$i]);
+                $question_max_score = floatval($question_max_scores[$i]);
+                $question_message = $question_messages[$i];
+                $question_extra_credit = intval($question_extra_credits[$i]) == 1;
+                $question_grading_note = $question_grading_notes[$i];
+                // ensure we have indexes for this part
+                if($question_total == -100){
+                    $grade_question_score = "ERROR";
+                    $grade_question_comment = "[ ERROR GRADE MISSING ]";
+                    // Found error, subtract 1 million to ensure we catch the bad grade
+                    $student_grade -= 1000000;
                 }
-                else {
-                    $grade_days_late = 0;
+               else{
+                    $grade_question_score = floatval($question_total);
+                    $grade_question_comment = htmlspecialchars($grading_note);
                 }
-
-                $late_days_used_overall += $grade_days_late;
-
-                // Query database to get grades (and regrades if old homeworks)
-                $params = array($rubric_id, $student_rcs);
-                if (($regraded_only == true || $only_regrade == true) && $all != true) {
-                    if ($rubric['grade_is_regrade'] != 1) {
-                        continue;
-                    }
+                // Generate output for each question
+                $student_output_text .= $question_message . " [ " . $grade_question_score . " / " . $question_max_score . " ]" . $nl;
+                // general rubric notes intended for TA & student
+                if ($question_grading_note != "") {
+                    $student_output_text .= "Rubric: ". $question_grading_note . $nl;
                 }
-                $grade_record = $rubric;
-                // Check to see if student has been graded yet
-                if(isset($grade_record["grade_id"])) {
-                    $grade_id = intval($grade_record["grade_id"]);
-                    $grade_user_id = intval($grade_record["grade_user_id"]);
-                    $grade_comment = htmlspecialchars($grade_record["grade_comment"]);
-
-                    // Query database to gather TA info
-                    $params = array($grade_user_id);
-                    $db->query("SELECT * FROM users WHERE user_id=?", $params);
-                    $user_record = $db->row();
-
-                    $grade_user_first_name = $user_record["user_firstname"];
-                    $grade_user_last_name = $user_record["user_lastname"];
-                    $grade_user_email = $user_record["user_email"];
-
-                    // Generate output (period is string concatenation in PHP)
-                    $student_output_text_main .= strtoupper($rubric['rubric_name']) . " GRADE" . $nl;
-                    $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
-
-                    if (!($grade_user_first_name == "Mentor" || $grade_user_first_name == "TA" || $grade_user_first_name == "")) {
-                        $student_output_text_main .= "Graded by: " . $grade_user_first_name . " " . $grade_user_last_name . " <" . $grade_user_email . ">" . $nl;
-                    }
-
-                    $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: " . $grade_user_email . $nl;
-
-
-                    $student_output_text_main .= "Late days used on this homework: " . $grade_days_late . $nl;
-                    if ($student_allowed_lates > 0) {
-                        $student_output_text_main .= "Late days used overall: " . $late_days_used_overall . $nl;
-                        $student_output_text_main .= "Late days remaining: " . max(0, $student_allowed_lates - $late_days_used_overall) . $nl;
-                    }
-                    //$student_output_text_main .= $nl;
-                    $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
-
-                    // Query database for specific questions from this rubric
-                    $part_grade = array();
-                    $question_part_number_last = -1;
-
-                    $params = array($grade_id, $rubric_id);
-                    $db->query("
-SELECT q.*, g.*
-FROM questions q
-LEFT JOIN (
-    SELECT *
-    FROM grades_questions
-    WHERE grade_id=?
-) as g ON g.question_id=q.question_id
-WHERE q.rubric_id=?
-ORDER BY q.question_part_number ASC, q.question_number ASC", $params);
-                    foreach($db->rows() as $question_record)
-                    {
-
-                        // Gather question info
-                        $question_id = intval($question_record["question_id"]);
-                        $question_part_number = intval($question_record["question_part_number"]);
-                        $question_message = $question_record["question_message"];
-                        $question_grading_note = $question_record["question_grading_note"];
-                        $question_total = floatval($question_record["question_total"]);
-                        $question_default = $question_record["question_default"];
-                        $question_extra_credit = intval($question_record["question_extra_credit"]) == 1;
-
-                        // ensure we have indexes for this part
-                        if (!isset($student_output_text[$question_part_number]) || !isset($student_grade[$question_part_number])) {
-                            $student_output_text[$question_part_number] = "";
-                            $student_grade[$question_part_number] = 0;
-                            $part_grade[$question_part_number] = 0;
-                        }
-
-                        // Gather grade for student for this question
-                        $params = array($grade_id, $question_id);
-
-                        $grade_question_record = $question_record;
-
-                        if(!isset($grade_question_record["grade_question_score"]))
-                        {
-                            $grade_question_score = "ERROR";
-                            $grade_question_comment = "[ ERROR GRADE MISSING ]";
-
-                            // Found error, subtract 1 million to ensure we catch the bad grade
-                            $student_grade[$question_part_number] -= 1000000;
-                        }
-                        else
-                        {
-                            $grade_question_score = floatval($grade_question_record["grade_question_score"]);
-                            //$grade_question_comment = $grade_question_record["grade_question_comment"];
-                            $grade_question_comment = htmlspecialchars($grade_question_record["grade_question_comment"]);
-                        }
-
-                        // we only need to do that for homeworks without separate parts
-                        if($question_part_number_last != $question_part_number && $rubric_sep != true)
-                        {
-                            //$student_output_text[$question_part_number] .= "PART " . $question_part_number . $nl;
-                            //$student_output_text[$question_part_number] .= "------" . $nl;
-                        }
-
-                        // Generate output for each question
-                        $student_output_text[$question_part_number] .= $question_message . " [ " . $grade_question_score . " / " . $question_total . " ]" . $nl;
-
-                        // general rubric notes intended for TA & student
-                        if ($question_grading_note != "") {
-                            $student_output_text[$question_part_number] .= "Rubric: ". $question_grading_note . $nl;
-                        }
-
-                        if ($grade_question_comment != "") {
-                            $student_output_text[$question_part_number] .= $nl."   TA NOTE: " . $grade_question_comment . $nl;
-                        }
-                        else if ($question_default != "" && isset($question_default) && $question_total == $grade_question_score) {
-                            $student_output_text[$question_part_number] .= $nl."   TA NOTE: " . $question_default . $nl;
-                        }
-
-                        $student_output_text[$question_part_number] .= $nl;
-
-                        // Keep track of students grade and rubric total
-                        $student_grade[$question_part_number] += $grade_question_score;
-
-                        $rubric_total += ($question_extra_credit ? 0 : $question_total);
-                        $part_grade[$question_part_number] += ($question_extra_credit ? 0 : $question_total);
-
-                        $question_part_number_last = $question_part_number;
-                    }
-
-                    // Run through all parts now and put the footer text as approprtiate
-                    foreach($student_output_text as $part => $v) {
-                        if ($part == 0) {
-                            // If it's part 0, then we append auto-grading total as well as auto-grader log
-                            $student_output_text[$part] .= "AUTO-GRADING TOTAL [ " . $student_grade[$part] . " / " . $part_grade[$part] . " ]";
-
-                            $submit_file = __SUBMISSION_SERVER__."/results/".$rubric['rubric_submission_id']."/".$student_rcs."/".$grade_record['grade_active_assignment']."/.submit.grade";
-
-                            if (!file_exists($submit_file)) {
-                                $student_output_text[$part] .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
-                            }
-                            else {
-                                $gradefilecontents = file_get_contents($submit_file);
-                                $student_output_text[$part] .= $nl.$nl.$gradefilecontents.$nl;
-                            }
-                        }
-                        else {
-                            if ($rubric_sep) {
-                                $student_output_text[$part] .= "PART " . $part . " GRADE [ " . $student_grade[$part] . " / " . $part_grade[$part] . " ]". $nl;
-                            }
-                            else {
-                                $student_output_text[$part] .= "TA GRADING TOTAL [ " . $student_grade[$part] . " / " . $part_grade[$part] . " ]". $nl;
-                            }
-                        }
-
-                        $student_output_text[$part] .= "----------------------------------------------------------------------" . $nl;
-                    }
-
-                    // If output is all one file, condense to one element array
-                    if ($rubric_sep == false) {
-                        $student_output_text = array(implode($nl, $student_output_text));
-                    }
+                if ($grade_question_comment != "") {
+                    $student_output_text .= $nl."   TA NOTE: " . $grade_question_comment . $nl;
                 }
+                else if ($question_default != "" && isset($question_default) && $question_total == $grade_question_score) {
+                    $student_output_text .= $nl."   TA NOTE: " . $question_default . $nl;
+                }
+                $student_output_text .= $nl;
+                // Keep track of students grade and rubric total
+                $student_grade += $grade_question_score;
+                $rubric_total += (($question_extra_credit && $question_max_score > 0) ? 0 : $question_max_score);
+                $ta_max_score += (($question_extra_credit && $question_max_score > 0) ? 0 : $question_max_score);
+            }
+                                                            //TODO replace with total overall score
+            $student_output_text .= "TA GRADING TOTAL [ " . $student_grade . " / " . $ta_max_score . " ]". $nl;
+            $student_output_text .= "----------------------------------------------------------------------" . $nl;
+            $rubric_total += $auto_grading_max_score;
+            $student_grade += $auto_grading_awarded;
+        } 
+    
+        if($write_output){
+            $student_final_grade = $student_grade;
+            $student_output_last = strtoupper($gradeable['g_title']) . " GRADE [ " . $student_final_grade . " / " . $rubric_total . " ]" . $nl;
+            $student_output_last .= $nl;
+            $student_output_last .= "OVERALL NOTE FROM TA: " . ($grade_comment != "" ? $grade_comment . $nl : "No Note") . $nl;
+            $student_output_last .= "----------------------------------------------------------------------" . $nl;
+
+            $dir = implode("/", array(__SUBMISSION_SERVER__, "reports", $gradeable['g_id']));
+            
+            if (!create_dir($dir)) {
+                print "failed to create directory {$dir}";
+                exit();
+            }
+            $save_filename = implode("/", array($dir, $student_output_filename));
+
+            $student_final_output = $student_output_text_main . $student_output_text. $student_output_last;
+
+            if ($student_final_output == "") {
+                $student_final_output = "[ TA HAS NOT GRADED ASSIGNMENT, CHECK BACK LATER ]";
             }
 
-            if($write_output)
-            {
-                $student_final_grade = array_sum($student_grade);
-                if(isset($academic_resolutions[$rubric_id]) && array_key_exists($student_rcs, $academic_resolutions[$rubric_id]))
-                {
-                    $student_resolution = $academic_resolutions[$rubric_id];
-                    $student_penalty_grade = $student_final_grade * floatval($student_resolution[$student_rcs]);
-                    $student_output_academic .= "[ YOUR HOMEWORK IS BEING PENALIZED DUE TO AN ACADEMIC INTEGRITY VIOLATION ]" . $nl;
-                    $student_output_academic .= "[ PENALTY: -" . intval(100.0 - (100.0 * floatval($student_resolution[$student_rcs]))) . "% OFF OF THE ORIGINAL GRADE ]" . $nl;
-                    $student_output_academic .= "PENALIZED " . strtoupper($rubric['rubric_name']) . " GRADE [ " . $student_penalty_grade . " / " . $rubric_total . " ]". $nl;
-                    $student_output_academic .= "----------------------------------------------------------------------" . $nl;
-                }
-
-                $student_output_last = strtoupper($rubric['rubric_name']) . " GRADE [ " . $student_final_grade . " / " . $rubric_total . " ]" . $nl;
-                $student_output_last .= $nl;
-                $student_output_last .= "OVERALL NOTE FROM TA: " . ($grade_comment != "" ? $grade_comment . $nl : "No Note") . $nl;
-                $student_output_last .= "----------------------------------------------------------------------" . $nl;
-
-                $rubric_submission_parts = explode(",", $rubric['rubric_parts_submission_id']);
-                foreach($student_output_text as $k => $output) {
-                    if ($output == "") { continue; }
-
-                    if($rubric_sep == true) {
-                        $dir = implode("/",array(__SUBMISSION_SERVER__, "reports", $rubric['rubric_submission_id'].$rubric_submission_parts[$k-1]));
-                    }
-                    else {
-                        $dir = implode("/", array(__SUBMISSION_SERVER__, "reports", $rubric['rubric_submission_id']));
-                    }
-                    if (!create_dir($dir)) {
-                        print "failed to create directory {$dir}";
-                        exit();
-                    }
-                    $save_filename = implode("/", array($dir, $student_output_filename));
-
-                    $student_final_output = $student_output_text_main . $output . $student_output_last;
-                    if ($output == "academic") {
-                        $student_final_output .= $student_output_academic;
-                    }
-                    else {
-                        if ($student_final_output == "") {
-                            $student_final_output = "[ TA HAS NOT GRADED ASSIGNMENT, CHECK BACK LATER ]";
-                        }
-
-                        $student_final_output .= $student_output_academic;
-                    }
-
-                    if (file_put_contents($save_filename, $student_final_output) === false) {
-                        print "failed to write {$save_filename}\n";
-                    }
-                }
+            if (file_put_contents($save_filename, $student_final_output) === false) {
+                print "failed to write {$save_filename}\n";
             }
         }
     }
 }
 
-$db->query("UPDATE grades SET grade_is_regraded=0",array());
-
 echo "updated";
-
-if (isset($_GET['develop']) && $_GET['develop'] == "1" && app\models\User::$is_developer) {
-    echo "|".(microtime_float()-$start)."|".$db->totalQueries();
-}*/

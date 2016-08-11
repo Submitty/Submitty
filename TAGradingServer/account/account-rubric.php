@@ -133,7 +133,8 @@ if ($calculate_diff) {
             }
         });
 
-        $("#score_total").html(total + " / {$eg->eg_details['eg_total']}");
+        $("#score_total").html(parseFloat(total + {$eg->autograding_points})+" / "+parseFloat({$eg->autograding_max}+{$eg->eg_details['eg_total']}) + "&emsp;&emsp;&emsp;"+
+                            " AUTO-GRADING: " + {$eg->autograding_points} + "/" + {$eg->autograding_max});
     }
 
     function load_tab_icon(tab_id, iframe_id, points_user, points_total) {
@@ -355,7 +356,6 @@ HTML;
             $output .= <<<HTML
                                 </textarea>
 HTML;
-            $output .= sourceSettingsJS($testcase['execute_logfile'], $source_number);
             $output .= <<<HTML
                             </div>
                         </div>
@@ -630,7 +630,6 @@ HTML;
 
 JS;
         $output .= "                                    </script>";
-
     }
     $output .= <<<HTML
 
@@ -644,8 +643,9 @@ HTML;
 if(isset($_GET["individual"])) {
     $output .= <<<HTML
                         <tr>
-                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;"><strong>CURRENT GRADE</strong></td>
-                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;"><strong id="score_total">0 / {$eg->eg_details['eg_total']}</strong></td>
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;"><strong>TOTAL</strong></td>
+                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;"><strong id="score_total">0 / {$eg->eg_details['eg_total']} &emsp;&emsp;&emsp;
+                            AUTO-GRADING {$eg->autograding_points} / {$eg->autograding_max}</strong></td>
                         </tr>
 HTML;
 }
@@ -654,8 +654,9 @@ else {
                         <tr>
                             <td style="background-color: #EEE; border-top: 1px solid #CCC;"></td>
                             <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"></td>
-                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"><strong>CURRENT GRADE</strong></td>
-                            <td style="background-color: #EEE; border-top: 1px solid #CCC;"><strong id="score_total">0 / {$eg->eg_details['eg_total']}</strong></td>
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"><strong>TOTAL</strong></td>
+                            <td style="background-color: #EEE; border-top: 1px solid #CCC;"><strong id="score_total">0 / {$eg->eg_details['eg_total']}&emsp;&emsp;&emsp;
+                            AUTO-GRADING {$eg->autograding_points} / {$eg->autograding_max}</strong></td>
                         </tr>
 HTML;
 }
