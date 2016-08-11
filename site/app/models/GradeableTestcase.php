@@ -19,6 +19,8 @@ use app\libraries\Utils;
 class GradeableTestcase {
     private $core;
     
+    private $index;
+    
     /** @var string */
     private $name = "";
     /** @var string */
@@ -33,8 +35,9 @@ class GradeableTestcase {
     private $compilation_output = "";
     private $autochecks = array();
     
-    public function __construct(Core $core, $testcase) {
+    public function __construct(Core $core, $testcase, $idx) {
         $this->core = $core;
+        $this->index = $idx;
         
         if (isset($testcase['title'])) {
             $this->name = Utils::prepareHtmlString($testcase['title']);
@@ -67,8 +70,11 @@ class GradeableTestcase {
         }
         
         if (isset($testcase['autochecks'])) {
-            foreach ($testcase['autochecks'] as $autocheck) {
-                $this->autochecks[] = new GradeableAutocheck($autocheck, $this->core->getConfig()->getCoursePath(), $result_path);
+            foreach ($testcase['autochecks'] as $idx => $autocheck) {
+                $index = "id_{$this->index}_{$idx}";
+                $this->autochecks[] = new GradeableAutocheck($autocheck,
+                                                             $this->core->getConfig()->getCoursePath(),
+                                                             $result_path, $index);
             }
         }
         
