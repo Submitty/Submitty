@@ -23,7 +23,7 @@ HTML;
 $iframe .= $diffViewer->getCSS();
 $iframe .= $diffViewer->getJavascript();
 
-$has_diff = false;
+$no_diff = true;
 
 $testcase = json_decode(urldecode($_GET['testcases']), true);
 $i = 0;
@@ -59,7 +59,7 @@ if (isset($testcase['diffs']) && count($testcase['diffs']) > 0) {
                 $iframe .= "Expected<br />{$expected}";
             }
             $iframe .= "<br /><br />";
-            $has_diff = $diffViewer->exists_difference();
+            $no_diff = $no_diff && !$diffViewer->exists_difference();
         }
         else {
             if ($actual != "") {
@@ -90,7 +90,7 @@ HTML;
     $iframe .= sourceSettingsJS($testcase['compilation_output'], $i++);
 }
 
-$diff_difference = ($has_diff) ? "1" : "0";
+$diff_difference = ($no_diff) ? "0" : "1";
 $iframe .= "\n\n<input type='hidden' name='exists_difference' value='{$diff_difference}' />";
 
 echo $iframe;
