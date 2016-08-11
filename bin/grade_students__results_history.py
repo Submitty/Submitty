@@ -3,6 +3,7 @@
 import json
 import sys
 import os
+import collections
 
 
 #####################################
@@ -16,13 +17,13 @@ if (len(sys.argv)) != 12 :
 json_file = str(sys.argv[1])
 if os.path.isfile(json_file):
     with open (json_file,'r') as infile:
-        obj = json.load(infile)
+        obj = json.load(infile, object_pairs_hook=collections.OrderedDict)
 else :
     obj = []
 
 #####################################
 # CREATE THE NEWEST INFO BLOB
-blob = {}
+blob = collections.OrderedDict()
 blob["assignment_deadline"] = str(sys.argv[2])
 blob["submission_time"]     = str(sys.argv[3])
 seconds_late                = int(sys.argv[4])
@@ -30,10 +31,9 @@ if (seconds_late > 0) :
     minutes_late = int( (seconds_late+60-1)       / 60         )
     hours_late   = int( (seconds_late+60*60-1)    / (60*60)    )
     days_late    = int( (seconds_late+60*60*24-1) / (60*60*24) )
-    blob["days_late_(before_extensions)"] = days_late
+    blob["days_late_before_extensions"] = days_late
 blob["queue_time"]         = str(sys.argv[5])
-if (str(sys.argv[6]) == "BATCH") :
-    blob["batch_regrade"]  = True
+blob["batch_regrade"] = True if str(sys.argv[6]) == "BATCH" else False
 blob["grading_began"]      = str(sys.argv[7])
 blob["wait_time"]          = int(sys.argv[8])
 blob["grading_finished"]   = str(sys.argv[9])
@@ -47,4 +47,4 @@ if (autograde_array[0] == "Automatic") :
 #  ADD IT TO THE HISTORY 
 obj.append(blob);
 with open (json_file,'w') as outfile:
-    json.dump(obj,outfile,sort_keys=True,indent=4, separators=(',', ': '))
+    json.dump(obj,outfile,indent=4, separators=(',', ': '))
