@@ -252,6 +252,7 @@ textarea {
 
 .clear {
     clear: both;
+    margin-bottom: 20px;
 }
 
 #page-info {
