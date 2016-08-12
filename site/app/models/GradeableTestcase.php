@@ -11,7 +11,7 @@ use app\libraries\Utils;
  *
  * Contains information pertaining to individual auto-grader test cases that are
  * detailed in the config/build/build_*.json files. Additionally, can load in information
- * from a submission.json file to set additional information pertaining to each testcase.
+ * from a results.json file to set additional information pertaining to each testcase.
  * We only really need to do this for the version we're actually looking at and no others
  * as we don't need that high level of information (as we really only ever need late days,
  * points awarded, and if it's the active version).

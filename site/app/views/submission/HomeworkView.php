@@ -315,11 +315,21 @@ HTML;
                 if($gradeable->hasResults()) {
                     $return .= <<<HTML
 submission timestamp: {$results['submission_time']}<br />
-days late (before extensions): {$results['days_late']}<br />
-<br />
-wait time: {$results['wait_time']}<br />
-grade time: {$results['grade_time']}<br />
+days late: {$results['days_late']} (before extensions)<br />
+grading time: {$results['grade_time']} seconds<br />
 HTML;
+                    if($results['num_autogrades'] > 1) {
+                      $regrades = $results['num_autogrades']-1;
+                      $return .= <<<HTML
+<br />
+number of re-autogrades: {$regrades}<br />
+last re-autograde finished: {$results['grading_finished']}<br />
+HTML;
+                    } else {
+                      $return .= <<<HTML
+queue wait time: {$results['wait_time']} seconds<br />
+HTML;
+                    }
                 }
                 $return .= <<<HTML
         </div>
