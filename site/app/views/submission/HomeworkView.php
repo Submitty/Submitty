@@ -129,19 +129,23 @@ HTML;
 HTML;
                 }
             }
-    
-            // TODO: We probably want to move this into the ready element into drag-and-drop.js
             if ($gradeable->getCurrentVersion() == $gradeable->getHighestVersion() && $gradeable->getCurrentVersion() > 0) {
                 $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() { 
+        $(document).ready(function() {
             setUsePrevious();
             {$old_files}
-            setButtonStatus();
         });
     </script>
 HTML;
             }
+                $return .= <<<HTML
+    <script type="text/javascript">
+        $(document).ready(function() {
+            setButtonStatus();
+        });
+    </script>
+HTML;
             $return .= <<<HTML
     
     <script type="text/javascript">
@@ -429,7 +433,7 @@ HTML;
                                 }
                                 $diff_viewer = $autocheck->getDiffViewer();
                                 $description = $autocheck->getDescription();
-                                if($diff_viewer->hasActualOutput()) {
+                                if($diff_viewer->hasDisplayActual()) {
                                     $return .= <<<HTML
                             <div class='diff-element'>
                                 <h4>Student {$description}</h4>
@@ -438,7 +442,7 @@ HTML;
 HTML;
                                 }
                     
-                                if($diff_viewer->hasDisplayExpected() && $diff_viewer->hasExpectedOutput()) {
+                                if($diff_viewer->hasDisplayExpected()) {
                                     $return .= <<<HTML
                             <div class='diff-element'>
                                 <h4>Instructor {$description}</h4>
@@ -449,6 +453,7 @@ HTML;
                     
                                 $return .= <<<HTML
                 </div>
+                <div class="clear"></div>
 HTML;
                             }
                         }

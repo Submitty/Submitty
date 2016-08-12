@@ -201,8 +201,8 @@ abstract class Gradeable {
         }
 
         if (isset($details['testcases'])) {
-            foreach ($details['testcases'] as $testcase) {
-                $testcase = new GradeableTestcase($this->core, $testcase);
+            foreach ($details['testcases'] as $idx => $testcase) {
+                $testcase = new GradeableTestcase($this->core, $testcase, $idx);
                 $this->testcases[] = $testcase;
                 $this->normal_points += $testcase->getNormalPoints();
                 $this->non_hidden_points += $testcase->getNonHiddenPoints();
