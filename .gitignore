@@ -1,7 +1,7 @@
 .DS_Store
 *.autosave
 *.orig*
-public/site_path.txt
+public/
 output/
 *~
 *.o

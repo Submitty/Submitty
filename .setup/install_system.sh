@@ -66,8 +66,9 @@ if [ ${VAGRANT} == 1 ]; then
     chmod +rx /etc/motd
 
     echo "192.168.56.101    test-submit test-submit.cs.rpi.edu" >> /etc/hosts
-    echo "192.168.56.102    test-svn test-svn.cs.rpi.edu" >> /etc/hosts
-    echo "192.168.56.103    test-hwgrading test-hwgrading.cs.rpi.edu hwgrading" >> /etc/hosts
+    echo "192.168.56.102    test-cgi test-cgi.cs.rpi.edu" >> /etc/hosts
+    echo "192.168.56.103    test-svn test-svn.cs.rpi.edu" >> /etc/hosts
+    echo "192.168.56.104    test-hwgrading test-hwgrading.cs.rpi.edu" >> /etc/hosts
 fi
 
 
@@ -206,8 +207,7 @@ echo "Binding static IPs to \"Host-Only\" virtual network interface."
 printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
 printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
 printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-printf "auto eth1:3\niface eth1:3 inet static\naddress 192.168.56.104\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-printf "auto eth1:4\niface eth1:4 inet static\naddress 192.168.56.105\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
+printf "auto eth1:3\niface eth1:3 inet static\naddress 192.168.56.104\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
 
 # Turn them on.
 ifup eth1 eth1:1 eth1:2 eth1:3 eth1:4
@@ -282,21 +282,6 @@ a2enmod include actions cgi suexec authnz_external headers ssl
 mkdir /etc/apache2/ssl
 cd /etc/apache2/ssl
 echo "creating ssl certificates"
-echo -e "US
-New York
-Troy
-RPI
-CSCI
-.
-." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout submit.key -out submit.crt > /dev/null 2>&1
-
-echo -e "US
-New York
-Troy
-RPI
-CSCI
-.
-." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout hwgrading.key -out hwgrading.crt > /dev/null 2>&1
 
 echo -e "US
 New York
@@ -548,10 +533,10 @@ if [ ${VAGRANT} == 1 ]; then
 	echo -e "localhost
 hsdbu
 hsdbu
-http://192.168.56.104
-https://192.168.56.103
-http://192.168.56.105
-svn+ssh:192.168.56.102" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
+http://192.168.56.101
+https://192.168.56.104
+http://192.168.56.102
+svn+ssh:192.168.56.103" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 else
 	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 fi
@@ -560,11 +545,10 @@ source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 #source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean test
 
 source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
-cp ${SUBMITTY_REPOSITORY}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
-cp ${SUBMITTY_REPOSITORY}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
 cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/submitty.conf /etc/apache2/sites-available/submitty.conf
 cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/cgi.conf /etc/apache2/sites-available/cgi.conf
-cp -f ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
 
 # permissions: rw- r-- ---
 chmod 0640 /etc/apache2/sites-available/*.conf
@@ -573,13 +557,8 @@ chmod 0640 /etc/apache2/suexec/www-data
 if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /root/bin/bottom.txt
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
-	sed -i 's/submitty.crt/submit.crt/g' /etc/apache2/sites-available/submit.conf
-	sed -i 's/submitty.key/submit.key/g' /etc/apache2/sites-available/submit.conf
-	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /etc/apache2/sites-available/hwgrading.conf
-	sed -i 's/hwgrading.cer/hwgrading.crt/g' /etc/apache2/sites-available/hwgrading.conf
 fi
 
-a2ensite submit
 a2ensite hwgrading
 a2ensite submitty
 a2ensite cgi

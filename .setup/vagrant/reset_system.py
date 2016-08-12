@@ -58,12 +58,13 @@ if __name__ == '__main__':
 
     # Scrub the hosts file
     hosts = ["192.168.56.101    test-submit test-submit.cs.rpi.edu",
-             "192.168.56.102    test-svn test-svn.cs.rpi.edu",
-             "192.168.56.103    test-hwgrading test-hwgrading.cs.rpi.edu hwgrading"]
+             "192.168.56.102    test-cgi test-cgi.cs.rpi.edu",
+             "192.168.56.103    test-svn test-svn.cs.rpi.edu",
+             "192.168.56.104    test-hwgrading test-hwgrading.cs.rpi.edu"]
     remove_lines("/etc/hosts", hosts)
 
     # Scrub out the network interfaces that were created for Vagrant
-    subprocess.call(["ifdown", "eth1", "eth1:1", "eth1:2", "eth1:3", "eth1:4"])
+    subprocess.call(["ifdown", "eth1", "eth1:1", "eth1:2", "eth1:3"])
     remove_file("/etc/network/interfaces.d/eth1.cfg")
 
     # Remove the data directories for submitty
