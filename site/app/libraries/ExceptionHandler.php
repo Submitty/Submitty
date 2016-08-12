@@ -68,6 +68,20 @@ class ExceptionHandler {
             $display_message = $exception->displayMessage();
             $log_exception = $exception->logException();
         }
+        
+        $trace_string = array();
+        foreach ($exception->getTrace() as $elem => $frame) {
+            if (is_a($exception, '\app\exceptions\AuthenticationException') && $frame['function'] == "authenticate") {
+                $frame['args'][1] = "****";
+            }
+            $trace_string[] = sprintf( "#%s %s(%s): %s(%s)",
+                             $elem,
+                             isset($frame['file']) ? $frame['file'] : 'unknown file',
+                             isset($frame['line']) ? $frame['line'] : 'unknown line',
+                             (isset($frame['class']))  ? $frame['class'].$frame['type'].$frame['function'] : $frame['function'],
+                             static::parseArgs($frame['args']));
+        }
+        $trace_string = implode("\n", $trace_string);
 
         $exception_name = get_class($exception);
         $file = $exception->getFile();
@@ -86,7 +100,7 @@ class ExceptionHandler {
 
         $message = "{$exception_name} (Code: {$exception->getCode()}) thrown in {$file} (Line {$exception_line}) by:\n";
         $message .= "{$line_code}\n\nMessage:\n{$exception->getMessage()}\n\nStrack Trace:\n";
-        $message .= "{$exception->getTraceAsString()}\n";
+        $message .= "{$trace_string}\n";
 
         if ($is_base_exception) {
             /** @type BaseException $exception */
@@ -121,5 +135,45 @@ you were doing that caused this exception.
 
 HTML;
         }
+    }
+    
+    /**
+     * Parse the arguments from the stack trace into type appropriate representation for the stack trace. We
+     * may want to look into expanding the $args when they're an Array, but for now, this is probably fine.
+     *
+     * @param mixed $args
+     *
+     * @return string
+     */
+    private static function parseArgs($args) {
+        $return = "";
+        if (isset($args)) {
+            $return_args = array();
+            foreach ($args as $arg) {
+                if (is_string($arg)) {
+                    $return_args[] = "'" . $arg . "'";
+                }
+                elseif (is_array($arg)) {
+                    $return_args[] = "Array";
+                }
+                elseif (is_null($arg)) {
+                    $return_args[] = 'NULL';
+                }
+                elseif (is_bool($arg)) {
+                    $return_args[] = ($arg) ? "true" : "false";
+                }
+                elseif (is_object($arg)) {
+                    $return_args[] = get_class($arg);
+                }
+                elseif (is_resource($arg)) {
+                    $return_args[] = get_resource_type($arg);
+                }
+                else {
+                    $return_args[] = $arg;
+                }
+            }
+            $return = implode(", ", $return_args);
+        }
+        return $return;
     }
 }
