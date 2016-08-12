@@ -27,7 +27,7 @@ if (isset($_POST['student_id']) && $_POST['student_id'] !== "") {
 
 		//Do DB lookup for student by Student ID
 		$row = lookup_student_in_db($_POST['student_id']);
-		if ($row !== "") {
+		if (!empty($row)) {
 			$view->fill_form($row);		
 		} else {
 			$state = "student_not_found";
