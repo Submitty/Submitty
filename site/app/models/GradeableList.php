@@ -17,6 +17,12 @@ class GradeableList {
     private $gradeables = array();
     
     /**
+     * @var now
+     *
+    */
+    private $now;
+    
+    /**
      * GradeableList constructor.
      *
      * @param Core          $core
@@ -44,6 +50,7 @@ class GradeableList {
                 $this->gradeables[] = new GradeableDb($this->core, $id);
             }
         }
+        $this->now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
     }
     
     /**
@@ -115,10 +122,10 @@ class GradeableList {
     public function getOpenElectronicGradeables($needs_config = false) {
         /** @var Gradeable[] $list */
         $list = array();
-        $now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
+        
         foreach ($this->gradeables as $gradeable) {
             if ($gradeable->getType()==GradeableType::ELECTRONIC_FILE &&(!$needs_config || $gradeable->hasConfig() == true)) {
-                if ($gradeable->getOpenDate() < $now && $gradeable->getDueDate() > $now) {
+                if ($gradeable->getOpenDate() < $this->now && $gradeable->getDueDate() > $this->now) {
                     $list[$gradeable->getId()] = $gradeable;
                 }
             }
@@ -131,10 +138,9 @@ class GradeableList {
     
     public function getClosedElectronicGradeables($needs_config = false){
         $list = array();
-        $now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
         foreach ($this->gradeables as $gradeable) {
             if ($gradeable->getType()==GradeableType::ELECTRONIC_FILE &&(!$needs_config || $gradeable->hasConfig() == true)) {
-                if ($gradeable->getDueDate() < $now && $gradeable->getGradeStartDate() > $now) {
+                if ($gradeable->getDueDate() < $this->now && $gradeable->getGradeStartDate() > $this->now) {
                     $list[$gradeable->getId()] = $gradeable;
                 }
             }
@@ -147,9 +153,8 @@ class GradeableList {
     
     public function getGradingGradeables(){
         $list = array();
-        $now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
         foreach ($this->gradeables as $gradeable) {
-            if ($gradeable->getGradeStartDate() < $now && $gradeable->getGradeReleasedDate() > $now) {
+            if ($gradeable->getGradeStartDate() < $this->now && $gradeable->getGradeReleasedDate() > $this->now) {
                 $list[$gradeable->getId()] = $gradeable;
             }
         }
@@ -162,9 +167,8 @@ class GradeableList {
     
     public function getGradedGradeables(){
         $list = array();
-        $now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
         foreach ($this->gradeables as $gradeable) {
-            if ($gradeable->getGradeReleasedDate() < $now) {
+            if ($gradeable->getGradeReleasedDate() < $this->now) {
                 $list[$gradeable->getId()] = $gradeable;
             }
         }
@@ -177,14 +181,13 @@ class GradeableList {
     
     public function getFutureGradeables(){
         $list = array();
-        $now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
         foreach ($this->gradeables as $gradeable) {
             if ($gradeable->getType()==GradeableType::ELECTRONIC_FILE) {
-                if ($gradeable->getOpenDate() > $now) {
+                if ($gradeable->getOpenDate() > $this->now) {
                     $list[$gradeable->getId()] = $gradeable;
                 }
             }
-            elseif($gradeable->getGradeStartDate() > $now){
+            elseif($gradeable->getGradeStartDate() > $this->now){
                 $list[$gradeable->getId()] = $gradeable;
             }
         }

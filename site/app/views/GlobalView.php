@@ -82,9 +82,6 @@ HTML;
                 $return .= <<<HTML
 <div id="nav">
     <ul>
-        <li><a href="{$this->core->buildUrl(array('component' => 'submission', 
-                                                  'page' => 'homework'))}">Submit</a></li>
-
 HTML;
                 if($this->core->getUser()->accessAdmin()) {
                     $return .= <<<HTML
@@ -118,7 +115,7 @@ HTML;
                             <a href="{$ta_base_url}/account/admin-users.php?course={$course}&semester={$semester}&this=View%20Users">View Users</a>
                         </li>
                         
-                        <!--<li>
+                       <li>
                             <a href="{$ta_base_url}/account/admin-classlist.php?course={$course}&semester={$semester}&this=Upload%20ClassList">Upload ClassList</a>
                         </li>
                         
@@ -132,7 +129,7 @@ HTML;
                         
                         <li>
                             <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Late%200Days%20Student">Late Days Student</a>
-                        </li>-->
+                        </li>
                         
                     <!-- -->
                     
