@@ -38,7 +38,7 @@ class GradeableFile extends Gradeable {
         }
         else if ($details['gradeable_type'] == "Checkpoints") {
             $this->type = GradeableType::CHECKPOINTS;
-            $this->optional_ta_message = $details['checkpt-opt-ta-messg'] === "yes";
+            //$this->optional_ta_message = $details['checkpt-opt-ta-messg'] === "yes";
             // TODO: load checkpoints
         }
         else {

@@ -405,12 +405,24 @@ abstract class Gradeable {
         return $this->due_date;
     }
     
+    public function getGradeStartDate(){
+        return $this->grade_start_date;
+    }
+    
+    public function getGradeReleasedDate(){
+        return $this->grade_released_date;
+    }
+    
     public function getOpenDate() {
         return $this->open_date;
     }
     
     public function getDaysLate() {
         return ($this->hasResults()) ? $this->result_details['days_late'] : 0;
+    }
+    
+    public function getInstructionsURL(){
+        return $this->instructions_url;
     }
     
     /**
