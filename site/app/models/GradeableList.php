@@ -118,7 +118,7 @@ class GradeableList {
         $now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
         foreach ($this->gradeables as $gradeable) {
             if ($gradeable->getType()==GradeableType::ELECTRONIC_FILE &&(!$needs_config || $gradeable->hasConfig() == true)) {
-                if ($this->core->getUser()->accessAdmin() || ($gradeable->getOpenDate() < $now && $gradeable->getDueDate() > $now)) {
+                if ($gradeable->getOpenDate() < $now && $gradeable->getDueDate() > $now) {
                     $list[$gradeable->getId()] = $gradeable;
                 }
             }

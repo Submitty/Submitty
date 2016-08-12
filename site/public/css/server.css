@@ -509,4 +509,8 @@ table .instructor .option{
 table .instructor .two-options{
 	width: 15%;
 }
+.nav_header{
+  text-align:center;
+  background-color:#bfbfbf;
+}
 

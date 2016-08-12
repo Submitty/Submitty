@@ -17,12 +17,19 @@ class NavigationView {
     }
 
     public function showGradeables($sections_to_list) {
-        $return = '<div class="content"><table class="gradeable_list">';
+        $return = '<div class="content"><table class="gradeable_list" style="width:100%;">';
         $ta_base_url = $this->core->getConfig()->getTABaseUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $site_url = $this->core->getConfig()->getSiteUrl();
-        
+        $return.= <<<HTML
+                                    <tr class="nav_header">
+                                        <th>Title</th>
+                                        <th>Submission</th>
+                                        <th>Grade</th>
+                                        <th>Option</th>
+                                    </tr>
+HTML;
         foreach($sections_to_list as $title => $gradeable_list){
             $return .= <<<HTML
                                     <tr class="bar"><td colspan="4"></td></tr>
@@ -33,32 +40,32 @@ HTML;
                 
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE){
                     if(trim($g_data->getInstructionsURL())!=''){
-                        $gradeable_title = '<a href="'.$g_data->getInstructionsURL().'" target="_blank"><label class="has-url">'.$gradeable.'</label></a>';
+                        $gradeable_title = '<a href="'.$g_data->getInstructionsURL().'" target="_blank"><label class="has-url">'.$g_data->getName().'</label></a>';
                     }
                     $gradeable_open_range = <<<HTML
-                                         <button class="btn btn-primary" style="width:70%;" onclick="location.href='{$site_url}&component=student&gradeable_id={$gradeable}';">
-                                             {$g_data->getOpenDate()->format("M d H:i ")}-{$g_data->getDueDate()->format("M d H:i ")}
+                                         <button class="btn btn-primary" style="width:100%;" onclick="location.href='{$site_url}&component=student&gradeable_id={$gradeable}';">
+                                             {$g_data->getOpenDate()->format("M d H:i ")} - {$g_data->getDueDate()->format("M d H:i ")}
                                          </button>
 HTML;
                     $gradeable_grade_range = <<<HTML
-                                            <button class="btn btn-primary" style="width:70%;" \\
+                                            <button class="btn btn-primary" style="width:100%;" \\
                                             onclick="location.href='{$ta_base_url}/account/index.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
                                             {$gradeable_grade_range}</button>
 HTML;
                 }
                 else{
-                    $gradeable_title = '<label>'.$gradeable.'</label>';
+                    $gradeable_title = '<label>'.$g_data->getName().'</label>';
                     $gradeable_open_range = '';
                     if($g_data->getType() == GradeableType::CHECKPOINTS){
                        $gradeable_grade_range = <<<HTML
-                                            <button class="btn btn-primary" style="width:70%;" \\
+                                            <button class="btn btn-primary" style="width:100%;" \\
                                             onclick="location.href='{$ta_base_url}/account/account-checkpoints-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
                                             {$gradeable_grade_range}</button>
 HTML;
                     }
                     elseif($g_data->getType() == GradeableType::NUMERIC){
                         $gradeable_grade_range = <<<HTML
-                                            <button class="btn btn-primary" style="width:70%;" \\
+                                            <button class="btn btn-primary" style="width:100%;" \\
                                             onclick="location.href='{$ta_base_url}/account/account-numerictext-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
                                             {$gradeable_grade_range}</button>
 HTML;
@@ -66,10 +73,10 @@ HTML;
                 }
                 
                 $return.= <<<HTML
-                                    <tr>
+                                    <tr id="gradeable_row">
                                         <td>{$gradeable_title}</td>
-                                        <td>{$gradeable_open_range}</td>
-                                        <td>{$gradeable_grade_range}</td>
+                                        <td style="padding: 10px;">{$gradeable_open_range}</td>
+                                        <td style="padding: 10px;">{$gradeable_grade_range}</td>
                                         <td><button class="btn btn-primary" style="width:100%;" \\
                                         onclick="location.href='{$ta_base_url}/account/admin-gradeable.php?course={$course}&semester={$semester}&action=edit&id={$gradeable}'">
                                         Edit</button></td>
