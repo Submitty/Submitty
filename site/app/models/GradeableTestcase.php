@@ -148,4 +148,8 @@ class GradeableTestcase {
     public function getAutochecks() {
         return $this->autochecks;
     }
+    
+    public function hasDetails() {
+        return count($this->autochecks) > 0 || $this->hasCompilationOutput() || $this->hasExecuteLog();
+    }
 }
