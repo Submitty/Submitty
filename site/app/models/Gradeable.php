@@ -245,9 +245,17 @@ abstract class Gradeable {
             }
             
             $this->versions[$version] = FileUtils::readJsonFile($results_path."/".$version."/results.json");
+
             $this->versions[$version]['status'] = true;
+
             $this->versions[$version] = array_merge($this->versions[$version],
-                                                    FileUtils::readJsonFile($results_path."/".$version."/.grade.timestamp"));
+                                                  FileUtils::readJsonFile($results_path."/".$version."/.grade.timestamp"));
+
+            //$results_history=FileUtils::readJsonFile($results_path."/".$version."/results_history.json");
+            //$last_results_timestamp=$results_history[count($results_history)-1];
+            //$this->versions[$version] = array_merge($this->versions[$version],$last_results_timestamp);
+
+
             $this->versions[$version]['days_late'] = isset($this->versions[$version]['days_late_(before_extensions)']) ?
                 intval($this->versions[$version]['days_late_(before_extensions)']) : 0;
             if ($this->versions[$version]['days_late'] < 0) {
