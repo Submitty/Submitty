@@ -8,6 +8,8 @@ SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
+COURSE_BUILDERS_GROUP=course_builders
+
 #################################################################
 # PROVISION SETUP
 #################
@@ -157,6 +159,7 @@ apt-get -qqy autoremove
 # so that hwphp is the only one who could use PAM for example
 pip install python-pam
 pip install xlsx2csv
+#NOTE: BELOW THE PYTHON PAM MODULE IS RESTRICTED TO hwcgi
 
 chmod -R 555 /usr/local/lib/python2.7/*
 chmod 555 /usr/lib/python2.7/dist-packages
@@ -214,6 +217,8 @@ ifup eth1 eth1:1 eth1:2 eth1:3 eth1:4
 #################
 echo "Getting JUnit..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/JUnit
+chmod 750 ${SUBMITTY_INSTALL_DIR}/JUnit
 cd ${SUBMITTY_INSTALL_DIR}/JUnit
 
 wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar -o /dev/null > /dev/null 2>&1
@@ -242,13 +247,17 @@ chmod o+r . *.jar
 
 echo "Getting DrMemory..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
-cd /tmp
+cd ${SUBMITTY_INSTALL_DIR}/DrMemory
 DRMEM_TAG=release_1.10.1
 DRMEM_VER=1.10.1-3
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${SUBMITTY_INSTALL_DIR}/DrMemory
 ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
 rm DrMemory-Linux-${DRMEM_VER}.tar.gz
+chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/DrMemory
+# FIXME: these permissions could probably be adjusted
+chmod -R 755 ${SUBMITTY_INSTALL_DIR}/DrMemory
+
 
 #################################################################
 # APACHE SETUP
@@ -403,6 +412,10 @@ if [ ${VAGRANT} == 1 ]; then
 	echo "hwcron:hwcron" | sudo chpasswd
 fi
 
+# only hwcgi can use the python pam module
+chown hwcgi:hwcgi /usr/local/lib/python2.7/dist-packages/pam*
+chmod 500         /usr/local/lib/python2.7/dist-packages/pam*
+
 
 # FIXME:  umask setting above not complete
 # might need to also set USERGROUPS_ENAB to "no", and manually create
@@ -511,12 +524,21 @@ fi
 #################################################################
 # ANALYSIS TOOLS SETUP
 #################
-if [ ${VAGRANT} == 1 ]; then
-    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-    pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-    make ubuntudeps
-    popd
-fi
+
+git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+#pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+#make ubuntudeps
+# graph tool...  for later?  add-apt-repository "http://downloads.skewed.de/apt/trusty universe" -y
+add-apt-repository ppa:ubuntu-toolchain-r/test -y
+apt-get update -qq
+apt-get install -qq build-essential pkg-config flex bison
+apt-get install -qq libpcre3 libpcre3-dev
+apt-get install -qq splint indent
+apt-get install -qq python3 python3-dev libpython3.4 python3-pip
+python3 -m pip install pylint
+# graph tool...  for later?  apt-get install -qq --force-yes python3-graph-tool
+#popd
+
 
 #################################################################
 # SUBMITTY SETUP
