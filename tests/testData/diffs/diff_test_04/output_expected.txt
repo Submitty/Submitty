@@ -1,175 +1,175 @@
-<div class='diff-container'><table cellpadding='0' cellspacing='0' class='diff-code'>
-	<tbody class='highlight' id="id_expected_0">
-	<tr class='bad'><td class='line_number'>1</td><td class='line_code'><pre><b>1. Daleks</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>2</td><td class='line_code'><pre><b>2. Cybermen</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>3</td><td class='line_code'><pre><b>3. Master (the)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>4</td><td class='line_code'><pre><b>4. Dalek Supreme (Supreme Dalek), inc Progenitor</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>5</td><td class='line_code'><pre><b>5. Sontarans</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>6</td><td class='line_code'><pre><b>6. Ice Warriors (inc benevolent appearences)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>7</td><td class='line_code'><pre><b>7. Davros</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>8</td><td class='line_code'><pre><b>8. Silurians (exc Sea Devils)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>9</td><td class='line_code'><pre><b>9. Kovarian, Madame</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>10</td><td class='line_code'><pre><b>10. Cyber-leader</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>11</td><td class='line_code'><pre><b>Please enter a number between 1 and 10, or -1 to end</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>12</td><td class='line_code'><pre><b>Enter a villain ==&gt; 1</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>13</td><td class='line_code'><pre><b>Daleks first appeared in 1963</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>14</td><td class='line_code'><pre><b>Daleks were in 37 stories, with the following other villains:</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>15</td><td class='line_code'><pre><b>==================================================</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>16</td><td class='line_code'><pre><b>     Alliance - onscreen - Daleks, Cybermen, Sontarans &amp; Autons, (cameos</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>17</td><td class='line_code'><pre><b>     Silurians, Sycorax, Judoon, Hoix, Roboforms, microcameos Blowfish,</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>18</td><td class='line_code'><pre><b>     Uvodni, Weevils), Aridians, Atraxi, Borusa, Bragen, Cult of Skaro (inc</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>19</td><td class='line_code'><pre><b>     Dalek Sec and three others), Cyber-leader, Cybermen, Dala, Dalek</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>20</td><td class='line_code'><pre><b>     &quot;puppet&quot;, Dalek Supreme (Supreme Dalek), inc Progenitor, Dalek prime</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>21</td><td class='line_code'><pre><b>     minister, Davros, Dracula, Robot Count, Flood (the), Frankenstein's</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>22</td><td class='line_code'><pre><b>     monster robot, Gantok, Grey Lady robot, Gubbage Cone, Hartman, Yvonne,</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>23</td><td class='line_code'><pre><b>     Hawthorne, Ice Warriors (inc benevolent appearences), Judoon,</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>24</td><td class='line_code'><pre><b>     Kovarian, Madame, Lytton, Commander Gustav, Master (the), Mavic Chen,</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>25</td><td class='line_code'><pre><b>     Meddling Monk (the), Moroks, (the), Mortimus, Movellans, Nyder,</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>26</td><td class='line_code'><pre><b>     Ogrons, Ood, the (Oodkind), inc benevolent appearances, Rassilon,</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>27</td><td class='line_code'><pre><b>     Raston Warrior Robot, Robomen, Robot Dr Who, Sharrel, Silence (the),</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>28</td><td class='line_code'><pre><b>     Slyther, Smilers (Winders), Sontarans, Terrible Zodin, War Chief, War</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>29</td><td class='line_code'><pre><b>     Lord, Winder, Yeti, van Statten, Henry</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>30</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>31</td><td class='line_code'><pre><b>The stories that only features Daleks were:</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>32</td><td class='line_code'><pre><b>==================================================</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>33</td><td class='line_code'><pre><b>     Bad Wolf/The Parting of the Ways, Daleks in, Death to the Daleks,</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>34</td><td class='line_code'><pre><b>     Journey's End, Manhattan/Evolution of the Daleks, Mission to the</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>35</td><td class='line_code'><pre><b>     Unknown, The Big Bang, The Daleks</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>36</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>37</td><td class='line_code'><pre><b>The doctors who fought Daleks were:</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>38</td><td class='line_code'><pre><b>==================================================</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>39</td><td class='line_code'><pre><b>     Colin Baker</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>40</td><td class='line_code'><pre><b>     Tom Baker</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>41</td><td class='line_code'><pre><b>     Peter Davison</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>42</td><td class='line_code'><pre><b>     Christopher Eccleston</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>43</td><td class='line_code'><pre><b>     William Hartnell</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>44</td><td class='line_code'><pre><b>     Sylvester McCoy</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>45</td><td class='line_code'><pre><b>     Jon Pertwee</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>46</td><td class='line_code'><pre><b>     Matt Smith</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>47</td><td class='line_code'><pre><b>     David Tennant</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>48</td><td class='line_code'><pre><b>     Patrick Troughton</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>49</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>50</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>51</td><td class='line_code'><pre><b>1. Daleks</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>52</td><td class='line_code'><pre><b>2. Cybermen</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>53</td><td class='line_code'><pre><b>3. Master (the)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>54</td><td class='line_code'><pre><b>4. Dalek Supreme (Supreme Dalek), inc Progenitor</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>55</td><td class='line_code'><pre><b>5. Sontarans</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>56</td><td class='line_code'><pre><b>6. Ice Warriors (inc benevolent appearences)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>57</td><td class='line_code'><pre><b>7. Davros</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>58</td><td class='line_code'><pre><b>8. Silurians (exc Sea Devils)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>59</td><td class='line_code'><pre><b>9. Kovarian, Madame</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>60</td><td class='line_code'><pre><b>10. Cyber-leader</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>61</td><td class='line_code'><pre><b>Please enter a number between 1 and 10, or -1 to end</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>62</td><td class='line_code'><pre><b>Enter a villain ==&gt; stop</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>63</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>64</td><td class='line_code'><pre><b>1. Daleks</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>65</td><td class='line_code'><pre><b>2. Cybermen</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>66</td><td class='line_code'><pre><b>3. Master (the)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>67</td><td class='line_code'><pre><b>4. Dalek Supreme (Supreme Dalek), inc Progenitor</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>68</td><td class='line_code'><pre><b>5. Sontarans</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>69</td><td class='line_code'><pre><b>6. Ice Warriors (inc benevolent appearences)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>70</td><td class='line_code'><pre><b>7. Davros</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>71</td><td class='line_code'><pre><b>8. Silurians (exc Sea Devils)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>72</td><td class='line_code'><pre><b>9. Kovarian, Madame</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>73</td><td class='line_code'><pre><b>10. Cyber-leader</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>74</td><td class='line_code'><pre><b>Please enter a number between 1 and 10, or -1 to end</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>75</td><td class='line_code'><pre><b>Enter a villain ==&gt; 5</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>76</td><td class='line_code'><pre><b>Sontarans first appeared in 1973</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>77</td><td class='line_code'><pre><b>Sontarans were in 9 stories, with the following other villains:</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>78</td><td class='line_code'><pre><b>==================================================</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>79</td><td class='line_code'><pre><b>     Alliance - onscreen - Daleks, Cybermen, Sontarans &amp; Autons, (cameos</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>80</td><td class='line_code'><pre><b>     Silurians, Sycorax, Judoon, Hoix, Roboforms, microcameos Blowfish,</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>81</td><td class='line_code'><pre><b>     Uvodni, Weevils), Atraxi, Borusa, Chessene of the Franzine Grig,</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>82</td><td class='line_code'><pre><b>     Cybermen, Dalek Supreme (Supreme Dalek), inc Progenitor, Daleks,</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>83</td><td class='line_code'><pre><b>     Dastari, Joinson, Gray, Steve, Harris, Private Carl, Headless Monks,</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>84</td><td class='line_code'><pre><b>     Irongron, Kovarian, Madame, Manton, Colonel, Martha Jones- Clone,</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>85</td><td class='line_code'><pre><b>     Master (the), Naismith, Joshua, Rassilon, Rattigan, Luke, Red</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>86</td><td class='line_code'><pre><b>     Carnivorous Maw, Shockeye of the Quawncing Grig, Silurians (exc Sea</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>87</td><td class='line_code'><pre><b>     Devils), Staal, Stike, Vardan, Varl, Varla</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>88</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>89</td><td class='line_code'><pre><b>The stories that only features Sontarans were:</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>90</td><td class='line_code'><pre><b>==================================================</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>91</td><td class='line_code'><pre><b>     The Sontaran Experiment</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>92</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>93</td><td class='line_code'><pre><b>The doctors who fought Sontarans were:</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>94</td><td class='line_code'><pre><b>==================================================</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>95</td><td class='line_code'><pre><b>     Colin Baker</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>96</td><td class='line_code'><pre><b>     Tom Baker</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>97</td><td class='line_code'><pre><b>     Jon Pertwee</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>98</td><td class='line_code'><pre><b>     Matt Smith</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>99</td><td class='line_code'><pre><b>     David Tennant</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>100</td><td class='line_code'><pre><b>     Patrick Troughton</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>101</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>102</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>103</td><td class='line_code'><pre><b>1. Daleks</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>104</td><td class='line_code'><pre><b>2. Cybermen</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>105</td><td class='line_code'><pre><b>3. Master (the)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>106</td><td class='line_code'><pre><b>4. Dalek Supreme (Supreme Dalek), inc Progenitor</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>107</td><td class='line_code'><pre><b>5. Sontarans</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>108</td><td class='line_code'><pre><b>6. Ice Warriors (inc benevolent appearences)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>109</td><td class='line_code'><pre><b>7. Davros</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>110</td><td class='line_code'><pre><b>8. Silurians (exc Sea Devils)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>111</td><td class='line_code'><pre><b>9. Kovarian, Madame</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>112</td><td class='line_code'><pre><b>10. Cyber-leader</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>113</td><td class='line_code'><pre><b>Please enter a number between 1 and 10, or -1 to end</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>114</td><td class='line_code'><pre><b>Enter a villain ==&gt; 7</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>115</td><td class='line_code'><pre><b>Davros first appeared in 1975</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>116</td><td class='line_code'><pre><b>Davros were in 6 stories, with the following other villains:</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>117</td><td class='line_code'><pre><b>==================================================</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>118</td><td class='line_code'><pre><b>     Dalek Supreme (Supreme Dalek), inc Progenitor, Daleks, Lytton,</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>119</td><td class='line_code'><pre><b>     Commander Gustav, Movellans, Nyder, Sharrel</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>120</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>121</td><td class='line_code'><pre><b>There are no stories with only this villain</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>122</td><td class='line_code'><pre><b>==================================================</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>123</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>124</td><td class='line_code'><pre><b>The doctors who fought Davros were:</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>125</td><td class='line_code'><pre><b>==================================================</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>126</td><td class='line_code'><pre><b>     Colin Baker</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>127</td><td class='line_code'><pre><b>     Tom Baker</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>128</td><td class='line_code'><pre><b>     Peter Davison</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>129</td><td class='line_code'><pre><b>     Sylvester McCoy</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>130</td><td class='line_code'><pre><b>     David Tennant</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>131</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>132</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>133</td><td class='line_code'><pre><b>1. Daleks</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>134</td><td class='line_code'><pre><b>2. Cybermen</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>135</td><td class='line_code'><pre><b>3. Master (the)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>136</td><td class='line_code'><pre><b>4. Dalek Supreme (Supreme Dalek), inc Progenitor</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>137</td><td class='line_code'><pre><b>5. Sontarans</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>138</td><td class='line_code'><pre><b>6. Ice Warriors (inc benevolent appearences)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>139</td><td class='line_code'><pre><b>7. Davros</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>140</td><td class='line_code'><pre><b>8. Silurians (exc Sea Devils)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>141</td><td class='line_code'><pre><b>9. Kovarian, Madame</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>142</td><td class='line_code'><pre><b>10. Cyber-leader</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>143</td><td class='line_code'><pre><b>Please enter a number between 1 and 10, or -1 to end</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>144</td><td class='line_code'><pre><b>Enter a villain ==&gt; 11</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>145</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>146</td><td class='line_code'><pre><b>1. Daleks</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>147</td><td class='line_code'><pre><b>2. Cybermen</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>148</td><td class='line_code'><pre><b>3. Master (the)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>149</td><td class='line_code'><pre><b>4. Dalek Supreme (Supreme Dalek), inc Progenitor</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>150</td><td class='line_code'><pre><b>5. Sontarans</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>151</td><td class='line_code'><pre><b>6. Ice Warriors (inc benevolent appearences)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>152</td><td class='line_code'><pre><b>7. Davros</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>153</td><td class='line_code'><pre><b>8. Silurians (exc Sea Devils)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>154</td><td class='line_code'><pre><b>9. Kovarian, Madame</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>155</td><td class='line_code'><pre><b>10. Cyber-leader</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>156</td><td class='line_code'><pre><b>Please enter a number between 1 and 10, or -1 to end</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>157</td><td class='line_code'><pre><b>Enter a villain ==&gt; 0</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>158</td><td class='line_code'><pre><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>159</td><td class='line_code'><pre><b>1. Daleks</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>160</td><td class='line_code'><pre><b>2. Cybermen</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>161</td><td class='line_code'><pre><b>3. Master (the)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>162</td><td class='line_code'><pre><b>4. Dalek Supreme (Supreme Dalek), inc Progenitor</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>163</td><td class='line_code'><pre><b>5. Sontarans</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>164</td><td class='line_code'><pre><b>6. Ice Warriors (inc benevolent appearences)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>165</td><td class='line_code'><pre><b>7. Davros</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>166</td><td class='line_code'><pre><b>8. Silurians (exc Sea Devils)</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>167</td><td class='line_code'><pre><b>9. Kovarian, Madame</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>168</td><td class='line_code'><pre><b>10. Cyber-leader</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>169</td><td class='line_code'><pre><b>Please enter a number between 1 and 10, or -1 to end</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>170</td><td class='line_code'><pre><b>Enter a villain ==&gt; -1</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>171</td><td class='line_code'><pre><b>Exiting</b></pre></td></td></tr>
-	</tbody>
-</table></div>
+<div class='diff-container'><div class='diff-code'>
+	<div class='highlight' id="id_expected_0">
+	<div class='bad'><span class='line_number'>1</span><span class='line_code'><span class='line_code_inner'>1. Daleks</span></span></div>
+	<div class='bad'><span class='line_number'>2</span><span class='line_code'><span class='line_code_inner'>2. Cybermen</span></span></div>
+	<div class='bad'><span class='line_number'>3</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
+	<div class='bad'><span class='line_number'>4</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
+	<div class='bad'><span class='line_number'>5</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
+	<div class='bad'><span class='line_number'>6</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>7</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
+	<div class='bad'><span class='line_number'>8</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
+	<div class='bad'><span class='line_number'>9</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>
+	<div class='bad'><span class='line_number'>10</span><span class='line_code'><span class='line_code_inner'>10. Cyber-leader</span></span></div>
+	<div class='bad'><span class='line_number'>11</span><span class='line_code'><span class='line_code_inner'>Please enter a number between 1 and 10, or -1 to end</span></span></div>
+	<div class='bad'><span class='line_number'>12</span><span class='line_code'><span class='line_code_inner'>Enter a villain ==&gt; 1</span></span></div>
+	<div class='bad'><span class='line_number'>13</span><span class='line_code'><span class='line_code_inner'>Daleks first appeared in 1963</span></span></div>
+	<div class='bad'><span class='line_number'>14</span><span class='line_code'><span class='line_code_inner'>Daleks were in 37 stories, with the following other villains:</span></span></div>
+	<div class='bad'><span class='line_number'>15</span><span class='line_code'><span class='line_code_inner'>==================================================</span></span></div>
+	<div class='bad'><span class='line_number'>16</span><span class='line_code'><span class='line_code_inner'>     Alliance - onscreen - Daleks, Cybermen, Sontarans &amp; Autons, (cameos</span></span></div>
+	<div class='bad'><span class='line_number'>17</span><span class='line_code'><span class='line_code_inner'>     Silurians, Sycorax, Judoon, Hoix, Roboforms, microcameos Blowfish,</span></span></div>
+	<div class='bad'><span class='line_number'>18</span><span class='line_code'><span class='line_code_inner'>     Uvodni, Weevils), Aridians, Atraxi, Borusa, Bragen, Cult of Skaro (inc</span></span></div>
+	<div class='bad'><span class='line_number'>19</span><span class='line_code'><span class='line_code_inner'>     Dalek Sec and three others), Cyber-leader, Cybermen, Dala, Dalek</span></span></div>
+	<div class='bad'><span class='line_number'>20</span><span class='line_code'><span class='line_code_inner'>     &quot;puppet&quot;, Dalek Supreme (Supreme Dalek), inc Progenitor, Dalek prime</span></span></div>
+	<div class='bad'><span class='line_number'>21</span><span class='line_code'><span class='line_code_inner'>     minister, Davros, Dracula, Robot Count, Flood (the), Frankenstein's</span></span></div>
+	<div class='bad'><span class='line_number'>22</span><span class='line_code'><span class='line_code_inner'>     monster robot, Gantok, Grey Lady robot, Gubbage Cone, Hartman, Yvonne,</span></span></div>
+	<div class='bad'><span class='line_number'>23</span><span class='line_code'><span class='line_code_inner'>     Hawthorne, Ice Warriors (inc benevolent appearences), Judoon,</span></span></div>
+	<div class='bad'><span class='line_number'>24</span><span class='line_code'><span class='line_code_inner'>     Kovarian, Madame, Lytton, Commander Gustav, Master (the), Mavic Chen,</span></span></div>
+	<div class='bad'><span class='line_number'>25</span><span class='line_code'><span class='line_code_inner'>     Meddling Monk (the), Moroks, (the), Mortimus, Movellans, Nyder,</span></span></div>
+	<div class='bad'><span class='line_number'>26</span><span class='line_code'><span class='line_code_inner'>     Ogrons, Ood, the (Oodkind), inc benevolent appearances, Rassilon,</span></span></div>
+	<div class='bad'><span class='line_number'>27</span><span class='line_code'><span class='line_code_inner'>     Raston Warrior Robot, Robomen, Robot Dr Who, Sharrel, Silence (the),</span></span></div>
+	<div class='bad'><span class='line_number'>28</span><span class='line_code'><span class='line_code_inner'>     Slyther, Smilers (Winders), Sontarans, Terrible Zodin, War Chief, War</span></span></div>
+	<div class='bad'><span class='line_number'>29</span><span class='line_code'><span class='line_code_inner'>     Lord, Winder, Yeti, van Statten, Henry</span></span></div>
+	<div class='bad'><span class='line_number'>30</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>31</span><span class='line_code'><span class='line_code_inner'>The stories that only features Daleks were:</span></span></div>
+	<div class='bad'><span class='line_number'>32</span><span class='line_code'><span class='line_code_inner'>==================================================</span></span></div>
+	<div class='bad'><span class='line_number'>33</span><span class='line_code'><span class='line_code_inner'>     Bad Wolf/The Parting of the Ways, Daleks in, Death to the Daleks,</span></span></div>
+	<div class='bad'><span class='line_number'>34</span><span class='line_code'><span class='line_code_inner'>     Journey's End, Manhattan/Evolution of the Daleks, Mission to the</span></span></div>
+	<div class='bad'><span class='line_number'>35</span><span class='line_code'><span class='line_code_inner'>     Unknown, The Big Bang, The Daleks</span></span></div>
+	<div class='bad'><span class='line_number'>36</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>37</span><span class='line_code'><span class='line_code_inner'>The doctors who fought Daleks were:</span></span></div>
+	<div class='bad'><span class='line_number'>38</span><span class='line_code'><span class='line_code_inner'>==================================================</span></span></div>
+	<div class='bad'><span class='line_number'>39</span><span class='line_code'><span class='line_code_inner'>     Colin Baker</span></span></div>
+	<div class='bad'><span class='line_number'>40</span><span class='line_code'><span class='line_code_inner'>     Tom Baker</span></span></div>
+	<div class='bad'><span class='line_number'>41</span><span class='line_code'><span class='line_code_inner'>     Peter Davison</span></span></div>
+	<div class='bad'><span class='line_number'>42</span><span class='line_code'><span class='line_code_inner'>     Christopher Eccleston</span></span></div>
+	<div class='bad'><span class='line_number'>43</span><span class='line_code'><span class='line_code_inner'>     William Hartnell</span></span></div>
+	<div class='bad'><span class='line_number'>44</span><span class='line_code'><span class='line_code_inner'>     Sylvester McCoy</span></span></div>
+	<div class='bad'><span class='line_number'>45</span><span class='line_code'><span class='line_code_inner'>     Jon Pertwee</span></span></div>
+	<div class='bad'><span class='line_number'>46</span><span class='line_code'><span class='line_code_inner'>     Matt Smith</span></span></div>
+	<div class='bad'><span class='line_number'>47</span><span class='line_code'><span class='line_code_inner'>     David Tennant</span></span></div>
+	<div class='bad'><span class='line_number'>48</span><span class='line_code'><span class='line_code_inner'>     Patrick Troughton</span></span></div>
+	<div class='bad'><span class='line_number'>49</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>50</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>51</span><span class='line_code'><span class='line_code_inner'>1. Daleks</span></span></div>
+	<div class='bad'><span class='line_number'>52</span><span class='line_code'><span class='line_code_inner'>2. Cybermen</span></span></div>
+	<div class='bad'><span class='line_number'>53</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
+	<div class='bad'><span class='line_number'>54</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
+	<div class='bad'><span class='line_number'>55</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
+	<div class='bad'><span class='line_number'>56</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>57</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
+	<div class='bad'><span class='line_number'>58</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
+	<div class='bad'><span class='line_number'>59</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>
+	<div class='bad'><span class='line_number'>60</span><span class='line_code'><span class='line_code_inner'>10. Cyber-leader</span></span></div>
+	<div class='bad'><span class='line_number'>61</span><span class='line_code'><span class='line_code_inner'>Please enter a number between 1 and 10, or -1 to end</span></span></div>
+	<div class='bad'><span class='line_number'>62</span><span class='line_code'><span class='line_code_inner'>Enter a villain ==&gt; stop</span></span></div>
+	<div class='bad'><span class='line_number'>63</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>64</span><span class='line_code'><span class='line_code_inner'>1. Daleks</span></span></div>
+	<div class='bad'><span class='line_number'>65</span><span class='line_code'><span class='line_code_inner'>2. Cybermen</span></span></div>
+	<div class='bad'><span class='line_number'>66</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
+	<div class='bad'><span class='line_number'>67</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
+	<div class='bad'><span class='line_number'>68</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
+	<div class='bad'><span class='line_number'>69</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>70</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
+	<div class='bad'><span class='line_number'>71</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
+	<div class='bad'><span class='line_number'>72</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>
+	<div class='bad'><span class='line_number'>73</span><span class='line_code'><span class='line_code_inner'>10. Cyber-leader</span></span></div>
+	<div class='bad'><span class='line_number'>74</span><span class='line_code'><span class='line_code_inner'>Please enter a number between 1 and 10, or -1 to end</span></span></div>
+	<div class='bad'><span class='line_number'>75</span><span class='line_code'><span class='line_code_inner'>Enter a villain ==&gt; 5</span></span></div>
+	<div class='bad'><span class='line_number'>76</span><span class='line_code'><span class='line_code_inner'>Sontarans first appeared in 1973</span></span></div>
+	<div class='bad'><span class='line_number'>77</span><span class='line_code'><span class='line_code_inner'>Sontarans were in 9 stories, with the following other villains:</span></span></div>
+	<div class='bad'><span class='line_number'>78</span><span class='line_code'><span class='line_code_inner'>==================================================</span></span></div>
+	<div class='bad'><span class='line_number'>79</span><span class='line_code'><span class='line_code_inner'>     Alliance - onscreen - Daleks, Cybermen, Sontarans &amp; Autons, (cameos</span></span></div>
+	<div class='bad'><span class='line_number'>80</span><span class='line_code'><span class='line_code_inner'>     Silurians, Sycorax, Judoon, Hoix, Roboforms, microcameos Blowfish,</span></span></div>
+	<div class='bad'><span class='line_number'>81</span><span class='line_code'><span class='line_code_inner'>     Uvodni, Weevils), Atraxi, Borusa, Chessene of the Franzine Grig,</span></span></div>
+	<div class='bad'><span class='line_number'>82</span><span class='line_code'><span class='line_code_inner'>     Cybermen, Dalek Supreme (Supreme Dalek), inc Progenitor, Daleks,</span></span></div>
+	<div class='bad'><span class='line_number'>83</span><span class='line_code'><span class='line_code_inner'>     Dastari, Joinson, Gray, Steve, Harris, Private Carl, Headless Monks,</span></span></div>
+	<div class='bad'><span class='line_number'>84</span><span class='line_code'><span class='line_code_inner'>     Irongron, Kovarian, Madame, Manton, Colonel, Martha Jones- Clone,</span></span></div>
+	<div class='bad'><span class='line_number'>85</span><span class='line_code'><span class='line_code_inner'>     Master (the), Naismith, Joshua, Rassilon, Rattigan, Luke, Red</span></span></div>
+	<div class='bad'><span class='line_number'>86</span><span class='line_code'><span class='line_code_inner'>     Carnivorous Maw, Shockeye of the Quawncing Grig, Silurians (exc Sea</span></span></div>
+	<div class='bad'><span class='line_number'>87</span><span class='line_code'><span class='line_code_inner'>     Devils), Staal, Stike, Vardan, Varl, Varla</span></span></div>
+	<div class='bad'><span class='line_number'>88</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>89</span><span class='line_code'><span class='line_code_inner'>The stories that only features Sontarans were:</span></span></div>
+	<div class='bad'><span class='line_number'>90</span><span class='line_code'><span class='line_code_inner'>==================================================</span></span></div>
+	<div class='bad'><span class='line_number'>91</span><span class='line_code'><span class='line_code_inner'>     The Sontaran Experiment</span></span></div>
+	<div class='bad'><span class='line_number'>92</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>93</span><span class='line_code'><span class='line_code_inner'>The doctors who fought Sontarans were:</span></span></div>
+	<div class='bad'><span class='line_number'>94</span><span class='line_code'><span class='line_code_inner'>==================================================</span></span></div>
+	<div class='bad'><span class='line_number'>95</span><span class='line_code'><span class='line_code_inner'>     Colin Baker</span></span></div>
+	<div class='bad'><span class='line_number'>96</span><span class='line_code'><span class='line_code_inner'>     Tom Baker</span></span></div>
+	<div class='bad'><span class='line_number'>97</span><span class='line_code'><span class='line_code_inner'>     Jon Pertwee</span></span></div>
+	<div class='bad'><span class='line_number'>98</span><span class='line_code'><span class='line_code_inner'>     Matt Smith</span></span></div>
+	<div class='bad'><span class='line_number'>99</span><span class='line_code'><span class='line_code_inner'>     David Tennant</span></span></div>
+	<div class='bad'><span class='line_number'>100</span><span class='line_code'><span class='line_code_inner'>     Patrick Troughton</span></span></div>
+	<div class='bad'><span class='line_number'>101</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>102</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>103</span><span class='line_code'><span class='line_code_inner'>1. Daleks</span></span></div>
+	<div class='bad'><span class='line_number'>104</span><span class='line_code'><span class='line_code_inner'>2. Cybermen</span></span></div>
+	<div class='bad'><span class='line_number'>105</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
+	<div class='bad'><span class='line_number'>106</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
+	<div class='bad'><span class='line_number'>107</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
+	<div class='bad'><span class='line_number'>108</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>109</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
+	<div class='bad'><span class='line_number'>110</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
+	<div class='bad'><span class='line_number'>111</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>
+	<div class='bad'><span class='line_number'>112</span><span class='line_code'><span class='line_code_inner'>10. Cyber-leader</span></span></div>
+	<div class='bad'><span class='line_number'>113</span><span class='line_code'><span class='line_code_inner'>Please enter a number between 1 and 10, or -1 to end</span></span></div>
+	<div class='bad'><span class='line_number'>114</span><span class='line_code'><span class='line_code_inner'>Enter a villain ==&gt; 7</span></span></div>
+	<div class='bad'><span class='line_number'>115</span><span class='line_code'><span class='line_code_inner'>Davros first appeared in 1975</span></span></div>
+	<div class='bad'><span class='line_number'>116</span><span class='line_code'><span class='line_code_inner'>Davros were in 6 stories, with the following other villains:</span></span></div>
+	<div class='bad'><span class='line_number'>117</span><span class='line_code'><span class='line_code_inner'>==================================================</span></span></div>
+	<div class='bad'><span class='line_number'>118</span><span class='line_code'><span class='line_code_inner'>     Dalek Supreme (Supreme Dalek), inc Progenitor, Daleks, Lytton,</span></span></div>
+	<div class='bad'><span class='line_number'>119</span><span class='line_code'><span class='line_code_inner'>     Commander Gustav, Movellans, Nyder, Sharrel</span></span></div>
+	<div class='bad'><span class='line_number'>120</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>121</span><span class='line_code'><span class='line_code_inner'>There are no stories with only this villain</span></span></div>
+	<div class='bad'><span class='line_number'>122</span><span class='line_code'><span class='line_code_inner'>==================================================</span></span></div>
+	<div class='bad'><span class='line_number'>123</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>124</span><span class='line_code'><span class='line_code_inner'>The doctors who fought Davros were:</span></span></div>
+	<div class='bad'><span class='line_number'>125</span><span class='line_code'><span class='line_code_inner'>==================================================</span></span></div>
+	<div class='bad'><span class='line_number'>126</span><span class='line_code'><span class='line_code_inner'>     Colin Baker</span></span></div>
+	<div class='bad'><span class='line_number'>127</span><span class='line_code'><span class='line_code_inner'>     Tom Baker</span></span></div>
+	<div class='bad'><span class='line_number'>128</span><span class='line_code'><span class='line_code_inner'>     Peter Davison</span></span></div>
+	<div class='bad'><span class='line_number'>129</span><span class='line_code'><span class='line_code_inner'>     Sylvester McCoy</span></span></div>
+	<div class='bad'><span class='line_number'>130</span><span class='line_code'><span class='line_code_inner'>     David Tennant</span></span></div>
+	<div class='bad'><span class='line_number'>131</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>132</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>133</span><span class='line_code'><span class='line_code_inner'>1. Daleks</span></span></div>
+	<div class='bad'><span class='line_number'>134</span><span class='line_code'><span class='line_code_inner'>2. Cybermen</span></span></div>
+	<div class='bad'><span class='line_number'>135</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
+	<div class='bad'><span class='line_number'>136</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
+	<div class='bad'><span class='line_number'>137</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
+	<div class='bad'><span class='line_number'>138</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>139</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
+	<div class='bad'><span class='line_number'>140</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
+	<div class='bad'><span class='line_number'>141</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>
+	<div class='bad'><span class='line_number'>142</span><span class='line_code'><span class='line_code_inner'>10. Cyber-leader</span></span></div>
+	<div class='bad'><span class='line_number'>143</span><span class='line_code'><span class='line_code_inner'>Please enter a number between 1 and 10, or -1 to end</span></span></div>
+	<div class='bad'><span class='line_number'>144</span><span class='line_code'><span class='line_code_inner'>Enter a villain ==&gt; 11</span></span></div>
+	<div class='bad'><span class='line_number'>145</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>146</span><span class='line_code'><span class='line_code_inner'>1. Daleks</span></span></div>
+	<div class='bad'><span class='line_number'>147</span><span class='line_code'><span class='line_code_inner'>2. Cybermen</span></span></div>
+	<div class='bad'><span class='line_number'>148</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
+	<div class='bad'><span class='line_number'>149</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
+	<div class='bad'><span class='line_number'>150</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
+	<div class='bad'><span class='line_number'>151</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>152</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
+	<div class='bad'><span class='line_number'>153</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
+	<div class='bad'><span class='line_number'>154</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>
+	<div class='bad'><span class='line_number'>155</span><span class='line_code'><span class='line_code_inner'>10. Cyber-leader</span></span></div>
+	<div class='bad'><span class='line_number'>156</span><span class='line_code'><span class='line_code_inner'>Please enter a number between 1 and 10, or -1 to end</span></span></div>
+	<div class='bad'><span class='line_number'>157</span><span class='line_code'><span class='line_code_inner'>Enter a villain ==&gt; 0</span></span></div>
+	<div class='bad'><span class='line_number'>158</span><span class='line_code'><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>159</span><span class='line_code'><span class='line_code_inner'>1. Daleks</span></span></div>
+	<div class='bad'><span class='line_number'>160</span><span class='line_code'><span class='line_code_inner'>2. Cybermen</span></span></div>
+	<div class='bad'><span class='line_number'>161</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
+	<div class='bad'><span class='line_number'>162</span><span class='line_code'><span class='line_code_inner'>4. Dalek Supreme (Supreme Dalek), inc Progenitor</span></span></div>
+	<div class='bad'><span class='line_number'>163</span><span class='line_code'><span class='line_code_inner'>5. Sontarans</span></span></div>
+	<div class='bad'><span class='line_number'>164</span><span class='line_code'><span class='line_code_inner'>6. Ice Warriors (inc benevolent appearences)</span></span></div>
+	<div class='bad'><span class='line_number'>165</span><span class='line_code'><span class='line_code_inner'>7. Davros</span></span></div>
+	<div class='bad'><span class='line_number'>166</span><span class='line_code'><span class='line_code_inner'>8. Silurians (exc Sea Devils)</span></span></div>
+	<div class='bad'><span class='line_number'>167</span><span class='line_code'><span class='line_code_inner'>9. Kovarian, Madame</span></span></div>
+	<div class='bad'><span class='line_number'>168</span><span class='line_code'><span class='line_code_inner'>10. Cyber-leader</span></span></div>
+	<div class='bad'><span class='line_number'>169</span><span class='line_code'><span class='line_code_inner'>Please enter a number between 1 and 10, or -1 to end</span></span></div>
+	<div class='bad'><span class='line_number'>170</span><span class='line_code'><span class='line_code_inner'>Enter a villain ==&gt; -1</span></span></div>
+	<div class='bad'><span class='line_number'>171</span><span class='line_code'><span class='line_code_inner'>Exiting</span></span></div>
+	</div>
+</div></div>

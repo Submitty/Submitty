@@ -7,4 +7,4 @@ def correct_json_output(test):
     # Check differences on output files. Files within the data directory are compared with
     # their counterparts in the validation directory.
     test.json_diff("test01_0_diff.json")
-    test.json_diff("submission.json")
+    test.json_diff("results.json")

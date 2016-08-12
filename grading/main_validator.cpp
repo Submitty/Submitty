@@ -313,18 +313,12 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
   assert (total_possible_pts == TOTAL_POINTS);
 
-  /* Generate submission.json */
+  /* Generate results.json */
   nlohmann::json sj;
-  sj["submission_number"] = subnum;
-  sj["points_awarded"] = hidden_auto_pts;
-  sj["nonhidden_points_awarded"] = nonhidden_auto_pts;
-  sj["extra_credit_points_awarded"] = hidden_extra_credit;
-  sj["non_extra_credit_points_awarded"] = hidden_auto_pts - hidden_extra_credit;
-  sj["submission_time"] = subtime;
   sj["testcases"] = all_testcases;
 
 
-  std::ofstream json_file("submission.json");
+  std::ofstream json_file("results.json");
   json_file << sj.dump(4);
 
 

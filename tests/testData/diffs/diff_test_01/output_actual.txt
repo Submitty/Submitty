@@ -1,20 +1,20 @@
-<div class='diff-container'><table cellpadding='0' cellspacing='0' class='diff-code'>
-	<tr><td class='line_number'>1</td><td class='line_code'><pre>proper name ==&gt; Brad</pre></td></td></tr>
-	<tr><td class='line_number'>2</td><td class='line_code'><pre>emotion ==&gt; happy</pre></td></td></tr>
-	<tr><td class='line_number'>3</td><td class='line_code'><pre>verb ==&gt; eat</pre></td></td></tr>
-	<tr><td class='line_number'>4</td><td class='line_code'><pre>adjective ==&gt; silly</pre></td></td></tr>
-	<tr><td class='line_number'>5</td><td class='line_code'><pre>noun ==&gt; mouse</pre></td></td></tr>
-	<tbody class='highlight' id="id_actual_0">
-	<tr class='bad'><td class='line_number'>6</td><td class='line_code'><pre>adjective ==&gt; <span class='highlight-char'>sill</span><b>y</b></pre></td></td></tr>
-	</tbody>
-	<tr><td class='line_number'>7</td><td class='line_code'><pre>noun ==&gt; computer</pre></td></td></tr>
-	<tr><td class='line_number'>8</td><td class='line_code'><pre>adjective ==&gt; cute</pre></td></td></tr>
-	<tr><td class='line_number'>9</td><td class='line_code'><pre>Look, Brad ...</pre></td></td></tr>
-	<tr><td class='line_number'>10</td><td class='line_code'><pre>  I can see you're really happy about this ...</pre></td></td></tr>
-	<tr><td class='line_number'>11</td><td class='line_code'><pre>  I honestly think you ought to eat calmly ...</pre></td></td></tr>
-	<tr><td class='line_number'>12</td><td class='line_code'><pre>  take a silly mouse and think things over ...</pre></td></td></tr>
-	<tr><td class='line_number'>13</td><td class='line_code'><pre>  I know I've made some very hungry decisions recently,</pre></td></td></tr>
-	<tr><td class='line_number'>14</td><td class='line_code'><pre>  but I can give you my complete computer that my work will be backaaaaaaaaaaaaaa</pre></td></td></tr>
-	<tr><td class='line_number'>15</td><td class='line_code'><pre>  to cute.</pre></td></td></tr>
-	<tr><td class='line_number'>16</td><td class='line_code'><pre></pre></td></td></tr>
-</table></div>
+<div class='diff-container'><div class='diff-code'>
+	<div><span class='line_number'>1</span><span class='line_code'>proper name ==&gt; Brad</span></div>
+	<div><span class='line_number'>2</span><span class='line_code'>emotion ==&gt; happy</span></div>
+	<div><span class='line_number'>3</span><span class='line_code'>verb ==&gt; eat</span></div>
+	<div><span class='line_number'>4</span><span class='line_code'>adjective ==&gt; silly</span></div>
+	<div><span class='line_number'>5</span><span class='line_code'>noun ==&gt; mouse</span></div>
+	<div class='highlight' id="id_actual_0">
+	<div class='bad'><span class='line_number'>6</span><span class='line_code'>adjective ==&gt; <span class='highlight-char'>sill</span><span class='line_code_inner'>y</span></span></div>
+	</div>
+	<div><span class='line_number'>7</span><span class='line_code'>noun ==&gt; computer</span></div>
+	<div><span class='line_number'>8</span><span class='line_code'>adjective ==&gt; cute</span></div>
+	<div><span class='line_number'>9</span><span class='line_code'>Look, Brad ...</span></div>
+	<div><span class='line_number'>10</span><span class='line_code'>  I can see you're really happy about this ...</span></div>
+	<div><span class='line_number'>11</span><span class='line_code'>  I honestly think you ought to eat calmly ...</span></div>
+	<div><span class='line_number'>12</span><span class='line_code'>  take a silly mouse and think things over ...</span></div>
+	<div><span class='line_number'>13</span><span class='line_code'>  I know I've made some very hungry decisions recently,</span></div>
+	<div><span class='line_number'>14</span><span class='line_code'>  but I can give you my complete computer that my work will be backaaaaaaaaaaaaaa</span></div>
+	<div><span class='line_number'>15</span><span class='line_code'>  to cute.</span></div>
+	<div><span class='line_number'>16</span><span class='line_code'></span></div>
+</div></div>
