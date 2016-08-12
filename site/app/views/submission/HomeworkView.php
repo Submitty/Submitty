@@ -129,19 +129,23 @@ HTML;
 HTML;
                 }
             }
-    
-            // TODO: We probably want to move this into the ready element into drag-and-drop.js
             if ($gradeable->getCurrentVersion() == $gradeable->getHighestVersion() && $gradeable->getCurrentVersion() > 0) {
                 $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() { 
+        $(document).ready(function() {
             setUsePrevious();
             {$old_files}
-            setButtonStatus();
         });
     </script>
 HTML;
             }
+                $return .= <<<HTML
+    <script type="text/javascript">
+        $(document).ready(function() {
+            setButtonStatus();
+        });
+    </script>
+HTML;
             $return .= <<<HTML
     
     <script type="text/javascript">
@@ -311,11 +315,21 @@ HTML;
                 if($gradeable->hasResults()) {
                     $return .= <<<HTML
 submission timestamp: {$results['submission_time']}<br />
-days late (before extensions): {$results['days_late']}<br />
-<br />
-wait time: {$results['wait_time']}<br />
-grade time: {$results['grade_time']}<br />
+days late: {$results['days_late']} (before extensions)<br />
+grading time: {$results['grade_time']} seconds<br />
 HTML;
+                    if($results['num_autogrades'] > 1) {
+                      $regrades = $results['num_autogrades']-1;
+                      $return .= <<<HTML
+<br />
+number of re-autogrades: {$regrades}<br />
+last re-autograde finished: {$results['grading_finished']}<br />
+HTML;
+                    } else {
+                      $return .= <<<HTML
+queue wait time: {$results['wait_time']} seconds<br />
+HTML;
+                    }
                 }
                 $return .= <<<HTML
         </div>
@@ -354,8 +368,10 @@ HTML;
                         }
                         $return .= <<<HTML
         <div class="box">
-            <span class="badge {$background}">{$results['points']} / {$gradeable->getNormalPoints()}</span>
-            <h4>Total</h4>
+            <div class="box-title">
+                <span class="badge {$background}">{$results['points']} / {$gradeable->getNormalPoints()}</span>
+                <h4>Total</h4>
+            </div>
         </div>
 HTML;
                     }
@@ -363,27 +379,40 @@ HTML;
                     $count = 0;
                     $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
                     foreach ($gradeable->getTestcases() as $testcase) {
+                        $div_click = "";
+                        if ($testcase->hasDetails()) {
+                            $div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
+                        }
                         $return .= <<<HTML
         <div class="box">
+            <div class="box-title" {$div_click}>
 HTML;
+                        if ($testcase->hasDetails()) {
+                            $return .= <<<HTML
+                <span style="float:right; color: #0000EE; text-decoration: underline">Details</span>
+HTML;
+                        }
                         if ($testcase->hasPoints()) {
                             if ($testcase->isHidden()) {
                                 $return .= <<<HTML
-            <span class="badge">Hidden</span>
+                <span class="badge">Hidden</span>
 HTML;
                             }
                             else {
+                                $background = "";
                                 if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
                                     $background = "green-background";
                                 }
-                                else if ($testcase->getPointsAwarded() > 0) {
-                                    $background = "yellow-background";
-                                }
-                                else {
-                                    $background = "red-background";
+                                else if (!$testcase->isExtraCredit()) {
+                                    if ($testcase->getPointsAwarded() > 0) {
+                                        $background = "yellow-background";
+                                    }
+                                    else {
+                                        $background = "red-background";
+                                    }
                                 }
                                 $return .= <<<HTML
-                            <span class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</span>
+                <span class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</span>
 HTML;
                             }
                         }
@@ -394,7 +423,8 @@ HTML;
                         }
                         $command = htmlentities($testcase->getDetails());
                         $return .= <<<HTML
-            <h4 onclick="return toggleDiv('testcase_{$count}');" style="cursor: pointer;">{$name} <code>{$command}</code></h4>
+                <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code></h4>
+            </div>
             <div id="testcase_{$count}" style="display: {$display_box};">
 HTML;
                         if(!$testcase->isHidden()) {
@@ -418,30 +448,52 @@ HTML;
 HTML;
                             }
                     
+                            $autocheck_cnt = 0;
+                            $autocheck_len = count($testcase->getAutochecks());
                             foreach ($testcase->getAutochecks() as $autocheck) {
+                                $description = $autocheck->getDescription();
+                                $diff_viewer = $autocheck->getDiffViewer();
+                                
                                 $return .= <<<HTML
                 <div class="box-block">
 HTML;
+                                
+                                $title = "";
+                                $return .= <<<HTML
+                            <div class='diff-element'>
+HTML;
+                                if ($diff_viewer->hasDisplayExpected()) {
+                                    $title = "Student ";
+                                }
+                                $title .= $description;
+                                $return .= <<<HTML
+                                <h4>{$title}</h4>
+HTML;
                                 foreach ($autocheck->getMessages() as $message) {
                                     $return .= <<<HTML
-                    <div class="red-message">{$message}</div>
+                                <span class="red-message">{$message}</span><br />
 HTML;
                                 }
-                                $diff_viewer = $autocheck->getDiffViewer();
-                                $description = $autocheck->getDescription();
-                                if($diff_viewer->hasActualOutput()) {
+                                if ($diff_viewer->hasDisplayActual()) {
                                     $return .= <<<HTML
-                            <div class='diff-element'>
-                                <h4>Student {$description}</h4>
                                 {$diff_viewer->getDisplayActual()}
+HTML;
+                                }
+                                $return .= <<<HTML
                             </div>
 HTML;
-                                }
                     
-                                if($diff_viewer->hasDisplayExpected() && $diff_viewer->hasExpectedOutput()) {
+                                if ($diff_viewer->hasDisplayExpected()) {
                                     $return .= <<<HTML
                             <div class='diff-element'>
-                                <h4>Instructor {$description}</h4>
+                                <h4>Expected {$description}</h4>
+HTML;
+                                    for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
+                                        $return .= <<<HTML
+                                <br />
+HTML;
+                                    }
+                                    $return .= <<<HTML
                                 {$diff_viewer->getDisplayExpected()}
                             </div>
 HTML;
@@ -450,6 +502,11 @@ HTML;
                                 $return .= <<<HTML
                 </div>
 HTML;
+                                if (++$autocheck_cnt < $autocheck_len) {
+                                    $return .= <<<HTML
+                <div class="clear"></div>
+HTML;
+                                }
                             }
                         }
                         $return .= <<<HTML

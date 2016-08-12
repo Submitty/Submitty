@@ -1,0 +1,90 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "autocheck_id": "test01_0_autocheck",
+                    "description": "Program Output",
+                    "difference_file": "test01_0_diff.json",
+                    "expected_file": "test_output/testassignment/p1_out.txt",
+                    "actual_file": "test01_STDOUT_0.txt"
+                },
+                {
+                    "autocheck_id": "test01_1_autocheck",
+                    "description": "Number of print statements",
+                    "messages": [
+                        "FAILURE! Number of print statements 0 ge 1"
+                    ],
+                    "actual_file": "test01_STDOUT_1.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 1 Convert Temperature"
+        },
+        {
+            "autochecks": [
+                {
+                    "autocheck_id": "test02_0_autocheck",
+                    "description": "Program Output",
+                    "difference_file": "test02_0_diff.json",
+                    "expected_file": "test_output/testassignment/p2_out.txt",
+                    "actual_file": "test02_part2__p2_bug.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 2 Legal Variable Names"
+        },
+        {
+            "autochecks": [
+                {
+                    "autocheck_id": "test03_0_autocheck",
+                    "description": "Program Output",
+                    "difference_file": "test03_0_diff.json",
+                    "expected_file": "test_output/testassignment/p3_out.txt",
+                    "actual_file": "test03_STDOUT_0.txt"
+                },
+                {
+                    "autocheck_id": "test03_1_autocheck",
+                    "description": "Number of assignments",
+                    "messages": [
+                        "FAILURE! Number of assignments 2 ge 5"
+                    ],
+                    "actual_file": "test03_STDOUT_1.txt"
+                },
+                {
+                    "autocheck_id": "test03_2_autocheck",
+                    "description": "Number of multiplications",
+                    "actual_file": "test03_STDOUT_2.txt"
+                },
+                {
+                    "autocheck_id": "test03_3_autocheck",
+                    "description": "Number of additions",
+                    "actual_file": "test03_STDOUT_3.txt"
+                }
+            ],
+            "points_awarded": 3,
+            "test_name": "Test 3 Volume and Area"
+        },
+        {
+            "autochecks": [
+                {
+                    "autocheck_id": "test04_0_autocheck",
+                    "description": "Program Output",
+                    "difference_file": "test04_0_diff.json",
+                    "expected_file": "test_output/testassignment/p4_out.txt",
+                    "actual_file": "test04_STDOUT_0.txt"
+                },
+                {
+                    "autocheck_id": "test04_1_autocheck",
+                    "description": "Number of while loops",
+                    "messages": [
+                        "FAILURE! Number of while loops 0 ge 1"
+                    ],
+                    "actual_file": "test04_STDOUT_1.txt"
+                }
+            ],
+            "points_awarded": 1,
+            "test_name": "Test 4 Count Odd"
+        }
+    ]
+}

@@ -7,6 +7,7 @@ use \lib\ExceptionHandler;
 use \lib\FileUtils;
 use \lib\ServerException;
 use \lib\Utils;
+use \app\models\User;
 
 /**
  * Class ElectronicGradeable
@@ -151,6 +152,13 @@ class ElectronicGradeable {
      * @var array
      */
     public $questions_count = array();
+    
+    
+    /**
+     * @var float
+     * The maximum score for autograding excluding extra credit
+    **/
+    public $autograding_max = 0;
 
     /**
      * @var array
@@ -257,10 +265,19 @@ SELECT g_title, gd_overall_comment, g_grade_start_date, eg.* FROM electronic_gra
         
         $this->eg_details = Database::row();
         
-        // CREATE THE GRADEABLE DATA
         if (empty($this->eg_details)) {
-                                //TODO replace with grader id
-            $params = array($this->g_id, $this->student_id, $this->student_id, '', 0,0,1); 
+            //get the active version 
+            $assignment_settings = __SUBMISSION_SERVER__."/submissions/".$this->g_id."/".$this->student_id."/user_assignment_settings.json";
+            if (!file_exists($assignment_settings)) {
+                $active_version = -1;
+            }
+            else{
+                $assignment_settings_contents = file_get_contents($assignment_settings);
+                $results = json_decode($assignment_settings_contents, true);
+                $active_version = $results['active_version'];
+            }
+                                                                    ///TODO UPDATE THE STATUS 
+            $params = array($this->g_id, $this->student_id, User::$user_id, '', 1,0,$active_version); 
             Database::query("INSERT INTO gradeable_data(g_id,gd_user_id,gd_grader_id,gd_overall_comment, gd_status,gd_late_days_used,gd_active_version) VALUES(?,?,?,?,?,?,?)", $params); 
             $this->gd_id = \lib\Database::getLastInsertId('gradeable_data_gd_id_seq');
             
@@ -291,6 +308,20 @@ AND gd.gd_id=?
 ORDER BY gc_order ASC
         ", $params);
         $this->questions = Database::rows();
+        
+        $total = 0;
+        $build_file = __SUBMISSION_SERVER__."/config/build/build_".$this->g_id.".json";
+        if (file_exists($build_file)) {
+            $build_file_contents = file_get_contents($build_file);
+            $results = json_decode($build_file_contents, true);
+            foreach($results['testcases'] as $testcase){
+                $testcase_value = floatval($testcase['points']);
+                if ($testcase_value > 0 && !$testcase['extra_credit']){
+                    $total += $testcase_value;
+                }
+            }
+        }   
+        $this->autograding_max = $total; 
     }
 
     /**
@@ -364,7 +395,7 @@ ORDER BY gc_order ASC
                 continue;
             }
 
-            $submission_details = $result_directory."/submission.json";
+            $submission_details = $result_directory."/results.json";
             if (!file_exists($submission_details)) {
                 $details = array();
             }

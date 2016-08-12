@@ -61,7 +61,7 @@ def correct(test):
     test.run_run()
     test.run_validator()
     test.diff(".submit.grade", ".submit.grade_correct")
-    test.json_diff("submission.json", "submission.json_correct")
+    test.json_diff("results.json", "results.json_correct")
 
 
 @testcase
@@ -83,7 +83,7 @@ def buggy(test):
     test.run_run()
     test.run_validator()
     test.diff(".submit.grade", ".submit.grade_buggy")
-    test.json_diff("submission.json", "submission.json_buggy")
+    test.json_diff("results.json", "results.json_buggy")
 
 
 '''
@@ -98,7 +98,7 @@ def buggy2(test):
     test.run_run()
     test.run_validator()
     test.diff(".submit.grade", ".submit.grade_buggy2")
-    test.json_diff("submission.json", "submission.json_buggy2")
+    test.json_diff("results.json", "results.json_buggy2")
 
 
 @testcase
@@ -111,5 +111,5 @@ def buggy3(test):
     test.run_run()
     test.run_validator()
     test.diff(".submit.grade", ".submit.grade_buggy3")
-    test.json_diff("submission.json", "submission.json_buggy3")
+    test.json_diff("results.json", "results.json_buggy3")
 '''

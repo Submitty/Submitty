@@ -313,6 +313,8 @@ chmod 550 $SUBMITTY_INSTALL_DIR/bin/grading_done.sh
 # fix the permissions specifically of the grade_students.sh script
 chown root:$HWCRON_USER $SUBMITTY_INSTALL_DIR/bin/grade_students.sh
 chmod 550 $SUBMITTY_INSTALL_DIR/bin/grade_students.sh
+chown root:$HWCRON_USER $SUBMITTY_INSTALL_DIR/bin/grade_students__results_history.py
+chmod 550 $SUBMITTY_INSTALL_DIR/bin/grade_students__results_history.py
 
 # build the helper program for strace output and restrictions by system call categories
 g++ $SUBMITTY_INSTALL_DIR/src/grading/system_call_check.cpp -o $SUBMITTY_INSTALL_DIR/bin/system_call_check.out

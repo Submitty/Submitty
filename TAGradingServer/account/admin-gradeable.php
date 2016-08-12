@@ -6,8 +6,6 @@ include "../header.php";
 
 check_administrator();
 
-// start the question for electronic gradeables from 1
-
 if($user_is_administrator){
     $have_old = $has_grades = false;
     $current_date = date('Y/m/d 23:59:59');
@@ -114,8 +112,8 @@ if($user_is_administrator){
         $g_grade_start_date = $old_gradeable['g_grade_start_date'];
         $g_grade_released_date = $old_gradeable['g_grade_released_date'];
         $g_min_grading_group = $old_gradeable['g_min_grading_group'];
-        $string = "Edit";
-        $action = strtolower($string);
+        $string = "Save";
+        $action = 'edit';
     }
 
     $have_old = json_encode($have_old);
@@ -661,7 +659,7 @@ HTML;
 HTML;
 
     $valid_assignment_type = array('homework','assignment','quiz','test','reading','participation',
-                                   'exam','lab','recitation','problem-set','project');
+                                   'exam','lab','recitation','problem-set','project', 'none (for practice only)');
     foreach ($valid_assignment_type as $type){
         print <<<HTML
                 <option value="{$type}"

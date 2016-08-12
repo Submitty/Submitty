@@ -383,6 +383,16 @@ function grade_this_item {
     results_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/results/$assignment/$user/$version"
     bin_path="$SUBMITTY_DATA_DIR/courses/$semester/$course/bin"
 
+
+    # grab a copy of the current results_history.json file (if it exists)
+    global_results_history_file_location=${results_path}/results_history.json
+    if [ -e "$global_results_history_file_location" ]
+    then
+        tmp_results_history_filename=`mktemp`
+        cp -f $global_results_history_file_location  $tmp_results_history_filename
+    fi
+
+
     # --------------------------------------------------------------------
     # MAKE TEMPORARY DIRECTORY & COPY THE NECESSARY FILES THERE
     tmp=`mktemp -d /tmp/temp.XXXXXXXX`
@@ -551,7 +561,7 @@ function grade_this_item {
         # remove the read/write permissions for the compilation log
         chmod 660 .submit_compile_output.txt
         # remove the execute bit for any text files
-	chmod -R go-x *.txt
+	chmod -Rf go-x *.txt
 
 	# run the run.out as the untrusted user
 	echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$assignment" "$user" "$version" "$submission_time" >& .submit_runner_output.txt'
@@ -626,7 +636,7 @@ function grade_this_item {
     # Make directory structure in results if it doesn't exist
     mkdir -p "$results_path" || log_error "$NEXT_TO_GRADE" "Could not create results path $results_path"
 
-    cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/test*.html $tmp/.submit* $tmp/submission.json $tmp/test*.json "$results_path"
+    cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/test*.html $tmp/.submit* $tmp/results.json $tmp/test*.json "$results_path"
 
 
     # FIXME: a global variable
@@ -644,8 +654,16 @@ function grade_this_item {
 	global_grade_result="WARNING: $results_path/.submit.grade does not have a total score"
     fi
 
-    global_grade_timestamp_file_location=${results_path}/.grade.timestamp
-    printf "temporary data" > $global_grade_timestamp_file_location
+
+    # move the copied results history (if it exists) back into results folder
+    if [ -e "$tmp_results_history_filename" ]
+    then
+        mv $tmp_results_history_filename $global_results_history_file_location
+        # and fix permissions
+        ta_group=`stat -c "%G"  ${results_path}`
+        chgrp ${ta_group} $global_results_history_file_location
+        chmod g+r $global_results_history_file_location
+    fi
 
 
     # --------------------------------------------------------------------
@@ -804,9 +822,9 @@ while true; do
 	# log the start
 	log_message "$IS_BATCH_JOB"  "$NEXT_ITEM"  "wait:"  "$WAITTIME"  ""
 
+
 	# FIXME: using a global variable to pass back the grade
 	global_grade_result="ERROR: NO GRADE"
-	global_grade_timestamp_file_location="/dev/null"
 	global_submission_time=""
 	global_assignment_deadline=""
 	# call the helper function
@@ -832,31 +850,22 @@ while true; do
 
 
 	# -------------------------------------------------------------
-	# PREPARE THE .grade.timestamp json file
-	# FIXME: could use a json library to create this file
-	printf "{\n"                                                                                     >  $global_grade_timestamp_file_location
-	printf "  \"assignment_deadline\"            : \"%s\",\n"          "$global_assignment_deadline" >> $global_grade_timestamp_file_location
-	printf "  \"submission_time\"                : \"%s\",\n"          "$global_submission_time"     >> $global_grade_timestamp_file_location
-	sec_deadline=`date -d "${global_assignment_deadline}" +%s`
-	sec_submission=`date -d "${global_submission_time}" +%s`
-	seconds_late=$((sec_submission-sec_deadline))
-	echo "seconds_late " $seconds_late
-	if (( $seconds_late > 0 )) ; then
-	    minutes_late=$((($seconds_late+60-1)/60))
-	    hours_late=$((($seconds_late+60*60-1)/(60*60)))
-	    days_late=$((($seconds_late+60*60*24-1)/(60*60*24)))
-	    echo "days late " $days_late
-	printf "  \"days_late_(before_extensions)\"  : \"%s\",\n"          "$days_late"                  >> $global_grade_timestamp_file_location
-	fi
-	printf "  \"queue_time\"                     : \"%s\",\n"          "`date -d @$FILE_TIMESTAMP`"  >> $global_grade_timestamp_file_location
-	if [ "$IS_BATCH_JOB" != "" ]; then
-        printf "  \"batch_regrade\"                  : true,\n"                                          >> $global_grade_timestamp_file_location
-	fi
-	printf "  \"grading_began\"                  : \"%s\",\n"          "`date -d @$STARTTIME`"       >> $global_grade_timestamp_file_location
-	printf "  \"wait_time\"                      : \"%s seconds\",\n"  $WAITTIME                     >> $global_grade_timestamp_file_location
-	printf "  \"grading_finished\"               : \"%s\",\n"          "`date -d @$ENDTIME`"         >> $global_grade_timestamp_file_location
-	printf "  \"grade_time\"                     : \"%s seconds\"\n"   $ELAPSED                      >> $global_grade_timestamp_file_location
-	printf "}\n"                                                                                     >> $global_grade_timestamp_file_location
+        # create/append to the results history
+        sec_deadline=`date -d "${global_assignment_deadline}" +%s`
+        sec_submission=`date -d "${global_submission_time}" +%s`
+        seconds_late=$((sec_submission-sec_deadline))
+        /usr/local/submitty/bin/grade_students__results_history.py  \
+            "$global_results_history_file_location" \
+            "$global_assignment_deadline" \
+            "$global_submission_time" \
+            "$seconds_late" \
+             "`date -d @$FILE_TIMESTAMP`" \
+            "$IS_BATCH_JOB" \
+            "`date -d @$STARTTIME`" \
+            "$WAITTIME" \
+            "`date -d @$ENDTIME`" \
+            "$ELAPSED" \
+	    "$global_grade_result"
 
 
 	# break out of the loop (need to check for new interactive items)

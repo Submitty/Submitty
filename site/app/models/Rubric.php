@@ -418,7 +418,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 continue;
             }
 
-            $submission_details = $result_directory."/submission.json";
+            $submission_details = $result_directory."/results.json";
             if (!file_exists($submission_details)) {
                 $details = array();
             }
