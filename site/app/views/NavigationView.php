@@ -78,7 +78,7 @@ HTML;
                                         <td style="padding: 10px;">{$gradeable_open_range}</td>
                                         <td style="padding: 10px;">{$gradeable_grade_range}</td>
                                         <td><button class="btn btn-primary" style="width:100%;" \\
-                                        onclick="location.href='{$ta_base_url}/account/admin-gradeable.php?course={$course}&semester={$semester}&action=edit&id={$gradeable}'">
+                                        onclick="location.href='{$ta_base_url}/account/admin-gradeable.php?course={$course}&semester={$semester}&action=edit&id={$gradeable}&this=Edit%20Gradeable'">
                                         Edit</button></td>
                                     </tr>
 HTML;
