@@ -15,7 +15,7 @@ class GlobalView {
         $this->core = $core;
     }
 
-    public function header($breadcrumbs) {
+    public function header($breadcrumbs, $css=array()) {
         $messages = <<<HTML
 <div id='messages'>
 
@@ -53,6 +53,14 @@ HTML;
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/server.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
+HTML;
+    foreach($css as $css_ref){
+        $return .= <<<HTML
+        <link rel="stylesheet" type="text/css" href="{$css_ref}" />   
+HTML;
+    }
+    
+    $return .= <<<HTML
     {$override_css}
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.min.js"></script>
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/diff-viewer.js"></script>

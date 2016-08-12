@@ -28,6 +28,11 @@ class NavigationController implements IController {
     }
 
     public function run() {
+        $this->core->getOutput()->addCSS("https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700");
+        $this->core->getOutput()->addCSS("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic");
+        $this->core->getOutput()->addCSS("https://fonts.googleapis.com/css?family=PT+Sans:700,700italic");
+  		$this->core->getOutput()->addCSS("https://fonts.googleapis.com/css?family=Inconsolata");
+        
         $future_gradeables_list = $this->gradeables_list->getFutureGradeables();
         $open_gradeables_list = $this->gradeables_list->getOpenElectronicGradeables(false);
         $closed_gradeables_list = $this->gradeables_list->getClosedElectronicGradeables(false);
