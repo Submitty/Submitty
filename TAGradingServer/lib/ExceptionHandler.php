@@ -66,7 +66,6 @@ class ExceptionHandler {
         }
 
         if (ExceptionHandler::$debug) {
-        	echo nl2br("\n\n\n\n"); //Pushes exception message down to a viewable area.
             throw $exception;
         }
         else {
