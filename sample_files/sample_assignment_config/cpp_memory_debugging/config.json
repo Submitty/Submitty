@@ -35,13 +35,13 @@
             "validation" : [
                 {
                     "method" : "warnIfEmpty",
-                    "filename" : "STDOUT.txt",
+                    "actual_file" : "STDOUT.txt",
                     "description" : "Standard Output (STDOUT)"
                 },
                 {
                     "method" : "searchToken",
                     "data" : [ "NO ERRORS FOUND:" ],
-                    "filename" : "STDERR.txt",
+                    "actual_file" : "STDERR.txt",
                     "description" : "Standard Error (STDERR)",
                     "deduction" : 1.0
                 }
@@ -55,13 +55,13 @@
             "validation" : [
                 {
                     "method" : "warnIfEmpty",
-                    "filename" : "STDOUT.txt",
+                    "actual_file" : "STDOUT.txt",
                     "description" : "Standard Output (STDOUT)"
                 },
                 {
                     "method" : "searchToken",
                     "data" : [ "ERROR SUMMARY: 0 errors from 0 contexts" ],
-                    "filename" : "STDERR.txt",
+                    "actual_file" : "STDERR.txt",
                     "description" : "Standard Error (STDERR)",
                     "deduction" : 1.0
                 }

@@ -1,10 +1,10 @@
 {
 "differences":[
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 3
@@ -15,10 +15,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 5
@@ -29,10 +29,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 27
@@ -43,10 +43,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 52
@@ -57,10 +57,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 80
@@ -71,10 +71,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 89
@@ -85,7 +85,7 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 10
@@ -93,13 +93,13 @@
         ],
         "start": 10
     },
-    "student": {
+    "actual": {
         "start": 100
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 21
@@ -107,13 +107,13 @@
         ],
         "start": 21
     },
-    "student": {
+    "actual": {
         "start": 100
     }
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "line": [
             {
                 "line_number": 32
@@ -121,7 +121,7 @@
         ],
         "start": 32
     },
-    "student": {
+    "actual": {
         "start": 100
     }
 }

@@ -117,8 +117,8 @@ class DiffViewer {
             $diff = FileUtils::readJsonFile($diff_file);
         }
 
-        $this->diff = array('expected' => array(), 'actual' => array());
-        $this->add = array('expected' => array(), 'actual' => array());
+        $this->diff = array("expected" => array(), "actual" => array());
+        $this->add = array("expected" => array(), "actual" => array());
 
         if (isset($diff['differences'])) {
             $diffs = $diff['differences'];
@@ -131,45 +131,45 @@ class DiffViewer {
             foreach ($diffs as $diff) {
                 $act_ins = 0;
                 $exp_ins = 0;
-                $act_start = $diff["student"]['start'];
+                $act_start = $diff["actual"]['start'];
                 $act_final = $act_start;
-                if (isset($diff["student"]['line'])) {
-                    $act_ins = count($diff["student"]['line']);
-                    foreach ($diff["student"]['line'] as $line) {
+                if (isset($diff["actual"]['line'])) {
+                    $act_ins = count($diff["actual"]['line']);
+                    foreach ($diff["actual"]['line'] as $line) {
                         $line_num = $line['line_number'];
                         if (isset($line['char_number'])) {
-                            $this->diff['actual'][$line_num] = $this->compressRange($line['char_number']);
+                            $this->diff["actual"][$line_num] = $this->compressRange($line['char_number']);
                         } else {
-                            $this->diff['actual'][$line_num] = array();
+                            $this->diff["actual"][$line_num] = array();
                         }
                         $act_final = $line_num;
                     }
                 }
 
-                $exp_start = $diff["instructor"]['start'];
+                $exp_start = $diff["expected"]['start'];
                 $exp_final = $exp_start;
-                if (isset($diff["instructor"]['line'])) {
-                    $exp_ins = count($diff["instructor"]['line']);
-                    foreach ($diff["instructor"]['line'] as $line) {
+                if (isset($diff["expected"]['line'])) {
+                    $exp_ins = count($diff["expected"]['line']);
+                    foreach ($diff["expected"]['line'] as $line) {
                         $line_num = $line['line_number'];
                         if (isset($line['char_number'])) {
-                            $this->diff['expected'][$line_num] = $this->compressRange($line['char_number']);
+                            $this->diff["expected"][$line_num] = $this->compressRange($line['char_number']);
                         } else {
-                            $this->diff['expected'][$line_num] = array();
+                            $this->diff["expected"][$line_num] = array();
                         }
                         $exp_final = $line_num;
                     }
                 }
 
-                $this->link['actual'][($act_start)] = (isset($this->link['actual'])) ? count($this->link['actual']) : 0;
-                $this->link['expected'][($exp_start)] = (isset($this->link['expected'])) ? count($this->link['expected']) : 0;
+                $this->link["actual"][($act_start)] = (isset($this->link["actual"])) ? count($this->link["actual"]) : 0;
+                $this->link["expected"][($exp_start)] = (isset($this->link["expected"])) ? count($this->link["expected"]) : 0;
 
                 // Do we need to insert blank lines into actual?
                 if ($act_ins < $exp_ins) {
-                    $this->add['actual'][($act_final)] = $exp_ins - $act_ins;
+                    $this->add["actual"][($act_final)] = $exp_ins - $act_ins;
                 } // Or into expected?
                 else if ($act_ins > $exp_ins) {
-                    $this->add['expected'][($exp_final)] = $act_ins - $exp_ins;
+                    $this->add["expected"][($exp_final)] = $act_ins - $exp_ins;
                 }
             }
         }
@@ -217,7 +217,7 @@ class DiffViewer {
      */
     public function getDisplayActual() {
         if ($this->display_actual) {
-            return $this->getDisplay($this->actual, 'actual');
+            return $this->getDisplay($this->actual, "actual");
         }
         else {
             return "";
@@ -232,7 +232,7 @@ class DiffViewer {
      */
     public function getDisplayExpected() {
         if ($this->display_expected) {
-            return $this->getDisplay($this->expected, 'expected');
+            return $this->getDisplay($this->expected, "expected");
         }
         else {
             return "";
@@ -251,17 +251,17 @@ class DiffViewer {
      *
      * @return string html to be displayed to user
      */
-    private function getDisplay($lines, $type='expected') {
+    private function getDisplay($lines, $type="expected") {
         $start = null;
-        $html = "<div class='diff-container'><table cellpadding='0' cellspacing='0' class='diff-code'>\n";
+        $html = "<div class='diff-container'><div class='diff-code'>\n";
 
         if (isset($this->add[$type]) && count($this->add[$type]) > 0) {
             if (array_key_exists(-1, $this->add[$type])) {
-                $html .= "\t<tbody class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][-1]}\">\n";
+                $html .= "\t<div class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][-1]}\">\n";
                 for ($k = 0; $k < $this->add[$type][-1]; $k++) {
-                    $html .= "\t<tr class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></tr>\n";
+                    $html .= "\t<div class='row bad'><div class='empty_line'>&nbsp;</div></div>\n";
                 }
-                $html .= "\t</tbody>\n";
+                $html .= "\t</div>\n";
             }
         }
 
@@ -273,16 +273,16 @@ class DiffViewer {
             $j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
                 $start = $i;
-                $html .= "\t<tbody class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][$start]}\">\n";
+                $html .= "\t<div class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][$start]}\">\n";
             }
             if (isset($this->diff[$type][$i])) {
-                $html .= "\t<tr class='bad'>";
+                $html .= "\t<div class='bad'>";
             }
             else {
-                $html .= "\t<tr>";
+                $html .= "\t<div>";
             }
-            $html .= "<td class='line_number'>{$j}</td>";
-            $html .= "<td class='line_code'><pre>";
+            $html .= "<span class='line_number'>{$j}</span>";
+            $html .= "<span class='line_code'>";
             if (isset($this->diff[$type][$i])) {
                 // highlight the line
                 $current = 0;
@@ -292,34 +292,34 @@ class DiffViewer {
                     $html .= "<span class='highlight-char'>".htmlentities(substr($lines[$i], $diff[0], ($diff[1] - $diff[0] + 1)))."</span>";
                     $current = $diff[1]+1;
                 }
-                $html .= "<b>".htmlentities(substr($lines[$i], $current))."</b>";
+                $html .= "<span class='line_code_inner'>".htmlentities(substr($lines[$i], $current))."</span>";
             }
             else {
                 if (isset($lines[$i])) {
                     $html .= htmlentities($lines[$i]);
                 }
             }
-            $html .= "</pre></td></td></tr>\n";
+            $html .= "</span></div>\n";
 
             if (isset($this->add[$type][$i])) {
                 if ($start === null) {
-                    $html .= "\t<tbody class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][$i]}\">\n";
+                    $html .= "\t<div class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][$i]}\">\n";
                 }
                 for ($k = 0; $k < $this->add[$type][$i]; $k++) {
-                    $html .= "\t<tr class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></tr>\n";
+                    $html .= "\t<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>\n";
                 }
                 if ($start === null) {
-                    $html .= "\t</tbody>\n";
+                    $html .= "\t</div>\n";
                 }
             }
 
             if ($start !== null && !isset($this->diff[$type][($i+1)])) {
                 $start = null;
-                $html .= "\t</tbody>\n";
+                $html .= "\t</div>\n";
             }
         }
 
-        $html .= "</table></div>\n";
+        $html .= "</div></div>\n";
         return $html;
     }
 
@@ -362,7 +362,7 @@ class DiffViewer {
      */
     public function existsDifference() {
         $return = false;
-        foreach(array('expected', 'actual') as $key) {
+        foreach(array("expected", "actual") as $key) {
             if(count($this->diff[$key]) > 0 || count($this->add[$key]) > 0) {
                 $return = true;
             }

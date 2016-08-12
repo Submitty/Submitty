@@ -7,6 +7,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
+use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\GradeableList;
 
@@ -22,6 +23,9 @@ class SubmissionController implements IController {
      * @var GradeableList
      */
     private $gradeables_list;
+    
+    private $upload_details = array('version' => -1, 'version_path' => null, 'user_path' => null,
+                                    'assignment_settings' => false);
 
     public function __construct(Core $core) {
         $this->core = $core;
@@ -67,14 +71,6 @@ class SubmissionController implements IController {
                                                                $gradeable->getId());
     
             $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
-    
-            $gradefile_path = $this->core->getConfig()->getCoursePath()."/reports/summary_html/".
-                $this->core->getUser()->getId()."_summary.html";
-            
-            $grade_file = null;
-            if (file_exists($gradefile_path)) {
-                $grade_file = file_get_contents($gradefile_path);
-            }
             
             $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'showGradeable',
                                                    $gradeable, $select, $days_late);
@@ -120,15 +116,20 @@ class SubmissionController implements IController {
         }
     
         $user_path = $gradeable_path."/".$this->core->getUser()->getId();
+        $this->upload_details['user_path'] = $user_path;
         if (!FileUtils::createDir($user_path)) {
                 return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
     
         $new_version = $gradeable->getHighestVersion() + 1;
         $version_path = $user_path."/".$new_version;
+        
         if (!FileUtils::createDir($version_path)) {
             return $this->uploadResult("Failed to make folder for the current version.", false);
         }
+    
+        $this->upload_details['version_path'] = $version_path;
+        $this->upload_details['version'] = $new_version;
     
         $part_path = array();
         // We upload the assignment such that if it's multiple parts, we put it in folders "part#" otherwise
@@ -154,10 +155,6 @@ class SubmissionController implements IController {
                 if (isset($_FILES["files".($i+1)])) {
                     $uploaded_files[$i+1] = $_FILES["files".($i+1)];
                 }
-            }
-            
-            if (empty($uploaded_files)) {
-                return_error("No files actually uploaded");
             }
             
             $errors = array();
@@ -189,6 +186,10 @@ class SubmissionController implements IController {
                 if (count($tmp[$i]) > 0) {
                     $previous_files[$i + 1] = $tmp[$i];
                 }
+            }
+            
+            if (empty($uploaded_files) && empty($previous_files)) {
+                return $this->uploadResult("No files to be submitted", false);
             }
             
             if (count($previous_files) > 0) {
@@ -266,7 +267,6 @@ class SubmissionController implements IController {
                         }
                         else {
                             if (is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
-                                
                                 if (!copy($uploaded_files[$i]["tmp_name"][$j], $part_path[$i]."/".$uploaded_files[$i]["name"][$j])) {
                                     return $this->uploadResult("Failed to copy uploaded file ".$uploaded_files[$i]["name"][$j]." to current submission.", false);
                                 }
@@ -284,9 +284,9 @@ class SubmissionController implements IController {
     
                 // copy selected previous submitted files
                 if (isset($previous_files[$i])){
-                    for ($i=0; $i < count($previous_files[$i]); $i++){
-                        if (!copy($previous_part_path[$i]."/".$previous_files[$i][$i], $part_path[$i]."/".$previous_files[$i][$i])) {
-                            return $this->uploadResult("Failed to copy previously submitted file ".$previous_files[$i][$i]." to current submission.", false);
+                    for ($j=0; $j < count($previous_files[$i]); $j++){
+                        if (!copy($previous_part_path[$i]."/".$previous_files[$i][$j], $part_path[$i]."/".$previous_files[$i][$j])) {
+                            return $this->uploadResult("Failed to copy previously submitted file ".$previous_files[$i][$j]." to current submission.", false);
                         }
                     }
                 }
@@ -314,12 +314,12 @@ class SubmissionController implements IController {
         }
     
         // TODO: If any of these fail, should we "cancel" (delete) the entire submission attempt or just leave it?
-        if (!file_put_contents($settings_file, json_encode($json, JSON_PRETTY_PRINT))) {
+        if (!file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             return $this->uploadResult("Failed to write to settings file.", false);
         }
-    
-        // TODO: should we really be outputting an error on this as we've basically created all other files
-        // at this point
+        
+        $this->upload_details['assignment_settings'] = true;
+
         if (!file_put_contents($version_path."/.submit.timestamp", $current_time."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
@@ -328,13 +328,34 @@ class SubmissionController implements IController {
             $gradeable->getId(), $this->core->getUser()->getId(), $new_version);
         $touch_file = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_interactive/".implode("__", $touch_file);
         if (!touch($touch_file)) {
-            return $this->uploadResult("Failed to create file for grading queue.");
+            return $this->uploadResult("Failed to create file for grading queue.", false);
         }
         
         return $this->uploadResult("Successfully uploaded files");
     }
     
     private function uploadResult($message, $success = true) {
+        if (!$success) {
+            // we don't want to throw an exception here as that'll mess up our return json payload
+            if ($this->upload_details['version_path'] !== null
+                && !FileUtils::recursiveRmdir($this->upload_details['version_path'])) {
+                Logger::error("Could not clean up folder {$this->upload_details['version_path']}");
+            }
+            else if ($this->upload_details['assignment_settings'] === true) {
+                $settings_file = $this->upload_details['user_path']. "/user_assignment_settings.json";
+                $settings = json_decode(file_get_contents($settings_file), true);
+                if (count($settings['history']) == 1) {
+                    unlink($settings_file);
+                }
+                else {
+                    array_pop($settings['history']);
+                    $last = Utils::getLastArrayElement($settings['history']);
+                    $settings['active_version'] = $last['version'];
+                    file_put_contents($settings_file, FileUtils::encodeJson($settings));
+                }
+            }
+        }
+        
         $this->core->getOutput()->renderJson(array('success' => $success, 'error' => !$success, 'message' => $message));
         return $success;
     }
@@ -375,7 +396,7 @@ class SubmissionController implements IController {
         $json["history"][] = array("version" => $new_version,
                                    "time" => new \DateTime('now', new \DateTimeZone($this->core->getConfig()->getTimezone())));
     
-        if (!file_put_contents($settings_file, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES))) {
+        if (!file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $_SESSION['messages']['error'][] = "Could not write to settings file.";
             $this->core->redirect($this->core->buildUrl(array('component' => 'student',
                                                               'gradeable_id' => $gradeable->getId())));
@@ -393,7 +414,7 @@ class SubmissionController implements IController {
     }
     
     /**
-     * Check if the results folder exists for a given gradeable and version submission.json
+     * Check if the results folder exists for a given gradeable and version results.json
      * in the results/ directory. If the file exists, we output a string that the calling
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
      */
@@ -404,7 +425,7 @@ class SubmissionController implements IController {
         $version = $_REQUEST['gradeable_version'];
         $path = $this->core->getConfig()->getCoursePath()."/results/".$g_id."/".
                     $this->core->getUser()->getId()."/".$version;
-        if (file_exists($path."/submission.json")) {
+        if (file_exists($path."/results.json")) {
             $this->core->getOutput()->renderString("REFRESH_ME");
         }
         else {

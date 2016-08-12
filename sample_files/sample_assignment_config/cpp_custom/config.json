@@ -23,7 +23,7 @@
                 {
                     "method" : "custom",
                     "args" : "5",
-                    "filename" : "STDOUT.txt"
+                    "actual_file" : "STDOUT.txt"
                 }
             ]
         },
@@ -35,7 +35,7 @@
                 {
                     "method" : "custom",
                     "args" : "10",
-                    "filename" : "STDOUT.txt"
+                    "actual_file" : "STDOUT.txt"
                 }
             ]
         },
@@ -51,7 +51,7 @@
                 {
                     "method" : "custom",
                     "args" : "5",
-                    "filename" : 
+                    "actual_file" : 
                     [
                         "STDOUT_0.txt",
                         "STDOUT_1.txt"

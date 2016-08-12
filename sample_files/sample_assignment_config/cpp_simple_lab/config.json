@@ -16,7 +16,7 @@
         {
             "type" : "FileCheck",
             "title" : "README",
-            "filename" : "part1/README.txt",
+            "actual_file" : "part1/README.txt",
             "points" : 2
         },
 
@@ -38,8 +38,8 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
-                    "instructor_file" : "test1_output.txt"
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "test1_output.txt"
                 }
             ]
         },
@@ -51,8 +51,8 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
-                    "instructor_file" : "test2_output.txt"
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "test2_output.txt"
                 }
             ]
         },
@@ -65,8 +65,8 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
-                    "instructor_file" : "test3_output.txt"
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "test3_output.txt"
                 }
             ]
         },
@@ -78,8 +78,8 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
-                    "instructor_file" : "test4_output.txt"
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "test4_output.txt"
                 }
             ]
         },
@@ -91,8 +91,8 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
-                    "instructor_file" : "test5_output.txt"
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "test5_output.txt"
                 }
             ]
         },
@@ -106,13 +106,13 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
-                    "instructor_file" : "test6_output.txt"
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "test6_output.txt"
                 },
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDERR.txt",
-                    "instructor_file" : "test6_outputB.txt"
+                    "actual_file" : "STDERR.txt",
+                    "expected_file" : "test6_outputB.txt"
                 }
             ]
         },
@@ -125,13 +125,13 @@
             "validation" : [
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDOUT.txt",
-                    "instructor_file" : "test7_output.txt"
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "test7_output.txt"
                 },
                 {
                     "method" : "myersDiffbyLinebyChar",
-                    "filename" : "STDERR.txt",
-                    "instructor_file" : "test7_outputB.txt"
+                    "actual_file" : "STDERR.txt",
+                    "expected_file" : "test7_outputB.txt"
                 }
             ]
         }

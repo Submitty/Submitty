@@ -50,7 +50,7 @@ HTML;
 <html>
 <head>
     <title>{$this->core->getFullCourseName()}</title>
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/server.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
     {$override_css}
@@ -115,8 +115,11 @@ HTML;
 <div id="header">
     <a href="http://submitty.org">
     <div id="logo-text">
+          <img height=80 width=230 src="http://submitty.org/images/submitty_logo.png">
+<!--
         <h1>Submitty</h1>
         <h2>Rensselaer Center for Open Source</h2>
+-->
     </div>
     </a>
     <div id="header-text">

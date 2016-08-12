@@ -23,7 +23,8 @@ class GradeableFile extends Gradeable {
         $this->ta_instructions = $details['ta_instructions'];
         //$this->team_gradeable = isset($details['team-assignment']) ? $details['team-assignment'] === "yes" : "no";
     
-        if ($details['gradeable_type'] == "Electronic File") {
+        $this->type = GradeableType::stringToType($details['gradeable_type']);
+        if ($this->type === GradeableType::ELECTRONIC_FILE) {
             $this->type = GradeableType::ELECTRONIC_FILE;
             $this->open_date = new \DateTime($details['date_submit'], $timezone);
             $this->due_date = new \DateTime($details['date_due'], $timezone);
@@ -36,13 +37,13 @@ class GradeableFile extends Gradeable {
             
             $this->loadGradeableConfig();
         }
-        else if ($details['gradeable_type'] == "Checkpoints") {
+        else if ($this->type === GradeableType::CHECKPOINTS) {
             $this->type = GradeableType::CHECKPOINTS;
             $this->optional_ta_message = $details['checkpt-opt-ta-messg'] === "yes";
             // TODO: load checkpoints
         }
         else {
-            $this->type = GradeableType::NUMERIC;
+            $this->type = GradeableType::NUMERIC_TEXT;
             // TODO: load numerics and text fields
         }
         

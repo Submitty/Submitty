@@ -208,9 +208,11 @@ function setButtonStatus() {
 
     if (labels == 0) {
         $("#startnew").prop("disabled", true);
+        $("#submit").prop("disabled", true);
     }
     else {
         $("#startnew").prop("disabled", false);
+        $("#submit").prop("disabled", false);
     }
 
     // We only have "non-previous" submissions if there's stuff in the file array as well as if we've
@@ -307,6 +309,7 @@ function isValidSubmission(){
  * @param svn_checkout
  */
 function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout){
+    $("#submit").prop("disabled", true);
 
     var message = "";
     // check versions used
@@ -357,25 +360,28 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
         contentType: false,
         type: 'POST',
         success: function(data) {
+            $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
+                var response = "ERROR! Please contact administrator with following error:\n\n";
+                var redirect = false;
+                if (data['success']) {
+                    response = "SUCCESS!\n\n";
+                    redirect = true;
+                }
+                alert(response + data['message']);
+                if (redirect) {
+                    window.location.href = return_url;
+                }
             }
             catch (e) {
-                alert("Error parsing response from server. Try refereshing the page.");
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
                 console.log(data);
-            }
-            var response = "ERROR! Please contact administrator with following error:\n\n";
-            var redirect = false;
-            if (data['success']) {
-                response = "SUCCESS!\n\n";
-                redirect = true;
-            }
-            alert(response + data['message']);
-            if (redirect) {
-                window.location.href = return_url;
             }
         },
         error: function() {
+            $("#submit").prop("disabled", false);
             alert("ERROR! Please contact administrator that you could not upload files.");
         }
     });

@@ -5,7 +5,7 @@
  *
  * RELEVANT DOCUMENTATION:
  * Provides the functionality of opening and running the input files (student files) 
- * and the instructor files to get the differences between them.  Relies on the
+ * and the expected files to get the differences between them.  Relies on the
  * method implemented in differences.h and differences.cpp
  */
  
@@ -26,7 +26,7 @@
 #include <fstream>
 
 /* METHOD: readFileList
- * ARGS: input: list of file names, sample_file: instructor file,
+ * ARGS: input: list of file names, sample_file: expected file,
  * student_files: vector of strings that contain names of student_files
  * RETURN: void
  * PURPOSE: Compile a list of student files from the sample file
@@ -67,9 +67,9 @@ std::string getFileInput ( std::string file ) {
 }
 
 /* METHOD: runFiles
- * ARGS: input: list of files names, where the first is the instructor file
+ * ARGS: input: list of files names, where the first is the expected file
  * RETURN: void
- * PURPOSE: Run both the instructor and student file to get the differences
+ * PURPOSE: Run both the expected and student file to get the differences
  * between them and make the resulting JSON
  */
 void runFiles ( std::string input ) {
@@ -79,7 +79,7 @@ void runFiles ( std::string input ) {
 
 	vectorOfWords contents, sample_text;
 	std::string text;
-	text = getFileInput( sample_file ); // get the text from the instructor file
+	text = getFileInput( sample_file ); // get the text from the expected file
 	sample_text = stringToWords( text );
 	for ( int a = 0; a < student_files.size(); a++ ) {
 		contents.clear();
@@ -103,7 +103,7 @@ void runFiles ( std::string input ) {
 }
 
 /* METHOD: runFilesDiff
- * ARGS: input: list of files names, where first is the instructor file
+ * ARGS: input: list of files names, where first is the expected file
  * RETURN: void
  * PURPOSE: Another implementation of runFiles (look above for implementation)
  */
@@ -114,7 +114,7 @@ void runFilesDiff ( std::string input ) {
 
 	std::string contents, sample_text;
 	std::string text;
-	text = getFileInput( sample_file ); // get the text from the instructor file
+	text = getFileInput( sample_file ); // get the text from the expected file
 	sample_text = ( text );
 	for ( int a = 0; a < student_files.size(); a++ ) {
 		contents.clear();

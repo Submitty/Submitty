@@ -1,23 +1,23 @@
-<div class='diff-container'><table cellpadding='0' cellspacing='0' class='diff-code'>
-	<tr><td class='line_number'>1</td><td class='line_code'><pre>Please enter a country ==&gt; Germany</pre></td></td></tr>
-	<tr><td class='line_number'>2</td><td class='line_code'><pre>All games:</pre></td></td></tr>
-	<tbody class='highlight' id="id_expected_0">
-	<tr class='bad'><td class='line_number'>3</td><td class='line_code'><pre>                 G<span class='highlight-char'>erm</span>an<span class='highlight-char'>y</span>   <span class='highlight-char'>4</span>-<span class='highlight-char'>0</span>   <span class='highlight-char'>Portugal</span>                Winner: <span class='highlight-char'>Germany</span><b></b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>4</td><td class='line_code'><pre>                 <span class='highlight-char'>Germany</span>   2-2   <span class='highlight-char'>Gh</span>a<span class='highlight-char'>na</span>                <span class='highlight-char'>   </span><b>Winner: Draw</b></pre></td></td></tr>
-	</tbody>
-	<tr><td class='line_number'>5</td><td class='line_code'><pre>                     USA   0-1   Germany                 Winner: Germany</pre></td></td></tr>
-	<tbody class='highlight' id="id_expected_1">
-	<tr class='bad'><td class='line_number'>6</td><td class='line_code'><pre><b>                 Germany   2-1   Algeria                 Winner: Germany</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>7</td><td class='line_code'><pre><b>                  France   0-1   Germany                 Winner: Germany</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>8</td><td class='line_code'><pre><b>                  Brazil   1-7   Germany                 Winner: Germany</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>9</td><td class='line_code'><pre><b>                 Germany   1-0   Argentina               Winner: Germany</b></pre></td></td></tr>
-	</tbody>
-	<tr><td class='line_number'>10</td><td class='line_code'><pre>Scores:</pre></td></td></tr>
-	<tr><td class='line_number'>11</td><td class='line_code'><pre>Games Wins  Lose  Draw  GF    GA</pre></td></td></tr>
-	<tbody class='highlight' id="id_expected_2">
-	<tr class='bad'><td class='line_number'>12</td><td class='line_code'><pre><b>7     6     0     1     18    4     </b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>13</td><td class='line_code'><pre><b>The highest achievement in 2014 World cup was finals</b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>14</td><td class='line_code'><pre><b>This country placed in the first place</b></pre></td></td></tr>
-	</tbody>
-	<tr><td class='line_number'>15</td><td class='line_code'><pre></pre></td></td></tr>
-</table></div>
+<div class='diff-container'><div class='diff-code'>
+	<div><span class='line_number'>1</span><span class='line_code'>Please enter a country ==&gt; Germany</span></div>
+	<div><span class='line_number'>2</span><span class='line_code'>All games:</span></div>
+	<div class='highlight' id="id_expected_0">
+	<div class='bad'><span class='line_number'>3</span><span class='line_code'>                 G<span class='highlight-char'>erm</span>an<span class='highlight-char'>y</span>   <span class='highlight-char'>4</span>-<span class='highlight-char'>0</span>   <span class='highlight-char'>Portugal</span>                Winner: <span class='highlight-char'>Germany</span><span class='line_code_inner'></span></span></div>
+	<div class='bad'><span class='line_number'>4</span><span class='line_code'>                 <span class='highlight-char'>Germany</span>   2-2   <span class='highlight-char'>Gh</span>a<span class='highlight-char'>na</span>                <span class='highlight-char'>   </span><span class='line_code_inner'>Winner: Draw</span></span></div>
+	</div>
+	<div><span class='line_number'>5</span><span class='line_code'>                     USA   0-1   Germany                 Winner: Germany</span></div>
+	<div class='highlight' id="id_expected_1">
+	<div class='bad'><span class='line_number'>6</span><span class='line_code'><span class='line_code_inner'>                 Germany   2-1   Algeria                 Winner: Germany</span></span></div>
+	<div class='bad'><span class='line_number'>7</span><span class='line_code'><span class='line_code_inner'>                  France   0-1   Germany                 Winner: Germany</span></span></div>
+	<div class='bad'><span class='line_number'>8</span><span class='line_code'><span class='line_code_inner'>                  Brazil   1-7   Germany                 Winner: Germany</span></span></div>
+	<div class='bad'><span class='line_number'>9</span><span class='line_code'><span class='line_code_inner'>                 Germany   1-0   Argentina               Winner: Germany</span></span></div>
+	</div>
+	<div><span class='line_number'>10</span><span class='line_code'>Scores:</span></div>
+	<div><span class='line_number'>11</span><span class='line_code'>Games Wins  Lose  Draw  GF    GA</span></div>
+	<div class='highlight' id="id_expected_2">
+	<div class='bad'><span class='line_number'>12</span><span class='line_code'><span class='line_code_inner'>7     6     0     1     18    4     </span></span></div>
+	<div class='bad'><span class='line_number'>13</span><span class='line_code'><span class='line_code_inner'>The highest achievement in 2014 World cup was finals</span></span></div>
+	<div class='bad'><span class='line_number'>14</span><span class='line_code'><span class='line_code_inner'>This country placed in the first place</span></span></div>
+	</div>
+	<div><span class='line_number'>15</span><span class='line_code'></span></div>
+</div></div>

@@ -1,10 +1,10 @@
 {
 "differences":[
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 4
@@ -15,10 +15,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 9
@@ -29,10 +29,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 14
@@ -43,10 +43,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 19
@@ -57,10 +57,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 24
@@ -71,10 +71,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 29
@@ -85,10 +85,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 34
@@ -99,10 +99,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 39
@@ -113,10 +113,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 44
@@ -127,10 +127,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 49
@@ -141,10 +141,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 54
@@ -155,10 +155,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 59
@@ -169,10 +169,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 64
@@ -183,10 +183,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 69
@@ -197,10 +197,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 74
@@ -211,10 +211,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 79
@@ -225,10 +225,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 84
@@ -239,10 +239,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 89
@@ -253,10 +253,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 94
@@ -267,10 +267,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 99
@@ -281,10 +281,10 @@
 }
   ,
 {
-    "instructor": {
+    "expected": {
         "start": 97
     },
-    "student": {
+    "actual": {
         "line": [
             {
                 "line_number": 104

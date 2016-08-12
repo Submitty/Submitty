@@ -76,7 +76,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
   double score = deduction*(1-grade);
   std::cout << "score = " << score << std::endl;
 
-  std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"filename");
+  std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"actual_file");
   for (int FN = 0; FN < filenames.size(); FN++) {
 
     // JSON FOR THIS FILE DISPLAY
@@ -109,17 +109,17 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
 
 
     bool studentFileExists, studentFileEmpty;
-    bool instructorFileExists=false, instructorFileEmpty=false;
+    bool expectedFileExists=false, expectedFileEmpty=false;
     fileStatus(student_file, studentFileExists,studentFileEmpty);
 
     std::string expected;
 
     if (studentFileExists) {
-      autocheck_j["student_file"] = student_file;
-      expected = tcg.value("instructor_file", "");
+      autocheck_j["actual_file"] = student_file;
+      expected = tcg.value("expected_file", "");
       if (expected != "") {
-        fileStatus(expected, instructorFileExists,instructorFileEmpty);
-        assert (instructorFileExists);
+        fileStatus(expected, expectedFileExists,expectedFileEmpty);
+        assert (expectedFileExists);
         // PREPARE THE JSON DIFF FILE
         std::stringstream diff_path;
         diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
@@ -129,8 +129,8 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
         std::string id = hw_id;
         std::string expected_out_dir = "test_output/" + id + "/";
         expected_path << expected_out_dir << expected;
-        autocheck_j["instructor_file"] = expected_path.str();
-        autocheck_j["difference"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
+        autocheck_j["expected_file"] = expected_path.str();
+        autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
       }
     }
 
@@ -144,7 +144,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
     std::cout << "AUTOCHECK GRADE " << grade << std::endl;
     std::cout << "MESSAGES SIZE " << result->getMessages().size() << std::endl;
     std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
-    std::cout << "INSTRUCTOR FILEEXISTS " << instructorFileExists << " EMPTY " << instructorFileEmpty << std::endl;
+    std::cout << "EXPECTED FILEEXISTS " << expectedFileExists << " EMPTY " << expectedFileEmpty << std::endl;
 
     std::cout << "-----" << std::endl;
     system (("ls -lta " + student_file).c_str());
@@ -225,18 +225,23 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     
     nlohmann::json tc_j;
     tc_j["test_name"] = title;
+    nlohmann::json autocheck_js;
 
     bool fileExists, fileEmpty;
     fileStatus(my_testcase.getPrefix() + "_execute_logfile.txt", fileExists,fileEmpty);
     if (fileExists && !fileEmpty) {
-      tc_j["execute_logfile"] = my_testcase.getPrefix() + "_execute_logfile.txt";
+      nlohmann::json autocheck_j;
+      autocheck_j["autocheck_id"] = my_testcase.getPrefix() + "_execute_logfile_autocheck";
+      autocheck_j["actual_file"] = my_testcase.getPrefix() + "_execute_logfile.txt";
+      autocheck_j["description"] = "Execution Logfile";
+      autocheck_js.push_back(autocheck_j);
     }
 
     int testcase_pts = 0;
     //std::string message = "";
     //message += "Unresolved warnings in your program!";
     //message += "Error: compilation was not successful!";
-    nlohmann::json autocheck_js;
+
     double my_score = 1.0;
     assert (my_testcase.numFileGraders() > 0);
     for (int j = 0; j < my_testcase.numFileGraders(); j++) {
@@ -308,18 +313,12 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
   assert (total_possible_pts == TOTAL_POINTS);
 
-  /* Generate submission.json */
+  /* Generate results.json */
   nlohmann::json sj;
-  sj["submission_number"] = subnum;
-  sj["points_awarded"] = hidden_auto_pts;
-  sj["nonhidden_points_awarded"] = nonhidden_auto_pts;
-  sj["extra_credit_points_awarded"] = hidden_extra_credit;
-  sj["non_extra_credit_points_awarded"] = hidden_auto_pts - hidden_extra_credit;
-  sj["submission_time"] = subtime;
   sj["testcases"] = all_testcases;
 
 
-  std::ofstream json_file("submission.json");
+  std::ofstream json_file("results.json");
   json_file << sj.dump(4);
 
 

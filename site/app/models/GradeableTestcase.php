@@ -11,13 +11,15 @@ use app\libraries\Utils;
  *
  * Contains information pertaining to individual auto-grader test cases that are
  * detailed in the config/build/build_*.json files. Additionally, can load in information
- * from a submission.json file to set additional information pertaining to each testcase.
+ * from a results.json file to set additional information pertaining to each testcase.
  * We only really need to do this for the version we're actually looking at and no others
  * as we don't need that high level of information (as we really only ever need late days,
  * points awarded, and if it's the active version).
  */
 class GradeableTestcase {
     private $core;
+    
+    private $index;
     
     /** @var string */
     private $name = "";
@@ -33,8 +35,9 @@ class GradeableTestcase {
     private $compilation_output = "";
     private $autochecks = array();
     
-    public function __construct(Core $core, $testcase) {
+    public function __construct(Core $core, $testcase, $idx) {
         $this->core = $core;
+        $this->index = $idx;
         
         if (isset($testcase['title'])) {
             $this->name = Utils::prepareHtmlString($testcase['title']);
@@ -67,8 +70,11 @@ class GradeableTestcase {
         }
         
         if (isset($testcase['autochecks'])) {
-            foreach ($testcase['autochecks'] as $autocheck) {
-                $this->autochecks[] = new GradeableAutocheck($autocheck, $this->core->getConfig()->getCoursePath(), $result_path);
+            foreach ($testcase['autochecks'] as $idx => $autocheck) {
+                $index = "id_{$this->index}_{$idx}";
+                $this->autochecks[] = new GradeableAutocheck($autocheck,
+                                                             $this->core->getConfig()->getCoursePath(),
+                                                             $result_path, $index);
             }
         }
         
@@ -141,5 +147,9 @@ class GradeableTestcase {
      */
     public function getAutochecks() {
         return $this->autochecks;
+    }
+    
+    public function hasDetails() {
+        return count($this->autochecks) > 0 || $this->hasCompilationOutput() || $this->hasExecuteLog();
     }
 }

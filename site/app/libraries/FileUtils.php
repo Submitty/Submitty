@@ -61,10 +61,11 @@ class FileUtils {
     }
 
     /**
-     * Recursively goes through a directory deleting everything in it
-     * before deleting the folder itself
+     * Recursively goes through a directory deleting everything in it before deleting the folder itself. Returns
+     * true if successful, false otherwise.
      *
      * @param string $dir
+     * @return bool
      */
     public static function recursiveRmdir($dir) {
         if (is_dir($dir)) {
@@ -72,16 +73,21 @@ class FileUtils {
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
                     if (filetype($dir . "/" . $object) == "dir") {
-                        FileUtils::recursiveRmdir($dir . "/" . $object);
+                        if (!FileUtils::recursiveRmdir($dir . "/" . $object)) {
+                            return false;
+                        }
                     }
                     else {
-                        unlink($dir . "/" . $object);
+                        if (!unlink($dir . "/" . $object)) {
+                            return false;
+                        }
                     }
                 }
             }
             reset($objects);
             rmdir($dir);
         }
+        return true;
     }
 
     /**
@@ -202,5 +208,9 @@ class FileUtils {
             zip_close($zip);
         }
         return $size;
+    }
+    
+    public static function encodeJson($string) {
+        return json_encode($string, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 }
