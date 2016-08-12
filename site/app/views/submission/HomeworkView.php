@@ -377,14 +377,17 @@ HTML;
 HTML;
                             }
                             else {
+                                $background = "";
                                 if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
                                     $background = "green-background";
                                 }
-                                else if ($testcase->getPointsAwarded() > 0) {
-                                    $background = "yellow-background";
-                                }
-                                else {
-                                    $background = "red-background";
+                                else if (!$testcase->isExtraCredit()) {
+                                    if ($testcase->getPointsAwarded() > 0) {
+                                        $background = "yellow-background";
+                                    }
+                                    else {
+                                        $background = "red-background";
+                                    }
                                 }
                                 $return .= <<<HTML
                             <span class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</span>
