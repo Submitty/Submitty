@@ -16,8 +16,6 @@ $view = new local_view();
 //Default state.
 $state = "";
 
-echo nl2br("\n\n\n\n\n" . var_export($_POST, true));
-
 //Validate submission
 //Is Student ID submitted (required!)
 if (isset($_POST['student_id']) && $_POST['student_id'] !== "") {
@@ -28,16 +26,22 @@ if (isset($_POST['student_id']) && $_POST['student_id'] !== "") {
 	    (isset($_POST['email'])      && $_POST['email']      === "")) {
 
 		//Do DB lookup for student by Student ID
+		$row = lookup_student_in_db($_POST['student_id']);
+		if ($row !== "") {
+			$view->fill_form($row);		
+		} else {
+			$state = "student_not_found";
+		}		
 	} else {
 		//Do form data validation.
 		//No validation on student id as pattern varies among Universities.
-		//No validation on checkbox as only possible values are true or false.
-		//Email regex should match most cases, including unusual TLDs.
-		//Email regex will NOT match domains dictated by IP address.
-		//    (who the heck has an email@[ip_address] anyway?)
+		//No validation on checkbox as only possible values are on (true) or
+		//   off (false).
+		//Email regex should match most cases, including unusual TLDs and
+		//      IPv4 address domains.
 		if (preg_match("~^[a-zA-Z.'`\- ]+$~",                               $_POST['first_name']) &&
 		    preg_match("~^[a-zA-Z.'`\- ]+$~",                               $_POST['last_name'] ) &&
-		    preg_match("~^[a-zA-Z0-9._\-]+@[a-zA-Z0-9.\-]+.[a-zA-Z]{2,}$~", $_POST['email']     ) &&
+		    preg_match("~^[a-zA-Z0-9._\-]+@[a-zA-Z0-9.\-]+.[a-zA-Z0-9]+$~", $_POST['email']     ) &&
 		    preg_match("~^$|^[0-9]+$~",                                     $_POST['r_section'] )) {
 		    $is_validated = true;
 		} else {
@@ -47,11 +51,11 @@ if (isset($_POST['student_id']) && $_POST['student_id'] !== "") {
 		if ($is_validated) {
 			//upsert's argument expects 2D array
 			upsert(array( array( $_POST['student_id'],
-								 $_POST['first_name'],
-								 $_POST['last_name'],
-								 $_POST['email'],
-								($_POST['r_section'] === "") ? "NULL" : $_POST['r_section'],
-								 $_POST['is_manual'] )));
+			                     $_POST['first_name'],
+			                     $_POST['last_name'],
+			                     $_POST['email'],
+			                    ($_POST['r_section'] === "")   ? "NULL" : $_POST['r_section'],
+		                        ($_POST['is_manual'] === "on") ? "TRUE" : "FALSE" )));
 		} else {
 			$state = 'invalid_student_info';
 		}
@@ -70,6 +74,24 @@ exit;
 
 function lookup_student_in_db($student_id) {
 
+	$student_group = '4';
+
+	//TODO: "SELECT user_is_manual FROM users" when DB is updated so this data
+	//      is returned to function caller.
+	$sql = <<<SQL
+SELECT
+	user_id,
+	user_firstname,
+	user_lastname,
+	user_email,
+	registration_section
+FROM users
+WHERE user_id=?
+AND user_group=?
+SQL;
+
+		\lib\Database::query($sql, array($student_id, $student_group));
+		return \lib\Database::row();
 }
 
 /* END FUNCTION lookup_student_in_db() ====================================== */
@@ -105,7 +127,7 @@ CREATE TEMPORARY TABLE temp
 	 first_name VARCHAR(255),
 	 last_name  VARCHAR(255),
 	 email      VARCHAR(255),
-	 group      INTEGER,
+	 user_group INTEGER,
 	 r_section  INTEGER,
 	 is_manual  BOOLEAN)	
 ON COMMIT DROP;
@@ -131,12 +153,13 @@ SQL;
 	$sql['update'] = <<<SQL
 UPDATE users
 SET
-	users.user_firstname=temp.first_name,
-	users.user_lastname=temp.last_name,
-	users.useremail=temp.email,
-	users.registration_section=temp.r_section,
+	user_firstname=temp.first_name,
+	user_lastname=temp.last_name,
+	user_email=temp.email,
+	registration_section=temp.r_section
 FROM temp
 WHERE users.user_id=temp.student_id
+	AND users.user_group=temp.user_group
 SQL;
 
 	//This portion ensures that INSERT will only occur when data record is new.
@@ -154,7 +177,7 @@ SELECT
 	temp.first_name,
 	temp.last_name,
 	temp.email,
-	temp.group,
+	temp.user_group,
 	temp.r_section
 FROM temp 
 LEFT OUTER JOIN users
@@ -243,57 +266,44 @@ HTML;
 	//NOTE:    Instead of creating a table to display a student's info, the info
 	//         is filled into the form for easy and quick tweaking.
 
+	//$db_data expected indices:
+	//[0]: student id
+	//[1]: student first name
+	//[2]: student last name
+	//[3]: student email
+	//[4]: student registered section
+	//[5]: student "is manual" boolean flag
+
 		//validate data parameters and/or set defaults.
 		if (!is_array($db_data)) {
-			$db_data = array(
-				'student_id' => "",
-				'first_name' => "",
-				'last_name'  => "",
-				'email'      => "",
-				'r_section'  => "",
-				'is_manual'  => true
-			);
+			$db_data = array("", "", "" , "", "", true);
 		} else {
 			//Some fields may be OK, and others may need to be set to default.
 			//Check each individually to be thorough.
-			if (!isset($db_data['student_id'])) {
-				$db_data['student_id'] = "";
+			for ($i = 0; $i<=4; $i++) {
+				if (!isset($db_data[$i]) || $db_data[$i] == 'null') {
+					$db_data[$i] = "";
+				}
 			}
 
-			if (!isset($db_data['first_name'])) {
-				$db_data['first_name'] = "";
-			}
-
-			if (!isset($db_data['last_name'])) {
-				$db_data['last_name'] = "";
-			}
-
-			if (!isset($db_data['email'])) {
-				$db_data['email'] = "";
-			}
-
-			if (!isset($db_data['r_section'])) {
-				$db_data['r_section'] = "";
-			}
-
-			if (!isset($db_data['is_manual'])) {
-				$db_data['is_manual'] = true;
+			if (!isset($db_data[5]) || $db_data[5] == 'on') {
+				$db_data[5] = true;
 			}
 		}
 
 		//Build form
 		//Determine if is_manual checkbox should be checked by default
-		$is_checked = ($db_data['is_manual']) ? "checked" : "";
+		$is_checked = ($db_data[5]) ? "checked" : "";
 		
 		//Construct rest of form.  Note string expansions in HTML: {}
 		self::$view['form'] = <<<HTML
 <form action="admin-single-student-review.php" method="POST" enctype="multipart/form-data">
-<div style="width:30%; display:block;">Student ID:<br><input type="text" name="student_id" value="{$db_data['student_id']}" style="width:95%;"></div>
+<div style="width:30%; display:block;">Student ID:<br><input type="text" name="student_id" value="{$db_data[0]}" style="width:95%;"></div>
 <p>To only lookup a student's enrollment, leave blank all fields marked <span style="color:red;">*</span>.
-<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">First Name: <span style="color:red;">*</span><br><input type="text" name="first_name" value="{$db_data['first_name']}" style="width:95%;"></div>
-<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Last Name: <span style="color:red;">*</span><br><input type="text" name="last_name" value="{$db_data['last_name']}" style="width:95%;"></div>
-<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Email: <span style="color:red;">*</span><br><input type="text" name="email" value="{$db_data['email']}" style="width:95%;"></div>
-<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Registered Section:<br><input type="text" name="r_section" value="{$db_data['r_section']}" style="width:95%;"></div>
+<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">First Name: <span style="color:red;">*</span><br><input type="text" name="first_name" value="{$db_data[1]}" style="width:95%;"></div>
+<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Last Name: <span style="color:red;">*</span><br><input type="text" name="last_name" value="{$db_data[2]}" style="width:95%;"></div>
+<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Email: <span style="color:red;">*</span><br><input type="text" name="email" value="{$db_data[3]}" style="width:95%;"></div>
+<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Registered Section:<br><input type="text" name="r_section" value="{$db_data[4]}" style="width:95%;"></div>
 <div style="width:50%; display:inline-block; vertical-align:top; padding-right:5px;"><p><input type="checkbox" name="is_manual" style="position:inherit; text-align:center; padding-top:1em;" {$is_checked}> Manually Registered Student<br>
 	<p><span style="color:red;">*</span> Required <span style="font-style:italic;">only</span> for add/updating student.</div>
 <div style="display:inline-block; vertical-align:top; padding-top:1.5em;"><input type="submit" name="submit" value="Submit"></div>
@@ -312,25 +322,25 @@ HTML;
 		switch($state) {
 		case 'student_not_found':
 			echo self::$view['head']              .
-   				 self::$view['form']              . 
+			     self::$view['form']              . 
 			     self::$view['student_not_found'] .
 			     self::$view['tail'];
 			break;
 		case 'invalid_student_info':
 			echo self::$view['head']                 .
-				 self::$view['form']                 . 
-				 self::$view['invalid_student_info'] . 
-				 self::$view['tail'];
+			     self::$view['form']                 . 
+			     self::$view['invalid_student_info'] . 
+			     self::$view['tail'];
 			break;
 		case 'upsert_done':
 			echo self::$view['head']        .
-				 self::$view['form']        . 
-				 self::$view['upsert_done'] . 
+			     self::$view['form']        . 
+			     self::$view['upsert_done'] . 
 			     self::$view['tail'];
 			break;
 		default:
 			echo self::$view['head'] .
-				 self::$view['form'] . 
+			     self::$view['form'] . 
 			     self::$view['tail'];
 			break;
 		}
