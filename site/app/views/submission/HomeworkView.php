@@ -224,7 +224,7 @@ HTML;
             if ($gradeable->getActiveVersion() == 0) {
                 $selected = ($gradeable->getCurrentVersion() == $gradeable->getActiveVersion()) ? "selected" : "";
                 $return .= <<<HTML
-        <option value="0" {$selected}>Cancelled</option>
+        <option value="0" {$selected}>Do Not Grade Assignment</option>
 HTML;
 
             }
@@ -261,7 +261,7 @@ HTML;
             if ($gradeable->getCurrentVersion() > 0) {
                 if ($gradeable->getCurrentVersion() == $gradeable->getActiveVersion()) {
                     $version = 0;
-                    $button = '<input type="submit" class="btn btn-default" style="float: right" value="Do Not Grade This Version (Mark All Inactive)">';
+                    $button = '<input type="submit" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">';
                 }
                 else {
                     $version = $gradeable->getCurrentVersion();
@@ -286,8 +286,9 @@ HTML;
                 $return .= <<<HTML
     <div class="sub">
         <p class="red-message">
-        Note: You have NO ACTIVE submissions for this assignment.<br />
-        This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.
+            Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
+            This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
+            You may select any version above and select that for grading however.<br />
         </p>
     </div>
 
