@@ -60,7 +60,7 @@ def correct(test):
     test.run_compile()  # NOTE: This is necessary to rename part2 file
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade", ".submit.grade_correct")
+    test.diff("results_grade.txt", "results_grade.txt_correct")
     test.json_diff("results.json", "results.json_correct")
 
 
@@ -82,7 +82,7 @@ def buggy(test):
     test.run_compile()  # NOTE: This is necessary to rename part2 file
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade", ".submit.grade_buggy")
+    test.diff("results_grade.txt", "results_grade.txt_buggy")
     test.json_diff("results.json", "results.json_buggy")
 
 
@@ -97,7 +97,7 @@ def buggy2(test):
     test.run_compile()  # NOTE: This is necessary to rename part2 file
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade", ".submit.grade_buggy2")
+    test.diff("results_grade.txt", "results_grade.txt_buggy2")
     test.json_diff("results.json", "results.json_buggy2")
 
 
@@ -110,6 +110,6 @@ def buggy3(test):
     test.run_compile()  # NOTE: This is necessary to rename part2 file
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade", ".submit.grade_buggy3")
+    test.diff("results_grade.txt", "results_grade.txt_buggy3")
     test.json_diff("results.json", "results.json_buggy3")
 '''

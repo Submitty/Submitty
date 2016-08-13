@@ -191,7 +191,7 @@ foreach($db->rows() as $student_record) {
             $question_max_scores = pgArrayToPhp($gradeable['max_scores']);
             $question_total = 0; 
 
-            $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$gradeable['gd_active_version']."/.submit.grade";
+            $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$gradeable['gd_active_version']."/results_grade.txt";
             if (!file_exists($submit_file)) {
                 $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
             }

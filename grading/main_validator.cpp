@@ -177,7 +177,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
 
-  std::string grade_path = ".submit.grade";
+  std::string grade_path = "results_grade.txt";
   std::ofstream gradefile(grade_path.c_str());
 
   gradefile << "Grade for: " << rcsid << std::endl;
