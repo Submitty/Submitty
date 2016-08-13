@@ -42,7 +42,7 @@
     vertical-align: top;
     max-height: 20px !important;
     height: 20px !important;
-    font-family: 'Inconsolata', serif !important;
+    font-family: 'Inconsolata', monospace !important;
     font-size: 16px;
     line-height: 20px !important;
     padding: 0;
@@ -53,13 +53,11 @@
     height: 20px !important;
     line-height: 20px !important;
     padding: 0 !important;
-    white-space: pre !important;
     overflow-x: scroll !important;
-    font-family: monospace;
 }
 
 .line_code {
-    white-space: nowrap;
+    white-space: pre;
     padding-left: 10px;
 }
 
