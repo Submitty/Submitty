@@ -16,6 +16,7 @@ fi
 
 SUBMITTY_INSTALL_DIR=__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__
 SUBMITTY_DATA_DIR=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__
+SUBMISSION_URL=__INSTALL__FILLIN__SUBMISSION_URL__
 
 HWPHP_USER=__INSTALL__FILLIN__HWPHP_USER__
 HWCRON_USER=__INSTALL__FILLIN__HWCRON_USER__
@@ -235,7 +236,7 @@ echo -e "\nMake sure to create the database: $DATABASE_NAME\n\n"
 
 echo -e "SUCCESS!  new course   $course $semester   CREATED HERE:   $course_dir"
 
-echo -e "SUCCESS!  submission url  https://submit.cs.rpi.edu/index.php?semester="$semester"&course="$course
+echo -e "SUCCESS!  submission url  ${SUBMISSION_URL}index.php?semester=${semester}&course=${course}"
 
 ########################################################################################################################
 ########################################################################################################################

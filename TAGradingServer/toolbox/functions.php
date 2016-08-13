@@ -94,7 +94,24 @@ $BASE_URL = rtrim(__BASE_URL__, "/");
 header("Content-Type: text/html; charset=UTF-8");
 
 $user_id = 0;
-$suggested_username = ($DEBUG && isset($_GET['useUser'])) ? $_GET['useUser'] : $_SERVER["PHP_AUTH_USER"];
+if ($DEBUG && isset($_GET['useUser'])) {
+    $suggested_username = $_GET['userUser'];
+}
+else {
+    if (isset($_SERVER['PHP_AUTH_USER'])) {
+        $suggested_username = $_SERVER['PHP_AUTH_USER'];
+    }
+    else if (isset($_SERVER['REMOTE_USER'])) {
+        $suggested_username = $_SERVER['PHP_AUTH_USER'];
+    }
+    else {
+        // if not already authenticated do it
+        header('WWW-Authenticate: Basic realm=HWServer');
+        header('HTTP/1.0 401 Unauthorized');
+        exit;
+    }
+}
+
 $params = array($suggested_username);
 try {
     User::loadUser($suggested_username);
