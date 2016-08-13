@@ -52,10 +52,9 @@ if [ ${VAGRANT} == 1 ]; then
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
 ##    https://192.168.56.101 (submission)                 ##
-##    https://192.168.56.102 (svn)                        ##
-##    https://192.168.56.103 (grading)                    ##
-##    https://192.168.56.104 (new-submission)             ##
-##    https://192.168.56.105 (cgi-bin scripts)            ##
+##    https://192.168.56.102 (cgi-bin scripts)            ##
+##    https://192.168.56.103 (svn)                        ##
+##    https://192.168.56.104 (tagrading)                  ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
 ##   localhost:15432                                      ##

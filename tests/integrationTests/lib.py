@@ -231,7 +231,7 @@ class TestcaseWrapper:
     # running test.diff("foo.txt") within the test package "test_foo", the files
     # /var/local/autograde_tests/tests/test_foo/data/foo.txt and
     # /var/local/autograde_tests/tests/test_foo/validation/foo.txt will be compared.
-    def diff(self, f1, f2=""):
+    def diff(self, f1, f2="", arg=""):
         # if only 1 filename provided...
         if not f2:
             f2 = f1
@@ -249,8 +249,13 @@ class TestcaseWrapper:
         if not os.path.isfile(filename2):
             raise RuntimeError("File " + filename2 + " does not exist")
 
-        #return_code = subprocess.call(["diff", "-b", filename1, filename2]) #ignores changes in white space
-        process = subprocess.Popen(["diff", filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if (arg=="") :
+            process = subprocess.Popen(["diff", filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        elif (arg=="-b") :
+            #ignore changes in white space
+            process = subprocess.Popen(["diff", arg, filename1, filename2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        else :
+            raise RuntimeError("ARGUMENT "+arg+" TO DIFF NOT TESTED")
         out, err = process.communicate()
         if process.returncode == 1:
             raise RuntimeError("Difference between " + filename1 + " and " + filename2 +

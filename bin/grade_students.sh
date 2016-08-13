@@ -465,7 +465,7 @@ function grade_this_item {
         # svn checkout into the archival directory
         mkdir -p $checkout_path
         pushd $checkout_path > /dev/null
-        svn co $SVN_PATH/$user/$svn_subdirectory@{"$submission_time"} . > $tmp/.submit_svn_checkout.txt 2>&1
+        svn co $SVN_PATH/$user/$svn_subdirectory@{"$submission_time"} . > $tmp/results_log_svn_checkout.txt 2>&1
         popd > /dev/null
 
         # copy checkout into tmp compilation directory
@@ -505,8 +505,8 @@ function grade_this_item {
 	chmod -R go+rwx $tmp
 
 	# run the compile.out as the untrusted user
-	echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$assignment" "$user" "$version" "$submission_time" >& $tmp/.submit_compile_output.txt'
-	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$assignment" "$user" "$version" "$submission_time" >& $tmp/.submit_compile_output.txt
+	echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$assignment" "$user" "$version" "$submission_time" >& $tmp/results_log_compile.txt'
+	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation/my_compile.out "$assignment" "$user" "$version" "$submission_time" >& $tmp/results_log_compile.txt
 
 	compile_error_code="$?"
 	if [[ "$compile_error_code" -ne 0 ]] ;
@@ -559,17 +559,17 @@ function grade_this_item {
   	# give the untrusted user read/write/execute permissions on the tmp directory & files
 	chmod -R go+rwx $tmp
         # remove the read/write permissions for the compilation log
-        chmod 660 .submit_compile_output.txt
+        chmod 660 results_log_compile.txt
         # remove the execute bit for any text files
 	chmod -Rf go-x *.txt
 
 	# run the run.out as the untrusted user
-	echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$assignment" "$user" "$version" "$submission_time" >& .submit_runner_output.txt'
-	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$assignment" "$user" "$version" "$submission_time" >& .submit_runner_output.txt
+	echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$assignment" "$user" "$version" "$submission_time" >& results_log_runner.txt'
+	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" $tmp/my_run.out "$assignment" "$user" "$version" "$submission_time" >& results_log_runner.txt
 	runner_error_code="$?"
 
 	# change permissions of all files created by untrusted in this directory (so hwcron can archive/grade them)
-	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp -user "${ARGUMENT_UNTRUSTED_USER}" -exec /bin/chmod o+r {} \;   >>  .submit_runner_output.txt 2>&1
+	$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp -user "${ARGUMENT_UNTRUSTED_USER}" -exec /bin/chmod o+r {} \;   >>  results_log_runner.txt 2>&1
 
 
 	# FIXME
@@ -580,7 +580,7 @@ function grade_this_item {
 
 	# this didn't fix it (didn't give hwcron ability to delete these files
 	# also need to add execute on the directories...
-	#$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp -user "${ARGUMENT_UNTRUSTED_USER}" -type d -exec /bin/chmod o+x {} \;   >>  .submit_runner_output.txt 2>&1
+	#$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/find $tmp -user "${ARGUMENT_UNTRUSTED_USER}" -type d -exec /bin/chmod o+x {} \;   >>  results_log_runner.txt 2>&1
 
 
 
@@ -608,11 +608,11 @@ function grade_this_item {
 
 	#FIXME: do we still need valgrind here?
         if [[ 0 -eq 0 ]] ; then
-            echo "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
-            "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+            echo "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& results_log_validator.txt
+            "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& results_log_validator.txt
         else
-            echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt'
-            "$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" " "/usr/bin/valgrind" "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& .submit_validator_output.txt
+            echo '$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /usr/bin/valgrind "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& results_log_validator.txt'
+            "$SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}" " "/usr/bin/valgrind" "$bin_path/$assignment/validate.out" "$assignment" "$user" "$version" "$submission_time"  >& results_log_validator.txt
         fi
 
 	validator_error_code="$?"
@@ -636,22 +636,22 @@ function grade_this_item {
     # Make directory structure in results if it doesn't exist
     mkdir -p "$results_path" || log_error "$NEXT_TO_GRADE" "Could not create results path $results_path"
 
-    cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/test*.html $tmp/.submit* $tmp/results.json $tmp/test*.json "$results_path"
+    cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/test*.html $tmp/results_log_*txt $tmp/results.json $tmp/results_grade.txt $tmp/test*.json "$results_path"
 
 
     # FIXME: a global variable
 
-    if [ -e $results_path/.submit.grade ] ;
+    if [ -e $results_path/results_grade.txt ] ;
     then
-	global_grade_result=`grep "total:" $results_path/.submit.grade`
+	global_grade_result=`grep "total:" $results_path/results_grade.txt`
     else
-	global_grade_result="ERROR: $results_path/.submit.grade does not exist"
+	global_grade_result="ERROR: $results_path/results_grade.txt does not exist"
     fi
 
 
     if [[ $global_grade_result == "" ]] ;
     then
-	global_grade_result="WARNING: $results_path/.submit.grade does not have a total score"
+	global_grade_result="WARNING: $results_path/results_grade.txt does not have a total score"
     fi
 
 

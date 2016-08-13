@@ -43,7 +43,7 @@ def buggy_code(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_buggy")
+    test.diff("results_grade.txt","results_grade.txt_buggy","-b")
 
 
 @testcase
@@ -54,5 +54,5 @@ def nonbuggy_code(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_nonbuggy")
+    test.diff("results_grade.txt","results_grade.txt_nonbuggy","-b")
 

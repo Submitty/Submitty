@@ -1,0 +1,4 @@
+Testcase  1: Compilation of student code: Factorial.java  2 /  2
+Testcase  2: Compilation of instructor test cases: *Test.java  2 /  2
+Testcase  3: FactorialTest                   8 / 16
+Automatic grading total:                           12 / 20
