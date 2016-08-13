@@ -485,5 +485,5 @@ def testcase(func):
     global to_run
     to_run[modname].wrapper = tw
     to_run[modname].testcases.append(wrapper)
-    to_run[modname].testcases_names.append(func.__name)
+    to_run[modname].testcases_names.append(func.__name__)
     return wrapper
