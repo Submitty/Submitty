@@ -54,7 +54,7 @@ def correct(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_correct")
+    test.diff("results_grade.txt","results_grade.txt_correct")
     test.json_diff("results.json","results.json_correct")
 
 
@@ -68,7 +68,7 @@ def missing_label(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_missing_label")
+    test.diff("results_grade.txt","results_grade.txt_missing_label")
     test.json_diff("results.json","results.json_missing_label")
 
 
@@ -82,7 +82,7 @@ def wrong_num(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_wrong_num")
+    test.diff("results_grade.txt","results_grade.txt_wrong_num")
     test.json_diff("results.json","results.json_wrong_num")
 
 
@@ -96,7 +96,7 @@ def wrong_total(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_wrong_total")
+    test.diff("results_grade.txt","results_grade.txt_wrong_total")
     test.json_diff("results.json","results.json_wrong_total")
 
 
@@ -110,7 +110,7 @@ def not_random(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_not_random")
+    test.diff("results_grade.txt","results_grade.txt_not_random")
     test.json_diff("results.json","results.json_not_random")
 
 
@@ -124,7 +124,7 @@ def all_bugs(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_all_bugs")
+    test.diff("results_grade.txt","results_grade.txt_all_bugs")
     test.json_diff("results.json","results.json_all_bugs")
 
 
