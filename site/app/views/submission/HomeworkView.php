@@ -240,7 +240,7 @@ HTML;
                 }
     
                 if ($version == $gradeable->getActiveVersion()) {
-                    $select_text[] = "ACTIVE";
+                    $select_text[] = "GRADE THIS VERSION";
                 }
                 
                 if ($version == $gradeable->getCurrentVersion()) {
@@ -261,11 +261,11 @@ HTML;
             if ($gradeable->getCurrentVersion() > 0) {
                 if ($gradeable->getCurrentVersion() == $gradeable->getActiveVersion()) {
                     $version = 0;
-                    $button = '<input type="submit" class="btn btn-default" value="Do Not Grade This Version (Mark All Inactive)">';
+                    $button = '<input type="submit" class="btn btn-default" style="float: right" value="Do Not Grade This Version (Mark All Inactive)">';
                 }
                 else {
                     $version = $gradeable->getCurrentVersion();
-                    $button = '<input type="submit" class="btn btn-primary" value="Make Active">';
+                    $button = '<input type="submit" class="btn btn-primary" value="Grade This Version">';
                 }
                 $return .= <<<HTML
     <form style="display: inline;" method="post" 
