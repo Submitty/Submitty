@@ -165,52 +165,6 @@ pip install xlsx2csv
 chmod -R 555 /usr/local/lib/python2.7/*
 chmod 555 /usr/lib/python2.7/dist-packages
 
-#################################################################
-# NETWORK CONFIGURATION
-#################
-#
-# The goal here is to ensure the VM is accessible from your own
-# computer for code testing, has an outgoing connection to the
-# Internet to access github and receive Ubuntu updates, but is also
-# unreachable via incoming Internet connections so to block uninvited
-# guests.
-#
-# Open the VM’s Settings window and click on the “Network” tab.  There
-# are tabs for four network adapters.  Enable adapters #1 and #2.
-#
-# Adapter #1 should be attached to NAT and make sure the cable
-# connected box (under advanced) is checked.  You may ignore all other
-# settings for adapter #1.  This provides the VM’s outgoing Internet
-# connection, but uninvited guests on the Internet cannot see the VM.
-#
-# Adapter #2 should be attached to Host-only Network.  Under “name”,
-# there is a drop down menu to select Host-only Ethernet Adapter (or
-# vboxnet).  Recall that this was created in the previous section,
-# Create Virtual Network Adapters.  This adapter can only communicate
-# between your host OS and the VM, and it is unreachable to and from
-# the Internet.
-#
-# After Ubuntu is fully installed, you need to adjust the networking
-# configuration so that you may access the VM via static IP addressing
-# as a convenience for code testing.
-#
-# The VM’s host-only adapter provides a private connection to the VM,
-# but Ubuntu also needs to be configured to use this adapter.
-
-echo "Binding static IPs to \"Host-Only\" virtual network interface."
-
-# eth0 is auto-configured by Vagrant as NAT.  eth1 is a host-only adapter and
-# not auto-configured.  eth1 is manually set so that the host-only network
-# interface remains consistent among VM reboots as Vagrant has a bad habit of
-# discarding and recreating networking interfaces everytime the VM is restarted.
-# eth1 is statically bound to 192.168.56.101, 102, 103, 104, and 105.
-printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-printf "auto eth1:3\niface eth1:3 inet static\naddress 192.168.56.104\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
-
-# Turn them on.
-ifup eth1 eth1:1 eth1:2 eth1:3 eth1:4
 
 #################################################################
 # JAR SETUP
@@ -258,6 +212,55 @@ chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/DrMemory
 # FIXME: these permissions could probably be adjusted
 chmod -R 755 ${SUBMITTY_INSTALL_DIR}/DrMemory
 
+#################################################################
+# NETWORK CONFIGURATION
+#################
+if [ ${VAGRANT} == 1 ]; then
+    #
+    # The goal here is to ensure the VM is accessible from your own
+    # computer for code testing, has an outgoing connection to the
+    # Internet to access github and receive Ubuntu updates, but is also
+    # unreachable via incoming Internet connections so to block uninvited
+    # guests.
+    #
+    # Open the VM’s Settings window and click on the “Network” tab.  There
+    # are tabs for four network adapters.  Enable adapters #1 and #2.
+    #
+    # Adapter #1 should be attached to NAT and make sure the cable
+    # connected box (under advanced) is checked.  You may ignore all other
+    # settings for adapter #1.  This provides the VM’s outgoing Internet
+    # connection, but uninvited guests on the Internet cannot see the VM.
+    #
+    # Adapter #2 should be attached to Host-only Network.  Under “name”,
+    # there is a drop down menu to select Host-only Ethernet Adapter (or
+    # vboxnet).  Recall that this was created in the previous section,
+    # Create Virtual Network Adapters.  This adapter can only communicate
+    # between your host OS and the VM, and it is unreachable to and from
+    # the Internet.
+    #
+    # After Ubuntu is fully installed, you need to adjust the networking
+    # configuration so that you may access the VM via static IP addressing
+    # as a convenience for code testing.
+    #
+    # The VM’s host-only adapter provides a private connection to the VM,
+    # but Ubuntu also needs to be configured to use this adapter.
+
+    echo "Binding static IPs to \"Host-Only\" virtual network interface."
+
+    # eth0 is auto-configured by Vagrant as NAT.  eth1 is a host-only adapter and
+    # not auto-configured.  eth1 is manually set so that the host-only network
+    # interface remains consistent among VM reboots as Vagrant has a bad habit of
+    # discarding and recreating networking interfaces everytime the VM is restarted.
+    # eth1 is statically bound to 192.168.56.101, 102, 103, 104, and 105.
+    printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+    printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+    printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+    printf "auto eth1:3\niface eth1:3 inet static\naddress 192.168.56.104\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
+
+    # Turn them on.
+    ifup eth1 eth1:1 eth1:2 eth1:3 eth1:4
+fi
+
 
 #################################################################
 # APACHE SETUP
@@ -291,8 +294,6 @@ CSCI
 .
 ." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout svn.key -out svn.crt > /dev/null 2>&1
 
-chmod o+r hwgrading.crt
-chmod o+r submit.crt
 chmod o+r svn.crt
 
 echo -e "#%PAM-1.0
@@ -496,7 +497,7 @@ if [ ${VAGRANT} == 1 ]; then
 	echo "postgres:postgres" | chpasswd postgres
 	adduser postgres shadow
 	service postgresql restart
-	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}')"
+	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost       all    all    192.168.56.0\/24    pam\nhost       all    all    all                md5/" /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
 	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
@@ -534,7 +535,7 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 http://192.168.56.101
-https://192.168.56.104
+http://192.168.56.104
 http://192.168.56.102
 svn+ssh:192.168.56.103" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 else

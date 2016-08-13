@@ -109,7 +109,7 @@ if __name__ == '__main__':
     #remove_lines('/etc/apache2/apache2.conf', ["ServerName 10.0.2.15"])
 
     shutil.rmtree('/root/bin', True)
-    users = ["instructor", "ta", "developer", "student", "smithj", "hwphp", "hwcgi", "hwcron", "hsdbu"]
+    users = ["instructor", "ta", "developer", "student", "smithj", "hwcgi", "hwphp", "hwcron", "hsdbu"]
 
     for user in users:
         try:
