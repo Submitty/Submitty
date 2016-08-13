@@ -97,10 +97,16 @@ HTML;
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+                if ($gradeable->getNumParts() > 1) {
+                    $label = "Drag your {$gradeable->getPartsNames()[$i]} here or click to open file browser";
+                }
+                else {
+                    $label = "Drag your file(s) here or click to open file browser";
+                }
                 $return .= <<<HTML
         
         <div id="upload{$i}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
-            <h3 class="label" id="label{$i}">Drag your {$gradeable->getPartsNames()[$i]} here or click to open file browser</h3>
+            <h3 class="label" id="label{$i}">{$label}</h3>
             <input type="file" name="files" id="input_file{$i}" style="display: none" onchange="addFilesFromInput({$i})" />
         </div>
 HTML;
