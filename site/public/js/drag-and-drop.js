@@ -363,15 +363,11 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
             $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
-                var response = "ERROR! Please contact administrator with following error:\n\n";
-                var redirect = false;
                 if (data['success']) {
-                    response = "SUCCESS!\n\n";
-                    redirect = true;
-                }
-                alert(response + data['message']);
-                if (redirect) {
                     window.location.href = return_url;
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
                 }
             }
             catch (e) {

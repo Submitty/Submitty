@@ -331,6 +331,7 @@ class SubmissionController implements IController {
             return $this->uploadResult("Failed to create file for grading queue.", false);
         }
         
+        $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
         return $this->uploadResult("Successfully uploaded files");
     }
     
