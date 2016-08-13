@@ -9,6 +9,9 @@ import traceback
 import sys
 from pprint import pprint
 
+if sys.version_info[0] == 3:
+    xrange = range
+
 # global variable available to be used by the test suite modules
 SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
 
@@ -39,6 +42,7 @@ class TestcaseFile:
     def __init__(self):
         self.prebuild = lambda: None
         self.testcases = []
+        self.testcases_names = []
 
 to_run = defaultdict(lambda: TestcaseFile(), {})
 
@@ -71,9 +75,10 @@ white = ASCIIEscapeManager([37])
 ###################################################################################
 # Run the given list of test case names
 def run_tests(names):
-    success = True
     totalmodules = len(names)
-    for key in names:
+    for name in names:
+        name = name.split(".")
+        key = name[0]
         val = to_run[key]
         modsuccess = True
         with bold:
@@ -89,8 +94,15 @@ def run_tests(names):
             modsuccess = False
             cont = False
         if cont:
-            total = len(val.testcases)
-            for index, f in zip(xrange(1, total + 1), val.testcases):
+            testcases = []
+            if len(name) > 1:
+                for i in range(len(val.testcases)):
+                    if str(val.testcases_names[i]).lower() == name[1].lower():
+                        testcases.append(val.testcases[i])
+            else:
+                testcases = val.testcases
+            total = len(testcases)
+            for index, f in zip(xrange(1, total + 1), testcases):
                 try:
                     f()
                 except Exception as e:
@@ -100,17 +112,17 @@ def run_tests(names):
                         for i in range(len(tb)-1, -1, -1):
                             if os.path.basename(tb[i][0]) == '__init__.py':
                                 lineno = tb[i][1]
-                        print("Testcase " + str(index) + " failed on line " + str(lineno) + " with exception: ", e)
+                        print("Testcase " + str(index) + " failed on line " + str(lineno) +
+                              " with exception: ", e)
                         sys.exc_info()
                         total -= 1
-            if total == len(val.testcases):
+            if total == len(testcases):
                 with bold + green:
                     print("All testcases passed")
             else:
                 with bold + red:
-                    print(str(total) + "/" + str(len(val.testcases)) + " testcases passed")
+                    print(str(total) + "/" + str(len(testcases)) + " testcases passed")
                     modsuccess = False
-                    success = False
         with bold:
             print("--- END TEST MODULE " + key.upper() + " ---")
         print()
@@ -123,6 +135,7 @@ def run_tests(names):
         with bold + red:
             print(str(totalmodules) + "/" + str(len(names)) + " modules passed")
         sys.exit(1)
+
 
 # Run every test currently loaded
 def run_all():
@@ -472,4 +485,5 @@ def testcase(func):
     global to_run
     to_run[modname].wrapper = tw
     to_run[modname].testcases.append(wrapper)
+    to_run[modname].testcases_names.append(func.__name)
     return wrapper
