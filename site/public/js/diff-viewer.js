@@ -2,9 +2,12 @@ $(document).ready(function() {
     var types = ['expected', 'actual'];
     var hoverOn = function(e) {
         var args = $(e.currentTarget).attr('id').split("_");
-        var id = args.length-1;
+        var id = args[0];
+        for (var i = 1; i < args.length-2; i++) {
+            id += "_" + args[i];
+        }
         types.forEach(function(type) {
-            $('#'+args[0]+'_'+type+'_' + args[id]).children().each(function() {
+            $('#'+id+'_'+type+'_' + args[args.length-1]).children().each(function() {
                 $(this).addClass('highlight-hover');
             });
         });
@@ -13,8 +16,12 @@ $(document).ready(function() {
     var hoverOff = function(e) {
         var args = $(e.currentTarget).attr('id').split("_");
         var id = args.length-1;
+        id = args[0];
+        for (var i = 1; i < args.length-2; i++) {
+            id += "_" + args[i];
+        }
         types.forEach(function(type) {
-            $('#'+args[0]+'_'+type+'_' + args[id]).children().each(function() {
+            $('#'+id+'_'+type+'_' + args[args.length-1]).children().each(function() {
                 $(this).removeClass('highlight-hover');
             });
         });

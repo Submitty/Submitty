@@ -1,0 +1,55 @@
+{
+    "testcases": [
+        {
+            "points_awarded": 2,
+            "test_name": "Test 1 Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "autocheck_id": "test02_0_autocheck",
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        "ERROR!  MISSING \"total = \" string"
+                    ],
+                    "actual_file": "test02_STDOUT.txt"
+                }
+            ],
+            "points_awarded": 6,
+            "test_name": "Test 2 Sum of 5 random numbers"
+        },
+        {
+            "autochecks": [
+                {
+                    "autocheck_id": "test03_0_autocheck",
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        "ERROR!  MISSING \"total = \" string"
+                    ],
+                    "actual_file": "test03_STDOUT.txt"
+                }
+            ],
+            "points_awarded": 4,
+            "test_name": "Test 3 Sum of 10 random numbers"
+        },
+        {
+            "autochecks": [
+                {
+                    "autocheck_id": "test04_0_0_autocheck",
+                    "description": "STDOUT_0.txt",
+                    "messages": [
+                        "ERROR!  MISSING \"total = \" string"
+                    ],
+                    "actual_file": "test04_STDOUT_0.txt"
+                },
+                {
+                    "autocheck_id": "test04_0_1_autocheck",
+                    "description": "STDOUT_1.txt",
+                    "actual_file": "test04_STDOUT_1.txt"
+                }
+            ],
+            "points_awarded": 3,
+            "test_name": "Test 4 Is it random?  (Is it different on each run?)"
+        }
+    ]
+}

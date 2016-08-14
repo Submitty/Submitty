@@ -395,7 +395,7 @@ ORDER BY gc_order ASC
                 continue;
             }
 
-            $submission_details = $result_directory."/submission.json";
+            $submission_details = $result_directory."/results.json";
             if (!file_exists($submission_details)) {
                 $details = array();
             }

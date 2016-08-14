@@ -1,0 +1,23 @@
+{
+"testcases": [
+		{
+			"test_name": "Test 1 Compilation of student code: Factorial.java",
+			"points_awarded": 2
+		},
+		{
+			"test_name": "Test 2 Compilation of instructor test cases: *Test.java",
+			"points_awarded": 2
+		},
+		{
+			"test_name": "Test 3 FactorialTest",
+			"autochecks": [
+				{
+					"autocheck_id":"test03_0_autocheck",
+					"actual_file":"test03_STDOUT.txt",
+					"description": "JUnit output"
+				}
+			],
+			"points_awarded": 16
+		}
+	]
+}

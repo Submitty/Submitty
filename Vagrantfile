@@ -9,6 +9,8 @@ Vagrant.configure(2) do |config|
   config.vm.network "private_network", ip: "192.168.56.101", auto_config: false
 
   config.vm.provider "virtualbox" do |vb|
+    #vb.gui = true
+
     vb.memory = 2048
     vb.cpus = 2
     # When you put your computer (while running the VM) to sleep, then resume work some time later the VM will be out

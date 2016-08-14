@@ -1,16 +1,16 @@
-<div class='diff-container'><table cellpadding='0' cellspacing='0' class='diff-code'>
-	<tr><td class='line_number'>1</td><td class='line_code'><pre>Height==&gt; 4</pre></td></td></tr>
-	<tr><td class='line_number'>2</td><td class='line_code'><pre>Width==&gt; 15</pre></td></td></tr>
-	<tbody class='highlight' id="id_actual_0">
-	<tr class='bad'><td class='line_number'>3</td><td class='line_code'><pre><b>***************  </b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>4</td><td class='line_code'><pre><b>* h: 4, w: 15 * </b></pre></td></td></tr>
-	<tr class='bad'><td class='line_number'>5</td><td class='line_code'><pre><b>* area: 60    *  </b></pre></td></td></tr>
-	</tbody>
-	<tr><td class='line_number'>6</td><td class='line_code'><pre>***************</pre></td></td></tr>
-	<tbody class='highlight' id="id_actual_1">
-	<tr class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></tr>
-	<tr class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></tr>
-	<tr class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></tr>
-	</tbody>
-	<tr><td class='line_number'>7</td><td class='line_code'><pre></pre></td></td></tr>
-</table></div>
+<div class='diff-container'><div class='diff-code'>
+	<div><span class='line_number'>1</span><span class='line_code'>Height==&gt; 4</span></div>
+	<div><span class='line_number'>2</span><span class='line_code'>Width==&gt; 15</span></div>
+	<div class='highlight' id="id_actual_0">
+	<div class='bad'><span class='line_number'>3</span><span class='line_code'><span class='line_code_inner'>***************  </span></span></div>
+	<div class='bad'><span class='line_number'>4</span><span class='line_code'><span class='line_code_inner'>* h: 4, w: 15 * </span></span></div>
+	<div class='bad'><span class='line_number'>5</span><span class='line_code'><span class='line_code_inner'>* area: 60    *  </span></span></div>
+	</div>
+	<div><span class='line_number'>6</span><span class='line_code'>***************</span></div>
+	<div class='highlight' id="id_actual_1">
+	<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>
+	<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>
+	<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>
+	</div>
+	<div><span class='line_number'>7</span><span class='line_code'></span></div>
+</div></div>

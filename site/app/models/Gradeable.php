@@ -201,8 +201,8 @@ abstract class Gradeable {
         }
 
         if (isset($details['testcases'])) {
-            foreach ($details['testcases'] as $testcase) {
-                $testcase = new GradeableTestcase($this->core, $testcase);
+            foreach ($details['testcases'] as $idx => $testcase) {
+                $testcase = new GradeableTestcase($this->core, $testcase, $idx);
                 $this->testcases[] = $testcase;
                 $this->normal_points += $testcase->getNormalPoints();
                 $this->non_hidden_points += $testcase->getNonHiddenPoints();
@@ -244,16 +244,23 @@ abstract class Gradeable {
                 continue;
             }
             
-            $this->versions[$version] = FileUtils::readJsonFile($results_path."/".$version."/submission.json");
+            $this->versions[$version] = FileUtils::readJsonFile($results_path."/".$version."/results.json");
+
             $this->versions[$version]['status'] = true;
-            $this->versions[$version] = array_merge($this->versions[$version],
-                                                    FileUtils::readJsonFile($results_path."/".$version."/.grade.timestamp"));
-            $this->versions[$version]['days_late'] = isset($this->versions[$version]['days_late_(before_extensions)']) ?
-                intval($this->versions[$version]['days_late_(before_extensions)']) : 0;
+
+            $results_history=FileUtils::readJsonFile($results_path."/".$version."/results_history.json");
+            $last_results_timestamp=$results_history[count($results_history)-1];
+            $this->versions[$version] = array_merge($this->versions[$version],$last_results_timestamp);
+
+            $this->versions[$version]['days_late'] = isset($this->versions[$version]['days_late_before_extensions']) ?
+                intval($this->versions[$version]['days_late_before_extensions']) : 0;
             if ($this->versions[$version]['days_late'] < 0) {
                 $this->versions[$version]['days_late'] = 0;
             }
+            $this->versions[$version]['num_autogrades'] = count($results_history);
+
             $this->versions[$version]['points'] = 0;
+
             // TODO: We don't want to take into account points_awarded for hidden testcases
             for ($i = 0; $i < count($this->testcases); $i++) {
                 if (!$this->testcases[$i]->isHidden()) {

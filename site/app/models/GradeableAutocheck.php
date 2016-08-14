@@ -13,7 +13,11 @@ use app\libraries\Utils;
  */
 class GradeableAutocheck {
     
+    /** @var string */
     private $id;
+    
+    /** @var string */
+    private $index;
     
     /** @var DiffViewer DiffViewer instance to hold the student, instructor, and differences */
     private $diff_viewer;
@@ -24,8 +28,17 @@ class GradeableAutocheck {
     /** @var String[] Message to show underneath the description for a diff */
     private $messages = array();
     
-    public function __construct($details, $course_path, $result_path) {
+    /**
+     * GradeableAutocheck constructor.
+     *
+     * @param $details
+     * @param $course_path
+     * @param $result_path
+     * @param $idx
+     */
+    public function __construct($details, $course_path, $result_path, $idx) {
         $this->id = $details['autocheck_id'];
+        $this->index = $idx;
         
         if (isset($details['description'])) {
             $this->description = Utils::prepareHtmlString($details['description']);
@@ -51,7 +64,7 @@ class GradeableAutocheck {
             $difference_file = $result_path . "/" . $details["difference_file"];
         }
         
-        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file);
+        $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $this->index);
     }
     
     public function getId() {

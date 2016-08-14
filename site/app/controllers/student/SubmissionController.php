@@ -414,7 +414,7 @@ class SubmissionController implements IController {
     }
     
     /**
-     * Check if the results folder exists for a given gradeable and version submission.json
+     * Check if the results folder exists for a given gradeable and version results.json
      * in the results/ directory. If the file exists, we output a string that the calling
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
      */
@@ -425,7 +425,7 @@ class SubmissionController implements IController {
         $version = $_REQUEST['gradeable_version'];
         $path = $this->core->getConfig()->getCoursePath()."/results/".$g_id."/".
                     $this->core->getUser()->getId()."/".$version;
-        if (file_exists($path."/submission.json")) {
+        if (file_exists($path."/results.json")) {
             $this->core->getOutput()->renderString("REFRESH_ME");
         }
         else {
