@@ -180,11 +180,11 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   std::string grade_path = "results_grade.txt";
   std::ofstream gradefile(grade_path.c_str());
 
-  //  gradefile << "Grade for: " << rcsid << std::endl;
-  //gradefile << "  submission#: " << subnum << std::endl;
-
   int automated_points_awarded = 0;
   int automated_points_possible = 0;
+  int nonhidden_automated_points_awarded = 0;
+  int nonhidden_automated_points_possible = 0;
+
   std::stringstream testcase_json;
   nlohmann::json all_testcases;
 
@@ -205,7 +205,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
     std::cout << "------------------------------------------\n";
     TestCase my_testcase((*tc)[i]);
-    std::cout << "Test # " + std::to_string(i+1) << std::endl;
     std::string title = "Test " + std::to_string(i+1) + " " + (*tc)[i].value("title","MISSING TITLE");
     int points = (*tc)[i].value("points",0);
     std::cout << title << " - points: " << points << std::endl;
@@ -234,8 +233,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         autocheck_j["description"] = "Execution Logfile";
         autocheck_js.push_back(autocheck_j);
       }
-      
-
       double my_score = 1.0;
       assert (my_testcase.numFileGraders() > 0);
       for (int j = 0; j < my_testcase.numFileGraders(); j++) {
@@ -248,31 +245,37 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       my_score = std::max(0.0,std::min(1.0,my_score));
       std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
       testcase_pts = (int)floor(my_score * my_testcase.getPoints());
-
-      // output grade & message
-      
       std::cout << "Grade: " << testcase_pts << std::endl;
-      automated_points_awarded += testcase_pts;
-      if (!my_testcase.getExtraCredit()) {
-        automated_points_possible += my_testcase.getPoints();
-      }
     }
     tc_j["points_awarded"] = testcase_pts;
+    automated_points_awarded += testcase_pts;
+    if (!my_testcase.getHidden()) {
+      nonhidden_automated_points_awarded += testcase_pts;
+    }
+    if (my_testcase.getPoints() > 0 && !my_testcase.getExtraCredit()) {
+      automated_points_possible += my_testcase.getPoints();
+      if (!my_testcase.getHidden()) {
+        nonhidden_automated_points_possible += my_testcase.getPoints();
+      }
+    }
     all_testcases.push_back(tc_j); 
     gradefile << "Testcase"
               << std::setw(3) << std::right << i+1 << ": "
               << std::setw(50) << std::left << my_testcase.getTitle() << " ";
     if (my_testcase.getExtraCredit()) {
       if (testcase_pts > 0) {
-        gradefile << std::setw(3) << std::right << "+"+std::to_string(testcase_pts) << " points extra credit";
+        gradefile << std::setw(3) << std::right << "+"+std::to_string(testcase_pts) << " points";
       }
     } else if (my_testcase.getPoints() < 0) {
       if (testcase_pts < 0) {
-        gradefile << std::setw(3) << std::right << std::to_string(testcase_pts) << " points penalty";
+        gradefile << std::setw(3) << std::right << std::to_string(testcase_pts) << " points";
       }
     } else {
       gradefile << std::setw(3) << std::right << testcase_pts << " /"
                 << std::setw(3) << std::right << my_testcase.getPoints();
+    }
+    if (my_testcase.getHidden()) {
+      gradefile << "  [ HIDDEN ]";
     }
     gradefile << std::endl;
 
@@ -283,11 +286,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",automated_points_possible);
   assert (AUTO_POINTS == automated_points_possible);
   int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
-
-  std::cout << "hidden auto pts         " <<  automated_points_awarded << std::endl;
-  std::cout << "hidden possible pts     " <<  automated_points_possible << std::endl;
-
-
+  
   // Generate results.json 
   nlohmann::json sj;
   sj["testcases"] = all_testcases;
@@ -300,6 +299,11 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
             << std::setw(3) << std::right << automated_points_awarded
             << " /" <<  std::setw(3)
             << std::right << automated_points_possible << std::endl;
+
+  gradefile << std::setw(64) << std::left << "Non-Hidden Automatic grading total:"
+            << std::setw(3) << std::right << nonhidden_automated_points_awarded
+            << " /" <<  std::setw(3)
+            << std::right << nonhidden_automated_points_possible << std::endl;
 
   return 0;
 }

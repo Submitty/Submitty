@@ -450,7 +450,7 @@ HTML;
                                 if ($testcase->getPointsAwarded() > 0) {
                                   $background = "green-background";
                                   $return .= <<<HTML
-                <span class="badge {$background}"> &nbsp; + {$testcase->getPointsAwarded()} &nbsp; </span>
+                <span class="badge {$background}"> &nbsp; +{$testcase->getPointsAwarded()} &nbsp; </span>
 HTML;
                                 }
                               } else if ($testcase->getPoints() > 0) {
