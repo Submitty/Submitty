@@ -30,7 +30,9 @@ HTML;
                                                  "ITEMS BEING GRADED" => "btn-primary", "GRADED" => 'btn-danger');
         $title_to_prefix = array("FUTURE" => "OPEN DATE", "OPEN" => "SUBMIT", "CLOSED" => "CLOSED", "ITEMS BEING GRADED" => "GRADING", "GRADED" => "GRADED");
         foreach($sections_to_list as $title => $gradeable_list){
-            if(count($gradeable_list)==0) continue;
+            if(count($gradeable_list)==0){
+                continue;  
+            } 
             $return .= <<<HTML
                                     <tr class="bar"><td colspan="4"></td></tr>
                                     <tr class="colspan"><td colspan="4">{$title}</td></tr>
