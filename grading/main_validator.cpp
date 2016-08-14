@@ -216,12 +216,16 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
     if (my_testcase.isSubmissionLimit()) {
       int max = my_testcase.getMaxSubmissions();
-      int additional = my_testcase.getAdditionalPenalty();
+      float penalty = my_testcase.getPenalty();
+      assert (penalty <= 0);
       int points = my_testcase.getPoints();
       int excessive_submissions = std::max(0,subnum-max);
-      int penalty = std::ceil(excessive_submissions / float(additional));
-      testcase_pts = std::max(points, -penalty);
-      std::cout << "EXCESSIVE SUBMISSIONS PENALTY = " << testcase_pts << std::endl;
+      // round down to the biggest negative full point penalty
+      testcase_pts = std::floor(excessive_submissions * penalty);
+      if (testcase_pts < points) testcase_pts = points;
+      if (testcase_pts != 0) {
+        std::cout << "EXCESSIVE SUBMISSIONS PENALTY = " << testcase_pts << std::endl;
+      }
     } 
     else {
       bool fileExists, fileEmpty;

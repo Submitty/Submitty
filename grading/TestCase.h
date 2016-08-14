@@ -46,7 +46,7 @@ public:
 
   bool isSubmissionLimit() const { return (isFileCheck() && _json.find("max_submissions") != _json.end()); }
   int getMaxSubmissions() const { assert (isSubmissionLimit()); return _json.value("max_submissions",20); }
-  int getAdditionalPenalty() const { assert (isSubmissionLimit()); return _json.value("additional_penalty",10); }
+  float getPenalty() const { assert (isSubmissionLimit()); return _json.value("penalty",-0.1); }
 
   void debugJSON() const { std::cout << _json.dump(2) << std::endl; }
 

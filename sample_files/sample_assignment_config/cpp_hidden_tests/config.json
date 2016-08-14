@@ -155,7 +155,7 @@
             "title" : "Submission Limit",
             "points" : -5,
             "max_submissions" : 3,
-            "additional_penalty" : 2
+            "penalty" : -0.5
         }
     ]
 }

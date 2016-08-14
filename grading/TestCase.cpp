@@ -389,12 +389,12 @@ void TestCase::FileCheck_Helper() {
       assert (itr->is_number_integer());
       assert ((int)(*itr) < 0);
     }
-    itr = _json.find("additional_penalty");
+    itr = _json.find("penalty");
     if (itr == _json.end()) {
-      _json["additional_penalty"] = 10;
+      _json["penalty"] = -0.1;
     } else {
-      assert (itr->is_number_integer());
-      assert ((int)(*itr) > 0);
+      assert (itr->is_number());
+      assert ((*itr) < 0);
     }
     itr = _json.find("title");
     if (itr == _json.end()) {
