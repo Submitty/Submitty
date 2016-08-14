@@ -97,10 +97,16 @@ HTML;
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+                if ($gradeable->getNumParts() > 1) {
+                    $label = "Drag your {$gradeable->getPartsNames()[$i]} here or click to open file browser";
+                }
+                else {
+                    $label = "Drag your file(s) here or click to open file browser";
+                }
                 $return .= <<<HTML
         
         <div id="upload{$i}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
-            <h3 class="label" id="label{$i}">Drag your {$gradeable->getPartsNames()[$i]} here or click to open file browser</h3>
+            <h3 class="label" id="label{$i}">{$label}</h3>
             <input type="file" name="files" id="input_file{$i}" style="display: none" onchange="addFilesFromInput({$i})" />
         </div>
 HTML;
@@ -218,7 +224,7 @@ HTML;
             if ($gradeable->getActiveVersion() == 0) {
                 $selected = ($gradeable->getCurrentVersion() == $gradeable->getActiveVersion()) ? "selected" : "";
                 $return .= <<<HTML
-        <option value="0" {$selected}>Cancelled</option>
+        <option value="0" {$selected}>Do Not Grade Assignment</option>
 HTML;
 
             }
@@ -234,7 +240,7 @@ HTML;
                 }
     
                 if ($version == $gradeable->getActiveVersion()) {
-                    $select_text[] = "ACTIVE";
+                    $select_text[] = "GRADE THIS VERSION";
                 }
                 
                 if ($version == $gradeable->getCurrentVersion()) {
@@ -255,11 +261,11 @@ HTML;
             if ($gradeable->getCurrentVersion() > 0) {
                 if ($gradeable->getCurrentVersion() == $gradeable->getActiveVersion()) {
                     $version = 0;
-                    $button = '<input type="submit" class="btn btn-default" value="Do Not Grade This Version (Mark All Inactive)">';
+                    $button = '<input type="submit" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">';
                 }
                 else {
                     $version = $gradeable->getCurrentVersion();
-                    $button = '<input type="submit" class="btn btn-primary" value="Make Active">';
+                    $button = '<input type="submit" class="btn btn-primary" value="Grade This Version">';
                 }
                 $return .= <<<HTML
     <form style="display: inline;" method="post" 
@@ -280,8 +286,9 @@ HTML;
                 $return .= <<<HTML
     <div class="sub">
         <p class="red-message">
-        Note: You have NO ACTIVE submissions for this assignment.<br />
-        This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.
+            Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
+            This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
+            You may select any version above and select that for grading however.<br />
         </p>
     </div>
 
@@ -339,20 +346,59 @@ HTML;
     <div class="sub">
         <h4>Results</h4>
 HTML;
-        
-        
-                if(!$gradeable->hasResults()) {
-                    $return .= <<<HTML
-        <p class="red-message">
-            Currently being graded
-        </p>
+                $refresh_js = <<<HTML
         <script type="text/javascript">
-            checkRefreshSubmissionPage('{$this->core->buildUrl(array('component' => 'student', 
-                                                                     'page' => 'submission', 
-                                                                     'action' => 'check_refresh', 
-                                                                     'gradeable_id' => $gradeable->getId(), 
+            checkRefreshSubmissionPage('{$this->core->buildUrl(array('component' => 'student',
+                                                                     'page' => 'submission',
+                                                                     'action' => 'check_refresh',
+                                                                     'gradeable_id' => $gradeable->getId(),
                                                                      'gradeable_version' => $gradeable->getCurrentVersion()))}')
         </script>
+HTML;
+
+                if ($gradeable->inBatchQueue() && $gradeable->hasResults()) {
+                    if ($gradeable->beingGradedBatchQueue()) {
+                        $return .= <<<HTML
+        <p class="red-message">
+            This submission is currently being regraded.
+        </p>
+HTML;
+                    }
+                    else {
+                        $return .= <<<HTML
+        <p class="red-message">
+            This submission is currently in the queue to be regraded.
+        </p>
+HTML;
+                    }
+                    
+                }
+                
+                if ($gradeable->inInteractiveQueue() || ($gradeable->inBatchQueue() && !$gradeable->hasResults())) {
+                    if ($gradeable->beingGradedInteractiveQueue() ||
+                        (!$gradeable->hasResults() && $gradeable->beingGradedBatchQueue())) {
+                        $return .= <<<HTML
+        <p class="red-message">
+            This submission is currently being graded.
+        </p>
+HTML;
+                    }
+                    else {
+                        $return .= <<<HTML
+        <p class="red-message">
+            This submission is currently in the queue to be graded.
+        </p>
+HTML;
+                    }
+                    $return .= <<<HTML
+        {$refresh_js}
+HTML;
+                }
+                else if(!$gradeable->hasResults()) {
+                    $return .= <<<HTML
+        <p class="red-message">
+            Something has gone wrong with grading this submission. Please contact your instructor about this.
+        </p>
 HTML;
                 }
                 else {
