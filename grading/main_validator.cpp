@@ -265,14 +265,19 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
     if (my_testcase.getExtraCredit()) {
       if (testcase_pts > 0) {
         gradefile << std::setw(3) << std::right << "+"+std::to_string(testcase_pts) << " points";
+      } else {
+        gradefile << std::setw(10) << "";
       }
     } else if (my_testcase.getPoints() < 0) {
       if (testcase_pts < 0) {
         gradefile << std::setw(3) << std::right << std::to_string(testcase_pts) << " points";
+      } else {
+        gradefile << std::setw(10) << "";
       }
     } else {
       gradefile << std::setw(3) << std::right << testcase_pts << " /"
-                << std::setw(3) << std::right << my_testcase.getPoints();
+                << std::setw(3) << std::right << my_testcase.getPoints()
+                << std::setw(2) << "";
     }
     if (my_testcase.getHidden()) {
       gradefile << "  [ HIDDEN ]";
