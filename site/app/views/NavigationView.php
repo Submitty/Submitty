@@ -24,16 +24,21 @@ class NavigationView {
         $site_url = $this->core->getConfig()->getSiteUrl();
         $return.= <<<HTML
 HTML;
-        $title_to_button_type = array("FUTURE" => "btn-default", "OPEN" => "btn-primary" , "CLOSED" => "btn-danger", "ITEMS BEING GRADED" => "btn-default", "GRADED" => 'btn-success');
+        $title_to_button_type_submission = array("FUTURE" => "btn-default", "OPEN" => "btn-primary" , "CLOSED" => "btn-danger", 
+                                                 "ITEMS BEING GRADED" => "btn-default", "GRADED" => 'btn-success');
+        $title_to_button_type_grading = array("FUTURE" => "btn-default", "OPEN" => "btn-default" , "CLOSED" => "btn-default", 
+                                                 "ITEMS BEING GRADED" => "btn-primary", "GRADED" => 'btn-danger');
         $title_to_prefix = array("FUTURE" => "OPEN DATE", "OPEN" => "SUBMIT", "CLOSED" => "CLOSED", "ITEMS BEING GRADED" => "GRADING", "GRADED" => "GRADED");
         foreach($sections_to_list as $title => $gradeable_list){
+            if(count($gradeable_list)==0) continue;
             $return .= <<<HTML
                                     <tr class="bar"><td colspan="4"></td></tr>
-                                    <tr class="colspan"><td colspan="4" style="border-bottom:2px black solid;">{$title}</td></tr>
+                                    <tr class="colspan"><td colspan="4">{$title}</td></tr>
 HTML;
             foreach($gradeable_list as $gradeable => $g_data){
+                $time = ($title=="GRADED") ? "": " @ H:i";
                 $gradeable_grade_range = ($title=='GRADED' || $title=='ITEMS BEING GRADED') ? 
-                                         'GRADES (open '.$g_data->getGradeStartDate()->format("m-d H:i ").')' : 'GRADES (due '.$g_data->getGradeReleasedDate()->format("m-d H:i ").")";
+                                         'GRADING (due '.$g_data->getGradeStartDate()->format("m/d/y{$time}").')' : 'GRADING (open '.$g_data->getGradeReleasedDate()->format("m/d/y{$time}").")";
                 
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE){
                     if(trim($g_data->getInstructionsURL())!=''){
@@ -42,14 +47,14 @@ HTML;
                     else{
                         $gradeable_title = $g_data->getName();
                     }
-                    $display_date = ($title=="FUTURE") ? $g_data->getOpenDate()->format("m-d H:i ") : "(due ".$g_data->getDueDate()->format("m-d H:i").")";  
+                    $display_date = ($title=="FUTURE") ? $g_data->getOpenDate()->format("m/d/y{$time}") : "(due ".$g_data->getDueDate()->format("m/d/y{$time}").")";  
                     $gradeable_open_range = <<<HTML
-                                         <button class="btn {$title_to_button_type[$title]}" style="width:100%;" onclick="location.href='{$site_url}&component=student&gradeable_id={$gradeable}';">
+                                         <button class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" onclick="location.href='{$site_url}&component=student&gradeable_id={$gradeable}';">
                                              {$title_to_prefix[$title]} {$display_date}
                                          </button>
 HTML;
                     $gradeable_grade_range = <<<HTML
-                                            <button class="btn {$title_to_button_type[$title]}" style="width:100%;" \\
+                                            <button class="btn {$title_to_button_type_grading[$title]}" style="width:100%;" \\
                                             onclick="location.href='{$ta_base_url}/account/index.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
                                             {$gradeable_grade_range}</button>
 HTML;
@@ -59,14 +64,14 @@ HTML;
                     $gradeable_open_range = '';
                     if($g_data->getType() == GradeableType::CHECKPOINTS){
                        $gradeable_grade_range = <<<HTML
-                                            <button class="btn {$title_to_button_type[$title]}" style="width:100%;" \\
+                                            <button class="btn {$title_to_button_type_grading[$title]}" style="width:100%;" \\
                                             onclick="location.href='{$ta_base_url}/account/account-checkpoints-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
                                             {$gradeable_grade_range}</button>
 HTML;
                     }
                     elseif($g_data->getType() == GradeableType::NUMERIC){
                         $gradeable_grade_range = <<<HTML
-                                            <button class="btn {$title_to_button_type[$title]}" style="width:100%;" \\
+                                            <button class="btn {$title_to_button_type_grading[$title]}" style="width:100%;" \\
                                             onclick="location.href='{$ta_base_url}/account/account-numerictext-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
                                             {$gradeable_grade_range}</button>
 HTML;
@@ -91,6 +96,5 @@ HTML;
                         </div>
 HTML;
         return $return;
-    }
-    
+    }   
 }
