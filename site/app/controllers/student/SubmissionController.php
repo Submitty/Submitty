@@ -69,7 +69,7 @@ class SubmissionController implements IController {
             $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
             
             $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'showGradeable',
-                                                   $gradeable, $select, $days_late);
+                                                   $gradeable, $days_late);
         }
         else {
             $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeables');

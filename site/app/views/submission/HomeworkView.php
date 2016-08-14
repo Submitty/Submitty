@@ -23,38 +23,7 @@ class HomeworkView {
 
 HTML;
     }
-    
-    /**
-     * @param Gradeable[] $gradeables
-     * @param $gradeable_id
-     *
-     * @return string
-     */
-    public function gradeableSelect($gradeables, $gradeable_id) {
-        $return = <<<HTML
-<div class="sub">
-    <span style="font-weight: bold;">Select Assignment:</span>
-    <select style="margin-left: 5px" onChange="gradeableChange('{$this->core->buildUrl(array('component' => 'student', 
-                                                                                'gradeable_id' => ''))}', this);">
-HTML;
-        foreach ($gradeables as $gradeable) {
-            if ($gradeable_id === $gradeable->getId()) {
-                $selected = "selected";
-            }
-            else {
-                $selected = "";
-            }
-            $return .= "\t\t<option value='{$gradeable->getId()}' {$selected}>{$gradeable->getName()}</option>\n";
-        }
-
-        $return .= <<<HTML
-    </select>
-</div>
-HTML;
-
-        return $return;
-    }
-    
+        
     /**
      * @param Gradeable $gradeable
      * @param string    $gradeable_select
@@ -62,12 +31,11 @@ HTML;
      *
      * @return string
      */
-    public function showGradeable($gradeable, $gradeable_select, $days_late) {
+    public function showGradeable($gradeable, $days_late) {
         $show_ta_grades = $this->core->getConfig()->showTaGrades();
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
-{$gradeable_select}
 <div class="content">
     <h2>View Assignment {$gradeable->getName()}</h2>
     <div class="sub">
