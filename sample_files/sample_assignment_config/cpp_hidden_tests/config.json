@@ -137,6 +137,13 @@
                     "deduction" : 1.0
                 }
             ]
+        },
+        {
+            "type" : "FileCheck",
+            "title" : "Submission Limit",
+            "points" : -5,
+            "max_submissions" : 3,
+            "additional_penalty" : 2
         }
     ]
 }
