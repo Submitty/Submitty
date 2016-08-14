@@ -346,20 +346,59 @@ HTML;
     <div class="sub">
         <h4>Results</h4>
 HTML;
-        
-        
-                if(!$gradeable->hasResults()) {
-                    $return .= <<<HTML
-        <p class="red-message">
-            Currently being graded
-        </p>
+                $refresh_js = <<<HTML
         <script type="text/javascript">
-            checkRefreshSubmissionPage('{$this->core->buildUrl(array('component' => 'student', 
-                                                                     'page' => 'submission', 
-                                                                     'action' => 'check_refresh', 
-                                                                     'gradeable_id' => $gradeable->getId(), 
+            checkRefreshSubmissionPage('{$this->core->buildUrl(array('component' => 'student',
+                                                                     'page' => 'submission',
+                                                                     'action' => 'check_refresh',
+                                                                     'gradeable_id' => $gradeable->getId(),
                                                                      'gradeable_version' => $gradeable->getCurrentVersion()))}')
         </script>
+HTML;
+
+                if ($gradeable->inBatchQueue() && $gradeable->hasResults()) {
+                    if ($gradeable->beingGradedBatchQueue()) {
+                        $return .= <<<HTML
+        <p class="red-message">
+            This submission is currently being regraded.
+        </p>
+HTML;
+                    }
+                    else {
+                        $return .= <<<HTML
+        <p class="red-message">
+            This submission is currently in the queue to be regraded.
+        </p>
+HTML;
+                    }
+                    
+                }
+                
+                if ($gradeable->inInteractiveQueue() || ($gradeable->inBatchQueue() && !$gradeable->hasResults())) {
+                    if ($gradeable->beingGradedInteractiveQueue() ||
+                        (!$gradeable->hasResults() && $gradeable->beingGradedBatchQueue())) {
+                        $return .= <<<HTML
+        <p class="red-message">
+            This submission is currently being graded.
+        </p>
+HTML;
+                    }
+                    else {
+                        $return .= <<<HTML
+        <p class="red-message">
+            This submission is currently in the queue to be graded.
+        </p>
+HTML;
+                    }
+                    $return .= <<<HTML
+        {$refresh_js}
+HTML;
+                }
+                else if(!$gradeable->hasResults()) {
+                    $return .= <<<HTML
+        <p class="red-message">
+            Something has gone wrong with grading this submission. Please contact your instructor about this.
+        </p>
 HTML;
                 }
                 else {
