@@ -249,22 +249,20 @@ function addLabel(filename, filesize, part, previous){
     // create element
     var tmp = document.createElement('label');
     tmp.setAttribute("class", "mylabel");
-    tmp.innerHTML =  filename + " " + filesize + "kb" + "<br>";
+    tmp.innerHTML =  filename + " " + filesize + "kb <i class='fa fa-trash-o'></i><br />";
     // styling
-    tmp.onmouseover = function(e){
+    tmp.children[0].onmouseover = function(e){
         e.stopPropagation();
         this.style.color = "#FF3933";
-        this.style.background = "lightgrey";
     };
-    tmp.onmouseout = function(e){
+    tmp.children[0].onmouseout = function(e){
         e.stopPropagation();
         this.style.color = "black";
-        this.style.background = "";
     };
     // remove file and label on click
-    tmp.onclick = function(e){
+    tmp.children[0].onclick = function(e){
         e.stopPropagation();
-        this.parentNode.removeChild(this);
+        this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
     };
     // add to parent div
@@ -363,15 +361,11 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
             $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
-                var response = "ERROR! Please contact administrator with following error:\n\n";
-                var redirect = false;
                 if (data['success']) {
-                    response = "SUCCESS!\n\n";
-                    redirect = true;
-                }
-                alert(response + data['message']);
-                if (redirect) {
                     window.location.href = return_url;
+                }
+                else {
+                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
                 }
             }
             catch (e) {
