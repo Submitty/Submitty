@@ -445,33 +445,38 @@ HTML;
 HTML;
                             }
                             else {
-                                $background = "";
-                                if ($testcase->getPoints() > 0) {
-                                  if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
-                                    $background = "green-background";
-                                  }
-                                  else if (!$testcase->isExtraCredit()) {
-                                    if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
-                                      $background = "red-background";
-                                    }
-                                    else {
-                                      $background = "yellow-background";
-                                    }
-                                  }
+                              $background = "";
+                              if ($testcase->isExtraCredit()) {
+                                if ($testcase->getPointsAwarded() > 0) {
+                                  $background = "green-background";
+                                  $return .= <<<HTML
+                <span class="badge {$background}"> &nbsp; + {$testcase->getPointsAwarded()} &nbsp; </span>
+HTML;
+                                }
+                              } else if ($testcase->getPoints() > 0) {
+                                if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
+                                  $background = "green-background";
+                                } else if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
+                                  $background = "red-background";
+                                } else {
+                                  $background = "yellow-background";
+                                }
                                 $return .= <<<HTML
                 <span class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</span>
 HTML;
-                                } else if ($testcase->getPoints() < 0) {
+                              } else if ($testcase->getPoints() < 0) {
+                                if ($testcase->getPointsAwarded() < 0) {
                                   if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
                                     $background = "red-background";
                                   }
                                   else if ($testcase->getPointsAwarded() < 0) {
                                     $background = "yellow-background";
                                   }
-                                $return .= <<<HTML
+                                  $return .= <<<HTML
                                   <span class="badge {$background}"> &nbsp; {$testcase->getPointsAwarded()} &nbsp; </span>
 HTML;
                                 }
+                              }
                             }
                         }
                 

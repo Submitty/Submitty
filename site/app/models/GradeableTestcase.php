@@ -164,6 +164,7 @@ class GradeableTestcase {
     }
     
     public function hasDetails() {
+        if ($this->isHidden()) return false;
         return count($this->autochecks) > 0 || $this->hasCompilationOutput() || $this->hasExecuteLog();
     }
 }
