@@ -415,12 +415,6 @@ ORDER BY gc_order ASC
           
             $skip_files = array();
             foreach ($this->results_details['testcases'] as $testcase) {
-                if (isset($testcase['execute_logfile'])) {
-                    $skip_files[] = $testcase['execute_logfile'];
-                }
-                if (isset($testcase['compilation_output'])) {
-                    $skip_files[] = $testcase['compilation_output'];
-                }
                 if (isset($testcase['diffs'])){
                     foreach($testcase['diffs'] as $diff) {
                         foreach(array("expected_file", "actual_file", "diff_id") as $file) {

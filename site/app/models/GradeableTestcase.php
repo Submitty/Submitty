@@ -32,7 +32,6 @@ class GradeableTestcase {
     /** @var float */
     private $points_awarded = 0;
     private $log_file = "";
-    private $compilation_output = "";
     private $autochecks = array();
     
     public function __construct(Core $core, $testcase, $idx) {
@@ -57,15 +56,6 @@ class GradeableTestcase {
     }
     
     public function addResultTestcase($testcase, $result_path) {
-        if (isset($testcase['execute_logfile']) && file_exists($result_path."/".$testcase['execute_logfile'])) {
-            $this->log_file = file_get_contents($result_path . "/" . $testcase['execute_logfile']);
-        }
-        
-        if (isset($testcase['compilation_output']) &&
-            file_exists($result_path . "/" . $testcase['compilation_output'])) {
-                $this->compilation_output = file_get_contents($result_path . "/" . $testcase['compilation_output']);
-        }
-        
         if (isset($testcase['autochecks'])) {
             foreach ($testcase['autochecks'] as $idx => $autocheck) {
                 $index = "id_{$this->index}_{$idx}";
@@ -139,20 +129,8 @@ class GradeableTestcase {
         return $this->extra_credit;
     }
     
-    public function hasExecuteLog() {
-        return trim($this->log_file) !== "";
-    }
-    
-    public function hasCompilationOutput() {
-        return trim($this->compilation_output) !== "";
-    }
-    
     public function getLogfile() {
         return $this->log_file;
-    }
-    
-    public function getCompilationOutput() {
-        return $this->compilation_output;
     }
     
     /**
@@ -164,7 +142,6 @@ class GradeableTestcase {
     }
     
     public function hasDetails() {
-        if ($this->isHidden()) return false;
-        return count($this->autochecks) > 0 || $this->hasCompilationOutput() || $this->hasExecuteLog();
+      return (!$this->isHidden() && count($this->autochecks) > 0);
     }
 }

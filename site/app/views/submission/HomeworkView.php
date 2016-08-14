@@ -491,26 +491,6 @@ HTML;
             <div id="testcase_{$count}" style="display: {$display_box};">
 HTML;
                         if(!$testcase->isHidden()) {
-                            if($testcase->hasCompilationOutput()) {
-                                $compile_output = htmlentities($testcase->getCompilationOutput());
-                                $return .= <<<HTML
-                <div class="box-block">
-                    <h4>Compilation Output</h4>
-                    <pre>{$compile_output}</pre>
-                </div>
-HTML;
-                            }
-                    
-                            if($testcase->hasExecuteLog()) {
-                                $log_file = htmlentities($testcase->getLogfile());
-                                $return .= <<<HTML
-                <div class="box-block">
-                    <h4>Execution Output</h4>
-                    <pre>{$log_file}</pre>
-                </div>
-HTML;
-                            }
-                    
                             $autocheck_cnt = 0;
                             $autocheck_len = count($testcase->getAutochecks());
                             foreach ($testcase->getAutochecks() as $autocheck) {
