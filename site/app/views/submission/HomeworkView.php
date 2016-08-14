@@ -446,20 +446,32 @@ HTML;
                             }
                             else {
                                 $background = "";
-                                if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
+                                if ($testcase->getPoints() > 0) {
+                                  if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
                                     $background = "green-background";
-                                }
-                                else if (!$testcase->isExtraCredit()) {
-                                    if ($testcase->getPointsAwarded() > 0) {
-                                        $background = "yellow-background";
+                                  }
+                                  else if (!$testcase->isExtraCredit()) {
+                                    if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
+                                      $background = "red-background";
                                     }
                                     else {
-                                        $background = "red-background";
+                                      $background = "yellow-background";
                                     }
-                                }
+                                  }
                                 $return .= <<<HTML
                 <span class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</span>
 HTML;
+                                } else if ($testcase->getPoints() < 0) {
+                                  if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
+                                    $background = "red-background";
+                                  }
+                                  else if ($testcase->getPointsAwarded() < 0) {
+                                    $background = "yellow-background";
+                                  }
+                                $return .= <<<HTML
+                                  <span class="badge {$background}"> &nbsp; {$testcase->getPointsAwarded()} &nbsp; </span>
+HTML;
+                                }
                             }
                         }
                 

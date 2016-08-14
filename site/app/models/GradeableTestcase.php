@@ -47,9 +47,6 @@ class GradeableTestcase {
         }
         if (isset($testcase['points'])) {
             $this->points = floatval($testcase['points']);
-            if ($this->points < 0) {
-                $this->points = 0;
-            }
         }
         if (isset($testcase['extra_credit'])) {
             $this->extra_credit = $testcase['extra_credit'] === true;
@@ -80,11 +77,28 @@ class GradeableTestcase {
         
         if (isset($testcase['points_awarded'])) {
             $this->points_awarded = floatval($testcase['points_awarded']);
-            if ($this->points_awarded > $this->points) {
-                $this->points_awarded = $this->points;
-            }
-            else if ($this->points_awarded < 0) {
+            if ($this->points > 0) {
+              // POSITIVE POINTS TESTCASE
+              if ($this->points_awarded < 0) {
+                // TODO: ADD ERROR
                 $this->points_awarded = 0;
+              }
+              if ($this->points_awarded > $this->points) {
+                // TODO: ADD ERROR
+                $this->points_awarded = $this_points;
+              }
+            } else if ($this->points < 0) {
+              // PENALTY TESTCASE
+              if ($this->points_awarded > 0) {
+                // TODO: ADD ERROR
+                $this->points_awarded = 0;
+              }
+              if ($this->points_awarded < $this->points) {
+                // TODO: ADD ERROR
+                $this->points_awarded = $this_points;
+              }
+            } else {
+              $this->points_awarded = 0;
             }
         }
     }
@@ -114,7 +128,7 @@ class GradeableTestcase {
     }
     
     public function hasPoints() {
-        return $this->points > 0;
+        return $this->points != 0;
     }
     
     public function isHidden() {

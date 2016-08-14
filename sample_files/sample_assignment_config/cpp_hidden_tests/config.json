@@ -6,6 +6,8 @@
         "EXTRA_CREDIT_POINTS" : 4
     },
 
+    "assignment_message" : "You are allowed 3 no penalty submissions.  You will lose 1 points for each 2 submissions beyond the non penalty submissions, for a maximum penalty of 5 points.",
+
     "testcases" : [
 
         // *************** COMPILATION *****************
@@ -96,7 +98,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "STDERR.txt",
-                    "expected_file" : "error_nonpositive.txt",
+                    "expected_file" : "error_arguments.txt",
                     "deduction" : 1.0
                 }
             ]
@@ -133,7 +135,7 @@
                 {
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "STDERR.txt",
-                    "expected_file" : "error_nonpositive.txt",
+                    "expected_file" : "error_arguments.txt",
                     "deduction" : 1.0
                 }
             ]

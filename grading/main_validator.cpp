@@ -219,8 +219,10 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       int max = my_testcase.getMaxSubmissions();
       int additional = my_testcase.getAdditionalPenalty();
       int points = my_testcase.getPoints();
-      testcase_pts = std::max(points, int(std::floor(std::min(0,-(subnum-max)/additional))));
-      std::cout << "PENALTY = " << testcase_pts << std::endl;
+      int excessive_submissions = std::max(0,subnum-max);
+      int penalty = std::ceil(excessive_submissions / float(additional));
+      testcase_pts = std::max(points, -penalty);
+      std::cout << "EXCESSIVE SUBMISSIONS PENALTY = " << testcase_pts << std::endl;
     } 
     else {
       bool fileExists, fileEmpty;
