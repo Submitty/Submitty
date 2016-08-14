@@ -299,13 +299,17 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   json_file << sj.dump(4);
 
 
+  // clamp total to zero (no negative total!)
+  automated_points_awarded = std::max(0,automated_points_awarded);
+  nonhidden_automated_points_awarded = std::max(0,nonhidden_automated_points_awarded);
+
   // final line of results_grade.txt
   gradefile << std::setw(64) << std::left << "Automatic grading total:"
             << std::setw(3) << std::right << automated_points_awarded
             << " /" <<  std::setw(3)
             << std::right << automated_points_possible << std::endl;
 
-  gradefile << std::setw(64) << std::left << "Non-Hidden Automatic grading total:"
+  gradefile << std::setw(64) << std::left << "Non-hidden automatic grading total:"
             << std::setw(3) << std::right << nonhidden_automated_points_awarded
             << " /" <<  std::setw(3)
             << std::right << nonhidden_automated_points_possible << std::endl;

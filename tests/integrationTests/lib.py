@@ -216,10 +216,13 @@ class TestcaseWrapper:
     # customizable (different submission numbers, multiple users, etc.)
     # TODO: Read "main" for other executables, determine what files they expect and
     # the locations in which they expect them given different inputs.
-    def run_validator(self):
+    def run_validator(self,user="testuser",subnum="1",subtime="0"):
+
+        # VALIDATOR USAGE: validator <hw_id> <rcsid> <submission#> <time-of-submission>
+
         with open (os.path.join(self.testcase_path, "log", "validate_output.txt"), "w") as log:
             return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "validate.out"),
-                "testassignment", "testuser", "1", "0"],
+                "testassignment", user,subnum,subtime], #"testuser", "1", "0"],
                 cwd=os.path.join(self.testcase_path, "data"), stdout=log, stderr=log)
             if return_code != 0:
                 raise RuntimeError("Validator exited with exit code " + str(return_code))

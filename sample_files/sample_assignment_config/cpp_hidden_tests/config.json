@@ -130,7 +130,7 @@
         },
         {
             "title" : "Error Checking: Too Many Arguments",
-            "command" : "./a.out",
+            "command" : "./a.out 1 2 3",
             "extra_credit" : true,
             "points" : 2,
             "hidden" : true,

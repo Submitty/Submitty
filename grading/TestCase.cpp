@@ -366,6 +366,7 @@ void TestCase::FileCheck_Helper() {
   m_itr = _json.find("max_submissions");
   
   if (f_itr != _json.end()) {
+    // need to rewrite to use a validation
     assert (m_itr == _json.end());
     assert (v_itr == _json.end());
     nlohmann::json v;
@@ -374,11 +375,10 @@ void TestCase::FileCheck_Helper() {
     v["description"] = (*f_itr);
     _json["validation"].push_back(v);
     _json.erase(f_itr);
+  } else if (v_itr != _json.end()) {
+    // already has a validation
   } else {
     assert (m_itr != _json.end());
-    assert (f_itr == _json.end());
-    assert (v_itr == _json.end());
-
     assert (m_itr->is_number_integer());
     assert ((int)(*m_itr) >= 1);
 
@@ -389,7 +389,6 @@ void TestCase::FileCheck_Helper() {
       assert (itr->is_number_integer());
       assert ((int)(*itr) < 0);
     }
-    
     itr = _json.find("additional_penalty");
     if (itr == _json.end()) {
       _json["additional_penalty"] = 10;
@@ -397,7 +396,6 @@ void TestCase::FileCheck_Helper() {
       assert (itr->is_number_integer());
       assert ((int)(*itr) > 0);
     }
-
     itr = _json.find("title");
     if (itr == _json.end()) {
       _json["title"] = "Submission Limit";
@@ -405,7 +403,6 @@ void TestCase::FileCheck_Helper() {
       assert (itr->is_string());
     }
   }
-
 }
 
 void TestCase::Compilation_Helper() {
