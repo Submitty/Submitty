@@ -410,7 +410,7 @@ select {
 .badge {
     float: left;
     display: inline-block;
-    width: 100px;
+    width: 70px;
     padding: 3px 7px;
     font-weight: bold;
     line-height: 1;
@@ -425,7 +425,7 @@ select {
 }
 
 .no-badge {
-    width: 115px;
+    width: 85px;
     height: 10px;
     margin-right: 20px;
     margin-left: 10px;
