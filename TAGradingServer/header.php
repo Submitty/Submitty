@@ -1,8 +1,5 @@
 <?php
 
-
-
-
 // Prevent back button from showing sensitive cached content after logout.
 header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
 header('Pragma: no-cache'); // HTTP 1.0.
@@ -74,6 +71,78 @@ if ($user_logged_in) {
         <div class="navbar navbar-inverse navbar-fixed-top">
             <div class="navbar-inner">
                 <div class="container-fluid" style="font-weight: 300; display: inline-block;color:#999;">
+<!--
+                <div class="container-fluid">
+                    <a class="brand" href="{$BASE_URL}/account/index.php">$COURSE_NAME Grading Server</a>
+
+                    <ul class="nav" role="navigation">
+HTML;
+    if ($user_is_administrator) {
+        print <<<HTML
+<!--
+                        <li class="divider-vertical"
+                            style="border-right-color: #666;height: 18px; margin-top: 11px;"></li>
+
+                        <li class="dropdown">
+                            <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
+                                Grading Tools <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="drop-grade">
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-hw-report.php" role="button" data-toggle="modal">
+                                    Generate Homework Report
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-grade-summaries.php" role="button" data-toggle="modal">
+                                    Generate Grade Summaries
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-csv-report.php" role="button" data-toggle="modal">
+                                    Generate CSV Report
+                                </a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
+                                Gradeables <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="drop-grade">
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-gradeables.php" role="button" data-toggle="modal">
+                                Manage Gradeables
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/account-numerictext-gradeable.php" role="button" data-toggle="modal">
+                                Numeric/Text Gradeables
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/account-checkpoints-gradeable.php" role="button" data-toggle="modal">
+                                Checkpoints Gradeables
+                                </a></li>
+                            </ul>
+                        </li>                        
+                        <li class="dropdown">
+                            <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
+                                System Management <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu" role="menu" aria-labelledby="drop-utility">
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-students.php" role="button" data-toggle="modal">
+                                    View Students
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-users.php" role="button" data-toggle="modal">
+                                    View Users
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-classlist.php" role="button" data-toggle="modal">
+                                    Upload Classlist
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-single-student-review.php" role="button" data-toggle="modal">
+									Individual Student Enrollment Review
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-rotating-sections.php" role="button" data-toggle="modal">
+                                    Setup Rotating Sections
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-latedays.php" role="button" data-toggle="modal">
+                                    Add Late Days To Course
+                                </a></li>
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-latedays-exceptions.php" role="button" data-toggle="modal">
+                                    Add Late Day Exceptions For Students
+                                </a></li>
+                            </ul>
+                        </li>
 HTML;
 
     $submission_url = __SUBMISSION_URL__;

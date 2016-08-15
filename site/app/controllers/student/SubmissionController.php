@@ -60,7 +60,7 @@ class SubmissionController implements IController {
             else {
                 $gradeable = Utils::getLastArrayElement($gradeable_list);
             }
-            $gradeable->loadSubmissionDetails();
+            $gradeable->loadResultDetails();
             $loc = array('page' => 'submission',
                          'action' => 'display',
                          'gradeable_id' => $gradeable->getId());
@@ -97,7 +97,7 @@ class SubmissionController implements IController {
         }
         
         $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
-        $gradeable->loadSubmissionDetails();
+        $gradeable->loadResultDetails();
         $gradeable_path = $this->core->getConfig()->getCoursePath()."/submissions/".$gradeable->getId();
         
         /*
@@ -327,6 +327,7 @@ class SubmissionController implements IController {
             return $this->uploadResult("Failed to create file for grading queue.", false);
         }
         
+        $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
         return $this->uploadResult("Successfully uploaded files");
     }
     
@@ -364,7 +365,7 @@ class SubmissionController implements IController {
         }
         
         $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
-        $gradeable->loadSubmissionDetails();
+        $gradeable->loadResultDetails();
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $_SESSION['messages']['error'][] = "Invalid CSRF token. Refresh the page and try again.";
             $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId())));

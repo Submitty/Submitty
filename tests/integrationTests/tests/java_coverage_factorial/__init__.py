@@ -47,7 +47,7 @@ def cleanup(test):
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "test*.txt")))
     subprocess.call(["rm"] + ["-f"] + 
-            glob.glob(os.path.join(test.testcase_path, "data/.submit.grade")))
+            glob.glob(os.path.join(test.testcase_path, "data/results_grade.txt")))
     subprocess.call(["rm"] + ["-f"] + 
             glob.glob(os.path.join(test.testcase_path, "data/results.json")))
 
@@ -67,7 +67,7 @@ def correct(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade","correct_.submit.grade")
+    test.diff("results_grade.txt","correct_results_grade.txt","-b")
     test.json_diff("results.json","correct_results.json")
     test.emma_coverage_diff("test05_emma_report.txt","correct_test05_emma_report.txt")
 
@@ -87,7 +87,7 @@ def correct_no_coverage(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade","correct_no_coverage_.submit.grade")
+    test.diff("results_grade.txt","correct_no_coverage_results_grade.txt","-b")
     test.json_diff("results.json","correct_no_coverage_results.json")
     test.emma_coverage_diff("test05_emma_report.txt","correct_no_coverage_test05_emma_report.txt")
 
@@ -107,7 +107,7 @@ def buggy_coverage(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade","buggy_coverage_.submit.grade")
+    test.diff("results_grade.txt","buggy_coverage_results_grade.txt","-b")
     test.json_diff("results.json","buggy_coverage_results.json")
     test.emma_coverage_diff("test05_emma_report.txt","buggy_coverage_test05_emma_report.txt")
 
@@ -127,7 +127,7 @@ def buggy_no_coverage(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade","buggy_no_coverage_.submit.grade")
+    test.diff("results_grade.txt","buggy_no_coverage_results_grade.txt","-b")
     test.json_diff("results.json","buggy_no_coverage_results.json")
     test.emma_coverage_diff("test05_emma_report.txt","buggy_no_coverage_test05_emma_report.txt")
 

@@ -177,27 +177,15 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
 
-  std::string grade_path = ".submit.grade";
+  std::string grade_path = "results_grade.txt";
   std::ofstream gradefile(grade_path.c_str());
 
-  gradefile << "Grade for: " << rcsid << std::endl;
-  gradefile << "  submission#: " << subnum << std::endl;
-  int penalty = -std::min(SUBMISSION_PENALTY,int(std::ceil(std::max(0,subnum-MAX_NUM_SUBMISSIONS)/10.0)));
-  assert (penalty >= -SUBMISSION_PENALTY && penalty <= 0);
-  if (penalty != 0) {
-    gradefile << "  penalty for excessive submissions: " << penalty << " points" << std::endl;
-  }
-  assert (penalty <= 0 && penalty >= -10);
-
-  int nonhidden_auto_pts = penalty;
-  int hidden_auto_pts = penalty;
-  int nonhidden_extra_credit = 0;
-  int hidden_extra_credit = 0;
-  int nonhidden_possible_pts = 0;
-  int hidden_possible_pts = 0;
+  int automated_points_awarded = 0;
+  int automated_points_possible = 0;
+  int nonhidden_automated_points_awarded = 0;
+  int nonhidden_automated_points_possible = 0;
 
   std::stringstream testcase_json;
-
   nlohmann::json all_testcases;
 
 #ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
@@ -208,7 +196,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 #endif
 
   //system ("ls -lta");
-  system("find . -type f");
+  //system("find . -type f");
 
   // LOOP OVER ALL TEST CASES
   nlohmann::json::iterator tc = config_json.find("testcases");
@@ -216,122 +204,119 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   for (unsigned int i = 0; i < tc->size(); i++) {
 
     std::cout << "------------------------------------------\n";
-    std::cout << "Test # " + std::to_string(i+1) << std::endl;
-
     TestCase my_testcase((*tc)[i]);
     std::string title = "Test " + std::to_string(i+1) + " " + (*tc)[i].value("title","MISSING TITLE");
     int points = (*tc)[i].value("points",0);
     std::cout << title << " - points: " << points << std::endl;
-    
+
     nlohmann::json tc_j;
     tc_j["test_name"] = title;
     nlohmann::json autocheck_js;
-
-    bool fileExists, fileEmpty;
-    fileStatus(my_testcase.getPrefix() + "_execute_logfile.txt", fileExists,fileEmpty);
-    if (fileExists && !fileEmpty) {
-      nlohmann::json autocheck_j;
-      autocheck_j["autocheck_id"] = my_testcase.getPrefix() + "_execute_logfile_autocheck";
-      autocheck_j["actual_file"] = my_testcase.getPrefix() + "_execute_logfile.txt";
-      autocheck_j["description"] = "Execution Logfile";
-      autocheck_js.push_back(autocheck_j);
-    }
-
     int testcase_pts = 0;
-    //std::string message = "";
-    //message += "Unresolved warnings in your program!";
-    //message += "Error: compilation was not successful!";
 
-    double my_score = 1.0;
-    assert (my_testcase.numFileGraders() > 0);
-    for (int j = 0; j < my_testcase.numFileGraders(); j++) {
-      my_score -= ValidateGrader(my_testcase, j, autocheck_js,hw_id);
-    }
-    if (autocheck_js.size() > 0) {
-      tc_j["autochecks"] = autocheck_js;
-    }
-    assert (my_score <= 1.00001);
-    my_score = std::max(0.0,std::min(1.0,my_score));
-    std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
-    testcase_pts = (int)floor(my_score * my_testcase.getPoints());
-
-    // output grade & message
-
-    std::cout << "Grade: " << testcase_pts << std::endl;
-    // TODO: LOGIC NEEDS TO BE TESTED WITH MORE COMPLEX HOMEWORK!
-
-    if (!my_testcase.getHidden()) {
-      nonhidden_auto_pts += testcase_pts;
-      if (my_testcase.getExtraCredit()) {
-        nonhidden_extra_credit += testcase_pts; 
-      }
-      else {
-        nonhidden_possible_pts += my_testcase.getPoints();
+    if (my_testcase.isSubmissionLimit()) {
+      int max = my_testcase.getMaxSubmissions();
+      float penalty = my_testcase.getPenalty();
+      assert (penalty <= 0);
+      int points = my_testcase.getPoints();
+      int excessive_submissions = std::max(0,subnum-max);
+      // round down to the biggest negative full point penalty
+      testcase_pts = std::floor(excessive_submissions * penalty);
+      if (testcase_pts < points) testcase_pts = points;
+      if (testcase_pts != 0) {
+        std::cout << "EXCESSIVE SUBMISSIONS PENALTY = " << testcase_pts << std::endl;
       }
     } 
-    hidden_auto_pts += testcase_pts;
-    if (my_testcase.getExtraCredit()) {
-      hidden_extra_credit += testcase_pts; 
-    }
     else {
-      hidden_possible_pts += my_testcase.getPoints();
+      bool fileExists, fileEmpty;
+      fileStatus(my_testcase.getPrefix() + "_execute_logfile.txt", fileExists,fileEmpty);
+      if (fileExists && !fileEmpty) {
+        nlohmann::json autocheck_j;
+        autocheck_j["autocheck_id"] = my_testcase.getPrefix() + "_execute_logfile_autocheck";
+        autocheck_j["actual_file"] = my_testcase.getPrefix() + "_execute_logfile.txt";
+        autocheck_j["description"] = "Execution Logfile";
+        autocheck_js.push_back(autocheck_j);
+      }
+      double my_score = 1.0;
+      assert (my_testcase.numFileGraders() > 0);
+      for (int j = 0; j < my_testcase.numFileGraders(); j++) {
+        my_score -= ValidateGrader(my_testcase, j, autocheck_js,hw_id);
+      }
+      if (autocheck_js.size() > 0) {
+        tc_j["autochecks"] = autocheck_js;
+      }
+      assert (my_score <= 1.00001);
+      my_score = std::max(0.0,std::min(1.0,my_score));
+      std::cout << "[ FINISHED ] my_score = " << my_score << std::endl;
+      testcase_pts = (int)floor(my_score * my_testcase.getPoints());
+      std::cout << "Grade: " << testcase_pts << std::endl;
     }
-    
     tc_j["points_awarded"] = testcase_pts;
-    //if (message != "") {
-    //  tc_j["messages"].push_back(message);
-    //}
+    automated_points_awarded += testcase_pts;
+    if (!my_testcase.getHidden()) {
+      nonhidden_automated_points_awarded += testcase_pts;
+    }
+    if (my_testcase.getPoints() > 0 && !my_testcase.getExtraCredit()) {
+      automated_points_possible += my_testcase.getPoints();
+      if (!my_testcase.getHidden()) {
+        nonhidden_automated_points_possible += my_testcase.getPoints();
+      }
+    }
     all_testcases.push_back(tc_j); 
-    gradefile << "  Test " << std::setw(2) << std::right << i+1 << ":" 
-        << std::setw(30) << std::left << my_testcase.getTitle() << " " 
-        << std::setw(2) << std::right << testcase_pts << " / " 
-        << std::setw(2) << std::right << my_testcase.getPoints() << std::endl;
+    gradefile << "Testcase"
+              << std::setw(3) << std::right << i+1 << ": "
+              << std::setw(50) << std::left << my_testcase.getTitle() << " ";
+    if (my_testcase.getExtraCredit()) {
+      if (testcase_pts > 0) {
+        gradefile << std::setw(3) << std::right << "+"+std::to_string(testcase_pts) << " points";
+      } else {
+        gradefile << std::setw(10) << "";
+      }
+    } else if (my_testcase.getPoints() < 0) {
+      if (testcase_pts < 0) {
+        gradefile << std::setw(3) << std::right << std::to_string(testcase_pts) << " points";
+      } else {
+        gradefile << std::setw(10) << "";
+      }
+    } else {
+      gradefile << std::setw(3) << std::right << testcase_pts << " /"
+                << std::setw(3) << std::right << my_testcase.getPoints()
+                << std::setw(2) << "";
+    }
+    if (my_testcase.getHidden()) {
+      gradefile << "  [ HIDDEN ]";
+    }
+    gradefile << std::endl;
 
   } // end test case loop
 
 
   nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
-  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",hidden_possible_pts);
+  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",automated_points_possible);
+  assert (AUTO_POINTS == automated_points_possible);
   int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
-  int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
-  int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
   
-  int possible_ta_pts = TA_POINTS;
-  int total_possible_pts = possible_ta_pts + hidden_possible_pts;
-
-  std::cout << "totals " << possible_ta_pts << " " << hidden_possible_pts << " " << TOTAL_POINTS << std::endl;
-
-  std::cout << "penalty                 " <<  penalty << std::endl;
-  std::cout << "nonhidden auto pts      " <<  nonhidden_auto_pts << std::endl;
-  std::cout << "hidden auto pts         " <<  hidden_auto_pts << std::endl;
-  std::cout << "nonhidden extra credit  " <<  nonhidden_extra_credit << std::endl;
-  std::cout << "hidden extra credit     " <<  hidden_extra_credit << std::endl;
-  std::cout << "nonhidden possible pts  " <<  nonhidden_possible_pts << std::endl;
-  std::cout << "hidden possible pts     " <<  hidden_possible_pts << std::endl;
-  std::cout << "possible ta pts         " <<  possible_ta_pts << std::endl;
-  std::cout << "total possible pts      " <<  total_possible_pts << std::endl;
-
-  assert (total_possible_pts == TOTAL_POINTS);
-
-  /* Generate results.json */
+  // Generate results.json 
   nlohmann::json sj;
   sj["testcases"] = all_testcases;
-
-
   std::ofstream json_file("results.json");
   json_file << sj.dump(4);
 
 
-  json_file.close();
+  // clamp total to zero (no negative total!)
+  automated_points_awarded = std::max(0,automated_points_awarded);
+  nonhidden_automated_points_awarded = std::max(0,nonhidden_automated_points_awarded);
 
-  gradefile << "Automatic extra credit (w/o hidden):               " << "+ " << nonhidden_extra_credit << " points" << std::endl;
-  gradefile << "Automatic grading total (w/o hidden):              " << nonhidden_auto_pts << " / " << nonhidden_possible_pts << std::endl;
-  gradefile << "Max possible hidden automatic grading points:      " << hidden_possible_pts - nonhidden_possible_pts << std::endl;
-  gradefile << "Automatic extra credit:                            " << "+ " << hidden_extra_credit << " points" << std::endl;
-  gradefile << "Automatic grading total:                           " << hidden_auto_pts << " / " << hidden_possible_pts << std::endl;
-  gradefile << "Remaining points to be graded by TA:               " << possible_ta_pts << std::endl;
-  gradefile << "Max points for assignment (excluding extra credit):" << total_possible_pts << std::endl;
+  // final line of results_grade.txt
+  gradefile << std::setw(64) << std::left << "Automatic grading total:"
+            << std::setw(3) << std::right << automated_points_awarded
+            << " /" <<  std::setw(3)
+            << std::right << automated_points_possible << std::endl;
 
+  gradefile << std::setw(64) << std::left << "Non-hidden automatic grading total:"
+            << std::setw(3) << std::right << nonhidden_automated_points_awarded
+            << " /" <<  std::setw(3)
+            << std::right << nonhidden_automated_points_possible << std::endl;
 
   return 0;
 }

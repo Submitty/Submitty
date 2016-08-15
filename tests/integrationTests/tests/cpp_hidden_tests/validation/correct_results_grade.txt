@@ -1,0 +1,12 @@
+Testcase  1: Compilation                                          2 /  2  
+Testcase  2: Frame Size 1                                         2 /  2  
+Testcase  3: Frame Size 5                                         2 /  2  
+Testcase  4: Frame Size 10                                        2 /  2  
+Testcase  5: Frame Size 13                                        2 /  2    [ HIDDEN ]
+Testcase  6: Error Checking: Frame Size 0                         2 /  2  
+Testcase  7: Error Checking: Frame Size Negative                  2 /  2    [ HIDDEN ]
+Testcase  8: Error Checking: No Arguments                        +2 points
+Testcase  9: Error Checking: Too Many Arguments                  +2 points  [ HIDDEN ]
+Testcase 10: Submission Limit                                             
+Automatic grading total:                                         18 / 14
+Non-hidden automatic grading total:                              12 / 10

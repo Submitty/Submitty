@@ -8,6 +8,8 @@ SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
 
+COURSE_BUILDERS_GROUP=course_builders
+
 #################################################################
 # PROVISION SETUP
 #################
@@ -50,10 +52,9 @@ if [ ${VAGRANT} == 1 ]; then
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
 ##    https://192.168.56.101 (submission)                 ##
-##    https://192.168.56.102 (svn)                        ##
-##    https://192.168.56.103 (grading)                    ##
-##    https://192.168.56.104 (new-submission)             ##
-##    https://192.168.56.105 (cgi-bin scripts)            ##
+##    https://192.168.56.102 (cgi-bin scripts)            ##
+##    https://192.168.56.103 (svn)                        ##
+##    https://192.168.56.104 (tagrading)                  ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
 ##   localhost:15432                                      ##
@@ -64,8 +65,9 @@ if [ ${VAGRANT} == 1 ]; then
     chmod +rx /etc/motd
 
     echo "192.168.56.101    test-submit test-submit.cs.rpi.edu" >> /etc/hosts
-    echo "192.168.56.102    test-svn test-svn.cs.rpi.edu" >> /etc/hosts
-    echo "192.168.56.103    test-hwgrading test-hwgrading.cs.rpi.edu hwgrading" >> /etc/hosts
+    echo "192.168.56.102    test-cgi test-cgi.cs.rpi.edu" >> /etc/hosts
+    echo "192.168.56.103    test-svn test-svn.cs.rpi.edu" >> /etc/hosts
+    echo "192.168.56.104    test-hwgrading test-hwgrading.cs.rpi.edu" >> /etc/hosts
 fi
 
 
@@ -157,63 +159,19 @@ apt-get -qqy autoremove
 # so that hwphp is the only one who could use PAM for example
 pip install python-pam
 pip install xlsx2csv
+#NOTE: BELOW THE PYTHON PAM MODULE IS RESTRICTED TO hwcgi
 
 chmod -R 555 /usr/local/lib/python2.7/*
 chmod 555 /usr/lib/python2.7/dist-packages
 
-#################################################################
-# NETWORK CONFIGURATION
-#################
-#
-# The goal here is to ensure the VM is accessible from your own
-# computer for code testing, has an outgoing connection to the
-# Internet to access github and receive Ubuntu updates, but is also
-# unreachable via incoming Internet connections so to block uninvited
-# guests.
-#
-# Open the VM’s Settings window and click on the “Network” tab.  There
-# are tabs for four network adapters.  Enable adapters #1 and #2.
-#
-# Adapter #1 should be attached to NAT and make sure the cable
-# connected box (under advanced) is checked.  You may ignore all other
-# settings for adapter #1.  This provides the VM’s outgoing Internet
-# connection, but uninvited guests on the Internet cannot see the VM.
-#
-# Adapter #2 should be attached to Host-only Network.  Under “name”,
-# there is a drop down menu to select Host-only Ethernet Adapter (or
-# vboxnet).  Recall that this was created in the previous section,
-# Create Virtual Network Adapters.  This adapter can only communicate
-# between your host OS and the VM, and it is unreachable to and from
-# the Internet.
-#
-# After Ubuntu is fully installed, you need to adjust the networking
-# configuration so that you may access the VM via static IP addressing
-# as a convenience for code testing.
-#
-# The VM’s host-only adapter provides a private connection to the VM,
-# but Ubuntu also needs to be configured to use this adapter.
-
-echo "Binding static IPs to \"Host-Only\" virtual network interface."
-
-# eth0 is auto-configured by Vagrant as NAT.  eth1 is a host-only adapter and
-# not auto-configured.  eth1 is manually set so that the host-only network
-# interface remains consistent among VM reboots as Vagrant has a bad habit of
-# discarding and recreating networking interfaces everytime the VM is restarted.
-# eth1 is statically bound to 192.168.56.101, 102, 103, 104, and 105.
-printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-printf "auto eth1:3\niface eth1:3 inet static\naddress 192.168.56.104\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-printf "auto eth1:4\niface eth1:4 inet static\naddress 192.168.56.105\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
-
-# Turn them on.
-ifup eth1 eth1:1 eth1:2 eth1:3 eth1:4
 
 #################################################################
 # JAR SETUP
 #################
 echo "Getting JUnit..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/JUnit
+chmod 750 ${SUBMITTY_INSTALL_DIR}/JUnit
 cd ${SUBMITTY_INSTALL_DIR}/JUnit
 
 wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar -o /dev/null > /dev/null 2>&1
@@ -242,13 +200,66 @@ chmod o+r . *.jar
 
 echo "Getting DrMemory..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
-cd /tmp
+cd ${SUBMITTY_INSTALL_DIR}/DrMemory
 DRMEM_TAG=release_1.10.1
 DRMEM_VER=1.10.1-3
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${SUBMITTY_INSTALL_DIR}/DrMemory
 ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
 rm DrMemory-Linux-${DRMEM_VER}.tar.gz
+chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/DrMemory
+# FIXME: these permissions could probably be adjusted
+chmod -R 755 ${SUBMITTY_INSTALL_DIR}/DrMemory
+
+#################################################################
+# NETWORK CONFIGURATION
+#################
+if [ ${VAGRANT} == 1 ]; then
+    #
+    # The goal here is to ensure the VM is accessible from your own
+    # computer for code testing, has an outgoing connection to the
+    # Internet to access github and receive Ubuntu updates, but is also
+    # unreachable via incoming Internet connections so to block uninvited
+    # guests.
+    #
+    # Open the VM’s Settings window and click on the “Network” tab.  There
+    # are tabs for four network adapters.  Enable adapters #1 and #2.
+    #
+    # Adapter #1 should be attached to NAT and make sure the cable
+    # connected box (under advanced) is checked.  You may ignore all other
+    # settings for adapter #1.  This provides the VM’s outgoing Internet
+    # connection, but uninvited guests on the Internet cannot see the VM.
+    #
+    # Adapter #2 should be attached to Host-only Network.  Under “name”,
+    # there is a drop down menu to select Host-only Ethernet Adapter (or
+    # vboxnet).  Recall that this was created in the previous section,
+    # Create Virtual Network Adapters.  This adapter can only communicate
+    # between your host OS and the VM, and it is unreachable to and from
+    # the Internet.
+    #
+    # After Ubuntu is fully installed, you need to adjust the networking
+    # configuration so that you may access the VM via static IP addressing
+    # as a convenience for code testing.
+    #
+    # The VM’s host-only adapter provides a private connection to the VM,
+    # but Ubuntu also needs to be configured to use this adapter.
+
+    echo "Binding static IPs to \"Host-Only\" virtual network interface."
+
+    # eth0 is auto-configured by Vagrant as NAT.  eth1 is a host-only adapter and
+    # not auto-configured.  eth1 is manually set so that the host-only network
+    # interface remains consistent among VM reboots as Vagrant has a bad habit of
+    # discarding and recreating networking interfaces everytime the VM is restarted.
+    # eth1 is statically bound to 192.168.56.101, 102, 103, 104, and 105.
+    printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+    printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+    printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+    printf "auto eth1:3\niface eth1:3 inet static\naddress 192.168.56.104\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
+
+    # Turn them on.
+    ifup eth1 eth1:1 eth1:2 eth1:3 eth1:4
+fi
+
 
 #################################################################
 # APACHE SETUP
@@ -273,21 +284,6 @@ a2enmod include actions cgi suexec authnz_external headers ssl
 mkdir /etc/apache2/ssl
 cd /etc/apache2/ssl
 echo "creating ssl certificates"
-echo -e "US
-New York
-Troy
-RPI
-CSCI
-.
-." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout submit.key -out submit.crt > /dev/null 2>&1
-
-echo -e "US
-New York
-Troy
-RPI
-CSCI
-.
-." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout hwgrading.key -out hwgrading.crt > /dev/null 2>&1
 
 echo -e "US
 New York
@@ -297,8 +293,6 @@ CSCI
 .
 ." | openssl req -x509 -nodes -days 365000 -newkey rsa:2048 -keyout svn.key -out svn.crt > /dev/null 2>&1
 
-chmod o+r hwgrading.crt
-chmod o+r submit.crt
 chmod o+r svn.crt
 
 echo -e "#%PAM-1.0
@@ -403,6 +397,10 @@ if [ ${VAGRANT} == 1 ]; then
 	echo "hwcron:hwcron" | sudo chpasswd
 fi
 
+# only hwcgi can use the python pam module
+chown hwcgi:hwcgi /usr/local/lib/python2.7/dist-packages/pam*
+chmod 500         /usr/local/lib/python2.7/dist-packages/pam*
+
 
 # FIXME:  umask setting above not complete
 # might need to also set USERGROUPS_ENAB to "no", and manually create
@@ -498,7 +496,7 @@ if [ ${VAGRANT} == 1 ]; then
 	echo "postgres:postgres" | chpasswd postgres
 	adduser postgres shadow
 	service postgresql restart
-	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}')"
+	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
 	sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost       all    all    192.168.56.0\/24    pam\nhost       all    all    all                md5/" /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
 	echo "Creating PostgreSQL users"
 	su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
@@ -511,12 +509,21 @@ fi
 #################################################################
 # ANALYSIS TOOLS SETUP
 #################
-if [ ${VAGRANT} == 1 ]; then
-    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-    pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-    make ubuntudeps
-    popd
-fi
+
+git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+#pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+#make ubuntudeps
+# graph tool...  for later?  add-apt-repository "http://downloads.skewed.de/apt/trusty universe" -y
+add-apt-repository ppa:ubuntu-toolchain-r/test -y
+apt-get update -qq
+apt-get install -qq build-essential pkg-config flex bison
+apt-get install -qq libpcre3 libpcre3-dev
+apt-get install -qq splint indent
+apt-get install -qq python3 python3-dev libpython3.4 python3-pip
+python3 -m pip install pylint
+# graph tool...  for later?  apt-get install -qq --force-yes python3-graph-tool
+#popd
+
 
 #################################################################
 # SUBMITTY SETUP
@@ -526,10 +533,10 @@ if [ ${VAGRANT} == 1 ]; then
 	echo -e "localhost
 hsdbu
 hsdbu
+http://192.168.56.101
 http://192.168.56.104
-https://192.168.56.103
-http://192.168.56.105
-svn+ssh:192.168.56.102" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
+http://192.168.56.102
+svn+ssh:192.168.56.103" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 else
 	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 fi
@@ -538,11 +545,10 @@ source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 #source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean test
 
 source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
-cp ${SUBMITTY_REPOSITORY}/Docs/sample_apache_config /etc/apache2/sites-available/submit.conf
-cp ${SUBMITTY_REPOSITORY}/Docs/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
 cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/submitty.conf /etc/apache2/sites-available/submitty.conf
 cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/cgi.conf /etc/apache2/sites-available/cgi.conf
-cp -f ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
 
 # permissions: rw- r-- ---
 chmod 0640 /etc/apache2/sites-available/*.conf
@@ -551,13 +557,8 @@ chmod 0640 /etc/apache2/suexec/www-data
 if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /root/bin/bottom.txt
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
-	sed -i 's/submitty.crt/submit.crt/g' /etc/apache2/sites-available/submit.conf
-	sed -i 's/submitty.key/submit.key/g' /etc/apache2/sites-available/submit.conf
-	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /etc/apache2/sites-available/hwgrading.conf
-	sed -i 's/hwgrading.cer/hwgrading.crt/g' /etc/apache2/sites-available/hwgrading.conf
 fi
 
-a2ensite submit
 a2ensite hwgrading
 a2ensite submitty
 a2ensite cgi
