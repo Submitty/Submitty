@@ -107,35 +107,34 @@ HTML;
                                                               'page' => 'users',
                                                               'action' => 'listStudents'))}">View Students</a></li>-->
                     <!-- TODO Add these to a drop down -->
-                        <li>
-                            <a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=View%20Students">View Students</a>
-                        </li>
-                        
-                        <li>
-                            <a href="{$ta_base_url}/account/admin-users.php?course={$course}&semester={$semester}&this=View%20Users">View Users</a>
-                        </li>
-                        
-                       <li>
-                            <a href="{$ta_base_url}/account/admin-classlist.php?course={$course}&semester={$semester}&this=Upload%20ClassList">Upload ClassList</a>
-                        </li>
-                        
-                        <li>
-                            <a href="{$ta_base_url}/account/admin-rotating-sections.php?course={$course}&semester={$semester}&this=Setup%20Rotating%20Sections">Setup Rotating Sections</a>
-                        </li>
-                        
-                        <li>
-                            <a href="{$ta_base_url}/account/admin-latedays.php?course={$course}&semester={$semester}&this=Late%200Days%20Course">Late Days Course</a>
-                        </li>
-                        
-                        <li>
-                            <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Late%200Days%20Student">Late Days Student</a>
-                        </li>
-                        
-                    <!-- -->
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=View%20Students">View Students</a>
+                    </li>
                     
-                    <!--<li><a href="{$this->core->buildUrl(array('component' => 'admin', 
-                                                              'page' => 'configuration', 
-                                                              'action' => 'view'))}">Class Configuration</a></li>-->
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-users.php?course={$course}&semester={$semester}&this=View%20Users">View Users</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-classlist.php?course={$course}&semester={$semester}&this=Upload%20ClassList">Upload ClassList</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-rotating-sections.php?course={$course}&semester={$semester}&this=Setup%20Rotating%20Sections">Setup Rotating Sections</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-latedays.php?course={$course}&semester={$semester}&this=Late%20Days%20Course">Late Days Course</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Late%20Days%20Student">Late Days Student</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 
+                                                              'action' => 'view'))}">Class Configuration</a>
+                    </li>
 
 HTML;
                     if($this->core->getUser()->isDeveloper()) {
