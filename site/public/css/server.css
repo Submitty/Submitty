@@ -162,31 +162,13 @@ textarea {
     color: #000;
 }
 
-#logo-text {
+#logo-submitty {
     float: right;
-    margin-top: 10px;
-    margin-right: 30px;
-}
-
-#logo-text h1 {
-    display: block;
-    font-size: 100px !important;
-    line-height: 80px;
-    letter-spacing: -1px;
-    text-align: center;
-    clear: both;
-    font-family: 'Grand Hotel', serif;
-}
-
-#logo-text h2 {
-    display: block;
-    font-family: "Roboto", sans-serif;
-    font-size: 13px !important;
-    font-weight: 300;
-    text-align: center;
-    padding-right: 20px;
-    clear: both;
-    position: relative;
+    margin-right: 10px;
+    height: 125px;
+    width: 357px;
+    background: url('http://submitty.org/images/submitty_logo.png') no-repeat;
+    background-size: 357px 125px;
 }
 
 .content {
