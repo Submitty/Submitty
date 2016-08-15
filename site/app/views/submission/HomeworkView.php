@@ -33,6 +33,22 @@ HTML;
 HTML;
         }
     }
+    
+    /**
+     * @param Gradeable $gradeable
+     *
+     * @return bool|string
+     */
+    public function showGradeableError($gradeable) {
+        return <<<HTML
+<div class="content">
+    <p class="red-message">
+    {$gradeable->getName()} has not been built and cannot accept submissions at this time. The instructor
+    needs to configure the config.json for this assignment and then build the course.
+    </p>
+</div>
+HTML;
+    }
         
     /**
      * @param Gradeable $gradeable

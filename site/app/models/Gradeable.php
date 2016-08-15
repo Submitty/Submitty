@@ -246,6 +246,10 @@ abstract class Gradeable {
             return;
         }
         
+        if (!$this->hasResults()) {
+            return;
+        }
+        
         $course_path = $this->core->getConfig()->getCoursePath();
 
         $submission_path = $course_path."/submissions/".$this->id."/".$this->core->getUser()->getId();
