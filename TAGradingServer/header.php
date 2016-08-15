@@ -143,7 +143,9 @@ HTML;
                                 </a></li>
                             </ul>
                         </li>
+-->
 HTML;
+    }
 
     $submission_url = __SUBMISSION_URL__;
     $semester = __COURSE_SEMESTER__;
