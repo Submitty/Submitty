@@ -98,7 +98,7 @@ if($user_is_administrator){
         $gradeable_submission_id = "";
         $g_team_assignment = json_encode($old_gradeable['g_team_assignment']);
         $g_grade_by_registration = $old_gradeable['g_grade_by_registration'];
-        $string = "Add";
+        $string = $button_string = "Add";
         $action = strtolower($string);
     }
     else {
@@ -112,7 +112,8 @@ if($user_is_administrator){
         $g_grade_start_date = $old_gradeable['g_grade_start_date'];
         $g_grade_released_date = $old_gradeable['g_grade_released_date'];
         $g_min_grading_group = $old_gradeable['g_min_grading_group'];
-        $string = "Save";
+        $string = "Edit";
+        $button_string ="Save";
         $action = 'edit';
     }
 
@@ -216,7 +217,7 @@ if($user_is_administrator){
         <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
-            <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{$string} Gradeable</button>
+            <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{$button_string} Gradeable</button>
         </div>
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
             What is the unique id of this gradeable?: <input style='width: 200px' type='text' name='gradeable_id' class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>

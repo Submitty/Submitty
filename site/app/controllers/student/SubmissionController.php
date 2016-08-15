@@ -65,15 +65,11 @@ class SubmissionController implements IController {
                          'action' => 'display',
                          'gradeable_id' => $gradeable->getId());
             $this->core->getOutput()->addBreadcrumb("<a href='{$this->core->buildUrl($loc)}'>{$gradeable->getName()}</a>");
-            
-            $select = $this->core->getOutput()->renderTemplate(array('submission', 'Homework'), 'gradeableSelect',
-                                                               $gradeable_list,
-                                                               $gradeable->getId());
-    
+                
             $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
             
             $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'showGradeable',
-                                                   $gradeable, $select, $days_late);
+                                                   $gradeable, $days_late);
         }
         else {
             $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeables');
