@@ -1,6 +1,8 @@
 <?php
 use app\models\User;
 
+use \app\models\ElectronicGradeable;
+
 	include "../header.php";
 
 	$account_subpages_unlock = true;
@@ -101,7 +103,6 @@ else {
         $button = "";
     }
     
-    
     $rubric_total = $gradeable_info["score"];
     
     print <<<HTML
@@ -168,6 +169,7 @@ HTML;
     $students = $db->rows();
 
     foreach ($students as $student) {
+        $eg = new ElectronicGradeable($student["user_id"], $g_id);
         if($prev_section !== $student[$user_section_field]) {
             $section_id = intval($student[$user_section_field]);
             print <<<HTML
@@ -191,7 +193,8 @@ HTML;
         if(count($students) > 0) {
             if(isset($row['score'])) {
                 if($row['score'] >= 0) {
-                    echo "<a class='btn' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>[ " . $row['score'] . " / " . $rubric_total . " ]</a>";
+                    echo "<a class='btn' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>[ " . ($row['score'] +$eg->autograding_points). 
+                           " / " . ($rubric_total + $eg->autograding_max) . " ]</a>";
                 } else {
                     echo "<a class='btn btn-danger' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>[ GRADING ERROR ]</a>";
                 }

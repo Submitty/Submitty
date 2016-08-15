@@ -333,9 +333,11 @@ TestCase::TestCase (const nlohmann::json& input) {
   }
 
   nlohmann::json::iterator itr = _json.find("validation");
-  std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
-  VerifyGraderDeductions(*itr);
-  AddDefaultGraders(commands,*itr);
+  if (itr != _json.end()) {
+    VerifyGraderDeductions(*itr);
+    std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
+    AddDefaultGraders(commands,*itr);
+  }
 
   //std::cout << "AFTER " << _json.dump(2) << std::endl;
 }
@@ -356,13 +358,16 @@ void TestCase::General_Helper() {
 }
 
 void TestCase::FileCheck_Helper() {
-  nlohmann::json::iterator f_itr,v_itr;
+  nlohmann::json::iterator f_itr,v_itr,m_itr,itr;
 
   // Check the required fields for all test types
   f_itr = _json.find("actual_file");
   v_itr = _json.find("validation");
-
+  m_itr = _json.find("max_submissions");
+  
   if (f_itr != _json.end()) {
+    // need to rewrite to use a validation
+    assert (m_itr == _json.end());
     assert (v_itr == _json.end());
     nlohmann::json v;
     v["method"] = "fileExists";
@@ -370,16 +375,34 @@ void TestCase::FileCheck_Helper() {
     v["description"] = (*f_itr);
     _json["validation"].push_back(v);
     _json.erase(f_itr);
+  } else if (v_itr != _json.end()) {
+    // already has a validation
   } else {
-    assert (v_itr != _json.end());
+    assert (m_itr != _json.end());
+    assert (m_itr->is_number_integer());
+    assert ((int)(*m_itr) >= 1);
+
+    itr = _json.find("points");
+    if (itr == _json.end()) {
+      _json["points"] = -5;
+    } else {
+      assert (itr->is_number_integer());
+      assert ((int)(*itr) < 0);
+    }
+    itr = _json.find("penalty");
+    if (itr == _json.end()) {
+      _json["penalty"] = -0.1;
+    } else {
+      assert (itr->is_number());
+      assert ((*itr) < 0);
+    }
+    itr = _json.find("title");
+    if (itr == _json.end()) {
+      _json["title"] = "Submission Limit";
+    } else {
+      assert (itr->is_string());
+    }
   }
-
-  f_itr = _json.find("actual_file");
-  v_itr = _json.find("validation");
-
-  assert (f_itr == _json.end());
-  assert (v_itr != _json.end());
-
 }
 
 void TestCase::Compilation_Helper() {
@@ -478,12 +501,10 @@ std::vector<std::vector<std::string>> TestCase::getFilenames() const {
   assert (_json.find("actual_file") == _json.end());
   int num = numFileGraders();
   assert (num > 0);
-  std::cout << "num file graders" << num << std::endl;
   for (int v = 0; v < num; v++) {
     filenames.push_back(stringOrArrayOfStrings(getGrader(v),"actual_file"));
     assert (filenames[v].size() > 0);
   }
-  std::cout << "filenames.size() " << filenames.size() << std::endl;
 
   return filenames;
 }

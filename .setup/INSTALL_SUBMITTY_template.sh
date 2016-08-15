@@ -136,7 +136,6 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
 
     echo -e "\nDeleting directories for a clean installation\n"
 
-    rm -rf $SUBMITTY_INSTALL_DIR/website
     rm -rf $SUBMITTY_INSTALL_DIR/hwgrading_website
     rm -rf $SUBMITTY_INSTALL_DIR/site
     rm -rf $SUBMITTY_INSTALL_DIR/src
@@ -199,41 +198,6 @@ chmod  770                                  $SUBMITTY_DATA_DIR/to_be_graded_batc
 #  (--delete, but probably dont want)
 #  / trailing slash, copies contents into target
 #  no slash, copies the directory & contents to target
-
-
-########################################################################################################################
-########################################################################################################################
-# COPY THE SUBMISSION SERVER WEBSITE (php & javascript)
-
-echo -e "Copy the submission website"
-
-# copy the website from the repo
-rsync -rtz   $SUBMITTY_REPOSITORY/public   $SUBMITTY_INSTALL_DIR/website
-
-# automatically create the site path file, storing the data directory in the file
-echo $SUBMITTY_DATA_DIR > $SUBMITTY_INSTALL_DIR/website/public/site_path.txt
-
-# set special user $HWPHP_USER as owner & group of all website files
-find $SUBMITTY_INSTALL_DIR/website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
-
-# set the permissions of all files
-# $HWPHP_USER can read & execute all directories and read all files
-# "other" can cd into all subdirectories
-chmod -R 400 $SUBMITTY_INSTALL_DIR/website
-find $SUBMITTY_INSTALL_DIR/website -type d -exec chmod uo+x {} \;
-# "other" can read all .txt, .jpg, & .css files
-find $SUBMITTY_INSTALL_DIR/website -type f -name \*.css -exec chmod o+r {} \;
-find $SUBMITTY_INSTALL_DIR/website -type f -name \*.jpg -exec chmod o+r {} \;
-find $SUBMITTY_INSTALL_DIR/website -type f -name \*.png -exec chmod o+r {} \;
-find $SUBMITTY_INSTALL_DIR/website -type f -name \*.txt -exec chmod o+r {} \;
-# "other" can read & execute all .js files
-find $SUBMITTY_INSTALL_DIR/website -type f -name \*.js -exec chmod o+rx {} \;
-
-# create the custom_resources directory
-mkdir -p $SUBMITTY_INSTALL_DIR/website/public/custom_resources
-# course builders will be able to add their own .css file customizations to this directory
-find $SUBMITTY_INSTALL_DIR/website/public/custom_resources -exec chown root:$COURSE_BUILDERS_GROUP {} \;
-find $SUBMITTY_INSTALL_DIR/website/public/custom_resources -exec chmod 775 {} \;
 
 
 ########################################################################################################################
@@ -349,6 +313,8 @@ chmod 550 $SUBMITTY_INSTALL_DIR/bin/grading_done.sh
 # fix the permissions specifically of the grade_students.sh script
 chown root:$HWCRON_USER $SUBMITTY_INSTALL_DIR/bin/grade_students.sh
 chmod 550 $SUBMITTY_INSTALL_DIR/bin/grade_students.sh
+chown root:$HWCRON_USER $SUBMITTY_INSTALL_DIR/bin/grade_students__results_history.py
+chmod 550 $SUBMITTY_INSTALL_DIR/bin/grade_students__results_history.py
 
 # build the helper program for strace output and restrictions by system call categories
 g++ $SUBMITTY_INSTALL_DIR/src/grading/system_call_check.cpp -o $SUBMITTY_INSTALL_DIR/bin/system_call_check.out
@@ -424,7 +390,7 @@ find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+r
 ################################################################################################################
 # COPY THE 1.0 Grading Website
 
-echo -e "Copy the 1.0 grading website"
+echo -e "Copy the submission website"
 
 # copy the website from the repo
 rsync -rtz   $SUBMITTY_REPOSITORY/site   $SUBMITTY_INSTALL_DIR

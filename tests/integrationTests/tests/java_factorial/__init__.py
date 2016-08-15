@@ -43,9 +43,9 @@ def cleanup(test):
     subprocess.call(["rm"] + ["-f"] +
             glob.glob(os.path.join(test.testcase_path, "data/", "test*.txt")))
     subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data/.submit.grade")))
+            glob.glob(os.path.join(test.testcase_path, "data/results_grade.txt")))
     subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data/submission.json")))
+            glob.glob(os.path.join(test.testcase_path, "data/results.json")))
 
 
 @testcase
@@ -64,8 +64,8 @@ def correct(test):
     test.junit_diff("test03_STDOUT.txt","correct_test03_STDOUT.txt")
     test.empty_file("test03_STDERR.txt")
     test.empty_file("test03_execute_logfile.txt")
-    test.diff(".submit.grade","correct_.submit.grade")
-    test.json_diff("submission.json","correct_submission.json")
+    test.diff("results_grade.txt","correct_results_grade.txt", "-b")
+    test.json_diff("results.json","correct_results.json")
 
 
 @testcase
@@ -84,8 +84,8 @@ def does_not_compile(test):
     test.junit_diff("test03_STDOUT.txt", "does_not_compile_test03_STDOUT.txt")
     test.empty_file("test03_STDERR.txt")
     test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
-    test.diff(".submit.grade", "does_not_compile_.submit.grade")
-    test.json_diff("submission.json", "does_not_compile_submission.json")
+    test.diff("results_grade.txt", "does_not_compile_results_grade.txt", "-b")
+    test.json_diff("results.json", "does_not_compile_results.json")
 
 
 @testcase
@@ -104,8 +104,8 @@ def buggy(test):
     test.junit_diff("test03_STDOUT.txt","buggy_test03_STDOUT.txt")
     test.empty_file("test03_STDERR.txt")
     test.diff("test03_execute_logfile.txt","exit_status_1.txt")
-    test.diff(".submit.grade","buggy_.submit.grade")
-    test.json_diff("submission.json","buggy_submission.json")
+    test.diff("results_grade.txt","buggy_results_grade.txt", "-b")
+    test.json_diff("results.json","buggy_results.json")
 
 
 @testcase
@@ -124,5 +124,5 @@ def still_buggy(test):
     test.junit_diff("test03_STDOUT.txt","still_buggy_test03_STDOUT.txt")
     test.empty_file("test03_STDERR.txt")
     test.diff("test03_execute_logfile.txt","exit_status_1.txt")
-    test.diff(".submit.grade","still_buggy_.submit.grade")
-    test.json_diff("submission.json","still_buggy_submission.json")
+    test.diff("results_grade.txt","still_buggy_results_grade.txt", "-b")
+    test.json_diff("results.json","still_buggy_results.json")

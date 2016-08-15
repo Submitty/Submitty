@@ -54,8 +54,8 @@ def correct(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_correct")
-    test.json_diff("submission.json","submission.json_correct")
+    test.diff("results_grade.txt","results_grade.txt_correct","-b")
+    test.json_diff("results.json","results.json_correct")
 
 
 @testcase
@@ -68,8 +68,8 @@ def missing_label(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_missing_label")
-    test.json_diff("submission.json","submission.json_missing_label")
+    test.diff("results_grade.txt","results_grade.txt_missing_label","-b")
+    test.json_diff("results.json","results.json_missing_label")
 
 
 @testcase
@@ -82,8 +82,8 @@ def wrong_num(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_wrong_num")
-    test.json_diff("submission.json","submission.json_wrong_num")
+    test.diff("results_grade.txt","results_grade.txt_wrong_num","-b")
+    test.json_diff("results.json","results.json_wrong_num")
 
 
 @testcase
@@ -96,8 +96,8 @@ def wrong_total(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_wrong_total")
-    test.json_diff("submission.json","submission.json_wrong_total")
+    test.diff("results_grade.txt","results_grade.txt_wrong_total","-b")
+    test.json_diff("results.json","results.json_wrong_total")
 
 
 @testcase
@@ -110,8 +110,8 @@ def not_random(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_not_random")
-    test.json_diff("submission.json","submission.json_not_random")
+    test.diff("results_grade.txt","results_grade.txt_not_random","-b")
+    test.json_diff("results.json","results.json_not_random")
 
 
 @testcase
@@ -124,7 +124,7 @@ def all_bugs(test):
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff(".submit.grade",".submit.grade_all_bugs")
-    test.json_diff("submission.json","submission.json_all_bugs")
+    test.diff("results_grade.txt","results_grade.txt_all_bugs","-b")
+    test.json_diff("results.json","results.json_all_bugs")
 
 

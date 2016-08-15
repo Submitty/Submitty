@@ -23,38 +23,7 @@ class HomeworkView {
 
 HTML;
     }
-    
-    /**
-     * @param Gradeable[] $gradeables
-     * @param $gradeable_id
-     *
-     * @return string
-     */
-    public function gradeableSelect($gradeables, $gradeable_id) {
-        $return = <<<HTML
-<div class="sub">
-    <span style="font-weight: bold;">Select Assignment:</span>
-    <select style="margin-left: 5px" onChange="gradeableChange('{$this->core->buildUrl(array('component' => 'student', 
-                                                                                'gradeable_id' => ''))}', this);">
-HTML;
-        foreach ($gradeables as $gradeable) {
-            if ($gradeable_id === $gradeable->getId()) {
-                $selected = "selected";
-            }
-            else {
-                $selected = "";
-            }
-            $return .= "\t\t<option value='{$gradeable->getId()}' {$selected}>{$gradeable->getName()}</option>\n";
-        }
-
-        $return .= <<<HTML
-    </select>
-</div>
-HTML;
-
-        return $return;
-    }
-    
+        
     /**
      * @param Gradeable $gradeable
      * @param string    $gradeable_select
@@ -62,12 +31,11 @@ HTML;
      *
      * @return string
      */
-    public function showGradeable($gradeable, $gradeable_select, $days_late) {
+    public function showGradeable($gradeable, $days_late) {
         $show_ta_grades = $this->core->getConfig()->showTaGrades();
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
-{$gradeable_select}
 <div class="content">
     <h2>View Assignment {$gradeable->getName()}</h2>
     <div class="sub">
@@ -97,10 +65,16 @@ HTML;
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+                if ($gradeable->getNumParts() > 1) {
+                    $label = "Drag your {$gradeable->getPartsNames()[$i]} here or click to open file browser";
+                }
+                else {
+                    $label = "Drag your file(s) here or click to open file browser";
+                }
                 $return .= <<<HTML
         
         <div id="upload{$i}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
-            <h3 class="label" id="label{$i}">Drag your {$gradeable->getPartsNames()[$i]} here or click to open file browser</h3>
+            <h3 class="label" id="label{$i}">{$label}</h3>
             <input type="file" name="files" id="input_file{$i}" style="display: none" onchange="addFilesFromInput({$i})" />
         </div>
 HTML;
@@ -129,19 +103,23 @@ HTML;
 HTML;
                 }
             }
-    
-            // TODO: We probably want to move this into the ready element into drag-and-drop.js
             if ($gradeable->getCurrentVersion() == $gradeable->getHighestVersion() && $gradeable->getCurrentVersion() > 0) {
                 $return .= <<<HTML
     <script type="text/javascript">
-        $(document).ready(function() { 
+        $(document).ready(function() {
             setUsePrevious();
             {$old_files}
-            setButtonStatus();
         });
     </script>
 HTML;
             }
+                $return .= <<<HTML
+    <script type="text/javascript">
+        $(document).ready(function() {
+            setButtonStatus();
+        });
+    </script>
+HTML;
             $return .= <<<HTML
     
     <script type="text/javascript">
@@ -214,7 +192,7 @@ HTML;
             if ($gradeable->getActiveVersion() == 0) {
                 $selected = ($gradeable->getCurrentVersion() == $gradeable->getActiveVersion()) ? "selected" : "";
                 $return .= <<<HTML
-        <option value="0" {$selected}>Cancelled</option>
+        <option value="0" {$selected}>Do Not Grade Assignment</option>
 HTML;
 
             }
@@ -230,7 +208,7 @@ HTML;
                 }
     
                 if ($version == $gradeable->getActiveVersion()) {
-                    $select_text[] = "ACTIVE";
+                    $select_text[] = "GRADE THIS VERSION";
                 }
                 
                 if ($version == $gradeable->getCurrentVersion()) {
@@ -251,11 +229,11 @@ HTML;
             if ($gradeable->getCurrentVersion() > 0) {
                 if ($gradeable->getCurrentVersion() == $gradeable->getActiveVersion()) {
                     $version = 0;
-                    $button = '<input type="submit" class="btn btn-default" value="Do Not Grade This Version (Mark All Inactive)">';
+                    $button = '<input type="submit" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">';
                 }
                 else {
                     $version = $gradeable->getCurrentVersion();
-                    $button = '<input type="submit" class="btn btn-primary" value="Make Active">';
+                    $button = '<input type="submit" class="btn btn-primary" value="Grade This Version">';
                 }
                 $return .= <<<HTML
     <form style="display: inline;" method="post" 
@@ -276,8 +254,9 @@ HTML;
                 $return .= <<<HTML
     <div class="sub">
         <p class="red-message">
-        Note: You have NO ACTIVE submissions for this assignment.<br />
-        This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.
+            Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
+            This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
+            You may select any version above and select that for grading however.<br />
         </p>
     </div>
 
@@ -311,11 +290,21 @@ HTML;
                 if($gradeable->hasResults()) {
                     $return .= <<<HTML
 submission timestamp: {$results['submission_time']}<br />
-days late (before extensions): {$results['days_late']}<br />
-<br />
-wait time: {$results['wait_time']}<br />
-grade time: {$results['grade_time']}<br />
+days late: {$results['days_late']} (before extensions)<br />
+grading time: {$results['grade_time']} seconds<br />
 HTML;
+                    if($results['num_autogrades'] > 1) {
+                      $regrades = $results['num_autogrades']-1;
+                      $return .= <<<HTML
+<br />
+number of re-autogrades: {$regrades}<br />
+last re-autograde finished: {$results['grading_finished']}<br />
+HTML;
+                    } else {
+                      $return .= <<<HTML
+queue wait time: {$results['wait_time']} seconds<br />
+HTML;
+                    }
                 }
                 $return .= <<<HTML
         </div>
@@ -325,20 +314,59 @@ HTML;
     <div class="sub">
         <h4>Results</h4>
 HTML;
-        
-        
-                if(!$gradeable->hasResults()) {
-                    $return .= <<<HTML
-        <p class="red-message">
-            Currently being graded
-        </p>
+                $refresh_js = <<<HTML
         <script type="text/javascript">
-            checkRefreshSubmissionPage('{$this->core->buildUrl(array('component' => 'student', 
-                                                                     'page' => 'submission', 
-                                                                     'action' => 'check_refresh', 
-                                                                     'gradeable_id' => $gradeable->getId(), 
+            checkRefreshSubmissionPage('{$this->core->buildUrl(array('component' => 'student',
+                                                                     'page' => 'submission',
+                                                                     'action' => 'check_refresh',
+                                                                     'gradeable_id' => $gradeable->getId(),
                                                                      'gradeable_version' => $gradeable->getCurrentVersion()))}')
         </script>
+HTML;
+
+                if ($gradeable->inBatchQueue() && $gradeable->hasResults()) {
+                    if ($gradeable->beingGradedBatchQueue()) {
+                        $return .= <<<HTML
+        <p class="red-message">
+            This submission is currently being regraded.
+        </p>
+HTML;
+                    }
+                    else {
+                        $return .= <<<HTML
+        <p class="red-message">
+            This submission is currently in the queue to be regraded.
+        </p>
+HTML;
+                    }
+                    
+                }
+                
+                if ($gradeable->inInteractiveQueue() || ($gradeable->inBatchQueue() && !$gradeable->hasResults())) {
+                    if ($gradeable->beingGradedInteractiveQueue() ||
+                        (!$gradeable->hasResults() && $gradeable->beingGradedBatchQueue())) {
+                        $return .= <<<HTML
+        <p class="red-message">
+            This submission is currently being graded.
+        </p>
+HTML;
+                    }
+                    else {
+                        $return .= <<<HTML
+        <p class="red-message">
+            This submission is currently in the queue to be graded.
+        </p>
+HTML;
+                    }
+                    $return .= <<<HTML
+        {$refresh_js}
+HTML;
+                }
+                else if(!$gradeable->hasResults()) {
+                    $return .= <<<HTML
+        <p class="red-message">
+            Something has gone wrong with grading this submission. Please contact your instructor about this.
+        </p>
 HTML;
                 }
                 else {
@@ -354,8 +382,10 @@ HTML;
                         }
                         $return .= <<<HTML
         <div class="box">
-            <span class="badge {$background}">{$results['points']} / {$gradeable->getNormalPoints()}</span>
-            <h4>Total</h4>
+            <div class="box-title">
+                <span class="badge {$background}">{$results['points']} / {$gradeable->getNormalPoints()}</span>
+                <h4>Total</h4>
+            </div>
         </div>
 HTML;
                     }
@@ -363,28 +393,58 @@ HTML;
                     $count = 0;
                     $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
                     foreach ($gradeable->getTestcases() as $testcase) {
+                        $div_click = "";
+                        if ($testcase->hasDetails()) {
+                            $div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
+                        }
                         $return .= <<<HTML
         <div class="box">
+            <div class="box-title" {$div_click}>
 HTML;
+                        if ($testcase->hasDetails()) {
+                            $return .= <<<HTML
+                <span style="float:right; color: #0000EE; text-decoration: underline">Details</span>
+HTML;
+                        }
                         if ($testcase->hasPoints()) {
                             if ($testcase->isHidden()) {
                                 $return .= <<<HTML
-            <span class="badge">Hidden</span>
+                <span class="badge">Hidden</span>
 HTML;
                             }
                             else {
+                              $background = "";
+                              if ($testcase->isExtraCredit()) {
+                                if ($testcase->getPointsAwarded() > 0) {
+                                  $background = "green-background";
+                                  $return .= <<<HTML
+                <span class="badge {$background}"> &nbsp; +{$testcase->getPointsAwarded()} &nbsp; </span>
+HTML;
+                                }
+                              } else if ($testcase->getPoints() > 0) {
                                 if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
-                                    $background = "green-background";
-                                }
-                                else if ($testcase->getPointsAwarded() > 0) {
-                                    $background = "yellow-background";
-                                }
-                                else {
-                                    $background = "red-background";
+                                  $background = "green-background";
+                                } else if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
+                                  $background = "red-background";
+                                } else {
+                                  $background = "yellow-background";
                                 }
                                 $return .= <<<HTML
-                            <span class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</span>
+                <span class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</span>
 HTML;
+                              } else if ($testcase->getPoints() < 0) {
+                                if ($testcase->getPointsAwarded() < 0) {
+                                  if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
+                                    $background = "red-background";
+                                  }
+                                  else if ($testcase->getPointsAwarded() < 0) {
+                                    $background = "yellow-background";
+                                  }
+                                  $return .= <<<HTML
+                                  <span class="badge {$background}"> &nbsp; {$testcase->getPointsAwarded()} &nbsp; </span>
+HTML;
+                                }
+                              }
                             }
                         }
                 
@@ -394,54 +454,57 @@ HTML;
                         }
                         $command = htmlentities($testcase->getDetails());
                         $return .= <<<HTML
-            <h4 onclick="return toggleDiv('testcase_{$count}');" style="cursor: pointer;">{$name} <code>{$command}</code></h4>
+                <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code></h4>
+            </div>
             <div id="testcase_{$count}" style="display: {$display_box};">
 HTML;
                         if(!$testcase->isHidden()) {
-                            if($testcase->hasCompilationOutput()) {
-                                $compile_output = htmlentities($testcase->getCompilationOutput());
-                                $return .= <<<HTML
-                <div class="box-block">
-                    <h4>Compilation Output</h4>
-                    <pre>{$compile_output}</pre>
-                </div>
-HTML;
-                            }
-                    
-                            if($testcase->hasExecuteLog()) {
-                                $log_file = htmlentities($testcase->getLogfile());
-                                $return .= <<<HTML
-                <div class="box-block">
-                    <h4>Execution Output</h4>
-                    <pre>{$log_file}</pre>
-                </div>
-HTML;
-                            }
-                    
+                            $autocheck_cnt = 0;
+                            $autocheck_len = count($testcase->getAutochecks());
                             foreach ($testcase->getAutochecks() as $autocheck) {
+                                $description = $autocheck->getDescription();
+                                $diff_viewer = $autocheck->getDiffViewer();
+                                
                                 $return .= <<<HTML
                 <div class="box-block">
+HTML;
+                                
+                                $title = "";
+                                $return .= <<<HTML
+                            <div class='diff-element'>
+HTML;
+                                if ($diff_viewer->hasDisplayExpected()) {
+                                    $title = "Student ";
+                                }
+                                $title .= $description;
+                                $return .= <<<HTML
+                                <h4>{$title}</h4>
 HTML;
                                 foreach ($autocheck->getMessages() as $message) {
                                     $return .= <<<HTML
-                    <div class="red-message">{$message}</div>
+                                <span class="red-message">{$message}</span><br />
 HTML;
                                 }
-                                $diff_viewer = $autocheck->getDiffViewer();
-                                $description = $autocheck->getDescription();
-                                if($diff_viewer->hasActualOutput()) {
+                                if ($diff_viewer->hasDisplayActual()) {
                                     $return .= <<<HTML
-                            <div class='diff-element'>
-                                <h4>Student {$description}</h4>
                                 {$diff_viewer->getDisplayActual()}
+HTML;
+                                }
+                                $return .= <<<HTML
                             </div>
 HTML;
-                                }
                     
-                                if($diff_viewer->hasDisplayExpected() && $diff_viewer->hasExpectedOutput()) {
+                                if ($diff_viewer->hasDisplayExpected()) {
                                     $return .= <<<HTML
                             <div class='diff-element'>
-                                <h4>Instructor {$description}</h4>
+                                <h4>Expected {$description}</h4>
+HTML;
+                                    for ($i = 0; $i < count($autocheck->getMessages()); $i++) {
+                                        $return .= <<<HTML
+                                <br />
+HTML;
+                                    }
+                                    $return .= <<<HTML
                                 {$diff_viewer->getDisplayExpected()}
                             </div>
 HTML;
@@ -450,6 +513,11 @@ HTML;
                                 $return .= <<<HTML
                 </div>
 HTML;
+                                if (++$autocheck_cnt < $autocheck_len) {
+                                    $return .= <<<HTML
+                <div class="clear"></div>
+HTML;
+                                }
                             }
                         }
                         $return .= <<<HTML

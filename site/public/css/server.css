@@ -162,31 +162,13 @@ textarea {
     color: #000;
 }
 
-#logo-text {
+#logo-submitty {
     float: right;
-    margin-top: 10px;
-    margin-right: 30px;
-}
-
-#logo-text h1 {
-    display: block;
-    font-size: 100px !important;
-    line-height: 80px;
-    letter-spacing: -1px;
-    text-align: center;
-    clear: both;
-    font-family: 'Grand Hotel', serif;
-}
-
-#logo-text h2 {
-    display: block;
-    font-family: "Roboto", sans-serif;
-    font-size: 13px !important;
-    font-weight: 300;
-    text-align: center;
-    padding-right: 20px;
-    clear: both;
-    position: relative;
+    margin-right: 10px;
+    height: 125px;
+    width: 357px;
+    background: url('http://submitty.org/images/submitty_logo.png') no-repeat;
+    background-size: 357px 125px;
 }
 
 .content {
@@ -248,6 +230,12 @@ textarea {
 
 .spacer30 {
     height: 30px;
+}
+
+.clear {
+    clear: both;
+    border-bottom: 1px solid lightgrey;
+    padding-top: 20px;
 }
 
 #page-info {
@@ -382,6 +370,10 @@ select {
     padding: 5px 5px 10px;
 }
 
+.box-title {
+    margin-top: 10px;
+}
+
 .box > h4 {
     margin-bottom: 10px;
     margin-left: 10px;
@@ -411,13 +403,12 @@ select {
 }
 
 .diff-element {
-    width: 48%;
     float: left;
     margin-right: 20px;
 }
 
 .badge {
-    float: right;
+    float: left;
     display: inline-block;
     min-width: 10px;
     padding: 3px 7px;
@@ -429,8 +420,8 @@ select {
     vertical-align: baseline;
     background-color: #999;
     border-radius: 10px;
-    margin-top: 10px;
     margin-right: 20px;
+    margin-left: 10px;
 }
 
 .green-background {
@@ -450,3 +441,67 @@ select {
     font-style: italic;
     text-decoration: none;
 }
+
+.gradeable_list{
+	width: 100%;
+	padding: 50px;
+	padding-top: 0px;
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size: 18px;
+	text-align: left !important;
+}
+
+table .colspan{
+	padding: 10px;
+	font-size: 28px;
+	font-weight: 600;
+}
+table .bar{
+	height:20px;
+}
+table .gradeable_title {
+	padding-left: 50px;
+}
+table a{
+	text-decoration: none;
+}
+table .has-url:hover {
+	cursor: pointer;
+	color: #3232FF;
+}
+table .student .gradeable_title {
+	width: 45%;
+}
+table .student .date {
+	width: 30%;
+}
+table .student .option {
+	width: 25%;
+}
+table .ta .gradeable_title{
+	width: 25%;
+}
+table .ta .date{
+	width: 25%;
+	text-align: center;
+}
+table .ta .option{
+	width: 12.5%;
+}
+table .instructor .gradeable_title{
+	width: 25%;
+}
+table .instructor .date{
+	width: 15%;
+}
+table .instructor .option{
+	width: 10%;
+}
+table .instructor .two-options{
+	width: 15%;
+}
+.nav_header{
+  text-align:center;
+  background-color:#bfbfbf;
+}
+

@@ -15,6 +15,7 @@ class Output {
     private $output_buffer = "";
     private $breadcrumbs = array();
     private $loaded_views = array();
+    private $css = array();
     
     private $use_header = true;
     private $use_footer = true;
@@ -109,7 +110,7 @@ class Output {
     public function getOutput() {
         $return = "";
         if ($this->use_header) {
-            $return .= $this->renderTemplate("Global", 'header', implode(" > ", $this->breadcrumbs));
+            $return .= $this->renderTemplate("Global", 'header', implode(" > ", $this->breadcrumbs), $this->css);
         }
         $return .= $this->output_buffer;
         if ($this->use_footer) {
@@ -175,6 +176,14 @@ class Output {
         }
 
         return $errorPage;
+    }
+    
+    public function addInternalCSS($file) {
+        $this->addCSS($this->core->getConfig->getBaseUrl()."/css/".$file);
+    }
+ 
+    public function addCSS($url) {
+        $this->css[] = $url;
     }
     
     /**

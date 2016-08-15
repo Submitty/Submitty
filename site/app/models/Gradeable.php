@@ -9,13 +9,13 @@ use app\libraries\GradeableType;
 use app\libraries\Utils;
 
 /**
- * Class Assignment
+ * Class Gradeable
  *
- * Model of the current assignment being looked at for submission by the student. The information is a combination
- * of the info contained in the class.json file for the assignment as well as information solely in the assignment's
- * json file (as well as the relevant json files for the student's given attempt at the assignment. This does not
- * contain any information about the assignment that is stored in the database (so for example the TA grade details),
- * but only things contained in JSON/text files.
+ * Model of the current gradeable being looked at for submission by the student. This information is a combination of
+ * the info contained in the form json file or database, various result json files, and the version history file in the
+ * submission folder. This abstract class is extended by GradeableFile (which loads the form json file) and
+ * GradeableDb (which loads the data from the database). Additionally, it'll hold the relevant information necessary
+ * for the TA to be able to grade this.
  */
 abstract class Gradeable {
 
@@ -147,6 +147,11 @@ abstract class Gradeable {
     
     protected $grade_file = null;
     
+    protected $in_interactive_queue = false;
+    protected $grading_interactive_queue = false;
+    protected $in_batch_queue = false;
+    protected $grading_batch_queue = false;
+    
     public function __construct(Core $core, $id) {
         $this->core = $core;
         $this->id = $id;
@@ -201,20 +206,42 @@ abstract class Gradeable {
         }
 
         if (isset($details['testcases'])) {
-            foreach ($details['testcases'] as $testcase) {
-                $testcase = new GradeableTestcase($this->core, $testcase);
+            foreach ($details['testcases'] as $idx => $testcase) {
+                $testcase = new GradeableTestcase($this->core, $testcase, $idx);
                 $this->testcases[] = $testcase;
-                $this->normal_points += $testcase->getNormalPoints();
-                $this->non_hidden_points += $testcase->getNonHiddenPoints();
+                if ($testcase->getNormalPoints() >= 0) {
+                  $this->normal_points += $testcase->getNormalPoints();
+                }
+                if ($testcase->getNonHiddenPoints() >= 0) {
+                  $this->non_hidden_points += $testcase->getNonHiddenPoints();
+                }
             }
         }
+    }
+    
+    /**
+     * Sets the grading queue status of the gradeable. We don't really care
+     */
+    public function setQueueStatus() {
+        $interactive_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_interactive";
+        $batch_queue = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_batch";
+        
+        $queue_file = implode("__", array($this->core->getConfig()->getSemester(),
+                                          $this->core->getConfig()->getCourse(), $this->id,
+                                          $this->core->getUser()->getId(), $this->current));
+        $grade_file = "GRADING_".$queue_file;
+        
+        $this->in_interactive_queue = file_exists($interactive_queue."/".$queue_file);
+        $this->in_batch_queue = file_exists($batch_queue."/".$queue_file);
+        $this->grading_interactive_queue = file_exists($interactive_queue."/".$grade_file);
+        $this->grading_batch_queue = file_exists($batch_queue."/".$grade_file);
     }
     
     /**
      * Loads submission details about an electronic submission from the submissions/ and
      * results/ directories and their respective json files.
      */
-    public function loadSubmissionDetails() {
+    public function loadResultDetails() {
         if ($this->type !== GradeableType::ELECTRONIC_FILE) {
             return;
         }
@@ -244,26 +271,31 @@ abstract class Gradeable {
                 continue;
             }
             
-            $this->versions[$version] = FileUtils::readJsonFile($results_path."/".$version."/submission.json");
+            $this->versions[$version] = FileUtils::readJsonFile($results_path."/".$version."/results.json");
+
             $this->versions[$version]['status'] = true;
-            $this->versions[$version] = array_merge($this->versions[$version],
-                                                    FileUtils::readJsonFile($results_path."/".$version."/.grade.timestamp"));
-            $this->versions[$version]['days_late'] = isset($this->versions[$version]['days_late_(before_extensions)']) ?
-                intval($this->versions[$version]['days_late_(before_extensions)']) : 0;
+
+            $results_history=FileUtils::readJsonFile($results_path."/".$version."/results_history.json");
+            $last_results_timestamp=$results_history[count($results_history)-1];
+            $this->versions[$version] = array_merge($this->versions[$version],$last_results_timestamp);
+
+            $this->versions[$version]['days_late'] = isset($this->versions[$version]['days_late_before_extensions']) ?
+                intval($this->versions[$version]['days_late_before_extensions']) : 0;
             if ($this->versions[$version]['days_late'] < 0) {
                 $this->versions[$version]['days_late'] = 0;
             }
+            $this->versions[$version]['num_autogrades'] = count($results_history);
+
             $this->versions[$version]['points'] = 0;
-            // TODO: We don't want to take into account points_awarded for hidden testcases
+
             for ($i = 0; $i < count($this->testcases); $i++) {
                 if (!$this->testcases[$i]->isHidden()) {
-                    if ($this->versions[$version]['testcases'][$i]['points_awarded'] <= $this->testcases[$i]->getPoints()) {
-                        $this->versions[$version]['points'] += $this->versions[$version]['testcases'][$i]['points_awarded'];
-                    }
-                    else {
-                        $this->versions[$version]['points'] += $this->testcases[$i]->getPoints();
-                    }
+                  $this->versions[$version]['points'] += $this->versions[$version]['testcases'][$i]['points_awarded'];
                 }
+            }
+            // Clamp to zero (no negative total!)
+            if ($this->versions[$version]['points'] < 0) {
+              $this->versions[$version]['points'] = 0;
             }
         }
         
@@ -284,6 +316,8 @@ abstract class Gradeable {
         else if ($this->current > $this->submissions) {
             $this->current = $this->active;
         }
+        
+        $this->setQueueStatus();
 
         $submission_current_path = $submission_path."/".$this->current;
         
@@ -405,12 +439,24 @@ abstract class Gradeable {
         return $this->due_date;
     }
     
+    public function getGradeStartDate(){
+        return $this->grade_start_date;
+    }
+    
+    public function getGradeReleasedDate(){
+        return $this->grade_released_date;
+    }
+    
     public function getOpenDate() {
         return $this->open_date;
     }
     
     public function getDaysLate() {
         return ($this->hasResults()) ? $this->result_details['days_late'] : 0;
+    }
+    
+    public function getInstructionsURL(){
+        return $this->instructions_url;
     }
     
     /**
@@ -462,5 +508,21 @@ abstract class Gradeable {
     
     public function hasConfig() {
         return $this->has_config;
+    }
+    
+    public function inInteractiveQueue() {
+        return $this->in_interactive_queue;
+    }
+    
+    public function beingGradedInteractiveQueue() {
+        return $this->grading_interactive_queue;
+    }
+    
+    public function inBatchQueue() {
+        return $this->in_batch_queue;
+    }
+    
+    public function beingGradedBatchQueue() {
+        return $this->grading_batch_queue;
     }
 }

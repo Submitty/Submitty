@@ -60,20 +60,16 @@ class SubmissionController implements IController {
             else {
                 $gradeable = Utils::getLastArrayElement($gradeable_list);
             }
-            $gradeable->loadSubmissionDetails();
+            $gradeable->loadResultDetails();
             $loc = array('page' => 'submission',
                          'action' => 'display',
                          'gradeable_id' => $gradeable->getId());
             $this->core->getOutput()->addBreadcrumb("<a href='{$this->core->buildUrl($loc)}'>{$gradeable->getName()}</a>");
-            
-            $select = $this->core->getOutput()->renderTemplate(array('submission', 'Homework'), 'gradeableSelect',
-                                                               $gradeable_list,
-                                                               $gradeable->getId());
-    
+                
             $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
             
             $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'showGradeable',
-                                                   $gradeable, $select, $days_late);
+                                                   $gradeable, $days_late);
         }
         else {
             $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeables');
@@ -101,7 +97,7 @@ class SubmissionController implements IController {
         }
         
         $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
-        $gradeable->loadSubmissionDetails();
+        $gradeable->loadResultDetails();
         $gradeable_path = $this->core->getConfig()->getCoursePath()."/submissions/".$gradeable->getId();
         
         /*
@@ -331,6 +327,7 @@ class SubmissionController implements IController {
             return $this->uploadResult("Failed to create file for grading queue.", false);
         }
         
+        $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
         return $this->uploadResult("Successfully uploaded files");
     }
     
@@ -368,7 +365,7 @@ class SubmissionController implements IController {
         }
         
         $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
-        $gradeable->loadSubmissionDetails();
+        $gradeable->loadResultDetails();
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $_SESSION['messages']['error'][] = "Invalid CSRF token. Refresh the page and try again.";
             $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId())));
@@ -414,7 +411,7 @@ class SubmissionController implements IController {
     }
     
     /**
-     * Check if the results folder exists for a given gradeable and version submission.json
+     * Check if the results folder exists for a given gradeable and version results.json
      * in the results/ directory. If the file exists, we output a string that the calling
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
      */
@@ -425,7 +422,7 @@ class SubmissionController implements IController {
         $version = $_REQUEST['gradeable_version'];
         $path = $this->core->getConfig()->getCoursePath()."/results/".$g_id."/".
                     $this->core->getUser()->getId()."/".$version;
-        if (file_exists($path."/submission.json")) {
+        if (file_exists($path."/results.json")) {
             $this->core->getOutput()->renderString("REFRESH_ME");
         }
         else {

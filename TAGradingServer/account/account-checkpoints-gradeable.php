@@ -55,10 +55,15 @@ print <<<HTML
         white-space:pre-wrap;
     }
 </style>
+HTML;
 
+$params = array($_GET['g_id']);
+$db->query("SELECT * FROM gradeable WHERE g_gradeable_type='1' AND g_id=?", $params);
+$c_gradeable = $db->row();
+print <<<HTML
 <div id="container-g-checkpoints">
     <div class="modal-header">
-        <!--<h3 id="myModalLabel" style="width:20%; display:inline-block;">Labs</h3>-->
+        <h3 id="myModalLabel" style="width:20%; display:inline-block;">{$c_gradeable['g_title']}</h3>
         <span style="width: 29%; display:inline-block;">{$button}</span>
         <div style="text-align:right; width:49%; display:inline-block;">
             <i class="icon-question-sign" rel="tooltip" title="No Color - No Credit
@@ -71,96 +76,72 @@ Red - [SAVE ERROR] Refresh Page"></i>
 
     <div class="modal-body" style="padding-bottom:10px; padding-top:25px;">
         <div class="bs-docs-example">
-            <ul id="myTab" class="nav nav-tabs">
 HTML;
 
-$params = array(1);
-$db->query("SELECT * FROM gradeable WHERE g_gradeable_type=? ORDER BY g_grade_start_date ASC", $params);
-
-$first = true;
-
-foreach($db->rows() as $c_gradeable_row) {
-    print <<<HTML
-            <li class="check_g_tab
-HTML;
-    print ($first)?" active":"";
-    print <<<HTML
-            "><a href="#check_g{$c_gradeable_row["g_id"]}" data-toggle="tab">{$c_gradeable_row["g_title"]}</a></li>
-HTML;
-    $first = false;
+$params = array($c_gradeable['g_id']);
+$db->query("SELECT gc_title from gradeable_component WHERE g_id=?", $params);
+$c_gradeable_checkpoints = array();
+foreach($db->rows() as $row){
+    array_push($c_gradeable_checkpoints, $row['gc_title']);
 }
 
+$ta_instructions = (trim($c_gradeable['g_overall_ta_instructions']) == '') ? '' : '<b>Grading Instructions</b>: ' . $c_gradeable['g_overall_ta_instructions'];
+
 print <<<HTML
-            </ul>
-            <div id="myTabContent" class="tab-content">
+            {$ta_instructions} <br /> <br />
+            <table class="table table-bordered striped-table" id="g-checkpoints-table" style=" border: 1px solid #AAA;">
+                <thead style="background: #E1E1E1;">
+                    <tr>
+                        <th>User ID</th>
 HTML;
-
-
-$first = true;
-
-foreach($db->rows() as $check_g_row) {
-    $params = array($check_g_row['g_id']);
-    $db->query("SELECT gc_title from gradeable_component WHERE g_id=?", $params);
-    $check_g_row_checkpoints = array();
-    foreach($db->rows() as $row){
-        array_push($check_g_row_checkpoints, $row['gc_title']);
-    }
-    $active = ($first) ? 'active in' : '';
+foreach($c_gradeable_checkpoints as $checkpoint) {
     print <<<HTML
-                <div class="tab-pane fade {$active}" id="check_g{$check_g_row["g_id"]}">
-                    <table class="table table-bordered striped-table" id="g-checkpoints-table" style=" border: 1px solid #AAA;">
-                        <thead style="background: #E1E1E1;">
-                            <tr>
-                                <th>User ID</th>
+                            <th>{$checkpoint}</th>
 HTML;
-    foreach($check_g_row_checkpoints as $checkpoint) {
-        print <<<HTML
-                                <th>{$checkpoint}</th>
-HTML;
-    }
+}
     print <<<HTML
                             </tr>
                         </thead>
 HTML;
 
-    $grade_by_reg_section = $check_g_row['g_grade_by_registration'];
-    $section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
-    $user_section_param = ($grade_by_reg_section ? 'registration_section': 'rotating_section');
+$grade_by_reg_section = $c_gradeable['g_grade_by_registration'];
+$section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
+$user_section_param = ($grade_by_reg_section ? 'registration_section': 'rotating_section');
+$params = array($user_id);
+if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true){
+    $params = array();
+    $query = ($grade_by_reg_section ? "SELECT * FROM sections_registration ORDER BY sections_registration_id ASC"
+                                    : "SELECT * FROM sections_rotating ORDER BY sections_rotating_id ASC");
+    $db->query($query, $params);
+}
+else{
     $params = array($user_id);
-    if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true){
-        $params = array();
-        $query = ($grade_by_reg_section ? "SELECT * FROM sections_registration ORDER BY sections_registration_id ASC"
-                                        : "SELECT * FROM sections_rotating ORDER BY sections_rotating_id ASC");
-        $db->query($query, $params);
-    }
-    else{
-        $params = array($user_id);
-        $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC"
-                                        : "SELECT * FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating ASC");
-        $db->query($query, $params);
-    }
+    $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC"
+                                    : "SELECT * FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating ASC");
+    $db->query($query, $params);
+}
 
-    foreach($db->rows() as $section) {
-        $params = array($section[$section_param]);
-        $db->query("SELECT COUNT(*) AS cnt FROM users WHERE ".$user_section_param."=?",$params);
-        if($db->row()['cnt']==0) continue;
-        
-        $section_id = intval($section[$section_param]);
-        $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
-        $count = count($check_g_row_checkpoints) + 1;
-        print <<<HTML
-                        <tr class="info">
-                            <td colspan="{$count}" style="text-align:center;" id="section-{$section_id}">
-                                    Students Enrolled in {$section_type} Section {$section_id}
-                                    <a href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$check_g_row['g_id']}&section_id={$section_id}&grade_by_reg_section={$grade_by_reg_section}">
-                                        <div class="icon-print"></div>
-                                    </a>
-                            </td>
-                        </tr>
-                        <tbody>
+foreach($db->rows() as $section) {
+    $params = array($section[$section_param]);
+    $db->query("SELECT COUNT(*) AS cnt FROM users WHERE ".$user_section_param."=?",$params);
+    if($db->row()['cnt']==0) continue;
+    
+    $section_id = intval($section[$section_param]);
+    $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
+    $count = count($c_gradeable_checkpoints) + 1;
+    print <<<HTML
+                    <tr class="info">
+                        <td colspan="{$count}" style="text-align:center;" id="section-{$section_id}">
+                                Students Enrolled in {$section_type} Section {$section_id}
+                                <a href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$c_gradeable['g_id']}&section_id={$section_id}&grade_by_reg_section={$grade_by_reg_section}">
+                                    <div class="icon-print"></div>
+                                </a>
+                        </td>
+                    </tr>
+                    <tbody>
 HTML;
-        $params = array($check_g_row["g_id"],$section_id, 4);
-        $db->query("
+    $params = array($c_gradeable["g_id"],$section_id, 4);
+    $db->query("
         
 SELECT
     s.user_id
@@ -209,52 +190,52 @@ WHERE s.".$user_section_param.
 ORDER BY
     s.user_id", $params);
 
-        foreach($db->rows() as $row) {
-            $grade_value_array = pgArrayToPhp($row['grade_value_array']);
-            $grade_checkpoint_array = pgArrayToPhp($row['grade_checkpoint_array']);
-            if (count($grade_checkpoint_array) > 0 && count($grade_value_array) == count($grade_checkpoint_array)) {
-                $grades = array_combine($grade_checkpoint_array,$grade_value_array);
+    foreach($db->rows() as $row) {
+        $grade_value_array = pgArrayToPhp($row['grade_value_array']);
+        $grade_checkpoint_array = pgArrayToPhp($row['grade_checkpoint_array']);
+        if (count($grade_checkpoint_array) > 0 && count($grade_value_array) == count($grade_checkpoint_array)) {
+            $grades = array_combine($grade_checkpoint_array,$grade_value_array);
+        }
+        else {
+            $grades = array();
+        }
+
+        $student_info = $row;
+        print <<<HTML
+                        <tr>
+                            <td class="cell-all" id="cell-{$c_gradeable["g_id"]}-all-{$row["user_id"]}" cell-status="0">
+                                {$student_info["user_id"]} ({$student_info["user_lastname"]}, {$student_info["user_firstname"]})
+                            </td>
+HTML;
+        $count = 1;
+
+        foreach($c_gradeable_checkpoints as $checkpoint) {
+            if(isset($grades[$count])) {
+                $grade_value = $grades[$count];
             }
             else {
-                $grades = array();
+                $grade_value = 0;
+            }
+            $mode = $grade_value;
+
+            if($mode == 0) {
+                $background_color = "transparent";
+                $background_color = "";
+            }
+            elseif($mode == 1) {
+                $background_color = "#149bdf";
+                $background_color = "background-color:#149bdf";
+            }
+            elseif($mode == 0.5) {
+                $background_color = "#88d0f4";
+                $background_color = "background-color:#88d0f4";
             }
 
-            $student_info = $row;
             print <<<HTML
-                            <tr>
-                                <td class="cell-all" id="cell-{$check_g_row["g_id"]}-all-{$row["user_id"]}" cell-status="0">
-                                    {$student_info["user_id"]} ({$student_info["user_lastname"]}, {$student_info["user_firstname"]})
-                                </td>
+                            <td id="cell-{$c_gradeable["g_id"]}-check{$count}-{$row["user_id"]}" cell-status="{$mode}" style="{$background_color}"></td>
 HTML;
-            $count = 1;
-
-            foreach($check_g_row_checkpoints as $checkpoint) {
-                if(isset($grades[$count])) {
-                    $grade_value = $grades[$count];
-                }
-                else {
-                    $grade_value = 0;
-                }
-                $mode = $grade_value;
-
-                if($mode == 0) {
-                    $background_color = "transparent";
-                    $background_color = "";
-                }
-                elseif($mode == 1) {
-                    $background_color = "#149bdf";
-                    $background_color = "background-color:#149bdf";
-                }
-                elseif($mode == 0.5) {
-                    $background_color = "#88d0f4";
-                    $background_color = "background-color:#88d0f4";
-                }
-
-                print <<<HTML
-                                <td id="cell-{$check_g_row["g_id"]}-check{$count}-{$row["user_id"]}" cell-status="{$mode}" style="{$background_color}"></td>
-HTML;
-                $count++;
-            }
+            $count++;
+        }
             print <<<HTML
                             </tr>
 HTML;
@@ -265,11 +246,8 @@ HTML;
     }
     print <<<HTML
                     </table>
-                </div>
 HTML;
 
-    $first = false;
-}
 print <<<HTML
             </div>
         </div>
@@ -277,9 +255,6 @@ print <<<HTML
 </div>
 
 <script type="text/javascript">
-
-    //TODO rename stuff
-
     $("td[id^=cell-]").click(function() {
         var cell_status = (parseFloat($(this).attr('cell-status')) == 0) ? 1: parseFloat($(this).attr('cell-status')) - 0.5;
         var name = $(this).attr("id");

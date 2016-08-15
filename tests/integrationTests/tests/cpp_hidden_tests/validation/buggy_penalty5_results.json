@@ -1,0 +1,129 @@
+{
+    "testcases": [
+        {
+            "points_awarded": 2,
+            "test_name": "Test 1 Compilation"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02_STDOUT.txt",
+                    "autocheck_id": "test02_0_autocheck",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test02_0_diff.json",
+                    "expected_file": "test_output/testassignment/frame_1.txt"
+                }
+            ],
+            "points_awarded": 2,
+            "test_name": "Test 2 Frame Size 1"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03_STDOUT.txt",
+                    "autocheck_id": "test03_0_autocheck",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test03_0_diff.json",
+                    "expected_file": "test_output/testassignment/frame_5.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 3 Frame Size 5"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04_STDOUT.txt",
+                    "autocheck_id": "test04_0_autocheck",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test04_0_diff.json",
+                    "expected_file": "test_output/testassignment/frame_10.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 4 Frame Size 10"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test05_STDOUT.txt",
+                    "autocheck_id": "test05_0_autocheck",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test05_0_diff.json",
+                    "expected_file": "test_output/testassignment/frame_13.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 5 Frame Size 13"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test06_STDERR.txt",
+                    "autocheck_id": "test06_1_autocheck",
+                    "description": "STDERR.txt",
+                    "difference_file": "test06_1_diff.json",
+                    "expected_file": "test_output/testassignment/error_nonpositive.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 6 Error Checking: Frame Size 0"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test07_STDERR.txt",
+                    "autocheck_id": "test07_1_autocheck",
+                    "description": "STDERR.txt",
+                    "difference_file": "test07_1_diff.json",
+                    "expected_file": "test_output/testassignment/error_nonpositive.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 7 Error Checking: Frame Size Negative"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test08_execute_logfile.txt",
+                    "autocheck_id": "test08_execute_logfile_autocheck",
+                    "description": "Execution Logfile"
+                },
+                {
+                    "actual_file": "test08_STDERR.txt",
+                    "autocheck_id": "test08_1_autocheck",
+                    "description": "STDERR.txt",
+                    "difference_file": "test08_1_diff.json",
+                    "expected_file": "test_output/testassignment/error_arguments.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 8 Error Checking: No Arguments"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test09_STDOUT.txt",
+                    "autocheck_id": "test09_0_autocheck",
+                    "description": "STDOUT.txt",
+                    "messages": [
+                        "WARNING: This file should be empty"
+                    ]
+                },
+                {
+                    "actual_file": "test09_STDERR.txt",
+                    "autocheck_id": "test09_1_autocheck",
+                    "description": "STDERR.txt",
+                    "difference_file": "test09_1_diff.json",
+                    "expected_file": "test_output/testassignment/error_arguments.txt"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 9 Error Checking: Too Many Arguments"
+        },
+        {
+            "points_awarded": -5,
+            "test_name": "Test 10 Submission Limit"
+        }
+    ]
+}

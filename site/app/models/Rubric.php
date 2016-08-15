@@ -418,7 +418,7 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
                 continue;
             }
 
-            $submission_details = $result_directory."/submission.json";
+            $submission_details = $result_directory."/results.json";
             if (!file_exists($submission_details)) {
                 $details = array();
             }
@@ -439,12 +439,6 @@ ORDER BY question_part_number", array($this->rubric_details['rubric_id']));
             $this->results_details[$part] = $details;
             $skip_files = array();
             foreach ($this->results_details[$part]['testcases'] as $testcase) {
-                if (isset($testcase['execute_logfile'])) {
-                    $skip_files[] = $testcase['execute_logfile'];
-                }
-                if (isset($testcase['compilation_output'])) {
-                    $skip_files[] = $testcase['compilation_output'];
-                }
                 foreach($testcase['diffs'] as $diff) {
                     foreach(array("expected_file", "actual_file", "diff_id") as $file) {
                         if(isset($diff[$file])) {

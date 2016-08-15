@@ -37,6 +37,7 @@ $_GET['semester'] = isset($_GET['semester']) ? str_replace("/", "_", $_GET['seme
 
 $a = IniParser::readFile(__DIR__."/../../site/config/master.ini");
 define("__BASE_URL__", $a['site_details']['ta_base_url']);
+define("__SUBMISSION_URL__", $a['site_details']['base_url']);
 define("__CGI_URL__", $a['site_details']['cgi_url']);
 define("__SUBMISSION_GRACE_PERIOD_SECONDS__", "30 * 60");
 define("__OUTPUT_MAX_LENGTH__", 100000);
@@ -94,7 +95,24 @@ $BASE_URL = rtrim(__BASE_URL__, "/");
 header("Content-Type: text/html; charset=UTF-8");
 
 $user_id = 0;
-$suggested_username = ($DEBUG && isset($_GET['useUser'])) ? $_GET['useUser'] : $_SERVER["PHP_AUTH_USER"];
+if ($DEBUG && isset($_GET['useUser'])) {
+    $suggested_username = $_GET['userUser'];
+}
+else {
+    if (isset($_SERVER['PHP_AUTH_USER'])) {
+        $suggested_username = $_SERVER['PHP_AUTH_USER'];
+    }
+    else if (isset($_SERVER['REMOTE_USER'])) {
+        $suggested_username = $_SERVER['PHP_AUTH_USER'];
+    }
+    else {
+        // if not already authenticated do it
+        header('WWW-Authenticate: Basic realm=HWServer');
+        header('HTTP/1.0 401 Unauthorized');
+        exit;
+    }
+}
+
 $params = array($suggested_username);
 try {
     User::loadUser($suggested_username);
