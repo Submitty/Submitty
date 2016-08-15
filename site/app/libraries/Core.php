@@ -3,6 +3,7 @@
 namespace app\libraries;
 
 use app\authentication\IAuthentication;
+use app\exceptions\AuthenticationException;
 use app\exceptions\DatabaseException;
 use app\libraries\database\DatabaseQueriesPostgresql;
 use app\libraries\database\IDatabaseQueries;
@@ -195,13 +196,23 @@ class Core {
      */
     public function authenticate($user_id, $password) {
         $auth = false;
-        if ($this->authentication->authenticate($user_id, $password)) {
-            $auth = true;
-            $session_id = $this->session_manager->newSession($user_id);
-            // We set the cookie to expire 10 years into the future effectly making it last forever
-            if (setcookie('session_id', $session_id, time() + (10 * 365 * 24 * 60 * 60), "/") === false) {
-                return false;
+        try {
+            if ($this->authentication->authenticate($user_id, $password)) {
+                $auth = true;
+                $session_id = $this->session_manager->newSession($user_id);
+                // We set the cookie to expire 10 years into the future effectly making it last forever
+                if (setcookie('session_id', $session_id, time() + (10 * 365 * 24 * 60 * 60), "/") === false) {
+                    return false;
+                }
             }
+        }
+        catch (\Exception $e) {
+            // We wrap all non AuthenticationExceptions so that they get specially processed in the
+            // ExceptionHandler to remove password details
+            if ($e instanceof AuthenticationException) {
+                throw $e;
+            }
+            throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
         }
         return $auth;
     }

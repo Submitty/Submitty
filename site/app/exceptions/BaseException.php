@@ -13,7 +13,15 @@ class BaseException extends \RuntimeException{
     protected $details;
     protected $log_exception = true;
     protected $show_exception_message = false;
-
+    
+    /**
+     * BaseException constructor.
+     *
+     * @param string            $message
+     * @param array             $details
+     * @param int               $code
+     * @param \Exception|null   $previous
+     */
     public function __construct($message, $details = array(), $code = 0, $previous = null) {
         if (!is_array($details)) {
             $this->details = array("extra_details" => $details);
