@@ -7,6 +7,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
+use app\libraries\GradeableType;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\GradeableList;
@@ -51,28 +52,27 @@ class SubmissionController implements IController {
     }
 
     private function showHomeworkPage() {
-        $gradeable_list = $this->gradeables_list->getOpenElectronicGradeables(true);
-        if (count($gradeable_list) > 0) {
-            $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
-            if (array_key_exists($gradeable_id, $gradeable_list)) {
-                $gradeable = $gradeable_list[$gradeable_id];
+        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+        $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
+        if ($gradeable !== null) {
+            $now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
+            if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessAdmin()) {
+                $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
             }
             else {
-                $gradeable = Utils::getLastArrayElement($gradeable_list);
+                $loc = array('page' => 'submission',
+                             'action' => 'display',
+                             'gradeable_id' => $gradeable->getId());
+                $this->core->getOutput()->addBreadcrumb("<a href='{$this->core->buildUrl($loc)}'>{$gradeable->getName()}</a>");
+                $gradeable->loadResultDetails();
+                $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
+                $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'showGradeable',
+                                                       $gradeable, $days_late);
             }
-            $gradeable->loadResultDetails();
-            $loc = array('page' => 'submission',
-                         'action' => 'display',
-                         'gradeable_id' => $gradeable->getId());
-            $this->core->getOutput()->addBreadcrumb("<a href='{$this->core->buildUrl($loc)}'>{$gradeable->getName()}</a>");
-                
-            $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
-            
-            $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'showGradeable',
-                                                   $gradeable, $days_late);
+
         }
         else {
-            $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeables');
+            $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
         }
     }
     
@@ -88,7 +88,7 @@ class SubmissionController implements IController {
         }
         $svn_checkout = isset($_REQUEST['svn_checkout']) ? $_REQUEST['svn_checkout'] === "true" : false;
     
-        $gradeable_list = $this->gradeables_list->getOpenElectronicGradeables(true);
+        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
         
         // This checks for an assignment id, and that it's a valid assignment id in that
         // it corresponds to one that we can access (whether through admin or it being released)
@@ -358,7 +358,7 @@ class SubmissionController implements IController {
     }
     
     private function updateSubmissionVersion() {
-        $gradeable_list = $this->gradeables_list->getOpenElectronicGradeables(true);
+        $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
         if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
             $_SESSION['messages']['error'][] = "Invalid gradeable id";
             $this->core->redirect($this->core->buildUrl(array('component' => 'student')));

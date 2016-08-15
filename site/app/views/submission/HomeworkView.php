@@ -15,18 +15,27 @@ class HomeworkView {
         $this->core = $core;
     }
 
-    public function noGradeables() {
-        return <<<HTML
+    public function noGradeable($gradeable_id) {
+        if ($gradeable_id === null) {
+            return <<<HTML
 <div class="content">
-    There are currently no released gradeables. Try checking back later.
+    No gradeable id specified. Contact your instructor if you think this
+    is an error.
 </div>
-
 HTML;
+        }
+        else {
+            return <<<HTML
+<div class="content">
+    {$gradeable_id} is not a valid electronic submission gradeable. Contact your instructor if you think this
+    is an error.
+</div>
+HTML;
+        }
     }
         
     /**
      * @param Gradeable $gradeable
-     * @param string    $gradeable_select
      * @param int       $days_late
      *
      * @return string
