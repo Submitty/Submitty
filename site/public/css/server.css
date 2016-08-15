@@ -370,8 +370,8 @@ select {
     padding: 5px 5px 10px;
 }
 
-.box-title {
-    margin-top: 10px;
+.box-title > h4 {
+    margin-left: 20px;
 }
 
 .box > h4 {
@@ -410,7 +410,7 @@ select {
 .badge {
     float: left;
     display: inline-block;
-    min-width: 10px;
+    width: 100px;
     padding: 3px 7px;
     font-weight: bold;
     line-height: 1;
@@ -420,8 +420,16 @@ select {
     vertical-align: baseline;
     background-color: #999;
     border-radius: 10px;
+    margin-left: 10px;
+    margin-right: 20px;
+}
+
+.no-badge {
+    width: 115px;
+    height: 10px;
     margin-right: 20px;
     margin-left: 10px;
+    float: left;
 }
 
 .green-background {
