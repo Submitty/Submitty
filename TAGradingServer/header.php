@@ -1,8 +1,5 @@
 <?php
 
-
-
-
 // Prevent back button from showing sensitive cached content after logout.
 header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
 header('Pragma: no-cache'); // HTTP 1.0.
@@ -73,6 +70,8 @@ if ($user_logged_in) {
     print <<<HTML
         <div class="navbar navbar-inverse navbar-fixed-top">
             <div class="navbar-inner">
+                <div class="container-fluid" style="font-weight: 300; display: inline-block;color:#999;">
+<!--
                 <div class="container-fluid">
                     <a class="brand" href="{$BASE_URL}/account/index.php">$COURSE_NAME Grading Server</a>
 
@@ -80,6 +79,7 @@ if ($user_logged_in) {
 HTML;
     if ($user_is_administrator) {
         print <<<HTML
+<!--
                         <li class="divider-vertical"
                             style="border-right-color: #666;height: 18px; margin-top: 11px;"></li>
 
@@ -143,42 +143,41 @@ HTML;
                                 </a></li>
                             </ul>
                         </li>
+-->
 HTML;
     }
-    print <<<HTML
-                    </ul>
-HTML;
-    if ($DEVELOPER) {
-        print <<<HTML
 
-                    <ul class="nav" role="navigation" style="float:right">
-                        <li class="dropdown">
-                            <a id="drop1" href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
-                                Welcome back, {$user_info["user_firstname"]} <b class="caret"></b>
-                            </a>
-                            <ul class="dropdown-menu" role="menu" aria-labelledby="drop1">
-                                <li><a tabindex="-1" href="#" role="button" data-toggle="modal" onClick="toggle()">
-                                    Toggle Page Details
-                                </a></li>
-                            </ul>
-                        </li>
-                    </ul>
+    $submission_url = __SUBMISSION_URL__;
+    $semester = __COURSE_SEMESTER__;
+    $semester_upper = strtoupper($semester);
+    $course = __COURSE_CODE__;
+    $course_upper = strtoupper($course);
+    $course_name = __COURSE_NAME__;
+    
+    print <<<HTML
+                    <h4>{$semester_upper} &gt;
+                    <a href="{$submission_url}/index.php?semester={$semester}&course={$course}" role="button" data-toggle="modal">
+                        {$course_upper}: {$course_name}
+                    </a>
+HTML;
+    if(isset($_GET['g_id'])){
+        $db->query("SELECT g_title FROM gradeable WHERE g_id=?",array($_GET['g_id']));
+        $title = $db->row()['g_title'];
+        print <<<HTML
+                &gt; {$title}
 HTML;
     }
-    else {
+    if(isset($_GET['this'])){
         print <<<HTML
-                    <ul class="nav" role="navigation" style="float:right">
-                        <li class="dropdown">
-                            <span style="display: block; padding: 10px 15px 10px; float: none; text-shadow: 0 -1px 0 rgba(0,0,0,0.25); color: #999;">
-                                Welcome back, {$user_info["user_firstname"]}
-                            </span>
-                        </li>
-                    </ul>
+                &gt; {$_GET['this']}
 HTML;
     }
     print <<<HTML
-                </div>
+        </h4>
             </div>
         </div>
+        </div>
+HTML;
+    print <<<HTML
 HTML;
 }
