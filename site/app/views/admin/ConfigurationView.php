@@ -11,8 +11,6 @@ class ConfigurationView {
     }
 
     public function viewConfig($fields) {
-        $autograder_checked = ($fields['use_autograder'] === true) ? 'checked' : '';
-        $diff_checked = ($fields['generate_diff'] === true) ? 'checked' : '';
         $zero_checked = ($fields['zero_rubric_grades'] === true) ? 'checked' : '';
 
         return <<<HTML
@@ -53,14 +51,6 @@ class ConfigurationView {
                 <div class="option-alt">Should rubrics start out at zero when TAs are grading? If disabled, the rubric will
                 start at full credit unless the submission was too late/not submitted at which point it'll be zeroed out
                 automatically.</div>
-            </div>
-        </div>
-        <div class="option">
-            <div class="option-input"><input type="checkbox" name="display_hidden" value="true" {$hidden_checked} /></div>
-            <div class="option-desc">
-                <div class="option-title">Display Hidden Points</div>
-                <div class="option-alt">Should the points be visible for hidden testcases for submissions? The details
-                about the score of the test (diffs, etc.) will not be shown to the student.</div>
             </div>
         </div>
     </div>
