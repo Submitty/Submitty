@@ -209,8 +209,12 @@ abstract class Gradeable {
             foreach ($details['testcases'] as $idx => $testcase) {
                 $testcase = new GradeableTestcase($this->core, $testcase, $idx);
                 $this->testcases[] = $testcase;
-                $this->normal_points += $testcase->getNormalPoints();
-                $this->non_hidden_points += $testcase->getNonHiddenPoints();
+                if ($testcase->getNormalPoints() >= 0) {
+                  $this->normal_points += $testcase->getNormalPoints();
+                }
+                if ($testcase->getNonHiddenPoints() >= 0) {
+                  $this->non_hidden_points += $testcase->getNonHiddenPoints();
+                }
             }
         }
     }
@@ -284,16 +288,14 @@ abstract class Gradeable {
 
             $this->versions[$version]['points'] = 0;
 
-            // TODO: We don't want to take into account points_awarded for hidden testcases
             for ($i = 0; $i < count($this->testcases); $i++) {
                 if (!$this->testcases[$i]->isHidden()) {
-                    if ($this->versions[$version]['testcases'][$i]['points_awarded'] <= $this->testcases[$i]->getPoints()) {
-                        $this->versions[$version]['points'] += $this->versions[$version]['testcases'][$i]['points_awarded'];
-                    }
-                    else {
-                        $this->versions[$version]['points'] += $this->testcases[$i]->getPoints();
-                    }
+                  $this->versions[$version]['points'] += $this->versions[$version]['testcases'][$i]['points_awarded'];
                 }
+            }
+            // Clamp to zero (no negative total!)
+            if ($this->versions[$version]['points'] < 0) {
+              $this->versions[$version]['points'] = 0;
             }
         }
         

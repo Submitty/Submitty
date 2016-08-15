@@ -62,12 +62,14 @@ int main(int argc, char *argv[]) {
     int points = itr->value("points",0);
     bool extra_credit = itr->value("extra_credit",false);
     bool hidden = itr->value("hidden",false);
-    if (!extra_credit)
-      total_nonec += points;
-    else
-      total_ec += points;
-    if (!hidden)
-      visible += points;
+    if (points > 0) {
+      if (!extra_credit)
+        total_nonec += points;
+      else
+        total_ec += points;
+      if (!hidden)
+        visible += points;
+    }
     TestCase tc(*itr);
     all.push_back(printTestCase(tc)); 
   }

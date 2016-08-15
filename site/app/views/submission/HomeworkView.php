@@ -445,21 +445,38 @@ HTML;
 HTML;
                             }
                             else {
-                                $background = "";
-                                if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
-                                    $background = "green-background";
+                              $background = "";
+                              if ($testcase->isExtraCredit()) {
+                                if ($testcase->getPointsAwarded() > 0) {
+                                  $background = "green-background";
+                                  $return .= <<<HTML
+                <span class="badge {$background}"> &nbsp; +{$testcase->getPointsAwarded()} &nbsp; </span>
+HTML;
                                 }
-                                else if (!$testcase->isExtraCredit()) {
-                                    if ($testcase->getPointsAwarded() > 0) {
-                                        $background = "yellow-background";
-                                    }
-                                    else {
-                                        $background = "red-background";
-                                    }
+                              } else if ($testcase->getPoints() > 0) {
+                                if ($testcase->getPointsAwarded() >= $testcase->getPoints()) {
+                                  $background = "green-background";
+                                } else if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
+                                  $background = "red-background";
+                                } else {
+                                  $background = "yellow-background";
                                 }
                                 $return .= <<<HTML
                 <span class="badge {$background}">{$testcase->getPointsAwarded()} / {$testcase->getPoints()}</span>
 HTML;
+                              } else if ($testcase->getPoints() < 0) {
+                                if ($testcase->getPointsAwarded() < 0) {
+                                  if ($testcase->getPointsAwarded() < 0.5 * $testcase->getPoints()) {
+                                    $background = "red-background";
+                                  }
+                                  else if ($testcase->getPointsAwarded() < 0) {
+                                    $background = "yellow-background";
+                                  }
+                                  $return .= <<<HTML
+                                  <span class="badge {$background}"> &nbsp; {$testcase->getPointsAwarded()} &nbsp; </span>
+HTML;
+                                }
+                              }
                             }
                         }
                 
@@ -474,26 +491,6 @@ HTML;
             <div id="testcase_{$count}" style="display: {$display_box};">
 HTML;
                         if(!$testcase->isHidden()) {
-                            if($testcase->hasCompilationOutput()) {
-                                $compile_output = htmlentities($testcase->getCompilationOutput());
-                                $return .= <<<HTML
-                <div class="box-block">
-                    <h4>Compilation Output</h4>
-                    <pre>{$compile_output}</pre>
-                </div>
-HTML;
-                            }
-                    
-                            if($testcase->hasExecuteLog()) {
-                                $log_file = htmlentities($testcase->getLogfile());
-                                $return .= <<<HTML
-                <div class="box-block">
-                    <h4>Execution Output</h4>
-                    <pre>{$log_file}</pre>
-                </div>
-HTML;
-                            }
-                    
                             $autocheck_cnt = 0;
                             $autocheck_len = count($testcase->getAutochecks());
                             foreach ($testcase->getAutochecks() as $autocheck) {

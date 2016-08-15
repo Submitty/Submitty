@@ -5,3 +5,4 @@ Testcase  4: Running student tests in hw0/tests/  4 /  4
 Testcase  5: Generating coverage report for student tests  6 /  6
 Testcase  6: Instructor Test                 6 /  6
 Automatic grading total:                           20 / 20
+Non-hidden automatic grading total:                           20 / 20
