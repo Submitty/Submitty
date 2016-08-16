@@ -304,9 +304,11 @@ find $SUBMITTY_INSTALL_DIR/bin -type f -exec chmod 500 {} \;
 chown root:$COURSE_BUILDERS_GROUP $SUBMITTY_INSTALL_DIR/bin/build_homework_function.sh
 chown root:$COURSE_BUILDERS_GROUP $SUBMITTY_INSTALL_DIR/bin/regrade.sh
 chown root:$COURSE_BUILDERS_GROUP $SUBMITTY_INSTALL_DIR/bin/grading_done.sh
+chown root:$COURSE_BUILDERS_GROUP $SUBMITTY_INSTALL_DIR/bin/make_assignments_txt_file.py
 chmod 550 $SUBMITTY_INSTALL_DIR/bin/build_homework_function.sh
 chmod 550 $SUBMITTY_INSTALL_DIR/bin/regrade.sh
 chmod 550 $SUBMITTY_INSTALL_DIR/bin/grading_done.sh
+chmod 550 $SUBMITTY_INSTALL_DIR/bin/make_assignments_txt_file.py
 
 # fix the permissions specifically of the grade_students.sh script
 chown root:$HWCRON_USER $SUBMITTY_INSTALL_DIR/bin/grade_students.sh
