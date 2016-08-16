@@ -195,6 +195,7 @@ abstract class Gradeable {
         }
         
         for ($i = 1; $i <= $this->num_parts; $i++) {
+            $this->previous_files[$i] = array();
             $j = $i - 1;
             if (isset($details['part_names']) && isset($details['part_names'][$j]) &&
                 trim($details['part_names'][$j]) !== "") {
