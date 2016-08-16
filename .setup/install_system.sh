@@ -159,10 +159,12 @@ apt-get -qqy autoremove
 # so that hwphp is the only one who could use PAM for example
 pip install python-pam
 pip install xlsx2csv
-#NOTE: BELOW THE PYTHON PAM MODULE IS RESTRICTED TO hwcgi
 
+#NOTE: BELOW THE PYTHON PAM MODULE IS RESTRICTED TO hwcgi
 chmod -R 555 /usr/local/lib/python2.7/*
 chmod 555 /usr/lib/python2.7/dist-packages
+sudo chmod 500   /usr/local/lib/python2.7/dist-packages/pam.py*
+sudo chown hwcgi /usr/local/lib/python2.7/dist-packages/pam.py*
 
 
 #################################################################
