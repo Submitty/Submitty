@@ -158,10 +158,9 @@ HTML;
 HTML;
         if ($this->core->userLoaded()) {
             $logout_link = $this->core->buildUrl(array('component' => 'authentication', 'page' => 'logout'));
-            $first_name = $this->core->getUser()->getFirstName();
             $id = $this->core->getUser()->getId();
             $return .= <<<HTML
-            <span id="login">Hello {$first_name} (<span id="login-id">{$id}</span>)</span> (<a id='logout' href='{$logout_link}'>Logout</a>)
+            <span id="login">Hello <span id="login-id">{$id}</span></span> (<a id='logout' href='{$logout_link}'>Logout</a>)
 HTML;
         }
         else {
