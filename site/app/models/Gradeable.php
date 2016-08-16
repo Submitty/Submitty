@@ -247,7 +247,7 @@ abstract class Gradeable {
             return;
         }
         
-        if (!$this->hasResults()) {
+        if (!$this->hasConfig()) {
             return;
         }
         
@@ -267,6 +267,7 @@ abstract class Gradeable {
         if ($this->highest === null) {
             $this->highest = 0;
         }
+        
         foreach ($versions as $version) {
             if (!is_dir($results_path."/".$version)) {
                 $this->versions[$version]['status'] = false;
@@ -307,7 +308,6 @@ abstract class Gradeable {
         $this->submissions = count($this->versions);
 
         if ($this->active < 0 && $this->active > $this->submissions) {
-            // TODO: What should happen here? Raise Exception;
             $this->active = $this->submissions;
         }
 
