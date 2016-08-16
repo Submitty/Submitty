@@ -208,21 +208,12 @@ echo -e "Copy the grading code"
 
 # copy the files from the repo
 rsync -rtz $SUBMITTY_REPOSITORY/grading $SUBMITTY_INSTALL_DIR/src
-# root will be owner & group of these files
-chown -R  root:root $SUBMITTY_INSTALL_DIR/src
-# "other" can cd into & ls all subdirectories
-find $SUBMITTY_INSTALL_DIR/src -type d -exec chmod 555 {} \;
-# "other" can read all files
-find $SUBMITTY_INSTALL_DIR/src -type f -exec chmod 444 {} \;
-
-
 
 #replace necessary variables
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/CMakeLists.txt
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/system_call_check.cpp
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/execute.cpp
-
 
 # building the autograding library
 mkdir -p $SUBMITTY_INSTALL_DIR/src/grading/lib
@@ -234,6 +225,13 @@ if [ $? -ne 0 ] ; then
     exit 1
 fi
 popd
+
+# root will be owner & group of these files
+chown -R  root:root $SUBMITTY_INSTALL_DIR/src
+# "other" can cd into & ls all subdirectories
+find $SUBMITTY_INSTALL_DIR/src -type d -exec chmod 555 {} \;
+# "other" can read all files
+find $SUBMITTY_INSTALL_DIR/src -type f -exec chmod 444 {} \;
 
 
 ########################################################################################################################
