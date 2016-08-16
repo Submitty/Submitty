@@ -37,8 +37,8 @@ HTML;
 
 HTML;
         $override_css = '';
-        if (file_exists($this->core->getConfig()->getCoursePath()."/override.css")) {
-            $override_css = "<style type='text/css'>".file_get_contents($this->core->getConfig()->getCoursePath()."/override.css")."</style>";
+        if (file_exists($this->core->getConfig()->getCoursePath()."/config/override.css")) {
+            $override_css = "<style type='text/css'>".file_get_contents($this->core->getConfig()->getCoursePath()."/config/override.css")."</style>";
         }
 
         $is_dev = ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) ? "true" : "false";
