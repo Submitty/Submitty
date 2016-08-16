@@ -36,12 +36,9 @@ HTML;
 </div>
 
 HTML;
-
+        $override_css = '';
         if (file_exists($this->core->getConfig()->getCoursePath()."/override.css")) {
-            $override_css = "<link rel='stylesheet' type='text/css' href='{$this->core->getConfig()->getCoursePath()}/override.css' />";
-        }
-        else {
-            $override_css = '';
+            $override_css = "<style type='text/css'>".file_get_contents($this->core->getConfig()->getCoursePath()."/override.css")."</style>";
         }
 
         $is_dev = ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) ? "true" : "false";
