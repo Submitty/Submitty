@@ -36,12 +36,9 @@ HTML;
 </div>
 
 HTML;
-
-        if (file_exists($this->core->getConfig()->getCoursePath()."/override.css")) {
-            $override_css = "<link rel='stylesheet' type='text/css' href='{$this->core->getConfig()->getCoursePath()}/override.css' />";
-        }
-        else {
-            $override_css = '';
+        $override_css = '';
+        if (file_exists($this->core->getConfig()->getCoursePath()."/config/override.css")) {
+            $override_css = "<style type='text/css'>".file_get_contents($this->core->getConfig()->getCoursePath()."/config/override.css")."</style>";
         }
 
         $is_dev = ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) ? "true" : "false";
@@ -107,35 +104,34 @@ HTML;
                                                               'page' => 'users',
                                                               'action' => 'listStudents'))}">View Students</a></li>-->
                     <!-- TODO Add these to a drop down -->
-                        <li>
-                            <a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=View%20Students">View Students</a>
-                        </li>
-                        
-                        <li>
-                            <a href="{$ta_base_url}/account/admin-users.php?course={$course}&semester={$semester}&this=View%20Users">View Users</a>
-                        </li>
-                        
-                       <li>
-                            <a href="{$ta_base_url}/account/admin-classlist.php?course={$course}&semester={$semester}&this=Upload%20ClassList">Upload ClassList</a>
-                        </li>
-                        
-                        <li>
-                            <a href="{$ta_base_url}/account/admin-rotating-sections.php?course={$course}&semester={$semester}&this=Setup%20Rotating%20Sections">Setup Rotating Sections</a>
-                        </li>
-                        
-                        <li>
-                            <a href="{$ta_base_url}/account/admin-latedays.php?course={$course}&semester={$semester}&this=Late%200Days%20Course">Late Days Course</a>
-                        </li>
-                        
-                        <li>
-                            <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Late%200Days%20Student">Late Days Student</a>
-                        </li>
-                        
-                    <!-- -->
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=View%20Students">View Students</a>
+                    </li>
                     
-                    <!--<li><a href="{$this->core->buildUrl(array('component' => 'admin', 
-                                                              'page' => 'configuration', 
-                                                              'action' => 'view'))}">Class Configuration</a></li>-->
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-users.php?course={$course}&semester={$semester}&this=View%20Users">View Users</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-classlist.php?course={$course}&semester={$semester}&this=Upload%20ClassList">Upload ClassList</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-rotating-sections.php?course={$course}&semester={$semester}&this=Setup%20Rotating%20Sections">Setup Rotating Sections</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-latedays.php?course={$course}&semester={$semester}&this=Late%20Days%20Course">Late Days Course</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Late%20Days%20Student">Late Days Student</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 
+                                                              'action' => 'view'))}">Class Configuration</a>
+                    </li>
 
 HTML;
                     if($this->core->getUser()->isDeveloper()) {
@@ -162,10 +158,9 @@ HTML;
 HTML;
         if ($this->core->userLoaded()) {
             $logout_link = $this->core->buildUrl(array('component' => 'authentication', 'page' => 'logout'));
-            $first_name = $this->core->getUser()->getFirstName();
             $id = $this->core->getUser()->getId();
             $return .= <<<HTML
-            <span id="login">Hello {$first_name} (<span id="login-id">{$id}</span>)</span> (<a id='logout' href='{$logout_link}'>Logout</a>)
+            <span id="login">Hello <span id="login-id">{$id}</span></span> (<a id='logout' href='{$logout_link}'>Logout</a>)
 HTML;
         }
         else {

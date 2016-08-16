@@ -120,6 +120,10 @@ try {
 catch (InvalidArgumentException $e) {
     die(\lib\ErrorPage::get_error_page("Unrecognized user: {$suggested_username}. Please contact an administrator to get an account."));
 }
+
+if (User::$user_group == 4) {
+    die(\lib\ErrorPage::get_error_page("Not a valid grading user. Please contact an administrator if this is a mistake."));
+}
 $user_info = User::$user_details;
 $user_logged_in = isset($user_info['user_id']);
 $user_is_administrator = User::$is_administrator;

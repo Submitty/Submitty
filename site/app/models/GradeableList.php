@@ -36,18 +36,19 @@ class GradeableList {
                 $handle = opendir($form_path);
                 while (($entry = readdir($handle)) !== false) {
                     if(is_file($form_path . $entry)) {
-                        $this->gradeables[] = new GradeableFile($this->core, str_replace("form_", "", basename($entry, ".json")));
+                        $id = str_replace("form_", "", basename($entry, ".json"));
+                        $this->gradeables[$id] = new GradeableFile($this->core, $id);
                     }
                 }
             }
-            usort($this->gradeables, function(Gradeable $a, Gradeable $b) {
+            uasort($this->gradeables, function(Gradeable $a, Gradeable $b) {
                 return $a->getId() < $b->getId();
             });
         }
         else {
             $ids = $this->core->getQueries()->getAllGradeablesIds();
             foreach ($ids as $id) {
-                $this->gradeables[] = new GradeableDb($this->core, $id);
+                $this->gradeables[$id] = new GradeableDb($this->core, $id);
             }
         }
         $this->now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
@@ -74,6 +75,11 @@ class GradeableList {
         return null;
     }
     
+    /**
+     * @param GradeableType|null $type
+     *
+     * @return int
+     */
     public function getGradeableCount($type = null) {
         $count = 0;
         if ($type !== null) {
@@ -119,12 +125,28 @@ class GradeableList {
         }
     }
     
-    public function getOpenElectronicGradeables($needs_config = false) {
+    public function getSubmittableElectronicGradeables() {
+        /** @var Gradeable[] $list */
+        $list = array();
+    
+        foreach ($this->gradeables as $gradeable) {
+            if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE &&
+                ($gradeable->getOpenDate() < $this->now || $this->core->getUser()->accessAdmin())) {
+                $list[$gradeable->getId()] = $gradeable;
+            }
+        }
+        uasort($list, function(Gradeable $a, Gradeable $b) {
+            return $a->getDueDate() < $b->getDueDate();
+        });
+        return $list;
+    }
+    
+    public function getOpenElectronicGradeables() {
         /** @var Gradeable[] $list */
         $list = array();
         
         foreach ($this->gradeables as $gradeable) {
-            if ($gradeable->getType()==GradeableType::ELECTRONIC_FILE &&(!$needs_config || $gradeable->hasConfig() == true)) {
+            if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
                 if ($gradeable->getOpenDate() < $this->now && $gradeable->getDueDate() > $this->now) {
                     $list[$gradeable->getId()] = $gradeable;
                 }
@@ -136,10 +158,10 @@ class GradeableList {
         return $list;
     }
     
-    public function getClosedElectronicGradeables($needs_config = false){
+    public function getClosedElectronicGradeables() {
         $list = array();
         foreach ($this->gradeables as $gradeable) {
-            if ($gradeable->getType()==GradeableType::ELECTRONIC_FILE &&(!$needs_config || $gradeable->hasConfig() == true)) {
+            if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
                 if ($gradeable->getDueDate() < $this->now && $gradeable->getGradeStartDate() > $this->now) {
                     $list[$gradeable->getId()] = $gradeable;
                 }
@@ -154,11 +176,11 @@ class GradeableList {
     public function getGradingGradeables(){
         $list = array();
         foreach ($this->gradeables as $gradeable) {
-            if ($gradeable->getGradeStartDate() < $this->now && $gradeable->getGradeReleasedDate() > $this->now) {
+            if ($gradeable->getGradeStartDate() < $this->now
+                && $gradeable->getGradeReleasedDate() > $this->now) {
                 $list[$gradeable->getId()] = $gradeable;
             }
         }
-        // only electronic gradeables have due_dates so items must be sorted by the date grading begins
         uasort($list, function(Gradeable $a, Gradeable $b) {
             return $a->getGradeStartDate() < $b->getGradeStartDate();
         });
@@ -172,7 +194,6 @@ class GradeableList {
                 $list[$gradeable->getId()] = $gradeable;
             }
         }
-        // only electronic gradeables have due_dates so items must be sorted by the date grading begins
         uasort($list, function(Gradeable $a, Gradeable $b) {
             return $a->getGradeStartDate() < $b->getGradeStartDate();
         });
