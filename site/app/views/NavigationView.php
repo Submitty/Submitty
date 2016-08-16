@@ -52,7 +52,7 @@ HTML;
                 
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE){
                     if(trim($g_data->getInstructionsURL())!=''){
-                        $gradeable_title = '<label class="has-url">'.$g_data->getName().'</label><a href="'.$g_data->getInstructionsURL().'" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
+                        $gradeable_title = '<label>'.$g_data->getName().'</label><a class="external" href="'.$g_data->getInstructionsURL().'" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
                     }
                     else{
                         $gradeable_title = $g_data->getName();

@@ -160,6 +160,11 @@ textarea {
 #header a:link,
 #header a:visited {
     color: #000;
+    text-decoration: underline;
+}
+
+#header a:hover {
+    text-decoration: none;
 }
 
 #logo-submitty {
@@ -511,5 +516,15 @@ table .instructor .two-options{
 .nav_header{
   text-align:center;
   background-color:#bfbfbf;
+}
+
+a.external,
+a.external:visited,
+a.external:link {
+    color: #000000;
+}
+
+a.external:hover {
+    color: #2627ee;
 }
 
