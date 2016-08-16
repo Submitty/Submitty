@@ -195,6 +195,7 @@ abstract class Gradeable {
         }
         
         for ($i = 1; $i <= $this->num_parts; $i++) {
+            $this->previous_files[$i] = array();
             $j = $i - 1;
             if (isset($details['part_names']) && isset($details['part_names'][$j]) &&
                 trim($details['part_names'][$j]) !== "") {
@@ -246,6 +247,10 @@ abstract class Gradeable {
             return;
         }
         
+        if (!$this->hasConfig()) {
+            return;
+        }
+        
         $course_path = $this->core->getConfig()->getCoursePath();
 
         $submission_path = $course_path."/submissions/".$this->id."/".$this->core->getUser()->getId();
@@ -262,6 +267,7 @@ abstract class Gradeable {
         if ($this->highest === null) {
             $this->highest = 0;
         }
+        
         foreach ($versions as $version) {
             if (!is_dir($results_path."/".$version)) {
                 $this->versions[$version]['status'] = false;
@@ -302,7 +308,6 @@ abstract class Gradeable {
         $this->submissions = count($this->versions);
 
         if ($this->active < 0 && $this->active > $this->submissions) {
-            // TODO: What should happen here? Raise Exception;
             $this->active = $this->submissions;
         }
 

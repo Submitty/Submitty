@@ -57,61 +57,44 @@ def create_course(course, semester, course_group, assignments):
 
     # ---------------------------------------------------------------
     # WRITE THE CLASS JSON (TODO: REMOVE THIS ONCE 1.0 FULLY TESTED)
-    with open(submitty_data_dir + "/courses/" + semester + "/" + course + "/config/class.json",
-              "w") as write_file:
 
-        class_json = OrderedDict()
-        class_json["dev_team"] = list()
-        class_json["upload_message"] = 'Prepare your assignment for submission exactly as '\
-                                       'described on the course webpage.  By clicking "Submit '\
-                                       'File" you are confirming that you have read, understand, '\
-                                       'and agree to follow the Academic Integrity Policy'
-        class_json["assignments"] = list()
+    for i in range(len(assignments)):
+        assignment = assignments[i]
+        with open("%s/sample_files/sample_form_config/form_%s.json" %
+                  (submitty_repository, assignment)) as read_file:
+            form_json = json.load(read_file, object_pairs_hook=OrderedDict)
 
-        for i in range(len(assignments)):
-            assignment = assignments[i]
-            with open("%s/sample_files/sample_form_config/form_%s.json" %
-                      (submitty_repository, assignment)) as read_file:
-                form_json = json.load(read_file, object_pairs_hook=OrderedDict)
+        tmp = date.today() + timedelta(days=((2 * i) - 2))
+        otmp = tmp - timedelta(days=8)
+        form_json["date_submit"] = "{:d}-{:d}-{:d} 00:00:01".format(otmp.year, otmp.month,
+                                                                    otmp.day)
+        form_json["date_due"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp.year, tmp.month, tmp.day)
+        tmp2 = tmp + timedelta(days=4)
+        form_json["date_grade"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp2.year, tmp2.month,
+                                                                   tmp2.day)
+        tmp2 = tmp + timedelta(days=1)
+        form_json["date_released"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp2.year, tmp2.month,
+                                                                      tmp2.day)
 
-            tmp = date.today() + timedelta(days=((2 * i) - 2))
-            otmp = tmp - timedelta(days=8)
-            form_json["date_submit"] = "{:d}-{:d}-{:d} 00:00:01".format(otmp.year, otmp.month,
-                                                                        otmp.day)
-            form_json["date_due"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp.year, tmp.month, tmp.day)
-            tmp2 = tmp + timedelta(days=4)
-            form_json["date_grade"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp2.year, tmp2.month,
-                                                                       tmp2.day)
-            tmp2 = tmp + timedelta(days=1)
-            form_json["date_released"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp2.year, tmp2.month,
-                                                                          tmp2.day)
+        form_file = "{}/courses/{}/{}/config/form/form_{}.json".format(submitty_data_dir, semester, course,
+                                                                       assignment)
+        with open(form_file, "w") as form_write:
+            json.dump(form_json, form_write, indent=2)
+        os.chown(form_file, hwphp[0], course_group_gid)
 
-            form_file = "{}/courses/{}/{}/config/form/form_{}.json".format(submitty_data_dir, semester, course,
-                                                                           assignment)
-            with open(form_file, "w") as form_write:
-                json.dump(form_json, form_write, indent=2)
-            os.chown(form_file, hwphp[0], course_group_gid)
+        os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO gradeable VALUES ('{}', "
+                  "'{}', '', false, 0, true, '{}', '{}', 'homework', 1, NULL)\""
+                  .format(database, form_json['gradeable_id'], form_json['gradeable_title'],
+                          form_json['date_grade'], form_json['date_released']))
+        os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO electronic_gradeable "
+                  "VALUES ('{}', '{}', '{}', '{}', false, '', true, '{}', 2, {})\""
+                  .format(database, form_json['gradeable_id'], form_json['instructions_url'],
+                          form_json['date_submit'], form_json['date_due'],
+                          form_json['config_path'], form_json['point_precision']))
+        os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO gradeable_component "
+                  "VALUES ({:d}, '{}', 'Test', '', '', 5, false, false, 1)\""
+                  .format(database, i, form_json['gradeable_id']))
 
-            os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO gradeable VALUES ('{}', "
-                      "'{}', '', false, 0, true, '{}', '{}', 'homework', 1, NULL)\""
-                      .format(database, form_json['gradeable_id'], form_json['gradeable_title'],
-                              form_json['date_grade'], form_json['date_released']))
-            os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO electronic_gradeable "
-                      "VALUES ('{}', '{}', '{}', '{}', false, '', true, '{}', 2, {})\""
-                      .format(database, form_json['gradeable_id'], form_json['instructions_url'],
-                              form_json['date_submit'], form_json['date_due'],
-                              form_json['config_path'], form_json['point_precision']))
-            os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO gradeable_component "
-                      "VALUES ({:d}, '{}', 'Test', '', '', 5, false, false, 1)\""
-                      .format(database, i, form_json['gradeable_id']))
-
-            elem = OrderedDict()
-            elem['assignment_id'] = assignment
-            elem["assignment_name"] = form_json['gradeable_title']
-            elem["released"] = True if otmp <= date.today() else False
-            elem["ta_grade_released"] = False
-            elem["due_date"] = form_json["date_due"]
-            class_json['assignments'].append(elem)
 
         json.dump(class_json, write_file, indent=2)
 
