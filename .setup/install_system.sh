@@ -165,6 +165,8 @@ chmod -R 555 /usr/local/lib/python2.7/*
 chmod 555 /usr/lib/python2.7/dist-packages
 
 
+
+
 #################################################################
 # JAR SETUP
 #################
@@ -385,6 +387,8 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 adduser hwcgi hwphp
+# NOTE: hwcgi must be in the shadow group so that it has access to the
+# local passwords for pam authentication
 adduser hwcgi shadow
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
@@ -494,6 +498,7 @@ fi
 #################
 if [ ${VAGRANT} == 1 ]; then
 	echo "postgres:postgres" | chpasswd postgres
+        # note:  maybe it's not necessary for postgres to be in shadow
 	adduser postgres shadow
 	service postgresql restart
 	PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
