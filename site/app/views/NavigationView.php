@@ -17,15 +17,27 @@ class NavigationView {
     }
     
     public function showGradeables($sections_to_list) {
-        $return = <<<HTML
-<div class="content">
-    <table class="gradeable_list" style="width:100%;">
-
-HTML;
         $ta_base_url = $this->core->getConfig()->getTABaseUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $site_url = $this->core->getConfig()->getSiteUrl();
+        
+        $return = <<<HTML
+<div class="content">
+    <div class="nav-buttons">
+HTML;
+        if ($this->core->getUser()->accessAdmin()) {
+            $return .= <<<HTML
+        <button class="btn btn-primary" onclick="window.location.href='{$ta_base_url}/account/admin-gradeable.php?course=csci1000&semester=f16'">New Gradeable</button>
+        <button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course=csci1000&semester=f16&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button>
+HTML;
+        }
+        $return .= <<<HTML
+        <!--<button class="btn btn-primary">View Grades</button>-->
+    </div>
+    <table class="gradeable_list" style="width:100%;">
+
+HTML;
         $title_to_button_type_submission = array("FUTURE" => "btn-default", "OPEN" => "btn-primary" , "CLOSED" => "btn-danger",
                                                  "ITEMS BEING GRADED" => "btn-default", "GRADED" => 'btn-success');
         $title_to_button_type_grading = array("FUTURE" => "btn-default", "OPEN" => "btn-default" , "CLOSED" => "btn-default",

@@ -92,18 +92,6 @@ HTML;
                     <li>
                         <a href="{$ta_base_url}/account/admin-csv-report.php?course={$course}&semester={$semester}&this=Generate%20CSV%20Report">Generate CSV Report</a>
                     </li>
-
-                    <!--<li><a href="{$this->core->buildUrl(array('component' => 'admin',
-                                                              'page' => 'gradeables',
-                                                              'action' => 'list'))}">Manage Gradeables</a></li>-->
-                    <li>
-                        <a href="{$ta_base_url}/account/admin-gradeables.php?course={$course}&semester={$semester}&this=Manage%20Gradeables">Manage Gradeables</a>
-                    </li>
-                    
-                    <!--<li><a href="{$this->core->buildUrl(array('component' => 'admin',
-                                                              'page' => 'users',
-                                                              'action' => 'listStudents'))}">View Students</a></li>-->
-                    <!-- TODO Add these to a drop down -->
                     <li>
                         <a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=View%20Students">View Students</a>
                     </li>
