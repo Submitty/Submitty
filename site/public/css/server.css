@@ -287,11 +287,11 @@ textarea {
 }
 
 .option {
-    margin-bottom: 20px;
+    margin-bottom: 40px;
 }
 
 .option-desc {
-    width: 70%;
+    width: 60%;
 }
 
 .option-title {
@@ -306,7 +306,7 @@ textarea {
 .option-input {
     float: right;
     margin-top: 10px;
-    width: 30%;
+    width: 40%;
 }
 
 .post-panel-btn {

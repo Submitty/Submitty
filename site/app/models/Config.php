@@ -30,6 +30,7 @@ class Config {
     private $course;
 
     private $config_path;
+    private $course_ini;
 
     /*** MASTER CONFIG ***/
     private $base_url;
@@ -140,12 +141,13 @@ class Config {
             throw new ConfigException("Invalid course: ".$this->course, true);
         }
 
-        $course_config = implode(DIRECTORY_SEPARATOR, array($this->course_path, "config", "config.ini"));
-        $course = IniParser::readFile($course_config);
+        $this->course_ini = implode(DIRECTORY_SEPARATOR, array($this->course_path, "config", "config.ini"));
+        
+        $course = IniParser::readFile($this->course_ini);
 
         $this->setConfigValues($course, 'database_details', array('database_name'));
         $this->setConfigValues($course, 'course_details', array('course_name', 'default_hw_late_days',
-            'default_student_late_days', 'zero_rubric_grades', 'upload_message', 'ta_grades', 'grade_summary'));
+            'default_student_late_days', 'zero_rubric_grades', 'upload_message', 'ta_grades'));
 
         $this->upload_message = Utils::prepareHtmlString($this->upload_message);
         
@@ -343,5 +345,9 @@ class Config {
     
     public function showGradeSummary() {
         return $this->grade_summary;
+    }
+    
+    public function getCourseIniPath() {
+        return $this->course_ini;
     }
 }
