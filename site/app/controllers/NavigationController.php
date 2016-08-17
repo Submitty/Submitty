@@ -7,8 +7,10 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
+use app\libraries\GradeableType;
 use app\libraries\Logger;
 use app\libraries\Utils;
+use app\models\Gradeable;
 use app\models\GradeableList;
 
 class NavigationController implements IController {
@@ -34,14 +36,33 @@ class NavigationController implements IController {
   		$this->core->getOutput()->addCSS("https://fonts.googleapis.com/css?family=Inconsolata");
         
         $future_gradeables_list = $this->gradeables_list->getFutureGradeables();
-        $open_gradeables_list = $this->gradeables_list->getOpenElectronicGradeables(false);
-        $closed_gradeables_list = $this->gradeables_list->getClosedElectronicGradeables(false);
+        $open_gradeables_list = $this->gradeables_list->getOpenElectronicGradeables();
+        $closed_gradeables_list = $this->gradeables_list->getClosedElectronicGradeables();
         $grading_gradeables_list = $this->gradeables_list->getGradingGradeables();
         $graded_gradeables_list = $this->gradeables_list->getGradedGradeables();
-        $sections_to_lists = array("FUTURE" => $future_gradeables_list,"OPEN" => $open_gradeables_list, 
-                                   "CLOSED" => $closed_gradeables_list, "ITEMS BEING GRADED" => $grading_gradeables_list,
+        
+        $sections_to_lists = array("FUTURE" => $future_gradeables_list,
+                                   "OPEN" => $open_gradeables_list,
+                                   "CLOSED" => $closed_gradeables_list,
+                                   "ITEMS BEING GRADED" => $grading_gradeables_list,
                                    "GRADED" => $graded_gradeables_list);
-        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables',
-                                               $sections_to_lists);  
+        
+        if (!$this->core->getUser()->accessAdmin()) {
+            foreach ($sections_to_lists as $key => $value) {
+                $sections_to_lists[$key] = array_filter($value, array($this, "filterNoConfig"));
+            }
+        }
+        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists);
+    }
+    
+    /**
+     * @param Gradeable $gradeable
+     * @return bool
+     */
+    private function filterNoConfig($gradeable) {
+        if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
+            return $gradeable->hasConfig();
+        }
+        return true;
     }
 }

@@ -74,12 +74,12 @@ HTML;
                     else {
                         $gradeable_open_range = <<<HTML
              <button class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" disabled>
-                 Missing Build Config File.
+                 Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh
              </button>
 HTML;
                         $gradeable_grade_range = <<<HTML
             <button class="btn {$title_to_button_type_grading[$title]}" style="width:100%;" disabled>
-                Missing Build Config File
+                Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh
             </button>
 HTML;
                     }

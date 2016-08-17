@@ -173,7 +173,7 @@ class GradeableList {
         return $list;
     }
     
-    public function getGradingGradeables(){
+    public function getGradingGradeables() {
         $list = array();
         foreach ($this->gradeables as $gradeable) {
             if ($gradeable->getGradeStartDate() < $this->now
@@ -187,7 +187,7 @@ class GradeableList {
         return $list;
     }
     
-    public function getGradedGradeables(){
+    public function getGradedGradeables() {
         $list = array();
         foreach ($this->gradeables as $gradeable) {
             if ($gradeable->getGradeReleasedDate() < $this->now) {
@@ -200,7 +200,7 @@ class GradeableList {
         return $list;
     }
     
-    public function getFutureGradeables(){
+    public function getFutureGradeables() {
         $list = array();
         foreach ($this->gradeables as $gradeable) {
             if ($gradeable->getType()==GradeableType::ELECTRONIC_FILE) {
