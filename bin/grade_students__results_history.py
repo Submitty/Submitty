@@ -9,8 +9,8 @@ import collections
 #####################################
 # CHECK ARGUMENTS
 if (len(sys.argv)) != 12 : 
-    print ("ERROR!  WRONG NUMBER OF ARGS TO "+str(sys.argv[0]))
-    sys.exit(1)
+    raise SystemExit("ERROR!  WRONG NUMBER OF ARGS TO "+str(sys.argv[0]))
+
 
 #####################################
 # LOAD THE PREVIOUS HISTORY
@@ -20,6 +20,7 @@ if os.path.isfile(json_file):
         obj = json.load(infile, object_pairs_hook=collections.OrderedDict)
 else :
     obj = []
+
 
 #####################################
 # CREATE THE NEWEST INFO BLOB

@@ -160,6 +160,11 @@ textarea {
 #header a:link,
 #header a:visited {
     color: #000;
+    text-decoration: underline;
+}
+
+#header a:hover {
+    text-decoration: none;
 }
 
 #logo-submitty {
@@ -370,8 +375,8 @@ select {
     padding: 5px 5px 10px;
 }
 
-.box-title {
-    margin-top: 10px;
+.box-title > h4 {
+    margin-left: 20px;
 }
 
 .box > h4 {
@@ -410,7 +415,7 @@ select {
 .badge {
     float: left;
     display: inline-block;
-    min-width: 10px;
+    width: 70px;
     padding: 3px 7px;
     font-weight: bold;
     line-height: 1;
@@ -420,8 +425,16 @@ select {
     vertical-align: baseline;
     background-color: #999;
     border-radius: 10px;
+    margin-left: 10px;
+    margin-right: 20px;
+}
+
+.no-badge {
+    width: 85px;
+    height: 10px;
     margin-right: 20px;
     margin-left: 10px;
+    float: left;
 }
 
 .green-background {
@@ -441,3 +454,77 @@ select {
     font-style: italic;
     text-decoration: none;
 }
+
+.gradeable_list{
+	width: 100%;
+	padding: 50px;
+	padding-top: 0px;
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size: 18px;
+	text-align: left !important;
+}
+
+table .colspan{
+	padding: 10px;
+	font-size: 28px;
+	font-weight: 600;
+}
+table .bar{
+	height:20px;
+}
+table .gradeable_title {
+	padding-left: 50px;
+}
+table a{
+	text-decoration: none;
+}
+table .has-url:hover {
+	cursor: pointer;
+	color: #3232FF;
+}
+table .student .gradeable_title {
+	width: 45%;
+}
+table .student .date {
+	width: 30%;
+}
+table .student .option {
+	width: 25%;
+}
+table .ta .gradeable_title{
+	width: 25%;
+}
+table .ta .date{
+	width: 25%;
+	text-align: center;
+}
+table .ta .option{
+	width: 12.5%;
+}
+table .instructor .gradeable_title{
+	width: 25%;
+}
+table .instructor .date{
+	width: 15%;
+}
+table .instructor .option{
+	width: 10%;
+}
+table .instructor .two-options{
+	width: 15%;
+}
+.nav_header{
+  text-align:center;
+  background-color:#bfbfbf;
+}
+
+a.external,
+a.external:visited,
+a.external:link {
+    color: #000000;
+}
+
+a.external:hover {
+    color: #2627ee;
+}
+

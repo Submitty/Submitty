@@ -37,6 +37,7 @@ $_GET['semester'] = isset($_GET['semester']) ? str_replace("/", "_", $_GET['seme
 
 $a = IniParser::readFile(__DIR__."/../../site/config/master.ini");
 define("__BASE_URL__", $a['site_details']['ta_base_url']);
+define("__SUBMISSION_URL__", $a['site_details']['base_url']);
 define("__CGI_URL__", $a['site_details']['cgi_url']);
 define("__SUBMISSION_GRACE_PERIOD_SECONDS__", "30 * 60");
 define("__OUTPUT_MAX_LENGTH__", 100000);
@@ -118,6 +119,10 @@ try {
 }
 catch (InvalidArgumentException $e) {
     die(\lib\ErrorPage::get_error_page("Unrecognized user: {$suggested_username}. Please contact an administrator to get an account."));
+}
+
+if (User::$user_group == 4) {
+    die(\lib\ErrorPage::get_error_page("Not a valid grading user. Please contact an administrator if this is a mistake."));
 }
 $user_info = User::$user_details;
 $user_logged_in = isset($user_info['user_id']);

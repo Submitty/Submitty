@@ -56,6 +56,9 @@ class User {
         $this->loaded = true;
         $this->id = $details['user_id'];
         $this->first_name = $details['user_firstname'];
+        if (isset($details['user_preferred_firstname']) && $details['user_preferred_firstname'] != "") {
+            $this->first_name = $details['user_preferred_firstname'];
+        }
         $this->last_name = $details['user_lastname'];
         $this->email = $details['user_email'];
         $this->group = $details['user_group'];

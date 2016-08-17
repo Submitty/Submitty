@@ -15,7 +15,7 @@ class GlobalView {
         $this->core = $core;
     }
 
-    public function header($breadcrumbs) {
+    public function header($breadcrumbs, $css=array()) {
         $messages = <<<HTML
 <div id='messages'>
 
@@ -36,12 +36,9 @@ HTML;
 </div>
 
 HTML;
-
-        if (file_exists($this->core->getConfig()->getCoursePath()."/override.css")) {
-            $override_css = "<link rel='stylesheet' type='text/css' href='{$this->core->getConfig()->getCoursePath()}/override.css' />";
-        }
-        else {
-            $override_css = '';
+        $override_css = '';
+        if (file_exists($this->core->getConfig()->getCoursePath()."/config/override.css")) {
+            $override_css = "<style type='text/css'>".file_get_contents($this->core->getConfig()->getCoursePath()."/config/override.css")."</style>";
         }
 
         $is_dev = ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) ? "true" : "false";
@@ -53,6 +50,14 @@ HTML;
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/server.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
+HTML;
+    foreach($css as $css_ref){
+        $return .= <<<HTML
+        <link rel="stylesheet" type="text/css" href="{$css_ref}" />   
+HTML;
+    }
+    
+    $return .= <<<HTML
     {$override_css}
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.min.js"></script>
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/diff-viewer.js"></script>
@@ -68,36 +73,70 @@ HTML;
 HTML;
         if ($this->core->getUser() != null) {
             if($this->core->getUser()->accessGrading()) {
+                $ta_base_url = $this->core->getConfig()->getTABaseUrl();
+                $semester = $this->core->getConfig()->getSemester();
+                $course = $this->core->getConfig()->getCourse();
                 $return .= <<<HTML
 <div id="nav">
     <ul>
-        <li><a href="{$this->core->buildUrl(array('component' => 'submission', 
-                                                  'page' => 'homework'))}">Submit</a></li>
-        <li><a href="#">Grade Assignments</a></li>
-        <li><a href="#">Grade Labs</a></li>
-        <li><a href="#">Grade Tests</a></li>
-
 HTML;
                 if($this->core->getUser()->accessAdmin()) {
                     $return .= <<<HTML
-        <li><a href="#">Report Tools</a></li>
-        <li><a href="{$this->core->buildUrl(array('component' => 'admin',
-                                                  'page' => 'gradeables',
-                                                  'action' => 'list'))}">Manage Gradeables</a>
-        </li>
-        <li><a href="{$this->core->buildUrl(array('component' => 'admin',
-                                                  'page' => 'users',
-                                                  'action' => 'listStudents'))}">View Students</a></li>
-        <li><a href="#">View Users</a></li>
-        <li><a href="{$this->core->buildUrl(array('component' => 'admin', 
-                                                  'page' => 'configuration', 
-                                                  'action' => 'view'))}">Class Configuration</a></li>
-        <li><a href="#">View Orphans</a></li>
+            
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-hw-report.php?course={$course}&semester={$semester}&this=Generate%20Homework%20Report">Generate Homework Report</a>
+                    </li>
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-grade-summaries.php?course={$course}&semester={$semester}&this=Generate%20Grade%20Summaries">Generate Grade Summaries</a>
+                    </li>
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-csv-report.php?course={$course}&semester={$semester}&this=Generate%20CSV%20Report">Generate CSV Report</a>
+                    </li>
+
+                    <!--<li><a href="{$this->core->buildUrl(array('component' => 'admin',
+                                                              'page' => 'gradeables',
+                                                              'action' => 'list'))}">Manage Gradeables</a></li>-->
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-gradeables.php?course={$course}&semester={$semester}&this=Manage%20Gradeables">Manage Gradeables</a>
+                    </li>
+                    
+                    <!--<li><a href="{$this->core->buildUrl(array('component' => 'admin',
+                                                              'page' => 'users',
+                                                              'action' => 'listStudents'))}">View Students</a></li>-->
+                    <!-- TODO Add these to a drop down -->
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=View%20Students">View Students</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-users.php?course={$course}&semester={$semester}&this=View%20Users">View Users</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-classlist.php?course={$course}&semester={$semester}&this=Upload%20ClassList">Upload ClassList</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-rotating-sections.php?course={$course}&semester={$semester}&this=Setup%20Rotating%20Sections">Setup Rotating Sections</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-latedays.php?course={$course}&semester={$semester}&this=Late%20Days%20Course">Late Days Course</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Late%20Days%20Student">Late Days Student</a>
+                    </li>
+                    
+                    <li>
+                        <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 
+                                                              'action' => 'view'))}">Class Configuration</a>
+                    </li>
 
 HTML;
                     if($this->core->getUser()->isDeveloper()) {
-                        $return .= <<<HTML
-        <li><a href="#" onClick="togglePageDetails();">Show Page Details</a></li>
+                                $return .= <<<HTML
+                    <li><a href="#" onClick="togglePageDetails();">Show Page Details</a></li>
 
 HTML;
                     }
@@ -119,10 +158,9 @@ HTML;
 HTML;
         if ($this->core->userLoaded()) {
             $logout_link = $this->core->buildUrl(array('component' => 'authentication', 'page' => 'logout'));
-            $first_name = $this->core->getUser()->getFirstName();
             $id = $this->core->getUser()->getId();
             $return .= <<<HTML
-            <span id="login">Hello {$first_name} (<span id="login-id">{$id}</span>)</span> (<a id='logout' href='{$logout_link}'>Logout</a>)
+            <span id="login">Hello <span id="login-id">{$id}</span></span> (<a id='logout' href='{$logout_link}'>Logout</a>)
 HTML;
         }
         else {
