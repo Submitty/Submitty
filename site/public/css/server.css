@@ -172,7 +172,10 @@ textarea {
     margin-right: 10px;
     height: 125px;
     width: 357px;
+/*
     background: url('http://submitty.org/images/submitty_logo.png') no-repeat;
+*/
+    background: url('submitty_logo.png') no-repeat;
     background-size: 357px 125px;
 }
 
