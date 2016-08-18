@@ -34,6 +34,7 @@ class Config {
 
     /*** MASTER CONFIG ***/
     private $base_url;
+    private $course_url = null;
     private $ta_base_url;
     private $cgi_url;
     private $site_url;
@@ -122,7 +123,6 @@ class Config {
         $this->base_url = rtrim($this->base_url, "/")."/";
         $this->cgi_url = rtrim($this->cgi_url, "/")."/";
         $this->ta_base_url = rtrim($this->ta_base_url, "/")."/";
-        $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
 
         // Check that the paths from the config file are valid
         foreach(array('submitty_path', 'submitty_log_path') as $path) {
@@ -148,7 +148,12 @@ class Config {
         $this->setConfigValues($course, 'database_details', array('database_name'));
         $this->setConfigValues($course, 'course_details', array('course_name', 'default_hw_late_days',
             'default_student_late_days', 'zero_rubric_grades', 'upload_message', 'ta_grades'));
-
+        
+        if (isset($course['course_details']['course_url'])) {
+            $this->course_url = rtrim($course['course_details']['course_url'], "/")."/";
+            $this->base_url = $this->course_url;
+        }
+        
         $this->upload_message = Utils::prepareHtmlString($this->upload_message);
         
         foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
@@ -158,11 +163,13 @@ class Config {
         foreach (array('zero_rubric_grades', 'ta_grades', 'grade_summary') as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
+    
+        $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
     }
 
     private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {
-            throw new ConfigException("Missing config section {$section} in master.ini");
+            throw new ConfigException("Missing config section {$section} in ini file");
         }
 
         foreach ($keys as $key) {
@@ -349,5 +356,9 @@ class Config {
     
     public function getCourseIniPath() {
         return $this->course_ini;
+    }
+    
+    public function getCourseUrl() {
+        return $this->course_url;
     }
 }

@@ -102,6 +102,10 @@ class ConfigurationController implements IController {
             )
         );
         
+        if ($this->core->getConfig()->getCourseUrl() !== null) {
+            $save_array['course_details']['course_url'] = $this->core->getConfig()->getCourseUrl();
+        }
+        
         IniParser::writeFile($this->core->getConfig()->getCourseIniPath(), $save_array);
         $_SESSION['messages']['success'][] = "Site configuration updated";
         $this->core->redirect($this->core->buildUrl(array('component' => 'admin',
