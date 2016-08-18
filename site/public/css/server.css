@@ -14,7 +14,16 @@ html {
 }
 
 body {
-    background-color: #B6CECE;
+
+    /* OLD SEAFOAM GREEN COLOR */
+    /* background-color: #B6CECE; */
+
+    /* Submitty Logo blue */
+    /* background-color: #0d6789; */
+
+    /* A lighter shade of blue grey */
+    background-color: #88aacc;
+
     font-family: 'Source Sans Pro', sans-serif;
     height: 100%;
     position: relative;
