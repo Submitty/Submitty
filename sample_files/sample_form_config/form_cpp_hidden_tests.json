@@ -7,7 +7,7 @@
     "date_due": "08/07/2016 11:59:59",
     "eg_late_days": 2,
     "upload_type": "Upload File",
-    "config_path": "/usr/local/submitty/sample_files/sample_assignment_config/cpp_hidden_tests/config.json",
+    "config_path": "/usr/local/submitty/sample_files/sample_assignment_config/cpp_hidden_tests/",
     "point_precision": 0.5,
     "ta_grading": true,
     "comment_title": [

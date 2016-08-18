@@ -80,9 +80,7 @@ def create_course(course, semester, course_group, assignments):
         os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO gradeable_component "
                   "VALUES ({:d}, '{}', 'Test', '', '', 5, false, false, 1)\""
                   .format(database, i, form_json['gradeable_id']))
-
-
-        json.dump(class_json, write_file, indent=2)
+        
 
     # ---------------------------------------------------------------
     # RUN THE BUILD COURSE SCRIPT
