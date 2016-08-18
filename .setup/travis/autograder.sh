@@ -91,4 +91,9 @@ git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GI
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 git pull origin master
 make
+
+mkdir ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/lang ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
+cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
+
 popd

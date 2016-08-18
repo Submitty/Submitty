@@ -14,7 +14,16 @@ html {
 }
 
 body {
-    background-color: #B6CECE;
+
+    /* OLD SEAFOAM GREEN COLOR */
+    /* background-color: #B6CECE; */
+
+    /* Submitty Logo blue */
+    /* background-color: #0d6789; */
+
+    /* A lighter shade of blue grey */
+    background-color: #88aacc;
+
     font-family: 'Source Sans Pro', sans-serif;
     height: 100%;
     position: relative;
@@ -64,7 +73,7 @@ textarea {
 
 #container {
     min-height: 100%;
-    margin: 0 auto -30px;
+    margin: 0 auto -60px;
 }
 
 #nav {
@@ -172,7 +181,7 @@ textarea {
     margin-right: 10px;
     height: 125px;
     width: 357px;
-    background: url('http://submitty.org/images/submitty_logo.png') no-repeat;
+    background: url('../img/submitty_logo.png') no-repeat;
     background-size: 357px 125px;
 }
 
