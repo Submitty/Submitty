@@ -181,7 +181,7 @@ textarea {
     margin-right: 10px;
     height: 125px;
     width: 357px;
-    background: url('submitty_logo.png') no-repeat;
+    background: url('../img/submitty_logo.png') no-repeat;
     background-size: 357px 125px;
 }
 
