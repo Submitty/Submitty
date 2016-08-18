@@ -43,7 +43,7 @@ def create_course(course, semester, course_group, assignments):
               (database, submitty_repository))
 
     # ---------------------------------------------------------------
-    # WRITE THE PER ASSIGNMENT FORM JSON AND ASSIGNMENT DATA TO DATABASE
+    # ADD DATES TO THE PER ASSIGNMENT FORM JSONS AND INSERT PER ASSIGNMENT DATA TO DATABASE
     for i in range(len(assignments)):
         assignment = assignments[i]
         with open("%s/sample_files/sample_form_config/form_%s.json" %
