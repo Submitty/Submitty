@@ -52,7 +52,7 @@ HTML;
         
     /**
      * TODO: BREAK UP THIS FUNCTION INTO EASIER TO MANAGE CHUNKS
-     * 
+     *
      * @param Gradeable $gradeable
      * @param int       $days_late
      *
@@ -333,10 +333,10 @@ HTML;
         <h4>Submitted Files</h4>
         <div class="box half">
 HTML;
-                // TODO: This is going to be different for SVN
-                foreach ($gradeable->getSubmittedFiles() as $submitted_file) {
-                    $size = number_format($submitted_file['size'] / 1024, 2);
-                    $return .= "{$submitted_file['relative_name']} ({$size}kb)<br />";
+                $array = ($gradeable->useSvnCheckout()) ? $gradeable->getSvnFiles() : $gradeable->getSubmittedFiles();
+                foreach ($array as $file) {
+                    $size = number_format($file['size'] / 1024, 2);
+                    $return .= "{$file['relative_name']} ({$size}kb)<br />";
                 }
                 $return .= <<<HTML
         </div>
