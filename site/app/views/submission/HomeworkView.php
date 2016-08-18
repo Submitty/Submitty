@@ -75,16 +75,7 @@ HTML;
 HTML;
         if($gradeable->useSvnCheckout()) {
             $return .= <<<HTML
-    <form action="{$this->core->buildUrl(array('component' => 'student', 
-                                               'page' => 'submission', 
-                                               'action' => 'upload',
-                                               'gradeable_id' => $gradeable->getId()))}" method="post" 
-        onsubmit="return checkVersionsUsed('{$gradeable->getName()}', {$gradeable->getHighestVersion()},
-                                            {$gradeable->getMaxSubmissions()});">
-        <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-        <input type="hidden" name="svn_checkout" value="true" />
-        <input type="submit" id="submit" class="btn btn-primary" value="Grade SVN" />
-    </form>
+    <input type="submit" id="submit" class="btn btn-primary" value="Grade SVN" />
 HTML;
         }
         else {
@@ -176,18 +167,6 @@ HTML;
             }
             e.stopPropagation();
         });
-        $("#submit").click(function(e){ // Submit button
-            handleSubmission("{$this->core->buildUrl(array('component' => 'student', 'action' => 'upload', 
-                                                           'gradeable_id' => $gradeable->getId()))}",
-                             "{$this->core->buildUrl(array('component' => 'student', 
-                                                           'gradeable_id' => $gradeable->getId()))}",
-                             {$days_late},
-                             {$gradeable->getAllowedLateDays()},
-                             {$gradeable->getHighestVersion()},
-                             {$gradeable->getMaxSubmissions()},
-                             "{$this->core->getCsrfToken()}", false);
-            e.stopPropagation();
-        });
 
         // GET FILES OF THE HIGHEST VERSION
         if (assignment_version == highest_version && highest_version > 0) {
@@ -202,7 +181,26 @@ HTML;
 HTML;
         }
         
+        $svn_string = ($gradeable->useSvnCheckout()) ? "true" : "false";
+        
         $return .= <<<HTML
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#submit").click(function(e){ // Submit button
+                handleSubmission("{$this->core->buildUrl(array('component' => 'student', 
+                                                               'action' => 'upload',
+                                                               'gradeable_id' => $gradeable->getId()))}",
+                                 "{$this->core->buildUrl(array('component' => 'student',
+                                                               'gradeable_id' => $gradeable->getId()))}",
+                                 {$days_late},
+                                 {$gradeable->getAllowedLateDays()},
+                                 {$gradeable->getHighestVersion()},
+                                 {$gradeable->getMaxSubmissions()},
+                                 "{$this->core->getCsrfToken()}", {$svn_string});
+                e.stopPropagation();
+            });
+        });
+    </script>
 </div>
 HTML;
         

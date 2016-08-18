@@ -306,7 +306,7 @@ function isValidSubmission(){
  * @param csrf_token
  * @param svn_checkout
  */
-function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout){
+function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout) {
     $("#submit").prop("disabled", true);
 
     var message = "";
