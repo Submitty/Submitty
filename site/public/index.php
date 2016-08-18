@@ -100,16 +100,24 @@ if (isset($_COOKIE['session_id'])) {
 // Prevent anyone who isn't logged in from going to any other controller than authentication
 if (!$logged_in) {
     if ($_REQUEST['component'] != 'authentication') {
-        foreach ($core->getControllerTypes() as $key) {
-            if(isset($_REQUEST[$key])) {
-                $_REQUEST['old'][$key] = $_REQUEST[$key];
-                $_REQUEST[$key] = "";
-            } else if(isset($_REQUEST['old_' . $key])) {
-                $_REQUEST['old'][$key] = $_REQUEST['old_' . $key];
-                unset($_REQUEST['old_' . $key]);
+        foreach ($_REQUEST as $key => $value) {
+            if ($key == "semester" || $key == "course") {
+                continue;
             }
+            if ($value === "") {
+                continue;
+            }
+            if(isset($_REQUEST[$key])) {
+                $_REQUEST['old'][$key] = $value;
+            }
+            else if(substr($key, 0, 4) === "old_") {
+                $_REQUEST['old'][substr($key, 4)] = $value;
+                
+            }
+            unset($_REQUEST[$key]);
         }
         $_REQUEST['component'] = 'authentication';
+        $_REQUEST['page'] = 'login';
     }
 }
 

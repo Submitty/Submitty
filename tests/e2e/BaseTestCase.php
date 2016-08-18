@@ -18,7 +18,7 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
     /** @var string password to use for logging into the site */
     protected $password = null;
     /** @var string URL to use as the base for the tests */
-    protected $test_url = null;
+    protected $test_url = "http://192.168.56.101";
     
     private $logged_in = false;
     
