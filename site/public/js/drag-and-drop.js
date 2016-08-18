@@ -334,6 +334,9 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
 
     var formData = new FormData();
 
+    formData.append('csrf_token', csrf_token);
+    formData.append('svn_checkout', svn_checkout);
+    
     if (!svn_checkout) {
         // Check if new submission
         if (!isValidSubmission()) {
@@ -341,9 +344,6 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
             window.location.reload();
             return;
         }
-
-        formData.append('csrf_token', csrf_token);
-        formData.append('svn_checkout', svn_checkout);
 
         // Files selected
         for (var i = 0; i < file_array.length; i++) {
@@ -354,7 +354,7 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
         // Files from previous submission
         formData.append('previous_files', JSON.stringify(previous_files));
     }
-    
+
     $.ajax({
         url: submit_url,
         data: formData,
