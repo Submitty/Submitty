@@ -284,12 +284,15 @@ abstract class GradeableType{
  
  function constructGradeable ($db, $request_args){
      $g_id = $request_args['gradeable_id'];
+     if ($g_id === null or $g_id === "") {
+         throw new Exception("Gradeable id cannot be blank or null");
+     }
      
      if ($_GET['action'] != 'edit'){
          $db->query("SELECT COUNT(*) AS cnt FROM gradeable WHERE g_id=?", array($g_id));
          if ($db->row()['cnt'] > 0){
             throw new Exception('Gradeable already exists');
-         }  
+         }
      }
 
      $g_title = $request_args['gradeable_title'];
@@ -357,8 +360,14 @@ $action = $_GET['action'];
 
 // single update or create
 if ($action != 'import'){
-    $gradeable = constructGradeable($db, $_POST);
-    $db->beginTransaction();  
+    try {
+        $gradeable = constructGradeable($db, $_POST);
+    }
+    catch (Exception $e) {
+        die($e->getMessage());
+    }
+    
+    $db->beginTransaction();
 
     if ($action=='edit'){
         $gradeable->updateGradeable($db);
@@ -389,7 +398,7 @@ else{
 
     foreach($files as $file){
         try{
-            $db->beginTransaction();  
+            $db->beginTransaction();
             $fp = fopen($file, 'r');
             if (!$fp){
                 array_push($failed_files, $file);
@@ -404,22 +413,22 @@ else{
                 if (is_array($v)){
                     if (strpos($k, '_extra') !== false){
                         for($i=1; $i<= count($v); ++$i){
-                           $request_args[$k.'_'.intval($v[$i-1])] = "";    
-                        } 
+                           $request_args[$k.'_'.intval($v[$i-1])] = "";
+                        }
                     }
                     else if (strpos($k, 'grader') !== false){
                         foreach($v as $k2 => $v2){
                             foreach($v2 as $k3 => $v3){
                                 $request_args['grader_'.$k3] =$v3;
-                            } 
+                            }
                         }
                     }
                     else{
                         for($i=1; $i<= count($v); ++$i){
-                           $request_args[$k.'_'.intval($i)] = $v[$i-1];    
-                        } 
+                           $request_args[$k.'_'.intval($i)] = $v[$i-1];
+                        }
                     }
-                }  
+                }
             }
             
             $gradeable->createComponents($db, $action, $request_args);
