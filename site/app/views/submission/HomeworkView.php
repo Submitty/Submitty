@@ -75,7 +75,9 @@ HTML;
 HTML;
         if($gradeable->useSvnCheckout()) {
             $return .= <<<HTML
-    <form action="{$this->core->buildUrl(array())}" method="post" 
+    <form action="{$this->core->buildUrl(array('component' => 'student', 
+                                               'page' => 'submission', 
+                                               'action' => 'upload'))}" method="post" 
         onsubmit="return checkVersionsUsed('{$gradeable->getName()}', {$gradeable->getHighestVersion()},
                                             {$gradeable->getMaxSubmissions()});">
         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
