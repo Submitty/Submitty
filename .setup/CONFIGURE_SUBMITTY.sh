@@ -10,7 +10,7 @@ fi
 
 echo -e "\nWelcome to the Submitty Homework Submission Server Configuration\n"
 
-echo "What is the database host? (ex: localhost or csdb3)"
+echo "What is the database host? (ex: localhost or your.database.server)"
 read DATABASE_HOST
 
 echo "What is the database user? (ex: hsdbu)"

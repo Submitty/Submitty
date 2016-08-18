@@ -62,13 +62,12 @@ HTML;
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
-    <h2>View Assignment {$gradeable->getName()}</h2>
+    <h2>New submission for: {$gradeable->getName()}</h2>
     <div class="sub">
-        {$upload_message}
 HTML;
         if ($gradeable->hasAssignmentMessage()) {
             $return .= <<<HTML
-        <p class='green-message'>Note: {$gradeable->getAssignmentMessage()}</p>
+        <p class='green-message'>{$gradeable->getAssignmentMessage()}</p>
 HTML;
         }
         $return .= <<<HTML
@@ -106,6 +105,12 @@ HTML;
             }
     
             $return .= <<<HTML
+
+    </div>
+    <div>
+        {$upload_message}
+	<br>
+	&nbsp;
     </div>
     <button type="button" id="submit" class="btn btn-success" style="margin-right: 100px;">Submit</button>
     <button type="button" id="startnew" class="btn btn-primary">Clear</button>
@@ -277,26 +282,45 @@ HTML;
             
             if($gradeable->getActiveVersion() == 0 && $gradeable->getCurrentVersion() == 0) {
                 $return .= <<<HTML
-    <div class="sub">
-        <p class="red-message">
-            Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
-            This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
-            You may select any version above and select that for grading however.<br />
-        </p>
-    </div>
-
+                    <div class="sub">
+                    <p class="red-message">
+                    Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
+                    This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
+                    You may select any version above and press "Grade This Version" to re-activate your submission for grading.<br />
+                    </p>
+                    </div>
 HTML;
             }
             else {
-                if($gradeable->getActiveVersion() > 0 && $gradeable->getActiveVersion() === $gradeable->getCurrentVersion()) {
+	        if($gradeable->getActiveVersion() > 0 && $gradeable->getActiveVersion() === $gradeable->getCurrentVersion()) {
                     $return .= <<<HTML
-    <div class="sub">
-        <p class="green-message">
-        Note: This is your "ACTIVE" submission version, which will be graded by the instructor/TAs and the score recorded in the gradebook.
-        </p>
-    </div>
+		        <div class="sub">
+ 			<p class="green-message">
+			Note: This version of your assignment will be graded by the instructor/TAs and the score recorded in the gradebook.
+			</p>
+			</div>
 HTML;
-                }
+                } else {
+		    if($gradeable->getActiveVersion() > 0) {
+		        $return .= <<<HTML
+                           <div class="sub">
+                           <p class="red-message">
+                           Note: This version of your assignment will not be graded the instructor/TAs. <br />
+HTML;
+		    } else {
+                       $return .= <<<HTML
+                           <div class="sub">
+                           <p class="red-message">
+			   Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
+			   This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
+HTML;
+		    }
+                    $return .= <<<HTML
+                         Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
+                         </p>
+                         </div>
+HTML;
+	        }	
                 $return .= <<<HTML
     <div class="sub">
         <h4>Submitted Files</h4>
