@@ -336,7 +336,7 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
 
     formData.append('csrf_token', csrf_token);
     formData.append('svn_checkout', svn_checkout);
-    
+
     if (!svn_checkout) {
         // Check if new submission
         if (!isValidSubmission()) {

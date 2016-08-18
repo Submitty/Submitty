@@ -51,6 +51,8 @@ HTML;
     }
         
     /**
+     * TODO: BREAK UP THIS FUNCTION INTO EASIER TO MANAGE CHUNKS
+     * 
      * @param Gradeable $gradeable
      * @param int       $days_late
      *
@@ -303,28 +305,29 @@ HTML;
 HTML;
                 }
                 else {
-		    if($gradeable->getActiveVersion() > 0) {
-		        $return .= <<<HTML
+		            if($gradeable->getActiveVersion() > 0) {
+		                $return .= <<<HTML
    <div class="sub">
        <p class="red-message">
-           Note: This version of your assignment will not be graded the instructor/TAs. <br />
+            Note: This version of your assignment will not be graded the instructor/TAs. <br />
 HTML;
-		    }
-		    else {
+                    }
+                    else {
                        $return .= <<<HTML
-   <div class="sub">
-       <p class="red-message">
-           Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
-           This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
+    <div class="sub">
+        <p class="red-message">
+            Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
+            This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
 HTML;
-		    }
+		            }
             
-		    $return .= <<<HTML
-             Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
+		                $return .= <<<HTML
+            Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
          </p>
      </div>
 HTML;
-	        }
+	            }
+	            
                 $return .= <<<HTML
     <div class="sub">
         <h4>Submitted Files</h4>
@@ -353,7 +356,8 @@ HTML;
 number of re-autogrades: {$regrades}<br />
 last re-autograde finished: {$results['grading_finished']}<br />
 HTML;
-                    } else {
+                    }
+                    else {
                       $return .= <<<HTML
 queue wait time: {$results['wait_time']} seconds<br />
 HTML;
@@ -364,9 +368,15 @@ HTML;
 HTML;
                 $return .= <<<HTML
     </div>
+HTML;
+                $return .= <<<HTML
     <div class="sub">
+HTML;
+                if (count($gradeable->getTestcases()) > 0) {
+                    $return .= <<<HTML
         <h4>Results</h4>
 HTML;
+                }
                 $refresh_js = <<<HTML
         <script type="text/javascript">
             checkRefreshSubmissionPage('{$this->core->buildUrl(array('component' => 'student',
