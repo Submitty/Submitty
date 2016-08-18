@@ -278,16 +278,16 @@ function addLabel(filename, filesize, part, previous){
 //========================================================================================
 function isValidSubmission(){
     // check if new files added
-    for(var i=0; i < file_array.length; i++){
+    for (var i=0; i < file_array.length; i++) {
         if(file_array[i].length != 0){
             return true;
         }
     }
     // check if files from previous submission changed
-    if(changed){
+    if (changed) {
         // check if previous submission files are emptied
-        for(var j = 0; j < previous_files.length; j++){
-            if(previous_files[j] != 0) {
+        for (var j = 0; j < previous_files.length; j++) {
+            if (previous_files[j] != 0) {
                 return true;
             }
         }
@@ -331,26 +331,30 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
         }
     }
 
-    // Check if new submission
-    if(!isValidSubmission()){
-        alert("Not a new submission.");
-        window.location.reload();
-        return;
-    }
+
     var formData = new FormData();
 
-    formData.append('csrf_token', csrf_token);
-    formData.append('svn_checkout', svn_checkout);
-
-    // Files selected
-    for (var i = 0; i < file_array.length; i++){
-        for (var j = 0; j < file_array[i].length; j++){
-            formData.append('files' + (i+1) + '[]', file_array[i][j]);
+    if (!svn_checkout) {
+        // Check if new submission
+        if (!isValidSubmission()) {
+            alert("Not a new submission.");
+            window.location.reload();
+            return;
         }
-    }
-    // Files from previous submission
-    formData.append('previous_files', JSON.stringify(previous_files));
 
+        formData.append('csrf_token', csrf_token);
+        formData.append('svn_checkout', svn_checkout);
+
+        // Files selected
+        for (var i = 0; i < file_array.length; i++) {
+            for (var j = 0; j < file_array[i].length; j++) {
+                formData.append('files' + (i + 1) + '[]', file_array[i][j]);
+            }
+        }
+        // Files from previous submission
+        formData.append('previous_files', JSON.stringify(previous_files));
+    }
+    
     $.ajax({
         url: submit_url,
         data: formData,
