@@ -239,7 +239,7 @@ WHERE
 AND 
      eg.eg_submission_due_date <=?
 GROUP BY 
-    ldu.user_id", $params); 
+    ldu.user_id", $params);
 
             $row = Database::row();
 
@@ -253,7 +253,7 @@ GROUP BY
      * @throws \InvalidArgumentException
      */
     private function setEGDetails() {
-        //CHECK IF THERE IS A GRADEABLE FOR THIS STUDENT 
+        //CHECK IF THERE IS A GRADEABLE FOR THIS STUDENT
         
         $eg_details_query = "
 SELECT g_title, gd_overall_comment, g_grade_start_date, eg.* FROM electronic_gradeable AS eg 
@@ -266,7 +266,7 @@ SELECT g_title, gd_overall_comment, g_grade_start_date, eg.* FROM electronic_gra
         $this->eg_details = Database::row();
         
         if (empty($this->eg_details)) {
-            //get the active version 
+            //get the active version
             $assignment_settings = __SUBMISSION_SERVER__."/submissions/".$this->g_id."/".$this->student_id."/user_assignment_settings.json";
             if (!file_exists($assignment_settings)) {
                 $active_version = -1;
@@ -276,9 +276,9 @@ SELECT g_title, gd_overall_comment, g_grade_start_date, eg.* FROM electronic_gra
                 $results = json_decode($assignment_settings_contents, true);
                 $active_version = $results['active_version'];
             }
-                                                                    ///TODO UPDATE THE STATUS 
-            $params = array($this->g_id, $this->student_id, User::$user_id, '', 1,0,$active_version); 
-            Database::query("INSERT INTO gradeable_data(g_id,gd_user_id,gd_grader_id,gd_overall_comment, gd_status,gd_late_days_used,gd_active_version) VALUES(?,?,?,?,?,?,?)", $params); 
+                                                                    ///TODO UPDATE THE STATUS
+            $params = array($this->g_id, $this->student_id, User::$user_id, '', 1,0,$active_version);
+            Database::query("INSERT INTO gradeable_data(g_id,gd_user_id,gd_grader_id,gd_overall_comment, gd_status,gd_late_days_used,gd_active_version) VALUES(?,?,?,?,?,?,?)", $params);
             $this->gd_id = \lib\Database::getLastInsertId('gradeable_data_gd_id_seq');
             
             Database::query( $eg_details_query, array($this->student_id, $this->g_id));
@@ -320,8 +320,8 @@ ORDER BY gc_order ASC
                     $total += $testcase_value;
                 }
             }
-        }   
-        $this->autograding_max = $total; 
+        }
+        $this->autograding_max = $total;
     }
 
     /**
@@ -388,6 +388,8 @@ ORDER BY gc_order ASC
      */
     private function setEGResults() {
         foreach($this->submission_ids as $submission_id) {
+            $submission_directory = implode("/", array(__SUBMISSION_SERVER__, "submissions", $submission_id,
+                                                       $this->student_id, $this->active_assignment));
             $result_directory = implode("/", array(__SUBMISSION_SERVER__, "results",
                                 $submission_id, $this->student_id, $this->active_assignment));
 
@@ -395,14 +397,16 @@ ORDER BY gc_order ASC
                 continue;
             }
 
-            $submission_details = $result_directory."/results.json";
-            if (!file_exists($submission_details)) {
+            $results_file = $result_directory."/results.json";
+            $timestamp = file_get_contents($submission_directory."/.submit.timestamp");
+            if (!file_exists($results_file)) {
                 $details = array();
             }
             else {
-                $details = json_decode(file_get_contents($submission_details), true);
+                $details = json_decode(file_get_contents($results_file), true);
                 // TODO: Convert this to using DateTime and DateTimeInterval objects
-                $date_submission = strtotime($details['submission_time']);
+                $date_submission = strtotime($timestamp);
+                $details['submission_time'] = $timestamp;
                 $date_due = strtotime($this->eg_details["eg_submission_due_date"]) + 1 + __SUBMISSION_GRACE_PERIOD_SECONDS__;
                 $days_late = round((($date_submission - $date_due) / (60 * 60 * 24)) + .5, 0);
                 $this->days_late = ($days_late < 0) ? 0 : $days_late;
@@ -436,7 +440,7 @@ ORDER BY gc_order ASC
     /**
      * Calculate the overall status of the electronic gradeable. There is an entire electronic gradeable status which can take
      * on the values of 0 (not accepted) or 1 (accepted) where not accepted just means electronic gradeable
-     * should get a 0 automatically and 1 means electronic gradeable should be graded. 
+     * should get a 0 automatically and 1 means electronic gradeable should be graded.
      */
     private function calculateStatus() {
         if (!$this->submitted) {
@@ -452,7 +456,7 @@ ORDER BY gc_order ASC
             $this->status=0;
         }
         // IF MORE LATEDAYS WERE USED THAN THE STUDENT IS ALLOWED => FAIL
-        else if ($this->student['student_allowed_lates'] >= 0 && !$submitted_lates && 
+        else if ($this->student['student_allowed_lates'] >= 0 && !$submitted_lates &&
                  $this->days_late + $this->student['used_late_days'] > $this->student['student_allowed_lates']) {
             $this->status = 0;
         }
@@ -496,6 +500,6 @@ ORDER BY gc_order ASC
                 $total += $question['gc_max_value'];
             }
         }
-        $this->eg_details['eg_total'] = $total; 
+        $this->eg_details['eg_total'] = $total;
     }
 }
