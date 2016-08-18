@@ -77,7 +77,8 @@ HTML;
             $return .= <<<HTML
     <form action="{$this->core->buildUrl(array('component' => 'student', 
                                                'page' => 'submission', 
-                                               'action' => 'upload'))}" method="post" 
+                                               'action' => 'upload',
+                                               'gradeable_id' => $gradeable->getId()))}" method="post" 
         onsubmit="return checkVersionsUsed('{$gradeable->getName()}', {$gradeable->getHighestVersion()},
                                             {$gradeable->getMaxSubmissions()});">
         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
