@@ -145,12 +145,12 @@ class Config {
         
         $course = IniParser::readFile($this->course_ini);
 
-        $this->setConfigValues($course, 'database_details', array('database_name'));
+        $this->setConfigValues($course, 'hidden_details', array('database_name'));
         $this->setConfigValues($course, 'course_details', array('course_name', 'default_hw_late_days',
             'default_student_late_days', 'zero_rubric_grades', 'upload_message', 'ta_grades'));
         
-        if (isset($course['course_details']['course_url'])) {
-            $this->course_url = rtrim($course['course_details']['course_url'], "/")."/";
+        if (isset($course['hidden_details']['course_url'])) {
+            $this->course_url = rtrim($course['hidden_details']['course_url'], "/")."/";
             $this->base_url = $this->course_url;
         }
         
