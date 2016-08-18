@@ -518,6 +518,10 @@ abstract class Gradeable {
         return $this->grade_file;
     }
     
+    public function useTAGrading() {
+        return $this->ta_grading;
+    }
+    
     public function taGradesReleased() {
         return $this->ta_grades_released;
     }

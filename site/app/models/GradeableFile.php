@@ -33,7 +33,7 @@ class GradeableFile extends Gradeable {
             $this->subdirectory = isset($details['subdirectory']) ? $details['subdirectory'] : "";
             $this->point_precision = floatval($details['point_precision']);
             $this->instructions_url = $details['instructions_url'];
-            $this->ta_grading = $details['ta_grading'] == "yes";
+            $this->ta_grading = $details['ta_grading'] === true;
             
             $this->loadGradeableConfig();
         }
