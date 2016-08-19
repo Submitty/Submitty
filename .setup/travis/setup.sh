@@ -27,6 +27,13 @@ sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
 sudo mkdir -p ${SUBMITTY_DATA_DIR}
 
 python ${DIR}/../create_untrusted_users.py
+
+adduser ta --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+echo "ta:ta" | sudo chpasswd
+adduser instructor --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+echo "instructor:instructor" | sudo chpasswd
+adduser instructor sudo
+
 addgroup hwcronphp
 addgroup course_builders
 adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
