@@ -78,7 +78,7 @@ sudo echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
 sudo echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/valid
 sudo echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
 sudo echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/valid
-sudo echo "\n" | ${SUBMITTY_DATA_DIR}/bin/authonly.pl
+sudo echo "\n" | sudo perl ${SUBMITTY_DATA_DIR}/bin/authonly.pl
 sudo echo "student:student" | sudo chpasswd
 sudo echo "smithj:smithj" | sudo chpasswd
-sudo python ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py csci1100
+sudo python ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py csci1000
