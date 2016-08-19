@@ -44,7 +44,7 @@ sudo adduser hwcgi shadow
 sudo adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 sudo adduser hwphp hwcronphp
 sudo adduser hwcron hwcronphp
-sudo adduser hsdbu
+adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 echo "hsdbu:hsdbu" | sudo chpasswd
 
 
@@ -57,7 +57,7 @@ sudo adduser instructor course_builders
 sudo adduser ta csci1000
 sudo adduser ta csci1000_tas_www
 sudo adduser instructor csci1000
-sudo adduser	instructor csci1000_tas_www
+sudo adduser instructor csci1000_tas_www
 
 sudo chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
 sudo chown hwphp:hwphp ${SUBMITTY_DATA_DIR}
