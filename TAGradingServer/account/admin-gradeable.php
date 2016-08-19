@@ -230,7 +230,7 @@ if($user_is_administrator){
         <input type="radio" name="team_assignment" value="yes"
 HTML;
     
-    echo ($g_team_assignment===true)?'checked':''; 
+    echo ($g_team_assignment===true)?'checked':'';
     print <<<HTML
         > Yes
             <input type="radio" name="team_assignment" value ="no" 
@@ -347,13 +347,13 @@ HTML;
 HTML;
         print <<<HTML
                 <td style="overflow: hidden;">
-                    <textarea name="comment_title_{$num}" rows="1" class="comment_title complex_type" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" 
-                              >{$question['question_message']}</textarea>
+                    <textarea name="comment_title_{$num}" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" 
+                              placeholder="Question Title">{$question['question_message']}</textarea>
                     <textarea name="ta_comment_{$num}" id="individual_{$num}" class="ta_comment complex_type" rows="1" placeholder=" Message to TA"  onkeyup="autoResizeComment(event);"
-                                               style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
+                                               style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
                                                display: block;">{$question['question_grading_note']}</textarea>
                     <textarea name="student_comment_{$num}" id="student_{$num}" class="student_comment complex_type" rows="1" placeholder=" Message to Student" onkeyup="autoResizeComment(event);"
-                              style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
+                              style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
                               display: block;">{$question['student_grading_note']}</textarea>
                 </td>
 
@@ -363,9 +363,8 @@ HTML;
         print selectBox($num, $old_grade);
         $checked = ($question['question_extra_credit']) ? "checked" : "";
         print <<<HTML
-                    <input onclick='calculatePercentageTotal();' name="eg_extra_{$num}" type="checkbox" class='eg_extra extra' value='on' {$checked}/>
-HTML;
-        print <<<HTML
+                <br />
+                Extra Credit:&nbsp;&nbsp;<input onclick='calculatePercentageTotal();' name="eg_extra_{$num}" type="checkbox" class='eg_extra extra' value='on' {$checked}/>
                 <br />
 HTML;
         if ($num > 1){
@@ -387,17 +386,10 @@ HTML;
     }
         print <<<HTML
             <tr id="add-question">
-                <td style="overflow: hidden;">
+                <td colspan="2" style="overflow: hidden;">
                     <div class="btn btn-small btn-success" id="rubric-add-button" onclick="addQuestion()"><i class="icon-plus icon-white"></i> Question</div>
                 </td>
-                <td style="border-left: 1px solid #F9F9F9;"></td>
             </tr>
-HTML;
-        print <<<HTML
-                <tr>
-                    <td style="border-left: 1px solid #F9F9F9;"></td>
-                    <td style="border-left: 1px solid #F9F9F9;"></td>
-                </tr>
 HTML;
         print <<<HTML
                     <tr>
@@ -526,7 +518,7 @@ HTML;
             <br />
             What overall instructions should be provided to the TA?:<br /><textarea rows="4" cols="200" name="ta_instructions" placeholder="(Optional)" style="width: 500px;">
 HTML;
-    echo htmlspecialchars($g_overall_ta_instructions);  
+    echo htmlspecialchars($g_overall_ta_instructions);
     print <<<HTML
 </textarea>
             
@@ -548,7 +540,7 @@ HTML;
 
     $db->query("SELECT COUNT(*) AS cnt FROM sections_rotating", array());
     $num_rotating_sections = $db->row()['cnt'];
-    $all_sections = str_replace(array('[', ']'), '', 
+    $all_sections = str_replace(array('[', ']'), '',
                     htmlspecialchars(json_encode(range(1,$num_rotating_sections)), ENT_NOQUOTES));
 
     $db->query("
@@ -567,7 +559,7 @@ HTML;
     $graders_to_sections = array();
     
     foreach($db->rows() as $grader){
-        $graders_to_sections[$grader['user_id']] = str_replace(array('[', ']'), '', 
+        $graders_to_sections[$grader['user_id']] = str_replace(array('[', ']'), '',
                                                    htmlspecialchars(json_encode(pgArrayToPhp($grader['sections'])), ENT_NOQUOTES));
     }
     
@@ -595,9 +587,9 @@ HTML;
 HTML;
         if($action==='edit' && !$g_grade_by_registration) {
             print (isset($graders_to_sections[$fa_grader['user_id']])) ? $graders_to_sections[$fa_grader['user_id']] : '';
-        } 
+        }
         else{
-            print $all_sections; 
+            print $all_sections;
         }
         print <<<HTML
             "></td>
@@ -624,9 +616,9 @@ HTML;
 HTML;
         if($action==='edit' && !$g_grade_by_registration) {
             print (isset($graders_to_sections[$la_grader['user_id']])) ? $graders_to_sections[$la_grader['user_id']] : '';
-        } 
+        }
         else{
-            print $all_sections; 
+            print $all_sections;
         }
         print <<<HTML
 "></td>
@@ -1066,14 +1058,15 @@ HTML;
         var sBox = selectBox(newQ);
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
             <td style="overflow: hidden;"> \
-                <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 800px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"></textarea> \
+                <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" placeholder="Question Title"></textarea> \
                 <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA"  onkeyup="autoResizeComment(event);" \
-                          style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
+                          style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
                 <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student"  onkeyup="autoResizeComment(event);" \
-                          style="width: 940px; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
+                          style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
             </td> \
             <td style="background-color:#EEE;">' + sBox + ' \
-                <input onclick="calculatePercentageTotal();" name="eg_extra_'+newQ+'" type="checkbox" class="eg_extra extra" value="on"/> \
+                <br /> \
+                Extra Credit:&nbsp;&nbsp;<input onclick="calculatePercentageTotal();" name="eg_extra_'+newQ+'" type="checkbox" class="eg_extra extra" value="on"/> \
                 <br /> \
                 <a id="delete-'+newQ+'" class="question-icon" onclick="deleteQuestion('+newQ+');"> \
                     <img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a> \
