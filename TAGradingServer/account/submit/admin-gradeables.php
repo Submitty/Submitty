@@ -18,11 +18,11 @@ switch($action) {
         if (is_file($json_config)){
             unlink($json_config);
         }
-        print "success|".$id;
         break;
     default:
         print "invalid action";
         exit();
 }
 
+header('Location: '.__SUBMISSION_URL__.'/index.php?semester='.__COURSE_SEMESTER__.'&course='.__COURSE_CODE__);
 ?>
