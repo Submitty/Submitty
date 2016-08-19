@@ -44,6 +44,9 @@ sudo adduser hwcgi shadow
 sudo adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 sudo adduser hwphp hwcronphp
 sudo adduser hwcron hwcronphp
+sudo adduser hsdbu
+echo "hsdbu:hsdbu" | sudo chpasswd
+
 
 sudo addgroup csci1000
 sudo addgroup csci1000_tas_www
