@@ -18,3 +18,13 @@ if [ ! -f "$SELENIUM_JAR" ]; then
     sudo wget -O "${SELENIUM_JAR}" "${SELENIUM_DOWNLOAD_URL}"
     echo "Downloaded Selenium"
 fi
+
+USER=travis
+
+sudo mkdir -p SUBMITTY_INSTALL_DIR
+sudo mkdir -p SUBMITTY_DATA_DIR
+
+sudo chown ${USER}:${USER} SUBMITTY_INSTALL_DIR
+sudo chown ${USER}:${USER} SUBMITTY_DATA_DIR
+sudo chmod 777 SUBMITTY_INSTALL_DIR
+sudo chmod 777 SUBMITTY_DATA_DIR
