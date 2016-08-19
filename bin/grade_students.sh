@@ -462,9 +462,6 @@ function grade_this_item {
         # first, clean out all of the old files if this is a re-run
         rm -rf "$checkout_path"
 
-	# replace slashes with dashs in the timestamp (needed by SVN)
-	submission_time=${submission_time//\//-}
-
         # svn checkout into the archival directory
         mkdir -p $checkout_path
         pushd $checkout_path > /dev/null
