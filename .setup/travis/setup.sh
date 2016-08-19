@@ -72,11 +72,13 @@ svn+ssh:192.168.56.103" | sudo bash ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBM
 sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
 sudo bash ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
+sudo chmod 777 ${SUBMITTY_DATA_DIR}/instructors/authlist
+sudo chmod 777 ${SUBMITTY_DATA_DIR}/instructors/valid
 sudo echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
 sudo echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/valid
 sudo echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
 sudo echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/valid
-sudo ${SUBMITTY_DATA_DIR}/bin/authonly.pl
+sudo echo "\n" | ${SUBMITTY_DATA_DIR}/bin/authonly.pl
 sudo echo "student:student" | sudo chpasswd
 sudo echo "smithj:smithj" | sudo chpasswd
 sudo python ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py csci1100
