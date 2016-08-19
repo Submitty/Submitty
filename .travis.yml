@@ -62,6 +62,7 @@ before_script:
   - psql -U postgres -d submitty -f tests/testData/travis.sql
   - sudo ./.setup/travis/autograder.sh
   - ./.setup/travis/setup.sh
+  - sudo ./.setup/travis/setup_test_suite.sh
   - ./.setup/travis/start.sh
 
 script:
