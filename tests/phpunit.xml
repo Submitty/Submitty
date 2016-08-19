@@ -8,9 +8,10 @@
         <testsuite name="Unit Tests">
             <directory suffix="Tester.php">unitTests/app</directory>
         </testsuite>
-        <!--<testsuite name="Functional Tests">
+        <testsuite name="E2E Tests">
             <directory suffix="Tester.php">e2e</directory>
-        </testsuite>-->
+            <exclude>e2e/GradingServer</exclude>
+        </testsuite>
     </testsuites>
 
     <logging>
