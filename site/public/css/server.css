@@ -338,13 +338,14 @@ textarea {
 
 select {
     margin: 0 10px;
-    padding: 5px 15px;
+    padding: 5px 35px 5px 10px;
     font-size: 16px;
     border: 1px solid #ccc;
     height: 34px;
+    background: #FFF url('../img/down_arrow.png') no-repeat right 10px center;
+    background-size: 20px;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background: #fff;
 }
 
 .label {
