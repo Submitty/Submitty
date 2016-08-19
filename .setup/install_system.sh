@@ -70,6 +70,105 @@ if [ ${VAGRANT} == 1 ]; then
     echo "192.168.56.104    test-hwgrading test-hwgrading.cs.rpi.edu" >> /etc/hosts
 fi
 
+#################################################################
+# USERS SETUP
+#################
+
+python ${SUBMITTY_REPOSITORY}/.setup/create_untrusted_users.py
+
+# Special users and groups needed to run Submitty
+#
+# It is probably easiest to set and store passwords for the special
+# accounts, although you can also use ‘sudo su user’ to change to the
+# desired user on the local machine which works for most things.
+
+# The group hwcronphp allows hwphp to write the submissions, but give
+# read-only access to the hwcron user.  And the hwcron user writes the
+# results, and gives read-only access to the hwphp user.
+
+addgroup hwcronphp
+
+# The group course_builders allows instructors/head TAs/course
+# managers to write website custimization files and run course
+# management scripts.
+
+addgroup course_builders
+
+if [ ${VAGRANT} == 1 ]; then
+	adduser vagrant sudo
+	adduser ta --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+	echo "ta:ta" | sudo chpasswd
+	adduser instructor --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+	echo "instructor:instructor" | sudo chpasswd
+	adduser instructor sudo
+	adduser developer --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+	echo "developer:developer" | sudo chpasswd
+	adduser developer sudo
+fi
+
+# change the default user umask (was 002)
+sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs
+grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && exit)
+
+adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser hwcgi hwphp
+# NOTE: hwcgi must be in the shadow group so that it has access to the
+# local passwords for pam authentication
+adduser hwcgi shadow
+if [ ${VAGRANT} == 1 ]; then
+	echo "hwphp:hwphp" | sudo chpasswd
+	echo "hwcgi:hwcgi" | sudo chpasswd
+	adduser hwphp vagrant
+	adduser hwcgi vagrant
+fi
+adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+if [ ${VAGRANT} == 1 ]; then
+	echo "hwcron:hwcron" | sudo chpasswd
+fi
+
+# FIXME:  umask setting above not complete
+# might need to also set USERGROUPS_ENAB to "no", and manually create
+# the hwphp and hwcron single user groups.  See also /etc/login.defs
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcgi/.profile
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
+
+
+adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+if [ ${VAGRANT} == 1 ]; then
+	echo "hsdbu:hsdbu" | sudo chpasswd
+fi
+adduser hwphp hwcronphp
+adduser hwcron hwcronphp
+
+for COURSE in csci1000 csci1100 csci1200 csci2600
+do
+
+    # for each course, create a group to contain the current
+    # instructor along the lines of:
+
+	addgroup ${COURSE}
+
+    # and another group to contain the current instructor, TAs,
+    # hwcron, and hwphp along the lines of
+
+	addgroup ${COURSE}_tas_www
+	adduser hwphp ${COURSE}_tas_www
+	adduser hwcron ${COURSE}_tas_www
+	if [ ${VAGRANT} == 1 ]; then
+		adduser ta ${COURSE}
+		adduser ta ${COURSE}_tas_www
+		adduser instructor ${COURSE}
+		adduser	instructor ${COURSE}_tas_www
+		adduser developer ${COURSE}
+		adduser developer ${COURSE}_tas_www
+	fi
+done
+
+if [ ${VAGRANT} == 1 ]; then
+	adduser instructor course_builders
+fi
 
 
 #################################################################
@@ -96,10 +195,8 @@ apt-get install -qqy ntp
 service ntp restart
 
 # path for untrusted user creation script will be different if not using Vagrant
-${SUBMITTY_REPOSITORY}/.setup/create.untrusted.users.pl
 
 apt-get install -qqy libpam-passwdqc
-
 
 # Use suphp to improve file permission granularity by running php
 # scripts as the user that owns the file instead of www-data
@@ -165,8 +262,6 @@ chmod -R 555 /usr/local/lib/python2.7/*
 chmod 555 /usr/lib/python2.7/dist-packages
 sudo chmod 500   /usr/local/lib/python2.7/dist-packages/pam.py*
 sudo chown hwcgi /usr/local/lib/python2.7/dist-packages/pam.py*
-
-
 
 
 #################################################################
@@ -344,120 +439,11 @@ sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php5/cgi/php.ini
 sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php5/cgi/php.ini
 sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php5/cgi/php.ini
 
-
-#################################################################
-# USERS SETUP
-#################
-
-# Special users and groups needed to run Submitty
-#
-# It is probably easiest to set and store passwords for the special
-# accounts, although you can also use ‘sudo su user’ to change to the
-# desired user on the local machine which works for most things.
-
-# The group hwcronphp allows hwphp to write the submissions, but give
-# read-only access to the hwcron user.  And the hwcron user writes the
-# results, and gives read-only access to the hwphp user.
-
-addgroup hwcronphp
-
-# The group course_builders allows instructors/head TAs/course
-# managers to write website custimization files and run course
-# management scripts.
-
-addgroup course_builders
-
-if [ ${VAGRANT} == 1 ]; then
-	adduser vagrant sudo
-	adduser ta --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-	echo "ta:ta" | sudo chpasswd
-	adduser instructor --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-	echo "instructor:instructor" | sudo chpasswd
-	adduser instructor sudo
-	adduser developer --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-	echo "developer:developer" | sudo chpasswd
-	adduser developer sudo
-fi
-
-
-# change the default user umask (was 002)
-sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs
-grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && exit)
-
-
-adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser hwcgi hwphp
-# NOTE: hwcgi must be in the shadow group so that it has access to the
-# local passwords for pam authentication
-adduser hwcgi shadow
-if [ ${VAGRANT} == 1 ]; then
-	echo "hwphp:hwphp" | sudo chpasswd
-	echo "hwcgi:hwcgi" | sudo chpasswd
-	adduser hwphp vagrant
-	adduser hwcgi vagrant
-fi
-adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-if [ ${VAGRANT} == 1 ]; then
-	echo "hwcron:hwcron" | sudo chpasswd
-fi
-
-# only hwcgi can use the python pam module
-chown hwcgi:hwcgi /usr/local/lib/python2.7/dist-packages/pam*
-chmod 500         /usr/local/lib/python2.7/dist-packages/pam*
-
-
-# FIXME:  umask setting above not complete
-# might need to also set USERGROUPS_ENAB to "no", and manually create
-# the hwphp and hwcron single user groups.  See also /etc/login.defs
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcgi/.profile
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
-
-
-adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-if [ ${VAGRANT} == 1 ]; then
-	echo "hsdbu:hsdbu" | sudo chpasswd
-fi
-adduser hwphp hwcronphp
-adduser hwcron hwcronphp
-
-for COURSE in csci1000 csci1100 csci1200 csci2600
-do
-
-    # for each course, create a group to contain the current
-    # instructor along the lines of:
-
-	addgroup $COURSE
-
-    # and another group to contain the current instructor, TAs,
-    # hwcron, and hwphp along the lines of
-
-	addgroup $COURSE\_tas_www
-	adduser hwphp $COURSE\_tas_www
-	adduser hwcron $COURSE\_tas_www
-	if [ ${VAGRANT} == 1 ]; then
-		adduser ta $COURSE
-		adduser instructor $COURSE
-		adduser	instructor $COURSE\_tas_www
-		adduser developer $COURSE
-		adduser developer $COURSE\_tas_www
-	fi
-done
-
-if [ ${VAGRANT} == 1 ]; then
-	adduser instructor course_builders
-fi
-
-
 # create directories and fix permissions
-
 mkdir -p ${SUBMITTY_DATA_DIR}
-
 
 # create a list of valid userids and put them in /var/local/submitty/instructors
 # one way to create your list is by listing all of the userids in /home
-
 mkdir -p ${SUBMITTY_DATA_DIR}/instructors
 ls /home | sort > ${SUBMITTY_DATA_DIR}/instructors/valid
 

@@ -44,7 +44,7 @@ install:
   - travis_retry composer install --prefer-dist --no-interaction
 
 before_script:
-  - sudo iptables -t nat -A OUTPUT -p all -d 192.168.56.104 -j DNAT --to-destination 127.0.0.1
+  - sudo iptables -t nat -A OUTPUT -p all -d 192.168.56.101 -j DNAT --to-destination 127.0.0.1
   - sudo usermod -a -G travis www-data
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - sudo a2enmod rewrite actions fastcgi alias
