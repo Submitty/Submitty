@@ -55,8 +55,8 @@ before_script:
   - sudo sed -e "s?%TRAVIS_BUILD_DIR?$(pwd)?g" --in-place /etc/apache2/sites-available/000-default.conf
   - sudo service apache2 restart
 #  - if [[ "$TRAVIS_PHP_VERSION" = "hhvm" ]]; then source ./.setup/travis/hhvm.sh; fi
-  - ./.setup/travis/setup.sh
   - sudo ./.setup/travis/autograder.sh
+  - ./.setup/travis/setup.sh
   - psql -U postgres -c 'create database submitty;'
   - psql -U postgres -c "CREATE GROUP submitty ROLE postgres"
   - psql -U postgres -d submitty -f site/data/tables.sql
