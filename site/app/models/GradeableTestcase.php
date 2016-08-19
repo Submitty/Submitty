@@ -75,7 +75,7 @@ class GradeableTestcase {
               }
               if ($this->points_awarded > $this->points) {
                 // TODO: ADD ERROR
-                $this->points_awarded = $this_points;
+                $this->points_awarded = $this->points;
               }
             } else if ($this->points < 0) {
               // PENALTY TESTCASE
@@ -85,7 +85,7 @@ class GradeableTestcase {
               }
               if ($this->points_awarded < $this->points) {
                 // TODO: ADD ERROR
-                $this->points_awarded = $this_points;
+                $this->points_awarded = $this->points;
               }
             } else {
               $this->points_awarded = 0;
