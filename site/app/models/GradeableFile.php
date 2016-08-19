@@ -25,7 +25,6 @@ class GradeableFile extends Gradeable {
     
         $this->type = GradeableType::stringToType($details['gradeable_type']);
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
-            $this->type = GradeableType::ELECTRONIC_FILE;
             $this->open_date = new \DateTime($details['date_submit'], $timezone);
             $this->due_date = new \DateTime($details['date_due'], $timezone);
             $this->late_days = $details['eg_late_days'];
@@ -38,7 +37,6 @@ class GradeableFile extends Gradeable {
             $this->loadGradeableConfig();
         }
         else if ($this->type === GradeableType::CHECKPOINTS) {
-            $this->type = GradeableType::CHECKPOINTS;
             //$this->optional_ta_message = $details['checkpt-opt-ta-messg'] === "yes";
             // TODO: load checkpoints
         }

@@ -23,19 +23,22 @@ class DatabaseQueriesPostgresql implements IDatabaseQueries{
         // TODO: Implement getAssignmentById() method.
     }
 
-    public function getAllGradeables() {
-        $this->database->query("
-SELECT r.*, CASE WHEN (q.cnt > 0) THEN true ELSE false END as has_rubric
-FROM assignments as r
-LEFT JOIN (
-	SELECT assignment_id, count(*) as cnt
-	FROM questions
-	GROUP BY assignment_id
-) as q ON q.assignment_id=r.assignment_id
-ORDER BY assignment_due_date, assignment_id");
+    public function getAllGradeableIds() {
+        $this->database->query("SELECT g_id FROM gradeable ORDER BY g_id");
         return $this->database->rows();
     }
-
+    
+    public function getGradeableById($g_id) {
+        $this->database->query("SELECT g.*, eg.*
+FROM gradeable as g
+LEFT JOIN (
+	SELECT *
+	FROM electronic_gradeable
+) as eg ON eg.g_id = g.g_id
+WHERE g.g_id=?", array($g_id));
+        return $this->database->row();
+    }
+    
     public function getAllStudents() {
         $this->database->query("
 SELECT u.*, s.section_title

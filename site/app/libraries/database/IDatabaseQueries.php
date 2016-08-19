@@ -45,20 +45,21 @@ interface IDatabaseQueries {
      * @return array
      */
     public function getAssignmentById($assignment_id);
-
+    
     /**
-     * Fetches all assignments and their details (including if rubric exists for assignment)
-     * from the database ordered by their due date and then id. This is a multidimensional array
-     * where each inner array has the form of:
-     *
-     * @todo: write the return array structure
-     * array(
-     *      '',
-     * );
-     *
-     * @return array
+     * Gets array of all gradeables ids in the database returning it in a list sorted alphabetically
+     * @return mixed
      */
-    public function getAllGradeables();
+    public function getAllGradeableIds();
+    
+    /**
+     * Gets gradeable for the the given id
+     *
+     * @param $g_id
+     *
+     * @return mixed
+     */
+    public function getGradeableById($g_id);
 
     /**
      * Fetches all students from the users table, ordering by course section than user_id. All users
@@ -125,10 +126,4 @@ interface IDatabaseQueries {
      * @param $session_id
      */
     public function removeSessionById($session_id);
-    
-    /**
-     * Gets array of all gradeables ids in the database returning it in a list sorted alphabetically
-     * @return mixed
-     */
-    public function getAllGradeablesIds();
 }

@@ -26,7 +26,7 @@ class NavigationController implements IController {
     
     public function __construct(Core $core) {
         $this->core = $core;
-        $this->gradeables_list = new GradeableList($this->core);
+        $this->gradeables_list = new GradeableList($this->core, true);
     }
 
     public function run() {

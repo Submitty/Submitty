@@ -46,9 +46,9 @@ class GradeableList {
             });
         }
         else {
-            $ids = $this->core->getQueries()->getAllGradeablesIds();
-            foreach ($ids as $id) {
-                $this->gradeables[$id] = new GradeableDb($this->core, $id);
+            $rows = $this->core->getQueries()->getAllGradeableIds();
+            foreach ($rows as $row) {
+                $this->gradeables[$row['g_id']] = new GradeableDb($this->core, $row['g_id']);
             }
         }
         $this->now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
