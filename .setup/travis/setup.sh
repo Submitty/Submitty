@@ -25,6 +25,7 @@ fi
 
 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
 sudo mkdir -p ${SUBMITTY_DATA_DIR}
+sudo ln -s ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
 
 sudo python ${DIR}/../create_untrusted_users.py
 
