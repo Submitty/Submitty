@@ -23,8 +23,18 @@ if($user_is_administrator){
         'g_min_grading_group' => ''
     );
     $old_questions = $old_components = $electronic_gradeable = array();
+    $electronic_gradeable['eg_instructions_url'] = "";
+    $electronic_gradeable['eg_submission_open_date'] = "";
+    $electronic_gradeable['eg_submission_due_date'] = "";
+    $electronic_gradeable['eg_subdirectory'] = "";
+    $electronic_gradeable['eg_config_path'] = "";
+    $electronic_gradeable['eg_late_days'] = __DEFAULT_LATE_DAYS__;
+    $electronic_gradeable['eg_precision'] = 0.5;
+    $old_components = "{}";
+    
     $num_numeric = $num_text = 0;
-    $g_gradeable_type = $is_repository = $g_syllabus_bucket = $g_min_grading_group = $default_late_days = -1;
+    $g_gradeable_type = $g_syllabus_bucket = $g_min_grading_group = $default_late_days = -1;
+    $is_repository = false;
     $use_ta_grading = true;
     $g_overall_ta_instructions = $g_id = '';
     $edit = json_encode(isset($_GET['action']) && $_GET['action'] == 'edit');
@@ -113,7 +123,7 @@ if($user_is_administrator){
         $g_grade_released_date = $old_gradeable['g_grade_released_date'];
         $g_min_grading_group = $old_gradeable['g_min_grading_group'];
         $string = "Edit";
-        $button_string ="Save";
+        $button_string = "Save";
         $action = 'edit';
     }
 
@@ -211,6 +221,9 @@ if($user_is_administrator){
 </style>
 
 <div id="container-rubric">
+    <form id="delete-gradeable" action="{$BASE_URL}/account/submit/admin-gradeables.php?action=delete&id={$old_gradeable['g_id']}" method="post">
+        <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
+    </form>
     <form id="gradeable-form" class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" 
           method="post" enctype="multipart/form-data"> 
 
@@ -218,6 +231,13 @@ if($user_is_administrator){
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
             <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{$button_string} Gradeable</button>
+HTML;
+    if ($action == "edit") {
+        print <<<HTML
+                <button type="button" class="btn btn-danger" onclick="deleteForm();" style="margin-right:10px; float: right;">Delete Gradeable</button>
+HTML;
+    }
+    print <<<HTML
         </div>
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
             What is the unique id of this gradeable?: <input style='width: 200px' type='text' name='gradeable_id' class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
@@ -279,7 +299,7 @@ HTML;
                 <fieldset>
                     <input type="radio" class="upload_file" name="upload_type" value="Upload File"
 HTML;
-                    echo ($is_repository===false)?'checked':'';
+                    echo ($is_repository === false)?'checked':'';
         print <<<HTML
                     > Upload File(s)
                     <input type="radio" id="repository_radio" class="upload_repo" name="upload_type" value="Repository"
@@ -300,7 +320,7 @@ HTML;
                 </fieldset>
 
                 Path to autograding config: 
-                <input style='width: 227px' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
+                <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
                 <br />
                 Point precision: 
                 <input style='width: 50px' type='text' name='point_precision' value="0.5" class="float_val" />
@@ -498,6 +518,7 @@ HTML;
                 <input type="radio" name="opt_ta_messg" value="no" /> No-->
             </div>  
             </fieldset>
+            <div id="grading_questions">
             What is the lowest privileged user group that can grade this?
             <select name="minimum_grading_group" class="int_val" style="width:180px;">
 HTML;
@@ -641,11 +662,13 @@ HTML;
                 style="cursor: auto; background-color: #FFF; width: 250px;">
             
             <br />
-            What date will the TA grades be released to the students? 
+            What date will the grade be released to the student? 
             <input name="date_released" id="date_released" class="datepicker" type="text" 
                    style="cursor: auto; background-color: #FFF; width: 250px;">    
             
             <br />
+            </div>
+            
             What syllabus/iris "bucket" does this item belong to?:
             
             <select name="gradeable_buckets" style="width: 170px;">
@@ -677,12 +700,29 @@ HTML;
             -->
         </div>
         <div class="modal-footer">
-                <button class="btn btn-primary" type="submit" style="margin-top: 10px;">{$string} Gradeable</button>
+                <button class="btn btn-primary" type="submit" style="margin-top: 10px; float: right;">{$button_string} Gradeable</button>
+HTML;
+    if ($action == "edit") {
+        print <<<HTML
+                <button type="button" class="btn btn-danger" onclick="deleteForm();" style="margin-top:10px; margin-right: 10px; float: right;">Delete Gradeable</button>
+HTML;
+    }
+    print <<<HTML
         </div>
     </form>
 </div>
 
 <script type="text/javascript">
+    function deleteForm() {
+        var r = confirm("Are you sure you want to delete this gradeable?");
+        if (r == true) {
+            $("#delete-gradeable").submit();
+        }
+        else {
+            return false;
+        }
+    }
+    
     $.fn.serializeObject = function(){
         var o = {};
         var a = this.serializeArray();
@@ -892,7 +932,7 @@ HTML;
         if ($('input[name=gradeable_type]').is(':checked')){
             $('input[name=gradeable_type]').each(function(){
                 if(!($(this).is(':checked')) && {$edit}){
-                    $(this).attr("disabled",true);    
+                    $(this).attr("disabled",true);
                 }
             });
         }
@@ -910,16 +950,18 @@ HTML;
             }
         });
         
-        if ( $('input:radio[name="ta_grading"]:checked').attr('value')==='false'){
+        if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
             $('#rubric_questions').hide();
+            $('#grading_questions').hide();
         }
         
-        $('input:radio[name="ta_grading"]').change(
-        function(){
+        $('input:radio[name="ta_grading"]').change(function(){
             $('#rubric_questions').hide();
+            $('#grading_questions').hide();
             if ($(this).is(':checked')){
                 if($(this).val() == 'true'){ 
                     $('#rubric_questions').show();
+                    $('#grading_questions').show();
                 }
             }
         });
@@ -959,6 +1001,11 @@ HTML;
             }
             
             $('#electronic_file').show();
+            
+            if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
+                $('#rubric_questions').hide();
+                $('#grading_questions').hide();
+            }
         }
         else if ($('#radio_checkpoints').is(':checked')){
             var components = {$old_components};
@@ -968,6 +1015,7 @@ HTML;
                 addCheckpoint(elem.gc_title,elem.gc_is_extra_credit);
             });
             $('#checkpoints').show();
+            $('#grading_questions').show();
         }
         else if ($('#radio_numeric').is(':checked')){ 
             var components = {$old_components};
@@ -982,6 +1030,7 @@ HTML;
             $('#numeric_num-items').val({$num_numeric});
             $('#numeric_num_text_items').val({$num_text});
             $('#numeric').show();
+            $('#grading_questions').show();
         }
         if({$have_old}){
             $('input[name=gradeable_id]').attr('readonly', true);
@@ -1027,12 +1076,18 @@ HTML;
         if ($(this).is(':checked')){ 
             if($(this).val() == 'Electronic File'){ 
                 $('#electronic_file').show();
+                if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
+                    $('#rubric_questions').hide();
+                    $('#grading_questions').hide();
+                }
             }
             else if ($(this).val() == 'Checkpoints'){ 
                 $('#checkpoints').show();
+                $('#grading_questions').show();
             }
             else if ($(this).val() == 'Numeric'){ 
                 $('#numeric').show();
+                $('#grading_questions').show();
             }
         }
     });
