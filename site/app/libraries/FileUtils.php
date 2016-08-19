@@ -37,7 +37,11 @@ class FileUtils {
                         $temp = FileUtils::getAllFiles($path, $skip_files);
                         if ($flatten) {
                             foreach ($temp as $file => $details) {
-                                $details['relative_name'] = $entry."/".$details['name'];
+			        if (isset($details['name'])) {
+				   $details['relative_name'] = $entry."/".$details['name'];
+				} else {
+				   $details['relative_name'] = $entry."/UNKNOWN.txt";
+				}
                                 $return[$entry."/".$file] = $details;
                             }
                         }
