@@ -1,5 +1,13 @@
 #!/bin/bash
 
+SUBMITTY_INSTALL_DIR=/usr/local/submitty
+SUBMITTY_DATA_DIR=/var/local/submitty
+
+mkdir -p ${SUBMITTY_INSTALL_DIR}
+mkdir -p ${SUBMITTY_DATA_DIR}
+mkdir -p ${SUBMITTY_INSTALL_DIR}/src
+cp -r grading/ ${SUBMITTY_INSTALL_DIR}/src/
+
 # --------------------------------------
 echo "Getting DrMemory..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
