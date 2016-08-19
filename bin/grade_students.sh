@@ -423,8 +423,8 @@ function grade_this_item {
 
     # use the jq json parsing command line utility to grab the svn_checkout flag from the config file
     json_config="$SUBMITTY_DATA_DIR/courses/$semester/$course/config/form/form_${assignment}.json"
-    step=`cat ${json_config} | jq '.["upload-type"]'`
-    if [ "$step" = "Repository" ]; then svn_checkout=true; else svn_checkout=false; fi
+    step=`cat ${json_config} | jq .upload_type`
+    if [ "$step" == "\"Repository\"" ]; then svn_checkout=true; else svn_checkout=false; fi
 
     # also save the due date
     global_assignment_deadline=`cat ${json_config} | jq .date_due`

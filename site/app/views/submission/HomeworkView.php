@@ -335,7 +335,11 @@ HTML;
 HTML;
                 $array = ($gradeable->useSvnCheckout()) ? $gradeable->getSvnFiles() : $gradeable->getSubmittedFiles();
                 foreach ($array as $file) {
-                    $size = number_format($file['size'] / 1024, 2);
+                    if (isset($file['size'])) {
+		       $size = number_format($file['size'] / 1024, 2);
+		    } else {
+		       $size = number_format(-1);
+		    }
                     $return .= "{$file['relative_name']} ({$size}kb)<br />";
                 }
                 $return .= <<<HTML

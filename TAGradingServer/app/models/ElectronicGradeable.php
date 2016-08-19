@@ -314,10 +314,12 @@ ORDER BY gc_order ASC
         if (file_exists($build_file)) {
             $build_file_contents = file_get_contents($build_file);
             $results = json_decode($build_file_contents, true);
-            foreach($results['testcases'] as $testcase){
-                $testcase_value = floatval($testcase['points']);
-                if ($testcase_value > 0 && !$testcase['extra_credit']){
-                    $total += $testcase_value;
+            if (isset($results['testcases']) && count($results['testcases']) > 0) {
+                foreach ($results['testcases'] as $testcase) {
+                    $testcase_value = floatval($testcase['points']);
+                    if ($testcase_value > 0 && !$testcase['extra_credit']) {
+                        $total += $testcase_value;
+                    }
                 }
             }
         }
