@@ -12,6 +12,7 @@ class ConfigurationView {
 
     public function viewConfig($fields) {
         $zero_checked = ($fields['zero_rubric_grades'] === true) ? 'checked' : '';
+        $ta_grades = ($fields['ta_grades'] === true) ? 'checked' : '';
 
         return <<<HTML
 <div class="content">
@@ -51,6 +52,21 @@ class ConfigurationView {
                 <div class="option-alt">Should rubrics start out at zero when TAs are grading? If disabled, the rubric will
                 start at full credit unless the submission was too late/not submitted at which point it'll be zeroed out
                 automatically.</div>
+            </div>
+        </div>
+        <div class="option">
+            <div class="option-input"><textarea style="height: 50px" name="upload_message">{$fields['upload_message']}</textarea></div>
+            <div class="option-desc">
+                <div class="option-title">Upload Message</div>
+                <div class="option-alt">What is the message that should be shown to students above the upload area
+                on the submission page.</div>
+            </div>
+        </div>
+        <div class="option">
+            <div class="option-input"><input type="checkbox" name="ta_grades" value="true" {$ta_grades} /></div>
+            <div class="option-desc">
+                <div class="option-title">Enable TA Grades</div>
+                <div class="option-alt">Should TA grade reports ever be shown to students on their submissions.</div>
             </div>
         </div>
     </div>

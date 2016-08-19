@@ -64,7 +64,7 @@ if (!file_exists($config)) {
 $a = IniParser::readFile($config);
 define("__COURSE_CODE__", $_GET['course']);
 define("__COURSE_SEMESTER__", $_GET['semester']);
-define("__DATABASE_NAME__", $a['database_details']['database_name']);
+define("__DATABASE_NAME__", $a['hidden_details']['database_name']);
 define("__COURSE_NAME__", $a['course_details']['course_name']);
 define("__CALCULATE_DIFF__", true);
 define("__DEFAULT_LATE_DAYS__", $a['course_details']['default_hw_late_days']);

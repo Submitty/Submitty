@@ -20,9 +20,9 @@ class AuthenticationView {
             <input type="hidden" name="component" value="authentication" />
             <input type="hidden" name="page" value="checkLogin" />
 HTML;
-        foreach ($this->core->getControllerTypes() as $type) {
-            if (isset($_REQUEST['old'][$type])) {
-                $return .= "<input type='hidden' name='old_{$type}' value='{$_REQUEST['old'][$type]}' />\n";
+        if (isset($_REQUEST['old'])) {
+            foreach ($_REQUEST['old'] as $key => $value) {
+                $return .= "<input type='hidden' name='old_{$key}' value='{$value}' />\n";
             }
         }
         $return .= <<<HTML

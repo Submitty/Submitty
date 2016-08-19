@@ -22,13 +22,11 @@ FROM
     gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id
 WHERE 
     g.g_id=?
-    AND NOT gc_is_extra_credit
-    AND gc_max_value > 0
 GROUP BY 
     g.g_id", $params);
 	$gradeable_info = $db->row();
     
-// students and their grade data    
+// students and their grade data
 $query = "
 SELECT
 	s.*,
@@ -47,7 +45,7 @@ FROM
         GROUP BY 
             g_id, 
             gd_user_id
-	) as gt ON gt.gd_user_id=s.user_id "; 
+	) as gt ON gt.gd_user_id=s.user_id ";
 
 print <<<HTML
 	<style type="text/css">
@@ -193,7 +191,7 @@ HTML;
         if(count($students) > 0) {
             if(isset($row['score'])) {
                 if($row['score'] >= 0) {
-                    echo "<a class='btn' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>[ " . ($row['score'] +$eg->autograding_points). 
+                    echo "<a class='btn' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>[ " . ($row['score'] +$eg->autograding_points).
                            " / " . ($rubric_total + $eg->autograding_max) . " ]</a>";
                 } else {
                     echo "<a class='btn btn-danger' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>[ GRADING ERROR ]</a>";

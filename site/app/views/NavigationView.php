@@ -17,15 +17,27 @@ class NavigationView {
     }
     
     public function showGradeables($sections_to_list) {
-        $return = <<<HTML
-<div class="content">
-    <table class="gradeable_list" style="width:100%;">
-
-HTML;
         $ta_base_url = $this->core->getConfig()->getTABaseUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $site_url = $this->core->getConfig()->getSiteUrl();
+        
+        $return = <<<HTML
+<div class="content">
+    <div class="nav-buttons">
+HTML;
+        if ($this->core->getUser()->accessAdmin()) {
+            $return .= <<<HTML
+        <button class="btn btn-primary" onclick="window.location.href='{$ta_base_url}/account/admin-gradeable.php?course={$course}&semester={$semester}'">New Gradeable</button>
+        <button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course={$course}&semester={$semester}&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button>
+HTML;
+        }
+        $return .= <<<HTML
+        <!--<button class="btn btn-primary">View Grades</button>-->
+    </div>
+    <table class="gradeable_list" style="width:100%;">
+
+HTML;
         $title_to_button_type_submission = array("FUTURE" => "btn-default", "OPEN" => "btn-primary" , "CLOSED" => "btn-danger",
                                                  "ITEMS BEING GRADED" => "btn-default", "GRADED" => 'btn-success');
         $title_to_button_type_grading = array("FUTURE" => "btn-default", "OPEN" => "btn-default" , "CLOSED" => "btn-default",
@@ -65,21 +77,26 @@ HTML;
                  {$button_text}
              </button>
 HTML;
-                        $gradeable_grade_range = <<<HTML
+                        if ($g_data->useTAGrading()) {
+                            $gradeable_grade_range = <<<HTML
             <button class="btn {$title_to_button_type_grading[$title]}" style="width:100%;" \\
             onclick="location.href='{$ta_base_url}/account/index.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
             {$gradeable_grade_range}</button>
 HTML;
+                        }
+                        else {
+                            $gradeable_grade_range = "";
+                        }
                     }
                     else {
                         $gradeable_open_range = <<<HTML
              <button class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" disabled>
-                 Missing Build Config File.
+                 Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh
              </button>
 HTML;
                         $gradeable_grade_range = <<<HTML
             <button class="btn {$title_to_button_type_grading[$title]}" style="width:100%;" disabled>
-                Missing Build Config File
+                Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh
             </button>
 HTML;
                     }

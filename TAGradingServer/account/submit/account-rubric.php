@@ -16,15 +16,11 @@ if (!isset($gradeable['g_id'])){
 }
 
 $now = new DateTime('now');
-$homeworkDate = new DateTime($gradeable['eg_submission_due_date']);
+$homeworkDate = new DateTime($gradeable['g_grade_start_date']);
 $status = intval($_POST['status']);
 $submitted = intval($_POST['submitted']);
 $is_graded = boolval($_POST['is_graded']);
 $_POST["late"] = intval($_POST['late']);
-
-if ($gradeable['eg_late_days'] > 0) {
-    $homeworkDate->add(new DateInterval("PT{$gradeable['eg_late_days']}H"));
-}
 
 if ($now < $homeworkDate) {
     die("Gradeable is not open for grading yet.");

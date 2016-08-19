@@ -58,7 +58,7 @@ def create_course(course, semester, course_group, assignments):
         tmp2 = tmp + timedelta(days=4)
         form_json["date_grade"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp2.year, tmp2.month,
                                                                    tmp2.day)
-        tmp2 = tmp + timedelta(days=1)
+        tmp2 = tmp2 + timedelta(days=1)
         form_json["date_released"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp2.year, tmp2.month,
                                                                       tmp2.day)
 
@@ -80,7 +80,7 @@ def create_course(course, semester, course_group, assignments):
         os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO gradeable_component "
                   "VALUES ({:d}, '{}', 'Test', '', '', 5, false, false, 1)\""
                   .format(database, i, form_json['gradeable_id']))
-        
+
 
     # ---------------------------------------------------------------
     # RUN THE BUILD COURSE SCRIPT

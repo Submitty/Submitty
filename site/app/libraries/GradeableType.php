@@ -36,7 +36,7 @@ abstract class GradeableType{
                 return static::ELECTRONIC_FILE;
             case "Checkpoints":
                 return static::CHECKPOINTS;
-            case "Numeric/Text":
+            case "Numeric":
                 return static::NUMERIC_TEXT;
             default:
                 throw new \InvalidArgumentException("Invalid type");

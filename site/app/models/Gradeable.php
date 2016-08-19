@@ -140,6 +140,7 @@ abstract class Gradeable {
     /** @var array Array of all files for a specified submission number where each key is a previous file and then each element
      * is an array that contains filename, file path, and the file size. */
     protected $submitted_files = array();
+    protected $svn_files = array();
     protected $meta_files = array();
     protected $previous_files = array();
     
@@ -254,6 +255,7 @@ abstract class Gradeable {
         $course_path = $this->core->getConfig()->getCoursePath();
 
         $submission_path = $course_path."/submissions/".$this->id."/".$this->core->getUser()->getId();
+        $svn_path = $course_path."/checkout/".$this->id."/".$this->core->getUser()->getId();
         $results_path = $course_path."/results/".$this->id."/".$this->core->getUser()->getId();
         
         if (is_file($submission_path."/user_assignment_settings.json")) {
@@ -325,7 +327,6 @@ abstract class Gradeable {
         $this->setQueueStatus();
 
         $submission_current_path = $submission_path."/".$this->current;
-        
         $submitted_files = FileUtils::getAllFiles($submission_current_path, array(), true);
         foreach ($submitted_files as $file => $details) {
             if (substr(basename($file), 0, 1) === '.') {
@@ -334,6 +335,12 @@ abstract class Gradeable {
             else {
                 $this->submitted_files[$file] = $details;
             }
+        }
+    
+        $svn_current_path = $svn_path."/".$this->current;
+        $svn_files = FileUtils::getAllFiles($svn_current_path, array(), true);
+        foreach ($svn_files as $file => $details) {
+            $this->svn_files[$file] = $details;
         }
         
         if ($this->getNumParts() > 1) {
@@ -483,6 +490,10 @@ abstract class Gradeable {
         return $this->submitted_files;
     }
     
+    public function getSvnFiles() {
+        return $this->svn_files;
+    }
+    
     public function getTestcases() {
         return $this->testcases;
     }
@@ -505,6 +516,10 @@ abstract class Gradeable {
     
     public function getGradeFile() {
         return $this->grade_file;
+    }
+    
+    public function useTAGrading() {
+        return $this->ta_grading;
     }
     
     public function taGradesReleased() {

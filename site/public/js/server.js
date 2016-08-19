@@ -74,6 +74,23 @@ function check_server(url) {
     );
 }
 
+function batchImportJSON(url, csrf_token){
+    $.ajax(url, {
+        type: "POST",
+        data: {
+            csrf_token: csrf_token
+        }
+    })
+    .done(function(response) {
+        window.alert(response);
+        location.reload(true);
+    })
+    .fail(function() {
+        window.alert("[AJAX ERROR] Refresh page");
+    });
+}
+
+
 /* TODO: Add way to add new errors/notices/successes to the screen for ajax forms */
 $(function() {
     setTimeout(function() {

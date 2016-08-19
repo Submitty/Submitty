@@ -43,8 +43,8 @@ class AuthenticationController implements IController {
                 $this->isLoggedIn();
                 $this->checkLogin();
                 break;
-            default:
             case 'login':
+            default:
                 $this->isLoggedIn();
                 $this->loginForm();
                 break;
@@ -54,10 +54,8 @@ class AuthenticationController implements IController {
     public function isLoggedIn() {
         if ($this->logged_in) {
             $redirect = array();
-            foreach ($this->core->getControllerTypes() as $type) {
-                if (isset($_REQUEST['old'][$type])) {
-                    $redirect[$type] = $_REQUEST['old'][$type];
-                }
+            foreach ($_REQUEST['old'] as $key => $value) {
+                $redirect[$key] = $value;
             }
             $this->core->redirect($this->core->buildUrl($redirect));
         }
@@ -88,25 +86,20 @@ class AuthenticationController implements IController {
      * to maintain that old request data passing it back into the login form.
      */
     public function checkLogin() {
+        $redirect = array();
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
             $_SESSION['messages']['error'][] = "Cannot leave user id or password blank";
-            $redirect = array();
-            foreach ($this->core->getControllerTypes() as $type) {
-                if (isset($_REQUEST['old'][$type])) {
-                    $redirect['old_'.$type] = $_REQUEST['old'][$type];
+            foreach ($_REQUEST as $key => $value) {
+                if (substr($key, 0, 4) == "old_") {
+                    $redirect[$key] = $_REQUEST['old'][$value];
                 }
             }
             $this->core->redirect($this->core->buildUrl($redirect));
         }
-
-        if ($this->core->authenticate($_POST['user_id'], $_POST['password'])) {
-            $redirect = array();
-            foreach ($this->core->getControllerTypes() as $type) {
-                if (isset($_REQUEST['old'][$type])) {
-                    $redirect[$type] = $_REQUEST['old'][$type];
-                }
-                else {
-                    break;
+        else if ($this->core->authenticate($_POST['user_id'], $_POST['password'])) {
+            foreach ($_REQUEST as $key => $value) {
+                if (substr($key, 0, 4) == "old_") {
+                    $redirect[substr($key, 4)] = $value;
                 }
             }
             $_SESSION['messages']['success'][] = "Successfully logged in as ".htmlentities($_POST['user_id']);
@@ -114,10 +107,9 @@ class AuthenticationController implements IController {
         }
         else {
             $_SESSION['messages']['error'][] = "Could not login using that user id or password";
-            $redirect = array();
-            foreach ($this->core->getControllerTypes() as $type) {
-                if (isset($_REQUEST['old'][$type])) {
-                    $redirect['old_'.$type] = $_REQUEST['old'][$type];
+            foreach ($_REQUEST as $key => $value) {
+                if (substr($key, 0, 4) == "old_") {
+                    $redirect[$key] = $_REQUEST['old'][$value];
                 }
             }
             $this->core->redirect($this->core->buildUrl($redirect));

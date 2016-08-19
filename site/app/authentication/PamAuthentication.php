@@ -63,7 +63,15 @@ class PamAuthentication implements IAuthentication {
         else if (!isset($output['authenticated'])) {
             throw new AuthenticationException("Missing response in JSON for PAM");
         }
+        else if ($output['authenticated'] !== true) {
+            return false;
+        }
         
-        return $output['authenticated'];
+        $this->core->loadUser($username);
+        if (!$this->core->userLoaded()) {
+            return false;
+        }
+        
+        return true;
     }
 }

@@ -51,6 +51,8 @@ HTML;
     }
         
     /**
+     * TODO: BREAK UP THIS FUNCTION INTO EASIER TO MANAGE CHUNKS
+     *
      * @param Gradeable $gradeable
      * @param int       $days_late
      *
@@ -75,13 +77,7 @@ HTML;
 HTML;
         if($gradeable->useSvnCheckout()) {
             $return .= <<<HTML
-    <form action="{$this->core->buildUrl(array())}" method="post" 
-        onsubmit="return checkVersionsUsed('{$gradeable->getName()}', {$gradeable->getHighestVersion()},
-                                            {$gradeable->getMaxSubmissions()});">
-        <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-        <input type="hidden" name="svn_checkout" value="true" />
-        <input type="submit" id="submit" class="btn btn-primary" value="Grade SVN" />
-    </form>
+    <input type="submit" id="submit" class="btn btn-primary" value="Grade SVN" />
 HTML;
         }
         else {
@@ -173,18 +169,6 @@ HTML;
             }
             e.stopPropagation();
         });
-        $("#submit").click(function(e){ // Submit button
-            handleSubmission("{$this->core->buildUrl(array('component' => 'student', 'action' => 'upload', 
-                                                           'gradeable_id' => $gradeable->getId()))}",
-                             "{$this->core->buildUrl(array('component' => 'student', 
-                                                           'gradeable_id' => $gradeable->getId()))}",
-                             {$days_late},
-                             {$gradeable->getAllowedLateDays()},
-                             {$gradeable->getHighestVersion()},
-                             {$gradeable->getMaxSubmissions()},
-                             "{$this->core->getCsrfToken()}", false);
-            e.stopPropagation();
-        });
 
         // GET FILES OF THE HIGHEST VERSION
         if (assignment_version == highest_version && highest_version > 0) {
@@ -199,7 +183,26 @@ HTML;
 HTML;
         }
         
+        $svn_string = ($gradeable->useSvnCheckout()) ? "true" : "false";
+        
         $return .= <<<HTML
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#submit").click(function(e){ // Submit button
+                handleSubmission("{$this->core->buildUrl(array('component' => 'student', 
+                                                               'action' => 'upload',
+                                                               'gradeable_id' => $gradeable->getId()))}",
+                                 "{$this->core->buildUrl(array('component' => 'student',
+                                                               'gradeable_id' => $gradeable->getId()))}",
+                                 {$days_late},
+                                 {$gradeable->getAllowedLateDays()},
+                                 {$gradeable->getHighestVersion()},
+                                 {$gradeable->getMaxSubmissions()},
+                                 "{$this->core->getCsrfToken()}", {$svn_string});
+                e.stopPropagation();
+            });
+        });
+    </script>
 </div>
 HTML;
         
@@ -282,54 +285,58 @@ HTML;
             
             if($gradeable->getActiveVersion() == 0 && $gradeable->getCurrentVersion() == 0) {
                 $return .= <<<HTML
-                    <div class="sub">
-                    <p class="red-message">
-                    Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
-                    This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
-                    You may select any version above and press "Grade This Version" to re-activate your submission for grading.<br />
-                    </p>
-                    </div>
+    <div class="sub">
+        <p class="red-message">
+            Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
+            This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
+            You may select any version above and press "Grade This Version" to re-activate your submission for grading.<br />
+        </p>
+    </div>
 HTML;
             }
             else {
-	        if($gradeable->getActiveVersion() > 0 && $gradeable->getActiveVersion() === $gradeable->getCurrentVersion()) {
+	            if($gradeable->getActiveVersion() > 0 && $gradeable->getActiveVersion() === $gradeable->getCurrentVersion()) {
                     $return .= <<<HTML
-		        <div class="sub">
- 			<p class="green-message">
-			Note: This version of your assignment will be graded by the instructor/TAs and the score recorded in the gradebook.
-			</p>
-			</div>
+    <div class="sub">
+        <p class="green-message">
+            Note: This version of your assignment will be graded by the instructor/TAs and the score recorded in the gradebook.
+        </p>
+    </div>
 HTML;
-                } else {
-		    if($gradeable->getActiveVersion() > 0) {
-		        $return .= <<<HTML
-                           <div class="sub">
-                           <p class="red-message">
-                           Note: This version of your assignment will not be graded the instructor/TAs. <br />
+                }
+                else {
+		            if($gradeable->getActiveVersion() > 0) {
+		                $return .= <<<HTML
+   <div class="sub">
+       <p class="red-message">
+            Note: This version of your assignment will not be graded the instructor/TAs. <br />
 HTML;
-		    } else {
+                    }
+                    else {
                        $return .= <<<HTML
-                           <div class="sub">
-                           <p class="red-message">
-			   Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
-			   This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
+    <div class="sub">
+        <p class="red-message">
+            Note: You have selected to NOT GRADE THIS ASSIGNMENT.<br />
+            This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
 HTML;
-		    }
-                    $return .= <<<HTML
-                         Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
-                         </p>
-                         </div>
+		            }
+            
+		                $return .= <<<HTML
+            Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
+         </p>
+     </div>
 HTML;
-	        }	
+	            }
+	            
                 $return .= <<<HTML
     <div class="sub">
         <h4>Submitted Files</h4>
         <div class="box half">
 HTML;
-                // TODO: This is going to be different for SVN
-                foreach ($gradeable->getSubmittedFiles() as $submitted_file) {
-                    $size = number_format($submitted_file['size'] / 1024, 2);
-                    $return .= "{$submitted_file['relative_name']} ({$size}kb)<br />";
+                $array = ($gradeable->useSvnCheckout()) ? $gradeable->getSvnFiles() : $gradeable->getSubmittedFiles();
+                foreach ($array as $file) {
+                    $size = number_format($file['size'] / 1024, 2);
+                    $return .= "{$file['relative_name']} ({$size}kb)<br />";
                 }
                 $return .= <<<HTML
         </div>
@@ -349,7 +356,8 @@ HTML;
 number of re-autogrades: {$regrades}<br />
 last re-autograde finished: {$results['grading_finished']}<br />
 HTML;
-                    } else {
+                    }
+                    else {
                       $return .= <<<HTML
 queue wait time: {$results['wait_time']} seconds<br />
 HTML;
@@ -360,9 +368,15 @@ HTML;
 HTML;
                 $return .= <<<HTML
     </div>
+HTML;
+                $return .= <<<HTML
     <div class="sub">
+HTML;
+                if (count($gradeable->getTestcases()) > 0) {
+                    $return .= <<<HTML
         <h4>Results</h4>
 HTML;
+                }
                 $refresh_js = <<<HTML
         <script type="text/javascript">
             checkRefreshSubmissionPage('{$this->core->buildUrl(array('component' => 'student',
