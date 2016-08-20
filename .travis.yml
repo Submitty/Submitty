@@ -71,6 +71,7 @@ before_script:
   - tar -xjf /tmp/firefox-48.0.tar.bz2 --directory /tmp
   - export PATH="/tmp/firefox:$PATH"
   - echo "Using firefox version `firefox --version`"
+  - mkdir -p ${HOME}/bin
   - curl -L https://github.com/mozilla/geckodriver/releases/download/v0.10.0/geckodriver-v0.10.0-linux64.tar.gz | zcat > $HOME/bin/wires
   - chmod +x $HOME/bin/wires
   - export PATH=$PATH:$HOME/bin/
