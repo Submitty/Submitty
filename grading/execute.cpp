@@ -309,7 +309,7 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
 // =====================================================================================
 // =====================================================================================
 
-std::string get_executable_name(const std::string &cmd) {
+std::string get_program_name(const std::string &cmd) {
   std::string my_program;
   std::stringstream ss(cmd);
 
@@ -663,14 +663,14 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
   // ensure fork was successful
   assert (childPID >= 0);
 
-  std::string executable_name = get_executable_name(cmd);
-  int seconds_to_run = get_the_limit(executable_name,RLIMIT_CPU,test_case_limits,assignment_limits);
+  std::string program_name = get_program_name(cmd);
+  int seconds_to_run = get_the_limit(program_name,RLIMIT_CPU,test_case_limits,assignment_limits);
 
   if (childPID == 0) {
     // CHILD PROCESS
 
 
-    enable_all_setrlimit(executable_name,test_case_limits,assignment_limits);
+    enable_all_setrlimit(program_name,test_case_limits,assignment_limits);
 
 
     // Student's shouldn't be forking & making threads/processes...
