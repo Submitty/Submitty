@@ -242,7 +242,7 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
 
 void wildcard_expansion(std::vector<std::string> &my_args, const std::string &full_pattern, std::ostream &logfile) {
 
-  std::cout << "IN WILDCARD EXPANSION " << full_pattern << std::endl;
+  //std::cout << "IN WILDCARD EXPANSION " << full_pattern << std::endl;
 
   // if the pattern does not contain a wildcard, just return that
   if (full_pattern.find("*") == std::string::npos) {
@@ -250,7 +250,7 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
     return;
   }
 
-  std::cout << "WILDCARD DETECTED:" << full_pattern << std::endl;
+  //  std::cout << "WILDCARD DETECTED:" << full_pattern << std::endl;
 
   // otherwise, if our pattern contains directory structure, first remove that
   std::string directory = "";

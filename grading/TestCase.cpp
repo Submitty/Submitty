@@ -98,7 +98,7 @@ bool getFileContents(const std::string &filename, std::string &file_contents) {
   std::ifstream file(filename);
   if (!file.good()) { return false; }
   file_contents = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-  std::cout << "file contents size = " << file_contents.size() << std::endl;
+  //std::cout << "file contents size = " << file_contents.size() << std::endl;
   return true;
 }
 

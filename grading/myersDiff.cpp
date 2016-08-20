@@ -30,20 +30,20 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
     filename = replace_slash_with_double_underscore(filename);
   }
 
-  std::cout << "FILE EXISTS CHECK: " << filename << std::endl;
+  std::cout << "  file exists check: '" << filename << "' : ";
 
   std::vector<std::string> files;
   wildcard_expansion(files, filename, std::cout);
   for (int i = 0; i < files.size(); i++) {
-    std::cout << "FILE CANDIDATE: " << files[i] << std::endl;
+    //std::cout << "FILE CANDIDATE: " << files[i] << std::endl;
     if (access( files[i].c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists
-      std::cout << "WILDCARD FILE FOUND: " << files[i] << std::endl;
+      std::cout << "FOUND '" << files[i] << "'" << std::endl;
       return new TestResults(1.0);
     }
-    std::cout << "OOPS, does not exist: " << files[i] << std::endl;
+    //std::cout << "OOPS, does not exist: " << files[i] << std::endl;
   }
 
-  std::cout << "DIDN'T FIND IT " << std::endl;
+  std::cout << "NOT FOUND" << std::endl;
   return new TestResults(0.0,{"ERROR: " + filename + " does not exist"});
 
 }
