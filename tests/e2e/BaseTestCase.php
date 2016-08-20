@@ -27,8 +27,8 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
     // one browser window per test function (which is way slower)
     public static $browsers = array(
         array(
-            'browserName' => 'phantomjs',
-            //'browserName' => 'firefox',
+            //'browserName' => 'phantomjs',
+            'browserName' => 'firefox',
             'sessionStrategy' => 'shared'
         )
     );

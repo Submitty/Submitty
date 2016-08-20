@@ -64,6 +64,10 @@ before_script:
   - ./.setup/travis/setup.sh
   - sudo ./.setup/travis/setup_test_suite.sh
   - ./.setup/travis/start.sh
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+
 
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
