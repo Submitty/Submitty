@@ -81,7 +81,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
     nlohmann::json autocheck_j;
     autocheck_j["description"] = tcg.value("description",filenames[FN]);
 
-    bool student_file_to_print = false;
+    bool actual_file_to_print = false;
 
     std::string autocheckid = std::to_string(which_grader);
     if (filenames.size() > 1) {
@@ -89,23 +89,21 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
     }
 
     if (my_testcase.isCompilation() && autocheck_j.value("description","") == "Create Executable") {
-      //if (grade < 0.1) {
-      //  std::cout << "  MISSING EXECUTABLE "+filenames[FN] << std::endl;
-      //}
+      // MISSING EXECUTABLE
     } else {
-      std::string student_file = my_testcase.getPrefix() + "_" + filenames[FN];
-      student_file = replace_slash_with_double_underscore(student_file);
+      std::string actual_file = my_testcase.getPrefix() + "_" + filenames[FN];
+      actual_file = replace_slash_with_double_underscore(actual_file);
       std::vector<std::string> files;
-      wildcard_expansion(files, student_file, std::cout);
+      wildcard_expansion(files, actual_file, std::cout);
       for (int i = 0; i < files.size(); i++) {
-	student_file = files[i];
+	actual_file = files[i];
       }
       bool studentFileExists, studentFileEmpty;
       bool expectedFileExists=false, expectedFileEmpty=false;
-      fileStatus(student_file, studentFileExists,studentFileEmpty);
+      fileStatus(actual_file, studentFileExists,studentFileEmpty);
       std::string expected;
       if (studentFileExists) {
-	autocheck_j["actual_file"] = student_file;
+	autocheck_j["actual_file"] = actual_file;
 	expected = tcg.value("expected_file", "");
 	if (expected != "") {
 	  fileStatus(expected, expectedFileExists,expectedFileEmpty);
@@ -127,7 +125,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
       std::cout << "EXPECTED FILEEXISTS " << expectedFileExists << " EMPTY " << expectedFileEmpty << std::endl;
 
       if (studentFileExists && !studentFileEmpty) {
-	student_file_to_print = true;
+	actual_file_to_print = true;
       }
     }
 
@@ -141,10 +139,9 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
     std::cout << "AUTOCHECK GRADE " << grade << std::endl;
     std::cout << "MESSAGES SIZE " << result->getMessages().size() << std::endl;
 
-
     if (grade < 1.0 ||
         result->getMessages().size() > 0 ||
-        student_file_to_print) {
+        actual_file_to_print) {
       std::cout << "GOING TO OUTPUT" << std::endl;
       autocheck_js.push_back(autocheck_j);
     }

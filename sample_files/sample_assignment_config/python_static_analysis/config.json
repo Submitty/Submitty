@@ -29,7 +29,12 @@
                     "actual_file" : "STDOUT_1.txt",
                     "description" : "Number of print statements",
 		    "comparison" : "ge",
-                    "term" : 1
+                    "term" : 1,
+                    //"show" : "always"
+                    "show_messaage" : "on_error"
+                    //"show" : "on_error"
+                    //"show" : "on_success"
+                    //"show" : "never"
                 }
             ]
         },
@@ -43,7 +48,11 @@
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "part2/*.txt",
                     "description" : "Program Output",
-		    "expected_file" : "p2_out.txt"
+		    "expected_file" : "p2_out.txt",
+                    "show_expected" : "never",
+                    "show_actual" : "always",
+                    "show_message" : "on_error",
+                    "error_messaage" : "Incorrect Answer"
                 }
             ]
         },
