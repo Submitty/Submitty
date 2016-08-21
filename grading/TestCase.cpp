@@ -414,19 +414,6 @@ void TestCase::Compilation_Helper() {
 
   if (f_itr != _json.end()) {
 
-    std::vector<std::string> executable_names = stringOrArrayOfStrings(_json,"executable_name");
-
-    assert (executable_names.size() > 0);
-    for (int i = 0; i < executable_names.size(); i++) {
-      nlohmann::json v;
-      v["method"] = "fileExists";
-      v["actual_file"] = executable_names[i];
-      v["description"] = "executable created";
-      v["deduction"] = 1.0/executable_names.size();
-      _json["validation"].push_back(v);
-    }
-    _json.erase(f_itr);
-
     w_itr = _json.find("warning_deduction");
     float warning_fraction = 0.0;
     if (w_itr != _json.end()) {
@@ -438,9 +425,21 @@ void TestCase::Compilation_Helper() {
     nlohmann::json v2;
     v2["method"] = "errorIfNotEmpty";
     v2["actual_file"] = "STDERR.txt";
-    v2["description"] = "compilation warnings and errors";
+    v2["description"] = "Compilation Errors and/or Warnings";
     v2["deduction"] = warning_fraction;
     _json["validation"].push_back(v2);
+
+    std::vector<std::string> executable_names = stringOrArrayOfStrings(_json,"executable_name");
+    assert (executable_names.size() > 0);
+    for (int i = 0; i < executable_names.size(); i++) {
+      nlohmann::json v;
+      v["method"] = "fileExists";
+      v["actual_file"] = executable_names[i];
+      v["description"] = "Create Executable";
+      v["deduction"] = 1.0/executable_names.size();
+      _json["validation"].push_back(v);
+    }
+    _json.erase(f_itr);
   }
 
   f_itr = _json.find("executable_name");
@@ -448,9 +447,7 @@ void TestCase::Compilation_Helper() {
 
   assert (f_itr == _json.end());
   assert (v_itr != _json.end());
-
   //assert (commands.size() > 0);
-
 }
 
 void TestCase::Execution_Helper() {

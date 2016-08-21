@@ -89,11 +89,10 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
     }
     autocheck_j["autocheck_id"] = my_testcase.getPrefix() + "_" + autocheckid + "_autocheck";
 
-    if (my_testcase.isCompilation()) {      
-      if (grade < 0.1 && autocheck_j.value("description","") == "executable created") {
-	autocheck_j["messages"].push_back("MISSING EXECUTABLE "+filenames[FN]);
-	std::cout << "  MISSING EXECUTABLE "+filenames[FN] << std::endl;
-      }
+    if (my_testcase.isCompilation() && autocheck_j.value("description","") == "Create Executable") {
+      //if (grade < 0.1) {
+      //  std::cout << "  MISSING EXECUTABLE "+filenames[FN] << std::endl;
+      //}
     } else {
       std::string student_file = my_testcase.getPrefix() + "_" + filenames[FN];
       student_file = replace_slash_with_double_underscore(student_file);
@@ -214,6 +213,12 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       }
     } 
     else {
+      double my_score = 1.0;
+      std::cout << "NUM FILE GRADERS " << my_testcase.numFileGraders() << std::endl;
+      assert (my_testcase.numFileGraders() > 0);
+      for (int j = 0; j < my_testcase.numFileGraders(); j++) {
+        my_score -= ValidateGrader(my_testcase, j, autocheck_js,hw_id);
+      }
       bool fileExists, fileEmpty;
       fileStatus(my_testcase.getPrefix() + "_execute_logfile.txt", fileExists,fileEmpty);
       if (fileExists && !fileEmpty) {
@@ -222,12 +227,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         autocheck_j["actual_file"] = my_testcase.getPrefix() + "_execute_logfile.txt";
         autocheck_j["description"] = "Execution Logfile";
         autocheck_js.push_back(autocheck_j);
-      }
-      double my_score = 1.0;
-      std::cout << "NUM FILE GRADERS " << my_testcase.numFileGraders() << std::endl;
-      assert (my_testcase.numFileGraders() > 0);
-      for (int j = 0; j < my_testcase.numFileGraders(); j++) {
-        my_score -= ValidateGrader(my_testcase, j, autocheck_js,hw_id);
       }
       if (autocheck_js.size() > 0) {
         tc_j["autochecks"] = autocheck_js;
