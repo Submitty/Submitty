@@ -3,9 +3,7 @@
                 {
                         "test_name": "Test 1 hello world",
                         "autochecks": [
-                                {
-                                        "autocheck_id":"test01_0_autocheck",
-                                        "actual_file":"test01_STDOUT.txt",
+                                {                                        "actual_file":"test01_STDOUT.txt",
                                         "expected_file":"test_output/testassignment/test1_output.txt",
                                         "difference_file":"test01_0_diff.json",
                                         "description": "Standard OUTPUT (STDOUT)"

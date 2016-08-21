@@ -87,7 +87,6 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
     if (filenames.size() > 1) {
       autocheckid += "_" + std::to_string(FN);
     }
-    autocheck_j["autocheck_id"] = my_testcase.getPrefix() + "_" + autocheckid + "_autocheck";
 
     if (my_testcase.isCompilation() && autocheck_j.value("description","") == "Create Executable") {
       //if (grade < 0.1) {
@@ -223,7 +222,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       fileStatus(my_testcase.getPrefix() + "_execute_logfile.txt", fileExists,fileEmpty);
       if (fileExists && !fileEmpty) {
         nlohmann::json autocheck_j;
-        autocheck_j["autocheck_id"] = my_testcase.getPrefix() + "_execute_logfile_autocheck";
         autocheck_j["actual_file"] = my_testcase.getPrefix() + "_execute_logfile.txt";
         autocheck_j["description"] = "Execution Logfile";
         autocheck_js.push_back(autocheck_j);
