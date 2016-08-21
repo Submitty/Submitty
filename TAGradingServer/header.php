@@ -129,8 +129,8 @@ HTML;
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-classlist.php" role="button" data-toggle="modal">
                                     Upload Classlist
                                 </a></li>
-                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-single-student-review.php" role="button" data-toggle="modal">
-									Individual Student Enrollment Review
+                                <li><a tabindex="-1" href="{$BASE_URL}/account/admin-single-user-review.php" role="button" data-toggle="modal">
+									Individual User Enrollment Review
                                 </a></li>
                                 <li><a tabindex="-1" href="{$BASE_URL}/account/admin-rotating-sections.php" role="button" data-toggle="modal">
                                     Setup Rotating Sections

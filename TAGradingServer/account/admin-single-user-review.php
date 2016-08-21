@@ -2,16 +2,7 @@
 
 //Author: Peter Bailie, Systems Programmer, RPI Computer Science, August 2016
 
-/* -----------------------------------------------------------------------------
- * KNOWN BUG:  Should the professor try to "upsert" data on any user not amid
- *             the student user group, the system will (incorrectly) state 
- *             "Student info is updated", but the upsert is (correctly) NOT
- *             done per SQL transaction rules.
- * -------------------------------------------------------------------------- */
-
 /* MAIN ===================================================================== */
-
-define('_STUDENT_USER_GROUP', '4');
 
 include "../header.php";
 
@@ -26,34 +17,34 @@ $view = new local_view();
 $state = "";
 
 //Validate submission
-//Is Student ID submitted? (required!)
-if (isset($_POST['student_id']) && $_POST['student_id'] !== "") {
+//Is User ID submitted? (required!)
+if (isset($_POST['user_id']) && $_POST['user_id'] !== "") {
 
-	//Is this a lookup or upsert?  (determined in *'d fields are filled or not)
+	//Is this a lookup or upsert?
+	//(determined whether *'d fields are filled or not)
 	if ((isset($_POST['first_name']) && $_POST['first_name'] === "") &&
 	    (isset($_POST['last_name'])  && $_POST['last_name']  === "") &&
 	    (isset($_POST['email'])      && $_POST['email']      === "")) {
 
-		//Do DB lookup for student by Student ID
-		$row = lookup_student_in_db($_POST['student_id']);
+		//Do DB lookup for user by user ID
+		$row = lookup_user_in_db($_POST['user_id']);
 		if (!empty($row)) {
 			$view->fill_form($row);		
 		} else {
-			$state = "student_not_found";
+			$state = "user_not_found";
 		}		
 	} else {
 		//Do form data validation in preperation for upsert.
-		//No validation on student id as pattern varies among Universities.
-		//No validation on checkbox as only possible values are on (true) or
-		//   off (false).
+		//No validation on user id as pattern varies among Universities.
+		//No validation on is_manual checkbox as it is not SET when not ticked.
 		//Email regex should match most cases, including unusual TLDs and
 		//      IPv4 addresses.
 		//VERY LOW PRIORITY TO DO: adjust regex to validate IPv6 addresses.
-		//'r_section' regex allows empty string or any number string.
 		if (preg_match("~^[a-zA-Z.'`\- ]+$~", $_POST['first_name']) &&
 		    preg_match("~^[a-zA-Z.'`\- ]+$~", $_POST['last_name'] ) &&
 		    preg_match("~^[a-zA-Z0-9._\-]+@[a-zA-Z0-9.\-]+.[a-zA-Z0-9]+$~", $_POST['email']) &&
-		    preg_match("~^$|^[0-9]+$~", $_POST['r_section'] )) {
+		    preg_match("~^[1-4]{1}$~", strval($_POST['user_group'])) &&
+			preg_match("~^$|^[0-9]+$~", $_POST['r_section'])) {
 		    $is_validated = true;
 		} else {
 			$is_validated = false;
@@ -64,15 +55,16 @@ if (isset($_POST['student_id']) && $_POST['student_id'] !== "") {
 			//NULL values must be passed as keyword null, but true/false values
 			//must be passed as 'true'/'false' strings.  Otherwise, DB throws
 			//an exception.
-			upsert(array( array( $_POST['student_id'],
+			upsert(array( array( $_POST['user_id'],
 			                     $_POST['first_name'],
 			                     $_POST['last_name'],
 			                     $_POST['email'],
+								 $_POST['user_group'],
 			                    ($_POST['r_section'] === "") ? null : $_POST['r_section'],
-		                        (isset($_POST['is_manual']) && $_POST['is_manual'] === 'on') ? 'true' : 'false' )));
+		                        (isset($_POST['manual_flag']) && $_POST['manual_flag'] === 'on') ? 'true' : 'false' )));
 		    $state = 'upsert_done';
 		} else {
-			$state = 'invalid_student_info';
+			$state = 'invalid_user_info';
 		}
 	}
 }
@@ -87,28 +79,26 @@ exit;
 
 /* END MAIN ================================================================= */
 
-function lookup_student_in_db($student_id) {
+function lookup_user_in_db($user_id) {
 
-	//TODO: "SELECT user_is_manual FROM users" when DB is updated so this data
-	//      is returned to function caller.
 	$sql = <<<SQL
 SELECT
 	user_id,
 	user_firstname,
 	user_lastname,
 	user_email,
+	user_group,
 	registration_section,
 	manual_registration
 FROM users
 WHERE user_id=?
-AND user_group=?
 SQL;
 
-		\lib\Database::query($sql, array($student_id, _STUDENT_USER_GROUP));
+		\lib\Database::query($sql, array($user_id));
 		return \lib\Database::row();
 }
 
-/* END FUNCTION lookup_student_in_db() ====================================== */
+/* END FUNCTION lookup_user_in_db() ====================================== */
 
 function upsert(array $data) {
 //IN:  Data to be "upserted" as 2D array.
@@ -130,24 +120,18 @@ function upsert(array $data) {
  *             single rows of information.
  * -------------------------------------------------------------------------- */
 
-	//_STUDENT_USER_GROUP cannot be expanded with {}, so it is locally copied.
-	//NOTE: hard coded define value is used in temp.group and user.s_group to
-	//      specifically identify students.
-	$student_user_group = _STUDENT_USER_GROUP;
-
 	$sql = array();
 	
 	//TEMPORARY table to hold all new values that will be "upserted"
-	/* *** NOTE: is_manual property is not yet active until DB is updated *** */
 	$sql['temp_table'] = <<<SQL
 CREATE TEMPORARY TABLE temp
-	(student_id VARCHAR(255),
-	 first_name VARCHAR(255),
-	 last_name  VARCHAR(255),
-	 email      VARCHAR(255),
-	 s_group    INTEGER,
-	 r_section  INTEGER,
-	 is_manual  BOOLEAN)
+	(user_id     VARCHAR(255),
+	 first_name  VARCHAR(255),
+	 last_name   VARCHAR(255),
+	 email       VARCHAR(255),
+	 user_group  INTEGER,
+	 r_section   INTEGER,
+	 manual_flag BOOLEAN)
 ON COMMIT DROP;
 SQL;
 
@@ -155,8 +139,9 @@ SQL;
 	//in a single DB transaction.
 	for ($i=0; $i<count($data); $i++) {
 		$sql["data_{$i}"] = <<<SQL
-INSERT INTO temp VALUES (?,?,?,?,{$student_user_group},?,?);
+INSERT INTO temp VALUES (?,?,?,?,?,?,?);
 SQL;
+
 	}
 
 	//LOCK will prevent sharing collisions while upsert is in process.
@@ -165,19 +150,17 @@ LOCK TABLE users IN EXCLUSIVE MODE;
 SQL;
 
 	//This portion ensures that UPDATE will only occur when a record already exists.
-	//NOTE: "AND users.user_group=temp.s_group" is critical to prevent updating
-	//of any non-student user.
 	$sql['update'] = <<<SQL
 UPDATE users
 SET
 	user_firstname=temp.first_name,
 	user_lastname=temp.last_name,
 	user_email=temp.email,
+	user_group=temp.user_group,
 	registration_section=temp.r_section,
-	manual_registration=temp.is_manual
+	manual_registration=temp.manual_flag
 FROM temp
-WHERE users.user_id=temp.student_id
-	AND users.user_group=temp.s_group;
+WHERE users.user_id=temp.user_id;
 SQL;
 
 	//This portion ensures that INSERT will only occur when data record is new.
@@ -191,16 +174,16 @@ INSERT INTO users
 	 registration_section,
 	 manual_registration)
 SELECT
-	temp.student_id,
+	temp.user_id,
 	temp.first_name,
 	temp.last_name,
 	temp.email,
-	temp.s_group,
+	temp.user_group,
 	temp.r_section,
-	temp.is_manual
+	temp.manual_flag
 FROM temp 
 LEFT OUTER JOIN users
-	ON users.user_id=temp.student_id
+	ON users.user_id=temp.user_id
 WHERE users.user_id is NULL;
 SQL;
 
@@ -247,7 +230,7 @@ class local_view {
 <div id="container" style="width:100%; margin-top:40px;">
 <div class="modal hide fade in" style="display:block; margin-top:5%; z-index:100;">
 <div class="modal-header">
-<h3>Review Individual Student Enrollment</h3>
+<h3>Review Individual User Enrollment</h3>
 </div>
 <div class="modal-body" style="padding-top:10px; padding-bottom:10px;">
 HTML;
@@ -258,19 +241,19 @@ HTML;
 </div>
 HTML;
 
-		self::$view['student_not_found'] = <<<HTML
+		self::$view['user_not_found'] = <<<HTML
 <p style="margin:0;"><em style="color:red; font-weight:bold; font-style:normal;">
-{$utf8_styled_x} Student not found.</em>
+{$utf8_styled_x} User not found.</em>
 HTML;
 
-		self::$view['invalid_student_info'] = <<<HTML
+		self::$view['invalid_user_info'] = <<<HTML
 <p style="margin:0;"><em style="color:red; font-weight:bold; font-style:normal;">
-{$utf8_styled_x} Invalid student information.</em>
+{$utf8_styled_x} Invalid user information.</em>
 HTML;
 
 		self::$view['upsert_done'] = <<<HTML
 <p style="margin:0;"><em style="color:green; font-weight:bold; font-style:normal;">
-{$utf8_checkmark} Student info is updated.</em>
+{$utf8_checkmark} User info is updated.</em>
 HTML;
 
 		//Build form with default values
@@ -279,69 +262,79 @@ HTML;
 	
 /* END CLASS CONSTRUCTOR ---------------------------------------------------- */	
 
-	public function fill_form($db_data = null) {
-	//IN:  data from database used to build form
+	public function fill_form($db_data = array("","","","",3,"",true)) {
+	//IN:  data from database used to build form.
 	//OUT: no return, although form data is propogated as a class property
 	//PURPOSE: Craft HTML required to display the form.
-	//NOTE:    Instead of creating a table to display a student's info, the info
+	//NOTE:    Instead of creating a table to display a user's info, the info
 	//         is filled into the form for easy and quick tweaking.
 
 /* -----------------------------------------------------------------------------
  * $db_data expected indices:
- * [0]: (string) student id
- * [1]: (string) student first name
- * [2]: (string) student last name
- * [3]: (string) student email
- * [4]: (string) student registered section
- * [5]: (bool)   student "manual registration" flag
+ * [0]: (string) user id
+ * [1]: (string) user first name
+ * [2]: (string) user last name
+ * [3]: (string) user email
+ * [4]: (int)    user group
+ * [5]: (string) user registered section
+ * [6]: (bool)   user "manual registration" flag
  * -------------------------------------------------------------------------- */
 
-		//validate data parameters and/or set defaults.
-		if (!is_array($db_data)) {
-			$db_data = array("", "", "" , "", "", true);
-		} else {
-			//Some fields may be OK, and others may need to be set to default.
-			//Check each individually to be thorough.
-			for ($i = 0; $i <= 4; $i++) {
-				if (!isset($db_data[$i]) || is_null($db_data[$i])) {
-					$db_data[$i] = "";
-				}
-			}
-
-			if (!isset($db_data[5]) || !is_bool($db_data[5])) {
-				$db_data[5] = true;
-			}
-		}
-
-		//Build form
-		//Javascript to clear textboxes when student_id textbox changes.
+ 		//Build form
+		//Javascript to clear textboxes when user_id textbox changes.
 		$js = <<<JS
 document.getElementById('first_name').value='';
 document.getElementById('last_name').value='';
 document.getElementById('email').value='';
 document.getElementById('r_section').value='';
 JS;
+
+		//Construct selectbox (drop-down) box.
+		$group_names = array( 1 => "Course Instructor",
+		                      2 => "Course TA Grader",
+							  3 => "Section TA Grader",
+							  4 => "Student" );
 		
-		//Determine if is_manual checkbox should be checked by default
-		$is_checked = ($db_data[5]) ? "checked" : "";
+		$ug_select = <<<HTML
+<div style="width:30%; display:inline-block; vertical-align:top;">Group:<br><select id="user_group" name="user_group">
+HTML;
 		
-		//Construct rest of form.  Note string expansions in HTML: {}
+		//Determine default selection for selectbox while building option list.
+		for ($i = 1; $i <= 4; $i++) {
+			$d_selected = ($i == $db_data[4]) ? ' selected="selected"' : '';
+			$ug_select .= <<<HTML
+<option value="{$i}"{$d_selected}>{$group_names[$i]}</option>
+HTML;
+		
+		}
+		
+		$ug_select .= <<<HTML
+</select>
+</div>
+HTML;
+
+		//FINISHED constructing selectbox.
+		//Determine if 'manual_flag' checkbox should be checked by default
+		$is_checked = ($db_data[6]) ? "checked" : "";
+			
+		//Construct form.  Note string expansions in HTML: {}
 		self::$view['form'] = <<<HTML
-<form action="admin-single-student-review.php" method="POST" enctype="multipart/form-data">
-<div style="width:30%; display:block;">Student ID:<br><input type="text" id="student_id" name="student_id" value="{$db_data[0]}" style="width:95%;" oninput="{$js}"></div>
-<p>To only lookup a student's enrollment, leave blank all fields marked <span style="color:red;">*</span>.
+<form action="admin-single-user-review.php" method="POST" enctype="multipart/form-data">
+<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">User ID:<br><input type="text" id="user_id" name="user_id" value="{$db_data[0]}" style="width:95%;" oninput="{$js}"></div>
+<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;"> </div>
+{$ug_select}
+<p>To only lookup a user's enrollment, leave blank all fields marked <span style="color:red;">*</span>.
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">First Name: <span style="color:red;">*</span><br><input type="text" id="first_name" name="first_name" value="{$db_data[1]}" style="width:95%;"></div>
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Last Name: <span style="color:red;">*</span><br><input type="text" id="last_name" name="last_name" value="{$db_data[2]}" style="width:95%;"></div>
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Email: <span style="color:red;">*</span><br><input type="text" id="email" name="email" value="{$db_data[3]}" style="width:95%;"></div>
-<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Registered Section:<br><input type="text" id="r_section" name="r_section" value="{$db_data[4]}" style="width:95%;"></div>
-<div style="width:50%; display:inline-block; vertical-align:top; padding-right:5px;"><p><input type="checkbox" id="is_manual" name="is_manual" style="position:inherit; text-align:center; padding-top:1em;" {$is_checked}> Manually Registered Student<br>
-	<p><span style="color:red;">*</span> Required <span style="font-style:italic;">only</span> for add/updating student.</div>
+<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Registered Section:<br><input type="text" id="r_section" name="r_section" value="{$db_data[5]}" style="width:95%;"></div>
+<div style="width:50%; display:inline-block; vertical-align:top; padding-right:5px;"><p><input type="checkbox" id="manual_flag" name="manual_flag" style="position:inherit; text-align:center; padding-top:1em;" {$is_checked}> Manually Registered User<br>
+	<p><span style="color:red;">*</span> Required <span style="font-style:italic;">only</span> for add/updating user.</div>
 <div style="display:inline-block; vertical-align:top; padding-top:1.5em;"><input type="submit" name="submit" value="Submit"></div>
 </form>
 HTML;
 
 }
-	
 /* END CLASS METHOD fill_form() --------------------------------------------- */
 
 	public function display($state) {
@@ -350,16 +343,16 @@ HTML;
 	//PURPOSE:  Display appropriate page contents.
 	
 		switch($state) {
-		case 'student_not_found':
-			echo self::$view['head']              .
-			     self::$view['form']              . 
-			     self::$view['student_not_found'] .
+		case 'user_not_found':
+			echo self::$view['head']           .
+			     self::$view['form']           . 
+			     self::$view['user_not_found'] .
 			     self::$view['tail'];
 			break;
-		case 'invalid_student_info':
-			echo self::$view['head']                 .
-			     self::$view['form']                 . 
-			     self::$view['invalid_student_info'] . 
+		case 'invalid_user_info':
+			echo self::$view['head']              .
+			     self::$view['form']              . 
+			     self::$view['invalid_user_info'] . 
 			     self::$view['tail'];
 			break;
 		case 'upsert_done':
