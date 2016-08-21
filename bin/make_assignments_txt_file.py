@@ -19,6 +19,10 @@ if (len(sys.argv)) != 3:
 # OPEN ALL FILES IN THE FORMS DIRECTORIES
 with open (sys.argv[2],'w') as outfile:
     for filename in os.listdir(sys.argv[1]):
+        length = len(filename)
+        extension = filename[length-5:length]
+        if (extension != ".json") :
+            continue
         json_filename = os.path.join (sys.argv[1],filename)
         if os.path.isfile(json_filename):
             with open (json_filename,'r') as infile:
