@@ -115,7 +115,7 @@ HTML;
                                                               'action' => 'view'))}">Class Configuration</a>
                     </li>
                     <li>
-                        <a href="{$ta_base_url}/account/admin-single-student-review.php?course={$course}&semester={$semester}&this=Manage%20Students">Manage Students</a>
+                        <a href="{$ta_base_url}/account/admin-single-user-review.php?course={$course}&semester={$semester}&this=Manage%20Students">Manage Students</a>
                     </li>
 HTML;
                     if($this->core->getUser()->isDeveloper()) {
