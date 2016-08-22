@@ -190,8 +190,9 @@ TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
     if (success)
       return new TestResults(1.0);
     std::string description = j.value("description","MISSING DESCRIPTION");
-    //return new TestResults(0.0,{"FAILURE! "+description+" "+std::to_string(value)+" "+cmpstr+" "+std::to_string(term)});
-    return new TestResults(0.0,{"ERROR! "+description+" "+std::to_string(value)+" "+cmpstr+" "+std::to_string(term)});
+    std::string failure_message = j.value("failure_message",
+                                          "ERROR! "+description+" "+std::to_string(value)+" "+cmpstr+" "+std::to_string(term));
+    return new TestResults(0.0,{failure_message});
   } catch (...) {
     return new TestResults(0.0,{"int comparison do it error stoi"});
   }
@@ -283,8 +284,8 @@ void AddDefaultGrader(const std::string &command,
     j["description"] = "DEFAULTING TO "+filename;
   }
   j["deduction"] = 0.0;
-  j["show_message"] = "on_error";
-  j["show_actual"] = "on_error";
+  j["show_message"] = "on_failure";
+  j["show_actual"] = "on_failure";
   json_graders.push_back(j);
 }
 
@@ -320,18 +321,13 @@ bool validShowValue(const nlohmann::json& v) {
   return (v.is_string() &&
           (v == "always" ||
            v == "never" ||
-           v == "on_error" ||
+           v == "on_failure" ||
            v == "on_success"));
 }
 
-TestCase::TestCase (const nlohmann::json& input) {
-  std::cout << "BEFORE " << input.dump(2) << std::endl;
-
+TestCase::TestCase (nlohmann::json& input) : _json(input) {
   test_case_id = next_test_case_id;
   next_test_case_id++;
-  
-  _json = input;
-
   General_Helper();
 
   if (isFileCheck()) {
@@ -345,27 +341,33 @@ TestCase::TestCase (const nlohmann::json& input) {
 
   nlohmann::json::iterator itr = _json.find("validation");
   if (itr != _json.end()) {
+    assert (itr->is_array());
     VerifyGraderDeductions(*itr);
     std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
     AddDefaultGraders(commands,*itr);
-  }
 
-  itr = _json.find("validation");
-  if (itr != _json.end()) {
-    assert (itr->is_array());
-    for (int i = 0; i < (*itr).size(); i++) {
+     for (int i = 0; i < (*itr).size(); i++) {
       nlohmann::json& grader = (*itr)[i];
       nlohmann::json::iterator itr2;
+      std::string method = grader.value("method","MISSING METHOD");
       itr2 = grader.find("show_message");
       if (itr2 == grader.end()) {
-        grader["show_message"] = "always";
+        if (method == "warnIfNotEmpty" || method == "warnIfEmpty") {
+          grader["show_message"] = "on_failure";
+        } else {
+          grader["show_message"] = "always";
+        }
       } else {
         assert (validShowValue(*itr2));
       }
       if (grader.find("actual_file") != grader.end()) {
         itr2 = grader.find("show_actual");
         if (itr2 == grader.end()) {
-          grader["show_actual"] = "always";
+          if (method == "warnIfNotEmpty" || method == "warnIfEmpty") {
+            grader["show_actual"] = "on_failure";
+          } else {
+            grader["show_actual"] = "always";
+          }
         } else {
           assert (validShowValue(*itr2));
         }
@@ -380,9 +382,6 @@ TestCase::TestCase (const nlohmann::json& input) {
       }
     }
   }
-
-  std::cout << "AFTER " << _json.dump(2) << std::endl;
-  std::cout << "--------------------------------------------------" << std::endl;
 }
 
 
@@ -469,6 +468,8 @@ void TestCase::Compilation_Helper() {
     v2["method"] = "errorIfNotEmpty";
     v2["actual_file"] = "STDERR.txt";
     v2["description"] = "Compilation Errors and/or Warnings";
+    v2["show_actual"] = "on_failure";
+    v2["show_message"] = "on_failure";
     v2["deduction"] = warning_fraction;
     _json["validation"].push_back(v2);
 
@@ -479,6 +480,8 @@ void TestCase::Compilation_Helper() {
       v["method"] = "fileExists";
       v["actual_file"] = executable_names[i];
       v["description"] = "Create Executable";
+      v["show_actual"] = "on_failure";
+      v["show_message"] = "on_failure";
       v["deduction"] = 1.0/executable_names.size();
       _json["validation"].push_back(v);
     }

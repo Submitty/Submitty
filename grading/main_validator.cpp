@@ -55,6 +55,16 @@ int main(int argc, char *argv[]) {
 }
 
 
+
+bool ShowHelper(const std::string& when, bool success) {
+  if (when == "always") return true;
+  if (when == "never") return false;
+  if (when == "on_success" && success) return true;
+  if (when == "on_failure" && !success) return true;
+  return false;
+}
+
+
 double ValidateGrader(const TestCase &my_testcase, int which_grader,
                       nlohmann::json &autocheck_js, const std::string &hw_id) {
 
@@ -73,6 +83,14 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
   std::cout << "deduction_multiplier=" << deduction << "  ";
   double score = deduction*(1-grade);
   std::cout << "score=" << score << std::endl;
+
+  bool show_message  = ShowHelper(tcg.value("show_message", "never"),result->getSuccess());
+  bool show_actual   = ShowHelper(tcg.value("show_actual",  "never"),result->getSuccess());
+  bool show_expected = ShowHelper(tcg.value("show_expected","never"),result->getSuccess());
+
+  if (show_actual == false && show_expected == true) {
+    std::cout << "ERROR show_actual == false & show_expected == true" << std::endl;
+  }
 
   std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"actual_file");
   for (int FN = 0; FN < filenames.size(); FN++) {
@@ -103,8 +121,10 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
       fileStatus(actual_file, studentFileExists,studentFileEmpty);
       std::string expected;
       if (studentFileExists) {
-	autocheck_j["actual_file"] = actual_file;
-	expected = tcg.value("expected_file", "");
+        if (show_actual) {
+          autocheck_j["actual_file"] = actual_file;
+	}
+        expected = tcg.value("expected_file", "");
 	if (expected != "") {
 	  fileStatus(expected, expectedFileExists,expectedFileEmpty);
 	  assert (expectedFileExists);
@@ -117,8 +137,12 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
 	  std::string id = hw_id;
 	  std::string expected_out_dir = "test_output/" + id + "/";
 	  expected_path << expected_out_dir << expected;
-	  autocheck_j["expected_file"] = expected_path.str();
-	  autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
+	  if (show_expected) {
+            autocheck_j["expected_file"] = expected_path.str();
+          }
+	  if (show_actual) {
+            autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
+          }
 	}
       }
       std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
@@ -129,20 +153,25 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
       }
     }
 
-    if (FN==0) {
-      for (int m = 0; m < result->getMessages().size(); m++) {
-        if (result->getMessages()[m] != "")
-          autocheck_j["messages"].push_back(result->getMessages()[m]);
+
+    const std::vector<std::string>& messages = result->getMessages();
+    if (FN==0 && show_message) {
+      if (messages.size() == 0) {
+        show_message = false;
+      }
+      for (int m = 0; m < messages.size(); m++) {
+        if (messages[m] != "")
+          autocheck_j["messages"].push_back(messages[m]);
       }
     }
 
     std::cout << "AUTOCHECK GRADE " << grade << std::endl;
-    std::cout << "MESSAGES SIZE " << result->getMessages().size() << std::endl;
+    std::cout << "MESSAGES SIZE " << messages.size() << std::endl;
 
-    if (grade < 1.0 ||
-        result->getMessages().size() > 0 ||
-        actual_file_to_print) {
-      std::cout << "GOING TO OUTPUT" << std::endl;
+    if (show_message || show_actual || show_expected) {
+      //grade < 1.0 ||
+      //result->getMessages().size() > 0 ||
+      //actual_file_to_print) {
       autocheck_js.push_back(autocheck_j);
     }
   }

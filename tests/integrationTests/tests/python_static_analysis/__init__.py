@@ -86,14 +86,26 @@ def buggy(test):
     test.json_diff("results.json", "results.json_buggy")
 
 
-'''
-# THIS IS AN INFINITE LOOP?
 @testcase
 def buggy2(test):
     cleanup(test)
+
+    # FIXME: INFINITE LOOP(?) WHEN THIS DOES NOT EXIST
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p1_bug.py"),
+                     os.path.join(test.testcase_path, "data", "part1")])
+
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "p2_bug2.txt"),
                      os.path.join(test.testcase_path, "data", "part2")])
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p3_bug2.py"),
+                     os.path.join(test.testcase_path, "data", "part3")])
+
+    # FIXME: INFINITE LOOP(?) WHEN THIS DOES NOT EXIST
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p4_bug.py"),
+                     os.path.join(test.testcase_path, "data", "part4")])
     test.run_compile()  # NOTE: This is necessary to rename part2 file
     test.run_run()
     test.run_validator()
@@ -104,12 +116,25 @@ def buggy2(test):
 @testcase
 def buggy3(test):
     cleanup(test)
+
+    # FIXME: INFINITE LOOP(?) WHEN THIS DOES NOT EXIST
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p1_bug.py"),
+                     os.path.join(test.testcase_path, "data", "part1")])
+
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "p2_bug3.txt"),
                      os.path.join(test.testcase_path, "data", "part2")])
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p3_bug3.py"),
+                     os.path.join(test.testcase_path, "data", "part3")])
+
+    # FIXME: INFINITE LOOP(?) WHEN THIS DOES NOT EXIST
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_SUBMISSIONS, "p4_bug.py"),
+                     os.path.join(test.testcase_path, "data", "part4")])
     test.run_compile()  # NOTE: This is necessary to rename part2 file
     test.run_run()
     test.run_validator()
     test.diff("results_grade.txt", "results_grade.txt_buggy3", "-b")
     test.json_diff("results.json", "results.json_buggy3")
-'''

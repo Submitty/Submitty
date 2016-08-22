@@ -34,7 +34,8 @@ function build_homework {
     echo "install $hw_source $hw_build_path"
     
     # copy the files to the build directory 
-    rsync -rvuz --delete  $hw_source/   $hw_build_path
+    #rsync -rvuz --delete  $hw_source/   $hw_build_path
+    rsync -ruz --delete  $hw_source/   $hw_build_path
     find $hw_build_path -type d -exec chmod 770 {} \;
     find $hw_build_path -type d -exec chmod g+s {} \;
     find $hw_build_path -type f -exec chmod 660 {} \;
