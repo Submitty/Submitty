@@ -29,7 +29,10 @@
                     "actual_file" : "STDOUT_1.txt",
                     "description" : "Number of print statements",
 		    "comparison" : "ge",
-                    "term" : 1
+                    "term" : 1,
+                    "failure_message" : "Looks like you forgot the 'print' statement.",
+                    "show_message" : "on_failure",
+                    "show_actual" : "never"
                 }
             ]
         },
@@ -43,7 +46,11 @@
                     "method" : "myersDiffbyLinebyChar",
                     "actual_file" : "part2/*.txt",
                     "description" : "Program Output",
-		    "expected_file" : "p2_out.txt"
+		    "expected_file" : "p2_out.txt",
+                    "show_expected" : "never",
+                    "show_actual" : "always",
+                    "show_message" : "on_failure",
+                    "failure_messaage" : "Incorrect Answer"
                 }
             ]
         },
@@ -68,23 +75,32 @@
                     "actual_file" : "STDOUT_1.txt",
                     "description" : "Number of assignments",
 		    "comparison" : "ge",
-                    "term" : 5
+                    "term" : 5,
+                    "failure_message" : "Re-read the problem instructions.",
+                    "show_message" : "on_failure",
+                    "show_actual" : "never"
                 },
                 {
-                    // number of multiplications must be >= 2
+                    // number of multiplications must be >= 7
                     "method" : "intComparison",
                     "actual_file" : "STDOUT_2.txt",
                     "description" : "Number of multiplications",
 		    "comparison" : "ge",
-                    "term" : 2
+                    "term" : 7,
+                    "failure_message" : "Re-read the problem instructions.",
+                    "show_message" : "on_failure",
+                    "show_actual" : "never"
                 },
                 {
-                    // number of additions must be >= 1
+                    // number of additions must be >= 2
                     "method" : "intComparison",
                     "actual_file" : "STDOUT_3.txt",
                     "description" : "Number of additions",
 		    "comparison" : "ge",
-                    "term" : 1
+                    "term" : 2,
+                    "failure_message" : "Re-read the problem instructions.",
+                    "show_message" : "on_failure",
+                    "show_actual" : "never"
                 }
             ]
         },
@@ -107,7 +123,10 @@
                     "actual_file" : "STDOUT_1.txt",
                     "description" : "Number of while loops",
 		    "comparison" : "ge",
-                    "term" : 1
+                    "term" : 1,
+                    "failure_message" : "Re-read the problem instructions.",
+                    "show_message" : "on_failure",
+                    "show_actual" : "never"
                 }
             ]
         }

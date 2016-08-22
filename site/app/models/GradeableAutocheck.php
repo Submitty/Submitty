@@ -14,9 +14,6 @@ use app\libraries\Utils;
 class GradeableAutocheck {
     
     /** @var string */
-    private $id;
-    
-    /** @var string */
     private $index;
     
     /** @var DiffViewer DiffViewer instance to hold the student, instructor, and differences */
@@ -37,7 +34,6 @@ class GradeableAutocheck {
      * @param $idx
      */
     public function __construct($details, $course_path, $result_path, $idx) {
-        $this->id = $details['autocheck_id'];
         $this->index = $idx;
         
         if (isset($details['description'])) {
@@ -65,10 +61,6 @@ class GradeableAutocheck {
         }
         
         $this->diff_viewer = new DiffViewer($actual_file, $expected_file, $difference_file, $this->index);
-    }
-    
-    public function getId() {
-        return $this->id;
     }
     
     /**

@@ -12,13 +12,9 @@
 			"test_name": "Test 3 FactorialTest",
 			"autochecks": [
 			    {
-                                "actual_file": "test03_execute_logfile.txt",
-                                "autocheck_id": "test03_execute_logfile_autocheck",
-                                "description": "Execution Logfile"
+                                "actual_file": "test03_execute_logfile.txt",                                "description": "Execution Logfile"
                             },
-			    {
-				"autocheck_id":"test03_0_autocheck",
-				"actual_file":"test03_STDOUT.txt",
+			    {				"actual_file":"test03_STDOUT.txt",
 				"description": "JUnit output",
 				"messages": ["ERROR: JUnit testing has revealed an exception or other failure.  Successful tests = 2/4"]
 			    }

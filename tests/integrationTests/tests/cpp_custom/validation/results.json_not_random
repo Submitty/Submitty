@@ -6,9 +6,7 @@
         },
         {
             "autochecks": [
-                {
-                    "autocheck_id": "test02_0_autocheck",
-                    "description": "STDOUT.txt",
+                {                    "description": "STDOUT.txt",
                     "actual_file": "test02_STDOUT.txt"
                 }
             ],
@@ -17,9 +15,7 @@
         },
         {
             "autochecks": [
-                {
-                    "autocheck_id": "test03_0_autocheck",
-                    "description": "STDOUT.txt",
+                {                    "description": "STDOUT.txt",
                     "actual_file": "test03_STDOUT.txt"
                 }
             ],
@@ -28,17 +24,13 @@
         },
         {
             "autochecks": [
-                {
-                    "autocheck_id": "test04_0_0_autocheck",
-                    "description": "STDOUT_0.txt",
+                {                    "description": "STDOUT_0.txt",
                     "messages": [
                         "ERROR!  NOT RANDOM"
                     ],
                     "actual_file": "test04_STDOUT_0.txt"
                 },
-                {
-                    "autocheck_id": "test04_0_1_autocheck",
-                    "description": "STDOUT_1.txt",
+                {                    "description": "STDOUT_1.txt",
                     "actual_file": "test04_STDOUT_1.txt"
                 }
             ],
