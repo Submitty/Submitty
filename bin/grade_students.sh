@@ -457,6 +457,11 @@ function grade_this_item {
         # svn co svn+ssh://csci2600svn.cs.rpi.edu/local/svn/csci2600/USERNAME
         #
         # -r specifies which version to checkout (by timestamp)
+	# BUT... we want to use the @ syntax.  often -r and @ are the
+	# same, but if a student has renamed a directory and then
+	# recreated it, -r and @ are different.  FIXME: Look up the
+	# documentation and improve this comment.
+	# 
         ##############
 
         # first, clean out all of the old files if this is a re-run

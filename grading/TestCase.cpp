@@ -98,7 +98,7 @@ bool getFileContents(const std::string &filename, std::string &file_contents) {
   std::ifstream file(filename);
   if (!file.good()) { return false; }
   file_contents = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-  std::cout << "file contents size = " << file_contents.size() << std::endl;
+  //std::cout << "file contents size = " << file_contents.size() << std::endl;
   return true;
 }
 
@@ -268,12 +268,12 @@ void AddDefaultGrader(const std::string &command,
   if (filename.find("STDOUT") != std::string::npos) {
     j["description"] = "Standard Output (STDOUT)";
   } else if (filename.find("STDERR") != std::string::npos) {
-    std::string executable_name = get_executable_name(command);
-    if (executable_name == "/usr/bin/python") {
+    std::string program_name = get_program_name(command);
+    if (program_name == "/usr/bin/python") {
       j["description"] = "syntax error output from running python";
-    } else if (executable_name == "/usr/bin/java") {
+    } else if (program_name == "/usr/bin/java") {
       j["description"] = "syntax error output from running java";
-    } else if (executable_name == "/usr/bin/javac") {
+    } else if (program_name == "/usr/bin/javac") {
       j["description"] = "syntax error output from running javac";
     } else {
       j["description"] = "Standard Error (STDERR)";
@@ -413,13 +413,6 @@ void TestCase::Compilation_Helper() {
   v_itr = _json.find("validation");
 
   if (f_itr != _json.end()) {
-    nlohmann::json v;
-    v["method"] = "fileExists";
-    v["actual_file"] = (*f_itr);
-    v["description"] = "executable created";
-    v["deduction"] = 1.0;
-    _json["validation"].push_back(v);
-    _json.erase(f_itr);
 
     w_itr = _json.find("warning_deduction");
     float warning_fraction = 0.0;
@@ -432,9 +425,21 @@ void TestCase::Compilation_Helper() {
     nlohmann::json v2;
     v2["method"] = "errorIfNotEmpty";
     v2["actual_file"] = "STDERR.txt";
-    v2["description"] = "compilation warnings and errors";
+    v2["description"] = "Compilation Errors and/or Warnings";
     v2["deduction"] = warning_fraction;
     _json["validation"].push_back(v2);
+
+    std::vector<std::string> executable_names = stringOrArrayOfStrings(_json,"executable_name");
+    assert (executable_names.size() > 0);
+    for (int i = 0; i < executable_names.size(); i++) {
+      nlohmann::json v;
+      v["method"] = "fileExists";
+      v["actual_file"] = executable_names[i];
+      v["description"] = "Create Executable";
+      v["deduction"] = 1.0/executable_names.size();
+      _json["validation"].push_back(v);
+    }
+    _json.erase(f_itr);
   }
 
   f_itr = _json.find("executable_name");
@@ -442,9 +447,7 @@ void TestCase::Compilation_Helper() {
 
   assert (f_itr == _json.end());
   assert (v_itr != _json.end());
-
   //assert (commands.size() > 0);
-
 }
 
 void TestCase::Execution_Helper() {

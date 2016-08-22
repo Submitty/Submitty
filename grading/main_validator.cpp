@@ -62,19 +62,17 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
   TestResults* result = my_testcase.do_the_grading(which_grader);
   assert (result != NULL);
 
-  //my_testcase.debugJSON();
-
   // loop over the student files
   const nlohmann::json& tcg = my_testcase.getGrader(which_grader);
 
   float grade = result->getGrade();
-  std::cout << "result->getGrade() = " << grade << std::endl;
+  std::cout << "  grade=" << grade << "  ";
   assert (grade >= 0.0 && grade <= 1.0);
   double deduction = tcg.value("deduction",1.0);
   assert (deduction >= -0.001 && deduction <= 1.001);
-  std::cout << "deduction multiplier = " << deduction << std::endl;
+  std::cout << "deduction_multiplier=" << deduction << "  ";
   double score = deduction*(1-grade);
-  std::cout << "score = " << score << std::endl;
+  std::cout << "score=" << score << std::endl;
 
   std::vector<std::string> filenames = stringOrArrayOfStrings(tcg,"actual_file");
   for (int FN = 0; FN < filenames.size(); FN++) {
@@ -83,54 +81,54 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
     nlohmann::json autocheck_j;
     autocheck_j["description"] = tcg.value("description",filenames[FN]);
 
-    if (my_testcase.isCompilation() && autocheck_j.value("description","") == "executable created") {
-      // SKIPPING BECAUSE ITS A COMPILATION
-      continue;
-    }
-
-    if (my_testcase.isCompilation() && filenames[FN].find("STDERR") != std::string::npos) {
-      // FIXME might want to do something different here?
-    }
+    bool student_file_to_print = false;
 
     std::string autocheckid = std::to_string(which_grader);
     if (filenames.size() > 1) {
       autocheckid += "_" + std::to_string(FN);
     }
     autocheck_j["autocheck_id"] = my_testcase.getPrefix() + "_" + autocheckid + "_autocheck";
-    std::string student_file = my_testcase.getPrefix() + "_" + filenames[FN];
 
+    if (my_testcase.isCompilation() && autocheck_j.value("description","") == "Create Executable") {
+      //if (grade < 0.1) {
+      //  std::cout << "  MISSING EXECUTABLE "+filenames[FN] << std::endl;
+      //}
+    } else {
+      std::string student_file = my_testcase.getPrefix() + "_" + filenames[FN];
+      student_file = replace_slash_with_double_underscore(student_file);
+      std::vector<std::string> files;
+      wildcard_expansion(files, student_file, std::cout);
+      for (int i = 0; i < files.size(); i++) {
+	student_file = files[i];
+      }
+      bool studentFileExists, studentFileEmpty;
+      bool expectedFileExists=false, expectedFileEmpty=false;
+      fileStatus(student_file, studentFileExists,studentFileEmpty);
+      std::string expected;
+      if (studentFileExists) {
+	autocheck_j["actual_file"] = student_file;
+	expected = tcg.value("expected_file", "");
+	if (expected != "") {
+	  fileStatus(expected, expectedFileExists,expectedFileEmpty);
+	  assert (expectedFileExists);
+	  // PREPARE THE JSON DIFF FILE
+	  std::stringstream diff_path;
+	  diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
+	  std::ofstream diff_stream(diff_path.str().c_str());
+	  result->printJSON(diff_stream);
+	  std::stringstream expected_path;
+	  std::string id = hw_id;
+	  std::string expected_out_dir = "test_output/" + id + "/";
+	  expected_path << expected_out_dir << expected;
+	  autocheck_j["expected_file"] = expected_path.str();
+	  autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
+	}
+      }
+      std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
+      std::cout << "EXPECTED FILEEXISTS " << expectedFileExists << " EMPTY " << expectedFileEmpty << std::endl;
 
-    student_file = replace_slash_with_double_underscore(student_file);
-    std::vector<std::string> files;
-    wildcard_expansion(files, student_file, std::cout);
-    for (int i = 0; i < files.size(); i++) {
-      student_file = files[i];
-    }
-
-
-    bool studentFileExists, studentFileEmpty;
-    bool expectedFileExists=false, expectedFileEmpty=false;
-    fileStatus(student_file, studentFileExists,studentFileEmpty);
-
-    std::string expected;
-
-    if (studentFileExists) {
-      autocheck_j["actual_file"] = student_file;
-      expected = tcg.value("expected_file", "");
-      if (expected != "") {
-        fileStatus(expected, expectedFileExists,expectedFileEmpty);
-        assert (expectedFileExists);
-        // PREPARE THE JSON DIFF FILE
-        std::stringstream diff_path;
-        diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
-        std::ofstream diff_stream(diff_path.str().c_str());
-        result->printJSON(diff_stream);
-        std::stringstream expected_path;
-        std::string id = hw_id;
-        std::string expected_out_dir = "test_output/" + id + "/";
-        expected_path << expected_out_dir << expected;
-        autocheck_j["expected_file"] = expected_path.str();
-        autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
+      if (studentFileExists && !studentFileEmpty) {
+	student_file_to_print = true;
       }
     }
 
@@ -143,24 +141,11 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
 
     std::cout << "AUTOCHECK GRADE " << grade << std::endl;
     std::cout << "MESSAGES SIZE " << result->getMessages().size() << std::endl;
-    std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
-    std::cout << "EXPECTED FILEEXISTS " << expectedFileExists << " EMPTY " << expectedFileEmpty << std::endl;
 
-    std::cout << "-----" << std::endl;
-    system (("ls -lta " + student_file).c_str());
-    std::cout << "-----" << std::endl;
-    system (("more " + student_file).c_str());
-    std::cout << "-----" << std::endl;
-    if (expected != "") {
-      system (("ls -lta " + expected).c_str());
-      std::cout << "-----" << std::endl;
-      system (("more " + expected).c_str());
-      std::cout << "-----" << std::endl;
-    }
 
     if (grade < 1.0 ||
         result->getMessages().size() > 0 ||
-        (studentFileExists && !studentFileEmpty) ) {
+        student_file_to_print) {
       std::cout << "GOING TO OUTPUT" << std::endl;
       autocheck_js.push_back(autocheck_j);
     }
@@ -228,6 +213,12 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       }
     } 
     else {
+      double my_score = 1.0;
+      std::cout << "NUM FILE GRADERS " << my_testcase.numFileGraders() << std::endl;
+      assert (my_testcase.numFileGraders() > 0);
+      for (int j = 0; j < my_testcase.numFileGraders(); j++) {
+        my_score -= ValidateGrader(my_testcase, j, autocheck_js,hw_id);
+      }
       bool fileExists, fileEmpty;
       fileStatus(my_testcase.getPrefix() + "_execute_logfile.txt", fileExists,fileEmpty);
       if (fileExists && !fileEmpty) {
@@ -236,11 +227,6 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
         autocheck_j["actual_file"] = my_testcase.getPrefix() + "_execute_logfile.txt";
         autocheck_j["description"] = "Execution Logfile";
         autocheck_js.push_back(autocheck_j);
-      }
-      double my_score = 1.0;
-      assert (my_testcase.numFileGraders() > 0);
-      for (int j = 0; j < my_testcase.numFileGraders(); j++) {
-        my_score -= ValidateGrader(my_testcase, j, autocheck_js,hw_id);
       }
       if (autocheck_js.size() > 0) {
         tc_j["autochecks"] = autocheck_js;
