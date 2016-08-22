@@ -2,6 +2,13 @@
 
 //Author: Peter Bailie, Systems Programmer, RPI Computer Science, August 2016
 
+/* -----------------------------------------------------------------------------
+ * KNOWN BUG:  Should there be an "upsert" on a regsitered section record for
+ *             anyone who is not in the students group, the system will
+ *             (incorrectly) state "User info is updated", but registration info
+ *             in the DB will (correctly) remain NULL (enforced at upsert call).
+ * -------------------------------------------------------------------------- */
+
 /* MAIN ===================================================================== */
 
 include "../header.php";
@@ -9,6 +16,7 @@ include "../header.php";
 check_administrator();
 
 /* Process ------------------------------------------------------------------ */
+
 $view = new local_view();
 
 //$state affects what's displayed in browser.
@@ -42,11 +50,12 @@ if (isset($_POST['user_id']) && $_POST['user_id'] !== "") {
 		//Email regex should match most cases, including unusual TLDs and
 		//      IPv4 addresses.
 		//VERY LOW PRIORITY TO DO: adjust regex to validate IPv6 addresses.
-		if ( preg_match("~^[a-zA-Z.'`\- ]+$~", $_POST['first_name'])  &&
-		     preg_match("~^[a-zA-Z.'`\- ]+$~", $_POST['last_name'])   &&
+		if ( preg_match("~^[a-zA-Z.'`\- ]+$~", $_POST['first_name']) &&
+			 preg_match("~^$|^[a-zA-Z.'`\- ]+$~", $_POST['preferred_first_name']) &&
+		     preg_match("~^[a-zA-Z.'`\- ]+$~", $_POST['last_name']) &&
 		     preg_match("~^[a-zA-Z0-9._\-]+@[a-zA-Z0-9.\-]+.[a-zA-Z0-9]+$~", $_POST['email']) &&
-		     preg_match("~^[1-4]{1}$~", strval($_POST['user_group'])) &&
-			 preg_match("~^null$|^[0-9]+$~", $_POST['r_section']) ) {
+		     preg_match("~^[1-4]{1}$~", $_POST['user_group']) &&
+			 preg_match("~^null$|^[0-9]+$~", $_POST['r_section']) ){
 		    $is_validated = true;
 		} else {
 			$is_validated = false;
@@ -57,12 +66,16 @@ if (isset($_POST['user_id']) && $_POST['user_id'] !== "") {
 			//NULL values must be passed as keyword null, but true/false values
 			//must be passed as 'true'/'false' strings.  Otherwise, DB throws
 			//an exception.
+			
+			//echo nl2br("\n\n\n\n\n"); var_dump($_POST); die;
+
 			upsert(array( array( $_POST['user_id'],
 			                     $_POST['first_name'],
+								($_POST['preferred_first_name'] === "") ? null : $_POST['preferred_first_name'],
 			                     $_POST['last_name'],
 			                     $_POST['email'],
 								 $_POST['user_group'],
-			                    ($_POST['r_section'] === "null") ? null : $_POST['r_section'],
+			                    ($_POST['r_section'] === "null" || $_POST['user_group'] !== '4') ? null : $_POST['r_section'],
 		                        (isset($_POST['manual_flag']) && $_POST['manual_flag'] === 'on') ? 'true' : 'false' )));
 		    $state = 'upsert_done';
 		} else {
@@ -71,14 +84,16 @@ if (isset($_POST['user_id']) && $_POST['user_id'] !== "") {
 	}
 }
 
-//display
+//$user_data was set in code, above.
 $sec_data = lookup_sections_registration_in_db();
 $view->fill_form($user_data, $sec_data);
 $view->display($state);
+
 /* END Process -------------------------------------------------------------- */
 
 include "../footer.php";
 exit;
+
 /* END MAIN ================================================================= */
 
 function lookup_user_in_db($user_id) {
@@ -90,6 +105,7 @@ function lookup_user_in_db($user_id) {
 SELECT
 	user_id,
 	user_firstname,
+	user_preferred_firstname,
 	user_lastname,
 	user_email,
 	user_group,
@@ -146,13 +162,14 @@ function upsert(array $data) {
 	//TEMPORARY table to hold all new values that will be "upserted"
 	$sql['temp_table'] = <<<SQL
 CREATE TEMPORARY TABLE temp
-	(user_id     VARCHAR(255),
-	 first_name  VARCHAR(255),
-	 last_name   VARCHAR(255),
-	 email       VARCHAR(255),
-	 user_group  INTEGER,
-	 r_section   INTEGER,
-	 manual_flag BOOLEAN)
+	(user_id         VARCHAR,
+	 first_name      VARCHAR,
+	 pref_first_name VARCHAR,
+	 last_name       VARCHAR,
+	 email           VARCHAR,
+	 user_group      INTEGER,
+	 r_section       INTEGER,
+	 manual_flag     BOOLEAN)
 ON COMMIT DROP;
 SQL;
 
@@ -160,7 +177,7 @@ SQL;
 	//in a single DB transaction.
 	for ($i=0; $i<count($data); $i++) {
 		$sql["data_{$i}"] = <<<SQL
-INSERT INTO temp VALUES (?,?,?,?,?,?,?);
+INSERT INTO temp VALUES (?,?,?,?,?,?,?,?);
 SQL;
 
 	}
@@ -175,6 +192,7 @@ SQL;
 UPDATE users
 SET
 	user_firstname=temp.first_name,
+	user_preferred_firstname=temp.pref_first_name,
 	user_lastname=temp.last_name,
 	user_email=temp.email,
 	user_group=temp.user_group,
@@ -189,6 +207,7 @@ SQL;
 INSERT INTO users
 	(user_id,
 	 user_firstname,
+	 user_preferred_firstname,
 	 user_lastname,
 	 user_email,
 	 user_group,
@@ -197,6 +216,7 @@ INSERT INTO users
 SELECT
 	temp.user_id,
 	temp.first_name,
+	temp.pref_first_name,
 	temp.last_name,
 	temp.email,
 	temp.user_group,
@@ -292,16 +312,17 @@ HTML;
  * $user_data expected indices:
  * [0]: (string) user id
  * [1]: (string) user first name
- * [2]: (string) user last name
- * [3]: (string) user email
- * [4]: (int)    user group
- * [5]: (string) user registered section
- * [6]: (bool)   user "manual registration" flag
+ * [2]: (string) user "preferred" first name
+ * [3]: (string) user last name
+ * [4]: (string) user email
+ * [5]: (int)    user group
+ * [6]: (int)    user registered section
+ * [7]: (bool)   user "manual registration" flag
  * -------------------------------------------------------------------------- */
  
 		//defaults
 		if (is_null($user_data)) {
-			$user_data = array("", "", "", "", 3, null, true);
+			$user_data = array("", "", "", "", "", 3, null, true);
 		}
 		
 		if (is_null($sec_data)) {
@@ -314,6 +335,7 @@ HTML;
 document.getElementById('first_name').value='';
 document.getElementById('last_name').value='';
 document.getElementById('email').value='';
+document.getElementById('preferred_first_name').value='';
 JS;
 
 		//Construct user group selectbox (drop-down) box.
@@ -322,20 +344,22 @@ JS;
 							  3 => "Section TA Grader",
 							  4 => "Student" );
 		
-		$ugroup_select = <<<HTML
-<div style="width:30%; display:inline-block; vertical-align:top;">Group:<br><select id="user_group" name="user_group">
+		$ugroup_selectbox = <<<HTML
+<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
+	Group:<br>
+	<select id="user_group" name="user_group">
 HTML;
 		
 		//Determine default selection for selectbox while building option list.
 		for ($i = 1; $i <= 4; $i++) {
-			$d_selected = ($i == $user_data[4]) ? ' selected="selected"' : '';
-			$ugroup_select .= <<<HTML
+			$d_selected = ($i === $user_data[5]) ? ' selected="selected"' : '';
+			$ugroup_selectbox .= <<<HTML
 <option value="{$i}"{$d_selected}>{$group_names[$i]}</option>
 HTML;
 		
 		}
 		
-		$ugroup_select .= <<<HTML
+		$ugroup_selectbox .= <<<HTML
 </select>
 </div>
 HTML;
@@ -343,27 +367,27 @@ HTML;
 		//FINISHED constructing user group selectbox.
 		
 		//Construct available sections selectbox (drop-down) box.
-		$rsections_select = <<<HTML
-<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
+		$rsections_selectbox = <<<HTML
+<div style="width:30%; display:inline-block; vertical-align:top;">
 	Registered Section:<br>
 	<select id="r_section" name="r_section" style="width:95%;">
 HTML;
 
 		//Build options list.  There is always a NULL section.
-		$d_selected = (is_null($user_data[5])) ? ' selected="selected"' : '';
-		$rsections_select .= <<<HTML
+		$d_selected = (is_null($user_data[6])) ? ' selected="selected"' : '';
+		$rsections_selectbox .= <<<HTML
 <option value="null"{$d_selected}>Not Registered</option>
 HTML;
 
 		foreach($sec_data as $section) {
-			$d_selected = ($user_data[5] === $section[0]) ? ' selected="selected"' : '';
-			$rsections_select .= <<<HTML
+			$d_selected = ($user_data[6] === $section[0]) ? ' selected="selected"' : '';
+			$rsections_selectbox .= <<<HTML
 <option value="{$section[0]}"{$d_selected}>Section {$section[0]}</option>
 HTML;
 
 		}
 		
-		$rsections_select .= <<<HTML
+		$rsections_selectbox .= <<<HTML
 </select>
 </div>
 HTML;
@@ -371,18 +395,15 @@ HTML;
 		//FINISHED constructing available sections selectbox.
 		
 		//Determine if 'manual_flag' checkbox should be checked by default
-		$is_checked = ($user_data[6]) ? " checked" : "";
+		$is_checked = ($user_data[7]) ? " checked" : "";
 			
 		//Construct form.  Note string expansions in HTML: {}
 		self::$view['form'] = <<<HTML
 <form action="admin-single-user-review.php" method="POST" enctype="multipart/form-data">
-<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
+<div style="width:30%; display:inline-block; vertical-align:top;">
 	User ID:<br>
 	<input type="text" id="user_id" name="user_id" value="{$user_data[0]}" style="width:95%;" oninput="{$js}">
 </div>
-<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
-</div>
-{$ugroup_select}
 <p>To only lookup a user's enrollment, leave blank all fields marked <span style="color:red;">*</span>.
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
 	First Name: <span style="color:red;">*</span><br>
@@ -390,16 +411,23 @@ HTML;
 </div>
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
 	Last Name: <span style="color:red;">*</span><br>
-	<input type="text" id="last_name" name="last_name" value="{$user_data[2]}" style="width:95%;">
+	<input type="text" id="last_name" name="last_name" value="{$user_data[3]}" style="width:95%;">
+</div>
+<div style="width:30%; display:inline-block; vertical-align:top;">
+	Email: <span style="color:red;">*</span><br>
+	<input type="text" id="email" name="email" value="{$user_data[4]}" style="width:95%;">
 </div>
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
-	Email: <span style="color:red;">*</span><br>
-	<input type="text" id="email" name="email" value="{$user_data[3]}" style="width:95%;">
+	Preferred First Name:<br>
+	<input type="text" id="preferred_first_name" name="preferred_first_name" value="{$user_data[2]}" style="width:95%;">
 </div>
-{$rsections_select}
+{$ugroup_selectbox}
+{$rsections_selectbox}
 <div style="width:50%; display:inline-block; vertical-align:top; padding-right:5px;">
 	<p><input type="checkbox" id="manual_flag" name="manual_flag" style="position:inherit; text-align:center; padding-top:1em;"{$is_checked}> Manually Registered User<br>
 	<p><span style="color:red;">*</span> Required <span style="font-style:italic;">only</span> for add/updating user.
+</div>
+<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
 </div>
 <div style="display:inline-block; vertical-align:top; padding-top:1.5em;">
 	<input type="submit" name="submit" value="Submit">
