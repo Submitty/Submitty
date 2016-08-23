@@ -138,7 +138,11 @@ void validate_filename(const std::string &filename) {
 std::string validate_option(const std::string &program, const std::string &option) {
   const std::map<std::string,std::map<std::string,std::string> > option_replacements = {
     { "/usr/bin/javac",
-      { { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" } },
+      { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
+        { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
+        { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
+        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
+      }
     },
     { "/usr/bin/java",
       { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
@@ -147,7 +151,7 @@ std::string validate_option(const std::string &program, const std::string &optio
         { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
       }
     }
-  };
+    };
 
   // see if this program has option replacements
   std::map<std::string,std::map<std::string,std::string> >::const_iterator itr = option_replacements.find(program);
