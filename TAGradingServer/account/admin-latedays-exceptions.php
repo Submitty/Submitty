@@ -361,7 +361,7 @@ class local_view {
 <div id="container" style="width:100%; margin-top:40px;">
 <div class="modal hide fade in" style="display:block; margin-top:5%; z-index:100;">
 <div class="modal-header">
-<h3>Add Late Day Exceptions</h3>
+<h3>Excused Absense Extensions</h3>
 </div>
 HTML;
 
@@ -412,6 +412,11 @@ HTML;
 		self::$view['form'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
 <form action="admin-latedays-exceptions.php" method="POST" enctype="multipart/form-data">
+<p>
+Use this form to grant an extension (e.g., for an excused absense)
+to a student on a specific assignment.
+</p>
+
 <p>Select Rubric:
 <select name="selected_gradeable" onchange="this.form.submit()">
 HTML;

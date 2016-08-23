@@ -239,8 +239,14 @@ HTML;
     }
     print <<<HTML
         </div>
+
+
+<div class="modal-body">
+<b>Please Read: <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable">Submitty Wiki Instructions for "Create or Edit a Gradeable"</a></b>
+</div>
+
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
-            What is the unique id of this gradeable?: <input style='width: 200px' type='text' name='gradeable_id' class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
+            What is the unique id of this gradeable? (e.g., <tt>hw01</tt>, <tt>lab_12</tt>, or <tt>midterm</tt>): <input style='width: 200px' type='text' name='gradeable_id' class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
             <br />
             What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' class="required" value="{$gradeable_name}" placeholder="(Required)" />
             <br />
@@ -259,7 +265,8 @@ HTML;
     print <<<HTML
             > No -->
             <br />   
-            What is the type of your gradeable?: <div id="required_type" style="color:red; display:inline;">(Required)</div>
+            What is the <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable#types-of-gradeables">
+type of the gradeable</a>?: <div id="required_type" style="color:red; display:inline;">(Required)</div>
 
             <fieldset>
                 <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File"
@@ -294,8 +301,10 @@ HTML;
                 <br />
                 How many late days may students use on this assignment? <input style="width: 50px" name="eg_late_days" class="int_val"
                                                                          type="text"/>
-                <br/>
+                <br /> <br />
                 
+
+                Are students uploading files or commiting code to an SVN repository?<br />
                 <fieldset>
                     <input type="radio" class="upload_file" name="upload_type" value="Upload File"
 HTML;
@@ -313,19 +322,21 @@ HTML;
                     
                     <div class="upload_type upload_repo" id="repository">
                         <br />
-                        Which subdirectory? <input style='width: 227px' type='text' name='subdirectory' value="" />
+                        Which subdirectory of the repository?<input style='width: 227px' type='text' name='subdirectory' value="src" />
                         <br />
                     </div>
                     
                 </fieldset>
 
-                Path to autograding config: 
+		<br />
+                <b>Full path to the directory containing the autograding config.json file:</b><br>
+                See samples here: <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/sample_files/sample_assignment_config">Submitty GitHub sample assignment configurations</a><br>
+		<tt>/usr/local/submitty/sample_files/sample_assignment_config/no_autograding/</tt>  (for an upload only homework)<br>
+		<tt>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</tt> (for a custom autograded homework)<br>
+
                 <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
-                <br />
-                Point precision: 
-                <input style='width: 50px' type='text' name='point_precision' value="0.5" class="float_val" />
                 <br /> <br />
-                
+
                 Use TA grading? 
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
 HTML;
@@ -338,11 +349,16 @@ HTML;
         print <<<HTML
                 /> No
                 <div id="rubric_questions" class="bool_val rubric_questions">
-                <br /> <br />
+
+                Point precision (for TA grading): 
+                <input style='width: 50px' type='text' name='point_precision' value="0.5" class="float_val" />
+                <br /> 
+                
+
                 <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
                     <thead style="background: #E1E1E1;">
                         <tr>
-                            <th>Question</th>
+                            <th>TA Grading Rubric</th>
                             <th style="width:120px;">Points</th>
                         </tr>
                     </thead>
@@ -368,11 +384,11 @@ HTML;
         print <<<HTML
                 <td style="overflow: hidden;">
                     <textarea name="comment_title_{$num}" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" 
-                              placeholder="Question Title">{$question['question_message']}</textarea>
-                    <textarea name="ta_comment_{$num}" id="individual_{$num}" class="ta_comment complex_type" rows="1" placeholder=" Message to TA"  onkeyup="autoResizeComment(event);"
+                              placeholder="Rubric Item Title">{$question['question_message']}</textarea>
+                    <textarea name="ta_comment_{$num}" id="individual_{$num}" class="ta_comment complex_type" rows="1" placeholder=" Message to TA (seen only by TAs)"  onkeyup="autoResizeComment(event);"
                                                style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
                                                display: block;">{$question['question_grading_note']}</textarea>
-                    <textarea name="student_comment_{$num}" id="student_{$num}" class="student_comment complex_type" rows="1" placeholder=" Message to Student" onkeyup="autoResizeComment(event);"
+                    <textarea name="student_comment_{$num}" id="student_{$num}" class="student_comment complex_type" rows="1" placeholder=" Message to Student (seen by both students and TAs)" onkeyup="autoResizeComment(event);"
                               style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
                               display: block;">{$question['student_grading_note']}</textarea>
                 </td>
@@ -407,7 +423,7 @@ HTML;
         print <<<HTML
             <tr id="add-question">
                 <td colspan="2" style="overflow: hidden;">
-                    <div class="btn btn-small btn-success" id="rubric-add-button" onclick="addQuestion()"><i class="icon-plus icon-white"></i> Question</div>
+                    <div class="btn btn-small btn-success" id="rubric-add-button" onclick="addQuestion()"><i class="icon-plus icon-white"></i> Rubric Item</div>
                 </td>
             </tr>
 HTML;
@@ -519,7 +535,8 @@ HTML;
             </div>  
             </fieldset>
             <div id="grading_questions">
-            What is the lowest privileged user group that can grade this?
+            What is the <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable#grading-user-groups">
+	    lowest privileged user group</a> that can grade this?
             <select name="minimum_grading_group" class="int_val" style="width:180px;">
 HTML;
 
@@ -544,7 +561,7 @@ HTML;
 </textarea>
             
             <br />
-            Who is assigned to grade this item?:
+            <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable#grading-by-registration-section-or-rotating-section">How should TAs be assigned</a> to grade this item?:
             <br />
             <fieldset>
                 <input type="radio" name="section_type" value="reg_section"
@@ -669,7 +686,7 @@ HTML;
             <br />
             </div>
             
-            What syllabus/iris "bucket" does this item belong to?:
+            What <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Iris-(Rainbow-Grades)">syllabus category</a> does this item belong to?:
             
             <select name="gradeable_buckets" style="width: 170px;">
 HTML;
@@ -1113,10 +1130,10 @@ HTML;
         var sBox = selectBox(newQ);
         $('#row-'+num).after('<tr class="rubric-row" id="row-'+newQ+'"> \
             <td style="overflow: hidden;"> \
-                <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" placeholder="Question Title"></textarea> \
-                <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA"  onkeyup="autoResizeComment(event);" \
+                <textarea name="comment_title_'+newQ+'" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" placeholder="Rubric Item Title"></textarea> \
+                <textarea name="ta_comment_'+newQ+'" id="individual_'+newQ+'" rows="1" class="ta_comment complex_type" placeholder=" Message to TA (seen only by TAs)"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
-                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student"  onkeyup="autoResizeComment(event);" \
+                <textarea name="student_comment_'+newQ+'" id="student_'+newQ+'" rows="1" class="student_comment complex_type" placeholder=" Message to Student (seen by both students and TAs"  onkeyup="autoResizeComment(event);" \
                           style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;"></textarea> \
             </td> \
             <td style="background-color:#EEE;">' + sBox + ' \

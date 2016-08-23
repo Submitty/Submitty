@@ -331,9 +331,24 @@ class local_view {
 <div id="container" style="width:100%; margin-top:40px;">
 <div class="modal hide fade in" style="display:block; margin-top:5%; z-index:100;">
 <div class="modal-header">
-<h3>Add Late Days</h3>
+<h3>Late Days Allowed</h3>
 </div>
+
+
+
+
 <div class="modal-body" style="padding-top:10px; padding-bottom:10px;">
+
+<p>
+Use this form to grant students additional late days
+(beyond the initial number specified in the course configuration).
+</p>
+
+<p>
+Students may use these additional late days for any future homeworks
+(after the specificed date).
+</p>
+
 HTML;
 
 		self::$view['tail'] = <<<HTML
@@ -404,13 +419,13 @@ HTML;
 			self::$view['student_review_table'] = <<<HTML
 <table style="border:5px solid white; border-collapse:collapse; margin: 0 auto; text-align:center;">
 <caption style="caption-side:top; font-weight:bold; font-size:1.2em;">
-Current Late Day Exceptions
+Late Days Allowed
 </caption>
 <th style="background:lavender; width:20%;">Student ID</th>
 <th style="background:lavender; width:20%;">First Name</th>
 <th style="background:lavender; width:20%;">Last Name</th>
-<th style="background:lavender; width:20%;">Allowed Lates</th>
-<th style="background:lavender;">Since Date</th>
+<th style="background:lavender; width:20%;">Total Allowed Late Days</th>
+<th style="background:lavender;">Effective Date</th>
 HTML;
 	
 			//Table BODY
