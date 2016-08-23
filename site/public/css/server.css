@@ -19,10 +19,12 @@ body {
     /* background-color: #B6CECE; */
 
     /* Submitty Logo blue */
-    /* background-color: #0d6789; */
+    /* background-color: #0a6496; */
 
     /* A lighter shade of blue grey */
-    background-color: #88aacc;
+    background: #88aacc;
+
+    background: linear-gradient(#0a6496, #b8d5e5); /
 
     font-family: 'Source Sans Pro', sans-serif;
     height: 100%;

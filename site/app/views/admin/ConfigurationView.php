@@ -16,7 +16,7 @@ class ConfigurationView {
 
         return <<<HTML
 <div class="content">
-    <h2>Manage Class Configuration</h2>
+    <h2>Course Settings</h2>
     <form id="configForm" method="post" action="{$this->core->buildUrl(array('component' => 'admin', 
                                                                              'page'      => 'configuration', 
                                                                              'action'    => 'update'))}">
@@ -29,29 +29,33 @@ class ConfigurationView {
                 <div class="option-alt">Input the course name that should appear in the header of the site</div>
             </div>
         </div>
-        <div class="option">
-            <div class="option-input"><input type="text" name="default_hw_late_days" value="{$fields['default_hw_late_days']}" /></div>
-            <div class="option-desc">
-                <div class="option-title">Default HW Late Days</div>
-                <div class="option-alt">Number of late days that a homework will have by default (can be changed when making/editing 
-                and assignment)</div>
-            </div>
-        </div>
+
         <div class="option">
             <div class="option-input"><input type="text" name="default_student_late_days" value="{$fields['default_student_late_days']}" /></div>
             <div class="option-desc">
-                <div class="option-title">Default Student Late Days</div>
-                <div class="option-alt">Number of late days a student has when added to the server. Additional late days can be
-                given to the student throughout the semester.</div>
-            </div>  
+              <div class="option-title">Initial Allowed Late Days (Per Student, Per Semester)</div>
+                <div class="option-alt">Number of allowed late days given to each student when they are added to
+                                        the course.  Additional late days can be granted (e.g., as incentives)
+                                        using the "Late Days Allowed" form.</div>
+            </div>
         </div>
+
+        <div class="option">
+            <div class="option-input"><input type="text" name="default_hw_late_days" value="{$fields['default_hw_late_days']}" /></div>
+            <div class="option-desc">
+                <div class="option-title">Default Maximum Late Days Per Assignment</div>
+                <div class="option-alt">Specify the default number of late days that may be used on a single homework.  This can be adjusted
+                            per assignment on the "Create/Edit Gradeable" form.</div>
+            </div>
+        </div>
+
+
         <div class="option">
             <div class="option-input"><input type="checkbox" name="zero_rubric_grades" value="true" {$zero_checked} /></div>
             <div class="option-desc">
                 <div class="option-title">Zero Rubric Grading</div>
-                <div class="option-alt">Should rubrics start out at zero when TAs are grading? If disabled, the rubric will
-                start at full credit unless the submission was too late/not submitted at which point it'll be zeroed out
-                automatically.</div>
+                <div class="option-alt">Should each rubric item score default to zero?  If disabled, the grading rubric will
+                  default at full credit.   Note: Assignments that are not submitted/submitted too late always be set to zero.</div>
             </div>
         </div>
         <div class="option">
