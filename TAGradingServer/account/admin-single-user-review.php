@@ -270,7 +270,7 @@ class local_view {
 <div id="container" style="width:100%; margin-top:40px;">
 <div class="modal hide fade in" style="display:block; margin-top:5%; z-index:100;">
 <div class="modal-header">
-<h3>Review Individual User Enrollment</h3>
+<h3>Manage Users<br>(Instructors, Graders, and Students)</h3>
 </div>
 <div class="modal-body" style="padding-top:10px; padding-bottom:10px;">
 HTML;
@@ -339,10 +339,10 @@ document.getElementById('preferred_first_name').value='';
 JS;
 
 		//Construct user group selectbox (drop-down) box.
-		$group_names = array( 1 => "Course Instructor",
-		                      2 => "Course TA Grader",
-							  3 => "Section TA Grader",
-							  4 => "Student" );
+		$group_names = array( 1 => "Instructor",
+		                      2 => "Full Access Grader (Grad TA)",
+				      3 => "Limited Access Grader (mentor)",
+				      4 => "Student" );
 		
 		$ugroup_selectbox = <<<HTML
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
