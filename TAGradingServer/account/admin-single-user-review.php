@@ -3,10 +3,9 @@
 //Author: Peter Bailie, Systems Programmer, RPI Computer Science, August 2016
 
 /* -----------------------------------------------------------------------------
- * KNOWN BUG:  Should there be an "upsert" on a regsitered section record for
- *             anyone who is not in the students group, the system will
- *             (incorrectly) state "User info is updated", but registration info
- *             in the DB will (correctly) remain NULL (enforced at upsert call).
+ * KNOWN BUG:  Registered section is intended for students, but form and upsert
+ *             allows any user, including instructor and graders, to have a
+ *             registered section.
  * -------------------------------------------------------------------------- */
  
 /* -----------------------------------------------------------------------------
