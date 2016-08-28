@@ -8,8 +8,19 @@
  *             (incorrectly) state "User info is updated", but registration info
  *             in the DB will (correctly) remain NULL (enforced at upsert call).
  * -------------------------------------------------------------------------- */
+ 
+/* -----------------------------------------------------------------------------
+ * TO DO:  Disable ("gray out") Assigned Sections checkbox group when user
+ *         group selectbox has Instructor or Student (not grader) selected.
+ *         For now, user group is validated so that sections can only be
+ *         assigned to graders.  Also, students are forced to have no assigned
+ *         sections by removing any existing rows in the database's
+ *         grading_registration table.  e.g. a user is erroneously added as
+ *         a grader with assigned sections, but is later correctly updated to
+ *         be a student -- their assigned sections are automatically removed.
+ * -------------------------------------------------------------------------- */
 
-/* MAIN ===================================================================== */
+  /* MAIN ===================================================================== */
 
 include "../header.php";
 
@@ -73,7 +84,21 @@ if (isset($_POST['user_id']) && $_POST['user_id'] !== "") {
 			                     $_POST['email'],
 								 $_POST['user_group'],
 			                    ($_POST['r_section'] === "null") ? null : $_POST['r_section'],
-		                        (isset($_POST['manual_flag']) && $_POST['manual_flag'] === 'on') ? 'true' : 'false' )));
+		                        (isset($_POST['manual_flag']) && $_POST['manual_flag'] === 'on') ? 'true' : 'false' )) );
+			
+			//Only groups 2 and 3 may have a grader section assignment.
+			//On case 4 (student) -- automatically wipe out grader assignments.
+			switch($_POST['user_group']) {
+			case 2:
+			case 3:
+				update_grader_section_assignments( $_POST['user_id'],
+											      (isset($_POST['grader_section_assignments'])) ? $_POST['grader_section_assignments'] : array() );
+				break;
+			case 4:
+				update_grader_section_assignments( $_POST['user_id'], array() );
+				break;										      
+			}
+						
 		    $state = 'upsert_done';
 		} else {
 			$state = 'invalid_user_info';
@@ -96,9 +121,14 @@ exit;
 function lookup_user_in_db($user_id) {
 //IN:  ID of user to lookup in DB.
 //OUT: Single user information.
-//PURPOSE: Simply a DB lookup of a single user.
+//PURPOSE: Lookup user info in the "users" table and the "grading_registration"
+//         tables.  grading_registration table is expected to return multiple
+//         rows, so that table is checked in a separate query and the results
+//         appended to the results from the "user" table query.
 
 	$sql = array();
+	
+	//"user" table query
 	$sql['user'] = <<<SQL
 SELECT
 	user_id,
@@ -113,19 +143,24 @@ FROM users
 WHERE users.user_id=?
 SQL;
 
+	//"grading_registration" query
 	$sql['grader_assigned_sections'] = <<<SQL
 SELECT
 	sections_registration_id
 FROM grading_registration
 WHERE user_id=?
 SQL;
-		
+	
+	//"user" table result should be one row.
 	\lib\Database::query($sql['user'], array($user_id));
 	$result = \lib\Database::row();
 	
+	//"grading_registration" table result is likely to be multiple rows.
 	\lib\Database::query($sql['grader_assigned_sections'], array($user_id));
 	$result2 = \lib\Database::rows();
 	
+	//append "grading_registration" rows to to "user" query row as label and
+	//numeric index.
 	$result['grader_assigned_sections'] = $result2;
 	$result[] = $result2;
 
@@ -249,7 +284,7 @@ SQL;
 	\lib\Database::query($sql['temp_table']);
 	
 	foreach ($data as $index => $record) {
-		\lib\Database::query($sql["data_{$index}"], array($record));
+		\lib\Database::query($sql["data_{$index}"], $record);
 	}
 	
 	\lib\Database::query($sql['lock']);
@@ -261,9 +296,18 @@ SQL;
 	//Server will throw exception if there is a problem with DB access.
 }
 
-/* END FUNCTION upsert_user() ==================================================== */
+/* END FUNCTION upsert_user() =============================================== */
 
-function update_grader_section_assignments($user_id, $sections_assigned) {
+function update_grader_section_assignments($user_id, $sections_assigned = array()) {
+//IN:  User ID (string) and array of assigned sections for a particular user.
+//OUT: No return.  This is assumed to work.  (Server should throw an exception
+//     if this process fails)
+//PURPOSE:  Update/remove any assigned sections.  This is primarily intended for
+//          full or limited grader users.  Works with the "grading_registration"
+//          table.  Because a user will have multiple rows -- one for every
+//          section assignment, (in lieu of an update query) all of the user's
+//          rows are first deleted and the "updated" assigned sections are
+//          inserted afterwards.
 
 	$sql= array();
 	
@@ -272,20 +316,21 @@ function update_grader_section_assignments($user_id, $sections_assigned) {
 LOCK TABLE grading_registration IN EXCLUSIVE MODE;
 SQL;
 
-	//Remove all existing entries.  Technically not an SQL error if no entries
-	//yet exist.
+	//Remove all existing entries, if any.
 	$sql['delete'] = <<<SQL
 DELETE FROM grading_registration
 WHERE user_id=?;
 SQL;
 
+	//Updated assigned sections (skipped, if array is empty)
 	foreach($sections_assigned as $index => $entry) {
 		$sql["insert_{$index}"] = <<<SQL
 INSERT INTO grading_registration 
 VALUES(?,?);
 SQL;
 	}
-	
+
+	//DB transaction
 	\lib\Database::beginTransaction();
 	\lib\Database::query($sql['lock']);
 	\lib\Database::query($sql['delete'], array($user_id));
@@ -301,7 +346,7 @@ SQL;
 /* END FUNCTION update_grader_section_assignments() ========================= */	
 
 class local_view {
-//View class for admin-latedays.php
+//View class for admin-single-user-review.php
 
 	//Properties
 	//Class constants to represent unicode styled X and checkmark symbols.
@@ -342,7 +387,7 @@ HTML;
 
 		self::$view['invalid_user_info'] = <<<HTML
 <p style="margin:0;"><em style="color:red; font-weight:bold; font-style:normal;">
-{$utf8_styled_x} Invalid user information.</em>
+{$utf8_styled_x} Invalid user update.</em>
 HTML;
 
 		self::$view['upsert_done'] = <<<HTML
@@ -385,6 +430,7 @@ HTML;
 			$sec_data = array();
 		}
 		
+		//There can be multiple Javascript blocks for different DOM elements.
 		$js = array();
 
  		//Build form
@@ -394,11 +440,6 @@ document.getElementById('first_name').value='';
 document.getElementById('last_name').value='';
 document.getElementById('email').value='';
 document.getElementById('preferred_first_name').value='';
-JS;
-
-		//Javascript to disable checkboxes for Instructor and Student groups.
-		//TO DO: (not yet implemented)
-		$js['checkboxes']= <<<JS
 JS;
 
 		//Construct user group selectbox (drop-down) box.
@@ -514,7 +555,7 @@ HTML;
 </div>
 {$ugroup_selectbox}
 {$registration_sections_selectbox}
-<div style=display:inline-block; vertical-align:top;">
+<div style="display:inline-block; vertical-align:top;">
 	<p><input type="checkbox" id="manual_flag" name="manual_flag" style="vertical-align: top; position: relative;"{$is_checked}> Manually Registered User (no automatic updates)
 </div>
 <h4>Assigned Sections (Graders Only)</h4>
