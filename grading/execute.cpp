@@ -57,6 +57,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
     // for Computer Science I
     { "python",                 "/usr/bin/python" },
+    { "python2",                "/usr/bin/python2" },
+    { "python3",                "/usr/bin/python3" },
 
     // for Data Structures
     { "g++",                    "/usr/bin/g++" },
