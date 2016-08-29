@@ -58,6 +58,7 @@ before_script:
   - sudo ./.setup/travis/setup_test_suite.sh
   - ./.setup/travis/start.sh
   - sudo usermod -a -G travis www-data
+  - sudo usermod -a -G hwphp www-data
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - sudo sed -e "s?www-data?hwphp?g" --in-place ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
