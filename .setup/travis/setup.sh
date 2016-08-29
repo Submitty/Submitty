@@ -73,7 +73,7 @@ http://192.168.56.101/cgi-bin
 svn+ssh:192.168.56.103" | sudo bash ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 
 sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
-sudo chmod 777 ${SUBMITTY_INSTALL_DIR}
+sudo chmod -R 777 ${SUBMITTY_INSTALL_DIR}
 
 sudo bash ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
 sudo chmod 777 ${SUBMITTY_DATA_DIR}/instructors/authlist
