@@ -84,5 +84,9 @@ script:
   - BROWSER=phantomjs TEST_URL="http://localhost" vendor/bin/phpunit --configuration tests/phpunit.xml --no-coverage
   - python /usr/local/submitty/test_suite/integrationTests/run.py
 
+after_script:
+  - tail -n 50 /var/apache2/submitty.log
+  - tail -n 50 /var/apache2/submitty-error.log
+
 notifications:
   email: false
