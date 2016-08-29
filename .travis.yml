@@ -14,7 +14,6 @@ cache:
 
 addons:
   postgresql: "9.3"
-  firefox: "48.0"
   apt:
     sources:
       - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
@@ -65,24 +64,15 @@ before_script:
   - ./.setup/travis/setup.sh
   - sudo ./.setup/travis/setup_test_suite.sh
   - ./.setup/travis/start.sh
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - echo "Extracting firefox and setting PATH variable..."
-  - tar -xjf /tmp/firefox-48.0.tar.bz2 --directory /tmp
-  - export PATH="/tmp/firefox:$PATH"
-  - echo "Using firefox version `firefox --version`"
-  - mkdir -p ${HOME}/bin
-  - curl -L https://github.com/mozilla/geckodriver/releases/download/v0.10.0/geckodriver-v0.10.0-arm7hf.tar.gz | zcat > $HOME/bin/wires
-  - chmod +x $HOME/bin/wires
-  - export PATH=$PATH:$HOME/bin/
-  - wires --version
-  - sleep 10 # give xvfb some time to start
+#  - "export DISPLAY=:99.0"
+#  - "sh -e /etc/init.d/xvfb start"
+#  - sleep 10 # give xvfb some time to start
 
 
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
   - vendor/bin/phpunit --version
-  - vendor/bin/phpunit --configuration tests/phpunit.xml
+  - BROWSER=phantomjs vendor/bin/phpunit --configuration tests/phpunit.xml
   - python /usr/local/submitty/test_suite/integrationTests/run.py
 
 notifications:
