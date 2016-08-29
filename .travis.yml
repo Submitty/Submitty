@@ -44,7 +44,6 @@ install:
   - travis_retry composer install --prefer-dist --no-interaction
 
 before_script:
-  - sudo iptables -t nat -A OUTPUT -p all -d 192.168.56.101 -j DNAT --to-destination 127.0.0.1
   - sudo usermod -a -G travis www-data
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - sudo a2enmod rewrite actions fastcgi alias
@@ -64,6 +63,7 @@ before_script:
   - ./.setup/travis/setup.sh
   - sudo ./.setup/travis/setup_test_suite.sh
   - ./.setup/travis/start.sh
+  - phantomjs --version
 #  - "export DISPLAY=:99.0"
 #  - "sh -e /etc/init.d/xvfb start"
 #  - sleep 10 # give xvfb some time to start
@@ -72,7 +72,7 @@ before_script:
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
   - vendor/bin/phpunit --version
-  - BROWSER=phantomjs vendor/bin/phpunit --configuration tests/phpunit.xml
+  - BROWSER=phantomjs TEST_URL="http://localhost" vendor/bin/phpunit --configuration tests/phpunit.xml
   - python /usr/local/submitty/test_suite/integrationTests/run.py
 
 notifications:
