@@ -59,6 +59,7 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
         }
         catch (\Exception $e) {
             print($this->source());
+            print($this->url());
             throw $e;
         }
         $this->timeouts()->implicitWait($time);
