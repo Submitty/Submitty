@@ -72,7 +72,7 @@ before_script:
   - export PATH="/tmp/firefox:$PATH"
   - echo "Using firefox version `firefox --version`"
   - mkdir -p ${HOME}/bin
-  - curl -L https://github.com/mozilla/geckodriver/releases/download/v0.10.0/geckodriver-v0.10.0-linux64.tar.gz | zcat > $HOME/bin/wires
+  - curl -L https://github.com/mozilla/geckodriver/releases/download/v0.10.0/geckodriver-v0.10.0-arm7hf.tar.gz | zcat > $HOME/bin/wires
   - chmod +x $HOME/bin/wires
   - export PATH=$PATH:$HOME/bin/
   - wires --version
