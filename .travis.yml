@@ -85,6 +85,7 @@ script:
   - python /usr/local/submitty/test_suite/integrationTests/run.py
 
 after_script:
+  - echo ${APACHE_LOG_DIR}
   - tail -n 50 /var/apache2/submitty.log
   - tail -n 50 /var/apache2/submitty-error.log
 
