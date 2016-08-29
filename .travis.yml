@@ -86,10 +86,8 @@ script:
 
 after_script:
   - echo ${APACHE_LOG_DIR}
-  - tail -n 50 /var/log/apache/submitty.log
-  - tail -n 50 /var/log/apache/submitty-error.log
-  - tail -n 50 /var/log/apache2/submitty.log
-  - tail -n 50 /var/log/apache2/submitty-error.log
+  - sudo tail -n 50 /var/log/apache2/submitty.log
+  - sudo tail -n 50 /var/log/apache2/submitty-error.log
 
 notifications:
   email: false
