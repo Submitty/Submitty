@@ -8,8 +8,8 @@ class StudentSubmissionTester extends BaseTestCase {
     protected $user_id = "student";
     protected $password = "student";
     
-    public function testUpload() {
-        $this->assertTrue(true);
-    }
+    //public function testUpload() {
+    //    $this->assertTrue(true);
+    //}
     
 }
