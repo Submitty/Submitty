@@ -3,10 +3,20 @@
 //Author: Peter Bailie, Systems Programmer, RPI Computer Science, August 2016
 
 /* -----------------------------------------------------------------------------
- * KNOWN BUG:  Should there be an "upsert" on a regsitered section record for
- *             anyone who is not in the students group, the system will
- *             (incorrectly) state "User info is updated", but registration info
- *             in the DB will (correctly) remain NULL (enforced at upsert call).
+ * KNOWN BUG:  Registered section is intended for students, but form and upsert
+ *             allows any user, including instructor and graders, to have a
+ *             registered section.
+ * -------------------------------------------------------------------------- */
+ 
+/* -----------------------------------------------------------------------------
+ * TO DO:  Disable ("gray out") Assigned Sections checkbox group when user
+ *         group selectbox has Instructor or Student (not grader) selected.
+ *         For now, user group is validated so that sections can only be
+ *         assigned to graders.  Also, students are forced to have no assigned
+ *         sections by removing any existing rows in the database's
+ *         grading_registration table.  e.g. a user is erroneously added as
+ *         a grader with assigned sections, but is later correctly updated to
+ *         be a student -- their assigned sections are automatically removed.
  * -------------------------------------------------------------------------- */
 
 /* MAIN ===================================================================== */
@@ -38,13 +48,13 @@ if (isset($_POST['user_id']) && $_POST['user_id'] !== "") {
 
 		//Do DB lookup for user by user ID
 		$user_data = lookup_user_in_db($_POST['user_id']);
-		
+
 		if (count($user_data) < 1) {
 			$user_data = null;
 			$state = "user_not_found";
 		}		
 	} else {
-		//Do form data validation in preperation for upsert.
+		//Do form data validation in preperation for upsert_user.
 		//No validation on user id as pattern varies among Universities.
 		//No validation on is_manual checkbox as it is not SET when not ticked.
 		//Email regex should match most cases, including unusual TLDs and
@@ -55,28 +65,39 @@ if (isset($_POST['user_id']) && $_POST['user_id'] !== "") {
 		     preg_match("~^[a-zA-Z.'`\- ]+$~", $_POST['last_name']) &&
 		     preg_match("~^[a-zA-Z0-9._\-]+@[a-zA-Z0-9.\-]+.[a-zA-Z0-9]+$~", $_POST['email']) &&
 		     preg_match("~^[1-4]{1}$~", $_POST['user_group']) &&
-			 preg_match("~^null$|^[0-9]+$~", $_POST['r_section']) ){
+			 preg_match("~^null$|^[0-9]+$~", $_POST['r_section']) ) {
 		    $is_validated = true;
 		} else {
 			$is_validated = false;
 		}
 
 		if ($is_validated) {
-			//upsert's argument expects 2D array.
+			//upsert_user's argument expects 2D array.
 			//NULL values must be passed as keyword null, but true/false values
 			//must be passed as 'true'/'false' strings.  Otherwise, DB throws
 			//an exception.
-			
-			//echo nl2br("\n\n\n\n\n"); var_dump($_POST); die;
-
-			upsert(array( array( $_POST['user_id'],
+			upsert_user(array( array( $_POST['user_id'],
 			                     $_POST['first_name'],
 								($_POST['preferred_first_name'] === "") ? null : $_POST['preferred_first_name'],
 			                     $_POST['last_name'],
 			                     $_POST['email'],
 								 $_POST['user_group'],
-			                    ($_POST['r_section'] === "null" || $_POST['user_group'] !== '4') ? null : $_POST['r_section'],
-		                        (isset($_POST['manual_flag']) && $_POST['manual_flag'] === 'on') ? 'true' : 'false' )));
+			                    ($_POST['r_section'] === "null") ? null : $_POST['r_section'],
+		                        (isset($_POST['manual_flag']) && $_POST['manual_flag'] === 'on') ? 'true' : 'false' )) );
+			
+			//Only groups 2 and 3 may have a grader section assignment.
+			//On case 4 (student) -- automatically wipe out grader assignments.
+			switch($_POST['user_group']) {
+			case 2:
+			case 3:
+				update_grader_section_assignments( $_POST['user_id'],
+											      (isset($_POST['grader_section_assignments'])) ? $_POST['grader_section_assignments'] : array() );
+				break;
+			case 4:
+				update_grader_section_assignments( $_POST['user_id'], array() );
+				break;										      
+			}
+						
 		    $state = 'upsert_done';
 		} else {
 			$state = 'invalid_user_info';
@@ -99,9 +120,15 @@ exit;
 function lookup_user_in_db($user_id) {
 //IN:  ID of user to lookup in DB.
 //OUT: Single user information.
-//PURPOSE: Simply a DB lookup of a single user.
+//PURPOSE: Lookup user info in the "users" table and the "grading_registration"
+//         tables.  grading_registration table is expected to return multiple
+//         rows, so that table is checked in a separate query and the results
+//         appended to the results from the "user" table query.
 
-	$sql = <<<SQL
+	$sql = array();
+	
+	//"user" table query
+	$sql['user'] = <<<SQL
 SELECT
 	user_id,
 	user_firstname,
@@ -112,12 +139,33 @@ SELECT
 	registration_section,
 	manual_registration
 FROM users
-WHERE user_id=?
+WHERE users.user_id=?
 SQL;
 
-	\lib\Database::query($sql, array($user_id));
-	return \lib\Database::row();
+	//"grading_registration" query
+	$sql['grader_assigned_sections'] = <<<SQL
+SELECT
+	sections_registration_id
+FROM grading_registration
+WHERE user_id=?
+SQL;
+	
+	//"user" table result should be one row.
+	\lib\Database::query($sql['user'], array($user_id));
+	$result = \lib\Database::row();
+	
+	//"grading_registration" table result is likely to be multiple rows.
+	\lib\Database::query($sql['grader_assigned_sections'], array($user_id));
+	$result2 = \lib\Database::rows();
+	
+	//append "grading_registration" rows to to "user" query row as label and
+	//numeric index.
+	$result['grader_assigned_sections'] = $result2;
+	$result[] = $result2;
+
+	return $result;
 }
+
 /* END FUNCTION lookup_user_in_db() ========================================= */
 
 function lookup_sections_registration_in_db() {
@@ -130,15 +178,17 @@ function lookup_sections_registration_in_db() {
 	$sql = <<<SQL
 SELECT
 	sections_registration_id
-FROM sections_registration;
+FROM sections_registration
+ORDER BY sections_registration_id ASC;
 SQL;
 
 	\lib\Database::query($sql);
 	return \lib\Database::rows();
 }
+
 /* END FUNCTION lookup_sections_registration_in_db() ======================== */
 
-function upsert(array $data) {
+function upsert_user(array $data) {
 //IN:  Data to be "upserted" as 2D array.
 //OUT: No return.  This is assumed to work.  (Server should throw an exception
 //     if this process fails)
@@ -244,10 +294,58 @@ SQL;
 	//All Done!
 	//Server will throw exception if there is a problem with DB access.
 }
-/* END FUNCTION upsert() ==================================================== */
+
+/* END FUNCTION upsert_user() =============================================== */
+
+function update_grader_section_assignments($user_id, $sections_assigned = array()) {
+//IN:  User ID (string) and array of assigned sections for a particular user.
+//OUT: No return.  This is assumed to work.  (Server should throw an exception
+//     if this process fails)
+//PURPOSE:  Update/remove any assigned sections.  This is primarily intended for
+//          full or limited grader users.  Works with the "grading_registration"
+//          table.  Because a user will have multiple rows -- one for every
+//          section assignment, (in lieu of an update query) all of the user's
+//          rows are first deleted and the "updated" assigned sections are
+//          inserted afterwards.
+
+	$sql= array();
+	
+	//LOCK will prevent sharing collisions while updates are in process.
+	$sql['lock'] = <<<SQL
+LOCK TABLE grading_registration IN EXCLUSIVE MODE;
+SQL;
+
+	//Remove all existing entries, if any.
+	$sql['delete'] = <<<SQL
+DELETE FROM grading_registration
+WHERE user_id=?;
+SQL;
+
+	//Updated assigned sections (skipped, if array is empty)
+	foreach($sections_assigned as $index => $entry) {
+		$sql["insert_{$index}"] = <<<SQL
+INSERT INTO grading_registration 
+VALUES(?,?);
+SQL;
+	}
+
+	//DB transaction
+	\lib\Database::beginTransaction();
+	\lib\Database::query($sql['lock']);
+	\lib\Database::query($sql['delete'], array($user_id));
+	foreach($sections_assigned as $index =>$entry) {
+		\lib\Database::query($sql["insert_{$index}"], array($entry, $user_id));
+	}
+	\lib\Database::commit();
+	
+	//All Done!
+	//Server will throw exception if there is a problem with DB access.
+}
+
+/* END FUNCTION update_grader_section_assignments() ========================= */	
 
 class local_view {
-//View class for admin-latedays.php
+//View class for admin-single-user-review.php
 
 	//Properties
 	//Class constants to represent unicode styled X and checkmark symbols.
@@ -288,7 +386,7 @@ HTML;
 
 		self::$view['invalid_user_info'] = <<<HTML
 <p style="margin:0;"><em style="color:red; font-weight:bold; font-style:normal;">
-{$utf8_styled_x} Invalid user information.</em>
+{$utf8_styled_x} Invalid user update.</em>
 HTML;
 
 		self::$view['upsert_done'] = <<<HTML
@@ -299,9 +397,10 @@ HTML;
 		//Build form with default values
 		self::fill_form(null, null);
 	}
+	
 /* END CLASS CONSTRUCTOR ---------------------------------------------------- */	
 
-	public function fill_form($user_data, $sec_data) {
+	public function fill_form($user_data = null, $sec_data = null) {
 	//IN:  User and section data from database used to build form.
 	//OUT: no return, although form data is propogated as a class property
 	//PURPOSE: Craft HTML required to display the form.
@@ -318,20 +417,24 @@ HTML;
  * [5]: (int)    user group
  * [6]: (int)    user registered section
  * [7]: (bool)   user "manual registration" flag
+ * [8]: (array)  rows of grader section assignments
  * -------------------------------------------------------------------------- */
  
 		//defaults
 		if (is_null($user_data)) {
-			$user_data = array("", "", "", "", "", 3, null, true);
+			$user_data = array("", "", "", "", "", 3, null, true, array());
 		}
 		
 		if (is_null($sec_data)) {
 			$sec_data = array();
 		}
+		
+		//There can be multiple Javascript blocks for different DOM elements.
+		$js = array();
 
  		//Build form
 		//Javascript to clear textboxes when user_id textbox changes.
-		$js = <<<JS
+		$js['textboxes'] = <<<JS
 document.getElementById('first_name').value='';
 document.getElementById('last_name').value='';
 document.getElementById('email').value='';
@@ -341,8 +444,8 @@ JS;
 		//Construct user group selectbox (drop-down) box.
 		$group_names = array( 1 => "Instructor",
 		                      2 => "Full Access Grader (Grad TA)",
-				      3 => "Limited Access Grader (mentor)",
-				      4 => "Student" );
+		                      3 => "Limited Access Grader (mentor)",
+		                      4 => "Student" );
 		
 		$ugroup_selectbox = <<<HTML
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
@@ -351,10 +454,10 @@ JS;
 HTML;
 		
 		//Determine default selection for selectbox while building option list.
-		for ($i = 1; $i <= 4; $i++) {
+		foreach($group_names as $i => $elem) {
 			$d_selected = ($i === $user_data[5]) ? ' selected="selected"' : '';
 			$ugroup_selectbox .= <<<HTML
-<option value="{$i}"{$d_selected}>{$group_names[$i]}</option>
+<option value="{$i}"{$d_selected}>{$elem}</option>
 HTML;
 		
 		}
@@ -367,7 +470,7 @@ HTML;
 		//FINISHED constructing user group selectbox.
 		
 		//Construct available sections selectbox (drop-down) box.
-		$rsections_selectbox = <<<HTML
+		$registration_sections_selectbox = <<<HTML
 <div style="width:30%; display:inline-block; vertical-align:top;">
 	Registered Section:<br>
 	<select id="r_section" name="r_section" style="width:95%;">
@@ -375,24 +478,47 @@ HTML;
 
 		//Build options list.  There is always a NULL section.
 		$d_selected = (is_null($user_data[6])) ? ' selected="selected"' : '';
-		$rsections_selectbox .= <<<HTML
+		$registration_sections_selectbox .= <<<HTML
 <option value="null"{$d_selected}>Not Registered</option>
 HTML;
 
 		foreach($sec_data as $section) {
 			$d_selected = ($user_data[6] === $section[0]) ? ' selected="selected"' : '';
-			$rsections_selectbox .= <<<HTML
+			$registration_sections_selectbox .= <<<HTML
 <option value="{$section[0]}"{$d_selected}>Section {$section[0]}</option>
 HTML;
 
 		}
 		
-		$rsections_selectbox .= <<<HTML
+		$registration_sections_selectbox .= <<<HTML
 </select>
 </div>
 HTML;
 	
 		//FINISHED constructing available sections selectbox.
+
+		//Build grader assigned sections checkbox group
+		$assigned_sections_checkbox_group = "";
+		
+		foreach ($sec_data as $section) {
+			
+			//Prefill checkboxes for already assigned sections
+			$is_checked = "";
+			foreach($user_data[8] as $assigned_section) {
+				if ($assigned_section[0] === $section[0]) {
+					$is_checked = " checked";
+					break; //No need to keep processing loop after match is made.
+				}
+			}
+			
+			$assigned_sections_checkbox_group .= <<<HTML
+<div style="width:25%; display:inline-block; vertical-align:top; padding-top:5px;">
+	<input type="checkbox" name="grader_section_assignments[]" class="grader_section_assignments" style="vertical-align: top; position: relative;" value="{$section[0]}"{$is_checked}> Section {$section[0]}
+</div>
+HTML;
+		}
+
+		//FINISHED build grader assigned sections checkbox group
 		
 		//Determine if 'manual_flag' checkbox should be checked by default
 		$is_checked = ($user_data[7]) ? " checked" : "";
@@ -400,11 +526,16 @@ HTML;
 		//Construct form.  Note string expansions in HTML: {}
 		self::$view['form'] = <<<HTML
 <form action="admin-single-user-review.php" method="POST" enctype="multipart/form-data">
-<div style="width:30%; display:inline-block; vertical-align:top;">
+<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
 	User ID:<br>
-	<input type="text" id="user_id" name="user_id" value="{$user_data[0]}" style="width:95%;" oninput="{$js}">
+	<input type="text" id="user_id" name="user_id" value="{$user_data[0]}" style="width:95%;" oninput="{$js['textboxes']}">
 </div>
-<p>To only lookup a user's enrollment, leave blank all fields marked <span style="color:red;">*</span>.
+<div style="width:20%; display:inline-block; vertical-align:top;">
+</div>
+<div style="width:45%; display:inline-block; vertical-align:top; font-size:smaller; padding-top:0.75em;">
+	<span style="font-weight:bold;">User lookup:</span> leave blank all fields marked <span style="color:red; font-size:larger;">*</span>.<br>
+	<span style="font-weight:bold;">User update:</span> all fields marked <span style="color:red; font-size:larger;">*</span> required.
+</div>
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
 	First Name: <span style="color:red;">*</span><br>
 	<input type="text" id="first_name" name="first_name" value="{$user_data[1]}" style="width:95%;">
@@ -422,20 +553,22 @@ HTML;
 	<input type="text" id="preferred_first_name" name="preferred_first_name" value="{$user_data[2]}" style="width:95%;">
 </div>
 {$ugroup_selectbox}
-{$rsections_selectbox}
-<div style="width:50%; display:inline-block; vertical-align:top; padding-right:5px;">
-	<p><input type="checkbox" id="manual_flag" name="manual_flag" style="position:inherit; text-align:center; padding-top:1em;"{$is_checked}> Manually Registered User<br>
-	<p><span style="color:red;">*</span> Required <span style="font-style:italic;">only</span> for add/updating user.
+{$registration_sections_selectbox}
+<div style="display:inline-block; vertical-align:top;">
+	<p><input type="checkbox" id="manual_flag" name="manual_flag" style="vertical-align: top; position: relative;"{$is_checked}> Manually Registered User (no automatic updates)
 </div>
-<div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
+<h4>Assigned Sections (Graders Only)</h4>
+{$assigned_sections_checkbox_group}
+<div style="width:85%;display:inline-block; vertical-align:top;">
 </div>
-<div style="display:inline-block; vertical-align:top; padding-top:1.5em;">
+<div style="display:inline-block; vertical-align:top; padding-top:10px;">
 	<input type="submit" name="submit" value="Submit">
 </div>
 </form>
 HTML;
 
 }
+
 /* END CLASS METHOD fill_form() --------------------------------------------- */
 
 	public function display($state) {
@@ -470,6 +603,7 @@ HTML;
 		}
 	}
 }
+
 /* END CLASS METHOD display() ----------------------------------------------- */
 /* END CLASS local_view ===================================================== */
 /* EOF ====================================================================== */
