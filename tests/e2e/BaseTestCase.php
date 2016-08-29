@@ -18,7 +18,7 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
     /** @var string password to use for logging into the site */
     protected $password = null;
     /** @var string URL to use as the base for the tests */
-    protected $test_url = "http://192.168.56.101";
+    protected $test_url = __TEST_URL__;
     
     private $logged_in = false;
     
@@ -27,8 +27,7 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
     // one browser window per test function (which is way slower)
     public static $browsers = array(
         array(
-            //'browserName' => 'phantomjs',
-            'browserName' => 'firefox',
+            'browserName' => __BROWSER__,
             'sessionStrategy' => 'shared'
         )
     );

@@ -18,6 +18,7 @@
         <log type="coverage-html" target="report" />
     </logging>
     <php>
-        <env name="TEST_URL" value="http://localhost/"/>
+        <env name="TEST_URL" value="http://192.168.56.101" />
+        <env name="BROWSER" value="firefox" />
     </php>
 </phpunit>

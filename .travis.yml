@@ -75,7 +75,8 @@ before_script:
   - curl -L https://github.com/mozilla/geckodriver/releases/download/v0.10.0/geckodriver-v0.10.0-linux64.tar.gz | zcat > $HOME/bin/wires
   - chmod +x $HOME/bin/wires
   - export PATH=$PATH:$HOME/bin/
-  - sleep 3 # give xvfb some time to start
+  - wires --version
+  - sleep 10 # give xvfb some time to start
 
 
 script:
