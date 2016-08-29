@@ -53,6 +53,10 @@ install:
   - travis_retry composer install --prefer-dist --no-interaction
 
 before_script:
+  - sudo ./.setup/travis/autograder.sh
+  - ./.setup/travis/setup.sh
+  - sudo ./.setup/travis/setup_test_suite.sh
+  - ./.setup/travis/start.sh
   - sudo usermod -a -G travis www-data
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - sudo sed -e "s?www-data?hwphp?g" --in-place ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
@@ -69,10 +73,6 @@ before_script:
   - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
   - psql -U postgres -d submitty -f site/data/tables.sql
   - psql -U postgres -d submitty -f tests/testData/travis.sql
-  - sudo ./.setup/travis/autograder.sh
-  - ./.setup/travis/setup.sh
-  - sudo ./.setup/travis/setup_test_suite.sh
-  - ./.setup/travis/start.sh
   - phantomjs --version
 #  - "export DISPLAY=:99.0"
 #  - "sh -e /etc/init.d/xvfb start"
