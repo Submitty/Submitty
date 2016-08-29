@@ -55,9 +55,10 @@ install:
 before_script:
   - sudo usermod -a -G travis www-data
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - sudo sed -e "s?www-data?hwphp?g" --in-place ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
   - sudo a2enmod rewrite actions fastcgi alias
   - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo cp .setup/travis/www.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/; fi
   - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
   - sudo cp -f .setup/travis/000-default.conf /etc/apache2/sites-available/000-default.conf
   - sudo sed -e "s?%TRAVIS_BUILD_DIR?$(pwd)?g" --in-place /etc/apache2/sites-available/000-default.conf
