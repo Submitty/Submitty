@@ -37,7 +37,6 @@ $_GET['semester'] = isset($_GET['semester']) ? str_replace("/", "_", $_GET['seme
 
 $a = IniParser::readFile(__DIR__."/../../site/config/master.ini");
 define("__BASE_URL__", $a['site_details']['ta_base_url']);
-define("__SUBMISSION_URL__", $a['site_details']['base_url']);
 define("__CGI_URL__", $a['site_details']['cgi_url']);
 define("__SUBMISSION_GRACE_PERIOD_SECONDS__", "30 * 60");
 define("__OUTPUT_MAX_LENGTH__", 100000);
@@ -65,6 +64,12 @@ $a = IniParser::readFile($config);
 define("__COURSE_CODE__", $_GET['course']);
 define("__COURSE_SEMESTER__", $_GET['semester']);
 define("__DATABASE_NAME__", $a['hidden_details']['database_name']);
+if (isset($a['hidden_details']['course_url'])) {
+    define("__SUBMISSION_URL__", $a['hidden_details']['course_url']);
+}
+else {
+    define("__SUBMISSION_URL__", $a['site_details']['base_url']);
+}
 define("__COURSE_NAME__", $a['course_details']['course_name']);
 define("__CALCULATE_DIFF__", true);
 define("__DEFAULT_LATE_DAYS__", $a['course_details']['default_hw_late_days']);
