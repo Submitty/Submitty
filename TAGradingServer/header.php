@@ -79,9 +79,9 @@ if ($user_logged_in) {
             <div class="navbar-inner">
                 <div class="container-fluid" style="font-weight: 300; display: inline-block;color:#999;">
                     <h4>{$semester_upper} &gt;
-                    <a href="{$submission_url}/index.php?semester={$semester}&course={$course}" role="button" data-toggle="modal">
-                        {$course_upper}: {$course_name}
-                    </a>
+                        <a href="{$submission_url}/index.php?semester={$semester}&course={$course}" role="button" data-toggle="modal">
+                            {$course_upper}: {$course_name}
+                        </a>
 HTML;
     if(isset($_GET['g_id'])){
         $db->query("SELECT g_title FROM gradeable WHERE g_id=?",array($_GET['g_id']));
@@ -96,11 +96,9 @@ HTML;
 HTML;
     }
     print <<<HTML
-        </h4>
+                    </h4>
+                </div>
             </div>
         </div>
-        </div>
-HTML;
-    print <<<HTML
 HTML;
 }
