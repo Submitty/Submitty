@@ -76,11 +76,10 @@ before_script:
   - sudo chmod -R 755 /usr/local/submitty
   - sudo chmod -R 777 /usr/local/submitty/test_suite
   - sudo chmod 777 /var/local/submitty/courses/f16/csci1000/config/config.ini
-  - cat /etc/apache2/apache2.conf
+  - sudo cat /var/local/submitty/courses/f16/csci1000/config/config.ini
+  - sudo ln -ls /var/local/submitty/courses/f16/csci1000/config
   - ./.setup/travis/start.sh
-  - sudo service apache2 stop
-  - sudo service apache2 start
-  - ps aux | grep apache
+  - sudo service apache2 restart
 
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
