@@ -67,6 +67,7 @@ before_script:
   - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
   - sudo cp -f .setup/travis/000-default.conf /etc/apache2/sites-available/000-default.conf
   - sudo sed -e "s?%TRAVIS_BUILD_DIR?$(pwd)?g" --in-place /etc/apache2/sites-available/000-default.conf
+  - sudo chown hwphp:hwphp /var/lib/apache2/fastcgi
   - sudo service apache2 restart
 #  - if [[ "$TRAVIS_PHP_VERSION" = "hhvm" ]]; then source ./.setup/travis/hhvm.sh; fi
   - psql -U postgres -c "create database submitty;"
