@@ -61,7 +61,6 @@ before_script:
   - sudo ./.setup/travis/autograder.sh
   - ./.setup/travis/setup.sh
   - sudo ./.setup/travis/setup_test_suite.sh
-  - ./.setup/travis/start.sh
   - sudo usermod -a -G travis www-data
   - sudo usermod -a -G hwphp www-data
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
@@ -74,9 +73,11 @@ before_script:
   - sudo cp -f .setup/travis/000-default.conf /etc/apache2/sites-available/000-default.conf
   - sudo sed -e "s?%TRAVIS_BUILD_DIR?$(pwd)?g" --in-place /etc/apache2/sites-available/000-default.conf
   - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
+  - sudo chmod -R 755 /usr/local/submitty
+  - sudo chmod -R 755 /var/local/submitty
+  - ./.setup/travis/start.sh
   - sudo service apache2 restart
-  - sudo chmod -R 777 /usr/local/submitty
-  - sudo chmod -R 777 /var/local/submitty
+  - sleep 5
 
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l

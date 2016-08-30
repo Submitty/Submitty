@@ -19,7 +19,7 @@ sleep 5
 
 wget --retry-connrefused --tries=5 --waitretry=3 --output-file=/dev/null "${SELENIUM_HUB_URL}/wd/hub/status" -O /dev/null
 if [ ! $? -eq 0 ]; then
-    echo "Selenium Server not started"
+    echo "Selenium server not started."
 else
-    echo "Finished setup"
+    echo "Finished setup. Selenium server has started."
 fi
