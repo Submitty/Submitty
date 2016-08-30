@@ -79,7 +79,7 @@ before_script:
   - ./.setup/travis/start.sh
   - sudo service apache2 stop
   - sudo service apache2 start
-  - sleep 5
+  - ps aux | grep apache
 
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
