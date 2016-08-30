@@ -77,8 +77,17 @@ before_script:
   - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
   - sudo chmod -R 755 /usr/local/submitty
   - sudo chmod -R 777 /usr/local/submitty/test_suite
-  - sudo chmod 777 /var/local/submitty/courses/f16/csci1000/config/config.ini
-  - sudo ls -la /var/local/submitty/courses/f16/csci1000/config
+  - sudo chmod 440 /var/local/submitty/courses/f16/csci1000/config/config.ini
+  - whoami
+  - grep `whoami` /etc/group
+  - ls -la /
+  - ls -la /var
+  - ls -la /var/local
+  - ls -la /var/local/submitty
+  - ls -la /var/local/submitty/courses
+  - ls -la /var/local/submitty/courses/f16
+  - ls -la /var/local/submitty/courses/f16/csci1000
+  - ls -la /var/local/submitty/courses/f16/csci1000/config
   - cat /var/local/submitty/courses/f16/csci1000/config/config.ini
   - ./.setup/travis/start.sh
   - sudo service apache2 restart
