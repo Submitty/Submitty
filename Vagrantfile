@@ -1,6 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+VAGRANT_COMMAND = ARGV[0]
+
 Vagrant.configure(2) do |config|
 
   # This is the base VM that should be used for development of the Submitty application. Just typing "vagrant up",
@@ -44,6 +46,16 @@ Vagrant.configure(2) do |config|
   # as close to the Travis VM image as I could make it (with only the necessary languages we have).
   # This is so that we don't have to make hundreds of "travis" commits trying to debug something
   config.vm.define "travis", autostart: false do |travis|
-    submitty.vm.box = "ubuntu/trusty"
+    travis.vm.box = "ubuntu/trusty64"
+
+    travis.vm.provision "shell" do |s|
+      s.path = ".setup/travis/vagrant.sh"
+    end
+
+    # We want to be logged in as the "travis" user by default to better mimic how we might
+    # interact/debug the travis build
+    if VAGRANT_COMMAND == "ssh"
+      config.ssh.username = 'travis'
+    end
   end
 end

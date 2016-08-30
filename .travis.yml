@@ -66,11 +66,11 @@ before_script:
   - sudo adduser travis csci1000_tas_www
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo cp .setup/travis/www.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/; fi
-  - if [[ -f "~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf" ]]; then sudo sed -e "s?www-data?hwphp?g" --in-place ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf; fi
-  - if [[ -f "/etc/php${TRAVIS_PHP_VERSION:0:1}/fpm/pool.d/www.conf" ]]; then sudo sed -e "s?www-data?hwphp?g" --in-place /etc/php${TRAVIS_PHP_VERSION:0:1}/fpm/pool.d/www.conf; fi
-  - if [[ -f "/etc/php${TRAVIS_PHP_VERSION:0:1}/fpm/pool.d/www.conf" ]]; then sudo sed -e "s?travis?hwphp?g" --in-place /etc/php${TRAVIS_PHP_VERSION:0:1}/fpm/pool.d/www.conf; fi
-  - sudo sed -e "s?www-data?hwphp?g" --in-place ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-  - sudo sed -e "s?travis?hwphp?g" --in-place ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+#  - if [[ -f "~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf" ]]; then sudo sed -e "s?www-data?hwphp?g" --in-place ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf; fi
+#  - if [[ -f "/etc/php${TRAVIS_PHP_VERSION:0:1}/fpm/pool.d/www.conf" ]]; then sudo sed -e "s?www-data?hwphp?g" --in-place /etc/php${TRAVIS_PHP_VERSION:0:1}/fpm/pool.d/www.conf; fi
+#  - if [[ -f "/etc/php${TRAVIS_PHP_VERSION:0:1}/fpm/pool.d/www.conf" ]]; then sudo sed -e "s?travis?hwphp?g" --in-place /etc/php${TRAVIS_PHP_VERSION:0:1}/fpm/pool.d/www.conf; fi
+#  - sudo sed -e "s?www-data?hwphp?g" --in-place ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+#  - sudo sed -e "s?travis?hwphp?g" --in-place ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - sudo sed -e "s?\${APACHE_RUN_USER}?hwphp?g" --in-place /etc/apache2/apache2.conf
   - sudo sed -e "s?\${APACHE_RUN_GROUP}?hwphp?g" --in-place /etc/apache2/apache2.conf
   - sudo a2enmod rewrite actions fastcgi alias
