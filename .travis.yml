@@ -75,6 +75,8 @@ before_script:
   - sudo sed -e "s?%TRAVIS_BUILD_DIR?$(pwd)?g" --in-place /etc/apache2/sites-available/000-default.conf
   - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
   - sudo service apache2 restart
+  - sudo chmod -R 777 /usr/local/submitty
+  - sudo chmod -R 777 /var/local/submitty
 
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
