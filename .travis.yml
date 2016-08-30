@@ -79,6 +79,7 @@ before_script:
   - sudo ls -la /var/local/submitty
   - sudo ls -la /var/local/submitty/courses/f16/csci1000
   - sudo ls -la /var/local/submitty/courses/f16/csci1000/config
+  - su hwphp -c "cat /var/local/submitty/courses/f16/csci1000/config/config.ini"
   - ./.setup/travis/start.sh
   - sudo service apache2 restart
   - sleep 5

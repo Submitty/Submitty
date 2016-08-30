@@ -51,6 +51,7 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
             $this->assertEquals($this->user_id, $this->byId('login-id')->text());
         }
         catch (\PHPUnit_Extensions_Selenium2TestCase_WebDriverException $e) {
+            print(exec('whoami'));
             print($this->source());
             print($this->url());
         }
