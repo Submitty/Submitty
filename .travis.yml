@@ -76,9 +76,9 @@ before_script:
   - sudo chmod -R 755 /usr/local/submitty
   - sudo chmod -R 777 /usr/local/submitty/test_suite
   #- sudo chmod -R 755 /var/local/submitty
-  - ls -la /var/local/submitty
-  - ls -la /var/local/submitty/courses/f16/csci1000
-  - ls -la /var/local/submitty/courses/f16/csci1000/config
+  - sudo ls -la /var/local/submitty
+  - sudo ls -la /var/local/submitty/courses/f16/csci1000
+  - sudo ls -la /var/local/submitty/courses/f16/csci1000/config
   - ./.setup/travis/start.sh
   - sudo service apache2 restart
   - sleep 5
