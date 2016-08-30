@@ -65,8 +65,8 @@ before_script:
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo cp .setup/travis/www.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/; fi
   - sudo sed -e "s?www-data?hwphp?g" --in-place ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-  - sudo sed -e "s?${APACHE_RUN_USER}?hwphp?g" --in-place /etc/apache2/apache2.conf
-  - sudo sed -e "s?${APACHE_RUN_GROUP}?hwphp?g" --in-place /etc/apache2/apache2.conf
+  - sudo sed -e "s?\${APACHE_RUN_USER}?hwphp?g" --in-place /etc/apache2/apache2.conf
+  - sudo sed -e "s?\${APACHE_RUN_GROUP}?hwphp?g" --in-place /etc/apache2/apache2.conf
   - sudo a2enmod rewrite actions fastcgi alias
   - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
@@ -85,11 +85,6 @@ script:
   - vendor/bin/phpunit --version
   - BROWSER=phantomjs TEST_URL="http://localhost" vendor/bin/phpunit --configuration tests/phpunit.xml --no-coverage
   - python /usr/local/submitty/test_suite/integrationTests/run.py
-
-after_script:
-  - echo ${APACHE_LOG_DIR}
-  - sudo tail -n 50 /var/log/apache2/submitty.log
-  - sudo tail -n 50 /var/log/apache2/submitty-error.log
 
 notifications:
   email: false
