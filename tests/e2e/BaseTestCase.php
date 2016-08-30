@@ -53,15 +53,8 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
         
         $time = $this->timeouts()->getLastImplicitWaitValue();
         $this->timeouts()->implicitWait(2500);
-        try {
-            $this->byId('login');
-            $this->assertEquals($this->user_id, $this->byId('login-id')->text());
-        }
-        catch (\Exception $e) {
-            print($this->source());
-            print($this->url());
-            throw $e;
-        }
+        $this->byId('login');
+        $this->assertEquals($this->user_id, $this->byId('login-id')->text());
         $this->timeouts()->implicitWait($time);
         $this->logged_in = true;
     }

@@ -73,7 +73,6 @@ http://192.168.56.101/cgi-bin
 svn+ssh:192.168.56.103" | sudo bash ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 
 sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
-sudo chmod -R 777 ${SUBMITTY_INSTALL_DIR}
 
 sudo bash ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
 sudo chmod 777 ${SUBMITTY_DATA_DIR}/instructors/authlist
@@ -86,3 +85,6 @@ sudo echo "\n" | sudo perl ${SUBMITTY_DATA_DIR}/bin/authonly.pl
 sudo echo "student:student" | sudo chpasswd
 sudo echo "smithj:smithj" | sudo chpasswd
 sudo python ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py csci1000
+
+sudo chmod -R 777 ${SUBMITTY_INSTALL_DIR}
+sudo chmod -R 777 ${SUBMITTY_DATA_DIR}
