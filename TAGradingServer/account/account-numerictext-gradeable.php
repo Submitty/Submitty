@@ -348,8 +348,7 @@ echo <<<HTML
                 }
                 nt_gradeable += name[i];
             }
-            var nt_gradeable = name[1];
-            var user_id = name[2];
+            var user_id = name[name.length-2];
 
             if ($(this).attr('elem') == 'text') {
 
