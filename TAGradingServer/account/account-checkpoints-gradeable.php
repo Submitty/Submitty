@@ -63,7 +63,7 @@ $c_gradeable = $db->row();
 print <<<HTML
 <div id="container-g-checkpoints">
     <div class="modal-header">
-        <h3 id="myModalLabel" style="width:20%; display:inline-block;">{$c_gradeable['g_title']}</h3>
+        <h3 id="myModalLabel" style="width:70%; display:inline-block;">{$c_gradeable['g_title']}</h3>
         <span style="width: 29%; display:inline-block;">{$button}</span>
         <div style="text-align:right; width:49%; display:inline-block;">
             <i class="icon-question-sign" rel="tooltip" title="No Color - No Credit

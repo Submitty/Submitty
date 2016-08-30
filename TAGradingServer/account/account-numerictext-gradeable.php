@@ -83,7 +83,7 @@ $nt_gradeable = $db->row();
 print <<<HTML
 <div id="container-nt">
     <div class="modal-header">
-        <h3 id="myModalLabel" style="width:20%; display:inline-block;">{$nt_gradeable['g_title']}</h3>
+        <h3 id="myModalLabel" style="width:70%; display:inline-block;">{$nt_gradeable['g_title']}</h3>
         <span style="width: 79%; display: inline-block;">{$button}</span>
     </div>
 
@@ -338,10 +338,16 @@ echo <<<HTML
         var url = "";
 
         $("input[id^=cell-]").change(function() {
-
             var grade = $(this).val();
             var name = $(this).attr("id");
             name = name.split("-");
+            var nt_gradeable = "";
+            for (var i = 1; i < name.length-2; i++) {
+                if (i > 1) {
+                    nt_gradeable += "-";
+                }
+                nt_gradeable += name[i];
+            }
             var nt_gradeable = name[1];
             var user_id = name[2];
 
