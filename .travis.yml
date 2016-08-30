@@ -77,7 +77,8 @@ before_script:
   - sudo chmod -R 777 /usr/local/submitty/test_suite
   - cat /etc/apache2/apache2.conf
   - ./.setup/travis/start.sh
-  - sudo service apache2 restart
+  - sudo service apache2 stop
+  - sudo service apache2 start
   - sleep 5
 
 script:
