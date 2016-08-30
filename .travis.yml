@@ -80,8 +80,8 @@ before_script:
   - sudo ls -la /var/local/submitty/courses/f16/csci1000
   - sudo ls -la /var/local/submitty/courses/f16/csci1000/config
   - sudo su hwphp -c "cat /var/local/submitty/courses/f16/csci1000/config/config.ini"
+  - sudo cat /etc/apache2/envvars
   - sudo cat /etc/apache2/apache2.conf
-  - sudo cat /etc/apache2/httpd.conf
   - ./.setup/travis/start.sh
   - sudo service apache2 restart
   - sleep 5
