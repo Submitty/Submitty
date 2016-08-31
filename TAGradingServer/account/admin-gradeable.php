@@ -246,7 +246,7 @@ HTML;
 </div>
 
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
-            What is the unique id of this gradeable? (e.g., <pre>hw01</pre>, <pre>lab_12</pre>, or <pre>midterm</pre>): <input style='width: 200px' type='text' name='gradeable_id' class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
+            What is the unique id of this gradeable? (e.g., <tt>hw01</tt>, <tt>lab_12</tt>, or <tt>midterm</tt>): <input style='width: 200px' type='text' name='gradeable_id' class="required" value="{$gradeable_submission_id}" placeholder="(Required)"/>
             <br />
             What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' class="required" value="{$gradeable_name}" placeholder="(Required)" />
             <br />
@@ -331,8 +331,8 @@ HTML;
 		<br />
                 <b>Full path to the directory containing the autograding config.json file:</b><br>
                 See samples here: <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/sample_files/sample_assignment_config">Submitty GitHub sample assignment configurations</a><br>
-		<pre>/usr/local/submitty/sample_files/sample_assignment_config/no_autograding/</pre>  (for an upload only homework)<br>
-		<pre>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</pre> (for a custom autograded homework)<br>
+		<tt>/usr/local/submitty/sample_files/sample_assignment_config/no_autograding/</tt>  (for an upload only homework)<br>
+		<tt>/var/local/submitty/private_course_repositories/MY_COURSE_NAME/MY_HOMEWORK_NAME/</tt> (for a custom autograded homework)<br>
 
                 <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
                 <br /> <br />
