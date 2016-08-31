@@ -417,7 +417,7 @@ HTML;
             <div class="span2" style="float:left; text-align: left;"><b>{$eg->eg_details['g_title']}</b></div>
             <div class="span2" style="float:right; text-align: right; margin-top: -20px;"><b>
 
-	        {$eg->student['user_lastname']}, {$firstname}
+	        {$firstname} {$eg->student['user_lastname']}
 HTML;
 
    $output .= <<<HTML
