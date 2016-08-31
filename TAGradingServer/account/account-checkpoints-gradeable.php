@@ -93,6 +93,7 @@ print <<<HTML
                 <thead style="background: #E1E1E1;">
                     <tr>
                         <th>User ID</th>
+                        <th>Name</th>
 HTML;
 foreach($c_gradeable_checkpoints as $checkpoint) {
     print <<<HTML
@@ -128,7 +129,7 @@ foreach($db->rows() as $section) {
     
     $section_id = intval($section[$section_param]);
     $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
-    $count = count($c_gradeable_checkpoints) + 1;
+    $count = count($c_gradeable_checkpoints) + 2;
     print <<<HTML
                     <tr class="info">
                         <td colspan="{$count}" style="text-align:center;" id="section-{$section_id}">
@@ -146,6 +147,7 @@ HTML;
 SELECT
     s.user_id
     , s.user_firstname
+    , s.user_preferred_firstname
     , s.user_lastname
     , case when gcds.grade_value_array is null then '{}' else gcds.grade_value_array end
     , case when gcds.grade_checkpoint_array is null then '{}' else gcds.grade_checkpoint_array end
@@ -201,11 +203,18 @@ ORDER BY
         }
 
         $student_info = $row;
+        if ($student_info["user_preferred_firstname"] === "") {
+            $firstname = $student_info["user_firstname"];
+        }
+        else {
+            $firstname = $student_info["user_preferred_firstname"];
+        }
         print <<<HTML
                         <tr>
                             <td class="cell-all" id="cell-{$c_gradeable["g_id"]}-all-{$row["user_id"]}" cell-status="0">
-                                {$student_info["user_id"]} ({$student_info["user_lastname"]}, {$student_info["user_firstname"]})
+                            {$student_info["user_id"]}
                             </td>
+                            <td>{$firstname} {$student_info["user_lastname"]}</td>
 HTML;
         $count = 1;
 

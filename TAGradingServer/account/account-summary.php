@@ -114,7 +114,8 @@ else {
 			<table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
 				<thead style="background: #E1E1E1;">
 					<tr>
-						<th>ID</th>
+						<th>User ID</th>
+						<th>Name</th>
 						<th>Status</th>
 					</tr>
 				</thead>
@@ -173,7 +174,7 @@ HTML;
             print <<<HTML
 
 					<tr class="info">
-						<td colspan="2" style="text-align:center;">
+						<td colspan="3" style="text-align:center;">
 							Students Assigned to {$section_title} Section {$section_id}
 						</td>
 					</tr>
@@ -184,7 +185,20 @@ HTML;
         print <<<HTML
                 <tr>
                     <td>
-                        {$student["user_id"]} ({$student["user_lastname"]}, {$student["user_firstname"]})
+                        {$student["user_id"]}
+			</td><td>
+HTML;
+	if ($eg->student['user_preferred_firstname'] == "") {
+    print <<<HTML
+                {$eg->student['user_firstname']}
+HTML;
+	} else {
+    print <<<HTML
+                {$eg->student['user_preferred_firstname']}
+HTML;
+	}
+   print <<<HTML
+			{$student["user_lastname"]}
                     </td>
                     <td>
 HTML;
