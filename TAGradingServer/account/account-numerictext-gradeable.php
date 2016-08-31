@@ -120,6 +120,7 @@ print <<<HTML
                     <thead style="background: #E1E1E1;">
                         <tr>
                             <th>User ID</th>
+                            <th>Name</th>
 HTML;
 if ($colspan2 === 0){
     print <<<HTML
@@ -162,7 +163,7 @@ else{
     $db->query($query, $params);
 }
 
-$colspan += 2;
+$colspan += 3;
 $colspan += $colspan2;
 
 foreach($db->rows() as $section){
@@ -185,6 +186,7 @@ HTML;
 SELECT
     s.user_id
     , s.user_firstname
+    , s.user_preferred_firstname
     , s.user_lastname
     , case when gcds.grade_value_array is null then '{}' else gcds.grade_value_array end
     , case when gcds.grade_text is null then '{}' else gcds.grade_text end
@@ -234,7 +236,7 @@ ORDER BY
     $titles = $db->rows();
     print <<<HTML
                 <tr style="background: #E1E1E1;">
-                <td></td>
+                <td colspan=2></td>
 HTML;
     for($i=0; $i<$num_numeric; ++$i){
         $title = $titles[$i];
@@ -267,8 +269,22 @@ HTML;
         print <<<HTML
                         <tr>
                             <td>
-                                {$student_info["user_id"]} ({$student_info["user_lastname"]}, {$student_info["user_firstname"]})
+                            {$student_info["user_id"]}
                             </td>
+                            <td>
+HTML;
+                            if ($student_info["user_preferred_firstname"] == "") {
+        print <<<HTML
+                               {$student_info["user_firstname"]}
+HTML;
+                            } else {
+        print <<<HTML
+                               {$student_info["user_preferred_firstname"]}
+HTML;
+                            }
+        print <<<HTML
+                            {$student_info["user_lastname"]}
+	                    </td>
 HTML;
         $question_grades=pgArrayToPhp($temp['grade_value_array']);
         //return an empty array of zeros here
