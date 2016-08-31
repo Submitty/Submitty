@@ -83,7 +83,7 @@ $nt_gradeable = $db->row();
 print <<<HTML
 <div id="container-nt">
     <div class="modal-header">
-        <h3 id="myModalLabel" style="width:20%; display:inline-block;">{$nt_gradeable['g_title']}</h3>
+        <h3 id="myModalLabel" style="width:70%; display:inline-block;">{$nt_gradeable['g_title']}</h3>
         <span style="width: 79%; display: inline-block;">{$button}</span>
     </div>
 
@@ -325,30 +325,30 @@ print <<<HTML
 </div>
 HTML;
 
-$js_array_questions = "";
-$js_array_text = "";
-
 $params = array($nt_gradeable['g_id']);
 $db->query("SELECT COUNT(*) AS cnt from gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='false'", $params);
 $num_numeric = $db->row()['cnt'];
 $db->query("SELECT COUNT(*) AS cnt from gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", $params);
 $num_text = $db->row()['cnt'];
-$js_array_questions .= $nt_gradeable['g_id'].':"'.$num_numeric.'",';
-$js_array_text .= $nt_gradeable['g_id'].':"'.$num_text.'",';
 
 echo <<<HTML
 	<script type="text/javascript">
-        var questions = {{$js_array_questions}};
-        var text_fields = {{$js_array_text}};
+        var questions = {$num_numeric};
+        var text_fields = {$num_text};
         var url = "";
 
         $("input[id^=cell-]").change(function() {
-
             var grade = $(this).val();
             var name = $(this).attr("id");
             name = name.split("-");
-            var nt_gradeable = name[1];
-            var user_id = name[2];
+            var nt_gradeable = "";
+            for (var i = 1; i < name.length-2; i++) {
+                if (i > 1) {
+                    nt_gradeable += "-";
+                }
+                nt_gradeable += name[i];
+            }
+            var user_id = name[name.length-2];
 
             if ($(this).attr('elem') == 'text') {
 
@@ -369,7 +369,7 @@ echo <<<HTML
             }
             var total = 0;
             var extra = "";
-            for (var i = 0; i < questions[nt_gradeable]; i++) {
+            for (var i = 0; i < questions; i++) {
                 var score = parseFloat($("#cell-"+nt_gradeable+"-"+user_id+"-q"+i).val());
                 if (isNaN(score)) {
                     score = 0;
@@ -378,7 +378,7 @@ echo <<<HTML
                 total += score;
             }
 
-            for (var j = questions[nt_gradeable]; j <questions[nt_gradeable]+text_fields[nt_gradeable]; ++j){
+            for (var j = questions; j < questions+text_fields; ++j){
                 var text = $("#cell-"+nt_gradeable+"-"+user_id+"-t"+j).val();
                 extra += "&t"+j+"="+text;
             }

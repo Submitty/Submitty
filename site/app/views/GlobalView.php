@@ -76,66 +76,61 @@ HTML;
                 $ta_base_url = $this->core->getConfig()->getTABaseUrl();
                 $semester = $this->core->getConfig()->getSemester();
                 $course = $this->core->getConfig()->getCourse();
-                $return .= <<<HTML
-<div id="nav">
-    <ul>
-HTML;
                 if($this->core->getUser()->accessAdmin()) {
                     $return .= <<<HTML
-            
+    <div id="nav">
+        <ul>
+            <li>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view'))}">Course Settings</a>
+            </li>
+            <li>
+              <!--<a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=View%20Students">Students</a>-->
+                <a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=Students">Students</a>
+            </li>
+            <li>
+                <a href="{$ta_base_url}/account/admin-users.php?course={$course}&semester={$semester}&this=Users">Users</a>
+            </li>
+            <li>
+                <a href="{$ta_base_url}/account/admin-single-user-review.php?course={$course}&semester={$semester}&this=Manage%20Users">Manage Users</a>
+            </li>
+            <li>
+                <a href="{$ta_base_url}/account/admin-rotating-sections.php?course={$course}&semester={$semester}&this=Setup%20Rotating%20Sections">Setup Rotating Sections</a>
+            </li>
+            <li>
+                <a href="{$ta_base_url}/account/admin-latedays.php?course={$course}&semester={$semester}&this=Late%20Days%20Allowed">Late Days Allowed</a>
+            </li>
+            <li>
+                <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Excused%20Absense%20Extensions">Excused Absense Extensions</a>
+            </li>
 
-                    <li>
-                        <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view'))}">Course Settings</a>
-                    </li>
-                    <li>
-                      <!--<a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=View%20Students">Students</a>-->
-                        <a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=Students">Students</a>
-                    </li>
-                    <li>
-                        <a href="{$ta_base_url}/account/admin-users.php?course={$course}&semester={$semester}&this=Users">Users</a>
-                    </li>
-                    <li>
-                        <a href="{$ta_base_url}/account/admin-single-user-review.php?course={$course}&semester={$semester}&this=Manage%20Users">Manage Users</a>
-                    </li>
-                    <li>
-                        <a href="{$ta_base_url}/account/admin-rotating-sections.php?course={$course}&semester={$semester}&this=Setup%20Rotating%20Sections">Setup Rotating Sections</a>
-                    </li>
-                    <li>
-                        <a href="{$ta_base_url}/account/admin-latedays.php?course={$course}&semester={$semester}&this=Late%20Days%20Allowed">Late Days Allowed</a>
-                    </li>
-                    <li>
-                        <a href="{$ta_base_url}/account/admin-latedays-exceptions.php?course={$course}&semester={$semester}&this=Excused%20Absense%20Extensions">Excused Absense Extensions</a>
-                    </li>
+            <li>
+                <a href="{$ta_base_url}/account/admin-grade-summaries.php?course={$course}&semester={$semester}&this=Grade%20Summaries">Grade Summaries</a>
+            </li>
+            <li>
+                <a href="{$ta_base_url}/account/admin-csv-report.php?course={$course}&semester={$semester}&this=CSV%20Report">CSV Report</a>
+            </li>
 
-                    <li>
-                        <a href="{$ta_base_url}/account/admin-grade-summaries.php?course={$course}&semester={$semester}&this=Grade%20Summaries">Grade Summaries</a>
-                    </li>
-                    <li>
-                        <a href="{$ta_base_url}/account/admin-csv-report.php?course={$course}&semester={$semester}&this=CSV%20Report">CSV Report</a>
-                    </li>
-
-                    <li>
-                        <a href="{$ta_base_url}/account/admin-classlist.php?course={$course}&semester={$semester}&this=Upload%20ClassList">[DELETE]UploadClassList</a>
-                    </li>
-                    <li>
-                        <a href="{$ta_base_url}/account/admin-hw-report.php?course={$course}&semester={$semester}&this=Homework%20Report">[DELETE]HWReport</a>
-                    </li>
+            <li>
+                <a href="{$ta_base_url}/account/admin-classlist.php?course={$course}&semester={$semester}&this=Upload%20ClassList">[DELETE]UploadClassList</a>
+            </li>
+            <li>
+                <a href="{$ta_base_url}/account/admin-hw-report.php?course={$course}&semester={$semester}&this=Homework%20Report">[DELETE]HWReport</a>
+            </li>
 
 
 HTML;
-                    if($this->core->getUser()->isDeveloper()) {
-                                $return .= <<<HTML
-                    <li><a href="#" onClick="togglePageDetails();">Show Page Details</a></li>
+                    if ($this->core->getUser()->isDeveloper()) {
+                        $return .= <<<HTML
+            <li><a href="#" onClick="togglePageDetails();">Show Page Details</a></li>
 
 HTML;
                     }
-                }
-                $return .= <<<HTML
-    </ul>
-</div>
-<div id="nav-clear"></div>
-
+                    $return .= <<<HTML
+        </ul>
+    </div>
+    <div id="nav-clear"></div>
 HTML;
+                }
             }
         }
 
