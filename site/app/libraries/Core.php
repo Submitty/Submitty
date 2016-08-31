@@ -149,7 +149,7 @@ class Core {
      * @return bool
      */
     public function userLoaded() {
-        return $this->user !== null;
+        return $this->user !== null && $this->user->isLoaded();
     }
 
     /**

@@ -50,7 +50,7 @@ class User {
     public function __construct($user_id, $database) {
         $details = $database->getUserById($user_id);
         if (count($details) == 0) {
-            return false;
+            return;
         }
         
         $this->loaded = true;
@@ -65,8 +65,6 @@ class User {
         $this->registration_section = $details['registration_section'];
         $this->rotating_section = $details['rotating_section'];
         $this->manual_registration = $details['manual_registration'];
-
-        return true;
     }
     
     /**
