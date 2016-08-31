@@ -479,6 +479,7 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
 cp ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_node  ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
 cp ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_token ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
+cp ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_function ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
 cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/lang ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
 
 # change permissions

@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
     j["assignment_message"] = config_json.value("assignment_message",""); 
   }
   j["max_submissions"] = MAX_NUM_SUBMISSIONS;
-  j["max_submission_size"] = MAX_SUBMISSION_SIZE;
+  j["max_submission_size"] = config_json.value("max_submission_size",MAX_SUBMISSION_SIZE);
 
   nlohmann::json::iterator parts = config_json.find("part_names");
   if (parts != config_json.end()) {

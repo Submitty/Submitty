@@ -68,10 +68,6 @@ class PamAuthentication implements IAuthentication {
         }
         
         $this->core->loadUser($username);
-        if (!$this->core->userLoaded()) {
-            return false;
-        }
-        
-        return true;
+        return $this->core->userLoaded();
     }
 }

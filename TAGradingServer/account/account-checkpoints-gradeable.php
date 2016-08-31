@@ -63,7 +63,7 @@ $c_gradeable = $db->row();
 print <<<HTML
 <div id="container-g-checkpoints">
     <div class="modal-header">
-        <h3 id="myModalLabel" style="width:20%; display:inline-block;">{$c_gradeable['g_title']}</h3>
+        <h3 id="myModalLabel" style="width:70%; display:inline-block;">{$c_gradeable['g_title']}</h3>
         <span style="width: 29%; display:inline-block;">{$button}</span>
         <div style="text-align:right; width:49%; display:inline-block;">
             <i class="icon-question-sign" rel="tooltip" title="No Color - No Credit
@@ -259,9 +259,15 @@ print <<<HTML
         var cell_status = (parseFloat($(this).attr('cell-status')) == 0) ? 1: parseFloat($(this).attr('cell-status')) - 0.5;
         var name = $(this).attr("id");
         name = name.split("-");
-        var gradeable = name[1];
-        var check = name[2].replace("check", "");
-        var user_id = name[3];
+        var gradeable = "";
+        for (var i = 1; i < name.length-2; i++) {
+            if (i > 1) {
+                gradeable += "-";
+            }
+            gradeable += name[i];
+        }
+        var check = name[name.length-2].replace("check", "");
+        var user_id = name[name.length-1];
         
         var url = "{$BASE_URL}/account/ajax/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id=" + gradeable + "&check=" + check + "&user_id=" + user_id + "&mode=" + cell_status;
 
