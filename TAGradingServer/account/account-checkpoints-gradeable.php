@@ -259,9 +259,15 @@ print <<<HTML
         var cell_status = (parseFloat($(this).attr('cell-status')) == 0) ? 1: parseFloat($(this).attr('cell-status')) - 0.5;
         var name = $(this).attr("id");
         name = name.split("-");
-        var gradeable = name[1];
-        var check = name[2].replace("check", "");
-        var user_id = name[3];
+        var gradeable = "";
+        for (var i = 1; i < name.length-2; i++) {
+            if (i > 1) {
+                gradeable += "-";
+            }
+            gradeable += name[i];
+        }
+        var check = name[name.length-2].replace("check", "");
+        var user_id = name[name.length-1];
         
         var url = "{$BASE_URL}/account/ajax/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id=" + gradeable + "&check=" + check + "&user_id=" + user_id + "&mode=" + cell_status;
 
