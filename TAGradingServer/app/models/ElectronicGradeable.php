@@ -314,10 +314,12 @@ ORDER BY gc_order ASC
         if (file_exists($build_file)) {
             $build_file_contents = file_get_contents($build_file);
             $results = json_decode($build_file_contents, true);
-            foreach($results['testcases'] as $testcase){
-                $testcase_value = floatval($testcase['points']);
-                if ($testcase_value > 0 && !$testcase['extra_credit']){
-                    $total += $testcase_value;
+            if (isset($results['testcases']) && count($results['testcases']) > 0) {
+                foreach ($results['testcases'] as $testcase) {
+                    $testcase_value = floatval($testcase['points']);
+                    if ($testcase_value > 0 && !$testcase['extra_credit']) {
+                        $total += $testcase_value;
+                    }
                 }
             }
         }
@@ -418,19 +420,21 @@ ORDER BY gc_order ASC
             $this->results_details = $details;
           
             $skip_files = array();
-            foreach ($this->results_details['testcases'] as $testcase) {
-                if (isset($testcase['diffs'])){
-                    foreach($testcase['diffs'] as $diff) {
-                        foreach(array("expected_file", "actual_file", "diff_id") as $file) {
-                            if(isset($diff[$file])) {
-                                $skip_files[] = $diff[$file] . ($file == 'diff_id' ? '.json' : '');
+            if (isset($this->results_details['testcases'])) {
+                foreach ($this->results_details['testcases'] as $testcase) {
+                    if (isset($testcase['diffs'])){
+                        foreach($testcase['diffs'] as $diff) {
+                            foreach(array("expected_file", "actual_file", "diff_id") as $file) {
+                                if(isset($diff[$file])) {
+                                    $skip_files[] = $diff[$file] . ($file == 'diff_id' ? '.json' : '');
+                                }
                             }
                         }
                     }
-                }
-                //FIXME this won't work for extra credit auto-grading
-                if (isset($testcase['points_awarded'])){
-                    $this->autograding_points += $testcase['points_awarded'];
+                    //FIXME this won't work for extra credit auto-grading
+                    if (isset($testcase['points_awarded'])){
+                        $this->autograding_points += $testcase['points_awarded'];
+                    }
                 }
             }
             $this->eg_files = array_merge($this->eg_files, FileUtils::getAllFiles($result_directory, array(), $skip_files));

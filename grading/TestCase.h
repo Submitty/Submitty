@@ -22,7 +22,7 @@ public:
 
   // -------------------------------
   // CONSTRUCTOR
-  TestCase (const nlohmann::json &input);
+  TestCase (nlohmann::json& input);
 
   void General_Helper();
   void FileCheck_Helper();
@@ -102,7 +102,7 @@ private:
   // REPRESENTATION
   int test_case_id;
   static int next_test_case_id;
-  nlohmann::json _json;
+  nlohmann::json& _json;
 };
 
 

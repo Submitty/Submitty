@@ -270,7 +270,7 @@ sudo chown hwcgi /usr/local/lib/python2.7/dist-packages/pam.py*
 echo "Getting JUnit..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/JUnit
-chmod 750 ${SUBMITTY_INSTALL_DIR}/JUnit
+chmod 751 ${SUBMITTY_INSTALL_DIR}/JUnit
 cd ${SUBMITTY_INSTALL_DIR}/JUnit
 
 wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar -o /dev/null > /dev/null 2>&1

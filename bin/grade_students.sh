@@ -423,8 +423,8 @@ function grade_this_item {
 
     # use the jq json parsing command line utility to grab the svn_checkout flag from the config file
     json_config="$SUBMITTY_DATA_DIR/courses/$semester/$course/config/form/form_${assignment}.json"
-    step=`cat ${json_config} | jq '.["upload-type"]'`
-    if [ "$step" = "Repository" ]; then svn_checkout=true; else svn_checkout=false; fi
+    step=`cat ${json_config} | jq .upload_type`
+    if [ "$step" == "\"Repository\"" ]; then svn_checkout=true; else svn_checkout=false; fi
 
     # also save the due date
     global_assignment_deadline=`cat ${json_config} | jq .date_due`
@@ -457,6 +457,11 @@ function grade_this_item {
         # svn co svn+ssh://csci2600svn.cs.rpi.edu/local/svn/csci2600/USERNAME
         #
         # -r specifies which version to checkout (by timestamp)
+	# BUT... we want to use the @ syntax.  often -r and @ are the
+	# same, but if a student has renamed a directory and then
+	# recreated it, -r and @ are different.  FIXME: Look up the
+	# documentation and improve this comment.
+	# 
         ##############
 
         # first, clean out all of the old files if this is a re-run

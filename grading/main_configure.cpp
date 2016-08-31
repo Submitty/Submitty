@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
     j["assignment_message"] = config_json.value("assignment_message",""); 
   }
   j["max_submissions"] = MAX_NUM_SUBMISSIONS;
-  j["max_submission_size"] = MAX_SUBMISSION_SIZE;
+  j["max_submission_size"] = config_json.value("max_submission_size",MAX_SUBMISSION_SIZE);
 
   nlohmann::json::iterator parts = config_json.find("part_names");
   if (parts != config_json.end()) {
@@ -141,6 +141,20 @@ int main(int argc, char *argv[]) {
   }
 
   init << j.dump(4) << std::endl;
-  
+
+  // -----------------------------------------------------------------------
+  // Also, write out the config file with automatic defaults (for debugging)
+  std::string complete_config_file = argv[1];
+  int b_pos = complete_config_file.find("/build/build_");
+  if (b_pos != std::string::npos) {
+    // only do this for the regular usage, not for the test suite
+    complete_config_file = complete_config_file.substr(0,b_pos) +
+      "/complete_config/complete_config_"+ complete_config_file.substr(b_pos+13,complete_config_file.size()-b_pos-13);
+    std::string mkdir_command = "mkdir -p " + complete_config_file.substr(0,b_pos) + "/complete_config/";
+    system (mkdir_command.c_str());
+    std::ofstream complete_config;
+    complete_config.open(complete_config_file, std::ios::out);
+    complete_config << config_json.dump(4) << std::endl;
+  }
   return 0;
 }

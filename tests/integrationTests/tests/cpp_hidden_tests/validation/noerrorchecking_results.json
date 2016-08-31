@@ -7,9 +7,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test02_STDOUT.txt",
-                    "autocheck_id": "test02_0_autocheck",
-                    "description": "STDOUT.txt",
+                    "actual_file": "test02_STDOUT.txt",                    "description": "STDOUT.txt",
                     "difference_file": "test02_0_diff.json",
                     "expected_file": "test_output/testassignment/frame_1.txt"
                 }
@@ -20,9 +18,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test03_STDOUT.txt",
-                    "autocheck_id": "test03_0_autocheck",
-                    "description": "STDOUT.txt",
+                    "actual_file": "test03_STDOUT.txt",                    "description": "STDOUT.txt",
                     "difference_file": "test03_0_diff.json",
                     "expected_file": "test_output/testassignment/frame_5.txt"
                 }
@@ -33,9 +29,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test04_STDOUT.txt",
-                    "autocheck_id": "test04_0_autocheck",
-                    "description": "STDOUT.txt",
+                    "actual_file": "test04_STDOUT.txt",                    "description": "STDOUT.txt",
                     "difference_file": "test04_0_diff.json",
                     "expected_file": "test_output/testassignment/frame_10.txt"
                 }
@@ -46,9 +40,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test05_STDOUT.txt",
-                    "autocheck_id": "test05_0_autocheck",
-                    "description": "STDOUT.txt",
+                    "actual_file": "test05_STDOUT.txt",                    "description": "STDOUT.txt",
                     "difference_file": "test05_0_diff.json",
                     "expected_file": "test_output/testassignment/frame_13.txt"
                 }
@@ -59,9 +51,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test06_STDERR.txt",
-                    "autocheck_id": "test06_1_autocheck",
-                    "description": "STDERR.txt",
+                    "actual_file": "test06_STDERR.txt",                    "description": "STDERR.txt",
                     "difference_file": "test06_1_diff.json",
                     "expected_file": "test_output/testassignment/error_nonpositive.txt"
                 }
@@ -72,9 +62,7 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test07_STDERR.txt",
-                    "autocheck_id": "test07_1_autocheck",
-                    "description": "STDERR.txt",
+                    "actual_file": "test07_STDERR.txt",                    "description": "STDERR.txt",
                     "difference_file": "test07_1_diff.json",
                     "expected_file": "test_output/testassignment/error_nonpositive.txt"
                 }
@@ -85,14 +73,10 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test08_execute_logfile.txt",
-                    "autocheck_id": "test08_execute_logfile_autocheck",
-                    "description": "Execution Logfile"
+                    "actual_file": "test08_execute_logfile.txt",                    "description": "Execution Logfile"
                 },
                 {
-                    "actual_file": "test08_STDERR.txt",
-                    "autocheck_id": "test08_1_autocheck",
-                    "description": "STDERR.txt",
+                    "actual_file": "test08_STDERR.txt",                    "description": "STDERR.txt",
                     "difference_file": "test08_1_diff.json",
                     "expected_file": "test_output/testassignment/error_arguments.txt"
                 }
@@ -103,17 +87,13 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test09_STDOUT.txt",
-                    "autocheck_id": "test09_0_autocheck",
-                    "description": "STDOUT.txt",
+                    "actual_file": "test09_STDOUT.txt",                    "description": "STDOUT.txt",
                     "messages": [
                         "WARNING: This file should be empty"
                     ]
                 },
                 {
-                    "actual_file": "test09_STDERR.txt",
-                    "autocheck_id": "test09_1_autocheck",
-                    "description": "STDERR.txt",
+                    "actual_file": "test09_STDERR.txt",                    "description": "STDERR.txt",
                     "difference_file": "test09_1_diff.json",
                     "expected_file": "test_output/testassignment/error_arguments.txt"
                 }

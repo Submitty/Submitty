@@ -57,7 +57,8 @@ print <<<HTML
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Registration Sections</th>
-                    <th>Administrator</th>
+                    <th>User Group</th>
+                    <!--<th>Administrator</th>-->
                 </tr>
             </thead>
             <tbody>
@@ -66,6 +67,17 @@ HTML;
 Database::query("SELECT * FROM users WHERE user_group <=?", array(3));
 foreach (Database::rows() as $user) {
     $is_admin = $user['user_group'] <=1;
+    $user_group = "UNKNOWN";
+    if ($user['user_group'] == 1) {
+      $user_group = "Instructor";
+    } else if ($user['user_group'] == 2) {
+      $user_group = "Full Access Grader (Grad TA)";
+    } else if ($user['user_group'] == 3) {
+      $user_group = "Limited Access Grader (mentor)";
+    } else if ($user['user_group'] == 4) {
+      $user_group = "Student";
+    }
+
     if ($user['user_group'] <=1){
         $sections = 'All';
     }
@@ -85,7 +97,8 @@ foreach (Database::rows() as $user) {
                     <td>{$user['user_firstname']}</td>
                     <td>{$user['user_lastname']}</td>
                     <td>{$sections}</td>
-                    <td>{$is_admin}</td>
+                    <td>{$user_group}</td>
+                    <!--<td>{$is_admin}</td>-->
                 </tr>
 HTML;
 }

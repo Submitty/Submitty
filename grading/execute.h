@@ -22,7 +22,7 @@ rlim_t get_the_limit(const std::string &program_name, int which_limit,
                           nlohmann::json &test_case_limits,
                           nlohmann::json &assignment_limits);
 
-std::string get_executable_name(const std::string &cmd);
+std::string get_program_name(const std::string &cmd);
 
 void wildcard_expansion(std::vector<std::string> &my_args, const std::string &full_pattern, std::ostream &logfile);
 

@@ -54,9 +54,12 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     // Submitty Analysis Tools
     { "submitty_count_token",   SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token" },
     { "submitty_count_node",    SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_node" },
+    { "submitty_count_function",    SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_function" },
 
     // for Computer Science I
     { "python",                 "/usr/bin/python" },
+    { "python2",                "/usr/bin/python2" },
+    { "python3",                "/usr/bin/python3" },
 
     // for Data Structures
     { "g++",                    "/usr/bin/g++" },
@@ -138,7 +141,11 @@ void validate_filename(const std::string &filename) {
 std::string validate_option(const std::string &program, const std::string &option) {
   const std::map<std::string,std::map<std::string,std::string> > option_replacements = {
     { "/usr/bin/javac",
-      { { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" } },
+      { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
+        { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
+        { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
+        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
+      }
     },
     { "/usr/bin/java",
       { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
@@ -147,7 +154,7 @@ std::string validate_option(const std::string &program, const std::string &optio
         { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" }
       }
     }
-  };
+    };
 
   // see if this program has option replacements
   std::map<std::string,std::map<std::string,std::string> >::const_iterator itr = option_replacements.find(program);
@@ -240,17 +247,19 @@ bool wildcard_match(const std::string &pattern, const std::string &thing, std::o
 }
 
 
-void wildcard_expansion(std::vector<std::string> &my_args, const std::string &full_pattern, std::ostream &logfile) {
+void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::string &full_pattern, std::ostream &logfile) {
 
-  std::cout << "IN WILDCARD EXPANSION " << full_pattern << std::endl;
+  //std::cout << "IN WILDCARD EXPANSION " << full_pattern << std::endl;
 
   // if the pattern does not contain a wildcard, just return that
   if (full_pattern.find("*") == std::string::npos) {
-    my_args.push_back(full_pattern);
+    my_finished_args.push_back(full_pattern);
     return;
   }
 
-  std::cout << "WILDCARD DETECTED:" << full_pattern << std::endl;
+  std::vector<std::string> my_args;
+
+  //  std::cout << "WILDCARD DETECTED:" << full_pattern << std::endl;
 
   // otherwise, if our pattern contains directory structure, first remove that
   std::string directory = "";
@@ -304,12 +313,16 @@ void wildcard_expansion(std::vector<std::string> &my_args, const std::string &fu
   if (count_matches == 0) {
     std::cout << "ERROR: FOUND NO MATCHES" << std::endl;
   }
+
+  // sort the matches, so things are deterministic (and unix wildcard is sorted)
+  std::sort(my_args.begin(),my_args.end());
+  my_finished_args.insert(my_finished_args.end(), my_args.begin(), my_args.end());
 }
 
 // =====================================================================================
 // =====================================================================================
 
-std::string get_executable_name(const std::string &cmd) {
+std::string get_program_name(const std::string &cmd) {
   std::string my_program;
   std::stringstream ss(cmd);
 
@@ -663,14 +676,14 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
   // ensure fork was successful
   assert (childPID >= 0);
 
-  std::string executable_name = get_executable_name(cmd);
-  int seconds_to_run = get_the_limit(executable_name,RLIMIT_CPU,test_case_limits,assignment_limits);
+  std::string program_name = get_program_name(cmd);
+  int seconds_to_run = get_the_limit(program_name,RLIMIT_CPU,test_case_limits,assignment_limits);
 
   if (childPID == 0) {
     // CHILD PROCESS
 
 
-    enable_all_setrlimit(executable_name,test_case_limits,assignment_limits);
+    enable_all_setrlimit(program_name,test_case_limits,assignment_limits);
 
 
     // Student's shouldn't be forking & making threads/processes...

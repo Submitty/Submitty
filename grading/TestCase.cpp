@@ -98,7 +98,7 @@ bool getFileContents(const std::string &filename, std::string &file_contents) {
   std::ifstream file(filename);
   if (!file.good()) { return false; }
   file_contents = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-  std::cout << "file contents size = " << file_contents.size() << std::endl;
+  //std::cout << "file contents size = " << file_contents.size() << std::endl;
   return true;
 }
 
@@ -190,7 +190,9 @@ TestResults* intComparison_doit (const TestCase &tc, const nlohmann::json& j) {
     if (success)
       return new TestResults(1.0);
     std::string description = j.value("description","MISSING DESCRIPTION");
-    return new TestResults(0.0,{"FAILURE! "+description+" "+std::to_string(value)+" "+cmpstr+" "+std::to_string(term)});
+    std::string failure_message = j.value("failure_message",
+                                          "ERROR! "+description+" "+std::to_string(value)+" "+cmpstr+" "+std::to_string(term));
+    return new TestResults(0.0,{failure_message});
   } catch (...) {
     return new TestResults(0.0,{"int comparison do it error stoi"});
   }
@@ -268,12 +270,12 @@ void AddDefaultGrader(const std::string &command,
   if (filename.find("STDOUT") != std::string::npos) {
     j["description"] = "Standard Output (STDOUT)";
   } else if (filename.find("STDERR") != std::string::npos) {
-    std::string executable_name = get_executable_name(command);
-    if (executable_name == "/usr/bin/python") {
+    std::string program_name = get_program_name(command);
+    if (program_name == "/usr/bin/python") {
       j["description"] = "syntax error output from running python";
-    } else if (executable_name == "/usr/bin/java") {
+    } else if (program_name == "/usr/bin/java") {
       j["description"] = "syntax error output from running java";
-    } else if (executable_name == "/usr/bin/javac") {
+    } else if (program_name == "/usr/bin/javac") {
       j["description"] = "syntax error output from running javac";
     } else {
       j["description"] = "Standard Error (STDERR)";
@@ -282,6 +284,8 @@ void AddDefaultGrader(const std::string &command,
     j["description"] = "DEFAULTING TO "+filename;
   }
   j["deduction"] = 0.0;
+  j["show_message"] = "on_failure";
+  j["show_actual"] = "on_failure";
   json_graders.push_back(j);
 }
 
@@ -313,14 +317,17 @@ void AddDefaultGraders(const std::vector<std::string> &commands,
 // =================================================================================
 // CONSTRUCTOR
 
-TestCase::TestCase (const nlohmann::json& input) {
-  //std::cout << "BEFORE " << input.dump(2) << std::endl;
+bool validShowValue(const nlohmann::json& v) {
+  return (v.is_string() &&
+          (v == "always" ||
+           v == "never" ||
+           v == "on_failure" ||
+           v == "on_success"));
+}
 
+TestCase::TestCase (nlohmann::json& input) : _json(input) {
   test_case_id = next_test_case_id;
   next_test_case_id++;
-  
-  _json = input;
-
   General_Helper();
 
   if (isFileCheck()) {
@@ -334,12 +341,47 @@ TestCase::TestCase (const nlohmann::json& input) {
 
   nlohmann::json::iterator itr = _json.find("validation");
   if (itr != _json.end()) {
+    assert (itr->is_array());
     VerifyGraderDeductions(*itr);
     std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
     AddDefaultGraders(commands,*itr);
-  }
 
-  //std::cout << "AFTER " << _json.dump(2) << std::endl;
+     for (int i = 0; i < (*itr).size(); i++) {
+      nlohmann::json& grader = (*itr)[i];
+      nlohmann::json::iterator itr2;
+      std::string method = grader.value("method","MISSING METHOD");
+      itr2 = grader.find("show_message");
+      if (itr2 == grader.end()) {
+        if (method == "warnIfNotEmpty" || method == "warnIfEmpty") {
+          grader["show_message"] = "on_failure";
+        } else {
+          grader["show_message"] = "always";
+        }
+      } else {
+        assert (validShowValue(*itr2));
+      }
+      if (grader.find("actual_file") != grader.end()) {
+        itr2 = grader.find("show_actual");
+        if (itr2 == grader.end()) {
+          if (method == "warnIfNotEmpty" || method == "warnIfEmpty") {
+            grader["show_actual"] = "on_failure";
+          } else {
+            grader["show_actual"] = "always";
+          }
+        } else {
+          assert (validShowValue(*itr2));
+        }
+      }
+      if (grader.find("expected_file") != grader.end()) {
+        itr2 = grader.find("show_expected");
+        if (itr2 == grader.end()) {
+          grader["show_expected"] = "always";
+        } else {
+          assert (validShowValue(*itr2));
+        }
+      }
+    }
+  }
 }
 
 
@@ -413,13 +455,6 @@ void TestCase::Compilation_Helper() {
   v_itr = _json.find("validation");
 
   if (f_itr != _json.end()) {
-    nlohmann::json v;
-    v["method"] = "fileExists";
-    v["actual_file"] = (*f_itr);
-    v["description"] = "executable created";
-    v["deduction"] = 1.0;
-    _json["validation"].push_back(v);
-    _json.erase(f_itr);
 
     w_itr = _json.find("warning_deduction");
     float warning_fraction = 0.0;
@@ -432,9 +467,25 @@ void TestCase::Compilation_Helper() {
     nlohmann::json v2;
     v2["method"] = "errorIfNotEmpty";
     v2["actual_file"] = "STDERR.txt";
-    v2["description"] = "compilation warnings and errors";
+    v2["description"] = "Compilation Errors and/or Warnings";
+    v2["show_actual"] = "on_failure";
+    v2["show_message"] = "on_failure";
     v2["deduction"] = warning_fraction;
     _json["validation"].push_back(v2);
+
+    std::vector<std::string> executable_names = stringOrArrayOfStrings(_json,"executable_name");
+    assert (executable_names.size() > 0);
+    for (int i = 0; i < executable_names.size(); i++) {
+      nlohmann::json v;
+      v["method"] = "fileExists";
+      v["actual_file"] = executable_names[i];
+      v["description"] = "Create Executable";
+      v["show_actual"] = "on_failure";
+      v["show_message"] = "on_failure";
+      v["deduction"] = 1.0/executable_names.size();
+      _json["validation"].push_back(v);
+    }
+    _json.erase(f_itr);
   }
 
   f_itr = _json.find("executable_name");
@@ -442,9 +493,7 @@ void TestCase::Compilation_Helper() {
 
   assert (f_itr == _json.end());
   assert (v_itr != _json.end());
-
   //assert (commands.size() > 0);
-
 }
 
 void TestCase::Execution_Helper() {

@@ -212,8 +212,8 @@ replace_fillin_variables $course_dir/BUILD_${course}.sh
 
 # copy the config file for TA grading & replace the variables
 cp $SUBMITTY_INSTALL_DIR/site/config/course_template.ini ${course_dir}/config/config.ini
-chown ${HWPHP_USER}:${HWPHP_USER} ${course_dir}/config/config.ini
-chmod 400 ${course_dir}/config/config.ini
+chown ${HWPHP_USER}:${ta_www_group} ${course_dir}/config/config.ini
+chmod 660 ${course_dir}/config/config.ini
 replace_fillin_variables ${course_dir}/config/config.ini
 
 echo -e "\nMake sure to create the database: $DATABASE_NAME\n\n"

@@ -148,7 +148,7 @@ class SubmissionController implements IController {
             $part_path[1] = $version_path;
         }
         
-        $current_time = (new \DateTime('now', new \DateTimeZone($this->core->getConfig()->getTimezone())))->format("Y/m/d H:i:s");
+        $current_time = (new \DateTime('now', new \DateTimeZone($this->core->getConfig()->getTimezone())))->format("Y-m-d H:i:s");
         $max_size = $gradeable->getMaxSize();
         
         if ($svn_checkout === false) {

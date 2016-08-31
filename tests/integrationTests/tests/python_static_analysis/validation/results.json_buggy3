@@ -3,10 +3,10 @@
         {
             "autochecks": [
                 {
+                    "actual_file": "test01_STDOUT_0.txt",
                     "description": "Program Output",
                     "difference_file": "test01_0_diff.json",
-                    "expected_file": "test_output/testassignment/p1_out.txt",
-                    "actual_file": "test01_STDOUT_0.txt"
+                    "expected_file": "test_output/testassignment/p1_out.txt"
                 },
                 {
                     "description": "Number of print statements",
@@ -21,9 +21,9 @@
         {
             "autochecks": [
                 {
+                    "actual_file": "test02_part2__p2_bug3.txt",
                     "description": "Program Output",
-                    "difference_file": "test02_0_diff.json",
-                    "actual_file": "test02_part2__p2_bug.txt"
+                    "difference_file": "test02_0_diff.json"
                 }
             ],
             "points_awarded": 0,
@@ -32,28 +32,40 @@
         {
             "autochecks": [
                 {
+                    "actual_file": "test03_STDOUT_0.txt",
                     "description": "Program Output",
                     "difference_file": "test03_0_diff.json",
-                    "expected_file": "test_output/testassignment/p3_out.txt",
-                    "actual_file": "test03_STDOUT_0.txt"
+                    "expected_file": "test_output/testassignment/p3_out.txt"
                 },
                 {
                     "description": "Number of assignments",
                     "messages": [
                         "Re-read the problem instructions."
                     ]
+                },
+                {
+                    "description": "Number of multiplications",
+                    "messages": [
+                        "Re-read the problem instructions."
+                    ]
+                },
+                {
+                    "description": "Number of additions",
+                    "messages": [
+                        "Re-read the problem instructions."
+                    ]
                 }
             ],
-            "points_awarded": 3,
+            "points_awarded": 0,
             "test_name": "Test 3 Volume and Area"
         },
         {
             "autochecks": [
                 {
+                    "actual_file": "test04_STDOUT_0.txt",
                     "description": "Program Output",
                     "difference_file": "test04_0_diff.json",
-                    "expected_file": "test_output/testassignment/p4_out.txt",
-                    "actual_file": "test04_STDOUT_0.txt"
+                    "expected_file": "test_output/testassignment/p4_out.txt"
                 },
                 {
                     "description": "Number of while loops",
