@@ -203,25 +203,18 @@ ORDER BY
         }
 
         $student_info = $row;
+        if ($student_info["user_preferred_firstname"] === "") {
+            $firstname = $student_info["user_firstname"];
+        }
+        else {
+            $firstname = $student_info["user_preferred_firstname"];
+        }
         print <<<HTML
                         <tr>
                             <td class="cell-all" id="cell-{$c_gradeable["g_id"]}-all-{$row["user_id"]}" cell-status="0">
                             {$student_info["user_id"]}
                             </td>
-                            <td>
-HTML;
-                            if ($student_info["user_preferred_firstname"] == "") {
-        print <<<HTML
-                               {$student_info["user_firstname"]}
-HTML;
-                            } else {
-        print <<<HTML
-                               {$student_info["user_preferred_firstname"]}
-HTML;
-                            }
-        print <<<HTML
-                            {$student_info["user_lastname"]}
-	                    </td>
+                            <td>{$firstname} {$student_info["user_lastname"]}</td>
 HTML;
         $count = 1;
 

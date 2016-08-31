@@ -235,56 +235,43 @@ ORDER BY
     $db->query("SELECT gc_title FROM gradeable_component WHERE g_id=? ORDER BY gc_order ASC", array($g_id));
     $titles = $db->rows();
     print <<<HTML
-                <tr style="background: #E1E1E1;">
-                <td colspan=2></td>
+                        <tr style="background: #E1E1E1;">
+                            <td colspan='2'></td>
 HTML;
     for($i=0; $i<$num_numeric; ++$i){
         $title = $titles[$i];
         print <<<HTML
-                <td>{$title['gc_title']} ({$max_scores[$i]})</td>
+                            <td>{$title['gc_title']} ({$max_scores[$i]})</td>
 HTML;
     }
     print <<<HTML
-                <td></td>
+                            <td></td>
 HTML;
     for($i=$num_numeric; $i<$num_numeric+$num_text; ++$i){
         $title = $titles[$i];
         print <<<HTML
-                <td>{$title['gc_title']}</td>
+                            <td>{$title['gc_title']}</td>
 HTML;
     }
 
     print <<<HTML
-                </tr>
+                        </tr>
 HTML;
     
     foreach($students_grades as $row){
         $student_info = $row;
         $temp = $row;
-        
-        print <<<HTML
-                    </tr>
-HTML;
+        if ($student_info["user_preferred_firstname"] === "") {
+            $firstname = $student_info["user_firstname"];
+        }
+        else {
+            $firstname = $student_info["user_preferred_firstname"];
+        }
         
         print <<<HTML
                         <tr>
-                            <td>
-                            {$student_info["user_id"]}
-                            </td>
-                            <td>
-HTML;
-                            if ($student_info["user_preferred_firstname"] == "") {
-        print <<<HTML
-                               {$student_info["user_firstname"]}
-HTML;
-                            } else {
-        print <<<HTML
-                               {$student_info["user_preferred_firstname"]}
-HTML;
-                            }
-        print <<<HTML
-                            {$student_info["user_lastname"]}
-	                    </td>
+                            <td>{$student_info["user_id"]}</td>
+                            <td>{$firstname} {$student_info["user_lastname"]}</td>
 HTML;
         $question_grades=pgArrayToPhp($temp['grade_value_array']);
         //return an empty array of zeros here
