@@ -29,15 +29,6 @@ print <<<HTML
         -moz-background-clip: padding-box;
         background-clip: padding-box;
     }
-    #labsTable td
-    {
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
 
     .tooltip-inner {
         white-space:pre-wrap;

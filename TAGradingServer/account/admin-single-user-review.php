@@ -38,8 +38,8 @@ $user_data = null;
 
 //Validate submission
 //Is User ID submitted? (required!)
-if (isset($_POST['user_id']) && $_POST['user_id'] !== "") {
 
+if (isset($_POST['user_id']) && $_POST['user_id'] !== "") {
 	//Is this a lookup or upsert?
 	//(determined whether *'d fields are filled or not)
 	if ((isset($_POST['first_name']) && $_POST['first_name'] === "") &&
@@ -153,14 +153,16 @@ SQL;
 	//"user" table result should be one row.
 	\lib\Database::query($sql['user'], array($user_id));
 	$result = \lib\Database::row();
-	
+
+	if (empty($result)) {
+		return $result;
+	}
 	//"grading_registration" table result is likely to be multiple rows.
 	\lib\Database::query($sql['grader_assigned_sections'], array($user_id));
 	$result2 = \lib\Database::rows();
 	
 	//append "grading_registration" rows to to "user" query row as label and
 	//numeric index.
-	$result['grader_assigned_sections'] = $result2;
 	$result[] = $result2;
 
 	return $result;

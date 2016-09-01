@@ -15,14 +15,16 @@ class User {
     private $loaded = false;
     
     /**
-     * @var string $id          The id of this user which should be a unique identifier (ex: RCS ID at RPI)
-     * @var string $first_name  The first name of the user
-     * @var string $last_name   The last name of the user
-     * @var string $email       The email of the user
-     * @var int    $group       The group of the user, used for access controls (ex: student, instructor, etc.)
+     * @var string $id                    The id of this user which should be a unique identifier (ex: RCS ID at RPI)
+     * @var string $first_name            The first name of the user
+     * @var string $preferred_first_name  The first name of the user
+     * @var string $last_name             The last name of the user
+     * @var string $email                 The email of the user
+     * @var int    $group                 The group of the user, used for access controls (ex: student, instructor, etc.)
      */
     private $id;
     private $first_name;
+    private $preferred_first_name;
     private $last_name;
     private $email;
     private $group;
@@ -56,8 +58,9 @@ class User {
         $this->loaded = true;
         $this->id = $details['user_id'];
         $this->first_name = $details['user_firstname'];
+	$this->preferred_first_name = $this->first_name;
         if (isset($details['user_preferred_firstname']) && $details['user_preferred_firstname'] != "") {
-            $this->first_name = $details['user_preferred_firstname'];
+            $this->preferred_first_name = $details['user_preferred_firstname'];
         }
         $this->last_name = $details['user_lastname'];
         $this->email = $details['user_email'];
@@ -121,6 +124,9 @@ class User {
      */
     public function getFirstName() {
         return $this->first_name;
+    }
+    public function getPreferredFirstName() {
+        return $this->preferred_first_name;
     }
     
     /**

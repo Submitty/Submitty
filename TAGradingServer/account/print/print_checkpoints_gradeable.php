@@ -19,8 +19,7 @@ Date: ____________________&emsp;&emsp;&emsp;
 <table border="1">
     <tr>
     <td style="width: 20%">User Id</td>
-    <td style="width: 20%">Last Name</td>
-    <td style="width: 20%">First Name</td>
+    <td style="width: 20%">Name</td>
 HTML;
 
 //Get the names of all of the checkpoints 
@@ -30,7 +29,7 @@ foreach($db->rows() as $row){
     array_push($checkpoints, $row['gc_title']);
 }
 
-$width = (40/count($checkpoints));
+$width = (60/count($checkpoints));
 for($i = 0; $i < count($checkpoints); $i++) {
     print <<<HTML
         <td style="width: {$width}%">{$checkpoints[$i]}</td>
@@ -54,11 +53,19 @@ foreach($db->rows() as $student) {
             {$student['user_id']}
         </td>
         <td>
+HTML;
+    if ($student['user_preferred_firstname']=="") {
+        print <<<HTML
+        {$student['user_firstname']}
+HTML;
+    } else {
+        print <<<HTML
+        {$student['user_preferred_firstname']}
+HTML;
+    }
+    print <<<HTML
             {$student['user_lastname']}
-        </td>
-        <td>
-            {$student['user_firstname']}
-        </td>
+    </td>
 HTML;
     for($i = 0; $i < count($checkpoints); $i++) {
         print <<<HTML

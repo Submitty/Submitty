@@ -395,6 +395,13 @@ HTML;
     $output .= "\n";
     display_files($eg->eg_files, $output, 1);
 
+    if ($eg->student['user_preferred_firstname'] == "") {
+        $firstname = $eg->student['user_firstname'];
+    }
+    else {
+        $firstname = $eg->student['user_preferred_firstname'];
+    }
+
     $output .= <<<HTML
 </div>
 </span><!---->
@@ -408,8 +415,14 @@ HTML;
     <div id="inner-container" style="margin:5px;">
         <div id="rubric-title">
             <div class="span2" style="float:left; text-align: left;"><b>{$eg->eg_details['g_title']}</b></div>
-            <div class="span2" style="float:right; text-align: right; margin-top: -20px;"><b>{$eg->student['user_lastname']}, 
-                {$eg->student['user_firstname']}<br/>ID: {$eg->student['user_id']}</b></div>
+            <div class="span2" style="float:right; text-align: right; margin-top: -20px;"><b>
+
+	        {$firstname} {$eg->student['user_lastname']}
+HTML;
+
+   $output .= <<<HTML
+            <br/>
+            ID: {$eg->student['user_id']}</b></div>
         </div>
 HTML;
 $submitted = ($eg->submitted) ? "1" : "0";

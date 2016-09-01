@@ -22,9 +22,10 @@ body {
     /* background-color: #0a6496; */
 
     /* A lighter shade of blue grey */
-    background: #88aacc;
-
-    background: linear-gradient(#0a6496, #b8d5e5); /
+    background: #b8d5e5;
+    /* a gradient! */
+    background: linear-gradient(#0a6496, #b8d5e5);
+    background-attachment: fixed;
 
     font-family: 'Source Sans Pro', sans-serif;
     height: 100%;
