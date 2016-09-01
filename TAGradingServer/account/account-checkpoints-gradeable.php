@@ -7,10 +7,13 @@ $account_subpages_unlock = true;
 
 if (!User::$is_administrator) {
     if (isset($_GET['all']) && $_GET['all'] == "true") {
-        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}'>View Your Sections</a>";
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}'>View Your Sections</a>";
     }
     else {
-        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&all=true'>View All Sections</a>";
+// not sure why this isn't working.  it's ending up with 2 copies of the course & semester variables and giving errors.
+//        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&all=true'>View ALL Sections</a>";
+// this does work.  course & semester variables are somehow added to the end.
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?g_id={$_GET['g_id']}&all=true'>View ALL Sections</a>";
     }
 }
 else {
