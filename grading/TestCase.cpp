@@ -130,7 +130,7 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
   }
 
   if (!getFileContents(p_filename,student_file_contents)) {
-    messages.push_back("ERROR!  Could not open student file: '" + filename);
+    messages.push_back("ERROR!  Could not open student file: '" + filename + "'");
     return false;
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
