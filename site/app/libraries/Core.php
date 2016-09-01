@@ -196,6 +196,7 @@ class Core {
      */
     public function authenticate($user_id, $password) {
         $auth = false;
+        $user_id = strtolower($user_id);
         try {
             if ($this->authentication->authenticate($user_id, $password)) {
                 $auth = true;
