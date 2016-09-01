@@ -837,7 +837,6 @@ HTML;
                 o[this.name] = val || '';
             }
         });
-        console.log(JSON.stringify(o));
         return o;
     };
 
@@ -846,7 +845,6 @@ HTML;
             .attr('name', 'gradeableJSON')
             .attr('value', JSON.stringify($('form').serializeObject()))
             .appendTo('#gradeable-form');
-            console.log(JSON.stringify('#gradeable-form'));
     });
 
     $(document).ready(function() {
