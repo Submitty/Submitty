@@ -48,14 +48,15 @@ Vagrant.configure(2) do |config|
   config.vm.define "travis", autostart: false do |travis|
     travis.vm.box = "ubuntu/trusty64"
 
+    travis.vm.synced_folder ".", "/home/travis/Submitty", create: true, owner: "travis", group: "travis", mount_options: ["dmode=777", "fmode=777"]
+
     travis.vm.provision "shell" do |s|
       s.path = ".setup/travis/vagrant.sh"
     end
 
-    # We want to be logged in as the "travis" user by default to better mimic how we might
-    # interact/debug the travis build
+    # Make it so that when we ssh into the machine, we are using the "travis" user (as that's how Travis works)
     if VAGRANT_COMMAND == "ssh"
-      config.ssh.username = 'travis'
+      travis.ssh.username = 'travis'
     end
   end
 end
