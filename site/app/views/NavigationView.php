@@ -47,7 +47,7 @@ HTML;
 
 	    // temporary: want to make future - only visible to
 	    //  instructor (not released for submission to graders)
-	    //  and future - not yet visible to students
+	    //  and future - grader preview
 	    //  (released to graders for submission)
 	    //if ($title == "FUTURE" && !$this->core->getUser()->accessAdmin()) {
 
