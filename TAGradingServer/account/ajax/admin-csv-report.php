@@ -17,7 +17,7 @@ $header = array();
 $header[] = "Username";
 $header[] = "First Name";
 $header[] = "Last Name";
-$header[] = "Section";
+$header[] = "Registration Section";
 
 $totals = array();
 
@@ -67,7 +67,7 @@ foreach ($users as $user){
     $student_grades = $db->rows();
     $student_row = array();
     $student_row[] = $user['user_id'];
-    $student_row[] = (isset($user['user_preferred_firstname'])) ? $user['user_preferred_firstname'] : $user['user_firstname'];
+    $student_row[] = (isset($user['user_preferred_firstname']) && $user['user_preferred_firstname'] != "") ? $user['user_preferred_firstname'] : $user['user_firstname'];
     $student_row[] = $user['user_lastname'];
     $student_row[] = $user['registration_section'];
     
