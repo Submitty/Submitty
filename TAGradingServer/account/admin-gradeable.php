@@ -94,12 +94,7 @@ if($user_is_administrator){
     $account_subpages_unlock = true;
     
     function selectBox($question, $grade = 0) {
-        $retVal = "<select name='points_{$question}' class='points' onchange='calculatePercentageTotal();'>";
-        for($i = -100; $i <= 100; $i += 0.5) {
-            $selected = ($grade == $i) ? "selected" : "";
-            $retVal .= "<option {$selected}>{$i}</option>";
-        }
-        $retVal .= "</select>";
+        $retVal ='<input type="number" id="grade-'."{$question}".'" class="points" name="points_'."{$question}".'" value="'."{$grade}".'" min="-1000" max="1000" step="0.5" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">';
         return $retVal;
     }
 
@@ -1157,23 +1152,14 @@ HTML;
     }
 
     function selectBox(question){
-        var retVal = '<select name="points_' + question + '" class="points" onchange="calculatePercentageTotal()">';
-        for(var i = -100; i <= 100; i++) {
-            if(i==0){
-                retVal = retVal + '<option selected="selected">' + (i * 0.5) + '</option>';
-            }
-            else{
-                retVal = retVal + '<option>' + (i * 0.5) + '</option>';
-            }
-        }
-        retVal = retVal + '</select>';
-        return retVal;
+        // should be the increment value
+        return '<input type="number" id="grade-'+question+'" class="points" name="points_' + question +'" value="0" min="-1000" max="1000" step="0.5" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">';
     }
 
     function calculatePercentageTotal() {
         var total = 0;
         var ec = 0;
-        $('select.points').each(function(){
+        $('input.points').each(function(){
             var elem = $(this).attr('name').replace('points_','eg_extra_');
             if ($(this).val() > 0){
                 if (!$('[name="'+elem+'"]').is(':checked') == true) {
