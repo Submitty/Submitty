@@ -44,10 +44,10 @@ print <<<HTML
         <table class="table table-bordered striped-table" id="labsTable" style=" border: 1px solid #AAA;">
             <thead style="background: #E1E1E1;">
                 <tr>
-                    <th>Student ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
+                    <th>User ID</th>
+                    <th>Name</th>
                     <th>Rotating Section</th>
+                    <th>Manual Registration</th>
                 </tr>
             </thead>
 HTML;
@@ -70,12 +70,24 @@ HTML;
         $last_section = $student['registration_section'];
     }
 
+    if ($student["user_preferred_firstname"] === "") {
+        $firstname = $student["user_firstname"];
+    }
+    else {
+        $firstname = $student["user_preferred_firstname"];
+    }
+
+    $manual = "";
+    if ($student["manual_registration"] === true) {
+        $manual = "manual";
+    }
     print <<<HTML
                 <tr>
                     <td>{$student['user_id']}</td>
-                    <td>{$student['user_firstname']}</td>
-                    <td>{$student['user_lastname']}</td>
+                    <td>{$firstname}
+		    {$student['user_lastname']}</td>
                     <td>{$student['rotating_section']}</td>
+                    <td>{$manual}</td>
                 </tr>
 HTML;
 }
