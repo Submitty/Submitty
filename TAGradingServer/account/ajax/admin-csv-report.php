@@ -22,11 +22,11 @@ $header[] = "Section";
 $totals = array();
 
 // find the syllabus buckets
-$db->query("SELECT DISTINCT g_syllabus_bucket FROM gradeable WHERE g_grade_released_date < now() ORDER BY g_syllabus_bucket ASC", array());
+$db->query("SELECT DISTINCT g_syllabus_bucket FROM gradeable ORDER BY g_syllabus_bucket ASC", array());
 $buckets = $db->rows();
 // populate the header
 foreach ($buckets as $bucket){
-    $db->query("SELECT g_title, g_id, g_syllabus_bucket FROM gradeable WHERE g_grade_released_date < now() AND g_syllabus_bucket=? ORDER BY g_grade_released_date ASC", array($bucket['g_syllabus_bucket']));
+    $db->query("SELECT g_title, g_id, g_syllabus_bucket FROM gradeable WHERE g_syllabus_bucket=? ORDER BY g_grade_released_date ASC", array($bucket['g_syllabus_bucket']));
     foreach ($db->rows() as $row) {
         $header[] = $row['g_title'];
         $totals[$row['g_syllabus_bucket']][] = $row['g_id'];
@@ -57,8 +57,6 @@ foreach ($users as $user){
                     GROUP BY gd_id
                 ) AS gd_sum ON gd.gd_id=gd_sum.gd_id
             ) AS total ON total.g_id = g.g_id AND total.gd_user_id=u.user_id
-        WHERE 
-            g_grade_released_date < now()
         ORDER BY g_syllabus_bucket ASC, g_grade_released_date ASC, u.user_id ASC
         ) AS user_grades
     WHERE user_id=?
