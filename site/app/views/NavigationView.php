@@ -29,7 +29,7 @@ HTML;
         if ($this->core->getUser()->accessAdmin()) {
             $return .= <<<HTML
         <button class="btn btn-primary" onclick="window.location.href='{$ta_base_url}/account/admin-gradeable.php?course={$course}&semester={$semester}&this=New%20Gradeable'">New Gradeable</button>
-        <button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course={$course}&semester={$semester}&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button>
+        <!-- <button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course={$course}&semester={$semester}&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button> -->
 HTML;
         }
         $return .= <<<HTML
@@ -44,10 +44,17 @@ HTML;
                                                  "ITEMS BEING GRADED" => "btn-primary", "GRADED" => 'btn-danger');
         $title_to_prefix = array("FUTURE" => "OPEN DATE", "OPEN" => "SUBMIT", "CLOSED" => "CLOSED", "ITEMS BEING GRADED" => "GRADING", "GRADED" => "GRADED");
         foreach ($sections_to_list as $title => $gradeable_list) {
-            if ($title == "FUTURE" && !$this->core->getUser()->accessAdmin()) {
+
+	    // temporary: want to make future - only visible to
+	    //  instructor (not released for submission to graders)
+	    //  and future - grader preview
+	    //  (released to graders for submission)
+	    //if ($title == "FUTURE" && !$this->core->getUser()->accessAdmin()) {
+
+            if ($title == "FUTURE" && !$this->core->getUser()->accessGrading()) {
                 continue;
             }
-            
+
             if (count($gradeable_list) == 0) {
                 continue;
             }
