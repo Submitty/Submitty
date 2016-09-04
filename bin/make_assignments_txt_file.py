@@ -3,6 +3,7 @@
 import json
 import sys
 import os
+import stat
 
 
 # USAGE
@@ -38,3 +39,11 @@ with open (sys.argv[2],'w') as outfile:
             semester=dirs[len(dirs)-4]
             course=dirs[len(dirs)-3]
             outfile.write("build_homework  "+config_path+"  "+semester+"  "+course+"  "+id+"\n")
+
+
+#####################################
+# SET PERMISSION ON ASSIGNMENTS.txt file
+try:
+    os.chmod(sys.argv[2], stat.S_IRUSR | stat.S_IRGRP | stat.S_IWUSR | stat.S_IWGRP )
+except OSError:
+    pass
