@@ -34,6 +34,8 @@ class IniParser {
         }
 
         if (!file_exists($filename)) {
+            phpinfo();
+            die();
             throw new FileNotFoundException("Could not find ini file to parse: {$filename}");
         }
 
