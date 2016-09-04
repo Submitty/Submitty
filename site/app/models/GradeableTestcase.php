@@ -25,6 +25,7 @@ class GradeableTestcase {
     private $name = "";
     /** @var string */
     private $details = "";
+    private $view_testcase = true;
     /** @var float */
     private $points = 0;
     private $extra_credit = false;
@@ -91,6 +92,9 @@ class GradeableTestcase {
               $this->points_awarded = 0;
             }
         }
+        if (isset($testcase['view_testcase'])) {
+            $this->view_testcase = $testcase['view_testcase'];
+        }
     }
     
     public function getName() {
@@ -99,6 +103,10 @@ class GradeableTestcase {
     
     public function getDetails() {
         return $this->details;
+    }
+
+    public function viewTestcase() {
+      return $this->view_testcase;
     }
     
     public function getPoints() {

@@ -103,6 +103,7 @@ int main(int argc, char *argv[]) {
   nlohmann::json config_json;
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
+  AddSubmissionLimitTestCase(config_json);
 
   std::cout << "JSON PARSED" << std::endl;
 
