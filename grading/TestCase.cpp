@@ -637,3 +637,41 @@ std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
   return tmp;
 }
 
+
+// Go through the instructor-written test cases.
+//   If the autograding points are non zero, and
+//   if the instructor didn't add a penalty for excessive submissions, then
+//   add a standard small penalty for > 20 submissions.
+//
+void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
+  int total_points = 0;
+  bool has_limit_test = false;
+
+  // count total points and search for submission limit testcase
+  nlohmann::json::iterator tc = config_json.find("testcases");
+  assert (tc != config_json.end());
+  for (unsigned int i = 0; i < tc->size(); i++) {
+    TestCase my_testcase((*tc)[i]);
+    int points = (*tc)[i].value("points",0);
+    if (points > 0) {
+      total_points += points;
+    }
+    if (my_testcase.isSubmissionLimit()) {
+      has_limit_test = true;
+    }
+  }
+
+  // add submission limit test case
+  if (total_points > 0 && !has_limit_test) {
+    nlohmann::json limit_test;
+    limit_test["type"] = "FileCheck";
+    limit_test["title"] = "Submission Limit";
+    limit_test["points"] = -5;
+    limit_test["max_submissions"] = 20;
+    limit_test["penalty"] = -0.1;
+    config_json["testcases"].push_back(limit_test);
+  }
+
+  // FIXME:  ugly...  need to reset the id...
+  TestCase::reset_next_test_case_id();
+}

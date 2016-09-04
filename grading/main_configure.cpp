@@ -23,7 +23,6 @@ nlohmann::json printTestCase(TestCase test) {
   j["points"] = test.getPoints();
   j["extra_credit"] = test.getExtraCredit();
   j["hidden"] = test.getHidden();
-  j["visible"] = !test.getHidden();
 
   // THESE ELEMENTS ARE DEPRECATED / NEED TO BE REPLACED
   j["view_file_results"] = true;
@@ -37,7 +36,8 @@ int main(int argc, char *argv[]) {
   nlohmann::json config_json;
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
-  
+  AddSubmissionLimitTestCase(config_json);
+
   nlohmann::json j;
 
   if (argc != 2) {
