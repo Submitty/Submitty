@@ -136,7 +136,7 @@ HTML;
 
         $return .= <<<HTML
 <div id="header">
-    <a href="http://submitty.org"><div id="logo-submitty"></div></a>
+    <a href="http://submitty.org" target=_blank><div id="logo-submitty"></div></a>
     <div id="header-text">
         <h2>
 HTML;
