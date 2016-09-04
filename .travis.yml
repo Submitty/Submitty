@@ -84,6 +84,7 @@ before_script:
   - sudo chmod 440 /var/local/submitty/courses/f16/csci1000/config/config.ini
   - whoami
   - grep `whoami` /etc/group
+  - su - travis
   - ls -la /
   - ls -la /var
   - ls -la /var/local
