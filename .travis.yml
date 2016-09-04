@@ -2,9 +2,9 @@ language: php
 sudo: true
 dist: trusty
 php:
-  - 5.5
+#  - 5.5
   - 5.6
-  - 7.0
+#  - 7.0
 
 cache:
   pip: true
@@ -82,17 +82,17 @@ before_script:
   - sudo chmod -R 755 /usr/local/submitty
   - sudo chmod -R 777 /usr/local/submitty/test_suite
   - sudo chmod 440 /var/local/submitty/courses/f16/csci1000/config/config.ini
-  #- whoami
-  #- grep `whoami` /etc/group
-  #- ls -la /
-  #- ls -la /var
-  #- ls -la /var/local
-  #- ls -la /var/local/submitty
-  #- ls -la /var/local/submitty/courses
-  #- ls -la /var/local/submitty/courses/f16
-  #- ls -la /var/local/submitty/courses/f16/csci1000
-  #- ls -la /var/local/submitty/courses/f16/csci1000/config
-  #- cat /var/local/submitty/courses/f16/csci1000/config/config.ini
+  - whoami
+  - grep `whoami` /etc/group
+  - ls -la /
+  - ls -la /var
+  - ls -la /var/local
+  - ls -la /var/local/submitty
+  - ls -la /var/local/submitty/courses
+  - ls -la /var/local/submitty/courses/f16
+  - ls -la /var/local/submitty/courses/f16/csci1000
+  - ls -la /var/local/submitty/courses/f16/csci1000/config
+  - cat /var/local/submitty/courses/f16/csci1000/config/config.ini
   - ./.setup/travis/start.sh
   - sudo service apache2 restart
 
@@ -100,7 +100,7 @@ script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
   - vendor/bin/phpunit --version
   - BROWSER=phantomjs TEST_URL="http://localhost" vendor/bin/phpunit --configuration tests/phpunit.xml --no-coverage
-  - python /usr/local/submitty/test_suite/integrationTests/run.py
+#  - python /usr/local/submitty/test_suite/integrationTests/run.py
 
 notifications:
   email: false
