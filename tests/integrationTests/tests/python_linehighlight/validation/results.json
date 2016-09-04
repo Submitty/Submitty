@@ -3,12 +3,14 @@
 		{
 			"test_name": "Test 1 CORRECT SOLUTION",
 			"autochecks": [
-				{					"actual_file":"test01_output_correct.txt",
+				{
+					"actual_file":"test01_output_correct.txt",
 					"expected_file":"test_output/testassignment/output_instructor.txt",
 					"difference_file":"test01_0_diff.json",
 					"description": "output_correct.txt"
 				},
-				{					"actual_file":"test01_output_correct.txt",
+				{
+					"actual_file":"test01_output_correct.txt",
 					"expected_file":"test_output/testassignment/output_instructor.txt",
 					"difference_file":"test01_1_diff.json",
 					"description": "output_correct.txt"
@@ -19,7 +21,8 @@
 		{
 			"test_name": "Test 2 DUPLICATE LINES - Required Order",
 			"autochecks": [
-				{					"actual_file":"test02_output_duplicates.txt",
+				{
+					"actual_file":"test02_output_duplicates.txt",
 					"expected_file":"test_output/testassignment/output_instructor.txt",
 					"difference_file":"test02_0_diff.json",
 					"description": "output_duplicates.txt"
@@ -30,7 +33,8 @@
 		{
 			"test_name": "Test 3 DUPLICATE LINES - Re-Ordering OK",
 			"autochecks": [
-				{					"actual_file":"test03_output_duplicates.txt",
+				{
+					"actual_file":"test03_output_duplicates.txt",
 					"expected_file":"test_output/testassignment/output_instructor.txt",
 					"difference_file":"test03_0_diff.json",
 					"description": "output_duplicates.txt",
@@ -42,7 +46,8 @@
 		{
 			"test_name": "Test 4 EXTRA LINES - Required Order",
 			"autochecks": [
-				{					"actual_file":"test04_output_extra.txt",
+				{
+					"actual_file":"test04_output_extra.txt",
 					"expected_file":"test_output/testassignment/output_instructor.txt",
 					"difference_file":"test04_0_diff.json",
 					"description": "output_extra.txt"
@@ -53,7 +58,8 @@
 		{
 			"test_name": "Test 5 EXTRA LINES - Re-Ordering OK",
 			"autochecks": [
-				{					"actual_file":"test05_output_extra.txt",
+				{
+					"actual_file":"test05_output_extra.txt",
 					"expected_file":"test_output/testassignment/output_instructor.txt",
 					"difference_file":"test05_0_diff.json",
 					"description": "output_extra.txt",
@@ -65,7 +71,8 @@
 		{
 			"test_name": "Test 6 MISSING LINES - Required Order",
 			"autochecks": [
-				{					"actual_file":"test06_output_missing.txt",
+				{
+					"actual_file":"test06_output_missing.txt",
 					"expected_file":"test_output/testassignment/output_instructor.txt",
 					"difference_file":"test06_0_diff.json",
 					"description": "output_missing.txt"
@@ -76,7 +83,8 @@
 		{
 			"test_name": "Test 7 MISSING LINES - Re-Ordering OK",
 			"autochecks": [
-				{					"actual_file":"test07_output_missing.txt",
+				{
+					"actual_file":"test07_output_missing.txt",
 					"expected_file":"test_output/testassignment/output_instructor.txt",
 					"difference_file":"test07_0_diff.json",
 					"description": "output_missing.txt",
@@ -88,7 +96,8 @@
 		{
 			"test_name": "Test 8 OUT OF ORDER - Required Order",
 			"autochecks": [
-				{					"actual_file":"test08_output_reordered.txt",
+				{
+					"actual_file":"test08_output_reordered.txt",
 					"expected_file":"test_output/testassignment/output_instructor.txt",
 					"difference_file":"test08_0_diff.json",
 					"description": "output_reordered.txt"
@@ -99,7 +108,8 @@
 		{
 			"test_name": "Test 9 OUT OF ORDER - Re-Ordering OK",
 			"autochecks": [
-				{					"actual_file":"test09_output_reordered.txt",
+				{
+					"actual_file":"test09_output_reordered.txt",
 					"expected_file":"test_output/testassignment/output_instructor.txt",
 					"difference_file":"test09_0_diff.json",
 					"description": "output_reordered.txt",
@@ -107,6 +117,11 @@
 				}
 			],
 			"points_awarded": 9
-		}
+		},
+                {
+                    "points_awarded": 0,
+                    "test_name": "Test 10 Submission Limit",
+                    "view_testcase": false
+                }
 	]
 }
