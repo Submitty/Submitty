@@ -17,6 +17,7 @@ addons:
   postgresql: "9.3"
   apt:
     sources:
+      - sourceline: "ppa:ondrej"
       - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
       - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
     packages:
