@@ -237,8 +237,6 @@ CREATE TABLE sections_registration (
     sections_registration_id integer NOT NULL
 );
 
-ALTER TABLE late_days_used
-    ADD CONSTRAINT late_days_used_pkey PRIMARY KEY (user_id, g_id);
 
 --
 -- Name: sections_rotating; Type: TABLE; Schema: public; Owner: -; Tablespace:
