@@ -64,6 +64,8 @@ CREATE TABLE electronic_gradeable (
     eg_precision numeric NOT NULL
 );
 
+ALTER TABLE electronic_gradeable
+    ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
 
 --
 -- Name: gradeable; Type: TABLE; Schema: public; Owner: -; Tablespace:
@@ -189,6 +191,8 @@ CREATE TABLE grading_rotating (
     sections_rotating integer NOT NULL
 );
 
+ALTER TABLE grading_rotating
+    ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (g_id, user_id, sections_rotating);
 
 --
 -- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -; Tablespace:
@@ -222,6 +226,8 @@ CREATE TABLE late_days_used (
     late_days_used integer NOT NULL
 );
 
+ALTER TABLE late_days_used
+    ADD CONSTRAINT late_days_used_pkey PRIMARY KEY (user_id, g_id);
 
 --
 -- Name: sections_registration; Type: TABLE; Schema: public; Owner: -; Tablespace:

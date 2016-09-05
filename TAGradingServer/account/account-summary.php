@@ -83,7 +83,7 @@ if (!isset($gradeable_info['g_id'])) {
 
 		<div class="modal-body" style="padding-bottom:10px; padding-top:25px;">
 			Could not find a gradeable with that ID.<br /><br />
-			<a class="btn" href="{$BASE_URL}/account/index.php">Select Different Gradeable</a>
+			<a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Gradeable</a>
         </div>
     </div>
 HTML;
@@ -91,10 +91,10 @@ HTML;
 else {
     if (!User::$is_administrator) {
         if (isset($_GET['all']) && $_GET['all'] == "true") {
-            $button = "<a class='btn' href='{$BASE_URL}/account/account-summary.php?g_id={$g_id}&course={$_GET['course']}'>View Your Sections</a>";
+            $button = "<a class='btn' href='{$BASE_URL}/account/account-summary.php?g_id={$g_id}&course={$_GET['course']}&semester={$_GET['semester']}'>View Your Sections</a>";
         }
         else {
-            $button = "<a class='btn' href='{$BASE_URL}/account/account-summary.php?g_id={$g_id}&course={$_GET['course']}&all=true'>View All Sections</a>";
+            $button = "<a class='btn' href='{$BASE_URL}/account/account-summary.php?g_id={$g_id}&course={$_GET['course']}&semester={$_GET['semester']}&all=true'>View All Sections</a>";
         }
     }
     else {
@@ -205,16 +205,16 @@ HTML;
         if(count($students) > 0) {
             if(isset($row['score'])) {
                 if($row['score'] >= 0) {
-                    echo "<a class='btn' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>[ " . ($row['score'] +$eg->autograding_points).
+                    echo "<a class='btn' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "&course={$_GET['course']}&semester={$_GET['semester']}'>[ " . ($row['score'] +$eg->autograding_points).
                            " / " . ($rubric_total + $eg->autograding_max) . " ]</a>";
                 } else {
-                    echo "<a class='btn btn-danger' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>[ GRADING ERROR ]</a>";
+                    echo "<a class='btn btn-danger' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "&course={$_GET['course']}&semester={$_GET['semester']}'>[ GRADING ERROR ]</a>";
                 }
             } else {
-                echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>Grade</a>";
+                echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "course={$_GET['course']}&semester={$_GET['semester']}'>Grade</a>";
             }
         } else {
-            echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "'>Grade</a>";
+            echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "course={$_GET['course']}&semester={$_GET['semester']}'>Grade</a>";
         }
         print <<<HTML
                     </td>
@@ -227,8 +227,8 @@ HTML;
 		</div>
 
 		<div class="modal-footer">
-			<a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
-			<a class="btn" href="{$BASE_URL}/account/index.php?g_id={$_GET['g_id']}">Grade Next Student</a>
+			<a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Homework</a>
+			<a class="btn" href="{$BASE_URL}/account/index.php?g_id={$_GET['g_id']}&course={$_GET['course']}&semester={$_GET['semester']}">Grade Next Student</a>
 		</div>
 	</div>
 HTML;
