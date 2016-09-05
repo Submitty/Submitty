@@ -20,6 +20,11 @@
 				}
 			],
 			"points_awarded": 4
+                },
+                {
+                    "points_awarded": 0,
+                    "test_name": "Test 4 Submission Limit",
+                    "view_testcase": false
 		}
 	]
 }

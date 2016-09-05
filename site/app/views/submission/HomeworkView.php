@@ -462,6 +462,9 @@ HTML;
                     $count = 0;
                     $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
                     foreach ($gradeable->getTestcases() as $testcase) {
+                        if (!$testcase->viewTestcase()) {
+                          continue;
+                        }
                         $div_click = "";
                         if ($testcase->hasDetails()) {
                             $div_click = "onclick=\"return toggleDiv('testcase_{$count}');\" style=\"cursor: pointer;\"";
@@ -534,14 +537,14 @@ HTML;
                 <div class="no-badge"></div>
 HTML;
                         }
-                
                         $name = htmlentities($testcase->getName());
+                        $extra_credit = "";
                         if($testcase->isExtraCredit()) {
-                            $name = "<span class='italics'>Extra Credit</span> " . $name;
+                          $extra_credit = "<span class='italics'><font color=\"0a6495\">Extra Credit</font></span>";
                         }
                         $command = htmlentities($testcase->getDetails());
                         $return .= <<<HTML
-                <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code></h4>
+                        <h4>{$name}&nbsp;&nbsp;&nbsp;<code>{$command}</code>&nbsp;&nbsp;{$extra_credit}</h4>
             </div>
 HTML;
                         if ($testcase->hasDetails()) {

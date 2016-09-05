@@ -131,7 +131,13 @@ class GradeableList {
     
         foreach ($this->gradeables as $gradeable) {
             if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE &&
-                ($gradeable->getOpenDate() < $this->now || $this->core->getUser()->accessAdmin())) {
+
+	        // ORIGINAL
+                //($gradeable->getOpenDate() < $this->now || $this->core->getUser()->accessAdmin())) {
+		
+		// TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
+                ($gradeable->getOpenDate() < $this->now || $this->core->getUser()->accessGrading())) {
+
                 $list[$gradeable->getId()] = $gradeable;
             }
         }

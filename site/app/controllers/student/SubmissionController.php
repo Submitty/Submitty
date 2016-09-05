@@ -56,7 +56,13 @@ class SubmissionController implements IController {
         $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
         if ($gradeable !== null) {
             $now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
-            if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessAdmin()) {
+
+	    // ORIGINAL
+	    //if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessAdmin()) {
+
+	    // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
+            if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessGrading()) {
+
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
             }
             else {
