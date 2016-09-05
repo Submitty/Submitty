@@ -76,6 +76,8 @@ before_script:
   - sudo ls -ld /var/lib/apache2/fastcgi
   - sudo ls -la /var/lib/apache2/fastcgi
   - sudo sudo id hwphp
+  - sudo sudo id travis
+  - sudo sudo id www-data
   - sudo service apache2 restart
 
 script:
