@@ -66,6 +66,8 @@ before_script:
   - ./.setup/travis/setup.sh
   - sudo ./.setup/travis/setup_test_suite.sh
   - sudo sed -e "s?\$www-data?hwphp?g" --in-place /etc/apache2/envvars
+  - export APACHE_RUN_USER=hwphp
+  - export APACHE_RUN_GROUP=hwphp
   - sudo a2enmod include rewrite actions cgi alias headers
   - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - sudo a2dissite 000-default
