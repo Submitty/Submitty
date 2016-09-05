@@ -73,6 +73,9 @@ before_script:
   - ./.setup/travis/start.sh
   - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
   - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
+  - sudo ls -ld /var/lib/apache2/fastcgi
+  - sudo ls -la /var/lib/apache2/fastcgi
+  - sudo sudo id hwphp
   - sudo service apache2 restart
 
 script:
