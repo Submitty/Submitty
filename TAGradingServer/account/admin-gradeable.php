@@ -20,10 +20,10 @@ if($user_is_administrator){
         'g_grade_start_date' => date('Y/m/d 23:59:59', strtotime( '+7 days' )),
         'g_grade_released_date' => date('Y/m/d 23:59:59', strtotime( '+14 days' )),
         'g_syllabus_bucket' => '',
-        'g_min_grading_group' => ''
+        'g_min_grading_group' => '',
+        'g_instructions_url' => ''
     );
     $old_questions = $old_components = $electronic_gradeable = array();
-    $electronic_gradeable['eg_instructions_url'] = "";
     $electronic_gradeable['eg_submission_open_date'] = "";
     $electronic_gradeable['eg_submission_due_date'] = "";
     $electronic_gradeable['eg_subdirectory'] = "";
@@ -101,6 +101,7 @@ if($user_is_administrator){
     if (!$have_old) {
         $gradeable_name = "";
         $gradeable_submission_id = "";
+        $g_instructions_url = "";
         $g_team_assignment = json_encode($old_gradeable['g_team_assignment']);
         $g_grade_by_registration = $old_gradeable['g_grade_by_registration'];
         $string = $button_string = "Add";
@@ -109,6 +110,7 @@ if($user_is_administrator){
     else {
         $gradeable_name = $old_gradeable['g_title'];
         $gradeable_submission_id = $old_gradeable['g_id'];
+        $g_instructions_url = $old_gradeable['g_instructions_url'];
         $g_overall_ta_instructions = $old_gradeable['g_overall_ta_instructions'];
         $g_gradeable_type = $old_gradeable['g_gradeable_type'];
         $g_team_assignment = $old_gradeable['g_team_assignment'];
@@ -245,7 +247,8 @@ HTML;
             <br />
             What is the title of this gradeable?: <input style='width: 227px' type='text' name='gradeable_title' class="required" value="{$gradeable_name}" placeholder="(Required)" />
             <br />
-            
+            What is the URL to the assignment instructions? (shown to student) <input style='width: 227px' type='text' name='instructions_url' value="{$g_instructions_url}" placeholder="(Optional)" />
+            <br />
        <!-- <br />
         Is this a team assignment?:
         <input type="radio" name="team_assignment" value="yes"
@@ -288,9 +291,7 @@ HTML;
                 What date does the submission open to students?: <input id="date_submit" name="date_submit" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
                 <br />
-                What is the URL to the assignment instructions? (shown to student) 
-                <input style='width: 227px' type='text' name='instructions_url' placeholder="(Optional)" value="" />
-                <br />
+
                 What is the due date? <input id="date_due" name="date_due" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
                 <br />
@@ -753,6 +754,7 @@ HTML;
         $(':radio').each(function(){
            if(! $(this).is(':checked')){
                if($(this).attr('class') !== undefined){
+
                   // now remove all of the child elements names for the radio button
                   $('.' + $(this).attr('class')).find('input, textarea, select').each(function(){
                       ignore.push($(this).attr('name'));
@@ -1000,7 +1002,6 @@ HTML;
         }
         
         if($('#radio_electronic_file').is(':checked')){ 
-            $('input[name=instructions_url]').val('{$electronic_gradeable['eg_instructions_url']}');
             $('input[name=date_submit]').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_open_date']}")));
             $('input[name=date_due]').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_due_date']}")));
             $('input[name=subdirectory]').val('{$electronic_gradeable['eg_subdirectory']}');
@@ -1020,7 +1021,7 @@ HTML;
             }
         }
         else if ($('#radio_checkpoints').is(':checked')){
-            var components = {$old_components};
+			var components = {$old_components};
             // remove the default checkpoint
             removeCheckpoint(); 
             $.each(components, function(i,elem){
