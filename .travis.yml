@@ -4,7 +4,7 @@ dist: trusty
 php:
   - 5.5
   - 5.6
-  - 7.0
+#  - 7.0
 
 cache:
   pip: true
@@ -80,7 +80,7 @@ before_script:
   - sudo chmod 440 /var/local/submitty/courses/f16/csci1000/config/config.ini
   - sudo sudo -H -u travis bash -c 'cat /var/local/submitty/courses/f16/csci1000/config/config.ini'
   - ./.setup/travis/start.sh
-  - restart php5-fpm
+  - sudo service php5-fpm restart
   - sudo service apache2 restart
 
 script:
