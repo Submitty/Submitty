@@ -81,7 +81,7 @@ before_script:
   - sudo chmod 440 /var/local/submitty/courses/f16/csci1000/config/config.ini
   - sudo sudo -H -u travis bash -c 'cat /var/local/submitty/courses/f16/csci1000/config/config.ini'
   - ./.setup/travis/start.sh
-#  - sudo service php-fpm restart
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm restart
   - sudo service apache2 restart
 
 script:
