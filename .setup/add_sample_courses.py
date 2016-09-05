@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
     python_homeworks = ["python_simple_homework", "python_linehighlight",
                         "python_simple_homework_multipart", "python_static_analysis"]
-    cpp_homeworks = ["cpp_simple_lab", "cpp_cats", "cpp_memory_debugging", "cpp_custom", "cpp_hidden_tests"]
+    cpp_homeworks = ["cpp_simple_lab", "cpp_cats", "cpp_memory_debugging", "cpp_custom", "cpp_hidden_tests", "cpp_goto_auto"]
     java_homeworks = ["java_factorial", "java_coverage_factorial"]
     all = python_homeworks + cpp_homeworks + java_homeworks
 

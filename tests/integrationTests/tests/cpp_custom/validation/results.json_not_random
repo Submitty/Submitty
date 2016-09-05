@@ -36,6 +36,11 @@
             ],
             "points_awarded": 2,
             "test_name": "Test 4 Is it random?  (Is it different on each run?)"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 5 Submission Limit",
+            "view_testcase": false
         }
     ]
 }

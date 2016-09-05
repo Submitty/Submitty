@@ -76,6 +76,11 @@
             ],
             "points_awarded": 1,
             "test_name": "Test 4 Count Odd"
+         },
+         {
+             "points_awarded": 0,
+             "test_name": "Test 5 Submission Limit",
+             "view_testcase": false
         }
     ]
 }

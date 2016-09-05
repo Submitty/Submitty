@@ -106,7 +106,8 @@
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 10 Submission Limit"
+            "test_name": "Test 10 Submission Limit",
+            "view_testcase": false
         }
     ]
 }
