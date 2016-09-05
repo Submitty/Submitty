@@ -73,6 +73,7 @@ before_script:
   - sudo chmod -R 777 /usr/local/submitty/test_suite
   - ./.setup/travis/start.sh
   - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - sudo cat ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
   - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm -i
   - sudo service apache2 restart
 
