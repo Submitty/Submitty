@@ -54,7 +54,6 @@ SET default_with_oids = false;
 
 CREATE TABLE electronic_gradeable (
     g_id character varying(255) NOT NULL,
-    eg_instructions_url character varying(255) NOT NULL,
     eg_submission_open_date timestamp(6) without time zone NOT NULL,
     eg_submission_due_date timestamp(6) without time zone NOT NULL,
     eg_is_repository boolean NOT NULL,
@@ -75,6 +74,7 @@ ALTER TABLE electronic_gradeable
 CREATE TABLE gradeable (
     g_id character varying(255) NOT NULL,
     g_title character varying(255) NOT NULL,
+    g_instructions_url character varying(255) NOT NULL,
     g_overall_ta_instructions character varying NOT NULL,
     g_team_assignment boolean NOT NULL,
     g_gradeable_type integer NOT NULL,

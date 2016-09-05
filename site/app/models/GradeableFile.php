@@ -21,6 +21,7 @@ class GradeableFile extends Gradeable {
         $this->name = $details['gradeable_title'];
         
         $this->ta_instructions = $details['ta_instructions'];
+        $this->instructions_url = $details['instructions_url'];
         //$this->team_gradeable = isset($details['team-assignment']) ? $details['team-assignment'] === "yes" : "no";
     
         $this->type = GradeableType::stringToType($details['gradeable_type']);
@@ -31,7 +32,6 @@ class GradeableFile extends Gradeable {
             $this->is_repository = $details['upload_type'] === "Repository";
             $this->subdirectory = isset($details['subdirectory']) ? $details['subdirectory'] : "";
             $this->point_precision = floatval($details['point_precision']);
-            $this->instructions_url = $details['instructions_url'];
             $this->ta_grading = $details['ta_grading'] === true;
             
             $this->loadGradeableConfig();

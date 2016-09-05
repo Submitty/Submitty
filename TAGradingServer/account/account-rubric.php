@@ -53,23 +53,23 @@ if ($calculate_diff) {
     $output = <<<HTML
 
 <script>
-    function openFile(file) {
-        window.open("{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" + file + "&add_submission_path=1","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+    function openFile(url_file) {
+        window.open("{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" + url_file + "&add_submission_path=1","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
 
-    function openFrame(file, part, num) {
+    function openFrame(url_file, part, num) {
         var iframe = $('#file_viewer_' + part + '_' + num);
         if (!iframe.hasClass('open')) {
             var iframeId = "file_viewer_" + part + "_" + num + "_iframe";
             // handle pdf
-            if(file.substring(file.length - 3) == "pdf") {
-                iframe.html("<iframe id='" + iframeId + "' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" + file 
+            if(url_file.substring(url_file.length - 3) == "pdf") {
+                iframe.html("<iframe id='" + iframeId + "' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" + url_file
                             + "' width='750px' height='600px' style='border: 0'></iframe>");
             }
             else {
                 iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" 
-                            + file + "' width='750px' style='border: 0'></iframe>");
+                            + url_file + "' width='750px' style='border: 0'></iframe>");
             }
             iframe.addClass('open');
         }
@@ -237,12 +237,18 @@ HTML;
         }
     }
     else {
-        $file = htmlentities($file);
-        $output .= <<<HTML
+      // TODO: urlencode necessary to handle '#' in a filename
+      //       htmlentities probably not necessary (and could be harmful)
+      //       may want to strip url parameters too
+      $html_file = htmlentities($file);
+      $url_file = urlencode(htmlentities($file));
+      $output .= <<<HTML
     <div>
-        <div class="file-viewer"><a onclick='openFrame("{$file}", {$part}, {$j})'>
-            <span class='icon-plus'></span>{$file}</a>
-        </div> <a onclick='openFile("{$file}")'>(Popout)</a><br />
+        <div class="file-viewer"><a onclick='openFrame("{$url_file}", {$part}, {$j})'>
+            <span class='icon-plus'></span>{$html_file}</a>
+
+        </div> <a onclick='openFile("{$url_file}")'>(Popout)</a><br />
+
         <div id="file_viewer_{$part}_{$j}" style='margin-left: {$neg_margin_left}px'></div>
     </div>
 HTML;
