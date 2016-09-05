@@ -276,8 +276,8 @@ HTML;
             </div>
 
             <div class="modal-footer">
-                <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
-                <a class="btn" href="{$BASE_URL}/account/account-summary.php?g_id={$_GET["g_id"]}">{$g_title} Overview</a>
+                <a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Homework</a>
+                <a class="btn" href="{$BASE_URL}/account/account-summary.php?g_id={$_GET["g_id"]}&course={$_GET['course']}&semester={$_GET['semester']}">{$g_title} Overview</a>
                 <!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
             </div>
         </div>
@@ -299,8 +299,8 @@ HTML;
             </div>
 
             <div class="modal-footer">
-                <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Homework</a>
-                <a class="btn" href="{$BASE_URL}/account/account-summary.php?g_id={$_GET["g_id"]}">{$g_title} Overview</a>
+                <a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Homework</a>
+                <a class="btn" href="{$BASE_URL}/account/account-summary.php?g_id={$_GET["g_id"]}&course={$_GET['course']}&semester={$_GET['semester']}">{$g_title} Overview</a>
                 <!--<a class="btn btn-primary" href="/logout.php">Logout</a>-->
             </div>
         </div>
@@ -320,7 +320,7 @@ else if(!isset($_GET["g_id"])) {
     if(count($results) > 0) {
         print <<<HTML
     <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
-        <form action="{$BASE_URL}/account/index.php" method="get">
+        <form action="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}" method="get">
             <div class="modal-header">
                 <h3 id="myModalLabel">Select Gradeable</h3>
             </div>
@@ -380,7 +380,7 @@ else {
         </div>
 
         <div class="modal-footer">
-            <a class="btn" href="{$BASE_URL}/account/index.php">Select Different Gradable</a>
+            <a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Gradable</a>
         </div>
     </div>
 HTML;
@@ -401,9 +401,9 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
     <i title="Show/Hide Grading Panel (Press G)" <?php echo "class='icon-grading-panel".(($show_rubric == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyG')"></i>
     <i title="Show/Hide Auto Grading Results (Press A)" <?php echo "class='icon-auto-grading-results".(($show_left == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyA');"></i>
     <i title="Show/Hide Files Viewer (Press F)" <?php echo "class='icon-files".(($show_right == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyF')"></i>
-    <a <?php echo ($previous_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&g_id={$_GET['g_id']}&prev={$previous_user_id}\""); ?> ><i title="Go to the previous student (Press Left Arrow)" class="icon-left <?php echo ($previous_user_id == "" ? 'icon-disabled"' : '"'); ?> ></i></a>
-    <a href="<?php echo $BASE_URL; ?>/account/account-summary.php?g_id=<?php echo $_GET["g_id"]; ?>"><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
-    <a <?php echo ($next_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&g_id={$_GET['g_id']}&next={$next_user_id}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($next_user_id == "" ? 'icon-disabled"' : '"'); ?>></i></a>
+    <a <?php echo ($previous_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&prev={$previous_user_id}\""); ?> ><i title="Go to the previous student (Press Left Arrow)" class="icon-left <?php echo ($previous_user_id == "" ? 'icon-disabled"' : '"'); ?> ></i></a>
+    <a href="<?php echo $BASE_URL; ?>/account/account-summary.php?course=<?php echo $_GET['course']; ?>&semester=<?php echo $_GET['semester']; ?>&g_id=<?php echo $_GET["g_id"]; ?>"><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
+    <a <?php echo ($next_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&next={$next_user_id}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($next_user_id == "" ? 'icon-disabled"' : '"'); ?>></i></a>
     <i title="Pin Toolbar" class="icon-toolbar-up" ></i>
     <div style="width:100%; height: 15px; bottome:0;">
         <?php if($position_other == 0) { ?>
