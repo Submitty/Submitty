@@ -489,8 +489,6 @@ function grade_this_item {
     if [ -d "$test_code_path" ]
     then
         rsync -a $test_code_path/ "$tmp_compilation" || log_error "$NEXT_TO_GRADE" "Failed to copy instructor files to temporary compilation directory:  cp -rf $test_code_path/ $tmp_compilation"
-
-        #cp -rf $SUBMITTY_DATA_DIR/courses/$semester/$course/config/disallowed_words.txt "$tmp_compilation" ||  echo "ERROR: Failed to copy disallowed_words.txt to temporary directory $test_code_path : cp -rf $SUBMITTY_DATA_DIR/courses/$semester/$course/config/disallowed_words.txt $tmp_compilation" >&2
     fi
 
     pushd $tmp_compilation > /dev/null

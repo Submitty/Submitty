@@ -27,3 +27,4 @@ std::string get_program_name(const std::string &cmd);
 void wildcard_expansion(std::vector<std::string> &my_args, const std::string &full_pattern, std::ostream &logfile);
 
 std::string replace_slash_with_double_underscore(const std::string& input);
+std::string escape_spaces(const std::string& input);
