@@ -61,18 +61,12 @@ before_script:
   - sudo ./.setup/travis/autograder.sh
   - ./.setup/travis/setup.sh
   - sudo ./.setup/travis/setup_test_suite.sh
-  - sudo adduser travis hwphp
-  - sudo adduser travis course_builders
-  - sudo adduser travis csci1000_tas_www
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - sudo sed -e "s?nobody?hwphp?g" --in-place ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo cp .setup/travis/www.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/; fi
-  #- sudo cat ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-  - sudo sed -e "s?\${APACHE_RUN_USER}?hwphp?g" --in-place /etc/apache2/apache2.conf
-  - sudo sed -e "s?\${APACHE_RUN_GROUP}?hwphp?g" --in-place /etc/apache2/apache2.conf
+  - sudo sed -e "s?\$www-data?hwphp?g" --in-place /etc/apache2/envvars
   - sudo a2enmod rewrite actions fastcgi alias
   - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
   - sudo cp -f .setup/travis/000-default.conf /etc/apache2/sites-available/000-default.conf
   - sudo sed -e "s?%TRAVIS_BUILD_DIR?$(pwd)?g" --in-place /etc/apache2/sites-available/000-default.conf
   - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
@@ -81,7 +75,8 @@ before_script:
   - sudo chmod 440 /var/local/submitty/courses/f16/csci1000/config/config.ini
   - sudo sudo -H -u travis bash -c 'cat /var/local/submitty/courses/f16/csci1000/config/config.ini'
   - ./.setup/travis/start.sh
-  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm restart
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm -i
   - sudo service apache2 restart
 
 script:
