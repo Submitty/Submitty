@@ -213,6 +213,18 @@ std::string replace_slash_with_double_underscore(const std::string& input) {
   return answer;
 }
 
+std::string escape_spaces(const std::string& input) {
+  std::string answer;
+  for (int i = 0; i < input.size(); i++) {
+    if (input[i] != ' ') answer.push_back(input[i]);
+    else {
+      answer.push_back('\\');
+      answer.push_back(' ');
+    }
+  }
+  return answer;
+}
+
 // =====================================================================
 
 bool wildcard_match(const std::string &pattern, const std::string &thing, std::ostream &logfile) {
@@ -299,12 +311,12 @@ void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::s
       if (ent == NULL) break;
       std::string thing = ent->d_name;
       if (wildcard_match(file_pattern,thing,logfile)) {
-	std::cout << "   MATCHED! " << thing << std::endl;
+	std::cout << "   MATCHED!  '" << thing << "'" << std::endl;
 	validate_filename(directory+thing);
 	my_args.push_back(directory+thing);
 	count_matches++;
       } else {
-	//std::cout << "   no match  " << thing << std::endl;
+	//std::cout << "   no match  '" << thing << "'" << std::endl;
       }
     }
     closedir(dir);
@@ -348,10 +360,18 @@ void parse_command_line(const std::string &cmd,
   my_program = my_stdin = my_stdout = my_stderr = "";
 
   std::stringstream ss(cmd);
-  std::string token;
+  std::string token,token2;
 
   while (ss >> token) {
     assert (token.size() >= 1);
+
+    // handle escaped spaces in the command line
+    while (token.back() == '\\') {
+      token.pop_back();
+      token2 = " ";
+      ss >> token2;
+      token = token + ' ' + token2;
+    }
 
     // grab the program name
     if (my_program == "") {
