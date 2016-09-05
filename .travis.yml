@@ -65,8 +65,9 @@ before_script:
   - sudo adduser travis course_builders
   - sudo adduser travis csci1000_tas_www
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - sudo sed -e "s?nobody?hwphp?g" --in-place ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo cp .setup/travis/www.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/; fi
-  - sudo cat ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  #- sudo cat ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - sudo sed -e "s?\${APACHE_RUN_USER}?hwphp?g" --in-place /etc/apache2/apache2.conf
   - sudo sed -e "s?\${APACHE_RUN_GROUP}?hwphp?g" --in-place /etc/apache2/apache2.conf
   - sudo a2enmod rewrite actions fastcgi alias
@@ -80,7 +81,7 @@ before_script:
   - sudo chmod 440 /var/local/submitty/courses/f16/csci1000/config/config.ini
   - sudo sudo -H -u travis bash -c 'cat /var/local/submitty/courses/f16/csci1000/config/config.ini'
   - ./.setup/travis/start.sh
-  - sudo service php5-fpm restart
+  - sudo service php-fpm restart
   - sudo service apache2 restart
 
 script:
