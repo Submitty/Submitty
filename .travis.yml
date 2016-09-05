@@ -68,13 +68,11 @@ before_script:
   - sudo a2enmod rewrite actions fastcgi alias
   - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - sudo cp -f .setup/travis/000-default.conf /etc/apache2/sites-available/000-default.conf
-  - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
   - sudo chmod -R 755 /usr/local/submitty
   - sudo chmod -R 777 /usr/local/submitty/test_suite
   - ./.setup/travis/start.sh
   - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
-  - sudo cat ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
-  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm -i
+  - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
   - sudo service apache2 restart
 
 script:
