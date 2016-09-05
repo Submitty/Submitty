@@ -66,8 +66,8 @@ before_script:
   - ./.setup/travis/setup.sh
   - sudo ./.setup/travis/setup_test_suite.sh
   - sudo sed -e "s?\$www-data?hwphp?g" --in-place /etc/apache2/envvars
-  - export APACHE_RUN_USER=hwphp
-  - export APACHE_RUN_GROUP=hwphp
+  - sudo export APACHE_RUN_USER=hwphp
+  - sudo export APACHE_RUN_GROUP=hwphp
   - sudo a2enmod include rewrite actions cgi alias headers
   - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - sudo a2dissite 000-default
@@ -79,6 +79,7 @@ before_script:
   - sudo chmod -R 777 /usr/local/submitty/test_suite
   - ./.setup/travis/start.sh
   - sudo service apache2 restart
+  - ps aux | grep apache
 
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
