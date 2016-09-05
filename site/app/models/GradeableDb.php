@@ -19,6 +19,7 @@ class GradeableDb extends Gradeable {
         $this->name = $details['g_title'];
         
         $this->ta_instructions = $details['g_overall_ta_instructions'];
+        $this->instructions_url = $details['g_instructions_url'];
         //$this->team_gradeable = isset($details['team-assignment']) ? $details['team-assignment'] === "yes" : "no";
     
         $this->type = $details['g_gradeable_type'];
@@ -29,7 +30,6 @@ class GradeableDb extends Gradeable {
             $this->is_repository = $details['eg_is_repository'] === true;
             $this->subdirectory = $details['eg_subdirectory'];
             $this->point_precision = floatval($details['eg_precision']);
-            $this->instructions_url = $details['eg_instructions_url'];
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
             
             $this->loadGradeableConfig();
