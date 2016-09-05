@@ -111,7 +111,8 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         for i in range(1, len(sys.argv)):
-            create_course(sys.argv[i], semester, sys.argv[i] + "_tas_www", ALL_HOMEWORKS)
+            create_course(sys.argv[i], semester, sys.argv[i] + "_tas_www",
+                          ["python_simple_homework"])
     else:
         create_course("csci1000", semester, "csci1000_tas_www", ALL_HOMEWORKS)
         create_course("csci1100", semester, "csci1100_tas_www", PYTHON_HOMEWORKS)
