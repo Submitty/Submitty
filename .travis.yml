@@ -38,6 +38,8 @@ addons:
       - python3
       - libpcre3
       - libpcre3-dev
+      - unzip
+      - google-chrome-stable
 
 before_install:
    - export PHANTOMJS_VERSION=2.1.1
@@ -54,6 +56,10 @@ install:
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then sudo apt-get install libapache2-mod-php5 php5-pgsql; a2enmod php5; fi
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then sudo apt-get install libapache2-mod-php5.6; a2enmod php5.6; fi
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo apt-get install libapache2-mod-php7.0; a2enmod php7.0; fi
+  - wget http://chromedriver.storage.googleapis.com/2.21/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip
+  - sudo chmod u+x chromedriver
+  - sudo mv chromedriver /usr/bin/
   - travis_retry composer install --prefer-dist --no-interaction
 
 before_script:
@@ -82,7 +88,7 @@ before_script:
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
   - vendor/bin/phpunit --version
-  - BROWSER=phantomjs TEST_URL="http://localhost" vendor/bin/phpunit --configuration tests/phpunit.xml --no-coverage
+  - BROWSER=chrome TEST_URL="http://localhost" vendor/bin/phpunit --configuration tests/phpunit.xml --no-coverage
 #  - python /usr/local/submitty/test_suite/integrationTests/run.py
 
 notifications:

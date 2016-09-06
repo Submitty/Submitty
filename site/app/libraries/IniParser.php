@@ -34,9 +34,6 @@ class IniParser {
         }
 
         if (!file_exists($filename)) {
-            print("~~~~WHOAMI: " . exec("whoami") . "~~~~~");
-            phpinfo();
-            die();
             throw new FileNotFoundException("Could not find ini file to parse: {$filename}");
         }
 
