@@ -2,10 +2,24 @@
 
 namespace app\views;
 
+
+
+function scrub_error_message($error_message) {
+   if ((strpos($error_message, 'PAM') !== false) ||
+       (strpos($error_message, 'authentication') !== false) ||
+       (strpos($error_message, 'hsdbu') !== false)) {
+     return "Error message truncated.  Please contact the administrator, a PAM authentication error has occured.";
+   }
+   return $error_message;
+}
+
+
+
 class ErrorView {
     public function exceptionPage($error_message) {
         $top_message = "Oh no! Something irrecoverable has happened...";
         $error_message = nl2br(str_replace(" ", "&nbsp;", $error_message));
+	$error_message = scrub_error_message($error_message);
         return <<<HTML
 <html>
 <head>
@@ -64,6 +78,7 @@ HTML;
 
     public function errorPage($error_message) {
         $error_message = nl2br(str_replace(" ", "&nbsp;", $error_message));
+	$error_message = scrub_error_message($error_message);
         return <<<HTML
 <html>
 <head>
