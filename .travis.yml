@@ -3,7 +3,7 @@ sudo: true
 dist: trusty
 php:
   - 5.5
-  - 5.6
+#  - 5.6
 #  - 7.0
 
 cache:
@@ -17,7 +17,6 @@ addons:
   postgresql: "9.3"
   apt:
     sources:
-      - sourceline: "ppa:ondrej"
       - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
       - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
     packages:
@@ -51,7 +50,8 @@ before_install:
    - export PATH="$PATH:$HOME/.composer/vendor/bin"
 
 install:
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then sudo apt-get install libapache2-mod-php5; a2enmod php5; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.6" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then sudo apt-get install libapache2-mod-php5 php5-pgsql; a2enmod php5; fi
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then sudo apt-get install libapache2-mod-php5.6; a2enmod php5.6; fi
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo apt-get install libapache2-mod-php7.0; a2enmod php7.0; fi
   - travis_retry composer install --prefer-dist --no-interaction
@@ -74,12 +74,10 @@ before_script:
   - sudo cp -f .setup/travis/apache.conf /etc/apache2/sites-available/submitty.conf
   - sudo a2ensite submitty
   - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
-  - sudo -u hwphp id
   - sudo chmod -R 755 /usr/local/submitty
   - sudo chmod -R 777 /usr/local/submitty/test_suite
   - ./.setup/travis/start.sh
   - sudo service apache2 restart
-  - ps aux | grep apache
 
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
