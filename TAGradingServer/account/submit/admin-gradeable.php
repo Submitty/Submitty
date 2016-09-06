@@ -143,7 +143,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
             $params = array($this->g_id, $this->date_submit, $this->date_due,
                             $this->is_repo, $this->subdirectory, $this->ta_grading, $this->config_path, $this->late_days, $this->point_precision);
             $db->query("INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, 
-                eg_is_repository, eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision) VALUES(?,?,?,?,?,?,?,?,?,?)", $params);
+                eg_is_repository, eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision) VALUES(?,?,?,?,?,?,?,?,?)", $params);
         }
 
         $num_questions = 0;
