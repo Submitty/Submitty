@@ -15,6 +15,7 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
     /* These variables should be overwritten */
     /** @var string user id to use for logging into the site */
     protected $user_id = null;
+    protected $user_name = null;
     /** @var string password to use for logging into the site */
     protected $password = null;
     /** @var string URL to use as the base for the tests */
@@ -48,7 +49,7 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
         $this->timeouts()->implicitWait(2500);
         try {
             $this->byId('login');
-            $this->assertEquals($this->user_id, $this->byId('login-id')->text());
+            $this->assertEquals($this->user_name, $this->byId('login-id')->text());
         }
         catch (\PHPUnit_Extensions_Selenium2TestCase_WebDriverException $e) {
             print($this->source());

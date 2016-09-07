@@ -6,6 +6,7 @@ use tests\e2e\BaseTestCase;
 
 class LoginTester extends BaseTestCase {
     protected $user_id = "student";
+    protected $user_name = "Joe";
     protected $password = "student";
     
     /**
@@ -23,7 +24,7 @@ class LoginTester extends BaseTestCase {
         $this->byName("password")->value($this->password);
         $this->byName("login")->click();
         $this->byId('login');
-        $this->assertEquals($this->user_id, $this->byId('login-id')->text());
+        $this->assertEquals($this->user_name, $this->byId('login-id')->text());
         $this->timeouts()->implicitWait($time);
         $this->assertEquals($this->test_url.$url_string, $this->url());
         //$this->assertEquals("No gradeable id specified. Contact your instructor if you think this is an error.", $this->byClassName("content")->text());
