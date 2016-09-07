@@ -31,6 +31,14 @@ read CGI_URL
 echo "What is the SVN path to be used? (ex: svn+ssh://192.168.56.103 or file:///var/lib/svn/csci2600)"
 read SVN_PATH
 
+DEBUGGING_ENABLED=false
+if [ "$DATABASE_HOST" = "localhost" ] ; then
+    echo "Would you like to enable debugging?  y/n"
+    read en_debug
+    if [ "$en_debug" = "y" ] ; then
+	DEBUGGING_ENABLED=true
+    fi
+fi
 
 ########################################################################################################################
 ########################################################################################################################
@@ -153,6 +161,8 @@ sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_URL__|$TAGRADING_URL|g" $SUBMITTY_IN
 sed -i -e "s|__CONFIGURE__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 sed -i -e "s|__CONFIGURE__FILLIN__CGI_URL__|$CGI_URL|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 sed -i -e "s|__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
+
+sed -i -e "s|__CONFIGURE__FILLIN__DEBUGGING_ENABLED__|$DEBUGGING_ENABLED|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 
 sed -i -e "s|__CONFIGURE__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $SUBMITTY_INSTALL_DIR/.setup/INSTALL_SUBMITTY.sh
 

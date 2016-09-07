@@ -64,6 +64,7 @@ SUBMISSION_URL=__CONFIGURE__FILLIN__SUBMISSION_URL__
 CGI_URL=__CONFIGURE__FILLIN__CGI_URL__
 TAGRADING_LOG_PATH=__CONFIGURE__FILLIN__TAGRADING_LOG_PATH__
 
+DEBUGGING_ENABLED=__CONFIGURE__FILLIN__DEBUGGING_ENABLED__
 
 AUTOGRADING_LOG_PATH=__CONFIGURE__FILLIN__AUTOGRADING_LOG_PATH__
 
@@ -110,6 +111,8 @@ function replace_fillin_variables {
     sed -i -e "s|__INSTALL__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" $1
     sed -i -e "s|__INSTALL__FILLIN__CGI_URL__|$CGI_URL|g" $1
     sed -i -e "s|__INSTALL__FILLIN__TAGRADING_LOG_PATH__|$TAGRADING_LOG_PATH|g" $1
+
+    sed -i -e "s|__INSTALL__FILLIN__DEBUGGING_ENABLED__|$DEBUGGING_ENABLED|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $1
 
@@ -416,6 +419,7 @@ find $SUBMITTY_INSTALL_DIR/site -type f -name \*.js -exec chmod o+rx {} \;
 find $SUBMITTY_INSTALL_DIR/site -type f -name \*.cgi -exec chmod u+x {} \;
 
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/site/config/master_template.ini
+replace_fillin_variables $SUBMITTY_INSTALL_DIR/site/app/models/Config.php
 mv $SUBMITTY_INSTALL_DIR/site/config/master_template.ini $SUBMITTY_INSTALL_DIR/site/config/master.ini
 
 ################################################################################################################
