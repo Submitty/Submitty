@@ -74,16 +74,18 @@ class Core {
     
     public function loadConfig($semester, $course) {
         $this->config = new Config($semester, $course);
-
-        $this->database = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
-            $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
-
         $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
         if (!in_array('app\authentication\IAuthentication', class_implements($auth_class))) {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the IAuthentication interface.");
         }
         $this->authentication = new $auth_class($this);
         $this->session_manager = new SessionManager($this);
+    }
+
+    public function loadDatabase() {
+        $this->database = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
+            $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
+        $this->database->connect();
 
         switch ($this->config->getDatabaseType()) {
             case 'pgsql':
