@@ -82,7 +82,7 @@ class Database {
                 $this->link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             }
             catch (PDOException $pdoException) {
-                throw new DatabaseException("Failed to connect to the database with given user and password");
+                throw new DatabaseException($pdoException->getMessage());
             }
         }
     }
