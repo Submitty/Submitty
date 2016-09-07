@@ -24,7 +24,7 @@ class Config {
      * turn on if running server in production environment.
      * @var bool
      */
-    private $debug = __INSTALL__FILLIN__DEBUGGING_ENABLED__;
+    private $debug = false;
 
     private $semester;
     private $course;
