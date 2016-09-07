@@ -131,8 +131,7 @@ class ExceptionHandler {
         }
         else {
             return <<<HTML
-An exception was thrown. Please contact an administrator about what<br />
-you were doing that caused this exception.
+An exception was thrown. Please contact an administrator about what<br />you were doing that caused this exception.
 
 HTML;
         }
