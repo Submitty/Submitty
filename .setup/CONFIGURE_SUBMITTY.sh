@@ -31,14 +31,18 @@ read CGI_URL
 echo "What is the SVN path to be used? (ex: svn+ssh://192.168.56.103 or file:///var/lib/svn/csci2600)"
 read SVN_PATH
 
+
 DEBUGGING_ENABLED=false
+# FIXME:  Replace with a safety check for a live installation
+# (localhost could be a valid database for live installation)
 if [ "$DATABASE_HOST" = "localhost" ] ; then
-    echo "Would you like to enable debugging?  y/n"
+    echo "Would you like to enable debugging? (NOT RECOMMENDED FOR LIVE INSTALLATION) y/n"
     read en_debug
     if [ "$en_debug" = "y" ] ; then
 	DEBUGGING_ENABLED=true
     fi
 fi
+
 
 ########################################################################################################################
 ########################################################################################################################
