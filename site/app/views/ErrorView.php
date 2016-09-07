@@ -9,7 +9,7 @@ class ErrorView {
         return <<<HTML
 <html>
 <head>
-    <title>HWServer - Error</title>
+    <title>Submitty - Error</title>
 </head>
 
 <body>
@@ -67,7 +67,7 @@ HTML;
         return <<<HTML
 <html>
 <head>
-    <title>Forbidden</title>
+    <title>Submitty - Forbidden</title>
 </head>
 <body>
 <h1 style="margin-left: 20px; margin-top: 10px;">Forbidden</h1>
