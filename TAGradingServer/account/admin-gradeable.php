@@ -218,10 +218,10 @@ if($user_is_administrator){
 </style>
 
 <div id="container-rubric">
-    <form id="delete-gradeable" action="{$BASE_URL}/account/submit/admin-gradeables.php?action=delete&id={$old_gradeable['g_id']}" method="post">
+    <form id="delete-gradeable" action="{$BASE_URL}/account/submit/admin-gradeables.php?course={$_GET['course']}&semester={$_GET['semester']}&action=delete&id={$old_gradeable['g_id']}" method="post">
         <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
     </form>
-    <form id="gradeable-form" class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" 
+    <form id="gradeable-form" class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&action={$action}&id={$old_gradeable['g_id']}" 
           method="post" enctype="multipart/form-data"> 
 
         <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
