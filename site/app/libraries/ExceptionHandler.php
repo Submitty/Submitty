@@ -73,7 +73,9 @@ class ExceptionHandler {
         $trace_string = array();
         foreach ($exception->getTrace() as $elem => $frame) {
             if (is_a($exception, '\app\exceptions\AuthenticationException') && $frame['function'] == "authenticate") {
-                $frame['args'][1] = "****";
+                if (isset($frame['args'][1])) {
+                    $frame['args'][1] = "****";
+                }
             }
             $trace_string[] = sprintf( "#%s %s(%s): %s(%s)",
                              $elem,
