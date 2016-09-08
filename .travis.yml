@@ -94,7 +94,7 @@ before_script:
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
   - vendor/bin/phpunit --version
-  - BROWSER=chrome TEST_URL="http://localhost" vendor/bin/phpunit --configuration tests/phpunit.xml --no-coverage
+  - BROWSER=phantomjs TEST_URL="http://localhost" vendor/bin/phpunit --configuration tests/phpunit.xml --no-coverage
   - curl "http://localhost/index.php?semester=f16&course=csci1000"
 #  - python /usr/local/submitty/test_suite/integrationTests/run.py
 
