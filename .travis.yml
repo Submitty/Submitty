@@ -2,7 +2,7 @@ language: php
 sudo: true
 dist: trusty
 php:
-#  - 5.5
+  - 5.5
 #  - 5.6
   - 7.0
 
@@ -96,6 +96,10 @@ script:
   - BROWSER=firefox TEST_URL="http://localhost" vendor/bin/phpunit --configuration tests/phpunit.xml --no-coverage
   - curl "http://localhost/index.php?semester=f16&course=csci1000"
 #  - python /usr/local/submitty/test_suite/integrationTests/run.py
+
+after_script:
+  - cat nohup.out
+  - cat .setup/common/nohup.out
 
 notifications:
   email: false

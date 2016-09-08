@@ -34,7 +34,6 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
     );
 
     public function logIn($user_id, $password) {
-        print($this->test_url."/index.php?semester=f16&course=csci1000");
         $this->url("/index.php?semester=f16&course=csci1000");
         try {
             $this->byId("login-guest");

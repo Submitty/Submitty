@@ -17,7 +17,7 @@ echo "Starting selenium"
 nohup bash -c "xvfb-run java -jar \"${SELENIUM_JAR}\" 2>&1 &"
 sleep 5
 
-wget --retry-connrefused --tries=5 --waitretry=3 --output-file=/dev/null "${SELENIUM_HUB_URL}/wd/hub/status" -O /dev/null
+wget --retry-connrefused --tries=5 --waitretry=5 --output-file=/dev/null "${SELENIUM_HUB_URL}/wd/hub/status" -O /dev/null
 if [ ! $? -eq 0 ]; then
     echo "Selenium server not started."
 else
