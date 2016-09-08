@@ -14,7 +14,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 source ${DIR}/../common/common_env.sh
 
 echo "Starting selenium"
-nohup bash -c "java -jar \"${SELENIUM_JAR}\" 2>&1 &"
+nohup bash -c "java -jar \"${SELENIUM_JAR}\" -role hub 2>&1 &"
 sleep 5
 
 wget --retry-connrefused --tries=5 --waitretry=3 --output-file=/dev/null "${SELENIUM_HUB_URL}/wd/hub/status" -O /dev/null
@@ -24,4 +24,5 @@ else
     echo "Finished setup. Selenium server has started."
     wget -q -O - "$@" ${SELENIUM_HUB_URL}/wd/hub/status
     curl "http://localhost:4444/wd/hub/status"
+    nohup bash -c "java -jar \"${SELENIUM_JAR}\" -role node -hub http://localhost:4444/grid/register -browser \"browserName=chrome;version=ANY\" -Dwebdriver.chrome.driver=/usr/bin/chromedriver 2>&1 &"
 fi
