@@ -14,7 +14,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 source ${DIR}/../common/common_env.sh
 
 echo "Starting selenium"
-nohup bash -c "java -jar \"${SELENIUM_JAR}\" 2>&1 &"
+nohup bash -c "xvfb-run java -jar \"${SELENIUM_JAR}\" 2>&1 &"
 sleep 5
 
 wget --retry-connrefused --tries=5 --waitretry=3 --output-file=/dev/null "${SELENIUM_HUB_URL}/wd/hub/status" -O /dev/null
