@@ -215,10 +215,15 @@ int main(int argc, char *argv[]) {
         std::cout << "AFTER  " << commands[j] << std::endl;
 #endif
       
+        std::string which = "";
+        if (commands.size() > 1) {
+          which = "_" + std::to_string(j);
+        }
+
         // run the command, capturing STDOUT & STDERR
         int exit_no = execute(commands[j] +
-                              " 1>" + my_testcase.getPrefix() + "_STDOUT.txt" +
-                              " 2>" + my_testcase.getPrefix() + "_STDERR.txt",
+                              " 1>" + my_testcase.getPrefix() + "_STDOUT" + which + ".txt" +
+                              " 2>" + my_testcase.getPrefix() + "_STDERR" + which + ".txt",
                               my_testcase.getPrefix() + "_execute_logfile.txt",
                               my_testcase.get_test_case_limits(),
                               config_json.value("resource_limits",nlohmann::json()));

@@ -628,6 +628,9 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
   my_path = getenv("PATH");
   //std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
 
+  // set the locale so that special characters (e.g., the copyright
+  // symbol) are not interpreted as ascii
+  setenv("LC_ALL", "en_US.UTF-8", 1);
 
   // print this out here (before losing our output)
   //  if (SECCOMP_ENABLED != 0) {

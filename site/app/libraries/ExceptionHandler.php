@@ -20,12 +20,13 @@ class ExceptionHandler {
 
     /**
      * Should we display the actual exception to the user or just a generic message?
-     * This should always be initially true in case we hit an exception in our initial
-     * setup routines
+     * This is initially set to false to prevent leaking any data when loading the config,
+     * but this does mean that by default any exceptions thrown when loading the config
+     * will be swallowed.
      *
      * @var bool
      */
-    private static $display_exceptions = true;
+    private static $display_exceptions = false;
 
     /**
      * This is a static class so it should never be instaniated or copied anywhere
@@ -130,8 +131,7 @@ class ExceptionHandler {
         }
         else {
             return <<<HTML
-An exception was thrown. Please contact an administrator about what<br />
-you were doing that caused this exception.
+An exception was thrown. Please contact an administrator about what<br />you were doing that caused this exception.
 
 HTML;
         }
