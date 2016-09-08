@@ -23,4 +23,5 @@ if [ ! $? -eq 0 ]; then
 else
     echo "Finished setup. Selenium server has started."
     wget -q -O - "$@" ${SELENIUM_HUB_URL}/wd/hub/status
+    curl "http://localhost:4444/wd/hub/status"
 fi
