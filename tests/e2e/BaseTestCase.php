@@ -74,6 +74,7 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
      */
     public function setUp() {
         $this->setBrowserUrl($this->test_url);
+        $this->setTimeout(120);
     }
 
     /**
