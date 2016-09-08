@@ -419,7 +419,6 @@ find $SUBMITTY_INSTALL_DIR/site -type f -name \*.js -exec chmod o+rx {} \;
 find $SUBMITTY_INSTALL_DIR/site -type f -name \*.cgi -exec chmod u+x {} \;
 
 replace_fillin_variables $SUBMITTY_INSTALL_DIR/site/config/master_template.ini
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/site/app/models/Config.php
 mv $SUBMITTY_INSTALL_DIR/site/config/master_template.ini $SUBMITTY_INSTALL_DIR/site/config/master.ini
 
 ################################################################################################################
