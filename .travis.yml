@@ -2,9 +2,9 @@ language: php
 sudo: true
 dist: trusty
 php:
-  - 5.5
+#  - 5.5
 #  - 5.6
-#  - 7.0
+  - 7.0
 
 cache:
   pip: true
@@ -52,10 +52,10 @@ before_install:
    - export PATH="$PATH:$HOME/.composer/vendor/bin"
 
 install:
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.6" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then sudo apt-get install libapache2-mod-php5 php5-pgsql; a2enmod php5; fi
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then sudo apt-get install libapache2-mod-php5.6; a2enmod php5.6; fi
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo apt-get install libapache2-mod-php7.0; a2enmod php7.0; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.5" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then sudo apt-get -y install libapache2-mod-php5 php5-pgsql; a2enmod php5; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then sudo apt-get -y install libapache2-mod-php5.6; a2enmod php5.6; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo apt-get -y install libapache2-mod-php7.0; a2enmod php7.0; fi
   - wget http://chromedriver.storage.googleapis.com/2.21/chromedriver_linux64.zip
   - unzip chromedriver_linux64.zip
   - sudo chmod u+x chromedriver
