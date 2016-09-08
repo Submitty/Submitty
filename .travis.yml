@@ -14,6 +14,7 @@ cache:
     - travis_phantomjs
 
 addons:
+  firefox: "45.0"
   postgresql: "9.3"
   apt:
     sources:
