@@ -81,7 +81,6 @@ class BaseTestCase extends \PHPUnit_Extensions_Selenium2TestCase {
      * (so after setUp()) so that we can access the url() function.
      */
     public function setUpPage() {
-        $this->setTimeout(120);
         $this->logIn($this->user_id, $this->password);
     }
 
