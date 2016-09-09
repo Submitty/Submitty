@@ -14,7 +14,7 @@ cache:
     - travis_phantomjs
 
 addons:
-  firefox: "45.0"
+  #firefox: "45.0"
   postgresql: "9.3"
   apt:
     sources:
@@ -95,9 +95,9 @@ before_script:
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
   - vendor/bin/phpunit --version
-  - firefox --version
-  - BROWSER=phantomjs TEST_URL="http://localhost" vendor/bin/phpunit --configuration tests/phpunit.xml --no-coverage
-  - python /usr/local/submitty/test_suite/integrationTests/run.py
+  #- firefox --version
+  #- vendor/bin/phpunit --configuration tests/phpunit.xml
+  #- python /usr/local/submitty/test_suite/integrationTests/run.py
   - python tests/selenium_test.py
 
 notifications:
