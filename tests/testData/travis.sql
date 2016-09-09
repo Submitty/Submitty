@@ -5,17 +5,17 @@ INSERT INTO sections_registration (sections_registration_id) VALUES (2);
 -- Developers
 
 INSERT INTO users (user_id, user_password, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
-    VALUES ('developer', '$2y$10$ixKdNjozeJItoI.qpg/As.pL.mGo6QH3vyl.d1fCzztlLOQmp/kDG', 'Bob', 'Developer', 'developer@rpi.edu', 0, 1, NULL);
+    VALUES ('developer', '$2y$10$ixKdNjozeJItoI.qpg/As.pL.mGo6QH3vyl.d1fCzztlLOQmp/kDG', 'Developer', 'Jackson', 'developer@rpi.edu', 0, 1, NULL);
 
 -- Administrators
 
 INSERT INTO users(user_id, user_password, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
-    VALUES ('instructor', '$2y$10$TF4/JQHhsyS2jXkmXp5aj.e62rZca8xqW/80dIODi2Uj3swzosljG', 'Steve', 'Instructor', 'instructor@rpi.edu', 1, 1, NULL);
+    VALUES ('instructor', '$2y$10$TF4/JQHhsyS2jXkmXp5aj.e62rZca8xqW/80dIODi2Uj3swzosljG', 'Instructor', 'Elric', 'instructor@rpi.edu', 1, 1, NULL);
 
 -- Teaching Assistants
 
 INSERT INTO users (user_id, user_password, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
-    VALUES ('ta', '$2y$10$19mUGBfp6YPFVIisGcKJTOLyjubAwuZeQ04pbuVcwCrYQB6Qkyrtq', 'Teaching', 'Assistant', 'ta@.rpi.edu', 2, 1, NULL);
+    VALUES ('ta', '$2y$10$19mUGBfp6YPFVIisGcKJTOLyjubAwuZeQ04pbuVcwCrYQB6Qkyrtq', 'TA', 'Ross', 'ta@.rpi.edu', 2, 1, NULL);
 
 -- Undergraduate Assistants
 
@@ -33,7 +33,7 @@ INSERT INTO users (user_id, user_password, user_firstname, user_lastname, user_e
     VALUES ('smithj', '$2y$10$QWgS95.ylFDcBO9WmYuUIeIPOBLFcZwJ6mv57n3kE0L/BNCuNr/lu', 'John', 'Smith', 'smithj@email.com', 4, 1, NULL);
 
 INSERT INTO users (user_id, user_password, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
-    VALUES ('student', '$2y$10$mQP9cdHXD5xXlleua0/fpemO7nNk.bfFdw8xY7PaLC5LQoGa4DO5i', 'Michael', 'Brady', 'student@email.com', 4, 1, NULL);
+    VALUES ('student', '$2y$10$auNE9Ih6T7OO8WzEWVlFF.AQVRWtANFR5jYvS2fyz9sRgG2ozL2OO', 'Joe', 'Student', 'student@email.com', 4, 1, NULL);
 
 -- Assign TAs to sections
 
