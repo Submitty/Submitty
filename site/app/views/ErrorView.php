@@ -4,7 +4,6 @@ namespace app\views;
 
 class ErrorView {
     public function exceptionPage($error_message) {
-        print(exec('whoami'));
         $top_message = "Oh no! Something irrecoverable has happened...";
         $error_message = nl2br(str_replace(" ", "&nbsp;", $error_message));
         return <<<HTML

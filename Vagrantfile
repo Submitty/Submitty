@@ -1,8 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-VAGRANT_COMMAND = ARGV[0]
-
 Vagrant.configure(2) do |config|
     # Ubuntu 14.04 (Trusty Tahr) - 64bit
     config.vm.box = "ubuntu/trusty64"
