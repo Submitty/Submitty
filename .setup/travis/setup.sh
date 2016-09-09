@@ -66,9 +66,9 @@ sudo chmod 777         ${SUBMITTY_DATA_DIR}
 sudo echo -e "localhost
 hsdbu
 hsdbu
-http://192.168.56.101
-http://192.168.56.101/TAGrading
-http://192.168.56.101/cgi-bin
+http://localhost
+http://localhost/TAGrading
+http://localhost/cgi-bin
 svn+ssh:192.168.56.103" | sudo bash ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 
 sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
