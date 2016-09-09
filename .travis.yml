@@ -65,6 +65,7 @@ install:
   #- sudo mv chromedriver /usr/bin/
   - travis_retry composer install --prefer-dist --no-interaction
   - pip install selenium
+  - pip install unittest2
 
 before_script:
   - psql -U postgres -c "create database submitty;"
@@ -88,6 +89,8 @@ before_script:
   - sudo chmod -R 777 /usr/local/submitty/test_suite
   - sudo service apache2 restart
   - ./.setup/travis/start.sh
+  - sudo sed -e "s?debug = false?debug = true?g" --in-place /usr/local/submitty/site/config/master.ini
+  - sudo sed -e "s?PamAuthentication?DatabaseAuthentication?g" --in-place /usr/local/submitty/site/config/master.ini
 
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
