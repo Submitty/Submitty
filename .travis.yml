@@ -93,9 +93,8 @@ script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
   - vendor/bin/phpunit --version
   #- firefox --version
-  #- vendor/bin/phpunit --configuration tests/phpunit.xml
-  #- python /usr/local/submitty/test_suite/integrationTests/run.py
-  - python tests/selenium_test.py
+  - vendor/bin/phpunit --configuration tests/phpunit.xml
+  - python /usr/local/submitty/test_suite/integrationTests/run.py
   - TEST_URL="http://localhost" nose2 --start-dir="tests/e2e"
 
 notifications:
