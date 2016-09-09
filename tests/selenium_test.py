@@ -9,5 +9,7 @@ elem = driver.find_element_by_name('password')
 elem.send_keys("student")
 driver.find_element_by_name('login').click()
 #print(driver.page_source)
-assert "Joe" == driver.find_element_by_id("login-id").text
+print(driver.current_url)
+print(driver.page_source)
+#assert "Joe" == driver.find_element_by_id("login-id").text
 driver.close()
