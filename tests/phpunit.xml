@@ -8,10 +8,12 @@
         <testsuite name="Unit Tests">
             <directory suffix="Tester.php">unitTests/app</directory>
         </testsuite>
+        <!--
         <testsuite name="E2E Tests">
             <directory suffix="Tester.php">e2e</directory>
             <exclude>e2e/GradingServer</exclude>
         </testsuite>
+        -->
     </testsuites>
 
     <filter>

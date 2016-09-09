@@ -24,6 +24,7 @@ addons:
       - apache2
       - libapache2-mod-fastcgi
       - python
+      - python-pip
       - build-essential
       - automake
       - cmake
@@ -37,6 +38,7 @@ addons:
       - flex
       - bison
       - python3
+      - python3-pip
       - libpcre3
       - libpcre3-dev
       - unzip
@@ -62,6 +64,7 @@ install:
   - sudo chmod u+x chromedriver
   - sudo mv chromedriver /usr/bin/
   - travis_retry composer install --prefer-dist --no-interaction
+  - pip install selenium
 
 before_script:
   - psql -U postgres -c "create database submitty;"
@@ -94,8 +97,10 @@ script:
   - php -i
   - vendor/bin/phpunit --version
   - firefox --version
+  - python tests/selenium_test.py
   - BROWSER=phantomjs TEST_URL="http://localhost" vendor/bin/phpunit --configuration tests/phpunit.xml --no-coverage
   - curl "http://localhost/index.php?semester=f16&course=csci1000"
+  - python tests/selenium_test.py
 #  - python /usr/local/submitty/test_suite/integrationTests/run.py
 
 after_script:
