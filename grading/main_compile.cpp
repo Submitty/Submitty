@@ -103,6 +103,7 @@ int main(int argc, char *argv[]) {
   nlohmann::json config_json;
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
+  AddSubmissionLimitTestCase(config_json);
 
   std::cout << "JSON PARSED" << std::endl;
 
@@ -177,7 +178,9 @@ int main(int argc, char *argv[]) {
             for (int i = 0; i < files.size(); i++) {
               std::cout << "  rescue  FILE #" << i << ": " << files[i] << std::endl;
               std::string new_filename = my_testcase.getPrefix() + "_" + replace_slash_with_double_underscore(files[i]);
-              execute ("/bin/cp "+files[i]+" "+new_filename,
+              std::string old_filename = escape_spaces(files[i]);
+              new_filename = escape_spaces(new_filename);
+              execute ("/bin/cp "+old_filename+" "+new_filename,
                        "/dev/null",
                        my_testcase.get_test_case_limits(),
                        config_json.value("resource_limits",nlohmann::json()));

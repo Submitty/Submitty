@@ -46,6 +46,11 @@
 				}
 			],
 			"points_awarded": 6
+                },
+                {
+                    "points_awarded": 0,
+                    "test_name": "Test 7 Submission Limit",
+                    "view_testcase": false
 		}
 	]
 }

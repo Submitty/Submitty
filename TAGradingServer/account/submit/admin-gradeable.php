@@ -14,6 +14,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
  class Gradeable{
      protected $g_id;
      protected $g_title;
+     protected $g_instructions_url;
      protected $g_overall_ta_instr;
      protected $g_use_teams;
      protected $g_gradeable_type;
@@ -26,6 +27,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     function __construct($params){
          $this->g_id = $params['gradeable_id'];
          $this->g_title = $params['gradeable_title'];
+         $this->g_instructions_url = $params['instructions_url'];
          $this->g_overall_ta_instr = $params['ta_instructions'];
          $this->g_use_teams = $params['team_assignment'];
          $this->g_gradeable_type = $params['gradeable_type'];
@@ -42,10 +44,10 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     function updateGradeable($db){
         $params = array($this->g_title, $this->g_overall_ta_instr, $this->g_use_teams, $this->g_gradeable_type,
                         $this->g_grade_by_registration, $this->g_grade_start_date, $this->g_grade_released_date,
-                        $this->g_syllabus_bucket, $this->g_min_grading_group, $this->g_id);
+                        $this->g_syllabus_bucket, $this->g_min_grading_group, $this->g_instructions_url , $this->g_id);
         $db->query("UPDATE gradeable SET g_title=?, g_overall_ta_instructions=?, g_team_assignment=?, g_gradeable_type=?, 
                     g_grade_by_registration=?, g_grade_start_date=?, g_grade_released_date=?, g_syllabus_bucket=?, 
-                    g_min_grading_group=? WHERE g_id=?", $params);
+                    g_min_grading_group=?, g_instructions_url=? WHERE g_id=?", $params);
     }
     
      /**
@@ -54,10 +56,11 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     function createGradeable($db){
         $params = array($this->g_id,$this->g_title, $this->g_overall_ta_instr, $this->g_use_teams,
                         $this->g_gradeable_type, $this->g_grade_by_registration, $this->g_grade_start_date,
-                        $this->g_grade_released_date, $this->g_syllabus_bucket, $this->g_min_grading_group);
+                        $this->g_grade_released_date, $this->g_syllabus_bucket, $this->g_min_grading_group,
+                        $this->g_instructions_url);
         $db->query("INSERT INTO gradeable(g_id,g_title, g_overall_ta_instructions, g_team_assignment, 
                     g_gradeable_type, g_grade_by_registration, g_grade_start_date, g_grade_released_date,
-                    g_syllabus_bucket,g_min_grading_group) VALUES (?,?,?,?,?,?,?,?,?,?)", $params);
+                    g_syllabus_bucket,g_min_grading_group, g_instructions_url) VALUES (?,?,?,?,?,?,?,?,?,?,?)", $params);
     }
     
      /**
@@ -107,7 +110,6 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
  }
  
  class ElectronicGradeable extends Gradeable{
-    private $instructions_url;
     private $date_submit;
     private $date_due;
     private $is_repo;
@@ -119,7 +121,6 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     
      function __construct($params){
          parent::__construct($params);
-         $this->instructions_url = $params['instructions_url'];
          $this->date_submit = $params['date_submit'];
          $this->date_due =$params['date_due'];
          $this->is_repo = $params['is_repo'];
@@ -133,16 +134,16 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
      //TODO extract to multiple functions
      function createComponents($db, $action, $add_args){
         if ($action=='edit'){
-            $params = array($this->instructions_url, $this->date_submit, $this->date_due, $this->is_repo,
+            $params = array($this->date_submit, $this->date_due, $this->is_repo,
                             $this->subdirectory, $this->ta_grading, $this->config_path, $this->late_days, $this->point_precision, $this->g_id);
-            $db->query("UPDATE electronic_gradeable SET eg_instructions_url=?, eg_submission_open_date=?,eg_submission_due_date=?, 
+            $db->query("UPDATE electronic_gradeable SET eg_submission_open_date=?,eg_submission_due_date=?, 
                         eg_is_repository=?, eg_subdirectory=?, eg_use_ta_grading=?, eg_config_path=?, eg_late_days=?, eg_precision=? WHERE g_id=?", $params);
         }
         else{
-            $params = array($this->g_id, $this->instructions_url, $this->date_submit, $this->date_due,
+            $params = array($this->g_id, $this->date_submit, $this->date_due,
                             $this->is_repo, $this->subdirectory, $this->ta_grading, $this->config_path, $this->late_days, $this->point_precision);
-            $db->query("INSERT INTO electronic_gradeable(g_id, eg_instructions_url, eg_submission_open_date, eg_submission_due_date, 
-                eg_is_repository, eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision) VALUES(?,?,?,?,?,?,?,?,?,?)", $params);
+            $db->query("INSERT INTO electronic_gradeable(g_id, eg_submission_open_date, eg_submission_due_date, 
+                eg_is_repository, eg_subdirectory, eg_use_ta_grading, eg_config_path, eg_late_days, eg_precision) VALUES(?,?,?,?,?,?,?,?,?)", $params);
         }
 
         $num_questions = 0;
@@ -296,6 +297,7 @@ abstract class GradeableType{
      }
 
      $g_title = $request_args['gradeable_title'];
+     $g_instructions_url = $request_args['instructions_url'];
      $g_overall_ta_instr = $request_args['ta_instructions'];
      $g_use_teams = (isset($request_args['team_assignment']) && $request_args['team_assignment'] === 'yes') ? "true" : "false";
      $g_min_grading_group=(isset($request_args['minimum_grading_group'])) ? intval($request_args['minimum_grading_group']) : 1;
@@ -304,15 +306,15 @@ abstract class GradeableType{
      $g_grade_released_date = $request_args['date_released'];
      $g_syllabus_bucket = $request_args['gradeable_buckets'];
      
-     $g_constructor_params = array('gradeable_id' => $g_id, 'gradeable_title' => $g_title, 'ta_instructions' => $g_overall_ta_instr,
+     $g_constructor_params = array('gradeable_id' => $g_id, 'gradeable_title' => $g_title,
+                                   'instructions_url' => $g_instructions_url,'ta_instructions' => $g_overall_ta_instr,
                                    'team_assignment' => $g_use_teams, 'min_grading_group' => $g_min_grading_group,
                                    'section_type' => $g_grade_by_registration, 'date_grade' => $g_grade_start_date,
                                    'date_released' =>$g_grade_released_date, 'bucket' => $g_syllabus_bucket);
      
      if ($request_args['gradeable_type'] === "Electronic File"){
         $g_constructor_params['gradeable_type'] = GradeableType::electronic_file;
-        
-        $instructions_url = $request_args['instructions_url'];
+
         $date_submit = $request_args['date_submit'];
         $date_due = $request_args['date_due'];
         $is_repo = ($request_args['upload_type'] == 'Repository')? "true" : "false";
@@ -321,8 +323,7 @@ abstract class GradeableType{
         $config_path = $request_args['config_path'];
         $eg_late_days = intval($request_args['eg_late_days']);
         $eg_pt_precision = floatval($request_args['point_precision']);
-        
-        $g_constructor_params['instructions_url'] = $instructions_url;
+
         $g_constructor_params['date_submit'] = $date_submit;
         $g_constructor_params['date_due'] = $date_due;
         $g_constructor_params['is_repo'] = $is_repo;

@@ -27,7 +27,7 @@ HTML;
     <!-- JQuery -->
     <script>
         $(document).ready(function() {
-
+            /*
             $('a').each(function() {
                 if ($(this).attr('href') == undefined) {
                     return;
@@ -44,6 +44,7 @@ HTML;
                     }
                 }
             });
+            */
 
             $('form').each(function() {
                 if ($(this).attr('action') == undefined) {

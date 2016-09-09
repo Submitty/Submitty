@@ -54,7 +54,6 @@ SET default_with_oids = false;
 
 CREATE TABLE electronic_gradeable (
     g_id character varying(255) NOT NULL,
-    eg_instructions_url character varying(255) NOT NULL,
     eg_submission_open_date timestamp(6) without time zone NOT NULL,
     eg_submission_due_date timestamp(6) without time zone NOT NULL,
     eg_is_repository boolean NOT NULL,
@@ -65,6 +64,8 @@ CREATE TABLE electronic_gradeable (
     eg_precision numeric NOT NULL
 );
 
+ALTER TABLE electronic_gradeable
+    ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
 
 --
 -- Name: gradeable; Type: TABLE; Schema: public; Owner: -; Tablespace:
@@ -73,6 +74,7 @@ CREATE TABLE electronic_gradeable (
 CREATE TABLE gradeable (
     g_id character varying(255) NOT NULL,
     g_title character varying(255) NOT NULL,
+    g_instructions_url character varying(255) NOT NULL,
     g_overall_ta_instructions character varying NOT NULL,
     g_team_assignment boolean NOT NULL,
     g_gradeable_type integer NOT NULL,
@@ -189,6 +191,8 @@ CREATE TABLE grading_rotating (
     sections_rotating integer NOT NULL
 );
 
+ALTER TABLE grading_rotating
+    ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (g_id, user_id, sections_rotating);
 
 --
 -- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -; Tablespace:
@@ -222,6 +226,8 @@ CREATE TABLE late_days_used (
     late_days_used integer NOT NULL
 );
 
+ALTER TABLE late_days_used
+    ADD CONSTRAINT late_days_used_pkey PRIMARY KEY (user_id, g_id);
 
 --
 -- Name: sections_registration; Type: TABLE; Schema: public; Owner: -; Tablespace:

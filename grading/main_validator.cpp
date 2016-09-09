@@ -186,6 +186,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   nlohmann::json config_json;
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> config_json;
+  AddSubmissionLimitTestCase(config_json);
 
   std::string grade_path = "results_grade.txt";
   std::ofstream gradefile(grade_path.c_str());
@@ -233,7 +234,9 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
       // round down to the biggest negative full point penalty
       testcase_pts = std::floor(excessive_submissions * penalty);
       if (testcase_pts < points) testcase_pts = points;
-      if (testcase_pts != 0) {
+      if (testcase_pts == 0) {
+        tc_j["view_testcase"] = false;
+      } else {
         std::cout << "EXCESSIVE SUBMISSIONS PENALTY = " << testcase_pts << std::endl;
       }
     } 

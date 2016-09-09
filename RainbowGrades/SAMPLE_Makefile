@@ -3,8 +3,8 @@
 
 USERNAME=username
 RAINBOW_GRADES_DIRECTORY=/<PATH_TO_SUBMITTY_REPO>/RainbowGrades
-HWSERVER=submit.cs.rpi.edu
-REPORTSDIRECTORY=/var/local/submitty/courses/<SEMESTER>/<COURSE>/reports
+HWSERVER=submitty.cs.rpi.edu
+REPORTS_DIRECTORY=/var/local/submitty/courses/<SEMESTER>/<COURSE>/reports
 
 # =============================================================================
 

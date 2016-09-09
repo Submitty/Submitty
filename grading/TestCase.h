@@ -90,6 +90,7 @@ public:
   }
   const nlohmann::json get_test_case_limits() const;
 
+  static void reset_next_test_case_id() { next_test_case_id = 1; }
 
 private:
 
@@ -114,6 +115,9 @@ private:
 // NON MEMBER  HELPER FUNCTIONS
 
 void adjust_test_case_limits(nlohmann::json &modified_test_case_limits, int rlimit_name, rlim_t value);
+
+void AddSubmissionLimitTestCase(nlohmann::json &config_json);
+
 
 std::string getAssignmentIdFromCurrentDirectory(std::string);
 
