@@ -91,14 +91,15 @@ def create_course(course, semester, course_group, assignments):
                   "VALUES ({:d}, '{}', 'Test', '', '', 5, false, false, 1)\""
                   .format(database, i, form_json['gradeable_id']))
 
+    os.system("psql -d {} -h localhost -U hsdbu -c \"SELECT pg_catalog.setval("
+              "'gradeable_component_gc_id_seq', {:d}, true)\"".format(database, len(assignments)))
+
     # ---------------------------------------------------------------
     # RUN THE BUILD COURSE SCRIPT
     os.system("%s/courses/%s/%s/BUILD_%s.sh" % (SUBMITTY_DATA_DIR, semester, course, course))
 
     # ---------------------------------------------------------------
     # DELETE THE PGPASSWORD FILE
-    os.system("psql -d {} -h localhost -U hsdbu -c \"SELECT pg_catalog.setval("
-              "'gradeable_component_gc_id_seq', {:d}, true)\"".format(database, len(assignments)))
     del os.environ['PGPASSWORD']
 
 if __name__ == "__main__":

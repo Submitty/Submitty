@@ -33,6 +33,6 @@ class DatabaseAuthentication implements IAuthentication {
             return false;
         }
 
-        return password_verify($password, $user['password']);
+        return password_verify($password, $user['user_password']);
     }
 }
