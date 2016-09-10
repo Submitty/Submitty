@@ -18,6 +18,11 @@ $iframe = <<<HTML
 <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/clike/clike.js"></script>
 <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/python/python.js"></script>
 <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/shell/shell.js"></script>
+<script type="text/javascript">
+    function resizeTextarea(id) {
+       $("#" + id).attr('rows', $("#" + id).val().split("\\n").length);
+    }
+</script>
 HTML;
 
 $iframe .= $diffViewer->getCSS();
@@ -69,14 +74,20 @@ if (isset($testcase['autochecks']) && count($testcase['autochecks']) > 0) {
                 $iframe .= <<<HTML
     Student File<br />
     <textarea id="code{$i}">{$out}</textarea>
+    <script type="text/javascript">
+        resizeTextarea("code{$i}");
+    </script>
 HTML;
-                $iframe .= sourceSettingsJS($diff['student_file'], $i++);
+                $iframe .= sourceSettingsJS($diff['actual_file'], $i++);
             }
             if ($expected != "") {
                 $out = htmlentities(file_get_contents($expected));
                 $iframe .= <<<HTML
     Instructor File<br />
     <textarea id="code{$i}">{$out}</textarea>
+    <script type="text/javascript">
+        resizeTextarea("code{$i}");
+    </script>
 HTML;
                 $iframe .= sourceSettingsJS($diff["expected_file"], $i++);
             }
@@ -88,6 +99,9 @@ if (isset($testcase['compilation_output']) && $testcase['compilation_output'] !=
     $out = htmlentities(file_get_contents($_GET['directory'].'/'.$testcase['compilation_output']));
     $iframe .= <<<HTML
     <textarea id="code{$i}">{$out}</textarea>
+    <script type="text/javascript">
+        resizeTextarea("code{$i}");
+    </script>
 HTML;
     $iframe .= sourceSettingsJS($testcase['compilation_output'], $i++);
 }
