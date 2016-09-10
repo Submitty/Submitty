@@ -140,7 +140,7 @@ foreach($db->rows() as $section) {
                     <tr class="info">
                         <td colspan="{$count}" style="text-align:center;" id="section-{$section_id}">
                                 Students Enrolled in {$section_type} Section {$section_id}
-                                <a href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$c_gradeable['g_id']}&section_id={$section_id}&grade_by_reg_section={$grade_by_reg_section}">
+                                <a target=_blank href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$c_gradeable['g_id']}&section_id={$section_id}&grade_by_reg_section={$grade_by_reg_section}">
                                     <div class="icon-print"></div>
                                 </a>
                         </td>

@@ -24,7 +24,7 @@ class Config {
      * turn on if running server in production environment.
      * @var bool
      */
-    private $debug = true;
+    private $debug = false;
 
     private $semester;
     private $course;
@@ -109,7 +109,7 @@ class Config {
         $this->setConfigValues($master, 'database_details', array('database_host', 'database_user', 'database_password'));
 
         if (isset($master['site_details']['debug'])) {
-            $this->debug = $master['site_details']['debug'];
+            $this->debug = $master['site_details']['debug'] === true;
         }
 
         if (isset($master['site_details']['timezone'])) {

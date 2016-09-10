@@ -456,22 +456,31 @@ void TestCase::Compilation_Helper() {
 
   if (f_itr != _json.end()) {
 
-    w_itr = _json.find("warning_deduction");
-    float warning_fraction = 0.0;
-    if (w_itr != _json.end()) {
-      assert (w_itr->is_number());
-      warning_fraction = (*w_itr);
-      _json.erase(w_itr);
+    std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
+    assert (commands.size() > 0);
+    for (int i = 0; i < commands.size(); i++) {
+      w_itr = _json.find("warning_deduction");
+      float warning_fraction = 0.0;
+      if (w_itr != _json.end()) {
+        assert (w_itr->is_number());
+        warning_fraction = (*w_itr);
+        _json.erase(w_itr);
+      }
+      assert (warning_fraction >= 0.0 && warning_fraction <= 1.0);
+      nlohmann::json v2;
+      v2["method"] = "errorIfNotEmpty";
+      if (commands.size() == 1) {
+        v2["actual_file"] = "STDERR.txt";
+      } else {
+        v2["actual_file"] = "STDERR_" + std::to_string(i) + ".txt";
+      }
+      v2["description"] = "Compilation Errors and/or Warnings";
+      v2["show_actual"] = "on_failure";
+      v2["show_message"] = "on_failure";
+      v2["deduction"] = warning_fraction;
+      _json["validation"].push_back(v2);
     }
-    assert (warning_fraction >= 0.0 && warning_fraction <= 1.0);
-    nlohmann::json v2;
-    v2["method"] = "errorIfNotEmpty";
-    v2["actual_file"] = "STDERR.txt";
-    v2["description"] = "Compilation Errors and/or Warnings";
-    v2["show_actual"] = "on_failure";
-    v2["show_message"] = "on_failure";
-    v2["deduction"] = warning_fraction;
-    _json["validation"].push_back(v2);
+
 
     std::vector<std::string> executable_names = stringOrArrayOfStrings(_json,"executable_name");
     assert (executable_names.size() > 0);
