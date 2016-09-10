@@ -18,6 +18,11 @@ $iframe = <<<HTML
 <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/clike/clike.js"></script>
 <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/python/python.js"></script>
 <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/shell/shell.js"></script>
+<script type="text/javascript">
+    function resizeTextarea(id) {
+       $("#" + id).attr('rows', $("#" + id).val().split("\\n").length);
+    }
+</script>
 HTML;
 
 $iframe .= $diffViewer->getCSS();
@@ -31,20 +36,22 @@ $i = 0;
 if (isset($testcase['test_name']) && $testcase['test_name'] != "") {
     $iframe .= "<h3>{$testcase['test_name']}</h3>";
 }
-if (isset($testcase['diffs']) && count($testcase['diffs']) > 0) {
-    foreach ($testcase['diffs'] as $diff) {
-        $iframe .= "<div style='height:auto'><h3>{$diff['description']}</h3>";
+if (isset($testcase['autochecks']) && count($testcase['autochecks']) > 0) {
+    foreach ($testcase['autochecks'] as $diff) {
+        if (isset($diff['description'])) {
+            $iframe .= "<div style='height:auto'><h3>{$diff['description']}</h3>";
+        }
         $actual = $expected = $difference = "";
-        if (isset($diff['student_file']) && file_exists($_GET['directory'] . "/" . $diff['student_file'])) {
-            $actual = $_GET['directory'] . "/" . $diff['student_file'];
+        if (isset($diff['actual_file']) && file_exists($_GET['directory'] . "/" . $diff['actual_file'])) {
+            $actual = $_GET['directory'] . "/" . $diff['actual_file'];
         }
 
         if (isset($diff["expected_file"]) && file_exists(implode("/", array(__SUBMISSION_SERVER__, $diff["expected_file"])))) {
             $expected = implode("/", array(__SUBMISSION_SERVER__, $diff["expected_file"]));
         }
 
-        if (isset($diff['difference']) && file_exists($_GET['directory'] . "/" . $diff['difference'])) {
-            $difference = $_GET['directory'] . "/" . $diff['difference'];
+        if (isset($diff['difference_file']) && file_exists($_GET['directory'] . "/" . $diff['difference_file'])) {
+            $difference = $_GET['directory'] . "/" . $diff['difference_file'];
         }
 
         if ($difference != "") {
@@ -67,14 +74,20 @@ if (isset($testcase['diffs']) && count($testcase['diffs']) > 0) {
                 $iframe .= <<<HTML
     Student File<br />
     <textarea id="code{$i}">{$out}</textarea>
+    <script type="text/javascript">
+        resizeTextarea("code{$i}");
+    </script>
 HTML;
-                $iframe .= sourceSettingsJS($diff['student_file'], $i++);
+                $iframe .= sourceSettingsJS($diff['actual_file'], $i++);
             }
             if ($expected != "") {
                 $out = htmlentities(file_get_contents($expected));
                 $iframe .= <<<HTML
     Instructor File<br />
     <textarea id="code{$i}">{$out}</textarea>
+    <script type="text/javascript">
+        resizeTextarea("code{$i}");
+    </script>
 HTML;
                 $iframe .= sourceSettingsJS($diff["expected_file"], $i++);
             }
@@ -86,6 +99,9 @@ if (isset($testcase['compilation_output']) && $testcase['compilation_output'] !=
     $out = htmlentities(file_get_contents($_GET['directory'].'/'.$testcase['compilation_output']));
     $iframe .= <<<HTML
     <textarea id="code{$i}">{$out}</textarea>
+    <script type="text/javascript">
+        resizeTextarea("code{$i}");
+    </script>
 HTML;
     $iframe .= sourceSettingsJS($testcase['compilation_output'], $i++);
 }
