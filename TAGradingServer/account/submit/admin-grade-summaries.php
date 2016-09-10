@@ -32,6 +32,15 @@ function autogradingTotalAwarded($g_id, $student_id, $active_version){
     return $total;
 }
 
+// get the mini-lecutre assignments
+
+function generateLectureExcerices($g_ids){
+  //check if the g_id is in the hash
+
+  // generate the output from the results
+  
+}
+
 // find the syllabus buckets
 $db->query("SELECT DISTINCT g_syllabus_bucket FROM gradeable WHERE g_grade_released_date < now() ORDER BY g_syllabus_bucket ASC", array());
 $buckets = $db->rows();
@@ -78,7 +87,7 @@ foreach($db->rows() as $student_record) {
             g_gradeable_type, 
             g.g_id, 
             u.user_id, 
-            case when score is null then -100 else score end, 
+            case when score is null then 0 else score end, 
             titles, 
             comments,
             scores,
@@ -172,8 +181,6 @@ foreach($db->rows() as $student_record) {
             $this_g[$gradeable['g_id']]["component_scores"] = $component_scores;
         }
         
-        //special score of -100 means no submission 
-        if($gradeable['score'] == -100) continue;
         
         array_push($student_output_json[ucwords($gradeable['g_syllabus_bucket'])], $this_g);
     }
