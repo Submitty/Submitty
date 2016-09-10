@@ -14,25 +14,14 @@ use app\libraries\Core;
  * @link http://php.net/manual/en/function.password-hash.php
  * @link http://php.net/manual/en/function.password-verify.php
  */
-class DatabaseAuthentication implements IAuthentication {
-    /** @var Core Core library for running the application */
-    private $core;
-    
-    /**
-     * DatabaseAuthentication constructor.
-     *
-     * @param Core $core
-     */
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
+class DatabaseAuthentication extends AbstractAuthentication {
 
-    public function authenticate($user_id, $password) {
-        $user = $this->core->getQueries()->getUserById($user_id);
+    public function authenticate() {
+        $user = $this->core->getQueries()->getUserById($this->user_id);
         if (empty($user)) {
             return false;
         }
 
-        return password_verify($password, $user['user_password']);
+        return password_verify($this->password, $user['user_password']);
     }
 }

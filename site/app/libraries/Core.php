@@ -2,7 +2,7 @@
 
 namespace app\libraries;
 
-use app\authentication\IAuthentication;
+use app\authentication\AbstractAuthentication;
 use app\exceptions\AuthenticationException;
 use app\exceptions\DatabaseException;
 use app\libraries\database\DatabaseQueriesPostgresql;
@@ -28,7 +28,7 @@ class Core {
     private $database;
 
     /**
-     * @var IAuthentication
+     * @var AbstractAuthentication
      */
     private $authentication;
 
@@ -74,16 +74,18 @@ class Core {
     
     public function loadConfig($semester, $course) {
         $this->config = new Config($semester, $course);
-
-        $this->database = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
-            $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
-
         $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
-        if (!in_array('app\authentication\IAuthentication', class_implements($auth_class))) {
-            throw new \Exception("Invalid module specified for Authentication. All modules should implement the IAuthentication interface.");
+        if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
+            throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
         }
         $this->authentication = new $auth_class($this);
         $this->session_manager = new SessionManager($this);
+    }
+
+    public function loadDatabase() {
+        $this->database = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
+            $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
+        $this->database->connect();
 
         switch ($this->config->getDatabaseType()) {
             case 'pgsql':
@@ -160,7 +162,7 @@ class Core {
     }
 
     /**
-     * @return IAuthentication
+     * @return AbstractAuthentication
      */
     public function getAuthentication() {
         return $this->authentication;
@@ -189,16 +191,13 @@ class Core {
     }
 
     /**
-     * @param $user_id
-     * @param $password
-     *
      * @return bool
      */
-    public function authenticate($user_id, $password) {
+    public function authenticate() {
         $auth = false;
-        $user_id = strtolower($user_id);
+        $user_id = $this->authentication->getUserId();
         try {
-            if ($this->authentication->authenticate($user_id, $password)) {
+            if ($this->authentication->authenticate()) {
                 $auth = true;
                 $session_id = $this->session_manager->newSession($user_id);
                 // We set the cookie to expire 10 years into the future effectly making it last forever

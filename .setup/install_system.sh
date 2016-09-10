@@ -528,7 +528,8 @@ hsdbu
 http://192.168.56.101
 http://192.168.56.104
 http://192.168.56.102
-svn+ssh:192.168.56.103" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
+svn+ssh:192.168.56.103
+y" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 else
 	source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 fi
