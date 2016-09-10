@@ -58,7 +58,8 @@ class User {
         $this->loaded = true;
         $this->id = $details['user_id'];
         $this->first_name = $details['user_firstname'];
-	$this->preferred_first_name = $this->first_name;
+
+	    $this->preferred_first_name = $this->first_name;
         if (isset($details['user_preferred_firstname']) && $details['user_preferred_firstname'] != "") {
             $this->preferred_first_name = $details['user_preferred_firstname'];
         }
@@ -125,6 +126,7 @@ class User {
     public function getFirstName() {
         return $this->first_name;
     }
+
     public function getPreferredFirstName() {
         return $this->preferred_first_name;
     }
