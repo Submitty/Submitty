@@ -411,7 +411,7 @@ HTML;
 	
 		self::$view['form'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-<form action="admin-latedays-exceptions.php" method="POST" enctype="multipart/form-data">
+<form action="{$BASE_URL}/account/admin-latedays-exceptions.php?course={$_GET['course']}&semester={$_GET['semester']}" method="POST" enctype="multipart/form-data">
 <p>
 Use this form to grant an extension (e.g., for an excused absense)
 to a student on a specific assignment.

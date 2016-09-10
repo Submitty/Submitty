@@ -383,7 +383,7 @@ HTML;
 HTML;
 
 		self::$view['form'] = <<<HTML
-<form action="admin-latedays.php" method="POST" enctype="multipart/form-data">
+<form action="{$BASE_URL}/account/admin-latedays.php?course={$_GET['course']}&semester={$_GET['semester']}" method="POST" enctype="multipart/form-data">
 <h4>Single Student Entry</h4>
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Student ID:<br><input type="text" name="student_id" style="width:95%;"></div>
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Datestamp (MM/DD/YY):<br><input type="text" name="datestamp" style="width:95%;"></div>
