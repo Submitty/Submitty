@@ -16,10 +16,6 @@ if (!User::$is_administrator
         $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}'>View Your Sections</a>";
     }
     else {
-// not sure why this isn't working.  it's ending up with 2 copies of the course & semester variables and giving errors.
-//        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&all=true'>View ALL Sections</a>";
-
-// this does work.  course & semester variables are somehow added to the end.
         $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&all=true'>View ALL Sections</a>";
     }
 }
@@ -144,7 +140,7 @@ foreach($db->rows() as $section) {
                     <tr class="info">
                         <td colspan="{$count}" style="text-align:center;" id="section-{$section_id}">
                                 Students Enrolled in {$section_type} Section {$section_id}
-                                <a href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$c_gradeable['g_id']}&section_id={$section_id}&grade_by_reg_section={$grade_by_reg_section}">
+                                <a target=_blank href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$c_gradeable['g_id']}&section_id={$section_id}&grade_by_reg_section={$grade_by_reg_section}">
                                     <div class="icon-print"></div>
                                 </a>
                         </td>

@@ -266,7 +266,7 @@ CREATE TABLE sessions (
 
 CREATE TABLE users (
     user_id character varying NOT NULL,
-    user_password character,
+    user_password character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying NULL,
     user_lastname character varying NOT NULL,
