@@ -62,6 +62,9 @@ def create_course(course, semester, course_group, assignments):
         form_json["date_released"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp2.year, tmp2.month,
                                                                       tmp2.day)
 
+        form_json["ta_view_date"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp2.year, tmp2.month,
+                                                                      tmp2.day)
+
         form_file = "{}/courses/{}/{}/config/form/form_{}.json".format(submitty_data_dir, semester, course,
                                                                        assignment)
         with open(form_file, "w") as form_write:
@@ -69,12 +72,13 @@ def create_course(course, semester, course_group, assignments):
         os.chown(form_file, hwphp[0], course_group_gid)
 
         os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO gradeable VALUES ('{}', "
-                  "'{}', '', false, 0, true, '{}', '{}', 'homework', 1, NULL)\""
+                  "'{}', '{}', '', false, 0, true, '{}', '{}', 'homework', 1, NULL, '{}')\""
                   .format(database, form_json['gradeable_id'], form_json['gradeable_title'],
-                          form_json['date_grade'], form_json['date_released']))
+                  form_json['instructions_url'], form_json['date_grade'], form_json['date_released']
+                  , form_json['ta_view_date']))
         os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO electronic_gradeable "
-                  "VALUES ('{}', '{}', '{}', '{}', false, '', true, '{}', 2, {})\""
-                  .format(database, form_json['gradeable_id'], form_json['instructions_url'],
+                  "VALUES ('{}', '{}', '{}', false, '', true, '{}', 2, {})\""
+                  .format(database, form_json['gradeable_id'],
                           form_json['date_submit'], form_json['date_due'],
                           form_json['config_path'], form_json['point_precision']))
         os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO gradeable_component "

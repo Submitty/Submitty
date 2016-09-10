@@ -46,6 +46,7 @@ class GradeableDb extends Gradeable {
         $this->grade_by_registration = $details['g_grade_by_registration'] === true;
         $this->grade_start_date = new \DateTime($details['g_grade_start_date'], $timezone);
         $this->grade_released_date = new \DateTime($details['g_grade_released_date'], $timezone);
+        $this->ta_view_date = new \DateTime($details['g_ta_view_start_date'], $timezone);
         // Is it past when the TA grades should be released
         $this->ta_grades_released = $this->grade_released_date < new \DateTime("now", $timezone);
         $this->bucket = $details['g_syllabus_bucket'];
