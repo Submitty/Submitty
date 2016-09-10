@@ -360,7 +360,7 @@ HTML;
             }
 
             .bad {
-                background-color: #fedede;
+                background-color: #fdffe0;
 
             }
 
@@ -369,10 +369,10 @@ HTML;
             }
 
             .highlight-hover {
-                background-color: yellow !important;
+                background-color: #ddf !important;
             }
             .highlight-char {
-                background-color: #fffdbe;
+                background-color: #fe5b5b;
             }
 
             .line_number {
