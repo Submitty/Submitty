@@ -32,15 +32,6 @@ function autogradingTotalAwarded($g_id, $student_id, $active_version){
     return $total;
 }
 
-// get the mini-lecutre assignments
-
-function generateLectureExcerices($g_ids){
-  //check if the g_id is in the hash
-
-  // generate the output from the results
-  
-}
-
 // find the syllabus buckets
 $db->query("SELECT DISTINCT g_syllabus_bucket FROM gradeable WHERE g_grade_released_date < now() ORDER BY g_syllabus_bucket ASC", array());
 $buckets = $db->rows();
