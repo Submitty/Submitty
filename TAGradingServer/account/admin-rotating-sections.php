@@ -28,7 +28,7 @@ echo <<<HTML
     }
 </style>
 <div id="container-grading">
-    <form action="{$BASE_URL}/account/submit/admin-rotating-sections.php" method="post" enctype="multipart/form-data">
+    <form action="{$BASE_URL}/account/submit/admin-rotating-sections.php?course={$_GET['course']}&semester={$_GET['semester']}" method="post" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
         <div class="modal-header">
             <h3 id="myModalLabel">Setup Rotating Sections</h3>

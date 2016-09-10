@@ -109,14 +109,9 @@ HTML;
             <li>
                 <a href="{$ta_base_url}/account/admin-csv-report.php?course={$course}&semester={$semester}&this=CSV%20Report">CSV Report</a>
             </li>
-
             <li>
-                <a href="{$ta_base_url}/account/admin-classlist.php?course={$course}&semester={$semester}&this=Upload%20ClassList">[DELETE]UploadClassList</a>
+                <a href="{$ta_base_url}/account/admin-hw-report.php?course={$course}&semester={$semester}&this=Homework%20Report">HWReport</a>
             </li>
-            <li>
-                <a href="{$ta_base_url}/account/admin-hw-report.php?course={$course}&semester={$semester}&this=Homework%20Report">[DELETE]HWReport</a>
-            </li>
-
 
 HTML;
                     if ($this->core->getUser()->isDeveloper()) {

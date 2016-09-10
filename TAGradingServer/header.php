@@ -90,10 +90,18 @@ HTML;
                 &gt; {$title}
 HTML;
     }
-    if(isset($_GET['this'])){
-        print <<<HTML
-                &gt; {$_GET['this']}
+    if(isset($_GET['this'])) {
+        if (is_array($_GET['this'])) {
+            foreach ($_GET['this'] as $that) {
+                print <<<HTML
+                    &gt; {$that}
 HTML;
+            }
+        } else {
+            print <<<HTML
+                    &gt; {$_GET['this']}
+HTML;
+        }
     }
     print <<<HTML
                     </h4>
