@@ -15,20 +15,8 @@ use app\libraries\FileUtils;
  * filename to the cgi script via GET, then saves the results to another tmp file passing back
  * the filename via GET to this page, all using the cURL library.
  */
-class PamAuthentication implements IAuthentication {
-    /** @var Core Core library for running the application */
-    private $core;
-    
-    /**
-     * PamAuthentication constructor.
-     *
-     * @param Core $core
-     */
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
-    public function authenticate($username, $password) {
+class PamAuthentication extends AbstractAuthentication {
+    public function authenticate() {
         if (!FileUtils::createDir("/tmp/pam")) {
             throw new AuthenticationException("Could not create tmp PAM directory.");
         }
@@ -37,7 +25,7 @@ class PamAuthentication implements IAuthentication {
             $file = md5(uniqid(rand(), true));
         } while (file_exists("/tmp/{$file}"));
 
-        $contents = json_encode(array('username' => $username, 'password' => $password));
+        $contents = json_encode(array('username' => $this->user_id, 'password' => $this->password));
         if (file_put_contents("/tmp/{$file}", $contents) === false) {
             throw new AuthenticationException("Could not create tmp user PAM file.");
         }
@@ -67,7 +55,7 @@ class PamAuthentication implements IAuthentication {
             return false;
         }
         
-        $this->core->loadUser($username);
+        $this->core->loadUser($this->user_id);
         return $this->core->userLoaded();
     }
 }

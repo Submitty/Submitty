@@ -13,15 +13,10 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source ${DIR}/../common/common_env.sh
 
-echo "Starting selenium"
-nohup bash -c "xvfb-run java -jar \"${SELENIUM_JAR}\" 2>&1 &"
-sleep 5
+echo "Setting up auto-grader test suite"
 
-wget --retry-connrefused --tries=5 --waitretry=5 --output-file=/dev/null "${SELENIUM_HUB_URL}/wd/hub/status" -O /dev/null
-if [ ! $? -eq 0 ]; then
-    echo "Selenium server not started."
-else
-    echo "Finished setup. Selenium server has started."
-    wget -q -O - "$@" ${SELENIUM_HUB_URL}/wd/hub/status
-    curl "http://localhost:4444/wd/hub/status"
-fi
+mkdir -p ${SUBMITTY_INSTALL_DIR}/test_suite
+mkdir -p ${SUBMITTY_INSTALL_DIR}/test_suite/log
+cp -r tests/. ${SUBMITTY_INSTALL_DIR}/test_suite
+
+sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|${SUBMITTY_INSTALL_DIR}|g" ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/lib.py

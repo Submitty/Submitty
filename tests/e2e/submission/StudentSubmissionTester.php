@@ -6,6 +6,7 @@ use tests\e2e\BaseTestCase;
 
 class StudentSubmissionTester extends BaseTestCase {
     protected $user_id = "student";
+    protected $user_name = "Joe";
     protected $password = "student";
     
     public function testUpload() {
