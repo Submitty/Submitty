@@ -37,6 +37,7 @@ print <<<HTML
 
 <div id="container-students">
     <div class="modal-header">
+        <a style="float: right" class="btn" href="{$BASE_URL}/account/admin-classlist.php?course={$course}&semester={$semester}&this[]=Students&this[]=Upload%20ClassList">Upload Class List</a>
         <h3 id="myModalLabel" style="width:20%; display:inline-block;">Students</h3>
     </div>
 

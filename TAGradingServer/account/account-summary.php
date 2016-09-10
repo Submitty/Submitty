@@ -227,7 +227,7 @@ HTML;
 		</div>
 
 		<div class="modal-footer">
-			<a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Homework</a>
+			<!--<a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Homework</a>-->
 			<a class="btn" href="{$BASE_URL}/account/index.php?g_id={$_GET['g_id']}&course={$_GET['course']}&semester={$_GET['semester']}">Grade Next Student</a>
 		</div>
 	</div>
