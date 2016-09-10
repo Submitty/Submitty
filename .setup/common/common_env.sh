@@ -10,6 +10,11 @@ COMMON_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 SELENIUM_HUB_URL='http://127.0.0.1:4444'
 SELENIUM_JAR=${COMMON_DIR}/selenium-server-standalone.jar
-SELENIUM_DOWNLOAD_URL=http://selenium-release.storage.googleapis.com/3.0-beta1/selenium-server-standalone-3.0.0-beta1.jar
+SELENIUM_VERSION=2.53
+SELENIUM_DOWNLOAD_URL=http://selenium-release.storage.googleapis.com/${SELENIUM_VERSION}/selenium-server-standalone-${SELENIUM_VERSION}.0.jar
+#SELENIUM_DOWNLOAD_URL=http://selenium-release.storage.googleapis.com/3.0-beta2/selenium-server-standalone-3.0.0-beta2.jar
 PHP_VERSION=$(php -v)
 
+SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT_Submitty
+SUBMITTY_INSTALL_DIR=/usr/local/submitty
+SUBMITTY_DATA_DIR=/var/local/submitty
