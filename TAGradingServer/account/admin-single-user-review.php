@@ -527,7 +527,7 @@ HTML;
 			
 		//Construct form.  Note string expansions in HTML: {}
 		self::$view['form'] = <<<HTML
-<form action="admin-single-user-review.php" method="POST" enctype="multipart/form-data">
+<form action="{$BASE_URL}/account/admin-single-user-review.php?course={$_GET['course']}&semester={$_GET['semester']}" method="POST" enctype="multipart/form-data">
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">
 	User ID:<br>
 	<input type="text" id="user_id" name="user_id" value="{$user_data[0]}" style="width:95%;" oninput="{$js['textboxes']}">
