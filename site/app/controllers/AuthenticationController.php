@@ -96,7 +96,10 @@ class AuthenticationController implements IController {
             }
             $this->core->redirect($this->core->buildUrl($redirect));
         }
-        else if ($this->core->authenticate($_POST['user_id'], $_POST['password'])) {
+
+        $this->core->getAuthentication()->setUserId($_POST['user_id']);
+        $this->core->getAuthentication()->setPassword($_POST['password']);
+        if ($this->core->authenticate()) {
             foreach ($_REQUEST as $key => $value) {
                 if (substr($key, 0, 4) == "old_") {
                     $redirect[substr($key, 4)] = $value;

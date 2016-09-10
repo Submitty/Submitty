@@ -69,12 +69,13 @@ def create_course(course, semester, course_group, assignments):
         os.chown(form_file, hwphp[0], course_group_gid)
 
         os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO gradeable VALUES ('{}', "
-                  "'{}', '', false, 0, true, '{}', '{}', 'homework', 1, NULL)\""
+                  "'{}', '{}', '', false, 0, true, '{}', '{}', 'homework', 1, NULL)\""
                   .format(database, form_json['gradeable_id'], form_json['gradeable_title'],
+                          form_json['instructions_url'],
                           form_json['date_grade'], form_json['date_released']))
         os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO electronic_gradeable "
-                  "VALUES ('{}', '{}', '{}', '{}', false, '', true, '{}', 2, {})\""
-                  .format(database, form_json['gradeable_id'], form_json['instructions_url'],
+                  "VALUES ('{}', '{}', '{}', false, '', true, '{}', 2, {})\""
+                  .format(database, form_json['gradeable_id'],
                           form_json['date_submit'], form_json['date_due'],
                           form_json['config_path'], form_json['point_precision']))
         os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO gradeable_component "
