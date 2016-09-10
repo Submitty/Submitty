@@ -688,7 +688,8 @@ HTML;
 HTML;
 
     $valid_assignment_type = array('homework','assignment','quiz','test','reading','participation',
-                                   'exam','lab','recitation','problem-set','project', 'none (for practice only)');
+                                   'exam','lab','recitation', 'lecture-set', 'problem-set','project',
+                                   'none (for practice only)');
     foreach ($valid_assignment_type as $type){
         print <<<HTML
                 <option value="{$type}"
