@@ -10,7 +10,7 @@ class BaseTestCase(unittest2.TestCase):
         if "TEST_URL" in os.environ and os.environ['TEST_URL'] is not None:
             self.test_url = os.environ['TEST_URL']
         else:
-            self.test_url = ""
+            self.test_url = "http://192.168.56.101"
 
     def setUp(self):
         self.driver = webdriver.PhantomJS()
@@ -21,6 +21,8 @@ class BaseTestCase(unittest2.TestCase):
         self.driver.close()
 
     def get(self, url):
+        if url[0] != "/":
+            url = "/" + url
         self.driver.get(self.test_url + url)
 
     def log_in(self):
