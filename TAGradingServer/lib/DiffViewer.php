@@ -64,7 +64,7 @@ class DiffViewer {
      * @param string $expected name of expected in difference file
      * @param string $actual name of actual in difference file
      */
-    public function __construct($expected="instructor", $actual="student") {
+    public function __construct($expected="expected", $actual="actual") {
         $this->expected_name = $expected;
         $this->actual_name = $actual;
     }

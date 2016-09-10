@@ -31,20 +31,22 @@ $i = 0;
 if (isset($testcase['test_name']) && $testcase['test_name'] != "") {
     $iframe .= "<h3>{$testcase['test_name']}</h3>";
 }
-if (isset($testcase['diffs']) && count($testcase['diffs']) > 0) {
-    foreach ($testcase['diffs'] as $diff) {
-        $iframe .= "<div style='height:auto'><h3>{$diff['description']}</h3>";
+if (isset($testcase['autochecks']) && count($testcase['autochecks']) > 0) {
+    foreach ($testcase['autochecks'] as $diff) {
+        if (isset($diff['description'])) {
+            $iframe .= "<div style='height:auto'><h3>{$diff['description']}</h3>";
+        }
         $actual = $expected = $difference = "";
-        if (isset($diff['student_file']) && file_exists($_GET['directory'] . "/" . $diff['student_file'])) {
-            $actual = $_GET['directory'] . "/" . $diff['student_file'];
+        if (isset($diff['actual_file']) && file_exists($_GET['directory'] . "/" . $diff['actual_file'])) {
+            $actual = $_GET['directory'] . "/" . $diff['actual_file'];
         }
 
         if (isset($diff["expected_file"]) && file_exists(implode("/", array(__SUBMISSION_SERVER__, $diff["expected_file"])))) {
             $expected = implode("/", array(__SUBMISSION_SERVER__, $diff["expected_file"]));
         }
 
-        if (isset($diff['difference']) && file_exists($_GET['directory'] . "/" . $diff['difference'])) {
-            $difference = $_GET['directory'] . "/" . $diff['difference'];
+        if (isset($diff['difference_file']) && file_exists($_GET['directory'] . "/" . $diff['difference_file'])) {
+            $difference = $_GET['directory'] . "/" . $diff['difference_file'];
         }
 
         if ($difference != "") {
