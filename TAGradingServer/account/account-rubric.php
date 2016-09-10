@@ -115,7 +115,7 @@ if ($calculate_diff) {
     function autoResize(id) {
         var newheight;
         if(document.getElementById) {
-            newheight=document.getElementById(id).contentWindow.document.body.scrollHeight;
+            newheight = document.getElementById(id).contentWindow.document.body.scrollHeight;
         }
 
         if (newheight < 10) {
@@ -354,15 +354,6 @@ HTML;
                             <div style="width:95%; margin: auto auto auto auto; overflow-y:auto; overflow-x:hidden; padding-top:20px;">                                                                                               
                                 <iframe src="{$url}" id='iframe-{$i}' width='750px' style='border: 0' onload="autoResize('iframe-{$i}'); load_tab_icon('tab-{$i}', 'iframe-{$i}', {$testcase['points_awarded']}, {$eg->config_details['testcases'][$k]['points']}); ">
                                 </iframe>
-                                <br />
-                                Logfile
-                                <textarea id="code{$source_number}">
-HTML;
-            //$output .= htmlentities(file_get_contents($results_details['directory']."/".$testcase['execute_logfile']));
-            $output .= <<<HTML
-                                </textarea>
-HTML;
-            $output .= <<<HTML
                             </div>
                         </div>
 HTML;
