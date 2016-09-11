@@ -41,6 +41,19 @@ foreach ($buckets as $bucket){
     array_push($categories, ucwords($bucket['g_syllabus_bucket']));
 }
 
+
+// FIXME: more elegantly extract default student late days value from config.ini
+$config_ini_file = "/var/local/submitty/courses/" + $_GET['semester'] + "/" + $_GET['course']) +"/config/config.ini";
+$config_ini_file_contents = file_get_contents( $config_ini_filename );
+$default_allowed_lates = 0;
+$default_allowed_lates_position = strpos( $config_ini_file_contents, "default_student_late_days=" );
+if ($default_allowed_lates_position) {
+  $default_allowed_lates = substr($config_ini_file_contents, $default_allowed_lates_position+strlen("default_student_late_days="));
+}
+
+
+
+
 $db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
 foreach($db->rows() as $student_record) {
         
@@ -65,6 +78,8 @@ foreach($db->rows() as $student_record) {
 
 
     // adds late days for electronic gradeables 
+    // FIXME: this query assumes only 1 row of the table.
+    //    we really want the value from the row with the most recent timestamp
     $db->query("
         SELECT 
             allowed_late_days
@@ -74,6 +89,8 @@ foreach($db->rows() as $student_record) {
     $row = $db->row();
     $late_days_allowed = isset($row['allowed_late_days']) ? $row['allowed_late_days'] : 0;
 
+
+    $student_output_json["default_allowed_late_days"] = $default_allowed_late_days;
     $student_output_json["allowed_late_days"] = $late_days_allowed;
 
     $student_output_json["last_update"] = date("l, F j, Y");
