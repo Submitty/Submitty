@@ -11,6 +11,9 @@ class BaseTestCase(unittest2.TestCase):
             self.test_url = os.environ['TEST_URL']
         else:
             self.test_url = "http://192.168.56.101"
+        self.user_id = "student"
+        self.user_name = "Joe"
+        self.user_password = "student"
 
     def setUp(self):
         self.driver = webdriver.PhantomJS()
