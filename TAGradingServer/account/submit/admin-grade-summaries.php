@@ -43,12 +43,13 @@ foreach ($buckets as $bucket){
 
 
 // FIXME: more elegantly extract default student late days value from config.ini
-$config_ini_file = "/var/local/submitty/courses/" + $_GET['semester'] + "/" + $_GET['course']) +"/config/config.ini";
-$config_ini_file_contents = file_get_contents( $config_ini_filename );
+// FIXME: sanitize GET variables
+$config_ini_file = "/var/local/submitty/courses/" . $_GET['semester'] . "/" . $_GET['course'] . "/config/config.ini";
+$config_ini_file_contents = file_get_contents( $config_ini_file );
 $default_allowed_lates = 0;
 $default_allowed_lates_position = strpos( $config_ini_file_contents, "default_student_late_days=" );
 if ($default_allowed_lates_position) {
-  $default_allowed_lates = substr($config_ini_file_contents, $default_allowed_lates_position+strlen("default_student_late_days="));
+  $default_allowed_lates = substr($config_ini_file_contents, $default_allowed_lates_position+strlen("default_student_late_days="),1);
 }
 
 
@@ -90,7 +91,7 @@ foreach($db->rows() as $student_record) {
     $late_days_allowed = isset($row['allowed_late_days']) ? $row['allowed_late_days'] : 0;
 
 
-    $student_output_json["default_allowed_late_days"] = $default_allowed_late_days;
+    $student_output_json["default_allowed_late_days"] = $default_allowed_lates;
     $student_output_json["allowed_late_days"] = $late_days_allowed;
 
     $student_output_json["last_update"] = date("l, F j, Y");
