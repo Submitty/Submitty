@@ -40,7 +40,7 @@ if(isset($_GET["g_id"]) && isset($rubric["g_id"])) {
     $g_title = $rubric['g_title'];
     $rubric_late_days = $rubric['eg_late_days'];
     $grade_by_reg_section = $rubric['g_grade_by_registration'];
-    $section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
+    $section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
     $user_section_param = ($grade_by_reg_section ? 'registration_section': 'rotating_section');
     $grading_section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
     $section_title = ($grade_by_reg_section ? 'Registration': 'Rotating');
