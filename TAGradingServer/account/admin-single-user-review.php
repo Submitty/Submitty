@@ -524,7 +524,7 @@ HTML;
 		
 		//Determine if 'manual_flag' checkbox should be checked by default
 		$is_checked = ($user_data[7]) ? " checked" : "";
-			
+		$BASE_URL = rtrim(__BASE_URL__, "/");	
 		//Construct form.  Note string expansions in HTML: {}
 		self::$view['form'] = <<<HTML
 <form action="{$BASE_URL}/account/admin-single-user-review.php?course={$_GET['course']}&semester={$_GET['semester']}" method="POST" enctype="multipart/form-data">
