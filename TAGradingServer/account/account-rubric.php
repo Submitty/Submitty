@@ -403,10 +403,8 @@ HTML;
 </div>
 </span><!---->
 
-<span id="stats" class="resbox" style="display: {$display_stats}; z-index: 200;" onmousedown="changeStackingOrder(event); dragPanelStart(event, 'stats'); return false;" 
-      onmousemove="dragPanel(event, 'stats');"  onmouseup="dragPanelEnd(event);">
-    <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event, 'stats'); return false;" 
-         onmousemove="dragPanel(event, 'stats');"  onmouseup="dragPanelEnd(event);">
+<span id="stats" class="resbox draggable" style="display: {$display_stats}; z-index: 200;">
+    <div class="" style="background-color: #99cccc; height:20px; cursor: move;" >
     <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyS')" ></span>
     </div>
     <div id="inner-container" style="margin:5px;">
@@ -489,8 +487,8 @@ $output .= <<<HTML
     </div>
 </span>
 
-<span id="rubric" class="resbox" style="display: {$display_rubric}; z-index: 199; overflow-y=hidden;" onmousedown="changeStackingOrder(event); dragPanelStart(event, 'rubric');" onmousemove="dragPanel(event, 'rubric');" onmouseup="dragPanelEnd(event);">
-    <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;"  >
+<span id="rubric" class="resbox draggable" style="display: {$display_rubric}; z-index: 199; overflow-y=hidden;">
+    <div class="" style="background-color: #99cccc; height:20px; cursor: move;"  >
         <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyG')" ></span>
     </div>
     <div class="inner-container" style="overflow-y:auto; margin:1px; height:100%">

@@ -64,6 +64,10 @@ HTML;
         <tr class="colspan"><td colspan="4">{$title}</td></tr>
 HTML;
             foreach ($gradeable_list as $gradeable => $g_data) {
+                $date = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
+                if($g_data->getTAViewDate()->format('Y-m-d H:i:s') > $date->format('Y-m-d H:i:s') && !$this->core->getUser()->accessAdmin()){
+                    continue;
+                }
                 /** @var Gradeable $g_data */
                 $time = ($title=="GRADED") ? "": " @ H:i";
                 $gradeable_grade_range = ($title=='GRADED' || $title=='ITEMS BEING GRADED') ?

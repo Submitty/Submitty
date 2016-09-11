@@ -70,6 +70,9 @@ def create_course(course, semester, course_group, assignments):
         form_json["date_released"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp2.year, tmp2.month,
                                                                       tmp2.day)
 
+        form_json["ta_view_date"] = "{:d}-{:d}-{:d} 23:59:59".format(date.today().year, date.today().month,
+                                                                     date.today().day)
+
         form_file = "{}/courses/{}/{}/config/form/form_{}.json".format(SUBMITTY_DATA_DIR, semester,
                                                                        course, assignment)
         with open(form_file, "w") as form_write:
@@ -77,10 +80,10 @@ def create_course(course, semester, course_group, assignments):
         os.chown(form_file, HWPHP[0], course_group_gid)
 
         os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO gradeable VALUES ('{}', "
-                  "'{}', '{}', '', false, 0, true, '{}', '{}', 'homework', 1, NULL)\""
+                  "'{}', '{}', '', false, 0, true, '{}', '{}', 'homework', 1, NULL, '{}')\""
                   .format(database, form_json['gradeable_id'], form_json['gradeable_title'],
                           form_json['instructions_url'],
-                          form_json['date_grade'], form_json['date_released']))
+                          form_json['date_grade'], form_json['date_released'], form_json['ta_view_date']))
 
         os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO electronic_gradeable "
                   "VALUES ('{}', '{}', '{}', false, '', true, '{}', 2, {})\""

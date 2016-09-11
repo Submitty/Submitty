@@ -22,8 +22,6 @@ $rubric_top = isset($_COOKIE["rubric_top"]) ? floatval($_COOKIE["rubric_top"]) :
 $rubric_width = isset($_COOKIE["rubric_width"]) ? floatval($_COOKIE["rubric_width"]) : 0;
 $rubric_height = isset($_COOKIE["rubric_height"]) ? floatval($_COOKIE["rubric_height"]) : 0;
 
-$grade_left = isset($_COOKIE["grade_left"]) ? floatval($_COOKIE["grade_left"]) : 0; // position of toolbar should also be remembered. Not implemented yet
-$grade_top = isset($_COOKIE["grade_top"]) ? floatval($_COOKIE["grade_top"]) : 0;
 $rubric_late_days = 0;
 
 print <<<HTML
@@ -396,15 +394,14 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
     }
 
     ?>
-<span id="grade" class="resbox draggable" style="padding:5px;" onmousedown="dragPanelStart(event, 'grade'); return false;" onmousemove="dragPanel(event, 'grade');"  onmouseup="dragPanelEnd(event);">
+<span id="grade" class="resbox" style="padding:5px;">
     <i title="Show/Hide Submission Info (Press S)" <?php echo "class='icon-status".(($show_stats == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyS')"></i>
     <i title="Show/Hide Grading Panel (Press G)" <?php echo "class='icon-grading-panel".(($show_rubric == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyG')"></i>
     <i title="Show/Hide Auto Grading Results (Press A)" <?php echo "class='icon-auto-grading-results".(($show_left == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyA');"></i>
     <i title="Show/Hide Files Viewer (Press F)" <?php echo "class='icon-files".(($show_right == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyF')"></i>
-    <a <?php echo ($previous_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&prev={$previous_user_id}\""); ?> ><i title="Go to the previous student (Press Left Arrow)" class="icon-left <?php echo ($previous_user_id == "" ? 'icon-disabled"' : '"'); ?> ></i></a>
-    <a href="<?php echo $BASE_URL; ?>/account/account-summary.php?course=<?php echo $_GET['course']; ?>&semester=<?php echo $_GET['semester']; ?>&g_id=<?php echo $_GET["g_id"]; ?>"><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
-    <a <?php echo ($next_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&next={$next_user_id}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($next_user_id == "" ? 'icon-disabled"' : '"'); ?>></i></a>
-    <i title="Pin Toolbar" class="icon-toolbar-up" ></i>
+    <a <?php echo ($previous_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&prev={$previous_user_id}\""); ?> ><i title="Go to the previous student (Press Left Arrow)" class="icon-left <?php echo ($previous_user_id == "" ? 'icon-disabled' : ''); ?>" ></i></a>
+    <a <?php echo ("href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}\""); ?> ><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
+    <a <?php echo ($next_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&next={$next_user_id}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($next_user_id == "" ? 'icon-disabled' : ''); ?>" ></i></a>
     <div style="width:100%; height: 15px; bottome:0;">
         <?php if($position_other == 0) { ?>
             <div class="progress" id="prog" style="border:#AAA solid 2px; ">
@@ -431,8 +428,6 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
 
 <?php } ?>
 <script type="text/javascript">
-    var mousedown = false;
-    var dragging_panel = false;
 
     $("#rubric-autoscroll-checkbox").change(function() {
         if($("#rubric-autoscroll-checkbox").is(':checked')) {
@@ -498,11 +493,9 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
     window.onload = updateDisplay();
 
     window.onresize = function(event) {
-        document.getElementById('grade').style.left = parseFloat(window.innerWidth * document.getElementById('grade').offsetLeft/(width + 7)) + 'px';
         document.getElementById('rubric').style.left = parseFloat(window.innerWidth * document.getElementById('rubric').offsetLeft/(width + 7)) + 'px';
         document.getElementById('stats').style.left = parseFloat(window.innerWidth * document.getElementById('stats').offsetLeft/(width + 7)) + 'px';
 
-        document.getElementById('grade').style.top = parseFloat(window.innerHeight * document.getElementById('grade').offsetTop/height) + 'px';
         document.getElementById('rubric').style.top = parseFloat(window.innerHeight * document.getElementById('rubric').offsetTop/height) + 'px';
         document.getElementById('stats').style.top = parseFloat(window.innerHeight * document.getElementById('stats').offsetTop/height) + 'px';
 
@@ -558,8 +551,6 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
                 setCookie("rubric_height", 0, -180*24*60*60);
                 setCookie("rubric_left", 0, -180*24*60*60);
                 setCookie("rubric_top", 0, -180*24*60*60);
-                setCookie("grade_left", 0, -180*24*60*60);
-                setCookie("grade_top", 0, -180*24*60*60);
                 break;
             default:
                 break;
@@ -651,38 +642,9 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
 
     // ========================================================
     // Drag to move toolbar/grading/status panel around
-    function dragPanelStart(e, id) {
-        if (e.target.tagName == "TEXTAREA" || e.target.tagName == "INPUT" || e.target.tagName == "SELECT") return; // disable dragging when editing textarea/input
-        if (hasClass(e.target, "ui-resizable-handle")) return; // disable dragging when resizing panel
-        dragging_panel = true;
-        mouse_x = e.clientX;
-        mouse_y = e.clientY;
-        drag_id = id;
-    }
-    function dragPanel(e, id) {
-        if(!dragging_panel) return;
-        if(id != drag_id) return;
-
-        var element = document.getElementById(id);
-        element.style.left = (element.offsetLeft - (mouse_x - e.clientX)) + 'px';
-        element.style.top = (element.offsetTop - (mouse_y - e.clientY)) + 'px';
-        mouse_x = e.clientX;
-        mouse_y = e.clientY;
-        savePosition(id);
-        /*
-        // TODO: Add check for dragging off sight or add a function to reset panel positions somewhere?
-        if((grade.offsetRight - grade.offsetWidth) < 5) {
-            grade.style.right = '5px';
-        }
-        if((grade.offsetBottom - grade.offsetHeight) < 5) {
-            grade.style.bottom = '5px';
-        }
-        */
-    }
-
-    function dragPanelEnd(e) {
-        dragging_panel = false;
-    }
+    $(function (){
+        $(".draggable").draggable();
+    });
 
     // checks if an element has a class using javascript, may or may not be useful
     function hasClass(element, cls) {
