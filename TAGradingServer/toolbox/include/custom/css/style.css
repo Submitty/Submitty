@@ -73,7 +73,7 @@ span#right.resbox {
 
 .progress {
     display: inline-block;
-    width: 100%;
+    width: 97%;
     margin: auto;
     position:absolute;
     bottom: 0;
@@ -134,7 +134,7 @@ ul.dropdown-menu li#logout a:hover {
     top: 60px;
     right: 10px;
     height: 60px;
-    width: 258px;
+    width: 250px;
     background: #C3BEFF;
     opacity:0.5;
     z-index: 201;

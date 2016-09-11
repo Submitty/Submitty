@@ -428,8 +428,6 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
 
 <?php } ?>
 <script type="text/javascript">
-    var mousedown = false;
-    var dragging_panel = false;
 
     $("#rubric-autoscroll-checkbox").change(function() {
         if($("#rubric-autoscroll-checkbox").is(':checked')) {
@@ -495,11 +493,9 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
     window.onload = updateDisplay();
 
     window.onresize = function(event) {
-        document.getElementById('grade').style.left = parseFloat(window.innerWidth * document.getElementById('grade').offsetLeft/(width + 7)) + 'px';
         document.getElementById('rubric').style.left = parseFloat(window.innerWidth * document.getElementById('rubric').offsetLeft/(width + 7)) + 'px';
         document.getElementById('stats').style.left = parseFloat(window.innerWidth * document.getElementById('stats').offsetLeft/(width + 7)) + 'px';
 
-        document.getElementById('grade').style.top = parseFloat(window.innerHeight * document.getElementById('grade').offsetTop/height) + 'px';
         document.getElementById('rubric').style.top = parseFloat(window.innerHeight * document.getElementById('rubric').offsetTop/height) + 'px';
         document.getElementById('stats').style.top = parseFloat(window.innerHeight * document.getElementById('stats').offsetTop/height) + 'px';
 
