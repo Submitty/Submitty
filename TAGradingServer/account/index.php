@@ -400,7 +400,7 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
     <i title="Show/Hide Auto Grading Results (Press A)" <?php echo "class='icon-auto-grading-results".(($show_left == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyA');"></i>
     <i title="Show/Hide Files Viewer (Press F)" <?php echo "class='icon-files".(($show_right == 0) ? "' ": " icon-selected'") ;?> onclick="handleKeyPress('KeyF')"></i>
     <a <?php echo ($previous_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&prev={$previous_user_id}\""); ?> ><i title="Go to the previous student (Press Left Arrow)" class="icon-left <?php echo ($previous_user_id == "" ? 'icon-disabled' : ''); ?>" ></i></a>
-    <a <?php echo ("href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}\""); ?> ><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
+    <a <?php echo ("href=\"{$BASE_URL}/account/account-summary.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}\""); ?> ><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
     <a <?php echo ($next_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&next={$next_user_id}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($next_user_id == "" ? 'icon-disabled' : ''); ?>" ></i></a>
     <div style="width:100%; height: 15px; bottome:0;">
         <?php if($position_other == 0) { ?>
