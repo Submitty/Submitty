@@ -121,8 +121,10 @@ foreach($db->rows() as $student_record) {
     foreach($db->rows() as $gradeable){
         $this_g = array();
         $autograding_score = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);
-        $this_g[$gradeable['g_id']] = array("name" => $gradeable['g_title'], "score" => (floatval($gradeable['score'])+floatval($autograding_score)));
-       
+        $this_g["id"] = $gradeable['g_id'];
+        $this_g["name"] =  $gradeable['g_title'];
+        $this_g["score"] = (floatval($gradeable['score'])+floatval($autograding_score));
+
         // adds late days for electronic gradeables 
         if($gradeable['g_gradeable_type'] == 0){
             $db->query("
@@ -134,7 +136,7 @@ foreach($db->rows() as $student_record) {
             $row = $db->row();
             $late_days_used = isset($row['late_days_used']) ? $row['late_days_used'] : 0;
             if ($late_days_used > 0){
-                $this_g[$gradeable['g_id']]["days_late"] = $late_days_used;
+                $this_g["days_late"] = $late_days_used;
             }
         }
 
@@ -151,7 +153,7 @@ foreach($db->rows() as $student_record) {
             }
 
             if(count($text_items) > 0){
-                $this_g[$gradeable['g_id']]["text"] = $text_items;
+                $this_g["text"] = $text_items;
             }
         }
         
@@ -169,7 +171,7 @@ foreach($db->rows() as $student_record) {
                 }
             }
 
-            $this_g[$gradeable['g_id']]["component_scores"] = $component_scores;
+            $this_g["component_scores"] = $component_scores;
         }
         
         
