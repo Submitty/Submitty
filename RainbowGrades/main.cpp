@@ -897,8 +897,16 @@ void load_student_grades(std::vector<Student*> &students) {
 		  }
 		  s->setSection(a);
 		} else if (token == "default_allowed_late_days") {
-                  std::string value = j[token].get<std::string>();
-                  s->setDefaultAllowedLateDays(std::stoi(value));
+                  int value = 0;
+                  if (!j[token].is_null()) {
+                    if (j[token].is_string()) {
+                      std::string s_value = j[token].get<std::string>();
+                      value = std::stoi(s_value);
+                    } else {
+                      value = j[token].get<int>();
+                    }
+                  }
+                  s->setDefaultAllowedLateDays(value);
 		} else if (token == "allowed_late_days") {
                   int value = j[token].get<int>();
                   s->setCurrentAllowedLateDays(value);
