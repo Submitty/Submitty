@@ -41,26 +41,16 @@ foreach ($buckets as $bucket){
     array_push($categories, ucwords($bucket['g_syllabus_bucket']));
 }
 
+$default_allowed_lates = __DEFAULT_LATE_DAYS_STUDENT__;
 
-// FIXME: more elegantly extract default student late days value from config.ini
-// FIXME: sanitize GET variables
-$config_ini_file = "/var/local/submitty/courses/" . $_GET['semester'] . "/" . $_GET['course'] . "/config/config.ini";
-$config_ini_file_contents = file_get_contents( $config_ini_file );
-$default_allowed_lates = 0;
-$default_allowed_lates_position = strpos( $config_ini_file_contents, "default_student_late_days=" );
-if ($default_allowed_lates_position) {
-  $default_allowed_lates = substr($config_ini_file_contents, $default_allowed_lates_position+strlen("default_student_late_days="),1);
-}
-
-
-
-
-$db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
+$db->query("SELECT * FROM users ORDER BY user_id ASC", array());
+//$db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
 foreach($db->rows() as $student_record) {
         
     // Gather student info, set output filename, reset output
     $student_id = $student_record["user_id"];
-    $student_first_name = $student_record["user_firstname"];
+    $student_legal_first_name = $student_record["user_firstname"];
+    $student_preferred_first_name = $student_record["user_preferred_firstname"];
     $student_last_name = $student_record["user_lastname"];
 
     // create/reset student json
@@ -73,20 +63,20 @@ foreach($db->rows() as $student_record) {
 
 	// CREATE HEADER FOR JSON
     $student_output_json["user_id"] = $student_id;
-    $student_output_json["first_name"] = $student_first_name;
+    $student_output_json["legal_first_name"] = $student_legal_first_name;
+    $student_output_json["preferred_first_name"] = $student_preferred_first_name;
     $student_output_json["last_name"] = $student_last_name;
     $student_output_json["registration_section"] = intval($student_section);
 
 
-    // adds late days for electronic gradeables 
-    // FIXME: this query assumes only 1 row of the table.
-    //    we really want the value from the row with the most recent timestamp
+    // adds late days for electronic gradeables
     $db->query("
         SELECT 
             allowed_late_days
         FROM 
             late_days 
-        WHERE user_id=?", array($student_id));
+        WHERE user_id=?
+        ORDER BY since_timestamp DESC", array($student_id));
     $row = $db->row();
     $late_days_allowed = isset($row['allowed_late_days']) ? $row['allowed_late_days'] : 0;
 
