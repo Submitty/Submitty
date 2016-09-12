@@ -53,7 +53,8 @@ TableCell::TableCell(const std::string& c, float d, int precision, const std::st
 
 std::ostream& operator<<(std::ostream &ostr, const TableCell &c) {
   
-  ostr << "<td bgcolor=\"" << c.color << "\" align=\"" << c.align << "\">";
+  //  ostr << "<td bgcolor=\"" << c.color << "\" align=\"" << c.align << "\">";
+  ostr << "<td style=\"border:1px solid #aaaaaa; background-color:#" << c.color << ";\" align=\"" << c.align << "\">";
   if (0) { //rotate == 90) {
     ostr << "<div style=\"position:relative\"><p class=\"rotate\">";
   }
@@ -130,7 +131,8 @@ void Table::output(std::ostream& ostr,
   ostr << "&nbsp;<br>\n";
 
 
-  ostr << "<table border=0 cellpadding=3 cellspacing=2 style=\"background-color:#aaaaaa\">\n";
+  ostr << "<table style=\"border:1px solid #aaaaaa; background-color:#aaaaaa;\">\n";
+  //  ostr << "<table border=0 cellpadding=3 cellspacing=2 style=\"background-color:#aaaaaa\">\n";
   
   if (transpose) {
     for (std::vector<int>::iterator c = which_data.begin(); c != which_data.end(); c++) {

@@ -693,8 +693,11 @@ HTML;
             <select name="gradeable_buckets" style="width: 170px;">
 HTML;
 
-    $valid_assignment_type = array('homework','assignment','quiz','test','reading','participation',
-                                   'exam','lab','recitation', 'lecture-exercise', 'problem-set','project',
+    $valid_assignment_type = array('homework','assignment','problem-set',
+                                   'quiz','test','exam',
+                                   'exercise','lecture-exercise','reading','lab','recitation', 
+                                   'project',                                   
+                                   'participation','note'
                                    'none (for practice only)');
     foreach ($valid_assignment_type as $type){
         print <<<HTML

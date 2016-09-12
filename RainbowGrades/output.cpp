@@ -279,7 +279,8 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
 
 #if 1
 
-  ostr << "<table border=1 cellpadding=5 cellspacing=0 style=\"background-color:#ddffdd\">\n";
+  ostr << "<table style=\"border:1px solid yellowgreen; background-color:#ddffdd;\">\n";
+  //  ostr << "<table border=\"1\" cellpadding=5 cellspacing=0 style=\"border:1px solid yellowgreen; background-color:#ddffdd;\">\n";
   ostr << "<tr><td>\n";
   ostr << "<table border=0 cellpadding=5 cellspacing=0>\n";
   ostr << "  <tr><td colspan=2>" << GLOBAL_EXAM_TITLE << "</td></tr>\n";
@@ -935,7 +936,8 @@ void end_table(std::ofstream &ostr,  bool for_instructor, Student *s) {
 
 
 
-  ostr << "<table border=2 cellpadding=5 cellspacing=0>\n";
+  ostr << "<table style=\"border:1px solid yellowgreen; background-color:#ddffdd;\">\n";
+  //  ostr << "<table border=2 cellpadding=5 cellspacing=0>\n";
   ostr << "<tr>\n";
   ostr << "<td width=150>FINAL GRADE</td>";
   ostr << "<td align=center bgcolor="<<GradeColor("A")<<" width=40>A</td><td align=center bgcolor="<<GradeColor("A-")<<" width=40>A-</td>";
