@@ -258,16 +258,31 @@ void gradeable_helper(std::ifstream& istr, GRADEABLE_ENUM g) {
 
 
 bool string_to_gradeable_enum(const std::string &s, GRADEABLE_ENUM &return_value) {
-  if (s == "reading")               { return_value = GRADEABLE_ENUM::READING;        return true;  }
-  if (s == "exercise")              { return_value = GRADEABLE_ENUM::EXERCISE;       return true;  }
-  if (s == "lab" || s == "Lab")     { return_value = GRADEABLE_ENUM::LAB;            return true;  }
-  if (s == "participation")         { return_value = GRADEABLE_ENUM::PARTICIPATION;  return true;  }
-  if (s == "hw" || s == "homework") { return_value = GRADEABLE_ENUM::HOMEWORK;       return true;  }
-  if (s == "project")               { return_value = GRADEABLE_ENUM::PROJECT;        return true;  }
-  if (s == "quiz" || s == "quizze") { return_value = GRADEABLE_ENUM::QUIZ;           return true;  }
-  if (s == "test")                  { return_value = GRADEABLE_ENUM::TEST;           return true;  }
-  if (s == "exam")                  { return_value = GRADEABLE_ENUM::EXAM;           return true;  }
-  if (s == "instructor_note")       { return_value = GRADEABLE_ENUM::NOTE;           return true;  }
+  if (s == "hw" || s == "homework") { return_value = GRADEABLE_ENUM::HOMEWORK;          return true;  }
+  if (s == "assignment")            { return_value = GRADEABLE_ENUM::ASSIGNMENT;        return true;  }
+  if (s == "problem_set")           { return_value = GRADEABLE_ENUM::PROBLEM_SET;       return true;  }
+
+  if (s == "quiz" || s == "quizze") { return_value = GRADEABLE_ENUM::QUIZ;              return true;  }
+  if (s == "test")                  { return_value = GRADEABLE_ENUM::TEST;              return true;  }
+  if (s == "exam")                  { return_value = GRADEABLE_ENUM::EXAM;              return true;  }
+
+  if (s == "exercise")              { return_value = GRADEABLE_ENUM::EXERCISE;          return true;  }
+  if (s == "Lecture-exercise" ||
+      s == "lecture_exercise" ||
+      s == "lec_ex")      { return_value = GRADEABLE_ENUM::LECTURE_EXERCISE;  return true;  }
+  if (s == "reading")               { return_value = GRADEABLE_ENUM::READING;           return true;  }
+  if (s == "lab" || s == "Lab")     { return_value = GRADEABLE_ENUM::LAB;               return true;  }
+
+  if (s == "recitation")            { return_value = GRADEABLE_ENUM::RECITATION;        return true;  }
+  if (s == "project")               { return_value = GRADEABLE_ENUM::PROJECT;           return true;  }
+  if (s == "participation")         { return_value = GRADEABLE_ENUM::PARTICIPATION;     return true;  }
+
+
+  if (s == "instructor_note")       { return_value = GRADEABLE_ENUM::NOTE;              return true;  }
+  if (s == "note")                  { return_value = GRADEABLE_ENUM::NOTE;              return true;  }
+
+  if (s == "None" || s == "none" || 
+      s == "None (for Practice Only)")  { return_value = GRADEABLE_ENUM::NOTE;              return true;  }
   return false;
 }
 
@@ -752,15 +767,20 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
         std::stringstream ss(gradesline);
 
 
-        if (g == GRADEABLE_ENUM::HOMEWORK ||
-            g == GRADEABLE_ENUM::LAB ||
-            g == GRADEABLE_ENUM::READING ||
-            g == GRADEABLE_ENUM::QUIZ ||
-            g == GRADEABLE_ENUM::EXAM ||
-            g == GRADEABLE_ENUM::PARTICIPATION ||
-            g == GRADEABLE_ENUM::PROJECT ||
-            g == GRADEABLE_ENUM::TEST ||
-            g == GRADEABLE_ENUM::NOTE) {
+        if (g == GRADEABLE_ENUM::HOMEWORK ||  
+            g == GRADEABLE_ENUM::ASSIGNMENT ||      
+            g == GRADEABLE_ENUM::PROBLEM_SET ||     
+            g == GRADEABLE_ENUM::QUIZ ||            
+            g == GRADEABLE_ENUM::TEST ||            
+            g == GRADEABLE_ENUM::EXAM ||            
+            g == GRADEABLE_ENUM::EXERCISE ||        
+            g == GRADEABLE_ENUM::LECTURE_EXERCISE ||
+            g == GRADEABLE_ENUM::READING ||         
+            g == GRADEABLE_ENUM::LAB ||             
+            g == GRADEABLE_ENUM::RECITATION ||      
+            g == GRADEABLE_ENUM::PROJECT ||         
+            g == GRADEABLE_ENUM::PARTICIPATION) {
+
           ss >> which_token;
           
           assert (!GRADEABLES[g].hasCorrespondence(which_token));
@@ -853,7 +873,7 @@ void load_student_grades(std::vector<Student*> &students) {
 	  // std::cout << "token: " << token << "!" << std::endl;
 	  GRADEABLE_ENUM g;
 	  bool gradeable_enum_success = string_to_gradeable_enum(token,g);
-      if (!gradeable_enum_success && token != "Other" && token != "rubric" && token != "Test") {
+          if (!gradeable_enum_success && token != "Other" && token != "rubric" && token != "Test") {
 		// non grableables
 		if (token == "user_id") {
 			s->setUserName(j[token].get<std::string>());
@@ -877,8 +897,16 @@ void load_student_grades(std::vector<Student*> &students) {
 		  }
 		  s->setSection(a);
 		} else if (token == "default_allowed_late_days") {
-                  std::string value = j[token].get<std::string>();
-                  s->setDefaultAllowedLateDays(std::stoi(value));
+                  int value = 0;
+                  if (!j[token].is_null()) {
+                    if (j[token].is_string()) {
+                      std::string s_value = j[token].get<std::string>();
+                      value = std::stoi(s_value);
+                    } else {
+                      value = j[token].get<int>();
+                    }
+                  }
+                  s->setDefaultAllowedLateDays(value);
 		} else if (token == "allowed_late_days") {
                   int value = j[token].get<int>();
                   s->setCurrentAllowedLateDays(value);
