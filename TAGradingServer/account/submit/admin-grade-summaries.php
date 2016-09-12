@@ -55,12 +55,14 @@ if ($default_allowed_lates_position) {
 
 
 
-$db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
+$db->query("SELECT * FROM users ORDER BY user_id ASC", array());
+//$db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
 foreach($db->rows() as $student_record) {
         
     // Gather student info, set output filename, reset output
     $student_id = $student_record["user_id"];
-    $student_first_name = $student_record["user_firstname"];
+    $student_legal_first_name = $student_record["user_firstname"];
+    $student_preferred_first_name = $student_record["user_preferred_firstname"];
     $student_last_name = $student_record["user_lastname"];
 
     // create/reset student json
@@ -73,7 +75,8 @@ foreach($db->rows() as $student_record) {
 
 	// CREATE HEADER FOR JSON
     $student_output_json["user_id"] = $student_id;
-    $student_output_json["first_name"] = $student_first_name;
+    $student_output_json["legal_first_name"] = $student_legal_first_name;
+    $student_output_json["preferred_first_name"] = $student_preferred_first_name;
     $student_output_json["last_name"] = $student_last_name;
     $student_output_json["registration_section"] = intval($student_section);
 
