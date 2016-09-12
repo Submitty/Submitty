@@ -4,6 +4,7 @@
 #include "table.h"
 #include "constants_and_globals.h"
 
+bool GLOBAL_instructor_output = false;
 
 bool global_details = false;
 
@@ -59,7 +60,12 @@ std::ostream& operator<<(std::ostream &ostr, const TableCell &c) {
   ostr << "<font size=-1>";
   
 
-  if ((c.data == "" && c.note=="") || c.visible==CELL_CONTENTS_HIDDEN) {
+  if ((c.data == "" && c.note=="") 
+      || c.visible==CELL_CONTENTS_HIDDEN
+      || (c.visible==CELL_CONTENTS_VISIBLE_INSTRUCTOR && GLOBAL_instructor_output == false) 
+      || (c.visible==CELL_CONTENTS_VISIBLE_STUDENT    && GLOBAL_instructor_output == true)) {
+
+
     ostr << "<div></div>";
   } else {
     ostr << c.data; 

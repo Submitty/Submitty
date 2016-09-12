@@ -49,8 +49,8 @@ public:
 
   // personal data
   const std::string& getUserName()      const { return username; }
-  const std::string& getFirstName()     const { return first; }
-  const std::string& getPreferredName() const { if (preferred != "") return preferred; return first; }
+  const std::string& getFirstName()     const { return legal_first; }
+  const std::string& getPreferredName() const { if (preferred_first != "") return preferred_first; return legal_first; }
   const std::string& getLastName()      const { return last; }
   const std::string& getLastUpdate()    const { return lastUpdate; }
 
@@ -66,6 +66,11 @@ public:
   int getAllowedLateDays(int which_lecture) const;
   int getUsedLateDays() const;
   float getMossPenalty() const { return moss_penalty; }
+
+  void setCurrentAllowedLateDays(int d) { current_allowed_late_days = d; }
+  void setDefaultAllowedLateDays(int d) { default_allowed_late_days = d; }
+
+  int getDefaultAllowedLateDays() const { return default_allowed_late_days; }
 
   void add_bonus_late_day(int which_lecture) { bonus_late_days_which_lecture.push_back(which_lecture); }
 
@@ -90,8 +95,8 @@ public:
 
   // personal data
   void setUserName(const std::string &s)      { username=s; }
-  void setFirstName(const std::string &s)     { first=s; }
-  void setPreferredName(const std::string &s) { preferred=s; }
+  void setLegalFirstName(const std::string &s)     { legal_first=s; }
+  void setPreferredFirstName(const std::string &s) { preferred_first=s; }
   void setLastName(const std::string &s)      { last=s; }
 
   void setLastUpdate(const std::string &s)    { lastUpdate = s; }
@@ -157,11 +162,14 @@ private:
 
   // personal data
   std::string username;
-  std::string first;
-  std::string preferred;
+  std::string legal_first;
+  std::string preferred_first;
   std::string last;
 
   std::string lastUpdate;
+
+  int current_allowed_late_days;
+  int default_allowed_late_days;
 
     // registration status
   int section;
