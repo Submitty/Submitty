@@ -122,8 +122,6 @@ foreach($db->rows() as $student_record) {
                 ) AS gd_sum ON gd.gd_id=gd_sum.gd_id
                 INNER JOIN electronic_gradeable AS eg ON gd.g_id=eg.g_id
             ) AS total ON total.g_id = g.g_id AND total.gd_user_id=u.user_id
-        WHERE 
-            g_grade_released_date < now()
         ORDER BY g_syllabus_bucket ASC, g_grade_released_date ASC, u.user_id ASC
         ) AS user_grades
     WHERE user_id=?
