@@ -1,6 +1,8 @@
 <?php
 include "../../toolbox/functions.php";
 
+use \models\User;
+
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
     die("invalid csrf token");
 }
@@ -36,7 +38,7 @@ $row = $db->row();
 if (empty($row)){
    // GRADEABLE DATA DOES NOT EXIST 
    //TODO FILL IN THE CORRECT STATUS?
-   $params = array($g_id, $user_id, $user_id, '', 0,0,1); 
+   $params = array($g_id, $user_id, User::$user_id, '', 0,0,1);
    $db->query("INSERT INTO gradeable_data (g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status, gd_late_days_used, gd_active_version)
                 VALUES(?,?,?,?,?,?,?)", $params);
    $gd_id = \lib\Database::getLastInsertId('gradeable_data_gd_id_seq');
