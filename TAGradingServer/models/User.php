@@ -10,10 +10,7 @@ use lib\ExceptionHandler;
  * @package app\models
  */
 class User {
-    
-    /**
-     * @var int
-     */
+
     public static $user_id = -1;
     
     /**

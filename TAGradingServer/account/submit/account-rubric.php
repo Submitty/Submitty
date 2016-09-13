@@ -56,8 +56,18 @@ foreach($rows AS $row){
 
 //update the gradeable data
 $overall_comment = $_POST['comment-general'];
-$params = array($overall_comment, $gd_id);
-$db->query("UPDATE gradeable_data SET gd_overall_comment=? WHERE gd_id=?",$params);
+$assignment_settings = __SUBMISSION_SERVER__."/submissions/".$gradeable['g_id']."/".$student."/user_assignment_settings.json";
+if (!file_exists($assignment_settings)) {
+    $active_version = -1;
+}
+else{
+    $assignment_settings_contents = file_get_contents($assignment_settings);
+    $results = json_decode($assignment_settings_contents, true);
+    $active_version = $results['active_version'];
+}
+
+$params = array(\models\User::$user_id, $active_version, $overall_comment, $status, intval($_POST['late']), $gd_id);
+$db->query("UPDATE gradeable_data SET gd_grader_id=?, gd_active_version=?, gd_overall_comment=?, gd_status=?, gd_late_days_used=? WHERE gd_id=?",$params);
 
 //update the number of late days for the student the first time grades are submitted
 if ($status == 1 && !$is_graded){
