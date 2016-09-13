@@ -67,6 +67,7 @@ install:
   - pip install selenium
   - pip install nose2
   - pip install unittest2
+  - pip install pylint_runner
 
 before_script:
   - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
@@ -96,6 +97,12 @@ script:
   - vendor/bin/phpunit --configuration tests/phpunit.xml
   - python /usr/local/submitty/test_suite/integrationTests/run.py
   - TEST_URL="http://localhost" nose2 --start-dir="tests/e2e"
+
+# Add more linters to the build process here
+after_script:
+  # Eventually this should be moved into the "script" once we've gotten the build to a point where all contained
+  # python files will actually pass (which a lot right now will not)
+  - pylint_runner ${TRAVIS_BUILD_DIR}
 
 notifications:
   email: false
