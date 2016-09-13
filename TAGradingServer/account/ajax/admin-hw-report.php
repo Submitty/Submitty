@@ -2,9 +2,6 @@
 
 include "../../toolbox/functions.php";
 
-use lib\Database;
-use app\models;
-
 check_administrator();
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {

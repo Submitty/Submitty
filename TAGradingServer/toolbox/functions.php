@@ -19,12 +19,12 @@ use \lib\Database;
 use \lib\ExceptionHandler;
 use \lib\IniParser;
 use \lib\Logger;
-use \app\models\User;
+use \models\User;
 
 // get our sweet autoloader!
 include __DIR__ . "/../lib/AutoLoader.php";
 AutoLoader::registerDirectory(__DIR__."/../lib", true, "lib");
-AutoLoader::registerDirectory(__DIR__."/../app", true, "app");
+AutoLoader::registerDirectory(__DIR__."/../models", true, "models");
 
 $start_time = microtime_float();
 

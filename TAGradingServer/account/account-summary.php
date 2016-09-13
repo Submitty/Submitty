@@ -1,7 +1,7 @@
 <?php
-use app\models\User;
+use \models\User;
 
-use \app\models\ElectronicGradeable;
+use \models\ElectronicGradeable;
 
 	include "../header.php";
 

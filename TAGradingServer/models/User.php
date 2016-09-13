@@ -1,6 +1,6 @@
 <?php
 
-namespace app\models;
+namespace models;
 
 use \lib\Database;
 use lib\ExceptionHandler;
