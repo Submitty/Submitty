@@ -59,8 +59,6 @@ $overall_comment = $_POST['comment-general'];
 $params = array($overall_comment, $gd_id);
 $db->query("UPDATE gradeable_data SET gd_overall_comment=? WHERE gd_id=?",$params);
 
-var_dump($_POST);
-
 //update the number of late days for the student the first time grades are submitted
 if ($status == 1 && !$is_graded){
     $db->query("INSERT INTO late_days_used (user_id, g_id, late_days_used) VALUES (?,?,?)", array($student, $g_id, intval($_POST['late'])));
