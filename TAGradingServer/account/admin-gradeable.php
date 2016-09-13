@@ -697,7 +697,7 @@ HTML;
                                    'quiz','test','exam',
                                    'exercise','lecture-exercise','reading','lab','recitation', 
                                    'project',                                   
-                                   'participation','note'
+                                   'participation','note',
                                    'none (for practice only)');
     foreach ($valid_assignment_type as $type){
         print <<<HTML
