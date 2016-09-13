@@ -1,5 +1,5 @@
 # =============================================================================
-# This is the helper Makefile 
+# This is the helper Makefile
 
 # Don't directly use this Makefile, it should be included from the
 # per-course Makefile with these variables set:
@@ -22,24 +22,24 @@ endif
 
 # =============================================================================
 
-.PHONY: default pull push all compile overall section lab hw test quiz final iclicker zone clean 
+.PHONY: default pull push all compile overall section lab hw test quiz final iclicker zone clean
 
 default: overall
 
 pull:
 	mkdir -p raw_data/
-	scp ${USERNAME}@${HWSERVER}:${REPORTS_DIRECTORY}/all_grades/\* raw_data/
+	rsync -azP ${USERNAME}@${HWSERVER}:${REPORTS_DIRECTORY}/all_grades/ raw_data/
 
 
 push:
-	scp individual_summary_html/* ${USERNAME}@${HWSERVER}:${REPORTS_DIRECTORY}/summary_html
+	rsync -azP individual_summary_html/ ${USERNAME}@${HWSERVER}:${REPORTS_DIRECTORY}/summary_html/
 
 
 flags = -g
 
 UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)  
-     flags = -g -std=c++11 
+ifeq ($(UNAME_S),Darwin)
+     flags = -g -std=c++11
 endif
 
 ifeq ($(UNAME_S),Linux)
