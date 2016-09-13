@@ -51,7 +51,7 @@ endif
 
 
 compile:
-	g++ -Wall ${flags} \
+	g++ -m32 -Wall ${flags} \
 		${RAINBOW_GRADES_DIRECTORY}/main.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/output.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/table.cpp \
@@ -76,8 +76,8 @@ overall: compile
 	./process_grades.out by_overall
 
 memory_debug: compile
-#	drmemory -- ./process_grades.out by_overall
-	valgrind ./process_grades.out by_overall
+	drmemory -- ./process_grades.out by_overall
+        #	valgrind ./process_grades.out by_overall
 
 iclicker: compile
 	./process_grades.out by_iclicker

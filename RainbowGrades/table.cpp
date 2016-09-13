@@ -4,6 +4,7 @@
 #include "table.h"
 #include "constants_and_globals.h"
 
+bool GLOBAL_instructor_output = false;
 
 bool global_details = false;
 
@@ -52,14 +53,20 @@ TableCell::TableCell(const std::string& c, float d, int precision, const std::st
 
 std::ostream& operator<<(std::ostream &ostr, const TableCell &c) {
   
-  ostr << "<td bgcolor=\"" << c.color << "\" align=\"" << c.align << "\">";
+  //  ostr << "<td bgcolor=\"" << c.color << "\" align=\"" << c.align << "\">";
+  ostr << "<td style=\"border:1px solid #aaaaaa; background-color:#" << c.color << ";\" align=\"" << c.align << "\">";
   if (0) { //rotate == 90) {
     ostr << "<div style=\"position:relative\"><p class=\"rotate\">";
   }
   ostr << "<font size=-1>";
   
 
-  if ((c.data == "" && c.note=="") || c.visible==CELL_CONTENTS_HIDDEN) {
+  if ((c.data == "" && c.note=="") 
+      || c.visible==CELL_CONTENTS_HIDDEN
+      || (c.visible==CELL_CONTENTS_VISIBLE_INSTRUCTOR && GLOBAL_instructor_output == false) 
+      || (c.visible==CELL_CONTENTS_VISIBLE_STUDENT    && GLOBAL_instructor_output == true)) {
+
+
     ostr << "<div></div>";
   } else {
     ostr << c.data; 
@@ -124,7 +131,8 @@ void Table::output(std::ostream& ostr,
   ostr << "&nbsp;<br>\n";
 
 
-  ostr << "<table border=0 cellpadding=3 cellspacing=2 style=\"background-color:#aaaaaa\">\n";
+  ostr << "<table style=\"border:1px solid #aaaaaa; background-color:#aaaaaa;\">\n";
+  //  ostr << "<table border=0 cellpadding=3 cellspacing=2 style=\"background-color:#aaaaaa\">\n";
   
   if (transpose) {
     for (std::vector<int>::iterator c = which_data.begin(); c != which_data.end(); c++) {

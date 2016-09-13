@@ -32,6 +32,18 @@ function autogradingTotalAwarded($g_id, $student_id, $active_version){
     return $total;
 }
 
+
+function getActiveVersion($g_id, $student_id) {
+    $settings_file = __SUBMISSION_SERVER__."/submissions/".$g_id."/".$student_id."/user_assignment_settings.json";
+    if (file_exists($settings_file)) {
+        $settings_file_contents = file_get_contents($settings_file);
+        $settings = json_decode($settings_file_contents, true);
+        return $settings['active_version'];
+    }
+    return 0;
+}
+
+
 // find the syllabus buckets
 $db->query("SELECT DISTINCT g_syllabus_bucket FROM gradeable WHERE g_grade_released_date < now() ORDER BY g_syllabus_bucket ASC", array());
 $buckets = $db->rows();
@@ -41,12 +53,16 @@ foreach ($buckets as $bucket){
     array_push($categories, ucwords($bucket['g_syllabus_bucket']));
 }
 
-$db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
+$default_allowed_lates = __DEFAULT_LATE_DAYS_STUDENT__;
+
+$db->query("SELECT * FROM users ORDER BY user_id ASC", array());
+//$db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
 foreach($db->rows() as $student_record) {
         
     // Gather student info, set output filename, reset output
     $student_id = $student_record["user_id"];
-    $student_first_name = $student_record["user_firstname"];
+    $student_legal_first_name = $student_record["user_firstname"];
+    $student_preferred_first_name = $student_record["user_preferred_firstname"];
     $student_last_name = $student_record["user_lastname"];
 
     // create/reset student json
@@ -59,9 +75,27 @@ foreach($db->rows() as $student_record) {
 
 	// CREATE HEADER FOR JSON
     $student_output_json["user_id"] = $student_id;
-    $student_output_json["first_name"] = $student_first_name;
+    $student_output_json["legal_first_name"] = $student_legal_first_name;
+    $student_output_json["preferred_first_name"] = $student_preferred_first_name;
     $student_output_json["last_name"] = $student_last_name;
     $student_output_json["registration_section"] = intval($student_section);
+
+
+    // adds late days for electronic gradeables
+    $db->query("
+        SELECT 
+            allowed_late_days
+        FROM 
+            late_days 
+        WHERE user_id=?
+        ORDER BY since_timestamp DESC", array($student_id));
+    $row = $db->row();
+    $late_days_allowed = isset($row['allowed_late_days']) ? $row['allowed_late_days'] : 0;
+
+
+    $student_output_json["default_allowed_late_days"] = $default_allowed_lates;
+    $student_output_json["allowed_late_days"] = $late_days_allowed;
+
     $student_output_json["last_update"] = date("l, F j, Y");
     
     // ADD each bucket to the output
@@ -120,9 +154,21 @@ foreach($db->rows() as $student_record) {
 	
     foreach($db->rows() as $gradeable){
         $this_g = array();
-        $autograding_score = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);
-        $this_g[$gradeable['g_id']] = array("name" => $gradeable['g_title'], "score" => (floatval($gradeable['score'])+floatval($autograding_score)));
-       
+
+	//
+	// FIXME:  Should use value in the database, for electronic gradeables with TA grading
+	//  ...  but that value is broken
+	//  ...  also, that value does not exist for non ta graded electronic gradeables
+	//  currently, a student can change the active version after the deadline and get full credit for a late submission
+	//
+	$active_version = getActiveVersion($gradeable['g_id'], $student_id);
+	//$autograding_score = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);
+	$autograding_score = autogradingTotalAwarded($gradeable['g_id'], $student_id, $active_version);
+
+        $this_g["id"] = $gradeable['g_id'];
+        $this_g["name"] =  $gradeable['g_title'];
+        $this_g["score"] = (floatval($gradeable['score'])+floatval($autograding_score));
+
         // adds late days for electronic gradeables 
         if($gradeable['g_gradeable_type'] == 0){
             $db->query("
@@ -134,7 +180,7 @@ foreach($db->rows() as $student_record) {
             $row = $db->row();
             $late_days_used = isset($row['late_days_used']) ? $row['late_days_used'] : 0;
             if ($late_days_used > 0){
-                $this_g[$gradeable['g_id']]["days_late"] = $late_days_used;
+                $this_g["days_late"] = $late_days_used;
             }
         }
 
@@ -151,7 +197,7 @@ foreach($db->rows() as $student_record) {
             }
 
             if(count($text_items) > 0){
-                $this_g[$gradeable['g_id']]["text"] = $text_items;
+                $this_g["text"] = $text_items;
             }
         }
         
@@ -169,7 +215,7 @@ foreach($db->rows() as $student_record) {
                 }
             }
 
-            $this_g[$gradeable['g_id']]["component_scores"] = $component_scores;
+            $this_g["component_scores"] = $component_scores;
         }
         
         
