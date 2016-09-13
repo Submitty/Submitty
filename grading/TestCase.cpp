@@ -10,7 +10,8 @@
 // FIXME should be configurable within the homework, but should not exceed what is reasonable to myers diff
 
 //#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 50   // in characters  (approx 1000 lines with 50 characters per line)
-#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 60   // in characters  (approx 1000 lines with 60 characters per line)
+//#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 60   // in characters  (approx 1000 lines with 60 characters per line)
+#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 80   // in characters  (approx 1000 lines with 60 characters per line)
 #define OTHER_MAX_FILE_SIZE      1000 * 100  // in characters  (approx 1000 lines with 100 characters per line)
 
 

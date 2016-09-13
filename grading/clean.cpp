@@ -56,6 +56,32 @@ vectorOfWords stringToWords(std::string text) {
 	return contents;
 }
 
+std::string LimitLineLength(std::string word) {
+  if (word.length() < 30) { return word; }
+  for (int i = 0; i < word.size(); i++) {
+    if (word[i] != '-') { return word; }
+  }
+  return std::string(30,'-');
+}
+
+
+vectorOfWords stringToWordsLimitLineLength(std::string text) {
+	vectorOfWords contents;
+	std::stringstream input(text);
+	
+	std::string word;
+	while (getline(input, word)) {
+		std::vector<std::string> text;
+		std::stringstream line;
+		line << word;
+		while (line >> word) {
+   		  text.push_back(LimitLineLength(word));
+		}
+		contents.push_back(text);
+	}
+	return contents;
+}
+
 /* METHOD: stringToLines
  * ARGS: text: the body of text that needs cleaning
  * RETURN: vectorOfLines: a vector of strings 

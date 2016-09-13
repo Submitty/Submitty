@@ -37,6 +37,8 @@ void clean(std::string & content);
  */
 vectorOfWords stringToWords(std::string text);
 
+vectorOfWords stringToWordsLimitLineLength(std::string text);
+
 /* METHOD: stringToLines
  * ARGS: text: the body of text that needs cleaning
  * RETURN: vectorOfLines: a vector of strings 

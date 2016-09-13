@@ -131,8 +131,8 @@ TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::js
   if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
-  vectorOfWords text_a = stringToWords( student_file_contents );
-  vectorOfWords text_b = stringToWords( expected_file_contents );
+  vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
+  vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
   Difference* diff = ses( &text_a, &text_b, false );
   diff->type = ByLineByWord;
   return diff;
