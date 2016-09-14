@@ -2,9 +2,6 @@
 
 include "../../toolbox/functions.php";
 
-use lib\Database;
-use app\models;
-
 check_administrator();
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
@@ -190,6 +187,8 @@ foreach($db->rows() as $student_record) {
             $question_total = 0; 
 
             $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$gradeable['gd_active_version']."/results_grade.txt";
+            $auto_grading_max_score = 0;
+            $auto_grading_awarded = 0;
             if (!file_exists($submit_file)) {
                 $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
             }
@@ -227,9 +226,6 @@ foreach($db->rows() as $student_record) {
                 }
                 if ($grade_question_comment != "") {
                     $student_output_text .= $nl."   TA NOTE: " . $grade_question_comment . $nl;
-                }
-                else if ($question_default != "" && isset($question_default) && $question_total == $grade_question_score) {
-                    $student_output_text .= $nl."   TA NOTE: " . $question_default . $nl;
                 }
                 $student_output_text .= $nl;
                 // Keep track of students grade and rubric total

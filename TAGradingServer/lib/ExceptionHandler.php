@@ -46,7 +46,22 @@ class ExceptionHandler {
     public static function throwException($class, $exception, $extra = array()) {
         $exceptionName = get_class($exception);
         $message = "{$class} threw {$exceptionName}\n";
-        $message .= "Message:\n{$exception->getMessage()}\nStrack Trace:\n{$exception->getTraceAsString()}\n";
+        $trace_string = array();
+        foreach ($exception->getTrace() as $elem => $frame) {
+            if (is_a($exception, '\app\exceptions\AuthenticationException') && $frame['function'] == "authenticate") {
+                if (isset($frame['args'][1])) {
+                    $frame['args'][1] = "****";
+                }
+            }
+            $trace_string[] = sprintf( "#%s %s(%s): %s",
+                $elem,
+                isset($frame['file']) ? $frame['file'] : 'unknown file',
+                isset($frame['line']) ? $frame['line'] : 'unknown line',
+                (isset($frame['class']))  ? $frame['class'].$frame['type'].$frame['function'] : $frame['function']);
+        }
+        $trace_string = implode("\n", $trace_string);
+
+        $message .= "Message:\n{$exception->getMessage()}\nStrack Trace:\n{$trace_string}\n";
         if (count($extra) > 0) {
             $message .= "Extra Details:\n";
             foreach ($extra as $key => $value) {
