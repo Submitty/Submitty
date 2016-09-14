@@ -192,15 +192,12 @@ foreach($db->rows() as $student_record) {
             $question_grading_notes = pgArrayToPhp($gradeable['grading_notes']);
             $question_max_scores = pgArrayToPhp($gradeable['max_scores']);
             $question_total = 0; 
+            
+            // THIS IS TEMPORARY, UNTIL THE PROPER VALUE IS STORED IN THE DATABASE
+            $active_version = getActiveVersionFromFile($gradeable['g_id'],$student_id);
 
-
-
-	    // THIS IS TEMPORARY, UNTIL THE PROPER VALUE IS STORED IN THE DATABASE
-	    $active_version = getActiveVersionFromFile($gradeable['g_id'],$student_id);
-
-	    //$submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$gradeable['gd_active_version']."/results_grade.txt";
+	        //$submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$gradeable['gd_active_version']."/results_grade.txt";
             $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$active_version."/results_grade.txt";
-
 
             $auto_grading_max_score = 0;
             $auto_grading_awarded = 0;
@@ -217,7 +214,7 @@ foreach($db->rows() as $student_record) {
                 $student_output_text .= $nl.$nl.$gradefilecontents.$nl;
             } 
 
-            for ($i=0; $i < count($grading_notes); ++$i){
+            for ($i=0; $i < count($grading_notes); $i++){
                 $grading_note = $grading_notes[$i];
                 $question_total = floatval($question_totals[$i]);
                 $question_max_score = floatval($question_max_scores[$i]);
