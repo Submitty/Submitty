@@ -364,7 +364,7 @@ rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/*php         ${SUBMITTY_INSTA
 rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/toolbox      ${SUBMITTY_INSTALL_DIR}/hwgrading_website
 rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/lib          ${SUBMITTY_INSTALL_DIR}/hwgrading_website
 rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/account      ${SUBMITTY_INSTALL_DIR}/hwgrading_website
-rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/app          ${SUBMITTY_INSTALL_DIR}/hwgrading_website
+rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/models          ${SUBMITTY_INSTALL_DIR}/hwgrading_website
 
 # set special user $HWPHP_USER as owner & group of all hwgrading_website files
 find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;

@@ -290,8 +290,6 @@ SQL;
 INSERT INTO temp VALUES (?,?,?);
 SQL;
 	}
-    
-    print_r($data);
 
 	//LOCK will prevent sharing collisions while upsert is in process.
 	$sql['lock'] = <<<SQL

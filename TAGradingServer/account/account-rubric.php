@@ -6,7 +6,7 @@
     $g_id
 */
 
-use \app\models\ElectronicGradeable;
+use \models\ElectronicGradeable;
 
 $eg = new ElectronicGradeable($s_user_id, $g_id);
 

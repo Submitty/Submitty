@@ -1,13 +1,12 @@
 <?php
 
-namespace app\models;
+namespace models;
 
 use \lib\Database;
 use \lib\ExceptionHandler;
 use \lib\FileUtils;
 use \lib\ServerException;
 use \lib\Utils;
-use \app\models\User;
 
 /**
  * Class ElectronicGradeable
