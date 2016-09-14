@@ -22,6 +22,8 @@
 
 #include "constants_and_globals.h"
 
+extern std::string OUTPUT_FILE;
+extern std::string ALL_STUDENTS_OUTPUT_DIRECTORY;
 
 // ==========================================================
 
@@ -277,7 +279,8 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
 
 #if 1
 
-  ostr << "<table border=1 cellpadding=5 cellspacing=0 style=\"background-color:#ddffdd\">\n";
+  ostr << "<table style=\"border:1px solid yellowgreen; background-color:#ddffdd;\">\n";
+  //  ostr << "<table border=\"1\" cellpadding=5 cellspacing=0 style=\"border:1px solid yellowgreen; background-color:#ddffdd;\">\n";
   ostr << "<tr><td>\n";
   ostr << "<table border=0 cellpadding=5 cellspacing=0>\n";
   ostr << "  <tr><td colspan=2>" << GLOBAL_EXAM_TITLE << "</td></tr>\n";
@@ -336,13 +339,13 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
 // ====================================================================================================
 // ====================================================================================================
 
-void end_table(std::ofstream &ostr,  bool for_instructor, const std::vector<Student*> &students, int rank);
+void end_table(std::ofstream &ostr,  bool for_instructor, Student *s);
 
-void start_table_open_file(std::ofstream &ostr, std::string &filename, bool for_instructor,
+void start_table_open_file(bool for_instructor,
                  const std::vector<Student*> &students, int rank, int month, int day, int year,
                  enum GRADEABLE_ENUM which_gradeable_enum) {
 
-
+  /*
   ostr.exceptions ( std::ofstream::failbit | std::ofstream::badbit );
   try {
     ostr.open(filename.c_str());
@@ -352,10 +355,10 @@ void start_table_open_file(std::ofstream &ostr, std::string &filename, bool for_
     std::cerr << "Exception opening/reading file";
     exit(0);
   }
-
+  */
 }
 
-void start_table_output(std::ofstream &ostr, std::string &filename, bool for_instructor,
+void start_table_output( bool for_instructor,
                  const std::vector<Student*> &students, int rank, int month, int day, int year,
                         enum GRADEABLE_ENUM g,
                         Student *sp, Student *sa, Student *sb, Student *sc, Student *sd) {
@@ -686,7 +689,7 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
         } else {
           assert (answer.second == ICLICKER_NOANSWER);
         }
-        table.set(myrow,counter++,TableCell(color,thing,"",0,CELL_CONTENTS_HIDDEN,"center"));
+        table.set(myrow,counter++,TableCell(color,thing,"",0,CELL_CONTENTS_VISIBLE_INSTRUCTOR,"center"));
       }
       table.set(myrow,counter++,TableCell(grey_divider));
     }
@@ -702,10 +705,31 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
     all_students.push_back(i);
   }
 
-  std::ofstream ostr2("all.html");
+  std::cout << "WRITE ALL.html" << std::endl;
+  std::ofstream ostr2(OUTPUT_FILE);
+
+  GLOBAL_instructor_output = true;
   table.output(ostr2, all_students,instructor_data);
 
-  end_table(ostr2,true,students,-1);
+  end_table(ostr2,true,NULL);
+  ostr2.close();
+  
+  /*
+  // get todays date;
+  time_t now = time(0);  
+  struct tm * now2 = localtime( & now );
+  int month = now2->tm_mon+1;
+  int day = now2->tm_mday;
+  int year = now2->tm_year+1900;
+  */
+
+  std::stringstream ss;
+  ss << ALL_STUDENTS_OUTPUT_DIRECTORY << "output_" << month << "_" << day << "_" << year << ".html";
+   
+  std::string command = "cp -f output.html " + ss.str();
+  std::cout << "RUN COMMAND " << command << std::endl;
+  system(command.c_str());
+  
 
   for (std::map<int,std::string>::iterator itr = student_correspondences.begin();
        itr != student_correspondences.end(); itr++) {
@@ -720,9 +744,10 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
     if (s != NULL) {
       last_update = s->getLastUpdate();
     }
+    GLOBAL_instructor_output = false;
     table.output(ostr3, select_students,student_data,true,true,last_update);
 
-    end_table(ostr3,false,students,-1);
+    end_table(ostr3,false,s);
   }
 
   Student* s = NULL;
@@ -733,17 +758,17 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
 
 
 
-  ostr << "<br>&nbsp;<br>\n";
+  //ostr << "<br>&nbsp;<br>\n";
 
 
   // -------------------------------------------------------------------------------
   // BEGIN THE TABLE
-  ostr << "<table border=2 cellpadding=5 cellspacing=0>\n";
+  //ostr << "<table border=2 cellpadding=5 cellspacing=0>\n";
 
   // open the title row
-  ostr << "<tr>";
+  //ostr << "<tr>";
 
-
+  /*
   // -------------------------------------------------------------------------------
   // RANK & SECTION
   if (for_instructor) {
@@ -806,6 +831,8 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
     }
   }
 
+
+
   // -------------------------------------------------------------------------------  
   // GRADE DETAILS
   if (DISPLAY_GRADE_DETAILS) {
@@ -845,21 +872,47 @@ void start_table_output(std::ofstream &ostr, std::string &filename, bool for_ins
              << "<td align=center colspan=" << ICLICKER_QUESTION_NAMES.size() << ">ICLICKER QUESTIONS<br>CORRECT(green)=1.0, INCORRECT(red)=0.5, POLL(yellow)=1.0, NO ANSWER(white)=0.0<br>25.0 iClicker points = 3rd late day, 50.0 iClicker pts = 4th late day, 75.0 iClicker pts = 5th late day<br>&ge;8.0/12.0 most recent=Priority Help Queue (iClicker status highlighted in blue)</td>";
     }
   }
-  
+
   // -------------------------------------------------------------------------------  
   ostr << "</td></tr>\n";    
+  */  
 }
 
 
 
 
-void end_table(std::ofstream &ostr,  bool for_instructor, const std::vector<Student*> &students, int rank) {
+void end_table(std::ofstream &ostr,  bool for_instructor, Student *s) {
+
+
+  if (GLOBAL_instructor_output == false &&
+      DISPLAY_ICLICKER) {
+
+    ostr << "<p><b>IClicker Legend:</b><br> &nbsp;&nbsp; CORRECT(green)=1.0 <br> &nbsp;&nbsp; INCORRECT(red)=0.5 <br>&nbsp;&nbsp; POLL(yellow)=1.0 <br> &nbsp;&nbsp; NO ANSWER(white)=0.0<br>" << std::endl;
+    if (s != NULL) {
+      ostr << "<b>Initial number of allowed late days: </b>" << s->getDefaultAllowedLateDays() <<  "<br>" << std::endl;
+    }
+    ostr << "<b>Extra late days earned after iclicker points:</b> ";
+    for (int i = 0; i < GLOBAL_earned_late_days.size(); i++) {
+      ostr << GLOBAL_earned_late_days[i];
+      if (i < GLOBAL_earned_late_days.size()-1) {
+        ostr << ", ";
+      }
+    }
+    ostr << "<br>" << std::endl;
+    ostr << "</p>" << std::endl;
+
+
+    //ostr << GLOBAL_earned_late
+
+    //25.0 iClicker points = 3rd late day, 50.0 iClicker pts = 4th late day, 75.0 iClicker pts = 5th late day<br>&ge;8.0/12.0 most recent=Priority Help Queue (iClicker status highlighted in blue)</td>";
+  }
 
   ostr << "<p>&nbsp;<p>\n";
 
 
+
   bool print_moss_message = false;
-  if (rank != -1 && students[rank]->getMossPenalty() < -0.01) {
+  if (s != NULL && s->getMossPenalty() < -0.01) {
     print_moss_message = true;
   }
 
@@ -867,7 +920,7 @@ void end_table(std::ofstream &ostr,  bool for_instructor, const std::vector<Stud
     ostr << "@ = final grade with Academic Integrity Violation penalty<p>&nbsp;<p>\n";
   }
 
-  if (DISPLAY_FINAL_GRADE && students.size() > 50) {
+  if (DISPLAY_FINAL_GRADE) { // && students.size() > 50) {
 
   int total_A = grade_counts[Grade("A")] + grade_counts[Grade("A-")];
   int total_B = grade_counts[Grade("B+")] + grade_counts[Grade("B")] + grade_counts[Grade("B-")]; 
@@ -883,7 +936,8 @@ void end_table(std::ofstream &ostr,  bool for_instructor, const std::vector<Stud
 
 
 
-  ostr << "<table border=2 cellpadding=5 cellspacing=0>\n";
+  ostr << "<table style=\"border:1px solid yellowgreen; background-color:#ddffdd;\">\n";
+  //  ostr << "<table border=2 cellpadding=5 cellspacing=0>\n";
   ostr << "<tr>\n";
   ostr << "<td width=150>FINAL GRADE</td>";
   ostr << "<td align=center bgcolor="<<GradeColor("A")<<" width=40>A</td><td align=center bgcolor="<<GradeColor("A-")<<" width=40>A-</td>";

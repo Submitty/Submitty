@@ -6,7 +6,7 @@
     $g_id
 */
 
-use \app\models\ElectronicGradeable;
+use \models\ElectronicGradeable;
 
 $eg = new ElectronicGradeable($s_user_id, $g_id);
 
@@ -403,10 +403,8 @@ HTML;
 </div>
 </span><!---->
 
-<span id="stats" class="resbox" style="display: {$display_stats}; z-index: 200;" onmousedown="changeStackingOrder(event); dragPanelStart(event, 'stats'); return false;" 
-      onmousemove="dragPanel(event, 'stats');"  onmouseup="dragPanelEnd(event);">
-    <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event, 'stats'); return false;" 
-         onmousemove="dragPanel(event, 'stats');"  onmouseup="dragPanelEnd(event);">
+<span id="stats" class="resbox draggable" style="display: {$display_stats}; z-index: 200;">
+    <div class="" style="background-color: #99cccc; height:20px; cursor: move;" >
     <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyS')" ></span>
     </div>
     <div id="inner-container" style="margin:5px;">
@@ -489,8 +487,8 @@ $output .= <<<HTML
     </div>
 </span>
 
-<span id="rubric" class="resbox" style="display: {$display_rubric}; z-index: 199; overflow-y=hidden;" onmousedown="changeStackingOrder(event); dragPanelStart(event, 'rubric');" onmousemove="dragPanel(event, 'rubric');" onmouseup="dragPanelEnd(event);">
-    <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;"  >
+<span id="rubric" class="resbox draggable" style="display: {$display_rubric}; z-index: 199; overflow-y=hidden;">
+    <div class="" style="background-color: #99cccc; height:20px; cursor: move;"  >
         <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyG')" ></span>
     </div>
     <div class="inner-container" style="overflow-y:auto; margin:1px; height:100%">
@@ -558,7 +556,7 @@ HTML;
         $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
     }
     $output .= <<<HTML
-                            <td style="font-size: 12px" colspan="2">
+                            <td style="font-size: 12px" colspan="4">
                                 <b>{$message}</b> {$note}
 HTML;
 
@@ -580,12 +578,12 @@ HTML;
     
     $output .= <<<HTML
     <tr style="background-color: #f9f9f9;">
-                            <td style="white-space:nowrap; vertical-align:middle; text-align:center;"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}"
+                            <td style="white-space:nowrap; vertical-align:middle; text-align:center;" colspan="1"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}"
                                 min="{$min_val}" max="{$max_val}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  {$precision}); calculatePercentageTotal();" 
                                 style="width:50px; resize:none;" {$disabled}></textarea><strong> / {$question['gc_max_value']}</strong></td>
-                            <td style="width:100%; padding:0px">
+                            <td style="width:98%;" colspan="3">
                                 <div id="rubric-{$c}">
-                                    <textarea name="comment-{$question["gc_order"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:100%; height:100%; resize:none; margin:0px 0px; border-radius:0px; border:none; padding:5px; float:left; margin-right:-25px;" 
+                                    <textarea name="comment-{$question["gc_order"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; resize:none; float:left;" 
                                         placeholder="Message for the student..." comment-position="0" {$disabled}>{$question['gcd_component_comment']}</textarea>
 HTML;
 
@@ -653,8 +651,8 @@ HTML;
 if(isset($_GET["individual"])) {
     $output .= <<<HTML
                         <tr>
-                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;"><strong>TOTAL</strong></td>
-                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;"><strong id="score_total">0 / {$eg->eg_details['eg_total']} &emsp;&emsp;&emsp;
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong>TOTAL</strong></td>
+                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="3"><strong id="score_total">0 / {$eg->eg_details['eg_total']} &emsp;&emsp;&emsp;
                             AUTO-GRADING {$eg->autograding_points} / {$eg->autograding_max}</strong></td>
                         </tr>
 HTML;
@@ -662,10 +660,8 @@ HTML;
 else {
     $output .= <<<HTML
                         <tr>
-                            <td style="background-color: #EEE; border-top: 1px solid #CCC;"></td>
-                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"></td>
-                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"><strong>TOTAL</strong></td>
-                            <td style="background-color: #EEE; border-top: 1px solid #CCC;"><strong id="score_total">0 / {$eg->eg_details['eg_total']}&emsp;&emsp;&emsp;
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;" colspan="1"><strong>TOTAL</strong></td>
+                            <td style="background-color: #EEE; border-top: 1px solid #CCC;" colspan="1"><strong id="score_total">0 / {$eg->eg_details['eg_total']}&emsp;&emsp;&emsp;
                             AUTO-GRADING {$eg->autograding_points} / {$eg->autograding_max}</strong></td>
                         </tr>
 HTML;
@@ -675,7 +671,7 @@ $output .= <<<HTML
                     </tbody>
                 </table>
                 <div style="width:100%;"><b>General Comment:</b></div>
-                <textarea name="comment-general" rows="5" style="width:98%; padding:5px; resize:none;" 
+                <textarea name="comment-general" rows="5" style="width:98%; resize:none;" 
                           placeholder="Overall message for student about the gradeable...">{$eg->eg_details['gd_overall_comment']}</textarea>
 HTML;
 if (isset($eg->eg_details['user_email'])) {

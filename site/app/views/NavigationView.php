@@ -29,11 +29,12 @@ HTML;
         if ($this->core->getUser()->accessAdmin()) {
             $return .= <<<HTML
         <button class="btn btn-primary" onclick="window.location.href='{$ta_base_url}/account/admin-gradeable.php?course={$course}&semester={$semester}&this=New%20Gradeable'">New Gradeable</button>
-        <!-- <button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course={$course}&semester={$semester}&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button> -->
+        <!--<button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course={$course}&semester={$semester}&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button> -->
 HTML;
         }
         $return .= <<<HTML
-        <!--<button class="btn btn-primary">View Grades</button>-->
+        <button class="btn btn-primary" onclick="window.location.href='{$this->core->buildUrl(array('component' => 'student',
+                                                                                                    'page' => 'rainbow'))}'">View Grades</button>
     </div>
     <table class="gradeable_list" style="width:100%;">
 
@@ -64,6 +65,10 @@ HTML;
         <tr class="colspan"><td colspan="4">{$title}</td></tr>
 HTML;
             foreach ($gradeable_list as $gradeable => $g_data) {
+                $date = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
+                if($g_data->getTAViewDate()->format('Y-m-d H:i:s') > $date->format('Y-m-d H:i:s') && !$this->core->getUser()->accessAdmin()){
+                    continue;
+                }
                 /** @var Gradeable $g_data */
                 $time = ($title=="GRADED") ? "": " @ H:i";
                 $gradeable_grade_range = ($title=='GRADED' || $title=='ITEMS BEING GRADED') ?

@@ -363,7 +363,7 @@ rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/*php         $SUBMITTY_INSTALL_
 rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/toolbox      $SUBMITTY_INSTALL_DIR/hwgrading_website
 rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/lib          $SUBMITTY_INSTALL_DIR/hwgrading_website
 rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/account      $SUBMITTY_INSTALL_DIR/hwgrading_website
-rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/app          $SUBMITTY_INSTALL_DIR/hwgrading_website
+rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/models       $SUBMITTY_INSTALL_DIR/hwgrading_website
 
 # set special user $HWPHP_USER as owner & group of all hwgrading_website files
 find $SUBMITTY_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
@@ -474,8 +474,8 @@ rm ${HWCRON_CRONTAB_FILE}
 
 echo -e "Compile and install analysis tools"
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-git pull origin master
-make
+#git pull origin master
+#make
 
 # copy the necessary files out of the repo
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools

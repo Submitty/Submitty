@@ -1,6 +1,6 @@
 <?php
 // Pull out tabs to separate URL
-use app\models\User;
+use \models\User;
 
 include "../header.php";
 

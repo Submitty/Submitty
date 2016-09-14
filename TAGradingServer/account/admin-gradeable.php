@@ -17,6 +17,7 @@ if($user_is_administrator){
         'g_team_assignment' => false,
         'g_gradeable_type' => 0,
         'g_grade_by_registration' => false,
+        'g_ta_view_start_date' => date('Y/m/d 23:59:59', strtotime( '+7 days' )),
         'g_grade_start_date' => date('Y/m/d 23:59:59', strtotime( '+7 days' )),
         'g_grade_released_date' => date('Y/m/d 23:59:59', strtotime( '+14 days' )),
         'g_syllabus_bucket' => '',
@@ -116,6 +117,7 @@ if($user_is_administrator){
         $g_team_assignment = $old_gradeable['g_team_assignment'];
         $g_grade_by_registration = $old_gradeable['g_grade_by_registration'];
         $g_syllabus_bucket = $old_gradeable['g_syllabus_bucket'];
+        $g_ta_view_start_date = $old_gradeable['g_ta_view_start_date'];
         $g_grade_start_date = $old_gradeable['g_grade_start_date'];
         $g_grade_released_date = $old_gradeable['g_grade_released_date'];
         $g_min_grading_group = $old_gradeable['g_min_grading_group'];
@@ -671,6 +673,10 @@ HTML;
 
     print <<<HTML
             <!-- TODO default to the submission + late days for electronic -->
+            What date can the TAs view this?: <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
+                style="cursor: auto; background-color: #FFF; width: 250px;">
+            
+            <br />
             What date can the TAs start grading this?: <input name="date_grade" id="date_grade" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
             
@@ -687,8 +693,11 @@ HTML;
             <select name="gradeable_buckets" style="width: 170px;">
 HTML;
 
-    $valid_assignment_type = array('homework','assignment','quiz','test','reading','participation',
-                                   'exam','lab','recitation', 'lecture-exercise', 'problem-set','project',
+    $valid_assignment_type = array('homework','assignment','problem-set',
+                                   'quiz','test','exam',
+                                   'exercise','lecture-exercise','reading','lab','recitation', 
+                                   'project',                                   
+                                   'participation','note',
                                    'none (for practice only)');
     foreach ($valid_assignment_type as $type){
         print <<<HTML
@@ -1063,6 +1072,7 @@ HTML;
         
     }
     
+    $('#date_ta_view').datetimepicker('setDate', (new Date("{$old_gradeable['g_ta_view_start_date']}")));
     $('#date_grade').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_start_date']}")));
     $('#date_released').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_released_date']}")));
 

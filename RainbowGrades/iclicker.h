@@ -10,6 +10,7 @@
 
 #define MAX_LECTURES 28
 
+extern std::vector<float> GLOBAL_earned_late_days;
 
 class Student;
 

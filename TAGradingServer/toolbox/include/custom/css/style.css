@@ -73,7 +73,7 @@ span#right.resbox {
 
 .progress {
     display: inline-block;
-    width: 100%;
+    width: 97%;
     margin: auto;
     position:absolute;
     bottom: 0;
@@ -131,13 +131,10 @@ ul.dropdown-menu li#logout a:hover {
 /*======================================*/
 #grade {
     position:absolute;
-    bottom: 5%;
-    left: 40%;
-    /*height: 5%;*/
-    /*width: 20%;*/
+    top: 60px;
+    right: 10px;
     height: 60px;
-    /*width: 286px;*/
-    width: 290px;
+    width: 250px;
     background: #C3BEFF;
     opacity:0.5;
     z-index: 201;
@@ -175,7 +172,7 @@ ul.dropdown-menu li#logout a:hover {
 }
 /*************************************/
 .resbox {
-    display : inline-block;
+
     height : 100%;
     overflow:hidden;
 }

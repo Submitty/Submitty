@@ -80,8 +80,10 @@ class LoggerTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(Utils::pad($current_date['year']), $date[2], "Year is not right");
         $this->assertEquals(Utils::pad($current_date['hours']), $time[0], "Hours place is not right");
         $this->assertEquals(Utils::pad($current_date['minutes']), $time[1], "Minutes place is not right");
-        // Give seconds place a leeway of 3 seconds incase of test slowdown so we don't get intermittent failures
-        $this->assertEquals(Utils::pad($current_date['seconds']), $time[2], "Seconds place is not right", 3);
+        $this->assertEquals(2, strlen($time[2]));
+        if (intval($time[2]) < 10) {
+            $this->assertStringStartsWith('0', $time[2]);
+        }
 
         $this->assertEquals($level, $first_line[1], "Level is wrong");
         $this->assertEquals($message, $lines[1], "Message is wrong");

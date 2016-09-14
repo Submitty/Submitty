@@ -1,7 +1,7 @@
 <?php
-use app\models\User;
+use \models\User;
 
-use \app\models\ElectronicGradeable;
+use \models\ElectronicGradeable;
 
 	include "../header.php";
 
@@ -22,6 +22,7 @@ FROM
     gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id
 WHERE 
     g.g_id=?
+    AND NOT gc.gc_is_extra_credit
 GROUP BY 
     g.g_id", $params);
 	$gradeable_info = $db->row();
