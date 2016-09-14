@@ -54,7 +54,10 @@ class DatabaseUtils {
                     $in_string = true;
                     $quot = $ch;
                 }
-                else if ($in_string && $ch == $quot) {
+                else if ($in_string && $ch == $quot && $text[$i-1] == "\\") {
+                    $element = substr($element, 0, -1).$ch;
+                }
+                else if ($in_string && $ch == $quot && $text[$i-1] != "\\") {
                     $in_string = false;
                     $have_string = true;
                 }
@@ -63,6 +66,7 @@ class DatabaseUtils {
                 }
                 else if (!$in_string && $ch == ",") {
                     self::parsePGValue($element, $have_string, $parse_bools, $return);
+                    $have_string = false;
                     $element = "";
                 }
                 else {
@@ -92,17 +96,16 @@ class DatabaseUtils {
                 $return[] = ($element + 0);
             }
             else {
-                if ($parse_bools) {
-                    if (in_array(strtolower($element), array("true", "false"))) {
-                        $return[] = (strtolower($element) == "true") ? true : false;
-                        return;
-                    }
+                $lower = strtolower($element);
+                if ($parse_bools && in_array($lower, array("true", "t", "false", "f"))) {
+                    $return[] = ($lower === "true" || $lower === "t") ? true : false;
                 }
-                if (strtolower($element) == "null") {
+                else if (strtolower($element) == "null") {
                     $return[] = null;
-                    return;
                 }
-                $return[] =  $element;
+                else {
+                    $return[] = $element;
+                }
             }
         }
     }
@@ -125,11 +128,14 @@ class DatabaseUtils {
         }
         $elements = array();
         foreach ($array as $e) {
-            if (is_array($e)) {
-                $elements[]= DatabaseUtils::fromPHPToPGArray($e);
+            if ($e === null) {
+                $elements[] = "null";
+            }
+            else if (is_array($e)) {
+                $elements[] = DatabaseUtils::fromPHPToPGArray($e);
             }
             else if (is_string($e)) {
-                $elements[] .= "\"{$e}\"";
+                $elements[] .= '"'. str_replace('"', '\"', $e) .'"';
             }
             else if (is_bool($e)) {
                 $elements[] .= ($e) ? "true" : "false";

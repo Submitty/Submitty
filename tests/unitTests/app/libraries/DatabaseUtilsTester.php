@@ -2,6 +2,7 @@
 
 namespace tests\unitTests\app\libraries;
 
+use app\libraries\Database;
 use \app\libraries\DatabaseUtils;
 
 class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
@@ -16,7 +17,10 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
             array('{{"breakfast", "test"}, {{"another", "array"}, {"test", "me"}}}',
                 array(array('breakfast','test'),array(array('another','array'),array('test','me')))),
             array('{"true", "false"}', array("true", "false")),
-            array('{"M5"}', array('M5'))
+            array('{"M5"}', array('M5')),
+            array('{"aa", null, "null", null}', array('aa', null, "null", null)),
+            array('{"aaa\"bbb\nccc"}', array('aaa"bbb\nccc')),
+            array('{"yes?{}", "", "blah/yes(more).'."\n".'", "\"aaaa. \""}', array("yes?{}", "", "blah/yes(more).\n", '"aaaa. "'))
         );
     }
 
@@ -76,7 +80,16 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
     public function testNullPGArray() {
         $this->assertEquals(array(null), DatabaseUtils::fromPGToPHPArray("{NULL}"));
     }
+
+    public function testSeatNumberPGToPHP() {
+        $this->assertEquals(array("M5"), DatabaseUtils::fromPGToPHPArray("{M5}"));
+    }
+
     public function testBooleanPGToPHP() {
         $this->assertEquals(array(true, false, 'test'), DatabaseUtils::fromPGToPHPArray("{true, false, 'test'}", true));
+    }
+
+    public function testShortBooleanPGToPHP() {
+        $this->assertEquals(array(true, false, false, true), DatabaseUtils::fromPGToPHPArray("{t, f, f, t}", true));
     }
 }

@@ -357,11 +357,12 @@ function microtime_float() {
 
 /**
  * @param $text
+ * @param $parse_bools
  *
  * @return array
  */
-function pgArrayToPhp($text) {
-    return \lib\DatabaseUtils::fromPGToPHPArray($text);
+function pgArrayToPhp($text, $parse_bools=false) {
+    return \lib\DatabaseUtils::fromPGToPHPArray($text, $parse_bools);
 }
 
 /**

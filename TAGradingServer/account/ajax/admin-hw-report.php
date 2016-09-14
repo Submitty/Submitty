@@ -188,7 +188,7 @@ foreach($db->rows() as $student_record) {
             $grading_notes = pgArrayToPhp($gradeable['comments']);
             $question_totals = pgArrayToPhp($gradeable['scores']);
             $question_messages = pgArrayToPhp($gradeable['titles']);
-            $question_extra_credits = pgArrayToPhp($gradeable['is_extra_credits']);
+            $question_extra_credits = pgArrayToPhp($gradeable['is_extra_credits'], true);
             $question_grading_notes = pgArrayToPhp($gradeable['grading_notes']);
             $question_max_scores = pgArrayToPhp($gradeable['max_scores']);
             $question_total = 0; 
@@ -207,35 +207,16 @@ foreach($db->rows() as $student_record) {
                 $auto_grading_max_score = getAutogradingMaxScore($gradeable['g_id']);                                                                                
                 $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]" . $nl;
                 $gradefilecontents = file_get_contents($submit_file);
-		$student_output_text .= "submission version #" . $active_version .$nl;
-		$student_output_text .= $nl.$gradefilecontents.$nl;
+                $student_output_text .= "submission version #" . $active_version .$nl;
+                $student_output_text .= $nl.$gradefilecontents.$nl;
             } 
 
-            for ($i=0; $i < count($grading_notes); $i++){
+            for ($i = 0; $i < count($grading_notes); $i++){
                 $grading_note = $grading_notes[$i];
                 $question_total = floatval($question_totals[$i]);
                 $question_max_score = floatval($question_max_scores[$i]);
                 $question_message = $question_messages[$i];
-
-
-
-		//
-		// FIXME
-		//
-		// THIS IS BROKEN (value always empty)
-		//$question_extra_credit = intval($question_extra_credits[$i]) == 1;
-
-		// HACK
-		$question_extra_credit = false;
-		if ( strcmp($question_message,"EXTRA CREDIT") == 0) {
-		     $question_extra_credit = true;
-		}
-		// END HACK
-		//
-		//
-
-
-
+        		$question_extra_credit = boolval($question_extra_credits[$i]);
                 $question_grading_note = $question_grading_notes[$i];
                 // ensure we have indexes for this part
                 if($question_total == -100){
