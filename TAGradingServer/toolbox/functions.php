@@ -437,3 +437,26 @@ function getActiveVersionFromFile($g_id, $student_id) {
 }
 
 
+
+//
+// PROBABLY NOT THE RIGHT LOCATION FOR THIS FUNCTION
+//
+function getDaysLateFromFile($g_id,$student_id,$active_version) {
+    $timestamp_file = __SUBMISSION_SERVER__."/submissions/".$g_id."/".$student_id."/".$active_version."/.submit.timestamp";
+    if (file_exists($timestamp_file)) {
+        $timestamp_file_contents = file_get_contents($timestamp_file);
+	//
+	// FIXME
+	// yes, this only works for due date on the 8th :(
+	//
+	if (substr($timestamp_file_contents,8,2) == "05") return 0;
+	if (substr($timestamp_file_contents,8,2) == "06") return 0;
+	if (substr($timestamp_file_contents,8,2) == "07") return 0;
+	if (substr($timestamp_file_contents,8,2) == "08") return 0;
+	if (substr($timestamp_file_contents,8,2) == "09") return 1;
+	if (substr($timestamp_file_contents,8,2) == "10") return 2;
+	if (substr($timestamp_file_contents,8,2) == "10") return 3;
+	if (substr($timestamp_file_contents,8,2) == "10") return 4;
+    }
+    return 0;
+}

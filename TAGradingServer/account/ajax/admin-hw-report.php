@@ -194,13 +194,20 @@ foreach($db->rows() as $student_record) {
             $question_total = 0; 
 
 
-
-	    // THIS IS TEMPORARY, UNTIL THE PROPER VALUE IS STORED IN THE DATABASE
+	    //
+	    //
+	    // THIS IS TEMPORARY, UNTIL THE PROPER VALUES ARE STORED IN THE DATABASE
 	    $active_version = getActiveVersionFromFile($gradeable['g_id'],$student_id);
+
+	    $days_late_from_file = getDaysLateFromFile($gradeable['g_id'],$student_id,$active_version);
+	    $grade_days_late = $days_late_from_file;
+	    $late_days_used_overal = $grade_days_late;
 
 	    //$submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$gradeable['gd_active_version']."/results_grade.txt";
             $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$active_version."/results_grade.txt";
-
+	    //
+	    //
+	    //
 
             $auto_grading_max_score = 0;
             $auto_grading_awarded = 0;
@@ -222,7 +229,26 @@ foreach($db->rows() as $student_record) {
                 $question_total = floatval($question_totals[$i]);
                 $question_max_score = floatval($question_max_scores[$i]);
                 $question_message = $question_messages[$i];
-                $question_extra_credit = intval($question_extra_credits[$i]) == 1;
+
+
+
+		//
+		// FIXME
+		//
+		// THIS IS BROKEN (value always empty)
+		//$question_extra_credit = intval($question_extra_credits[$i]) == 1;
+
+		// HACK
+		$question_extra_credit = false;
+		if ( strcmp($question_message,"EXTRA CREDIT") == 0) {
+		     $question_extra_credit = true;
+		}
+		// END HACK
+		//
+		//
+
+
+
                 $question_grading_note = $question_grading_notes[$i];
                 // ensure we have indexes for this part
                 if($question_total == -100){
