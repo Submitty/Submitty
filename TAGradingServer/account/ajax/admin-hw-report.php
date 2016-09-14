@@ -193,25 +193,8 @@ foreach($db->rows() as $student_record) {
             $question_max_scores = pgArrayToPhp($gradeable['max_scores']);
             $question_total = 0; 
             
-            // THIS IS TEMPORARY, UNTIL THE PROPER VALUE IS STORED IN THE DATABASE
-            $active_version = getActiveVersionFromFile($gradeable['g_id'],$student_id);
-
-
-	    //
-	    //
-	    // THIS IS TEMPORARY, UNTIL THE PROPER VALUES ARE STORED IN THE DATABASE
-	    $active_version = getActiveVersionFromFile($gradeable['g_id'],$student_id);
-
-	    $days_late_from_file = getDaysLateFromFile($gradeable['g_id'],$student_id,$active_version);
-	    $grade_days_late = $days_late_from_file;
-	    $late_days_used_overal = $grade_days_late;
-
-	    //$submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$gradeable['gd_active_version']."/results_grade.txt";
+            $active_version = $gradeable['gd_active_version'];
             $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$active_version."/results_grade.txt";
-	    //
-	    //
-	    //
-
 
             $auto_grading_max_score = 0;
             $auto_grading_awarded = 0;
@@ -223,9 +206,10 @@ foreach($db->rows() as $student_record) {
 	        //$auto_grading_awarded = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);
                 $auto_grading_awarded = autogradingTotalAwarded($gradeable['g_id'], $student_id, $active_version);
                 $auto_grading_max_score = getAutogradingMaxScore($gradeable['g_id']);                                                                                
-                $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]";
+                $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]" . $nl;
                 $gradefilecontents = file_get_contents($submit_file);
-                $student_output_text .= $nl.$nl.$gradefilecontents.$nl;
+		$student_output_text .= "submission version #" . $active_version .$nl;
+		$student_output_text .= $nl.$gradefilecontents.$nl;
             } 
 
             for ($i=0; $i < count($grading_notes); $i++){
