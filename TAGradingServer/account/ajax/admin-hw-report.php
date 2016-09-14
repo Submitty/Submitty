@@ -141,7 +141,14 @@ foreach($db->rows() as $student_record) {
         
         if ($gradeable['gd_status'] == 1) {
             $db->query("SELECT late_days_used FROM late_days_used WHERE g_id=? AND user_id=?", array($g_id, $student_id));
-            $late_days_used = $db->row()['late_days_used'];
+            $row = $db->row();
+            if (isset($row['late_days_used'])) {
+                $late_days_used = $row['late_days_used'];
+            }
+            else {
+                $late_days_used = 0;
+            }
+
             $grade_days_late = $late_days_used;
         }
         else {
