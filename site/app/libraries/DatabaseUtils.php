@@ -100,7 +100,7 @@ class DatabaseUtils {
                 if ($parse_bools && in_array($lower, array("true", "t", "false", "f"))) {
                     $return[] = ($lower === "true" || $lower === "t") ? true : false;
                 }
-                else if (strtolower($element) == "null") {
+                else if ($lower == "null") {
                     $return[] = null;
                 }
                 else {

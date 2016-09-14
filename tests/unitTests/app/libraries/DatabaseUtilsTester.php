@@ -2,7 +2,6 @@
 
 namespace tests\unitTests\app\libraries;
 
-use app\libraries\Database;
 use \app\libraries\DatabaseUtils;
 
 class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
@@ -91,5 +90,9 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
 
     public function testShortBooleanPGToPHP() {
         $this->assertEquals(array(true, false, false, true), DatabaseUtils::fromPGToPHPArray("{t, f, f, t}", true));
+    }
+
+    public function testNullCasingPGToPHP() {
+        $this->assertEquals(array(null, null, null), DatabaseUtils::fromPGToPHPArray("{null, NULL, NuLl}"));
     }
 }

@@ -216,7 +216,7 @@ foreach($db->rows() as $student_record) {
                 $question_total = floatval($question_totals[$i]);
                 $question_max_score = floatval($question_max_scores[$i]);
                 $question_message = $question_messages[$i];
-        		$question_extra_credit = boolval($question_extra_credits[$i]);
+                $question_extra_credit = boolval($question_extra_credits[$i]);
                 $question_grading_note = $question_grading_notes[$i];
                 // ensure we have indexes for this part
                 if($question_total == -100){
