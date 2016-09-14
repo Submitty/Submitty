@@ -203,7 +203,6 @@ foreach($db->rows() as $student_record) {
                 $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
             }
             else {
-	        //$auto_grading_awarded = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);
                 $auto_grading_awarded = autogradingTotalAwarded($gradeable['g_id'], $student_id, $active_version);
                 $auto_grading_max_score = getAutogradingMaxScore($gradeable['g_id']);                                                                                
                 $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]" . $nl;
