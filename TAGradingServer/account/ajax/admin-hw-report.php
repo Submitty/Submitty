@@ -193,14 +193,24 @@ foreach($db->rows() as $student_record) {
             $question_max_scores = pgArrayToPhp($gradeable['max_scores']);
             $question_total = 0; 
 
-            $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$gradeable['gd_active_version']."/results_grade.txt";
+
+
+	    // THIS IS TEMPORARY, UNTIL THE PROPER VALUE IS STORED IN THE DATABASE
+	    $active_version = getActiveVersionFromFile($gradeable['g_id'],$student_id);
+
+	    //$submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$gradeable['gd_active_version']."/results_grade.txt";
+            $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$active_version."/results_grade.txt";
+
+
             $auto_grading_max_score = 0;
             $auto_grading_awarded = 0;
+
             if (!file_exists($submit_file)) {
                 $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
             }
             else {
-                $auto_grading_awarded = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);        
+	        //$auto_grading_awarded = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);
+                $auto_grading_awarded = autogradingTotalAwarded($gradeable['g_id'], $student_id, $active_version);
                 $auto_grading_max_score = getAutogradingMaxScore($gradeable['g_id']);                                                                                
                 $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]";
                 $gradefilecontents = file_get_contents($submit_file);
