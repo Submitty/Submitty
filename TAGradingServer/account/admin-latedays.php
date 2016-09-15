@@ -382,6 +382,8 @@ HTML;
 {$utf8_checkmark} Late days are updated.</em>
 HTML;
 
+		$BASE_URL = rtrim(__BASE_URL__, "/");	
+
 		self::$view['form'] = <<<HTML
 <form action="{$BASE_URL}/account/admin-latedays.php?course={$_GET['course']}&semester={$_GET['semester']}" method="POST" enctype="multipart/form-data">
 <h4>Single Student Entry</h4>
