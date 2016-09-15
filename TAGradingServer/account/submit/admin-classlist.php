@@ -91,7 +91,6 @@ if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedo
             die("Error parsing xlsx to csv: ".$output['error_message']);
         }
         else if ($output['success'] !== true) {
-            var_dump($output);
             print(curl_error($ch));
             die("Error on response on parsing xlsx");
         }

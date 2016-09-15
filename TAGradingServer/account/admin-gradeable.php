@@ -32,14 +32,14 @@ if($user_is_administrator){
     $electronic_gradeable['eg_late_days'] = __DEFAULT_LATE_DAYS__;
     $electronic_gradeable['eg_precision'] = 0.5;
     $old_components = "{}";
-    
+
     $num_numeric = $num_text = 0;
     $g_gradeable_type = $g_syllabus_bucket = $g_min_grading_group = $default_late_days = -1;
     $is_repository = false;
     $use_ta_grading = true;
     $g_overall_ta_instructions = $g_id = '';
     $edit = json_encode(isset($_GET['action']) && $_GET['action'] == 'edit');
-    
+
     if (isset($_GET['action']) && $_GET['action'] == 'edit') {
         $g_id = $_GET['id'];
         Database::query("SELECT * FROM gradeable WHERE g_id=?",array($g_id));
@@ -50,23 +50,23 @@ if($user_is_administrator){
         Database::query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($g_id));
         $old_components = json_encode(Database::rows());
         $have_old = true;
-        
+
         // get the number of text and numeric fields for the form
         if ($old_gradeable['g_gradeable_type']==2){
             $params=array($g_id);
-            $db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc 
+            $db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc
                         ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='false'", $params);
             $num_numeric = $db->row()['cnt'];
-            $db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc 
+            $db->query("SELECT COUNT(*) AS cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc
                         ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", $params);
             $num_text = $db->row()['cnt'];
         }
-        
+
         //figure out if the gradeable has grades or not
-        $db->query("SELECT COUNT(*) as cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id 
+        $db->query("SELECT COUNT(*) as cnt FROM gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id
                     INNER JOIN gradeable_component_data AS gcd ON gcd.gc_id=gc.gc_id WHERE g.g_id=?",array($g_id));
         $has_grades= $db->row()['cnt'];
-       
+
        //if electonic file then add all of the old questions
        if($old_gradeable['g_gradeable_type']==0){
             //get the electronic file stuff
@@ -75,7 +75,7 @@ if($user_is_administrator){
             $use_ta_grading = $electronic_gradeable['eg_use_ta_grading'];
             $is_repository = $electronic_gradeable['eg_is_repository'];
             $late_days = $electronic_gradeable['eg_late_days'];
-            $db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_max_value, gc_is_extra_credit FROM gradeable_component 
+            $db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_max_value, gc_is_extra_credit FROM gradeable_component
                         WHERE g_id=? GROUP BY gc_id ORDER BY gc_order ASC",array($g_id));
             $tmp_questions = $db->rows();
             foreach($tmp_questions as $question){
@@ -93,7 +93,7 @@ if($user_is_administrator){
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
     $account_subpages_unlock = true;
-    
+
     function selectBox($question, $grade = 0) {
         $retVal ='<input type="number" id="grade-'."{$question}".'" class="points" name="points_'."{$question}".'" value="'."{$grade}".'" min="-1000" max="1000" step="0.5" placeholder="±0.5" onchange="calculatePercentageTotal();" style="width:50px; resize:none;">';
         return $retVal;
@@ -190,7 +190,7 @@ if($user_is_administrator){
         top: -96px;
         left: -313px;
     }
-    
+
     /* align the radio, buttons and checkboxes with labels */
     input[type="radio"],input[type="checkbox"] {
         margin-top: -1px;
@@ -199,32 +199,32 @@ if($user_is_administrator){
     .gradeable_type_options, .upload_type{
         display: none;
     }
-    
+
     fieldset {
         margin: 8px;
         border: 1px solid silver;
-        padding: 8px;    
+        padding: 8px;
         border-radius: 4px;
     }
-    
+
     legend{
-        padding: 2px;  
+        padding: 2px;
         font-size: 12pt;
     }
-    
+
     .required::-webkit-input-placeholder { color: red; }
     .required:-moz-placeholder { color: red; }
     .required::-moz-placeholder { color: red; }
-    .required:-ms-input-placeholder { color: red; 
-        
+    .required:-ms-input-placeholder { color: red;
+
 </style>
 
 <div id="container-rubric">
     <form id="delete-gradeable" action="{$BASE_URL}/account/submit/admin-gradeables.php?course={$_GET['course']}&semester={$_GET['semester']}&action=delete&id={$old_gradeable['g_id']}" method="post">
         <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
     </form>
-    <form id="gradeable-form" class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&action={$action}&id={$old_gradeable['g_id']}" 
-          method="post" enctype="multipart/form-data"> 
+    <form id="gradeable-form" class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&action={$action}&id={$old_gradeable['g_id']}"
+          method="post" enctype="multipart/form-data">
 
         <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
         <div class="modal-header" style="overflow: auto;">
@@ -255,16 +255,16 @@ HTML;
         Is this a team assignment?:
         <input type="radio" name="team_assignment" value="yes"
 HTML;
-    
+
     echo ($g_team_assignment===true)?'checked':'';
     print <<<HTML
         > Yes
-            <input type="radio" name="team_assignment" value ="no" 
+            <input type="radio" name="team_assignment" value ="no"
 HTML;
     echo ($g_team_assignment===false)?'checked':'' ;
     print <<<HTML
             > No -->
-            <br />   
+            <br />
             What is the <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable#types-of-gradeables">
 type of the gradeable</a>?: <div id="required_type" style="color:red; display:inline;">(Required)</div>
 
@@ -273,7 +273,7 @@ type of the gradeable</a>?: <div id="required_type" style="color:red; display:in
 HTML;
     echo ($g_gradeable_type === 0)?'checked':'';
     print <<<HTML
-            > 
+            >
             Electronic File
             <input type='radio' id="radio_checkpoints" class="checkpoints" name="gradeable_type" value="Checkpoints"
 HTML;
@@ -288,7 +288,7 @@ HTML;
             >
             Numeric/Text
             <!-- This is only relevant to Electronic Files -->
-            <div class="gradeable_type_options electronic_file" id="electronic_file" >    
+            <div class="gradeable_type_options electronic_file" id="electronic_file" >
                 <br />
                 What date does the submission open to students?: <input id="date_submit" name="date_submit" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
@@ -300,7 +300,7 @@ HTML;
                 How many late days may students use on this assignment? <input style="width: 50px" name="eg_late_days" class="int_val"
                                                                          type="text"/>
                 <br /> <br />
-                
+
 
                 Are students uploading files or commiting code to an SVN repository?<br />
                 <fieldset>
@@ -314,16 +314,16 @@ HTML;
                     echo ($is_repository===true)?'checked':'';
         print <<<HTML
                     > Repository
-                    
+
                     <div class="upload_type upload_file" id="upload_file">
                     </div>
-                    
+
                     <div class="upload_type upload_repo" id="repository">
                         <br />
                         Which subdirectory of the repository?<input style='width: 227px' type='text' name='subdirectory' value="src" />
                         <br />
                     </div>
-                    
+
                 </fieldset>
 
 		<br />
@@ -335,7 +335,7 @@ HTML;
                 <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
                 <br /> <br />
 
-                Use TA grading? 
+                Use TA grading?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
 HTML;
                 echo ($use_ta_grading===true)?'checked':'';
@@ -348,10 +348,10 @@ HTML;
                 /> No
                 <div id="rubric_questions" class="bool_val rubric_questions">
 
-                Point precision (for TA grading): 
+                Point precision (for TA grading):
                 <input style='width: 50px' type='text' name='point_precision' value="0.5" class="float_val" />
-                <br /> 
-                
+                <br />
+
 
                 <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
                     <thead style="background: #E1E1E1;">
@@ -373,7 +373,7 @@ HTML;
 
     //this is a hack
     array_unshift($old_questions, "tmp");
-    
+
     foreach ($old_questions as $num => $question) {
         if($num == 0) continue;
         print <<<HTML
@@ -381,13 +381,13 @@ HTML;
 HTML;
         print <<<HTML
                 <td style="overflow: hidden;">
-                    <textarea name="comment_title_{$num}" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;" 
+                    <textarea name="comment_title_{$num}" rows="1" class="comment_title complex_type" style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-right: 1px;"
                               placeholder="Rubric Item Title">{$question['question_message']}</textarea>
                     <textarea name="ta_comment_{$num}" id="individual_{$num}" class="ta_comment complex_type" rows="1" placeholder=" Message to TA (seen only by TAs)"  onkeyup="autoResizeComment(event);"
-                                               style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
+                                               style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;
                                                display: block;">{$question['question_grading_note']}</textarea>
                     <textarea name="student_comment_{$num}" id="student_{$num}" class="student_comment complex_type" rows="1" placeholder=" Message to Student (seen by both students and TAs)" onkeyup="autoResizeComment(event);"
-                              style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px; 
+                              style="width: 99%; padding: 0 0 0 10px; resize: none; margin-top: 5px; margin-bottom: 5px;
                               display: block;">{$question['student_grading_note']}</textarea>
                 </td>
 
@@ -407,12 +407,12 @@ HTML;
                 <img class="question-icon-cross" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
                 <a id="down-{$num}" class="question-icon" onclick="moveQuestionDown({$num});">
                 <img class="question-icon-down" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
-        
+
                 <a id="up-{$num}" class="question-icon" onclick="moveQuestionUp({$num});">
                 <img class="question-icon-up" src="../toolbox/include/bootstrap/img/glyphicons-halflings.png"></a>
 HTML;
         }
-        
+
         print <<<HTML
                 </td>
             </tr>
@@ -448,29 +448,29 @@ HTML;
                             </tr>
                         </thead>
                         <tbody style="background: #f9f9f9;">
-                      
+
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="checkpoint_label_0" type="text" class="checkpoint_label complex_type" value="Checkpoint 0"/> 
-                           </td>     
-                           <td>     
+                               <input style="width: 200px" name="checkpoint_label_0" type="text" class="checkpoint_label complex_type" value="Checkpoint 0"/>
+                           </td>
+                           <td>
                                 <input type="checkbox" name="checkpoint_extra_0" class="checkpoint_extra extra" value="true" />
-                           </td> 
+                           </td>
                         </tr>
-                      
+
                        <tr class="multi-field" id="mult-field-1">
                            <td>
-                               <input style="width: 200px" name="checkpoint_label_1" type="text" class="checkpoint_label complex_type" value="Checkpoint 1"/> 
-                           </td>     
-                           <td>     
+                               <input style="width: 200px" name="checkpoint_label_1" type="text" class="checkpoint_label complex_type" value="Checkpoint 1"/>
+                           </td>
+                           <td>
                                 <input type="checkbox" name="checkpoint_extra_1" class="checkpoint_extra extra" value="true" />
-                           </td> 
+                           </td>
                         </tr>
                   </table>
-                  <button type="button" id="add-checkpoint_field">Add </button>  
-                  <button type="button" id="remove-checkpoint_field" id="remove-checkpoint" style="visibilty:hidden;">Remove</button>   
-                </div> 
+                  <button type="button" id="add-checkpoint_field">Add </button>
+                  <button type="button" id="remove-checkpoint_field" id="remove-checkpoint" style="visibilty:hidden;">Remove</button>
+                </div>
                 <br />
                 <!--Do you want a box for an (optional) message from the TA to the student?
                 <input type="radio" name="checkpoint_opt_ta_messg" value="yes" /> Yes
@@ -478,12 +478,12 @@ HTML;
             </div>
             <div class="gradeable_type_options numeric" id="numeric">
                 <br />
-                How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val"/> 
+                How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val"/>
                 &emsp;&emsp;
-                
+
                 How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val"/>
                 <br /> <br />
-                
+
                 <div class="multi-field-wrapper-numeric">
                     <h5>Numeric Items</h5>
                     <table class="numerics-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
@@ -499,17 +499,17 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label complex_type" value="0"/> 
-                           </td>  
-                            <td>     
-                                <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" /> 
-                           </td>                           
-                           <td>     
+                               <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label complex_type" value="0"/>
+                           </td>
+                            <td>
+                                <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" />
+                           </td>
+                           <td>
                                 <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" value="" />
-                           </td> 
+                           </td>
                         </tr>
                     </table>
-                    
+
                     <h5>Text Items</h5>
                     <table class="text-table table table-bordered" style=" border: 1px solid #AAA; max-width:25% !important;">
                         <thead style="background: #E1E1E1;">
@@ -521,16 +521,16 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="text_label_0" type="text" class="text_label complex_type" value="0"/> 
-                           </td>  
+                               <input style="width: 200px" name="text_label_0" type="text" class="text_label complex_type" value="0"/>
+                           </td>
                         </tr>
                     </table>
-                </div>  
+                </div>
                 <br />
                 <!--Do you want a box for an (optional) message from the TA to the student?
                 <input type="radio" name="opt_ta_messg" value="yes" /> Yes
                 <input type="radio" name="opt_ta_messg" value="no" /> No-->
-            </div>  
+            </div>
             </fieldset>
             <div id="grading_questions">
             What is the <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable#grading-user-groups">
@@ -548,7 +548,7 @@ HTML;
             >{$role}</option>
 HTML;
     }
-    
+
     print <<<HTML
             </select>
             <br />
@@ -557,7 +557,7 @@ HTML;
     echo htmlspecialchars($g_overall_ta_instructions);
     print <<<HTML
 </textarea>
-            
+
             <br />
             <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable#grading-by-registration-section-or-rotating-section">How should TAs be assigned</a> to grade this item?:
             <br />
@@ -580,41 +580,41 @@ HTML;
                     htmlspecialchars(json_encode(range(1,$num_rotating_sections)), ENT_NOQUOTES));
 
     $db->query("
-    SELECT 
+    SELECT
         u.user_id, array_agg(sections_rotating ORDER BY sections_rotating ASC) AS sections
-    FROM 
+    FROM
         users AS u INNER JOIN grading_rotating AS gr ON u.user_id = gr.user_id
-    WHERE 
+    WHERE
         g_id=?
-    AND 
+    AND
         u.user_group BETWEEN 2 AND 3
-    GROUP BY 
+    GROUP BY
         u.user_id
     ",array($g_id));
-    
+
     $graders_to_sections = array();
-    
+
     foreach($db->rows() as $grader){
         $graders_to_sections[$grader['user_id']] = str_replace(array('[', ']'), '',
                                                    htmlspecialchars(json_encode(pgArrayToPhp($grader['sections'])), ENT_NOQUOTES));
     }
-    
+
     print <<<HTML
     <div id="rotating-sections" class="graders" style="display:none;">
         <br />
         Available rotating sections: {$num_rotating_sections}
-        
+
 HTML;
-    
+
     print <<<HTML
         <div id="full-access-graders" style="display:none;">
             <br />
             <table>
                 <th>Full Access Graders</th>
 HTML;
-    
+
    $db->query("SELECT user_id FROM users WHERE user_group=?", array(2));
-      
+
     foreach($db->rows() as $fa_grader){
         print <<<HTML
         <tr>
@@ -632,7 +632,7 @@ HTML;
         </tr>
 HTML;
     }
-    
+
     print <<<HTML
             </table>
         </div>
@@ -643,7 +643,7 @@ HTML;
 HTML;
 
    $db->query("SELECT user_id FROM users WHERE user_group=?", array(3));
-      
+
     foreach($db->rows() as $la_grader){
         print <<<HTML
         <tr>
@@ -665,7 +665,7 @@ HTML;
     print <<<HTML
         </table>
 
-    </div> 
+    </div>
         <br />
     </div>
     </fieldset>
@@ -675,29 +675,29 @@ HTML;
             <!-- TODO default to the submission + late days for electronic -->
             What date can the TAs view this?: <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
-            
+
             <br />
             What date can the TAs start grading this?: <input name="date_grade" id="date_grade" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
-            
+
             <br />
-            What date will the grade be released to the student? 
-            <input name="date_released" id="date_released" class="datepicker" type="text" 
-                   style="cursor: auto; background-color: #FFF; width: 250px;">    
-            
+            What date will the grade be released to the student?
+            <input name="date_released" id="date_released" class="datepicker" type="text"
+                   style="cursor: auto; background-color: #FFF; width: 250px;">
+
             <br />
             </div>
-            
+
             What <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Iris-(Rainbow-Grades)">syllabus category</a> does this item belong to?:
-            
+
             <select name="gradeable_buckets" style="width: 170px;">
 HTML;
 
     $valid_assignment_type = array('homework','assignment','problem-set',
                                    'quiz','test','exam',
-                                   'exercise','lecture-exercise','reading','lab','recitation', 
-                                   'project',                                   
-                                   'participation','note'
+                                   'exercise','lecture-exercise','reading','lab','recitation',
+                                   'project',
+                                   'participation','note',
                                    'none (for practice only)');
     foreach ($valid_assignment_type as $type){
         print <<<HTML
@@ -745,7 +745,7 @@ HTML;
             return false;
         }
     }
-    
+
     $.fn.serializeObject = function(){
         var o = {};
         var a = this.serializeArray();
@@ -754,13 +754,13 @@ HTML;
         $('.ignore').each(function(){
             ignore.push($(this).attr('name'));
         });
-        
+
         ignore.push("numeric_label_0");
         ignore.push("max_score_0");
         ignore.push("numeric_extra_0");
         ignore.push("text_label_0");
         ignore.push("checkpoint_label_0");
-        
+
         $(':radio').each(function(){
            if(! $(this).is(':checked')){
                if($(this).attr('class') !== undefined){
@@ -770,9 +770,9 @@ HTML;
                       ignore.push($(this).attr('name'));
                   });
                }
-           } 
-        }); 
-        
+           }
+        });
+
         $.each(a, function() {
             if($.inArray(this.name,ignore) !== -1) {
                 return;
@@ -788,7 +788,7 @@ HTML;
             else if($("[name="+this.name+"]").hasClass('bool_val')){
                 val = (this.value === 'true');
             }
-           
+
             if($("[name="+this.name+"]").hasClass('grader')){
                 var tmp = this.name.split('_');
                 var grader = tmp[1];
@@ -820,19 +820,19 @@ HTML;
                 val = parseInt(tmp[2]);
                 o[bucket].push(val);
             }
-            
+
             else if($("[name="+this.name+"]").hasClass('complex_type')){
                 var classes = $("[name="+this.name+"]").closest('.complex_type').prop('class').split(" ");
                 classes.splice( classes.indexOf('complex_type'), 1);
                 var complex_type = classes[0];
-                
+
                 if (o[complex_type] === undefined){
                     o[complex_type] = [];
                 }
                 o[complex_type].push(val);
-                
-            } 
-            
+
+            }
+
             else if (o[this.name] !== undefined) {
                 if (!o[this.name].push) {
                     o[this.name] = [o[this.name]];
@@ -854,7 +854,7 @@ HTML;
 
     $(document).ready(function() {
         var numCheckpoints=1;
-        
+
         function addCheckpoint(label, extra_credit){
             var wrapper = $('.checkpoints-table');
             ++numCheckpoints;
@@ -862,12 +862,12 @@ HTML;
             $('#mult-field-' + numCheckpoints,wrapper).find('.checkpoint_label').attr('name','checkpoint_label_'+numCheckpoints);
             $('#mult-field-' + numCheckpoints,wrapper).find('.checkpoint_extra').attr('name','checkpoint_extra_'+numCheckpoints);
             if(extra_credit){
-                $('#mult-field-' + numCheckpoints,wrapper).find('.checkpoint_extra').attr('checked',true); 
+                $('#mult-field-' + numCheckpoints,wrapper).find('.checkpoint_extra').attr('checked',true);
             }
             $('#remove-checkpoint_field').show();
             $('#mult-field-' + numCheckpoints,wrapper).show();
         }
-        
+
         function removeCheckpoint(){
             if (numCheckpoints > 0){
                 $('#mult-field-'+numCheckpoints,'.checkpoints-table').remove();
@@ -876,7 +876,7 @@ HTML;
                 }
             }
         }
-        
+
         $('.multi-field-wrapper-checkpoints').each(function() {
             $("#add-checkpoint_field", $(this)).click(function(e) {
                 addCheckpoint('Checkpoint '+(numCheckpoints+1),false);
@@ -885,12 +885,12 @@ HTML;
                 removeCheckpoint();
             });
         });
-        
+
         $('#remove-checkpoint_field').hide();
 
         var numNumeric=0;
         var numText=0;
-        
+
         function addNumeric(label, max_score, extra_credit){
             var wrapper = $('.numerics-table');
             numNumeric++;
@@ -899,18 +899,18 @@ HTML;
             $('#mult-field-' + numNumeric,wrapper).find('.numeric_label').attr('name','numeric_label_'+numNumeric);
             $('#mult-field-' + numNumeric,wrapper).find('.max_score').attr('name','max_score_'+numNumeric).val(max_score);
             if(extra_credit){
-                $('#mult-field-' + numNumeric,wrapper).find('.numeric_extra').attr('checked',true); 
+                $('#mult-field-' + numNumeric,wrapper).find('.numeric_extra').attr('checked',true);
             }
             $('#mult-field-' + numNumeric,wrapper).show();
         }
-        
+
         function removeNumeric(){
             if (numNumeric > 0){
                 $('#mult-field-'+numNumeric,'.numerics-table').remove();
             }
             --numNumeric;
         }
-        
+
         function addText(label){
             var wrapper = $('.text-table');
             numText++;
@@ -920,18 +920,18 @@ HTML;
         }
         function removeText(){
             if (numText > 0){
-               $('#mult-field-'+numText,'.text-table').remove(); 
+               $('#mult-field-'+numText,'.text-table').remove();
             }
             --numText;
         }
-        
+
         $('#numeric_num_text_items').on('input', function(e){
             var requestedText = this.value;
             if (isNaN(requestedText) || requestedText < 0){
                requestedText = 0;
             }
             while(numText < requestedText){
-                addText('');   
+                addText('');
             }
             while(numText > requestedText){
                removeText();
@@ -944,15 +944,15 @@ HTML;
                requestedNumeric = 0;
            }
            while(numNumeric < requestedNumeric){
-                addNumeric(numNumeric+1,0,false);   
+                addNumeric(numNumeric+1,0,false);
            }
            while(numNumeric > requestedNumeric){
                removeNumeric();
            }
         });
-        
+
         $('.gradeable_type_options').hide();
-        
+
         if ($('input[name=gradeable_type]').is(':checked')){
             $('input[name=gradeable_type]').each(function(){
                 if(!($(this).is(':checked')) && {$edit}){
@@ -960,7 +960,7 @@ HTML;
                 }
             });
         }
-        
+
         if($('#rotating-section').is(':checked')){
             $('#rotating-sections').show();
         }
@@ -968,30 +968,30 @@ HTML;
         function(){
             $('#rotating-sections').hide();
             if ($(this).is(':checked')){
-                if($(this).val() == 'rotating-section'){ 
+                if($(this).val() == 'rotating-section'){
                     $('#rotating-sections').show();
                 }
             }
         });
-        
+
         if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
             $('#rubric_questions').hide();
             $('#grading_questions').hide();
         }
-        
+
         $('input:radio[name="ta_grading"]').change(function(){
             $('#rubric_questions').hide();
             $('#grading_questions').hide();
             if ($(this).is(':checked')){
-                if($(this).val() == 'true'){ 
+                if($(this).val() == 'true'){
                     $('#rubric_questions').show();
                     $('#grading_questions').show();
                 }
             }
         });
-        
+
         function showGroups(val){
-            var graders = ['','','full-access-graders', 'limited-access-graders']; 
+            var graders = ['','','full-access-graders', 'limited-access-graders'];
             for(var i=parseInt(val)+1; i<graders.length; ++i){
                 $('#'+graders[i]).hide();
             }
@@ -999,32 +999,32 @@ HTML;
                 $('#'+graders[i]).show();
             }
         }
-        
+
         showGroups($('select[name="minimum_grading_group"] option:selected').attr('value'));
-        
+
         $('select[name="minimum_grading_group"]').change(
         function(){
             showGroups(this.value);
         });
-        
+
         if({$default_late_days} != -1){
             $('input[name=eg_late_days]').val('{$default_late_days}');
         }
-        
-        if($('#radio_electronic_file').is(':checked')){ 
+
+        if($('#radio_electronic_file').is(':checked')){
             $('input[name=date_submit]').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_open_date']}")));
             $('input[name=date_due]').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_due_date']}")));
             $('input[name=subdirectory]').val('{$electronic_gradeable['eg_subdirectory']}');
             $('input[name=config_path]').val('{$electronic_gradeable['eg_config_path']}');
             $('input[name=eg_late_days]').val('{$electronic_gradeable['eg_late_days']}');
             $('input[name=point_precision]').val('{$electronic_gradeable['eg_precision']}');
-            
+
             if($('#repository_radio').is(':checked')){
                 $('#repository').show();
             }
-            
+
             $('#electronic_file').show();
-            
+
             if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
                 $('#rubric_questions').hide();
                 $('#grading_questions').hide();
@@ -1033,14 +1033,14 @@ HTML;
         else if ($('#radio_checkpoints').is(':checked')){
 			var components = {$old_components};
             // remove the default checkpoint
-            removeCheckpoint(); 
+            removeCheckpoint();
             $.each(components, function(i,elem){
                 addCheckpoint(elem.gc_title,elem.gc_is_extra_credit);
             });
             $('#checkpoints').show();
             $('#grading_questions').show();
         }
-        else if ($('#radio_numeric').is(':checked')){ 
+        else if ($('#radio_numeric').is(':checked')){
             var components = {$old_components};
             $.each(components, function(i,elem){
                 if(i < {$num_numeric}){
@@ -1065,13 +1065,13 @@ HTML;
         timeFormat: "HH:mm:ss",
         showTimezone: false
     });
-    
+
     if(!{$have_old}){
         $('#date_submit').datetimepicker('setDate', (new Date("{$yesterday}")));
         $('#date_due').datetimepicker('setDate', (new Date("{$current_date}")));
-        
+
     }
-    
+
     $('#date_ta_view').datetimepicker('setDate', (new Date("{$old_gradeable['g_ta_view_start_date']}")));
     $('#date_grade').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_start_date']}")));
     $('#date_released').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_released_date']}")));
@@ -1087,7 +1087,7 @@ HTML;
         }
         calculatePercentageTotal();
     }
-    
+
     if({$have_old}){
         $('#required_type').hide();
     }
@@ -1097,34 +1097,34 @@ HTML;
     function(){
         $('#required_type').hide();
         $('.gradeable_type_options').hide();
-        if ($(this).is(':checked')){ 
-            if($(this).val() == 'Electronic File'){ 
+        if ($(this).is(':checked')){
+            if($(this).val() == 'Electronic File'){
                 $('#electronic_file').show();
                 if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
                     $('#rubric_questions').hide();
                     $('#grading_questions').hide();
                 }
             }
-            else if ($(this).val() == 'Checkpoints'){ 
+            else if ($(this).val() == 'Checkpoints'){
                 $('#checkpoints').show();
                 $('#grading_questions').show();
             }
-            else if ($(this).val() == 'Numeric'){ 
+            else if ($(this).val() == 'Numeric'){
                 $('#numeric').show();
                 $('#grading_questions').show();
             }
         }
     });
-    
+
     // Shows the radio inputs dynamically
     $('input:radio[name="upload_type"]').change(
     function(){
         $('.upload_type').hide();
-        if ($(this).is(':checked')){ 
-            if($(this).val() == 'Upload File'){ 
+        if ($(this).is(':checked')){
+            if($(this).val() == 'Upload File'){
                 $('#upload_file').show();
             }
-            else if ($(this).val() == 'Repository'){ 
+            else if ($(this).val() == 'Repository'){
                 $('#repository').show();
             }
         }
@@ -1156,7 +1156,7 @@ HTML;
             </td> \
         </tr>');
     }
-    
+
     // autoresize the comment box
     function autoResizeComment(e){
         e.target.style.height ="";

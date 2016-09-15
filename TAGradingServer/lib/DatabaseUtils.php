@@ -46,14 +46,14 @@ class DatabaseUtils {
      *
      * ex: "{1, 2, 3, 4}" => array(1, 2, 3, 4)
      *
-     * @param string $text the text representation of the postgres array
-     * @param int $start index to start looking through $text at
-     * @param int $end index of $text where we exist current pgArrayToPhp call
-     * @param bool $parseBools set to true to convert "true"/"false" to booleans instead of strings
+     * @param string $text        the text representation of the postgres array
+     * @param bool   $parse_bools set to true to convert "true"/"false" to booleans instead of strings
+     * @param int    $start       index to start looking through $text at
+     * @param int    $end         index of $text where we exist current pgArrayToPhp call
      *
      * @return array PHP array representation
      */
-    public static function fromPGToPHPArray($text, $parseBools=false, $start=0, &$end=null) {
+    public static function fromPGToPHPArray($text, $parse_bools = false, $start=0, &$end=null) {
         $text = trim($text);
 
         if(empty($text) || $text[0] != "{") {
@@ -71,27 +71,10 @@ class DatabaseUtils {
                     $in_array = true;
                 }
                 else if (!$in_string && $ch == "{") {
-                    $return[] = DatabaseUtils::fromPGToPHPArray($text, $parseBools, $i, $i);
+                    $return[] = DatabaseUtils::fromPGToPHPArray($text, $parse_bools, $i, $i);
                 }
                 else if (!$in_string && $ch == "}") {
-                    if ($have_string) {
-                        $return[] = $element;
-                    }
-                    else if (strlen($element) > 0) {
-                        if (is_numeric($element)) {
-                            $return[] = $element + 0;
-                        }
-                        else {
-                            if (!$parseBools) {
-                                if (strtolower($element) != "null") {
-                                    $return[] = $element;
-                                }
-                            }
-                            else {
-                                $return[] = (strtolower($element) == "true") ? true : false;
-                            }
-                        }
-                    }
+                    self::parsePGValue($element, $have_string, $parse_bools, $return);
                     $end = $i;
                     return $return;
                 }
@@ -99,7 +82,10 @@ class DatabaseUtils {
                     $in_string = true;
                     $quot = $ch;
                 }
-                else if ($in_string && $ch == $quot) {
+                else if ($in_string && $ch == $quot && $text[$i-1] == "\\") {
+                    $element = substr($element, 0, -1).$ch;
+                }
+                else if ($in_string && $ch == $quot && $text[$i-1] != "\\") {
                     $in_string = false;
                     $have_string = true;
                 }
@@ -107,23 +93,8 @@ class DatabaseUtils {
                     continue;
                 }
                 else if (!$in_string && $ch == ",") {
-                    if ($have_string) {
-                        $return[] = $element;
-                    }
-                    else if (strlen($element) > 0) {
-
-                        if (is_numeric($element)) {
-                            $return[] = $element + 0;
-                        }
-                        else {
-                            if (!$parseBools) {
-                                $return[] = $element;
-                            }
-                            else {
-                                $return[] = (strtolower($element) == "true") ? true : false;
-                            }
-                        }
-                    }
+                    self::parsePGValue($element, $have_string, $parse_bools, $return);
+                    $have_string = false;
                     $element = "";
                 }
                 else {
@@ -133,6 +104,38 @@ class DatabaseUtils {
         }
 
         return array();
+    }
+
+    /**
+     * Method that given an element figures out how to add it to the $return array whether it's a string, a numeric,
+     * a null, a boolean, or an unquoted string
+     *
+     * @param string $element     element to analyze
+     * @param bool   $have_string do we have a quoted element (using either ' or " characters around the string)
+     * @param bool   $parse_bools set to true to convert "true"/"false" to booleans instead of strings
+     * @param array  &$return     this is the array being built to contain the parsed PG array
+     */
+    private static function parsePGValue($element, $have_string, $parse_bools, &$return) {
+        if ($have_string) {
+            $return[] = $element;
+        }
+        else if (strlen($element) > 0) {
+            if (is_numeric($element)) {
+                $return[] = ($element + 0);
+            }
+            else {
+                $lower = strtolower($element);
+                if ($parse_bools && in_array($lower, array("true", "t", "false", "f"))) {
+                    $return[] = ($lower === "true" || $lower === "t") ? true : false;
+                }
+                else if ($lower == "null") {
+                    $return[] = null;
+                }
+                else {
+                    $return[] = $element;
+                }
+            }
+        }
     }
 
     /**
@@ -153,11 +156,14 @@ class DatabaseUtils {
         }
         $elements = array();
         foreach ($array as $e) {
-            if (is_array($e)) {
-                $elements[]= DatabaseUtils::fromPHPToPGArray($e);
+            if ($e === null) {
+                $elements[] = "null";
+            }
+            else if (is_array($e)) {
+                $elements[] = DatabaseUtils::fromPHPToPGArray($e);
             }
             else if (is_string($e)) {
-                $elements[] .= "\"{$e}\"";
+                $elements[] .= '"'. str_replace('"', '\"', $e) .'"';
             }
             else if (is_bool($e)) {
                 $elements[] .= ($e) ? "true" : "false";
