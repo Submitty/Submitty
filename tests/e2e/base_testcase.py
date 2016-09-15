@@ -55,6 +55,7 @@ class BaseTestCase(unittest2.TestCase):
         :return:
         """
         self.get("/index.php?semester=" + self.semester + "&course=csci1000")
+        print(self.driver.page_source)
         assert "CSCI1000" in self.driver.title
         self.driver.find_element_by_name('user_id').send_keys(self.user_id)
         self.driver.find_element_by_name('password').send_keys(self.user_password)
