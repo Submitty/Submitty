@@ -251,6 +251,10 @@ HTML;
             <br />
             What is the URL to the assignment instructions? (shown to student) <input style='width: 227px' type='text' name='instructions_url' value="{$g_instructions_url}" placeholder="(Optional)" />
             <br />
+            What date can the TAs view this gradeable (for beta testing)?: <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text" style="cursor: auto; background-color: #FFF; width: 250px;">
+            <br />
+
+
        <!-- <br />
         Is this a team assignment?:
         <input type="radio" name="team_assignment" value="yes"
@@ -677,10 +681,7 @@ HTML;
                 style="cursor: auto; background-color: #FFF; width: 250px;">
             <br />
             </div>
-            What date can the TAs view this?: <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
-                style="cursor: auto; background-color: #FFF; width: 250px;">
-            
-            <br />
+
             What date will the grade be released to the student? 
             <input name="date_released" id="date_released" class="datepicker" type="text" 
                    style="cursor: auto; background-color: #FFF; width: 250px;">    
