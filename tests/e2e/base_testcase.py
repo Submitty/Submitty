@@ -5,7 +5,6 @@ import sys
 
 import unittest2
 from selenium import webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 if sys.version_info[0] == 3:
     raw_input = input
@@ -23,6 +22,7 @@ class BaseTestCase(unittest2.TestCase):
     USER_ID = "student"
     USER_NAME = "Joe"
     USER_PASSWORD = "student"
+    DRIVER = webdriver.Chrome()
 
     def __init__(self, *args, **kwargs):
         super(BaseTestCase, self).__init__(*args, **kwargs)
@@ -37,13 +37,11 @@ class BaseTestCase(unittest2.TestCase):
         self.logged_in = False
 
     def setUp(self):
-        self.driver = webdriver.PhantomJS()
-        # self.driver = webdriver.Chrome()
+        self.driver = BaseTestCase.DRIVER
         self.log_in()
 
     def tearDown(self):
         self.log_out()
-        self.driver.close()
 
     def get(self, url):
         if url[0] != "/":

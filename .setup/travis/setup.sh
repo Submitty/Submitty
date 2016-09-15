@@ -15,12 +15,12 @@ source ${DIR}/../common/common_env.sh
 
 #sudo chmod -R 755 /home/travis/build
 
-if [ ! -f "$SELENIUM_JAR" ]; then
-    echo "Downloading Selenium"
-    sudo mkdir -p $(dirname "${SELENIUM_JAR}")
-    sudo wget -O "${SELENIUM_JAR}" "${SELENIUM_DOWNLOAD_URL}"
-    echo "Downloaded Selenium"
-fi
+#if [ ! -f "$SELENIUM_JAR" ]; then
+#    echo "Downloading Selenium"
+#    sudo mkdir -p $(dirname "${SELENIUM_JAR}")
+#    sudo wget -O "${SELENIUM_JAR}" "${SELENIUM_DOWNLOAD_URL}"
+#    echo "Downloaded Selenium"
+#fi
 
 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
 sudo mkdir -p ${SUBMITTY_DATA_DIR}

@@ -33,7 +33,6 @@ class TestAccess(BaseTestCase):
 
     def test_semester_with_directory_change(self):
         self.get("/index.php?semester=../../" + self.semester + "&course=csci1000")
-        print(self.driver.current_url)
         assert self.driver.current_url == \
             self.test_url + "/index.php?semester=" + self.semester + "&course=csci1000"
 
