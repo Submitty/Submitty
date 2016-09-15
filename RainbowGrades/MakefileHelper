@@ -34,8 +34,9 @@ pull:
 push:
 	scp individual_summary_html/* ${USERNAME}@${HWSERVER}:${REPORTS_DIRECTORY}/summary_html
 
-
 flags = -g
+memory_debug : memory_flags = -m32
+
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)  
@@ -47,11 +48,8 @@ ifeq ($(UNAME_S),Linux)
 endif
 
 
-
-
-
 compile:
-	g++ -m32 -Wall ${flags} \
+	g++ -Wall ${flags} ${memory_flags} \
 		${RAINBOW_GRADES_DIRECTORY}/main.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/output.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/table.cpp \
