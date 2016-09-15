@@ -259,7 +259,8 @@ void gradeable_helper(std::ifstream& istr, GRADEABLE_ENUM g) {
 
 bool string_to_gradeable_enum(const std::string &s, GRADEABLE_ENUM &return_value) {
   if (s == "hw" ||
-      s == "homework")                  { return_value = GRADEABLE_ENUM::HOMEWORK;          return true;  }
+      s == "homework" ||
+      s == "Homework")                  { return_value = GRADEABLE_ENUM::HOMEWORK;          return true;  }
   if (s == "assignment")                { return_value = GRADEABLE_ENUM::ASSIGNMENT;        return true;  }
   if (s == "problem_set")               { return_value = GRADEABLE_ENUM::PROBLEM_SET;       return true;  }
 
