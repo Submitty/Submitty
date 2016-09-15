@@ -147,13 +147,13 @@ print <<<HTML
 HTML;
 
 $grade_by_reg_section = $nt_gradeable['g_grade_by_registration'];
-$section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
+$section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
 $user_section_param = ($grade_by_reg_section ? 'registration_section': 'rotating_section');
 $params = array($user_id);
 if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true){
     $params = array();
     $query = ($grade_by_reg_section ? "SELECT * FROM sections_registration ORDER BY sections_registration_id ASC"
-                                    : "SELECT * FROM sections_rotating ORDER BY sections_rotating_id ASC");
+                                    : "SELECT * FROM sections_rotating ORDER BY sections_rotating ASC");
     $db->query($query, $params);
 }
 else{
