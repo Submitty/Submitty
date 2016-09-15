@@ -65,6 +65,14 @@ if (!isset($_REQUEST['course'])) {
 $semester = basename($_REQUEST['semester']);
 $course = basename($_REQUEST['course']);
 
+if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
+    $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $url = str_replace("course={$_REQUEST['course']}", "course={$course}", $url);
+    $url = str_replace("semester={$_REQUEST['semester']}", "semester={$semester}", $url);
+    header("Location: {$url}");
+    exit();
+}
+
 /*
  * This sets up our Core (which in turn loads the config, database, etc.) for the application
  * and then we initialize our Output engine (as it requires Core to run) and then set the
