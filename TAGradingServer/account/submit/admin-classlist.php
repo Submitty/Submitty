@@ -40,8 +40,10 @@ finfo_close($fh); //No longer needed once mime type is determined.
 
 if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
     $csv_file = "/tmp/".\lib\Utils::generateRandomString();
+    $old_umask = umask(0007);
     file_put_contents($csv_file, "");
-    chmod($csv_file, 0660);
+    umask($old_umask);
+    //@chmod($csv_file, 0660);
     $xlsx_file = "/tmp/".\lib\Utils::generateRandomString();
 }
 else if (($fileType == 'csv' && $mimeType == 'text/plain')) {
@@ -91,8 +93,7 @@ if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedo
             die("Error parsing xlsx to csv: ".$output['error_message']);
         }
         else if ($output['success'] !== true) {
-            print(curl_error($ch));
-            die("Error on response on parsing xlsx");
+            die("Error on response on parsing xlsx: ".curl_error($ch));
         }
         curl_close($ch);
     }
@@ -118,15 +119,18 @@ $error_message = ""; //Used to show accumulated errors during data validation
 $row_being_processed = 1; //Offset to account for header (user will cross-reference with his data sheet)
 $rows = array();
 unset($contents[0]); //header should be thrown away (does not affect cross-reference)
+if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+    unset($contents[1]); // xlsx2csv will add a row to the top of the spreadsheet
+}
 
 foreach($contents as $content) {
 	$row_being_processed++;
 	$details = explode(",", trim($content));
-	$rows[] = array( 'student_first_name' => $details[$csvFieldsINI['student_first_name']],
-	                 'student_last_name'  => $details[$csvFieldsINI['student_last_name']],
-	                 'user_id'            => explode("@", $details[$csvFieldsINI['student_email']])[0],
-                     'student_email'      =>  $details[$csvFieldsINI['student_email']],
-	                 'registration_section'    => intval($details[$csvFieldsINI['student_section']]) );
+	$rows[] = array( 'student_first_name'   => $details[$csvFieldsINI['student_first_name']],
+	                 'student_last_name'    => $details[$csvFieldsINI['student_last_name']],
+	                 'user_id'              => explode("@", $details[$csvFieldsINI['student_email']])[0],
+                     'student_email'        =>  $details[$csvFieldsINI['student_email']],
+	                 'registration_section' => intval($details[$csvFieldsINI['student_section']]) );
 
 	//Validate massaged data.  First, make sure we're working on the most recent entry (should be the "end" element).
 	$val = end($rows);
@@ -138,7 +142,7 @@ foreach($contents as $content) {
 	$error_message .= (preg_match("~^[a-zA-Z.'`\- ]+$~", $val['student_last_name'])) ? "" : "Error in student last name column, row #{$row_being_processed}: {$val['student_last_name']}<br>";
 
 	//Student section must be greater than zero (intval($str) returns zero when $str is not integer)
-	$error_message .= ($val['registration_section'] > 0) ? "" : "Error in student section column, row #{$row_being_processed}: {$val['student_section']}<br>";
+	$error_message .= ($val['registration_section'] > 0) ? "" : "Error in student section column, row #{$row_being_processed}: {$val['registration_section']}<br>";
 
 	//No check on user_id (computing login ID) -- different Univeristies have different formats.
 }
@@ -203,4 +207,4 @@ foreach ($students as $user_id => $student) {
 }
 
 \lib\Database::commit();
-header("Location: {$BASE_URL}/account/admin-classlist.php?course={$_GET['course']}&semester={$_GET['semester']}&update=1&inserted={$inserted}&updated={$updated}&deleted={$deleted}&moved={$moved}");
+header("Location: {$BASE_URL}/account/admin-classlist.php?course={$_GET['course']}&semester={$_GET['semester']}&update=1&inserted={$inserted}&updated={$updated}&deleted={$deleted}&moved={$moved}&this[]=Students&this[]=Upload%20ClassList");
