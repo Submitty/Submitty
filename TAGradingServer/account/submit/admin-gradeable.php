@@ -321,24 +321,25 @@ abstract class GradeableType{
                                    'section_type' => $g_grade_by_registration, 'date_grade' => $g_grade_start_date,
                                    'date_released' =>$g_grade_released_date, 'bucket' => $g_syllabus_bucket,
                                    'date_ta_view' => $g_ta_view_start_date);
-     
+
      if ($request_args['gradeable_type'] === "Electronic File"){
         $g_constructor_params['gradeable_type'] = GradeableType::electronic_file;
 
+        $ta_grading = ($request_args['ta_grading'] == "true") ? "true" : "false";
         $date_submit = $request_args['date_submit'];
         $date_due = $request_args['date_due'];
-        
-        if (strtotime($date_due) < strtotime($date_submit)){
+
+        if (strtotime($date_due) < strtotime($date_submit)) {
             throw new Exception('Submission due date cannot be earlier than submission open date.');
         }
         
-        if(strtotime($g_grade_start_date) < strtotime($date_due)){
+        if ($ta_grading === "true" && strtotime($g_grade_start_date) < strtotime($date_due)) {
             throw new Exception('TAs cannot start grading before the submission due date');
         }
         
         $is_repo = ($request_args['upload_type'] == 'Repository')? "true" : "false";
         $subdirectory = (isset($request_args['subdirectory']) && $is_repo == "true")? $request_args['subdirectory'] : '';
-        $ta_grading = ($request_args['ta_grading'] == "true")? "true" : "false";
+
         $config_path = $request_args['config_path'];
         $eg_late_days = intval($request_args['eg_late_days']);
         $eg_pt_precision = floatval($request_args['point_precision']);
