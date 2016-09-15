@@ -1,6 +1,6 @@
 <?php
 
-namespace app\models;
+namespace models;
 
 use \lib\Database;
 use lib\ExceptionHandler;
@@ -10,10 +10,7 @@ use lib\ExceptionHandler;
  * @package app\models
  */
 class User {
-    
-    /**
-     * @var int
-     */
+
     public static $user_id = -1;
     
     /**

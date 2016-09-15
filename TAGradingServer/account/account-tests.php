@@ -1,5 +1,5 @@
 <?php
-use app\models\User;
+use \models\User;
 
 include "../header.php";
 

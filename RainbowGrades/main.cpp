@@ -258,30 +258,33 @@ void gradeable_helper(std::ifstream& istr, GRADEABLE_ENUM g) {
 
 
 bool string_to_gradeable_enum(const std::string &s, GRADEABLE_ENUM &return_value) {
-  if (s == "hw" || s == "homework") { return_value = GRADEABLE_ENUM::HOMEWORK;          return true;  }
-  if (s == "assignment")            { return_value = GRADEABLE_ENUM::ASSIGNMENT;        return true;  }
-  if (s == "problem_set")           { return_value = GRADEABLE_ENUM::PROBLEM_SET;       return true;  }
+  if (s == "hw" ||
+      s == "homework")                  { return_value = GRADEABLE_ENUM::HOMEWORK;          return true;  }
+  if (s == "assignment")                { return_value = GRADEABLE_ENUM::ASSIGNMENT;        return true;  }
+  if (s == "problem_set")               { return_value = GRADEABLE_ENUM::PROBLEM_SET;       return true;  }
 
-  if (s == "quiz" || s == "quizze") { return_value = GRADEABLE_ENUM::QUIZ;              return true;  }
-  if (s == "test")                  { return_value = GRADEABLE_ENUM::TEST;              return true;  }
-  if (s == "exam")                  { return_value = GRADEABLE_ENUM::EXAM;              return true;  }
+  if (s == "quiz" ||
+      s == "quizze")                    { return_value = GRADEABLE_ENUM::QUIZ;              return true;  }
+  if (s == "test")                      { return_value = GRADEABLE_ENUM::TEST;              return true;  }
+  if (s == "exam")                      { return_value = GRADEABLE_ENUM::EXAM;              return true;  }
 
-  if (s == "exercise")              { return_value = GRADEABLE_ENUM::EXERCISE;          return true;  }
+  if (s == "exercise")                  { return_value = GRADEABLE_ENUM::EXERCISE;          return true;  }
   if (s == "Lecture-exercise" ||
       s == "lecture_exercise" ||
-      s == "lec_ex")      { return_value = GRADEABLE_ENUM::LECTURE_EXERCISE;  return true;  }
-  if (s == "reading")               { return_value = GRADEABLE_ENUM::READING;           return true;  }
-  if (s == "lab" || s == "Lab")     { return_value = GRADEABLE_ENUM::LAB;               return true;  }
+      s == "lec_ex")                    { return_value = GRADEABLE_ENUM::LECTURE_EXERCISE;  return true;  }
+  if (s == "reading")                   { return_value = GRADEABLE_ENUM::READING;           return true;  }
+  if (s == "lab" ||
+      s == "Lab")                       { return_value = GRADEABLE_ENUM::LAB;               return true;  }
 
-  if (s == "recitation")            { return_value = GRADEABLE_ENUM::RECITATION;        return true;  }
-  if (s == "project")               { return_value = GRADEABLE_ENUM::PROJECT;           return true;  }
-  if (s == "participation")         { return_value = GRADEABLE_ENUM::PARTICIPATION;     return true;  }
+  if (s == "recitation")                { return_value = GRADEABLE_ENUM::RECITATION;        return true;  }
+  if (s == "project")                   { return_value = GRADEABLE_ENUM::PROJECT;           return true;  }
+  if (s == "participation")             { return_value = GRADEABLE_ENUM::PARTICIPATION;     return true;  }
 
+  if (s == "instructor_note")           { return_value = GRADEABLE_ENUM::NOTE;              return true;  }
+  if (s == "note")                      { return_value = GRADEABLE_ENUM::NOTE;              return true;  }
 
-  if (s == "instructor_note")       { return_value = GRADEABLE_ENUM::NOTE;              return true;  }
-  if (s == "note")                  { return_value = GRADEABLE_ENUM::NOTE;              return true;  }
-
-  if (s == "None" || s == "none" ||
+  if (s == "None" ||
+      s == "none" ||
       s == "None (for Practice Only)")  { return_value = GRADEABLE_ENUM::NOTE;              return true;  }
   return false;
 }
@@ -927,7 +930,6 @@ void load_student_grades(std::vector<Student*> &students) {
                   std::string gradeable_id = (*itr2).value("id","ERROR BAD ID");
                   std::string gradeable_name = (*itr2).value("name",gradeable_id);
 		  float score = (*itr2).value("score",0.0);
-
                   std::string other_note = (*itr2).value("text","");
 
 		  // Search through the gradeable categories as needed to find where this item belongs

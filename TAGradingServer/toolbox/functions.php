@@ -19,12 +19,12 @@ use \lib\Database;
 use \lib\ExceptionHandler;
 use \lib\IniParser;
 use \lib\Logger;
-use \app\models\User;
+use \models\User;
 
 // get our sweet autoloader!
 include __DIR__ . "/../lib/AutoLoader.php";
 AutoLoader::registerDirectory(__DIR__."/../lib", true, "lib");
-AutoLoader::registerDirectory(__DIR__."/../app", true, "app");
+AutoLoader::registerDirectory(__DIR__."/../models", true, "models");
 
 $start_time = microtime_float();
 
@@ -357,11 +357,12 @@ function microtime_float() {
 
 /**
  * @param $text
+ * @param $parse_bools
  *
  * @return array
  */
-function pgArrayToPhp($text) {
-    return \lib\DatabaseUtils::fromPGToPHPArray($text);
+function pgArrayToPhp($text, $parse_bools=false) {
+    return \lib\DatabaseUtils::fromPGToPHPArray($text, $parse_bools);
 }
 
 /**
@@ -421,3 +422,18 @@ function check_administrator() {
         die("<br /><br /><br /><br />&nbsp;&nbsp;You must be an administrator to access this page.");
     }
 }
+
+
+//
+// PROBABLY NOT THE RIGHT LOCATION FOR THIS FUNCTION
+//
+function getActiveVersionFromFile($g_id, $student_id) {
+    $settings_file = __SUBMISSION_SERVER__."/submissions/".$g_id."/".$student_id."/user_assignment_settings.json";
+    if (file_exists($settings_file)) {
+        $settings_file_contents = file_get_contents($settings_file);
+        $settings = json_decode($settings_file_contents, true);
+        return $settings['active_version'];
+    }
+    return 0;
+}
+

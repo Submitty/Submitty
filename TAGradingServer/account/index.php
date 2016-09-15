@@ -1,7 +1,7 @@
 <?php
 include "../header.php";
 
-use app\models\User;
+use \models\User;
 use lib\Database;
 
 $account_subpages_unlock = true;
@@ -162,7 +162,7 @@ ORDER BY
                 $db->query("SELECT gd_grader_id FROM gradeable_data WHERE gd_user_id=? AND g_id=?", $params);
                 $temp_row = $db->row();
 
-                if(intval($temp_row["gd_grader_id"]) == \app\models\User::$user_id) {
+                if(intval($temp_row["gd_grader_id"]) == User::$user_id) {
                     $position_completed++;
                 } else {
                     $position_other++;
