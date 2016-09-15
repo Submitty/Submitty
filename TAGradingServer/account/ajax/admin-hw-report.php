@@ -141,7 +141,14 @@ foreach($db->rows() as $student_record) {
         
         if ($gradeable['gd_status'] == 1) {
             $db->query("SELECT late_days_used FROM late_days_used WHERE g_id=? AND user_id=?", array($g_id, $student_id));
-            $late_days_used = $db->row()['late_days_used'];
+            $row = $db->row();
+            if (isset($row['late_days_used'])) {
+                $late_days_used = $row['late_days_used'];
+            }
+            else {
+                $late_days_used = 0;
+            }
+
             $grade_days_late = $late_days_used;
         }
         else {
@@ -181,31 +188,35 @@ foreach($db->rows() as $student_record) {
             $grading_notes = pgArrayToPhp($gradeable['comments']);
             $question_totals = pgArrayToPhp($gradeable['scores']);
             $question_messages = pgArrayToPhp($gradeable['titles']);
-            $question_extra_credits = pgArrayToPhp($gradeable['is_extra_credits']);
+            $question_extra_credits = pgArrayToPhp($gradeable['is_extra_credits'], true);
             $question_grading_notes = pgArrayToPhp($gradeable['grading_notes']);
             $question_max_scores = pgArrayToPhp($gradeable['max_scores']);
             $question_total = 0; 
+            
+            $active_version = $gradeable['gd_active_version'];
+            $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$active_version."/results_grade.txt";
 
-            $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$gradeable['gd_active_version']."/results_grade.txt";
             $auto_grading_max_score = 0;
             $auto_grading_awarded = 0;
+
             if (!file_exists($submit_file)) {
                 $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
             }
             else {
-                $auto_grading_awarded = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);        
+                $auto_grading_awarded = autogradingTotalAwarded($gradeable['g_id'], $student_id, $active_version);
                 $auto_grading_max_score = getAutogradingMaxScore($gradeable['g_id']);                                                                                
-                $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]";
+                $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]" . $nl;
                 $gradefilecontents = file_get_contents($submit_file);
-                $student_output_text .= $nl.$nl.$gradefilecontents.$nl;
+                $student_output_text .= "submission version #" . $active_version .$nl;
+                $student_output_text .= $nl.$gradefilecontents.$nl;
             } 
 
-            for ($i=0; $i < count($grading_notes); ++$i){
+            for ($i = 0; $i < count($grading_notes); $i++){
                 $grading_note = $grading_notes[$i];
                 $question_total = floatval($question_totals[$i]);
                 $question_max_score = floatval($question_max_scores[$i]);
                 $question_message = $question_messages[$i];
-                $question_extra_credit = intval($question_extra_credits[$i]) == 1;
+                $question_extra_credit = boolval($question_extra_credits[$i]);
                 $question_grading_note = $question_grading_notes[$i];
                 // ensure we have indexes for this part
                 if($question_total == -100){

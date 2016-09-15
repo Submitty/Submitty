@@ -1,17 +1,16 @@
 .DS_Store
 *.autosave
 *.orig*
-public/
-output/
+/output/
 *~
 *.o
 INSTALL.sh
-.vagrant
+/.vagrant
 *.zip
 
-.idea
+/.idea
 
-tests/report
+/tests/report
 selenium*.jar
 
 logs/
@@ -24,11 +23,11 @@ TAGradingServer/toolbox/configs/*
 !TAGradingServer/toolbox/configs/sample_course.php
 !TAGradingServer/toolbox/configs/course_template.php
 
-site/config/*
-!site/config/master_template.ini
-!site/config/course_template.ini
+/site/config/*
+!/site/config/master_template.ini
+!/site/config/course_template.ini
 
-vendor/
+/vendor/
 composer.lock
 
 *.aux
