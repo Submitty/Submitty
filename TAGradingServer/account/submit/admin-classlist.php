@@ -103,7 +103,11 @@ if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedo
 }
 
 // Get CSV ini config
-$csvFieldsINI = parse_ini_file("../../toolbox/configs/student_csv_fields.ini", false, INI_SCANNER_RAW);
+$csvFieldsINI = false;
+if (file_exists("../../toolbox/configs/student_csv_fields.ini")) {
+    $csvFieldsINI = parse_ini_file("../../toolbox/configs/student_csv_fields.ini", false, INI_SCANNER_RAW);
+}
+
 if ($csvFieldsINI === false) {
     die("Cannot read student list CSV configuration file.  Please contact your sysadmin to run setcsvfields tool.");
 }
