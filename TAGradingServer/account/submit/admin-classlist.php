@@ -129,7 +129,7 @@ foreach($contents as $content) {
     $rows[] = array( 'student_first_name'   => $details[$csvFieldsINI['student_first_name']],
                      'student_last_name'    => $details[$csvFieldsINI['student_last_name']],
                      'user_id'              => explode("@", $details[$csvFieldsINI['student_email']])[0],
-                     'student_email'        =>  $details[$csvFieldsINI['student_email']],
+                     'student_email'        => $details[$csvFieldsINI['student_email']],
                      'registration_section' => intval($details[$csvFieldsINI['student_section']]) );
 
     //Validate massaged data.  First, make sure we're working on the most recent entry (should be the "end" element).
