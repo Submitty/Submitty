@@ -52,17 +52,17 @@ before_install:
    #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi
    #- phantomjs --version
    - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
-   - export PATH="$PATH:$HOME/.composer/vendor/bin"
+   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
 
 install:
   #- if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.5" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
   #- if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then sudo apt-get -y install libapache2-mod-php5 php5-pgsql php5-curl; a2enmod php5; fi
   #- if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then sudo apt-get -y install libapache2-mod-php5.6 php5.6-pgsql php5.6-curl; a2enmod php5.6; fi
   #- if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo apt-get -y install libapache2-mod-php7.0 php7.0-pgsql php7.0-curl; a2enmod php7.0; fi
-  #- wget http://chromedriver.storage.googleapis.com/2.21/chromedriver_linux64.zip
-  #- unzip chromedriver_linux64.zip
-  #- sudo chmod u+x chromedriver
-  #- sudo mv chromedriver /usr/bin/
+  - wget http://chromedriver.storage.googleapis.com/2.24/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip
+  - sudo chmod u+x chromedriver
+  - sudo mv chromedriver /usr/bin/
   - travis_retry composer install --prefer-dist --no-interaction
   - pip install selenium
   - pip install nose2
