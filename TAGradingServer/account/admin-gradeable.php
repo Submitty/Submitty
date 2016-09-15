@@ -673,11 +673,11 @@ HTML;
 
     print <<<HTML
             <!-- TODO default to the submission + late days for electronic -->
-            What date can the TAs view this?: <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
-                style="cursor: auto; background-color: #FFF; width: 250px;">
-            
-            <br />
             What date can the TAs start grading this?: <input name="date_grade" id="date_grade" class="datepicker" type="text"
+                style="cursor: auto; background-color: #FFF; width: 250px;">
+            <br />
+            </div>
+            What date can the TAs view this?: <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
             
             <br />
@@ -686,7 +686,6 @@ HTML;
                    style="cursor: auto; background-color: #FFF; width: 250px;">    
             
             <br />
-            </div>
             
             What <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Iris-(Rainbow-Grades)">syllabus category</a> does this item belong to?:
             
