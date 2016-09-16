@@ -56,9 +56,12 @@ if (!file_exists($xlsx_file)) {
 else if (!file_exists($csv_file)) {
     return_error("CSV file not found");
 }
+else if (!is_writeable($csv_file)) {
+    return_error("Cannot write to CSV file");
+}
 
 //XLSX to CSV conversion
-$proc_handle = popen("xlsx2csv -d , -i -s 0 {$xlsx_file} {$csv_file}_folder 2>&1", "r");
+$proc_handle = popen("xlsx2csv -d , -i -s 0 {$xlsx_file} > {$csv_file} 2>&1", "r");
 
 //Validate result after process.
 //Check for traceback from xlsx2csv process (no message when process successful).
@@ -67,18 +70,5 @@ pclose($proc_handle);
 if (!empty($tmp)) {
     return_error("Failed converting xlsx to csv.");
 }
-
-//Check to make sure _HSS_csv was written.
-if (is_dir($csv_file."_folder")) {
-    if (file_put_contents($csv_file, file_get_contents($csv_file."_folder/Sheet1.csv")) === false) {
-        system("rm -rf {$csv_file}_folder");
-        return_error(error_get_last());
-    }
-    
-}
-else {
-    file_put_contents($csv_file, file_get_contents($csv_file."_folder"));
-}
-system("rm -rf {$csv_file}_folder");
 
 return_success();
