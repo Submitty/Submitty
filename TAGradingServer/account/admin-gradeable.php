@@ -251,6 +251,10 @@ HTML;
             <br />
             What is the URL to the assignment instructions? (shown to student) <input style='width: 227px' type='text' name='instructions_url' value="{$g_instructions_url}" placeholder="(Optional)" />
             <br />
+            What date can the TAs view this gradeable (for beta testing)?: <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text" style="cursor: auto; background-color: #FFF; width: 250px;">
+            <br />
+
+
        <!-- <br />
         Is this a team assignment?:
         <input type="radio" name="team_assignment" value="yes"
@@ -673,22 +677,18 @@ HTML;
 
     print <<<HTML
             <!-- TODO default to the submission + late days for electronic -->
-            What date can the TAs view this?: <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
-                style="cursor: auto; background-color: #FFF; width: 250px;">
-
-            <br />
             What date can the TAs start grading this?: <input name="date_grade" id="date_grade" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
-
             <br />
+            </div>
+
             What date will the grade be released to the student?
             <input name="date_released" id="date_released" class="datepicker" type="text"
                    style="cursor: auto; background-color: #FFF; width: 250px;">
 
             <br />
-            </div>
 
-            What <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Iris-(Rainbow-Grades)">syllabus category</a> does this item belong to?:
+            What <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Iris-(Rainbow-Grades)">syllabus category</a> does this item belong to?
 
             <select name="gradeable_buckets" style="width: 170px;">
 HTML;
