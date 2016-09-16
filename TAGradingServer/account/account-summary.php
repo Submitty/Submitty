@@ -134,9 +134,9 @@ HTML;
     $section_section_field = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
     
     if(!((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true)) {
-        $params = array($user_id);
-        $s_query = ($grade_by_reg_section) ? "SELECT sections_registration_id FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id"
-                                         : "SELECT sections_rotating FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating";
+        $params = array($user_id,$g_id);
+        $s_query = ($grade_by_reg_section) ? "SELECT sections_registration_id FROM grading_registration WHERE user_id=? AND g_id=? ORDER BY sections_registration_id"
+                                         : "SELECT sections_rotating FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating";
         $db->query($s_query, $params);
         $sections = array();
         foreach ($db->rows() as $section) {
