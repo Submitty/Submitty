@@ -1078,6 +1078,8 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
 
     std::string file2 = INDIVIDUAL_FILES_OUTPUT_DIRECTORY + students[S]->getUserName() + "_message.html";
     std::ofstream ostr2(file2.c_str());
+
+#if 0
     if (students[S]->hasPriorityHelpStatus()) {
       ostr2 << "<h3>PRIORITY HELP QUEUE</h3>" << std::endl;
       priority_stream << std::left << std::setw(15) << students[S]->getSection()
@@ -1092,6 +1094,7 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
       ostr2 << "<em>recent iclicker = " << students[S]->getIClickerRecent() << " / 12.0</em>" << std::endl;
     }
 
+#endif
     PrintExamRoomAndZoneTable(ostr2,students[S]);
 
 
