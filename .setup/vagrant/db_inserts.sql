@@ -2,6 +2,8 @@
 
 INSERT INTO sections_registration(sections_registration_id)
     VALUES (1);
+INSERT INTO sections_registration(sections_registration_id)
+    VALUES (2);
 
 -- Add all instructors / TAs, administrators
 INSERT INTO users (user_id, user_password, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
@@ -23,6 +25,12 @@ INSERT INTO users (user_id, user_password, user_firstname, user_lastname, user_e
     
 INSERT INTO users (user_id, user_password, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
     VALUES ('smithj', '$2y$10$QmZt5iv6gYlUrKXiKVoQee169ruXqNAk0loj835wbG7/CXX7BGboy', 'John', 'Smith', 'smithj@email.com', 4, 1, NULL);
+
+INSERT INTO users (user_id, user_password, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('joness', '$2y$10$QmZt5iv6gYlUrKXiKVoQee169ruXqNAk0loj835wbG7/CXX7BGboy', 'Sally', 'Jones', 'joness@email.com', 4, 2, NULL);
+
+INSERT INTO users (user_id, user_password, user_firstname, user_lastname, user_email, user_group, registration_section, rotating_section)
+    VALUES ('browna', '$2y$10$QmZt5iv6gYlUrKXiKVoQee169ruXqNAk0loj835wbG7/CXX7BGboy', 'Alex', 'Brown', 'browna@email.com', 4, 2, NULL);
     
 -- Late days    
 INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
@@ -30,3 +38,9 @@ INSERT INTO late_days (user_id, allowed_late_days, since_timestamp)
     
 INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
     VALUES ('smithj', 3, timestamp '1970-01-01 00:00:00');
+
+INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
+    VALUES ('joness', 3, timestamp '1970-01-01 00:00:00');
+
+INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
+    VALUES ('browna', 3, timestamp '1970-01-01 00:00:00');
