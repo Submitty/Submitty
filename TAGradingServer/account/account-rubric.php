@@ -198,14 +198,10 @@ HTML;
 }
 
 $code_number = 0;
-$display_stats = ($show_stats == 0) ? "none" : "inline-block";
-$display_rubric = ($show_rubric == 0) ? "none" : "inline-block";
-$display_left = ($show_left == 0) ? "none" : "inline-block";
-$display_right = ($show_right == 0) ? "none" : "inline-block";
 $output .= <<<HTML
 
-<span id="left" class="resbox" style="display: {$display_left};">
-    <div id="content">
+
+    <div id="left" class="draggable resizable rubric_panel" style="left:5px;top:50px; height:55%;width:60%;">
 HTML;
 
 $source_number = 0;
@@ -262,12 +258,9 @@ HTML;
     if (!isset($eg->submission_details)) {
         $output .= <<<HTML
         <div id="inner-container">
-            <div id="inner-container-spacer"></div>
-            <div id="inner-container-spacer"></div>
-
-            <div class="tabbable">
+            <div class="tabbable" style="padding-top: 10px;">
                 <ul id="myTab" class="nav nav-tabs">
-                    <li style="margin-right:2px; height:34px; width:20px; text-align:center; line-height:16px; padding-top:3px; -webkit-border-radius: 4px 4px 0 0; -moz-border-radius: 4px 4px 0 0; border-radius: 4px 4px 0 0; background-color: #DA4F49;">
+                    <li style="margin-right:2px; height:34px; width:20px; text-align:center; line-height:16px; padding-top:3px;">
                         <i class="icon-remove icon-white"></i>
                     </li>
                     <li class='active'><a href="#output-1" data-toggle="tab">
@@ -295,7 +288,6 @@ HTML;
 
     $output .= <<<HTML
         <div id="inner-container">
-            <div id="inner-container-spacer"></div>
             <br />
 HTML;
     if ($eg->active_assignment == 0){
@@ -310,8 +302,7 @@ HTML;
 HTML;
     }
     $output .= <<<HTML
-            <div id="inner-container-spacer"></div>
-            <div class="tabbable">
+            <div class="tabbable" style="padding-top:10px;">
                 <ul id="myTab" class="nav nav-tabs">
                     <li style="margin-right:2px; height:34px; width:20px; text-align:center; line-height:16px; padding-top:3px; -webkit-border-radius: 4px 4px 0 0; -moz-border-radius: 4px 4px 0 0; border-radius: 4px 4px 0 0; background-color: {$icon_color};">
                         {$icon}
@@ -339,7 +330,7 @@ HTML;
     $output .= <<<HTML
 
                 </ul>
-                <div class="tab-content" style="width: 100%; overflow-x: hidden;">
+                <div class="tab-content" style="width: 100%; overflow-x: hidden; border:thin solid black">
 HTML;
 
     $i = 0;
@@ -381,13 +372,8 @@ HTML;
 
     $output .= <<<HTML
     </div>
-</span><!-- puts no space between spans
 
---><span id="pane"></span><!--
---><span id="panemover" onmousedown="dragStart(event, 'left', 'right'); return false;" onmousemove="drag(event, 'left', 'right');" onmouseout="dragRelease();" onmouseup="dragRelease();"></span><!--
-
---><span id="right" class="resbox" style="display: {$display_right}; overflow-y:auto;">
-<div id="inner-container-spacer"></div><div id="inner-container" >
+<div id="right" class="draggable resizable rubric_panel" style="top:65%; left: 5px;width: 60%; height: 30%">
 HTML;
     $output .= "\n";
     display_files($eg->eg_files, $output, 1);
@@ -401,10 +387,10 @@ HTML;
 
     $output .= <<<HTML
 </div>
-</span><!---->
 
-<span id="stats" class="resbox draggable" style="display: {$display_stats}; z-index: 200;">
-    <div class="" style="background-color: #99cccc; height:20px; cursor: move;" >
+
+<div id="stats" class="draggable resizable rubric_panel" style="bottom: 0px; right:20px; width:35%; height: 25%;">
+    <div class="">
     <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyS')" ></span>
     </div>
     <div id="inner-container" style="margin:5px;">
@@ -485,13 +471,13 @@ $print_status = ($eg->status == 1) ? "Good" : "Bad";
 $output .= <<<HTML
                 <b>Status:</b> <span style="color: {$color};">{$part_status}</span><br />
     </div>
-</span>
+</div>
 
-<span id="rubric" class="resbox draggable" style="display: {$display_rubric}; z-index: 199; overflow-y=hidden;">
-    <div class="" style="background-color: #99cccc; height:20px; cursor: move;"  >
+<div id="rubric" class="resizable draggable rubric_panel" style="top:50px; right:20px;width:35%; height: 65%;">
+    <div class="">
         <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyG')" ></span>
     </div>
-    <div class="inner-container" style="overflow-y:auto; margin:1px; height:100%">
+    <div class="inner-container" style="margin:1px; height:100%">
 
 HTML;
 
@@ -705,7 +691,7 @@ $output .= <<<HTML
             </form>
 
     </div>
-</span>
+</div>
 HTML;
 
 $output .= <<<HTML
