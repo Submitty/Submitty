@@ -47,7 +47,7 @@ $default_allowed_lates = __DEFAULT_LATE_DAYS_STUDENT__;
 $db->query("SELECT * FROM users ORDER BY user_id ASC", array());
 //$db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
 foreach($db->rows() as $student_record) {
-        
+
     // Gather student info, set output filename, reset output
     $student_id = $student_record["user_id"];
     $student_legal_first_name = $student_record["user_firstname"];
@@ -56,8 +56,8 @@ foreach($db->rows() as $student_record) {
 
     // create/reset student json
     $student_output_json = array();
-    $student_output_json_name = $student_id . "_summary.json";	
-	
+    $student_output_json_name = $student_id . "_summary.json";
+
     $student_section = intval($student_record['registration_section']);
 
     $params = array($student_id);
@@ -72,10 +72,10 @@ foreach($db->rows() as $student_record) {
 
     // adds late days for electronic gradeables
     $db->query("
-        SELECT 
+        SELECT
             allowed_late_days
-        FROM 
-            late_days 
+        FROM
+            late_days
         WHERE user_id=?
         ORDER BY since_timestamp DESC", array($student_id));
     $row = $db->row();
@@ -86,50 +86,50 @@ foreach($db->rows() as $student_record) {
     $student_output_json["allowed_late_days"] = $late_days_allowed;
 
     $student_output_json["last_update"] = date("l, F j, Y");
-    
+
     // ADD each bucket to the output
     foreach($categories as $category){
         $student_output_json[$category] = array();
     }
-    
+
     // SQL sorcery ༼╰( ͡° ͜ʖ ͡° )つ──☆*:・ﾟ
     $db->query("
     SELECT * FROM (
-        SELECT 
-            g_syllabus_bucket, 
-            g_title, 
-            g_gradeable_type, 
-            g.g_id, 
-            u.user_id, 
-            case when score is null then 0 else score end, 
-            titles, 
+        SELECT
+            g_syllabus_bucket,
+            g_title,
+            g_gradeable_type,
+            g.g_id,
+            u.user_id,
+            case when score is null then 0 else score end,
+            titles,
             comments,
             scores,
             is_texts,
             gd_active_version
         FROM
-            users AS u CROSS JOIN gradeable AS g 
+            users AS u CROSS JOIN gradeable AS g
             LEFT JOIN (
-                SELECT 
-                    g_id, 
-                    gd_user_id, 
-                    score, 
-                    titles, 
+                SELECT
+                    g_id,
+                    gd_user_id,
+                    score,
+                    titles,
                     comments,
                     scores,
                     is_texts,
                     gd_active_version
-                FROM 
+                FROM
                     gradeable_data AS gd INNER JOIN(
-                    SELECT 
-                        gd_id, 
-                        SUM(gcd_score) AS score, 
-                        array_agg(gc_title ORDER BY gc_order ASC) AS titles, 
+                    SELECT
+                        gd_id,
+                        SUM(gcd_score) AS score,
+                        array_agg(gc_title ORDER BY gc_order ASC) AS titles,
                         array_agg(gcd_component_comment ORDER BY gc_order ASC) AS comments,
                         array_agg(gcd_score ORDER BY gc_order ASC) AS scores,
                         array_agg(gc_is_text ORDER BY gc_order ASC) AS is_texts
-                    FROM 
-                        gradeable_component_data AS gcd INNER JOIN 
+                    FROM
+                        gradeable_component_data AS gcd INNER JOIN
                             gradeable_component AS gc ON gcd.gc_id=gc.gc_id
                     GROUP BY gd_id
                 ) AS gd_sum ON gd.gd_id=gd_sum.gd_id
@@ -138,7 +138,7 @@ foreach($db->rows() as $student_record) {
         ) AS user_grades
     WHERE user_id=?
         ",array($student_id));
-	
+
     foreach($db->rows() as $gradeable){
         $this_g = array();
 
@@ -156,13 +156,13 @@ foreach($db->rows() as $student_record) {
         $this_g["name"] =  $gradeable['g_title'];
         $this_g["score"] = (floatval($gradeable['score'])+floatval($autograding_score));
 
-        // adds late days for electronic gradeables 
+        // adds late days for electronic gradeables
         if($gradeable['g_gradeable_type'] == 0){
             $db->query("
-        SELECT 
-            GREATEST(late_days_used - COALESCE(late_day_exceptions,0),0) 
-        FROM 
-            late_days_used AS ldu LEFT JOIN late_day_exceptions AS lde ON ldu.g_id = lde.g_id  
+        SELECT
+            GREATEST(late_days_used - COALESCE(late_day_exceptions,0),0)
+        FROM
+            late_days_used AS ldu LEFT JOIN late_day_exceptions AS lde ON ldu.g_id = lde.g_id
         WHERE ldu.g_id=? AND ldu.user_id=?", array($gradeable['g_id'],$student_id));
             $row = $db->row();
             $late_days_used = isset($row['late_days_used']) ? $row['late_days_used'] : 0;
@@ -187,7 +187,7 @@ foreach($db->rows() as $student_record) {
                 $this_g["text"] = $text_items;
             }
         }
-        
+
         // Add problem scores for checkpoints and numeric/text gradeables
         if($gradeable['g_gradeable_type'] == 2 || $gradeable['g_gradeable_type'] == 1){
             $component_scores = array();
@@ -204,16 +204,16 @@ foreach($db->rows() as $student_record) {
 
             $this_g["component_scores"] = $component_scores;
         }
-        
-        
+
+
         array_push($student_output_json[ucwords($gradeable['g_syllabus_bucket'])], $this_g);
     }
-	
+
     // WRITE THE JSON FILE
     file_put_contents(implode("/", array(__SUBMISSION_SERVER__, "reports","all_grades", $student_output_json_name)), json_encode($student_output_json,JSON_PRETTY_PRINT));
-    
+
     echo "grade summary json produced for " . $student_id . "<br>";
-	
+
 }
 
 echo "Queries run: ".$db->totalQueries();
