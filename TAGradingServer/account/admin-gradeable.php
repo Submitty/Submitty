@@ -17,7 +17,7 @@ if($user_is_administrator){
         'g_team_assignment' => false,
         'g_gradeable_type' => 0,
         'g_grade_by_registration' => false,
-        'g_ta_view_start_date' => date('Y/m/d 23:59:59', strtotime( '+7 days' )),
+        'g_ta_view_start_date' => date('Y/m/d 23:59:59', strtotime( '+1 days' )),
         'g_grade_start_date' => date('Y/m/d 23:59:59', strtotime( '+7 days' )),
         'g_grade_released_date' => date('Y/m/d 23:59:59', strtotime( '+14 days' )),
         'g_syllabus_bucket' => '',
@@ -36,7 +36,7 @@ if($user_is_administrator){
     $num_numeric = $num_text = 0;
     $g_gradeable_type = $g_syllabus_bucket = $g_min_grading_group = $default_late_days = -1;
     $is_repository = false;
-    $use_ta_grading = true;
+    $use_ta_grading = false;
     $g_overall_ta_instructions = $g_id = '';
     $edit = json_encode(isset($_GET['action']) && $_GET['action'] == 'edit');
     
@@ -251,7 +251,9 @@ HTML;
             <br />
             What is the URL to the assignment instructions? (shown to student) <input style='width: 227px' type='text' name='instructions_url' value="{$g_instructions_url}" placeholder="(Optional)" />
             <br />
-            What date can the TAs view this gradeable (for beta testing)?: <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text" style="cursor: auto; background-color: #FFF; width: 250px;">
+            What is the <em style='color: orange;'><b>TA Beta Testing Date</b></em>? (gradeable visible to TAs):
+            <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
+            style="cursor: auto; background-color: #FFF; width: 250px;">
             <br />
 
 
@@ -294,13 +296,18 @@ HTML;
             <!-- This is only relevant to Electronic Files -->
             <div class="gradeable_type_options electronic_file" id="electronic_file" >    
                 <br />
-                What date does the submission open to students?: <input id="date_submit" name="date_submit" class="datepicker" type="text"
+                What is the <em style='color: orange;'><b>Submission Open Date</b></em>? (submission available to students):
+                <input id="date_submit" name="date_submit" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
+                <em style='color: orange;'>must be >= TA Beta Testing Date</em>
                 <br />
 
-                What is the due date? <input id="date_due" name="date_due" class="datepicker" type="text"
+                What is the <em style='color: orange;'><b>Due Date</b></em>?
+                <input id="date_due" name="date_due" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
+                <em style='color: orange;'>must be >= Submission Open Date</em>
                 <br />
+
                 How many late days may students use on this assignment? <input style="width: 50px" name="eg_late_days" class="int_val"
                                                                          type="text"/>
                 <br /> <br />
@@ -339,7 +346,7 @@ HTML;
                 <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
                 <br /> <br />
 
-                Use TA grading? 
+                Will this assignment also be graded by the TAs?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
 HTML;
                 echo ($use_ta_grading===true)?'checked':'';
@@ -677,15 +684,17 @@ HTML;
 
     print <<<HTML
             <!-- TODO default to the submission + late days for electronic -->
-            What date can the TAs start grading this?: <input name="date_grade" id="date_grade" class="datepicker" type="text"
-                style="cursor: auto; background-color: #FFF; width: 250px;">
+            What is the <em style='color: orange;'><b>TA Grading Open Date</b></em>? (TAs may begin grading)
+            <input name="date_grade" id="date_grade" class="datepicker" type="text"
+            style="cursor: auto; background-color: #FFF; width: 250px;">
+            <em style='color: orange;'>must be >= <span id="ta_grading_compare_date">UNSPECIFIED</span></em>
             <br />
             </div>
 
-            What date will the grade be released to the student? 
+            What is the <em style='color: orange;'><b>Grades Released Date</b></em>? (TA grades will be visible to students)
             <input name="date_released" id="date_released" class="datepicker" type="text" 
-                   style="cursor: auto; background-color: #FFF; width: 250px;">    
-            
+            style="cursor: auto; background-color: #FFF; width: 250px;">    
+            <em style='color: orange;'>must be >= <span id="grades_released_compare_date">TA Beta Testing Date</span></em>
             <br />
             
             What <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Iris-(Rainbow-Grades)">syllabus category</a> does this item belong to?:
@@ -986,6 +995,9 @@ HTML;
                 if($(this).val() == 'true'){ 
                     $('#rubric_questions').show();
                     $('#grading_questions').show();
+                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                } else {
+                    $('#grades_released_compare_date').html('Due Date');
                 }
             }
         });
@@ -1104,14 +1116,25 @@ HTML;
                     $('#rubric_questions').hide();
                     $('#grading_questions').hide();
                 }
+                $('#ta_grading_compare_date').html('Due Date (+ max allowed late days)');
+
+                if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
+                   $('#grades_released_compare_date').html('Due Date');
+                } else { 
+                   $('#grades_released_compare_date').html('TA Grading Open Date');
+                }
             }
             else if ($(this).val() == 'Checkpoints'){ 
                 $('#checkpoints').show();
                 $('#grading_questions').show();
+                $('#ta_grading_compare_date').html('TA Beta Testing Date');
+                $('#grades_released_compare_date').html('TA Grading Open Date');
             }
             else if ($(this).val() == 'Numeric'){ 
                 $('#numeric').show();
                 $('#grading_questions').show();
+                $('#ta_grading_compare_date').html('TA Beta Testing Date');
+                $('#grades_released_compare_date').html('TA Grading Open Date');
             }
         }
     });
