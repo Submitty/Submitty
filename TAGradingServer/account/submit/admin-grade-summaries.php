@@ -34,7 +34,7 @@ function autogradingTotalAwarded($g_id, $student_id, $active_version){
 
 
 // find the syllabus buckets
-$db->query("SELECT DISTINCT g_syllabus_bucket FROM gradeable WHERE g_grade_released_date < now() ORDER BY g_syllabus_bucket ASC", array());
+$db->query("SELECT DISTINCT g_syllabus_bucket FROM gradeable ORDER BY g_syllabus_bucket ASC", array());
 $buckets = $db->rows();
 $categories = array();
 
@@ -134,8 +134,6 @@ foreach($db->rows() as $student_record) {
                     GROUP BY gd_id
                 ) AS gd_sum ON gd.gd_id=gd_sum.gd_id
             ) AS total ON total.g_id = g.g_id AND total.gd_user_id=u.user_id
-        WHERE 
-            g_grade_released_date < now()
         ORDER BY g_syllabus_bucket ASC, g_grade_released_date ASC, u.user_id ASC
         ) AS user_grades
     WHERE user_id=?

@@ -75,9 +75,9 @@ if(isset($_GET["g_id"]) && isset($rubric["g_id"])) {
         $student_individual_graded = isset($temp_row['cnt']) && $temp_row['cnt'] > 0;
     }
 
-    $params = array(User::$user_id);
-    $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC"
-                                    : "SELECT * FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating ASC");
+    $params = array(User::$user_id,$g_id);
+    $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? AND g_id=? ORDER BY sections_registration_id ASC"
+                                    : "SELECT * FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating ASC");
     $db->query($query, $params);
     foreach ($db->rows() as $section) {
         $params = array($g_id, intval($section[$section_param]));

@@ -56,6 +56,9 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
 
   // ============================================================
   // read in any existing assignments...
+
+  std::cout << "READING " << zone_assignments_filename << std::endl;
+
   int existing_assignments = 0;
   {
     std::ifstream istr_zone_assignments(zone_assignments_filename.c_str());
@@ -65,6 +68,11 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
         std::stringstream ss(line.c_str());
         std::string token,last,first,rcs,building,room,zone,time;
         ss >> last >> first >> rcs >> building >> room >> zone >> time;
+
+        while (ss >> token) { time += " " + token; }
+
+        std::cout << "FOUND " << rcs << std::endl;
+
         if (last == "") break;
         Student *s = GetStudent(students,rcs);
         if (s == NULL) {
@@ -170,8 +178,13 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
       
       if (s->getLastName() == "") continue;
 
-      ostr_zone_assignments << std::setw(20) << std::left << s->getLastName()  << " ";
-      ostr_zone_assignments << std::setw(15) << std::left << s->getFirstName() << " ";
+      std::string f = s->getFirstName();
+      std::string l = s->getLastName();
+      std::replace( f.begin(), f.end(), ' ', '_');
+      std::replace( l.begin(), l.end(), ' ', '_');
+
+      ostr_zone_assignments << std::setw(20) << std::left << l  << " ";
+      ostr_zone_assignments << std::setw(15) << std::left << f << " ";
       ostr_zone_assignments << std::setw(12) << std::left << s->getUserName()  << " ";
 
       ostr_zone_assignments << std::setw(10) << std::left << s->getExamRoom()  << " ";
