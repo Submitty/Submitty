@@ -114,6 +114,7 @@ HTML;
 $grade_by_reg_section = $c_gradeable['g_grade_by_registration'];
 $section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
 $user_section_param = ($grade_by_reg_section ? 'registration_section': 'rotating_section');
+$g_id = $c_gradeable['g_id'];
 $params = array($user_id);
 if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true){
     $params = array();
@@ -130,7 +131,7 @@ if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == 
     $db->query($query, $params);
 }
 else{
-    $params = array($user_id,$g_id);
+    $params = array($user_id,$_GET['g_id']);
     $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? AND g_id=? ORDER BY sections_registration_id ASC"
                                     : "SELECT * FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating ASC");
     $db->query($query, $params);
