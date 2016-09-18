@@ -580,9 +580,15 @@ if [[ ${VAGRANT} == 1 ]]; then
     echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/valid
     echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
     echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+    echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+    echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+    echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+    echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/valid
     ${SUBMITTY_DATA_DIR}/bin/authonly.pl
     echo "student:student" | sudo chpasswd
     echo "smithj:smithj" | sudo chpasswd
+    echo "joness:joness" | sudo chpasswd
+    echo "browna:browna" | sudo chpasswd
 
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
     rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
