@@ -311,9 +311,6 @@ abstract class GradeableType{
      $g_grade_released_date = $request_args['date_released'];
      $g_syllabus_bucket = $request_args['gradeable_buckets'];
      
-     if(strtotime($g_grade_released_date) < strtotime($g_grade_start_date)){
-        throw new Exception('DATE CONSISTENCY:  Grade released date cannot be earlier than grade start date'); 
-     }
      $g_constructor_params = array('gradeable_id' => $g_id, 'gradeable_title' => $g_title,
                                    'instructions_url' => $g_instructions_url,'ta_instructions' => $g_overall_ta_instr,
                                    'team_assignment' => $g_use_teams, 'min_grading_group' => $g_min_grading_group,
@@ -327,19 +324,24 @@ abstract class GradeableType{
         $ta_grading = ($request_args['ta_grading'] == "true") ? "true" : "false";
         $date_submit = $request_args['date_submit'];
         $date_due = $request_args['date_due'];
-
         if (strtotime($date_submit) < strtotime($g_ta_view_start_date)) {
-            throw new Exception('DATE CONSISTENCY:  Submission open to students cannot be earlier than TA beta testing date.');
+          throw new Exception('DATE CONSISTENCY:  Submission Open Date must be >= TA Beta Testing Date');
         }
-
         if (strtotime($date_due) < strtotime($date_submit)) {
-            throw new Exception('DATE CONSISTENCY:  Submission due date cannot be earlier than submission open date.');
+          throw new Exception('DATE CONSISTENCY:  Due Date must be >= Submission Open Date');
         }
-        
-        if ($ta_grading === "true" && strtotime($g_grade_start_date) < strtotime($date_due)) {
-            throw new Exception('DATE CONSISTENCY:  TAs cannot start grading before the submission due date');
+        if ($ta_grading === "true") {
+          if (strtotime($g_grade_start_date) < strtotime($date_due)) {
+            throw new Exception('DATE CONSISTENCY:  TA Grading Open Date must be >= Due Date');
+          }
+          if(strtotime($g_grade_released_date) < strtotime($g_grade_start_date)) {
+            throw new Exception('DATE CONSISTENCY:  Grades Released Date must be >= TA Grading Open Date');
+          }
+        } else {
+          if(strtotime($g_grade_released_date) < strtotime($date_due)) {
+            throw new Exception('DATE CONSISTENCY:  Grades Released Date must be >= Due Date');
+          }
         }
-        
         $is_repo = ($request_args['upload_type'] == 'Repository')? "true" : "false";
         $subdirectory = (isset($request_args['subdirectory']) && $is_repo == "true")? $request_args['subdirectory'] : '';
 
@@ -361,10 +363,22 @@ abstract class GradeableType{
      else if ($request_args['gradeable_type'] === "Checkpoints"){
         $g_constructor_params['gradeable_type'] = GradeableType::checkpoints;
         $gradeable = new CheckpointGradeable($g_constructor_params);
+        if (strtotime($g_grade_start_date) < strtotime($g_ta_view_start_date)) {
+          throw new Exception('DATE CONSISTENCY:  TA Grading Open Date must be >= TA Beta Testing Date');
+        }
+        if(strtotime($g_grade_released_date) < strtotime($g_grade_start_date)){
+          throw new Exception('DATE CONSISTENCY:  Grade Released Date must be >= TA Grading Open Date');
+        }
      }
      else if ($request_args['gradeable_type'] === "Numeric"){
         $g_constructor_params['gradeable_type'] = GradeableType::numeric;
         $gradeable = new NumericGradeable($g_constructor_params);
+        if (strtotime($g_grade_start_date) < strtotime($g_ta_view_start_date)) {
+          throw new Exception('DATE CONSISTENCY:  TA Grading Open Date must be >= TA Beta Testing Date');
+        }
+        if(strtotime($g_grade_released_date) < strtotime($g_grade_start_date)){
+          throw new Exception('DATE CONSISTENCY:  Grade Released Date must be >= TA Grading Open Date');
+        }
      }
      return $gradeable;
  }

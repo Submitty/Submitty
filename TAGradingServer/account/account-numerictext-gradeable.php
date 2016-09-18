@@ -172,10 +172,15 @@ if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == 
     $db->query($query, $params);
 }
 else{
-    $params = array($user_id,$g_id);
-    $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? AND g_id=? ORDER BY sections_registration_id ASC"
-                                    : "SELECT * FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating ASC");
-    $db->query($query, $params);
+    if ($grade_by_reg_section) {
+        $params = array($user_id);
+    	$query = "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC";
+        $db->query($query, $params);
+    } else {
+        $params = array($user_id,$g_id);
+        $query = "SELECT * FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating ASC";
+        $db->query($query, $params);
+    }
 }
 
 $colspan += 3;
@@ -189,10 +194,11 @@ foreach($db->rows() as $section){
     
     $section_id = intval($section[$section_param]);
     $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
+    $enrolled_assignment = ($grade_by_reg_section ? "enrolled in": "assigned to");
     print <<<HTML
                         <tr class="info">
                             <td colspan="{$colspan}" style="text-align:center;">
-                                Students Enrolled in {$section_type} Section {$section_id}
+                                Students {$enrolled_assignment} {$section_type} Section {$section_id}
                             </td>
                         </tr>
 HTML;

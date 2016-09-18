@@ -129,7 +129,15 @@ foreach($db->rows() as $student_record) {
         $params = array($student_id, $gradeable['eg_submission_due_date']);
         $db->query("SELECT allowed_late_days FROM late_days WHERE user_id=? AND since_timestamp <= ? ORDER BY since_timestamp DESC LIMIT 1", $params);
         $late_day = $db->row();
-        $student_allowed_lates = isset($late_day['allowed_late_days']) ? $late_day['allowed_late_days'] : 0;
+
+        $student_allowed_lates = __DEFAULT_LATE_DAYS__;
+        if (count($late_day) > 0 &&
+            isset($late_day['allowed_late_days']) &&
+            $late_day['allowed_late_days'] > $student_allowed_lates) {
+          $student_allowed_lates = $late_day['allowed_late_days'];
+          //          $student_allowed_lates = isset($late_day['allowed_late_days']) ? $late_day['allowed_late_days'] : 0;
+        }
+
         $g_id = $gradeable['g_id'];
         $rubric_total = 0;
         $ta_max_score = 0;
