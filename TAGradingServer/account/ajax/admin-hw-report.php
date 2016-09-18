@@ -131,7 +131,7 @@ foreach($db->rows() as $student_record) {
         $late_day = $db->row();
 
         $student_allowed_lates = __DEFAULT_LATE_DAYS__;
-        if (count($late_day) > 0 && 
+        if (count($late_day) > 0 &&
             isset($late_day['allowed_late_days']) &&
             $late_day['allowed_late_days'] > $student_allowed_lates) {
           $student_allowed_lates = $late_day['allowed_late_days'];
