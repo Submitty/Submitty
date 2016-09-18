@@ -15,11 +15,10 @@ class TestLogin(BaseTestCase):
         Test that if you attempt to go to a url when not logged in,
         you'll be taken to the login screen, and then once logged in,
         taken to that original page you had requested.
-        :return:
         """
         url = "/index.php?semester=" + self.semester + "&course=csci1000&component=cpp_cats"
         self.log_in(url)
-        assert self.test_url + url == self.driver.current_url
+        self.assertEqual(self.test_url + url, self.driver.current_url)
 
     def test_bad_login_password(self):
         self.get("/index.php?semester=" + self.semester + "&course=csci1000")
@@ -28,7 +27,7 @@ class TestLogin(BaseTestCase):
         self.driver.find_element_by_name("password").send_keys("bad_password")
         self.driver.find_element_by_name("login").click()
         error = self.driver.find_element_by_id("error-0")
-        assert "Could not login using that user id or password" == error.text
+        self.assertEqual("Could not login using that user id or password", error.text)
 
     def test_bad_login_username(self):
         self.get("/index.php?semester=" + self.semester + "&course=csci1000")
@@ -37,7 +36,7 @@ class TestLogin(BaseTestCase):
         self.driver.find_element_by_name("password").send_keys(self.user_password)
         self.driver.find_element_by_name("login").click()
         error = self.driver.find_element_by_id("error-0")
-        assert "Could not login using that user id or password" == error.text
+        self.assertEqual("Could not login using that user id or password", error.text)
 
 if __name__ == "__main__":
     unittest2.main()
