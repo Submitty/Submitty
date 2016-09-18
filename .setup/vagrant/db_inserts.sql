@@ -33,14 +33,14 @@ INSERT INTO users (user_id, user_password, user_firstname, user_lastname, user_e
     VALUES ('browna', '$2y$10$QmZt5iv6gYlUrKXiKVoQee169ruXqNAk0loj835wbG7/CXX7BGboy', 'Alex', 'Brown', 'browna@email.com', 4, 2, NULL);
     
 -- Late days    
-INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
-    VALUES ('student', 3, timestamp '1970-01-01 00:00:00');
-    
-INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
-    VALUES ('smithj', 3, timestamp '1970-01-01 00:00:00');
-
-INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
-    VALUES ('joness', 3, timestamp '1970-01-01 00:00:00');
-
-INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
-    VALUES ('browna', 3, timestamp '1970-01-01 00:00:00');
+--  INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
+--      VALUES ('student', 3, timestamp '1970-01-01 00:00:00');
+--      
+--  INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
+--      VALUES ('smithj', 3, timestamp '1970-01-01 00:00:00');
+--  
+--  INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
+--      VALUES ('joness', 3, timestamp '1970-01-01 00:00:00');
+--  
+--  INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) 
+--      VALUES ('browna', 3, timestamp '1970-01-01 00:00:00');
