@@ -22,7 +22,7 @@ class BaseTestCase(unittest2.TestCase):
     USER_ID = "student"
     USER_NAME = "Joe"
     USER_PASSWORD = "student"
-    DRIVER = webdriver.Chrome()
+    DRIVER = None
 
     def __init__(self, *args, **kwargs):
         super(BaseTestCase, self).__init__(*args, **kwargs)
@@ -36,6 +36,10 @@ class BaseTestCase(unittest2.TestCase):
         self.semester = BaseTestCase.get_current_semester()
         self.logged_in = False
 
+    @classmethod
+    def setUpClass(cls):
+        BaseTestCase.DRIVER = webdriver.Chrome()
+
     def setUp(self):
         self.driver = BaseTestCase.DRIVER
         self.log_in()
@@ -43,18 +47,25 @@ class BaseTestCase(unittest2.TestCase):
     def tearDown(self):
         self.log_out()
 
+    @classmethod
+    def tearDownClass(cls):
+        BaseTestCase.DRIVER.close()
+
     def get(self, url):
         if url[0] != "/":
             url = "/" + url
         self.driver.get(self.test_url + url)
 
-    def log_in(self):
+    def log_in(self, url=None):
         """
         Provides a common function for logging into the site (and ensuring
         that we're logged in)
         :return:
         """
-        self.get("/index.php?semester=" + self.semester + "&course=csci1000")
+        if url is not None:
+            self.get(url)
+        else:
+            self.get("/index.php?semester=" + self.semester + "&course=csci1000")
         assert "CSCI1000" in self.driver.title
         self.driver.find_element_by_name('user_id').send_keys(self.user_id)
         self.driver.find_element_by_name('password').send_keys(self.user_password)
