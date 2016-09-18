@@ -17,16 +17,16 @@ if($user_is_administrator){
         'g_team_assignment' => false,
         'g_gradeable_type' => 0,
         'g_grade_by_registration' => false,
-        'g_ta_view_start_date' => date('Y/m/d 23:59:59', strtotime( '+7 days' )),
-        'g_grade_start_date' => date('Y/m/d 23:59:59', strtotime( '+7 days' )),
+        'g_ta_view_start_date' => date('Y/m/d 23:59:59', strtotime( '-1 days' )),
+        'g_grade_start_date' => date('Y/m/d 23:59:59', strtotime( '+10 days' )),
         'g_grade_released_date' => date('Y/m/d 23:59:59', strtotime( '+14 days' )),
         'g_syllabus_bucket' => '',
         'g_min_grading_group' => '',
         'g_instructions_url' => ''
     );
     $old_questions = $old_components = $electronic_gradeable = array();
-    $electronic_gradeable['eg_submission_open_date'] = "";
-    $electronic_gradeable['eg_submission_due_date'] = "";
+    $electronic_gradeable['eg_submission_open_date'] = date('Y/m/d 23:59:59', strtotime( '0 days' )); //"";
+    $electronic_gradeable['eg_submission_due_date'] = date('Y/m/d 23:59:59', strtotime( '+7 days' )); //"";"";
     $electronic_gradeable['eg_subdirectory'] = "";
     $electronic_gradeable['eg_config_path'] = "";
     $electronic_gradeable['eg_late_days'] = __DEFAULT_LATE_DAYS__;
@@ -36,10 +36,13 @@ if($user_is_administrator){
     $num_numeric = $num_text = 0;
     $g_gradeable_type = $g_syllabus_bucket = $g_min_grading_group = $default_late_days = -1;
     $is_repository = false;
-    $use_ta_grading = true;
+    $use_ta_grading = false;
     $g_overall_ta_instructions = $g_id = '';
     $edit = json_encode(isset($_GET['action']) && $_GET['action'] == 'edit');
     
+    $initial_ta_grading_compare_date = "UNSPECIFIED";
+    $initial_grades_released_compare_date = "TA Beta Testing Date";
+
     if (isset($_GET['action']) && $_GET['action'] == 'edit') {
         $g_id = $_GET['id'];
         Database::query("SELECT * FROM gradeable WHERE g_id=?",array($g_id));
@@ -73,6 +76,15 @@ if($user_is_administrator){
             $db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($g_id));
             $electronic_gradeable = $db->row();
             $use_ta_grading = $electronic_gradeable['eg_use_ta_grading'];
+
+            $initial_ta_grading_compare_date = "Due Date (+ max allowed late days)";
+
+            if ($use_ta_grading) {
+              $initial_grades_released_compare_date = "TA Grading Open Date";
+            } else {
+              $initial_grades_released_compare_date = "Due Date";
+            }
+
             $is_repository = $electronic_gradeable['eg_is_repository'];
             $late_days = $electronic_gradeable['eg_late_days'];
             $db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_max_value, gc_is_extra_credit FROM gradeable_component 
@@ -85,7 +97,12 @@ if($user_is_administrator){
                                                 'question_total'        => $question['gc_max_value'],
                                                 'question_extra_credit' => $question['gc_is_extra_credit']));
             }
+       } else {
+         // numeric or checkpoint
+         $initial_ta_grading_compare_date = "TA Beta Testing Date";
+         $initial_grades_released_compare_date = "TA Grading Open Date";
        }
+
     }
     else{
             $default_late_days = __DEFAULT_LATE_DAYS__;
@@ -251,6 +268,12 @@ HTML;
             <br />
             What is the URL to the assignment instructions? (shown to student) <input style='width: 227px' type='text' name='instructions_url' value="{$g_instructions_url}" placeholder="(Optional)" />
             <br />
+            What is the <em style='color: orange;'><b>TA Beta Testing Date</b></em>? (gradeable visible to TAs):
+            <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
+            style="cursor: auto; background-color: #FFF; width: 250px;">
+            <br />
+
+
        <!-- <br />
         Is this a team assignment?:
         <input type="radio" name="team_assignment" value="yes"
@@ -290,15 +313,21 @@ HTML;
             <!-- This is only relevant to Electronic Files -->
             <div class="gradeable_type_options electronic_file" id="electronic_file" >    
                 <br />
-                What date does the submission open to students?: <input id="date_submit" name="date_submit" class="datepicker" type="text"
+                What is the <em style='color: orange;'><b>Submission Open Date</b></em>? (submission available to students):
+                <input id="date_submit" name="date_submit" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
+                <em style='color: orange;'>must be >= TA Beta Testing Date</em>
                 <br />
 
-                What is the due date? <input id="date_due" name="date_due" class="datepicker" type="text"
+                What is the <em style='color: orange;'><b>Due Date</b></em>?
+                <input id="date_due" name="date_due" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
+                <em style='color: orange;'>must be >= Submission Open Date</em>
                 <br />
+
                 How many late days may students use on this assignment? <input style="width: 50px" name="eg_late_days" class="int_val"
                                                                          type="text"/>
+                <em style='color: orange;'>NOTE: must be 0 for gradeables with no TA grading</em>
                 <br /> <br />
                 
 
@@ -335,7 +364,7 @@ HTML;
                 <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
                 <br /> <br />
 
-                Use TA grading? 
+                Will this assignment also be graded by the TAs?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
 HTML;
                 echo ($use_ta_grading===true)?'checked':'';
@@ -673,20 +702,18 @@ HTML;
 
     print <<<HTML
             <!-- TODO default to the submission + late days for electronic -->
-            What date can the TAs view this?: <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
-                style="cursor: auto; background-color: #FFF; width: 250px;">
-            
-            <br />
-            What date can the TAs start grading this?: <input name="date_grade" id="date_grade" class="datepicker" type="text"
-                style="cursor: auto; background-color: #FFF; width: 250px;">
-            
-            <br />
-            What date will the grade be released to the student? 
-            <input name="date_released" id="date_released" class="datepicker" type="text" 
-                   style="cursor: auto; background-color: #FFF; width: 250px;">    
-            
+            What is the <em style='color: orange;'><b>TA Grading Open Date</b></em>? (TAs may begin grading)
+            <input name="date_grade" id="date_grade" class="datepicker" type="text"
+            style="cursor: auto; background-color: #FFF; width: 250px;">
+              <em style='color: orange;'>must be >= <span id="ta_grading_compare_date">{$initial_ta_grading_compare_date}</span></em>
             <br />
             </div>
+
+            What is the <em style='color: orange;'><b>Grades Released Date</b></em>? (TA grades will be visible to students)
+            <input name="date_released" id="date_released" class="datepicker" type="text" 
+            style="cursor: auto; background-color: #FFF; width: 250px;">
+            <em style='color: orange;'>must be >= <span id="grades_released_compare_date">{$initial_grades_released_compare_date}</span></em>
+            <br />
             
             What <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Iris-(Rainbow-Grades)">syllabus category</a> does this item belong to?:
             
@@ -986,6 +1013,9 @@ HTML;
                 if($(this).val() == 'true'){ 
                     $('#rubric_questions').show();
                     $('#grading_questions').show();
+                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                } else {
+                    $('#grades_released_compare_date').html('Due Date');
                 }
             }
         });
@@ -1067,9 +1097,8 @@ HTML;
     });
     
     if(!{$have_old}){
-        $('#date_submit').datetimepicker('setDate', (new Date("{$yesterday}")));
-        $('#date_due').datetimepicker('setDate', (new Date("{$current_date}")));
-        
+        $('#date_submit').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_open_date']}")));
+        $('#date_due').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_due_date']}")));
     }
     
     $('#date_ta_view').datetimepicker('setDate', (new Date("{$old_gradeable['g_ta_view_start_date']}")));
@@ -1104,14 +1133,25 @@ HTML;
                     $('#rubric_questions').hide();
                     $('#grading_questions').hide();
                 }
+
+                $('#ta_grading_compare_date').html('Due Date (+ max allowed late days)');
+                if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
+                   $('#grades_released_compare_date').html('Due Date');
+                } else { 
+                   $('#grades_released_compare_date').html('TA Grading Open Date');
+                }
             }
             else if ($(this).val() == 'Checkpoints'){ 
                 $('#checkpoints').show();
                 $('#grading_questions').show();
+                $('#ta_grading_compare_date').html('TA Beta Testing Date');
+                $('#grades_released_compare_date').html('TA Grading Open Date');
             }
             else if ($(this).val() == 'Numeric'){ 
                 $('#numeric').show();
                 $('#grading_questions').show();
+                $('#ta_grading_compare_date').html('TA Beta Testing Date');
+                $('#grades_released_compare_date').html('TA Grading Open Date');
             }
         }
     });

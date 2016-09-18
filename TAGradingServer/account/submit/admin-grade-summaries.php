@@ -33,19 +33,8 @@ function autogradingTotalAwarded($g_id, $student_id, $active_version){
 }
 
 
-function getActiveVersion($g_id, $student_id) {
-    $settings_file = __SUBMISSION_SERVER__."/submissions/".$g_id."/".$student_id."/user_assignment_settings.json";
-    if (file_exists($settings_file)) {
-        $settings_file_contents = file_get_contents($settings_file);
-        $settings = json_decode($settings_file_contents, true);
-        return $settings['active_version'];
-    }
-    return 0;
-}
-
-
 // find the syllabus buckets
-$db->query("SELECT DISTINCT g_syllabus_bucket FROM gradeable WHERE g_grade_released_date < now() ORDER BY g_syllabus_bucket ASC", array());
+$db->query("SELECT DISTINCT g_syllabus_bucket FROM gradeable ORDER BY g_syllabus_bucket ASC", array());
 $buckets = $db->rows();
 $categories = array();
 
@@ -90,7 +79,14 @@ foreach($db->rows() as $student_record) {
         WHERE user_id=?
         ORDER BY since_timestamp DESC", array($student_id));
     $row = $db->row();
-    $late_days_allowed = isset($row['allowed_late_days']) ? $row['allowed_late_days'] : 0;
+    
+    $late_days_allowed = __DEFAULT_LATE_DAYS__;
+    if (count($row) > 0 &&
+        isset($row['allowed_late_days']) &&
+        $row['allowed_late_days'] > $late_days_allowed) {
+      $late_days_allowed = $row['allowed_late_days'];
+    }
+    //$late_days_allowed = isset($row['allowed_late_days']) ? $row['allowed_late_days'] : 0;
 
 
     $student_output_json["default_allowed_late_days"] = $default_allowed_lates;
@@ -145,8 +141,6 @@ foreach($db->rows() as $student_record) {
                     GROUP BY gd_id
                 ) AS gd_sum ON gd.gd_id=gd_sum.gd_id
             ) AS total ON total.g_id = g.g_id AND total.gd_user_id=u.user_id
-        WHERE 
-            g_grade_released_date < now()
         ORDER BY g_syllabus_bucket ASC, g_grade_released_date ASC, u.user_id ASC
         ) AS user_grades
     WHERE user_id=?
@@ -161,7 +155,7 @@ foreach($db->rows() as $student_record) {
 	//  ...  also, that value does not exist for non ta graded electronic gradeables
 	//  currently, a student can change the active version after the deadline and get full credit for a late submission
 	//
-	$active_version = getActiveVersion($gradeable['g_id'], $student_id);
+	$active_version = getActiveVersionFromFile($gradeable['g_id'], $student_id);
 	//$autograding_score = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);
 	$autograding_score = autogradingTotalAwarded($gradeable['g_id'], $student_id, $active_version);
 

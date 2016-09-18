@@ -130,14 +130,22 @@ HTML;
 
     $grade_by_reg_section = $gradeable_info['g_grade_by_registration'];
     $section_title = ($grade_by_reg_section ? 'Registration': 'Rotating');
+    $enrolled_assignment = ($grade_by_reg_section ? "enrolled in": "assigned to");
     $user_section_field =  ($grade_by_reg_section ? 'registration_section': 'rotating_section');
     $section_section_field = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
     
     if(!((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true)) {
+
+      if ($grade_by_reg_section) {
         $params = array($user_id);
-        $s_query = ($grade_by_reg_section) ? "SELECT sections_registration_id FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id"
-                                         : "SELECT sections_rotating FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating";
+        $s_query = "SELECT sections_registration_id FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id";
         $db->query($s_query, $params);
+      } else {
+        $params = array($user_id,$g_id);
+        $s_query = "SELECT sections_rotating FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating";
+        $db->query($s_query, $params);
+      }
+
         $sections = array();
         foreach ($db->rows() as $section) {
             $sections[] = $section[$section_section_field];
@@ -176,7 +184,7 @@ HTML;
 
 					<tr class="info">
 						<td colspan="3" style="text-align:center;">
-							Students Assigned to {$section_title} Section {$section_id}
+              Students {$enrolled_assignment} {$section_title} Section {$section_id}
 						</td>
 					</tr>
 HTML;

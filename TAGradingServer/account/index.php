@@ -85,10 +85,15 @@ if(isset($_GET["g_id"]) && isset($rubric["g_id"])) {
         $student_individual_graded = isset($temp_row['cnt']) && $temp_row['cnt'] > 0;
     }
 
-    $params = array(User::$user_id);
-    $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC"
-                                    : "SELECT * FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating ASC");
-    $db->query($query, $params);
+    if ($grade_by_reg_section) {
+      $params = array(User::$user_id);
+      $query = "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC";
+      $db->query($query, $params);
+    } else {
+      $params = array(User::$user_id,$g_id);
+      $query = "SELECT * FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating ASC";
+      $db->query($query, $params);
+    }
     foreach ($db->rows() as $section) {
         $params = array($g_id, intval($section[$section_param]));
         $db->query("
@@ -162,7 +167,7 @@ ORDER BY
                 $db->query("SELECT gd_grader_id FROM gradeable_data WHERE gd_user_id=? AND g_id=?", $params);
                 $temp_row = $db->row();
 
-                if(intval($temp_row["gd_grader_id"]) == \app\models\User::$user_id) {
+                if(intval($temp_row["gd_grader_id"]) == User::$user_id) {
                     $position_completed++;
                 } else {
                     $position_other++;

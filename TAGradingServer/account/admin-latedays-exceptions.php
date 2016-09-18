@@ -407,6 +407,9 @@ HTML;
 	//         Are essential for crafting a proper drop-down menu for selecting
 	//         a gradeable.  That is, only gradeables that exist are shown.
 	
+
+		$BASE_URL = rtrim(__BASE_URL__, "/");	
+
 		self::$view['form'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
 <form action="{$BASE_URL}/account/admin-latedays-exceptions.php?course={$_GET['course']}&semester={$_GET['semester']}" method="POST" enctype="multipart/form-data">

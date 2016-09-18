@@ -21,8 +21,28 @@ class NavigationView {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $site_url = $this->core->getConfig()->getSiteUrl();
-        
+
+        $message_file_path = $this->core->getConfig()->getCoursePath()."/reports/summary_html/".$this->core->getUser()->getId()."_message.html";
+
+        $message_file_contents = "";
+        if (file_exists($message_file_path)) {
+            $message_file_contents = file_get_contents($message_file_path);
+        }
+
+
         $return = <<<HTML
+HTML;
+
+
+if ($message_file_contents != "") {
+        $return .= <<<HTML
+<div class="content">
+{$message_file_contents}
+</div>
+HTML;
+}
+
+        $return .= <<<HTML
 <div class="content">
     <div class="nav-buttons">
 HTML;

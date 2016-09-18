@@ -128,7 +128,7 @@ function replace_fillin_variables {
 ########################################################################################################################
 ########################################################################################################################
 # if the top level INSTALL directory does not exist, then make it
-mkdir -p $SUBMITTY_INSTALL_DIR
+mkdir -p ${SUBMITTY_INSTALL_DIR}
 
 
 # option for clean install (delete all existing directories/files
@@ -139,17 +139,18 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
 
     echo -e "\nDeleting directories for a clean installation\n"
 
-    rm -rf $SUBMITTY_INSTALL_DIR/hwgrading_website
-    rm -rf $SUBMITTY_INSTALL_DIR/site
-    rm -rf $SUBMITTY_INSTALL_DIR/src
-    rm -rf $SUBMITTY_INSTALL_DIR/bin
-    rm -rf $SUBMITTY_INSTALL_DIR/test_suite
+    rm -rf ${SUBMITTY_INSTALL_DIR}/hwgrading_website
+    rm -rf ${SUBMITTY_INSTALL_DIR}/site
+    rm -rf ${SUBMITTY_INSTALL_DIR}/src
+    rm -rf ${SUBMITTY_INSTALL_DIR}/bin
+    rm -rf ${SUBMITTY_INSTALL_DIR}/test_suite
+    rm -rf ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 fi
 
 
 # set the permissions of the top level directory
-chown  root:$COURSE_BUILDERS_GROUP  $SUBMITTY_INSTALL_DIR
-chmod  751                          $SUBMITTY_INSTALL_DIR
+chown  root:$COURSE_BUILDERS_GROUP  ${SUBMITTY_INSTALL_DIR}
+chmod  751                          ${SUBMITTY_INSTALL_DIR}
 
 
 ########################################################################################################################
@@ -210,17 +211,17 @@ chmod  770                                  $SUBMITTY_DATA_DIR/to_be_graded_batc
 echo -e "Copy the grading code"
 
 # copy the files from the repo
-rsync -rtz $SUBMITTY_REPOSITORY/grading $SUBMITTY_INSTALL_DIR/src
+rsync -rtz ${SUBMITTY_REPOSITORY}/grading ${SUBMITTY_INSTALL_DIR}/src
 
 #replace necessary variables
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/Sample_CMakeLists.txt
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/CMakeLists.txt
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/system_call_check.cpp
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/src/grading/execute.cpp
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/Sample_CMakeLists.txt
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/CMakeLists.txt
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/src/grading/execute.cpp
 
 # building the autograding library
-mkdir -p $SUBMITTY_INSTALL_DIR/src/grading/lib
-pushd $SUBMITTY_INSTALL_DIR/src/grading/lib
+mkdir -p ${SUBMITTY_INSTALL_DIR}/src/grading/lib
+pushd ${SUBMITTY_INSTALL_DIR}/src/grading/lib
 cmake ..
 make
 if [ $? -ne 0 ] ; then
@@ -230,11 +231,11 @@ fi
 popd
 
 # root will be owner & group of these files
-chown -R  root:root $SUBMITTY_INSTALL_DIR/src
+chown -R  root:root ${SUBMITTY_INSTALL_DIR}/src
 # "other" can cd into & ls all subdirectories
-find $SUBMITTY_INSTALL_DIR/src -type d -exec chmod 555 {} \;
+find ${SUBMITTY_INSTALL_DIR}/src -type d -exec chmod 555 {} \;
 # "other" can read all files
-find $SUBMITTY_INSTALL_DIR/src -type f -exec chmod 444 {} \;
+find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
 
 
 ########################################################################################################################
@@ -244,13 +245,13 @@ find $SUBMITTY_INSTALL_DIR/src -type f -exec chmod 444 {} \;
 echo -e "Copy the sample files"
 
 # copy the files from the repo
-rsync -rtz $SUBMITTY_REPOSITORY/sample_files $SUBMITTY_INSTALL_DIR
+rsync -rtz ${SUBMITTY_REPOSITORY}/sample_files ${SUBMITTY_INSTALL_DIR}
 
 # root will be owner & group of these files
-chown -R  root:root $SUBMITTY_INSTALL_DIR/sample_files
+chown -R  root:root ${SUBMITTY_INSTALL_DIR}/sample_files
 # but everyone can read all that files & directories, and cd into all the directories
-find $SUBMITTY_INSTALL_DIR/sample_files -type d -exec chmod 555 {} \;
-find $SUBMITTY_INSTALL_DIR/sample_files -type f -exec chmod 444 {} \;
+find ${SUBMITTY_INSTALL_DIR}/sample_files -type d -exec chmod 555 {} \;
+find ${SUBMITTY_INSTALL_DIR}/sample_files -type f -exec chmod 444 {} \;
 
 
 ########################################################################################################################
@@ -260,9 +261,9 @@ find $SUBMITTY_INSTALL_DIR/sample_files -type f -exec chmod 444 {} \;
 echo -e "Build the junit test runner"
 
 # copy the file from the repo
-rsync -rtz $SUBMITTY_REPOSITORY/junit_test_runner/TestRunner.java $SUBMITTY_INSTALL_DIR/JUnit/TestRunner.java
+rsync -rtz ${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java ${SUBMITTY_INSTALL_DIR}/JUnit/TestRunner.java
 
-pushd $SUBMITTY_INSTALL_DIR/JUnit > /dev/null
+pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
 # root will be owner & group of the source file
 chown  root:root  TestRunner.java
 # everyone can read this file
@@ -284,46 +285,46 @@ popd > /dev/null
 echo -e "Copy the scripts"
 
 # make the directory (has a different name)
-mkdir -p $SUBMITTY_INSTALL_DIR/bin
-chown root:$COURSE_BUILDERS_GROUP $SUBMITTY_INSTALL_DIR/bin
-chmod 751 $SUBMITTY_INSTALL_DIR/bin
+mkdir -p ${SUBMITTY_INSTALL_DIR}/bin
+chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin
+chmod 751 ${SUBMITTY_INSTALL_DIR}/bin
 
 # copy all of the files
-rsync -rtz  $SUBMITTY_REPOSITORY/bin/*   $SUBMITTY_INSTALL_DIR/bin/
+rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 #replace necessary variables in the copied scripts
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/bin/create_course.sh
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/bin/grade_students.sh
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/bin/grading_done.sh
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/bin/regrade.sh
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/bin/build_homework_function.sh
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/bin/fake_submit_button_press.sh
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/bin/setcsvfields
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/fake_submit_button_press.sh
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields
 
 # most of the scripts should be root only
-find $SUBMITTY_INSTALL_DIR/bin -type f -exec chown root:root {} \;
-find $SUBMITTY_INSTALL_DIR/bin -type f -exec chmod 500 {} \;
+find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chown root:root {} \;
+find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 500 {} \;
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-chown root:$COURSE_BUILDERS_GROUP $SUBMITTY_INSTALL_DIR/bin/build_homework_function.sh
-chown root:$COURSE_BUILDERS_GROUP $SUBMITTY_INSTALL_DIR/bin/regrade.sh
-chown root:$COURSE_BUILDERS_GROUP $SUBMITTY_INSTALL_DIR/bin/grading_done.sh
-chown root:$COURSE_BUILDERS_GROUP $SUBMITTY_INSTALL_DIR/bin/make_assignments_txt_file.py
-chmod 550 $SUBMITTY_INSTALL_DIR/bin/build_homework_function.sh
-chmod 550 $SUBMITTY_INSTALL_DIR/bin/regrade.sh
-chmod 550 $SUBMITTY_INSTALL_DIR/bin/grading_done.sh
-chmod 550 $SUBMITTY_INSTALL_DIR/bin/make_assignments_txt_file.py
+chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
+chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
+chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
+chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 
 # fix the permissions specifically of the grade_students.sh script
-chown root:$HWCRON_USER $SUBMITTY_INSTALL_DIR/bin/grade_students.sh
-chmod 550 $SUBMITTY_INSTALL_DIR/bin/grade_students.sh
-chown root:$HWCRON_USER $SUBMITTY_INSTALL_DIR/bin/grade_students__results_history.py
-chmod 550 $SUBMITTY_INSTALL_DIR/bin/grade_students__results_history.py
+chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
+chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
 
 # build the helper program for strace output and restrictions by system call categories
-g++ $SUBMITTY_INSTALL_DIR/src/grading/system_call_check.cpp -o $SUBMITTY_INSTALL_DIR/bin/system_call_check.out
+g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 # set the permissions
-chown root:$COURSE_BUILDERS_GROUP $SUBMITTY_INSTALL_DIR/bin/system_call_check.out
-chmod 550 $SUBMITTY_INSTALL_DIR/bin/system_call_check.out
+chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 
 
 
@@ -332,24 +333,24 @@ chmod 550 $SUBMITTY_INSTALL_DIR/bin/system_call_check.out
 # PREPARE THE UNTRUSTED_EXEUCTE EXECUTABLE WITH SUID
 
 # copy the file
-rsync -rtz  $SUBMITTY_REPOSITORY/.setup/untrusted_execute.c   $SUBMITTY_INSTALL_DIR/.setup/
+rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/untrusted_execute.c   ${SUBMITTY_INSTALL_DIR}/.setup/
 # replace necessary variables
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/.setup/untrusted_execute.c
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/.setup/untrusted_execute.c
 
 # SUID (Set owner User ID up on execution), allows the $HWCRON_USER
 # to run this executable as sudo/root, which is necessary for the
 # "switch user" to untrusted as part of the sandbox.
 
-pushd $SUBMITTY_INSTALL_DIR/.setup/ > /dev/null
+pushd ${SUBMITTY_INSTALL_DIR}/.setup/ > /dev/null
 # set ownership/permissions on the source code
 chown root:root untrusted_execute.c
 chmod 500 untrusted_execute.c
 # compile the code
-g++ -static untrusted_execute.c -o $SUBMITTY_INSTALL_DIR/bin/untrusted_execute
+g++ -static untrusted_execute.c -o ${SUBMITTY_INSTALL_DIR}/bin/untrusted_execute
 # change permissions & set suid: (must be root)
-chown root  $SUBMITTY_INSTALL_DIR/bin/untrusted_execute
-chgrp $HWCRON_USER  $SUBMITTY_INSTALL_DIR/bin/untrusted_execute
-chmod 4550  $SUBMITTY_INSTALL_DIR/bin/untrusted_execute
+chown root  ${SUBMITTY_INSTALL_DIR}/bin/untrusted_execute
+chgrp $HWCRON_USER  ${SUBMITTY_INSTALL_DIR}/bin/untrusted_execute
+chmod 4550  ${SUBMITTY_INSTALL_DIR}/bin/untrusted_execute
 popd > /dev/null
 
 
@@ -359,34 +360,34 @@ popd > /dev/null
 
 echo -e "Copy the ta grading website"
 
-rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/*php         $SUBMITTY_INSTALL_DIR/hwgrading_website
-rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/toolbox      $SUBMITTY_INSTALL_DIR/hwgrading_website
-rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/lib          $SUBMITTY_INSTALL_DIR/hwgrading_website
-rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/account      $SUBMITTY_INSTALL_DIR/hwgrading_website
-rsync  -rtz $SUBMITTY_REPOSITORY/TAGradingServer/models       $SUBMITTY_INSTALL_DIR/hwgrading_website
+rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/*php         ${SUBMITTY_INSTALL_DIR}/hwgrading_website
+rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/toolbox      ${SUBMITTY_INSTALL_DIR}/hwgrading_website
+rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/lib          ${SUBMITTY_INSTALL_DIR}/hwgrading_website
+rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/account      ${SUBMITTY_INSTALL_DIR}/hwgrading_website
+rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/models          ${SUBMITTY_INSTALL_DIR}/hwgrading_website
 
 # set special user $HWPHP_USER as owner & group of all hwgrading_website files
-find $SUBMITTY_INSTALL_DIR/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
+find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
 
 # set the permissions of all files
 # $HWPHP_USER can read & execute all directories and read all files
 # "other" can cd into all subdirectories
-chmod -R 400 $SUBMITTY_INSTALL_DIR/hwgrading_website
-find $SUBMITTY_INSTALL_DIR/hwgrading_website -type d -exec chmod uo+x {} \;
+chmod -R 400 ${SUBMITTY_INSTALL_DIR}/hwgrading_website
+find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type d -exec chmod uo+x {} \;
 # "other" can read all .txt & .css files
-find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
-find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.txt -exec chmod o+r {} \;
-find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.ico -exec chmod o+r {} \;
-find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
-find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.png -exec chmod o+r {} \;
-find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.jpg -exec chmod o+r {} \;
-find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.gif -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.txt -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.ico -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.png -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.jpg -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.gif -exec chmod o+r {} \;
 
 # "other" can read & execute all .js files
-find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
 
-#replace_fillin_variables $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php
-#mv $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master_template.php $SUBMITTY_INSTALL_DIR/hwgrading_website/toolbox/configs/master.php
+#replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/hwgrading_website/toolbox/configs/master_template.php
+#mv ${SUBMITTY_INSTALL_DIR}/hwgrading_website/toolbox/configs/master_template.php ${SUBMITTY_INSTALL_DIR}/hwgrading_website/toolbox/configs/master.php
 
 
 ################################################################################################################
@@ -396,30 +397,30 @@ find $SUBMITTY_INSTALL_DIR/hwgrading_website -type f -name \*.js -exec chmod o+r
 echo -e "Copy the submission website"
 
 # copy the website from the repo
-rsync -rtz   $SUBMITTY_REPOSITORY/site   $SUBMITTY_INSTALL_DIR
+rsync -rtz   ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
 
 # set special user $HWPHP_USER as owner & group of all website files
-find $SUBMITTY_INSTALL_DIR/site -exec chown $HWPHP_USER:$HWPHP_USER {} \;
-find $SUBMITTY_INSTALL_DIR/site/cgi-bin -exec chown $HWCGI_USER:$HWCGI_USER {} \;
+find ${SUBMITTY_INSTALL_DIR}/site -exec chown $HWPHP_USER:$HWPHP_USER {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown $HWCGI_USER:$HWCGI_USER {} \;
 
 # set the permissions of all files
 # $HWPHP_USER can read & execute all directories and read all files
 # "other" can cd into all subdirectories
-chmod -R 440 $SUBMITTY_INSTALL_DIR/site
-find $SUBMITTY_INSTALL_DIR/site -type d -exec chmod ogu+x {} \;
+chmod -R 440 ${SUBMITTY_INSTALL_DIR}/site
+find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
 
 # "other" can read all .txt, .jpg, & .css files
-find $SUBMITTY_INSTALL_DIR/site -type f -name \*.css -exec chmod o+r {} \;
-find $SUBMITTY_INSTALL_DIR/site -type f -name \*.otf -exec chmod o+r {} \;
-find $SUBMITTY_INSTALL_DIR/site -type f -name \*.jpg -exec chmod o+r {} \;
-find $SUBMITTY_INSTALL_DIR/site -type f -name \*.png -exec chmod o+r {} \;
-find $SUBMITTY_INSTALL_DIR/site -type f -name \*.txt -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.css -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.otf -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.jpg -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.png -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.txt -exec chmod o+r {} \;
 # "other" can read & execute all .js files
-find $SUBMITTY_INSTALL_DIR/site -type f -name \*.js -exec chmod o+rx {} \;
-find $SUBMITTY_INSTALL_DIR/site -type f -name \*.cgi -exec chmod u+x {} \;
+find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.js -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.cgi -exec chmod u+x {} \;
 
-replace_fillin_variables $SUBMITTY_INSTALL_DIR/site/config/master_template.ini
-mv $SUBMITTY_INSTALL_DIR/site/config/master_template.ini $SUBMITTY_INSTALL_DIR/site/config/master.ini
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini
+mv ${SUBMITTY_INSTALL_DIR}/site/config/master_template.ini ${SUBMITTY_INSTALL_DIR}/site/config/master.ini
 
 ################################################################################################################
 ################################################################################################################
@@ -480,10 +481,11 @@ pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 # copy the necessary files out of the repo
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-cp ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_node  ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-cp ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_token ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-cp ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_function ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
-cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/lang ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
+mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_node      ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_token     ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_function  ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
+rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/lang/*              ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
 
 # change permissions
 chown -R hwcron:course_builders ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
@@ -511,19 +513,19 @@ if [[ "$#" -ge 1 && $1 == "test" ]]; then
 
     # copy the directory tree and replace variables
     echo -e "Install Autograding Test Suite..."
-    rsync -rtz  $SUBMITTY_REPOSITORY/tests/  $SUBMITTY_INSTALL_DIR/test_suite
-    mkdir -p $SUBMITTY_INSTALL_DIR/test_suite/log
-    replace_fillin_variables $SUBMITTY_INSTALL_DIR/test_suite/integrationTests/lib.py
+    rsync -rtz  ${SUBMITTY_REPOSITORY}/tests/  ${SUBMITTY_INSTALL_DIR}/test_suite
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/test_suite/log
+    replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/lib.py
 
     # add a symlink to conveniently run the test suite or specific tests without the full reinstall
-    ln -sf  $SUBMITTY_INSTALL_DIR/test_suite/integrationTests/run.py  $SUBMITTY_INSTALL_DIR/bin/run_test_suite.py
+    ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py
 
     echo -e "\nRun Autograding Test Suite...\n"
 
     # pop the first argument from the list of command args
     shift
     # pass any additional command line arguments to the run test suite
-    python $SUBMITTY_INSTALL_DIR/test_suite/integrationTests/run.py  "$@"
+    python ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  "$@"
 
     echo -e "\nCompleted Autograding Test Suite\n"
 fi

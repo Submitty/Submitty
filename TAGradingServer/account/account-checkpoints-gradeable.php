@@ -112,20 +112,36 @@ HTML;
 HTML;
 
 $grade_by_reg_section = $c_gradeable['g_grade_by_registration'];
-$section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
+$section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
 $user_section_param = ($grade_by_reg_section ? 'registration_section': 'rotating_section');
+
+$g_id = $c_gradeable['g_id'];
+
 $params = array($user_id);
 if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true){
     $params = array();
     $query = ($grade_by_reg_section ? "SELECT * FROM sections_registration ORDER BY sections_registration_id ASC"
-                                    : "SELECT * FROM sections_rotating ORDER BY sections_rotating_id ASC");
+                                    : "SELECT * FROM sections_rotating ORDER BY sections_rotating ASC");
+
+    //
+    //  FIXME
+    //  UGLY!  SQL TABLE COLUMNS ARE NAMED INCONSISTENTLY :(
+    $section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
+    //
+    //
+
     $db->query($query, $params);
 }
 else{
-    $params = array($user_id);
-    $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC"
-                                    : "SELECT * FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating ASC");
-    $db->query($query, $params);
+    if ($grade_by_reg_section) {
+        $params = array($user_id);
+    	$query = "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC";
+        $db->query($query, $params);
+    } else {
+        $params = array($user_id,$g_id);
+        $query = "SELECT * FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating ASC";
+        $db->query($query, $params);
+    }
 }
 
 foreach($db->rows() as $section) {
@@ -135,11 +151,12 @@ foreach($db->rows() as $section) {
     
     $section_id = intval($section[$section_param]);
     $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
+    $enrolled_assignment = ($grade_by_reg_section ? "enrolled in": "assigned to");
     $count = count($c_gradeable_checkpoints) + 2;
     print <<<HTML
                     <tr class="info">
                         <td colspan="{$count}" style="text-align:center;" id="section-{$section_id}">
-                                Students Enrolled in {$section_type} Section {$section_id}
+                                Students {$enrolled_assignment} {$section_type} Section {$section_id}
                                 <a target=_blank href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$c_gradeable['g_id']}&section_id={$section_id}&grade_by_reg_section={$grade_by_reg_section}">
                                     <div class="icon-print"></div>
                                 </a>

@@ -2,6 +2,4 @@
 
 <?php
 
-echo exec('whoami');
-echo "\n\n";
-phpinfo();
+echo "it works!"
