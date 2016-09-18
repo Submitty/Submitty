@@ -194,10 +194,11 @@ foreach($db->rows() as $section){
     
     $section_id = intval($section[$section_param]);
     $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
+    $enrolled_assignment = ($grade_by_reg_section ? "enrolled in": "assigned to");
     print <<<HTML
                         <tr class="info">
                             <td colspan="{$colspan}" style="text-align:center;">
-                                Students Enrolled in {$section_type} Section {$section_id}
+                                Students {$enrolled_assignment} {$section_type} Section {$section_id}
                             </td>
                         </tr>
 HTML;

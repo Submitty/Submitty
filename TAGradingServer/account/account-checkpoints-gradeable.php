@@ -151,11 +151,12 @@ foreach($db->rows() as $section) {
     
     $section_id = intval($section[$section_param]);
     $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
+    $enrolled_assignment = ($grade_by_reg_section ? "enrolled in": "assigned to");
     $count = count($c_gradeable_checkpoints) + 2;
     print <<<HTML
                     <tr class="info">
                         <td colspan="{$count}" style="text-align:center;" id="section-{$section_id}">
-                                Students Enrolled in {$section_type} Section {$section_id}
+                                Students {$enrolled_assignment} {$section_type} Section {$section_id}
                                 <a target=_blank href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$c_gradeable['g_id']}&section_id={$section_id}&grade_by_reg_section={$grade_by_reg_section}">
                                     <div class="icon-print"></div>
                                 </a>
