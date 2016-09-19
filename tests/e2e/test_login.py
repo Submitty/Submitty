@@ -38,5 +38,14 @@ class TestLogin(BaseTestCase):
         error = self.driver.find_element_by_id("error-0")
         self.assertEqual("Could not login using that user id or password", error.text)
 
+    def test_login_non_course_user(self):
+        self.get("/index.php?semester=" + self.semester + "&course=csci1000")
+        self.driver.find_element_by_id("login-guest")
+        self.driver.find_element_by_name("user_id").send_keys("pearsr")
+        self.driver.find_element_by_name("password").send_keys("pearsr")
+        self.driver.find_element_by_name("login").click()
+        error = self.driver.find_element_by_id("error-0")
+        self.assertEqual("Could not login using that user id or password", error.text)
+
 if __name__ == "__main__":
     unittest2.main()

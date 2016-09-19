@@ -23,6 +23,7 @@ class BaseTestCase(unittest2.TestCase):
     USER_NAME = "Joe"
     USER_PASSWORD = "student"
     DRIVER = None
+    """:type : webdriver.Chrome"""
 
     def __init__(self, *args, **kwargs):
         super(BaseTestCase, self).__init__(*args, **kwargs)
@@ -42,6 +43,7 @@ class BaseTestCase(unittest2.TestCase):
 
     def setUp(self):
         self.driver = BaseTestCase.DRIVER
+        """:type : webdriver.Chrome"""
         self.log_in()
 
     def tearDown(self):
@@ -56,21 +58,27 @@ class BaseTestCase(unittest2.TestCase):
             url = "/" + url
         self.driver.get(self.test_url + url)
 
-    def log_in(self, url=None):
+    def log_in(self, url=None, user_id=None, user_password=None, user_name=None):
         """
         Provides a common function for logging into the site (and ensuring
         that we're logged in)
         :return:
         """
-        if url is not None:
-            self.get(url)
-        else:
-            self.get("/index.php?semester=" + self.semester + "&course=csci1000")
-        assert "CSCI1000" in self.driver.title
-        self.driver.find_element_by_name('user_id').send_keys(self.user_id)
-        self.driver.find_element_by_name('password').send_keys(self.user_password)
+        if url is None:
+            url = "/index.php?semester=" + self.semester + "&course=csci1000"
+        if user_id is None:
+            user_id = self.user_id
+        if user_password is None:
+            user_password = self.user_password
+        if user_name is None:
+            user_name = self.user_name
+        self.get(url)
+
+        self.assertIn("CSCI1000", self.driver.title)
+        self.driver.find_element_by_name('user_id').send_keys(user_id)
+        self.driver.find_element_by_name('password').send_keys(user_password)
         self.driver.find_element_by_name('login').click()
-        assert self.user_name == self.driver.find_element_by_id("login-id").text
+        self.assertEqual(user_name, self.driver.find_element_by_id("login-id").text)
         self.logged_in = True
 
     def log_out(self):

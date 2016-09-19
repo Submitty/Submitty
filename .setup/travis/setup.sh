@@ -84,9 +84,12 @@ sudo echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
 sudo echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/valid
 sudo echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
 sudo echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/valid
 sudo echo "\n" | sudo perl ${SUBMITTY_DATA_DIR}/bin/authonly.pl
 sudo echo "student:student" | sudo chpasswd
 sudo echo "smithj:smithj" | sudo chpasswd
 sudo echo "joness:joness" | sudo chpasswd
 sudo echo "browna:browna" | sudo chpasswd
+sudo echo "pearsr:pearsr" | sudo chpasswd
 sudo python ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py csci1000
