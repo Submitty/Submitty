@@ -437,3 +437,13 @@ function getActiveVersionFromFile($g_id, $student_id) {
     return 0;
 }
 
+function getDisplayName($student_info) {
+    $first_name = isset($student_info['user_firstname']) ? $student_info['user_firstname'] : "";
+    $preferred_name = isset($student_info['user_preferred_firstname']) ? $student_info['user_preferred_firstname'] : "";
+    if ($preferred_name !== null && $preferred_name !== "") {
+        return $preferred_name;
+    }
+    else {
+        return $first_name;
+    }
+}
