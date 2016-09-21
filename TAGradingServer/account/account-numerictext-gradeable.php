@@ -282,12 +282,7 @@ HTML;
     foreach($students_grades as $row){
         $student_info = $row;
         $temp = $row;
-        if ($student_info["user_preferred_firstname"] === "") {
-            $firstname = $student_info["user_firstname"];
-        }
-        else {
-            $firstname = $student_info["user_preferred_firstname"];
-        }
+        $firstname = getDisplayName($student_info);
         
         print <<<HTML
                         <tr>

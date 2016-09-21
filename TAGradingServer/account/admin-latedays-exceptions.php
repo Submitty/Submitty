@@ -233,8 +233,10 @@ function retrieve_students_from_db($gradeable_id = 0) {
 
 	$sql = <<<SQL
 SELECT
+	users.user_id,
 	users.user_email,
 	users.user_firstname,
+	users.user_preferred_firstname,
 	users.user_lastname,
 	late_day_exceptions.late_day_exceptions
 FROM users
@@ -433,7 +435,7 @@ HTML;
 
 		self::$view['form'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-<form action="{$BASE_URL}/account/admin-latedays-exceptions.php?course={$_GET['course']}&semester={$_GET['semester']}" method="POST" enctype="multipart/form-data">
+<form action="{$BASE_URL}/account/admin-latedays-exceptions.php?course={$_GET['course']}&semester={$_GET['semester']}&this=Excused%20Absense%20Extensions" method="POST" enctype="multipart/form-data">
 <p>
 Use this form to grant an extension (e.g., for an excused absense)
 to a student on a specific assignment.
@@ -506,12 +508,13 @@ HTML;
 			//Table BODY
 			$cell_color = array('white', 'aliceblue');
 			foreach ($db_data as $index => $record) {
+				$firstname = getDisplayName($record);
 				self::$view['student_review_table'] .= <<<HTML
 <tr>
-<td style="background:{$cell_color[$index%2]};">{$record[0]}</td>
-<td style="background:{$cell_color[$index%2]};">{$record[1]}</td>
-<td style="background:{$cell_color[$index%2]};">{$record[2]}</td>
-<td style="background:{$cell_color[$index%2]};">{$record[3]}</td>
+<td style="background:{$cell_color[$index%2]};">{$record['user_id']}</td>
+<td style="background:{$cell_color[$index%2]};">{$firstname}</td>
+<td style="background:{$cell_color[$index%2]};">{$record['user_lastname']}</td>
+<td style="background:{$cell_color[$index%2]};">{$record['late_day_exceptions']}</td>
 </tr>
 HTML;
 			}

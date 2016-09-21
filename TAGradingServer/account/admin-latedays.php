@@ -205,6 +205,7 @@ function retrieve_students_from_db() {
 SELECT
 	late_days.user_id,
 	users.user_firstname,
+	users.user_preferred_firstname,
 	users.user_lastname,
 	late_days.allowed_late_days,
 	late_days.since_timestamp::timestamp::date
@@ -406,7 +407,7 @@ HTML;
 		$BASE_URL = rtrim(__BASE_URL__, "/");	
 
 		self::$view['form'] = <<<HTML
-<form action="{$BASE_URL}/account/admin-latedays.php?course={$_GET['course']}&semester={$_GET['semester']}" method="POST" enctype="multipart/form-data">
+<form action="{$BASE_URL}/account/admin-latedays.php?course={$_GET['course']}&semester={$_GET['semester']}&this=Late%20Days%20Allowed" method="POST" enctype="multipart/form-data">
 <h4>Single Student Entry</h4>
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Student ID:<br><input type="text" name="student_id" style="width:95%;"></div>
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Datestamp (MM/DD/YY):<br><input type="text" name="datestamp" style="width:95%;"></div>
@@ -454,13 +455,14 @@ HTML;
 			//Table BODY
 			$cell_color = array('white', 'aliceblue');
 			foreach ($db_data as $index => $record) {
+				$firstname = getDisplayName($record);
 				self::$view['student_review_table'] .= <<<HTML
 <tr>
-<td style="background:{$cell_color[$index%2]};">{$record[0]}</td>
-<td style="background:{$cell_color[$index%2]};">{$record[1]}</td>
-<td style="background:{$cell_color[$index%2]};">{$record[2]}</td>
-<td style="background:{$cell_color[$index%2]};">{$record[3]}</td>
-<td style="background:{$cell_color[$index%2]};">{$record[4]}</td>
+<td style="background:{$cell_color[$index%2]};">{$record['user_id']}</td>
+<td style="background:{$cell_color[$index%2]};">{$firstname}</td>
+<td style="background:{$cell_color[$index%2]};">{$record['user_lastname']}</td>
+<td style="background:{$cell_color[$index%2]};">{$record['allowed_late_days']}</td>
+<td style="background:{$cell_color[$index%2]};">{$record['since_timestamp']}</td>
 </tr>
 HTML;
 			}

@@ -70,12 +70,7 @@ HTML;
         $last_section = $student['registration_section'];
     }
 
-    if ($student["user_preferred_firstname"] === "") {
-        $firstname = $student["user_firstname"];
-    }
-    else {
-        $firstname = $student["user_preferred_firstname"];
-    }
+    $firstname = getDisplayName($student);
 
     $manual = "";
     if ($student["manual_registration"] === true) {
@@ -84,8 +79,7 @@ HTML;
     print <<<HTML
                 <tr>
                     <td>{$student['user_id']}</td>
-                    <td>{$firstname}
-		    {$student['user_lastname']}</td>
+                    <td>{$firstname} {$student['user_lastname']}</td>
                     <td>{$student['rotating_section']}</td>
                     <td>{$manual}</td>
                 </tr>

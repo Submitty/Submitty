@@ -14,19 +14,19 @@ class User {
      */
     private $loaded = false;
     
-    /**
-     * @var string $id                    The id of this user which should be a unique identifier (ex: RCS ID at RPI)
-     * @var string $first_name            The first name of the user
-     * @var string $preferred_first_name  The first name of the user
-     * @var string $last_name             The last name of the user
-     * @var string $email                 The email of the user
-     * @var int    $group                 The group of the user, used for access controls (ex: student, instructor, etc.)
-     */
+    /** @var string  The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     private $id;
+    /** @var string  The first name of the user */
     private $first_name;
-    private $preferred_first_name;
+    /** @var string  The first name of the user */
+    private $preferred_first_name = "";
+    /** @var  string  The name to be displayed by the system (either preferred name or first name) */
+    private $displayed_first_name;
+    /** @var string  The last name of the user */
     private $last_name;
+    /** @var string  The email of the user */
     private $email;
+    /** @var int     The group of the user, used for access controls (ex: student, instructor, etc.) */
     private $group;
     
     /**
@@ -59,10 +59,17 @@ class User {
         $this->id = $details['user_id'];
         $this->first_name = $details['user_firstname'];
 
-	    $this->preferred_first_name = $this->first_name;
-        if (isset($details['user_preferred_firstname']) && $details['user_preferred_firstname'] != "") {
+        if (isset($details['user_preferred_firstname'])) {
             $this->preferred_first_name = $details['user_preferred_firstname'];
         }
+
+        if ($this->preferred_first_name !== "" && $this->preferred_first_name !== null) {
+            $this->displayed_first_name = $this->preferred_first_name;
+        }
+        else {
+            $this->displayed_first_name = $this->first_name;
+        }
+
         $this->last_name = $details['user_lastname'];
         $this->email = $details['user_email'];
         $this->group = $details['user_group'];
@@ -127,8 +134,21 @@ class User {
         return $this->first_name;
     }
 
+    /**
+     * Get the preferred name of the loaded user
+     * @return string
+     */
     public function getPreferredFirstName() {
         return $this->preferred_first_name;
+    }
+
+    /**
+     * Returns the preferred name if one exists and is not null or blank, otherwise return the
+     * first name field for the user.
+     * @return string
+     */
+    public function getDisplayedFirstName() {
+        return $this->displayed_first_name;
     }
     
     /**
