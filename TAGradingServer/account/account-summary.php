@@ -191,23 +191,14 @@ HTML;
             $prev_section = $section_id;
         }
         $row = $student;
+        $firstname = getDisplayName($student);
         print <<<HTML
                 <tr>
                     <td>
                         {$student["user_id"]}
-			</td><td>
-HTML;
-	if ($eg->student['user_preferred_firstname'] == "") {
-    print <<<HTML
-                {$eg->student['user_firstname']}
-HTML;
-	} else {
-    print <<<HTML
-                {$eg->student['user_preferred_firstname']}
-HTML;
-	}
-   print <<<HTML
-			{$student["user_lastname"]}
+			        </td>
+			        <td>
+			            {$firstname} {$student["user_lastname"]}
                     </td>
                     <td>
 HTML;

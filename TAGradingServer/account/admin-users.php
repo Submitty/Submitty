@@ -82,14 +82,14 @@ foreach (Database::rows() as $user) {
             $sections .= $section['sections_registration_id'];
         }
     }
+    $firstname = getDisplayName($user);
     print <<<HTML
                 <tr>
                     <td>{$user['user_id']}</td>
-                    <td>{$user['user_firstname']}</td>
+                    <td>{$firstname}</td>
                     <td>{$user['user_lastname']}</td>
                     <td>{$sections}</td>
                     <td>{$user_group}</td>
-                    <!--<td>{$is_admin}</td>-->
                 </tr>
 HTML;
 }
