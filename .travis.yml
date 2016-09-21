@@ -70,6 +70,9 @@ install:
   - pip install pylint_runner
 
 before_script:
+  # Doing this helps chromedriver from hanging for some mysterious reason
+  # https://github.com/SeleniumHQ/docker-selenium/issues/87
+  - export DBUS_SESSION_BUS_ADDRESS=/dev/null
   - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
   - sudo ./.setup/travis/autograder.sh
   - ./.setup/travis/setup.sh
