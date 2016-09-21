@@ -356,15 +356,36 @@ class local_view {
 		self::$view = array();
 		
 		self::$view['head'] = <<<HTML
-<div id="container" style="width:100%; margin-top:40px;">
-<div class="modal hide fade in" style="display:block; margin-top:5%; z-index:100;">
+<style type="text/css">
+	body {
+		overflow-y: scroll;
+	}
+	
+	#container-latedays
+	{
+		width: 700px;
+		margin: 70px auto 100px;
+		background-color: #fff;
+		border: 1px solid #999;
+		-webkit-border-radius: 6px;
+		-moz-border-radius: 6px;
+		border-radius: 6px;outline: 0;
+		-webkit-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+		-moz-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+		box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+		-webkit-background-clip: padding-box;
+		-moz-background-clip: padding-box;
+		background-clip: padding-box;
+	}
+</style>
+
+<div id="container-latedays">
 <div class="modal-header">
 <h3>Excused Absense Extensions</h3>
 </div>
 HTML;
 
 		self::$view['tail'] = <<<HTML
-</div>
 </div>	
 HTML;
 

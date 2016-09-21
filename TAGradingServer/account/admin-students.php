@@ -8,14 +8,13 @@ check_administrator();
 print <<<HTML
 <style type="text/css">
     body {
-        overflow: scroll;
+        overflow-y: scroll;
     }
 
     #container-students
     {
         width:700px;
-        margin:100px auto;
-        margin-top: 130px;
+        margin: 70px auto 100px;
         background-color: #fff;
         border: 1px solid #999;
         border: 1px solid rgba(0,0,0,0.3);
