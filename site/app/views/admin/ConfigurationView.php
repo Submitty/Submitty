@@ -12,7 +12,9 @@ class ConfigurationView {
 
     public function viewConfig($fields) {
         $zero_checked = ($fields['zero_rubric_grades'] === true) ? 'checked' : '';
-        $ta_grades = ($fields['ta_grades'] === true) ? 'checked' : '';
+        $display_iris_grades_summary = ($fields['display_iris_grades_summary'] === true) ? 'checked' : '';
+        $display_custom_message = ($fields['display_custom_message'] === true) ? 'checked' : '';
+
 
         return <<<HTML
 <div class="content">
@@ -66,13 +68,25 @@ class ConfigurationView {
                 on the submission page.</div>
             </div>
         </div>
+
         <div class="option">
-            <div class="option-input"><input type="checkbox" name="ta_grades" value="true" {$ta_grades} /></div>
+            <div class="option-input"><input type="checkbox" name="display_iris_grades_summary" value="true" {$display_iris_grades_summary} /></div>
             <div class="option-desc">
-                <div class="option-title">Enable TA Grades</div>
-                <div class="option-alt">Should TA grade reports ever be shown to students on their submissions.</div>
+                <div class="option-title">Display Iris Grades Summary</div>
+                <div class="option-alt">Should Iris Grades Summary be displayed to students.</div>
             </div>
         </div>
+
+        <div class="option">
+            <div class="option-input"><input type="checkbox" name="display_custom_message" value="true" {$display_custom_message} /></div>
+            <div class="option-desc">
+                <div class="option-title">Display Exam Zone Seating Assignment</div>
+                <div class="option-alt">Should the Exam Zone Seating Assignment currently be visible to students?</div>
+            </div>
+        </div>
+
+
+
     </div>
     <div class="post-panel-btn">
         <button class="btn btn-primary" style="float: right" type="submit" form="configForm">
