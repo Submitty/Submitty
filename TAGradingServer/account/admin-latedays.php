@@ -329,8 +329,30 @@ class local_view {
 		self::$view = array();
 		
 		self::$view['head'] = <<<HTML
-<div id="container" style="width:100%; margin-top:40px;">
-<div class="modal hide fade in" style="display:block; margin-top:5%; z-index:100;">
+<style type="text/css">
+	body {
+		overflow-y: scroll;
+	}
+	
+	#container-latedays
+	{
+		width:700px;
+		margin: 70px auto 100px;
+		background-color: #fff;
+		border: 1px solid #999;
+		-webkit-border-radius: 6px;
+		-moz-border-radius: 6px;
+		border-radius: 6px;outline: 0;
+		-webkit-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+		-moz-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+		box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+		-webkit-background-clip: padding-box;
+		-moz-background-clip: padding-box;
+		background-clip: padding-box;
+	}
+</style>
+
+<div id="container-latedays">
 <div class="modal-header">
 <h3>Late Days Allowed</h3>
 </div>
@@ -353,7 +375,6 @@ Students may use these additional late days for any future homeworks
 HTML;
 
 		self::$view['tail'] = <<<HTML
-</div>
 </div>
 </div>
 HTML;
@@ -391,7 +412,7 @@ HTML;
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Student ID:<br><input type="text" name="student_id" style="width:95%;"></div>
 <div style="width:30%; display:inline-block; vertical-align:top; padding-right:10px;">Datestamp (MM/DD/YY):<br><input type="text" name="datestamp" style="width:95%;"></div>
 <div style="width:15%; display:inline-block; vertical-align:top; padding-right:15px;">Late Days:<br><input type="text" name="late_days" style="width:95%;"></div>
-<div style="display:inline-block; vertical-align:top; padding-top:1.5em;"><input type="submit" value="Submit"></div>
+<div style="display:inline-block; vertical-align:top; padding-top:1.5em;"><input class='btn' type="submit" value="Submit"></div>
 <h4>Multiple Student Entry Via CSV Upload</h4>
 <div style="padding-bottom:20px;"><input type="file" name="csv_upload" onchange="this.form.submit()"></div>
 </form>
