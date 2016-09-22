@@ -68,6 +68,7 @@ bool ShowHelper(const std::string& when, bool success) {
 double ValidateGrader(const TestCase &my_testcase, int which_grader,
                       nlohmann::json &autocheck_js, const std::string &hw_id) {
 
+  //std::cerr << "----------------------------------------" << std::endl;
   std::cerr << "autocheck #" << which_grader << std::endl;
   TestResults* result = my_testcase.do_the_grading(which_grader);
   assert (result != NULL);
@@ -87,6 +88,8 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
   bool show_message  = ShowHelper(tcg.value("show_message", "never"),result->getSuccess());
   bool show_actual   = ShowHelper(tcg.value("show_actual",  "never"),result->getSuccess());
   bool show_expected = ShowHelper(tcg.value("show_expected","never"),result->getSuccess());
+
+  //std::cout << "sm=" << show_message << "  sa=" << show_actual << "  se=" << show_expected << std::endl;
 
   if (show_actual == false && show_expected == true) {
     std::cout << "ERROR show_actual == false & show_expected == true" << std::endl;
@@ -155,23 +158,35 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
 
 
     const std::vector<std::string>& messages = result->getMessages();
-    if (FN==0 && show_message) {
-      if (messages.size() == 0) {
-        show_message = false;
+    
+    std::string fm = tcg.value("failure_message","");
+
+    if (show_message) {
+      bool failure_message_already_added = false;
+      if (FN==0) {
+        for (int m = 0; m < messages.size(); m++) {
+          if (messages[m] != "") {
+            if (messages[m] == fm) failure_message_already_added = true;
+            autocheck_j["messages"].push_back(messages[m]);
+          }
+        }
       }
-      for (int m = 0; m < messages.size(); m++) {
-        if (messages[m] != "")
-          autocheck_j["messages"].push_back(messages[m]);
+
+      if (fm != "" && !failure_message_already_added) {
+        autocheck_j["messages"].push_back(fm);
       }
     }
 
     std::cout << "AUTOCHECK GRADE " << grade << std::endl;
-    std::cout << "MESSAGES SIZE " << messages.size() << std::endl;
-
-    if (show_message || show_actual || show_expected) {
-      //grade < 1.0 ||
-      //result->getMessages().size() > 0 ||
-      //actual_file_to_print) {
+    int num_messages = 0;
+    if (autocheck_j.find("messages") != autocheck_j.end()) {
+      num_messages = autocheck_j.find("messages")->size();
+      assert (num_messages > 0);
+    }
+    
+    if ((show_message && num_messages > 0) 
+        || show_actual 
+        || show_expected) {
       autocheck_js.push_back(autocheck_j);
     }
   }
