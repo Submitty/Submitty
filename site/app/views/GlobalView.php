@@ -167,7 +167,7 @@ HTML;
 </div>
 <div id="footer">
     <span id="copyright">&copy; 2016 RPI</span>
-    <a href="https://github.com/RCOS-Grading-Server/HWserver" target="blank" title="Fork us on Github">
+    <a href="https://github.com/Submitty/Submitty" target="blank" title="Fork us on Github">
         <i class="fa fa-github fa-lg"></i>
     </a>
 </div>
