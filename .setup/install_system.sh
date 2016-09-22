@@ -519,8 +519,6 @@ fi
 #################
 
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-#pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-#make ubuntudeps
 # graph tool...  for later?  add-apt-repository "http://downloads.skewed.de/apt/trusty universe" -y
 add-apt-repository ppa:ubuntu-toolchain-r/test -y
 apt-get update -qq
@@ -530,7 +528,9 @@ apt-get install -qq splint indent
 apt-get install -qq python3 python3-dev libpython3.4 python3-pip
 python3 -m pip install pylint
 # graph tool...  for later?  apt-get install -qq --force-yes python3-graph-tool
-#popd
+pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+make
+popd
 
 
 #################################################################
