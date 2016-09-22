@@ -31,8 +31,7 @@ print <<<HTML
     #container-nt{
         min-width:700px;
         width: 80%;
-        margin:100px auto;
-        margin-top: 130px;
+        margin: 70px auto 100px;
         background-color: #fff;
         border: 1px solid #999;
         border: 1px solid rgba(0,0,0,0.3);
