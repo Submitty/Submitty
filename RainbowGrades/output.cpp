@@ -289,6 +289,12 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
   ostr << "  <tr><td>Your zone assignment: </td><td align=center>" << zone << "</td></tr>\n";
   ostr << "</table>\n";
   ostr << "</tr></td>\n";
+
+  if (s->getExamZoneImage() != "") {
+    ostr << "<tr><td style=\"background-color:#ffffff;\"><img src=\"zone_images/" + s->getExamZoneImage() + "\"></td></tr>\n";
+  }
+
+
   ostr << "</table>\n";
 
 #else
