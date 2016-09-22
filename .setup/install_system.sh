@@ -31,7 +31,7 @@ if [ ${VAGRANT} == 1 ]; then
     chmod +x /etc/update-motd.d/00-header
 
     echo -e '
-  _______  __   __  _______  __   __  ___   _______  _______  __   __
+ _______  __   __  _______  __   __  ___   _______  _______  __   __
 |       ||  | |  ||  _    ||  |_|  ||   | |       ||       ||  | |  |
 |  _____||  | |  || |_|   ||       ||   | |_     _||_     _||  |_|  |
 | |_____ |  |_|  ||       ||       ||   |   |   |    |   |  |       |
@@ -584,11 +584,14 @@ if [[ ${VAGRANT} == 1 ]]; then
     echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/valid
     echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
     echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+    echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+    echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/valid
     ${SUBMITTY_DATA_DIR}/bin/authonly.pl
     echo "student:student" | sudo chpasswd
     echo "smithj:smithj" | sudo chpasswd
     echo "joness:joness" | sudo chpasswd
     echo "browna:browna" | sudo chpasswd
+    echo "pearsr:pearsr" | sudo chpasswd
 
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
     rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
