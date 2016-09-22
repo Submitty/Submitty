@@ -1074,7 +1074,7 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
   
 
   for (int S = 0; S < (int)students.size(); S++) {
-    if (students[S]->getSection() == 0) continue;
+    //if (students[S]->getSection() == 0) continue;
 
     std::string file2 = INDIVIDUAL_FILES_OUTPUT_DIRECTORY + students[S]->getUserName() + "_message.html";
     std::ofstream ostr2(file2.c_str());
