@@ -80,8 +80,8 @@ class ConfigurationView {
         <div class="option">
             <div class="option-input"><input type="checkbox" name="display_custom_message" value="true" {$display_custom_message} /></div>
             <div class="option-desc">
-                <div class="option-title">Display Exam Zone Seating Assignment</div>
-                <div class="option-alt">Should the Exam Zone Seating Assignment currently be visible to students?</div>
+                <div class="option-title">Display Iris Custom Message</div>
+                <div class="option-alt">The primary use of the custom message is to announce Exam Zone Seating Assignments.</div>
             </div>
         </div>
 
