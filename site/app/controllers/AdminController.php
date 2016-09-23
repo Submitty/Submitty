@@ -26,13 +26,6 @@ class AdminController implements IController {
 
         $controller = null;
         switch ($_REQUEST['page']) {
-            case 'gradeables':
-                $controller = new GradeablesController($this->core);
-                break;
-            case 'labs':
-                break;
-            case 'tests':
-                break;
             case 'users':
                 $controller = new UsersController($this->core);
                 break;

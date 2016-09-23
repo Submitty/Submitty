@@ -5,6 +5,7 @@ namespace app\controllers\admin;
 use app\controllers\IController;
 use app\libraries\Core;
 use app\libraries\Output;
+use app\models\User;
 
 class UsersController implements IController {
     private $core;
@@ -30,10 +31,8 @@ class UsersController implements IController {
             case 'users':
                 break;
             case 'students':
-                $this->listStudents();
-                break;
             default:
-                $this->core->getOutput()->showError("Invalid page request for controller");
+                $this->listStudents();
                 break;
         }
     }
