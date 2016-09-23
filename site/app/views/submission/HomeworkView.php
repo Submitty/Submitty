@@ -107,6 +107,7 @@ HTML;
 	<br>
 	&nbsp;
     </div>
+
     <button type="button" id="submit" class="btn btn-success" style="margin-right: 100px;">Submit</button>
     <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
@@ -121,10 +122,11 @@ HTML;
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 foreach ($gradeable->getPreviousFiles($i) as $file) {
                     $size = number_format($file['size'] / 1024, 2);
+                    $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
                     $old_files .= <<<HTML
 
-                addLabel('{$file['name']}', '{$size}', {$i}, true);
-                readPrevious('{$file['name']}', {$i});
+                addLabel('$escape_quote_filename', '{$size}', {$i}, true);
+                readPrevious('$escape_quote_filename', {$i});
 HTML;
                 }
             }
