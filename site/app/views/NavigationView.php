@@ -29,15 +29,11 @@ class NavigationView {
             $message_file_contents = file_get_contents($message_file_path);
         }
 
-
-        $return = <<<HTML
-HTML;
-
-
-if ($message_file_contents != "") {
-        $return .= <<<HTML
+        $display_custom_message = $this->core->getConfig()->displayCustomMessage();
+        if ($display_custom_message && $message_file_contents != "") {
+          $return .= <<<HTML
 <div class="content">
-{$message_file_contents}
+   {$message_file_contents}
 </div>
 HTML;
 }
@@ -52,9 +48,13 @@ HTML;
         <!--<button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course={$course}&semester={$semester}&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button> -->
 HTML;
         }
+        $display_iris_grades_summary = $this->core->getConfig()->displayIrisGradesSummary();
+        if ($display_iris_grades_summary) {
         $return .= <<<HTML
-        <button class="btn btn-primary" onclick="window.location.href='{$this->core->buildUrl(array('component' => 'student',
-                                                                                                    'page' => 'rainbow'))}'">View Grades</button>
+        <button class="btn btn-primary" onclick="window.location.href='{$this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow'))}'">View Grades</button>
+HTML;
+          }
+        $return .= <<<HTML
     </div>
     <table class="gradeable_list" style="width:100%;">
 

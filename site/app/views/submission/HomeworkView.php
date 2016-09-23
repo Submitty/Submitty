@@ -59,7 +59,6 @@ HTML;
      * @return string
      */
     public function showGradeable($gradeable, $days_late) {
-        $show_ta_grades = $this->core->getConfig()->showTaGrades();
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
@@ -631,7 +630,7 @@ HTML;
             $return .= <<<HTML
 </div>
 HTML;
-            if ($show_ta_grades && $gradeable->taGradesReleased()) {
+            if ($gradeable->taGradesReleased()) {
                 $return .= <<<HTML
 <div class="content">
 HTML;
