@@ -90,9 +90,85 @@ function batchImportJSON(url, csrf_token){
     });
 }
 
+var hasNav = false;
 
-/* TODO: Add way to add new errors/notices/successes to the screen for ajax forms */
+function UpdateTableHeaders() {
+    var count = 0;
+    var scrollTop = parseInt($(window).scrollTop());
+    $(".persist-area").each(function() {
+        var el = $(".persist-thead", this);
+        var height = parseFloat(el.height());
+        var offset = parseFloat(el.offset().top);
+        var floatingHeader = $(".floating-thead", this);
+        if (scrollTop > (offset - height)) {
+            if (floatingHeader.css("visibility") != "visible") {
+                var cnt = 0;
+                $("#floating-thead-0>td").each(function() {
+                    $(this).css("width", $($("#anchor-thead").children()[cnt]).width());
+                    cnt++;
+                });
+                floatingHeader.css("visibility", "visible");
+            }
+        }
+        else {
+            floatingHeader.css("visibility", "hidden");
+        }
+        $(".persist-header", this).each(function() {
+            floatingHeader = $("#floating-header-" + count);
+            el = $(this);
+            height = parseFloat(el.height());
+            offset = parseFloat(el.offset().top);
+            if (scrollTop > (offset - height)) {
+                if (floatingHeader.css("visibility") != "visible") {
+                    floatingHeader.css("visibility", "visible");
+                    var cnt = 0;
+                    $("#floating-header-" + count + ">td").each(function() {
+                        $(this).css("width", $($("#anchor-head-" + count).children()[cnt]).width());
+                        cnt++;
+                    });
+                }
+            }
+            else {
+                floatingHeader.css("visibility", "hidden");
+            }
+            count++;
+        });
+    });
+}
+
 $(function() {
+    hasNav = $("#nav").length > 0;
+
+    // Each persist-area can have multiple persist-headers, we need to create each one with a new z-index
+    var persist = $(".persist-area");
+    var z_index = 900;
+    var count = 0;
+    persist.each(function() {
+        var el = $(".persist-thead>tr", this);
+        el.attr('id', 'anchor-thead');
+
+        el.before(el.clone()).css({"width": el.width(), "top": "30px", "z-index": "899"}).addClass('floating-thead')
+            .attr('id', 'floating-thead-' + count);
+        $(".floating-thead", this).each(function() {
+           $(this).children().removeAttr('width');
+        });
+        $(".persist-header", this).each(function() {
+            $(this).attr('id', 'anchor-head-' + count);
+            var clone = $(this);
+            clone.before(clone.clone()).css({
+                "width": clone.width(),
+                "top": (30 + el.height()) + "px",
+                "z-index": "" + z_index
+            }).addClass("floating-header").removeClass("persist-header").attr('id', 'floating-header-' + count);
+            z_index++;
+            count++;
+        });
+    });
+
+    if (persist.length > 0) {
+        $(window).scroll(UpdateTableHeaders).trigger("scroll");
+    }
+
     setTimeout(function() {
         $('.inner-message').fadeOut();
     }, 5000);

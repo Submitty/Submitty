@@ -84,6 +84,9 @@ HTML;
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view'))}">Course Settings</a>
             </li>
             <li>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users'))}">Students</a>
+            </li>
+            <li>
               <!--<a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=View%20Students">Students</a>-->
                 <a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=Students">Students</a>
             </li>
@@ -138,7 +141,6 @@ HTML;
         if ($this->core->userLoaded()) {
             $logout_link = $this->core->buildUrl(array('component' => 'authentication', 'page' => 'logout'));
             $my_preferred_name = $this->core->getUser()->getDisplayedFirstName();
-            $id = $this->core->getUser()->getId();
             $return .= <<<HTML
             <span id="login">Hello <span id="login-id">{$my_preferred_name}</span></span> (<a id='logout' href='{$logout_link}'>Logout</a>)
 HTML;
@@ -166,10 +168,12 @@ HTML;
     <div id="push"></div>
 </div>
 <div id="footer">
-    <span id="copyright">&copy; 2016 RPI</span>
-    <a href="https://github.com/Submitty/Submitty" target="blank" title="Fork us on Github">
-        <i class="fa fa-github fa-lg"></i>
-    </a>
+    <span id="copyright">&copy; 2016 RPI | A <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
+    <span id="github">
+        <a href="https://github.com/RCOS-Grading-Server/HWserver" target="blank" title="Fork us on Github">
+            <i class="fa fa-github fa-lg"></i>
+        </a>
+    </span>
 </div>
 HTML;
         if ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) {

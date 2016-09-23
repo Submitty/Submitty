@@ -32,23 +32,23 @@ body {
     position: relative;
 }
 
-table {
-    width: 100%;
-    text-align: center;
-    border-collapse: collapse;
-}
-
-table tr.table-header {
-    border-bottom: 1px solid black;
-}
-
 a, a:hover, a:link, a:visited {
     text-decoration: none;
 }
 
-/**
+a.external,
+a.external:visited,
+a.external:link {
+    color: #000000;
+}
+
+a.external:hover {
+    color: #2627ee;
+}
+
+/****************************
  * INPUT STYLES
- */
+ ***************************/
 input {
     border: 1px solid #ccc;
     -webkit-border-radius: 4px;
@@ -72,6 +72,69 @@ textarea {
     -moz-border-radius: 4px;
     border-radius: 4px;
 
+}
+
+/****************************
+ * TABLE STYLES
+ ***************************/
+table {
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+}
+
+table a{
+    text-decoration: none;
+}
+
+table tr.table-header {
+    border-bottom: 1px solid black;
+}
+
+.table tr {
+
+}
+
+.table td {
+    padding: 5px;
+    border-top: 1px solid #dddddd;
+}
+
+.table-bordered {
+    border: 1px solid #AAAAAA;
+    border-collapse: separate;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.table-striped>tbody>tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+.table-striped>tbody>tr:nth-child(odd) {
+    background: #ffffff;
+}
+
+.table>thead>tr {
+    background: #E1E1E1;
+}
+
+.table>tbody>tr.info {
+    background-color: #d9edf7;
+}
+
+.floating-thead,
+.floating-header {
+    position: fixed;
+    top: 0;
+    visibility: hidden;
+}
+
+.floating-thead > td,
+.floating-header > td {
+    display: table-cell;
+    text-align: center;
 }
 
 #container {
@@ -222,7 +285,19 @@ textarea {
 }
 
 #footer #copyright {
-    margin-right: 15px;
+    margin-right: 5px;
+}
+
+#footer #github {
+    margin-left: 5px;
+}
+
+#copyright > a {
+    color: #4078c0;
+}
+
+#copyright > a:hover {
+    text-decoration: underline;
 }
 
 .sub {
@@ -477,6 +552,11 @@ select {
 	text-align: left !important;
 }
 
+.gradeable_list tr:nth-child(odd),
+.gradeable_list tr:nth-child(even) {
+    background-color: #E9EFEF
+}
+
 table .colspan{
 	padding: 10px;
 	font-size: 28px;
@@ -488,9 +568,7 @@ table .bar{
 table .gradeable_title {
 	padding-left: 50px;
 }
-table a{
-	text-decoration: none;
-}
+
 table .has-url:hover {
 	cursor: pointer;
 	color: #3232FF;
@@ -526,19 +604,10 @@ table .instructor .option{
 table .instructor .two-options{
 	width: 15%;
 }
+
 .nav_header{
   text-align:center;
   background-color:#bfbfbf;
-}
-
-a.external,
-a.external:visited,
-a.external:link {
-    color: #000000;
-}
-
-a.external:hover {
-    color: #2627ee;
 }
 
 .nav-buttons {

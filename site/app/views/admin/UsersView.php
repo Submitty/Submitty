@@ -3,6 +3,7 @@
 namespace app\views\admin;
 
 use app\libraries\Core;
+use app\models\User;
 
 class UsersView {
     private $core;
@@ -11,50 +12,81 @@ class UsersView {
         $this->core = $core;
     }
 
+    /**
+     * @param User[] $students
+     * @return string
+     */
     public function listStudents($students) {
-        $section = null;
+        $section = -1;
         $return = <<<HTML
 <div class="content">
-    <h2>View students</h2>
-    <div class="panel">
-        <table>
+    <h2>View Students</h2>
+    <table class="table table-striped table-bordered persist-area">
+        <thead class="persist-thead">
+            <tr>
+                <td width="5%"></td>
+                <td width="15%">Registration Section</td>
+                <td width="20%" style="text-align: left">User ID</td>
+                <td width="30%" colspan="2">Name</td>
+                
+                <td width="15%">Rotating Section</td>
+                <td width="15%">Manual Registration</td>
+            </tr>
+        </thead>
 HTML;
         if (count($students) > 0) {
+            $count = 1;
+            $tbody_open = false;
             foreach ($students as $student) {
-                if($section != $student['user_course_section']) {
+                $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
+                if($section !== $student->getRegistrationSection()) {
+                    $count = 1;
+                    if ($tbody_open) {
+                        $return .= <<<HTML
+        
+        </tbody>
+HTML;
+                    }
                     $return .= <<<HTML
-                <tr>
-                    <td colspan="3">{$student['section_title']}</td>
-                </tr>
+        
+        <tr class="info persist-header">
+            <td colspan="7" style="text-align: center">Students Enrolled in Registration Section {$registration}</td>
+        </tr>
+        <tbody id="section-{$registration}">
 HTML;
-                    $section = $student['user_course_section'];
+                    $tbody_open = true;
+                    $section = $student->getRegistrationSection();
                 }
+                $manual = ($student->isManualRegistration()) ? "TRUE" : "FALSE";
+                $rotating_section = ($student->getRotatingSection() === null) ? "NULL" : $student->getRotatingSection();
                 $return .= <<<HTML
-                <tr>
-                    <td>{$student['user_id']}</td>
-                    <td>{$student['user_firstname']} {$student['user_lastname']}</td>
-                    <td>{$student['user_assignment_section']}</td>
-                </tr>
+            
+            <tr>
+                <td>{$count}</td>
+                <td>{$registration}</td>
+                <td style="text-align: left">{$student->getId()}</td>
+                <td style="text-align: left">{$student->getDisplayedFirstName()}</td> 
+                <td style="text-align: left">{$student->getLastName()}</td>
+                <td>{$rotating_section}</td>
+                <td>{$manual}</td>
+            </tr>
 HTML;
+                $count++;
             }
+            $return .= <<<HTML
+        </tbody>
+HTML;
         }
         else {
             $return .= <<<HTML
-            <tr>
-                <td colspan="3">No students found</td>
-            </tr>
+        <tr>
+            <td colspan="3">No students found</td>
+        </tr>
 HTML;
         }
 
         $return .= <<<HTML
-        </table>
-    </div>
-    <div class="post-panel-btn">
-        <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin',
-                                                                      'page'      => 'users',
-                                                                      'action'    => 'add_student'))}" style="float: right">
-        <i class="fa fa-plus fa-fw"></i> New Student</a>
-    </div>
+    </table>
 </div>
 HTML;
 
