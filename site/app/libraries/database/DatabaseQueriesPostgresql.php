@@ -3,6 +3,7 @@
 namespace app\libraries\database;
 
 use app\libraries\Database;
+use app\models\User;
 
 class DatabaseQueriesPostgresql implements IDatabaseQueries{
     /**
@@ -16,11 +17,7 @@ class DatabaseQueriesPostgresql implements IDatabaseQueries{
 
     public function getUserById($user_id) {
         $this->database->query("SELECT * FROM users WHERE user_id=?", array($user_id));
-        return $this->database->row();
-    }
-
-    public function getAssignmentById($assignment_id) {
-        // TODO: Implement getAssignmentById() method.
+        return new User($this->database->row());
     }
 
     public function getAllGradeableIds() {
@@ -41,15 +38,15 @@ WHERE g.g_id=?", array($g_id));
     
     public function getAllStudents() {
         $this->database->query("
-SELECT u.*, s.section_title
-FROM users u 
-LEFT JOIN (
-    SELECT section_number, section_title 
-    FROM sections
-) as s ON s.section_number = u.user_course_section
-WHERE user_group=1
-ORDER BY u.user_course_section, u.user_id");
-        return $this->database->rows();
+SELECT u.*
+FROM users u
+WHERE user_group=4
+ORDER BY u.registration_section, u.user_id");
+        $return = array();
+        foreach ($this->database->rows() as $row) {
+            $return[] = new User($row);
+        }
+        return $return;
     }
 
     public function getAllUsers() {

@@ -132,7 +132,7 @@ class Core {
      */
     public function loadUser($user_id) {
         // attempt to load rcs as both student and user
-        $this->user = new User($user_id, $this->database_queries);
+        $this->user = $this->database_queries->getUserById($user_id);
     }
 
     /**

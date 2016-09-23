@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries\database;
+use app\models\User;
 
 /**
  * Interface DatabaseQueries
@@ -12,39 +13,12 @@ namespace app\libraries\database;
 interface IDatabaseQueries {
 
     /**
-     * Gets a user from the database given a user_id. It will return an associate array with the
-     * form of:
-     *
-     * array(
-     *      'user_id',
-     *      'user_firstname',
-     *      'user_lastname',
-     *      'user_email',
-     *      'user_group',
-     *      'user_course_section',
-     *      'user_assignment_section'
-     * );
-     *
+     * Gets a user from the database given a user_id.
      * @param string $user_id
      *
-     * @return array
+     * @return User
      */
     public function getUserById($user_id);
-
-    /**
-     * Gets an assignment from the database given an assignment_id. It will return an associate array
-     * with the form of:
-     *
-     * @todo: write the return array structure
-     * array(
-     *      '',
-     * );
-     *
-     * @param string $assignment_id
-     *
-     * @return array
-     */
-    public function getAssignmentById($assignment_id);
     
     /**
      * Gets array of all gradeables ids in the database returning it in a list sorted alphabetically
@@ -67,7 +41,7 @@ interface IDatabaseQueries {
      *
      * @todo: write the return array structure
      *
-     * @return array
+     * @return User[]
      */
     public function getAllStudents();
 
