@@ -45,16 +45,12 @@ class User {
 
     /**
      * User constructor.
-     *
-     * @param string           $user_id
-     * @param IDatabaseQueries $database
      */
-    public function __construct($user_id, $database) {
-        $details = $database->getUserById($user_id);
+    public function __construct($details) {
         if (count($details) == 0) {
             return;
         }
-        
+
         $this->loaded = true;
         $this->id = $details['user_id'];
         $this->first_name = $details['user_firstname'];
