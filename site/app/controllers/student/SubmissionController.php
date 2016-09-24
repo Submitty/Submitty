@@ -259,6 +259,18 @@ class SubmissionController implements IController {
                 return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1000)." kb. Uploaded file(s) was ".($file_size/1000)." kb.", false);
             }
             
+            for($i = 1; $i <= $gradeable->getNumParts();$i++) {
+                if(isset($uploaded_files[$i])) {
+                    for($j = 0; $j < $count[$i]; $j++) {
+                        if($uploaded_files[$i]["is_zip"][$j] === true) {
+                            if(FileUtils::checkFileInZipName($uploaded_files[$i]["tmp_name"][$j]) === false) {
+                                return $this->uploadResult("You may not use quotes, backslashes or angle brackets in your filename for files inside the zip.", false);
+                            }
+                        }
+                    }
+                }
+            }
+
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 if (isset($uploaded_files[$i])) {
                     for ($j = 0; $j < $count[$i]; $j++) {

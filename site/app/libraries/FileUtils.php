@@ -227,6 +227,18 @@ class FileUtils {
         return $size;
     }
     
+    public static function checkFileInZipName($filename) {
+        $zip = zip_open($filename);
+        if(is_resource(($zip))) {
+            while ($inner_file = zip_read($zip)) {
+                $fname = zip_entry_name($inner_file);
+                if(strpos($fname, '\'') !== false || strpos($fname, '\\') !== false || strpos($fname, '\"') !== false || strpos($fname, '<') !== false) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
     public static function encodeJson($string) {
         return json_encode($string, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
