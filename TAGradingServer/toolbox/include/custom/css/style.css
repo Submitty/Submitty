@@ -82,7 +82,10 @@ span#right.resbox {
 }
 
 .grading_label{
-    padding: 5px;
+    display: inline-block;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 18pt;
 }
 
 
@@ -549,16 +552,25 @@ table {
 }
 
 .icon-selected.icon-auto-grading-results {
-    box-shadow: 0px 0px 5px 5px #c40233;
-    background-color: #c40233;
+    box-shadow: 0px 0px 5px 5px #fd4472;
+    background-color: #fd4472;
 }
 .icon-selected.icon-grading-panel {
-    box-shadow: 0px 0px 5px 5px #00a368;
-    background-color: #00a368;
+    box-shadow: 0px 0px 5px 5px #00e08e;
+    background-color: #00e08e;
 }
 .icon-selected.icon-files {
-    box-shadow: 0px 0px 5px 5px #0088bf;
-    background-color: #0088bf;
+    box-shadow: 0px 0px 5px 5px #00b3fa;
+    background-color: #00b3fa;
+}
+
+.icon-refresh{
+    background: url('../../bootstrap/img/refresh-page-option.png') no-repeat;
+    background-size: 100%;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
 }
 
 #grade{
