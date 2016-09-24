@@ -904,8 +904,8 @@ void load_student_grades(std::vector<Student*> &students) {
                   }
                   s->setDefaultAllowedLateDays(value);
 		} else if (token == "allowed_late_days") {
-                  int value = j[token].get<int>();
-                  s->setCurrentAllowedLateDays(value);
+                  //int value = j[token].get<int>();
+                  //s->setCurrentAllowedLateDays(value);
                 } else {
             std::cout << "UNKNOWN TOKEN Y '" << token << "'" << std::endl;
 			exit(0);
