@@ -390,42 +390,60 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
 
     ?>
 <div id="grade">
-    <i title="Show/Hide Submission Info (Press S)" class="icon-status icon-selected" onclick="handleKeyPress('KeyS')"></i>
-    <i title="Show/Hide Grading Panel (Press G)" class="icon-grading-panel icon-selected" onclick="handleKeyPress('KeyG')"></i>
-    <i title="Show/Hide Auto Grading Results (Press A)" class="icon-auto-grading-results icon-selected" onclick="handleKeyPress('KeyA');"></i>
-    <i title="Show/Hide Files Viewer (Press F)" class="icon-files icon-selected" onclick="handleKeyPress('KeyF')"></i>
+    <i title="Show/Hide Student Information (Press S)" class="icon-status" onclick="handleKeyPress('KeyS')"></i>
+    <i title="Show/Hide Grading Rubric (Press G)" class="icon-grading-panel" onclick="handleKeyPress('KeyG')"></i>
+    <i title="Show/Hide Auto-Grading Testcases (Press A)" class="icon-auto-grading-results" onclick="handleKeyPress('KeyA');"></i>
+    <i title="Show/Hide Submission and Results Browser (Press F)" class="icon-files" onclick="handleKeyPress('KeyF')"></i>
+    <i title="Reset Rubric Panel Positions" class="icon-pin" onclick="handleKeyPress('KeyR')"></i>
     <a <?php echo ($previous_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&prev={$previous_user_id}\""); ?> ><i title="Go to the previous student (Press Left Arrow)" class="icon-left <?php echo ($previous_user_id == "" ? 'icon-disabled' : ''); ?>" ></i></a>
     <a <?php echo ("href=\"{$BASE_URL}/account/account-summary.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}\""); ?> ><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
     <a <?php echo ($next_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&next={$next_user_id}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($next_user_id == "" ? 'icon-disabled' : ''); ?>" ></i></a>
 </div>
 
 <div id="progress_bar">
-    <?php if($position_other == 0) { ?>
-        <div class="progress" id="prog" style="border:#AAA solid 2px; height:93%">
-            <div class="bar bar-primary" style="width: <?php echo (($position_completed - $position_other) / $position_total) * 100; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
-            <div class="bar bar-warning" style="width: <?php echo ($position_completed + $position_other) * 100; ?>%;"><i class="icon-refresh icon-white" id="progress-icon"></i></div>
-            <div class="bar" style="width: 5%; background-image: none; background-color: #777;"><?php echo round(($position_completed / $position_total) * 100, 1); ?>%</div>
-        </div>
-    <?php } else if($position_other < $position_total) { ?>
-        <div class="progress" id="prog" style="border:#AAA solid 2px; height:93% ">
-            <div class="bar bar-info" style="width: <?php echo ($position_other / $position_total) * 100; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
-            <div class="bar" style="width: 1%; background-image: none; background-color: #777;"></div>
-            <div class="bar bar-primary" style="width: <?php echo (($position_completed - $position_other) / $position_total) * 100; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
-            <div class="bar bar-warning" style="width: <?php echo ($position_completed + $position_other) * 100; ?>%;"><i class="icon-refresh icon-white" id="progress-icon"></i></div>
-            <div class="bar" style="width: 5%; background-image: none; background-color: #777;"><?php echo round((($position_completed + $position_other) / $position_total) * 100, 1); ?>%</div>
-        </div>
-    <?php } else { ?>
-        <div class="progress" id="prog" style="border:#AAA solid 2px; height:93% ">
-            <div class="bar bar-info" style="width: <?php echo ($position_other / $position_total) * 100; ?>%;"><i class="icon-ok icon-white" id="progress-icon"></i></div>
-            <div class="bar" style="width: 5%; background-image: none; background-color: #777;"><?php echo round(($position_other / $position_total) * 100, 1); ?>%</div>
-        </div>
-    <?php } ?>
+        <progress class="progressbar" max="100" value="<?php echo round(($position_completed / $position_total) * 100, 1); ?>"
+                  style="width:80%; height: 100%;"></progress>
+    <div class="progress-value" style="display:inline;"></div>
 </div>
 
 <?php } ?>
 <script type="text/javascript">
+
+    var progressbar = $(".progressbar"),
+        value = progressbar.val();
+    $(".progress-value").html("<b>" +value + '%</b>');
+
+    //Used to reset users cookies
+    var cookie_version = 1;
+
     //Set positions and visibility of configurable ui elements
     $(document).ready(function(){
+
+        $.each(document.cookie.split(/; */), function(){
+           if(this.split("=")[1]){
+               document.cookie = "cookie_version=-1; path=/;";
+           }
+        })
+
+        if(document.cookie.replace(/(?:(?:^|.*;\s*)cookie_version\s*\=\s*([^;]*).*$)|^.*$/, "$1") != cookie_version)
+        {
+            //If cookie version is not the same as the current version then toggle the visibility of each
+            //rubric panel then update the cookies
+
+            handleKeyPress("KeyG");
+            handleKeyPress("KeyA");
+            handleKeyPress("KeyS");
+            handleKeyPress("KeyF");
+            handleKeyPress("KeyR");
+            updateCookies();
+        }
+        else{
+            readCookies();
+        }
+    });
+
+
+    function readCookies(){
         var output_top = document.cookie.replace(/(?:(?:^|.*;\s*)output_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         var output_left = document.cookie.replace(/(?:(?:^|.*;\s*)output_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         var output_width = document.cookie.replace(/(?:(?:^|.*;\s*)output_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -479,7 +497,7 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
         (files_visible) ? ((files_visible) == "none" ? $(".icon-files").removeClass("icon-selected") : $(".icon-files").addClass("icon-selected")) : {};
         (rubric_visible) ? ((rubric_visible) == "none" ? $(".icon-grading-panel").removeClass("icon-selected") : $(".icon-grading-panel").addClass("icon-selected")) : {};
         (status_visible) ? ((status_visible) == "none" ? $(".icon-status").removeClass("icon-selected") : $(".icon-status").addClass("icon-selected")) : {};
-    });
+    }
 
     $("#rubric-autoscroll-checkbox").change(function() {
         if($("#rubric-autoscroll-checkbox").is(':checked')) {
@@ -498,11 +516,6 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
             document.getElementById('rubric').scrollTop = scrollPercentage * (document.getElementById('rubric').scrollHeight-document.getElementById('rubric').clientHeight);
         }
     });
-
-
-    // get cookies of panel size and position
-    var split = 0;
-    split = <?php echo ($split == "" || $split < 25 || 75 < $split ? 50 : $split); ?> / 100.0;
 
     window.onkeydown = function(e) {
         if (e.target.tagName == "TEXTAREA" || e.target.tagName == "INPUT" || e.target.tagName == "SELECT") return; // disable keyboard event when typing to textarea/input
@@ -527,30 +540,23 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
                 $('#grade .icon-auto-grading-results').toggleClass('icon-selected');
                 $("#left").toggle();
                 break;
+            case "KeyR":
+                $("#left").attr("style", "left:5px;top:50px; height:55%;width:60%; display: block;");
+                $("#right").attr("style", "top:65%; left: 5px;width: 60%; height: 30%; display: block;");
+                $("#stats").attr("style", "bottom: 0px; right:20px; width:35%; height: 25%; display: block;");
+                $("#rubric").attr("style", "top:50px; right:20px;width:35%; height: 65%; display: block;");
+                updateCookies();
+                break;
             default:
                 break;
         }
         updateCookies();
     }
 
-    function setCookie(name, value, seconds) {
-        var date = new Date();
-        date.setTime(date.getTime()+(seconds*1000));
-        var expires = "; expires="+date.toGMTString();
-        var path = "; path=/;";
-        document.cookie = name + "=" + value + expires + path;
-    }
-
-    $(function (){
-        $(".draggable").draggable({snap:true, grid:[10, 10], stack:".draggable"});
-    });
+    $(".draggable").draggable({snap:true, grid:[10, 10], stack:".draggable"}).resizable();
 
     $(".draggable").on("dragstop", function(){
         updateCookies();
-    });
-
-    $(function (){
-        $(".resizable").resizable();
     });
 
     $(".draggable").on("resizestop", function(){
@@ -581,6 +587,8 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
         document.cookie = "status_width=" + $("#stats").css("width") + "; path=/;";
         document.cookie = "status_height=" + $("#stats").css("height") + "; path=/;";
         document.cookie = "status_visible=" + $("#stats").css("display") + "; path=/;";
+
+        document.cookie = "cookie_version=" + cookie_version + "; path=/;";
     }
 
     eraseCookie("reset");

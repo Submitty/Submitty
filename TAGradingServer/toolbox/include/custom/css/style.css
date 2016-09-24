@@ -60,22 +60,31 @@ span#right.resbox {
     cursor: move;
     position:absolute;
     background: white;
-    border: 5px solid #006398;
-    overflow:auto;
     opacity: .95;
+    display:none;
+    overflow: scroll;
 }
 
-.progress {
-    display: inline-block;
-    width: 97%;
-    margin: auto;
-    position:absolute;
-    bottom: 0;
-    left: 0;
-    -webkit-border-radius: 0;
-    -moz-border-radius: 0;
-    border-radius: 0;
+#left.rubric_panel{
+    border:5px solid #c40233 ;
 }
+
+#right.rubric_panel{
+    border:5px solid #0088bf ;
+}
+
+#stats.rubric_panel{
+    border:5px solid black;
+}
+
+#rubric.rubric_panel{
+    border:5px solid #00a368;
+}
+
+.grading_label{
+    padding: 5px;
+}
+
 
 #progress-icon {
     margin-top:-0.5px;
@@ -128,7 +137,7 @@ ul.dropdown-menu li#logout a:hover {
     top: 0px;
     right: 0px;
     height: 41px;
-    width: 250px;
+    width: 290px;
     z-index: 1099;
     background: white;
 }
@@ -136,11 +145,32 @@ ul.dropdown-menu li#logout a:hover {
 #progress_bar{
     position:fixed;
     top: 0px;
-    right: 250px;
-    height: 41px;
+    right: 290px;
+    height: 31px;
     width: 250px;
     z-index: 1099;
     background: white;
+    border: 5px solid white;
+}
+
+progress::-webkit-progress-bar{
+    background:red;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.2) inset;
+    border-radius: 3px;
+}
+
+progress::-webkit-progress-value{
+    background: linear-gradient(80deg ,blue 100%, transparent);
+}
+
+progress{
+    background:red;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.2) inset;
+    border-radius: 3px;
+}
+
+progress::-moz-progress-bar{
+    background: linear-gradient(80deg ,blue 100%, transparent);
 }
 
 /*************************************/
@@ -513,9 +543,22 @@ table {
     box-shadow: 0px 0px 5px 5px yellow;
     background-color: yellow;
 }
-.icon-selected {
-    box-shadow: 0px 0px 5px 5px #00b8e4;;
-    background-color: #00b8e4;;
+.icon-selected.icon-status {
+    box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.icon-selected.icon-auto-grading-results {
+    box-shadow: 0px 0px 5px 5px #c40233;
+    background-color: #c40233;
+}
+.icon-selected.icon-grading-panel {
+    box-shadow: 0px 0px 5px 5px #00a368;
+    background-color: #00a368;
+}
+.icon-selected.icon-files {
+    box-shadow: 0px 0px 5px 5px #0088bf;
+    background-color: #0088bf;
 }
 
 #grade{

@@ -201,7 +201,8 @@ $code_number = 0;
 $output .= <<<HTML
 
 
-    <div id="left" class="draggable resizable rubric_panel" style="left:5px;top:50px; height:55%;width:60%;">
+    <div id="left" class="draggable rubric_panel" style="left:5px;top:50px; height:55%;width:60%;">
+<span class="grading_label">Auto-Grading Testcases</span>
 HTML;
 
 $source_number = 0;
@@ -373,7 +374,8 @@ HTML;
     $output .= <<<HTML
     </div>
 
-<div id="right" class="draggable resizable rubric_panel" style="top:65%; left: 5px;width: 60%; height: 30%">
+<div id="right" class="draggable rubric_panel" style="top:65%; left: 5px;width: 60%; height: 30%">
+<span class="grading_label">Submission and Results Browser</span>
 HTML;
     $output .= "\n";
     display_files($eg->eg_files, $output, 1);
@@ -389,10 +391,8 @@ HTML;
 </div>
 
 
-<div id="stats" class="draggable resizable rubric_panel" style="bottom: 0px; right:20px; width:35%; height: 25%;">
-    <div class="">
-    <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyS')" ></span>
-    </div>
+<div id="stats" class="draggable rubric_panel" style="bottom: 0px; right:20px; width:35%; height: 25%;">
+<span class="grading_label">Student Information</span>
     <div id="inner-container" style="margin:5px;">
         <div id="rubric-title">
             <div class="span2" style="float:left; text-align: left;"><b>{$eg->eg_details['g_title']}</b></div>
@@ -473,10 +473,8 @@ $output .= <<<HTML
     </div>
 </div>
 
-<div id="rubric" class="resizable draggable rubric_panel" style="top:50px; right:20px;width:35%; height: 65%;">
-    <div class="">
-        <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyG')" ></span>
-    </div>
+<div id="rubric" class="draggable rubric_panel" style="top:50px; right:20px;width:35%; height: 65%;">
+<span class="grading_label">Grading Rubric</span>
     <div class="inner-container" style="margin:1px; height:100%">
 
 HTML;
