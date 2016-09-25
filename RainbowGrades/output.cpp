@@ -289,6 +289,12 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
   ostr << "  <tr><td>Your zone assignment: </td><td align=center>" << zone << "</td></tr>\n";
   ostr << "</table>\n";
   ostr << "</tr></td>\n";
+
+  if (s->getExamZoneImage() != "") {
+    ostr << "<tr><td style=\"background-color:#ffffff;\"><img src=\"zone_images/" + s->getExamZoneImage() + "\"></td></tr>\n";
+  }
+
+
   ostr << "</table>\n";
 
 #else
@@ -389,6 +395,14 @@ void start_table_output( bool for_instructor,
   student_data.push_back(counter-1);  
   student_data.push_back(counter-3);  
   student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
+
+  if (DISPLAY_EXAM_SEATING) {
+    student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","exam room"));
+    student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","exam zone"));
+    student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","exam time"));
+    student_data.push_back(counter); table.set(0,counter++,TableCell(grey_divider));
+  }
+
   student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","OVERALL"));
   student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
 
@@ -540,6 +554,31 @@ void start_table_output( bool for_instructor,
     table.set(myrow,counter++,TableCell(default_color,this_student->getPreferredName()));
     table.set(myrow,counter++,TableCell(grey_divider));
 
+
+    if (DISPLAY_EXAM_SEATING) {
+
+      std::string room = GLOBAL_EXAM_DEFAULT_ROOM;
+      std::string zone = "SEE INSTRUCTOR";
+      std::string time = GLOBAL_EXAM_TIME;
+      if (this_student->getExamRoom() == "") {
+        //std::cout << "NO ROOM FOR " << this_student->getUserName() << std::endl;
+      } else {
+        room = this_student->getExamRoom();
+        zone = this_student->getExamZone();
+        if (this_student->getExamTime() != "") {
+          time = this_student->getExamTime();
+        }
+      }
+      if (zone == "SEE_INSTRUCTOR") {
+        zone = "SEE INSTRUCTOR";
+      }
+
+      table.set(myrow,counter++,TableCell("ffffff",room));
+      table.set(myrow,counter++,TableCell("ffffff",zone));
+      table.set(myrow,counter++,TableCell("ffffff",time));
+      table.set(myrow,counter++,TableCell(grey_divider));
+    }
+
     float grade = this_student->overall();
     std::string color = coloritcolor(grade,
                                      sp->overall(),
@@ -549,7 +588,8 @@ void start_table_output( bool for_instructor,
                                      sd->overall());
     table.set(myrow,counter++,TableCell(color,grade,2));
     table.set(myrow,counter++,TableCell(grey_divider));
-    
+
+
     if (DISPLAY_FINAL_GRADE) {
       std::string g = this_student->grade(false,sd);
       color = GradeColor(g);
@@ -883,6 +923,8 @@ void start_table_output( bool for_instructor,
 
 void end_table(std::ofstream &ostr,  bool for_instructor, Student *s) {
 
+
+    ostr << "<p>* = 1 late day used</p>" << std::endl;
 
   if (GLOBAL_instructor_output == false &&
       DISPLAY_ICLICKER) {

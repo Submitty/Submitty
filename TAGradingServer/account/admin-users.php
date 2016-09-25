@@ -8,14 +8,13 @@ check_administrator();
 print <<<HTML
 <style type="text/css">
     body {
-        overflow: scroll;
+        overflow-y: scroll;
     }
 
     #container-users
     {
         width:700px;
-        margin:100px auto;
-        margin-top: 130px;
+        margin: 70px auto 100px;
         background-color: #fff;
         border: 1px solid #999;
         border: 1px solid rgba(0,0,0,0.3);
@@ -82,14 +81,14 @@ foreach (Database::rows() as $user) {
             $sections .= $section['sections_registration_id'];
         }
     }
+    $firstname = getDisplayName($user);
     print <<<HTML
                 <tr>
                     <td>{$user['user_id']}</td>
-                    <td>{$user['user_firstname']}</td>
+                    <td>{$firstname}</td>
                     <td>{$user['user_lastname']}</td>
                     <td>{$sections}</td>
                     <td>{$user_group}</td>
-                    <!--<td>{$is_admin}</td>-->
                 </tr>
 HTML;
 }

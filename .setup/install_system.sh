@@ -31,7 +31,7 @@ if [ ${VAGRANT} == 1 ]; then
     chmod +x /etc/update-motd.d/00-header
 
     echo -e '
-  _______  __   __  _______  __   __  ___   _______  _______  __   __
+ _______  __   __  _______  __   __  ___   _______  _______  __   __
 |       ||  | |  ||  _    ||  |_|  ||   | |       ||       ||  | |  |
 |  _____||  | |  || |_|   ||       ||   | |_     _||_     _||  |_|  |
 | |_____ |  |_|  ||       ||       ||   |   |   |    |   |  |       |
@@ -519,8 +519,6 @@ fi
 #################
 
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-#pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-#make ubuntudeps
 # graph tool...  for later?  add-apt-repository "http://downloads.skewed.de/apt/trusty universe" -y
 add-apt-repository ppa:ubuntu-toolchain-r/test -y
 apt-get update -qq
@@ -530,7 +528,9 @@ apt-get install -qq splint indent
 apt-get install -qq python3 python3-dev libpython3.4 python3-pip
 python3 -m pip install pylint
 # graph tool...  for later?  apt-get install -qq --force-yes python3-graph-tool
-#popd
+pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+make
+popd
 
 
 #################################################################
@@ -584,11 +584,14 @@ if [[ ${VAGRANT} == 1 ]]; then
     echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/valid
     echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
     echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+    echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+    echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/valid
     ${SUBMITTY_DATA_DIR}/bin/authonly.pl
     echo "student:student" | sudo chpasswd
     echo "smithj:smithj" | sudo chpasswd
     echo "joness:joness" | sudo chpasswd
     echo "browna:browna" | sudo chpasswd
+    echo "pearsr:pearsr" | sudo chpasswd
 
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
     rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs

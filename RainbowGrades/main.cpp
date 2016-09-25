@@ -903,29 +903,18 @@ void load_student_grades(std::vector<Student*> &students) {
                     }
                   }
                   s->setDefaultAllowedLateDays(value);
-		} else if (token == "allowed_late_days") {
-                  int value = j[token].get<int>();
-                  s->setCurrentAllowedLateDays(value);
                 } else {
             std::cout << "UNKNOWN TOKEN Y '" << token << "'" << std::endl;
 			exit(0);
 		}
 	  } else {
 	    for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-
-              //std::cout << "---------------ITR:\n " << itr->dump(4) << std::endl;
-              //std::cout << "---------------ITR2:\n " << itr2->dump(4) << std::endl;
-
 		  int which;
-		  //float value;
 		  bool invalid = false;
-
                   std::string gradeable_id = (*itr2).value("id","ERROR BAD ID");
                   std::string gradeable_name = (*itr2).value("name",gradeable_id);
 		  float score = (*itr2).value("score",0.0);
-		  
                   std::string other_note =  ""; //(*itr2).value("text","");
-
 		  // Search through the gradeable categories as needed to find where this item belongs
 		  // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
 		  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
@@ -934,37 +923,35 @@ void load_student_grades(std::vector<Student*> &students) {
 		      g = g2;
 		    }
 		  }
-
 		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
 			invalid = true;
 			//std::cerr << "ERROR! cannot find a category for this item " << gradeable_id << std::endl;
-
 		  } else {
 			invalid = false;
 			const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
-            which = c.first;
+                        which = c.first;
 			if (c.second == "") {
-              GRADEABLES[g].setCorrespondenceName(gradeable_id,gradeable_name); 
-            } else {
-              assert (c.second == gradeable_name);
-            }
+                          GRADEABLES[g].setCorrespondenceName(gradeable_id,gradeable_name); 
+                        } else {
+                          assert (c.second == gradeable_name);
+                        }
 		  }
 		  
 		  if (!invalid) {
 			assert (which >= 0);
 			assert (score >= 0.0);
-
                         int ldu = 0;
-			if (token == "rubric") {
-			  if (j[token][gradeable_id].find("days_late") != j[token][gradeable_id].end()) {
-			    if (score <= 0) {
-                              std::cout << "Should not be Charged a late day" << std::endl;
-			    } else {
-                              ldu = j[token][gradeable_id]["days_late"].get<int>();
-			    }
-			  }
+                        json::iterator itr3 = itr2->find("days_late");
+                        if (itr3 != itr2->end()) {
+                          if (score <= 0) {
+                            std::cout << "Should not be Charged a late day" << std::endl;
+                          } else {
+                            ldu = itr3->get<int>();
+                          }
                         }
-                        
+                        if (ldu != 0) {
+                          std::cout << "ldu=" << ldu << std::endl;
+                        }
 			s->setGradeableItemGrade(g,which,score,ldu,other_note);
 		  }
 	    }  
@@ -1074,7 +1061,7 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
   
 
   for (int S = 0; S < (int)students.size(); S++) {
-    if (students[S]->getSection() == 0) continue;
+    //if (students[S]->getSection() == 0) continue;
 
     std::string file2 = INDIVIDUAL_FILES_OUTPUT_DIRECTORY + students[S]->getUserName() + "_message.html";
     std::ofstream ostr2(file2.c_str());

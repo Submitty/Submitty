@@ -84,6 +84,7 @@ public:
   const std::string& getExamRoom() const { return exam_room; }
   const std::string& getExamZone() const { return exam_zone; }
   const std::string& getExamTime() const { return exam_time; }
+  const std::string& getExamZoneImage() const { return exam_zone_image; }
 
   // per student notes
   const std::string& getTA_recommendation()          const { return ta_recommendation; }
@@ -123,6 +124,7 @@ public:
   void setExamRoom(const std::string &s) { exam_room = s; }
   void setExamZone(const std::string &s) { exam_zone = s; }
   void setExamTime(const std::string &s) { exam_time = s; }
+  void setExamZoneImage(const std::string &s) { exam_zone_image = s; }
 
   // per student notes
   void addWarning(const std::string &message) { early_warnings.push_back(message); }
@@ -197,6 +199,7 @@ private:
   std::string exam_zone;
   std::string exam_room;
   std::string exam_time;
+  std::string exam_zone_image;
 
   // per student notes 
   std::string ta_recommendation;

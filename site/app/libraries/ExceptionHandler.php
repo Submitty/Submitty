@@ -128,12 +128,15 @@ class ExceptionHandler {
             Logger::fatal($message);
         }
 
-        if (static::$display_exceptions || $display_message) {
+        if (static::$display_exceptions) {
             return $message;
+        }
+        else if ($display_message) {
+            return $exception->getMessage();
         }
         else {
             return <<<HTML
-An exception was thrown. Please contact an administrator about what<br />you were doing that caused this exception.
+An exception was thrown. Please contact an administrator about what you were doing that caused this exception.
 
 HTML;
         }

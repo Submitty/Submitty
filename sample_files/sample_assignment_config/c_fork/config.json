@@ -17,7 +17,7 @@
 	    "type" : "Compilation",
 	    "title" : "Compilation",
 	    "command" : "/usr/bin/gcc -Wall -o a.out *.c",
-	    "actual_file" : "a.out",
+	    "executable_name" : "a.out",
 	    "points" : 5
 	},
 

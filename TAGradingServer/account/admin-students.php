@@ -8,14 +8,13 @@ check_administrator();
 print <<<HTML
 <style type="text/css">
     body {
-        overflow: scroll;
+        overflow-y: scroll;
     }
 
     #container-students
     {
         width:700px;
-        margin:100px auto;
-        margin-top: 130px;
+        margin: 70px auto 100px;
         background-color: #fff;
         border: 1px solid #999;
         border: 1px solid rgba(0,0,0,0.3);
@@ -71,12 +70,7 @@ HTML;
         $last_section = $student['registration_section'];
     }
 
-    if ($student["user_preferred_firstname"] === "") {
-        $firstname = $student["user_firstname"];
-    }
-    else {
-        $firstname = $student["user_preferred_firstname"];
-    }
+    $firstname = getDisplayName($student);
 
     $manual = "";
     if ($student["manual_registration"] === true) {
@@ -85,8 +79,7 @@ HTML;
     print <<<HTML
                 <tr>
                     <td>{$student['user_id']}</td>
-                    <td>{$firstname}
-		    {$student['user_lastname']}</td>
+                    <td>{$firstname} {$student['user_lastname']}</td>
                     <td>{$student['rotating_section']}</td>
                     <td>{$manual}</td>
                 </tr>

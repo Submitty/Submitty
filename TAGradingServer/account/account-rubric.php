@@ -380,12 +380,7 @@ HTML;
     $output .= "\n";
     display_files($eg->eg_files, $output, 1);
 
-    if ($eg->student['user_preferred_firstname'] == "") {
-        $firstname = $eg->student['user_firstname'];
-    }
-    else {
-        $firstname = $eg->student['user_preferred_firstname'];
-    }
+    $firstname = getDisplayName($eg->student);
 
     $output .= <<<HTML
 </div>

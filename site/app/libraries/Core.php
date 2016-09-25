@@ -200,8 +200,9 @@ class Core {
             if ($this->authentication->authenticate()) {
                 $auth = true;
                 $session_id = $this->session_manager->newSession($user_id);
-                // We set the cookie to expire 10 years into the future effectly making it last forever
-                if (setcookie('session_id', $session_id, time() + (10 * 365 * 24 * 60 * 60), "/") === false) {
+                $cookie_id = $this->getConfig()->getSemester()."_".$this->getConfig()->getCourse()."_session_id";
+                // Set the cookie to last for 7 days
+                if (setcookie($cookie_id, $session_id, time() + (7 * 24 * 60 * 60), "/") === false) {
                     return false;
                 }
             }
