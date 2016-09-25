@@ -42,7 +42,7 @@ foreach ($buckets as $bucket){
     array_push($categories, ucwords($bucket['g_syllabus_bucket']));
 }
 
-$default_allowed_lates = __DEFAULT_LATE_DAYS_STUDENT__;
+$default_allowed_late_days = __DEFAULT_TOTAL_LATE_DAYS__;
 
 $db->query("SELECT * FROM users ORDER BY user_id ASC", array());
 //$db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
@@ -80,17 +80,17 @@ foreach($db->rows() as $student_record) {
         ORDER BY since_timestamp DESC", array($student_id));
     $row = $db->row();
     
-    $late_days_allowed = __DEFAULT_LATE_DAYS__;
-    if (count($row) > 0 &&
-        isset($row['allowed_late_days']) &&
-        $row['allowed_late_days'] > $late_days_allowed) {
-      $late_days_allowed = $row['allowed_late_days'];
-    }
+    //    $default_allowed_late_days = __DEFAULT_TOTAL_LATE_DAYS__;
+    //if (count($row) > 0 &&
+    //    isset($row['allowed_late_days']) &&
+    //   $row['allowed_late_days'] > $late_days_allowed) {
+    //  $late_days_allowed = $row['allowed_late_days'];
+    //}
     //$late_days_allowed = isset($row['allowed_late_days']) ? $row['allowed_late_days'] : 0;
 
 
-    $student_output_json["default_allowed_late_days"] = $default_allowed_lates;
-    $student_output_json["allowed_late_days"] = $late_days_allowed;
+    $student_output_json["default_allowed_late_days"] = $default_allowed_late_days;
+    //$student_output_json["allowed_late_days"] = $late_days_allowed;
 
     $student_output_json["last_update"] = date("l, F j, Y");
     
@@ -165,17 +165,32 @@ foreach($db->rows() as $student_record) {
 
         // adds late days for electronic gradeables 
         if($gradeable['g_gradeable_type'] == 0){
-            $db->query("
-        SELECT 
-            GREATEST(late_days_used - COALESCE(late_day_exceptions,0),0) 
-        FROM 
-            late_days_used AS ldu LEFT JOIN late_day_exceptions AS lde ON ldu.g_id = lde.g_id  
-        WHERE ldu.g_id=? AND ldu.user_id=?", array($gradeable['g_id'],$student_id));
+
+
+// TOOK THIS CODE FROM admin-hw-report.php
+            $db->query("SELECT late_days_used FROM late_days_used WHERE g_id=? AND user_id=?", array($gradeable['g_id'],$student_id));
             $row = $db->row();
-            $late_days_used = isset($row['late_days_used']) ? $row['late_days_used'] : 0;
+            if (isset($row['late_days_used'])) {
+                $late_days_used = $row['late_days_used'];
+            }
+            else {
+                $late_days_used = 0;
+            }
+
+// THIS ISN'T WORKING...
+//            $db->query("
+//        SELECT 
+//            GREATEST(late_days_used - COALESCE(late_day_exceptions,0),0) 
+//        FROM 
+//            late_days_used AS ldu LEFT JOIN late_day_exceptions AS lde ON ldu.g_id = lde.g_id  
+//        WHERE ldu.g_id=? AND ldu.user_id=?", array($gradeable['g_id'],$student_id));
+//            $row = $db->row();
+//            $late_days_used = isset($row['late_days_used']) ? $row['late_days_used'] : 0;
+
             if ($late_days_used > 0){
                 $this_g["days_late"] = $late_days_used;
             }
+
         }
 
         // Add text for numeric/text gradeables and electronic gradeables

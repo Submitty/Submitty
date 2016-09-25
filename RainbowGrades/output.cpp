@@ -924,6 +924,8 @@ void start_table_output( bool for_instructor,
 void end_table(std::ofstream &ostr,  bool for_instructor, Student *s) {
 
 
+    ostr << "<p>* = 1 late day used</p>" << std::endl;
+
   if (GLOBAL_instructor_output == false &&
       DISPLAY_ICLICKER) {
 
