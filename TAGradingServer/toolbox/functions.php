@@ -73,8 +73,8 @@ else {
 }
 define("__COURSE_NAME__", $a['course_details']['course_name']);
 define("__CALCULATE_DIFF__", true);
-define("__DEFAULT_LATE_DAYS__", $a['course_details']['default_hw_late_days']);
-define("__DEFAULT_LATE_DAYS_STUDENT__", $a['course_details']['default_student_late_days']);
+define("__DEFAULT_HW_LATE_DAYS__", $a['course_details']['default_hw_late_days']);
+define("__DEFAULT_TOTAL_LATE_DAYS__", $a['course_details']['default_student_late_days']);
 define("__USE_AUTOGRADER__", true);
 define("__ZERO_RUBRIC_GRADES__", $a['course_details']['zero_rubric_grades']);
 
@@ -437,3 +437,13 @@ function getActiveVersionFromFile($g_id, $student_id) {
     return 0;
 }
 
+function getDisplayName($student_info) {
+    $first_name = isset($student_info['user_firstname']) ? $student_info['user_firstname'] : "";
+    $preferred_name = isset($student_info['user_preferred_firstname']) ? $student_info['user_preferred_firstname'] : "";
+    if ($preferred_name !== null && $preferred_name !== "") {
+        return $preferred_name;
+    }
+    else {
+        return $first_name;
+    }
+}

@@ -57,8 +57,7 @@ print <<<HTML
 		#container-rubric
 		{
 			width:700px;
-			margin:100px auto;
-			margin-top: 130px;
+			margin: 70px auto 100px;
 			background-color: #fff;
 			border: 1px solid #999;
 			border: 1px solid rgba(0,0,0,0.3);
@@ -191,23 +190,14 @@ HTML;
             $prev_section = $section_id;
         }
         $row = $student;
+        $firstname = getDisplayName($student);
         print <<<HTML
                 <tr>
                     <td>
                         {$student["user_id"]}
-			</td><td>
-HTML;
-	if ($eg->student['user_preferred_firstname'] == "") {
-    print <<<HTML
-                {$eg->student['user_firstname']}
-HTML;
-	} else {
-    print <<<HTML
-                {$eg->student['user_preferred_firstname']}
-HTML;
-	}
-   print <<<HTML
-			{$student["user_lastname"]}
+			        </td>
+			        <td>
+			            {$firstname} {$student["user_lastname"]}
                     </td>
                     <td>
 HTML;

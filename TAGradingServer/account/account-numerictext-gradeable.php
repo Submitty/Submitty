@@ -31,8 +31,7 @@ print <<<HTML
     #container-nt{
         min-width:700px;
         width: 80%;
-        margin:100px auto;
-        margin-top: 130px;
+        margin: 70px auto 100px;
         background-color: #fff;
         border: 1px solid #999;
         border: 1px solid rgba(0,0,0,0.3);
@@ -283,12 +282,7 @@ HTML;
     foreach($students_grades as $row){
         $student_info = $row;
         $temp = $row;
-        if ($student_info["user_preferred_firstname"] === "") {
-            $firstname = $student_info["user_firstname"];
-        }
-        else {
-            $firstname = $student_info["user_preferred_firstname"];
-        }
+        $firstname = getDisplayName($student_info);
         
         print <<<HTML
                         <tr>

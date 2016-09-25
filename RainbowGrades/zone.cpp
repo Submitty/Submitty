@@ -14,6 +14,7 @@ public:
   std::string building;
   std::string room;
   std::string zone;
+  std::string image_url;
   int max;
   int count;
 };
@@ -40,7 +41,15 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
   
   int total_seats = 0;
   ZoneInfo zi;
-  while (istr_zone_counts >> zi.zone >> zi.building >> zi.room >> zi.max) {
+
+  std::string line;
+
+  while (std::getline(istr_zone_counts,line)) {
+    std::stringstream ss(line);
+    if (!(ss >> zi.zone >> zi.building >> zi.room >> zi.max)) continue;
+
+    ss >> zi.image_url;
+
     zi.count=0;
     
     if (zones.find(zi.zone) != zones.end()) {
@@ -71,7 +80,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
 
         while (ss >> token) { time += " " + token; }
 
-        std::cout << "FOUND " << rcs << std::endl;
+        //std::cout << "FOUND " << rcs << std::endl;
 
         if (last == "") break;
         Student *s = GetStudent(students,rcs);
@@ -95,6 +104,7 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
           existing_assignments++;
           s->setExamRoom(building+std::string(" ")+room);
           s->setExamZone(zone);
+          s->setExamZoneImage(itr->second.image_url);
           if (time != "") {
             s->setExamTime(time);
           } else {

@@ -137,7 +137,7 @@ HTML;
 HTML;
         if ($this->core->userLoaded()) {
             $logout_link = $this->core->buildUrl(array('component' => 'authentication', 'page' => 'logout'));
-            $my_preferred_name = $this->core->getUser()->getPreferredFirstName();
+            $my_preferred_name = $this->core->getUser()->getDisplayedFirstName();
             $id = $this->core->getUser()->getId();
             $return .= <<<HTML
             <span id="login">Hello <span id="login-id">{$my_preferred_name}</span></span> (<a id='logout' href='{$logout_link}'>Logout</a>)
@@ -167,7 +167,7 @@ HTML;
 </div>
 <div id="footer">
     <span id="copyright">&copy; 2016 RPI</span>
-    <a href="https://github.com/RCOS-Grading-Server/HWserver" target="blank" title="Fork us on Github">
+    <a href="https://github.com/Submitty/Submitty" target="blank" title="Fork us on Github">
         <i class="fa fa-github fa-lg"></i>
     </a>
 </div>

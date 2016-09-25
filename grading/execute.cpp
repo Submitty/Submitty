@@ -76,6 +76,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
     // for Operating Systems
     { "gcc",                    "/usr/bin/gcc" },
+    { "cut",                    "/usr/bin/cut" },
+    { "sort",                   "/usr/bin/sort" },
 
     // for Programming Languages
     { "swipl",                  "/usr/bin/swipl" },
