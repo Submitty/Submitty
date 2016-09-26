@@ -419,17 +419,19 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
     //Set positions and visibility of configurable ui elements
     $(document).ready(function(){
 
+        //Check each cookie and test for 'undefined'. If any cookie is undefined
         $.each(document.cookie.split(/; */), function(){
-           if(this.split("=")[1]){
-               document.cookie = "cookie_version=-1; path=/;";
+            var cookie = this.split("=")
+           if(!cookie[1]){
+                deleteCookies();
            }
-        })
+        });
 
         if(document.cookie.replace(/(?:(?:^|.*;\s*)cookie_version\s*\=\s*([^;]*).*$)|^.*$/, "$1") != cookie_version)
         {
             //If cookie version is not the same as the current version then toggle the visibility of each
             //rubric panel then update the cookies
-
+            deleteCookies();
             handleKeyPress("KeyG");
             handleKeyPress("KeyA");
             handleKeyPress("KeyS");
@@ -442,6 +444,15 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
         }
     });
 
+    function deleteCookies(){
+        $.each(document.cookie.split(/; */), function(){
+            var cookie = this.split("=")
+            if(!cookie[1]){
+                document.cookie = cookie[0] + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                document.cookie = "cookie_version=-1; path=/;";
+            }
+        });
+    }
 
     function readCookies(){
         var output_top = document.cookie.replace(/(?:(?:^|.*;\s*)output_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -541,10 +552,15 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
                 $("#left").toggle();
                 break;
             case "KeyR":
+                $('#grade .icon-auto-grading-results').addClass('icon-selected');
                 $("#left").attr("style", "left:5px;top:50px; height:55%;width:60%; display: block;");
+                $('#grade .icon-files').addClass('icon-selected');
                 $("#right").attr("style", "top:65%; left: 5px;width: 60%; height: 30%; display: block;");
+                $('#grade .icon-status').addClass('icon-selected');
                 $("#stats").attr("style", "bottom: 0px; right:20px; width:35%; height: 25%; display: block;");
+                $('#grade .icon-grading-panel').addClass('icon-selected');
                 $("#rubric").attr("style", "top:50px; right:20px;width:35%; height: 65%; display: block;");
+                deleteCookies();
                 updateCookies();
                 break;
             default:
