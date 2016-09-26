@@ -119,6 +119,11 @@ WHERE g.g_id=?", array($g_id));
         return $this->database->rows();
     }
 
+    public function getRotatingSections() {
+        $this->database->query("SELECT * FROM sections_rotating ORDER BY sections_rotating_id");
+        return $this->database->rows();
+    }
+
     public function getSession($session_id) {
         $this->database->query("SELECT * FROM sessions WHERE session_id=?", array($session_id));
         return $this->database->row();

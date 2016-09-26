@@ -33,14 +33,20 @@ class UsersController extends AbstractController {
 
     public function listStudents() {
         $students = $this->core->getQueries()->getAllUsers();
-        $sections = $this->core->getQueries()->getRegistrationSections();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students, $sections);
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students);
+        $this->renderUserForm('update_student');
     }
 
     public function listGraders() {
         $graders = $this->core->getQueries()->getAllGraders();
-        $sections = $this->core->getQueries()->getRegistrationSections();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $sections);
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders);
+        $this->renderUserForm('update_grader');
+    }
+
+    private function renderUserForm($action) {
+        $reg_sections = $this->core->getQueries()->getRegistrationSections();
+        $rot_sections = $this->core->getQueries()->getRotatingSections();
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'userForm', $reg_sections, $rot_sections, $action);
     }
 
     public function ajaxGetUserDetails() {
@@ -83,6 +89,13 @@ class UsersController extends AbstractController {
         }
         else {
             $user->setRegistrationSection(intval($_POST['registered_section']));
+        }
+
+        if ($_POST['rotating_section'] == "null") {
+            $user->setRotatingSection(null);
+        }
+        else {
+            $user->setRotatingSection(intval($_POST['rotating_section']));
         }
 
         $user->setGroup(intval($_POST['user_group']));

@@ -14,19 +14,24 @@ class User {
      */
     private $loaded = false;
     
-    /** @var string  The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
+    /** @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     private $id;
-    /** @var string  The first name of the user */
+    /**
+     * @var string The password for the student used for database authentication. This should be hashed and salted.
+     * @link http://php.net/manual/en/function.password-hash.php
+     */
+    private $password;
+    /** @var string The first name of the user */
     private $first_name;
-    /** @var string  The first name of the user */
+    /** @var string The first name of the user */
     private $preferred_first_name = "";
-    /** @var  string  The name to be displayed by the system (either preferred name or first name) */
+    /** @var  string The name to be displayed by the system (either preferred name or first name) */
     private $displayed_first_name;
-    /** @var string  The last name of the user */
+    /** @var string The last name of the user */
     private $last_name;
-    /** @var string  The email of the user */
+    /** @var string The email of the user */
     private $email;
-    /** @var int     The group of the user, used for access controls (ex: student, instructor, etc.) */
+    /** @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
     private $group;
     
     /** @var int What is the registration section that the user was assigned to for the course */
@@ -119,6 +124,14 @@ class User {
 
     public function setId($id) {
         $this->id = $id;
+    }
+
+    public function getPassword() {
+        return $this->password;
+    }
+
+    public function setPassword($password) {
+        $this->password = password_hash($password, PASSWORD_DEFAULT);
     }
     
     /**

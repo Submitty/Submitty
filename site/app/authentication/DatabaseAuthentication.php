@@ -22,6 +22,6 @@ class DatabaseAuthentication extends AbstractAuthentication {
             return false;
         }
 
-        return password_verify($this->password, $user['user_password']);
+        return password_verify($this->password, $user->getPassword());
     }
 }

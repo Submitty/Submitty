@@ -56,7 +56,15 @@ function editUserForm(user_id) {
             else {
                 registration_section = json['registration_section'].toString();
             }
+            let rotating_section;
+            if (json['rotating_section'] == null) {
+                rotating_section = "null";
+            }
+            else {
+                rotating_section = json['rotating_section'].toString();
+            }
             $('[name="registered_section"] option[value="' + registration_section + '"]', form).prop('selected', true);
+            $('[name="rotating_section"] option[value="' + rotating_section + '"]', form).prop('selected', true);
             $('[name="manual_registration"]', form).prop('checked', json['manual_registration']);
             $('[name="user_group"] option[value="' + json['user_group'] + '"]', form).prop('selected', true);
             $("[name='grading_registration_section[]']").prop('checked', false);
@@ -83,6 +91,7 @@ function newUserForm() {
     $('[name="user_lastname"]', form).val("");
     $('[name="user_email"]', form).val("");
     $('[name="registered_section"] option[value="null"]', form).prop('selected', true);
+    $('[name="rotating_section"] option[value="null"]', form).prop('selected', true);
     $('[name="manual_registration"]', form).prop('checked', true);
     $('[name="user_group"] option[value="4"]', form).prop('selected', true);
     $("[name='grading_registration_section[]']").prop('checked', false);

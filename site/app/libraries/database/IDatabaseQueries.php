@@ -63,10 +63,17 @@ interface IDatabaseQueries {
 
     /**
      * Gets all registration sections from the sections_registration table
-     *
-     * @return integer[]
+
+     * @return array
      */
     public function getRegistrationSections();
+
+    /**
+     * Gets all rotating sections from the sections_rotating table
+     *
+     * @return array
+     */
+    public function getRotatingSections();
 
     /**
      * @todo: write phpdoc

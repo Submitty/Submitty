@@ -13,11 +13,10 @@ class UsersView {
     }
 
     /**
-     * @param User[]    $students
-     * @param integer[] $sections
+     * @param User[] $students
      * @return string
      */
-    public function listStudents($students, $sections) {
+    public function listStudents($students) {
         $section = -1;
         $return = <<<HTML
 <div class="content">
@@ -96,8 +95,6 @@ HTML;
 HTML;
         }
 
-        $return .= $this->userForm($sections, 'update_student');
-
         $return .= <<<HTML
 
     </table>
@@ -108,11 +105,10 @@ HTML;
     }
 
     /**
-     * @param User[]    $graders
-     * @param integer[] $sections
+     * @param User[] $graders
      * @return string
      */
-    public function listGraders($graders, $sections) {
+    public function listGraders($graders) {
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
@@ -184,8 +180,6 @@ HTML;
 HTML;
         }
 
-        $return .= $this->userForm($sections, 'update_grader');
-
         $return .= <<<HTML
 
     </table>
@@ -195,13 +189,26 @@ HTML;
         return $return;
     }
 
-    public function userForm($sections, $action) {
+    /**
+     * Creates the user form box to be displayed when creating or editing a user on the students/graders pages
+     * @param array $reg_sections associative array representing registration sections in the system
+     * @param array $rot_sections associative array representing rotating sections in the system
+     * @param string $action what action to go to after hitting the submit button (different for student vs grader page)
+     * @return string
+     */
+    public function userForm($reg_sections, $rot_sections, $action) {
         $url = array('component' => 'admin', 'page' => 'users', 'action' => $action);
 
-        $select_html = "";
-        foreach($sections as $section) {
+        $reg_select_html = "";
+        foreach ($reg_sections as $section) {
             $section = $section['sections_registration_id'];
-            $select_html .= "<option value='{$section}'>Section {$section}</option>\n";
+            $reg_select_html .= "<option value='{$section}'>Section {$section}</option>\n";
+        }
+
+        $rot_select_html = "";
+        foreach ($rot_sections as $section) {
+            $section = $section['sections_rotating_id'];
+            $rot_select_html .= "<option value='{$section}'>Section {$section}</option>\n";
         }
 
         $return = <<<HTML
@@ -233,10 +240,10 @@ HTML;
         Registered Section:<br />
         <select name="registered_section">
             <option value="null">Not Registered</option>
-            {$select_html}
+            {$reg_select_html}
         </select>
     </div>
-    <div style="width: 50%">
+    <div style="width: 62%">
             Group:<br />
         <select name="user_group">
             <option value="1">Instructor</option>
@@ -245,14 +252,21 @@ HTML;
             <option value="4">Student</option>
         </select>
     </div>
-    <div style="width: 100%">
+    <div>
+        Rotating Section:<br />
+        <select name="rotating_section">
+            <option value="null">No Section</option>
+            {$rot_select_html}
+        </select>
+    </div>
+    <div style="width: 70%">
         <input type="checkbox" id="manual_registration" name="manual_registration"> 
         <label for="manual_registration">Manually Registered User (no automatic updates)</label>
     </div>
     <div style="width: 100%">
         <h3>Assigned Sections (Graders Only)</h3>
 HTML;
-        foreach ($sections as $section) {
+        foreach ($reg_sections as $section) {
             $section = $section['sections_registration_id'];
             $return .= <<<HTML
 
