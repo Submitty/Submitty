@@ -29,7 +29,7 @@ if($user_is_administrator){
     $electronic_gradeable['eg_submission_due_date'] = date('Y/m/d 23:59:59', strtotime( '+7 days' )); //"";"";
     $electronic_gradeable['eg_subdirectory'] = "";
     $electronic_gradeable['eg_config_path'] = "";
-    $electronic_gradeable['eg_late_days'] = __DEFAULT_LATE_DAYS__;
+    $electronic_gradeable['eg_late_days'] = __DEFAULT_HW_LATE_DAYS__;
     $electronic_gradeable['eg_precision'] = 0.5;
     $old_components = "{}";
     
@@ -105,7 +105,7 @@ if($user_is_administrator){
 
     }
     else{
-            $default_late_days = __DEFAULT_LATE_DAYS__;
+            $default_late_days = __DEFAULT_HW_LATE_DAYS__;
     }
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";

@@ -130,7 +130,7 @@ foreach($db->rows() as $student_record) {
         $db->query("SELECT allowed_late_days FROM late_days WHERE user_id=? AND since_timestamp <= ? ORDER BY since_timestamp DESC LIMIT 1", $params);
         $late_day = $db->row();
 
-        $student_allowed_lates = __DEFAULT_LATE_DAYS__;
+        $student_allowed_lates = __DEFAULT_TOTAL_LATE_DAYS__;
         if (count($late_day) > 0 &&
             isset($late_day['allowed_late_days']) &&
             $late_day['allowed_late_days'] > $student_allowed_lates) {
