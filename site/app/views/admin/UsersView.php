@@ -117,7 +117,7 @@ HTML;
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
         <a onclick="newUserForm(); 
-            $('[name=\'user_group\'] option[value=\'1\']').prop('selected', true);" class="btn btn-primary">New Grader</a>
+            $('[name=\'user_group\'] option[value=\'3\']').prop('selected', true);" class="btn btn-primary">New Grader</a>
     </div>
     <h2>View Graders</h2>
     <table class="table table-striped table-bordered persist-area">

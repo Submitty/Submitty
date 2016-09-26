@@ -39,7 +39,12 @@ interface IDatabaseQueries {
      */
     public function updateUser(User $user);
 
-    public function updateGradingRegistration($user_id, $sections);
+    /**
+     * @param string    $user_id
+     * @param integer   $user_group
+     * @param integer[] $sections
+     */
+    public function updateGradingRegistration($user_id, $user_group, $sections);
     
     /**
      * Gets array of all gradeables ids in the database returning it in a list sorted alphabetically

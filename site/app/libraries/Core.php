@@ -245,12 +245,17 @@ class Core {
     /**
      * Given some number of URL parameters (parts), build a URL for the site using those parts
      *
-     * @param array $parts
+     * @param array  $parts
+     * @param string $hash
      *
      * @return string
      */
-    public function buildUrl($parts=array()) {
-        return $this->config->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
+    public function buildUrl($parts=array(), $hash = null) {
+        $url = $this->config->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
+        if ($hash !== null) {
+            $url .= "#".$hash;
+        }
+        return $url;
     }
 
     /**

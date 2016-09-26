@@ -54,20 +54,19 @@ class User {
         }
 
         $this->loaded = true;
-        $this->id = $details['user_id'];
-        $this->first_name = $details['user_firstname'];
+        $this->setId($details['user_id']);
+        $this->setFirstName($details['user_firstname']);
         if (isset($details['user_preferred_firstname'])) {
-            $this->preferred_first_name = $details['user_preferred_firstname'];
+            $this->setPreferredFirstName($details['user_preferred_firstname']);
         }
-        $this->setDisplayedFirstName();
 
-        $this->last_name = $details['user_lastname'];
-        $this->email = $details['user_email'];
-        $this->group = $details['user_group'];
-        $this->registration_section = $details['registration_section'];
-        $this->rotating_section = $details['rotating_section'];
-        $this->manual_registration = $details['manual_registration'];
-        $this->grading_registration_sections = DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']);
+        $this->setLastName($details['user_lastname']);
+        $this->setEmail($details['user_email']);
+        $this->setGroup($details['user_group']);
+        $this->setRegistrationSection($details['registration_section']);
+        $this->setRotatingSection($details['rotating_section']);
+        $this->setManualRegistration($details['manual_registration']);
+        $this->setGradingRegistrationSections(DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']));
     }
     
     /**
@@ -132,6 +131,7 @@ class User {
 
     public function setFirstName($name) {
         $this->first_name = $name;
+        $this->setDisplayedFirstName();
     }
 
     /**
@@ -198,7 +198,7 @@ class User {
     }
 
     public function setGroup($group) {
-        $this->group = $group;
+        $this->group = intval($group);
     }
     
     /**
@@ -210,6 +210,7 @@ class User {
     }
 
     public function setRegistrationSection($section) {
+        $section = ($section !== null) ? intval($section) : $section;
         $this->registration_section = $section;
     }
     
@@ -219,6 +220,11 @@ class User {
      */
     public function getRotatingSection() {
         return $this->rotating_section;
+    }
+
+    public function setRotatingSection($section) {
+        $section = ($section !== null) ? intval($section) : $section;
+        $this->rotating_section = $section;
     }
     
     /**
@@ -241,6 +247,11 @@ class User {
     }
 
     public function setGradingRegistrationSections($sections) {
-        $this->grading_registration_sections = $sections;
+        if ($this->getGroup() < 4) {
+            $this->grading_registration_sections = $sections;
+        }
+        else {
+            $this->grading_registration_sections = array();
+        }
     }
 }

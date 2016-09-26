@@ -61,7 +61,8 @@ class UsersController extends AbstractController {
     }
 
     public function updateUser($action='students') {
-        $return_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => $action));
+        $return_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'users',
+            'action' => $action), 'user-'.$_POST['user_id']);
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $this->core->addErrorMessage("Invalid CSRF token.");
             $this->core->redirect($return_url);

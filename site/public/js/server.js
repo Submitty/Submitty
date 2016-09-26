@@ -83,7 +83,7 @@ function newUserForm() {
     $('[name="user_lastname"]', form).val("");
     $('[name="user_email"]', form).val("");
     $('[name="registered_section"] option[value="null"]', form).prop('selected', true);
-    $('[name="manual_registration"]', form).prop('checked', false);
+    $('[name="manual_registration"]', form).prop('checked', true);
     $('[name="user_group"] option[value="4"]', form).prop('selected', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
 }
@@ -257,6 +257,16 @@ $(function() {
 
     if (persist.length > 0) {
         $(window).scroll(UpdateTableHeaders).trigger("scroll");
+    }
+
+    if (window.location.hash != "") {
+        if ($(window.location.hash) > 0) {
+            let minus = 60;
+            if (hasNav) {
+                minus += 30;
+            }
+            $("html, body").animate({scrollTop: ($(window.location.hash).offset().top - minus)}, 800);
+        }
     }
 
     setTimeout(function() {

@@ -1,6 +1,6 @@
 <?php
 
-namespace unitTests\app\models;
+namespace tests\unitTests\app\models;
 
 
 class ConfigTester extends \PHPUnit_Framework_TestCase {

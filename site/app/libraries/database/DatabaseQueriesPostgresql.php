@@ -74,7 +74,7 @@ ORDER BY u.registration_section, u.user_id");
 INSERT INTO users (user_id, user_firstname, user_preferred_firstname, user_lastname, user_email, 
                    user_group, registration_section, rotating_section, manual_registration) 
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", $array);
-        $this->updateGradingRegistration($user->getId(), $user->getGradingRegistrationSections());
+        $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
     public function updateUser(User $user) {
@@ -85,14 +85,16 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", $array);
 UPDATE users SET user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_email=?, user_group=?, 
 registration_section=?, rotating_section=?, manual_registration=?
 WHERE user_id=?", $array);
-        $this->updateGradingRegistration($user->getId(), $user->getGradingRegistrationSections());
+        $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
-    public function updateGradingRegistration($user_id, $sections) {
+    public function updateGradingRegistration($user_id, $user_group, $sections) {
         $this->database->query("DELETE FROM grading_registration WHERE user_id=?", array($user_id));
-        foreach($sections as $section) {
-            $this->database->query("
-INSERT INTO grading_registration (user_id, sections_registration_id) VALUES(?, ?)", array($user_id, $section));
+        if ($user_group < 4) {
+            foreach ($sections as $section) {
+                $this->database->query("
+    INSERT INTO grading_registration (user_id, sections_registration_id) VALUES(?, ?)", array($user_id, $section));
+            }
         }
     }
 
