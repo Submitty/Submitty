@@ -18,7 +18,7 @@ class DatabaseAuthentication extends AbstractAuthentication {
 
     public function authenticate() {
         $user = $this->core->getQueries()->getUserById($this->user_id);
-        if (empty($user)) {
+        if (!$user->isLoaded()) {
             return false;
         }
 
