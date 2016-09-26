@@ -219,8 +219,8 @@ WHERE s.user_id=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $
                 throw new \InvalidArgumentException("Could not find student '{$this->student_id}'");
             }
 
-            if ($this->student['student_allowed_lates'] < __DEFAULT_LATE_DAYS__ ) {
-              $this->student['student_allowed_lates'] = __DEFAULT_LATE_DAYS__;
+            if ($this->student['student_allowed_lates'] < __DEFAULT_TOTAL_LATE_DAYS__ ) {
+              $this->student['student_allowed_lates'] = __DEFAULT_TOTAL_LATE_DAYS__;
             }
 
             $params = array($this->student_id, $this->eg_details['g_id']);
