@@ -60,8 +60,8 @@ class User {
 
         $this->loaded = true;
         $this->setId($details['user_id']);
-        if (isset($details['password'])) {
-            $this->setPassword($details['password']);
+        if (isset($details['user_password'])) {
+            $this->setPassword($details['user_password']);
         }
         $this->setFirstName($details['user_firstname']);
         if (isset($details['user_preferred_firstname'])) {

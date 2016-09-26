@@ -2,8 +2,6 @@
 
 namespace app\authentication;
 
-use app\libraries\Core;
-
 /**
  * Class DatabaseAuthentication
  *
