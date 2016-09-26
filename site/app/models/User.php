@@ -60,6 +60,7 @@ class User {
 
         $this->loaded = true;
         $this->setId($details['user_id']);
+        $this->setPassword($details['password']);
         $this->setFirstName($details['user_firstname']);
         if (isset($details['user_preferred_firstname'])) {
             $this->setPreferredFirstName($details['user_preferred_firstname']);
@@ -131,7 +132,13 @@ class User {
     }
 
     public function setPassword($password) {
-        $this->password = password_hash($password, PASSWORD_DEFAULT);
+        $info = password_get_info($password);
+        if ($info['algo'] === 0) {
+            $this->password = password_hash($password, PASSWORD_DEFAULT);
+        }
+        else {
+            $this->password = $password;
+        }
     }
     
     /**
