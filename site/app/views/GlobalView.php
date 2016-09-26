@@ -20,6 +20,7 @@ class GlobalView {
 <div id='messages'>
 
 HTML;
+
         foreach (array('error', 'notice', 'success') as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
                 $messages .= <<<HTML
@@ -49,6 +50,7 @@ HTML;
     <title>{$this->core->getFullCourseName()}</title>
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/server.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
 HTML;
     foreach($css as $css_ref){
@@ -64,6 +66,7 @@ HTML;
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/server.js"></script>
     <script type="text/javascript">
         var is_developer = {$is_dev};
+        setSiteUrl('{$this->core->getConfig()->getSiteUrl()}');
     </script>
 </head>
 <body>
@@ -87,14 +90,7 @@ HTML;
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users'))}">Students</a>
             </li>
             <li>
-              <!--<a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=View%20Students">Students</a>-->
-                <a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=Students">Students</a>
-            </li>
-            <li>
-                <a href="{$ta_base_url}/account/admin-users.php?course={$course}&semester={$semester}&this=Users">Users</a>
-            </li>
-            <li>
-                <a href="{$ta_base_url}/account/admin-single-user-review.php?course={$course}&semester={$semester}&this=Manage%20Users">Manage Users</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders'))}">Graders</a>
             </li>
             <li>
                 <a href="{$ta_base_url}/account/admin-rotating-sections.php?course={$course}&semester={$semester}&this=Setup%20Rotating%20Sections">Setup Rotating Sections</a>

@@ -1,3 +1,93 @@
+let siteUrl = undefined;
+
+function setSiteUrl(url) {
+    siteUrl = url
+}
+
+/**
+ * Acts in a similar fashion to Core->buildUrl() function within the PHP code
+ * so that we do not have to pass in fully built URL to JS functions, but rather
+ * construct them there as it makes sense (which helps on cutting down on potential
+ * duplication of effort where we can replicate JS functions across multiple pages).
+ *
+ * @param parts - Object representing URL parts to append to the URL
+ * @returns {string} - Built up URL to use
+ */
+function buildUrl(parts) {
+    let url = siteUrl;
+    let constructed = "";
+    for (let part in parts) {
+        if (parts.hasOwnProperty(part)) {
+            constructed += "&" + part + "=" + parts[part];
+        }
+    }
+    return url + constructed;
+}
+
+/**
+ *
+ */
+function editUserForm(user_id) {
+    let url = buildUrl({'component': 'admin', 'page': 'users', 'action': 'get_user_details', 'user_id': user_id});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            let json = JSON.parse(data);
+            let form = $("#edit-user-form");
+            form.css("display", "block");
+            $('[name="edit_user"]', form).val("true");
+            let user = $('[name="user_id"]', form);
+            user.val(json['user_id']);
+            user.attr('readonly', 'readonly');
+            if (!user.hasClass('readonly')) {
+                user.addClass('readonly');
+            }
+            $('[name="user_firstname"]', form).val(json['user_firstname']);
+            if (json['user_preferred_firstname'] == null) {
+                json['user_preferred_firstname'] = "";
+            }
+            $('[name="user_preferred_firstname"]', form).val(json['user_preferred_firstname']);
+            $('[name="user_lastname"]', form).val(json['user_lastname']);
+            $('[name="user_email"]', form).val(json['user_email']);
+            let registration_section;
+            if (json['registration_section'] == null) {
+                registration_section = "null";
+            }
+            else {
+                registration_section = json['registration_section'].toString();
+            }
+            $('[name="registered_section"] option[value="' + registration_section + '"]', form).prop('selected', true);
+            $('[name="manual_registration"]', form).prop('checked', json['manual_registration']);
+            $('[name="user_group"] option[value="' + json['user_group'] + '"]', form).prop('selected', true);
+            $("[name='grading_registration_section[]']").prop('checked', false);
+            if (json['grading_registration_sections'] != null && json['grading_registration_sections'] != undefined) {
+                json['grading_registration_sections'].forEach(function(val) {
+                    $('#grs_' + val).prop('checked', true);
+                });
+            }
+
+        },
+        error: function() {
+            alert("Could not load user data, please refresh the page and try again.");
+        }
+    })
+}
+
+function newUserForm() {
+    let form = $("#edit-user-form");
+    form.css("display", "block");
+    $('[name="edit_user"]', form).val("false");
+    $('[name="user_id"]', form).removeClass('readonly').removeAttr('readonly').val("");
+    $('[name="user_firstname"]', form).val("");
+    $('[name="user_preferred_firstname"]', form).val("");
+    $('[name="user_lastname"]', form).val("");
+    $('[name="user_email"]', form).val("");
+    $('[name="registered_section"] option[value="null"]', form).prop('selected', true);
+    $('[name="manual_registration"]', form).prop('checked', false);
+    $('[name="user_group"] option[value="4"]', form).prop('selected', true);
+    $("[name='grading_registration_section[]']").prop('checked', false);
+}
+
 /**
  * Toggles the page details box of the page, showing or not showing various information
  * such as number of queries run, length of time for script execution, and other details
@@ -90,19 +180,19 @@ function batchImportJSON(url, csrf_token){
     });
 }
 
-var hasNav = false;
+let hasNav = false;
 
 function UpdateTableHeaders() {
-    var count = 0;
-    var scrollTop = parseInt($(window).scrollTop());
+    let count = 0;
+    let scrollTop = parseInt($(window).scrollTop());
     $(".persist-area").each(function() {
-        var el = $(".persist-thead", this);
-        var height = parseFloat(el.height());
-        var offset = parseFloat(el.offset().top);
-        var floatingHeader = $(".floating-thead", this);
+        let el = $(".persist-thead", this);
+        let height = parseFloat(el.height());
+        let offset = parseFloat(el.offset().top);
+        let floatingHeader = $(".floating-thead", this);
         if (scrollTop > (offset - height)) {
             if (floatingHeader.css("visibility") != "visible") {
-                var cnt = 0;
+                let cnt = 0;
                 $("#floating-thead-0>td").each(function() {
                     $(this).css("width", $($("#anchor-thead").children()[cnt]).width());
                     cnt++;
@@ -121,7 +211,7 @@ function UpdateTableHeaders() {
             if (scrollTop > (offset - height)) {
                 if (floatingHeader.css("visibility") != "visible") {
                     floatingHeader.css("visibility", "visible");
-                    var cnt = 0;
+                    let cnt = 0;
                     $("#floating-header-" + count + ">td").each(function() {
                         $(this).css("width", $($("#anchor-head-" + count).children()[cnt]).width());
                         cnt++;
@@ -140,11 +230,11 @@ $(function() {
     hasNav = $("#nav").length > 0;
 
     // Each persist-area can have multiple persist-headers, we need to create each one with a new z-index
-    var persist = $(".persist-area");
-    var z_index = 900;
-    var count = 0;
+    let persist = $(".persist-area");
+    let z_index = 900;
+    let count = 0;
     persist.each(function() {
-        var el = $(".persist-thead>tr", this);
+        let el = $(".persist-thead>tr", this);
         el.attr('id', 'anchor-thead');
 
         el.before(el.clone()).css({"width": el.width(), "top": "30px", "z-index": "899"}).addClass('floating-thead')
@@ -154,7 +244,7 @@ $(function() {
         });
         $(".persist-header", this).each(function() {
             $(this).attr('id', 'anchor-head-' + count);
-            var clone = $(this);
+            let clone = $(this);
             clone.before(clone.clone()).css({
                 "width": clone.width(),
                 "top": (30 + el.height()) + "px",

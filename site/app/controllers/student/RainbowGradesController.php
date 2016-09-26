@@ -3,16 +3,10 @@
 namespace app\controllers\student;
 
 
-use app\controllers\IController;
+use app\controllers\AbstractController;
 use app\libraries\Core;
 
-class RainbowGradesController implements IController {
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class RainbowGradesController extends AbstractController {
     public function run() {
         $grade_path = $this->core->getConfig()->getCoursePath()."/reports/summary_html/"
             .$this->core->getUser()->getId()."_summary.html";

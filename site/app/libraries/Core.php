@@ -106,6 +106,18 @@ class Core {
         }
     }
 
+    public function addErrorMessage($message) {
+        $_SESSION['messages']['error'][] = $message;
+    }
+
+    public function addNoticeMessage($message) {
+        $_SESSION['messages']['notice'][] = $message;
+    }
+
+    public function addSuccessMessage($message) {
+        $_SESSION['messages']['success'][] = $message;
+    }
+
     /**
      * @return Config
      */

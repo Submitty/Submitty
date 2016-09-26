@@ -2,18 +2,12 @@
 
 namespace app\controllers\admin;
 
-use app\controllers\IController;
+use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\libraries\IniParser;
 use app\libraries\Output;
 
-class ConfigurationController implements IController {
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class ConfigurationController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'view':

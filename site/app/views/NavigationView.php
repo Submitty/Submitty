@@ -17,6 +17,8 @@ class NavigationView {
     }
     
     public function showGradeables($sections_to_list) {
+        $return = "";
+
         $ta_base_url = $this->core->getConfig()->getTABaseUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();

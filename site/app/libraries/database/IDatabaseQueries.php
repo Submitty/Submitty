@@ -7,8 +7,8 @@ use app\models\User;
  * Interface DatabaseQueries
  *
  * Database Query Interface which specifies all available queries in the system and by extension
- * all queries that any implemented database type must also support for full system
- * operation.
+ * all queries that any implemented database type must also support for full system operation.
+ * The "get" queries should return models if possible.
  */
 interface IDatabaseQueries {
 
@@ -19,6 +19,27 @@ interface IDatabaseQueries {
      * @return User
      */
     public function getUserById($user_id);
+
+    /**
+     * Fetches all students from the users table, ordering by course section than user_id.
+     *
+     * @return User[]
+     */
+    public function getAllUsers();
+
+    /**
+     * @return User[]
+     */
+    public function getAllGraders();
+
+    public function createUser(User $user);
+
+    /**
+     * @param User $user
+     */
+    public function updateUser(User $user);
+
+    public function updateGradingRegistration($user_id, $sections);
     
     /**
      * Gets array of all gradeables ids in the database returning it in a list sorted alphabetically
@@ -36,32 +57,11 @@ interface IDatabaseQueries {
     public function getGradeableById($g_id);
 
     /**
-     * Fetches all students from the users table, ordering by course section than user_id. All users
-     * with group number one are considered students.
+     * Gets all registration sections from the sections_registration table
      *
-     * @todo: write the return array structure
-     *
-     * @return User[]
+     * @return integer[]
      */
-    public function getAllStudents();
-
-    /**
-     * @todo: write phpdoc
-     *
-     * @todo: write the return array structure
-     *
-     * @return array
-     */
-    public function getAllGroups();
-
-    /**
-     * @todo: write phpdoc
-     *
-     * @todo: write the return array structure
-     *
-     * @return array
-     */
-    public function getAllCourseSections();
+    public function getRegistrationSections();
 
     /**
      * @todo: write phpdoc

@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use app\libraries\database\IDatabaseQueries;
+use app\libraries\DatabaseUtils;
 
 /**
  * Class User
@@ -29,22 +29,24 @@ class User {
     /** @var int     The group of the user, used for access controls (ex: student, instructor, etc.) */
     private $group;
     
-    /**
-     * @var int $registration_section What is the registration section that the user was assigned to for the course
-     * @var int $rotating_section     What is the assigned rotating section for the user
-     */
-    private $registration_section;
-    private $rotating_section;
+    /** @var int What is the registration section that the user was assigned to for the course */
+    private $registration_section = null;
+    /** @var int What is the assigned rotating section for the user */
+    private $rotating_section = null;
     
     /**
      * @var bool Was the user imported via a normal class list or was added manually. This is useful for students
      *           that are doing independent studies in the course, so not actually registered and so wouldn't want
      *           to be shifted to a null registration section or rotating section like a dropped student
      */
-    private $manual_registration;
+    private $manual_registration = false;
+
+    /** @var array */
+    private $grading_registration_sections = array();
 
     /**
      * User constructor.
+     * @param array $details
      */
     public function __construct($details) {
         if (count($details) == 0) {
@@ -54,17 +56,10 @@ class User {
         $this->loaded = true;
         $this->id = $details['user_id'];
         $this->first_name = $details['user_firstname'];
-
         if (isset($details['user_preferred_firstname'])) {
             $this->preferred_first_name = $details['user_preferred_firstname'];
         }
-
-        if ($this->preferred_first_name !== "" && $this->preferred_first_name !== null) {
-            $this->displayed_first_name = $this->preferred_first_name;
-        }
-        else {
-            $this->displayed_first_name = $this->first_name;
-        }
+        $this->setDisplayedFirstName();
 
         $this->last_name = $details['user_lastname'];
         $this->email = $details['user_email'];
@@ -72,6 +67,7 @@ class User {
         $this->registration_section = $details['registration_section'];
         $this->rotating_section = $details['rotating_section'];
         $this->manual_registration = $details['manual_registration'];
+        $this->grading_registration_sections = DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']);
     }
     
     /**
@@ -113,13 +109,17 @@ class User {
     public function isDeveloper() {
         return $this->group === 0;
     }
-    
+
     /**
      * Get the id of the loaded user
      * @return string
      */
     public function getId() {
         return $this->id;
+    }
+
+    public function setId($id) {
+        $this->id = $id;
     }
     
     /**
@@ -130,12 +130,21 @@ class User {
         return $this->first_name;
     }
 
+    public function setFirstName($name) {
+        $this->first_name = $name;
+    }
+
     /**
      * Get the preferred name of the loaded user
      * @return string
      */
     public function getPreferredFirstName() {
         return $this->preferred_first_name;
+    }
+
+    public function setPreferredFirstName($name) {
+        $this->preferred_first_name = $name;
+        $this->setDisplayedFirstName();
     }
 
     /**
@@ -146,6 +155,15 @@ class User {
     public function getDisplayedFirstName() {
         return $this->displayed_first_name;
     }
+
+    public function setDisplayedFirstName() {
+        if ($this->preferred_first_name !== "" && $this->preferred_first_name !== null) {
+            $this->displayed_first_name = $this->preferred_first_name;
+        }
+        else {
+            $this->displayed_first_name = $this->first_name;
+        }
+    }
     
     /**
      * Get the last name of the loaded user
@@ -153,6 +171,10 @@ class User {
      */
     public function getLastName() {
         return $this->last_name;
+    }
+
+    public function setLastName($name) {
+        $this->last_name = $name;
     }
     
     /**
@@ -162,6 +184,10 @@ class User {
     public function getEmail() {
         return $this->email;
     }
+
+    public function setEmail($email) {
+        $this->email = $email;
+    }
     
     /**
      * Get the group of the loaded user
@@ -170,6 +196,10 @@ class User {
     public function getGroup() {
         return $this->group;
     }
+
+    public function setGroup($group) {
+        $this->group = $group;
+    }
     
     /**
      * Get the registration section of the loaded user
@@ -177,6 +207,10 @@ class User {
      */
     public function getRegistrationSection() {
         return $this->registration_section;
+    }
+
+    public function setRegistrationSection($section) {
+        $this->registration_section = $section;
     }
     
     /**
@@ -193,5 +227,20 @@ class User {
      */
     public function isManualRegistration() {
         return $this->manual_registration;
+    }
+
+    public function setManualRegistration($manual) {
+        $this->manual_registration = $manual === true;
+    }
+
+    /**
+     * @return array
+     */
+    public function getGradingRegistrationSections() {
+        return $this->grading_registration_sections;
+    }
+
+    public function setGradingRegistrationSections($sections) {
+        $this->grading_registration_sections = $sections;
     }
 }
