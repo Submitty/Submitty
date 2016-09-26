@@ -20,7 +20,7 @@ class User {
      * @var string The password for the student used for database authentication. This should be hashed and salted.
      * @link http://php.net/manual/en/function.password-hash.php
      */
-    private $password;
+    private $password = null;
     /** @var string The first name of the user */
     private $first_name;
     /** @var string The first name of the user */
@@ -60,7 +60,9 @@ class User {
 
         $this->loaded = true;
         $this->setId($details['user_id']);
-        $this->setPassword($details['password']);
+        if (isset($details['password'])) {
+            $this->setPassword($details['password']);
+        }
         $this->setFirstName($details['user_firstname']);
         if (isset($details['user_preferred_firstname'])) {
             $this->setPreferredFirstName($details['user_preferred_firstname']);
