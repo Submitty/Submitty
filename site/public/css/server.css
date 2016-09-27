@@ -577,7 +577,7 @@ table tr.table-header {
 
 .gradeable_list tr:nth-child(odd),
 .gradeable_list tr:nth-child(even) {
-    background-color: #E9EFEF
+/*    background-color: #E9EFEF*/
 }
 
 table .colspan{
