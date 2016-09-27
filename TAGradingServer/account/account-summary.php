@@ -116,8 +116,8 @@ else {
                     <tr>
                         <th>User ID</th>
                         <th>Name</th>
-                        <td>Autograding</td>
-                        <th>Status</th>
+                        <th>Autograding</th>
+                        <th>TA Grading</th>
                     </tr>
                 </thead>
 
