@@ -27,8 +27,10 @@ function autogradingTotalAwarded($g_id, $student_id, $active_version){
     if (file_exists($results_file)) {
         $results_file_contents = file_get_contents($results_file);
         $results = json_decode($results_file_contents, true);
-        foreach($results['testcases'] as $testcase){
-            $total += floatval($testcase['points_awarded']);
+        if (isset($results['testcases'])) {
+            foreach ($results['testcases'] as $testcase) {
+                $total += floatval($testcase['points_awarded']);
+            }
         }
     }
     return $total;
@@ -37,13 +39,15 @@ function autogradingTotalAwarded($g_id, $student_id, $active_version){
 function getAutogradingMaxScore($g_id){
     $total = 0;
     $build_file = __SUBMISSION_SERVER__."/config/build/build_".$g_id.".json";
-     if (file_exists($build_file)) {
+    if (file_exists($build_file)) {
         $build_file_contents = file_get_contents($build_file);
         $results = json_decode($build_file_contents, true);
-        foreach($results['testcases'] as $testcase){
-            $testcase_value = floatval($testcase['points']);
-            if ($testcase_value > 0 && !$testcase['extra_credit']){
-                $total += $testcase_value;
+        if (isset($results['testcases'])) {
+            foreach ($results['testcases'] as $testcase) {
+                $testcase_value = floatval($testcase['points']);
+                if ($testcase_value > 0 && !$testcase['extra_credit']) {
+                    $total += $testcase_value;
+                }
             }
         }
     }
