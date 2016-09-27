@@ -97,4 +97,8 @@ class Utils {
         $temp = array_slice($array, -1);
         return (count($temp) > 0) ? array_pop($temp) : null;
     }
+
+    public static function convertBooleanToString($value) {
+        return ($value === true) ? "true" : "false";
+    }
 }

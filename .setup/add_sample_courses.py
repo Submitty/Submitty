@@ -64,6 +64,10 @@ def create_course(course, semester, course_group, assignments=None):
 
             tmp = date.today() + timedelta(days=((2 * i) - 2))
             otmp = tmp - timedelta(days=8)
+            otmp2 = otmp - timedelta(days=1)
+            form_json["ta_view_date"] = "{:d}-{:d}-{:d} 23:59:59".format(otmp2.year,
+                                                                         otmp2.month,
+                                                                         otmp2.day)
             form_json["date_submit"] = "{:d}-{:d}-{:d} 00:00:01".format(otmp.year, otmp.month,
                                                                         otmp.day)
             form_json["date_due"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp.year, tmp.month, tmp.day)
@@ -73,10 +77,6 @@ def create_course(course, semester, course_group, assignments=None):
             tmp2 = tmp2 + timedelta(days=1)
             form_json["date_released"] = "{:d}-{:d}-{:d} 23:59:59".format(tmp2.year, tmp2.month,
                                                                           tmp2.day)
-
-            form_json["ta_view_date"] = "{:d}-{:d}-{:d} 23:59:59".format(date.today().year,
-                                                                         date.today().month,
-                                                                         date.today().day)
 
             form_file = "{}/courses/{}/{}/config/form/form_{}.json".format(SUBMITTY_DATA_DIR,
                                                                            semester, course,

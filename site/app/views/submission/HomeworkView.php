@@ -218,9 +218,10 @@ HTML;
             $return .= <<<HTML
 <div class="content">
     <h3 class='label' style="float: left">Select Submission Version:</h3> 
-    <select name="submission_version" onChange="versionChange('{$this->core->buildUrl(array('component' => 'student', 
-                                                                                            'gradeable_id' => $gradeable->getId(), 
-                                                                                            'gradeable_version' => ""))}', this)">
+    <select style="margin: 0 10px;" name="submission_version" 
+    onChange="versionChange('{$this->core->buildUrl(array('component' => 'student', 
+                                                          'gradeable_id' => $gradeable->getId(), 
+                                                          'gradeable_version' => ""))}', this)">
 
 HTML;
             if ($gradeable->getActiveVersion() == 0) {

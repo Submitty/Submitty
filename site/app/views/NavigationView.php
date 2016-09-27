@@ -17,10 +17,13 @@ class NavigationView {
     }
     
     public function showGradeables($sections_to_list) {
+        $return = "";
+
         $ta_base_url = $this->core->getConfig()->getTABaseUrl();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $site_url = $this->core->getConfig()->getSiteUrl();
+        $return = "";
 
         $message_file_path = $this->core->getConfig()->getCoursePath()."/reports/summary_html/".$this->core->getUser()->getId()."_message.html";
 
