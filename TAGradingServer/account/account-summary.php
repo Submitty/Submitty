@@ -3,16 +3,16 @@ use \models\User;
 
 use \models\ElectronicGradeable;
 
-	include "../header.php";
+    include "../header.php";
 
-	$account_subpages_unlock = true;
+    $account_subpages_unlock = true;
 
-	$g_id = $_GET['g_id'];
+    $g_id = $_GET['g_id'];
 
-	$params = array($g_id);
+    $params = array($g_id);
     
     //get the total score for the gradeable
-	$db->query("
+    $db->query("
 SELECT 
     g.g_id, 
     g_title,
@@ -25,18 +25,18 @@ WHERE
     AND NOT gc.gc_is_extra_credit
 GROUP BY 
     g.g_id", $params);
-	$gradeable_info = $db->row();
+    $gradeable_info = $db->row();
     
 // students and their grade data
 $query = "
 SELECT
-	s.*,
-	gt.g_id,
-	case when gt.score is null then 0 else gt.score end
+    s.*,
+    gt.g_id,
+    gt.score
 FROM
-	users AS s
-	LEFT JOIN (
-		SELECT 
+    users AS s
+    LEFT JOIN (
+        SELECT 
            g_id, 
            gd_user_id,
            sum(gcd_score) AS score
@@ -46,44 +46,44 @@ FROM
         GROUP BY 
             g_id, 
             gd_user_id
-	) as gt ON gt.gd_user_id=s.user_id ";
+    ) as gt ON gt.gd_user_id=s.user_id";
 
 print <<<HTML
-	<style type="text/css">
-		body {
-			overflow: scroll;
-		}
+    <style type="text/css">
+        body {
+            overflow: scroll;
+        }
 
-		#container-rubric
-		{
-			width:700px;
-			margin: 70px auto 100px;
-			background-color: #fff;
-			border: 1px solid #999;
-			border: 1px solid rgba(0,0,0,0.3);
-			-webkit-border-radius: 6px;
-			-moz-border-radius: 6px;
-			border-radius: 6px;outline: 0;
-			-webkit-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
-			-moz-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
-			box-shadow: 0 3px 7px rgba(0,0,0,0.3);
-			-webkit-background-clip: padding-box;
-			-moz-background-clip: padding-box;
-			background-clip: padding-box;
-		}
-	</style>
+        #container-rubric
+        {
+            width:700px;
+            margin: 70px auto 100px;
+            background-color: #fff;
+            border: 1px solid #999;
+            border: 1px solid rgba(0,0,0,0.3);
+            -webkit-border-radius: 6px;
+            -moz-border-radius: 6px;
+            border-radius: 6px;outline: 0;
+            -webkit-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+            -moz-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+            box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+            -webkit-background-clip: padding-box;
+            -moz-background-clip: padding-box;
+            background-clip: padding-box;
+        }
+    </style>
 HTML;
 
 if (!isset($gradeable_info['g_id'])) {
     print <<<HTML
     <div id="container-rubric">
-		<div class="modal-header">
-			<h3 id="myModalLabel">Invalid Gradeable</h3>
-		</div>
+        <div class="modal-header">
+            <h3 id="myModalLabel">Invalid Gradeable</h3>
+        </div>
 
-		<div class="modal-body" style="padding-bottom:10px; padding-top:25px;">
-			Could not find a gradeable with that ID.<br /><br />
-			<a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Gradeable</a>
+        <div class="modal-body" style="padding-bottom:10px; padding-top:25px;">
+            Could not find a gradeable with that ID.<br /><br />
+            <a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Gradeable</a>
         </div>
     </div>
 HTML;
@@ -104,23 +104,24 @@ else {
     $rubric_total = $gradeable_info["score"];
     
     print <<<HTML
-	<div id="container-rubric">
-		<div class="modal-header">
-			<h3 id="myModalLabel" style="width: 75%; display: inline-block">{$gradeable_info['g_title']} Summary</h3>
-			{$button}
-		</div>
+    <div id="container-rubric">
+        <div class="modal-header">
+            <h3 id="myModalLabel" style="width: 75%; display: inline-block">{$gradeable_info['g_title']} Summary</h3>
+            {$button}
+        </div>
 
-		<div class="modal-body" style="padding-bottom:10px; padding-top:25px;">
-			<table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
-				<thead style="background: #E1E1E1;">
-					<tr>
-						<th>User ID</th>
-						<th>Name</th>
-						<th>Status</th>
-					</tr>
-				</thead>
+        <div class="modal-body" style="padding-bottom:10px; padding-top:25px;">
+            <table class="table table-bordered" id="rubricTable" style=" border: 1px solid #AAA;">
+                <thead style="background: #E1E1E1;">
+                    <tr>
+                        <th>User ID</th>
+                        <th>Name</th>
+                        <td>Autograding</td>
+                        <th>Status</th>
+                    </tr>
+                </thead>
 
-				<tbody style="background: #f9f9f9;">
+                <tbody style="background: #f9f9f9;">
 HTML;
 
     
@@ -135,15 +136,16 @@ HTML;
     
     if(!((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true)) {
 
-      if ($grade_by_reg_section) {
-        $params = array($user_id);
-        $s_query = "SELECT sections_registration_id FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id";
-        $db->query($s_query, $params);
-      } else {
-        $params = array($user_id,$g_id);
-        $s_query = "SELECT sections_rotating FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating";
-        $db->query($s_query, $params);
-      }
+        if ($grade_by_reg_section) {
+            $params = array($user_id);
+            $s_query = "SELECT sections_registration_id FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id";
+            $db->query($s_query, $params);
+        }
+        else {
+            $params = array($user_id,$g_id);
+            $s_query = "SELECT sections_rotating FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating";
+            $db->query($s_query, $params);
+        }
 
         $sections = array();
         foreach ($db->rows() as $section) {
@@ -151,7 +153,8 @@ HTML;
         }
         if(count($sections) > 0){
             $where[] = "s.".$user_section_field." IN (" . implode(",", $sections) . ")";
-        } else {
+        }
+        else {
             $where[] = "s.user_id = null";
         }
     }
@@ -181,11 +184,11 @@ HTML;
             $section_id = intval($student[$user_section_field]);
             print <<<HTML
 
-					<tr class="info">
-						<td colspan="3" style="text-align:center;">
-              Students {$enrolled_assignment} {$section_title} Section {$section_id}
-						</td>
-					</tr>
+                <tr class="info">
+                    <td colspan="4" style="text-align:center;">
+          Students {$enrolled_assignment} {$section_title} Section {$section_id}
+                    </td>
+                </tr>
 HTML;
             $prev_section = $section_id;
         }
@@ -195,25 +198,26 @@ HTML;
                 <tr>
                     <td>
                         {$student["user_id"]}
-			        </td>
-			        <td>
-			            {$firstname} {$student["user_lastname"]}
+                    </td>
+                    <td>
+                        {$firstname} {$student["user_lastname"]}
+                    </td>
+                    <td>
+                        {$eg->autograding_points} / {$eg->autograding_max}
                     </td>
                     <td>
 HTML;
-        if(count($students) > 0) {
-            if(isset($row['score'])) {
-                if($row['score'] >= 0) {
-                    echo "<a class='btn' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "&course={$_GET['course']}&semester={$_GET['semester']}'>[ " . ($row['score'] +$eg->autograding_points).
-                           " / " . ($rubric_total + $eg->autograding_max) . " ]</a>";
-                } else {
-                    echo "<a class='btn btn-danger' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "&course={$_GET['course']}&semester={$_GET['semester']}'>[ GRADING ERROR ]</a>";
-                }
-            } else {
-                echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "course={$_GET['course']}&semester={$_GET['semester']}'>Grade</a>";
+        if(isset($row['score'])) {
+            if($row['score'] >= 0) {
+                echo "<a class='btn' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "&course={$_GET['course']}&semester={$_GET['semester']}'>[ " . ($row['score']).
+                       " / " . ($rubric_total) . " ]</a>";
             }
-        } else {
-            echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "course={$_GET['course']}&semester={$_GET['semester']}'>Grade</a>";
+            else {
+                echo "<a class='btn btn-danger' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "&course={$_GET['course']}&semester={$_GET['semester']}'>[ GRADING ERROR ]</a>";
+            }
+        }
+        else {
+            echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "&course={$_GET['course']}&semester={$_GET['semester']}'>Grade</a>";
         }
         print <<<HTML
                     </td>
@@ -221,21 +225,21 @@ HTML;
 HTML;
     }
     print <<<HTML
-				</tbody>
-			</table>
-		</div>
+                </tbody>
+            </table>
+        </div>
 
-		<div class="modal-footer">
-			<!--<a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Homework</a>-->
-			<a class="btn" href="{$BASE_URL}/account/index.php?g_id={$_GET['g_id']}&course={$_GET['course']}&semester={$_GET['semester']}">Grade Next Student</a>
-		</div>
-	</div>
+        <div class="modal-footer">
+            <!--<a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Homework</a>-->
+            <a class="btn" href="{$BASE_URL}/account/index.php?g_id={$_GET['g_id']}&course={$_GET['course']}&semester={$_GET['semester']}">Grade Next Student</a>
+        </div>
+    </div>
 HTML;
 
     print <<<HTML
-	<script type="text/javascript">
-		createCookie('backup',0,1000);
-	</script>
+    <script type="text/javascript">
+        createCookie('backup',0,1000);
+    </script>
 HTML;
 }
 
