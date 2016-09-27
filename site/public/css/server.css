@@ -1,7 +1,7 @@
 @import url("reset.css");
 @import url("https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700");
 @import url("https://fonts.googleapis.com/css?family=Inconsolata");
-@import url("bootstrap.css");
+
 @font-face {
     font-family: 'Grand Hotel';
     src: url('../fonts/grand-hotel/GrandHotel-Regular.otf') format('opentype');
@@ -32,47 +32,141 @@ body {
     position: relative;
 }
 
-table {
-    width: 100%;
-    text-align: center;
-    border-collapse: collapse;
-}
-
-table tr.table-header {
-    border-bottom: 1px solid black;
-}
-
 a, a:hover, a:link, a:visited {
     text-decoration: none;
 }
 
-/**
+a,
+a:visited,
+a:link,
+a.external,
+a.external:visited,
+a.external:link {
+    color: #000000;
+}
+
+a:hover,
+a.external:hover {
+    color: #2627ee;
+}
+
+/****************************
  * INPUT STYLES
- */
-input {
+ ***************************/
+
+select,
+textarea,
+input[type="text"],
+input[type="password"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="date"],
+input[type="month"],
+input[type="time"],
+input[type="week"],
+input[type="number"],
+input[type="email"],
+input[type="url"],
+input[type="search"],
+input[type="tel"],
+input[type="color"] {
+    height: 20px;
+    padding: 4px 6px;
+    font-size: 14px;
+    line-height: 20px;
+    color: #555555;
+    vertical-align: middle;
     border: 1px solid #ccc;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
+    width: auto;
+}
+
+input.readonly {
+    background-color: #f2f2f2;
+    cursor: not-allowed;
+}
+
+select {
+    padding: 5px 35px 5px 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    height: 34px;
+    background: #FFF url('../img/down_arrow.png') no-repeat right 10px center;
+    background-size: 20px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }
 
 input[type="checkbox"] {
     cursor: pointer;
 }
 
-input[type="text"] {
+/****************************
+ * TABLE STYLES
+ ***************************/
+table {
     width: 100%;
+    text-align: center;
+    border-collapse: collapse;
 }
 
-textarea {
-    width: 100%;
-    height: 100%;
-    border: 1px solid #ccc;
+table a{
+    text-decoration: none;
+}
+
+table tr.table-header {
+    border-bottom: 1px solid black;
+}
+
+.table tr {
+
+}
+
+.table td {
+    padding: 5px;
+    border-top: 1px solid #dddddd;
+}
+
+.table-bordered {
+    border: 1px solid #AAAAAA;
+    border-collapse: separate;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
-
 }
+
+.table-striped>tbody>tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+.table-striped>tbody>tr:nth-child(odd) {
+    background: #ffffff;
+}
+
+.table>thead>tr {
+    background: #E1E1E1;
+}
+
+.table>tbody>tr.info {
+    background-color: #d9edf7;
+}
+
+.floating-thead,
+.floating-header {
+    position: fixed;
+    top: 0;
+    visibility: hidden;
+}
+
+.floating-thead > td,
+.floating-header > td {
+    display: table-cell;
+    text-align: center;
+}
+
+/**********************************************************/
 
 #container {
     min-height: 100%;
@@ -222,7 +316,19 @@ textarea {
 }
 
 #footer #copyright {
-    margin-right: 15px;
+    margin-right: 5px;
+}
+
+#footer #github {
+    margin-left: 5px;
+}
+
+#copyright > a {
+    color: #4078c0;
+}
+
+#copyright > a:hover {
+    text-decoration: underline;
 }
 
 .sub {
@@ -321,6 +427,12 @@ textarea {
     width: 40%;
 }
 
+.option-input > textarea,
+.option-input > input {
+    width: 95%;
+    height: 100%;
+}
+
 .post-panel-btn {
     height: 20px;
     padding-right: 10px;
@@ -334,21 +446,7 @@ textarea {
 #login input[type="text"],
 #login input[type="password"] {
     width: 50%;
-    font-size: 14pt;
-    padding: 5px;
     margin-bottom: 5px;
-}
-
-select {
-    margin: 0 10px;
-    padding: 5px 35px 5px 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    height: 34px;
-    background: #FFF url('../img/down_arrow.png') no-repeat right 10px center;
-    background-size: 20px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
 }
 
 .label {
@@ -477,6 +575,11 @@ select {
 	text-align: left !important;
 }
 
+.gradeable_list tr:nth-child(odd),
+.gradeable_list tr:nth-child(even) {
+/*    background-color: #E9EFEF*/
+}
+
 table .colspan{
 	padding: 10px;
 	font-size: 28px;
@@ -488,9 +591,7 @@ table .bar{
 table .gradeable_title {
 	padding-left: 50px;
 }
-table a{
-	text-decoration: none;
-}
+
 table .has-url:hover {
 	cursor: pointer;
 	color: #3232FF;
@@ -526,19 +627,10 @@ table .instructor .option{
 table .instructor .two-options{
 	width: 15%;
 }
+
 .nav_header{
   text-align:center;
   background-color:#bfbfbf;
-}
-
-a.external,
-a.external:visited,
-a.external:link {
-    color: #000000;
-}
-
-a.external:hover {
-    color: #2627ee;
 }
 
 .nav-buttons {
@@ -564,3 +656,28 @@ a.external:hover {
     color-stop(100%, rgba(255, 0, 0, 0.4)));
 }
 
+#edit-user-form {
+    z-index: 2000;
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    width: 680px;
+    /*height: 300px;*/
+    margin-left: -340px;
+    background: #FFFFFF;
+    border: 1px solid #000000;
+    padding: 10px;
+    display: none;
+}
+
+#edit-user-form div {
+    width: 30%;
+    display: inline-block;
+    vertical-align: top;
+    padding-right: 10px;
+    padding-bottom: 10px;
+}
+
+#edit-user-form > div > input[type="text"] {
+    width: 95%;
+}

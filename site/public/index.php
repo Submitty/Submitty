@@ -1,10 +1,10 @@
 <?php
 
+use app\exceptions\BaseException;
 use app\libraries\AutoLoader;
 use app\libraries\Core;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
-use app\libraries\Output;
 
 /*
  * The user's umask is ignored for the user running php, so we need
@@ -44,10 +44,14 @@ function exception_handler($throwable) {
 }
 set_exception_handler("exception_handler");
 
-function error_handler($errno, $errstr, $errfile, $errline) {
-    throw new \app\exceptions\BaseException("Fatal Error (".$errno."): ".$errstr." in file ".$errfile." on line ".$errline);
+function error_handler() {
+    $error = error_get_last();
+    if ($error['type'] === E_ERROR) {
+        exception_handler(new BaseException("Fatal Error: " . $error['message'] . " in file 
+        " . $error['file'] . " on line " . $error['line']));
+    }
 }
-set_error_handler("error_handler", E_ERROR);
+register_shutdown_function("error_handler");
 /*
  * Check that we have a semester and a course specified by the user and then that there's no
  * potential for path trickery by using basename which will return only the last part of a
@@ -80,7 +84,7 @@ if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
  */
 $core->loadConfig($semester, $course);
 $core->getOutput()->addBreadcrumb("F16");
-$core->getOutput()->addBreadcrumb("<a href='{$core->buildUrl()}'>{$core->getFullCourseName()}</a>");
+$core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->buildUrl());
 date_default_timezone_set($core->getConfig()->getTimezone());
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->getLogExceptions());
