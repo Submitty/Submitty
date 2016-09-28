@@ -107,9 +107,9 @@ input[type="checkbox"] {
  * TABLE STYLES
  ***************************/
 table {
-    width: 100%;
-    text-align: center;
-    border-collapse: collapse;
+    /*width: 100%;*/
+    /*text-align: center;*/
+    /*border-collapse: collapse;*/
 }
 
 table a{
