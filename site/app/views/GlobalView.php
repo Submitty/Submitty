@@ -45,7 +45,7 @@ HTML;
         $is_dev = ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) ? "true" : "false";
         $return = <<<HTML
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>{$this->core->getFullCourseName()}</title>
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
