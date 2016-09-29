@@ -107,9 +107,6 @@ input[type="checkbox"] {
  * TABLE STYLES
  ***************************/
 table {
-    width: 100%;
-    text-align: center;
-    border-collapse: collapse;
 }
 
 table a{
@@ -118,6 +115,12 @@ table a{
 
 table tr.table-header {
     border-bottom: 1px solid black;
+}
+
+.table {
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
 }
 
 .table tr {

@@ -25,8 +25,10 @@ function autogradingTotalAwarded($g_id, $student_id, $active_version){
     if (file_exists($results_file)) {
         $results_file_contents = file_get_contents($results_file);
         $results = json_decode($results_file_contents, true);
-        foreach($results['testcases'] as $testcase){
-            $total += floatval($testcase['points_awarded']);
+	if (isset($results['testcases'])) {	       
+            foreach($results['testcases'] as $testcase){
+                $total += floatval($testcase['points_awarded']);
+            }
         }
     }
     return $total;
