@@ -28,6 +28,7 @@ extern std::string ALL_STUDENTS_OUTPUT_DIRECTORY;
 extern Student* AVERAGE_STUDENT_POINTER;
 extern Student* STDDEV_STUDENT_POINTER;
 
+extern std::string GLOBAL_sort_order;
 
 // ==========================================================
 
@@ -315,7 +316,7 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
 
 #if 1
 
-  ostr << "<table style=\"border:1px solid yellowgreen; background-color:#ddffdd;\">\n";
+  ostr << "<table style=\"border:1px solid yellowgreen; background-color:#ddffdd; width:auto;\" >\n";
   //  ostr << "<table border=\"1\" cellpadding=5 cellspacing=0 style=\"border:1px solid yellowgreen; background-color:#ddffdd;\">\n";
   ostr << "<tr><td>\n";
   ostr << "<table border=0 cellpadding=5 cellspacing=0>\n";
@@ -336,7 +337,7 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
 #else
 
 
-  ostr << "<table border=1 cellpadding=5 cellspacing=0 style=\"background-color:#ddffdd\">\n";
+  ostr << "<table border=1 cellpadding=5 cellspacing=0 style=\"background-color:#ddffdd; width:auto;\">\n";
   ostr << "<tr><td>\n";
   ostr << "<table border=0 cellpadding=5 cellspacing=0>\n";
   ostr << "  <tr><td colspan=2>" << GLOBAL_EXAM_TITLE << "</td></tr>\n";
@@ -594,6 +595,7 @@ void start_table_output( bool for_instructor,
 
   int myrank = 1;
   int myrow = 1;
+  int last_section = -1;
   for (unsigned int stu= 0; stu < students.size(); stu++) {
     std::string default_color="ffffff";
     Student *this_student = students[stu];
@@ -615,7 +617,12 @@ void start_table_output( bool for_instructor,
     } else {
       //std::cout << " WHO? " << this_student->getUserName() << std::endl;
       student_correspondences[myrow] = this_student->getUserName();
-      table.set(myrow,counter++,TableCell(default_color,std::to_string(myrank++)));
+      if (GLOBAL_sort_order == "by_section" && this_student->getSection() != last_section) {
+        myrank=1;
+        last_section = this_student->getSection();
+      }
+      table.set(myrow,counter++,TableCell(default_color,std::to_string(myrank)));
+      myrank++;
     }
 
     
@@ -626,7 +633,13 @@ void start_table_output( bool for_instructor,
 
     //table.set(myrow,counter++,TableCell(default_color,"part"));
     //table.set(myrow,counter++,TableCell(default_color,"under"));
-    table.set(myrow,counter++,TableCell(default_color,"")); //notes"));
+    std::string notes;
+    std::vector<std::string> ews = this_student->getEarlyWarnings();
+    for (int i = 0; i < ews.size(); i++) {
+      notes += ews[i];
+    }
+
+    table.set(myrow,counter++,TableCell(default_color,"<font color=\"ff0000\">"+notes+"</font>"));
 
     //counter+=3;
     table.set(myrow,counter++,TableCell(default_color,this_student->getUserName()));
@@ -1055,7 +1068,7 @@ void end_table(std::ofstream &ostr,  bool for_instructor, Student *s) {
 
 
 
-  ostr << "<table style=\"border:1px solid yellowgreen; background-color:#ddffdd;\">\n";
+  ostr << "<table style=\"border:1px solid yellowgreen; background-color:#ddffdd; width:auto;\">\n";
   //  ostr << "<table border=2 cellpadding=5 cellspacing=0>\n";
   ostr << "<tr>\n";
   ostr << "<td width=150>FINAL GRADE</td>";
