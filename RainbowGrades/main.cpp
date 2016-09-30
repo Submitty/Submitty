@@ -1118,8 +1118,11 @@ void output_helper(std::vector<Student*> &students,  std::string &GLOBAL_sort_or
     if (MAX_ICLICKER_TOTAL > 0) {
       ostr2 << "<em>recent iclicker = " << students[S]->getIClickerRecent() << " / 12.0</em>" << std::endl;
     }
-
 #endif
+
+
+
+
     PrintExamRoomAndZoneTable(ostr2,students[S]);
 
     int prev = students[S]->getAllowedLateDays(0);
