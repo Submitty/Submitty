@@ -11,6 +11,7 @@
 
 html {
     height: 100%;
+    /*position: fixed;*/
 }
 
 body {
@@ -24,12 +25,14 @@ body {
     /* A lighter shade of blue grey */
     background: #b8d5e5;
     /* a gradient! */
+
     background: linear-gradient(#0a6496, #b8d5e5);
     background-attachment: fixed;
 
     font-family: 'Source Sans Pro', sans-serif;
     height: 100%;
     position: relative;
+    /*position : fixed;*/
 }
 
 table {
@@ -77,27 +80,41 @@ textarea {
 #container {
     min-height: 100%;
     margin: 0 auto -60px;
+
+    /*min-width: 500px;//ml change*/
 }
 
 #nav {
+
+    /*background-color: yellow;*/
     background-color: #000000;
     color: #FFFFFF;
     font-family: 'Open Sans Condensed', sans-serif;
-    position: fixed;
+    /*position: fixed;*/
+    /*position: absolute;*/
+
     width: 100%;
     left: 0;
     top: 0;
     z-index: 9999;
-    /*height: 32px;*/
+    /*min-height: 64px;
+    height:auto !important;*/
+
 }
 
 #nav ul {
+  background-color: #000000;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style-type: none;
 
 }
 
 #nav li {
     float: left;
-    list-style-type: none;
+    /*background-color: black;*/
+    /*list-style-type: none;*/
 }
 
 #nav li:hover, .dropdown:hover .dropbtn {
@@ -108,7 +125,8 @@ textarea {
 #nav li a, .dropbtn {
     color: #FFFFFF;
     text-decoration: none;
-    display: inline-block;
+    /*display: inline-block;*/
+    display: block;
     padding: 5px 10px;
 }
 
@@ -149,21 +167,24 @@ textarea {
     display: block;
 }
 
-#nav-clear {
-    height: 32px;
-}
+/*#nav-clear {
+    /*height: 32px;
+}*/
 
 #header {
     background-color: #edf6f6;
-    height: 125px;
-    /*text-align: center;*/
+    min-height: 125px;
+    height: auto;
+    width: 100%;
     box-shadow: 0 2px 15px -5px #888888;
     font-family: 'Open Sans Condensed', sans-serif;
 }
 
 #header-text {
+
     font-weight: 300;
     display: inline-block;
+
     margin-top: 25px;
     margin-left: 20px;
 }
@@ -186,6 +207,7 @@ textarea {
     width: 357px;
     background: url('../img/submitty_logo.png') no-repeat;
     background-size: 357px 125px;
+
 }
 
 .content {
@@ -563,4 +585,3 @@ a.external:hover {
     color-stop(80%, rgba(255, 0, 255, 0.4)),
     color-stop(100%, rgba(255, 0, 0, 0.4)));
 }
-
