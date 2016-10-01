@@ -227,18 +227,24 @@ class FileUtils {
         return $size;
     }
     
-    public static function checkFileInZipName($filename) {
-        $zip = zip_open($filename);
+    public static function checkFileInZipName($zipname) {
+        $zip = zip_open($zipname);
         if(is_resource(($zip))) {
             while ($inner_file = zip_read($zip)) {
                 $fname = zip_entry_name($inner_file);
-                if(strpos($fname, '\'') !== false || strpos($fname, '\\') !== false || strpos($fname, '\"') !== false || strpos($fname, '<') !== false) {
+                if(FileUtils::isValidFileName($fname) === false) {
                     return false;
                 }
             }
         }
         return true;
     }
+
+    public static function isValidFileName($filename) {
+        return strpos($filename, '\'') === false && strpos($filename, '\\') === false
+        && strpos($filename, '\"') === false && strpos($filename, '<') === false;
+    }
+
     public static function encodeJson($string) {
         return json_encode($string, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
