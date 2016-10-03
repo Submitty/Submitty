@@ -554,7 +554,7 @@ std::string TestCase::getPrefix() const {
 
 
 std::vector<std::vector<std::string>> TestCase::getFilenames() const {
-  std::cout << "getfilenames of " << _json << std::endl;
+  //std::cout << "getfilenames of " << _json << std::endl;
   std::vector<std::vector<std::string>> filenames;
 
   assert (_json.find("actual_file") == _json.end());
