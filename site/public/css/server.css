@@ -106,7 +106,6 @@ input[type="checkbox"]{
     appearance: none;
     background: #FFF;
     box-sizing: border-box;
-    position: relative;
     width: 20px;
     height: 20px;
     border: 1px solid #000000;
@@ -131,6 +130,10 @@ input[type="checkbox"]:checked:before {
 input[type="checkbox"]:focus{
     outline: 0 none;
     box-shadow: none;
+}
+
+input.disabled {
+    background-color: lightgrey;
 }
 
 /****************************
@@ -546,6 +549,7 @@ table tr.table-header {
 }
 
 .half {
+    float: left;
     width: 48%;
     margin-right: 10px;
 }
