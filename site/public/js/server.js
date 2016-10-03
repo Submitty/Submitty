@@ -1,4 +1,4 @@
-let siteUrl = undefined;
+var siteUrl = undefined;
 
 function setSiteUrl(url) {
     siteUrl = url
@@ -14,9 +14,9 @@ function setSiteUrl(url) {
  * @returns {string} - Built up URL to use
  */
 function buildUrl(parts) {
-    let url = siteUrl;
-    let constructed = "";
-    for (let part in parts) {
+    var url = siteUrl;
+    var constructed = "";
+    for (var part in parts) {
         if (parts.hasOwnProperty(part)) {
             constructed += "&" + part + "=" + parts[part];
         }
@@ -28,15 +28,15 @@ function buildUrl(parts) {
  *
  */
 function editUserForm(user_id) {
-    let url = buildUrl({'component': 'admin', 'page': 'users', 'action': 'get_user_details', 'user_id': user_id});
+    var url = buildUrl({'component': 'admin', 'page': 'users', 'action': 'get_user_details', 'user_id': user_id});
     $.ajax({
         url: url,
         success: function(data) {
-            let json = JSON.parse(data);
-            let form = $("#edit-user-form");
+            var json = JSON.parse(data);
+            var form = $("#edit-user-form");
             form.css("display", "block");
             $('[name="edit_user"]', form).val("true");
-            let user = $('[name="user_id"]', form);
+            var user = $('[name="user_id"]', form);
             user.val(json['user_id']);
             user.attr('readonly', 'readonly');
             if (!user.hasClass('readonly')) {
@@ -49,14 +49,14 @@ function editUserForm(user_id) {
             $('[name="user_preferred_firstname"]', form).val(json['user_preferred_firstname']);
             $('[name="user_lastname"]', form).val(json['user_lastname']);
             $('[name="user_email"]', form).val(json['user_email']);
-            let registration_section;
+            var registration_section;
             if (json['registration_section'] == null) {
                 registration_section = "null";
             }
             else {
                 registration_section = json['registration_section'].toString();
             }
-            let rotating_section;
+            var rotating_section;
             if (json['rotating_section'] == null) {
                 rotating_section = "null";
             }
@@ -82,7 +82,7 @@ function editUserForm(user_id) {
 }
 
 function newUserForm() {
-    let form = $("#edit-user-form");
+    var form = $("#edit-user-form");
     form.css("display", "block");
     $('[name="edit_user"]', form).val("false");
     $('[name="user_id"]', form).removeClass('readonly').removeAttr('readonly').val("");
@@ -189,19 +189,19 @@ function batchImportJSON(url, csrf_token){
     });
 }
 
-let hasNav = false;
+var hasNav = false;
 
 function UpdateTableHeaders() {
-    let count = 0;
-    let scrollTop = parseInt($(window).scrollTop());
+    var count = 0;
+    var scrollTop = parseInt($(window).scrollTop());
     $(".persist-area").each(function() {
-        let el = $(".persist-thead", this);
-        let height = parseFloat(el.height());
-        let offset = parseFloat(el.offset().top);
-        let floatingHeader = $(".floating-thead", this);
+        var el = $(".persist-thead", this);
+        var height = parseFloat(el.height());
+        var offset = parseFloat(el.offset().top);
+        var floatingHeader = $(".floating-thead", this);
         if (scrollTop > (offset - height)) {
             if (floatingHeader.css("visibility") != "visible") {
-                let cnt = 0;
+                var cnt = 0;
                 $("#floating-thead-0>td").each(function() {
                     $(this).css("width", $($("#anchor-thead").children()[cnt]).width());
                     cnt++;
@@ -220,7 +220,7 @@ function UpdateTableHeaders() {
             if (scrollTop > (offset - height)) {
                 if (floatingHeader.css("visibility") != "visible") {
                     floatingHeader.css("visibility", "visible");
-                    let cnt = 0;
+                    var cnt = 0;
                     $("#floating-header-" + count + ">td").each(function() {
                         $(this).css("width", $($("#anchor-head-" + count).children()[cnt]).width());
                         cnt++;
@@ -239,11 +239,11 @@ $(function() {
     hasNav = $("#nav").length > 0;
 
     // Each persist-area can have multiple persist-headers, we need to create each one with a new z-index
-    let persist = $(".persist-area");
-    let z_index = 900;
-    let count = 0;
+    var persist = $(".persist-area");
+    var z_index = 900;
+    var count = 0;
     persist.each(function() {
-        let el = $(".persist-thead>tr", this);
+        var el = $(".persist-thead>tr", this);
         el.attr('id', 'anchor-thead');
 
         el.before(el.clone()).css({"width": el.width(), "top": "30px", "z-index": "899"}).addClass('floating-thead')
@@ -253,7 +253,7 @@ $(function() {
         });
         $(".persist-header", this).each(function() {
             $(this).attr('id', 'anchor-head-' + count);
-            let clone = $(this);
+            var clone = $(this);
             clone.before(clone.clone()).css({
                 "width": clone.width(),
                 "top": (30 + el.height()) + "px",
@@ -270,7 +270,7 @@ $(function() {
 
     if (window.location.hash != "") {
         if ($(window.location.hash) > 0) {
-            let minus = 60;
+            var minus = 60;
             if (hasNav) {
                 minus += 30;
             }
