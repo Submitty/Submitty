@@ -130,29 +130,11 @@ int main(int argc, char *argv[]) {
     return 1;
   } 
 
-  /*
-  std::cout << "Scanning User Code..." << std::endl;
-
-  std::set<std::string> disallowed_words;
-  std::set<std::string> warning_words;
-  LoadDisallowedWords("disallowed_words.txt",disallowed_words,warning_words);
-  SearchForDisallowedWords(disallowed_words,warning_words);
-  */
-
   std::cout << "Compiling User Code..." << std::endl;
 
   system("find . -type f");
 
   CustomizeAutoGrading(rcsid,config_json);
-
-  /*
-#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-  std::string replace_string_before = __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__;
-  std::string replace_string_after  = CustomizeAutoGrading(rcsid);
-  std::cout << "CUSTOMIZE AUTO GRADING for user '" << rcsid << "'" << std::endl;
-  std::cout << "CUSTOMIZE AUTO GRADING replace " <<  replace_string_before << " with " << replace_string_after << std::endl;
-#endif
-  */
 
   system ("ls -lta");
 
@@ -218,17 +200,6 @@ int main(int argc, char *argv[]) {
       for (int j = 0; j < commands.size(); j++) {
         std::cout << "COMMAND #" << j << ": " << commands[j] << std::endl;
 
-#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-        std::cout << "BEFORE " << commands[j] << std::endl;
-        while (1) {
-          int location = commands[j].find(replace_string_before);
-          if (location == std::string::npos)
-            break;
-          commands[j].replace(location,replace_string_before.size(),replace_string_after);
-        }
-        std::cout << "AFTER  " << commands[j] << std::endl;
-#endif
-      
         std::string which = "";
         if (commands.size() > 1) {
           which = "_" + std::to_string(j);

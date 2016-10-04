@@ -15,10 +15,6 @@
 #define OTHER_MAX_FILE_SIZE      1000 * 100  // in characters  (approx 1000 lines with 100 characters per line)
 
 
-std::string GLOBAL_replace_string_before = "";
-std::string GLOBAL_replace_string_after = "";
-
-
 int TestCase::next_test_case_id = 1;
 
 std::string rlimit_name_decoder(int i);
@@ -81,21 +77,6 @@ void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty) 
 
 
 bool getFileContents(const std::string &filename, std::string &file_contents) {
-  /*
-  //#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-  if (GLOBAL_replace_string_before != "") {
-    std::cout << "BEFORE " << expected << std::endl;
-    while (1) {
-      int location = expected.find(GLOBAL_replace_string_before);
-      if (location == std::string::npos) 
-	break;
-      expected.replace(location,GLOBAL_replace_string_before.size(),GLOBAL_replace_string_after);
-    }
-    std::cout << "AFTER  " << expected << std::endl;
-  }
-  //#endif
-  */
-
   std::ifstream file(filename);
   if (!file.good()) { return false; }
   file_contents = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
@@ -610,22 +591,6 @@ TestResults* TestCase::do_the_grading (int j) const {
   return this->dispatch(tcg);
 }
 
-/*
-  //#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-  std::string expected = expected_file;
-  if (GLOBAL_replace_string_before != "") {
-    std::cout << "BEFORE " << expected << std::endl;
-    while (1) {
-      int location = expected.find(GLOBAL_replace_string_before);
-      if (location == std::string::npos) 
-	break;
-      expected.replace(location,GLOBAL_replace_string_before.size(),GLOBAL_replace_string_after);
-    }
-    std::cout << "AFTER  " << expected << std::endl;
-  }
-  //#endif
-*/
-
 
 std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
   //std::cout << "getassignmentidfromcurrentdirectory '" << dir << "'\n";
@@ -696,13 +661,12 @@ void RecursiveReplace(nlohmann::json& j, const std::string& placeholder, const s
     std::string str = j.get<std::string>();
     int pos = str.find(placeholder);
     if (pos != std::string::npos) {
-      std::cout << "REPLACING " << str << " with ";
+      std::cout << "REPLACING '" << str << "' with '";
       str.replace(pos,placeholder.length(),replacement);
-      std::cout << str << std::endl;
+      std::cout << str << "'" << std::endl;
       j = str;
     }
   } else if (j.is_array() || j.is_object()) {
-    std::cout << "array " << std::endl;
     for (nlohmann::json::iterator itr = j.begin(); itr != j.end(); itr++) {
       RecursiveReplace(*itr,placeholder,replacement);
     }

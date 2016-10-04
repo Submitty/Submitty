@@ -48,14 +48,6 @@ int main(int argc, char *argv[]) {
   // necessary since the untrusted user does not have a home directory
   setenv("DYNAMORIO_CONFIGDIR", ".", 1);
 
- 
-  //#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-  //std::string replace_string_before = __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__;
-  //std::string replace_string_after  = CustomizeAutoGrading(rcsid);
-  //std::cout << "CUSTOMIZE AUTO GRADING for user '" << rcsid << "'" << std::endl;
-  //std::cout << "CUSTOMIZE AUTO GRADING replace " <<  replace_string_before << " with " << replace_string_after << std::endl;
-  //#endif
-
   CustomizeAutoGrading(rcsid,config_json);
 
   system("find . -type f");
@@ -83,19 +75,6 @@ int main(int argc, char *argv[]) {
 
       assert (commands[x] != "MISSING COMMAND");
       assert (commands[x] != "");
-
-
-#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-      std::cout << "BEFORE " << commands[x] << std::endl;
-      while (1) {
-	int location = commands[x].find(replace_string_before);
-	if (location == std::string::npos) 
-	  break;
-	commands[x].replace(location,replace_string_before.size(),replace_string_after);
-      }
-      std::cout << "AFTER  " << commands[x] << std::endl;
-#endif
-      
       
       std::string which = "";
       if (commands.size() > 1) {
