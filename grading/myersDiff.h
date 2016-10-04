@@ -36,7 +36,7 @@
 
 #include "json.hpp"
 
-template<class T> Difference* ses ( T* a, T* b, bool secondary = false, bool extraStudentOutputOk =false );
+template<class T> Difference* ses (const nlohmann::json& j, T* a, T* b, bool secondary = false, bool extraStudentOutputOk =false );
 template<class T> metaData< T > sesSnapshots ( T* a, T* b, bool extraStudentOutputOk  );
 template<class T> metaData< T > sesSnakes ( metaData< T > & meta_diff, bool extraStudentOutputOk  );
 template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extraStudentOutputOk);
