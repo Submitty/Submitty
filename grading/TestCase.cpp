@@ -685,7 +685,6 @@ void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
     assert (replacement == "hashed_username");
     int mod_value = j2.value("mod",-1);
     assert (mod_value > 0);
-    assert (mod_value == 12);
     
     int A = 54059; /* a prime */
     int B = 76963; /* another prime */
