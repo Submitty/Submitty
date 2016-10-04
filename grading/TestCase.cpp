@@ -691,16 +691,29 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
 
 
 
+void RecursiveReplace(nlohmann::json& j, const std::string& placeholder, const std::string& replacement) {
+  if (j.is_string()) {
+    std::string str = j.get<std::string>();
+    int pos = str.find(placeholder);
+    if (pos != std::string::npos) {
+      std::cout << "REPLACING " << str << " with ";
+      str.replace(pos,placeholder.length(),replacement);
+      std::cout << str << std::endl;
+      j = str;
+    }
+  } else if (j.is_array() || j.is_object()) {
+    std::cout << "array " << std::endl;
+    for (nlohmann::json::iterator itr = j.begin(); itr != j.end(); itr++) {
+      RecursiveReplace(*itr,placeholder,replacement);
+    }
+  }
+}
 
 
 void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
-
   if (j.find("string_replacement") != j.end()) {
-
     nlohmann::json j2 = j["string_replacement"];
-
     std::cout << "CUSTOMIZE AUTO GRADING" << std::endl;
-
     std::string placeholder = j2.value("placeholder","");
     assert (placeholder != "");
     std::string replacement = j2.value("replacement","");
@@ -717,17 +730,16 @@ void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
     unsigned int sum = FIRSTH;
     for (int i = 0; i < username.size(); i++) {
       sum = (sum * A) ^ (username[i] * B);
-      s++;
     }
 
-    int assigned = (hw4_sum % 12)+1; 
+    int assigned = (sum % 12)+1; 
   
     std::string repl = std::to_string(assigned);
 
+    nlohmann::json::iterator itr = j.find("testcases");
+    if (itr != j.end()) {
 
-    std::cout << "CUSTOMIZE AUTO GRADING" << std::endl;
-
-    
+      RecursiveReplace(*itr,placeholder,repl);
+    }
   }
-
 }

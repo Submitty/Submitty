@@ -225,12 +225,16 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   std::stringstream testcase_json;
   nlohmann::json all_testcases;
 
+  CustomizeAutoGrading(rcsid,config_json);
+
+  /*
 #ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
   GLOBAL_replace_string_before = __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__;
   GLOBAL_replace_string_after  = CustomizeAutoGrading(rcsid);
   std::cout << "CUSTOMIZE AUTO GRADING for user '" << rcsid << "'" << std::endl;
   std::cout << "CUSTOMIZE AUTO GRADING replace " <<  GLOBAL_replace_string_before << " with " << GLOBAL_replace_string_after << std::endl;
 #endif
+  */
 
   system ("ls -lta");
   system("find . -type f");
