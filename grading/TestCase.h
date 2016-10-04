@@ -10,7 +10,7 @@
 
 #include "testResults.h"
 
-
+void CustomizeAutoGrading(const std::string& username, nlohmann::json& j);
 std::vector<std::string> stringOrArrayOfStrings(nlohmann::json j, const std::string what);
 
 // =================================================================================

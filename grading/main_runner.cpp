@@ -48,14 +48,16 @@ int main(int argc, char *argv[]) {
   // necessary since the untrusted user does not have a home directory
   setenv("DYNAMORIO_CONFIGDIR", ".", 1);
 
+ 
+  //#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
+  //std::string replace_string_before = __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__;
+  //std::string replace_string_after  = CustomizeAutoGrading(rcsid);
+  //std::cout << "CUSTOMIZE AUTO GRADING for user '" << rcsid << "'" << std::endl;
+  //std::cout << "CUSTOMIZE AUTO GRADING replace " <<  replace_string_before << " with " << replace_string_after << std::endl;
+  //#endif
 
-#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-  std::string replace_string_before = __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__;
-  std::string replace_string_after  = CustomizeAutoGrading(rcsid);
-  std::cout << "CUSTOMIZE AUTO GRADING for user '" << rcsid << "'" << std::endl;
-  std::cout << "CUSTOMIZE AUTO GRADING replace " <<  replace_string_before << " with " << replace_string_after << std::endl;
-#endif
-  
+  CustomizeAutoGrading(rcsid,config_json);
+
   system("find . -type f");
 
   // Run each test case and create output files

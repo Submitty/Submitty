@@ -687,3 +687,47 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
   // FIXME:  ugly...  need to reset the id...
   TestCase::reset_next_test_case_id();
 }
+
+
+
+
+
+
+void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
+
+  if (j.find("string_replacement") != j.end()) {
+
+    nlohmann::json j2 = j["string_replacement"];
+
+    std::cout << "CUSTOMIZE AUTO GRADING" << std::endl;
+
+    std::string placeholder = j2.value("placeholder","");
+    assert (placeholder != "");
+    std::string replacement = j2.value("replacement","");
+    assert (replacement != "");
+    assert (replacement == "hashed_username");
+
+    int mod_value = j2.value("mod",-1);
+    assert (mod_value > 0);
+
+    int A = 54059; /* a prime */
+    int B = 76963; /* another prime */
+    int FIRSTH = 37; /* also prime */
+    
+    unsigned int sum = FIRSTH;
+    for (int i = 0; i < username.size(); i++) {
+      sum = (sum * A) ^ (username[i] * B);
+      s++;
+    }
+
+    int assigned = (hw4_sum % 12)+1; 
+  
+    std::string repl = std::to_string(assigned);
+
+
+    std::cout << "CUSTOMIZE AUTO GRADING" << std::endl;
+
+    
+  }
+
+}
