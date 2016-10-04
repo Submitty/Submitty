@@ -198,7 +198,10 @@ class Output {
         $this->use_footer = $bool;
     }
     
-    public function addBreadcrumb($string) {
+    public function addBreadcrumb($string, $url=null) {
+        if ($url !== null && $url !== "") {
+            $string = "<a href='{$url}'>{$string}</a>";
+        }
         $this->breadcrumbs[] = $string;
     }
 }

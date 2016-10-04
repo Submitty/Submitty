@@ -4,6 +4,8 @@
 #include <vector>
 #include "testResults.h"
 
+#include "json.hpp"
+
 #define tab "    "
 #define OtherType 0
 #define ByLineByChar 1
@@ -49,11 +51,14 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
 			    const std::vector<std::vector<std::string> > &a, 
 			    const std::vector<std::vector<std::string> >  &b,
 			    bool &only_whitespace,
-			    bool extra_student_output_ok) { 
+			    bool extra_student_output_ok,
+			    int &line_added,
+			    int &line_deleted,
+			    int &char_added,
+			    int &char_deleted) {
   std::cout << "NOT HANDLING THINGS IN THIS CASE... " << std::endl;
   only_whitespace = false;
 }
-
 
 
 /* METHOD: INSPECT_CHANGES
@@ -68,7 +73,33 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
 			    const std::vector<std::string> &adata, 
 			    const std::vector<std::string>  &bdata,
 			    bool &only_whitespace,
-			    bool extra_student_output_ok) { 
+			    bool extra_student_output_ok,
+			    int &line_added,
+			    int &line_deleted,
+			    int &char_added,
+			    int &char_deleted) {
+
+  std::string added;
+  std::string deleted;
+
+  for (int i = 0; i < c.a_changes.size(); i++) {
+    int line = c.a_changes[i];
+    line_added++;
+    assert (line >= 0 && line < adata.size());
+    if (c.a_characters.size()==0) {
+      char_added += adata[line].size();
+      added+=adata[line];
+    }
+  }
+  for (int i = 0; i < c.b_changes.size(); i++) {
+    int line = c.b_changes[i];
+    line_added++;
+    assert (line >= 0 && line < bdata.size());
+    if (c.b_characters.size()==0) {
+      char_added += bdata[line].size();
+      deleted+=bdata[line];
+    }
+  }
 
   // if there are more lines in b (expected) 
   if (c.a_changes.size() < c.b_changes.size()) only_whitespace = false;
@@ -87,6 +118,8 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
       int row = c.a_changes[i];
       int col = c.a_characters[i][j];
       if (adata[row][col] != ' ') only_whitespace = false;
+      char_added++;
+      added.push_back(adata[row][col]);
     }
   }
 
@@ -95,6 +128,8 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
       int row = c.b_changes[i];
       int col = c.b_characters[i][j];
       if (bdata[row][col] != ' ') only_whitespace = false;
+      char_deleted++;
+      deleted.push_back(bdata[row][col]);
     }
   }
 
@@ -103,6 +138,8 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
   } else {
     std::cout << "FILE HAS NON WHITESPACE CHANGES!!!!!!!!!!!!!" << std::endl;
   }
+  //std::cout << "added   '" << added << "'" << std::endl;
+  //std::cout << "deleted '" << deleted << "'" << std::endl;
 }
 
 /* METHOD: clear
@@ -131,13 +168,29 @@ public:
   bool extraStudentOutputOk;
   bool only_whitespace_changes;
 
-  void PrepareGrade();
+  int line_added;
+  int line_deleted;
+  int total_line;
+  int char_added;
+  int char_deleted;
+  int total_char;
+
+  std::string message;
+
+  void PrepareGrade(const nlohmann::json& j);
 };
 
 
 inline Difference::Difference() :
   TestResults(), output_length_a(0), output_length_b(0), edit_distance(0), 
   type(OtherType), extraStudentOutputOk(false), only_whitespace_changes(false) {
+
+  line_added = -1;
+  line_deleted = -1; 
+  total_line = -1;
+  char_added = -1;
+  char_deleted = -1; 
+  total_char = -1;
 }
 
 

@@ -106,6 +106,18 @@ class Core {
         }
     }
 
+    public function addErrorMessage($message) {
+        $_SESSION['messages']['error'][] = $message;
+    }
+
+    public function addNoticeMessage($message) {
+        $_SESSION['messages']['notice'][] = $message;
+    }
+
+    public function addSuccessMessage($message) {
+        $_SESSION['messages']['success'][] = $message;
+    }
+
     /**
      * @return Config
      */
@@ -132,7 +144,7 @@ class Core {
      */
     public function loadUser($user_id) {
         // attempt to load rcs as both student and user
-        $this->user = new User($user_id, $this->database_queries);
+        $this->user = $this->database_queries->getUserById($user_id);
     }
 
     /**
@@ -233,12 +245,17 @@ class Core {
     /**
      * Given some number of URL parameters (parts), build a URL for the site using those parts
      *
-     * @param array $parts
+     * @param array  $parts
+     * @param string $hash
      *
      * @return string
      */
-    public function buildUrl($parts=array()) {
-        return $this->config->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
+    public function buildUrl($parts=array(), $hash = null) {
+        $url = $this->config->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
+        if ($hash !== null) {
+            $url .= "#".$hash;
+        }
+        return $url;
     }
 
     /**

@@ -56,6 +56,7 @@ compile:
 		${RAINBOW_GRADES_DIRECTORY}/student.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/iclicker.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/zone.cpp \
+		${RAINBOW_GRADES_DIRECTORY}/benchmark.cpp \
 		-g -o process_grades.out
 	mkdir -p individual_summary_html/
 	mkdir -p all_students_summary_html/

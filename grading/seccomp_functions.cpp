@@ -38,7 +38,7 @@
 #define ALLOW_SYSCALL(name) do {\
   int __res__ = seccomp_rule_add(sc, SCMP_ACT_ALLOW, SCMP_SYS(name), 0); \
   if (__res__ < 0) {\
-    execute_logfile << "WARNING:  Errno " << __res__ << " installing seccomp rule for " << #name << std::endl; \
+    /*execute_logfile << "WARNING:  Errno " << __res__ << " installing seccomp rule for " << #name << std::endl;*/ \
   }\
 } while (0)
 

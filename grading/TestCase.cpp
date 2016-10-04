@@ -15,10 +15,6 @@
 #define OTHER_MAX_FILE_SIZE      1000 * 100  // in characters  (approx 1000 lines with 100 characters per line)
 
 
-std::string GLOBAL_replace_string_before = "";
-std::string GLOBAL_replace_string_after = "";
-
-
 int TestCase::next_test_case_id = 1;
 
 std::string rlimit_name_decoder(int i);
@@ -81,21 +77,6 @@ void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty) 
 
 
 bool getFileContents(const std::string &filename, std::string &file_contents) {
-  /*
-  //#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-  if (GLOBAL_replace_string_before != "") {
-    std::cout << "BEFORE " << expected << std::endl;
-    while (1) {
-      int location = expected.find(GLOBAL_replace_string_before);
-      if (location == std::string::npos) 
-	break;
-      expected.replace(location,GLOBAL_replace_string_before.size(),GLOBAL_replace_string_after);
-    }
-    std::cout << "AFTER  " << expected << std::endl;
-  }
-  //#endif
-  */
-
   std::ifstream file(filename);
   if (!file.good()) { return false; }
   file_contents = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
@@ -554,7 +535,7 @@ std::string TestCase::getPrefix() const {
 
 
 std::vector<std::vector<std::string>> TestCase::getFilenames() const {
-  std::cout << "getfilenames of " << _json << std::endl;
+  //std::cout << "getfilenames of " << _json << std::endl;
   std::vector<std::vector<std::string>> filenames;
 
   assert (_json.find("actual_file") == _json.end());
@@ -562,6 +543,8 @@ std::vector<std::vector<std::string>> TestCase::getFilenames() const {
   assert (num > 0);
   for (int v = 0; v < num; v++) {
     filenames.push_back(stringOrArrayOfStrings(getGrader(v),"actual_file"));
+
+
     assert (filenames[v].size() > 0);
   }
 
@@ -607,22 +590,6 @@ TestResults* TestCase::do_the_grading (int j) const {
   nlohmann::json tcg = getGrader(j);
   return this->dispatch(tcg);
 }
-
-/*
-  //#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-  std::string expected = expected_file;
-  if (GLOBAL_replace_string_before != "") {
-    std::cout << "BEFORE " << expected << std::endl;
-    while (1) {
-      int location = expected.find(GLOBAL_replace_string_before);
-      if (location == std::string::npos) 
-	break;
-      expected.replace(location,GLOBAL_replace_string_before.size(),GLOBAL_replace_string_after);
-    }
-    std::cout << "AFTER  " << expected << std::endl;
-  }
-  //#endif
-*/
 
 
 std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
@@ -684,4 +651,54 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
 
   // FIXME:  ugly...  need to reset the id...
   TestCase::reset_next_test_case_id();
+}
+
+
+
+
+void RecursiveReplace(nlohmann::json& j, const std::string& placeholder, const std::string& replacement) {
+  if (j.is_string()) {
+    std::string str = j.get<std::string>();
+    int pos = str.find(placeholder);
+    if (pos != std::string::npos) {
+      std::cout << "REPLACING '" << str << "' with '";
+      str.replace(pos,placeholder.length(),replacement);
+      std::cout << str << "'" << std::endl;
+      j = str;
+    }
+  } else if (j.is_array() || j.is_object()) {
+    for (nlohmann::json::iterator itr = j.begin(); itr != j.end(); itr++) {
+      RecursiveReplace(*itr,placeholder,replacement);
+    }
+  }
+}
+
+
+void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
+  if (j.find("string_replacement") != j.end()) {
+    // Read and check string replacement variables
+    nlohmann::json j2 = j["string_replacement"];
+    std::string placeholder = j2.value("placeholder","");
+    assert (placeholder != "");
+    std::string replacement = j2.value("replacement","");
+    assert (replacement != "");
+    assert (replacement == "hashed_username");
+    int mod_value = j2.value("mod",-1);
+    assert (mod_value > 0);
+    
+    int A = 54059; /* a prime */
+    int B = 76963; /* another prime */
+    int FIRSTH = 37; /* also prime */
+    unsigned int sum = FIRSTH;
+    for (int i = 0; i < username.size(); i++) {
+      sum = (sum * A) ^ (username[i] * B);
+    }
+    int assigned = (sum % mod_value)+1; 
+  
+    std::string repl = std::to_string(assigned);
+    nlohmann::json::iterator itr = j.find("testcases");
+    if (itr != j.end()) {
+      RecursiveReplace(*itr,placeholder,repl);
+    }
+  }
 }

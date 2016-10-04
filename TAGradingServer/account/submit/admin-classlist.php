@@ -185,7 +185,7 @@ foreach ($rows as $row) {
     }
     else {
         \lib\Database::query("INSERT INTO users (" . (implode(",", $columns)) . ") VALUES (?, ?, ?, ?, ?, ?)", $values);
-        /*\lib\Database::query("INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) VALUES(?, ?, TIMESTAMP '1970-01-01 00:00:01')", array($user_id, __DEFAULT_LATE_DAYS_STUDENT__));*/
+        /*\lib\Database::query("INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) VALUES(?, ?, TIMESTAMP '1970-01-01 00:00:01')", array($user_id, __DEFAULT_TOTAL_LATE_DAYS__));*/
         $inserted++;
     }
 }

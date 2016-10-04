@@ -7,6 +7,38 @@ display grade_details
 #display iclicker
 
 
+
+# CHOOSE THE COLUMNS & ORDER OF COLUMNS THAT WILL APPEAR
+# IN THE PER-STUDENT INDIVIDUAL SUMMARY HTML REPORTS
+display_benchmark average
+display_benchmark stddev
+display_benchmark perfect
+display_benchmark lowest_a- 
+display_benchmark lowest_b- 
+display_benchmark lowest_c- 
+display_benchmark lowest_d 
+
+
+# SPECIFY THE DEFAULT PERCENTAGE CUTOFFS FOR GRADEABLE CURVES
+# THE DEFAULT IS 90/80/70/60
+#benchmark_percent lowest_a- 0.9
+#benchmark_percent lowest_b- 0.8
+#benchmark_percent lowest_c- 0.7
+#benchmark_percent lowest_d  0.6
+
+
+# SPECIFY THE COLORS TO INTERPOLATE FOR EACH GRADE
+# THE DEFAULTS ARE dark purple/purple/green/yellow/orange/red/dark red
+#benchmark_color extracredit  aa88ff
+#benchmark_color perfect      c8c8ff
+#benchmark_color lowest_a-    c8ffc8
+#benchmark_color lowest_b-    ffffc8
+#benchmark_color lowest_c-    ffc8c8
+#benchmark_color lowest_d     ff0000
+#benchmark_color failing      c80000
+
+
+
 num_labs  14  0.15  42
 lab  lab01  3.0  
 lab  lab02  3.0 

@@ -2,7 +2,7 @@
 
 namespace app\controllers\student;
 
-use app\controllers\IController;
+use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
@@ -13,12 +13,7 @@ use app\libraries\Utils;
 use app\models\GradeableList;
 
 
-class SubmissionController implements IController {
-
-    /**
-     * @var Core
-     */
-    private $core;
+class SubmissionController extends AbstractController {
 
     /**
      * @var GradeableList
@@ -29,14 +24,14 @@ class SubmissionController implements IController {
                                     'assignment_settings' => false);
 
     public function __construct(Core $core) {
-        $this->core = $core;
+        parent::__construct($core);
         $this->gradeables_list = new GradeableList($this->core, true);
     }
 
     public function run() {
         switch($_REQUEST['action']) {
             case 'upload':
-                $this->uploadSubmission();
+                $this->ajaxUploadSubmission();
                 break;
             case 'update':
                 $this->updateSubmissionVersion();
@@ -69,7 +64,7 @@ class SubmissionController implements IController {
                 $loc = array('page' => 'submission',
                              'action' => 'display',
                              'gradeable_id' => $gradeable->getId());
-                $this->core->getOutput()->addBreadcrumb("<a href='{$this->core->buildUrl($loc)}'>{$gradeable->getName()}</a>");
+                $this->core->getOutput()->addBreadcrumb($gradeable->getName(), $this->core->buildUrl($loc));
                 if (!$gradeable->hasConfig()) {
                     $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
                                                            'showGradeableError', $gradeable);
@@ -94,7 +89,7 @@ class SubmissionController implements IController {
      *
      * @return boolean
      */
-    private function uploadSubmission() {
+    private function ajaxUploadSubmission() {
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token: {$_POST['csrf_token']}.", false);
         }
