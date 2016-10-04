@@ -294,6 +294,59 @@ void colorit(std::ostream &ostr,
 
 void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
 
+
+
+#if 1
+    
+  ostr << "<table border=1 cellpadding=5 cellspacing=0 style=\"background-color:#ddffdd; width:auto;\">\n";
+  ostr << "<tr><td>\n";
+  ostr << "<table border=0 cellpadding=5 cellspacing=0>\n";
+
+
+  ostr << "<h3>HOMEWORK 4 MATERIALS</h3>" << std::endl;
+
+  std::string username = s->getUserName();
+
+
+
+  int A = 54059; /* a prime */
+  int B = 76963; /* another prime */
+  int FIRSTH = 37; /* also prime */
+    
+  unsigned int hw4_sum = FIRSTH;
+  for (int i = 0; i < username.size(); i++) {
+    hw4_sum = (hw4_sum * A) ^ (username[i] * B);
+  }
+
+  int hw4_section = (hw4_sum % 12)+1; 
+  
+  std::string hw4_filename = "UNASSIGNED";
+  if (hw4_section == 1)  hw4_filename = "fzpmxbuvwohshsohsjzoqxuhpclupzuw.zip";
+  if (hw4_section == 2)  hw4_filename = "aedgeiasbwnjmsqfxixoxoodgnufxuox.zip";
+  if (hw4_section == 3)  hw4_filename = "qytpyhfhwylatvqckixspnsbwpjexfxq.zip";
+  if (hw4_section == 4)  hw4_filename = "rmdclwdnvgiscteyiwpxyovxwvvhivnb.zip";
+  if (hw4_section == 5)  hw4_filename = "sfsoudlbcalzdapzcycmhqssoclnebbz.zip";
+  if (hw4_section == 6)  hw4_filename = "nfovjnknkgycgasjanvkjclmdmduofoe.zip";
+  if (hw4_section == 7)  hw4_filename = "emehlzoplgkcskvhnbqflsswoxvcisfm.zip";
+  if (hw4_section == 8)  hw4_filename = "akouiieotrdetopvzrxiazyojhoacbic.zip";
+  if (hw4_section == 9)  hw4_filename = "hjswmlktxhnheehjwmcmscfescmrmxvu.zip";
+  if (hw4_section == 10) hw4_filename = "hejwhufoceankytyfqnbumyyvpeqflqm.zip";
+  if (hw4_section == 11) hw4_filename = "ydwbnvkvljtomzppmqswylvuklfdzjax.zip";
+  if (hw4_section == 12) hw4_filename = "mgjcqmdrnmagzmvmlfjrrtzuofvtwnai.zip";
+  assert (hw4_filename != "UNASSIGNED");
+
+  std::string hw4_directory = "http://www.cs.rpi.edu/academics/courses/fall16/csci1200/hw/04_debugging_list_iterators/" + hw4_filename;
+
+  ostr << "  <tr><td><a href=\"" << hw4_directory << "\" download=\"provided_files.zip\">provided_files.zip</a></td></tr>\n";
+
+  ostr << "</table>\n";
+  ostr << "</tr></td>\n";
+  ostr << "</table>\n";
+
+
+#endif
+
+
   if ( DISPLAY_EXAM_SEATING == false) return;
 
   std::string room = GLOBAL_EXAM_DEFAULT_ROOM;
