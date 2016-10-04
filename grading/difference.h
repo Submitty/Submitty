@@ -94,7 +94,7 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
   for (int i = 0; i < c.b_changes.size(); i++) {
     int line = c.b_changes[i];
     line_added++;
-    assert (line >= 0 && line < adata.size());
+    assert (line >= 0 && line < bdata.size());
     if (c.b_characters.size()==0) {
       char_added += bdata[line].size();
       deleted+=bdata[line];
