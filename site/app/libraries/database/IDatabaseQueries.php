@@ -48,7 +48,7 @@ interface IDatabaseQueries {
     
     /**
      * Gets array of all gradeables ids in the database returning it in a list sorted alphabetically
-     * @return mixed
+     * @return array
      */
     public function getAllGradeableIds();
     
@@ -57,7 +57,7 @@ interface IDatabaseQueries {
      *
      * @param $g_id
      *
-     * @return mixed
+     * @return array
      */
     public function getGradeableById($g_id);
 
@@ -74,6 +74,34 @@ interface IDatabaseQueries {
      * @return array
      */
     public function getRotatingSections();
+
+    /**
+     * Returns the count of all users in rotating sections that are in a non-null registration section. These are
+     * generally students who have late added a course and have been automatically added to the course, but this
+     * was done after rotating sections had already been set-up.
+     *
+     * @return array
+     */
+    public function getCountUsersRotatingSections();
+
+    /**
+     * Returns the count of all users that are in a rotating section, but are not in an assigned registration section.
+     * These are generally students who have dropped the course and have not yet been removed from a rotating
+     * section.
+     *
+     * @return array
+     */
+    public function getCountNullUsersRotatingSections();
+
+    public function getRegisteredOrManualStudentIds();
+
+    public function setAllUsersRotatingSectionNull();
+
+    public function getMaxRotatingSection();
+
+    public function insertNewRotatingSection($section);
+
+    public function updateUsersRotatingSection($section, $users);
 
     /**
      * @todo: write phpdoc

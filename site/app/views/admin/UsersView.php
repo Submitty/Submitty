@@ -287,4 +287,81 @@ HTML;
 HTML;
         return $return;
     }
+
+    public function rotatingUserForm($not_null_counts, $null_counts) {
+        $return = <<<HTML
+<script type="text/javascript">
+$(function() {
+    $("[name='rotating_type']").change(function() {
+        if ($(this).val() == "alphabetically") {
+            $("[name='fewest']").prop('checked', false).attr('onclick', 'return false').addClass("disabled");
+            
+        }
+        else {
+            $("[name='fewest']").attr('onclick', '').removeClass('disabled');
+        }
+    });
+});
+</script>
+<div class="content">
+    <h2>Setup Rotating Sections</h2>
+    <form action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'update_rotating_sections'))}" method="post">
+    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+    <div class="sub">
+        <div class="box half">
+            Place students in <input type="text" name="sections" placeholder="#" style="width: 25px" /> rotating sections 
+            <select name="rotating_type">
+                <option value="random">randomly</option>
+                <option value="alphabetically">alphabetically</option>
+            </select><br />
+            <label>
+                <input type="radio" style="margin-top: -2px" name="sort_type" value="redo" /> Redo rotating sections completely
+            </label><br />
+            <label>
+                <input type="radio" style="margin-top: -2px" name="sort_type" value="fewest" /> Put students into rotating section with fewest members
+            </label>
+        </div>
+        <div class="box half">
+            <h2>Student Counts in Rotating Sections</h2>
+            <div class="half">
+                <h3>Students in Registered Sections</h3>
+                <table class="table table-bordered table-striped">
+HTML;
+        foreach($not_null_counts as $row) {
+            if ($row['rotating_section'] === null) {
+                $row['rotating_section'] = "NULL";
+            }
+            $return .= <<<HTML
+                    <tr>
+                        <td>Section {$row['rotating_section']}</td> 
+                        <td>{$row['count']}</td>
+HTML;
+        }
+        $return .= <<<HTML
+                </table>
+            </div>
+            <div class="half">
+                <h3>Students in Null Registration Section</h3>
+                <table class="table table-bordered table-striped">
+HTML;
+        foreach ($null_counts as $row) {
+            if ($row['rotating_section'] === null) {
+                $row['rotating_section'] = "NULL";
+            }
+            $return .= <<<HTML
+                    <tr>
+                        <td>Section {$row['rotating_section']}</td>
+                        <td>{$row['count']}</td>
+HTML;
+        }
+        $return .= <<<HTML
+                </table>
+            </div>
+        </div>
+    </div>
+    </form>
+</div>
+HTML;
+        return $return;
+    }
 }

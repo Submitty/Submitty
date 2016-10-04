@@ -104,7 +104,8 @@ WHERE user_id=?", $array);
     }
 
     public function getGradeableById($g_id) {
-        $this->database->query("SELECT g.*, eg.*
+        $this->database->query("
+SELECT g.*, eg.*
 FROM gradeable as g
 LEFT JOIN (
 	SELECT *
@@ -122,6 +123,57 @@ WHERE g.g_id=?", array($g_id));
     public function getRotatingSections() {
         $this->database->query("SELECT * FROM sections_rotating ORDER BY sections_rotating_id");
         return $this->database->rows();
+    }
+
+    public function getCountUsersRotatingSections() {
+        $this->database->query("
+SELECT rotating_section, count(*) as count
+FROM users
+WHERE registration_section IS NOT NULL
+GROUP BY rotating_section
+ORDER BY rotating_section");
+        return $this->database->rows();
+    }
+
+    public function getCountNullUsersRotatingSections() {
+        $this->database->query("
+SELECT rotating_section, count(*) as count
+FROM users
+WHERE registration_section IS NULL AND rotating_section IS NOT NULL
+GROUP BY rotating_section
+ORDER BY rotating_section");
+        return $this->database->rows();
+    }
+
+    public function getRegisteredOrManualStudentIds() {
+        $this->database->query("
+SELECT user_id 
+FROM users 
+WHERE 
+  (user_group=? AND registration_section IS NOT NULL) OR 
+  (manual_registration) 
+ORDER BY user_id ASC");
+        return array_map(function($elem) { return $elem['user_id']; }, $this->database->rows());
+    }
+
+    public function setAllUsersRotatingSectionNull() {
+        $this->database->query("UPDATE users SET rotating_section=NULL");
+    }
+
+    public function getMaxRotatingSection() {
+        $this->database->query("SELECT MAX(sections_rotating_id) as max FROM sections_rotating");
+        $row = $this->database->row();
+        return $row['max'];
+    }
+
+    public function insertNewRotatingSection($section) {
+        $this->database->query("INSERT INTO sections_rotating (sections_rotating_id) VALUES(?)", array($section));
+    }
+
+    public function updateUsersRotatingSection($section, $users) {
+        $update_array = array_merge(array($section), $users);
+        $update_string = implode(",", array_pad(array(), count($users), "?"));
+        $this->database->query("UPDATE users SET rotating_section=? WHERE user_id IN ({$update_string})", $update_array);
     }
 
     public function getSession($session_id) {

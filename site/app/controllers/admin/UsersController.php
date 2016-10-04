@@ -23,6 +23,12 @@ class UsersController extends AbstractController {
                 $this->core->getOutput()->addBreadcrumb("Graders");
                 $this->listGraders();
                 break;
+            case 'rotating_sections':
+                $this->rotatingSectionsForm();
+                break;
+            case 'update_rotating_sections':
+                $this->updateRotatingSections();
+                break;
             case 'students':
             default:
                 $this->core->getOutput()->addBreadcrumb("Students");
@@ -116,5 +122,75 @@ class UsersController extends AbstractController {
             $this->core->addSuccessMessage("User '{$user->getId()}' created");
         }
         $this->core->redirect($return_url);
+    }
+
+    public function rotatingSectionsForm() {
+        $non_null_counts = $this->core->getQueries()->getCountUsersRotatingSections();
+        $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingUserForm', $non_null_counts, $null_counts);
+    }
+
+    public function updateRotatingSections() {
+        $return_url = $this->core->buildUrl(
+            array('component' => 'admin',
+                  'page' => 'users',
+                  'action' => 'rotating_sections')
+        );
+        if ($this->core->checkCsrfToken()) {
+            $this->core->addErrorMessage("Invalid CSRF token. Try again.");
+            $this->core->redirect($return_url);
+        }
+
+        if (in_array($_REQUEST['rotating_type'], array('random', 'alphabetically'))) {
+            $type = $_REQUEST['rotating_type'];
+        }
+        else {
+            $type = 'random';
+        }
+
+        $sections = intval($_REQUEST['sections']);
+        if (in_array($_REQUEST['sort_type'], array('redo', 'fewest')) && $type == "random") {
+            $sort = $_REQUEST['sort_type'];
+        }
+        else {
+            $sort = 'redo';
+        }
+
+        $max_section = $this->core->getQueries()->getMaxRotatingSection();
+        $section_counts = array_fill(0, $sections, 0);
+        if ($sort === 'redo') {
+            $users = $this->core->getQueries()->getRegisteredOrManualStudentIds();
+            if ($type === 'random') {
+                shuffle($users);
+            }
+            $this->core->getQueries()->setAllUsersRotatingSectionNull();
+            for ($i = 0; $i < count($users); $i++) {
+                $section = $i % $sections;
+                $section_counts[$section]++;
+                if ($section > $max_section) {
+                    $this->core->getQueries()->insertNewRotatingSection($section);
+                }
+            }
+        }
+        else {
+            // TODO: get all users without a rotating section that need one (registered or manual)
+            $users = array();
+            shuffle($users);
+            // TODO: get count of users in all rotating sections (ignoring null section)
+            // TODO: figure out which sections requires new users to be added
+            $counts_rows = $this->core->getQueries()->getCountUsersRotatingSections();
+            $counts = array();
+            foreach($counts_rows as $counts_row) {
+                if ($counts_row['rotating_section'] === null) {
+                    continue;
+                }
+                $counts[$counts_row['rotating_section']] = $counts_row['count'];
+            }
+        }
+
+        for ($i = 0; $i < $sections; $i++) {
+            $users = array_splice($users, 0, $section_counts[$i]);
+            $this->core->getQueries()->updateUsersRotatingSection($i + 1, $users);
+        }
     }
 }
