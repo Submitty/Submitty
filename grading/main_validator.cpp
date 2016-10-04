@@ -89,6 +89,8 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
   bool show_actual   = ShowHelper(tcg.value("show_actual",  "never"),result->getSuccess());
   bool show_expected = ShowHelper(tcg.value("show_expected","never"),result->getSuccess());
 
+  std::string BROKEN_CONFIG_ERROR_MESSAGE;
+
   //std::cout << "sm=" << show_message << "  sa=" << show_actual << "  se=" << show_expected << std::endl;
 
   if (show_actual == false && show_expected == true) {
@@ -130,22 +132,27 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
         expected = tcg.value("expected_file", "");
 	if (expected != "") {
 	  fileStatus(expected, expectedFileExists,expectedFileEmpty);
-	  assert (expectedFileExists);
-	  // PREPARE THE JSON DIFF FILE
-	  std::stringstream diff_path;
-	  diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
-	  std::ofstream diff_stream(diff_path.str().c_str());
-	  result->printJSON(diff_stream);
-	  std::stringstream expected_path;
-	  std::string id = hw_id;
-	  std::string expected_out_dir = "test_output/" + id + "/";
-	  expected_path << expected_out_dir << expected;
-	  if (show_expected) {
-            autocheck_j["expected_file"] = expected_path.str();
-          }
-	  if (show_actual) {
-            autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
-          }
+	  if (!expectedFileExists) {
+	    BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";
+	    std::cout << BROKEN_CONFIG_ERROR_MESSAGE << std::endl;
+	  }
+	  else {
+	    // PREPARE THE JSON DIFF FILE
+	    std::stringstream diff_path;
+	    diff_path << my_testcase.getPrefix() << "_" << which_grader << "_diff.json";
+	    std::ofstream diff_stream(diff_path.str().c_str());
+	    result->printJSON(diff_stream);
+	    std::stringstream expected_path;
+	    std::string id = hw_id;
+	    std::string expected_out_dir = "test_output/" + id + "/";
+	    expected_path << expected_out_dir << expected;
+	    if (show_expected) {
+	      autocheck_j["expected_file"] = expected_path.str();
+	    }
+	    if (show_actual) {
+	      autocheck_j["difference_file"] = my_testcase.getPrefix() + "_" + std::to_string(which_grader) + "_diff.json";
+	    }
+	  }
 	}
       }
       std::cout << "STUDENT FILEEXISTS " << studentFileExists << " EMPTY " << studentFileEmpty << std::endl;
@@ -157,8 +164,12 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
     }
 
 
-    const std::vector<std::string>& messages = result->getMessages();
-    
+    std::vector<std::string> messages = result->getMessages();
+
+    if (BROKEN_CONFIG_ERROR_MESSAGE != "") {
+      messages.push_back(BROKEN_CONFIG_ERROR_MESSAGE);
+    }
+
     std::string fm = tcg.value("failure_message","");
 
     if (show_message) {
@@ -221,8 +232,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   std::cout << "CUSTOMIZE AUTO GRADING replace " <<  GLOBAL_replace_string_before << " with " << GLOBAL_replace_string_after << std::endl;
 #endif
 
-  //system ("ls -lta");
-  //system("find . -type f");
+  system ("ls -lta");
+  system("find . -type f");
 
   // LOOP OVER ALL TEST CASES
   nlohmann::json::iterator tc = config_json.find("testcases");

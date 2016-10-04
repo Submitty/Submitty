@@ -562,6 +562,8 @@ std::vector<std::vector<std::string>> TestCase::getFilenames() const {
   assert (num > 0);
   for (int v = 0; v < num; v++) {
     filenames.push_back(stringOrArrayOfStrings(getGrader(v),"actual_file"));
+
+
     assert (filenames[v].size() > 0);
   }
 

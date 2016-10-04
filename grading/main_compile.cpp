@@ -172,14 +172,24 @@ int main(int argc, char *argv[]) {
         std::vector<std::vector<std::string>> filenames = my_testcase.getFilenames();
         for (int i = 0; i < filenames.size(); i++) {
           for (int j = 0; j < filenames[i].size(); j++) {
+	    std::string pattern = filenames[i][j];
             std::cout << "PATTERN: " << filenames[i][j] << std::endl;
+	    bool special_flag = false;
+	    if (pattern.substr(pattern.size()-8,8) == ".cpp.txt") {
+	      pattern = pattern.substr(0,pattern.size()-4);
+	      special_flag = true;
+	    }
             std::vector<std::string> files;
-            wildcard_expansion(files, filenames[i][j], std::cout);
+            wildcard_expansion(files, pattern, std::cout);
             for (int i = 0; i < files.size(); i++) {
               std::cout << "  rescue  FILE #" << i << ": " << files[i] << std::endl;
               std::string new_filename = my_testcase.getPrefix() + "_" + replace_slash_with_double_underscore(files[i]);
               std::string old_filename = escape_spaces(files[i]);
               new_filename = escape_spaces(new_filename);
+	      std::cout << new_filename.substr(new_filename.size()-4,4) << std::endl;
+	      if (special_flag) {
+		new_filename += ".txt";
+	      }
               execute ("/bin/cp "+old_filename+" "+new_filename,
                        "/dev/null",
                        my_testcase.get_test_case_limits(),
