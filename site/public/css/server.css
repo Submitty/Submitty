@@ -11,7 +11,6 @@
 
 html {
     height: 100%;
-    /*position: fixed;*/
 }
 
 body {
@@ -32,7 +31,6 @@ body {
     font-family: 'Source Sans Pro', sans-serif;
     height: 100%;
     position: relative;
-    /*position : fixed;*/
 }
 
 table {
@@ -80,25 +78,16 @@ textarea {
 #container {
     min-height: 100%;
     margin: 0 auto -60px;
-
-    /*min-width: 500px;//ml change*/
 }
 
 #nav {
-
-    /*background-color: yellow;*/
     background-color: #000000;
     color: #FFFFFF;
     font-family: 'Open Sans Condensed', sans-serif;
-    /*position: fixed;*/
-    /*position: absolute;*/
-
     width: 100%;
     left: 0;
     top: 0;
     z-index: 9999;
-    /*min-height: 64px;
-    height:auto !important;*/
 
 }
 
@@ -113,13 +102,11 @@ textarea {
 
 #nav li {
     float: left;
-    /*background-color: black;*/
-    /*list-style-type: none;*/
 }
 
 #nav li:hover, .dropdown:hover .dropbtn {
     background-color: gray;
-    /*cursor: pointer;*/
+    cursor: pointer;
 }
 
 #nav li a, .dropbtn {
@@ -166,10 +153,6 @@ textarea {
 #nav .dropdown:hover .dropdown-content {
     display: block;
 }
-
-/*#nav-clear {
-    /*height: 32px;
-}*/
 
 #header {
     background-color: #edf6f6;
@@ -492,9 +475,8 @@ select {
 
 .gradeable_list{
 	width: 100%;
-	padding: 50px;
-	padding-top: 0px;
-	font-family: 'Source Sans Pro', sans-serif;
+    padding: 0px 50px 50px;
+    font-family: 'Source Sans Pro', sans-serif;
 	font-size: 18px;
 	text-align: left !important;
 }
