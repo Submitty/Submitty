@@ -1,10 +1,10 @@
 <?php
 
+use app\exceptions\BaseException;
 use app\libraries\AutoLoader;
 use app\libraries\Core;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
-use app\libraries\Output;
 
 /*
  * The user's umask is ignored for the user running php, so we need
@@ -44,10 +44,14 @@ function exception_handler($throwable) {
 }
 set_exception_handler("exception_handler");
 
-function error_handler($errno, $errstr, $errfile, $errline) {
-    throw new \app\exceptions\BaseException("Fatal Error (".$errno."): ".$errstr." in file ".$errfile." on line ".$errline);
+function error_handler() {
+    $error = error_get_last();
+    if ($error['type'] === E_ERROR) {
+        exception_handler(new BaseException("Fatal Error: " . $error['message'] . " in file 
+        " . $error['file'] . " on line " . $error['line']));
+    }
 }
-set_error_handler("error_handler", E_ERROR);
+register_shutdown_function("error_handler");
 /*
  * Check that we have a semester and a course specified by the user and then that there's no
  * potential for path trickery by using basename which will return only the last part of a
@@ -65,6 +69,14 @@ if (!isset($_REQUEST['course'])) {
 $semester = basename($_REQUEST['semester']);
 $course = basename($_REQUEST['course']);
 
+if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
+    $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $url = str_replace("course={$_REQUEST['course']}", "course={$course}", $url);
+    $url = str_replace("semester={$_REQUEST['semester']}", "semester={$semester}", $url);
+    header("Location: {$url}");
+    exit();
+}
+
 /*
  * This sets up our Core (which in turn loads the config, database, etc.) for the application
  * and then we initialize our Output engine (as it requires Core to run) and then set the
@@ -72,7 +84,7 @@ $course = basename($_REQUEST['course']);
  */
 $core->loadConfig($semester, $course);
 $core->getOutput()->addBreadcrumb("F16");
-$core->getOutput()->addBreadcrumb("<a href='{$core->buildUrl()}'>{$core->getFullCourseName()}</a>");
+$core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->buildUrl());
 date_default_timezone_set($core->getConfig()->getTimezone());
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->getLogExceptions());
@@ -90,11 +102,15 @@ if($core->getConfig()->isDebug()) {
 // Check if we have a saved cookie with a session id and then that there exists a session with that id
 // If there is no session, then we delete the cookie
 $logged_in = false;
-if (isset($_COOKIE['session_id'])) {
-    $logged_in = $core->getSession($_COOKIE['session_id']);
+$cookie_key = $semester."_".$course."_session_id";
+if (isset($_COOKIE[$cookie_key])) {
+    $logged_in = $core->getSession($_COOKIE[$cookie_key]);
     if (!$logged_in) {
         // delete the stale and invalid cookie
-        setcookie('session_id', "", time() - 3600);
+        setcookie($cookie_key, "", time() - 3600);
+    }
+    else {
+        setcookie($cookie_key, $_COOKIE[$cookie_key], time() + (7 * 24 * 60 * 60), "/");
     }
 }
 

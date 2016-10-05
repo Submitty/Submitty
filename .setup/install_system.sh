@@ -31,7 +31,7 @@ if [ ${VAGRANT} == 1 ]; then
     chmod +x /etc/update-motd.d/00-header
 
     echo -e '
-  _______  __   __  _______  __   __  ___   _______  _______  __   __
+ _______  __   __  _______  __   __  ___   _______  _______  __   __
 |       ||  | |  ||  _    ||  |_|  ||   | |       ||       ||  | |  |
 |  _____||  | |  || |_|   ||       ||   | |_     _||_     _||  |_|  |
 | |_____ |  |_|  ||       ||       ||   |   |   |    |   |  |       |
@@ -226,7 +226,7 @@ hardening-includes python python-pip p7zip-full patchutils postgresql-client pos
 unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libfile-mmagic-perl \
 libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
-libseccomp2 seccomp junit cmake libpcre3 libpcre3-dev flex bison
+libseccomp2 seccomp junit cmake libpcre3 libpcre3-dev flex bison spim
 
 apt-get install -qqy subversion subversion-tools
 apt-get install -qqy libapache2-svn
@@ -519,8 +519,6 @@ fi
 #################
 
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-#pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-#make ubuntudeps
 # graph tool...  for later?  add-apt-repository "http://downloads.skewed.de/apt/trusty universe" -y
 add-apt-repository ppa:ubuntu-toolchain-r/test -y
 apt-get update -qq
@@ -530,7 +528,9 @@ apt-get install -qq splint indent
 apt-get install -qq python3 python3-dev libpython3.4 python3-pip
 python3 -m pip install pylint
 # graph tool...  for later?  apt-get install -qq --force-yes python3-graph-tool
-#popd
+pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+make
+popd
 
 
 #################################################################
@@ -580,9 +580,18 @@ if [[ ${VAGRANT} == 1 ]]; then
     echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/valid
     echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
     echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+    echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+    echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+    echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+    echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+    echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+    echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/valid
     ${SUBMITTY_DATA_DIR}/bin/authonly.pl
     echo "student:student" | sudo chpasswd
     echo "smithj:smithj" | sudo chpasswd
+    echo "joness:joness" | sudo chpasswd
+    echo "browna:browna" | sudo chpasswd
+    echo "pearsr:pearsr" | sudo chpasswd
 
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
     rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs

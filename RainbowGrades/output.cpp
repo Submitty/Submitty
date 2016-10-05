@@ -16,7 +16,7 @@
 #include "iclicker.h"
 #include "grade.h"
 #include "table.h"
-
+#include "benchmark.h"
 
 #define grey_divider "aaaaaa"
 
@@ -25,6 +25,10 @@
 extern std::string OUTPUT_FILE;
 extern std::string ALL_STUDENTS_OUTPUT_DIRECTORY;
 
+extern Student* AVERAGE_STUDENT_POINTER;
+extern Student* STDDEV_STUDENT_POINTER;
+
+
 // ==========================================================
 
 std::string HEX(int h) {
@@ -32,6 +36,16 @@ std::string HEX(int h) {
   ss << std::hex << std::setw(2) << std::setfill('0') << h;
   return ss.str();
 }
+
+int UNHEX(std::string s) {
+  assert (s.size() == 2);
+  int h;
+  std::stringstream ss(s);
+  ss >> std::hex >> h;
+  assert (h >= 0 && h <= 255);
+  return h;
+}
+
 
 // colors for grades
 const std::string GradeColor(const std::string &grade) {
@@ -96,6 +110,17 @@ int convertMajor(const std::string &major) {
 
 // ==========================================================
 
+class Color {
+public:
+  Color(int r_=0, int g_=0, int b_=0) : r(r_),g(g_),b(b_) {}
+  Color(const std::string& s) {
+    r = UNHEX(s.substr(0,2));
+    g = UNHEX(s.substr(2,2));
+    b = UNHEX(s.substr(4,2));
+  }
+  int r,g,b;
+};
+
 std::string coloritcolor(float val,
                          float perfect,
                          float a,
@@ -103,40 +128,51 @@ std::string coloritcolor(float val,
                          float c,
                          float d) {
   
+  assert (perfect >= a &&
+          a >= b &&
+          b >= c &&
+          c >= d &&
+          d >= 0);
+
   if (val < 0.00001) return "ffffff";
-  else if (val > perfect) return "aa88ff";
+  else if (val > perfect) return GetBenchmarkColor("extracredit");
   else {
-  float red,green,blue;
+  float alpha;
+  Color c1,c2;
 
-  if (val >= a) { // blue -> green
-    red = 200;
-    green = 200 + 55*(perfect-val)/(float(perfect-a));
-    blue = 255 - 55*(perfect-val)/(float(perfect-a));
+  static Color perfect_color(GetBenchmarkColor("perfect"));
+  static Color a_color(GetBenchmarkColor("lowest_a-"));
+  static Color b_color(GetBenchmarkColor("lowest_b-"));
+  static Color c_color(GetBenchmarkColor("lowest_c-"));
+  static Color d_color(GetBenchmarkColor("lowest_d"));
+
+  if (val >= a) {
+    alpha = (perfect-val)/float(perfect-a);
+    c1 = perfect_color;
+    c2 = a_color;
   } 
-
-  else if (val >= b) {  // green -> yellow
-    red = 200 + 55*(a-val)/(float(a-b));
-    green = 255;
-    blue = 200;
+  else if (val >= b) {
+    alpha = (a-val)/float(a-b);
+    c1 = a_color;
+    c2 = b_color;
   } 
-
-  else if (val >= c) { // yellow -> pink
-    red = 255; 
-    green = 255 - 55*(b-val)/(float(b-c));
-    blue = 200;
+  else if (val >= c) {
+    alpha = (b-val)/float(b-c);
+    c1 = b_color;
+    c2 = c_color;
   } 
-
-  else if (val >= d) {  // pink -> red;
-    red = 255;
-    green = 200 - 200*(c-val)/(float(c-d));
-    blue = 200 - 200*(c-val)/(float(c-d));
+  else if (val >= d) {
+    alpha = (c-val)/float(c-d);
+    c1 = c_color;
+    c2 = d_color;
   } 
-
-  else { // dark red
-    red = 200;
-    green = 0;
-    blue = 0;
+  else {
+    return GetBenchmarkColor("failing");
   }
+
+  float red   = (1-alpha) * c1.r + (alpha) * c2.r;
+  float green = (1-alpha) * c1.g + (alpha) * c2.g;
+  float blue  = (1-alpha) * c1.b + (alpha) * c2.b;
 
   return HEX(red) + HEX(green) + HEX(blue);
 
@@ -289,6 +325,12 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
   ostr << "  <tr><td>Your zone assignment: </td><td align=center>" << zone << "</td></tr>\n";
   ostr << "</table>\n";
   ostr << "</tr></td>\n";
+
+  if (s->getExamZoneImage() != "") {
+    ostr << "<tr><td style=\"background-color:#ffffff;\"><img src=\"zone_images/" + s->getExamZoneImage() + "\"></td></tr>\n";
+  }
+
+
   ostr << "</table>\n";
 
 #else
@@ -358,6 +400,49 @@ void start_table_open_file(bool for_instructor,
   */
 }
 
+
+void SelectBenchmarks(std::vector<int> &select_students, const std::vector<Student*> &students,
+                      Student *sp, Student *sa, Student *sb, Student *sc, Student *sd) {
+  int myrow = 1;
+
+  int offset = select_students.size();
+  select_students.resize(select_students.size()+NumVisibleBenchmarks());
+
+  for (unsigned int stu= 0; stu < students.size(); stu++) {
+    std::string default_color="ffffff";
+    Student *this_student = students[stu];
+    myrow++;
+
+    int which;
+
+    if (this_student->getLastName() == "") {
+      if (this_student == sp) {
+        which = WhichVisibleBenchmark("perfect");
+        if (which >= 0) select_students[offset+which]=myrow;
+      } else if (this_student == AVERAGE_STUDENT_POINTER) {
+        which = WhichVisibleBenchmark("average");
+        if (which >= 0) select_students[offset+which]=myrow;
+      } else if (this_student == STDDEV_STUDENT_POINTER) {
+        which = WhichVisibleBenchmark("stddev");
+        if (which >= 0) select_students[offset+which]=myrow;
+      } else if (this_student == sa) {
+        which = WhichVisibleBenchmark("lowest_a-");
+        if (which >= 0) select_students[offset+which]=myrow;
+      } else if (this_student == sb) {
+        which = WhichVisibleBenchmark("lowest_b-");
+        if (which >= 0) select_students[offset+which]=myrow;
+      } else if (this_student == sc) {
+        which = WhichVisibleBenchmark("lowest_c-");
+        if (which >= 0) select_students[offset+which]=myrow;
+      } else if (this_student == sd) {
+        which = WhichVisibleBenchmark("lowest_d");
+        if (which >= 0) select_students[offset+which]=myrow;
+      }
+    }
+  }
+}
+
+
 void start_table_output( bool for_instructor,
                  const std::vector<Student*> &students, int rank, int month, int day, int year,
                         enum GRADEABLE_ENUM g,
@@ -389,6 +474,14 @@ void start_table_output( bool for_instructor,
   student_data.push_back(counter-1);  
   student_data.push_back(counter-3);  
   student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
+
+  if (DISPLAY_EXAM_SEATING) {
+    student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","exam room"));
+    student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","exam zone"));
+    student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","exam time"));
+    student_data.push_back(counter); table.set(0,counter++,TableCell(grey_divider));
+  }
+
   student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","OVERALL"));
   student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
 
@@ -496,6 +589,9 @@ void start_table_output( bool for_instructor,
   // =====================================================================================================
   // ALL OF THE STUDENTS
 
+  SelectBenchmarks(select_students,students,sp,sa,sb,sc,sd);
+
+
   int myrank = 1;
   int myrow = 1;
   for (unsigned int stu= 0; stu < students.size(); stu++) {
@@ -503,8 +599,7 @@ void start_table_output( bool for_instructor,
     Student *this_student = students[stu];
     myrow++;
     counter = 0;
-    if (this_student->getLastName() == "" && this_student->getUserName() != "AVERAGE") {
-      select_students.push_back(myrow);
+    if (this_student->getLastName() == "") {
       if (this_student == sp) {
         default_color= coloritcolor(5,5,4,3,2,1);
       } else if (this_student == sa) {
@@ -540,6 +635,31 @@ void start_table_output( bool for_instructor,
     table.set(myrow,counter++,TableCell(default_color,this_student->getPreferredName()));
     table.set(myrow,counter++,TableCell(grey_divider));
 
+
+    if (DISPLAY_EXAM_SEATING) {
+
+      std::string room = GLOBAL_EXAM_DEFAULT_ROOM;
+      std::string zone = "SEE INSTRUCTOR";
+      std::string time = GLOBAL_EXAM_TIME;
+      if (this_student->getExamRoom() == "") {
+        //std::cout << "NO ROOM FOR " << this_student->getUserName() << std::endl;
+      } else {
+        room = this_student->getExamRoom();
+        zone = this_student->getExamZone();
+        if (this_student->getExamTime() != "") {
+          time = this_student->getExamTime();
+        }
+      }
+      if (zone == "SEE_INSTRUCTOR") {
+        zone = "SEE INSTRUCTOR";
+      }
+
+      table.set(myrow,counter++,TableCell("ffffff",room));
+      table.set(myrow,counter++,TableCell("ffffff",zone));
+      table.set(myrow,counter++,TableCell("ffffff",time));
+      table.set(myrow,counter++,TableCell(grey_divider));
+    }
+
     float grade = this_student->overall();
     std::string color = coloritcolor(grade,
                                      sp->overall(),
@@ -547,9 +667,11 @@ void start_table_output( bool for_instructor,
                                      sb->overall(),
                                      sc->overall(),
                                      sd->overall());
+    if (this_student == STDDEV_STUDENT_POINTER) color="ffffff";
     table.set(myrow,counter++,TableCell(color,grade,2));
     table.set(myrow,counter++,TableCell(grey_divider));
-    
+
+
     if (DISPLAY_FINAL_GRADE) {
       std::string g = this_student->grade(false,sd);
       color = GradeColor(g);
@@ -572,6 +694,7 @@ void start_table_output( bool for_instructor,
                                        sb->GradeablePercent(g),
                                        sc->GradeablePercent(g),
                                        sd->GradeablePercent(g));
+      if (this_student == STDDEV_STUDENT_POINTER) color="ffffff";
       table.set(myrow,counter++,TableCell(color,grade,2));
     }
     table.set(myrow,counter++,TableCell(grey_divider));
@@ -592,6 +715,7 @@ void start_table_output( bool for_instructor,
                                          sb->getGradeableItemGrade(g,j).getValue(),
                                          sc->getGradeableItemGrade(g,j).getValue(),
                                          sd->getGradeableItemGrade(g,j).getValue());
+        if (this_student == STDDEV_STUDENT_POINTER) color="ffffff";
         std::string details;
         details = this_student->getGradeableItemGrade(g,j).getNote();
 
@@ -611,6 +735,7 @@ void start_table_output( bool for_instructor,
                                            sb->adjusted_test(j),
                                            sc->adjusted_test(j),
                                            sd->adjusted_test(j));
+          if (this_student == STDDEV_STUDENT_POINTER) color="ffffff";
           table.set(myrow,counter++,TableCell(color,grade,1,"",0,visible));
         }
         table.set(myrow,counter++,TableCell(grey_divider));
@@ -714,15 +839,6 @@ void start_table_output( bool for_instructor,
   end_table(ostr2,true,NULL);
   ostr2.close();
   
-  /*
-  // get todays date;
-  time_t now = time(0);  
-  struct tm * now2 = localtime( & now );
-  int month = now2->tm_mon+1;
-  int day = now2->tm_mday;
-  int year = now2->tm_year+1900;
-  */
-
   std::stringstream ss;
   ss << ALL_STUDENTS_OUTPUT_DIRECTORY << "output_" << month << "_" << day << "_" << year << ".html";
    
@@ -745,6 +861,7 @@ void start_table_output( bool for_instructor,
       last_update = s->getLastUpdate();
     }
     GLOBAL_instructor_output = false;
+
     table.output(ostr3, select_students,student_data,true,true,last_update);
 
     end_table(ostr3,false,s);
@@ -883,6 +1000,8 @@ void start_table_output( bool for_instructor,
 
 void end_table(std::ofstream &ostr,  bool for_instructor, Student *s) {
 
+
+    ostr << "<p>* = 1 late day used</p>" << std::endl;
 
   if (GLOBAL_instructor_output == false &&
       DISPLAY_ICLICKER) {

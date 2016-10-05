@@ -15,12 +15,12 @@ source ${DIR}/../common/common_env.sh
 
 #sudo chmod -R 755 /home/travis/build
 
-if [ ! -f "$SELENIUM_JAR" ]; then
-    echo "Downloading Selenium"
-    sudo mkdir -p $(dirname "${SELENIUM_JAR}")
-    sudo wget -O "${SELENIUM_JAR}" "${SELENIUM_DOWNLOAD_URL}"
-    echo "Downloaded Selenium"
-fi
+#if [ ! -f "$SELENIUM_JAR" ]; then
+#    echo "Downloading Selenium"
+#    sudo mkdir -p $(dirname "${SELENIUM_JAR}")
+#    sudo wget -O "${SELENIUM_JAR}" "${SELENIUM_DOWNLOAD_URL}"
+#    echo "Downloaded Selenium"
+#fi
 
 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
 sudo mkdir -p ${SUBMITTY_DATA_DIR}
@@ -80,7 +80,16 @@ sudo echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
 sudo echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/valid
 sudo echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
 sudo echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+sudo echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+sudo echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+sudo echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+sudo echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/valid
 sudo echo "\n" | sudo perl ${SUBMITTY_DATA_DIR}/bin/authonly.pl
 sudo echo "student:student" | sudo chpasswd
 sudo echo "smithj:smithj" | sudo chpasswd
+sudo echo "joness:joness" | sudo chpasswd
+sudo echo "browna:browna" | sudo chpasswd
+sudo echo "pearsr:pearsr" | sudo chpasswd
 sudo python ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py csci1000
