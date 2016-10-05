@@ -93,9 +93,13 @@ interface IDatabaseQueries {
      */
     public function getCountNullUsersRotatingSections();
 
-    public function getRegisteredOrManualStudentIds();
+    public function getRegisteredUserIdsWithNullRotating();
+
+    public function getRegisteredUserIds();
 
     public function setAllUsersRotatingSectionNull();
+
+    public function deleteAllRotatingSections();
 
     public function getMaxRotatingSection();
 

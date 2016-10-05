@@ -129,7 +129,7 @@ WHERE g.g_id=?", array($g_id));
         $this->database->query("
 SELECT rotating_section, count(*) as count
 FROM users
-WHERE registration_section IS NOT NULL
+WHERE (registration_section IS NOT NULL OR manual_registration)
 GROUP BY rotating_section
 ORDER BY rotating_section");
         return $this->database->rows();
@@ -145,19 +145,34 @@ ORDER BY rotating_section");
         return $this->database->rows();
     }
 
-    public function getRegisteredOrManualStudentIds() {
+    public function getRegisteredUserIdsWithNullRotating() {
         $this->database->query("
 SELECT user_id 
 FROM users 
-WHERE 
-  (user_group=? AND registration_section IS NOT NULL) OR 
-  (manual_registration) 
+WHERE
+    (rotating_section IS NULL) and 
+    (registration_section IS NOT NULL or manual_registration)
+ORDER BY user_id ASC");
+        return array_map(function($elem) { return $elem['user_id']; }, $this->database->rows());
+    }
+
+    public function getRegisteredUserIds() {
+        $this->database->query("
+SELECT user_id 
+FROM users 
+WHERE
+    (registration_section IS NOT NULL) OR 
+    (manual_registration)
 ORDER BY user_id ASC");
         return array_map(function($elem) { return $elem['user_id']; }, $this->database->rows());
     }
 
     public function setAllUsersRotatingSectionNull() {
         $this->database->query("UPDATE users SET rotating_section=NULL");
+    }
+
+    public function deleteAllRotatingSections() {
+        $this->database->query("DELETE FROM sections_rotating");
     }
 
     public function getMaxRotatingSection() {

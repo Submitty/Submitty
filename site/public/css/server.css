@@ -33,6 +33,7 @@ body {
 }
 
 a, a:hover, a:link, a:visited {
+    cursor: pointer;
     text-decoration: none;
 }
 

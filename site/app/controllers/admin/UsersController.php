@@ -148,7 +148,7 @@ class UsersController extends AbstractController {
             $type = 'random';
         }
 
-        $sections = intval($_REQUEST['sections']);
+        $section_count = intval($_REQUEST['sections']);
         if (in_array($_REQUEST['sort_type'], array('redo', 'fewest')) && $type == "random") {
             $sort = $_REQUEST['sort_type'];
         }
@@ -156,41 +156,51 @@ class UsersController extends AbstractController {
             $sort = 'redo';
         }
 
-        $max_section = $this->core->getQueries()->getMaxRotatingSection();
-        $section_counts = array_fill(0, $sections, 0);
+        $section_counts = array_fill(0, $section_count, 0);
         if ($sort === 'redo') {
-            $users = $this->core->getQueries()->getRegisteredOrManualStudentIds();
+            $users = $this->core->getQueries()->getRegisteredUserIds();
             if ($type === 'random') {
                 shuffle($users);
             }
             $this->core->getQueries()->setAllUsersRotatingSectionNull();
+            $this->core->getQueries()->deleteAllRotatingSections();
             for ($i = 0; $i < count($users); $i++) {
-                $section = $i % $sections;
+                $section = $i % $section_count;
                 $section_counts[$section]++;
-                if ($section > $max_section) {
-                    $this->core->getQueries()->insertNewRotatingSection($section);
-                }
+                $this->core->getQueries()->insertNewRotatingSection($section);
             }
         }
         else {
-            // TODO: get all users without a rotating section that need one (registered or manual)
-            $users = array();
+            $max_section = $this->core->getQueries()->getMaxRotatingSection();
+            if ($max_section === null) {
+                $this->core->addErrorMessage("No rotating sections have been added to the system, cannot use fewest");
+            }
+            else if ($max_section != $section_count) {
+                $this->core->addErrorMessage("Cannot use a different number of sections when setting up via fewest");
+                $this->core->redirect($return_url);
+            }
+            $users = $this->core->getQueries()->getRegisteredUserIdsWithNullRotating();
+            // only random sort can use 'fewest' type
             shuffle($users);
-            // TODO: get count of users in all rotating sections (ignoring null section)
-            // TODO: figure out which sections requires new users to be added
-            $counts_rows = $this->core->getQueries()->getCountUsersRotatingSections();
-            $counts = array();
-            foreach($counts_rows as $counts_row) {
-                if ($counts_row['rotating_section'] === null) {
-                    continue;
+            $sections = $this->core->getQueries()->getCountUsersRotatingSections();
+            $use_section = 0;
+            $max = $sections[0]['count'];
+            foreach ($sections as $section) {
+                if ($section['count'] < $max) {
+                    $use_section = $section['rotating_section'] - 1;
+                    break;
                 }
-                $counts[$counts_row['rotating_section']] = $counts_row['count'];
+            }
+
+            for ($i = 0; $i < count($users); $i++) {
+                $section_counts[$use_section]++;
+                $use_section = ($use_section + 1) % $section_count;
             }
         }
 
-        for ($i = 0; $i < $sections; $i++) {
-            $users = array_splice($users, 0, $section_counts[$i]);
-            $this->core->getQueries()->updateUsersRotatingSection($i + 1, $users);
+        for ($i = 0; $i < $section_count; $i++) {
+            $update_users = array_splice($users, 0, $section_counts[$i]);
+            $this->core->getQueries()->updateUsersRotatingSection($i + 1, $update_users);
         }
     }
 }
