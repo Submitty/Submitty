@@ -144,7 +144,11 @@ class UsersController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if (isset($_REQUEST['sort_type']) && $_REQUEST['sort_type'] === "drop_null") {
+        if (!isset($_REQUEST['sort_type'])) {
+            $this->core->addErrorMessage("Must select one of the three options for setting up rotating sections");
+            $this->core->redirect($return_url);
+        }
+        else if ($_REQUEST['sort_type'] === "drop_null") {
             $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
             $this->core->addSuccessMessage("Non registered students removed from rotating sections");
             $this->core->redirect($return_url);
@@ -159,7 +163,7 @@ class UsersController extends AbstractController {
 
         $section_count = intval($_REQUEST['sections']);
         if ($section_count < 1) {
-            $this->core->addErrorMessage("You must have use 1+ rotating sections");
+            $this->core->addErrorMessage("You must have at least one rotating section");
             $this->core->redirect($return_url);
         }
 
@@ -188,6 +192,7 @@ class UsersController extends AbstractController {
             }
         }
         else {
+            $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
             $max_section = $this->core->getQueries()->getMaxRotatingSection();
             if ($max_section === null) {
                 $this->core->addErrorMessage("No rotating sections have been added to the system, cannot use fewest");

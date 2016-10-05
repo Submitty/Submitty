@@ -331,13 +331,13 @@ $(function() {
                 <option value="alphabetically">alphabetically</option>
             </select><br />
             <label>
-                <input type="radio" style="margin-top: -2px" name="sort_type" value="redo" checked="checked"/> Redo rotating sections completely
+                <input type="radio" style="margin-top: -2px" name="sort_type" value="drop_null" /> Only remove unregistered students from rotating sections
+            </label><br />
+            <label>
+                <input type="radio" style="margin-top: -2px" name="sort_type" value="redo" /> Redo rotating sections completely
             </label><br />
             <label>
                 <input type="radio" style="margin-top: -2px" name="sort_type" value="fewest" /> Put students into rotating section with fewest members
-            </label><br />
-            <label>
-                <input type="radio" style="margin-top: -2px" name="sort_type" value="drop_null" /> Remove unregistered students from rotating sections
             </label><br />
             <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
         </div>
