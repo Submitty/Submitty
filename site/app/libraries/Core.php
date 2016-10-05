@@ -240,7 +240,7 @@ class Core {
      */
     public function checkCsrfToken($csrf_token=null) {
         if ($csrf_token === null) {
-            return $this->getCsrfToken() === $_POST['csrf_token'];
+            return isset($_POST['csrf_token']) && $this->getCsrfToken() === $_POST['csrf_token'];
         }
         else {
             return $this->getCsrfToken() === $csrf_token;

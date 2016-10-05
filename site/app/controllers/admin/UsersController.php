@@ -127,7 +127,9 @@ class UsersController extends AbstractController {
     public function rotatingSectionsForm() {
         $non_null_counts = $this->core->getQueries()->getCountUsersRotatingSections();
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingUserForm', $non_null_counts, $null_counts);
+        $max_section = $this->core->getQueries()->getMaxRotatingSection();
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingUserForm',
+            $non_null_counts, $null_counts, $max_section);
     }
 
     public function updateRotatingSections() {
@@ -136,12 +138,19 @@ class UsersController extends AbstractController {
                   'page' => 'users',
                   'action' => 'rotating_sections')
         );
-        if ($this->core->checkCsrfToken()) {
+
+        if (!$this->core->checkCsrfToken()) {
             $this->core->addErrorMessage("Invalid CSRF token. Try again.");
             $this->core->redirect($return_url);
         }
 
-        if (in_array($_REQUEST['rotating_type'], array('random', 'alphabetically'))) {
+        if (isset($_REQUEST['sort_type']) && $_REQUEST['sort_type'] === "drop_null") {
+            $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
+            $this->core->addSuccessMessage("Non registered students removed from rotating sections");
+            $this->core->redirect($return_url);
+        }
+
+        if (isset($_REQUEST['rotating_type']) && in_array($_REQUEST['rotating_type'], array('random', 'alphabetically'))) {
             $type = $_REQUEST['rotating_type'];
         }
         else {
@@ -149,6 +158,11 @@ class UsersController extends AbstractController {
         }
 
         $section_count = intval($_REQUEST['sections']);
+        if ($section_count < 1) {
+            $this->core->addErrorMessage("You must have use 1+ rotating sections");
+            $this->core->redirect($return_url);
+        }
+
         if (in_array($_REQUEST['sort_type'], array('redo', 'fewest')) && $type == "random") {
             $sort = $_REQUEST['sort_type'];
         }
@@ -164,10 +178,13 @@ class UsersController extends AbstractController {
             }
             $this->core->getQueries()->setAllUsersRotatingSectionNull();
             $this->core->getQueries()->deleteAllRotatingSections();
+            for ($i = 1; $i <= $section_count; $i++) {
+                $this->core->getQueries()->insertNewRotatingSection($i);
+            }
+
             for ($i = 0; $i < count($users); $i++) {
                 $section = $i % $section_count;
                 $section_counts[$section]++;
-                $this->core->getQueries()->insertNewRotatingSection($section);
             }
         }
         else {
@@ -200,7 +217,13 @@ class UsersController extends AbstractController {
 
         for ($i = 0; $i < $section_count; $i++) {
             $update_users = array_splice($users, 0, $section_counts[$i]);
+            if (count($update_users) == 0) {
+                continue;
+            }
             $this->core->getQueries()->updateUsersRotatingSection($i + 1, $update_users);
         }
+
+        $this->core->addSuccessMessage("Rotating sections setup");
+        $this->core->redirect($return_url);
     }
 }

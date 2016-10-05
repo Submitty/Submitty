@@ -139,7 +139,7 @@ ORDER BY rotating_section");
         $this->database->query("
 SELECT rotating_section, count(*) as count
 FROM users
-WHERE registration_section IS NULL AND rotating_section IS NOT NULL
+WHERE (registration_section IS NULL and NOT manual_registration) AND rotating_section IS NOT NULL
 GROUP BY rotating_section
 ORDER BY rotating_section");
         return $this->database->rows();
@@ -169,6 +169,10 @@ ORDER BY user_id ASC");
 
     public function setAllUsersRotatingSectionNull() {
         $this->database->query("UPDATE users SET rotating_section=NULL");
+    }
+
+    public function setNonRegisteredUsersRotatingSectionNull() {
+        $this->database->query("UPDATE users SET rotating_section=NULL WHERE registration_section IS NULL AND NOT manual_registration");
     }
 
     public function deleteAllRotatingSections() {

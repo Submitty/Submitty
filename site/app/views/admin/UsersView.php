@@ -288,7 +288,7 @@ HTML;
         return $return;
     }
 
-    public function rotatingUserForm($not_null_counts, $null_counts) {
+    public function rotatingUserForm($not_null_counts, $null_counts, $max_section) {
         $return = <<<HTML
 <script type="text/javascript">
 $(function() {
@@ -301,11 +301,27 @@ $(function() {
             $("[name='fewest']").attr('onclick', '').removeClass('disabled');
         }
     });
+    
+    $("[name='sort_type']").change(function() {
+        var val = $(this).val();
+        if (val == "fewest") {
+            $("[name='sections']").val({$max_section}).addClass('disabled').attr('readonly', 'readonly');
+            $("[name='rotating_type']").val("random").addClass('disabled').attr('disabled', 'true');
+        }
+        else if (val == "drop_null") {
+            $("[name='sections']").addClass('disabled').attr('readonly', 'readonly');
+            $("[name='rotating_type']").addClass('disabled').attr('disabled', 'true');
+        }
+        else {
+            $("[name='sections']").removeClass('disabled').removeAttr('readonly');
+            $("[name='rotating_type']").removeClass('disabled').removeAttr('disabled');
+        }
+    });
 });
 </script>
 <div class="content">
     <h2>Setup Rotating Sections</h2>
-    <form action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'update_rotating_sections'))}" method="post">
+    <form action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'update_rotating_sections'))}" method="POST">
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <div class="sub">
         <div class="box half">
@@ -315,16 +331,20 @@ $(function() {
                 <option value="alphabetically">alphabetically</option>
             </select><br />
             <label>
-                <input type="radio" style="margin-top: -2px" name="sort_type" value="redo" /> Redo rotating sections completely
+                <input type="radio" style="margin-top: -2px" name="sort_type" value="redo" checked="checked"/> Redo rotating sections completely
             </label><br />
             <label>
                 <input type="radio" style="margin-top: -2px" name="sort_type" value="fewest" /> Put students into rotating section with fewest members
-            </label>
+            </label><br />
+            <label>
+                <input type="radio" style="margin-top: -2px" name="sort_type" value="drop_null" /> Remove unregistered students from rotating sections
+            </label><br />
+            <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
         </div>
         <div class="box half">
             <h2>Student Counts in Rotating Sections</h2>
             <div class="half">
-                <h3>Students in Registered Sections</h3>
+                <h3>Registered Students</h3>
                 <table class="table table-bordered table-striped">
 HTML;
         foreach($not_null_counts as $row) {
@@ -341,7 +361,7 @@ HTML;
                 </table>
             </div>
             <div class="half">
-                <h3>Students in Null Registration Section</h3>
+                <h3>Non-registered Students</h3>
                 <table class="table table-bordered table-striped">
 HTML;
         foreach ($null_counts as $row) {

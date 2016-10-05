@@ -99,6 +99,8 @@ interface IDatabaseQueries {
 
     public function setAllUsersRotatingSectionNull();
 
+    public function setNonRegisteredUsersRotatingSectionNull();
+
     public function deleteAllRotatingSections();
 
     public function getMaxRotatingSection();

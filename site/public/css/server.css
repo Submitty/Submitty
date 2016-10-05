@@ -133,6 +133,8 @@ input[type="checkbox"]:focus{
     box-shadow: none;
 }
 
+select.disabled,
+textarea.disabled,
 input.disabled {
     background-color: lightgrey;
 }
