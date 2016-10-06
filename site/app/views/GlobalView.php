@@ -45,9 +45,10 @@ HTML;
         $is_dev = ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) ? "true" : "false";
         $return = <<<HTML
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>{$this->core->getFullCourseName()}</title>
+    <link rel="shortcut icon" href="{$this->core->getConfig()->getBaseUrl()}img/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/server.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
@@ -93,7 +94,7 @@ HTML;
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders'))}">Graders</a>
             </li>
             <li>
-                <a href="{$ta_base_url}/account/admin-rotating-sections.php?course={$course}&semester={$semester}&this=Setup%20Rotating%20Sections">Setup Rotating Sections</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections'))}">Setup Rotating Sections</a>
             </li>
             <li>
                 <a href="{$ta_base_url}/account/admin-latedays.php?course={$course}&semester={$semester}&this=Late%20Days%20Allowed">Late Days Allowed</a>

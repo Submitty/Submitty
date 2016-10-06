@@ -138,8 +138,8 @@ class Database {
     }
 
     /**
-     * Returns a single row from the result set from running a query. Removes the row
-     * from the result set before returning it
+     * Returns a single row from the result set of the last ran query, removing the that row from
+     * the result set.
      *
      * @return array
      */

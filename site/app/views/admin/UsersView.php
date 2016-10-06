@@ -287,4 +287,101 @@ HTML;
 HTML;
         return $return;
     }
+
+    public function rotatingUserForm($not_null_counts, $null_counts, $max_section) {
+        $return = <<<HTML
+<script type="text/javascript">
+$(function() {
+    $("[name='rotating_type']").change(function() {
+        if ($(this).val() == "alphabetically") {
+            $("[name='fewest']").prop('checked', false).attr('onclick', 'return false').addClass("disabled");
+            
+        }
+        else {
+            $("[name='fewest']").attr('onclick', '').removeClass('disabled');
+        }
+    });
+    
+    $("[name='sort_type']").change(function() {
+        var val = $(this).val();
+        if (val == "fewest") {
+            $("[name='sections']").val({$max_section}).addClass('disabled').attr('readonly', 'readonly');
+            $("[name='rotating_type']").val("random").addClass('disabled').attr('disabled', 'true');
+        }
+        else if (val == "drop_null") {
+            $("[name='sections']").addClass('disabled').attr('readonly', 'readonly');
+            $("[name='rotating_type']").addClass('disabled').attr('disabled', 'true');
+        }
+        else {
+            $("[name='sections']").removeClass('disabled').removeAttr('readonly');
+            $("[name='rotating_type']").removeClass('disabled').removeAttr('disabled');
+        }
+    });
+});
+</script>
+<div class="content">
+    <h2>Setup Rotating Sections</h2>
+    <form action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'update_rotating_sections'))}" method="POST">
+    <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
+    <div class="sub">
+        <div class="box half">
+            Place students in <input type="text" name="sections" placeholder="#" style="width: 25px" /> rotating sections 
+            <select name="rotating_type">
+                <option value="random">randomly</option>
+                <option value="alphabetically">alphabetically</option>
+            </select><br /><br />
+            <label>
+                <input type="radio" style="margin-top: -2px" name="sort_type" value="drop_null" /> Only remove unregistered students from rotating sections
+            </label><br /><br />
+            <label>
+                <input type="radio" style="margin-top: -2px" name="sort_type" value="fewest" /> Remove unregistered students from rotating sections and put newly registered students into rotating section with fewest members
+            </label><br /><br />
+            <label>
+                <input type="radio" style="margin-top: -2px" name="sort_type" value="redo" /> Redo rotating sections completely
+            </label><br />
+            <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
+        </div>
+        <div class="box half">
+            <h2>Student Counts in Rotating Sections</h2>
+            <div class="half">
+                <h3>Registered Students</h3>
+                <table class="table table-bordered table-striped">
+HTML;
+        foreach($not_null_counts as $row) {
+            if ($row['rotating_section'] === null) {
+                $row['rotating_section'] = "NULL";
+            }
+            $return .= <<<HTML
+                    <tr>
+                        <td>Section {$row['rotating_section']}</td> 
+                        <td>{$row['count']}</td>
+HTML;
+        }
+        $return .= <<<HTML
+                </table>
+            </div>
+            <div class="half">
+                <h3>Non-registered Students</h3>
+                <table class="table table-bordered table-striped">
+HTML;
+        foreach ($null_counts as $row) {
+            if ($row['rotating_section'] === null) {
+                $row['rotating_section'] = "NULL";
+            }
+            $return .= <<<HTML
+                    <tr>
+                        <td>Section {$row['rotating_section']}</td>
+                        <td>{$row['count']}</td>
+HTML;
+        }
+        $return .= <<<HTML
+                </table>
+            </div>
+        </div>
+    </div>
+    </form>
+</div>
+HTML;
+        return $return;
+    }
 }

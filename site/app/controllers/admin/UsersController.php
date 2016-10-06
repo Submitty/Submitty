@@ -23,6 +23,12 @@ class UsersController extends AbstractController {
                 $this->core->getOutput()->addBreadcrumb("Graders");
                 $this->listGraders();
                 break;
+            case 'rotating_sections':
+                $this->rotatingSectionsForm();
+                break;
+            case 'update_rotating_sections':
+                $this->updateRotatingSections();
+                break;
             case 'students':
             default:
                 $this->core->getOutput()->addBreadcrumb("Students");
@@ -115,6 +121,114 @@ class UsersController extends AbstractController {
             $this->core->getQueries()->createUser($user);
             $this->core->addSuccessMessage("User '{$user->getId()}' created");
         }
+        $this->core->redirect($return_url);
+    }
+
+    public function rotatingSectionsForm() {
+        $non_null_counts = $this->core->getQueries()->getCountUsersRotatingSections();
+        $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
+        $max_section = $this->core->getQueries()->getMaxRotatingSection();
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingUserForm',
+            $non_null_counts, $null_counts, $max_section);
+    }
+
+    public function updateRotatingSections() {
+        $return_url = $this->core->buildUrl(
+            array('component' => 'admin',
+                  'page' => 'users',
+                  'action' => 'rotating_sections')
+        );
+
+        if (!$this->core->checkCsrfToken()) {
+            $this->core->addErrorMessage("Invalid CSRF token. Try again.");
+            $this->core->redirect($return_url);
+        }
+
+        if (!isset($_REQUEST['sort_type'])) {
+            $this->core->addErrorMessage("Must select one of the three options for setting up rotating sections");
+            $this->core->redirect($return_url);
+        }
+        else if ($_REQUEST['sort_type'] === "drop_null") {
+            $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
+            $this->core->addSuccessMessage("Non registered students removed from rotating sections");
+            $this->core->redirect($return_url);
+        }
+
+        if (isset($_REQUEST['rotating_type']) && in_array($_REQUEST['rotating_type'], array('random', 'alphabetically'))) {
+            $type = $_REQUEST['rotating_type'];
+        }
+        else {
+            $type = 'random';
+        }
+
+        $section_count = intval($_REQUEST['sections']);
+        if ($section_count < 1) {
+            $this->core->addErrorMessage("You must have at least one rotating section");
+            $this->core->redirect($return_url);
+        }
+
+        if (in_array($_REQUEST['sort_type'], array('redo', 'fewest')) && $type == "random") {
+            $sort = $_REQUEST['sort_type'];
+        }
+        else {
+            $sort = 'redo';
+        }
+
+        $section_counts = array_fill(0, $section_count, 0);
+        if ($sort === 'redo') {
+            $users = $this->core->getQueries()->getRegisteredUserIds();
+            if ($type === 'random') {
+                shuffle($users);
+            }
+            $this->core->getQueries()->setAllUsersRotatingSectionNull();
+            $this->core->getQueries()->deleteAllRotatingSections();
+            for ($i = 1; $i <= $section_count; $i++) {
+                $this->core->getQueries()->insertNewRotatingSection($i);
+            }
+
+            for ($i = 0; $i < count($users); $i++) {
+                $section = $i % $section_count;
+                $section_counts[$section]++;
+            }
+        }
+        else {
+            $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
+            $max_section = $this->core->getQueries()->getMaxRotatingSection();
+            if ($max_section === null) {
+                $this->core->addErrorMessage("No rotating sections have been added to the system, cannot use fewest");
+            }
+            else if ($max_section != $section_count) {
+                $this->core->addErrorMessage("Cannot use a different number of sections when setting up via fewest");
+                $this->core->redirect($return_url);
+            }
+            $users = $this->core->getQueries()->getRegisteredUserIdsWithNullRotating();
+            // only random sort can use 'fewest' type
+            shuffle($users);
+            $sections = $this->core->getQueries()->getCountUsersRotatingSections();
+            $use_section = 0;
+            $max = $sections[0]['count'];
+            foreach ($sections as $section) {
+                if ($section['count'] < $max) {
+                    $use_section = $section['rotating_section'] - 1;
+                    break;
+                }
+            }
+
+            for ($i = 0; $i < count($users); $i++) {
+                $section_counts[$use_section]++;
+                $use_section = ($use_section + 1) % $section_count;
+            }
+        }
+
+        for ($i = 0; $i < $section_count; $i++) {
+            $update_users = array_splice($users, 0, $section_counts[$i]);
+            if (count($update_users) == 0) {
+                continue;
+            }
+            $this->core->getQueries()->updateUsersRotatingSection($i + 1, $update_users);
+        }
+
+        $this->core->addSuccessMessage("Rotating sections setup");
         $this->core->redirect($return_url);
     }
 }
