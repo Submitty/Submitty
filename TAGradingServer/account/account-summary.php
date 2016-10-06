@@ -178,13 +178,19 @@ HTML;
 
     foreach ($students as $student) {
         $eg = new ElectronicGradeable($student["user_id"], $g_id);
-        $section_id = intval($student[$user_section_field]);
+        $section_id = ($student[$user_section_field]) !== null ? intval($student[$user_section_field]) : null;
         if($prev_section !== $section_id) {
+            if ($section_id === null) {
+                $to_show = "NULL {$section_title} Section";
+            }
+            else {
+                $to_show = "{$section_title} Section {$section_id}";
+            }
             print <<<HTML
 
                 <tr class="info">
                     <td colspan="4" style="text-align:center;">
-          Students {$enrolled_assignment} {$section_title} Section {$section_id}
+          Students {$enrolled_assignment} {$to_show}
                     </td>
                 </tr>
 HTML;
