@@ -49,6 +49,21 @@ FROM
     ) as gt ON gt.gd_user_id=s.user_id";
 
 print <<<HTML
+    <script type="text/javascript">
+    if (window.location.hash != "") {
+        window.scrollTo(0, 0);
+        setTimeout(function() {
+            window.scrollTo(0, 0);
+        }, 1);
+    }
+    $(function() {
+        if (window.location.hash != "") {
+            if ($(window.location.hash).offset().top > 0) {
+                $("html, body").animate({scrollTop: ($(window.location.hash).offset().top - 40)}, 800);
+            }
+        }
+    });
+    </script>
     <style type="text/css">
         body {
             overflow: scroll;
@@ -195,7 +210,7 @@ HTML;
         $row = $student;
         $firstname = getDisplayName($student);
         print <<<HTML
-                <tr>
+                <tr id="user-row-{$student['user_id']}">
                     <td>
                         {$student["user_id"]}
                     </td>
