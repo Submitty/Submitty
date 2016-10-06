@@ -1161,8 +1161,8 @@ void load_bonus_late_day(std::vector<Student*> &students,
   while (istr >> username) {
     Student *s = GetStudent(students,username);
     if (s == NULL) {
-      std::cerr << "ERROR!  bad username " << username << std::endl;
-      exit(1);
+      std::cerr << "ERROR!  bad username " << username << " cannot give late day " << std::endl;
+      //exit(1);
     } else {
       s->add_bonus_late_day(which_lecture);
     }
