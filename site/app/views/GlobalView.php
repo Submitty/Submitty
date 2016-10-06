@@ -55,10 +55,10 @@ HTML;
 HTML;
     foreach($css as $css_ref){
         $return .= <<<HTML
-        <link rel="stylesheet" type="text/css" href="{$css_ref}" />   
+        <link rel="stylesheet" type="text/css" href="{$css_ref}" />
 HTML;
     }
-    
+
     $return .= <<<HTML
     {$override_css}
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.min.js"></script>
@@ -122,7 +122,7 @@ HTML;
                     $return .= <<<HTML
         </ul>
     </div>
-    <div id="nav-clear"></div>
+    
 HTML;
                 }
             }
@@ -186,7 +186,7 @@ HTML;
 </html>
 
 HTML;
-        
+
         return $return;
     }
 
