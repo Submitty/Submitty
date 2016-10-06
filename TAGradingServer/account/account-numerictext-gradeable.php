@@ -22,7 +22,7 @@ if (!User::$is_administrator) {
 }
 
 if(User::$user_group == 1){
-    $csv_button = "<label>Upload CSV (WARNING! Previously entered data may be overwritten!): Do not include a header row. Format CSV using one column for student id and one column for each field. Columns and field types must match.</br><input type=\"file\" id=\"csvUpload\" accept=\".csv, .txt\" onchange=\"csvUpload()\"></label>";
+    $csv_button = "<label>Upload CSV (WARNING! Previously entered data may be overwritten!): Do not include a header row. Format CSV using one column for student id and one column for each field. Columns and field types must match.</label></br><input type=\"file\" id=\"csvUpload\" accept=\".csv, .txt\" onchange=\"csvUpload()\">";
     $csv_upload_functions = "
         function csvUpload(){
             var f = $('#csvUpload').get(0).files[0];
