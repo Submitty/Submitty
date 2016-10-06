@@ -329,15 +329,15 @@ $(function() {
             <select name="rotating_type">
                 <option value="random">randomly</option>
                 <option value="alphabetically">alphabetically</option>
-            </select><br />
+            </select><br /><br />
             <label>
                 <input type="radio" style="margin-top: -2px" name="sort_type" value="drop_null" /> Only remove unregistered students from rotating sections
-            </label><br />
+            </label><br /><br />
+            <label>
+                <input type="radio" style="margin-top: -2px" name="sort_type" value="fewest" /> Remove unregistered students from rotating sections and put newly registered students into rotating section with fewest members
+            </label><br /><br />
             <label>
                 <input type="radio" style="margin-top: -2px" name="sort_type" value="redo" /> Redo rotating sections completely
-            </label><br />
-            <label>
-                <input type="radio" style="margin-top: -2px" name="sort_type" value="fewest" /> Put students into rotating section with fewest members
             </label><br />
             <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
         </div>
