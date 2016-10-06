@@ -2,6 +2,7 @@
 
 namespace tests\unitTests\app\libraries;
 
+use app\exceptions\AuthenticationException;
 use \app\exceptions\BaseException;
 use \app\libraries\ExceptionHandler;
 use \app\libraries\FileUtils;
@@ -37,14 +38,14 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
     }
 
     public function testThrowServerException() {
-        $message = ExceptionHandler::throwException(new \RuntimeException("test"));
+        $message = ExceptionHandler::handleException(new \RuntimeException("test"));
         $this->assertContains("An exception was thrown. Please contact an administrator about what you were doing that caused this exception.", $message);
         $this->assertNotContains("test", $message);
     }
 
     public function testThrowRuntimeException() {
         ExceptionHandler::setDisplayExceptions(true);
-        $this->assertContains("test", ExceptionHandler::throwException(new \RuntimeException("test")));
+        $this->assertContains("test", ExceptionHandler::handleException(new \RuntimeException("test")));
         ExceptionHandler::setDisplayExceptions(false);
     }
 
@@ -54,11 +55,37 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
         $filename = $date['year'].str_pad($date['mon'], 2, '0', STR_PAD_LEFT).str_pad($date['mday'], 2, '0', STR_PAD_LEFT);
         ExceptionHandler::setDisplayExceptions(false);
         ExceptionHandler::setLogExceptions(true);
-        ExceptionHandler::throwException(new BaseException("test", array("test"=>"b", "test2"=>array('a','c'))));
+        ExceptionHandler::handleException(new BaseException("test", array("test"=>"b", "test2"=>array('a','c'))));
         $this->assertFileExists(__TEST_DIRECTORY__."/EHLogs/".$filename.".txt");
         $actual = file_get_contents(__TEST_DIRECTORY__."/EHLogs/".$filename.".txt");
         $this->assertEquals(1, preg_match('/[0-9]{2}\/[0-9]{2}\/[0-9]{4}\ [0-9]{2}\:[0-9]{2}\:[0-9]{2} \- FATAL ERROR\napp.+/', $actual));
         $this->assertEquals(1, preg_match('/Extra Details:\n\ttest: b\n\ttest2:\n\t\ta\n\t\tc/', $actual));
         ExceptionHandler::setLogExceptions(false);
+    }
+
+    private function authenticate($username, $password) {
+        throw new AuthenticationException($username. "  ". $password);
+    }
+
+
+    public function testScrubPassword() {
+        try {
+            $this->authenticate("test", "test");
+            $this->fail("Should have thrown exception");
+        }
+        catch(AuthenticationException $e) {
+            ExceptionHandler::setDisplayExceptions(true);
+            $message = ExceptionHandler::handleException($e);
+            $this->assertContains("tests\\unitTests\\app\\libraries\\ExceptionHandlerTester->authenticate()", $message);
+        }
+    }
+
+    public function testDisplayJustExceptionMessage() {
+        ExceptionHandler::setDisplayExceptions(false);
+        $exception = new BaseException("exception message");
+        $exception->setDisplayMessage(true);
+        $message = ExceptionHandler::handleException($exception);
+        $this->assertContains("exception message", $message);
+        $this->assertNotContains("Stack Trace", $message);
     }
 }

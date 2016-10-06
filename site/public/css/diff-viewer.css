@@ -5,7 +5,6 @@
 }
 
 .diff-code {
-    padding: 0 0 0 5px;
     font-family: monospace;
 }
 
@@ -22,12 +21,10 @@
 }
 
 .highlight-hover {
-    /*background-color: yellow !important;*/
     background-color: #ddf !important;
 }
 
 .highlight-char {
-    /*background-color: #fffdbe;*/
     background-color: #fe5b5b;
 }
 
@@ -45,7 +42,7 @@
     font-family: 'Inconsolata', monospace !important;
     font-size: 16px;
     line-height: 20px !important;
-    padding: 0;
+    padding: 0 0 0 5px;
 }
 
 .line_code_inner {
@@ -59,8 +56,4 @@
 .line_code {
     white-space: pre;
     padding-left: 10px;
-}
-
-.empty_line {
-    /*width: 700px;*/
 }

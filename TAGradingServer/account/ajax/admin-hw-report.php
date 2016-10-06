@@ -152,7 +152,14 @@ foreach($db->rows() as $student_record) {
         $grade_comment = "";
         
         if ($gradeable['gd_status'] == 1) {
-            $db->query("SELECT late_days_used FROM late_days_used WHERE g_id=? AND user_id=?", array($g_id, $student_id));
+            $db->query("
+SELECT GREATEST(late_days_used - COALESCE(late_day_exceptions, 0), 0) as late_days_used
+FROM late_days_used AS ldu
+LEFT JOIN (
+    SELECT late_day_exceptions, user_id, g_id
+    FROM late_day_exceptions
+) AS lde ON lde.user_id=ldu.user_id AND lde.g_id=ldu.g_id
+WHERE ldu.g_id=? AND ldu.user_id=?", array($g_id, $student_id));
             $row = $db->row();
             if (isset($row['late_days_used'])) {
                 $late_days_used = $row['late_days_used'];
