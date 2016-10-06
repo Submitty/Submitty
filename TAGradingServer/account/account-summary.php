@@ -180,8 +180,8 @@ HTML;
 
     foreach ($students as $student) {
         $eg = new ElectronicGradeable($student["user_id"], $g_id);
-        if($prev_section !== $student[$user_section_field]) {
-            $section_id = intval($student[$user_section_field]);
+        $section_id = intval($student[$user_section_field]);
+        if($prev_section !== $section_id) {
             print <<<HTML
 
                 <tr class="info">
