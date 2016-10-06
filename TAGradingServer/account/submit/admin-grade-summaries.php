@@ -170,29 +170,21 @@ foreach($db->rows() as $student_record) {
 
 
 // TOOK THIS CODE FROM admin-hw-report.php
-            $db->query("SELECT late_days_used FROM late_days_used WHERE g_id=? AND user_id=?", array($gradeable['g_id'],$student_id));
+            $db->query("
+SELECT GREATEST(late_days_used - COALESCE(late_day_exceptions, 0), 0) as late_days_used
+FROM late_days_used AS ldu
+LEFT JOIN (
+    SELECT late_day_exceptions, user_id, g_id
+    FROM late_day_exceptions
+) AS lde ON lde.user_id=ldu.user_id AND lde.g_id=ldu.g_id
+WHERE ldu.g_id=? AND ldu.user_id=?", array($gradeable['g_id'],$student_id));
             $row = $db->row();
-            if (isset($row['late_days_used'])) {
-                $late_days_used = $row['late_days_used'];
+            if (isset($row['late_days_used']) && $row['late_days_used'] > 0) {
+                $this_g['days_late'] = $row['late_days_used'];
             }
             else {
-                $late_days_used = 0;
+                $this_g['days_late'] = 0;
             }
-
-// THIS ISN'T WORKING...
-//            $db->query("
-//        SELECT 
-//            GREATEST(late_days_used - COALESCE(late_day_exceptions,0),0) 
-//        FROM 
-//            late_days_used AS ldu LEFT JOIN late_day_exceptions AS lde ON ldu.g_id = lde.g_id  
-//        WHERE ldu.g_id=? AND ldu.user_id=?", array($gradeable['g_id'],$student_id));
-//            $row = $db->row();
-//            $late_days_used = isset($row['late_days_used']) ? $row['late_days_used'] : 0;
-
-            if ($late_days_used > 0){
-                $this_g["days_late"] = $late_days_used;
-            }
-
         }
 
         // Add text for numeric/text gradeables and electronic gradeables
