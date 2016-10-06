@@ -159,8 +159,6 @@ HTML;
         }
     }
     
-    $where[] = 'user_group=4';
-
     $order[] = "s.".$user_section_field;
     $order[] = "s.user_id";
 
