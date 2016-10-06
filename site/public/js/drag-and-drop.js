@@ -349,16 +349,17 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
         for (var i = 0; i < file_array.length; i++) {
             for (var j = 0; j < file_array[i].length; j++) {
                 if (file_array[i][j].name.indexOf("'") != -1 ||
-		    file_array[i][j].name.indexOf("\"") != -1) {
+                    file_array[i][j].name.indexOf("\"") != -1) {
                     alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
                     return;
                 }
-                if (file_array[i][j].name.indexOf("\\") != -1) {
-                    alert("ERROR! You may not use backslash in your filename: " + file_array[i][j].name);
+                else if (file_array[i][j].name.indexOf("\\") != -1 ||
+                    file_array[i][j].name.indexOf("/") != -1) {
+                    alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
                     return;
                 }
-                if (file_array[i][j].name.indexOf("<") != -1 ||
-		    file_array[i][j].name.indexOf(">") != -1) {
+                else if (file_array[i][j].name.indexOf("<") != -1 ||
+                    file_array[i][j].name.indexOf(">") != -1) {
                     alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                     return;
                 }
