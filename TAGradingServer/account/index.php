@@ -14,7 +14,7 @@ $show_right = isset($_COOKIE["show_right"]) ? intval($_COOKIE["show_right"]) : 1
 
 $rubric_late_days = 0;
 
-print <<<HTML 
+print <<<HTML
 <div id="container">
 HTML;
 
