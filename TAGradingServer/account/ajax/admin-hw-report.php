@@ -27,8 +27,10 @@ function autogradingTotalAwarded($g_id, $student_id, $active_version){
     if (file_exists($results_file)) {
         $results_file_contents = file_get_contents($results_file);
         $results = json_decode($results_file_contents, true);
-        foreach($results['testcases'] as $testcase){
-            $total += floatval($testcase['points_awarded']);
+        if (isset($results['testcases'])) {
+            foreach ($results['testcases'] as $testcase) {
+                $total += floatval($testcase['points_awarded']);
+            }
         }
     }
     return $total;
@@ -37,13 +39,15 @@ function autogradingTotalAwarded($g_id, $student_id, $active_version){
 function getAutogradingMaxScore($g_id){
     $total = 0;
     $build_file = __SUBMISSION_SERVER__."/config/build/build_".$g_id.".json";
-     if (file_exists($build_file)) {
+    if (file_exists($build_file)) {
         $build_file_contents = file_get_contents($build_file);
         $results = json_decode($build_file_contents, true);
-        foreach($results['testcases'] as $testcase){
-            $testcase_value = floatval($testcase['points']);
-            if ($testcase_value > 0 && !$testcase['extra_credit']){
-                $total += $testcase_value;
+        if (isset($results['testcases'])) {
+            foreach ($results['testcases'] as $testcase) {
+                $testcase_value = floatval($testcase['points']);
+                if ($testcase_value > 0 && !$testcase['extra_credit']) {
+                    $total += $testcase_value;
+                }
             }
         }
     }
@@ -130,7 +134,7 @@ foreach($db->rows() as $student_record) {
         $db->query("SELECT allowed_late_days FROM late_days WHERE user_id=? AND since_timestamp <= ? ORDER BY since_timestamp DESC LIMIT 1", $params);
         $late_day = $db->row();
 
-        $student_allowed_lates = __DEFAULT_LATE_DAYS__;
+        $student_allowed_lates = __DEFAULT_TOTAL_LATE_DAYS__;
         if (count($late_day) > 0 &&
             isset($late_day['allowed_late_days']) &&
             $late_day['allowed_late_days'] > $student_allowed_lates) {
@@ -148,7 +152,14 @@ foreach($db->rows() as $student_record) {
         $grade_comment = "";
         
         if ($gradeable['gd_status'] == 1) {
-            $db->query("SELECT late_days_used FROM late_days_used WHERE g_id=? AND user_id=?", array($g_id, $student_id));
+            $db->query("
+SELECT GREATEST(late_days_used - COALESCE(late_day_exceptions, 0), 0) as late_days_used
+FROM late_days_used AS ldu
+LEFT JOIN (
+    SELECT late_day_exceptions, user_id, g_id
+    FROM late_day_exceptions
+) AS lde ON lde.user_id=ldu.user_id AND lde.g_id=ldu.g_id
+WHERE ldu.g_id=? AND ldu.user_id=?", array($g_id, $student_id));
             $row = $db->row();
             if (isset($row['late_days_used'])) {
                 $late_days_used = $row['late_days_used'];

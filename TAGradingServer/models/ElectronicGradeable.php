@@ -164,9 +164,12 @@ class ElectronicGradeable {
      */
     private $submission_ids = array();
 
+    /** @var bool */
+    public $graded = false;
+
     /**
      * @param null|string $student_id
-     * @param null|int $rubric_id
+     * @param null|int $g_id
      *
      * @throws \InvalidArgumentException|\RuntimeException|ServerException
      */
@@ -174,8 +177,7 @@ class ElectronicGradeable {
         try {
             if ($student_id === null || $g_id == null) {
                 throw new \InvalidArgumentException("Invalid instantiation of ElectronicGradeable
-                class using student_id: {$student_id} and g_id:
-                {$g_id}");
+                class using student_id: {$student_id} and g_id: {$g_id}");
             }
 
             $this->student_id = $student_id;
@@ -219,8 +221,8 @@ WHERE s.user_id=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $
                 throw new \InvalidArgumentException("Could not find student '{$this->student_id}'");
             }
 
-            if ($this->student['student_allowed_lates'] < __DEFAULT_LATE_DAYS__ ) {
-              $this->student['student_allowed_lates'] = __DEFAULT_LATE_DAYS__;
+            if ($this->student['student_allowed_lates'] < __DEFAULT_TOTAL_LATE_DAYS__ ) {
+              $this->student['student_allowed_lates'] = __DEFAULT_TOTAL_LATE_DAYS__;
             }
 
             $params = array($this->student_id, $this->eg_details['g_id']);
@@ -301,6 +303,7 @@ SELECT g_title, gd_overall_comment, g_grade_start_date, eg.* FROM electronic_gra
         //GET ALL questions and scores ASSOCIATED WITH A GRADEABLE
         Database::query("
 SELECT gc.*, gcd.*, 
+    case when gcd_score is null then FALSE else TRUE end as is_graded,
     case when gcd_score is null then 0 else gcd_score end
 FROM gradeable_component AS gc 
     INNER JOIN gradeable AS g ON gc.g_id=g.g_id 
@@ -311,6 +314,13 @@ AND gd.gd_id=?
 ORDER BY gc_order ASC
         ", $params);
         $this->questions = Database::rows();
+
+        $this->graded = false;
+        foreach ($this->questions as $question) {
+            if ($question['is_graded']) {
+                $this->graded = true;
+            }
+        }
         
         $total = 0;
         $build_file = __SUBMISSION_SERVER__."/config/build/build_".$this->g_id.".json";

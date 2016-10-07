@@ -2,7 +2,7 @@
 
 namespace app\controllers;
 
-use app\controllers\IController;
+use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
@@ -13,19 +13,14 @@ use app\libraries\Utils;
 use app\models\Gradeable;
 use app\models\GradeableList;
 
-class NavigationController implements IController {
-    /**
-     * @var Core
-     */
-    private $core;
-    
+class NavigationController extends AbstractController {
     /**
      * @var GradeableList
      */
     private $gradeables_list;
     
     public function __construct(Core $core) {
-        $this->core = $core;
+        parent::__construct($core);
         $this->gradeables_list = new GradeableList($this->core, true);
     }
 

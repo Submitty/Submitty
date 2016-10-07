@@ -106,6 +106,18 @@ class Core {
         }
     }
 
+    public function addErrorMessage($message) {
+        $_SESSION['messages']['error'][] = $message;
+    }
+
+    public function addNoticeMessage($message) {
+        $_SESSION['messages']['notice'][] = $message;
+    }
+
+    public function addSuccessMessage($message) {
+        $_SESSION['messages']['success'][] = $message;
+    }
+
     /**
      * @return Config
      */
@@ -132,7 +144,7 @@ class Core {
      */
     public function loadUser($user_id) {
         // attempt to load rcs as both student and user
-        $this->user = new User($user_id, $this->database_queries);
+        $this->user = $this->database_queries->getUserById($user_id);
     }
 
     /**
@@ -200,8 +212,9 @@ class Core {
             if ($this->authentication->authenticate()) {
                 $auth = true;
                 $session_id = $this->session_manager->newSession($user_id);
-                // We set the cookie to expire 10 years into the future effectly making it last forever
-                if (setcookie('session_id', $session_id, time() + (10 * 365 * 24 * 60 * 60), "/") === false) {
+                $cookie_id = $this->getConfig()->getSemester()."_".$this->getConfig()->getCourse()."_session_id";
+                // Set the cookie to last for 7 days
+                if (setcookie($cookie_id, $session_id, time() + (7 * 24 * 60 * 60), "/") === false) {
                     return false;
                 }
             }
@@ -225,19 +238,29 @@ class Core {
      *
      * @return bool
      */
-    public function checkCsrfToken($csrf_token) {
-        return $this->getCsrfToken() === $csrf_token;
+    public function checkCsrfToken($csrf_token=null) {
+        if ($csrf_token === null) {
+            return isset($_POST['csrf_token']) && $this->getCsrfToken() === $_POST['csrf_token'];
+        }
+        else {
+            return $this->getCsrfToken() === $csrf_token;
+        }
     }
 
     /**
      * Given some number of URL parameters (parts), build a URL for the site using those parts
      *
-     * @param array $parts
+     * @param array  $parts
+     * @param string $hash
      *
      * @return string
      */
-    public function buildUrl($parts=array()) {
-        return $this->config->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
+    public function buildUrl($parts=array(), $hash = null) {
+        $url = $this->config->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
+        if ($hash !== null) {
+            $url .= "#".$hash;
+        }
+        return $url;
     }
 
     /**

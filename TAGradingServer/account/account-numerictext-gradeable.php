@@ -21,6 +21,52 @@ if (!User::$is_administrator) {
     }
 }
 
+if(User::$user_group == 1){
+    $csv_button = "<label>Upload CSV (WARNING! Previously entered data may be overwritten!): Do not include a header row. Format CSV using one column for student id and one column for each field. Columns and field types must match.</label></br><input type=\"file\" id=\"csvUpload\" accept=\".csv, .txt\" onchange=\"csvUpload()\">";
+    $csv_upload_functions = "
+        function csvUpload(){
+            var f = $('#csvUpload').get(0).files[0];
+            
+            if(f){
+                var reader = new FileReader();
+                reader.readAsText(f);
+                reader.onload = function(evt) {
+                  parseCsv(reader.result);
+                  
+                }
+                reader.onerror = function(evt){
+                    console.error(\"nope\");
+                }
+            } 
+        }
+        
+        function parseCsv(csv){
+            url = \"{$BASE_URL}/account/ajax/account-numerictext-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}\";
+            var lines = csv.split(/\\r\\n|\\n/);
+            console.log(lines);
+            console.log(url);
+            $.ajax({
+                type:\"POST\",
+                url:url,
+                data: {
+                    csrf_token: '{$_SESSION['csrf']}',
+                    parsedCsv: lines,
+                    action:\"csv\"
+                },
+                success: function(data, text){
+                    location.reload();
+                },
+                error: function(request, status, error){
+                    window.alert(\"An error has occurred. Contact an administrator.\");
+                }
+            });
+        }";
+}
+else{
+    $csv_button = "";
+    $csv_upload_functions = "";
+}
+
 print <<<HTML
 
 <style type="text/css">
@@ -31,8 +77,7 @@ print <<<HTML
     #container-nt{
         min-width:700px;
         width: 80%;
-        margin:100px auto;
-        margin-top: 130px;
+        margin: 70px auto 100px;
         background-color: #fff;
         border: 1px solid #999;
         border: 1px solid rgba(0,0,0,0.3);
@@ -89,6 +134,7 @@ print <<<HTML
 <div id="container-nt">
     <div class="modal-header">
         <h3 id="myModalLabel" style="width:70%; display:inline-block;">{$nt_gradeable['g_title']}</h3>
+        <span>{$csv_button}</span>
         <span style="width: 79%; display: inline-block;">{$button}</span>
     </div>
 
@@ -283,12 +329,7 @@ HTML;
     foreach($students_grades as $row){
         $student_info = $row;
         $temp = $row;
-        if ($student_info["user_preferred_firstname"] === "") {
-            $firstname = $student_info["user_firstname"];
-        }
-        else {
-            $firstname = $student_info["user_preferred_firstname"];
-        }
+        $firstname = getDisplayName($student_info);
         
         print <<<HTML
                         <tr>
@@ -456,6 +497,9 @@ echo <<<HTML
                 window.alert("[SAVE ERROR] Refresh Page");
             });
         }
+        
+        {$csv_upload_functions}
+        
 	</script>
 HTML;
 

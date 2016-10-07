@@ -42,44 +42,49 @@ bool system_program(const std::string &program, std::string &full_path_executabl
   const std::map<std::string,std::string> allowed_system_programs = {
 
     // Basic System Utilities (for debugging)
-    { "ls",                     "/bin/ls", },
-    { "time",                   "/usr/bin/time" },
-    { "mv",                     "/bin/mv" },
-    { "cp",                     "/bin/cp" },
-    { "chmod",                  "/bin/chmod" },
-    { "find",                   "/usr/bin/find" },
-    { "cat",                    "/bin/cat" },
-    { "compare",                "/usr/bin/compare" }, //image magick!
+    { "ls",                      "/bin/ls", },
+    { "time",                    "/usr/bin/time" },
+    { "mv",                      "/bin/mv" },
+    { "cp",                      "/bin/cp" },
+    { "chmod",                   "/bin/chmod" },
+    { "find",                    "/usr/bin/find" },
+    { "cat",                     "/bin/cat" },
+    { "compare",                 "/usr/bin/compare" }, //image magick!
+    { "cut",                     "/usr/bin/cut" },
+    { "sort",                    "/usr/bin/sort" },
 
     // Submitty Analysis Tools
-    { "submitty_count_token",   SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token" },
-    { "submitty_count_node",    SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_node" },
-    { "submitty_count_function",    SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_function" },
+    { "submitty_count_token",    SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token" },
+    { "submitty_count_node",     SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_node" },
+    { "submitty_count_function", SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_function" },
 
     // for Computer Science I
-    { "python",                 "/usr/bin/python" },
-    { "python2",                "/usr/bin/python2" },
-    { "python2.7",              "/usr/bin/python2.7" },
-    { "python3",                "/usr/bin/python3" },
-    { "python3.4",              "/usr/bin/python3.4" },
-    { "python3.5",              "/usr/bin/python3.5" },
+    { "python",                  "/usr/bin/python" },
+    { "python2",                 "/usr/bin/python2" },
+    { "python2.7",               "/usr/bin/python2.7" },
+    { "python3",                 "/usr/bin/python3" },
+    { "python3.4",               "/usr/bin/python3.4" },
+    { "python3.5",               "/usr/bin/python3.5" },
 
     // for Data Structures
-    { "g++",                    "/usr/bin/g++" },
-    { "clang++",                "/usr/bin/clang++" },
-    { "drmemory",               SUBMITTY_INSTALL_DIRECTORY+"/drmemory/bin/drmemory" },
-    { "valgrind",               "/usr/bin/valgrind" },
+    { "g++",                     "/usr/bin/g++" },
+    { "clang++",                 "/usr/bin/clang++" },
+    { "drmemory",                SUBMITTY_INSTALL_DIRECTORY+"/drmemory/bin/drmemory" },
+    { "valgrind",                "/usr/bin/valgrind" },
+
+    // for Computer Organization
+    { "spim",                    "/usr/bin/spim" },
 
     // for Principles of Software
-    { "java",                   "/usr/bin/java" },
-    { "javac",                  "/usr/bin/javac" },
+    { "java",                    "/usr/bin/java" },
+    { "javac",                   "/usr/bin/javac" },
 
     // for Operating Systems
-    { "gcc",                    "/usr/bin/gcc" },
+    { "gcc",                     "/usr/bin/gcc" },
 
     // for Programming Languages
-    { "swipl",                  "/usr/bin/swipl" },
-    { "plt-r5rs",               "/usr/bin/plt-r5rs" }
+    { "swipl",                   "/usr/bin/swipl" },
+    { "plt-r5rs",                "/usr/bin/plt-r5rs" }
 
   };
 

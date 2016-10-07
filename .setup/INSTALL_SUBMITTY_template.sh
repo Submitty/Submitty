@@ -403,6 +403,11 @@ rsync -rtz   ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
 find ${SUBMITTY_INSTALL_DIR}/site -exec chown $HWPHP_USER:$HWPHP_USER {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown $HWCGI_USER:$HWCGI_USER {} \;
 
+# TEMPORARY (until we have generalized code for generating charts in html) 
+# copy the zone chart images
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/
+cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/ 2>/dev/null
+
 # set the permissions of all files
 # $HWPHP_USER can read & execute all directories and read all files
 # "other" can cd into all subdirectories
@@ -414,6 +419,7 @@ find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.css -exec chmod o+r {} \;
 find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.otf -exec chmod o+r {} \;
 find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.jpg -exec chmod o+r {} \;
 find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.png -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.ico -exec chmod o+r {} \;
 find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.txt -exec chmod o+r {} \;
 # "other" can read & execute all .js files
 find ${SUBMITTY_INSTALL_DIR}/site -type f -name \*.js -exec chmod o+rx {} \;

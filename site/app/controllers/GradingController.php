@@ -6,16 +6,7 @@ use app\libraries\Core;
 use app\libraries\Output;
 use app\models\User;
 
-class GradingController implements IController{
-    /**
-     * @var Core
-     */
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class GradingController extends AbstractController{
     public function run() {
         if (!$this->core->getUser()->accessGrading()) {
             $this->core->getOutput()->showError("This account is not authorized to view grading section");
