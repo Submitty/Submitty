@@ -257,26 +257,19 @@ abstract class Gradeable {
             array_multisort($times,SORT_DESC,$files); //Sorted By Descending Here
 
             $files = scandir($interactive_queue);
-            var_dump("THESE ARE THE FILES: " . $files);
             foreach($files as $file) {
-                var_dump("THIS IS A FILE: ". $file);
                 if(is_file($interactive_queue.'/'.$file) && ($file !== "..") && ($file !== ".")) {
                     if(strpos($file, "GRADING_") !== false) {
                         $grading_count = $grading_count + 1;
-                        var_dump("THIS IS THE GRADING COUNT: " . $grading_count);
                     }
                     else {
                         $queue_count = $queue_count + 1;
-                        var_dump("THIS IS THE QUEUE COUNT: " . $queue_count);
                         if($file === $queue_file) {
                             $this->queue_position = $queue_count;
-                            var_dump("THIS IS THE QUEUE POSITION: " . $this->queue_position);
                         }
                     }
                 }
-
             }
-            var_dump("THIS IS THE NUMBER OF FILES: ". count($files));
             $this->queue_total = $queue_count;
             $this->grading_total = $grading_count;
         }

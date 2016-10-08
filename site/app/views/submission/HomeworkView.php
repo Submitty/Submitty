@@ -405,9 +405,6 @@ HTML;
                     }
                     else {
                         $return .= <<<HTML
-                        <script> console.log('{$gradeable->getQueuePosition()}');
-                                 console.log('{$gradeable->getQueueTotal()}');
-                                 </script>
         <p class="red-message">
             This submission is currently in the queue to be regraded. Your submission is number {$gradeable->getQueuePosition()} out of {$gradeable->getQueueTotal()}.
         </p>
