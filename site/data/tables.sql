@@ -134,8 +134,10 @@ CREATE TABLE electronic_gradeable_data (
     g_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     g_version integer NOT NULL,
-    autograding_total numeric DEFAULT 0 NOT NULL,
-    autograding_extra_credit_total numeric DEFAULT 0 NOT NULL,
+    autograding_non_hidden_non_extra_credit numeric DEFAULT 0 NOT NULL,
+    autograding_non_hidden_extra_credit numeric DEFAULT 0 NOT NULL,
+    autograding_hidden_non_extra_credit numeric DEFAULT 0 NOT NULL,
+    autograding_hidden_extra_credit numeric DEFAULT 0 NOT NULL,
     submission_time timestamp(6) without time zone NOT NULL
 );
 
