@@ -286,8 +286,10 @@ abstract class Gradeable {
             array_multisort($times,SORT_DESC,$files); //Sort By Descending Here
 
             foreach($files as $file) {
-                if(strpos($file, "GRADING_") !== false) {
-                    $grading_count = $grading_count + 1;
+                if(is_file($batch_queue.'/'.$file) && ($file !== "..") && ($file !== ".")) {
+                    if(strpos($file, "GRADING_") !== false) {
+                        $grading_count = $grading_count + 1;
+                    }
                 }
                 else {
                     $queue_count = $queue_count + 1;
