@@ -31,7 +31,7 @@ if [ ${VAGRANT} == 1 ]; then
     chmod +x /etc/update-motd.d/00-header
 
     echo -e '
-  _______  __   __  _______  __   __  ___   _______  _______  __   __
+ _______  __   __  _______  __   __  ___   _______  _______  __   __
 |       ||  | |  ||  _    ||  |_|  ||   | |       ||       ||  | |  |
 |  _____||  | |  || |_|   ||       ||   | |_     _||_     _||  |_|  |
 | |_____ |  |_|  ||       ||       ||   |   |   |    |   |  |       |
@@ -70,6 +70,105 @@ if [ ${VAGRANT} == 1 ]; then
     echo "192.168.56.104    test-hwgrading test-hwgrading.cs.rpi.edu" >> /etc/hosts
 fi
 
+#################################################################
+# USERS SETUP
+#################
+
+python ${SUBMITTY_REPOSITORY}/.setup/create_untrusted_users.py
+
+# Special users and groups needed to run Submitty
+#
+# It is probably easiest to set and store passwords for the special
+# accounts, although you can also use ‘sudo su user’ to change to the
+# desired user on the local machine which works for most things.
+
+# The group hwcronphp allows hwphp to write the submissions, but give
+# read-only access to the hwcron user.  And the hwcron user writes the
+# results, and gives read-only access to the hwphp user.
+
+addgroup hwcronphp
+
+# The group course_builders allows instructors/head TAs/course
+# managers to write website custimization files and run course
+# management scripts.
+
+addgroup course_builders
+
+if [ ${VAGRANT} == 1 ]; then
+	adduser vagrant sudo
+	adduser ta --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+	echo "ta:ta" | sudo chpasswd
+	adduser instructor --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+	echo "instructor:instructor" | sudo chpasswd
+	adduser instructor sudo
+	adduser developer --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+	echo "developer:developer" | sudo chpasswd
+	adduser developer sudo
+fi
+
+# change the default user umask (was 002)
+sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs
+grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && exit)
+
+adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+adduser hwcgi hwphp
+# NOTE: hwcgi must be in the shadow group so that it has access to the
+# local passwords for pam authentication
+adduser hwcgi shadow
+if [ ${VAGRANT} == 1 ]; then
+	echo "hwphp:hwphp" | sudo chpasswd
+	echo "hwcgi:hwcgi" | sudo chpasswd
+	adduser hwphp vagrant
+	adduser hwcgi vagrant
+fi
+adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+if [ ${VAGRANT} == 1 ]; then
+	echo "hwcron:hwcron" | sudo chpasswd
+fi
+
+# FIXME:  umask setting above not complete
+# might need to also set USERGROUPS_ENAB to "no", and manually create
+# the hwphp and hwcron single user groups.  See also /etc/login.defs
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcgi/.profile
+echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
+
+
+adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+if [ ${VAGRANT} == 1 ]; then
+	echo "hsdbu:hsdbu" | sudo chpasswd
+fi
+adduser hwphp hwcronphp
+adduser hwcron hwcronphp
+
+for COURSE in csci1000 csci1100 csci1200 csci2600
+do
+
+    # for each course, create a group to contain the current
+    # instructor along the lines of:
+
+	addgroup ${COURSE}
+
+    # and another group to contain the current instructor, TAs,
+    # hwcron, and hwphp along the lines of
+
+	addgroup ${COURSE}_tas_www
+	adduser hwphp ${COURSE}_tas_www
+	adduser hwcron ${COURSE}_tas_www
+	if [ ${VAGRANT} == 1 ]; then
+		adduser ta ${COURSE}
+		adduser ta ${COURSE}_tas_www
+		adduser instructor ${COURSE}
+		adduser	instructor ${COURSE}_tas_www
+		adduser developer ${COURSE}
+		adduser developer ${COURSE}_tas_www
+	fi
+done
+
+if [ ${VAGRANT} == 1 ]; then
+	adduser instructor course_builders
+fi
 
 
 #################################################################
@@ -96,10 +195,8 @@ apt-get install -qqy ntp
 service ntp restart
 
 # path for untrusted user creation script will be different if not using Vagrant
-${SUBMITTY_REPOSITORY}/.setup/create.untrusted.users.pl
 
 apt-get install -qqy libpam-passwdqc
-
 
 # Use suphp to improve file permission granularity by running php
 # scripts as the user that owns the file instead of www-data
@@ -129,7 +226,7 @@ hardening-includes python python-pip p7zip-full patchutils postgresql-client pos
 unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libfile-mmagic-perl \
 libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
-libseccomp2 seccomp junit cmake libpcre3 libpcre3-dev flex bison
+libseccomp2 seccomp junit cmake libpcre3 libpcre3-dev flex bison spim
 
 apt-get install -qqy subversion subversion-tools
 apt-get install -qqy libapache2-svn
@@ -165,8 +262,6 @@ chmod -R 555 /usr/local/lib/python2.7/*
 chmod 555 /usr/lib/python2.7/dist-packages
 sudo chmod 500   /usr/local/lib/python2.7/dist-packages/pam.py*
 sudo chown hwcgi /usr/local/lib/python2.7/dist-packages/pam.py*
-
-
 
 
 #################################################################
@@ -339,125 +434,32 @@ sed -i -e 's/^allow_directory_group_writeable=false/allow_directory_group_writea
 sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php5/cgi/php.ini
 sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php5/cgi/php.ini
 sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php5/cgi/php.ini
-sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php5/apache2/php.ini
 sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php5/cgi/php.ini
 sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php5/cgi/php.ini
 sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php5/cgi/php.ini
-
-
-#################################################################
-# USERS SETUP
-#################
-
-# Special users and groups needed to run Submitty
-#
-# It is probably easiest to set and store passwords for the special
-# accounts, although you can also use ‘sudo su user’ to change to the
-# desired user on the local machine which works for most things.
-
-# The group hwcronphp allows hwphp to write the submissions, but give
-# read-only access to the hwcron user.  And the hwcron user writes the
-# results, and gives read-only access to the hwphp user.
-
-addgroup hwcronphp
-
-# The group course_builders allows instructors/head TAs/course
-# managers to write website custimization files and run course
-# management scripts.
-
-addgroup course_builders
-
-if [ ${VAGRANT} == 1 ]; then
-	adduser vagrant sudo
-	adduser ta --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-	echo "ta:ta" | sudo chpasswd
-	adduser instructor --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-	echo "instructor:instructor" | sudo chpasswd
-	adduser instructor sudo
-	adduser developer --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-	echo "developer:developer" | sudo chpasswd
-	adduser developer sudo
-fi
-
-
-# change the default user umask (was 002)
-sed -i  "s/^UMASK.*/UMASK 027/g"  /etc/login.defs
-grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && exit)
-
-
-adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-adduser hwcgi hwphp
-# NOTE: hwcgi must be in the shadow group so that it has access to the
-# local passwords for pam authentication
-adduser hwcgi shadow
-if [ ${VAGRANT} == 1 ]; then
-	echo "hwphp:hwphp" | sudo chpasswd
-	echo "hwcgi:hwcgi" | sudo chpasswd
-	adduser hwphp vagrant
-	adduser hwcgi vagrant
-fi
-adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-if [ ${VAGRANT} == 1 ]; then
-	echo "hwcron:hwcron" | sudo chpasswd
-fi
-
-# only hwcgi can use the python pam module
-chown hwcgi:hwcgi /usr/local/lib/python2.7/dist-packages/pam*
-chmod 500         /usr/local/lib/python2.7/dist-packages/pam*
-
-
-# FIXME:  umask setting above not complete
-# might need to also set USERGROUPS_ENAB to "no", and manually create
-# the hwphp and hwcron single user groups.  See also /etc/login.defs
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwphp/.profile
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcgi/.profile
-echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/hwcron/.profile
-
-
-adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-if [ ${VAGRANT} == 1 ]; then
-	echo "hsdbu:hsdbu" | sudo chpasswd
-fi
-adduser hwphp hwcronphp
-adduser hwcron hwcronphp
-
-for COURSE in csci1000 csci1100 csci1200 csci2600
-do
-
-    # for each course, create a group to contain the current
-    # instructor along the lines of:
-
-	addgroup $COURSE
-
-    # and another group to contain the current instructor, TAs,
-    # hwcron, and hwphp along the lines of
-
-	addgroup $COURSE\_tas_www
-	adduser hwphp $COURSE\_tas_www
-	adduser hwcron $COURSE\_tas_www
-	if [ ${VAGRANT} == 1 ]; then
-		adduser ta $COURSE
-		adduser instructor $COURSE
-		adduser	instructor $COURSE\_tas_www
-		adduser developer $COURSE
-		adduser developer $COURSE\_tas_www
-	fi
-done
-
-if [ ${VAGRANT} == 1 ]; then
-	adduser instructor course_builders
-fi
-
+# This should mimic the list of disabled functions that RPI uses on the HSS machine with the sole difference
+# being that we do not disable phpinfo() on the vagrant machine as it's not a function that could be used for
+# development of some feature, but it is useful for seeing information that could help debug something going wrong
+# with our version of PHP.
+DISABLED_FUNCTIONS="popen,pclose,proc_open,chmod,php_real_logo_guid,php_egg_logo_guid,php_ini_scanned_files,"
+DISABLED_FUNCTIONS+="php_ini_loaded_file,readlink,symlink,link,set_file_buffer,proc_close,proc_terminate,"
+DISABLED_FUNCTIONS+="proc_get_status,proc_nice,getmyuid,getmygid,getmyinode,putenv,get_current_user,"
+DISABLED_FUNCTIONS+="magic_quotes_runtime,set_magic_quotes_runtime,import_request_variables,ini_alter,"
+DISABLED_FUNCTIONS+="stream_socket_client,stream_socket_server,stream_socket_accept,stream_socket_pair,"
+DISABLED_FUNCTIONS+="stream_get_transports,stream_wrapper_restore,mb_send_mail,openlog,syslog,closelog,pfsockopen,"
+DISABLED_FUNCTIONS+="posix_kill,apache_child_terminate,apache_get_modules,apache_get_version,apache_lookup_uri,"
+DISABLED_FUNCTIONS+="apache_reset_timeout,apache_response_headers,virtual,system,exec,shell_exec,passthru,"
+DISABLED_FUNCTIONS+="pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,"
+DISABLED_FUNCTIONS+="pcntl_wifsignaled,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,"
+DISABLED_FUNCTIONS+="pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,"
+DISABLED_FUNCTIONS+="pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,"
+echo "disable_functions = ${DISABLED_FUNCTIONS}" >> /etc/php5/cgi/php.ini
 
 # create directories and fix permissions
-
 mkdir -p ${SUBMITTY_DATA_DIR}
-
 
 # create a list of valid userids and put them in /var/local/submitty/instructors
 # one way to create your list is by listing all of the userids in /home
-
 mkdir -p ${SUBMITTY_DATA_DIR}/instructors
 ls /home | sort > ${SUBMITTY_DATA_DIR}/instructors/valid
 
@@ -517,8 +519,6 @@ fi
 #################
 
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-#pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
-#make ubuntudeps
 # graph tool...  for later?  add-apt-repository "http://downloads.skewed.de/apt/trusty universe" -y
 add-apt-repository ppa:ubuntu-toolchain-r/test -y
 apt-get update -qq
@@ -528,7 +528,9 @@ apt-get install -qq splint indent
 apt-get install -qq python3 python3-dev libpython3.4 python3-pip
 python3 -m pip install pylint
 # graph tool...  for later?  apt-get install -qq --force-yes python3-graph-tool
-#popd
+pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+make
+popd
 
 
 #################################################################
@@ -578,9 +580,18 @@ if [[ ${VAGRANT} == 1 ]]; then
     echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/valid
     echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
     echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+    echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+    echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+    echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+    echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/valid
+    echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
+    echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/valid
     ${SUBMITTY_DATA_DIR}/bin/authonly.pl
     echo "student:student" | sudo chpasswd
     echo "smithj:smithj" | sudo chpasswd
+    echo "joness:joness" | sudo chpasswd
+    echo "browna:browna" | sudo chpasswd
+    echo "pearsr:pearsr" | sudo chpasswd
 
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
     rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs

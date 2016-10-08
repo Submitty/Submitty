@@ -6,7 +6,7 @@
     $g_id
 */
 
-use \app\models\ElectronicGradeable;
+use \models\ElectronicGradeable;
 
 $eg = new ElectronicGradeable($s_user_id, $g_id);
 
@@ -115,7 +115,7 @@ if ($calculate_diff) {
     function autoResize(id) {
         var newheight;
         if(document.getElementById) {
-            newheight=document.getElementById(id).contentWindow.document.body.scrollHeight;
+            newheight = document.getElementById(id).contentWindow.document.body.scrollHeight;
         }
 
         if (newheight < 10) {
@@ -198,14 +198,11 @@ HTML;
 }
 
 $code_number = 0;
-$display_stats = ($show_stats == 0) ? "none" : "inline-block";
-$display_rubric = ($show_rubric == 0) ? "none" : "inline-block";
-$display_left = ($show_left == 0) ? "none" : "inline-block";
-$display_right = ($show_right == 0) ? "none" : "inline-block";
 $output .= <<<HTML
 
-<span id="left" class="resbox" style="display: {$display_left};">
-    <div id="content">
+
+    <div id="left" class="draggable rubric_panel" style="left:5px;top:50px; height:55%;width:60%;">
+<span class="grading_label">Auto-Grading Testcases</span>
 HTML;
 
 $source_number = 0;
@@ -262,12 +259,9 @@ HTML;
     if (!isset($eg->submission_details)) {
         $output .= <<<HTML
         <div id="inner-container">
-            <div id="inner-container-spacer"></div>
-            <div id="inner-container-spacer"></div>
-
-            <div class="tabbable">
+            <div class="tabbable" style="padding-top: 10px;">
                 <ul id="myTab" class="nav nav-tabs">
-                    <li style="margin-right:2px; height:34px; width:20px; text-align:center; line-height:16px; padding-top:3px; -webkit-border-radius: 4px 4px 0 0; -moz-border-radius: 4px 4px 0 0; border-radius: 4px 4px 0 0; background-color: #DA4F49;">
+                    <li style="margin-right:2px; height:34px; width:20px; text-align:center; line-height:16px; padding-top:3px;">
                         <i class="icon-remove icon-white"></i>
                     </li>
                     <li class='active'><a href="#output-1" data-toggle="tab">
@@ -295,7 +289,6 @@ HTML;
 
     $output .= <<<HTML
         <div id="inner-container">
-            <div id="inner-container-spacer"></div>
             <br />
 HTML;
     if ($eg->active_assignment == 0){
@@ -310,8 +303,7 @@ HTML;
 HTML;
     }
     $output .= <<<HTML
-            <div id="inner-container-spacer"></div>
-            <div class="tabbable">
+            <div class="tabbable" style="padding-top:10px;">
                 <ul id="myTab" class="nav nav-tabs">
                     <li style="margin-right:2px; height:34px; width:20px; text-align:center; line-height:16px; padding-top:3px; -webkit-border-radius: 4px 4px 0 0; -moz-border-radius: 4px 4px 0 0; border-radius: 4px 4px 0 0; background-color: {$icon_color};">
                         {$icon}
@@ -339,7 +331,7 @@ HTML;
     $output .= <<<HTML
 
                 </ul>
-                <div class="tab-content" style="width: 100%; overflow-x: hidden;">
+                <div class="tab-content" style="width: 100%; overflow-x: hidden; border:thin solid black">
 HTML;
 
     $i = 0;
@@ -354,15 +346,6 @@ HTML;
                             <div style="width:95%; margin: auto auto auto auto; overflow-y:auto; overflow-x:hidden; padding-top:20px;">                                                                                               
                                 <iframe src="{$url}" id='iframe-{$i}' width='750px' style='border: 0' onload="autoResize('iframe-{$i}'); load_tab_icon('tab-{$i}', 'iframe-{$i}', {$testcase['points_awarded']}, {$eg->config_details['testcases'][$k]['points']}); ">
                                 </iframe>
-                                <br />
-                                Logfile
-                                <textarea id="code{$source_number}">
-HTML;
-            //$output .= htmlentities(file_get_contents($results_details['directory']."/".$testcase['execute_logfile']));
-            $output .= <<<HTML
-                                </textarea>
-HTML;
-            $output .= <<<HTML
                             </div>
                         </div>
 HTML;
@@ -390,34 +373,21 @@ HTML;
 
     $output .= <<<HTML
     </div>
-</span><!-- puts no space between spans
 
---><span id="pane"></span><!--
---><span id="panemover" onmousedown="dragStart(event, 'left', 'right'); return false;" onmousemove="drag(event, 'left', 'right');" onmouseout="dragRelease();" onmouseup="dragRelease();"></span><!--
-
---><span id="right" class="resbox" style="display: {$display_right}; overflow-y:auto;">
-<div id="inner-container-spacer"></div><div id="inner-container" >
+<div id="right" class="draggable rubric_panel" style="top:65%; left: 5px;width: 60%; height: 30%">
+<span class="grading_label">Submission and Results Browser</span>
 HTML;
     $output .= "\n";
     display_files($eg->eg_files, $output, 1);
 
-    if ($eg->student['user_preferred_firstname'] == "") {
-        $firstname = $eg->student['user_firstname'];
-    }
-    else {
-        $firstname = $eg->student['user_preferred_firstname'];
-    }
+    $firstname = getDisplayName($eg->student);
 
     $output .= <<<HTML
 </div>
-</span><!---->
 
-<span id="stats" class="resbox" style="display: {$display_stats}; z-index: 200;" onmousedown="changeStackingOrder(event); dragPanelStart(event, 'stats'); return false;" 
-      onmousemove="dragPanel(event, 'stats');"  onmouseup="dragPanelEnd(event);">
-    <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;" onmousedown="dragPanelStart(event, 'stats'); return false;" 
-         onmousemove="dragPanel(event, 'stats');"  onmouseup="dragPanelEnd(event);">
-    <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyS')" ></span>
-    </div>
+
+<div id="stats" class="draggable rubric_panel" style="bottom: 0px; right:20px; width:35%; height: 25%;">
+<span class="grading_label">Student Information</span>
     <div id="inner-container" style="margin:5px;">
         <div id="rubric-title">
             <div class="span2" style="float:left; text-align: left;"><b>{$eg->eg_details['g_title']}</b></div>
@@ -496,13 +466,11 @@ $print_status = ($eg->status == 1) ? "Good" : "Bad";
 $output .= <<<HTML
                 <b>Status:</b> <span style="color: {$color};">{$part_status}</span><br />
     </div>
-</span>
+</div>
 
-<span id="rubric" class="resbox" style="display: {$display_rubric}; z-index: 199; overflow-y=hidden;" onmousedown="changeStackingOrder(event); dragPanelStart(event, 'rubric');" onmousemove="dragPanel(event, 'rubric');" onmouseup="dragPanelEnd(event);">
-    <div class="draggable" style="background-color: #99cccc; height:20px; cursor: move;"  >
-        <span title='Hide Panel' class='icon-down' onmousedown="handleKeyPress('KeyG')" ></span>
-    </div>
-    <div class="inner-container" style="overflow-y:auto; margin:1px; height:100%">
+<div id="rubric" class="draggable rubric_panel" style="top:50px; right:20px;width:35%; height: 65%;">
+<span class="grading_label">Grading Rubric</span>
+    <div class="inner-container" style="margin:1px; height:100%">
 
 HTML;
 
@@ -567,7 +535,7 @@ HTML;
         $note = "<br/><div style='margin-bottom:5px; color:#777;'><i><b>Note to TA: </b>" . $note . "</i></div>";
     }
     $output .= <<<HTML
-                            <td style="font-size: 12px" colspan="2">
+                            <td style="font-size: 12px" colspan="4">
                                 <b>{$message}</b> {$note}
 HTML;
 
@@ -589,12 +557,12 @@ HTML;
     
     $output .= <<<HTML
     <tr style="background-color: #f9f9f9;">
-                            <td style="white-space:nowrap; vertical-align:middle; text-align:center;"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}"
+                            <td style="white-space:nowrap; vertical-align:middle; text-align:center;" colspan="1"><input type="number" id="grade-{$question['gc_order']}" class="grades" name="grade-{$question['gc_order']}" value="{$question['gcd_score']}"
                                 min="{$min_val}" max="{$max_val}" step="{$precision}" placeholder="&plusmn;{$precision}" onchange="validateInput('grade-{$question["gc_order"]}', '{$question["gc_max_value"]}',  {$precision}); calculatePercentageTotal();" 
                                 style="width:50px; resize:none;" {$disabled}></textarea><strong> / {$question['gc_max_value']}</strong></td>
-                            <td style="width:100%; padding:0px">
+                            <td style="width:98%;" colspan="3">
                                 <div id="rubric-{$c}">
-                                    <textarea name="comment-{$question["gc_order"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:100%; height:100%; resize:none; margin:0px 0px; border-radius:0px; border:none; padding:5px; float:left; margin-right:-25px;" 
+                                    <textarea name="comment-{$question["gc_order"]}" onkeyup="autoResizeComment(event);" rows="4" style="width:98%; height:100%; resize:none; float:left;" 
                                         placeholder="Message for the student..." comment-position="0" {$disabled}>{$question['gcd_component_comment']}</textarea>
 HTML;
 
@@ -662,8 +630,8 @@ HTML;
 if(isset($_GET["individual"])) {
     $output .= <<<HTML
                         <tr>
-                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;"><strong>TOTAL</strong></td>
-                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;"><strong id="score_total">0 / {$eg->eg_details['eg_total']} &emsp;&emsp;&emsp;
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top:5px #FAA732 solid;" colspan="1"><strong>TOTAL</strong></td>
+                            <td style="background-color: #EEE; border-top:5px #FAA732 solid;" colspan="3"><strong id="score_total">0 / {$eg->eg_details['eg_total']} &emsp;&emsp;&emsp;
                             AUTO-GRADING {$eg->autograding_points} / {$eg->autograding_max}</strong></td>
                         </tr>
 HTML;
@@ -671,10 +639,8 @@ HTML;
 else {
     $output .= <<<HTML
                         <tr>
-                            <td style="background-color: #EEE; border-top: 1px solid #CCC;"></td>
-                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"></td>
-                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;"><strong>TOTAL</strong></td>
-                            <td style="background-color: #EEE; border-top: 1px solid #CCC;"><strong id="score_total">0 / {$eg->eg_details['eg_total']}&emsp;&emsp;&emsp;
+                            <td style="background-color: #EEE; border-left: 1px solid #EEE; border-top: 1px solid #CCC;" colspan="1"><strong>TOTAL</strong></td>
+                            <td style="background-color: #EEE; border-top: 1px solid #CCC;" colspan="1"><strong id="score_total">0 / {$eg->eg_details['eg_total']}&emsp;&emsp;&emsp;
                             AUTO-GRADING {$eg->autograding_points} / {$eg->autograding_max}</strong></td>
                         </tr>
 HTML;
@@ -684,7 +650,7 @@ $output .= <<<HTML
                     </tbody>
                 </table>
                 <div style="width:100%;"><b>General Comment:</b></div>
-                <textarea name="comment-general" rows="5" style="width:98%; padding:5px; resize:none;" 
+                <textarea name="comment-general" rows="5" style="width:98%; resize:none;" 
                           placeholder="Overall message for student about the gradeable...">{$eg->eg_details['gd_overall_comment']}</textarea>
 HTML;
 if (isset($eg->eg_details['user_email'])) {
@@ -718,7 +684,7 @@ $output .= <<<HTML
             </form>
 
     </div>
-</span>
+</div>
 HTML;
 
 $output .= <<<HTML

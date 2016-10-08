@@ -20,6 +20,7 @@ class GlobalView {
 <div id='messages'>
 
 HTML;
+
         foreach (array('error', 'notice', 'success') as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
                 $messages .= <<<HTML
@@ -44,19 +45,21 @@ HTML;
         $is_dev = ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) ? "true" : "false";
         $return = <<<HTML
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>{$this->core->getFullCourseName()}</title>
+    <link rel="shortcut icon" href="{$this->core->getConfig()->getBaseUrl()}img/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/server.css" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
 HTML;
     foreach($css as $css_ref){
         $return .= <<<HTML
-        <link rel="stylesheet" type="text/css" href="{$css_ref}" />   
+        <link rel="stylesheet" type="text/css" href="{$css_ref}" />
 HTML;
     }
-    
+
     $return .= <<<HTML
     {$override_css}
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.min.js"></script>
@@ -64,6 +67,7 @@ HTML;
     <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/server.js"></script>
     <script type="text/javascript">
         var is_developer = {$is_dev};
+        setSiteUrl('{$this->core->getConfig()->getSiteUrl()}');
     </script>
 </head>
 <body>
@@ -84,17 +88,13 @@ HTML;
                 <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view'))}">Course Settings</a>
             </li>
             <li>
-              <!--<a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=View%20Students">Students</a>-->
-                <a href="{$ta_base_url}/account/admin-students.php?course={$course}&semester={$semester}&this=Students">Students</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users'))}">Students</a>
             </li>
             <li>
-                <a href="{$ta_base_url}/account/admin-users.php?course={$course}&semester={$semester}&this=Users">Users</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders'))}">Graders</a>
             </li>
             <li>
-                <a href="{$ta_base_url}/account/admin-single-user-review.php?course={$course}&semester={$semester}&this=Manage%20Users">Manage Users</a>
-            </li>
-            <li>
-                <a href="{$ta_base_url}/account/admin-rotating-sections.php?course={$course}&semester={$semester}&this=Setup%20Rotating%20Sections">Setup Rotating Sections</a>
+                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections'))}">Setup Rotating Sections</a>
             </li>
             <li>
                 <a href="{$ta_base_url}/account/admin-latedays.php?course={$course}&semester={$semester}&this=Late%20Days%20Allowed">Late Days Allowed</a>
@@ -109,14 +109,9 @@ HTML;
             <li>
                 <a href="{$ta_base_url}/account/admin-csv-report.php?course={$course}&semester={$semester}&this=CSV%20Report">CSV Report</a>
             </li>
-
             <li>
-                <a href="{$ta_base_url}/account/admin-classlist.php?course={$course}&semester={$semester}&this=Upload%20ClassList">[DELETE]UploadClassList</a>
+                <a href="{$ta_base_url}/account/admin-hw-report.php?course={$course}&semester={$semester}&this=Homework%20Report">HWReport</a>
             </li>
-            <li>
-                <a href="{$ta_base_url}/account/admin-hw-report.php?course={$course}&semester={$semester}&this=Homework%20Report">[DELETE]HWReport</a>
-            </li>
-
 
 HTML;
                     if ($this->core->getUser()->isDeveloper()) {
@@ -128,7 +123,7 @@ HTML;
                     $return .= <<<HTML
         </ul>
     </div>
-    <div id="nav-clear"></div>
+    
 HTML;
                 }
             }
@@ -142,8 +137,7 @@ HTML;
 HTML;
         if ($this->core->userLoaded()) {
             $logout_link = $this->core->buildUrl(array('component' => 'authentication', 'page' => 'logout'));
-            $my_preferred_name = $this->core->getUser()->getPreferredFirstName();
-            $id = $this->core->getUser()->getId();
+            $my_preferred_name = $this->core->getUser()->getDisplayedFirstName();
             $return .= <<<HTML
             <span id="login">Hello <span id="login-id">{$my_preferred_name}</span></span> (<a id='logout' href='{$logout_link}'>Logout</a>)
 HTML;
@@ -171,10 +165,12 @@ HTML;
     <div id="push"></div>
 </div>
 <div id="footer">
-    <span id="copyright">&copy; 2016 RPI</span>
-    <a href="https://github.com/RCOS-Grading-Server/HWserver" target="blank" title="Fork us on Github">
-        <i class="fa fa-github fa-lg"></i>
-    </a>
+    <span id="copyright">&copy; 2016 RPI | An <a href="https://rcos.io" target="_blank">RCOS project</a></span>|
+    <span id="github">
+        <a href="https://github.com/Submitty/Submitty" target="blank" title="Fork us on Github">
+            <i class="fa fa-github fa-lg"></i>
+        </a>
+    </span>
 </div>
 HTML;
         if ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) {
@@ -191,7 +187,7 @@ HTML;
 </html>
 
 HTML;
-        
+
         return $return;
     }
 

@@ -20,6 +20,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
      protected $g_gradeable_type;
      protected $g_min_grading_group;
      protected $g_grade_by_registration;
+     protected $g_ta_view_start_date;
      protected $g_grade_start_date;
      protected $g_grade_released_date;
      protected $g_syllabus_bucket;
@@ -33,6 +34,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
          $this->g_gradeable_type = $params['gradeable_type'];
          $this->g_min_grading_group= $params['min_grading_group'];
          $this->g_grade_by_registration = $params['section_type'];
+         $this->g_ta_view_start_date = $params['date_ta_view'];
          $this->g_grade_start_date = $params['date_grade'];
          $this->g_grade_released_date = $params['date_released'];
          $this->g_syllabus_bucket = $params['bucket'];
@@ -44,10 +46,11 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
     function updateGradeable($db){
         $params = array($this->g_title, $this->g_overall_ta_instr, $this->g_use_teams, $this->g_gradeable_type,
                         $this->g_grade_by_registration, $this->g_grade_start_date, $this->g_grade_released_date,
-                        $this->g_syllabus_bucket, $this->g_min_grading_group, $this->g_instructions_url , $this->g_id);
+                        $this->g_syllabus_bucket, $this->g_min_grading_group, $this->g_instructions_url,
+                        $this->g_ta_view_start_date , $this->g_id);
         $db->query("UPDATE gradeable SET g_title=?, g_overall_ta_instructions=?, g_team_assignment=?, g_gradeable_type=?, 
                     g_grade_by_registration=?, g_grade_start_date=?, g_grade_released_date=?, g_syllabus_bucket=?, 
-                    g_min_grading_group=?, g_instructions_url=? WHERE g_id=?", $params);
+                    g_min_grading_group=?, g_instructions_url=?, g_ta_view_start_date=? WHERE g_id=?", $params);
     }
     
      /**
@@ -57,10 +60,11 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
         $params = array($this->g_id,$this->g_title, $this->g_overall_ta_instr, $this->g_use_teams,
                         $this->g_gradeable_type, $this->g_grade_by_registration, $this->g_grade_start_date,
                         $this->g_grade_released_date, $this->g_syllabus_bucket, $this->g_min_grading_group,
-                        $this->g_instructions_url);
+                        $this->g_instructions_url, $this->g_ta_view_start_date);
         $db->query("INSERT INTO gradeable(g_id,g_title, g_overall_ta_instructions, g_team_assignment, 
                     g_gradeable_type, g_grade_by_registration, g_grade_start_date, g_grade_released_date,
-                    g_syllabus_bucket,g_min_grading_group, g_instructions_url) VALUES (?,?,?,?,?,?,?,?,?,?,?)", $params);
+                    g_syllabus_bucket,g_min_grading_group, g_instructions_url, g_ta_view_start_date) 
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?, ?)", $params);
     }
     
      /**
@@ -302,6 +306,7 @@ abstract class GradeableType{
      $g_use_teams = (isset($request_args['team_assignment']) && $request_args['team_assignment'] === 'yes') ? "true" : "false";
      $g_min_grading_group=(isset($request_args['minimum_grading_group'])) ? intval($request_args['minimum_grading_group']) : 1;
      $g_grade_by_registration = (isset($request_args['section_type']) && $request_args['section_type'] === 'reg_section') ? "true" : "false";
+     $g_ta_view_start_date = $request_args['date_ta_view'];
      $g_grade_start_date = $request_args['date_grade'];
      $g_grade_released_date = $request_args['date_released'];
      $g_syllabus_bucket = $request_args['gradeable_buckets'];
@@ -310,16 +315,36 @@ abstract class GradeableType{
                                    'instructions_url' => $g_instructions_url,'ta_instructions' => $g_overall_ta_instr,
                                    'team_assignment' => $g_use_teams, 'min_grading_group' => $g_min_grading_group,
                                    'section_type' => $g_grade_by_registration, 'date_grade' => $g_grade_start_date,
-                                   'date_released' =>$g_grade_released_date, 'bucket' => $g_syllabus_bucket);
-     
+                                   'date_released' =>$g_grade_released_date, 'bucket' => $g_syllabus_bucket,
+                                   'date_ta_view' => $g_ta_view_start_date);
+
      if ($request_args['gradeable_type'] === "Electronic File"){
         $g_constructor_params['gradeable_type'] = GradeableType::electronic_file;
 
+        $ta_grading = ($request_args['ta_grading'] == "true") ? "true" : "false";
         $date_submit = $request_args['date_submit'];
         $date_due = $request_args['date_due'];
+        if (strtotime($date_submit) < strtotime($g_ta_view_start_date)) {
+          throw new Exception('DATE CONSISTENCY:  Submission Open Date must be >= TA Beta Testing Date');
+        }
+        if (strtotime($date_due) < strtotime($date_submit)) {
+          throw new Exception('DATE CONSISTENCY:  Due Date must be >= Submission Open Date');
+        }
+        if ($ta_grading === "true") {
+          if (strtotime($g_grade_start_date) < strtotime($date_due)) {
+            throw new Exception('DATE CONSISTENCY:  TA Grading Open Date must be >= Due Date');
+          }
+          if(strtotime($g_grade_released_date) < strtotime($g_grade_start_date)) {
+            throw new Exception('DATE CONSISTENCY:  Grades Released Date must be >= TA Grading Open Date');
+          }
+        } else {
+          if(strtotime($g_grade_released_date) < strtotime($date_due)) {
+            throw new Exception('DATE CONSISTENCY:  Grades Released Date must be >= Due Date');
+          }
+        }
         $is_repo = ($request_args['upload_type'] == 'Repository')? "true" : "false";
         $subdirectory = (isset($request_args['subdirectory']) && $is_repo == "true")? $request_args['subdirectory'] : '';
-        $ta_grading = ($request_args['ta_grading'] == "true")? "true" : "false";
+
         $config_path = $request_args['config_path'];
         $eg_late_days = intval($request_args['eg_late_days']);
         $eg_pt_precision = floatval($request_args['point_precision']);
@@ -338,10 +363,22 @@ abstract class GradeableType{
      else if ($request_args['gradeable_type'] === "Checkpoints"){
         $g_constructor_params['gradeable_type'] = GradeableType::checkpoints;
         $gradeable = new CheckpointGradeable($g_constructor_params);
+        if (strtotime($g_grade_start_date) < strtotime($g_ta_view_start_date)) {
+          throw new Exception('DATE CONSISTENCY:  TA Grading Open Date must be >= TA Beta Testing Date');
+        }
+        if(strtotime($g_grade_released_date) < strtotime($g_grade_start_date)){
+          throw new Exception('DATE CONSISTENCY:  Grade Released Date must be >= TA Grading Open Date');
+        }
      }
      else if ($request_args['gradeable_type'] === "Numeric"){
         $g_constructor_params['gradeable_type'] = GradeableType::numeric;
         $gradeable = new NumericGradeable($g_constructor_params);
+        if (strtotime($g_grade_start_date) < strtotime($g_ta_view_start_date)) {
+          throw new Exception('DATE CONSISTENCY:  TA Grading Open Date must be >= TA Beta Testing Date');
+        }
+        if(strtotime($g_grade_released_date) < strtotime($g_grade_start_date)){
+          throw new Exception('DATE CONSISTENCY:  Grade Released Date must be >= TA Grading Open Date');
+        }
      }
      return $gradeable;
  }

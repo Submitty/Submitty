@@ -83,7 +83,8 @@ CREATE TABLE gradeable (
     g_grade_released_date timestamp(6) without time zone NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
     g_min_grading_group integer NOT NULL,
-    g_closed_date timestamp(6) without time zone
+    g_closed_date timestamp(6) without time zone,
+    g_ta_view_start_date timestamp(6) without time zone NOT NULL
 );
 
 
@@ -265,7 +266,7 @@ CREATE TABLE sessions (
 
 CREATE TABLE users (
     user_id character varying NOT NULL,
-    user_password character,
+    user_password character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying NULL,
     user_lastname character varying NOT NULL,
@@ -540,6 +541,65 @@ ALTER TABLE ONLY users
     ADD CONSTRAINT users_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES sections_rotating(sections_rotating_id);
 
 
+
+CREATE OR REPLACE FUNCTION csv_To_Numeric_Gradeable(vcode TEXT[], gradeable_id TEXT, grader_id TEXT)
+  RETURNS BOOLEAN AS
+  $BODY$
+  DECLARE
+    -- Size of first array after splitting
+    size INTEGER;
+    -- Array of individual line after splitting
+    line TEXT[];
+    -- Variable to store each line in the array
+    i TEXT;
+    -- Array of gc_ids for this gradeable
+    gcids INTEGER[];
+    -- gradeable_data id for this gradeable for this student
+    gdid INTEGER;
+    -- Array counter
+    j INTEGER;
+    -- Is this gradeable component text?
+    istext BOOLEAN[];
+    --Score to be inserted
+    score NUMERIC;
+  BEGIN
+    gcids := ARRAY(SELECT gc_id FROM gradeable_component WHERE g_id = gradeable_id);
+    istext := ARRAY(SELECT gc_is_text FROM gradeable_component WHERE g_id = gradeable_id);
+    -- Get the number of gradeable components for this gradeable. Will be used to test
+    -- for uniform sized arrays
+    size := array_length(gcids, 1);
+    FOREACH i IN ARRAY vcode
+      LOOP
+        -- Split the current line
+        line := string_to_array(i, ',');
+        -- Check for uniform size
+        IF array_length(line, 1) <> size + 1 THEN
+          RAISE EXCEPTION 'INVALID SIZE: Arrays are jagged.';
+        END IF;
+
+        -- Remove any existing record for this student for this gradeable
+        DELETE FROM gradeable_data WHERE gd_user_id = line[1] AND g_id = gradeable_id;
+
+        INSERT INTO gradeable_data(g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status
+          , gd_late_days_used, gd_active_version) VALUES (gradeable_id, line[1],grader_id, '', 0,0,1);
+
+        SELECT gd_id INTO gdid FROM gradeable_data WHERE g_id = gradeable_id AND gd_user_id = line[1];
+
+        FOR j IN 1..size
+        LOOP
+          IF istext[j] THEN
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_component_comment) VALUES (gcids[j], gdid,0, line[j+1]);
+          ELSE
+            score := CAST(line[j+1] AS NUMERIC);
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_component_comment) VALUES (gcids[j], gdid, score, '');
+          END IF;
+        END LOOP;
+
+      END LOOP;
+    RETURN TRUE ;
+  END;
+  $BODY$
+LANGUAGE plpgsql;
 --
 -- PostgreSQL database dump complete
 --

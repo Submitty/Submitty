@@ -233,8 +233,10 @@ function retrieve_students_from_db($gradeable_id = 0) {
 
 	$sql = <<<SQL
 SELECT
+	users.user_id,
 	users.user_email,
 	users.user_firstname,
+	users.user_preferred_firstname,
 	users.user_lastname,
 	late_day_exceptions.late_day_exceptions
 FROM users
@@ -290,8 +292,6 @@ SQL;
 INSERT INTO temp VALUES (?,?,?);
 SQL;
 	}
-    
-    print_r($data);
 
 	//LOCK will prevent sharing collisions while upsert is in process.
 	$sql['lock'] = <<<SQL
@@ -358,15 +358,36 @@ class local_view {
 		self::$view = array();
 		
 		self::$view['head'] = <<<HTML
-<div id="container" style="width:100%; margin-top:40px;">
-<div class="modal hide fade in" style="display:block; margin-top:5%; z-index:100;">
+<style type="text/css">
+	body {
+		overflow-y: scroll;
+	}
+	
+	#container-latedays
+	{
+		width: 700px;
+		margin: 70px auto 100px;
+		background-color: #fff;
+		border: 1px solid #999;
+		-webkit-border-radius: 6px;
+		-moz-border-radius: 6px;
+		border-radius: 6px;outline: 0;
+		-webkit-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+		-moz-box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+		box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+		-webkit-background-clip: padding-box;
+		-moz-background-clip: padding-box;
+		background-clip: padding-box;
+	}
+</style>
+
+<div id="container-latedays">
 <div class="modal-header">
 <h3>Excused Absense Extensions</h3>
 </div>
 HTML;
 
 		self::$view['tail'] = <<<HTML
-</div>
 </div>	
 HTML;
 
@@ -409,9 +430,12 @@ HTML;
 	//         Are essential for crafting a proper drop-down menu for selecting
 	//         a gradeable.  That is, only gradeables that exist are shown.
 	
+
+		$BASE_URL = rtrim(__BASE_URL__, "/");	
+
 		self::$view['form'] = <<<HTML
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-<form action="admin-latedays-exceptions.php" method="POST" enctype="multipart/form-data">
+<form action="{$BASE_URL}/account/admin-latedays-exceptions.php?course={$_GET['course']}&semester={$_GET['semester']}&this=Excused%20Absense%20Extensions" method="POST" enctype="multipart/form-data">
 <p>
 Use this form to grant an extension (e.g., for an excused absense)
 to a student on a specific assignment.
@@ -484,12 +508,13 @@ HTML;
 			//Table BODY
 			$cell_color = array('white', 'aliceblue');
 			foreach ($db_data as $index => $record) {
+				$firstname = getDisplayName($record);
 				self::$view['student_review_table'] .= <<<HTML
 <tr>
-<td style="background:{$cell_color[$index%2]};">{$record[0]}</td>
-<td style="background:{$cell_color[$index%2]};">{$record[1]}</td>
-<td style="background:{$cell_color[$index%2]};">{$record[2]}</td>
-<td style="background:{$cell_color[$index%2]};">{$record[3]}</td>
+<td style="background:{$cell_color[$index%2]};">{$record['user_id']}</td>
+<td style="background:{$cell_color[$index%2]};">{$firstname}</td>
+<td style="background:{$cell_color[$index%2]};">{$record['user_lastname']}</td>
+<td style="background:{$cell_color[$index%2]};">{$record['late_day_exceptions']}</td>
 </tr>
 HTML;
 			}

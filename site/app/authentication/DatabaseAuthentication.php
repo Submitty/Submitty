@@ -2,8 +2,6 @@
 
 namespace app\authentication;
 
-use app\libraries\Core;
-
 /**
  * Class DatabaseAuthentication
  *
@@ -18,10 +16,10 @@ class DatabaseAuthentication extends AbstractAuthentication {
 
     public function authenticate() {
         $user = $this->core->getQueries()->getUserById($this->user_id);
-        if (empty($user)) {
+        if (!$user->isLoaded()) {
             return false;
         }
 
-        return password_verify($this->password, $user['password']);
+        return password_verify($this->password, $user->getPassword());
     }
 }
