@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import argparse
 
 from sqlalchemy import create_engine, Table, MetaData
@@ -21,6 +23,7 @@ def main():
     parser.add_argument("autograding_hidden_non_extra_credit", type=float, help="")
     parser.add_argument("autograding_hidden_extra_credit", type=float, help="")
     parser.add_argument("submission_time", type=str, help="")
+    parser.add_argument("--active", "-a", action="store_true", default=False)
     args = parser.parse_args()
 
     db_name = "submitty_{}_{}".format(args.semester, args.course)
@@ -41,9 +44,10 @@ def main():
         db.execute(version_table.insert(), g_id=args.gradeable_id, user_id=args.user_id,
                    active_version=args.version)
     else:
-        db.execute(version_table.update(and_(version_table.c.g_id == args.gradeable_id,
-                                  version_table.c.user_id == args.user_id)),
-                   active_version=args.version)
+        if args.active:
+            db.execute(version_table.update(and_(version_table.c.g_id == args.gradeable_id,
+                                                 version_table.c.user_id == args.user_id)),
+                       active_version=args.version)
 
 if __name__ == "__main__":
     main()

@@ -73,7 +73,10 @@ def get_version_details(semester, course, homework, student, version, testcases,
              'submission_time': None, 'active': False}
     if int(version) == active_version:
         entry['active'] = True
-    with open(os.path.join(results_path, "results.json")) as open_file:
+    results_json = os.path.join(results_path, "results.json")
+    if not os.path.isfile(results_json):
+        return False
+    with open(results_json) as open_file:
         open_file = json.load(open_file)
         if len(testcases) != len(open_file['testcases']):
             return False

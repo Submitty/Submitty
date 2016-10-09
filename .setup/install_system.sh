@@ -223,10 +223,10 @@ apachectl -V | grep MPM
 echo "Preparing to install packages.  This may take a while."
 apt-get install -qqy clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
 hardening-includes python python-pip p7zip-full patchutils postgresql-client postgresql-client-9.3 postgresql-client-common \
-unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev javascript-common \
-apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libfile-mmagic-perl \
-libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ g++-multilib jq libseccomp-dev \
-libseccomp2 seccomp junit cmake libpcre3 libpcre3-dev flex bison spim
+postgresql-contrib libpq-dev python-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
+javascript-common apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup \
+libfile-mmagic-perl libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ \
+g++-multilib jq libseccomp-dev libseccomp2 seccomp junit cmake libpcre3 libpcre3-dev flex bison spim
 
 apt-get install -qqy subversion subversion-tools
 apt-get install -qqy libapache2-svn
@@ -257,6 +257,7 @@ apt-get -qqy autoremove
 pip install python-pam
 pip install xlsx2csv
 pip install sqlalchemy
+pip install psycopg2
 
 #NOTE: BELOW THE PYTHON PAM MODULE IS RESTRICTED TO hwcgi
 chmod -R 555 /usr/local/lib/python2.7/*
