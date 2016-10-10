@@ -22,34 +22,37 @@ abstract class Gradeable {
     /** @var Core */
     protected $core;
     
-    /** @var string $id Id of the gradeable (must be unique) */
+    /** @var string Id of the gradeable (must be unique) */
     protected $id;
+
+    /** @var int  */
+    protected $gd_id;
     
-    /** @var string $name Name of the gradeable */
+    /** @var string Name of the gradeable */
     protected $name;
     
-    /** @var int $type GradeableType set for this Gradeable */
+    /** @var int GradeableType set for this Gradeable */
     protected $type;
     
-    /** @var string $ta_instructions Instructions to give to TA for grading */
+    /** @var string Instructions to give to TA for grading */
     protected $ta_instructions = "";
     
-    /** @var bool $team_gradeable Is this a team gradeable */
+    /** @var bool Is this a team gradeable */
     protected $team_gradeable = false;
     
-    /** @var string $bucket Iris Bucket to place gradeable */
+    /** @var string Iris Bucket to place gradeable */
     protected $bucket = null;
     
-    /** @var int $minimum_grading_group Minimum group that's allowed to submit grades for this gradeable */
+    /** @var int Minimum group that's allowed to submit grades for this gradeable */
     protected $minimum_grading_group = 1;
 
-    /** @var \DateTime|null $ta_view_date Date for when grading can view */
+    /** @var \DateTime|null Date for when grading can view */
     protected $ta_view_date = null;
 
-    /** @var \DateTime|null $grade_start_date Date for when grading can start */
+    /** @var \DateTime|null Date for when grading can start */
     protected $grade_start_date = null;
 
-    /** @var \DateTime|null $grade_released_date Date for when the grade will be released to students */
+    /** @var \DateTime|null Date for when the grade will be released to students */
     protected $grade_released_date = null;
     
     protected $ta_grades_released = false;
@@ -57,23 +60,24 @@ abstract class Gradeable {
     /** @var bool Should the gradeable be graded by registration section (or by rotating section) */
     protected $grade_by_registration = true;
     
-    
+    protected $components = null;
+
     /* Config variables that are only for electronic submissions */
     protected $has_config = false;
     
-    /** @var \DateTime|null $open_date When is an electronic submission open to students */
+    /** @var \DateTime|null When is an electronic submission open to students */
     protected $open_date = null;
 
-    /** @var \DateTime|null $due_date Due date for an electronic submission */
+    /** @var \DateTime|null Due date for an electronic submission */
     protected $due_date = null;
 
-    /** @var bool $is_repository Is the electronic submission a SVN repository or allow uploads */
+    /** @var bool Is the electronic submission a SVN repository or allow uploads */
     protected $is_repository = false;
 
-    /** @var string $subdirectory What is the subdirectory for SVN */
+    /** @var string What is the subdirectory for SVN */
     protected $subdirectory = "";
 
-    /** @var int $late_days Number of days you can submit */
+    /** @var int Number of days you can submit */
     protected $late_days = 0;
 
     /** @var string Url to any instructions for the gradeable for students */
@@ -89,14 +93,7 @@ abstract class Gradeable {
     /** @var bool Is there any TA grading to be done for this gradeable (ie. any rubric questions) */
     protected $ta_grading = false;
     protected $questions = array();
-    
-    /* Config variables that are only for checkpoints */
-    protected $checkpoints = array();
-    
-    /* Config variables that are only for numeric/text types */
-    protected $numerics = array();
-    protected $texts = array();
-    
+
     /* Config variables that are for both checkpoints and numeric/text types */
     protected $optional_ta_message = false;
     
@@ -155,6 +152,13 @@ abstract class Gradeable {
     protected $grading_interactive_queue = false;
     protected $in_batch_queue = false;
     protected $grading_batch_queue = false;
+
+    protected $grader_id = null;
+    protected $overall_comment = "";
+    /** @var int code representing the state of electronic submission where 0 = not submitted, 1 = fine, 2 = late,
+     * 3 = too late */
+    protected $status;
+    protected $graded_version = null;
     
     public function __construct(Core $core, $id) {
         $this->core = $core;

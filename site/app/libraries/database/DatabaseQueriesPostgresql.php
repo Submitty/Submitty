@@ -2,18 +2,23 @@
 
 namespace app\libraries\database;
 
+use app\libraries\Core;
 use app\libraries\Database;
 use app\libraries\Utils;
+use app\models\GradeableComponent;
+use app\models\GradeableDb;
 use app\models\User;
 
 class DatabaseQueriesPostgresql implements IDatabaseQueries{
-    /**
-     * @var Database
-     */
+    /** @var Core */
+    private $core;
+
+    /** @var Database */
     private $database;
 
-    public function __construct(Database $database) {
-        $this->database = $database;
+    public function __construct(Core $core) {
+        $this->core = $core;
+        $this->database = $core->getDatabase();
     }
 
     public function getUserById($user_id) {
@@ -98,21 +103,61 @@ WHERE user_id=?", $array);
         }
     }
 
-    public function getAllGradeableIds() {
-        $this->database->query("SELECT g_id FROM gradeable ORDER BY g_id");
-        return $this->database->rows();
+    public function getAllGradeables($user_id = null) {
+        $this->database->query("
+SELECT eg.*, g.*, gd.*
+FROM gradeable as g 
+LEFT JOIN (
+  SELECT *
+  FROM electronic_gradeable
+) as eg ON eg.g_id = g.g_id
+LEFT JOIN (
+  SELECT *
+  FROM gradeable_data
+  WHERE gd_user_id=?
+) as gd ON gd.g_id=g.g_id
+ORDER BY g.g_id", array($user_id));
+        $return = array();
+        foreach ($this->database->rows() as $row) {
+            $return[$row['g_id']] = new GradeableDb($this->core, $row);
+        }
+        return $return;
     }
 
-    public function getGradeableById($g_id) {
+    public function getGradeableById($g_id, $user_id = null) {
         $this->database->query("
-SELECT g.*, eg.*
+SELECT g.*, eg.*, gd.*
 FROM gradeable as g
 LEFT JOIN (
-	SELECT *
-	FROM electronic_gradeable
+  SELECT *
+  FROM electronic_gradeable
 ) as eg ON eg.g_id = g.g_id
-WHERE g.g_id=?", array($g_id));
-        return $this->database->row();
+LEFT JOIN (
+  SELECT *
+  FROM gradeable_data
+  WHERE gd_user_id=?
+) as gd ON gd.g_id=g.g_id
+WHERE g.g_id=?", array($user_id, $g_id));
+        return new GradeableDb($this->core, $this->database->row());
+    }
+
+    public function getGradeableComponents($g_id, $gd_id=null) {
+        $this->database->query("
+SELECT gcd.*, gc.*
+FROM gradeable_component AS gc
+LEFT JOIN (
+  SELECT *
+  FROM gradeable_component_data
+  WHERE gd_id = ?
+) as gcd ON gc.gc_id = gcd.gc_id
+WHERE gc.g_id=?
+", array($gd_id, $g_id));
+
+        $return = array();
+        foreach ($this->database->rows() as $row) {
+            $return[$row['gc_id']] = new GradeableComponent($row);
+        }
+        return $return;
     }
 
     public function getRegistrationSections() {

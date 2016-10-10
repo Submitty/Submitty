@@ -11,10 +11,10 @@ use app\libraries\GradeableType;
  * Populates the Gradeable model by loading the data from the database
  */
 class GradeableDb extends Gradeable {
-    public function __construct(Core $core, $id) {
-        parent::__construct($core, $id);
-        
-        $details = $this->core->getQueries()->getGradeableById($id);
+    public function __construct(Core $core, $details) {
+        parent::__construct($core, $details['g_id']);
+
+        $this->gd_id = $details['gd_id'];
         $timezone = new \DateTimeZone($this->core->getConfig()->getTimezone());
         $this->name = $details['g_title'];
         
@@ -31,17 +31,15 @@ class GradeableDb extends Gradeable {
             $this->subdirectory = $details['eg_subdirectory'];
             $this->point_precision = floatval($details['eg_precision']);
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
+            $this->grader_id = $details['gd_grader_id'];
+            $this->overall_comment = $details['gd_overall_comment'];
+            $this->status = $details['gd_status'];
+            $this->graded_version = $details['gd_active_version'];
             
             $this->loadGradeableConfig();
         }
-        else if ($this->type === GradeableType::CHECKPOINTS) {
-            //$this->optional_ta_message = $details['checkpt-opt-ta-messg'] === "yes";
-            // TODO: load checkpoints
-        }
-        else {
-            $this->type = GradeableType::NUMERIC_TEXT;
-            // TODO: load numerics and text fields
-        }
+
+        $this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
         
         $this->grade_by_registration = $details['g_grade_by_registration'] === true;
         $this->grade_start_date = new \DateTime($details['g_grade_start_date'], $timezone);

@@ -1,6 +1,8 @@
 <?php
 
 namespace app\libraries\database;
+use app\models\Gradeable;
+use app\models\GradeableComponent;
 use app\models\User;
 
 /**
@@ -48,18 +50,30 @@ interface IDatabaseQueries {
     
     /**
      * Gets array of all gradeables ids in the database returning it in a list sorted alphabetically
-     * @return array
+     *
+     * @param $user_id
+     *
+     * @return Gradeable[]
      */
-    public function getAllGradeableIds();
+    public function getAllGradeables($user_id = null);
     
     /**
      * Gets gradeable for the the given id
      *
      * @param $g_id
+     * @param $user_id
      *
-     * @return array
+     * @return Gradeable
      */
-    public function getGradeableById($g_id);
+    public function getGradeableById($g_id, $user_id);
+
+    /**
+     * @param $g_id
+     * @param $gd_id
+     *
+     * @return GradeableComponent[]
+     */
+    public function getGradeableComponents($g_id, $gd_id);
 
     /**
      * Gets all registration sections from the sections_registration table
