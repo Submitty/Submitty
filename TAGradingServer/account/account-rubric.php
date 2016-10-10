@@ -653,10 +653,10 @@ $output .= <<<HTML
                 <textarea name="comment-general" rows="5" style="width:98%; resize:none;" 
                           placeholder="Overall message for student about the gradeable...">{$eg->eg_details['gd_overall_comment']}</textarea>
 HTML;
-if (isset($eg->eg_details['user_email'])) {
+if (isset($eg->original_grader)) {
     $output .= <<<HTML
     <div style="width:100%; height:40px;">
-        Graded By: {$eg->eg_details['user_email']}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br /><br />
+        Graded By: {$eg->original_grader}<br />Overwrite Grader: <input type='checkbox' name='overwrite' value='1' /><br /><br />
     </div>
 HTML;
 }
