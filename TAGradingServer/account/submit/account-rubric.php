@@ -75,7 +75,7 @@ if ($status == 1 && !$is_graded){
 }
 
 if($_GET["individual"] == "1") {
-   header('Location: '.$BASE_URL.'/account/account-summary.php?course='.$_GET['course'].'&semester='.$_GET['semester'].'&g_id=' . $_GET["g_id"]);
+   header('Location: '.$BASE_URL.'/account/account-summary.php?course='.$_GET['course'].'&semester='.$_GET['semester'].'&g_id=' . $_GET["g_id"]."#user-row-".$student);
 }
 else {
    header('Location: '.$BASE_URL.'/account/index.php?course='.$_GET['course'].'&semester='.$_GET['semester'].'&g_id=' . $_GET["g_id"]);

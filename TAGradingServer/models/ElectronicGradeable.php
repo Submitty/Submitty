@@ -167,6 +167,8 @@ class ElectronicGradeable {
     /** @var bool */
     public $graded = false;
 
+    /** @var string */
+    public $original_grader;
     /**
      * @param null|string $student_id
      * @param null|int $g_id
@@ -302,7 +304,7 @@ SELECT g_title, gd_overall_comment, g_grade_start_date, eg.* FROM electronic_gra
         
         //GET ALL questions and scores ASSOCIATED WITH A GRADEABLE
         Database::query("
-SELECT gc.*, gcd.*, 
+SELECT gc.*, gcd.*, gd.gd_grader_id,
     case when gcd_score is null then FALSE else TRUE end as is_graded,
     case when gcd_score is null then 0 else gcd_score end
 FROM gradeable_component AS gc 
@@ -319,6 +321,7 @@ ORDER BY gc_order ASC
         foreach ($this->questions as $question) {
             if ($question['is_graded']) {
                 $this->graded = true;
+                $this->original_grader = $question['gd_grader_id'];
             }
         }
         
