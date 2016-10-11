@@ -21,52 +21,6 @@ if (!User::$is_administrator) {
     }
 }
 
-if(User::$user_group == 1){
-    $csv_button = "<label>Upload CSV (WARNING! Previously entered data may be overwritten!): Do not include a header row. Format CSV using one column for student id and one column for each field. Columns and field types must match.</br><input type=\"file\" id=\"csvUpload\" accept=\".csv, .txt\" onchange=\"csvUpload()\"></label>";
-    $csv_upload_functions = "
-        function csvUpload(){
-            var f = $('#csvUpload').get(0).files[0];
-            
-            if(f){
-                var reader = new FileReader();
-                reader.readAsText(f);
-                reader.onload = function(evt) {
-                  parseCsv(reader.result);
-                  
-                }
-                reader.onerror = function(evt){
-                    console.error(\"nope\");
-                }
-            } 
-        }
-        
-        function parseCsv(csv){
-            url = \"{$BASE_URL}/account/ajax/account-numerictext-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}\";
-            var lines = csv.split(/\\r\\n|\\n/);
-            console.log(lines);
-            console.log(url);
-            $.ajax({
-                type:\"POST\",
-                url:url,
-                data: {
-                    csrf_token: '{$_SESSION['csrf']}',
-                    parsedCsv: lines,
-                    action:\"csv\"
-                },
-                success: function(data, text){
-                    location.reload();
-                },
-                error: function(request, status, error){
-                    window.alert(\"An error has occurred. Contact an administrator.\");
-                }
-            });
-        }";
-}
-else{
-    $csv_button = "";
-    $csv_upload_functions = "";
-}
-
 print <<<HTML
 
 <style type="text/css">
@@ -134,7 +88,14 @@ print <<<HTML
 <div id="container-nt">
     <div class="modal-header">
         <h3 id="myModalLabel" style="width:70%; display:inline-block;">{$nt_gradeable['g_title']}</h3>
-        <span>{$csv_button}</span>
+HTML;
+if(User::$user_group == 1) {
+    print <<<HTML
+    <input type="file" id="csvUpload" accept=".csv, .txt" onchange="csvUpload()">
+    <label for="csvUpload">Upload CSV</label>
+HTML;
+}
+print <<<HTML
         <span style="width: 79%; display: inline-block;">{$button}</span>
     </div>
 
@@ -496,12 +457,58 @@ echo <<<HTML
                 updateFail(item);
                 window.alert("[SAVE ERROR] Refresh Page");
             });
-        }
-        
-        {$csv_upload_functions}
-        
+        }  
 	</script>
 HTML;
 
+    if(User::$user_group == 1){
+        ECHO <<< HTML
+        <script>
+        function csvUpload(){
+                        
+            var confirmation = window.confirm("WARNING! \\nPreviously entered data may be overwritten! " +
+             "This action is irreversible! Are you sure you want to continue?\\n\\n Do not include a header row in your CSV. Format CSV using one column for " +
+              "student id and one column for each field. Columns and field types must match.");
+              if(confirmation){
+                    var f = $('#csvUpload').get(0).files[0];
+                    
+                    if(f){
+                        var reader = new FileReader();
+                        reader.readAsText(f);
+                        reader.onload = function(evt) {
+                          parseCsv(reader.result);                          
+                        }
+                        reader.onerror = function(evt){
+                            console.error(evt);
+                        }
+                    }
+              } else{
+                  var f = $('#csvUpload');
+                  f.replaceWith(f = f.clone(true));
+              }
+        }
+        
+        function parseCsv(csv){
+            url = "{$BASE_URL}/account/ajax/account-numerictext-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}";
+            var lines = csv.trim().split(/\\r\\n|\\n/);
+            $.ajax({
+                type:"POST",
+                url:url,
+                data: {
+                    csrf_token: '{$_SESSION['csrf']}',
+                    parsedCsv: lines,
+                    action:"csv"
+                },
+                success: function(data, text){
+                    location.reload();
+                },
+                error: function(request, status, error){
+                    window.alert("An error has occurred. Contact an administrator.");
+                }
+            });
+        }
+        </script>
+HTML;
+    }
 include "../footer.php";
 ?>

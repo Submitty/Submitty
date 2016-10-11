@@ -107,10 +107,17 @@ function standard()
 
 function csvupload(){
 
-    $csv = $_POST['parsedCsv'];
     global $db;
-    $params = array('{"'.implode('","', $csv).'"}', $_GET["g_id"], User::$user_id);
 
-    $db->query("SELECT * FROM csv_To_Numeric_Gradeable(?, ?, ?)", $params);
+    $csv = $_POST['parsedCsv'];
+    $csv_array = array();
+    foreach ($csv as $line){
+        $line = addslashes($line);
+        $csv_array[] = $line;
+    }
+
+    $params = array('{"'.implode('","', $csv_array).'"}', $_GET["g_id"], User::$user_id);
+
+    $db->query("SELECT csv_To_Numeric_Gradeable(?, ?, ?)", $params);
 }
 echo "updated";
