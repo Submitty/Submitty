@@ -115,7 +115,7 @@ TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::jso
   }
   vectorOfWords text_a = stringToWords( student_file_contents );
   vectorOfWords text_b = stringToWords( expected_file_contents );
-  Difference* diff = ses( &text_a, &text_b, true );
+  Difference* diff = ses(j, &text_a, &text_b, true );
   diff->type = ByLineByWord;
   return diff;
 }
@@ -133,7 +133,7 @@ TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::js
   }
   vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
   vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
-  Difference* diff = ses( &text_a, &text_b, false );
+  Difference* diff = ses(j, &text_a, &text_b, false );
   diff->type = ByLineByWord;
   return diff;
 }
@@ -151,7 +151,7 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
   }
   vectorOfLines text_a = stringToLines( student_file_contents );
   vectorOfLines text_b = stringToLines( expected_file_contents );
-  Difference* diff = ses( &text_a, &text_b, false );
+  Difference* diff = ses(j, &text_a, &text_b, false );
   diff->type = ByLineByChar;
   return diff;
 }
@@ -169,7 +169,7 @@ TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::jso
   }
   vectorOfLines text_a = stringToLines( student_file_contents );
   vectorOfLines text_b = stringToLines( expected_file_contents );
-  Difference* diff = ses( &text_a, &text_b, true );
+  Difference* diff = ses(j, &text_a, &text_b, true );
   diff->type = ByLineByChar;
   return diff;
 }
@@ -189,7 +189,7 @@ TestResults* myersDiffbyLinebyCharExtraStudentOutputOk_doit (const TestCase &tc,
   //from nowhite
 	vectorOfWords text_a = stringToWords( student_file_contents );
 	vectorOfWords text_b = stringToWords( expected_file_contents );
-	Difference diff = *(ses( &text_a, &text_b, true, extraStudentOutputOk ));
+	Difference diff = *(ses(j, &text_a, &text_b, true, extraStudentOutputOk ));
 	diff.type = ByLineByWord;
 	return diff;
 #else
@@ -197,7 +197,7 @@ TestResults* myersDiffbyLinebyCharExtraStudentOutputOk_doit (const TestCase &tc,
 	vectorOfLines text_a = stringToLines( student_file_contents );
 	vectorOfLines text_b = stringToLines( expected_file_contents );
 	bool extraStudentOutputOk = true;
-	Difference* diff = ses( &text_a, &text_b, true, extraStudentOutputOk );
+	Difference* diff = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
 	diff->type = ByLineByChar;
 	std::cout << "end of MYERS DIFF EXTRA STUDENT OUTPUT" << std::endl;
 	return diff;
@@ -353,7 +353,7 @@ TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
 @param bool extraStudentOutputOk - boolean that tells if it is okay to have extra student
        output at the end of the student output file 
 */
-template<class T> Difference* ses ( T* student_output, T* inst_output, bool secondary, bool extraStudentOutputOk  ) {
+template<class T> Difference* ses (const nlohmann::json& j, T* student_output, T* inst_output, bool secondary, bool extraStudentOutputOk  ) {
 
   metaData< T > meta_diff = sesSnapshots( ( T* ) student_output, ( T* ) inst_output, extraStudentOutputOk );
   sesSnakes( meta_diff,  extraStudentOutputOk  );
@@ -368,11 +368,30 @@ template<class T> Difference* ses ( T* student_output, T* inst_output, bool seco
 
   diff->only_whitespace_changes = true;
 
-  for (int x = 0; x < diff->changes.size(); x++) {
-    INSPECT_CHANGES(std::cout,diff->changes[x],*student_output,*inst_output,diff->only_whitespace_changes,extraStudentOutputOk);
+  
+  diff->line_added = 0;
+  diff->line_deleted = 0; 
+  diff->total_line = 0;
+  diff->char_added = 0;
+  diff->char_deleted = 0; 
+  diff->total_char = 0;
+
+  diff->total_line += (*inst_output).size();
+  for (int i = 0; i < (*inst_output).size(); i++) {
+    diff->total_char+=(*inst_output)[i].size();
   }
 
-  diff->PrepareGrade();
+  for (int x = 0; x < diff->changes.size(); x++) {
+    INSPECT_CHANGES(std::cout,diff->changes[x],*student_output,*inst_output,diff->only_whitespace_changes,extraStudentOutputOk,
+		    diff->line_added, diff->line_deleted, 
+		    diff->char_added, diff->char_deleted);
+  }
+
+  std::cout << "INSPECT CHANGES   lines  added=" << diff->line_added << "  deleted=" << diff->line_deleted << "  total=" << diff->total_line << std::endl;
+  std::cout << "INSPECT CHANGES   chars  added=" << diff->char_added << "  deleted=" << diff->char_deleted << "  total=" << diff->total_char << std::endl;
+
+
+  diff->PrepareGrade(j);
 
   return diff;
 }
@@ -639,12 +658,50 @@ template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extra
 // =================================================================
 // =================================================================
 
-void Difference::PrepareGrade() {
+void Difference::PrepareGrade(const nlohmann::json& j) {
   std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
   std::cout << "PREPARE GRADE" << std::endl;
 
+
   // --------------------------------------------------------
-  if (this->extraStudentOutputOk) {
+  std::cout << "json " << j.dump(4) << std::endl;
+  if (j.find("max_char_changes") != j.end()) {
+    std::cout << "MAX CHAR CHANGES" << std::endl;
+
+    float max_char_changes = j.value("max_char_changes", -1);
+    assert (max_char_changes > 0);
+    float min_char_changes = j.value("min_char_changes",0);
+    assert (min_char_changes >= 0);
+    assert (min_char_changes < max_char_changes);
+
+    assert (total_char > 0);
+    assert (max_char_changes <= total_char);
+
+    int char_changes = char_added + char_deleted;
+
+    std::cout << "char_changes=" << char_changes << " min=" << min_char_changes << " max=" << max_char_changes << std::endl;
+    
+    float grade;
+    if (char_changes <= min_char_changes) {
+      grade = 1.0;
+    } else if (char_changes > max_char_changes) {
+      grade = 0.0;
+    } else {
+      std::cout << "numer " << char_changes - min_char_changes << " denom= " << max_char_changes - min_char_changes << std::endl;
+      grade = 1 - float(char_changes - min_char_changes) / float(max_char_changes - min_char_changes);
+    }
+    std::cout << "grade " << grade << std::endl;
+    assert (grade >= -0.00001 & grade <= 1.00001);
+    this->setGrade(grade);
+    if (grade < 0.5) {
+      messages.push_back(j.value("failure_message", "ERROR!  Significant differences between this file and the expected file."));
+    } else if (grade < 0.99) {
+      messages.push_back(j.value("failure_message", "ERROR!  Differences between this file and the expected file."));
+    }
+  }
+
+  // --------------------------------------------------------
+  else if (this->extraStudentOutputOk) {
     // only missing lines (deletions) are a problem
     int count_of_missing_lines = 0;
     for (int x = 0; x < this->changes.size(); x++) {
