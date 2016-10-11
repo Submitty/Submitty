@@ -40,7 +40,7 @@ $core = new Core();
  */
 function exception_handler($throwable) {
     global $core;
-    $core->getOutput()->showException(ExceptionHandler::throwException($throwable));
+    $core->getOutput()->showException(ExceptionHandler::handleException($throwable));
 }
 set_exception_handler("exception_handler");
 
