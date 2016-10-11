@@ -97,6 +97,7 @@ print <<<HTML
             <table class="table table-bordered striped-table" id="g-checkpoints-table" style=" border: 1px solid #AAA;">
                 <thead style="background: #E1E1E1;">
                     <tr>
+                        <th></th>
                         <th>User ID</th>
                         <th>Name</th>
 HTML;
@@ -151,7 +152,7 @@ foreach($db->rows() as $section) {
     $section_id = intval($section[$section_param]);
     $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
     $enrolled_assignment = ($grade_by_reg_section ? "enrolled in": "assigned to");
-    $count = count($c_gradeable_checkpoints) + 2;
+    $count = count($c_gradeable_checkpoints) + 3;
     print <<<HTML
                     <tr class="info">
                         <td colspan="{$count}" style="text-align:center;" id="section-{$section_id}">
@@ -228,10 +229,11 @@ ORDER BY
         $firstname = getDisplayName($student_info);
         print <<<HTML
                         <tr>
-                            <td class="cell-all" id="cell-{$c_gradeable["g_id"]}-all-{$row["user_id"]}" cell-status="0">
+                            <td>{$section_id}</td>
+                            <td style="white-space: nowrap;" class="cell-all" id="cell-{$c_gradeable["g_id"]}-all-{$row["user_id"]}" cell-status="0">
                             {$student_info["user_id"]}
                             </td>
-                            <td>{$firstname} {$student_info["user_lastname"]}</td>
+                            <td style="white-space: nowrap;">{$firstname} {$student_info["user_lastname"]}</td>
 HTML;
         $count = 1;
 
