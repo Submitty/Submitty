@@ -32,7 +32,7 @@ pull:
 
 
 push:
-	rsync -azP individual_summary_html/ ${USERNAME}@${HWSERVER}:${REPORTS_DIRECTORY}/summary_html/
+	rsync -azP individual_summary_html/* ${USERNAME}@${HWSERVER}:${REPORTS_DIRECTORY}/summary_html/
 
 flags = -g
 memory_debug : memory_flags = -m32
