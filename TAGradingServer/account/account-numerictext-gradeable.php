@@ -170,6 +170,7 @@ print <<<HTML
                 <table class="table table-bordered" id="nt_gradeablesTable" style=" border: 1px solid #AAA;">
                     <thead style="background: #E1E1E1;">
                         <tr>
+                            <th></th>
                             <th>User ID</th>
                             <th>Name</th>
 HTML;
@@ -229,9 +230,9 @@ else{
     }
 }
 
-$colspan += 3;
+$colspan += 4;
 $colspan += $colspan2;
-
+$student_cnt = 0;
 
 foreach($db->rows() as $section){
     $params = array($section[$section_param]);
@@ -304,7 +305,7 @@ ORDER BY
     $titles = $db->rows();
     print <<<HTML
                         <tr style="background: #E1E1E1;">
-                            <td colspan='2'></td>
+                            <td colspan='3'></td>
 HTML;
     for($i=0; $i<$num_numeric; ++$i){
         $title = $titles[$i];
@@ -332,10 +333,12 @@ HTML;
         $firstname = getDisplayName($student_info);
         
         print <<<HTML
-                        <tr>
-                            <td>{$student_info["user_id"]}</td>
-                            <td>{$firstname} {$student_info["user_lastname"]}</td>
+                        <tr id="student-row-{$student_cnt}">
+                            <td>{$section_id}</td>
+                            <td style="white-space: nowrap;">{$student_info["user_id"]}</td>
+                            <td style="white-space: nowrap;">{$firstname} {$student_info["user_lastname"]}</td>
 HTML;
+        $student_cnt++;
         $question_grades=pgArrayToPhp($temp['grade_value_array']);
         //return an empty array of zeros here
         if (empty($question_grades)) {
@@ -366,7 +369,7 @@ HTML;
                             <td style="width: 10px" id="cell-{$nt_gradeable["g_id"]}-{$row['user_id']}-score">{$total_grade}</td>
 HTML;
         
-        for ($i = $num_numeric; $i <$num_numeric+$num_text; ++$i) {
+        for ($i = $num_numeric; $i < $num_numeric+$num_text; ++$i) {
             $text_field = isset($text_fields[$i]) ? $text_fields[$i] : "";
             print <<<HTML
                             <td class="input-container" style="border: 1px solid black">
