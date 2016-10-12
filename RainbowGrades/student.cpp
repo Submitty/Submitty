@@ -296,6 +296,11 @@ int Student::getAllowedLateDays(int which_lecture) const {
       answer++;
     }
   }
+
+  for (int i = 0; i < bonus_late_days_which_lecture.size(); i++) {
+    if (bonus_late_days_which_lecture[i] <= which_lecture)
+      answer++;
+  }
   
   return std::max(current_allowed_late_days,answer);
 

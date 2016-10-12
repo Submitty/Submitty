@@ -1058,6 +1058,8 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
 
   std::string command = "rm -f " + OUTPUT_FILE + " " + INDIVIDUAL_FILES_OUTPUT_DIRECTORY + "*html";
   system(command.c_str());
+  command = "rm -f " + OUTPUT_FILE + " " + INDIVIDUAL_FILES_OUTPUT_DIRECTORY + "*json";
+  system(command.c_str());
 
   // get todays date;
   time_t now = time(0);  
@@ -1098,10 +1100,21 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
   
 
   for (int S = 0; S < (int)students.size(); S++) {
-    //if (students[S]->getSection() == 0) continue;
+
+    nlohmann::json mj;
 
     std::string file2 = INDIVIDUAL_FILES_OUTPUT_DIRECTORY + students[S]->getUserName() + "_message.html";
+    std::string file2_json = INDIVIDUAL_FILES_OUTPUT_DIRECTORY + students[S]->getUserName() + "_message.json";
     std::ofstream ostr2(file2.c_str());
+    std::ofstream ostr2_json(file2_json.c_str());
+
+    mj["username"] = students[S]->getUserName();
+    mj["building"] = "DCC";
+    mj["room"] = "308";
+    mj["zone"] = "A";
+
+    ostr2_json << mj.dump(4);
+    
 
 #if 0
     if (students[S]->hasPriorityHelpStatus()) {
@@ -1161,10 +1174,11 @@ void load_bonus_late_day(std::vector<Student*> &students,
   while (istr >> username) {
     Student *s = GetStudent(students,username);
     if (s == NULL) {
-      std::cerr << "ERROR!  bad username " << username << " cannot give late day " << std::endl;
+      //std::cerr << "ERROR!  bad username " << username << " cannot give bonus late day " << std::endl;
       //exit(1);
     } else {
       s->add_bonus_late_day(which_lecture);
+      std::cout << "add bonus late day for " << username << std::endl;
     }
   } 
 
