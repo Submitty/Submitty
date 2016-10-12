@@ -520,6 +520,10 @@ abstract class Gradeable {
         return $this->due_date;
     }
 
+    public function getTAViewDate(){
+        return $this->ta_view_date;
+    }
+
     public function getGradeStartDate(){
         return $this->grade_start_date;
     }
