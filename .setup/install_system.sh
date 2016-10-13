@@ -74,7 +74,7 @@ fi
 # USERS SETUP
 #################
 
-python ${SUBMITTY_REPOSITORY}/.setup/create_untrusted_users.py
+${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
 
 # Special users and groups needed to run Submitty
 #
@@ -603,8 +603,7 @@ if [[ ${VAGRANT} == 1 ]]; then
     ln -s ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs ${SUBMITTY_DATA_DIR}/tagrading_logs
 
     # Call helper script that makes the courses and refreshes the database
-    chmod u+x ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py
-    ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py
+    ${SUBMITTY_REPOSITORY}/.setup/bin/add_sample_courses.py
 
     #################################################################
     # SET CSV FIELDS (for classlist upload data)

@@ -36,7 +36,7 @@ sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
 sudo mkdir -p ${SUBMITTY_DATA_DIR}
 sudo ln -s ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
 
-sudo python ${DIR}/../create_untrusted_users.py
+sudo python ${DIR}/../bin/create_untrusted_users.py
 
 sudo adduser ta --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 sudo echo "ta:ta" | sudo chpasswd
@@ -103,4 +103,4 @@ sudo echo "smithj:smithj" | sudo chpasswd
 sudo echo "joness:joness" | sudo chpasswd
 sudo echo "browna:browna" | sudo chpasswd
 sudo echo "pearsr:pearsr" | sudo chpasswd
-sudo python ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py csci1000
+sudo python ${SUBMITTY_REPOSITORY}/.setup/bin/add_sample_courses.py csci1000

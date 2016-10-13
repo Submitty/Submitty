@@ -20,7 +20,7 @@ cache:
   directories:
     - vendor
     - $HOME/.composer/cache
-    - travis_phantomjs
+    - $HOME/.cache/pip
 
 addons:
   #firefox: "45.0"
