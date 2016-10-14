@@ -15,7 +15,7 @@ class NavigationView {
     public function __construct(Core $core) {
         $this->core = $core;
     }
-    
+
     public function showGradeables($sections_to_list) {
         $return = "";
 
@@ -80,6 +80,11 @@ HTML;
             }
 
             if (count($gradeable_list) == 0) {
+                // $return .= <<<HTML
+                // <p>Welcome to {$course}!  There are currently no assignments available to complete.
+                //    Please check back later. </p>
+                // HTML;
+                // break;
                 continue;
             }
 
@@ -156,7 +161,7 @@ HTML;
 HTML;
                     }
                 }
-    
+
                 if ($this->core->getUser()->accessAdmin()) {
                     $admin_button = <<<HTML
                 <button class="btn btn-default" style="width:100%;" \\
@@ -168,12 +173,12 @@ HTML;
                 else {
                     $admin_button = "";
                 }
-                
+
                 if (!$this->core->getUser()->accessGrading()) {
                     $gradeable_grade_range = "";
-                    
+
                 }
-                
+
                 $return.= <<<HTML
             <tr class="gradeable_row">
                 <td>{$gradeable_title}</td>
