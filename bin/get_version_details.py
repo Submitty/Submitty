@@ -4,6 +4,13 @@
 Generate a list of active versions for students. Useful for when the database gets bad values for
 the active version and then you can just run this function to get the proper values to update the
 database with.
+
+Basic usage of this script is ./get_version_details.py <semester> <course> which will get all
+students and their submissions for that particular semester course. You can also pass in
+optional flag to not have any indentation in the JSON produced as well as to write the JSON
+to a file instead of printing it out to stdout.
+
+To see all options, use ./get_version_details.py --help
 """
 
 from __future__ import print_function
@@ -12,8 +19,7 @@ from datetime import datetime
 import json
 import os
 
-# FIXME: Path to the courses directory for submitty. Currently hardcoded pending #607
-DATA_PATH = "/var/local/submitty/courses"
+DATA_PATH = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 
 
 def get_all_versions(semester, course):
@@ -103,8 +109,8 @@ def main():
                                                  "details for all assignments")
     parser.add_argument("semester", type=str, help="What semester to look at?")
     parser.add_argument("course", type=str, help="What course to look at?")
-    parser.add_argument("--no-indent", "-n", action="store_true", default=False)
-    parser.add_argument("--outfile", "-o", type=str, default=None)
+    parser.add_argument("-n", "--no-indent", dest="no_indent", action="store_true", default=False)
+    parser.add_argument("-o", "--outfile", dest="outfile", type=str, default=None)
     args = parser.parse_args()
     versions = get_all_versions(args.semester, args.course)
     indent = None

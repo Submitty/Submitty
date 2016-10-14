@@ -299,6 +299,7 @@ replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/fake_submit_button_press.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 
 # most of the scripts should be root only
@@ -310,11 +311,13 @@ chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/build_homework_fun
 chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
 chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
 chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 chown ${HWCRON_USER}:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 
 # fix the permissions specifically of the grade_students.sh script

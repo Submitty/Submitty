@@ -859,7 +859,7 @@ while true; do
     sec_deadline=`date -d "${global_assignment_deadline}" +%s`
     sec_submission=`date -d "${global_submission_time}" +%s`
     seconds_late=$((sec_submission-sec_deadline))
-    /usr/local/submitty/bin/grade_students__results_history.py  \
+    ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py  \
         "$global_results_history_file_location" \
         "$global_assignment_deadline" \
         "$global_submission_time" \
@@ -874,7 +874,7 @@ while true; do
 
     #---------------------------------------------------------------------
     # WRITE OUT VERISON DETAILS
-    /usr/local/submitty/bin/insert_database_version_data.py \
+    ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
         "${semester}" \
         "${course}" \
         "${assignment}" \
