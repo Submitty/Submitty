@@ -217,7 +217,7 @@ ORDER BY
             $percent = round(($graded / $total) * 100);
 
             print <<<HTML
-        <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
+        <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; z-index:100; margin: 70px auto 100px; position: relative; width: 700px;">
             <div class="modal-header">
                 <h3 id="myModalLabel">{$g_title} Grading Status</h3>
             </div>
