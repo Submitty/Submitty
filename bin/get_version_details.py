@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 """
 Generate a list of active versions for students. Useful for when the database gets bad values for
@@ -8,9 +8,9 @@ database with.
 
 from __future__ import print_function
 import argparse
+from datetime import datetime
 import json
 import os
-import time
 
 # FIXME: Path to the courses directory for submitty. Currently hardcoded pending #607
 DATA_PATH = "/var/local/submitty/courses"
@@ -88,10 +88,9 @@ def get_version_details(semester, course, homework, student, version, testcases,
     with open(os.path.join(results_path, "results_history.json")) as open_file:
         json_file = json.load(open_file)
         if isinstance(json_file, list):
-            json_file = json_file[0]
-            a = time.strptime(json_file['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")
-            entry['submission_time'] = '{:02d}/{:02d}/{:02d} {:02d}:{:02d}:{:02d}'. \
-                format(a[2], a[1], a[0], a[3], a[4], a[5])
+            a = datetime.strptime(json_file[-1]['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")
+            entry['submission_time'] = '{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}'\
+                .format(a.year, a.month, a.day, a.hour, a.minute, a.second)
     return entry
 
 

@@ -332,13 +332,17 @@ class SubmissionController extends AbstractController {
         if (!file_put_contents($version_path."/.submit.timestamp", $current_time."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
-    
+
+        $user_id = $this->core->getUser()->getId();
+
         $touch_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
-            $gradeable->getId(), $this->core->getUser()->getId(), $new_version);
+            $gradeable->getId(), $user_id, $new_version);
         $touch_file = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_interactive/".implode("__", $touch_file);
         if (!touch($touch_file)) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
         }
+
+        $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, $new_version);
         
         $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
         return $this->uploadResult("Successfully uploaded files");
@@ -418,6 +422,8 @@ class SubmissionController extends AbstractController {
         else {
             $_SESSION['messages']['success'][] = "Updated version of gradeable to version #" . $new_version;
         }
+
+        $this->core->getQueries()->updateActiveVersion($gradeable->getId(), $this->core->getUser()->getId(), $new_version);
         $this->core->redirect($this->core->buildUrl(array('component' => 'student',
                                                           'gradeable_id' => $gradeable->getId(),
                                                           'gradeable_version' => $new_version)));
