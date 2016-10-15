@@ -807,7 +807,7 @@ HTML;
             return false;
         }
     }
-    
+    // export to JSON
     $.fn.serializeObject = function(){
         var o = {};
         var a = this.serializeArray();
@@ -822,6 +822,19 @@ HTML;
         ignore.push("numeric_extra_0");
         ignore.push("text_label_0");
         ignore.push("checkpoint_label_0");
+        
+        // export appropriate users 
+        if ($('[name="minimum_grading_group"]').prop('value') == 1){
+          $('#full-access-graders').find('.grader').each(function(){
+                      ignore.push($(this).attr('name'));
+          });
+        }
+
+        if ($('[name="minimum_grading_group"]').prop('value') <= 2){
+          $('#limited-access-graders').find('.grader').each(function(){
+                      ignore.push($(this).attr('name'));
+          });
+        }
         
         $(':radio').each(function(){
            if(! $(this).is(':checked')){
