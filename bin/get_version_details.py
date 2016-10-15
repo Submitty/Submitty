@@ -19,7 +19,7 @@ from datetime import datetime
 import json
 import os
 
-DATA_PATH = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
+DATA_PATH = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "courses")
 
 
 def get_all_versions(semester, course):
