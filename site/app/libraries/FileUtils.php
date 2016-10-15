@@ -253,9 +253,11 @@ class FileUtils {
         }
         else {
             foreach (str_split($filename) as $char) {
-                if (($char == "'" || $char == '"') ||
-                    ($char == "\\" || $char == "/") ||
-                    ($char == "<" || $char == ">")) {
+                if ($char == "'" || 
+		    $char == '"' ||
+                    $char == "\\" ||
+		    $char == "<" || 
+		    $char == ">") {
                     return false;
                 }
             }
