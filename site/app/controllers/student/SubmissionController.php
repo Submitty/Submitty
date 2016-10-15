@@ -415,7 +415,10 @@ class SubmissionController extends AbstractController {
             $this->core->redirect($this->core->buildUrl(array('component' => 'student',
                                                               'gradeable_id' => $gradeable->getId())));
         }
-        
+
+        $version = ($new_version > 0) ? $new_version : null;
+        $this->core->getQueries()->updateActiveVersion($gradeable->getId(), $this->core->getUser()->getId(), $version);
+
         if ($new_version == 0) {
             $_SESSION['messages']['success'][] = "Cancelled submission for gradeable";
         }
@@ -423,7 +426,6 @@ class SubmissionController extends AbstractController {
             $_SESSION['messages']['success'][] = "Updated version of gradeable to version #" . $new_version;
         }
 
-        $this->core->getQueries()->updateActiveVersion($gradeable->getId(), $this->core->getUser()->getId(), $new_version);
         $this->core->redirect($this->core->buildUrl(array('component' => 'student',
                                                           'gradeable_id' => $gradeable->getId(),
                                                           'gradeable_version' => $new_version)));

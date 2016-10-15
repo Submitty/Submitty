@@ -24,7 +24,7 @@ from datetime import datetime
 import json
 import os
 
-from sqlalchemy import create_engine, Table, MetaData
+from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
 
 DB_HOST = "__INSTALL__FILLIN__DATABASE_HOST__"
 DB_USER = "__INSTALL__FILLIN__DATABASE_USER__"
@@ -126,13 +126,37 @@ def main():
     we're using some other method of grading, we'll insert the row and whoever called the script
     will need to handle the active version afterwards.
     """
-    result = db.execute(data_table.select(), g_id=args.gradeable_id, user_id=args.user_id,
-                        g_version=args.version)
+    result = db.execute(select([func.count()]).select_from(data_table)
+                        .where(data_table.c.g_id == bindparam('g_id'))
+                        .where(data_table.c.user_id == bindparam('user_id'))
+                        .where(data_table.c.g_version == bindparam('g_version')),
+                        g_id=args.gradeable_id, user_id=args.user_id, g_version=args.version)
+    row = result.fetchone()
     query_type = data_table.insert()
-    if len(result) > 0:
-        query_type = data_table.update()
-    db.execute(query_type, g_id=args.gradeable_id, user_id=args.user_id,
-               g_version=args.version,
+    if row[0] > 0:
+        query_type = data_table\
+            .update(
+                values=
+                {
+                    data_table.c.autograding_non_hidden_non_extra_credit:
+                        bindparam("autograding_non_hidden_non_extra_credit"),
+                    data_table.c.autograding_non_hidden_extra_credit:
+                        bindparam("autograding_non_hidden_extra_credit"),
+                    data_table.c.autograding_hidden_non_extra_credit:
+                        bindparam("autograding_hidden_non_extra_credit"),
+                    data_table.c.autograding_hidden_extra_credit:
+                        bindparam("autograding_hidden_extra_credit")
+                })\
+            .where(data_table.c.g_id == bindparam('u_g_id'))\
+            .where(data_table.c.user_id == bindparam('u_user_id'))\
+            .where(data_table.c.g_version == bindparam('u_g_version'))
+        # we bind "u_g_id" (and others) as we cannot use "g_id" in the where clause for an
+        # update. Passing this as an argument to db.execute doesn't cause any issue when we
+        # use the insert query (that doesn't have u_g_id)
+    db.execute(query_type,
+               g_id=args.gradeable_id, u_g_id=args.gradeable_id,
+               user_id=args.user_id, u_user_id=args.user_id,
+               g_version=args.version, u_g_version=args.version,
                autograding_non_hidden_non_extra_credit=non_hidden_non_ec,
                autograding_non_hidden_extra_credit=non_hidden_ec,
                autograding_hidden_non_extra_credit=hidden_non_ec,

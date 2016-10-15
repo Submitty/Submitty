@@ -201,7 +201,7 @@ INSERT INTO electronic_gradeable_data
 (g_id, user_id, g_version, autograding_non_hidden_non_extra_credit, autograding_non_hidden_extra_credit, 
 autograding_hidden_non_extra_credit, autograding_hidden_extra_credit, submission_time) 
 VALUES(?, ?, ?, 0, 0, 0, 0, NOW())", array($g_id, $user_id, $version));
-        $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=?, user_id=?",
+        $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND user_id=?",
             array($g_id, $user_id));
         $row = $this->database->row();
         if (!empty($row)) {
