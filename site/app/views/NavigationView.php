@@ -81,10 +81,8 @@ HTML;
 
             if (count($gradeable_list) == 0) {
                 $return .= <<<HTML
-        <div class="jumbotron">
         <div class="container">
         <p>There are currently no assignments posted.  Please check back later.</p>
-        </div>
         </div>
 HTML;
                 break;

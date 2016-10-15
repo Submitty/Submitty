@@ -43,6 +43,9 @@ abstract class Gradeable {
     /** @var int $minimum_grading_group Minimum group that's allowed to submit grades for this gradeable */
     protected $minimum_grading_group = 1;
 
+    /** @var \DateTime|null $ta_view_date Date for when grading can view */
+    protected $ta_view_date = null;
+
     /** @var \DateTime|null $grade_start_date Date for when grading can start */
     protected $grade_start_date = null;
 
