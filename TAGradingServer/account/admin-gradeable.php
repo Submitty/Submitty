@@ -7,7 +7,7 @@ include "../header.php";
 check_administrator();
 
 if($user_is_administrator){
-    $have_old = $has_grades = false;
+    $have_old = $has_grades = $have_old_edit = false;
     $current_date = date('Y/m/d 23:59:59');
     $yesterday = date('Y/m/d 23:59:59', strtotime( '-1 days' ));
     $old_gradeable = array(
@@ -43,7 +43,7 @@ if($user_is_administrator){
     $initial_ta_grading_compare_date = "UNSPECIFIED";
     $initial_grades_released_compare_date = "TA Beta Testing Date";
 
-    if (isset($_GET['action']) && $_GET['action'] == 'edit') {
+    if (isset($_GET['action']) && ($_GET['action'] == 'edit' || $_GET['action'] == 'template')) {
         $g_id = $_GET['id'];
         Database::query("SELECT * FROM gradeable WHERE g_id=?",array($g_id));
         if (count(Database::rows()) == 0) {
@@ -53,6 +53,7 @@ if($user_is_administrator){
         Database::query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($g_id));
         $old_components = json_encode(Database::rows());
         $have_old = true;
+        $have_old_edit = (isset($_GET['action']) && ($_GET['action'] == 'edit'));
         
         // get the number of text and numeric fields for the form
         if ($old_gradeable['g_gradeable_type']==2){
@@ -126,8 +127,8 @@ if($user_is_administrator){
         $action = strtolower($string);
     }
     else {
-        $gradeable_name = $old_gradeable['g_title'];
-        $gradeable_submission_id = $old_gradeable['g_id'];
+        $gradeable_name = ($have_old_edit) ? $old_gradeable['g_title'] : '';
+        $gradeable_submission_id = ($have_old_edit) ? $old_gradeable['g_id']: '';
         $g_instructions_url = $old_gradeable['g_instructions_url'];
         $g_overall_ta_instructions = $old_gradeable['g_overall_ta_instructions'];
         $g_gradeable_type = $old_gradeable['g_gradeable_type'];
@@ -138,13 +139,28 @@ if($user_is_administrator){
         $g_grade_start_date = $old_gradeable['g_grade_start_date'];
         $g_grade_released_date = $old_gradeable['g_grade_released_date'];
         $g_min_grading_group = $old_gradeable['g_min_grading_group'];
-        $string = "Edit";
-        $button_string = "Save";
-        $action = 'edit';
+        
+        if ($have_old_edit){
+          $string = "Edit";
+          $button_string = "Save";
+          $action = 'edit';
+        }
+        else{
+          $string = $button_string = "Add";
+          $action = strtolower($string);
+        }
+    }
+    
+    // for templates 
+    if(!$have_old_edit){
+      // generate the drop down for all existing gradeables
+      $db->query("SELECT g_id, g_title FROM gradeable ORDER BY g_title ASC", array());
+      $gradeable_id_title = $db->rows();
     }
 
     $have_old = json_encode($have_old);
-    $extra = ($has_grades) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
+    $old_edit = json_encode($have_old_edit);
+    $extra = ($have_old_edit && $has_grades) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
     print <<<HTML
 
 <style type="text/css">
@@ -246,9 +262,28 @@ if($user_is_administrator){
         <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
+HTML;
+if (!$have_old_edit){
+  print <<<HTML
+            <div style="padding-left: 200px;">
+              From Template: <select name="gradeable_template" style='width: 170px;' value='' >
+            </div>
+            <option>--None--</option>
+HTML;
+
+    foreach ($gradeable_id_title as $g_id_title){
+      print <<<HTML
+          <option value="{$g_id_title['g_id']}">{$g_id_title['g_title']}</option>
+HTML;
+    }
+  print <<<HTML
+          </select>          
+HTML;
+}
+  print <<<HTML
             <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{$button_string} Gradeable</button>
 HTML;
-    if ($action == "edit") {
+    if ($have_old_edit) {
         print <<<HTML
                 <button type="button" class="btn btn-danger" onclick="deleteForm();" style="margin-right:10px; float: right;">Delete Gradeable</button>
 HTML;
@@ -593,12 +628,12 @@ HTML;
             <fieldset>
                 <input type="radio" name="section_type" value="reg_section"
 HTML;
-    echo (($action==='edit' && $g_grade_by_registration===true) || $action != 'edit')?'checked':'';
+    echo (($have_old && $g_grade_by_registration===true) || $action != 'edit')?'checked':'';
     print <<<HTML
                 /> Registration Section
                 <input type="radio" name="section_type" value="rotating-section" id="rotating-section" class="graders"
 HTML;
-    echo ($action==='edit' && $g_grade_by_registration===false)?'checked':'';
+    echo ($have_old && $g_grade_by_registration===false)?'checked':'';
     print <<<HTML
                 /> Rotating Section
 HTML;
@@ -650,7 +685,7 @@ HTML;
             <td>{$fa_grader['user_id']}</td>
             <td><input style="width: 227px" type="text" name="grader_{$fa_grader['user_id']}" class="grader" value="
 HTML;
-        if($action==='edit' && !$g_grade_by_registration) {
+        if($have_old && !$g_grade_by_registration) {
             print (isset($graders_to_sections[$fa_grader['user_id']])) ? $graders_to_sections[$fa_grader['user_id']] : '';
         }
         else{
@@ -679,7 +714,7 @@ HTML;
             <td>{$la_grader['user_id']}</td>
             <td><input style="width: 227px" type="text" name="grader_{$la_grader['user_id']}" class="grader" value="
 HTML;
-        if($action==='edit' && !$g_grade_by_registration) {
+        if($have_old && !$g_grade_by_registration) {
             print (isset($graders_to_sections[$la_grader['user_id']])) ? $graders_to_sections[$la_grader['user_id']] : '';
         }
         else{
@@ -752,7 +787,7 @@ HTML;
         <div class="modal-footer">
                 <button class="btn btn-primary" type="submit" style="margin-top: 10px; float: right;">{$button_string} Gradeable</button>
 HTML;
-    if ($action == "edit") {
+    if ($have_old_edit) {
         print <<<HTML
                 <button type="button" class="btn btn-danger" onclick="deleteForm();" style="margin-top:10px; margin-right: 10px; float: right;">Delete Gradeable</button>
 HTML;
@@ -1001,6 +1036,35 @@ HTML;
             }
         });
         
+        function getUrlVars() {
+          var vars = {};
+          var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,    
+          function(m,key,value) {
+            vars[key] = value;
+          });
+          return vars;
+      }
+        
+        $('[name="gradeable_template"]').change(
+        function(){
+          var no_params = window.location.href;
+          if(window.location.href.indexOf('&id') >= 0){
+            no_params = window.location.href.substring(0,window.location.href.indexOf('&id'));
+          }
+
+          var new_url =  no_params;
+          
+          if($(this).prop('selectedIndex')> 0){
+            new_url += '&id='+this.value + '&action=template';
+          }
+          
+          window.location.href = new_url;
+        });
+        
+        if({$have_old} && !{$old_edit}){
+          $('[name="gradeable_template"]').val(getUrlVars()['id']);
+        }
+        
         if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
             $('#rubric_questions').hide();
             $('#grading_questions').hide();
@@ -1085,7 +1149,7 @@ HTML;
             $('#numeric').show();
             $('#grading_questions').show();
         }
-        if({$have_old}){
+        if({$edit}){
             $('input[name=gradeable_id]').attr('readonly', true);
         }
     });
