@@ -80,12 +80,15 @@ HTML;
             }
 
             if (count($gradeable_list) == 0) {
-                // $return .= <<<HTML
-                // <p>Welcome to {$course}!  There are currently no assignments available to complete.
-                //    Please check back later. </p>
-                // HTML;
-                // break;
-                continue;
+                $return .= <<<HTML
+        <div class="jumbotron">
+        <div class="container">
+        <p>There are currently no assignments posted.  Please check back later.</p>
+        </div>
+        </div>
+HTML;
+                break;
+                //continue;
             }
 
             $lower_title = str_replace(" ", "_", strtolower($title));
