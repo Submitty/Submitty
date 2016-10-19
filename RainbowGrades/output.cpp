@@ -694,6 +694,12 @@ void start_table_output( bool for_instructor,
       std::string room = GLOBAL_EXAM_DEFAULT_ROOM;
       std::string zone = "SEE INSTRUCTOR";
       std::string time = GLOBAL_EXAM_TIME;
+
+      if (this_student->getSection() == 0) { //LastName() == "") {
+        room = "";
+        zone = "";
+        time = "";
+      }
       if (this_student->getExamRoom() == "") {
         //std::cout << "NO ROOM FOR " << this_student->getUserName() << std::endl;
       } else {
