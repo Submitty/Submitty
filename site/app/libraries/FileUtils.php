@@ -227,6 +227,44 @@ class FileUtils {
         return $size;
     }
     
+    public static function checkFileInZipName($zipname) {
+        $zip = zip_open($zipname);
+        if(is_resource(($zip))) {
+            while ($inner_file = zip_read($zip)) {
+                $fname = zip_entry_name($inner_file);
+                if(FileUtils::isValidFileName($fname) === false) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Given a string filename, checks the string for any quotes, brackets or slashes, returning
+     * false if any of them are found within the string.
+     *
+     * @param string $filename
+     * @return bool
+     */
+    public static function isValidFileName($filename) {
+        if (!is_string($filename)) {
+            return false;
+        }
+        else {
+            foreach (str_split($filename) as $char) {
+                if ($char == "'" || 
+		    $char == '"' ||
+                    $char == "\\" ||
+		    $char == "<" || 
+		    $char == ">") {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public static function encodeJson($string) {
         return json_encode($string, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }

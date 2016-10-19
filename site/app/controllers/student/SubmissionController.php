@@ -234,10 +234,16 @@ class SubmissionController extends AbstractController {
                     $uploaded_files[$i]["is_zip"] = array();
                     for ($j = 0; $j < $count[$i]; $j++) {
                         if (FileUtils::getMimeType($uploaded_files[$i]["tmp_name"][$j]) == "application/zip") {
+                            if(FileUtils::checkFileInZipName($uploaded_files[$i]["tmp_name"][$j]) === false) {
+                                return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[$i]["name"][$j].".", false);
+                            }
                             $uploaded_files[$i]["is_zip"][$j] = true;
                             $file_size += FileUtils::getZipSize($uploaded_files[$i]["tmp_name"][$j]);
                         }
                         else {
+                            if(FileUtils::isValidFileName($uploaded_files[$i]["name"][$j]) === false) {
+                                return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[$i]["name"][$j].".", false);
+                            }
                             $uploaded_files[$i]["is_zip"][$j] = false;
                             $file_size += $uploaded_files[$i]["size"][$j];
                         }
@@ -253,7 +259,7 @@ class SubmissionController extends AbstractController {
             if ($file_size > $max_size) {
                 return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1000)." kb. Uploaded file(s) was ".($file_size/1000)." kb.", false);
             }
-            
+
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 if (isset($uploaded_files[$i])) {
                     for ($j = 0; $j < $count[$i]; $j++) {

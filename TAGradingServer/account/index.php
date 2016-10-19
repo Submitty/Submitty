@@ -56,7 +56,7 @@ if(isset($_GET["g_id"]) && isset($rubric["g_id"])) {
         }
 
         $params = array($s_user_id);
-        $db->query("SELECT * FROM users WHERE user_id=? AND user_group=4", $params);
+        $db->query("SELECT * FROM users WHERE user_id=?", $params);
         $temp_row = $db->row();
         $student_first_name = $temp_row["user_firstname"];
         $student_last_name = $temp_row["user_lastname"];
@@ -108,7 +108,7 @@ FROM
     ) AS g
     ON s.user_id=g.gd_user_id
 WHERE
-    s.".$user_section_param."=?
+    s.{$user_section_param}=?
 AND 
     user_group=4
 ORDER BY
@@ -176,14 +176,14 @@ ORDER BY
         if (User::$is_administrator) {
             Database::query("
 SELECT
-    s.".$user_section_param.",
+    s.{$user_section_param},
     count(s.*) as total,
     case when gg.graded is null then 0 else gg.graded end
 FROM
     users as s
     LEFT JOIN (
         SELECT
-            uu.".$user_section_param.",
+            uu.{$user_section_param},
             count(*) as graded
         FROM
             users as uu 
@@ -196,15 +196,15 @@ FROM
                     gd.g_id=?
             ) AS gdd ON gdd.gd_user_id=uu.user_id 
             WHERE uu.user_group=?
-        GROUP BY uu.".$user_section_param."
-    ) as gg ON s.".$user_section_param." = gg.".$user_section_param."
+        GROUP BY uu.{$user_section_param}
+    ) as gg ON s.{$user_section_param} = gg.{$user_section_param}
 WHERE
     user_group=?
 GROUP BY
-    s.".$user_section_param.",
+    s.{$user_section_param},
     gg.graded
 ORDER BY
-    s.".$user_section_param, array($g_id,4,4));
+    s.{$user_section_param}", array($g_id,4,4));
 
             $sections = Database::rows();
             $graded = 0;
@@ -217,7 +217,7 @@ ORDER BY
             $percent = round(($graded / $total) * 100);
 
             print <<<HTML
-        <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
+        <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; z-index:100; margin: 70px auto 100px; position: relative; width: 700px;">
             <div class="modal-header">
                 <h3 id="myModalLabel">{$g_title} Grading Status</h3>
             </div>

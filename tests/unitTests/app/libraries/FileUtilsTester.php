@@ -65,4 +65,15 @@ class FileUtilsTester extends \PHPUnit_Framework_TestCase {
         $this->assertCount(2,scandir(__TEST_DIRECTORY__."/FileUtilsTest5"));
         FileUtils::recursiveRmdir(__TEST_DIRECTORY__."/FileUtilsTest5");
     }
+
+    public function testValidFileNames() {
+        $this->assertTrue(FileUtils::isValidFileName("file"));
+        $this->assertFalse(FileUtils::isValidFileName("file'"));
+        $this->assertFalse(FileUtils::isValidFileName("file\""));
+        $this->assertFalse(FileUtils::isValidFileName("<file"));
+        $this->assertFalse(FileUtils::isValidFileName("file>"));
+	//$this->assertFalse(FileUtils::isValidFileName("file/"));
+        $this->assertFalse(FileUtils::isValidFileName("file\\"));
+        $this->assertFalse(FileUtils::isValidFileName(0));
+    }
 }

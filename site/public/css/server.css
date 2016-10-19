@@ -24,6 +24,7 @@ body {
     /* A lighter shade of blue grey */
     background: #b8d5e5;
     /* a gradient! */
+
     background: linear-gradient(#0a6496, #b8d5e5);
     background-attachment: fixed;
 
@@ -33,6 +34,7 @@ body {
 }
 
 a, a:hover, a:link, a:visited {
+    cursor: pointer;
     text-decoration: none;
 }
 
@@ -99,17 +101,49 @@ select {
     -moz-appearance: none;
 }
 
-input[type="checkbox"] {
+input[type="checkbox"]{
     cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: #FFF;
+    box-sizing: border-box;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #000000;
+    transition: all .2s linear;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+input[type="checkbox"]:checked{
+    background-color: #3093FC;
+}
+
+/* this requires loading the FontAwesome CSS from the CDN before loading the server.css */
+input[type="checkbox"]:checked:before {
+    font-family: FontAwesome;
+    content: "\f00c";
+    color: #FFF;
+    font-size: 18px
+}
+
+input[type="checkbox"]:focus{
+    outline: 0 none;
+    box-shadow: none;
+}
+
+select.disabled,
+textarea.disabled,
+input.disabled {
+    background-color: lightgrey;
 }
 
 /****************************
  * TABLE STYLES
  ***************************/
 table {
-    width: 100%;
-    text-align: center;
-    border-collapse: collapse;
 }
 
 table a{
@@ -118,6 +152,12 @@ table a{
 
 table tr.table-header {
     border-bottom: 1px solid black;
+}
+
+.table {
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
 }
 
 .table tr {
@@ -177,32 +217,36 @@ table tr.table-header {
     background-color: #000000;
     color: #FFFFFF;
     font-family: 'Open Sans Condensed', sans-serif;
-    position: fixed;
     width: 100%;
     left: 0;
     top: 0;
     z-index: 9999;
-    /*height: 32px;*/
+
 }
 
 #nav ul {
+  background-color: #000000;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style-type: none;
 
 }
 
 #nav li {
     float: left;
-    list-style-type: none;
 }
 
 #nav li:hover, .dropdown:hover .dropbtn {
     background-color: gray;
-    /*cursor: pointer;*/
+    cursor: pointer;
 }
 
 #nav li a, .dropbtn {
     color: #FFFFFF;
     text-decoration: none;
-    display: inline-block;
+    /*display: inline-block;*/
+    display: block;
     padding: 5px 10px;
 }
 
@@ -243,21 +287,20 @@ table tr.table-header {
     display: block;
 }
 
-#nav-clear {
-    height: 32px;
-}
-
 #header {
     background-color: #edf6f6;
-    height: 125px;
-    /*text-align: center;*/
+    min-height: 125px;
+    height: auto;
+    width: 100%;
     box-shadow: 0 2px 15px -5px #888888;
     font-family: 'Open Sans Condensed', sans-serif;
 }
 
 #header-text {
+
     font-weight: 300;
     display: inline-block;
+
     margin-top: 25px;
     margin-left: 20px;
 }
@@ -280,6 +323,7 @@ table tr.table-header {
     width: 357px;
     background: url('../img/submitty_logo.png') no-repeat;
     background-size: 357px 125px;
+
 }
 
 .content {
@@ -428,9 +472,8 @@ table tr.table-header {
 }
 
 .option-input > textarea,
-.option-input > input {
+.option-input > input[type="text"] {
     width: 95%;
-    height: 100%;
 }
 
 .post-panel-btn {
@@ -514,6 +557,7 @@ table tr.table-header {
 }
 
 .half {
+    float: left;
     width: 48%;
     margin-right: 10px;
 }
@@ -568,9 +612,8 @@ table tr.table-header {
 
 .gradeable_list{
 	width: 100%;
-	padding: 50px;
-	padding-top: 0px;
-	font-family: 'Source Sans Pro', sans-serif;
+    padding: 0px 50px 50px;
+    font-family: 'Source Sans Pro', sans-serif;
 	font-size: 18px;
 	text-align: left !important;
 }

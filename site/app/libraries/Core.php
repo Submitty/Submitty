@@ -238,8 +238,13 @@ class Core {
      *
      * @return bool
      */
-    public function checkCsrfToken($csrf_token) {
-        return $this->getCsrfToken() === $csrf_token;
+    public function checkCsrfToken($csrf_token=null) {
+        if ($csrf_token === null) {
+            return isset($_POST['csrf_token']) && $this->getCsrfToken() === $_POST['csrf_token'];
+        }
+        else {
+            return $this->getCsrfToken() === $csrf_token;
+        }
     }
 
     /**
