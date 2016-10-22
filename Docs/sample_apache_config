@@ -1,3 +1,8 @@
+<VirtualHost test-submit:80>
+        ServerName test-submit
+        Redirect / https://test-submit/
+</Virtualhost>
+
 <IfModule mod_ssl.c>
 SSLUseStapling On
 SSLStaplingCache "shmcb:logs/stapling-cache(150000)"

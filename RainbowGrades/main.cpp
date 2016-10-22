@@ -1000,13 +1000,15 @@ void load_student_grades(std::vector<Student*> &students) {
                         json::iterator itr3 = itr2->find("days_late");
                         if (itr3 != itr2->end()) {
                           if (score <= 0) {
-                            std::cout << "Should not be Charged a late day" << std::endl;
+                            if (s->getUserName() != "") {
+                              std::cout << "Should not be Charged a late day  " << s->getUserName() << " " << gradeable_name << " " << score << std::endl;
+                            }
                           } else {
                             ldu = itr3->get<int>();
                           }
                         }
                         if (ldu != 0) {
-                          std::cout << "ldu=" << ldu << std::endl;
+                          //std::cout << "ldu=" << ldu << std::endl;
                         }
 			s->setGradeableItemGrade(g,which,score,ldu,other_note);
 		  }
