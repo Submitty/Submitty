@@ -195,12 +195,12 @@ ORDER BY user_id ASC");
         $this->database->query("UPDATE users SET rotating_section=? WHERE user_id IN ({$update_string})", $update_array);
     }
 
-    public function insertVersionDetails($g_id, $user_id, $version) {
+    public function insertVersionDetails($g_id, $user_id, $version, $timestamp) {
         $this->database->query("
 INSERT INTO electronic_gradeable_data 
 (g_id, user_id, g_version, autograding_non_hidden_non_extra_credit, autograding_non_hidden_extra_credit, 
 autograding_hidden_non_extra_credit, autograding_hidden_extra_credit, submission_time) 
-VALUES(?, ?, ?, 0, 0, 0, 0, NOW())", array($g_id, $user_id, $version));
+VALUES(?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $version, $timestamp));
         $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND user_id=?",
             array($g_id, $user_id));
         $row = $this->database->row();

@@ -121,7 +121,7 @@ interface IDatabaseQueries {
      * @param $user_id
      * @param $version
      */
-    public function insertVersionDetails($g_id, $user_id, $version);
+    public function insertVersionDetails($g_id, $user_id, $version, $timestamp);
 
     /**
      * Updates the row in electronic_gradeable_version table for a given gradeable and student. This function should
