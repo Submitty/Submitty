@@ -202,7 +202,7 @@ def get_testcases(semester, course, g_id):
     if os.path.isfile(build_file):
         with open(build_file) as build_file:
             build_json = json.load(build_file)
-            if "testcases" in build_json:
+            if 'testcases' in build_json and build_json['testcases'] is not None:
                 for testcase in build_json['testcases']:
                     testcases.append({'hidden': testcase['hidden'],
                                       'extra_credit': testcase['extra_credit'],
@@ -230,7 +230,7 @@ def get_result_details(semester, course, g_id, user_id, version):
     if os.path.isfile(os.path.join(result_dir, "results.json")):
         with open(os.path.join(result_dir, "results.json")) as result_file:
             result_json = json.load(result_file)
-            if "testcases" in result_json:
+            if 'testcases' in result_json and result_json['testcases'] is not None:
                 for testcase in result_json['testcases']:
                     result_details['testcases'].append({'points': testcase['points_awarded']})
 
