@@ -422,7 +422,7 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
         //Check each cookie and test for 'undefined'. If any cookie is undefined
         $.each(document.cookie.split(/; */), function(){
             var cookie = this.split("=")
-           if(!cookie[1]){
+           if(!cookie[1] || cookie[1] == 'undefined'){
                 deleteCookies();
            }
         });
@@ -447,7 +447,7 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
     function deleteCookies(){
         $.each(document.cookie.split(/; */), function(){
             var cookie = this.split("=")
-            if(!cookie[1]){
+            if(!cookie[1] || cookie[1] == 'undefined'){
                 document.cookie = cookie[0] + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
                 document.cookie = "cookie_version=-1; path=/;";
             }
