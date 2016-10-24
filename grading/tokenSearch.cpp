@@ -70,49 +70,43 @@ TestResults* searchToken_doit (const TestCase &tc, const nlohmann::json& j) {
   }
 
 
-//TestResults* searchToken ( const std::string& student,
-//			   			   const std::vector<std::string>& token_vec ) {
+  //Build a table to use for the search
+  Tokens* diff = new Tokens();
+  diff->num_tokens = token_vec.size();
+  assert (diff->num_tokens > 0);
+  
+  int found = 0;
 
-	//Build a table to use for the search
-	Tokens* diff = new Tokens();
-	diff->num_tokens = 1;
-	//buildTable( V, token );
-	assert (token_vec.size() == 1);
-	int V[token_vec[0].size()];
-	//int V[token.size()];
-	buildTable( V, token_vec[0] );
-
-	std::cout << "searching for " << token_vec[0] << std::endl;
-
-	int m = 0;
-	int i = 0;
-	while ( m + i < student_file_contents.size() ) {
-	  //if ( student_file_contents[i + m] == token[i] ) {
-		if ( student_file_contents[i + m] == token_vec[0][i] ) {
-		  //if ( i == token.size() - 1 ) {
-			if ( i == token_vec[0].size() - 1 ) {
-				diff->tokens_found.push_back( m );
-				std::cout << "found! " << std::endl;
-				diff->setGrade(1);
-				return diff;
-			}
-
-			i++;
-		} else {
-			m += i - V[i];
-			if ( V[i] == -1 )
-				i = 0;
-			else
-				i = V[i];
-		}
+  for (int which = 0; which < diff->num_tokens; which++) {
+    int V[token_vec[which].size()];
+    buildTable( V, token_vec[which] );
+    std::cout << "searching for " << token_vec[which] << std::endl;
+    int m = 0;
+    int i = 0;
+    while ( m + i < student_file_contents.size() ) {
+      if ( student_file_contents[i + m] == token_vec[which][i] ) {
+	if ( i == token_vec[which].size() - 1 ) {
+	  diff->tokens_found.push_back( m );
+	  std::cout << "found! " << std::endl;
+	  found++;
+	  break;
 	}
+	i++;
+      } else {
+	m += i - V[i];
+	if ( V[i] == -1 )
+	  i = 0;
+	else
+	  i = V[i];
+      }
+    }
+    diff->tokens_found.push_back( -1 );
+  }
 
-	diff->tokens_found.push_back( -1 );
+  assert (found <= diff->num_tokens);
 
-	std::cout << "not found!" << std::endl;
-	diff->setGrade(0);
-
-	return diff;
+  diff->setGrade(found / float(diff->num_tokens));
+  return diff;
 }
 
 /* METHOD: searchAllTokens
