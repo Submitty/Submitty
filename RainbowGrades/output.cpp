@@ -322,18 +322,18 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
   int hw4_section = (hw4_sum % 12)+1; 
   
   std::string hw4_filename = "UNASSIGNED";
-  if (hw4_section == 1)  hw4_filename = "fzpmxbuvwohshsohsjzoqxuhpclupzuw.zip";
-  if (hw4_section == 2)  hw4_filename = "aedgeiasbwnjmsqfxixoxoodgnufxuox.zip";
-  if (hw4_section == 3)  hw4_filename = "qytpyhfhwylatvqckixspnsbwpjexfxq.zip";
-  if (hw4_section == 4)  hw4_filename = "rmdclwdnvgiscteyiwpxyovxwvvhivnb.zip";
-  if (hw4_section == 5)  hw4_filename = "sfsoudlbcalzdapzcycmhqssoclnebbz.zip";
-  if (hw4_section == 6)  hw4_filename = "nfovjnknkgycgasjanvkjclmdmduofoe.zip";
-  if (hw4_section == 7)  hw4_filename = "emehlzoplgkcskvhnbqflsswoxvcisfm.zip";
-  if (hw4_section == 8)  hw4_filename = "akouiieotrdetopvzrxiazyojhoacbic.zip";
-  if (hw4_section == 9)  hw4_filename = "hjswmlktxhnheehjwmcmscfescmrmxvu.zip";
-  if (hw4_section == 10) hw4_filename = "hejwhufoceankytyfqnbumyyvpeqflqm.zip";
-  if (hw4_section == 11) hw4_filename = "ydwbnvkvljtomzppmqswylvuklfdzjax.zip";
-  if (hw4_section == 12) hw4_filename = "mgjcqmdrnmagzmvmlfjrrtzuofvtwnai.zip";
+  if (hw4_section == 1)  hw4_filename = "";
+  if (hw4_section == 2)  hw4_filename = "";
+  if (hw4_section == 3)  hw4_filename = "";
+  if (hw4_section == 4)  hw4_filename = "";
+  if (hw4_section == 5)  hw4_filename = "";
+  if (hw4_section == 6)  hw4_filename = "";
+  if (hw4_section == 7)  hw4_filename = "";
+  if (hw4_section == 8)  hw4_filename = "";
+  if (hw4_section == 9)  hw4_filename = "";
+  if (hw4_section == 10) hw4_filename = "";
+  if (hw4_section == 11) hw4_filename = "";
+  if (hw4_section == 12) hw4_filename = "";
   assert (hw4_filename != "UNASSIGNED");
 
   std::string hw4_directory = "http://www.cs.rpi.edu/academics/courses/fall16/csci1200/hw/04_debugging_list_iterators/" + hw4_filename;
@@ -355,6 +355,11 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
   std::string room = GLOBAL_EXAM_DEFAULT_ROOM;
   std::string zone = "SEE INSTRUCTOR";
   std::string time = GLOBAL_EXAM_TIME;
+  if (s->getSection() == 0) {
+    room = "";
+    zone = "";
+    time = "";
+  }
   if (s->getExamRoom() == "") {
     //std::cout << "NO ROOM FOR " << s->getUserName() << std::endl;
   } else {

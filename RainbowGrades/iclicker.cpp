@@ -93,15 +93,9 @@ void MatchClickerRemotes(std::vector<Student*> &students, const std::string &rem
   char c;
   while (1) {
     std::string remote = ReadRemote(istr);
-    bool success = true;
-    //istr >> c;
-    //if (!success || c != ',') {
-      //std::cout << success << " OOPS-not comma '" << c << "'" << std::endl;
-    //}
     std::string username = ReadQuoted(istr);
     if (remote == "" || username == "") break;
-    std::cout << "tokens: " << remote << " " << username << std::endl;
-
+    //std::cout << "tokens: " << remote << " " << username << std::endl;
     Student *s = GetStudent(students,username);
     if (s == NULL) {
       std::cout << "BAD USERNAME FOR CLICKER MATCHING " << username << std::endl;
@@ -109,14 +103,10 @@ void MatchClickerRemotes(std::vector<Student*> &students, const std::string &rem
     }
     assert (s != NULL);
     s->setRemoteID(remote);
-
-    std::cout << "MATCH " << username << " " << remote << std::endl;
-
+    //std::cout << "MATCH " << username << " " << remote << std::endl;
     if (GLOBAL_CLICKER_MAP.find(remote) != GLOBAL_CLICKER_MAP.end()) {
       std::cout << "ERROR!  already have this clicker assigned " << remote << " " << s->getUserName() << std::endl;
     }
-
-
     assert (GLOBAL_CLICKER_MAP.find(remote) == GLOBAL_CLICKER_MAP.end());
     GLOBAL_CLICKER_MAP[remote] = username;
   }

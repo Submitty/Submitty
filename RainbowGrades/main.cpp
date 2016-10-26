@@ -14,7 +14,6 @@
 #include "benchmark.h"
 
 std::vector<std::vector<std::string> > HACKMAXPROJECTS;
-std::string GLOBAL_sort_order;
 
 
 #include "student.h"
@@ -30,6 +29,7 @@ std::string ReadQuoted(std::istream &istr);
 void suggest_curves(std::vector<Student*> &students);
 
 
+std::string GLOBAL_sort_order;
 
 
 //====================================================================
@@ -1040,7 +1040,7 @@ void end_table(std::ofstream &ostr,  bool full_details, Student *s);
 
 
 
-void output_helper(std::vector<Student*> &students,  std::string &GLOBAL_sort_order) {
+void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
 
   Student *sp = GetStudent(students,"PERFECT");
   Student *student_average = GetStudent(students,"AVERAGE");
@@ -1086,7 +1086,7 @@ void output_helper(std::vector<Student*> &students,  std::string &GLOBAL_sort_or
         !validSection(students[S]->getSection())) {
       rank = -1;
     } else {
-      if (GLOBAL_sort_order == std::string("by_section") &&
+      if (sort_order == std::string("by_section") &&
           last_section != students[S]->getSection()) {
         last_section = students[S]->getSection();
         next_rank = rank = 1;
@@ -1181,11 +1181,11 @@ void load_bonus_late_day(std::vector<Student*> &students,
 
 int main(int argc, char* argv[]) {
 
-  //std::string sort_order = "by_overall";
+  std::string sort_order = "by_overall";
 
   if (argc > 1) {
     assert (argc == 2);
-    GLOBAL_sort_order = argv[1];
+    sort_order = argv[1];
   }
 
   std::vector<Student*> students;  
@@ -1217,13 +1217,13 @@ int main(int argc, char* argv[]) {
   std::sort(students.begin(),students.end(),by_overall);
 
 
-  if (GLOBAL_sort_order == std::string("by_overall")) {
+  if (sort_order == std::string("by_overall")) {
     std::sort(students.begin(),students.end(),by_overall);
-  } else if (GLOBAL_sort_order == std::string("by_name")) {
+  } else if (sort_order == std::string("by_name")) {
     std::sort(students.begin(),students.end(),by_name);
-  } else if (GLOBAL_sort_order == std::string("by_section")) {
+  } else if (sort_order == std::string("by_section")) {
     std::sort(students.begin(),students.end(),by_section);
-  } else if (GLOBAL_sort_order == std::string("by_zone")) {
+  } else if (sort_order == std::string("by_zone")) {
 
     DISPLAY_INSTRUCTOR_NOTES = false;
     DISPLAY_EXAM_SEATING = true;
@@ -1235,25 +1235,25 @@ int main(int argc, char* argv[]) {
 
     std::sort(students.begin(),students.end(),by_name);
 
-  } else if (GLOBAL_sort_order == std::string("by_iclicker")) {
+  } else if (sort_order == std::string("by_iclicker")) {
     std::sort(students.begin(),students.end(),by_iclicker);
 
     DISPLAY_ICLICKER = true;
 
-  } else if (GLOBAL_sort_order == std::string("by_test_and_exam")) {
+  } else if (sort_order == std::string("by_test_and_exam")) {
     std::sort(students.begin(),students.end(),by_test_and_exam);
 
   } else {
-    assert (GLOBAL_sort_order.size() > 3);
+    assert (sort_order.size() > 3);
     GRADEABLE_ENUM g;
     // take off "by_"
-    std::string tmp = GLOBAL_sort_order.substr(3,GLOBAL_sort_order.size()-3);
+    std::string tmp = sort_order.substr(3,sort_order.size()-3);
     bool success = string_to_gradeable_enum(tmp,g);
     if (success) {
       std::sort(students.begin(),students.end(), GradeableSorter(g) );
     }
     else {
-      std::cerr << "UNKNOWN SORT OPTION " << GLOBAL_sort_order << std::endl;
+      std::cerr << "UNKNOWN SORT OPTION " << sort_order << std::endl;
       std::cerr << "  Usage: " << argv[0] << " [ by_overall | by_name | by_section | by_zone | by_iclicker | by_lab | by_exercise | by_reading | by_hw | by_test | by_exam | by_test_and_exam ]" << std::endl;
       exit(1);
     }
@@ -1304,7 +1304,8 @@ int main(int argc, char* argv[]) {
   // ======================================================================
   // OUTPUT
 
-  output_helper(students,GLOBAL_sort_order);
+  GLOBAL_sort_order = sort_order;
+  output_helper(students,sort_order);
 
 }
 
