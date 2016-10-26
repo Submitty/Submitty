@@ -30,9 +30,6 @@ std::string ReadQuoted(std::istream &istr);
 void suggest_curves(std::vector<Student*> &students);
 
 
-std::string GLOBAL_sort_order;
-
-
 //====================================================================
 // DIRECTORIES & FILES
 
@@ -1321,8 +1318,7 @@ int main(int argc, char* argv[]) {
   // ======================================================================
   // OUTPUT
 
-  GLOBAL_sort_order = sort_order;
-  output_helper(students,sort_order);
+  output_helper(students,GLOBAL_sort_order);
 
 }
 
