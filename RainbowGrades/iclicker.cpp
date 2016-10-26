@@ -47,6 +47,22 @@ Date dateFromFilename(const std::string& filename_with_directory) {
 }
 
 
+std::string ReadRemote(std::istream &istr) {
+  char c;
+  std::string answer;
+  if (!istr.good()) return "";
+  istr >> c;
+  if (!istr.good()) return "";
+  if (c != '#') return answer;
+  answer = "#";
+  while (1) {
+    istr >> c;
+    if (c == ',') break;
+    answer.push_back(c);
+  }
+  return answer;
+}
+
 std::string ReadQuoted(std::istream &istr) {
   char c;
   std::string answer;
@@ -63,6 +79,8 @@ std::string ReadQuoted(std::istream &istr) {
   return answer;
 }
 
+
+
 std::map<std::string, std::string> GLOBAL_CLICKER_MAP;
 
 
@@ -75,29 +93,22 @@ void MatchClickerRemotes(std::vector<Student*> &students, const std::string &rem
 
   char c;
   while (1) {
-    std::string remote = ReadQuoted(istr);
-    bool success = true;
-    istr >> c;
-    if (!success || c != ',') {
-      //std::cout << success << " OOPS-not comma '" << c << "'" << std::endl;
-    }
+    std::string remote = ReadRemote(istr);
     std::string username = ReadQuoted(istr);
     if (remote == "" || username == "") break;
     //std::cout << "tokens: " << remote << " " << username << std::endl;
-
     Student *s = GetStudent(students,username);
     if (s == NULL) {
       std::cout << "BAD USERNAME FOR CLICKER MATCHING " << username << std::endl;
+      exit(0);
       continue;
     }
     assert (s != NULL);
     s->setRemoteID(remote);
-
+    //std::cout << "MATCH " << username << " " << remote << std::endl;
     if (GLOBAL_CLICKER_MAP.find(remote) != GLOBAL_CLICKER_MAP.end()) {
       std::cout << "ERROR!  already have this clicker assigned " << remote << " " << s->getUserName() << std::endl;
     }
-
-
     assert (GLOBAL_CLICKER_MAP.find(remote) == GLOBAL_CLICKER_MAP.end());
     GLOBAL_CLICKER_MAP[remote] = username;
   }
