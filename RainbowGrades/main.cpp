@@ -14,6 +14,7 @@
 #include "benchmark.h"
 
 std::vector<std::vector<std::string> > HACKMAXPROJECTS;
+std::string GLOBAL_sort_order;
 
 
 #include "student.h"
@@ -27,8 +28,6 @@ using nlohmann::json;
 // defined in iclicker.cpp
 std::string ReadQuoted(std::istream &istr);
 void suggest_curves(std::vector<Student*> &students);
-
-
 
 
 //====================================================================
@@ -1000,13 +999,15 @@ void load_student_grades(std::vector<Student*> &students) {
                         json::iterator itr3 = itr2->find("days_late");
                         if (itr3 != itr2->end()) {
                           if (score <= 0) {
-                            std::cout << "Should not be Charged a late day" << std::endl;
+                            if (s->getUserName() != "") {
+                              std::cout << "Should not be Charged a late day  " << s->getUserName() << " " << gradeable_name << " " << score << std::endl;
+                            }
                           } else {
                             ldu = itr3->get<int>();
                           }
                         }
                         if (ldu != 0) {
-                          std::cout << "ldu=" << ldu << std::endl;
+                          //std::cout << "ldu=" << ldu << std::endl;
                         }
 			s->setGradeableItemGrade(g,which,score,ldu,other_note);
 		  }
@@ -1039,7 +1040,7 @@ void end_table(std::ofstream &ostr,  bool full_details, Student *s);
 
 
 
-void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
+void output_helper(std::vector<Student*> &students,  std::string &GLOBAL_sort_order) {
 
   Student *sp = GetStudent(students,"PERFECT");
   Student *student_average = GetStudent(students,"AVERAGE");
@@ -1087,7 +1088,7 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
         !validSection(students[S]->getSection())) {
       rank = -1;
     } else {
-      if (sort_order == std::string("by_section") &&
+      if (GLOBAL_sort_order == std::string("by_section") &&
           last_section != students[S]->getSection()) {
         last_section = students[S]->getSection();
         next_rank = rank = 1;
@@ -1130,8 +1131,11 @@ void output_helper(std::vector<Student*> &students,  std::string &sort_order) {
     if (MAX_ICLICKER_TOTAL > 0) {
       ostr2 << "<em>recent iclicker = " << students[S]->getIClickerRecent() << " / 12.0</em>" << std::endl;
     }
-
 #endif
+
+
+
+
     PrintExamRoomAndZoneTable(ostr2,students[S]);
 
     int prev = students[S]->getAllowedLateDays(0);
@@ -1164,6 +1168,8 @@ void load_bonus_late_day(std::vector<Student*> &students,
                          int which_lecture,
                          std::string bonus_late_day_file) {
 
+  std::cout << "LOAD BONUS LATE" << std::endl;
+
   std::ifstream istr(bonus_late_day_file.c_str());
   if (!istr.good()) {
     std::cerr << "ERROR!  could not open " << bonus_late_day_file << std::endl;
@@ -1177,6 +1183,7 @@ void load_bonus_late_day(std::vector<Student*> &students,
       //std::cerr << "ERROR!  bad username " << username << " cannot give bonus late day " << std::endl;
       //exit(1);
     } else {
+      std::cout << "BONUS DAY FOR USER " << username << std::endl;
       s->add_bonus_late_day(which_lecture);
       std::cout << "add bonus late day for " << username << std::endl;
     }
@@ -1185,13 +1192,14 @@ void load_bonus_late_day(std::vector<Student*> &students,
 }
 
 
+
 int main(int argc, char* argv[]) {
 
-  std::string sort_order = "by_overall";
+  //std::string sort_order = "by_overall";
 
   if (argc > 1) {
     assert (argc == 2);
-    sort_order = argv[1];
+    GLOBAL_sort_order = argv[1];
   }
 
   std::vector<Student*> students;  
@@ -1201,6 +1209,8 @@ int main(int argc, char* argv[]) {
   // LOAD ALL THE STUDENT DATA
   load_student_grades(students);
 
+
+  std::cout << "LOAD BONUS " << BONUS_FILE << std::endl;
   if (BONUS_FILE != "") {
     load_bonus_late_day(students,BONUS_WHICH_LECTURE,BONUS_FILE);
   }
@@ -1221,13 +1231,13 @@ int main(int argc, char* argv[]) {
   std::sort(students.begin(),students.end(),by_overall);
 
 
-  if (sort_order == std::string("by_overall")) {
+  if (GLOBAL_sort_order == std::string("by_overall")) {
     std::sort(students.begin(),students.end(),by_overall);
-  } else if (sort_order == std::string("by_name")) {
+  } else if (GLOBAL_sort_order == std::string("by_name")) {
     std::sort(students.begin(),students.end(),by_name);
-  } else if (sort_order == std::string("by_section")) {
+  } else if (GLOBAL_sort_order == std::string("by_section")) {
     std::sort(students.begin(),students.end(),by_section);
-  } else if (sort_order == std::string("by_zone")) {
+  } else if (GLOBAL_sort_order == std::string("by_zone")) {
 
     DISPLAY_INSTRUCTOR_NOTES = false;
     DISPLAY_EXAM_SEATING = true;
@@ -1239,25 +1249,25 @@ int main(int argc, char* argv[]) {
 
     std::sort(students.begin(),students.end(),by_name);
 
-  } else if (sort_order == std::string("by_iclicker")) {
+  } else if (GLOBAL_sort_order == std::string("by_iclicker")) {
     std::sort(students.begin(),students.end(),by_iclicker);
 
     DISPLAY_ICLICKER = true;
 
-  } else if (sort_order == std::string("by_test_and_exam")) {
+  } else if (GLOBAL_sort_order == std::string("by_test_and_exam")) {
     std::sort(students.begin(),students.end(),by_test_and_exam);
 
   } else {
-    assert (sort_order.size() > 3);
+    assert (GLOBAL_sort_order.size() > 3);
     GRADEABLE_ENUM g;
     // take off "by_"
-    std::string tmp = sort_order.substr(3,sort_order.size()-3);
+    std::string tmp = GLOBAL_sort_order.substr(3,GLOBAL_sort_order.size()-3);
     bool success = string_to_gradeable_enum(tmp,g);
     if (success) {
       std::sort(students.begin(),students.end(), GradeableSorter(g) );
     }
     else {
-      std::cerr << "UNKNOWN SORT OPTION " << sort_order << std::endl;
+      std::cerr << "UNKNOWN SORT OPTION " << GLOBAL_sort_order << std::endl;
       std::cerr << "  Usage: " << argv[0] << " [ by_overall | by_name | by_section | by_zone | by_iclicker | by_lab | by_exercise | by_reading | by_hw | by_test | by_exam | by_test_and_exam ]" << std::endl;
       exit(1);
     }
@@ -1308,7 +1318,7 @@ int main(int argc, char* argv[]) {
   // ======================================================================
   // OUTPUT
 
-  output_helper(students,sort_order);
+  output_helper(students,GLOBAL_sort_order);
 
 }
 
