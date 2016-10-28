@@ -28,6 +28,7 @@ extern std::string ALL_STUDENTS_OUTPUT_DIRECTORY;
 extern Student* AVERAGE_STUDENT_POINTER;
 extern Student* STDDEV_STUDENT_POINTER;
 
+extern std::string GLOBAL_sort_order;
 
 // ==========================================================
 
@@ -294,11 +295,69 @@ void colorit(std::ostream &ostr,
 
 void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
 
+
+#if 0
+    
+  ostr << "<table border=1 cellpadding=5 cellspacing=0 style=\"background-color:#ddffdd; width:auto;\">\n";
+  ostr << "<tr><td>\n";
+  ostr << "<table border=0 cellpadding=5 cellspacing=0>\n";
+
+
+  ostr << "<h3>HOMEWORK 4 MATERIALS</h3>" << std::endl;
+
+  std::string username = s->getUserName();
+
+
+
+  int A = 54059; /* a prime */
+  int B = 76963; /* another prime */
+  int FIRSTH = 37; /* also prime */
+    
+  unsigned int hw4_sum = FIRSTH;
+  for (int i = 0; i < username.size(); i++) {
+    hw4_sum = (hw4_sum * A) ^ (username[i] * B);
+    s++;
+  }
+
+  int hw4_section = (hw4_sum % 12)+1; 
+  
+  std::string hw4_filename = "UNASSIGNED";
+  if (hw4_section == 1)  hw4_filename = "";
+  if (hw4_section == 2)  hw4_filename = "";
+  if (hw4_section == 3)  hw4_filename = "";
+  if (hw4_section == 4)  hw4_filename = "";
+  if (hw4_section == 5)  hw4_filename = "";
+  if (hw4_section == 6)  hw4_filename = "";
+  if (hw4_section == 7)  hw4_filename = "";
+  if (hw4_section == 8)  hw4_filename = "";
+  if (hw4_section == 9)  hw4_filename = "";
+  if (hw4_section == 10) hw4_filename = "";
+  if (hw4_section == 11) hw4_filename = "";
+  if (hw4_section == 12) hw4_filename = "";
+  assert (hw4_filename != "UNASSIGNED");
+
+  std::string hw4_directory = "http://www.cs.rpi.edu/academics/courses/fall16/csci1200/hw/04_debugging_list_iterators/" + hw4_filename;
+
+  ostr << "  <tr><td><a href=\"" << hw4_directory << "\" download=\"provided_files.zip\">provided_files.zip</a></td></tr>\n";
+
+  ostr << "</table>\n";
+  ostr << "</tr></td>\n";
+  ostr << "</table>\n";
+
+
+#endif
+
+
   if ( DISPLAY_EXAM_SEATING == false) return;
 
   std::string room = GLOBAL_EXAM_DEFAULT_ROOM;
   std::string zone = "SEE INSTRUCTOR";
   std::string time = GLOBAL_EXAM_TIME;
+  if (s->getSection() == 0) {
+    room = "";
+    zone = "";
+    time = "";
+  }
   if (s->getExamRoom() == "") {
     //std::cout << "NO ROOM FOR " << s->getUserName() << std::endl;
   } else {
@@ -315,7 +374,7 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
 
 #if 1
 
-  ostr << "<table style=\"border:1px solid yellowgreen; background-color:#ddffdd;\">\n";
+  ostr << "<table style=\"border:1px solid yellowgreen; background-color:#ddffdd; width:auto;\" >\n";
   //  ostr << "<table border=\"1\" cellpadding=5 cellspacing=0 style=\"border:1px solid yellowgreen; background-color:#ddffdd;\">\n";
   ostr << "<tr><td>\n";
   ostr << "<table border=0 cellpadding=5 cellspacing=0>\n";
@@ -336,12 +395,14 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
 #else
 
 
-  ostr << "<table border=1 cellpadding=5 cellspacing=0 style=\"background-color:#ddffdd\">\n";
+  ostr << "<table border=1 cellpadding=5 cellspacing=0 style=\"background-color:#ddffdd; width:auto;\">\n";
   ostr << "<tr><td>\n";
   ostr << "<table border=0 cellpadding=5 cellspacing=0>\n";
   ostr << "  <tr><td colspan=2>" << GLOBAL_EXAM_TITLE << "</td></tr>\n";
   //  ostr << "  <tr><td>" << GLOBAL_EXAM_DATE << "</td><td align=center>" << time << "</td></tr>\n";
   //ostr << "  <tr><td>Your room assignment: </td><td align=center>" << room << "</td></tr>\n";
+
+  
 
 
   if (zone == "SEE INSTRUCTOR") {
@@ -594,6 +655,7 @@ void start_table_output( bool for_instructor,
 
   int myrank = 1;
   int myrow = 1;
+  int last_section = -1;
   for (unsigned int stu= 0; stu < students.size(); stu++) {
     std::string default_color="ffffff";
     Student *this_student = students[stu];
@@ -615,7 +677,12 @@ void start_table_output( bool for_instructor,
     } else {
       //std::cout << " WHO? " << this_student->getUserName() << std::endl;
       student_correspondences[myrow] = this_student->getUserName();
-      table.set(myrow,counter++,TableCell(default_color,std::to_string(myrank++)));
+      if (GLOBAL_sort_order == "by_section" && this_student->getSection() != last_section) {
+        myrank=1;
+        last_section = this_student->getSection();
+      }
+      table.set(myrow,counter++,TableCell(default_color,std::to_string(myrank)));
+      myrank++;
     }
 
     
@@ -626,7 +693,13 @@ void start_table_output( bool for_instructor,
 
     //table.set(myrow,counter++,TableCell(default_color,"part"));
     //table.set(myrow,counter++,TableCell(default_color,"under"));
-    table.set(myrow,counter++,TableCell(default_color,"")); //notes"));
+    std::string notes;
+    std::vector<std::string> ews = this_student->getEarlyWarnings();
+    for (int i = 0; i < ews.size(); i++) {
+      notes += ews[i];
+    }
+
+    table.set(myrow,counter++,TableCell(default_color,"<font color=\"ff0000\">"+notes+"</font>"));
 
     //counter+=3;
     table.set(myrow,counter++,TableCell(default_color,this_student->getUserName()));
@@ -641,6 +714,12 @@ void start_table_output( bool for_instructor,
       std::string room = GLOBAL_EXAM_DEFAULT_ROOM;
       std::string zone = "SEE INSTRUCTOR";
       std::string time = GLOBAL_EXAM_TIME;
+
+      if (this_student->getSection() == 0) { //LastName() == "") {
+        room = "";
+        zone = "";
+        time = "";
+      }
       if (this_student->getExamRoom() == "") {
         //std::cout << "NO ROOM FOR " << this_student->getUserName() << std::endl;
       } else {
@@ -1055,7 +1134,7 @@ void end_table(std::ofstream &ostr,  bool for_instructor, Student *s) {
 
 
 
-  ostr << "<table style=\"border:1px solid yellowgreen; background-color:#ddffdd;\">\n";
+  ostr << "<table style=\"border:1px solid yellowgreen; background-color:#ddffdd; width:auto;\">\n";
   //  ostr << "<table border=2 cellpadding=5 cellspacing=0>\n";
   ostr << "<tr>\n";
   ostr << "<td width=150>FINAL GRADE</td>";
