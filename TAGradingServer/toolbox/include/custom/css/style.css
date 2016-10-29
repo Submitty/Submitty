@@ -652,3 +652,23 @@ table {
     background-color:#f9f9f9
 }
 
+#csvUpload{
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+}
+
+#csvUpload + label{
+    font-size: 14px;
+    font-weight: normal;
+    color:white;
+    background-color: #337ab7;
+    cursor: pointer;
+    display: inline;
+    padding: 6px 12px;
+    border-radius: 4px;
+    float: right;
+    margin: 5px;
+}

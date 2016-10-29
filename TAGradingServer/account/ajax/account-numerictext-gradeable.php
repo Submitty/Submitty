@@ -33,6 +33,7 @@ function standard()
     $db->query("SELECT COUNT(*) AS cnt from gradeable AS g INNER JOIN gradeable_component AS gc ON g.g_id=gc.g_id WHERE g.g_id=? AND gc_is_text='true'", $params);
     $num_text = $db->row()['cnt'];
 
+
     $questions = array();
     for ($i = 0; $i < $num_numeric; $i++) {
         $questions[$i] = floatval($_GET['q' . $i]);
@@ -107,10 +108,18 @@ function standard()
 
 function csvupload(){
 
-    $csv = $_POST['parsedCsv'];
     global $db;
-    $params = array('{"'.implode('","', $csv).'"}', $_GET["g_id"], User::$user_id);
 
-    $db->query("SELECT * FROM csv_To_Numeric_Gradeable(?, ?, ?)", $params);
+    $csv = $_POST['parsedCsv'];
+    $csv_array = array();
+    foreach ($csv as $line){
+        $line = addslashes($line);
+        $csv_array[] = $line;
+    }
+
+    $params = array('{"'.implode('","', $csv_array).'"}', $_GET["g_id"], User::$user_id);
+
+    $db->query("SELECT csv_To_Numeric_Gradeable(?, ?, ?)", $params);
+
 }
 echo "updated";
