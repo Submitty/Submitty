@@ -10,8 +10,7 @@
 // FIXME should be configurable within the homework, but should not exceed what is reasonable to myers diff
 
 //#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 50   // in characters  (approx 1000 lines with 50 characters per line)
-//#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 60   // in characters  (approx 1000 lines with 60 characters per line)
-#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 80   // in characters  (approx 1000 lines with 60 characters per line)
+#define MYERS_DIFF_MAX_FILE_SIZE 10000 * 100   // in characters  (approx 10000 lines with 100 characters per line)
 #define OTHER_MAX_FILE_SIZE      1000 * 100  // in characters  (approx 1000 lines with 100 characters per line)
 
 
@@ -85,12 +84,16 @@ bool getFileContents(const std::string &filename, std::string &file_contents) {
 }
 
 
-bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::vector<std::string> &messages) {
-  std::string filename = j.value("actual_file","");
-  if (filename == "") {
+bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, 
+		     std::vector<std::string> &messages) {
+
+  std::vector<std::string> filenames = stringOrArrayOfStrings(j,"actual_file");
+  if (filenames.size() != 1) {
     messages.push_back("ERROR!  STUDENT FILENAME MISSING");
     return false;
   }
+
+  std::string filename = filenames[0];
   std::string p_filename = tc.getPrefix() + "_" + filename;
 
   // check for wildcard
@@ -116,14 +119,18 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
     return false;
   }
   if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
-    messages.push_back("ERROR!  Student file '" + p_filename + "' too large for grader");
+    messages.push_back("ERROR!  Student file '" + p_filename + "' too large for grader (" +
+		       std::to_string(student_file_contents.size()) + " vs. " +
+		       std::to_string(MYERS_DIFF_MAX_FILE_SIZE) + ")");
     return false;
   }
   return true;
 }
 
 
-bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, std::vector<std::string> &messages) {
+bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, 
+		      std::vector<std::string> &messages) {
+
   std::string filename = j.value("expected_file","");
   if (filename == "") {
     messages.push_back("ERROR!  EXPECTED FILENAME MISSING");
@@ -134,7 +141,10 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
     return false;
   }
   if (expected_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
-    messages.push_back("ERROR!  Expected file '" + filename + "' too large for grader");
+    messages.push_back("ERROR!  Expected file '" + filename + "' too large for grader (" +
+		       std::to_string(expected_file_contents.size()) + " vs. " +
+		       std::to_string(MYERS_DIFF_MAX_FILE_SIZE) + ")");
+
     return false;
   }
   return true;
@@ -396,7 +406,18 @@ void TestCase::FileCheck_Helper() {
     nlohmann::json v;
     v["method"] = "fileExists";
     v["actual_file"] = (*f_itr);
-    v["description"] = (*f_itr);
+    std::vector<std::string> filenames = stringOrArrayOfStrings(_json,"actual_file");
+    std::string desc = "file check ";
+    for (int i = 0; i < filenames.size(); i++) {
+      desc += " " + filenames[i];
+    }
+    v["description"] = desc;
+    if (filenames.size() != 1) {
+      v["show_actual"] = "never";
+    }
+    if (_json.value("one_of",false)) {
+      v["one_of"] = true;
+    }
     _json["validation"].push_back(v);
     _json.erase(f_itr);
   } else if (v_itr != _json.end()) {
