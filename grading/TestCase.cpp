@@ -407,9 +407,10 @@ void TestCase::FileCheck_Helper() {
     v["method"] = "fileExists";
     v["actual_file"] = (*f_itr);
     std::vector<std::string> filenames = stringOrArrayOfStrings(_json,"actual_file");
-    std::string desc = "file check ";
+    std::string desc;
     for (int i = 0; i < filenames.size(); i++) {
-      desc += " " + filenames[i];
+      if (i != 0) desc += " ";
+      desc += filenames[i];
     }
     v["description"] = desc;
     if (filenames.size() != 1) {
