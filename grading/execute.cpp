@@ -74,6 +74,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
     // for Computer Organization
     { "spim",                    "/usr/bin/spim" },
+    { "clang",                   "/usr/bin/clang" },
 
     // for Principles of Software
     { "java",                    "/usr/bin/java" },
