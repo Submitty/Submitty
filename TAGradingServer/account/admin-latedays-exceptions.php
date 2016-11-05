@@ -154,7 +154,6 @@ function verify_student_in_db($student) {
 SELECT COUNT(1)
 FROM users
 WHERE user_id=?
-AND	user_group=4
 SQL;
 
 	\lib\Database::query($sql, array($student));
@@ -243,7 +242,6 @@ FROM users
 FULL OUTER JOIN late_day_exceptions
 	ON users.user_id=late_day_exceptions.user_id
 WHERE late_day_exceptions.g_id=?
-	AND users.user_group=4
 	AND	late_day_exceptions.late_day_exceptions IS NOT NULL
 	AND	late_day_exceptions.late_day_exceptions>0
 ORDER BY users.user_email ASC;

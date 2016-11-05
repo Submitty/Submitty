@@ -660,8 +660,8 @@ if (isset($eg->original_grader)) {
     </div>
 HTML;
 }
-             
-if (!($now < new DateTime($eg->eg_details['g_grade_start_date']))) {
+                
+if (!($now < new DateTime($eg->eg_details['g_grade_start_date'])) && $eg->eg_details['eg_total'] > 0) {
     if((!isset($_GET["individual"])) || (isset($_GET["individual"]) && !$student_individual_graded)) {
         $output .= <<<HTML
         <input class="btn btn-large btn-primary" type="submit" value="Submit Homework Grade"/>
