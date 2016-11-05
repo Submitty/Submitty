@@ -22,32 +22,6 @@ $grade_select_extra = $now < $eg_due_date ? 'disabled="true"' : "";
 //not sure if correct
 $color = "#998100";
 
-if ($eg->status == 1 && $eg->days_late_used == 0) {
-    $icon= '<i class="icon-ok icon-white"></i>';
-    $icon_color = "#008000";
-    $part_status = "Good";
-}
-else if ($eg->status == 1 && $eg->days_late_used > 0) {
-    $icon= '<i class="icon-exclamation-sign icon-white"></i>';
-    $color = "#998100";
-    $icon_color = "#FAA732";
-    $part_status = 'Late';
-}
-else {
-    $icon = '<i class="icon-remove icon-white"></i>';
-    $color  = "#DA4F49";
-    $icon_color  = "#DA4F49";
-    if ($eg->active_assignment == -1) {
-        $part_status  = 'No Submission';
-    }
-    else if($eg->active_assignment == 0){
-        $part_status = 'Cancelled';
-    }
-    else {
-        $part_status  = 'Bad';
-    }
-}
-
 $calculate_diff = __CALCULATE_DIFF__;
 if ($calculate_diff) {
     $output = <<<HTML
@@ -305,9 +279,6 @@ HTML;
     $output .= <<<HTML
             <div class="tabbable" style="padding-top:10px;">
                 <ul id="myTab" class="nav nav-tabs">
-                    <li style="margin-right:2px; height:34px; width:20px; text-align:center; line-height:16px; padding-top:3px; -webkit-border-radius: 4px 4px 0 0; -moz-border-radius: 4px 4px 0 0; border-radius: 4px 4px 0 0; background-color: {$icon_color};">
-                        {$icon}
-                    </li>
 HTML;
 
     $i = 0;
@@ -425,44 +396,92 @@ $output .= <<<HTML
                 </div>
 HTML;
 
-if ($eg->eg_details['eg_late_days'] >= 0) {
-    $late_days = $eg->eg_details['eg_late_days'];
-    $plural = (($late_days > 1) ? 's': '');
-    $output .= <<<HTML
-                <span style="color: black">Gradeable allows {$late_days} late day{$plural}.</span><br />
-HTML;
-}
 
-if ($eg->student['student_allowed_lates'] >= 0) {
-    $allowed_lates = $eg->student['student_allowed_lates'];
-    $plural = (($allowed_lates > 1) ? 's': '');
+$output .= <<<HTML
+            <h4>Overall Late Day Usage</h4>
+            <table>
+                <thead>
+                    <tr><th></th><th style="border:thin solid black">Late days used</th>
+                    <th style="border:thin solid black">Late day exceptions</th></tr>
+                </thead>
+                <tbody>
+HTML;
+$total_late = 0;
+$late_this_assignment_pre_exceptions = 0;
+$late_this_assignment = 0;
+$exceptions_this_assignment = 0;
+foreach($eg->student['used_late_days'] as $ld){
+    $total_late += ($ld['late_days_used'] - $ld['exceptions']);
+    if($ld['g_id'] == $eg->g_id){
+        $late_this_assignment = ($ld['late_days_used'] - $ld['exceptions']);
+        $late_this_assignment_pre_exceptions = $ld['late_days_used'];
+        $late_this_assignment = ($late_this_assignment > 0 ? $late_this_assignment : 0);
+        $exceptions_this_assignment = $ld['exceptions'];
+    }
     $output .= <<<HTML
-                <span style="color: black">Student has used {$eg->student['used_late_days']}/{$allowed_lates} late day{$plural} this semester.</span><br />
+            <tr>
+                <th style="border:thin solid black">{$ld['g_id']}</th>
+                <td align="center" style="border:thin solid black">{$ld['late_days_used']}</td>
+                <td align="center" style="border:thin solid black">{$ld['exceptions']}</td>
+            </tr>
 HTML;
 }
 
 $output .= <<<HTML
-                Late Days Used on Assignment:&nbsp;{$eg->days_late}<br />
+                </tbody>
+            </table>
+            <br>
 HTML;
 
-if ($eg->late_days_exception > 0) {
-    $late_days_exception = $eg->late_days_exception;
-    $plural = (($late_days_exception > 1) ? 's': '');
+    $late_days = $eg->eg_details['eg_late_days'];
+    $plural = (($late_days > 1) ? 's': '');
     $output .= <<<HTML
-                <span style="color: green">Student has an exception of {$late_days_exception} late day{$plural}.</span><br />
+                <span style="color: black">Gradeable allows {$late_days} late day{$plural}.</span>
+                <br>
+                <span style="color: black">Student used {$late_this_assignment_pre_exceptions} late day(s) on this assignment.</span>
+                <br>
+                <span style="color: black">Student had {$exceptions_this_assignment} late day exceptions on this assignment.</span>
+                <br>
+                <span style="color:black">Late Days Used on this Assignment After Exceptions: {$late_this_assignment}</span>
+                <br>
 HTML;
-    $output .= <<<HTML
-                <b>Late Days Used:</b>&nbsp;{$eg->days_late_used}<br />
-HTML;
+
+$status = 1;
+if($late_this_assignment > $late_days || ($total_late > __DEFAULT_TOTAL_LATE_DAYS__ && $late_this_assignment > 0)){
+    $status = 0;
 }
 
-if($eg->status == 0 && $eg->submitted == 1) {
+if ($status == 1 && $late_this_assignment == 0 && $eg->active_assignment > 0) {
+    $part_status = "Good";
+}
+else if ($status == 1 && $late_this_assignment > 0 && $eg->active_assignment > 0) {
+    $color = "#998100";
+    $part_status = 'Late';
+}
+else {
+    $output .= <<<HTML
+                <script>
+                    $('body').css('background-color', 'red');
+                </script>
+HTML;
+    $color  = "#DA4F49";
+    if ($eg->active_assignment == 0) {
+        $part_status  = 'No Submission';
+    }
+    else if($eg->active_assignment == -1){
+        $part_status = 'Cancelled';
+    }
+    else {
+        $part_status  = 'Bad';
+    }
+}
+
+if($status == 0 && $eg->submitted == 1) {
     $output .= <<<HTML
                 <b style="color:#DA4F49;">Too many total late days used for this assignment</b><br />
 HTML;
 }
 
-$print_status = ($eg->status == 1) ? "Good" : "Bad";
 $output .= <<<HTML
                 <b>Status:</b> <span style="color: {$color};">{$part_status}</span><br />
     </div>

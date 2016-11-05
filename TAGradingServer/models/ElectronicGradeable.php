@@ -188,7 +188,7 @@ class ElectronicGradeable {
             $this->setStudentDetails();
             $this->setEGSubmissionDetails();
             $this->setEGResults();
-            $this->calculateStatus();
+            //$this->calculateStatus();
             $this->setQuestionTotals();
 
             Utils::stripStringFromArray(__SUBMISSION_SERVER__, $this->eg_files);
@@ -227,30 +227,26 @@ WHERE s.user_id=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $
               $this->student['student_allowed_lates'] = __DEFAULT_TOTAL_LATE_DAYS__;
             }
 
-            $params = array($this->student_id, $this->eg_details['g_id']);
-            Database::query("SELECT * FROM late_day_exceptions WHERE user_id=? AND g_id=?", $params);
-            $row = Database::row();
-            $this->late_days_exception = (isset($row['late_day_exceptions'])) ? $row['late_day_exceptions'] : 0;
-
             // late days used for the semester as of submission date
             $params = array($this->student_id, $this->eg_details['eg_submission_due_date']);
             Database::query("
-SELECT 
-    SUM(GREATEST(late_days_used - COALESCE(late_day_exceptions,0),0)) AS used_late_days
-FROM 
-    late_days_used ldu INNER JOIN electronic_gradeable AS eg
-    ON ldu.g_id = eg.g_id LEFT JOIN late_day_exceptions AS lde ON
-    lde.g_id = eg.g_id    
-WHERE 
-    ldu.user_id=?
-AND 
-     eg.eg_submission_due_date <=?
-GROUP BY 
-    ldu.user_id", $params);
+SELECT
+  ldu.g_id
+  , ldu.late_days_used
+  , coalesce(lde.late_day_exceptions, 0) as exceptions
+FROM
+  late_days_used ldu FULL OUTER JOIN late_day_exceptions lde
+    on ldu.g_id = lde.g_id AND ldu.user_id = lde.user_id
+  , electronic_gradeable eg
+WHERE
+  ldu.user_id =?
+  AND ldu.g_id = eg.g_id
+  AND eg.eg_submission_due_date <=?
+ORDER BY
+  eg.eg_submission_due_date
+", $params);
 
-            $row = Database::row();
-
-            $this->student['used_late_days'] = (isset($row['used_late_days']) ? $row['used_late_days'] : 0);
+            $this->student['used_late_days'] = Database::rows();
         }
     }
 
@@ -466,7 +462,7 @@ ORDER BY gc_order ASC
         if (!$this->submitted) {
             return;
         }
-        
+
         Database::query("SELECT * FROM late_days_used WHERE user_id=? AND g_id=?", array($this->student_id, $this->eg_details['g_id']));
         
         $submitted_lates = isset( Database::row()['g_id']);
