@@ -628,16 +628,78 @@ HTML;
                                                    htmlspecialchars(json_encode(pgArrayToPhp($grader['sections'])), ENT_NOQUOTES));
     }
     
-    print <<<HTML
-    <div id="rotating-sections" class="graders" style="display:none;">
-        <br />
-        Available rotating sections: {$num_rotating_sections}
-        
+print <<<HTML
+  <div id="rotating-sections" class="graders" style="display:none; width: 1000px; overflow-x:scroll">
+  <br />
+  <table style="border: 3px solid black;">
 HTML;
-    
+
+$db->query("SELECT g_id FROM gradeable ORDER BY g_grade_start_date ASC", array());
+$gradeables = $db->rows();
+
+// create header 
+  print <<<HTML
+        <tr>
+        <th></th>
+HTML;
+  
+  foreach($gradeables as $row){
+    print <<< HTML
+      <th style="padding: 8px; border: 3px solid black;">{$row['g_id']}</th>
+HTML;
+  }
+
+  print <<<HTML
+        </tr>
+        <tr>
+HTML;
+  
+// get gradeables graded by rotating section in the past and the sections each grader graded
+  $db->query("
+  SELECT 
+    gu.g_id, gu.user_id, gr.sections_rotating, g_grade_start_date 
+  FROM (SELECT g.g_id, u.user_id, g_grade_start_date
+          FROM (SELECT user_id FROM users WHERE user_group=2 OR user_group=3) AS u CROSS JOIN (
+            SELECT 
+              DISTINCT g.g_id,
+              g_grade_start_date
+            FROM gradeable AS g LEFT JOIN 
+              grading_rotating AS gr ON g.g_id = gr.g_id) AS g ) as gu 
+        LEFT JOIN (
+              SELECT 
+                g_id, user_id, array_agg(sections_rotating) as sections_rotating 
+              FROM 
+                grading_rotating 
+              GROUP BY 
+              g_id, user_id) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id 
+              ORDER BY user_id, g_grade_start_date", array());
+  
+  $last = '';
+  
+  foreach($db->rows() as $row){
+    $new_row = false;
+    if (strcmp($row['user_id'],$last) != 0){
+      $new_row = true;
+    }
+    if($new_row){
+      print <<<HTML
+          </tr>
+          <tr>     
+          <th style="padding: 8px; border: 3px solid black;">{$row['user_id']}</th>
+HTML;
+    }
+    $sections = implode(", ", pgArrayToPhp($row['sections_rotating']));
     print <<<HTML
+          <td style="padding: 8px; border: 3px solid black; text-align: center;">{$sections}</td>      
+HTML;
+    $last = $row['user_id'];
+  }  
+  
+  print <<<HTML
+            </table>
         <div id="full-access-graders" style="display:none;">
-            <br />
+        <br /> 
+        Available rotating sections: {$num_rotating_sections}
             <table>
                 <th>Full Access Graders</th>
 HTML;
@@ -664,7 +726,10 @@ HTML;
     
     print <<<HTML
             </table>
-        </div>
+            <div style="border: 1px black;">
+HTML;
+
+  print <<<HTML
         <div id="limited-access-graders" style="display:none;">
             <br />
             <table>
