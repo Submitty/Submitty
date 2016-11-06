@@ -77,6 +77,7 @@ install:
   - pip install -U pip
   - pip install xlsx2csv
   - pip install python-pam
+  - pip install sqlalchemy
   - pip install selenium
   - pip install nose2
   - pip install unittest2
