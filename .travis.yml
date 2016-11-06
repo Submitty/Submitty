@@ -78,10 +78,12 @@ install:
   - pip install xlsx2csv
   - pip install python-pam
   - pip install sqlalchemy
+  - pip install psycopg2
   - pip install selenium
   - pip install nose2
   - pip install unittest2
   - pip install pylint_runner
+  - pip --version
   - sudo chmod -R 555 /usr/local/lib/python2.7/*
   - sudo chmod -R 555 /opt/python/2.7.10/lib/python2.7/*
 
