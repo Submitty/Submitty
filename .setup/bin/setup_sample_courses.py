@@ -23,10 +23,6 @@ import os
 import pwd
 import re
 import subprocess
-import sys
-
-for line in sys.path:
-    print(line)
 
 from sqlalchemy import create_engine, Table, MetaData
 import yaml
@@ -62,10 +58,11 @@ def main():
     users = {}  # dict[str, User]
     courses_json = load_data_yaml('courses.yml')
     for course_json in courses_json:
-        if len(use_courses) == 0 or course_json in use_courses:
+        if len(use_courses) == 0 or course_json['code'] in use_courses:
             course = Course(course_json)
             courses[course.code] = course
 
+    create_group("course_builders")
     users_json = load_data_yaml('users.yml')
     for user_json in users_json:
         # TODO: Add check for builtin system users (hwphp, etc.) and untrusted as they should
@@ -89,7 +86,6 @@ def main():
                 if user.rotating_section is not None:
                     courses[key].rotating_sections.add(user.rotating_section)
 
-    create_group("course_builders")
     for course in courses.keys():
         courses[course].instructor = users[courses[course].instructor]
         courses[course].create()
