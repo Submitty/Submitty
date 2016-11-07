@@ -23,10 +23,6 @@ import os
 import pwd
 import re
 import subprocess
-import sys
-
-for path in sys.path:
-    print(path)
 
 from sqlalchemy import create_engine, Table, MetaData
 import yaml
@@ -75,11 +71,12 @@ def main():
         users[user.id] = user
         if user.courses is not None:
             for course in user.courses:
-                courses[course].users.append(user)
-                if user.registration_section is not None:
-                    courses[course].registration_sections.add(user.registration_section)
-                if user.rotating_section is not None:
-                    courses[course].rotating_sections.add(user.rotating_section)
+                if course in courses:
+                    courses[course].users.append(user)
+                    if user.registration_section is not None:
+                        courses[course].registration_sections.add(user.registration_section)
+                    if user.rotating_section is not None:
+                        courses[course].rotating_sections.add(user.rotating_section)
         else:
             for key in courses.keys():
                 courses[key].users.append(user)
@@ -353,16 +350,22 @@ class User(object):
 
     def _create_ssh(self):
         if not user_exists(self.id):
+            print("Creating user {}...".format(self.id))
             os.system("adduser {} --gecos 'First Last,RoomNumber,WorkPhone,HomePhone' "
                       "--disabled-password".format(self.id))
-            os.system("echo {}:{} | chpasswd".format(self.id, self.id))
+            self.set_password()
 
     def _create_non_ssh(self):
         if not user_exists(self.id):
+            print("Creating user {}...".format(self.id))
             os.system("/usr/sbin/adduser {} --quiet --home /tmp --gecos \'AUTH ONLY account\' "
                       "--no-create-home --disabled-password --shell "
                       "/usr/sbin/nologin".format(self.id))
-            os.system("echo {}:{} | chpasswd".format(self.id, self.id))
+            self.set_password()
+
+    def set_password(self):
+        print("Setting password for user {}...".format(self.id));
+        os.system("echo {}:{} | chpasswd".format(self.id, self.id))
 
     def __getitem__(self, item):
         return self.__dict__[item]

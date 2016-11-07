@@ -22,15 +22,13 @@ source ${DIR}/../common/common_env.sh
 #    echo "Downloaded Selenium"
 #fi
 
-if [ ${AUTH_METHOD} = "PamAuthentication" ]; then
-    sudo bash -c 'echo -e "#%PAM-1.0
+sudo bash -c 'echo -e "#%PAM-1.0
 auth required pam_unix.so
 account required pam_unix.so" > /etc/pam.d/httpd'
-    sudo sed -i '25s/^/\#/' /etc/pam.d/common-password
-    sudo sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
-    PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
-	sudo sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost       all    all    192.168.56.0\/24    pam\nhost       all    all    all                md5/" /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
-fi
+sudo sed -i '25s/^/\#/' /etc/pam.d/common-password
+sudo sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
+PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
+sudo sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost       all    all    192.168.56.0\/24    pam\nhost       all    all    all                md5/" /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
 
 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
 sudo mkdir -p ${SUBMITTY_DATA_DIR}
