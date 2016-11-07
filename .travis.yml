@@ -63,6 +63,7 @@ before_install:
    #- phantomjs --version
    - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
    - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
+   - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
 
 install:
   - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.5" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
@@ -94,11 +95,11 @@ before_script:
   - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
   - sudo ./.setup/travis/autograder.sh
   - ./.setup/travis/setup.sh
-  - sudo python --version
+  - sudo -E python --version
   - which python
   - echo $PATH
   - sudo echo $PATH
-  - sudo which python
+  - sudo -E which python
   - sudo -E python /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py csci1000
   - sudo ./.setup/travis/setup_test_suite.sh
   - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
