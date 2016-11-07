@@ -95,6 +95,9 @@ before_script:
   - sudo ./.setup/travis/autograder.sh
   - ./.setup/travis/setup.sh
   - sudo python --version
+  - which python
+  - echo $PATH
+  - sudo echo $PATH
   - sudo which python
   - sudo python /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py csci1000
   - sudo ./.setup/travis/setup_test_suite.sh
