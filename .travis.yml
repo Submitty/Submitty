@@ -84,6 +84,9 @@ install:
   - sudo pip install nose2
   - sudo pip install unittest2
   - sudo pip install pylint_runner
+  - cat /usr/local/bin/nose2
+  - sudo pip --version
+  - pip --version
   - sudo chmod -R 555 /usr/local/lib/python2.7/*
   - sudo chmod -R 555 /opt/python/2.7.10/lib/python2.7/*
 
