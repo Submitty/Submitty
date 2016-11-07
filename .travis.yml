@@ -63,6 +63,8 @@ before_install:
    #- phantomjs --version
    - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
    - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
+   - echo "alias sudo='sudo env PATH=$PATH'" >> ~/.bashrc
+   - source ~/.bashrc
 
 install:
   - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.5" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
