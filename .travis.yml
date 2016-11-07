@@ -131,7 +131,7 @@ script:
   - vendor/bin/phpunit --version
   #- firefox --version
   - if [ ${INTEGRATION_SUITE} = false ]; then vendor/bin/phpunit --configuration tests/phpunit.xml; fi
-  - if [ ${INTEGRATION_SUITE} = true ]; then python /usr/local/submitty/test_suite/integrationTests/run.py; fi
+  - if [ ${INTEGRATION_SUITE} = true ]; then sudo python /usr/local/submitty/test_suite/integrationTests/run.py; fi
   - if [ ${INTEGRATION_SUITE} = false ]; then TEST_URL="http://localhost" nose2 -v --start-dir="tests/e2e"; fi
 
 # Add more linters to the build process here
