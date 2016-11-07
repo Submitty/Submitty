@@ -23,6 +23,10 @@ import os
 import pwd
 import re
 import subprocess
+import sys
+
+for path in sys.path:
+    print(path)
 
 from sqlalchemy import create_engine, Table, MetaData
 import yaml

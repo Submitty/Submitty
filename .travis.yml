@@ -94,6 +94,9 @@ before_script:
   - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
   - sudo ./.setup/travis/autograder.sh
   - ./.setup/travis/setup.sh
+  - sudo python --version
+  - sudo which python
+  - sudo python ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py csci1000
   - sudo ./.setup/travis/setup_test_suite.sh
   - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
   - sudo a2enmod include rewrite actions cgi alias headers
