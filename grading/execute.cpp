@@ -52,6 +52,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "compare",                 "/usr/bin/compare" }, //image magick!
     { "cut",                     "/usr/bin/cut" },
     { "sort",                    "/usr/bin/sort" },
+    { "sed",                     "/bin/sed" },
 
     // Submitty Analysis Tools
     { "submitty_count_token",    SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token" },
