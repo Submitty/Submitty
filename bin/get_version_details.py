@@ -45,13 +45,16 @@ def get_all_versions(semester, course):
         raise SystemError("Could not find submission or results directory")
     for homework in os.listdir(submission_path):
         testcases = []
-        with open(os.path.join(build_path, "build_" + homework + ".json")) as open_file:
-            parsed = json.load(open_file)
-            for testcase in parsed['testcases']:
-                testcases.append({"title": testcase['title'],
-                                  "points": testcase['points'],
-                                  "extra_credit": testcase['extra_credit'],
-                                  "hidden": testcase['hidden']})
+        buildfile = os.path.join(build_path, "build_" + homework + ".json")
+        if os.path.isfile(buildfile):
+            with open(buildfile) as open_file:
+                parsed = json.load(open_file)
+                if parsed['testcases']:
+                    for testcase in parsed['testcases']:
+                        testcases.append({"title": testcase['title'],
+                                          "points": testcase['points'],
+                                          "extra_credit": testcase['extra_credit'],
+                                          "hidden": testcase['hidden']})
         homework_path = os.path.join(submission_path, homework)
         for student in os.listdir(homework_path):
             if student not in versions:
@@ -84,15 +87,16 @@ def get_version_details(semester, course, homework, student, version, testcases,
         return False
     with open(results_json) as open_file:
         open_file = json.load(open_file)
-        if len(testcases) != len(open_file['testcases']):
-            return False
-        for i in range(len(open_file['testcases'])):
-            points = float(open_file['testcases'][i]['points_awarded'])
-            hidden = "hidden" if testcases[i]['hidden'] else "non_hidden"
-            ec = "extra_credit" if testcases[i]['extra_credit'] else "non_extra_credit"
-            entry['autograding_' + hidden + "_" + ec] += points
-    with open(os.path.join(results_path, "results_history.json")) as open_file:
-        json_file = json.load(open_file)
+        if testcases:
+            if len(testcases) != len(open_file['testcases']):
+                return False
+            for i in range(len(open_file['testcases'])):
+                points = float(open_file['testcases'][i]['points_awarded'])
+                hidden = "hidden" if testcases[i]['hidden'] else "non_hidden"
+                ec = "extra_credit" if testcases[i]['extra_credit'] else "non_extra_credit"
+                entry['autograding_' + hidden + "_" + ec] += points
+        with open(os.path.join(results_path, "results_history.json")) as open_file:
+            json_file = json.load(open_file)
         if isinstance(json_file, list):
             a = datetime.strptime(json_file[-1]['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")
             entry['submission_time'] = '{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}'\

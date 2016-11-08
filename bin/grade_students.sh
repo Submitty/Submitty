@@ -550,7 +550,8 @@ function grade_this_item {
     # copy input files to tmp directory
     if [ -d "$test_input_path" ]
     then
-	cp -rf $test_input_path/* "$tmp" || log_error "$NEXT_TO_GRADE" "Failed to copy input files to temporary directory $test_input_path to $tmp : cp -rf $test_input_path/* $tmp"
+	#cp -rf $test_input_path/* "$tmp" || log_error "$NEXT_TO_GRADE" "Failed to copy input files to temporary directory $test_input_path to $tmp : cp -rf $test_input_path/* $tmp"
+	cp -rf $test_input_path/* "$tmp" > /dev/null 2>&1
     fi
 
     # copy run.out to the tmp directory

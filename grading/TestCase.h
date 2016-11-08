@@ -10,6 +10,10 @@
 
 #include "testResults.h"
 
+#define MYERS_DIFF_MAX_FILE_SIZE_MODERATE 1000 * 50    // in characters  (approx 1000  lines with 50 characters per line)
+#define MYERS_DIFF_MAX_FILE_SIZE_HUGE     10000 * 100  // in characters  (approx 10000 lines with 100 characters per line)
+#define OTHER_MAX_FILE_SIZE               1000 * 100   // in characters  (approx 1000  lines with 100 characters per line)
+
 void CustomizeAutoGrading(const std::string& username, nlohmann::json& j);
 std::vector<std::string> stringOrArrayOfStrings(nlohmann::json j, const std::string what);
 
