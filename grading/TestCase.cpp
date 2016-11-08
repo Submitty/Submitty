@@ -7,13 +7,6 @@
 #include "tokenSearch.h"
 #include "execute.h"
 
-// FIXME should be configurable within the homework, but should not exceed what is reasonable to myers diff
-
-//#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 50   // in characters  (approx 1000 lines with 50 characters per line)
-#define MYERS_DIFF_MAX_FILE_SIZE 10000 * 100   // in characters  (approx 10000 lines with 100 characters per line)
-#define OTHER_MAX_FILE_SIZE      1000 * 100  // in characters  (approx 1000 lines with 100 characters per line)
-
-
 int TestCase::next_test_case_id = 1;
 
 std::string rlimit_name_decoder(int i);
@@ -118,10 +111,10 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
     messages.push_back("ERROR!  Could not open student file: '" + filename + "'");
     return false;
   }
-  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
     messages.push_back("ERROR!  Student file '" + p_filename + "' too large for grader (" +
 		       std::to_string(student_file_contents.size()) + " vs. " +
-		       std::to_string(MYERS_DIFF_MAX_FILE_SIZE) + ")");
+		       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")");
     return false;
   }
   return true;
@@ -140,11 +133,10 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
     messages.push_back("ERROR!  Could not open expected file: '" + filename);
     return false;
   }
-  if (expected_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
+  if (expected_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
     messages.push_back("ERROR!  Expected file '" + filename + "' too large for grader (" +
 		       std::to_string(expected_file_contents.size()) + " vs. " +
-		       std::to_string(MYERS_DIFF_MAX_FILE_SIZE) + ")");
-
+		       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")");
     return false;
   }
   return true;
