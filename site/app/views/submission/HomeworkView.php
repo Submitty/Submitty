@@ -397,7 +397,6 @@ HTML;
                 if ($gradeable->inBatchQueue() && $gradeable->hasResults()) {
                     if ($gradeable->beingGradedBatchQueue()) {
                         $return .= <<<HTML
-                        <script> console.log('HERE!!!'); </script>
         <p class="red-message">
             This submission is currently being regraded. It is one of {$gradeable->getNumberOfGradingTotal()} grading.
         </p>
@@ -406,7 +405,7 @@ HTML;
                     else {
                         $return .= <<<HTML
         <p class="red-message">
-            This submission is currently in the queue to be regraded. Your submission is number {$gradeable->getQueuePosition()} out of {$gradeable->getQueueTotal()}.
+            This submission is currently in the queue to be regraded.
         </p>
 HTML;
                     }
@@ -425,7 +424,7 @@ HTML;
                     else {
                         $return .= <<<HTML
         <p class="red-message">
-            This submission is currently in the queue to be graded. Your submission is number {$gradeable->getQueuePosition()} out of {$gradeable->getQueueTotal()}.
+            This submission is currently in the queue to be graded. Your submission is number {$gradeable->getInteractiveQueuePosition()} out of {$gradeable->getInteractiveQueueTotal()}.
         </p>
 HTML;
                     }

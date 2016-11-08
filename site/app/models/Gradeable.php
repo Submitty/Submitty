@@ -155,8 +155,11 @@ abstract class Gradeable {
     protected $grading_interactive_queue = false;
     protected $in_batch_queue = false;
     protected $grading_batch_queue = false;
-    protected $queue_total = 0;
-    protected $queue_position = 0;
+
+    protected $interactive_queue_total = 0;
+    protected $interactive_queue_position = 0;
+    protected $batch_queue_total = 0;
+    protected $batch_queue_position = 0;
     protected $grading_total = 0;
 
     public function __construct(Core $core, $id) {
@@ -247,20 +250,18 @@ abstract class Gradeable {
         $queue_count = 0;
         $grading_count = 0;
         if($this->in_interactive_queue === true) {
-            //SORT FILES BEFORE COUNTING POSITION IN QUEUE!!!
-            $files = array();
             $files = scandir($interactive_queue);
+            $f = array();
             $times = array();
             foreach($files as $file){
-              if(is_file($interactive_queue.'/'.$file)){
-                $files[] = $file;
-                $times[] = filemtime($interactive_queue.'/'.$file);
+              if(is_file($interactive_queue.'/'.$file) && ($file !== "..") && ($file !== ".") && !in_array($file, $f)) {
+                  $f[] = $file;
+                  $times[] = filemtime($interactive_queue.'/'.$file);
               }
             }
-            array_multisort($times,SORT_DESC,$files); //Sorted By Descending Here
+            array_multisort($times,SORT_DESC,$f); //Sorted By Descending Here
 
-            $files = scandir($interactive_queue);
-            foreach($files as $file) {
+            foreach($f as $file) {
                 if(is_file($interactive_queue.'/'.$file) && ($file !== "..") && ($file !== ".")) {
                     if(strpos($file, "GRADING_") !== false) {
                         $grading_count = $grading_count + 1;
@@ -268,45 +269,76 @@ abstract class Gradeable {
                     else {
                         $queue_count = $queue_count + 1;
                         if($file === $queue_file) {
-                            $this->queue_position = $queue_count;
+                            $this->interactive_queue_position = $queue_count;
                         }
                     }
                 }
             }
-            $this->queue_total = $queue_count;
-            $this->grading_total = $grading_count;
-        }
-        else if($this->in_batch_queue === true) {
-            $files = array();
-            $files = scandir($batch_queue);
-            $times = array();
-            foreach($files as $file){
-              if(is_file($batch_queue.'/'.$file)){
-                $files[] = $file;
-                $times[] = filemtime($batch_queue.'/'.$file);
-              }
-            }
-            array_multisort($times,SORT_DESC,$files); //Sort By Descending Here
 
-            foreach($files as $file) {
-                if(is_file($batch_queue.'/'.$file) && ($file !== "..") && ($file !== ".")) {
+            error_reporting(E_ERROR | E_PARSE);
+            try {
+                $files = scandir($batch_queue);
+                // Count the number being graded in the batch queue to get total of submissions currently being graded
+                foreach($files as $file) {
                     if(strpos($file, "GRADING_") !== false) {
                         $grading_count = $grading_count + 1;
                     }
                 }
+            } catch (Exception $e) {}
+
+            $this->interactive_queue_total = $queue_count;
+            $this->grading_total = $grading_count;
+        }
+        else if($this->in_batch_queue === true) {
+            $files = scandir($batch_queue);
+            $f = array();
+            $times = array();
+            foreach($files as $file){
+              if(is_file($batch_queue.'/'.$file)){
+                $f[] = $file;
+                $times[] = filemtime($batch_queue.'/'.$file);
+              }
+            }
+            array_multisort($times,SORT_DESC,$f); //Sort By Descending Here
+
+            foreach($f as $file) {
+                if(strpos($file, "GRADING_") !== false) {
+                    $grading_count = $grading_count + 1;
+                }
                 else {
                     $queue_count = $queue_count + 1;
                     if($file === $queue_file) {
-                        $this->queue_position = $queue_count;
+                        $this->batch_queue_position = $queue_count;
                     }
                 }
             }
-            $this->queue_total = $queue_count;
+
+            error_reporting(E_ERROR | E_PARSE);
+            try {
+                $files = scandir($interactive_queue);
+                // Count the number being graded in the batch queue to get total of submissions currently being graded
+                foreach($files as $file) {
+                    if(strpos($file, "GRADING_") !== false) {
+                        $grading_count = $grading_count + 1;
+                    }
+                }
+            } catch (Exception $e) {}
+
+            $files = scandir($interactive_queue);
+            // Count the number being graded in the batch queue to get total of submissions currently being graded
+            foreach($files as $file) {
+                if(strpos($file, "GRADING_") !== false) {
+                    $grading_count = $grading_count + 1;
+                }
+            }
+            $this->batch_queue_total = $queue_count;
             $this->grading_total = $grading_count;
         }
-        else {
-            $this->queue_position = 0;
-            $this->queue_total = 0;
+        if($this->in_interactive_queue === false && $this->in_batch_queue === false) {
+            $this->interactive_queue_position = 0;
+            $this->interactive_queue_total = 0;
+            $this->batch_queue_position = 0;
+            $this->batch_queue_total = 0;
             $this->grading_total = 0;
         }
     }
@@ -530,7 +562,7 @@ abstract class Gradeable {
         return $this->due_date;
     }
 
-    public function getTAViewDate() {
+    public function getTAViewDate(){
         return $this->ta_view_date;
     }
 
@@ -629,12 +661,20 @@ abstract class Gradeable {
         return $this->grading_batch_queue;
     }
 
-    public function getQueuePosition() {
-        return $this->queue_position;
+    public function getInteractiveQueuePosition() {
+        return $this->interactive_queue_position;
     }
 
-    public function getQueueTotal() {
-        return $this->queue_total;
+    public function getInteractiveQueueTotal() {
+        return $this->interactive_queue_total;
+    }
+
+    public function getBatchQueuePosition() {
+        return $this->batch_queue_position;
+    }
+
+    public function getBatchQueueTotal() {
+        return $this->batch_queue_total;
     }
 
     public function getNumberOfGradingTotal() {
