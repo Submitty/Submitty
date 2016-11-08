@@ -7,8 +7,6 @@
 #include "tokenSearch.h"
 #include "execute.h"
 
-// FIXME should be configurable within the homework, but should not exceed what is reasonable to myers diff
-
 int TestCase::next_test_case_id = 1;
 
 std::string rlimit_name_decoder(int i);
@@ -139,7 +137,6 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
     messages.push_back("ERROR!  Expected file '" + filename + "' too large for grader (" +
 		       std::to_string(expected_file_contents.size()) + " vs. " +
 		       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")");
-
     return false;
   }
   return true;
