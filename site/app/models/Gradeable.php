@@ -275,16 +275,13 @@ abstract class Gradeable {
                 }
             }
 
-            error_reporting(E_ERROR | E_PARSE);
-            try {
-                $files = scandir($batch_queue);
-                // Count the number being graded in the batch queue to get total of submissions currently being graded
-                foreach($files as $file) {
-                    if(strpos($file, "GRADING_") !== false) {
-                        $grading_count = $grading_count + 1;
-                    }
+            $files = @scandir($batch_queue);
+            // Count the number being graded in the batch queue to get total of submissions currently being graded
+            foreach($files as $file) {
+                if(strpos($file, "GRADING_") !== false) {
+                    $grading_count = $grading_count + 1;
                 }
-            } catch (Exception $e) {}
+            }
 
             $this->interactive_queue_total = $queue_count;
             $this->grading_total = $grading_count;
@@ -313,18 +310,7 @@ abstract class Gradeable {
                 }
             }
 
-            error_reporting(E_ERROR | E_PARSE);
-            try {
-                $files = scandir($interactive_queue);
-                // Count the number being graded in the batch queue to get total of submissions currently being graded
-                foreach($files as $file) {
-                    if(strpos($file, "GRADING_") !== false) {
-                        $grading_count = $grading_count + 1;
-                    }
-                }
-            } catch (Exception $e) {}
-
-            $files = scandir($interactive_queue);
+            $files = @scandir($interactive_queue);
             // Count the number being graded in the batch queue to get total of submissions currently being graded
             foreach($files as $file) {
                 if(strpos($file, "GRADING_") !== false) {
