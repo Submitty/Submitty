@@ -25,23 +25,23 @@ class SubmissionController extends AbstractController {
 
     public function __construct(Core $core) {
         parent::__construct($core);
-        $this->gradeables_list = new GradeableList($this->core, true);
+        $this->gradeables_list = $this->core->loadModel("GradeableList", $this->core, true);
     }
 
     public function run() {
         switch($_REQUEST['action']) {
             case 'upload':
-                $this->ajaxUploadSubmission();
+                return $this->ajaxUploadSubmission();
                 break;
             case 'update':
-                $this->updateSubmissionVersion();
+                return $this->updateSubmissionVersion();
                 break;
             case 'check_refresh':
-                $this->checkRefresh();
+                return $this->checkRefresh();
                 break;
             case 'display':
             default:
-                $this->showHomeworkPage();
+                return $this->showHomeworkPage();
                 break;
         }
     }
@@ -369,9 +369,11 @@ class SubmissionController extends AbstractController {
                 }
             }
         }
+
+        $return = array('success' => $success, 'error' => !$success, 'message' => $message);
         
-        $this->core->getOutput()->renderJson(array('success' => $success, 'error' => !$success, 'message' => $message));
-        return $success;
+        $this->core->getOutput()->renderJson($return);
+        return $return;
     }
     
     private function updateSubmissionVersion() {
