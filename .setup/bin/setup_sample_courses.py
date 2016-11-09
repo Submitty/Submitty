@@ -78,6 +78,8 @@ def main():
                         courses[course].registration_sections.add(user.registration_section)
                     if user.rotating_section is not None:
                         courses[course].rotating_sections.add(user.rotating_section)
+                    if user.grading_registration_section is not None:
+                        courses[course].registration_sections.add(user.grading_registration_section)
         else:
             for key in courses.keys():
                 courses[key].users.append(user)
@@ -85,9 +87,12 @@ def main():
                     courses[key].registration_sections.add(user.registration_section)
                 if user.rotating_section is not None:
                     courses[key].rotating_sections.add(user.rotating_section)
+                if user.grading_registration_section is not None:
+                    courses[key].registration_sections.add(user.grading_registration_section)
 
     for course in courses.keys():
         courses[course].instructor = users[courses[course].instructor]
+        courses[course].check_rotating(users)
         courses[course].create()
 
 
@@ -157,6 +162,9 @@ def create_group(group):
     """
     if not group_exists(group):
         os.system("addgroup {}".format(group))
+
+    if group == "sudo":
+        return
     # These users must be in the groups that get created as else creating the course
     # might fail (and we wouldn't be able to read some necessary files on PHP interface
     os.system("adduser hwphp {}".format(group))
@@ -301,6 +309,7 @@ class User(object):
         self.preferred_firstname = None
         self.registration_section = None
         self.rotating_section = None
+        self.grading_registration_section = None
         self.unix_groups = None
         self.courses = None
         self.manual = False
@@ -310,13 +319,15 @@ class User(object):
             self.preferred_firstname = user['user_preferred_firstname']
         if 'user_email' in user:
             self.email = user['user_email']
-        if "user_group" in user:
+        if 'user_group' in user:
             self.group = user['user_group']
         assert 0 <= self.group <= 4
         if 'registration_section' in user:
             self.registration_section = int(user['registration_section'])
         if 'rotating_section' in user:
             self.rotating_section = int(user['rotating_section'])
+        if 'grading_registration_section' in user:
+            self.grading_registration_section = int(user['grading_registration_section'])
         if 'unix_groups' in user:
             self.unix_groups = user['unix_groups']
         if 'manual_registration' in user:
@@ -328,9 +339,11 @@ class User(object):
                     self.courses[course] = {"user_group": self.group}
             elif isinstance(user['courses'], dict):
                 self.courses = user['courses']
-                self.group = 5
+                check_group = 5
                 for course in self.courses:
-                    self.group = min(self.courses[course]["user_group"], self.group)
+                    if 'user_group' not in self.courses[course]:
+                        self.courses[course]['user_group'] = self.group
+                    check_group = min(self.courses[course]['user_group'], check_group)
             else:
                 raise ValueError("Invalid type for courses key, it should either be list or dict")
         if 'sudo' in user:
@@ -375,6 +388,8 @@ class User(object):
             user_detail = "user_" + detail
             if user_detail in self.courses[course]:
                 return self.courses[course][user_detail]
+            elif detail in self.courses[course]:
+                return self.courses[course][detail]
         return self[detail]
 
 
@@ -436,9 +451,10 @@ class Course(object):
         for section in self.rotating_sections:
             conn.execute(table.insert(), sections_rotating_id=section)
 
-        table = Table("users", metadata, autoload=True)
+        users_table = Table("users", metadata, autoload=True)
+        reg_table = Table("grading_registration", metadata, autoload=True)
         for user in self.users:
-            conn.execute(table.insert(), user_id=user.get_detail(self.code, "id"),
+            conn.execute(users_table.insert(), user_id=user.get_detail(self.code, "id"),
                          user_password=user.get_detail(self.code, "password"),
                          user_firstname=user.get_detail(self.code, "firstname"),
                          user_preferred_firstname=user.get_detail(self.code, "preferred_firstname"),
@@ -449,14 +465,25 @@ class Course(object):
                          rotating_section=user.get_detail(self.code, "rotating_section"),
                          manual_registration=user.get_detail(self.code, "manual"))
 
+            if user.get_detail(self.code, "grading_registration_section") is not None:
+                conn.execute(reg_table.insert(),
+                             user_id=user.get_detail(self.code, "id"),
+                             sections_registration_id=
+                             user.get_detail(self.code, "grading_registration_section"))
+
             if user.unix_groups is None:
                 if user.get_detail(self.code, "group") <= 1:
                     add_to_group(self.code, user.id)
                     add_to_group(self.code + "_archive", user.id)
                 if user.get_detail(self.code, "group") <= 2:
                     add_to_group(self.code + "_tas_www", user.id)
+
+        gradeable_table = Table("gradeable", metadata, autoload=True)
+        electronic_table = Table("electronic_gradeable", metadata, autoload=True)
+        reg_table = Table("grading_rotating", metadata, autoload=True)
+        component_table = Table('gradeable_component', metadata, autoload=True)
         for gradeable in self.gradeables:
-            gradeable.create(conn, metadata)
+            gradeable.create(conn, gradeable_table, electronic_table, reg_table, component_table)
             form = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code,
                                 "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
@@ -466,6 +493,14 @@ class Course(object):
         os.system("{}/courses/{}/{}/BUILD_{}.sh".format(SUBMITTY_DATA_DIR, self.semester,
                                                         self.code, self.code))
         os.environ['PGPASSWORD'] = ""
+
+    def check_rotating(self, users):
+        for gradeable in self.gradeables:
+            for grading_rotating in gradeable.grading_rotating:
+                string = "Invalid user_id {} for rotating section for gradeable {}".format(
+                    grading_rotating['user_id'], gradeable.id)
+                if grading_rotating['user_id'] not in users:
+                    raise ValueError(string)
 
 
 class Gradeable(object):
@@ -490,9 +525,7 @@ class Gradeable(object):
         self.precision = 0.5
         self.syllabus_bucket = "none (for practice only)"
         self.min_grading_group = 3
-        self.gradeable_table = None
-        self.electronic_table = None
-        self.component_table = None
+        self.grading_rotating = []
 
         if 'gradeable_config' in gradeable:
             self.config_path = os.path.join(SAMPLE_DIR, gradeable['gradeable_config'])
@@ -514,6 +547,9 @@ class Gradeable(object):
 
         if 'g_grade_by_registration' in gradeable:
             self.grade_by_registration = gradeable['g_grade_by_registration'] is True
+
+        if 'grading_rotating' in gradeable:
+            self.grading_rotating = gradeable['grading_rotating']
 
         self.ta_view_date = parse_datetime(gradeable['g_ta_view_start_date'])
         self.grade_start_date = parse_datetime(gradeable['g_grade_start_date'])
@@ -552,10 +588,8 @@ class Gradeable(object):
                 component['gc_max_value'] = 1
             self.components.append(Component(component, i))
 
-    def create(self, conn, metadata):
-        if self.gradeable_table is None:
-            self.gradeable_table = Table("gradeable", metadata, autoload=True)
-        conn.execute(self.gradeable_table.insert(), g_id=self.id, g_title=self.title,
+    def create(self, conn, gradeable_table, electronic_table, reg_table, component_table):
+        conn.execute(gradeable_table.insert(), g_id=self.id, g_title=self.title,
                      g_instructions_url=self.instructions_url,
                      g_overall_ta_instructions=self.overall_ta_instructions,
                      g_team_assignment=self.team_assignment, g_gradeable_type=self.type,
@@ -567,20 +601,20 @@ class Gradeable(object):
                      g_min_grading_group=self.min_grading_group,
                      g_closed_date=None)
 
+        for rotate in self.grading_rotating:
+            conn.execute(reg_table.insert(), g_id=self.id, user_id=rotate['user_id'],
+                         sections_rotating=rotate['section_rotating_id'])
+
         if self.type == 0:
-            if self.electronic_table is None:
-                self.electronic_table = Table("electronic_gradeable", metadata, autoload=True)
-            conn.execute(self.electronic_table.insert(), g_id=self.id,
+            conn.execute(electronic_table.insert(), g_id=self.id,
                          eg_submission_open_date=self.submission_open_date,
                          eg_submission_due_date=self.submission_due_date,
                          eg_is_repository=self.is_repository, eg_subdirectory=self.subdirectory,
                          eg_use_ta_grading=self.use_ta_grading, eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision)
 
-        if self.component_table is None:
-            self.component_table = Table('gradeable_component', metadata, autoload=True)
         for component in self.components:
-            component.create(self.id, conn, self.component_table)
+            component.create(self.id, conn, component_table)
 
     def create_form(self):
         form_json = OrderedDict()
@@ -665,6 +699,7 @@ class Gradeable(object):
             return "Repository"
         else:
             return "Upload File"
+
 
 class Component(object):
     def __init__(self, component, order):

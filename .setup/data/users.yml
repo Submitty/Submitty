@@ -101,6 +101,7 @@
   user_firstname: Tim
   user_lastname: Grader
   user_group: 3
+  grading_registration_group: 1
 
 ## STUDENT ACCOUNTS
 
