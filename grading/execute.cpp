@@ -692,6 +692,29 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 // =====================================================================================
 // =====================================================================================
 
+std::string output_of_system_command(const char* cmd) {
+    char buffer[128];
+    std::string result = "";
+    std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) throw std::runtime_error("popen() failed!");
+    while (!feof(pipe.get())) {
+        if (fgets(buffer, 128, pipe.get()) != NULL)
+            result += buffer;
+    }
+    return result;
+}
+
+int resident_set_size(int childPID) {
+  std::string command2 = "ps -o pid,ppid,pgid,comm,%cpu,%mem,rss | grep " + std::to_string(childPID) + " | awk '{ sum += $7 } END { print sum }'";
+  std::string output = output_of_system_command(command2.c_str());
+  std::stringstream ss(output);
+  int mem;
+  if (ss >> mem) {
+    return mem;
+  };
+  return -1;
+}
+
 
 // Executes command (from shell) and returns error code (0 = success)
 int execute(const std::string &cmd, const std::string &execute_logfile,
@@ -743,6 +766,8 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
         float elapsed = 0;
         int status;
         pid_t wpid = 0;
+        float next_checkpoint = 0;
+
         do {
             wpid = waitpid(childPID, &status, WNOHANG);
             if (wpid == 0) {
@@ -752,6 +777,12 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
                     // sleep 1/10 of a second
                     usleep(100000);
                     elapsed+= 0.1;
+                    if (elapsed >= next_checkpoint) {
+                      int memory = resident_set_size(childPID);
+                      std::cout << "time elapsed = " << elapsed << " seconds,  memory used = " << memory << " kb" << std::endl;
+                      next_checkpoint = elapsed*2.0;
+                    }
+
                 }
                 else {
   		    static int kill_counter = 0;
