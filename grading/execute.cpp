@@ -706,7 +706,7 @@ std::string output_of_system_command(const char* cmd) {
 
 int resident_set_size(int childPID) {
   // get all of the processes owned by the current user (untrustedXX)
-  std::string command = std::string("ps xw o user:15,pid:10,rss:10,cmd"); 
+  std::string command = std::string("ps xw o user:15,pid:10,rss:10,cmd | grep untrusted"); 
 
   // for debugging, print this output to the log
   std::cout << "system ( '" + command + "' )" << std::endl;
