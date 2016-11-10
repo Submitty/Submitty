@@ -764,6 +764,8 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
   std::string program_name = get_program_name(cmd);
   int seconds_to_run = get_the_limit(program_name,RLIMIT_CPU,test_case_limits,assignment_limits);
 
+  int allowed_rss_memory = get_the_limit(program_name,RLIMIT_RSS,test_case_limits,assignment_limits);
+
   if (childPID == 0) {
     // CHILD PROCESS
 
@@ -811,9 +813,9 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
 		time_kill=1;
 	      }
 	      
-	      if (rss_memory > RLIMIT_RSS) {
+	      if (rss_memory > allowed_rss_memory) {
 		// terminate for excessive memory usage (RSS = resident set size = RAM)
-		std::cout << "Killing child process " << childPID << " for using " << rss_memory << " kb RAM." << std::endl;
+		std::cout << "Killing child process " << childPID << " for using " << rss_memory << " kb RAM.  (limit is " << allowed_rss_memory << " kb)" << std::endl;
 		TerminateProcess(elapsed,childPID);
 		memory_kill=1;
 	      } 
