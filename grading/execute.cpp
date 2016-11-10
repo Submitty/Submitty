@@ -796,6 +796,7 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
         int status;
         pid_t wpid = 0;
         float next_checkpoint = 0;
+	int rss_memory = 0;
 
         do {
             wpid = waitpid(childPID, &status, WNOHANG);
@@ -805,14 +806,14 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
 	      
 	      if (elapsed > seconds_to_run + 10) {
 		// terminate for excessive time
-		std::cout << "Killing child process" << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
+		std::cout << "Killing child process " << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
 		TerminateProcess(elapsed,childPID);
 		time_kill=1;
 	      }
-
-	      if (0 ) {
+	      
+	      if (rss_memory > RLIMIT_RSS) {
 		// terminate for excessive memory usage (RSS = resident set size = RAM)
-		std::cout << "Killing child process" << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
+		std::cout << "Killing child process " << childPID << " for using " << rss_memory << " kb RAM." << std::endl;
 		TerminateProcess(elapsed,childPID);
 		memory_kill=1;
 	      } 
@@ -824,8 +825,8 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
 		elapsed+= 0.1;
 	      }
 	      if (elapsed >= next_checkpoint) {
-		int memory = resident_set_size(childPID);
-		std::cout << "time elapsed = " << elapsed << " seconds,  memory used = " << memory << " kb" << std::endl;
+		rss_memory = resident_set_size(childPID);
+		std::cout << "time elapsed = " << elapsed << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
 		next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
 	      }
 
@@ -856,12 +857,8 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
         }
         else if (WIFSIGNALED(status)) {
             int what_signal =  WTERMSIG(status);
-
-
 	    OutputSignalErrorMessageToExecuteLogfile(what_signal,logfile);
-
-            //std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
-
+            std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
             if (WTERMSIG(status) == 0){
 	      result=0;
             }
@@ -874,11 +871,16 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
 	  logfile << "Program Terminated" << std::endl;
 	  result=3;
         }
+        if (time_kill){
+	  logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
+	  logfile << "Program Terminated" << std::endl;
+	  result=3;
+        }
         std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
         parent_result = system("date");
         assert (parent_result == 0);
     }
-  std::cout <<"Result: "<<result<<std::endl;
+    std::cout <<"Result: "<<result<<std::endl;
     return result;
 }
 
