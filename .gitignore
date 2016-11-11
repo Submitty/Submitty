@@ -1,22 +1,22 @@
+/.idea/
+/output/
+/tests/report/
+/.vagrant/
+
+selenium*.jar
 .DS_Store
 *.autosave
 *.orig*
-/output/
 *~
 *.o
 INSTALL.sh
-/.vagrant
-*.zip
-
-/.idea
-
-/tests/report
-selenium*.jar
-
 logs/
-*.csv
 
 *.pyc
+*.aux
+*.log
+*.out
+*.synctex.gz
 
 TAGradingServer/toolbox/configs/*
 !TAGradingServer/toolbox/configs/master_template.php
@@ -29,10 +29,5 @@ TAGradingServer/toolbox/configs/*
 
 /vendor/
 composer.lock
-
-*.aux
-*.log
-*.out
-*.synctex.gz
 
 db_update.php

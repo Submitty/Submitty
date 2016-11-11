@@ -76,4 +76,35 @@ class FileUtilsTester extends \PHPUnit_Framework_TestCase {
         $this->assertFalse(FileUtils::isValidFileName("file\\"));
         $this->assertFalse(FileUtils::isValidFileName(0));
     }
+
+    public function joinPathsData() {
+        return array(
+            array("", ""),
+            array("", "", ""),
+            array("/", "/"),
+            array("/", "", "/"),
+            array("/a", "/", "a"),
+            array("/a", "/", "/a"),
+            array("abc/def", "abc", "def"),
+            array("abc/def", "abc", "/def"),
+            array("/abc/def", "/abc", "/def"),
+            array("foo.jpg", "", "foo.jpg"),
+            array("dir/0/a.jpg", "dir", "0", "a.jpg")
+        );
+    }
+
+    /**
+     * @dataProvider joinPathsData
+     */
+    public function testJoinPaths() {
+        $args = func_get_args();
+        $expected = $args[0];
+        // In case we decide to test this on a non *nix system
+        $rest = array_slice($args, 1);
+        for ($i = 0; $i < count($rest); $i++) {
+            $rest[$i] = str_replace("/", DIRECTORY_SEPARATOR, $rest[$i]);
+        }
+        $actual = forward_static_call_array(array('app\\libraries\\FileUtils', 'joinPaths'), array_slice($args, 1));
+        $this->assertEquals($expected, $actual);
+    }
 }

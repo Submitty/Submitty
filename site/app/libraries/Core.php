@@ -341,4 +341,16 @@ class Core {
     public function getOutput() {
         return $this->output;
     }
+
+    /**
+     * We use this function to allow us to bypass certain "safe" PHP functions that we cannot
+     * bypass via mocking or some other method (like is_uploaded_file). This method, which normally
+     * ALWAYS returns FALSE we can mock to return TRUE for testing. It's probably not "best practices",
+     * and the proper way is using "phpt" files, but
+     *
+     * @return bool
+     */
+    public function isTesting() {
+        return false;
+    }
 }

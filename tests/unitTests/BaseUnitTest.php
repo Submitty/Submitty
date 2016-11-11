@@ -25,9 +25,11 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
         if (isset($config_values['semester'])) {
             $config->method('getSemester')->willReturn($config_values['semester']);
         }
+
         if (isset($config_values['course'])) {
             $config->method('getCourse')->willReturn($config_values['course']);
         }
+
         if (isset($config_values['tmp_path'])) {
             $config->method('getSubmittyPath')->willReturn($config_values['tmp_path']);
         }
@@ -35,10 +37,12 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
         if (isset($config_values['course_path'])) {
             $config->method('getCoursePath')->willReturn($config_values['course_path']);
         }
+
         $config->method('getTimezone')->willReturn("America/New_York");
 
         $core->method('getConfig')->willReturn($config);
         $core->method('checkCsrfToken')->willReturn(true);
+        $core->method('isTesting')->willReturn(true);
 
         $queries = $this->createMock(IDatabaseQueries::class);
         $core->method('getQueries')->willReturn($queries);

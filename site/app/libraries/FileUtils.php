@@ -32,28 +32,26 @@ class FileUtils {
         $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
         $disallowed_files = array('.ds_store');
 
-	// Return an array of all discovered files
+        // Return an array of all discovered files
         $return = array();
 
         if (is_dir($dir)) {
             if ($handle = opendir($dir)) {
-
-	        // loop over items in this directory
+                // loop over items in this directory
                 while (false !== ($entry = readdir($handle))) {
-
-		    // the full path
+                    // the full path
                     $path = "{$dir}/{$entry}";
-
-		    // recurse into subdirectories
+                    // recurse into subdirectories
                     if (is_dir($path) && !in_array(strtolower($entry), $disallowed_folders)) {
                         $temp = FileUtils::getAllFiles($path, $skip_files,$flatten);
                         if ($flatten) {
                             foreach ($temp as $file => $details) {
-			        if (isset($details['relative_name'])) {
-				    $details['relative_name'] = $entry."/".$details['relative_name'];
-			        } else {
-				    $details['relative_name'] = $entry."/".$details['name'];
-				}
+                                if (isset($details['relative_name'])) {
+                                    $details['relative_name'] = $entry."/".$details['relative_name'];
+                                }
+                                else {
+                                    $details['relative_name'] = $entry."/".$details['name'];
+                                }
                                 $return[$entry."/".$file] = $details;
                             }
                         }
@@ -63,7 +61,7 @@ class FileUtils {
                     }
                     else if (is_file($path) && !in_array(strtolower($entry), $skip_files) &&
                         !in_array(strtolower($entry), $disallowed_files)) {
-			// add file to array
+                        // add file to array
                         $return[$entry] = array('name' => $entry,
                                                 'path' => $path,
                                                 'size' => filesize($path),
@@ -267,11 +265,11 @@ class FileUtils {
         }
         else {
             foreach (str_split($filename) as $char) {
-                if ($char == "'" || 
-		    $char == '"' ||
+                if ($char == "'" ||
+                    $char == '"' ||
                     $char == "\\" ||
-		    $char == "<" || 
-		    $char == ">") {
+                    $char == "<" ||
+                    $char == ">") {
                     return false;
                 }
             }
@@ -281,5 +279,28 @@ class FileUtils {
 
     public static function encodeJson($string) {
         return json_encode($string, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    }
+
+    /**
+     * Given some number of arguments, joins them together separating them with a '/'. This makes sure that we do not
+     * end up with double slashes between any potential path and that we start with a slash (and do not end with a
+     * slash).
+     *
+     * Credit goes to SO user Riccardo Galli (http://stackoverflow.com/users/210090/riccardo-galli) for his answer:
+     * http://stackoverflow.com/a/15575293/4616655
+     *
+     * @return string
+     */
+    public static function joinPaths() {
+        $paths = array();
+
+        foreach (func_get_args() as $arg) {
+            if ($arg !== '') {
+                $paths[] = $arg;
+            }
+        }
+
+        $sep = DIRECTORY_SEPARATOR;
+        return preg_replace('#'.preg_quote($sep).'+#', $sep, join($sep, $paths));
     }
 }

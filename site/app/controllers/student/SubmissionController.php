@@ -275,7 +275,7 @@ class SubmissionController extends AbstractController {
                             }
                         }
                         else {
-                            if (is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
+                            if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
                                 if (!copy($uploaded_files[$i]["tmp_name"][$j], $part_path[$i]."/".$uploaded_files[$i]["name"][$j])) {
                                     return $this->uploadResult("Failed to copy uploaded file ".$uploaded_files[$i]["name"][$j]." to current submission.", false);
                                 }
