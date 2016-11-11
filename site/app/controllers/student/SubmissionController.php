@@ -154,9 +154,9 @@ class SubmissionController extends AbstractController {
         
         if ($svn_checkout === false) {
             $uploaded_files = array();
-            for ($i = 0; $i < $gradeable->getNumParts(); $i++){
-                if (isset($_FILES["files".($i+1)])) {
-                    $uploaded_files[$i+1] = $_FILES["files".($i+1)];
+            for ($i = 1; $i <= $gradeable->getNumParts(); $i++){
+                if (isset($_FILES["files{$i}"])) {
+                    $uploaded_files[$i] = $_FILES["files{$i}"];
                 }
             }
             

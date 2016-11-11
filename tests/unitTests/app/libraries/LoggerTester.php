@@ -10,11 +10,11 @@ class LoggerTester extends \PHPUnit_Framework_TestCase {
     private static $file_name;
 
     public static function setUpBeforeClass() {
-        Logger::setLogPath(__TEST_DIRECTORY__."/LoggerTesterLogs");
-        FileUtils::createDir(__TEST_DIRECTORY__."/LoggerTesterLogs", true);
-        FileUtils::emptyDir(__TEST_DIRECTORY__."/LoggerTesterLogs");
+        Logger::setLogPath(__TEST_DATA__."/LoggerTesterLogs");
+        FileUtils::createDir(__TEST_DATA__."/LoggerTesterLogs", true);
+        FileUtils::emptyDir(__TEST_DATA__."/LoggerTesterLogs");
         $date = getdate(time());
-        LoggerTester::$file_name = __TEST_DIRECTORY__."/LoggerTesterLogs/".
+        LoggerTester::$file_name = __TEST_DATA__."/LoggerTesterLogs/".
             $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday']).".txt";
 
         $_SERVER['HTTP_HOST'] = "localhost";
@@ -23,7 +23,7 @@ class LoggerTester extends \PHPUnit_Framework_TestCase {
     }
 
     public static function tearDownAfterClass() {
-        FileUtils::recursiveRmdir(__TEST_DIRECTORY__."/LoggerTesterLogs");
+        FileUtils::recursiveRmdir(__TEST_DATA__."/LoggerTesterLogs");
         unset($_SERVER['HTTP_HOST']);
         unset($_SERVER['HTTPS']);
         unset($_SERVER['REQUEST_URI']);

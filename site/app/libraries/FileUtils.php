@@ -133,19 +133,33 @@ class FileUtils {
      * delete the file, and then try to create directory.
      *
      * @param string $dir
+     * @param int    $mode
      * @param bool   $recursive
      *
      * @return bool
      */
-    public static function createDir($dir, $recursive = false) {
+    public static function createDir($dir, $mode = null, $recursive = false) {
         $return = true;
         if (!is_dir($dir)) {
             if (file_exists($dir)) {
                 unlink($dir);
             }
-            $return = @mkdir($dir, 0777, $recursive);
+            $return = @mkdir($dir, ($mode === null) ? 0777 : $mode, $recursive);
+            if ($mode !== null && $return) {
+                static::recursiveChmod($dir, $mode);
+            }
         }
         return $return;
+    }
+
+    public static function recursiveChmod($path, $mode) {
+        $dir = new \DirectoryIterator($path);
+        foreach ($dir as $item) {
+            chmod($item->getPathname(), $mode);
+            if ($item->isDir() && !$item->isDot()) {
+                static::recursiveChmod($item->getPathname(), $mode);
+            }
+        }
     }
     
     /**

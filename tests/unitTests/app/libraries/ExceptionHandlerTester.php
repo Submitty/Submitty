@@ -11,18 +11,18 @@ use \app\libraries\Logger;
 class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
 
     public static function setUpBeforeClass() {
-        if (is_dir(__TEST_DIRECTORY__."/EHLogs")) {
-            FileUtils::emptyDir(__TEST_DIRECTORY__."/EHLogs");
+        if (is_dir(__TEST_DATA__."/EHLogs")) {
+            FileUtils::emptyDir(__TEST_DATA__."/EHLogs");
         }
         else {
-            FileUtils::createDir(__TEST_DIRECTORY__."/EHLogs", true);
+            FileUtils::createDir(__TEST_DATA__."/EHLogs", true);
         }
 
-        Logger::setLogPath(__TEST_DIRECTORY__."/EHLogs/");
+        Logger::setLogPath(__TEST_DATA__."/EHLogs/");
     }
 
     public static function tearDownAfterClass() {
-        FileUtils::recursiveRmdir(__TEST_DIRECTORY__."/EHLogs");
+        FileUtils::recursiveRmdir(__TEST_DATA__."/EHLogs");
     }
 
     public function testClassVariables() {
@@ -56,8 +56,8 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
         ExceptionHandler::setDisplayExceptions(false);
         ExceptionHandler::setLogExceptions(true);
         ExceptionHandler::handleException(new BaseException("test", array("test"=>"b", "test2"=>array('a','c'))));
-        $this->assertFileExists(__TEST_DIRECTORY__."/EHLogs/".$filename.".txt");
-        $actual = file_get_contents(__TEST_DIRECTORY__."/EHLogs/".$filename.".txt");
+        $this->assertFileExists(__TEST_DATA__."/EHLogs/".$filename.".txt");
+        $actual = file_get_contents(__TEST_DATA__."/EHLogs/".$filename.".txt");
         $this->assertEquals(1, preg_match('/[0-9]{2}\/[0-9]{2}\/[0-9]{4}\ [0-9]{2}\:[0-9]{2}\:[0-9]{2} \- FATAL ERROR\napp.+/', $actual));
         $this->assertEquals(1, preg_match('/Extra Details:\n\ttest: b\n\ttest2:\n\t\ta\n\t\tc/', $actual));
         ExceptionHandler::setLogExceptions(false);

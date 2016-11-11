@@ -137,5 +137,26 @@ class Utils {
         return substr($haystack, (-1*strlen($needle)), strlen($needle)) === $needle;
     }
 
+    /**
+     * Given some number of arguments, joins them together separating them with a '/'. This makes sure that we do not
+     * end up with double slashes between any potential path and that we start with a slash (and do not end with a
+     * slash).
+     *
+     * Credit goes to SO user Riccardo Galli (http://stackoverflow.com/users/210090/riccardo-galli) for his answer:
+     * http://stackoverflow.com/a/15575293/4616655
+     *
+     * @return string
+     */
+    public static function joinPaths() {
+        $paths = array();
 
+        foreach (func_get_args() as $arg) {
+            if ($arg !== '') {
+                $paths[] = $arg;
+            }
+        }
+
+        $sep = DIRECTORY_SEPARATOR;
+        return preg_replace('#'.preg_quote($sep).'+#', $sep, join($sep, $paths));
+    }
 }
