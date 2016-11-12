@@ -1,6 +1,19 @@
 #!/usr/bin/env php
 <?php
 
+/* HEADING ---------------------------------------------------------------------
+ *
+ * accounts.php
+ * By Peter Bailie, Systems Programmer (RPI dept of computer science)
+ *
+ * This script is intended to be run from the CLI as a scheduled cron job, and
+ * should not be executed as part of a website.
+ *
+ * This script will read all user IDs of all active Submitty courses and create
+ * auth and svn access accounts on the Submitty server.
+ *
+ * -------------------------------------------------------------------------- */
+
 error_reporting(0);
 ini_set('display_errors', 0);
 
@@ -46,10 +59,10 @@ date_default_timezone_set('America/New_York');
  *
  * This will run the script every hour at the half-hour (e.g. 8:30, 9:30, etc),
  * and any stdout/stderr output will be emailed to a sysadmin mailing list.
- *
- * MAILTO=sysadmins@lists.university.edu
- * 30 * * * * /var/local/submitty/bin/accounts.php
- *
+
+MAILTO=sysadmins@lists.university.edu
+30 * * * * /var/local/submitty/bin/accounts.php
+
  * -------------------------------------------------------------------------- */
 
 
