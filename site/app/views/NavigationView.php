@@ -15,7 +15,7 @@ class NavigationView {
     public function __construct(Core $core) {
         $this->core = $core;
     }
-    
+
     public function showGradeables($sections_to_list) {
         $return = "";
 
@@ -80,7 +80,13 @@ HTML;
             }
 
             if (count($gradeable_list) == 0) {
-                continue;
+                $return .= <<<HTML
+        <div class="container">
+        <p>There are currently no assignments posted.  Please check back later.</p>
+        </div>
+HTML;
+                break;
+                //continue;
             }
 
             $lower_title = str_replace(" ", "_", strtolower($title));
@@ -156,7 +162,7 @@ HTML;
 HTML;
                     }
                 }
-    
+
                 if ($this->core->getUser()->accessAdmin()) {
                     $admin_button = <<<HTML
                 <button class="btn btn-default" style="width:100%;" \\
@@ -168,12 +174,12 @@ HTML;
                 else {
                     $admin_button = "";
                 }
-                
+
                 if (!$this->core->getUser()->accessGrading()) {
                     $gradeable_grade_range = "";
-                    
+
                 }
-                
+
                 $return.= <<<HTML
             <tr class="gradeable_row">
                 <td>{$gradeable_title}</td>
