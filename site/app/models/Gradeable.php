@@ -253,7 +253,7 @@ abstract class Gradeable {
             $files = scandir($interactive_queue);
             $f = array();
             $times = array();
-            foreach($files as $file){
+            foreach($files as $file) {
               if(is_file($interactive_queue.'/'.$file) && ($file !== "..") && ($file !== ".") && !in_array($file, $f)) {
                   $f[] = $file;
                   $times[] = filemtime($interactive_queue.'/'.$file);
@@ -275,13 +275,15 @@ abstract class Gradeable {
                 }
             }
 
-            $files = @scandir($batch_queue);
+            /* Note:  Once permissions to access batch queue from interactive queue has been sorted, then can add in
+                      the code below to count the full total of submissions being graded across both queues */
+            /*$files = @scandir($batch_queue);
             // Count the number being graded in the batch queue to get total of submissions currently being graded
             foreach($files as $file) {
                 if(strpos($file, "GRADING_") !== false) {
                     $grading_count = $grading_count + 1;
                 }
-            }
+            }*/
 
             $this->interactive_queue_total = $queue_count;
             $this->grading_total = $grading_count;
@@ -310,13 +312,15 @@ abstract class Gradeable {
                 }
             }
 
-            $files = @scandir($interactive_queue);
+            /* Note:  Once permissions to access interactive queue from batch queue has been sorted, then can add in
+                      the code below to count the full total of submissions being graded across both queues */
+            /* $files = @scandir($interactive_queue);
             // Count the number being graded in the batch queue to get total of submissions currently being graded
             foreach($files as $file) {
                 if(strpos($file, "GRADING_") !== false) {
                     $grading_count = $grading_count + 1;
                 }
-            }
+            }*/
             $this->batch_queue_total = $queue_count;
             $this->grading_total = $grading_count;
         }
