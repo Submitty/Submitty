@@ -289,7 +289,7 @@ bool string_to_gradeable_enum(const std::string &s, GRADEABLE_ENUM &return_value
 //====================================================================
 
 
-void preprocesscustomizationfile() {	
+void preprocesscustomizationfile(std::vector<Student*> &students) {	
   /*
   std::ifstream istr(CUSTOMIZATION_FILE.c_str());
   assert (istr);
@@ -412,13 +412,24 @@ void preprocesscustomizationfile() {
   std::ifstream istr(CUSTOMIZATION_FILE.c_str());
   assert (istr);
   std::string token;
+  float p_score,a_score,b_score,c_score,d_score;
+  
+  Student *perfect  = GetStudent(students,"PERFECT");
+  Student *student_average  = GetStudent(students,"AVERAGE");
+  Student *student_stddev  = GetStudent(students,"STDDEV");
+  Student *lowest_a = GetStudent(students,"LOWEST A-");
+  Student *lowest_b = GetStudent(students,"LOWEST B-");
+  Student *lowest_c = GetStudent(students,"LOWEST C-");
+  Student *lowest_d = GetStudent(students,"LOWEST D");
   
   json j;
   j << istr;
   
   // load gradeables
-  json grabeableName = j["gradeable"].get<json>();
-  for (json::iterator itr = gradeableName.begin(); itr != grabeableName.end(); itr++) {
+  json::iterator it = j.begin();
+  json gradeableName = (*it).value("grableables", {});
+  //json gradeableName = j["gradeable"].get<json>();
+  for (json::iterator itr = gradeableName.begin(); itr != gradeableName.end(); itr++) {
     GRADEABLE_ENUM g;
     std::string gradeable_id = itr.key();
 	
@@ -432,12 +443,13 @@ void preprocesscustomizationfile() {
 	float p = 0.0;
 	float m = 0.0;	
 	
-	json ids = (*itr).value("ids", []);
+	json ids = (*itr).value("ids", {});
 	for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
 	  c++;
 	  p += (*itr2).value("percent", 0.0);
 	  m += (*itr2).value("max", 0.0);
 	}
+
 	
     Gradeable answer (c,p,m);
     GRADEABLES.insert(std::make_pair(g,answer));
@@ -445,77 +457,76 @@ void preprocesscustomizationfile() {
     assert (GRADEABLES[g].getPercent() >= 0.0 && GRADEABLES[g].getPercent() <= 1.0);
     assert (GRADEABLES[g].getMaximum() >= 0.0);
 	
-	ALL_GRADEABLES.push_back(g);
-	
-	perfect  = new Student();perfect->setUserName("PERFECT");
-    student_average = new Student();student_average->setUserName("AVERAGE");
-    student_stddev = new Student();student_stddev->setUserName("STDDEV");
-
-    lowest_a = new Student();lowest_a->setUserName("LOWEST A-");lowest_a->setFirstName("approximate");
-    lowest_b = new Student();lowest_b->setUserName("LOWEST B-");lowest_b->setFirstName("approximate");
-    lowest_c = new Student();lowest_c->setUserName("LOWEST C-");lowest_c->setFirstName("approximate");
-    lowest_d = new Student();lowest_d->setUserName("LOWEST D"); lowest_d->setFirstName("approximate");
-
-    PERFECT_STUDENT_POINTER = perfect;
-    AVERAGE_STUDENT_POINTER = student_average;
-    STDDEV_STUDENT_POINTER = student_stddev;
-	
-	json grabeableName = j["gradeable"].get<json>();
-	for (json::iterator itr = gradeableName.begin(); itr != grabeableName.end(); itr++) {
-	  GRADEABLE_ENUM g;
-	  std::string gradeable_id = itr.key();
-	  bool success = string_to_gradeable_enum(gradeableName, g);
-	  if (!success) {
-		std::cout << "UNKNOWN GRADEABLE: " << gradeableName << std::endl;
-		exit(0);
-	  }
-	  json ids = (*itr).value("ids", []);
-	  for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
-		which = GRADEABLES[g].setCorrespondence(itr2.key());
-		p_score = (*itr2).value("max", 0.0);
-		std::vector<float> curve = (*itr2).value("curve", NULL);
-		if (curve != NULL) {
-		  assert (curve.size() == 5);
-		  p_score = curve[0];
-		  a_score = curve[1];
-		  b_score = curve[2];
-		  c_score = curve[3];
-		  d_score = curve[4];
-		} else {
-		  p_score = (*itr2).value("max", 0.0);
-		  a_score = GetBenchmarkPercentage("lowest_a-")*p_score;
-		  b_score = GetBenchmarkPercentage("lowest_b-")*p_score;
-		  c_score = GetBenchmarkPercentage("lowest_c-")*p_score;
-		  d_score = GetBenchmarkPercentage("lowest_d")*p_score;
-		}
-		
-		assert (p_score >= a_score &&
-				a_score >= b_score &&
-				b_score >= c_score &&
-				c_score >= d_score);
-	
-        assert (which >= 0 && which < GRADEABLES[g].getCount());
-        perfect->setGradeableValue(g,which, p_score);
-        lowest_a->setGradeableValue(g,which, a_score);
-        lowest_b->setGradeableValue(g,which, b_score);
-        lowest_c->setGradeableValue(g,which, c_score);
-        lowest_d->setGradeableValue(g,which, d_score);
-	  }
-	}
-	students.push_back(perfect);
-    students.push_back(lowest_a);
-    students.push_back(lowest_b);
-    students.push_back(lowest_c);
-    students.push_back(lowest_d);
-	
 	// Set remove lowest for gradeable
 	int num = (*itr).value("remove_lowest", 0);
 	assert (num >= 0 && num < GRADEABLES[g].getCount());
 	GRADEABLES[g].setRemoveLowest(num);
+	
+	ALL_GRADEABLES.push_back(g);
   }
+	
+  perfect = new Student();perfect->setUserName("PERFECT");
+  student_average = new Student();student_average->setUserName("AVERAGE");
+  student_stddev = new Student();student_stddev->setUserName("STDDEV");
+
+  lowest_a = new Student();lowest_a->setUserName("LOWEST A-");lowest_a->setLegalFirstName("approximate");
+  lowest_b = new Student();lowest_b->setUserName("LOWEST B-");lowest_b->setLegalFirstName("approximate");
+  lowest_c = new Student();lowest_c->setUserName("LOWEST C-");lowest_c->setLegalFirstName("approximate");
+  lowest_d = new Student();lowest_d->setUserName("LOWEST D"); lowest_d->setLegalFirstName("approximate");
+
+  PERFECT_STUDENT_POINTER = perfect;
+  AVERAGE_STUDENT_POINTER = student_average;
+  STDDEV_STUDENT_POINTER = student_stddev;
+	
+  for (json::iterator itr = gradeableName.begin(); itr != gradeableName.end(); itr++) {
+	GRADEABLE_ENUM g;
+	std::string gradeable_id = itr.key();
+	bool success = string_to_gradeable_enum(gradeableName, g);
+	if (!success) {
+	  std::cout << "UNKNOWN GRADEABLE: " << gradeableName << std::endl;
+	  exit(0);
+	}
+	json ids = (*itr).value("ids", {});
+	for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
+	  int which = GRADEABLES[g].setCorrespondence(itr2.key());
+	  p_score = (*itr2).value("max", 0.0);
+	  std::vector<float> curve = (*itr2)["curve"].get<std::vector<float> >();
+	  if (!curve.empty()) {
+		assert (curve.size() == 5);
+		p_score = curve[0];
+		a_score = curve[1];
+		b_score = curve[2];
+		c_score = curve[3];
+		d_score = curve[4];
+	  } else {
+		p_score = (*itr2).value("max", 0.0);
+		a_score = GetBenchmarkPercentage("lowest_a-")*p_score;
+		b_score = GetBenchmarkPercentage("lowest_b-")*p_score;
+		c_score = GetBenchmarkPercentage("lowest_c-")*p_score;
+		d_score = GetBenchmarkPercentage("lowest_d")*p_score;
+	  }
+		
+	  assert (p_score >= a_score &&
+			  a_score >= b_score &&
+			  b_score >= c_score &&
+			  c_score >= d_score);
+	
+      assert (which >= 0 && which < GRADEABLES[g].getCount());
+      perfect->setGradeableItemGrade(g,which, p_score);
+      lowest_a->setGradeableItemGrade(g,which, a_score);
+      lowest_b->setGradeableItemGrade(g,which, b_score);
+      lowest_c->setGradeableItemGrade(g,which, c_score);
+      lowest_d->setGradeableItemGrade(g,which, d_score);
+	}
+  }
+  students.push_back(perfect);
+  students.push_back(lowest_a);
+  students.push_back(lowest_b);
+  students.push_back(lowest_c);
+  students.push_back(lowest_d);
   
   // get display optioons
-  std::vector<std::string> displays = j["display"].get<std::vector<std::strng> >();
+  std::vector<std::string> displays = j["display"].get<std::vector<std::string> >();
   for (int i=0; i<displays.size(); i++) {
 	token = displays[i];
 	if (token == "instructor_notes") {
@@ -540,14 +551,14 @@ void preprocesscustomizationfile() {
   }
   
   // Set Display Benchmark
-  std::vector<std::string> displayBenchmark = j["display_benchmark"].get<std::vector<std::strng> >();
+  std::vector<std::string> displayBenchmark = j["display_benchmark"].get<std::vector<std::string> >();
   for (int i=0; i<displayBenchmark.size(); i++) {
     token = displayBenchmark[i];
 	DisplayBenchmark(token);
   }
   
   // Set Benchmark Percent
-  json benchmarkPercent = j["benchmark_percent"].get<json>();
+  json benchmarkPercent = (*it).value("benchmark_percent", {});
   for (json::iterator itr = benchmarkPercent.begin(); itr != benchmarkPercent.end(); itr++) {
     token = itr.key();
 	float value;
@@ -557,7 +568,7 @@ void preprocesscustomizationfile() {
   }
   
   // Set Benchmark Color
-  json benchmarkColor = j["benchmark_color"].get<json>();
+  json benchmarkColor = (*it).value("benchmark_color", {});
   for (json::iterator itr = benchmarkColor.begin(); itr != benchmarkColor.end(); itr++) {
     token = itr.key();
 	std::string color;
@@ -567,14 +578,14 @@ void preprocesscustomizationfile() {
   }
   
   std::vector<std::string> items = j["hackmaxprojects"].get<std::vector<std::string> >();
-  if (items != NULL) {
+  if (!items.empty()) {
 	std::cout << "HACK MAX " << items.size() << std::endl;
     std::cout <<  "   HMP=" << HACKMAXPROJECTS.size() << std::endl;
 	
 	HACKMAXPROJECTS.push_back(items);
   }
   
-  json useJSON = j["use"].get<json>();
+  json useJSON = (*it).value("use", {});
   for (json::iterator itr = useJSON.begin(); itr != useJSON.end(); itr++) {
 	token = itr.key();
 	if (token == "late_day_penalty") {
@@ -651,15 +662,9 @@ void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::str
 
 void load_student_grades(std::vector<Student*> &students);
 
-void processcustomizationfile(std::vector<Student*> &students) {
+void load_bonus_late_day(std::vector<Student*> &students, int which_lecture, std::string bonus_late_day_file);
 
-  Student *perfect  = GetStudent(students,"PERFECT");
-  Student *student_average  = GetStudent(students,"AVERAGE");
-  Student *student_stddev  = GetStudent(students,"STDDEV");
-  Student *lowest_a = GetStudent(students,"LOWEST A-");
-  Student *lowest_b = GetStudent(students,"LOWEST B-");
-  Student *lowest_c = GetStudent(students,"LOWEST C-");
-  Student *lowest_d = GetStudent(students,"LOWEST D");
+void processcustomizationfile(std::vector<Student*> &students) {
 
   SetBenchmarkPercentage("lowest_a-",0.9);
   SetBenchmarkPercentage("lowest_b-",0.8);
@@ -674,7 +679,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
   SetBenchmarkColor("lowest_d"   ,"ff0000"); // red
   SetBenchmarkColor("failing"    ,"c80000"); // dark red
 
-  preprocesscustomizationfile();
+  preprocesscustomizationfile(students);
   
   load_student_grades(students);
 
@@ -1078,7 +1083,8 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	  // create sections
 	  int counter = 0;
 	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-		int section = itr2.key();
+		std::string temp = itr2.key();
+		int section = std::stoi(temp);
 		std::string section_name = itr2.value();
 		std::cout << "MAKE ASSOCIATION " << section << " " << section_name << std::endl;
 		assert (!validSection(section));
@@ -1188,7 +1194,8 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	  for (int i = 0; i < iclickerLectures.size(); i++) {
 	    json iclickerLecture = iclickerLectures[i];
 	    for (json::iterator itr2 = iclickerLecture.begin(); itr2 != iclickerLecture.end(); itr2++) {
-		  int which_lecture = itr2.key();
+		  std::string temp = itr2.key();
+		  int which_lecture = std::stoi(temp);
 		  std::string clicker_file = (itr2.value())["file"].get<std::string>();
 		  int which_column = (itr2.value())["column"].get<int>();
 		  std::string correct_answer = (itr2.value())["answer"].get<std::string>();
@@ -1239,7 +1246,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
 	    std::string username = itr2.key();
 		int hw = (itr2.value())["hw"].get<int>();
-		float note = (itr2.value())["penalty"].get<float>();
+		float penalty = (itr2.value())["penalty"].get<float>();
 		assert (hw >= 1 && hw <= 10);
         assert (penalty >= -0.01 && penalty <= 1.01);
 		Student *s = GetStudent(students,username);
@@ -1267,20 +1274,21 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	} else if (token == "exam_data") {
 	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
 	    token2 = itr2.key();
+		std::string value = (*itr2).value(token2, "");
 		if (token2 == "exam_title") {
-		  GLOBAL_EXAM_TITLE = itr2.value();
+		  strcpy(GLOBAL_EXAM_TITLE, value.c_str());
 		} else if (token2 == "exam_date") {
-		  GLOBAL_EXAM_DATE = itr2.value();
+		  strcpy(GLOBAL_EXAM_DATE, value.c_str());
 		} else if (token2 == "exam_time") {
-		  GLOBAL_EXAM_TIME = itr2.value();
+		  strcpy(GLOBAL_EXAM_TIME, value.c_str());
 		} else if (token2 == "exam_default_room") {
-		  GLOBAL_EXAM_DEFAULT_ROOM = itr2.value();
+		  strcpy(GLOBAL_EXAM_DEFAULT_ROOM, value.c_str());
 		} else if (token2 == "min_overall_for_zone_assignment") {
-		  GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = itr2.value();
+		  GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = (*itr2).value(token2, 0);
 		} else if (token2 == "exam_seating") {
 		  std::cout << "TOKEN IS EXAM SEATING" << std::endl;
 		  
-		  std::vector<std::string> examSeating = itr2.value();
+		  std::vector<std::string> examSeating = (*itr2)[token2].get<std::vector<std::string> >();
 		  token = examSeating[0];
 		  token2 = examSeating[1];
 		  
@@ -1290,13 +1298,16 @@ void processcustomizationfile(std::vector<Student*> &students) {
 		}
 	  }
 	} else if (token == "bonus_latedays") {
-	  BONUS_WHICH_LECTURE = ((*itr).value()).key();
-	  BONUS_FILE = ((*itr).value()).value();
-      std::cout << "BONUS LATE DAYS" << std::endl;
+	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+	    std::string bonus = itr2.key();
+	    BONUS_WHICH_LECTURE = std::stoi(bonus);
+	    BONUS_FILE = (*itr2).value(bonus, "");
+        std::cout << "BONUS LATE DAYS" << std::endl;
 	  
-	  if (BONUS_FILE != "") {
-        load_bonus_late_day(students,BONUS_WHICH_LECTURE,BONUS_FILE);
-	  }
+	    if (BONUS_FILE != "") {
+          load_bonus_late_day(students,BONUS_WHICH_LECTURE,BONUS_FILE);
+	    }
+	  }  
 	} else {
 	  if (token == "display" || token == "display_benchmark" || token == "benchmark_percent") {
 	    continue;
