@@ -146,6 +146,10 @@ TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::jso
   if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
+      student_file_contents.size() > 10* expected_file_contents.size()) {
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+  }
   vectorOfWords text_a = stringToWords( student_file_contents );
   vectorOfWords text_b = stringToWords( expected_file_contents );
   Difference* diff = ses(j, &text_a, &text_b, true );
@@ -163,6 +167,10 @@ TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::js
   }
   if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
+  }
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
+      student_file_contents.size() > 10* expected_file_contents.size()) {
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
   }
   vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
   vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
@@ -182,6 +190,10 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
   if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
+      student_file_contents.size() > 10* expected_file_contents.size()) {
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+  }
   vectorOfLines text_a = stringToLines( student_file_contents );
   vectorOfLines text_b = stringToLines( expected_file_contents );
   Difference* diff = ses(j, &text_a, &text_b, false );
@@ -199,6 +211,10 @@ TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::jso
   }
   if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
+  }
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
+      student_file_contents.size() > 10* expected_file_contents.size()) {
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
   }
   vectorOfLines text_a = stringToLines( student_file_contents );
   vectorOfLines text_b = stringToLines( expected_file_contents );
@@ -218,6 +234,11 @@ TestResults* myersDiffbyLinebyCharExtraStudentOutputOk_doit (const TestCase &tc,
   if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
+      student_file_contents.size() > 10* expected_file_contents.size()) {
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+  }
+
 #if 0
   //from nowhite
 	vectorOfWords text_a = stringToWords( student_file_contents );
