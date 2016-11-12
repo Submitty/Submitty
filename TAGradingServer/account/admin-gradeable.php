@@ -666,10 +666,18 @@ HTML;
 print <<<HTML
   <div id="rotating-sections" class="graders" style="display:none; width: 1000px; overflow-x:scroll">
   <br />
-  <table style="border: 3px solid black;">
+  <table id="grader-history" style="border: 3px solid black; display:none;">
 HTML;
 
-$db->query("SELECT g_id FROM gradeable ORDER BY g_grade_start_date ASC", array());
+$db->query("SELECT 
+              g_id 
+            FROM 
+              gradeable 
+            WHERE 
+              g_grade_by_registration = 'f' 
+            ORDER BY 
+              g_grade_start_date ASC", array());
+              
 $gradeables = $db->rows();
 
 // create header 
@@ -692,14 +700,16 @@ HTML;
 // get gradeables graded by rotating section in the past and the sections each grader graded
   $db->query("
   SELECT 
-    gu.g_id, gu.user_id, gr.sections_rotating, g_grade_start_date 
-  FROM (SELECT g.g_id, u.user_id, g_grade_start_date
-          FROM (SELECT user_id FROM users WHERE user_group=2 OR user_group=3) AS u CROSS JOIN (
+    gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating, g_grade_start_date 
+  FROM (SELECT g.g_id, u.user_id, u.user_group, g_grade_start_date
+          FROM (SELECT user_id, user_group FROM users WHERE user_group=2 OR user_group=3) AS u CROSS JOIN ( 
             SELECT 
               DISTINCT g.g_id,
               g_grade_start_date
-            FROM gradeable AS g LEFT JOIN 
-              grading_rotating AS gr ON g.g_id = gr.g_id) AS g ) as gu 
+            FROM gradeable AS g
+            LEFT JOIN 
+              grading_rotating AS gr ON g.g_id = gr.g_id
+            WHERE g_grade_by_registration = 'f') AS g ) as gu 
         LEFT JOIN (
               SELECT 
                 g_id, user_id, array_agg(sections_rotating) as sections_rotating 
@@ -707,19 +717,20 @@ HTML;
                 grading_rotating 
               GROUP BY 
               g_id, user_id) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id 
-              ORDER BY user_id, g_grade_start_date", array());
+              ORDER BY user_group, user_id, g_grade_start_date", array());
   
   $last = '';
   
   foreach($db->rows() as $row){
     $new_row = false;
+    $u_group = $row['user_group'];
     if (strcmp($row['user_id'],$last) != 0){
       $new_row = true;
     }
     if($new_row){
       print <<<HTML
           </tr>
-          <tr>     
+          <tr class="g_history g_group_{$u_group}">     
           <th style="padding: 8px; border: 3px solid black;">{$row['user_id']}</th>
 HTML;
     }
@@ -741,7 +752,7 @@ HTML;
     
    $db->query("SELECT user_id FROM users WHERE user_group=?", array(2));
       
-    foreach($db->rows() as $fa_grader){
+    foreach($db->rows() as $fa_grader){ 
         print <<<HTML
         <tr>
             <td>{$fa_grader['user_id']}</td>
@@ -1162,6 +1173,16 @@ HTML;
             }
         });
         
+        function showHistory(val){
+          $('#grader-history').show();
+          // hide all rows in history
+          $('.g_history').hide();
+          // show relevant rows
+          for (var i=1; i<=parseInt(val); ++i){
+              $('.g_group_'+i).show();
+          }
+        }
+        
         function showGroups(val){
             var graders = ['','','full-access-graders', 'limited-access-graders']; 
             for(var i=parseInt(val)+1; i<graders.length; ++i){
@@ -1169,6 +1190,13 @@ HTML;
             }
             for(var i=0; i <= parseInt(val) ; ++i){
                 $('#'+graders[i]).show();
+            }
+            if (val > 1){
+              // show specific groups
+              showHistory(val);
+            }
+            else{
+              $('#grader-history').hide();
             }
         }
         
