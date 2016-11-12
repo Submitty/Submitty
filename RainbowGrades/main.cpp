@@ -273,8 +273,8 @@ bool string_to_gradeable_enum(const std::string &s, GRADEABLE_ENUM &return_value
 
 //====================================================================
 
-
 void preprocesscustomizationfile() {
+  /*
   std::ifstream istr(CUSTOMIZATION_FILE.c_str());
   assert (istr);
   std::string token;
@@ -370,6 +370,193 @@ void preprocesscustomizationfile() {
       }
     }
   }
+  */
+  
+  // ---------------------------------------------------------------------------------------
+  
+  std::ifstream istr(CUSTOMIZATION_FILE.c_str());
+  assert (istr);
+  std::string token;
+  
+  json j;
+  j << istr;
+  
+  // load gradeables
+  json grabeableName = j["gradeable"].get<json>();
+  for (json::iterator itr = gradeableName.begin(); itr != grabeableName.end(); itr++) {
+    GRADEABLE_ENUM g;
+    std::string gradeable_id = itr.key();
+	
+	bool success = string_to_gradeable_enum(gradeableName, g);
+	if (!success) {
+	  std::cout << "UNKNOWN GRADEABLE: " << gradeableName << std::endl;
+	  exit(0);
+	}
+	
+    int c = 0;
+	float p = 0.0;
+	float m = 0.0;	
+	
+	json ids = (*itr).value("ids", []);
+	for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
+	  c++;
+	  p += (*itr2).value("percent", 0.0);
+	  m += (*itr2).value("max", 0.0);
+	}
+	
+    Gradeable answer (c,p,m);
+    GRADEABLES.insert(std::make_pair(g,answer));
+    assert (GRADEABLES[g].getCount() >= 0);
+    assert (GRADEABLES[g].getPercent() >= 0.0 && GRADEABLES[g].getPercent() <= 1.0);
+    assert (GRADEABLES[g].getMaximum() >= 0.0);
+	
+	ALL_GRADEABLES.push_back(g);
+	
+	perfect  = new Student();perfect->setUserName("PERFECT");
+    student_average = new Student();student_average->setUserName("AVERAGE");
+    student_stddev = new Student();student_stddev->setUserName("STDDEV");
+
+    lowest_a = new Student();lowest_a->setUserName("LOWEST A-");lowest_a->setFirstName("approximate");
+    lowest_b = new Student();lowest_b->setUserName("LOWEST B-");lowest_b->setFirstName("approximate");
+    lowest_c = new Student();lowest_c->setUserName("LOWEST C-");lowest_c->setFirstName("approximate");
+    lowest_d = new Student();lowest_d->setUserName("LOWEST D"); lowest_d->setFirstName("approximate");
+
+    PERFECT_STUDENT_POINTER = perfect;
+    AVERAGE_STUDENT_POINTER = student_average;
+    STDDEV_STUDENT_POINTER = student_stddev;
+	
+	json grabeableName = j["gradeable"].get<json>();
+	for (json::iterator itr = gradeableName.begin(); itr != grabeableName.end(); itr++) {
+	  GRADEABLE_ENUM g;
+	  std::string gradeable_id = itr.key();
+	  bool success = string_to_gradeable_enum(gradeableName, g);
+	  if (!success) {
+		std::cout << "UNKNOWN GRADEABLE: " << gradeableName << std::endl;
+		exit(0);
+	  }
+	  json ids = (*itr).value("ids", []);
+	  for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
+		which = GRADEABLES[g].setCorrespondence(itr2.key());
+		p_score = (*itr2).value("max", 0.0);
+		std::vector<float> curve = (*itr2).value("curve", NULL);
+		if (curve != NULL) {
+		  assert (curve.size() == 5);
+		  p_score = curve[0];
+		  a_score = curve[1];
+		  b_score = curve[2];
+		  c_score = curve[3];
+		  d_score = curve[4];
+		} else {
+		  p_score = (*itr2).value("max", 0.0);
+		  a_score = GetBenchmarkPercentage("lowest_a-")*p_score;
+		  b_score = GetBenchmarkPercentage("lowest_b-")*p_score;
+		  c_score = GetBenchmarkPercentage("lowest_c-")*p_score;
+		  d_score = GetBenchmarkPercentage("lowest_d")*p_score;
+		}
+		
+		assert (p_score >= a_score &&
+				a_score >= b_score &&
+				b_score >= c_score &&
+				c_score >= d_score);
+	
+        assert (which >= 0 && which < GRADEABLES[g].getCount());
+        perfect->setGradeableValue(g,which, p_score);
+        lowest_a->setGradeableValue(g,which, a_score);
+        lowest_b->setGradeableValue(g,which, b_score);
+        lowest_c->setGradeableValue(g,which, c_score);
+        lowest_d->setGradeableValue(g,which, d_score);
+	  }
+	}
+	students.push_back(perfect);
+    students.push_back(lowest_a);
+    students.push_back(lowest_b);
+    students.push_back(lowest_c);
+    students.push_back(lowest_d);
+	
+	// Set remove lowest for gradeable
+	int num = (*itr).value("remove_lowest", 0);
+	assert (num >= 0 && num < GRADEABLES[g].getCount());
+	GRADEABLES[g].setRemoveLowest(num);
+  }
+  
+  // get display optioons
+  std::vector<std::string> displays = j["display"].get<std::vector<std::strng> >();
+  for (int i=0; i<displays.size(); i++) {
+	token = displays[i];
+	if (token == "instructor_notes") {
+      DISPLAY_INSTRUCTOR_NOTES = true;
+    } else if (token == "exam_seating") {
+      DISPLAY_EXAM_SEATING = true;
+    } else if (token == "moss_details") {
+      DISPLAY_MOSS_DETAILS = true;
+    } else if (token == "final_grade") {
+      DISPLAY_FINAL_GRADE = true;
+    } else if (token == "grade_summary") {
+      DISPLAY_GRADE_SUMMARY = true;
+    } else if (token == "grade_details") {
+      DISPLAY_GRADE_DETAILS = true;
+    } else if (token == "iclicker") {
+      DISPLAY_ICLICKER = true;
+	  
+    } else {
+      std::cout << "OOPS " << token << std::endl;
+      exit(0);
+    }
+  }
+  
+  // Set Display Benchmark
+  std::vector<std::string> displayBenchmark = j["display_benchmark"].get<std::vector<std::strng> >();
+  for (int i=0; i<displayBenchmark.size(); i++) {
+    token = displayBenchmark[i];
+	DisplayBenchmark(token);
+  }
+  
+  // Set Benchmark Percent
+  json benchmarkPercent = j["benchmark_percent"].get<json>();
+  for (json::iterator itr = benchmarkPercent.begin(); itr != benchmarkPercent.end(); itr++) {
+    token = itr.key();
+	float value;
+	value = itr.value();
+	
+	SetBenchmarkPercentage(token,value);
+  }
+  
+  // Set Benchmark Color
+  json benchmarkColor = j["benchmark_color"].get<json>();
+  for (json::iterator itr = benchmarkColor.begin(); itr != benchmarkColor.end(); itr++) {
+    token = itr.key();
+	std::string color;
+	color = itr.value();
+	
+	SetBenchmarkColor(token,color);
+  }
+  
+  std::vector<std::string> items = j["hackmaxprojects"].get<std::vector<std::string> >();
+  if (items != NULL) {
+	std::cout << "HACK MAX " << items.size() << std::endl;
+    std::cout <<  "   HMP=" << HACKMAXPROJECTS.size() << std::endl;
+	
+	HACKMAXPROJECTS.push_back(items);
+  }
+  
+  json useJSON = j["use"].get<json>();
+  for (json::iterator itr = useJSON.begin(); itr != useJSON.end(); itr++) {
+	token = itr.key();
+	if (token == "late_day_penalty") {
+	  LATE_DAY_PERCENTAGE_PENALTY = itr.value();
+	  assert (LATE_DAY_PERCENTAGE_PENALTY >= 0.0 && LATE_DAY_PERCENTAGE_PENALTY < 0.25);
+	} else if (token == "test_improvement_averaging_adjustment") {
+		TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT = true;
+	} else if (token == "quiz_normalize_and_drop_two") {
+		QUIZ_NORMALIZE_AND_DROP_TWO = true;
+	} else if (token == "lowest_test_counts_half") {
+		LOWEST_TEST_COUNTS_HALF = true;
+	} else {
+	  std::cout << "ERROR: unknown use " << token << std::endl;
+      exit(0);
+	}
+  }
+  
 }
 
 
@@ -429,33 +616,160 @@ void MakeRosterFile(std::vector<Student*> &students) {
 void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::string &zone_assignments_filename, std::vector<Student*> &students);
 
 
+void load_student_grades(std::vector<Student*> &students) {
 
-void processcustomizationfile(std::vector<Student*> &students, bool students_loaded) {
+  Student *perfect = GetStudent(students,"PERFECT");
+  assert (perfect != NULL);
+
+  Student *student_average = GetStudent(students,"AVERAGE");
+  assert (student_average != NULL);
+
+  
+  std::string command2 = "ls -1 " + RAW_DATA_DIRECTORY + "*.json > files_json.txt";
+
+  system(command2.c_str());
+  
+  std::ifstream files_istr("files_json.txt");
+  assert(files_istr);
+  std::string filename;
+  int count = 0;
+  while (files_istr >> filename) {
+	std::ifstream istr(filename.c_str());
+	assert(istr);
+	Student *s = new Student();
+	
+	count++;
+	
+	json j;
+	j << istr;
+
+	for (json::iterator itr = j.begin(); itr != j.end(); itr++) {
+	  std::string token = itr.key();
+	  // std::cout << "token: " << token << "!" << std::endl;
+	  GRADEABLE_ENUM g;
+	  bool gradeable_enum_success = string_to_gradeable_enum(token,g);
+      if (!gradeable_enum_success && token != "Other" && token != "rubric" && token != "Test") {
+		// non grableables
+		if (token == "rcs_id") {
+		  s->setUserName(j[token].get<std::string>());
+		} else if (token == "first_name") {
+		  s->setFirstName(j[token].get<std::string>());
+		} else if (token == "last_name") {
+		  s->setLastName(j[token].get<std::string>());
+		} else if (token == "last_update") {
+		  s->setLastUpdate(j[token].get<std::string>());
+		} else if (token == "section") {
+		  int a = j[token].get<int>();
+		  if (!validSection(a)) {
+		    // the "drop" section is one bigger than the greatest valid section
+		    if (!validSection(a-1)){
+			  std::cerr << "WARNING: invalid section " << a << std::endl;
+		    }
+		  }
+		  s->setSection(a);
+		} else {
+          std::cout << "UNKNOWN TOKEN Y '" << token << "'" << std::endl;
+		  exit(0);
+		}
+	  } else {
+	    for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+		  int which;
+		  float value;
+		  bool invalid = false;
+	      
+		  std::string gradeable_id;
+		  std::string gradeable_name;
+		  std::string other_note;
+		  
+		  gradeable_id = itr2.key();
+		  gradeable_name = (itr2.value())["name"].get<std::string>();
+		  value = (itr2.value())["score"].get<float>();
+		  
+		  if ((itr2.value()).find("text") != (itr2.value()).end()) {
+			other_note = (itr2.value())["text"].get<std::string>();
+		  }
+
+		  // Search through the gradeable categories as needed to find where this item belongs
+		  // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
+		  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
+		    GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
+		    if (GRADEABLES[g2].hasCorrespondence(gradeable_id)) {
+		      g = g2;
+		    }
+		  }
+
+		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
+			invalid = true;
+			//std::cerr << "ERROR! cannot find a category for this item " << gradeable_id << std::endl;
+
+		  } else {
+			invalid = false;
+			const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
+            which = c.first;
+			if (c.second == "") {
+              GRADEABLES[g].setCorrespondenceName(gradeable_id,gradeable_name); 
+            } else {
+              assert (c.second == gradeable_name);
+            }
+		  }
+		  
+		  if (!invalid) {
+			assert (which >= 0);
+			assert (value >= 0.0);
+
+            int ldu = 0;
+			if (token == "rubric") {
+			  if (j[token][gradeable_id].find("days_late") != j[token][gradeable_id].end()) {
+			    if (value <= 0) {
+                  std::cout << "Should not be Charged a late day" << std::endl;
+			    } else {
+                  ldu = j[token][gradeable_id]["days_late"].get<int>();
+			    }
+			  }
+            }
+                        
+			s->setGradeableItemGrade(g,which,value,ldu,other_note);
+		  }
+	    }  
+	  }
+	}
+	students.push_back(s);
+  }
+}
+
+
+void processcustomizationfile(std::vector<Student*> &students) {
 
   //  Student *blank    = GetStudent(students,"");
   Student *perfect  = GetStudent(students,"PERFECT");
   Student *student_average  = GetStudent(students,"AVERAGE");
+  Student *student_stddev  = GetStudent(students,"STDDEV");
   Student *lowest_a = GetStudent(students,"LOWEST A-");
   Student *lowest_b = GetStudent(students,"LOWEST B-");
   Student *lowest_c = GetStudent(students,"LOWEST C-");
   Student *lowest_d = GetStudent(students,"LOWEST D");
+  
+  SetBenchmarkPercentage("lowest_a-",0.9);
+  SetBenchmarkPercentage("lowest_b-",0.8);
+  SetBenchmarkPercentage("lowest_c-",0.7);
+  SetBenchmarkPercentage("lowest_d",0.6);
+  
+  SetBenchmarkColor("extracredit","aa88ff"); // dark purple
+  SetBenchmarkColor("perfect"    ,"c8c8ff"); // purple
+  SetBenchmarkColor("lowest_a-"  ,"c8ffc8"); // green
+  SetBenchmarkColor("lowest_b-"  ,"ffffc8"); // yellow
+  SetBenchmarkColor("lowest_c-"  ,"ffc8c8"); // orange
+  SetBenchmarkColor("lowest_d"   ,"ff0000"); // red
+  SetBenchmarkColor("failing"    ,"c80000"); // dark red
+  
+  // take away since only one runthrough
+  preprocesscustomizationfile();
 
-  if (students_loaded == false) {
-    preprocesscustomizationfile();
-    // blank    = new Student();
-    perfect  = new Student();perfect->setUserName("PERFECT");
-    student_average = new Student();student_average->setUserName("AVERAGE");
+  load_student_grades(students);
+  
+  // -------------------------------------------------------------------------------------
 
-    lowest_a = new Student();lowest_a->setUserName("LOWEST A-");lowest_a->setFirstName("approximate");
-    lowest_b = new Student();lowest_b->setUserName("LOWEST B-");lowest_b->setFirstName("approximate");
-    lowest_c = new Student();lowest_c->setUserName("LOWEST C-");lowest_c->setFirstName("approximate");
-    lowest_d = new Student();lowest_d->setUserName("LOWEST D"); lowest_d->setFirstName("approximate");
-
-    PERFECT_STUDENT_POINTER = perfect;
-    AVERAGE_STUDENT_POINTER = student_average;
-  } 
-
-
+  /*
   std::ifstream istr(CUSTOMIZATION_FILE.c_str());
   assert (istr);
 
@@ -805,132 +1119,264 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
     MatchClickerRemotes(students, iclicker_remotes_filename);
     AddClickerScores(students,iclicker_questions);
   }
-}
-
-
-
-void load_student_grades(std::vector<Student*> &students) {
-
-  Student *perfect = GetStudent(students,"PERFECT");
-  assert (perfect != NULL);
-
-  Student *student_average = GetStudent(students,"AVERAGE");
-  assert (student_average != NULL);
-
   
-  std::string command2 = "ls -1 " + RAW_DATA_DIRECTORY + "*.json > files_json.txt";
-
-  system(command2.c_str());
+  */
   
-  std::ifstream files_istr("files_json.txt");
-  assert(files_istr);
-  std::string filename;
-  int count = 0;
-  while (files_istr >> filename) {
-	std::ifstream istr(filename.c_str());
-	assert(istr);
-	Student *s = new Student();
-	
-	count++;
-	
-	json j;
-	j << istr;
+  // -----------------------------------------------------------------------
+  
+  std::ifstream istr(CUSTOMIZATION_FILE.c_str());
+  assert (istr);
 
-	for (json::iterator itr = j.begin(); itr != j.end(); itr++) {
-	  std::string token = itr.key();
-	  // std::cout << "token: " << token << "!" << std::endl;
-	  GRADEABLE_ENUM g;
-	  bool gradeable_enum_success = string_to_gradeable_enum(token,g);
-      if (!gradeable_enum_success && token != "Other" && token != "rubric" && token != "Test") {
-		// non grableables
-		if (token == "rcs_id") {
-			s->setUserName(j[token].get<std::string>());
-		} else if (token == "first_name") {
-			s->setFirstName(j[token].get<std::string>());
-		} else if (token == "last_name") {
-			s->setLastName(j[token].get<std::string>());
-		} else if (token == "last_update") {
-			s->setLastUpdate(j[token].get<std::string>());
-		} else if (token == "section") {
-		  int a = j[token].get<int>();
-		  if (!validSection(a)) {
-		    // the "drop" section is one bigger than the greatest valid section
-		    if (!validSection(a-1)){
-			  std::cerr << "WARNING: invalid section " << a << std::endl;
-		    }
+  std::string token,token2;
+  //int num;
+  int which;
+  std::string which_token;
+  float p_score,a_score,b_score,c_score,d_score;
+
+  std::string iclicker_remotes_filename;
+  std::vector<std::vector<iClickerQuestion> > iclicker_questions(MAX_LECTURES+1);
+  
+  json j;
+  j << istr;
+  
+  for (json::iterator itr = j.begin(); itr != j.end(); itr++) {
+    token = itr.key();
+	if (token == "section") {
+	  // create sections
+	  int counter = 0;
+	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+		int section = itr2.key();
+		std::string section_name = itr2.value();
+		std::cout << "MAKE ASSOCIATION " << section << " " << section_name << std::endl;
+		assert (!validSection(section));
+		sectionNames[section] = section_name;
+		if (sectionColors.find(section_name) == sectionColors.end()) {
+		  if (counter == 0) {
+            sectionColors[section_name] = "ccffcc"; // lt green
+          } else if (counter == 1) {
+            sectionColors[section_name] = "ffcccc"; // lt salmon
+          } else if (counter == 2) {
+            sectionColors[section_name] = "ffffaa"; // lt yellow
+          } else if (counter == 3) {
+            sectionColors[section_name] = "ccccff"; // lt blue-purple
+          } else if (counter == 4) {
+            sectionColors[section_name] = "aaffff"; // lt cyan
+          } else if (counter == 5) {
+            sectionColors[section_name] = "ffaaff"; // lt magenta
+          } else if (counter == 6) {
+            sectionColors[section_name] = "88ccff"; // blue 
+          } else if (counter == 7) {
+            sectionColors[section_name] = "cc88ff"; // purple 
+          } else if (counter == 8) {
+            sectionColors[section_name] = "88ffcc"; // mint 
+          } else if (counter == 9) {
+            sectionColors[section_name] = "ccff88"; // yellow green
+          } else if (counter == 10) {
+            sectionColors[section_name] = "ff88cc"; // pink
+          } else if (counter == 11) {
+            sectionColors[section_name] = "ffcc88"; // orange
+          } else if (counter == 12) {
+            sectionColors[section_name] = "ffff33"; // yellow
+          } else if (counter == 13) {
+            sectionColors[section_name] = "ff33ff"; // magenta
+          } else if (counter == 14) {
+            sectionColors[section_name] = "33ffff"; // cyan
+          } else if (counter == 15) {
+            sectionColors[section_name] = "6666ff"; // blue-purple
+          } else if (counter == 16) {
+            sectionColors[section_name] = "66ff66"; // green
+          } else if (counter == 17) {
+            sectionColors[section_name] = "ff6666"; // red
+          } else {
+            sectionColors[section_name] = "aaaaaa"; // grey 
 		  }
-		  s->setSection(a);
-		} else {
-            std::cout << "UNKNOWN TOKEN Y '" << token << "'" << std::endl;
-			exit(0);
+		  counter++;
 		}
-	  } else {
-	    for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-		  int which;
-		  float value;
-		  bool invalid = false;
-	      
-		  std::string gradeable_id;
-		  std::string gradeable_name;
-		  std::string other_note;
-		  
-		  gradeable_id = itr2.key();
-		  gradeable_name = (itr2.value())["name"].get<std::string>();
-		  value = (itr2.value())["score"].get<float>();
-		  
-		  if ((itr2.value()).find("text") != (itr2.value()).end()) {
-			other_note = (itr2.value())["text"].get<std::string>();
-		  }
-
-		  // Search through the gradeable categories as needed to find where this item belongs
-		  // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
-		  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-		    GRADEABLE_ENUM g2 = ALL_GRADEABLES[i];
-		    if (GRADEABLES[g2].hasCorrespondence(gradeable_id)) {
-		      g = g2;
-		    }
-		  }
-
-		  if (!GRADEABLES[g].hasCorrespondence(gradeable_id)) {
-			invalid = true;
-			//std::cerr << "ERROR! cannot find a category for this item " << gradeable_id << std::endl;
-
-		  } else {
-			invalid = false;
-			const std::pair<int,std::string>& c = GRADEABLES[g].getCorrespondence(gradeable_id);
-            which = c.first;
-			if (c.second == "") {
-              GRADEABLES[g].setCorrespondenceName(gradeable_id,gradeable_name); 
-            } else {
-              assert (c.second == gradeable_name);
-            }
-		  }
-		  
-		  if (!invalid) {
-			assert (which >= 0);
-			assert (value >= 0.0);
-
-                        int ldu = 0;
-			if (token == "rubric") {
-			  if (j[token][gradeable_id].find("days_late") != j[token][gradeable_id].end()) {
-			    if (value <= 0) {
-                              std::cout << "Should not be Charged a late day" << std::endl;
-			    } else {
-                              ldu = j[token][gradeable_id]["days_late"].get<int>();
-			    }
-			  }
-                        }
-                        
-			s->setGradeableItemGrade(g,which,value,ldu,other_note);
-		  }
-	    }  
 	  }
+	} else if (token == "message") {
+	  // general message at the top of the file
+	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+		MESSAGES.push_back(itr2.value());
+	  }
+	} else if (token == "warning") {
+	  // EWS early warning system [ per student ]
+	  std::vector<json> warning_list = itr.value();
+	  for (int i = 0; i<warning_list.size(); i++) {
+		json warning_user = warning_list[i];
+	    std::string username = warning_user["user"].get<std::string>();
+		std::string message = warning_user["msg"].get<std::string>();
+		Student *s = GetStudent(students,username);
+		if (s == NULL) {
+          std::cout << username << std::endl;
+        }
+        assert (s != NULL);
+		s->addWarning(message);
+	  }
+	} else if (token == "recommend") {
+	  // UTA/mentor recommendations [ per student ]
+	  std::vector<json> recommend_list = itr.value();
+	  for (int i = 0; i < recommend_list.size(); i++) {
+		json recommend_user = recommend_list[i];
+	    std::string username = recommend_user["user"].get<std::string>();
+		std::string message = recommend_user["msg"].get<std::string>();
+		Student *s = GetStudent(students,username);
+		if (s == NULL) {
+          std::cout << username << std::endl;
+        }
+        assert (s != NULL);
+		s->addRecommendation(message);
+	  }
+	} else if (token == "note") {
+	  // other grading note [ per student ]
+	  std::vector<json> note_list = itr.value();
+	  for (int i = 0; i < note_list.size(); i++) {
+		json note_user = note_list[i];
+	    std::string username = note_user["user"].get<std::string>();
+		std::string message = note_user["msg"].get<std::string>();
+		Student *s = GetStudent(students,username);
+		if (s == NULL) {
+          std::cout << username << std::endl;
+        }
+        assert (s != NULL);
+		s->addNote(message);
+	  }
+	} else if (token == "earned_late_days") {
+	  std::vector<float> earnedLateDays = itr.value();
+	  GLOBAL_earned_late_days.clear();
+	  for (int i = 0; i < earnedLateDays.size(); i++) {
+	    float tmp = earnedLateDays[i];
+		assert (GLOBAL_earned_late_days.size() == 0 || tmp > GLOBAL_earned_late_days.back());
+        GLOBAL_earned_late_days.push_back(tmp);
+	  }
+	} else if (token == "iclicker_ids") {
+	  iclicker_remotes_filename = itr.value();
+	} else if (token == "iclicker") {
+	  std::vector<json> iclickerLectures;
+	  for (int i = 0; i < iclickerLectures.size(); i++) {
+	    json iclickerLecture = iclickerLectures[i];
+	    for (json::iterator itr2 = iclickerLecture.begin(); itr2 != iclickerLecture.end(); itr2++) {
+		  int which_lecture = itr2.key();
+		  std::string clicker_file = (itr2.value())["file"].get<std::string>();
+		  int which_column = (itr2.value())["column"].get<int>();
+		  std::string correct_answer = (itr2.value())["answer"].get<std::string>();
+		  assert (which_lecture >= 1 && which_lecture <= MAX_LECTURES);
+		  iclicker_questions[which_lecture].push_back(iClickerQuestion(clicker_file,which_column,correct_answer));
+	    }
+	  }
+	} else if (token == "audit") {
+	  std::vector<json> audit_list = itr.value();
+	  for (int i = 0; i < audit_list.size(); i++) {
+	    std::string username = audit_list[i];
+        Student *s = GetStudent(students,username);
+        assert (s != NULL);
+        assert (s->getAudit() == false);
+        s->setAudit();
+        s->addNote("AUDIT");
+	  }
+	} else if (token == "withdraw") {
+	  std::vector<json> withdraw_list = itr.value();
+	  for (int i = 0; i < withdraw_list.size(); i++) {
+	    std::string username = withdraw_list[i];
+        Student *s = GetStudent(students,username);
+        assert (s != NULL);
+        assert (s->getWithdraw() == false);
+        s->setWithdraw();
+        s->addNote("LATE WITHDRAW");
+	  }
+	} else if (token == "independentstudy") {
+	  std::vector<json> independent_study_list = itr.value();
+	  for (int i = 0; i < independent_study_list.size(); i++) {
+	    std::string username = independent_study_list[i];
+        Student *s = GetStudent(students,username);
+        assert (s != NULL);
+        assert (s->getIndependentStudy() == false);
+        s->setIndependentStudy();
+        s->addNote("INDEPENDENT STUDY");
+	  }
+	} else if (token == "manual_grade") {
+	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+	    std::string username = itr2.key();
+		std::string grade = (itr2.value())["grade"].get<std::string>();
+		std::string note = (itr2.value())["note"].get<std::string>();
+		Student *s = GetStudent(students,username);
+        assert (s != NULL);
+        s->ManualGrade(grade,note);
+	  }
+	} else if (token == "moss") {
+	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+	    std::string username = itr2.key();
+		int hw = (itr2.value())["hw"].get<int>();
+		float note = (itr2.value())["penalty"].get<float>();
+		assert (hw >= 1 && hw <= 10);
+        assert (penalty >= -0.01 && penalty <= 1.01);
+		Student *s = GetStudent(students,username);
+        assert (s != NULL);
+        s->mossify(hw,penalty);
+	  }
+	} else if (token == "final_cutoff") {
+	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+	    std::string grade = itr2.key();
+		float cutoff = itr2.value();
+		assert (grade == "A" ||
+              grade == "A-" ||
+              grade == "B+" ||
+              grade == "B" ||
+              grade == "B-" ||
+              grade == "C+" ||
+              grade == "C" ||
+              grade == "C-" ||
+              grade == "D+" ||
+              grade == "D");
+	    CUTOFFS[grade] = cutoff;
+	  }
+	} else if (token == "grableables") {
+	  continue;
+	} else if (token == "exam_data") {
+	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+	    token2 = itr2.key();
+		if (token2 == "exam_title") {
+		  GLOBAL_EXAM_TITLE = itr2.value();
+		} else if (token2 == "exam_date") {
+		  GLOBAL_EXAM_DATE = itr2.value();
+		} else if (token2 == "exam_time") {
+		  GLOBAL_EXAM_TIME = itr2.value();
+		} else if (token2 == "exam_default_room") {
+		  GLOBAL_EXAM_DEFAULT_ROOM = itr2.value();
+		} else if (token2 == "min_overall_for_zone_assignment") {
+		  GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = itr2.value();
+		} else if (token2 == "exam_seating") {
+		  std::cout << "TOKEN IS EXAM SEATING" << std::endl;
+		  
+		  std::vector<std::string> examSeating = itr2.value();
+		  token = examSeating[0];
+		  token2 = examSeating[1];
+		  
+		  LoadExamSeatingFile(token,token2,students);
+		  
+		  MakeRosterFile(students);
+		}
+	  }
+	} else if (token == "bonus_latedays") {
+	  BONUS_WHICH_LECTURE = ((*itr).value()).key();
+	  BONUS_FILE = ((*itr).value()).value();
+      std::cout << "BONUS LATE DAYS" << std::endl;
+	  
+	  if (BONUS_FILE != "") {
+        load_bonus_late_day(students,BONUS_WHICH_LECTURE,BONUS_FILE);
+	  }
+	} else {
+	  if (token == "display" || token == "display_benchmark" || token == "benchmark_percent") {
+	    continue;
+	} else if (token == "use" || token == "hackmaxprojects" || token == "benchmark_color") {
+		continue;
 	}
-	students.push_back(s);
+	  std::cout << "ERROR: UNKNOWN TOKEN  X" << token << std::endl;
+	}
   }
-
+  
+  MatchClickerRemotes(students, iclicker_remotes_filename);
+  AddClickerScores(students,iclicker_questions);
 }
-
 
 void start_table_open_file(std::ofstream &ostr, std::string &filename, bool full_details, 
                  const std::vector<Student*> &students, int S, int month, int day, int year,
@@ -1116,19 +1562,23 @@ int main(int argc, char* argv[]) {
   }
 
   std::vector<Student*> students;  
-  processcustomizationfile(students,false);
+  //processcustomizationfile(students,false);
 
+  processcustomizationfile(students);
+  
   // ======================================================================
   // LOAD ALL THE STUDENT DATA
-  load_student_grades(students);
+  // load_student_grades(students);
 
+  /*
   if (BONUS_FILE != "") {
     load_bonus_late_day(students,BONUS_WHICH_LECTURE,BONUS_FILE);
   }
+  */
 
   // ======================================================================
   // MAKE FAKE STUDENTS FOR THE CURVES
-  processcustomizationfile(students,true); 
+  // processcustomizationfile(students,true); 
 
 
   // ======================================================================
