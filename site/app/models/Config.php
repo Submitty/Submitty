@@ -24,7 +24,7 @@ class Config {
      * turn on if running server in production environment.
      * @var bool
      */
-    private $debug = true;
+    private $debug = false;
 
     private $semester;
     private $course;
@@ -87,9 +87,11 @@ class Config {
     private $display_hidden;
 
     private $upload_message;
-    private $ta_grades;
-    private $grade_summary;
+    private $grades_summary;
     
+    private $display_iris_grades_summary;
+    private $display_custom_message;
+
     /**
      * Config constructor.
      *
@@ -109,7 +111,7 @@ class Config {
         $this->setConfigValues($master, 'database_details', array('database_host', 'database_user', 'database_password'));
 
         if (isset($master['site_details']['debug'])) {
-            $this->debug = $master['site_details']['debug'];
+            $this->debug = $master['site_details']['debug'] === true;
         }
 
         if (isset($master['site_details']['timezone'])) {
@@ -146,8 +148,10 @@ class Config {
         $course = IniParser::readFile($this->course_ini);
 
         $this->setConfigValues($course, 'hidden_details', array('database_name'));
-        $this->setConfigValues($course, 'course_details', array('course_name', 'default_hw_late_days',
-            'default_student_late_days', 'zero_rubric_grades', 'upload_message', 'ta_grades'));
+        $this->setConfigValues($course, 'course_details', array
+                               ('course_name', 'default_hw_late_days',
+                                'default_student_late_days', 'zero_rubric_grades', 'upload_message', 
+                                'display_iris_grades_summary', 'display_custom_message'));
         
         if (isset($course['hidden_details']['course_url'])) {
             $this->course_url = rtrim($course['hidden_details']['course_url'], "/")."/";
@@ -160,7 +164,7 @@ class Config {
             $this->$key = intval($this->$key);
         }
 
-        foreach (array('zero_rubric_grades', 'ta_grades', 'grade_summary') as $key) {
+        foreach (array('zero_rubric_grades', 'display_iris_grades_summary', 'display_custom_message') as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
     
@@ -346,12 +350,16 @@ class Config {
         return $this->upload_message;
     }
     
-    public function showTaGrades() {
-        return $this->ta_grades;
+    public function displayCustomMessage() {
+        return $this->display_custom_message;
     }
-    
+
+    public function displayIrisGradesSummary() {
+        return $this->display_iris_grades_summary;
+    }
+
     public function showGradeSummary() {
-        return $this->grade_summary;
+        return $this->grades_summary;
     }
     
     public function getCourseIniPath() {

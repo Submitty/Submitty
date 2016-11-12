@@ -64,7 +64,7 @@ class DiffViewer {
      * @param string $expected name of expected in difference file
      * @param string $actual name of actual in difference file
      */
-    public function __construct($expected="instructor", $actual="student") {
+    public function __construct($expected="expected", $actual="actual") {
         $this->expected_name = $expected;
         $this->actual_name = $actual;
     }
@@ -360,7 +360,7 @@ HTML;
             }
 
             .bad {
-                background-color: #fedede;
+                background-color: #fdffe0;
 
             }
 
@@ -369,10 +369,10 @@ HTML;
             }
 
             .highlight-hover {
-                background-color: yellow !important;
+                background-color: #ddf !important;
             }
             .highlight-char {
-                background-color: #fffdbe;
+                background-color: #fe5b5b;
             }
 
             .line_number {

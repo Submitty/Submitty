@@ -12,11 +12,7 @@ use app\libraries\Output;
  * and the associated registered IAuthentication interface returning whether or not we were able to actually
  * authenticate the user or not, and then the controller redirects on that answer.
  */
-class AuthenticationController implements IController {
-
-    /** @var Core  */
-    private $core;
-    
+class AuthenticationController extends AbstractController {
     /**
      * @var bool Is the user logged in or not. We use this to prevent the user going to the login controller
      *           and trying to login again.
@@ -30,7 +26,7 @@ class AuthenticationController implements IController {
      * @param bool $logged_in
      */
     public function __construct(Core $core, $logged_in) {
-        $this->core = $core;
+        parent::__construct($core);
         $this->logged_in = $logged_in;
     }
 
@@ -96,7 +92,10 @@ class AuthenticationController implements IController {
             }
             $this->core->redirect($this->core->buildUrl($redirect));
         }
-        else if ($this->core->authenticate($_POST['user_id'], $_POST['password'])) {
+
+        $this->core->getAuthentication()->setUserId($_POST['user_id']);
+        $this->core->getAuthentication()->setPassword($_POST['password']);
+        if ($this->core->authenticate()) {
             foreach ($_REQUEST as $key => $value) {
                 if (substr($key, 0, 4) == "old_") {
                     $redirect[substr($key, 4)] = $value;

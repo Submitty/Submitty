@@ -2,18 +2,12 @@
 
 namespace app\controllers\admin;
 
-use app\controllers\IController;
+use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\libraries\IniParser;
 use app\libraries\Output;
 
-class ConfigurationController implements IController {
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class ConfigurationController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
             case 'view':
@@ -35,7 +29,8 @@ class ConfigurationController implements IController {
             'default_student_late_days' => $this->core->getConfig()->getDefaultStudentLateDays(),
             'zero_rubric_grades'        => $this->core->getConfig()->shouldZeroRubricGrades(),
             'upload_message'            => $this->core->getConfig()->getUploadMessage(),
-            'ta_grades'                 => $this->core->getConfig()->showTaGrades()
+            'display_iris_grades_summary' => $this->core->getConfig()->displayIrisGradesSummary(),
+            'display_custom_message'      => $this->core->getConfig()->displayCustomMessage()
         );
 
         foreach (array('course_name', 'upload_message') as $key) {
@@ -50,7 +45,7 @@ class ConfigurationController implements IController {
             }
         }
 
-        foreach (array('zero_rubric_grades', 'ta_grades') as $key) {
+        foreach (array('zero_rubric_grades', 'display_iris_grades_summary', 'display_custom_message') as $key) {
             if (isset($_SESSION['request'][$key])) {
                 $fields[$key] = ($_SESSION['request'][$key] == true) ? true : false;
             }
@@ -84,7 +79,7 @@ class ConfigurationController implements IController {
             $_POST[$key] = (isset($_POST[$key])) ? intval($_POST[$key]) : 0;
         }
 
-        foreach (array('zero_rubric_grades', 'ta_grades') as $key) {
+        foreach (array('zero_rubric_grades', 'display_iris_grades_summary', 'display_custom_message') as $key) {
             $_POST[$key] = (isset($_POST[$key]) && $_POST[$key] == "true") ? true : false;
         }
 
@@ -98,7 +93,8 @@ class ConfigurationController implements IController {
                 'default_student_late_days' => $_POST['default_student_late_days'],
                 'zero_rubric_grades'        => $_POST['zero_rubric_grades'],
                 'upload_message'            => nl2br($_POST['upload_message']),
-                'ta_grades'                 => $_POST['ta_grades']
+                'display_iris_grades_summary' => $_POST['display_iris_grades_summary'],
+                'display_custom_message'      => $_POST['display_custom_message']
             )
         );
         

@@ -7,7 +7,7 @@ include "../header.php";
 check_administrator();
 
 if($user_is_administrator){
-    $have_old = $has_grades = false;
+    $have_old = $has_grades = $have_old_edit = false;
     $current_date = date('Y/m/d 23:59:59');
     $yesterday = date('Y/m/d 23:59:59', strtotime( '-1 days' ));
     $old_gradeable = array(
@@ -17,29 +17,33 @@ if($user_is_administrator){
         'g_team_assignment' => false,
         'g_gradeable_type' => 0,
         'g_grade_by_registration' => false,
-        'g_grade_start_date' => date('Y/m/d 23:59:59', strtotime( '+7 days' )),
+        'g_ta_view_start_date' => date('Y/m/d 23:59:59', strtotime( '-1 days' )),
+        'g_grade_start_date' => date('Y/m/d 23:59:59', strtotime( '+10 days' )),
         'g_grade_released_date' => date('Y/m/d 23:59:59', strtotime( '+14 days' )),
         'g_syllabus_bucket' => '',
         'g_min_grading_group' => '',
         'g_instructions_url' => ''
     );
     $old_questions = $old_components = $electronic_gradeable = array();
-    $electronic_gradeable['eg_submission_open_date'] = "";
-    $electronic_gradeable['eg_submission_due_date'] = "";
+    $electronic_gradeable['eg_submission_open_date'] = date('Y/m/d 23:59:59', strtotime( '0 days' )); //"";
+    $electronic_gradeable['eg_submission_due_date'] = date('Y/m/d 23:59:59', strtotime( '+7 days' )); //"";"";
     $electronic_gradeable['eg_subdirectory'] = "";
     $electronic_gradeable['eg_config_path'] = "";
-    $electronic_gradeable['eg_late_days'] = __DEFAULT_LATE_DAYS__;
+    $electronic_gradeable['eg_late_days'] = __DEFAULT_HW_LATE_DAYS__;
     $electronic_gradeable['eg_precision'] = 0.5;
     $old_components = "{}";
     
     $num_numeric = $num_text = 0;
     $g_gradeable_type = $g_syllabus_bucket = $g_min_grading_group = $default_late_days = -1;
     $is_repository = false;
-    $use_ta_grading = true;
+    $use_ta_grading = false;
     $g_overall_ta_instructions = $g_id = '';
     $edit = json_encode(isset($_GET['action']) && $_GET['action'] == 'edit');
     
-    if (isset($_GET['action']) && $_GET['action'] == 'edit') {
+    $initial_ta_grading_compare_date = "UNSPECIFIED";
+    $initial_grades_released_compare_date = "TA Beta Testing Date";
+
+    if (isset($_GET['action']) && ($_GET['action'] == 'edit' || $_GET['action'] == 'template')) {
         $g_id = $_GET['id'];
         Database::query("SELECT * FROM gradeable WHERE g_id=?",array($g_id));
         if (count(Database::rows()) == 0) {
@@ -49,6 +53,7 @@ if($user_is_administrator){
         Database::query("SELECT * FROM gradeable_component WHERE g_id=? ORDER BY gc_order", array($g_id));
         $old_components = json_encode(Database::rows());
         $have_old = true;
+        $have_old_edit = (isset($_GET['action']) && ($_GET['action'] == 'edit'));
         
         // get the number of text and numeric fields for the form
         if ($old_gradeable['g_gradeable_type']==2){
@@ -72,6 +77,15 @@ if($user_is_administrator){
             $db->query("SELECT * FROM electronic_gradeable WHERE g_id=?", array($g_id));
             $electronic_gradeable = $db->row();
             $use_ta_grading = $electronic_gradeable['eg_use_ta_grading'];
+
+            $initial_ta_grading_compare_date = "Due Date (+ max allowed late days)";
+
+            if ($use_ta_grading) {
+              $initial_grades_released_compare_date = "TA Grading Open Date";
+            } else {
+              $initial_grades_released_compare_date = "Due Date";
+            }
+
             $is_repository = $electronic_gradeable['eg_is_repository'];
             $late_days = $electronic_gradeable['eg_late_days'];
             $db->query("SELECT gc_title, gc_ta_comment, gc_student_comment, gc_max_value, gc_is_extra_credit FROM gradeable_component 
@@ -84,10 +98,15 @@ if($user_is_administrator){
                                                 'question_total'        => $question['gc_max_value'],
                                                 'question_extra_credit' => $question['gc_is_extra_credit']));
             }
+       } else {
+         // numeric or checkpoint
+         $initial_ta_grading_compare_date = "TA Beta Testing Date";
+         $initial_grades_released_compare_date = "TA Grading Open Date";
        }
+
     }
     else{
-            $default_late_days = __DEFAULT_LATE_DAYS__;
+            $default_late_days = __DEFAULT_HW_LATE_DAYS__;
     }
 
     $useAutograder = (__USE_AUTOGRADER__) ? "true" : "false";
@@ -108,24 +127,40 @@ if($user_is_administrator){
         $action = strtolower($string);
     }
     else {
-        $gradeable_name = $old_gradeable['g_title'];
-        $gradeable_submission_id = $old_gradeable['g_id'];
+        $gradeable_name = ($have_old_edit) ? $old_gradeable['g_title'] : '';
+        $gradeable_submission_id = ($have_old_edit) ? $old_gradeable['g_id']: '';
         $g_instructions_url = $old_gradeable['g_instructions_url'];
         $g_overall_ta_instructions = $old_gradeable['g_overall_ta_instructions'];
         $g_gradeable_type = $old_gradeable['g_gradeable_type'];
         $g_team_assignment = $old_gradeable['g_team_assignment'];
         $g_grade_by_registration = $old_gradeable['g_grade_by_registration'];
         $g_syllabus_bucket = $old_gradeable['g_syllabus_bucket'];
+        $g_ta_view_start_date = $old_gradeable['g_ta_view_start_date'];
         $g_grade_start_date = $old_gradeable['g_grade_start_date'];
         $g_grade_released_date = $old_gradeable['g_grade_released_date'];
         $g_min_grading_group = $old_gradeable['g_min_grading_group'];
-        $string = "Edit";
-        $button_string = "Save";
-        $action = 'edit';
+        
+        if ($have_old_edit){
+          $string = "Edit";
+          $button_string = "Save";
+          $action = 'edit';
+        }
+        else{
+          $string = $button_string = "Add";
+          $action = strtolower($string);
+        }
+    }
+    
+    // for templates 
+    if(!$have_old_edit){
+      // generate the drop down for all existing gradeables
+      $db->query("SELECT g_id, g_title FROM gradeable ORDER BY g_title ASC", array());
+      $gradeable_id_title = $db->rows();
     }
 
     $have_old = json_encode($have_old);
-    $extra = ($has_grades) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
+    $old_edit = json_encode($have_old_edit);
+    $extra = ($have_old_edit && $has_grades) ? "<span style='color: red;'>(Grading has started! Edit Questions At Own Peril!)</span>" : "";
     print <<<HTML
 
 <style type="text/css">
@@ -218,18 +253,37 @@ if($user_is_administrator){
 </style>
 
 <div id="container-rubric">
-    <form id="delete-gradeable" action="{$BASE_URL}/account/submit/admin-gradeables.php?action=delete&id={$old_gradeable['g_id']}" method="post">
+    <form id="delete-gradeable" action="{$BASE_URL}/account/submit/admin-gradeables.php?course={$_GET['course']}&semester={$_GET['semester']}&action=delete&id={$old_gradeable['g_id']}" method="post">
         <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
     </form>
-    <form id="gradeable-form" class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?action={$action}&id={$old_gradeable['g_id']}" 
+    <form id="gradeable-form" class="form-signin" action="{$BASE_URL}/account/submit/admin-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&action={$action}&id={$old_gradeable['g_id']}" 
           method="post" enctype="multipart/form-data"> 
 
         <input type='hidden' class="ignore" name="csrf_token" value="{$_SESSION['csrf']}" />
         <div class="modal-header" style="overflow: auto;">
             <h3 id="myModalLabel" style="float: left;">{$string} Gradeable {$extra}</h3>
+HTML;
+if (!$have_old_edit){
+  print <<<HTML
+            <div style="padding-left: 200px;">
+              From Template: <select name="gradeable_template" style='width: 170px;' value='' >
+            </div>
+            <option>--None--</option>
+HTML;
+
+    foreach ($gradeable_id_title as $g_id_title){
+      print <<<HTML
+          <option value="{$g_id_title['g_id']}">{$g_id_title['g_title']}</option>
+HTML;
+    }
+  print <<<HTML
+          </select>          
+HTML;
+}
+  print <<<HTML
             <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{$button_string} Gradeable</button>
 HTML;
-    if ($action == "edit") {
+    if ($have_old_edit) {
         print <<<HTML
                 <button type="button" class="btn btn-danger" onclick="deleteForm();" style="margin-right:10px; float: right;">Delete Gradeable</button>
 HTML;
@@ -249,6 +303,12 @@ HTML;
             <br />
             What is the URL to the assignment instructions? (shown to student) <input style='width: 227px' type='text' name='instructions_url' value="{$g_instructions_url}" placeholder="(Optional)" />
             <br />
+            What is the <em style='color: orange;'><b>TA Beta Testing Date</b></em>? (gradeable visible to TAs):
+            <input name="date_ta_view" id="date_ta_view" class="datepicker" type="text"
+            style="cursor: auto; background-color: #FFF; width: 250px;">
+            <br />
+
+
        <!-- <br />
         Is this a team assignment?:
         <input type="radio" name="team_assignment" value="yes"
@@ -288,15 +348,21 @@ HTML;
             <!-- This is only relevant to Electronic Files -->
             <div class="gradeable_type_options electronic_file" id="electronic_file" >    
                 <br />
-                What date does the submission open to students?: <input id="date_submit" name="date_submit" class="datepicker" type="text"
+                What is the <em style='color: orange;'><b>Submission Open Date</b></em>? (submission available to students):
+                <input id="date_submit" name="date_submit" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
+                <em style='color: orange;'>must be >= TA Beta Testing Date</em>
                 <br />
 
-                What is the due date? <input id="date_due" name="date_due" class="datepicker" type="text"
+                What is the <em style='color: orange;'><b>Due Date</b></em>?
+                <input id="date_due" name="date_due" class="datepicker" type="text"
                 style="cursor: auto; background-color: #FFF; width: 250px;">
+                <em style='color: orange;'>must be >= Submission Open Date</em>
                 <br />
+
                 How many late days may students use on this assignment? <input style="width: 50px" name="eg_late_days" class="int_val"
                                                                          type="text"/>
+                <em style='color: orange;'>NOTE: must be 0 for gradeables with no TA grading</em>
                 <br /> <br />
                 
 
@@ -333,7 +399,7 @@ HTML;
                 <input style='width: 83%' type='text' name='config_path' value="" class="required" placeholder="(Required)" />
                 <br /> <br />
 
-                Use TA grading? 
+                Will this assignment also be graded by the TAs?
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val rubric_questions"
 HTML;
                 echo ($use_ta_grading===true)?'checked':'';
@@ -562,12 +628,12 @@ HTML;
             <fieldset>
                 <input type="radio" name="section_type" value="reg_section"
 HTML;
-    echo (($action==='edit' && $g_grade_by_registration===true) || $action != 'edit')?'checked':'';
+    echo (($have_old && $g_grade_by_registration===true) || $action != 'edit')?'checked':'';
     print <<<HTML
                 /> Registration Section
                 <input type="radio" name="section_type" value="rotating-section" id="rotating-section" class="graders"
 HTML;
-    echo ($action==='edit' && $g_grade_by_registration===false)?'checked':'';
+    echo ($have_old && $g_grade_by_registration===false)?'checked':'';
     print <<<HTML
                 /> Rotating Section
 HTML;
@@ -619,7 +685,7 @@ HTML;
             <td>{$fa_grader['user_id']}</td>
             <td><input style="width: 227px" type="text" name="grader_{$fa_grader['user_id']}" class="grader" value="
 HTML;
-        if($action==='edit' && !$g_grade_by_registration) {
+        if($have_old && !$g_grade_by_registration) {
             print (isset($graders_to_sections[$fa_grader['user_id']])) ? $graders_to_sections[$fa_grader['user_id']] : '';
         }
         else{
@@ -648,7 +714,7 @@ HTML;
             <td>{$la_grader['user_id']}</td>
             <td><input style="width: 227px" type="text" name="grader_{$la_grader['user_id']}" class="grader" value="
 HTML;
-        if($action==='edit' && !$g_grade_by_registration) {
+        if($have_old && !$g_grade_by_registration) {
             print (isset($graders_to_sections[$la_grader['user_id']])) ? $graders_to_sections[$la_grader['user_id']] : '';
         }
         else{
@@ -671,24 +737,30 @@ HTML;
 
     print <<<HTML
             <!-- TODO default to the submission + late days for electronic -->
-            What date can the TAs start grading this?: <input name="date_grade" id="date_grade" class="datepicker" type="text"
-                style="cursor: auto; background-color: #FFF; width: 250px;">
-            
-            <br />
-            What date will the grade be released to the student? 
-            <input name="date_released" id="date_released" class="datepicker" type="text" 
-                   style="cursor: auto; background-color: #FFF; width: 250px;">    
-            
+            What is the <em style='color: orange;'><b>TA Grading Open Date</b></em>? (TAs may begin grading)
+            <input name="date_grade" id="date_grade" class="datepicker" type="text"
+            style="cursor: auto; background-color: #FFF; width: 250px;">
+              <em style='color: orange;'>must be >= <span id="ta_grading_compare_date">{$initial_ta_grading_compare_date}</span></em>
             <br />
             </div>
+
+            What is the <em style='color: orange;'><b>Grades Released Date</b></em>? (TA grades will be visible to students)
+            <input name="date_released" id="date_released" class="datepicker" type="text" 
+            style="cursor: auto; background-color: #FFF; width: 250px;">
+            <em style='color: orange;'>must be >= <span id="grades_released_compare_date">{$initial_grades_released_compare_date}</span></em>
+            <br />
             
             What <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Iris-(Rainbow-Grades)">syllabus category</a> does this item belong to?:
             
             <select name="gradeable_buckets" style="width: 170px;">
 HTML;
 
-    $valid_assignment_type = array('homework','assignment','quiz','test','reading','participation',
-                                   'exam','lab','recitation','problem-set','project', 'none (for practice only)');
+    $valid_assignment_type = array('homework','assignment','problem-set',
+                                   'quiz','test','exam',
+                                   'exercise','lecture-exercise','reading','lab','recitation', 
+                                   'project',                                   
+                                   'participation','note',
+                                   'none (for practice only)');
     foreach ($valid_assignment_type as $type){
         print <<<HTML
                 <option value="{$type}"
@@ -715,7 +787,7 @@ HTML;
         <div class="modal-footer">
                 <button class="btn btn-primary" type="submit" style="margin-top: 10px; float: right;">{$button_string} Gradeable</button>
 HTML;
-    if ($action == "edit") {
+    if ($have_old_edit) {
         print <<<HTML
                 <button type="button" class="btn btn-danger" onclick="deleteForm();" style="margin-top:10px; margin-right: 10px; float: right;">Delete Gradeable</button>
 HTML;
@@ -735,7 +807,7 @@ HTML;
             return false;
         }
     }
-    
+    // export to JSON
     $.fn.serializeObject = function(){
         var o = {};
         var a = this.serializeArray();
@@ -750,6 +822,19 @@ HTML;
         ignore.push("numeric_extra_0");
         ignore.push("text_label_0");
         ignore.push("checkpoint_label_0");
+        
+        // export appropriate users 
+        if ($('[name="minimum_grading_group"]').prop('value') == 1){
+          $('#full-access-graders').find('.grader').each(function(){
+                      ignore.push($(this).attr('name'));
+          });
+        }
+
+        if ($('[name="minimum_grading_group"]').prop('value') <= 2){
+          $('#limited-access-graders').find('.grader').each(function(){
+                      ignore.push($(this).attr('name'));
+          });
+        }
         
         $(':radio').each(function(){
            if(! $(this).is(':checked')){
@@ -964,6 +1049,35 @@ HTML;
             }
         });
         
+        function getUrlVars() {
+          var vars = {};
+          var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,    
+          function(m,key,value) {
+            vars[key] = value;
+          });
+          return vars;
+      }
+        
+        $('[name="gradeable_template"]').change(
+        function(){
+          var no_params = window.location.href;
+          if(window.location.href.indexOf('&id') >= 0){
+            no_params = window.location.href.substring(0,window.location.href.indexOf('&id'));
+          }
+
+          var new_url =  no_params;
+          
+          if($(this).prop('selectedIndex')> 0){
+            new_url += '&id='+this.value + '&action=template';
+          }
+          
+          window.location.href = new_url;
+        });
+        
+        if({$have_old} && !{$old_edit}){
+          $('[name="gradeable_template"]').val(getUrlVars()['id']);
+        }
+        
         if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
             $('#rubric_questions').hide();
             $('#grading_questions').hide();
@@ -976,6 +1090,9 @@ HTML;
                 if($(this).val() == 'true'){ 
                     $('#rubric_questions').show();
                     $('#grading_questions').show();
+                    $('#grades_released_compare_date').html('TA Grading Open Date');
+                } else {
+                    $('#grades_released_compare_date').html('Due Date');
                 }
             }
         });
@@ -1045,7 +1162,7 @@ HTML;
             $('#numeric').show();
             $('#grading_questions').show();
         }
-        if({$have_old}){
+        if({$edit}){
             $('input[name=gradeable_id]').attr('readonly', true);
         }
     });
@@ -1057,11 +1174,11 @@ HTML;
     });
     
     if(!{$have_old}){
-        $('#date_submit').datetimepicker('setDate', (new Date("{$yesterday}")));
-        $('#date_due').datetimepicker('setDate', (new Date("{$current_date}")));
-        
+        $('#date_submit').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_open_date']}")));
+        $('#date_due').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_due_date']}")));
     }
     
+    $('#date_ta_view').datetimepicker('setDate', (new Date("{$old_gradeable['g_ta_view_start_date']}")));
     $('#date_grade').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_start_date']}")));
     $('#date_released').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_released_date']}")));
 
@@ -1093,14 +1210,25 @@ HTML;
                     $('#rubric_questions').hide();
                     $('#grading_questions').hide();
                 }
+
+                $('#ta_grading_compare_date').html('Due Date (+ max allowed late days)');
+                if ($('input:radio[name="ta_grading"]:checked').attr('value') === 'false') {
+                   $('#grades_released_compare_date').html('Due Date');
+                } else { 
+                   $('#grades_released_compare_date').html('TA Grading Open Date');
+                }
             }
             else if ($(this).val() == 'Checkpoints'){ 
                 $('#checkpoints').show();
                 $('#grading_questions').show();
+                $('#ta_grading_compare_date').html('TA Beta Testing Date');
+                $('#grades_released_compare_date').html('TA Grading Open Date');
             }
             else if ($(this).val() == 'Numeric'){ 
                 $('#numeric').show();
                 $('#grading_questions').show();
+                $('#ta_grading_compare_date').html('TA Beta Testing Date');
+                $('#grades_released_compare_date').html('TA Grading Open Date');
             }
         }
     });

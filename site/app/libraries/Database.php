@@ -14,32 +14,38 @@ class Database {
     /**
      * @var PDO
      */
-    private static $link = null;
+    private $link = null;
 
     /**
      * @var array
      */
-    private static $results = array();
+    private $results = array();
 
     /**
      * @var string
      */
-    private static $lastid = "";
+    private $lastid = "";
 
     /**
      * @var int
      */
-    private static $query_count = 0;
+    private $query_count = 0;
 
     /**
      * @var array
      */
-    private static $all_queries = array();
+    private $all_queries = array();
 
     /**
      * @var bool
      */
-    private static $transaction = false;
+    private $transaction = false;
+
+    private $host = null;
+    private $user = null;
+    private $password = null;
+    private $name = null;
+    private $type = null;
 
     /**
      * Database constructor.
@@ -51,31 +57,29 @@ class Database {
      * @param string $type
      */
     public function __construct($host, $user, $password, $name, $type='pgsql') {
-        $this->connect($host, $user, $password, $name, $type);
+        $this->host = $host;
+        $this->user = $user;
+        $this->password = $password;
+        $this->name = $name;
+        $this->type = $type;
     }
 
     /**
      * Connect to a database via PDO
      *
-     * @param string $host
-     * @param string $user
-     * @param string $password
-     * @param string $name
-     * @param string $type
-     *
      * @throws DatabaseException
      */
-    public function connect($host, $user, $password, $name, $type='pgsql') {
+    public function connect() {
         // Only start a new connection if we're not already connected to a DB
-        if (Database::$link == null) {
-            Database::$query_count = 0;
-            Database::$all_queries = array();
+        if ($this->link == null) {
+            $this->query_count = 0;
+            $this->all_queries = array();
 
             try {
-                Database::$link = new PDO("{$type}:host={$host};dbname={$name}", $user, $password);
+                $this->link = new PDO("{$this->type}:host={$this->host};dbname={$this->name}", $this->user, $this->password);
 
-                Database::$link->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-                Database::$link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $this->link->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+                $this->link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             }
             catch (PDOException $pdoException) {
                 throw new DatabaseException($pdoException->getMessage());
@@ -93,17 +97,17 @@ class Database {
      */
     public function query($query, $parameters=array()) {
         try {
-            $statement = Database::$link->prepare($query);
+            $statement = $this->link->prepare($query);
             $statement->execute($parameters);
-            Database::$results = $statement->fetchAll();
-            Database::$lastid = Database::$link->lastInsertId();
-            Database::$query_count++;
-            Database::$all_queries[] = array($query, $parameters);
+            $this->results = $statement->fetchAll();
+            $this->lastid = $this->link->lastInsertId();
+            $this->query_count++;
+            $this->all_queries[] = array($query, $parameters);
         }
         catch (PDOException $pdoException) {
-            if (Database::$transaction) {
-                Database::$link->rollBack();
-                Database::$transaction = false;
+            if ($this->transaction) {
+                $this->link->rollBack();
+                $this->transaction = false;
             }
             throw new DatabaseException($pdoException->getMessage(), $query, $parameters);
         }
@@ -116,8 +120,8 @@ class Database {
      * actually commited to the database till Database::commit() is called.
      */
     public function beginTransaction() {
-        if (!Database::$transaction) {
-            Database::$transaction = Database::$link->beginTransaction();
+        if (!$this->transaction) {
+            $this->transaction = $this->link->beginTransaction();
         }
     }
 
@@ -127,21 +131,21 @@ class Database {
      * @throws \Exception
      */
     public function commit() {
-        if (Database::$transaction) {
-            Database::$link->commit();
-            Database::$transaction = false;
+        if ($this->transaction) {
+            $this->link->commit();
+            $this->transaction = false;
         }
     }
 
     /**
-     * Returns a single row from the result set from running a query. Removes the row
-     * from the result set before returning it
+     * Returns a single row from the result set of the last ran query, removing the that row from
+     * the result set.
      *
      * @return array
      */
     public function row() {
-        if(Database::$results != NULL && count(Database::$results) > 0) {
-            return array_shift(Database::$results);
+        if($this->results != NULL && count($this->results) > 0) {
+            return array_shift($this->results);
         }
         else {
             return array();
@@ -155,8 +159,8 @@ class Database {
      * @return array
      */
     public function rows() {
-        if(Database::$results != NULL && count(Database::$results) > 0) {
-            return Database::$results;
+        if($this->results != NULL && count($this->results) > 0) {
+            return $this->results;
         }
         else {
             return array();
@@ -169,7 +173,7 @@ class Database {
      * @return int
      */
     public function totalQueries() {
-        return Database::$query_count;
+        return $this->query_count;
     }
 
     /**
@@ -180,7 +184,7 @@ class Database {
     public function getQueries() {
         $c = 1;
         $print = "";
-        foreach(Database::$all_queries as $query) {
+        foreach($this->all_queries as $query) {
             $print .= ($c++).") ";
             foreach($query[1] as $parameter) {
                 $query[0] = preg_replace('/\?/', "'{$parameter}'", $query[0], 1);
@@ -195,12 +199,12 @@ class Database {
      * the link to null.
      */
     public function disconnect() {
-        if (Database::$transaction) {
+        if ($this->transaction) {
             Database::commit();
         }
-        Database::$link = null;
-        Database::$query_count = 0;
-        Database::$all_queries = array();
+        $this->link = null;
+        $this->query_count = 0;
+        $this->all_queries = array();
     }
 
     /**
@@ -210,19 +214,19 @@ class Database {
      * @return bool
      */
     public function hasConnection() {
-        return Database::$link !== null;
+        return $this->link !== null;
     }
 
     public function inTransaction() {
-        return Database::$transaction;
+        return $this->transaction;
     }
 
     public function getLastInsertId($name = "") {
         if (!empty($name)) {
-            return Database::$link->lastInsertId($name);
+            return $this->link->lastInsertId($name);
         }
         else {
-            return Database::$link->lastInsertId();
+            return $this->link->lastInsertId();
         }
     }
 }

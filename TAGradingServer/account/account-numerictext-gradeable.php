@@ -1,6 +1,6 @@
 <?php
 // Pull out tabs to separate URL
-use app\models\User;
+use \models\User;
 
 include "../header.php";
 
@@ -9,11 +9,62 @@ $account_subpages_unlock = true;
 $button = "";
 if (!User::$is_administrator) {
     if (isset($_GET['all']) && $_GET['all'] == "true") {
-        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}'>View Your Sections</a>";
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-numerictext-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}'>View Your Sections</a>";
     }
     else {
-        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&all=true'>View All Sections</a>";
+
+      //
+      // FIXME  : THIS SHOULD ONLY BE AVAILABLE TO FULL ACCESS GRADERS
+      //
+
+        $button = "<a class='btn' href='{$BASE_URL}/account/account-numerictext-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&all=true'>View All Sections</a>";
     }
+}
+
+if(User::$user_group == 1){
+    $csv_button = "<label>Upload CSV (WARNING! Previously entered data may be overwritten!): Do not include a header row. Format CSV using one column for student id and one column for each field. Columns and field types must match.</label></br><input type=\"file\" id=\"csvUpload\" accept=\".csv, .txt\" onchange=\"csvUpload()\">";
+    $csv_upload_functions = "
+        function csvUpload(){
+            var f = $('#csvUpload').get(0).files[0];
+            
+            if(f){
+                var reader = new FileReader();
+                reader.readAsText(f);
+                reader.onload = function(evt) {
+                  parseCsv(reader.result);
+                  
+                }
+                reader.onerror = function(evt){
+                    console.error(\"nope\");
+                }
+            } 
+        }
+        
+        function parseCsv(csv){
+            url = \"{$BASE_URL}/account/ajax/account-numerictext-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}\";
+            var lines = csv.split(/\\r\\n|\\n/);
+            console.log(lines);
+            console.log(url);
+            $.ajax({
+                type:\"POST\",
+                url:url,
+                data: {
+                    csrf_token: '{$_SESSION['csrf']}',
+                    parsedCsv: lines,
+                    action:\"csv\"
+                },
+                success: function(data, text){
+                    location.reload();
+                },
+                error: function(request, status, error){
+                    window.alert(\"An error has occurred. Contact an administrator.\");
+                }
+            });
+        }";
+}
+else{
+    $csv_button = "";
+    $csv_upload_functions = "";
 }
 
 print <<<HTML
@@ -26,8 +77,7 @@ print <<<HTML
     #container-nt{
         min-width:700px;
         width: 80%;
-        margin:100px auto;
-        margin-top: 130px;
+        margin: 70px auto 100px;
         background-color: #fff;
         border: 1px solid #999;
         border: 1px solid rgba(0,0,0,0.3);
@@ -84,6 +134,15 @@ print <<<HTML
 <div id="container-nt">
     <div class="modal-header">
         <h3 id="myModalLabel" style="width:70%; display:inline-block;">{$nt_gradeable['g_title']}</h3>
+HTML;
+if(User::$user_group == 1) {
+    print <<<HTML
+    <input type="file" id="csvUpload" accept=".csv, .txt" onchange="csvUpload()">
+    <label for="csvUpload">Upload CSV</label>
+HTML;
+}
+print <<<HTML
+
         <span style="width: 79%; display: inline-block;">{$button}</span>
     </div>
 
@@ -119,6 +178,7 @@ print <<<HTML
                 <table class="table table-bordered" id="nt_gradeablesTable" style=" border: 1px solid #AAA;">
                     <thead style="background: #E1E1E1;">
                         <tr>
+                            <th></th>
                             <th>User ID</th>
                             <th>Name</th>
 HTML;
@@ -147,24 +207,40 @@ print <<<HTML
 HTML;
 
 $grade_by_reg_section = $nt_gradeable['g_grade_by_registration'];
-$section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
+$section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
 $user_section_param = ($grade_by_reg_section ? 'registration_section': 'rotating_section');
+
+
 $params = array($user_id);
 if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true){
     $params = array();
     $query = ($grade_by_reg_section ? "SELECT * FROM sections_registration ORDER BY sections_registration_id ASC"
-                                    : "SELECT * FROM sections_rotating ORDER BY sections_rotating_id ASC");
+                                    : "SELECT * FROM sections_rotating ORDER BY sections_rotating ASC");
+
+    //
+    //  FIXME
+    //  UGLY!  SQL TABLE COLUMNS ARE NAMED INCONSISTENTLY :(
+    $section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
+    //
+    //
+
     $db->query($query, $params);
 }
 else{
-    $params = array($user_id);
-    $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC"
-                                    : "SELECT * FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating ASC");
-    $db->query($query, $params);
+    if ($grade_by_reg_section) {
+        $params = array($user_id);
+    	$query = "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC";
+        $db->query($query, $params);
+    } else {
+        $params = array($user_id,$g_id);
+        $query = "SELECT * FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating ASC";
+        $db->query($query, $params);
+    }
 }
 
-$colspan += 3;
+$colspan += 4;
 $colspan += $colspan2;
+$student_cnt = 0;
 
 foreach($db->rows() as $section){
     $params = array($section[$section_param]);
@@ -173,10 +249,11 @@ foreach($db->rows() as $section){
     
     $section_id = intval($section[$section_param]);
     $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
+    $enrolled_assignment = ($grade_by_reg_section ? "enrolled in": "assigned to");
     print <<<HTML
                         <tr class="info">
                             <td colspan="{$colspan}" style="text-align:center;">
-                                Students Enrolled in {$section_type} Section {$section_id}
+                                Students {$enrolled_assignment} {$section_type} Section {$section_id}
                             </td>
                         </tr>
 HTML;
@@ -236,7 +313,7 @@ ORDER BY
     $titles = $db->rows();
     print <<<HTML
                         <tr style="background: #E1E1E1;">
-                            <td colspan='2'></td>
+                            <td colspan='3'></td>
 HTML;
     for($i=0; $i<$num_numeric; ++$i){
         $title = $titles[$i];
@@ -261,18 +338,15 @@ HTML;
     foreach($students_grades as $row){
         $student_info = $row;
         $temp = $row;
-        if ($student_info["user_preferred_firstname"] === "") {
-            $firstname = $student_info["user_firstname"];
-        }
-        else {
-            $firstname = $student_info["user_preferred_firstname"];
-        }
+        $firstname = getDisplayName($student_info);
         
         print <<<HTML
-                        <tr>
-                            <td>{$student_info["user_id"]}</td>
-                            <td>{$firstname} {$student_info["user_lastname"]}</td>
+                        <tr id="student-row-{$student_cnt}">
+                            <td>{$section_id}</td>
+                            <td style="white-space: nowrap;">{$student_info["user_id"]}</td>
+                            <td style="white-space: nowrap;">{$firstname} {$student_info["user_lastname"]}</td>
 HTML;
+        $student_cnt++;
         $question_grades=pgArrayToPhp($temp['grade_value_array']);
         //return an empty array of zeros here
         if (empty($question_grades)) {
@@ -303,7 +377,7 @@ HTML;
                             <td style="width: 10px" id="cell-{$nt_gradeable["g_id"]}-{$row['user_id']}-score">{$total_grade}</td>
 HTML;
         
-        for ($i = $num_numeric; $i <$num_numeric+$num_text; ++$i) {
+        for ($i = $num_numeric; $i < $num_numeric+$num_text; ++$i) {
             $text_field = isset($text_fields[$i]) ? $text_fields[$i] : "";
             print <<<HTML
                             <td class="input-container" style="border: 1px solid black">
@@ -437,5 +511,54 @@ echo <<<HTML
 	</script>
 HTML;
 
+    if(User::$user_group == 1){
+        ECHO <<< HTML
+        <script>
+        function csvUpload(){
+                        
+            var confirmation = window.confirm("WARNING! \\nPreviously entered data may be overwritten! " +
+             "This action is irreversible! Are you sure you want to continue?\\n\\n Do not include a header row in your CSV. Format CSV using one column for " +
+              "student id and one column for each field. Columns and field types must match.");
+              if(confirmation){
+                    var f = $('#csvUpload').get(0).files[0];
+                    
+                    if(f){
+                        var reader = new FileReader();
+                        reader.readAsText(f);
+                        reader.onload = function(evt) {
+                          parseCsv(reader.result);                          
+                        }
+                        reader.onerror = function(evt){
+                            console.error(evt);
+                        }
+                    }
+              } else{
+                  var f = $('#csvUpload');
+                  f.replaceWith(f = f.clone(true));
+              }
+        }
+        
+        function parseCsv(csv){
+            url = "{$BASE_URL}/account/ajax/account-numerictext-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}";
+            var lines = csv.trim().split(/\\r\\n|\\n/);
+            $.ajax({
+                type:"POST",
+                url:url,
+                data: {
+                    csrf_token: '{$_SESSION['csrf']}',
+                    parsedCsv: lines,
+                    action:"csv"
+                },
+                success: function(data, text){
+                    location.reload();
+                },
+                error: function(request, status, error){
+                    window.alert("An error has occurred. Contact an administrator.");
+                }
+            });
+        }
+        </script>
+HTML;
+    }
 include "../footer.php";
 ?>

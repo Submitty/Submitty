@@ -20,12 +20,13 @@ class ExceptionHandler {
 
     /**
      * Should we display the actual exception to the user or just a generic message?
-     * This should always be initially true in case we hit an exception in our initial
-     * setup routines
+     * This is initially set to false to prevent leaking any data when loading the config,
+     * but this does mean that by default any exceptions thrown when loading the config
+     * will be swallowed.
      *
      * @var bool
      */
-    private static $display_exceptions = true;
+    private static $display_exceptions = false;
 
     /**
      * This is a static class so it should never be instaniated or copied anywhere
@@ -50,15 +51,15 @@ class ExceptionHandler {
     /**
      * Takes in a Throwable (Exception or Error), and then we will log the details
      * of the message (assuming the appropriate flag is set in Config) and
-     * then either return the exception message if throwable is of type BaseException
-     * and the flag is set for it, otherwise just return a very generic message to
-     * the user
+     * then either return the exception message if the flag is set to display exceptions
+     * (either via field of BaseException or on private variable $display_exceptions)
+     * otherwise just returning a very generic message to the user
      *
      * @param \Exception $exception
      * @return string    A string that either contains a generic message or the actual
      *                   exception message depending on the value of $display_exceptions
      */
-    public static function throwException(\Exception $exception) {
+    public static function handleException(\Exception $exception) {
         $display_message = false;
         $is_base_exception = false;
         $log_exception = static::$log_exceptions;
@@ -71,15 +72,12 @@ class ExceptionHandler {
         
         $trace_string = array();
         foreach ($exception->getTrace() as $elem => $frame) {
-            if (is_a($exception, '\app\exceptions\AuthenticationException') && $frame['function'] == "authenticate") {
-                $frame['args'][1] = "****";
-            }
             $trace_string[] = sprintf( "#%s %s(%s): %s(%s)",
                              $elem,
                              isset($frame['file']) ? $frame['file'] : 'unknown file',
                              isset($frame['line']) ? $frame['line'] : 'unknown line',
                              (isset($frame['class']))  ? $frame['class'].$frame['type'].$frame['function'] : $frame['function'],
-                             static::parseArgs($frame['args']));
+                             static::parseArgs(is_a($exception, '\app\exceptions\AuthenticationException') ? array() : $frame['args']));
         }
         $trace_string = implode("\n", $trace_string);
 
@@ -88,7 +86,6 @@ class ExceptionHandler {
         $exception_line = $exception->getLine();
         $line = 1;
         $line_code = "";
-        // TODO: Get the actual line
         $fh = fopen($file, 'r');
         while (($buffer = fgets($fh)) !== FALSE) {
             if ($line == $exception_line) {
@@ -125,13 +122,15 @@ class ExceptionHandler {
             Logger::fatal($message);
         }
 
-        if (static::$display_exceptions || $display_message) {
+        if (static::$display_exceptions) {
             return $message;
+        }
+        else if ($display_message) {
+            return $exception->getMessage();
         }
         else {
             return <<<HTML
-An exception was thrown. Please contact an administrator about what<br />
-you were doing that caused this exception.
+An exception was thrown. Please contact an administrator about what you were doing that caused this exception.
 
 HTML;
         }
@@ -140,6 +139,7 @@ HTML;
     /**
      * Parse the arguments from the stack trace into type appropriate representation for the stack trace. We
      * may want to look into expanding the $args when they're an Array, but for now, this is probably fine.
+     * @codeCoverageIgnore
      *
      * @param mixed $args
      *

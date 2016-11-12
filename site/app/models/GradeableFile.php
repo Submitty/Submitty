@@ -48,6 +48,7 @@ class GradeableFile extends Gradeable {
         $this->grade_by_registration = $details['section_type'] === "reg-section";
         $this->grade_start_date = new \DateTime($details['date_grade'], $timezone);
         $this->grade_released_date = new \DateTime($details['date_released'], $timezone);
+        $this->ta_view_date = new \DateTime($details['date_ta_view'], $timezone);
         // Is it past when the TA grades should be released
         $this->ta_grades_released = $this->grade_released_date < new \DateTime("now", $timezone);
         $this->bucket = $details['gradeable_buckets'];

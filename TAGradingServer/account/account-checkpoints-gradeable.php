@@ -1,5 +1,5 @@
 <?php
-use app\models\User;
+use models\User;
 
 include "../header.php";
 
@@ -16,10 +16,6 @@ if (!User::$is_administrator
         $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}'>View Your Sections</a>";
     }
     else {
-// not sure why this isn't working.  it's ending up with 2 copies of the course & semester variables and giving errors.
-//        $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&all=true'>View ALL Sections</a>";
-
-// this does work.  course & semester variables are somehow added to the end.
         $button = "<a class='btn' href='{$BASE_URL}/account/account-checkpoints-gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&all=true'>View ALL Sections</a>";
     }
 }
@@ -36,8 +32,7 @@ print <<<HTML
     #container-g-checkpoints
     {
         width:75%;
-        margin:100px auto;
-        margin-top: 130px;
+        margin: 70px auto 100px;
         background-color: #fff;
         border: 1px solid #999;
         border: 1px solid rgba(0,0,0,0.3);
@@ -102,6 +97,7 @@ print <<<HTML
             <table class="table table-bordered striped-table" id="g-checkpoints-table" style=" border: 1px solid #AAA;">
                 <thead style="background: #E1E1E1;">
                     <tr>
+                        <th></th>
                         <th>User ID</th>
                         <th>Name</th>
 HTML;
@@ -116,20 +112,36 @@ HTML;
 HTML;
 
 $grade_by_reg_section = $c_gradeable['g_grade_by_registration'];
-$section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
+$section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
 $user_section_param = ($grade_by_reg_section ? 'registration_section': 'rotating_section');
+
+$g_id = $c_gradeable['g_id'];
+
 $params = array($user_id);
 if((isset($_GET["all"]) && $_GET["all"] == "true") || $user_is_administrator == true){
     $params = array();
     $query = ($grade_by_reg_section ? "SELECT * FROM sections_registration ORDER BY sections_registration_id ASC"
-                                    : "SELECT * FROM sections_rotating ORDER BY sections_rotating_id ASC");
+                                    : "SELECT * FROM sections_rotating ORDER BY sections_rotating ASC");
+
+    //
+    //  FIXME
+    //  UGLY!  SQL TABLE COLUMNS ARE NAMED INCONSISTENTLY :(
+    $section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
+    //
+    //
+
     $db->query($query, $params);
 }
 else{
-    $params = array($user_id);
-    $query = ($grade_by_reg_section ? "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC"
-                                    : "SELECT * FROM grading_rotating WHERE user_id=? ORDER BY sections_rotating ASC");
-    $db->query($query, $params);
+    if ($grade_by_reg_section) {
+        $params = array($user_id);
+    	$query = "SELECT * FROM grading_registration WHERE user_id=? ORDER BY sections_registration_id ASC";
+        $db->query($query, $params);
+    } else {
+        $params = array($user_id,$g_id);
+        $query = "SELECT * FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating ASC";
+        $db->query($query, $params);
+    }
 }
 
 foreach($db->rows() as $section) {
@@ -139,12 +151,13 @@ foreach($db->rows() as $section) {
     
     $section_id = intval($section[$section_param]);
     $section_type = ($grade_by_reg_section ? "Registration": "Rotating");
-    $count = count($c_gradeable_checkpoints) + 2;
+    $enrolled_assignment = ($grade_by_reg_section ? "enrolled in": "assigned to");
+    $count = count($c_gradeable_checkpoints) + 3;
     print <<<HTML
                     <tr class="info">
                         <td colspan="{$count}" style="text-align:center;" id="section-{$section_id}">
-                                Students Enrolled in {$section_type} Section {$section_id}
-                                <a href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$c_gradeable['g_id']}&section_id={$section_id}&grade_by_reg_section={$grade_by_reg_section}">
+                                Students {$enrolled_assignment} {$section_type} Section {$section_id}
+                                <a target=_blank href="{$BASE_URL}/account/print/print_checkpoints_gradeable.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$c_gradeable['g_id']}&section_id={$section_id}&grade_by_reg_section={$grade_by_reg_section}">
                                     <div class="icon-print"></div>
                                 </a>
                         </td>
@@ -213,18 +226,14 @@ ORDER BY
         }
 
         $student_info = $row;
-        if ($student_info["user_preferred_firstname"] === "") {
-            $firstname = $student_info["user_firstname"];
-        }
-        else {
-            $firstname = $student_info["user_preferred_firstname"];
-        }
+        $firstname = getDisplayName($student_info);
         print <<<HTML
                         <tr>
-                            <td class="cell-all" id="cell-{$c_gradeable["g_id"]}-all-{$row["user_id"]}" cell-status="0">
+                            <td>{$section_id}</td>
+                            <td style="white-space: nowrap;" class="cell-all" id="cell-{$c_gradeable["g_id"]}-all-{$row["user_id"]}" cell-status="0">
                             {$student_info["user_id"]}
                             </td>
-                            <td>{$firstname} {$student_info["user_lastname"]}</td>
+                            <td style="white-space: nowrap;">{$firstname} {$student_info["user_lastname"]}</td>
 HTML;
         $count = 1;
 

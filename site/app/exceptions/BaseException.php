@@ -36,6 +36,10 @@ class BaseException extends \RuntimeException{
         return $this->details;
     }
 
+    public function setDisplayMessage($bool) {
+        $this->show_exception_message = $bool;
+    }
+
     public function displayMessage() {
         return $this->show_exception_message;
     }

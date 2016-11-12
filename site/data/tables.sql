@@ -44,12 +44,73 @@ END;
 $_$;
 
 
-SET default_tablespace = '';
+--
+-- Name: csv_to_numeric_gradeable(text[], text, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION csv_to_numeric_gradeable(vcode text[], gradeable_id text, grader_id text) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+  DECLARE
+    -- Size of first array after splitting
+    size INTEGER;
+    -- Array of individual line after splitting
+    line TEXT[];
+    -- Variable to store each line in the array
+    i TEXT;
+    -- Array of gc_ids for this gradeable
+    gcids INTEGER[];
+    -- gradeable_data id for this gradeable for this student
+    gdid INTEGER;
+    -- Array counter
+    j INTEGER;
+    -- Is this gradeable component text?
+    istext BOOLEAN[];
+    --Score to be inserted
+    score NUMERIC;
+  BEGIN
+    gcids := ARRAY(SELECT gc_id FROM gradeable_component WHERE g_id = gradeable_id);
+    istext := ARRAY(SELECT gc_is_text FROM gradeable_component WHERE g_id = gradeable_id);
+    -- Get the number of gradeable components for this gradeable. Will be used to test
+    -- for uniform sized arrays
+    size := array_length(gcids, 1);
+    FOREACH i IN ARRAY vcode
+      LOOP
+        -- Split the current line
+        line := string_to_array(i, ',');
+        -- Check for uniform size
+        IF array_length(line, 1) <> size + 1 THEN
+          RAISE EXCEPTION 'INVALID SIZE: Arrays are jagged.';
+        END IF;
+
+        -- Remove any existing record for this student for this gradeable
+        DELETE FROM gradeable_data WHERE gd_user_id = line[1] AND g_id = gradeable_id;
+
+        INSERT INTO gradeable_data(g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status
+          , gd_late_days_used, gd_active_version) VALUES (gradeable_id, line[1],grader_id, '', 0,0,1);
+
+        SELECT gd_id INTO gdid FROM gradeable_data WHERE g_id = gradeable_id AND gd_user_id = line[1];
+
+        FOR j IN 1..size
+        LOOP
+          IF istext[j] THEN
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_component_comment) VALUES (gcids[j], gdid,0, line[j+1]);
+          ELSE
+            score := CAST(line[j+1] AS NUMERIC);
+            INSERT INTO gradeable_component_data(gc_id, gd_id, gcd_score, gcd_component_comment) VALUES (gcids[j], gdid, score, '');
+          END IF;
+        END LOOP;
+
+      END LOOP;
+    RETURN TRUE ;
+  END;
+  $$;
+
 
 SET default_with_oids = false;
 
 --
--- Name: electronic_gradeable; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: electronic_gradeable; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE electronic_gradeable (
@@ -64,11 +125,36 @@ CREATE TABLE electronic_gradeable (
     eg_precision numeric NOT NULL
 );
 
-ALTER TABLE electronic_gradeable
-    ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
 
 --
--- Name: gradeable; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: electronic_gradeable_data; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE electronic_gradeable_data (
+    g_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    g_version integer NOT NULL,
+    autograding_non_hidden_non_extra_credit numeric DEFAULT 0 NOT NULL,
+    autograding_non_hidden_extra_credit numeric DEFAULT 0 NOT NULL,
+    autograding_hidden_non_extra_credit numeric DEFAULT 0 NOT NULL,
+    autograding_hidden_extra_credit numeric DEFAULT 0 NOT NULL,
+    submission_time timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: electronic_gradeable_version; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE electronic_gradeable_version (
+    g_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    active_version integer
+);
+
+
+--
+-- Name: gradeable; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE gradeable (
@@ -83,12 +169,13 @@ CREATE TABLE gradeable (
     g_grade_released_date timestamp(6) without time zone NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
     g_min_grading_group integer NOT NULL,
-    g_closed_date timestamp(6) without time zone
+    g_closed_date timestamp(6) without time zone,
+    g_ta_view_start_date timestamp(6) without time zone NOT NULL
 );
 
 
 --
--- Name: gradeable_component; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: gradeable_component; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE gradeable_component (
@@ -105,7 +192,7 @@ CREATE TABLE gradeable_component (
 
 
 --
--- Name: gradeable_component_data; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: gradeable_component_data; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE gradeable_component_data (
@@ -137,7 +224,7 @@ ALTER SEQUENCE gradeable_component_gc_id_seq OWNED BY gradeable_component.gc_id;
 
 
 --
--- Name: gradeable_data; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: gradeable_data; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE gradeable_data (
@@ -172,7 +259,7 @@ ALTER SEQUENCE gradeable_data_gd_id_seq OWNED BY gradeable_data.gd_id;
 
 
 --
--- Name: grading_registration; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: grading_registration; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE grading_registration (
@@ -182,7 +269,7 @@ CREATE TABLE grading_registration (
 
 
 --
--- Name: grading_rotating; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: grading_rotating; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE grading_rotating (
@@ -191,11 +278,9 @@ CREATE TABLE grading_rotating (
     sections_rotating integer NOT NULL
 );
 
-ALTER TABLE grading_rotating
-    ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (g_id, user_id, sections_rotating);
 
 --
--- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE late_day_exceptions (
@@ -206,7 +291,7 @@ CREATE TABLE late_day_exceptions (
 
 
 --
--- Name: late_days; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: late_days; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE late_days (
@@ -217,7 +302,7 @@ CREATE TABLE late_days (
 
 
 --
--- Name: late_days_used; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: late_days_used; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE late_days_used (
@@ -226,11 +311,9 @@ CREATE TABLE late_days_used (
     late_days_used integer NOT NULL
 );
 
-ALTER TABLE late_days_used
-    ADD CONSTRAINT late_days_used_pkey PRIMARY KEY (user_id, g_id);
 
 --
--- Name: sections_registration; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: sections_registration; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE sections_registration (
@@ -239,7 +322,7 @@ CREATE TABLE sections_registration (
 
 
 --
--- Name: sections_rotating; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: sections_rotating; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE sections_rotating (
@@ -248,7 +331,7 @@ CREATE TABLE sections_rotating (
 
 
 --
--- Name: session; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: sessions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE sessions (
@@ -260,14 +343,14 @@ CREATE TABLE sessions (
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: -; Tablespace:
+-- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE users (
     user_id character varying NOT NULL,
-    user_password character,
+    user_password character varying,
     user_firstname character varying NOT NULL,
-    user_preferred_firstname character varying NULL,
+    user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
     user_email character varying NOT NULL,
     user_group integer NOT NULL,
@@ -293,7 +376,31 @@ ALTER TABLE ONLY gradeable_data ALTER COLUMN gd_id SET DEFAULT nextval('gradeabl
 
 
 --
--- Name: gradeable_component_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: electronic_gradeable_data_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY electronic_gradeable_data
+    ADD CONSTRAINT electronic_gradeable_data_pk PRIMARY KEY (g_id, user_id, g_version);
+
+
+--
+-- Name: electronic_gradeable_g_id_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY electronic_gradeable
+    ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
+
+
+--
+-- Name: electronic_gradeable_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY electronic_gradeable_version
+    ADD CONSTRAINT electronic_gradeable_pk PRIMARY KEY (g_id, user_id);
+
+
+--
+-- Name: gradeable_component_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY gradeable_component_data
@@ -301,7 +408,7 @@ ALTER TABLE ONLY gradeable_component_data
 
 
 --
--- Name: gradeable_component_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: gradeable_component_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY gradeable_component
@@ -309,7 +416,7 @@ ALTER TABLE ONLY gradeable_component
 
 
 --
--- Name: gradeable_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: gradeable_data_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY gradeable_data
@@ -317,7 +424,7 @@ ALTER TABLE ONLY gradeable_data
 
 
 --
--- Name: gradeable_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: gradeable_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY gradeable
@@ -325,7 +432,7 @@ ALTER TABLE ONLY gradeable
 
 
 --
--- Name: grading_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: grading_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY grading_registration
@@ -333,7 +440,15 @@ ALTER TABLE ONLY grading_registration
 
 
 --
--- Name: late_day_exceptions_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: grading_rotating_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grading_rotating
+    ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (g_id, user_id, sections_rotating);
+
+
+--
+-- Name: late_day_exceptions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY late_day_exceptions
@@ -341,7 +456,7 @@ ALTER TABLE ONLY late_day_exceptions
 
 
 --
--- Name: late_days_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: late_days_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY late_days
@@ -349,7 +464,15 @@ ALTER TABLE ONLY late_days
 
 
 --
--- Name: sections_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: late_days_used_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY late_days_used
+    ADD CONSTRAINT late_days_used_pkey PRIMARY KEY (user_id, g_id);
+
+
+--
+-- Name: sections_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY sections_registration
@@ -357,7 +480,7 @@ ALTER TABLE ONLY sections_registration
 
 
 --
--- Name: sections_rotating_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: sections_rotating_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY sections_rotating
@@ -365,7 +488,7 @@ ALTER TABLE ONLY sections_rotating
 
 
 --
--- Name: sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY sessions
@@ -373,7 +496,7 @@ ALTER TABLE ONLY sessions
 
 
 --
--- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+-- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY users
@@ -381,11 +504,19 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: sessions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: electronic_gradeable_data_gid; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY sessions
-    ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
+ALTER TABLE ONLY electronic_gradeable_data
+    ADD CONSTRAINT electronic_gradeable_data_gid FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: electronic_gradeable_data_user; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY electronic_gradeable_data
+    ADD CONSTRAINT electronic_gradeable_data_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
 --
@@ -394,6 +525,30 @@ ALTER TABLE ONLY sessions
 
 ALTER TABLE ONLY electronic_gradeable
     ADD CONSTRAINT electronic_gradeable_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: electronic_gradeable_gid; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY electronic_gradeable_version
+    ADD CONSTRAINT electronic_gradeable_gid FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: electronic_gradeable_user; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY electronic_gradeable_version
+    ADD CONSTRAINT electronic_gradeable_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: electronic_gradeable_version; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY electronic_gradeable_version
+    ADD CONSTRAINT electronic_gradeable_version FOREIGN KEY (g_id, user_id, active_version) REFERENCES electronic_gradeable_data(g_id, user_id, g_version) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -433,7 +588,7 @@ ALTER TABLE ONLY gradeable_data
 --
 
 ALTER TABLE ONLY gradeable_data
-    ADD CONSTRAINT gradeable_data_gd_grader_id_fkey FOREIGN KEY (gd_grader_id) REFERENCES users(user_id);
+    ADD CONSTRAINT gradeable_data_gd_grader_id_fkey FOREIGN KEY (gd_grader_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
 --
@@ -441,7 +596,7 @@ ALTER TABLE ONLY gradeable_data
 --
 
 ALTER TABLE ONLY gradeable_data
-    ADD CONSTRAINT gradeable_data_gd_user_id_fkey FOREIGN KEY (gd_user_id) REFERENCES users(user_id);
+    ADD CONSTRAINT gradeable_data_gd_user_id_fkey FOREIGN KEY (gd_user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
 --
@@ -457,7 +612,7 @@ ALTER TABLE ONLY grading_registration
 --
 
 ALTER TABLE ONLY grading_registration
-    ADD CONSTRAINT grading_registration_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
+    ADD CONSTRAINT grading_registration_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
 --
@@ -481,7 +636,7 @@ ALTER TABLE ONLY grading_rotating
 --
 
 ALTER TABLE ONLY grading_rotating
-    ADD CONSTRAINT grading_rotating_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
+    ADD CONSTRAINT grading_rotating_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
 --
@@ -497,7 +652,7 @@ ALTER TABLE ONLY late_day_exceptions
 --
 
 ALTER TABLE ONLY late_day_exceptions
-    ADD CONSTRAINT late_day_exceptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
+    ADD CONSTRAINT late_day_exceptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
 --
@@ -513,7 +668,7 @@ ALTER TABLE ONLY late_days_used
 --
 
 ALTER TABLE ONLY late_days_used
-    ADD CONSTRAINT late_days_used_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
+    ADD CONSTRAINT late_days_used_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
 --
@@ -521,7 +676,15 @@ ALTER TABLE ONLY late_days_used
 --
 
 ALTER TABLE ONLY late_days
-    ADD CONSTRAINT late_days_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
+    ADD CONSTRAINT late_days_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: sessions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY sessions
+    ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
 --

@@ -130,25 +130,11 @@ int main(int argc, char *argv[]) {
     return 1;
   } 
 
-  /*
-  std::cout << "Scanning User Code..." << std::endl;
-
-  std::set<std::string> disallowed_words;
-  std::set<std::string> warning_words;
-  LoadDisallowedWords("disallowed_words.txt",disallowed_words,warning_words);
-  SearchForDisallowedWords(disallowed_words,warning_words);
-  */
-
   std::cout << "Compiling User Code..." << std::endl;
 
   system("find . -type f");
 
-#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-  std::string replace_string_before = __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__;
-  std::string replace_string_after  = CustomizeAutoGrading(rcsid);
-  std::cout << "CUSTOMIZE AUTO GRADING for user '" << rcsid << "'" << std::endl;
-  std::cout << "CUSTOMIZE AUTO GRADING replace " <<  replace_string_before << " with " << replace_string_after << std::endl;
-#endif
+  CustomizeAutoGrading(rcsid,config_json);
 
   system ("ls -lta");
 
@@ -172,14 +158,24 @@ int main(int argc, char *argv[]) {
         std::vector<std::vector<std::string>> filenames = my_testcase.getFilenames();
         for (int i = 0; i < filenames.size(); i++) {
           for (int j = 0; j < filenames[i].size(); j++) {
+	    std::string pattern = filenames[i][j];
             std::cout << "PATTERN: " << filenames[i][j] << std::endl;
+	    bool special_flag = false;
+	    if (pattern.substr(pattern.size()-8,8) == ".cpp.txt") {
+	      pattern = pattern.substr(0,pattern.size()-4);
+	      special_flag = true;
+	    }
             std::vector<std::string> files;
-            wildcard_expansion(files, filenames[i][j], std::cout);
+            wildcard_expansion(files, pattern, std::cout);
             for (int i = 0; i < files.size(); i++) {
               std::cout << "  rescue  FILE #" << i << ": " << files[i] << std::endl;
               std::string new_filename = my_testcase.getPrefix() + "_" + replace_slash_with_double_underscore(files[i]);
               std::string old_filename = escape_spaces(files[i]);
               new_filename = escape_spaces(new_filename);
+	      std::cout << new_filename.substr(new_filename.size()-4,4) << std::endl;
+	      if (special_flag) {
+		new_filename += ".txt";
+	      }
               execute ("/bin/cp "+old_filename+" "+new_filename,
                        "/dev/null",
                        my_testcase.get_test_case_limits(),
@@ -204,21 +200,15 @@ int main(int argc, char *argv[]) {
       for (int j = 0; j < commands.size(); j++) {
         std::cout << "COMMAND #" << j << ": " << commands[j] << std::endl;
 
-#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-        std::cout << "BEFORE " << commands[j] << std::endl;
-        while (1) {
-          int location = commands[j].find(replace_string_before);
-          if (location == std::string::npos)
-            break;
-          commands[j].replace(location,replace_string_before.size(),replace_string_after);
+        std::string which = "";
+        if (commands.size() > 1) {
+          which = "_" + std::to_string(j);
         }
-        std::cout << "AFTER  " << commands[j] << std::endl;
-#endif
-      
+
         // run the command, capturing STDOUT & STDERR
         int exit_no = execute(commands[j] +
-                              " 1>" + my_testcase.getPrefix() + "_STDOUT.txt" +
-                              " 2>" + my_testcase.getPrefix() + "_STDERR.txt",
+                              " 1>" + my_testcase.getPrefix() + "_STDOUT" + which + ".txt" +
+                              " 2>" + my_testcase.getPrefix() + "_STDERR" + which + ".txt",
                               my_testcase.getPrefix() + "_execute_logfile.txt",
                               my_testcase.get_test_case_limits(),
                               config_json.value("resource_limits",nlohmann::json()));

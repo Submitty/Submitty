@@ -9,6 +9,8 @@
 extern std::vector<std::string> ICLICKER_QUESTION_NAMES;
 extern float MAX_ICLICKER_TOTAL;
 
+std::vector<float> GLOBAL_earned_late_days;
+
 std::map<int,Date> LECTURE_DATE_CORRESPONDENCES;
 
 Student* GetStudent(const std::vector<Student*> &students, const std::string& name);
@@ -23,20 +25,43 @@ Date dateFromFilename(const std::string& filename_with_directory) {
     filename = filename.substr(pos+1,filename.size()-pos-1);
   }
 
-  assert (filename.size() == 14);
-  assert (filename[4] == '_');
-  assert (filename[7] == '_');
-  assert (filename.substr(10,4) == ".csv");
+  assert (filename.size() == 15);
+  assert (filename[0] == 'L');
+  //  assert (filename[7] == '_');
+  assert (filename.substr(11,4) == ".csv");
 
   Date answer;
 
-  answer.year  = atoi(filename.substr(0,4).c_str());
-  answer.month = atoi(filename.substr(5,2).c_str());
-  answer.day   = atoi(filename.substr(8,2).c_str());
+  answer.year  = 2000 + atoi(filename.substr(1,2).c_str());
+  answer.month = atoi(filename.substr(3,2).c_str());
+  answer.day   = atoi(filename.substr(5,2).c_str());
+
+  //std::cout << "YEAR " << answer.year << std::endl;
+  //std::cout << "MONTH " << answer.month << std::endl;
+  //std::cout << "DAY " << answer.day << std::endl;
+
+  assert (answer.month >= 1 && answer.month <= 12);
+  assert (answer.day >= 1 && answer.day <= 31);
 
   return answer;
 }
 
+
+std::string ReadRemote(std::istream &istr) {
+  char c;
+  std::string answer;
+  if (!istr.good()) return "";
+  istr >> c;
+  if (!istr.good()) return "";
+  if (c != '#') return answer;
+  answer = "#";
+  while (1) {
+    istr >> c;
+    if (c == ',') break;
+    answer.push_back(c);
+  }
+  return answer;
+}
 
 std::string ReadQuoted(std::istream &istr) {
   char c;
@@ -54,6 +79,8 @@ std::string ReadQuoted(std::istream &istr) {
   return answer;
 }
 
+
+
 std::map<std::string, std::string> GLOBAL_CLICKER_MAP;
 
 
@@ -66,29 +93,22 @@ void MatchClickerRemotes(std::vector<Student*> &students, const std::string &rem
 
   char c;
   while (1) {
-    std::string remote = ReadQuoted(istr);
-    bool success = true;
-    istr >> c;
-    if (!success || c != ',') {
-      //std::cout << success << " OOPS-not comma '" << c << "'" << std::endl;
-    }
+    std::string remote = ReadRemote(istr);
     std::string username = ReadQuoted(istr);
     if (remote == "" || username == "") break;
     //std::cout << "tokens: " << remote << " " << username << std::endl;
-
     Student *s = GetStudent(students,username);
     if (s == NULL) {
       std::cout << "BAD USERNAME FOR CLICKER MATCHING " << username << std::endl;
+      exit(0);
       continue;
     }
     assert (s != NULL);
     s->setRemoteID(remote);
-
+    //std::cout << "MATCH " << username << " " << remote << std::endl;
     if (GLOBAL_CLICKER_MAP.find(remote) != GLOBAL_CLICKER_MAP.end()) {
       std::cout << "ERROR!  already have this clicker assigned " << remote << " " << s->getUserName() << std::endl;
     }
-
-
     assert (GLOBAL_CLICKER_MAP.find(remote) == GLOBAL_CLICKER_MAP.end());
     GLOBAL_CLICKER_MAP[remote] = username;
   }
@@ -165,7 +185,7 @@ void AddClickerScores(std::vector<Student*> &students, std::vector<std::vector<i
         Student *s = GetStudent(students,username);
         assert (s != NULL);
 
-iclicker_answer_enum grade = ICLICKER_NOANSWER;
+        iclicker_answer_enum grade = ICLICKER_NOANSWER;
         if (question.participationQuestion()) 
           grade = ICLICKER_PARTICIPATED;
         else {

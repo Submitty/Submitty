@@ -7,17 +7,6 @@
 #include "tokenSearch.h"
 #include "execute.h"
 
-// FIXME should be configurable within the homework, but should not exceed what is reasonable to myers diff
-
-//#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 50   // in characters  (approx 1000 lines with 50 characters per line)
-#define MYERS_DIFF_MAX_FILE_SIZE 1000 * 60   // in characters  (approx 1000 lines with 60 characters per line)
-#define OTHER_MAX_FILE_SIZE      1000 * 100  // in characters  (approx 1000 lines with 100 characters per line)
-
-
-std::string GLOBAL_replace_string_before = "";
-std::string GLOBAL_replace_string_after = "";
-
-
 int TestCase::next_test_case_id = 1;
 
 std::string rlimit_name_decoder(int i);
@@ -80,21 +69,6 @@ void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty) 
 
 
 bool getFileContents(const std::string &filename, std::string &file_contents) {
-  /*
-  //#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-  if (GLOBAL_replace_string_before != "") {
-    std::cout << "BEFORE " << expected << std::endl;
-    while (1) {
-      int location = expected.find(GLOBAL_replace_string_before);
-      if (location == std::string::npos) 
-	break;
-      expected.replace(location,GLOBAL_replace_string_before.size(),GLOBAL_replace_string_after);
-    }
-    std::cout << "AFTER  " << expected << std::endl;
-  }
-  //#endif
-  */
-
   std::ifstream file(filename);
   if (!file.good()) { return false; }
   file_contents = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
@@ -103,12 +77,16 @@ bool getFileContents(const std::string &filename, std::string &file_contents) {
 }
 
 
-bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, std::vector<std::string> &messages) {
-  std::string filename = j.value("actual_file","");
-  if (filename == "") {
+bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &student_file_contents, 
+		     std::vector<std::string> &messages) {
+
+  std::vector<std::string> filenames = stringOrArrayOfStrings(j,"actual_file");
+  if (filenames.size() != 1) {
     messages.push_back("ERROR!  STUDENT FILENAME MISSING");
     return false;
   }
+
+  std::string filename = filenames[0];
   std::string p_filename = tc.getPrefix() + "_" + filename;
 
   // check for wildcard
@@ -133,15 +111,19 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
     messages.push_back("ERROR!  Could not open student file: '" + filename + "'");
     return false;
   }
-  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
-    messages.push_back("ERROR!  Student file '" + p_filename + "' too large for grader");
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
+    messages.push_back("ERROR!  Student file '" + p_filename + "' too large for grader (" +
+		       std::to_string(student_file_contents.size()) + " vs. " +
+		       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")");
     return false;
   }
   return true;
 }
 
 
-bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, std::vector<std::string> &messages) {
+bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents, 
+		      std::vector<std::string> &messages) {
+
   std::string filename = j.value("expected_file","");
   if (filename == "") {
     messages.push_back("ERROR!  EXPECTED FILENAME MISSING");
@@ -151,8 +133,10 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
     messages.push_back("ERROR!  Could not open expected file: '" + filename);
     return false;
   }
-  if (expected_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE) {
-    messages.push_back("ERROR!  Expected file '" + filename + "' too large for grader");
+  if (expected_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_HUGE) {
+    messages.push_back("ERROR!  Expected file '" + filename + "' too large for grader (" +
+		       std::to_string(expected_file_contents.size()) + " vs. " +
+		       std::to_string(MYERS_DIFF_MAX_FILE_SIZE_HUGE) + ")");
     return false;
   }
   return true;
@@ -414,7 +398,19 @@ void TestCase::FileCheck_Helper() {
     nlohmann::json v;
     v["method"] = "fileExists";
     v["actual_file"] = (*f_itr);
-    v["description"] = (*f_itr);
+    std::vector<std::string> filenames = stringOrArrayOfStrings(_json,"actual_file");
+    std::string desc;
+    for (int i = 0; i < filenames.size(); i++) {
+      if (i != 0) desc += " ";
+      desc += filenames[i];
+    }
+    v["description"] = desc;
+    if (filenames.size() != 1) {
+      v["show_actual"] = "never";
+    }
+    if (_json.value("one_of",false)) {
+      v["one_of"] = true;
+    }
     _json["validation"].push_back(v);
     _json.erase(f_itr);
   } else if (v_itr != _json.end()) {
@@ -456,22 +452,31 @@ void TestCase::Compilation_Helper() {
 
   if (f_itr != _json.end()) {
 
-    w_itr = _json.find("warning_deduction");
-    float warning_fraction = 0.0;
-    if (w_itr != _json.end()) {
-      assert (w_itr->is_number());
-      warning_fraction = (*w_itr);
-      _json.erase(w_itr);
+    std::vector<std::string> commands = stringOrArrayOfStrings(_json,"command");
+    assert (commands.size() > 0);
+    for (int i = 0; i < commands.size(); i++) {
+      w_itr = _json.find("warning_deduction");
+      float warning_fraction = 0.0;
+      if (w_itr != _json.end()) {
+        assert (w_itr->is_number());
+        warning_fraction = (*w_itr);
+        _json.erase(w_itr);
+      }
+      assert (warning_fraction >= 0.0 && warning_fraction <= 1.0);
+      nlohmann::json v2;
+      v2["method"] = "errorIfNotEmpty";
+      if (commands.size() == 1) {
+        v2["actual_file"] = "STDERR.txt";
+      } else {
+        v2["actual_file"] = "STDERR_" + std::to_string(i) + ".txt";
+      }
+      v2["description"] = "Compilation Errors and/or Warnings";
+      v2["show_actual"] = "on_failure";
+      v2["show_message"] = "on_failure";
+      v2["deduction"] = warning_fraction;
+      _json["validation"].push_back(v2);
     }
-    assert (warning_fraction >= 0.0 && warning_fraction <= 1.0);
-    nlohmann::json v2;
-    v2["method"] = "errorIfNotEmpty";
-    v2["actual_file"] = "STDERR.txt";
-    v2["description"] = "Compilation Errors and/or Warnings";
-    v2["show_actual"] = "on_failure";
-    v2["show_message"] = "on_failure";
-    v2["deduction"] = warning_fraction;
-    _json["validation"].push_back(v2);
+
 
     std::vector<std::string> executable_names = stringOrArrayOfStrings(_json,"executable_name");
     assert (executable_names.size() > 0);
@@ -544,7 +549,7 @@ std::string TestCase::getPrefix() const {
 
 
 std::vector<std::vector<std::string>> TestCase::getFilenames() const {
-  std::cout << "getfilenames of " << _json << std::endl;
+  //std::cout << "getfilenames of " << _json << std::endl;
   std::vector<std::vector<std::string>> filenames;
 
   assert (_json.find("actual_file") == _json.end());
@@ -552,6 +557,8 @@ std::vector<std::vector<std::string>> TestCase::getFilenames() const {
   assert (num > 0);
   for (int v = 0; v < num; v++) {
     filenames.push_back(stringOrArrayOfStrings(getGrader(v),"actual_file"));
+
+
     assert (filenames[v].size() > 0);
   }
 
@@ -597,22 +604,6 @@ TestResults* TestCase::do_the_grading (int j) const {
   nlohmann::json tcg = getGrader(j);
   return this->dispatch(tcg);
 }
-
-/*
-  //#ifdef __CUSTOMIZE_AUTO_GRADING_REPLACE_STRING__
-  std::string expected = expected_file;
-  if (GLOBAL_replace_string_before != "") {
-    std::cout << "BEFORE " << expected << std::endl;
-    while (1) {
-      int location = expected.find(GLOBAL_replace_string_before);
-      if (location == std::string::npos) 
-	break;
-      expected.replace(location,GLOBAL_replace_string_before.size(),GLOBAL_replace_string_after);
-    }
-    std::cout << "AFTER  " << expected << std::endl;
-  }
-  //#endif
-*/
 
 
 std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
@@ -674,4 +665,54 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
 
   // FIXME:  ugly...  need to reset the id...
   TestCase::reset_next_test_case_id();
+}
+
+
+
+
+void RecursiveReplace(nlohmann::json& j, const std::string& placeholder, const std::string& replacement) {
+  if (j.is_string()) {
+    std::string str = j.get<std::string>();
+    int pos = str.find(placeholder);
+    if (pos != std::string::npos) {
+      std::cout << "REPLACING '" << str << "' with '";
+      str.replace(pos,placeholder.length(),replacement);
+      std::cout << str << "'" << std::endl;
+      j = str;
+    }
+  } else if (j.is_array() || j.is_object()) {
+    for (nlohmann::json::iterator itr = j.begin(); itr != j.end(); itr++) {
+      RecursiveReplace(*itr,placeholder,replacement);
+    }
+  }
+}
+
+
+void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
+  if (j.find("string_replacement") != j.end()) {
+    // Read and check string replacement variables
+    nlohmann::json j2 = j["string_replacement"];
+    std::string placeholder = j2.value("placeholder","");
+    assert (placeholder != "");
+    std::string replacement = j2.value("replacement","");
+    assert (replacement != "");
+    assert (replacement == "hashed_username");
+    int mod_value = j2.value("mod",-1);
+    assert (mod_value > 0);
+    
+    int A = 54059; /* a prime */
+    int B = 76963; /* another prime */
+    int FIRSTH = 37; /* also prime */
+    unsigned int sum = FIRSTH;
+    for (int i = 0; i < username.size(); i++) {
+      sum = (sum * A) ^ (username[i] * B);
+    }
+    int assigned = (sum % mod_value)+1; 
+  
+    std::string repl = std::to_string(assigned);
+    nlohmann::json::iterator itr = j.find("testcases");
+    if (itr != j.end()) {
+      RecursiveReplace(*itr,placeholder,repl);
+    }
+  }
 }

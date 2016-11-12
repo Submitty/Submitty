@@ -2,7 +2,7 @@
 
 namespace app\controllers\student;
 
-use app\controllers\IController;
+use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
@@ -13,12 +13,7 @@ use app\libraries\Utils;
 use app\models\GradeableList;
 
 
-class SubmissionController implements IController {
-
-    /**
-     * @var Core
-     */
-    private $core;
+class SubmissionController extends AbstractController {
 
     /**
      * @var GradeableList
@@ -29,14 +24,14 @@ class SubmissionController implements IController {
                                     'assignment_settings' => false);
 
     public function __construct(Core $core) {
-        $this->core = $core;
+        parent::__construct($core);
         $this->gradeables_list = new GradeableList($this->core, true);
     }
 
     public function run() {
         switch($_REQUEST['action']) {
             case 'upload':
-                $this->uploadSubmission();
+                $this->ajaxUploadSubmission();
                 break;
             case 'update':
                 $this->updateSubmissionVersion();
@@ -69,7 +64,7 @@ class SubmissionController implements IController {
                 $loc = array('page' => 'submission',
                              'action' => 'display',
                              'gradeable_id' => $gradeable->getId());
-                $this->core->getOutput()->addBreadcrumb("<a href='{$this->core->buildUrl($loc)}'>{$gradeable->getName()}</a>");
+                $this->core->getOutput()->addBreadcrumb($gradeable->getName(), $this->core->buildUrl($loc));
                 if (!$gradeable->hasConfig()) {
                     $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
                                                            'showGradeableError', $gradeable);
@@ -94,7 +89,7 @@ class SubmissionController implements IController {
      *
      * @return boolean
      */
-    private function uploadSubmission() {
+    private function ajaxUploadSubmission() {
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->uploadResult("Invalid CSRF token: {$_POST['csrf_token']}.", false);
         }
@@ -239,10 +234,16 @@ class SubmissionController implements IController {
                     $uploaded_files[$i]["is_zip"] = array();
                     for ($j = 0; $j < $count[$i]; $j++) {
                         if (FileUtils::getMimeType($uploaded_files[$i]["tmp_name"][$j]) == "application/zip") {
+                            if(FileUtils::checkFileInZipName($uploaded_files[$i]["tmp_name"][$j]) === false) {
+                                return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[$i]["name"][$j].".", false);
+                            }
                             $uploaded_files[$i]["is_zip"][$j] = true;
                             $file_size += FileUtils::getZipSize($uploaded_files[$i]["tmp_name"][$j]);
                         }
                         else {
+                            if(FileUtils::isValidFileName($uploaded_files[$i]["name"][$j]) === false) {
+                                return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[$i]["name"][$j].".", false);
+                            }
                             $uploaded_files[$i]["is_zip"][$j] = false;
                             $file_size += $uploaded_files[$i]["size"][$j];
                         }
@@ -258,7 +259,7 @@ class SubmissionController implements IController {
             if ($file_size > $max_size) {
                 return $this->uploadResult("File(s) uploaded too large.  Maximum size is ".($max_size/1000)." kb. Uploaded file(s) was ".($file_size/1000)." kb.", false);
             }
-            
+
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 if (isset($uploaded_files[$i])) {
                     for ($j = 0; $j < $count[$i]; $j++) {
@@ -331,13 +332,17 @@ class SubmissionController implements IController {
         if (!file_put_contents($version_path."/.submit.timestamp", $current_time."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
-    
+
+        $user_id = $this->core->getUser()->getId();
+
         $touch_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
-            $gradeable->getId(), $this->core->getUser()->getId(), $new_version);
+            $gradeable->getId(), $user_id, $new_version);
         $touch_file = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_interactive/".implode("__", $touch_file);
         if (!touch($touch_file)) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
         }
+
+        $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, $new_version, $current_time);
         
         $_SESSION['messages']['success'][] = "Successfully uploaded version {$new_version} for {$gradeable->getName()}";
         return $this->uploadResult("Successfully uploaded files");
@@ -410,13 +415,17 @@ class SubmissionController implements IController {
             $this->core->redirect($this->core->buildUrl(array('component' => 'student',
                                                               'gradeable_id' => $gradeable->getId())));
         }
-        
+
+        $version = ($new_version > 0) ? $new_version : null;
+        $this->core->getQueries()->updateActiveVersion($gradeable->getId(), $this->core->getUser()->getId(), $version);
+
         if ($new_version == 0) {
             $_SESSION['messages']['success'][] = "Cancelled submission for gradeable";
         }
         else {
             $_SESSION['messages']['success'][] = "Updated version of gradeable to version #" . $new_version;
         }
+
         $this->core->redirect($this->core->buildUrl(array('component' => 'student',
                                                           'gradeable_id' => $gradeable->getId(),
                                                           'gradeable_version' => $new_version)));

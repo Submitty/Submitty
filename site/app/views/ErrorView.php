@@ -9,11 +9,11 @@ class ErrorView {
         return <<<HTML
 <html>
 <head>
-    <title>HWServer - Error</title>
+    <title>Submitty - Error</title>
 </head>
 
 <body>
-<h1 style="margin-left: 20px; margin-top: 10px;"Server Error</h1>
+<h1 style="margin-left: 20px; margin-top: 10px;">Server Error</h1>
 <div style="position: absolute; top: 144px; left: 362px; border: 1px dashed black; padding: 10px; font-family: monospace">
     {$top_message}<br /><br />
     {$error_message}
@@ -67,7 +67,7 @@ HTML;
         return <<<HTML
 <html>
 <head>
-    <title>Forbidden</title>
+    <title>Submitty - Forbidden</title>
 </head>
 <body>
 <h1 style="margin-left: 20px; margin-top: 10px;">Forbidden</h1>

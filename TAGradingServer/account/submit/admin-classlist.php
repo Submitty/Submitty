@@ -40,8 +40,10 @@ finfo_close($fh); //No longer needed once mime type is determined.
 
 if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
     $csv_file = "/tmp/".\lib\Utils::generateRandomString();
+    $old_umask = umask(0007);
     file_put_contents($csv_file, "");
-    chmod($csv_file, 0660);
+    umask($old_umask);
+    //@chmod($csv_file, 0660);
     $xlsx_file = "/tmp/".\lib\Utils::generateRandomString();
 }
 else if (($fileType == 'csv' && $mimeType == 'text/plain')) {
@@ -91,9 +93,7 @@ if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedo
             die("Error parsing xlsx to csv: ".$output['error_message']);
         }
         else if ($output['success'] !== true) {
-            var_dump($output);
-            print(curl_error($ch));
-            die("Error on response on parsing xlsx");
+            die("Error on response on parsing xlsx: ".curl_error($ch));
         }
         curl_close($ch);
     }
@@ -103,15 +103,19 @@ if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedo
 }
 
 // Get CSV ini config
-$csvFieldsINI = parse_ini_file("../../toolbox/configs/student_csv_fields.ini", false, INI_SCANNER_RAW);
+$csvFieldsINI = false;
+if (file_exists("../../toolbox/configs/student_csv_fields.ini")) {
+    $csvFieldsINI = parse_ini_file("../../toolbox/configs/student_csv_fields.ini", false, INI_SCANNER_RAW);
+}
+
 if ($csvFieldsINI === false) {
-	die("Cannot read student list CSV configuration file.  Please contact your sysadmin to run setcsvfields tool.");
+    die("Cannot read student list CSV configuration file.  Please contact your sysadmin to run setcsvfields tool.");
 }
 
 // Read file into row-by-row array.  Returns false on failure.
 $contents = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 if ($contents === false) {
-	die("File was not properly uploaded.  Please contact tech support.");
+    die("File was not properly uploaded.  Please contact tech support.");
 }
 
 // Massage student CSV file into generalized data array
@@ -119,34 +123,37 @@ $error_message = ""; //Used to show accumulated errors during data validation
 $row_being_processed = 1; //Offset to account for header (user will cross-reference with his data sheet)
 $rows = array();
 unset($contents[0]); //header should be thrown away (does not affect cross-reference)
+if ($fileType == 'xlsx' && $mimeType == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+    unset($contents[1]); // xlsx2csv will add a row to the top of the spreadsheet
+}
 
 foreach($contents as $content) {
-	$row_being_processed++;
-	$details = explode(",", trim($content));
-	$rows[] = array( 'student_first_name' => $details[$csvFieldsINI['student_first_name']],
-	                 'student_last_name'  => $details[$csvFieldsINI['student_last_name']],
-	                 'user_id'            => explode("@", $details[$csvFieldsINI['student_email']])[0],
-                     'student_email'      =>  $details[$csvFieldsINI['student_email']],
-	                 'registration_section'    => intval($details[$csvFieldsINI['student_section']]) );
+    $row_being_processed++;
+    $details = explode(",", trim($content));
+    $rows[] = array( 'student_first_name'   => $details[$csvFieldsINI['student_first_name']],
+                     'student_last_name'    => $details[$csvFieldsINI['student_last_name']],
+                     'user_id'              => explode("@", $details[$csvFieldsINI['student_email']])[0],
+                     'student_email'        => $details[$csvFieldsINI['student_email']],
+                     'registration_section' => intval($details[$csvFieldsINI['student_section']]) );
 
-	//Validate massaged data.  First, make sure we're working on the most recent entry (should be the "end" element).
-	$val = end($rows);
+    //Validate massaged data.  First, make sure we're working on the most recent entry (should be the "end" element).
+    $val = end($rows);
     
-	//First name must be alpha characters, white-space, or certain punctuation.
-	$error_message .= (preg_match("~^[a-zA-Z.'`\- ]+$~", $val['student_first_name'])) ? "" : "Error in student first name column, row #{$row_being_processed}: {$val['student_first_name']}<br>";
+    //First name must be alpha characters, white-space, or certain punctuation.
+    $error_message .= (preg_match("~^[a-zA-Z.'`\- ]+$~", $val['student_first_name'])) ? "" : "Error in student first name column, row #{$row_being_processed}: {$val['student_first_name']}<br>";
 
-	//Last name must be alpha characters white-space, or certain punctuation.
-	$error_message .= (preg_match("~^[a-zA-Z.'`\- ]+$~", $val['student_last_name'])) ? "" : "Error in student last name column, row #{$row_being_processed}: {$val['student_last_name']}<br>";
+    //Last name must be alpha characters white-space, or certain punctuation.
+    $error_message .= (preg_match("~^[a-zA-Z.'`\- ]+$~", $val['student_last_name'])) ? "" : "Error in student last name column, row #{$row_being_processed}: {$val['student_last_name']}<br>";
 
-	//Student section must be greater than zero (intval($str) returns zero when $str is not integer)
-	$error_message .= ($val['registration_section'] > 0) ? "" : "Error in student section column, row #{$row_being_processed}: {$val['student_section']}<br>";
+    //Student section must be greater than zero (intval($str) returns zero when $str is not integer)
+    $error_message .= ($val['registration_section'] > 0) ? "" : "Error in student section column, row #{$row_being_processed}: {$val['registration_section']}<br>";
 
-	//No check on user_id (computing login ID) -- different Univeristies have different formats.
+    //No check on user_id (computing login ID) -- different Univeristies have different formats.
 }
 
 //Display any accumulated errors.  Quit on errors, otherwise continue.
 if (empty($error_message) === false) {
-	die($error_message . "Contact your sysadmin.");
+    die($error_message . "Contact your sysadmin.");
 }
 
 //Collect existing student list, group data by user_id
@@ -165,43 +172,43 @@ $updated = 0;
 // student_manual is true)
 \lib\Database::beginTransaction();
 foreach ($rows as $row) {
-	$columns = array("user_id", "user_firstname", "user_lastname", "user_email", "user_group", "registration_section");
-	$values = array($row['user_id'], $row['student_first_name'], $row['student_last_name'], $row['student_email'], 4, $row['registration_section']);
-	$user_id = $row['user_id'];
-	if (array_key_exists($user_id, $students)) {
-	if (isset($_POST['ignore_manual_1']) && $_POST['ignore_manual_1'] == true && $students[$user_id]['manual_registration'] == true) {
-			continue;
-		}
-		\lib\Database::query("UPDATE users SET registration_section=? WHERE user_id=?", array($row['registration_section'], $user_id));
+    $columns = array("user_id", "user_firstname", "user_lastname", "user_email", "user_group", "registration_section");
+    $values = array($row['user_id'], $row['student_first_name'], $row['student_last_name'], $row['student_email'], 4, $row['registration_section']);
+    $user_id = $row['user_id'];
+    if (array_key_exists($user_id, $students)) {
+    if (isset($_POST['ignore_manual_1']) && $_POST['ignore_manual_1'] == true && $students[$user_id]['manual_registration'] == true) {
+            continue;
+        }
+        \lib\Database::query("UPDATE users SET registration_section=? WHERE user_id=?", array($row['registration_section'], $user_id));
         $updated++;
-		unset($students[$user_id]);
-	}
-	else {
-		\lib\Database::query("INSERT INTO users (" . (implode(",", $columns)) . ") VALUES (?, ?, ?, ?, ?, ?)", $values);
-		\lib\Database::query("INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) VALUES(?, ?, TIMESTAMP '1970-01-01 00:00:01')", array($user_id, __DEFAULT_LATE_DAYS_STUDENT__));
+        unset($students[$user_id]);
+    }
+    else {
+        \lib\Database::query("INSERT INTO users (" . (implode(",", $columns)) . ") VALUES (?, ?, ?, ?, ?, ?)", $values);
+        /*\lib\Database::query("INSERT INTO late_days (user_id, allowed_late_days, since_timestamp) VALUES(?, ?, TIMESTAMP '1970-01-01 00:00:01')", array($user_id, __DEFAULT_TOTAL_LATE_DAYS__));*/
         $inserted++;
-	}
+    }
 }
 
 $moved = 0;
 $deleted = 0;
 foreach ($students as $user_id => $student) {
-	if (isset($_POST['ignore_manual_2']) && $_POST['ignore_manual_2'] == true && $student['manual_registration'] == true) {
-		continue;
-	}
-	$_POST['missing_students'] = intval($_POST['missing_students']);
-	if ($_POST['missing_students'] == -2) {
-		continue;
-	}
-	else if ($_POST['missing_students'] == -1) {
-		\lib\Database::query("DELETE FROM users WHERE user_id=?", array($user_id));
+    if (isset($_POST['ignore_manual_2']) && $_POST['ignore_manual_2'] == true && $student['manual_registration'] == true) {
+        continue;
+    }
+    $_POST['missing_students'] = intval($_POST['missing_students']);
+    if ($_POST['missing_students'] == -2) {
+        continue;
+    }
+    else if ($_POST['missing_students'] == -1) {
+        \lib\Database::query("DELETE FROM users WHERE user_id=?", array($user_id));
         $deleted++;
-	}
-	else {
-		\lib\Database::query("UPDATE users SET registration_section=? WHERE user_id=?", array($_POST['missing_students'], $user_id));
+    }
+    else {
+        \lib\Database::query("UPDATE users SET registration_section=? WHERE user_id=?", array($_POST['missing_students'], $user_id));
         $moved++;
-	}
+    }
 }
 
 \lib\Database::commit();
-header("Location: {$BASE_URL}/account/admin-classlist.php?course={$_GET['course']}&semester={$_GET['semester']}&update=1&inserted={$inserted}&updated={$updated}&deleted={$deleted}&moved={$moved}");
+header("Location: {$BASE_URL}/account/admin-classlist.php?course={$_GET['course']}&semester={$_GET['semester']}&update=1&inserted={$inserted}&updated={$updated}&deleted={$deleted}&moved={$moved}&this[]=Students&this[]=Upload%20ClassList");

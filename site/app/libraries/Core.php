@@ -2,7 +2,7 @@
 
 namespace app\libraries;
 
-use app\authentication\IAuthentication;
+use app\authentication\AbstractAuthentication;
 use app\exceptions\AuthenticationException;
 use app\exceptions\DatabaseException;
 use app\libraries\database\DatabaseQueriesPostgresql;
@@ -28,7 +28,7 @@ class Core {
     private $database;
 
     /**
-     * @var IAuthentication
+     * @var AbstractAuthentication
      */
     private $authentication;
 
@@ -74,16 +74,18 @@ class Core {
     
     public function loadConfig($semester, $course) {
         $this->config = new Config($semester, $course);
-
-        $this->database = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
-            $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
-
         $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
-        if (!in_array('app\authentication\IAuthentication', class_implements($auth_class))) {
-            throw new \Exception("Invalid module specified for Authentication. All modules should implement the IAuthentication interface.");
+        if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
+            throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
         }
         $this->authentication = new $auth_class($this);
         $this->session_manager = new SessionManager($this);
+    }
+
+    public function loadDatabase() {
+        $this->database = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
+            $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
+        $this->database->connect();
 
         switch ($this->config->getDatabaseType()) {
             case 'pgsql':
@@ -102,6 +104,18 @@ class Core {
         if ($this->database !== null) {
             $this->getDatabase()->disconnect();
         }
+    }
+
+    public function addErrorMessage($message) {
+        $_SESSION['messages']['error'][] = $message;
+    }
+
+    public function addNoticeMessage($message) {
+        $_SESSION['messages']['notice'][] = $message;
+    }
+
+    public function addSuccessMessage($message) {
+        $_SESSION['messages']['success'][] = $message;
     }
 
     /**
@@ -130,7 +144,7 @@ class Core {
      */
     public function loadUser($user_id) {
         // attempt to load rcs as both student and user
-        $this->user = new User($user_id, $this->database_queries);
+        $this->user = $this->database_queries->getUserById($user_id);
     }
 
     /**
@@ -160,7 +174,7 @@ class Core {
     }
 
     /**
-     * @return IAuthentication
+     * @return AbstractAuthentication
      */
     public function getAuthentication() {
         return $this->authentication;
@@ -189,20 +203,18 @@ class Core {
     }
 
     /**
-     * @param $user_id
-     * @param $password
-     *
      * @return bool
      */
-    public function authenticate($user_id, $password) {
+    public function authenticate() {
         $auth = false;
-        $user_id = strtolower($user_id);
+        $user_id = $this->authentication->getUserId();
         try {
-            if ($this->authentication->authenticate($user_id, $password)) {
+            if ($this->authentication->authenticate()) {
                 $auth = true;
                 $session_id = $this->session_manager->newSession($user_id);
-                // We set the cookie to expire 10 years into the future effectly making it last forever
-                if (setcookie('session_id', $session_id, time() + (10 * 365 * 24 * 60 * 60), "/") === false) {
+                $cookie_id = $this->getConfig()->getSemester()."_".$this->getConfig()->getCourse()."_session_id";
+                // Set the cookie to last for 7 days
+                if (setcookie($cookie_id, $session_id, time() + (7 * 24 * 60 * 60), "/") === false) {
                     return false;
                 }
             }
@@ -226,19 +238,29 @@ class Core {
      *
      * @return bool
      */
-    public function checkCsrfToken($csrf_token) {
-        return $this->getCsrfToken() === $csrf_token;
+    public function checkCsrfToken($csrf_token=null) {
+        if ($csrf_token === null) {
+            return isset($_POST['csrf_token']) && $this->getCsrfToken() === $_POST['csrf_token'];
+        }
+        else {
+            return $this->getCsrfToken() === $csrf_token;
+        }
     }
 
     /**
      * Given some number of URL parameters (parts), build a URL for the site using those parts
      *
-     * @param array $parts
+     * @param array  $parts
+     * @param string $hash
      *
      * @return string
      */
-    public function buildUrl($parts=array()) {
-        return $this->config->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
+    public function buildUrl($parts=array(), $hash = null) {
+        $url = $this->config->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
+        if ($hash !== null) {
+            $url .= "#".$hash;
+        }
+        return $url;
     }
 
     /**

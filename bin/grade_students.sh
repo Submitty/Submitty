@@ -536,10 +536,12 @@ function grade_this_item {
     #  --include="*.XXX"  grab all .XXX files
     #  --exclude="*"  exclude everything else
 
-    rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"  --include="*.class"  --include="*.py" --include="*.pl"  --include="*.rkt"  --include="*README*"  --include="test*.txt" --include="data/*" 	--exclude="*"  $tmp_compilation/  $tmp
-
+    rsync   1>/dev/null  2>&1   -rvuzm   --include="*/"  --include="*.out"  --include="*.class"  --include="*.py" --include="*.s" --include="*.pl"  --include="*.rkt" --include="*.png" --include="*.pdf" --include="*.jpg"  --include="*README*"  --include="test*.txt" --include="data/*" 	--exclude="*"  $tmp_compilation/  $tmp
     # NOTE: Also grabbing all student data files (files with 'data/' directory in path)
+
     # remove the compilation directory
+    $SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /bin/rm -rf $tmp_compilation  > /dev/null  2>&1
+    $SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  $tmp_compilation  > /dev/null  2>&1
     rm -rf $tmp_compilation
 
     # --------------------------------------------------------------------
@@ -548,7 +550,8 @@ function grade_this_item {
     # copy input files to tmp directory
     if [ -d "$test_input_path" ]
     then
-	cp -rf $test_input_path/* "$tmp" || log_error "$NEXT_TO_GRADE" "Failed to copy input files to temporary directory $test_input_path to $tmp : cp -rf $test_input_path/* $tmp"
+	#cp -rf $test_input_path/* "$tmp" || log_error "$NEXT_TO_GRADE" "Failed to copy input files to temporary directory $test_input_path to $tmp : cp -rf $test_input_path/* $tmp"
+	cp -rf $test_input_path/* "$tmp" > /dev/null 2>&1
     fi
 
     # copy run.out to the tmp directory
@@ -646,7 +649,7 @@ function grade_this_item {
 
     if [ -e $results_path/results_grade.txt ] ;
     then
-	global_grade_result=`grep "total:" $results_path/results_grade.txt`
+	global_grade_result=`grep "Automatic grading total:" $results_path/results_grade.txt`
     else
 	global_grade_result="ERROR: $results_path/results_grade.txt does not exist"
     fi
@@ -668,15 +671,15 @@ function grade_this_item {
         chmod g+r $global_results_history_file_location
     fi
 
-
     # --------------------------------------------------------------------
     # REMOVE TEMP DIRECTORY
 
     # step out of this directory
     popd > /dev/null
     # and remove the directory
+    find . -exec ls -lta {} \; > $results_path/results_log_done.txt 2>&1
+    $SUBMITTY_INSTALL_DIR/bin/untrusted_execute  "${ARGUMENT_UNTRUSTED_USER}"  /bin/rm -rf $tmp  > /dev/null  2>&1
     rm -rf $tmp
-
 }
 
 
@@ -853,23 +856,31 @@ while true; do
 
 
 	# -------------------------------------------------------------
-        # create/append to the results history
-        sec_deadline=`date -d "${global_assignment_deadline}" +%s`
-        sec_submission=`date -d "${global_submission_time}" +%s`
-        seconds_late=$((sec_submission-sec_deadline))
-        /usr/local/submitty/bin/grade_students__results_history.py  \
-            "$global_results_history_file_location" \
-            "$global_assignment_deadline" \
-            "$global_submission_time" \
-            "$seconds_late" \
-             "`date -d @$FILE_TIMESTAMP`" \
-            "$IS_BATCH_JOB" \
-            "`date -d @$STARTTIME`" \
-            "$WAITTIME" \
-            "`date -d @$ENDTIME`" \
-            "$ELAPSED" \
-	    "$global_grade_result"
+    # create/append to the results history
+    sec_deadline=`date -d "${global_assignment_deadline}" +%s`
+    sec_submission=`date -d "${global_submission_time}" +%s`
+    seconds_late=$((sec_submission-sec_deadline))
+    ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py  \
+        "$global_results_history_file_location" \
+        "$global_assignment_deadline" \
+        "$global_submission_time" \
+        "$seconds_late" \
+         "`date -d @$FILE_TIMESTAMP`" \
+        "$IS_BATCH_JOB" \
+        "`date -d @$STARTTIME`" \
+        "$WAITTIME" \
+        "`date -d @$ENDTIME`" \
+        "$ELAPSED" \
+        "$global_grade_result"
 
+    #---------------------------------------------------------------------
+    # WRITE OUT VERISON DETAILS
+    ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py \
+        "${semester}" \
+        "${course}" \
+        "${assignment}" \
+        "${user}" \
+        ${version}
 
 	# break out of the loop (need to check for new interactive items)
 	graded_something=true

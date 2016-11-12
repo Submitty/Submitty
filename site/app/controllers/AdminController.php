@@ -9,34 +9,20 @@ use app\libraries\Core;
 use app\libraries\Output;
 use app\models\User;
 
-class AdminController implements IController {
-    /**
-     * @var Core
-     */
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class AdminController extends AbstractController {
     public function run() {
         if (!$this->core->getUser()->accessAdmin()) {
             $this->core->getOutput()->showError("This account cannot access admin pages");
         }
 
+        $this->core->getOutput()->addBreadcrumb("Admin");
         $controller = null;
         switch ($_REQUEST['page']) {
-            case 'gradeables':
-                $controller = new GradeablesController($this->core);
-                break;
-            case 'labs':
-                break;
-            case 'tests':
-                break;
             case 'users':
                 $controller = new UsersController($this->core);
                 break;
             case 'configuration':
+                $this->core->getOutput()->addBreadcrumb("Course Settings");
                 $controller = new ConfigurationController($this->core);
                 break;
             default:

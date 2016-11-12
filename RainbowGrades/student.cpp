@@ -17,6 +17,9 @@ Student::Student() {
   withdraw = false;
   independentstudy = false;
 
+  default_allowed_late_days = 0;
+  current_allowed_late_days = 0;
+
   // grade data
   for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) { 
     GRADEABLE_ENUM g = ALL_GRADEABLES[i];
@@ -277,7 +280,9 @@ float Student::lowest_test_counts_half_pct() const {
 int Student::getAllowedLateDays(int which_lecture) const {
   if (getSection() == 0) return 0;
   
-  int answer = 2;
+  //int answer = 2;
+
+  int answer = default_allowed_late_days;
   
   // average 4 questions per lecture 2-28 ~= 112 clicker questions
   //   30 questions => 3 late days
@@ -286,16 +291,20 @@ int Student::getAllowedLateDays(int which_lecture) const {
   
   float total = getIClickerTotal(which_lecture,0);
   
-  for (unsigned int i = 0; i < bonus_late_days_which_lecture.size(); i++) {
-    if (bonus_late_days_which_lecture[i] <= which_lecture) {
-      answer ++;
+  for (unsigned int i = 0; i < GLOBAL_earned_late_days.size(); i++) {
+    if (total >= GLOBAL_earned_late_days[i]) {
+      answer++;
     }
   }
 
-
-  //return answer += int(total / 30); //25);
-  return answer += int(total / 25);
+  for (unsigned int i = 0; i < bonus_late_days_which_lecture.size(); i++) {
+    if (bonus_late_days_which_lecture[i] <= which_lecture) {
+      answer++;
+    }
+  }
   
+  return std::max(current_allowed_late_days,answer);
+
 }
 
 // get the total used late days

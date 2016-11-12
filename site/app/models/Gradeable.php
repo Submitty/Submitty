@@ -42,7 +42,10 @@ abstract class Gradeable {
     
     /** @var int $minimum_grading_group Minimum group that's allowed to submit grades for this gradeable */
     protected $minimum_grading_group = 1;
-    
+
+    /** @var \DateTime|null $ta_view_date Date for when grading can view */
+    protected $ta_view_date = null;
+
     /** @var \DateTime|null $grade_start_date Date for when grading can start */
     protected $grade_start_date = null;
 
@@ -283,9 +286,16 @@ abstract class Gradeable {
 
             $this->versions[$version]['status'] = true;
 
-            $results_history=FileUtils::readJsonFile($results_path."/".$version."/results_history.json");
-            $last_results_timestamp=$results_history[count($results_history)-1];
-            $this->versions[$version] = array_merge($this->versions[$version],$last_results_timestamp);
+            $results_history = FileUtils::readJsonFile($results_path."/".$version."/results_history.json");
+            if ($results_history !== false) {
+                $last_results_timestamp = $results_history[count($results_history)-1];
+            }
+            else {
+                $last_results_timestamp = array('submission_time' => "UNKNOWN", "grade_time" => "UNKOWN",
+                    "wait_time" => "UNKNOWN");
+            }
+
+            $this->versions[$version] = array_merge($this->versions[$version], $last_results_timestamp);
 
             $this->versions[$version]['days_late'] = isset($this->versions[$version]['days_late_before_extensions']) ?
                 intval($this->versions[$version]['days_late_before_extensions']) : 0;
@@ -450,7 +460,11 @@ abstract class Gradeable {
     public function getDueDate() {
         return $this->due_date;
     }
-    
+
+    public function getTAViewDate(){
+        return $this->ta_view_date;
+    }
+
     public function getGradeStartDate(){
         return $this->grade_start_date;
     }

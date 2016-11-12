@@ -1,10 +1,4 @@
-html,body {
-    margin:0;
-    padding:0;
-    height:100%;
-    width:100%;
-    overflow: hidden;
-}
+
 
 header {
     width:100%;
@@ -14,6 +8,7 @@ header {
 
 #container {
     display : inline-block;
+    padding-top:40px;
 }
 
 #inner-container {
@@ -54,34 +49,45 @@ span#right.resbox {
     margin: 75px 0px;
 }
 
-#content {
+.content {
     background: #FFF;
-    width: 100%;
+    width: 50%;
     height: 100%;
-    float: left;
-    overflow:scroll;
-    overflow-x: hidden;
 }
 
-#rubric {
-    background: #E1E1E1;
-    width: 100%;
-    height: 100%;
-    float: right;
-    /*overflow:hidden;*/
-}
 
-.progress {
-    display: inline-block;
-    width: 100%;
-    margin: auto;
+.rubric_panel{
+    cursor: move;
     position:absolute;
-    bottom: 0;
-    left: 0;
-    -webkit-border-radius: 0;
-    -moz-border-radius: 0;
-    border-radius: 0;
+    background: white;
+    opacity: .95;
+    display:none;
+    overflow: scroll;
 }
+
+#left.rubric_panel{
+    border:5px solid #c40233 ;
+}
+
+#right.rubric_panel{
+    border:5px solid #0088bf ;
+}
+
+#stats.rubric_panel{
+    border:5px solid black;
+}
+
+#rubric.rubric_panel{
+    border:5px solid #00a368;
+}
+
+.grading_label{
+    display: inline-block;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 18pt;
+}
+
 
 #progress-icon {
     margin-top:-0.5px;
@@ -130,52 +136,49 @@ ul.dropdown-menu li#logout a:hover {
 
 /*======================================*/
 #grade {
-    position:absolute;
-    bottom: 5%;
-    left: 40%;
-    /*height: 5%;*/
-    /*width: 20%;*/
-    height: 60px;
-    /*width: 286px;*/
+    position:fixed;
+    top: 0px;
+    right: 0px;
+    height: 41px;
     width: 290px;
-    background: #C3BEFF;
-    opacity:0.5;
-    z-index: 201;
+    z-index: 1099;
+    background: white;
 }
-.draggable {
-    cursor: move;
+
+#progress_bar{
+    position:fixed;
+    top: 0px;
+    right: 290px;
+    height: 31px;
+    width: 250px;
+    z-index: 1099;
+    background: white;
+    border: 5px solid white;
 }
-#rubric {
-    position:absolute;
-    left: 40%;
-    top: 15%;
-    width: 45%;
-    height: 80%;
-    background: #C3BEFF;
-    opacity:0.9;
-    border-width: 2px 5px 5px 5px;
-    border-color: #99cccc;
-    border-style:solid;
-    display:none;
-    z-index: 199;
+
+progress::-webkit-progress-bar{
+    background:red;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.2) inset;
+    border-radius: 3px;
 }
-#stats {
-    position:absolute;
-    left: 10%;
-    top: 55%;
-    width: 20%;
-    height: 40%;
-    background: #C3BEFF;
-    opacity:0.9;
-    border-width: 2px 5px 5px 5px;
-    border-color: #99cccc;
-    border-style:solid;
-    display:none;
-    z-index: 200;
+
+progress::-webkit-progress-value{
+    background: linear-gradient(80deg ,blue 100%, transparent);
 }
+
+progress{
+    background:red;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.2) inset;
+    border-radius: 3px;
+}
+
+progress::-moz-progress-bar{
+    background: linear-gradient(80deg ,blue 100%, transparent);
+}
+
 /*************************************/
 .resbox {
-    display : inline-block;
+
     height : 100%;
     overflow:hidden;
 }
@@ -264,7 +267,7 @@ select {
 
 .nav-tabs {
     color: #444;
-    border-bottom: 1px solid #DDD;
+    border-bottom:0px;
 }
 
 .nav-tabs > li {
@@ -274,11 +277,17 @@ select {
 
 .nav-tabs > li > a {
     color: #444;
+    margin-right: 0px;
+    border-radius: 0px;
 }
 
-.nav-tabs > .active > a, .nav-tabs > .active > a:hover {
+.nav-tabs > .active > a:hover {
     border: 1px solid #DDD;
     border-bottom: 1px solid #FFF;
+}
+
+.nav-tabs > .active > a {
+    background-color: #DDD;
 }
 
 .tabbable {
@@ -293,6 +302,13 @@ select {
     -webkit-border-bottom-right-radius: 4px;
     -moz-border-radius-bottomright: 4px;
     border-bottom-right-radius: 4px;
+}
+
+.tabbable li{
+    border-width: 2px 2px 1px 2px;
+    border-radius: 3px 3px 0px 0px;
+    border-color: lightgrey;
+    border-style: solid ;
 }
 
 form {
@@ -530,15 +546,37 @@ table {
     box-shadow: 0px 0px 5px 5px yellow;
     background-color: yellow;
 }
-.icon-selected {
-    box-shadow: 0px 0px 5px 5px aqua;
-    background-color: aqua;
-
+.icon-selected.icon-status {
+    box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
-#grade a, div{
+.icon-selected.icon-auto-grading-results {
+    box-shadow: 0px 0px 5px 5px #fd4472;
+    background-color: #fd4472;
+}
+.icon-selected.icon-grading-panel {
+    box-shadow: 0px 0px 5px 5px #00e08e;
+    background-color: #00e08e;
+}
+.icon-selected.icon-files {
+    box-shadow: 0px 0px 5px 5px #00b3fa;
+    background-color: #00b3fa;
+}
+
+.icon-refresh{
+    background: url('../../bootstrap/img/refresh-page-option.png') no-repeat;
+    background-size: 100%;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    margin: 5px;
+}
+
+#grade{
     cursor: default;
 }
+
 /******************************************************************************/
 .file-viewer{
     float: left;
@@ -614,3 +652,23 @@ table {
     background-color:#f9f9f9
 }
 
+#csvUpload{
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+}
+
+#csvUpload + label{
+    font-size: 14px;
+    font-weight: normal;
+    color:white;
+    background-color: #337ab7;
+    cursor: pointer;
+    display: inline;
+    padding: 6px 12px;
+    border-radius: 4px;
+    float: right;
+    margin: 5px;
+}

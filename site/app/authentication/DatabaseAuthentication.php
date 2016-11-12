@@ -2,8 +2,6 @@
 
 namespace app\authentication;
 
-use app\libraries\Core;
-
 /**
  * Class DatabaseAuthentication
  *
@@ -14,25 +12,14 @@ use app\libraries\Core;
  * @link http://php.net/manual/en/function.password-hash.php
  * @link http://php.net/manual/en/function.password-verify.php
  */
-class DatabaseAuthentication implements IAuthentication {
-    /** @var Core Core library for running the application */
-    private $core;
-    
-    /**
-     * DatabaseAuthentication constructor.
-     *
-     * @param Core $core
-     */
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
+class DatabaseAuthentication extends AbstractAuthentication {
 
-    public function authenticate($user_id, $password) {
-        $user = $this->core->getQueries()->getUserById($user_id);
-        if (empty($user)) {
+    public function authenticate() {
+        $user = $this->core->getQueries()->getUserById($this->user_id);
+        if (!$user->isLoaded()) {
             return false;
         }
 
-        return password_verify($password, $user['password']);
+        return password_verify($this->password, $user->getPassword());
     }
 }

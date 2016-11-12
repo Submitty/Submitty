@@ -11,8 +11,10 @@ cache:
   directories:
     - vendor
     - $HOME/.composer/cache
+    - travis_phantomjs
 
 addons:
+  #firefox: "45.0"
   postgresql: "9.3"
   apt:
     sources:
@@ -22,6 +24,7 @@ addons:
       - apache2
       - libapache2-mod-fastcgi
       - python
+      - python-pip
       - build-essential
       - automake
       - cmake
@@ -35,41 +38,77 @@ addons:
       - flex
       - bison
       - python3
+      - python3-pip
       - libpcre3
       - libpcre3-dev
+      - unzip
+      - google-chrome-stable
+
+before_install:
+   #- export PHANTOMJS_VERSION=2.1.1
+   #- export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH
+   #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then rm -rf $PWD/travis_phantomjs; mkdir -p $PWD/travis_phantomjs; fi
+   #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then wget https://github.com/Medium/phantomjs/releases/download/v$PHANTOMJS_VERSION/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -O $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2; fi
+   #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi
+   #- phantomjs --version
+   - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
+   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
 
 install:
-  - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
-  - export PATH="$PATH:$HOME/.composer/vendor/bin"
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.5" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then sudo apt-get -y install libapache2-mod-php5 php5-pgsql php5-curl; a2enmod php5; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then sudo apt-get -y install libapache2-mod-php5.6 php5.6-pgsql php5.6-curl; a2enmod php5.6; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo apt-get -y install libapache2-mod-php7.0 php7.0-pgsql php7.0-curl; a2enmod php7.0; fi
+  - wget http://chromedriver.storage.googleapis.com/2.24/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip
+  - sudo chmod u+x chromedriver
+  - sudo mv chromedriver /usr/bin/
   - travis_retry composer install --prefer-dist --no-interaction
+  - pip install selenium
+  - pip install nose2
+  - pip install unittest2
+  - pip install pylint_runner
 
 before_script:
-  - sudo iptables -t nat -A OUTPUT -p all -d 192.168.56.104 -j DNAT --to-destination 127.0.0.1
-  - sudo usermod -a -G travis www-data
-  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-  - sudo a2enmod rewrite actions fastcgi alias
-  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo cp .setup/travis/www.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/; fi
-  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
-  - sudo cp -f .setup/travis/000-default.conf /etc/apache2/sites-available/000-default.conf
-  - sudo sed -e "s?%TRAVIS_BUILD_DIR?$(pwd)?g" --in-place /etc/apache2/sites-available/000-default.conf
-  - sudo service apache2 restart
-#  - if [[ "$TRAVIS_PHP_VERSION" = "hhvm" ]]; then source ./.setup/travis/hhvm.sh; fi
-  - ./.setup/travis/setup.sh
+  # Doing this helps chromedriver from hanging for some mysterious reason
+  # https://github.com/SeleniumHQ/docker-selenium/issues/87
+  - export DBUS_SESSION_BUS_ADDRESS=/dev/null
+  - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
   - sudo ./.setup/travis/autograder.sh
-  - psql -c 'create database test_hwgrading;' -U postgres
-  - psql --host=localhost --username=postgres --command="CREATE GROUP test_hwgrading ROLE postgres"
-  - psql -f site/data/tables.sql -U postgres -d test_hwgrading
-  - psql -f tests/testData/travis.sql -U postgres -d test_hwgrading
-  - ./.setup/travis/start.sh
+  - ./.setup/travis/setup.sh
+  - sudo ./.setup/travis/setup_test_suite.sh
+  - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
+  - sudo a2enmod include rewrite actions cgi alias headers
+  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - sudo a2dissite 000-default
+  - sudo rm -rf /etc/apache2/sites-available/*
+  - sudo rm -rf /etc/apache2/sites-enabled/*
+  - sudo cp -f .setup/travis/apache.conf /etc/apache2/sites-available/submitty.conf
+  - sudo a2ensite submitty
+  - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
+  - sudo chmod -R 755 /usr/local/submitty
+  - sudo chmod -R 777 /usr/local/submitty/test_suite
+  - sudo service apache2 restart
+  #- ./.setup/travis/start.sh
+  - sudo sed -e "s?debug = false?debug = true?g" --in-place /usr/local/submitty/site/config/master.ini
+  - sudo sed -e "s?PamAuthentication?DatabaseAuthentication?g" --in-place /usr/local/submitty/site/config/master.ini
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
 
 script:
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
   - vendor/bin/phpunit --version
+  #- firefox --version
   - vendor/bin/phpunit --configuration tests/phpunit.xml
-#  - if [[ "$TRAVIS_BRANCH" = "master" ]]; then vendor/phpunit/phpunit/phpunit --configuration tests/phpunit_e2e.xml; fi
-#  - vendor/phpunit/phpunit/phpunit --configuration tests/phpunit_e2e.xml
   - python /usr/local/submitty/test_suite/integrationTests/run.py
+  - TEST_URL="http://localhost" nose2 -v --start-dir="tests/e2e"
+
+# Add more linters to the build process here
+after_script:
+  # Eventually this should be moved into the "script" once we've gotten the build to a point where all contained
+  # python files will actually pass (which a lot right now will not)
+  - pylint_runner ${TRAVIS_BUILD_DIR}
 
 notifications:
   email: false
