@@ -67,6 +67,24 @@ HTML;
         $title_to_button_type_grading = array("FUTURE" => "btn-default", "OPEN" => "btn-default" , "CLOSED" => "btn-default",
                                                  "ITEMS BEING GRADED" => "btn-primary", "GRADED" => 'btn-danger');
         $title_to_prefix = array("FUTURE" => "OPEN DATE", "OPEN" => "SUBMIT", "CLOSED" => "CLOSED", "ITEMS BEING GRADED" => "GRADING", "GRADED" => "GRADED");
+
+        $found_assignment = false;
+        foreach ($sections_to_list as $title => $gradeable_list) {
+            if(count($gradeable_list) != 0) {
+                $found_assignment = true;
+                break;
+            }
+        }
+
+        if($found_assignment == false) {
+            $return .= <<<HTML
+    <div class="container">
+    <p>There are currently no assignments posted.  Please check back later.</p>
+    </div></table></div>
+HTML;
+            return $return;
+        }
+
         foreach ($sections_to_list as $title => $gradeable_list) {
 
 	    // temporary: want to make future - only visible to
