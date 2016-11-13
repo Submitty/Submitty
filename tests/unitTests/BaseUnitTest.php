@@ -65,7 +65,7 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
      * @throws \PHPUnit_Framework_Exception
      */
     public function createMock($originalClassName) {
-        if (version_compare("5.5", phpversion()) == -1) {
+        if (version_compare("5.6", phpversion()) > -1) {
             return $this->getMockBuilder($originalClassName)
                 ->disableOriginalConstructor()
                 ->disableOriginalClone()
