@@ -261,6 +261,15 @@ class SubmissionController extends AbstractController {
             }
 
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+                // copy selected previous submitted files
+                if (isset($previous_files[$i])){
+                    for ($j=0; $j < count($previous_files[$i]); $j++){
+                        if (!copy($previous_part_path[$i]."/".$previous_files[$i][$j], $part_path[$i]."/".$previous_files[$i][$j])) {
+                            return $this->uploadResult("Failed to copy previously submitted file ".$previous_files[$i][$j]." to current submission.", false);
+                        }
+                    }
+                }
+
                 if (isset($uploaded_files[$i])) {
                     for ($j = 0; $j < $count[$i]; $j++) {
                         if ($uploaded_files[$i]["is_zip"][$j] === true) {
@@ -287,15 +296,6 @@ class SubmissionController extends AbstractController {
                         // Is this really an error we should fail on?
                         if (!unlink($uploaded_files[$i]["tmp_name"][$j])) {
                             return $this->uploadResult("Failed to delete the uploaded file ".$uploaded_files[$i]["name"][$j]." from temporary storage.", false);
-                        }
-                    }
-                }
-    
-                // copy selected previous submitted files
-                if (isset($previous_files[$i])){
-                    for ($j=0; $j < count($previous_files[$i]); $j++){
-                        if (!copy($previous_part_path[$i]."/".$previous_files[$i][$j], $part_path[$i]."/".$previous_files[$i][$j])) {
-                            return $this->uploadResult("Failed to copy previously submitted file ".$previous_files[$i][$j]." to current submission.", false);
                         }
                     }
                 }

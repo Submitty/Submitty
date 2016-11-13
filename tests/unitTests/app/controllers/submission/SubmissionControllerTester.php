@@ -11,7 +11,13 @@ use tests\unitTests\BaseUnitTest;
 
 class SubmissionControllerTester extends BaseUnitTest {
 
+    /**
+     * @var array
+     */
     private $config = array();
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
     private $core;
 
     public function setUp() {
@@ -42,31 +48,49 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->core = $this->mockCore($this->config);
 
-        $gradeable = $this->createMock(Gradeable::class);
-        $gradeable->method('getId')->willReturn("test");
-        $gradeable->method('getName')->willReturn("Test Gradeable");
-        $gradeable->method('getHighestVersion')->willReturn(0);
+        $highest_version = 0;
+        $num_parts = 1;
+        $max_size = 1000000; // 1 MB
 
         $annotations = $this->getAnnotations();
         if (isset($annotations['method']['highestVersion'][0])) {
-            $gradeable->method('getHighestVersion')->willReturn(intval($annotations['method']['highestVersion'][0]));
-        }
-        else {
-            $gradeable->method('getHighestVersion')->willReturn(0);
+            $highest_version = intval($annotations['method']['highestVersion'][0]);
         }
 
         if (isset($annotations['method']['numParts'][0])) {
-            $gradeable->method('getNumParts')->willReturn(intval($annotations['method']['numParts'][0]));
-        }
-        else {
-            $gradeable->method('getNumParts')->willReturn(1);
+            $num_parts = intval($annotations['method']['numParts'][0]);
         }
 
-        $gradeable->method('getMaxSize')->willReturn(1000000); // 1 MB
+        if (isset($annotations['method']['maxSize'][0])) {
+            $max_size = floatval($annotations['method']['maxSize'][0]);
+        }
+
+        $this->core->method('loadModel')->willReturn($this->createMockGradeableList($highest_version, $num_parts, $max_size));
+    }
+
+    /**
+     * Helper method to generate a mocked gradeable list with one gradeable. We can use annotations in our testcases
+     * to set various aspects of the gradeable, namely @highestVersion, @numParts, and @maxSize for
+     * highest version of submission, number of parts, and filesize respectively.
+     *
+     * @param int    $highest_version
+     * @param int    $num_parts
+     * @param double $max_size
+     *
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    private function createMockGradeableList($highest_version = 0, $num_parts = 1, $max_size = 1000000.) {
+        $gradeable = $this->createMock(Gradeable::class);
+        $gradeable->method('getId')->willReturn("test");
+        $gradeable->method('getName')->willReturn("Test Gradeable");
+
+        $gradeable->method('getHighestVersion')->willReturn(intval($highest_version));
+        $gradeable->method('getNumParts')->willReturn(intval($num_parts));
+        $gradeable->method('getMaxSize')->willReturn($max_size);
 
         $g_list = $this->createMock(GradeableList::class);
         $g_list->method('getSubmittableElectronicGradeables')->willReturn(array('test' => $gradeable));
-        $this->core->method('loadModel')->willReturn($g_list);
+        return $g_list;
     }
 
     /**
@@ -77,6 +101,13 @@ class SubmissionControllerTester extends BaseUnitTest {
         FileUtils::recursiveRmdir($this->config['tmp_path']);
     }
 
+    /**
+     * This adds a new entry to $_FILES, moving the file to the directory we've created for the tests.
+     *
+     * @param $name
+     * @param string $dir
+     * @param int $part
+     */
     public function setUploadFiles($name, $dir="", $part=1) {
         $src = FileUtils::joinPaths(__TEST_DATA__, "files", $dir, $name);
         $dst = FileUtils::joinPaths($this->config['tmp_path'], Utils::generateRandomString());
@@ -88,9 +119,21 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_FILES["files{$part}"]['error'][] = null;
     }
 
-    public function runController() {
-        $controller = new SubmissionController($this->core);
-        return $controller->run();
+    /**
+     * Runs the upload function in the controller using our mocked Core object, and then clearing out the $_FILES
+     * array.
+     *
+     * @param $core
+     */
+    public function runController($core=null) {
+        if ($core === null) {
+            $core = $this->core;
+        }
+        /** @noinspection PhpParamsInspection */
+        $controller = new SubmissionController($core);
+        $return = $controller->run();
+        $_FILES = array();
+        return $return;
     }
 
     /**
@@ -129,6 +172,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $iter = new \RecursiveDirectoryIterator($tmp);
+        $parts = array();
         while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
             if ($iter->isDot()) {
                 $iter->next();
@@ -139,6 +183,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
             else if ($iter->isDir()) {
                 $this->assertTrue(in_array($iter->getFilename(), array('part1', 'part2')));
+                $parts[] = $iter->getFilename();
                 $iter2 = $iter->getChildren();
                 while ($iter2 !== "" && $iter2->getFilename() !== "") {
                     if ($iter2->isDot()) {
@@ -167,6 +212,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
             $iter->next();
         }
+        $this->assertEquals(array('part1', 'part2'), $parts);
     }
 
     /**
@@ -181,13 +227,14 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $iter = new \RecursiveDirectoryIterator($tmp);
+        $filenames = array();
         while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
             if ($iter->isDot()) {
                 $iter->next();
                 continue;
             }
             else if ($iter->isFile()) {
-                $this->assertTrue(in_array($iter->getFilename(), array(".submit.timestamp", "test2.txt")));
+                $filenames[] = $iter->getFilename();
             }
             else if ($iter->isDir()) {
                 $this->assertEquals("testDir", $iter->getFilename());
@@ -212,6 +259,145 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
             $iter->next();
         }
+        $this->assertEquals(array(".submit.timestamp", "test2.txt"), $filenames);
+    }
+
+    /**
+     * Upload a second version of a gradeable with no previous files and different files per upload. Test
+     * that both versions exist and neither bled over to the other.
+     */
+    public function testSecondVersionNoPrevious() {
+        $this->setUploadFiles('test1.txt');
+        $return = $this->runController();
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
+        $files = array();
+        foreach (new \FilesystemIterator($tmp) as $file) {
+            $this->assertFalse($file->isDir());
+            $files[] = $file->getFilename();
+        }
+        $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
+
+        $this->setUploadFiles('test2.txt');
+        $core = $this->mockCore($this->config);
+        $core->method('loadModel')->willReturn($this->createMockGradeableList(1));
+        $return = $this->runController($core);
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "2");
+        $files = array();
+        foreach (new \FilesystemIterator($tmp) as $file) {
+            $this->assertFalse($file->isDir());
+            $files[] = $file->getFilename();
+        }
+        $this->assertEquals(array('.submit.timestamp', 'test2.txt'), $files);
+
+    }
+
+    /**
+     * Upload a second version of a gradeable that includes previous files, but there's no overlap in file names
+     * so we should have one file in version 1 and two files in version 2
+     */
+    public function testSecondVersionPreviousNoOverlap() {
+        $this->setUploadFiles('test1.txt');
+        $return = $this->runController();
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
+        $files = array();
+        foreach (new \FilesystemIterator($tmp) as $file) {
+            $this->assertFalse($file->isDir());
+            $files[] = $file->getFilename();
+        }
+        $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
+
+        $this->setUploadFiles('test2.txt');
+        $_POST['previous_files'] = json_encode(array(array('test1.txt')));
+        $core = $this->mockCore($this->config);
+        $core->method('loadModel')->willReturn($this->createMockGradeableList(1));
+        $return = $this->runController($core);
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "2");
+        $files = array();
+        foreach (new \FilesystemIterator($tmp) as $file) {
+            $this->assertFalse($file->isDir());
+            $files[] = $file->getFilename();
+        }
+        $this->assertEquals(array('.submit.timestamp', 'test1.txt', 'test2.txt'), $files);
+    }
+
+    /**
+     * Upload a second version that has previous files that has the same filename as the file that's being uploaded.
+     * This should only include the version that was uploaded (and not use the previous).
+     */
+    public function testSecondVersionPreviousOverlap() {
+        $this->setUploadFiles('test1.txt');
+        $return = $this->runController();
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
+        $files = array();
+        foreach (new \FilesystemIterator($tmp) as $file) {
+            $this->assertFalse($file->isDir());
+            $files[] = $file->getFilename();
+        }
+        $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
+
+        $this->setUploadFiles('test1.txt', 'overlap');
+        $_POST['previous_files'] = json_encode(array(array('test1.txt')));
+        $core = $this->mockCore($this->config);
+        $core->method('loadModel')->willReturn($this->createMockGradeableList(1));
+        $return = $this->runController($core);
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "2");
+        $files = array();
+        foreach (new \FilesystemIterator($tmp) as $file) {
+            $this->assertFalse($file->isDir());
+            $files[] = $file->getFilename();
+            if ($file->getFilename() === "test1.txt") {
+                $this->assertStringEqualsFile($file->getPathname(), "new_file");
+            }
+        }
+        $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
+    }
+
+    /**
+     * This tests what happens when we upload a second version of the gradeable that is a zip that contains a file
+     * that overlaps the file from the first version.
+     */
+    public function testSecondVersionPreviousOverlapZip() {
+        $this->setUploadFiles('test1.txt');
+        $return = $this->runController();
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
+        $files = array();
+        foreach (new \FilesystemIterator($tmp) as $file) {
+            $this->assertFalse($file->isDir());
+            $files[] = $file->getFilename();
+        }
+        $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
+
+        $this->setUploadFiles('overlap.zip', 'overlap');
+        $_POST['previous_files'] = json_encode(array(array('test1.txt')));
+        $core = $this->mockCore($this->config);
+        $core->method('loadModel')->willReturn($this->createMockGradeableList(1));
+        $return = $this->runController($core);
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "2");
+        $files = array();
+        foreach (new \FilesystemIterator($tmp) as $file) {
+            $this->assertFalse($file->isDir());
+            $files[] = $file->getFilename();
+            if ($file->getFilename() === "test1.txt") {
+                $this->assertStringEqualsFile($file->getPathname(), "new_file");
+            }
+        }
+        $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
     }
 
     /**
@@ -227,20 +413,21 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $iter = new \RecursiveDirectoryIterator($tmp);
+        $files = array();
         while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
             if ($iter->isDot()) {
                 $iter->next();
                 continue;
             }
             else if ($iter->isFile()) {
-                $this->assertTrue(in_array($iter->getFilename(),
-                    array(".submit.timestamp", "test1.txt", "basic_zip.zip")));
+                $files[] = $iter->getFilename();
             }
             else {
                 $this->fail("Unknown type found in test directory.");
             }
             $iter->next();
         }
+        $this->assertEquals(array(".submit.timestamp", "basic_zip.zip", "test1.txt"), $files);
     }
 
     /**
@@ -263,7 +450,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     /**
-     * This tests the same thing as  testSameFilenameInZip(), however we submit "test.txt" before "zippedfiles.zip"
+     * This tests the same thing as testSameFilenameInZip(), however we submit "test.txt" before "zippedfiles.zip"
      */
     public function testSameFilenameInZipReversed() {
         $this->setUploadFiles('test.txt', 'same_filenames_in_zip');
@@ -280,8 +467,36 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     /**
+     * Test that error is thrown when trying to upload to a gradeable id that does not exist in
+     * our gradeable list
+     */
+    public function testErrorInvalidGradeableId() {
+        $_REQUEST['gradeable_id'] = "fake";
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Invalid gradeable id 'fake'", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    /**
+     * Test that error is thrown when system is trying to make a folder for the assignment (in the submissions
+     * folder) and it cannot.
+     */
+    public function testInvalidFolder() {
+        $config = $this->config;
+        $config['tmp_path'] = "invalid_folder_that_does_not_exist";
+        $config['course_path'] = "invalid_folder_that_does_not_exist";
+        $core = $this->mockCore($config);
+        $core->method('loadModel')->willReturn($this->createMockGradeableList());
+        $return = $this->runController($core);
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to make folder for this assignment.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    /**
      * Because our system does not recursively expand zip files with reckless disregard, we only need to worry
-     * about someone hiding a weird size in the root of the zip.
+     * about someone hiding a big sized file in the outermost zip.
      */
     public function testUploadZipBomb() {
         $this->setUploadFiles('zip_bomb.zip', 'zip_bomb');
@@ -294,15 +509,4 @@ class SubmissionControllerTester extends BaseUnitTest {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertFalse(is_dir($tmp));
     }
-
-    /**
-     * Upload test cases:
-     * 1) normal upload one bucket (no zips)
-     * 2) normal upload two buckets (no zips)
-     * 3) zip upload one bucket (no folders)
-     * 4) zip upload two buckets (no folders)
-     * 5) zip upload one bucket (folders)
-     * 6) zip upload two buckets (folders)
-     * 7) zip bomb
-     */
 }
