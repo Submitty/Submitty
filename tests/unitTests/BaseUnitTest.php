@@ -56,4 +56,21 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
 
         return $core;
     }
+
+    /**
+     * This copies the createMock() function from PHPUnit as it was added in 5.4 which is not available to PHP 5.5.
+     * @TODO: Remove this once we drop official support for PHP 5.5
+     *
+     * @param string $originalClassName
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @throws \PHPUnit_Framework_Exception
+     */
+    public function createMock($originalClassName) {
+        return $this->getMockBuilder($originalClassName)
+            ->disableOriginalConstructor()
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+    }
 }

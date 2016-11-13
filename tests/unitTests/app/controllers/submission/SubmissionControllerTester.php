@@ -150,12 +150,15 @@ class SubmissionControllerTester extends BaseUnitTest {
         $pattern = '/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/';
         $this->assertRegExp($pattern, file_get_contents(FileUtils::joinPaths($tmp, ".submit.timestamp")));
         $iter = new \FilesystemIterator($tmp);
+        $files = array();
         foreach ($iter as $entry) {
             $this->assertFalse($entry->isDir());
             $this->assertFalse($entry->isLink());
             $this->assertTrue($entry->isFile());
-            $this->assertTrue(in_array($entry->getFilename(), array('test1.txt', '.submit.timestamp')));
+            $files[] = $entry->getFilename();
         }
+        sort($files);
+        $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
     }
 
     /**
@@ -173,6 +176,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $iter = new \RecursiveDirectoryIterator($tmp);
         $parts = array();
+        $files = array();
         while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
             if ($iter->isDot()) {
                 $iter->next();
@@ -191,6 +195,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                         continue;
                     }
                     else if ($iter2->isFile()) {
+                        $files[] = $iter2->getFilename();
                         if ($iter->getFilename() === "part1") {
                             $this->assertEquals($iter2->getFilename(), "test1.txt");
                             $this->assertStringEqualsFile($iter2->getPathname(), "a");
@@ -198,6 +203,9 @@ class SubmissionControllerTester extends BaseUnitTest {
                         else if ($iter->getFilename() === "part2") {
                             $this->assertEquals($iter2->getFilename(), "test2.txt");
                             $this->assertStringEqualsFile($iter2->getPathname(), "b");
+                        }
+                        else {
+                            $this->fail("There should only be test1.txt or test2.txt in these directories");
                         }
                     }
                     else {
@@ -212,7 +220,10 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
             $iter->next();
         }
+        sort($parts);
         $this->assertEquals(array('part1', 'part2'), $parts);
+        sort($files);
+        $this->assertEquals(array('test1.txt', 'test2.txt'), $files);
     }
 
     /**
@@ -259,6 +270,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
             $iter->next();
         }
+        sort($filenames);
         $this->assertEquals(array(".submit.timestamp", "test2.txt"), $filenames);
     }
 
@@ -277,6 +289,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $this->assertFalse($file->isDir());
             $files[] = $file->getFilename();
         }
+        sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
 
         $this->setUploadFiles('test2.txt');
@@ -291,6 +304,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $this->assertFalse($file->isDir());
             $files[] = $file->getFilename();
         }
+        sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test2.txt'), $files);
 
     }
@@ -310,6 +324,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $this->assertFalse($file->isDir());
             $files[] = $file->getFilename();
         }
+        sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
 
         $this->setUploadFiles('test2.txt');
@@ -325,6 +340,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $this->assertFalse($file->isDir());
             $files[] = $file->getFilename();
         }
+        sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt', 'test2.txt'), $files);
     }
 
@@ -343,6 +359,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $this->assertFalse($file->isDir());
             $files[] = $file->getFilename();
         }
+        sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
 
         $this->setUploadFiles('test1.txt', 'overlap');
@@ -361,6 +378,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $this->assertStringEqualsFile($file->getPathname(), "new_file");
             }
         }
+        sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
     }
 
@@ -397,6 +415,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $this->assertStringEqualsFile($file->getPathname(), "new_file");
             }
         }
+        sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
     }
 
@@ -427,6 +446,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             }
             $iter->next();
         }
+        sort($files);
         $this->assertEquals(array(".submit.timestamp", "basic_zip.zip", "test1.txt"), $files);
     }
 
