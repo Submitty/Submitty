@@ -5,7 +5,6 @@ namespace tests\unitTests;
 use app\libraries\Core;
 use app\libraries\database\IDatabaseQueries;
 use app\libraries\Output;
-use app\libraries\Utils;
 use app\models\Config;
 use app\models\User;
 
