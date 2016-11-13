@@ -65,11 +65,20 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
      * @throws \PHPUnit_Framework_Exception
      */
     public function createMock($originalClassName) {
-        return $this->getMockBuilder($originalClassName)
-            ->disableOriginalConstructor()
-            ->disableOriginalClone()
-            ->disableArgumentCloning()
-            ->disallowMockingUnknownTypes()
-            ->getMock();
+        if (version_compare("5.5", phpversion()) == -1) {
+            return $this->getMockBuilder($originalClassName)
+                ->disableOriginalConstructor()
+                ->disableOriginalClone()
+                ->disableArgumentCloning()
+                ->disallowMockingUnknownTypes()
+                ->getMock();
+        }
+        else {
+            return $this->getMockBuilder($originalClassName)
+                ->disableOriginalConstructor()
+                ->disableOriginalClone()
+                ->disableArgumentCloning()
+                ->getMock();
+        }
     }
 }
