@@ -33,17 +33,9 @@ class SubmissionControllerTester extends BaseUnitTest {
         $config['course_path'] = FileUtils::joinPaths($config['tmp_path'], "courses", $config['semester'],
             $config['course']);
 
-        if (!FileUtils::createDir($config['course_path'], null, true)) {
-            print("Could not create ".$config['course_path']);
-        }
-
-        if (!FileUtils::createDir(FileUtils::joinPaths($config['course_path'], "submissions"))) {
-            print("Could not create ".FileUtils::joinPaths($config['course_path'], "submissions"));
-        }
-
-        if (!FileUtils::createDir(FileUtils::joinPaths($config['tmp_path'], "to_be_graded_interactive"))) {
-            print("Could not create ".FileUtils::joinPaths($config['tmp_path'], "to_be_graded_interactive"));
-        }
+        $this->assertTrue(FileUtils::createDir($config['course_path'], null, true));
+        $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($config['course_path'], "submissions")));
+        $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($config['tmp_path'], "to_be_graded_interactive")));
 
         $this->config = $config;
 
@@ -160,6 +152,24 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
+        $touch_file = implode("__", array($this->config['semester'], $this->config['course'], "test", "testUser", "1"));
+        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive", $touch_file));
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
+        foreach (new \FilesystemIterator($tmp) as $iter) {
+            if ($iter->isDir()) {
+                $this->assertEquals("1", $iter->getFilename());
+            }
+            else {
+                $this->assertTrue($iter->isFile());
+                $this->assertEquals("user_assignment_settings.json", $iter->getFilename());
+                $json = FileUtils::readJsonFile($iter->getPathname());
+                $this->assertEquals(1, $json['active_version']);
+                $this->assertTrue(isset($json['history']));
+                $this->assertEquals(1, count($json['history']));
+                $this->assertEquals(1, $json['history'][0]['version']);
+                $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
+            }
+        }
     }
 
     /**
@@ -308,6 +318,28 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test2.txt'), $files);
 
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
+
+        $dirs = array();
+        foreach (new \FilesystemIterator($tmp) as $iter) {
+            if ($iter->isDir()) {
+                $dirs[] = $iter->getFilename();
+            }
+            else {
+                $this->assertTrue($iter->isFile());
+                $this->assertEquals("user_assignment_settings.json", $iter->getFilename());
+                $json = FileUtils::readJsonFile($iter->getPathname());
+                $this->assertEquals(2, $json['active_version']);
+                $this->assertTrue(isset($json['history']));
+                $this->assertEquals(2, count($json['history']));
+                $this->assertEquals(1, $json['history'][0]['version']);
+                $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
+                $this->assertEquals(2, $json['history'][1]['version']);
+                $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
+            }
+        }
+        sort($dirs);
+        $this->assertEquals(array('1', '2'), $dirs);
     }
 
     /**
@@ -544,6 +576,24 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals(array('.submit.timestamp', 'filename with spaces.txt'), $files);
     }
 
+    public function testSvnUpload() {
+        $_REQUEST['svn_checkout'] = "true";
+        $return = $this->runController();
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
+
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
+        $files = array();
+        foreach (new \FilesystemIterator($tmp) as $iter) {
+            $this->assertTrue($iter->isFile());
+            $files[] = $iter->getFilename();
+        }
+        sort($files);
+        $this->assertEquals(array('.submit.SVN_CHECKOUT', '.submit.timestamp'), $files);
+        $touch_file = implode("__", array($this->config['semester'], $this->config['course'], "test", "testUser", "1"));
+        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive", $touch_file));
+    }
+
     /**
      * Test that error is thrown when trying to upload to a gradeable id that does not exist in
      * our gradeable list
@@ -702,5 +752,60 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['success']);
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertFalse(is_dir($tmp));
+    }
+
+    public function testErrorOnBrokenZip() {
+        $this->setUploadFiles('broken.zip');
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Could not properly unpack zip file. Error message: Zip archive is inconsistent.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    public function testErrorOnCopyingFile() {
+        $this->setUploadFiles('test1.txt');
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to copy uploaded file test1.txt to current submission.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    /**
+     * Test that we cannot just set the $_FILES array manually under normal operation (not within our
+     * test framework) and that we'll get an error.
+     */
+    public function testErrorFakeFiles() {
+        $this->setUploadFiles('test1.txt');
+        $config = $this->config;
+        $config['testing'] = false;
+        $core = $this->createMockCore($config);
+        $core->method('loadModel')->willReturn($this->createMockGradeableList());
+        $return = $this->runController($core);
+        $this->assertTrue($return['error']);
+        $this->assertEquals("The tmp file 'test1.txt' was not properly uploaded.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    public function testErrorCreateSVNFile() {
+        $_REQUEST['svn_checkout'] = "true";
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to touch file for svn submission.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    public function testErrorCreateQueueFile() {
+        $this->setUploadFiles('test1.txt');
+        $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive");
+        $this->assertTrue(FileUtils::recursiveRmdir($dir));
+        $this->assertTrue(FileUtils::createDir($dir, 0444));
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to create file for grading queue.", $return['message']);
+        $this->assertFalse($return['success']);
     }
 }

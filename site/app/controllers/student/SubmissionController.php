@@ -284,21 +284,21 @@ class SubmissionController extends AbstractController {
                                 $zip->close();
                             }
                             else {
-                                return $this->uploadResult("Could not properly unpack zip file. Error message: ".ErrorMessages::uploadErrors($res), false);
+                                return $this->uploadResult("Could not properly unpack zip file. Error message: ".ErrorMessages::zipErrors($res), false);
                             }
                         }
                         else {
                             if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
-                                if (!copy($uploaded_files[$i]["tmp_name"][$j], $part_path[$i]."/".$uploaded_files[$i]["name"][$j])) {
+                                if (!@copy($uploaded_files[$i]["tmp_name"][$j], $part_path[$i]."/".$uploaded_files[$i]["name"][$j])) {
                                     return $this->uploadResult("Failed to copy uploaded file ".$uploaded_files[$i]["name"][$j]." to current submission.", false);
                                 }
                             }
                             else {
-                                return $this->uploadResult("The tmp file '{$uploaded_files[$i]['tmp_name'][$j]}' was not properly uploaded.", false);
+                                return $this->uploadResult("The tmp file '{$uploaded_files[$i]['name'][$j]}' was not properly uploaded.", false);
                             }
                         }
                         // Is this really an error we should fail on?
-                        if (!unlink($uploaded_files[$i]["tmp_name"][$j])) {
+                        if (!@unlink($uploaded_files[$i]["tmp_name"][$j])) {
                             return $this->uploadResult("Failed to delete the uploaded file ".$uploaded_files[$i]["name"][$j]." from temporary storage.", false);
                         }
                     }
@@ -306,7 +306,7 @@ class SubmissionController extends AbstractController {
             }
         }
         else {
-            if (!touch($version_path."/.submit.SVN_CHECKOUT")) {
+            if (!@touch($version_path."/.submit.SVN_CHECKOUT")) {
                 return $this->uploadResult("Failed to touch file for svn submission.", false);
             }
         }
@@ -327,13 +327,13 @@ class SubmissionController extends AbstractController {
         }
     
         // TODO: If any of these fail, should we "cancel" (delete) the entire submission attempt or just leave it?
-        if (!file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             return $this->uploadResult("Failed to write to settings file.", false);
         }
         
         $this->upload_details['assignment_settings'] = true;
 
-        if (!file_put_contents($version_path."/.submit.timestamp", $current_time."\n")) {
+        if (!@file_put_contents($version_path."/.submit.timestamp", $current_time."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
 
@@ -342,7 +342,7 @@ class SubmissionController extends AbstractController {
         $touch_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $user_id, $new_version);
         $touch_file = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_interactive/".implode("__", $touch_file);
-        if (!touch($touch_file)) {
+        if (!@touch($touch_file)) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
         }
 

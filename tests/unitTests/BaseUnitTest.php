@@ -41,7 +41,14 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
 
         $core->method('getConfig')->willReturn($config);
         $core->method('checkCsrfToken')->willReturn(true);
-        $core->method('isTesting')->willReturn(true);
+
+        if (isset($config_values['testing'])) {
+            $core->method('isTesting')->willReturn($config_values['testing'] === true);
+        }
+        else {
+            $core->method('isTesting')->willReturn(true);
+        }
+
 
         $queries = $this->createMock(IDatabaseQueries::class);
         $core->method('getQueries')->willReturn($queries);
