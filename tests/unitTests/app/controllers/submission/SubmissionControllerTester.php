@@ -485,6 +485,63 @@ class SubmissionControllerTester extends BaseUnitTest {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertStringEqualsFile(FileUtils::joinPaths($tmp, "test.txt"), "");
         $this->assertStringEqualsFile(FileUtils::joinPaths($tmp, "test2.txt"), "");
+        $files = array();
+        foreach (new \FilesystemIterator($tmp) as $iter) {
+            $this->assertTrue($iter->isFile());
+            $files[] = $iter->getFilename();
+        }
+        sort($files);
+        $this->assertEquals(array('.submit.timestamp', 'test.txt', 'test2.txt'), $files);
+
+    }
+
+    public function testFilenameWithSpaces() {
+        $this->setUploadFiles("filename with spaces.txt");
+        $return = $this->runController();
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
+
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
+        $files = array();
+        foreach (new \FilesystemIterator($tmp) as $iter) {
+            $this->assertTrue($iter->isFile());
+            $files[] = $iter->getFilename();
+        }
+        sort($files);
+        $this->assertEquals(array('.submit.timestamp', 'filename with spaces.txt'), $files);
+    }
+
+    public function testZipContaingFilesWithSpaces() {
+        $this->setUploadFiles('contains_spaces.zip');
+        $return = $this->runController();
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
+        $files = array();
+        $iter = new \RecursiveDirectoryIterator($tmp);
+        while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
+            if ($iter->isDot()) {
+                $iter->next();
+                continue;
+            }
+            else if ($iter->isDir()) {
+                $this->assertEquals("folder with spaces", $iter->getFilename());
+                foreach (new \FilesystemIterator($iter->getPathname()) as $iter2) {
+                    $this->assertTrue($iter2->isFile());
+                    $this->assertEquals("filename with spaces2.txt", $iter->getFilename());
+                }
+            }
+            else if ($iter->isFile()) {
+                $files[] = $iter->getFilename();
+            }
+            else {
+                $this->fail("Invalid type found in upload");
+            }
+            $iter->next();
+        }
+
+        sort($files);
+        $this->assertEquals(array('.submit.timestamp', 'filename with spaces.txt'), $files);
     }
 
     /**
@@ -563,7 +620,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $this->runController();
         $this->assertTrue($return['error']);
         $this->assertEquals("No files to be submitted.", $return['message']);
-        $this->assertFalse($return['message']);
+        $this->assertFalse($return['success']);
     }
 
     public function testErrorPreviousFilesFirstVersion() {
