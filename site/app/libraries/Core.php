@@ -83,8 +83,8 @@ class Core {
      * @param $course
      * @throws \Exception
      */
-    public function loadConfig($semester, $course) {
-        $this->config = new Config($semester, $course);
+    public function loadConfig($semester, $course, $master_ini_path) {
+        $this->config = new Config($semester, $course, $master_ini_path);
         $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
         if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");

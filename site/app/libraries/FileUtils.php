@@ -127,8 +127,13 @@ class FileUtils {
     }
 
     /**
-     * Create a directory if it doesn't already exist. If it's a file,
-     * delete the file, and then try to create directory.
+     * Create a directory if it doesn't already exist. If it's a file, delete the file, and then try to create
+     * directory. Additionally, we can specify a certain mode for the directory as well as if we should recursively
+     * create any folders specified in $dir if they don't all exist. The mkdir function takes into account the
+     * umask setting of your computer (which by default would be something like 022). However, we set it such that
+     * if we specify a mode, then we turn off the umask while we create the folder before reenabling it so we have
+     * absolute power for it without having to worry about umasks (and can actually make a folder 0777 if we so
+     * wanted).
      *
      * @param string $dir
      * @param int    $mode

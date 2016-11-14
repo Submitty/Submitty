@@ -82,7 +82,8 @@ if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
  * and then we initialize our Output engine (as it requires Core to run) and then set the
  * paths for the Logger and ExceptionHandler
  */
-$core->loadConfig($semester, $course);
+$master_ini_path = \app\libraries\FileUtils::joinPaths("..", "config", "master.ini");
+$core->loadConfig($semester, $course, $master_ini_path);
 $core->getOutput()->addBreadcrumb("F16");
 $core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->buildUrl());
 date_default_timezone_set($core->getConfig()->getTimezone());
