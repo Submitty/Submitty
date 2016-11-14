@@ -17,7 +17,7 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
      * @param $config_values
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function mockCore($config_values=array()) {
+    protected function createMockCore($config_values=array()) {
         $core = $this->createMock(Core::class);
 
         $config = $this->createMock(Config::class);

@@ -169,7 +169,7 @@ class SubmissionController extends AbstractController {
                         if (!isset($uploaded_files[$i]["tmp_name"][$j]) || $uploaded_files[$i]["tmp_name"][$j] == "") {
                             $error_message = $uploaded_files[$i]["name"][$j]." failed to upload. ";
                             if (isset($uploaded_files[$i]["error"][$j])) {
-                                $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_files[$i]["error"][$j]);
+                                $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_files[$i]["error"][$j]). ".";
                             }
                             $errors[] = $error_message;
                         }
@@ -192,25 +192,28 @@ class SubmissionController extends AbstractController {
             }
             
             if (empty($uploaded_files) && empty($previous_files)) {
-                return $this->uploadResult("No files to be submitted", false);
+                return $this->uploadResult("No files to be submitted.", false);
             }
             
             if (count($previous_files) > 0) {
                 if ($gradeable->getHighestVersion() === 0) {
-                    return $this->uploadResult("No submission found. There should not be any files kept from previous submission.", false);
+                    return $this->uploadResult("No submission found. There should not be any files from a previous submission.", false);
                 }
                 
                 $previous_path = $user_path."/".$gradeable->getHighestVersion();
                 if ($gradeable->getNumParts() > 1) {
                     for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                         $previous_part_path[$i] = $previous_path."/part".$i;
-                        if (!is_dir($previous_part_path[$i])) {
-                            return $this->uploadResult("Files from previous submission not found. Folder for previous submission does not exist.", false);
-                        }
                     }
                 }
                 else {
                     $previous_part_path[1] = $previous_path;
+                }
+
+                foreach ($previous_part_path as $path) {
+                    if (!is_dir($path)) {
+                        return $this->uploadResult("Files from previous submission not found. Folder for previous submission does not exist.", false);
+                    }
                 }
     
                 for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
@@ -218,7 +221,8 @@ class SubmissionController extends AbstractController {
                         foreach ($previous_files[$i] as $prev_file) {
                             $filename = $previous_part_path[$i]."/".$prev_file;
                             if (!file_exists($filename)) {
-                                return $this->uploadResult("File '{$filename}' does not exist in previous submission.", false);
+                                $name = basename($filename);
+                                return $this->uploadResult("File '{$name}' does not exist in previous submission.", false);
                             }
                         }
                     }

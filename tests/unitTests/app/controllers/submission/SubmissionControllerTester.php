@@ -23,6 +23,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function setUp() {
         $_REQUEST['action'] = 'upload';
         $_REQUEST['gradeable_id'] = 'test';
+        $_REQUEST['svn_checkout'] = false;
         $_POST['previous_files'] = "";
         $_POST['csrf_token'] = null;
 
@@ -46,7 +47,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->config = $config;
 
-        $this->core = $this->mockCore($this->config);
+        $this->core = $this->createMockCore($this->config);
 
         $highest_version = 0;
         $num_parts = 1;
@@ -62,7 +63,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
 
         if (isset($annotations['method']['maxSize'][0])) {
-            $max_size = floatval($annotations['method']['maxSize'][0]);
+            $max_size = intval($annotations['method']['maxSize'][0]);
         }
 
         $this->core->method('loadModel')->willReturn($this->createMockGradeableList($highest_version, $num_parts, $max_size));
@@ -293,7 +294,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
 
         $this->setUploadFiles('test2.txt');
-        $core = $this->mockCore($this->config);
+        $core = $this->createMockCore($this->config);
         $core->method('loadModel')->willReturn($this->createMockGradeableList(1));
         $return = $this->runController($core);
         $this->assertFalse($return['error'], "Error: {$return['message']}");
@@ -329,7 +330,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->setUploadFiles('test2.txt');
         $_POST['previous_files'] = json_encode(array(array('test1.txt')));
-        $core = $this->mockCore($this->config);
+        $core = $this->createMockCore($this->config);
         $core->method('loadModel')->willReturn($this->createMockGradeableList(1));
         $return = $this->runController($core);
         $this->assertFalse($return['error'], "Error: {$return['message']}");
@@ -364,7 +365,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->setUploadFiles('test1.txt', 'overlap');
         $_POST['previous_files'] = json_encode(array(array('test1.txt')));
-        $core = $this->mockCore($this->config);
+        $core = $this->createMockCore($this->config);
         $core->method('loadModel')->willReturn($this->createMockGradeableList(1));
         $return = $this->runController($core);
         $this->assertFalse($return['error'], "Error: {$return['message']}");
@@ -401,7 +402,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->setUploadFiles('overlap.zip', 'overlap');
         $_POST['previous_files'] = json_encode(array(array('test1.txt')));
-        $core = $this->mockCore($this->config);
+        $core = $this->createMockCore($this->config);
         $core->method('loadModel')->willReturn($this->createMockGradeableList(1));
         $return = $this->runController($core);
         $this->assertFalse($return['error'], "Error: {$return['message']}");
@@ -502,11 +503,11 @@ class SubmissionControllerTester extends BaseUnitTest {
      * Test that error is thrown when system is trying to make a folder for the assignment (in the submissions
      * folder) and it cannot.
      */
-    public function testInvalidFolder() {
+    public function testFailureToCreateGradeableFolder() {
         $config = $this->config;
         $config['tmp_path'] = "invalid_folder_that_does_not_exist";
         $config['course_path'] = "invalid_folder_that_does_not_exist";
-        $core = $this->mockCore($config);
+        $core = $this->createMockCore($config);
         $core->method('loadModel')->willReturn($this->createMockGradeableList());
         $return = $this->runController($core);
         $this->assertTrue($return['error']);
@@ -514,11 +515,127 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['success']);
     }
 
+    public function testFailureToCreateStudentFolder() {
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test"), 0444);
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to make folder for this assignment for the user.", $return['message']);
+        $this->assertFalse($return['success']);
+        FileUtils::recursiveChmod($this->config['course_path'], 0777);
+    }
+
+    public function testFailureToCreateVersionFolder() {
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test"));
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), 0444);
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to make folder for the current version.", $return['message']);
+        $this->assertFalse($return['success']);
+        FileUtils::recursiveChmod($this->config['course_path'], 0777);
+    }
+
+    /**
+     * @numParts 2
+     */
+    public function testFailureToCreatePartFolder() {
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to make the folder for part 1.", $return['message']);
+        $this->assertFalse($return['success']);
+        FileUtils::recursiveChmod($this->config['course_path'], 0777);
+    }
+
+    public function testFileUploadError() {
+        $_FILES["files1"]['name'][] = "test.txt";
+        $_FILES["files1"]['type'][] = "";
+        $_FILES["files1"]['size'][] = 0;
+        $_FILES["files1"]['tmp_name'][] = "";
+        $_FILES["files1"]['error'][] = UPLOAD_ERR_PARTIAL;
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Upload Failed: test.txt failed to upload. Error message: The file was only partially uploaded.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    public function testNoFilesToSubmit() {
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("No files to be submitted.", $return['message']);
+        $this->assertFalse($return['message']);
+    }
+
+    public function testErrorPreviousFilesFirstVersion() {
+        $_POST['previous_files'] = json_encode(array(0=>array('test.txt')));
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("No submission found. There should not be any files from a previous submission.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    /**
+     * @highestVersion 2
+     */
+    public function testErrorMissingPreviousFolder() {
+        $_POST['previous_files'] = json_encode(array(0 => array('test.txt')));
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Files from previous submission not found. Folder for previous submission does not exist.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    public function testErrorMissingPreviousFile() {
+        $this->setUploadFiles('test1.txt');
+        $return = $this->runController();
+        $this->assertTrue($return['success']);
+
+        $_POST['previous_files'] = json_encode(array(0 => array('missing.txt')));
+        $this->setUploadFiles('test1.txt');
+        $core = $this->createMockCore($this->config);
+        $core->method('loadModel')->willReturn($this->createMockGradeableList(1));
+        $return = $this->runController($core);
+        $this->assertTrue($return['error']);
+        $this->assertEquals("File 'missing.txt' does not exist in previous submission.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    /**
+     * We are not running through all possible invalid filenames (as the list might grow) as that is tested elsewhere,
+     * just that we're using that function at all really.
+     */
+    public function testInvalidFilename() {
+        $this->setUploadFiles('in"valid.txt', 'invalid_files');
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Error: You may not use quotes, backslashes or angle brackets in your file name in\"valid.txt.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    public function testInvalidFilenameInZip() {
+        $this->setUploadFiles("invalid.zip", "invalid_files");
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside invalid.zip.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    /**
+     * @maxSize 0
+     */
+    public function testErrorFileTooBig() {
+        $this->setUploadFiles('test1.txt');
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("File(s) uploaded too large.  Maximum size is 0 kb. Uploaded file(s) was 0.001 kb.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
     /**
      * Because our system does not recursively expand zip files with reckless disregard, we only need to worry
      * about someone hiding a big sized file in the outermost zip.
      */
-    public function testUploadZipBomb() {
+    public function testErrorFilesInZipTooBig() {
         $this->setUploadFiles('zip_bomb.zip', 'zip_bomb');
         $return = $this->runController();
 

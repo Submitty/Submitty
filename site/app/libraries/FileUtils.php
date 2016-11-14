@@ -142,22 +142,40 @@ class FileUtils {
             if (file_exists($dir)) {
                 unlink($dir);
             }
-            $return = @mkdir($dir, ($mode === null) ? 0777 : $mode, $recursive);
-            if ($mode !== null && $return) {
-                static::recursiveChmod($dir, $mode);
+            // Umask gets applied to the mode when creating a folder, so we have to turn it off
+            $umask = null;
+            if ($mode !== null) {
+                $umask = umask(0000);
+            }
+            $return = @mkdir($dir, $mode !== null ? $mode : 0777, $recursive);
+            if ($mode !== null) {
+                umask($umask);
             }
         }
         return $return;
     }
 
+    /**
+     * @param $path
+     * @param $mode
+     *
+     * @return bool
+     */
     public static function recursiveChmod($path, $mode) {
-        $dir = new \DirectoryIterator($path);
+        $dir = new \FilesystemIterator($path);
+        $files = array();
         foreach ($dir as $item) {
-            chmod($item->getPathname(), $mode);
-            if ($item->isDir() && !$item->isDot()) {
+            if ($item->isDir()) {
                 static::recursiveChmod($item->getPathname(), $mode);
             }
+            $files[] = $item->getPathname();
         }
+
+        $return = true;
+        foreach ($files as $file) {
+            $return = $return && chmod($file, $mode);
+        }
+        return $return;
     }
     
     /**
