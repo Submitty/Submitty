@@ -3,67 +3,70 @@
 namespace tests\unitTests\app\libraries;
 
 use \app\libraries\FileUtils;
+use \app\libraries\Utils;
 
 class FileUtilsTester extends \PHPUnit_Framework_TestCase {
-    public static function setUpBeforeClass() {
-        $class = new \ReflectionClass(FileUtilsTester::class);
-        for ($i = 0; $i < count($class->getMethods())-1; $i++) {
-            FileUtils::recursiveRmdir(__TEST_DATA__."/FileUtilsTest".$i);
+
+    private $path;
+
+    public function setUp() {
+        $this->path = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
+    }
+
+    public function tearDown() {
+        if (file_exists($this->path)) {
+            FileUtils::recursiveRmdir($this->path);
         }
     }
 
     public function testCreateNonExistantDir() {
-        $this->assertFileNotExists(__TEST_DATA__."/FileUtilsTest1");
-        $this->assertTrue(FileUtils::createDir(__TEST_DATA__."/FileUtilsTest1"));
-        $this->assertFileExists(__TEST_DATA__."/FileUtilsTest1");
-        $this->assertTrue(is_dir(__TEST_DATA__."/FileUtilsTest1"));
-        FileUtils::recursiveRmdir(__TEST_DATA__."/FileUtilsTest1");
+        $this->assertFileNotExists($this->path);
+        $this->assertTrue(FileUtils::createDir($this->path));
+        $this->assertFileExists($this->path);
+        $this->assertTrue(is_dir($this->path));
     }
 
     public function testCreateExistingDir() {
-        $this->assertFileNotExists(__TEST_DATA__."/FileUtilsTest2");
-        $this->assertTrue(FileUtils::createDir(__TEST_DATA__."/FileUtilsTest2"));
-        $this->assertTrue(FileUtils::createDir(__TEST_DATA__."/FileUtilsTest2"));
-        $this->assertFileExists(__TEST_DATA__."/FileUtilsTest2");
-        $this->assertTrue(is_dir(__TEST_DATA__."/FileUtilsTest2"));
-        FileUtils::recursiveRmdir(__TEST_DATA__."/FileUtilsTest2");
+        $this->assertFileNotExists($this->path);
+        $this->assertTrue(FileUtils::createDir($this->path));
+        $this->assertTrue(FileUtils::createDir($this->path));
+        $this->assertFileExists($this->path);
+        $this->assertTrue(is_dir($this->path));
     }
 
     public function testCreateDirOverFile() {
-        $this->assertFileNotExists(__TEST_DATA__."/FileUtilsTest3");
-        file_put_contents(__TEST_DATA__."/FileUtilsTest3", "Some Data");
-        $this->assertFileExists(__TEST_DATA__."/FileUtilsTest3");
-        $this->assertFalse(is_dir(__TEST_DATA__."/FileUtilsTest3"));
-        $this->assertTrue(FileUtils::createDir(__TEST_DATA__."/FileUtilsTest3"));
-        $this->assertFileExists(__TEST_DATA__."/FileUtilsTest3");
-        $this->assertTrue(is_dir(__TEST_DATA__."/FileUtilsTest3"));
-        FileUtils::recursiveRmdir(__TEST_DATA__."/FileUtilsTest3");
+        $this->assertFileNotExists($this->path);
+        file_put_contents($this->path, "Some Data");
+        $this->assertFileExists($this->path);
+        $this->assertFalse(is_dir($this->path));
+        $this->assertTrue(FileUtils::createDir($this->path));
+        $this->assertFileExists($this->path);
+        $this->assertTrue(is_dir($this->path));
     }
 
     public function testRecursiveRmDir() {
-        $this->assertFileNotExists(__TEST_DATA__."/FileUtilsTest4");
-        FileUtils::createDir(__TEST_DATA__."/FileUtilsTest4");
-        file_put_contents(__TEST_DATA__."/FileUtilsTest4/test.txt", "a");
-        file_put_contents(__TEST_DATA__."/FileUtilsTest4/test2.txt", "b");
-        FileUtils::createDir(__TEST_DATA__."/FileUtilsTest4/a");
-        FileUtils::createDir(__TEST_DATA__."/FileUtilsTest4/b");
-        file_put_contents(__TEST_DATA__."/FileUtilsTest4/b/test.txt", "aa");
-        FileUtils::recursiveRmdir(__TEST_DATA__."/FileUtilsTest4");
-        $this->assertFileNotExists(__TEST_DATA__."/FileUtilsTest4");
+        $this->assertFileNotExists($this->path);
+        FileUtils::createDir($this->path);
+        file_put_contents(FileUtils::joinPaths($this->path, "test.txt"), "a");
+        file_put_contents(FileUtils::joinPaths($this->path, "test2.txt"), "b");
+        FileUtils::createDir(FileUtils::joinPaths($this->path, "a"));
+        FileUtils::createDir(FileUtils::joinPaths($this->path, "b"));
+        file_put_contents(FileUtils::joinPaths($this->path, "b", "test.txt"), "aa");
+        FileUtils::recursiveRmdir($this->path);
+        $this->assertFileNotExists($this->path);
     }
 
     public function testEmptyDir() {
-        $this->assertFileNotExists(__TEST_DATA__."/FileUtilsTest5");
-        FileUtils::createDir(__TEST_DATA__."/FileUtilsTest5");
-        file_put_contents(__TEST_DATA__."/FileUtilsTest5/test.txt", "a");
-        file_put_contents(__TEST_DATA__."/FileUtilsTest5/test2.txt", "b");
-        FileUtils::createDir(__TEST_DATA__."/FileUtilsTest5/a");
-        FileUtils::createDir(__TEST_DATA__."/FileUtilsTest5/b");
-        file_put_contents(__TEST_DATA__."/FileUtilsTest5/b/test.txt", "aa");
-        FileUtils::emptyDir(__TEST_DATA__."/FileUtilsTest5");
-        $this->assertFileExists(__TEST_DATA__."/FileUtilsTest5");
-        $this->assertCount(2,scandir(__TEST_DATA__."/FileUtilsTest5"));
-        FileUtils::recursiveRmdir(__TEST_DATA__."/FileUtilsTest5");
+        $this->assertFileNotExists($this->path);
+        FileUtils::createDir($this->path);
+        file_put_contents(FileUtils::joinPaths($this->path, "test.txt"), "a");
+        file_put_contents(FileUtils::joinPaths($this->path, "test.txt"), "b");
+        FileUtils::createDir(FileUtils::joinPaths($this->path, "a"));
+        FileUtils::createDir(FileUtils::joinPaths($this->path, "b"));
+        file_put_contents(FileUtils::joinPaths($this->path, "b", "test.txt"), "aa");
+        FileUtils::emptyDir($this->path);
+        $this->assertFileExists($this->path);
+        $this->assertCount(2,scandir($this->path));
     }
 
     public function testValidFileNames() {
