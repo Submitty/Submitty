@@ -17,7 +17,7 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
      * @param $config_values
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function createMockCore($config_values=array()) {
+    protected function createMockCore($config_values=array(), $user_config=array()) {
         $core = $this->createMock(Core::class);
 
         $config = $this->createMock(Config::class);
@@ -40,8 +40,13 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
         $config->method('getTimezone')->willReturn("America/New_York");
 
         $core->method('getConfig')->willReturn($config);
-        $core->method('checkCsrfToken')->willReturn(true);
 
+        if (isset($config_values['csrf_token'])) {
+            $core->method('checkCsrfToken')->willReturn($config_values['csrf_token'] === true);
+        }
+        else {
+            $core->method('checkCsrfToken')->willReturn(true);
+        }
         if (isset($config_values['testing'])) {
             $core->method('isTesting')->willReturn($config_values['testing'] === true);
         }
@@ -55,6 +60,13 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
 
         $user = $this->createMock(User::class);
         $user->method('getId')->willReturn("testUser");
+        if (isset($user_config['access_grading'])) {
+            $user->method('accessGrading')->willReturn($user_config['access_grading'] == true);
+        }
+        else {
+            $user->method('accessGrading')->willReturn(false);
+        }
+
         $core->method('getUser')->willReturn($user);
 
         $output = $this->createMock(Output::class);

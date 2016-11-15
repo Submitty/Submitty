@@ -25,7 +25,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_REQUEST['gradeable_id'] = 'test';
         $_REQUEST['svn_checkout'] = false;
         $_POST['previous_files'] = "";
-        $_POST['csrf_token'] = null;
+        $_POST['csrf_token'] = "";
 
         $config['tmp_path'] = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $config['semester'] = "test";
@@ -91,7 +91,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * uploaded files.
      */
     public function tearDown() {
-        FileUtils::recursiveRmdir($this->config['tmp_path']);
+        $this->assertTrue(FileUtils::recursiveRmdir($this->config['tmp_path']));
     }
 
     /**
@@ -117,6 +117,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * array.
      *
      * @param $core
+     * @return mixed
      */
     public function runController($core=null) {
         if ($core === null) {
@@ -340,6 +341,26 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($dirs);
         $this->assertEquals(array('1', '2'), $dirs);
+    }
+
+    /**
+     * @numParts 2
+     */
+    public function testSecondVersionPreviousTwoParts() {
+        $this->setUploadFiles("test1.txt", "", 1);
+        $this->setUploadFiles("test1.txt", "", 2);
+        $return = $this->runController();
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
+
+        $_POST['previous_files'] = json_encode(array(0 => array('test1.txt'), 1 => array('test1.txt')));
+        $core = $this->createMockCore($this->config);
+        $core->method('loadModel')->willReturn($this->createMockGradeableList(1, 2));
+        $this->setUploadFiles("test2.txt", "", 1);
+        $this->setUploadFiles("test2.txt", "", 2);
+        $return = $this->runController($core);
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
     }
 
     /**
@@ -594,6 +615,24 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive", $touch_file));
     }
 
+    public function testErrorNotSetCsrfToken() {
+        $_POST['csrf_token'] = null;
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Invalid CSRF token.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    public function testErrorInvalidCsrfToken() {
+        $config = $this->config;
+        $config['csrf_token'] = false;
+        $core = $this->createMockCore($config);
+        $return = $this->runController($core);
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Invalid CSRF token.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
     /**
      * Test that error is thrown when trying to upload to a gradeable id that does not exist in
      * our gradeable list
@@ -762,6 +801,24 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['success']);
     }
 
+    public function testErrorOnCopyingPrevious() {
+        $this->setUploadFiles('test1.txt');
+        $return = $this->runController();
+        $this->assertFalse($return['error'], "Error: {$return['message']}");
+        $this->assertTrue($return['success']);
+        $prev = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1", "test1.txt");
+
+        $_POST['previous_files'] = json_encode(array(0 => array('test1.txt')));
+        chmod($prev, 0000);
+        $core = $this->createMockCore($this->config);
+        $core->method('loadModel')->willReturn($this->createMockGradeableList(1));
+        $return = $this->runController($core);
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to copy previously submitted file test1.txt to current submission.", $return['message']);
+        $this->assertFalse($return['success']);
+        chmod($prev, 0777);
+    }
+
     public function testErrorOnCopyingFile() {
         $this->setUploadFiles('test1.txt');
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
@@ -770,6 +827,25 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['error']);
         $this->assertEquals("Failed to copy uploaded file test1.txt to current submission.", $return['message']);
         $this->assertFalse($return['success']);
+    }
+
+    public function testErrorCleanupTempFiles() {
+        $src = FileUtils::joinPaths(__TEST_DATA__, "files", "test1.txt");
+        $dst_dir = FileUtils::joinPaths($this->config['tmp_path'], "test_files");
+        $dst = FileUtils::joinPaths($dst_dir, Utils::generateRandomString());
+        FileUtils::createDir($dst_dir);
+        copy($src, $dst);
+        $_FILES["files1"]['name'][] = "test1.txt";
+        $_FILES["files1"]['type'][] = FileUtils::getMimeType($src);
+        $_FILES["files1"]['size'][] = filesize($src);
+        $_FILES["files1"]['tmp_name'][] = $dst;
+        $_FILES["files1"]['error'][] = null;
+        chmod($dst_dir, 0550);
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to delete the uploaded file test1.txt from temporary storage.", $return['message']);
+        $this->assertFalse($return['success']);
+        chmod($dst_dir, 0777);
     }
 
     /**
@@ -807,5 +883,260 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['error']);
         $this->assertEquals("Failed to create file for grading queue.", $return['message']);
         $this->assertFalse($return['success']);
+    }
+
+    public function testErrorBrokenHistoryFile() {
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
+        FileUtils::createDir($tmp, null, true);
+        file_put_contents(FileUtils::joinPaths($tmp, "user_assignment_settings.json"), "]invalid_json[");
+        $this->setUploadFiles('test1.txt');
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to open settings file.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    /**
+     * We're testing that rolling back the history works on failure to upload the second version of the file
+     */
+    public function testErrorHistorySecondVersion() {
+        $this->setUploadFiles('test1.txt');
+        $return = $this->runController();
+        $this->assertTrue($return['success']);
+
+        $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_interactive");
+        $this->assertTrue(FileUtils::recursiveRmdir($dir));
+        $this->assertTrue(FileUtils::createDir($dir, 0444));
+
+        $this->setUploadFiles('test1.txt');
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to create file for grading queue.", $return['message']);
+        $this->assertFalse($return['success']);
+
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
+        foreach (new \FilesystemIterator($tmp) as $iter) {
+            if ($iter->isDir()) {
+                $this->assertEquals("1", $iter->getFilename());
+            }
+            else {
+                $this->assertTrue($iter->isFile());
+                $this->assertEquals("user_assignment_settings.json", $iter->getFilename());
+                $json = FileUtils::readJsonFile($iter->getPathname());
+                $this->assertEquals(1, $json['active_version']);
+                $this->assertTrue(isset($json['history']));
+                $this->assertEquals(1, count($json['history']));
+                $this->assertEquals(1, $json['history'][0]['version']);
+                $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][0]['time']);
+            }
+        }
+    }
+
+    public function testErrorWriteSettingsFile() {
+        $this->setUploadFiles('test1.txt');
+        $dir = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
+        FileUtils::createDir($dir, null, true);
+        $settings = FileUtils::joinPaths($dir, "user_assignment_settings.json");
+        file_put_contents($settings, '{"active_version": 0, "history": []}');
+        chmod($settings, 0444);
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to write to settings file.", $return['message']);
+        $this->assertFalse($return['success']);
+        chmod($settings, 0777);
+    }
+
+    public function testErrorWriteTimestampFile() {
+        $this->setUploadFiles('test1.txt');
+        $dir = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
+        FileUtils::createDir($dir, null, true);
+        $timestamp = FileUtils::joinPaths($dir, ".submit.timestamp");
+        file_put_contents($timestamp, "Failed to save timestamp file for this submission.");
+        chmod($timestamp, 0444);
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to save timestamp file for this submission.", $return['message']);
+        $this->assertFalse($return['success']);
+    }
+
+    public function testShowHomeworkPageNoGradeable() {
+        $_REQUEST['action'] = 'display';
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("No gradeable with that id.", $return['message']);
+    }
+
+    public function testShowHomework() {
+        $_REQUEST['action'] = 'display';
+        $core = $this->createMockCore();
+        $now = new \DateTime("now", new \DateTimeZone($core->getConfig()->getTimezone()));
+        $gradeable = $this->createMock(Gradeable::class);
+        $gradeable->method('hasConfig')->willReturn(true);
+        $gradeable->method('getOpenDate')->willReturn($now);
+
+        $g_list = $this->createMock(GradeableList::class);
+        $g_list->method('getGradeable')->willReturn($gradeable);
+        $core->method('loadModel')->willReturn($g_list);
+        $return = $this->runController($core);
+        $this->assertEquals("test", $return['id']);
+        $this->assertFalse($return['error']);
+    }
+
+    public function testShowHomeworkNoConfig() {
+        $_REQUEST['action'] = 'display';
+        $core = $this->createMockCore();
+        $now = new \DateTime("now", new \DateTimeZone($core->getConfig()->getTimezone()));
+        $gradeable = $this->createMock(Gradeable::class);
+        $gradeable->method('hasConfig')->willReturn(false);
+        $gradeable->method('getOpenDate')->willReturn($now);
+
+        $g_list = $this->createMock(GradeableList::class);
+        $g_list->method('getGradeable')->willReturn($gradeable);
+        $core->method('loadModel')->willReturn($g_list);
+        $return = $this->runController($core);
+        $this->assertEquals("test", $return['id']);
+        $this->assertTrue($return['error']);
+    }
+
+    public function testShowHomeworkNoAccess() {
+        $_REQUEST['action'] = 'display';
+        $core = $this->createMockCore(array(), array('access_grading' => false));
+        /** @noinspection PhpUndefinedMethodInspection */
+        $now = new \DateTime("tomorrow", new \DateTimeZone($core->getConfig()->getTimezone()));
+        $gradeable = $this->createMock(Gradeable::class);
+        $gradeable->method('hasConfig')->willReturn(false);
+        $gradeable->method('getOpenDate')->willReturn($now);
+
+        $g_list = $this->createMock(GradeableList::class);
+        $g_list->method('getGradeable')->willReturn($gradeable);
+        $core->method('loadModel')->willReturn($g_list);
+        $return = $this->runController($core);
+        $this->assertTrue($return['error']);
+        $this->assertEquals("No gradeable with that id.", $return['message']);
+    }
+
+    public function testUpdateSumbmissionNoId() {
+        $_REQUEST['gradeable_id'] = null;
+        $_REQUEST['action'] = 'update';
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Invalid gradeable id.", $return['message']);
+    }
+
+    public function testUpdateSubmissionNoCsrfToken() {
+        $_POST['csrf_token'] = null;
+        $_REQUEST['action'] = 'update';
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Invalid CSRF token. Refresh the page and try again.", $return['message']);
+    }
+
+    public function testUpdateNegativeVersion() {
+        $_REQUEST['action'] = 'update';
+        $_REQUEST['new_version'] = -1;
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Cannot set the version below 0.", $return['message']);
+    }
+
+    /**
+     * @highestVersion 1
+     */
+    public function testUpdateInvalidVersion() {
+        $_REQUEST['action'] = 'update';
+        $_REQUEST['new_version'] = 2;
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Cannot set the version past 1.", $return['message']);
+    }
+
+    /**
+     * @highestVersion 2
+     */
+    public function testUpdateNoInvalidSettingsFile() {
+        $_REQUEST['action'] = 'update';
+        $_REQUEST['new_version'] = 1;
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Failed to open settings file.", $return['message']);
+    }
+
+    /**
+     * @highestVersion 2
+     */
+    public function testUpdateCannotWriteSettingsFile() {
+        $_REQUEST['action'] = 'update';
+        $_REQUEST['new_version'] = 1;
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
+        FileUtils::createDir($tmp, null, true);
+        $json = json_encode(array('active_version' => 1, 'history' => array('version' => 0, 'time' => '')));
+        $settings = FileUtils::joinPaths($tmp, "user_assignment_settings.json");
+        file_put_contents($settings, $json);
+        chmod($settings, 0444);
+        $return = $this->runController();
+        $this->assertTrue($return['error']);
+        $this->assertEquals("Could not write to settings file.", $return['message']);
+    }
+
+    public function testUpdateCancelSubmission() {
+        $_REQUEST['action'] = 'update';
+        $_REQUEST['new_version'] = 0;
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
+        FileUtils::createDir($tmp, null, true);
+        $json = json_encode(array('active_version' => 1, 'history' => array(array('version' => 0, 'time' => ''))));
+        $settings = FileUtils::joinPaths($tmp, "user_assignment_settings.json");
+        file_put_contents($settings, $json);
+        $return = $this->runController();
+        $this->assertFalse($return['error']);
+        $this->assertEquals("Cancelled submission for gradeable.", $return['message']);
+        $this->assertEquals(0, $return['version']);
+        $json = json_decode(file_get_contents($settings), true);
+        $this->assertEquals(0, $json['active_version']);
+        $this->assertTrue(isset($json['history']));
+        $this->assertEquals(2, count($json['history']));
+        $this->assertEquals(0, $json['history'][1]['version']);
+        $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
+    }
+
+    /**
+     * @highestVersion 5
+     */
+    public function testUpdateSubmission() {
+        $_REQUEST['action'] = 'update';
+        $_REQUEST['new_version'] = 4;
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
+        FileUtils::createDir($tmp, null, true);
+        $json = json_encode(array('active_version' => 1, 'history' => array(array('version' => 0, 'time' => ''))));
+        $settings = FileUtils::joinPaths($tmp, "user_assignment_settings.json");
+        file_put_contents($settings, $json);
+        $return = $this->runController();
+        $this->assertFalse($return['error']);
+        $this->assertEquals("Updated version of gradeable to version #4.", $return['message']);
+        $this->assertEquals(4, $return['version']);
+        $json = json_decode(file_get_contents($settings), true);
+        $this->assertEquals(4, $json['active_version']);
+        $this->assertTrue(isset($json['history']));
+        $this->assertEquals(2, count($json['history']));
+        $this->assertEquals(4, $json['history'][1]['version']);
+        $this->assertRegExp('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
+    }
+
+    public function testCheckRefreshSuccess() {
+        $_REQUEST['action'] = 'check_refresh';
+        $_REQUEST['gradeable_version'] = 1;
+        $tmp = FileUtils::joinPaths($this->config['course_path'], "results", "test", "testUser", "1");
+        FileUtils::createDir($tmp, null, true);
+        touch(FileUtils::joinPaths($tmp, "results.json"));
+        $return = $this->runController();
+        $this->assertTrue($return['refresh']);
+        $this->assertEquals("REFRESH_ME", $return['string']);
+    }
+
+    public function testCheckRefreshFailed() {
+        $_REQUEST['action'] = 'check_refresh';
+        $_REQUEST['gradeable_version'] = 1;
+        $return = $this->runController();
+        $this->assertFalse($return['refresh']);
+        $this->assertEquals("NO_REFRESH", $return['string']);
     }
 }
