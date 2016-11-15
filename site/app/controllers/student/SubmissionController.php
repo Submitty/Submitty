@@ -368,8 +368,9 @@ class SubmissionController extends AbstractController {
                 // @codeCoverageIgnoreStart
                 // Without the filesystem messing up here, we should not be able to hit this error
                 Logger::error("Could not clean up folder {$this->upload_details['version_path']}");
-                // @codeCoverageIgnoreEnd
+
             }
+            // @codeCoverageIgnoreEnd
             else if ($this->upload_details['assignment_settings'] === true) {
                 $settings_file = FileUtils::joinPaths($this->upload_details['user_path'], "user_assignment_settings.json");
                 $settings = json_decode(file_get_contents($settings_file), true);

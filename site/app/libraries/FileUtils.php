@@ -261,7 +261,11 @@ class FileUtils {
         }
         return $size;
     }
-    
+
+    /**
+     * @param $zipname
+     * @return bool
+     */
     public static function checkFileInZipName($zipname) {
         $zip = zip_open($zipname);
         if(is_resource(($zip))) {
