@@ -17,6 +17,7 @@
     </filter>
 
     <logging>
-        <log type="coverage-html" target="report" />
+        <log type="coverage-clover" target="report/clover.xml"/>
+        <log type="coverage-html"   target="report" />
     </logging>
 </phpunit>

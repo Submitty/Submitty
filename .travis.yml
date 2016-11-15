@@ -110,5 +110,8 @@ after_script:
   # python files will actually pass (which a lot right now will not)
   - pylint_runner ${TRAVIS_BUILD_DIR}
 
+after_success:
+  - travis_retry php vendor/bin/coveralls -v
+
 notifications:
   email: false
