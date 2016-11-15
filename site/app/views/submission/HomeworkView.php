@@ -33,7 +33,7 @@ HTML;
 HTML;
         }
     }
-    
+
     /**
      * @param Gradeable $gradeable
      *
@@ -49,7 +49,7 @@ HTML;
 </div>
 HTML;
     }
-        
+
     /**
      * TODO: BREAK UP THIS FUNCTION INTO EASIER TO MANAGE CHUNKS
      *
@@ -91,14 +91,14 @@ HTML;
                     $label = "Drag your file(s) here or click to open file browser";
                 }
                 $return .= <<<HTML
-        
+
         <div id="upload{$i}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
             <h3 class="label" id="label{$i}">{$label}</h3>
             <input type="file" name="files" id="input_file{$i}" style="display: none" onchange="addFilesFromInput({$i})" />
         </div>
 HTML;
             }
-    
+
             $return .= <<<HTML
 
     </div>
@@ -117,7 +117,7 @@ HTML;
     <button type="button" id= "getprev" class="btn btn-primary">Get Most Recent Files</button>
 HTML;
             }
-    
+
             $old_files = "";
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 foreach ($gradeable->getPreviousFiles($i) as $file) {
@@ -148,7 +148,7 @@ HTML;
     </script>
 HTML;
             $return .= <<<HTML
-    
+
     <script type="text/javascript">
         // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
         var num_parts = {$gradeable->getNumParts()};
@@ -163,7 +163,7 @@ HTML;
             dropzone.addEventListener("dragleave", draghandle, false);
             dropzone.addEventListener("drop", drop, false);
         }
-        
+
         $("#startnew").click(function(e){ // Clear all the selected files in the buckets
             for (var i = 1; i <= num_parts; i++){
               deleteFiles(i);
@@ -183,14 +183,14 @@ HTML;
     </script>
 HTML;
         }
-        
+
         $svn_string = ($gradeable->useSvnCheckout()) ? "true" : "false";
-        
+
         $return .= <<<HTML
     <script type="text/javascript">
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
-                handleSubmission("{$this->core->buildUrl(array('component' => 'student', 
+                handleSubmission("{$this->core->buildUrl(array('component' => 'student',
                                                                'action' => 'upload',
                                                                'gradeable_id' => $gradeable->getId()))}",
                                  "{$this->core->buildUrl(array('component' => 'student',
@@ -206,7 +206,7 @@ HTML;
     </script>
 </div>
 HTML;
-        
+
         if ($gradeable->getSubmissionCount() === 0) {
             $return .= <<<HTML
 <div class="content">
@@ -217,10 +217,11 @@ HTML;
         else {
             $return .= <<<HTML
 <div class="content">
-    <h3 class='label' style="float: left">Select Submission Version:</h3> 
-    <select style="margin: 0 10px;" name="submission_version" 
-    onChange="versionChange('{$this->core->buildUrl(array('component' => 'student', 
-                                                          'gradeable_id' => $gradeable->getId(), 
+
+    <h3 class='label' style="float: left">Select Submission Version:</h3>
+    <select style="margin: 0 10px;" name="submission_version"
+    onChange="versionChange('{$this->core->buildUrl(array('component' => 'student',
+                                                          'gradeable_id' => $gradeable->getId(),
                                                           'gradeable_version' => ""))}', this)">
 
 HTML;
@@ -237,26 +238,26 @@ HTML;
                 if ($gradeable->getNormalPoints() > 0) {
                     $select_text[] = "Score: ".$version_details['points']." / " . $gradeable->getNormalPoints();
                 }
-                
+
                 if ($version_details['days_late'] > 0) {
                     $select_text[] = "Days Late: ".$version_details['days_late'];
                 }
-    
+
                 if ($version == $gradeable->getActiveVersion()) {
                     $select_text[] = "GRADE THIS VERSION";
                 }
-                
+
                 if ($version == $gradeable->getCurrentVersion()) {
                     $selected = "selected";
                 }
-                
+
                 $select_text = implode("&nbsp;&nbsp;&nbsp;", $select_text);
                 $return .= <<<HTML
         <option value="{$version}" {$selected}>{$select_text}</option>
 
 HTML;
             }
-            
+
             $return .= <<<HTML
     </select>
 HTML;
@@ -271,8 +272,8 @@ HTML;
                     $button = '<input type="submit" class="btn btn-primary" value="Grade This Version">';
                 }
                 $return .= <<<HTML
-    <form style="display: inline;" method="post" 
-            onsubmit="return checkVersionChange({$gradeable->getDaysLate()},{$gradeable->getAllowedLateDays()})" 
+    <form style="display: inline;" method="post"
+            onsubmit="return checkVersionChange({$gradeable->getDaysLate()},{$gradeable->getAllowedLateDays()})"
             action="{$this->core->buildUrl(array('component' => 'student',
                                                  'action' => 'update',
                                                  'gradeable_id' => $gradeable->getId(),
@@ -284,7 +285,7 @@ HTML;
 
 HTML;
             }
-            
+
             if($gradeable->getActiveVersion() == 0 && $gradeable->getCurrentVersion() == 0) {
                 $return .= <<<HTML
     <div class="sub">
@@ -322,14 +323,14 @@ HTML;
             This assignment will not be graded by the instructor/TAs and a zero will be recorded in the gradebook.<br />
 HTML;
 		            }
-            
+
 		                $return .= <<<HTML
             Click the button "Grade This Version" if you would like to specify that this version of your homework should be graded.
          </p>
      </div>
 HTML;
 	            }
-	            
+
                 $return .= <<<HTML
     <div class="sub">
         <h4>Submitted Files</h4>
@@ -397,7 +398,7 @@ HTML;
                     if ($gradeable->beingGradedBatchQueue()) {
                         $return .= <<<HTML
         <p class="red-message">
-            This submission is currently being regraded.
+            This submission is currently being regraded. It is one of {$gradeable->getNumberOfGradingTotal()} grading.
         </p>
 HTML;
                     }
@@ -408,22 +409,22 @@ HTML;
         </p>
 HTML;
                     }
-                    
+
                 }
-                
+
                 if ($gradeable->inInteractiveQueue() || ($gradeable->inBatchQueue() && !$gradeable->hasResults())) {
                     if ($gradeable->beingGradedInteractiveQueue() ||
                         (!$gradeable->hasResults() && $gradeable->beingGradedBatchQueue())) {
                         $return .= <<<HTML
         <p class="red-message">
-            This submission is currently being graded.
+            This submission is currently being graded. It is one of {$gradeable->getNumberOfGradingTotal()} grading.
         </p>
 HTML;
                     }
                     else {
                         $return .= <<<HTML
         <p class="red-message">
-            This submission is currently in the queue to be graded.
+            This submission is currently in the queue to be graded. Your submission is number {$gradeable->getInteractiveQueuePosition()} out of {$gradeable->getInteractiveQueueTotal()}.
         </p>
 HTML;
                     }
@@ -460,7 +461,7 @@ HTML;
         </div>
 HTML;
                     }
-            
+
                     $count = 0;
                     $display_box = (count($gradeable->getTestcases()) == 1) ? "block" : "none";
                     foreach ($gradeable->getTestcases() as $testcase) {
@@ -559,11 +560,11 @@ HTML;
                                 foreach ($testcase->getAutochecks() as $autocheck) {
                                     $description = $autocheck->getDescription();
                                     $diff_viewer = $autocheck->getDiffViewer();
-            
+
                                     $return .= <<<HTML
                 <div class="box-block">
 HTML;
-            
+
                                     $title = "";
                                     $return .= <<<HTML
                             <div class='diff-element'>
@@ -588,7 +589,7 @@ HTML;
                                     $return .= <<<HTML
                             </div>
 HTML;
-            
+
                                     if ($diff_viewer->hasDisplayExpected()) {
                                         $return .= <<<HTML
                             <div class='diff-element'>
@@ -604,7 +605,7 @@ HTML;
                             </div>
 HTML;
                                     }
-            
+
                                     $return .= <<<HTML
                 </div>
 HTML;
@@ -629,7 +630,7 @@ HTML;
     </div>
 HTML;
             }
-            
+
             $return .= <<<HTML
 </div>
 HTML;
@@ -653,7 +654,7 @@ HTML;
 HTML;
             }
         }
-        
+
         return $return;
     }
 }
