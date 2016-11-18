@@ -15,7 +15,7 @@ class NavigationView {
     public function __construct(Core $core) {
         $this->core = $core;
     }
-    
+
     public function showGradeables($sections_to_list) {
         $return = "";
 
@@ -67,6 +67,24 @@ HTML;
         $title_to_button_type_grading = array("FUTURE" => "btn-default", "OPEN" => "btn-default" , "CLOSED" => "btn-default",
                                                  "ITEMS BEING GRADED" => "btn-primary", "GRADED" => 'btn-danger');
         $title_to_prefix = array("FUTURE" => "OPEN DATE", "OPEN" => "SUBMIT", "CLOSED" => "CLOSED", "ITEMS BEING GRADED" => "GRADING", "GRADED" => "GRADED");
+
+        $found_assignment = false;
+        foreach ($sections_to_list as $title => $gradeable_list) {
+            if(count($gradeable_list) != 0) {
+                $found_assignment = true;
+                break;
+            }
+        }
+
+        if($found_assignment == false) {
+            $return .= <<<HTML
+    <div class="container">
+    <p>There are currently no assignments posted.  Please check back later.</p>
+    </div></table></div>
+HTML;
+            return $return;
+        }
+
         foreach ($sections_to_list as $title => $gradeable_list) {
 
 	    // temporary: want to make future - only visible to
@@ -80,7 +98,13 @@ HTML;
             }
 
             if (count($gradeable_list) == 0) {
-                continue;
+                $return .= <<<HTML
+        <div class="container">
+        <p>There are currently no assignments posted.  Please check back later.</p>
+        </div>
+HTML;
+                break;
+                //continue;
             }
 
             $lower_title = str_replace(" ", "_", strtolower($title));
@@ -156,7 +180,7 @@ HTML;
 HTML;
                     }
                 }
-    
+
                 if ($this->core->getUser()->accessAdmin()) {
                     $admin_button = <<<HTML
                 <button class="btn btn-default" style="width:100%;" \\
@@ -168,12 +192,12 @@ HTML;
                 else {
                     $admin_button = "";
                 }
-                
+
                 if (!$this->core->getUser()->accessGrading()) {
                     $gradeable_grade_range = "";
-                    
+
                 }
-                
+
                 $return.= <<<HTML
             <tr class="gradeable_row">
                 <td>{$gradeable_title}</td>
