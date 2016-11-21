@@ -140,9 +140,7 @@ abstract class Gradeable {
     protected $current = -1;
     protected $highest = 0;
 
-    protected $history = array();
     protected $versions = array();
-
 
     /** @var array Array of all files for a specified submission number where each key is a previous file and then each element
      * is an array that contains filename, file path, and the file size. */
@@ -363,61 +361,14 @@ abstract class Gradeable {
         $svn_path = $course_path."/checkout/".$this->id."/".$this->core->getUser()->getId();
         $results_path = $course_path."/results/".$this->id."/".$this->core->getUser()->getId();
 
+        $this->versions = $this->core->getQueries()->getGradeableVersions($this->id, $this->core->getUser()->getId());
         if (is_file($submission_path."/user_assignment_settings.json")) {
             $settings = FileUtils::readJsonFile($submission_path."/user_assignment_settings.json");
             $this->active = intval($settings['active_version']);
-            $this->history = $settings['history'];
         }
 
-        $versions = array_map("intval", FileUtils::getAllDirs($submission_path));
-        $this->highest = Utils::getLastArrayElement($versions);
-        if ($this->highest === null) {
-            $this->highest = 0;
-        }
-
-        foreach ($versions as $version) {
-            if (!is_dir($results_path."/".$version)) {
-                $this->versions[$version]['status'] = false;
-                $this->versions[$version]['days_late'] = 0;
-                $this->versions[$version]['points'] = 0;
-                $this->versions[$version]['testcases'] = array();
-                continue;
-            }
-
-            $this->versions[$version] = FileUtils::readJsonFile($results_path."/".$version."/results.json");
-
-            $this->versions[$version]['status'] = true;
-
-            $results_history = FileUtils::readJsonFile($results_path."/".$version."/results_history.json");
-            if ($results_history !== false) {
-                $last_results_timestamp = $results_history[count($results_history)-1];
-            }
-            else {
-                $last_results_timestamp = array('submission_time' => "UNKNOWN", "grade_time" => "UNKOWN",
-                    "wait_time" => "UNKNOWN");
-            }
-
-            $this->versions[$version] = array_merge($this->versions[$version], $last_results_timestamp);
-
-            $this->versions[$version]['days_late'] = isset($this->versions[$version]['days_late_before_extensions']) ?
-                intval($this->versions[$version]['days_late_before_extensions']) : 0;
-            if ($this->versions[$version]['days_late'] < 0) {
-                $this->versions[$version]['days_late'] = 0;
-            }
-            $this->versions[$version]['num_autogrades'] = count($results_history);
-
-            $this->versions[$version]['points'] = 0;
-
-            for ($i = 0; $i < count($this->testcases); $i++) {
-                if (!$this->testcases[$i]->isHidden()) {
-                  $this->versions[$version]['points'] += $this->versions[$version]['testcases'][$i]['points_awarded'];
-                }
-            }
-            // Clamp to zero (no negative total!)
-            if ($this->versions[$version]['points'] < 0) {
-              $this->versions[$version]['points'] = 0;
-            }
-        }
+        $this->highest = Utils::getLastArrayElement($this->versions)->getVersion();
+        // How do we want to get how many days late for a version?
 
         $this->submissions = count($this->versions);
 

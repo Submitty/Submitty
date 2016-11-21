@@ -7,6 +7,7 @@ use app\libraries\Database;
 use app\libraries\Utils;
 use app\models\GradeableComponent;
 use app\models\GradeableDb;
+use app\models\GradeableVersion;
 use app\models\User;
 
 class DatabaseQueriesPostgresql implements IDatabaseQueries{
@@ -134,7 +135,7 @@ ORDER BY g.g_id", array($user_id));
 
     public function getGradeableById($g_id, $user_id = null) {
         $this->database->query("
-SELECT g.*, eg.*, gd.*
+SELECT g.*, eg.*, gd.*, egv.*, egd.*
 FROM gradeable as g
 LEFT JOIN (
   SELECT *
@@ -172,6 +173,19 @@ WHERE gc.g_id=?
         $return = array();
         foreach ($this->database->rows() as $row) {
             $return[$row['gc_id']] = new GradeableComponent($row);
+        }
+        return $return;
+    }
+
+    public function getGradeableVersions($g_id, $user_id, $due_date = null) {
+        $this->database->query("
+SELECT * 
+FROM electronic_gradeable_data 
+WHERE g_id=? AND user_id=? 
+ORDER BY g_version", array($g_id, $user_id));
+        $return = array();
+        foreach ($this->database->rows() as $row) {
+            $return[$row['g_version']] = new GradeableVersion($row);
         }
         return $return;
     }

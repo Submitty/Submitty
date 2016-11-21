@@ -65,7 +65,7 @@ interface IDatabaseQueries {
      *
      * @return Gradeable
      */
-    public function getGradeableById($g_id, $user_id);
+    public function getGradeableById($g_id, $user_id = null);
 
     /**
      * @param $g_id
@@ -74,6 +74,8 @@ interface IDatabaseQueries {
      * @return GradeableComponent[]
      */
     public function getGradeableComponents($g_id, $gd_id);
+
+    public function getGradeableVersions($g_id, $user_id, $due_date=null);
 
     /**
      * Gets all registration sections from the sections_registration table
