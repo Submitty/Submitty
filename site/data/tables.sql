@@ -452,7 +452,7 @@ ALTER TABLE ONLY grading_registration
 --
 
 ALTER TABLE ONLY grading_rotating
-    ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (g_id, user_id, sections_rotating_id);
+    ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (sections_rotating_id, user_id, g_id);
 
 
 --

@@ -645,7 +645,7 @@ HTML;
 
     $db->query("
     SELECT 
-        u.user_id, array_agg(sections_rotating ORDER BY sections_rotating ASC) AS sections
+        u.user_id, array_agg(sections_rotating ORDER BY sections_rotating_id ASC) AS sections
     FROM 
         users AS u INNER JOIN grading_rotating AS gr ON u.user_id = gr.user_id
     WHERE 
