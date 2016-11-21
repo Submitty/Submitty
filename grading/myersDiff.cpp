@@ -23,29 +23,62 @@
 
 
 TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::string filename = j.value("actual_file","MISSING FILENAME");
 
-  if (!tc.isCompilation()) {
-    filename = tc.getPrefix() + "_" + filename;
-    filename = replace_slash_with_double_underscore(filename);
+  // grab the required files
+  std::vector<std::string> filenames = stringOrArrayOfStrings(j,"actual_file");
+  if (filenames.size() == 0) {
+    return new TestResults(0.0,{"ERROR: no required files specified"});
   }
-
-  std::cout << "  file exists check: '" << filename << "' : ";
-
-  std::vector<std::string> files;
-  wildcard_expansion(files, filename, std::cout);
-  for (int i = 0; i < files.size(); i++) {
-    //std::cout << "FILE CANDIDATE: " << files[i] << std::endl;
-    if (access( files[i].c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists
-      std::cout << "FOUND '" << files[i] << "'" << std::endl;
-      return new TestResults(1.0);
+  for (int f = 0; f < filenames.size(); f++) {
+    if (!tc.isCompilation()) {
+      filenames[f] = tc.getPrefix() + "_" + filenames[f];
+      filenames[f] = replace_slash_with_double_underscore(filenames[f]);
     }
-    //std::cout << "OOPS, does not exist: " << files[i] << std::endl;
   }
 
-  std::cout << "NOT FOUND" << std::endl;
-  return new TestResults(0.0,{"ERROR: " + filename + " does not exist"});
+  // is it required to have all of these files or just one of these files?
+  bool one_of = j.value("one_of",false);
 
+  // loop over all of the listed files
+  int found_count = 0;
+  std::string files_not_found;
+  for (int f = 0; f < filenames.size(); f++) {
+    std::cout << "  file exists check: '" << filenames[f] << "' : ";
+    std::vector<std::string> files;
+    wildcard_expansion(files, filenames[f], std::cout);
+    bool found = false;
+    // loop over the available files
+    for (int i = 0; i < files.size(); i++) {
+      std::cout << "FILE CANDIDATE: " << files[i] << std::endl;
+      if (access( files[i].c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists
+	std::cout << "FOUND '" << files[i] << "'" << std::endl;
+	found = true;
+      }
+      std::cout << "OOPS, does not exist: " << files[i] << std::endl;
+    }
+    if (found) {
+      found_count++;
+    } else {
+      files_not_found += " " + filenames[f];
+    }
+  }
+
+  // the answer
+  if (one_of) {
+    if (found_count > 0) {
+      return new TestResults(1.0);
+    } else {
+      std::cout << "FILE NOT FOUND " + files_not_found << std::endl;
+      return new TestResults(0.0,{"ERROR: required file not found: " + files_not_found});
+    }
+  } else {
+    if (found_count == filenames.size()) {
+      return new TestResults(1.0);
+    } else {
+      std::cout << "FILES NOT FOUND " + files_not_found << std::endl;
+      return new TestResults(0.0,{"ERROR: required files not found: " + files_not_found});
+    }
+  }
 }
 
 
@@ -113,6 +146,10 @@ TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::jso
   if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
+      student_file_contents.size() > 10* expected_file_contents.size()) {
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+  }
   vectorOfWords text_a = stringToWords( student_file_contents );
   vectorOfWords text_b = stringToWords( expected_file_contents );
   Difference* diff = ses(j, &text_a, &text_b, true );
@@ -130,6 +167,10 @@ TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::js
   }
   if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
+  }
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
+      student_file_contents.size() > 10* expected_file_contents.size()) {
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
   }
   vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
   vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
@@ -149,6 +190,10 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
   if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
+      student_file_contents.size() > 10* expected_file_contents.size()) {
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+  }
   vectorOfLines text_a = stringToLines( student_file_contents );
   vectorOfLines text_b = stringToLines( expected_file_contents );
   Difference* diff = ses(j, &text_a, &text_b, false );
@@ -166,6 +211,10 @@ TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::jso
   }
   if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
+  }
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
+      student_file_contents.size() > 10* expected_file_contents.size()) {
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
   }
   vectorOfLines text_a = stringToLines( student_file_contents );
   vectorOfLines text_b = stringToLines( expected_file_contents );
@@ -185,6 +234,11 @@ TestResults* myersDiffbyLinebyCharExtraStudentOutputOk_doit (const TestCase &tc,
   if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
     return new TestResults(0.0,messages);
   }
+  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
+      student_file_contents.size() > 10* expected_file_contents.size()) {
+    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
+  }
+
 #if 0
   //from nowhite
 	vectorOfWords text_a = stringToWords( student_file_contents );

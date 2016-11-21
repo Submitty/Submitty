@@ -124,6 +124,31 @@ interface IDatabaseQueries {
     public function updateUsersRotatingSection($section, $users);
 
     /**
+     * This inserts an row in the electronic_gradeable_data table for a given gradeable/user/version combination.
+     * The values for the row are set to defaults (0 for numerics and NOW() for the timestamp) with the actual values
+     * to be later filled in by the grade_students.sh routine. We do it this way as we can properly deal with the
+     * electronic_gradeable_version table here as the "active_version" is a concept strictly within the PHP application
+     * code and grade_students.sh has no concept of it. This will either update or insert the row in
+     * electronic_gradeable_version for the given gradeable and student.
+     *
+     * @param $g_id
+     * @param $user_id
+     * @param $version
+     */
+    public function insertVersionDetails($g_id, $user_id, $version, $timestamp);
+
+    /**
+     * Updates the row in electronic_gradeable_version table for a given gradeable and student. This function should
+     * only be run directly if we know that the row exists (so when changing the active version for example) as
+     * otherwise it'll throw an exception as it does not do error checking on if the row exists.
+     *
+     * @param $g_id
+     * @param $user_id
+     * @param $version
+     */
+    public function updateActiveVersion($g_id, $user_id, $version);
+
+    /**
      * @todo: write phpdoc
      *
      * @param $session_id

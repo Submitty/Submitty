@@ -240,6 +240,29 @@ ORDER BY user_id ASC");
         $this->database->query("UPDATE users SET rotating_section=? WHERE user_id IN ({$update_string})", $update_array);
     }
 
+    public function insertVersionDetails($g_id, $user_id, $version, $timestamp) {
+        $this->database->query("
+INSERT INTO electronic_gradeable_data 
+(g_id, user_id, g_version, autograding_non_hidden_non_extra_credit, autograding_non_hidden_extra_credit, 
+autograding_hidden_non_extra_credit, autograding_hidden_extra_credit, submission_time) 
+VALUES(?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $version, $timestamp));
+        $this->database->query("SELECT * FROM electronic_gradeable_version WHERE g_id=? AND user_id=?",
+            array($g_id, $user_id));
+        $row = $this->database->row();
+        if (!empty($row)) {
+            $this->updateActiveVersion($g_id, $user_id, $version);
+        }
+        else {
+            $this->database->query("INSERT INTO electronic_gradeable_version (g_id, user_id, active_version) VALUES(?, ?, ?)",
+                array($g_id, $user_id, $version));
+        }
+    }
+
+    public function updateActiveVersion($g_id, $user_id, $version) {
+        $this->database->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND user_id=?",
+            array($version, $g_id, $user_id));
+    }
+
     public function getSession($session_id) {
         $this->database->query("SELECT * FROM sessions WHERE session_id=?", array($session_id));
         return $this->database->row();

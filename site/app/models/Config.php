@@ -89,6 +89,7 @@ class Config {
     private $upload_message;
     private $grades_summary;
     
+    private $keep_previous_files;
     private $display_iris_grades_summary;
     private $display_custom_message;
 
@@ -150,7 +151,7 @@ class Config {
         $this->setConfigValues($course, 'hidden_details', array('database_name'));
         $this->setConfigValues($course, 'course_details', array
                                ('course_name', 'default_hw_late_days',
-                                'default_student_late_days', 'zero_rubric_grades', 'upload_message', 
+                                'default_student_late_days', 'zero_rubric_grades', 'upload_message', 'keep_previous_files',
                                 'display_iris_grades_summary', 'display_custom_message'));
         
         if (isset($course['hidden_details']['course_url'])) {
@@ -164,7 +165,7 @@ class Config {
             $this->$key = intval($this->$key);
         }
 
-        foreach (array('zero_rubric_grades', 'display_iris_grades_summary', 'display_custom_message') as $key) {
+        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_iris_grades_summary', 'display_custom_message') as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
     
@@ -352,6 +353,10 @@ class Config {
     
     public function displayCustomMessage() {
         return $this->display_custom_message;
+    }
+
+    public function keepPreviousFiles() {
+        return $this->keep_previous_files;
     }
 
     public function displayIrisGradesSummary() {

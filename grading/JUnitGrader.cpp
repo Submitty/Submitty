@@ -202,6 +202,7 @@ TestResults* JUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) 
 	junit_output >> token1;
 	assert (token1 == "Failures:");
 	junit_output >> test_failures;
+	assert (test_failures >= 0);
       }
     }
   }
@@ -216,7 +217,12 @@ TestResults* JUnitTestGrader_doit (const TestCase &tc, const nlohmann::json& j) 
     if (tests_run > num_junit_tests) {
       return new TestResults(0.0,{"ERROR: Number of tests specified in configuration does not match!"});
     }
-    assert (tests_run >= 0 && test_failures >= 0);
+    std::cout << "tests_run " << tests_run << " test_failures " << test_failures << std::endl;
+    if (test_failures == -1) {
+      return new TestResults(0.0,{"ERROR: Failure to read number of test failures"});
+    }
+    assert (tests_run >= 0);
+    assert (test_failures >= 0);
     // hmm, it appears that a test can fail before even starting to run(??)
     // so we cannot test this:
     //assert (tests_run >= test_failures);
