@@ -116,6 +116,14 @@ LEFT JOIN (
   FROM gradeable_data
   WHERE gd_user_id=?
 ) as gd ON gd.g_id=g.g_id
+LEFT JOIN (
+  SELECT *
+  FROM electronic_gradeable_version
+) as egv ON egv.g_id=g.g_id AND egv.user_id=gd.gd_user_id
+LEFT JOIN (
+  SELECT *
+  FROM electronic_gradeable_data
+) as egd ON egd.g_id=g.g_id AND egd.g_version=egv.active_version
 ORDER BY g.g_id", array($user_id));
         $return = array();
         foreach ($this->database->rows() as $row) {
@@ -137,6 +145,14 @@ LEFT JOIN (
   FROM gradeable_data
   WHERE gd_user_id=?
 ) as gd ON gd.g_id=g.g_id
+LEFT JOIN (
+  SELECT *
+  FROM electronic_gradeable_version
+) as egv ON egv.g_id=g.g_id AND egv.user_id=gd.gd_user_id
+LEFT JOIN (
+  SELECT *
+  FROM electronic_gradeable_data
+) as egd ON egd.g_id=g.g_id AND egd.g_version=egv.active_version
 WHERE g.g_id=?", array($user_id, $g_id));
         return new GradeableDb($this->core, $this->database->row());
     }
