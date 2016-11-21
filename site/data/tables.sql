@@ -115,12 +115,12 @@ SET default_with_oids = false;
 
 CREATE TABLE electronic_gradeable (
     g_id character varying(255) NOT NULL,
-    eg_submission_open_date timestamp(6) without time zone NOT NULL,
-    eg_submission_due_date timestamp(6) without time zone NOT NULL,
+    eg_config_path character varying(1024) NOT NULL,
     eg_is_repository boolean NOT NULL,
     eg_subdirectory character varying(1024) NOT NULL,
     eg_use_ta_grading boolean NOT NULL,
-    eg_config_path character varying(1024) NOT NULL,
+    eg_submission_open_date timestamp(6) without time zone NOT NULL,
+    eg_submission_due_date timestamp(6) without time zone NOT NULL,
     eg_late_days integer DEFAULT (-1) NOT NULL,
     eg_precision numeric NOT NULL
 );
@@ -165,12 +165,12 @@ CREATE TABLE gradeable (
     g_team_assignment boolean NOT NULL,
     g_gradeable_type integer NOT NULL,
     g_grade_by_registration boolean NOT NULL,
+    g_ta_view_start_date timestamp(6) without time zone NOT NULL,
     g_grade_start_date timestamp(6) without time zone NOT NULL,
     g_grade_released_date timestamp(6) without time zone NOT NULL,
-    g_syllabus_bucket character varying(255) NOT NULL,
-    g_min_grading_group integer NOT NULL,
     g_closed_date timestamp(6) without time zone,
-    g_ta_view_start_date timestamp(6) without time zone NOT NULL
+    g_min_grading_group integer NOT NULL,
+    g_syllabus_bucket character varying(255) NOT NULL
 );
 
 
@@ -273,9 +273,9 @@ CREATE TABLE grading_registration (
 --
 
 CREATE TABLE grading_rotating (
-    g_id character varying NOT NULL,
+    sections_rotating_id integer NOT NULL,
     user_id character varying NOT NULL,
-    sections_rotating integer NOT NULL
+    g_id character varying NOT NULL
 );
 
 
@@ -284,8 +284,8 @@ CREATE TABLE grading_rotating (
 --
 
 CREATE TABLE late_day_exceptions (
-    g_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
+    g_id character varying(255) NOT NULL,
     late_day_exceptions integer NOT NULL
 );
 
@@ -432,6 +432,14 @@ ALTER TABLE ONLY gradeable
 
 
 --
+-- Name: gradeable_unqiue; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gradeable_data
+    ADD CONSTRAINT gradeable_unqiue UNIQUE (g_id, gd_user_id);
+
+
+--
 -- Name: grading_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -444,7 +452,7 @@ ALTER TABLE ONLY grading_registration
 --
 
 ALTER TABLE ONLY grading_rotating
-    ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (g_id, user_id, sections_rotating);
+    ADD CONSTRAINT grading_rotating_pkey PRIMARY KEY (g_id, user_id, sections_rotating_id);
 
 
 --
@@ -628,7 +636,7 @@ ALTER TABLE ONLY grading_rotating
 --
 
 ALTER TABLE ONLY grading_rotating
-    ADD CONSTRAINT grading_rotating_sections_rotating_fkey FOREIGN KEY (sections_rotating) REFERENCES sections_rotating(sections_rotating_id) ON DELETE CASCADE;
+    ADD CONSTRAINT grading_rotating_sections_rotating_fkey FOREIGN KEY (sections_rotating_id) REFERENCES sections_rotating(sections_rotating_id) ON DELETE CASCADE;
 
 
 --
