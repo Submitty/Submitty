@@ -130,7 +130,8 @@ HTML;
 HTML;
                 }
             }
-            if ($gradeable->getCurrentVersion() == $gradeable->getHighestVersion() && $gradeable->getCurrentVersion() > 0) {
+            if ($gradeable->getCurrentVersion() == $gradeable->getHighestVersion() && $gradeable->getCurrentVersion() > 0
+                && $this->core->getConfig()->keepPreviousFiles()) {
                 $return .= <<<HTML
     <script type="text/javascript">
         $(document).ready(function() {
@@ -176,6 +177,7 @@ HTML;
             $("#getprev").click(function(e){
                 $("#startnew").click();
                 {$old_files}
+                setUsePrevious();
                 setButtonStatus();
                 e.stopPropagation();
             });
