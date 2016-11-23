@@ -95,6 +95,8 @@ define('DB_PASSWORD', 'hsdbu');
 
 /* The following constants identify what columns to read in the CSV dump. --- */
 //these properties are used to group data by individual course and student.
+//NOTE: If your University does not support "Preferred Name" in its student
+//      registration data -- set the column value to null.
 define('COURSE_GROUP',        '9');   //course number column
 define('COURSE_REGISTRATION', '8');   //course registration status column
 define('COURSE_STUDENT_ID',   '5');   //student's campus ID number column
@@ -454,7 +456,7 @@ SQL;
 			pg_query_params(self::$db, $sql["data_{$i}"], array( $row[UPSERT_CSLOGIN],
 			                                                     $row[UPSERT_FNAME],
 			                                                     $row[UPSERT_LNAME],
-			                                                     $row[UPSERT_PNAME],
+			                                                     (is_null(UPSERT_PNAME) ? null : $row[UPSERT_PNAME]),
 			                                                     $row[UPSERT_EMAIL],
 			                                                     4,
 			                                                     $row[UPSERT_RSECTION],
