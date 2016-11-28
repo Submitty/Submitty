@@ -231,19 +231,28 @@ WHERE s.user_id=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $
             $params = array($this->student_id, $this->eg_details['eg_submission_due_date']);
             Database::query("
 SELECT
-  ldu.g_id
-  , ldu.late_days_used
-  , coalesce(lde.late_day_exceptions, 0) as exceptions
+  eg.g_id
+  , eg.eg_late_days as assignment_allowed
+  , greatest(0, ceil(extract(EPOCH FROM(egd.submission_time - eg.eg_submission_due_date))/86400):: integer) as days_late
+  , eg.eg_submission_due_date
+  , egd.submission_time
+  , coalesce(lde.late_day_exceptions, 0) as extensions
+  , g.g_title
+  , coalesce(egv.active_version, -1) as active_version
 FROM
-  late_days_used ldu FULL OUTER JOIN late_day_exceptions lde
-    on ldu.g_id = lde.g_id AND ldu.user_id = lde.user_id
-  , electronic_gradeable eg
+  electronic_gradeable eg
+  , electronic_gradeable_version egv
+  , electronic_gradeable_data egd FULL OUTER JOIN late_day_exceptions lde ON lde.user_id = egd.user_id AND lde.g_id = egd.g_id
+  , gradeable g  
 WHERE
-  ldu.user_id =?
-  AND ldu.g_id = eg.g_id
+  eg.g_id = egv.g_id
+  AND egv.g_id = egd.g_id
+  AND egv.user_id = egd.user_id
+  AND eg.g_id = g.g_id
+  AND egv.user_id = ?
   AND eg.eg_submission_due_date <=?
 ORDER BY
-  eg.eg_submission_due_date
+  eg.eg_submission_due_date  
 ", $params);
 
             $this->student['used_late_days'] = Database::rows();

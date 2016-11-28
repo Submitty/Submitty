@@ -384,7 +384,7 @@ else {
 $active_assignments = $eg->active_assignment;
 
 $output .= <<<HTML
-            <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$eg->eg_details['g_id']}&student={$eg->student['user_id']}&individual={$individual}" method="post">
+            <form id="rubric_form" action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$eg->eg_details['g_id']}&student={$eg->student['user_id']}&individual={$individual}" method="post">
                 <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
                 <input type="hidden" name="submitted" value="{$submitted}" />
                 <input type="hidden" name="status" value="{$eg->status}" />
@@ -401,103 +401,114 @@ $output .= <<<HTML
             <h4>Overall Late Day Usage</h4>
             <table>
                 <thead>
-                    <tr><th></th><th style="border:thin solid black">Late days used</th>
-                    <th style="border:thin solid black">Late day exceptions</th></tr>
+                    <tr>
+                        <th></th>
+                        <th style="border:thin solid black">Allowed per term</th>
+                        <th style="border:thin solid black">Allowed per assignment</th>
+                        <th style="border:thin solid black">Late days used</th>
+                        <th style="border:thin solid black">Extensions</th>
+                        <th style="border:thin solid black">Status</th>
+                        <th style="border:thin solid black">Late Days Charged</th>
+                        <th style="border:thin solid black">Remaining Days</th>
+                    </tr>
                 </thead>
                 <tbody>
 HTML;
-$total_late = 0;
-$late_this_assignment_pre_exceptions = 0;
-$late_this_assignment = 0;
-$exceptions_this_assignment = 0;
+
+$curr_late_used = 0;
+
+$curr_allowed_term = __DEFAULT_HW_LATE_DAYS__;
+$curr_remaining_late = __DEFAULT_HW_LATE_DAYS__;
+
+$status = "Good";
+$color = "black";
+
+if(!$eg->submitted){
+    $status = "Not submitted";
+}
+elseif($eg->active_assignment == 0){
+    $status = "Cancelled";
+}
+
+$bad_modifier = "";
+
 foreach($eg->student['used_late_days'] as $ld){
-    $total_late += ($ld['late_days_used'] - $ld['exceptions']);
-    if($ld['g_id'] == $eg->g_id){
-        $late_this_assignment = ($ld['late_days_used'] - $ld['exceptions']);
-        $late_this_assignment_pre_exceptions = $ld['late_days_used'];
-        $late_this_assignment = ($late_this_assignment > 0 ? $late_this_assignment : 0);
-        $exceptions_this_assignment = $ld['exceptions'];
+    $curr_bad_modifier = "";
+    $curr_late_used = $ld['days_late'];
+    $curr_status = $status;
+    $curr_late_charged = 0;
+
+    $late_flag = true;
+
+    if($curr_late_used - $ld['extensions'] > 0){
+        $curr_status = "Late";
+    }
+    if($curr_late_used - $ld['extensions'] > $ld['assignment_allowed']){
+        $curr_status = "Bad";
+        $curr_bad_modifier = " too many used for this assignment";
+        $late_flag = false;
+    }
+    if($curr_late_used - $ld['extensions'] > $curr_allowed_term){
+        $curr_status = "Bad";
+        $curr_bad_modifier = " too many used this term";
+        $late_flag = false;
+    }
+
+    if($late_flag){
+        $curr_late_charged = $curr_late_used - $ld['extensions'];
+        $curr_remaining_late -= $curr_late_charged;
     }
     $output .= <<<HTML
             <tr>
-                <th style="border:thin solid black">{$ld['g_id']}</th>
-                <td align="center" style="border:thin solid black">{$ld['late_days_used']}</td>
-                <td align="center" style="border:thin solid black">{$ld['exceptions']}</td>
+                <th style="border:thin solid black">{$ld['g_title']}</th>
+                <td align="center" style="border:thin solid black">{$curr_allowed_term}</td>
+                <td align="center" style="border:thin solid black">{$ld['assignment_allowed']}</td>
+                <td align="center" style="border:thin solid black">{$curr_late_used}</td>
+                <td align="center" style="border:thin solid black">{$ld['extensions']}</td>
+                <td align="center" style="border:thin solid black">{$curr_status}{$curr_bad_modifier}</td>
+                <td align="center" style="border:thin solid black">{$curr_late_charged}</td>
+                <td align="center" style="border:thin solid black">{$curr_remaining_late}</td>
             </tr>
 HTML;
-}
+    //Decrement $curr_allowed_term if necessary
+    $curr_allowed_term -= $curr_late_charged;
 
+    if($eg->g_id == $ld['g_id']){
+        $status = $curr_status;
+        $bad_modifier = $curr_bad_modifier;
+    }
+}
+$output .= <<<HTML
+
+HTML;
 $output .= <<<HTML
                 </tbody>
             </table>
             <br>
 HTML;
 
-    $late_days = $eg->eg_details['eg_late_days'];
-    $plural = (($late_days > 1) ? 's': '');
-    $output .= <<<HTML
-                <span style="color: black">Gradeable allows {$late_days} late day{$plural}.</span>
-                <br>
-                <span style="color: black">Student used {$late_this_assignment_pre_exceptions} late day(s) on this assignment.</span>
-                <br>
-                <span style="color: black">Student had {$exceptions_this_assignment} late day exceptions on this assignment.</span>
-                <br>
-                <span style="color:black">Late Days Used on this Assignment After Exceptions: {$late_this_assignment}</span>
-                <br>
-HTML;
-
-$status = 1;
-if($late_this_assignment > $late_days || ($total_late > __DEFAULT_TOTAL_LATE_DAYS__ && $late_this_assignment > 0)){
-    $status = 0;
-}
-
-if ($status == 1 && $late_this_assignment == 0 && $eg->active_assignment > 0) {
-    $part_status = "Good";
-}
-else if ($status == 1 && $late_this_assignment > 0 && $eg->active_assignment > 0) {
-    $color = "#998100";
-    $part_status = 'Late';
-}
-else {
+if($status != "Good" && $status != "Late"){
+    $color = "red";
     $output .= <<<HTML
                 <script>
                     $('body').css('background-color', 'red');
                 </script>
 HTML;
-    $color  = "#DA4F49";
-    if ($eg->active_assignment == 0) {
-        $part_status  = 'No Submission';
-    }
-    else if($eg->active_assignment == -1){
-        $part_status = 'Cancelled';
-    }
-    else {
-        $part_status  = 'Bad';
-    }
-}
-
-if($status == 0 && $eg->submitted == 1) {
-    $output .= <<<HTML
-                <b style="color:#DA4F49;">Too many total late days used for this assignment</b><br />
-HTML;
 }
 
 $output .= <<<HTML
-                <b>Status:</b> <span style="color: {$color};">{$part_status}</span><br />
+                <b>Status:</b> <span style="color: {$color};">{$status}{$bad_modifier}</span><br />
+
     </div>
 </div>
-
-<div id="rubric" class="draggable rubric_panel" style="top:50px; right:20px;width:35%; height: 65%;">
-<span class="grading_label">Grading Rubric</span>
-    <div class="inner-container" style="margin:1px; height:100%">
-
 HTML;
-
 
 //============================================================
 
 $output .= <<<HTML
-
+            <div id="rubric" class="draggable rubric_panel" style="top:50px; right:20px;width:35%; height: 65%;">
+            <span class="grading_label">Grading Rubric</span>
+            <div class="inner-container" style="margin:1px; height:100%">
                 <table class="table table-bordered table-striped" id="rubric-table">
                     <thead>
 HTML;
@@ -700,6 +711,15 @@ HTML;
 
 
 $output .= <<<HTML
+
+                <script>
+                    $("#rubric_form").submit(function(event){
+                       var confirm = window.confirm("This submission has a bad status. Are you sure you want to submit a grade for it?");
+                       if(!confirm){
+                           event.preventDefault();
+                       }
+                    });
+                </script>
             </form>
 
     </div>
