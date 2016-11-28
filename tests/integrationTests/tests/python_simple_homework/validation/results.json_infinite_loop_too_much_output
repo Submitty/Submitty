@@ -6,12 +6,17 @@
 			    {
                                 "actual_file": "test01_execute_logfile.txt",                                "description": "Execution Logfile"
                             },
-				{					"actual_file":"test01_STDOUT.txt",
+				{
+					"actual_file":"test01_STDOUT.txt",
 					"expected_file":"test_output/testassignment/hw01part1_sol.txt",
+                                        "messages": [
+                                                "ERROR: Student file too large for grader"
+                                        ],
 					"difference_file":"test01_0_diff.json",
 					"description": "Program Output"
 				},
-				{					"actual_file":"test01_STDERR.txt",
+				{
+					"actual_file":"test01_STDERR.txt",
 					"description": "syntax error output from running python",
 					"messages": ["WARNING: This file should be empty"]
 				}
