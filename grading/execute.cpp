@@ -50,6 +50,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "find",                    "/usr/bin/find" },
     { "cat",                     "/bin/cat" },
     { "compare",                 "/usr/bin/compare" }, //image magick!
+    { "mogrify",                 "/usr/bin/mogrify" }, //image magick!
     { "cut",                     "/usr/bin/cut" },
     { "sort",                    "/usr/bin/sort" },
     { "sed",                     "/bin/sed" },
@@ -692,6 +693,58 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile) {
 // =====================================================================================
 // =====================================================================================
 
+std::string output_of_system_command(const char* cmd) {
+    char buffer[128];
+    std::string result = "";
+    std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) throw std::runtime_error("popen() failed!");
+    while (!feof(pipe.get())) {
+        if (fgets(buffer, 128, pipe.get()) != NULL)
+            result += buffer;
+    }
+    return result;
+}
+
+int resident_set_size(int childPID) {
+  // get all of the processes owned by the current user (untrustedXX)
+  std::string command = std::string("ps xw o user:15,pid:10,rss:10,cmd | grep untrusted"); 
+
+  // for debugging, print this output to the log
+  std::cout << "system ( '" + command + "' )" << std::endl;
+  system (command.c_str());
+
+  // now sum up the resident set size column of the output
+  std::string command2 = command + " | awk '{ sum += $3 } END { print sum }'";
+  std::string output = output_of_system_command(command2.c_str());
+  std::stringstream ss(output);
+  int mem;
+
+  if (ss >> mem) {
+    return mem;
+  };
+  return -1;
+}
+
+
+
+void TerminateProcess(float &elapsed, int childPID) {
+  static int kill_counter = 0;
+  // the '-' here means to kill the group
+  int success_kill_a = kill(childPID, SIGKILL);
+  int success_kill_b = kill(-childPID, SIGKILL);
+  kill_counter++;
+  if (success_kill_a != 0 || success_kill_b != 0) {
+    std::cout << "ERROR! kill pid " << childPID << " was not successful" << std::endl;
+  }
+  if (kill_counter >= 5) {
+    std::cout << "ERROR! kill counter for pid " << childPID << " is " << kill_counter << std::endl;
+    std::cout << "  Check /var/log/syslog (or other logs) for possible kernel bug \n"
+	      << "  or hardware bug that is preventing killing this job. " << std::endl;
+  }
+  usleep(10000); /* wait 1/100th of a second for the process to die */
+  elapsed+=0.001;
+}
+
 
 // Executes command (from shell) and returns error code (0 = success)
 int execute(const std::string &cmd, const std::string &execute_logfile,
@@ -705,12 +758,15 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
   // Forking to allow the setting of limits of RLIMITS on the command
   int result = -1;
   int time_kill=0;
+  int memory_kill=0;
   pid_t childPID = fork();
   // ensure fork was successful
   assert (childPID >= 0);
 
   std::string program_name = get_program_name(cmd);
   int seconds_to_run = get_the_limit(program_name,RLIMIT_CPU,test_case_limits,assignment_limits);
+
+  int allowed_rss_memory = get_the_limit(program_name,RLIMIT_RSS,test_case_limits,assignment_limits);
 
   if (childPID == 0) {
     // CHILD PROCESS
@@ -743,36 +799,44 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
         float elapsed = 0;
         int status;
         pid_t wpid = 0;
+        float next_checkpoint = 0;
+	int rss_memory = 0;
+
         do {
             wpid = waitpid(childPID, &status, WNOHANG);
             if (wpid == 0) {
 	      // allow 10 extra seconds for differences in wall clock
 	      // vs CPU time (imperfect solution)
-	      if (elapsed < seconds_to_run + 10) {
-                    // sleep 1/10 of a second
-                    usleep(100000);
-                    elapsed+= 0.1;
-                }
-                else {
-  		    static int kill_counter = 0;
-                    std::cout << "Killing child process" << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
-                    // the '-' here means to kill the group
-		    int success_kill_a = kill(childPID, SIGKILL);
-                    int success_kill_b = kill(-childPID, SIGKILL);
-		    kill_counter++;
-		    if (success_kill_a != 0 || success_kill_b != 0) {
-		      std::cout << "ERROR! kill pid " << childPID << " was not successful" << std::endl;
-		    }
-		    if (kill_counter >= 5) {
-		      std::cout << "ERROR! kill counter for pid " << childPID << " is " << kill_counter << std::endl;
-		      std::cout << "  Check /var/log/syslog (or other logs) for possible kernel bug \n"
-				<< "  or hardware bug that is preventing killing this job. " << std::endl;
-		    }
-                    usleep(10000); /* wait 1/100th of a second for the process to die */
-		    elapsed+=0.001;
-                    time_kill=1;
-                }
+	      
+	      if (elapsed > seconds_to_run + 10) {
+		// terminate for excessive time
+		std::cout << "Killing child process " << childPID << " after " << elapsed << " seconds elapsed." << std::endl;
+		TerminateProcess(elapsed,childPID);
+		time_kill=1;
+	      }
+	      
+	      if (rss_memory > allowed_rss_memory) {
+		// terminate for excessive memory usage (RSS = resident set size = RAM)
+		std::cout << "Killing child process " << childPID << " for using " << rss_memory << " kb RAM.  (limit is " << allowed_rss_memory << " kb)" << std::endl;
+		TerminateProcess(elapsed,childPID);
+		memory_kill=1;
+	      } 
+
+	      // monitor time & memory usage
+	      if (!time_kill && !memory_kill) {
+		// sleep 1/10 of a second
+		usleep(100000);
+		elapsed+= 0.1;
+	      }
+	      if (elapsed >= next_checkpoint) {
+		rss_memory = resident_set_size(childPID);
+		std::cout << "time elapsed = " << elapsed << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
+		next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
+	      }
+
             }
+
+
         } while (wpid == 0);
 
         if (WIFEXITED(status)) {
@@ -797,12 +861,8 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
         }
         else if (WIFSIGNALED(status)) {
             int what_signal =  WTERMSIG(status);
-
-
 	    OutputSignalErrorMessageToExecuteLogfile(what_signal,logfile);
-
-            //std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
-
+            std::cout << "Child " << childPID << " was terminated with a status of: " << what_signal << std::endl;
             if (WTERMSIG(status) == 0){
 	      result=0;
             }
@@ -815,11 +875,16 @@ int execute(const std::string &cmd, const std::string &execute_logfile,
 	  logfile << "Program Terminated" << std::endl;
 	  result=3;
         }
+        if (time_kill){
+	  logfile << "ERROR: Maximum RSS (RAM) exceeded" << std::endl;
+	  logfile << "Program Terminated" << std::endl;
+	  result=3;
+        }
         std::cout << "PARENT PROCESS COMPLETE: " << std::endl;
         parent_result = system("date");
         assert (parent_result == 0);
     }
-  std::cout <<"Result: "<<result<<std::endl;
+    std::cout <<"Result: "<<result<<std::endl;
     return result;
 }
 
