@@ -422,34 +422,46 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   Student *lowest_c = GetStudent(students,"LOWEST C-");
   Student *lowest_d = GetStudent(students,"LOWEST D");
   
+  //std::cout << "0" << std::endl;
+  
   json j;
   j << istr;
   
+  //std::cout << "1" << std::endl;
+  //std::cout << j << std::endl;
   // load gradeables
   json::iterator it = j.begin();
-  json gradeableName = (*it).value("grableables", {});
+  json gradeableName = j["gradeables"];
   //json gradeableName = j["gradeable"].get<json>();
+  
   for (json::iterator itr = gradeableName.begin(); itr != gradeableName.end(); itr++) {
+	//std::cout << "it makes it here in gradeable" << std::endl;
     GRADEABLE_ENUM g;
-    std::string gradeable_id = itr.key();
-	
-	bool success = string_to_gradeable_enum(gradeableName, g);
+    std::string gradeable_name = itr.key();
+	//std::cout << "it makes it here in gradeable2" << std::endl;
+	bool success = string_to_gradeable_enum(gradeable_name, g);
 	if (!success) {
-	  std::cout << "UNKNOWN GRADEABLE: " << gradeableName << std::endl;
+	  std::cout << "UNKNOWN GRADEABLE: " << gradeable_name << std::endl;
 	  exit(0);
 	}
-	
+	//std::cout << "it makes it here in gradeable3 " << gradeable_name << std::endl;
     int c = 0;
 	float p = 0.0;
-	float m = 0.0;	
+	float m = 0.0;
 	
-	json ids = (*itr).value("ids", {});
+	json ids = j["gradeables"][gradeable_name]["ids"];
+	//std::cout << ids << std::endl;
 	for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
+	  std::string gradeable_id = itr2.key();
+	  //std::cout << "hi " << gradeable_id << std::endl;
+	  json grades = ids[gradeable_id];
 	  c++;
-	  p += (*itr2).value("percent", 0.0);
-	  m += (*itr2).value("max", 0.0);
-	}
+	  p += grades["percent"].get<float>();
+	  m += grades["max"].get<float>();
+	}  
+	//std::cout << "it makes it here in gradeable4" << std::endl;
 
+	//std::cout << c << " " << p << " " << m << std::endl;
 	
     Gradeable answer (c,p,m);
     GRADEABLES.insert(std::make_pair(g,answer));
@@ -459,6 +471,8 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 	
 	// Set remove lowest for gradeable
 	int num = (*itr).value("remove_lowest", 0);
+	//std::cout << num << std::endl;
+	//std::cout << GRADEABLES[g].getCount() << std::endl;
 	assert (num >= 0 && num < GRADEABLES[g].getCount());
 	GRADEABLES[g].setRemoveLowest(num);
 	
@@ -477,16 +491,18 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   PERFECT_STUDENT_POINTER = perfect;
   AVERAGE_STUDENT_POINTER = student_average;
   STDDEV_STUDENT_POINTER = student_stddev;
+  
+  //std::cout << "2" << std::endl;
 	
   for (json::iterator itr = gradeableName.begin(); itr != gradeableName.end(); itr++) {
 	GRADEABLE_ENUM g;
-	std::string gradeable_id = itr.key();
-	bool success = string_to_gradeable_enum(gradeableName, g);
+	std::string gradeable_name = itr.key();
+	bool success = string_to_gradeable_enum(gradeable_name, g);
 	if (!success) {
-	  std::cout << "UNKNOWN GRADEABLE: " << gradeableName << std::endl;
+	  std::cout << "UNKNOWN GRADEABLE: " << gradeable_name << std::endl;
 	  exit(0);
 	}
-	json ids = (*itr).value("ids", {});
+	json ids = j["gradeables"][gradeable_name]["ids"];
 	for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
 	  int which = GRADEABLES[g].setCorrespondence(itr2.key());
 	  p_score = (*itr2).value("max", 0.0);
@@ -520,10 +536,14 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 	}
   }
   students.push_back(perfect);
+  students.push_back(student_average);
+  students.push_back(student_stddev);
   students.push_back(lowest_a);
   students.push_back(lowest_b);
   students.push_back(lowest_c);
   students.push_back(lowest_d);
+  
+  //std::cout << "3" << std::endl;
   
   // get display optioons
   std::vector<std::string> displays = j["display"].get<std::vector<std::string> >();
@@ -550,6 +570,8 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
     }
   }
   
+  //std::cout << "4" << std::endl;
+  
   // Set Display Benchmark
   std::vector<std::string> displayBenchmark = j["display_benchmark"].get<std::vector<std::string> >();
   for (int i=0; i<displayBenchmark.size(); i++) {
@@ -557,8 +579,10 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 	DisplayBenchmark(token);
   }
   
+  //std::cout << "5" << std::endl;
+  
   // Set Benchmark Percent
-  json benchmarkPercent = (*it).value("benchmark_percent", {});
+  json benchmarkPercent = j["benchmark_percent"];
   for (json::iterator itr = benchmarkPercent.begin(); itr != benchmarkPercent.end(); itr++) {
     token = itr.key();
 	float value;
@@ -567,8 +591,10 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 	SetBenchmarkPercentage(token,value);
   }
   
+  //std::cout << "6" << std::endl;
+  
   // Set Benchmark Color
-  json benchmarkColor = (*it).value("benchmark_color", {});
+  json benchmarkColor = j["benchmark_color"];
   for (json::iterator itr = benchmarkColor.begin(); itr != benchmarkColor.end(); itr++) {
     token = itr.key();
 	std::string color;
@@ -577,15 +603,18 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 	SetBenchmarkColor(token,color);
   }
   
-  std::vector<std::string> items = j["hackmaxprojects"].get<std::vector<std::string> >();
-  if (!items.empty()) {
-	std::cout << "HACK MAX " << items.size() << std::endl;
-    std::cout <<  "   HMP=" << HACKMAXPROJECTS.size() << std::endl;
-	
-	HACKMAXPROJECTS.push_back(items);
-  }
+  //std::cout << "7" << std::endl;
   
-  json useJSON = (*it).value("use", {});
+  json::iterator itr = j.find("hackmaxprojects");
+  if (itr != j.end()) {
+    std::vector<std::string> items = j["hackmaxprojects"].get<std::vector<std::string> >();
+    std::cout << "HACK MAX " << items.size() << std::endl;
+    std::cout <<  "   HMP=" << HACKMAXPROJECTS.size() << std::endl;
+    HACKMAXPROJECTS.push_back(items);
+  }
+  //std::cout << "8" << std::endl;
+  
+  json useJSON = j["use"];
   for (json::iterator itr = useJSON.begin(); itr != useJSON.end(); itr++) {
 	token = itr.key();
 	if (token == "late_day_penalty") {
@@ -602,6 +631,8 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
       exit(0);
 	}
   }
+  
+  //std::cout << "9" << std::endl;
 }
 
 
@@ -678,8 +709,12 @@ void processcustomizationfile(std::vector<Student*> &students) {
   SetBenchmarkColor("lowest_c-"  ,"ffc8c8"); // orange
   SetBenchmarkColor("lowest_d"   ,"ff0000"); // red
   SetBenchmarkColor("failing"    ,"c80000"); // dark red
+  
+  //std::cout << "it makes it here!!" << std::endl;
 
   preprocesscustomizationfile(students);
+  
+  //std::cout << "it makes it here" << std::endl;
   
   load_student_grades(students);
 
@@ -1079,6 +1114,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
   
   for (json::iterator itr = j.begin(); itr != j.end(); itr++) {
     token = itr.key();
+	std::cout << token << std::endl;
 	if (token == "section") {
 	  // create sections
 	  int counter = 0;
@@ -1132,14 +1168,14 @@ void processcustomizationfile(std::vector<Student*> &students) {
 		  counter++;
 		}
 	  }
-	} else if (token == "message") {
+	} else if (token == "messages") {
 	  // general message at the top of the file
 	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
 		MESSAGES.push_back(itr2.value());
 	  }
 	} else if (token == "warning") {
 	  // EWS early warning system [ per student ]
-	  std::vector<json> warning_list = itr.value();
+	  std::vector<json> warning_list = j[token].get<std::vector<json> >();
 	  for (int i = 0; i<warning_list.size(); i++) {
 		json warning_user = warning_list[i];
 	    std::string username = warning_user["user"].get<std::string>();
@@ -1153,7 +1189,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	  }
 	} else if (token == "recommend") {
 	  // UTA/mentor recommendations [ per student ]
-	  std::vector<json> recommend_list = itr.value();
+	  std::vector<json> recommend_list = j[token].get<std::vector<json> >();
 	  for (int i = 0; i < recommend_list.size(); i++) {
 		json recommend_user = recommend_list[i];
 	    std::string username = recommend_user["user"].get<std::string>();
@@ -1167,7 +1203,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	  }
 	} else if (token == "note") {
 	  // other grading note [ per student ]
-	  std::vector<json> note_list = itr.value();
+	  std::vector<json> note_list = j[token].get<std::vector<json> >();
 	  for (int i = 0; i < note_list.size(); i++) {
 		json note_user = note_list[i];
 	    std::string username = note_user["user"].get<std::string>();
@@ -1180,7 +1216,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 		s->addNote(message);
 	  }
 	} else if (token == "earned_late_days") {
-	  std::vector<float> earnedLateDays = itr.value();
+	  std::vector<float> earnedLateDays = j[token].get<std::vector<float> >();
 	  GLOBAL_earned_late_days.clear();
 	  for (int i = 0; i < earnedLateDays.size(); i++) {
 	    float tmp = earnedLateDays[i];
@@ -1190,18 +1226,18 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	} else if (token == "iclicker_ids") {
 	  iclicker_remotes_filename = itr.value();
 	} else if (token == "iclicker") {
-	  std::vector<json> iclickerLectures;
-	  for (int i = 0; i < iclickerLectures.size(); i++) {
-	    json iclickerLecture = iclickerLectures[i];
-	    for (json::iterator itr2 = iclickerLecture.begin(); itr2 != iclickerLecture.end(); itr2++) {
-		  std::string temp = itr2.key();
+	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+	    std::string temp = itr2.key();
+		std::vector<json> iclickerLectures = j[token][temp];
+		for (int i = 0; i < iclickerLectures.size(); i++) {
+		  json iclickerLecture = iclickerLectures[i];
 		  int which_lecture = std::stoi(temp);
-		  std::string clicker_file = (itr2.value())["file"].get<std::string>();
-		  int which_column = (itr2.value())["column"].get<int>();
-		  std::string correct_answer = (itr2.value())["answer"].get<std::string>();
+		  std::string clicker_file = iclickerLecture["file"].get<std::string>();
+		  int which_column = iclickerLecture["column"].get<int>();
+		  std::string correct_answer = iclickerLecture["answer"].get<std::string>();
 		  assert (which_lecture >= 1 && which_lecture <= MAX_LECTURES);
 		  iclicker_questions[which_lecture].push_back(iClickerQuestion(clicker_file,which_column,correct_answer));
-	    }
+		}
 	  }
 	} else if (token == "audit") {
 	  std::vector<json> audit_list = itr.value();
@@ -1269,26 +1305,31 @@ void processcustomizationfile(std::vector<Student*> &students) {
               grade == "D");
 	    CUTOFFS[grade] = cutoff;
 	  }
-	} else if (token == "grableables") {
+	} else if (token == "gradeables") {
 	  continue;
 	} else if (token == "exam_data") {
 	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
 	    token2 = itr2.key();
-		std::string value = (*itr2).value(token2, "");
+		std::cout << token2 << std::endl;
 		if (token2 == "exam_title") {
+		  std::string value = itr2.value();
 		  strcpy(GLOBAL_EXAM_TITLE, value.c_str());
 		} else if (token2 == "exam_date") {
+		  std::string value = itr2.value();
 		  strcpy(GLOBAL_EXAM_DATE, value.c_str());
 		} else if (token2 == "exam_time") {
+		  std::string value = itr2.value();
 		  strcpy(GLOBAL_EXAM_TIME, value.c_str());
 		} else if (token2 == "exam_default_room") {
+		  std::string value = itr2.value();
 		  strcpy(GLOBAL_EXAM_DEFAULT_ROOM, value.c_str());
 		} else if (token2 == "min_overall_for_zone_assignment") {
-		  GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = (*itr2).value(token2, 0);
+		  float value = itr2.value();
+		  GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = value;
 		} else if (token2 == "exam_seating") {
 		  std::cout << "TOKEN IS EXAM SEATING" << std::endl;
 		  
-		  std::vector<std::string> examSeating = (*itr2)[token2].get<std::vector<std::string> >();
+		  std::vector<std::string> examSeating = itr2.value();
 		  token = examSeating[0];
 		  token2 = examSeating[1];
 		  
@@ -1298,23 +1339,24 @@ void processcustomizationfile(std::vector<Student*> &students) {
 		}
 	  }
 	} else if (token == "bonus_latedays") {
-	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
+	  json bonusJson = j[token];
+	  for (json::iterator itr2 = bonusJson.begin(); itr2 != bonusJson.end(); itr2++) {
 	    std::string bonus = itr2.key();
 	    BONUS_WHICH_LECTURE = std::stoi(bonus);
-	    BONUS_FILE = (*itr2).value(bonus, "");
+	    BONUS_FILE = j[token][bonus];
         std::cout << "BONUS LATE DAYS" << std::endl;
-	  
+	    
 	    if (BONUS_FILE != "") {
           load_bonus_late_day(students,BONUS_WHICH_LECTURE,BONUS_FILE);
 	    }
-	  }  
+	  }
 	} else {
 	  if (token == "display" || token == "display_benchmark" || token == "benchmark_percent") {
 	    continue;
 	} else if (token == "use" || token == "hackmaxprojects" || token == "benchmark_color") {
 		continue;
 	}
-	  std::cout << "ERROR: UNKNOWN TOKEN  X" << token << std::endl;
+	  std::cout << "ERROR: UNKNOWN TOKEN  X " << token << std::endl;
 	}
   }
   
@@ -1360,7 +1402,7 @@ void load_student_grades(std::vector<Student*> &students) {
 	  GRADEABLE_ENUM g;
 	  bool gradeable_enum_success = string_to_gradeable_enum(token,g);
           if (!gradeable_enum_success && token != "Other" && token != "rubric" && token != "Test") {
-		// non grableables
+		// non gradeables
 		if (token == "user_id") {
 			s->setUserName(j[token].get<std::string>());
 		} else if (token == "legal_first_name") {
@@ -1636,7 +1678,7 @@ int main(int argc, char* argv[]) {
     assert (argc == 2);
     GLOBAL_sort_order = argv[1];
   }
-
+  
   std::vector<Student*> students;  
   processcustomizationfile(students);
   //processcustomizationfile(students,false);
