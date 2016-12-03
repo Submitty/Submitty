@@ -284,7 +284,7 @@ mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F1.3%2Fhamcrest-core-1
 # EMMA is a tool for computing code coverage of Java programs
 
 echo "Getting emma..."
-wget http://downloads.sourceforge.net/project/emma/emma-release/2.0.5312/emma-2.0.5312.zip -o /dev/null > /dev/null 2>&1
+wget https://github.com/Submitty/emma/releases/download/2.0.5312/emma-2.0.5312.zip -o /dev/null > /dev/null 2>&1
 unzip emma-2.0.5312.zip > /dev/null
 mv emma-2.0.5312/lib/emma.jar emma.jar
 rm -rf emma-2.0.5312

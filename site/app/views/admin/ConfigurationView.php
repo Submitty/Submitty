@@ -12,6 +12,7 @@ class ConfigurationView {
 
     public function viewConfig($fields) {
         $zero_checked = ($fields['zero_rubric_grades'] === true) ? 'checked' : '';
+        $keep_previous_files = ($fields['keep_previous_files'] === true) ? 'checked' : '';
         $display_iris_grades_summary = ($fields['display_iris_grades_summary'] === true) ? 'checked' : '';
         $display_custom_message = ($fields['display_custom_message'] === true) ? 'checked' : '';
 
@@ -66,6 +67,13 @@ class ConfigurationView {
                 <div class="option-title">Upload Message</div>
                 <div class="option-alt">What is the message that should be shown to students above the upload area
                 on the submission page.</div>
+            </div>
+        </div>
+        <div class="option">
+            <div class="option-input"><input type="checkbox" name="keep_previous_files" value="true" {$keep_previous_files} /></div>
+            <div class="option-desc">
+                <div class="option-title">Keep previous files uploaded</div>
+                <div class="option-alt">Should the files from previous submission be in the upload box by default.</div>
             </div>
         </div>
 
