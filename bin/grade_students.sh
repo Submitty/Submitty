@@ -642,7 +642,7 @@ function grade_this_item {
     # Make directory structure in results if it doesn't exist
     mkdir -p "$results_path" || log_error "$NEXT_TO_GRADE" "Could not create results path $results_path"
 
-    cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/test*.html $tmp/results_log_*txt $tmp/results.json $tmp/results_grade.txt $tmp/test*.json "$results_path"
+    cp  1>/dev/null  2>&1  $tmp/test*.txt $tmp/test*.png $tmp/test*.html $tmp/results_log_*txt $tmp/results.json $tmp/results_grade.txt $tmp/test*.json "$results_path"
 
 
     # FIXME: a global variable
