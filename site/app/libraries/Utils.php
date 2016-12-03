@@ -101,4 +101,51 @@ class Utils {
     public static function convertBooleanToString($value) {
         return ($value === true) ? "true" : "false";
     }
+
+
+    function getContentType($filename){
+        switch (strtolower(pathinfo($filename, PATHINFO_EXTENSION))) {
+            // pdf
+            case 'pdf':
+                $content_type = "application/pdf";
+                break;
+            // images
+            case 'png':
+                $content_type = "image/png";
+                break;
+            case 'jpg':
+            case 'jpeg':
+                $content_type = "image/jpeg";
+                break;
+            case 'gif':
+                $content_type = "image/gif";
+                break;
+            case 'bmp':
+                $content_type = "image/bmp";
+                break;
+            // text
+            case 'c':
+                $content_type = 'text/x-csrc';
+                break;
+            case 'cpp':
+            case 'cxx':
+            case 'h':
+            case 'hpp':
+            case 'hxx':
+                $content_type = 'text/x-c++src';
+                break;
+            case 'java':
+                $content_type = 'text/x-java';
+                break;
+            case 'py':
+                $content_type = 'text/x-python';
+                break;
+            default:
+                $content_type = 'text/x-sh';
+                break;
+        }
+        return $content_type;
+    }
+
+
 }
