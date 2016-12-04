@@ -81,6 +81,7 @@ class Config {
     /*** COURSE DATABASE CONFIG ***/
 
     private $course_name;
+    private $course_home_url;
     private $default_hw_late_days;
     private $default_student_late_days;
     private $zero_rubric_grades;
@@ -150,7 +151,7 @@ class Config {
 
         $this->setConfigValues($course, 'hidden_details', array('database_name'));
         $this->setConfigValues($course, 'course_details', array
-                               ('course_name', 'default_hw_late_days',
+                               ('course_name', 'course_home_url', 'default_hw_late_days',
                                 'default_student_late_days', 'zero_rubric_grades', 'upload_message', 'keep_previous_files',
                                 'display_iris_grades_summary', 'display_custom_message'));
         
@@ -302,6 +303,12 @@ class Config {
      */
     public function getCourseName() {
         return $this->course_name;
+    }
+    /**
+     * @return string
+     */
+    public function getCourseHomeUrl(){
+        return $this->course_home_url;
     }
 
     /**
