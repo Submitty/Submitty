@@ -83,7 +83,7 @@ if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
  * paths for the Logger and ExceptionHandler
  */
 $core->loadConfig($semester, $course);
-$core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->getConfig()->getCourseHomeUrl());
+$core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->getConfig()->getCourseHomeUrl(),true);
 $core->getOutput()->addBreadcrumb("Submitty", $core->buildUrl());
 date_default_timezone_set($core->getConfig()->getTimezone());
 Logger::setLogPath($core->getConfig()->getLogPath());
