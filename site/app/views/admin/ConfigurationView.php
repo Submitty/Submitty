@@ -32,6 +32,14 @@ class ConfigurationView {
                 <div class="option-alt">Input the course name that should appear in the header of the site</div>
             </div>
         </div>
+        
+        <div class="option">
+            <div class="option-input"><input type="text" name="course_home_url" value="{$fields['course_home_url']}" /></div>
+            <div class="option-desc">
+                <div class="option-title">Course Home URL</div>
+                <div class="option-alt">Input the url that will link to your course page from the Course Name</div>
+            </div>
+        </div>
 
         <div class="option">
             <div class="option-input"><input type="text" name="default_student_late_days" value="{$fields['default_student_late_days']}" /></div>
