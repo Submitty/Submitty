@@ -50,11 +50,12 @@ TestResults* fileExists_doit (const TestCase &tc, const nlohmann::json& j) {
     // loop over the available files
     for (int i = 0; i < files.size(); i++) {
       std::cout << "FILE CANDIDATE: " << files[i] << std::endl;
-      if (access( files[i].c_str(), F_OK|R_OK|W_OK ) != -1) { // file exists
+      if (access( files[i].c_str(), F_OK|R_OK ) != -1) { // file exists
 	std::cout << "FOUND '" << files[i] << "'" << std::endl;
 	found = true;
+      } else {
+	std::cout << "OOPS, does not exist: " << files[i] << std::endl;
       }
-      std::cout << "OOPS, does not exist: " << files[i] << std::endl;
     }
     if (found) {
       found_count++;
