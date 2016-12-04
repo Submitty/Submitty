@@ -25,6 +25,7 @@ class ConfigurationController extends AbstractController {
     public function viewConfiguration() {
         $fields = array(
             'course_name'               => $this->core->getConfig()->getCourseName(),
+            'course_home_url'           => $this->core->getConfig()->getCourseHomeUrl(),
             'default_hw_late_days'      => $this->core->getConfig()->getDefaultHwLateDays(),
             'default_student_late_days' => $this->core->getConfig()->getDefaultStudentLateDays(),
             'zero_rubric_grades'        => $this->core->getConfig()->shouldZeroRubricGrades(),
@@ -90,6 +91,7 @@ class ConfigurationController extends AbstractController {
             ),
             'course_details' => array(
                 'course_name'               => $_POST['course_name'],
+                'course_home_url'           => $_POST['course_home_url'],
                 'default_hw_late_days'      => $_POST['default_hw_late_days'],
                 'default_student_late_days' => $_POST['default_student_late_days'],
                 'zero_rubric_grades'        => $_POST['zero_rubric_grades'],
