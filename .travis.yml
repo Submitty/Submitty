@@ -65,6 +65,8 @@ before_install:
    - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
    - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
    #- export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
+   - echo $PATH
+   - sudo echo $PATH
    - sudo sed -e "s?secure_path=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?secure_path=\"${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?g" --in-place /etc/sudoers
    - sudo cat /etc/sudoers
 
