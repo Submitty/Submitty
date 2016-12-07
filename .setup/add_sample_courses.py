@@ -286,10 +286,10 @@ def create_course(course, semester, course_group, assignments=None):
                               form_json['date_released'], form_json['ta_view_date']))
 
             os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO electronic_gradeable "
-                      "VALUES ('{}', '{}', '{}', false, '', true, '{}', 2, {})\""
-                      .format(database, form_json['gradeable_id'],
+                      "VALUES ('{}', '{}', false, '', true, '{}', '{}', 2, {})\""
+                      .format(database, form_json['gradeable_id'], form_json['config_path'],
                               form_json['date_submit'], form_json['date_due'],
-                              form_json['config_path'], form_json['point_precision']))
+                              form_json['point_precision']))
 
             insert_gradeable_component(database, assignment, "Test 1", 5, 1)
             insert_gradeable_component(database, assignment, "Test 2", 5, 2, ec=1)
@@ -349,4 +349,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
