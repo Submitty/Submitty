@@ -451,6 +451,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $this->assertFalse($file->isDir());
             $files[] = $file->getFilename();
         }
+        sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
 
         $this->setUploadFiles('overlap.zip', 'overlap');
