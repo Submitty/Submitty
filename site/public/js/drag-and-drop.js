@@ -131,6 +131,12 @@ function isFolder(file){
 function addFile(file, part){
     var i = fileExists(file, part);
     if( i[0] == -1 ){    // file does not exist
+        // empty bucket if file is a zip and bucket is not empty
+        if(file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
+            if(confirm("Note: All files currently in the bucket will be deleted if you try to upload a zip: " + file.name + ". Do you want to continue?")){
+                deleteFiles(part);
+            }
+        }
         file_array[part-1].push(file);
         addLabel(file.name, (file.size/1024).toFixed(2), part, false);
     }
