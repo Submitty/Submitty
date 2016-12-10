@@ -29,7 +29,7 @@ class AutoLoaderTester extends \PHPUnit_Framework_TestCase {
     }
 
     public function testUnregister() {
-        AutoLoader::registerDirectory(__TEST_DIRECTORY__);
+        AutoLoader::registerDirectory(__TEST_DATA__);
         $this->assertTrue(in_array('DummyClass', array_keys(AutoLoader::getClasses())));
         AutoLoader::unregisterClass('DummyClass');
         $this->assertFalse(in_array('DummyClass', array_keys(AutoLoader::getClasses())));
@@ -43,7 +43,7 @@ class AutoLoaderTester extends \PHPUnit_Framework_TestCase {
     }
 
     public function testRegisterNamespace() {
-        AutoLoader::registerDirectory(__TEST_DIRECTORY__, true, "tests");
+        AutoLoader::registerDirectory(__TEST_DATA__, true, "tests");
         $this->assertTrue(in_array('tests\misc\DummyClass', array_keys(AutoLoader::getClasses())));
     }
 }

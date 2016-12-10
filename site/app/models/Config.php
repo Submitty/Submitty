@@ -97,16 +97,17 @@ class Config {
     /**
      * Config constructor.
      *
-     * @param $semester
-     * @param $course
+     * @param string $semester
+     * @param string $course
+     * @param string $master_ini_path
      */
-    public function __construct($semester, $course) {
+    public function __construct($semester, $course, $master_ini_path) {
         $this->semester = $semester;
         $this->course = $course;
-        $this->config_path = implode("/", array(__DIR__, '..', '..', 'config'));
+        $this->config_path = realpath(dirname($master_ini_path));
 
         // Load config details from the master config file
-        $master = IniParser::readFile(implode("/", array($this->config_path, 'master.ini')));
+        $master = IniParser::readFile($master_ini_path);
 
         $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
         $this->setConfigValues($master, 'site_details', array('base_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
