@@ -7,68 +7,69 @@ use \app\libraries\Utils;
 use \app\libraries\FileUtils;
 
 class LoggerTester extends \PHPUnit_Framework_TestCase {
-    private static $file_name;
+    private $file;
+    private $directory;
 
     public static function setUpBeforeClass() {
-        Logger::setLogPath(__TEST_DIRECTORY__."/LoggerTesterLogs");
-        FileUtils::createDir(__TEST_DIRECTORY__."/LoggerTesterLogs", true);
-        FileUtils::emptyDir(__TEST_DIRECTORY__."/LoggerTesterLogs");
-        $date = getdate(time());
-        LoggerTester::$file_name = __TEST_DIRECTORY__."/LoggerTesterLogs/".
-            $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday']).".txt";
-
         $_SERVER['HTTP_HOST'] = "localhost";
         $_SERVER['HTTPS'] = true;
         $_SERVER['REQUEST_URI'] = "index.php?test=1";
     }
 
     public static function tearDownAfterClass() {
-        FileUtils::recursiveRmdir(__TEST_DIRECTORY__."/LoggerTesterLogs");
         unset($_SERVER['HTTP_HOST']);
         unset($_SERVER['HTTPS']);
         unset($_SERVER['REQUEST_URI']);
     }
 
+    public function setUp() {
+        $this->directory = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
+        FileUtils::createDir($this->directory);
+        $this->assertFileExists($this->directory);
+        Logger::setLogPath($this->directory);
+        $date = getdate(time());
+        $filename = $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday']).".txt";
+        $this->file = FileUtils::joinPaths($this->directory, $filename);
+    }
+
     public function tearDown() {
-        if (file_exists(LoggerTester::$file_name)) {
-            unlink(LoggerTester::$file_name);
-        }
+        FileUtils::recursiveRmdir($this->directory);
     }
 
     public function testLoggerDebug() {
-        $this->assertFileNotExists(LoggerTester::$file_name);
+        $this->assertFileNotExists($this->file);
         Logger::debug("Debug Message");
-        $this->assertFileExists(LoggerTester::$file_name);
+        $this->assertFileExists($this->file);
         $this->assertMessage("DEBUG", "Debug Message");
     }
 
     public function testLoggerInfo() {
-        $this->assertFileNotExists(LoggerTester::$file_name);
+        $this->assertFileNotExists($this->file);
         Logger::info("Info Message");
         $this->assertMessage("INFO", "Info Message");
     }
 
     public function testLoggerWarn() {
-        $this->assertFileNotExists(LoggerTester::$file_name);
+        $this->assertFileNotExists($this->file);
         Logger::warn("Warn Message");
         $this->assertMessage("WARN", "Warn Message");
     }
 
     public function testLoggerError() {
-        $this->assertFileNotExists(LoggerTester::$file_name);
+        $this->assertFileNotExists($this->file);
         Logger::error("Error Message");
         $this->assertMessage("ERROR", "Error Message");
     }
 
     public function testLoggerFatalError() {
-        $this->assertFileNotExists(LoggerTester::$file_name);
+        $this->assertFileNotExists($this->file);
         Logger::fatal("Fatal Message");
         $this->assertMessage("FATAL ERROR", "Fatal Message");
     }
 
     public function assertMessage($level, $message) {
         $current_date = getdate(time());
-        $file = file_get_contents(LoggerTester::$file_name);
+        $file = file_get_contents($this->file);
         $lines = explode("\n", $file);
         $this->assertCount(5, $lines);
         $first_line = explode(" - ", $lines[0]);

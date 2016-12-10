@@ -142,5 +142,8 @@ after_script:
   - pylint_runner ${TRAVIS_BUILD_DIR}
 #  - sudo ./.setup/travis/print_debug.sh
 
+after_success:
+  - travis_retry php vendor/bin/coveralls -v
+
 notifications:
   email: false
