@@ -651,7 +651,7 @@ HTML;
     WHERE 
         g_id=?
     AND 
-        u.user_group BETWEEN 2 AND 3
+        u.user_group BETWEEN 1 AND 3
     GROUP BY 
         u.user_id
     ",array($g_id));
@@ -702,7 +702,7 @@ HTML;
   SELECT 
     gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating, g_grade_start_date 
   FROM (SELECT g.g_id, u.user_id, u.user_group, g_grade_start_date
-          FROM (SELECT user_id, user_group FROM users WHERE user_group=2 OR user_group=3) AS u CROSS JOIN ( 
+          FROM (SELECT user_id, user_group FROM users WHERE user_group BETWEEN 1 AND 3) AS u CROSS JOIN ( 
             SELECT 
               DISTINCT g.g_id,
               g_grade_start_date
@@ -720,6 +720,26 @@ HTML;
               ORDER BY user_group, user_id, g_grade_start_date", array());
   
   $last = '';
+  
+  function display_graders($graders, $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections){
+    foreach($graders as $grader){
+       print <<<HTML
+        <tr>
+            <td>{$grader['user_id']}</td>
+            <td><input style="width: 227px" type="text" name="grader_{$grader['user_id']}" class="grader" disabled value="
+HTML;
+        if($have_old && !$g_grade_by_registration) {
+            print (isset($graders_to_sections[$grader['user_id']])) ? $graders_to_sections[$grader['user_id']] : '';
+        }
+        else{
+            print $all_sections;
+        }
+        print <<<HTML
+"></td>
+        </tr>
+HTML;
+    }
+  }
   
   foreach($db->rows() as $row){
     $new_row = false;
@@ -743,65 +763,43 @@ HTML;
   
   print <<<HTML
             </table>
-        <div id="full-access-graders" style="display:none;">
         <br /> 
         Available rotating sections: {$num_rotating_sections}
+        <br /> <br />
+        <div id="instructor-graders">
+        <table>
+                <th>Instructor Graders</th>
+HTML;
+    $db->query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_id ASC", array(1));
+    display_graders($db->rows(), $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections);
+    
+  print <<<HTML
+        </table>
+        </div>
+        <br />
+        <div id="full-access-graders" style="display:none;">
             <table>
                 <th>Full Access Graders</th>
 HTML;
     
-   $db->query("SELECT user_id FROM users WHERE user_group=?", array(2));
-      
-    foreach($db->rows() as $fa_grader){ 
-        print <<<HTML
-        <tr>
-            <td>{$fa_grader['user_id']}</td>
-            <td><input style="width: 227px" type="text" name="grader_{$fa_grader['user_id']}" class="grader" value="
-HTML;
-        if($have_old && !$g_grade_by_registration) {
-            print (isset($graders_to_sections[$fa_grader['user_id']])) ? $graders_to_sections[$fa_grader['user_id']] : '';
-        }
-        else{
-            print $all_sections;
-        }
-        print <<<HTML
-            "></td>
-        </tr>
-HTML;
-    }
+  $db->query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_id ASC", array(2));
+  display_graders($db->rows(), $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections);
     
-    print <<<HTML
+  print <<<HTML
             </table>
-            <div style="border: 1px black;">
 HTML;
 
   print <<<HTML
+        </div>
         <div id="limited-access-graders" style="display:none;">
             <br />
             <table>
                 <th>Limited Access Graders</th>
 HTML;
 
-   $db->query("SELECT user_id FROM users WHERE user_group=?", array(3));
-      
-    foreach($db->rows() as $la_grader){
-        print <<<HTML
-        <tr>
-            <td>{$la_grader['user_id']}</td>
-            <td><input style="width: 227px" type="text" name="grader_{$la_grader['user_id']}" class="grader" value="
-HTML;
-        if($have_old && !$g_grade_by_registration) {
-            print (isset($graders_to_sections[$la_grader['user_id']])) ? $graders_to_sections[$la_grader['user_id']] : '';
-        }
-        else{
-            print $all_sections;
-        }
-        print <<<HTML
-"></td>
-        </tr>
-HTML;
-    }
-
+  $db->query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_id ASC", array(3));
+  display_graders($db->rows(), $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections);    
+  
     print <<<HTML
         </table>
 
@@ -1001,6 +999,9 @@ HTML;
             .attr('name', 'gradeableJSON')
             .attr('value', JSON.stringify($('form').serializeObject()))
             .appendTo('#gradeable-form');
+         if ($("input[name='section_type']:checked").val() == 'reg_section'){
+            $('#rotating-sections :input').prop('disabled',true);
+         }
     });
 
     $(document).ready(function() {
@@ -1184,20 +1185,18 @@ HTML;
         }
         
         function showGroups(val){
-            var graders = ['','','full-access-graders', 'limited-access-graders']; 
+            var graders = ['','instructor-graders','full-access-graders', 'limited-access-graders']; 
             for(var i=parseInt(val)+1; i<graders.length; ++i){
+                $('#'+graders[i]+' :input').prop('disabled',true);
                 $('#'+graders[i]).hide();
             }
-            for(var i=0; i <= parseInt(val) ; ++i){
+            for(var i=1; i <= parseInt(val) ; ++i){
                 $('#'+graders[i]).show();
+                $('#'+graders[i]+' :input').prop('disabled',false);
             }
-            if (val > 1){
-              // show specific groups
-              showHistory(val);
-            }
-            else{
-              $('#grader-history').hide();
-            }
+
+            // show specific groups
+            showHistory(val);
         }
         
         showGroups($('select[name="minimum_grading_group"] option:selected').attr('value'));
