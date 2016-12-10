@@ -2,6 +2,7 @@
     "name": "submitty/submitty",
     "require-dev": {
         "phpunit/phpunit": "4.*",
-        "phpunit/phpunit-selenium": "1.*"
+        "phpunit/phpunit-selenium": "1.*",
+        "satooshi/php-coveralls": "1.*"
     }
 }

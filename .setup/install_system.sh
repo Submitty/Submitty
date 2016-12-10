@@ -74,7 +74,7 @@ fi
 # USERS SETUP
 #################
 
-python ${SUBMITTY_REPOSITORY}/.setup/create_untrusted_users.py
+${SUBMITTY_REPOSITORY}/.setup/bin/create_untrusted_users.py
 
 # Special users and groups needed to run Submitty
 #
@@ -96,14 +96,6 @@ addgroup course_builders
 
 if [ ${VAGRANT} == 1 ]; then
 	adduser vagrant sudo
-	adduser ta --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-	echo "ta:ta" | sudo chpasswd
-	adduser instructor --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-	echo "instructor:instructor" | sudo chpasswd
-	adduser instructor sudo
-	adduser developer --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-	echo "developer:developer" | sudo chpasswd
-	adduser developer sudo
 fi
 
 # change the default user umask (was 002)
@@ -141,34 +133,6 @@ if [ ${VAGRANT} == 1 ]; then
 fi
 adduser hwphp hwcronphp
 adduser hwcron hwcronphp
-
-for COURSE in csci1000 csci1100 csci1200 csci2600
-do
-
-    # for each course, create a group to contain the current
-    # instructor along the lines of:
-
-	addgroup ${COURSE}
-
-    # and another group to contain the current instructor, TAs,
-    # hwcron, and hwphp along the lines of
-
-	addgroup ${COURSE}_tas_www
-	adduser hwphp ${COURSE}_tas_www
-	adduser hwcron ${COURSE}_tas_www
-	if [ ${VAGRANT} == 1 ]; then
-		adduser ta ${COURSE}
-		adduser ta ${COURSE}_tas_www
-		adduser instructor ${COURSE}
-		adduser	instructor ${COURSE}_tas_www
-		adduser developer ${COURSE}
-		adduser developer ${COURSE}_tas_www
-	fi
-done
-
-if [ ${VAGRANT} == 1 ]; then
-	adduser instructor course_builders
-fi
 
 
 #################################################################
@@ -480,24 +444,6 @@ a2enmod authz_groupfile
 mkdir -p /var/lib/svn
 chmod g+s /var/lib/svn
 
-# make a group and subdirectory for any classes requiring subversion
-# repositories:
-mkdir -p /var/lib/svn/csci2600
-touch /var/lib/svn/svngroups
-chown www-data:csci2600_tas_www /var/lib/svn/csci2600 /var/lib/svn/svngroups
-if [ ${VAGRANT} == 1 ]; then
-    # set up ssh keys for hwcron to connect to the subversion
-    # repository (do not use root/sudo except as shown)
-	su hwcron
-        # generate the key (accept the defaults):
-	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N "" > /dev/null 2>&1
-	echo "hwcron" > password.txt
-        # copy the key to test-svn:
-	sshpass -f password.txt ssh-copy-id hwcron@test-svn
-	rm password.txt
-	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
-fi
-
 #################################################################
 # POSTGRES SETUP
 #################
@@ -578,23 +524,6 @@ apache2ctl -t
 service apache2 restart
 
 if [[ ${VAGRANT} == 1 ]]; then
-    echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
-    echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/valid
-    echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
-    echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/valid
-    echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
-    echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/valid
-    echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
-    echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/valid
-    echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
-    echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/valid
-    ${SUBMITTY_DATA_DIR}/bin/authonly.pl
-    echo "student:student" | sudo chpasswd
-    echo "smithj:smithj" | sudo chpasswd
-    echo "joness:joness" | sudo chpasswd
-    echo "browna:browna" | sudo chpasswd
-    echo "pearsr:pearsr" | sudo chpasswd
-
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
     rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
     mkdir ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
@@ -605,8 +534,7 @@ if [[ ${VAGRANT} == 1 ]]; then
     ln -s ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs ${SUBMITTY_DATA_DIR}/tagrading_logs
 
     # Call helper script that makes the courses and refreshes the database
-    chmod u+x ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py
-    ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py
+    ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py
 
     #################################################################
     # SET CSV FIELDS (for classlist upload data)
@@ -627,5 +555,28 @@ chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
 # blocks r/w access to the directory by others on the system.
 chmod 2771 ${SUBMITTY_INSTALL_DIR}
 
+#################################################################
+# CREATE SVN GROUPS
+###################
+# We can't do this when we install the stuff for SVN as the groups
+# are created when setting up the courses. This should also probably
+# be moved into setup_sample_courses.py
+# make a group and subdirectory for any classes requiring subversion
+# repositories:
+mkdir -p /var/lib/svn/csci2600
+touch /var/lib/svn/svngroups
+chown www-data:csci2600_tas_www /var/lib/svn/csci2600 /var/lib/svn/svngroups
+if [ ${VAGRANT} == 1 ]; then
+    # set up ssh keys for hwcron to connect to the subversion
+    # repository (do not use root/sudo except as shown)
+	su hwcron
+        # generate the key (accept the defaults):
+	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N "" > /dev/null 2>&1
+	echo "hwcron" > password.txt
+        # copy the key to test-svn:
+	sshpass -f password.txt ssh-copy-id hwcron@test-svn
+	rm password.txt
+	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
+fi
 echo "Done."
 exit 0
