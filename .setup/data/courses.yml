@@ -1,0 +1,406 @@
+# Define a list of courses to be added to the system. Any courses that are mentioned in users.yml should
+# be defined below. A good primer on YAML syntax can be found at http:--docs.ansible.com-ansible-YAMLSyntax.html.
+#
+# The syntax for each entry is (anything marked optional can be omitted):
+#
+#   code: string for course should be (this should follow RPI naming convention so csci####)
+#
+#   instructor: string for who leads this course. This should correspond to any existing entry in users.yml
+#
+#   gradeable: a list of gradeables to be used for this course. Each gradeable is defined as:
+#     gradeable_config [optional]: what config to use out of sample_files-sample_assignent_config for this gradeable.
+#         this should be omitted if this is not an electronic gradeable.
+#
+#     g_id: what is the id for this gradeable. This is optional for electronic gradeables and will default to the
+#         filename of the gradeable_config, otherwise this is required to be defined.
+#
+#     g_title: [optional] what is the title for this gradeable. Defaults to a capitalized version of g_id with
+#         underscores converted to spaces.
+#
+#     g_type: integer between 0-2 inclusive, where 0 is for electronic gradeable, 1 is for Checkpoint and 2 is for
+#         Numeric-Text. This can be omitted if it's an electronic gradeable (as anything with gradeable_config defined
+#         will always be assumed to be g_type 0).
+#
+#     g_instructions_url: [optional] string for URL to use as link for submission on navigation page. Defaults to .
+#
+#     g_overall_ta_instructions: [optional] string for additional details to TA for grading. Defaults to .
+#
+#     g_team_assignment: [optional] boolean for if gradeable is a team assignment. Defaults to False (NOT CURRENTLY USED)
+#
+#     g_grade_by_registration: [optional] boolean on if gradeable is graded by registration (TRUE) or rotating (FALSE).
+#         Defaults to True.
+#
+#     g_ta_view_start_date: when are TAs allowed to view this gradeable on the navigation page (before grading has started).
+#         This should be before grading start date and submission open date (if electronic gradeable). Only instructors
+#         can view gradeables before this date has happened (then TAs are allowed).
+#
+#     g_grade_start_date: when should grading start for the gradeable
+#
+#     g_grade_released_date: when are the grades are going to be available to the student via interface and rainbow
+#         grades. This should happen after the grading start date.
+#
+#     g_syllabus_bucket: [optional] what bucket should the gradeable be a part of for rainbox grades. Defaults to None.
+#
+#     g_min_grading_group: [optional] integer for what groups (and above) are allowed to submit grades. Defaults to 3.
+#
+# These next fields are only if the gradeable is of type 0 (electronic gradeable) and can be ignored otherwise):
+#
+#     eg_submission_open_date: Timestamp on when does the gradeable open to students for submission. Should be before
+#         grading start date and submission due date, but after the TA view date.
+#
+#     eg_submission_due_date: Timestamp when is the due date for the gradeable. Should be after submission open date.
+#
+#     eg_is_repository: [optional] Boolean for if this gradeable using version control (TRUE) or not (FALSE).
+#         Defaults to FALSE.
+#
+#     eg_subdirectory: String for where to look for version control repository. Only needed if above setting is TRUE.
+#
+#     eg_use_ta_grading: [optional] Boolean for whether or not to have any TA grading (regardless if there are defined
+#         components). Defaults to TRUE
+#
+#     eg_late_days: [optional] integer for how many late days are allowed for this gradeable. Defaults to 2.
+#
+#     eg_precision: [optional] what is the precision to be used on the rubric page per item when grading.
+#         Defaults to 0.5.
+#
+# To make how the order of the time fields work more explicit:
+# g_ta_view_start_date < eg_submission_open_date < eg_submission_due_date < g_grade_start_date < g_grade_released_date
+#
+#     components: this is a list of dictionaries for each component to be added for the gradeable. Each entry uses:
+#
+#       gc_title: string for component title.
+#       gc_ta_comment: [optional] string for comment to be given to TA on grading. Only for electronic gradeables.
+#       gc_student_comment: [optional] string for comment to be given to student on grade report. Only for electronic
+#             gradeables.
+#       gc_max_value: numeric for max value allowed for this component. If for g_type 1, can be omitted (and will
+#             always be 1).
+#       gc_is_text: [optional] boolean for if this is a text field or not. Only needed if gradeabe is of type
+#             Numeric/Text. Defaults to FALSE. If this is true, then you do not need gc_max_value or gc_is_extra_credit.
+#       gc_is_extra_credit: [optional] boolean for if this is extra credit or not. Defaults to FALSE.
+#
+# Any field that uses a timestamp allows for strings in four formats (if the time is omitted, it defaults to 23:59:59).
+#   - YEAR-MONTH-DAY                      (Ex: 2016-10-13)
+#   - YEAR-MONTH-DAY HOUR:MINUTE:SECOND   (Ex: 2016-10-13 22:45:59)
+#   - (+/-)# day(s)                       (Ex: +2 days)
+#   - (+/-)# day(s) at HOUR:MINUTE:SECOND (Ex: -1 day at 11:40:11)
+
+# the late days for these courses is that our pivot is (2 * i) - 2
+# then from there it's -9, -8, pivot, + 4, +5
+- code: csci1000
+  instructor: instructor
+  gradeables:
+    # homeworks
+    - gradeable_config: python_simple_homework # Future, No TAs
+      g_id: future_no_tas_homework
+      g_title: Future (No TAs) Homework
+      g_ta_view_start_date: 9995-12-31 23:59:59
+      eg_submission_open_date: 9996-12-31 23:59:59
+      eg_submission_due_date: 9997-12-31 23:59:59
+      g_grade_start_date: 9998-12-31 23:59:59
+      g_grade_released_date: 9999-12-31 23:59:59
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+        - gc_title: Question 2
+          gc_max_value: 5
+          gc_is_extra_credit: true
+        
+    - gradeable_config: python_simple_homework
+      g_id: future_tas_homework
+      g_title: Future (TAs) Homework
+      g_ta_view_start_date: 1970-01-01 23:59:59
+      eg_submission_open_date: 9996-12-31 23:59:59
+      eg_submission_due_date: 9997-12-31 23:59:59
+      g_grade_start_date: 9998-12-31 23:59:59
+      g_grade_released_date: 9999-12-31 23:59:59
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+        - gc_title: Question 2
+          gc_max_value: 5
+          gc_is_extra_credit: true
+    - gradeable_config: python_simple_homework
+      g_id: open_homework
+      g_title: Open Homework
+      g_ta_view_start_date: 1970-01-01 23:59:59
+      eg_submission_open_date: 1971-01-01 23:59:59
+      eg_submission_due_date: 9997-12-31 23:59:59
+      g_grade_start_date: 9998-12-31 23:59:59
+      g_grade_released_date: 9999-12-31 23:59:59
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+        - gc_title: Question 2
+          gc_max_value: 5
+          gc_is_extra_credit: true
+    - gradeable_config: python_simple_homework
+      g_id: closed_homework
+      g_title: Closed Homework
+      g_ta_view_start_date: 1970-01-01 23:59:59
+      eg_submission_open_date: 1971-01-01 23:59:59
+      eg_submission_due_date: 1972-01-01 23:59:59
+      g_grade_start_date: 9998-12-31 23:59:59
+      g_grade_released_date: 9999-12-31 23:59:59
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+        - gc_title: Question 2
+          gc_max_value: 5
+          gc_is_extra_credit: true
+    - gradeable_config: python_simple_homework
+      g_id: grading_homework
+      g_title: Grading Homework
+      g_ta_view_start_date: 1970-01-01 23:59:59
+      eg_submission_open_date: 1971-01-01 23:59:59
+      eg_submission_due_date: 1972-01-01 23:59:59
+      g_grade_start_date: 1973-01-01 23:59:59
+      g_grade_released_date: 9999-12-31 23:59:59
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+        - gc_title: Question 2
+          gc_max_value: 5
+          gc_is_extra_credit: true
+    - gradeable_config: python_simple_homework
+      g_id: grades_released_homework
+      g_title: Grades Released Homework
+      g_ta_view_start_date: 1970-01-01 23:59:59
+      eg_submission_open_date: 1971-01-01 23:59:59
+      eg_submission_due_date: 1972-01-01 23:59:59
+      g_grade_start_date: 1973-01-01 23:59:59
+      g_grade_released_date: 1974-01-01 23:59:59
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+        - gc_title: Question 2
+          gc_max_value: 5
+          gc_is_extra_credit: true
+
+    # checkpoints
+    - g_type: 1
+      g_id: future_no_tas_lab
+      g_title: Future (No TAs) Lab
+      g_ta_view_start_date: 9997-12-31 23:59:59
+      g_grade_start_date: 9998-12-31 23:59:59
+      g_grade_released_date: 9999-12-31 23:59:59
+      components:
+        - gc_title: Question 1
+        - gc_title: Question 2
+          gc_is_extra_credit: true
+    - g_type: 1
+      g_id: future_tas_lab
+      g_title: Future (TAs) Lab
+      g_ta_view_start_date: 1970-01-01 23:59:59
+      g_grade_start_date: 9998-12-31 23:59:59
+      g_grade_released_date: 9999-12-31 23:59:59
+      components:
+        - gc_title: Question 1
+        - gc_title: Question 2
+          gc_is_extra_credit: true
+    - g_type: 1
+      g_id: grading_lab
+      g_title: Grading Lab
+      g_ta_view_start_date: 1970-01-01 23:59:59
+      g_grade_start_date: 1971-01-01 23:59:59
+      g_grade_released_date: 9999-12-31 23:59:59
+      components:
+        - gc_title: Question 1
+        - gc_title: Question 2
+          gc_is_extra_credit: true
+    - g_type: 1
+      g_id: grades_released_lab
+      g_title: Grades Released Lab
+      g_ta_view_start_date: 1970-01-01 23:59:59
+      g_grade_start_date: 1971-01-01 23:59:59
+      g_grade_released_date: 1972-01-01 23:59:59
+      components:
+        - gc_title: Question 1
+        - gc_title: Question 2
+          gc_is_extra_credit: true
+
+    # numeric-text
+    - g_type: 2
+      g_id: future_no_tas_test
+      g_title: Future (No TAs) Test
+      g_ta_view_start_date: 9997-12-31 23:59:59
+      g_grade_start_date: 9998-12-31 23:59:59
+      g_grade_released_date: 9999-12-31 23:59:59
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+        - gc_title: Question 2
+          gc_max_value: 5
+          gc_is_extra_credit: true
+        - gc_title: Text 1
+          gc_is_text: true
+    - g_type: 2
+      g_id: future_tas_test
+      g_title: Future (TAs) Test
+      g_ta_view_start_date: 1970-01-01 23:59:59
+      g_grade_start_date: 9998-12-31 23:59:59
+      g_grade_released_date: 9999-12-31 23:59:59
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+        - gc_title: Question 2
+          gc_max_value: 5
+          gc_is_extra_credit: true
+        - gc_title: Text 1
+          gc_is_text: true
+    - g_type: 2
+      g_id: grading_test
+      g_title: Grading Test
+      g_ta_view_start_date: 1970-01-01 23:59:59
+      g_grade_start_date: 1971-01-01 23:59:59
+      g_grade_released_date: 9999-12-31 23:59:59
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+        - gc_title: Question 2
+          gc_max_value: 5
+          gc_is_extra_credit: true
+        - gc_title: Text 1
+          gc_is_text: true
+    - g_type: 2
+      g_id: grades_released_test
+      g_title: Grades Released Test
+      g_ta_view_start_date: 1970-01-01 23:59:59
+      g_grade_start_date: 1971-01-01 23:59:59
+      g_grade_released_date: 1972-01-01 23:59:59
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+        - gc_title: Question 2
+          gc_max_value: 5
+          gc_is_extra_credit: true
+        - gc_title: Text 1
+          gc_is_text: true
+
+- code: csci1100
+  instructor: instructor
+  gradeables:
+    - gradeable_config: python_simple_homework
+      g_ta_view_start_date: -11 days
+      eg_submission_open_date: -10 days
+      eg_submission_due_date: -2 days
+      g_grade_start_date: +2 days
+      g_grade_released_date: +3 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+    - gradeable_config: python_linehighlight
+      g_ta_view_start_date: -9 days
+      eg_submission_open_date: -8 days
+      eg_submission_due_date: +0 days
+      g_grade_start_date: +4 days
+      g_grade_released_date: +5 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+    - gradeable_config: python_simple_homework_multipart
+      g_ta_view_start_date: -7 days
+      eg_submission_open_date: -6 days
+      eg_submission_due_date: +2 days
+      g_grade_start_date: +6 days
+      g_grade_released_date: +7 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+    - gradeable_config: python_static_analysis
+      g_ta_view_start_date: -5 days
+      eg_submission_open_date: -4 days
+      eg_submission_due_date: +4 days
+      g_grade_start_date: +8 days
+      g_grade_released_date: +9 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+
+- code: csci1200
+  instructor: instructor
+  gradeables:
+    - gradeable_config: cpp_simple_lab
+      g_ta_view_start_date: -11 days
+      eg_submission_open_date: -10 days
+      eg_submission_due_date: -2 days
+      g_grade_start_date: +2 days
+      g_grade_released_date: +3 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+    - gradeable_config: cpp_cats
+      g_ta_view_start_date: -9 days
+      eg_submission_open_date: -8 days
+      eg_submission_due_date: +0 days
+      g_grade_start_date: +4 days
+      g_grade_released_date: +5 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+    - gradeable_config: cpp_memory_debugging
+      g_ta_view_start_date: -7 days
+      eg_submission_open_date: -6 days
+      eg_submission_due_date: +2 days
+      g_grade_start_date: +6 days
+      g_grade_released_date: +7 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+    - gradeable_config: cpp_custom
+      g_ta_view_start_date: -5 days
+      eg_submission_open_date: -4 days
+      eg_submission_due_date: +4 days
+      g_grade_start_date: +8 days
+      g_grade_released_date: +9 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+    - gradeable_config: cpp_hidden_tests
+      g_ta_view_start_date: -3 days
+      eg_submission_open_date: -2 days
+      eg_submission_due_date: +6 days
+      g_grade_start_date: +10 days
+      g_grade_released_date: +11 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+    - gradeable_config: c_fork
+      g_ta_view_start_date: -1 days
+      eg_submission_open_date: +1 day
+      eg_submission_due_date: +8 days
+      g_grade_start_date: +12 days
+      g_grade_released_date: +13 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+    - gradeable_config: c_failure_messages
+      g_ta_view_start_date: +1 day
+      eg_submission_open_date: +3 day
+      eg_submission_due_date: +10 days
+      g_grade_start_date: +14 days
+      g_grade_released_date: +15 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+
+- code: csci2600
+  instructor: instructor
+  gradeables:
+    - gradeable_config: java_factorial
+      g_ta_view_start_date: -11 days
+      eg_submission_open_date: -10 days
+      eg_submission_due_date: -2 days
+      g_grade_start_date: +2 days
+      g_grade_released_date: +3 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+    - gradeable_config: java_coverage_factorial
+      g_ta_view_start_date: -9 days
+      eg_submission_open_date: -8 days
+      eg_submission_due_date: +0 days
+      g_grade_start_date: +4 days
+      g_grade_released_date: +5 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5

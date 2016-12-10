@@ -1,0 +1,142 @@
+# This file defines all users that will be added to the submitty vagrant machine. It will add the users regardless of
+# whether or not that user is in any course on the vagrant machine. Each user is defined via global definitions which
+# will be used unless you specify a particular value for a setting for a particular course (see below). This allows for
+# most users to be added quickly (as they'll be the same across courses) while some users only being in certain courses
+# or in certain ways. A good primer on YAML syntax can be found at http://docs.ansible.com/ansible/YAMLSyntax.html.
+#
+# The format for each entry is (anything marked optional can be omitted from any entry):
+#   user_id: string representing the id for the user both in the database as well as linux
+#
+#   user_firstname: string for the user's first name
+#
+#   user_preferred_firstname: [optional] name to display for user instead of their legal first name
+#         If this is omitted, then it will go into the database as NULL
+#
+#   user_lastname: string to display as the user's last name
+#
+#   user_email: [optional] string for the user's email.
+#         If this is omitted, then it will go into the database as <user_id>@example.com
+#
+#   user_group: [optional] integer for what group user should be. This is a number between 0-4 inclusively.
+#         If omitted, this will default to the integer 4.
+#
+#   unix_groups: [optional] when creating the user, only explicitly put them into these unix groups
+#         By default, any user that is an instructor or higher for any course is put into the "course_builders".
+#         Then, they will be added to the following groups by their group level for a given course:
+#           instructors and above:
+#             <course_id>
+#             <course_id>_archive
+#           TAs and above:
+#             <course_id>_tas_www
+#
+#   registration_section: [optional] registration section to place the user into. Defaults to NULL.
+#
+#   rotating_section: [optional] rotating section to place the user into. Defaults to NULL.
+#
+#   courses: This is a either a list of strings of courses to add the user to or a list of dictionaries that contain
+#         course specific settings for this user (the dictionary can be empty though if you just want the course and
+#         to use the "global" settings for the user. If this is defined, the user will not be added to any course not
+#         included in this list. An example of the basic usage is:
+#
+#         courses:
+#           - csci1100
+#           - csci1200
+#
+#         where the user will only be added to the csci1100 and csci1200 courses using the settings defined above.
+#         A more complex usage would be:
+#
+#         courses:
+#           csci1100:
+#             user_group: 4
+#             registration_section: 1
+#           csci1200:
+#             user_group: 1
+#
+#         where now the user is added to the two courses as before, but their in different groups in the courses (and
+#         different unix groups), as well as having a registration_section in the first course that overrides the
+#         global setting.
+#
+#   sudo: [optional] boolean on whether to give user sudo access. Defaults to False.
+#
+# If you need help coming up with a name for some fake user: http://random-name-generator.info/ and then just make the
+# user_id be first five letters of last name + first letter of first name.
+
+## DEVELOPER ACCOUNTS
+
+- user_id: developer
+  user_firstname: Nancy
+  user_lastname: Developer
+  user_group: 0
+  sudo: true
+
+## INSTRUCTOR ACCOUNTS
+
+- user_id: instructor
+  user_firstname: Quinn
+  user_lastname: Instructor
+  user_group: 1
+  sudo: true
+
+- user_id: manne
+  user_firstname: Emmett
+  user_lastname: Mann
+  courses:
+    csci1000:
+      user_group: 1
+    csci1100:
+      user_group: 2
+    csci1200:
+      user_group: 4
+
+## TA ACCOUNTS
+
+- user_id: ta
+  user_firstname: Jill
+  user_lastname: TA
+  user_group: 2
+
+## GRADER ACCOUNTS
+
+- user_id: grader
+  user_firstname: Tim
+  user_lastname: Grader
+  user_group: 3
+  grading_registration_group: 1
+
+## STUDENT ACCOUNTS
+
+- user_id: student
+  user_firstname: Joe
+  user_lastname: Student
+  user_email: student@example.com
+  user_group: 4
+  registration_section: 1
+
+- user_id: smithj
+  user_firstname: John
+  user_lastname: Smith
+  user_email: smithj@example.com
+  user_group: 4
+  registration_section: 1
+
+- user_id: joness
+  user_firstname: Sally
+  user_lastname: Jones
+  user_email: joness@example.com
+  user_group: 4
+  registration_section: 2
+
+- user_id: browna
+  user_firstname: Alex
+  user_lastname: Brown
+  user_email: browna@example.com
+  user_group: 4
+  registration_section: 2
+
+- user_id: pearsr
+  user_firstname: Randy
+  user_lastname: Pears
+  user_email: pearsr@example.com
+  user_group: 4
+  registration_section: 1
+  courses: []
