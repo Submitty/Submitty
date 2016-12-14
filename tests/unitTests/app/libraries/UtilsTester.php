@@ -34,4 +34,48 @@ class UtilsTester extends \PHPUnit_Framework_TestCase {
     public function testGenerateRandomString2() {
         $this->assertEquals(16, strlen(Utils::generateRandomString(8)));
     }
+
+    public function stringStarts() {
+        return array(
+            array("test", "test", true),
+            array("test", "tes", true),
+            array("test", "te", true),
+            array("test", "t", true),
+            array("test", "", true),
+            array("test", "st", false)
+        );
+    }
+
+    /**
+     * @dataProvider stringStarts
+     *
+     * @param $haystack
+     * @param $needle
+     * @param $result
+     */
+    public function testStartsWith($haystack, $needle, $result) {
+        $this->assertEquals(Utils::startsWith($haystack, $needle), $result);
+    }
+
+    public function stringEnds() {
+        return array(
+            array("test", "test", true),
+            array("test", "est", true),
+            array("test", "st", true),
+            array("test", "t", true),
+            array("test", "", true),
+            array("test", "te", false)
+        );
+    }
+
+    /**
+     * @dataProvider stringEnds
+     *
+     * @param $haystack
+     * @param $needle
+     * @param $result
+     */
+    public function testEndsWith($haystack, $needle, $result) {
+        $this->assertEquals(Utils::endsWith($haystack, $needle), $result);
+    }
 }

@@ -20,12 +20,12 @@ class Core {
     /**
      * @var Config
      */
-    private $config;
+    private $config = null;
 
     /**
      * @var Database
      */
-    private $database;
+    private $database = null;
 
     /**
      * @var AbstractAuthentication
@@ -71,9 +71,20 @@ class Core {
             $_REQUEST[$key] = (isset($_REQUEST[$key])) ? strtolower($_REQUEST[$key]) : "";
         }
     }
-    
-    public function loadConfig($semester, $course) {
-        $this->config = new Config($semester, $course);
+
+    /**
+     * Load the config details for the application. This takes in a file from the ../../config/master.ini as well as
+     * then a config.ini contained in {$SUBMITTY_DATA_DIR}/courses/{$SEMESTER}/{$COURSE}/config directory. These
+     * files contain details about how the database, location of files, late days settings, etc.
+     *
+     * Config model will throw exceptions if we cannot find a given $semester or $course on the fileystem.
+     *
+     * @param $semester
+     * @param $course
+     * @throws \Exception
+     */
+    public function loadConfig($semester, $course, $master_ini_path) {
+        $this->config = new Config($semester, $course, $master_ini_path);
         $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
         if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
@@ -82,7 +93,18 @@ class Core {
         $this->session_manager = new SessionManager($this);
     }
 
+    /**
+     * Create a connection to the database using the details loaded from the config files. Additionally, we make
+     * available queries that all parts of the application should go through. It should never be allowed to directly
+     * go through the database as we risk ending up with the same queries repeated around the application which makes
+     * changing and fixing bugs that much harder.
+     *
+     * @throws \Exception if we have not loaded the config yet
+     */
     public function loadDatabase() {
+        if ($this->config === null) {
+            throw new \Exception("Need to load the config before we can connect to the database");
+        }
         $this->database = new Database($this->config->getDatabaseHost(), $this->config->getDatabaseUser(),
             $this->config->getDatabasePassword(), $this->config->getDatabaseName(), $this->config->getDatabaseType());
         $this->database->connect();
@@ -94,6 +116,23 @@ class Core {
             default:
                 throw new DatabaseException("Unrecognized database type");
         }
+    }
+
+    public function loadModel() {
+        if (func_num_args() == 0) {
+            throw new \InvalidArgumentException("loadModel requires at least one argument (Model)");
+        }
+        $args = func_get_args();
+        $model = $args[0];
+        foreach (AutoLoader::getClasses() as $class => $path) {
+            if (Utils::startsWith($class, "app\\models\\") && Utils::endsWith($class, $model)) {
+                // TODO: Once we drop PHP 5.5, we can drop this reflection and just use vargs
+                $reflect = new \ReflectionClass($class);
+                return $reflect->newInstanceArgs(array_slice($args, 1));
+            }
+        }
+        $error = "Could not find the model to load. Check for misspellings and that it was autoloaded";
+        throw new \InvalidArgumentException($error);
     }
 
     /**
@@ -301,5 +340,17 @@ class Core {
      */
     public function getOutput() {
         return $this->output;
+    }
+
+    /**
+     * We use this function to allow us to bypass certain "safe" PHP functions that we cannot
+     * bypass via mocking or some other method (like is_uploaded_file). This method, which normally
+     * ALWAYS returns FALSE we can mock to return TRUE for testing. It's probably not "best practices",
+     * and the proper way is using "phpt" files, but
+     *
+     * @return bool
+     */
+    public function isTesting() {
+        return false;
     }
 }

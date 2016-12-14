@@ -81,6 +81,7 @@ class Config {
     /*** COURSE DATABASE CONFIG ***/
 
     private $course_name;
+    private $course_home_url;
     private $default_hw_late_days;
     private $default_student_late_days;
     private $zero_rubric_grades;
@@ -89,22 +90,24 @@ class Config {
     private $upload_message;
     private $grades_summary;
     
+    private $keep_previous_files;
     private $display_iris_grades_summary;
     private $display_custom_message;
 
     /**
      * Config constructor.
      *
-     * @param $semester
-     * @param $course
+     * @param string $semester
+     * @param string $course
+     * @param string $master_ini_path
      */
-    public function __construct($semester, $course) {
+    public function __construct($semester, $course, $master_ini_path) {
         $this->semester = $semester;
         $this->course = $course;
-        $this->config_path = implode("/", array(__DIR__, '..', '..', 'config'));
+        $this->config_path = realpath(dirname($master_ini_path));
 
         // Load config details from the master config file
-        $master = IniParser::readFile(implode("/", array($this->config_path, 'master.ini')));
+        $master = IniParser::readFile($master_ini_path);
 
         $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
         $this->setConfigValues($master, 'site_details', array('base_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
@@ -149,8 +152,8 @@ class Config {
 
         $this->setConfigValues($course, 'hidden_details', array('database_name'));
         $this->setConfigValues($course, 'course_details', array
-                               ('course_name', 'default_hw_late_days',
-                                'default_student_late_days', 'zero_rubric_grades', 'upload_message', 
+                               ('course_name', 'course_home_url', 'default_hw_late_days',
+                                'default_student_late_days', 'zero_rubric_grades', 'upload_message', 'keep_previous_files',
                                 'display_iris_grades_summary', 'display_custom_message'));
         
         if (isset($course['hidden_details']['course_url'])) {
@@ -164,7 +167,7 @@ class Config {
             $this->$key = intval($this->$key);
         }
 
-        foreach (array('zero_rubric_grades', 'display_iris_grades_summary', 'display_custom_message') as $key) {
+        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_iris_grades_summary', 'display_custom_message') as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
     
@@ -302,6 +305,12 @@ class Config {
     public function getCourseName() {
         return $this->course_name;
     }
+    /**
+     * @return string
+     */
+    public function getCourseHomeUrl(){
+        return $this->course_home_url;
+    }
 
     /**
      * @return integer
@@ -352,6 +361,10 @@ class Config {
     
     public function displayCustomMessage() {
         return $this->display_custom_message;
+    }
+
+    public function keepPreviousFiles() {
+        return $this->keep_previous_files;
     }
 
     public function displayIrisGradesSummary() {
