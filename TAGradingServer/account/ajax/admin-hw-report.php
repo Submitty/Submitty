@@ -260,10 +260,12 @@ WHERE ldu.g_id=? AND ldu.user_id=?", array($g_id, $student_id));
                 $student_output_text .= $nl;
                 // Keep track of students grade and rubric total
                 $student_grade += $grade_question_score;
-                $rubric_total += (($question_extra_credit && $question_max_score > 0) ? 0 : $question_max_score);
-                $ta_max_score += (($question_extra_credit && $question_max_score > 0) ? 0 : $question_max_score);
+                if (!$question_extra_credit && $question_max_score > 0){
+                  $rubric_total += $question_max_score;
+                  $ta_max_score += $question_max_score;
+                }
             }
-                                                            //TODO replace with total overall score
+
             $student_output_text .= "TA GRADING TOTAL [ " . $student_grade . " / " . $ta_max_score . " ]". $nl;
             $student_output_text .= "----------------------------------------------------------------------" . $nl;
             $rubric_total += $auto_grading_max_score;
@@ -271,7 +273,7 @@ WHERE ldu.g_id=? AND ldu.user_id=?", array($g_id, $student_id));
         } 
     
         if($write_output){
-            $student_final_grade = $student_grade;
+            $student_final_grade = max(0,$student_grade);
             $student_output_last = strtoupper($gradeable['g_title']) . " GRADE [ " . $student_final_grade . " / " . $rubric_total . " ]" . $nl;
             $student_output_last .= $nl;
             $student_output_last .= "OVERALL NOTE FROM TA: " . ($grade_comment != "" ? $grade_comment . $nl : "No Note") . $nl;

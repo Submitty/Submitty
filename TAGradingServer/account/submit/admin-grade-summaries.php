@@ -163,7 +163,7 @@ foreach($db->rows() as $student_record) {
 
         $this_g["id"] = $gradeable['g_id'];
         $this_g["name"] =  $gradeable['g_title'];
-        $this_g["score"] = (floatval($gradeable['score'])+floatval($autograding_score));
+        $this_g["score"] = max(0,(floatval($gradeable['score'])+floatval($autograding_score)));
 
         // adds late days for electronic gradeables 
         if($gradeable['g_gradeable_type'] == 0){
