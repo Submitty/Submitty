@@ -5,11 +5,12 @@
     $s_user_id
     $g_id
 */
-
+require "../toolbox/late-day-calculation.php";
 use \models\ElectronicGradeable;
 
-$eg = new ElectronicGradeable($s_user_id, $g_id);
+$output = "";
 
+$eg = new ElectronicGradeable($s_user_id, $g_id);
 $now = new DateTime('now');
 
 $eg_due_date = new DateTime($eg->eg_details['eg_submission_due_date']);
@@ -24,7 +25,7 @@ $color = "#998100";
 
 $calculate_diff = __CALCULATE_DIFF__;
 if ($calculate_diff) {
-    $output = <<<HTML
+    $output .= <<<HTML
 
 <script>
     function openFile(url_file) {
@@ -396,96 +397,13 @@ $output .= <<<HTML
                 </div>
 HTML;
 
-
-$output .= <<<HTML
-            <h4>Overall Late Day Usage</h4>
-            <table>
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th style="border:thin solid black">Allowed per term</th>
-                        <th style="border:thin solid black">Allowed per assignment</th>
-                        <th style="border:thin solid black">Late days used</th>
-                        <th style="border:thin solid black">Extensions</th>
-                        <th style="border:thin solid black">Status</th>
-                        <th style="border:thin solid black">Late Days Charged</th>
-                        <th style="border:thin solid black">Remaining Days</th>
-                    </tr>
-                </thead>
-                <tbody>
-HTML;
-
-$curr_late_used = 0;
-
-$curr_allowed_term = __DEFAULT_HW_LATE_DAYS__;
-$curr_remaining_late = __DEFAULT_HW_LATE_DAYS__;
-
-$status = "Good";
-$color = "black";
-
-if(!$eg->submitted){
-    $status = "Not submitted";
-}
-elseif($eg->active_assignment == 0){
-    $status = "Cancelled";
-}
-
-$bad_modifier = "";
-
-foreach($eg->student['used_late_days'] as $ld){
-    $curr_bad_modifier = "";
-    $curr_late_used = $ld['days_late'];
-    $curr_status = $status;
-    $curr_late_charged = 0;
-
-    $late_flag = true;
-
-    if($curr_late_used - $ld['extensions'] > 0){
-        $curr_status = "Late";
-    }
-    if($curr_late_used - $ld['extensions'] > $ld['assignment_allowed']){
-        $curr_status = "Bad";
-        $curr_bad_modifier = " too many used for this assignment";
-        $late_flag = false;
-    }
-    if($curr_late_used - $ld['extensions'] > $curr_allowed_term){
-        $curr_status = "Bad";
-        $curr_bad_modifier = " too many used this term";
-        $late_flag = false;
-    }
-
-    if($late_flag){
-        $curr_late_charged = $curr_late_used - $ld['extensions'];
-        $curr_remaining_late -= $curr_late_charged;
-    }
-    $output .= <<<HTML
-            <tr>
-                <th style="border:thin solid black">{$ld['g_title']}</th>
-                <td align="center" style="border:thin solid black">{$curr_allowed_term}</td>
-                <td align="center" style="border:thin solid black">{$ld['assignment_allowed']}</td>
-                <td align="center" style="border:thin solid black">{$curr_late_used}</td>
-                <td align="center" style="border:thin solid black">{$ld['extensions']}</td>
-                <td align="center" style="border:thin solid black">{$curr_status}{$curr_bad_modifier}</td>
-                <td align="center" style="border:thin solid black">{$curr_late_charged}</td>
-                <td align="center" style="border:thin solid black">{$curr_remaining_late}</td>
-            </tr>
-HTML;
-    //Decrement $curr_allowed_term if necessary
-    $curr_allowed_term -= $curr_late_charged;
-
-    if($eg->g_id == $ld['g_id']){
-        $status = $curr_status;
-        $bad_modifier = $curr_bad_modifier;
-    }
-}
-$output .= <<<HTML
-
-HTML;
-$output .= <<<HTML
-                </tbody>
-            </table>
-            <br>
-HTML;
+//Begin late day calculation////////////////////////////////////////////////////////////////////////////////////////////
+$due_string = $eg_due_date->format('Y-m-d H:i:s');
+$ldu = new LateDaysCalculation($due_string,$s_user_id);
+$ld_table = $ldu->generate_table_for_user($s_user_id);
+$output .= $ld_table;
+$status = $ldu ->get_gradeable_status($s_user_id, $eg->g_id);
+//End late day calculation//////////////////////////////////////////////////////////////////////////////////////////////
 
 if($status != "Good" && $status != "Late"){
     $color = "red";
@@ -497,7 +415,7 @@ HTML;
 }
 
 $output .= <<<HTML
-                <b>Status:</b> <span style="color: {$color};">{$status}{$bad_modifier}</span><br />
+                <b>Status:</b> <span style="color: {$color};">{$status}</span><br />
 
     </div>
 </div>

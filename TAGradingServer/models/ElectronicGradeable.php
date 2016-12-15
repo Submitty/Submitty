@@ -244,11 +244,14 @@ FROM
   , electronic_gradeable_version egv
   , electronic_gradeable_data egd FULL OUTER JOIN late_day_exceptions lde ON lde.user_id = egd.user_id AND lde.g_id = egd.g_id
   , gradeable g  
+  , late_days l
 WHERE
   eg.g_id = egv.g_id
   AND egv.g_id = egd.g_id
   AND egv.user_id = egd.user_id
   AND eg.g_id = g.g_id
+  AND egv.active_version = egd.g_version
+  AND l.user_id = egv.user_id
   AND egv.user_id = ?
   AND eg.eg_submission_due_date <=?
 ORDER BY
@@ -256,6 +259,22 @@ ORDER BY
 ", $params);
 
             $this->student['used_late_days'] = Database::rows();
+
+            $params = array($this->student_id, $this->eg_details['eg_submission_due_date']);
+            Database::query("
+SELECT
+  *
+FROM
+  late_days l
+WHERE
+  l.user_id = ?
+  AND l.since_timestamp <= ?
+ORDER BY
+  l.since_timestamp
+;
+", $params);
+
+            $this->student['earned_late_days'] = Database::rows();
         }
     }
 
