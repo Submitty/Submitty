@@ -266,6 +266,7 @@ class LateDaysCalculation
             //Base allowed late days and remaining late days
             $curr_allowed_term = __DEFAULT_HW_LATE_DAYS__;
             $curr_remaining_late = __DEFAULT_HW_LATE_DAYS__;
+            $total_late_used = 0;
             $status = "Good";
 
             $submissions = $student['submissions'];
@@ -295,7 +296,7 @@ class LateDaysCalculation
                 //day updates. Attempting to ensure that late day updates are not applied twice.
                 foreach($latedays as $ld){
                     if($ld['since_timestamp'] < $submissions[$i]['eg_submission_due_date']){
-                        $late_day_updates_total += $latedays[$i]['allowed_late_days'];
+                        $late_day_updates_total += $ld['allowed_late_days'];
                         array_push($late_day_updates, $ld);
                         array_push($items_to_remove, $ld);
                     }
@@ -340,6 +341,7 @@ class LateDaysCalculation
                     $curr_late_charged = $curr_late_used - $submissions[$i]['extensions'];
                     $curr_late_charged = ($curr_late_charged < 0) ? 0 : $curr_late_charged;
                     $curr_remaining_late -= $curr_late_charged;
+                    $total_late_used += $curr_late_charged;
                 }
 
                 $submission_latedays['user_id'] = $submissions[$i]['user_id'];
@@ -352,6 +354,7 @@ class LateDaysCalculation
                 $submission_latedays['late_days_charged'] = $curr_late_charged;
                 $submission_latedays['remaining_days'] = $curr_remaining_late;
                 $submission_latedays['lateday_updates'] = $late_day_updates_total;
+                $submission_latedays['total_late_used'] = $total_late_used;
 
                 $late_day_usage[$submissions[$i]['g_id']] = $submission_latedays;
 
@@ -435,6 +438,20 @@ HTML;
             return $this->all_latedays[$user_id][$g_id]['status'];
         }
         return 'Not Submitted';
+    }
+
+    /**
+     * Get the lateday usage table for a given user for a given gradeable. Assumes gradeable was due before the $endDate
+     * provided at instantiation.
+     * @param $user_id String. The user to query for.
+     * @param $g_id String. The gradeable id to query for.
+     * @return string. The status string.
+     */
+    public function get_gradeable($user_id, $g_id){
+        if(array_key_exists($user_id, $this->all_latedays) && array_key_exists($g_id, $this->all_latedays[$user_id])){
+            return $this->all_latedays[$user_id][$g_id];
+        }
+        return array();
     }
 
     private function submission_sort($a, $b){

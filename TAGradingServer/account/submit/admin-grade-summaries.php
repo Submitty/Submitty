@@ -1,6 +1,7 @@
 <?php
 
 require "../../toolbox/functions.php";
+require "../../toolbox/late-day-calculation.php";
 
 check_administrator();
 
@@ -46,6 +47,13 @@ foreach ($buckets as $bucket){
 
 $default_allowed_late_days = __DEFAULT_TOTAL_LATE_DAYS__;
 
+//Begin late day calculation////////////////////////////////////////////////////////////////////////////////////////////
+$now = new DateTime();
+$due_string = $now->format('Y-m-d H:i:s');
+$ldu = new LateDaysCalculation($due_string,array());
+//End late day calculation//////////////////////////////////////////////////////////////////////////////////////////////
+
+
 $db->query("SELECT * FROM users ORDER BY user_id ASC", array());
 //$db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
 foreach($db->rows() as $student_record) {
@@ -70,26 +78,6 @@ foreach($db->rows() as $student_record) {
     $student_output_json["preferred_first_name"] = $student_preferred_first_name;
     $student_output_json["last_name"] = $student_last_name;
     $student_output_json["registration_section"] = intval($student_section);
-
-
-    // adds late days for electronic gradeables
-    $db->query("
-        SELECT 
-            allowed_late_days
-        FROM 
-            late_days 
-        WHERE user_id=?
-        ORDER BY since_timestamp DESC", array($student_id));
-    $row = $db->row();
-    
-    //    $default_allowed_late_days = __DEFAULT_TOTAL_LATE_DAYS__;
-    //if (count($row) > 0 &&
-    //    isset($row['allowed_late_days']) &&
-    //   $row['allowed_late_days'] > $late_days_allowed) {
-    //  $late_days_allowed = $row['allowed_late_days'];
-    //}
-    //$late_days_allowed = isset($row['allowed_late_days']) ? $row['allowed_late_days'] : 0;
-
 
     $student_output_json["default_allowed_late_days"] = $default_allowed_late_days;
     //$student_output_json["allowed_late_days"] = $late_days_allowed;
@@ -165,22 +153,13 @@ foreach($db->rows() as $student_record) {
         $this_g["name"] =  $gradeable['g_title'];
         $this_g["score"] = (floatval($gradeable['score'])+floatval($autograding_score));
 
-        // adds late days for electronic gradeables 
+        // adds late days for electronic gradeables
         if($gradeable['g_gradeable_type'] == 0){
 
+            $late_days = $ldu ->get_gradeable($student_id, $gradeable['g_id']);
 
-// TOOK THIS CODE FROM admin-hw-report.php
-            $db->query("
-SELECT GREATEST(late_days_used - COALESCE(late_day_exceptions, 0), 0) as late_days_used
-FROM late_days_used AS ldu
-LEFT JOIN (
-    SELECT late_day_exceptions, user_id, g_id
-    FROM late_day_exceptions
-) AS lde ON lde.user_id=ldu.user_id AND lde.g_id=ldu.g_id
-WHERE ldu.g_id=? AND ldu.user_id=?", array($gradeable['g_id'],$student_id));
-            $row = $db->row();
-            if (isset($row['late_days_used']) && $row['late_days_used'] > 0) {
-                $this_g['days_late'] = $row['late_days_used'];
+            if (array_key_exists('late_days_charged', $late_days) && $late_days['late_days_charged'] > 0) {
+                $this_g['days_late'] = $late_days['late_days_charged'];
             }
             else {
                 $this_g['days_late'] = 0;
