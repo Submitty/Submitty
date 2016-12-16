@@ -25,23 +25,23 @@ class SubmissionController extends AbstractController {
 
     public function __construct(Core $core) {
         parent::__construct($core);
-        $this->gradeables_list = new GradeableList($this->core, true);
+        $this->gradeables_list = $this->core->loadModel("GradeableList", $this->core, true);
     }
 
     public function run() {
         switch($_REQUEST['action']) {
             case 'upload':
-                $this->ajaxUploadSubmission();
+                return $this->ajaxUploadSubmission();
                 break;
             case 'update':
-                $this->updateSubmissionVersion();
+                return $this->updateSubmissionVersion();
                 break;
             case 'check_refresh':
-                $this->checkRefresh();
+                return $this->checkRefresh();
                 break;
             case 'display':
             default:
-                $this->showHomeworkPage();
+                return $this->showHomeworkPage();
                 break;
         }
     }
@@ -50,15 +50,16 @@ class SubmissionController extends AbstractController {
         $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
         $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
         if ($gradeable !== null) {
+            $error = false;
             $now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
 
-	    // ORIGINAL
-	    //if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessAdmin()) {
+            // ORIGINAL
+            //if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessAdmin()) {
 
-	    // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
+            // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
             if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessGrading()) {
-
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
+                return array('error' => true, 'message' => 'No gradeable with that id.');
             }
             else {
                 $loc = array('page' => 'submission',
@@ -68,6 +69,7 @@ class SubmissionController extends AbstractController {
                 if (!$gradeable->hasConfig()) {
                     $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
                                                            'showGradeableError', $gradeable);
+                    $error = true;
                 }
                 else {
                     $gradeable->loadResultDetails();
@@ -76,10 +78,11 @@ class SubmissionController extends AbstractController {
                                                            'showGradeable', $gradeable, $days_late);
                 }
             }
-
+            return array('id' => $gradeable_id, 'error' => $error);
         }
         else {
             $this->core->getOutput()->renderOutput(array('submission', 'Homework'), 'noGradeable', $gradeable_id);
+            return array('error' => true, 'message' => 'No gradeable with that id.');
         }
     }
     
@@ -90,8 +93,8 @@ class SubmissionController extends AbstractController {
      * @return boolean
      */
     private function ajaxUploadSubmission() {
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            return $this->uploadResult("Invalid CSRF token: {$_POST['csrf_token']}.", false);
+        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            return $this->uploadResult("Invalid CSRF token.", false);
         }
         $svn_checkout = isset($_REQUEST['svn_checkout']) ? $_REQUEST['svn_checkout'] === "true" : false;
     
@@ -105,7 +108,8 @@ class SubmissionController extends AbstractController {
         
         $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
         $gradeable->loadResultDetails();
-        $gradeable_path = $this->core->getConfig()->getCoursePath()."/submissions/".$gradeable->getId();
+        $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
+            $gradeable->getId());
         
         /*
          * Perform checks on the following folders (and whether or not they exist):
@@ -118,14 +122,14 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to make folder for this assignment.", false);
         }
     
-        $user_path = $gradeable_path."/".$this->core->getUser()->getId();
+        $user_path = FileUtils::joinPaths($gradeable_path, $this->core->getUser()->getId());
         $this->upload_details['user_path'] = $user_path;
         if (!FileUtils::createDir($user_path)) {
                 return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
     
         $new_version = $gradeable->getHighestVersion() + 1;
-        $version_path = $user_path."/".$new_version;
+        $version_path = FileUtils::joinPaths($user_path, $new_version);
         
         if (!FileUtils::createDir($version_path)) {
             return $this->uploadResult("Failed to make folder for the current version.", false);
@@ -139,7 +143,7 @@ class SubmissionController extends AbstractController {
         // put all files in the root folder
         if ($gradeable->getNumParts() > 1) {
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
-                $part_path[$i] = $version_path."/part".$i;
+                $part_path[$i] = FileUtils::joinPaths($version_path, "part".$i);
                 if (!FileUtils::createDir($part_path[$i])) {
                     return $this->uploadResult("Failed to make the folder for part {$i}.", false);
                 }
@@ -154,9 +158,9 @@ class SubmissionController extends AbstractController {
         
         if ($svn_checkout === false) {
             $uploaded_files = array();
-            for ($i = 0; $i < $gradeable->getNumParts(); $i++){
-                if (isset($_FILES["files".($i+1)])) {
-                    $uploaded_files[$i+1] = $_FILES["files".($i+1)];
+            for ($i = 1; $i <= $gradeable->getNumParts(); $i++){
+                if (isset($_FILES["files{$i}"])) {
+                    $uploaded_files[$i] = $_FILES["files{$i}"];
                 }
             }
             
@@ -169,7 +173,7 @@ class SubmissionController extends AbstractController {
                         if (!isset($uploaded_files[$i]["tmp_name"][$j]) || $uploaded_files[$i]["tmp_name"][$j] == "") {
                             $error_message = $uploaded_files[$i]["name"][$j]." failed to upload. ";
                             if (isset($uploaded_files[$i]["error"][$j])) {
-                                $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_files[$i]["error"][$j]);
+                                $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_files[$i]["error"][$j]). ".";
                             }
                             $errors[] = $error_message;
                         }
@@ -192,33 +196,37 @@ class SubmissionController extends AbstractController {
             }
             
             if (empty($uploaded_files) && empty($previous_files)) {
-                return $this->uploadResult("No files to be submitted", false);
+                return $this->uploadResult("No files to be submitted.", false);
             }
             
             if (count($previous_files) > 0) {
                 if ($gradeable->getHighestVersion() === 0) {
-                    return $this->uploadResult("No submission found. There should not be any files kept from previous submission.", false);
+                    return $this->uploadResult("No submission found. There should not be any files from a previous submission.", false);
                 }
                 
-                $previous_path = $user_path."/".$gradeable->getHighestVersion();
+                $previous_path = FileUtils::joinPaths($user_path, $gradeable->getHighestVersion());
                 if ($gradeable->getNumParts() > 1) {
                     for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
-                        $previous_part_path[$i] = $previous_path."/part".$i;
-                        if (!is_dir($previous_part_path[$i])) {
-                            return $this->uploadResult("Files from previous submission not found. Folder for previous submission does not exist.", false);
-                        }
+                        $previous_part_path[$i] = FileUtils::joinPaths($previous_path, "part".$i);
                     }
                 }
                 else {
                     $previous_part_path[1] = $previous_path;
                 }
+
+                foreach ($previous_part_path as $path) {
+                    if (!is_dir($path)) {
+                        return $this->uploadResult("Files from previous submission not found. Folder for previous submission does not exist.", false);
+                    }
+                }
     
                 for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                     if (isset($previous_files[$i])) {
                         foreach ($previous_files[$i] as $prev_file) {
-                            $filename = $previous_part_path[$i]."/".$prev_file;
+                            $filename = FileUtils::joinPaths($previous_part_path[$i], $prev_file);
                             if (!file_exists($filename)) {
-                                return $this->uploadResult("File '{$filename}' does not exist in previous submission.", false);
+                                $name = basename($filename);
+                                return $this->uploadResult("File '{$name}' does not exist in previous submission.", false);
                             }
                         }
                     }
@@ -251,7 +259,7 @@ class SubmissionController extends AbstractController {
                 }
                 if (isset($previous_files[$i]) && isset($previous_part_path[$i])) {
                     foreach ($previous_files[$i] as $prev_file) {
-                        $file_size += filesize($previous_part_path[$i]."/".$prev_file);
+                        $file_size += filesize(FileUtils::joinPaths($previous_part_path[$i], $prev_file));
                     }
                 }
             }
@@ -261,6 +269,17 @@ class SubmissionController extends AbstractController {
             }
 
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
+                // copy selected previous submitted files
+                if (isset($previous_files[$i])){
+                    for ($j=0; $j < count($previous_files[$i]); $j++){
+                        $src = FileUtils::joinPaths($previous_part_path[$i], $previous_files[$i][$j]);
+                        $dst = FileUtils::joinPaths($part_path[$i], $previous_files[$i][$j]);
+                        if (!@copy($src, $dst)) {
+                            return $this->uploadResult("Failed to copy previously submitted file {$previous_files[$i][$j]} to current submission.", false);
+                        }
+                    }
+                }
+
                 if (isset($uploaded_files[$i])) {
                     for ($j = 0; $j < $count[$i]; $j++) {
                         if ($uploaded_files[$i]["is_zip"][$j] === true) {
@@ -271,43 +290,35 @@ class SubmissionController extends AbstractController {
                                 $zip->close();
                             }
                             else {
-                                return $this->uploadResult("Could not properly unpack zip file. Error message: ".ErrorMessages::uploadErrors($res), false);
+                                return $this->uploadResult("Could not properly unpack zip file. Error message: ".ErrorMessages::zipErrors($res), false);
                             }
                         }
                         else {
-                            if (is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
-                                if (!copy($uploaded_files[$i]["tmp_name"][$j], $part_path[$i]."/".$uploaded_files[$i]["name"][$j])) {
-                                    return $this->uploadResult("Failed to copy uploaded file ".$uploaded_files[$i]["name"][$j]." to current submission.", false);
+                            if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
+                                $dst = FileUtils::joinPaths($part_path[$i], $uploaded_files[$i]["name"][$j]);
+                                if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst)) {
+                                    return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[$i]["name"][$j]} to current submission.", false);
                                 }
                             }
                             else {
-                                return $this->uploadResult("The tmp file '{$uploaded_files[$i]['tmp_name'][$j]}' was not properly uploaded.", false);
+                                return $this->uploadResult("The tmp file '{$uploaded_files[$i]['name'][$j]}' was not properly uploaded.", false);
                             }
                         }
                         // Is this really an error we should fail on?
-                        if (!unlink($uploaded_files[$i]["tmp_name"][$j])) {
-                            return $this->uploadResult("Failed to delete the uploaded file ".$uploaded_files[$i]["name"][$j]." from temporary storage.", false);
-                        }
-                    }
-                }
-    
-                // copy selected previous submitted files
-                if (isset($previous_files[$i])){
-                    for ($j=0; $j < count($previous_files[$i]); $j++){
-                        if (!copy($previous_part_path[$i]."/".$previous_files[$i][$j], $part_path[$i]."/".$previous_files[$i][$j])) {
-                            return $this->uploadResult("Failed to copy previously submitted file ".$previous_files[$i][$j]." to current submission.", false);
+                        if (!@unlink($uploaded_files[$i]["tmp_name"][$j])) {
+                            return $this->uploadResult("Failed to delete the uploaded file {$uploaded_files[$i]["name"][$j]} from temporary storage.", false);
                         }
                     }
                 }
             }
         }
         else {
-            if (!touch($version_path."/.submit.SVN_CHECKOUT")) {
+            if (!@touch(FileUtils::joinPaths($version_path, ".submit.SVN_CHECKOUT"))) {
                 return $this->uploadResult("Failed to touch file for svn submission.", false);
             }
         }
     
-        $settings_file = $user_path."/user_assignment_settings.json";
+        $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
         if (!file_exists($settings_file)) {
             $json = array("active_version" => $new_version,
                           "history" => array(array("version" => $new_version,
@@ -323,13 +334,13 @@ class SubmissionController extends AbstractController {
         }
     
         // TODO: If any of these fail, should we "cancel" (delete) the entire submission attempt or just leave it?
-        if (!file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             return $this->uploadResult("Failed to write to settings file.", false);
         }
         
         $this->upload_details['assignment_settings'] = true;
 
-        if (!file_put_contents($version_path."/.submit.timestamp", $current_time."\n")) {
+        if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
 
@@ -337,8 +348,9 @@ class SubmissionController extends AbstractController {
 
         $touch_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $user_id, $new_version);
-        $touch_file = $this->core->getConfig()->getSubmittyPath()."/to_be_graded_interactive/".implode("__", $touch_file);
-        if (!touch($touch_file)) {
+        $touch_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
+            implode("__", $touch_file));
+        if (!@touch($touch_file)) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
         }
 
@@ -353,10 +365,14 @@ class SubmissionController extends AbstractController {
             // we don't want to throw an exception here as that'll mess up our return json payload
             if ($this->upload_details['version_path'] !== null
                 && !FileUtils::recursiveRmdir($this->upload_details['version_path'])) {
+                // @codeCoverageIgnoreStart
+                // Without the filesystem messing up here, we should not be able to hit this error
                 Logger::error("Could not clean up folder {$this->upload_details['version_path']}");
+
             }
+            // @codeCoverageIgnoreEnd
             else if ($this->upload_details['assignment_settings'] === true) {
-                $settings_file = $this->upload_details['user_path']. "/user_assignment_settings.json";
+                $settings_file = FileUtils::joinPaths($this->upload_details['user_path'], "user_assignment_settings.json");
                 $settings = json_decode(file_get_contents($settings_file), true);
                 if (count($settings['history']) == 1) {
                     unlink($settings_file);
@@ -369,66 +385,84 @@ class SubmissionController extends AbstractController {
                 }
             }
         }
+
+        $return = array('success' => $success, 'error' => !$success, 'message' => $message);
         
-        $this->core->getOutput()->renderJson(array('success' => $success, 'error' => !$success, 'message' => $message));
-        return $success;
+        $this->core->getOutput()->renderJson($return);
+        return $return;
     }
     
     private function updateSubmissionVersion() {
         $gradeable_list = $this->gradeables_list->getSubmittableElectronicGradeables();
         if (!isset($_REQUEST['gradeable_id']) || !array_key_exists($_REQUEST['gradeable_id'], $gradeable_list)) {
-            $_SESSION['messages']['error'][] = "Invalid gradeable id";
+            $msg = "Invalid gradeable id.";
+            $_SESSION['messages']['error'][] = $msg;
             $this->core->redirect($this->core->buildUrl(array('component' => 'student')));
+            return array('error' => true, 'message' => $msg);
         }
         
         $gradeable = $gradeable_list[$_REQUEST['gradeable_id']];
         $gradeable->loadResultDetails();
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $_SESSION['messages']['error'][] = "Invalid CSRF token. Refresh the page and try again.";
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId())));
+        $url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
+        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            $msg = "Invalid CSRF token. Refresh the page and try again.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($url);
+            return array('error' => true, 'message' => $msg);
         }
     
         $new_version = intval($_REQUEST['new_version']);
         if ($new_version < 0) {
-            $_SESSION['messages']['error'][] = "Cannot set the version below 0.";
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId())));
+            $msg = "Cannot set the version below 0.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($url);
+            return array('error' => true, 'message' => $msg);
         }
         
         if ($new_version > $gradeable->getHighestVersion()) {
-            $_SESSION['messages']['error'][] = "Cannot set the version past " . $gradeable->getHighestVersion();
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId())));
+            $msg = "Cannot set the version past {$gradeable->getHighestVersion()}.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($url);
+            return array('error' => true, 'message' => $msg);
         }
     
-        $settings_file = $this->core->getConfig()->getCoursePath() . "/submissions/" .
-            $gradeable->getId() . "/" . $this->core->getUser()->getId() . "/user_assignment_settings.json";
+        $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
+            $gradeable->getId(), $this->core->getUser()->getId(), "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
-            $_SESSION['messages']['error'][] = "Failed to open settings file.";
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId())));
+            $msg = "Failed to open settings file.";
+            $_SESSION['messages']['error'][] = $msg;
+            $this->core->redirect($url);
+            return array('error' => true, 'message' => $msg);
         }
         $json["active_version"] = $new_version;
-        $json["history"][] = array("version" => $new_version,
-                                   "time" => new \DateTime('now', new \DateTimeZone($this->core->getConfig()->getTimezone())));
-    
-        if (!file_put_contents($settings_file, FileUtils::encodeJson($json))) {
-            $_SESSION['messages']['error'][] = "Could not write to settings file.";
+        $current_time = (new \DateTime('now', new \DateTimeZone($this->core->getConfig()->getTimezone())))->format("Y-m-d H:i:s");
+        $json["history"][] = array("version" => $new_version, "time" => $current_time);
+
+        if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
+            $msg = "Could not write to settings file.";
+            $_SESSION['messages']['error'][] = $msg;
             $this->core->redirect($this->core->buildUrl(array('component' => 'student',
                                                               'gradeable_id' => $gradeable->getId())));
+            return array('error' => true, 'message' => $msg);
         }
 
         $version = ($new_version > 0) ? $new_version : null;
         $this->core->getQueries()->updateActiveVersion($gradeable->getId(), $this->core->getUser()->getId(), $version);
 
         if ($new_version == 0) {
-            $_SESSION['messages']['success'][] = "Cancelled submission for gradeable";
+            $msg = "Cancelled submission for gradeable.";
+            $_SESSION['messages']['success'][] = $msg;
         }
         else {
-            $_SESSION['messages']['success'][] = "Updated version of gradeable to version #" . $new_version;
+            $msg = "Updated version of gradeable to version #{$new_version}.";
+            $_SESSION['messages']['success'][] = $msg;
         }
-
         $this->core->redirect($this->core->buildUrl(array('component' => 'student',
                                                           'gradeable_id' => $gradeable->getId(),
                                                           'gradeable_version' => $new_version)));
+
+        return array('error' => false, 'version' => $new_version, 'message' => $msg);
     }
     
     /**
@@ -441,13 +475,17 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->useFooter(false);
         $g_id = $_REQUEST['gradeable_id'];
         $version = $_REQUEST['gradeable_version'];
-        $path = $this->core->getConfig()->getCoursePath()."/results/".$g_id."/".
-                    $this->core->getUser()->getId()."/".$version;
+        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $g_id,
+            $this->core->getUser()->getId(), $version);
         if (file_exists($path."/results.json")) {
-            $this->core->getOutput()->renderString("REFRESH_ME");
+            $refresh_string = "REFRESH_ME";
+            $refresh_bool = true;
         }
         else {
-            $this->core->getOutput()->renderString("NO_REFRESH");
+            $refresh_string = "NO_REFRESH";
+            $refresh_bool = false;
         }
+        $this->core->getOutput()->renderString($refresh_string);
+        return array('refresh' => $refresh_bool, 'string' => $refresh_string);
     }
 }

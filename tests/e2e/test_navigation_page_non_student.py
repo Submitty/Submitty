@@ -7,7 +7,7 @@ class TestNavigationPageNonStudent(BaseTestCase):
         self.driver = BaseTestCase.DRIVER
 
     def test_instructor(self):
-        self.log_in(user_id="instructor", user_password="instructor", user_name="Instructor")
+        self.log_in(user_id="instructor", user_password="instructor", user_name="Quinn")
         elements = self.driver.find_elements_by_class_name('nav-title-row')
         self.assertEqual(5, len(elements))
         self.assertEqual("future", elements[0].get_attribute('id'))
@@ -34,7 +34,7 @@ class TestNavigationPageNonStudent(BaseTestCase):
             'gradeable_row').find_elements_by_tag_name('td')))
 
     def test_ta(self):
-        self.log_in(user_id="ta", user_password="ta", user_name="TA")
+        self.log_in(user_id="ta", user_password="ta", user_name="Jill")
         elements = self.driver.find_elements_by_class_name('nav-title-row')
         self.assertEqual(5, len(elements))
         self.assertEqual("future", elements[0].get_attribute('id'))

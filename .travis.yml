@@ -1,17 +1,26 @@
 language: php
 sudo: true
 dist: trusty
-php:
-  - 5.5
-  - 5.6
-  - 7.0
+
+matrix:
+  include:
+    - php: 5.5
+      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
+    - php: 5.5
+      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=true
+    - php: 5.6
+      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
+    - php: 7.0
+      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
+    - php: 7.0
+      env: AUTH_METHOD=PamAuthentication INTEGRATION_SUITE=false
 
 cache:
   pip: true
   directories:
     - vendor
     - $HOME/.composer/cache
-    - travis_phantomjs
+    - $HOME/.cache/pip
 
 addons:
   #firefox: "45.0"
@@ -43,17 +52,24 @@ addons:
       - libpcre3-dev
       - unzip
       - google-chrome-stable
+      - libpam-passwdqc
 
 before_install:
-  - jdk_switcher use default
-  #- export PHANTOMJS_VERSION=2.1.1
-  #- export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH
-  #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then rm -rf $PWD/travis_phantomjs; mkdir -p $PWD/travis_phantomjs; fi
-  #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then wget https://github.com/Medium/phantomjs/releases/download/v$PHANTOMJS_VERSION/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -O $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2; fi
-  #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi
-  #- phantomjs --version
-  - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
-  - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
+   - jdk_switcher use default
+   #- export PHANTOMJS_VERSION=2.1.1
+   #- export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH
+   #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then rm -rf $PWD/travis_phantomjs; mkdir -p $PWD/travis_phantomjs; fi
+   #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then wget https://github.com/Medium/phantomjs/releases/download/v$PHANTOMJS_VERSION/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -O $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2; fi
+   #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi
+   #- phantomjs --version
+   - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
+   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
+   #- export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
+   - sudo sed -e "s?secure_path=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?secure_path=\"${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?g" --in-place /etc/sudoers
+   - sudo cat /etc/sudoers
+   - sudo rm -rf /usr/bin/python
+   - sudo ln -s /opt/python/2.7.12/bin/python /usr/bin/python
+   - sudo chmod 777 /usr/bin/python
 
 install:
   - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.5" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
@@ -65,10 +81,18 @@ install:
   - sudo chmod u+x chromedriver
   - sudo mv chromedriver /usr/bin/
   - travis_retry composer install --prefer-dist --no-interaction
+  - pip install -U pip
+  - pip install xlsx2csv
+  - pip install python-pam
+  - pip install sqlalchemy
+  - pip install psycopg2
+  - pip install PyYAML
   - pip install selenium
   - pip install nose2
   - pip install unittest2
   - pip install pylint_runner
+  - sudo chmod -R 555 /usr/local/lib/python2.7/*
+  - sudo chmod -R 555 /opt/python/2.7.*/lib/python2.7/*
 
 before_script:
   # Doing this helps chromedriver from hanging for some mysterious reason
@@ -77,6 +101,7 @@ before_script:
   - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
   - sudo ./.setup/travis/autograder.sh
   - ./.setup/travis/setup.sh
+  - sudo python /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py csci1000
   - sudo ./.setup/travis/setup_test_suite.sh
   - sudo sed -e "s?www-data?hwphp?g" --in-place /etc/apache2/envvars
   - sudo a2enmod include rewrite actions cgi alias headers
@@ -89,27 +114,36 @@ before_script:
   - sudo chown -R hwphp:hwphp /var/lib/apache2/fastcgi
   - sudo chmod -R 755 /usr/local/submitty
   - sudo chmod -R 777 /usr/local/submitty/test_suite
+  - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
+  - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.profile'
+  - sudo bash -c 'echo "export PATH=$PATH" >> /home/hwphp/.bashrc'
   - sudo service apache2 restart
   #- ./.setup/travis/start.sh
   - sudo sed -e "s?debug = false?debug = true?g" --in-place /usr/local/submitty/site/config/master.ini
-  - sudo sed -e "s?PamAuthentication?DatabaseAuthentication?g" --in-place /usr/local/submitty/site/config/master.ini
+  - sudo sed -e "s?PamAuthentication?${AUTH_METHOD}?g" --in-place /usr/local/submitty/site/config/master.ini
+  - sudo cat /usr/local/submitty/site/config/master.ini
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
 
 script:
+  - curl http://localhost/cgi-bin/index.cgi
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
   - vendor/bin/phpunit --version
   #- firefox --version
-  - vendor/bin/phpunit --configuration tests/phpunit.xml
-  - python /usr/local/submitty/test_suite/integrationTests/run.py
-  - TEST_URL="http://localhost" nose2 -v --start-dir="tests/e2e"
+  - if [ ${INTEGRATION_SUITE} = false ]; then vendor/bin/phpunit --configuration tests/phpunit.xml; fi
+  - if [ ${INTEGRATION_SUITE} = true ]; then sudo python /usr/local/submitty/test_suite/integrationTests/run.py; fi
+  - if [ ${INTEGRATION_SUITE} = false ]; then TEST_URL="http://localhost" nose2 -v --start-dir="tests/e2e"; fi
 
 # Add more linters to the build process here
 after_script:
   # Eventually this should be moved into the "script" once we've gotten the build to a point where all contained
   # python files will actually pass (which a lot right now will not)
   - pylint_runner ${TRAVIS_BUILD_DIR}
+#  - sudo ./.setup/travis/print_debug.sh
+
+after_success:
+  - travis_retry php vendor/bin/coveralls -v
 
 notifications:
   email: false
