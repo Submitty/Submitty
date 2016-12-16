@@ -23,6 +23,7 @@ FROM
 WHERE 
     g.g_id=?
     AND NOT gc.gc_is_extra_credit
+    AND gc_max_value > 0
 GROUP BY 
     g.g_id", $params);
     $gradeable_info = $db->row();
@@ -133,6 +134,7 @@ else {
                         <th>Name</th>
                         <th>Autograding</th>
                         <th>TA Grading</th>
+                        <th>Total</th>
                     </tr>
                 </thead>
 
@@ -204,7 +206,7 @@ HTML;
             print <<<HTML
 
                 <tr class="info">
-                    <td colspan="4" style="text-align:center;">
+                    <td colspan="5" style="text-align:center;">
           Students {$enrolled_assignment} {$to_show}
                     </td>
                 </tr>
@@ -226,19 +228,20 @@ HTML;
                     </td>
                     <td>
 HTML;
+        $earned_score = $eg->autograding_points;
+        $max_possible_score = $eg->autograding_max + $rubric_total;
         if(isset($row['score'])) {
-            if($row['score'] >= 0) {
-                echo "<a class='btn' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "&course={$_GET['course']}&semester={$_GET['semester']}'>[ " . ($row['score']).
-                       " / " . ($rubric_total) . " ]</a>";
-            }
-            else {
-                echo "<a class='btn btn-danger' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "&course={$_GET['course']}&semester={$_GET['semester']}'>[ GRADING ERROR ]</a>";
-            }
+            echo "<a class='btn' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "&course={$_GET['course']}&semester={$_GET['semester']}'>[ " . ($row['score']).
+                   " / " . ($rubric_total) . " ]</a>";
+            $earned_score = max(0, $earned_score+floatval($row['score']));
         }
         else {
             echo "<a class='btn btn-primary' href='{$BASE_URL}/account/index.php?g_id=" . $_GET["g_id"] . "&individual=" . $student["user_id"] . "&course={$_GET['course']}&semester={$_GET['semester']}'>Grade</a>";
         }
         print <<<HTML
+                    </td>
+                    <td>
+                    {$earned_score} / {$max_possible_score}
                     </td>
                 </tr>
 HTML;
