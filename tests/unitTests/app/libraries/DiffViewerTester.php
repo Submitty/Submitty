@@ -15,7 +15,7 @@ class DiffViewerTester extends \PHPUnit_Framework_TestCase {
     public function diffDir() {
         $needed_files = array('input_actual.txt', 'input_expected.txt',
             'input_differences.json', 'output_actual.txt', 'output_expected.txt');
-        $dir = __TEST_DIRECTORY__.'/diffs';
+        $dir = __TEST_DATA__.'/diffs';
         $files = scandir($dir);
         $diffs = array();
         foreach ($files as $file) {
@@ -54,7 +54,7 @@ class DiffViewerTester extends \PHPUnit_Framework_TestCase {
      * @expectedException \Exception
      */
     public function testExpectedException() {
-        $diff = new DiffViewer(__TEST_DIRECTORY__."/diffs/diff_test_01/input_actual.txt",
+        $diff = new DiffViewer(__TEST_DATA__."/diffs/diff_test_01/input_actual.txt",
                                "file_that_doesnt_exist", "");
     }
 
@@ -62,8 +62,8 @@ class DiffViewerTester extends \PHPUnit_Framework_TestCase {
      * @expectedException \Exception
      */
     public function testDifferencesException() {
-        $diff = new DiffViewer(__TEST_DIRECTORY__."/diffs/diff_test_01/input_actual.txt",
-                               __TEST_DIRECTORY__."/diffs/diff_test_01/input_expected.txt",
+        $diff = new DiffViewer(__TEST_DATA__."/diffs/diff_test_01/input_actual.txt",
+                               __TEST_DATA__."/diffs/diff_test_01/input_expected.txt",
                                "file_that_doesnt_exist");
     }
 }
