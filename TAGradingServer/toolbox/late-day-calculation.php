@@ -120,7 +120,7 @@ class LateDaysCalculation
         $query = "SELECT
               eg.g_id
               , eg.eg_late_days as assignment_allowed
-              , greatest(0, ceil((extract(EPOCH FROM(egd.submission_time - eg.eg_submission_due_date)) + (?))/86400):: integer) as days_late
+              , greatest(0, ceil((extract(EPOCH FROM(egd.submission_time - eg.eg_submission_due_date)) - (?))/86400):: integer) as days_late
               , eg.eg_submission_due_date
               , egd.submission_time
               , coalesce(lde.late_day_exceptions, 0) as extensions
@@ -317,7 +317,7 @@ class LateDaysCalculation
                     $late_flag = false;
                 }
                 //If late days used - extensions applied > allowed per term then status is "Bad..."
-                if ($curr_late_used - $submissions[$i]['extensions'] >  $curr_allowed_term) {
+                if ($curr_late_used - $submissions[$i]['extensions'] >  $curr_allowed_term - $total_late_used) {
                     $curr_status = "Bad";
                     $curr_bad_modifier = " too many used this term";
                     $late_flag = false;
