@@ -3,6 +3,12 @@
 use \lib\Database;
 class LateDaysCalculation
 {
+    //Set grace period to 5 minutes in here
+    /**
+     * @var int. The number of minutes of grace a user is allowed before a submission is counted as late.
+     */
+    const grace_period = 5;
+
     /**
      * @var String of format('Y-m-d H:i:s'). Represents the cutoff date for fetching grades.
      */
@@ -114,7 +120,7 @@ class LateDaysCalculation
         $query = "SELECT
               eg.g_id
               , eg.eg_late_days as assignment_allowed
-              , greatest(0, ceil(extract(EPOCH FROM(egd.submission_time - eg.eg_submission_due_date))/86400):: integer) as days_late
+              , greatest(0, ceil((extract(EPOCH FROM(egd.submission_time - eg.eg_submission_due_date)) + (?))/86400):: integer) as days_late
               , eg.eg_submission_due_date
               , egd.submission_time
               , coalesce(lde.late_day_exceptions, 0) as extensions
@@ -132,7 +138,7 @@ class LateDaysCalculation
               AND egv.user_id = egd.user_id
               AND eg.g_id = g.g_id
               AND egv.active_version = egd.g_version ";
-
+        array_push($params, __SUBMISSION_GRACE_PERIOD_SECONDS__);
         //For every user_id in user_ids add another condition to the query and another user id to the parameters list.
         if (is_array($userIds) && count($userIds) > 0) {
             $query .= " AND (";
@@ -264,8 +270,8 @@ class LateDaysCalculation
         foreach ($students as $student) {
 
             //Base allowed late days and remaining late days
-            $curr_allowed_term = __DEFAULT_HW_LATE_DAYS__;
-            $curr_remaining_late = __DEFAULT_HW_LATE_DAYS__;
+            $curr_allowed_term = __DEFAULT_TOTAL_LATE_DAYS__;
+            $curr_remaining_late = __DEFAULT_TOTAL_LATE_DAYS__;
             $total_late_used = 0;
             $status = "Good";
 
@@ -282,46 +288,27 @@ class LateDaysCalculation
             for ($i = 0; $i < count($submissions); $i++) {
                 $submission_latedays = array();
 
-                $curr_remaining_increment = 0;
+                //Sort latedays by since_timestamp before calculating late day usage.
+                usort($latedays, array($this, "lateday_update_sort"));
 
-                //For each late day update check if it's timestamp is earlier than the due date of the gradeable. If so
-                //apply the update to the remaining late days
-                $items_to_remove = array();
-
-                $late_day_updates_total = 0;
-                $late_day_updates = Array();
-
-                //Find all late day updates before this submission due date. Append the update to a list of updates
-                //applied to this submission. Also append to a list of items to be removed from the master list of late
-                //day updates. Attempting to ensure that late day updates are not applied twice.
+                //Find all late day updates before this submission due date.
                 foreach($latedays as $ld){
                     if($ld['since_timestamp'] < $submissions[$i]['eg_submission_due_date']){
-                        $late_day_updates_total += $ld['allowed_late_days'];
-                        array_push($late_day_updates, $ld);
-                        array_push($items_to_remove, $ld);
+                        $curr_allowed_term = $ld['allowed_late_days'];
                     }
                 }
-
-                //Remove all of the newly applied late day updates.
-                foreach($items_to_remove as $item){
-                    if(($key = array_search($item, $latedays)) !== false){
-                        unset($latedays[$key]);
-                    }
-                }
-
-                //Update the number of remaining late days the user has remaining.
-                $curr_remaining_late += $late_day_updates_total;
 
                 $curr_bad_modifier = "";
                 $curr_late_used = $submissions[$i]['days_late'];
                 $curr_status = $status;
                 $curr_late_charged = 0;
 
-                $late_flag = true;
+                $late_flag = false;
 
                 //If late days used - extensions applied > 0 then status is "Late"
                 if ($curr_late_used - $submissions[$i]['extensions'] > 0) {
                     $curr_status = "Late";
+                    $late_flag = true;
                 }
                 //If late days used - extensions applied > allowed per assignment then status is "Bad..."
                 if ($curr_late_used - $submissions[$i]['extensions'] > $submissions[$i]['assignment_allowed']) {
@@ -340,9 +327,11 @@ class LateDaysCalculation
                 if ($late_flag) {
                     $curr_late_charged = $curr_late_used - $submissions[$i]['extensions'];
                     $curr_late_charged = ($curr_late_charged < 0) ? 0 : $curr_late_charged;
-                    $curr_remaining_late -= $curr_late_charged;
                     $total_late_used += $curr_late_charged;
                 }
+
+                $curr_remaining_late = $curr_allowed_term - $total_late_used;
+                $curr_remaining_late = ($curr_remaining_late < 0) ? 0 : $curr_remaining_late;
 
                 $submission_latedays['user_id'] = $submissions[$i]['user_id'];
                 $submission_latedays['g_title'] = $submissions[$i]['g_title'];
@@ -353,12 +342,9 @@ class LateDaysCalculation
                 $submission_latedays['status'] = $curr_status.$curr_bad_modifier;
                 $submission_latedays['late_days_charged'] = $curr_late_charged;
                 $submission_latedays['remaining_days'] = $curr_remaining_late;
-                $submission_latedays['lateday_updates'] = $late_day_updates_total;
                 $submission_latedays['total_late_used'] = $total_late_used;
 
                 $late_day_usage[$submissions[$i]['g_id']] = $submission_latedays;
-
-                $curr_allowed_term = $curr_remaining_late;
             }
 
             $all_latedays[$student['user_id']] = $late_day_usage;
@@ -385,7 +371,6 @@ class LateDaysCalculation
                             <th style="border:thin solid black">Allowed per assignment</th>
                             <th style="border:thin solid black">Late days used</th>
                             <th style="border:thin solid black">Extensions</th>
-                            <th style="border:thin solid black">Late Day Updates</th>
                             <th style="border:thin solid black">Status</th>
                             <th style="border:thin solid black">Late Days Charged</th>
                             <th style="border:thin solid black">Remaining Days</th>
@@ -408,7 +393,6 @@ HTML;
                     <td align="center" style="border:thin solid black">{$submission['allowed_per_assignment']}</td>
                     <td align="center" style="border:thin solid black">{$submission['late_days_used']}</td>
                     <td align="center" style="border:thin solid black">{$submission['extensions']}</td>
-                    <td align="center" style="border:thin solid black">{$submission['lateday_updates']}</td>
                     <td align="center" style="border:thin solid black">{$submission['status']}</td>
                     <td align="center" style="border:thin solid black">{$submission['late_days_charged']}</td>
                     <td align="center" style="border:thin solid black">{$submission['remaining_days']}</td>
@@ -456,5 +440,9 @@ HTML;
 
     private function submission_sort($a, $b){
         return $a['eg_submission_due_date'] > $b['eg_submission_due_date'];
+    }
+
+    private function lateday_update_sort($a, $b){
+        return $a['since_timestamp'] > $b['since_timestamp'];
     }
 }
