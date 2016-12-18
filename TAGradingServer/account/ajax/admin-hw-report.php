@@ -159,11 +159,24 @@ foreach($db->rows() as $student_record) {
 
 
             $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: " . $grade_user_email . $nl;
-            $student_output_text_main .= "Late days used on this homework: " . $late_days['late_days_charged'] . $nl;
-            if ($late_days['total_late_used'] > 0) {
-                $student_output_text_main .= "Late days used overall: " . $late_days['total_late_used'] . $nl;
-                $student_output_text_main .= "Late days remaining: " . $late_days['remaining_days'] . $nl;
+	    if ($late_days['late_days_used'] > 0) {
+                $student_output_text_main .= "This submission was " . $late_days['late_days_used'] . " day(s) after the due date." . $nl;
+	    }
+	    if ($late_days['extensions'] > 0) {
+               $student_output_text_main .= "You have a " . $late_days['extensions'] . " day extension on this assignment." . $nl;
+	    }
+            $student_output_text_main .= "Homework status: " . $late_days['status'] . $nl;
+	    if (strpos($late_days['status'], 'Bad') !== false) {
+                $student_output_text_main .= "NOTE:  HOMEWORK GRADE WILL BE RECORDED AS ZERO.";
+		$student_output_text_main .= "  Contact your TA or instructor if you believe this is an error." . $nl;
+	    }
+	    if ($late_days['late_days_charged'] > 0) {
+                $student_output_text_main .= "Number of late days used for this homework: " . $late_days['late_days_charged'] . $nl;
             }
+            $student_output_text_main .= "Total late days used this semester: " . $late_days['total_late_used'] . " (up to and including this assignment)" . $nl;
+            $student_output_text_main .= "Late days remaining for the semester: " . $late_days['remaining_days'] . " (as of the due date of this homework)" . $nl;
+
+
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
             // Query database for specific questions from this rubric
             $grading_notes = pgArrayToPhp($gradeable['comments']);

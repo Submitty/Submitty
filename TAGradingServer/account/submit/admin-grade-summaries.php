@@ -151,15 +151,42 @@ foreach($db->rows() as $student_record) {
 
         $this_g["id"] = $gradeable['g_id'];
         $this_g["name"] =  $gradeable['g_title'];
+
+	// TODO: DEPRECATE THIS FIELD
         $this_g["score"] = max(0,(floatval($gradeable['score'])+floatval($autograding_score)));
+
+	// REPLACED BY:
+        $this_g["original_score"] = max(0,(floatval($gradeable['score'])+floatval($autograding_score)));
+	$this_g["actual_score"] = $this_g["original_score"];
 
         // adds late days for electronic gradeables
         if($gradeable['g_gradeable_type'] == 0){
 
+	    $this_g["status"] = "NO SUBMISSION";
+
             $late_days = $ldu ->get_gradeable($student_id, $gradeable['g_id']);
 
-            if (array_key_exists('late_days_charged', $late_days) && $late_days['late_days_charged'] > 0) {
+	    if (array_key_exists('late_days_charged', $late_days)) {
+	        $this_g["status"] = $late_days['status'];
+	    }
+
+	    if (strpos($this_g["status"], 'Bad') !== false) {
+	        $this_g["actual_score"] = 0;
+	    }
+
+	    // TODO: DEPRECATE THIS FIELD
+            $this_g["original_score"] = max(0,(floatval($gradeable['score'])+floatval($autograding_score)));
+
+            if (array_key_exists('late_days_charged', $late_days) && $late_days['late_days_used'] > 0) {
+
+	        // TODO:  DEPRECATE THIS FIELD
                 $this_g['days_late'] = $late_days['late_days_charged'];
+
+		// REPLACED BY:
+                $this_g['days_after_deadline'] = $late_days['late_days_used'];	
+                $this_g['extensions'] = $late_days['extensions'];
+                $this_g['days_charged'] = $late_days['late_days_charged'];
+
             }
             else {
                 $this_g['days_late'] = 0;
