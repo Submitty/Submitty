@@ -9,15 +9,6 @@ class LateDaysCalculation
      */
     const grace_period = 5;
 
-    /**
-     * @var String of format('Y-m-d H:i:s'). Represents the cutoff date for fetching grades.
-     */
-    private $endDate;
-    /**
-     * @var Array([String]). The user ids so query for. An empty Array will fetch all users.
-     */
-    private $userIds;
-
     /**Submission
      * @psuedo_struct Array([keys]). An array containing the data required to calculate late days for a given
      * gradeable. Contains the keys:
@@ -91,14 +82,11 @@ class LateDaysCalculation
      * @param $endDate String of format('Y-m-d H:i:s'). Represents the cutoff date for fetching grades.
      * @param $userIds Array([String]). The user ids so query for. An empty Array will fetch all users.
      */
-    function __construct($endDate, $userIds)
+    function __construct()
     {
-        //Set class properties.
-        $this -> endDate = $endDate;
-        $this -> userIds = $userIds;
         //Query database and parse queries
-        $this -> submissions = $this -> get_student_submissions($endDate, $userIds);
-        $this -> latedays = $this -> get_student_lateday_updates($endDate, $userIds);
+        $this -> submissions = $this -> get_student_submissions();
+        $this -> latedays = $this -> get_student_lateday_updates();
         $this -> students = $this -> parse_students($this -> submissions, $this -> latedays);
         //Calculate lateday usages for all students for all assignments queried
         $this -> all_latedays = $this -> calculate_student_lateday_usage($this -> students);
@@ -110,60 +98,66 @@ class LateDaysCalculation
      * @param $userIds Array([String]). The user ids so query for. An empty Array will fetch all users.
      * @return Array([Submission])
      */
-    private function get_student_submissions($endDate, $userIds)
+    private function get_student_submissions()
     {
         $params = array();
 
-        //Joint gradeable, electronic_gradeable, electronic_gradeable_version, electronic_gradeable_data,
-        //and late_day_exceptions. Full join on electronic_gradeable_data and late_day_exceptions for fields user_id and
-        //g_id. Needed to get sparse late_day_exceptions data.
         $query = "SELECT
-              eg.g_id
-              , eg.eg_late_days as assignment_allowed
-              , greatest(0, ceil((extract(EPOCH FROM(egd.submission_time - eg.eg_submission_due_date)) - (?))/86400):: integer) as days_late
-              , eg.eg_submission_due_date
-              , egd.submission_time
-              , coalesce(lde.late_day_exceptions, 0) as extensions
-              , g.g_title
-              , coalesce(egv.active_version, -1) as active_version
-              , egv.user_id
-            FROM
-              electronic_gradeable eg
-              , electronic_gradeable_version egv
-              , electronic_gradeable_data egd FULL OUTER JOIN late_day_exceptions lde ON lde.user_id = egd.user_id AND lde.g_id = egd.g_id
-              , gradeable g
-            WHERE
-              eg.g_id = egv.g_id
-              AND egv.g_id = egd.g_id
-              AND egv.user_id = egd.user_id
-              AND eg.g_id = g.g_id
-              AND egv.active_version = egd.g_version ";
+                      submissions.*
+                      , coalesce(late_day_exceptions, 0) extensions
+                      , greatest(0, ceil((extract(EPOCH FROM(coalesce(submission_time, eg_submission_due_date) - eg_submission_due_date)) - (?*60))/86400):: integer) as days_late
+                    FROM
+                      (
+                        SELECT
+                        base.g_id
+                        , g_title
+                        , base.assignment_allowed
+                        , base.user_id
+                        , eg_submission_due_date
+                        , coalesce(active_version, -1) as active_version
+                        , submission_time
+                      FROM
+                      (
+                        --Begin BASE--
+                        SELECT
+                          g.g_id,
+                          u.user_id,
+                          g.g_title,
+                          eg.eg_submission_due_date,
+                          eg.eg_late_days AS assignment_allowed
+                        FROM
+                          users u
+                          , gradeable g
+                          , electronic_gradeable eg
+                        WHERE
+                          g.g_id = eg.g_id
+                        --End Base--
+                      ) as base
+                    FULL JOIN
+                    (
+                      --Begin Details--
+                      SELECT
+                        g_id
+                        , user_id
+                        , active_version
+                        , g_version
+                        , submission_time
+                      FROM
+                        electronic_gradeable_version egv NATURAL JOIN electronic_gradeable_data egd
+                      WHERE
+                        egv.active_version = egd.g_version
+                      --End Details--
+                    ) as details
+                    ON
+                      base.user_id = details.user_id
+                      AND base.g_id = details.g_id
+                    ) 
+                      AS submissions 
+                      FULL OUTER JOIN 
+                        late_day_exceptions AS lde 
+                      ON submissions.g_id = lde.g_id 
+                      AND submissions.user_id = lde.user_id";
         array_push($params, __SUBMISSION_GRACE_PERIOD_SECONDS__);
-        //For every user_id in user_ids add another condition to the query and another user id to the parameters list.
-        if (is_array($userIds) && count($userIds) > 0) {
-            $query .= " AND (";
-            for ($i = 0; $i < count($userIds); $i++) {
-                if ($i > 0) {
-                    $query .= " OR ";
-                }
-                $query .= "egv.user_id = ?";
-                array_push($params, $userIds[$i]);
-            }
-            $query .= ")";
-        }
-
-        //Add due date to query and parameters list.
-        $query .= "
-            AND eg.eg_submission_due_date <= ? ";
-
-        //Add order by condition so that results are received in chronological order by due date.
-        $query .= "ORDER BY
-          eg.eg_submission_due_date
-          , g.g_title
-          , egv.user_id
-          ;";
-
-        array_push($params, $endDate);
 
         //Query database and return results.
         Database::query($query, $params);
@@ -176,39 +170,17 @@ class LateDaysCalculation
      * @param $userIds Array([String]). The user ids so query for. An empty Array will fetch all users.
      * @return Array([LateDayUpdate])
      */
-    private function get_student_lateday_updates($endDate, $userIds)
+    private function get_student_lateday_updates()
     {
         $params = array();
         //Select from late_days where user_id in $userIds and since_timestamp < $endDate.
         $query = "SELECT
           *
         FROM
-          late_days l
-        WHERE
-          l.since_timestamp <=? ";
-
-        array_push($params, $endDate);
-
-        //Add all user_ids
-        if (is_array($userIds) && count($userIds) > 0) {
-            $query .= "AND (";
-            for ($i = 0; $i < count($userIds); $i++) {
-                if ($i > 0) {
-                    $query .= " OR ";
-                }
-                $query .= "l.user_id = ?";
-                array_push($params, $userIds[$i]);
-            }
-            $query .= ")";
-        }
-
-        //Append the order by condition.
-        $query .= "ORDER BY
-            l.user_id
-            , l.since_timestamp;";
+          late_days;";
 
         //Query database and return results.
-        Database::query($query, $params);
+        Database::query($query);
         return Database::rows();
     }
 

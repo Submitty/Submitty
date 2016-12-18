@@ -48,9 +48,7 @@ function getAutogradingMaxScore($g_id){
 }
 
 //Begin late day calculation////////////////////////////////////////////////////////////////////////////////////////////
-$now = new DateTime();
-$due_string = $now->format('Y-m-d H:i:s');
-$ldu = new LateDaysCalculation($due_string,array());
+$ldu = new LateDaysCalculation();
 //End late day calculation//////////////////////////////////////////////////////////////////////////////////////////////
 
 $db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
