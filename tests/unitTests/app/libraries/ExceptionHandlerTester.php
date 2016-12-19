@@ -7,24 +7,9 @@ use \app\exceptions\BaseException;
 use \app\libraries\ExceptionHandler;
 use \app\libraries\FileUtils;
 use \app\libraries\Logger;
+use app\libraries\Utils;
 
 class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
-
-    public static function setUpBeforeClass() {
-        if (is_dir(__TEST_DIRECTORY__."/EHLogs")) {
-            FileUtils::emptyDir(__TEST_DIRECTORY__."/EHLogs");
-        }
-        else {
-            FileUtils::createDir(__TEST_DIRECTORY__."/EHLogs", true);
-        }
-
-        Logger::setLogPath(__TEST_DIRECTORY__."/EHLogs/");
-    }
-
-    public static function tearDownAfterClass() {
-        FileUtils::recursiveRmdir(__TEST_DIRECTORY__."/EHLogs");
-    }
-
     public function testClassVariables() {
         $class = new \ReflectionClass('app\libraries\ExceptionHandler');
         $properties = $class->getProperties();
@@ -50,17 +35,22 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
     }
 
     public function testExceptionHandlerLog() {
+        $tmp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
+        $this->assertTrue(FileUtils::createDir($tmp_dir));
+        Logger::setLogPath($tmp_dir);
         date_default_timezone_set("America/New_York");
         $date = getdate(time());
-        $filename = $date['year'].str_pad($date['mon'], 2, '0', STR_PAD_LEFT).str_pad($date['mday'], 2, '0', STR_PAD_LEFT);
+        $filename = $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday']).".txt";
         ExceptionHandler::setDisplayExceptions(false);
         ExceptionHandler::setLogExceptions(true);
         ExceptionHandler::handleException(new BaseException("test", array("test"=>"b", "test2"=>array('a','c'))));
-        $this->assertFileExists(__TEST_DIRECTORY__."/EHLogs/".$filename.".txt");
-        $actual = file_get_contents(__TEST_DIRECTORY__."/EHLogs/".$filename.".txt");
-        $this->assertEquals(1, preg_match('/[0-9]{2}\/[0-9]{2}\/[0-9]{4}\ [0-9]{2}\:[0-9]{2}\:[0-9]{2} \- FATAL ERROR\napp.+/', $actual));
-        $this->assertEquals(1, preg_match('/Extra Details:\n\ttest: b\n\ttest2:\n\t\ta\n\t\tc/', $actual));
+        $file = FileUtils::joinPaths($tmp_dir, $filename);
+        $this->assertFileExists($file);
+        $actual = file_get_contents($file);
+        $this->assertRegExp('/[0-9]{2}\/[0-9]{2}\/[0-9]{4}\ [0-9]{2}\:[0-9]{2}\:[0-9]{2} \- FATAL ERROR\napp.+/', $actual);
+        $this->assertRegExp('/Extra Details:\n\ttest: b\n\ttest2:\n\t\ta\n\t\tc/', $actual);
         ExceptionHandler::setLogExceptions(false);
+        $this->assertTrue(FileUtils::recursiveRmdir($tmp_dir));
     }
 
     private function authenticate($username, $password) {
