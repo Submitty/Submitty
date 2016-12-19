@@ -50,7 +50,7 @@ $default_allowed_late_days = __DEFAULT_TOTAL_LATE_DAYS__;
 //Begin late day calculation////////////////////////////////////////////////////////////////////////////////////////////
 $now = new DateTime();
 $due_string = $now->format('Y-m-d H:i:s');
-$ldu = new LateDaysCalculation($due_string,array());
+$ldu = new LateDaysCalculation();
 //End late day calculation//////////////////////////////////////////////////////////////////////////////////////////////
 
 

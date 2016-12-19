@@ -401,8 +401,8 @@ HTML;
 
 //Begin late day calculation////////////////////////////////////////////////////////////////////////////////////////////
 $due_string = $eg_due_date->format('Y-m-d H:i:s');
-$ldu = new LateDaysCalculation($due_string,$s_user_id);
-$ld_table = $ldu->generate_table_for_user($s_user_id);
+$ldu = new LateDaysCalculation();
+$ld_table = $ldu->generate_table_for_user_date($s_user_id, $due_string);
 $output .= $ld_table;
 $status = $ldu ->get_gradeable_status($s_user_id, $eg->g_id);
 //End late day calculation//////////////////////////////////////////////////////////////////////////////////////////////
@@ -412,6 +412,12 @@ if($status != "Good" && $status != "Late"){
     $output .= <<<HTML
                 <script>
                     $('body').css('background-color', 'red');
+                    $("#rubric_form").submit(function(event){
+                        var confirm = window.confirm("This submission has a bad status. Are you sure you want to submit a grade for it?");
+                        if(!confirm){
+                            event.preventDefault();
+                        }
+                    });
                 </script>
 HTML;
 }
@@ -628,23 +634,6 @@ else {
         <div style="width:100%; text-align:right; color:#777;">This homework has not been opened for grading.</div>
 HTML;
 }
-
-
-$output .= <<<HTML
-
-                <script>
-                    $("#rubric_form").submit(function(event){
-                       var confirm = window.confirm("This submission has a bad status. Are you sure you want to submit a grade for it?");
-                       if(!confirm){
-                           event.preventDefault();
-                       }
-                    });
-                </script>
-            </form>
-
-    </div>
-</div>
-HTML;
 
 $output .= <<<HTML
 <script>
