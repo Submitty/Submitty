@@ -2,12 +2,16 @@
 -- PostgreSQL database dump
 --
 
+-- Dumped from database version 9.3.15
+-- Dumped by pg_dump version 9.5.1
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
+SET row_security = off;
 
 --
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
@@ -122,7 +126,8 @@ CREATE TABLE electronic_gradeable (
     eg_submission_open_date timestamp(6) without time zone NOT NULL,
     eg_submission_due_date timestamp(6) without time zone NOT NULL,
     eg_late_days integer DEFAULT (-1) NOT NULL,
-    eg_precision numeric NOT NULL
+    eg_precision numeric NOT NULL,
+    CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date))
 );
 
 
@@ -168,9 +173,12 @@ CREATE TABLE gradeable (
     g_ta_view_start_date timestamp(6) without time zone NOT NULL,
     g_grade_start_date timestamp(6) without time zone NOT NULL,
     g_grade_released_date timestamp(6) without time zone NOT NULL,
-    g_closed_date timestamp(6) without time zone,
+    g_grade_locked_date timestamp(6) without time zone,
     g_min_grading_group integer NOT NULL,
-    g_syllabus_bucket character varying(255) NOT NULL
+    g_syllabus_bucket character varying(255) NOT NULL,
+    CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date)),
+    CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_released_date)),
+    CONSTRAINT g_grade_released_date CHECK ((g_grade_released_date <= g_grade_locked_date))
 );
 
 
