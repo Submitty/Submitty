@@ -94,12 +94,12 @@ const ItemGrade& Student::getGradeableItemGrade(GRADEABLE_ENUM g, int i) const {
 
 
 void Student::setGradeableItemGrade(GRADEABLE_ENUM g, int i, float value, 
-                                    int late_days_used, const std::string &note) {
+                                    int late_days_used, const std::string &note, const std::string &status) {
   assert (i >= 0 && i < GRADEABLES[g].getCount());
   std::map<GRADEABLE_ENUM,std::vector<ItemGrade> >::iterator itr = all_item_grades.find(g);
   assert (itr != all_item_grades.end());
   assert (int(itr->second.size()) > i);
-  itr->second[i] = ItemGrade(value,late_days_used,note);
+  itr->second[i] = ItemGrade(value,late_days_used,note,status);
 }
 
 
