@@ -19,7 +19,7 @@ HWPHP = (pwd.getpwnam("hwphp").pw_uid, grp.getgrnam("hwphp").gr_gid)
 PYTHON_HOMEWORKS = ["python_simple_homework", "python_linehighlight",
                     "python_simple_homework_multipart", "python_static_analysis"]
 CPP_HOMEWORKS = ["cpp_simple_lab", "cpp_cats", "cpp_memory_debugging", "cpp_custom",
-                 "cpp_hidden_tests", "c_fork", "c_failure_messages" ]
+                 "cpp_hidden_tests", "c_fork", "c_failure_messages"]
 JAVA_HOMEWORKS = ["java_factorial", "java_coverage_factorial"]
 ALL_HOMEWORKS = PYTHON_HOMEWORKS + CPP_HOMEWORKS + JAVA_HOMEWORKS
 

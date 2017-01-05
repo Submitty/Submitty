@@ -1,15 +1,13 @@
 <?php
 
 namespace app\libraries;
-use app\exceptions\IOException;
 
 /**
  * Class Utils
  */
 class Utils {
     /**
-     * Strips some string recursively from an array, removing it from both the
-     * array's keys and its values
+     * Strips some string recursively from an array, removing it from both the array's keys and its values
      *
      * @param string $string
      * @param array  $array
@@ -29,7 +27,6 @@ class Utils {
             } else {
                 $array[$key] = $value;
             }
-
         }
     }
 
@@ -62,7 +59,6 @@ class Utils {
      */
     public static function removeTrailingCommas($json) {
         $json = preg_replace('/,\s*([\]}])/m', '$1', $json);
-
         return $json;
     }
 
@@ -80,8 +76,8 @@ class Utils {
     }
     
     /**
-     * Given a string, convert all newline characters to "<br />" while also
-     * performing htmlentities on all elements that are not for the new lines
+     * Given a string, convert all newline characters to "<br />" while also performing htmlentities on all elements
+     * that are not for the new lines
      *
      * @param string $string
      *
@@ -92,14 +88,54 @@ class Utils {
         $string = explode("<br />", $string);
         return implode("<br />", array_map("htmlentities", $string));
     }
-    
+
+    /**
+     * Gets the last element of an array. As PHP arrays are technically ordered maps, this will return the last
+     * element that was inserted into that map regardless of how the keys might be ordered. This is useful especially
+     * for associative arrays that do not have numeric keys or the keys are out of order and we can't just use indices
+     * as in other languages.
+     *
+     * @param $array
+     * @return mixed|null
+     */
     public static function getLastArrayElement($array) {
         $temp = array_slice($array, -1);
         return (count($temp) > 0) ? array_pop($temp) : null;
     }
 
+    /**
+     * This converts a Boolean to a Sting representation. We use this as by default the String representations are that
+     * TRUE is "1" and FALSE is "" (empty string) which we generally do not want (especially if concatating booleans
+     * to a string or using it within PDO).
+     *
+     * @param $value
+     * @return string
+     */
     public static function convertBooleanToString($value) {
         return ($value === true) ? "true" : "false";
+    }
+
+
+    /**
+     * Checks if string $haystack begins with the string $needle, returning TRUE if it does or FALSE otherwise.
+     *
+     * @param string $haystack
+     * @param string $needle
+     * @return bool
+     */
+    public static function startsWith($haystack, $needle) {
+        return substr($haystack, 0, strlen($needle)) === $needle;
+    }
+
+    /**
+     * Checks if string $haystack ends with the string $needle, returning TRUE if it does or FALSE otherwise.
+     *
+     * @param string $haystack
+     * @param string $needle
+     * @return bool
+     */
+    public static function endsWith($haystack, $needle) {
+        return substr($haystack, (-1*strlen($needle)), strlen($needle)) === $needle;
     }
 
 
@@ -146,6 +182,5 @@ class Utils {
         }
         return $content_type;
     }
-
 
 }

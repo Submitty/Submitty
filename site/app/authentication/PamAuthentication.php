@@ -42,6 +42,7 @@ class PamAuthentication extends AbstractAuthentication {
         if ($output === false) {
             throw new AuthenticationException(curl_error($ch));
         }
+
         $output = json_decode($output, true);
         curl_close($ch);
 

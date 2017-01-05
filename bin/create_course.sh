@@ -223,7 +223,7 @@ echo -e "\nMake sure to create the database: $DATABASE_NAME\n\n"
 ########################################################################################################################
 
 echo -e "SUCCESS!  new course   $course $semester   CREATED HERE:   $course_dir"
-echo -e "SUCCESS!  submission url  ${SUBMISSION_URL}index.php?semester=${semester}&course=${course}"
+echo -e "SUCCESS!  submission url  ${SUBMISSION_URL}/index.php?semester=${semester}&course=${course}"
 
 ########################################################################################################################
 ########################################################################################################################

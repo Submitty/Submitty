@@ -132,8 +132,10 @@ if ($calculate_diff) {
                 total += parseFloat($(this).val());
             }
         });
+        
+        total = Math.max(parseFloat(total + {$eg->autograding_points}),0);
 
-        $("#score_total").html(parseFloat(total + {$eg->autograding_points})+" / "+parseFloat({$eg->autograding_max}+{$eg->eg_details['eg_total']}) + "&emsp;&emsp;&emsp;"+
+        $("#score_total").html(total+" / "+parseFloat({$eg->autograding_max}+{$eg->eg_details['eg_total']}) + "&emsp;&emsp;&emsp;"+
                             " AUTO-GRADING: " + {$eg->autograding_points} + "/" + {$eg->autograding_max});
     }
 

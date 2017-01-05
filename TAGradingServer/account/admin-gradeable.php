@@ -651,7 +651,7 @@ HTML;
     WHERE 
         g_id=?
     AND 
-        u.user_group BETWEEN 2 AND 3
+        u.user_group BETWEEN 1 AND 3
     GROUP BY 
         u.user_id
     ",array($g_id));
@@ -663,59 +663,73 @@ HTML;
                                                    htmlspecialchars(json_encode(pgArrayToPhp($grader['sections'])), ENT_NOQUOTES));
     }
     
-    print <<<HTML
-    <div id="rotating-sections" class="graders" style="display:none;">
-        <br />
-        Available rotating sections: {$num_rotating_sections}
-        
-HTML;
-    
-    print <<<HTML
-        <div id="full-access-graders" style="display:none;">
-            <br />
-            <table>
-                <th>Full Access Graders</th>
-HTML;
-    
-   $db->query("SELECT user_id FROM users WHERE user_group=?", array(2));
-      
-    foreach($db->rows() as $fa_grader){
-        print <<<HTML
-        <tr>
-            <td>{$fa_grader['user_id']}</td>
-            <td><input style="width: 227px" type="text" name="grader_{$fa_grader['user_id']}" class="grader" value="
-HTML;
-        if($have_old && !$g_grade_by_registration) {
-            print (isset($graders_to_sections[$fa_grader['user_id']])) ? $graders_to_sections[$fa_grader['user_id']] : '';
-        }
-        else{
-            print $all_sections;
-        }
-        print <<<HTML
-            "></td>
-        </tr>
-HTML;
-    }
-    
-    print <<<HTML
-            </table>
-        </div>
-        <div id="limited-access-graders" style="display:none;">
-            <br />
-            <table>
-                <th>Limited Access Graders</th>
+print <<<HTML
+  <div id="rotating-sections" class="graders" style="display:none; width: 1000px; overflow-x:scroll">
+  <br />
+  <table id="grader-history" style="border: 3px solid black; display:none;">
 HTML;
 
-   $db->query("SELECT user_id FROM users WHERE user_group=?", array(3));
-      
-    foreach($db->rows() as $la_grader){
-        print <<<HTML
+$db->query("SELECT 
+              g_id 
+            FROM 
+              gradeable 
+            WHERE 
+              g_grade_by_registration = 'f' 
+            ORDER BY 
+              g_grade_start_date ASC", array());
+              
+$gradeables = $db->rows();
+
+// create header 
+  print <<<HTML
         <tr>
-            <td>{$la_grader['user_id']}</td>
-            <td><input style="width: 227px" type="text" name="grader_{$la_grader['user_id']}" class="grader" value="
+        <th></th>
+HTML;
+  
+  foreach($gradeables as $row){
+    print <<< HTML
+      <th style="padding: 8px; border: 3px solid black;">{$row['g_id']}</th>
+HTML;
+  }
+
+  print <<<HTML
+        </tr>
+        <tr>
+HTML;
+  
+// get gradeables graded by rotating section in the past and the sections each grader graded
+  $db->query("
+  SELECT 
+    gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating, g_grade_start_date 
+  FROM (SELECT g.g_id, u.user_id, u.user_group, g_grade_start_date
+          FROM (SELECT user_id, user_group FROM users WHERE user_group BETWEEN 1 AND 3) AS u CROSS JOIN ( 
+            SELECT 
+              DISTINCT g.g_id,
+              g_grade_start_date
+            FROM gradeable AS g
+            LEFT JOIN 
+              grading_rotating AS gr ON g.g_id = gr.g_id
+            WHERE g_grade_by_registration = 'f') AS g ) as gu 
+        LEFT JOIN (
+              SELECT 
+                g_id, user_id, array_agg(sections_rotating) as sections_rotating 
+              FROM 
+                grading_rotating 
+              GROUP BY 
+              g_id, user_id) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id 
+              ORDER BY user_group, user_id, g_grade_start_date", array());
+  
+  $last = '';
+  
+  function display_graders($graders, $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections){
+    foreach($graders as $grader){
+       print <<<HTML
+        <tr>
+            <td>{$grader['user_id']}</td>
+            <td><input style="width: 227px" type="text" name="grader_{$grader['user_id']}" class="grader" disabled value="
 HTML;
         if($have_old && !$g_grade_by_registration) {
-            print (isset($graders_to_sections[$la_grader['user_id']])) ? $graders_to_sections[$la_grader['user_id']] : '';
+            print (isset($graders_to_sections[$grader['user_id']])) ? $graders_to_sections[$grader['user_id']] : '';
         }
         else{
             print $all_sections;
@@ -725,7 +739,67 @@ HTML;
         </tr>
 HTML;
     }
+  }
+  
+  foreach($db->rows() as $row){
+    $new_row = false;
+    $u_group = $row['user_group'];
+    if (strcmp($row['user_id'],$last) != 0){
+      $new_row = true;
+    }
+    if($new_row){
+      print <<<HTML
+          </tr>
+          <tr class="g_history g_group_{$u_group}">     
+          <th style="padding: 8px; border: 3px solid black;">{$row['user_id']}</th>
+HTML;
+    }
+    $sections = implode(", ", pgArrayToPhp($row['sections_rotating']));
+    print <<<HTML
+          <td style="padding: 8px; border: 3px solid black; text-align: center;">{$sections}</td>      
+HTML;
+    $last = $row['user_id'];
+  }  
+  
+  print <<<HTML
+            </table>
+        <br /> 
+        Available rotating sections: {$num_rotating_sections}
+        <br /> <br />
+        <div id="instructor-graders">
+        <table>
+                <th>Instructor Graders</th>
+HTML;
+    $db->query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_id ASC", array(1));
+    display_graders($db->rows(), $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections);
+    
+  print <<<HTML
+        </table>
+        </div>
+        <br />
+        <div id="full-access-graders" style="display:none;">
+            <table>
+                <th>Full Access Graders</th>
+HTML;
+    
+  $db->query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_id ASC", array(2));
+  display_graders($db->rows(), $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections);
+    
+  print <<<HTML
+            </table>
+HTML;
 
+  print <<<HTML
+        </div>
+        <div id="limited-access-graders" style="display:none;">
+            <br />
+            <table>
+                <th>Limited Access Graders</th>
+HTML;
+
+  $db->query("SELECT user_id FROM users WHERE user_group=? ORDER BY user_id ASC", array(3));
+  display_graders($db->rows(), $have_old, $g_grade_by_registration, $graders_to_sections, $all_sections);    
+  
     print <<<HTML
         </table>
 
@@ -925,6 +999,9 @@ HTML;
             .attr('name', 'gradeableJSON')
             .attr('value', JSON.stringify($('form').serializeObject()))
             .appendTo('#gradeable-form');
+         if ($("input[name='section_type']:checked").val() == 'reg_section'){
+            $('#rotating-sections :input').prop('disabled',true);
+         }
     });
 
     $(document).ready(function() {
@@ -1097,14 +1174,29 @@ HTML;
             }
         });
         
+        function showHistory(val){
+          $('#grader-history').show();
+          // hide all rows in history
+          $('.g_history').hide();
+          // show relevant rows
+          for (var i=1; i<=parseInt(val); ++i){
+              $('.g_group_'+i).show();
+          }
+        }
+        
         function showGroups(val){
-            var graders = ['','','full-access-graders', 'limited-access-graders']; 
+            var graders = ['','instructor-graders','full-access-graders', 'limited-access-graders']; 
             for(var i=parseInt(val)+1; i<graders.length; ++i){
+                $('#'+graders[i]+' :input').prop('disabled',true);
                 $('#'+graders[i]).hide();
             }
-            for(var i=0; i <= parseInt(val) ; ++i){
+            for(var i=1; i <= parseInt(val) ; ++i){
                 $('#'+graders[i]).show();
+                $('#'+graders[i]+' :input').prop('disabled',false);
             }
+
+            // show specific groups
+            showHistory(val);
         }
         
         showGroups($('select[name="minimum_grading_group"] option:selected').attr('value'));

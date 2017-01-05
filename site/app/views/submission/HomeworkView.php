@@ -123,7 +123,12 @@ HTML;
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 foreach ($gradeable->getPreviousFiles($i) as $file) {
                     $size = number_format($file['size'] / 1024, 2);
-                    $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
+                    // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
+                    if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
+                        $escape_quote_filename = str_replace('\'','\\\'',substr($file['relative_name'], strlen("part{$i}/")));
+                    }
+                    else
+                        $escape_quote_filename = str_replace('\'','\\\'',$file['relative_name']);
                     $old_files .= <<<HTML
 
                 addLabel('$escape_quote_filename', '{$size}', {$i}, true);
