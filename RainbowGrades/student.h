@@ -19,18 +19,23 @@
 
 class ItemGrade {
 public:
-  ItemGrade(float v, int ldu=0, const std::string& n="") {
+  ItemGrade(float v, int ldu=0, const std::string& n="", const std::string &s="") {
     value = v;
     late_days_used = ldu;
     note = n;
+    if (s != "UNKONWN") {
+      status = s;
+    }
   }
   float getValue() const { return value; }
   int getLateDaysUsed() const { return late_days_used; }
   const std::string& getNote() const { return note; }
+  const std::string& getStatus() const { return status; }
 private:
   float value;
   int late_days_used;
   std::string note;
+  std::string status;
 };
 
 //====================================================================
@@ -87,7 +92,7 @@ public:
   const std::string& getExamZoneImage() const { return exam_zone_image; }
 
   // per student notes
-  const std::string& getTA_recommendation()          const { return ta_recommendation; }
+  const std::string& getRecommendation()          const { return ta_recommendation; }
   const std::string& getOtherNote()                  const { return other_note; }
   const std::vector<std::string>& getEarlyWarnings() const { return early_warnings; }
 
@@ -110,7 +115,7 @@ public:
 
   // grade data
   void setTestZone(int which_test, const std::string &zone)  { zones[which_test] = zone; }
-  void setGradeableItemGrade(GRADEABLE_ENUM g, int i, float value, int late_days_used=0, const std::string &note="");
+  void setGradeableItemGrade(GRADEABLE_ENUM g, int i, float value, int late_days_used=0, const std::string &note="",const std::string &status="");
 
   void mossify(int hw, float penalty);
 

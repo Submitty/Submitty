@@ -526,14 +526,17 @@ void start_table_output( bool for_instructor,
   table.set(0,counter++,TableCell("ffffff","SECTION"));
   //table.set(0,counter++,TableCell("ffffff","part."));
   //table.set(0,counter++,TableCell("ffffff","under."));
-  table.set(0,counter++,TableCell("ffffff","notes"));
-  table.set(0,counter++,TableCell("ffffff","USERNAME"));
-  table.set(0,counter++,TableCell("ffffff","LAST"));
-  table.set(0,counter++,TableCell("ffffff","FIRST (LEGAL)"));
-  table.set(0,counter++,TableCell("ffffff","FIRST"));
-  student_data.push_back(counter-4);  
-  student_data.push_back(counter-1);  
-  student_data.push_back(counter-3);  
+  if (DISPLAY_INSTRUCTOR_NOTES) {
+    table.set(0,counter++,TableCell("ffffff","notes"));
+  }
+  student_data.push_back(counter); table.set(0,counter++,TableCell("ffffff","USERNAME"));
+  int last_name_counter=counter; table.set(0,counter++,TableCell("ffffff","LAST"));
+
+  if (DISPLAY_INSTRUCTOR_NOTES) {
+    table.set(0,counter++,TableCell("ffffff","FIRST (LEGAL)"));
+  }
+  student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","FIRST"));
+  student_data.push_back(last_name_counter);
   student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
 
   if (DISPLAY_EXAM_SEATING) {
@@ -566,45 +569,46 @@ void start_table_output( bool for_instructor,
 
   // ----------------------------
   // DETAILS OF EACH GRADEABLE
-  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-    GRADEABLE_ENUM g = ALL_GRADEABLES[i];
-
-    for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
-      if (g != GRADEABLE_ENUM::NOTE) {
-        student_data.push_back(counter);  
-      }
-      std::string gradeable_id = GRADEABLES[g].getID(j);
-      std::string gradeable_name = "";
-      if (GRADEABLES[g].hasCorrespondence(gradeable_id)) {
-        gradeable_name = GRADEABLES[g].getCorrespondence(gradeable_id).second;
-      }
-      table.set(0,counter++,TableCell("ffffff",gradeable_name));
-    }
-    if (g != GRADEABLE_ENUM::NOTE) {
-      student_data.push_back(counter);  
-    }
-    table.set(0,counter++,TableCell(grey_divider));
-
-    if (g == GRADEABLE_ENUM::TEST && TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
+  if (DISPLAY_GRADE_DETAILS) {
+    for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
+      GRADEABLE_ENUM g = ALL_GRADEABLES[i];
       for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
-        student_data.push_back(counter);  
+        if (g != GRADEABLE_ENUM::NOTE) {
+          student_data.push_back(counter);
+        }
         std::string gradeable_id = GRADEABLES[g].getID(j);
         std::string gradeable_name = "";
         if (GRADEABLES[g].hasCorrespondence(gradeable_id)) {
-          gradeable_name = "Adjusted " + GRADEABLES[g].getCorrespondence(gradeable_id).second;
+          gradeable_name = GRADEABLES[g].getCorrespondence(gradeable_id).second;
         }
         table.set(0,counter++,TableCell("ffffff",gradeable_name));
       }
-      student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
+      if (g != GRADEABLE_ENUM::NOTE) {
+        student_data.push_back(counter);
+      }
+      table.set(0,counter++,TableCell(grey_divider));
+
+      if (g == GRADEABLE_ENUM::TEST && TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
+        for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
+          student_data.push_back(counter);
+          std::string gradeable_id = GRADEABLES[g].getID(j);
+          std::string gradeable_name = "";
+          if (GRADEABLES[g].hasCorrespondence(gradeable_id)) {
+            gradeable_name = "Adjusted " + GRADEABLES[g].getCorrespondence(gradeable_id).second;
+          }
+          table.set(0,counter++,TableCell("ffffff",gradeable_name));
+        }
+        student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
+      }
     }
 
+  // LATE DAYS
+    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ALLOWED LATE DAYS"));
+    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","USED LATE DAYS"));
+    student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
   }
 
 
-  // LATE DAYS
-  student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ALLOWED LATE DAYS"));
-  student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","USED LATE DAYS"));
-  student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
 
 
   // ----------------------------
@@ -657,8 +661,11 @@ void start_table_output( bool for_instructor,
   int myrow = 1;
   int last_section = -1;
   for (unsigned int stu= 0; stu < students.size(); stu++) {
-    std::string default_color="ffffff";
+
     Student *this_student = students[stu];
+
+    std::string default_color="ffffff";
+
     myrow++;
     counter = 0;
     if (this_student->getLastName() == "") {
@@ -681,8 +688,12 @@ void start_table_output( bool for_instructor,
         myrank=1;
         last_section = this_student->getSection();
       }
-      table.set(myrow,counter++,TableCell(default_color,std::to_string(myrank)));
-      myrank++;
+      if (validSection(this_student->getSection())) {
+        table.set(myrow,counter++,TableCell(default_color,std::to_string(myrank)));
+        myrank++;
+      } else {
+        table.set(myrow,counter++,TableCell(default_color,""));
+      }
     }
 
     
@@ -693,18 +704,28 @@ void start_table_output( bool for_instructor,
 
     //table.set(myrow,counter++,TableCell(default_color,"part"));
     //table.set(myrow,counter++,TableCell(default_color,"under"));
-    std::string notes;
-    std::vector<std::string> ews = this_student->getEarlyWarnings();
-    for (int i = 0; i < ews.size(); i++) {
-      notes += ews[i];
-    }
+    if (DISPLAY_INSTRUCTOR_NOTES) {
+      std::string notes;
+      std::vector<std::string> ews = this_student->getEarlyWarnings();
+      for (int i = 0; i < ews.size(); i++) {
+        notes += ews[i];
+      }
+      std::string other_note = this_student->getOtherNote();
+      std::string recommendation = this_student->getRecommendation();
+      std::string THING =
+        "<font color=\"ff0000\">"+notes+"</font> " +
+        "<font color=\"0000ff\">"+other_note+"</font> " +
+        "<font color=\"00bb00\">"+recommendation+"</font>";
+      table.set(myrow,counter++,TableCell(default_color,THING));
 
-    table.set(myrow,counter++,TableCell(default_color,"<font color=\"ff0000\">"+notes+"</font>"));
+    }
 
     //counter+=3;
     table.set(myrow,counter++,TableCell(default_color,this_student->getUserName()));
     table.set(myrow,counter++,TableCell(default_color,this_student->getLastName()));
-    table.set(myrow,counter++,TableCell(default_color,this_student->getFirstName()));
+    if (DISPLAY_INSTRUCTOR_NOTES) {
+      table.set(myrow,counter++,TableCell(default_color,this_student->getFirstName()));
+    }
     table.set(myrow,counter++,TableCell(default_color,this_student->getPreferredName()));
     table.set(myrow,counter++,TableCell(grey_divider));
 
@@ -739,7 +760,9 @@ void start_table_output( bool for_instructor,
       table.set(myrow,counter++,TableCell(grey_divider));
     }
 
+
     float grade = this_student->overall();
+
     std::string color = coloritcolor(grade,
                                      sp->overall(),
                                      sa->overall(),
@@ -780,64 +803,66 @@ void start_table_output( bool for_instructor,
     
     // ----------------------------
     // DETAILS OF EACH GRADEABLE    
-    for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-      GRADEABLE_ENUM g = ALL_GRADEABLES[i];
-      enum CELL_CONTENTS_STATUS visible = CELL_CONTENTS_VISIBLE;
-      if (g == GRADEABLE_ENUM::TEST) {
-        visible = CELL_CONTENTS_NO_DETAILS;
-      }
-      for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
-        float grade = this_student->getGradeableItemGrade(g,j).getValue();
-        std::string color = coloritcolor(grade,
-                                         sp->getGradeableItemGrade(g,j).getValue(),
-                                         sa->getGradeableItemGrade(g,j).getValue(),
-                                         sb->getGradeableItemGrade(g,j).getValue(),
-                                         sc->getGradeableItemGrade(g,j).getValue(),
-                                         sd->getGradeableItemGrade(g,j).getValue());
-        if (this_student == STDDEV_STUDENT_POINTER) color="ffffff";
-        std::string details;
-        details = this_student->getGradeableItemGrade(g,j).getNote();
-
-        int late_days_used = this_student->getGradeableItemGrade(g,j).getLateDaysUsed();
-
-        table.set(myrow,counter++,TableCell(color,grade,1,details,late_days_used,visible));
-      }
-      table.set(myrow,counter++,TableCell(grey_divider));
-
-      // FIXME
-      if (g == GRADEABLE_ENUM::TEST && TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
+    if (DISPLAY_GRADE_DETAILS) {
+      for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
+        GRADEABLE_ENUM g = ALL_GRADEABLES[i];
+        enum CELL_CONTENTS_STATUS visible = CELL_CONTENTS_VISIBLE;
+        if (g == GRADEABLE_ENUM::TEST) {
+          visible = CELL_CONTENTS_NO_DETAILS;
+        }
         for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
-          float grade = this_student->adjusted_test(j);
-          std::string color = coloritcolor(this_student->adjusted_test(j),
-                                           sp->adjusted_test(j),
-                                           sa->adjusted_test(j),
-                                           sb->adjusted_test(j),
-                                           sc->adjusted_test(j),
-                                           sd->adjusted_test(j));
+          float grade = this_student->getGradeableItemGrade(g,j).getValue();
+          std::string color = coloritcolor(grade,
+                                           sp->getGradeableItemGrade(g,j).getValue(),
+                                           sa->getGradeableItemGrade(g,j).getValue(),
+                                           sb->getGradeableItemGrade(g,j).getValue(),
+                                           sc->getGradeableItemGrade(g,j).getValue(),
+                                           sd->getGradeableItemGrade(g,j).getValue());
           if (this_student == STDDEV_STUDENT_POINTER) color="ffffff";
-          table.set(myrow,counter++,TableCell(color,grade,1,"",0,visible));
+          std::string details;
+          details = this_student->getGradeableItemGrade(g,j).getNote();
+          std::string status = this_student->getGradeableItemGrade(g,j).getStatus();
+          if (status.find("Bad") != std::string::npos) {
+            details += " " + status;
+          }
+          int late_days_used = this_student->getGradeableItemGrade(g,j).getLateDaysUsed();
+          table.set(myrow,counter++,TableCell(color,grade,1,details,late_days_used,visible));
         }
         table.set(myrow,counter++,TableCell(grey_divider));
+
+        // FIXME
+        if (g == GRADEABLE_ENUM::TEST && TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
+          for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
+            float grade = this_student->adjusted_test(j);
+            std::string color = coloritcolor(this_student->adjusted_test(j),
+                                             sp->adjusted_test(j),
+                                             sa->adjusted_test(j),
+                                             sb->adjusted_test(j),
+                                             sc->adjusted_test(j),
+                                             sd->adjusted_test(j));
+            if (this_student == STDDEV_STUDENT_POINTER) color="ffffff";
+            table.set(myrow,counter++,TableCell(color,grade,1,"",0,visible));
+          }
+          table.set(myrow,counter++,TableCell(grey_divider));
+        }
       }
 
-
+      // LATE DAYS
+      if (this_student->getLastName() != "") {
+        int allowed = this_student->getAllowedLateDays(100);
+        std::string color = coloritcolor(allowed,5,4,3,2,2);
+        table.set(myrow,counter++,TableCell(color,allowed,"",0,CELL_CONTENTS_VISIBLE,"right"));
+        int used = this_student->getUsedLateDays();
+        color = coloritcolor(allowed-used+2, 5+2, 3+2, 2+2, 1+2, 0+2);
+        table.set(myrow,counter++,TableCell(color,used,"",0,CELL_CONTENTS_VISIBLE,"right"));
+      } else {
+        color="ffffff"; // default_color;
+        table.set(myrow,counter++,TableCell(color,""));
+        table.set(myrow,counter++,TableCell(color,""));
+      }
+      table.set(myrow,counter++,TableCell(grey_divider));
     }
 
-
-    // LATE DAYS
-    if (this_student->getLastName() != "") {
-      int allowed = this_student->getAllowedLateDays(100);
-      std::string color = coloritcolor(allowed,5,4,3,2,2);
-      table.set(myrow,counter++,TableCell(color,allowed,"",0,CELL_CONTENTS_VISIBLE,"right"));
-      int used = this_student->getUsedLateDays();
-      color = coloritcolor(allowed-used+2, 5+2, 3+2, 2+2, 1+2, 0+2);
-      table.set(myrow,counter++,TableCell(color,used,"",0,CELL_CONTENTS_VISIBLE,"right"));
-    } else {
-      color="ffffff"; // default_color;
-      table.set(myrow,counter++,TableCell(color,""));
-      table.set(myrow,counter++,TableCell(color,""));
-    }
-    table.set(myrow,counter++,TableCell(grey_divider));
 
 
     // ----------------------------

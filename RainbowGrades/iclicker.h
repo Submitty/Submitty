@@ -46,7 +46,7 @@ public:
   iClickerQuestion(const std::string& f, int q, const std::string& ca) {
     filename = f;
     which_question = q;
-    assert (which_question >= 0 && which_question < 8);
+    assert (which_question >= 0 && which_question < 20);
     correct_answer = ca;
   }
 
