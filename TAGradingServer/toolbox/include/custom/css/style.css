@@ -62,7 +62,7 @@ span#right.resbox {
     background: white;
     opacity: .95;
     display:none;
-    overflow: scroll;
+    overflow:auto;
 }
 
 #left.rubric_panel{

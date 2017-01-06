@@ -1,26 +1,20 @@
 <?php
-
 include "../../toolbox/functions.php";
+require "../../toolbox/late-day-calculation.php";
 
 check_administrator();
-
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
     die("invalid csrf token");
 }
-
 $start = microtime_float();
-
 // Make sure we actually have a created output directory
 if (!is_dir(implode("/",array(__SUBMISSION_SERVER__,"reports")))) {
     mkdir(implode("/",array(__SUBMISSION_SERVER__,"reports")));
 }
-
 $nl = "\n";
 $write_output = True;
-
 // Query the database for all students registered in the class
 $params = array();
-
 function autogradingTotalAwarded($g_id, $student_id, $active_version){
     $total = 0;
     $results_file = __SUBMISSION_SERVER__."/results/".$g_id."/".$student_id."/".$active_version."/results.json";
@@ -35,7 +29,6 @@ function autogradingTotalAwarded($g_id, $student_id, $active_version){
     }
     return $total;
 }
-
 function getAutogradingMaxScore($g_id){
     $total = 0;
     $build_file = __SUBMISSION_SERVER__."/config/build/build_".$g_id.".json";
@@ -54,6 +47,9 @@ function getAutogradingMaxScore($g_id){
     return $total;
 }
 
+//Begin late day calculation////////////////////////////////////////////////////////////////////////////////////////////
+$ldu = new LateDaysCalculation();
+//End late day calculation//////////////////////////////////////////////////////////////////////////////////////////////
 
 $db->query("SELECT * FROM users WHERE (user_group=4 AND registration_section IS NOT NULL) OR (manual_registration) ORDER BY user_id ASC", array());
 foreach($db->rows() as $student_record) {
@@ -61,11 +57,11 @@ foreach($db->rows() as $student_record) {
     $student_id = $student_record["user_id"];
     $student_first_name = $student_record["user_firstname"];
     $student_last_name = $student_record["user_lastname"];
-    $student_output_filename = $student_id . ".txt";	
+    $student_output_filename = $student_id . ".txt";
     $student_section = intval($student_record['registration_section']);
     $late_days_used_overall = 0;
     $params = array($student_id);
-    
+
     // SQL sorcery ༼╰( ͡° ͜ʖ ͡° )つ──☆*:・ﾟ
     $db->query("
     SELECT * FROM (
@@ -128,20 +124,8 @@ foreach($db->rows() as $student_record) {
     WHERE user_id=?
     AND g_gradeable_type='0'
         ",array($student_id));
-	
+
     foreach($db->rows() as $gradeable){
-        $params = array($student_id, $gradeable['eg_submission_due_date']);
-        $db->query("SELECT allowed_late_days FROM late_days WHERE user_id=? AND since_timestamp <= ? ORDER BY since_timestamp DESC LIMIT 1", $params);
-        $late_day = $db->row();
-
-        $student_allowed_lates = __DEFAULT_TOTAL_LATE_DAYS__;
-        if (count($late_day) > 0 &&
-            isset($late_day['allowed_late_days']) &&
-            $late_day['allowed_late_days'] > $student_allowed_lates) {
-          $student_allowed_lates = $late_day['allowed_late_days'];
-          //          $student_allowed_lates = isset($late_day['allowed_late_days']) ? $late_day['allowed_late_days'] : 0;
-        }
-
         $g_id = $gradeable['g_id'];
         $rubric_total = 0;
         $ta_max_score = 0;
@@ -150,32 +134,7 @@ foreach($db->rows() as $student_record) {
         $student_output_text = "";
         $student_grade = 0;
         $grade_comment = "";
-        
-        if ($gradeable['gd_status'] == 1) {
-            $db->query("
-SELECT GREATEST(late_days_used - COALESCE(late_day_exceptions, 0), 0) as late_days_used
-FROM late_days_used AS ldu
-LEFT JOIN (
-    SELECT late_day_exceptions, user_id, g_id
-    FROM late_day_exceptions
-) AS lde ON lde.user_id=ldu.user_id AND lde.g_id=ldu.g_id
-WHERE ldu.g_id=? AND ldu.user_id=?", array($g_id, $student_id));
-            $row = $db->row();
-            if (isset($row['late_days_used'])) {
-                $late_days_used = $row['late_days_used'];
-            }
-            else {
-                $late_days_used = 0;
-            }
 
-            $grade_days_late = $late_days_used;
-        }
-        else {
-            $grade_days_late = 0;
-        }
-    
-        $late_days_used_overall += $grade_days_late;
-        
         // Check to see if student has been graded yet
         $graded=true;
         if($gradeable["score"] != -100 && isset($gradeable["gd_grader_id"])) {
@@ -188,21 +147,37 @@ WHERE ldu.g_id=? AND ldu.user_id=?", array($g_id, $student_id));
             $grade_user_first_name = $user_record["user_firstname"];
             $grade_user_last_name = $user_record["user_lastname"];
             $grade_user_email = $user_record["user_email"];
-            
-            // Generate output 
+
+            // Generate output
             $student_output_text_main .= strtoupper($gradeable['g_title']) . " GRADE" . $nl;
             $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
             if (!($grade_user_first_name == "Mentor" || $grade_user_first_name == "TA" || $grade_user_first_name == "")) {
                 $student_output_text_main .= "Graded by: " . $grade_user_first_name . " " . $grade_user_last_name . " <" . $grade_user_email . ">" . $nl;
             }
-            $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: " . $grade_user_email . $nl;
-            $student_output_text_main .= "Late days used on this homework: " . $grade_days_late . $nl;
-            if ($student_allowed_lates > 0) {
-                $student_output_text_main .= "Late days used overall: " . $late_days_used_overall . $nl;
-                $student_output_text_main .= "Late days remaining: " . max(0, $student_allowed_lates - $late_days_used_overall) . $nl;
-            }
-            $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
 
+            $late_days = $ldu ->get_gradeable($student_id, $g_id);
+
+
+            $student_output_text_main .= "Any regrade requests are due within 7 days of posting to: " . $grade_user_email . $nl;
+	    if ($late_days['late_days_used'] > 0) {
+                $student_output_text_main .= "This submission was " . $late_days['late_days_used'] . " day(s) after the due date." . $nl;
+	    }
+	    if ($late_days['extensions'] > 0) {
+               $student_output_text_main .= "You have a " . $late_days['extensions'] . " day extension on this assignment." . $nl;
+	    }
+            $student_output_text_main .= "Homework status: " . $late_days['status'] . $nl;
+	    if (strpos($late_days['status'], 'Bad') !== false) {
+                $student_output_text_main .= "NOTE:  HOMEWORK GRADE WILL BE RECORDED AS ZERO.";
+		$student_output_text_main .= "  Contact your TA or instructor if you believe this is an error." . $nl;
+	    }
+	    if ($late_days['late_days_charged'] > 0) {
+                $student_output_text_main .= "Number of late days used for this homework: " . $late_days['late_days_charged'] . $nl;
+            }
+            $student_output_text_main .= "Total late days used this semester: " . $late_days['total_late_used'] . " (up to and including this assignment)" . $nl;
+            $student_output_text_main .= "Late days remaining for the semester: " . $late_days['remaining_days'] . " (as of the due date of this homework)" . $nl;
+
+
+            $student_output_text_main .= "----------------------------------------------------------------------" . $nl;
             // Query database for specific questions from this rubric
             $grading_notes = pgArrayToPhp($gradeable['comments']);
             $question_totals = pgArrayToPhp($gradeable['scores']);
@@ -210,26 +185,23 @@ WHERE ldu.g_id=? AND ldu.user_id=?", array($g_id, $student_id));
             $question_extra_credits = pgArrayToPhp($gradeable['is_extra_credits'], true);
             $question_grading_notes = pgArrayToPhp($gradeable['grading_notes']);
             $question_max_scores = pgArrayToPhp($gradeable['max_scores']);
-            $question_total = 0; 
-            
+            $question_total = 0;
+
             $active_version = $gradeable['gd_active_version'];
             $submit_file = __SUBMISSION_SERVER__."/results/".$gradeable['g_id']."/".$student_id."/".$active_version."/results_grade.txt";
-
             $auto_grading_max_score = 0;
             $auto_grading_awarded = 0;
-
             if (!file_exists($submit_file)) {
                 $student_output_text .= $nl.$nl."NO AUTO-GRADE RECORD FOUND (contact the instructor if you did submit this assignment)".$nl.$nl;
             }
             else {
                 $auto_grading_awarded = autogradingTotalAwarded($gradeable['g_id'], $student_id, $active_version);
-                $auto_grading_max_score = getAutogradingMaxScore($gradeable['g_id']);                                                                                
+                $auto_grading_max_score = getAutogradingMaxScore($gradeable['g_id']);
                 $student_output_text .= "AUTO-GRADING TOTAL [ " . $auto_grading_awarded . " / " . $auto_grading_max_score . " ]" . $nl;
                 $gradefilecontents = file_get_contents($submit_file);
                 $student_output_text .= "submission version #" . $active_version .$nl;
                 $student_output_text .= $nl.$gradefilecontents.$nl;
-            } 
-
+            }
             for ($i = 0; $i < count($grading_notes); $i++){
                 $grading_note = $grading_notes[$i];
                 $question_total = floatval($question_totals[$i]);
@@ -244,7 +216,7 @@ WHERE ldu.g_id=? AND ldu.user_id=?", array($g_id, $student_id));
                     // Found error, subtract 1 million to ensure we catch the bad grade
                     $student_grade -= 1000000;
                 }
-               else{
+                else{
                     $grade_question_score = floatval($question_total);
                     $grade_question_comment = htmlspecialchars($grading_note);
                 }
@@ -270,34 +242,29 @@ WHERE ldu.g_id=? AND ldu.user_id=?", array($g_id, $student_id));
             $student_output_text .= "----------------------------------------------------------------------" . $nl;
             $rubric_total += $auto_grading_max_score;
             $student_grade += $auto_grading_awarded;
-        } 
-    
+        }
+
         if($write_output){
             $student_final_grade = max(0,$student_grade);
             $student_output_last = strtoupper($gradeable['g_title']) . " GRADE [ " . $student_final_grade . " / " . $rubric_total . " ]" . $nl;
             $student_output_last .= $nl;
             $student_output_last .= "OVERALL NOTE FROM TA: " . ($grade_comment != "" ? $grade_comment . $nl : "No Note") . $nl;
             $student_output_last .= "----------------------------------------------------------------------" . $nl;
-
             $dir = implode("/", array(__SUBMISSION_SERVER__, "reports", $gradeable['g_id']));
-            
+
             if (!create_dir($dir)) {
                 print "failed to create directory {$dir}";
                 exit();
             }
             $save_filename = implode("/", array($dir, $student_output_filename));
-
             $student_final_output = $student_output_text_main . $student_output_text. $student_output_last;
-
             if ($student_final_output == "") {
                 $student_final_output = "[ TA HAS NOT GRADED ASSIGNMENT, CHECK BACK LATER ]";
             }
-
             if (file_put_contents($save_filename, $student_final_output) === false) {
                 print "failed to write {$save_filename}\n";
             }
         }
     }
 }
-
 echo "updated";

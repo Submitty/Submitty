@@ -569,7 +569,7 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
         updateCookies();
     }
 
-    $(".draggable").draggable({snap:true, grid:[10, 10], stack:".draggable"}).resizable();
+    $(".draggable").draggable({snap:false, grid:[2, 2], stack:".draggable"}).resizable();
 
     $(".draggable").on("dragstop", function(){
         updateCookies();
