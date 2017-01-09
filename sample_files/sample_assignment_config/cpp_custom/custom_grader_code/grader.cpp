@@ -16,8 +16,10 @@ TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
   // GRAB THE COMMAND LINE ARG
   int num;
   std::string args = grader.value("args","");
-  num = std::stoi(args.c_str());
-  if (num <= 0) {
+  try {
+    num = std::stoi(args.c_str());
+    if (num <= 0) throw -1;
+  } catch (...) {
     return new TestResults(0.0,{"ERROR! args should be > 1 (specify number of values to sum)"});
   }
 
@@ -55,7 +57,11 @@ TestResults* TestCase::custom_dispatch(const nlohmann::json& grader) const {
         found_total_string = true;
         break;
       }
-      last_value = std::stoi(token.c_str());
+      try {
+        last_value = std::stoi(token.c_str());
+      } catch (...) {
+        return new TestResults(0.0,{"ERROR! parser error!"});
+      }
       computed_total += last_value;
       num_values++;
     }
