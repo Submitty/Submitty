@@ -244,7 +244,8 @@ CREATE TABLE gradeable_data (
     gd_overall_comment character varying NOT NULL,
     gd_status integer NOT NULL,
     gd_late_days_used integer NOT NULL,
-    gd_active_version integer NOT NULL
+    gd_active_version integer NOT NULL,
+    user_viewed_date timestamp(6) without time zone DEFAULT NULL
 );
 
 
