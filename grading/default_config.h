@@ -6,17 +6,6 @@
 extern const char *GLOBAL_config_json_string;  // defined in json_generated.cpp
 
 // ========================================================================================
-
-#define ASSIGNMENT_MESSAGE ""
-
-// ========================================================================================
-
-#define MAX_NUM_SUBMISSIONS 20
-#define SUBMISSION_PENALTY 5
-#define MAX_SUBMISSION_SIZE 100000      // 100 KB submitted files size
-#define PART_NAMES { }
-
-// ========================================================================================
 // ========================================================================================
 
 extern const std::map<int,rlim_t> default_limits;
