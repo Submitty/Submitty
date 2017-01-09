@@ -104,6 +104,7 @@ abstract class Gradeable {
     /** @var int Max size (in bytes) allowed for the submission */
     protected $max_size = 50000;
     /** @var int Max number of submission allowed before a student starts suffering deductions every 10 submissions */
+    /* NOTE:  This should never be used.  It should always be set in the gradeables build.json file. */
     protected $max_submissions = 20;
 
     /** @var float Non hidden, non extra credit points */

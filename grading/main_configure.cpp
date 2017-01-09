@@ -55,6 +55,8 @@ int main(int argc, char *argv[]) {
   
   assert (tc != config_json.end());
 
+  int max_submissions = MAX_NUM_SUBMISSIONS;
+
   nlohmann::json all;
   for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++) {
     int points = itr->value("points",0);
@@ -69,6 +71,9 @@ int main(int argc, char *argv[]) {
         visible += points;
     }
     TestCase tc(*itr);
+    if (tc.isSubmissionLimit()) {
+      max_submissions = tc.getMaxSubmissions();
+    }
     all.push_back(printTestCase(tc)); 
   }
   std::cout << "processed " << all.size() << " test cases" << std::endl;
@@ -109,7 +114,7 @@ int main(int argc, char *argv[]) {
   if (config_json.find("assignment_message") != config_json.end()) {
     j["assignment_message"] = config_json.value("assignment_message",""); 
   }
-  j["max_submissions"] = MAX_NUM_SUBMISSIONS;
+  j["max_submissions"] = max_submissions;
   j["max_submission_size"] = config_json.value("max_submission_size",MAX_SUBMISSION_SIZE);
 
   nlohmann::json::iterator parts = config_json.find("part_names");
