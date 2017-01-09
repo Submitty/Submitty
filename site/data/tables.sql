@@ -154,8 +154,7 @@ CREATE TABLE electronic_gradeable_data (
 CREATE TABLE electronic_gradeable_version (
     g_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
-    active_version integer,
-    user_viewed_date timestamp(6) without time zone DEFAULT NULL
+    active_version integer
 );
 
 
