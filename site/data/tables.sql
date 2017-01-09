@@ -143,7 +143,8 @@ CREATE TABLE electronic_gradeable_data (
     autograding_non_hidden_extra_credit numeric DEFAULT 0 NOT NULL,
     autograding_hidden_non_extra_credit numeric DEFAULT 0 NOT NULL,
     autograding_hidden_extra_credit numeric DEFAULT 0 NOT NULL,
-    submission_time timestamp(6) without time zone NOT NULL
+    submission_time timestamp(6) without time zone NOT NULL,
+    user_viewed_date timestamp(6) without time zone DEFAULT NULL
 );
 
 
