@@ -283,7 +283,7 @@ HTML;
   print <<<HTML
             <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{$button_string} Gradeable</button>
 HTML;
-    if ($have_old_edit) {
+    if (false && $have_old_edit) {
         print <<<HTML
                 <button type="button" class="btn btn-danger" onclick="deleteForm();" style="margin-right:10px; float: right;">Delete Gradeable</button>
 HTML;
