@@ -1420,8 +1420,6 @@ void suggest_curves(std::vector<Student*> &students) {
         total += itr->second;
       }
       std::cout << "  TOTAL = " << total << std::endl;
-      
-      
     }
   }
 }
