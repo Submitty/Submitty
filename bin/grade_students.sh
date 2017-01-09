@@ -225,68 +225,45 @@ function log_exit {
 
 function grade_this_item {
 
-    NEXT_TO_GRADE=$1
+    NEXT_DIRECTORY=$1
+    NEXT_TO_GRADE=$2
 
     echo "========================================================================"
     echo "GRADE $NEXT_TO_GRADE"
 
     # --------------------------------------------------------------------
-    # extract the course, assignment, user, and version from the filename
-    # replace the '__' with spaces to allow for looping over list
-    with_spaces=${NEXT_TO_GRADE//__/ }
-    t=0
-    semester="NOSEMESTER"
-    course="NOCOURSE"
-    assignment="NOASSIGNMENT"
-    user="NOUSER"
-    version="NOVERSION"
-    for thing in $with_spaces; do
-	((t++))
-	#FIXME replace with switch statement
-	if [ $t -eq 1 ]
-	then
-	    semester=$thing
-	elif [ $t -eq 2 ]
-	then
-	    course=$thing
-	elif [ $t -eq 3 ]
-	then
-	    assignment=$thing
-	elif [ $t -eq 4 ]
-	then
-	    user=$thing
-	elif [ $t -eq 5 ]
-	then
-	    version=$thing
-	else
-            #FIXME document error handling approach: leave GRADING_ file in $TO_BE_GRADED directory, assume email sent, move to next
-	    echo "ERROR BAD FORMAT: $NEXT_TO_GRADE" >&2
-	    return
-	fi
-    done
-    # error checking
-    # FIXME: error checking could be more significant
-    if [ $semester == "NOSEMESTER" ]
+    # The queue file name contains the necessary information to
+    # identify the assignment to grade (separated by '__'), but let's
+    # instead parse it out of the json file contents.
+
+    semester=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .semester | tr -d '"'`
+    course=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .course | tr -d '"'`
+    assignment=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .gradeable| tr -d '"'`
+    user=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .user | tr -d '"'`
+    version=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .version | tr -d '"'`
+
+    # error checking (make sure nothing is null)
+    if [ -z "$semester" ]
     then
 	echo "ERROR IN SEMESTER: $NEXT_TO_GRADE" >&2
 	return
     fi
-    if [ $course == "NOCOURSE" ]
+    if [ -z "$course" ]
     then
 	echo "ERROR IN COURSE: $NEXT_TO_GRADE" >&2
 	return
     fi
-    if [ $assignment == "NOASSIGNMENT" ]
+    if [ -z "$assignment" ]
     then
 	echo "ERROR IN ASSIGNMENT: $NEXT_TO_GRADE" >&2
 	return
     fi
-    if [ $user == "NOUSER" ]
+    if [ -z "$user" ]
     then
 	echo "ERROR IN USER: $NEXT_TO_GRADE" >&2
 	return
     fi
-    if [ $version == "NOVERSION" ]
+    if [ -z "$version" ]
     then
 	echo "ERROR IN VERSION: $NEXT_TO_GRADE" >&2
 	return
@@ -834,7 +811,7 @@ while true; do
 	global_submission_time=""
 	global_assignment_deadline=""
 	# call the helper function
-	grade_this_item $NEXT_ITEM
+	grade_this_item $NEXT_DIRECTORY $NEXT_ITEM
 
 	# mark the end time
 	ENDTIME=$(date +%s)
