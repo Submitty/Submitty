@@ -1,7 +1,7 @@
 <?php
 
 require "../../toolbox/functions.php";
-require "../../toolbox/late-day-calculation.php";
+require "../../toolbox/LateDayCalculation.php";
 
 check_administrator();
 

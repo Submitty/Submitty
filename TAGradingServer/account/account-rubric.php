@@ -5,7 +5,7 @@
     $s_user_id
     $g_id
 */
-require "../toolbox/late-day-calculation.php";
+require "../models/LateDayCalculation.php";
 use \models\ElectronicGradeable;
 
 $output = "";
@@ -386,13 +386,15 @@ else {
 
 $active_assignments = $eg->active_assignment;
 
+$late_charged = 0;
+
 $output .= <<<HTML
             <form id="rubric_form" action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$eg->eg_details['g_id']}&student={$eg->student['user_id']}&individual={$individual}" method="post">
                 <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
                 <input type="hidden" name="submitted" value="{$submitted}" />
                 <input type="hidden" name="status" value="{$eg->status}" />
                 <input type="hidden" name="is_graded" value="{$student_individual_graded}" />
-                <input type="hidden" name="late" value="{$eg->days_late}" />
+                <input type="hidden" name="late" value="{$late_charged}" />
                 <input type="hidden" name="active_assignment" value="{$active_assignments}" />
                 <div style="margin-top: 0; margin-bottom:35px;">
                     <input type="checkbox" style="margin-top:0; margin-right:5px;" id="rubric-autoscroll-checkbox" {$cookie_auto} /><span style="font-size:11px;">Rubric Auto Scroll</span>
@@ -404,7 +406,9 @@ $due_string = $eg_due_date->format('Y-m-d H:i:s');
 $ldu = new LateDaysCalculation();
 $ld_table = $ldu->generate_table_for_user_date($s_user_id, $eg_due_date);
 $output .= $ld_table;
-$status = $ldu ->get_gradeable_status($s_user_id, $eg->g_id);
+$gradeable= $ldu->get_gradeable($s_user_id, $eg->g_id);
+$status = $gradeable['status'];
+$late_charged = $gradeable['late_days_charged'];
 //End late day calculation//////////////////////////////////////////////////////////////////////////////////////////////
 
 if($status != "Good" && $status != "Late"){
