@@ -318,7 +318,7 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
     var message = "";
     // check versions used
     if(versions_used >= versions_allowed) {
-        message = "You have already made " + versions_used + "/" + versions_allowed + " submissions. Are you sure you want to continue? Uploading may result in loss of points.";
+        message = "You have already made " + versions_used + " submissions.  You are allowed " + versions_allowed + " submissions before a small point penalty will be applied. Are you sure you want to continue?";
         if (!confirm(message)) {
             return;
         }

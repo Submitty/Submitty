@@ -200,7 +200,7 @@ for semester in `cd $base_path/courses && ls -d * 2> /dev/null`; do
 			echo "GRADE THIS: $next_to_grade"
 
 			# collect the submissions (don't add them just yet...)
-			my_queue=("${my_queue[@]}" "$next_to_grade")
+			my_queue=("${my_queue[@]}" "$semester" "$course" "$assignment" "$user" "$version")
 		    fi
 		done
 	    done
@@ -214,6 +214,7 @@ done
 
 # if there are alot of matching submissions, first confirm that we want to regrade all of them
 queue_size=${#my_queue[@]}
+queue_size=$((queue_size / 5))
 if [ "$queue_size" -gt 50 ]
 then
     echo "Found $queue_size matching submissions.  Add to queue? [y/n]"
@@ -226,8 +227,26 @@ then
 fi
 
 # add the matching submissions to the grading queue
-for i in "${my_queue[@]}"
-do
-touch $base_path/$TO_BE_GRADED/$i
+i=0
+while [ $i -lt ${#my_queue[@]} ] ; do
+
+    semester=${my_queue[$((i++))]}
+    course=${my_queue[$((i++))]}
+    assignment=${my_queue[$((i++))]}
+    user=${my_queue[$((i++))]}
+    version=${my_queue[$((i++))]}
+
+    # name of the file
+    file=$base_path/$TO_BE_GRADED/$semester"__"$course"__"$assignment"__"$user"__"$version
+
+    # create the contents of the json file
+    echo '{'                                  >   $file
+    echo '  "semester":   "'$semester'",'     >>  $file
+    echo '  "course":     "'$course'",'       >>  $file
+    echo '  "gradeable":  "'$assignment'",'   >>  $file
+    echo '  "user":       "'$user'",'         >>  $file
+    echo '  "version":    "'$version'"'       >>  $file
+    echo '}'                                  >>  $file
+
 done
 echo "Added $queue_size submissions to $TO_BE_GRADED queue for regrading."
