@@ -83,42 +83,12 @@ class GradeSummary
         return $db->rows();
     }
 
-    private function generateSummary($gradeable, $ldu, $categories)
+    private function generateSummary($gradeable, $ldu, $categories, $student_output_json)
     {
-        $default_allowed_late_days = __DEFAULT_TOTAL_LATE_DAYS__;
-
-        // Gather student info, set output filename, reset output
         $student_id = $gradeable["user_id"];
-        $student_legal_first_name = $gradeable["user_firstname"];
-        $student_preferred_first_name = $gradeable["user_preferred_firstname"];
-        $student_last_name = $gradeable["user_lastname"];
-
-        // create/reset student json
-        $student_output_json = array();
-        $student_output_json_name = $student_id . "_summary.json";
-
-        $student_section = intval($gradeable['registration_section']);
-
-        // CREATE HEADER FOR JSON
-        $student_output_json["user_id"] = $student_id;
-        $student_output_json["legal_first_name"] = $student_legal_first_name;
-        $student_output_json["preferred_first_name"] = $student_preferred_first_name;
-        $student_output_json["last_name"] = $student_last_name;
-        $student_output_json["registration_section"] = intval($student_section);
-
-        $student_output_json["default_allowed_late_days"] = $default_allowed_late_days;
-        //$student_output_json["allowed_late_days"] = $late_days_allowed;
-
-        $student_output_json["last_update"] = date("l, F j, Y");
-
-        // ADD each bucket to the output
-        foreach ($categories as $category) {
-            $student_output_json[$category] = array();
-        }
 
         $this_g = array();
 
-        //
         // FIXME:  Should use value in the database, for electronic gradeables with TA grading
         //  ...  but that value is broken
         //  ...  also, that value does not exist for non ta graded electronic gradeables
@@ -208,6 +178,65 @@ class GradeSummary
 
 
         array_push($student_output_json[ucwords($gradeable['g_syllabus_bucket'])], $this_g);
+
+        return $student_output_json;
+    }
+
+    private function generateSummariesFromQueryResults($summaryData, $categories, $ldu){
+        // create/reset student json
+        $student_output_json = array();
+
+        //Build the summaries
+        foreach ($summaryData as $gradeable){
+            $student_id = $gradeable['user_id'];
+            if(!array_key_exists($student_id, $student_output_json)){
+                $student_output_json[$student_id] = array();
+
+                $default_allowed_late_days = __DEFAULT_TOTAL_LATE_DAYS__;
+
+                // Gather student info, set output filename, reset output
+                $student_id = $gradeable["user_id"];
+                $student_legal_first_name = $gradeable["user_firstname"];
+                $student_preferred_first_name = $gradeable["user_preferred_firstname"];
+                $student_last_name = $gradeable["user_lastname"];
+
+                $student_section = intval($gradeable['registration_section']);
+                // CREATE HEADER FOR JSON
+                $student_output_json["user_id"] = $student_id;
+                $student_output_json["legal_first_name"] = $student_legal_first_name;
+                $student_output_json["preferred_first_name"] = $student_preferred_first_name;
+                $student_output_json["last_name"] = $student_last_name;
+                $student_output_json["registration_section"] = intval($student_section);
+
+                $student_output_json["default_allowed_late_days"] = $default_allowed_late_days;
+                //$student_output_json["allowed_late_days"] = $late_days_allowed;
+
+                $student_output_json["last_update"] = date("l, F j, Y");
+
+                // ADD each bucket to the output
+                foreach ($categories as $category) {
+                    $student_output_json[$category] = array();
+                }
+            }
+
+            $student = $student_output_json[$student_id];
+
+            $student_output_json[$gradeable['user_id']] = $this->generateSummary($gradeable, $ldu, $categories, $student);
+        }
+
+        // WRITE THE JSON FILE
+        foreach($student_output_json as $student)
+        {
+            $student_id = $student['user_id'];
+            $student_output_json_name = $student_id . "_summary.json";
+
+            file_put_contents(implode("/", array(__SUBMISSION_SERVER__, "reports","all_grades", $student_output_json_name)), json_encode($student,JSON_PRETTY_PRINT));
+
+            echo "grade summary json produced for " . $student_id . "<br>";
+
+        }
+        global $db;
+        echo "Queries run: " . $db->totalQueries();
     }
 
     private function getSyllabusBuckets()
@@ -234,27 +263,17 @@ class GradeSummary
 
     public function generateAllSummaries(){
         $summaryData = $this->getSummaryDataAll();
-        //$graders = $this->getGraders();
-        //$ldu = new LateDaysCalculation();
         $categories = $this->getSyllabusBuckets();
+        $ldu = new LateDaysCalculation();
 
-        foreach ($summaryData as $gradeable){
-            $this->generateSummary($gradeable, $categories);
-        }
-        // WRITE THE JSON FILE
-        file_put_contents(implode("/", array(__SUBMISSION_SERVER__, "reports","all_grades", $student_output_json_name)), json_encode($student_output_json,JSON_PRETTY_PRINT));
-
-        echo "grade summary json produced for " . $student_id . "<br>";
+        $this->generateSummariesFromQueryResults($summaryData, $categories, $ldu);
     }
 
     public function generateAllSummariesForStudent($student_id){
         $summaryData = $this->getSummaryDataStudent($student_id);
-        //$graders = $this->getGraders();
-        //$ldu = new LateDaysCalculation();
         $categories = $this->getSyllabusBuckets();
+        $ldu = new LateDaysCalculation();
 
-        foreach ($summaryData as $gradeable){
-            $this->generateSummary($gradeable, $categories);
-        }
+        $this->generateSummariesFromQueryResults($summaryData, $categories, $ldu);
     }
 }
