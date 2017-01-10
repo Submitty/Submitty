@@ -351,13 +351,21 @@ class SubmissionController extends AbstractController {
 
         $user_id = $this->core->getUser()->getId();
 
-        $touch_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+        $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $user_id, $new_version);
-        $touch_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
-            implode("__", $touch_file));
-        if (!@touch($touch_file)) {
-            return $this->uploadResult("Failed to create file for grading queue.", false);
-        }
+        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
+            implode("__", $queue_file));
+
+        // create json file...
+        $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
+                                 "course" => $this->core->getConfig()->getCourse(),
+                                 "gradeable" =>  $gradeable->getId(),
+                                 "user" => $user_id,
+                                 "version" => $new_version);
+
+        $queue_fp = fopen($queue_file,'w');
+        fwrite($queue_fp,json_encode($queue_data,JSON_PRETTY_PRINT));
+        fclose($queue_fp);
 
         $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, $new_version, $current_time);
         

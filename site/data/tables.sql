@@ -11,7 +11,6 @@ SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET row_security = off;
 
 --
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
@@ -243,7 +242,8 @@ CREATE TABLE gradeable_data (
     gd_overall_comment character varying NOT NULL,
     gd_status integer NOT NULL,
     gd_late_days_used integer NOT NULL,
-    gd_active_version integer NOT NULL
+    gd_active_version integer NOT NULL,
+    user_viewed_date timestamp(6) without time zone DEFAULT NULL
 );
 
 
