@@ -34,9 +34,10 @@ int main() {
     }
   }
 
+  /* wait for all children to finish */
   for (i = 0; i < 10; i++) {
     wait(&status);
   }
-
+  printf ("ALL DONE!\n");
   return 0;
 }

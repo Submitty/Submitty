@@ -35,5 +35,6 @@ int main() {
       usleep(100000);
     }
   }
+  printf ("ALL DONE!\n");
   return 0;
 }

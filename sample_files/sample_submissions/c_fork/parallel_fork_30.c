@@ -3,19 +3,25 @@
 #include <unistd.h> 
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <assert.h>
 
-int main() {
+int main(int argc, char* argv[]) {
 
   int i;
   pid_t pid;
   pid_t my_pid;
   int status;
+  int fork_count;
+
+  assert (argc == 2);
+  fork_count = atoi (argv[1]);
+  assert (fork_count >= 0);
 
   /* note: need to flush the buffer after printing, or the child will
      flush the shared file handle at its exit and result in duplicate
      prints */
 
-  for (i = 0; i < 30; i++) {
+  for (i = 0; i < fork_count; i++) {
     pid = fork();
     if (pid == 0) {
       /* child process */
@@ -29,14 +35,19 @@ int main() {
       return 0;
     } else {
       /* parent process */
+      if (pid == -1) {
+        printf ("loop %d:  FORK FAILED\n", i);
+      } 
       /* pause for 1/100th of a second */
       usleep(10000);
     }
   }
 
-  for (i = 0; i < 30; i++) {
-    wait(&status);
+  /* wait for all children to finish */
+  for (i = 0; i < fork_count; i++) {
+    int child_pid = wait(&status);
+    printf ("child %d finished\n", child_pid);
   }
-
+  printf ("ALL DONE!\n");
   return 0;
 }
