@@ -14,6 +14,7 @@ class DiffViewer {
      * @var bool
      */
     private $has_actual = false;
+    private $actual_file_image = "";
 
     /**
      * @var bool
@@ -94,10 +95,14 @@ class DiffViewer {
             throw new \Exception("'{$actual_file}' could not be found.");
         }
         else if ($actual_file != "") {
-            $this->actual = file_get_contents($actual_file);
-            $this->has_actual = trim($this->actual) !== "" ? true: false;
-            $this->actual = explode("\n", $this->actual);
-            $this->display_actual = true;
+	    if (substr($actual_file,strlen($actual_file)-4,4) == ".png") {
+	        $this->actual_file_image = $actual_file;
+            } else {
+                $this->actual = file_get_contents($actual_file);
+                $this->has_actual = trim($this->actual) !== "" ? true: false;
+                $this->actual = explode("\n", $this->actual);
+                $this->display_actual = true;
+	    }
         }
         
         if (!file_exists($expected_file) && $expected_file != "") {
@@ -224,6 +229,12 @@ class DiffViewer {
         }
 
     }
+
+
+    public function getActualImageFilename() {
+    	return $this->actual_file_image;
+    }
+
 
     /**
      * Return the HTML for the expected display

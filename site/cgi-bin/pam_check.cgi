@@ -11,8 +11,8 @@ import json
 import os
 import pam
 
-success = "{'authenticated': true}"
-fail = "{'authenticated': false}"
+success = '{"authenticated": true}'
+fail = '{"authenticated": false}'
 
 print "Content-type: text/html"
 print

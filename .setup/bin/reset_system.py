@@ -13,6 +13,25 @@ import shutil
 import subprocess
 import tempfile
 
+import yaml
+
+CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
+SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
+
+
+def load_data_yaml(file_name):
+    """
+    Loads yaml file from the .setup/data directory returning the parsed structure
+    :param file_name: name of file to load
+    :return: parsed YAML structure from loaded file
+    """
+    file_path = os.path.join(SETUP_DATA_PATH, file_name)
+    if not os.path.isfile(file_path):
+        raise IOError("Missing the yaml file {}".format(file_path))
+    with open(file_path) as open_file:
+        yaml_file = yaml.safe_load(open_file)
+    return yaml_file
+
 
 def remove_lines(filename, lines):
     """
@@ -52,9 +71,28 @@ def remove_file(filename):
         os.remove(filename)
 
 
-if __name__ == '__main__':
+def delete_user(user_id):
+    """
+    Checks to see if the user_id exists on the linux filesystem, and if so, delete the user
+    and remove the home directory for it.
+
+    :param user_id:
+    :return: boolean on if the user_id existed and was removed
+    """
+    try:
+        pwd.getpwnam(user_id)
+        os.system("userdel " + user_id)
+        if os.path.isdir("/home/" + user_id):
+            shutil.rmtree("/home/" + user_id)
+        return True
+    except KeyError:
+        pass
+    return False
+
+
+def main():
     # Remove the MOT.D
-    remove_file("/etc/motd");
+    remove_file("/etc/motd")
 
     # Scrub the hosts file
     hosts = ["192.168.56.101    test-submit test-submit.cs.rpi.edu",
@@ -82,17 +120,17 @@ if __name__ == '__main__':
 
         psql_version = subprocess.check_output("psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}'",
                                                shell=True).strip()
-        lines = ["hostssl    all    all    192.168.56.0/24    pam",
+        hosts = ["hostssl    all    all    192.168.56.0/24    pam",
                  "host       all    all    192.168.56.0/24    pam",
                  "host       all    all    all                md5"]
-        remove_lines('/etc/postgresql/' + str(psql_version) + '/main/pg_hba.conf', lines)
+        remove_lines('/etc/postgresql/' + str(psql_version) + '/main/pg_hba.conf', hosts)
 
     for i in range(0, 60):
         j = str(i).zfill(2)
         os.system("userdel untrusted" + j)
 
-    lines = ["#%PAM-1.0", "auth required pam_unix.so", "account required pam_unix.so"]
-    remove_lines('/etc/pam.d/httpd', lines)
+    auths = ["#%PAM-1.0", "auth required pam_unix.so", "account required pam_unix.so"]
+    remove_lines('/etc/pam.d/httpd', auths)
 
     # Scrub some stuff from apache
     shutil.rmtree('/etc/apache2/ssl', True)
@@ -109,24 +147,23 @@ if __name__ == '__main__':
     #remove_lines('/etc/apache2/apache2.conf', ["ServerName 10.0.2.15"])
 
     shutil.rmtree('/root/bin', True)
-    users = ["instructor", "ta", "developer", "student", "smithj", "joness", "browna",
-             "pearsr", "hwcgi", "hwphp", "hwcron", "hsdbu"]
 
+    users = load_data_yaml("users.yml")
     for user in users:
-        try:
-            pwd.getpwnam(user)
-            os.system("userdel " + user)
-            if os.path.isdir("/home/" + user):
-                shutil.rmtree("/home/" + user)
-        except KeyError:
-            # user doesn't exist, so skip that person
-            pass
+        delete_user(user['user_id'])
+
+    for user in ["hwcgi", "hwphp", "hwcron", "hsdbu"]:
+        delete_user(user)
 
     groups = ["hwcronphp", "course_builders"]
-    courses = ["csci1000", "csci1100", "csci1200", "csci2600"]
+    courses = load_data_yaml("courses.yml")
     for course in courses:
-        groups.append(course)
-        groups.append(course + "_tas_www")
+        groups.append(course['code'])
+        groups.append(course['code'] + "_archive")
+        groups.append(course['code'] + "_tas_www")
 
     for group in groups:
         os.system('groupdel ' + group)
+
+if __name__ == '__main__':
+    main()

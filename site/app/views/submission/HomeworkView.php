@@ -3,6 +3,7 @@
 namespace app\views\submission;
 
 use app\libraries\Core;
+use app\libraries\Utils;
 use app\models\Gradeable;
 
 class HomeworkView {
@@ -122,7 +123,12 @@ HTML;
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 foreach ($gradeable->getPreviousFiles($i) as $file) {
                     $size = number_format($file['size'] / 1024, 2);
-                    $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
+                    // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
+                    if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
+                        $escape_quote_filename = str_replace('\'','\\\'',substr($file['relative_name'], strlen("part{$i}/")));
+                    }
+                    else
+                        $escape_quote_filename = str_replace('\'','\\\'',$file['relative_name']);
                     $old_files .= <<<HTML
 
                 addLabel('$escape_quote_filename', '{$size}', {$i}, true);
@@ -583,7 +589,21 @@ HTML;
                                 <span class="red-message">{$message}</span><br />
 HTML;
                                     }
-                                    if ($diff_viewer->hasDisplayActual()) {
+				    $myimage = $diff_viewer->getActualImageFilename();
+
+                                    if ($myimage != "") {
+					// borrowed from file-display.php
+					$content_type = Utils::getContentType($myimage);
+					if (substr($content_type, 0, 5) === "image") {
+					   // Read image path, convert to base64 encoding
+					   $imageData = base64_encode(file_get_contents($myimage));
+					   // Format the image SRC:  data:{mime};base64,{data};
+					   $myimagesrc = 'data: '.mime_content_type($myimage).';charset=utf-8;base64,'.$imageData;
+					   // insert the sample image data
+					   $return .= '<img src="'.$myimagesrc.'">';
+					}
+				    }
+                                    else if ($diff_viewer->hasDisplayActual()) {
                                         $return .= <<<HTML
                                 {$diff_viewer->getDisplayActual()}
 HTML;

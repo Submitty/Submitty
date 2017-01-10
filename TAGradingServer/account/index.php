@@ -30,9 +30,9 @@ if(isset($_GET["g_id"]) && isset($rubric["g_id"])) {
     $g_title = $rubric['g_title'];
     $rubric_late_days = $rubric['eg_late_days'];
     $grade_by_reg_section = $rubric['g_grade_by_registration'];
-    $section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
+    $section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
     $user_section_param = ($grade_by_reg_section ? 'registration_section': 'rotating_section');
-    $grading_section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating');
+    $grading_section_param = ($grade_by_reg_section ? 'sections_registration_id': 'sections_rotating_id');
     $section_title = ($grade_by_reg_section ? 'Registration': 'Rotating');
     $eg_submission_due_date = $rubric['eg_submission_due_date'];
     $s_user_id = null;
@@ -81,7 +81,7 @@ if(isset($_GET["g_id"]) && isset($rubric["g_id"])) {
       $db->query($query, $params);
     } else {
       $params = array(User::$user_id,$g_id);
-      $query = "SELECT * FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating ASC";
+      $query = "SELECT * FROM grading_rotating WHERE user_id=? AND g_id=? ORDER BY sections_rotating_id ASC";
       $db->query($query, $params);
     }
     foreach ($db->rows() as $section) {
@@ -240,7 +240,7 @@ HTML;
                 <div style="margin-left: 20px">
 HTML;
             $query = ($grade_by_reg_section ? "SELECT gr.*, u.* FROM grading_registration gr LEFT JOIN (SELECT * FROM users) as u ON gr.user_id = u.user_id WHERE user_group <=3 ORDER BY gr.sections_registration_id, u.user_id"
-                                            : "SELECT gr.*, u.* FROM grading_rotating gr LEFT JOIN (SELECT * FROM users) as u ON gr.user_id = u.user_id WHERE user_group <=3 AND g_id=? ORDER BY gr.sections_rotating, u.user_id");
+                                            : "SELECT gr.*, u.* FROM grading_rotating gr LEFT JOIN (SELECT * FROM users) as u ON gr.user_id = u.user_id WHERE user_group <=3 AND g_id=? ORDER BY gr.sections_rotating_id, u.user_id");
             
             if ($grade_by_reg_section){
                 Database::query($query, array());
@@ -569,7 +569,7 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
         updateCookies();
     }
 
-    $(".draggable").draggable({snap:true, grid:[10, 10], stack:".draggable"}).resizable();
+    $(".draggable").draggable({snap:false, grid:[2, 2], stack:".draggable"}).resizable();
 
     $(".draggable").on("dragstop", function(){
         updateCookies();

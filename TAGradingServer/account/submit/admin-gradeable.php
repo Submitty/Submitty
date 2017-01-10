@@ -107,7 +107,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) 
         $db->query("DELETE FROM grading_rotating WHERE g_id=?", array($this->g_id));
         foreach ($graders as $grader=>$sections){
             foreach($sections as $i=>$section){
-                $db->query("INSERT INTO grading_rotating(g_id, user_id, sections_rotating) VALUES(?,?,?)", array($this->g_id,$grader,$section));
+                $db->query("INSERT INTO grading_rotating(g_id, user_id, sections_rotating_id) VALUES(?,?,?)", array($this->g_id,$grader,$section));
             }
         }
     }
@@ -493,7 +493,7 @@ else{
 }
 
 if($action != 'import'){
-    header('Location: '.__SUBMISSION_URL__.'/index.php?semester='.__COURSE_SEMESTER__.'&course='.__COURSE_CODE__);
+  header('Location: '.__SUBMISSION_URL__.'/index.php?semester='.__COURSE_SEMESTER__.'&course='.__COURSE_CODE__);
 }
 
 ?>
