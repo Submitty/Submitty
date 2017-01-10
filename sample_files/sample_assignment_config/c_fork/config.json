@@ -4,6 +4,7 @@
     },
     
     "resource_limits" : {
+        "RLIMIT_CPU" : 10, // timeout after 10 seconds
         "RLIMIT_NPROC" : 20 // allow 20 additional processes
     },
     "allow_system_calls" : [
