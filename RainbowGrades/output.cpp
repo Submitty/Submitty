@@ -790,7 +790,6 @@ void start_table_output( bool for_instructor,
       // different gradeables.  Note also: the average isn't a simple
       // addition either, since blank scores for a specific gradeable
       // are omitted from the average.
-      grade = 62;
       std::vector<float> vals;
       for (unsigned int S = 0; S < students.size(); S++) {
         if (validSection(students[S]->getSection())) {
@@ -838,7 +837,7 @@ void start_table_output( bool for_instructor,
       float grade;
       if (this_student->getUserName() == "AVERAGE" ||
           this_student->getUserName() == "STDDEV") {
-        // Special case for overall average and standard deviation.
+        // Special case for per gradeable average and standard deviation.
         // Mathematically, we can't simply add the std dev for the
         // different gradeables.  Note also: the average isn't a simple
         // addition either, since blank scores for a specific gradeable
