@@ -12,6 +12,8 @@ int main(int argc, char* argv[]) {
   pid_t my_pid;
   int status;
   int fork_count;
+  int fork_success;
+  int finish_count;
 
   assert (argc == 2);
   fork_count = atoi (argv[1]);
@@ -21,6 +23,7 @@ int main(int argc, char* argv[]) {
      flush the shared file handle at its exit and result in duplicate
      prints */
 
+  fork_success = 0;
   for (i = 0; i < fork_count; i++) {
     pid = fork();
     if (pid == 0) {
@@ -37,17 +40,26 @@ int main(int argc, char* argv[]) {
       /* parent process */
       if (pid == -1) {
         printf ("loop %d:  FORK FAILED\n", i);
-      } 
+        fflush(stdout);
+      } else {
+        fork_success++;
+      }
       /* pause for 1/100th of a second */
       usleep(10000);
     }
   }
 
   /* wait for all children to finish */
+  finish_count = 0;
   for (i = 0; i < fork_count; i++) {
     int child_pid = wait(&status);
     printf ("child %d finished\n", child_pid);
+    if (child_pid != -1) finish_count++;
+    fflush(stdout);
   }
-  printf ("ALL DONE!\n");
+  assert(finish_count == fork_success);
+
+  printf ("ALL DONE! %d successful forks\n", fork_success);
+  fflush(stdout);
   return 0;
 }

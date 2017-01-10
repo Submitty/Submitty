@@ -17,16 +17,30 @@
 	    "title" : "Compilation",
 	    "command" : "/usr/bin/gcc -Wall -o a.out *.c",
 	    "executable_name" : "a.out",
-	    "points" : 5
+	    "points" : 2
 	},
 	{
-	    "title" : "Just Do It",
-	    "command" : "./a.out",
-	    "points" : 5,
+	    "title" : "./a.out 10",
+	    "command" : "./a.out 10",
+	    "points" : 4,
 	    "validation" : [
                 {
                     "method" : "searchToken",
-                    "data" : [ "ALL DONE" ],
+                    "data" : [ "ALL DONE! 10 successful forks" ],
+                    "actual_file" : "STDOUT.txt",
+                    "description" : "Standard Output (STDOUT)",
+                    "deduction" : 1.0
+                }
+	    ]
+	},
+	{
+	    "title" : "./a.out 30",
+	    "command" : "./a.out 30",
+	    "points" : 4,
+	    "validation" : [
+                {
+                    "method" : "searchToken",
+                    "data" : [ "ALL DONE! 30 successful forks" ],
                     "actual_file" : "STDOUT.txt",
                     "description" : "Standard Output (STDOUT)",
                     "deduction" : 1.0
