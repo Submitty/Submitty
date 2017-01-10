@@ -358,14 +358,14 @@ class SubmissionController extends AbstractController {
 
         // create json file...
         $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
-                                 "course" => $this->core->getConfig()->getCourse(),
-                                 "gradeable" =>  $gradeable->getId(),
-                                 "user" => $user_id,
-                                 "version" => $new_version);
+                            "course" => $this->core->getConfig()->getCourse(),
+                            "gradeable" =>  $gradeable->getId(),
+                            "user" => $user_id,
+                            "version" => $new_version);
 
-        $queue_fp = fopen($queue_file,'w');
-        fwrite($queue_fp,json_encode($queue_data,JSON_PRETTY_PRINT));
-        fclose($queue_fp);
+        if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+            return $this->uploadResult("Failed to create file for grading queue.", false);
+        }
 
         $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, $new_version, $current_time);
         
