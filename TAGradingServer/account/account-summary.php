@@ -27,7 +27,7 @@ WHERE
 GROUP BY 
     g.g_id", $params);
     $gradeable_info = $db->row();
-    
+
 // students and their grade data
 $query = "
 SELECT
@@ -263,6 +263,7 @@ HTML;
         createCookie('backup',0,1000);
     </script>
 HTML;
+    echo "Queries run: " . $db->totalQueries();
 }
 
 include "../footer.php";

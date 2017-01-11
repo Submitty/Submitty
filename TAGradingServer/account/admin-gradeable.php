@@ -700,7 +700,7 @@ HTML;
 // get gradeables graded by rotating section in the past and the sections each grader graded
   $db->query("
   SELECT 
-    gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating, g_grade_start_date 
+    gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating_id, g_grade_start_date 
   FROM (SELECT g.g_id, u.user_id, u.user_group, g_grade_start_date
           FROM (SELECT user_id, user_group FROM users WHERE user_group BETWEEN 1 AND 3) AS u CROSS JOIN ( 
             SELECT 
@@ -712,7 +712,7 @@ HTML;
             WHERE g_grade_by_registration = 'f') AS g ) as gu 
         LEFT JOIN (
               SELECT 
-                g_id, user_id, array_agg(sections_rotating_id) as sections_rotating 
+                g_id, user_id, array_agg(sections_rotating_id) as sections_rotating_id 
               FROM 
                 grading_rotating 
               GROUP BY 
@@ -754,7 +754,7 @@ HTML;
           <th style="padding: 8px; border: 3px solid black;">{$row['user_id']}</th>
 HTML;
     }
-    $sections = implode(", ", pgArrayToPhp($row['sections_rotating']));
+    $sections = implode(", ", pgArrayToPhp($row['sections_rotating_id']));
     print <<<HTML
           <td style="padding: 8px; border: 3px solid black; text-align: center;">{$sections}</td>      
 HTML;

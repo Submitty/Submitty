@@ -16,6 +16,7 @@ class GradeSummary
             u.user_firstname,
             u.user_preferred_firstname,
             u.user_lastname, 
+            u.registration_section,
             case when score is null then 0 else score end, 
             titles, 
             comments,
@@ -50,7 +51,7 @@ class GradeSummary
                 ) AS gd_sum ON gd.gd_id=gd_sum.gd_id
             ) AS total ON total.g_id = g.g_id AND total.gd_user_id=u.user_id";
 
-    const report_order_by = " ORDER BY u.user_id ASC, g_syllabus_bucket ASC, g_grade_released_date ASC";
+    const report_order_by = " ORDER BY u.user_id ASC, g_syllabus_bucket ASC, g_grade_released_date ASC) as result";
 
     private function autogradingTotalAwarded($g_id, $student_id, $active_version)
     {
@@ -83,7 +84,7 @@ class GradeSummary
         return $db->rows();
     }
 
-    private function generateSummary($gradeable, $ldu, $categories, $student_output_json)
+    private function generateSummary($gradeable, $ldu, $student_output_json)
     {
         $student_id = $gradeable["user_id"];
 
@@ -96,7 +97,7 @@ class GradeSummary
         //
         $active_version = getActiveVersionFromFile($gradeable['g_id'], $student_id);
         //$autograding_score = autogradingTotalAwarded($gradeable['g_id'], $student_id, $gradeable['gd_active_version']);
-        $autograding_score = autogradingTotalAwarded($gradeable['g_id'], $student_id, $active_version);
+        $autograding_score = $this->autogradingTotalAwarded($gradeable['g_id'], $student_id, $active_version);
 
         $this_g["id"] = $gradeable['g_id'];
         $this_g["name"] =  $gradeable['g_title'];
@@ -176,7 +177,6 @@ class GradeSummary
             $this_g["component_scores"] = $component_scores;
         }
 
-
         array_push($student_output_json[ucwords($gradeable['g_syllabus_bucket'])], $this_g);
 
         return $student_output_json;
@@ -202,26 +202,26 @@ class GradeSummary
 
                 $student_section = intval($gradeable['registration_section']);
                 // CREATE HEADER FOR JSON
-                $student_output_json["user_id"] = $student_id;
-                $student_output_json["legal_first_name"] = $student_legal_first_name;
-                $student_output_json["preferred_first_name"] = $student_preferred_first_name;
-                $student_output_json["last_name"] = $student_last_name;
-                $student_output_json["registration_section"] = intval($student_section);
+                $student_output_json[$student_id]["user_id"] = $student_id;
+                $student_output_json[$student_id]["legal_first_name"] = $student_legal_first_name;
+                $student_output_json[$student_id]["preferred_first_name"] = $student_preferred_first_name;
+                $student_output_json[$student_id]["last_name"] = $student_last_name;
+                $student_output_json[$student_id]["registration_section"] = intval($student_section);
 
-                $student_output_json["default_allowed_late_days"] = $default_allowed_late_days;
+                $student_output_json[$student_id]["default_allowed_late_days"] = $default_allowed_late_days;
                 //$student_output_json["allowed_late_days"] = $late_days_allowed;
 
-                $student_output_json["last_update"] = date("l, F j, Y");
+                $student_output_json[$student_id]["last_update"] = date("l, F j, Y");
 
                 // ADD each bucket to the output
                 foreach ($categories as $category) {
-                    $student_output_json[$category] = array();
+                    $student_output_json[$student_id][ucwords($category)] = array();
                 }
             }
 
             $student = $student_output_json[$student_id];
 
-            $student_output_json[$gradeable['user_id']] = $this->generateSummary($gradeable, $ldu, $categories, $student);
+            $student_output_json[$student_id] = $this->generateSummary($gradeable, $ldu, $student);
         }
 
         // WRITE THE JSON FILE
