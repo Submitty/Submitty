@@ -2,26 +2,17 @@
 
 namespace app\views\submission;
 
-use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\Gradeable;
+use app\views\AbstractView;
 
-class HomeworkView {
-    /**
-     * @var Core
-     */
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
+class HomeworkView extends AbstractView {
 
     public function noGradeable($gradeable_id) {
         if ($gradeable_id === null) {
             return <<<HTML
 <div class="content">
-    No gradeable id specified. Contact your instructor if you think this
-    is an error.
+    No gradeable id specified. Contact your instructor if you think this is an error.
 </div>
 HTML;
         }

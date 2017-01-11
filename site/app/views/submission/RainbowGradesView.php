@@ -1,23 +1,10 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: mpeveler
- * Date: 9/12/16
- * Time: 11:32 AM
- */
 
 namespace app\views\submission;
 
+use app\views\AbstractView;
 
-use app\libraries\Core;
-
-class RainbowGradesView {
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class RainbowGradesView extends AbstractView {
     public function showGrades($grade_file) {
         $return = <<<HTML
 <div class="content">

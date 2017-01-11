@@ -133,12 +133,12 @@ abstract class Gradeable {
     protected $submissions = 0;
 
     /**
-     * @var int $active  The set active version for the assignment
-     * @var int $current The current version of the assignment being viewed
-     * @var int $highest Highest version submitted for an assignment
+     * @var int $active_version  The set active version for the assignment
      */
-    protected $active = -1;
+    protected $active_version = -1;
+    /** @var int $current The current version of the assignment being viewed */
     protected $current = -1;
+    /** @var int $highest Highest version submitted for an assignment */
     protected $highest = 0;
 
     protected $versions = array();
@@ -172,6 +172,28 @@ abstract class Gradeable {
     protected $batch_queue_position = 0;
     protected $grading_total = 0;
 
+    protected $been_autograded = false;
+
+    protected $total_auto_non_hidden_non_extra_credit = 0;
+    protected $total_auto_non_hidden_extra_credit = 0;
+    protected $total_auto_hidden_non_extra_credit = 0;
+    protected $total_auto_hidden_extra_credit = 0;
+
+    protected $graded_auto_non_hidden_non_extra_credit = 0;
+    protected $graded_auto_non_hidden_extra_credit = 0;
+    protected $graded_auto_hidden_non_extra_credit = 0;
+    protected $graded_auto_hidden_extra_credit = 0;
+    protected $submission_time = null;
+
+    protected $been_tagraded = false;
+
+    protected $graded_tagrading = 0;
+
+    protected $total_tagrading_non_extra_credit = 0;
+    protected $total_tagrading_extra_credit = 0;
+
+    protected $user = null;
+
     public function __construct(Core $core, $id) {
         $this->core = $core;
         $this->id = $id;
@@ -185,8 +207,7 @@ abstract class Gradeable {
             return;
         }
 
-        $course_path = $this->core->getConfig()->getCoursePath();
-        $details = FileUtils::readJsonFile($course_path."/config/build/build_".$this->id.".json");
+        $details = GradeableAutogradingConfig::getConfig($this->core, $this->getId());
 
         // Was there actually a config file to read from
         if ($details === false) {
@@ -230,8 +251,23 @@ abstract class Gradeable {
             foreach ($details['testcases'] as $idx => $testcase) {
                 $testcase = new GradeableTestcase($this->core, $testcase, $idx);
                 $this->testcases[] = $testcase;
-                if ($testcase->getNormalPoints() >= 0) {
-                  $this->normal_points += $testcase->getNormalPoints();
+                if ($testcase->getPoints() > 0) {
+                    if ($testcase->isHidden() && $testcase->isExtraCredit()) {
+                        $this->total_auto_hidden_extra_credit += $testcase->getPoints();
+                    }
+                    else if ($testcase->isHidden() && !$testcase->isExtraCredit()) {
+                        $this->total_auto_hidden_non_extra_credit += $testcase->getPoints();
+                    }
+                    else if (!$testcase->isHidden() && $testcase->isExtraCredit()) {
+                        $this->total_auto_non_hidden_extra_credit += $testcase->getPoints();
+                    }
+                    else {
+                        $this->total_auto_non_hidden_non_extra_credit += $testcase->getPoints();
+                    }
+                }
+
+                if ($testcase->getNonHiddenNonExtraCreditPoints() >= 0) {
+                  $this->normal_points += $testcase->getNonHiddenNonExtraCreditPoints();
                 }
                 if ($testcase->getNonHiddenPoints() >= 0) {
                   $this->non_hidden_points += $testcase->getNonHiddenPoints();
@@ -362,30 +398,24 @@ abstract class Gradeable {
         $svn_path = $course_path."/checkout/".$this->id."/".$this->core->getUser()->getId();
         $results_path = $course_path."/results/".$this->id."/".$this->core->getUser()->getId();
 
+        $this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
         $this->versions = $this->core->getQueries()->getGradeableVersions($this->id, $this->core->getUser()->getId());
-        if (is_file($submission_path."/user_assignment_settings.json")) {
-            $settings = FileUtils::readJsonFile($submission_path."/user_assignment_settings.json");
-            $this->active = intval($settings['active_version']);
-        }
 
-        $this->highest = Utils::getLastArrayElement($this->versions)->getVersion();
-        // How do we want to get how many days late for a version?
+        if (count($this->versions) > 0) {
+            $this->highest = Utils::getLastArrayElement($this->versions)->getVersion();
+        }
 
         $this->submissions = count($this->versions);
-
-        if ($this->active < 0 && $this->active > $this->submissions) {
-            $this->active = $this->submissions;
-        }
 
         if (isset($_REQUEST['gradeable_version'])) {
             $this->current = intval($_REQUEST['gradeable_version']);
         }
 
-        if ($this->current < 0 && $this->active >= 0) {
-            $this->current = $this->active;
+        if ($this->current < 0 && $this->active_version >= 0) {
+            $this->current = $this->active_version;
         }
         else if ($this->current > $this->submissions) {
-            $this->current = $this->active;
+            $this->current = $this->active_version;
         }
 
         $this->setQueueStatus();
@@ -459,7 +489,7 @@ abstract class Gradeable {
     }
 
     public function getActiveVersion() {
-        return $this->active;
+        return $this->active_version;
     }
 
     public function getCurrentVersion() {
@@ -499,16 +529,31 @@ abstract class Gradeable {
         return $this->normal_points;
     }
 
-    public function getTotalHiddenPoints() {
-        throw new NotImplementedException();
+    public function getTotalNonHiddenNonExtraCreditPoints() {
+        return $this->total_auto_non_hidden_non_extra_credit;
     }
 
-    public function getExtraCreditPoints() {
-        throw new NotImplementedException();
+    public function getGradedNonHiddenPoints() {
+        return $this->graded_auto_non_hidden_extra_credit + $this->graded_auto_non_hidden_non_extra_credit;
     }
 
-    public function getHiddenExtraCreditPoints() {
-        throw new NotImplementedException();
+    public function getGradedAutograderPoints() {
+        return $this->graded_auto_non_hidden_extra_credit +
+            $this->graded_auto_non_hidden_non_extra_credit +
+            $this->graded_auto_hidden_extra_credit +
+            $this->graded_auto_hidden_non_extra_credit;
+    }
+
+    public function getTotalAutograderNonExtraCreditPoints() {
+        return $this->total_auto_hidden_non_extra_credit + $this->total_auto_non_hidden_non_extra_credit;
+    }
+
+    public function getGradedTAPoints() {
+        return $this->graded_tagrading;
+    }
+
+    public function getTotalTANonExtraCreditPoints() {
+        return $this->total_tagrading_non_extra_credit;
     }
 
     public function getDueDate() {
@@ -578,6 +623,14 @@ abstract class Gradeable {
         return $this->is_repository;
     }
 
+    public function beenAutograded() {
+        return $this->been_autograded;
+    }
+
+    public function beenTAgraded() {
+        return $this->been_tagraded;
+    }
+
     public function hasGradeFile() {
         return $this->grade_file !== null;
     }
@@ -632,5 +685,20 @@ abstract class Gradeable {
 
     public function getNumberOfGradingTotal() {
         return $this->grading_total;
+    }
+
+    public function isGradeByRegistration() {
+        return $this->grade_by_registration;
+    }
+
+    /**
+     * @return User
+     */
+    public function getUser() {
+        return $this->user;
+    }
+
+    public function getCore() {
+        return $this->core;
     }
 }

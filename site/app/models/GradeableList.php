@@ -17,7 +17,7 @@ class GradeableList {
     private $gradeables = array();
     
     /**
-     * @var now
+     * @var DateTime
      *
     */
     private $now;

@@ -2,20 +2,10 @@
 
 namespace app\views;
 
-use app\libraries\Core;
 use \app\libraries\GradeableType;
 use app\models\Gradeable;
 
-class NavigationView {
-    /**
-     * @var Core
-     */
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class NavigationView extends AbstractView {
     public function showGradeables($sections_to_list) {
         $return = "";
 

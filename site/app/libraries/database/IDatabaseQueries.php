@@ -27,7 +27,7 @@ interface IDatabaseQueries {
      *
      * @return User[]
      */
-    public function getAllUsers();
+    public function getAllUsers($section_key="registration_section");
 
     /**
      * @return User[]
@@ -75,7 +75,23 @@ interface IDatabaseQueries {
      */
     public function getGradeableComponents($g_id, $gd_id);
 
-    public function getGradeableVersions($g_id, $user_id, $due_date=null);
+    public function getGradeableVersions($g_id, $user_id);
+
+    /**
+     * Given a gradeable id and an array of user ids, it returns an array of gradeables for each user.
+     *
+     * @param string $g_id
+     * @param array  $users
+     * @param string $section_key
+     * @return Gradeable
+     */
+    public function getGradeableForUsers($g_id, $users, $section_key="registration_section");
+
+    public function getUsersByRegistrationSections($sections);
+
+    public function getRotatingSectionsForGradeableAndUser($g_id, $user_id);
+
+    public function getUsersByRotatingSections($sections);
 
     /**
      * Gets all registration sections from the sections_registration table

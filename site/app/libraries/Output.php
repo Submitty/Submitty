@@ -68,10 +68,6 @@ class Output {
             $args[0] = implode("\\", $args[0]);
         }
         $func = call_user_func_array(array(static::getView($args[0]), $args[1]), array_slice($args, 2));
-        if ($args[0] == 'Error') {
-            print $func;
-            var_dump($func);
-        }
         if ($func === false) {
             throw new OutputException("Cannot find function '{$args[1]}' in requested view '{$args[0]}'");
         }
