@@ -66,6 +66,27 @@ const std::string GradeColor(const std::string &grade) {
 
 // ==========================================================
 
+float compute_average(const std::vector<float> &vals) {
+  assert (vals.size() > 0);
+  float total = 0;
+  for (int i = 0; i < vals.size(); i++) {
+    total += vals[i];
+  }
+  return total / float (vals.size());
+}
+
+
+float compute_stddev(const std::vector<float> &vals, float average) {
+  assert (vals.size() > 0);
+  float total = 0;
+  for (int i = 0; i < vals.size(); i++) {
+    total += (vals[i]-average)*(vals[i]-average);
+  }
+  return sqrt(total / float (vals.size()) );
+}
+
+// ==========================================================
+
 int convertYear(const std::string &major) {
   if (major == "FR") return 1;
   if (major == "SO") return 2;
@@ -602,10 +623,11 @@ void start_table_output( bool for_instructor,
       }
     }
 
-  // LATE DAYS
-    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ALLOWED LATE DAYS"));
-    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","USED LATE DAYS"));
-    student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
+    if (DISPLAY_LATE_DAYS) {
+      student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ALLOWED LATE DAYS"));
+      student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","USED LATE DAYS"));
+      student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
+    }
   }
 
 
@@ -761,7 +783,30 @@ void start_table_output( bool for_instructor,
     }
 
 
-    float grade = this_student->overall();
+    float grade;
+    if (this_student->getUserName() == "AVERAGE" ||
+        this_student->getUserName() == "STDDEV") {
+      // Special case for overall average and standard deviation.
+      // Mathematically, we can't simply add the std dev for the
+      // different gradeables.  Note also: the average isn't a simple
+      // addition either, since blank scores for a specific gradeable
+      // are omitted from the average.
+      std::vector<float> vals;
+      for (unsigned int S = 0; S < students.size(); S++) {
+        if (validSection(students[S]->getSection())) {
+          vals.push_back(students[S]->overall());
+        }
+      }
+      float tmp_average = compute_average(vals);
+      if (this_student->getUserName() == "AVERAGE") {
+        grade = tmp_average;
+      } else {
+        float tmp_std_dev = compute_stddev(vals,tmp_average);
+        grade = tmp_std_dev;
+      }
+    } else {
+      grade = this_student->overall();
+    }
 
     std::string color = coloritcolor(grade,
                                      sp->overall(),
@@ -789,7 +834,32 @@ void start_table_output( bool for_instructor,
         assert (GRADEABLES[g].getPercent() < 0.01);
         continue;
       }
-      float grade = this_student->GradeablePercent(g);
+
+      float grade;
+      if (this_student->getUserName() == "AVERAGE" ||
+          this_student->getUserName() == "STDDEV") {
+        // Special case for per gradeable average and standard deviation.
+        // Mathematically, we can't simply add the std dev for the
+        // different gradeables.  Note also: the average isn't a simple
+        // addition either, since blank scores for a specific gradeable
+        // are omitted from the average.
+        std::vector<float> vals;
+        for (unsigned int S = 0; S < students.size(); S++) {
+          if (validSection(students[S]->getSection())) {
+            vals.push_back(students[S]->GradeablePercent(g));
+          }
+        }
+        float tmp_average = compute_average(vals);
+        if (this_student->getUserName() == "AVERAGE") {
+          grade = tmp_average;
+        } else {
+          float tmp_std_dev = compute_stddev(vals,tmp_average);
+          grade = tmp_std_dev;
+        }
+      } else {
+        grade = this_student->GradeablePercent(g);
+      }
+
       std::string color = coloritcolor(grade,
                                        sp->GradeablePercent(g),
                                        sa->GradeablePercent(g),
@@ -847,20 +917,22 @@ void start_table_output( bool for_instructor,
         }
       }
 
-      // LATE DAYS
-      if (this_student->getLastName() != "") {
-        int allowed = this_student->getAllowedLateDays(100);
-        std::string color = coloritcolor(allowed,5,4,3,2,2);
-        table.set(myrow,counter++,TableCell(color,allowed,"",0,CELL_CONTENTS_VISIBLE,"right"));
-        int used = this_student->getUsedLateDays();
-        color = coloritcolor(allowed-used+2, 5+2, 3+2, 2+2, 1+2, 0+2);
-        table.set(myrow,counter++,TableCell(color,used,"",0,CELL_CONTENTS_VISIBLE,"right"));
-      } else {
-        color="ffffff"; // default_color;
-        table.set(myrow,counter++,TableCell(color,""));
-        table.set(myrow,counter++,TableCell(color,""));
+      if (DISPLAY_LATE_DAYS) {
+        // LATE DAYS
+        if (this_student->getLastName() != "") {
+          int allowed = this_student->getAllowedLateDays(100);
+          std::string color = coloritcolor(allowed,5,4,3,2,2);
+          table.set(myrow,counter++,TableCell(color,allowed,"",0,CELL_CONTENTS_VISIBLE,"right"));
+          int used = this_student->getUsedLateDays();
+          color = coloritcolor(allowed-used+2, 5+2, 3+2, 2+2, 1+2, 0+2);
+          table.set(myrow,counter++,TableCell(color,used,"",0,CELL_CONTENTS_VISIBLE,"right"));
+        } else {
+          color="ffffff"; // default_color;
+          table.set(myrow,counter++,TableCell(color,""));
+          table.set(myrow,counter++,TableCell(color,""));
+        }
+        table.set(myrow,counter++,TableCell(grey_divider));
       }
-      table.set(myrow,counter++,TableCell(grey_divider));
     }
 
 

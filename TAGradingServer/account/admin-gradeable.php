@@ -283,7 +283,7 @@ HTML;
   print <<<HTML
             <button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">{$button_string} Gradeable</button>
 HTML;
-    if ($have_old_edit) {
+    if (false && $have_old_edit) {
         print <<<HTML
                 <button type="button" class="btn btn-danger" onclick="deleteForm();" style="margin-right:10px; float: right;">Delete Gradeable</button>
 HTML;
@@ -699,24 +699,24 @@ HTML;
   
 // get gradeables graded by rotating section in the past and the sections each grader graded
   $db->query("
-  SELECT 
-    gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating_id, g_grade_start_date 
+  SELECT
+    gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating_id, g_grade_start_date
   FROM (SELECT g.g_id, u.user_id, u.user_group, g_grade_start_date
-          FROM (SELECT user_id, user_group FROM users WHERE user_group BETWEEN 1 AND 3) AS u CROSS JOIN ( 
-            SELECT 
+          FROM (SELECT user_id, user_group FROM users WHERE user_group BETWEEN 1 AND 3) AS u CROSS JOIN (
+            SELECT
               DISTINCT g.g_id,
               g_grade_start_date
             FROM gradeable AS g
-            LEFT JOIN 
+            LEFT JOIN
               grading_rotating AS gr ON g.g_id = gr.g_id
-            WHERE g_grade_by_registration = 'f') AS g ) as gu 
+            WHERE g_grade_by_registration = 'f') AS g ) as gu
         LEFT JOIN (
-              SELECT 
-                g_id, user_id, array_agg(sections_rotating_id) as sections_rotating_id 
-              FROM 
-                grading_rotating 
-              GROUP BY 
-              g_id, user_id) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id 
+              SELECT
+                g_id, user_id, array_agg(sections_rotating_id) as sections_rotating_id
+              FROM
+                grading_rotating
+              GROUP BY
+              g_id, user_id) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id
               ORDER BY user_group, user_id, g_grade_start_date", array());
   
   $last = '';
