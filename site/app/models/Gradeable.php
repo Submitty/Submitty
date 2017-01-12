@@ -504,9 +504,12 @@ abstract class Gradeable {
     }
 
     /**
-     * @return GradeableVersion
+     * @return GradeableVersion|null
      */
     public function getCurrentVersion() {
+        if (!isset($this->versions[$this->current])) {
+            return null;
+        }
         return $this->versions[$this->current];
     }
 

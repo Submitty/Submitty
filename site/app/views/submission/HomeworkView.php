@@ -53,6 +53,7 @@ HTML;
     public function showGradeable($gradeable, $days_late) {
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
+        $current_version_number = ($current_version === null) ? -1 : $current_version->getVersion();
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
@@ -105,8 +106,8 @@ HTML;
     <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
 HTML;
-            if($current_version->getVersion() === $gradeable->getHighestVersion()
-                && $current_version->getVersion() > 0) {
+            if($current_version_number === $gradeable->getHighestVersion()
+                && $current_version_number > 0) {
                 $return .= <<<HTML
     <button type="button" id= "getprev" class="btn btn-primary">Get Most Recent Files</button>
 HTML;
@@ -129,8 +130,8 @@ HTML;
 HTML;
                 }
             }
-            if ($current_version->getVersion() == $gradeable->getHighestVersion()
-                && $current_version->getVersion() > 0 && $this->core->getConfig()->keepPreviousFiles()) {
+            if ($current_version_number == $gradeable->getHighestVersion()
+                && $current_version_number > 0 && $this->core->getConfig()->keepPreviousFiles()) {
                 $return .= <<<HTML
     <script type="text/javascript">
         $(document).ready(function() {
@@ -153,7 +154,7 @@ HTML;
         // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
         var num_parts = {$gradeable->getNumParts()};
         createArray(num_parts);
-        var assignment_version = {$current_version->getVersion()};
+        var assignment_version = {$current_version_number};
         var highest_version = {$gradeable->getHighestVersion()};
         for (var i = 1; i <= num_parts; i++ ){
             var dropzone = document.getElementById("upload" + i);
@@ -227,7 +228,7 @@ HTML;
 
 HTML;
             if ($gradeable->getActiveVersion() == 0) {
-                $selected = ($current_version->getVersion() == $gradeable->getActiveVersion()) ? "selected" : "";
+                $selected = ($current_version_number == $gradeable->getActiveVersion()) ? "selected" : "";
                 $return .= <<<HTML
         <option value="0" {$selected}>Do Not Grade Assignment</option>
 HTML;
@@ -248,7 +249,7 @@ HTML;
                     $select_text[] = "GRADE THIS VERSION";
                 }
 
-                if ($version->getVersion() == $current_version->getVersion()) {
+                if ($version->getVersion() == $current_version_number) {
                     $selected = "selected";
                 }
 
@@ -263,7 +264,7 @@ HTML;
     </select>
 HTML;
             // If viewing the active version, show cancel button, otherwise so button to switch active
-            if ($current_version->getVersion() > 0) {
+            if ($current_version_number > 0) {
                 if ($current_version->getVersion() == $gradeable->getActiveVersion()) {
                     $version = 0;
                     $button = '<input type="submit" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">';
@@ -393,7 +394,7 @@ HTML;
                                                                      'page' => 'submission',
                                                                      'action' => 'check_refresh',
                                                                      'gradeable_id' => $gradeable->getId(),
-                                                                     'gradeable_version' => $current_version->getVersion()))}')
+                                                                     'gradeable_version' => $current_version_number))}')
         </script>
 HTML;
 

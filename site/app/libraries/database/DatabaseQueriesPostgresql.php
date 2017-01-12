@@ -134,12 +134,13 @@ LEFT JOIN (
 LEFT JOIN (
   SELECT *
   FROM electronic_gradeable_version
-) as egv ON egv.g_id=g.g_id AND egv.user_id=gd.gd_user_id
+  WHERE user_id=?
+) as egv ON egv.g_id=g.g_id
 LEFT JOIN (
   SELECT *
   FROM electronic_gradeable_data
 ) as egd ON egd.g_id=g.g_id AND egd.g_version=egv.active_version
-ORDER BY g.g_id", array($user_id));
+ORDER BY g.g_id", array($user_id, $user_id));
         $return = array();
         foreach ($this->database->rows() as $row) {
             $return[$row['g_id']] = new GradeableDb($this->core, $row);
@@ -177,12 +178,13 @@ LEFT JOIN (
 LEFT JOIN (
   SELECT *
   FROM electronic_gradeable_version
-) as egv ON egv.g_id=g.g_id AND egv.user_id=gd.gd_user_id
+  WHERE user_id=?
+) as egv ON egv.g_id=g.g_id
 LEFT JOIN (
   SELECT *
   FROM electronic_gradeable_data
 ) as egd ON egd.g_id=g.g_id AND egd.g_version=egv.active_version
-WHERE g.g_id=?", array($user_id, $g_id));
+WHERE g.g_id=?", array($user_id, $user_id, $g_id));
         if (count($this->database->rows()) === 0) {
             return null;
         }
@@ -222,6 +224,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         foreach ($this->database->rows() as $row) {
             $return[$row['g_version']] = new GradeableVersion($row, $due_date, new \DateTimeZone($this->core->getConfig()->getTimezone()));
         }
+
         return $return;
     }
 
