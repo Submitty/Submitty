@@ -32,7 +32,7 @@ class LipsumGenerator {
      * Generate a given amount of words of dummy text
      *
      * @param int  $amount Number of wrods to generated. Minimum value is 5.
-     * @param bool $start  Should the first paragraph start with "Lorem ipsum dolor sit amet..."
+     * @param bool $start  Should the returned words start with "Lorem ipsum dolor sit amet..."
      *
      * @return string
      */
