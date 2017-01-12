@@ -320,14 +320,16 @@ ORDER BY registration_section", $params);
         $params = array($g_id);
         $where = "";
         if (count($sections) > 0) {
-            $where = " AND registration_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $where = "WHERE registration_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
             $params = array_merge($params, $sections);
         }
         $this->database->query("
 SELECT count(u.*) as cnt, u.registration_section
 FROM users AS u
-INNER JOIN gradeable_data AS gd ON u.user_id = gd.gd_user_id
-WHERE gd.g_id=? AND gd.gd_active_version >= 0 {$where}
+INNER JOIN (
+  SELECT * FROM gradeable_data WHERE g_id=? AND (gd_active_version >= 0 OR (gd_active_version = -1 AND gd_status = 0))
+) AS gd ON u.user_id = gd.gd_user_id
+{$where}
 GROUP BY u.registration_section
 ORDER BY u.registration_section", $params);
         foreach ($this->database->rows() as $row) {
@@ -336,6 +338,7 @@ ORDER BY u.registration_section", $params);
             }
             $return[$row['registration_section']] = intval($row['cnt']);
         }
+        return $return;
     }
 
     public function getGradersForRegistrationSections($sections) {
@@ -419,14 +422,16 @@ ORDER BY rotating_section", $params);
         $params = array($g_id);
         $where = "";
         if (count($sections) > 0) {
-            $where = " AND rotating_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $where = "WHERE rotating_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
             $params = array_merge($params, $sections);
         }
         $this->database->query("
 SELECT count(u.*) as cnt, u.registration_section
 FROM users AS u
-INNER JOIN gradeable_data AS gd ON u.user_id = gd.gd_user_id
-WHERE gd.g_id=? AND gd.gd_active_version >= 0 {$where}
+INNER JOIN (
+  SELECT * FROM gradeable_data WHERE g_id=? AND (gd_active_version >= 0 OR (gd_active_version = -1 AND gd_status = 0))
+) AS gd ON u.user_id = gd.gd_user_id
+{$where}
 GROUP BY u.rotating_section
 ORDER BY u.rotating_section", $params);
         foreach ($this->database->rows() as $row) {
@@ -435,6 +440,7 @@ ORDER BY u.rotating_section", $params);
             }
             $return[$row['rotating_section']] = intval($row['cnt']);
         }
+        return $return;
     }
 
     public function getGradersForRotatingSections($g_id, $sections) {

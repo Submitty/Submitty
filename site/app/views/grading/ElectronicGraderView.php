@@ -145,7 +145,7 @@ HTML;
 HTML;
                 }
                 $return .= <<<HTML
-            <tr>
+            <tr id="user-row-{$row->getUser()->getId()}">
                 <td>{$count}</td>
                 <td>{$display_section}</td>
                 <td>{$row->getUser()->getId()}</td>
