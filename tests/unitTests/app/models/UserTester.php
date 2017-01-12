@@ -21,7 +21,6 @@ class UserTester extends \PHPUnit_Framework_TestCase {
         );
         $user = new User($details);
         $this->assertEquals($details['user_id'], $user->getId());
-        $this->assertEquals($details['user_password'], $user->getPassword());
         $this->assertEquals($details['user_firstname'], $user->getFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getPreferredFirstName());
         $this->assertEquals($details['user_firstname'], $user->getDisplayedFirstName());
@@ -75,10 +74,11 @@ class UserTester extends \PHPUnit_Framework_TestCase {
             'grading_registration_sections' => "{1,2}"
         );
         $user = new User($details);
+        $this->assertTrue(password_verify("test", $user->getPassword()));
         $user->setPassword("test");
         $hashed_password = password_hash("test", PASSWORD_DEFAULT);
-        password_verify($user->getPassword(), $hashed_password);
+        password_verify("test", $hashed_password);
         $user->setPassword($hashed_password);
-        password_verify($user->getPassword(), $hashed_password);
+        password_verify("test", $hashed_password);
     }
 }
