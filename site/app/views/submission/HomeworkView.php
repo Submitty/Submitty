@@ -52,6 +52,7 @@ HTML;
      */
     public function showGradeable($gradeable, $days_late) {
         $upload_message = $this->core->getConfig()->getUploadMessage();
+        $current_version = $gradeable->getCurrentVersion();
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
@@ -104,7 +105,8 @@ HTML;
     <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
 HTML;
-            if($gradeable->getCurrentVersion() === $gradeable->getHighestVersion() && $gradeable->getCurrentVersion() > 0) {
+            if($current_version->getVersion() === $gradeable->getHighestVersion()
+                && $current_version->getVersion() > 0) {
                 $return .= <<<HTML
     <button type="button" id= "getprev" class="btn btn-primary">Get Most Recent Files</button>
 HTML;
@@ -127,8 +129,8 @@ HTML;
 HTML;
                 }
             }
-            if ($gradeable->getCurrentVersion() == $gradeable->getHighestVersion() && $gradeable->getCurrentVersion() > 0
-                && $this->core->getConfig()->keepPreviousFiles()) {
+            if ($current_version->getVersion() == $gradeable->getHighestVersion()
+                && $current_version->getVersion() > 0 && $this->core->getConfig()->keepPreviousFiles()) {
                 $return .= <<<HTML
     <script type="text/javascript">
         $(document).ready(function() {
@@ -151,7 +153,7 @@ HTML;
         // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
         var num_parts = {$gradeable->getNumParts()};
         createArray(num_parts);
-        var assignment_version = {$gradeable->getCurrentVersion()};
+        var assignment_version = {$current_version->getVersion()};
         var highest_version = {$gradeable->getHighestVersion()};
         for (var i = 1; i <= num_parts; i++ ){
             var dropzone = document.getElementById("upload" + i);
@@ -225,34 +227,34 @@ HTML;
 
 HTML;
             if ($gradeable->getActiveVersion() == 0) {
-                $selected = ($gradeable->getCurrentVersion() == $gradeable->getActiveVersion()) ? "selected" : "";
+                $selected = ($current_version->getVersion() == $gradeable->getActiveVersion()) ? "selected" : "";
                 $return .= <<<HTML
         <option value="0" {$selected}>Do Not Grade Assignment</option>
 HTML;
 
             }
-            foreach ($gradeable->getVersions() as $version => $version_details) {
+            foreach ($gradeable->getVersions() as $version) {
                 $selected = "";
-                $select_text = array("Version #{$version}");
+                $select_text = array("Version #{$version->getVersion()}");
                 if ($gradeable->getNormalPoints() > 0) {
-                    $select_text[] = "Score: ".$version_details['points']." / " . $gradeable->getNormalPoints();
+                    $select_text[] = "Score: ".$version->getNonHiddenTotal()." / " . $gradeable->getTotalNonHiddenNonExtraCreditPoints();
                 }
 
-                if ($version_details['days_late'] > 0) {
-                    $select_text[] = "Days Late: ".$version_details['days_late'];
+                if ($version->getDaysLate() > 0) {
+                    $select_text[] = "Days Late: ".$version->getDaysLate();
                 }
 
-                if ($version == $gradeable->getActiveVersion()) {
+                if ($version->isActive()) {
                     $select_text[] = "GRADE THIS VERSION";
                 }
 
-                if ($version == $gradeable->getCurrentVersion()) {
+                if ($version->getVersion() == $current_version->getVersion()) {
                     $selected = "selected";
                 }
 
                 $select_text = implode("&nbsp;&nbsp;&nbsp;", $select_text);
                 $return .= <<<HTML
-        <option value="{$version}" {$selected}>{$select_text}</option>
+        <option value="{$version->getVersion()}" {$selected}>{$select_text}</option>
 
 HTML;
             }
@@ -261,13 +263,13 @@ HTML;
     </select>
 HTML;
             // If viewing the active version, show cancel button, otherwise so button to switch active
-            if ($gradeable->getCurrentVersion() > 0) {
-                if ($gradeable->getCurrentVersion() == $gradeable->getActiveVersion()) {
+            if ($current_version->getVersion() > 0) {
+                if ($current_version->getVersion() == $gradeable->getActiveVersion()) {
                     $version = 0;
                     $button = '<input type="submit" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">';
                 }
                 else {
-                    $version = $gradeable->getCurrentVersion();
+                    $version = $current_version->getVersion();
                     $button = '<input type="submit" class="btn btn-primary" value="Grade This Version">';
                 }
                 $return .= <<<HTML
@@ -285,7 +287,7 @@ HTML;
 HTML;
             }
 
-            if($gradeable->getActiveVersion() == 0 && $gradeable->getCurrentVersion() == 0) {
+            if($gradeable->getActiveVersion() == 0 && $current_version->getVersion() == 0) {
                 $return .= <<<HTML
     <div class="sub">
         <p class="red-message">
@@ -297,7 +299,8 @@ HTML;
 HTML;
             }
             else {
-	            if($gradeable->getActiveVersion() > 0 && $gradeable->getActiveVersion() === $gradeable->getCurrentVersion()) {
+	            if($gradeable->getActiveVersion() > 0
+                    && $gradeable->getActiveVersion() === $current_version->getVersion()) {
                     $return .= <<<HTML
     <div class="sub">
         <p class="green-message">
@@ -338,10 +341,11 @@ HTML;
                 $array = ($gradeable->useSvnCheckout()) ? $gradeable->getSvnFiles() : $gradeable->getSubmittedFiles();
                 foreach ($array as $file) {
                     if (isset($file['size'])) {
-		       $size = number_format($file['size'] / 1024, 2);
-		    } else {
-		       $size = number_format(-1);
-		    }
+                        $size = number_format($file['size'] / 1024, 2);
+                    }
+                    else {
+                        $size = number_format(-1);
+                    }
                     $return .= "{$file['relative_name']} ({$size}kb)<br />";
                 }
                 $return .= <<<HTML
@@ -351,8 +355,8 @@ HTML;
                 $results = $gradeable->getResults();
                 if($gradeable->hasResults()) {
                     $return .= <<<HTML
-submission timestamp: {$results['submission_time']}<br />
-days late: {$results['days_late']} (before extensions)<br />
+submission timestamp: {$current_version->getSubmissionTime()}<br />
+days late: {$current_version->getDaysLate()} (before extensions)<br />
 grading time: {$results['grade_time']} seconds<br />
 HTML;
                     if($results['num_autogrades'] > 1) {
@@ -389,7 +393,7 @@ HTML;
                                                                      'page' => 'submission',
                                                                      'action' => 'check_refresh',
                                                                      'gradeable_id' => $gradeable->getId(),
-                                                                     'gradeable_version' => $gradeable->getCurrentVersion()))}')
+                                                                     'gradeable_version' => $current_version->getVersion()))}')
         </script>
 HTML;
 
@@ -442,10 +446,10 @@ HTML;
                     $has_badges = false;
                     if ($gradeable->getNormalPoints() > 0) {
                         $has_badges = true;
-                        if($results['points'] >= $gradeable->getNormalPoints()) {
+                        if ($current_version->getNonHiddenTotal() >= $gradeable->getNormalPoints()) {
                             $background = "green-background";
                         }
-                        else if($results['points'] > 0) {
+                        else if ($current_version->getNonHiddenTotal() > 0) {
                             $background = "yellow-background";
                         }
                         else {
@@ -454,7 +458,7 @@ HTML;
                         $return .= <<<HTML
         <div class="box">
             <div class="box-title">
-                <span class="badge {$background}">{$results['points']} / {$gradeable->getNormalPoints()}</span>
+                <span class="badge {$background}">{$current_version->getNonHiddenTotal()} / {$gradeable->getNormalPoints()}</span>
                 <h4>Total</h4>
             </div>
         </div>

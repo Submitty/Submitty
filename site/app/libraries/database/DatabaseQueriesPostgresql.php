@@ -108,7 +108,7 @@ WHERE user_id=?", $array);
 
     public function getAllGradeables($user_id = null) {
         $this->database->query("
-SELECT eg.*, gd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, g.*
+SELECT egv.*, egd.*, eg.*, gd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, g.*
 FROM gradeable as g 
 LEFT JOIN (
   SELECT *
@@ -208,15 +208,19 @@ WHERE gc.g_id=?
         return $return;
     }
 
-    public function getGradeableVersions($g_id, $user_id) {
+    public function getGradeableVersions($g_id, $user_id, $due_date) {
         $this->database->query("
-SELECT * 
-FROM electronic_gradeable_data 
-WHERE g_id=? AND user_id=?
-ORDER BY g_version", array($g_id, $user_id));
+SELECT egd.*, egv.active_version = egd.g_version as active_version
+FROM electronic_gradeable_data AS egd
+LEFT JOIN (
+  SELECT *
+  FROM electronic_gradeable_version
+) AS egv ON egv.active_version = egd.g_version AND egv.user_id = egd.user_id AND egv.g_id = egd.g_id
+WHERE egd.g_id=? AND egd.user_id=?
+ORDER BY egd.g_version", array($g_id, $user_id));
         $return = array();
         foreach ($this->database->rows() as $row) {
-            $return[$row['g_version']] = new GradeableVersion($row);
+            $return[$row['g_version']] = new GradeableVersion($row, $due_date, new \DateTimeZone($this->core->getConfig()->getTimezone()));
         }
         return $return;
     }
@@ -288,6 +292,84 @@ ORDER BY g_version", array($g_id, $user_id));
         return $return;
     }
 
+    public function getTotalUserCountByRegistrationSections($sections) {
+        $return = array();
+        $params = array();
+        $where = "";
+        if (count($sections) > 0) {
+            $where = "WHERE registration_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $params = $sections;
+        }
+        $this->database->query("
+SELECT count(*) as cnt, registration_section 
+FROM users 
+{$where}
+GROUP BY registration_section 
+ORDER BY registration_section", $params);
+        foreach ($this->database->rows() as $row) {
+            if ($row['registration_section'] === null) {
+                $row['registration_section'] = "NULL";
+            }
+            $return[$row['registration_section']] = intval($row['cnt']);
+        }
+        return $return;
+    }
+
+    public function getGradedUserCountByRegistrationSections($g_id, $sections) {
+        $return = array();
+        $params = array($g_id);
+        $where = "";
+        if (count($sections) > 0) {
+            $where = " AND registration_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $params = array_merge($params, $sections);
+        }
+        $this->database->query("
+SELECT count(u.*) as cnt, u.registration_section
+FROM users AS u
+INNER JOIN gradeable_data AS gd ON u.user_id = gd.gd_user_id
+WHERE gd.g_id=? AND gd.gd_active_version >= 0 {$where}
+GROUP BY u.registration_section
+ORDER BY u.registration_section", $params);
+        foreach ($this->database->rows() as $row) {
+            if ($row['registration_section'] === null) {
+                $row['registration_section'] = "NULL";
+            }
+            $return[$row['registration_section']] = intval($row['cnt']);
+        }
+    }
+
+    public function getGradersForRegistrationSections($sections) {
+        $return = array();
+        $params = array();
+        $where = "";
+        if (count($sections) > 0) {
+            $where = "WHERE sections_registration_id IN (" . implode(",", array_fill(0, count($sections), "?")) . ")";
+            $params = $sections;
+        }
+        $this->database->query("
+SELECT g.*, u.* 
+FROM grading_registration AS g
+LEFT JOIN (
+  SELECT *
+  FROM users
+) AS u ON u.user_id = g.user_id
+{$where}", $params);
+        $user_store = array();
+        foreach ($this->database->rows() as $row) {
+            if ($row['sections_registration_id'] === null) {
+                $row['sections_registration_id'] = "NULL";
+            }
+            if (!isset($return[$row['sections_registration_id']])) {
+                $return[$row['sections_registration_id']] = array();
+            }
+            if (!isset($user_store[$row['user_id']])) {
+                $user_store[$row['user_id']] = new User($row);
+            }
+            $return[$row['sections_registration_id']][] = $user_store[$row['user_id']];
+        }
+        return $return;
+    }
+
     public function getRotatingSectionsForGradeableAndUser($g_id, $user) {
         $this->database->query("SELECT sections_rotating_id FROM grading_rotating WHERE user_id=? AND g_id=?", array($user, $g_id));
         $return = array();
@@ -305,6 +387,84 @@ ORDER BY g_version", array($g_id, $user_id));
             foreach ($this->database->rows() as $row) {
                 $return[] = new User($row);
             }
+        }
+        return $return;
+    }
+
+    public function getTotalUserCountByRotatingSections($sections) {
+        $return = array();
+        $where = "";
+        $params = array();
+        if (count($sections) > 0) {
+            $where = "WHERE rotating_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $params = $sections;
+        }
+        $this->database->query("
+SELECT count(*) as cnt, rotating_section 
+FROM users 
+{$where}
+GROUP BY registration_section 
+ORDER BY rotating_section", $params);
+        foreach ($this->database->rows() as $row) {
+            if ($row['rotating_section'] === null) {
+                $row['rotating_section'] = "NULL";
+            }
+            $return[$row['rotating_section']] = intval($row['cnt']);
+        }
+        return $return;
+    }
+
+    public function getGradedUserCountByRotatingSections($g_id, $sections) {
+        $return = array();
+        $params = array($g_id);
+        $where = "";
+        if (count($sections) > 0) {
+            $where = " AND rotating_section IN (".implode(",", array_fill(0, count($sections), "?")).")";
+            $params = array_merge($params, $sections);
+        }
+        $this->database->query("
+SELECT count(u.*) as cnt, u.registration_section
+FROM users AS u
+INNER JOIN gradeable_data AS gd ON u.user_id = gd.gd_user_id
+WHERE gd.g_id=? AND gd.gd_active_version >= 0 {$where}
+GROUP BY u.rotating_section
+ORDER BY u.rotating_section", $params);
+        foreach ($this->database->rows() as $row) {
+            if ($row['rotating_section'] === null) {
+                $row['rotating_section'] = "NULL";
+            }
+            $return[$row['rotating_section']] = intval($row['cnt']);
+        }
+    }
+
+    public function getGradersForRotatingSections($g_id, $sections) {
+        $return = array();
+        $params = array($g_id);
+        $where = "";
+        if (count($sections) > 0) {
+            $where = " AND sections_rotating_id IN (" . implode(",", array_fill(0, count($sections), "?")) . ")";
+            $params = array_merge($params, $sections);
+        }
+        $this->database->query("
+SELECT g.*, u.* 
+FROM grading_rotating AS g
+LEFT JOIN (
+  SELECT *
+  FROM users
+) AS u ON u.user_id = g.user_id
+WHERE g.g_id=? {$where}", $params);
+        $user_store = array();
+        foreach ($this->database->rows() as $row) {
+            if ($row['sections_rotating_id'] === null) {
+                $row['sections_rotating_id'] = "NULL";
+            }
+            if (!isset($return[$row['sections_rotating_id']])) {
+                $return[$row['sections_rotating_id']] = array();
+            }
+            if (!isset($user_store[$row['user_id']])) {
+                $user_store[$row['user_id']] = new User($row);
+            }
+            $return[$row['sections_rotating_id']][] = $user_store[$row['user_id']];
         }
         return $return;
     }

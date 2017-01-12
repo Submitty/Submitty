@@ -399,7 +399,7 @@ abstract class Gradeable {
         $results_path = $course_path."/results/".$this->id."/".$this->core->getUser()->getId();
 
         $this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
-        $this->versions = $this->core->getQueries()->getGradeableVersions($this->id, $this->core->getUser()->getId());
+        $this->versions = $this->core->getQueries()->getGradeableVersions($this->id, $this->core->getUser()->getId(), $this->getDueDate());
 
         if (count($this->versions) > 0) {
             $this->highest = Utils::getLastArrayElement($this->versions)->getVersion();
@@ -451,10 +451,21 @@ abstract class Gradeable {
             $this->previous_files[1] = $this->submitted_files;
         }
 
-        if ($this->current > 0 && $this->versions[$this->current]['status'] !== false) {
-            $this->result_details = $this->versions[$this->current];
-            for ($i = 0; $i < count($this->result_details['testcases']); $i++) {
-                $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], $results_path."/".$this->current);
+        if ($this->current > 0) {
+            $this->result_details = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current, "results.json"));
+            if ($this->result_details !== false) {
+                $results_history = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, $this->current, "results_history.json"));
+                if ($results_history !== false) {
+                    $last_results_timestamp = $results_history[count($results_history) - 1];
+                } else {
+                    $last_results_timestamp = array('submission_time' => "UNKNOWN", "grade_time" => "UNKOWN",
+                        "wait_time" => "UNKNOWN");
+                }
+                $this->result_details = array_merge($this->result_details, $last_results_timestamp);
+                $this->result_details['num_autogrades'] = count($results_history);
+                for ($i = 0; $i < count($this->result_details['testcases']); $i++) {
+                    $this->testcases[$i]->addResultTestcase($this->result_details['testcases'][$i], FileUtils::joinPaths($results_path, $this->current));
+                }
             }
         }
 
@@ -492,8 +503,11 @@ abstract class Gradeable {
         return $this->active_version;
     }
 
+    /**
+     * @return GradeableVersion
+     */
     public function getCurrentVersion() {
-        return $this->current;
+        return $this->versions[$this->current];
     }
 
     public function getPreviousFiles($part = 1) {
@@ -517,6 +531,9 @@ abstract class Gradeable {
         return $this->late_days;
     }
 
+    /**
+     * @return GradeableVersion[]
+     */
     public function getVersions() {
         return $this->versions;
     }
@@ -577,7 +594,7 @@ abstract class Gradeable {
     }
 
     public function getDaysLate() {
-        return ($this->hasResults()) ? $this->result_details['days_late'] : 0;
+        return ($this->hasResults()) ? $this->getCurrentVersion()->getDaysLate() : 0;
     }
 
     public function getInstructionsURL(){

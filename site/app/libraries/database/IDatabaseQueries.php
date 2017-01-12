@@ -3,6 +3,7 @@
 namespace app\libraries\database;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
+use app\models\GradeableVersion;
 use app\models\User;
 
 /**
@@ -75,7 +76,13 @@ interface IDatabaseQueries {
      */
     public function getGradeableComponents($g_id, $gd_id);
 
-    public function getGradeableVersions($g_id, $user_id);
+    /**
+     * @param string   $g_id
+     * @param string   $user_id
+     * @param \DateTime $due_date
+     * @return GradeableVersion[]
+     */
+    public function getGradeableVersions($g_id, $user_id, $due_date);
 
     /**
      * Given a gradeable id and an array of user ids, it returns an array of gradeables for each user.
@@ -89,9 +96,21 @@ interface IDatabaseQueries {
 
     public function getUsersByRegistrationSections($sections);
 
+    public function getTotalUserCountByRegistrationSections($sections);
+
+    public function getGradedUserCountByRegistrationSections($g_id, $sections);
+
+    public function getGradersForRegistrationSections($sections);
+
     public function getRotatingSectionsForGradeableAndUser($g_id, $user_id);
 
     public function getUsersByRotatingSections($sections);
+
+    public function getTotalUserCountByRotatingSections($sections);
+
+    public function getGradedUserCountByRotatingSections($g_id, $sections);
+
+    public function getGradersForRotatingSections($g_id, $sections);
 
     /**
      * Gets all registration sections from the sections_registration table

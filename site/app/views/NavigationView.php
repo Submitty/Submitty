@@ -126,7 +126,7 @@ HTML;
                         if ($g_data->useTAGrading()) {
                             $gradeable_grade_range = <<<HTML
                 <button class="btn {$title_to_button_type_grading[$title]}" style="width:100%;" \\
-                onclick="location.href='{$ta_base_url}/account/index.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
+                onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}'">
                 {$gradeable_grade_range}</button>
 HTML;
                         }

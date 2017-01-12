@@ -214,7 +214,7 @@ class FileUtils {
      *
      * @param string $filename
      *
-     * @return string
+     * @return array|boolean
      */
     public static function readJsonFile($filename) {
         if (!is_file($filename)) {

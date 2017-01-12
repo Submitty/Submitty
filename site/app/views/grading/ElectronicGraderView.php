@@ -8,7 +8,83 @@ use app\views\AbstractView;
 class ElectronicGraderView extends AbstractView {
     /**
      * @param Gradeable $gradeable
+     * @param array     $sections
+     * @return string
+     */
+    public function overviewPage($gradeable, $sections) {
+        $course = $this->core->getConfig()->getCourse();
+        $semester = $this->core->getConfig()->getSemester();
+        $graded = 0;
+        $total = 0;
+        foreach ($sections as $key => $section) {
+            if ($key === "NULL") {
+                continue;
+            }
+            $graded += $section['graded_students'];
+            $total += $section['total_students'];
+        }
+        $percentage = round(($graded / $total) * 100);
+        $return = <<<HTML
+<div class="content">
+    <h2>Overview of {$gradeable->getName()}</h2>
+    <div class="sub">
+        Current percentage of grading done: {$percentage}% ({$graded}/{$total})
+        <br />
+        <br />
+        By Grading Sections:
+        <div style="margin-left: 20px">
+HTML;
+        foreach ($sections as $key => $section) {
+            $percentage = round(($section['graded_students'] / $section['total_students']) * 100);
+            $return .= <<<HTML
+            Section {$key}: {$percentage}% ({$section['graded_students']} / {$section['total_students']})<br />
+HTML;
+        }
+        $return .= <<<HTML
+        </div>
+        <br />
+        Graders:
+        <div style="margin-left: 20px">
+HTML;
+        foreach ($sections as $key => $section) {
+            if ($key === "NULL") {
+                continue;
+            }
+            if (count($section['graders']) > 0) {
+                $graders = implode(", ", array_map(function($grader) { $grader->getId(); }, $section['graders']));
+            }
+            else {
+                $graders = "Nobody";
+            }
+            $return .= <<<HTML
+            Section {$key}: {$graders}<br />
+HTML;
+        }
+        $return .= <<<HTML
+        </div>
+        <div style="margin-top: 20px">
+            <a class="btn btn-primary" 
+                href="{$this->core->buildUrl(array('component'    => 'grading',
+                                                   'page'         => 'electronic',
+                                                   'action'       => 'summary',
+                                                   'gradeable_id' => $gradeable->getId()))}">
+                Grading Homework Overview
+            </a>
+            <a class="btn btn-primary"
+                href="{$this->core->getConfig()->getTABaseUrl()}account/index.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}">
+                Grade Next Student
+            </a>
+        </div>
+    </div>
+</div>
+HTML;
+        return $return;
+    }
+
+    /**
+     * @param Gradeable   $gradeable
      * @param Gradeable[] $rows
+     * @param string      $section_key
      * @return string
      */
     public function summaryPage($gradeable, $rows, $section_key="registration_section") {
@@ -87,7 +163,7 @@ HTML;
                     $contents = "Grade";
                 }
                 $return .= <<<HTML
-                    <a class="btn {$btn_class}" href="{$this->core->getConfig()->getTABaseUrl()}account/index.php?g_id={$gradeable->getId()}&amp;individual={$gradeable->getUser()->getId()}&amp;course={$this->core->getConfig()->getCourse()}&amp;semester={$this->core->getConfig()->getSemester()}">
+                    <a class="btn {$btn_class}" href="{$this->core->getConfig()->getTABaseUrl()}account/index.php?g_id={$gradeable->getId()}&amp;individual={$row->getUser()->getId()}&amp;course={$this->core->getConfig()->getCourse()}&amp;semester={$this->core->getConfig()->getSemester()}">
                         {$contents}
                     </a>
                 </td>

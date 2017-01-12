@@ -46,7 +46,7 @@ class GradeableList {
             });
         }
         else {
-            $this->gradeables = $this->core->getQueries()->getAllGradeables();
+            $this->gradeables = $this->core->getQueries()->getAllGradeables($this->core->getUser()->getId());
         }
         $this->now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
     }

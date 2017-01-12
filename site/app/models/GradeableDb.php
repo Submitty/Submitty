@@ -35,15 +35,16 @@ class GradeableDb extends Gradeable {
             $this->grader_id = $details['gd_grader_id'];
             $this->overall_comment = $details['gd_overall_comment'];
             $this->status = $details['gd_status'];
-            if ($details['gd_active_version'] !== null) {
+            $this->graded_version = $details['gd_active_version'];
+
+            if ($details['active_version'] !== null) {
                 $this->been_autograded = true;
-                $this->graded_version = $details['gd_active_version'];
                 $this->active_version = $details['active_version'];
                 $this->graded_auto_non_hidden_non_extra_credit = floatval($details['autograding_non_hidden_non_extra_credit']);
                 $this->graded_auto_non_hidden_extra_credit = floatval($details['autograding_non_hidden_extra_credit']);
                 $this->graded_auto_hidden_non_extra_credit = floatval($details['autograding_hidden_non_extra_credit']);
                 $this->graded_auto_hidden_extra_credit = floatval($details['autograding_hidden_extra_credit']);
-                $this->submission_time = $details['submission_time'];
+                $this->submission_time =  new \DateTime($details['submission_time'], $timezone);
             }
 
             $this->total_tagrading_extra_credit = floatval($details['total_tagrading_extra_credit']);
