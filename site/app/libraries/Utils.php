@@ -15,7 +15,7 @@ class Utils {
      * @return array
      */
     public static function stripStringFromArray($needle, $haystack) {
-        if (!is_array($haystack)) {
+        if (!is_array($haystack) || !is_string($needle)) {
             return null;
         }
         foreach($haystack as $key => $value) {

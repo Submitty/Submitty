@@ -8,7 +8,7 @@ class DateUtilsTester extends \PHPUnit_Framework_TestCase {
     public function data() {
         return array(
             array(1, "Now", "Tomorrow"),
-            array(0, "Now", "Now"),
+            array(0, "2017-01-12 19:10:53.000000", "2017-01-12 19:10:53.000000"),
             array(1, "2016-07-19 00:00:00", "2016-07-19 00:00:30"),
             array(0, "2016-07-19 00:00:30", "2016-07-19 00:00:00"),
             array(1, "2016-07-19 00:00:00", "2016-07-19 00:01:00"),

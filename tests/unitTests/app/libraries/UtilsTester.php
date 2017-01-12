@@ -114,4 +114,10 @@ class UtilsTester extends \PHPUnit_Framework_TestCase {
         $expected = array("/aa", array("/2/aa", "bb"));
         $this->assertEquals($expected, Utils::stripStringFromArray("test", $array));
     }
+
+    public function testStripStringFromArrayNull() {
+        $this->assertNull(Utils::stripStringFromArray("test", null));
+        $this->assertNull(Utils::stripStringFromArray(null, array()));
+        $this->assertNull(Utils::stripStringFromArray(1, array()));
+    }
 }
