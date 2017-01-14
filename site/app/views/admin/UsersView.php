@@ -112,7 +112,7 @@ HTML;
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
-        <a href="{$this->core->getConfig()->getTABaseUrl()}account/admin-graders-list.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&this[]=Graders&this[]=Upload%20Grader%20List" class="btn btn-primary">Upload Grader list</a>
+        <a href="{$this->core->getConfig()->getTABaseUrl()}account/admin-grader-list.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&this[]=Graders&this[]=Upload%20Grader%20List" class="btn btn-primary">Upload Grader list</a>
         <a onclick="newUserForm();
             $('[name=\'user_group\'] option[value=\'3\']').prop('selected', true);" class="btn btn-primary">New Grader</a>
     </div>
