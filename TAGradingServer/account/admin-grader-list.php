@@ -27,6 +27,18 @@ if ($_SERVER['REQUEST_METHOD'] !== "POST") {
 <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
 <div class="modal-header">
 <h3 id="myModalLabel">Upload Grader List</h3>
+<p>&nbsp;</p>
+<p>
+Format your grader data as an .xlsx or .csv file with 5 columns:<br>
+<tt>username, LastName, FirstName, email, GraderGroup</tt><br>
+</p>
+<p>
+Where GraderGroup is:<br>
+1=Instructor<br>
+2=Full Access Grader (graduate teaching assistant)<br>
+3=Limited Access Grader (mentor)<br>
+4=Student (no grading access)
+</p>
 </div>
 
 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
