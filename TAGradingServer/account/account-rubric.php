@@ -5,7 +5,7 @@
     $s_user_id
     $g_id
 */
-require "../models/LateDayCalculation.php";
+require "../models/LateDaysCalculation.php";
 use \models\ElectronicGradeable;
 
 $output = "";

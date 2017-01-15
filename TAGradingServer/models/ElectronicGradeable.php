@@ -187,7 +187,6 @@ class ElectronicGradeable
             $this->setStudentDetails();
             $this->setEGSubmissionDetails();
             $this->setEGResults();
-            //$this->calculateStatus();
             $this->setQuestionTotals();
 
             Utils::stripStringFromArray(__SUBMISSION_SERVER__, $this->eg_files);

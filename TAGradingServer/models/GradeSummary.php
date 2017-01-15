@@ -2,7 +2,7 @@
 
 use \lib\Database;
 
-require "LateDayCalculation.php";
+require "LateDaysCalculation.php";
 
 class GradeSummary
 {
