@@ -4,6 +4,8 @@ use \lib\Database;
 
 include "../header.php";
 
+$account_subpages_unlock = true;
+
 function getGrades($g_id)
 {
     $query = "
