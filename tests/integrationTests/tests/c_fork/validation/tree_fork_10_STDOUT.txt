@@ -1,0 +1,30 @@
+requested 10 forks, approximating with tree of height 4
+pid 25740 spawned child pid 25743
+pid 25740 spawned child pid 25745
+pid 25743 spawned child pid 25746
+pid 25740 spawned child pid 25747
+pid 25744 spawned child pid 25748
+pid 25745 spawned child pid 25749
+pid 25740 spawned child pid 25750
+pid 25744 spawned child pid 25751
+pid 25745 spawned child pid 25752
+pid 25743 spawned child pid 25753
+pid 25747 spawned child pid 25754
+pid 25746 spawned child pid 25755
+pid 25749 spawned child pid 25756
+pid 25748 spawned child pid 25757
+pid 25740's child pid 25750 finished
+pid 25744's child pid 25748 finished
+pid 25746's child pid 25755 finished
+pid 25747's child pid 25754 finished
+pid 25743's child pid 25746 finished
+pid 25740's child pid 25747 finished
+pid 25745's child pid 25752 finished
+pid 25743's child pid 25753 finished
+pid 25749's child pid 25756 finished
+pid 25745's child pid 25749 finished
+pid 25744's child pid 25751 finished
+pid 25740's child pid 25745 finished
+pid 25743's child pid 25744 finished
+pid 25740's child pid 25743 finished
+ALL DONE!
