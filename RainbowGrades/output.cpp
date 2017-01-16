@@ -623,10 +623,11 @@ void start_table_output( bool for_instructor,
       }
     }
 
-  // LATE DAYS
-    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ALLOWED LATE DAYS"));
-    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","USED LATE DAYS"));
-    student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
+    if (DISPLAY_LATE_DAYS) {
+      student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ALLOWED LATE DAYS"));
+      student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","USED LATE DAYS"));
+      student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
+    }
   }
 
 
@@ -916,20 +917,22 @@ void start_table_output( bool for_instructor,
         }
       }
 
-      // LATE DAYS
-      if (this_student->getLastName() != "") {
-        int allowed = this_student->getAllowedLateDays(100);
-        std::string color = coloritcolor(allowed,5,4,3,2,2);
-        table.set(myrow,counter++,TableCell(color,allowed,"",0,CELL_CONTENTS_VISIBLE,"right"));
-        int used = this_student->getUsedLateDays();
-        color = coloritcolor(allowed-used+2, 5+2, 3+2, 2+2, 1+2, 0+2);
-        table.set(myrow,counter++,TableCell(color,used,"",0,CELL_CONTENTS_VISIBLE,"right"));
-      } else {
-        color="ffffff"; // default_color;
-        table.set(myrow,counter++,TableCell(color,""));
-        table.set(myrow,counter++,TableCell(color,""));
+      if (DISPLAY_LATE_DAYS) {
+        // LATE DAYS
+        if (this_student->getLastName() != "") {
+          int allowed = this_student->getAllowedLateDays(100);
+          std::string color = coloritcolor(allowed,5,4,3,2,2);
+          table.set(myrow,counter++,TableCell(color,allowed,"",0,CELL_CONTENTS_VISIBLE,"right"));
+          int used = this_student->getUsedLateDays();
+          color = coloritcolor(allowed-used+2, 5+2, 3+2, 2+2, 1+2, 0+2);
+          table.set(myrow,counter++,TableCell(color,used,"",0,CELL_CONTENTS_VISIBLE,"right"));
+        } else {
+          color="ffffff"; // default_color;
+          table.set(myrow,counter++,TableCell(color,""));
+          table.set(myrow,counter++,TableCell(color,""));
+        }
+        table.set(myrow,counter++,TableCell(grey_divider));
       }
-      table.set(myrow,counter++,TableCell(grey_divider));
     }
 
 

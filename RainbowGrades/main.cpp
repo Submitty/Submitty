@@ -115,6 +115,7 @@ bool DISPLAY_FINAL_GRADE = false;
 bool DISPLAY_GRADE_SUMMARY = false;
 bool DISPLAY_GRADE_DETAILS = false;
 bool DISPLAY_ICLICKER = false;
+bool DISPLAY_LATE_DAYS = false;
 
 
 std::vector<std::string> MESSAGES;
@@ -635,7 +636,7 @@ void processcustomizationfile(std::vector<Student*> &students, bool students_loa
       s->addNote(line);
 
     } else if (token == "earned_late_days") {
-
+      DISPLAY_LATE_DAYS = true;
       char line[MAX_STRING_LENGTH];
       istr.getline(line,MAX_STRING_LENGTH);
       GLOBAL_earned_late_days.clear();
@@ -966,6 +967,9 @@ void load_student_grades(std::vector<Student*> &students) {
                     }
                   }
                   s->setDefaultAllowedLateDays(value);
+                  if (value > 0) {
+                    DISPLAY_LATE_DAYS = true;
+                  }
                 } else {
             std::cout << "UNKNOWN TOKEN Y '" << token << "'" << std::endl;
 			exit(0);
