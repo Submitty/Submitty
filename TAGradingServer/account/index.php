@@ -313,7 +313,9 @@ else if(!isset($_GET["g_id"])) {
     if(count($results) > 0) {
         print <<<HTML
     <div class="modal hide fade in" tabindex="-1" role="dialog" aria-labelledby="Grading Done" aria-hidden="false" style="display: block; margin-top:5%; z-index:100;">
-        <form action="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}" method="get">
+        <form action="{$BASE_URL}/account/index.php" method="get">
+            <input type="hidden" name="course" value="{$_GET['course']}" />
+            <input type="hidden" name="semester" value="{$_GET['semester']}" />
             <div class="modal-header">
                 <h3 id="myModalLabel">Select Gradeable</h3>
             </div>
@@ -329,7 +331,7 @@ HTML;
         foreach($results as $row) {
             $homeworkDate = new DateTime($row['g_grade_start_date']);
             //TODO ADD LATE DAYS
-            if ($row['eg_late_days'] > 0) {
+            if (isset($row['eg_late_days']) && $row['eg_late_days'] > 0) {
                 $homeworkDate->add(new DateInterval("PT{$row['eg_late_days']}H"));
             }
             $extra = ($now < $homeworkDate) ? "(Gradable: {$homeworkDate->format("Y-m-d H:i:s")})" : "";
@@ -396,7 +398,7 @@ if(isset($_GET["g_id"]) && isset($g_id)) {
     <i title="Show/Hide Submission and Results Browser (Press O)" class="icon-files" onclick="handleKeyPress('KeyO')"></i>
     <i title="Reset Rubric Panel Positions" class="icon-refresh" onclick="handleKeyPress('KeyR')"></i>
     <a <?php echo ($previous_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&prev={$previous_user_id}\""); ?> ><i title="Go to the previous student (Press Left Arrow)" class="icon-left <?php echo ($previous_user_id == "" ? 'icon-disabled' : ''); ?>" ></i></a>
-    <a <?php echo ("href=\"{$BASE_URL}/account/account-summary.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}\""); ?> ><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
+    <a <?php echo ("href=\"{$SUBMISSION_URL}/index.php?course={$_GET['course']}&semester={$_GET['semester']}&component=grading&page=electronic&action=summary&gradeable_id={$_GET['g_id']}\""); ?> ><i title="Go to the main page (Press H)" class="icon-home" ></i></a>
     <a <?php echo ($next_user_id == "" ? "" : "href=\"{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}&next={$next_user_id}\""); ?> ><i title="Go to the next student (Press Right Arrow)" class="icon-right <?php echo ($next_user_id == "" ? 'icon-disabled' : ''); ?>" ></i></a>
 </div>
 

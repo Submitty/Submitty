@@ -138,7 +138,7 @@ class DatabaseUtils {
                 $elements[] .= '"'. str_replace('"', '\"', $e) .'"';
             }
             else if (is_bool($e)) {
-                $elements[] .= ($e) ? "true" : "false";
+                $elements[] .= ($e === true) ? "true" : "false";
             }
             else {
                 $elements[] .= "{$e}";

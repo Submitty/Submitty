@@ -2,14 +2,9 @@
 
 namespace app\views\admin;
 
-use app\libraries\Core;
+use app\views\AbstractView;
 
-class ConfigurationView {
-    private $core;
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class ConfigurationView extends AbstractView {
     public function viewConfig($fields) {
         $zero_checked = ($fields['zero_rubric_grades'] === true) ? 'checked' : '';
         $keep_previous_files = ($fields['keep_previous_files'] === true) ? 'checked' : '';

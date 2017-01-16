@@ -214,7 +214,7 @@ class FileUtils {
      *
      * @param string $filename
      *
-     * @return string
+     * @return array|boolean
      */
     public static function readJsonFile($filename) {
         if (!is_file($filename)) {
@@ -330,5 +330,63 @@ class FileUtils {
 
         $sep = DIRECTORY_SEPARATOR;
         return preg_replace('#'.preg_quote($sep).'+#', $sep, join($sep, $paths));
+    }
+
+    /**
+     * Given a filename (with or without the fully formed path), this function will return a string that
+     * acts as a pseudo content-type for that file in any text based file that is recognized can use
+     * that content-type to tell CodeMirror how to highlight the file. As such, any unrecognized file
+     * extension will get the content type "text/x-sh" even though just "text" would probably be more
+     * appropriate. This is a weaker check for binary files than FileUtils::getMimeType which does
+     * some basic analysis of the actual file to determine the information as opposed to just the filename.
+     *
+     * @param $filename
+     * @return null|string
+     */
+    public static function getContentType($filename){
+        if ($filename === null) {
+            return null;
+        }
+        switch (strtolower(pathinfo($filename, PATHINFO_EXTENSION))) {
+            // pdf
+            case 'pdf':
+                $content_type = "application/pdf";
+                break;
+            // images
+            case 'png':
+                $content_type = "image/png";
+                break;
+            case 'jpg':
+            case 'jpeg':
+                $content_type = "image/jpeg";
+                break;
+            case 'gif':
+                $content_type = "image/gif";
+                break;
+            case 'bmp':
+                $content_type = "image/bmp";
+                break;
+            // text
+            case 'c':
+                $content_type = 'text/x-csrc';
+                break;
+            case 'cpp':
+            case 'cxx':
+            case 'h':
+            case 'hpp':
+            case 'hxx':
+                $content_type = 'text/x-c++src';
+                break;
+            case 'java':
+                $content_type = 'text/x-java';
+                break;
+            case 'py':
+                $content_type = 'text/x-python';
+                break;
+            default:
+                $content_type = 'text/x-sh';
+                break;
+        }
+        return $content_type;
     }
 }

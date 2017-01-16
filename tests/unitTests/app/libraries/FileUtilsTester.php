@@ -110,4 +110,35 @@ class FileUtilsTester extends \PHPUnit_Framework_TestCase {
         $actual = forward_static_call_array(array('app\\libraries\\FileUtils', 'joinPaths'), array_slice($args, 1));
         $this->assertEquals($expected, $actual);
     }
+
+    public function fileExtensions() {
+        return array(
+            array('test.pdf', 'application/pdf'),
+            array('test.png', 'image/png'),
+            array('test.jpg', 'image/jpeg'),
+            array('test.jpeg', 'image/jpeg'),
+            array('test.gif', 'image/gif'),
+            array('test.bmp', 'image/bmp'),
+            array('test.c', 'text/x-csrc'),
+            array('test.cpp', 'text/x-c++src'),
+            array('test.cxx', 'text/x-c++src'),
+            array('test.h', 'text/x-c++src'),
+            array('test.hpp', 'text/x-c++src'),
+            array('test.hxx', 'text/x-c++src'),
+            array('test.java', 'text/x-java'),
+            array('test.py', 'text/x-python'),
+            array('test.sh', 'text/x-sh'),
+            array('test', 'text/x-sh'),
+            array(null, null)
+        );
+    }
+
+    /**
+     * @dataProvider fileExtensions
+     * @param $filename
+     * @param $expected
+     */
+    public function testContentType($filename, $expected) {
+        $this->assertEquals($expected, FileUtils::getContentType($filename));
+    }
 }

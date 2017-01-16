@@ -117,7 +117,7 @@ class GradeableTestcase {
         return (!$this->isHidden()) ? $this->points : 0;
     }
     
-    public function getNormalPoints() {
+    public function getNonHiddenNonExtraCreditPoints() {
         return (!$this->isHidden() && !$this->isExtraCredit()) ? $this->points : 0;
     }
     
