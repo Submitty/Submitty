@@ -78,4 +78,46 @@ class UtilsTester extends \PHPUnit_Framework_TestCase {
     public function testEndsWith($haystack, $needle, $result) {
         $this->assertEquals(Utils::endsWith($haystack, $needle), $result);
     }
+
+    public function booleanConverts() {
+        return array(
+            array(true, "true"),
+            array(false, "false"),
+            array(null, "false"),
+            array("a", "false")
+        );
+    }
+
+    /**
+     * @dataProvider booleanConverts
+     *
+     * @param $value
+     * @param $expected
+     */
+    public function testConvertBooleanFalseString($value, $expected) {
+        $this->assertEquals($expected, Utils::convertBooleanToString($value));
+    }
+
+    public function testPrepareHtmlString() {
+        $string = "<test\n\ntest>";
+        $this->assertEquals("&lt;test<br />\n<br />\ntest&gt;", Utils::prepareHtmlString($string));
+    }
+
+    public function testStripStringFromArray() {
+        $array = array(
+            "test/aa",
+            array(
+                "test/test2/aa",
+                "bb"
+            )
+        );
+        $expected = array("/aa", array("/2/aa", "bb"));
+        $this->assertEquals($expected, Utils::stripStringFromArray("test", $array));
+    }
+
+    public function testStripStringFromArrayNull() {
+        $this->assertNull(Utils::stripStringFromArray("test", null));
+        $this->assertNull(Utils::stripStringFromArray(null, array()));
+        $this->assertNull(Utils::stripStringFromArray(1, array()));
+    }
 }

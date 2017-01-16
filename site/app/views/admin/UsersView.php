@@ -2,16 +2,10 @@
 
 namespace app\views\admin;
 
-use app\libraries\Core;
 use app\models\User;
+use app\views\AbstractView;
 
-class UsersView {
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class UsersView extends AbstractView {
     /**
      * @param User[] $students
      * @return string
@@ -90,7 +84,7 @@ HTML;
         else {
             $return .= <<<HTML
         <tr>
-            <td colspan="3">No students found</td>
+            <td colspan="8">No students found</td>
         </tr>
 HTML;
         }

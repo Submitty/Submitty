@@ -111,7 +111,7 @@ class Core {
 
         switch ($this->config->getDatabaseType()) {
             case 'pgsql':
-                $this->database_queries = new DatabaseQueriesPostgresql($this->database);
+                $this->database_queries = new DatabaseQueriesPostgresql($this);
                 break;
             default:
                 throw new DatabaseException("Unrecognized database type");
