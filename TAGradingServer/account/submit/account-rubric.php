@@ -1,6 +1,7 @@
 <?php
 
 include "../../toolbox/functions.php";
+require "../../models/HWReport.php";
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
     die("invalid csrf token");
@@ -73,6 +74,9 @@ $db->query("UPDATE gradeable_data SET gd_grader_id=?, gd_active_version=?, gd_ov
 if ($status == 1 && !$is_graded){
     $db->query("INSERT INTO late_days_used (user_id, g_id, late_days_used) VALUES (?,?,?)", array($student, $g_id, intval($_POST['late'])));
 }
+
+$hwReport = new HWReport();
+$hwReport->generateSingleReport($student, $g_id);
 
 if($_GET["individual"] == "1") {
    header('Location: '.$BASE_URL.'/account/account-summary.php?course='.$_GET['course'].'&semester='.$_GET['semester'].'&g_id=' . $_GET["g_id"]."#user-row-".$student);
