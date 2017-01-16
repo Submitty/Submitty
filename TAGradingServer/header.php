@@ -85,28 +85,18 @@ if ($user_logged_in) {
 HTML;
     if(isset($_GET['g_id'])){
         $db->query("SELECT g_title FROM gradeable WHERE g_id=?",array($_GET['g_id']));
-        $title = $db->row()['g_title'];
-        print <<<HTML
-                &gt; {$title}
-HTML;
-    }
-    if(isset($_GET['this'])) {
-        if (is_array($_GET['this'])) {
-            foreach ($_GET['this'] as $that) {
-                print <<<HTML
-                    &gt; {$that}
-HTML;
-            }
-        } else {
+
+        $title = $db->row();
+        if(!empty($title)){
             print <<<HTML
-                    &gt; {$_GET['this']}
+                &gt; {$title['g_title']}
 HTML;
         }
     }
     print <<<HTML
-                    </h4>
-                </div>
+                </h4>
             </div>
         </div>
+    </div>
 HTML;
 }

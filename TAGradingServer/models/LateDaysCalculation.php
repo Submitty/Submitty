@@ -3,12 +3,6 @@
 use \lib\Database;
 class LateDaysCalculation
 {
-    //Set grace period to 5 minutes in here
-    /**
-     * @var int. The number of minutes of grace a user is allowed before a submission is counted as late.
-     */
-    const grace_period = 5;
-
     /**Submission
      * @psuedo_struct Array([keys]). An array containing the data required to calculate late days for a given
      * gradeable. Contains the keys:
