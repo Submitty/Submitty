@@ -95,14 +95,16 @@ class DiffViewer {
             throw new \Exception("'{$actual_file}' could not be found.");
         }
         else if ($actual_file != "") {
-	    if (substr($actual_file,strlen($actual_file)-4,4) == ".png") {
-	        $this->actual_file_image = $actual_file;
-            } else {
+            // TODO: fix this hacky way to deal with images
+	        if (substr($actual_file,strlen($actual_file)-4,4) == ".png") {
+	            $this->actual_file_image = $actual_file;
+            }
+            else {
                 $this->actual = file_get_contents($actual_file);
                 $this->has_actual = trim($this->actual) !== "" ? true: false;
                 $this->actual = explode("\n", $this->actual);
                 $this->display_actual = true;
-	    }
+	        }
         }
         
         if (!file_exists($expected_file) && $expected_file != "") {

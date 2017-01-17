@@ -11,10 +11,11 @@ use app\libraries\GradeableType;
  * Populates the Gradeable model by loading the data from the database
  */
 class GradeableDb extends Gradeable {
-    public function __construct(Core $core, $id) {
-        parent::__construct($core, $id);
-        
-        $details = $this->core->getQueries()->getGradeableById($id);
+    public function __construct(Core $core, $details, $user=null) {
+        parent::__construct($core, $details['g_id']);
+
+        $this->user = ($user === null) ? $this->core->getUser() : $user;
+        $this->gd_id = $details['gd_id'];
         $timezone = new \DateTimeZone($this->core->getConfig()->getTimezone());
         $this->name = $details['g_title'];
         
@@ -31,16 +32,31 @@ class GradeableDb extends Gradeable {
             $this->subdirectory = $details['eg_subdirectory'];
             $this->point_precision = floatval($details['eg_precision']);
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
+            $this->grader_id = $details['gd_grader_id'];
+            $this->overall_comment = $details['gd_overall_comment'];
+            $this->status = $details['gd_status'];
+            $this->graded_version = $details['gd_active_version'];
+
+            if ($details['active_version'] !== null) {
+                $this->been_autograded = true;
+                $this->active_version = $details['active_version'];
+                $this->graded_auto_non_hidden_non_extra_credit = floatval($details['autograding_non_hidden_non_extra_credit']);
+                $this->graded_auto_non_hidden_extra_credit = floatval($details['autograding_non_hidden_extra_credit']);
+                $this->graded_auto_hidden_non_extra_credit = floatval($details['autograding_hidden_non_extra_credit']);
+                $this->graded_auto_hidden_extra_credit = floatval($details['autograding_hidden_extra_credit']);
+                $this->submission_time =  new \DateTime($details['submission_time'], $timezone);
+            }
+
+            $this->total_tagrading_extra_credit = floatval($details['total_tagrading_extra_credit']);
+            $this->total_tagrading_non_extra_credit = floatval($details['total_tagrading_non_extra_credit']);
+
+            if (isset($details['graded_tagrading']) && $details['graded_tagrading'] !== null) {
+                $this->been_tagraded = true;
+                $this->graded_tagrading = $details['graded_tagrading'];
+
+            }
             
             $this->loadGradeableConfig();
-        }
-        else if ($this->type === GradeableType::CHECKPOINTS) {
-            //$this->optional_ta_message = $details['checkpt-opt-ta-messg'] === "yes";
-            // TODO: load checkpoints
-        }
-        else {
-            $this->type = GradeableType::NUMERIC_TEXT;
-            // TODO: load numerics and text fields
         }
         
         $this->grade_by_registration = $details['g_grade_by_registration'] === true;

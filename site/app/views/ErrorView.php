@@ -2,7 +2,7 @@
 
 namespace app\views;
 
-class ErrorView {
+class ErrorView extends AbstractView {
     public function exceptionPage($error_message) {
         $top_message = "Oh no! Something irrecoverable has happened...";
         $error_message = nl2br(str_replace(" ", "&nbsp;", $error_message));
@@ -102,5 +102,23 @@ Please contact system administrators if you believe this is a mistake.
 </html>
 HTML;
 
+    }
+
+    public function noGradeable($gradeable_id) {
+        if ($gradeable_id === null) {
+            return <<<HTML
+<div class="content">
+    No gradeable id specified. Contact your instructor if you think this is an error.
+</div>
+HTML;
+        }
+        else {
+            return <<<HTML
+<div class="content">
+    {$gradeable_id} is not a valid electronic submission gradeable. Contact your instructor if you think this
+    is an error.
+</div>
+HTML;
+        }
     }
 }

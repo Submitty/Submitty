@@ -74,7 +74,10 @@ class User {
         $this->setRegistrationSection($details['registration_section']);
         $this->setRotatingSection($details['rotating_section']);
         $this->setManualRegistration($details['manual_registration']);
-        $this->setGradingRegistrationSections(DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']));
+        if (isset($details['grading_registration_sections'])) {
+            $this->setGradingRegistrationSections(DatabaseUtils::fromPGToPHPArray($details['grading_registration_sections']));
+        }
+
     }
     
     /**
@@ -271,9 +274,6 @@ class User {
     public function setGradingRegistrationSections($sections) {
         if ($this->getGroup() < 4) {
             $this->grading_registration_sections = $sections;
-        }
-        else {
-            $this->grading_registration_sections = array();
         }
     }
 }

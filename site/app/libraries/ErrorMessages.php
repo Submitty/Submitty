@@ -39,27 +39,4 @@ class ErrorMessages {
                 return "Unknown error code.";
         }
     }
-    
-    public static function zipErrors($code) {
-        switch($code) {
-            case \ZipArchive::ER_EXISTS:
-                return "File already exists.";
-            case \ZipArchive::ER_INCONS:
-                return "Zip archive is inconsistent.";
-            case \ZipArchive::ER_INVAL:
-                return "Invalid argument for opening the zip.";
-            case \ZipArchive::ER_MEMORY:
-                return "Malloc failure opening the zip.";
-            case \ZipArchive::ER_NOENT:
-                return "No such file.";
-            case \ZipArchive::ER_OPEN:
-                return "Couldn't open file.";
-            case \ZipArchive::ER_READ:
-                return "Read error.";
-            case \ZipArchive::ER_SEEK:
-                return "Seek error.";
-        }
-    }
-    
-    
 }

@@ -170,7 +170,7 @@ class SubmissionController extends AbstractController {
                 if (isset($uploaded_files[$i])) {
                     $count[$i] = count($uploaded_files[$i]["name"]);
                     for ($j = 0; $j < $count[$i]; $j++) {
-                        if (!isset($uploaded_files[$i]["tmp_name"][$j]) || $uploaded_files[$i]["tmp_name"][$j] == "") {
+                        if (!isset($uploaded_files[$i]["tmp_name"][$j]) || $uploaded_files[$i]["tmp_name"][$j] === "") {
                             $error_message = $uploaded_files[$i]["name"][$j]." failed to upload. ";
                             if (isset($uploaded_files[$i]["error"][$j])) {
                                 $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_files[$i]["error"][$j]). ".";
@@ -290,7 +290,12 @@ class SubmissionController extends AbstractController {
                                 $zip->close();
                             }
                             else {
-                                return $this->uploadResult("Could not properly unpack zip file. Error message: ".ErrorMessages::zipErrors($res), false);
+                                // If the zip is an invalid zip (say we remove the last character from the zip file
+                                // then trying to get the status code will throw an exception and not give us a string
+                                // so we have that string hardcoded, otherwise we can just get the status string as
+                                // normal.
+                                $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
+                                return $this->uploadResult("Could not properly unpack zip file. Error message: ".$error_message.".", false);
                             }
                         }
                         else {
@@ -346,11 +351,19 @@ class SubmissionController extends AbstractController {
 
         $user_id = $this->core->getUser()->getId();
 
-        $touch_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+        $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $user_id, $new_version);
-        $touch_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
-            implode("__", $touch_file));
-        if (!@touch($touch_file)) {
+        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_interactive",
+            implode("__", $queue_file));
+
+        // create json file...
+        $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
+                            "course" => $this->core->getConfig()->getCourse(),
+                            "gradeable" =>  $gradeable->getId(),
+                            "user" => $user_id,
+                            "version" => $new_version);
+
+        if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
         }
 

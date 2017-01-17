@@ -2,20 +2,10 @@
 
 namespace app\views;
 
-use app\libraries\Core;
 use \app\libraries\GradeableType;
 use app\models\Gradeable;
 
-class NavigationView {
-    /**
-     * @var Core
-     */
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class NavigationView extends AbstractView {
     public function showGradeables($sections_to_list) {
         $return = "";
 
@@ -136,7 +126,7 @@ HTML;
                         if ($g_data->useTAGrading()) {
                             $gradeable_grade_range = <<<HTML
                 <button class="btn {$title_to_button_type_grading[$title]}" style="width:100%;" \\
-                onclick="location.href='{$ta_base_url}/account/index.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
+                onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable))}'">
                 {$gradeable_grade_range}</button>
 HTML;
                         }

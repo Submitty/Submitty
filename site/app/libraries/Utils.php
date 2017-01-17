@@ -7,27 +7,26 @@ namespace app\libraries;
  */
 class Utils {
     /**
-     * Strips some string recursively from an array, removing it from both the array's keys and its values
+     * Recursively removes a string from any value in an array.
      *
-     * @param string $string
-     * @param array  $array
+     * @param string $needle
+     * @param array  $haystack
+     *
+     * @return array
      */
-    public static function stripStringFromArray($string, &$array) {
-        foreach($array as $key => $value) {
+    public static function stripStringFromArray($needle, $haystack) {
+        if (!is_array($haystack) || !is_string($needle)) {
+            return null;
+        }
+        foreach($haystack as $key => $value) {
             if (is_array($value)) {
-                Utils::stripStringFromArray($string, $value);
+                $haystack[$key] = Utils::stripStringFromArray($needle, $value);
             }
             else {
-                $value = str_replace($string, "", $value);
-            }
-            $new_key = str_replace($string, "", $key);
-            if($new_key != $key) {
-                $array[$new_key] = $value;
-                unset($array[$key]);
-            } else {
-                $array[$key] = $value;
+                $haystack[$key] = str_replace($needle, "", $value);
             }
         }
+        return $haystack;
     }
 
     /**
@@ -137,50 +136,4 @@ class Utils {
     public static function endsWith($haystack, $needle) {
         return substr($haystack, (-1*strlen($needle)), strlen($needle)) === $needle;
     }
-
-
-    function getContentType($filename){
-        switch (strtolower(pathinfo($filename, PATHINFO_EXTENSION))) {
-            // pdf
-            case 'pdf':
-                $content_type = "application/pdf";
-                break;
-            // images
-            case 'png':
-                $content_type = "image/png";
-                break;
-            case 'jpg':
-            case 'jpeg':
-                $content_type = "image/jpeg";
-                break;
-            case 'gif':
-                $content_type = "image/gif";
-                break;
-            case 'bmp':
-                $content_type = "image/bmp";
-                break;
-            // text
-            case 'c':
-                $content_type = 'text/x-csrc';
-                break;
-            case 'cpp':
-            case 'cxx':
-            case 'h':
-            case 'hpp':
-            case 'hxx':
-                $content_type = 'text/x-c++src';
-                break;
-            case 'java':
-                $content_type = 'text/x-java';
-                break;
-            case 'py':
-                $content_type = 'text/x-python';
-                break;
-            default:
-                $content_type = 'text/x-sh';
-                break;
-        }
-        return $content_type;
-    }
-
 }

@@ -2,19 +2,7 @@
 
 namespace app\views;
 
-use app\libraries\Core;
-use app\models\User;
-
-class GlobalView {
-    /**
-     * @var Core
-     */
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class GlobalView extends AbstractView {
     public function header($breadcrumbs, $css=array()) {
         $messages = <<<HTML
 <div id='messages'>

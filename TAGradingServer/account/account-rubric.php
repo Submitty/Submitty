@@ -5,11 +5,12 @@
     $s_user_id
     $g_id
 */
-
+require "../models/LateDaysCalculation.php";
 use \models\ElectronicGradeable;
 
-$eg = new ElectronicGradeable($s_user_id, $g_id);
+$output = "";
 
+$eg = new ElectronicGradeable($s_user_id, $g_id);
 $now = new DateTime('now');
 
 $eg_due_date = new DateTime($eg->eg_details['eg_submission_due_date']);
@@ -22,35 +23,9 @@ $grade_select_extra = $now < $eg_due_date ? 'disabled="true"' : "";
 //not sure if correct
 $color = "#998100";
 
-if ($eg->status == 1 && $eg->days_late_used == 0) {
-    $icon= '<i class="icon-ok icon-white"></i>';
-    $icon_color = "#008000";
-    $part_status = "Good";
-}
-else if ($eg->status == 1 && $eg->days_late_used > 0) {
-    $icon= '<i class="icon-exclamation-sign icon-white"></i>';
-    $color = "#998100";
-    $icon_color = "#FAA732";
-    $part_status = 'Late';
-}
-else {
-    $icon = '<i class="icon-remove icon-white"></i>';
-    $color  = "#DA4F49";
-    $icon_color  = "#DA4F49";
-    if ($eg->active_assignment == -1) {
-        $part_status  = 'No Submission';
-    }
-    else if($eg->active_assignment == 0){
-        $part_status = 'Cancelled';
-    }
-    else {
-        $part_status  = 'Bad';
-    }
-}
-
 $calculate_diff = __CALCULATE_DIFF__;
 if ($calculate_diff) {
-    $output = <<<HTML
+    $output .= <<<HTML
 
 <script>
     function openFile(url_file) {
@@ -307,9 +282,6 @@ HTML;
     $output .= <<<HTML
             <div class="tabbable" style="padding-top:10px;">
                 <ul id="myTab" class="nav nav-tabs">
-                    <li style="margin-right:2px; height:34px; width:20px; text-align:center; line-height:16px; padding-top:3px; -webkit-border-radius: 4px 4px 0 0; -moz-border-radius: 4px 4px 0 0; border-radius: 4px 4px 0 0; background-color: {$icon_color};">
-                        {$icon}
-                    </li>
 HTML;
 
     $i = 0;
@@ -414,73 +386,59 @@ else {
 
 $active_assignments = $eg->active_assignment;
 
+$late_charged = 0;
+
 $output .= <<<HTML
-            <form action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$eg->eg_details['g_id']}&student={$eg->student['user_id']}&individual={$individual}" method="post">
+            <form id="rubric_form" action="{$BASE_URL}/account/submit/account-rubric.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$eg->eg_details['g_id']}&student={$eg->student['user_id']}&individual={$individual}" method="post">
                 <input type="hidden" name="csrf_token" value="{$_SESSION['csrf']}" />
                 <input type="hidden" name="submitted" value="{$submitted}" />
                 <input type="hidden" name="status" value="{$eg->status}" />
                 <input type="hidden" name="is_graded" value="{$student_individual_graded}" />
-                <input type="hidden" name="late" value="{$eg->days_late}" />
+                <input type="hidden" name="late" value="{$late_charged}" />
                 <input type="hidden" name="active_assignment" value="{$active_assignments}" />
                 <div style="margin-top: 0; margin-bottom:35px;">
                     <input type="checkbox" style="margin-top:0; margin-right:5px;" id="rubric-autoscroll-checkbox" {$cookie_auto} /><span style="font-size:11px;">Rubric Auto Scroll</span>
                 </div>
 HTML;
 
-if ($eg->eg_details['eg_late_days'] >= 0) {
-    $late_days = $eg->eg_details['eg_late_days'];
-    $plural = (($late_days > 1) ? 's': '');
-    $output .= <<<HTML
-                <span style="color: black">Gradeable allows {$late_days} late day{$plural}.</span><br />
-HTML;
-}
+//Begin late day calculation////////////////////////////////////////////////////////////////////////////////////////////
+$due_string = $eg_due_date->format('Y-m-d H:i:s');
+$ldu = new LateDaysCalculation();
+$ld_table = $ldu->generate_table_for_user_date($s_user_id, $eg_due_date);
+$output .= $ld_table;
+$gradeable= $ldu->get_gradeable($s_user_id, $eg->g_id);
+$status = $gradeable['status'];
+$late_charged = $gradeable['late_days_charged'];
+//End late day calculation//////////////////////////////////////////////////////////////////////////////////////////////
 
-if ($eg->student['student_allowed_lates'] >= 0) {
-    $allowed_lates = $eg->student['student_allowed_lates'];
-    $plural = (($allowed_lates > 1) ? 's': '');
+if($status != "Good" && $status != "Late"){
+    $color = "red";
     $output .= <<<HTML
-                <span style="color: black">Student has used {$eg->student['used_late_days']}/{$allowed_lates} late day{$plural} this semester.</span><br />
+                <script>
+                    $('body').css('background-color', 'red');
+                    $("#rubric_form").submit(function(event){
+                       var confirm = window.confirm("This submission has a bad status. Are you sure you want to submit a grade for it?");
+                       if(!confirm){
+                           event.preventDefault();
+                       }
+                    });
+                </script>
 HTML;
 }
 
 $output .= <<<HTML
-                Late Days Used on Assignment:&nbsp;{$eg->days_late}<br />
-HTML;
+                <b>Status:</b> <span style="color: {$color};">{$status}</span><br />
 
-if ($eg->late_days_exception > 0) {
-    $late_days_exception = $eg->late_days_exception;
-    $plural = (($late_days_exception > 1) ? 's': '');
-    $output .= <<<HTML
-                <span style="color: green">Student has an exception of {$late_days_exception} late day{$plural}.</span><br />
-HTML;
-    $output .= <<<HTML
-                <b>Late Days Used:</b>&nbsp;{$eg->days_late_used}<br />
-HTML;
-}
-
-if($eg->status == 0 && $eg->submitted == 1) {
-    $output .= <<<HTML
-                <b style="color:#DA4F49;">Too many total late days used for this assignment</b><br />
-HTML;
-}
-
-$print_status = ($eg->status == 1) ? "Good" : "Bad";
-$output .= <<<HTML
-                <b>Status:</b> <span style="color: {$color};">{$part_status}</span><br />
     </div>
 </div>
-
-<div id="rubric" class="draggable rubric_panel" style="top:50px; right:20px;width:35%; height: 65%;">
-<span class="grading_label">Grading Rubric</span>
-    <div class="inner-container" style="margin:1px; height:100%">
-
 HTML;
-
 
 //============================================================
 
 $output .= <<<HTML
-
+            <div id="rubric" class="draggable rubric_panel" style="top:50px; right:20px;width:35%; height: 65%;">
+            <span class="grading_label">Grading Rubric</span>
+            <div class="inner-container" style="margin:1px; height:100%">
                 <table class="table table-bordered table-striped" id="rubric-table">
                     <thead>
 HTML;

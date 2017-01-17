@@ -2,15 +2,7 @@
 
 namespace app\views;
 
-use app\libraries\Core;
-
-class AuthenticationView {
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class AuthenticationView extends AbstractView {
     public function loginForm() {
         $return = <<<HTML
 <div class="content">
