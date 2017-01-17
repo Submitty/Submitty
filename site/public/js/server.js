@@ -289,9 +289,6 @@ $(function() {
     if (window.location.hash !== "") {
         if ($(window.location.hash).offset().top > 0) {
             var minus = 60;
-            if (hasNav) {
-                minus += 30;
-            }
             $("html, body").animate({scrollTop: ($(window.location.hash).offset().top - minus)}, 800);
         }
     }
