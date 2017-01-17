@@ -558,21 +558,21 @@ HTML;
 			break;
 		case 'bad_upload':
 			echo self::$view['head']                 .
-   				 self::$view['form']                 .
+   			     self::$view['form']                 .
 			     self::$view['bad_upload']           .
 			     self::$view['student_review_table'] .
 			     self::$view['tail'];
 			break;
 		case 'student_not_found':
 			echo self::$view['head']                 .
-   				 self::$view['form']                 .
+   			     self::$view['form']                 .
 			     self::$view['student_not_found']    .
 			     self::$view['student_review_table'] .
 			     self::$view['tail'];
 			break;
 		case 'late_days_not_integer':
 			echo self::$view['head']                  .
-   				 self::$view['form']                  .
+   			     self::$view['form']                  .
 			     self::$view['late_days_not_integer'] .
 			     self::$view['student_review_table']  .
 			     self::$view['tail'];
@@ -586,7 +586,7 @@ HTML;
 			break;
 		default:
 			echo self::$view['head']                 .
-				 self::$view['form']                 .
+			     self::$view['form']                 .
 			     self::$view['student_review_table'] .
 			     self::$view['tail'];
 			break;
