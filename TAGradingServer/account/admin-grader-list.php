@@ -145,6 +145,11 @@ HTML;
 	 *  Process CSV to DB
 	 */
 
+	//Set environment config to allow '\r' EOL encoding.  (reverts back after script exits)
+	//Otherwise, only '\n' and '\r\n' are allowed.  ('\r' is normally expected to be a Unix item seperator)
+	//Older versions of Microsoft Excel on Macintosh write CSVs with '\r' EOL encoding.
+	ini_set("auto_detect_line_endings", true);
+
 	// Read file into row-by-row array.  Returns false on failure.
 	$contents = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 	if ($contents === false) {
@@ -198,7 +203,7 @@ HTML;
 		$error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $vals[3]) ? "" : "Error in email column, row #{$row_being_processed}: {$vals[3]}" . PHP_EOL;
 
 		//grader-level check is a digit between 1 - 4.
-		$error_message .= preg_match("~[1-4]{1}~", $vals[4]) ? "" : "Error in grader-level email column, row #{$row_being_processed}: {$vals[4]}" . PHP_EOL;
+		$error_message .= preg_match("~[1-4]{1}~", $vals[4]) ? "" : "Error in grader-level column, row #{$row_being_processed}: {$vals[4]}" . PHP_EOL;
 
 		//Append content to data rows for processing.
 		$rows[] = $vals;
