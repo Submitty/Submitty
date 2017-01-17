@@ -189,6 +189,7 @@ function batchImportJSON(url, csrf_token){
     });
 }
 
+/*
 var hasNav = false;
 
 function UpdateTableHeaders() {
@@ -269,6 +270,23 @@ $(function() {
     }
 
     if (window.location.hash != "") {
+        if ($(window.location.hash).offset().top > 0) {
+            var minus = 60;
+            if (hasNav) {
+                minus += 30;
+            }
+            $("html, body").animate({scrollTop: ($(window.location.hash).offset().top - minus)}, 800);
+        }
+    }
+
+    setTimeout(function() {
+        $('.inner-message').fadeOut();
+    }, 5000);
+});
+*/
+
+$(function() {
+    if (window.location.hash !== "") {
         if ($(window.location.hash).offset().top > 0) {
             var minus = 60;
             if (hasNav) {
