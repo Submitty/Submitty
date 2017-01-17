@@ -197,8 +197,8 @@ HTML;
 		 */
 		$error_message .= preg_match("~.+@{1}[a-zA-Z0-9:\.\-\[\]]+$~", $vals[3]) ? "" : "Error in email column, row #{$row_being_processed}: {$vals[3]}" . PHP_EOL;
 
-		//grader-level check is a digit between 1 - 3.
-		$error_message .= preg_match("~[1-3]{1}~", $vals[4]) ? "" : "Error in grader-level email column, row #{$row_being_processed}: {$vals[4]}" . PHP_EOL;
+		//grader-level check is a digit between 1 - 4.
+		$error_message .= preg_match("~[1-4]{1}~", $vals[4]) ? "" : "Error in grader-level email column, row #{$row_being_processed}: {$vals[4]}" . PHP_EOL;
 
 		//Append content to data rows for processing.
 		$rows[] = $vals;
