@@ -179,8 +179,10 @@ class GradeableList {
     public function getGradingGradeables() {
         $list = array();
         foreach ($this->gradeables as $gradeable) {
-            if ($gradeable->getGradeStartDate() < $this->now
-                && $gradeable->getGradeReleasedDate() > $this->now) {
+            if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && !$gradeable->useTAGrading()) {
+                continue;
+            }
+            if ($gradeable->getGradeStartDate() < $this->now && $gradeable->getGradeReleasedDate() > $this->now) {
                 $list[$gradeable->getId()] = $gradeable;
             }
         }
