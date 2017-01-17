@@ -579,8 +579,8 @@ HTML;
 		    break;
 		case 'upsert_done':
 			echo self::$view['head']                 .
-				 self::$view['form']                 .
-				 self::$view['upsert_done']          .
+			     self::$view['form']                 .
+			     self::$view['upsert_done']          .
 			     self::$view['student_review_table'] .
 			     self::$view['tail'];
 			break;
