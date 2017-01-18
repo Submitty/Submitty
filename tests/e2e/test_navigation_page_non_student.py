@@ -11,7 +11,7 @@ class TestNavigationPageNonStudent(BaseTestCase):
         elements = self.driver.find_elements_by_class_name('nav-title-row')
         self.assertEqual(6, len(elements))
         self.assertEqual("future", elements[0].get_attribute('id'))
-        self.assertEqual(4, len(self.driver
+        self.assertEqual(3, len(self.driver
                          .find_element_by_id('future_tbody')
                          .find_elements_by_class_name("gradeable_row")))
         self.assertEquals("beta", elements[1].get_attribute('id'))
