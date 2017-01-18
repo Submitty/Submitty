@@ -81,4 +81,46 @@ class UserTester extends \PHPUnit_Framework_TestCase {
         $user->setPassword($hashed_password);
         password_verify("test", $hashed_password);
     }
+
+    public function testToObject() {
+        $details = array(
+            'user_id' => "test",
+            'user_password' => "test",
+            'user_firstname' => "User",
+            'user_preferred_firstname' => null,
+            'user_lastname' => "Tester",
+            'user_email' => "test@example.com",
+            'user_group' => 1,
+            'registration_section' => 1,
+            'rotating_section' => null,
+            'manual_registration' => false,
+            'grading_registration_sections' => "{1,2}"
+        );
+        $user = new User($details);
+        $actual = $user->toArray();
+        password_verify("test", $actual['password']);
+        unset($actual['password']);
+        ksort($actual);
+        $expected = array(
+            'displayed_first_name' => 'User',
+            'email' => 'test@example.com',
+            'first_name' => 'User',
+            'grading_registration_sections' => array(1,2),
+            'group' => 1,
+            'id' => 'test',
+            'last_name' => 'Tester',
+            'loaded' => true,
+            'manual_registration' => false,
+            'preferred_first_name' => "",
+            'registration_section' => 1,
+            'rotating_section' => null
+        );
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testErrorUser() {
+        $user = new User(array());
+        $this->assertFalse($user->isLoaded());
+        $this->assertNull($user->getId());
+    }
 }

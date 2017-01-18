@@ -8,7 +8,7 @@ namespace app\models;
  * Model for the GradeableComponent data whether read from a file or from the database (to mimic
  * the behavior of the main Gradeable model)
  */
-class GradeableComponent {
+class GradeableComponent extends AbstractModel {
     private $id;
     private $title;
     private $ta_comment;

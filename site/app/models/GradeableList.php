@@ -5,7 +5,7 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\GradeableType;
 
-class GradeableList {
+class GradeableList extends AbstractModel {
     /**
      * @var Core
      */
@@ -17,7 +17,7 @@ class GradeableList {
     private $gradeables = array();
     
     /**
-     * @var DateTime
+     * @var \DateTime
      *
     */
     private $now;

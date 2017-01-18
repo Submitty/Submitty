@@ -17,7 +17,7 @@ use app\libraries\Utils;
  * GradeableDb (which loads the data from the database). Additionally, it'll hold the relevant information necessary
  * for the TA to be able to grade this.
  */
-abstract class Gradeable {
+abstract class Gradeable extends AbstractModel {
 
     /** @var Core */
     protected $core;

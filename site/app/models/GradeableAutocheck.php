@@ -11,7 +11,7 @@ use app\libraries\Utils;
  * Contains information pertaining to the autocheck element that's contained within a
  * GradeableTestcase. There is 0+ autochecks per GradeableTestcase.
  */
-class GradeableAutocheck {
+class GradeableAutocheck extends AbstractModel {
     
     /** @var string */
     private $index;

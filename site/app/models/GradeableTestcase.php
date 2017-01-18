@@ -16,7 +16,7 @@ use app\libraries\Utils;
  * as we don't need that high level of information (as we really only ever need late days,
  * points awarded, and if it's the active version).
  */
-class GradeableTestcase {
+class GradeableTestcase extends AbstractModel {
     private $core;
     
     private $index;

@@ -409,7 +409,7 @@ LEFT JOIN (
 SELECT count(*) as cnt, rotating_section 
 FROM users 
 {$where}
-GROUP BY registration_section 
+GROUP BY rotating_section 
 ORDER BY rotating_section", $params);
         foreach ($this->database->rows() as $row) {
             if ($row['rotating_section'] === null) {
