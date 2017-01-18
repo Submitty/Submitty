@@ -190,7 +190,7 @@ hardening-includes python python-pip p7zip-full patchutils postgresql-client pos
 postgresql-contrib libpq-dev python-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
 javascript-common apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup \
 libfile-mmagic-perl libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ \
-g++-multilib jq libseccomp-dev libseccomp2 seccomp junit cmake libpcre3 libpcre3-dev flex bison spim
+g++-multilib jq libseccomp-dev libseccomp2 seccomp junit cmake libpcre3 libpcre3-dev flex bison spim poppler-utils
 
 apt-get install -qqy subversion subversion-tools
 apt-get install -qqy libapache2-svn

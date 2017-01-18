@@ -54,6 +54,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "cut",                     "/usr/bin/cut" },
     { "sort",                    "/usr/bin/sort" },
     { "sed",                     "/bin/sed" },
+    { "pdftotext",               "/usr/bin/pdftotext" },
+    { "wc",                      "/usr/bin/wc" },
 
     // Submitty Analysis Tools
     { "submitty_count_token",    SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token" },
