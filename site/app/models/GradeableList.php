@@ -17,7 +17,7 @@ class GradeableList {
     private $gradeables = array();
 
     /*
-     * All elements of $this->>gradeables should fall into one of the following six lists. There should
+     * All elements of $this->gradeables should fall into one of the following six lists. There should
      * be no overlap between them.
      */
     /** @var Gradeable[] */
