@@ -489,6 +489,10 @@ class Course(object):
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
         conn.close()
+        os.system("chown hwphp:{}_tas_www {}".format(self.code,
+                                                     os.path.join(SUBMITTY_DATA_DIR, "courses",
+                                                                  self.semester, self.code,
+                                                                  "config", "form", "*")));
 
         os.system("{}/courses/{}/{}/BUILD_{}.sh".format(SUBMITTY_DATA_DIR, self.semester,
                                                         self.code, self.code))

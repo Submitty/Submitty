@@ -1,0 +1,91 @@
+loop 0:  child pid 16776 started
+loop 1:  child pid 16777 started
+loop 2:  child pid 16778 started
+loop 3:  child pid 16779 started
+loop 4:  child pid 16780 started
+loop 5:  child pid 16781 started
+loop 6:  child pid 16782 started
+loop 7:  child pid 16783 started
+loop 8:  child pid 16788 started
+loop 9:  child pid 16789 started
+loop 10:  child pid 16790 started
+loop 11:  child pid 16791 started
+loop 12:  child pid 16792 started
+loop 13:  child pid 16793 started
+loop 14:  child pid 16794 started
+loop 15:  child pid 16795 started
+loop 16:  child pid 16796 started
+loop 17:  child pid 16797 started
+loop 18:  child pid 16802 started
+loop 19:  child pid 16803 started
+loop 20:  child pid 16804 started
+loop 21:  child pid 16805 started
+loop 22:  child pid 16806 started
+loop 23:  child pid 16807 started
+loop 24:  child pid 16808 started
+loop 25:  child pid 16809 started
+loop 26:  child pid 16810 started
+loop 27:  child pid 16811 started
+loop 28:  child pid 16812 started
+loop 29:  child pid 16813 started
+loop 0:  child pid 16776 going to exit
+child 16776 finished
+loop 1:  child pid 16777 going to exit
+child 16777 finished
+loop 2:  child pid 16778 going to exit
+child 16778 finished
+loop 3:  child pid 16779 going to exit
+child 16779 finished
+loop 4:  child pid 16780 going to exit
+child 16780 finished
+loop 5:  child pid 16781 going to exit
+child 16781 finished
+loop 6:  child pid 16782 going to exit
+child 16782 finished
+loop 7:  child pid 16783 going to exit
+child 16783 finished
+loop 8:  child pid 16788 going to exit
+child 16788 finished
+loop 9:  child pid 16789 going to exit
+child 16789 finished
+loop 10:  child pid 16790 going to exit
+child 16790 finished
+loop 11:  child pid 16791 going to exit
+child 16791 finished
+loop 12:  child pid 16792 going to exit
+child 16792 finished
+loop 13:  child pid 16793 going to exit
+child 16793 finished
+loop 14:  child pid 16794 going to exit
+child 16794 finished
+loop 15:  child pid 16795 going to exit
+child 16795 finished
+loop 16:  child pid 16796 going to exit
+child 16796 finished
+loop 17:  child pid 16797 going to exit
+child 16797 finished
+loop 18:  child pid 16802 going to exit
+child 16802 finished
+loop 19:  child pid 16803 going to exit
+child 16803 finished
+loop 20:  child pid 16804 going to exit
+child 16804 finished
+loop 21:  child pid 16805 going to exit
+child 16805 finished
+loop 22:  child pid 16806 going to exit
+child 16806 finished
+loop 23:  child pid 16807 going to exit
+child 16807 finished
+loop 24:  child pid 16808 going to exit
+child 16808 finished
+loop 25:  child pid 16809 going to exit
+child 16809 finished
+loop 26:  child pid 16810 going to exit
+child 16810 finished
+loop 27:  child pid 16811 going to exit
+child 16811 finished
+loop 28:  child pid 16812 going to exit
+child 16812 finished
+loop 29:  child pid 16813 going to exit
+child 16813 finished
+ALL DONE! 30 successful forks
