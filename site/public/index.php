@@ -141,6 +141,27 @@ if (!$logged_in) {
     }
 }
 
+if ($core->getUser() !== null) {
+    $log = false;
+    $action = "";
+    if ($_REQUEST['component'] === "authentication" && $_REQUEST['page'] === "logout") {
+        $log = true;
+        $action = "logout";
+    }
+    else if (in_array($_REQUEST['component'], array('student', 'submission')) && $_REQUEST['page'] === "submission" &&
+        $_REQUEST['action'] === "upload") {
+        $log = true;
+        $action = "submission:{$_REQUEST['gradeable_id']}";
+    }
+    else if (isset($_REQUEST['success_login']) && $_REQUEST['success_login'] === "true") {
+        $log = true;
+        $action = "login";
+    }
+    if ($log && $action !== "") {
+        Logger::logAccess($core->getUser()->getId(), $action);
+    }
+}
+
 switch($_REQUEST['component']) {
     case 'admin':
         $control = new app\controllers\AdminController($core);

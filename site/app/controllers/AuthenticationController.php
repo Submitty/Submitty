@@ -102,6 +102,7 @@ class AuthenticationController extends AbstractController {
                 }
             }
             $_SESSION['messages']['success'][] = "Successfully logged in as ".htmlentities($_POST['user_id']);
+            $redirect['success_login'] = "true";
             $this->core->redirect($this->core->buildUrl($redirect));
         }
         else {

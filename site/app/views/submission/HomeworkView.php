@@ -194,6 +194,7 @@ HTML;
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
                 handleSubmission("{$this->core->buildUrl(array('component' => 'student',
+                                                               'page' => 'submission',
                                                                'action' => 'upload',
                                                                'gradeable_id' => $gradeable->getId()))}",
                                  "{$this->core->buildUrl(array('component' => 'student',
