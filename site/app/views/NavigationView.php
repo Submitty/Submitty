@@ -52,11 +52,29 @@ HTML;
     <table class="gradeable_list" style="width:100%;">
 
 HTML;
-        $title_to_button_type_submission = array("FUTURE" => "btn-default", "OPEN" => "btn-primary" , "CLOSED" => "btn-danger",
-                                                 "ITEMS BEING GRADED" => "btn-default", "GRADED" => 'btn-success');
-        $title_to_button_type_grading = array("FUTURE" => "btn-default", "OPEN" => "btn-default" , "CLOSED" => "btn-default",
-                                                 "ITEMS BEING GRADED" => "btn-primary", "GRADED" => 'btn-danger');
-        $title_to_prefix = array("FUTURE" => "OPEN DATE", "OPEN" => "SUBMIT", "CLOSED" => "CLOSED", "ITEMS BEING GRADED" => "GRADING", "GRADED" => "GRADED");
+        $title_to_button_type_submission = array(
+            "FUTURE" => "btn-default",
+            "BETA" => "btn-default",
+            "OPEN" => "btn-primary" ,
+            "CLOSED" => "btn-danger",
+            "ITEMS BEING GRADED" => "btn-default",
+            "GRADED" => 'btn-success'
+        );
+        $title_to_button_type_grading = array(
+            "FUTURE" => "btn-default",
+            "BETA" => "btn-default",
+            "OPEN" => "btn-default" ,
+            "CLOSED" => "btn-default",
+            "ITEMS BEING GRADED" => "btn-primary",
+            "GRADED" => 'btn-danger');
+        $title_to_prefix = array(
+            "FUTURE" => "OPEN DATE",
+            "BETA" => "OPEN DATE",
+            "OPEN" => "SUBMIT",
+            "CLOSED" => "CLOSED",
+            "ITEMS BEING GRADED" => "GRADING",
+            "GRADED" => "GRADED"
+        );
 
         $found_assignment = false;
         foreach ($sections_to_list as $title => $gradeable_list) {
@@ -66,7 +84,7 @@ HTML;
             }
         }
 
-        if($found_assignment == false) {
+        if ($found_assignment == false) {
             $return .= <<<HTML
     <div class="container">
     <p>There are currently no assignments posted.  Please check back later.</p>
@@ -83,7 +101,7 @@ HTML;
 	    //  (released to graders for submission)
 	    //if ($title == "FUTURE" && !$this->core->getUser()->accessAdmin()) {
 
-            if ($title == "FUTURE" && !$this->core->getUser()->accessGrading()) {
+            if (($title === "FUTURE" || $title === "BETA") && !$this->core->getUser()->accessGrading()) {
                 continue;
             }
 
@@ -115,7 +133,7 @@ HTML;
 
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE){
 
-                    $display_date = ($title=="FUTURE") ? $g_data->getOpenDate()->format("m/d/y{$time}") : "(due ".$g_data->getDueDate()->format("m/d/y{$time}").")";
+                    $display_date = ($title == "FUTURE" || $title == "BETA") ? $g_data->getOpenDate()->format("m/d/y{$time}") : "(due ".$g_data->getDueDate()->format("m/d/y{$time}").")";
                     $button_text = "{$title_to_prefix[$title]} {$display_date}";
                     if ($g_data->hasConfig()) {
                         $gradeable_open_range = <<<HTML

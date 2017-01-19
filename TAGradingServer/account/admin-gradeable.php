@@ -640,8 +640,14 @@ HTML;
 
     $db->query("SELECT COUNT(*) AS cnt FROM sections_rotating", array());
     $num_rotating_sections = $db->row()['cnt'];
-    $all_sections = str_replace(array('[', ']'), '',
-                    htmlspecialchars(json_encode(range(1,$num_rotating_sections)), ENT_NOQUOTES));
+    if ($num_rotating_sections > 0) {
+        $all_sections = str_replace(array('[', ']'), '',
+            htmlspecialchars(json_encode(range(1,$num_rotating_sections)), ENT_NOQUOTES));
+    }
+    else {
+        $all_sections = "";
+    }
+
 
     $db->query("
     SELECT 
@@ -759,7 +765,7 @@ HTML;
           <td style="padding: 8px; border: 3px solid black; text-align: center;">{$sections}</td>      
 HTML;
     $last = $row['user_id'];
-  }  
+  }
   
   print <<<HTML
             </table>
