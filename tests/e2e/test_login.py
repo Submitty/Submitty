@@ -16,7 +16,8 @@ class TestLogin(BaseTestCase):
         you'll be taken to the login screen, and then once logged in,
         taken to that original page you had requested.
         """
-        url = "/index.php?semester=" + self.semester + "&course=csci1000&component=cpp_cats"
+        url = "/index.php?semester=" + self.semester + \
+              "&course=csci1000&component=cpp_cats&success_login=true"
         self.log_in(url)
         self.assertEqual(self.test_url + url, self.driver.current_url)
 
