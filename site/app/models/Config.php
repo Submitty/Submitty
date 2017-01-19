@@ -22,41 +22,41 @@ class Config extends AbstractModel {
      * turn on if running server in production environment.
      * @var bool
      */
-    private $debug = false;
+    protected $debug = false;
 
     /** @var string contains the semester to use, generally from the $_REQUEST['semester'] global */
-    private $semester;
+    protected $semester;
     /** @var string contains the course to use, generally from the $_REQUEST['course'] global */
-    private $course;
+    protected $course;
 
     /** @var string path on the filesystem that points to the course data directory */
-    private $config_path;
+    protected $config_path;
     /** @var string path to the ini file that contains all the course specific settings */
-    private $course_ini;
+    protected $course_ini;
 
     /*** MASTER CONFIG ***/
     /** @var string */
-    private $base_url;
+    protected $base_url;
     /** @var string */
-    private $course_url;
+    protected $course_url;
     /** @var string */
-    private $ta_base_url;
+    protected $ta_base_url;
     /** @var string */
-    private $cgi_url;
+    protected $cgi_url;
     /** @var string */
-    private $site_url;
+    protected $site_url;
     /** @var string */
-    private $authentication;
+    protected $authentication;
     /** @var string */
-    private $timezone = "America/New_York";
+    protected $timezone = "America/New_York";
     /** @var string */
-    private $submitty_path;
+    protected $submitty_path;
     /** @var string */
-    private $course_path;
+    protected $course_path;
     /** @var string */
-    private $submitty_log_path;
+    protected $submitty_log_path;
     /** @var bool */
-    private $log_exceptions;
+    protected $log_exceptions;
 
     /**
      * Database host for PDO. The user does not need to set this
@@ -64,53 +64,53 @@ class Config extends AbstractModel {
      * to PostgreSQL.
      * @var string
      */
-    private $database_type = "pgsql";
+    protected $database_type = "pgsql";
 
     /**
      * Database host for PDO
      * @var string
      */
-    private $database_host;
+    protected $database_host;
 
     /**
      * Database user for PDO
      * @var string
      */
-    private $database_user;
+    protected $database_user;
 
     /**
      * Database password for PDO
      * @var string
      */
-    private $database_password;
+    protected $database_password;
 
     /*** COURSE SPECIFIC CONFIG ***/
     /**
      * Database name for PDO
      * @var string
      */
-    private $database_name;
+    protected $database_name;
 
     /*** COURSE DATABASE CONFIG ***/
     /** @var string */
-    private $course_name;
+    protected $course_name;
     /** @var string */
-    private $course_home_url;
+    protected $course_home_url;
     /** @var int */
-    private $default_hw_late_days;
+    protected $default_hw_late_days;
     /** @var int */
-    private $default_student_late_days;
+    protected $default_student_late_days;
     /** @var bool */
-    private $zero_rubric_grades;
+    protected $zero_rubric_grades;
 
     /** @var string */
-    private $upload_message;
+    protected $upload_message;
     /** @var bool */
-    private $keep_previous_files;
+    protected $keep_previous_files;
     /** @var bool */
-    private $display_iris_grades_summary;
+    protected $display_iris_grades_summary;
     /** @var bool */
-    private $display_custom_message;
+    protected $display_custom_message;
 
     /**
      * Config constructor.

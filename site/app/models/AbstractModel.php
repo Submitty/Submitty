@@ -34,15 +34,23 @@ abstract class AbstractModel {
      * @return mixed
      */
     protected function parseObject($object) {
-        $return = $object;
         if (is_object($object)) {
-            /** @noinspection PhpUndefinedMethodInspection */
-            $return = $object->toArray();
+            if (is_a($object, 'app\Models\AbstractModel') || is_subclass_of($object, 'app\Models\AbstractModel')) {
+                /** @noinspection PhpUndefinedMethodInspection */
+                $return = $object->toArray();
+            }
+            else {
+                $return = get_class($object);
+            }
         }
         else if (is_array($object)) {
+            $return = array();
             foreach ($object as $key => $value) {
                 $return[$key] = $this->parseObject($value);
             }
+        }
+        else {
+            $return = $object;
         }
         return $return;
     }

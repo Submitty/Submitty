@@ -718,7 +718,7 @@ abstract class Gradeable extends AbstractModel {
         return $this->user;
     }
 
-    public function getCore() {
-        return $this->core;
+    public function getComponents() {
+        return $this->components;
     }
 }

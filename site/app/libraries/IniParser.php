@@ -29,9 +29,11 @@ class IniParser {
      * @return array
      */
     public static function readFile($filename) {
+        // @codeCoverageIgnoreStart
         if (!function_exists('parse_ini_file')) {
             throw new IniException("parse_ini_file needs to be enabled");
         }
+        // @codeCoverageIgnoreEnd
 
         if (!file_exists($filename)) {
             throw new FileNotFoundException("Could not find ini file to parse: {$filename}");

@@ -86,6 +86,7 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
     public function testConfig() {
         $this->createConfigFile();
         $config = new Config("s17", "csci0000", $this->master);
+
         $this->assertFalse($config->isDebug());
         $this->assertEquals("s17", $config->getSemester());
         $this->assertEquals("csci0000", $config->getCourse());
@@ -117,6 +118,44 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000", "config", "config.ini"),
             $config->getCourseIniPath());
         $this->assertNull($config->getCourseUrl());
+
+        $expected = array(
+            'debug' => false,
+            'semester' => 's17',
+            'course' => 'csci0000',
+            'base_url' => 'http://example.com/',
+            'ta_base_url' => 'http://example.com/ta/',
+            'cgi_url' => 'http://example.com/cgi/',
+            'site_url' => 'http://example.com/index.php?semester=s17&course=csci0000',
+            'submitty_path' => $this->temp_dir,
+            'course_path' => $this->temp_dir.'/courses/s17/csci0000',
+            'submitty_log_path' => $this->temp_dir.'/logs',
+            'log_exceptions' => true,
+            'database_type' => 'pgsql',
+            'database_host' => 'db_host',
+            'database_name' => 'submitty_s17_csci0000',
+            'database_user' => 'db_user',
+            'database_password' => 'db_pass',
+            'course_name' => 'Test Course',
+            'course_url' => null,
+            'config_path' => $this->temp_dir,
+            'course_ini' => $this->temp_dir.'/courses/s17/csci0000/config/config.ini',
+            'authentication' => 'PamAuthentication',
+            'timezone' => 'America/Chicago',
+            'course_home_url' => '',
+            'default_hw_late_days' => 2,
+            'default_student_late_days' => 3,
+            'zero_rubric_grades' => false,
+            'upload_message' => '',
+            'keep_previous_files' => false,
+            'display_iris_grades_summary' => false,
+            'display_custom_message' => false
+        );
+        $actual = $config->toArray();
+
+        ksort($expected);
+        ksort($actual);
+        $this->assertEquals($expected, $actual);
     }
 
     public function testCourseUrl() {
