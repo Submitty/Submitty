@@ -40,14 +40,14 @@ class ExceptionHandlerTester extends \PHPUnit_Framework_TestCase {
         Logger::setLogPath($tmp_dir);
         date_default_timezone_set("America/New_York");
         $date = getdate(time());
-        $filename = $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday']).".txt";
+        $filename = $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday'])."_error.log";
         ExceptionHandler::setDisplayExceptions(false);
         ExceptionHandler::setLogExceptions(true);
         ExceptionHandler::handleException(new BaseException("test", array("test"=>"b", "test2"=>array('a','c'))));
         $file = FileUtils::joinPaths($tmp_dir, $filename);
         $this->assertFileExists($file);
         $actual = file_get_contents($file);
-        $this->assertRegExp('/[0-9]{2}\/[0-9]{2}\/[0-9]{4}\ [0-9]{2}\:[0-9]{2}\:[0-9]{2} \- FATAL ERROR\napp.+/', $actual);
+        $this->assertRegExp('/[0-9]{2}\:[0-9]{2}\:[0-9]{2}\ [0-9]{2}\/[0-9]{2}\/[0-9]{4} \- FATAL ERROR\napp.+/', $actual);
         $this->assertRegExp('/Extra Details:\n\ttest: b\n\ttest2:\n\t\ta\n\t\tc/', $actual);
         ExceptionHandler::setLogExceptions(false);
         $this->assertTrue(FileUtils::recursiveRmdir($tmp_dir));
