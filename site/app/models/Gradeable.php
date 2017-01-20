@@ -503,6 +503,10 @@ abstract class Gradeable {
         return $this->active_version;
     }
 
+    public function getCurrentVersionNumber() {
+        return $this->current;
+    }
+
     /**
      * @return GradeableVersion|null
      */
