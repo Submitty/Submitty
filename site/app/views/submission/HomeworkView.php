@@ -54,7 +54,7 @@ HTML;
     public function showGradeable($gradeable, $days_late) {
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
-        $current_version_number = ($current_version === null) ? -1 : $current_version->getVersion();
+        $current_version_number = $gradeable->getCurrentVersionNumber();
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
@@ -270,14 +270,15 @@ HTML;
                 if ($current_version->getVersion() == $gradeable->getActiveVersion()) {
                     $version = 0;
                     $button = '<input type="submit" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">';
+                    $onsubmit = "";
                 }
                 else {
                     $version = $current_version->getVersion();
                     $button = '<input type="submit" class="btn btn-primary" value="Grade This Version">';
+                    $onsubmit = "onsubmit='return checkVersionChange({$gradeable->getDaysLate()},{$gradeable->getAllowedLateDays()})'";;
                 }
                 $return .= <<<HTML
-    <form style="display: inline;" method="post"
-            onsubmit="return checkVersionChange({$gradeable->getDaysLate()},{$gradeable->getAllowedLateDays()})"
+    <form style="display: inline;" method="post" {$onsubmit}
             action="{$this->core->buildUrl(array('component' => 'student',
                                                  'action' => 'update',
                                                  'gradeable_id' => $gradeable->getId(),
@@ -290,7 +291,7 @@ HTML;
 HTML;
             }
 
-            if($gradeable->getActiveVersion() == 0 && $current_version->getVersion() == 0) {
+            if($gradeable->getActiveVersion() === 0 && $current_version_number === 0) {
                 $return .= <<<HTML
     <div class="sub">
         <p class="red-message">

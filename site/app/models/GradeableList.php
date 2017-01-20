@@ -190,9 +190,24 @@ class GradeableList {
     public function getBetaGradeables() {
         return $this->beta_gradeables;
     }
-    
+
+    /**
+     * @return Gradeable[]
+     */
     public function getSubmittableElectronicGradeables() {
-        return array_merge($this->future_gradeables, $this->beta_gradeables, $this->open_gradeables);
+        $this->now;
+        $return = array();
+        foreach ($this->gradeables as $gradeable) {
+            if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+                continue;
+            }
+            if ($this->core->getUser()->accessAdmin() ||
+                ($gradeable->getTAViewDate() <= $this->now && $this->core->getUser()->accessGrading()) ||
+                $gradeable->getOpenDate() <= $this->now) {
+                $return[$gradeable->getId()] = $gradeable;
+            }
+        }
+        return $return;
     }
     
     public function getOpenElectronicGradeables() {
