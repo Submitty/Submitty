@@ -201,11 +201,14 @@ class GradeableList {
             if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
                 continue;
             }
+            $return[$gradeable->getId()] = $gradeable;
+            /* This seems to have a bug in it for normal students, need to investigate further
             if ($this->core->getUser()->accessAdmin() ||
                 ($gradeable->getTAViewDate() <= $this->now && $this->core->getUser()->accessGrading()) ||
                 $gradeable->getOpenDate() <= $this->now) {
                 $return[$gradeable->getId()] = $gradeable;
             }
+            */
         }
         return $return;
     }
