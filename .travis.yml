@@ -46,6 +46,7 @@ addons:
       - pkg-config
       - flex
       - bison
+      - poppler-utils
       - python3
       - python3-pip
       - libpcre3
