@@ -45,7 +45,7 @@ function exception_handler($throwable) {
     if (is_a($throwable, '\app\exceptions\BaseException')) {
         /** @var BaseException $throwable */
         if ($throwable->displayMessage()) {
-            $message = htmlentities($message);
+            $message = htmlentities($message, ENT_QUOTES);
         }
     }
     $core->getOutput()->showException($message);
