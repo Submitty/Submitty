@@ -40,7 +40,15 @@ $core = new Core();
  */
 function exception_handler($throwable) {
     global $core;
-    $core->getOutput()->showException(ExceptionHandler::handleException($throwable));
+    $message = ExceptionHandler::handleException($throwable);
+    // Any exceptions that always get shown we need to make sure to escape, especially for production
+    if (is_a($throwable, '\app\exceptions\BaseException')) {
+        /** @var BaseException $throwable */
+        if ($throwable->displayMessage()) {
+            $message = htmlentities($message, ENT_QUOTES);
+        }
+    }
+    $core->getOutput()->showException($message);
 }
 set_exception_handler("exception_handler");
 
