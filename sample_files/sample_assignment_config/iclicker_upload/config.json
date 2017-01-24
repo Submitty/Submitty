@@ -1,0 +1,12 @@
+{
+    "part_names" : [ ],
+    "textbox_names" : [ "Enter your 8 digit iClicker ID:" ],
+    "testcases" : [ 
+        {
+            "type" : "FileCheck",
+            "title" : "iClicker ID",
+            "actual_file" : "textbox_0.txt",
+            "points" : 0
+        }
+    ]
+}
