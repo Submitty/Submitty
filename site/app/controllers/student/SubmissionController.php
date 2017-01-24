@@ -187,7 +187,7 @@ class SubmissionController extends AbstractController {
             }
 
             // save the contents of the text boxes to files
-            if (isset($_POST['textbox_answers']) {
+            if (isset($_POST['textbox_answers'])) {
                 $empty_textboxes = true;
                 $textbox_answer_array = json_decode($_POST['textbox_answers']);
                 for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
