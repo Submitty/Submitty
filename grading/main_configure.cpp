@@ -119,9 +119,16 @@ int main(int argc, char *argv[]) {
 
   nlohmann::json::iterator parts = config_json.find("part_names");
   if (parts != config_json.end()) {
-    j["num_parts"] = parts->size();
+    j["part_names"] =  nlohmann::json::array();
     for (int i = 0; i < parts->size(); i++) {
       j["part_names"].push_back((*parts)[i]);
+    }
+  }
+  nlohmann::json::iterator textboxes = config_json.find("textbox_names");
+  if (textboxes != config_json.end()) {
+    j["textbox_names"] =  nlohmann::json::array();
+    for (int i = 0; i < textboxes->size(); i++) {
+      j["textbox_names"].push_back((*textboxes)[i]);
     }
   }
 

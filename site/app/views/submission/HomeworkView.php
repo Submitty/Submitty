@@ -78,6 +78,17 @@ HTML;
             $return .= <<<HTML
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
+
+
+            for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
+              $label = $gradeable->getTextBoxNames()[$i];
+                $return .= <<<HTML
+                  <p>
+                  $label <input type="text" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();">
+                  </p><br>
+HTML;
+            }
+
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 if ($gradeable->getNumParts() > 1) {
                     $label = "Drag your {$gradeable->getPartsNames()[$i]} here or click to open file browser";
@@ -203,7 +214,9 @@ HTML;
                                  {$gradeable->getAllowedLateDays()},
                                  {$gradeable->getHighestVersion()},
                                  {$gradeable->getMaxSubmissions()},
-                                 "{$this->core->getCsrfToken()}", {$svn_string});
+                                 "{$this->core->getCsrfToken()}",
+                                 {$svn_string},
+                                 {$gradeable->getNumTextBoxes()});
                 e.stopPropagation();
             });
         });
