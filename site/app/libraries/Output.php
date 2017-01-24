@@ -175,7 +175,7 @@ class Output {
     }
     
     public function addInternalCSS($file) {
-        $this->addCSS($this->core->getConfig->getBaseUrl()."/css/".$file);
+        $this->addCSS($this->core->getConfig()->getBaseUrl()."/css/".$file);
     }
  
     public function addCSS($url) {
