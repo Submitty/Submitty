@@ -187,16 +187,18 @@ class SubmissionController extends AbstractController {
             }
 
             // save the contents of the text boxes to files
-            $empty_textboxes = true;
-            $textbox_answer_array = json_decode($_POST['textbox_answers']);
-            for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
-                $textbox_answer_val = $textbox_answer_array[$i];
-                if ($textbox_answer_val != "") $empty_textboxes = false;
-                $dst = FileUtils::joinPaths($version_path, "textbox_".$i.".txt");
-                // FIXME: add error checking
-                $file = fopen($dst, "w");
-                fwrite($file, $textbox_answer_val);
-                fclose($file);
+            if (isset($_POST['textbox_answers']) {
+                $empty_textboxes = true;
+                $textbox_answer_array = json_decode($_POST['textbox_answers']);
+                for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
+                    $textbox_answer_val = $textbox_answer_array[$i];
+                    if ($textbox_answer_val != "") $empty_textboxes = false;
+                    $dst = FileUtils::joinPaths($version_path, "textbox_".$i.".txt");
+                    // FIXME: add error checking
+                    $file = fopen($dst, "w");
+                    fwrite($file, $textbox_answer_val);
+                    fclose($file);
+                }
             }
     
             $previous_files = array();
