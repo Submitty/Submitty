@@ -15,13 +15,16 @@ class NavigationView extends AbstractView {
         $site_url = $this->core->getConfig()->getSiteUrl();
         $return = "";
 
-        $message_file_path = $this->core->getConfig()->getCoursePath()."/reports/summary_html/".$this->core->getUser()->getId()."_message.html";
 
+        // ======================================================================================
+        // DISPLAY CUSTOM BANNER (typically used for exam seating assignments)
+        // note: placement of this information this may eventually be re-designed
+        // ======================================================================================
+        $message_file_path = $this->core->getConfig()->getCoursePath()."/reports/summary_html/".$this->core->getUser()->getId()."_message.html";
         $message_file_contents = "";
         if (file_exists($message_file_path)) {
             $message_file_contents = file_get_contents($message_file_path);
         }
-
         $display_custom_message = $this->core->getConfig()->displayCustomMessage();
         if ($display_custom_message && $message_file_contents != "") {
           $return .= <<<HTML
@@ -29,18 +32,24 @@ class NavigationView extends AbstractView {
    {$message_file_contents}
 </div>
 HTML;
-}
+        }
 
         $return .= <<<HTML
 <div class="content">
     <div class="nav-buttons">
 HTML;
+        // ======================================================================================
+        // CREATE NEW GRADEABLE BUTTON -- only visible to instructors
+        // ======================================================================================
         if ($this->core->getUser()->accessAdmin()) {
             $return .= <<<HTML
         <button class="btn btn-primary" onclick="window.location.href='{$ta_base_url}/account/admin-gradeable.php?course={$course}&semester={$semester}&this=New%20Gradeable'">New Gradeable</button>
         <!--<button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course={$course}&semester={$semester}&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button> -->
 HTML;
         }
+        // ======================================================================================
+        // GRADES SUMMARY BUTTON
+        // ======================================================================================
         $display_iris_grades_summary = $this->core->getConfig()->displayIrisGradesSummary();
         if ($display_iris_grades_summary) {
         $return .= <<<HTML
@@ -49,9 +58,23 @@ HTML;
           }
         $return .= <<<HTML
     </div>
-    <table class="gradeable_list" style="width:100%;">
-
 HTML;
+
+
+        // ======================================================================================
+        // INDEX OF ALL GRADEABLES
+        // ======================================================================================
+        $return .= <<<HTML
+    <table class="gradeable_list" style="width:100%;">
+HTML;
+        $title_to_category_title = array(
+            "FUTURE" => "FUTURE &nbsp;&nbsp; <em>visible only to Instructors</em>",
+            "BETA" => "BETA &nbsp;&nbsp; <em>open for testing by TAs</em>",
+            "OPEN" => "OPEN",
+            "CLOSED" => "PAST DUE",
+            "ITEMS BEING GRADED" => "CLOSED",
+            "GRADED" => "GRADES AVAILABLE"
+        );
         $title_to_button_type_submission = array(
             "FUTURE" => "btn-default",
             "BETA" => "btn-default",
@@ -68,12 +91,12 @@ HTML;
             "ITEMS BEING GRADED" => "btn-primary",
             "GRADED" => 'btn-danger');
         $title_to_prefix = array(
-            "FUTURE" => "OPEN DATE",
-            "BETA" => "OPEN DATE",
-            "OPEN" => "SUBMIT",
-            "CLOSED" => "CLOSED",
-            "ITEMS BEING GRADED" => "GRADING",
-            "GRADED" => "GRADED"
+            "FUTURE" => "ALPHA SUBMIT<br>",
+            "BETA" => "BETA SUBMIT<br>",
+            "OPEN" => "SUBMIT<br>",
+            "CLOSED" => "LATE SUBMIT<br>",
+            "ITEMS BEING GRADED" => "VIEW SUBMISSION",
+            "GRADED" => "VIEW GRADE"
         );
 
         $found_assignment = false;
@@ -105,25 +128,53 @@ HTML;
                 continue;
             }
 
-            if (count($gradeable_list) == 0) {
+
+            // count the # of electronic gradeables in this category
+            $electronic_gradeable_count = 0;
+            foreach ($gradeable_list as $gradeable => $g_data) {
+              if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
+                $electronic_gradeable_count++;
                 continue;
+              }
+            }
+
+            // if there are no gradeables, or if its a student and no electronic upload gradeables, don't show this category
+            if (count($gradeable_list) == 0 ||
+                ($electronic_gradeable_count == 0 && !$this->core->getUser()->accessGrading())) {
+              continue;
             }
 
             $lower_title = str_replace(" ", "_", strtolower($title));
             $return .= <<<HTML
         <tr class="bar"><td colspan="4"></td></tr>
-        <tr class="colspan nav-title-row" id="{$lower_title}"><td colspan="4">{$title}</td></tr>
+        <tr class="colspan nav-title-row" id="{$lower_title}"><td colspan="4">{$title_to_category_title[$title]}</td></tr>
         <tbody id="{$lower_title}_tbody">
 HTML;
             foreach ($gradeable_list as $gradeable => $g_data) {
+
+                // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
+                if ($g_data->getType() != GradeableType::ELECTRONIC_FILE && !$this->core->getUser()->accessGrading()) {
+                  continue;
+                }
+
                 /** @var Gradeable $g_data */
                 $date = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
                 if($g_data->getTAViewDate()->format('Y-m-d H:i:s') > $date->format('Y-m-d H:i:s') && !$this->core->getUser()->accessAdmin()){
                     continue;
                 }
-                $time = ($title=="GRADED") ? "": " @ H:i";
-                $gradeable_grade_range = ($title=='GRADED' || $title=='ITEMS BEING GRADED') ?
-                                         'GRADING (due '.$g_data->getGradeStartDate()->format("m/d/y{$time}").')' : 'GRADING (open '.$g_data->getGradeReleasedDate()->format("m/d/y{$time}").")";
+                $time = " @ H:i";
+
+                $gradeable_grade_range = 'VIEW FORM<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/y{$time}").")</span>";
+                if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
+                  $gradeable_grade_range = 'VIEW SUBMISSIONS<br><span style="font-size:smaller;">(grading opens '.$g_data->getGradeStartDate()->format("m/d/y{$time}")."</span>)";
+                }
+                if ($title=='ITEMS BEING GRADED') {
+                  $gradeable_grade_range = 'GRADE<br><span style="font-size:smaller;">(grades due '.$g_data->getGradeReleasedDate()->format("m/d/y{$time}").'</span>)';
+                }
+                if ($title=='GRADED') {
+                  $gradeable_grade_range = 'REGRADE';
+                }
+
                 if(trim($g_data->getInstructionsURL())!=''){
                     $gradeable_title = '<label>'.$g_data->getName().'</label><a class="external" href="'.$g_data->getInstructionsURL().'" target="_blank"><i style="margin-left: 10px;" class="fa fa-external-link"></i></a>';
                 }
@@ -133,7 +184,8 @@ HTML;
 
                 if ($g_data->getType() == GradeableType::ELECTRONIC_FILE){
 
-                    $display_date = ($title == "FUTURE" || $title == "BETA") ? $g_data->getOpenDate()->format("m/d/y{$time}") : "(due ".$g_data->getDueDate()->format("m/d/y{$time}").")";
+                    $display_date = ($title == "FUTURE" || $title == "BETA") ? "<span style=\"font-size:smaller;\">(opens ".$g_data->getOpenDate()->format("m/d/y{$time}")."</span>)" : "<span style=\"font-size:smaller;\">(due ".$g_data->getDueDate()->format("m/d/y{$time}")."</span>)";
+                    if ($title=="GRADED" || $title=="ITEMS BEING GRADED") { $display_date = ""; }
                     $button_text = "{$title_to_prefix[$title]} {$display_date}";
                     if ($g_data->hasConfig()) {
                         $gradeable_open_range = <<<HTML
