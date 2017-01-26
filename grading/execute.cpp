@@ -53,9 +53,12 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "mogrify",                 "/usr/bin/mogrify" }, //image magick!
     { "cut",                     "/usr/bin/cut" },
     { "sort",                    "/usr/bin/sort" },
+    { "grep",                    "/bin/grep" },
     { "sed",                     "/bin/sed" },
     { "pdftotext",               "/usr/bin/pdftotext" },
     { "wc",                      "/usr/bin/wc" },
+    { "head",                    "/usr/bin/head" },
+    { "tail",                    "/usr/bin/tail" },
 
     // Submitty Analysis Tools
     { "submitty_count_token",    SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token" },
