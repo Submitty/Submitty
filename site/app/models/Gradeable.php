@@ -127,7 +127,7 @@ abstract class Gradeable {
     protected $part_names = array();
 
     /** @var string[] */
-    protected $textbox_names = array();
+    protected $textboxes = array();
 
     /* Variables for submission details (such as attempts used, etc.) */
     protected $submissions = 0;
@@ -234,8 +234,8 @@ abstract class Gradeable {
         }
 
         $num_textboxes = 0;
-        if (isset($details['textbox_names'])) {
-          $num_textboxes = count($details['textbox_names']);
+        if (isset($details['textboxes'])) {
+          $num_textboxes = count($details['textboxes']);
         }
 
         for ($i = 1; $i <= $num_parts; $i++) {
@@ -251,7 +251,8 @@ abstract class Gradeable {
         }
 
         for ($i = 0; $i < $num_textboxes; $i++) {
-          $this->textbox_names[$i] = $details['textbox_names'][$i];
+          $this->textbox_names[$i] = $details['textboxes'][$i]['label'];
+          $this->textboxes[$i] = $details['textboxes'][$i];
         }
 
         if (isset($details['testcases'])) {
@@ -508,6 +509,9 @@ abstract class Gradeable {
 
     public function getTextBoxNames() {
         return $this->textbox_names;
+    }
+    public function getTextBoxes() {
+        return $this->textboxes;
     }
 
     public function getHighestVersion() {

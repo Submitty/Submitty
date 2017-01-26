@@ -292,6 +292,41 @@ function handle_textbox_keypress() {
     setButtonStatus();
 }
 
+function handle_textbox_keypress() {
+    empty_textboxes = false;
+    setButtonStatus();
+}
+
+function allow_textbox_tab_character(e) {
+    //alert ("hi I'm in textbox tab with "+e.keyCode);
+    if(e.keyCode === 9) { // tab was pressed
+        alert ("found a tab");
+        // get caret position/selection
+        var start = this.selectionStart;
+        var end = this.selectionEnd;
+
+        var $this = $(this);
+        var value = $this.val();
+
+        // set textarea value to: text before caret + tab + text after caret
+        $this.val(value.substring(0, start)
+                    + "\t"
+                    + value.substring(end));
+
+        // put caret at right position again (add one for the tab)
+        this.selectionStart = this.selectionEnd = start + 1;
+
+        // prevent the focus lose
+        alert ("going to prevent");
+        e.preventDefault();
+        alert ("going to stop");
+        e.stopPropagation();
+        alert ("going to return false");
+        return false;
+    }
+}
+
+
 // HANDLE SUBMISSION
 //========================================================================================
 function isValidSubmission(){
