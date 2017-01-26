@@ -72,7 +72,7 @@ HTML;
             "BETA" => "BETA &nbsp;&nbsp; <em>open for testing by TAs</em>",
             "OPEN" => "OPEN",
             "CLOSED" => "PAST DUE",
-            "ITEMS BEING GRADED" => "CLOSED",
+            "ITEMS BEING GRADED" => "CLOSED &nbsp;&nbsp; <em>being graded by TA/Instructor</em>",
             "GRADED" => "GRADES AVAILABLE"
         );
         $title_to_button_type_submission = array(
