@@ -119,10 +119,37 @@ int main(int argc, char *argv[]) {
 
   nlohmann::json::iterator parts = config_json.find("part_names");
   if (parts != config_json.end()) {
-    j["num_parts"] = parts->size();
+    j["part_names"] =  nlohmann::json::array();
     for (int i = 0; i < parts->size(); i++) {
       j["part_names"].push_back((*parts)[i]);
     }
+  }
+  nlohmann::json::iterator textboxes = config_json.find("textboxes");
+  if (textboxes != config_json.end()) {
+    j["textboxes"] =  nlohmann::json::array();
+    for (int i = 0; i < textboxes->size(); i++) {
+      nlohmann::json textbox;
+      nlohmann::json::iterator label = (*textboxes)[i].find("label");
+      assert (label != (*textboxes)[i].end());
+      assert (label->is_string());
+      textbox["label"] = *label;
+      // default #rows = 0 => single row, non resizeable, textbox
+      textbox["rows"]  = (*textboxes)[i].value("rows",0);
+      assert (int(textbox["rows"]) >= 0);
+      textbox["filename"] = (*textboxes)[i].value("filename","textbox_"+std::to_string(i)+".txt");
+      j["textboxes"].push_back(textbox);
+    }
+  }
+
+  // By default, we have one drop zone without a part label / sub
+  // directory.
+
+  // But, if there are textboxes, but there are no explicit parts
+  // (drag & drop zones / "bucket"s for file upload), set part_names
+  // to an empty array (no zones for file drag & drop).
+  if (parts == config_json.end() &&
+      textboxes != config_json.end()) {
+    j["part_names"] =  nlohmann::json::array();
   }
 
   j["auto_pts"] = AUTO_POINTS;

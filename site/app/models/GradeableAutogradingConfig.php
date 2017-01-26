@@ -46,13 +46,6 @@ class GradeableAutogradingConfig {
             $details['assignment_mesage'] = Utils::prepareHtmlString($details['assignment_message']);
         }
 
-        if (isset($details['num_parts'])) {
-            $details['num_parts'] = intval($details['num_parts']);
-            if ($details['num_parts'] < 1) {
-                $details['num_parts'] = 1;
-            }
-        }
-
         GradeableAutogradingConfig::$config_store[$gradeable_id] = $details;
     }
 
