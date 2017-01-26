@@ -433,7 +433,7 @@ LEFT JOIN (
 SELECT count(*) as cnt, rotating_section 
 FROM users 
 {$where}
-GROUP BY registration_section 
+GROUP BY rotating_section 
 ORDER BY rotating_section", $params);
         foreach ($this->database->rows() as $row) {
             if ($row['rotating_section'] === null) {
@@ -459,8 +459,8 @@ INNER JOIN (
   SELECT * FROM gradeable_data WHERE g_id=? AND (gd_active_version >= 0 OR (gd_active_version = -1 AND gd_status = 0))
 ) AS gd ON u.user_id = gd.gd_user_id
 {$where}
-GROUP BY u.rotating_section
-ORDER BY u.rotating_section", $params);
+GROUP BY u.registration_section
+ORDER BY u.registration_section", $params);
         foreach ($this->database->rows() as $row) {
             if ($row['rotating_section'] === null) {
                 $row['rotating_section'] = "NULL";
