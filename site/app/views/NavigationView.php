@@ -99,22 +99,8 @@ HTML;
             "GRADED" => "VIEW GRADE"
         );
 
-        $found_assignment = false;
-        foreach ($sections_to_list as $title => $gradeable_list) {
-            if(count($gradeable_list) != 0) {
-                $found_assignment = true;
-                break;
-            }
-        }
 
-        if ($found_assignment == false) {
-            $return .= <<<HTML
-    <div class="container">
-    <p>There are currently no assignments posted.  Please check back later.</p>
-    </div></table></div>
-HTML;
-            return $return;
-        }
+        $found_assignment = false;
 
         foreach ($sections_to_list as $title => $gradeable_list) {
 
@@ -142,6 +128,8 @@ HTML;
             if (count($gradeable_list) == 0 ||
                 ($electronic_gradeable_count == 0 && !$this->core->getUser()->accessGrading())) {
               continue;
+            } else {
+              $found_assignment = true;
             }
 
             $lower_title = str_replace(" ", "_", strtolower($title));
@@ -269,6 +257,16 @@ HTML;
             }
             $return .= '</tbody><tr class="colspan"><td colspan="4" style="border-bottom:2px black solid;"></td></tr>';
         }
+
+        if ($found_assignment == false) {
+            $return .= <<<HTML
+    <div class="container">
+    <p>There are currently no assignments posted.  Please check back later.</p>
+    </div></table></div>
+HTML;
+            return $return;
+        }
+
         $return .= <<<HTML
                             </table>
                         </div>
