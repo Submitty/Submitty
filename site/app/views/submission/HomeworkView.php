@@ -85,13 +85,13 @@ HTML;
                 $rows = $gradeable->getTextBoxes()[$i]['rows'];
                 if ($rows == 0) {
                   $return .= <<<HTML
-                    <p>
+                    <p style="max-width: 50em;">
                     $label<br><input type="text" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();">
                     </p><br>
 HTML;
                 } else {
                   $return .= <<<HTML
-                    <p>
+                    <p style="max-width: 50em;">
                     $label<br><textarea rows="{$rows}" cols="50"  style="width:60em; height:100%;" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();"></textarea>
                     </p><br>
 HTML;
