@@ -78,6 +78,54 @@ HTML;
             $return .= <<<HTML
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
+
+
+            for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
+                $label = $gradeable->getTextBoxes()[$i]['label'];
+                $rows = $gradeable->getTextBoxes()[$i]['rows'];
+                if ($rows == 0) {
+                  $return .= <<<HTML
+                    <p style="max-width: 50em;">
+                    $label<br><input type="text" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();">
+                    </p><br>
+HTML;
+                } else {
+                  $return .= <<<HTML
+                    <p style="max-width: 50em;">
+                    $label<br><textarea rows="{$rows}" cols="50"  style="width:60em; height:100%;" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();"></textarea>
+                    </p><br>
+HTML;
+
+                  // Allow tab in the larger text boxes (normally tab moves to the next textbox)
+                  // http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
+$return .= <<<HTML
+<script>
+$("#textbox_{$i}").keydown(function(e) {
+HTML;
+$return .= <<<'HTML'
+    if(e.keyCode === 9) { // tab was pressed
+        // get caret position/selection
+        var start = this.selectionStart;
+        var end = this.selectionEnd;
+        var $this = $(this);
+        var value = $this.val();
+        // set textarea value to: text before caret + tab + text after caret
+        $this.val(value.substring(0, start)
+                    + "\t"
+                    + value.substring(end));
+        // put caret at right position again (add one for the tab)
+        this.selectionStart = this.selectionEnd = start + 1;
+        // prevent the focus lose
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+});
+</script>
+HTML;
+
+                }
+            }
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 if ($gradeable->getNumParts() > 1) {
                     $label = "Drag your {$gradeable->getPartsNames()[$i]} here or click to open file browser";
@@ -203,7 +251,9 @@ HTML;
                                  {$gradeable->getAllowedLateDays()},
                                  {$gradeable->getHighestVersion()},
                                  {$gradeable->getMaxSubmissions()},
-                                 "{$this->core->getCsrfToken()}", {$svn_string});
+                                 "{$this->core->getCsrfToken()}",
+                                 {$svn_string},
+                                 {$gradeable->getNumTextBoxes()});
                 e.stopPropagation();
             });
         });
