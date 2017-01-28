@@ -876,7 +876,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
       if (students_loaded == false) continue;
       assert (s != NULL);
       s->addRecommendation(line);
-      */
+      */ /*
 
     } else if (token == "note") {
       // other grading note [ per student ]
@@ -1272,6 +1272,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 		s->addNote(message);
 	  }
 	} else if (token == "earned_late_days") {
+	  DISPLAY_LATE_DAYS = true;
 	  std::vector<float> earnedLateDays = j[token].get<std::vector<float> >();
 	  GLOBAL_earned_late_days.clear();
 	  for (int i = 0; i < earnedLateDays.size(); i++) {
