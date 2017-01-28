@@ -35,7 +35,7 @@ void suggest_curves(std::vector<Student*> &students);
 
 std::string ICLICKER_ROSTER_FILE              = "./iclicker_Roster.txt";
 std::string OUTPUT_FILE                       = "./output.html";
-std::string CUSTOMIZATION_FILE                = "./for_garrett.json";
+std::string CUSTOMIZATION_FILE                = "./customization.json";
 
 std::string RAW_DATA_DIRECTORY                = "./raw_data/";
 std::string INDIVIDUAL_FILES_OUTPUT_DIRECTORY = "./individual_summary_html/";
@@ -97,6 +97,8 @@ char GLOBAL_EXAM_TITLE[MAX_STRING_LENGTH] = "exam title uninitialized";
 char GLOBAL_EXAM_DATE[MAX_STRING_LENGTH] = "exam date uninitialized";
 char GLOBAL_EXAM_TIME[MAX_STRING_LENGTH] = "exam time uninitialized";
 char GLOBAL_EXAM_DEFAULT_ROOM[MAX_STRING_LENGTH] = "exam default room uninitialized";
+char GLOBAL_EXAM_SEATING[MAX_STRING_LENGTH] = "";
+char GLOBAL_EXAM_SEATING_COUNT[MAX_STRING_LENGTH] = "";
 
 float GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = 0.1;
 
@@ -449,16 +451,19 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 	float p = 0.0;
 	float m = 0.0;
 	
-	json ids = j["gradeables"][gradeable_name]["ids"];
-	//std::cout << ids << std::endl;
-	for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
-	  std::string gradeable_id = itr2.key();
-	  //std::cout << "hi " << gradeable_id << std::endl;
-	  json grades = ids[gradeable_id];
-	  c++;
-	  p += grades["percent"].get<float>();
-	  m += grades["max"].get<float>();
-	}  
+	json ids_list = j["gradeables"][gradeable_name]["ids"];
+	for (unsigned int i = 0; i < ids_list.size(); i++) {
+	  json ids = ids_list[i];
+	  //std::cout << ids << std::endl;
+	  for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
+	    std::string gradeable_id = itr2.key();
+	    //std::cout << "hi " << gradeable_id << std::endl;
+	    json grades = ids[gradeable_id];
+	    c++;
+	    p += grades["percent"].get<float>();
+	    m += grades["max"].get<float>();
+	  }  
+	}
 	//std::cout << "it makes it here in gradeable4" << std::endl;
 
 	//std::cout << c << " " << p << " " << m << std::endl;
@@ -502,11 +507,14 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 	  std::cout << "UNKNOWN GRADEABLE: " << gradeable_name << std::endl;
 	  exit(0);
 	}
-	json ids = j["gradeables"][gradeable_name]["ids"];
-	for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
-	  int which = GRADEABLES[g].setCorrespondence(itr2.key());
-	  p_score = (*itr2).value("max", 0.0);
-	  std::vector<float> curve = (*itr2)["curve"].get<std::vector<float> >();
+	json ids_list = j["gradeables"][gradeable_name]["ids"];
+	//std::cout << "hello ids_list" << std::endl;
+	for (unsigned int i = 0; i < ids_list.size(); i++) {
+	  json grade_id = ids_list[i];
+	  std::string token_key = (grade_id.begin()).key();
+	  int which = GRADEABLES[g].setCorrespondence(token_key);
+	  p_score = grade_id[token_key].value("max", 0.0);
+	  std::vector<float> curve = grade_id[token_key]["curve"].get<std::vector<float> >();
 	  if (!curve.empty()) {
 		assert (curve.size() == 5);
 		p_score = curve[0];
@@ -515,7 +523,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 		c_score = curve[3];
 		d_score = curve[4];
 	  } else {
-		p_score = (*itr2).value("max", 0.0);
+		p_score = grade_id.value("max", 0.0);
 		a_score = GetBenchmarkPercentage("lowest_a-")*p_score;
 		b_score = GetBenchmarkPercentage("lowest_b-")*p_score;
 		c_score = GetBenchmarkPercentage("lowest_c-")*p_score;
@@ -533,6 +541,45 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
       lowest_b->setGradeableItemGrade(g,which, b_score);
       lowest_c->setGradeableItemGrade(g,which, c_score);
       lowest_d->setGradeableItemGrade(g,which, d_score);
+	  
+	  //std::cout << "it makes it to exam data" << std::endl;
+	  
+	  json exam_data = grade_id[token_key]["exam_data"];
+	  //std::cout << exam_data << std::endl;
+	  if (!exam_data.empty()) {
+		//std::cout << "makes it into exam data" << std::endl;
+	    int active = exam_data["active"].get<int>();
+		if (active == 1) {
+	      for (json::iterator itr2 = (exam_data).begin(); itr2 != (exam_data).end(); itr2++) {
+	        std::string token2 = itr2.key();
+		    //std::cout << token2 << std::endl;
+		    if (token2 == "exam_title") {
+		      std::string value = itr2.value();
+		      strcpy(GLOBAL_EXAM_TITLE, value.c_str());
+		    } else if (token2 == "exam_date") {
+		      std::string value = itr2.value();
+		      strcpy(GLOBAL_EXAM_DATE, value.c_str());
+		    } else if (token2 == "exam_time") {
+		      std::string value = itr2.value();
+		      strcpy(GLOBAL_EXAM_TIME, value.c_str());
+		    } else if (token2 == "exam_default_room") {
+		      std::string value = itr2.value();
+		      strcpy(GLOBAL_EXAM_DEFAULT_ROOM, value.c_str());
+		    } else if (token2 == "min_overall_for_zone_assignment") {
+		      float value = itr2.value();
+		      GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = value;
+		    } else if (token2 == "exam_seating") {
+		      std::cout << "TOKEN IS EXAM SEATING" << std::endl;
+			  std::string value = itr2.value();
+			  strcpy(GLOBAL_EXAM_SEATING, value.c_str());
+			} else if (token2 == "exam_seating_count") {
+		      std::cout << "TOKEN IS EXAM SEATING COUNT" << std::endl;
+			  std::string value = itr2.value();
+			  strcpy(GLOBAL_EXAM_SEATING_COUNT, value.c_str());
+			}
+	      }
+		}
+	  }
 	}
   }
   students.push_back(perfect);
@@ -1307,37 +1354,6 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	  }
 	} else if (token == "gradeables") {
 	  continue;
-	} else if (token == "exam_data") {
-	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-	    token2 = itr2.key();
-		std::cout << token2 << std::endl;
-		if (token2 == "exam_title") {
-		  std::string value = itr2.value();
-		  strcpy(GLOBAL_EXAM_TITLE, value.c_str());
-		} else if (token2 == "exam_date") {
-		  std::string value = itr2.value();
-		  strcpy(GLOBAL_EXAM_DATE, value.c_str());
-		} else if (token2 == "exam_time") {
-		  std::string value = itr2.value();
-		  strcpy(GLOBAL_EXAM_TIME, value.c_str());
-		} else if (token2 == "exam_default_room") {
-		  std::string value = itr2.value();
-		  strcpy(GLOBAL_EXAM_DEFAULT_ROOM, value.c_str());
-		} else if (token2 == "min_overall_for_zone_assignment") {
-		  float value = itr2.value();
-		  GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = value;
-		} else if (token2 == "exam_seating") {
-		  std::cout << "TOKEN IS EXAM SEATING" << std::endl;
-		  
-		  std::vector<std::string> examSeating = itr2.value();
-		  token = examSeating[0];
-		  token2 = examSeating[1];
-		  
-		  LoadExamSeatingFile(token,token2,students);
-		  
-		  MakeRosterFile(students);
-		}
-	  }
 	} else if (token == "bonus_latedays") {
 	  json bonusJson = j[token];
 	  for (json::iterator itr2 = bonusJson.begin(); itr2 != bonusJson.end(); itr2++) {
@@ -1360,6 +1376,8 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	}
   }
   
+  LoadExamSeatingFile(GLOBAL_EXAM_SEATING_COUNT,GLOBAL_EXAM_SEATING,students);
+  MakeRosterFile(students);
   MatchClickerRemotes(students, iclicker_remotes_filename);
   AddClickerScores(students,iclicker_questions);
 }
