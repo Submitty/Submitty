@@ -16,6 +16,7 @@ set (GRADINGCODE ${SUBMITTY_INSTALL_DIR}/src)
 add_library(submitty_grading
   ${GRADINGCODE}/grading/TestCase.cpp 
   ${GRADINGCODE}/grading/JUnitGrader.cpp
+  ${GRADINGCODE}/grading/PacmanGrader.cpp
   ${GRADINGCODE}/grading/myersDiff.cpp 
   ${GRADINGCODE}/grading/tokens.cpp 
   ${GRADINGCODE}/grading/tokenSearch.cpp 

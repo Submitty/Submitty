@@ -29,6 +29,8 @@ using nlohmann::json;
 std::string ReadQuoted(std::istream &istr);
 void suggest_curves(std::vector<Student*> &students);
 
+std::string GLOBAL_recommend_id = "";
+
 
 //====================================================================
 // DIRECTORIES & FILES
@@ -115,6 +117,7 @@ bool DISPLAY_FINAL_GRADE = false;
 bool DISPLAY_GRADE_SUMMARY = false;
 bool DISPLAY_GRADE_DETAILS = false;
 bool DISPLAY_ICLICKER = false;
+bool DISPLAY_LATE_DAYS = false;
 
 
 std::vector<std::string> MESSAGES;
@@ -861,6 +864,10 @@ void processcustomizationfile(std::vector<Student*> &students) {
       s->addWarning(line);
     } else if (token == "recommend") {
       // UTA/mentor recommendations [ per student ]
+      //assert ( GLOBAL_recommend_id == "");
+      istr >> GLOBAL_recommend_id;
+
+      /*
       std::string username;
       istr >> username;
       char line[MAX_STRING_LENGTH];
@@ -869,6 +876,8 @@ void processcustomizationfile(std::vector<Student*> &students) {
       if (students_loaded == false) continue;
       assert (s != NULL);
       s->addRecommendation(line);
+      */
+
     } else if (token == "note") {
       // other grading note [ per student ]
       std::string username;
@@ -884,7 +893,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
       s->addNote(line);
 
     } else if (token == "earned_late_days") {
-
+      DISPLAY_LATE_DAYS = true;
       char line[MAX_STRING_LENGTH];
       istr.getline(line,MAX_STRING_LENGTH);
       GLOBAL_earned_late_days.clear();
@@ -1453,6 +1462,9 @@ void load_student_grades(std::vector<Student*> &students) {
                     }
                   }
                   s->setDefaultAllowedLateDays(value);
+                  if (value > 0) {
+                    DISPLAY_LATE_DAYS = true;
+                  }
                 } else {
             std::cout << "UNKNOWN TOKEN Y '" << token << "'" << std::endl;
 			exit(0);
@@ -1463,7 +1475,20 @@ void load_student_grades(std::vector<Student*> &students) {
 		  bool invalid = false;
                   std::string gradeable_id = (*itr2).value("id","ERROR BAD ID");
                   std::string gradeable_name = (*itr2).value("name",gradeable_id);
-		  float score = (*itr2).value("score",0.0);
+                  std::string status = (*itr2).value("status","NOT ELECTRONIC");
+		  float score = (*itr2).value("original_score",0.0);
+		  float score2 = (*itr2).value("actual_score",0.0);
+                  if (status.find("Bad") != std::string::npos) {
+                    assert (score2 == 0);
+                    if (score != score2) {
+                      score = 0;
+                    } else {
+                      // already 0
+                    }
+                  } else {
+                      assert (status == "NO SUBMISSION" || status == "NOT ELECTRONIC" || status == "Good" || status == "Late");
+                  }
+
                   std::string other_note =  ""; //(*itr2).value("text","");
 		  // Search through the gradeable categories as needed to find where this item belongs
 		  // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
@@ -1487,6 +1512,18 @@ void load_student_grades(std::vector<Student*> &students) {
                         }
 		  }
 		  
+                  if (gradeable_id == GLOBAL_recommend_id) {
+                    json::iterator rec = itr2->find("text");
+                    if (rec != itr2->end()) {
+                      for (int i = 0; i < (*rec).size(); i++) {
+                        for (auto itr8 = (*rec)[i].begin(); itr8 != (*rec)[i].end(); itr8++) {
+                          std::string r = itr8.value();
+                          s->addRecommendation(std::string(" ") + r);
+                        }
+                      }
+                    }
+                  }
+
 		  if (!invalid) {
 			assert (which >= 0);
 			assert (score >= 0.0);
@@ -1504,8 +1541,9 @@ void load_student_grades(std::vector<Student*> &students) {
                         if (ldu != 0) {
                           //std::cout << "ldu=" << ldu << std::endl;
                         }
-			s->setGradeableItemGrade(g,which,score,ldu,other_note);
+			s->setGradeableItemGrade(g,which,score,ldu,other_note,status);
 		  }
+
 	    }  
 	  }
 	}
@@ -1678,9 +1716,9 @@ void load_bonus_late_day(std::vector<Student*> &students,
       //std::cerr << "ERROR!  bad username " << username << " cannot give bonus late day " << std::endl;
       //exit(1);
     } else {
-      std::cout << "BONUS DAY FOR USER " << username << std::endl;
+      //std::cout << "BONUS DAY FOR USER " << username << std::endl;
       s->add_bonus_late_day(which_lecture);
-      std::cout << "add bonus late day for " << username << std::endl;
+      //std::cout << "add bonus late day for " << username << std::endl;
     }
   } 
 
@@ -1884,8 +1922,6 @@ void suggest_curves(std::vector<Student*> &students) {
         total += itr->second;
       }
       std::cout << "  TOTAL = " << total << std::endl;
-      
-      
     }
   }
 }

@@ -68,10 +68,6 @@ class Output {
             $args[0] = implode("\\", $args[0]);
         }
         $func = call_user_func_array(array(static::getView($args[0]), $args[1]), array_slice($args, 2));
-        if ($args[0] == 'Error') {
-            print $func;
-            var_dump($func);
-        }
         if ($func === false) {
             throw new OutputException("Cannot find function '{$args[1]}' in requested view '{$args[0]}'");
         }
@@ -179,7 +175,7 @@ class Output {
     }
     
     public function addInternalCSS($file) {
-        $this->addCSS($this->core->getConfig->getBaseUrl()."/css/".$file);
+        $this->addCSS($this->core->getConfig()->getBaseUrl()."/css/".$file);
     }
  
     public function addCSS($url) {
@@ -198,9 +194,13 @@ class Output {
         $this->use_footer = $bool;
     }
     
-    public function addBreadcrumb($string, $url=null) {
+    public function addBreadcrumb($string, $url=null, $top=false) {
         if ($url !== null && $url !== "") {
-            $string = "<a href='{$url}'>{$string}</a>";
+	    if ($top == true) {
+                $string = "<a target=\"_top\" href='{$url}'>{$string}</a>";
+	    } else {
+                $string = "<a href='{$url}'>{$string}</a>";
+	    }
         }
         $this->breadcrumbs[] = $string;
     }

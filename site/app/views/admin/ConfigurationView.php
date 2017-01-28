@@ -2,14 +2,9 @@
 
 namespace app\views\admin;
 
-use app\libraries\Core;
+use app\views\AbstractView;
 
-class ConfigurationView {
-    private $core;
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class ConfigurationView extends AbstractView {
     public function viewConfig($fields) {
         $zero_checked = ($fields['zero_rubric_grades'] === true) ? 'checked' : '';
         $keep_previous_files = ($fields['keep_previous_files'] === true) ? 'checked' : '';
@@ -30,6 +25,14 @@ class ConfigurationView {
             <div class="option-desc">
                 <div class="option-title">Course Name</div>
                 <div class="option-alt">Input the course name that should appear in the header of the site</div>
+            </div>
+        </div>
+        
+        <div class="option">
+            <div class="option-input"><input type="text" name="course_home_url" value="{$fields['course_home_url']}" /></div>
+            <div class="option-desc">
+                <div class="option-title">Course Home URL</div>
+                <div class="option-alt">Input the url that will link to your course page from the Course Name</div>
             </div>
         </div>
 

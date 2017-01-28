@@ -2,26 +2,18 @@
 
 namespace app\views\submission;
 
-use app\libraries\Core;
+use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\Gradeable;
+use app\views\AbstractView;
 
-class HomeworkView {
-    /**
-     * @var Core
-     */
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
+class HomeworkView extends AbstractView {
 
     public function noGradeable($gradeable_id) {
         if ($gradeable_id === null) {
             return <<<HTML
 <div class="content">
-    No gradeable id specified. Contact your instructor if you think this
-    is an error.
+    No gradeable id specified. Contact your instructor if you think this is an error.
 </div>
 HTML;
         }
@@ -61,6 +53,8 @@ HTML;
      */
     public function showGradeable($gradeable, $days_late) {
         $upload_message = $this->core->getConfig()->getUploadMessage();
+        $current_version = $gradeable->getCurrentVersion();
+        $current_version_number = $gradeable->getCurrentVersionNumber();
         $return = <<<HTML
 <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/drag-and-drop.js"></script>
 <div class="content">
@@ -84,6 +78,54 @@ HTML;
             $return .= <<<HTML
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 HTML;
+
+
+            for ($i = 0; $i < $gradeable->getNumTextBoxes(); $i++) {
+                $label = $gradeable->getTextBoxes()[$i]['label'];
+                $rows = $gradeable->getTextBoxes()[$i]['rows'];
+                if ($rows == 0) {
+                  $return .= <<<HTML
+                    <p style="max-width: 50em;">
+                    $label<br><input type="text" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();">
+                    </p><br>
+HTML;
+                } else {
+                  $return .= <<<HTML
+                    <p style="max-width: 50em;">
+                    $label<br><textarea rows="{$rows}" cols="50"  style="width:60em; height:100%;" name="textbox_{$i}" id="textbox_{$i}" onKeyPress="handle_textbox_keypress();"></textarea>
+                    </p><br>
+HTML;
+
+                  // Allow tab in the larger text boxes (normally tab moves to the next textbox)
+                  // http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
+$return .= <<<HTML
+<script>
+$("#textbox_{$i}").keydown(function(e) {
+HTML;
+$return .= <<<'HTML'
+    if(e.keyCode === 9) { // tab was pressed
+        // get caret position/selection
+        var start = this.selectionStart;
+        var end = this.selectionEnd;
+        var $this = $(this);
+        var value = $this.val();
+        // set textarea value to: text before caret + tab + text after caret
+        $this.val(value.substring(0, start)
+                    + "\t"
+                    + value.substring(end));
+        // put caret at right position again (add one for the tab)
+        this.selectionStart = this.selectionEnd = start + 1;
+        // prevent the focus lose
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+});
+</script>
+HTML;
+
+                }
+            }
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 if ($gradeable->getNumParts() > 1) {
                     $label = "Drag your {$gradeable->getPartsNames()[$i]} here or click to open file browser";
@@ -113,7 +155,8 @@ HTML;
     <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
 HTML;
-            if($gradeable->getCurrentVersion() === $gradeable->getHighestVersion() && $gradeable->getCurrentVersion() > 0) {
+            if($current_version_number === $gradeable->getHighestVersion()
+                && $current_version_number > 0) {
                 $return .= <<<HTML
     <button type="button" id= "getprev" class="btn btn-primary">Get Most Recent Files</button>
 HTML;
@@ -123,7 +166,12 @@ HTML;
             for ($i = 1; $i <= $gradeable->getNumParts(); $i++) {
                 foreach ($gradeable->getPreviousFiles($i) as $file) {
                     $size = number_format($file['size'] / 1024, 2);
-                    $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
+                    // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
+                    if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
+                        $escape_quote_filename = str_replace('\'','\\\'',substr($file['relative_name'], strlen("part{$i}/")));
+                    }
+                    else
+                        $escape_quote_filename = str_replace('\'','\\\'',$file['relative_name']);
                     $old_files .= <<<HTML
 
                 addLabel('$escape_quote_filename', '{$size}', {$i}, true);
@@ -131,8 +179,8 @@ HTML;
 HTML;
                 }
             }
-            if ($gradeable->getCurrentVersion() == $gradeable->getHighestVersion() && $gradeable->getCurrentVersion() > 0
-                && $this->core->getConfig()->keepPreviousFiles()) {
+            if ($current_version_number == $gradeable->getHighestVersion()
+                && $current_version_number > 0 && $this->core->getConfig()->keepPreviousFiles()) {
                 $return .= <<<HTML
     <script type="text/javascript">
         $(document).ready(function() {
@@ -155,7 +203,7 @@ HTML;
         // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
         var num_parts = {$gradeable->getNumParts()};
         createArray(num_parts);
-        var assignment_version = {$gradeable->getCurrentVersion()};
+        var assignment_version = {$current_version_number};
         var highest_version = {$gradeable->getHighestVersion()};
         for (var i = 1; i <= num_parts; i++ ){
             var dropzone = document.getElementById("upload" + i);
@@ -194,6 +242,7 @@ HTML;
         $(document).ready(function() {
             $("#submit").click(function(e){ // Submit button
                 handleSubmission("{$this->core->buildUrl(array('component' => 'student',
+                                                               'page' => 'submission',
                                                                'action' => 'upload',
                                                                'gradeable_id' => $gradeable->getId()))}",
                                  "{$this->core->buildUrl(array('component' => 'student',
@@ -202,7 +251,9 @@ HTML;
                                  {$gradeable->getAllowedLateDays()},
                                  {$gradeable->getHighestVersion()},
                                  {$gradeable->getMaxSubmissions()},
-                                 "{$this->core->getCsrfToken()}", {$svn_string});
+                                 "{$this->core->getCsrfToken()}",
+                                 {$svn_string},
+                                 {$gradeable->getNumTextBoxes()});
                 e.stopPropagation();
             });
         });
@@ -229,34 +280,34 @@ HTML;
 
 HTML;
             if ($gradeable->getActiveVersion() == 0) {
-                $selected = ($gradeable->getCurrentVersion() == $gradeable->getActiveVersion()) ? "selected" : "";
+                $selected = ($current_version_number == $gradeable->getActiveVersion()) ? "selected" : "";
                 $return .= <<<HTML
         <option value="0" {$selected}>Do Not Grade Assignment</option>
 HTML;
 
             }
-            foreach ($gradeable->getVersions() as $version => $version_details) {
+            foreach ($gradeable->getVersions() as $version) {
                 $selected = "";
-                $select_text = array("Version #{$version}");
+                $select_text = array("Version #{$version->getVersion()}");
                 if ($gradeable->getNormalPoints() > 0) {
-                    $select_text[] = "Score: ".$version_details['points']." / " . $gradeable->getNormalPoints();
+                    $select_text[] = "Score: ".$version->getNonHiddenTotal()." / " . $gradeable->getTotalNonHiddenNonExtraCreditPoints();
                 }
 
-                if ($version_details['days_late'] > 0) {
-                    $select_text[] = "Days Late: ".$version_details['days_late'];
+                if ($version->getDaysLate() > 0) {
+                    $select_text[] = "Days Late: ".$version->getDaysLate();
                 }
 
-                if ($version == $gradeable->getActiveVersion()) {
+                if ($version->isActive()) {
                     $select_text[] = "GRADE THIS VERSION";
                 }
 
-                if ($version == $gradeable->getCurrentVersion()) {
+                if ($version->getVersion() == $current_version_number) {
                     $selected = "selected";
                 }
 
                 $select_text = implode("&nbsp;&nbsp;&nbsp;", $select_text);
                 $return .= <<<HTML
-        <option value="{$version}" {$selected}>{$select_text}</option>
+        <option value="{$version->getVersion()}" {$selected}>{$select_text}</option>
 
 HTML;
             }
@@ -265,18 +316,19 @@ HTML;
     </select>
 HTML;
             // If viewing the active version, show cancel button, otherwise so button to switch active
-            if ($gradeable->getCurrentVersion() > 0) {
-                if ($gradeable->getCurrentVersion() == $gradeable->getActiveVersion()) {
+            if ($current_version_number > 0) {
+                if ($current_version->getVersion() == $gradeable->getActiveVersion()) {
                     $version = 0;
                     $button = '<input type="submit" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">';
+                    $onsubmit = "";
                 }
                 else {
-                    $version = $gradeable->getCurrentVersion();
+                    $version = $current_version->getVersion();
                     $button = '<input type="submit" class="btn btn-primary" value="Grade This Version">';
+                    $onsubmit = "onsubmit='return checkVersionChange({$gradeable->getDaysLate()},{$gradeable->getAllowedLateDays()})'";;
                 }
                 $return .= <<<HTML
-    <form style="display: inline;" method="post"
-            onsubmit="return checkVersionChange({$gradeable->getDaysLate()},{$gradeable->getAllowedLateDays()})"
+    <form style="display: inline;" method="post" {$onsubmit}
             action="{$this->core->buildUrl(array('component' => 'student',
                                                  'action' => 'update',
                                                  'gradeable_id' => $gradeable->getId(),
@@ -289,7 +341,7 @@ HTML;
 HTML;
             }
 
-            if($gradeable->getActiveVersion() == 0 && $gradeable->getCurrentVersion() == 0) {
+            if($gradeable->getActiveVersion() === 0 && $current_version_number === 0) {
                 $return .= <<<HTML
     <div class="sub">
         <p class="red-message">
@@ -301,7 +353,8 @@ HTML;
 HTML;
             }
             else {
-	            if($gradeable->getActiveVersion() > 0 && $gradeable->getActiveVersion() === $gradeable->getCurrentVersion()) {
+	            if($gradeable->getActiveVersion() > 0
+                    && $gradeable->getActiveVersion() === $current_version->getVersion()) {
                     $return .= <<<HTML
     <div class="sub">
         <p class="green-message">
@@ -342,10 +395,11 @@ HTML;
                 $array = ($gradeable->useSvnCheckout()) ? $gradeable->getSvnFiles() : $gradeable->getSubmittedFiles();
                 foreach ($array as $file) {
                     if (isset($file['size'])) {
-		       $size = number_format($file['size'] / 1024, 2);
-		    } else {
-		       $size = number_format(-1);
-		    }
+                        $size = number_format($file['size'] / 1024, 2);
+                    }
+                    else {
+                        $size = number_format(-1);
+                    }
                     $return .= "{$file['relative_name']} ({$size}kb)<br />";
                 }
                 $return .= <<<HTML
@@ -355,8 +409,8 @@ HTML;
                 $results = $gradeable->getResults();
                 if($gradeable->hasResults()) {
                     $return .= <<<HTML
-submission timestamp: {$results['submission_time']}<br />
-days late: {$results['days_late']} (before extensions)<br />
+submission timestamp: {$current_version->getSubmissionTime()}<br />
+days late: {$current_version->getDaysLate()} (before extensions)<br />
 grading time: {$results['grade_time']} seconds<br />
 HTML;
                     if($results['num_autogrades'] > 1) {
@@ -393,7 +447,7 @@ HTML;
                                                                      'page' => 'submission',
                                                                      'action' => 'check_refresh',
                                                                      'gradeable_id' => $gradeable->getId(),
-                                                                     'gradeable_version' => $gradeable->getCurrentVersion()))}')
+                                                                     'gradeable_version' => $current_version_number))}')
         </script>
 HTML;
 
@@ -446,10 +500,10 @@ HTML;
                     $has_badges = false;
                     if ($gradeable->getNormalPoints() > 0) {
                         $has_badges = true;
-                        if($results['points'] >= $gradeable->getNormalPoints()) {
+                        if ($current_version->getNonHiddenTotal() >= $gradeable->getNormalPoints()) {
                             $background = "green-background";
                         }
-                        else if($results['points'] > 0) {
+                        else if ($current_version->getNonHiddenTotal() > 0) {
                             $background = "yellow-background";
                         }
                         else {
@@ -458,7 +512,7 @@ HTML;
                         $return .= <<<HTML
         <div class="box">
             <div class="box-title">
-                <span class="badge {$background}">{$results['points']} / {$gradeable->getNormalPoints()}</span>
+                <span class="badge {$background}">{$current_version->getNonHiddenTotal()} / {$gradeable->getNormalPoints()}</span>
                 <h4>Total</h4>
             </div>
         </div>
@@ -584,20 +638,20 @@ HTML;
                                 <span class="red-message">{$message}</span><br />
 HTML;
                                     }
-				    $myimage = $diff_viewer->getActualImageFilename();
 
+                                    $myimage = $diff_viewer->getActualImageFilename();
                                     if ($myimage != "") {
-					// borrowed from file-display.php
-					$content_type = Utils::getContentType($myimage);
-					if (substr($content_type, 0, 5) === "image") {
-					   // Read image path, convert to base64 encoding
-					   $imageData = base64_encode(file_get_contents($myimage));
-					   // Format the image SRC:  data:{mime};base64,{data};
-					   $myimagesrc = 'data: '.mime_content_type($myimage).';charset=utf-8;base64,'.$imageData;
-					   // insert the sample image data
-					   $return .= '<img src="'.$myimagesrc.'">';
-					}
-				    }
+                                        // borrowed from file-display.php
+                                        $content_type = FileUtils::getContentType($myimage);
+                                        if (substr($content_type, 0, 5) === "image") {
+                                           // Read image path, convert to base64 encoding
+                                           $imageData = base64_encode(file_get_contents($myimage));
+                                           // Format the image SRC:  data:{mime};base64,{data};
+                                           $myimagesrc = 'data: '.mime_content_type($myimage).';charset=utf-8;base64,'.$imageData;
+                                           // insert the sample image data
+                                           $return .= '<img src="'.$myimagesrc.'">';
+                                        }
+                                    }
                                     else if ($diff_viewer->hasDisplayActual()) {
                                         $return .= <<<HTML
                                 {$diff_viewer->getDisplayActual()}

@@ -16,7 +16,7 @@ extern bool DISPLAY_FINAL_GRADE;
 extern bool DISPLAY_GRADE_SUMMARY;
 extern bool DISPLAY_GRADE_DETAILS;
 extern bool DISPLAY_ICLICKER;
-
+extern bool DISPLAY_LATE_DAYS;
 
 // ==========================================================
 // messages for zone assignment

@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 #include "TestCase.h"
 #include "JUnitGrader.h"
+#include "PacmanGrader.h"
 #include "myersDiff.h"
 #include "tokenSearch.h"
 #include "execute.h"
@@ -193,6 +194,7 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader) const {
   else if (method == "EmmaInstrumentationGrader")  { return EmmaInstrumentationGrader_doit(*this,grader); }
   else if (method == "MultipleJUnitTestGrader")    { return MultipleJUnitTestGrader_doit(*this,grader);   }
   else if (method == "EmmaCoverageReportGrader")   { return EmmaCoverageReportGrader_doit(*this,grader);  }
+  else if (method == "PacmanGrader")               { return PacmanGrader_doit(*this,grader);              }
   else if (method == "searchToken")                { return searchToken_doit(*this,grader);               }
   else if (method == "intComparison")              { return intComparison_doit(*this,grader);             }
   else if (method == "myersDiffbyLinebyChar")      { return myersDiffbyLinebyChar_doit(*this,grader);     }
@@ -425,14 +427,14 @@ void TestCase::FileCheck_Helper() {
       _json["points"] = -5;
     } else {
       assert (itr->is_number_integer());
-      assert ((int)(*itr) < 0);
+      assert ((int)(*itr) <= 0);
     }
     itr = _json.find("penalty");
     if (itr == _json.end()) {
       _json["penalty"] = -0.1;
     } else {
       assert (itr->is_number());
-      assert ((*itr) < 0);
+      assert ((*itr) <= 0);
     }
     itr = _json.find("title");
     if (itr == _json.end()) {
@@ -655,15 +657,21 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
   }
 
   // add submission limit test case
-  if (total_points > 0 && !has_limit_test) {
+  if (!has_limit_test) {
     nlohmann::json limit_test;
     limit_test["type"] = "FileCheck";
     limit_test["title"] = "Submission Limit";
-    limit_test["points"] = -5;
-    limit_test["max_submissions"] = 20;
-    limit_test["penalty"] = -0.1;
+    limit_test["max_submissions"] = MAX_NUM_SUBMISSIONS;
+    if (total_points > 0) {
+      limit_test["points"] = -5;
+      limit_test["penalty"] = -0.1;
+    } else {
+      limit_test["points"] = 0;
+      limit_test["penalty"] = 0;
+    }
     config_json["testcases"].push_back(limit_test);
   }
+
 
   // FIXME:  ugly...  need to reset the id...
   TestCase::reset_next_test_case_id();

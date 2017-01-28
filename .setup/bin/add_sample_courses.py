@@ -19,9 +19,11 @@ HWPHP = (pwd.getpwnam("hwphp").pw_uid, grp.getgrnam("hwphp").gr_gid)
 PYTHON_HOMEWORKS = ["python_simple_homework", "python_linehighlight",
                     "python_simple_homework_multipart", "python_static_analysis"]
 CPP_HOMEWORKS = ["cpp_simple_lab", "cpp_cats", "cpp_memory_debugging", "cpp_custom",
-                 "cpp_hidden_tests", "c_fork", "c_failure_messages" ]
+                 "cpp_hidden_tests", "c_fork", "c_failure_messages"]
 JAVA_HOMEWORKS = ["java_factorial", "java_coverage_factorial"]
-ALL_HOMEWORKS = PYTHON_HOMEWORKS + CPP_HOMEWORKS + JAVA_HOMEWORKS
+MISC_HOMEWORKS = ["no_autograding", "iclicker_upload", "paragraph_textboxes", "pdf_word_count"]
+
+ALL_HOMEWORKS = PYTHON_HOMEWORKS + CPP_HOMEWORKS + JAVA_HOMEWORKS + MISC_HOMEWORKS
 
 
 def create_course(course, semester, course_group, assignments=None):
@@ -286,10 +288,10 @@ def create_course(course, semester, course_group, assignments=None):
                               form_json['date_released'], form_json['ta_view_date']))
 
             os.system("psql -d {} -h localhost -U hsdbu -c \"INSERT INTO electronic_gradeable "
-                      "VALUES ('{}', '{}', '{}', false, '', true, '{}', 2, {})\""
-                      .format(database, form_json['gradeable_id'],
+                      "VALUES ('{}', '{}', false, '', true, '{}', '{}', 2, {})\""
+                      .format(database, form_json['gradeable_id'], form_json['config_path'],
                               form_json['date_submit'], form_json['date_due'],
-                              form_json['config_path'], form_json['point_precision']))
+                              form_json['point_precision']))
 
             insert_gradeable_component(database, assignment, "Test 1", 5, 1)
             insert_gradeable_component(database, assignment, "Test 2", 5, 2, ec=1)
@@ -346,7 +348,7 @@ def main():
         create_course("csci1100", semester, "csci1100_tas_www", PYTHON_HOMEWORKS)
         create_course("csci1200", semester, "csci1200_tas_www", CPP_HOMEWORKS)
         create_course("csci2600", semester, "csci2600_tas_www", JAVA_HOMEWORKS)
+        create_course("csci9999", semester, "csci9999_tas_www", MISC_HOMEWORKS)
 
 if __name__ == "__main__":
     main()
-

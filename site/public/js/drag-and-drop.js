@@ -17,6 +17,8 @@ var label_array = [];
 var use_previous = false;
 var changed = false;        // if files from previous submission changed
 
+var empty_textboxes = true;
+
 // initializing file_array and prevous_files
 function createArray(num_parts){
     if(file_array.length == 0){
@@ -131,6 +133,12 @@ function isFolder(file){
 function addFile(file, part){
     var i = fileExists(file, part);
     if( i[0] == -1 ){    // file does not exist
+        // empty bucket if file is a zip and bucket is not empty
+        if(file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
+            if(confirm("Note: All files currently in the bucket will be deleted if you try to upload a zip: " + file.name + ". Do you want to continue?")){
+                deleteFiles(part);
+            }
+        }
         file_array[part-1].push(file);
         addLabel(file.name, (file.size/1024).toFixed(2), part, false);
     }
@@ -200,6 +208,7 @@ function deleteSingleFile(filename, part, previous) {
 }
 
 function setButtonStatus() {
+
     // we only want to clear buckets if there's any labels in it (otherwise it's "blank")
     var labels = 0;
     for (var i = 0; i < label_array.length; i++) {
@@ -208,7 +217,11 @@ function setButtonStatus() {
 
     if (labels == 0) {
         $("#startnew").prop("disabled", true);
-        $("#submit").prop("disabled", true);
+        if (empty_textboxes) {
+            $("#submit").prop("disabled", true);
+        } else {
+            $("#submit").prop("disabled", false);
+        }
     }
     else {
         $("#startnew").prop("disabled", false);
@@ -274,6 +287,18 @@ function addLabel(filename, filesize, part, previous){
     label_array[part-1].push(filename);
 }
 
+function handle_textbox_keypress() {
+    empty_textboxes = false;
+    setButtonStatus();
+}
+
+function handle_textbox_keypress() {
+    empty_textboxes = false;
+    setButtonStatus();
+}
+
+
+
 // HANDLE SUBMISSION
 //========================================================================================
 function isValidSubmission(){
@@ -306,13 +331,13 @@ function isValidSubmission(){
  * @param csrf_token
  * @param svn_checkout
  */
-function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout) {
+function handleSubmission(submit_url, return_url, days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, svn_checkout, num_textboxes) {
     $("#submit").prop("disabled", true);
 
     var message = "";
     // check versions used
     if(versions_used >= versions_allowed) {
-        message = "You have already made " + versions_used + "/" + versions_allowed + " submissions. Are you sure you want to continue? Uploading may result in loss of points.";
+        message = "You have already made " + versions_used + " submissions.  You are allowed " + versions_allowed + " submissions before a small point penalty will be applied. Are you sure you want to continue?";
         if (!confirm(message)) {
             return;
         }
@@ -339,7 +364,7 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
 
     if (!svn_checkout) {
         // Check if new submission
-        if (!isValidSubmission()) {
+        if (!isValidSubmission() && empty_textboxes) {
             alert("Not a new submission.");
             window.location.reload();
             return;
@@ -369,6 +394,12 @@ function handleSubmission(submit_url, return_url, days_late, late_days_allowed, 
         // Files from previous submission
         formData.append('previous_files', JSON.stringify(previous_files));
     }
+
+    var textbox_answers = [];
+    for (var i = 0; i < num_textboxes; i++) {
+        textbox_answers[i] = $("#textbox_"+i).val();
+    }
+    formData.append('textbox_answers', JSON.stringify(textbox_answers));
 
     $.ajax({
         url: submit_url,

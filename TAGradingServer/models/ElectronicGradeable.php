@@ -21,7 +21,8 @@ use \lib\Utils;
  *
  * @package app\models
  */
-class ElectronicGradeable {
+class ElectronicGradeable
+{
 
     /**
      * Array containing information about student from students table
@@ -51,7 +52,7 @@ class ElectronicGradeable {
      * @var null|int
      */
     public $g_id;
-    
+
     public $autograding_points = 0;
 
     /**
@@ -79,14 +80,12 @@ class ElectronicGradeable {
      * @var int
      */
     public $late_days_exception = 0;
-    
-    
+
     /**
-     gradeable data id
-    **/
+     * gradeable data id
+     **/
     public $gd_id;
 
-    
     //TODO Change status codes
     /**
      * This is a status for the assignment as a whole (potentially excluding some parts that are 0). We just leave it
@@ -118,8 +117,7 @@ class ElectronicGradeable {
      * @var array
      */
     public $max_assignment;
-    
-    
+
     /**
      * @var array
      */
@@ -151,12 +149,11 @@ class ElectronicGradeable {
      * @var array
      */
     public $questions_count = array();
-    
-    
+
     /**
      * @var float
      * The maximum score for autograding excluding extra credit
-    **/
+     **/
     public $autograding_max = 0;
 
     /**
@@ -169,13 +166,15 @@ class ElectronicGradeable {
 
     /** @var string */
     public $original_grader;
+
     /**
      * @param null|string $student_id
      * @param null|int $g_id
      *
      * @throws \InvalidArgumentException|\RuntimeException|ServerException
      */
-    function __construct($student_id=null, $g_id=null) {
+    function __construct($student_id = null, $g_id = null)
+    {
         try {
             if ($student_id === null || $g_id == null) {
                 throw new \InvalidArgumentException("Invalid instantiation of ElectronicGradeable
@@ -188,12 +187,10 @@ class ElectronicGradeable {
             $this->setStudentDetails();
             $this->setEGSubmissionDetails();
             $this->setEGResults();
-            $this->calculateStatus();
             $this->setQuestionTotals();
 
             Utils::stripStringFromArray(__SUBMISSION_SERVER__, $this->eg_files);
-        }
-        catch (\Exception $ex) {
+        } catch (\Exception $ex) {
             ExceptionHandler::throwException("Gradeable", $ex);
         }
     }
@@ -203,54 +200,79 @@ class ElectronicGradeable {
      *
      * @throws \InvalidArgumentException
      */
-     
-    private function setStudentDetails() {
+
+    private function setStudentDetails()
+    {
         if (!isset($this->student)) {
-            
-//GETS THE ALLOWED LATE DAYS FOR A STUDENT AS OF THE SUBMISSION DATE
-           Database::query("
-SELECT s.*, COALESCE(ld.allowed_late_days,0) as student_allowed_lates
-FROM users as s
-LEFT JOIN (
-    SELECT allowed_late_days
-    FROM late_days
-    WHERE since_timestamp <= ? and user_id=?
-    ORDER BY since_timestamp DESC
-) as ld on 1=1
-WHERE s.user_id=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $this->student_id, $this->student_id));
+
+            //GETS THE ALLOWED LATE DAYS FOR A STUDENT AS OF THE SUBMISSION DATE
+            Database::query("
+                SELECT s.*, COALESCE(ld.allowed_late_days,0) as student_allowed_lates
+                FROM users as s
+                LEFT JOIN (
+                    SELECT allowed_late_days
+                    FROM late_days
+                    WHERE since_timestamp <= ? and user_id=?
+                    ORDER BY since_timestamp DESC
+                ) as ld on 1=1
+                WHERE s.user_id=? LIMIT 1", array($this->eg_details['eg_submission_due_date'], $this->student_id, $this->student_id));
             $this->student = Database::row();
             if ($this->student == array()) {
                 throw new \InvalidArgumentException("Could not find student '{$this->student_id}'");
             }
 
-            if ($this->student['student_allowed_lates'] < __DEFAULT_TOTAL_LATE_DAYS__ ) {
-              $this->student['student_allowed_lates'] = __DEFAULT_TOTAL_LATE_DAYS__;
+            if ($this->student['student_allowed_lates'] < __DEFAULT_TOTAL_LATE_DAYS__) {
+                $this->student['student_allowed_lates'] = __DEFAULT_TOTAL_LATE_DAYS__;
             }
-
-            $params = array($this->student_id, $this->eg_details['g_id']);
-            Database::query("SELECT * FROM late_day_exceptions WHERE user_id=? AND g_id=?", $params);
-            $row = Database::row();
-            $this->late_days_exception = (isset($row['late_day_exceptions'])) ? $row['late_day_exceptions'] : 0;
 
             // late days used for the semester as of submission date
             $params = array($this->student_id, $this->eg_details['eg_submission_due_date']);
             Database::query("
-SELECT 
-    SUM(GREATEST(late_days_used - COALESCE(late_day_exceptions,0),0)) AS used_late_days
-FROM 
-    late_days_used ldu INNER JOIN electronic_gradeable AS eg
-    ON ldu.g_id = eg.g_id LEFT JOIN late_day_exceptions AS lde ON
-    lde.g_id = eg.g_id    
-WHERE 
-    ldu.user_id=?
-AND 
-     eg.eg_submission_due_date <=?
-GROUP BY 
-    ldu.user_id", $params);
+                SELECT
+                  eg.g_id
+                  , eg.eg_late_days as assignment_allowed
+                  , greatest(0, ceil(extract(EPOCH FROM(egd.submission_time - eg.eg_submission_due_date))/86400):: integer) as days_late
+                  , eg.eg_submission_due_date
+                  , egd.submission_time
+                  , coalesce(lde.late_day_exceptions, 0) as extensions
+                  , g.g_title
+                  , coalesce(egv.active_version, -1) as active_version
+                FROM
+                  electronic_gradeable eg
+                  , electronic_gradeable_version egv
+                  , electronic_gradeable_data egd FULL OUTER JOIN late_day_exceptions lde ON lde.user_id = egd.user_id AND lde.g_id = egd.g_id
+                  , gradeable g  
+                  , late_days l
+                WHERE
+                  eg.g_id = egv.g_id
+                  AND egv.g_id = egd.g_id
+                  AND egv.user_id = egd.user_id
+                  AND eg.g_id = g.g_id
+                  AND egv.active_version = egd.g_version
+                  AND l.user_id = egv.user_id
+                  AND egv.user_id = ?
+                  AND eg.eg_submission_due_date <=?
+                ORDER BY
+                  eg.eg_submission_due_date  
+                ", $params);
 
-            $row = Database::row();
+            $this->student['used_late_days'] = Database::rows();
 
-            $this->student['used_late_days'] = (isset($row['used_late_days']) ? $row['used_late_days'] : 0);
+            $params = array($this->student_id, $this->eg_details['eg_submission_due_date']);
+            Database::query("
+                SELECT
+                  *
+                FROM
+                  late_days l
+                WHERE
+                  l.user_id = ?
+                  AND l.since_timestamp <= ?
+                ORDER BY
+                  l.since_timestamp
+                ;
+            ", $params);
+
+            $this->student['earned_late_days'] = Database::rows();
         }
     }
 
@@ -259,49 +281,48 @@ GROUP BY
      *
      * @throws \InvalidArgumentException
      */
-    private function setEGDetails() {
+    private function setEGDetails()
+    {
         //CHECK IF THERE IS A GRADEABLE FOR THIS STUDENT
-        
+
         $eg_details_query = "
 SELECT g_title, gd_overall_comment, g_grade_start_date, eg.* FROM electronic_gradeable AS eg 
     INNER JOIN gradeable AS g ON eg.g_id = g.g_id
     INNER JOIN gradeable_data AS gd ON gd.g_id=g.g_id 
         WHERE gd_user_id=? AND g.g_id=?";
-        
+
         Database::query($eg_details_query, array($this->student_id, $this->g_id));
-        
+
         $this->eg_details = Database::row();
-        
+
         if (empty($this->eg_details)) {
             //get the active version
-            $assignment_settings = __SUBMISSION_SERVER__."/submissions/".$this->g_id."/".$this->student_id."/user_assignment_settings.json";
+            $assignment_settings = __SUBMISSION_SERVER__ . "/submissions/" . $this->g_id . "/" . $this->student_id . "/user_assignment_settings.json";
             if (!file_exists($assignment_settings)) {
                 $active_version = -1;
-            }
-            else{
+            } else {
                 $assignment_settings_contents = file_get_contents($assignment_settings);
                 $results = json_decode($assignment_settings_contents, true);
                 $active_version = $results['active_version'];
             }
-                                                                    ///TODO UPDATE THE STATUS
-            $params = array($this->g_id, $this->student_id, User::$user_id, '', 1,0,$active_version);
+            ///TODO UPDATE THE STATUS
+            $params = array($this->g_id, $this->student_id, User::$user_id, '', 1, 0, $active_version);
             Database::query("INSERT INTO gradeable_data(g_id,gd_user_id,gd_grader_id,gd_overall_comment, gd_status,gd_late_days_used,gd_active_version) VALUES(?,?,?,?,?,?,?)", $params);
             $this->gd_id = \lib\Database::getLastInsertId('gradeable_data_gd_id_seq');
-            
-            Database::query( $eg_details_query, array($this->student_id, $this->g_id));
-        
+
+            Database::query($eg_details_query, array($this->student_id, $this->g_id));
+
             $this->eg_details = Database::row();
-        }
-        else{
-            $params=array($this->student_id, $this->g_id);
+        } else {
+            $params = array($this->student_id, $this->g_id);
             Database::query("SELECT gd_id FROM gradeable as g INNER JOIN gradeable_data AS gd ON g.g_id=gd.g_id WHERE gd_user_id=? AND g.g_id =?", $params);
             $this->gd_id = Database::row()['gd_id'];
         }
 
         $this->submission_ids[1] = $this->eg_details['g_id'];
-                
+
         $params = array($this->eg_details['g_id'], $this->gd_id);
-        
+
         //GET ALL questions and scores ASSOCIATED WITH A GRADEABLE
         Database::query("
 SELECT gc.*, gcd.*, gd.gd_grader_id,
@@ -324,9 +345,9 @@ ORDER BY gc_order ASC
                 $this->original_grader = $question['gd_grader_id'];
             }
         }
-        
+
         $total = 0;
-        $build_file = __SUBMISSION_SERVER__."/config/build/build_".$this->g_id.".json";
+        $build_file = __SUBMISSION_SERVER__ . "/config/build/build_" . $this->g_id . ".json";
         if (file_exists($build_file)) {
             $build_file_contents = file_get_contents($build_file);
             $results = json_decode($build_file_contents, true);
@@ -345,23 +366,23 @@ ORDER BY gc_order ASC
     /**
      * Get the files associated with the assignment from the submission directory
      */
-    private function setEGSubmissionDetails() {
-        
-        foreach($this->submission_ids as $submission_id) {
+    private function setEGSubmissionDetails()
+    {
+
+        foreach ($this->submission_ids as $submission_id) {
             $submission_directory = implode("/", array(__SUBMISSION_SERVER__, "submissions", $submission_id, $this->student_id));
             if (!file_exists($submission_directory)) {
                 continue;
             }
 
             $objects = scandir($submission_directory);
-            $objects = array_filter($objects, function($element) use ($submission_directory) {
-                return is_dir($submission_directory."/".$element) && !in_array($element, array('.', '..'));
+            $objects = array_filter($objects, function ($element) use ($submission_directory) {
+                return is_dir($submission_directory . "/" . $element) && !in_array($element, array('.', '..'));
             });
             sort($objects);
             if (count($objects) > 0) {
                 $this->max_assignment = end($objects);
-            }
-            else {
+            } else {
                 continue;
             }
 
@@ -376,13 +397,12 @@ ORDER BY gc_order ASC
                     if ($settings['active_version'] == 0) {
                         continue;
                     }
-                }
-                else {
+                } else {
                     $this->active_assignment = $this->max_assignment;
                 }
             }
             ////////////////////////////////////////////////////////////////////
-            
+
             $submission_directory = $submission_directory . "/" . $this->active_assignment;
 
             if (!file_exists($submission_directory) || !is_dir($submission_directory)) {
@@ -396,31 +416,31 @@ ORDER BY gc_order ASC
             $this->eg_files = array_merge($this->eg_files, FileUtils::getAllFiles($details['svn_directory']));
 
             $this->config_details = json_decode(
-                removeTrailingCommas(file_get_contents(implode("/",array(__SUBMISSION_SERVER__,"config",
-                                                                         "build","build_".$submission_id.".json")))), true);
+                removeTrailingCommas(file_get_contents(implode("/", array(__SUBMISSION_SERVER__, "config",
+                    "build", "build_" . $submission_id . ".json")))), true);
         }
     }
 
     /**
      * Get result files associated with the assignment
      */
-    private function setEGResults() {
-        foreach($this->submission_ids as $submission_id) {
+    private function setEGResults()
+    {
+        foreach ($this->submission_ids as $submission_id) {
             $submission_directory = implode("/", array(__SUBMISSION_SERVER__, "submissions", $submission_id,
-                                                       $this->student_id, $this->active_assignment));
+                $this->student_id, $this->active_assignment));
             $result_directory = implode("/", array(__SUBMISSION_SERVER__, "results",
-                                $submission_id, $this->student_id, $this->active_assignment));
+                $submission_id, $this->student_id, $this->active_assignment));
 
             if (!file_exists($result_directory) || !is_dir($result_directory)) {
                 continue;
             }
 
-            $results_file = $result_directory."/results.json";
-            $timestamp = file_get_contents($submission_directory."/.submit.timestamp");
+            $results_file = $result_directory . "/results.json";
+            $timestamp = file_get_contents($submission_directory . "/.submit.timestamp");
             if (!file_exists($results_file)) {
                 $details = array();
-            }
-            else {
+            } else {
                 $details = json_decode(file_get_contents($results_file), true);
                 // TODO: Convert this to using DateTime and DateTimeInterval objects
                 $date_submission = strtotime($timestamp);
@@ -434,21 +454,21 @@ ORDER BY gc_order ASC
 
             // We can lazy load the actual results till we need them (such as the diffs, etc.)
             $this->results_details = $details;
-          
+
             $skip_files = array();
             if (isset($this->results_details['testcases'])) {
                 foreach ($this->results_details['testcases'] as $testcase) {
-                    if (isset($testcase['diffs'])){
-                        foreach($testcase['diffs'] as $diff) {
-                            foreach(array("expected_file", "actual_file", "diff_id") as $file) {
-                                if(isset($diff[$file])) {
+                    if (isset($testcase['diffs'])) {
+                        foreach ($testcase['diffs'] as $diff) {
+                            foreach (array("expected_file", "actual_file", "diff_id") as $file) {
+                                if (isset($diff[$file])) {
                                     $skip_files[] = $diff[$file] . ($file == 'diff_id' ? '.json' : '');
                                 }
                             }
                         }
                     }
                     //FIXME this won't work for extra credit auto-grading
-                    if (isset($testcase['points_awarded'])){
+                    if (isset($testcase['points_awarded'])) {
                         $this->autograding_points += $testcase['points_awarded'];
                     }
                 }
@@ -458,60 +478,29 @@ ORDER BY gc_order ASC
     }
 
     /**
-     * Calculate the overall status of the electronic gradeable. There is an entire electronic gradeable status which can take
-     * on the values of 0 (not accepted) or 1 (accepted) where not accepted just means electronic gradeable
-     * should get a 0 automatically and 1 means electronic gradeable should be graded.
-     */
-    private function calculateStatus() {
-        if (!$this->submitted) {
-            return;
-        }
-        
-        Database::query("SELECT * FROM late_days_used WHERE user_id=? AND g_id=?", array($this->student_id, $this->eg_details['g_id']));
-        
-        $submitted_lates = isset( Database::row()['g_id']);
-        
-        // IF MORE LATEDAYS WERE USED ON THIS ASSIGNMENT THAN ALLOWED => FAIL
-        if ($this->days_late > ($this->eg_details['eg_late_days'] + $this->late_days_exception)) {
-            $this->status=0;
-        }
-        // IF MORE LATEDAYS WERE USED THAN THE STUDENT IS ALLOWED => FAIL
-        else if ($this->student['student_allowed_lates'] >= 0 && !$submitted_lates &&
-                 $this->days_late + $this->student['used_late_days'] > $this->student['student_allowed_lates']) {
-            $this->status = 0;
-        }
-        else{
-            $this->status = 1;
-        }
-    }
-
-    /**
      * Calculate the current grade for each question. This is either the saved value in the DB (for a regrade),
      * a 0 if the electronic gradeable wasn't submitted or the ZERO_RUBRIC_GRADES flag is set,
      * otherwise set the question to its potential full value.
      */
-    private function setQuestionTotals() {
+    private function setQuestionTotals()
+    {
         $total = 0;
         for ($i = 0; $i < count($this->questions); ++$i) {
             $question = &$this->questions[$i];
             if (!isset($question['gcd_score'])) {
                 if ($this->status == 0) {
                     $question['gcd_score'] = 0;
-                }
-                else if (__USE_AUTOGRADER__ && $question['gc_order']< 2) {
+                } else if (__USE_AUTOGRADER__ && $question['gc_order'] < 2) {
                     $question['gcd_score'] = 0;
-                        
+
                     if ($question['gc_order'] == 1) {
                         $question['gcd_score'] += $this->results_details['non_extra_credit_points_awarded'];
-                    }
-                    else {
+                    } else {
                         $question['gcd_score'] += $this->results_details['extra_credit_points_awarded'];
                     }
-                }
-                else if (__ZERO_RUBRIC_GRADES__) {
+                } else if (__ZERO_RUBRIC_GRADES__) {
                     $question['gcd_score'] = 0;
-                }
-                else {
+                } else {
                     $question['gcd_score'] = $question['gc_max_value'];
                 }
             }

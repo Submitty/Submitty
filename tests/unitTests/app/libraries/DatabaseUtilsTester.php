@@ -71,8 +71,11 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
      */
     public function testInvalidInputPHP() {
         $this->assertEquals("{}", DatabaseUtils::fromPHPToPGArray(null));
+        /** @noinspection PhpParamsInspection */
         $this->assertEquals("{}", DatabaseUtils::fromPHPToPGArray(""));
+        /** @noinspection PhpParamsInspection */
         $this->assertEquals("{}", DatabaseUtils::fromPHPToPGArray("abcd"));
+        /** @noinspection PhpParamsInspection */
         $this->assertEquals("{}", DatabaseUtils::fromPHPToPGArray(1));
     }
 
@@ -86,6 +89,10 @@ class DatabaseUtilsTester extends \PHPUnit_Framework_TestCase {
 
     public function testBooleanPGToPHP() {
         $this->assertEquals(array(true, false, 'test'), DatabaseUtils::fromPGToPHPArray("{true, false, 'test'}", true));
+    }
+
+    public function testBooleanPHPToPG() {
+        $this->assertEquals('{true, false}', DatabaseUtils::fromPHPToPGArray(array(true, false)));
     }
 
     public function testShortBooleanPGToPHP() {

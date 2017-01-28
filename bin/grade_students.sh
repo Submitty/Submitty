@@ -225,68 +225,45 @@ function log_exit {
 
 function grade_this_item {
 
-    NEXT_TO_GRADE=$1
+    NEXT_DIRECTORY=$1
+    NEXT_TO_GRADE=$2
 
     echo "========================================================================"
     echo "GRADE $NEXT_TO_GRADE"
 
     # --------------------------------------------------------------------
-    # extract the course, assignment, user, and version from the filename
-    # replace the '__' with spaces to allow for looping over list
-    with_spaces=${NEXT_TO_GRADE//__/ }
-    t=0
-    semester="NOSEMESTER"
-    course="NOCOURSE"
-    assignment="NOASSIGNMENT"
-    user="NOUSER"
-    version="NOVERSION"
-    for thing in $with_spaces; do
-	((t++))
-	#FIXME replace with switch statement
-	if [ $t -eq 1 ]
-	then
-	    semester=$thing
-	elif [ $t -eq 2 ]
-	then
-	    course=$thing
-	elif [ $t -eq 3 ]
-	then
-	    assignment=$thing
-	elif [ $t -eq 4 ]
-	then
-	    user=$thing
-	elif [ $t -eq 5 ]
-	then
-	    version=$thing
-	else
-            #FIXME document error handling approach: leave GRADING_ file in $TO_BE_GRADED directory, assume email sent, move to next
-	    echo "ERROR BAD FORMAT: $NEXT_TO_GRADE" >&2
-	    return
-	fi
-    done
-    # error checking
-    # FIXME: error checking could be more significant
-    if [ $semester == "NOSEMESTER" ]
+    # The queue file name contains the necessary information to
+    # identify the assignment to grade (separated by '__'), but let's
+    # instead parse it out of the json file contents.
+
+    semester=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .semester | tr -d '"'`
+    course=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .course | tr -d '"'`
+    assignment=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .gradeable| tr -d '"'`
+    user=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .user | tr -d '"'`
+    version=`cat ${NEXT_DIRECTORY}/${NEXT_TO_GRADE} | jq .version | tr -d '"'`
+
+    # error checking (make sure nothing is null)
+    if [ -z "$semester" ]
     then
 	echo "ERROR IN SEMESTER: $NEXT_TO_GRADE" >&2
 	return
     fi
-    if [ $course == "NOCOURSE" ]
+    if [ -z "$course" ]
     then
 	echo "ERROR IN COURSE: $NEXT_TO_GRADE" >&2
 	return
     fi
-    if [ $assignment == "NOASSIGNMENT" ]
+    if [ -z "$assignment" ]
     then
 	echo "ERROR IN ASSIGNMENT: $NEXT_TO_GRADE" >&2
 	return
     fi
-    if [ $user == "NOUSER" ]
+    if [ -z "$user" ]
     then
 	echo "ERROR IN USER: $NEXT_TO_GRADE" >&2
 	return
     fi
-    if [ $version == "NOVERSION" ]
+    if [ -z "$version" ]
     then
 	echo "ERROR IN VERSION: $NEXT_TO_GRADE" >&2
 	return
@@ -461,7 +438,7 @@ function grade_this_item {
 	# same, but if a student has renamed a directory and then
 	# recreated it, -r and @ are different.  FIXME: Look up the
 	# documentation and improve this comment.
-	# 
+	#
         ##############
 
         # first, clean out all of the old files if this is a re-run
@@ -834,26 +811,13 @@ while true; do
 	global_submission_time=""
 	global_assignment_deadline=""
 	# call the helper function
-	grade_this_item $NEXT_ITEM
+	grade_this_item $NEXT_DIRECTORY $NEXT_ITEM
 
 	# mark the end time
 	ENDTIME=$(date +%s)
 
 	# calculate how long this job was running
 	ELAPSED=$(($ENDTIME - $STARTTIME))
-
-	echo "finished with $NEXT_ITEM in ~$ELAPSED seconds"
-
-	# -------------------------------------------------------------
-	# remove submission & the active grading tag from the todo list
-	flock -w 5 $TODO_LOCK_FILE || log_exit "$NEXT_ITEM" "flock() failed"
-	rm -f $NEXT_DIRECTORY/$NEXT_ITEM          || log_error "$NEXT_ITEM" "Could not delete item from todo list"
-	rm -f $NEXT_DIRECTORY/GRADING_$NEXT_ITEM  || log_error "$NEXT_ITEM" "Could not delete item (w/ 'GRADING_' tag) from todo list"
-	flock -u $TODO_LOCK_FILE
-
-	# log the end
-	log_message "$IS_BATCH_JOB"  "$NEXT_ITEM"  "grade:"  "$ELAPSED" "$global_grade_result"
-
 
 	# -------------------------------------------------------------
     # create/append to the results history
@@ -881,6 +845,18 @@ while true; do
         "${assignment}" \
         "${user}" \
         ${version}
+
+	echo "finished with $NEXT_ITEM in ~$ELAPSED seconds"
+
+	# -------------------------------------------------------------
+	# remove submission & the active grading tag from the todo list
+	flock -w 5 $TODO_LOCK_FILE || log_exit "$NEXT_ITEM" "flock() failed"
+	rm -f $NEXT_DIRECTORY/$NEXT_ITEM          || log_error "$NEXT_ITEM" "Could not delete item from todo list"
+	rm -f $NEXT_DIRECTORY/GRADING_$NEXT_ITEM  || log_error "$NEXT_ITEM" "Could not delete item (w/ 'GRADING_' tag) from todo list"
+	flock -u $TODO_LOCK_FILE
+
+	# log the end
+	log_message "$IS_BATCH_JOB"  "$NEXT_ITEM"  "grade:"  "$ELAPSED" "$global_grade_result"
 
 	# break out of the loop (need to check for new interactive items)
 	graded_something=true

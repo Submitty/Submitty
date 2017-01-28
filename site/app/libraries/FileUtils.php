@@ -32,28 +32,26 @@ class FileUtils {
         $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
         $disallowed_files = array('.ds_store');
 
-	// Return an array of all discovered files
+        // Return an array of all discovered files
         $return = array();
 
         if (is_dir($dir)) {
             if ($handle = opendir($dir)) {
-
-	        // loop over items in this directory
+                // loop over items in this directory
                 while (false !== ($entry = readdir($handle))) {
-
-		    // the full path
+                    // the full path
                     $path = "{$dir}/{$entry}";
-
-		    // recurse into subdirectories
+                    // recurse into subdirectories
                     if (is_dir($path) && !in_array(strtolower($entry), $disallowed_folders)) {
                         $temp = FileUtils::getAllFiles($path, $skip_files,$flatten);
                         if ($flatten) {
                             foreach ($temp as $file => $details) {
-			        if (isset($details['relative_name'])) {
-				    $details['relative_name'] = $entry."/".$details['relative_name'];
-			        } else {
-				    $details['relative_name'] = $entry."/".$details['name'];
-				}
+                                if (isset($details['relative_name'])) {
+                                    $details['relative_name'] = $entry."/".$details['relative_name'];
+                                }
+                                else {
+                                    $details['relative_name'] = $entry."/".$details['name'];
+                                }
                                 $return[$entry."/".$file] = $details;
                             }
                         }
@@ -63,7 +61,7 @@ class FileUtils {
                     }
                     else if (is_file($path) && !in_array(strtolower($entry), $skip_files) &&
                         !in_array(strtolower($entry), $disallowed_files)) {
-			// add file to array
+                        // add file to array
                         $return[$entry] = array('name' => $entry,
                                                 'path' => $path,
                                                 'size' => filesize($path),
@@ -129,21 +127,58 @@ class FileUtils {
     }
 
     /**
-     * Create a directory if it doesn't already exist. If it's a file,
-     * delete the file, and then try to create directory.
+     * Create a directory if it doesn't already exist. If it's a file, delete the file, and then try to create
+     * directory. Additionally, we can specify a certain mode for the directory as well as if we should recursively
+     * create any folders specified in $dir if they don't all exist. The mkdir function takes into account the
+     * umask setting of your computer (which by default would be something like 022). However, we set it such that
+     * if we specify a mode, then we turn off the umask while we create the folder before reenabling it so we have
+     * absolute power for it without having to worry about umasks (and can actually make a folder 0777 if we so
+     * wanted).
      *
      * @param string $dir
+     * @param int    $mode
      * @param bool   $recursive
      *
      * @return bool
      */
-    public static function createDir($dir, $recursive = false) {
+    public static function createDir($dir, $mode = null, $recursive = false) {
         $return = true;
         if (!is_dir($dir)) {
             if (file_exists($dir)) {
                 unlink($dir);
             }
-            $return = @mkdir($dir, 0777, $recursive);
+            // Umask gets applied to the mode when creating a folder, so we have to turn it off
+            $umask = null;
+            if ($mode !== null) {
+                $umask = umask(0000);
+            }
+            $return = @mkdir($dir, $mode !== null ? $mode : 0777, $recursive);
+            if ($mode !== null) {
+                umask($umask);
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * @param $path
+     * @param $mode
+     *
+     * @return bool
+     */
+    public static function recursiveChmod($path, $mode) {
+        $dir = new \FilesystemIterator($path);
+        $files = array();
+        foreach ($dir as $item) {
+            if ($item->isDir()) {
+                static::recursiveChmod($item->getPathname(), $mode);
+            }
+            $files[] = $item->getPathname();
+        }
+
+        $return = true;
+        foreach ($files as $file) {
+            $return = $return && chmod($file, $mode);
         }
         return $return;
     }
@@ -179,7 +214,7 @@ class FileUtils {
      *
      * @param string $filename
      *
-     * @return string
+     * @return array|boolean
      */
     public static function readJsonFile($filename) {
         if (!is_file($filename)) {
@@ -226,7 +261,11 @@ class FileUtils {
         }
         return $size;
     }
-    
+
+    /**
+     * @param $zipname
+     * @return bool
+     */
     public static function checkFileInZipName($zipname) {
         $zip = zip_open($zipname);
         if(is_resource(($zip))) {
@@ -253,11 +292,11 @@ class FileUtils {
         }
         else {
             foreach (str_split($filename) as $char) {
-                if ($char == "'" || 
-		    $char == '"' ||
+                if ($char == "'" ||
+                    $char == '"' ||
                     $char == "\\" ||
-		    $char == "<" || 
-		    $char == ">") {
+                    $char == "<" ||
+                    $char == ">") {
                     return false;
                 }
             }
@@ -267,5 +306,87 @@ class FileUtils {
 
     public static function encodeJson($string) {
         return json_encode($string, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    }
+
+    /**
+     * Given some number of arguments, joins them together separating them with the DIRECTORY_SEPERATOR constant. This
+     * works in the same way as os.path.join does in Python, making sure that we do not end up with any doubles of
+     * a seperator and that we can start the path with a seperator if we specify the first argument as starting with
+     * it.
+     *
+     * Credit goes to SO user Riccardo Galli (http://stackoverflow.com/users/210090/riccardo-galli) for his answer:
+     * http://stackoverflow.com/a/15575293/4616655
+     *
+     * @return string
+     */
+    public static function joinPaths() {
+        $paths = array();
+
+        foreach (func_get_args() as $arg) {
+            if ($arg !== '') {
+                $paths[] = $arg;
+            }
+        }
+
+        $sep = DIRECTORY_SEPARATOR;
+        return preg_replace('#'.preg_quote($sep).'+#', $sep, join($sep, $paths));
+    }
+
+    /**
+     * Given a filename (with or without the fully formed path), this function will return a string that
+     * acts as a pseudo content-type for that file in any text based file that is recognized can use
+     * that content-type to tell CodeMirror how to highlight the file. As such, any unrecognized file
+     * extension will get the content type "text/x-sh" even though just "text" would probably be more
+     * appropriate. This is a weaker check for binary files than FileUtils::getMimeType which does
+     * some basic analysis of the actual file to determine the information as opposed to just the filename.
+     *
+     * @param $filename
+     * @return null|string
+     */
+    public static function getContentType($filename){
+        if ($filename === null) {
+            return null;
+        }
+        switch (strtolower(pathinfo($filename, PATHINFO_EXTENSION))) {
+            // pdf
+            case 'pdf':
+                $content_type = "application/pdf";
+                break;
+            // images
+            case 'png':
+                $content_type = "image/png";
+                break;
+            case 'jpg':
+            case 'jpeg':
+                $content_type = "image/jpeg";
+                break;
+            case 'gif':
+                $content_type = "image/gif";
+                break;
+            case 'bmp':
+                $content_type = "image/bmp";
+                break;
+            // text
+            case 'c':
+                $content_type = 'text/x-csrc';
+                break;
+            case 'cpp':
+            case 'cxx':
+            case 'h':
+            case 'hpp':
+            case 'hxx':
+                $content_type = 'text/x-c++src';
+                break;
+            case 'java':
+                $content_type = 'text/x-java';
+                break;
+            case 'py':
+                $content_type = 'text/x-python';
+                break;
+            default:
+                $content_type = 'text/x-sh';
+                break;
+        }
+        return $content_type;
     }
 }

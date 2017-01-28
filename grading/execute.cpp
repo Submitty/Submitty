@@ -53,7 +53,12 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "mogrify",                 "/usr/bin/mogrify" }, //image magick!
     { "cut",                     "/usr/bin/cut" },
     { "sort",                    "/usr/bin/sort" },
+    { "grep",                    "/bin/grep" },
     { "sed",                     "/bin/sed" },
+    { "pdftotext",               "/usr/bin/pdftotext" },
+    { "wc",                      "/usr/bin/wc" },
+    { "head",                    "/usr/bin/head" },
+    { "tail",                    "/usr/bin/tail" },
 
     // Submitty Analysis Tools
     { "submitty_count_token",    SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/bin/count_token" },
@@ -447,9 +452,9 @@ void parse_command_line(const std::string &cmd,
     else {
       // validate_filename(token);
       // validate_option(my_program,token);
-      std::cout << "before TOKEN IS " << token << std::endl;
+      //std::cout << "before TOKEN IS " << token << std::endl;
       token = validate_option(my_program,token);
-      std::cout << "after  TOKEN IS " << token << std::endl;
+      //std::cout << "after  TOKEN IS " << token << std::endl;
       my_args.push_back(token);
     }
   }
@@ -710,9 +715,8 @@ int resident_set_size(int childPID) {
   std::string command = std::string("ps xw o user:15,pid:10,rss:10,cmd | grep untrusted"); 
 
   // for debugging, print this output to the log
-  std::cout << "system ( '" + command + "' )" << std::endl;
-  system (command.c_str());
-
+  //std::cout << "system ( '" + command + "' )" << std::endl;
+  //system (command.c_str());
   // now sum up the resident set size column of the output
   std::string command2 = command + " | awk '{ sum += $3 } END { print sum }'";
   std::string output = output_of_system_command(command2.c_str());

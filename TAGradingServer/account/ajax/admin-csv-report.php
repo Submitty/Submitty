@@ -70,7 +70,7 @@ foreach ($users as $user){
     $student_row[] = $user['registration_section'];
     
     foreach($student_grades as $student_grade) {
-        $student_row[] = $student_grade['score'];
+        $student_row[] = max(0,floatval($student_grade['score']));
     }
     $csv_output .= implode(",", $student_row).$nl;
 }

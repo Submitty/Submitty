@@ -22,41 +22,32 @@ source ${DIR}/../common/common_env.sh
 #    echo "Downloaded Selenium"
 #fi
 
+sudo bash -c 'echo -e "#%PAM-1.0
+auth required pam_unix.so
+account required pam_unix.so" > /etc/pam.d/httpd'
+sudo sed -i '25s/^/\#/' /etc/pam.d/common-password
+sudo sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
+PG_VERSION="$(psql -V | egrep -o '[0-9]{1,}.[0-9]{1,}')"
+sudo sed -i -e "s/# ----------------------------------/# ----------------------------------\nhostssl    all    all    192.168.56.0\/24    pam\nhost       all    all    192.168.56.0\/24    pam\nhost       all    all    all                md5/" /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
+
 sudo mkdir -p ${SUBMITTY_INSTALL_DIR}
 sudo mkdir -p ${SUBMITTY_DATA_DIR}
 sudo ln -s ${TRAVIS_BUILD_DIR} ${SUBMITTY_REPOSITORY}
 
-sudo python ${DIR}/../create_untrusted_users.py
-
-sudo adduser ta --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo echo "ta:ta" | sudo chpasswd
-sudo adduser instructor --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo echo "instructor:instructor" | sudo chpasswd
-sudo adduser instructor sudo
+sudo python ${DIR}/../bin/create_untrusted_users.py
 
 sudo addgroup hwcronphp
 sudo addgroup course_builders
 sudo adduser hwphp --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 sudo adduser hwcgi --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 sudo adduser hwcgi hwphp
+sudo adduser hwphp shadow
 sudo adduser hwcgi shadow
 sudo adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 sudo adduser hwphp hwcronphp
 sudo adduser hwcron hwcronphp
 sudo adduser hsdbu --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 sudo echo "hsdbu:hsdbu" | sudo chpasswd
-
-
-sudo addgroup csci1000
-sudo addgroup csci1000_tas_www
-sudo adduser hwphp csci1000_tas_www
-sudo adduser hwcron csci1000_tas_www
-
-sudo adduser instructor course_builders
-sudo adduser ta csci1000
-sudo adduser ta csci1000_tas_www
-sudo adduser instructor csci1000
-sudo adduser instructor csci1000_tas_www
 
 sudo chown hwphp:hwphp ${SUBMITTY_INSTALL_DIR}
 sudo chown hwphp:hwphp ${SUBMITTY_DATA_DIR}
@@ -72,24 +63,4 @@ http://localhost/cgi-bin
 svn+ssh:192.168.56.103" | sudo bash ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
 
 sudo bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
-
 sudo bash ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
-sudo chmod 777 ${SUBMITTY_DATA_DIR}/instructors/authlist
-sudo chmod 777 ${SUBMITTY_DATA_DIR}/instructors/valid
-sudo echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
-sudo echo "student" >> ${SUBMITTY_DATA_DIR}/instructors/valid
-sudo echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
-sudo echo "smithj" >> ${SUBMITTY_DATA_DIR}/instructors/valid
-sudo echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
-sudo echo "joness" >> ${SUBMITTY_DATA_DIR}/instructors/valid
-sudo echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
-sudo echo "browna" >> ${SUBMITTY_DATA_DIR}/instructors/valid
-echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/authlist
-echo "pearsr" >> ${SUBMITTY_DATA_DIR}/instructors/valid
-sudo echo "\n" | sudo perl ${SUBMITTY_DATA_DIR}/bin/authonly.pl
-sudo echo "student:student" | sudo chpasswd
-sudo echo "smithj:smithj" | sudo chpasswd
-sudo echo "joness:joness" | sudo chpasswd
-sudo echo "browna:browna" | sudo chpasswd
-sudo echo "pearsr:pearsr" | sudo chpasswd
-sudo python ${SUBMITTY_REPOSITORY}/.setup/add_sample_courses.py csci1000

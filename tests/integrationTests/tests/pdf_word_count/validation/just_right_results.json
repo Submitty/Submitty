@@ -1,0 +1,29 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01_words_881.pdf",
+                    "description": "*.pdf"
+                }
+            ],
+            "points_awarded": 1,
+            "test_name": "Test 1 Submitted a .pdf file"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02_plaintext.txt",
+                    "description": "plaintext.txt"
+                }
+            ],
+            "points_awarded": 1,
+            "test_name": "Test 2 Required 500-1000 Words"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 3 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

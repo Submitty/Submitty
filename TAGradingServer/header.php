@@ -49,11 +49,12 @@ print <<<HTML
 		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/bootstrap/js/bootstrap.min.js"></script>
 		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/custom/js/script.js"></script>
 
-
 		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.js"></script>
 		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/clike/clike.js"></script>
 		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/python/python.js"></script>
 		<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/shell/shell.js"></script>
+
+        <script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/moment/moment.js"></script>
 
 		<link type="text/css" rel="stylesheet" href="{$BASE_URL}/toolbox/include/custom/css/style.css" />
 
@@ -85,28 +86,18 @@ if ($user_logged_in) {
 HTML;
     if(isset($_GET['g_id'])){
         $db->query("SELECT g_title FROM gradeable WHERE g_id=?",array($_GET['g_id']));
-        $title = $db->row()['g_title'];
-        print <<<HTML
-                &gt; {$title}
-HTML;
-    }
-    if(isset($_GET['this'])) {
-        if (is_array($_GET['this'])) {
-            foreach ($_GET['this'] as $that) {
-                print <<<HTML
-                    &gt; {$that}
-HTML;
-            }
-        } else {
+
+        $title = $db->row();
+        if(!empty($title)){
             print <<<HTML
-                    &gt; {$_GET['this']}
+                &gt; {$title['g_title']}
 HTML;
         }
     }
     print <<<HTML
-                    </h4>
-                </div>
+                </h4>
             </div>
         </div>
+    </div>
 HTML;
 }
