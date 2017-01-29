@@ -15,10 +15,10 @@
 
 # FIXES: when there is not a full week the is a division by 0 error
 import os
-from __future__ import division
+from __future__ import division, print_function
 # import numpy as np
 
-print "lets parse some files!! "
+print("lets parse some files!! ")
 
 
 def weekday_to_num(str):
@@ -46,10 +46,10 @@ def num_to_weekday(num):
 
 path = '/var/local/submitty/autograding_logs/'
 submissions_per_hour = [0]*24
-avg_hours_ot_week = [[0 for x in range(24)] for x in range(7)]
-avg_hours_ot_week_csci1200 = [[0 for x in range(24)] for x in range(7)]
-avg_waittime_ot_week = [[0 for x in range(24)] for x in range(7)]  # average wait time per assignment per week
-avg_gradingtime_ot_week = [[0 for x in range(24)] for x in range(7)]  # average grade time per assignment per week
+avg_hours_ot_week = [[0]*24 for _ in range(7)]
+avg_hours_ot_week_csci1200 = [[0]*24 for _ in range(7)]
+avg_waittime_ot_week = [[0]*24 for _ in range(7)]  # average wait time per assignment per week
+avg_gradingtime_ot_week = [[0]*24 for _ in range(7)]  # average grade time per assignment per week
 number_of_weekdays = [0]*7
 
 submissions_csci1200 = []
@@ -60,7 +60,7 @@ submission_temp_cs2600 = 0
 submission_temp_cs4430 = 0
 submission_temp_cs4380 = 0
 
-hours_in_days = [[0 for x in range(24)] for x in range(7)]  # for waiting time calc
+hours_in_days = [[0]*24 for _ in range(7)]  # for waiting time calc
 
 all_students = set([])
 all_courses = set([])
@@ -86,8 +86,8 @@ for filename in os.listdir(path):
             info = ((line[48:99]).strip()).split("__")
 
             if (len(info) < 3):
-                print filename
-                print info
+                print(filename)
+                print(info)
                 continue
 
             all_students.add(info[3])
@@ -103,7 +103,7 @@ for filename in os.listdir(path):
             if (line[101:105] == "wait"):
                 waitsec = int(line[106:114])
                 if (waitsec > 1000):
-                    print "Anomoly %s %d  %d" % (filename, hour, waitsec)
+                    print("Anomoly %s %d  %d" % (filename, hour, waitsec))
                 avg_waittime_ot_week[day_of_week][hour] += int(line[106:114])
 
             elif (line[101:106] == "grade"):
@@ -128,7 +128,7 @@ for filename in os.listdir(path):
             new_day = False
 
     if (full_week == 7):
-        print filename[5:9]
+        print(filename[5:9])
         f3.write("%s %s, " % (line[4:10], filename[5:9]))
         submission_temp_cs1200 //= 2
         submission_temp_cs2600 //= 2
@@ -144,21 +144,21 @@ for filename in os.listdir(path):
         submission_temp_cs2200 = 0
         submission_temp_cs4380 = 0
 
-    # print day_of_week
+    # print(day_of_week)
 
 num_of_sumbissions //= 2
 submissions_per_hour[:] = [x // (2*num_days) for x in submissions_per_hour]
 num_of_students = len(all_students)
-# print avg_hours_ot_week
-# print ", ".join(str(x) for x in submissions_per_hour)
-print "The number of days %d" % num_days
-print "Number of submissions %d" % num_of_sumbissions
-print "Number of students %d" % num_of_students
-print "Number of courses %d" % len(all_courses)
-print all_courses
-print number_of_weekdays
-# print avg_waittime_ot_week
-# print avg_hours_ot_week
+# print(avg_hours_ot_week)
+# print(", ".join(str(x) for x in submissions_per_hour))
+print("The number of days %d" % num_days)
+print("Number of submissions %d" % num_of_sumbissions)
+print("Number of students %d" % num_of_students)
+print("Number of courses %d" % len(all_courses))
+print(all_courses)
+print(number_of_weekdays)
+# print(avg_waittime_ot_week)
+# print(avg_hours_ot_week)
 # i = 0
 # f = open('submissions_per_hour.csv', 'w+')
 # for x in submissions_per_hour:
@@ -196,8 +196,8 @@ for x in range(7):
     #     if (avg_hours_ot_week[x][h] != 0):
     #         avg_waittime_ot_week[x][h] = avg_waittime_ot_week[x][h] // avg_hours_ot_week[x][h]
 
-    # print "%s" % (num_to_weekday(x))
-    # print ", ".join(str(i) for i in avg_hours_ot_week[x])
+    # print("%s" % num_to_weekday(x))
+    # print(", ".join(str(i) for i in avg_hours_ot_week[x]))
 
     # f2.write(num_to_weekday(x))
     f2.write(", ".join(str(i) for i in avg_hours_ot_week[x]))
@@ -212,6 +212,6 @@ f2.write("\n")
 for x in range(7):
     f2.write(", ".join(str(i) for i in avg_gradingtime_ot_week[x]))
     f2.write(", ")
-# print "AVERAGED"
-# print avg_waittime_ot_week
-# print avg_hours_ot_week
+# print("AVERAGED")
+# print(avg_waittime_ot_week)
+# print(avg_hours_ot_week)
