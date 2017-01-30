@@ -102,9 +102,7 @@ before_script:
   - psql -U postgres -c "CREATE ROLE hsdbu WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'hsdbu'"
   - sudo ./.setup/travis/autograder.sh
   - ./.setup/travis/setup.sh
-  - pushd
   - sudo python /usr/local/submitty/GIT_CHECKOUT_Submitty/.setup/bin/setup_sample_courses.py csci1000
-  - popd
   - pwd
   - ls -lta .setup/travis
   - sudo ./.setup/travis/setup_test_suite.sh
