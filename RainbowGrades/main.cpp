@@ -94,13 +94,13 @@ std::string sectionName(int section) {
 
 
 //====================================================================
-
-char GLOBAL_EXAM_TITLE[MAX_STRING_LENGTH] = "exam title uninitialized";
-char GLOBAL_EXAM_DATE[MAX_STRING_LENGTH] = "exam date uninitialized";
-char GLOBAL_EXAM_TIME[MAX_STRING_LENGTH] = "exam time uninitialized";
-char GLOBAL_EXAM_DEFAULT_ROOM[MAX_STRING_LENGTH] = "exam default room uninitialized";
-char GLOBAL_EXAM_SEATING[MAX_STRING_LENGTH] = "";
-char GLOBAL_EXAM_SEATING_COUNT[MAX_STRING_LENGTH] = "";
+ 
+std::string GLOBAL_EXAM_TITLE = "exam title uninitialized";
+std::string GLOBAL_EXAM_DATE = "exam date uninitialized";
+std::string GLOBAL_EXAM_TIME = "exam time uninitialized";
+std::string GLOBAL_EXAM_DEFAULT_ROOM = "exam default room uninitialized";
+std::string GLOBAL_EXAM_SEATING = "";
+std::string GLOBAL_EXAM_SEATING_COUNT = "";
 
 float GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = 0.1;
 
@@ -435,7 +435,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   //std::cout << "1" << std::endl;
   //std::cout << j << std::endl;
   // load gradeables
-  json::iterator it = j.begin();
+  //json::iterator it = j.begin();
   json gradeableName = j["gradeables"];
   //json gradeableName = j["gradeable"].get<json>();
   
@@ -558,28 +558,28 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 		    //std::cout << token2 << std::endl;
 		    if (token2 == "exam_title") {
 		      std::string value = itr2.value();
-		      strcpy(GLOBAL_EXAM_TITLE, value.c_str());
+		      GLOBAL_EXAM_TITLE = value;
 		    } else if (token2 == "exam_date") {
 		      std::string value = itr2.value();
-		      strcpy(GLOBAL_EXAM_DATE, value.c_str());
+		      GLOBAL_EXAM_DATE = value;
 		    } else if (token2 == "exam_time") {
 		      std::string value = itr2.value();
-		      strcpy(GLOBAL_EXAM_TIME, value.c_str());
+		      GLOBAL_EXAM_TIME = value;
 		    } else if (token2 == "exam_default_room") {
 		      std::string value = itr2.value();
-		      strcpy(GLOBAL_EXAM_DEFAULT_ROOM, value.c_str());
+		      GLOBAL_EXAM_DEFAULT_ROOM = value;
 		    } else if (token2 == "min_overall_for_zone_assignment") {
 		      float value = itr2.value();
 		      GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT = value;
 		    } else if (token2 == "exam_seating") {
 		      std::cout << "TOKEN IS EXAM SEATING" << std::endl;
-			  std::string value = itr2.value();
-			  strcpy(GLOBAL_EXAM_SEATING, value.c_str());
-			} else if (token2 == "exam_seating_count") {
+                      std::string value = itr2.value();
+                      GLOBAL_EXAM_SEATING = value;
+                    } else if (token2 == "exam_seating_count") {
 		      std::cout << "TOKEN IS EXAM SEATING COUNT" << std::endl;
-			  std::string value = itr2.value();
-			  strcpy(GLOBAL_EXAM_SEATING_COUNT, value.c_str());
-			}
+                      std::string value = itr2.value();
+                      GLOBAL_EXAM_SEATING_COUNT = value;
+                    }
 	      }
 		}
 	  }
@@ -867,7 +867,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
       //assert ( GLOBAL_recommend_id == "");
       istr >> GLOBAL_recommend_id;
 
-      /*
+      // / *
       std::string username;
       istr >> username;
       char line[MAX_STRING_LENGTH];
@@ -876,7 +876,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
       if (students_loaded == false) continue;
       assert (s != NULL);
       s->addRecommendation(line);
-      */ /*
+      // * / / *
 
     } else if (token == "note") {
       // other grading note [ per student ]
@@ -1386,7 +1386,9 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	}
   }
   
-  LoadExamSeatingFile(GLOBAL_EXAM_SEATING_COUNT,GLOBAL_EXAM_SEATING,students);
+  if (GLOBAL_EXAM_SEATING_COUNT != "" && GLOBAL_EXAM_SEATING != "") {
+    LoadExamSeatingFile(GLOBAL_EXAM_SEATING_COUNT,GLOBAL_EXAM_SEATING,students);
+  }
   MakeRosterFile(students);
   MatchClickerRemotes(students, iclicker_remotes_filename);
   AddClickerScores(students,iclicker_questions);
