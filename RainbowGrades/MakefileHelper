@@ -47,6 +47,10 @@ ifeq ($(UNAME_S),Linux)
      flags = -g -std=c++0x
 endif
 
+ifeq ($(findstring CYGWIN,$(UNAME_S)),CYGWIN)
+    flags = -g -std=c++11
+endif
+
 
 compile:
 	g++ -Wall ${flags} ${memory_flags} \
