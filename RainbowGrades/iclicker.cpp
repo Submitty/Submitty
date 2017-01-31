@@ -91,7 +91,6 @@ void MatchClickerRemotes(std::vector<Student*> &students, const std::string &rem
   std::ifstream istr(remotes_filename.c_str());
   if (!istr) return; 
 
-  char c;
   while (1) {
     std::string remote = ReadRemote(istr);
     std::string username = ReadQuoted(istr);

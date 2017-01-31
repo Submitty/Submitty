@@ -37,7 +37,7 @@ std::string GLOBAL_recommend_id = "";
 
 std::string ICLICKER_ROSTER_FILE              = "./iclicker_Roster.txt";
 std::string OUTPUT_FILE                       = "./output.html";
-std::string CUSTOMIZATION_FILE                = "./customization.json";
+std::string CUSTOMIZATION_FILE                = "./customization_no_comments.json";
 
 std::string RAW_DATA_DIRECTORY                = "./raw_data/";
 std::string INDIVIDUAL_FILES_OUTPUT_DIRECTORY = "./individual_summary_html/";
@@ -432,44 +432,34 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   json j;
   j << istr;
   
-  //std::cout << "1" << std::endl;
-  //std::cout << j << std::endl;
   // load gradeables
-  //json::iterator it = j.begin();
-  json gradeableName = j["gradeables"];
-  //json gradeableName = j["gradeable"].get<json>();
-  
-  for (json::iterator itr = gradeableName.begin(); itr != gradeableName.end(); itr++) {
-	//std::cout << "it makes it here in gradeable" << std::endl;
-    GRADEABLE_ENUM g;
-    std::string gradeable_name = itr.key();
-	//std::cout << "it makes it here in gradeable2" << std::endl;
-	bool success = string_to_gradeable_enum(gradeable_name, g);
-	if (!success) {
-	  std::cout << "UNKNOWN GRADEABLE: " << gradeable_name << std::endl;
-	  exit(0);
-	}
-	//std::cout << "it makes it here in gradeable3 " << gradeable_name << std::endl;
-    int c = 0;
-	float p = 0.0;
-	float m = 0.0;
-	
-	json ids_list = j["gradeables"][gradeable_name]["ids"];
-	for (unsigned int i = 0; i < ids_list.size(); i++) {
-	  json ids = ids_list[i];
-	  //std::cout << ids << std::endl;
-	  for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
-	    std::string gradeable_id = itr2.key();
-	    //std::cout << "hi " << gradeable_id << std::endl;
-	    json grades = ids[gradeable_id];
-	    c++;
-	    p += grades["percent"].get<float>();
-	    m += grades["max"].get<float>();
-	  }  
-	}
-	//std::cout << "it makes it here in gradeable4" << std::endl;
+  json all_gradeables = j["gradeables"];
+  int num_gradeables = all_gradeables.size();
 
-	//std::cout << c << " " << p << " " << m << std::endl;
+  for (int i = 0; i < num_gradeables; i++) {
+    json one_gradeable_type = all_gradeables[i];
+    GRADEABLE_ENUM g;
+    std::string gradeable_type = one_gradeable_type.value("type","BAD_GRADEABLE_TYPE");
+
+    bool success = string_to_gradeable_enum(gradeable_type, g);
+    if (!success) {
+      std::cout << "UNKNOWN GRADEABLE TYPE: " << gradeable_type << std::endl;
+      exit(0);
+    }
+    int c = 0;
+    float p = 0.0;
+    float m = 0.0;
+    json ids_list = one_gradeable_type["ids"];
+    for (unsigned int i = 0; i < ids_list.size(); i++) {
+      json ids = ids_list[i];
+      for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
+        std::string gradeable_id = itr2.key();
+        json grades = ids[gradeable_id];
+        c++;
+        p += grades["percent"].get<float>();
+        m += grades["max"].get<float>();
+      }
+    }
 	
     Gradeable answer (c,p,m);
     GRADEABLES.insert(std::make_pair(g,answer));
@@ -477,14 +467,13 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
     assert (GRADEABLES[g].getPercent() >= 0.0 && GRADEABLES[g].getPercent() <= 1.0);
     assert (GRADEABLES[g].getMaximum() >= 0.0);
 	
-	// Set remove lowest for gradeable
-	int num = (*itr).value("remove_lowest", 0);
-	//std::cout << num << std::endl;
-	//std::cout << GRADEABLES[g].getCount() << std::endl;
-	assert (num >= 0 && num < GRADEABLES[g].getCount());
-	GRADEABLES[g].setRemoveLowest(num);
-	
-	ALL_GRADEABLES.push_back(g);
+    // Set remove lowest for gradeable
+    int num = one_gradeable_type.value("remove_lowest", 0);
+    //std::cout << num << std::endl;
+    //std::cout << GRADEABLES[g].getCount() << std::endl;
+    assert (num == 0 || (num >= 0 && num < GRADEABLES[g].getCount()));
+    GRADEABLES[g].setRemoveLowest(num);
+    ALL_GRADEABLES.push_back(g);
   }
 	
   perfect = new Student();perfect->setUserName("PERFECT");
@@ -500,44 +489,46 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   AVERAGE_STUDENT_POINTER = student_average;
   STDDEV_STUDENT_POINTER = student_stddev;
   
-  //std::cout << "2" << std::endl;
-	
-  for (json::iterator itr = gradeableName.begin(); itr != gradeableName.end(); itr++) {
-	GRADEABLE_ENUM g;
-	std::string gradeable_name = itr.key();
-	bool success = string_to_gradeable_enum(gradeable_name, g);
-	if (!success) {
-	  std::cout << "UNKNOWN GRADEABLE: " << gradeable_name << std::endl;
-	  exit(0);
-	}
-	json ids_list = j["gradeables"][gradeable_name]["ids"];
-	//std::cout << "hello ids_list" << std::endl;
-	for (unsigned int i = 0; i < ids_list.size(); i++) {
-	  json grade_id = ids_list[i];
-	  std::string token_key = (grade_id.begin()).key();
-	  int which = GRADEABLES[g].setCorrespondence(token_key);
-	  p_score = grade_id[token_key].value("max", 0.0);
-	  std::vector<float> curve = grade_id[token_key]["curve"].get<std::vector<float> >();
-	  if (!curve.empty()) {
-		assert (curve.size() == 5);
-		p_score = curve[0];
-		a_score = curve[1];
-		b_score = curve[2];
-		c_score = curve[3];
-		d_score = curve[4];
-	  } else {
-		p_score = grade_id.value("max", 0.0);
-		a_score = GetBenchmarkPercentage("lowest_a-")*p_score;
-		b_score = GetBenchmarkPercentage("lowest_b-")*p_score;
-		c_score = GetBenchmarkPercentage("lowest_c-")*p_score;
-		d_score = GetBenchmarkPercentage("lowest_d")*p_score;
-	  }
-		
-	  assert (p_score >= a_score &&
-			  a_score >= b_score &&
-			  b_score >= c_score &&
-			  c_score >= d_score);
-	
+  for (int i = 0; i < num_gradeables; i++) {
+
+    json one_gradeable_type = all_gradeables[i];
+
+    GRADEABLE_ENUM g;
+    std::string gradeable_type = one_gradeable_type.value("type","BAD_GRADEABLE_TYPE");
+
+    bool success = string_to_gradeable_enum(gradeable_type, g);
+    if (!success) {
+      std::cout << "UNKNOWN GRADEABLE: " << gradeable_type << std::endl;
+      exit(0);
+    }
+    json ids_list = one_gradeable_type["ids"];
+
+    for (unsigned int i = 0; i < ids_list.size(); i++) {
+      json grade_id = ids_list[i];
+      std::string token_key = (grade_id.begin()).key();
+      int which = GRADEABLES[g].setCorrespondence(token_key);
+      p_score = grade_id[token_key].value("max", 0.0);
+      std::vector<float> curve = grade_id[token_key]["curve"].get<std::vector<float> >();
+      if (!curve.empty()) {
+        assert (curve.size() == 5);
+        p_score = curve[0];
+        a_score = curve[1];
+        b_score = curve[2];
+        c_score = curve[3];
+        d_score = curve[4];
+      } else {
+        p_score = grade_id.value("max", 0.0);
+        a_score = GetBenchmarkPercentage("lowest_a-")*p_score;
+        b_score = GetBenchmarkPercentage("lowest_b-")*p_score;
+        c_score = GetBenchmarkPercentage("lowest_c-")*p_score;
+        d_score = GetBenchmarkPercentage("lowest_d")*p_score;
+      }
+
+      assert (p_score >= a_score &&
+              a_score >= b_score &&
+              b_score >= c_score &&
+              c_score >= d_score);
+      
       assert (which >= 0 && which < GRADEABLES[g].getCount());
       perfect->setGradeableItemGrade(g,which, p_score);
       lowest_a->setGradeableItemGrade(g,which, a_score);
@@ -1158,9 +1149,9 @@ void processcustomizationfile(std::vector<Student*> &students) {
 
   std::string token,token2;
   //int num;
-  int which;
-  std::string which_token;
-  float p_score,a_score,b_score,c_score,d_score;
+  //int which;
+  //std::string which_token;
+  //float p_score,a_score,b_score,c_score,d_score;
 
   std::string iclicker_remotes_filename;
   std::vector<std::vector<iClickerQuestion> > iclicker_questions(MAX_LECTURES+1);

@@ -22,7 +22,7 @@ endif
 
 # =============================================================================
 
-.PHONY: default pull push all compile overall section lab hw test quiz final iclicker zone clean
+.PHONY: default pull push all compile overall section lab hw test quiz final iclicker zone clean remove_json_comments
 
 default: overall
 
@@ -52,7 +52,11 @@ ifeq ($(findstring CYGWIN,$(UNAME_S)),CYGWIN)
 endif
 
 
-compile:
+remove_json_comments: customization.json
+	cpp -xc++ $< | sed -e '/^#/d' > customization_no_comments.json
+
+
+compile:  remove_json_comments
 	g++ -Wall ${flags} ${memory_flags} \
 		${RAINBOW_GRADES_DIRECTORY}/main.cpp \
 		${RAINBOW_GRADES_DIRECTORY}/output.cpp \
@@ -64,6 +68,9 @@ compile:
 		-g -o process_grades.out
 	mkdir -p individual_summary_html/
 	mkdir -p all_students_summary_html/
+
+
+
 
 
 clean:
