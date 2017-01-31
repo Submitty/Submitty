@@ -27,10 +27,12 @@ int myrandomzone (int i) { return std::rand()%i;}
 
 
 void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::string &zone_assignments_filename, std::vector<Student*> &students) {
-  std::cout << "zone counts filename " << zone_counts_filename << std::endl;
-  std::cout << "zone assignments filename " << zone_assignments_filename << std::endl;
 
+  std::cout << "zone counts filename '" << zone_counts_filename << "'" << std::endl;
+  std::cout << "zone assignments filename '" << zone_assignments_filename << "'" << std::endl;
 
+  assert (zone_counts_filename != "");
+  assert (zone_assignments_filename != "");
 
   // ============================================================
   // read in the desired zone counts
