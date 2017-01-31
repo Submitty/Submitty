@@ -20,10 +20,10 @@ extern bool DISPLAY_LATE_DAYS;
 
 // ==========================================================
 // messages for zone assignment
-extern char GLOBAL_EXAM_TITLE[MAX_STRING_LENGTH];
-extern char GLOBAL_EXAM_DATE[MAX_STRING_LENGTH];
-extern char GLOBAL_EXAM_TIME[MAX_STRING_LENGTH];
-extern char GLOBAL_EXAM_DEFAULT_ROOM[MAX_STRING_LENGTH];
+extern std::string GLOBAL_EXAM_TITLE;
+extern std::string GLOBAL_EXAM_DATE;
+extern std::string GLOBAL_EXAM_TIME;
+extern std::string GLOBAL_EXAM_DEFAULT_ROOM;
 
 extern float GLOBAL_MIN_OVERALL_FOR_ZONE_ASSIGNMENT;
 

@@ -149,7 +149,7 @@ fi
 
 
 # set the permissions of the top level directory
-chown  root:$COURSE_BUILDERS_GROUP  ${SUBMITTY_INSTALL_DIR}
+chown  root:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_INSTALL_DIR}
 chmod  751                          ${SUBMITTY_INSTALL_DIR}
 
 
@@ -165,13 +165,13 @@ mkdir -p $SUBMITTY_DATA_DIR/tagrading_logs
 mkdir -p $SUBMITTY_DATA_DIR/autograding_logs
 
 # set the permissions of these directories
-chown  root:$COURSE_BUILDERS_GROUP   $SUBMITTY_DATA_DIR
+chown  root:${COURSE_BUILDERS_GROUP}   $SUBMITTY_DATA_DIR
 chmod  751                           $SUBMITTY_DATA_DIR
-chown  root:$COURSE_BUILDERS_GROUP   $SUBMITTY_DATA_DIR/courses
+chown  root:${COURSE_BUILDERS_GROUP}   $SUBMITTY_DATA_DIR/courses
 chmod  751                           $SUBMITTY_DATA_DIR/courses
-chown  $HWPHP_USER:$COURSE_BUILDERS_GROUP  $SUBMITTY_DATA_DIR/tagrading_logs
+chown  $HWPHP_USER:${COURSE_BUILDERS_GROUP}  $SUBMITTY_DATA_DIR/tagrading_logs
 chmod  u+rwx,g+rxs                   $SUBMITTY_DATA_DIR/tagrading_logs
-chown  $HWCRON_USER:$COURSE_BUILDERS_GROUP $SUBMITTY_DATA_DIR/autograding_logs
+chown  $HWCRON_USER:${COURSE_BUILDERS_GROUP} $SUBMITTY_DATA_DIR/autograding_logs
 chmod  u+rwx,g+rxs                   $SUBMITTY_DATA_DIR/autograding_logs
 
 # if the to_be_graded directories do not exist, then make them
@@ -184,7 +184,7 @@ mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_batch
 chown  $HWCRON_USER:$HWCRONPHP_GROUP        $SUBMITTY_DATA_DIR/to_be_graded_interactive
 chmod  770                                  $SUBMITTY_DATA_DIR/to_be_graded_interactive
 #course builders (instructors & head TAs) will write items to this todo list, hwcron will remove them
-chown  $HWCRON_USER:$COURSE_BUILDERS_GROUP  $SUBMITTY_DATA_DIR/to_be_graded_batch
+chown  $HWCRON_USER:${COURSE_BUILDERS_GROUP}  $SUBMITTY_DATA_DIR/to_be_graded_batch
 chmod  770                                  $SUBMITTY_DATA_DIR/to_be_graded_batch
 
 
@@ -286,7 +286,7 @@ echo -e "Copy the scripts"
 
 # make the directory (has a different name)
 mkdir -p ${SUBMITTY_INSTALL_DIR}/bin
-chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin
 chmod 751 ${SUBMITTY_INSTALL_DIR}/bin
 
 # copy all of the files
@@ -307,14 +307,16 @@ find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chown root:root {} \;
 find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 500 {} \;
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
-chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
-chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 chown ${HWCRON_USER}:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
@@ -329,7 +331,7 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 # set the permissions
-chown root:$COURSE_BUILDERS_GROUP ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
 
 
