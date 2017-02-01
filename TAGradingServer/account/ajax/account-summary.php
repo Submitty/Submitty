@@ -8,10 +8,10 @@
 $section_data = $_POST['section_data'];
 
 $html = '';
+$autograding_max = $section_data['autograding_max'];
 
 foreach ($section_data['students'] as $student) {
     $autograding_points = $student['autograding_points'];
-    $autograding_max = $section_data['autograding_max'];
 
     $ta_points = $student['ta_points'];
     $ta_max = $section_data['ta_max'];

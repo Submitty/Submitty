@@ -22,7 +22,7 @@ function getGrades($g_id)
   coalesce(sum(gc_max_value), 0) AS max_score,
   coalesce(sum(gcd_score), 0)    AS ta_points,
   coalesce(active_version, -1)   AS active_version,
-  coalesce(gd_grader_id, '')     AS gd_grader_id --Coalescing to '' so I can detect ungraded gradeables
+  coalesce(gd_grader_id, '')     AS gd_grader_id --Coalescing to '' so I can detect unviewed gradeables
 FROM
   (SELECT
      user_id,
@@ -39,12 +39,13 @@ FROM
      g_syllabus_bucket,
      gc_max_value,
      gc_is_extra_credit,
-    gc_id
+     gc_id
    FROM
      gradeable g
      FULL JOIN gradeable_component gc ON gc.g_id = g.g_id
-      , users
-    GROUP BY
+     , users
+   WHERE g.g_id = ?
+   GROUP BY
      user_id,
      user_firstname,
      user_preferred_firstname,
@@ -59,12 +60,11 @@ FROM
      g_syllabus_bucket,
      gc_max_value,
      gc_is_extra_credit,
-    gc_id
-
+     gc_id
   ) AS youser
   FULL JOIN
   electronic_gradeable_version egv ON egv.g_id = youser.g_id AND egv.user_id = youser.user_id
-  FULL OUTER JOIN
+  FULL JOIN
   (SELECT
      gd_user_id,
      g.g_id,
@@ -78,7 +78,6 @@ FROM
      FULL JOIN gradeable_component_data gcd ON gd.gd_id = gcd.gd_id) AS grdbl
     ON youser.g_id = grdbl.g_id AND youser.user_id = grdbl.gd_user_id AND youser.gc_id = grdbl.gc_id
 WHERE (NOT gc_is_extra_credit OR gc_is_extra_credit IS NULL)
-      AND youser.g_id = ?
       AND youser.user_id IS NOT NULL
 GROUP BY
   youser.user_id,
@@ -97,7 +96,8 @@ ORDER BY
   section
   , youser.user_id
   , user_lastname
-  , user_firstname;";
+  , user_firstname;
+";
 
     Database::query($query, array($g_id));
     return Database::rows();
@@ -368,12 +368,42 @@ JS;
     $js .= <<<JS
     //For each section that the TA is assigned fetch them first and remove them from the sections array
     Object.keys(ta_sections).forEach(function(element){
+        
+        var subsec1 = new Object();
+        subsec1['students'] = new Object();
+        subsec1['autograding_max'] = ta_sections[element]['autograding_max'];
+        subsec1['ta_max'] = ta_sections[element]['ta_max'];
+        var subsec2 = new Object();
+        subsec2['students'] = new Object();
+        subsec2['autograding_max'] = ta_sections[element]['autograding_max'];
+        subsec2['ta_max'] = ta_sections[element]['ta_max'];
+        
+        var section_keys = Object.keys(ta_sections[element]['students']);
+        
+        for(i = 0; i < section_keys.length/2; i++){
+            subsec1['students'][i] = ta_sections[element]['students'][i];
+        }
+        
+        for(i = section_keys.length/2; i < section_keys.length; i++){
+            subsec2['students'][i] = ta_sections[element]['students'][i];
+        }
+        
         $.post("ajax/account-summary.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}", 
-            {section_data: ta_sections[element], url_string: url_string})
+            {section_data: subsec1, url_string: url_string})
              .done(function(data){
                 //Build the dynamic id for this section and append the section html
                 section_body_string = "body_" + element;
                 $('#' + section_body_string ).html(data);
+            }).fail(function(){
+                console.log("failure: ta section " + element);
+            });
+        
+        $.post("ajax/account-summary.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}", 
+            {section_data: subsec2, url_string: url_string})
+             .done(function(data){
+                //Build the dynamic id for this section and append the section html
+                section_body_string = "body_" + element;
+                $('#' + section_body_string ).append(data);
             }).fail(function(){
                 console.log("failure: ta section " + element);
             });
