@@ -198,6 +198,7 @@ create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/
 #               drwxr-s---       instructor   ta_www_group    reports/
 create_and_set  u=rwx,g=rwxs,o=   $instructor   $ta_www_group   $course_dir/reports
 create_and_set  u=rwx,g=rwxs,o=   $instructor   $ta_www_group   $course_dir/reports/summary_html
+create_and_set  u=rwx,g=rwxs,o=   $HWPHP_USER   $ta_www_group   $course_dir/reports/all_grades
 
 
 ########################################################################################################################
