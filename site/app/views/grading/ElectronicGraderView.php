@@ -51,7 +51,7 @@ HTML;
                 continue;
             }
             if (count($section['graders']) > 0) {
-                $graders = implode(", ", array_map(function($grader) { $grader->getId(); }, $section['graders']));
+                $graders = implode(", ", array_map(function($grader) { return $grader->getId(); }, $section['graders']));
             }
             else {
                 $graders = "Nobody";
@@ -81,10 +81,9 @@ HTML;
     /**
      * @param Gradeable   $gradeable
      * @param Gradeable[] $rows
-     * @param string      $section_key
      * @return string
      */
-    public function summaryPage($gradeable, $rows, $section_key="registration_section") {
+    public function summaryPage($gradeable, $rows) {
         $return = <<<HTML
 <div class="content">
     <h2>Summary Page for {$gradeable->getName()}</h2>
@@ -119,11 +118,11 @@ HTML;
             foreach ($rows as $row) {
                 $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
                 $graded = $row->getGradedAutograderPoints() + $row->getGradedTAPoints();
-                if ($section_key === "rotating_section") {
-                    $section = $row->getUser()->getRotatingSection();
+                if ($gradeable->isGradeByRegistration()) {
+                    $section = $row->getUser()->getRegistrationSection();
                 }
                 else {
-                    $section = $row->getUser()->getRegistrationSection();
+                    $section = $row->getUser()->getRotatingSection();
                 }
                 $display_section = ($section === null) ? "NULL" : $section;
                 if ($section !== $last_section) {
@@ -167,6 +166,7 @@ HTML;
                 <td>{$graded} / {$total_possible}</td>
             </tr>
 HTML;
+                $count++;
             }
             $return .= <<<HTML
         </tbody>
