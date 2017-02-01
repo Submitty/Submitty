@@ -38,29 +38,48 @@ FROM
      g_grade_by_registration,
      g_syllabus_bucket,
      gc_max_value,
-     gc_is_extra_credit
+     gc_is_extra_credit,
+    gc_id
    FROM
-     users u
-     , gradeable g
-     FULL OUTER JOIN gradeable_component gc ON gc.g_id = g.g_id) AS youser
-  FULL OUTER JOIN
+     gradeable g
+     FULL JOIN gradeable_component gc ON gc.g_id = g.g_id
+      , users
+    GROUP BY
+     user_id,
+     user_firstname,
+     user_preferred_firstname,
+     user_lastname,
+     g_grade_by_registration,
+     registration_section,
+     rotating_section,
+     manual_registration,
+     g.g_id,
+     g_title,
+     g_grade_by_registration,
+     g_syllabus_bucket,
+     gc_max_value,
+     gc_is_extra_credit,
+    gc_id
+
+  ) AS youser
+  FULL JOIN
   electronic_gradeable_version egv ON egv.g_id = youser.g_id AND egv.user_id = youser.user_id
   FULL OUTER JOIN
   (SELECT
      gd_user_id,
      g.g_id,
      gcd_score,
-     gd_grader_id
+     gd_grader_id,
+     gc_id
    FROM
      gradeable g
      FULL JOIN
      gradeable_data gd ON g.g_id = gd.g_id
      FULL JOIN gradeable_component_data gcd ON gd.gd_id = gcd.gd_id) AS grdbl
-    ON youser.g_id = grdbl.g_id AND youser.user_id = grdbl.gd_user_id
+    ON youser.g_id = grdbl.g_id AND youser.user_id = grdbl.gd_user_id AND youser.gc_id = grdbl.gc_id
 WHERE (NOT gc_is_extra_credit OR gc_is_extra_credit IS NULL)
-      AND (gc_max_value > 0 OR gc_max_value IS NULL)
-      AND youser.user_id IS NOT NULL
       AND youser.g_id = ?
+      AND youser.user_id IS NOT NULL
 GROUP BY
   youser.user_id,
   user_firstname,
