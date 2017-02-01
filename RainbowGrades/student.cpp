@@ -64,6 +64,11 @@ Student* GetStudent(const std::vector<Student*> &students, const std::string& us
 // accessor & modifier for grade data
 
 const ItemGrade& Student::getGradeableItemGrade(GRADEABLE_ENUM g, int i) const {
+  static ItemGrade emptyItemGrade(0);
+  //std::cout << "i " << i << "   count " << GRADEABLES[g].getCount() << std::endl;
+  if (i >= GRADEABLES[g].getCount()) {
+    return emptyItemGrade;
+  }
   assert (i >= 0 && i < GRADEABLES[g].getCount());
   std::map<GRADEABLE_ENUM,std::vector<ItemGrade> >::const_iterator itr = all_item_grades.find(g);
   assert (itr != all_item_grades.end());
