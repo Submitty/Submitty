@@ -64,7 +64,7 @@ FROM
   ) AS youser
   FULL JOIN
   electronic_gradeable_version egv ON egv.g_id = youser.g_id AND egv.user_id = youser.user_id
-  FULL OUTER JOIN
+  FULL JOIN
   (SELECT
      gd_user_id,
      g.g_id,
