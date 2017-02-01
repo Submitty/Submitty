@@ -17,6 +17,8 @@ std::vector<std::vector<std::string> > HACKMAXPROJECTS;
 std::string GLOBAL_sort_order;
 
 
+int GLOBAL_ACTIVE_TEST_ZONE = 0;
+
 #include "student.h"
 #include "iclicker.h"
 #include "gradeable.h"
@@ -42,6 +44,8 @@ std::string CUSTOMIZATION_FILE                = "./customization_no_comments.jso
 std::string RAW_DATA_DIRECTORY                = "./raw_data/";
 std::string INDIVIDUAL_FILES_OUTPUT_DIRECTORY = "./individual_summary_html/";
 std::string ALL_STUDENTS_OUTPUT_DIRECTORY     = "./all_students_summary_html/";
+
+nlohmann::json GLOBAL_CUSTOMIZATION_JSON;
 
 
 //====================================================================
@@ -79,6 +83,11 @@ std::map<int,std::string> sectionNames;
 std::map<std::string,std::string> sectionColors;
 
 bool validSection(int section) {
+
+  nlohmann::json::iterator itr = GLOBAL_CUSTOMIZATION_JSON.find("section");
+  //  assert (itr != GLOBAL_CUSTOMIZATION_JSON.end());
+  //assert (itr->is_array());
+
   return (sectionNames.find(section) != sectionNames.end());
 }
 
@@ -544,6 +553,9 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 		//std::cout << "makes it into exam data" << std::endl;
 	    int active = exam_data["active"].get<int>();
 		if (active == 1) {
+
+                  GLOBAL_ACTIVE_TEST_ZONE = i;
+
 	      for (json::iterator itr2 = (exam_data).begin(); itr2 != (exam_data).end(); itr2++) {
 	        std::string token2 = itr2.key();
 		    //std::cout << token2 << std::endl;
@@ -1158,6 +1170,8 @@ void processcustomizationfile(std::vector<Student*> &students) {
   
   json j;
   j << istr;
+
+  GLOBAL_CUSTOMIZATION_JSON = j;
   
   for (json::iterator itr = j.begin(); itr != j.end(); itr++) {
     token = itr.key();
