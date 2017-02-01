@@ -85,10 +85,14 @@ std::map<std::string,std::string> sectionColors;
 bool validSection(int section) {
 
   nlohmann::json::iterator itr = GLOBAL_CUSTOMIZATION_JSON.find("section");
-  //  assert (itr != GLOBAL_CUSTOMIZATION_JSON.end());
-  //assert (itr->is_array());
+  assert (itr != GLOBAL_CUSTOMIZATION_JSON.end());
+  assert (itr->is_object());
 
-  return (sectionNames.find(section) != sectionNames.end());
+  nlohmann::json::iterator itr2 = itr->find(std::to_string(section));
+  if (itr2 == itr->end()) return false;
+  return true;
+  
+  //return (sectionNames.find(section) != sectionNames.end());
 }
 
 
@@ -750,6 +754,14 @@ void load_bonus_late_day(std::vector<Student*> &students, int which_lecture, std
 
 void processcustomizationfile(std::vector<Student*> &students) {
 
+
+  std::ifstream istr(CUSTOMIZATION_FILE.c_str());
+  assert (istr);
+  json j;
+  j << istr;
+  GLOBAL_CUSTOMIZATION_JSON = j;
+
+
   SetBenchmarkPercentage("lowest_a-",0.9);
   SetBenchmarkPercentage("lowest_b-",0.8);
   SetBenchmarkPercentage("lowest_c-",0.7);
@@ -1156,8 +1168,8 @@ void processcustomizationfile(std::vector<Student*> &students) {
   }
   */
   
-  std::ifstream istr(CUSTOMIZATION_FILE.c_str());
-  assert (istr);
+  //std::ifstream istr(CUSTOMIZATION_FILE.c_str());
+  //assert (istr);
 
   std::string token,token2;
   //int num;
@@ -1167,11 +1179,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 
   std::string iclicker_remotes_filename;
   std::vector<std::vector<iClickerQuestion> > iclicker_questions(MAX_LECTURES+1);
-  
-  json j;
-  j << istr;
 
-  GLOBAL_CUSTOMIZATION_JSON = j;
   
   for (json::iterator itr = j.begin(); itr != j.end(); itr++) {
     token = itr.key();
@@ -1184,7 +1192,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 		int section = std::stoi(temp);
 		std::string section_name = itr2.value();
 		std::cout << "MAKE ASSOCIATION " << section << " " << section_name << std::endl;
-		assert (!validSection(section));
+		//assert (!validSection(section));
 		sectionNames[section] = section_name;
 		if (sectionColors.find(section_name) == sectionColors.end()) {
 		  if (counter == 0) {
