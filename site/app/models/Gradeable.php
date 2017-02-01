@@ -251,7 +251,6 @@ abstract class Gradeable {
         }
 
         for ($i = 0; $i < $num_textboxes; $i++) {
-          $this->textbox_names[$i] = $details['textboxes'][$i]['label'];
           $this->textboxes[$i] = $details['textboxes'][$i];
         }
 
@@ -504,11 +503,7 @@ abstract class Gradeable {
     }
 
     public function getNumTextBoxes() {
-      return count($this->textbox_names);
-    }
-
-    public function getTextBoxNames() {
-        return $this->textbox_names;
+      return count($this->textboxes);
     }
     public function getTextBoxes() {
         return $this->textboxes;

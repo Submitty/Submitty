@@ -5,7 +5,7 @@
             "filename" : "color.txt"
         },
         {    
-            "label": "200-300 word description", 
+            "label": "200-300 word description",
             "rows" : 5,
             "filename" : "description.txt"
         },
