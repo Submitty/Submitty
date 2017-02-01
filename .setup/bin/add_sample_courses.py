@@ -21,7 +21,9 @@ PYTHON_HOMEWORKS = ["python_simple_homework", "python_linehighlight",
 CPP_HOMEWORKS = ["cpp_simple_lab", "cpp_cats", "cpp_memory_debugging", "cpp_custom",
                  "cpp_hidden_tests", "c_fork", "c_failure_messages"]
 JAVA_HOMEWORKS = ["java_factorial", "java_coverage_factorial"]
-ALL_HOMEWORKS = PYTHON_HOMEWORKS + CPP_HOMEWORKS + JAVA_HOMEWORKS
+MISC_HOMEWORKS = ["no_autograding", "iclicker_upload", "paragraph_textboxes", "pdf_word_count"]
+
+ALL_HOMEWORKS = PYTHON_HOMEWORKS + CPP_HOMEWORKS + JAVA_HOMEWORKS + MISC_HOMEWORKS
 
 
 def create_course(course, semester, course_group, assignments=None):
@@ -346,6 +348,7 @@ def main():
         create_course("csci1100", semester, "csci1100_tas_www", PYTHON_HOMEWORKS)
         create_course("csci1200", semester, "csci1200_tas_www", CPP_HOMEWORKS)
         create_course("csci2600", semester, "csci2600_tas_www", JAVA_HOMEWORKS)
+        create_course("csci9999", semester, "csci9999_tas_www", MISC_HOMEWORKS)
 
 if __name__ == "__main__":
     main()

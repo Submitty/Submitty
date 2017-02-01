@@ -123,11 +123,11 @@ abstract class Gradeable extends AbstractModel {
     /** @var string Message to show for the gradeable above all submission results */
     protected $message = "";
 
-    /** @var int  */
-    protected $num_parts = 1;
-
     /** @var string[] */
     protected $part_names = array();
+
+    /** @var string[] */
+    protected $textboxes = array();
 
     /* Variables for submission details (such as attempts used, etc.) */
     protected $submissions = 0;
@@ -228,14 +228,17 @@ abstract class Gradeable extends AbstractModel {
             $this->message = Utils::prepareHtmlString($details['assignment_message']);
         }
 
-        if (isset($details['num_parts'])) {
-            $this->num_parts = intval($details['num_parts']);
-            if ($this->num_parts < 1) {
-                $this->num_parts = 1;
-            }
+        $num_parts = 1;
+        if (isset($details['part_names'])) {
+          $num_parts = count($details['part_names']);
         }
 
-        for ($i = 1; $i <= $this->num_parts; $i++) {
+        $num_textboxes = 0;
+        if (isset($details['textboxes'])) {
+          $num_textboxes = count($details['textboxes']);
+        }
+
+        for ($i = 1; $i <= $num_parts; $i++) {
             $this->previous_files[$i] = array();
             $j = $i - 1;
             if (isset($details['part_names']) && isset($details['part_names'][$j]) &&
@@ -245,6 +248,10 @@ abstract class Gradeable extends AbstractModel {
             else {
                 $this->part_names[$i] = "Part ".$i;
             }
+        }
+
+        for ($i = 0; $i < $num_textboxes; $i++) {
+          $this->textboxes[$i] = $details['textboxes'][$i];
         }
 
         if (isset($details['testcases'])) {
@@ -488,11 +495,18 @@ abstract class Gradeable extends AbstractModel {
     }
 
     public function getNumParts() {
-        return $this->num_parts;
+      return count($this->part_names);
     }
 
     public function getPartsNames() {
         return $this->part_names;
+    }
+
+    public function getNumTextBoxes() {
+      return count($this->textboxes);
+    }
+    public function getTextBoxes() {
+        return $this->textboxes;
     }
 
     public function getHighestVersion() {
@@ -501,6 +515,10 @@ abstract class Gradeable extends AbstractModel {
 
     public function getActiveVersion() {
         return $this->active_version;
+    }
+
+    public function getCurrentVersionNumber() {
+        return $this->current;
     }
 
     /**

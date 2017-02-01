@@ -30,6 +30,8 @@ extern Student* STDDEV_STUDENT_POINTER;
 
 extern std::string GLOBAL_sort_order;
 
+extern int GLOBAL_ACTIVE_TEST_ZONE;
+
 // ==========================================================
 
 std::string HEX(int h) {
@@ -448,7 +450,7 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
 
 
   std::string x1 = s->getExamZone();
-  std::string x2 = s->getZone(1);
+  std::string x2 = s->getZone(GLOBAL_ACTIVE_TEST_ZONE);
 
   if (x2.size() > 0) {
     assert (x1.size() > 0);
@@ -640,7 +642,7 @@ void start_table_output( bool for_instructor,
     student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","iclicker status"));
     student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
     student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ICLICKER TOTAL"));
-    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ICLICKER RECENT"));
+    //student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff","ICLICKER RECENT"));
     student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
     
     /*
@@ -941,10 +943,10 @@ void start_table_output( bool for_instructor,
     // ICLICKER
     if (DISPLAY_ICLICKER && ICLICKER_QUESTION_NAMES.size() > 0) {
 
-      if (this_student->getRemoteID() != "" && this_student->hasPriorityHelpStatus()) {
+      if (this_student->getRemoteID() != "") { // && this_student->hasPriorityHelpStatus()) {
         table.set(myrow,counter++,TableCell("ccccff","registered"));
-      } else if (this_student->getRemoteID() != "") {
-        table.set(myrow,counter++,TableCell("ffffff","registered"));
+        //} else if (this_student->getRemoteID() != "") {
+        //table.set(myrow,counter++,TableCell("ffffff","registered"));
       } else if (this_student->getLastName() == "") {
         table.set(myrow,counter++,TableCell("ffffff"/*default_color*/,""));
       } else {
@@ -962,6 +964,7 @@ void start_table_output( bool for_instructor,
                                          0.60*MAX_ICLICKER_TOTAL,
                                          0.40*MAX_ICLICKER_TOTAL);
         table.set(myrow,counter++,TableCell(color,grade,1));
+        /*
         grade = this_student->getIClickerRecent();
         color = coloritcolor(grade,
                              ICLICKER_RECENT,
@@ -970,10 +973,11 @@ void start_table_output( bool for_instructor,
                              0.60*ICLICKER_RECENT,
                              0.40*ICLICKER_RECENT);
         table.set(myrow,counter++,TableCell(color,grade,1));
+        */
       } else {
         color="ffffff"; // default_color;
         table.set(myrow,counter++,TableCell(color,""));
-        table.set(myrow,counter++,TableCell(color,""));
+        //table.set(myrow,counter++,TableCell(color,""));
       }
 
       table.set(myrow,counter++,TableCell(grey_divider));

@@ -108,7 +108,15 @@ WHERE user_id=?", $array);
 
     public function getAllGradeables($user_id = null) {
         $this->database->query("
-SELECT egv.*, egd.*, eg.*, gd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, g.*
+SELECT 
+  CASE WHEN egv.user_id IS NOT NULL THEN 
+    CASE WHEN egv.active_version IS NULL THEN 
+      0 ELSE 
+      egv.active_version 
+    END ELSE 
+    NULL 
+  END AS active_version, 
+  egd.*, eg.*, gd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, g.*
 FROM gradeable as g 
 LEFT JOIN (
   SELECT *
@@ -152,7 +160,16 @@ ORDER BY g.g_id", array($user_id, $user_id));
 
     public function getGradeableById($g_id, $user_id = null) {
         $this->database->query("
-SELECT gd.*, egv.*, egd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, g.*, eg.*
+SELECT 
+  gd.*, 
+  CASE WHEN egv.user_id IS NOT NULL THEN 
+    CASE WHEN egv.active_version IS NULL THEN 
+      0 ELSE 
+      egv.active_version 
+    END ELSE 
+    NULL 
+  END AS active_version, 
+  egd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, g.*, eg.*
 FROM gradeable as g
 LEFT JOIN (
   SELECT *
@@ -235,46 +252,53 @@ ORDER BY egd.g_version", array($g_id, $user_id));
             $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
             $users_query = implode(",", array_fill(0, count($users), "?"));
             $this->database->query("
-    SELECT 
-      egv.*, egd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, gcd.graded_tagrading, 
-      gd.*, eg.*, g.*, u.*
-    FROM users AS u
-    NATURAL JOIN gradeable AS g
-    LEFT JOIN (
-      SELECT *
-      FROM gradeable_data
-    ) AS gd ON gd.gd_user_id=u.user_id AND g.g_id=gd.g_id
-    LEFT JOIN (
-      SELECT SUM(gc_max_value) as total_tagrading_extra_credit, g_id
-      FROM gradeable_component
-      WHERE gc_is_text = FALSE AND gc_is_extra_credit = TRUE
-      GROUP BY g_id
-    ) AS gc1 ON g.g_id=gc1.g_id
-    LEFT JOIN (
-      SELECT SUM(gc_max_value) as total_tagrading_non_extra_credit, g_id
-      FROM gradeable_component
-      WHERE gc_is_text = FALSE AND gc_is_extra_credit = FALSE
-      GROUP BY g_id
-    ) AS gc2 ON g.g_id=gc2.g_id
-    LEFT JOIN (
-      SELECT SUM(gcd_score) as graded_tagrading, gd_id
-      FROM gradeable_component_data
-      GROUP BY gd_id
-    ) AS gcd ON gd.gd_id=gcd.gd_id
-    LEFT JOIN (
-      SELECT *
-      FROM electronic_gradeable
-    ) AS eg ON eg.g_id=g.g_id
-    LEFT JOIN (
-      SELECT *
-      FROM electronic_gradeable_version
-    ) AS egv ON g.g_id=egv.g_id AND u.user_id=egv.user_id
-    LEFT JOIN (
-      SELECT *
-      FROM electronic_gradeable_data
-    ) AS egd ON g.g_id=egd.g_id AND egv.active_version=egd.g_version AND u.user_id=egd.user_id
-    WHERE g.g_id=? AND u.user_id IN ({$users_query})
-    ORDER BY u.{$section_key}, u.user_id", array_merge(array($g_id), $users));
+SELECT 
+  CASE WHEN egv.user_id IS NOT NULL THEN 
+    CASE WHEN egv.active_version IS NULL THEN 
+      0 ELSE 
+      egv.active_version 
+    END ELSE 
+    NULL 
+  END AS active_version, 
+  egd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, gcd.graded_tagrading, 
+  gd.*, eg.*, g.*, u.*
+FROM users AS u
+NATURAL JOIN gradeable AS g
+LEFT JOIN (
+  SELECT *
+  FROM gradeable_data
+) AS gd ON gd.gd_user_id=u.user_id AND g.g_id=gd.g_id
+LEFT JOIN (
+  SELECT SUM(gc_max_value) as total_tagrading_extra_credit, g_id
+  FROM gradeable_component
+  WHERE gc_is_text = FALSE AND gc_is_extra_credit = TRUE
+  GROUP BY g_id
+) AS gc1 ON g.g_id=gc1.g_id
+LEFT JOIN (
+  SELECT SUM(gc_max_value) as total_tagrading_non_extra_credit, g_id
+  FROM gradeable_component
+  WHERE gc_is_text = FALSE AND gc_is_extra_credit = FALSE
+  GROUP BY g_id
+) AS gc2 ON g.g_id=gc2.g_id
+LEFT JOIN (
+  SELECT SUM(gcd_score) as graded_tagrading, gd_id
+  FROM gradeable_component_data
+  GROUP BY gd_id
+) AS gcd ON gd.gd_id=gcd.gd_id
+LEFT JOIN (
+  SELECT *
+  FROM electronic_gradeable
+) AS eg ON eg.g_id=g.g_id
+LEFT JOIN (
+  SELECT *
+  FROM electronic_gradeable_version
+) AS egv ON g.g_id=egv.g_id AND u.user_id=egv.user_id
+LEFT JOIN (
+  SELECT *
+  FROM electronic_gradeable_data
+) AS egd ON g.g_id=egd.g_id AND egv.active_version=egd.g_version AND u.user_id=egd.user_id
+WHERE g.g_id=? AND u.user_id IN ({$users_query})
+ORDER BY u.{$section_key}, u.user_id", array_merge(array($g_id), $users));
 
             foreach ($this->database->rows() as $row) {
                 $return[] = new GradeableDb($this->core, $row, new User($row));
@@ -429,7 +453,7 @@ ORDER BY rotating_section", $params);
             $params = array_merge($params, $sections);
         }
         $this->database->query("
-SELECT count(u.*) as cnt, u.registration_section
+SELECT count(u.*) as cnt, u.rotating_section
 FROM users AS u
 INNER JOIN (
   SELECT * FROM gradeable_data WHERE g_id=? AND (gd_active_version >= 0 OR (gd_active_version = -1 AND gd_status = 0))

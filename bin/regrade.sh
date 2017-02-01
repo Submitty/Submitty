@@ -248,5 +248,8 @@ while [ $i -lt ${#my_queue[@]} ] ; do
     echo '  "version":    "'$version'"'       >>  $file
     echo '}'                                  >>  $file
 
+    # change the permissions so that hwcron can read the contents of this file
+    chmod o+rw $file
+
 done
 echo "Added $queue_size submissions to $TO_BE_GRADED queue for regrading."

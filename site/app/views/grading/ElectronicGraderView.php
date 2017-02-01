@@ -64,10 +64,7 @@ HTML;
         </div>
         <div style="margin-top: 20px">
             <a class="btn btn-primary" 
-                href="{$this->core->buildUrl(array('component'    => 'grading',
-                                                   'page'         => 'electronic',
-                                                   'action'       => 'summary',
-                                                   'gradeable_id' => $gradeable->getId()))}">
+                href="{$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}">
                 Grading Homework Overview
             </a>
             <a class="btn btn-primary"

@@ -8,77 +8,96 @@ $account_subpages_unlock = true;
 
 function getGrades($g_id)
 {
-    $query = "
-        SELECT
-          youser.user_id,
-          user_firstname,
-          user_preferred_firstname,
-          user_lastname,
-          section,
-          manual_registration,
-          youser.g_id,
-          g_title,
-          g_grade_by_registration,
-          g_syllabus_bucket,
-          sum(gc_max_value)            AS max_score,
-          coalesce(sum(gcd_score), 0)  AS ta_points,
-          coalesce(active_version, -1) AS active_version,
-          coalesce(gd_grader_id, '')   AS gd_grader_id --Coalescing to '' so I can detect ungraded gradeables
-        FROM
-          (SELECT
-             user_id,
-             user_firstname,
-             user_preferred_firstname,
-             user_lastname,
-             CASE WHEN g_grade_by_registration
-               THEN registration_section
-             ELSE rotating_section END AS section,
-             manual_registration,
-             g_id,
-             g_title,
-             g_grade_by_registration,
-             g_syllabus_bucket,
-             gc_max_value,
-             gc_is_extra_credit
-           FROM
-             users u
-             , gradeable g
-             NATURAL JOIN gradeable_component
-           WHERE
-             g_id = ?) AS youser
-          FULL OUTER JOIN
-          electronic_gradeable_version egv ON egv.g_id = youser.g_id AND egv.user_id = youser.user_id
-          FULL OUTER JOIN
-          (SELECT
-             gd_user_id,
-             g_id,
-             gcd_score,
-             gd_grader_id
-           FROM
-             gradeable_component_data
-             NATURAL JOIN gradeable_data
-             NATURAL JOIN gradeable) AS grdbl
-            ON youser.g_id = grdbl.g_id AND youser.user_id = grdbl.gd_user_id
-        WHERE NOT gc_is_extra_credit
-              AND gc_max_value > 0
-        GROUP BY
-          youser.user_id,
-          user_firstname,
-          user_preferred_firstname,
-          user_lastname,
-          manual_registration,
-          youser.g_id,
-          g_title,
-          g_grade_by_registration,
-          g_syllabus_bucket,
-          section,
-          active_version,
-          gd_grader_id
-        ORDER BY
-          section
-          , user_id
-          , user_lastname
-          , user_firstname;";
+    $query = "SELECT
+  youser.user_id,
+  user_firstname,
+  user_preferred_firstname,
+  user_lastname,
+  section,
+  manual_registration,
+  youser.g_id,
+  g_title,
+  g_grade_by_registration,
+  g_syllabus_bucket,
+  coalesce(sum(gc_max_value), 0) AS max_score,
+  coalesce(sum(gcd_score), 0)    AS ta_points,
+  coalesce(active_version, -1)   AS active_version,
+  coalesce(gd_grader_id, '')     AS gd_grader_id --Coalescing to '' so I can detect unviewed gradeables
+FROM
+  (SELECT
+     user_id,
+     user_firstname,
+     user_preferred_firstname,
+     user_lastname,
+     CASE WHEN g_grade_by_registration
+       THEN registration_section
+     ELSE rotating_section END AS section,
+     manual_registration,
+     g.g_id,
+     g_title,
+     g_grade_by_registration,
+     g_syllabus_bucket,
+     gc_max_value,
+     gc_is_extra_credit,
+     gc_id
+   FROM
+     gradeable g
+     FULL JOIN gradeable_component gc ON gc.g_id = g.g_id
+     , users
+   WHERE g.g_id = ?
+   GROUP BY
+     user_id,
+     user_firstname,
+     user_preferred_firstname,
+     user_lastname,
+     g_grade_by_registration,
+     registration_section,
+     rotating_section,
+     manual_registration,
+     g.g_id,
+     g_title,
+     g_grade_by_registration,
+     g_syllabus_bucket,
+     gc_max_value,
+     gc_is_extra_credit,
+     gc_id
+  ) AS youser
+  FULL JOIN
+  electronic_gradeable_version egv ON egv.g_id = youser.g_id AND egv.user_id = youser.user_id
+  FULL JOIN
+  (SELECT
+     gd_user_id,
+     g.g_id,
+     gcd_score,
+     gd_grader_id,
+     gc_id
+   FROM
+     gradeable g
+     FULL JOIN
+     gradeable_data gd ON g.g_id = gd.g_id
+     FULL JOIN gradeable_component_data gcd ON gd.gd_id = gcd.gd_id) AS grdbl
+    ON youser.g_id = grdbl.g_id AND youser.user_id = grdbl.gd_user_id AND youser.gc_id = grdbl.gc_id
+WHERE (NOT gc_is_extra_credit OR gc_is_extra_credit IS NULL)
+      AND youser.user_id IS NOT NULL
+GROUP BY
+  youser.user_id,
+  user_firstname,
+  user_preferred_firstname,
+  user_lastname,
+  manual_registration,
+  youser.g_id,
+  g_title,
+  g_grade_by_registration,
+  g_syllabus_bucket,
+  section,
+  active_version,
+  gd_grader_id
+ORDER BY
+  section
+  , youser.user_id
+  , user_lastname
+  , user_firstname;
+";
 
     Database::query($query, array($g_id));
     return Database::rows();
@@ -236,36 +255,23 @@ function getSummaryHTML($grades, $sections)
 HTML;
 
     //If there are no results then the gradeable does not exist.
-    if (empty($grades)) {
-        $html .= <<<HTML
-    <div id="container-rubric">
-        <div class="modal-header">
-            <h3 id="myModalLabel">Invalid Gradeable</h3>
-        </div>
 
-        <div class="modal-body" style="padding-bottom:10px; padding-top:25px;">
-            Could not find a gradeable with that ID.<br /><br />
-            <a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Gradeable</a>
-        </div>
-    </div>
-HTML;
-    } else {
 
-        $g_title = $grades[0]['g_title'];
+    $g_title = $grades[0]['g_title'];
 
-        //Change button text depending on user and url parameters
-        if (!User::$is_administrator) {
-            if (isset($_GET['all']) && $_GET['all'] == "true") {
-                $button = "<div class='btn all_sections'>View Your Sections</div>";
-            } else {
-                $button = "<div class='btn all_sections'>View All Sections</div>";
-            }
+    //Change button text depending on user and url parameters
+    if (!User::$is_administrator) {
+        if (isset($_GET['all']) && $_GET['all'] == "true") {
+            $button = "<div class='btn all_sections'>View Your Sections</div>";
         } else {
-            $button = "";
+            $button = "<div class='btn all_sections'>View All Sections</div>";
         }
+    } else {
+        $button = "";
+    }
 
-        //Build table header
-        $html .= <<<HTML
+    //Build table header
+    $html .= <<<HTML
     <div id="container-rubric">
         <div class="modal-header">
             <h3 id="myModalLabel" style="width: 75%; display: inline-block">{$g_title} Summary</h3>
@@ -287,13 +293,13 @@ HTML;
                 <tbody style="background: #f9f9f9;">
 HTML;
 
-        //For each section get html skeleton to hook onto
-        foreach (array_keys($sections) as $section) {
-            $html .= getSectionHTML($sections[$section]['is_registration'], $section);
-        }
+    //For each section get html skeleton to hook onto
+    foreach (array_keys($sections) as $section) {
+        $html .= getSectionHTML($sections[$section]['is_registration'], $section);
+    }
 
-        //Close html table
-        $html .= <<<HTML
+    //Close html table
+    $html .= <<<HTML
                 </tbody>
             </table>
         </div>
@@ -304,7 +310,7 @@ HTML;
         </div>
     </div>
 HTML;
-    }
+
     return $html;
 }
 
@@ -340,9 +346,9 @@ function getSummaryJS($sections)
 HTML;
 
     //If the user is not an administrator create 'notassigned_section' class for hiding sections
-    if(User::$is_administrator){
+    if (User::$is_administrator) {
         $js .= "var class_name = '';";
-    }else{
+    } else {
         $js .= <<<JS
         //Function for clicking on view all button
         $('.all_sections').click(function(){
@@ -362,12 +368,42 @@ JS;
     $js .= <<<JS
     //For each section that the TA is assigned fetch them first and remove them from the sections array
     Object.keys(ta_sections).forEach(function(element){
+        
+        var subsec1 = new Object();
+        subsec1['students'] = new Object();
+        subsec1['autograding_max'] = ta_sections[element]['autograding_max'];
+        subsec1['ta_max'] = ta_sections[element]['ta_max'];
+        var subsec2 = new Object();
+        subsec2['students'] = new Object();
+        subsec2['autograding_max'] = ta_sections[element]['autograding_max'];
+        subsec2['ta_max'] = ta_sections[element]['ta_max'];
+        
+        var section_keys = Object.keys(ta_sections[element]['students']);
+        
+        for(i = 0; i < section_keys.length/2; i++){
+            subsec1['students'][i] = ta_sections[element]['students'][i];
+        }
+        
+        for(i = section_keys.length/2; i < section_keys.length; i++){
+            subsec2['students'][i] = ta_sections[element]['students'][i];
+        }
+        
         $.post("ajax/account-summary.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}", 
-            {section_data: ta_sections[element], url_string: url_string})
+            {section_data: subsec1, url_string: url_string})
              .done(function(data){
                 //Build the dynamic id for this section and append the section html
                 section_body_string = "body_" + element;
                 $('#' + section_body_string ).html(data);
+            }).fail(function(){
+                console.log("failure: ta section " + element);
+            });
+        
+        $.post("ajax/account-summary.php?course={$_GET['course']}&semester={$_GET['semester']}&g_id={$_GET['g_id']}", 
+            {section_data: subsec2, url_string: url_string})
+             .done(function(data){
+                //Build the dynamic id for this section and append the section html
+                section_body_string = "body_" + element;
+                $('#' + section_body_string ).append(data);
             }).fail(function(){
                 console.log("failure: ta section " + element);
             });
@@ -417,9 +453,9 @@ function separateSections($all_sections, $ta_sections)
     }
 
     foreach (array_keys($all_sections) as $s) {
-        if(User::$is_administrator){
+        if (User::$is_administrator) {
             $sections['assigned'][$s] = $all_sections[$s];
-        }else{
+        } else {
             $sections['not_assigned'][$s] = $all_sections[$s];
         }
     }
@@ -435,6 +471,23 @@ function getSummary()
     //For every user for this gradeable for every gradeable component get user names and ta grading totals
     $grades = getGrades($g_id);
 
+    if (empty($grades)) {
+        global $BASE_URL;
+        return <<<HTML
+    <div id="container-rubric">
+        <div class="modal-header">
+            <h3 id="myModalLabel">Invalid Gradeable</h3>
+        </div>
+
+        <div class="modal-body" style="padding-bottom:10px; padding-top:25px;">
+            ERROR:  Invalid Gradeable ID or No TA grading rubric items for this Gradeable ID.  <br> 
+Check the <tt>g_id</tt> in the url, and ensure that this Gradeable has at least one TA Rubric item with points &gt; 0.<br /><br />
+            <a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Gradeable</a>
+        </div>
+    </div>
+HTML;
+
+    }
     $autograding_max = getAutogradingMax($g_id);
 
     //Parse the gradeable data out into individual sections and get autograding totals

@@ -31,12 +31,14 @@ class NavigationController extends AbstractController {
   		$this->core->getOutput()->addCSS("https://fonts.googleapis.com/css?family=Inconsolata");
         
         $future_gradeables_list = $this->gradeables_list->getFutureGradeables();
+        $beta_gradeables_list = $this->gradeables_list->getBetaGradeables();
         $open_gradeables_list = $this->gradeables_list->getOpenElectronicGradeables();
         $closed_gradeables_list = $this->gradeables_list->getClosedElectronicGradeables();
         $grading_gradeables_list = $this->gradeables_list->getGradingGradeables();
         $graded_gradeables_list = $this->gradeables_list->getGradedGradeables();
         
         $sections_to_lists = array("FUTURE" => $future_gradeables_list,
+                                   "BETA" => $beta_gradeables_list,
                                    "OPEN" => $open_gradeables_list,
                                    "CLOSED" => $closed_gradeables_list,
                                    "ITEMS BEING GRADED" => $grading_gradeables_list,

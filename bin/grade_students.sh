@@ -438,7 +438,7 @@ function grade_this_item {
 	# same, but if a student has renamed a directory and then
 	# recreated it, -r and @ are different.  FIXME: Look up the
 	# documentation and improve this comment.
-	# 
+	#
         ##############
 
         # first, clean out all of the old files if this is a re-run
@@ -819,19 +819,6 @@ while true; do
 	# calculate how long this job was running
 	ELAPSED=$(($ENDTIME - $STARTTIME))
 
-	echo "finished with $NEXT_ITEM in ~$ELAPSED seconds"
-
-	# -------------------------------------------------------------
-	# remove submission & the active grading tag from the todo list
-	flock -w 5 $TODO_LOCK_FILE || log_exit "$NEXT_ITEM" "flock() failed"
-	rm -f $NEXT_DIRECTORY/$NEXT_ITEM          || log_error "$NEXT_ITEM" "Could not delete item from todo list"
-	rm -f $NEXT_DIRECTORY/GRADING_$NEXT_ITEM  || log_error "$NEXT_ITEM" "Could not delete item (w/ 'GRADING_' tag) from todo list"
-	flock -u $TODO_LOCK_FILE
-
-	# log the end
-	log_message "$IS_BATCH_JOB"  "$NEXT_ITEM"  "grade:"  "$ELAPSED" "$global_grade_result"
-
-
 	# -------------------------------------------------------------
     # create/append to the results history
     sec_deadline=`date -d "${global_assignment_deadline}" +%s`
@@ -858,6 +845,18 @@ while true; do
         "${assignment}" \
         "${user}" \
         ${version}
+
+	echo "finished with $NEXT_ITEM in ~$ELAPSED seconds"
+
+	# -------------------------------------------------------------
+	# remove submission & the active grading tag from the todo list
+	flock -w 5 $TODO_LOCK_FILE || log_exit "$NEXT_ITEM" "flock() failed"
+	rm -f $NEXT_DIRECTORY/$NEXT_ITEM          || log_error "$NEXT_ITEM" "Could not delete item from todo list"
+	rm -f $NEXT_DIRECTORY/GRADING_$NEXT_ITEM  || log_error "$NEXT_ITEM" "Could not delete item (w/ 'GRADING_' tag) from todo list"
+	flock -u $TODO_LOCK_FILE
+
+	# log the end
+	log_message "$IS_BATCH_JOB"  "$NEXT_ITEM"  "grade:"  "$ELAPSED" "$global_grade_result"
 
 	# break out of the loop (need to check for new interactive items)
 	graded_something=true

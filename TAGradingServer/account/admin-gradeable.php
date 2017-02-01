@@ -640,8 +640,14 @@ HTML;
 
     $db->query("SELECT COUNT(*) AS cnt FROM sections_rotating", array());
     $num_rotating_sections = $db->row()['cnt'];
-    $all_sections = str_replace(array('[', ']'), '',
-                    htmlspecialchars(json_encode(range(1,$num_rotating_sections)), ENT_NOQUOTES));
+    if ($num_rotating_sections > 0) {
+        $all_sections = str_replace(array('[', ']'), '',
+            htmlspecialchars(json_encode(range(1,$num_rotating_sections)), ENT_NOQUOTES));
+    }
+    else {
+        $all_sections = "";
+    }
+
 
     $db->query("
     SELECT 
@@ -759,7 +765,7 @@ HTML;
           <td style="padding: 8px; border: 3px solid black; text-align: center;">{$sections}</td>      
 HTML;
     $last = $row['user_id'];
-  }  
+  }
   
   print <<<HTML
             </table>
@@ -881,6 +887,26 @@ HTML;
             return false;
         }
     }
+
+    function createCrossBrowserJSDate(val){
+        // Create a Date object that is cross-platform supported.
+        // Safari's Date object constructor is more restrictive that Chrome and 
+        // Firefox and will treat some dates as invalid.  Implementation details
+        // vary by browser and JavaScript engine.
+        // To solve this, we use Moment.js to standardize the parsing of the 
+        // datetime string and convert it into a RFC2822 / IETF date format.
+        //
+        // For example, ""2013-05-12 20:00:00"" is converted with Moment into 
+        // "Sun May 12 2013 00:00:00 GMT-0500 (EST)" and correctly parsed by
+        // Safari, Chrome, and Firefox.
+        //
+        // Ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse
+        // Ref: http://stackoverflow.com/questions/16616950/date-function-returning-invalid-date-in-safari-and-firefox
+        var timeParseString = "YYYY-MM-DD HH:mm:ss.S" // Expected string format given by the server
+        var momentDate = moment(val, timeParseString) // Parse raw datetime string
+        return new Date(momentDate.toString()) // Convert moment into RFC2822 and construct browser-specific jQuery Date object
+    }
+
     // export to JSON
     $.fn.serializeObject = function(){
         var o = {};
@@ -1211,8 +1237,8 @@ HTML;
         }
         
         if($('#radio_electronic_file').is(':checked')){ 
-            $('input[name=date_submit]').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_open_date']}")));
-            $('input[name=date_due]').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_due_date']}")));
+            $('input[name=date_submit]').datetimepicker('setDate', createCrossBrowserJSDate("{$electronic_gradeable['eg_submission_open_date']}"));
+            $('input[name=date_due]').datetimepicker('setDate', createCrossBrowserJSDate("{$electronic_gradeable['eg_submission_due_date']}"));
             $('input[name=subdirectory]').val('{$electronic_gradeable['eg_subdirectory']}');
             $('input[name=config_path]').val('{$electronic_gradeable['eg_config_path']}');
             $('input[name=eg_late_days]').val('{$electronic_gradeable['eg_late_days']}');
@@ -1266,13 +1292,13 @@ HTML;
     });
     
     if(!{$have_old}){
-        $('#date_submit').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_open_date']}")));
-        $('#date_due').datetimepicker('setDate', (new Date("{$electronic_gradeable['eg_submission_due_date']}")));
+        $('#date_submit').datetimepicker('setDate', createCrossBrowserJSDate("{$electronic_gradeable['eg_submission_open_date']}"));
+        $('#date_due').datetimepicker('setDate', createCrossBrowserJSDate("{$electronic_gradeable['eg_submission_due_date']}"));
     }
-    
-    $('#date_ta_view').datetimepicker('setDate', (new Date("{$old_gradeable['g_ta_view_start_date']}")));
-    $('#date_grade').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_start_date']}")));
-    $('#date_released').datetimepicker('setDate', (new Date("{$old_gradeable['g_grade_released_date']}")));
+
+    $('#date_ta_view').datetimepicker('setDate', createCrossBrowserJSDate("{$old_gradeable['g_ta_view_start_date']}"));
+    $('#date_grade').datetimepicker('setDate', createCrossBrowserJSDate("{$old_gradeable['g_grade_start_date']}"));
+    $('#date_released').datetimepicker('setDate', createCrossBrowserJSDate("{$old_gradeable['g_grade_released_date']}"));
 
     function toggleQuestion(question, role) {
         if(document.getElementById(role +"_" + question ).style.display == "block") {

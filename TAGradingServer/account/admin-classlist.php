@@ -16,6 +16,7 @@ echo <<<HTML
 
 			<div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
 HTML;
+
 if (isset($_GET['update']) && $_GET['update'] == '1') {
 	$updated =  isset($_GET['updated'])  ? intval($_GET['updated'])  : 0;
 	$inserted = isset($_GET['inserted']) ? intval($_GET['inserted']) : 0;
@@ -30,6 +31,30 @@ if (isset($_GET['update']) && $_GET['update'] == '1') {
 HTML;
 
 }
+
+/* NOTE ------------------------------------------------------------------------
+ * An alternative code block exists that includes a drop-down box option to
+ * delete students that are in the database users table, but not in the classlist
+ * spreadsheet or CSV upload.
+ *
+ * Alternative to deleting a student that leaves a course is to move them into
+ * an "inactive" section so that their records can be preserved.
+ *
+ * Note that the delete option invokes codeblock within if-elseif chain in file
+ *   TAGradingServer/account/submit/admin-classlist.php on lines 203 - 206
+ *   as per Github repository revision 9da15a6 on Sep 24, 2016.  Note that this
+ *   code file is within the 'submit' subdirectory.
+ * -------------------------------------------------------------------------- */
+
+echo <<<HTML
+				Upload Classlist: <input type="file" name="classlist" id="classlist"><br />
+				Ignore students marked manual in the classlist? <input type="checkbox" name="ignore_manual_1" checked="checked" /><br />
+				What to do with students in DB, but not classlist?
+				<select name="missing_students">
+					<option value="-2">Nothing</option>
+HTML;
+
+/* ALTERNATIVE CODE BLOCK TO ENABLE STUDENT DELETE OPTION ----------------------
 echo <<<HTML
 				Upload Classlist: <input type="file" name="classlist" id="classlist"><br />
 				Ignore students marked manual in the classlist? <input type="checkbox" name="ignore_manual_1" checked="checked" /><br />
@@ -38,10 +63,13 @@ echo <<<HTML
 					<option value="-2">Nothing</option>
 					<option value="-1">Delete</option>
 HTML;
+-- END ALTERNATIVE CODE BLOCK TO ENABLE STUDENT DELETE OPTION --------------- */
+
 \lib\Database::query("SELECT * FROM sections_registration ORDER BY sections_registration_id");
 foreach(\lib\Database::rows() as $section) {
 	echo "                        <option value='{$section['sections_registration_id']}'>Move to Section {$section['sections_registration_id']}</option>";
 }
+
 echo <<<HTML
 				</select><br />
 				Ignore students marked manual from above option? <input type="checkbox" name="ignore_manual_2" checked="checked" />

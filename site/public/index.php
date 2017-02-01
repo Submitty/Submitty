@@ -40,7 +40,15 @@ $core = new Core();
  */
 function exception_handler($throwable) {
     global $core;
-    $core->getOutput()->showException(ExceptionHandler::handleException($throwable));
+    $message = ExceptionHandler::handleException($throwable);
+    // Any exceptions that always get shown we need to make sure to escape, especially for production
+    if (is_a($throwable, '\app\exceptions\BaseException')) {
+        /** @var BaseException $throwable */
+        if ($throwable->displayMessage()) {
+            $message = htmlentities($message, ENT_QUOTES);
+        }
+    }
+    $core->getOutput()->showException($message);
 }
 set_exception_handler("exception_handler");
 
@@ -138,6 +146,27 @@ if (!$logged_in) {
         }
         $_REQUEST['component'] = 'authentication';
         $_REQUEST['page'] = 'login';
+    }
+}
+
+if ($core->getUser() !== null) {
+    $log = false;
+    $action = "";
+    if ($_REQUEST['component'] === "authentication" && $_REQUEST['page'] === "logout") {
+        $log = true;
+        $action = "logout";
+    }
+    else if (in_array($_REQUEST['component'], array('student', 'submission')) && $_REQUEST['page'] === "submission" &&
+        $_REQUEST['action'] === "upload") {
+        $log = true;
+        $action = "submission:{$_REQUEST['gradeable_id']}";
+    }
+    else if (isset($_REQUEST['success_login']) && $_REQUEST['success_login'] === "true") {
+        $log = true;
+        $action = "login";
+    }
+    if ($log && $action !== "") {
+        Logger::logAccess($core->getUser()->getId(), $action);
     }
 }
 
