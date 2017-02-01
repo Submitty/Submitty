@@ -70,6 +70,11 @@ public:
     return correspondences.find(id)->second;
   }
 
+  bool isReleased(const std::string &id) const {
+    assert (released.find(id) != released.end());
+    return released.find(id)->second;
+  }
+
   // MODIFIERS
   void setRemoveLowest(int r) { remove_lowest=r; }
 
@@ -87,6 +92,11 @@ public:
     correspondences[id].second = name;
   }
 
+  void setReleased(const std::string&id, bool is_released) {
+    assert (hasCorrespondence(id));
+    assert (released.find(id) == released.end());
+    released[id] = is_released;
+  }
 
 private:
 
@@ -96,6 +106,8 @@ private:
   float maximum;
   int remove_lowest;
   std::map<std::string,std::pair<int,std::string> > correspondences;
+
+  std::map<std::string,bool> released;
 };
 
 // ===============================================================================

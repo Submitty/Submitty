@@ -469,8 +469,8 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
         std::string gradeable_id = itr2.key();
         json grades = ids[gradeable_id];
         c++;
-        p += grades["percent"].get<float>();
-        m += grades["max"].get<float>();
+        p += grades.value("percent",0.0);
+        m += grades.value("max",0.0);
       }
     }
 	
@@ -521,7 +521,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
       std::string token_key = (grade_id.begin()).key();
       int which = GRADEABLES[g].setCorrespondence(token_key);
       p_score = grade_id[token_key].value("max", 0.0);
-      std::vector<float> curve = grade_id[token_key]["curve"].get<std::vector<float> >();
+      std::vector<float> curve = grade_id[token_key].value("curve",std::vector<float>()); //["curve"].get<std::vector<float> >();
       if (!curve.empty()) {
         assert (curve.size() == 5);
         p_score = curve[0];
@@ -537,17 +537,22 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
         d_score = GetBenchmarkPercentage("lowest_d")*p_score;
       }
 
+      bool released = grade_id[token_key].value("released",true);
+      GRADEABLES[g].setReleased(token_key,released);
+      
       assert (p_score >= a_score &&
               a_score >= b_score &&
               b_score >= c_score &&
               c_score >= d_score);
       
       assert (which >= 0 && which < GRADEABLES[g].getCount());
-      perfect->setGradeableItemGrade(g,which, p_score);
-      lowest_a->setGradeableItemGrade(g,which, a_score);
-      lowest_b->setGradeableItemGrade(g,which, b_score);
-      lowest_c->setGradeableItemGrade(g,which, c_score);
-      lowest_d->setGradeableItemGrade(g,which, d_score);
+      if (GRADEABLES[g].isReleased(token_key)) {
+        perfect->setGradeableItemGrade(g,which, p_score);
+        lowest_a->setGradeableItemGrade(g,which, a_score);
+        lowest_b->setGradeableItemGrade(g,which, b_score);
+        lowest_c->setGradeableItemGrade(g,which, c_score);
+        lowest_d->setGradeableItemGrade(g,which, d_score);
+      }
 	  
 	  //std::cout << "it makes it to exam data" << std::endl;
 	  
@@ -1557,7 +1562,10 @@ void load_student_grades(std::vector<Student*> &students) {
                         if (ldu != 0) {
                           //std::cout << "ldu=" << ldu << std::endl;
                         }
-			s->setGradeableItemGrade(g,which,score,ldu,other_note,status);
+
+                        if (GRADEABLES[g].isReleased(gradeable_id)) {
+                          s->setGradeableItemGrade(g,which,score,ldu,other_note,status);
+                        }
 		  }
 
 	    }  
