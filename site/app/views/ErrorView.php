@@ -64,7 +64,7 @@ HTML;
 
     public function errorPage($error_message) {
         $error_message = nl2br(str_replace(" ", "&nbsp;", $error_message));
-        return <<<HTML
+	$return = <<<HTML
 <html>
 <head>
     <title>Submitty - Forbidden</title>
@@ -75,6 +75,20 @@ HTML;
 It does not look like you're allowed to access this page.<br /><br />
 Reason: {$error_message}<br /><br />
 Please contact system administrators if you believe this is a mistake.
+HTML;
+
+
+	if (file_exists("/usr/local/submitty/site/app/views/current_courses.php")) {
+	   $courselist = file_get_contents("/usr/local/submitty/site/app/views/current_courses.php");
+           $return .= <<<HTML
+<br /><br />
+Perhaps you are looking for one of these courses:<br /><br />
+$courselist
+HTML;
+	}
+
+
+        $return .= <<<HTML
 </div>
 
 <pre>
@@ -101,7 +115,7 @@ Please contact system administrators if you believe this is a mistake.
 </body>
 </html>
 HTML;
-
+return $return;
     }
 
     public function noGradeable($gradeable_id) {
