@@ -431,7 +431,8 @@ function getSummary()
         </div>
 
         <div class="modal-body" style="padding-bottom:10px; padding-top:25px;">
-            Could not find a gradeable with that ID.<br /><br />
+            ERROR:  Invalid Gradeable ID or No TA grading rubric items for this Gradeable ID.  <br> 
+Check the <tt>g_id</tt> in the url, and ensure that this Gradeable has at least one TA Rubric item with points &gt; 0.<br /><br />
             <a class="btn" href="{$BASE_URL}/account/index.php?course={$_GET['course']}&semester={$_GET['semester']}">Select Different Gradeable</a>
         </div>
     </div>
