@@ -17,6 +17,8 @@ std::vector<std::vector<std::string> > HACKMAXPROJECTS;
 std::string GLOBAL_sort_order;
 
 
+int GLOBAL_ACTIVE_TEST_ZONE = 0;
+
 #include "student.h"
 #include "iclicker.h"
 #include "gradeable.h"
@@ -42,6 +44,8 @@ std::string CUSTOMIZATION_FILE                = "./customization_no_comments.jso
 std::string RAW_DATA_DIRECTORY                = "./raw_data/";
 std::string INDIVIDUAL_FILES_OUTPUT_DIRECTORY = "./individual_summary_html/";
 std::string ALL_STUDENTS_OUTPUT_DIRECTORY     = "./all_students_summary_html/";
+
+nlohmann::json GLOBAL_CUSTOMIZATION_JSON;
 
 
 //====================================================================
@@ -79,7 +83,16 @@ std::map<int,std::string> sectionNames;
 std::map<std::string,std::string> sectionColors;
 
 bool validSection(int section) {
-  return (sectionNames.find(section) != sectionNames.end());
+
+  nlohmann::json::iterator itr = GLOBAL_CUSTOMIZATION_JSON.find("section");
+  assert (itr != GLOBAL_CUSTOMIZATION_JSON.end());
+  assert (itr->is_object());
+
+  nlohmann::json::iterator itr2 = itr->find(std::to_string(section));
+  if (itr2 == itr->end()) return false;
+  return true;
+  
+  //return (sectionNames.find(section) != sectionNames.end());
 }
 
 
@@ -544,6 +557,9 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 		//std::cout << "makes it into exam data" << std::endl;
 	    int active = exam_data["active"].get<int>();
 		if (active == 1) {
+
+                  GLOBAL_ACTIVE_TEST_ZONE = i;
+
 	      for (json::iterator itr2 = (exam_data).begin(); itr2 != (exam_data).end(); itr2++) {
 	        std::string token2 = itr2.key();
 		    //std::cout << token2 << std::endl;
@@ -737,6 +753,14 @@ void load_student_grades(std::vector<Student*> &students);
 void load_bonus_late_day(std::vector<Student*> &students, int which_lecture, std::string bonus_late_day_file);
 
 void processcustomizationfile(std::vector<Student*> &students) {
+
+
+  std::ifstream istr(CUSTOMIZATION_FILE.c_str());
+  assert (istr);
+  json j;
+  j << istr;
+  GLOBAL_CUSTOMIZATION_JSON = j;
+
 
   SetBenchmarkPercentage("lowest_a-",0.9);
   SetBenchmarkPercentage("lowest_b-",0.8);
@@ -1144,8 +1168,8 @@ void processcustomizationfile(std::vector<Student*> &students) {
   }
   */
   
-  std::ifstream istr(CUSTOMIZATION_FILE.c_str());
-  assert (istr);
+  //std::ifstream istr(CUSTOMIZATION_FILE.c_str());
+  //assert (istr);
 
   std::string token,token2;
   //int num;
@@ -1155,9 +1179,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 
   std::string iclicker_remotes_filename;
   std::vector<std::vector<iClickerQuestion> > iclicker_questions(MAX_LECTURES+1);
-  
-  json j;
-  j << istr;
+
   
   for (json::iterator itr = j.begin(); itr != j.end(); itr++) {
     token = itr.key();
@@ -1170,7 +1192,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 		int section = std::stoi(temp);
 		std::string section_name = itr2.value();
 		std::cout << "MAKE ASSOCIATION " << section << " " << section_name << std::endl;
-		assert (!validSection(section));
+		//assert (!validSection(section));
 		sectionNames[section] = section_name;
 		if (sectionColors.find(section_name) == sectionColors.end()) {
 		  if (counter == 0) {
