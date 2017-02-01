@@ -350,6 +350,14 @@
 
       }
 
+      function sum_array(temp) {
+        var total = 0;
+        for(var index = 0; index < temp.length; index++) {
+            total += temp[index];
+        }
+        return total;
+      }
+
       // Find diagram DOM object and configure HTML5 canvas
       var diagram = document.getElementById("diagram");
       var ctx = diagram.getContext("2d");
@@ -413,10 +421,21 @@
       }
       temp.sort();
       container = document.getElementById("seats")
+      var total = 0;
       for(var index in temp) {
         var letter = temp[index];
         container.innerHTML += letter + " SAGE 3303 " + used[letter] + "\n";
+        total += used[letter];
       }
+
+      // Get total number of seats
+      var all = 0;
+      all += sum_array(seats["left"]);
+      all += sum_array(seats["middle"]);
+      all += sum_array(seats["right"]);
+
+      container.innerHTML += "\nTOTAL: " + total + "\n";
+      container.innerHTML += "UNUSED: " + (all - total) + "\n";
     </script>
   </body>
 </html>
