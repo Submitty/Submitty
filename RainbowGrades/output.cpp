@@ -30,6 +30,8 @@ extern Student* STDDEV_STUDENT_POINTER;
 
 extern std::string GLOBAL_sort_order;
 
+extern int GLOBAL_ACTIVE_TEST_ZONE;
+
 // ==========================================================
 
 std::string HEX(int h) {
@@ -448,7 +450,7 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
 
 
   std::string x1 = s->getExamZone();
-  std::string x2 = s->getZone(1);
+  std::string x2 = s->getZone(GLOBAL_ACTIVE_TEST_ZONE);
 
   if (x2.size() > 0) {
     assert (x1.size() > 0);
