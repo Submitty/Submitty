@@ -89,6 +89,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
     // for Operating Systems
     { "gcc",                     "/usr/bin/gcc" },
+    { "strings",                 "/usr/bin/strings" },
 
     // for Programming Languages
     { "swipl",                   "/usr/bin/swipl" },
