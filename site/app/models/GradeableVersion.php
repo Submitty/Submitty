@@ -14,6 +14,7 @@ class GradeableVersion {
     private $hidden_extra_credit = 0;
     private $submission_time;
     private $active = false;
+    private $days_late = 0;
 
     /**
      * GradeableVersion constructor.
