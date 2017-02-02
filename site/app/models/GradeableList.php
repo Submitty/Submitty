@@ -5,7 +5,7 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\GradeableType;
 
-class GradeableList {
+class GradeableList extends AbstractModel {
     /**
      * @var Core
      */

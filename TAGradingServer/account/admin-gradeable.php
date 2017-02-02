@@ -516,7 +516,7 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="checkpoint_label_0" type="text" class="checkpoint_label complex_type" value="Checkpoint 0"/> 
+                               <input style="width: 200px" name="checkpoint_label_0" type="text" class="checkpoint_label" value="Checkpoint 0"/> 
                            </td>     
                            <td>     
                                 <input type="checkbox" name="checkpoint_extra_0" class="checkpoint_extra extra" value="true" />
@@ -525,7 +525,7 @@ HTML;
                       
                        <tr class="multi-field" id="mult-field-1">
                            <td>
-                               <input style="width: 200px" name="checkpoint_label_1" type="text" class="checkpoint_label complex_type" value="Checkpoint 1"/> 
+                               <input style="width: 200px" name="checkpoint_label_1" type="text" class="checkpoint_label" value="Checkpoint 1"/> 
                            </td>     
                            <td>     
                                 <input type="checkbox" name="checkpoint_extra_1" class="checkpoint_extra extra" value="true" />
@@ -563,7 +563,7 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label complex_type" value="0"/> 
+                               <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label" value="0"/> 
                            </td>  
                             <td>     
                                 <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" /> 
@@ -585,7 +585,7 @@ HTML;
                         <!-- This is a bit of a hack, but it works (^_^) -->
                         <tr class="multi-field" id="mult-field-0" style="display:none;">
                            <td>
-                               <input style="width: 200px" name="text_label_0" type="text" class="text_label complex_type" value="0"/> 
+                               <input style="width: 200px" name="text_label_0" type="text" class="text_label" value="0"/> 
                            </td>  
                         </tr>
                     </table>
@@ -911,17 +911,12 @@ HTML;
     $.fn.serializeObject = function(){
         var o = {};
         var a = this.serializeArray();
-        var ignore = [];
+        var ignore = ["numeric_label_0", "max_score_0", "numeric_extra_0", "numeric_extra_0",
+                       "text_label_0", "checkpoint_label_0", "num_numeric_items", "num_text_items"];
 
         $('.ignore').each(function(){
             ignore.push($(this).attr('name'));
         });
-        
-        ignore.push("numeric_label_0");
-        ignore.push("max_score_0");
-        ignore.push("numeric_extra_0");
-        ignore.push("text_label_0");
-        ignore.push("checkpoint_label_0");
         
         // export appropriate users 
         if ($('[name="minimum_grading_group"]').prop('value') == 1){
@@ -939,7 +934,6 @@ HTML;
         $(':radio').each(function(){
            if(! $(this).is(':checked')){
                if($(this).attr('class') !== undefined){
-
                   // now remove all of the child elements names for the radio button
                   $('.' + $(this).attr('class')).find('input, textarea, select').each(function(){
                       ignore.push($(this).attr('name'));
@@ -947,6 +941,99 @@ HTML;
                }
            } 
         }); 
+        
+        //parse checkpoints 
+        
+        $('.checkpoints-table').find('.multi-field').each(function(){
+            var label = '';
+            var extra_credit = false;
+            var skip = false;
+            
+            $(this).find('.checkpoint_label').each(function(){
+               label = $(this).val();
+               if ($.inArray($(this).attr('name'),ignore) !== -1){
+                   skip = true;
+               }
+               ignore.push($(this).attr('name'));
+            });
+            
+            if (skip){
+                return;
+            }
+            
+            $(this).find('.checkpoint_extra').each(function(){
+                extra_credit = $(this).attr('checked') === 'checked';
+                ignore.push($(this).attr('name'));
+            });
+            
+            if (o['checkpoints'] === undefined){
+                o['checkpoints'] = [];
+            }
+            o['checkpoints'].push({"label": label, "extra_credit": extra_credit});
+        });
+        
+        
+        // parse text items
+        
+        $('.text-table').find('.multi-field').each(function(){
+           var label = '';
+           var skip = false;
+           
+           $(this).find('.text_label').each(function(){
+                label = $(this).val();
+                if ($.inArray($(this).attr('name'),ignore) !== -1){
+                   skip = true;
+               }
+               ignore.push($(this).attr('name'));
+           });
+           
+           if (skip){
+              return;
+           }
+           
+           if (o['text_questions'] === undefined){
+               o['text_questions'] = [];
+           }
+           o['text_questions'].push({'label' : label});
+        });
+        
+        // parse numeric items
+                
+        $('.numerics-table').find('.multi-field').each(function(){
+            var label = '';  
+            var max_score = 0;
+            var extra_credit = false;
+            var skip = false;
+            
+            $(this).find('.numeric_label').each(function(){
+               label = $(this).val();
+               if ($.inArray($(this).attr('name'),ignore) !== -1){
+                   skip = true;
+               }
+               ignore.push($(this).attr('name'));
+            });
+
+            if (skip){
+                return;
+            }
+            
+            $(this).find('.max_score').each(function(){
+               max_score = parseFloat($(this).val());
+               ignore.push($(this).attr('name'));
+            });
+
+            $(this).find('.numeric_extra').each(function(){
+                extra_credit = $(this).attr('checked') === 'checked';
+                ignore.push($(this).attr('name'));
+            });
+
+            if (o['numeric_questions'] === undefined){
+                o['numeric_questions'] = [];
+            }
+            o['numeric_questions'].push({"label": label, "max_score": max_score, "extra_credit": extra_credit});
+           
+        });
+        
         
         $.each(a, function() {
             if($.inArray(this.name,ignore) !== -1) {
@@ -974,28 +1061,12 @@ HTML;
                 arr[grader] = this.value.trim();
                 o['grader'].push(arr);
             }
-            else if ($("[name="+this.name+"]").hasClass('max_score')){
-                if (o['max_score'] === undefined){
-                    o['max_score'] = [];
-                }
-                o['max_score'].push(parseFloat(this.value));
-            }
             else if ($("[name="+this.name+"]").hasClass('points')){
                 if (o['points'] === undefined){
                     o['points'] = [];
                 }
                 o['points'].push(parseFloat(this.value));
             }
-            else if($("[name="+this.name+"]").hasClass('extra')){
-                var tmp = this.name.split('_');
-                var bucket = tmp[0] + '_' + tmp[1];
-                if (o[bucket] === undefined){
-                    o[bucket] = [];
-                }
-                val = parseInt(tmp[2]);
-                o[bucket].push(val);
-            }
-            
             else if($("[name="+this.name+"]").hasClass('complex_type')){
                 var classes = $("[name="+this.name+"]").closest('.complex_type').prop('class').split(" ");
                 classes.splice( classes.indexOf('complex_type'), 1);
@@ -1005,9 +1076,7 @@ HTML;
                     o[complex_type] = [];
                 }
                 o[complex_type].push(val);
-                
             } 
-            
             else if (o[this.name] !== undefined) {
                 if (!o[this.name].push) {
                     o[this.name] = [o[this.name]];

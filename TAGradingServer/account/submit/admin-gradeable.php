@@ -493,7 +493,27 @@ else{
             $gradeable->createGradeable($db);
             
             foreach($request_args AS $k=>$v){
-                if (is_array($v)){
+                if($k == 'checkpoints'){
+                    for($i=1; $i<=count($v);++$i){
+                       $request_args['checkpoint_label_' + $i] = $v[$i-1]['label']; 
+                       $request_args['checkpoint_extra_' + $i] = $v[$i-1]['extra_credit'];
+                    }
+                }
+                else if ($k == 'text_questions'){
+                    $request_args['num_text_items'] = count($v);
+                    for($i=1; $i<=count($v);++$i){
+                        $request_args['text_label_'+$i] = $v[$i-1]['label'];
+                    }
+                }
+                else if ($k == 'numeric_questions'){
+                    $request_args['num_numeric_items'] = count($v);
+                    for($i=1; $i<=count($v);++$i){
+                        $request_args['numeric_label_' + $i] = $v[$i-1]['label'];
+                        $request_args['max_score_' + $i] = $v[$i-1]['max_score'];
+                        $request_args['numeric_extra_' + $i] = $v[$i-1]['extra_credit'];
+                    }
+                }
+                else if (is_array($v)){
                     if (strpos($k, '_extra') !== false){
                         for($i=1; $i<= count($v); ++$i){
                            $request_args[$k.'_'.intval($v[$i-1])] = "";
