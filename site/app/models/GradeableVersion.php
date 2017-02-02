@@ -4,7 +4,7 @@ namespace app\models;
 
 use app\libraries\DateUtils;
 
-class GradeableVersion {
+class GradeableVersion extends AbstractModel {
     private $g_id;
     private $user_id;
     private $version;

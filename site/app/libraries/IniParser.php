@@ -29,9 +29,11 @@ class IniParser {
      * @return array
      */
     public static function readFile($filename) {
+        // @codeCoverageIgnoreStart
         if (!function_exists('parse_ini_file')) {
             throw new IniException("parse_ini_file needs to be enabled");
         }
+        // @codeCoverageIgnoreEnd
 
         if (!file_exists($filename)) {
             throw new FileNotFoundException("Could not find ini file to parse: {$filename}");
@@ -87,13 +89,13 @@ class IniParser {
     }
 
     /**
-     * @param $filename
-     * @param $config
+     * @param string $filename
+     * @param array  $array
      *
      */
-    public static function writeFile($filename, $config) {
+    public static function writeFile($filename, $array) {
         $to_write = "";
-        foreach ($config as $key => $value) {
+        foreach ($array as $key => $value) {
             // is this a section?
             if (is_array($value)) {
                 if (static::isSection($value)) {
@@ -141,7 +143,10 @@ class IniParser {
         }
         else {
             if (is_bool($value)) {
-                $to_write .= (($value) ? "true" : "false")."\n";
+                $to_write .= (($value === true) ? "true" : "false")."\n";
+            }
+            else if ($value === null) {
+                $to_write .= "null\n";
             }
             else {
                 $to_write .= "{$value}\n";
