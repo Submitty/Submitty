@@ -7,47 +7,47 @@ use app\libraries\DatabaseUtils;
 /**
  * Class User
  */
-class User {
+class User extends AbstractModel {
     
     /**
      * @var bool Is this user actually loaded (else you cannot access the other member variables)
      */
-    private $loaded = false;
+    protected $loaded = false;
     
     /** @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
-    private $id;
+    protected $id;
     /**
      * @var string The password for the student used for database authentication. This should be hashed and salted.
      * @link http://php.net/manual/en/function.password-hash.php
      */
-    private $password = null;
+    protected $password = null;
     /** @var string The first name of the user */
-    private $first_name;
+    protected $first_name;
     /** @var string The first name of the user */
-    private $preferred_first_name = "";
+    protected $preferred_first_name = "";
     /** @var  string The name to be displayed by the system (either preferred name or first name) */
-    private $displayed_first_name;
+    protected $displayed_first_name;
     /** @var string The last name of the user */
-    private $last_name;
+    protected $last_name;
     /** @var string The email of the user */
-    private $email;
+    protected $email;
     /** @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
-    private $group;
+    protected $group;
     
     /** @var int What is the registration section that the user was assigned to for the course */
-    private $registration_section = null;
+    protected $registration_section = null;
     /** @var int What is the assigned rotating section for the user */
-    private $rotating_section = null;
+    protected $rotating_section = null;
     
     /**
      * @var bool Was the user imported via a normal class list or was added manually. This is useful for students
      *           that are doing independent studies in the course, so not actually registered and so wouldn't want
      *           to be shifted to a null registration section or rotating section like a dropped student
      */
-    private $manual_registration = false;
+    protected $manual_registration = false;
 
     /** @var array */
-    private $grading_registration_sections = array();
+    protected $grading_registration_sections = array();
 
     /**
      * User constructor.

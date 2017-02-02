@@ -10,7 +10,7 @@ use app\libraries\GradeableType;
  *
  * Populates the Gradeable model by loading the data from the database
  */
-class GradeableDb extends Gradeable {
+class GradeableDb extends Gradeable{
     public function __construct(Core $core, $details, $user=null) {
         parent::__construct($core, $details['g_id']);
 

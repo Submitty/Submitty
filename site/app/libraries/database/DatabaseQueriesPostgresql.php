@@ -383,7 +383,8 @@ LEFT JOIN (
   SELECT *
   FROM users
 ) AS u ON u.user_id = g.user_id
-{$where}", $params);
+{$where}
+ORDER BY g.sections_registration_id, g.user_id", $params);
         $user_store = array();
         foreach ($this->database->rows() as $row) {
             if ($row['sections_registration_id'] === null) {
@@ -485,7 +486,8 @@ LEFT JOIN (
   SELECT *
   FROM users
 ) AS u ON u.user_id = g.user_id
-WHERE g.g_id=? {$where}", $params);
+WHERE g.g_id=? {$where}
+ORDER BY g.sections_rotating_id, g.user_id", $params);
         $user_store = array();
         foreach ($this->database->rows() as $row) {
             if ($row['sections_rotating_id'] === null) {

@@ -184,7 +184,8 @@ class FileUtils {
     }
     
     /**
-     * Given a path, return all directories in an array that are contained in that path.
+     * Given a path, return all directories in an array that are contained in that path, ignoring several
+     * known names that are used for VCS, OS, or IDE systems that we can safely ignore.
      *
      * @param string $path
      *

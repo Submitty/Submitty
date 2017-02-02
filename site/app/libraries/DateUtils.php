@@ -30,7 +30,7 @@ class DateUtils {
             $date2 = new DateTime($date2);
         }
         // Set the period as "1 day" for the interval
-        if ($date1 === $date2) {
+        if ($date1 == $date2) {
             return 0;
         }
         $diff = $date1->diff($date2);
