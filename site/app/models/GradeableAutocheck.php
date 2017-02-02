@@ -47,7 +47,8 @@ class GradeableAutocheck extends AbstractModel {
         }
         
         $actual_file = $expected_file = $difference_file = "";
-	if(isset($details["actual_file"]) && file_exists($result_path . "/" . $details["actual_file"])) {
+
+        if(isset($details["actual_file"]) && file_exists($result_path . "/" . $details["actual_file"])) {
             $actual_file = $result_path . "/" . $details["actual_file"];
         }
     
