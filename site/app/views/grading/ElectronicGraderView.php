@@ -3,6 +3,7 @@
 namespace app\views\grading;
 
 use app\models\Gradeable;
+use app\models\User;
 use app\views\AbstractView;
 
 class ElectronicGraderView extends AbstractView {
@@ -60,11 +61,12 @@ HTML;
             Section {$key}: {$graders}<br />
 HTML;
         }
+        // {$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}
         $return .= <<<HTML
         </div>
         <div style="margin-top: 20px">
             <a class="btn btn-primary" 
-                href="{$this->core->getConfig()->getTABaseUrl()}account/account-summary.php?course={$course}&semester={$semester}&g_id={$gradeable->getId()}">
+                href="{$this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId()))}"">
                 Grading Homework Overview
             </a>
             <a class="btn btn-primary"
@@ -81,11 +83,40 @@ HTML;
     /**
      * @param Gradeable   $gradeable
      * @param Gradeable[] $rows
+     * @param array       $graders
      * @return string
      */
-    public function summaryPage($gradeable, $rows) {
+    public function summaryPage($gradeable, $rows, $graders) {
         $return = <<<HTML
 <div class="content">
+    
+HTML;
+        if (!$this->core->getUser()->accessAdmin()) {
+            $return .= <<<HTML
+    <div style="float: right; margin-bottom: 10px">
+HTML;
+            if (!isset($_GET['view']) || $_GET['view'] !== 'all') {
+                $return .= <<<HTML
+        <a class="btn btn-default"
+            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId(), 'view' => 'all'))}">
+            View All    
+        </a>
+HTML;
+            }
+            else {
+                $return .= <<<HTML
+        <a class="btn btn-default"
+            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'summary', 'gradeable_id' => $gradeable->getId()))}">
+            View Your Sections    
+        </a>
+HTML;
+            }
+            $return .= <<<HTML
+    </div>
+HTML;
+        }
+
+        $return .= <<<HTML
     <h2>Summary Page for {$gradeable->getName()}</h2>
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
@@ -133,9 +164,19 @@ HTML;
         </tbody>
 HTML;
                     }
+                    if (isset($graders[$display_section]) && count($graders[$display_section]) > 0) {
+                        $section_graders = implode(", ", array_map(function($user) { return $user->getId(); }, $graders[$display_section]));
+                    }
+                    else {
+                        $section_graders = "Nobody";
+                    }
+
                     $return .= <<<HTML
         <tr class="info persist-header">
             <td colspan="8" style="text-align: center">Students Enrolled in Section {$display_section}</td>
+        </tr>
+        <tr class="info">
+            <td colspan="8" style="text-align: center">Graders: {$section_graders}</td>
         </tr>
         <tbody id="section-{$section}">
 HTML;

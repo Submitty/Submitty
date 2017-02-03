@@ -35,7 +35,6 @@ class ElectronicGraderController extends AbstractController {
         $graded = array();
         $graders = array();
         if ($gradeable->isGradeByRegistration()) {
-            $section_key = "registration_section";
             $sections = $this->core->getUser()->getGradingRegistrationSections();
             if (count($sections) > 0 || (count($sections) === 0 && $this->core->getUser()->accessAdmin())) {
                 $total = $this->core->getQueries()->getTotalUserCountByRegistrationSections($sections);
@@ -44,7 +43,6 @@ class ElectronicGraderController extends AbstractController {
             }
         }
         else {
-            $section_key = "rotating_section";
             $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
                 $this->core->getUser()->getId());
             if (count($sections) > 0 || (count($sections) === 0 && $this->core->getUser()->accessAdmin())) {
@@ -85,25 +83,34 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return;
         }
+        $students = array();
         if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
             $sections = $this->core->getUser()->getGradingRegistrationSections();
-            $students = $this->core->getQueries()->getUsersByRegistrationSections($sections);
+            if (!isset($_GET['view']) || $_GET['view'] !== "all") {
+                $students = $this->core->getQueries()->getUsersByRegistrationSections($sections);
+            }
+            $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
         }
         else {
             $section_key = "rotating_section";
             $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id,
                 $this->core->getUser()->getId());
-            $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
-        }
-        if (count($students) === 0 && $this->core->getUser()->accessAdmin()) {
-            $students = array();
-            foreach ($this->core->getQueries()->getAllUsers($section_key) as $users) {
-                $students[] = $users->getId();
+            if (!isset($_GET['view']) || $_GET['view'] !== "all") {
+                $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
             }
+            $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
+        }
+        if ((isset($_GET['view']) && $_GET['view'] === "all") || $this->core->getUser()->accessAdmin()) {
+            $students = $this->core->getQueries()->getAllUsers($section_key);
         }
 
-        $rows = $this->core->getQueries()->getGradeableForUsers($gradeable_id, $students, $section_key);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'summaryPage', $gradeable, $rows);
+        $students_ids = array();
+        foreach ($students as $student) {
+            $students_ids[] = $student->getId();
+        }
+
+        $rows = $this->core->getQueries()->getGradeableForUsers($gradeable_id, $students_ids, $section_key);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'summaryPage', $gradeable, $rows, $graders);
     }
 }
