@@ -1706,10 +1706,9 @@ void output_helper(std::vector<Student*> &students,  std::string &GLOBAL_sort_or
           continue;
         }
         Date &d = itr->second;
-        late_days_stream << std::setw(10) << std::left << students[S]->getUserName() << ", "
-                         << std::setw(12) << std::left << d.getStringRep() << ", " 
-          //<< std::setw(2)  << std::right << i  << " " 
-                         << std::setw(2)  << std::right << tmp << std::endl;
+        late_days_stream << students[S]->getUserName() << ","
+                         << d.getStringRep() << "," 
+                         << std::setw(2) << std::right << tmp << std::endl;
         prev = tmp;
       }
     }
