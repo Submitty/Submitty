@@ -402,7 +402,7 @@ ORDER BY g.sections_registration_id, g.user_id", $params);
     }
 
     public function getRotatingSectionsForGradeableAndUser($g_id, $user) {
-        $this->database->query("SELECT sections_rotating_id FROM grading_rotating WHERE user_id=? AND g_id=?", array($user, $g_id));
+        $this->database->query("SELECT sections_rotating_id FROM grading_rotating WHERE g_id=? AND user_id=?", array($g_id, $user));
         $return = array();
         foreach ($this->database->rows() as $row) {
             $return[] = $row['sections_rotating_id'];
