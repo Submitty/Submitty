@@ -131,7 +131,8 @@ function parse_and_validate_csv($csv_file, &$data) {
 		//$fields[1] represents gradeable id.  It must (1) be an integer >= 0
 		//           AND exist in database
 		//           ctype_digit() returns false with negative integers as strings
-		if (!ctype_digit($fields[1]) || !verify_gradeable_in_db($fields[1])) {
+		//if (!ctype_digit($fields[1]) || !verify_gradeable_in_db($fields[1])) {
+		if (!verify_gradeable_in_db($fields[1])) {
 			$data = null;
 			return false;
 		}
