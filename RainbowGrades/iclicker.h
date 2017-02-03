@@ -23,9 +23,9 @@ public:
   std::string getStringRep() {
     std::stringstream ss;
     ss << std::setw(4)  << year 
-       << "-" 
+       << "/" 
        << std::setw(2)  << std::setfill('0') << month 
-       << "-"
+       << "/"
        << std::setw(2)  << std::setfill('0') << day;
 
     return ss.str();
