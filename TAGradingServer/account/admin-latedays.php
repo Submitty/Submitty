@@ -17,7 +17,7 @@ $view = new local_view();
 $state = "";
 
 /* POST/FILES SUPERGLOBALS -------------------------------------------------- */
-	
+
 //Check to see if a CSV file was submitted.
 if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
 
@@ -29,7 +29,7 @@ if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name
 		$state = 'upsert_done';
 	}
 
-//if no file upload, examine Student ID and Late Day input fields.	
+//if no file upload, examine Student ID and Late Day input fields.
 } else if (isset($_POST['student_id']) && ($_POST['student_id'] !== "") &&
 		   isset($_POST['late_days'])  && ($_POST['late_days']  !== "") &&
 		   isset($_POST['datestamp'])  && ($_POST['datestamp']  !== "")) {
@@ -39,19 +39,19 @@ if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name
 	if (!ctype_digit($_POST['late_days'])) {
 		$state = 'late_days_not_integer';
 	}
-	
+
 	//Timestamp validation
 	if (!validate_timestamp($_POST['datestamp'])) {
 		$state = 'invalid_datestamp';
 	}
-	
+
 	//Validate that student does exist in DB (per rcs_id)
 	//"Student Not Found" error has precedence over late days being non-numerical
 	//as it is the more likely error to happen.
 	if (!verify_student_in_db($_POST['student_id'])) {
 		$state = 'student_not_found';
 	}
-	
+
 	//Process upsert if no errors were flagged.
 	if (empty($state)) {
 
@@ -83,57 +83,62 @@ function parse_and_validate_csv($csv_file, &$data) {
 //     FALSE otherwise.
 //PURPOSE:  (1) validate uploaded csv file so it may be parsed.
 //          (2) create data array of csv information that may be batch upserted.
-	
+
 	//Validate file MIME type (needs to be "text/plain")
 	$file_info = finfo_open(FILEINFO_MIME_TYPE);
 	$mime_type = finfo_file($file_info, $_FILES['csv_upload']['tmp_name']);
 	finfo_close($file_info);
-	
+
 	if ($mime_type !== "text/plain") {
 		$data = null;
 		return false;
 	}
-	
+
 	$rows = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-	
+
 	if ($rows === false) {
 		$data = null;
 		return false;
 	}
-	
+
 	foreach($rows as $row) {
-	
+
 		$fields = explode(',', $row);
-		
+
+		//Remove any extraneous whitespace at beginning/end of field
+		foreach($fields as &$field) {
+			$field = trim($field);
+		} unset($field);
+
 		//Each row has three fields
 		if (count($fields) !== 3) {
 			$data = null;
 			return false;
 		}
-		
+
 		//$fields[0]: Verify student exists in class (check by RCS ID)
 		if (!verify_student_in_db($fields[0])) {
 			$data = null;
 			return false;
-		}		
-		
+		}
+
 		//$fields[1] represents timestamp in the format (MM/DD/YY),
 		//(MM/DD/YYYY), (MM-DD-YY), or (MM-DD-YYYY).
 		if (!validate_timestamp($fields[1])) {
 			$data = null;
 			return false;
-		}		
-		
+		}
+
 		//$fields[2]: Number of late days must be an integer >= 0
 		if (!ctype_digit($fields[2])) {
 			$data = null;
 			return false;
 		}
-		
+
 		//Fields information seems okay.  Push fields onto data array.
 		$data[] = $fields;
 	}
-	
+
 	//Validation successful.
 	return true;
 }
@@ -241,7 +246,7 @@ function upsert(array $data) {
  * -------------------------------------------------------------------------- */
 
 	$sql = array();
-	
+
 	//TEMPORARY table to hold all new values that will be "upserted"
 	$sql['temp_table'] = <<<SQL
 CREATE TEMPORARY TABLE temp
@@ -283,7 +288,7 @@ SELECT
 	temp.student_id,
 	temp.date,
 	temp.late_days
-FROM temp 
+FROM temp
 LEFT OUTER JOIN late_days
 	ON late_days.user_id=temp.student_id
 	AND late_days.since_timestamp=temp.date
@@ -293,11 +298,11 @@ SQL;
 	//Begin DB transaction
 	\lib\Database::beginTransaction();
 	\lib\Database::query($sql['temp_table']);
-	
+
 	foreach ($data as $index => $record) {
 		\lib\Database::query($sql["data_{$index}"], array($record[0], $record[1], $record[2]));
 	}
-	
+
 	\lib\Database::query($sql['lock']);
 	\lib\Database::query($sql['update']);
 	\lib\Database::query($sql['insert']);
@@ -318,7 +323,7 @@ class local_view {
 
 	//HTML data to be sent to browser
 	static private $view;
-	
+
 	//Constructor
 	public function __construct() {
 		//Class constants cannot be expanded in strings with {}
@@ -327,13 +332,13 @@ class local_view {
 		$utf8_checkmark = self::UTF8_CHECKMARK;
 
 		self::$view = array();
-		
+
 		self::$view['head'] = <<<HTML
 <style type="text/css">
 	body {
 		overflow-y: scroll;
 	}
-	
+
 	#container-latedays
 	{
 		width:700px;
@@ -404,7 +409,7 @@ HTML;
 {$utf8_checkmark} Late days are updated.</em>
 HTML;
 
-		$BASE_URL = rtrim(__BASE_URL__, "/");	
+		$BASE_URL = rtrim(__BASE_URL__, "/");
 
 		self::$view['form'] = <<<HTML
 <form action="{$BASE_URL}/account/admin-latedays.php?course={$_GET['course']}&semester={$_GET['semester']}&this=Late%20Days%20Allowed" method="POST" enctype="multipart/form-data">
@@ -419,8 +424,8 @@ HTML;
 HTML;
 
 	}
-	
-/* END CLASS CONSTRUCTOR ---------------------------------------------------- */	
+
+/* END CLASS CONSTRUCTOR ---------------------------------------------------- */
 
 	public function configure_table($db_data) {
 	//IN:  data from database used to build table of granted late day exceptions
@@ -428,8 +433,8 @@ HTML;
 	//OUT: no return (although private view['student_review_table'] property is
 	//     filled)
 	//PURPOSE: Craft HTML required to display a table of existing late day
-	//         exceptions	
-	
+	//         exceptions
+
 		if (!is_array($db_data) || count($db_data) < 1) {
 		//No late days in DB -- indicate as much.
 
@@ -451,7 +456,7 @@ Late Days Allowed
 <th style="background:lavender; width:20%;">Total Allowed Late Days</th>
 <th style="background:lavender;">Effective Date</th>
 HTML;
-	
+
 			//Table BODY
 			$cell_color = array('white', 'aliceblue');
 			foreach ($db_data as $index => $record) {
@@ -473,53 +478,53 @@ HTML;
 HTML;
 		}
 	}
-	
+
 /* END CLASS METHOD configure_table() --------------------------------------- */
 
 	public function display($state) {
 	//IN:  Current "display state" determined in MAIN process
 	//OUT: No return, although ALL crafted HTML is sent to browser
 	//PURPOSE:  Display appropriate page contents.
-	
+
 		switch($state) {
 		case 'bad_upload':
 			echo self::$view['head']                 .
-   				 self::$view['form']                 . 
+   				 self::$view['form']                 .
 			     self::$view['bad_upload']           .
 			     self::$view['student_review_table'] .
 			     self::$view['tail'];
 			break;
 		case 'student_not_found':
 			echo self::$view['head']                 .
-   				 self::$view['form']                 . 
+   				 self::$view['form']                 .
 			     self::$view['student_not_found']    .
 			     self::$view['student_review_table'] .
 			     self::$view['tail'];
 			break;
 		case 'invalid_datestamp':
 			echo self::$view['head']                 .
-			     self::$view['form']                 . 
-			     self::$view['invalid_datestamp']    .   				 
+			     self::$view['form']                 .
+			     self::$view['invalid_datestamp']    .
 			     self::$view['student_review_table'] .
 			     self::$view['tail'];
 		    break;
 		case 'late_days_not_integer':
 			echo self::$view['head']                  .
-			     self::$view['form']                  . 
-			     self::$view['late_days_not_integer'] .   				 
+			     self::$view['form']                  .
+			     self::$view['late_days_not_integer'] .
 			     self::$view['student_review_table']  .
 			     self::$view['tail'];
 		    break;
 		case 'upsert_done':
 			echo self::$view['head']                 .
-				 self::$view['form']                 . 
-				 self::$view['upsert_done']          . 
+				 self::$view['form']                 .
+				 self::$view['upsert_done']          .
 			     self::$view['student_review_table'] .
 			     self::$view['tail'];
 			break;
 		default:
 			echo self::$view['head']                 .
-				 self::$view['form']                 . 
+				 self::$view['form']                 .
 			     self::$view['student_review_table'] .
 			     self::$view['tail'];
 			break;

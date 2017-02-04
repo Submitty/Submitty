@@ -116,6 +116,11 @@ function parse_and_validate_csv($csv_file, &$data) {
 
 		$fields = explode(',', $row);
 
+		//Remove any extraneous whitespace at beginning/end of field
+		foreach($fields as &$field) {
+			$field = trim($field);
+		} unset($field);
+
 		//Each row has three fields
 		if (count($fields) !== 3) {
 			$data = null;
