@@ -189,7 +189,6 @@ function verify_student_in_db($student) {
 SELECT COUNT(1)
 FROM users
 WHERE user_id=?
-AND	user_group=4
 SQL;
 
 	\lib\Database::query($sql, array($student));
