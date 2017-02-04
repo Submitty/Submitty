@@ -127,16 +127,14 @@ function parse_and_validate_csv($csv_file, &$data) {
 			return false;
 		}
 
-		//$fields[0]: Verify student exists in class (check by RCS ID)
+		//$fields[0]: Verify student exists in class (check by student user ID)
 		if (!verify_student_in_db($fields[0])) {
 			$data = null;
 			return false;
 		}
 
-		//$fields[1] represents gradeable id.  It must (1) be an integer >= 0
-		//           AND exist in database
-		//           ctype_digit() returns false with negative integers as strings
-		if (!ctype_digit($fields[1]) || !verify_gradeable_in_db($fields[1])) {
+		//$fields[1] represents gradeable id.  It must exist in database.
+		if (!verify_gradeable_in_db($fields[1])) {
 			$data = null;
 			return false;
 		}

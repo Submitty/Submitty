@@ -116,7 +116,7 @@ function parse_and_validate_csv($csv_file, &$data) {
 			return false;
 		}
 
-		//$fields[0]: Verify student exists in class (check by RCS ID)
+		//$fields[0]: Verify student exists in class (check by student user ID)
 		if (!verify_student_in_db($fields[0])) {
 			$data = null;
 			return false;
