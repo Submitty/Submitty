@@ -7,6 +7,7 @@ use app\models\Gradeable;
 
 class NavigationView extends AbstractView {
     public function showGradeables($sections_to_list) {
+
         $return = "";
 
         $ta_base_url = $this->core->getConfig()->getTABaseUrl();
@@ -98,8 +99,7 @@ HTML;
             "ITEMS BEING GRADED" => "VIEW SUBMISSION",
             "GRADED" => "VIEW GRADE"
         );
-
-
+        
         $found_assignment = false;
 
         foreach ($sections_to_list as $title => $gradeable_list) {
@@ -139,6 +139,29 @@ HTML;
         <tbody id="{$lower_title}_tbody">
 HTML;
             foreach ($gradeable_list as $gradeable => $g_data) {
+        
+                if ($g_data->getActiveVersion() == -1){
+                    $submission_status = array(
+                        "SUBMITTED" => "<em style='font-size: .8em;'>NOT SUMBITTED</em><br>",
+                        "AUTOGRADE" => ""
+                    );
+                }
+                else{
+                    if ($g_data->getTotalNonExtracreditAutograderPoints() == array()){
+                        $submission_status = array(
+                            "SUBMITTED" => "<em style='font-size: .8em;'>SUMBITTED</em><br>",
+                            "AUTOGRADE" => ""
+                        );  
+                    }
+                    else{
+                        $autograde_points_earned = $g_data->getGradedAutograderPoints(); 
+                        $autograde_points_total = $g_data->getTotalNonExtracreditAutograderPoints();
+                        $submission_status = array(
+                            "SUBMITTED" => "<em style='font-size: .8em;'>SUBMITTED</em><br>",
+                            "AUTOGRADE" => "<em style='font-size: .8em;'>Autograde: " . $autograde_points_earned . "/" . $autograde_points_total . "<br>"
+                        );
+                    }
+                }
 
                 // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
                 if ($g_data->getType() != GradeableType::ELECTRONIC_FILE && !$this->core->getUser()->accessGrading()) {
@@ -174,7 +197,7 @@ HTML;
 
                     $display_date = ($title == "FUTURE" || $title == "BETA") ? "<span style=\"font-size:smaller;\">(opens ".$g_data->getOpenDate()->format("m/d/y{$time}")."</span>)" : "<span style=\"font-size:smaller;\">(due ".$g_data->getDueDate()->format("m/d/y{$time}")."</span>)";
                     if ($title=="GRADED" || $title=="ITEMS BEING GRADED") { $display_date = ""; }
-                    $button_text = "{$title_to_prefix[$title]} {$display_date}";
+                    $button_text = "{$title_to_prefix[$title]} {$submission_status["SUBMITTED"]} {$submission_status["AUTOGRADE"]} {$display_date}";
                     if ($g_data->hasConfig()) {
                         $gradeable_open_range = <<<HTML
                  <button class="btn {$title_to_button_type_submission[$title]}" style="width:100%;" onclick="location.href='{$site_url}&component=student&gradeable_id={$gradeable}';">
