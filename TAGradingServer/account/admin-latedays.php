@@ -1,8 +1,12 @@
 <?php
 
 //Author: Peter Bailie, Systems Programmer, RPI Computer Science, July 2016
+//Update: Feb 6 2017 by pbailie
 
 /* MAIN ===================================================================== */
+
+//Permit '\r' EOL encoding (e.g. CSV export from MS Excel 2008/2011 for Mac).
+ini_set("auto_detect_line_endings", true);
 
 include "../header.php";
 
