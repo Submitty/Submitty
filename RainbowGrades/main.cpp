@@ -1510,7 +1510,16 @@ void load_student_grades(std::vector<Student*> &students) {
                       assert (status == "NO SUBMISSION" || status == "NOT ELECTRONIC" || status == "Good" || status == "Late");
                   }
 
-                  std::string other_note =  ""; //(*itr2).value("text","");
+                  std::string other_note = "";
+                  //                  nlohmann::json obj = (*itr2).value("text",nlohmann::json::object());
+                  nlohmann::json::iterator itr3 = itr2->find("text");
+                  if (itr3 != itr2->end()) {
+                    for (int i = 0; i < itr3->size(); i++) {
+                      other_note += (*itr3)[i].value("Notes","");
+                    }  
+                  }
+
+
 		  // Search through the gradeable categories as needed to find where this item belongs
 		  // (e.g. project may be prefixed by "hw", or exam may be prefixed by "test")
 		  for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
