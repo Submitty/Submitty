@@ -103,7 +103,8 @@ function parse_and_validate_csv($csv_file, &$data) {
 	$mime_type = finfo_file($file_info, $_FILES['csv_upload']['tmp_name']);
 	finfo_close($file_info);
 
-	if ($mime_type !== "text/plain") {
+	//MIME type must be text, but all subtypes are accetpable.
+	if (substr($mime_type, 0, 5) !== "text/") {
 		$data = null;
 		return false;
 	}

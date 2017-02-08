@@ -93,7 +93,8 @@ function parse_and_validate_csv($csv_file, &$data) {
 	$mime_type = finfo_file($file_info, $_FILES['csv_upload']['tmp_name']);
 	finfo_close($file_info);
 
-	if ($mime_type !== "text/plain") {
+	//MIME type must be text, but all subtypes are accetpable.
+	if (substr($mime_type, 0, 5) !== "text/") {
 		$data = null;
 		return false;
 	}
@@ -189,6 +190,9 @@ function verify_student_in_db($student) {
 //OUT: TRUE should RCS ID be found in the database.  FALSE otherwise.
 //PURPOSE:  Verify that student is in database (indicating the student is enrolled)
 
+//	$student = pg_escape_literal($student);
+
+
 	$sql = <<<SQL
 SELECT COUNT(1)
 FROM users
@@ -199,6 +203,7 @@ SQL;
 
 	//row() will be either 1 (true) or 0 (false)
 	return boolval(\lib\Database::row()['count']);
+
 }
 
 /* END FUNCTION verify_student_in_db() ====================================== */
