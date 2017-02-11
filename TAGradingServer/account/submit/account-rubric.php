@@ -79,7 +79,7 @@ $hwReport = new HWReport();
 $hwReport->generateSingleReport($student, $g_id);
 
 if($_GET["individual"] == "1") {
-    header('Location: '.$SUBMISSION_URL."/index.php?semester={$_GET['semester']}&course={$_GET['course']}&component=grading&page=electronic&action=summary&gradeable_id={$_GET["g_id"]}#user-row-".$student);
+    header('Location: '.$SUBMISSION_URL."/index.php?semester={$_GET['semester']}&course={$_GET['course']}&component=grading&page=electronic&action=summary&gradeable_id={$_GET['g_id']}#user-row-".$student);
 }
 else {
     header('Location: '.$BASE_URL.'/account/index.php?course='.$_GET['course'].'&semester='.$_GET['semester'].'&g_id=' . $_GET["g_id"]);
