@@ -449,32 +449,46 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   json all_gradeables = j["gradeables"];
   int num_gradeables = all_gradeables.size();
 
+  float sum_of_percents = 0;
+
   for (int i = 0; i < num_gradeables; i++) {
     json one_gradeable_type = all_gradeables[i];
     GRADEABLE_ENUM g;
-    std::string gradeable_type = one_gradeable_type.value("type","BAD_GRADEABLE_TYPE");
 
+    // TYPE
+    nlohmann::json::iterator itr = one_gradeable_type.find("type");
+    assert (itr != one_gradeable_type.end());
+    std::string gradeable_type = itr->get<std::string>();
     bool success = string_to_gradeable_enum(gradeable_type, g);
     if (!success) {
       std::cout << "UNKNOWN GRADEABLE TYPE: " << gradeable_type << std::endl;
       exit(0);
     }
+
+    // PERCENT
+    itr = one_gradeable_type.find("percent");
+    assert (itr != one_gradeable_type.end());
+    float gradeable_total_percent = itr->get<float>();
+    assert (gradeable_total_percent >= 0);
+    sum_of_percents += gradeable_total_percent;
+
     int c = 0;
-    float p = 0.0;
+    //float p = 0.0;
     float m = 0.0;
     json ids_list = one_gradeable_type["ids"];
     for (unsigned int i = 0; i < ids_list.size(); i++) {
       json ids = ids_list[i];
-      for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
-        std::string gradeable_id = itr2.key();
-        json grades = ids[gradeable_id];
-        c++;
-        p += grades.value("percent",0.0);
-        m += grades.value("max",0.0);
-      }
+      //for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
+      std::string gradeable_id = ids.value("id","");
+      assert (gradeable_id != "");//itr2.key();
+      //json grades = ids[gradeable_id];
+      c++;
+      //p += ids.value("percent",0.0);
+      m += ids.value("max",0.0);
     }
 	
-    Gradeable answer (c,p,m);
+
+    Gradeable answer (c,gradeable_total_percent,m);
     GRADEABLES.insert(std::make_pair(g,answer));
     assert (GRADEABLES[g].getCount() >= 0);
     assert (GRADEABLES[g].getPercent() >= 0.0 && GRADEABLES[g].getPercent() <= 1.0);
@@ -489,6 +503,21 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
     ALL_GRADEABLES.push_back(g);
   }
 	
+  // Set Benchmark Percent
+
+  std::vector<std::string> benchmark_percents;
+
+  json benchmarkPercent = j["benchmark_percent"];
+  for (json::iterator itr = benchmarkPercent.begin(); itr != benchmarkPercent.end(); itr++) {
+    token = itr.key();
+    float value;
+    value = itr.value();
+    SetBenchmarkPercentage(token,value);
+    benchmark_percents.push_back(token);
+  }
+
+
+
   perfect = new Student();perfect->setUserName("PERFECT");
   student_average = new Student();student_average->setUserName("AVERAGE");
   student_stddev = new Student();student_stddev->setUserName("STDDEV");
@@ -507,8 +536,9 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
     json one_gradeable_type = all_gradeables[i];
 
     GRADEABLE_ENUM g;
-    std::string gradeable_type = one_gradeable_type.value("type","BAD_GRADEABLE_TYPE");
-
+    nlohmann::json::iterator itr = one_gradeable_type.find("type");
+    assert (itr != one_gradeable_type.end());
+    std::string gradeable_type = itr->get<std::string>();
     bool success = string_to_gradeable_enum(gradeable_type, g);
     if (!success) {
       std::cout << "UNKNOWN GRADEABLE: " << gradeable_type << std::endl;
@@ -518,28 +548,37 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 
     for (unsigned int i = 0; i < ids_list.size(); i++) {
       json grade_id = ids_list[i];
-      std::string token_key = (grade_id.begin()).key();
+      std::string token_key = grade_id.value("id","");
+      assert (token_key != "");
+
       int which = GRADEABLES[g].setCorrespondence(token_key);
-      p_score = grade_id[token_key].value("max", 0.0);
-      std::vector<float> curve = grade_id[token_key].value("curve",std::vector<float>()); //["curve"].get<std::vector<float> >();
+      p_score = grade_id.value("max", 0.0);
+
+      std::vector<float> curve = grade_id.value("curve",std::vector<float>());
+
+      a_score = GetBenchmarkPercentage("lowest_a-")*p_score;
+      b_score = GetBenchmarkPercentage("lowest_b-")*p_score;
+      c_score = GetBenchmarkPercentage("lowest_c-")*p_score;
+      d_score = GetBenchmarkPercentage("lowest_d")*p_score;
+
       if (!curve.empty()) {
-        assert (curve.size() == 5);
-        p_score = curve[0];
-        a_score = curve[1];
-        b_score = curve[2];
-        c_score = curve[3];
-        d_score = curve[4];
-      } else {
-        p_score = grade_id.value("max", 0.0);
-        a_score = GetBenchmarkPercentage("lowest_a-")*p_score;
-        b_score = GetBenchmarkPercentage("lowest_b-")*p_score;
-        c_score = GetBenchmarkPercentage("lowest_c-")*p_score;
-        d_score = GetBenchmarkPercentage("lowest_d")*p_score;
+        assert(curve.size() == benchmark_percents.size());
+        for (int i = 0; i < benchmark_percents.size(); i++) {
+          if (benchmark_percents[i] == "lowest_a-") a_score = curve[i];
+          if (benchmark_percents[i] == "lowest_b-") b_score = curve[i];
+          if (benchmark_percents[i] == "lowest_c-") c_score = curve[i];
+          if (benchmark_percents[i] == "lowest_d") d_score = curve[i];
+        }
       }
 
-      bool released = grade_id[token_key].value("released",true);
+      c_score = std::min(b_score,c_score);
+      d_score = std::min(c_score,d_score);
+
+      bool released = grade_id.value("released",true);
       GRADEABLES[g].setReleased(token_key,released);
       
+      //std::cout << "scores " << p_score << " "<< a_score << " " << b_score <<  " " << c_score << " " << d_score << std::endl;
+
       assert (p_score >= a_score &&
               a_score >= b_score &&
               b_score >= c_score &&
@@ -556,7 +595,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 	  
 	  //std::cout << "it makes it to exam data" << std::endl;
 	  
-	  json exam_data = grade_id[token_key]["exam_data"];
+	  json exam_data = grade_id["exam_data"];
 	  //std::cout << exam_data << std::endl;
 	  if (!exam_data.empty()) {
 		//std::cout << "makes it into exam data" << std::endl;
@@ -643,15 +682,6 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   
   //std::cout << "5" << std::endl;
   
-  // Set Benchmark Percent
-  json benchmarkPercent = j["benchmark_percent"];
-  for (json::iterator itr = benchmarkPercent.begin(); itr != benchmarkPercent.end(); itr++) {
-    token = itr.key();
-	float value;
-	value = itr.value();
-	
-	SetBenchmarkPercentage(token,value);
-  }
   
   //std::cout << "6" << std::endl;
   
@@ -681,7 +711,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 	token = itr.key();
 	if (token == "late_day_penalty") {
 	  LATE_DAY_PERCENTAGE_PENALTY = itr.value();
-	  assert (LATE_DAY_PERCENTAGE_PENALTY >= 0.0 && LATE_DAY_PERCENTAGE_PENALTY < 0.25);
+	  assert (LATE_DAY_PERCENTAGE_PENALTY >= 0.0 && LATE_DAY_PERCENTAGE_PENALTY <= 0.5);
 	} else if (token == "test_improvement_averaging_adjustment") {
 		TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT = true;
 	} else if (token == "quiz_normalize_and_drop_two") {
@@ -1188,7 +1218,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
   
   for (json::iterator itr = j.begin(); itr != j.end(); itr++) {
     token = itr.key();
-	std::cout << token << std::endl;
+    //std::cout << token << std::endl;
 	if (token == "section") {
 	  // create sections
 	  int counter = 0;
@@ -1245,7 +1275,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	} else if (token == "messages") {
 	  // general message at the top of the file
 	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
-		MESSAGES.push_back(itr2.value());
+            MESSAGES.push_back(*itr2);
 	  }
 	} else if (token == "warning") {
 	  // EWS early warning system [ per student ]
