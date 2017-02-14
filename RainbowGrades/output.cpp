@@ -151,7 +151,12 @@ std::string coloritcolor(float val,
                          float b,
                          float c,
                          float d) {
-  
+
+  //check for nan
+  if (val != val) return "ffffff";
+  if (isinf(val)) return "00ff00";
+
+  //std::cout << "coloritcolor " << val << " " << perfect << " " << a << " " << b << " " << c << " " << d << std::endl;
   assert (perfect >= a &&
           a >= b &&
           b >= c &&
@@ -161,44 +166,48 @@ std::string coloritcolor(float val,
   if (val < 0.00001) return "ffffff";
   else if (val > perfect) return GetBenchmarkColor("extracredit");
   else {
-  float alpha;
-  Color c1,c2;
+    float alpha;
+    Color c1,c2;
 
-  static Color perfect_color(GetBenchmarkColor("perfect"));
-  static Color a_color(GetBenchmarkColor("lowest_a-"));
-  static Color b_color(GetBenchmarkColor("lowest_b-"));
-  static Color c_color(GetBenchmarkColor("lowest_c-"));
-  static Color d_color(GetBenchmarkColor("lowest_d"));
+    static Color perfect_color(GetBenchmarkColor("perfect"));
+    static Color a_color(GetBenchmarkColor("lowest_a-"));
+    static Color b_color(GetBenchmarkColor("lowest_b-"));
+    static Color c_color(GetBenchmarkColor("lowest_c-"));
+    static Color d_color(GetBenchmarkColor("lowest_d"));
 
-  if (val >= a) {
-    alpha = (perfect-val)/float(perfect-a);
-    c1 = perfect_color;
-    c2 = a_color;
-  } 
-  else if (val >= b) {
-    alpha = (a-val)/float(a-b);
-    c1 = a_color;
-    c2 = b_color;
-  } 
-  else if (val >= c) {
-    alpha = (b-val)/float(b-c);
-    c1 = b_color;
-    c2 = c_color;
-  } 
-  else if (val >= d) {
-    alpha = (c-val)/float(c-d);
-    c1 = c_color;
-    c2 = d_color;
-  } 
-  else {
-    return GetBenchmarkColor("failing");
-  }
+    if (val >= a) {
+      if (fabs(perfect-a) < 0.0001) alpha = 0;
+      else alpha = (perfect-val)/float(perfect-a);
+      c1 = perfect_color;
+      c2 = a_color;
+    }
+    else if (val >= b) {
+      if (fabs(a-b) < 0.0001) alpha = 0;
+      else alpha = (a-val)/float(a-b);
+      c1 = a_color;
+      c2 = b_color;
+    }
+    else if (val >= c) {
+      if (fabs(b-c) < 0.0001) alpha = 0;
+      else alpha = (b-val)/float(b-c);
+      c1 = b_color;
+      c2 = c_color;
+    }
+    else if (val >= d) {
+      if (fabs(c-d) < 0.0001) alpha = 0;
+      else alpha = (c-val)/float(c-d);
+      c1 = c_color;
+      c2 = d_color;
+    }
+    else {
+      return GetBenchmarkColor("failing");
+    }
 
-  float red   = (1-alpha) * c1.r + (alpha) * c2.r;
-  float green = (1-alpha) * c1.g + (alpha) * c2.g;
-  float blue  = (1-alpha) * c1.b + (alpha) * c2.b;
+    float red   = (1-alpha) * c1.r + (alpha) * c2.r;
+    float green = (1-alpha) * c1.g + (alpha) * c2.g;
+    float blue  = (1-alpha) * c1.b + (alpha) * c2.b;
 
-  return HEX(red) + HEX(green) + HEX(blue);
+    return HEX(red) + HEX(green) + HEX(blue);
 
   }
 }
@@ -704,6 +713,7 @@ void start_table_output( bool for_instructor,
       } else if (this_student == sd) {
         default_color= coloritcolor(1,5,4,3,2,1);
       } 
+      assert (default_color.size()==6);
       table.set(myrow,counter++,TableCell(default_color,""));
     } else {
       //std::cout << " WHO? " << this_student->getUserName() << std::endl;
@@ -713,9 +723,11 @@ void start_table_output( bool for_instructor,
         last_section = this_student->getSection();
       }
       if (validSection(this_student->getSection())) {
+        assert (default_color.size()==6);
         table.set(myrow,counter++,TableCell(default_color,std::to_string(myrank)));
         myrank++;
       } else {
+        assert (default_color.size()==6);
         table.set(myrow,counter++,TableCell(default_color,""));
       }
     }
@@ -724,6 +736,7 @@ void start_table_output( bool for_instructor,
     std::string section_color = default_color;
     std::string section_label = "";
     colorit_section2(this_student->getSection(),section_color,section_label);
+    assert (section_color.size()==6);
     table.set(myrow,counter++,TableCell(section_color,section_label));
 
     //table.set(myrow,counter++,TableCell(default_color,"part"));
@@ -740,11 +753,12 @@ void start_table_output( bool for_instructor,
         "<font color=\"ff0000\">"+notes+"</font> " +
         "<font color=\"0000ff\">"+other_note+"</font> " +
         "<font color=\"00bb00\">"+recommendation+"</font>";
+      assert (default_color.size()==6);
       table.set(myrow,counter++,TableCell(default_color,THING));
-
     }
 
     //counter+=3;
+    assert (default_color.size()==6);
     table.set(myrow,counter++,TableCell(default_color,this_student->getUserName()));
     table.set(myrow,counter++,TableCell(default_color,this_student->getLastName()));
     if (DISPLAY_INSTRUCTOR_NOTES) {
@@ -817,6 +831,7 @@ void start_table_output( bool for_instructor,
                                      sc->overall(),
                                      sd->overall());
     if (this_student == STDDEV_STUDENT_POINTER) color="ffffff";
+    assert (color.size()==6);
     table.set(myrow,counter++,TableCell(color,grade,2));
     table.set(myrow,counter++,TableCell(grey_divider));
 
@@ -824,6 +839,7 @@ void start_table_output( bool for_instructor,
     if (DISPLAY_FINAL_GRADE) {
       std::string g = this_student->grade(false,sd);
       color = GradeColor(g);
+      assert (color.size()==6);
       table.set(myrow,counter++,TableCell(color,g,"",0,CELL_CONTENTS_VISIBLE,"center"));
       table.set(myrow,counter++,TableCell(grey_divider));
     }
@@ -861,7 +877,6 @@ void start_table_output( bool for_instructor,
       } else {
         grade = this_student->GradeablePercent(g);
       }
-
       std::string color = coloritcolor(grade,
                                        sp->GradeablePercent(g),
                                        sa->GradeablePercent(g),
@@ -869,6 +884,7 @@ void start_table_output( bool for_instructor,
                                        sc->GradeablePercent(g),
                                        sd->GradeablePercent(g));
       if (this_student == STDDEV_STUDENT_POINTER) color="ffffff";
+      assert (color.size()==6);
       table.set(myrow,counter++,TableCell(color,grade,2));
     }
     table.set(myrow,counter++,TableCell(grey_divider));
@@ -898,6 +914,7 @@ void start_table_output( bool for_instructor,
             details += " " + status;
           }
           int late_days_used = this_student->getGradeableItemGrade(g,j).getLateDaysUsed();
+          assert (color.size()==6);
           table.set(myrow,counter++,TableCell(color,grade,1,details,late_days_used,visible));
         }
         table.set(myrow,counter++,TableCell(grey_divider));
@@ -913,6 +930,7 @@ void start_table_output( bool for_instructor,
                                              sc->adjusted_test(j),
                                              sd->adjusted_test(j));
             if (this_student == STDDEV_STUDENT_POINTER) color="ffffff";
+            assert (color.size()==6);
             table.set(myrow,counter++,TableCell(color,grade,1,"",0,visible));
           }
           table.set(myrow,counter++,TableCell(grey_divider));
