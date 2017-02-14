@@ -33,10 +33,15 @@ class DateUtils {
         if ($date1 == $date2) {
             return 0;
         }
-        else if ($date1 < $date2) {
-            $date1->sub(new DateInterval("P1D"));
+        $diff = $date1->diff($date2);
+        $days_late = intval($diff->format('%r%a'));
+        if ($date1 < $date2) {
+            if ($diff->h > 0 || $diff->i > 0 || $diff->s > 0) {
+                $days_late += 1;
+            }
         }
-        return intval($date1->diff($date2)->format('%r%a'));
+
+        return $days_late;
     }
     
 }

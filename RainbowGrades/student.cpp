@@ -64,6 +64,11 @@ Student* GetStudent(const std::vector<Student*> &students, const std::string& us
 // accessor & modifier for grade data
 
 const ItemGrade& Student::getGradeableItemGrade(GRADEABLE_ENUM g, int i) const {
+  static ItemGrade emptyItemGrade(0);
+  //std::cout << "i " << i << "   count " << GRADEABLES[g].getCount() << std::endl;
+  if (i >= GRADEABLES[g].getCount()) {
+    return emptyItemGrade;
+  }
   assert (i >= 0 && i < GRADEABLES[g].getCount());
   std::map<GRADEABLE_ENUM,std::vector<ItemGrade> >::const_iterator itr = all_item_grades.find(g);
   assert (itr != all_item_grades.end());
@@ -94,12 +99,12 @@ const ItemGrade& Student::getGradeableItemGrade(GRADEABLE_ENUM g, int i) const {
 
 
 void Student::setGradeableItemGrade(GRADEABLE_ENUM g, int i, float value, 
-                                    int late_days_used, const std::string &note) {
+                                    int late_days_used, const std::string &note, const std::string &status) {
   assert (i >= 0 && i < GRADEABLES[g].getCount());
   std::map<GRADEABLE_ENUM,std::vector<ItemGrade> >::iterator itr = all_item_grades.find(g);
   assert (itr != all_item_grades.end());
   assert (int(itr->second.size()) > i);
-  itr->second[i] = ItemGrade(value,late_days_used,note);
+  itr->second[i] = ItemGrade(value,late_days_used,note,status);
 }
 
 
@@ -111,6 +116,7 @@ extern std::vector<std::vector<std::string> > HACKMAXPROJECTS;
 
 float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   if (GRADEABLES[g].getCount() == 0) return 0;
+  if (GRADEABLES[g].getMaximum() == 0) return 0;
   assert (GRADEABLES[g].getMaximum() > 0);
   assert (GRADEABLES[g].getPercent() >= 0);
 

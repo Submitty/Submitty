@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
 	    std::string pattern = filenames[i][j];
             std::cout << "PATTERN: " << filenames[i][j] << std::endl;
 	    bool special_flag = false;
-	    if (pattern.substr(pattern.size()-8,8) == ".cpp.txt") {
+	    if (pattern.size() > 8 && pattern.substr(pattern.size()-8,8) == ".cpp.txt") {
 	      pattern = pattern.substr(0,pattern.size()-4);
 	      special_flag = true;
 	    }

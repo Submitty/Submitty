@@ -22,12 +22,11 @@ public:
 
   std::string getStringRep() {
     std::stringstream ss;
-    ss << std::setw(4)  << year 
-       << "-" 
-       << std::setw(2)  << std::setfill('0') << month 
-       << "-"
-       << std::setw(2)  << std::setfill('0') << day;
-
+    ss << std::setw(2)  << std::setfill('0') << month 
+       << "/"
+       << std::setw(2)  << std::setfill('0') << day
+       << "/"
+       << std::setw(4)  << year;
     return ss.str();
   }
 };
@@ -46,7 +45,7 @@ public:
   iClickerQuestion(const std::string& f, int q, const std::string& ca) {
     filename = f;
     which_question = q;
-    assert (which_question >= 0 && which_question < 8);
+    assert (which_question >= 0 && which_question < 20);
     correct_answer = ca;
   }
 

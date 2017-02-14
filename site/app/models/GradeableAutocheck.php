@@ -11,7 +11,7 @@ use app\libraries\Utils;
  * Contains information pertaining to the autocheck element that's contained within a
  * GradeableTestcase. There is 0+ autochecks per GradeableTestcase.
  */
-class GradeableAutocheck {
+class GradeableAutocheck extends AbstractModel {
     
     /** @var string */
     private $index;
@@ -47,6 +47,7 @@ class GradeableAutocheck {
         }
         
         $actual_file = $expected_file = $difference_file = "";
+
         if(isset($details["actual_file"]) && file_exists($result_path . "/" . $details["actual_file"])) {
             $actual_file = $result_path . "/" . $details["actual_file"];
         }

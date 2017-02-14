@@ -2,9 +2,7 @@
 
 namespace app\models;
 
-use app\database\Database;
 use app\exceptions\ConfigException;
-use app\exceptions\FileNotFoundException;
 use app\libraries\IniParser;
 use app\libraries\Utils;
 
@@ -16,7 +14,7 @@ use app\libraries\Utils;
  * the database. We also allow for using this to write back to the variables within the database
  * (but not the variables in the files).
  */
-class Config {
+class Config extends AbstractModel {
 
     /**
      * Variable to set the system to debug mode, which allows, among other things
@@ -24,26 +22,41 @@ class Config {
      * turn on if running server in production environment.
      * @var bool
      */
-    private $debug = false;
+    protected $debug = false;
 
-    private $semester;
-    private $course;
+    /** @var string contains the semester to use, generally from the $_REQUEST['semester'] global */
+    protected $semester;
+    /** @var string contains the course to use, generally from the $_REQUEST['course'] global */
+    protected $course;
 
-    private $config_path;
-    private $course_ini;
+    /** @var string path on the filesystem that points to the course data directory */
+    protected $config_path;
+    /** @var string path to the ini file that contains all the course specific settings */
+    protected $course_ini;
 
     /*** MASTER CONFIG ***/
-    private $base_url;
-    private $course_url = null;
-    private $ta_base_url;
-    private $cgi_url;
-    private $site_url;
-    private $authentication;
-    private $timezone = "America/New_York";
-    private $submitty_path;
-    private $course_path;
-    private $submitty_log_path;
-    private $log_exceptions;
+    /** @var string */
+    protected $base_url;
+    /** @var string */
+    protected $course_url;
+    /** @var string */
+    protected $ta_base_url;
+    /** @var string */
+    protected $cgi_url;
+    /** @var string */
+    protected $site_url;
+    /** @var string */
+    protected $authentication;
+    /** @var string */
+    protected $timezone = "America/New_York";
+    /** @var string */
+    protected $submitty_path;
+    /** @var string */
+    protected $course_path;
+    /** @var string */
+    protected $submitty_log_path;
+    /** @var bool */
+    protected $log_exceptions;
 
     /**
      * Database host for PDO. The user does not need to set this
@@ -51,60 +64,68 @@ class Config {
      * to PostgreSQL.
      * @var string
      */
-    private $database_type = "pgsql";
+    protected $database_type = "pgsql";
 
     /**
      * Database host for PDO
      * @var string
      */
-    private $database_host;
+    protected $database_host;
 
     /**
      * Database user for PDO
      * @var string
      */
-    private $database_user;
+    protected $database_user;
 
     /**
      * Database password for PDO
      * @var string
      */
-    private $database_password;
+    protected $database_password;
 
     /*** COURSE SPECIFIC CONFIG ***/
     /**
      * Database name for PDO
      * @var string
      */
-    private $database_name;
+    protected $database_name;
 
     /*** COURSE DATABASE CONFIG ***/
+    /** @var string */
+    protected $course_name;
+    /** @var string */
+    protected $course_home_url;
+    /** @var int */
+    protected $default_hw_late_days;
+    /** @var int */
+    protected $default_student_late_days;
+    /** @var bool */
+    protected $zero_rubric_grades;
 
-    private $course_name;
-    private $default_hw_late_days;
-    private $default_student_late_days;
-    private $zero_rubric_grades;
-    private $display_hidden;
-
-    private $upload_message;
-    private $grades_summary;
-    
-    private $display_iris_grades_summary;
-    private $display_custom_message;
+    /** @var string */
+    protected $upload_message;
+    /** @var bool */
+    protected $keep_previous_files;
+    /** @var bool */
+    protected $display_iris_grades_summary;
+    /** @var bool */
+    protected $display_custom_message;
 
     /**
      * Config constructor.
      *
-     * @param $semester
-     * @param $course
+     * @param string $semester
+     * @param string $course
+     * @param string $master_ini_path
      */
-    public function __construct($semester, $course) {
+    public function __construct($semester, $course, $master_ini_path) {
         $this->semester = $semester;
         $this->course = $course;
-        $this->config_path = implode("/", array(__DIR__, '..', '..', 'config'));
+        $this->config_path = dirname($master_ini_path);
 
         // Load config details from the master config file
-        $master = IniParser::readFile(implode("/", array($this->config_path, 'master.ini')));
+        $master = IniParser::readFile($master_ini_path);
 
         $this->setConfigValues($master, 'logging_details', array('submitty_log_path', 'log_exceptions'));
         $this->setConfigValues($master, 'site_details', array('base_url', 'cgi_url', 'ta_base_url', 'submitty_path', 'authentication'));
@@ -116,6 +137,9 @@ class Config {
 
         if (isset($master['site_details']['timezone'])) {
             $this->timezone = $master['site_details']['timezone'];
+            if (!in_array($this->timezone, \DateTimeZone::listIdentifiers())) {
+                throw new ConfigException("Invalid Timezone identifier: {$this->timezone}");
+            }
         }
 
         if (isset($master['database_details']['database_type'])) {
@@ -129,7 +153,7 @@ class Config {
         // Check that the paths from the config file are valid
         foreach(array('submitty_path', 'submitty_log_path') as $path) {
             if (!is_dir($this->$path)) {
-                throw new ConfigException("Invalid path for setting: {$path}\n{$this->$path}");
+                throw new ConfigException("Invalid path for setting {$path}: {$this->$path}");
             }
             $this->$path = rtrim($this->$path, "/");
         }
@@ -148,10 +172,10 @@ class Config {
         $course = IniParser::readFile($this->course_ini);
 
         $this->setConfigValues($course, 'hidden_details', array('database_name'));
-        $this->setConfigValues($course, 'course_details', array
-                               ('course_name', 'default_hw_late_days',
-                                'default_student_late_days', 'zero_rubric_grades', 'upload_message', 
-                                'display_iris_grades_summary', 'display_custom_message'));
+        $array = array('course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
+            'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_iris_grades_summary',
+            'display_custom_message');
+        $this->setConfigValues($course, 'course_details', $array);
         
         if (isset($course['hidden_details']['course_url'])) {
             $this->course_url = rtrim($course['hidden_details']['course_url'], "/")."/";
@@ -164,7 +188,9 @@ class Config {
             $this->$key = intval($this->$key);
         }
 
-        foreach (array('zero_rubric_grades', 'display_iris_grades_summary', 'display_custom_message') as $key) {
+        $array = array('zero_rubric_grades', 'keep_previous_files', 'display_iris_grades_summary',
+            'display_custom_message');
+        foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
     
@@ -257,7 +283,7 @@ class Config {
     /**
      * @return bool
      */
-    public function getLogExceptions() {
+    public function shouldLogExceptions() {
         return $this->log_exceptions;
     }
 
@@ -302,6 +328,12 @@ class Config {
     public function getCourseName() {
         return $this->course_name;
     }
+    /**
+     * @return string
+     */
+    public function getCourseHomeUrl(){
+        return $this->course_home_url;
+    }
 
     /**
      * @return integer
@@ -323,11 +355,10 @@ class Config {
     public function shouldZeroRubricGrades() {
         return $this->zero_rubric_grades;
     }
-    
-    public function shouldDisplayHidden() {
-        return $this->display_hidden;
-    }
 
+    /**
+     * @return string
+     */
     public function getConfigPath() {
         return $this->config_path;
     }
@@ -345,27 +376,45 @@ class Config {
     public function getTimezone() {
         return $this->timezone;
     }
-    
+
+    /**
+     * @return string
+     */
     public function getUploadMessage() {
         return $this->upload_message;
     }
-    
+
+    /**
+     * @return bool
+     */
     public function displayCustomMessage() {
         return $this->display_custom_message;
     }
 
+    /**
+     * @return bool
+     */
+    public function keepPreviousFiles() {
+        return $this->keep_previous_files;
+    }
+
+    /**
+     * @return bool
+     */
     public function displayIrisGradesSummary() {
         return $this->display_iris_grades_summary;
     }
 
-    public function showGradeSummary() {
-        return $this->grades_summary;
-    }
-    
+    /**
+     * @return string
+     */
     public function getCourseIniPath() {
         return $this->course_ini;
     }
-    
+
+    /**
+     * @return string
+     */
     public function getCourseUrl() {
         return $this->course_url;
     }

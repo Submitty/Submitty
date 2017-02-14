@@ -2,16 +2,10 @@
 
 namespace app\views\admin;
 
-use app\libraries\Core;
 use app\models\User;
+use app\views\AbstractView;
 
-class UsersView {
-    private $core;
-
-    public function __construct(Core $core) {
-        $this->core = $core;
-    }
-
+class UsersView extends AbstractView {
     /**
      * @param User[] $students
      * @return string
@@ -21,7 +15,7 @@ class UsersView {
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
-        <a href="{$this->core->getConfig()->getTABaseUrl()}account/admin-classlist.php?course=csci1000&semester=f16&this[]=Students&this[]=Upload%20ClassList" class="btn btn-primary">Upload Classlist</a>
+        <a href="{$this->core->getConfig()->getTABaseUrl()}account/admin-classlist.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&this[]=Students&this[]=Upload%20ClassList" class="btn btn-primary">Upload Classlist</a>
         <a onclick="newUserForm()" class="btn btn-primary">New Student</a>
     </div>
     <h2>View Students</h2>
@@ -47,12 +41,12 @@ HTML;
                     $count = 1;
                     if ($tbody_open) {
                         $return .= <<<HTML
-        
+
         </tbody>
 HTML;
                     }
                     $return .= <<<HTML
-        
+
         <tr class="info persist-header">
             <td colspan="8" style="text-align: center">Students Enrolled in Registration Section {$registration}</td>
         </tr>
@@ -68,12 +62,12 @@ HTML;
                     $style = "style='background: #7bd0f7;'";
                 }
                 $return .= <<<HTML
-            
+
             <tr id="user-{$student->getId()}" {$style}>
                 <td>{$count}</td>
                 <td>{$registration}</td>
                 <td style="text-align: left">{$student->getId()}</td>
-                <td style="text-align: left">{$student->getDisplayedFirstName()}</td> 
+                <td style="text-align: left">{$student->getDisplayedFirstName()}</td>
                 <td style="text-align: left">{$student->getLastName()}</td>
                 <td>{$rotating_section}</td>
                 <td>{$manual}</td>
@@ -90,7 +84,7 @@ HTML;
         else {
             $return .= <<<HTML
         <tr>
-            <td colspan="3">No students found</td>
+            <td colspan="8">No students found</td>
         </tr>
 HTML;
         }
@@ -112,7 +106,8 @@ HTML;
         $return = <<<HTML
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
-        <a onclick="newUserForm(); 
+        <a href="{$this->core->getConfig()->getTABaseUrl()}account/admin-grader-list.php?course={$this->core->getConfig()->getCourse()}&semester={$this->core->getConfig()->getSemester()}&this[]=Graders&this[]=Upload%20Grader%20List" class="btn btn-primary">Upload Grader list</a>
+        <a onclick="newUserForm();
             $('[name=\'user_group\'] option[value=\'3\']').prop('selected', true);" class="btn btn-primary">New Grader</a>
     </div>
     <h2>View Graders</h2>
@@ -154,11 +149,11 @@ HTML;
                         break;
                 }
                 $return .= <<<HTML
-            
+
             <tr id="user-{$grader->getId()}">
                 <td>{$count}</td>
                 <td style="text-align: left">{$grader->getId()}</td>
-                <td style="text-align: left">{$grader->getDisplayedFirstName()}</td> 
+                <td style="text-align: left">{$grader->getDisplayedFirstName()}</td>
                 <td style="text-align: left">{$grader->getLastName()}</td>
                 <td>{$group}</td>
                 <td>{$registration_sections}</td>
@@ -260,7 +255,7 @@ HTML;
         </select>
     </div>
     <div style="width: 70%">
-        <input type="checkbox" id="manual_registration" name="manual_registration"> 
+        <input type="checkbox" id="manual_registration" name="manual_registration">
         <label for="manual_registration">Manually Registered User (no automatic updates)</label>
     </div>
     <div style="width: 100%">
@@ -295,13 +290,13 @@ $(function() {
     $("[name='rotating_type']").change(function() {
         if ($(this).val() == "alphabetically") {
             $("[name='fewest']").prop('checked', false).attr('onclick', 'return false').addClass("disabled");
-            
+
         }
         else {
             $("[name='fewest']").attr('onclick', '').removeClass('disabled');
         }
     });
-    
+
     $("[name='sort_type']").change(function() {
         var val = $(this).val();
         if (val == "fewest") {
@@ -325,7 +320,7 @@ $(function() {
     <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
     <div class="sub">
         <div class="box half">
-            Place students in <input type="text" name="sections" placeholder="#" style="width: 25px" /> rotating sections 
+            Place students in <input type="text" name="sections" placeholder="#" style="width: 25px" /> rotating sections
             <select name="rotating_type">
                 <option value="random">randomly</option>
                 <option value="alphabetically">alphabetically</option>
@@ -353,7 +348,7 @@ HTML;
             }
             $return .= <<<HTML
                     <tr>
-                        <td>Section {$row['rotating_section']}</td> 
+                        <td>Section {$row['rotating_section']}</td>
                         <td>{$row['count']}</td>
 HTML;
         }

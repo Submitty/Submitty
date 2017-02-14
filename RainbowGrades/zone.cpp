@@ -25,17 +25,29 @@ int myrandomzone (int i) { return std::rand()%i;}
 
 //==========================================================================
 
+// More intuitive sort function to organize zones first by length (#
+// of characters), then alphabetical.
+class ZoneSorter {
+public:
+  bool operator()(const std::string& a, const std::string& b) const {
+    return (a.size() < b.size() ||
+            (a.size() == b.size() && a < b));
+  }
+};
+
 
 void LoadExamSeatingFile(const std::string &zone_counts_filename, const std::string &zone_assignments_filename, std::vector<Student*> &students) {
-  std::cout << "zone counts filename " << zone_counts_filename << std::endl;
-  std::cout << "zone assignments filename " << zone_assignments_filename << std::endl;
 
+  std::cout << "zone counts filename '" << zone_counts_filename << "'" << std::endl;
+  std::cout << "zone assignments filename '" << zone_assignments_filename << "'" << std::endl;
 
+  assert (zone_counts_filename != "");
+  assert (zone_assignments_filename != "");
 
   // ============================================================
   // read in the desired zone counts
 
-  std::map<std::string,ZoneInfo> zones;
+  std::map<std::string,ZoneInfo,ZoneSorter> zones;
   std::ifstream istr_zone_counts(zone_counts_filename.c_str());
   assert (istr_zone_counts.good());
   

@@ -25,10 +25,12 @@ class ConfigurationController extends AbstractController {
     public function viewConfiguration() {
         $fields = array(
             'course_name'               => $this->core->getConfig()->getCourseName(),
+            'course_home_url'           => $this->core->getConfig()->getCourseHomeUrl(),
             'default_hw_late_days'      => $this->core->getConfig()->getDefaultHwLateDays(),
             'default_student_late_days' => $this->core->getConfig()->getDefaultStudentLateDays(),
             'zero_rubric_grades'        => $this->core->getConfig()->shouldZeroRubricGrades(),
             'upload_message'            => $this->core->getConfig()->getUploadMessage(),
+            'keep_previous_files'       => $this->core->getConfig()->keepPreviousFiles(),
             'display_iris_grades_summary' => $this->core->getConfig()->displayIrisGradesSummary(),
             'display_custom_message'      => $this->core->getConfig()->displayCustomMessage()
         );
@@ -45,7 +47,7 @@ class ConfigurationController extends AbstractController {
             }
         }
 
-        foreach (array('zero_rubric_grades', 'display_iris_grades_summary', 'display_custom_message') as $key) {
+        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_iris_grades_summary', 'display_custom_message') as $key) {
             if (isset($_SESSION['request'][$key])) {
                 $fields[$key] = ($_SESSION['request'][$key] == true) ? true : false;
             }
@@ -79,7 +81,7 @@ class ConfigurationController extends AbstractController {
             $_POST[$key] = (isset($_POST[$key])) ? intval($_POST[$key]) : 0;
         }
 
-        foreach (array('zero_rubric_grades', 'display_iris_grades_summary', 'display_custom_message') as $key) {
+        foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_iris_grades_summary', 'display_custom_message') as $key) {
             $_POST[$key] = (isset($_POST[$key]) && $_POST[$key] == "true") ? true : false;
         }
 
@@ -89,10 +91,12 @@ class ConfigurationController extends AbstractController {
             ),
             'course_details' => array(
                 'course_name'               => $_POST['course_name'],
+                'course_home_url'           => $_POST['course_home_url'],
                 'default_hw_late_days'      => $_POST['default_hw_late_days'],
                 'default_student_late_days' => $_POST['default_student_late_days'],
                 'zero_rubric_grades'        => $_POST['zero_rubric_grades'],
                 'upload_message'            => nl2br($_POST['upload_message']),
+                'keep_previous_files'       => $_POST['keep_previous_files'],
                 'display_iris_grades_summary' => $_POST['display_iris_grades_summary'],
                 'display_custom_message'      => $_POST['display_custom_message']
             )

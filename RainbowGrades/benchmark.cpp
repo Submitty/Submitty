@@ -76,7 +76,7 @@ void SetBenchmarkPercentage(const std::string& s, float v) {
           s == "lowest_c-" ||
           s == "lowest_d");
   Benchmark& b = Benchmark::GetBenchmark(s);
-  assert (v >= 0.0 & v <= 1.0);
+  assert (v >= 0.0 && v <= 1.0);
   b.percentage = v;
 }
 

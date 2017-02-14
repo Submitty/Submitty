@@ -7,9 +7,9 @@
     note_right = "skip every other seat"
 
     var red = "#d00000";
-    var blue = "0400d0";
-    var green = "0b8f0a";
-    var yellow = "e4c012";
+    var blue = "#0400d0";
+    var green = "#0b8f0a";
+    var yellow = "#e4c012";
     var magenta = "#d000d0";
 
     var config = {
@@ -19,7 +19,7 @@
           "color": red,
         },
         "L": {
-          "rows": [5,6,7,8,9,13,14,12,11,10],
+          "rows": [5,6,7,8,9,10,11,12],
           "color": green,
         },
       },
@@ -109,17 +109,26 @@
 
       function render_section_row(section, row) {
         var height = BASE_ROW_HEIGHT
-
         var isle = false;
+        var past_walkway = row >= 7;
+
         try {
           var empty = false;
-          var color = expanded[section][row]["color"];
+          if(past_walkway)
+            var color = expanded[section][row - 2]["color"];
+          else
+            var color = expanded[section][row]["color"];
           ctx.setLineDash([]);
         }
         catch(err) {
           var empty = true;
           var color = BASE_ROW_COLOR
           ctx.setLineDash([10, 10]);
+        }
+
+        if(row == 5 || row == 6)
+        {
+          return
         }
 
         var center_x = BASE_ROW_CENTER;
@@ -191,48 +200,35 @@
           point_avg = [center_x, center_y]
         }
 
-        if(row >= 7) {
-          row2 = row -= 2
-          point_avg[1] -= 20;
-        }
-        else {
-          row2 = row
-        }
-
         if(DRAW_ROW_CENTER_LABELS) {
           ctx.font = "bold 7pt sans-serif";
           ctx.fillStyle = "#333333";
-          ctx.fillText(row2, point_avg[0], point_avg[1] - 10, 100);
+          ctx.fillText(row, point_avg[0], point_avg[1] - 10, 100);
         }
 
         if( ! isle) {
           ctx.font = "bold 7pt sans-serif";
           ctx.fillStyle = "#333333";
-          ctx.fillText(row2, center_x - width_half - 20, center_y, 100);
+          if(past_walkway)
+            ctx.fillText(row - 2, center_x - width_half - 20, center_y, 100);
+          else
+            ctx.fillText(row, center_x - width_half - 20, center_y, 100);
 
           ctx.font = "bold 7pt sans-serif";
           ctx.fillStyle = "#333333";
-          ctx.fillText(row2, center_x + width_half + 20, center_y, 100);
-        }
-        else if(row == 6) {
-          // Draw row label
-          message = "WALKWAY";
-          ctx.font = "bold 20pt sans-serif";
-
-          var width2 = ctx.measureText(message).width + 18.0;
-          var height2 = 22.0
-          var width_half2 = width2 / 2.0;
-          var height_half2 = height2 / 2.0;
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(point_avg[0] - width_half2, point_avg[1] - height_half2 - 10, width2, height2);
-
-          ctx.fillStyle = "#333333";
-          ctx.fillText(message, point_avg[0], point_avg[1] - 10);
+          if(past_walkway)
+            ctx.fillText(row - 2, center_x + width_half + 20, center_y, 100);
+          else
+            ctx.fillText(row, center_x + width_half + 20, center_y, 100);
         }
 
         // Draw points
         if( ! (empty || isle)) {
-          letter = expanded[section][row]["letter"]
+          if(past_walkway)
+            letter = expanded[section][row - 2]["letter"];
+          else
+            letter = expanded[section][row]["letter"];
+
           if( ! ("points" in config[section][letter])) {
             config[section][letter]["points"] = []
           }
@@ -240,7 +236,10 @@
             used[letter] = 0
           }
           config[section][letter]["points"].push(point_avg);
-          used[letter] += seats[section][row - 1];
+          if(past_walkway)
+            used[letter] += seats[section][row - 1 - 2];
+          else
+            used[letter] += seats[section][row - 1];
 
           if(DRAW_ROW_BLACK_DOTS) {
             if(row <= 4) {
@@ -327,6 +326,14 @@
 
       }
 
+      function sum_array(temp) {
+        var total = 0;
+        for(var index = 0; index < temp.length; index++) {
+            total += temp[index];
+        }
+        return total;
+      }
+
       // Find diagram DOM object and configure HTML5 canvas
       var diagram = document.getElementById("diagram");
       var ctx = diagram.getContext("2d");
@@ -378,8 +385,25 @@
       // Render arrows
       // render_arrow("middle");
 
-      render_section_row("middle", 5);
-      render_section_row("middle", 6);
+      // render_section_row("middle", 5);
+      // render_section_row("middle", 6);
+
+      // Draw WALKWAY row label
+      row = 6;
+      message = "WALKWAY";
+      ctx.font = "bold 20pt sans-serif";
+
+      var center_x = BASE_ROW_CENTER;
+      var center_y = BASE_ROW_START + 20 * row
+      var width2 = ctx.measureText(message).width + 18.0;
+      var height2 = 22.0
+      var width_half2 = width2 / 2.0;
+      var height_half2 = height2 / 2.0;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(center_x - width_half2, center_y - height_half2 - 10, width2, height2);
+
+      ctx.fillStyle = "#333333";
+      ctx.fillText(message, center_x, center_y - 10);
 
       // Render zone labels
       render_zone_labels(config);
@@ -394,10 +418,21 @@
       }
       temp.sort();
       container = document.getElementById("seats")
+      var total = 0;
       for(var index in temp) {
         var letter = temp[index];
         container.innerHTML += letter + " RICKETTS 203 " + used[letter] + "\n";
+        total += used[letter];
       }
+
+      // Get total number of seats
+      var all = 0;
+      // all += sum_array(seats["left"]);
+      all += sum_array(seats["middle"]);
+      // all += sum_array(seats["right"]);
+
+      container.innerHTML += "\nTOTAL: " + total + "\n";
+      container.innerHTML += "UNUSED: " + (all - total) + "\n";
     </script>
   </body>
 </html>

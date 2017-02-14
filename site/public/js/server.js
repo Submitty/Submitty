@@ -189,6 +189,7 @@ function batchImportJSON(url, csrf_token){
     });
 }
 
+/*
 var hasNav = false;
 
 function UpdateTableHeaders() {
@@ -236,8 +237,8 @@ function UpdateTableHeaders() {
 }
 
 $(function() {
-    hasNav = $("#nav").length > 0;
-
+    //hasNav = $("#nav").length > 0;
+    hasNav = false; // nav doesn't float anymore so we don't have to account for it.
     // Each persist-area can have multiple persist-headers, we need to create each one with a new z-index
     var persist = $(".persist-area");
     var z_index = 900;
@@ -269,11 +270,25 @@ $(function() {
     }
 
     if (window.location.hash != "") {
-        if ($(window.location.hash) > 0) {
+        if ($(window.location.hash).offset().top > 0) {
             var minus = 60;
             if (hasNav) {
                 minus += 30;
             }
+            $("html, body").animate({scrollTop: ($(window.location.hash).offset().top - minus)}, 800);
+        }
+    }
+
+    setTimeout(function() {
+        $('.inner-message').fadeOut();
+    }, 5000);
+});
+*/
+
+$(function() {
+    if (window.location.hash !== "") {
+        if ($(window.location.hash).offset().top > 0) {
+            var minus = 60;
             $("html, body").animate({scrollTop: ($(window.location.hash).offset().top - minus)}, 800);
         }
     }

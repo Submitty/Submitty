@@ -2,7 +2,7 @@
 
 namespace app\views;
 
-class ErrorView {
+class ErrorView extends AbstractView {
     public function exceptionPage($error_message) {
         $top_message = "Oh no! Something irrecoverable has happened...";
         $error_message = nl2br(str_replace(" ", "&nbsp;", $error_message));
@@ -64,7 +64,7 @@ HTML;
 
     public function errorPage($error_message) {
         $error_message = nl2br(str_replace(" ", "&nbsp;", $error_message));
-        return <<<HTML
+	$return = <<<HTML
 <html>
 <head>
     <title>Submitty - Forbidden</title>
@@ -75,6 +75,20 @@ HTML;
 It does not look like you're allowed to access this page.<br /><br />
 Reason: {$error_message}<br /><br />
 Please contact system administrators if you believe this is a mistake.
+HTML;
+
+
+	if (file_exists("/usr/local/submitty/site/app/views/current_courses.php")) {
+	   $courselist = file_get_contents("/usr/local/submitty/site/app/views/current_courses.php");
+           $return .= <<<HTML
+<br /><br />
+Perhaps you are looking for one of these courses:<br /><br />
+$courselist
+HTML;
+	}
+
+
+        $return .= <<<HTML
 </div>
 
 <pre>
@@ -101,6 +115,24 @@ Please contact system administrators if you believe this is a mistake.
 </body>
 </html>
 HTML;
+return $return;
+    }
 
+    public function noGradeable($gradeable_id) {
+        if ($gradeable_id === null) {
+            return <<<HTML
+<div class="content">
+    No gradeable id specified. Contact your instructor if you think this is an error.
+</div>
+HTML;
+        }
+        else {
+            return <<<HTML
+<div class="content">
+    {$gradeable_id} is not a valid electronic submission gradeable. Contact your instructor if you think this
+    is an error.
+</div>
+HTML;
+        }
     }
 }
