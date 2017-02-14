@@ -151,6 +151,12 @@ std::string coloritcolor(float val,
                          float b,
                          float c,
                          float d) {
+
+  //check for nan
+  if (val != val) return "ffffff";
+  if (isinf(val)) return "00ff00";
+
+  //std::cout << "coloritcolor " << val << " " << perfect << " " << a << " " << b << " " << c << " " << d << std::endl;
   assert (perfect >= a &&
           a >= b &&
           b >= c &&

@@ -265,7 +265,7 @@ bool operator< (const Grade &a, const Grade &b) {
 }
 
 //====================================================================
-
+/*
 void gradeable_helper(std::ifstream& istr, GRADEABLE_ENUM g) {
   int c; float p, m;
   istr >> c >> p >> m;
@@ -277,7 +277,7 @@ void gradeable_helper(std::ifstream& istr, GRADEABLE_ENUM g) {
   assert (GRADEABLES[g].getPercent() >= 0.0 && GRADEABLES[g].getPercent() <= 1.0);
   assert (GRADEABLES[g].getMaximum() >= 0.0);
 }
-
+*/
 
 bool string_to_gradeable_enum(const std::string &s, GRADEABLE_ENUM &return_value) {
   std::string s2;
@@ -472,32 +472,26 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
     assert (gradeable_total_percent >= 0);
     sum_of_percents += gradeable_total_percent;
 
-    int c = 0;
-    //float p = 0.0;
-    float m = 0.0;
+    int count = one_gradeable_type.value("count",-1);
+
     json ids_list = one_gradeable_type["ids"];
     for (unsigned int i = 0; i < ids_list.size(); i++) {
       json ids = ids_list[i];
-      //for (json::iterator itr2 = ids.begin(); itr2 != ids.end(); itr2++) {
       std::string gradeable_id = ids.value("id","");
-      assert (gradeable_id != "");//itr2.key();
-      //json grades = ids[gradeable_id];
-      c++;
-      //p += ids.value("percent",0.0);
-      m += ids.value("max",0.0);
+      assert (gradeable_id != "");
     }
-	
+    if (count == -1) {
+      count = ids_list.size();
+    }
+    assert (ids_list.size() <= count);
 
-    Gradeable answer (c,gradeable_total_percent,m);
+    Gradeable answer (count,gradeable_total_percent); //,m);
     GRADEABLES.insert(std::make_pair(g,answer));
     assert (GRADEABLES[g].getCount() >= 0);
     assert (GRADEABLES[g].getPercent() >= 0.0 && GRADEABLES[g].getPercent() <= 1.0);
-    assert (GRADEABLES[g].getMaximum() >= 0.0);
 	
     // Set remove lowest for gradeable
     int num = one_gradeable_type.value("remove_lowest", 0);
-    //std::cout << num << std::endl;
-    //std::cout << GRADEABLES[g].getCount() << std::endl;
     assert (num == 0 || (num >= 0 && num < GRADEABLES[g].getCount()));
     GRADEABLES[g].setRemoveLowest(num);
     ALL_GRADEABLES.push_back(g);
@@ -576,6 +570,9 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 
       bool released = grade_id.value("released",true);
       GRADEABLES[g].setReleased(token_key,released);
+
+      float maximum = grade_id.value("max",0);
+      GRADEABLES[g].setMaximum(token_key,maximum);
       
       //std::cout << "scores " << p_score << " "<< a_score << " " << b_score <<  " " << c_score << " " << d_score << std::endl;
 
@@ -1268,7 +1265,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
             sectionColors[section_name] = "ff6666"; // red
           } else {
             sectionColors[section_name] = "aaaaaa"; // grey 
-		  }
+	  }
 		  counter++;
 		}
 	  }
@@ -1281,16 +1278,39 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	  // EWS early warning system [ per student ]
 	  std::vector<json> warning_list = j[token].get<std::vector<json> >();
 	  for (int i = 0; i<warning_list.size(); i++) {
-		json warning_user = warning_list[i];
-	    std::string username = warning_user["user"].get<std::string>();
-		std::string message = warning_user["msg"].get<std::string>();
-		Student *s = GetStudent(students,username);
-		if (s == NULL) {
-          std::cout << username << std::endl;
-        }
-        assert (s != NULL);
-		s->addWarning(message);
+            json warning = warning_list[i];
+	    //std::string username = warning_user["user"].get<std::string>();
+            std::string message = warning["msg"].get<std::string>();
+            std::vector<std::string> ids;
+            float value = warning["value"].get<float>();
+            json j_ids = warning["ids"];
+            for (int k = 0; k < j_ids.size(); k++) {
+              ids.push_back(j_ids[i].get<std::string>());
+            }
+
+            std::cout << "search for " << message << std::endl;
+            for (int S = 0; S < (int)students.size(); S++) {
+              Student *s = students[S];
+              if (!validSection(students[S]->getSection())) continue;
+              //std::cout << "student " << s->getUserName() << std::endl;
+              float v = 0;
+              for (int k = 0; k < ids.size(); k++) {
+                GRADEABLE_ENUM g;
+                int i;
+                LookupGradeable(ids[k],g,i);
+                v += s->getGradeableItemGrade(g,i).getValue();
+              }
+
+              if (v < value) {
+                std::stringstream ss;
+                ss << " " << v << " < " << value;
+
+                s->addWarning(message + ss.str());
+              }
+            }
+
 	  }
+
 	} else if (token == "recommend") {
 	  // UTA/mentor recommendations [ per student ]
 	  std::vector<json> recommend_list = j[token].get<std::vector<json> >();
