@@ -1285,7 +1285,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
             float value = warning["value"].get<float>();
             json j_ids = warning["ids"];
             for (int k = 0; k < j_ids.size(); k++) {
-              ids.push_back(j_ids[i].get<std::string>());
+              ids.push_back(j_ids[k].get<std::string>());
             }
 
             std::cout << "search for " << message << std::endl;
@@ -1297,6 +1297,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
               for (int k = 0; k < ids.size(); k++) {
                 GRADEABLE_ENUM g;
                 int i;
+                std::cout << "GRADEABLE_ENUM " << (int)g << i << std::endl;
                 LookupGradeable(ids[k],g,i);
                 v += s->getGradeableItemGrade(g,i).getValue();
               }

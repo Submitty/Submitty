@@ -99,6 +99,7 @@ public:
 
   int setCorrespondence(const std::string& id) {
     assert (!hasCorrespondence(id));
+    //std::cout << "SET CORR " << id << std::endl;
     assert (int(correspondences.size()) < count);
     int index = correspondences.size();
     correspondences[id] = std::make_pair(index,"");
