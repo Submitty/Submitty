@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 #include "TestCase.h"
 #include "JUnitGrader.h"
+#include "DrMemoryGrader.h"
 #include "PacmanGrader.h"
 #include "myersDiff.h"
 #include "tokenSearch.h"
@@ -194,6 +195,7 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader) const {
   else if (method == "EmmaInstrumentationGrader")  { return EmmaInstrumentationGrader_doit(*this,grader); }
   else if (method == "MultipleJUnitTestGrader")    { return MultipleJUnitTestGrader_doit(*this,grader);   }
   else if (method == "EmmaCoverageReportGrader")   { return EmmaCoverageReportGrader_doit(*this,grader);  }
+  else if (method == "DrMemoryGrader")             { return DrMemoryGrader_doit(*this,grader);              }
   else if (method == "PacmanGrader")               { return PacmanGrader_doit(*this,grader);              }
   else if (method == "searchToken")                { return searchToken_doit(*this,grader);               }
   else if (method == "intComparison")              { return intComparison_doit(*this,grader);             }
