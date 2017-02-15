@@ -39,8 +39,7 @@
                     "description" : "Standard Output (STDOUT)"
                 },
                 {
-                    "method" : "searchToken",
-                    "data" : [ "NO ERRORS FOUND:" ],
+                    "method" : "DrMemoryGrader",
                     "actual_file" : "STDERR.txt",
                     "description" : "Standard Error (STDERR)",
                     "deduction" : 1.0
