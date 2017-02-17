@@ -18,6 +18,8 @@
 #include "table.h"
 #include "benchmark.h"
 
+#include "json.hpp"
+
 #define grey_divider "aaaaaa"
 
 #include "constants_and_globals.h"
@@ -325,59 +327,49 @@ void colorit(std::ostream &ostr,
 
 // ==========================================================
 
-void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s) {
+void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s, const nlohmann::json &special_message) {
 
-
-#if 0
+  if (special_message.size() > 0) {
     
-  ostr << "<table border=1 cellpadding=5 cellspacing=0 style=\"background-color:#ddffdd; width:auto;\">\n";
-  ostr << "<tr><td>\n";
-  ostr << "<table border=0 cellpadding=5 cellspacing=0>\n";
+    ostr << "<table border=1 cellpadding=5 cellspacing=0 style=\"background-color:#ddffdd; width:auto;\">\n";
+    ostr << "<tr><td>\n";
+    ostr << "<table border=0 cellpadding=5 cellspacing=0>\n";
 
+    assert (special_message.find("title") != special_message.end());
+    std::string title = special_message.value("title","MISSING TITLE");
 
-  ostr << "<h3>HOMEWORK 4 MATERIALS</h3>" << std::endl;
+    assert (special_message.find("description") != special_message.end());
+    std::string description = special_message.value("description","provided_files.zip");
 
-  std::string username = s->getUserName();
+    ostr << "<h3>" << title << "</h3>" << std::endl;
 
+    assert (special_message.find("files") != special_message.end());
+    nlohmann::json files = *(special_message.find("files"));
+    int num_files = files.size();
+    assert (num_files >= 1);
 
+    std::string username = s->getUserName();
+    int A = 54059; /* a prime */
+    int B = 76963; /* another prime */
+    int FIRSTH = 37; /* also prime */
 
-  int A = 54059; /* a prime */
-  int B = 76963; /* another prime */
-  int FIRSTH = 37; /* also prime */
-    
-  unsigned int hw4_sum = FIRSTH;
-  for (int i = 0; i < username.size(); i++) {
-    hw4_sum = (hw4_sum * A) ^ (username[i] * B);
-    s++;
+    unsigned int tmp = FIRSTH;
+    for (int i = 0; i < username.size(); i++) {
+      tmp = (tmp * A) ^ (username[i] * B);
+      s++;
+    }
+
+    int which = (tmp % num_files)+1;
+    std::string filename = files.value(std::to_string(which),"");
+    assert (filename != "");
+
+    ostr << "  <tr><td><a href=\"" << filename << "\" download=\"provided_files.zip\">" << description << "</a></td></tr>\n";
+    ostr << "</table>\n";
+    ostr << "</tr></td>\n";
+    ostr << "</table>\n";
   }
 
-  int hw4_section = (hw4_sum % 12)+1; 
-  
-  std::string hw4_filename = "UNASSIGNED";
-  if (hw4_section == 1)  hw4_filename = "";
-  if (hw4_section == 2)  hw4_filename = "";
-  if (hw4_section == 3)  hw4_filename = "";
-  if (hw4_section == 4)  hw4_filename = "";
-  if (hw4_section == 5)  hw4_filename = "";
-  if (hw4_section == 6)  hw4_filename = "";
-  if (hw4_section == 7)  hw4_filename = "";
-  if (hw4_section == 8)  hw4_filename = "";
-  if (hw4_section == 9)  hw4_filename = "";
-  if (hw4_section == 10) hw4_filename = "";
-  if (hw4_section == 11) hw4_filename = "";
-  if (hw4_section == 12) hw4_filename = "";
-  assert (hw4_filename != "UNASSIGNED");
-
-  std::string hw4_directory = "http://www.cs.rpi.edu/academics/courses/fall16/csci1200/hw/04_debugging_list_iterators/" + hw4_filename;
-
-  ostr << "  <tr><td><a href=\"" << hw4_directory << "\" download=\"provided_files.zip\">provided_files.zip</a></td></tr>\n";
-
-  ostr << "</table>\n";
-  ostr << "</tr></td>\n";
-  ostr << "</table>\n";
-
-
-#endif
+  // ==============================================================
 
 
   if ( DISPLAY_EXAM_SEATING == false) return;
