@@ -560,14 +560,6 @@ abstract class Gradeable extends AbstractModel {
     }
 
     /**
-     * Returns the total number of points possible for testcases
-     * @return float
-    */
-    public function getTotalNonExtracreditAutograderPoints() {
-        return $this->total_auto_non_hidden_non_extra_credit +
-            $this->total_auto_hidden_non_extra_credit;
-    }
-    /**
      * Returns the total number of points for testcases that are not hidden nor are extra credit
      * @return int
      */

@@ -139,30 +139,42 @@ HTML;
         <tbody id="{$lower_title}_tbody">
 HTML;
             foreach ($gradeable_list as $gradeable => $g_data) {
-        
-                if ($g_data->getActiveVersion() == -1){
+                if (!$this->core->getUser()->accessGrading()){
+                    if ($g_data->getActiveVersion() == -1){
+                        $submission_status = array(
+                            "SUBMITTED" => "<em style='font-size: .8em;'>NOT SUMBITTED</em><br>",
+                            "AUTOGRADE" => ""
+                        );
+                    }
+                    else if ($g_data->getActiveVersion() == 0){
+                        $submission_status = array(
+                            "SUBMITTED" => "<em style='font-size: .8em;'>CANCELLED</em><br>",
+                            "AUTOGRADE" => ""
+                        );
+                    }
+                    else{
+                        if ($g_data->getTotalNonHiddenNonExtraCreditPoints() == array()){
+                            $submission_status = array(
+                                "SUBMITTED" => "<em style='font-size: .8em;'>SUMBITTED</em><br>",
+                                "AUTOGRADE" => ""
+                            ); 
+                        }
+                        else{
+                            $autograde_points_earned = $g_data->getGradedNonHiddenPoints(); 
+                            $autograde_points_total = $g_data->getTotalNonHiddenNonExtraCreditPoints();
+                            $submission_status = array(
+                                "SUBMITTED" => "<em style='font-size: .8em;'>SUBMITTED ",
+                                "AUTOGRADE" => "(" . $autograde_points_earned . "/" . $autograde_points_total . ")<br>"
+                            );
+                        }
+                    }
+                }
+                else{ //don't show submission_status to instructors
                     $submission_status = array(
-                        "SUBMITTED" => "<em style='font-size: .8em;'>NOT SUMBITTED</em><br>",
+                        "SUBMITTED" => "",
                         "AUTOGRADE" => ""
                     );
                 }
-                else{
-                    if ($g_data->getTotalNonExtracreditAutograderPoints() == array()){
-                        $submission_status = array(
-                            "SUBMITTED" => "<em style='font-size: .8em;'>SUMBITTED</em><br>",
-                            "AUTOGRADE" => ""
-                        );  
-                    }
-                    else{
-                        $autograde_points_earned = $g_data->getGradedAutograderPoints(); 
-                        $autograde_points_total = $g_data->getTotalNonExtracreditAutograderPoints();
-                        $submission_status = array(
-                            "SUBMITTED" => "<em style='font-size: .8em;'>SUBMITTED</em><br>",
-                            "AUTOGRADE" => "<em style='font-size: .8em;'>Autograde: " . $autograde_points_earned . "/" . $autograde_points_total . "<br>"
-                        );
-                    }
-                }
-
                 // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
                 if ($g_data->getType() != GradeableType::ELECTRONIC_FILE && !$this->core->getUser()->accessGrading()) {
                   continue;
