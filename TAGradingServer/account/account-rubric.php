@@ -44,7 +44,7 @@ if ($calculate_diff) {
             }
             else {
                 iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{$BASE_URL}/account/iframe/file-display.php?course={$_GET['course']}&semester={$_GET['semester']}&filename=" 
-                            + url_file + "' width='750px' style='border: 0'></iframe>");
+                            + url_file + "' width='750px' height='600px' style='border: 0'></iframe>");
             }
             iframe.addClass('open');
         }
@@ -63,12 +63,12 @@ if ($calculate_diff) {
     }
 
     function resizeFrame(id) {
-        var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
+        var height = parseInt($("iframe-" + id).contents().find("body").css('height').slice(0,-2));
         if (height > 500) {
-            document.getElementById(id).height= "500px";
+            document.getElementById("iframe-" + id).height= "500px";
         }
         else {
-            document.getElementById(id).height = (height+18) + "px";
+            document.getElementById("iframe-" + id).height = (height+18) + "px";
         }
     }
 
