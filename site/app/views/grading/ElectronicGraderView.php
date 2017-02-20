@@ -126,8 +126,9 @@ HTML;
                 <td width="20%" style="text-align: left">User ID</td>
                 <td width="30%" colspan="2">Name</td>
                 <td width="14%">Autograding</td>
-                <td width="14%">TA Grading</td>
-                <td width="14%">Total</td>
+                <td width="10%">TA Grading</td>
+                <td width="10%">Total</td>
+                <td width="8%">Viewed Grade</td>
             </tr>
         </thead>
 HTML;
@@ -147,6 +148,35 @@ HTML;
             $last_section = false;
             $tbody_open = false;
             foreach ($rows as $row) {
+                $user_id = $row->getUser()->getId();
+                $g_id = $gradeable->getId();
+
+                $params = array($user_id, $g_id);
+                //A string representation of the sql query
+                $query = "SELECT 
+                user_viewed_date
+                FROM 
+                    gradeable_data 
+                WHERE
+                    gd_user_id = ?
+                AND 
+                    g_id = ?
+                ;";
+
+
+                $this->core->getDatabase()->query($query, $params);
+
+                //Get the results of the query 
+                $result = $this->core->getDatabase()->row();
+
+                if (!$result || !$result['user_viewed_date']){
+                    $viewed_grade = "&#10008;";
+                    $grade_viewed = "";
+                }
+                else if ($result && $result['user_viewed_date']){
+                    $viewed_grade = "&#x2714;";
+                    $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($result['user_viewed_date']));
+                }
                 $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
                 $graded = $row->getGradedAutograderPoints() + $row->getGradedTAPoints();
                 if ($gradeable->isGradeByRegistration()) {
@@ -173,10 +203,10 @@ HTML;
 
                     $return .= <<<HTML
         <tr class="info persist-header">
-            <td colspan="8" style="text-align: center">Students Enrolled in Section {$display_section}</td>
+            <td colspan="9" style="text-align: center">Students Enrolled in Section {$display_section}</td>
         </tr>
         <tr class="info">
-            <td colspan="8" style="text-align: center">Graders: {$section_graders}</td>
+            <td colspan="9" style="text-align: center">Graders: {$section_graders}</td>
         </tr>
         <tbody id="section-{$section}">
 HTML;
@@ -205,6 +235,7 @@ HTML;
                     </a>
                 </td>
                 <td>{$graded} / {$total_possible}</td>
+                <td title="{$grade_viewed}">{$viewed_grade}</td>
             </tr>
 HTML;
                 $count++;
