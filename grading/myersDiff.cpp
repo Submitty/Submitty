@@ -195,8 +195,8 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
       student_file_contents.size() > 10* expected_file_contents.size()) {
     return new TestResults(0.0,{"ERROR: Student file too large for grader"});
   }
-  vectorOfLines text_a = stringToLines( student_file_contents );
-  vectorOfLines text_b = stringToLines( expected_file_contents );
+  vectorOfLines text_a = stringToLines( student_file_contents, j );
+  vectorOfLines text_b = stringToLines( expected_file_contents, j );
   Difference* diff = ses(j, &text_a, &text_b, false );
   diff->type = ByLineByChar;
   return diff;
@@ -217,8 +217,8 @@ TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::jso
       student_file_contents.size() > 10* expected_file_contents.size()) {
     return new TestResults(0.0,{"ERROR: Student file too large for grader"});
   }
-  vectorOfLines text_a = stringToLines( student_file_contents );
-  vectorOfLines text_b = stringToLines( expected_file_contents );
+  vectorOfLines text_a = stringToLines( student_file_contents, j );
+  vectorOfLines text_b = stringToLines( expected_file_contents, j );
   Difference* diff = ses(j, &text_a, &text_b, true );
   diff->type = ByLineByChar;
   return diff;
@@ -249,8 +249,8 @@ TestResults* myersDiffbyLinebyCharExtraStudentOutputOk_doit (const TestCase &tc,
 	return diff;
 #else
 	std::cout << "MYERS DIFF EXTRA STUDENT OUTPUT" << std::endl;
-	vectorOfLines text_a = stringToLines( student_file_contents );
-	vectorOfLines text_b = stringToLines( expected_file_contents );
+	vectorOfLines text_a = stringToLines( student_file_contents, j );
+	vectorOfLines text_b = stringToLines( expected_file_contents, j );
 	bool extraStudentOutputOk = true;
 	Difference* diff = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
 	diff->type = ByLineByChar;
@@ -306,8 +306,8 @@ TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j) {
 
 
   // break each file (at the newlines) into vectors of strings
-  vectorOfLines student = stringToLines( student_file_contents );
-  vectorOfLines expected = stringToLines( expected_file_contents );
+  vectorOfLines student = stringToLines( student_file_contents, j );
+  vectorOfLines expected = stringToLines( expected_file_contents, j );
 
   // check for an empty solution file
   if (expected.size() < 1) {
@@ -437,7 +437,12 @@ template<class T> Difference* ses (const nlohmann::json& j, T* student_output, T
   }
 
   for (int x = 0; x < diff->changes.size(); x++) {
-    INSPECT_CHANGES(std::cout,diff->changes[x],*student_output,*inst_output,diff->only_whitespace_changes,extraStudentOutputOk,
+    INSPECT_CHANGES(std::cout,
+		    diff->changes[x],
+		    *student_output,
+		    *inst_output,
+		    j,
+		    diff->only_whitespace_changes,extraStudentOutputOk,
 		    diff->line_added, diff->line_deleted, 
 		    diff->char_added, diff->char_deleted);
   }
@@ -723,9 +728,9 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
   if (j.find("max_char_changes") != j.end()) {
     std::cout << "MAX CHAR CHANGES" << std::endl;
 
-    float max_char_changes = j.value("max_char_changes", -1);
+    int max_char_changes = j.value("max_char_changes", -1);
     assert (max_char_changes > 0);
-    float min_char_changes = j.value("min_char_changes",0);
+    int min_char_changes = j.value("min_char_changes",0);
     assert (min_char_changes >= 0);
     assert (min_char_changes < max_char_changes);
 
@@ -735,15 +740,39 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
     int char_changes = char_added + char_deleted;
 
     std::cout << "char_changes=" << char_changes << " min=" << min_char_changes << " max=" << max_char_changes << std::endl;
+
+    int min_max_diff = max_char_changes-min_char_changes;
+    int lower_bar = std::max(0,min_char_changes-min_max_diff);
+    int upper_bar = max_char_changes + min_max_diff;
     
+    assert (0 <= lower_bar &&
+	    lower_bar <= min_char_changes &&
+	    min_char_changes <= max_char_changes &&
+	    max_char_changes <= upper_bar);
+
     float grade;
-    if (char_changes <= min_char_changes) {
+    if (char_changes < lower_bar) {
+      std::cout << "too few char changes (zero credit)" << std::endl;
+    } else if (char_changes < min_char_changes) {
+      std::cout << "less than min char changes (partial credit)" << std::endl;
+      float numer = min_char_changes - char_changes;
+      float denom = min_max_diff;
+      std::cout << "numer " << numer << " denom= " << denom << std::endl;
+      assert (denom > 0);
+      grade = 1 - numer/denom;
+    } else if (char_changes < max_char_changes) {
+      std::cout << "between min and max char changes (full credit)" << std::endl;
       grade = 1.0;
-    } else if (char_changes > max_char_changes) {
-      grade = 0.0;
+    } else if (char_changes < upper_bar) {
+      std::cout << "more than max char changes (partial credit)" << std::endl;
+      float numer = char_changes - max_char_changes;
+      float denom = min_max_diff;
+      assert (denom > 0);
+      grade = 1 - numer/denom;
+      std::cout << "numer " << numer << " denom= " << denom << std::endl;
     } else {
-      std::cout << "numer " << char_changes - min_char_changes << " denom= " << max_char_changes - min_char_changes << std::endl;
-      grade = 1 - float(char_changes - min_char_changes) / float(max_char_changes - min_char_changes);
+      std::cout << "too many char changes (zero credit)" << std::endl;
+      grade = 0.0;
     }
     std::cout << "grade " << grade << std::endl;
     assert (grade >= -0.00001 & grade <= 1.00001);

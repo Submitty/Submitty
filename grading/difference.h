@@ -47,9 +47,11 @@ public:
  * RETURN: void
  * PURPOSE: Inspect the changes for student output and expected output
  */
-inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
+inline void INSPECT_CHANGES(std::ostream& ostr, 
+			    const Change &c,
 			    const std::vector<std::vector<std::string> > &a, 
 			    const std::vector<std::vector<std::string> >  &b,
+			    const nlohmann::json& j,
 			    bool &only_whitespace,
 			    bool extra_student_output_ok,
 			    int &line_added,
@@ -72,6 +74,7 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
 inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
 			    const std::vector<std::string> &adata, 
 			    const std::vector<std::string>  &bdata,
+			    const nlohmann::json& j,
 			    bool &only_whitespace,
 			    bool extra_student_output_ok,
 			    int &line_added,
@@ -81,6 +84,9 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
 
   std::string added;
   std::string deleted;
+
+  bool ignore_line_endings = j.value("ignore_line_endings",false);
+  //std::cout << "IGNORE LINE ENDINGS " << ignore_line_endings << std::endl;
 
   for (int i = 0; i < c.a_changes.size(); i++) {
     int line = c.a_changes[i];
@@ -93,10 +99,10 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
   }
   for (int i = 0; i < c.b_changes.size(); i++) {
     int line = c.b_changes[i];
-    line_added++;
+    line_deleted++;
     assert (line >= 0 && line < bdata.size());
     if (c.b_characters.size()==0) {
-      char_added += bdata[line].size();
+      char_deleted += bdata[line].size();
       deleted+=bdata[line];
     }
   }
@@ -118,6 +124,7 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
       int row = c.a_changes[i];
       int col = c.a_characters[i][j];
       if (adata[row][col] != ' ') only_whitespace = false;
+      if (adata[row][col] == '\r') { std::cout << "line ending diff" << std::endl; }
       char_added++;
       added.push_back(adata[row][col]);
     }
@@ -128,6 +135,7 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
       int row = c.b_changes[i];
       int col = c.b_characters[i][j];
       if (bdata[row][col] != ' ') only_whitespace = false;
+      if (bdata[row][col] == '\r') { std::cout << "line ending diff" << std::endl; }
       char_deleted++;
       deleted.push_back(bdata[row][col]);
     }

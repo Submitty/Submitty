@@ -141,7 +141,7 @@ std::vector<std::string> MESSAGES;
 std::ofstream priority_stream("priority.txt");
 std::ofstream late_days_stream("late_days.txt");
 
-void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s);
+void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s, const nlohmann::json &special_message);
 
 //====================================================================
 
@@ -1297,7 +1297,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
               for (int k = 0; k < ids.size(); k++) {
                 GRADEABLE_ENUM g;
                 int i;
-                std::cout << "GRADEABLE_ENUM " << (int)g << i << std::endl;
+                //std::cout << "GRADEABLE_ENUM " << (int)g << i << std::endl;
                 LookupGradeable(ids[k],g,i);
                 v += s->getGradeableItemGrade(g,i).getValue();
               }
@@ -1751,9 +1751,13 @@ void output_helper(std::vector<Student*> &students,  std::string &GLOBAL_sort_or
 #endif
 
 
+    nlohmann::json::iterator special_message_itr = GLOBAL_CUSTOMIZATION_JSON.find("special_message");
+    nlohmann::json special_message;
+    if (special_message_itr != GLOBAL_CUSTOMIZATION_JSON.end()) {
+      special_message = *special_message_itr;
+    }
 
-
-    PrintExamRoomAndZoneTable(ostr2,students[S]);
+    PrintExamRoomAndZoneTable(ostr2,students[S],special_message);
 
     int prev = students[S]->getAllowedLateDays(0);
 
