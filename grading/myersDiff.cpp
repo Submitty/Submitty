@@ -738,7 +738,7 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
     
     float grade;
     if (char_changes <= min_char_changes) {
-      grade = 1.0;
+      grade = 1 - float(min_char_changes-char_changes) / float(min_char_changes);
     } else if (char_changes > max_char_changes) {
       grade = 0.0;
     } else {

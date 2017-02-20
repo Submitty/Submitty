@@ -722,6 +722,12 @@ void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
     int assigned = (sum % mod_value)+1; 
   
     std::string repl = std::to_string(assigned);
+
+    nlohmann::json::iterator association = j2.find("association");
+    if (association != j2.end()) {
+      repl = (*association)[repl];
+    }
+
     nlohmann::json::iterator itr = j.find("testcases");
     if (itr != j.end()) {
       RecursiveReplace(*itr,placeholder,repl);
