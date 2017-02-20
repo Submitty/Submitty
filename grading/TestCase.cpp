@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 #include "TestCase.h"
 #include "JUnitGrader.h"
+#include "DrMemoryGrader.h"
 #include "PacmanGrader.h"
 #include "myersDiff.h"
 #include "tokenSearch.h"
@@ -194,6 +195,7 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader) const {
   else if (method == "EmmaInstrumentationGrader")  { return EmmaInstrumentationGrader_doit(*this,grader); }
   else if (method == "MultipleJUnitTestGrader")    { return MultipleJUnitTestGrader_doit(*this,grader);   }
   else if (method == "EmmaCoverageReportGrader")   { return EmmaCoverageReportGrader_doit(*this,grader);  }
+  else if (method == "DrMemoryGrader")             { return DrMemoryGrader_doit(*this,grader);              }
   else if (method == "PacmanGrader")               { return PacmanGrader_doit(*this,grader);              }
   else if (method == "searchToken")                { return searchToken_doit(*this,grader);               }
   else if (method == "intComparison")              { return intComparison_doit(*this,grader);             }
@@ -720,6 +722,12 @@ void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
     int assigned = (sum % mod_value)+1; 
   
     std::string repl = std::to_string(assigned);
+
+    nlohmann::json::iterator association = j2.find("association");
+    if (association != j2.end()) {
+      repl = (*association)[repl];
+    }
+
     nlohmann::json::iterator itr = j.find("testcases");
     if (itr != j.end()) {
       RecursiveReplace(*itr,placeholder,repl);

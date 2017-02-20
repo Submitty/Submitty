@@ -116,6 +116,7 @@ extern std::vector<std::vector<std::string> > HACKMAXPROJECTS;
 
 float Student::GradeablePercent(GRADEABLE_ENUM g) const {
   if (GRADEABLES[g].getCount() == 0) return 0;
+  if (GRADEABLES[g].getMaximum() == 0) return 0;
   assert (GRADEABLES[g].getMaximum() > 0);
   assert (GRADEABLES[g].getPercent() >= 0);
 
