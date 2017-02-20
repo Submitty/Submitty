@@ -10,10 +10,11 @@ matrix:
       env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=true
     - php: 5.6
       env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
-    - php: 7.0
-      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
-    - php: 7.0
-      env: AUTH_METHOD=PamAuthentication INTEGRATION_SUITE=false
+
+#    - php: 7.0
+#      env: AUTH_METHOD=DatabaseAuthentication INTEGRATION_SUITE=false
+#    - php: 7.0
+#      env: AUTH_METHOD=PamAuthentication INTEGRATION_SUITE=false
 
 cache:
   pip: true
