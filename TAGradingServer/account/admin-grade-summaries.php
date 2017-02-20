@@ -18,8 +18,15 @@ if($user_is_administrator)
                 </div>
 
                 <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
-                    Click the button below to generate grade summaries to:<br />
+                    <p>
+		    Click the button below to generate grade summaries to:<br />
                     {$dir}
+		    </p>
+		    <p>
+		    Then, follow these instructions to prepare and release Iris Grade Summaries:<br />
+		    <a href="https://github.com/Submitty/Submitty/wiki/Iris-(Rainbow-Grades)">
+		    https://github.com/Submitty/Submitty/wiki/Iris-(Rainbow-Grades)</a>
+		    </p>
                 </div>
 
                 <div class="modal-footer">

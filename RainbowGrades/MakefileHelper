@@ -20,6 +20,8 @@ ifndef REPORTS_DIRECTORY
 $(error Variable REPORTS_DIRECTORY not set)
 endif
 
+GRADING_DIRECTORY := $(RAINBOW_GRADES_DIRECTORY)/../grading
+
 # =============================================================================
 
 .PHONY: default pull push all compile overall section lab hw test quiz final iclicker zone clean remove_json_comments
@@ -54,7 +56,7 @@ endif
 
 remove_json_comments: customization.json
 	cpp -xc++ $< | sed -e '/^#/d' > customization_no_comments.json
-
+	python $(GRADING_DIRECTORY)/json_syntax_checker.py customization_no_comments.json
 
 compile:  remove_json_comments
 	g++ -Wall ${flags} ${memory_flags} \

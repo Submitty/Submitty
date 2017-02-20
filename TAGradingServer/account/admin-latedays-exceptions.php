@@ -137,7 +137,6 @@ function parse_and_validate_csv($csv_file, &$data) {
 			return false;
 		}
 
-		//$fields[1] represents gradeable id.  It must exist in database.
 		if (!verify_gradeable_in_db($fields[1])) {
 			$data = null;
 			return false;

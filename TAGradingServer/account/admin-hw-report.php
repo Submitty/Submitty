@@ -9,6 +9,13 @@ echo <<<HTML
         <form onsubmit="submitAJAX('ajax/admin-hw-report.php?course={$_GET['course']}&semester={$_GET['semester']}'); return false;">
             <div class="modal-header">
                 <h3 id="myModalLabel">Generate Homework Report</h3>
+	    </div>
+            <div class="modal-body" style="padding-top:20px; padding-bottom:20px;">
+		<p>
+		Each time a grader presses "Submit Homework Grade" or "Submit Homework Re-Grade", the homework report for that student for that electronic gradeable will be created or updated.  
+		</p>
+		<p>By pressing "Generate Homework Reports", you will update all homework reports for all students for all electronic gradeables.  <em>Note: This action should not be necessary, except perhaps to propagate changes to late days that affect the homework status of other electronic gradeables.</em>
+		</p>
             </div>
 
             <div class="modal-footer">

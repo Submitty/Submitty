@@ -10,6 +10,7 @@ bool global_details = false;
 
 TableCell::TableCell(const std::string& c, const std::string& d, const std::string& n, int ldu,
                      CELL_CONTENTS_STATUS v, const std::string& a, int s, int r) { 
+  assert (c.size() == 6);
   color=c; 
   data=d; 
   note=n; 
@@ -22,6 +23,7 @@ TableCell::TableCell(const std::string& c, const std::string& d, const std::stri
 
 TableCell::TableCell(const std::string& c, int d, const std::string& n, int ldu,
                      CELL_CONTENTS_STATUS v, const std::string& a, int s, int r) { 
+  assert (c.size() == 6);
   color=c; 
   data=std::to_string(d); 
   note=n; 
@@ -34,6 +36,7 @@ TableCell::TableCell(const std::string& c, int d, const std::string& n, int ldu,
 
 TableCell::TableCell(const std::string& c, float d, int precision, const std::string& n, int ldu,
                      CELL_CONTENTS_STATUS v, const std::string& a, int s, int r) { 
+  assert (c.size() == 6);
   assert (precision >= 0);
   color=c; 
   if (fabs(d) > 0.0001) {
@@ -52,7 +55,7 @@ TableCell::TableCell(const std::string& c, float d, int precision, const std::st
 }
 
 std::ostream& operator<<(std::ostream &ostr, const TableCell &c) {
-  
+  assert (c.color.size() == 6);
   //  ostr << "<td bgcolor=\"" << c.color << "\" align=\"" << c.align << "\">";
   ostr << "<td style=\"border:1px solid #aaaaaa; background-color:#" << c.color << ";\" align=\"" << c.align << "\">";
   if (0) { //rotate == 90) {
