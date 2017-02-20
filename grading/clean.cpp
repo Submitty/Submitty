@@ -82,18 +82,50 @@ vectorOfWords stringToWordsLimitLineLength(std::string text) {
 	return contents;
 }
 
+
+int removeDOSnewlines(std::string& line) {
+  int count = 0;
+  std::string answer;
+  for (int i = 0; i < line.size(); i++) {
+    if (line[i] != '\r') {
+      answer.push_back(line[i]);
+    } else {
+      count++;
+    }
+  }
+  line = answer;
+  return count;
+}
+
+
 /* METHOD: stringToLines
  * ARGS: text: the body of text that needs cleaning
  * RETURN: vectorOfLines: a vector of strings 
  * PURPOSE: eachstring is a line of text from the input
  */
-vectorOfLines stringToLines(std::string text) {
+vectorOfLines stringToLines(std::string text, const nlohmann::json &j) {
 	vectorOfLines contents;
 	std::stringstream input(text);
-	
+
+	bool has_DOS_newline = false;
+	int DOS_newline_count = 0;
+
+	bool ignore_line_endings = j.value("ignore_line_endings",false);
+
 	std::string line;
 	while (getline(input, line)) {
+		if (line.find('\r') != std::string::npos) {
+		  has_DOS_newline = true;
+		  if (ignore_line_endings) {
+		    DOS_newline_count += removeDOSnewlines(line);
+		  }
+		}
 		contents.push_back(line);
+	}
+	if (has_DOS_newline && DOS_newline_count == 0) {
+	  std::cout << "WARNING:  This file has DOS newlines." << std::endl;
+	} else if (DOS_newline_count > 0) {
+	  std::cout << "NOTE:  Removed " << DOS_newline_count << " DOS newlines" << std::endl;
 	}
 	return contents;
 }
