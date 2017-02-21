@@ -220,6 +220,10 @@ class Core {
     }
 
     /**
+     * Given a session id (which should be coming from a cookie or request header), the database is queried to find
+     * a session that matches the string, then returns the user that matches that row (if it exists). If no session
+     * is found that matches the given id, return false, otherwise return true and load the user.
+     *
      * @param $session_id
      *
      * @return bool
@@ -242,7 +246,14 @@ class Core {
     }
 
     /**
+     * Authenticates the user against whatever method was choosen within the master.ini config file (and exists
+     * within the app/authentication folder. The username and password for the user being authenticated are passed
+     * in separately so that we do not worry about those being leaked via the stack trace that might get thrown
+     * from this method. Returns True/False whether or not the authenication attempt succeeded/failed.
+     *
      * @return bool
+     *
+     * @throws AuthenticationException
      */
     public function authenticate() {
         $auth = false;
