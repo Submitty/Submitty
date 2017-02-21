@@ -11,22 +11,22 @@ use \lib\DiffViewer;
 $diffViewer = new DiffViewer();
 
 $iframe = <<<HTML
+<link rel="stylesheet" href="{$BASE_URL}/toolbox/include/custom/css/reset.css" />
 <link rel="stylesheet" href="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.css" />
 <link rel="stylesheet" href="{$BASE_URL}/toolbox/include/codemirror/theme/eclipse.css" />
-<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/custom/js/jquery-2.0.3.min.map.js"></script>
-<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.js"></script>
-<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/clike/clike.js"></script>
-<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/python/python.js"></script>
-<script type="text/javascript" language="javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/shell/shell.js"></script>
+<link rel="stylesheet" href="{$BASE_URL}/toolbox/include/custom/css/diff-viewer.css" />
+<script type="text/javascript" src="{$BASE_URL}/toolbox/include/custom/js/jquery-2.0.3.min.map.js"></script>
+<script type="text/javascript" src="{$BASE_URL}/toolbox/include/codemirror/lib/codemirror.js"></script>
+<script type="text/javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/clike/clike.js"></script>
+<script type="text/javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/python/python.js"></script>
+<script type="text/javascript" src="{$BASE_URL}/toolbox/include/codemirror/mode/shell/shell.js"></script>
+<script type="text/javascript" src="{$BASE_URL}/toolbox/include/custom/js/diff-viewer.js"></script>
 <script type="text/javascript">
     function resizeTextarea(id) {
        $("#" + id).attr('rows', $("#" + id).val().split("\\n").length);
     }
 </script>
 HTML;
-
-$iframe .= $diffViewer->getCSS();
-$iframe .= $diffViewer->getJavascript();
 
 $no_diff = true;
 
