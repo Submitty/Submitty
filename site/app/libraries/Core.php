@@ -243,15 +243,15 @@ class Core {
 
     /**
      * @return bool
+     *
+     * @throws AuthenticationException
      */
     public function authenticate() {
         $auth = false;
         $user_id = $this->authentication->getUserId();
         try {
-            print("a");
             if ($this->authentication->authenticate()) {
                 $auth = true;
-                print("b");
                 $session_id = $this->session_manager->newSession($user_id);
                 $cookie_id = $this->getConfig()->getSemester()."_".$this->getConfig()->getCourse()."_session_id";
                 // Set the cookie to last for 7 days
