@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 
   CustomizeAutoGrading(rcsid,config_json);
 
-  system("find . -type f");
+  system("find . -type f -exec ls -sh {} +");
 
   // Run each test case and create output files
   nlohmann::json::iterator tc = config_json.find("testcases");
