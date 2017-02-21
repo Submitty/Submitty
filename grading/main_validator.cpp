@@ -223,8 +223,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
   CustomizeAutoGrading(rcsid,config_json);
 
-  system ("ls -lta");
-  system("find . -type f");
+  system("find . -type f -exec ls -sh {} +");
 
   // LOOP OVER ALL TEST CASES
   nlohmann::json::iterator tc = config_json.find("testcases");
