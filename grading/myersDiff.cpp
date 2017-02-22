@@ -447,6 +447,12 @@ template<class T> Difference* ses (const nlohmann::json& j, T* student_output, T
 		    diff->char_added, diff->char_deleted);
   }
 
+  if (diff->only_whitespace_changes) {
+    std::cout << "ONLY WHITESPACE CHANGES!!!!!!!!!!!!!" << std::endl;
+  } else {
+    std::cout << "FILE HAS NON WHITESPACE CHANGES!!!!!!!!!!!!!" << std::endl;
+  }
+
   std::cout << "INSPECT CHANGES   lines  added=" << diff->line_added << "  deleted=" << diff->line_deleted << "  total=" << diff->total_line << std::endl;
   std::cout << "INSPECT CHANGES   chars  added=" << diff->char_added << "  deleted=" << diff->char_deleted << "  total=" << diff->total_char << std::endl;
 

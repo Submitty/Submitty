@@ -84,25 +84,33 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
 
   std::string added;
   std::string deleted;
-
+  int tmp_line_added = 0;
+  int tmp_line_deleted = 0;
+  int tmp_char_added = 0;
+  int tmp_char_deleted = 0;
   bool ignore_line_endings = j.value("ignore_line_endings",false);
-  //std::cout << "IGNORE LINE ENDINGS " << ignore_line_endings << std::endl;
+  bool further_check = false;
+
+  if (c.a_changes.size() != 0 && c.b_changes.size() != 0 &&
+      c.a_changes.size() != c.b_changes.size()) {
+    further_check = true;
+  }
 
   for (int i = 0; i < c.a_changes.size(); i++) {
     int line = c.a_changes[i];
-    line_added++;
+    tmp_line_added++;
     assert (line >= 0 && line < adata.size());
     if (c.a_characters.size()==0) {
-      char_added += adata[line].size();
+      tmp_char_added += adata[line].size();
       added+=adata[line];
     }
   }
   for (int i = 0; i < c.b_changes.size(); i++) {
     int line = c.b_changes[i];
-    line_deleted++;
+    tmp_line_deleted++;
     assert (line >= 0 && line < bdata.size());
     if (c.b_characters.size()==0) {
-      char_deleted += bdata[line].size();
+      tmp_char_deleted += bdata[line].size();
       deleted+=bdata[line];
     }
   }
@@ -125,7 +133,7 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
       int col = c.a_characters[i][j];
       if (adata[row][col] != ' ') only_whitespace = false;
       if (adata[row][col] == '\r') { std::cout << "line ending diff" << std::endl; }
-      char_added++;
+      tmp_char_added++;
       added.push_back(adata[row][col]);
     }
   }
@@ -136,18 +144,33 @@ inline void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
       int col = c.b_characters[i][j];
       if (bdata[row][col] != ' ') only_whitespace = false;
       if (bdata[row][col] == '\r') { std::cout << "line ending diff" << std::endl; }
-      char_deleted++;
+      tmp_char_deleted++;
       deleted.push_back(bdata[row][col]);
     }
   }
+  
+  /*
+  std::cout << "-----------" << std::endl;
+  std::cout << "added   '" << added << "'" << std::endl;
+  std::cout << "deleted '" << deleted << "'" << std::endl;
 
-  if (only_whitespace) {
-    std::cout << "ONLY WHITESPACE CHANGES!!!!!!!!!!!!!" << std::endl;
-  } else {
-    std::cout << "FILE HAS NON WHITESPACE CHANGES!!!!!!!!!!!!!" << std::endl;
+  if (further_check) {
+    std::cout << "SOMETHING BETTER NEEDED HERE" << std::endl;
   }
-  //std::cout << "added   '" << added << "'" << std::endl;
-  //std::cout << "deleted '" << deleted << "'" << std::endl;
+  */
+  
+  line_added += tmp_line_added;
+  line_deleted += tmp_line_deleted;
+  char_added += tmp_char_added;
+  char_deleted += tmp_char_deleted;
+
+  /*  
+  std::cout << "line_added=" << std::setw(6) << tmp_line_added << " " << " line_deleted=" << std::setw(6) << tmp_line_deleted
+	    << " char_added=" << std::setw(6) << tmp_char_added << " " << " char_deleted=" << std::setw(6) << tmp_char_deleted << "  | cumm:  ";
+
+  std::cout << "line_added=" << std::setw(6) << line_added << " " << " line_deleted=" << std::setw(6) << line_deleted
+	    << " char_added=" << std::setw(6) << char_added << " " << " char_deleted=" << std::setw(6) << char_deleted << std::endl;
+  */
 }
 
 /* METHOD: clear
