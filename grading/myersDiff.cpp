@@ -759,6 +759,7 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
     float grade;
     if (char_changes < lower_bar) {
       std::cout << "too few char changes (zero credit)" << std::endl;
+      messages.push_back("ERROR!  Significantly fewer character changes than allowed");
     } else if (char_changes < min_char_changes) {
       std::cout << "less than min char changes (partial credit)" << std::endl;
       float numer = min_char_changes - char_changes;
@@ -766,6 +767,7 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
       std::cout << "numer " << numer << " denom= " << denom << std::endl;
       assert (denom > 0);
       grade = 1 - numer/denom;
+      messages.push_back("ERROR!  Fewer character changes than allowed");
     } else if (char_changes < max_char_changes) {
       std::cout << "between min and max char changes (full credit)" << std::endl;
       grade = 1.0;
@@ -776,18 +778,15 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
       assert (denom > 0);
       grade = 1 - numer/denom;
       std::cout << "numer " << numer << " denom= " << denom << std::endl;
+      messages.push_back("ERROR!  More character changes than allowed");
     } else {
       std::cout << "too many char changes (zero credit)" << std::endl;
+      messages.push_back("ERROR!  Significantly more character changes than allowed");
       grade = 0.0;
     }
     std::cout << "grade " << grade << std::endl;
     assert (grade >= -0.00001 & grade <= 1.00001);
     this->setGrade(grade);
-    if (grade < 0.5) {
-      messages.push_back(j.value("failure_message", "ERROR!  Significant differences between this file and the expected file."));
-    } else if (grade < 0.99) {
-      messages.push_back(j.value("failure_message", "ERROR!  Differences between this file and the expected file."));
-    }
   }
 
   // --------------------------------------------------------
