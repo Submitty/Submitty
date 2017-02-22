@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\controllers\admin\GradeableController;
 use app\controllers\admin\GradeablesController;
 use app\controllers\admin\ConfigurationController;
 use app\controllers\admin\UsersController;
@@ -24,6 +25,9 @@ class AdminController extends AbstractController {
             case 'configuration':
                 $this->core->getOutput()->addBreadcrumb("Course Settings");
                 $controller = new ConfigurationController($this->core);
+                break;
+            case 'gradeable':
+                $controller = new GradeableController($this->core);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));
