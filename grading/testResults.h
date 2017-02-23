@@ -33,7 +33,7 @@ public:
   void setGrade(float g) { assert (g >= 0); my_grade = g; }
   void addMessage(const std::string &m) { messages.push_back(m); }
 
-  bool getSuccess() { return (messages.size() == 0); }
+  bool getSuccess() { return (my_grade >= 0.999); }
 
 
 public:
