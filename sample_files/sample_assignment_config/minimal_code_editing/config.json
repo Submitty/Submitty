@@ -24,8 +24,8 @@
                     "expected_file" : "fancy_hello_world.cpp",
                     "show_expected" : "always",
                     "show_actual" : "always",
-                    "show_message" : "always",
-                    "failure_message" : "Source code changes are outside the allowed range"
+                    "show_message" : "always"/*,
+                    "failure_message" : "Source code changes are outside the allowed range"*/
                 }
             ]
         }

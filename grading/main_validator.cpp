@@ -81,10 +81,16 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
   double score = deduction*(1-grade);
   std::cout << "score=" << score << std::endl;
 
-  bool test_case_success = result->getSuccess();
+  bool full_points = my_testcase.getPoints();
+  std::cout << "FULL POINTS " << full_points << std::endl;
+
+  bool test_case_success = (result->getMessages().size() == 0);
   bool show_message  = ShowHelper(tcg.value("show_message", "never"),test_case_success);
   bool show_actual   = ShowHelper(tcg.value("show_actual",  "never"),test_case_success);
   bool show_expected = ShowHelper(tcg.value("show_expected","never"),test_case_success);
+  /*  if (full_points > 0 && fabs(full_points-score) < 0.0001) {
+    test_case_success = true;
+    }*/
 
   std::string BROKEN_CONFIG_ERROR_MESSAGE;
 

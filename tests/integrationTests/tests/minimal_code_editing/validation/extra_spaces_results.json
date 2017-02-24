@@ -20,8 +20,7 @@
                     "difference_file": "test02_0_diff.json",
                     "expected_file": "test_output/testassignment/fancy_hello_world.cpp",
                     "messages": [
-                        "ERROR!  Approx 10 characters added and/or deleted.  Significantly fewer character changes than allowed.",
-                        "Source code changes are outside the allowed range"
+                        "ERROR!  Approx 10 characters added and/or deleted.  Significantly fewer character changes than allowed."
                     ]
                 }
             ],
