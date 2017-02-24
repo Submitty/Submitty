@@ -93,6 +93,9 @@ int main(int argc, char *argv[]) {
             for (int i = 0; i < files.size(); i++) {
               std::cout << "  rescue  FILE #" << i << ": " << files[i] << std::endl;
               std::string new_filename = my_testcase.getPrefix() + "_" + replace_slash_with_double_underscore(files[i]);
+              if (new_filename.substr(new_filename.size() - 4,4) == ".cpp" && !special_flag) {
+                new_filename += ".txt";
+              }
               std::string old_filename = escape_spaces(files[i]);
               new_filename = escape_spaces(new_filename);
 	      std::cout << new_filename.substr(new_filename.size()-4,4) << std::endl;

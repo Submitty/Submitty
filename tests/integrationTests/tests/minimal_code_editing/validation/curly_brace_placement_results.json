@@ -1,0 +1,37 @@
+{
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "description": "*.cpp",
+                    "messages": [
+                        "ERROR: required files not found:  test01_*.cpp"
+                    ]
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 1 copy the cpp files.."
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02_STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test02_0_diff.json",
+                    "expected_file": "test_output/testassignment/fancy_hello_world.cpp",
+                    "messages": [
+                        "ERROR!  Approx 44 characters added and/or deleted.  Fewer character changes than allowed.",
+                        "Source code changes are outside the allowed range"
+                    ]
+                }
+            ],
+            "points_awarded": 1,
+            "test_name": "Test 2 Reasonable Code Changes"
+        },
+        {
+            "points_awarded": 0,
+            "test_name": "Test 3 Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

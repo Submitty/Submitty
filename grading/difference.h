@@ -47,8 +47,8 @@ public:
  * RETURN: void
  * PURPOSE: Inspect the changes for student output and expected output
  */
-inline void INSPECT_CHANGES(std::ostream& ostr, 
-			    const Change &c,
+inline void INSPECT_IMPROVE_CHANGES(std::ostream& ostr,
+			    Change &c,
 			    const std::vector<std::vector<std::string> > &a,
 			    const std::vector<std::vector<std::string> >  &b,
 			    const nlohmann::json& j,
@@ -71,7 +71,7 @@ inline void INSPECT_CHANGES(std::ostream& ostr,
  * RETURN: void
  * PURPOSE: Used for logging
  */
-void INSPECT_CHANGES(std::ostream& ostr, const Change &c,
+void INSPECT_IMPROVE_CHANGES(std::ostream& ostr, Change &c,
                      const std::vector<std::string> &adata, 
                      const std::vector<std::string>  &bdata,
                      const nlohmann::json& j,
