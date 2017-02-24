@@ -185,10 +185,12 @@ void INSPECT_IMPROVE_CHANGES(std::ostream& ostr, Change &c,
   int tmp_line_deleted = 0;
   int tmp_char_added = 0;
   int tmp_char_deleted = 0;
+  //std::cout << "before" << std::endl;
   bool ignore_line_endings = false;
   if (j != nlohmann::json()) {
     j.value("ignore_line_endings",false);
   }
+  //std::cout << "after" << std::endl;
   bool further_check = false;
 
   if (c.a_changes.size() != 0 && c.b_changes.size() != 0 &&
