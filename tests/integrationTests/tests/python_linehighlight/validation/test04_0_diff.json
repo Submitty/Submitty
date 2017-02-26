@@ -1,299 +1,529 @@
 {
-"differences":[
-    {
-        "actual":
+    "differences": [
         {
-            "start": 4,
-            "line": [
-                {
-                    "line_number": 4
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 4
+                    }
+                ],
+                "start": 4
+            },
+            "expected": {
+                "start": 3
+            }
         },
-        "expected":
         {
-            "start":3
-        }
-    }, {
-        "actual":
-        {
-            "start": 9,
-            "line": [
-                {
-                    "line_number": 9
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 9
+                    }
+                ],
+                "start": 9
+            },
+            "expected": {
+                "start": 7
+            }
         },
-        "expected":
         {
-            "start":7
-        }
-    }, {
-        "actual":
-        {
-            "start": 14,
-            "line": [
-                {
-                    "line_number": 14
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 14
+                    }
+                ],
+                "start": 14
+            },
+            "expected": {
+                "start": 11
+            }
         },
-        "expected":
         {
-            "start":11
-        }
-    }, {
-        "actual":
-        {
-            "start": 19,
-            "line": [
-                {
-                    "line_number": 19
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 19
+                    }
+                ],
+                "start": 19
+            },
+            "expected": {
+                "start": 15
+            }
         },
-        "expected":
         {
-            "start":15
-        }
-    }, {
-        "actual":
-        {
-            "start": 24,
-            "line": [
-                {
-                    "line_number": 24
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 24
+                    }
+                ],
+                "start": 24
+            },
+            "expected": {
+                "start": 19
+            }
         },
-        "expected":
         {
-            "start":19
-        }
-    }, {
-        "actual":
-        {
-            "start": 29,
-            "line": [
-                {
-                    "line_number": 29
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 29
+                    }
+                ],
+                "start": 29
+            },
+            "expected": {
+                "start": 23
+            }
         },
-        "expected":
         {
-            "start":23
-        }
-    }, {
-        "actual":
-        {
-            "start": 34,
-            "line": [
-                {
-                    "line_number": 34
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 34
+                    }
+                ],
+                "start": 34
+            },
+            "expected": {
+                "start": 27
+            }
         },
-        "expected":
         {
-            "start":27
-        }
-    }, {
-        "actual":
-        {
-            "start": 39,
-            "line": [
-                {
-                    "line_number": 39
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 39
+                    }
+                ],
+                "start": 39
+            },
+            "expected": {
+                "start": 31
+            }
         },
-        "expected":
         {
-            "start":31
-        }
-    }, {
-        "actual":
-        {
-            "start": 44,
-            "line": [
-                {
-                    "line_number": 44
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 44
+                    }
+                ],
+                "start": 44
+            },
+            "expected": {
+                "start": 35
+            }
         },
-        "expected":
         {
-            "start":35
-        }
-    }, {
-        "actual":
-        {
-            "start": 49,
-            "line": [
-                {
-                    "line_number": 49
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 49
+                    }
+                ],
+                "start": 49
+            },
+            "expected": {
+                "start": 39
+            }
         },
-        "expected":
         {
-            "start":39
-        }
-    }, {
-        "actual":
-        {
-            "start": 54,
-            "line": [
-                {
-                    "line_number": 54
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 54
+                    }
+                ],
+                "start": 54
+            },
+            "expected": {
+                "start": 43
+            }
         },
-        "expected":
         {
-            "start":43
-        }
-    }, {
-        "actual":
-        {
-            "start": 59,
-            "line": [
-                {
-                    "line_number": 59
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 59
+                    }
+                ],
+                "start": 59
+            },
+            "expected": {
+                "start": 47
+            }
         },
-        "expected":
         {
-            "start":47
-        }
-    }, {
-        "actual":
-        {
-            "start": 64,
-            "line": [
-                {
-                    "line_number": 64
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 64
+                    }
+                ],
+                "start": 64
+            },
+            "expected": {
+                "start": 51
+            }
         },
-        "expected":
         {
-            "start":51
-        }
-    }, {
-        "actual":
-        {
-            "start": 69,
-            "line": [
-                {
-                    "line_number": 69
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 69
+                    }
+                ],
+                "start": 69
+            },
+            "expected": {
+                "start": 55
+            }
         },
-        "expected":
         {
-            "start":55
-        }
-    }, {
-        "actual":
-        {
-            "start": 74,
-            "line": [
-                {
-                    "line_number": 74
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 74
+                    }
+                ],
+                "start": 74
+            },
+            "expected": {
+                "start": 59
+            }
         },
-        "expected":
         {
-            "start":59
-        }
-    }, {
-        "actual":
-        {
-            "start": 79,
-            "line": [
-                {
-                    "line_number": 79
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 79
+                    }
+                ],
+                "start": 79
+            },
+            "expected": {
+                "start": 63
+            }
         },
-        "expected":
         {
-            "start":63
-        }
-    }, {
-        "actual":
-        {
-            "start": 84,
-            "line": [
-                {
-                    "line_number": 84
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 84
+                    }
+                ],
+                "start": 84
+            },
+            "expected": {
+                "start": 67
+            }
         },
-        "expected":
         {
-            "start":67
-        }
-    }, {
-        "actual":
-        {
-            "start": 89,
-            "line": [
-                {
-                    "line_number": 89
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 89
+                    }
+                ],
+                "start": 89
+            },
+            "expected": {
+                "start": 71
+            }
         },
-        "expected":
         {
-            "start":71
-        }
-    }, {
-        "actual":
-        {
-            "start": 94,
-            "line": [
-                {
-                    "line_number": 94
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 94
+                    }
+                ],
+                "start": 94
+            },
+            "expected": {
+                "start": 75
+            }
         },
-        "expected":
         {
-            "start":75
-        }
-    }, {
-        "actual":
-        {
-            "start": 99,
-            "line": [
-                {
-                    "line_number": 99
-                }
-            ]
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 99
+                    }
+                ],
+                "start": 99
+            },
+            "expected": {
+                "start": 79
+            }
         },
-        "expected":
         {
-            "start":79
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 104
+                    }
+                ],
+                "start": 104
+            },
+            "expected": {
+                "start": 83
+            }
         }
-    }, {
-        "actual":
-        {
-            "start": 104,
-            "line": [
-                {
-                    "line_number": 104
-                }
-            ]
-        },
-        "expected":
-        {
-            "start":83
-        }
-    }
-]
+    ]
 }
