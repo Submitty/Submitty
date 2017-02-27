@@ -2,7 +2,7 @@
 #
 # This script is run by a cron job as the hwcron user
 #
-# Will rebuild a course if
+# Regularly checks a queue to rebuild assignment configurations for recently modified gradeables.
 #
 
 import os
