@@ -28,7 +28,6 @@ def buildOne(data) :
 	gradeable = data["gradeable"]
 
 	build_script = "/var/local/submitty/courses/" + semester + "/" + course + "/BUILD_" + course + ".sh"
-	
 	build_output = "/var/local/submitty/courses/" + semester + "/" + course + "/build_script_output.txt"
 
 	f = open(build_output,'w')
@@ -49,7 +48,7 @@ def buildAll() :
 # ------------------------------------------------------------------------
 # MAIN LOOP
 
-# this script should only run for 5 minutes, then another process running 
+# this script should only run for 5 minutes, then another process running
 # this script will take over
 start = time.time()
 count=0
@@ -57,10 +56,10 @@ while True:
     count+=1
     now = time.time()
     formattedtime = time.strftime('%X %x %Z')
-    print "%s build_config_upload.py loop %d" % ( formattedtime, count ) 
-    
+    print "%s build_config_upload.py loop %d" % ( formattedtime, count )
+
     buildAll()
-    
+
     # stop if its been more than 5 minutes
     if (now-start) >= 5 * 60:
         print "exiting for time"
