@@ -177,6 +177,7 @@ chmod  u+rwx,g+rxs                   $SUBMITTY_DATA_DIR/autograding_logs
 # if the to_be_graded directories do not exist, then make them
 mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_interactive
 mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_batch
+mkdir -p $SUBMITTY_DATA_DIR/to_be_built
 
 # set the permissions of these directories
 
@@ -187,6 +188,9 @@ chmod  770                                  $SUBMITTY_DATA_DIR/to_be_graded_inte
 chown  $HWCRON_USER:${COURSE_BUILDERS_GROUP}  $SUBMITTY_DATA_DIR/to_be_graded_batch
 chmod  770                                  $SUBMITTY_DATA_DIR/to_be_graded_batch
 
+#hwphp will write items to this list, hwcron will remove them
+chown  $HWCRON_USER:$HWCRONPHP_GROUP        $SUBMITTY_DATA_DIR/to_be_built
+chmod  770                                  $SUBMITTY_DATA_DIR/to_be_built
 
 
 
@@ -327,6 +331,10 @@ chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
+
+# fix the permissions specifically of the build_config_upload.py script
+chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
 
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
@@ -475,6 +483,14 @@ while [ $minutes -lt 60 ]; do
     printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh  untrusted%02d  >  /dev/null\n"  $minutes $minutes  >> ${HWCRON_CRONTAB_FILE}
     minutes=$(($minutes + $GRADE_STUDENTS_FREQUENCY))
 done
+
+## NOTE:  the build_config_upload script is hardcoded to run for ~5 minutes and then exit
+minutes=0
+while [ $minutes -lt 60 ]; do
+    printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py  >  /dev/null\n"  $minutes  >> ${HWCRON_CRONTAB_FILE}
+    minutes=$(($minutes + 5))
+done
+
 echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${HWCRON_CRONTAB_FILE}
 echo -e "\n\n"                                                                                >> ${HWCRON_CRONTAB_FILE}
 

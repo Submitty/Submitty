@@ -188,9 +188,11 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_
 
 # NOTE: on each student submission, files are written to these directories
 #               drwxr-s---       $HWPHP_USER        ta_www_group    submissions/
+#               drwxr-s---       $HWPHP_USER        ta_www_group    config_upload/
 #               drwxr-s---       $HWCRON_USER       ta_www_group    results/
 #               drwxr-s---       $HWCRON_USER       ta_www_group    checkout/
 create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/submissions
+create_and_set  u=rwx,g=rxs,o=   $HWPHP_USER        $ta_www_group   $course_dir/config_upload
 create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/results
 create_and_set  u=rwx,g=rxs,o=   $HWCRON_USER       $ta_www_group   $course_dir/checkout
 

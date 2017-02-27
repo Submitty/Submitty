@@ -25,7 +25,7 @@ MY_COURSE_DIR=$SUBMITTY_DATA_DIR/courses/$semester/$course
 echo "BUILDING course=$course semester=$semester... "
 
 # generate ASSIGNMENTS.txt
-$SUBMITTY_INSTALL_DIR/bin/make_assignments_txt_file.py $MY_COURSE_DIR/config/form $MY_COURSE_DIR/ASSIGNMENTS.txt
+$SUBMITTY_INSTALL_DIR/bin/make_assignments_txt_file.py $MY_COURSE_DIR/config/form $MY_COURSE_DIR/ASSIGNMENTS.txt $@
 
 # pull in the homeworks from an auto-generated file
 . $MY_COURSE_DIR/ASSIGNMENTS.txt

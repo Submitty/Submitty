@@ -5,6 +5,7 @@
 
 include "../../toolbox/functions.php";
 
+
 check_administrator();
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
@@ -469,6 +470,8 @@ if ($action != 'import'){
     
     $db->commit();
     writeFormJSON($_POST['gradeable_id'],$_POST['gradeableJSON']);
+
+
 }
 // batch update or create
 else{
@@ -556,6 +559,30 @@ else{
     }
 
 }
+
+
+// -------------------------------------------------------
+// Create the a file to launch a rebuild of this course/gradeable...
+
+// FIXME:  should use a variable intead of hardcoded top level path
+$config_build_file = "/var/local/submitty/to_be_built/".__COURSE_SEMESTER__."__".__COURSE_CODE__."__".$_POST['gradeable_id'].".json";
+
+$config_build_data = array("semester" => __COURSE_SEMESTER__,
+                           "course" => __COURSE_CODE__,
+                           "gradeable" =>  $_POST['gradeable_id']);
+
+$config_build_fp = fopen($config_build_file,'w');
+
+if (!$config_build_fp){
+  die('failed to open file'.$config_build_file);
+}
+
+fwrite($config_build_fp, json_encode($config_build_data), JSON_PRETTY_PRINT);
+fclose($config_build_fp);
+
+// -------------------------------------------------------
+
+
 
 if($action != 'import'){
   header('Location: '.__SUBMISSION_URL__.'/index.php?semester='.__COURSE_SEMESTER__.'&course='.__COURSE_CODE__);
