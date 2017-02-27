@@ -571,14 +571,10 @@ $config_build_data = array("semester" => __COURSE_SEMESTER__,
                            "course" => __COURSE_CODE__,
                            "gradeable" =>  $_POST['gradeable_id']);
 
-$config_build_fp = fopen($config_build_file,'w');
-
-if (!$config_build_fp){
-  die('failed to open file'.$config_build_file);
+if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+    die("Failed to write file {$config_build_file}");
 }
 
-fwrite($config_build_fp, json_encode($config_build_data), JSON_PRETTY_PRINT);
-fclose($config_build_fp);
 
 // -------------------------------------------------------
 

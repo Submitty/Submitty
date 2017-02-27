@@ -36,13 +36,15 @@ def buildOne(data) :
 
 # ------------------------------------------------------------------------
 def buildAll() :
-    for file in glob.glob("/var/local/submitty/to_be_built/*.json") :
-        with open(file) as data_file:
-			print ("going to process: " + file)
+    for filename in glob.glob("/var/local/submitty/to_be_built/*.json") :
+        with open(filename) as data_file:
+			print ("going to process: " + filename)
 			data = json.load(data_file)
-			os.remove(file)
+			# after loading the contents of the file, remove it first
+			os.remove(filename)
+			# then build it, because build is slow (and we might have a race condition)
 			buildOne(data)
-			print ("finished with " + file)
+			print ("finished with " + filename)
 
 
 # ------------------------------------------------------------------------
