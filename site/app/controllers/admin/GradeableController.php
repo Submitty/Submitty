@@ -18,7 +18,9 @@ class GradeableController extends AbstractController {
     }
 
     public function upload_config() {
-        $this->core->getOutput()->renderOutput(array('admin', 'Gradeable'), 'uploadConfigForm');
+        $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
+        $all_files = FileUtils::getAllFiles($target_dir);
+        $this->core->getOutput()->renderOutput(array('admin', 'Gradeable'), 'uploadConfigForm', $target_dir, $all_files);
     }
 
     public function process_config_upload() {
