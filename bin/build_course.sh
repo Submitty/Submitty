@@ -23,6 +23,7 @@ MY_COURSE_DIR=$SUBMITTY_DATA_DIR/courses/$semester/$course
 # SPECIFIC HOMEWORKS
 
 echo "BUILDING course=$course semester=$semester... "
+date
 
 # generate ASSIGNMENTS.txt
 $SUBMITTY_INSTALL_DIR/bin/make_assignments_txt_file.py $MY_COURSE_DIR/config/form $MY_COURSE_DIR/ASSIGNMENTS.txt $@
@@ -30,7 +31,9 @@ $SUBMITTY_INSTALL_DIR/bin/make_assignments_txt_file.py $MY_COURSE_DIR/config/for
 # pull in the homeworks from an auto-generated file
 . $MY_COURSE_DIR/ASSIGNMENTS.txt
 
+echo "--------------------------------------------------------------------------------------"
 echo "done building course=$course semester=$semester"
+date
 
 echo -e "course page url: ${SUBMISSION_URL}/index.php?semester=${semester}&course=${course}"
 
