@@ -34,19 +34,28 @@ class GradeableView extends AbstractView {
         Upload Config: <input type="file" name="config_upload" /><br />
         <input type="submit" value="Upload" />
     </form>
-    <br /><br />
-    Upload Directory: {$target_dir}
-    <br /><br />
-    Previous Uploads:<br />
+</div>
+HTML;
+
+
+      if (count($all_files) > 0) {
+          $html_output .= <<<HTML
+<div class="content">
+       <h2>Previous Uploads</h2>
+<br>
+<b>located in {$target_dir}</b>
+<br>&nbsp;<br>
+<ul>
 HTML;
       foreach ($all_files as $key => $value) {
           $html_output .= <<<HTML
-    - {$target_dir}/{$key}<br /> 
+<li> {$target_dir}/{$key}<br /> 
 HTML;
 
       }
       //$html_output .= $this->display_files($all_files);
       $html_output .= <<<HTML
+</ul>
 </div>
 HTML;
 
@@ -66,6 +75,7 @@ $contents
 </pre>
 </div>
 HTML;
+      }
       }
 
       return $html_output;
