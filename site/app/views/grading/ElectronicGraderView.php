@@ -136,7 +136,7 @@ HTML;
             $return .= <<<HTML
         <tbody>
             <tr>
-                <td colspan="8">No students found for grading</td>
+                <td colspan="9">No students found for grading</td>
             </tr>
         </tbody>
 HTML;
@@ -169,13 +169,19 @@ HTML;
                 //Get the results of the query 
                 $result = $this->core->getDatabase()->row();
 
-                if (!$result || !$result['user_viewed_date']){
-                    $viewed_grade = "&#10008;";
-                    $grade_viewed = "";
+                if ($row->beenTAgraded()){
+                    if (!$result || !$result['user_viewed_date']){
+                        $viewed_grade = "&#10008;";
+                        $grade_viewed = "";
+                    }
+                    else if ($result && $result['user_viewed_date']){
+                        $viewed_grade = "&#x2714;";
+                        $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($result['user_viewed_date']));
+                    }
                 }
-                else if ($result && $result['user_viewed_date']){
-                    $viewed_grade = "&#x2714;";
-                    $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($result['user_viewed_date']));
+                else{
+                    $viewed_grade = "";
+                    $grade_viewed = "";
                 }
                 $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
                 $graded = $row->getGradedAutograderPoints() + $row->getGradedTAPoints();

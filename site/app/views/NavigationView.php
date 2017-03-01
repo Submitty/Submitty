@@ -144,6 +144,43 @@ HTML;
                 if ($g_data->getType() != GradeableType::ELECTRONIC_FILE && !$this->core->getUser()->accessGrading()) {
                   continue;
                 }
+                
+                echo "<br>Autograde: " . $g_data->beenAutograded() . "<br>TA Grade: " . $g_data->beenTAgraded() . "<br>-----"; 
+
+                if ($g_data->beenAutograded() && $g_data->beenTAgraded()){
+                
+                    $user_id = $this->core->getUser()->getId();
+                    $g_id = $g_data->getId();
+                    
+                    
+                    $params = array($user_id, $g_id);
+
+                    //A string representation of the sql query
+                    $query = "SELECT 
+                    user_viewed_date
+                    FROM
+                        gradeable_data 
+                    WHERE
+                        gd_user_id = ?
+                    AND 
+                        g_id = ?
+                    ;";
+
+
+                    $this->core->getDatabase()->query($query, $params);
+
+                    //Get the results of the query 
+                    $result = $this->core->getDatabase()->row();
+
+                    if (!$result || !$result['user_viewed_date']){
+                        //nothing, do nothing
+                        die("DIRE STRAITS");
+                    }
+                    else{
+                        $title_to_button_type_submission['GRADED'] = "btn-default";
+                        die("?");
+                    }
+                }
 
                 /** @var Gradeable $g_data */
                 $date = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
