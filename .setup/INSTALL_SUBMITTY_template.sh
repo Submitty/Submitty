@@ -311,11 +311,11 @@ find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chown root:root {} \;
 find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 500 {} \;
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
+chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
+chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 chown ${HWCRON_USER}:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
