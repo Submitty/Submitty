@@ -18,9 +18,10 @@ class HomeworkView extends AbstractView {
 HTML;
         }
         else {
+            $gradeable = htmlentities($gradeable_id, ENT_QUOTES);
             return <<<HTML
 <div class="content">
-    {$gradeable_id} is not a valid electronic submission gradeable. Contact your instructor if you think this
+    {$gradeable} is not a valid electronic submission gradeable. Contact your instructor if you think this
     is an error.
 </div>
 HTML;
