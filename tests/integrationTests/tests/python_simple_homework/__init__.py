@@ -137,7 +137,7 @@ def infinite_loop_time_cutoff(test):
     test.run_validator()
     test.empty_file("test01_STDOUT.txt")
     test.empty_file("test01_STDERR.txt")
-    test.json_diff("test01_0_diff.json","test01_0_diff.json_time_cutoff")
+    #test.json_diff("test01_0_diff.json","test01_0_diff.json_time_cutoff")
     test.diff("test01_execute_logfile.txt","test01_execute_logfile.txt_infinite_loop_time_cutoff")
     test.diff("results_grade.txt","results_grade.txt_infinite_loop_time_cutoff","-b")
     test.json_diff("results.json","results.json_infinite_loop_time_cutoff")

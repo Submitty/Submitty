@@ -415,10 +415,10 @@ template<class T> Difference* ses (const nlohmann::json& j, T* student_output, T
 
   Difference* diff = sesChanges( meta_diff, extraStudentOutputOk );
   if ( secondary ) {
-    std::cout << "do a secondary" << std::endl;
+    if (j != nlohmann::json()) { std::cout << "do a secondary" << std::endl; }
     sesSecondary( diff, meta_diff, extraStudentOutputOk );
   } else {
-    std::cout << "no secondary" << std::endl;
+    if (j != nlohmann::json()) { std::cout << "no secondary" << std::endl; }
   }
 
   diff->only_whitespace_changes = true;
@@ -437,7 +437,7 @@ template<class T> Difference* ses (const nlohmann::json& j, T* student_output, T
   }
 
   for (int x = 0; x < diff->changes.size(); x++) {
-    INSPECT_CHANGES(std::cout,
+    INSPECT_IMPROVE_CHANGES(std::cout,
 		    diff->changes[x],
 		    *student_output,
 		    *inst_output,
@@ -447,12 +447,19 @@ template<class T> Difference* ses (const nlohmann::json& j, T* student_output, T
 		    diff->char_added, diff->char_deleted);
   }
 
-  std::cout << "INSPECT CHANGES   lines  added=" << diff->line_added << "  deleted=" << diff->line_deleted << "  total=" << diff->total_line << std::endl;
-  std::cout << "INSPECT CHANGES   chars  added=" << diff->char_added << "  deleted=" << diff->char_deleted << "  total=" << diff->total_char << std::endl;
+  if (j != nlohmann::json()) {
+    if (diff->only_whitespace_changes) {
+      std::cout << "ONLY WHITESPACE CHANGES!!!!!!!!!!!!!" << std::endl;
+    } else {
+      std::cout << "FILE HAS NON WHITESPACE CHANGES!!!!!!!!!!!!!" << std::endl;
+    }
+    std::cout << "INSPECT CHANGES   lines  added=" << diff->line_added << "  deleted=" << diff->line_deleted << "  total=" << diff->total_line;
+    std::cout << "   chars  added=" << diff->char_added << "  deleted=" << diff->char_deleted << "  total=" << diff->total_char << std::endl;
+  }
 
-
-  diff->PrepareGrade(j);
-
+  if (j != nlohmann::json()) {
+    diff->PrepareGrade(j);
+  }
   return diff;
 }
 
@@ -735,6 +742,14 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
     assert (min_char_changes < max_char_changes);
 
     assert (total_char > 0);
+    if (max_char_changes > total_char) {
+      std::cout << "WARNING!  max_char_changes > total_char)" << std::endl;
+      max_char_changes = total_char;
+      if (min_char_changes > max_char_changes) {
+        min_char_changes = max_char_changes-1;
+      }
+      assert (min_char_changes >= 0);
+    }
     assert (max_char_changes <= total_char);
 
     int char_changes = char_added + char_deleted;
@@ -753,6 +768,7 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
     float grade;
     if (char_changes < lower_bar) {
       std::cout << "too few char changes (zero credit)" << std::endl;
+      messages.push_back("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Significantly fewer character changes than allowed.");
     } else if (char_changes < min_char_changes) {
       std::cout << "less than min char changes (partial credit)" << std::endl;
       float numer = min_char_changes - char_changes;
@@ -760,7 +776,9 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
       std::cout << "numer " << numer << " denom= " << denom << std::endl;
       assert (denom > 0);
       grade = 1 - numer/denom;
+      messages.push_back("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Fewer character changes than allowed.");
     } else if (char_changes < max_char_changes) {
+      messages.push_back("Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Character changes within allowed range.");
       std::cout << "between min and max char changes (full credit)" << std::endl;
       grade = 1.0;
     } else if (char_changes < upper_bar) {
@@ -770,18 +788,15 @@ void Difference::PrepareGrade(const nlohmann::json& j) {
       assert (denom > 0);
       grade = 1 - numer/denom;
       std::cout << "numer " << numer << " denom= " << denom << std::endl;
+      messages.push_back("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  More character changes than allowed.");
     } else {
       std::cout << "too many char changes (zero credit)" << std::endl;
+      messages.push_back("ERROR!  Approx " + std::to_string(char_changes) + " characters added and/or deleted.  Significantly more character changes than allowed.");
       grade = 0.0;
     }
     std::cout << "grade " << grade << std::endl;
     assert (grade >= -0.00001 & grade <= 1.00001);
     this->setGrade(grade);
-    if (grade < 0.5) {
-      messages.push_back(j.value("failure_message", "ERROR!  Significant differences between this file and the expected file."));
-    } else if (grade < 0.99) {
-      messages.push_back(j.value("failure_message", "ERROR!  Differences between this file and the expected file."));
-    }
   }
 
   // --------------------------------------------------------

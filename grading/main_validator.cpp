@@ -81,9 +81,16 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
   double score = deduction*(1-grade);
   std::cout << "score=" << score << std::endl;
 
-  bool show_message  = ShowHelper(tcg.value("show_message", "never"),result->getSuccess());
-  bool show_actual   = ShowHelper(tcg.value("show_actual",  "never"),result->getSuccess());
-  bool show_expected = ShowHelper(tcg.value("show_expected","never"),result->getSuccess());
+  bool full_points = my_testcase.getPoints();
+  std::cout << "FULL POINTS " << full_points << std::endl;
+
+  bool test_case_success = (result->getMessages().size() == 0);
+  bool show_message  = ShowHelper(tcg.value("show_message", "never"),test_case_success);
+  bool show_actual   = ShowHelper(tcg.value("show_actual",  "never"),test_case_success);
+  bool show_expected = ShowHelper(tcg.value("show_expected","never"),test_case_success);
+  /*  if (full_points > 0 && fabs(full_points-score) < 0.0001) {
+    test_case_success = true;
+    }*/
 
   std::string BROKEN_CONFIG_ERROR_MESSAGE;
 
@@ -168,7 +175,7 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
 
     std::string fm = tcg.value("failure_message","");
 
-    if (show_message) {
+    if (!test_case_success) {
       bool failure_message_already_added = false;
       if (FN==0) {
         for (int m = 0; m < messages.size(); m++) {
@@ -190,8 +197,8 @@ double ValidateGrader(const TestCase &my_testcase, int which_grader,
       num_messages = autocheck_j.find("messages")->size();
       assert (num_messages > 0);
     }
-    
-    if ((show_message && num_messages > 0) 
+
+    if ((show_message && num_messages > 0)
         || show_actual 
         || show_expected) {
       autocheck_js.push_back(autocheck_j);
@@ -223,8 +230,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
   CustomizeAutoGrading(rcsid,config_json);
 
-  system ("ls -lta");
-  system("find . -type f");
+  system("find . -type f -exec ls -sh {} +");
 
   // LOOP OVER ALL TEST CASES
   nlohmann::json::iterator tc = config_json.find("testcases");

@@ -1,5 +1,5 @@
 <div class='diff-container'><div class='diff-code'>
-	<div class='highlight' id="id_actual_0">
+	<div class='highlight' id='id_actual_0'>
 	<div class='row bad'><div class='empty_line'>&nbsp;</div></div>
 	<div class='row bad'><div class='empty_line'>&nbsp;</div></div>
 	<div class='row bad'><div class='empty_line'>&nbsp;</div></div>

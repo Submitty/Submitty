@@ -21,81 +21,6 @@
 // =====================================================================
 // =====================================================================
 
-void LoadDisallowedWords(const std::string &filename,
-			 std::set<std::string> &disallowed_words,
-			 std::set<std::string> &warning_words) {
-  std::ifstream istr(filename.c_str());
-  if (!istr) {
-    system("pwd");
-    system("whoami");
-    system("ls -lta");
-    std::cout << "file is " << filename << std::endl;
-  }
-  assert (istr);
-  std::string token1, token2;
-  while (istr >> token1 >> token2) {
-    if (token1 == "disallow") {
-      assert (warning_words.find(token2) == warning_words.end());
-      disallowed_words.insert(token2);
-    } else if (token1 == "warning") {
-      assert (disallowed_words.find(token2) == disallowed_words.end());
-      warning_words.insert(token2);
-    } else {
-      std::cout << "UNKNOWN TOKEN " << token1 << std::endl;
-      exit(1);
-    }
-  }
-}
-
-void SearchForDisallowedWords(std::set<std::string> &disallowed_words,
-			      std::set<std::string> &warning_words) {
-
-  system ("ls -lta");
-  system ("whoami");
-
-  char buf[DIR_PATH_MAX];
-  getcwd( buf, DIR_PATH_MAX );
-  DIR* dir = opendir(buf);
-  assert (dir != NULL);
-  struct dirent *ent;
-
-  bool disallowed = false;
-  bool warning = false;
-
-  while (1) {
-    ent = readdir(dir);
-    if (ent == NULL) break;
-    if (ent->d_type != DT_REG) continue;
-    std::string filename = ent->d_name;
-    if (filename == "disallowed_words.txt") continue;
-    if (filename == "my_compile.out") continue;
-
-    for (std::set<std::string>::iterator itr = disallowed_words.begin(); itr != disallowed_words.end(); itr++) {
-      int success = system ( (std::string("grep ")+(*itr)+" "+filename+" 1> /dev/null 2> /dev/null").c_str());
-      if (success == 0) {
-	std::cout << "DISALLOWED: " << filename << " contains '" << (*itr) << "'" << std::endl;
-	disallowed = true;
-      }
-    }
-
-    for (std::set<std::string>::iterator itr = warning_words.begin(); itr != warning_words.end(); itr++) {
-      int success = system ( (std::string("grep ")+(*itr)+" "+filename+" 1> /dev/null 2> /dev/null").c_str());
-      if (success == 0) {
-	std::cout << "WARNING: " << filename << " contains '" << (*itr) << "'" << std::endl;
-	warning = true;
-      }
-    }
-
-  }
-  closedir(dir);
-
-  if (disallowed) {
-    exit(1);
-  }
-}
-
-// =====================================================================
-
 int main(int argc, char *argv[]) {
 
   std::cout << "MAIN COMPILE" << std::endl;
@@ -132,11 +57,9 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Compiling User Code..." << std::endl;
 
-  system("find . -type f");
+  system("find . -type f -exec ls -sh {} +");
 
   CustomizeAutoGrading(rcsid,config_json);
-
-  system ("ls -lta");
 
   // Run each COMPILATION TEST
   nlohmann::json::iterator tc = config_json.find("testcases");
@@ -170,6 +93,9 @@ int main(int argc, char *argv[]) {
             for (int i = 0; i < files.size(); i++) {
               std::cout << "  rescue  FILE #" << i << ": " << files[i] << std::endl;
               std::string new_filename = my_testcase.getPrefix() + "_" + replace_slash_with_double_underscore(files[i]);
+              if (new_filename.substr(new_filename.size() - 4,4) == ".cpp" && !special_flag) {
+                new_filename += ".txt";
+              }
               std::string old_filename = escape_spaces(files[i]);
               new_filename = escape_spaces(new_filename);
 	      std::cout << new_filename.substr(new_filename.size()-4,4) << std::endl;
@@ -222,7 +148,7 @@ int main(int argc, char *argv[]) {
   std::cout << "========================================================" << std::endl;
   std::cout << "FINISHED ALL TESTS" << std::endl;
 
-  system("find . -type f");
+  system("find . -type f -exec ls -sh {} +");
 
   return 0;
 }
