@@ -17,10 +17,12 @@ from __future__ import print_function
 import argparse
 from collections import OrderedDict
 from datetime import datetime, timedelta
+import glob
 import grp
 import json
 import os
 import pwd
+import random
 import re
 import subprocess
 
@@ -39,13 +41,18 @@ DB_HOST = "localhost"
 DB_USER = "hsdbu"
 DB_PASS = "hsdbu"
 
+DB_ONLY = False
+
 
 def main():
     """
     Main program execution. This gets us our commandline arugments, reads in the data files,
     and then sets us up to run the create methods for the users and courses.
     """
+    global DB_ONLY
+
     args = parse_args()
+    DB_ONLY = args.db_only
     if not os.path.isdir(SUBMITTY_DATA_DIR):
         raise SystemError("The following directory does not exist: " + SUBMITTY_DATA_DIR)
     for directory in ["courses", "instructors"]:
@@ -56,44 +63,109 @@ def main():
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
-    courses_json = load_data_yaml('courses.yml')
-    for course_json in courses_json:
+    for course_file in glob.iglob(os.path.join(SETUP_DATA_PATH, 'courses', '*.yml')):
+        course_json = load_data_yaml(course_file)
         if len(use_courses) == 0 or course_json['code'] in use_courses:
             course = Course(course_json)
             courses[course.code] = course
 
     create_group("course_builders")
-    users_json = load_data_yaml('users.yml')
-    for user_json in users_json:
-        # TODO: Add check for builtin system users (hwphp, etc.) and untrusted as they should
-        # NOT be defined in this fashion as they're necessary for a lot of pre course creation steps
-        user = User(user_json)
+
+    for user_file in glob.iglob(os.path.join(SETUP_DATA_PATH, 'users', '*.yml')):
+        user = User(load_data_yaml(user_file))
+        if user.id in ['hwphp', 'hwcron', 'hwcgi', 'hsdbu', 'vagrant', 'postgres'] or \
+                user.id.startswith("untrusted"):
+            continue
         user.create()
         users[user.id] = user
         if user.courses is not None:
             for course in user.courses:
                 if course in courses:
                     courses[course].users.append(user)
-                    if user.registration_section is not None:
-                        courses[course].registration_sections.add(user.registration_section)
-                    if user.rotating_section is not None:
-                        courses[course].rotating_sections.add(user.rotating_section)
-                    if user.grading_registration_section is not None:
-                        courses[course].registration_sections.add(user.grading_registration_section)
         else:
             for key in courses.keys():
                 courses[key].users.append(user)
-                if user.registration_section is not None:
-                    courses[key].registration_sections.add(user.registration_section)
-                if user.rotating_section is not None:
-                    courses[key].rotating_sections.add(user.rotating_section)
-                if user.grading_registration_section is not None:
-                    courses[key].registration_sections.add(user.grading_registration_section)
+
+    # we get the max number of extra students, and then create a list that holds all of them,
+    # which we then randomly choose from to add to a course
+    extra_students = 0
+    for course_id in courses:
+        course = courses[course_id]
+        tmp = course.registered_students + course.unregistered_students + \
+              course.no_rotating_students + \
+              course.no_registration_students
+        extra_students = max(tmp, extra_students)
+    extra_students = generate_random_users(extra_students)
+
+    for course_id in courses.keys():
+        course = courses[course_id]
+        students = random.sample(extra_students, course.registered_students + course.no_registration_students +
+                                 course.no_rotating_students + course.unregistered_students)
+        key = 0
+        for i in range(course.registered_students):
+            reg_section = i % course.registration_sections
+            rot_section = i % course.rotating_sections
+            students[key].courses[course] = {"registration_section": reg_section, "rotating_section": rot_section}
+            course.users.append(students[key])
+            key += 1
+
+        for i in range(course.no_rotating_students):
+            reg_section = i % course.registration_sections
+            students[key].courses[course] = {"registration_section": reg_section, "rotating_section": None}
+            course.users.append(students[key])
+            key += 1
+
+        for i in range(course.no_registration_students):
+            rot_section = i % course.rotating_sections
+            students[key].courses[course] = {"registration_section": None, "rotating_section": rot_section}
+            course.users.append(students[key])
+            key += 1
+
+        for i in range(course.unregistered_students):
+            students[key].courses[course] = {"registration_section": None, "rotating_section": None}
+            course.users.append(students[key])
+            key += 1
 
     for course in courses.keys():
         courses[course].instructor = users[courses[course].instructor]
         courses[course].check_rotating(users)
         courses[course].create()
+
+
+def generate_random_users(total):
+    """
+    
+    :param total: 
+    :return: 
+    :rtype: List[User]
+    """
+    with open(os.path.join(SETUP_DATA_PATH,'random', 'lastNames.txt')) as last_file, \
+            open(os.path.join(SETUP_DATA_PATH, 'random', 'maleFirstNames.txt')) as male_file, \
+            open(os.path.join(SETUP_DATA_PATH, 'random', 'womenFirstNames.txt')) as woman_file:
+        last_names = last_file.read().strip().split()
+        male_names = male_file.read().strip().split()
+        women_names = woman_file.read().strip().split()
+
+    users = []
+    for i in range(total):
+        if random.random() < 0.5:
+            first_name = random.choice(male_names)
+        else:
+            first_name = random.choice(women_names)
+        last_name = random.choice(last_names)
+        user_id = last_name[:5] + first_name[0]
+        while user_id in users:
+            if user_id[-1].isdigit():
+                user_id[-1] = str(int(user_id[-1]) + 1)
+            else:
+                user_id = user_id + "1"
+
+        users.append(User({"user_id": user_id,
+                           "user_firstname": first_name,
+                           "user_lastname": last_name,
+                           "user_group": 4,
+                           "courses": dict()}))
+    return users
 
 
 def load_data_json(file_name):
@@ -275,10 +347,21 @@ def parse_args():
                     ".setup/data directory to determine what courses/users are allowed and then "
                     "either adds all or just a few depending on what gets passed to this script")
 
+    parser.add_argument("--db_only", action='store_true')
     parser.add_argument("course", nargs="*",
                         help="course code to build. If no courses are passed in, then it'll use "
                              "all courses in courses.json")
     return parser.parse_args()
+
+
+def create_user(user_id):
+    if not user_exists(id):
+        print("Creating user {}...".format(user_id))
+        os.system("/usr/sbin/adduser {} --quiet --home /tmp --gecos \'AUTH ONLY account\' "
+                  "--no-create-home --disabled-password --shell "
+                  "/usr/sbin/nologin".format(user_id))
+        print("Setting password for user {}...".format(user_id))
+        os.system("echo {}:{} | chpasswd".format(user_id, user_id))
 
 
 class User(object):
@@ -350,10 +433,11 @@ class User(object):
             self.sudo = user['sudo'] is True
 
     def create(self, force_ssh=False):
-        if self.group > 2 and not force_ssh:
-            self._create_non_ssh()
-        else:
-            self._create_ssh()
+        if not DB_ONLY:
+            if self.group > 2 and not force_ssh:
+                self._create_non_ssh()
+            else:
+                self._create_ssh()
         if self.group <= 1:
             add_to_group("course_builders", self.id)
             with open(os.path.join(SUBMITTY_DATA_DIR, "instructors", "valid"), "a") as open_file:
@@ -369,7 +453,7 @@ class User(object):
             self.set_password()
 
     def _create_non_ssh(self):
-        if not user_exists(self.id):
+        if not DB_ONLY and not user_exists(self.id):
             print("Creating user {}...".format(self.id))
             os.system("/usr/sbin/adduser {} --quiet --home /tmp --gecos \'AUTH ONLY account\' "
                       "--no-create-home --disabled-password --shell "
@@ -377,11 +461,14 @@ class User(object):
             self.set_password()
 
     def set_password(self):
-        print("Setting password for user {}...".format(self.id));
+        print("Setting password for user {}...".format(self.id))
         os.system("echo {}:{} | chpasswd".format(self.id, self.id))
 
     def __getitem__(self, item):
-        return self.__dict__[item]
+        if item not in self.__dict__:
+            return None
+        else:
+            return self.__dict__[item]
 
     def get_detail(self, course, detail):
         if self.courses is not None and course in self.courses:
@@ -390,7 +477,10 @@ class User(object):
                 return self.courses[course][user_detail]
             elif detail in self.courses[course]:
                 return self.courses[course][detail]
-        return self[detail]
+        if detail in self:
+            return self[detail]
+        else:
+            return None
 
 
 class Course(object):
@@ -416,8 +506,24 @@ class Course(object):
             assert self.gradeables[-1].id not in ids
             ids.append(self.gradeables[-1].id)
         self.users = []
-        self.registration_sections = set()
-        self.rotating_sections = set()
+        self.registration_sections = 10
+        self.rotating_sections = 5
+        self.registered_students = 300
+        self.no_registration_students = 75
+        self.no_rotating_students = 75
+        self.unregistered_students = 50
+        if 'registration_sections' in course:
+            self.registration_sections = course['registration_sections']
+        if 'rotating_sections' in course:
+            self.rotating_sections = course['rotating_sections']
+        if 'registered_students' in course:
+            self.registered_students = course['registered_students']
+        if 'no_registration_students' in course:
+            self.no_registration_students = course['no_registration_students']
+        if 'no_rotating_students' in course:
+            self.no_rotating_students = course['no_rotating_students']
+        if 'unregistered_students' in course:
+            self.unregistered_students = course['unregistered_students']
 
     def create(self):
         course_group = self.code + "_tas_www"
@@ -444,16 +550,22 @@ class Course(object):
         conn = engine.connect()
         metadata = MetaData(bind=engine)
         table = Table("sections_registration", metadata, autoload=True)
-        for section in self.registration_sections:
+        for section in range(1, self.registration_sections+1):
             conn.execute(table.insert(), sections_registration_id=section)
 
         table = Table("sections_rotating", metadata, autoload=True)
-        for section in self.rotating_sections:
+        for section in range(1, self.rotating_sections+1):
             conn.execute(table.insert(), sections_rotating_id=section)
 
         users_table = Table("users", metadata, autoload=True)
         reg_table = Table("grading_registration", metadata, autoload=True)
         for user in self.users:
+            reg_section = user.get_detail(self.code, "registration_section")
+            if reg_section is not None and reg_section > self.registration_sections:
+                reg_section = None
+            rot_section = user.get_detail(self.code, "rotating_section")
+            if rot_section is not None and rot_section > self.rotating_sections:
+                rot_section = None
             conn.execute(users_table.insert(), user_id=user.get_detail(self.code, "id"),
                          user_password=user.get_detail(self.code, "password"),
                          user_firstname=user.get_detail(self.code, "firstname"),
@@ -461,8 +573,8 @@ class Course(object):
                          user_lastname=user.get_detail(self.code, "lastname"),
                          user_email=user.get_detail(self.code, "email"),
                          user_group=user.get_detail(self.code, "group"),
-                         registration_section=user.get_detail(self.code, "registration_section"),
-                         rotating_section=user.get_detail(self.code, "rotating_section"),
+                         registration_section=reg_section,
+                         rotating_section=rot_section,
                          manual_registration=user.get_detail(self.code, "manual"))
 
             if user.get_detail(self.code, "grading_registration_section") is not None:
