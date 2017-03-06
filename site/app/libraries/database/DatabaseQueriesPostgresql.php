@@ -116,7 +116,7 @@ SELECT
     END ELSE 
     NULL 
   END AS active_version, 
-  egd.*, eg.*, gd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, g.*
+  egd.*, eg.*, gd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, g.*, gcd.graded_tagrading
 FROM gradeable as g 
 LEFT JOIN (
   SELECT *
@@ -139,6 +139,11 @@ LEFT JOIN (
   FROM gradeable_data
   WHERE gd_user_id=?
 ) as gd ON gd.g_id=g.g_id
+LEFT JOIN (
+  SELECT SUM(gcd_score) as graded_tagrading, gd_id
+  FROM gradeable_component_data
+  GROUP BY gd_id
+) AS gcd ON gd.gd_id=gcd.gd_id
 LEFT JOIN (
   SELECT *
   FROM electronic_gradeable_version
@@ -169,7 +174,7 @@ SELECT
     END ELSE 
     NULL 
   END AS active_version, 
-  egd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, g.*, eg.*
+  egd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, g.*, eg.*, gcd.graded_tagrading
 FROM gradeable as g
 LEFT JOIN (
   SELECT *
@@ -192,6 +197,11 @@ LEFT JOIN (
   FROM gradeable_data
   WHERE gd_user_id=?
 ) as gd ON gd.g_id=g.g_id
+LEFT JOIN (
+  SELECT SUM(gcd_score) as graded_tagrading, gd_id
+  FROM gradeable_component_data
+  GROUP BY gd_id
+) AS gcd ON gd.gd_id=gcd.gd_id
 LEFT JOIN (
   SELECT *
   FROM electronic_gradeable_version
