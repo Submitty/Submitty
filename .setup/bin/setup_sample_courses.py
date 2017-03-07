@@ -95,7 +95,7 @@ def main():
               course.no_rotating_students + \
               course.no_registration_students
         extra_students = max(tmp, extra_students)
-    extra_students = generate_random_users(extra_students)
+    extra_students = generate_random_users(extra_students, users)
 
     for course_id in courses.keys():
         course = courses[course_id]
@@ -103,26 +103,26 @@ def main():
                                  course.no_rotating_students + course.unregistered_students)
         key = 0
         for i in range(course.registered_students):
-            reg_section = i % course.registration_sections
-            rot_section = i % course.rotating_sections
-            students[key].courses[course] = {"registration_section": reg_section, "rotating_section": rot_section}
+            reg_section = (i % course.registration_sections) + 1
+            rot_section = (i % course.rotating_sections) + 1
+            students[key].courses[course.code] = {"registration_section": reg_section, "rotating_section": rot_section}
             course.users.append(students[key])
             key += 1
 
         for i in range(course.no_rotating_students):
-            reg_section = i % course.registration_sections
-            students[key].courses[course] = {"registration_section": reg_section, "rotating_section": None}
+            reg_section = (i % course.registration_sections) + 1
+            students[key].courses[course.code] = {"registration_section": reg_section, "rotating_section": None}
             course.users.append(students[key])
             key += 1
 
         for i in range(course.no_registration_students):
-            rot_section = i % course.rotating_sections
-            students[key].courses[course] = {"registration_section": None, "rotating_section": rot_section}
+            rot_section = (i % course.rotating_sections) + 1
+            students[key].courses[course.code] = {"registration_section": None, "rotating_section": rot_section}
             course.users.append(students[key])
             key += 1
 
         for i in range(course.unregistered_students):
-            students[key].courses[course] = {"registration_section": None, "rotating_section": None}
+            students[key].courses[course.code] = {"registration_section": None, "rotating_section": None}
             course.users.append(students[key])
             key += 1
 
@@ -132,14 +132,15 @@ def main():
         courses[course].create()
 
 
-def generate_random_users(total):
+def generate_random_users(total, real_users):
     """
     
     :param total: 
+    :param real_users:
     :return: 
-    :rtype: List[User]
+    :rtype: list[User]
     """
-    with open(os.path.join(SETUP_DATA_PATH,'random', 'lastNames.txt')) as last_file, \
+    with open(os.path.join(SETUP_DATA_PATH, 'random', 'lastNames.txt')) as last_file, \
             open(os.path.join(SETUP_DATA_PATH, 'random', 'maleFirstNames.txt')) as male_file, \
             open(os.path.join(SETUP_DATA_PATH, 'random', 'womenFirstNames.txt')) as woman_file:
         last_names = last_file.read().strip().split()
@@ -147,24 +148,31 @@ def generate_random_users(total):
         women_names = woman_file.read().strip().split()
 
     users = []
-    for i in range(total):
-        if random.random() < 0.5:
-            first_name = random.choice(male_names)
-        else:
-            first_name = random.choice(women_names)
-        last_name = random.choice(last_names)
-        user_id = last_name[:5] + first_name[0]
-        while user_id in users:
-            if user_id[-1].isdigit():
-                user_id[-1] = str(int(user_id[-1]) + 1)
+    user_ids = []
+    with open(os.path.join(SETUP_DATA_PATH, "random_users.txt"), "w") as random_users_file:
+        for i in range(total):
+            if random.random() < 0.5:
+                first_name = random.choice(male_names)
             else:
-                user_id = user_id + "1"
+                first_name = random.choice(women_names)
+            last_name = random.choice(last_names)
+            user_id = last_name.replace("'", "")[:5] + first_name[0]
+            while user_id in user_ids or user_id in real_users:
+                if user_id[-1].isdigit():
+                    user_id = user_id[:-1] + str(int(user_id[-1]) + 1)
+                else:
+                    user_id = user_id + "1"
 
-        users.append(User({"user_id": user_id,
-                           "user_firstname": first_name,
-                           "user_lastname": last_name,
-                           "user_group": 4,
-                           "courses": dict()}))
+            user_id = user_id.lower()
+            new_user = User({"user_id": user_id,
+                             "user_firstname": first_name,
+                             "user_lastname": last_name,
+                             "user_group": 4,
+                             "courses": dict()})
+            new_user.create()
+            user_ids.append(user_id)
+            users.append(new_user)
+            random_users_file.write(user_id + "\n")
     return users
 
 
@@ -182,15 +190,14 @@ def load_data_json(file_name):
     return json_file
 
 
-def load_data_yaml(file_name):
+def load_data_yaml(file_path):
     """
     Loads yaml file from the .setup/data directory returning the parsed structure
-    :param file_name: name of file to load
+    :param file_path: name of file to load
     :return: parsed YAML structure from loaded file
     """
-    file_path = os.path.join(SETUP_DATA_PATH, file_name)
     if not os.path.isfile(file_path):
-        raise IOError("Missing the yaml file .setup/data{}".format(file_name))
+        raise IOError("Missing the yaml file {}".format(file_path))
     with open(file_path) as open_file:
         yaml_file = yaml.safe_load(open_file)
     return yaml_file
@@ -384,7 +391,7 @@ class User(object):
     """
     def __init__(self, user):
         self.id = user['user_id']
-        self.password = get_php_db_password(self.id)
+        self.password = self.id
         self.firstname = user['user_firstname']
         self.lastname = user['user_lastname']
         self.email = self.id + "@example.com"
@@ -422,15 +429,15 @@ class User(object):
                     self.courses[course] = {"user_group": self.group}
             elif isinstance(user['courses'], dict):
                 self.courses = user['courses']
-                check_group = 5
                 for course in self.courses:
                     if 'user_group' not in self.courses[course]:
                         self.courses[course]['user_group'] = self.group
-                    check_group = min(self.courses[course]['user_group'], check_group)
             else:
                 raise ValueError("Invalid type for courses key, it should either be list or dict")
         if 'sudo' in user:
             self.sudo = user['sudo'] is True
+        if 'password' in user:
+            self.password = user['password']
 
     def create(self, force_ssh=False):
         if not DB_ONLY:
@@ -462,13 +469,7 @@ class User(object):
 
     def set_password(self):
         print("Setting password for user {}...".format(self.id))
-        os.system("echo {}:{} | chpasswd".format(self.id, self.id))
-
-    def __getitem__(self, item):
-        if item not in self.__dict__:
-            return None
-        else:
-            return self.__dict__[item]
+        os.system("echo {}:{} | chpasswd".format(self.id, self.password))
 
     def get_detail(self, course, detail):
         if self.courses is not None and course in self.courses:
@@ -477,8 +478,8 @@ class User(object):
                 return self.courses[course][user_detail]
             elif detail in self.courses[course]:
                 return self.courses[course][detail]
-        if detail in self:
-            return self[detail]
+        if detail in self.__dict__:
+            return self.__dict__[detail]
         else:
             return None
 
@@ -545,21 +546,34 @@ class Course(object):
         os.system("psql -d {} -h {} -U {} -f {}/site/data/tables.sql"
                   .format(database, DB_HOST, DB_USER, SUBMITTY_REPOSITORY))
 
+        print("Database created, now populating ", end="")
         engine = create_engine("postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASS, DB_HOST,
                                                                  database))
         conn = engine.connect()
         metadata = MetaData(bind=engine)
+        print("(connection made, metadata bound)...")
+        print("Creating registration sections ", end="")
         table = Table("sections_registration", metadata, autoload=True)
+        print("(tables loaded)...")
         for section in range(1, self.registration_sections+1):
+            print("Create section {}".format(section))
             conn.execute(table.insert(), sections_registration_id=section)
 
+        print("Creating rotating sections ", end="")
         table = Table("sections_rotating", metadata, autoload=True)
+        print("(tables loaded)...")
         for section in range(1, self.rotating_sections+1):
+            print("Create section {}".format(section))
             conn.execute(table.insert(), sections_rotating_id=section)
 
+        print("Create users ", end="")
         users_table = Table("users", metadata, autoload=True)
         reg_table = Table("grading_registration", metadata, autoload=True)
+        print("(tables loaded)...")
         for user in self.users:
+            print("Creating user {} {} ({})...".format(user.get_detail(self.code, "firstname"),
+                                                       user.get_detail(self.code, "lastname"),
+                                                       user.get_detail(self.code, "id")))
             reg_section = user.get_detail(self.code, "registration_section")
             if reg_section is not None and reg_section > self.registration_sections:
                 reg_section = None
@@ -567,7 +581,7 @@ class Course(object):
             if rot_section is not None and rot_section > self.rotating_sections:
                 rot_section = None
             conn.execute(users_table.insert(), user_id=user.get_detail(self.code, "id"),
-                         user_password=user.get_detail(self.code, "password"),
+                         user_password=get_php_db_password(user.get_detail(self.code, "password")),
                          user_firstname=user.get_detail(self.code, "firstname"),
                          user_preferred_firstname=user.get_detail(self.code, "preferred_firstname"),
                          user_lastname=user.get_detail(self.code, "lastname"),
