@@ -139,17 +139,15 @@ HTML;
         <tr class="colspan nav-title-row" id="{$lower_title}"><td colspan="4">{$title_to_category_title[$title]}</td></tr>
         <tbody id="{$lower_title}_tbody">
 HTML;
+            $title_save = $title_to_button_type_submission['GRADED'];
             foreach ($gradeable_list as $gradeable => $g_data) {
-
+                $title_to_button_type_submission['GRADED'] = $title_save;
                 // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
                 if ($g_data->getType() != GradeableType::ELECTRONIC_FILE && !$this->core->getUser()->accessGrading()) {
                   continue;
                 }
-                
-                echo "<br>Autograde: " . $g_data->beenAutograded() . "<br>TA Grade: " . $g_data->beenTAgraded() . "<br>-----"; 
 
                 if ($g_data->beenAutograded() && $g_data->beenTAgraded()){
-                
                     $user_id = $this->core->getUser()->getId();
                     $g_id = $g_data->getId();
                     
@@ -173,13 +171,10 @@ HTML;
                     //Get the results of the query 
                     $result = $this->core->getDatabase()->row();
 
-                    if (!$result || !$result['user_viewed_date']){
-                        //nothing, do nothing
-                        die("DIRE STRAITS");
+                    if (!$result || !$result['user_viewed_date'] || $result['user_viewed_date'] == ""){
                     }
-                    else{
+                    else if ($result && $result['user_viewed_date'] != ""){
                         $title_to_button_type_submission['GRADED'] = "btn-default";
-                        die("?");
                     }
                 }
 
@@ -226,6 +221,7 @@ HTML;
                 {$gradeable_grade_range}</button>
 HTML;
                         }
+
                         else {
                             $gradeable_grade_range = "";
                         }

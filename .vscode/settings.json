@@ -1,0 +1,6 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "editor.renderIndentGuides": true,
+    "php.validate.run": "onType",
+    "php.validate.executablePath": "/usr/bin/php"
+}

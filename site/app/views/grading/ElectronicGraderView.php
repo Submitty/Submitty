@@ -173,15 +173,18 @@ HTML;
                     if (!$result || !$result['user_viewed_date']){
                         $viewed_grade = "&#10008;";
                         $grade_viewed = "";
+                        $grade_viewed_color = "color: red;";
                     }
                     else if ($result && $result['user_viewed_date']){
                         $viewed_grade = "&#x2714;";
                         $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($result['user_viewed_date']));
+                        $grade_viewed_color = "color: green;";
                     }
                 }
                 else{
                     $viewed_grade = "";
                     $grade_viewed = "";
+                    $grade_viewed_color = "";
                 }
                 $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
                 $graded = $row->getGradedAutograderPoints() + $row->getGradedTAPoints();
@@ -241,7 +244,7 @@ HTML;
                     </a>
                 </td>
                 <td>{$graded} / {$total_possible}</td>
-                <td title="{$grade_viewed}">{$viewed_grade}</td>
+                <td title="{$grade_viewed}" style="{$grade_viewed_color}">{$viewed_grade}</td>
             </tr>
 HTML;
                 $count++;
