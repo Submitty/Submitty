@@ -640,13 +640,14 @@ class Course(object):
                                      g_version=1, submission_time=current_time)
                         conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
                                      active_version=1)
-                        with open(os.path.join(submission_path, "user_assignment_settings.json")) as open_file:
+                        with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
                             json.dump({"active_version": 1, "history": [{"version": 1, "time": current_time}]},
                                       open_file)
-                        with open(os.path.join(submission_path, "1", ".submit.timestamp")) as open_file:
+                        with open(os.path.join(submission_path, "1", ".submit.timestamp"), "w") as open_file:
                             open_file.write(current_time + "\n")
                         queue_file = "__".join([self.semester, self.code, gradeable.id, user.id, "1"])
-                        with open(os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive", queue_file)) as open_file:
+                        queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive", queue_file)
+                        with open(queue_file, "w") as open_file:
                             json.dump({"semester": self.semester,
                                        "course": self.code,
                                        "gradeable": gradeable.id,
