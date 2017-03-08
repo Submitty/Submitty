@@ -626,7 +626,7 @@ class Course(object):
             gradeable.create(conn, gradeable_table, electronic_table, reg_table, component_table)
             for user in self.users:
                 submission_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code,
-                                               "submissions", user.id)
+                                               "submissions", user.id, gradeable.id)
                 os.system("mkdir -p " + os.path.join(submission_path, "1"))
                 submitted = True
                 active = 1
