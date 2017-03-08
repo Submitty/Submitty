@@ -56,12 +56,12 @@ def cleanup(test):
 def correct(test):
     cleanup(test)
     subprocess.call(["cp",
-        os.path.join(SAMPLE_SUBMISSIONS, "correct/hw0.zip"),
+        os.path.join(SAMPLE_SUBMISSIONS, "correct.zip"),
         os.path.join(test.testcase_path, "data/")])
     subprocess.call(["unzip",
                      "-q",  # quiet
                      "-o",  # overwrite files
-                     os.path.join(test.testcase_path, "data/hw0.zip"),
+                     os.path.join(test.testcase_path, "data/correct.zip"),
                      "-d",  # save to directory
                      os.path.join(test.testcase_path, "data/")])
     test.run_compile()
@@ -76,12 +76,12 @@ def correct(test):
 def correct_no_coverage(test):
     cleanup(test)
     subprocess.call(["cp",
-        os.path.join(SAMPLE_SUBMISSIONS, "correct_no_coverage/hw0.zip"),
+        os.path.join(SAMPLE_SUBMISSIONS, "correct_no_coverage.zip"),
         os.path.join(test.testcase_path, "data/")])
     subprocess.call(["unzip",
                      "-q",  # quiet
                      "-o",  # overwrite files
-                     os.path.join(test.testcase_path, "data/hw0.zip"),
+                     os.path.join(test.testcase_path, "data/correct_no_coverage.zip"),
                      "-d",  # save to directory
                      os.path.join(test.testcase_path, "data/")])
     test.run_compile()
@@ -96,32 +96,32 @@ def correct_no_coverage(test):
 def buggy_coverage(test):
     cleanup(test)
     subprocess.call(["cp",
-        os.path.join(SAMPLE_SUBMISSIONS, "buggy_coverage/hw0.zip"),
+        os.path.join(SAMPLE_SUBMISSIONS, "buggy_coverage.zip"),
         os.path.join(test.testcase_path, "data/")])
     subprocess.call(["unzip",
                      "-q",  # quiet
                      "-o",  # overwrite files
-                     os.path.join(test.testcase_path, "data/hw0.zip"),
+                     os.path.join(test.testcase_path, "data/buggy_coverage.zip"),
                      "-d",  # save to directory
                      os.path.join(test.testcase_path, "data/")])
     test.run_compile()
     test.run_run()
     test.run_validator()
-    test.diff("results_grade.txt","buggy_coverage_results_grade.txt","-b")
-    test.json_diff("results.json","buggy_coverage_results.json")
-    test.emma_coverage_diff("test05_emma_report.txt","buggy_coverage_test05_emma_report.txt")
+    test.diff("results_grade.txt", "buggy_coverage_results_grade.txt", "-b")
+    test.json_diff("results.json", "buggy_coverage_results.json")
+    test.emma_coverage_diff("test05_emma_report.txt", "buggy_coverage_test05_emma_report.txt")
 
 
 @testcase
 def buggy_no_coverage(test):
     cleanup(test)
     subprocess.call(["cp",
-        os.path.join(SAMPLE_SUBMISSIONS, "buggy_no_coverage/hw0.zip"),
+        os.path.join(SAMPLE_SUBMISSIONS, "buggy_no_coverage.zip"),
         os.path.join(test.testcase_path, "data/")])
     subprocess.call(["unzip",
                      "-q",  # quiet
                      "-o",  # overwrite files
-                     os.path.join(test.testcase_path, "data/hw0.zip"),
+                     os.path.join(test.testcase_path, "data/buggy_no_coverage.zip"),
                      "-d",  # save to directory
                      os.path.join(test.testcase_path, "data/")])
     test.run_compile()

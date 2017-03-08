@@ -1,5 +1,7 @@
 code: csci1100
 instructor: instructor
+registration_sections: 5
+rotating_sections: 2
 registered_students: 20
 no_registration_students: 5
 no_rotating_students: 5

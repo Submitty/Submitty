@@ -1,4 +1,5 @@
 code: csci2600
+instructor: instructor
 gradeables:
 - components:
   - gc_max_value: 5
@@ -18,4 +19,4 @@ gradeables:
   g_grade_start_date: +4 days
   g_ta_view_start_date: -9 days
   gradeable_config: java_coverage_factorial
-instructor: instructor
+

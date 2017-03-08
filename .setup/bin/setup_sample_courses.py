@@ -24,6 +24,7 @@ import os
 import pwd
 import random
 import re
+import shutil
 import subprocess
 
 from sqlalchemy import create_engine, Table, MetaData
@@ -35,7 +36,8 @@ SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
 SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT_Submitty"
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
-SAMPLE_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files/sample_assignment_config")
+SAMPLE_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_assignment_config")
+SAMPLE_SUBMISSIONS = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_submissions")
 
 DB_HOST = "localhost"
 DB_USER = "hsdbu"
@@ -306,7 +308,9 @@ def parse_datetime(date_string):
     +2 days at 00:01:01
 
     :param date_string:
+    :type date_string: str
     :return:
+    :rtype: datetime
     """
     if isinstance(date_string, datetime):
         return date_string
@@ -509,10 +513,10 @@ class Course(object):
         self.users = []
         self.registration_sections = 10
         self.rotating_sections = 5
-        self.registered_students = 300
-        self.no_registration_students = 75
-        self.no_rotating_students = 75
-        self.unregistered_students = 50
+        self.registered_students = 50
+        self.no_registration_students = 10
+        self.no_rotating_students = 10
+        self.unregistered_students = 10
         if 'registration_sections' in course:
             self.registration_sections = course['registration_sections']
         if 'rotating_sections' in course:
@@ -608,8 +612,64 @@ class Course(object):
         electronic_table = Table("electronic_gradeable", metadata, autoload=True)
         reg_table = Table("grading_rotating", metadata, autoload=True)
         component_table = Table('gradeable_component', metadata, autoload=True)
+        gradeable_data = Table("gradeable_data", metadata, autoload=True)
+        gradeable_component_data = Table("gradeable_component_data", metadata, autoload=True)
+        electronic_gradeable_data = Table("electronic_gradeable_data", metadata, autoload=True)
+        electronic_gradeable_version = Table("electronic_gradeable_version", metadata, autoload=True)
         for gradeable in self.gradeables:
             gradeable.create(conn, gradeable_table, electronic_table, reg_table, component_table)
+            for user in self.users:
+                submission_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code,
+                                               "submissions", user.id)
+                os.system("mkdir -p " + os.path.join(submission_path, "1"))
+                submitted = True
+                active = 1
+                if gradeable.type == 0 and gradeable.submission_open_date < datetime.now():
+                    if random.random() < 0.2:
+                        submitted = False
+                        active = -1
+                    else:
+                        current_time = datetime.now().strftime("%x %X")
+                        conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
+                                     g_version=1, submission_time=current_time)
+                        conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
+                                     active_version=1)
+                        with open(os.path.join(submission_path, "user_assignment_settings.json")) as open_file:
+                            json.dump({"active_version": 1, "history": [{"version": 1, "time": current_time}]},
+                                      open_file)
+                        with open(os.path.join(submission_path, "1", ".submit.timestamp")) as open_file:
+                            open_file.write(current_time + "\n")
+                        queue_file = "__".join([self.semester, self.code, gradeable.id, user.id, "1"])
+                        with open(os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive", queue_file)) as open_file:
+                            json.dump({"semester": self.semester,
+                                       "course": self.code,
+                                       "gradeable": gradeable.id,
+                                       "user": user.id,
+                                       "version": 1}, open_file)
+                        submission = random.choice(gradeable.submissions)
+                        if isinstance(submission, list):
+                            submissions = submission
+                        else:
+                            submissions = [submission]
+                        for submission in submissions:
+                            src = os.path.join(SAMPLE_SUBMISSIONS, gradeable.id, submission)
+                            dst = os.path.join(submission_path, "1", submission)
+                            shutil.copy(src, dst)
+                if gradeable.grade_start_date < datetime.now():
+                    if gradeable.grade_released_date < datetime.now() or random.random() < 0.8:
+                        status = 1 if submitted else 0
+                        ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
+                                                             gd_grader_id=self.instructor.id,
+                                                             gd_overall_comment="lorem ipsum lodar",
+                                                             gd_status=status, gd_late_days_used=0,
+                                                             gd_active_version=active)
+                        res = conn.execute(ins)
+                        gd_id = res.inserted_primary_key
+                        for component in gradeable.components:
+                            score = 0 if status == 0 else random.randint(0, component.max_value)
+                            ins = gradeable_component_data.insert().values(gd_id=gd_id, gcd_score=score,
+                                                                           gcd_component_comment="lorem ipsum")
+                            conn.execute(ins)
             form = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code,
                                 "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
@@ -702,6 +762,10 @@ class Gradeable(object):
             assert self.ta_view_date < self.submission_open_date
             assert self.submission_open_date < self.submission_due_date
             assert self.submission_due_date < self.grade_start_date
+            if os.path.isfile(os.path.join(SAMPLE_SUBMISSIONS, self.id, "submissions.yml")):
+                self.submissions = load_data_yaml(os.path.join(SAMPLE_SUBMISSIONS, self.id, "submissions.yml"))
+            else:
+                self.submissions = os.listdir(os.path.join(SAMPLE_SUBMISSIONS, self.id))
         assert self.ta_view_date < self.grade_start_date
         assert self.grade_start_date < self.grade_released_date
 

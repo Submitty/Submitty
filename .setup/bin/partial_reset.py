@@ -20,6 +20,7 @@ SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT_Submitty"
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
 
+
 def load_data_yaml(file_path):
     """
     Loads yaml file from the .setup/data directory returning the parsed structure

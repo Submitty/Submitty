@@ -1,4 +1,5 @@
 code: csci9999
+instructor: instructor
 gradeables:
 - components:
   - gc_max_value: 5
@@ -36,4 +37,3 @@ gradeables:
   g_grade_start_date: +7 days
   g_ta_view_start_date: -5 days
   gradeable_config: pdf_word_count
-instructor: instructor
