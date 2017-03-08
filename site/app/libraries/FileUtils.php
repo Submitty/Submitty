@@ -43,7 +43,7 @@ class FileUtils {
                     $path = "{$dir}/{$entry}";
                     // recurse into subdirectories
                     if (is_dir($path) && !in_array(strtolower($entry), $disallowed_folders)) {
-                        $temp = FileUtils::getAllFiles($path, $skip_files,$flatten);
+                        $temp = FileUtils::getAllFiles($path, $skip_files, $flatten);
                         if ($flatten) {
                             foreach ($temp as $file => $details) {
                                 if (isset($details['relative_name'])) {
@@ -56,7 +56,7 @@ class FileUtils {
                             }
                         }
                         else {
-                            $return[$entry] = $temp;
+                            $return[$entry] = array('files' => $temp, 'path' => $path);
                         }
                     }
                     else if (is_file($path) && !in_array(strtolower($entry), $skip_files) &&
