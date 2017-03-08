@@ -631,7 +631,7 @@ class Course(object):
                 submitted = True
                 active = 1
                 if gradeable.type == 0 and gradeable.submission_open_date < datetime.now():
-                    if random.random() < 0.2:
+                    if gradeable.gradeable_config is None or random.random() < 0.2:
                         submitted = False
                         active = -1
                     else:
@@ -655,7 +655,7 @@ class Course(object):
                         if isinstance(gradeable.submissions, dict):
                             for key in gradeable.submissions:
                                 os.system("mkdir -p " + os.path.join(submission_path, "1", key))
-                                src = os.path.join(SAMPLE_SUBMISSIONS, gradeable.id,
+                                src = os.path.join(SAMPLE_SUBMISSIONS, gradeable.gradeable_config,
                                                    random.choice(gradeable.submissions[key]))
                                 dst = os.path.join(submission_path, "1", key, gradeable.submissions[key])
                                 shutil.copy(src, dst)
@@ -666,7 +666,7 @@ class Course(object):
                             else:
                                 submissions = [submission]
                             for submission in submissions:
-                                src = os.path.join(SAMPLE_SUBMISSIONS, gradeable.id, submission)
+                                src = os.path.join(SAMPLE_SUBMISSIONS, gradeable.gradeable_config, submission)
                                 dst = os.path.join(submission_path, "1", submission)
                                 shutil.copy(src, dst)
                 if gradeable.grade_start_date < datetime.now():
@@ -716,6 +716,7 @@ class Gradeable(object):
     """
     def __init__(self, gradeable):
         self.id = ""
+        self.gradeable_config = None
         self.config_path = None
         self.title = ""
         self.instructions_url = ""
@@ -738,6 +739,7 @@ class Gradeable(object):
             else:
                 self.id = gradeable['gradeable_config']
             self.type = 0
+            self.gradeable_config = gradeable['gradeable_config']
         else:
             self.config_path = None
             self.type = int(gradeable['g_type'])
@@ -776,10 +778,12 @@ class Gradeable(object):
             assert self.ta_view_date < self.submission_open_date
             assert self.submission_open_date < self.submission_due_date
             assert self.submission_due_date < self.grade_start_date
-            if os.path.isfile(os.path.join(SAMPLE_SUBMISSIONS, self.id, "submissions.yml")):
-                self.submissions = load_data_yaml(os.path.join(SAMPLE_SUBMISSIONS, self.id, "submissions.yml"))
-            else:
-                self.submissions = os.listdir(os.path.join(SAMPLE_SUBMISSIONS, self.id))
+            if self.gradeable_config is not None:
+                if os.path.isfile(os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config, "submissions.yml")):
+                    self.submissions = load_data_yaml(os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config,
+                                                                   "submissions.yml"))
+                else:
+                    self.submissions = os.listdir(os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config))
         assert self.ta_view_date < self.grade_start_date
         assert self.grade_start_date < self.grade_released_date
 

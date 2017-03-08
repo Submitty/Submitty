@@ -1,5 +1,9 @@
 code: csci1000
 instructor: instructor
+registered_students: 20
+no_registration_students: 5
+no_rotating_students: 5
+unregistered_students: 5
 gradeables:
 - g_id: future_no_tas_homework
   g_title: Future (No TAs) Homework
