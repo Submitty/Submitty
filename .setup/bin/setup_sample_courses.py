@@ -682,8 +682,8 @@ class Course(object):
                         gd_id = res.inserted_primary_key[0]
                         for component in gradeable.components:
                             score = 0 if status == 0 else random.randint(0, component.max_value)
-                            ins = gradeable_component_data.insert().values(gd_id=gd_id, gcd_score=score,
-                                                                           gcd_component_comment="lorem ipsum")
+                            conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
+                                         gcd_score=score, gcd_component_comment="lorem ipsum")
                             conn.execute(ins)
             form = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code,
                                 "config", "form", "form_{}.json".format(gradeable.id))
@@ -937,13 +937,15 @@ class Component(object):
         else:
             self.max_value = float(component['gc_max_value'])
 
+        self.key = None
+
     def create(self, g_id, conn, table):
         ins = table.insert().values(g_id=g_id, gc_title=self.title, gc_ta_comment=self.ta_comment,
                                     gc_student_comment=self.student_comment,
                                     gc_max_value=self.max_value, gc_is_text=self.is_text,
                                     gc_is_extra_credit=self.is_extra_credit, gc_order=self.order)
-        conn.execute(ins)
-
+        res = conn.execute(ins)
+        self.key = res.inserted_primary_key[0]
 
 if __name__ == "__main__":
     main()
