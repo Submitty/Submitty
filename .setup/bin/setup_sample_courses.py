@@ -159,13 +159,13 @@ def generate_random_users(total, real_users):
                 first_name = random.choice(women_names)
             last_name = random.choice(last_names)
             user_id = last_name.replace("'", "")[:5] + first_name[0]
+            user_id = user_id.lower()
             while user_id in user_ids or user_id in real_users:
                 if user_id[-1].isdigit():
                     user_id = user_id[:-1] + str(int(user_id[-1]) + 1)
                 else:
                     user_id = user_id + "1"
 
-            user_id = user_id.lower()
             new_user = User({"user_id": user_id,
                              "user_firstname": first_name,
                              "user_lastname": last_name,
