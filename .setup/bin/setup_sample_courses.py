@@ -65,7 +65,7 @@ def main():
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
-    for course_file in glob.iglob(os.path.join(SETUP_DATA_PATH, 'courses', '*.yml')):
+    for course_file in glob.iglob(os.path.join(args.courses_path, '*.yml')):
         course_json = load_data_yaml(course_file)
         if len(use_courses) == 0 or course_json['code'] in use_courses:
             course = Course(course_json)
@@ -73,7 +73,7 @@ def main():
 
     create_group("course_builders")
 
-    for user_file in glob.iglob(os.path.join(SETUP_DATA_PATH, 'users', '*.yml')):
+    for user_file in glob.iglob(os.path.join(args.users_path, '*.yml')):
         user = User(load_data_yaml(user_file))
         if user.id in ['hwphp', 'hwcron', 'hwcgi', 'hsdbu', 'vagrant', 'postgres'] or \
                 user.id.startswith("untrusted"):
@@ -359,6 +359,12 @@ def parse_args():
                     "either adds all or just a few depending on what gets passed to this script")
 
     parser.add_argument("--db_only", action='store_true')
+    parser.add_argument("--users_path", default=os.path.join(SETUP_DATA_PATH, "users"),
+                        help="Path to folder that contains .yml files to use for user creation. Defaults to "
+                             "../data/users")
+    parser.add_argument("--courses_path", default=os.path.join(SETUP_DATA_PATH, "courses"),
+                        help="Path to the folder that contains .yml files to use for course creation. Defaults to "
+                             "../data/courses")
     parser.add_argument("course", nargs="*",
                         help="course code to build. If no courses are passed in, then it'll use "
                              "all courses in courses.json")
@@ -440,8 +446,8 @@ class User(object):
                 raise ValueError("Invalid type for courses key, it should either be list or dict")
         if 'sudo' in user:
             self.sudo = user['sudo'] is True
-        if 'password' in user:
-            self.password = user['password']
+        if 'user_password' in user:
+            self.password = user['user_password']
 
     def create(self, force_ssh=False):
         if not DB_ONLY:
@@ -540,7 +546,7 @@ class Course(object):
         add_to_group(course_group, self.instructor.id)
         add_to_group(archive_group, self.instructor.id)
         os.system("{}/bin/create_course.sh {} {} {} {}"
-                  .format(SUBMITTY_INSTALL_DIR, self.semester, self.code, "instructor",
+                  .format(SUBMITTY_INSTALL_DIR, self.semester, self.code, self.instructor.id,
                           course_group))
 
         os.environ['PGPASSWORD'] = DB_PASS
