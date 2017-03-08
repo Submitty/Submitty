@@ -679,7 +679,7 @@ class Course(object):
                                                              gd_status=status, gd_late_days_used=0,
                                                              gd_active_version=active)
                         res = conn.execute(ins)
-                        gd_id = res.inserted_primary_key
+                        gd_id = res.inserted_primary_key[0]
                         for component in gradeable.components:
                             score = 0 if status == 0 else random.randint(0, component.max_value)
                             ins = gradeable_component_data.insert().values(gd_id=gd_id, gcd_score=score,
