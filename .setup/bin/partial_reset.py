@@ -6,7 +6,8 @@ removing DB users, all created users (including system ones like hwphp, hwcgi, e
 This script acts more like the inverse of "setup_sample_courses.py" so that we could only run these two scripts in
 opposition and not run into a corrupted system state. This should then give us a nice stability that 
 """
-
+from __future__ import print_function
+import argparse
 import glob
 import os
 import pwd
@@ -60,40 +61,64 @@ def cmd_exists(cmd):
     return os.system("type " + str(cmd)) == 0
 
 
-shutil.rmtree('/var/local/submitty', True)
-os.system("mkdir -p {}/courses".format(SUBMITTY_DATA_DIR))
-os.system("mkdir -p {}/instructors".format(SUBMITTY_DATA_DIR))
-os.system("ls /home | sort > {}/instructors/valid".format(SUBMITTY_DATA_DIR))
-os.system("{}/.setup/INSTALL_SUBMITTY.sh".format(SUBMITTY_INSTALL_DIR))
-os.system('rm -r {}/.vagrant/autograding_logs'.format(SUBMITTY_REPOSITORY))
-os.system('mkdir {}/.vagrant/autograding_logs'.format(SUBMITTY_REPOSITORY))
-os.system('ln -s {}/.vagrant/autograding_logs {}/autograding_logs'.format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
-os.system('rm -r {}/.vagrant/tagrading_logs'.format(SUBMITTY_REPOSITORY))
-os.system('mkdir {}/.vagrant/tagrading_logs'.format(SUBMITTY_REPOSITORY))
-os.system('ln -s {}/.vagrant/tagrading_logs {}/tagrading_logs'.format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
-
-if cmd_exists('psql'):
-    os.environ['PGPASSWORD'] = 'hsdbu'
-    os.system("psql -h localhost -U hsdbu --list | grep submitty_* | awk '{print $1}' | "
-              "xargs -I \"@@\" dropdb -h localhost -U hsdbu \"@@\"")
-    del os.environ['PGPASSWORD']
+def parse_args():
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument("--force", action="store_true",
+                        help="Run this script skipping the 'are you sure' prompts. These are also bypassed if .vagrant "
+                             "folder is detected.")
+    parser.add_argument("--users_path", default=os.path.join(SETUP_DATA_PATH, "users"),
+                        help="Path to folder that contains .yml files to use for user creation. Defaults to "
+                             "../data/users")
+    parser.add_argument("--courses_path", default=os.path.join(SETUP_DATA_PATH, "courses"),
+                        help="Path to the folder that contains .yml files to use for course creation. Defaults to "
+                             "../data/courses")
+    return parser.parse_args()
 
 
-for user_file in glob.iglob(os.path.join(SETUP_DATA_PATH, "users", "*.yml")):
-    user = load_data_yaml(user_file)
-    delete_user(user['user_id'])
+def main():
+    args = parse_args()
+    if not os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")) and not args.force:
+        inp = input("Do you really want to reset the system? There's no undo! [y/n]")
+        if inp.lower() not in ["yes", "y"]:
+            raise SystemExit("Aborting...")
 
-if os.path.isfile(os.path.join(SETUP_DATA_PATH, "random_users.txt")):
-    with open(os.path.join(SETUP_DATA_PATH, "random_users.txt")) as open_file:
-        for line in open_file:
-            delete_user(line.strip())
+    shutil.rmtree('/var/local/submitty', True)
+    os.system("mkdir -p {}/courses".format(SUBMITTY_DATA_DIR))
+    os.system("mkdir -p {}/instructors".format(SUBMITTY_DATA_DIR))
+    os.system("ls /home | sort > {}/instructors/valid".format(SUBMITTY_DATA_DIR))
+    os.system("{}/.setup/INSTALL_SUBMITTY.sh".format(SUBMITTY_INSTALL_DIR))
+    if os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")):
+        os.system('rm -r {}/.vagrant/autograding_logs'.format(SUBMITTY_REPOSITORY))
+        os.system('mkdir {}/.vagrant/autograding_logs'.format(SUBMITTY_REPOSITORY))
+        os.system('ln -s {}/.vagrant/autograding_logs {}/autograding_logs'.format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
+        os.system('rm -r {}/.vagrant/tagrading_logs'.format(SUBMITTY_REPOSITORY))
+        os.system('mkdir {}/.vagrant/tagrading_logs'.format(SUBMITTY_REPOSITORY))
+        os.system('ln -s {}/.vagrant/tagrading_logs {}/tagrading_logs'.format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))
 
-groups = []
-for course_file in glob.iglob(os.path.join(SETUP_DATA_PATH, "courses", "*.yml")):
-    course = load_data_yaml(course_file)
-    groups.append(course['code'])
-    groups.append(course['code'] + "_archive")
-    groups.append(course['code'] + "_tas_www")
+    if cmd_exists('psql'):
+        os.environ['PGPASSWORD'] = 'hsdbu'
+        os.system("psql -h localhost -U hsdbu --list | grep submitty_* | awk '{print $1}' | "
+                  "xargs -I \"@@\" dropdb -h localhost -U hsdbu \"@@\"")
+        del os.environ['PGPASSWORD']
 
-for group in groups:
-    os.system('groupdel ' + group)
+    for user_file in glob.iglob(os.path.join(args.users_path, "*.yml")):
+        user = load_data_yaml(user_file)
+        delete_user(user['user_id'])
+
+    if os.path.isfile(os.path.join(SETUP_DATA_PATH, "random_users.txt")):
+        with open(os.path.join(SETUP_DATA_PATH, "random_users.txt")) as open_file:
+            for line in open_file:
+                delete_user(line.strip())
+
+    groups = []
+    for course_file in glob.iglob(os.path.join(args.courses_path, "*.yml")):
+        course = load_data_yaml(course_file)
+        groups.append(course['code'])
+        groups.append(course['code'] + "_archive")
+        groups.append(course['code'] + "_tas_www")
+
+    for group in groups:
+        os.system('groupdel ' + group)
+
+if __name__ == "__main__":
+    main()

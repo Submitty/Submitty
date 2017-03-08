@@ -7,6 +7,7 @@ allows for install_system.sh to run cleanly and not end up with duplicate lines
 in configuration files or pre-existing databses.
 """
 
+from __future__ import print_function
 import glob
 import os
 import pwd
@@ -91,6 +92,9 @@ def delete_user(user_id):
 
 
 def main():
+    if not os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")):
+        raise SystemExit("This script can only be run against the vagrant installation")
+
     # Remove the MOT.D
     remove_file("/etc/motd")
 

@@ -652,15 +652,23 @@ class Course(object):
                                        "gradeable": gradeable.id,
                                        "user": user.id,
                                        "version": 1}, open_file)
-                        submission = random.choice(gradeable.submissions)
-                        if isinstance(submission, list):
-                            submissions = submission
+                        if isinstance(gradeable.submissions, dict):
+                            for key in gradeable.submissions:
+                                os.system("mkdir -p " + os.path.join(submission_path, "1", key))
+                                src = os.path.join(SAMPLE_SUBMISSIONS, gradeable.id,
+                                                   random.choice(gradeable.submissions[key]))
+                                dst = os.path.join(submission_path, "1", key, gradeable.submissions[key])
+                                shutil.copy(src, dst)
                         else:
-                            submissions = [submission]
-                        for submission in submissions:
-                            src = os.path.join(SAMPLE_SUBMISSIONS, gradeable.id, submission)
-                            dst = os.path.join(submission_path, "1", submission)
-                            shutil.copy(src, dst)
+                            submission = random.choice(gradeable.submissions)
+                            if isinstance(submission, list):
+                                submissions = submission
+                            else:
+                                submissions = [submission]
+                            for submission in submissions:
+                                src = os.path.join(SAMPLE_SUBMISSIONS, gradeable.id, submission)
+                                dst = os.path.join(submission_path, "1", submission)
+                                shutil.copy(src, dst)
                 if gradeable.grade_start_date < datetime.now():
                     if gradeable.grade_released_date < datetime.now() or random.random() < 0.8:
                         status = 1 if submitted else 0
