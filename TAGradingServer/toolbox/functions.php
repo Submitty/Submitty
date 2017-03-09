@@ -35,7 +35,13 @@ $start_time = microtime_float();
 $_GET['course'] = isset($_GET['course']) ? str_replace("/", "_", $_GET['course']) : "";
 $_GET['semester'] = isset($_GET['semester']) ? str_replace("/", "_", $_GET['semester']) : "";
 
-$a = IniParser::readFile(__DIR__."/../../site/config/master.ini");
+if (is_file(__DIR__."/../../site/config/master.ini")) {
+    $a = IniParser::readFile(__DIR__."/../../site/config/master.ini");
+}
+else {
+    $a = IniParser::readFile(__DIR__."/../../../config/master.ini");
+}
+
 $base_url = $a['site_details']['base_url'];
 define("__BASE_URL__", $a['site_details']['ta_base_url']);
 define("__CGI_URL__", $a['site_details']['cgi_url']);
@@ -102,24 +108,39 @@ $SUBMISSION_URL = rtrim(__SUBMISSION_URL__, "/");
 header("Content-Type: text/html; charset=UTF-8");
 
 $user_id = 0;
+$suggested_username = null;
 if ($DEBUG && isset($_GET['useUser'])) {
     $suggested_username = $_GET['userUser'];
 }
 else {
+    $key = $_GET['semester'].'_'.$_GET['course'].'_session_id';
+    if (isset($_COOKIE[$key])) {
+        $db->query("SELECT * FROM sessions WHERE session_id=?", array($_COOKIE[$key]));
+        $row = $db->row();
+        if (isset($row['user_id'])) {
+            $suggested_username = $row['user_id'];
+            setcookie($key, $_COOKIE[$key], time() + (7 * 24 * 60 * 60), "/");
+        }
+        else {
+            setcookie($key, "", time() - 3600);
+        }
+    }
     if (isset($_SERVER['PHP_AUTH_USER'])) {
         $suggested_username = $_SERVER['PHP_AUTH_USER'];
     }
     else if (isset($_SERVER['REMOTE_USER'])) {
         $suggested_username = $_SERVER['PHP_AUTH_USER'];
     }
-    else {
-        // if not already authenticated do it
-        header('WWW-Authenticate: Basic realm=HWServer');
-        header('HTTP/1.0 401 Unauthorized');
-        exit;
-    }
 }
 
+if ($suggested_username === null) {
+    header("Location: ".$SUBMISSION_URL."/index.php?semester={$_GET['semester']}&course={$_GET['course']}");
+    exit();
+    // if not already authenticated do it
+    //header('WWW-Authenticate: Basic realm=HWServer');
+    //header('HTTP/1.0 401 Unauthorized');
+    //exit;
+}
 $params = array($suggested_username);
 try {
     User::loadUser($suggested_username);
