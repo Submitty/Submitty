@@ -7,7 +7,7 @@ use app\views\AbstractView;
 
 class GradeableView extends AbstractView {
     public function uploadConfigForm($target_dir, $all_files) {
-      $html_output = <<<HTML
+        $html_output = <<<HTML
 <div class="content">
     <h2>Upload Gradeable Config</h2>
 
@@ -37,10 +37,8 @@ class GradeableView extends AbstractView {
     </form>
 </div>
 HTML;
-
-
-      if (count($all_files) > 0) {
-          $html_output .= <<<HTML
+        if (count($all_files) > 0) {
+            $html_output .= <<<HTML
 <div class="content">
        <h2>Previous Uploads</h2>
 <br>
@@ -48,32 +46,32 @@ HTML;
 <br>&nbsp;<br>
 <ul>
 HTML;
-          $html_output .= $this->display_files($all_files, $target_dir);
-          $html_output .= <<<HTML
+            $html_output .= $this->display_files($all_files, $target_dir);
+            $html_output .= <<<HTML
 </ul>
 </div>
 HTML;
 
-          $semester = $this->core->getConfig()->getSemester();
-          $course = $this->core->getConfig()->getCourse();
-          $build_script_output_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/build_script_output.txt";
-          if (file_exists($build_script_output_file)) {
-            $contents = file_get_contents($build_script_output_file);
-            $html_output .= <<<HTML
+            $semester = $this->core->getConfig()->getSemester();
+            $course = $this->core->getConfig()->getCourse();
+            $build_script_output_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/build_script_output.txt";
+            if (file_exists($build_script_output_file)) {
+                $contents = file_get_contents($build_script_output_file);
+                $html_output .= <<<HTML
 <div class="content">
 <h2>Output from most recent BUILD_{$course}.sh</h2>
 <br>
 <b>{$build_script_output_file}</b>
 <br>&nbsp;<br>
 <pre>
-$contents
+{$contents}
 </pre>
 </div>
 HTML;
-          }
-      }
+            }
+        }
 
-      return $html_output;
+        return $html_output;
     }
 
     private function display_files($file, $indent = 1, $seen_root = false) {
