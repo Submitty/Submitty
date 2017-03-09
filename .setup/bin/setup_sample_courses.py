@@ -673,6 +673,7 @@ class Course(object):
                 if gradeable.grade_start_date < datetime.now():
                     if gradeable.grade_released_date < datetime.now() or random.random() < 0.8:
                         status = 1 if submitted else 0
+                        print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
                                                              gd_grader_id=self.instructor.id,
                                                              gd_overall_comment="lorem ipsum lodar",
@@ -684,7 +685,6 @@ class Course(object):
                             score = 0 if status == 0 else random.randint(0, component.max_value)
                             conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                          gcd_score=score, gcd_component_comment="lorem ipsum")
-                            conn.execute(ins)
             form = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code,
                                 "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
@@ -785,6 +785,7 @@ class Gradeable(object):
                                                                    "submissions.yml"))
                 else:
                     self.submissions = os.listdir(os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config))
+                self.submissions = list(filter(lambda x: x != ".DS_Store", self.submissions))
         assert self.ta_view_date < self.grade_start_date
         assert self.grade_start_date < self.grade_released_date
 
