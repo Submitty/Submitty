@@ -35,7 +35,9 @@ $start_time = microtime_float();
 $_GET['course'] = isset($_GET['course']) ? str_replace("/", "_", $_GET['course']) : "";
 $_GET['semester'] = isset($_GET['semester']) ? str_replace("/", "_", $_GET['semester']) : "";
 
+$old_method = false;
 if (is_file(__DIR__."/../../site/config/master.ini")) {
+    $old_method = true;
     $a = IniParser::readFile(__DIR__."/../../site/config/master.ini");
 }
 else {
@@ -134,13 +136,18 @@ else {
 }
 
 if ($suggested_username === null) {
-    header("Location: ".$SUBMISSION_URL."/index.php?semester={$_GET['semester']}&course={$_GET['course']}");
-    exit();
-    // if not already authenticated do it
-    //header('WWW-Authenticate: Basic realm=HWServer');
-    //header('HTTP/1.0 401 Unauthorized');
-    //exit;
+    if ($old_method) {
+        // if not already authenticated do it
+        header('WWW-Authenticate: Basic realm=HWServer');
+        header('HTTP/1.0 401 Unauthorized');
+        exit;
+    }
+    else {
+        header("Location: ".$SUBMISSION_URL."/index.php?semester={$_GET['semester']}&course={$_GET['course']}");
+        exit();
+    }
 }
+
 $params = array($suggested_username);
 try {
     User::loadUser($suggested_username);
