@@ -191,6 +191,10 @@ switch($_REQUEST['component']) {
         $control = new app\controllers\StudentController($core);
         $control->run();
         break;
+    case 'misc':
+        $control = new app\controllers\MiscController($core);
+        $control->run();
+        break;
     default:
         $control = new app\controllers\NavigationController($core);
         $control->run();
