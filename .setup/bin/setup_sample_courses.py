@@ -706,7 +706,7 @@ class Course(object):
                 if gradeable.type == 0 and submitted:
                     queue_file = "__".join([self.semester, self.code, gradeable.id, user.id, "1"])
                     print("Creating queue file: " + queue_file)
-                    queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive", queue_file)
+                    queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch", queue_file)
                     with open(queue_file, "w") as open_file:
                         json.dump({"semester": self.semester,
                                    "course": self.code,
