@@ -68,6 +68,7 @@ def main():
     # ends up with just having a ton of build failures. Better to wait on grading any homeworks until we've done
     # all steps of setting up a course.
     os.system("crontab -u hwcron -l > /tmp/hwcron_cron_backup.txt")
+    os.system("crontab -u hwcron -r")
     os.system("killall grade_students.sh")
 
     courses = {}  # dict[str, Course]
