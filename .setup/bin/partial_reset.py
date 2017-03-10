@@ -88,6 +88,7 @@ def main():
     os.system("ls /home | sort > {}/instructors/valid".format(SUBMITTY_DATA_DIR))
     os.system("{}/.setup/INSTALL_SUBMITTY.sh".format(SUBMITTY_INSTALL_DIR))
     if os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")):
+        os.system("rm -rf {}/*_logs".format(SUBMITTY_DATA_DIR))
         os.system('rm -r {}/.vagrant/autograding_logs'.format(SUBMITTY_REPOSITORY))
         os.system('mkdir {}/.vagrant/autograding_logs'.format(SUBMITTY_REPOSITORY))
         os.system('ln -s {}/.vagrant/autograding_logs {}/autograding_logs'.format(SUBMITTY_REPOSITORY, SUBMITTY_DATA_DIR))

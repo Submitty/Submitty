@@ -13,7 +13,7 @@ The first will create all couress in courses.yml while the second will only crea
 specified (which is useful for something like Travis where we don't need the "demo classes", and
 just the ones used for testing.
 """
-from __future__ import print_function
+from __future__ import print_function, division
 import argparse
 from collections import OrderedDict
 from datetime import datetime, timedelta
@@ -62,6 +62,13 @@ def main():
             raise SystemError("The following directory does not exist: " + os.path.join(
                 SUBMITTY_DATA_DIR, directory))
     use_courses = args.course
+
+    # We have to kill crontab and all running grade students processes as otherwise we end up with the process
+    # grabbing the homework files that we are inserting before we're ready to (and permission errors exist) which
+    # ends up with just having a ton of build failures. Better to wait on grading any homeworks until we've done
+    # all steps of setting up a course.
+    os.system("crontab -u hwcron -l > /tmp/hwcron_cron_backup.txt")
+    os.system("killall grade_students.sh")
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
@@ -132,6 +139,9 @@ def main():
         courses[course].instructor = users[courses[course].instructor]
         courses[course].check_rotating(users)
         courses[course].create()
+
+    os.system("crontab -u hwcron /tmp/hwcron_cron_backup.txt")
+    os.system("rm /tmp/hwcron_cron_backup.txt")
 
 
 def generate_random_users(total, real_users):
@@ -622,20 +632,30 @@ class Course(object):
         gradeable_component_data = Table("gradeable_component_data", metadata, autoload=True)
         electronic_gradeable_data = Table("electronic_gradeable_data", metadata, autoload=True)
         electronic_gradeable_version = Table("electronic_gradeable_version", metadata, autoload=True)
+        course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code)
         for gradeable in self.gradeables:
             gradeable.create(conn, gradeable_table, electronic_table, reg_table, component_table)
+            form = os.path.join(course_path, "config", "form", "form_{}.json".format(gradeable.id))
+            with open(form, "w") as open_file:
+                json.dump(gradeable.create_form(), open_file, indent=2)
+        os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(course_path, "BUILD_{}.sh".format(self.code))))
+        os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(course_path, "build")))
+        os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(course_path, "test_*")))
+        os.system("chown instructor:{}_tas_www {}".format(self.code, os.path.join(course_path, "ASSIGNMENTS.txt")))
+
+        for gradeable in self.gradeables:
             for user in self.users:
-                submission_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code,
-                                               "submissions", user.id, gradeable.id)
-                os.system("mkdir -p " + os.path.join(submission_path, "1"))
-                submitted = True
+                submission_path = os.path.join(course_path, "submissions", gradeable.id, user.id)
+                os.system("mkdir -p " + os.path.join(submission_path))
+                submitted = False
                 active = 1
                 if gradeable.type == 0 and gradeable.submission_open_date < datetime.now():
                     if gradeable.gradeable_config is None or random.random() < 0.2:
-                        submitted = False
                         active = -1
                     else:
-                        current_time = datetime.now().strftime("%x %X")
+                        os.system("mkdir -p " + os.path.join(submission_path, "1"))
+                        submitted = True
+                        current_time = (gradeable.submission_due_date - timedelta(days=1)).strftime("%x %X")
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                      g_version=1, submission_time=current_time)
                         conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
@@ -644,15 +664,8 @@ class Course(object):
                             json.dump({"active_version": 1, "history": [{"version": 1, "time": current_time}]},
                                       open_file)
                         with open(os.path.join(submission_path, "1", ".submit.timestamp"), "w") as open_file:
-                            open_file.write(current_time + "\n")
-                        queue_file = "__".join([self.semester, self.code, gradeable.id, user.id, "1"])
-                        queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive", queue_file)
-                        with open(queue_file, "w") as open_file:
-                            json.dump({"semester": self.semester,
-                                       "course": self.code,
-                                       "gradeable": gradeable.id,
-                                       "user": user.id,
-                                       "version": 1}, open_file)
+                            open_file.write(current_time.replace("/", "-") + "\n")
+
                         if isinstance(gradeable.submissions, dict):
                             for key in gradeable.submissions:
                                 os.system("mkdir -p " + os.path.join(submission_path, "1", key))
@@ -670,9 +683,10 @@ class Course(object):
                                 src = os.path.join(SAMPLE_SUBMISSIONS, gradeable.gradeable_config, submission)
                                 dst = os.path.join(submission_path, "1", submission)
                                 shutil.copy(src, dst)
+
                 if gradeable.grade_start_date < datetime.now():
                     if gradeable.grade_released_date < datetime.now() or random.random() < 0.8:
-                        status = 1 if submitted else 0
+                        status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
                                                              gd_grader_id=self.instructor.id,
@@ -682,21 +696,25 @@ class Course(object):
                         res = conn.execute(ins)
                         gd_id = res.inserted_primary_key[0]
                         for component in gradeable.components:
-                            score = 0 if status == 0 else random.randint(0, component.max_value)
+                            score = 0 if status == 0 else (random.randint(0, component.max_value * 2) / 2)
                             conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                          gcd_score=score, gcd_component_comment="lorem ipsum")
-            form = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code,
-                                "config", "form", "form_{}.json".format(gradeable.id))
-            with open(form, "w") as open_file:
-                json.dump(gradeable.create_form(), open_file, indent=2)
-        conn.close()
-        os.system("chown hwphp:{}_tas_www {}".format(self.code,
-                                                     os.path.join(SUBMITTY_DATA_DIR, "courses",
-                                                                  self.semester, self.code,
-                                                                  "config", "form", "*")));
 
-        os.system("{}/courses/{}/{}/BUILD_{}.sh".format(SUBMITTY_DATA_DIR, self.semester,
-                                                        self.code, self.code))
+                os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
+                if gradeable.type == 0 and submitted:
+                    queue_file = "__".join([self.semester, self.code, gradeable.id, user.id, "1"])
+                    print("Creating queue file: " + queue_file)
+                    queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_interactive", queue_file)
+                    with open(queue_file, "w") as open_file:
+                        json.dump({"semester": self.semester,
+                                   "course": self.code,
+                                   "gradeable": gradeable.id,
+                                   "user": user.id,
+                                   "version": 1}, open_file)
+        conn.close()
+        os.system("chown hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "config", "form", "*")))
+
+        os.system("chown -R hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "submissions")))
         os.environ['PGPASSWORD'] = ""
 
     def check_rotating(self, users):
@@ -719,6 +737,7 @@ class Gradeable(object):
         self.id = ""
         self.gradeable_config = None
         self.config_path = None
+        self.sample_path = None
         self.title = ""
         self.instructions_url = ""
         self.overall_ta_instructions = ""
@@ -741,6 +760,10 @@ class Gradeable(object):
                 self.id = gradeable['gradeable_config']
             self.type = 0
             self.gradeable_config = gradeable['gradeable_config']
+            if 'sample_path' in gradeable:
+                self.sample_path = gradeable['sample_path']
+            else:
+                self.sample_path = os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config)
         else:
             self.config_path = None
             self.type = int(gradeable['g_type'])
@@ -781,10 +804,9 @@ class Gradeable(object):
             assert self.submission_due_date < self.grade_start_date
             if self.gradeable_config is not None:
                 if os.path.isfile(os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config, "submissions.yml")):
-                    self.submissions = load_data_yaml(os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config,
-                                                                   "submissions.yml"))
+                    self.submissions = load_data_yaml(os.path.join(self.sample_path, "submissions.yml"))
                 else:
-                    self.submissions = os.listdir(os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config))
+                    self.submissions = os.listdir(self.sample_path)
                 self.submissions = list(filter(lambda x: x != ".DS_Store", self.submissions))
         assert self.ta_view_date < self.grade_start_date
         assert self.grade_start_date < self.grade_released_date
@@ -800,7 +822,7 @@ class Gradeable(object):
 
             if self.type == 1:
                 component['gc_max_value'] = 1
-            self.components.append(Component(component, i))
+            self.components.append(Component(component, i+1))
 
     def create(self, conn, gradeable_table, electronic_table, reg_table, component_table):
         conn.execute(gradeable_table.insert(), g_id=self.id, g_title=self.title,
