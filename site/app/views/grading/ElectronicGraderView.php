@@ -173,12 +173,12 @@ HTML;
                     if (!$result || !$result['user_viewed_date']){
                         $viewed_grade = "&#10008;";
                         $grade_viewed = "";
-                        $grade_viewed_color = "color: red;";
+                        $grade_viewed_color = "color: red; font-size: 1.5em;";
                     }
                     else if ($result && $result['user_viewed_date']){
                         $viewed_grade = "&#x2714;";
                         $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($result['user_viewed_date']));
-                        $grade_viewed_color = "color: green;";
+                        $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
                     }
                 }
                 else{
