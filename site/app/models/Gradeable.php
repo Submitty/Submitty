@@ -59,8 +59,9 @@ abstract class Gradeable extends AbstractModel {
 
     /** @var bool Should the gradeable be graded by registration section (or by rotating section) */
     protected $grade_by_registration = true;
-    
-    protected $components = null;
+
+    /** @var \app\models\GradeableComponent[] */
+    protected $components = array();
 
     /* Config variables that are only for electronic submissions */
     protected $has_config = false;
@@ -405,7 +406,7 @@ abstract class Gradeable extends AbstractModel {
         $svn_path = $course_path."/checkout/".$this->id."/".$this->core->getUser()->getId();
         $results_path = $course_path."/results/".$this->id."/".$this->core->getUser()->getId();
 
-        $this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
+        //$this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
         $this->versions = $this->core->getQueries()->getGradeableVersions($this->id, $this->core->getUser()->getId(), $this->getDueDate());
 
         if (count($this->versions) > 0) {

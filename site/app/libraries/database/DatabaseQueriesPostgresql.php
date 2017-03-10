@@ -153,15 +153,27 @@ ORDER BY g.g_id", array($user_id, $user_id));
         foreach ($this->database->rows() as $row) {
             $return[$row['g_id']] = new GradeableDb($this->core, $row);
         }
-        //var_dump($return);
-        //die();
         return $return;
     }
 
     public function getGradeableById($g_id, $user_id = null) {
         $this->database->query("
 SELECT 
-  gd.*, 
+  g.*,
+  gd.gd_id,
+  gd.gd_grader_id,
+  gd.gd_overall_comment,
+  gd.gd_status,
+  gd.gd_late_days_used,
+  gd.gd_active_version,
+  eg.eg_config_path,
+  eg.eg_is_repository,
+  eg.eg_subdirectory,
+  eg.eg_use_ta_grading,
+  eg.eg_submission_open_date,
+  eg.eg_submission_due_date,
+  eg.eg_late_days,
+  eg.eg_precision,
   CASE WHEN egv.user_id IS NOT NULL THEN 
     CASE WHEN egv.active_version IS NULL THEN 
       0 ELSE 
@@ -169,7 +181,14 @@ SELECT
     END ELSE 
     NULL 
   END AS active_version, 
-  egd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, g.*, eg.*
+  egd.g_version,
+  egd.autograding_non_hidden_non_extra_credit,
+  egd.autograding_non_hidden_extra_credit,
+  egd.autograding_hidden_non_extra_credit,
+  egd.autograding_hidden_extra_credit,
+  egd.submission_time,
+  gc1.total_tagrading_extra_credit, 
+  gc2.total_tagrading_non_extra_credit
 FROM gradeable as g
 LEFT JOIN (
   SELECT *
@@ -252,7 +271,34 @@ ORDER BY egd.g_version", array($g_id, $user_id));
             $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
             $users_query = implode(",", array_fill(0, count($users), "?"));
             $this->database->query("
-SELECT 
+SELECT
+  u.*,
+  g.*,
+  gc.array_gc_id,
+  gc.array_gc_title,
+  gc.array_gc_ta_comment,
+  gc.array_gc_student_comment,
+  gc.array_gc_max_value,
+  gc.array_gc_is_text,
+  gc.array_gc_is_extra_credit,
+  gc.array_gc_order,
+  gd.gd_id,
+  gd.gd_grader_id,
+  gd.gd_overall_comment,
+  gd.gd_status,
+  gd.gd_late_days_used,
+  gd.gd_active_version,
+  gd.array_gcd_gc_id,
+  gd.array_gcd_score,
+  gd.array_gcd_component_comment,
+  eg.eg_config_path,
+  eg.eg_is_repository,
+  eg.eg_subdirectory,
+  eg.eg_use_ta_grading,
+  eg.eg_submission_open_date,
+  eg.eg_submission_due_date,
+  eg.eg_late_days,
+  eg.eg_precision,
   CASE WHEN egv.user_id IS NOT NULL THEN 
     CASE WHEN egv.active_version IS NULL THEN 
       0 ELSE 
@@ -260,13 +306,45 @@ SELECT
     END ELSE 
     NULL 
   END AS active_version, 
-  egd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, gcd.graded_tagrading, 
-  gd.*, eg.*, g.*, u.*
+  egd.g_version,
+  egd.autograding_non_hidden_non_extra_credit,
+  egd.autograding_non_hidden_extra_credit,
+  egd.autograding_hidden_non_extra_credit,
+  egd.autograding_hidden_extra_credit,
+  egd.submission_time,
+  gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, gcd.graded_tagrading
 FROM users AS u
 NATURAL JOIN gradeable AS g
 LEFT JOIN (
-  SELECT *
-  FROM gradeable_data
+  SELECT
+    g_id,
+    array_agg(gc_id) as array_gc_id,
+    array_agg(gc_title) AS array_gc_title,
+    array_agg(gc_ta_comment) AS array_gc_ta_comment,
+    array_agg(gc_student_comment) AS array_gc_student_comment,
+    array_agg(gc_max_value) AS array_gc_max_value,
+    array_agg(gc_is_text) AS array_gc_is_text,
+    array_agg(gc_is_extra_credit) AS array_gc_is_extra_credit,
+    array_agg(gc_order) AS array_gc_order
+  FROM gradeable_component
+  GROUP BY g_id
+) AS gc ON gc.g_id=g.g_id
+LEFT JOIN (
+  SELECT 
+    in_gd.*,
+    in_gcd.array_gcd_gc_id,
+    in_gcd.array_gcd_score,
+    in_gcd.array_gcd_component_comment
+  FROM gradeable_data as in_gd
+  LEFT JOIN (
+    SELECT
+      gd_id,
+      array_agg(gc_id) AS array_gcd_gc_id,
+      array_agg(gcd_score) as array_gcd_score,
+      array_agg(gcd_component_comment) as array_gcd_component_comment
+    FROM gradeable_component_data
+    GROUP BY gd_id
+  ) AS in_gcd ON in_gd.gd_id = in_gcd.gd_id
 ) AS gd ON gd.gd_user_id=u.user_id AND g.g_id=gd.g_id
 LEFT JOIN (
   SELECT SUM(gc_max_value) as total_tagrading_extra_credit, g_id
@@ -281,9 +359,9 @@ LEFT JOIN (
   GROUP BY g_id
 ) AS gc2 ON g.g_id=gc2.g_id
 LEFT JOIN (
-  SELECT SUM(gcd_score) as graded_tagrading, gd_id
+  SELECT SUM(gcd_score) as graded_tagrading, array_agg(gcd_score) as tagrades_array, gd_id
   FROM gradeable_component_data
-  GROUP BY gd_id
+  GROUP BY gd_id  
 ) AS gcd ON gd.gd_id=gcd.gd_id
 LEFT JOIN (
   SELECT *

@@ -106,6 +106,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $students_ids = array();
+        /** @var \app\models\User[] $students */
         foreach ($students as $student) {
             $students_ids[] = $student->getId();
         }

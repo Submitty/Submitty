@@ -3,6 +3,7 @@
 namespace app\models;
 
 use \app\libraries\Core;
+use app\libraries\DatabaseUtils;
 use app\libraries\GradeableType;
 
 /**
@@ -53,10 +54,38 @@ class GradeableDb extends Gradeable{
             if (isset($details['graded_tagrading']) && $details['graded_tagrading'] !== null) {
                 $this->been_tagraded = true;
                 $this->graded_tagrading = $details['graded_tagrading'];
-
             }
             
             $this->loadGradeableConfig();
+        }
+
+        if (isset($details['array_gc_id'])) {
+            $fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment', 'gc_max_value', 'gc_is_text',
+                            'gc_is_extra_credit', 'gc_order', 'gcd_gc_id', 'gcd_score', 'gcd_component_comment');
+            foreach ($fields as $key) {
+                if (isset($details['array_'.$key])) {
+                    $details['array_'.$key] = DatabaseUtils::fromPGToPHPArray($details['array_'.$key], true);
+                }
+            }
+            for ($i = 0; $i < count($details['array_gc_id']); $i++) {
+                $component_details = array('gcd_score' => 0, 'gcd_component_comment' => "");
+                $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
+                                          'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order');
+                foreach ($component_fields as $key) {
+                    $component_details[$key] = $details["array_{$key}"][$i];
+                }
+
+                if (isset($details['array_gcd_gc_id'])) {
+                    for ($j = 0; $j < count($details['array_gcd_gc_id']); $j++) {
+                        if ($details['array_gcd_gc_id'][$j] === $component_details['gc_id']) {
+                            $component_details['gcd_score'] = $details['array_gcd_score'][$j];
+                            $component_details['gcd_component_comment'] = $details['array_gcd_component_comment'][$j];
+                            break;
+                        }
+                    }
+                }
+                $this->components[$component_details['gc_order']] = new GradeableComponent($component_details);
+            }
         }
         
         $this->grade_by_registration = $details['g_grade_by_registration'] === true;
