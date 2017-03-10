@@ -154,8 +154,7 @@ def create_course(course, semester, course_group, assignments=None):
 
             if type == 1:
                 # Checkpoints
-                form_json['instructions_url'] = "https://github.com/Submitty/Submitty/wiki/" \
-                                                "Create-or-Edit-a-Gradeable#numerictext"
+                form_json['instructions_url'] = "http://submitty.org/index",
                 form_json["checkpoint_label"] = ["Checkpoint 1", "Checkpoint 2"]
                 form_json["checkpoint_extra"] = [2]
 
@@ -204,8 +203,7 @@ def create_course(course, semester, course_group, assignments=None):
                 "gradeable_id": tmp["id"] + "_" + str(i),
                 "gradeable_title": tmp["name"] + " " + str(i),
                 "gradeable_type": tmp["type"],
-                "instructions_url": "https://github.com/Submitty/Submitty/wiki/"
-                                    "Create-or-Edit-a-Gradeable#electronic-submission",
+                "instructions_url": "http://submitty.org/student/",
                 "minimum_grading_group": 3,
                 "section_type": "reg_section",
                 "eg_late_days": 2,
