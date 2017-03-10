@@ -1,4 +1,4 @@
-System instructions here: [HOME](https://github.com/Submitty/Submitty/wiki)
+System instructions here: [HOME](http://submitty.org/)
 
 [![Build Status](https://travis-ci.org/Submitty/Submitty.svg?branch=master)](https://travis-ci.org/Submitty/Submitty)
 

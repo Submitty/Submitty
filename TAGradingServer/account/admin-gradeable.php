@@ -293,7 +293,7 @@ HTML;
 
 
 <div class="modal-body">
-<b>Please Read: <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable">Submitty Wiki Instructions for "Create or Edit a Gradeable"</a></b>
+<b>Please Read: <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Submitty Instructions on "Create or Edit a Gradeable"</a></b>
 </div>
 
         <div class="modal-body" style="/*padding-bottom:80px;*/ overflow:visible;">
@@ -323,8 +323,7 @@ HTML;
     print <<<HTML
             > No -->
             <br />   
-            What is the <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable#types-of-gradeables">
-type of the gradeable</a>?: <div id="required_type" style="color:red; display:inline;">(Required)</div>
+            What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">type of the gradeable</a>?: <div id="required_type" style="color:red; display:inline;">(Required)</div>
 
             <fieldset>
                 <input type='radio' id="radio_electronic_file" class="electronic_file" name="gradeable_type" value="Electronic File"
@@ -598,7 +597,7 @@ HTML;
             </div>  
             </fieldset>
             <div id="grading_questions">
-            What is the <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable#grading-user-groups">
+            What is the <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups">
 	    lowest privileged user group</a> that can grade this?
             <select name="minimum_grading_group" class="int_val" style="width:180px;">
 HTML;
@@ -624,7 +623,7 @@ HTML;
 </textarea>
             
             <br />
-            <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Create-or-Edit-a-Gradeable#grading-by-registration-section-or-rotating-section">How should TAs be assigned</a> to grade this item?:
+            <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section">How should TAs be assigned</a> to grade this item?:
             <br />
             <fieldset>
                 <input type="radio" name="section_type" value="reg_section"
@@ -831,7 +830,7 @@ HTML;
             <em style='color: orange;'>must be >= <span id="grades_released_compare_date">{$initial_grades_released_compare_date}</span></em>
             <br />
             
-            What <a target=_blank href="https://github.com/Submitty/Submitty/wiki/Iris-(Rainbow-Grades)">syllabus category</a> does this item belong to?:
+            What <a target=_blank href="http://submitty.org/instructor/iris_rainbow_grades">syllabus category</a> does this item belong to?:
             
             <select name="gradeable_buckets" style="width: 170px;">
 HTML;
