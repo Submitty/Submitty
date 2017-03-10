@@ -12,8 +12,12 @@ import glob
 import os
 import pwd
 import shutil
+import sys
 
 import yaml
+
+if sys.version_info < (3, 0):
+    input = raw_input
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")

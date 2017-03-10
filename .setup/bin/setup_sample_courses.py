@@ -650,12 +650,14 @@ class Course(object):
                 submitted = False
                 active = 1
                 if gradeable.type == 0 and gradeable.submission_open_date < datetime.now():
-                    if gradeable.gradeable_config is None or random.random() < 0.2:
+                    if gradeable.gradeable_config is None or \
+                            (gradeable.submission_due_date < datetime.now() and random.random() < 0.8) or \
+                            (random.random() < 0.3):
                         active = -1
                     else:
                         os.system("mkdir -p " + os.path.join(submission_path, "1"))
                         submitted = True
-                        current_time = (gradeable.submission_due_date - timedelta(days=1)).strftime("%x %X")
+                        current_time = (gradeable.submission_due_date - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
                         conn.execute(electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                      g_version=1, submission_time=current_time)
                         conn.execute(electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
@@ -664,7 +666,7 @@ class Course(object):
                             json.dump({"active_version": 1, "history": [{"version": 1, "time": current_time}]},
                                       open_file)
                         with open(os.path.join(submission_path, "1", ".submit.timestamp"), "w") as open_file:
-                            open_file.write(current_time.replace("/", "-") + "\n")
+                            open_file.write(current_time + "\n")
 
                         if isinstance(gradeable.submissions, dict):
                             for key in gradeable.submissions:

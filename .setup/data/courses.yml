@@ -23,7 +23,7 @@
 #   unregistered_students: int for number of students to have that are not in either rotating or registration sections.
 #     The default for this is 50.
 #
-#   gradeable: a list of gradeables to be used for this course. Each gradeable is defined as:
+#   gradeables: a list of gradeables to be used for this course. Each gradeable is defined as:
 #
 #     g_id: what is the id for this gradeable. This is optional for electronic gradeables and will default to the
 #         filename of the gradeable_config, otherwise this is required to be defined.
