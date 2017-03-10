@@ -10,7 +10,7 @@ function setSiteUrl(url) {
  * construct them there as it makes sense (which helps on cutting down on potential
  * duplication of effort where we can replicate JS functions across multiple pages).
  *
- * @param parts - Object representing URL parts to append to the URL
+ * @param {object} parts - Object representing URL parts to append to the URL
  * @returns {string} - Built up URL to use
  */
 function buildUrl(parts) {
@@ -171,6 +171,63 @@ function check_server(url) {
             }
         }
     );
+}
+
+function openDiv(id) {
+    var elem = $('#' + id);
+    if (elem.hasClass('open')) {
+        elem.hide();
+        elem.removeClass('open');
+        $('#' + id + '-span').removeClass('icon-folder-open').addClass('icon-folder-closed');
+    }
+    else {
+        elem.show();
+        elem.addClass('open');
+        $('#' + id + '-span').removeClass('icon-folder-closed').addClass('icon-folder-open');
+    }
+    return false;
+}
+
+function openUrl(url) {
+    window.open(url, "_blank", "toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600");
+    return false;
+}
+
+function openFrame(url, id, filename) {
+    var iframe = $('#file_viewer_' + id);
+    if (!iframe.hasClass('open')) {
+        var iframeId = "file_viewer_" + id + "_iframe";
+        // handle pdf
+        if(filename.substring(filename.length - 3) === "pdf") {
+            iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='600px' style='border: 0'></iframe>");
+        }
+        else {
+            iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='" + url + "' width='750px' style='border: 0'></iframe>");
+        }
+        iframe.addClass('open');
+    }
+
+    if (!iframe.hasClass('shown')) {
+        iframe.show();
+        iframe.addClass('shown');
+        $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-plus').addClass('icon-minus');
+    }
+    else {
+        iframe.hide();
+        iframe.removeClass('shown');
+        $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-minus').addClass('icon-plus');
+    }
+    return false;
+}
+
+function resizeFrame(id) {
+    var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
+    if (height > 500) {
+        document.getElementById(id).height= "500px";
+    }
+    else {
+        document.getElementById(id).height = (height+18) + "px";
+    }
 }
 
 function batchImportJSON(url, csrf_token){
