@@ -639,15 +639,26 @@ class Course(object):
             form = os.path.join(course_path, "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
-        os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(course_path, "BUILD_{}.sh".format(self.code))))
+        os.system("chown hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "config", "form", "*")))
+        os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(course_path,
+                                                                          "BUILD_{}.sh".format(self.code))))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(course_path, "build")))
-        os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(course_path, "test_*")))
-        os.system("chown instructor:{}_tas_www {}".format(self.code, os.path.join(course_path, "ASSIGNMENTS.txt")))
+        os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code,
+                                                     os.path.join(course_path, "test_*")))
+        os.system("chown {}:{}_tas_www {}".format(self.instructor.id, self.code,
+                                                  os.path.join(course_path, "ASSIGNMENTS.txt")))
 
+        # On python 3, replace with os.makedirs(..., exist_ok=True)
+        os.system("mkdir -R {}".format(os.path.join(course_path, "submissions")))
+        os.system('chown {}:{}_tas_www {}'.format(self.instructor.id, self.code, os.path.join(course_path,
+                                                                                              'submissions')))
         for gradeable in self.gradeables:
+            gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
+            os.makedirs(gradeable_path)
+            os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, gradeable_path))
             for user in self.users:
-                submission_path = os.path.join(course_path, "submissions", gradeable.id, user.id)
-                os.system("mkdir -p " + os.path.join(submission_path))
+                submission_path = os.path.join(gradeable_path, user.id)
+                os.makedirs(submission_path)
                 submitted = False
                 active = 1
                 if gradeable.type == 0 and gradeable.submission_open_date < datetime.now():
@@ -715,9 +726,6 @@ class Course(object):
                                    "user": user.id,
                                    "version": 1}, open_file)
         conn.close()
-        os.system("chown hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "config", "form", "*")))
-
-        os.system("chown -R hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "submissions")))
         os.environ['PGPASSWORD'] = ""
 
     def check_rotating(self, users):
