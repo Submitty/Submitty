@@ -65,7 +65,8 @@ def main():
 
         # stop if its been more than 5 minutes
         if (now-start) >= 5 * 60:
-            raise SystemExit("exiting for time")
+			print "exiting for time"
+            raise SystemExit()
 
         # sleep for 5 seconds
         time.sleep(5)
