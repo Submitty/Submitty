@@ -649,8 +649,8 @@ template<class T> Difference* sesChanges ( metaData< T > & meta_diff, bool extra
         diff->output_length_b = 0;
     }
 	int added = abs( diff->output_length_a - diff->output_length_b );
-	diff->distance = ( meta_diff.distance - added ) / 2;
-	diff->distance += added;
+	diff->setDistance( ( meta_diff.distance - added ) / 2 );
+	diff->setDistance( diff->getDistance() + added );
 
 	if ( meta_diff.snakes.size() == 0 ) {
 	  diff->setGrade(1);
