@@ -32,11 +32,14 @@ require_once(__DIR__ . "/../app/libraries/AutoLoader.php");
 AutoLoader::registerDirectory(__DIR__ . "/../app", true, "app");
 
 $core = new Core();
-/*
+
+/**
  * Register custom expection and error handlers that will get run anytime our application
  * throws something or suffers a fatal error. This allows us to print a very generic error
  * page instead of the actual exception/stack trace during execution, both logging the error
  * and preventing the user from knowing exactly how our system is failing.
+ *
+ * @param Throwable $throwable
  */
 function exception_handler($throwable) {
     global $core;
@@ -189,6 +192,10 @@ switch($_REQUEST['component']) {
         break;
     case 'submission':
         $control = new app\controllers\StudentController($core);
+        $control->run();
+        break;
+    case 'misc':
+        $control = new app\controllers\MiscController($core);
         $control->run();
         break;
     default:

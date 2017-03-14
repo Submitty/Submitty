@@ -1,0 +1,10 @@
+courses:
+  csci1000:
+    user_group: 1
+  csci1100:
+    user_group: 2
+  csci1200:
+    user_group: 4
+user_firstname: Emmett
+user_id: manne
+user_lastname: Mann

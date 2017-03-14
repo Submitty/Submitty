@@ -1,0 +1,39 @@
+code: csci9999
+instructor: instructor
+gradeables:
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  eg_submission_due_date: -2 days
+  eg_submission_open_date: -10 days
+  g_grade_released_date: +3 days
+  g_grade_start_date: +2 days
+  g_ta_view_start_date: -11 days
+  gradeable_config: no_autograding
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  eg_submission_due_date: +0 days
+  eg_submission_open_date: -8 days
+  g_grade_released_date: +5 days
+  g_grade_start_date: +4 days
+  g_ta_view_start_date: -9 days
+  gradeable_config: iclicker_upload
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  eg_submission_due_date: +2 days
+  eg_submission_open_date: -6 days
+  g_grade_released_date: +7 days
+  g_grade_start_date: +5 days
+  g_ta_view_start_date: -7 days
+  gradeable_config: paragraph_textboxes
+- components:
+  - gc_max_value: 5
+    gc_title: Question 1
+  eg_submission_due_date: +4 days
+  eg_submission_open_date: -4 days
+  g_grade_released_date: +10 days
+  g_grade_start_date: +7 days
+  g_ta_view_start_date: -5 days
+  gradeable_config: pdf_word_count
