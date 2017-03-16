@@ -57,16 +57,16 @@ interface IDatabaseQueries {
      * @return Gradeable[]
      */
     public function getAllGradeables($user_id = null);
-    
+
     /**
      * Gets gradeable for the the given id
      *
      * @param $g_id
      * @param $user_id
      *
-     * @return Gradeable
+     * @return \app\models\Gradeable
      */
-    public function getGradeableById($g_id, $user_id = null);
+    public function getGradeables($g_id = null, $user_id = null);
 
     /**
      * @param $g_id
@@ -184,6 +184,14 @@ interface IDatabaseQueries {
      * @param $version
      */
     public function updateActiveVersion($g_id, $user_id, $version);
+
+    /**
+     * Given a gradeable objec, this updates all gradeable_component_data rows that are associated, updating the scores
+     * and comments that were left.
+     *
+     * @param \app\models\Gradeable $gradeable
+     */
+    public function updateGradeableData(Gradeable $gradeable);
 
     /**
      * @todo: write phpdoc

@@ -25,7 +25,7 @@ class ElectronicGraderController extends AbstractController {
      */
     public function showOverview() {
         $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $this->core->getQueries()->getGradeableById($gradeable_id);
+        $gradeable = $this->core->getQueries()->getGradeables($gradeable_id);
         $this->core->getOutput()->addBreadcrumb("Overview {$gradeable->getName()}");
 
         /*
@@ -77,7 +77,7 @@ class ElectronicGraderController extends AbstractController {
      */
     public function showSummary() {
         $gradeable_id = $_REQUEST['gradeable_id'];
-        $gradeable = $this->core->getQueries()->getGradeableById($gradeable_id);
+        $gradeable = $this->core->getQueries()->getGradeables($gradeable_id);
         $this->core->getOutput()->addBreadcrumb("Summary {$gradeable->getName()}");
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);

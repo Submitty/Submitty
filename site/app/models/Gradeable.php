@@ -160,6 +160,7 @@ abstract class Gradeable extends AbstractModel {
     protected $in_batch_queue = false;
     protected $grading_batch_queue = false;
 
+    protected $grader = null;
     protected $grader_id = null;
     protected $overall_comment = "";
     /** @var int code representing the state of electronic submission where 0 = not submitted, 1 = fine, 2 = late,
@@ -739,5 +740,48 @@ abstract class Gradeable extends AbstractModel {
 
     public function getComponents() {
         return $this->components;
+    }
+
+    public function setUser(User $user) {
+        $this->user = $user;
+    }
+
+    public function setGrader(User $user) {
+        $this->grader = $user;
+    }
+
+    /**
+     * @return User
+     */
+    public function getGrader() {
+        return $this->grader;
+    }
+
+    public function setOverallComment($comment) {
+        $this->overall_comment = $comment;
+    }
+
+    public function getOverallComment() {
+        return $this->overall_comment;
+    }
+
+    public function setStatus($status) {
+        $this->status = $status;
+    }
+
+    public function getStatus() {
+        return $this->status;
+    }
+
+    public function setActiveVersion($version) {
+        $this->active_version = $version;
+    }
+    
+    public function getGdId() {
+        return $this->gd_id;
+    }
+
+    public function setGdId($gd_id) {
+        $this->gd_id = $gd_id;
     }
 }

@@ -1,7 +1,9 @@
 var siteUrl = undefined;
+var csrfToken = undefined;
 
-function setSiteUrl(url) {
-    siteUrl = url
+function setSiteDetails(url, setCsrfToken) {
+    siteUrl = url;
+    csrfToken = setCsrfToken;
 }
 
 /**
@@ -342,6 +344,92 @@ $(function() {
 });
 */
 
+function updateCheckpointCell(elem) {
+    elem = $(elem);
+    if (elem.data("score") === 1.0) {
+        elem.data("score", 0.5);
+        elem.css("background-color", "#88d0f4");
+        elem.css("border-right", "15px solid #f9f9f9");
+    }
+    else if (elem.data("score") === 0.5) {
+        elem.data("score", 0);
+        elem.css("background-color", "");
+        elem.css("border-right", "15px solid #ddd");
+    }
+    else {
+        elem.data("score", 1);
+        elem.css("background-color", "#149bdf");
+        elem.css("border-right", "15px solid #f9f9f9");
+    }
+}
+
+function submitAJAX(url, data, callbackSuccess, callbackFailure) {
+    $.ajax(url, {
+        type: "POST",
+        data: data
+    })
+    .done(function(response) {
+        try{
+            response = JSON.parse(response);
+            if (response['status'] === 'success') {
+                callbackSuccess();
+            }
+            else {
+                console.log(response['message']);
+                callbackFailure();
+
+            }
+        }
+        catch (e) {
+            console.log(response);
+            callbackFailure();
+            window.alert("[SAVE ERROR] Refresh Page");
+
+        }
+    })
+    .fail(function() {
+        window.alert("[SAVE ERROR] Refresh Page");
+    });
+}
+
+function setupCheckboxCells() {
+    $("td[class^=cell-]").click(function() {
+        var parent = $(this).parent();
+        var elems = [];
+        if ($(this).hasClass('cell-all')) {
+            parent.children(".cell-grade").each(function() {
+                updateCheckpointCell(this);
+                elems.push(this);
+            });
+        }
+        else {
+            updateCheckpointCell(this);
+            elems.push(this);
+        }
+        var scores = {};
+        parent.children("td.cell-grade").each(function() {
+            scores[$(this).data("id")] = $(this).data("score");
+        });
+
+        submitAJAX(
+            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_grade'}),
+            {'csrf_token': csrfToken, 'user_id': parent.data("user"), 'g_id': parent.data('gradeable'), 'scores': scores},
+            function() {
+                elems.forEach(function(elem) {
+                    $(elem).animate({"border-right-width": "0px"}, 400);
+                });
+            },
+            function() {
+                elems.forEach(function(elem) {
+                    console.log(elem);
+                    $(elem).css("border-right-width", "15px");
+                    $(elem).stop(true, true).animate({"border-right-color": "#DA4F49"}, 400);
+                });
+            }
+        );
+    });
+}
+
 $(function() {
     if (window.location.hash !== "") {
         if ($(window.location.hash).offset().top > 0) {
@@ -353,4 +441,6 @@ $(function() {
     setTimeout(function() {
         $('.inner-message').fadeOut();
     }, 5000);
+
+    setupCheckboxCells();
 });

@@ -17,17 +17,22 @@ class SimpleGraderView extends AbstractView {
     public function checkpointForm($gradeable, $rows) {
         $return = <<<HTML
 <div class="content">
+    <i class="fa fa-question-circle tooltip" style="float: right" aria-hidden="true">
+        <span class="tooltiptext">
+No Color - No Credit<br />
+Dark Blue - Full Credit<br />
+Light Blue - Half Credit<br />
+Red - [SAVE ERROR] Refresh Page
+        </span>
+    </i>
     <h2>Overview of {$gradeable->getName()}</h2>
     <table class="table table-striped table-bordered persist-area">
         <thead class="persist-thead">
             <tr>
                 <td width="3%"></td>
                 <td width="5%">Section</td>
-                <td width="20%" style="text-align: left">User ID</td>
-                <td width="30%" colspan="2">Name</td>
-                <td>Question 1</td>
-                <td>Question 2</td>
-                <td>Text 1</td>
+                <td width="10%" style="text-align: left">User ID</td>
+                <td width="20%" colspan="2">Name</td>
 HTML;
         foreach ($gradeable->getComponents() as $component) {
             $return .= <<<HTML
@@ -41,14 +46,15 @@ HTML;
 HTML;
 
         $count = 1;
+        $row = 0;
         $last_section = false;
         $tbody_open = false;
-        foreach ($rows as $row) {
+        foreach ($rows as $gradeable_row) {
             if ($gradeable->isGradeByRegistration()) {
-                $section = $row->getUser()->getRegistrationSection();
+                $section = $gradeable_row->getUser()->getRegistrationSection();
             }
             else {
-                $section = $row->getUser()->getRotatingSection();
+                $section = $gradeable_row->getUser()->getRotatingSection();
             }
             $display_section = ($section === null) ? "NULL" : $section;
             if ($section !== $last_section) {
@@ -76,29 +82,44 @@ HTML;
         <tbody id="section-{$section}">
 HTML;
             }
+
             $return .= <<<HTML
-            <tr>
-                <td>{$count}</td>
-                <td>{$row->getUser()->getRegistrationSection()}</td>
-                <td style="text-align: left">{$row->getUser()->getId()}</td>
-                <td style="text-align: left">{$row->getUser()->getDisplayedFirstName()}</td>
-                <td style="text-align: left">{$row->getUser()->getLastName()}</td>
+            <tr data-gradeable="{$gradeable->getId()}" data-user="{$gradeable_row->getUser()->getId()}">
+                <td class="cell-all">{$count}</td>
+                <td class="cell-all">{$gradeable_row->getUser()->getRegistrationSection()}</td>
+                <td class="cell-all" style="text-align: left">{$gradeable_row->getUser()->getId()}</td>
+                <td class="cell-all" style="text-align: left">{$gradeable_row->getUser()->getDisplayedFirstName()}</td>
+                <td class="cell-all" style="text-align: left">{$gradeable_row->getUser()->getLastName()}</td>
 HTML;
-            foreach ($row->getComponents() as $component) {
+
+            $col = 0;
+            foreach ($gradeable_row->getComponents() as $component) {
                 if ($component->isText()) {
                     $return .= <<<HTML
                 <td>{$component->getComment()}</td>
 HTML;
                 }
                 else {
+                    if($component->getScore() === 1.0) {
+                        $background_color = "background-color: #149bdf";
+                    }
+                    else if($component->getScore() === 0.5) {
+                        $background_color = "background-color: #88d0f4";
+                    }
+                    else {
+                        $background_color = "";
+                    }
                     $return .= <<<HTML
-                <td>{$component->getScore()}</td>
+               <td class="cell-grade" id="cell-{$row}-{$col}" data-id="{$component->getId()}" data-score="{$component->getScore()}" style="{$background_color}"></td>
 HTML;
                 }
+                $gradeable_row++;
+                $col++;
             }
             $return .= <<<HTML
             </tr>
 HTML;
+            $row++;
             $count++;
         }
 

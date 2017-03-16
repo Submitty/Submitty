@@ -16,7 +16,14 @@ class GradeableDb extends Gradeable{
         parent::__construct($core, $details['g_id']);
 
         $this->user = ($user === null) ? $this->core->getUser() : $user;
-        $this->gd_id = $details['gd_id'];
+        if (isset($details['gd_id'])) {
+            $this->gd_id = $details['gd_id'];
+            $this->grader_id = $details['gd_grader_id'];
+            $this->overall_comment = $details['gd_overall_comment'];
+            $this->status = $details['gd_status'];
+            $this->graded_version = $details['gd_active_version'];
+        }
+
         $timezone = new \DateTimeZone($this->core->getConfig()->getTimezone());
         $this->name = $details['g_title'];
         
@@ -33,19 +40,16 @@ class GradeableDb extends Gradeable{
             $this->subdirectory = $details['eg_subdirectory'];
             $this->point_precision = floatval($details['eg_precision']);
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
-            $this->grader_id = $details['gd_grader_id'];
-            $this->overall_comment = $details['gd_overall_comment'];
-            $this->status = $details['gd_status'];
-            $this->graded_version = $details['gd_active_version'];
-
-            if ($details['active_version'] !== null) {
-                $this->been_autograded = true;
-                $this->active_version = $details['active_version'];
-                $this->graded_auto_non_hidden_non_extra_credit = floatval($details['autograding_non_hidden_non_extra_credit']);
-                $this->graded_auto_non_hidden_extra_credit = floatval($details['autograding_non_hidden_extra_credit']);
-                $this->graded_auto_hidden_non_extra_credit = floatval($details['autograding_hidden_non_extra_credit']);
-                $this->graded_auto_hidden_extra_credit = floatval($details['autograding_hidden_extra_credit']);
-                $this->submission_time =  new \DateTime($details['submission_time'], $timezone);
+            if (isset($details['gd_id'])) {
+                if ($details['active_version'] !== null) {
+                    $this->been_autograded = true;
+                    $this->active_version = $details['active_version'];
+                    $this->graded_auto_non_hidden_non_extra_credit = floatval($details['autograding_non_hidden_non_extra_credit']);
+                    $this->graded_auto_non_hidden_extra_credit = floatval($details['autograding_non_hidden_extra_credit']);
+                    $this->graded_auto_hidden_non_extra_credit = floatval($details['autograding_hidden_non_extra_credit']);
+                    $this->graded_auto_hidden_extra_credit = floatval($details['autograding_hidden_extra_credit']);
+                    $this->submission_time = new \DateTime($details['submission_time'], $timezone);
+                }
             }
 
             $this->total_tagrading_extra_credit = floatval($details['total_tagrading_extra_credit']);
@@ -68,7 +72,7 @@ class GradeableDb extends Gradeable{
                 }
             }
             for ($i = 0; $i < count($details['array_gc_id']); $i++) {
-                $component_details = array('gcd_score' => 0, 'gcd_component_comment' => "");
+                $component_details = array();
                 $component_fields = array('gc_id', 'gc_title', 'gc_ta_comment', 'gc_student_comment',
                                           'gc_max_value', 'gc_is_text', 'gc_is_extra_credit', 'gc_order');
                 foreach ($component_fields as $key) {
