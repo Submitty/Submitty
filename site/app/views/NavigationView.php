@@ -160,11 +160,8 @@ HTML;
                     
                     $user_id = $this->core->getUser()->getId();
                     $g_id = $g_data->getId();
-                    
-                    
-                    $params = array($user_id, $g_id);
 
-                    //A string representation of the sql query
+                    $params = array($user_id, $g_id);
                     $query = "SELECT 
                     user_viewed_date
                     FROM
@@ -175,15 +172,10 @@ HTML;
                         g_id = ?
                     ;";
 
-
                     $this->core->getDatabase()->query($query, $params);
-
-                    //Get the results of the query 
                     $result = $this->core->getDatabase()->row();
 
-                    if (!$result || !$result['user_viewed_date'] || $result['user_viewed_date'] == ""){
-                    }
-                    else if ($result && $result['user_viewed_date'] != ""){
+                    if ($result && $result['user_viewed_date'] != ""){
                         $title_to_button_type_submission['GRADED'] = "btn-default";
                     }
                 }

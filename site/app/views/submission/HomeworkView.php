@@ -55,29 +55,10 @@ HTML;
     public function showGradeable($gradeable, $days_late) {
         if ($gradeable->hasResults()){
             $user_id = $this->core->getUser()->getId();
-            $g_id = $gradeable->getId();
-            
+            $g_id = $gradeable->getId();            
             
             $params = array($user_id, $g_id);
 
-            //A string representation of the sql query
-            $query = "SELECT 
-            user_viewed_date
-            FROM 
-                gradeable_data 
-            WHERE
-                gd_user_id = ?
-            AND 
-                g_id = ?
-            ;";
-
-
-            $this->core->getDatabase()->query($query, $params);
-
-            //Get the results of the query 
-            $result = $this->core->getDatabase()->row();
-                
-            //A string representation of the sql query
             $query = "UPDATE gradeable_data
             SET 
                 user_viewed_date = now()
@@ -89,10 +70,6 @@ HTML;
 
             $this->core->getDatabase()->query($query, $params);
         }
-        
-        
-        
-        
         
         $upload_message = $this->core->getConfig()->getUploadMessage();
         $current_version = $gradeable->getCurrentVersion();
@@ -450,7 +427,6 @@ HTML;
 HTML;
                 $results = $gradeable->getResults();
                 if($gradeable->hasResults()) {
-                    //Insert some code to write to db about submission view
 
                     $return .= <<<HTML
 submission timestamp: {$current_version->getSubmissionTime()}<br />

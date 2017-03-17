@@ -152,7 +152,6 @@ HTML;
                 $g_id = $gradeable->getId();
 
                 $params = array($user_id, $g_id);
-                //A string representation of the sql query
                 $query = "SELECT 
                 user_viewed_date
                 FROM 
@@ -163,10 +162,7 @@ HTML;
                     g_id = ?
                 ;";
 
-
                 $this->core->getDatabase()->query($query, $params);
-
-                //Get the results of the query 
                 $result = $this->core->getDatabase()->row();
 
                 if ($row->beenTAgraded()){
