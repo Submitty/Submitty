@@ -784,4 +784,8 @@ abstract class Gradeable extends AbstractModel {
     public function setGdId($gd_id) {
         $this->gd_id = $gd_id;
     }
+
+    public function saveData() {
+        $this->core->getQueries()->updateGradeableData($this);
+    }
 }

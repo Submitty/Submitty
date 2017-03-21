@@ -24,7 +24,7 @@ class SimpleGraderController extends AbstractController  {
             throw new \Exception("ack");
         }
         $g_id = $_REQUEST['g_id'];
-        $gradeable = $this->core->getQueries()->getGradeables($g_id);
+        $gradeable = $this->core->getQueries()->getGradeable($g_id);
         if ($gradeable === null) {
             throw new \Exception("ugh");
         }
@@ -38,7 +38,7 @@ class SimpleGraderController extends AbstractController  {
 
         $students = $this->core->getQueries()->getAllUsers($section_key);
         $student_ids = array_map(function(User $user) { return $user->getId(); }, $students);
-        $rows = $this->core->getQueries()->getGradeableForUsers($gradeable->getId(), $student_ids, $section_key);
+        $rows = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids, $section_key);
         $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'checkpointForm', $gradeable, $rows);
     }
 
@@ -50,7 +50,7 @@ class SimpleGraderController extends AbstractController  {
         }
         $g_id = $_REQUEST['g_id'];
         $user_id = $_REQUEST['user_id'];
-        $gradeable = $this->core->getQueries()->getGradeables($g_id, $user_id);
+        $gradeable = $this->core->getQueries()->getGradeable($g_id, $user_id);
         $user = $this->core->getQueries()->getUserById($user_id);
         if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
             $response = array('status' => 'fail', 'message' => 'Invalid CSRF token');

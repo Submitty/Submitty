@@ -30,7 +30,6 @@ class GradeableDb extends Gradeable{
         $this->ta_instructions = $details['g_overall_ta_instructions'];
         $this->instructions_url = $details['g_instructions_url'];
         //$this->team_gradeable = isset($details['team-assignment']) ? $details['team-assignment'] === "yes" : "no";
-    
         $this->type = $details['g_gradeable_type'];
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
             $this->open_date = new \DateTime($details['eg_submission_open_date'], $timezone);
@@ -51,16 +50,11 @@ class GradeableDb extends Gradeable{
                     $this->submission_time = new \DateTime($details['submission_time'], $timezone);
                 }
             }
-
-            $this->total_tagrading_extra_credit = floatval($details['total_tagrading_extra_credit']);
-            $this->total_tagrading_non_extra_credit = floatval($details['total_tagrading_non_extra_credit']);
-
-            if (isset($details['graded_tagrading']) && $details['graded_tagrading'] !== null) {
-                $this->been_tagraded = true;
-                $this->graded_tagrading = $details['graded_tagrading'];
-            }
-            
             $this->loadGradeableConfig();
+        }
+
+        if (isset($details['array_gcd_gc_id'])) {
+            $this->been_tagraded = true;
         }
 
         if (isset($details['array_gc_id'])) {
@@ -89,6 +83,17 @@ class GradeableDb extends Gradeable{
                     }
                 }
                 $this->components[$component_details['gc_order']] = new GradeableComponent($component_details);
+
+                if (!$this->components[$component_details['gc_order']]->isText()) {
+                    $max_value = $this->components[$component_details['gc_order']]->getMaxValue();
+                    if ($this->components[$component_details['gc_order']]->isExtraCredit()) {
+                        $this->total_tagrading_extra_credit += $max_value;
+                    }
+                    else {
+                        $this->total_tagrading_non_extra_credit += $max_value;
+                    }
+                    $this->graded_tagrading += $this->components[$component_details['gc_order']]->getScore();
+                }
             }
         }
         

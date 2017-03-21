@@ -45,21 +45,21 @@ function editUserForm(user_id) {
                 user.addClass('readonly');
             }
             $('[name="user_firstname"]', form).val(json['user_firstname']);
-            if (json['user_preferred_firstname'] == null) {
+            if (json['user_preferred_firstname'] === null) {
                 json['user_preferred_firstname'] = "";
             }
             $('[name="user_preferred_firstname"]', form).val(json['user_preferred_firstname']);
             $('[name="user_lastname"]', form).val(json['user_lastname']);
             $('[name="user_email"]', form).val(json['user_email']);
             var registration_section;
-            if (json['registration_section'] == null) {
+            if (json['registration_section'] === null) {
                 registration_section = "null";
             }
             else {
                 registration_section = json['registration_section'].toString();
             }
             var rotating_section;
-            if (json['rotating_section'] == null) {
+            if (json['rotating_section'] === null) {
                 rotating_section = "null";
             }
             else {
@@ -70,7 +70,7 @@ function editUserForm(user_id) {
             $('[name="manual_registration"]', form).prop('checked', json['manual_registration']);
             $('[name="user_group"] option[value="' + json['user_group'] + '"]', form).prop('selected', true);
             $("[name='grading_registration_section[]']").prop('checked', false);
-            if (json['grading_registration_sections'] != null && json['grading_registration_sections'] != undefined) {
+            if (json['grading_registration_sections'] !== null && json['grading_registration_sections'] !== undefined) {
                 json['grading_registration_sections'].forEach(function(val) {
                     $('#grs_' + val).prop('checked', true);
                 });
@@ -377,6 +377,9 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
             else {
                 console.log(response['message']);
                 callbackFailure();
+                if (response['status'] === 'error') {
+                    window.alert("[SAVE ERROR] Refresh Page");
+                }
 
             }
         }
