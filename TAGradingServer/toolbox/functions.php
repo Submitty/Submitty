@@ -45,7 +45,7 @@ else {
 }
 
 $base_url = $a['site_details']['base_url'];
-define("__BASE_URL__", $a['site_details']['ta_base_url']);
+$ta_base_url = $a['site_details']['ta_base_url'];
 define("__CGI_URL__", $a['site_details']['cgi_url']);
 define("__SUBMISSION_GRACE_PERIOD_SECONDS__", 5 * 60);
 define("__OUTPUT_MAX_LENGTH__", 100000);
@@ -78,6 +78,12 @@ if (isset($a['hidden_details']['course_url'])) {
 }
 else {
     define("__SUBMISSION_URL__", $base_url);
+}
+if (isset($a['hidden_details']['ta_base_url'])) {
+    define("__BASE_URL__", $a['hidden_details']['ta_base_url']);
+}
+else {
+    define("__BASE_URL__", $ta_base_url);
 }
 define("__COURSE_NAME__", $a['course_details']['course_name']);
 define("__CALCULATE_DIFF__", true);
