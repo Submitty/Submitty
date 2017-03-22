@@ -12,7 +12,7 @@
                     "messages": [
                         "ERROR: TestResults not initialized.",
                         "Probably caused by error in validation.",
-                        "Ask instructor to check results_log_validator.txt"
+                        "If you cannot debug the issue, ask your instructor to check results_log_validator.txt"
                     ]
                 }
             ],
