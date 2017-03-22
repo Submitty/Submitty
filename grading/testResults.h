@@ -25,7 +25,7 @@ public:
     distance = 0;
     grade = 0;
     strcpy(diff,"");
-    char default_message[] = "ERROR: TestResults not initialized.\nProbably caused by error in validation.\nAsk instructor to check results_log_validator.txt";
+    char default_message[] = "ERROR: TestResults not initialized.\nProbably caused by error in validation.\nIf you cannot debug the issue, ask your instructor to check results_log_validator.txt";
     assert (strlen(default_message) < TEST_RESULT_MESSAGES_SIZE-1);
     strcpy(messages,default_message);
     std::cout << "init done " << std::endl;
@@ -35,7 +35,7 @@ public:
     grade = g;
     distance = dist;
     if (d.size() >= TEST_RESULT_DIFF_SIZE-1) {
-      m.push_back("ERROR: diff too large to display.\nAsk instructor to check results_log_validator.txt");
+      m.push_back("ERROR: diff too large to calculate/display.");
       strcpy(diff,"");
     } else {
       assert (d.size() < TEST_RESULT_DIFF_SIZE-1);
@@ -47,7 +47,7 @@ public:
       tmp += m[i];
     }
     if (tmp.size() >= TEST_RESULT_MESSAGES_SIZE-1) {
-      char default_message[] = "ERROR: messages too large to display.\nAsk instructor to check results_log_validator.txt";
+      char default_message[] = "ERROR: messages too large to display.";
       assert (strlen(default_message) < TEST_RESULT_MESSAGES_SIZE-1);
       strcpy(messages,default_message);
     } else {
