@@ -336,7 +336,7 @@
         - gc_title: Question 1
           gc_max_value: 5
 
-- code: csci1200
+- code: ds
   instructor: instructor
   gradeables:
     - gradeable_config: cpp_simple_lab

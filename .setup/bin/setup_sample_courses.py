@@ -687,9 +687,12 @@ class Course(object):
                                                    random.choice(gradeable.submissions[key]))
                                 dst = os.path.join(submission_path, "1", key, gradeable.submissions[key])
                                 shutil.copy(src, dst)
-                        else:
+                        elif (len(gradeable.submissions) > 0):
                             submission = random.choice(gradeable.submissions)
-                            if isinstance(submission, list):
+                            if isinstance(submission,dict):
+                                #ugly, can't handle nested directories in sample submissions
+                                continue
+                            elif isinstance(submission, list):
                                 submissions = submission
                             else:
                                 submissions = [submission]
