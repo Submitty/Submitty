@@ -107,7 +107,16 @@ def main():
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
 
+    list_of_courses_file="/usr/local/submitty/site/app/views/current_courses.php"
+    with open(list_of_courses_file, "w") as courses_file:
+        print("",file=courses_file)
+
     for course_id in courses.keys():
+
+        with open(list_of_courses_file, "a") as courses_file:
+            print('<a href="http://192.168.56.101/index.php?semester=s17&course='+course_id+'">'+course_id+', Spring 2017</a>',file=courses_file)
+            print("<br>",file=courses_file)
+
         course = courses[course_id]
         students = random.sample(extra_students, course.registered_students + course.no_registration_students +
                                  course.no_rotating_students + course.unregistered_students)
