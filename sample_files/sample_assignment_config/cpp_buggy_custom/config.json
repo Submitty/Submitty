@@ -1,0 +1,29 @@
+{
+    "assignment_message" : "This configuration has an (intentionally) broken custom grader... ",
+
+    "testcases" : [
+
+        // *************** COMPILATION *****************
+        {
+            "type" : "Compilation",
+            "title" : "Compilation",
+            "command" : "g++ -std=c++11 -Wall -o a.out *.cpp",
+            "executable_name" : "a.out",
+            "points" : 2
+        },
+
+        // *************** TEST CASES *****************
+        {
+            "title" : "Sum of 5 random numbers",
+            "command" : "./a.out 5",
+            "points" : 8,
+            "validation" : [
+                {
+                    "method" : "custom",
+                    "args" : "5",
+                    "actual_file" : "STDOUT.txt"
+                }
+            ]
+        }
+    ]
+}
