@@ -460,6 +460,23 @@ if [ ${VAGRANT} == 1 ]; then
 	service postgresql restart
 fi
 
+
+#################################################################
+# CLONE THE TUTORIAL REPO
+#################
+
+# grab the tutorial repo, which includes a number of curated example
+# assignment configurations
+
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial ]; then
+    pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
+    git pull
+    popd
+else
+    git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
+fi
+
+
 #################################################################
 # ANALYSIS TOOLS SETUP
 #################

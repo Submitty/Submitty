@@ -40,16 +40,16 @@
 #
 #         courses:
 #           - csci1100
-#           - ds
+#           - datastructures
 #
-#         where the user will only be added to the csci1100 and ds courses using the settings defined above.
+#         where the user will only be added to the csci1100 and datastructures courses using the settings defined above.
 #         A more complex usage would be:
 #
 #         courses:
 #           csci1100:
 #             user_group: 4
 #             registration_section: 1
-#           ds:
+#           datastructures:
 #             user_group: 1
 #
 #         where now the user is added to the two courses as before, but their in different groups in the courses (and
@@ -85,7 +85,7 @@
       user_group: 1
     csci1100:
       user_group: 2
-    ds:
+    datastructures:
       user_group: 4
 
 ## TA ACCOUNTS
