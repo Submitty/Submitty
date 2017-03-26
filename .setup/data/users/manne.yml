@@ -5,6 +5,8 @@ courses:
     user_group: 2
   datastructures:
     user_group: 4
+  tutorial:
+    user_group: 4
 user_firstname: Emmett
 user_id: manne
 user_lastname: Mann

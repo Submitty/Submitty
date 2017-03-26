@@ -87,6 +87,8 @@
       user_group: 2
     datastructures:
       user_group: 4
+    tutorial:
+      user_group: 4
 
 ## TA ACCOUNTS
 

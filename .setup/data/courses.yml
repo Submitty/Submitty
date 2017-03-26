@@ -474,3 +474,19 @@
       components:
         - gc_title: Question 1
           gc_max_value: 5
+
+
+
+
+- code: tutorial
+  instructor: instructor
+  gradeables:
+    - gradeable_config: iclicker_upload
+      g_ta_view_start_date: -9 days
+      eg_submission_open_date: -8 days
+      eg_submission_due_date: +0 days
+      g_grade_start_date: +4 days
+      g_grade_released_date: +5 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5

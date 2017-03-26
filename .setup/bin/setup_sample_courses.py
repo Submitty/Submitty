@@ -36,8 +36,11 @@ SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
 SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT_Submitty"
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
-SAMPLE_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_assignment_config")
+SAMPLE_ASSIGNMENT_CONFIG = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_assignment_config")
 SAMPLE_SUBMISSIONS = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_submissions")
+
+TUTORIAL_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT_Tutorial"
+TUTORIAL_DIR = os.path.join(TUTORIAL_REPOSITORY, "examples")
 
 DB_HOST = "localhost"
 DB_USER = "hsdbu"
@@ -692,8 +695,20 @@ class Course(object):
                         if isinstance(gradeable.submissions, dict):
                             for key in gradeable.submissions:
                                 os.system("mkdir -p " + os.path.join(submission_path, "1", key))
-                                src = os.path.join(SAMPLE_SUBMISSIONS, gradeable.gradeable_config,
-                                                   random.choice(gradeable.submissions[key]))
+
+                                sample_path = os.path.join(SAMPLE_SUBMISSIONS, gradeable.gradeable_config,
+                                                           random.choice(gradeable.submissions[key]))
+                                tutorial_path = os.path.join(TUTORIAL_DIR, gradeable.gradeable_config,"submissions",
+                                                             random.choice(gradeable.submissions[key]))
+
+                                if (os.path.exists(sample_path)):
+                                    src = sample_path
+                                elif (os.path.exists(tutorial_path)):
+                                    src = tutorial_path
+                                else:
+                                    src=""
+                                    print("ERROR!  PATHS DON'T EXIST "+sample_path+" "+tutorial_path)
+
                                 dst = os.path.join(submission_path, "1", key, gradeable.submissions[key])
                                 shutil.copy(src, dst)
                         elif (len(gradeable.submissions) > 0):
@@ -706,7 +721,18 @@ class Course(object):
                             else:
                                 submissions = [submission]
                             for submission in submissions:
-                                src = os.path.join(SAMPLE_SUBMISSIONS, gradeable.gradeable_config, submission)
+
+                                sample_path = os.path.join(SAMPLE_SUBMISSIONS, gradeable.gradeable_config,submission)
+                                tutorial_path = os.path.join(TUTORIAL_DIR, gradeable.gradeable_config,"submissions",submission)
+
+                                if (os.path.exists(sample_path)):
+                                    src = sample_path
+                                elif (os.path.exists(tutorial_path)):
+                                    src = tutorial_path
+                                else:
+                                    src=""
+                                    print("ERROR!  PATHS DON'T EXIST "+sample_path+" "+tutorial_path)
+
                                 dst = os.path.join(submission_path, "1", submission)
                                 shutil.copy(src, dst)
 
@@ -776,7 +802,14 @@ class Gradeable(object):
         self.grading_rotating = []
 
         if 'gradeable_config' in gradeable:
-            self.config_path = os.path.join(SAMPLE_DIR, gradeable['gradeable_config'])
+            sample_path = os.path.join(SAMPLE_ASSIGNMENT_CONFIG, gradeable['gradeable_config'])
+            tutorial_path = os.path.join(TUTORIAL_DIR, gradeable['gradeable_config'], "config")
+            if (os.path.isdir(sample_path)):
+                self.config_path = sample_path
+            elif (os.path.isdir(tutorial_path)):
+                self.config_path = tutorial_path
+            else:
+                self.config_path = None
             if 'g_id' in gradeable:
                 self.id = gradeable['g_id']
             else:
@@ -786,7 +819,16 @@ class Gradeable(object):
             if 'sample_path' in gradeable:
                 self.sample_path = gradeable['sample_path']
             else:
-                self.sample_path = os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config)
+                sample_path = os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config)
+                tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config,"submissions")
+                if (os.path.isdir(sample_path)):
+                    self.sample_path = sample_path
+                elif (os.path.isdir(tutorial_path)):
+                    self.sample_path = tutorial_path
+                else:
+                    self.sample_path=""
+                    print("ERROR!  PATHS DON'T EXIST "+sample_path+" "+tutorial_path)
+
         else:
             self.config_path = None
             self.type = int(gradeable['g_type'])
@@ -821,11 +863,19 @@ class Gradeable(object):
             if 'eg_precision' in gradeable:
                 self.precision = float(gradeable['eg_precision'])
             if self.config_path is None:
-                self.config_path = os.path.join(SAMPLE_DIR, self.id)
+                sample_path = os.path.join(SAMPLE_ASSIGNMENT_CONFIG, self.id)
+                tutorial_path = os.path.join(TUTORIAL_DIR, self.id, "config")
+                if (os.path.isdir(sample_path)):
+                    self.config_path = sample_path
+                elif (os.path.isdir(tutorial_path)):
+                    self.config_path = tutorial_path
+                else:
+                    self.config_path = None
             assert self.ta_view_date < self.submission_open_date
             assert self.submission_open_date < self.submission_due_date
             assert self.submission_due_date < self.grade_start_date
             if self.gradeable_config is not None:
+
                 if os.path.isfile(os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config, "submissions.yml")):
                     self.submissions = load_data_yaml(os.path.join(self.sample_path, "submissions.yml"))
                 else:
