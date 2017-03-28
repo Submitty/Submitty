@@ -39,16 +39,14 @@ class GradeableDb extends Gradeable{
             $this->subdirectory = $details['eg_subdirectory'];
             $this->point_precision = floatval($details['eg_precision']);
             $this->ta_grading = $details['eg_use_ta_grading'] === true;
-            if (isset($details['gd_id'])) {
-                if ($details['active_version'] !== null) {
-                    $this->been_autograded = true;
-                    $this->active_version = $details['active_version'];
-                    $this->graded_auto_non_hidden_non_extra_credit = floatval($details['autograding_non_hidden_non_extra_credit']);
-                    $this->graded_auto_non_hidden_extra_credit = floatval($details['autograding_non_hidden_extra_credit']);
-                    $this->graded_auto_hidden_non_extra_credit = floatval($details['autograding_hidden_non_extra_credit']);
-                    $this->graded_auto_hidden_extra_credit = floatval($details['autograding_hidden_extra_credit']);
-                    $this->submission_time = new \DateTime($details['submission_time'], $timezone);
-                }
+            if (isset($details['active_version']) && $details['active_version'] !== null) {
+                $this->been_autograded = true;
+                $this->active_version = $details['active_version'];
+                $this->graded_auto_non_hidden_non_extra_credit = floatval($details['autograding_non_hidden_non_extra_credit']);
+                $this->graded_auto_non_hidden_extra_credit = floatval($details['autograding_non_hidden_extra_credit']);
+                $this->graded_auto_hidden_non_extra_credit = floatval($details['autograding_hidden_non_extra_credit']);
+                $this->graded_auto_hidden_extra_credit = floatval($details['autograding_hidden_extra_credit']);
+                $this->submission_time = new \DateTime($details['submission_time'], $timezone);
             }
             $this->loadGradeableConfig();
         }
