@@ -5,6 +5,7 @@
 
 include "../../toolbox/functions.php";
 
+
 check_administrator();
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf']) {
@@ -130,6 +131,10 @@ INSERT INTO gradeable(
     function get_GID(){
         return $this->g_id;
     }
+
+    function getType(){
+        return $this->g_gradeable_type;
+    }
     
      /**
       * @param \lib\Database $db
@@ -157,7 +162,7 @@ INSERT INTO gradeable(
     private $config_path;
     private $late_days;
     private $point_precision;
-    
+
      function __construct($params){
          parent::__construct($params);
          $this->date_submit = $params['date_submit'];
@@ -469,6 +474,8 @@ if ($action != 'import'){
     
     $db->commit();
     writeFormJSON($_POST['gradeable_id'],$_POST['gradeableJSON']);
+
+
 }
 // batch update or create
 else{
@@ -556,6 +563,30 @@ else{
     }
 
 }
+
+
+// -------------------------------------------------------
+// Create the a file to launch a rebuild of this course/gradeable...
+
+if ($gradeable->getType() == 0) {  // is an electronic gradeable
+
+  // FIXME:  should use a variable intead of hardcoded top level path
+  $config_build_file = "/var/local/submitty/to_be_built/".__COURSE_SEMESTER__."__".__COURSE_CODE__."__".$_POST['gradeable_id'].".json";
+
+  $config_build_data = array("semester" => __COURSE_SEMESTER__,
+                             "course" => __COURSE_CODE__,
+                             "gradeable" =>  $_POST['gradeable_id']);
+
+  if (file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+    die("Failed to write file {$config_build_file}");
+  }
+
+}
+
+
+// -------------------------------------------------------
+
+
 
 if($action != 'import'){
   header('Location: '.__SUBMISSION_URL__.'/index.php?semester='.__COURSE_SEMESTER__.'&course='.__COURSE_CODE__);

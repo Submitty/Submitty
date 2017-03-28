@@ -3,14 +3,34 @@
 #include <sys/stat.h>
 #include "TestCase.h"
 #include "JUnitGrader.h"
+#include "DrMemoryGrader.h"
 #include "PacmanGrader.h"
 #include "myersDiff.h"
 #include "tokenSearch.h"
 #include "execute.h"
 
+#include <sys/time.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <unistd.h>
+#include <iostream>
+
+
+// Set mode bits on shared memory
+#define SHM_MODE (SHM_W | SHM_R | IPC_CREAT)
+
+
 int TestCase::next_test_case_id = 1;
 
 std::string rlimit_name_decoder(int i);
+
+void TerminateProcess(float &elapsed, int childPID);
+int resident_set_size(int childPID);
 
 void adjust_test_case_limits(nlohmann::json &modified_test_case_limits,
                              int rlimit_name, rlim_t value) {
@@ -194,6 +214,7 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader) const {
   else if (method == "EmmaInstrumentationGrader")  { return EmmaInstrumentationGrader_doit(*this,grader); }
   else if (method == "MultipleJUnitTestGrader")    { return MultipleJUnitTestGrader_doit(*this,grader);   }
   else if (method == "EmmaCoverageReportGrader")   { return EmmaCoverageReportGrader_doit(*this,grader);  }
+  else if (method == "DrMemoryGrader")             { return DrMemoryGrader_doit(*this,grader);              }
   else if (method == "PacmanGrader")               { return PacmanGrader_doit(*this,grader);              }
   else if (method == "searchToken")                { return searchToken_doit(*this,grader);               }
   else if (method == "intComparison")              { return intComparison_doit(*this,grader);             }
@@ -601,13 +622,107 @@ const nlohmann::json TestCase::get_test_case_limits() const {
 // =================================================================================
 
 
+TestResultsFixedSize TestCase::do_the_grading (int j) const {
 
-TestResults* TestCase::do_the_grading (int j) const {
-  assert (j >= 0 && j < numFileGraders());
+  // ALLOCATE SHARED MEMORY
+  int memid;
+  TestResultsFixedSize *tr_ptr;
+  if ((memid = shmget(IPC_PRIVATE,sizeof(TestResultsFixedSize),SHM_MODE)) == -1) {
+    std::cout << "Unsuccessful memory get" << std::endl;
+    std::cout << "Errno was " << errno << std::endl;
+    exit(-1);
+  }
 
-  nlohmann::json tcg = getGrader(j);
-  return this->dispatch(tcg);
+
+  // FORK A CHILD THREAD TO DO THE VALIDATION
+  pid_t childPID = fork();
+  // ensure fork was successful
+  assert (childPID >= 0);
+
+
+  if (childPID == 0) {
+    // CHILD
+
+    // attach to shared memory
+    tr_ptr = (TestResultsFixedSize*) shmat(memid,0 ,0);
+    tr_ptr->initialize();
+
+    // perform the validation (this might hang or crash)
+    assert (j >= 0 && j < numFileGraders());
+    nlohmann::json tcg = getGrader(j);
+    TestResults* answer_ptr = this->dispatch(tcg);
+    assert (answer_ptr != NULL);
+
+    // write answer to shared memory and terminate this process
+    answer_ptr->PACK(tr_ptr);
+    std::cout << "do_the_grading, child completed successfully " << std::endl;
+    exit(0);
+
+  } else {
+    // PARENT
+
+    // attach to shared memory
+    tr_ptr = (TestResultsFixedSize *)  shmat(memid,0 ,0);
+
+    bool time_kill=false;
+    bool memory_kill=false;
+    pid_t wpid = 0;
+    int status;
+    float elapsed = 0;
+    float next_checkpoint = 0;
+    int rss_memory = 0;
+    int seconds_to_run = 20;
+    int allowed_rss_memory = 1000000;
+
+    // loop while waiting for child to finish
+    do {
+      wpid = waitpid(childPID, &status, WNOHANG);
+      if (wpid == 0) {
+        // terminate for excessive time
+        if (elapsed > seconds_to_run) {
+          std::cout << "do_the_grading error:  Killing child process " << childPID
+                    << " after " << elapsed << " seconds elapsed." << std::endl;
+          TerminateProcess(elapsed,childPID);
+          time_kill=true;
+        }
+        // terminate for excessive memory usage (RSS = resident set size = RAM)
+        if (rss_memory > allowed_rss_memory) {
+          std::cout << "do_the_grading error:  Killing child process " << childPID
+                    << " for using " << rss_memory << " kb RAM.  (limit is " << allowed_rss_memory << " kb)" << std::endl;
+          TerminateProcess(elapsed,childPID);
+          memory_kill=true;
+        }
+        // monitor time & memory usage
+        if (!time_kill && !memory_kill) {
+          // sleep 1/10 of a second
+          usleep(100000);
+          elapsed+= 0.1;
+        }
+        if (elapsed >= next_checkpoint) {
+          rss_memory = resident_set_size(childPID);
+          std::cout << "do_the_grading running, time elapsed = " << elapsed
+                    << " seconds,  memory used = " << rss_memory << " kb" << std::endl;
+          next_checkpoint = std::min(elapsed+5.0,elapsed*2.0);
+        }
+      }
+    } while (wpid == 0);
+  }
+
+  // COPY result from shared memory
+  TestResultsFixedSize answer = *tr_ptr;
+
+  // detach shared memory and destroy the memory queue
+  shmdt((void *)tr_ptr);
+  if (shmctl(memid,IPC_RMID,0) < 0) {
+    std::cout << "Problems destroying shared memory ID" << std::endl;
+    std::cout << "Errno was " <<  errno << std::endl;
+    exit(-1);
+  }
+
+  std::cout << "do the grading complete: " << answer << std::endl;
+  return answer;
 }
+
 
 
 std::string getAssignmentIdFromCurrentDirectory(std::string dir) {
@@ -720,6 +835,12 @@ void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
     int assigned = (sum % mod_value)+1; 
   
     std::string repl = std::to_string(assigned);
+
+    nlohmann::json::iterator association = j2.find("association");
+    if (association != j2.end()) {
+      repl = (*association)[repl];
+    }
+
     nlohmann::json::iterator itr = j.find("testcases");
     if (itr != j.end()) {
       RecursiveReplace(*itr,placeholder,repl);

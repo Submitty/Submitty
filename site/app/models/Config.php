@@ -181,6 +181,10 @@ class Config extends AbstractModel {
             $this->course_url = rtrim($course['hidden_details']['course_url'], "/")."/";
             $this->base_url = $this->course_url;
         }
+
+        if (isset($course['hidden_details']['ta_base_url'])) {
+            $this->ta_base_url = rtrim($course['hidden_details']['ta_base_url'], "/")."/";
+        }
         
         $this->upload_message = Utils::prepareHtmlString($this->upload_message);
         

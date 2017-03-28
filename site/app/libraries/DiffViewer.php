@@ -270,7 +270,7 @@ class DiffViewer {
 
         if (isset($this->add[$type]) && count($this->add[$type]) > 0) {
             if (array_key_exists(-1, $this->add[$type])) {
-                $html .= "\t<div class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][-1]}\">\n";
+                $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][-1]}'>\n";
                 for ($k = 0; $k < $this->add[$type][-1]; $k++) {
                     $html .= "\t<div class='row bad'><div class='empty_line'>&nbsp;</div></div>\n";
                 }
@@ -286,7 +286,7 @@ class DiffViewer {
             $j = $i + 1;
             if ($start === null && isset($this->diff[$type][$i])) {
                 $start = $i;
-                $html .= "\t<div class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][$start]}\">\n";
+                $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][$start]}'>\n";
             }
             if (isset($this->diff[$type][$i])) {
                 $html .= "\t<div class='bad'>";
@@ -316,7 +316,7 @@ class DiffViewer {
 
             if (isset($this->add[$type][$i])) {
                 if ($start === null) {
-                    $html .= "\t<div class='highlight' id=\"{$this->id}{$type}_{$this->link[$type][$i]}\">\n";
+                    $html .= "\t<div class='highlight' id='{$this->id}{$type}_{$this->link[$type][$i]}'>\n";
                 }
                 for ($k = 0; $k < $this->add[$type][$i]; $k++) {
                     $html .= "\t<div class='bad'><td class='empty_line' colspan='2'>&nbsp;</td></div>\n";

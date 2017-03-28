@@ -7,6 +7,8 @@ allows for install_system.sh to run cleanly and not end up with duplicate lines
 in configuration files or pre-existing databses.
 """
 
+from __future__ import print_function
+import glob
 import os
 import pwd
 import shutil
@@ -19,13 +21,12 @@ CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
 
 
-def load_data_yaml(file_name):
+def load_data_yaml(file_path):
     """
     Loads yaml file from the .setup/data directory returning the parsed structure
-    :param file_name: name of file to load
+    :param file_path: name of file to load
     :return: parsed YAML structure from loaded file
     """
-    file_path = os.path.join(SETUP_DATA_PATH, file_name)
     if not os.path.isfile(file_path):
         raise IOError("Missing the yaml file {}".format(file_path))
     with open(file_path) as open_file:
@@ -91,6 +92,9 @@ def delete_user(user_id):
 
 
 def main():
+    if not os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")):
+        raise SystemExit("This script can only be run against the vagrant installation")
+
     # Remove the MOT.D
     remove_file("/etc/motd")
 
@@ -148,16 +152,18 @@ def main():
 
     shutil.rmtree('/root/bin', True)
 
-    users = load_data_yaml("users.yml")
-    for user in users:
+    for user_file in glob.iglob(os.path.join(SETUP_DATA_PATH, "users", "*.yml")):
+        user = load_data_yaml(user_file)
         delete_user(user['user_id'])
 
+    os.system('pkill -u username hwcron')
+    os.system('crontab -u hwcron -r')
     for user in ["hwcgi", "hwphp", "hwcron", "hsdbu"]:
         delete_user(user)
 
     groups = ["hwcronphp", "course_builders"]
-    courses = load_data_yaml("courses.yml")
-    for course in courses:
+    for course_file in glob.iglob(os.path.join(SETUP_DATA_PATH, "courses", "*.yml")):
+        course = load_data_yaml(course_file)
         groups.append(course['code'])
         groups.append(course['code'] + "_archive")
         groups.append(course['code'] + "_tas_www")

@@ -1,0 +1,102 @@
+{
+    "differences": [
+        {
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            26,
+                            27,
+                            28,
+                            29,
+                            30,
+                            31
+                        ],
+                        "line_number": 4
+                    },
+                    {
+                        "char_number": [
+                            18
+                        ],
+                        "line_number": 5
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            24
+                        ],
+                        "line_number": 6
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6
+                        ],
+                        "line_number": 7
+                    },
+                    {
+                        "char_number": [
+                            31,
+                            33
+                        ],
+                        "line_number": 8
+                    },
+                    {
+                        "char_number": [
+                            30
+                        ],
+                        "line_number": 9
+                    },
+                    {
+                        "char_number": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9
+                        ],
+                        "line_number": 10
+                    }
+                ],
+                "start": 4
+            },
+            "expected": {
+                "line": [
+                    {
+                        "line_number": 4
+                    },
+                    {
+                        "line_number": 5
+                    },
+                    {
+                        "char_number": [
+                            14,
+                            16
+                        ],
+                        "line_number": 6
+                    },
+                    {
+                        "line_number": 7
+                    }
+                ],
+                "start": 4
+            }
+        }
+    ]
+}

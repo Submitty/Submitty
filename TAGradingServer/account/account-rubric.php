@@ -97,6 +97,10 @@ if ($calculate_diff) {
         if (newheight < 10) {
             newheight = document.getElementById(id).contentWindow.document.body.offsetHeight;
         }
+        
+        if(newheight < 10){
+            newheight = 600;
+        }
         document.getElementById(id).height= (newheight) + "px";
     }
 

@@ -102,11 +102,17 @@ class GradeableList extends AbstractModel {
         );
         foreach ($sort_array as $list => $function) {
             uasort($this->$list, function(Gradeable $a, Gradeable $b) use ($function) {
-                if ($a->$function() === $b->$function()) {
-                    return $a->getId() < $b->getId();
+                if ($a->$function() == $b->$function()) {
+                    $function = "getId";
+                }
+                if ($a->$function() < $b->$function()) {
+                    return -1;
+                }
+                else if ($a->$function() == $b->$function()) {
+                    return 0;
                 }
                 else {
-                    return $a->$function() < $b->$function();
+                    return 1;
                 }
             });
         }
