@@ -34,7 +34,7 @@ HTML;
             else {
                 $return .= <<<HTML
         <a class="btn btn-default"
-            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab   ', 'g_id' => $gradeable->getId()))}">
+            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId()))}">
             View Your Sections    
         </a>
 HTML;
