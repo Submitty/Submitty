@@ -21,25 +21,40 @@ class SimpleGraderController extends AbstractController  {
 
     public function gradeLabs() {
         if (!isset($_REQUEST['g_id'])) {
-            throw new \Exception("ack");
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable');
         }
         $g_id = $_REQUEST['g_id'];
         $gradeable = $this->core->getQueries()->getGradeable($g_id);
         if ($gradeable === null) {
-            throw new \Exception("ugh");
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $g_id);
         }
         $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getName()}");
+
+        $students = array();
         if ($gradeable->isGradeByRegistration()) {
-            $section_key = 'registration_section';
+            $section_key = "registration_section";
+            $sections = $this->core->getUser()->getGradingRegistrationSections();
+            if (!isset($_GET['view']) || $_GET['view'] !== "all") {
+                $students = $this->core->getQueries()->getUsersByRegistrationSections($sections);
+            }
+            $graders = $this->core->getQueries()->getGradersForRegistrationSections($sections);
         }
         else {
-            $section_key = 'rotating_section';
+            $section_key = "rotating_section";
+            $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),
+                $this->core->getUser()->getId());
+            if (!isset($_GET['view']) || $_GET['view'] !== "all") {
+                $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
+            }
+            $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable->getId(), $sections);
+        }
+        if ((isset($_GET['view']) && $_GET['view'] === "all") || $this->core->getUser()->accessAdmin()) {
+            $students = $this->core->getQueries()->getAllUsers($section_key);
         }
 
-        $students = $this->core->getQueries()->getAllUsers($section_key);
         $student_ids = array_map(function(User $user) { return $user->getId(); }, $students);
         $rows = $this->core->getQueries()->getGradeables($gradeable->getId(), $student_ids, $section_key);
-        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'checkpointForm', $gradeable, $rows);
+        $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'checkpointForm', $gradeable, $rows, $graders);
     }
 
     public function saveGrade() {

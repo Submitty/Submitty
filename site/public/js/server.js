@@ -344,14 +344,14 @@ $(function() {
 });
 */
 
-function updateCheckpointCell(elem) {
+function updateCheckpointCell(elem, setFull) {
     elem = $(elem);
-    if (elem.data("score") === 1.0) {
+    if (!setFull && elem.data("score") === 1.0) {
         elem.data("score", 0.5);
         elem.css("background-color", "#88d0f4");
         elem.css("border-right", "15px solid #f9f9f9");
     }
-    else if (elem.data("score") === 0.5) {
+    else if (!setFull && elem.data("score") === 0.5) {
         elem.data("score", 0);
         elem.css("background-color", "");
         elem.css("border-right", "15px solid #ddd");
@@ -387,7 +387,6 @@ function submitAJAX(url, data, callbackSuccess, callbackFailure) {
             console.log(response);
             callbackFailure();
             window.alert("[SAVE ERROR] Refresh Page");
-
         }
     })
     .fail(function() {
@@ -400,8 +399,18 @@ function setupCheckboxCells() {
         var parent = $(this).parent();
         var elems = [];
         if ($(this).hasClass('cell-all')) {
+            var lastScore = null;
+            var setFull = false;
             parent.children(".cell-grade").each(function() {
-                updateCheckpointCell(this);
+                if (lastScore === null) {
+                    lastScore = $(this).data("score");
+                }
+                else if (lastScore !== $(this).data("score")) {
+                    setFull = true;
+                }
+            });
+            parent.children(".cell-grade").each(function() {
+                updateCheckpointCell(this, setFull);
                 elems.push(this);
             });
         }

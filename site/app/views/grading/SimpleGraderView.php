@@ -11,12 +11,39 @@ class SimpleGraderView extends AbstractView {
     /**
      * @param Gradeable $gradeable
      * @param Gradeable[] $rows
+     * @param array       $graders
      *
      * @return string
      */
-    public function checkpointForm($gradeable, $rows) {
+    public function checkpointForm($gradeable, $rows, $graders) {
         $return = <<<HTML
 <div class="content">
+HTML;
+        if (!$this->core->getUser()->accessAdmin()) {
+            $return .= <<<HTML
+    <div style="float: right; margin-bottom: 10px; margin-left: 20px">
+HTML;
+            if (!isset($_GET['view']) || $_GET['view'] !== 'all') {
+                $return .= <<<HTML
+        <a class="btn btn-default"
+            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'view' => 'all'))}">
+            View All    
+        </a>
+HTML;
+            }
+            else {
+                $return .= <<<HTML
+        <a class="btn btn-default"
+            href="{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab   ', 'g_id' => $gradeable->getId()))}">
+            View Your Sections    
+        </a>
+HTML;
+            }
+            $return .= <<<HTML
+    </div>
+HTML;
+        }
+        $return .= <<<HTML
     <i class="fa fa-question-circle tooltip" style="float: right" aria-hidden="true">
         <span class="tooltiptext">
 No Color - No Credit<br />
@@ -49,6 +76,7 @@ HTML;
         $row = 0;
         $last_section = false;
         $tbody_open = false;
+        $colspan = 5 + count($gradeable->getComponents());
         foreach ($rows as $gradeable_row) {
             if ($gradeable->isGradeByRegistration()) {
                 $section = $gradeable_row->getUser()->getRegistrationSection();
@@ -74,22 +102,22 @@ HTML;
 
                 $return .= <<<HTML
         <tr class="info persist-header">
-            <td colspan="8" style="text-align: center">Students Enrolled in Section {$display_section}</td>
+            <td colspan="{$colspan}" style="text-align: center">Students Enrolled in Section {$display_section}</td>
         </tr>
-        <!--<tr class="info">
-            <td colspan="8" style="text-align: center">Graders: {$section_graders}</td>
-        </tr>-->
+        <tr class="info">
+            <td colspan="{$colspan}" style="text-align: center">Graders: {$section_graders}</td>
+        </tr>
         <tbody id="section-{$section}">
 HTML;
             }
 
             $return .= <<<HTML
             <tr data-gradeable="{$gradeable->getId()}" data-user="{$gradeable_row->getUser()->getId()}">
-                <td class="cell-all">{$count}</td>
-                <td class="cell-all">{$gradeable_row->getUser()->getRegistrationSection()}</td>
+                <td class="">{$count}</td>
+                <td class="">{$gradeable_row->getUser()->getRegistrationSection()}</td>
                 <td class="cell-all" style="text-align: left">{$gradeable_row->getUser()->getId()}</td>
-                <td class="cell-all" style="text-align: left">{$gradeable_row->getUser()->getDisplayedFirstName()}</td>
-                <td class="cell-all" style="text-align: left">{$gradeable_row->getUser()->getLastName()}</td>
+                <td class="" style="text-align: left">{$gradeable_row->getUser()->getDisplayedFirstName()}</td>
+                <td class="" style="text-align: left">{$gradeable_row->getUser()->getLastName()}</td>
 HTML;
 
             $col = 0;

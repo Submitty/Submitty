@@ -3,6 +3,7 @@
 namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
+use app\models\User;
 
 class ElectronicGraderController extends AbstractController {
     public function run() {
@@ -105,13 +106,9 @@ class ElectronicGraderController extends AbstractController {
             $students = $this->core->getQueries()->getAllUsers($section_key);
         }
 
-        $students_ids = array();
-        /** @var \app\models\User[] $students */
-        foreach ($students as $student) {
-            $students_ids[] = $student->getId();
-        }
+        $student_ids = array_map(function(User $student) { return $student->getId(); }, $students);
 
-        $rows = $this->core->getQueries()->getGradeables($gradeable_id, $students_ids, $section_key);
+        $rows = $this->core->getQueries()->getGradeables($gradeable_id, $student_ids, $section_key);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'summaryPage', $gradeable, $rows, $graders);
     }
 }
