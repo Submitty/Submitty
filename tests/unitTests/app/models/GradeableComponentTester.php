@@ -29,8 +29,9 @@ class GradeableComponentTester extends \PHPUnit_Framework_TestCase {
             'is_text' => false,
             'is_extra_credit' => false,
             'order' => 1,
-            'score' => 10,
-            'comment' => 'Comment about gradeable'
+            'score' => 10.0,
+            'comment' => 'Comment about gradeable',
+            'graded' => true
         );
         $actual = $component->toArray();
         ksort($expected);

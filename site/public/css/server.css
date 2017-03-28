@@ -334,6 +334,10 @@ table tr.table-header {
     margin: 2% 15px;
 }
 
+.content h2 {
+    margin-bottom: 20px;
+}
+
 #footer {
     margin-top: 30px;
 }
@@ -723,4 +727,50 @@ table .instructor .two-options{
 
 #edit-user-form > div > input[type="text"] {
     width: 95%;
+}
+
+.cell-all,
+.cell-grade {
+    cursor: pointer;
+}
+
+.cell-grade {
+    border-left: 1px solid #dddddd;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 220px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    margin-left: -240px;
+    margin-top: -35px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 40%;
+    right: -4%;
+    border: 5px solid transparent;
+    border-left-color: #555;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
 }
