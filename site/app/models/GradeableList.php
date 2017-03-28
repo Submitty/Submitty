@@ -64,8 +64,11 @@ class GradeableList extends AbstractModel {
             });
         }
         else {
-            $this->gradeables = $this->core->getQueries()->getAllGradeables($this->core->getUser()->getId());
+            foreach ($this->core->getQueries()->getAllGradeables($this->core->getUser()->getId()) as $gradeable) {
+                $this->gradeables[$gradeable->getId()] = $gradeable;
+            }
         }
+
         $now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
 
         foreach ($this->gradeables as $gradeable) {
