@@ -56,8 +56,6 @@ TestResults* myersDiffbyLinebyWord_doit (const TestCase &tc, const nlohmann::jso
 TestResults* myersDiffbyLineNoWhite_doit (const TestCase &tc, const nlohmann::json& j);
 TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j);
 TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::json& j);
-TestResults* myersDiffbyLinebyCharExtraStudentOutputOk_doit (const TestCase &tc, const nlohmann::json& j);
-
 
 TestResults* diffLineSwapOk_doit (const TestCase &tc, const nlohmann::json& j);
 
