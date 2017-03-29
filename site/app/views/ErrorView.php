@@ -118,7 +118,7 @@ HTML;
 return $return;
     }
 
-    public function noGradeable($gradeable_id) {
+    public function noGradeable($gradeable_id = null) {
         if ($gradeable_id === null) {
             return <<<HTML
 <div class="content">

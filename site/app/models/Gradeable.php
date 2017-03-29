@@ -59,8 +59,9 @@ abstract class Gradeable extends AbstractModel {
 
     /** @var bool Should the gradeable be graded by registration section (or by rotating section) */
     protected $grade_by_registration = true;
-    
-    protected $components = null;
+
+    /** @var \app\models\GradeableComponent[] */
+    protected $components = array();
 
     /* Config variables that are only for electronic submissions */
     protected $has_config = false;
@@ -159,6 +160,7 @@ abstract class Gradeable extends AbstractModel {
     protected $in_batch_queue = false;
     protected $grading_batch_queue = false;
 
+    protected $grader = null;
     protected $grader_id = null;
     protected $overall_comment = "";
     /** @var int code representing the state of electronic submission where 0 = not submitted, 1 = fine, 2 = late,
@@ -405,7 +407,7 @@ abstract class Gradeable extends AbstractModel {
         $svn_path = $course_path."/checkout/".$this->id."/".$this->core->getUser()->getId();
         $results_path = $course_path."/results/".$this->id."/".$this->core->getUser()->getId();
 
-        $this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
+        //$this->components = $this->core->getQueries()->getGradeableComponents($this->id, $this->gd_id);
         $this->versions = $this->core->getQueries()->getGradeableVersions($this->id, $this->core->getUser()->getId(), $this->getDueDate());
 
         if (count($this->versions) > 0) {
@@ -738,5 +740,52 @@ abstract class Gradeable extends AbstractModel {
 
     public function getComponents() {
         return $this->components;
+    }
+
+    public function setUser(User $user) {
+        $this->user = $user;
+    }
+
+    public function setGrader(User $user) {
+        $this->grader = $user;
+    }
+
+    /**
+     * @return User
+     */
+    public function getGrader() {
+        return $this->grader;
+    }
+
+    public function setOverallComment($comment) {
+        $this->overall_comment = $comment;
+    }
+
+    public function getOverallComment() {
+        return $this->overall_comment;
+    }
+
+    public function setStatus($status) {
+        $this->status = $status;
+    }
+
+    public function getStatus() {
+        return $this->status;
+    }
+
+    public function setActiveVersion($version) {
+        $this->active_version = $version;
+    }
+    
+    public function getGdId() {
+        return $this->gd_id;
+    }
+
+    public function setGdId($gd_id) {
+        $this->gd_id = $gd_id;
+    }
+
+    public function saveData() {
+        $this->core->getQueries()->updateGradeableData($this);
     }
 }
