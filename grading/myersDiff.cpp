@@ -197,7 +197,10 @@ TestResults* myersDiffbyLine_doit (const TestCase &tc, const nlohmann::json& j) 
   }
   vectorOfLines text_a = stringToLines( student_file_contents, j );
   vectorOfLines text_b = stringToLines( expected_file_contents, j );
-  Difference* diff = ses(j, &text_a, &text_b, false );
+
+  bool extraStudentOutputOk = j.value("extra_student_output",false);
+
+  Difference* diff = ses(j, &text_a, &text_b, false,extraStudentOutputOk);
   diff->type = ByLineByChar;
   return diff;
 }
@@ -217,46 +220,14 @@ TestResults* myersDiffbyLinebyChar_doit (const TestCase &tc, const nlohmann::jso
       student_file_contents.size() > 10* expected_file_contents.size()) {
     return new TestResults(0.0,{"ERROR: Student file too large for grader"});
   }
+
+  bool extraStudentOutputOk = j.value("extra_student_output",false);
+
   vectorOfLines text_a = stringToLines( student_file_contents, j );
   vectorOfLines text_b = stringToLines( expected_file_contents, j );
-  Difference* diff = ses(j, &text_a, &text_b, true );
+  Difference* diff = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
   diff->type = ByLineByChar;
   return diff;
-}
-
-
-TestResults* myersDiffbyLinebyCharExtraStudentOutputOk_doit (const TestCase &tc, const nlohmann::json& j) {
-  std::vector<std::string> messages;
-  std::string student_file_contents;
-  std::string expected_file_contents;
-  if (!openStudentFile(tc,j,student_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-  if (!openExpectedFile(tc,j,expected_file_contents,messages)) { 
-    return new TestResults(0.0,messages);
-  }
-  if (student_file_contents.size() > MYERS_DIFF_MAX_FILE_SIZE_MODERATE &&
-      student_file_contents.size() > 10* expected_file_contents.size()) {
-    return new TestResults(0.0,{"ERROR: Student file too large for grader"});
-  }
-
-#if 0
-  //from nowhite
-	vectorOfWords text_a = stringToWords( student_file_contents );
-	vectorOfWords text_b = stringToWords( expected_file_contents );
-	Difference diff = *(ses(j, &text_a, &text_b, true, extraStudentOutputOk ));
-	diff.type = ByLineByWord;
-	return diff;
-#else
-	std::cout << "MYERS DIFF EXTRA STUDENT OUTPUT" << std::endl;
-	vectorOfLines text_a = stringToLines( student_file_contents, j );
-	vectorOfLines text_b = stringToLines( expected_file_contents, j );
-	bool extraStudentOutputOk = true;
-	Difference* diff = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
-	diff->type = ByLineByChar;
-	std::cout << "end of MYERS DIFF EXTRA STUDENT OUTPUT" << std::endl;
-	return diff;
-#endif
 }
 
 // ==============================================================================
