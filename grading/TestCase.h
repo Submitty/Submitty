@@ -89,7 +89,8 @@ public:
 
   // -------------------------------
   // GRADING & GRADERS
-  TestResults* do_the_grading (int j) const;
+  TestResultsFixedSize do_the_grading (int j) const;
+
   int numFileGraders() const {
     const nlohmann::json::const_iterator itr = _json.find("validation");
     if (itr == _json.end()) return 0;

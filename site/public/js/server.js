@@ -1,7 +1,9 @@
 var siteUrl = undefined;
+var csrfToken = undefined;
 
-function setSiteUrl(url) {
-    siteUrl = url
+function setSiteDetails(url, setCsrfToken) {
+    siteUrl = url;
+    csrfToken = setCsrfToken;
 }
 
 /**
@@ -10,7 +12,7 @@ function setSiteUrl(url) {
  * construct them there as it makes sense (which helps on cutting down on potential
  * duplication of effort where we can replicate JS functions across multiple pages).
  *
- * @param parts - Object representing URL parts to append to the URL
+ * @param {object} parts - Object representing URL parts to append to the URL
  * @returns {string} - Built up URL to use
  */
 function buildUrl(parts) {
@@ -43,21 +45,21 @@ function editUserForm(user_id) {
                 user.addClass('readonly');
             }
             $('[name="user_firstname"]', form).val(json['user_firstname']);
-            if (json['user_preferred_firstname'] == null) {
+            if (json['user_preferred_firstname'] === null) {
                 json['user_preferred_firstname'] = "";
             }
             $('[name="user_preferred_firstname"]', form).val(json['user_preferred_firstname']);
             $('[name="user_lastname"]', form).val(json['user_lastname']);
             $('[name="user_email"]', form).val(json['user_email']);
             var registration_section;
-            if (json['registration_section'] == null) {
+            if (json['registration_section'] === null) {
                 registration_section = "null";
             }
             else {
                 registration_section = json['registration_section'].toString();
             }
             var rotating_section;
-            if (json['rotating_section'] == null) {
+            if (json['rotating_section'] === null) {
                 rotating_section = "null";
             }
             else {
@@ -68,7 +70,7 @@ function editUserForm(user_id) {
             $('[name="manual_registration"]', form).prop('checked', json['manual_registration']);
             $('[name="user_group"] option[value="' + json['user_group'] + '"]', form).prop('selected', true);
             $("[name='grading_registration_section[]']").prop('checked', false);
-            if (json['grading_registration_sections'] != null && json['grading_registration_sections'] != undefined) {
+            if (json['grading_registration_sections'] !== null && json['grading_registration_sections'] !== undefined) {
                 json['grading_registration_sections'].forEach(function(val) {
                     $('#grs_' + val).prop('checked', true);
                 });
@@ -171,6 +173,63 @@ function check_server(url) {
             }
         }
     );
+}
+
+function openDiv(id) {
+    var elem = $('#' + id);
+    if (elem.hasClass('open')) {
+        elem.hide();
+        elem.removeClass('open');
+        $('#' + id + '-span').removeClass('icon-folder-open').addClass('icon-folder-closed');
+    }
+    else {
+        elem.show();
+        elem.addClass('open');
+        $('#' + id + '-span').removeClass('icon-folder-closed').addClass('icon-folder-open');
+    }
+    return false;
+}
+
+function openUrl(url) {
+    window.open(url, "_blank", "toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600");
+    return false;
+}
+
+function openFrame(url, id, filename) {
+    var iframe = $('#file_viewer_' + id);
+    if (!iframe.hasClass('open')) {
+        var iframeId = "file_viewer_" + id + "_iframe";
+        // handle pdf
+        if(filename.substring(filename.length - 3) === "pdf") {
+            iframe.html("<iframe id='" + iframeId + "' src='" + url + "' width='750px' height='600px' style='border: 0'></iframe>");
+        }
+        else {
+            iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='" + url + "' width='750px' style='border: 0'></iframe>");
+        }
+        iframe.addClass('open');
+    }
+
+    if (!iframe.hasClass('shown')) {
+        iframe.show();
+        iframe.addClass('shown');
+        $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-plus').addClass('icon-minus');
+    }
+    else {
+        iframe.hide();
+        iframe.removeClass('shown');
+        $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('icon-minus').addClass('icon-plus');
+    }
+    return false;
+}
+
+function resizeFrame(id) {
+    var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
+    if (height > 500) {
+        document.getElementById(id).height= "500px";
+    }
+    else {
+        document.getElementById(id).height = (height+18) + "px";
+    }
 }
 
 function batchImportJSON(url, csrf_token){
@@ -285,6 +344,104 @@ $(function() {
 });
 */
 
+function updateCheckpointCell(elem, setFull) {
+    elem = $(elem);
+    if (!setFull && elem.data("score") === 1.0) {
+        elem.data("score", 0.5);
+        elem.css("background-color", "#88d0f4");
+        elem.css("border-right", "15px solid #f9f9f9");
+    }
+    else if (!setFull && elem.data("score") === 0.5) {
+        elem.data("score", 0);
+        elem.css("background-color", "");
+        elem.css("border-right", "15px solid #ddd");
+    }
+    else {
+        elem.data("score", 1);
+        elem.css("background-color", "#149bdf");
+        elem.css("border-right", "15px solid #f9f9f9");
+    }
+}
+
+function submitAJAX(url, data, callbackSuccess, callbackFailure) {
+    $.ajax(url, {
+        type: "POST",
+        data: data
+    })
+    .done(function(response) {
+        try{
+            response = JSON.parse(response);
+            if (response['status'] === 'success') {
+                callbackSuccess();
+            }
+            else {
+                console.log(response['message']);
+                callbackFailure();
+                if (response['status'] === 'error') {
+                    window.alert("[SAVE ERROR] Refresh Page");
+                }
+
+            }
+        }
+        catch (e) {
+            console.log(response);
+            callbackFailure();
+            window.alert("[SAVE ERROR] Refresh Page");
+        }
+    })
+    .fail(function() {
+        window.alert("[SAVE ERROR] Refresh Page");
+    });
+}
+
+function setupCheckboxCells() {
+    $("td[class^=cell-]").click(function() {
+        var parent = $(this).parent();
+        var elems = [];
+        if ($(this).hasClass('cell-all')) {
+            var lastScore = null;
+            var setFull = false;
+            parent.children(".cell-grade").each(function() {
+                if (lastScore === null) {
+                    lastScore = $(this).data("score");
+                }
+                else if (lastScore !== $(this).data("score")) {
+                    setFull = true;
+                }
+            });
+            parent.children(".cell-grade").each(function() {
+                updateCheckpointCell(this, setFull);
+                elems.push(this);
+            });
+        }
+        else {
+            updateCheckpointCell(this);
+            elems.push(this);
+        }
+        var scores = {};
+        parent.children("td.cell-grade").each(function() {
+            scores[$(this).data("id")] = $(this).data("score");
+        });
+
+        submitAJAX(
+            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_grade'}),
+            {'csrf_token': csrfToken, 'user_id': parent.data("user"), 'g_id': parent.data('gradeable'), 'scores': scores},
+            function() {
+                elems.forEach(function(elem) {
+                    $(elem).animate({"border-right-width": "0px"}, 400);
+                });
+            },
+            function() {
+                elems.forEach(function(elem) {
+                    console.log(elem);
+                    $(elem).css("border-right-width", "15px");
+                    $(elem).stop(true, true).animate({"border-right-color": "#DA4F49"}, 400);
+                });
+            }
+        );
+    });
+}
+
 $(function() {
     if (window.location.hash !== "") {
         if ($(window.location.hash).offset().top > 0) {
@@ -296,4 +453,6 @@ $(function() {
     setTimeout(function() {
         $('.inner-message').fadeOut();
     }, 5000);
+
+    setupCheckboxCells();
 });

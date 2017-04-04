@@ -64,8 +64,11 @@ class GradeableList extends AbstractModel {
             });
         }
         else {
-            $this->gradeables = $this->core->getQueries()->getAllGradeables($this->core->getUser()->getId());
+            foreach ($this->core->getQueries()->getAllGradeables($this->core->getUser()->getId()) as $gradeable) {
+                $this->gradeables[$gradeable->getId()] = $gradeable;
+            }
         }
+
         $now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
 
         foreach ($this->gradeables as $gradeable) {
@@ -102,11 +105,17 @@ class GradeableList extends AbstractModel {
         );
         foreach ($sort_array as $list => $function) {
             uasort($this->$list, function(Gradeable $a, Gradeable $b) use ($function) {
-                if ($a->$function() === $b->$function()) {
-                    return $a->getId() < $b->getId();
+                if ($a->$function() == $b->$function()) {
+                    $function = "getId";
+                }
+                if ($a->$function() < $b->$function()) {
+                    return -1;
+                }
+                else if ($a->$function() == $b->$function()) {
+                    return 0;
                 }
                 else {
-                    return $a->$function() < $b->$function();
+                    return 1;
                 }
             });
         }

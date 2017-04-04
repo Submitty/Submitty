@@ -162,8 +162,8 @@ TestResults* diffLine ( const std::string& _student,
 		}
 		i++;
 	}
-	diffs->distance = ( int ) std::max( file.a_changes.size(),
-					    file.b_changes.size() );
+	diffs->setDistance ( ( int ) std::max( file.a_changes.size(),
+                                               file.b_changes.size() ) );
 
 	diffs->changes.push_back( file );
 	return diffs;
@@ -217,8 +217,8 @@ TestResults* diffLineNoSpace ( const std::string& _student,
 		}
 		i++;
 	}
-	diffs->distance = ( int ) std::max( file.a_changes.size(),
-					    file.b_changes.size() );
+	diffs->setDistance( ( int ) std::max( file.a_changes.size(),
+                                              file.b_changes.size() ));
 	diffs->changes.push_back( file );
 	return diffs;
 }

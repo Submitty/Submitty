@@ -177,6 +177,7 @@ chmod  u+rwx,g+rxs                   $SUBMITTY_DATA_DIR/autograding_logs
 # if the to_be_graded directories do not exist, then make them
 mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_interactive
 mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_batch
+mkdir -p $SUBMITTY_DATA_DIR/to_be_built
 
 # set the permissions of these directories
 
@@ -187,6 +188,9 @@ chmod  770                                  $SUBMITTY_DATA_DIR/to_be_graded_inte
 chown  $HWCRON_USER:${COURSE_BUILDERS_GROUP}  $SUBMITTY_DATA_DIR/to_be_graded_batch
 chmod  770                                  $SUBMITTY_DATA_DIR/to_be_graded_batch
 
+#hwphp will write items to this list, hwcron will remove them
+chown  $HWCRON_USER:$HWCRONPHP_GROUP        $SUBMITTY_DATA_DIR/to_be_built
+chmod  770                                  $SUBMITTY_DATA_DIR/to_be_built
 
 
 
@@ -307,11 +311,11 @@ find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chown root:root {} \;
 find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 500 {} \;
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
+chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
+chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 chown ${HWCRON_USER}:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
@@ -327,6 +331,10 @@ chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grade_students__results_history.py
+
+# fix the permissions specifically of the build_config_upload.py script
+chown root:$HWCRON_USER ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py
 
 # build the helper program for strace output and restrictions by system call categories
 g++ ${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp -o ${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out
@@ -368,35 +376,33 @@ popd > /dev/null
 
 echo -e "Copy the ta grading website"
 
-rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/*php         ${SUBMITTY_INSTALL_DIR}/hwgrading_website
-rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/toolbox      ${SUBMITTY_INSTALL_DIR}/hwgrading_website
-rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/lib          ${SUBMITTY_INSTALL_DIR}/hwgrading_website
-rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/account      ${SUBMITTY_INSTALL_DIR}/hwgrading_website
-rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/models          ${SUBMITTY_INSTALL_DIR}/hwgrading_website
+# Using a symbolic link would be nicer, but it seems that suphp doesn't like them very much so we just have
+# two copies of the site
+rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/*php         ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
+rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/toolbox      ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
+rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/lib          ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
+rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/account      ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
+rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/models       ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
 
 # set special user $HWPHP_USER as owner & group of all hwgrading_website files
-find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -exec chown $HWPHP_USER:$HWPHP_USER {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -exec chown $HWPHP_USER:$HWPHP_USER {} \;
 
 # set the permissions of all files
 # $HWPHP_USER can read & execute all directories and read all files
 # "other" can cd into all subdirectories
-chmod -R 400 ${SUBMITTY_INSTALL_DIR}/hwgrading_website
-find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type d -exec chmod uo+x {} \;
+chmod -R 400 ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
+find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type d -exec chmod uo+x {} \;
 # "other" can read all .txt & .css files
-find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.txt -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.ico -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.css -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.png -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.jpg -exec chmod o+r {} \;
-find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.gif -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.css -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.txt -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.ico -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.css -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.png -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.jpg -exec chmod o+r {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.gif -exec chmod o+r {} \;
 
 # "other" can read & execute all .js files
-find ${SUBMITTY_INSTALL_DIR}/hwgrading_website -type f -name \*.js -exec chmod o+rx {} \;
-
-#replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/hwgrading_website/toolbox/configs/master_template.php
-#mv ${SUBMITTY_INSTALL_DIR}/hwgrading_website/toolbox/configs/master_template.php ${SUBMITTY_INSTALL_DIR}/hwgrading_website/toolbox/configs/master.php
-
+find ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading -type f -name \*.js -exec chmod o+rx {} \;
 
 ################################################################################################################
 ################################################################################################################
@@ -475,6 +481,14 @@ while [ $minutes -lt 60 ]; do
     printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh  untrusted%02d  >  /dev/null\n"  $minutes $minutes  >> ${HWCRON_CRONTAB_FILE}
     minutes=$(($minutes + $GRADE_STUDENTS_FREQUENCY))
 done
+
+## NOTE:  the build_config_upload script is hardcoded to run for ~5 minutes and then exit
+minutes=0
+while [ $minutes -lt 60 ]; do
+    printf "%02d  * * * *   ${SUBMITTY_INSTALL_DIR}/bin/build_config_upload.py  >  /dev/null\n"  $minutes  >> ${HWCRON_CRONTAB_FILE}
+    minutes=$(($minutes + 5))
+done
+
 echo "# DO NOT EDIT -- THIS FILE CREATED AUTOMATICALLY BY INSTALL_SUBMITTY.sh"                >> ${HWCRON_CRONTAB_FILE}
 echo -e "\n\n"                                                                                >> ${HWCRON_CRONTAB_FILE}
 
@@ -496,12 +510,12 @@ make
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
-mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/config
+#mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/config
 #rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_node      ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
 #rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_token     ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
 #rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/count_function  ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/lang/*              ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
-rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/config/*            ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/config
+#rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/config/*            ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/config
 rsync -rtz ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/bin/*               ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/bin
 
 # change permissions

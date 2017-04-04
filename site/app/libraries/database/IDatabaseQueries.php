@@ -48,25 +48,31 @@ interface IDatabaseQueries {
      * @param integer[] $sections
      */
     public function updateGradingRegistration($user_id, $user_group, $sections);
-    
+
     /**
-     * Gets array of all gradeables ids in the database returning it in a list sorted alphabetically
-     *
      * @param $user_id
-     *
      * @return Gradeable[]
      */
     public function getAllGradeables($user_id = null);
-    
+
     /**
-     * Gets gradeable for the the given id
-     *
      * @param $g_id
      * @param $user_id
      *
      * @return Gradeable
      */
-    public function getGradeableById($g_id, $user_id = null);
+    public function getGradeable($g_id, $user_id = null);
+
+    /**
+     * Gets array of all gradeables ids in the database returning it in a list sorted alphabetically
+     *
+     * @param string|string[]|null  $g_ids
+     * @param string|string[]|null  $user_id
+     * @param string                $section_key
+     *
+     * @return Gradeable[]
+     */
+    public function getGradeables($g_ids = null, $user_id = null, $section_key = "registration_section");
 
     /**
      * @param $g_id
@@ -83,16 +89,6 @@ interface IDatabaseQueries {
      * @return GradeableVersion[]
      */
     public function getGradeableVersions($g_id, $user_id, $due_date);
-
-    /**
-     * Given a gradeable id and an array of user ids, it returns an array of gradeables for each user.
-     *
-     * @param string $g_id
-     * @param array  $users
-     * @param string $section_key
-     * @return Gradeable
-     */
-    public function getGradeableForUsers($g_id, $users, $section_key="registration_section");
 
     public function getUsersByRegistrationSections($sections);
 
@@ -184,6 +180,14 @@ interface IDatabaseQueries {
      * @param $version
      */
     public function updateActiveVersion($g_id, $user_id, $version);
+
+    /**
+     * Given a gradeable objec, this updates all gradeable_component_data rows that are associated, updating the scores
+     * and comments that were left.
+     *
+     * @param \app\models\Gradeable $gradeable
+     */
+    public function updateGradeableData(Gradeable $gradeable);
 
     /**
      * @todo: write phpdoc

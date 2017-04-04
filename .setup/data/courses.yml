@@ -7,15 +7,35 @@
 #
 #   instructor: string for who leads this course. This should correspond to any existing entry in users.yml
 #
-#   gradeable: a list of gradeables to be used for this course. Each gradeable is defined as:
-#     gradeable_config [optional]: what config to use out of sample_files-sample_assignent_config for this gradeable.
-#         this should be omitted if this is not an electronic gradeable.
+#   registration_sections: int for number of registration sections the course should have. Default is 10.
+#
+#   rotating_sections: int for number of rotating sections the course should have. Default is 5.
+#
+#   registered_students: int for number of students to have that are both in rotating sections and registration
+#     sections. The default for this is 300.
+#
+#   no_registration_students: int for number of students to have that are not in a registration section (but in a
+#     rotating section). The default for this is 75.
+#
+#   no_rotating_students: int for number of students to have that are not in a rotating section (but in a registration
+#     section). The default for this is 75.
+#
+#   unregistered_students: int for number of students to have that are not in either rotating or registration sections.
+#     The default for this is 50.
+#
+#   gradeables: a list of gradeables to be used for this course. Each gradeable is defined as:
 #
 #     g_id: what is the id for this gradeable. This is optional for electronic gradeables and will default to the
 #         filename of the gradeable_config, otherwise this is required to be defined.
 #
 #     g_title: [optional] what is the title for this gradeable. Defaults to a capitalized version of g_id with
 #         underscores converted to spaces.
+#
+#     gradeable_config [optional]: what config to use out of sample_files-sample_assignent_config for this gradeable.
+#         this should be omitted if this is not an electronic gradeable.
+#
+#     sample_path [optional]: path for where to get submissions for a given gradeable. If no path is given, then
+#         just use /usr/local/submitty/GIT_CHECKOUT_Submitty/sample_files/sample_submissions/<gradeable_id>
 #
 #     g_type: integer between 0-2 inclusive, where 0 is for electronic gradeable, 1 is for Checkpoint and 2 is for
 #         Numeric-Text. This can be omitted if it's an electronic gradeable (as anything with gradeable_config defined
@@ -329,6 +349,15 @@
         - gc_title: Question 1
           gc_max_value: 5
     - gradeable_config: cpp_cats
+      g_ta_view_start_date: -9 days
+      eg_submission_open_date: -8 days
+      eg_submission_due_date: +0 days
+      g_grade_start_date: +4 days
+      g_grade_released_date: +5 days
+      components:
+        - gc_title: Question 1
+          gc_max_value: 5
+    - gradeable_config: minimal_code_editing
       g_ta_view_start_date: -9 days
       eg_submission_open_date: -8 days
       eg_submission_due_date: +0 days

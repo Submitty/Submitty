@@ -1,5 +1,5 @@
 <div class='diff-container'><div class='diff-code'>
-	<div class='highlight' id="id_expected_0">
+	<div class='highlight' id='id_expected_0'>
 	<div class='bad'><span class='line_number'>1</span><span class='line_code'><span class='line_code_inner'>1. Daleks</span></span></div>
 	<div class='bad'><span class='line_number'>2</span><span class='line_code'><span class='line_code_inner'>2. Cybermen</span></span></div>
 	<div class='bad'><span class='line_number'>3</span><span class='line_code'><span class='line_code_inner'>3. Master (the)</span></span></div>
