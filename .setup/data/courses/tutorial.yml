@@ -1,111 +1,120 @@
 code: tutorial
 instructor: instructor
 gradeables:
-- components:
-  - gc_max_value: 5
-    gc_title: Question 1
-  g_ta_view_start_date: -4 days
-  eg_submission_open_date: -2 days
-  eg_submission_due_date: +4 days
-  g_grade_start_date: +7 days
-  g_grade_released_date: +9 days
-  gradeable_config:  01_simple_python
-- components:
-  - gc_max_value: 5
-    gc_title: Question 1
-  g_ta_view_start_date: -4 days
-  eg_submission_open_date: -2 days
-  eg_submission_due_date: +4 days
-  g_grade_start_date: +7 days
-  g_grade_released_date: +9 days
-  gradeable_config:  02_simple_cpp
-- components:
-  - gc_max_value: 5
-    gc_title: Question 1
-  g_ta_view_start_date: -4 days
-  eg_submission_open_date: -2 days
-  eg_submission_due_date: +4 days
-  g_grade_start_date: +7 days
-  g_grade_released_date: +9 days
-  gradeable_config:  03_multipart
-- components:
-  - gc_max_value: 5
-    gc_title: Question 1
-  g_ta_view_start_date: -4 days
-  eg_submission_open_date: -2 days
-  eg_submission_due_date: +4 days
-  g_grade_start_date: +7 days
-  g_grade_released_date: +9 days
-  gradeable_config:  04_python_static_analysis
-- components:
-  - gc_max_value: 5
-    gc_title: Question 1
-  g_ta_view_start_date: -4 days
-  eg_submission_open_date: -2 days
-  eg_submission_due_date: +4 days
-  g_grade_start_date: +7 days
-  g_grade_released_date: +9 days
-  gradeable_config:  05_cpp_static_analysis
-- components:
-  - gc_max_value: 5
-    gc_title: Question 1
-  g_ta_view_start_date: -4 days
-  eg_submission_open_date: -2 days
-  eg_submission_due_date: +4 days
-  g_grade_start_date: +7 days
-  g_grade_released_date: +9 days
-  gradeable_config:  06_loop_types
-- components:
-  - gc_max_value: 5
-    gc_title: Question 1
-  g_ta_view_start_date: -4 days
-  eg_submission_open_date: -2 days
-  eg_submission_due_date: +4 days
-  g_grade_start_date: +7 days
-  g_grade_released_date: +9 days
-  gradeable_config:  07_loop_depth
-- components:
-  - gc_max_value: 5
-    gc_title: Question 1
-  g_ta_view_start_date: -4 days
-  eg_submission_open_date: -2 days
-  eg_submission_due_date: +4 days
-  g_grade_start_date: +7 days
-  g_grade_released_date: +9 days
-  gradeable_config:  08_memory_debugging
-- components:
-  - gc_max_value: 5
-    gc_title: Question 1
-  g_ta_view_start_date: -4 days
-  eg_submission_open_date: -2 days
-  eg_submission_due_date: +4 days
-  g_grade_start_date: +7 days
-  g_grade_released_date: +9 days
-  gradeable_config:  09_java_testing
-- components:
-  - gc_max_value: 5
-    gc_title: Question 1
-  g_ta_view_start_date: -4 days
-  eg_submission_open_date: -2 days
-  eg_submission_due_date: +4 days
-  g_grade_start_date: +7 days
-  g_grade_released_date: +9 days
-  gradeable_config:  10_java_coverage
-- components:
-  - gc_max_value: 5
-    gc_title: Question 1
-  g_ta_view_start_date: -4 days
-  eg_submission_open_date: -2 days
-  eg_submission_due_date: +4 days
-  g_grade_start_date: +7 days
-  g_grade_released_date: +9 days
-  gradeable_config:  11_resources
-- components:
-  - gc_max_value: 5
-    gc_title: Question 1
-  g_ta_view_start_date: -4 days
-  eg_submission_open_date: -2 days
-  eg_submission_due_date: +4 days
-  g_grade_start_date: +7 days
-  g_grade_released_date: +9 days
-  gradeable_config:  12_system_calls
+  - gradeable_config:  01_simple_python
+    components:
+    - gc_max_value: 5
+      gc_title: Question 1
+    g_ta_view_start_date: -4 days
+    eg_submission_open_date: -2 days
+    eg_submission_due_date: +4 days
+    g_grade_start_date: +7 days
+    g_grade_released_date: +9 days
+
+  - gradeable_config:  02_simple_cpp
+    components:
+    - gc_max_value: 5
+      gc_title: Question 1
+    g_ta_view_start_date: -4 days
+    eg_submission_open_date: -2 days
+    eg_submission_due_date: +4 days
+    g_grade_start_date: +7 days
+    g_grade_released_date: +9 days
+  - gradeable_config:  03_multipart
+    components:
+    - gc_max_value: 5
+      gc_title: Question 1
+    g_ta_view_start_date: -4 days
+    eg_submission_open_date: -2 days
+    eg_submission_due_date: +4 days
+    g_grade_start_date: +7 days
+    g_grade_released_date: +9 days
+  - gradeable_config:  04_python_static_analysis
+    components:
+    - gc_max_value: 5
+      gc_title: Question 1
+    g_ta_view_start_date: -4 days
+    eg_submission_open_date: -2 days
+    eg_submission_due_date: +4 days
+    g_grade_start_date: +7 days
+    g_grade_released_date: +9 days
+  - gradeable_config:  05_cpp_static_analysis
+    components:
+    - gc_max_value: 5
+      gc_title: Question 1
+    g_ta_view_start_date: -4 days
+    eg_submission_open_date: -2 days
+    eg_submission_due_date: +4 days
+    g_grade_start_date: +7 days
+    g_grade_released_date: +9 days
+
+  - gradeable_config:  06_loop_types
+    components:
+    - gc_max_value: 5
+      gc_title: Question 1
+    g_ta_view_start_date: -4 days
+    eg_submission_open_date: -2 days
+    eg_submission_due_date: +4 days
+    g_grade_start_date: +7 days
+    g_grade_released_date: +9 days
+
+  - gradeable_config:  07_loop_depth
+    components:
+    - gc_max_value: 5
+      gc_title: Question 1
+    g_ta_view_start_date: -4 days
+    eg_submission_open_date: -2 days
+    eg_submission_due_date: +4 days
+    g_grade_start_date: +7 days
+    g_grade_released_date: +9 days
+
+  - gradeable_config:  08_memory_debugging
+    components:
+    - gc_max_value: 5
+      gc_title: Question 1
+    g_ta_view_start_date: -4 days
+    eg_submission_open_date: -2 days
+    eg_submission_due_date: +4 days
+    g_grade_start_date: +7 days
+    g_grade_released_date: +9 days
+
+  - gradeable_config:  09_java_testing
+    components:
+    - gc_max_value: 5
+      gc_title: Question 1
+    g_ta_view_start_date: -4 days
+    eg_submission_open_date: -2 days
+    eg_submission_due_date: +4 days
+    g_grade_start_date: +7 days
+    g_grade_released_date: +9 days
+
+  - gradeable_config:  10_java_coverage
+    components:
+    - gc_max_value: 5
+      gc_title: Question 1
+    g_ta_view_start_date: -4 days
+    eg_submission_open_date: -2 days
+    eg_submission_due_date: +4 days
+    g_grade_start_date: +7 days
+    g_grade_released_date: +9 days
+
+  - gradeable_config:  11_resources
+    components:
+    - gc_max_value: 5
+      gc_title: Question 1
+    g_ta_view_start_date: -4 days
+    eg_submission_open_date: -2 days
+    eg_submission_due_date: +4 days
+    g_grade_start_date: +7 days
+    g_grade_released_date: +9 days
+
+  - gradeable_config:  12_system_calls
+    components:
+    - gc_max_value: 5
+      gc_title: Question 1
+    g_ta_view_start_date: -4 days
+    eg_submission_open_date: -2 days
+    eg_submission_due_date: +4 days
+    g_grade_start_date: +7 days
+    g_grade_released_date: +9 days
+

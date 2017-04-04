@@ -582,20 +582,20 @@ chmod 2771 ${SUBMITTY_INSTALL_DIR}
 # be moved into setup_sample_courses.py
 # make a group and subdirectory for any classes requiring subversion
 # repositories:
-mkdir -p /var/lib/svn/csci2600
-touch /var/lib/svn/svngroups
-chown www-data:csci2600_tas_www /var/lib/svn/csci2600 /var/lib/svn/svngroups
-if [ ${VAGRANT} == 1 ]; then
+# mkdir -p /var/lib/svn/csci2600
+# touch /var/lib/svn/svngroups
+# chown www-data:csci2600_tas_www /var/lib/svn/csci2600 /var/lib/svn/svngroups
+# if [ ${VAGRANT} == 1 ]; then
     # set up ssh keys for hwcron to connect to the subversion
     # repository (do not use root/sudo except as shown)
-	su hwcron
+#	su hwcron
         # generate the key (accept the defaults):
-	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N "" > /dev/null 2>&1
-	echo "hwcron" > password.txt
+#	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N "" > /dev/null 2>&1
+#	echo "hwcron" > password.txt
         # copy the key to test-svn:
-	sshpass -f password.txt ssh-copy-id hwcron@test-svn
-	rm password.txt
-	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
-fi
+#	sshpass -f password.txt ssh-copy-id hwcron@test-svn
+#	rm password.txt
+#	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
+#fi
 echo "Done."
 exit 0
