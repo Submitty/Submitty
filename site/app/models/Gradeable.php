@@ -196,6 +196,8 @@ abstract class Gradeable extends AbstractModel {
 
     protected $user = null;
 
+    protected $user_viewed_date = null;
+
     public function __construct(Core $core, $id) {
         $this->core = $core;
         $this->id = $id;
@@ -785,7 +787,16 @@ abstract class Gradeable extends AbstractModel {
         $this->gd_id = $gd_id;
     }
 
+    public function getUserViewedDate() {
+        return $this->user_viewed_date;
+    }
+
+    public function updateUserViewedDate() {
+        $this->core->getQueries()->updateUserViewedDate($this);
+    }
+
     public function saveData() {
         $this->core->getQueries()->updateGradeableData($this);
     }
+
 }
