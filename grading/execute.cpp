@@ -720,14 +720,13 @@ int resident_set_size(int childPID) {
   std::string command = std::string("ps xw o user:15,pid:10,rss:10,cmd | grep untrusted"); 
 
   // for debugging, print this output to the log
-  //std::cout << "system ( '" + command + "' )" << std::endl;
-  //system (command.c_str());
+  std::cout << "system ( '" + command + "' )" << std::endl;
+  system (command.c_str());
   // now sum up the resident set size column of the output
   std::string command2 = command + " | awk '{ sum += $3 } END { print sum }'";
   std::string output = output_of_system_command(command2.c_str());
   std::stringstream ss(output);
   int mem;
-
   if (ss >> mem) {
     return mem;
   };
