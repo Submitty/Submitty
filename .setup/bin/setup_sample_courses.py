@@ -40,7 +40,7 @@ SUBMITTY_DATA_DIR = "/var/local/submitty"
 SAMPLE_ASSIGNMENT_CONFIG = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_assignment_config")
 SAMPLE_SUBMISSIONS = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_submissions")
 
-TUTORIAL_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT_Tutorial"
+TUTORIAL_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT_Tutorial")
 TUTORIAL_DIR = os.path.join(TUTORIAL_REPOSITORY, "examples")
 
 DB_HOST = "localhost"
@@ -797,15 +797,17 @@ class Gradeable(object):
         if 'gradeable_config' in gradeable:
             self.gradeable_config = gradeable['gradeable_config']
             self.type = 0
-            sample_path = os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config)
-            tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "submissions")
+
             if 'g_id' in gradeable:
                 self.id = gradeable['g_id']
             else:
                 self.id = gradeable['gradeable_config']
+
             if 'config_path' in gradeable:
                 self.config_path = gradeable['config_path']
             else:
+                sample_path = os.path.join(SAMPLE_ASSIGNMENT_CONFIG, self.gradeable_config)
+                tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "config")
                 if os.path.isdir(sample_path):
                     self.config_path = sample_path
                 elif os.path.isdir(tutorial_path):
@@ -813,6 +815,8 @@ class Gradeable(object):
                 else:
                     self.config_path = None
 
+            sample_path = os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config)
+            tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "submissions")
             if 'sample_path' in gradeable:
                 self.sample_path = gradeable['sample_path']
             else:
