@@ -148,32 +148,15 @@ HTML;
             $last_section = false;
             $tbody_open = false;
             foreach ($rows as $row) {
-                $user_id = $row->getUser()->getId();
-                $g_id = $gradeable->getId();
-
-                $params = array($user_id, $g_id);
-                $query = "SELECT 
-                user_viewed_date
-                FROM 
-                    gradeable_data 
-                WHERE
-                    gd_user_id = ?
-                AND 
-                    g_id = ?
-                ;";
-
-                $this->core->getDatabase()->query($query, $params);
-                $result = $this->core->getDatabase()->row();
-
                 if ($row->beenTAgraded()){
-                    if (!$result || !$result['user_viewed_date']){
+                    if ($row->getUserViewedDate() === null || $row->getUserViewedDate() === "") {
                         $viewed_grade = "&#10008;";
                         $grade_viewed = "";
                         $grade_viewed_color = "color: red; font-size: 1.5em;";
                     }
-                    else if ($result && $result['user_viewed_date']){
+                    else {
                         $viewed_grade = "&#x2714;";
-                        $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($result['user_viewed_date']));
+                        $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($row->getUserViewedDate()));
                         $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
                     }
                 }

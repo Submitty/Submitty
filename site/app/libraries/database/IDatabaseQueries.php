@@ -190,6 +190,13 @@ interface IDatabaseQueries {
     public function updateGradeableData(Gradeable $gradeable);
 
     /**
+     * This updates the viewed date on a gradeable object (assuming that it has a set $user object associated with it).
+     *
+     * @param \app\models\Gradeable $gradeable
+     */
+    public function updateUserViewedDate(Gradeable $gradeable);
+
+    /**
      * @todo: write phpdoc
      *
      * @param $session_id
