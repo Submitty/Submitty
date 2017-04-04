@@ -53,6 +53,7 @@ class GradeableDb extends Gradeable{
 
         if (isset($details['array_gcd_gc_id'])) {
             $this->been_tagraded = true;
+            $this->user_viewed_date = $details['gd_user_viewed_date'];
         }
 
         if (isset($details['array_gc_id'])) {
