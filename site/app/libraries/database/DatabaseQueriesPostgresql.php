@@ -5,6 +5,7 @@ namespace app\libraries\database;
 use app\libraries\Core;
 use app\libraries\Database;
 use app\libraries\Utils;
+use app\models\Gradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableDb;
 use app\models\GradeableVersion;
@@ -106,118 +107,6 @@ WHERE user_id=?", $array);
         }
     }
 
-    public function getAllGradeables($user_id = null) {
-        $this->database->query("
-SELECT 
-  CASE WHEN egv.user_id IS NOT NULL THEN 
-    CASE WHEN egv.active_version IS NULL THEN 
-      0 ELSE 
-      egv.active_version 
-    END ELSE 
-    NULL 
-  END AS active_version, 
-  egd.*, eg.*, gd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, g.*, gcd.graded_tagrading
-FROM gradeable as g 
-LEFT JOIN (
-  SELECT *
-  FROM electronic_gradeable
-) as eg ON eg.g_id = g.g_id
-LEFT JOIN (
-  SELECT SUM(gc_max_value) as total_tagrading_extra_credit, g_id
-  FROM gradeable_component
-  WHERE gc_is_text = FALSE AND gc_is_extra_credit = FALSE
-  GROUP BY g_id
-) AS gc1 ON g.g_id=gc1.g_id
-LEFT JOIN (
-  SELECT SUM(gc_max_value) as total_tagrading_non_extra_credit, g_id
-  FROM gradeable_component
-  WHERE gc_is_text = FALSE AND gc_is_extra_credit = TRUE
-  GROUP BY g_id
-) AS gc2 ON g.g_id=gc2.g_id
-LEFT JOIN (
-  SELECT *
-  FROM gradeable_data
-  WHERE gd_user_id=?
-) as gd ON gd.g_id=g.g_id
-LEFT JOIN (
-  SELECT SUM(gcd_score) as graded_tagrading, gd_id
-  FROM gradeable_component_data
-  GROUP BY gd_id
-) AS gcd ON gd.gd_id=gcd.gd_id
-LEFT JOIN (
-  SELECT *
-  FROM electronic_gradeable_version
-  WHERE user_id=?
-) as egv ON egv.g_id=g.g_id
-LEFT JOIN (
-  SELECT *
-  FROM electronic_gradeable_data
-) as egd ON egd.g_id=g.g_id AND egd.g_version=egv.active_version
-ORDER BY g.g_id", array($user_id, $user_id));
-        $return = array();
-        foreach ($this->database->rows() as $row) {
-            $return[$row['g_id']] = new GradeableDb($this->core, $row);
-        }
-        //var_dump($return);
-        //die();
-        return $return;
-    }
-
-    public function getGradeableById($g_id, $user_id = null) {
-        $this->database->query("
-SELECT 
-  gd.*, 
-  CASE WHEN egv.user_id IS NOT NULL THEN 
-    CASE WHEN egv.active_version IS NULL THEN 
-      0 ELSE 
-      egv.active_version 
-    END ELSE 
-    NULL 
-  END AS active_version, 
-  egd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, g.*, eg.*, gcd.graded_tagrading
-FROM gradeable as g
-LEFT JOIN (
-  SELECT *
-  FROM electronic_gradeable
-) as eg ON eg.g_id = g.g_id
-LEFT JOIN (
-  SELECT SUM(gc_max_value) as total_tagrading_extra_credit, g_id
-  FROM gradeable_component
-  WHERE gc_is_text = FALSE AND gc_is_extra_credit = FALSE
-  GROUP BY g_id
-) AS gc1 ON g.g_id=gc1.g_id
-LEFT JOIN (
-  SELECT SUM(gc_max_value) as total_tagrading_non_extra_credit, g_id
-  FROM gradeable_component
-  WHERE gc_is_text = FALSE AND gc_is_extra_credit = TRUE
-  GROUP BY g_id
-) AS gc2 ON g.g_id=gc2.g_id
-LEFT JOIN (
-  SELECT *
-  FROM gradeable_data
-  WHERE gd_user_id=?
-) as gd ON gd.g_id=g.g_id
-LEFT JOIN (
-  SELECT SUM(gcd_score) as graded_tagrading, gd_id
-  FROM gradeable_component_data
-  GROUP BY gd_id
-) AS gcd ON gd.gd_id=gcd.gd_id
-LEFT JOIN (
-  SELECT *
-  FROM electronic_gradeable_version
-  WHERE user_id=?
-) as egv ON egv.g_id=g.g_id
-LEFT JOIN (
-  SELECT *
-  FROM electronic_gradeable_data
-) as egd ON egd.g_id=g.g_id AND egd.g_version=egv.active_version
-WHERE g.g_id=?", array($user_id, $user_id, $g_id));
-        if (count($this->database->rows()) === 0) {
-            return null;
-        }
-        return new GradeableDb($this->core, $this->database->row());
-    }
-
     public function getGradeableComponents($g_id, $gd_id=null) {
         $this->database->query("
 SELECT gcd.*, gc.*
@@ -255,65 +144,165 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         return $return;
     }
 
-    public function getGradeableForUsers($g_id, $users, $section_key="registration_section") {
+    public function getAllGradeables($user_id = null) {
+        return $this->getGradeables(null, $user_id);
+    }
+
+    public function getGradeable($g_id = null, $user_id = null) {
+        return $this->getGradeables($g_id, $user_id)[0];
+    }
+
+    /*
+     * TODO:
+     * This should take in for:
+     *  gradeable: [string] or [array] which then maps that into a where clause (g_id = string) OR (g_id IN (?, ?))
+     *  users: [string] or [array] which then maps that into a where clause as well as adding in additional
+     *      components for the SELECT cause and in the FROM clause (don't need gradeable_data if this is null, etc.)
+     *  section_key:
+     */
+    public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section") {
         $return = array();
-        if (count($users) > 0) {
-            $keys = array("registration_section", "rotating_section");
-            $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
-            $users_query = implode(",", array_fill(0, count($users), "?"));
-            $this->database->query("
-SELECT 
-  CASE WHEN egv.user_id IS NOT NULL THEN 
-    CASE WHEN egv.active_version IS NULL THEN 
-      0 ELSE 
-      egv.active_version 
-    END ELSE 
-    NULL 
+        $g_ids_query = "";
+        $users_query = "";
+        $params = array();
+        if ($g_ids !== null && !is_array($g_ids)) {
+            $g_ids = array($g_ids);
+            $g_ids_query = implode(",", array_fill(0, count($g_ids), "?"));
+            $params = $g_ids;
+        }
+
+        if ($user_ids !== null && !is_array($user_ids)) {
+            $user_ids = array($user_ids);
+        }
+        $keys = array("registration_section", "rotating_section");
+        $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
+        if ($user_ids !== null && count($user_ids) > 0) {
+            $users_query = implode(",", array_fill(0, count($user_ids), "?"));
+            $params = array_merge($params, $user_ids);
+        }
+        $query = "
+SELECT";
+        if ($user_ids !== null) {
+            $query .= "
+  u.*,";
+        }
+        $query .= "
+  g.*,
+  eg.eg_config_path,
+  eg.eg_is_repository,
+  eg.eg_subdirectory,
+  eg.eg_use_ta_grading,
+  eg.eg_submission_open_date,
+  eg.eg_submission_due_date,
+  eg.eg_late_days,
+  eg.eg_precision,
+  gc.array_gc_id,
+  gc.array_gc_title,
+  gc.array_gc_ta_comment,
+  gc.array_gc_student_comment,
+  gc.array_gc_max_value,
+  gc.array_gc_is_text,
+  gc.array_gc_is_extra_credit,
+  gc.array_gc_order";
+        if ($user_ids !== null) {
+            $query .= ",
+  gd.gd_id,
+  gd.gd_grader_id,
+  gd.gd_overall_comment,
+  gd.gd_status,
+  gd.gd_late_days_used,
+  gd.gd_active_version,
+  gd.array_gcd_gc_id,
+  gd.array_gcd_score,
+  gd.array_gcd_component_comment,
+  CASE WHEN egd.active_version IS NULL THEN 
+    0 ELSE 
+    egd.active_version 
   END AS active_version, 
-  egd.*, gc1.total_tagrading_extra_credit, gc2.total_tagrading_non_extra_credit, gcd.graded_tagrading, 
-  gd.*, eg.*, g.*, u.*
+  egd.g_version,
+  egd.autograding_non_hidden_non_extra_credit,
+  egd.autograding_non_hidden_extra_credit,
+  egd.autograding_hidden_non_extra_credit,
+  egd.autograding_hidden_extra_credit,
+  egd.submission_time
 FROM users AS u
-NATURAL JOIN gradeable AS g
-LEFT JOIN (
-  SELECT *
-  FROM gradeable_data
-) AS gd ON gd.gd_user_id=u.user_id AND g.g_id=gd.g_id
-LEFT JOIN (
-  SELECT SUM(gc_max_value) as total_tagrading_extra_credit, g_id
-  FROM gradeable_component
-  WHERE gc_is_text = FALSE AND gc_is_extra_credit = TRUE
-  GROUP BY g_id
-) AS gc1 ON g.g_id=gc1.g_id
-LEFT JOIN (
-  SELECT SUM(gc_max_value) as total_tagrading_non_extra_credit, g_id
-  FROM gradeable_component
-  WHERE gc_is_text = FALSE AND gc_is_extra_credit = FALSE
-  GROUP BY g_id
-) AS gc2 ON g.g_id=gc2.g_id
-LEFT JOIN (
-  SELECT SUM(gcd_score) as graded_tagrading, gd_id
-  FROM gradeable_component_data
-  GROUP BY gd_id
-) AS gcd ON gd.gd_id=gcd.gd_id
+NATURAL JOIN gradeable AS g";
+        }
+        else {
+            $query .= "
+FROM gradeable AS g";
+        }
+        $query .= "
 LEFT JOIN (
   SELECT *
   FROM electronic_gradeable
 ) AS eg ON eg.g_id=g.g_id
 LEFT JOIN (
-  SELECT *
-  FROM electronic_gradeable_version
-) AS egv ON g.g_id=egv.g_id AND u.user_id=egv.user_id
+  SELECT
+    g_id,
+    array_agg(gc_id) as array_gc_id,
+    array_agg(gc_title) AS array_gc_title,
+    array_agg(gc_ta_comment) AS array_gc_ta_comment,
+    array_agg(gc_student_comment) AS array_gc_student_comment,
+    array_agg(gc_max_value) AS array_gc_max_value,
+    array_agg(gc_is_text) AS array_gc_is_text,
+    array_agg(gc_is_extra_credit) AS array_gc_is_extra_credit,
+    array_agg(gc_order) AS array_gc_order
+  FROM gradeable_component
+  GROUP BY g_id
+) AS gc ON gc.g_id=g.g_id";
+        if ($user_ids !== null) {
+            $query .= "
 LEFT JOIN (
-  SELECT *
-  FROM electronic_gradeable_data
-) AS egd ON g.g_id=egd.g_id AND egv.active_version=egd.g_version AND u.user_id=egd.user_id
-WHERE g.g_id=? AND u.user_id IN ({$users_query})
-ORDER BY u.{$section_key}, u.user_id", array_merge(array($g_id), $users));
-
-            foreach ($this->database->rows() as $row) {
-                $return[] = new GradeableDb($this->core, $row, new User($row));
-            }
+  SELECT 
+    in_gd.*,
+    in_gcd.array_gcd_gc_id,
+    in_gcd.array_gcd_score,
+    in_gcd.array_gcd_component_comment
+  FROM gradeable_data as in_gd
+  LEFT JOIN (
+    SELECT
+      gd_id,
+      array_agg(gc_id) AS array_gcd_gc_id,
+      array_agg(gcd_score) as array_gcd_score,
+      array_agg(gcd_component_comment) as array_gcd_component_comment
+    FROM gradeable_component_data
+    GROUP BY gd_id
+  ) AS in_gcd ON in_gd.gd_id = in_gcd.gd_id
+) AS gd ON gd.gd_user_id = u.user_id AND g.g_id = gd.g_id
+LEFT JOIN (
+  SELECT
+    egd.*,
+    egv.active_version
+  FROM electronic_gradeable_version AS egv, electronic_gradeable_data AS egd
+  WHERE egv.active_version = egd.g_version AND egv.g_id = egd.g_id AND egv.user_id = egd.user_id
+) AS egd ON g.g_id = egd.g_id AND u.user_id = egd.user_id";
         }
+
+        $where = array();
+        if ($g_ids !== null) {
+            $where[] = "g.g_id IN ({$g_ids_query})";
+        }
+        if ($user_ids !== null) {
+            $where[] = "u.user_id IN ({$users_query})";
+        }
+        if (count($where) > 0) {
+            $query .= "
+WHERE ".implode(" AND ", $where);
+        }
+
+        if ($user_ids !== null) {
+            $query .= "
+ORDER BY u.{$section_key}, u.user_id";
+        }
+
+        $this->database->query($query, $params);
+
+        foreach ($this->database->rows() as $row) {
+            $user = (isset($row['user_id']) && $row['user_id'] !== null) ? new User($row) : null;
+            $return[] = new GradeableDb($this->core, $row, $user);
+        }
+
         return $return;
     }
 
@@ -615,6 +604,52 @@ VALUES(?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $version, $timestamp));
     public function updateActiveVersion($g_id, $user_id, $version) {
         $this->database->query("UPDATE electronic_gradeable_version SET active_version=? WHERE g_id=? AND user_id=?",
             array($version, $g_id, $user_id));
+    }
+
+    /*
+    public function insertGradeableData(Gradeable $gradeable) {
+        $params = array($gradeable->getId(), $gradeable->getUser()->getId(), $gradeable->getGrader()->getId(),
+            $gradeable->getOverallComment(), $gradeable->getStatus(), 0, $gradeable->getActiveVersion());
+        $this->database->beginTransaction();
+
+        $this->database->commit();
+    }
+    */
+
+    public function updateGradeableData(Gradeable $gradeable) {
+        $this->database->beginTransaction();
+        if ($gradeable->getGdId() === null) {
+            $params = array($gradeable->getId(), $gradeable->getUser()->getId(), $gradeable->getGrader()->getId(),
+                            $gradeable->getOverallComment(), $gradeable->getStatus(), 0,
+                            $gradeable->getActiveVersion());
+            $this->database->query("INSERT INTO 
+gradeable_data (g_id, gd_user_id, gd_grader_id, gd_overall_comment, gd_status, gd_late_days_used, gd_active_version)
+VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
+            $gradeable->setGdId($this->database->getLastInsertId("gradeable_data_gd_id_seq"));
+        }
+        else {
+            $this->database->query("UPDATE gradeable_data SET gd_grader_id=? WHERE gd_id=?", array($gradeable->getGrader()->getId(), $gradeable->getGdId()));
+        }
+        foreach ($gradeable->getComponents() as $component) {
+
+        }
+
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->hasGrade()) {
+                $params = array($component->getScore(), $component->getComment(), $component->getId(), $gradeable->getGdId());
+                $this->database->query("
+UPDATE gradeable_component_data SET gcd_score=?, gcd_component_comment=? WHERE gc_id=? AND gd_id=?", $params);
+            }
+            else {
+                $params = array($component->getId(), $gradeable->getGdId(), $component->getScore(),
+                                $component->getComment());
+                $this->database->query("
+INSERT INTO gradeable_component_data (gc_id, gd_id, gcd_score, gcd_component_comment) 
+VALUES (?, ?, ?, ?)", $params);
+            }
+
+        }
+        $this->database->commit();
     }
 
     public function getSession($session_id) {

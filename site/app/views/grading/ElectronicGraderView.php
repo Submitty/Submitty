@@ -200,7 +200,7 @@ HTML;
 HTML;
                     }
                     if (isset($graders[$display_section]) && count($graders[$display_section]) > 0) {
-                        $section_graders = implode(", ", array_map(function($user) { return $user->getId(); }, $graders[$display_section]));
+                        $section_graders = implode(", ", array_map(function(User $user) { return $user->getId(); }, $graders[$display_section]));
                     }
                     else {
                         $section_graders = "Nobody";

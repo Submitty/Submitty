@@ -10,7 +10,8 @@ import glob
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
 SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/sample_files/sample_assignment_config/java_factorial"
-SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/sample_files/sample_submissions/java_factorial"
+SAMPLE_SUBMISSIONS = SUBMITTY_INSTALL_DIR + "/sample_files/sample_submissions/java_factorial"
+
 
 @prebuild
 def initialize(test):
@@ -24,11 +25,11 @@ def initialize(test):
         pass
 
     subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
-        os.path.join(test.testcase_path, "assignment_config")])
+                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
+                     os.path.join(test.testcase_path, "assignment_config")])
     subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_code", "FactorialTest.java"),
-        os.path.join(test.testcase_path, "data")])
+                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_code", "FactorialTest.java"),
+                     os.path.join(test.testcase_path, "data")])
 
 
 ############################################################################
@@ -37,23 +38,31 @@ def initialize(test):
 def cleanup(test):
     # seem to need to cleanup this class file, otherwise it doesn't recompile
     subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data/", "Factorial.class")))
+                    glob.glob(os.path.join(test.testcase_path, "data/", "*.zip")))
     subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data/", "Factorial.java")))
+                    glob.glob(os.path.join(test.testcase_path, "data/", "Factorial.class")))
     subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data/", "test*.txt")))
+                    glob.glob(os.path.join(test.testcase_path, "data/", "Factorial.java")))
     subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data/results_grade.txt")))
+                    glob.glob(os.path.join(test.testcase_path, "data/", "test*.txt")))
     subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data/results.json")))
+                    glob.glob(os.path.join(test.testcase_path, "data/results_grade.txt")))
+    subprocess.call(["rm"] + ["-f"] +
+                    glob.glob(os.path.join(test.testcase_path, "data/results.json")))
 
 
 @testcase
 def correct(test):
     cleanup(test)
     subprocess.call(["cp",
-        os.path.join(SAMPLE_SUBMISSIONS, "correct/Factorial.java"),
-        os.path.join(test.testcase_path, "data/")])
+                     os.path.join(SAMPLE_SUBMISSIONS, "correct.zip"),
+                     os.path.join(test.testcase_path, "data/")])
+    subprocess.call(["unzip",
+                     "-q",  # quiet
+                     "-o",  # overwrite files
+                     os.path.join(test.testcase_path, "data/correct.zip"),
+                     "-d",  # save to directory
+                     os.path.join(test.testcase_path, "data/")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -61,19 +70,25 @@ def correct(test):
     test.empty_file("test01_STDERR.txt")
     test.empty_file("test02_STDOUT.txt")
     test.empty_file("test02_STDERR.txt")
-    test.junit_diff("test03_STDOUT.txt","correct_test03_STDOUT.txt")
+    test.junit_diff("test03_STDOUT.txt", "correct_test03_STDOUT.txt")
     test.empty_file("test03_STDERR.txt")
     test.empty_file("test03_execute_logfile.txt")
-    test.diff("results_grade.txt","correct_results_grade.txt", "-b")
-    test.json_diff("results.json","correct_results.json")
+    test.diff("results_grade.txt", "correct_results_grade.txt", "-b")
+    test.json_diff("results.json", "correct_results.json")
 
 
 @testcase
 def does_not_compile(test):
     cleanup(test)
     subprocess.call(["cp",
-        os.path.join(SAMPLE_SUBMISSIONS, "does_not_compile/Factorial.java"),
-        os.path.join(test.testcase_path, "data/")])
+                     os.path.join(SAMPLE_SUBMISSIONS, "does_not_compile.zip"),
+                     os.path.join(test.testcase_path, "data/")])
+    subprocess.call(["unzip",
+                     "-q",  # quiet
+                     "-o",  # overwrite files
+                     os.path.join(test.testcase_path, "data/does_not_compile.zip"),
+                     "-d",  # save to directory
+                     os.path.join(test.testcase_path, "data/")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -92,8 +107,14 @@ def does_not_compile(test):
 def buggy(test):
     cleanup(test)
     subprocess.call(["cp",
-        os.path.join(SAMPLE_SUBMISSIONS, "buggy/Factorial.java"),
-        os.path.join(test.testcase_path, "data/")])
+                     os.path.join(SAMPLE_SUBMISSIONS, "buggy.zip"),
+                     os.path.join(test.testcase_path, "data/")])
+    subprocess.call(["unzip",
+                     "-q",  # quiet
+                     "-o",  # overwrite files
+                     os.path.join(test.testcase_path, "data/buggy.zip"),
+                     "-d",  # save to directory
+                     os.path.join(test.testcase_path, "data/")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -101,19 +122,25 @@ def buggy(test):
     test.empty_file("test01_STDERR.txt")
     test.empty_file("test02_STDOUT.txt")
     test.empty_file("test02_STDERR.txt")
-    test.junit_diff("test03_STDOUT.txt","buggy_test03_STDOUT.txt")
+    test.junit_diff("test03_STDOUT.txt", "buggy_test03_STDOUT.txt")
     test.empty_file("test03_STDERR.txt")
-    test.diff("test03_execute_logfile.txt","exit_status_1.txt")
-    test.diff("results_grade.txt","buggy_results_grade.txt", "-b")
-    test.json_diff("results.json","buggy_results.json")
+    test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
+    test.diff("results_grade.txt", "buggy_results_grade.txt", "-b")
+    test.json_diff("results.json", "buggy_results.json")
 
 
 @testcase
 def still_buggy(test):
     cleanup(test)
     subprocess.call(["cp",
-        os.path.join(SAMPLE_SUBMISSIONS, "still_buggy/Factorial.java"),
-        os.path.join(test.testcase_path, "data/")])
+                     os.path.join(SAMPLE_SUBMISSIONS, "still_buggy.zip"),
+                     os.path.join(test.testcase_path, "data/")])
+    subprocess.call(["unzip",
+                     "-q",  # quiet
+                     "-o",  # overwrite files
+                     os.path.join(test.testcase_path, "data/still_buggy.zip"),
+                     "-d",  # save to directory
+                     os.path.join(test.testcase_path, "data/")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -121,8 +148,8 @@ def still_buggy(test):
     test.empty_file("test01_STDERR.txt")
     test.empty_file("test02_STDOUT.txt")
     test.empty_file("test02_STDERR.txt")
-    test.junit_diff("test03_STDOUT.txt","still_buggy_test03_STDOUT.txt")
+    test.junit_diff("test03_STDOUT.txt", "still_buggy_test03_STDOUT.txt")
     test.empty_file("test03_STDERR.txt")
-    test.diff("test03_execute_logfile.txt","exit_status_1.txt")
-    test.diff("results_grade.txt","still_buggy_results_grade.txt", "-b")
-    test.json_diff("results.json","still_buggy_results.json")
+    test.diff("test03_execute_logfile.txt", "exit_status_1.txt")
+    test.diff("results_grade.txt", "still_buggy_results_grade.txt", "-b")
+    test.json_diff("results.json", "still_buggy_results.json")
