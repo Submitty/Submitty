@@ -80,15 +80,6 @@ class HWReport
                       FROM users
                     ) AS grader ON grader.user_id = gd.gd_grader_id
             ) AS total ON total.g_id = g.g_id AND total.gd_user_id=u.user_id
-            WHERE
-              ((
-                user_group = 4
-                AND registration_section IS NOT NULL
-              )
-              OR
-              (
-                manual_registration IS TRUE
-              ))
         ORDER BY g_syllabus_bucket ASC, g_grade_released_date ASC, u.user_id ASC
         ) AS user_grades
 
