@@ -113,13 +113,13 @@ def main():
 
     list_of_courses_file="/usr/local/submitty/site/app/views/current_courses.php"
     with open(list_of_courses_file, "w") as courses_file:
-        print("",file=courses_file)
+        print("", file=courses_file)
 
     for course_id in courses.keys():
 
         with open(list_of_courses_file, "a") as courses_file:
             print('<a href="http://192.168.56.101/index.php?semester=s17&course='+course_id+'">'+course_id+', Spring 2017</a>',file=courses_file)
-            print("<br>",file=courses_file)
+            print("<br>", file=courses_file)
 
         course = courses[course_id]
         students = random.sample(extra_students, course.registered_students + course.no_registration_students +
@@ -698,8 +698,9 @@ class Course(object):
                         if isinstance(gradeable.submissions, dict):
                             for key in gradeable.submissions:
                                 os.system("mkdir -p " + os.path.join(submission_path, "1", key))
-                                src = os.path.join(gradeable.sample_path, random.choice(gradeable.submissions[key]))
-                                dst = os.path.join(submission_path, "1", key, gradeable.submissions[key])
+                                submission = random.choice(gradeable.submissions[key])
+                                src = os.path.join(gradeable.sample_path, submission)
+                                dst = os.path.join(submission_path, "1", key, submission)
                                 if os.path.isdir(src):
                                     zip_dst = os.path.join("/tmp", uuid.uuid4())
                                     shutil.make_archive(zip_dst, 'zip', src)
@@ -723,7 +724,7 @@ class Course(object):
                                     src = tutorial_path
                                 else:
                                     src=""
-                                    print("ERROR!  PATHS DON'T EXIST "+sample_path+" "+tutorial_path)
+                                    print("ERROR!  PATHS DON'T EXIST", sample_path, tutorial_path)
 
                                 dst = os.path.join(submission_path, "1", submission)
                                 shutil.copy(src, dst)
@@ -747,7 +748,7 @@ class Course(object):
                 os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
                 if gradeable.type == 0 and submitted:
                     queue_file = "__".join([self.semester, self.code, gradeable.id, user.id, "1"])
-                    print("Creating queue file: " + queue_file)
+                    print("Creating queue file:", queue_file)
                     queue_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_batch", queue_file)
                     with open(queue_file, "w") as open_file:
                         json.dump({"semester": self.semester,
