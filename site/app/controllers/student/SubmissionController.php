@@ -62,8 +62,7 @@ class SubmissionController extends AbstractController {
                 return array('error' => true, 'message' => 'No gradeable with that id.');
             }
             else {
-                $loc = array('page' => 'submission',
-                             'action' => 'display',
+                $loc = array('component' => 'student',
                              'gradeable_id' => $gradeable->getId());
                 $this->core->getOutput()->addBreadcrumb($gradeable->getName(), $this->core->buildUrl($loc));
                 if (!$gradeable->hasConfig()) {
@@ -74,6 +73,9 @@ class SubmissionController extends AbstractController {
                 else {
                     $gradeable->loadResultDetails();
                     $days_late = DateUtils::calculateDayDiff($gradeable->getDueDate());
+                    if ($gradeable->beenTAgraded() && $gradeable->hasGradeFile()) {
+                        $gradeable->updateUserViewedDate();
+                    }
                     $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
                                                            'showGradeable', $gradeable, $days_late);
                 }

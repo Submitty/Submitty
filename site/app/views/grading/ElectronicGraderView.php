@@ -126,8 +126,9 @@ HTML;
                 <td width="20%" style="text-align: left">User ID</td>
                 <td width="30%" colspan="2">Name</td>
                 <td width="14%">Autograding</td>
-                <td width="14%">TA Grading</td>
-                <td width="14%">Total</td>
+                <td width="10%">TA Grading</td>
+                <td width="10%">Total</td>
+                <td width="8%">Viewed Grade</td>
             </tr>
         </thead>
 HTML;
@@ -135,7 +136,7 @@ HTML;
             $return .= <<<HTML
         <tbody>
             <tr>
-                <td colspan="8">No students found for grading</td>
+                <td colspan="9">No students found for grading</td>
             </tr>
         </tbody>
 HTML;
@@ -147,6 +148,23 @@ HTML;
             $last_section = false;
             $tbody_open = false;
             foreach ($rows as $row) {
+                if ($row->beenTAgraded()){
+                    if ($row->getUserViewedDate() === null || $row->getUserViewedDate() === "") {
+                        $viewed_grade = "&#10008;";
+                        $grade_viewed = "";
+                        $grade_viewed_color = "color: red; font-size: 1.5em;";
+                    }
+                    else {
+                        $viewed_grade = "&#x2714;";
+                        $grade_viewed = "Last Viewed: " . date("F j, Y, g:i a", strtotime($row->getUserViewedDate()));
+                        $grade_viewed_color = "color: #5cb85c; font-size: 1.5em;";
+                    }
+                }
+                else{
+                    $viewed_grade = "";
+                    $grade_viewed = "";
+                    $grade_viewed_color = "";
+                }
                 $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
                 $graded = $row->getGradedAutograderPoints() + $row->getGradedTAPoints();
                 if ($gradeable->isGradeByRegistration()) {
@@ -165,7 +183,7 @@ HTML;
 HTML;
                     }
                     if (isset($graders[$display_section]) && count($graders[$display_section]) > 0) {
-                        $section_graders = implode(", ", array_map(function($user) { return $user->getId(); }, $graders[$display_section]));
+                        $section_graders = implode(", ", array_map(function(User $user) { return $user->getId(); }, $graders[$display_section]));
                     }
                     else {
                         $section_graders = "Nobody";
@@ -173,10 +191,10 @@ HTML;
 
                     $return .= <<<HTML
         <tr class="info persist-header">
-            <td colspan="8" style="text-align: center">Students Enrolled in Section {$display_section}</td>
+            <td colspan="9" style="text-align: center">Students Enrolled in Section {$display_section}</td>
         </tr>
         <tr class="info">
-            <td colspan="8" style="text-align: center">Graders: {$section_graders}</td>
+            <td colspan="9" style="text-align: center">Graders: {$section_graders}</td>
         </tr>
         <tbody id="section-{$section}">
 HTML;
@@ -205,6 +223,7 @@ HTML;
                     </a>
                 </td>
                 <td>{$graded} / {$total_possible}</td>
+                <td title="{$grade_viewed}" style="{$grade_viewed_color}">{$viewed_grade}</td>
             </tr>
 HTML;
                 $count++;

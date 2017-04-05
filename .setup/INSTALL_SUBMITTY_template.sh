@@ -376,6 +376,8 @@ popd > /dev/null
 
 echo -e "Copy the ta grading website"
 
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading
+
 # Using a symbolic link would be nicer, but it seems that suphp doesn't like them very much so we just have
 # two copies of the site
 rsync  -rtz ${SUBMITTY_REPOSITORY}/TAGradingServer/*php         ${SUBMITTY_INSTALL_DIR}/site/public/hwgrading

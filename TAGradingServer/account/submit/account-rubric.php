@@ -68,7 +68,7 @@ else{
 }
 
 $params = array(\models\User::$user_id, $active_version, $overall_comment, $status, intval($_POST['late']), $gd_id);
-$db->query("UPDATE gradeable_data SET gd_grader_id=?, gd_active_version=?, gd_overall_comment=?, gd_status=?, gd_late_days_used=? WHERE gd_id=?",$params);
+$db->query("UPDATE gradeable_data SET gd_grader_id=?, gd_active_version=?, gd_overall_comment=?, gd_status=?, gd_late_days_used=?, gd_user_viewed_date=NULL WHERE gd_id=?",$params);
 
 //update the number of late days for the student the first time grades are submitted
 if ($status == 1 && !$is_graded){

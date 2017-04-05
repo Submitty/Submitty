@@ -26,6 +26,7 @@ import random
 import re
 import shutil
 import subprocess
+import uuid
 
 from sqlalchemy import create_engine, Table, MetaData
 import yaml
@@ -36,8 +37,11 @@ SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
 SUBMITTY_REPOSITORY = "/usr/local/submitty/GIT_CHECKOUT_Submitty"
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
-SAMPLE_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_assignment_config")
+SAMPLE_ASSIGNMENT_CONFIG = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_assignment_config")
 SAMPLE_SUBMISSIONS = os.path.join(SUBMITTY_INSTALL_DIR, "sample_files", "sample_submissions")
+
+TUTORIAL_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT_Tutorial")
+TUTORIAL_DIR = os.path.join(TUTORIAL_REPOSITORY, "examples")
 
 DB_HOST = "localhost"
 DB_USER = "hsdbu"
@@ -107,7 +111,16 @@ def main():
         extra_students = max(tmp, extra_students)
     extra_students = generate_random_users(extra_students, users)
 
+    list_of_courses_file="/usr/local/submitty/site/app/views/current_courses.php"
+    with open(list_of_courses_file, "w") as courses_file:
+        print("",file=courses_file)
+
     for course_id in courses.keys():
+
+        with open(list_of_courses_file, "a") as courses_file:
+            print('<a href="http://192.168.56.101/index.php?semester=s17&course='+course_id+'">'+course_id+', Spring 2017</a>',file=courses_file)
+            print("<br>",file=courses_file)
+
         course = courses[course_id]
         students = random.sample(extra_students, course.registered_students + course.no_registration_students +
                                  course.no_rotating_students + course.unregistered_students)
@@ -653,6 +666,8 @@ class Course(object):
         os.system('chown {}:{}_tas_www {}'.format(self.instructor.id, self.code, os.path.join(course_path,
                                                                                               'submissions')))
         for gradeable in self.gradeables:
+            if gradeable.type == 0 and len(gradeable.submissions) == 0:
+                continue
             gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
             os.makedirs(gradeable_path)
             os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, gradeable_path))
@@ -683,10 +698,14 @@ class Course(object):
                         if isinstance(gradeable.submissions, dict):
                             for key in gradeable.submissions:
                                 os.system("mkdir -p " + os.path.join(submission_path, "1", key))
-                                src = os.path.join(SAMPLE_SUBMISSIONS, gradeable.gradeable_config,
-                                                   random.choice(gradeable.submissions[key]))
+                                src = os.path.join(gradeable.sample_path, random.choice(gradeable.submissions[key]))
                                 dst = os.path.join(submission_path, "1", key, gradeable.submissions[key])
-                                shutil.copy(src, dst)
+                                if os.path.isdir(src):
+                                    zip_dst = os.path.join("/tmp", uuid.uuid4())
+                                    shutil.make_archive(zip_dst, 'zip', src)
+                                    shutil.move(zip_dst, dst)
+                                elif os.path.isfile(src):
+                                    shutil.copy(src, dst)
                         else:
                             submission = random.choice(gradeable.submissions)
                             if isinstance(submission, list):
@@ -694,7 +713,18 @@ class Course(object):
                             else:
                                 submissions = [submission]
                             for submission in submissions:
-                                src = os.path.join(SAMPLE_SUBMISSIONS, gradeable.gradeable_config, submission)
+
+                                sample_path = os.path.join(SAMPLE_SUBMISSIONS, gradeable.gradeable_config,submission)
+                                tutorial_path = os.path.join(TUTORIAL_DIR, gradeable.gradeable_config,"submissions",submission)
+
+                                if os.path.exists(sample_path):
+                                    src = sample_path
+                                elif os.path.exists(tutorial_path):
+                                    src = tutorial_path
+                                else:
+                                    src=""
+                                    print("ERROR!  PATHS DON'T EXIST "+sample_path+" "+tutorial_path)
+
                                 dst = os.path.join(submission_path, "1", submission)
                                 shutil.copy(src, dst)
 
@@ -762,23 +792,44 @@ class Gradeable(object):
         self.syllabus_bucket = "none (for practice only)"
         self.min_grading_group = 3
         self.grading_rotating = []
+        self.submissions = []
 
         if 'gradeable_config' in gradeable:
-            self.config_path = os.path.join(SAMPLE_DIR, gradeable['gradeable_config'])
+            self.gradeable_config = gradeable['gradeable_config']
+            self.type = 0
+
             if 'g_id' in gradeable:
                 self.id = gradeable['g_id']
             else:
                 self.id = gradeable['gradeable_config']
-            self.type = 0
-            self.gradeable_config = gradeable['gradeable_config']
+
+            if 'config_path' in gradeable:
+                self.config_path = gradeable['config_path']
+            else:
+                sample_path = os.path.join(SAMPLE_ASSIGNMENT_CONFIG, self.gradeable_config)
+                tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "config")
+                if os.path.isdir(sample_path):
+                    self.config_path = sample_path
+                elif os.path.isdir(tutorial_path):
+                    self.config_path = tutorial_path
+                else:
+                    self.config_path = None
+
+            sample_path = os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config)
+            tutorial_path = os.path.join(TUTORIAL_DIR, self.gradeable_config, "submissions")
             if 'sample_path' in gradeable:
                 self.sample_path = gradeable['sample_path']
             else:
-                self.sample_path = os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config)
+                if os.path.isdir(sample_path):
+                    self.sample_path = sample_path
+                elif os.path.isdir(tutorial_path):
+                    self.sample_path = tutorial_path
         else:
-            self.config_path = None
-            self.type = int(gradeable['g_type'])
             self.id = gradeable['g_id']
+            self.type = int(gradeable['g_type'])
+            self.config_path = None
+            self.sample_path = None
+
         assert 0 <= self.type <= 2
 
         if 'g_title' in gradeable:
@@ -809,16 +860,24 @@ class Gradeable(object):
             if 'eg_precision' in gradeable:
                 self.precision = float(gradeable['eg_precision'])
             if self.config_path is None:
-                self.config_path = os.path.join(SAMPLE_DIR, self.id)
+                sample_path = os.path.join(SAMPLE_ASSIGNMENT_CONFIG, self.id)
+                tutorial_path = os.path.join(TUTORIAL_DIR, self.id, "config")
+                if os.path.isdir(sample_path):
+                    self.config_path = sample_path
+                elif os.path.isdir(tutorial_path):
+                    self.config_path = tutorial_path
+                else:
+                    self.config_path = None
             assert self.ta_view_date < self.submission_open_date
             assert self.submission_open_date < self.submission_due_date
             assert self.submission_due_date < self.grade_start_date
             if self.gradeable_config is not None:
-                if os.path.isfile(os.path.join(SAMPLE_SUBMISSIONS, self.gradeable_config, "submissions.yml")):
-                    self.submissions = load_data_yaml(os.path.join(self.sample_path, "submissions.yml"))
-                else:
-                    self.submissions = os.listdir(self.sample_path)
-                self.submissions = list(filter(lambda x: x != ".DS_Store", self.submissions))
+                if self.sample_path is not None:
+                    if os.path.isfile(os.path.join(self.sample_path, "submissions.yml")):
+                        self.submissions = load_data_yaml(os.path.join(self.sample_path, "submissions.yml"))
+                    else:
+                        self.submissions = os.listdir(self.sample_path)
+                        self.submissions = list(filter(lambda x: not x.startswith("."), self.submissions))
         assert self.ta_view_date < self.grade_start_date
         assert self.grade_start_date < self.grade_released_date
 
