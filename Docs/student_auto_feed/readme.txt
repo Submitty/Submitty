@@ -1,4 +1,4 @@
-Submitty Student Auto Feed PHP Scripts Readme, Nov 21 2016
+Submitty Student Auto Feed PHP Scripts Readme, March 30 2017
 
 The following scripts are provided to assist in setting up an automatic update
 of student enrollments in Submitty courses.
@@ -41,5 +41,31 @@ more stringent.
 * Recommendation: if this script is run every hour by cronjob, professors can
   advise students who are manually added that they "will have access to Submitty
   within an hour."
+
+
+BACKUP/RECOVERY ****************************************************************
+submitty_student_auto_feed.php has data validation checks to help preserve the
+integrity of the courses' database users table from a bad feed.  Should a feed
+of bad data manage to get past validation and corrupt any/all users table, the
+following tools may be able to assist with quick recovery.
+
+
+user_table_backup.php
+A command line script to (optionally) backup the users table data of all
+Submitty courses.  This needs to be run BEFORE submitty_student_auto_feed.php.
+The number of days of backups needs to be defined (recommended: 7).  As users
+data contains data protected by FERPA, an optional AES encryption feature is
+also provided.  IMPORTANT:  This script will generate an encryption key (using
+/dev/urandom) when a key is not found.  It is vital that this key is given the
+utmost access protection.  If the key is ever leaked, your encrypted backups
+are vulnerable.
+
+
+restore_backup.php
+This utility will revert the users table data of any specific course to a
+backup of a specific date.  This script can also decrypt any encrypted backups.
+Decryption is done entirely in RAM -- there are no temp files made during
+decryption.
+
 
 EOF
