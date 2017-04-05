@@ -409,6 +409,7 @@ HTML;
 HTML;
                 $results = $gradeable->getResults();
                 if($gradeable->hasResults()) {
+
                     $return .= <<<HTML
 submission timestamp: {$current_version->getSubmissionTime()}<br />
 days late: {$current_version->getDaysLate()} (before extensions)<br />

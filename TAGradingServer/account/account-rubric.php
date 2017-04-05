@@ -74,6 +74,7 @@ if ($calculate_diff) {
 
     function openDiv(id) {
         var elem = $('#' + id);
+        //console.log(typeof(elem));
         if (elem.hasClass('open')) {
             elem.hide();
             elem.removeClass('open');
@@ -172,6 +173,40 @@ if ($calculate_diff) {
         e.target.style.height ="";
         e.target.style.height = e.target.scrollHeight + "px";
     }
+
+    // expand all files in Submissiona and Results section
+    function openAll() {
+        // click on all with the class openAllDiv that hasn't been expanded yet
+        $(".openAllDiv").each(function() {
+            if ($(this).parent().find('span').hasClass('icon-folder-closed')) {
+                $(this).click();
+            }
+        });
+
+        // click on all with the class openAllFile that hasn't been expanded yet
+        $(".openAllFile").each(function() {
+            if($(this).find('span').hasClass('icon-plus')) {
+                $(this.click());
+            }
+        });
+    }
+
+    // close all files in Submission and results section
+    function closeAll() {
+        // click on all with the class openAllFile that is expanded
+        $(".openAllFile").each(function() {
+            if($(this).find('span').hasClass('icon-minus')) {
+                $(this.click());
+            }
+        });
+
+        // click on all with the class openAllDiv that is expanded
+        $(".openAllDiv").each(function() {
+            if ($(this).parent().find('span').hasClass('icon-folder-open')) {
+                $(this).click();
+            }
+        });
+    }
 </script>
 
 HTML;
@@ -200,7 +235,7 @@ function display_files($file, &$output, $part, $indent = 1) {
                 $indent += 1;
                 $output .= <<<HTML
 <div>
-    <span id='{$id}-span' class='icon-folder-closed'></span><a onclick='openDiv("{$id}");'>{$k}</a>
+    <span id='{$id}-span' class='icon-folder-closed'></span><a class='openAllDiv' onclick='openDiv("{$id}");'>{$k}</a>
     <div id='{$id}' style='margin-left: {$margin_left}px; display: none'>
 HTML;
             }
@@ -222,7 +257,7 @@ HTML;
       $url_file = urlencode(htmlentities($file));
       $output .= <<<HTML
     <div>
-        <div class="file-viewer"><a onclick='openFrame("{$url_file}", {$part}, {$j})'>
+        <div class="file-viewer"><a class='openAllFile' onclick='openFrame("{$url_file}", {$part}, {$j})'>
             <span class='icon-plus'></span>{$html_file}</a>
 
         </div> <a onclick='openFile("{$url_file}")'>(Popout)</a><br />
@@ -354,6 +389,8 @@ HTML;
 
 <div id="right" class="draggable rubric_panel" style="top:65%; left: 5px;width: 60%; height: 30%">
 <span class="grading_label">Submission and Results Browser</span>
+<button onclick="openAll()">Expand All</button>
+<button onclick="closeAll()">Close All</button>
 HTML;
     $output .= "\n";
     display_files($eg->eg_files, $output, 1);

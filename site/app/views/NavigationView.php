@@ -104,33 +104,32 @@ HTML;
         $found_assignment = false;
 
         foreach ($sections_to_list as $title => $gradeable_list) {
-
-	    // temporary: want to make future - only visible to
-	    //  instructor (not released for submission to graders)
-	    //  and future - grader preview
-	    //  (released to graders for submission)
-	    //if ($title == "FUTURE" && !$this->core->getUser()->accessAdmin()) {
+            /** @var Gradeable[] $gradeable_list */
+            // temporary: want to make future - only visible to
+            //  instructor (not released for submission to graders)
+            //  and future - grader preview
+            //  (released to graders for submission)
+            //if ($title == "FUTURE" && !$this->core->getUser()->accessAdmin()) {
 
             if (($title === "FUTURE" || $title === "BETA") && !$this->core->getUser()->accessGrading()) {
                 continue;
             }
 
-
             // count the # of electronic gradeables in this category
             $electronic_gradeable_count = 0;
             foreach ($gradeable_list as $gradeable => $g_data) {
-              if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
-                $electronic_gradeable_count++;
-                continue;
-              }
+                if ($g_data->getType() == GradeableType::ELECTRONIC_FILE) {
+                    $electronic_gradeable_count++;
+                    continue;
+                }
             }
 
             // if there are no gradeables, or if its a student and no electronic upload gradeables, don't show this category
             if (count($gradeable_list) == 0 ||
                 ($electronic_gradeable_count == 0 && !$this->core->getUser()->accessGrading())) {
-              continue;
+                continue;
             } else {
-              $found_assignment = true;
+                $found_assignment = true;
             }
 
             $lower_title = str_replace(" ", "_", strtolower($title));
@@ -139,11 +138,24 @@ HTML;
         <tr class="colspan nav-title-row" id="{$lower_title}"><td colspan="4">{$title_to_category_title[$title]}</td></tr>
         <tbody id="{$lower_title}_tbody">
 HTML;
+            $title_save = $title;
+            $btn_title_save = $title_to_button_type_submission[$title];
             foreach ($gradeable_list as $gradeable => $g_data) {
-
+                $title = $title_save;
+                $title_to_button_type_submission[$title_save] = $btn_title_save;
                 // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
                 if ($g_data->getType() != GradeableType::ELECTRONIC_FILE && !$this->core->getUser()->accessGrading()) {
-                  continue;
+                    continue;
+                }
+
+                if ($g_data->getActiveVersion() < 1){
+                    if ($title == "GRADED" || $title == "ITEMS BEING GRADED"){
+                        $title = "CLOSED";
+                    }
+                }
+
+                if ($g_data->beenAutograded() && $g_data->beenTAgraded() && $g_data->getUserViewedDate() !== null){
+                    $title_to_button_type_submission['GRADED'] = "btn-default";
                 }
 
                 /** @var Gradeable $g_data */
@@ -189,6 +201,7 @@ HTML;
                 {$gradeable_grade_range}</button>
 HTML;
                         }
+
                         else {
                             $gradeable_grade_range = "";
                         }
