@@ -1,27 +1,18 @@
 #!/usr/bin/env php
 <?php
+
 /* HEADING ---------------------------------------------------------------------
  *
- * submitty_student_auto_feed.php script example
+ * config.php script used by submitty_student_auto_feed
  * By Peter Bailie, Systems Programmer (RPI dept of computer science)
  *
- * Requires minimum PHP version 5.4 with pgsql and iconv extensions.  This
- * script is intended to be run from the CLI as a scheduled cron job.
+ * Requires minimum PHP version 5.4 with pgsql and iconv extensions.
  *
- * This script is designed so that the university's registrar is sending a data
- * dump of student enrollment for all courses used in Submitty, perhaps even
- * the whole department, in a single CSV file.
+ * This class will read a student enrollment CSV feed provided by the campus
+ * registrar or data warehouse and "upsert" (insert/update) the feed into
+ * Submitty's course databases.
  *
- * The defined constants marked '***THIS NEEDS TO BE SET' need to be adjusted to
- * match your information system's configuration.
- *
- * Attempts have been made to generalize this code, but different Universities
- * have different information systems, some of which cannot be accounted for.
- *
- * This script has no log module, but pertinant error messages are written to
- * STDERR, which could be redirected to a text file.
- *
- * THIS SCRIPT IS PROVIDED AS IS AND HAS NO GUARANTEE THAT IT IS SAFE OR
+ * THIS SOFTWARE IS PROVIDED AS IS AND HAS NO GUARANTEE THAT IT IS SAFE OR
  * COMPATIBLE WITH YOUR UNIVERSITY'S INFORMATION SYSTEMS.  THIS IS ONLY A CODE
  * EXAMPLE FOR YOUR UNIVERSITY'S SYSYTEM'S PROGRAMMER TO PROVIDE AN
  * IMPLEMENTATION.  IT MAY REQUIRE SOME ADDITIONAL MODIFICATION TO SAFELY WORK
@@ -29,13 +20,6 @@
  *
  * -------------------------------------------------------------------------- */
 
-/* DRIVER =================================================================== */
-
-require "config.php";
-new submitty_student_auto_feed();
-exit(0);
-
-/* CLASS ==================================================================== */
 class submitty_student_auto_feed {
 	private static $course_list;
 	private static $course_mappings;

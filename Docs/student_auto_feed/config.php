@@ -9,10 +9,10 @@
  *
  * Configuration of submitty_student_auto_feed is structured through a series
  * of named constants.  This configuration is also used by
- * submitty_saf_users_data_backup.php
- * submitty_saf_users_data_restore.php
+ * submitty_users_data_backup.php
+ * submitty_users_data_rollback.php
  *
- * THIS SCRIPT IS PROVIDED AS IS AND HAS NO GUARANTEE THAT IT IS SAFE OR
+ * THIS SOFTWARE IS PROVIDED AS IS AND HAS NO GUARANTEE THAT IT IS SAFE OR
  * COMPATIBLE WITH YOUR UNIVERSITY'S INFORMATION SYSTEMS.  THIS IS ONLY A CODE
  * EXAMPLE FOR YOUR UNIVERSITY'S SYSYTEM'S PROGRAMMER TO PROVIDE AN
  * IMPLEMENTATION.  IT MAY REQUIRE SOME ADDITIONAL MODIFICATION TO SAFELY WORK
@@ -117,6 +117,27 @@ define('COLUMN_EMAIL',         6);  //Student's Campus Email
 //Set to false if data feed is already provided in UTF-8.
 define('CONVERT_CP1252', true);
 
+//Allow "\r" EOL encoding when reading CSV.  This is rare, but just in case...
+ini_set("auto_detect_line_endings", true);
+
+
+/* USER TABLE BACKUP OPTIONS ------------------------------------------------ */
+//Folder where backup data is stored.  Backups are CSV files sorted into folders
+//by each indiividual Submitty course.  **THIS NEEDS TO BE SET
+define('SUBMITTY_AUTO_FEED_BACKUP', '/path/to/user_data_backups');
+
+//How many days of user data backups to retain per course.
+define('DATA_BACKUP_RECORDS_KEPT', 7);
+
+//Set to TRUE to use file encryption of backup data.  When FALSE, other
+//encryption defines are ignored.
+define('ENABLE_BACKUP_ENCRYPTION', false);
+
+//Access permissions to the keyfile must be strictly maintained.  Just like with
+//accessing the CSV, the path to the key_file may also be a URL.
+define('ENCRYPTION_KEY_FILE',  '/path/to/key_file');
+
+
 /* SUGGESTED SETTINGS FOR TIMEZONES IN USA -------------------------------------
  *
  * Eastern ........... America/New_York
@@ -134,8 +155,5 @@ define('CONVERT_CP1252', true);
 
 // Univeristy campus's timezone.  ***THIS NEEDS TO BE SET.
 date_default_timezone_set('America/New_York');
-
-//Allow "\r" EOL encoding when reading CSV.  This is rare, but just in case...
-ini_set("auto_detect_line_endings", true);
 
 ?>
