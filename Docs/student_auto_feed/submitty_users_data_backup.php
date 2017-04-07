@@ -40,7 +40,7 @@ class submitty_users_table_backup {
 	private static $db;
 	private static $fh;
 
-	public function __construct($log_object, $did_rotation) {
+	public function __construct() {
 
 		//Important: Make sure we are running from CLI
 		if (PHP_SAPI != "cli") {
@@ -126,7 +126,7 @@ class submitty_users_table_backup {
 
 		$host     = DB_HOST;
 		$user     = DB_LOGIN;
-		$password = DB_PASSWD;
+		$password = DB_PASSWORD;
 		$month    = intval(substr(self::$today, 2, 2));
 		$year     = substr(self::$today, 0, 2);
 		//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}

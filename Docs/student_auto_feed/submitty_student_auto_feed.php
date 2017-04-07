@@ -155,7 +155,7 @@ class submitty_student_auto_feed {
 		//copied for string expansion with "{$var}"
 		$db_host     = DB_HOST;
 		$db_user     = DB_LOGIN;
-		$db_password = DB_PASSWD;
+		$db_password = DB_PASSWORD;
 		$month       = intval(date("m", time()));
 		$year        = date("y", time());
 		//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}

@@ -33,7 +33,7 @@
 /* DRIVER =================================================================== */
 
 require "config.php";
-require "submitty_users_table_backup.php";
+require "submitty_users_data_backup.php";
 require "submitty_student_auto_feed.php";
 
 //Comment out line 'submitty_users_table_backup()' to disable user data backup.
