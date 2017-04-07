@@ -31,7 +31,7 @@
  * NOTE: Current Submitty design spec requires that there are no DELETE queries
  *       are ever sent to the databases.  Therefore, this rollback tool will
  *       "upsert" (insert/update) from data backup.  This should correct any
- *       corrupted data row with matching user_id ID columns (the primary key).
+ *       corrupted data row with matching user_id columns (the primary key).
  *
  * -------------------------------------------------------------------------- */
 

@@ -53,14 +53,15 @@ class submitty_users_table_backup {
 		//Execute processes as soon as object is instantiated.
 		foreach(self::$course_list as $course) {
 
-		//Halts when a method returns FALSE (indicates a failure of some kind).
-		switch (false) {
-		case $this->check_backup_folder($course):
-			break;
-		case $this->backup_users_to_file($course):
-			break;
-		case $this->remove_obsolete_backup($course):
-			break;
+			//Halts when a method returns FALSE (indicates a failure of some kind).
+			switch (false) {
+			case $this->check_backup_folder($course):
+				break;
+			case $this->backup_users_to_file($course):
+				break;
+			case $this->remove_obsolete_backup($course):
+				break;
+			}
 		}
 	}
 
@@ -144,7 +145,7 @@ class submitty_users_table_backup {
 		//Open DB connection.
 		self::$db = pg_connect("host={$host} user={$user} password={$password} dbname=submitty_{$semester}_{$course}");
 		if (self::$db === false) {
-			fwrite(STDERR, ("Failed to connect to DB submitty_{$semester}_{$course}.  Skipping course..." . PHP_EOL);
+			fwrite(STDERR, "Failed to connect to DB submitty_{$semester}_{$course}.  Skipping course..." . PHP_EOL);
 			return false;
 		}
 
