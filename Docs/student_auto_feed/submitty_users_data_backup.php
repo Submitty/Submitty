@@ -11,11 +11,25 @@
  * backup CSV data.  It should only be run when -- and before -- the users table
  * is upserted with new data (per submitty_student_auto_feed.php).
  *
+ * Attempts have been made to generalize this code, but different Universities
+ * have different information systems, some of which cannot be accounted for.
+ *
  * THIS SOFTWARE IS PROVIDED AS IS AND HAS NO GUARANTEE THAT IT IS SAFE OR
  * COMPATIBLE WITH YOUR UNIVERSITY'S INFORMATION SYSTEMS.  THIS IS ONLY A CODE
  * EXAMPLE FOR YOUR UNIVERSITY'S SYSYTEM'S PROGRAMMER TO PROVIDE AN
  * IMPLEMENTATION.  IT MAY REQUIRE SOME ADDITIONAL MODIFICATION TO SAFELY WORK
  * WITH YOUR UNIVERSITY'S AND/OR DEPARTMENT'S INFORMATION SYSTEMS.
+ *
+ * -------------------------------------------------------------------------- */
+
+/* HOW TO USE ------------------------------------------------------------------
+ *
+ * Process flow code exists in the constructor, so all that is needed is to
+ * (1) include "config.php" so that constants are defined.
+ * (2) instantiate this class to backup users data for all courses listed in
+ *     config.php
+ *
+ * q.v. driver.php
  *
  * -------------------------------------------------------------------------- */
 
@@ -93,7 +107,7 @@ class submitty_users_table_backup {
 			$file_date = substr($file_name, 0, 8);
 			if ($file_date < $oldest_date) {
 				if (!unlink($folder . $file_name)) {
-					fwrite(STDERR, "Could not remove obsolete backup {course}/{$file_name}." . PHP_EOL);
+					fwrite(STDERR, "Could not remove obsolete backup {$course}/{$file_name}." . PHP_EOL);
 				}
 			}
 		}

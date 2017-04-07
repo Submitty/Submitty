@@ -20,6 +20,16 @@
  *
  * -------------------------------------------------------------------------- */
 
+/* HOW TO USE ------------------------------------------------------------------
+ *
+ * Process flow code exists in the constructor, so all that is needed is to
+ * (1) include "config.php" so that constants are defined.
+ * (2) instantiate this class to process a data feed.
+ *
+ * q.v. driver.php
+ *
+ * -------------------------------------------------------------------------- */
+
 class submitty_student_auto_feed {
 	private static $course_list;
 	private static $course_mappings;
