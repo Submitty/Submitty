@@ -92,10 +92,10 @@ HTML;
             "ITEMS BEING GRADED" => "btn-primary",
             "GRADED" => 'btn-danger');
         $title_to_prefix = array(
-            "FUTURE" => "ALPHA SUBMIT<br>",
-            "BETA" => "BETA SUBMIT<br>",
-            "OPEN" => "SUBMIT<br>",
-            "CLOSED" => "LATE SUBMIT<br>",
+            "FUTURE" => "ALPHA SUBMIT",
+            "BETA" => "BETA SUBMIT",
+            "OPEN" => "SUBMIT",
+            "CLOSED" => "LATE SUBMIT",
             "ITEMS BEING GRADED" => "VIEW SUBMISSION",
             "GRADED" => "VIEW GRADE"
         );
@@ -142,20 +142,20 @@ HTML;
                 if (!$this->core->getUser()->accessGrading()){
                     if ($g_data->getActiveVersion() == -1){
                         $submission_status = array(
-                            "SUBMITTED" => "<em style='font-size: .8em;'>NOT SUMBITTED</em><br>",
+                            "SUBMITTED" => "<em style='font-size: .8em;'>(NOT SUMBITTED)</em><br>",
                             "AUTOGRADE" => ""
                         );
                     }
                     else if ($g_data->getActiveVersion() == 0){
                         $submission_status = array(
-                            "SUBMITTED" => "<em style='font-size: .8em;'>CANCELLED</em><br>",
+                            "SUBMITTED" => "<em style='font-size: .8em;'>(SUBMIT CANCELLED)</em><br>",
                             "AUTOGRADE" => ""
                         );
                     }
                     else{
                         if ($g_data->getTotalNonHiddenNonExtraCreditPoints() == array()){
                             $submission_status = array(
-                                "SUBMITTED" => "<em style='font-size: .8em;'>SUMBITTED</em><br>",
+                                "SUBMITTED" => "<em style='font-size: .8em;'>AGAIN</em><br>",
                                 "AUTOGRADE" => ""
                             ); 
                         }
@@ -163,15 +163,15 @@ HTML;
                             $autograde_points_earned = $g_data->getGradedNonHiddenPoints(); 
                             $autograde_points_total = $g_data->getTotalNonHiddenNonExtraCreditPoints();
                             $submission_status = array(
-                                "SUBMITTED" => "<em style='font-size: .8em;'>SUBMITTED ",
-                                "AUTOGRADE" => "(" . $autograde_points_earned . "/" . $autograde_points_total . ")<br>"
+                                "SUBMITTED" => "AGAIN ",
+                                "AUTOGRADE" => "<em style='font-size: .8em;'>(" . $autograde_points_earned . "/" . $autograde_points_total . ")</em><br>"
                             );
                         }
                     }
                 }
                 else{ //don't show submission_status to instructors
                     $submission_status = array(
-                        "SUBMITTED" => "",
+                        "SUBMITTED" => "<br>",
                         "AUTOGRADE" => ""
                     );
                 }
