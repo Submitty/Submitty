@@ -121,6 +121,9 @@ def main():
         groups.append(course['code'])
         groups.append(course['code'] + "_archive")
         groups.append(course['code'] + "_tas_www")
+        for queue in ["to_be_graded_batch", "to_be_graded_interactive"]:
+            for queue_file in glob.iglob(os.path.join(SUBMITTY_DATA_DIR, queue, "*__{}__*".format(course['code']))):
+                os.remove(queue_file)
 
     for group in groups:
         os.system('groupdel ' + group)

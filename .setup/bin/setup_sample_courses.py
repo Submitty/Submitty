@@ -704,7 +704,8 @@ class Course(object):
                                 if os.path.isdir(src):
                                     zip_dst = os.path.join("/tmp", uuid.uuid4())
                                     shutil.make_archive(zip_dst, 'zip', src)
-                                    shutil.move(zip_dst, dst)
+                                    shutil.unpack_archive(zip_dst, dst)
+                                    os.remove(zip_dst)
                                 elif os.path.isfile(src):
                                     shutil.copy(src, dst)
                         else:
@@ -715,19 +716,22 @@ class Course(object):
                                 submissions = [submission]
                             for submission in submissions:
 
-                                sample_path = os.path.join(SAMPLE_SUBMISSIONS, gradeable.gradeable_config,submission)
-                                tutorial_path = os.path.join(TUTORIAL_DIR, gradeable.gradeable_config,"submissions",submission)
+                                sample_path = os.path.join(SAMPLE_SUBMISSIONS, gradeable.gradeable_config, submission)
+                                tutorial_path = os.path.join(TUTORIAL_DIR, gradeable.gradeable_config, "submissions", submission)
 
                                 if os.path.exists(sample_path):
                                     src = sample_path
                                 elif os.path.exists(tutorial_path):
                                     src = tutorial_path
-                                else:
-                                    src=""
-                                    print("ERROR!  PATHS DON'T EXIST", sample_path, tutorial_path)
 
                                 dst = os.path.join(submission_path, "1", submission)
-                                shutil.copy(src, dst)
+                                if os.path.isdir(src):
+                                    zip_dst = os.path.join("/tmp", uuid.uuid4())
+                                    shutil.make_archive(zip_dst, 'zip', src)
+                                    shutil.unpack_archive(zip_dst, dst)
+                                    os.remove(zip_dst)
+                                elif os.path.isfile(src):
+                                    shutil.copy(src, dst)
 
                 if gradeable.grade_start_date < datetime.now():
                     if gradeable.grade_released_date < datetime.now() or random.random() < 0.8:
@@ -879,6 +883,11 @@ class Gradeable(object):
                     else:
                         self.submissions = os.listdir(self.sample_path)
                         self.submissions = list(filter(lambda x: not x.startswith("."), self.submissions))
+                    if isinstance(self.submissions, list):
+                        for elem in self.submissions:
+                            if isinstance(elem, dict):
+                                raise TypeError("Cannot have dictionary inside of list for submissions "
+                                                "for {}".format(self.sample_path))
         assert self.ta_view_date < self.grade_start_date
         assert self.grade_start_date < self.grade_released_date
 
