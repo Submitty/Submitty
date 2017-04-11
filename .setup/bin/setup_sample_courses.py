@@ -27,6 +27,8 @@ import re
 import shutil
 import subprocess
 import uuid
+# TODO: Remove this and purely use shutil once we move totally to Python 3
+from zipfile import ZipFile
 
 from sqlalchemy import create_engine, Table, MetaData
 import yaml
@@ -702,9 +704,12 @@ class Course(object):
                                 src = os.path.join(gradeable.sample_path, submission)
                                 dst = os.path.join(submission_path, "1", key, submission)
                                 if os.path.isdir(src):
-                                    zip_dst = os.path.join("/tmp", uuid.uuid4())
+
+                                    zip_dst = os.path.join("/tmp", str(uuid.uuid4()))
                                     shutil.make_archive(zip_dst, 'zip', src)
-                                    shutil.unpack_archive(zip_dst, dst)
+                                    zip_dst += '.zip'
+                                    with open(zip_dst, 'r') as zip_file:
+                                        zip_file.extractall(dst)
                                     os.remove(zip_dst)
                                 elif os.path.isfile(src):
                                     shutil.copy(src, dst)
@@ -726,9 +731,11 @@ class Course(object):
 
                                 dst = os.path.join(submission_path, "1", submission)
                                 if os.path.isdir(src):
-                                    zip_dst = os.path.join("/tmp", uuid.uuid4())
+                                    zip_dst = os.path.join("/tmp", str(uuid.uuid4()))
                                     shutil.make_archive(zip_dst, 'zip', src)
-                                    shutil.unpack_archive(zip_dst, dst)
+                                    zip_dst += '.zip'
+                                    with open(zip_dst, 'r') as zip_file:
+                                        zip_file.extractall(dst)
                                     os.remove(zip_dst)
                                 elif os.path.isfile(src):
                                     shutil.copy(src, dst)
