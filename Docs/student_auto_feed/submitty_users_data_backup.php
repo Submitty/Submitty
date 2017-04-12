@@ -158,60 +158,72 @@ class submitty_users_table_backup {
 		//Read from Sections Registration table (foreign key constraint on users table)
 		$registration_query = pg_query(self::$db, "SELECT sections_registration_id FROM sections_registration");
 
+		//Make sure queries returned a data resource.
 		if ($users_query === false || $rotating_query === false || $registration_query === false) {
-			fwrite(stdERR, "DB query failed on submitty_{$semester}_{$course}.  Skipping course..." . PHP_EOL);
+			fwrite(STDERR, "DB query failed on submitty_{$semester}_{$course}.  Skipping course..." . PHP_EOL);
 			pg_close(self::$db);
 			return false;
 		}
 
-		//Collect data.  $db_data is assembled in this order:
-		//    headers for users table
-		//    All rows from users table
-		//    String "[Foreign Key Constraints Data]" (header for next two rows)
-		//    All rows of column sections_registration_id condensed to a single row.
-		//        OR empty row when there is no data.
-		//    All rows of column sections_rotating_id condensed to a single row.
-		//        OR empty row when there is no data.
-		$db_data = array_merge(array(array_keys(pg_fetch_assoc($users_query, 0))),
-		                       pg_fetch_all($users_query),
-		                       array(array("[Foreign Key Constraints Data]")),
-		                       (pg_fetch_all($registration_query) !== false) ?
-		                           array(array_column(pg_fetch_all($registration_query), 'sections_registration_id')) :
-		                           array(array()),
-		                       (pg_fetch_all($rotating_query) !== false) ?
-		                           array(array_column(pg_fetch_all($rotating_query), 'sections_rotating_id')) :
-		                           array(array()));
+		//Make sure there is some users data to backup.
+		if (pg_num_rows($users_query) > 0) {
 
-		//Some additional data massaging.
-		foreach ($db_data as &$row) {
-			//convert PHP NULL to NULL char for preservation.  (PHP NULL is not
-			//the same as NULL char and cannot be specifically written to file)
-			foreach($row as &$col) {
-				if (is_null($col)) {
-					$col = chr(0);
-				}
-			} unset($col);
+			//Collect data.  $db_data is assembled in this order:
+			//    headers for users table
+			//    All rows from users table
+			//    String "[Foreign Key Constraints Data]" (header for next two rows)
+			//    All rows of column sections_registration_id condensed to a single row.
+			//        OR empty row when there is no data.
+			//    All rows of column sections_rotating_id condensed to a single row.
+			//        OR empty row when there is no data.
 
-			//Combine columns into CSV string (tab delimited) with "\n" EOL.
-			$row = implode(chr(9), $row) . chr(10);
-		} unset($row);
+			$db_data = array_merge(array(array_keys(pg_fetch_assoc($users_query, 0))),
+								   pg_fetch_all($users_query),
+								   array(array("[Foreign Key Constraints Data]")),
+								   (pg_fetch_all($registration_query) !== false) ?
+									   array(array_column(pg_fetch_all($registration_query), 'sections_registration_id')) :
+									   array(array()),
+								   (pg_fetch_all($rotating_query) !== false) ?
+									   array(array_column(pg_fetch_all($rotating_query), 'sections_rotating_id')) :
+									   array(array()));
 
-		//We don't need an open DB connection anymore.
-		pg_close(self::$db);
+			//Some additional data massaging.
+			foreach ($db_data as &$row) {
 
-		//Do data encryption (if enabled).
-		if (ENABLE_BACKUP_ENCRYPTION) {
-			$this->encrypt_backup_data($file_data);
+				//convert PHP NULL to NULL char for preservation.  (PHP NULL is
+				//not the same as NULL char and cannot be specifically written
+				//to file)
+				foreach($row as &$col) {
+					if (is_null($col)) {
+						$col = chr(0);
+					}
+				} unset($col);
+
+				//Combine columns into CSV string (tab delimited) with "\n" EOL.
+				$row = implode(chr(9), $row) . chr(10);
+			} unset($row);
+
+			//We don't need an open DB connection anymore.
+			pg_close(self::$db);
+
+			//Do data encryption (if enabled).
+			if (ENABLE_BACKUP_ENCRYPTION) {
+				$this->encrypt_backup_data($file_data);
+			}
+
+			//Write data to file and check return status.
+			if (file_put_contents($file_name, $db_data, LOCK_EX) === false) {
+				fwrite(STDERR, "WARNING: Could not write {$file_name}." . PHP_EOL);
+				return false;
+			}
+
+			//Indicate success.
+			return true;
 		}
 
-		//Write data to file and log status
-		if (file_put_contents($file_name, $db_data, LOCK_EX) === false) {
-			fwrite(STDERR, "WARNING: Could not write {$file_name}." . PHP_EOL);
-		} else {
-			fwrite(STDERR, "SUCCESS: Created users data backup for {$course}" . PHP_EOL);
-		}
-
-		return true;
+		//No backup done.
+		fwrite(STDERR, "Users table returned 0 rows.  No data to backup." . PHP_EOL);
+		return false;
 	}
 
 	private function encrypt_backup_data(&$data) {
@@ -294,4 +306,3 @@ class submitty_users_table_backup {
 } //END User_Table_Backup_Class
 // EOF
 ?>
-
