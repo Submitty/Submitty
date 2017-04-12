@@ -86,6 +86,7 @@ class ConfigurationController extends AbstractController {
         }
 
         $save_array = array(
+            'hidden_details' => $this->core->getConfig()->getHiddenDetails(),
             'course_details' => array(
                 'course_name'               => $_POST['course_name'],
                 'course_home_url'           => $_POST['course_home_url'],
@@ -98,8 +99,6 @@ class ConfigurationController extends AbstractController {
                 'display_custom_message'      => $_POST['display_custom_message']
             )
         );
-
-        $save_array['hidden_details'] = $this->core->getConfig()->getHiddenDetails();
         
         IniParser::writeFile($this->core->getConfig()->getCourseIniPath(), $save_array);
         $_SESSION['messages']['success'][] = "Site configuration updated";
