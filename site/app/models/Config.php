@@ -38,8 +38,6 @@ class Config extends AbstractModel {
     /** @var string */
     protected $base_url;
     /** @var string */
-    protected $course_url;
-    /** @var string */
     protected $ta_base_url;
     /** @var string */
     protected $cgi_url;
@@ -112,6 +110,8 @@ class Config extends AbstractModel {
     /** @var bool */
     protected $display_custom_message;
 
+    protected $hidden_details;
+
     /**
      * Config constructor.
      *
@@ -176,10 +176,10 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_iris_grades_summary',
             'display_custom_message');
         $this->setConfigValues($course, 'course_details', $array);
-        
+
+        $this->hidden_details = $course['hidden_details'];
         if (isset($course['hidden_details']['course_url'])) {
-            $this->course_url = rtrim($course['hidden_details']['course_url'], "/")."/";
-            $this->base_url = $this->course_url;
+            $this->base_url = rtrim($course['hidden_details']['course_url'], "/")."/";;
         }
 
         if (isset($course['hidden_details']['ta_base_url'])) {
@@ -416,10 +416,7 @@ class Config extends AbstractModel {
         return $this->course_ini;
     }
 
-    /**
-     * @return string
-     */
-    public function getCourseUrl() {
-        return $this->course_url;
+    public function getHiddenDetails() {
+        return $this->hidden_details;
     }
 }
