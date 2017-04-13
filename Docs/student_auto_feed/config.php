@@ -133,8 +133,7 @@ define('SUBMITTY_AUTO_FEED_BACKUP', '/path/to/user_data_backups');
 //How many days of user data backups to retain per course.
 define('DATA_BACKUP_RECORDS_KEPT', 7);
 
-//Set to TRUE to use file encryption of backup data.  When FALSE, other
-//encryption defines are ignored.
+//Set to TRUE to use file encryption of backup data.
 define('ENABLE_BACKUP_ENCRYPTION', false);
 
 //Access permissions to the keyfile must be strictly maintained.  Just like with
