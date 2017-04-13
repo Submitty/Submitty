@@ -3,20 +3,21 @@
 
 /* HEADING ---------------------------------------------------------------------
  *
- * Submitty Student Information Auto Feed -- submitty_users_data_rollback.php
+ * Submitty Student Information Auto Feed -- restore_backup.php
  * By Peter Bailie, Systems Programmer (RPI dept of computer science)
  *
- * Requires minimum PHP version 5.4 with pgsql and iconv extensions.  This
- * driver script and required classes are intended to be run from the CLI as a
- * scheduled cron job.  This file is intended to be executable from the command
- * line.
+ * Requires minimum PHP version 5.4 with the pgsql extension.  This code is
+ * intended to be executable and run from the CLI by a sysadmin.
  *
- * In the event that a bad data feed got past validation checks and corrupts the
- * the users table data of one or more Submitty courses, this rollback tool
- * can be used to revert users data back to a specific date.
+ * submitty_student_auto_feed has several data validation checks intended to
+ * prevent a bad data feed from corrupting the users data of any course, but in
+ * the event that a bad data feed got past the validation checks and corrupts
+ * users table data of one or more Submitty courses, this rollback tool can be
+ * used to revert users data back to a specific date.  These backups are written
+ * by submitty_users_data_backup.php.
  *
- * There is no log module, but pertinant activity/error messages are written to
- * STDOUT and STDERR.
+ * There is no log module, but pertinant activity and error messages are written
+ * to STDOUT and STDERR respectively.
  *
  * Attempts have been made to generalize this code, but different Universities
  * have different information systems, some of which cannot be accounted for.
@@ -27,7 +28,7 @@
  * IMPLEMENTATION.  IT MAY REQUIRE SOME ADDITIONAL MODIFICATION TO SAFELY WORK
  * WITH YOUR UNIVERSITY'S AND/OR DEPARTMENT'S INFORMATION SYSTEMS.
  *
- * April 7, 2017
+ * April 13, 2017
  * NOTE: Current Submitty design spec requires that there are no DELETE queries
  *       are ever sent to the databases.  Therefore, this rollback tool will
  *       "upsert" (insert/update) from data backup.  This should correct any
@@ -37,10 +38,11 @@
 
 /* HOW TO USE ------------------------------------------------------------------
  *
- * This tool is a collection of static classes with inheritance.  This file
- * is intended to be invoked as executable from the command line.  Sudo is not
- * explicity required, but the user invoking this tool does need to have read
- * access to the backup data files.
+ * This tool is a collection of static classes with inheritance relationships.
+ * This file is intended to be invoked as executable from the command line.
+ * Sudo is not explicity required, but the user invoking this tool does need to
+ * have read access to the backup data files and the keyfile (when encryption is
+ * enabled).
  *
  * -------------------------------------------------------------------------- */
 
@@ -124,7 +126,7 @@ class restore_backup {
 			return false;
 		}
 
-		//Do encryption, if enabled.
+		//Do decryption, if enabled.
 		if (self::$encryption_enabled) {
 			if (self::decryption($data) === false) {
 				//Decryption method already printed error.
@@ -136,6 +138,7 @@ class restore_backup {
 		//(Last Chance!)
 		if (console::prompt_restore(self::$course, self::$date) === false) {
 			console::print_message("Aborting.");
+			//*technically* not a failure, but we are stopping here.
 			return true;
 		}
 
@@ -186,7 +189,7 @@ class restore_backup {
 
 	private static function validate_cli_params($arg_v) {
 
-		//Validate $arg_v[1] : course
+		//Validate $arg_v[1], which is the course specified.
 		//Scans backup data folder and discards any entries that start with '.'
 		//such as '.', '..', and any "hidden" folders.
 		$folder_list = array_filter(scandir(self::$backup_root_folder),
@@ -199,11 +202,12 @@ class restore_backup {
 			return false;
 		}
 
-		//Validate $arg_v[2] : date
+		//Validate $arg_v[2], which is the date specified.
 		//Verifies that the CLI Param date is (1) a real date (which includes
 		//leap year dates), and (2) conforms to the pattern "MM/DD/YY".
+		//IMPORTANT: date_default_timezone_set() needs to be set in config.php
 		$date_tmp = DateTime::createFromFormat('m/d/y', $arg_v[2]);
-		if (boolval($date_tmp) && $date_tmp->format('m/d/y') !== $arg_v[2]) {
+		if (!boolval($date_tmp) || $date_tmp->format('m/d/y') !== $arg_v[2]) {
 			console::print_error("Invalid date.");
 			return false;
 		}
@@ -339,7 +343,7 @@ class database extends restore_backup {
 		//DB connection parameters
 		$host     = DB_HOST;
 		$login    = DB_LOGIN;
-		$password = DB_PASSWD;
+		$password = DB_PASSWORD;
 
 		//Determine DB Name (based on semester which is derived from month and year)
 		$date     = parent::get_date();
@@ -579,12 +583,14 @@ class console extends restore_backup {
 		//"\e[44;97m"    = blue background, white text
 		//"\e[1;93;101m" = boldtype, red background, yellow text
 		//"\e[0m"        = end all special formatting
-		print <<<PROMPT
+		$prompt = <<<PROMPT
 This process will restore the Submitty database users table and requisite
 foreign keys for course \e[44;97m {$course} \e[0m on \e[44;97m {$date} \e[0m
-\e[1;93;101m                  !!!  THIS PROCESS CANNOT BE ROLLED BACK  !!!                  \e[0m
+\e[1;93;101m                    !!!  THIS PROCESS CANNOT BE UNDONE  !!!                    \e[0m
 
 PROMPT;
+
+		self::print_message($prompt);
 
 		$response = strtolower(readline("Proceed?  y/[n]: "));
 
@@ -599,25 +605,27 @@ PROMPT;
 		//"\e[44;97m"    = blue background, white text
 		//"\e[1;93;101m" = boldtype, red background, yellow text
 		//"\e[0m"        = end all special formatting
-		print <<<HELP
+		$help = <<<HELP
 
 This tool will restore a Submitty database user's table and requisite foreign
-keys.  \e[1;93;101m THIS PROCESS CANNOT BE ROLLED BACK \e[0m
+keys.  \e[1;93;101m THIS PROCESS CANNOT BE UNDONE \e[0m
 
 Usage: restore_backup.php <course> <date>
 
 course: Submitty course to restore a users table backup
 date:   Date of backup to restore in format MM/DD/YY.
 
-Example to restore users table backup for course CS100 on March 1, 2017:
-\e[44;97m restore_backup.php cs100 03/01/2017 \e[0m
+Example: Restore users data for course CS100 with backup taken on March 1, 2017:
+\e[44;97m restore_backup.php cs100 03/01/17 \e[0m
 
 
 HELP;
+
+		self::print_message($help);
 	}
 
 	protected static function print_error($msg) {
-	//IN:  No parameters.
+	//IN:  Message to write to STDERR.
 	//OUT: No return value
 	//PURPOSE: Print a message to STDERR.
 
@@ -625,11 +633,11 @@ HELP;
 	}
 
 	protected static function print_message($msg) {
-	//IN:  No parameters.
+	//IN:  Message to write to STDOUT.
 	//OUT: No return value
 	//PURPOSE: Print a message to STDOUT.
 
-		print $msg . PHP_EOL;
+		fwrite(STDOUT, $msg . PHP_EOL);
 	}
 }
 ?>
