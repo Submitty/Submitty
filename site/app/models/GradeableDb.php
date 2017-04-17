@@ -96,6 +96,7 @@ class GradeableDb extends Gradeable{
                     $this->graded_tagrading += $this->components[$component_details['gc_order']]->getScore();
                 }
             }
+            $this->graded_tagrading = max(0, $this->graded_tagrading);
         }
         
         $this->grade_by_registration = $details['g_grade_by_registration'] === true;
