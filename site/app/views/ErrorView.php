@@ -118,7 +118,7 @@ HTML;
 return $return;
     }
 
-    public function noGradeable($gradeable_id) {
+    public function noGradeable($gradeable_id = null) {
         if ($gradeable_id === null) {
             return <<<HTML
 <div class="content">
@@ -127,6 +127,7 @@ return $return;
 HTML;
         }
         else {
+            $gradeable_id = htmlentities($gradeable_id, ENT_QUOTES);
             return <<<HTML
 <div class="content">
     {$gradeable_id} is not a valid electronic submission gradeable. Contact your instructor if you think this

@@ -4,6 +4,10 @@ namespace app\views;
 
 class GlobalView extends AbstractView {
     public function header($breadcrumbs, $css=array()) {
+        if ($this->core->getConfig()->isDebug()) {
+            $extra = "?v=".time();
+        }
+
         $messages = <<<HTML
 <div id='messages'>
 
@@ -30,35 +34,33 @@ HTML;
             $override_css = "<style type='text/css'>".file_get_contents($this->core->getConfig()->getCoursePath()."/config/override.css")."</style>";
         }
 
-        $is_dev = ($this->core->userLoaded() && $this->core->getUser()->isDeveloper()) ? "true" : "false";
         $return = <<<HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <title>{$this->core->getFullCourseName()}</title>
     <link rel="shortcut icon" href="{$this->core->getConfig()->getBaseUrl()}img/favicon.ico" type="image/x-icon" />
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
-    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/server.css" />
-    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css" />
-    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css{$extra}" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/jquery-ui.min.css{$extra}" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/server.css{$extra}" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/bootstrap.css{$extra}" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css{$extra}" />
+    <link rel="stylesheet" type="text/css" href="{$this->core->getConfig()->getBaseUrl()}css/glyphicons-halflings.css{$extra}" />
 HTML;
-    foreach($css as $css_ref){
+    foreach($css as $css_ref) {
         $return .= <<<HTML
-        <link rel="stylesheet" type="text/css" href="{$css_ref}" />
+        <link rel="stylesheet" type="text/css" href="{$css_ref}{$extra}" />
 HTML;
     }
 
     $return .= <<<HTML
     {$override_css}
-    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.min.js"></script>
-    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/diff-viewer.js"></script>
-    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/server.js"></script>
-    <script type="text/javascript">
-        var is_developer = {$is_dev};
-        setSiteUrl('{$this->core->getConfig()->getSiteUrl()}');
-    </script>
+    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery.min.js{$extra}"></script>
+    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/jquery-ui.min.js{$extra}"></script>
+    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/diff-viewer.js{$extra}"></script>
+    <script type="text/javascript" src="{$this->core->getConfig()->getBaseUrl()}js/server.js{$extra}"></script>
 </head>
-<body>
+<body onload="setSiteDetails('{$this->core->getConfig()->getSiteUrl()}', '{$this->core->getCsrfToken()}')">
 {$messages}
 <div id="container">
 

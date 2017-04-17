@@ -10,7 +10,7 @@
 //------------------------------------------------------------------------------
 
 //Constants
-define ("_INI_PATH",  "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/hwgrading_website/toolbox/configs/");
+define ("_INI_PATH",  "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/site/public/hwgrading/toolbox/configs/");
 define ("_INI_FILE",  "student_csv_fields.ini");
 define ("_INI_OWNER", "__INSTALL__FILLIN__HWPHP_USER__");
 

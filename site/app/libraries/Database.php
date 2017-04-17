@@ -22,11 +22,6 @@ class Database {
     private $results = array();
 
     /**
-     * @var string
-     */
-    private $lastid = "";
-
-    /**
      * @var int
      */
     private $query_count = 0;
@@ -100,7 +95,6 @@ class Database {
             $statement = $this->link->prepare($query);
             $statement->execute($parameters);
             $this->results = $statement->fetchAll();
-            $this->lastid = $this->link->lastInsertId();
             $this->query_count++;
             $this->all_queries[] = array($query, $parameters);
         }

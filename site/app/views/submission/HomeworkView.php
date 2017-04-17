@@ -18,9 +18,10 @@ class HomeworkView extends AbstractView {
 HTML;
         }
         else {
+            $gradeable = htmlentities($gradeable_id, ENT_QUOTES);
             return <<<HTML
 <div class="content">
-    {$gradeable_id} is not a valid electronic submission gradeable. Contact your instructor if you think this
+    {$gradeable} is not a valid electronic submission gradeable. Contact your instructor if you think this
     is an error.
 </div>
 HTML;
@@ -137,7 +138,7 @@ HTML;
 
         <div id="upload{$i}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
             <h3 class="label" id="label{$i}">{$label}</h3>
-            <input type="file" name="files" id="input_file{$i}" style="display: none" onchange="addFilesFromInput({$i})" />
+            <input type="file" name="files" id="input_file{$i}" style="display: none" onchange="addFilesFromInput({$i})" multiple />
         </div>
 HTML;
             }

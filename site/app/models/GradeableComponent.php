@@ -28,9 +28,11 @@ class GradeableComponent extends AbstractModel {
     /** @var int Order for components to be shown in */
     protected $order;
     /** @var float Given grade that someone has given this component */
-    protected $score;
+    protected $score = 0;
     /** @var string Comment that grader has put on the component while grading for student */
-    protected $comment;
+    protected $comment = "";
+
+    protected $graded = false;
 
     public function __construct($details) {
         $this->id = $details['gc_id'];
@@ -41,13 +43,16 @@ class GradeableComponent extends AbstractModel {
         $this->is_text = $details['gc_is_text'];
         $this->is_extra_credit = $details['gc_is_extra_credit'];
         $this->order = $details['gc_order'];
-        $this->score = intval($details['gcd_score']);
-        if (!$this->is_text && $this->max_value < $this->score) {
-            $this->score = $this->max_value;
-        }
-        $this->comment = $details['gcd_component_comment'];
-        if ($this->comment === null) {
-            $this->comment = "";
+        if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
+            $this->graded = true;
+            $this->score = floatval($details['gcd_score']);
+            if (!$this->is_text && $this->max_value < $this->score) {
+                $this->score = $this->max_value;
+            }
+            $this->comment = $details['gcd_component_comment'];
+            if ($this->comment === null) {
+                $this->comment = "";
+            }
         }
     }
 
@@ -87,7 +92,15 @@ class GradeableComponent extends AbstractModel {
         return $this->score;
     }
 
+    public function setScore($score) {
+        $this->score = floatval($score);
+    }
+
     public function getComment() {
         return $this->comment;
+    }
+
+    public function hasGrade() {
+        return $this->graded;
     }
 }

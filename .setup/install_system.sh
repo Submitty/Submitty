@@ -54,7 +54,7 @@ if [ ${VAGRANT} == 1 ]; then
 ##    https://192.168.56.101 (submission)                 ##
 ##    https://192.168.56.102 (cgi-bin scripts)            ##
 ##    https://192.168.56.103 (svn)                        ##
-##    https://192.168.56.104 (tagrading)                  ##
+##    https://192.168.56.101/hwgrading (tagrading)        ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
 ##   localhost:15432                                      ##
@@ -67,7 +67,6 @@ if [ ${VAGRANT} == 1 ]; then
     echo "192.168.56.101    test-submit test-submit.cs.rpi.edu" >> /etc/hosts
     echo "192.168.56.102    test-cgi test-cgi.cs.rpi.edu" >> /etc/hosts
     echo "192.168.56.103    test-svn test-svn.cs.rpi.edu" >> /etc/hosts
-    echo "192.168.56.104    test-hwgrading test-hwgrading.cs.rpi.edu" >> /etc/hosts
 fi
 
 #################################################################
@@ -319,10 +318,9 @@ if [ ${VAGRANT} == 1 ]; then
     printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
     printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
     printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-    printf "auto eth1:3\niface eth1:3 inet static\naddress 192.168.56.104\nnetmask 255.255.255.0\n" >> /etc/network/interfaces.d/eth1.cfg
 
     # Turn them on.
-    ifup eth1 eth1:1 eth1:2 eth1:3 eth1:4
+    ifup eth1 eth1:1 eth1:2 eth1:3
 fi
 
 #################################################################
@@ -462,11 +460,34 @@ if [ ${VAGRANT} == 1 ]; then
 	service postgresql restart
 fi
 
+
+#################################################################
+# CLONE THE TUTORIAL REPO
+#################
+
+# grab the tutorial repo, which includes a number of curated example
+# assignment configurations
+
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial ]; then
+    pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
+    git pull
+    popd
+else
+    git clone 'https://github.com/Submitty/Tutorial' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_Tutorial
+fi
+
+
 #################################################################
 # ANALYSIS TOOLS SETUP
 #################
 
-git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
+    pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+    git pull
+    popd
+else
+    git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
+fi
 # graph tool...  for later?  add-apt-repository "http://downloads.skewed.de/apt/trusty universe" -y
 add-apt-repository ppa:ubuntu-toolchain-r/test -y
 apt-get update -qq
@@ -490,7 +511,7 @@ if [ ${VAGRANT} == 1 ]; then
 hsdbu
 hsdbu
 http://192.168.56.101
-http://192.168.56.104
+http://192.168.56.101/hwgrading
 http://192.168.56.102
 svn+ssh:192.168.56.103
 y" | source ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.sh
@@ -502,7 +523,6 @@ source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 #source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean test
 
 source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
-cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/hwgrading.conf /etc/apache2/sites-available/hwgrading.conf
 cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/submitty.conf /etc/apache2/sites-available/submitty.conf
 cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/cgi.conf /etc/apache2/sites-available/cgi.conf
 cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
@@ -516,7 +536,6 @@ if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
 fi
 
-a2ensite hwgrading
 a2ensite submitty
 a2ensite cgi
 
@@ -563,20 +582,20 @@ chmod 2771 ${SUBMITTY_INSTALL_DIR}
 # be moved into setup_sample_courses.py
 # make a group and subdirectory for any classes requiring subversion
 # repositories:
-mkdir -p /var/lib/svn/csci2600
-touch /var/lib/svn/svngroups
-chown www-data:csci2600_tas_www /var/lib/svn/csci2600 /var/lib/svn/svngroups
-if [ ${VAGRANT} == 1 ]; then
+# mkdir -p /var/lib/svn/csci2600
+# touch /var/lib/svn/svngroups
+# chown www-data:csci2600_tas_www /var/lib/svn/csci2600 /var/lib/svn/svngroups
+# if [ ${VAGRANT} == 1 ]; then
     # set up ssh keys for hwcron to connect to the subversion
     # repository (do not use root/sudo except as shown)
-	su hwcron
+#	su hwcron
         # generate the key (accept the defaults):
-	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N "" > /dev/null 2>&1
-	echo "hwcron" > password.txt
+#	echo -e "\n" | ssh-keygen -t rsa -b 4096 -N "" > /dev/null 2>&1
+#	echo "hwcron" > password.txt
         # copy the key to test-svn:
-	sshpass -f password.txt ssh-copy-id hwcron@test-svn
-	rm password.txt
-	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
-fi
+#	sshpass -f password.txt ssh-copy-id hwcron@test-svn
+#	rm password.txt
+#	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
+#fi
 echo "Done."
 exit 0

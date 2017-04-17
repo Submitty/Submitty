@@ -45,6 +45,7 @@ HTML;
         if ($this->core->getUser()->accessAdmin()) {
             $return .= <<<HTML
         <button class="btn btn-primary" onclick="window.location.href='{$ta_base_url}/account/admin-gradeable.php?course={$course}&semester={$semester}&this=New%20Gradeable'">New Gradeable</button>
+        <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable', 'action' => 'upload_config'))}">Upload Config & Review Build Output</a>
         <!--<button class="btn btn-primary" onclick="batchImportJSON('{$ta_base_url}/account/submit/admin-gradeable.php?course={$course}&semester={$semester}&action=import', '{$this->core->getCsrfToken()}');">Import From JSON</button> -->
 HTML;
         }
@@ -242,10 +243,11 @@ HTML;
                 }
                 else{
                     $gradeable_open_range = '';
+                    //<!--onclick="location.href='{$ta_base_url}/account/account-checkpoints-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">-->
                     if($g_data->getType() == GradeableType::CHECKPOINTS){
                        $gradeable_grade_range = <<<HTML
                 <button class="btn {$title_to_button_type_grading[$title]}" style="width:100%;" \\
-                onclick="location.href='{$ta_base_url}/account/account-checkpoints-gradeable.php?course={$course}&semester={$semester}&g_id={$gradeable}'">
+                onclick="location.href='{$this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable))}'">
                 {$gradeable_grade_range}</button>
 HTML;
                     }
