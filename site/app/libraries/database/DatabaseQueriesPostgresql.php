@@ -215,6 +215,7 @@ SELECT";
   gd.array_gcd_gc_id,
   gd.array_gcd_score,
   gd.array_gcd_component_comment,
+  gd.gd_user_viewed_date,
   CASE WHEN egd.active_version IS NULL THEN 
     0 ELSE 
     egd.active_version 
@@ -606,16 +607,6 @@ VALUES(?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $version, $timestamp));
             array($version, $g_id, $user_id));
     }
 
-    /*
-    public function insertGradeableData(Gradeable $gradeable) {
-        $params = array($gradeable->getId(), $gradeable->getUser()->getId(), $gradeable->getGrader()->getId(),
-            $gradeable->getOverallComment(), $gradeable->getStatus(), 0, $gradeable->getActiveVersion());
-        $this->database->beginTransaction();
-
-        $this->database->commit();
-    }
-    */
-
     public function updateGradeableData(Gradeable $gradeable) {
         $this->database->beginTransaction();
         if ($gradeable->getGdId() === null) {
@@ -629,9 +620,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?)", $params);
         }
         else {
             $this->database->query("UPDATE gradeable_data SET gd_grader_id=? WHERE gd_id=?", array($gradeable->getGrader()->getId(), $gradeable->getGdId()));
-        }
-        foreach ($gradeable->getComponents() as $component) {
-
         }
 
         foreach ($gradeable->getComponents() as $component) {
@@ -650,6 +638,13 @@ VALUES (?, ?, ?, ?)", $params);
 
         }
         $this->database->commit();
+    }
+
+    public function updateUserViewedDate(Gradeable $gradeable) {
+        if ($gradeable->getGdId() !== null) {
+            $this->database->query("UPDATE gradeable_data SET gd_user_viewed_date = NOW() WHERE gd_id=?",
+                array($gradeable->getGdId()));
+        }
     }
 
     public function getSession($session_id) {

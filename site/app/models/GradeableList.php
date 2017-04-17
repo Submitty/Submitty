@@ -108,7 +108,7 @@ class GradeableList extends AbstractModel {
                 if ($a->$function() == $b->$function()) {
                     $function = "getId";
                 }
-                if ($a->$function() < $b->$function()) {
+                if ($a->$function() > $b->$function()) {
                     return -1;
                 }
                 else if ($a->$function() == $b->$function()) {

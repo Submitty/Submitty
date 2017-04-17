@@ -243,7 +243,7 @@ CREATE TABLE gradeable_data (
     gd_status integer NOT NULL,
     gd_late_days_used integer NOT NULL,
     gd_active_version integer NOT NULL,
-    user_viewed_date timestamp(6) without time zone DEFAULT NULL
+    gd_user_viewed_date timestamp(6) without time zone DEFAULT NULL
 );
 
 
