@@ -85,11 +85,13 @@ class GradeableDb extends Gradeable{
 
                 if (!$this->components[$component_details['gc_order']]->isText()) {
                     $max_value = $this->components[$component_details['gc_order']]->getMaxValue();
-                    if ($this->components[$component_details['gc_order']]->isExtraCredit()) {
-                        $this->total_tagrading_extra_credit += $max_value;
-                    }
-                    else {
-                        $this->total_tagrading_non_extra_credit += $max_value;
+                    if ($max_value > 0) {
+                        if ($this->components[$component_details['gc_order']]->isExtraCredit()) {
+                            $this->total_tagrading_extra_credit += $max_value;
+                        }
+                        else {
+                            $this->total_tagrading_non_extra_credit += $max_value;
+                        }
                     }
                     $this->graded_tagrading += $this->components[$component_details['gc_order']]->getScore();
                 }
