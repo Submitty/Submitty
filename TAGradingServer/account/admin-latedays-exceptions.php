@@ -2,7 +2,7 @@
 
 //Author: Peter Bailie, Systems Programmer, RPI Computer Science, July 2016
 //Update: Feb 8 2017 by pbailie
-//Update: Apr 17 2017 by pbailie (issue 959)
+//Update: Apr 19 2017 by pbailie (issue 959)
 
 /* MAIN ===================================================================== */
 
@@ -228,7 +228,7 @@ function retrieve_gradeables_from_db() {
 //PURPOSE:  To build drop down menu of selectable gradeables.  Ordered
 //          descending so "newer" gradeables are higher in the menu.
 //
-//(Apr 17 2017) FIX ISSUE 959:
+//(Apr 19 2017) FIX ISSUE 959:
 //Now only electronic gradeables show in drop-down form
 
 	$sql = <<<SQL
