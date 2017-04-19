@@ -350,7 +350,7 @@ class database extends restore_backup {
 		$month    = intval($date['month']);
 		$year     = $date['year'];
 		//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
-		$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "u{$year}");
+		$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "m{$year}");
 		$course   = parent::get_course();
 		$db_name  = "submitty_{$semester}_{$course}";
 

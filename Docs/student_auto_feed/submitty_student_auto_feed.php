@@ -161,7 +161,7 @@ class submitty_student_auto_feed {
 		$month       = intval(date("m", time()));
 		$year        = date("y", time());
 		//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
-		$semester    = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "u{$year}");
+		$semester    = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "m{$year}");
 
 		foreach(self::$course_list as $course) {
 			$course_name = strtolower($course);

@@ -130,7 +130,7 @@ class submitty_users_table_backup {
 		$month    = intval(substr(self::$today, 2, 2));
 		$year     = substr(self::$today, 0, 2);
 		//if ($month <= 5) {...} else if ($month >= 8) {...} else {...}
-		$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "u{$year}");
+		$semester = ($month <= 5) ? "s{$year}" : (($month >= 8) ? "f{$year}" : "m{$year}");
 		$backup_data = array();
 
 		//e.g. backup file for CS-100 on March 15, 2017 might be...
