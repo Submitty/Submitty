@@ -167,6 +167,7 @@ HTML;
                 }
                 $total_possible = $row->getTotalAutograderNonExtraCreditPoints() + $row->getTotalTANonExtraCreditPoints();
                 $graded = $row->getGradedAutograderPoints() + $row->getGradedTAPoints();
+                if ($graded < 0) $graded = 0;
                 if ($gradeable->isGradeByRegistration()) {
                     $section = $row->getUser()->getRegistrationSection();
                 }
