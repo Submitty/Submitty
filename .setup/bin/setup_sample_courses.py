@@ -407,6 +407,39 @@ def create_user(user_id):
         os.system("echo {}:{} | chpasswd".format(user_id, user_id))
 
 
+def create_gradeable_submission(src, dst):
+    """
+    Given a source and a destination, copy the files from the source to the destination. First, before
+    copying, we check if the source is a directory, if it is, then we zip the contents of this to a temp
+    zip file (stored in /tmp) and store the path to this newly created zip as our new source.
+    
+    At this point, (for all uploads), we check if our source is a zip (by just checking file extension is
+    a .zip), then we will extract the contents of the source (using ZipFile) to the destination, else we
+    just do a simple copy operation of the source file to the destination location.
+    
+    At this point, if we created a zip file (as part of that first step), we remove it from the /tmp directory.
+    
+    :param src: path of the file or directory we want to use for this submission
+    :type src: str
+    :param dst: path to the folder where we should copy the submission to
+    :type src: str
+    """
+    zip_dst = None
+    if os.path.isdir(src):
+        zip_dst = os.path.join("/tmp", str(uuid.uuid4()))
+        zip_dst = shutil.make_archive(zip_dst, 'zip', src)
+        src = zip_dst
+
+    if src[-3:] == "zip":
+        with ZipFile(src, 'r') as zip_file:
+            zip_file.extractall(dst)
+    else:
+        shutil.copy(src, dst)
+
+    if zip_dst is not None and isinstance(zip_dst, str):
+        os.remove(zip_dst)
+
+
 class User(object):
     """
     A basic object to contain the objects loaded from the users.json file. We use this to link
@@ -664,11 +697,13 @@ class Course(object):
                                                   os.path.join(course_path, "ASSIGNMENTS.txt")))
 
         # On python 3, replace with os.makedirs(..., exist_ok=True)
-        os.system("mkdir -R {}".format(os.path.join(course_path, "submissions")))
+        os.system("mkdir -p {}".format(os.path.join(course_path, "submissions")))
         os.system('chown {}:{}_tas_www {}'.format(self.instructor.id, self.code, os.path.join(course_path,
                                                                                               'submissions')))
         for gradeable in self.gradeables:
             if gradeable.type == 0 and len(gradeable.submissions) == 0:
+                continue
+            elif gradeable.sample_path is None or gradeable.config_path is None:
                 continue
             gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
             os.makedirs(gradeable_path)
@@ -680,7 +715,7 @@ class Course(object):
                 active = 1
                 if gradeable.type == 0 and gradeable.submission_open_date < datetime.now():
                     if gradeable.gradeable_config is None or \
-                            (gradeable.submission_due_date < datetime.now() and random.random() < 0.8) or \
+                            (gradeable.submission_due_date < datetime.now() and random.random() < 0.5) or \
                             (random.random() < 0.3):
                         active = -1
                     else:
@@ -702,17 +737,8 @@ class Course(object):
                                 os.system("mkdir -p " + os.path.join(submission_path, "1", key))
                                 submission = random.choice(gradeable.submissions[key])
                                 src = os.path.join(gradeable.sample_path, submission)
-                                dst = os.path.join(submission_path, "1", key, submission)
-                                if os.path.isdir(src):
-
-                                    zip_dst = os.path.join("/tmp", str(uuid.uuid4()))
-                                    shutil.make_archive(zip_dst, 'zip', src)
-                                    zip_dst += '.zip'
-                                    with open(zip_dst, 'r') as zip_file:
-                                        zip_file.extractall(dst)
-                                    os.remove(zip_dst)
-                                elif os.path.isfile(src):
-                                    shutil.copy(src, dst)
+                                dst = os.path.join(submission_path, "1", key)
+                                create_gradeable_submission(src, dst)
                         else:
                             submission = random.choice(gradeable.submissions)
                             if isinstance(submission, list):
@@ -720,25 +746,9 @@ class Course(object):
                             else:
                                 submissions = [submission]
                             for submission in submissions:
-
-                                sample_path = os.path.join(SAMPLE_SUBMISSIONS, gradeable.gradeable_config, submission)
-                                tutorial_path = os.path.join(TUTORIAL_DIR, gradeable.gradeable_config, "submissions", submission)
-
-                                if os.path.exists(sample_path):
-                                    src = sample_path
-                                elif os.path.exists(tutorial_path):
-                                    src = tutorial_path
-
-                                dst = os.path.join(submission_path, "1", submission)
-                                if os.path.isdir(src):
-                                    zip_dst = os.path.join("/tmp", str(uuid.uuid4()))
-                                    shutil.make_archive(zip_dst, 'zip', src)
-                                    zip_dst += '.zip'
-                                    with open(zip_dst, 'r') as zip_file:
-                                        zip_file.extractall(dst)
-                                    os.remove(zip_dst)
-                                elif os.path.isfile(src):
-                                    shutil.copy(src, dst)
+                                src = os.path.join(gradeable.sample_path, submission)
+                                dst = os.path.join(submission_path, "1")
+                                create_gradeable_submission(src, dst)
 
                 if gradeable.grade_start_date < datetime.now():
                     if gradeable.grade_released_date < datetime.now() or random.random() < 0.8:
@@ -836,6 +846,8 @@ class Gradeable(object):
                     self.sample_path = sample_path
                 elif os.path.isdir(tutorial_path):
                     self.sample_path = tutorial_path
+                else:
+                    self.sample_path = None
         else:
             self.id = gradeable['g_id']
             self.type = int(gradeable['g_type'])
