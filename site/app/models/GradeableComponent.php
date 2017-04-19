@@ -46,8 +46,16 @@ class GradeableComponent extends AbstractModel {
         if (isset($details['gcd_score']) && $details['gcd_score'] !== null) {
             $this->graded = true;
             $this->score = floatval($details['gcd_score']);
-            if (!$this->is_text && $this->max_value < $this->score) {
-                $this->score = $this->max_value;
+            if (!$this->is_text) {
+              if ($this->max_value > 0) {
+                if ($this->max_value < $this->score) {
+                  $this->score = $this->max_value;
+                } if ($this->score < 0) {
+                  $this->score = 0;
+                }
+              } else {
+                // it's a penalty (negative) item
+              }
             }
             $this->comment = $details['gcd_component_comment'];
             if ($this->comment === null) {
