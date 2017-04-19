@@ -117,7 +117,6 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         $this->assertFalse($config->displayIrisGradesSummary());
         $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000", "config", "config.ini"),
             $config->getCourseIniPath());
-        $this->assertNull($config->getCourseUrl());
 
         $expected = array(
             'debug' => false,
@@ -137,7 +136,6 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'database_user' => 'db_user',
             'database_password' => 'db_pass',
             'course_name' => 'Test Course',
-            'course_url' => null,
             'config_path' => $this->temp_dir,
             'course_ini' => $this->temp_dir.'/courses/s17/csci0000/config/config.ini',
             'authentication' => 'PamAuthentication',
@@ -149,12 +147,17 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
             'upload_message' => '',
             'keep_previous_files' => false,
             'display_iris_grades_summary' => false,
-            'display_custom_message' => false
+            'display_custom_message' => false,
+            'hidden_details' => array(
+                'database_name' => 'submitty_s17_csci0000'
+            )
         );
         $actual = $config->toArray();
 
         ksort($expected);
         ksort($actual);
+        var_dump($expected);
+        var_dump($actual);
         $this->assertEquals($expected, $actual);
     }
 
@@ -162,7 +165,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
         $extra = array('hidden_details' => array('course_url' => 'http://example.com/course'));
         $this->createConfigFile($extra);
         $config = new Config("s17", "csci0000", $this->master);
-        $this->assertEquals("http://example.com/course/", $config->getCourseUrl());
+        $this->assertEquals("http://example.com/course/", $config->getBaseUrl());
+        $this->assertEquals("http://example.com/course", $config->getHiddenDetails()['course_url']);
     }
 
     public function testDefaultTimezone() {
