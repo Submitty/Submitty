@@ -6,6 +6,10 @@ GIT_PATH=/usr/local/submitty/GIT_CHECKOUT_Submitty
 chmod +x ${GIT_PATH}/.setup/vagrant.sh
 chmod +x ${GIT_PATH}/.setup/bin/*
 cd ${GIT_PATH}
+apt-get update
+apt-get install -qqy python python-pip python-dev python3 python3-pip python3-dev libpython3.5
+pip2 install -U pip
+pip3 install -U pip3
 ${GIT_PATH}/.setup/bin/reset_system.py
 ${GIT_PATH}/.setup/vagrant.sh vagrant
 SCRIPT
@@ -30,7 +34,7 @@ Vagrant.configure(2) do |config|
       vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 10000 ]
     end
 
-    config.vm.synced_folder ".", "/usr/local/submitty/GIT_CHECKOUT_Submitty", create: true, owner: "ubuntu", group: "ubuntu", mount_options: ["dmode=777", "fmode=777"]
+    config.vm.synced_folder ".", "/usr/local/submitty/GIT_CHECKOUT_Submitty", create: true
 
     config.vm.provision "shell", inline: $script
 

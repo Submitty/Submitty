@@ -10,6 +10,13 @@ SUBMITTY_DATA_DIR=/var/local/submitty
 
 COURSE_BUILDERS_GROUP=course_builders
 
+# Ensure we have python and pip installed before doing anything else so we can use
+# python as our glue
+apt-get update
+apt-get install -qqy python python-pip python-dev python3 python3-pip python3-dev libpython3.5
+pip2 install -U pip
+pip3 install -U pip3
+
 #################################################################
 # PROVISION SETUP
 #################
@@ -94,7 +101,7 @@ addgroup hwcronphp
 addgroup course_builders
 
 if [ ${VAGRANT} == 1 ]; then
-	adduser vagrant sudo
+	adduser ubuntu sudo
 fi
 
 # change the default user umask (was 002)
@@ -110,8 +117,8 @@ adduser hwcgi shadow
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
 	echo "hwcgi:hwcgi" | sudo chpasswd
-	adduser hwphp vagrant
-	adduser hwcgi vagrant
+	adduser hwphp ubuntu
+	adduser hwcgi ubuntu
 fi
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then
@@ -171,9 +178,8 @@ apt-get install -qqy libpam-passwdqc
 apt-get install -qqy ssh sshpass unzip
 apt-get install -qqy postgresql postgresql-contrib postgresql-client postgresql-client-common postgresql-client-9.5
 apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup
-apt-get isntall -qqy php7.0 php7.0-xdebug libapache2-mod-fastcgi php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt
+apt-get install -qqy php7.0 php7.0-cli php-xdebug libapache2-mod-fastcgi php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt
 
-apt-get install -qqy python python-pip python-dev python3 python3-pip python3-dev libpython3.5
 # Check to make sure you got the right setup by typing:
 #   apache2ctl -V | grep MPM
 # (it should say prefork)
@@ -229,13 +235,16 @@ apt-get -qqy autoremove
 
 # TODO: We should look into making it so that only certain users have access to certain packages
 # so that hwphp is the only one who could use PAM for example
-pip install -U pip
-pip install python-pam
-pip install xlsx2csv
-pip install sqlalchemy
-pip install psycopg2
+pip2 install -U pip
+pip2 install python-pam
+pip2 install xlsx2csv
+pip2 install sqlalchemy
+pip2 install psycopg2
+pip2 install PyYAML
 
 pip3 install -U pip
+pip3 install PyYAML
+pip3 install sqlalchemy
 
 #NOTE: BELOW THE PYTHON PAM MODULE IS RESTRICTED TO hwcgi
 chmod -R 555 /usr/local/lib/python2.7/*
@@ -324,25 +333,25 @@ if [ ${VAGRANT} == 1 ]; then
 
     echo "Binding static IPs to \"Host-Only\" virtual network interface."
 
-    # eth0 is auto-configured by Vagrant as NAT.  eth1 is a host-only adapter and
-    # not auto-configured.  eth1 is manually set so that the host-only network
+    # Note: Ubuntu 16.04 switched from the eth# scheme to ep0s# scheme.
+    # enp0s3 is auto-configured by Vagrant as NAT.  enp0s8 is a host-only adapter and
+    # not auto-configured.  enp0s8 is manually set so that the host-only network
     # interface remains consistent among VM reboots as Vagrant has a bad habit of
     # discarding and recreating networking interfaces everytime the VM is restarted.
-    # eth1 is statically bound to 192.168.56.101, 102, 103, 104, and 105.
-    printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-    printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-    printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+    # eth1 is statically bound to 192.168.56.101, 102, and 103.
+    echo -e "auto enp0s8\niface enp0s8 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
+    echo -e "auto enp0s8:1\niface enp0s8:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
+    echo -e "auto enp0s8:2\niface enp0s8:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
 
     # Turn them on.
-    ifup eth1 eth1:1 eth1:2 eth1:3
+    ifup enp0s8 enp0s8:1 enp0s8:2
 fi
 
 #################################################################
 # APACHE SETUP
 #################
+sed -i "s/www\-data/hwphp/g" /etc/apache2/envvars
 a2enmod include actions cgi suexec authnz_external headers ssl fastcgi
-a2dismod php7.0
-
 
 # If you have real certificates, follow the directions from your
 # certificate provider.
@@ -391,6 +400,17 @@ sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 # remove default sites which would cause server to mess up
 rm /etc/apache2/sites*/000-default.conf
 rm /etc/apache2/sites*/default-ssl.conf
+
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/cgi.conf /etc/apache2/sites-available/cgi.conf
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
+
+# permissions: rw- r-- ---
+chmod 0640 /etc/apache2/sites-available/*.conf
+chmod 0640 /etc/apache2/suexec/www-data
+a2ensite submitty
+a2ensite cgi
 
 service apache2 reload
 
@@ -531,21 +551,11 @@ source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 #source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean test
 
 source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
-cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/submitty.conf /etc/apache2/sites-available/submitty.conf
-cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/cgi.conf /etc/apache2/sites-available/cgi.conf
-cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
-
-# permissions: rw- r-- ---
-chmod 0640 /etc/apache2/sites-available/*.conf
-chmod 0640 /etc/apache2/suexec/www-data
 
 if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /root/bin/bottom.txt
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
 fi
-
-a2ensite submitty
-a2ensite cgi
 
 apache2ctl -t
 service apache2 restart
@@ -566,13 +576,12 @@ if [[ ${VAGRANT} == 1 ]]; then
     #################################################################
     # SET CSV FIELDS (for classlist upload data)
     #################
+    # Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
+    # of Science 2015-2016.
 
-	# Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
-	# of Science 2015-2016.
-
-	# Other Universities will need to rerun /bin/setcsvfields to match their
-	# classlist csv data.  See wiki for details.
-	${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
+    # Other Universities will need to rerun /bin/setcsvfields to match their
+    # classlist csv data.  See wiki for details.
+    ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields.py 13 12 15 7
 fi
 
 # Deferred ownership change

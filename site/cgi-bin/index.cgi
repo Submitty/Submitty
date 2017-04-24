@@ -2,4 +2,5 @@
 
 <?php
 
-echo "it works!";
+echo "it works!\n\n";
+echo(exec('whoami'));
