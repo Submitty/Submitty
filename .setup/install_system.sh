@@ -238,19 +238,20 @@ apt-get -qqy autoremove
 pip2 install -U pip
 pip2 install python-pam
 pip2 install xlsx2csv
-pip2 install sqlalchemy
 pip2 install psycopg2
 pip2 install PyYAML
+pip2 install sqlalchemy
 
 pip3 install -U pip
+pip3 install python-pam
 pip3 install PyYAML
+pip3 install psycopg2
 pip3 install sqlalchemy
 
-#NOTE: BELOW THE PYTHON PAM MODULE IS RESTRICTED TO hwcgi
-chmod -R 555 /usr/local/lib/python2.7/*
-chmod 555 /usr/lib/python2.7/dist-packages
-sudo chmod 500   /usr/local/lib/python2.7/dist-packages/pam.py*
-sudo chown hwcgi /usr/local/lib/python2.7/dist-packages/pam.py*
+chmod -R 555 /usr/local/lib/python*/*
+chmod 555 /usr/lib/python*/dist-packages
+sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
+sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
 
 
 #################################################################
