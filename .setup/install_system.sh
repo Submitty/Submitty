@@ -350,7 +350,7 @@ fi
 #################################################################
 # APACHE SETUP
 #################
-sed -i "s/www\-data/hwphp/g" /etc/apache2/envvars
+
 a2enmod include actions cgi suexec authnz_external headers ssl fastcgi
 
 # If you have real certificates, follow the directions from your
@@ -412,7 +412,7 @@ chmod 0640 /etc/apache2/suexec/www-data
 a2ensite submitty
 a2ensite cgi
 
-service apache2 reload
+service apache2 restart
 
 
 #################################################################
