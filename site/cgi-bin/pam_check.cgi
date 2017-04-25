@@ -12,8 +12,6 @@ import json
 import os
 import pam
 
-response = {"authenticated": True}
-
 print("Content-type: text/html")
 print()
 
