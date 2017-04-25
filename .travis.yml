@@ -92,8 +92,8 @@ install:
   - pip install nose2
   - pip install unittest2
   - pip install pylint_runner
-  - sudo chmod -R 555 /usr/local/lib/python2.7/*
-  - sudo chmod -R 555 /opt/python/2.7.*/lib/python2.7/*
+  - sudo chmod -R 555 /usr/local/lib/python*/
+  - sudo chmod -R 555 /opt/python/*/lib/python*/*
 
 before_script:
   # Doing this helps chromedriver from hanging for some mysterious reason
