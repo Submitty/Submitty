@@ -68,7 +68,8 @@ before_install:
   - ls -la /opt/python/3.5.2
   - ls -la /opt/python/3.5.2/lib
   - ls -la /opt/python/3.5.2/lib/python3.5
-  - cp /usr/lib/python3/dist-packages/lsb_release.py /opt/python/3.5.2/lib/python3.5/dist-packages
+  - mkdir -p /opt/python/3.5.2/lib/python3.5/dist-packages
+  - cp /usr/lib/python3/dist-packages/lsb_release.py /opt/python/3.5.2/lib/python3.5/dist-packages/lsb_release.py
   - sudo chmod 777 /usr/bin/python*
   - sudo python3 -V
   - lsb_release -a
