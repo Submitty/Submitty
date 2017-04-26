@@ -67,10 +67,10 @@ before_install:
    #- export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
    - sudo sed -e "s?secure_path=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?secure_path=\"${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?g" --in-place /etc/sudoers
    - sudo cat /etc/sudoers
-   - sudo rm -rf /usr/bin/python
+   - sudo rm -rf /usr/bin/python*
+   - sudo ls -la /opt/python
    - sudo ln -s /opt/python/2.7.12/bin/python /usr/bin/python2
    - sudo ln -s /usr/bin/python2 /usr/bin/python
-   - sudo ls -la /opt/python
    - sudo ln -s /opt/python/3.5.2/bin/python /usr/bin/python3
    - sudo chmod 777 /usr/bin/python*
    - python3 --version
