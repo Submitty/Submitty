@@ -55,23 +55,8 @@ before_install:
   - jdk_switcher use default
   - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
-  - sudo sed -e "s?secure_path=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?secure_path=\"${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?g" --in-place /etc/sudoers
+  - sudo sed -e "s?secure_path=\"/opt/python/2.7.12/bin:/opt/python/3.5.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?secure_path=\"${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?g" --in-place /etc/sudoers
   - sudo cat /etc/sudoers
-  - /usr/bin/python -c "import sys; print(sys.path);"
-  - /usr/bin/python3 -c "import sys; print(sys.path);"
-  - sudo rm -rf /usr/bin/python*
-  - sudo rm -rf /usr/bin/pip*
-  - sudo ln -s /opt/python/2.7.12/bin/python /usr/bin/python
-  - sudo ln -s /opt/python/2.7.12/bin/python /usr/bin/python2
-  - sudo ln -s /opt/python/3.5.2/bin/python /usr/bin/python3
-  - sudo ln -s /opt/python/2.7.12/bin/pip /usr/bin/pip
-  - sudo ln -s /opt/python/2.7.12/bin/pip /usr/bin/pip2
-  - sudo ln -s /opt/python/3.5.2/bin/pip3 /usr/bin/pip3
-  - sudo chmod 777 /usr/bin/python*
-  - /usr/bin/python -c "import sys; print(sys.path);"
-  - /usr/bin/python3 -c "import sys; print(sys.path);"
-  - cp -R /usr/lib/python2.7/dist-packages /opt/python/2.7.12/lib/python2.7/site-packages
-  - cp -R /usr/lib/python3/dist-packages /opt/python/3.5.2/lib/python3.5/site-packages
 
 install:
   - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.5" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
