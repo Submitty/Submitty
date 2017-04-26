@@ -68,7 +68,7 @@ before_install:
   - sudo chmod 777 /usr/bin/python*
   - /usr/bin/python3 -c "import sys; print(sys.path);"
   - echo $PYTHONPATH
-  - export PYTHONPATH=/usr/lib/python3/dist-packages"
+  - export PYTHONPATH=/usr/lib/python3/dist-packages
   - /usr/bin/python3 -c "import sys; print(sys.path);"
   #- cp -R /usr/lib/python3/dist-packages/ /opt/python/3.5.2/lib/python3.5/dist-packages/
 
