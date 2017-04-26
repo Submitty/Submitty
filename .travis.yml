@@ -51,7 +51,6 @@ addons:
       - libpam-passwdqc
 
 before_install:
-  - ls -la /usr/lib/python3/dist-packages/lsb_release.py
   - jdk_switcher use default
   - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
@@ -65,13 +64,8 @@ before_install:
   - sudo ln -s /opt/python/2.7.12/bin/pip /usr/bin/pip
   - sudo ln -s /opt/python/2.7.12/bin/pip /usr/bin/pip2
   - sudo ln -s /opt/python/3.5.2/bin/pip3 /usr/bin/pip3
-  - ls -la /opt/python/3.5.2
-  - ls -la /opt/python/3.5.2/lib
-  - ls -la /opt/python/3.5.2/lib/python3.5
-  - cp /usr/lib/python3/dist-packages/lsb_release.py /opt/python/3.5.2/lib/python3.5/lsb_release.py
   - sudo chmod 777 /usr/bin/python*
-  - sudo python3 -V
-  - lsb_release -a
+  - cp /usr/lib/python3/dist-packages/lsb_release.py /opt/python/3.5.2/lib/python3.5/lsb_release.py
 
 install:
   - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.5" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
@@ -99,7 +93,8 @@ install:
   - pip3 install PyYAML
   - pip3 install sqlalchemy
   - sudo chmod -R 555 /usr/local/lib/python*/
-  - sudo chmod -R 555 /opt/python/*/lib/python*/*
+  - sudo chmod -R 555 /opt/python/2.7.12/lib/python2.7/*
+  - sudo chmod -R 555 /opt/python/3.5.2/lib/python3.5/*
 
 before_script:
   # Doing this helps chromedriver from hanging for some mysterious reason
