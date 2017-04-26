@@ -21,6 +21,7 @@ cache:
     - vendor
     - $HOME/.composer/cache
     - $HOME/.cache/pip
+    - $HOME/.stack
 
 addons:
   postgresql: "9.5"

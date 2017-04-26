@@ -67,7 +67,7 @@ echo -e "Compile and install analysis tools"
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 git pull origin master
-make
+su travis -c "make"
 
 mkdir ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 cp -r ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools/lang ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/lang
