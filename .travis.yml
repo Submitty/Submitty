@@ -95,7 +95,7 @@ install:
   - pip2 install pylint_runner
   - pip3 install -U pip
   - pip3 install python-pam
-  - pip3 install pyscopg2
+  - pip3 install psycopg2
   - pip3 install PyYAML
   - pip3 install sqlalchemy
   - sudo chmod -R 555 /usr/local/lib/python*/
