@@ -69,6 +69,13 @@ before_install:
    - sudo cat /etc/sudoers
    - sudo rm -rf /usr/bin/python*
    - sudo ls -la /opt/python
+   - sudo ls -la /usr/bin
+   - which python
+   - which python2
+   - which python3
+   - which pip
+   - which pip2
+   - which pip3
    - sudo ln -s /opt/python/2.7.12/bin/python /usr/bin/python2
    - sudo ln -s /usr/bin/python2 /usr/bin/python
    - sudo ln -s /opt/python/3.5.2/bin/python /usr/bin/python3
@@ -88,16 +95,21 @@ install:
   - sudo chmod u+x chromedriver
   - sudo mv chromedriver /usr/bin/
   - travis_retry composer install --prefer-dist --no-interaction
-  - pip install -U pip
-  - pip install xlsx2csv
-  - pip install python-pam
-  - pip install sqlalchemy
-  - pip install psycopg2
-  - pip install PyYAML
-  - pip install selenium
-  - pip install nose2
-  - pip install unittest2
-  - pip install pylint_runner
+  - pip2 install -U pip
+  - pip2 install xlsx2csv
+  - pip2 install python-pam
+  - pip2 install sqlalchemy
+  - pip2 install psycopg2
+  - pip2 install PyYAML
+  - pip2 install selenium
+  - pip2 install nose2
+  - pip2 install unittest2
+  - pip2 install pylint_runner
+  - pip3 install -U pip
+  - pip3 install python-pam
+  - pip3 install pyscopg2
+  - pip3 install PyYAML
+  - pip3 install sqlalchemy
   - sudo chmod -R 555 /usr/local/lib/python*/
   - sudo chmod -R 555 /opt/python/*/lib/python*/*
 
