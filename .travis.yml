@@ -23,7 +23,7 @@ cache:
     - $HOME/.cache/pip
 
 addons:
-  postgresql: "9.3"
+  postgresql: "9.5"
   apt:
     sources:
       - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
@@ -51,6 +51,7 @@ addons:
       - libpam-passwdqc
 
 before_install:
+  - /usr/bin/python3 -c "import lsb_release; print(lsb_release.__file__)"
   - jdk_switcher use default
   - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
