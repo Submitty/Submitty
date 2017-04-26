@@ -66,11 +66,10 @@ before_install:
   - sudo ln -s /opt/python/2.7.12/bin/pip /usr/bin/pip2
   - sudo ln -s /opt/python/3.5.2/bin/pip3 /usr/bin/pip3
   - sudo chmod 777 /usr/bin/python*
+  - /usr/bin/python -c "import sys; print(sys.path);"
   - /usr/bin/python3 -c "import sys; print(sys.path);"
-  - echo $PYTHONPATH
-  - export PYTHONPATH=/usr/lib/python3/dist-packages
-  - /usr/bin/python3 -c "import sys; print(sys.path);"
-  #- cp -R /usr/lib/python3/dist-packages/ /opt/python/3.5.2/lib/python3.5/dist-packages/
+  - cp -R /usr/lib/python/dist-packages/ /opt/python/2.7.12/lib/python2.7/site-packages
+  - cp -R /usr/lib/python3/dist-packages/ /opt/python/3.5.2/lib/python3.5/site-packages
 
 install:
   - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.5" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
