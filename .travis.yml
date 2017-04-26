@@ -23,7 +23,6 @@ cache:
     - $HOME/.cache/pip
 
 addons:
-  #firefox: "45.0"
   postgresql: "9.3"
   apt:
     sources:
@@ -32,9 +31,6 @@ addons:
     packages:
       - apache2
       - libapache2-mod-fastcgi
-      - python
-      - python-pip
-      - python3-pip
       - build-essential
       - automake
       - cmake
@@ -55,35 +51,35 @@ addons:
       - libpam-passwdqc
 
 before_install:
-   - jdk_switcher use default
-   #- export PHANTOMJS_VERSION=2.1.1
-   #- export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH
-   #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then rm -rf $PWD/travis_phantomjs; mkdir -p $PWD/travis_phantomjs; fi
-   #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then wget https://github.com/Medium/phantomjs/releases/download/v$PHANTOMJS_VERSION/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -O $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2; fi
-   #- if [ $(phantomjs --version) != '$PHANTOMJS_VERSION' ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi
-   #- phantomjs --version
-   - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
-   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
-   #- export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
-   - sudo sed -e "s?secure_path=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?secure_path=\"${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?g" --in-place /etc/sudoers
-   - sudo cat /etc/sudoers
-   - sudo rm -rf /usr/bin/python*
-   - sudo ls -la /opt/python
-   - sudo ls -la /usr/bin
-   - which python
-   - which python2
-   - which python3
-   - which pip
-   - which pip2
-   - which pip3
-   - sudo ln -s /opt/python/2.7.12/bin/python /usr/bin/python2
-   - sudo ln -s /usr/bin/python2 /usr/bin/python
-   - sudo ln -s /opt/python/3.5.2/bin/python /usr/bin/python3
-   - sudo chmod 777 /usr/bin/python*
-   - python3 --version
-   - python2 --version
-   - pip2 --version
-   - pip3 --version
+  - jdk_switcher use default
+  - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
+  - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
+  - sudo sed -e "s?secure_path=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?secure_path=\"${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?g" --in-place /etc/sudoers
+  - sudo cat /etc/sudoers
+  - sudo rm -rf /usr/bin/python*
+  - sudo rm -rf /usr/bin/pip*
+  - sudo ls -la /opt/python
+  - sudo ls -la /usr/bin
+  - which python
+  - which python2
+  - which python3
+  - which pip
+  - which pip2
+  - which pip3
+  - sudo ln -s /opt/python/2.7.12/bin/python /usr/bin/python
+  - sudo ln -s /opt/python/2.7.12/bin/python /usr/bin/python2
+  - sudo ln -s /opt/python/3.5.2/bin/python /usr/bin/python3
+  - sudo python3 -V
+  - python3 -V
+  - sudo cat /usr/bin/lsb_release
+  - sudo ln -s /opt/python/2.7.12/bin/pip /usr/bin/pip
+  - sudo ln -s /opt/python/2.7.12/bin/pip /usr/bin/pip2
+  - sudo ln -s /opt/python/3.5.2/bin/pip3 /usr/bin/pip3
+  - sudo chmod 777 /usr/bin/python*
+  - python3 --version
+  - python2 --version
+  - pip2 --version
+  - pip3 --version
 
 install:
   - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.5" ]]; then sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update; fi
@@ -149,7 +145,6 @@ script:
   - curl http://localhost/cgi-bin/index.cgi
   - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
   - vendor/bin/phpunit --version
-  #- firefox --version
   - if [ ${INTEGRATION_SUITE} = false ]; then vendor/bin/phpunit --configuration tests/phpunit.xml; fi
   - if [ ${INTEGRATION_SUITE} = true ]; then sudo python /usr/local/submitty/test_suite/integrationTests/run.py; fi
   - if [ ${INTEGRATION_SUITE} = false ]; then TEST_URL="http://localhost" nose2 -v --start-dir="tests/e2e"; fi
@@ -158,7 +153,7 @@ script:
 after_script:
   # Eventually this should be moved into the "script" once we've gotten the build to a point where all contained
   # python files will actually pass (which a lot right now will not)
-  - pylint_runner ${TRAVIS_BUILD_DIR}
+  - pylint_runner -v ${TRAVIS_BUILD_DIR}
 #  - sudo ./.setup/travis/print_debug.sh
 
 after_success:
