@@ -66,7 +66,7 @@ before_install:
   - sudo ln -s /opt/python/3.5.2/bin/pip3 /usr/bin/pip3
   - ls -la /opt/python/3.5.2
   - ls -la /opt/python/3.5.2/lib
-  - /opt/python/3.5.2/lib/python3.5
+  - ls -la /opt/python/3.5.2/lib/python3.5
   - cp /usr/share/pyshared/lsb_release.py /opt/python/3.5.2/lib/python3.5/dist-packages
   - sudo chmod 777 /usr/bin/python*
   - sudo python3 -V
