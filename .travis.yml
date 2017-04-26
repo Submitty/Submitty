@@ -55,7 +55,7 @@ before_install:
   - jdk_switcher use default
   - if [[ "$TRAVIS_PHP_VERSION" = "5.5" ]]; then mv composer_55.json composer.json; fi
   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
-  - sudo sed -e "s?secure_path=\"/opt/python/2.7.12/bin:/opt/python/3.5.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?secure_path=\"${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?g" --in-place /etc/sudoers
+  - sudo sed -e "s?secure_path=\"?secure_path=\"/opt/python/2.7.12/bin:/opt/python/3.5.2/bin:${PATH}:?g" --in-place /etc/sudoers
   - sudo cat /etc/sudoers
 
 install:
