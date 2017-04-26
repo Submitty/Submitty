@@ -57,6 +57,8 @@ before_install:
   - export PATH="$PATH:$HOME/.composer/vendor/bin:/usr/bin"
   - sudo sed -e "s?secure_path=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?secure_path=\"${PATH}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"?g" --in-place /etc/sudoers
   - sudo cat /etc/sudoers
+  - /usr/bin/python -c "import sys; print(sys.path);"
+  - /usr/bin/python3 -c "import sys; print(sys.path);"
   - sudo rm -rf /usr/bin/python*
   - sudo rm -rf /usr/bin/pip*
   - sudo ln -s /opt/python/2.7.12/bin/python /usr/bin/python
