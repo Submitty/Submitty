@@ -3,4 +3,3 @@
 <?php
 
 echo "it works!\n\n";
-echo(exec('whoami'));

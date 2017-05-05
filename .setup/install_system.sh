@@ -419,24 +419,17 @@ service apache2 restart
 #################################################################
 # PHP SETUP
 #################
-#sed -i -e 's/^docroot=/docroot=\/usr\/local\/submitty:/g' /etc/suphp/suphp.conf
-
-# Assumes you need to have a group of people able to edit the files.  Comment out if not needed
-#sed -i -e 's/^allow_file_group_writeable=false/allow_file_group_writeable=true/g' /etc/suphp/suphp.conf
-# Assumes you need to have a group of people able to add/delete files and directories.  Comment out if not needed.
-#sed -i -e 's/^allow_directory_group_writeable=false/allow_directory_group_writeable=true/g' /etc/suphp/suphp.conf
-# do not allow others_writable files or directories or you will have even less security than without suphp
 
 # Edit php settings.  Note that if you need to accept larger files,
 # you’ll need to increase both upload_max_filesize and
 # post_max_filesize
 
-#sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php5/cgi/php.ini
-#sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php5/cgi/php.ini
-#sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php5/cgi/php.ini
-#sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php5/cgi/php.ini
-#sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php5/cgi/php.ini
-#sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php5/cgi/php.ini
+sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/7.0/fpm/php.ini
+sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php/7.0/fpm/php.ini
+sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php/7.0/fpm/php.ini
+sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php/7.0/fpm/php.ini
+sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php/7.0/fpm/php.ini
+sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php/7.0/fpm/php.ini
 # This should mimic the list of disabled functions that RPI uses on the HSS machine with the sole difference
 # being that we do not disable phpinfo() on the vagrant machine as it's not a function that could be used for
 # development of some feature, but it is useful for seeing information that could help debug something going wrong
@@ -453,7 +446,7 @@ DISABLED_FUNCTIONS+="pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifex
 DISABLED_FUNCTIONS+="pcntl_wifsignaled,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,"
 DISABLED_FUNCTIONS+="pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,"
 DISABLED_FUNCTIONS+="pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,"
-#echo "disable_functions = ${DISABLED_FUNCTIONS}" >> /etc/php5/cgi/php.ini
+sed -i -e "s/^disable_functions = .*/disable_functions = ${DISABLED_FUNCTIONS}/g" /etc/php/7.0/fpm/php.ini
 
 # create directories and fix permissions
 mkdir -p ${SUBMITTY_DATA_DIR}
