@@ -51,7 +51,7 @@ class SubmissionController extends AbstractController {
         $gradeable = $this->gradeables_list->getGradeable($gradeable_id, GradeableType::ELECTRONIC_FILE);
         if ($gradeable !== null) {
             $error = false;
-            $now = new \DateTime("now", new \DateTimeZone($this->core->getConfig()->getTimezone()));
+            $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
 
             // ORIGINAL
             //if ($gradeable->getOpenDate() > $now && !$this->core->getUser()->accessAdmin()) {
@@ -155,7 +155,7 @@ class SubmissionController extends AbstractController {
             $part_path[1] = $version_path;
         }
         
-        $current_time = (new \DateTime('now', new \DateTimeZone($this->core->getConfig()->getTimezone())))->format("Y-m-d H:i:s");
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:s");
         $max_size = $gradeable->getMaxSize();
         
         if ($svn_checkout === false) {
@@ -467,7 +467,7 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => $msg);
         }
         $json["active_version"] = $new_version;
-        $current_time = (new \DateTime('now', new \DateTimeZone($this->core->getConfig()->getTimezone())))->format("Y-m-d H:i:s");
+        $current_time = (new \DateTime('now', $this->core->getConfig()->getTimezone()))->format("Y-m-d H:i:s");
         $json["history"][] = array("version" => $new_version, "time" => $current_time);
 
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
