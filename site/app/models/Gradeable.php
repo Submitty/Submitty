@@ -2,8 +2,8 @@
 
 namespace app\models;
 
-use app\exceptions\NotImplementedException;
 use app\libraries\Core;
+use app\libraries\DatabaseUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Utils;
@@ -198,9 +198,9 @@ class Gradeable extends AbstractModel {
 
     protected $user_viewed_date = null;
 
-    public function __construct(Core $core, $id, User $user = null) {
+    public function __construct(Core $core, $details, User $user = null) {
         $this->core = $core;
-        $this->id = $id;
+        $this->id = $details['g_id'];
 
         $this->user = ($user === null) ? $this->core->getUser() : $user;
         if (isset($details['gd_id'])) {
