@@ -74,11 +74,11 @@ class BaseTestCase(unittest2.TestCase):
             user_name = self.user_name
         self.get(url)
 
-        print(self.driver.page_source)
         self.assertIn("CSCI1000", self.driver.title)
         self.driver.find_element_by_name('user_id').send_keys(user_id)
         self.driver.find_element_by_name('password').send_keys(user_password)
         self.driver.find_element_by_name('login').click()
+        print(self.driver.page_source)
         self.assertEqual(user_name, self.driver.find_element_by_id("login-id").text)
         self.logged_in = True
 
@@ -116,5 +116,5 @@ class BaseTestCase(unittest2.TestCase):
             semester = "s" + str(today.year)[-2:]
         return semester
 
-#if __name__ == "__main__":
+# if __name__ == "__main__":
 #    unittest2.main()
