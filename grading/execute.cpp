@@ -97,7 +97,12 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
     // for Cmake & Make
     { "cmake",                   "/usr/bin/cmake" },
-    { "make",                    "/usr/bin/make" }
+    { "make",                    "/usr/bin/make" },
+
+    // for Network Programming
+    { "timeout",                 "/usr/bin/timeout" },
+    { "mpicc.openmpi",           "/usr/bin/mpicc.openmpi" },
+    { "mpirun.openmpi",          "/usr/bin/mpirun.openmpi" }
 
   };
 

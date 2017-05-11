@@ -1,11 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # This script is run by a cron job as the hwcron user
 #
 # Regularly checks a queue to rebuild assignment configurations for recently modified gradeables.
 #
 
-from __future__ import print_function
 import os
 import pwd
 import time

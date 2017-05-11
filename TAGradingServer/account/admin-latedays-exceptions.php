@@ -2,6 +2,7 @@
 
 //Author: Peter Bailie, Systems Programmer, RPI Computer Science, July 2016
 //Update: Feb 8 2017 by pbailie
+//Update: Apr 19 2017 by pbailie (issue 959)
 
 /* MAIN ===================================================================== */
 
@@ -226,11 +227,14 @@ function retrieve_gradeables_from_db() {
 //OUT: All permissable gradeables ID and title, ordered descending by ID
 //PURPOSE:  To build drop down menu of selectable gradeables.  Ordered
 //          descending so "newer" gradeables are higher in the menu.
-
+//
+//(Apr 19 2017) FIX ISSUE 959:
+//Now only electronic gradeables show in drop-down form
 
 	$sql = <<<SQL
 SELECT g_id, g_title
 FROM gradeable
+WHERE g_gradeable_type=0
 ORDER BY g_grade_released_date DESC;
 SQL;
 
