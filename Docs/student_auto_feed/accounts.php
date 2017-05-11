@@ -131,7 +131,7 @@ function determine_semester() {
 //           timezone correctly.
 
 	$month = intval(date("m"));
-	$year  = intval(date("y"));
+	$year  = date("y");
 
 	if ($month <= 5) {
 		//spring is between months 1 - 5.
@@ -141,7 +141,7 @@ function determine_semester() {
 		$semester = "f{$year}";
 	} else {
 		//maybe it is a summer class...?
-		$semester = "u{$year}";
+		$semester = "m{$year}";
 	}
 
 	return $semester;
