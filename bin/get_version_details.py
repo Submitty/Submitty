@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 """
 Generate a list of active versions for students. Useful for when the database gets bad values for
@@ -13,6 +13,7 @@ to a file instead of printing it out to stdout.
 To see all options, use ./get_version_details.py --help
 """
 
+from __future__ import print_function
 import argparse
 from datetime import datetime
 import json
