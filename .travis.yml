@@ -29,6 +29,9 @@ addons:
     sources:
       - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
       - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
+    # You cannot put just any Ubuntu trusty package here and expect to install them and that
+    # they must be in this list: https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-trusty
+    # otherwise you'll have to install it via "sudo apt-get install ..." in the before_install section
     packages:
       - apache2
       - libapache2-mod-fastcgi
@@ -54,6 +57,7 @@ addons:
       - unzip
       - google-chrome-stable
       - libpam-passwdqc
+      - libboost-all-dev
 
 before_install:
    - jdk_switcher use default
@@ -77,7 +81,6 @@ install:
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then sudo apt-get -y install libapache2-mod-php5 php5-pgsql php5-curl; a2enmod php5; fi
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then sudo apt-get -y install libapache2-mod-php5.6 php5.6-pgsql php5.6-curl; a2enmod php5.6; fi
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then sudo apt-get -y install libapache2-mod-php7.0 php7.0-pgsql php7.0-curl; a2enmod php7.0; fi
-  - sudo apt-get install libboost-all-dev
   - wget http://chromedriver.storage.googleapis.com/2.24/chromedriver_linux64.zip
   - unzip chromedriver_linux64.zip
   - sudo chmod u+x chromedriver
