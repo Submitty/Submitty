@@ -74,25 +74,6 @@ const ItemGrade& Student::getGradeableItemGrade(GRADEABLE_ENUM g, int i) const {
   assert (itr != all_item_grades.end());
   assert (int(itr->second.size()) > i);
   
-  /*
-
-    FIXME:  Where should this logic be re-located?
-
-  float value = itr->second[i].getValue();
-  if (g == GRADEABLE_ENUM::HOMEWORK && LATE_DAY_PERCENTAGE_PENALTY > 0) {
-    int d = getUsedLateDays(i);
-
-    // grab the maximum score for this homework
-    assert (PERFECT_STUDENT_POINTER != NULL);
-    std::map<GRADEABLE_ENUM,std::vector<ItemGrade> >::const_iterator ps_itr = PERFECT_STUDENT_POINTER->all_item_grades.find(g);
-    assert (ps_itr != all_item_grades.end());
-    float ps_value = ps_itr->second[i].getValue();
-
-    // adjust the homework score
-    value = std::max(0.0f, value - d*LATE_DAY_PERCENTAGE_PENALTY*ps_value);
-  }
-  */
-
   return itr->second[i]; //return value; 
 }
 
@@ -125,9 +106,9 @@ float Student::GradeablePercent(GRADEABLE_ENUM g) const {
     return adjusted_test_pct();
   }
 
-  // normalize & drop lowest 2
-  if (g == GRADEABLE_ENUM::QUIZ && QUIZ_NORMALIZE_AND_DROP_TWO) {
-    return quiz_normalize_and_drop_two();
+  // normalize & drop lowest #
+  if (g == GRADEABLE_ENUM::QUIZ && QUIZ_NORMALIZE_AND_DROP > 0) {
+    return quiz_normalize_and_drop(QUIZ_NORMALIZE_AND_DROP);
   }
 
   if (g == GRADEABLE_ENUM::TEST && LOWEST_TEST_COUNTS_HALF) {
@@ -224,7 +205,9 @@ float Student::adjusted_test_pct() const {
 
 
 
-float Student::quiz_normalize_and_drop_two() const {
+float Student::quiz_normalize_and_drop(int num) const {
+
+  assert (num > 0);
 
   // collect the normalized quiz scores in a vector
   std::vector<float> scores;
@@ -236,19 +219,19 @@ float Student::quiz_normalize_and_drop_two() const {
     scores.push_back(v/p);
   }
 
-  assert (scores.size() > 2);
+  assert (scores.size() > num);
 
   // sort the scores
   sort(scores.begin(),scores.end());
 
-  // sum up all but the lowest 2 scores
+  // sum up all but the lowest "num" scores
   float sum = 0;
-  for (int i = 2; i < scores.size(); i++) {
+  for (int i = num; i < scores.size(); i++) {
     sum += scores[i];
   }
 
   // the overall percent of the final grade for quizzes
-  return 100 * GRADEABLES[GRADEABLE_ENUM::QUIZ].getPercent() * sum / float (scores.size()-2);
+  return 100 * GRADEABLES[GRADEABLE_ENUM::QUIZ].getPercent() * sum / float (scores.size()-num);
 }
 
 

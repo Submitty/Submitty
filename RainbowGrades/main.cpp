@@ -59,7 +59,7 @@ float LATE_DAY_PERCENTAGE_PENALTY = 0;
 bool  TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT = false;
 bool  LOWEST_TEST_COUNTS_HALF = false;
 
-bool QUIZ_NORMALIZE_AND_DROP_TWO = false;
+int QUIZ_NORMALIZE_AND_DROP = 0;
 
 std::vector<std::string> ICLICKER_QUESTION_NAMES;
 float MAX_ICLICKER_TOTAL;
@@ -573,6 +573,9 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 
       float maximum = grade_id.value("max",0);
       GRADEABLES[g].setMaximum(token_key,maximum);
+
+      float clamp = grade_id.value("clamp",-1);
+      GRADEABLES[g].setClamp(token_key,clamp);
       
       //std::cout << "scores " << p_score << " "<< a_score << " " << b_score <<  " " << c_score << " " << d_score << std::endl;
 
@@ -711,8 +714,8 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 	  assert (LATE_DAY_PERCENTAGE_PENALTY >= 0.0 && LATE_DAY_PERCENTAGE_PENALTY <= 0.5);
 	} else if (token == "test_improvement_averaging_adjustment") {
 		TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT = true;
-	} else if (token == "quiz_normalize_and_drop_two") {
-		QUIZ_NORMALIZE_AND_DROP_TWO = true;
+	} else if (token == "quiz_normalize_and_drop") {
+          QUIZ_NORMALIZE_AND_DROP = itr.value();
 	} else if (token == "lowest_test_counts_half") {
 		LOWEST_TEST_COUNTS_HALF = true;
 	} else {
@@ -1621,6 +1624,12 @@ void load_student_grades(std::vector<Student*> &students) {
                         }
                         if (ldu != 0) {
                           //std::cout << "ldu=" << ldu << std::endl;
+                        }
+                        
+                        float clamp = -1;
+                        clamp = GRADEABLES[g].getClamp(gradeable_id);
+                        if (clamp > 0) {
+                          score = std::min(clamp,score);
                         }
 
                         if (GRADEABLES[g].isReleased(gradeable_id)) {
