@@ -54,6 +54,7 @@ addons:
       - unzip
       - google-chrome-stable
       - libpam-passwdqc
+      - libboost-dev
 
 before_install:
    - jdk_switcher use default
