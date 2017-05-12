@@ -2,4 +2,4 @@
 
 <?php
 
-echo "it works!\n\n";
+echo "it works!";

@@ -298,11 +298,11 @@ rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 #replace necessary variables in the copied scripts
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/fake_submit_button_press.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields.py
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/fake_submit_button_press.sh
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 
@@ -312,16 +312,16 @@ find ${SUBMITTY_INSTALL_DIR}/bin -type f -exec chmod 500 {} \;
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
 chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
-chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
 chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 chown ${HWCRON_USER}:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
@@ -419,7 +419,7 @@ rsync -rtz   ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
 find ${SUBMITTY_INSTALL_DIR}/site -exec chown $HWPHP_USER:$HWPHP_USER {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown $HWCGI_USER:$HWCGI_USER {} \;
 
-# TEMPORARY (until we have generalized code for generating charts in html)
+# TEMPORARY (until we have generalized code for generating charts in html) 
 # copy the zone chart images
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/
 cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/ 2>/dev/null

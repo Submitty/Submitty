@@ -156,6 +156,8 @@ class ConfigTester extends \PHPUnit_Framework_TestCase {
 
         ksort($expected);
         ksort($actual);
+        var_dump($expected);
+        var_dump($actual);
         $this->assertEquals($expected, $actual);
     }
 
