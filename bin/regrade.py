@@ -49,7 +49,7 @@ def main():
     data_dir = os.path.join(SUBMITTY_DATA_DIR, "courses")
     grade_queue = []
     if not os.path.isdir(input_path) or data_dir not in input_path:
-        raise SystemError("You need to point to a directory within {}".format(data_dir))
+        raise SystemExit("You need to point to a directory within {}".format(data_dir))
     for semester in os.listdir(data_dir):
         semester_path = os.path.join(data_dir, semester)
         if not check_path(semester_path, input_path):
@@ -80,12 +80,12 @@ def main():
                         print("Grade this: {}".format("__".join([semester, course, assignment, user, version])))
 
     if len(grade_queue) > 50:
-        inp = input("Found {:d} matching submissions. Add to queue? [y/n]")
+        inp = input("Found {:d} matching submissions. Add to queue? [y/n]".format(len(grade_queue)))
         if inp.lower() not in ["yes", "y"]:
             raise SystemExit("Aborting...")
 
     for item in grade_queue:
-        file_name = "__".join([item['semester'], item['course'],     item['assignment'], item['user'], item['version']])
+        file_name = "__".join([item['semester'], item['course'], item['assignment'], item['user'], item['version']])
         file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_" + args.queue, file_name)
         with open(file_name, "w") as open_file:
             json.dump(item, open_file)
