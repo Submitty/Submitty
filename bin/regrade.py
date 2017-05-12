@@ -19,9 +19,6 @@ import sys
 
 SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
 
-if sys.version_info < (3, 0):
-    input = raw_input
-
 
 class StoreQueue(argparse.Action):
     def __call__(self, parser, args, values, option_string=None):
@@ -92,7 +89,7 @@ def main():
         file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_" + args.queue, file_name)
         with open(file_name, "w") as open_file:
             json.dump(item, open_file)
-        os.system("chmod o+rw {}".file_name)
+        os.system("chmod o+rw {}".format(file_name))
 
     print("Added {:d} to the {} queue for regrading.".format(len(grade_queue), args.queue.upper()))
 
