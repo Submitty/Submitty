@@ -162,10 +162,10 @@ def main():
 
 def generate_random_users(total, real_users):
     """
-
-    :param total:
+    
+    :param total: 
     :param real_users:
-    :return:
+    :return: 
     :rtype: list[User]
     """
     with open(os.path.join(SETUP_DATA_PATH, 'random', 'lastNames.txt')) as last_file, \
@@ -412,13 +412,13 @@ def create_gradeable_submission(src, dst):
     Given a source and a destination, copy the files from the source to the destination. First, before
     copying, we check if the source is a directory, if it is, then we zip the contents of this to a temp
     zip file (stored in /tmp) and store the path to this newly created zip as our new source.
-
+    
     At this point, (for all uploads), we check if our source is a zip (by just checking file extension is
     a .zip), then we will extract the contents of the source (using ZipFile) to the destination, else we
     just do a simple copy operation of the source file to the destination location.
-
+    
     At this point, if we created a zip file (as part of that first step), we remove it from the /tmp directory.
-
+    
     :param src: path of the file or directory we want to use for this submission
     :type src: str
     :param dst: path to the folder where we should copy the submission to
@@ -688,15 +688,13 @@ class Course(object):
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
         os.system("chown hwphp:{}_tas_www {}".format(self.code, os.path.join(course_path, "config", "form", "*")))
-        if not os.path.isfile(os.path.join(course_path, "ASSIGNMENTS.txt")):
-            os.system("touch {}".format(os.path.join(course_path, "ASSIGNMENTS.txt")))
-            os.system("chown {}:{}_tas_www {}".format(self.instructor.id, self.code,
-                                                      os.path.join(course_path, "ASSIGNMENTS.txt")))
         os.system("su {} -c '{}'".format(self.instructor.id, os.path.join(course_path,
                                                                           "BUILD_{}.sh".format(self.code))))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, os.path.join(course_path, "build")))
         os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code,
                                                      os.path.join(course_path, "test_*")))
+        os.system("chown {}:{}_tas_www {}".format(self.instructor.id, self.code,
+                                                  os.path.join(course_path, "ASSIGNMENTS.txt")))
 
         # On python 3, replace with os.makedirs(..., exist_ok=True)
         os.system("mkdir -p {}".format(os.path.join(course_path, "submissions")))

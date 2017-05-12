@@ -67,7 +67,6 @@ echo -e "Compile and install analysis tools"
 git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 git pull origin master
-sed -i "s/stack upgrade \-\-install\-ghc/stack upgrade \-\-install\-ghc \-\-allow\-different\-user/g" Makefile
 make
 
 mkdir ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools

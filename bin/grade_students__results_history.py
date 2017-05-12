@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 """
 Writes out submission datetime details (when it was submitted, how long it was in grading
