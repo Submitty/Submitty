@@ -1,12 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-This does a more partial reset of the system compared to reset_system.py, primarily not wiping various changes like 
+This does a more partial reset of the system compared to reset_system.py, primarily not wiping various changes like
 removing DB users, all created users (including system ones like hwphp, hwcgi, etc.), removing networking stuff, etc.
 
 This script acts more like the inverse of "setup_sample_courses.py" so that we could only run these two scripts in
-opposition and not run into a corrupted system state. This should then give us a nice stability that 
+opposition and not run into a corrupted system state. This should then give us a nice stability that
 """
-from __future__ import print_function
 import argparse
 import glob
 import os
@@ -15,9 +14,6 @@ import shutil
 import sys
 
 import yaml
-
-if sys.version_info < (3, 0):
-    input = raw_input
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
