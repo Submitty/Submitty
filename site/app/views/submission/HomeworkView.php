@@ -707,25 +707,25 @@ HTML;
             $return .= <<<HTML
 </div>
 HTML;
-            if ($gradeable->taGradesReleased()) {
-                $return .= <<<HTML
+	}
+        if ($gradeable->taGradesReleased()) {
+            $return .= <<<HTML
 <div class="content">
 HTML;
-                if($gradeable->hasGradeFile()) {
-                    $return .= <<<HTML
+            if($gradeable->hasGradeFile()) {
+                $return .= <<<HTML
     <h3 class="label">TA grade</h3>
     <pre>{$gradeable->getGradeFile()}</pre>
 HTML;
-                }
-                else {
-                    $return .= <<<HTML
+            }
+            else {
+                $return .= <<<HTML
     <h3 class="label">TA grade not available</h3>
 HTML;
-                }
-                $return .= <<<HTML
+            }
+            $return .= <<<HTML
 </div>
 HTML;
-            }
         }
 
         return $return;
