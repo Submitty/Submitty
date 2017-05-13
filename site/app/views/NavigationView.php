@@ -142,32 +142,49 @@ HTML;
             $btn_title_save = $title_to_button_type_submission[$title];
             foreach ($gradeable_list as $gradeable => $g_data) {
                 if (!$this->core->getUser()->accessGrading()){
-                    if ($g_data->getActiveVersion() == -1){
+                    
+                    if ($g_data->getActiveVersion() === 0 && $g_data->getCurrentVersionNumber() != 0){
                         $submission_status = array(
                             "SUBMITTED" => "<em style='font-size: .8em;'>(NOT SUMBITTED)</em><br>",
                             "AUTOGRADE" => ""
                         );
                     }
-                    else if ($g_data->getActiveVersion() == 0){
+                    else if ($g_data->getActiveVersion() === 0 && $g_data->getCurrentVersionNumber() === 0){
                         $submission_status = array(
                             "SUBMITTED" => "<em style='font-size: .8em;'>(SUBMIT CANCELLED)</em><br>",
                             "AUTOGRADE" => ""
                         );
                     }
                     else{
-                        if ($g_data->getTotalNonHiddenNonExtraCreditPoints() == array()){
+
+                        if ($g_data->getTotalNonHiddenNonExtraCreditPoints() == array() && ($title_save != "GRADED" && $title_save != "ITEMS BEING GRADED")){
                             $submission_status = array(
-                                "SUBMITTED" => "<em style='font-size: .8em;'>AGAIN</em><br>",
+                                "SUBMITTED" => "<em style='font-size: .8em;'>(AGAIN)</em><br>",
                                 "AUTOGRADE" => ""
                             ); 
+                        }
+                        else if ($g_data->getTotalNonHiddenNonExtraCreditPoints() != array() && ($title_save != "GRADED" && $title_save != "ITEMS BEING GRADED")){
+                            $autograde_points_earned = $g_data->getGradedNonHiddenPoints(); 
+                            $autograde_points_total = $g_data->getTotalNonHiddenNonExtraCreditPoints();
+                            $submission_status = array(
+                                "SUBMITTED" => "(AGAIN) ",
+                                "AUTOGRADE" => "<em style='font-size: .8em;'>(" . $autograde_points_earned . "/" . $autograde_points_total . ")</em><br>"
+                            );
+                        }
+                        else if ($g_data->getTotalNonHiddenNonExtraCreditPoints() != array() && ($title_save == "GRADED" || $title_save == "ITEMS BEING GRADED")){
+                            $submission_status = array(
+                                "SUBMITTED" => "",
+                                "AUTOGRADE" => ""
+                            );
                         }
                         else{
                             $autograde_points_earned = $g_data->getGradedNonHiddenPoints(); 
                             $autograde_points_total = $g_data->getTotalNonHiddenNonExtraCreditPoints();
                             $submission_status = array(
-                                "SUBMITTED" => "AGAIN ",
+                                "SUBMITTED" => "",
                                 "AUTOGRADE" => "<em style='font-size: .8em;'>(" . $autograde_points_earned . "/" . $autograde_points_total . ")</em><br>"
                             );
+                            
                         }
                     }
                 }
