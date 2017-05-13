@@ -40,6 +40,11 @@ void CleanUpMultipleParts() {
     if (!is_directory(part_path)) {
       continue;
     }
+    std::string path_name = part_path.string();
+    if (path_name.find("part") == std::string::npos) {
+      continue;
+    }
+
     int count = 0;
     for (boost::filesystem::directory_iterator part_itr( part_path ); part_itr != end_iter; ++part_itr) {
       count++;
