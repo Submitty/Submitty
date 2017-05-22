@@ -33,7 +33,7 @@ EXPIRATION = 7
 def delete_obsolete_dumps(working_path, expiration_stamp):
 # IN: (1) file or path to recurse.  (2) Oldest date to keep a dump file.
 # RETURN:  None
-# PURPOSE: Recurse through folders/files and delete any obsolete dump fi
+# PURPOSE: Recurse through folders/files and delete dump files past EXPIRATION.
 
 	# Filter out '.', '..', and any "hidden" file/folder.
 	# prepend full path to all directory list elements
@@ -108,7 +108,7 @@ for i in range(len(course_list)):
 
 # DETERMINE EXPIRATION DATE (to delete obsolete dump files) --------------------
 # (do this BEFORE recursion so it is not calculated recursively n times)
-expiration       = datetime.date.fromordinal(today.toordinal() - 7)
+expiration       = datetime.date.fromordinal(today.toordinal() - EXPIRATION)
 expiration_stamp = '{:0>2}{:0>2}{:0>2}'.format(expiration.year % 100, expiration.month, expiration.day)
 
 # RECURSIVELY CULL OBSOLETE DUMPS ----------------------------------------------
