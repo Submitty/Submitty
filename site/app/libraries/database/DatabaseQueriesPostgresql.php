@@ -163,7 +163,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
     public function getGradeables($g_ids = null, $user_ids = null, $section_key="registration_section") {
         $return = array();
         $g_ids_query = "";
-        $users_query = "";
+        $users_query = "$1";
         $params = array();
         if ($g_ids !== null && !is_array($g_ids)) {
             $g_ids = array($g_ids);
