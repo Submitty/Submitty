@@ -31,9 +31,14 @@ EXPIRATION = 7
 
 # RECURSIVE FUNCTION -----------------------------------------------------------
 def delete_obsolete_dumps(working_path, expiration_stamp):
-# IN: (1) file or path to recurse.  (2) Oldest date to keep a dump file.
-# RETURN:  None
-# PURPOSE: Recurse through folders/files and delete dump files past EXPIRATION.
+	"""
+	Recurse through folders/files and delete any obsolete dump file
+
+	:param working_path: file or path to recurse through
+	:param expiration_stamp: Oldest date to keep a dump file.
+	:type working_path: str
+	:type expiration_path: str
+	"""
 
 	# Filter out '.', '..', and any "hidden" file/folder.
 	# prepend full path to all directory list elements
@@ -54,8 +59,7 @@ def delete_obsolete_dumps(working_path, expiration_stamp):
 # MAIN -------------------------------------------------------------------------
 # ROOT required ----------------------------------------------------------------
 if os.getuid() != 0:
-	print ('Root required.  Please contact your sysadmin for assistance.', file=sys.stderr)
-	sys.exit(1)
+	raise SystemExit('Root required. Please contact your sysadmin for assistance.')
 
 # DETERMINE CURRENT DATE -------------------------------------------------------
 # (today.year % 100) determines the two digit year.  e.g. '2017' -> '17'
@@ -113,5 +117,3 @@ expiration_stamp = '{:0>2}{:0>2}{:0>2}'.format(expiration.year % 100, expiration
 
 # RECURSIVELY CULL OBSOLETE DUMPS ----------------------------------------------
 delete_obsolete_dumps(DUMP_PATH, expiration_stamp)
-
-sys.exit(0)
