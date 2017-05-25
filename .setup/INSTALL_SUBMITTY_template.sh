@@ -427,7 +427,7 @@ rsync -rtz   ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
 find ${SUBMITTY_INSTALL_DIR}/site -exec chown $HWPHP_USER:$HWPHP_USER {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown $HWCGI_USER:$HWCGI_USER {} \;
 
-# TEMPORARY (until we have generalized code for generating charts in html) 
+# TEMPORARY (until we have generalized code for generating charts in html)
 # copy the zone chart images
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/
 cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/ 2>/dev/null
