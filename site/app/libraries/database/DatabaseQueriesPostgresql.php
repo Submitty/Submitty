@@ -165,21 +165,33 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         $g_ids_query = "";
         $users_query = "$1";
         $params = array();
-        if ($g_ids !== null && !is_array($g_ids)) {
-            $g_ids = array($g_ids);
-            $g_ids_query = implode(",", array_fill(0, count($g_ids), "?"));
-            $params = $g_ids;
+        if ($g_ids !== null) {
+            if (!is_array($g_ids)) {
+                $g_ids = array($g_ids);
+            }
+            if (count($g_ids) > 0) {
+                $g_ids_query = implode(",", array_fill(0, count($g_ids), "?"));
+                $params = $g_ids;
+            }
+            else {
+                return $return;
+            }
         }
 
-        if ($user_ids !== null && !is_array($user_ids)) {
-            $user_ids = array($user_ids);
+        if ($user_ids !== null) {
+            if (!is_array($user_ids)) {
+                $user_ids = array($user_ids);
+            }
+            if (count($user_ids) > 0) {
+                $users_query = implode(",", array_fill(0, count($user_ids), "?"));
+                $params = array_merge($params, $user_ids);
+            }
+            else {
+                return $return;
+            }
         }
         $keys = array("registration_section", "rotating_section");
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
-        if ($user_ids !== null && count($user_ids) > 0) {
-            $users_query = implode(",", array_fill(0, count($user_ids), "?"));
-            $params = array_merge($params, $user_ids);
-        }
         $query = "
 SELECT";
         if ($user_ids !== null) {
