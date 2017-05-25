@@ -174,7 +174,7 @@ ORDER BY egd.g_version", array($g_id, $user_id));
         if ($user_ids !== null && !is_array($user_ids)) {
             $user_ids = array($user_ids);
         }
-        $keys = array("registration_section", "rotating_section");
+        $keys = array("registration_section", "rotating_section", "registration_section_by_first", "registration_section_by_last");
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
         if ($user_ids !== null && count($user_ids) > 0) {
             $users_query = implode(",", array_fill(0, count($user_ids), "?"));
@@ -291,11 +291,23 @@ LEFT JOIN (
             $query .= "
 WHERE ".implode(" AND ", $where);
         }
-
         if ($user_ids !== null) {
+          if ($section_key === "registration_section_by_first"){
+            $section_key = "registration_section";
+            $query .= "
+ORDER BY u.{$section_key}, u.user_firstname, u.user_lastname, u.user_id";
+          }
+          else if ($section_key === "registration_section_by_last"){
+            $section_key = "registration_section";
+            $query .= "
+ORDER BY u.{$section_key}, u.user_lastname, u.user_id";
+          }
+          else{
             $query .= "
 ORDER BY u.{$section_key}, u.user_id";
+          }
         }
+
 
         $this->database->query($query, $params);
 
