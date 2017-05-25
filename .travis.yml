@@ -30,6 +30,9 @@ addons:
     sources:
       - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
       - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
+    # You cannot put just any Ubuntu trusty package here and expect to install them and that
+    # they must be in this list: https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-trusty
+    # otherwise you'll have to install it via "sudo apt-get install ..." in the before_install section
     packages:
       - apache2
       - libapache2-mod-fastcgi
@@ -51,6 +54,7 @@ addons:
       - unzip
       - google-chrome-stable
       - libpam-passwdqc
+      - libboost-all-dev
 
 before_install:
   - jdk_switcher use default
