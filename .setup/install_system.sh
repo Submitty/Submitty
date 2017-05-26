@@ -414,8 +414,11 @@ chmod 0640 /etc/apache2/suexec/www-data
 a2ensite submitty
 a2ensite cgi
 
-service apache2 restart
+sudo mkdir /usr/lib/cgi-bin
+sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
+service apache2 restart
+service php7.0-fpm restart
 
 #################################################################
 # PHP SETUP
