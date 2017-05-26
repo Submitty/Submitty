@@ -12,14 +12,14 @@ class ConfigExceptionTester extends \PHPUnit_Framework_TestCase  {
         catch (ConfigException $exc) {
             $this->assertEquals("exception", $exc->getMessage());
             $this->assertEmpty($exc->getDetails());
-            $this->assertFalse($exc->displayMessage());
+            $this->assertTrue($exc->displayMessage());
             $this->assertTrue($exc->logException());
         }
     }
 
-    public function testConfigExceptionShowMessage() {
+    public function testConfigExceptionNoMessage() {
         try {
-            throw new ConfigException("exception", true);
+            throw new ConfigException("exception", false);
         }
         catch (ConfigException $exc) {
             $this->assertEquals("exception", $exc->getMessage());
