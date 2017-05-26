@@ -552,8 +552,6 @@ sudo mkdir /usr/lib/cgi-bin
 sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
 apache2ctl -t
-service apache2 restart
-service php7.0-fpm restart
 
 if [[ ${VAGRANT} == 1 ]]; then
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
@@ -609,5 +607,14 @@ chmod 2771 ${SUBMITTY_INSTALL_DIR}
 #	rm password.txt
 #	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
 #fi
+
+#################################################################
+# RESTART SERVICES
+###################
+
+service apache2 restart
+service php7.0-fpm restart
+service postgresql restart
+
 echo "Done."
 exit 0
