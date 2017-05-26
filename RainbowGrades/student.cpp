@@ -219,14 +219,14 @@ float Student::quiz_normalize_and_drop(int num) const {
     scores.push_back(v/p);
   }
 
-  assert (scores.size() > num);
+  assert (scores.size() > std::size_t(num)); //Relies on the assert(num > 0) at the top of this function.
 
   // sort the scores
   sort(scores.begin(),scores.end());
 
   // sum up all but the lowest "num" scores
   float sum = 0;
-  for (int i = num; i < scores.size(); i++) {
+  for (std::size_t i = num; i < scores.size(); i++) {
     sum += scores[i];
   }
 
@@ -300,7 +300,7 @@ int Student::getAllowedLateDays(int which_lecture) const {
 int Student::getUsedLateDays() const {
   int answer = 0;
   for (std::map<GRADEABLE_ENUM,std::vector<ItemGrade> >::const_iterator itr = all_item_grades.begin(); itr != all_item_grades.end(); itr++) {
-    for (int i = 0; i < itr->second.size(); i++) {
+    for (std::size_t i = 0; i < itr->second.size(); i++) {
       answer += itr->second[i].getLateDaysUsed();
     }
   }
@@ -321,8 +321,6 @@ float Student::overall_b4_moss() const {
 std::string Student::grade(bool flag_b4_moss, Student *lowest_d) const {
 
   if (section == 0) return "";
-  if (section == 11) return "";  // fake section
-  if (section == 12) return "";  // fake section
 
   if (!flag_b4_moss && manual_grade != "") return manual_grade;
   

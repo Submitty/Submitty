@@ -483,7 +483,11 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
     if (count == -1) {
       count = ids_list.size();
     }
-    assert (ids_list.size() <= count);
+    //If we ever have more than INT_MAX ids, this will wrap.
+    //Needed to resolve int vs uint comparison and this is preferable since
+    //presumably the json library is spitting out an int and the customization.json
+    //also assumes int.
+    assert (int(ids_list.size()) <= count);
 
     Gradeable answer (count,gradeable_total_percent); //,m);
     GRADEABLES.insert(std::make_pair(g,answer));
@@ -557,7 +561,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
 
       if (!curve.empty()) {
         assert(curve.size() == benchmark_percents.size());
-        for (int i = 0; i < benchmark_percents.size(); i++) {
+        for (std::size_t i = 0; i < benchmark_percents.size(); i++) {
           if (benchmark_percents[i] == "lowest_a-") a_score = curve[i];
           if (benchmark_percents[i] == "lowest_b-") b_score = curve[i];
           if (benchmark_percents[i] == "lowest_c-") c_score = curve[i];
@@ -648,7 +652,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   
   // get display optioons
   std::vector<std::string> displays = j["display"].get<std::vector<std::string> >();
-  for (int i=0; i<displays.size(); i++) {
+  for (std::size_t i=0; i<displays.size(); i++) {
 	token = displays[i];
 	if (token == "instructor_notes") {
       DISPLAY_INSTRUCTOR_NOTES = true;
@@ -675,7 +679,7 @@ void preprocesscustomizationfile(std::vector<Student*> &students) {
   
   // Set Display Benchmark
   std::vector<std::string> displayBenchmark = j["display_benchmark"].get<std::vector<std::string> >();
-  for (int i=0; i<displayBenchmark.size(); i++) {
+  for (std::size_t i=0; i<displayBenchmark.size(); i++) {
     token = displayBenchmark[i];
 	DisplayBenchmark(token);
   }
@@ -1280,24 +1284,24 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	} else if (token == "warning") {
 	  // EWS early warning system [ per student ]
 	  std::vector<json> warning_list = j[token].get<std::vector<json> >();
-	  for (int i = 0; i<warning_list.size(); i++) {
+	  for (std::size_t i = 0; i<warning_list.size(); i++) {
             json warning = warning_list[i];
 	    //std::string username = warning_user["user"].get<std::string>();
             std::string message = warning["msg"].get<std::string>();
             std::vector<std::string> ids;
             float value = warning["value"].get<float>();
             json j_ids = warning["ids"];
-            for (int k = 0; k < j_ids.size(); k++) {
+            for (std::size_t k = 0; k < j_ids.size(); k++) {
               ids.push_back(j_ids[k].get<std::string>());
             }
 
             std::cout << "search for " << message << std::endl;
-            for (int S = 0; S < (int)students.size(); S++) {
+            for (int S = 0; S < (int)students.size(); S++) { //TODO: See if there's a reason this was int / cast .size() to int instead of std::size_t S
               Student *s = students[S];
               if (!validSection(students[S]->getSection())) continue;
               //std::cout << "student " << s->getUserName() << std::endl;
               float v = 0;
-              for (int k = 0; k < ids.size(); k++) {
+              for (std::size_t k = 0; k < ids.size(); k++) {
                 GRADEABLE_ENUM g;
                 int i;
                 //std::cout << "GRADEABLE_ENUM " << (int)g << i << std::endl;
@@ -1318,7 +1322,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	} else if (token == "recommend") {
 	  // UTA/mentor recommendations [ per student ]
 	  std::vector<json> recommend_list = j[token].get<std::vector<json> >();
-	  for (int i = 0; i < recommend_list.size(); i++) {
+	  for (std::size_t i = 0; i < recommend_list.size(); i++) {
 		json recommend_user = recommend_list[i];
 	    std::string username = recommend_user["user"].get<std::string>();
 		std::string message = recommend_user["msg"].get<std::string>();
@@ -1332,7 +1336,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	} else if (token == "note") {
 	  // other grading note [ per student ]
 	  std::vector<json> note_list = j[token].get<std::vector<json> >();
-	  for (int i = 0; i < note_list.size(); i++) {
+	  for (std::size_t i = 0; i < note_list.size(); i++) {
 		json note_user = note_list[i];
 	    std::string username = note_user["user"].get<std::string>();
 		std::string message = note_user["msg"].get<std::string>();
@@ -1347,7 +1351,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	  DISPLAY_LATE_DAYS = true;
 	  std::vector<float> earnedLateDays = j[token].get<std::vector<float> >();
 	  GLOBAL_earned_late_days.clear();
-	  for (int i = 0; i < earnedLateDays.size(); i++) {
+	  for (std::size_t i = 0; i < earnedLateDays.size(); i++) {
 	    float tmp = earnedLateDays[i];
 		assert (GLOBAL_earned_late_days.size() == 0 || tmp > GLOBAL_earned_late_days.back());
         GLOBAL_earned_late_days.push_back(tmp);
@@ -1358,7 +1362,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	  for (json::iterator itr2 = (itr.value()).begin(); itr2 != (itr.value()).end(); itr2++) {
 	    std::string temp = itr2.key();
 		std::vector<json> iclickerLectures = j[token][temp];
-		for (int i = 0; i < iclickerLectures.size(); i++) {
+		for (std::size_t i = 0; i < iclickerLectures.size(); i++) {
 		  json iclickerLecture = iclickerLectures[i];
 		  int which_lecture = std::stoi(temp);
 		  std::string clicker_file = iclickerLecture["file"].get<std::string>();
@@ -1370,7 +1374,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	  }
 	} else if (token == "audit") {
 	  std::vector<json> audit_list = itr.value();
-	  for (int i = 0; i < audit_list.size(); i++) {
+	  for (std::size_t i = 0; i < audit_list.size(); i++) {
 	    std::string username = audit_list[i];
         Student *s = GetStudent(students,username);
         assert (s != NULL);
@@ -1380,7 +1384,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	  }
 	} else if (token == "withdraw") {
 	  std::vector<json> withdraw_list = itr.value();
-	  for (int i = 0; i < withdraw_list.size(); i++) {
+	  for (std::size_t i = 0; i < withdraw_list.size(); i++) {
 	    std::string username = withdraw_list[i];
         Student *s = GetStudent(students,username);
         assert (s != NULL);
@@ -1390,7 +1394,7 @@ void processcustomizationfile(std::vector<Student*> &students) {
 	  }
 	} else if (token == "independentstudy") {
 	  std::vector<json> independent_study_list = itr.value();
-	  for (int i = 0; i < independent_study_list.size(); i++) {
+	  for (std::size_t i = 0; i < independent_study_list.size(); i++) {
 	    std::string username = independent_study_list[i];
         Student *s = GetStudent(students,username);
         assert (s != NULL);
@@ -1566,6 +1570,12 @@ void load_student_grades(std::vector<Student*> &students) {
 
                   std::string other_note = "";
                   //                  nlohmann::json obj = (*itr2).value("text",nlohmann::json::object());
+                  //FIXME: itr3 defined in nlohmann scope, itr2 isn't. itr2 above uses (*itr2)., below we use itr2-> which is driving CLion nuts
+                  //FIXME: (cont'd) have to look into the why to understand, but we should be consistent one way or another.
+                  //FIXME: Also, different versions of the library in grading/json.hpp and RainbowGrades/json.hpp why?
+                  //FIXME: (cont'd) Why is the json library in two different places, regardless of version? (with the same namespace)
+
+                  //TODO: Figure out what the underlying object/type is to determine if std::size_t makes sense here or not (esp. long term)
                   nlohmann::json::iterator itr3 = itr2->find("text");
                   if (itr3 != itr2->end()) {
                     for (int i = 0; i < itr3->size(); i++) {
@@ -1597,6 +1607,7 @@ void load_student_grades(std::vector<Student*> &students) {
 		  }
 		  
                   if (gradeable_id == GLOBAL_recommend_id) {
+                    //TODO: FIXME: See comments on L1573-1578
                     json::iterator rec = itr2->find("text");
                     if (rec != itr2->end()) {
                       for (int i = 0; i < (*rec).size(); i++) {

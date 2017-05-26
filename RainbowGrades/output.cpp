@@ -73,7 +73,7 @@ const std::string GradeColor(const std::string &grade) {
 float compute_average(const std::vector<float> &vals) {
   assert (vals.size() > 0);
   float total = 0;
-  for (int i = 0; i < vals.size(); i++) {
+  for (std::size_t i = 0; i < vals.size(); i++) {
     total += vals[i];
   }
   return total / float (vals.size());
@@ -83,7 +83,7 @@ float compute_average(const std::vector<float> &vals) {
 float compute_stddev(const std::vector<float> &vals, float average) {
   assert (vals.size() > 0);
   float total = 0;
-  for (int i = 0; i < vals.size(); i++) {
+  for (std::size_t i = 0; i < vals.size(); i++) {
     total += (vals[i]-average)*(vals[i]-average);
   }
   return sqrt(total / float (vals.size()) );
@@ -354,7 +354,7 @@ void PrintExamRoomAndZoneTable(std::ofstream &ostr, Student *s, const nlohmann::
     int FIRSTH = 37; /* also prime */
 
     unsigned int tmp = FIRSTH;
-    for (int i = 0; i < username.size(); i++) {
+    for (std::size_t i = 0; i < username.size(); i++) {
       tmp = (tmp * A) ^ (username[i] * B);
       s++;
     }
@@ -736,7 +736,7 @@ void start_table_output( bool for_instructor,
     if (DISPLAY_INSTRUCTOR_NOTES) {
       std::string notes;
       std::vector<std::string> ews = this_student->getEarlyWarnings();
-      for (int i = 0; i < ews.size(); i++) {
+      for (std::size_t i = 0; i < ews.size(); i++) {
         notes += ews[i];
       }
       std::string other_note = this_student->getOtherNote();
@@ -1201,7 +1201,7 @@ void end_table(std::ofstream &ostr,  bool for_instructor, Student *s) {
       ostr << "<b>Initial number of allowed late days: </b>" << s->getDefaultAllowedLateDays() <<  "<br>" << std::endl;
     }
     ostr << "<b>Extra late days earned after iclicker points:</b> ";
-    for (int i = 0; i < GLOBAL_earned_late_days.size(); i++) {
+    for (std::size_t i = 0; i < GLOBAL_earned_late_days.size(); i++) {
       ostr << GLOBAL_earned_late_days[i];
       if (i < GLOBAL_earned_late_days.size()-1) {
         ostr << ", ";
