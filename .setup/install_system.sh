@@ -553,6 +553,8 @@ sudo mkdir /usr/lib/cgi-bin
 sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
 apache2ctl -t
+service apache2 restart
+service php7.0-fpm restart
 
 if [[ ${VAGRANT} == 1 ]]; then
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
