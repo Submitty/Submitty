@@ -1,0 +1,19 @@
+# This defines a common definition for editors to help uniform developers around one core code style for a given
+# language.
+# See http://editorconfig.org for additional details on how this file works.
+
+root = true
+[*]
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+charset = utf-8
+
+[*.{py,php,java,sh,css,html}]
+indent_size = 4
+
+[{MakefileHelper,SAMPLE_Makefile}]
+indent_size = 2
+
+[*.{c,h,cpp,hpp,js,json,yml,txt,md}]
+indent_size = 2

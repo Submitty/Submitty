@@ -1065,7 +1065,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testShowHomework() {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
-        $now = new \DateTime("now", new \DateTimeZone($core->getConfig()->getTimezone()));
+        $now = new \DateTime("now", $core->getConfig()->getTimezone());
         $gradeable = $this->createMock(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(true);
         $gradeable->method('getOpenDate')->willReturn($now);
@@ -1081,7 +1081,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testShowHomeworkNoConfig() {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
-        $now = new \DateTime("now", new \DateTimeZone($core->getConfig()->getTimezone()));
+        $now = new \DateTime("now", $core->getConfig()->getTimezone());
         $gradeable = $this->createMock(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(false);
         $gradeable->method('getOpenDate')->willReturn($now);
@@ -1098,7 +1098,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_REQUEST['action'] = 'display';
         $core = $this->createMockCore(array(), array('access_grading' => false));
         /** @noinspection PhpUndefinedMethodInspection */
-        $now = new \DateTime("tomorrow", new \DateTimeZone($core->getConfig()->getTimezone()));
+        $now = new \DateTime("tomorrow", $core->getConfig()->getTimezone());
         $gradeable = $this->createMock(Gradeable::class);
         $gradeable->method('hasConfig')->willReturn(false);
         $gradeable->method('getOpenDate')->willReturn($now);

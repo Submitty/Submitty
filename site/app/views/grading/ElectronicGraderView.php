@@ -24,7 +24,12 @@ class ElectronicGraderView extends AbstractView {
             $graded += $section['graded_students'];
             $total += $section['total_students'];
         }
-        $percentage = round(($graded / $total) * 100);
+        if ($total === 0) {
+            $percentage = 0;
+        }
+        else {
+            $percentage = round(($graded / $total) * 100);
+        }
         $return = <<<HTML
 <div class="content">
     <h2>Overview of {$gradeable->getName()}</h2>

@@ -10,6 +10,13 @@ SUBMITTY_DATA_DIR=/var/local/submitty
 
 COURSE_BUILDERS_GROUP=course_builders
 
+# Ensure we have python and pip installed before doing anything else so we can use
+# python as our glue
+apt-get update
+apt-get install -qqy python python-pip python-dev python3 python3-pip python3-dev libpython3.5
+pip2 install -U pip
+pip3 install -U pip
+
 #################################################################
 # PROVISION SETUP
 #################
@@ -94,7 +101,7 @@ addgroup hwcronphp
 addgroup course_builders
 
 if [ ${VAGRANT} == 1 ]; then
-	adduser vagrant sudo
+	adduser ubuntu sudo
 fi
 
 # change the default user umask (was 002)
@@ -110,8 +117,8 @@ adduser hwcgi shadow
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
 	echo "hwcgi:hwcgi" | sudo chpasswd
-	adduser hwphp vagrant
-	adduser hwcgi vagrant
+	adduser hwphp ubuntu
+	adduser hwcgi ubuntu
 fi
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then
@@ -157,19 +164,21 @@ apt-get -qq update
 apt-get install -qqy ntp
 service ntp restart
 
+echo "Preparing to install packages.  This may take a while."
+
 # path for untrusted user creation script will be different if not using Vagrant
 
 apt-get install -qqy libpam-passwdqc
 
-# Use suphp to improve file permission granularity by running php
-# scripts as the user that owns the file instead of www-data
-#
+
 # Set up apache to run with suphp in pre-fork mode since not all
 # modules are thread safe (do not combine the commands or you may get
 # the worker/threaded mode instead)
 
 apt-get install -qqy ssh sshpass unzip
-apt-get install -qqy apache2 postgresql postgresql-contrib php5 php5-xdebug libapache2-mod-suphp php5-curl
+apt-get install -qqy postgresql postgresql-contrib postgresql-client postgresql-client-common postgresql-client-9.5
+apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup
+apt-get install -qqy php7.0 php7.0-cli php-xdebug libapache2-mod-fastcgi php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt
 
 # Check to make sure you got the right setup by typing:
 #   apache2ctl -V | grep MPM
@@ -183,19 +192,28 @@ apachectl -V | grep MPM
 # DOCUMENTATION FIXME: Go through this list and categorize purpose of
 # these packages (as appropriate.. )
 
-echo "Preparing to install packages.  This may take a while."
 apt-get install -qqy clang autoconf automake autotools-dev clisp diffstat emacs finger gdb git git-man \
-hardening-includes python python-pip p7zip-full patchutils postgresql-client postgresql-client-9.3 postgresql-client-common \
-postgresql-contrib libpq-dev python-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
-javascript-common apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup \
-libfile-mmagic-perl libgnupg-interface-perl php5-pgsql php5-mcrypt libbsd-resource-perl libarchive-zip-perl gcc g++ \
-g++-multilib jq libseccomp-dev libseccomp2 seccomp junit cmake libpcre3 libpcre3-dev flex bison spim poppler-utils
+hardening-includes p7zip-full patchutils \
+libpq-dev unzip valgrind zip libmagic-ocaml-dev common-lisp-controller libboost-all-dev \
+javascript-common  \
+libfile-mmagic-perl libgnupg-interface-perl libbsd-resource-perl libarchive-zip-perl gcc g++ \
+g++-multilib jq libseccomp-dev libseccomp2 seccomp junit cmake flex bison spim poppler-utils
+
+# Packages necessary for static analysis
+# graph tool...  for later?  add-apt-repository "http://downloads.skewed.de/apt/trusty universe" -y
+add-apt-repository ppa:ubuntu-toolchain-r/test -y
+apt-get update -qq
+apt-get install -qq build-essential pkg-config flex bison
+apt-get install -qq libpcre3 libpcre3-dev
+apt-get install -qq splint indent
+
+# SVN
 
 apt-get install -qqy subversion subversion-tools
 apt-get install -qqy libapache2-svn
 
 # Enable PHP5-mcrypt
-php5enmod mcrypt
+#php5enmod mcrypt
 
 # Install Oracle 8 Non-Interactively
 echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
@@ -217,16 +235,24 @@ apt-get -qqy autoremove
 
 # TODO: We should look into making it so that only certain users have access to certain packages
 # so that hwphp is the only one who could use PAM for example
-pip install python-pam
-pip install xlsx2csv
-pip install sqlalchemy
-pip install psycopg2
+pip2 install -U pip
+pip2 install python-pam
+pip2 install xlsx2csv
+pip2 install psycopg2
+pip2 install PyYAML
+pip2 install sqlalchemy
 
-#NOTE: BELOW THE PYTHON PAM MODULE IS RESTRICTED TO hwcgi
-chmod -R 555 /usr/local/lib/python2.7/*
-chmod 555 /usr/lib/python2.7/dist-packages
-sudo chmod 500   /usr/local/lib/python2.7/dist-packages/pam.py*
-sudo chown hwcgi /usr/local/lib/python2.7/dist-packages/pam.py*
+pip3 install -U pip
+pip3 install python-pam
+pip3 install PyYAML
+pip3 install psycopg2
+pip3 install sqlalchemy
+pip3 install pylint
+
+chmod -R 555 /usr/local/lib/python*/*
+chmod 555 /usr/lib/python*/dist-packages
+sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
+sudo chown hwcgi /usr/local/lib/python*/dist-packages/pam.py*
 
 
 #################################################################
@@ -242,7 +268,6 @@ wget http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.
 mv remotecontent?filepath=junit%2Fjunit%2F4.12%2Fjunit-4.12.jar junit-4.12.jar
 wget http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar -o /dev/null > /dev/null 2>&1
 mv remotecontent?filepath=org%2Fhamcrest%2Fhamcrest-core%2F1.3%2Fhamcrest-core-1.3.jar hamcrest-core-1.3.jar
-
 
 # EMMA is a tool for computing code coverage of Java programs
 
@@ -310,24 +335,25 @@ if [ ${VAGRANT} == 1 ]; then
 
     echo "Binding static IPs to \"Host-Only\" virtual network interface."
 
-    # eth0 is auto-configured by Vagrant as NAT.  eth1 is a host-only adapter and
-    # not auto-configured.  eth1 is manually set so that the host-only network
+    # Note: Ubuntu 16.04 switched from the eth# scheme to ep0s# scheme.
+    # enp0s3 is auto-configured by Vagrant as NAT.  enp0s8 is a host-only adapter and
+    # not auto-configured.  enp0s8 is manually set so that the host-only network
     # interface remains consistent among VM reboots as Vagrant has a bad habit of
     # discarding and recreating networking interfaces everytime the VM is restarted.
-    # eth1 is statically bound to 192.168.56.101, 102, 103, 104, and 105.
-    printf "auto eth1\niface eth1 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-    printf "auto eth1:1\niface eth1:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
-    printf "auto eth1:2\niface eth1:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/eth1.cfg
+    # eth1 is statically bound to 192.168.56.101, 102, and 103.
+    echo -e "auto enp0s8\niface enp0s8 inet static\naddress 192.168.56.101\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
+    echo -e "auto enp0s8:1\niface enp0s8:1 inet static\naddress 192.168.56.102\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
+    echo -e "auto enp0s8:2\niface enp0s8:2 inet static\naddress 192.168.56.103\nnetmask 255.255.255.0\n\n" >> /etc/network/interfaces.d/00-vagrant.cfg
 
     # Turn them on.
-    ifup eth1 eth1:1 eth1:2 eth1:3
+    ifup enp0s8 enp0s8:1 enp0s8:2
 fi
 
 #################################################################
 # APACHE SETUP
 #################
-a2enmod include actions cgi suexec authnz_external headers ssl
 
+a2enmod include actions cgi suexec authnz_external headers ssl fastcgi
 
 # If you have real certificates, follow the directions from your
 # certificate provider.
@@ -377,30 +403,34 @@ sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 rm /etc/apache2/sites*/000-default.conf
 rm /etc/apache2/sites*/default-ssl.conf
 
-service apache2 reload
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/pool.d/submitty.conf /etc/php/7.0/fpm/pool.d/submitty.conf
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/cgi.conf /etc/apache2/sites-available/cgi.conf
+cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
+
+# permissions: rw- r-- ---
+chmod 0640 /etc/apache2/sites-available/*.conf
+chmod 0640 /etc/apache2/suexec/www-data
+a2ensite submitty
+a2ensite cgi
+
+service apache2 restart
 
 
 #################################################################
 # PHP SETUP
 #################
-sed -i -e 's/^docroot=/docroot=\/usr\/local\/submitty:/g' /etc/suphp/suphp.conf
-
-# Assumes you need to have a group of people able to edit the files.  Comment out if not needed
-sed -i -e 's/^allow_file_group_writeable=false/allow_file_group_writeable=true/g' /etc/suphp/suphp.conf
-# Assumes you need to have a group of people able to add/delete files and directories.  Comment out if not needed.
-sed -i -e 's/^allow_directory_group_writeable=false/allow_directory_group_writeable=true/g' /etc/suphp/suphp.conf
-# do not allow others_writable files or directories or you will have even less security than without suphp
 
 # Edit php settings.  Note that if you need to accept larger files,
 # you’ll need to increase both upload_max_filesize and
 # post_max_filesize
 
-sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php5/cgi/php.ini
-sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php5/cgi/php.ini
-sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php5/cgi/php.ini
-sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php5/cgi/php.ini
-sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php5/cgi/php.ini
-sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php5/cgi/php.ini
+sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/7.0/fpm/php.ini
+sed -i -e 's/^upload_max_filesize = 2M/upload_max_filesize = 10M/g' /etc/php/7.0/fpm/php.ini
+sed -i -e 's/^session.gc_maxlifetime = 1440/session.gc_maxlifetime = 86400/' /etc/php/7.0/fpm/php.ini
+sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php/7.0/fpm/php.ini
+sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php/7.0/fpm/php.ini
+sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php/7.0/fpm/php.ini
 # This should mimic the list of disabled functions that RPI uses on the HSS machine with the sole difference
 # being that we do not disable phpinfo() on the vagrant machine as it's not a function that could be used for
 # development of some feature, but it is useful for seeing information that could help debug something going wrong
@@ -417,7 +447,7 @@ DISABLED_FUNCTIONS+="pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifex
 DISABLED_FUNCTIONS+="pcntl_wifsignaled,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,"
 DISABLED_FUNCTIONS+="pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,"
 DISABLED_FUNCTIONS+="pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,"
-echo "disable_functions = ${DISABLED_FUNCTIONS}" >> /etc/php5/cgi/php.ini
+sed -i -e "s/^disable_functions = .*/disable_functions = ${DISABLED_FUNCTIONS}/g" /etc/php/7.0/fpm/php.ini
 
 # create directories and fix permissions
 mkdir -p ${SUBMITTY_DATA_DIR}
@@ -488,14 +518,7 @@ if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
 else
     git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 fi
-# graph tool...  for later?  add-apt-repository "http://downloads.skewed.de/apt/trusty universe" -y
-add-apt-repository ppa:ubuntu-toolchain-r/test -y
-apt-get update -qq
-apt-get install -qq build-essential pkg-config flex bison
-apt-get install -qq libpcre3 libpcre3-dev
-apt-get install -qq splint indent
-apt-get install -qq python3 python3-dev libpython3.4 python3-pip
-python3 -m pip install pylint
+
 # graph tool...  for later?  apt-get install -qq --force-yes python3-graph-tool
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 make
@@ -523,21 +546,11 @@ source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 #source ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean test
 
 source ${SUBMITTY_REPOSITORY}/Docs/sample_bin/admin_scripts_setup
-cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/submitty.conf /etc/apache2/sites-available/submitty.conf
-cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/cgi.conf /etc/apache2/sites-available/cgi.conf
-cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/www-data /etc/apache2/suexec/www-data
-
-# permissions: rw- r-- ---
-chmod 0640 /etc/apache2/sites-available/*.conf
-chmod 0640 /etc/apache2/suexec/www-data
 
 if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/SSLCertificateChainFile/#SSLCertificateChainFile/g' /root/bin/bottom.txt
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
 fi
-
-a2ensite submitty
-a2ensite cgi
 
 apache2ctl -t
 service apache2 restart
@@ -558,13 +571,12 @@ if [[ ${VAGRANT} == 1 ]]; then
     #################################################################
     # SET CSV FIELDS (for classlist upload data)
     #################
+    # Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
+    # of Science 2015-2016.
 
-	# Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
-	# of Science 2015-2016.
-
-	# Other Universities will need to rerun /bin/setcsvfields to match their
-	# classlist csv data.  See wiki for details.
-	${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
+    # Other Universities will need to rerun /bin/setcsvfields to match their
+    # classlist csv data.  See wiki for details.
+    ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields.py 13 12 15 7
 fi
 
 # Deferred ownership change
