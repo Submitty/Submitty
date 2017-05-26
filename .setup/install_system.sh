@@ -15,7 +15,7 @@ COURSE_BUILDERS_GROUP=course_builders
 apt-get update
 apt-get install -qqy python python-pip python-dev python3 python3-pip python3-dev libpython3.5
 pip2 install -U pip
-pip3 install -U pip3
+pip3 install -U pip
 
 #################################################################
 # PROVISION SETUP
@@ -58,10 +58,10 @@ if [ ${VAGRANT} == 1 ]; then
 ##    hsdbu, postgres, root, vagrant                      ##
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
-##    http://192.168.56.101 (submission)                  ##
-##    http://192.168.56.102 (cgi-bin scripts)             ##
-##    http://192.168.56.103 (svn)                         ##
-##    http://192.168.56.101/hwgrading (tagrading)         ##
+##    https://192.168.56.101 (submission)                 ##
+##    https://192.168.56.102 (cgi-bin scripts)            ##
+##    https://192.168.56.103 (svn)                        ##
+##    https://192.168.56.101/hwgrading (tagrading)        ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
 ##   localhost:15432                                      ##
@@ -247,6 +247,7 @@ pip3 install python-pam
 pip3 install PyYAML
 pip3 install psycopg2
 pip3 install sqlalchemy
+pip3 install pylint
 
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
@@ -514,7 +515,7 @@ if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
 else
     git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 fi
-pip3 install pylint
+
 # graph tool...  for later?  apt-get install -qq --force-yes python3-graph-tool
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 make
@@ -552,6 +553,8 @@ sudo mkdir /usr/lib/cgi-bin
 sudo chown -R www-data:www-data /usr/lib/cgi-bin
 
 apache2ctl -t
+service apache2 restart
+service php7.0-fpm restart
 
 if [[ ${VAGRANT} == 1 ]]; then
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
@@ -607,14 +610,5 @@ chmod 2771 ${SUBMITTY_INSTALL_DIR}
 #	rm password.txt
 #	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
 #fi
-
-#################################################################
-# RESTART SERVICES
-###################
-
-service apache2 restart
-service php7.0-fpm restart
-service postgresql restart
-
 echo "Done."
 exit 0
