@@ -414,9 +414,6 @@ chmod 0640 /etc/apache2/suexec/www-data
 a2ensite submitty
 a2ensite cgi
 
-service apache2 restart
-
-
 #################################################################
 # PHP SETUP
 #################
@@ -552,8 +549,12 @@ if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
 fi
 
+sudo mkdir /usr/lib/cgi-bin
+sudo chown -R www-data:www-data /usr/lib/cgi-bin
+
 apache2ctl -t
 service apache2 restart
+service php7.0-fpm restart
 
 if [[ ${VAGRANT} == 1 ]]; then
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs

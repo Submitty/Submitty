@@ -700,8 +700,7 @@ class Course(object):
 
         # On python 3, replace with os.makedirs(..., exist_ok=True)
         os.system("mkdir -p {}".format(os.path.join(course_path, "submissions")))
-        os.system('chown {}:{}_tas_www {}'.format(self.instructor.id, self.code, os.path.join(course_path,
-                                                                                              'submissions')))
+        os.system('chown hwphp:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'submissions')))
         for gradeable in self.gradeables:
             if gradeable.type == 0 and len(gradeable.submissions) == 0:
                 continue
@@ -709,7 +708,7 @@ class Course(object):
                 continue
             gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
             os.makedirs(gradeable_path)
-            os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, gradeable_path))
+            os.system("chown -R hwphp:{}_tas_www {}".format(self.code, gradeable_path))
             for user in self.users:
                 submission_path = os.path.join(gradeable_path, user.id)
                 os.makedirs(submission_path)
