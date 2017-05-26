@@ -7,6 +7,7 @@ use app\libraries\Database;
 use app\libraries\Utils;
 use app\models\Gradeable;
 use app\models\GradeableComponent;
+use app\models\GradeableDb;
 use app\models\GradeableVersion;
 use app\models\User;
 
@@ -137,8 +138,7 @@ WHERE egd.g_id=? AND egd.user_id=?
 ORDER BY egd.g_version", array($g_id, $user_id));
         $return = array();
         foreach ($this->database->rows() as $row) {
-            $row['submission_time'] = new \DateTime($row['submission_time'], $this->core->getConfig()->getTimezone());
-            $return[$row['g_version']] = new GradeableVersion($row, $due_date);
+            $return[$row['g_version']] = new GradeableVersion($row, $due_date, new \DateTimeZone($this->core->getConfig()->getTimezone()));
         }
 
         return $return;
@@ -313,7 +313,7 @@ ORDER BY u.{$section_key}, u.user_id";
 
         foreach ($this->database->rows() as $row) {
             $user = (isset($row['user_id']) && $row['user_id'] !== null) ? new User($row) : null;
-            $return[] = new Gradeable($this->core, $row, $user);
+            $return[] = new GradeableDb($this->core, $row, $user);
         }
 
         return $return;

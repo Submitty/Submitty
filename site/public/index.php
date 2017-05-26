@@ -99,7 +99,7 @@ $core->getOutput()->addBreadcrumb($core->getFullCourseName(), $core->getConfig()
 $core->getOutput()->addBreadcrumb("Submitty", $core->buildUrl());
 
 
-date_default_timezone_set($core->getConfig()->getTimezone()->getName());
+date_default_timezone_set($core->getConfig()->getTimezone());
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
