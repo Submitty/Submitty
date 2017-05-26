@@ -4,10 +4,8 @@ namespace tests\unitTests;
 
 use app\libraries\Core;
 use app\libraries\database\IDatabaseQueries;
-use app\libraries\GradeableType;
 use app\libraries\Output;
 use app\models\Config;
-use app\models\Gradeable;
 use app\models\User;
 
 class BaseUnitTest extends \PHPUnit_Framework_TestCase {
@@ -39,7 +37,7 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
             $config->method('getCoursePath')->willReturn($config_values['course_path']);
         }
 
-        $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
+        $config->method('getTimezone')->willReturn("America/New_York");
 
         $core->method('getConfig')->willReturn($config);
 
@@ -55,6 +53,7 @@ class BaseUnitTest extends \PHPUnit_Framework_TestCase {
         else {
             $core->method('isTesting')->willReturn(true);
         }
+
 
         $queries = $this->createMock(IDatabaseQueries::class);
         $core->method('getQueries')->willReturn($queries);

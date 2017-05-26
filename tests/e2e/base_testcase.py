@@ -115,5 +115,5 @@ class BaseTestCase(unittest2.TestCase):
             semester = "s" + str(today.year)[-2:]
         return semester
 
-# if __name__ == "__main__":
+#if __name__ == "__main__":
 #    unittest2.main()

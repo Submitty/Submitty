@@ -21,7 +21,7 @@ class NavigationController extends AbstractController {
     
     public function __construct(Core $core) {
         parent::__construct($core);
-        $this->gradeables_list = new GradeableList($this->core);
+        $this->gradeables_list = new GradeableList($this->core, true);
     }
 
     public function run() {

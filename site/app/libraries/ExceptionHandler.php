@@ -55,11 +55,11 @@ class ExceptionHandler {
      * (either via field of BaseException or on private variable $display_exceptions)
      * otherwise just returning a very generic message to the user
      *
-     * @param \Exception|\Throwable $exception
+     * @param \Exception $exception
      * @return string    A string that either contains a generic message or the actual
      *                   exception message depending on the value of $display_exceptions
      */
-    public static function handleException($exception) {
+    public static function handleException(\Exception $exception) {
         $display_message = false;
         $is_base_exception = false;
         $log_exception = static::$log_exceptions;
