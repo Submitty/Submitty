@@ -9,7 +9,7 @@ SCRIPT
 
 Vagrant.configure(2) do |config|
     # Ubuntu 14.04 (Trusty Tahr) - 64bit
-    config.vm.box = 'ubuntu/xenial64'
+    config.vm.box = 'bento/ubuntu-16.04'
 
     config.vm.network 'private_network', ip: '192.168.56.101', auto_config: false
 
