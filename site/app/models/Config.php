@@ -141,6 +141,7 @@ class Config extends AbstractModel {
                 throw new ConfigException("Invalid Timezone identifier: {$this->timezone}");
             }
         }
+        $this->timezone = new \DateTimeZone($this->timezone);
 
         if (isset($master['database_details']['database_type'])) {
             $this->database_type = $master['database_details']['database_type'];
@@ -375,7 +376,7 @@ class Config extends AbstractModel {
     }
 
     /**
-     * @return string
+     * @return \DateTimeZone
      */
     public function getTimezone() {
         return $this->timezone;
