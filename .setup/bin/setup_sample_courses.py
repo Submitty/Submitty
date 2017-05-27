@@ -710,15 +710,17 @@ class Course(object):
                  gradeable.config_path is None):
                     continue
 
+            gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
+
             if gradeable.type == 0:
-                gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
                 os.makedirs(gradeable_path)
                 os.system("chown -R hwphp:{}_tas_www {}".format(self.code, gradeable_path))
+
             for user in self.users:
                 submitted = False
                 active = 1
+                submission_path = os.path.join(gradeable_path, user.id)
                 if gradeable.type == 0 and gradeable.submission_open_date < NOW:
-                    submission_path = os.path.join(gradeable_path, user.id)
                     os.makedirs(submission_path)
                     if gradeable.gradeable_config is None or \
                             (gradeable.submission_due_date < NOW and random.random() < 0.5) or \
@@ -772,8 +774,9 @@ class Course(object):
                             conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                          gcd_score=score, gcd_component_comment="lorem ipsum")
 
-                if gradeable.type == 0:
+                if gradeable.type == 0 and os.path.isdir(submission_path):
                     os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
+
                 if gradeable.type == 0 and submitted:
                     queue_file = "__".join([self.semester, self.code, gradeable.id, user.id, "1"])
                     print("Creating queue file:", queue_file)
