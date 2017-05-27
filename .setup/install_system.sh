@@ -15,7 +15,7 @@ COURSE_BUILDERS_GROUP=course_builders
 apt-get update
 apt-get install -qqy python python-pip python-dev python3 python3-pip python3-dev libpython3.5
 pip2 install -U pip
-pip3 install -U pip3
+pip3 install -U pip
 
 #################################################################
 # PROVISION SETUP
@@ -101,7 +101,7 @@ addgroup hwcronphp
 addgroup course_builders
 
 if [ ${VAGRANT} == 1 ]; then
-	adduser ubuntu sudo
+	adduser vagrant sudo
 fi
 
 # change the default user umask (was 002)
@@ -117,8 +117,8 @@ adduser hwcgi shadow
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
 	echo "hwcgi:hwcgi" | sudo chpasswd
-	adduser hwphp ubuntu
-	adduser hwcgi ubuntu
+	adduser hwphp vagrant
+	adduser hwcgi vagrant
 fi
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then
@@ -247,6 +247,7 @@ pip3 install python-pam
 pip3 install PyYAML
 pip3 install psycopg2
 pip3 install sqlalchemy
+pip3 install pylint
 
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
@@ -514,7 +515,7 @@ if [ -d ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools ]; then
 else
     git clone 'https://github.com/Submitty/AnalysisTools' ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 fi
-pip3 install pylint
+
 # graph tool...  for later?  apt-get install -qq --force-yes python3-graph-tool
 pushd ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT_AnalysisTools
 make
@@ -574,7 +575,7 @@ if [[ ${VAGRANT} == 1 ]]; then
 
     # Other Universities will need to rerun /bin/setcsvfields to match their
     # classlist csv data.  See wiki for details.
-    ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields.py 13 12 15 7
+    ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
 fi
 
 # Deferred ownership change

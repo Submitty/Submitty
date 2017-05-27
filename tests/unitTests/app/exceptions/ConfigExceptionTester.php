@@ -17,7 +17,7 @@ class ConfigExceptionTester extends \PHPUnit_Framework_TestCase  {
         }
     }
 
-    public function testConfigExceptionNoMessage() {
+    public function testConfigExceptionShowMessage() {
         try {
             throw new ConfigException("exception", false);
         }

@@ -3,21 +3,13 @@
 
 $script = <<SCRIPT
 GIT_PATH=/usr/local/submitty/GIT_CHECKOUT_Submitty
-chmod +x ${GIT_PATH}/.setup/vagrant.sh
-chmod +x ${GIT_PATH}/.setup/bin/*
-cd ${GIT_PATH}
-apt-get update
-apt-get install -qqy python python-pip python-dev python3 python3-pip python3-dev libpython3.5
-pip2 install -U pip
-pip3 install -U pip3
-${GIT_PATH}/.setup/bin/reset_system.py
 mkdir -p ${GIT_PATH}/.vagrant/logs
-${GIT_PATH}/.setup/vagrant.sh vagrant 1>${GIT_PATH}/.vagrant/logs/vagrant.log 2>&1
+${GIT_PATH}/.setup/vagrant.sh vagrant 2>&1 | tee ${GIT_PATH}/.vagrant/logs/vagrant.log
 SCRIPT
 
 Vagrant.configure(2) do |config|
     # Ubuntu 14.04 (Trusty Tahr) - 64bit
-    config.vm.box = 'ubuntu/xenial64'
+    config.vm.box = 'bento/ubuntu-16.04'
 
     config.vm.network 'private_network', ip: '192.168.56.101', auto_config: false
 

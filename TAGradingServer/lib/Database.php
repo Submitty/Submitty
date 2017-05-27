@@ -104,7 +104,6 @@ class Database
             $statement = Database::$link->prepare($query);
             $statement->execute($parameters);
             Database::$results = $statement->fetchAll();
-            Database::$lastid = Database::$link->lastInsertId();
             Database::$query_count++;
             Database::$all_queries[] = array($query, $parameters);
         }
