@@ -555,6 +555,9 @@ sudo chown -R www-data:www-data /usr/lib/cgi-bin
 apache2ctl -t
 
 if [[ ${VAGRANT} == 1 ]]; then
+    # Disable OPCache for development purposes as we don't care about the efficiency as much
+    echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini
+
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
     rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
     mkdir ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
