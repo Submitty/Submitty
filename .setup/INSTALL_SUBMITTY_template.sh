@@ -299,6 +299,7 @@ rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/create_course.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grade_students.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
+replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/bin/fake_submit_button_press.sh
@@ -315,6 +316,7 @@ chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/build_homework
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
 chown hwcron:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 chown ${HWCRON_USER}:${HWCRON_USER} ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
@@ -322,6 +324,7 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/build_homework_function.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/regrade.sh
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/read_iclicker_ids.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.sh
+chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/check_everything.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/make_assignments_txt_file.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/get_version_details.py
 chmod 500 ${SUBMITTY_INSTALL_DIR}/bin/insert_database_version_data.py
