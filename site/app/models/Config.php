@@ -141,6 +141,7 @@ class Config extends AbstractModel {
                 throw new ConfigException("Invalid Timezone identifier: {$this->timezone}");
             }
         }
+        $this->timezone = new \DateTimeZone($this->timezone);
 
         if (isset($master['database_details']['database_type'])) {
             $this->database_type = $master['database_details']['database_type'];
@@ -168,7 +169,10 @@ class Config extends AbstractModel {
         }
 
         $this->course_ini = implode(DIRECTORY_SEPARATOR, array($this->course_path, "config", "config.ini"));
-        
+
+        if (!file_exists($this->course_ini)) {
+            throw new ConfigException("Could not find course config file: ".$this->course_ini, true);
+        }
         $course = IniParser::readFile($this->course_ini);
 
         $this->setConfigValues($course, 'hidden_details', array('database_name'));
@@ -375,7 +379,7 @@ class Config extends AbstractModel {
     }
 
     /**
-     * @return string
+     * @return \DateTimeZone
      */
     public function getTimezone() {
         return $this->timezone;
