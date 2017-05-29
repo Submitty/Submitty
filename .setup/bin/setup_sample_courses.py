@@ -51,6 +51,8 @@ DB_PASS = "hsdbu"
 
 DB_ONLY = False
 
+NOW = datetime.now()
+
 
 def main():
     """
@@ -356,12 +358,12 @@ def parse_datetime(date_string):
         minu = int(m.group(3))
         sec = int(m.group(4))
         days = int(m.group(1))
-        return datetime.now().replace(hour=hour, minute=minu, second=sec) + timedelta(days=days)
+        return NOW.replace(hour=hour, minute=minu, second=sec) + timedelta(days=days)
 
     m = re.search('([+|\-][0-9]+) (days|day)', date_string)
     if m is not None:
         days = int(m.group(1))
-        return datetime.now().replace(hour=23, minute=59, second=59) + timedelta(days=days)
+        return NOW.replace(hour=23, minute=59, second=59) + timedelta(days=days)
 
     raise ValueError("Invalid string for date parsing: " + str(date_string))
 
@@ -700,24 +702,28 @@ class Course(object):
 
         # On python 3, replace with os.makedirs(..., exist_ok=True)
         os.system("mkdir -p {}".format(os.path.join(course_path, "submissions")))
-        os.system('chown {}:{}_tas_www {}'.format(self.instructor.id, self.code, os.path.join(course_path,
-                                                                                              'submissions')))
+        os.system('chown hwphp:{}_tas_www {}'.format(self.code, os.path.join(course_path, 'submissions')))
         for gradeable in self.gradeables:
-            if gradeable.type == 0 and len(gradeable.submissions) == 0:
-                continue
-            elif gradeable.sample_path is None or gradeable.config_path is None:
-                continue
+            if gradeable.type == 0 and \
+                (len(gradeable.submissions) == 0 or
+                 gradeable.sample_path is None or
+                 gradeable.config_path is None):
+                    continue
+
             gradeable_path = os.path.join(course_path, "submissions", gradeable.id)
-            os.makedirs(gradeable_path)
-            os.system("chown -R {}:{}_tas_www {}".format(self.instructor.id, self.code, gradeable_path))
+
+            if gradeable.type == 0:
+                os.makedirs(gradeable_path)
+                os.system("chown -R hwphp:{}_tas_www {}".format(self.code, gradeable_path))
+
             for user in self.users:
-                submission_path = os.path.join(gradeable_path, user.id)
-                os.makedirs(submission_path)
                 submitted = False
                 active = 1
-                if gradeable.type == 0 and gradeable.submission_open_date < datetime.now():
+                submission_path = os.path.join(gradeable_path, user.id)
+                if gradeable.type == 0 and gradeable.submission_open_date < NOW:
+                    os.makedirs(submission_path)
                     if gradeable.gradeable_config is None or \
-                            (gradeable.submission_due_date < datetime.now() and random.random() < 0.5) or \
+                            (gradeable.submission_due_date < NOW and random.random() < 0.5) or \
                             (random.random() < 0.3):
                         active = -1
                     else:
@@ -752,8 +758,8 @@ class Course(object):
                                 dst = os.path.join(submission_path, "1")
                                 create_gradeable_submission(src, dst)
 
-                if gradeable.grade_start_date < datetime.now():
-                    if gradeable.grade_released_date < datetime.now() or random.random() < 0.8:
+                if gradeable.grade_start_date < NOW:
+                    if gradeable.grade_released_date < NOW or random.random() < 0.8:
                         status = 1 if gradeable.type != 0 or submitted else 0
                         print("Inserting {} for {}...".format(gradeable.id, user.id))
                         ins = gradeable_data.insert().values(g_id=gradeable.id, gd_user_id=user.id,
@@ -768,7 +774,9 @@ class Course(object):
                             conn.execute(gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
                                          gcd_score=score, gcd_component_comment="lorem ipsum")
 
-                os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
+                if gradeable.type == 0 and os.path.isdir(submission_path):
+                    os.system("chown -R hwphp:{}_tas_www {}".format(self.code, submission_path))
+
                 if gradeable.type == 0 and submitted:
                     queue_file = "__".join([self.semester, self.code, gradeable.id, user.id, "1"])
                     print("Creating queue file:", queue_file)

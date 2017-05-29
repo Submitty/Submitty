@@ -58,10 +58,10 @@ if [ ${VAGRANT} == 1 ]; then
 ##    hsdbu, postgres, root, vagrant                      ##
 ##                                                        ##
 ##  The VM can be accessed with the following urls:       ##
-##    https://192.168.56.101 (submission)                 ##
-##    https://192.168.56.102 (cgi-bin scripts)            ##
-##    https://192.168.56.103 (svn)                        ##
-##    https://192.168.56.101/hwgrading (tagrading)        ##
+##    http://192.168.56.101 (submission)                  ##
+##    http://192.168.56.102 (cgi-bin scripts)             ##
+##    http://192.168.56.103 (svn)                         ##
+##    http://192.168.56.101/hwgrading (tagrading)         ##
 ##                                                        ##
 ##  The database can be accessed on the host machine at   ##
 ##   localhost:15432                                      ##
@@ -101,7 +101,7 @@ addgroup hwcronphp
 addgroup course_builders
 
 if [ ${VAGRANT} == 1 ]; then
-	adduser ubuntu sudo
+	adduser vagrant sudo
 fi
 
 # change the default user umask (was 002)
@@ -117,8 +117,8 @@ adduser hwcgi shadow
 if [ ${VAGRANT} == 1 ]; then
 	echo "hwphp:hwphp" | sudo chpasswd
 	echo "hwcgi:hwcgi" | sudo chpasswd
-	adduser hwphp ubuntu
-	adduser hwcgi ubuntu
+	adduser hwphp vagrant
+	adduser hwcgi vagrant
 fi
 adduser hwcron --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 if [ ${VAGRANT} == 1 ]; then
@@ -414,9 +414,6 @@ chmod 0640 /etc/apache2/suexec/www-data
 a2ensite submitty
 a2ensite cgi
 
-service apache2 restart
-
-
 #################################################################
 # PHP SETUP
 #################
@@ -552,10 +549,15 @@ if [ ${VAGRANT} == 1 ]; then
 	sed -i 's/course01/csci2600/g' /root/bin/gen.middle
 fi
 
+sudo mkdir /usr/lib/cgi-bin
+sudo chown -R www-data:www-data /usr/lib/cgi-bin
+
 apache2ctl -t
-service apache2 restart
 
 if [[ ${VAGRANT} == 1 ]]; then
+    # Disable OPCache for development purposes as we don't care about the efficiency as much
+    echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini
+
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
     rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
     mkdir ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
@@ -576,7 +578,7 @@ if [[ ${VAGRANT} == 1 ]]; then
 
     # Other Universities will need to rerun /bin/setcsvfields to match their
     # classlist csv data.  See wiki for details.
-    ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields.py 13 12 15 7
+    ${SUBMITTY_INSTALL_DIR}/bin/setcsvfields 13 12 15 7
 fi
 
 # Deferred ownership change
@@ -609,5 +611,14 @@ chmod 2771 ${SUBMITTY_INSTALL_DIR}
 #	rm password.txt
 #	echo "csci2600_tas_www: hwcron ta instructor developer" >> /var/lib/svn/svngroups
 #fi
+
+#################################################################
+# RESTART SERVICES
+###################
+
+service apache2 restart
+service php7.0-fpm restart
+service postgresql restart
+
 echo "Done."
 exit 0
