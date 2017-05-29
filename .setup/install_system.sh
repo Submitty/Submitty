@@ -248,6 +248,7 @@ pip3 install PyYAML
 pip3 install psycopg2
 pip3 install sqlalchemy
 pip3 install pylint
+pip3 install psutil
 
 chmod -R 555 /usr/local/lib/python*/*
 chmod 555 /usr/lib/python*/dist-packages
@@ -558,14 +559,34 @@ if [[ ${VAGRANT} == 1 ]]; then
     # Disable OPCache for development purposes as we don't care about the efficiency as much
     echo "opcache.enable=0" >> /etc/php/7.0/fpm/conf.d/10-opcache.ini
 
+    #
+    # FIXME: commented out since symlink permissions aren't allowing
+    # hwcron to write the shared directory (new virtualbox or vagrant
+    # spec?)
+    #
+    #rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
+    #rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
+    #mkdir ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
+    #ln -s ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs ${SUBMITTY_DATA_DIR}/autograding_logs
+    #chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/autograding_logs
+    #chmod 770 ${SUBMITTY_DATA_DIR}/autograding_logs
+
+
+    # don't make it a shared directory
     rm -r ${SUBMITTY_DATA_DIR}/autograding_logs
-    rm -r ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
-    mkdir ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/autograding_logs ${SUBMITTY_DATA_DIR}/autograding_logs
+    mkdir ${SUBMITTY_DATA_DIR}/autograding_logs
+    chown hwcron:course_builders ${SUBMITTY_DATA_DIR}/autograding_logs
+    chmod 750 ${SUBMITTY_DATA_DIR}/autograding_logs
+
+
+    # this probably doesn't work either...
     rm -r ${SUBMITTY_DATA_DIR}/tagrading_logs
     rm -r ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
     mkdir ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs
     ln -s ${SUBMITTY_REPOSITORY}/.vagrant/tagrading_logs ${SUBMITTY_DATA_DIR}/tagrading_logs
+    chown hwphp:course_builders ${SUBMITTY_DATA_DIR}/tagrading_logs
+    chmod 770 ${SUBMITTY_DATA_DIR}/tagrading_logs
+
 
     # Call helper script that makes the courses and refreshes the database
     ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py

@@ -18,6 +18,10 @@ import psutil
 
 def main():
     """main function"""
+
+    print ("untrusted_canary.py start")
+    undead_count=0
+
     pid_list = psutil.pids()
     pid_list.reverse()
 
@@ -27,10 +31,13 @@ def main():
     for pid in pid_list:
         try:
             proc = psutil.Process(pid)
-            if 'untrusted' in proc.username() and proc.username() not in untrusted_users:
-                untrusted_users.append(proc.username())
+            if 'untrusted' in proc.username():
+                print ("untrusted process: ", pid, " ", proc.username())
+                if proc.username() not in untrusted_users:
+                    untrusted_users.append(proc.username())
             elif proc.username() == 'hwcron':
                 if '/usr/local/submitty/bin/grade_students.sh' in proc.cmdline():
+                    print ("grade_students instance: ", proc.cmdline())
                     commands.append(proc.cmdline())
         except psutil.NoSuchProcess:
             pass
@@ -44,6 +51,12 @@ def main():
 
         if found is False:
             print('Undead processes belonging to {}.'.format(untrusted), file=sys.stderr)
+            undead_count+=1
+
+    if (undead_count > 0):
+        print ("WARNING:  ", undead_count, " undead processes")
+
+    print ("untrusted_canary.y finish")
 
 if __name__ == "__main__":
     main()
