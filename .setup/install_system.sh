@@ -232,6 +232,7 @@ apt-get install -qqy imagemagick
 
 apt-get -qqy autoremove
 
+apt-get install libssl-dev
 
 # TODO: We should look into making it so that only certain users have access to certain packages
 # so that hwphp is the only one who could use PAM for example
