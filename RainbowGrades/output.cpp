@@ -1,3 +1,5 @@
+//TODO: TEST EXAM SEATING
+
 #include <iostream>
 #include <cassert>
 #include <fstream>
@@ -582,12 +584,12 @@ void start_table_output( bool for_instructor,
   // ----------------------------
   // % OF OVERALL AVERAGE FOR EACH GRADEABLE
   for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-    enum GRADEABLE_ENUM g = ALL_GRADEABLES[i];
-    if (g == GRADEABLE_ENUM::NOTE) {
-      assert (GRADEABLES[g].getPercent() < 0.01);
+    enum GRADEABLE_ENUM g_local = ALL_GRADEABLES[i];
+    if (g_local == GRADEABLE_ENUM::NOTE) {
+      assert (GRADEABLES[g_local].getPercent() < 0.01);
       continue;
     }
-    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff",gradeable_to_string(g)+" %"));
+    student_data.push_back(counter);  table.set(0,counter++,TableCell("ffffff",gradeable_to_string(g_local)+" %"));
   }
   student_data.push_back(counter);  table.set(0,counter++,TableCell(grey_divider));
 
@@ -595,30 +597,30 @@ void start_table_output( bool for_instructor,
   // DETAILS OF EACH GRADEABLE
   if (DISPLAY_GRADE_DETAILS) {
     for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-      GRADEABLE_ENUM g = ALL_GRADEABLES[i];
-      for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
-        if (g != GRADEABLE_ENUM::NOTE) {
+      GRADEABLE_ENUM g_local = ALL_GRADEABLES[i];
+      for (int j = 0; j < GRADEABLES[g_local].getCount(); j++) {
+        if (g_local != GRADEABLE_ENUM::NOTE) {
           student_data.push_back(counter);
         }
-        std::string gradeable_id = GRADEABLES[g].getID(j);
+        std::string gradeable_id = GRADEABLES[g_local].getID(j);
         std::string gradeable_name = "";
-        if (GRADEABLES[g].hasCorrespondence(gradeable_id)) {
-          gradeable_name = GRADEABLES[g].getCorrespondence(gradeable_id).second;
+        if (GRADEABLES[g_local].hasCorrespondence(gradeable_id)) {
+          gradeable_name = GRADEABLES[g_local].getCorrespondence(gradeable_id).second;
         }
         table.set(0,counter++,TableCell("ffffff",gradeable_name));
       }
-      if (g != GRADEABLE_ENUM::NOTE) {
+      if (g_local != GRADEABLE_ENUM::NOTE) {
         student_data.push_back(counter);
       }
       table.set(0,counter++,TableCell(grey_divider));
 
-      if (g == GRADEABLE_ENUM::TEST && TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
-        for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
+      if (g_local == GRADEABLE_ENUM::TEST && TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
+        for (int j = 0; j < GRADEABLES[g_local].getCount(); j++) {
           student_data.push_back(counter);
-          std::string gradeable_id = GRADEABLES[g].getID(j);
+          std::string gradeable_id = GRADEABLES[g_local].getID(j);
           std::string gradeable_name = "";
-          if (GRADEABLES[g].hasCorrespondence(gradeable_id)) {
-            gradeable_name = "Adjusted " + GRADEABLES[g].getCorrespondence(gradeable_id).second;
+          if (GRADEABLES[g_local].hasCorrespondence(gradeable_id)) {
+            gradeable_name = "Adjusted " + GRADEABLES[g_local].getCorrespondence(gradeable_id).second;
           }
           table.set(0,counter++,TableCell("ffffff",gradeable_name));
         }
@@ -829,19 +831,19 @@ void start_table_output( bool for_instructor,
 
 
     if (DISPLAY_FINAL_GRADE) {
-      std::string g = this_student->grade(false,sd);
-      color = GradeColor(g);
+      std::string g_local = this_student->grade(false,sd);
+      color = GradeColor(g_local);
       assert (color.size()==6);
-      table.set(myrow,counter++,TableCell(color,g,"",0,CELL_CONTENTS_VISIBLE,"center"));
+      table.set(myrow,counter++,TableCell(color,g_local,"",0,CELL_CONTENTS_VISIBLE,"center"));
       table.set(myrow,counter++,TableCell(grey_divider));
     }
 
     // ----------------------------
     // % OF OVERALL AVERAGE FOR EACH GRADEABLE
     for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-      enum GRADEABLE_ENUM g = ALL_GRADEABLES[i];
-      if (g == GRADEABLE_ENUM::NOTE) {
-        assert (GRADEABLES[g].getPercent() < 0.01);
+      enum GRADEABLE_ENUM g_local = ALL_GRADEABLES[i];
+      if (g_local == GRADEABLE_ENUM::NOTE) {
+        assert (GRADEABLES[g_local].getPercent() < 0.01);
         continue;
       }
 
@@ -856,7 +858,7 @@ void start_table_output( bool for_instructor,
         std::vector<float> vals;
         for (unsigned int S = 0; S < students.size(); S++) {
           if (validSection(students[S]->getSection())) {
-            vals.push_back(students[S]->GradeablePercent(g));
+            vals.push_back(students[S]->GradeablePercent(g_local));
           }
         }
         float tmp_average = compute_average(vals);
@@ -867,14 +869,14 @@ void start_table_output( bool for_instructor,
           grade = tmp_std_dev;
         }
       } else {
-        grade = this_student->GradeablePercent(g);
+        grade = this_student->GradeablePercent(g_local);
       }
       std::string color = coloritcolor(grade,
-                                       sp->GradeablePercent(g),
-                                       sa->GradeablePercent(g),
-                                       sb->GradeablePercent(g),
-                                       sc->GradeablePercent(g),
-                                       sd->GradeablePercent(g));
+                                       sp->GradeablePercent(g_local),
+                                       sa->GradeablePercent(g_local),
+                                       sb->GradeablePercent(g_local),
+                                       sc->GradeablePercent(g_local),
+                                       sd->GradeablePercent(g_local));
       if (this_student == STDDEV_STUDENT_POINTER) color="ffffff";
       assert (color.size()==6);
       table.set(myrow,counter++,TableCell(color,grade,2));
@@ -885,35 +887,35 @@ void start_table_output( bool for_instructor,
     // DETAILS OF EACH GRADEABLE    
     if (DISPLAY_GRADE_DETAILS) {
       for (unsigned int i = 0; i < ALL_GRADEABLES.size(); i++) {
-        GRADEABLE_ENUM g = ALL_GRADEABLES[i];
+        GRADEABLE_ENUM g_local = ALL_GRADEABLES[i];
         enum CELL_CONTENTS_STATUS visible = CELL_CONTENTS_VISIBLE;
-        if (g == GRADEABLE_ENUM::TEST) {
+        if (g_local == GRADEABLE_ENUM::TEST) {
           visible = CELL_CONTENTS_NO_DETAILS;
         }
-        for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
-          float grade = this_student->getGradeableItemGrade(g,j).getValue();
+        for (int j = 0; j < GRADEABLES[g_local].getCount(); j++) {
+          float grade = this_student->getGradeableItemGrade(g_local,j).getValue();
           std::string color = coloritcolor(grade,
-                                           sp->getGradeableItemGrade(g,j).getValue(),
-                                           sa->getGradeableItemGrade(g,j).getValue(),
-                                           sb->getGradeableItemGrade(g,j).getValue(),
-                                           sc->getGradeableItemGrade(g,j).getValue(),
-                                           sd->getGradeableItemGrade(g,j).getValue());
+                                           sp->getGradeableItemGrade(g_local,j).getValue(),
+                                           sa->getGradeableItemGrade(g_local,j).getValue(),
+                                           sb->getGradeableItemGrade(g_local,j).getValue(),
+                                           sc->getGradeableItemGrade(g_local,j).getValue(),
+                                           sd->getGradeableItemGrade(g_local,j).getValue());
           if (this_student == STDDEV_STUDENT_POINTER) color="ffffff";
           std::string details;
-          details = this_student->getGradeableItemGrade(g,j).getNote();
-          std::string status = this_student->getGradeableItemGrade(g,j).getStatus();
+          details = this_student->getGradeableItemGrade(g_local,j).getNote();
+          std::string status = this_student->getGradeableItemGrade(g_local,j).getStatus();
           if (status.find("Bad") != std::string::npos) {
             details += " " + status;
           }
-          int late_days_used = this_student->getGradeableItemGrade(g,j).getLateDaysUsed();
+          int late_days_used = this_student->getGradeableItemGrade(g_local,j).getLateDaysUsed();
           assert (color.size()==6);
           table.set(myrow,counter++,TableCell(color,grade,1,details,late_days_used,visible));
         }
         table.set(myrow,counter++,TableCell(grey_divider));
 
         // FIXME
-        if (g == GRADEABLE_ENUM::TEST && TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
-          for (int j = 0; j < GRADEABLES[g].getCount(); j++) {
+        if (g_local == GRADEABLE_ENUM::TEST && TEST_IMPROVEMENT_AVERAGING_ADJUSTMENT) {
+          for (int j = 0; j < GRADEABLES[g_local].getCount(); j++) {
             float grade = this_student->adjusted_test(j);
             std::string color = coloritcolor(this_student->adjusted_test(j),
                                              sp->adjusted_test(j),
