@@ -230,9 +230,11 @@ apt-get install -qqy swi-prolog > /dev/null 2>&1
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
 
+# Used by Network Programming class
+apt-get install -qqy libssl-dev
+
 apt-get -qqy autoremove
 
-apt-get install libssl-dev
 
 # TODO: We should look into making it so that only certain users have access to certain packages
 # so that hwphp is the only one who could use PAM for example
